@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 part 'fallback_attachment_builder.dart';
 part 'file_attachment_builder.dart';
@@ -8,7 +8,7 @@ part 'gallery_attachment_builder.dart';
 part 'giphy_attachment_builder.dart';
 part 'image_attachment_builder.dart';
 part 'mixed_attachment_builder.dart';
-part 'url_attachment_builder.dart';
+part 'link_preview_attachment_builder.dart';
 part 'video_attachment_builder.dart';
 part 'voice_recording_attachment_playlist_builder.dart';
 part 'poll_attachment_builder.dart';
@@ -16,10 +16,11 @@ part 'poll_attachment_builder.dart';
 /// {@template streamAttachmentWidgetTapCallback}
 /// Signature for a function that's called when the user taps on an attachment.
 /// {@endtemplate}
-typedef StreamAttachmentWidgetTapCallback = void Function(
-  Message message,
-  Attachment attachment,
-);
+typedef StreamAttachmentWidgetTapCallback =
+    void Function(
+      Message message,
+      Attachment attachment,
+    );
 
 /// {@template attachmentWidgetBuilder}
 /// A builder which is used to build a widget for a given [Message] and
@@ -66,8 +67,6 @@ abstract class StreamAttachmentWidgetBuilder {
   /// widget.
   static List<StreamAttachmentWidgetBuilder> defaultBuilders({
     required Message message,
-    ShapeBorder? shape,
-    EdgeInsetsGeometry padding = const EdgeInsets.all(4),
     StreamAttachmentWidgetTapCallback? onAttachmentTap,
     List<StreamAttachmentWidgetBuilder>? customAttachmentBuilders,
   }) {
@@ -75,67 +74,47 @@ abstract class StreamAttachmentWidgetBuilder {
       ...?customAttachmentBuilders,
 
       // Handles poll attachments.
-      PollAttachmentBuilder(
-        shape: shape,
-        padding: padding,
-      ),
+      const PollAttachmentBuilder(),
 
       // Handles a mix of image, gif, video, url, file and voice recording
       // attachments.
       MixedAttachmentBuilder(
-        padding: padding,
         onAttachmentTap: onAttachmentTap,
       ),
 
       // Handles a mix of image, gif, and video attachments.
       GalleryAttachmentBuilder(
-        shape: shape,
-        padding: padding,
-        runSpacing: padding.vertical / 2,
-        spacing: padding.horizontal / 2,
         onAttachmentTap: onAttachmentTap,
       ),
 
       // Handles file attachments.
       FileAttachmentBuilder(
-        shape: shape,
-        padding: padding,
         onAttachmentTap: onAttachmentTap,
       ),
 
       // Handles giphy attachments.
       GiphyAttachmentBuilder(
-        shape: shape,
-        padding: padding,
         onAttachmentTap: onAttachmentTap,
       ),
 
       // Handles image attachments.
       ImageAttachmentBuilder(
-        shape: shape,
-        padding: padding,
         onAttachmentTap: onAttachmentTap,
       ),
 
       // Handles video attachments.
       VideoAttachmentBuilder(
-        shape: shape,
-        padding: padding,
         onAttachmentTap: onAttachmentTap,
       ),
 
       // Handles voice recording attachments.
       VoiceRecordingAttachmentPlaylistBuilder(
-        shape: shape,
-        padding: padding,
         onAttachmentTap: onAttachmentTap,
       ),
 
       // We don't handle URL attachments if the message is a reply.
       if (message.quotedMessage == null)
-        UrlAttachmentBuilder(
-          shape: shape,
-          padding: padding,
+        LinkPreviewAttachmentBuilder(
           onAttachmentTap: onAttachmentTap,
         ),
 
@@ -151,7 +130,7 @@ abstract class StreamAttachmentWidgetBuilder {
 
   /// Builds a widget for the given [message] and [attachments].
   /// This will only be called if [canHandle] returns `true`.
-  Widget build(
+  Widget? build(
     BuildContext context,
     Message message,
     Map<String, List<Attachment>> attachments,

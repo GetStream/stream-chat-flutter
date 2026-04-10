@@ -41,21 +41,17 @@ class _UserMentionsPageState extends State<UserMentionsPage> {
                     children: [
                       Padding(
                         padding: const EdgeInsets.all(24),
-                        child: StreamSvgIcon(
-                          icon: StreamSvgIcons.mentions,
+                        child: Icon(
+                          context.streamIcons.mention32,
                           size: 96,
-                          color:
-                              StreamChatTheme.of(context).colorTheme.disabled,
+                          color: StreamChatTheme.of(context).colorTheme.disabled,
                         ),
                       ),
                       Text(
                         AppLocalizations.of(context).noMentionsExistYet,
-                        style:
-                            StreamChatTheme.of(context).textTheme.body.copyWith(
-                                  color: StreamChatTheme.of(context)
-                                      .colorTheme
-                                      .textLowEmphasis,
-                                ),
+                        style: StreamChatTheme.of(context).textTheme.body.copyWith(
+                          color: StreamChatTheme.of(context).colorTheme.textLowEmphasis,
+                        ),
                       ),
                     ],
                   ),

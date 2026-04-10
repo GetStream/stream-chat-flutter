@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart'
-    hide Message;
+import 'package:flutter_local_notifications/flutter_local_notifications.dart' hide Message;
 import 'package:go_router/go_router.dart';
 import 'package:sample_app/routes/routes.dart';
 import 'package:sample_app/utils/localizations.dart';

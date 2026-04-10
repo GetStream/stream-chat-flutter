@@ -17,15 +17,17 @@ void main() {
 
   group('GiphyInfoX', () {
     test('giphyInfo returns valid GiphyInfo object when data is valid', () {
-      final attachment = Attachment(extraData: const {
-        'giphy': {
-          'original': {
-            'url': 'https://example.com/original.gif',
-            'width': '200',
-            'height': '150',
-          }
-        }
-      });
+      final attachment = Attachment(
+        extraData: const {
+          'giphy': {
+            'original': {
+              'url': 'https://example.com/original.gif',
+              'width': '200',
+              'height': '150',
+            },
+          },
+        },
+      );
 
       final giphyInfo = attachment.giphyInfo(GiphyInfoType.original);
 
@@ -43,17 +45,18 @@ void main() {
       expect(giphyInfo, isNull);
     });
 
-    test('giphyInfo returns null when the specific GiphyInfoType is missing',
-        () {
-      final attachment = Attachment(extraData: const {
-        'giphy': {
-          'fixed_height': {
-            'url': 'https://example.com/fixed_height.gif',
-            'width': '100',
-            'height': '100',
-          }
-        }
-      });
+    test('giphyInfo returns null when the specific GiphyInfoType is missing', () {
+      final attachment = Attachment(
+        extraData: const {
+          'giphy': {
+            'fixed_height': {
+              'url': 'https://example.com/fixed_height.gif',
+              'width': '100',
+              'height': '100',
+            },
+          },
+        },
+      );
 
       final giphyInfo = attachment.giphyInfo(GiphyInfoType.original);
 

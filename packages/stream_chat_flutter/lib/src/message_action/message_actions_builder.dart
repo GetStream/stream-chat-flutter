@@ -1,9 +1,9 @@
-import 'package:flutter/widgets.dart';
-import 'package:stream_chat_flutter/src/icons/stream_svg_icon.dart';
+import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/message_action/message_action.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 /// {@template streamMessageActionsBuilder}
 /// A utility class that provides a builder for message actions
@@ -15,35 +15,39 @@ class StreamMessageActionsBuilder {
 
   /// Returns a list of message actions for the "bounced with error" state.
   ///
-  /// This method builds a list of [StreamMessageAction]s that are applicable to
+  /// This method builds a list of [StreamContextMenuAction]s that are
+  /// applicable to
   /// the given [message] when it is in the "bounced with error" state.
   ///
   /// The actions include options to retry sending the message, edit or delete
   /// the message.
-  static List<StreamMessageAction> buildBouncedErrorActions({
+  static List<StreamContextMenuAction<MessageAction>> buildBouncedErrorActions({
     required BuildContext context,
     required Message message,
   }) {
     // If the message is not bounced with an error, we don't show any actions.
     if (!message.isBouncedWithError) return [];
 
-    return <StreamMessageAction>[
-      StreamMessageAction(
-        action: ResendMessage(message: message),
-        iconColor: StreamChatTheme.of(context).colorTheme.accentPrimary,
-        title: Text(context.translations.sendAnywayLabel),
-        leading: const StreamSvgIcon(icon: StreamSvgIcons.circleUp),
+    final icons = context.streamIcons;
+
+    return <StreamContextMenuAction<MessageAction>>[
+      StreamContextMenuAction<MessageAction>(
+        value: ResendMessage(message: message),
+        label: Text(context.translations.sendAnywayLabel),
+        leading: Icon(
+          icons.send20,
+          color: StreamChatTheme.of(context).colorTheme.accentPrimary,
+        ),
       ),
-      StreamMessageAction(
-        action: EditMessage(message: message),
-        title: Text(context.translations.editMessageLabel),
-        leading: const StreamSvgIcon(icon: StreamSvgIcons.edit),
+      StreamContextMenuAction<MessageAction>(
+        value: EditMessage(message: message),
+        label: Text(context.translations.editMessageLabel),
+        leading: Icon(icons.edit20),
       ),
-      StreamMessageAction(
-        isDestructive: true,
-        action: HardDeleteMessage(message: message),
-        title: Text(context.translations.deleteMessageLabel),
-        leading: const StreamSvgIcon(icon: StreamSvgIcons.delete),
+      StreamContextMenuAction<MessageAction>.destructive(
+        value: HardDeleteMessage(message: message),
+        label: Text(context.translations.deleteMessageLabel),
+        leading: Icon(icons.delete20),
       ),
     ];
   }
@@ -51,40 +55,40 @@ class StreamMessageActionsBuilder {
   /// Returns a list of message actions based on the provided message and
   /// channel capabilities.
   ///
-  /// This method builds a list of [StreamMessageAction]s that are applicable to
+  /// This method builds a list of [StreamContextMenuAction]s that are
+  /// applicable to
   /// the given [message] in the [channel], considering the permissions of the
   /// [currentUser] and the current state of the message.
-  static List<StreamMessageAction> buildActions({
+  static List<StreamContextMenuAction<MessageAction>> buildActions({
     required BuildContext context,
     required Message message,
     required Channel channel,
     OwnUser? currentUser,
-    Iterable<StreamMessageAction>? customActions,
   }) {
     final messageState = message.state;
 
     // If the message is deleted, we don't show any actions.
     if (messageState.isDeleted) return [];
 
+    final icons = context.streamIcons;
+
     if (messageState.isFailed) {
       return [
         if (messageState.isSendingFailed || messageState.isUpdatingFailed) ...[
-          StreamMessageAction(
-            action: ResendMessage(message: message),
-            leading: const StreamSvgIcon(icon: StreamSvgIcons.circleUp),
-            iconColor: StreamChatTheme.of(context).colorTheme.accentPrimary,
-            title: Text(
+          StreamContextMenuAction(
+            value: ResendMessage(message: message),
+            leading: Icon(icons.send20),
+            label: Text(
               context.translations.toggleResendOrResendEditedMessage(
                 isUpdateFailed: messageState.isUpdatingFailed,
               ),
             ),
           ),
           if (messageState.isSendingFailed)
-            StreamMessageAction(
-              isDestructive: true,
-              action: HardDeleteMessage(message: message),
-              leading: const StreamSvgIcon(icon: StreamSvgIcons.delete),
-              title: Text(
+            StreamContextMenuAction.destructive(
+              value: HardDeleteMessage(message: message),
+              leading: Icon(icons.delete20),
+              label: Text(
                 context.translations.toggleDeleteRetryDeleteMessageText(
                   isDeleteFailed: false,
                 ),
@@ -92,11 +96,10 @@ class StreamMessageActionsBuilder {
             ),
         ],
         if (message.state.isDeletingFailed)
-          StreamMessageAction(
-            isDestructive: true,
-            action: ResendMessage(message: message),
-            leading: const StreamSvgIcon(icon: StreamSvgIcons.delete),
-            title: Text(
+          StreamContextMenuAction.destructive(
+            value: ResendMessage(message: message),
+            leading: Icon(icons.delete20),
+            label: Text(
               context.translations.toggleDeleteRetryDeleteMessageText(
                 isDeleteFailed: true,
               ),
@@ -123,34 +126,35 @@ class StreamMessageActionsBuilder {
       (attachment) => attachment.type == AttachmentType.giphy,
     );
 
-    final messageActions = <StreamMessageAction>[];
+    final messageActions = <StreamContextMenuAction<MessageAction>>[];
 
     if (canQuoteMessage) {
       messageActions.add(
-        StreamMessageAction(
-          action: QuotedReply(message: message),
-          title: Text(context.translations.replyLabel),
-          leading: const StreamSvgIcon(icon: StreamSvgIcons.reply),
+        StreamContextMenuAction(
+          value: QuotedReply(message: message),
+          label: Text(context.translations.replyLabel),
+          leading: Icon(icons.reply20),
         ),
       );
     }
 
     if (canSendReply && !isThreadMessage) {
       messageActions.add(
-        StreamMessageAction(
-          action: ThreadReply(message: message),
-          title: Text(context.translations.threadReplyLabel),
-          leading: const StreamSvgIcon(icon: StreamSvgIcons.threadReply),
+        StreamContextMenuAction(
+          value: ThreadReply(message: message),
+          label: Text(context.translations.threadReplyLabel),
+          leading: Icon(icons.thread20),
         ),
       );
     }
 
-    if (canReceiveReadEvents) {
-      StreamMessageAction markUnreadAction() {
-        return StreamMessageAction(
-          action: MarkUnread(message: message),
-          title: Text(context.translations.markAsUnreadLabel),
-          leading: const StreamSvgIcon(icon: StreamSvgIcons.messageUnread),
+    // Mark unread action is only available for other users' messages.
+    if (canReceiveReadEvents && !isSentByCurrentUser) {
+      StreamContextMenuAction<MessageAction> markUnreadAction() {
+        return StreamContextMenuAction(
+          value: MarkUnread(message: message),
+          label: Text(context.translations.markAsUnreadLabel),
+          leading: Icon(icons.notification20),
         );
       }
 
@@ -161,17 +165,17 @@ class StreamMessageActionsBuilder {
       }
       // If the message is in the channel view, only other user messages can be
       // marked unread.
-      else if (!isSentByCurrentUser && (!isThreadMessage || canShowInChannel)) {
+      else if (!isThreadMessage || canShowInChannel) {
         messageActions.add(markUnreadAction());
       }
     }
 
     if (message.text case final text? when text.isNotEmpty) {
       messageActions.add(
-        StreamMessageAction(
-          action: CopyMessage(message: message),
-          title: Text(context.translations.copyMessageLabel),
-          leading: const StreamSvgIcon(icon: StreamSvgIcons.copy),
+        StreamContextMenuAction(
+          value: CopyMessage(message: message),
+          label: Text(context.translations.copyMessageLabel),
+          leading: Icon(icons.copy20),
         ),
       );
     }
@@ -179,10 +183,10 @@ class StreamMessageActionsBuilder {
     if (!containsPoll && !containsGiphy) {
       if (canUpdateAnyMessage || (canUpdateOwnMessage && isSentByCurrentUser)) {
         messageActions.add(
-          StreamMessageAction(
-            action: EditMessage(message: message),
-            title: Text(context.translations.editMessageLabel),
-            leading: const StreamSvgIcon(icon: StreamSvgIcons.edit),
+          StreamContextMenuAction(
+            value: EditMessage(message: message),
+            label: Text(context.translations.editMessageLabel),
+            leading: Icon(icons.edit20),
           ),
         );
       }
@@ -197,14 +201,14 @@ class StreamMessageActionsBuilder {
 
       final action = switch (isPinned) {
         true => UnpinMessage(message: message),
-        false => PinMessage(message: message)
+        false => PinMessage(message: message),
       };
 
       messageActions.add(
-        StreamMessageAction(
-          action: action,
-          title: Text(label.call(pinned: isPinned)),
-          leading: const StreamSvgIcon(icon: StreamSvgIcons.pin),
+        StreamContextMenuAction(
+          value: action,
+          label: Text(label.call(pinned: isPinned)),
+          leading: Icon(icons.pin20),
         ),
       );
     }
@@ -213,27 +217,25 @@ class StreamMessageActionsBuilder {
       final label = context.translations.toggleDeleteRetryDeleteMessageText;
 
       messageActions.add(
-        StreamMessageAction(
-          isDestructive: true,
-          action: DeleteMessage(message: message),
-          leading: const StreamSvgIcon(icon: StreamSvgIcons.delete),
-          title: Text(label.call(isDeleteFailed: false)),
+        StreamContextMenuAction.destructive(
+          value: DeleteMessage(message: message),
+          leading: Icon(icons.delete20),
+          label: Text(label.call(isDeleteFailed: false)),
         ),
       );
     }
 
     if (!isSentByCurrentUser) {
       messageActions.add(
-        StreamMessageAction(
-          action: FlagMessage(message: message),
-          title: Text(context.translations.flagMessageLabel),
-          leading: const StreamSvgIcon(icon: StreamSvgIcons.flag),
+        StreamContextMenuAction(
+          value: FlagMessage(message: message),
+          label: Text(context.translations.flagMessageLabel),
+          leading: Icon(icons.flag20),
         ),
       );
     }
 
-    if (message.user case final messageUser?
-        when channel.config?.mutes == true && !isSentByCurrentUser) {
+    if (message.user case final messageUser? when channel.config?.mutes == true && !isSentByCurrentUser) {
       final mutedUsers = currentUser?.mutes.map((mute) => mute.target.id);
       final isMuted = mutedUsers?.contains(messageUser.id) ?? false;
       final label = context.translations.toggleMuteUnmuteUserText;
@@ -244,16 +246,13 @@ class StreamMessageActionsBuilder {
       };
 
       messageActions.add(
-        StreamMessageAction(
-          action: action,
-          title: Text(label.call(isMuted: isMuted)),
-          leading: const StreamSvgIcon(icon: StreamSvgIcons.mute),
+        StreamContextMenuAction(
+          value: action,
+          label: Text(label.call(isMuted: isMuted)),
+          leading: Icon(icons.mute20),
         ),
       );
     }
-
-    // Add all the remaining custom actions if provided.
-    if (customActions case final actions?) messageActions.addAll(actions);
 
     return messageActions;
   }

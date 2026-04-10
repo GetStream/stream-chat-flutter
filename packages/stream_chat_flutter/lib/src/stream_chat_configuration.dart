@@ -18,8 +18,7 @@ class StreamChatConfiguration extends InheritedWidget {
   final StreamChatConfigurationData data;
 
   @override
-  bool updateShouldNotify(StreamChatConfiguration oldWidget) =>
-      data != oldWidget.data;
+  bool updateShouldNotify(StreamChatConfiguration oldWidget) => data != oldWidget.data;
 
   /// Finds the [StreamChatConfigurationData] from the closest
   /// [StreamChatConfiguration] ancestor that encloses the given context.
@@ -81,8 +80,7 @@ class StreamChatConfiguration extends InheritedWidget {
   /// See also:
   ///  * [of], which throws if no [StreamChatConfiguration] is found.
   static StreamChatConfigurationData? maybeOf(BuildContext context) {
-    final streamChatConfiguration =
-        context.dependOnInheritedWidgetOfExactType<StreamChatConfiguration>();
+    final streamChatConfiguration = context.dependOnInheritedWidgetOfExactType<StreamChatConfiguration>();
     return streamChatConfiguration?.data;
   }
 }
@@ -163,20 +161,27 @@ class StreamChatConfigurationData {
     Widget loadingIndicator = const StreamLoadingIndicator(),
     Widget Function(BuildContext, User)? defaultUserImage,
     Widget Function(BuildContext, User)? placeholderUserImage,
-    List<StreamReactionIcon>? reactionIcons,
+    ReactionIconResolver? reactionIconResolver,
     bool? enforceUniqueReactions,
     bool draftMessagesEnabled = false,
     MessagePreviewFormatter? messagePreviewFormatter,
+    StreamImageCDN imageCDN = const StreamImageCDN(),
+    List<StreamAttachmentWidgetBuilder>? attachmentBuilders,
+    StreamReactionsType? reactionType,
+    StreamReactionsPosition? reactionPosition,
   }) {
     return StreamChatConfigurationData._(
       loadingIndicator: loadingIndicator,
       defaultUserImage: defaultUserImage ?? _defaultUserImage,
       placeholderUserImage: placeholderUserImage,
-      reactionIcons: reactionIcons ?? StreamReactionIcon.defaultReactions,
+      reactionIconResolver: reactionIconResolver ?? const DefaultReactionIconResolver(),
       enforceUniqueReactions: enforceUniqueReactions ?? true,
       draftMessagesEnabled: draftMessagesEnabled,
-      messagePreviewFormatter:
-          messagePreviewFormatter ?? MessagePreviewFormatter(),
+      messagePreviewFormatter: messagePreviewFormatter ?? MessagePreviewFormatter(),
+      imageCDN: imageCDN,
+      attachmentBuilders: attachmentBuilders,
+      reactionType: reactionType,
+      reactionPosition: reactionPosition,
     );
   }
 
@@ -184,10 +189,14 @@ class StreamChatConfigurationData {
     required this.loadingIndicator,
     required this.defaultUserImage,
     required this.placeholderUserImage,
-    required this.reactionIcons,
+    required this.reactionIconResolver,
     required this.enforceUniqueReactions,
     required this.draftMessagesEnabled,
     required this.messagePreviewFormatter,
+    required this.imageCDN,
+    required this.attachmentBuilders,
+    this.reactionType,
+    this.reactionPosition,
   });
 
   /// Copies the configuration options from one [StreamChatConfigurationData] to
@@ -196,21 +205,27 @@ class StreamChatConfigurationData {
     Widget? loadingIndicator,
     Widget Function(BuildContext, User)? defaultUserImage,
     Widget Function(BuildContext, User)? placeholderUserImage,
-    List<StreamReactionIcon>? reactionIcons,
+    ReactionIconResolver? reactionIconResolver,
     bool? enforceUniqueReactions,
     bool? draftMessagesEnabled,
     MessagePreviewFormatter? messagePreviewFormatter,
+    StreamImageCDN? imageCDN,
+    List<StreamAttachmentWidgetBuilder>? attachmentBuilders,
+    StreamReactionsType? reactionType,
+    StreamReactionsPosition? reactionPosition,
   }) {
     return StreamChatConfigurationData(
-      reactionIcons: reactionIcons ?? this.reactionIcons,
+      reactionIconResolver: reactionIconResolver ?? this.reactionIconResolver,
       defaultUserImage: defaultUserImage ?? this.defaultUserImage,
       placeholderUserImage: placeholderUserImage ?? this.placeholderUserImage,
       loadingIndicator: loadingIndicator ?? this.loadingIndicator,
-      enforceUniqueReactions:
-          enforceUniqueReactions ?? this.enforceUniqueReactions,
+      enforceUniqueReactions: enforceUniqueReactions ?? this.enforceUniqueReactions,
       draftMessagesEnabled: draftMessagesEnabled ?? this.draftMessagesEnabled,
-      messagePreviewFormatter:
-          messagePreviewFormatter ?? this.messagePreviewFormatter,
+      messagePreviewFormatter: messagePreviewFormatter ?? this.messagePreviewFormatter,
+      imageCDN: imageCDN ?? this.imageCDN,
+      attachmentBuilders: attachmentBuilders ?? this.attachmentBuilders,
+      reactionType: reactionType ?? this.reactionType,
+      reactionPosition: reactionPosition ?? this.reactionPosition,
     );
   }
 
@@ -228,8 +243,11 @@ class StreamChatConfigurationData {
   /// The widget that will be built when the user image is loading.
   final Widget Function(BuildContext, User)? placeholderUserImage;
 
-  /// Assets used for rendering reactions.
-  final List<StreamReactionIcon> reactionIcons;
+  /// The resolver used to convert reaction types into [StreamEmojiContent]
+  /// models and to provide the list of supported/default reaction types.
+  ///
+  /// Defaults to [DefaultReactionIconResolver].
+  final ReactionIconResolver reactionIconResolver;
 
   /// Whether a new reaction should replace the existing one.
   final bool enforceUniqueReactions;
@@ -238,6 +256,33 @@ class StreamChatConfigurationData {
   ///
   /// Defaults to [MessagePreviewFormatter].
   final MessagePreviewFormatter messagePreviewFormatter;
+
+  /// The image CDN used for generating resized image URLs and stable
+  /// cache keys.
+  ///
+  /// Defaults to [StreamImageCDN], which supports Stream's own CDN.
+  /// Extend [StreamImageCDN] to customize behavior for a custom CDN.
+  final StreamImageCDN imageCDN;
+
+  /// Custom attachment builders for rendering attachment widgets in messages.
+  ///
+  /// When non-null, these builders are prepended to the default builders
+  /// based on the [Attachment.type], allowing custom attachment types to be
+  /// rendered globally across all message widgets.
+  final List<StreamAttachmentWidgetBuilder>? attachmentBuilders;
+
+  /// The visual type of the reactions display used across all message widgets.
+  ///
+  /// When null, the widget resolves its own default
+  /// ([StreamReactionsType.segmented]).
+  final StreamReactionsType? reactionType;
+
+  /// Where reactions appear relative to the message bubble across all
+  /// message widgets.
+  ///
+  /// When null, the widget resolves its own default
+  /// ([StreamReactionsPosition.header]).
+  final StreamReactionsPosition? reactionPosition;
 
   static Widget _defaultUserImage(
     BuildContext context,

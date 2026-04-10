@@ -153,8 +153,7 @@ void main() {
         });
 
         test('should create from custom string correctly', () {
-          expect(ModerationAction.fromJson('custom'),
-              const ModerationAction('custom'));
+          expect(ModerationAction.fromJson('custom'), const ModerationAction('custom'));
         });
 
         test('should handle legacy v1 moderation actions correctly', () {
@@ -179,8 +178,7 @@ void main() {
           expect(ModerationAction.toJson(ModerationAction.flag), 'flag');
           expect(ModerationAction.toJson(ModerationAction.remove), 'remove');
           expect(ModerationAction.toJson(ModerationAction.shadow), 'shadow');
-          expect(ModerationAction.toJson(const ModerationAction('custom')),
-              'custom');
+          expect(ModerationAction.toJson(const ModerationAction('custom')), 'custom');
         });
 
         test('should serialize legacy v1 action strings correctly', () {

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 import '../mocks.dart';
 
@@ -14,8 +15,7 @@ void main() {
 
       when(() => client.state).thenReturn(clientState);
       when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
-      when(() => client.wsConnectionStatusStream)
-          .thenAnswer((_) => Stream.value(ConnectionStatus.connected));
+      when(() => client.wsConnectionStatusStream).thenAnswer((_) => Stream.value(ConnectionStatus.connected));
 
       await tester.pumpWidget(
         MaterialApp(
@@ -29,10 +29,9 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      final userAvatar =
-          tester.widget<StreamUserAvatar>(find.byType(StreamUserAvatar));
+      final userAvatar = tester.widget<StreamUserAvatar>(find.byType(StreamUserAvatar));
       expect(userAvatar.user, clientState.currentUser);
-      expect(find.byType(StreamNeumorphicButton), findsOneWidget);
+      expect(find.byType(StreamButton), findsOneWidget);
       expect(find.text('Stream Chat'), findsOneWidget);
     },
   );
@@ -45,8 +44,7 @@ void main() {
 
       when(() => client.state).thenReturn(clientState);
       when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
-      when(() => client.wsConnectionStatusStream)
-          .thenAnswer((_) => Stream.value(ConnectionStatus.disconnected));
+      when(() => client.wsConnectionStatusStream).thenAnswer((_) => Stream.value(ConnectionStatus.disconnected));
 
       await tester.pumpWidget(
         MaterialApp(
@@ -74,8 +72,7 @@ void main() {
 
       when(() => client.state).thenReturn(clientState);
       when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
-      when(() => client.wsConnectionStatusStream)
-          .thenAnswer((_) => Stream.value(ConnectionStatus.connecting));
+      when(() => client.wsConnectionStatusStream).thenAnswer((_) => Stream.value(ConnectionStatus.connecting));
 
       await tester.pumpWidget(
         MaterialApp(
@@ -103,8 +100,7 @@ void main() {
 
       when(() => client.state).thenReturn(clientState);
       when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
-      when(() => client.wsConnectionStatusStream)
-          .thenAnswer((_) => Stream.value(ConnectionStatus.connecting));
+      when(() => client.wsConnectionStatusStream).thenAnswer((_) => Stream.value(ConnectionStatus.connecting));
 
       await tester.pumpWidget(
         MaterialApp(
@@ -141,8 +137,7 @@ void main() {
 
       when(() => client.state).thenReturn(clientState);
       when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
-      when(() => client.wsConnectionStatusStream)
-          .thenAnswer((_) => Stream.value(ConnectionStatus.connecting));
+      when(() => client.wsConnectionStatusStream).thenAnswer((_) => Stream.value(ConnectionStatus.connecting));
 
       var tapped = false;
 
@@ -175,8 +170,7 @@ void main() {
 
       when(() => client.state).thenReturn(clientState);
       when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
-      when(() => client.wsConnectionStatusStream)
-          .thenAnswer((_) => Stream.value(ConnectionStatus.connecting));
+      when(() => client.wsConnectionStatusStream).thenAnswer((_) => Stream.value(ConnectionStatus.connected));
 
       var tapped = 0;
       await tester.pumpWidget(
@@ -199,7 +193,7 @@ void main() {
       await tester.pump();
 
       await tester.tap(find.byType(StreamUserAvatar));
-      await tester.tap(find.byType(StreamNeumorphicButton));
+      await tester.tap(find.byIcon(StreamIconData.plus20));
       expect(tapped, 2);
     },
   );

@@ -2,18 +2,16 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/scroll_view/stream_scroll_view_error_widget.dart';
 import 'package:stream_chat_flutter/src/scroll_view/stream_scroll_view_load_more_error.dart';
-import 'package:stream_chat_flutter/src/scroll_view/stream_scroll_view_load_more_indicator.dart';
 import 'package:stream_chat_flutter/src/scroll_view/stream_scroll_view_loading_widget.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 /// Default grid delegate  for [StreamMemberGridView].
-const defaultMemberGridViewDelegate =
-    SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 4);
+const defaultMemberGridViewDelegate = SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 4);
 
 /// Signature for the item builder that creates the children of the
 /// [StreamMemberGridView].
-typedef StreamMemberGridViewIndexedWidgetBuilder
-    = StreamScrollViewIndexedWidgetBuilder<Member, StreamMemberGridTile>;
+typedef StreamMemberGridViewIndexedWidgetBuilder = StreamScrollViewIndexedWidgetBuilder<Member, StreamMemberGridTile>;
 
 /// Signature for the member grid tile, currently equal to [StreamUserGridTile].
 typedef StreamMemberGridTile = StreamUserGridTile;
@@ -352,9 +350,9 @@ class StreamMemberGridView extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.all(8),
                 child: StreamScrollViewEmptyWidget(
-                  emptyIcon: StreamSvgIcon(
+                  emptyIcon: Icon(
+                    context.streamIcons.user32,
                     size: 148,
-                    icon: StreamSvgIcons.user,
                     color: chatThemeData.colorTheme.disabled,
                   ),
                   emptyTitle: Text(
@@ -365,18 +363,17 @@ class StreamMemberGridView extends StatelessWidget {
               ),
             );
       },
-      loadMoreErrorBuilder: (context, error) =>
-          StreamScrollViewLoadMoreError.grid(
+      loadMoreErrorBuilder: (context, error) => StreamScrollViewLoadMoreError.grid(
         onTap: controller.retry,
         error: Text(
           context.translations.loadingUsersError,
           textAlign: TextAlign.center,
         ),
       ),
-      loadMoreIndicatorBuilder: (context) => const Center(
+      loadMoreIndicatorBuilder: (context) => Center(
         child: Padding(
-          padding: EdgeInsets.all(16),
-          child: StreamScrollViewLoadMoreIndicator(),
+          padding: const EdgeInsets.all(16),
+          child: StreamLoadingSpinner(),
         ),
       ),
       loadingBuilder: (context) =>

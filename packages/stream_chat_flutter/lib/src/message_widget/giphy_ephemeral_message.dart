@@ -1,17 +1,17 @@
-import 'package:flutter/material.dart';
-import 'package:jiffy/jiffy.dart';
-import 'package:stream_chat_flutter/src/attachment/thumbnail/giphy_attachment_thumbnail.dart';
-import 'package:stream_chat_flutter/src/icons/stream_svg_icon.dart';
-import 'package:stream_chat_flutter/src/misc/timestamp.dart';
-import 'package:stream_chat_flutter/src/misc/visible_footnote.dart';
-import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
+import 'package:flutter/material.dart' hide Action;
+import 'package:stream_chat_flutter/src/attachment/giphy_attachment.dart';
+import 'package:stream_chat_flutter/src/message_widget/components/stream_message_metadata.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart' as core;
 
 /// Signature for the action callback passed to [GiphyEphemeralMessage].
 ///
 /// Used by [GiphyEphemeralMessage.onActionPressed].
 typedef GiffyAction = void Function(String name, String value);
+
+const _kDefaultConstraints = BoxConstraints(maxWidth: 256);
+const _kDefaultGiphyConstraints = BoxConstraints(minWidth: 128, maxWidth: 256, maxHeight: 256);
 
 /// {@template giphyEphemeralMessage}
 /// Shows an ephemeral message of type giphy in a [MessageWidget].
@@ -21,11 +21,15 @@ class GiphyEphemeralMessage extends StatelessWidget {
   const GiphyEphemeralMessage({
     super.key,
     required this.message,
+    this.constraints,
     this.onActionPressed,
   });
 
   /// The underlying [Message] object which this widget represents.
   final Message message;
+
+  /// The constraints to apply to the overall widget layout.
+  final BoxConstraints? constraints;
 
   /// Callback called when an action is pressed.
   final GiffyAction? onActionPressed;
@@ -37,84 +41,42 @@ class GiphyEphemeralMessage extends StatelessWidget {
     final actions = giphy.actions;
     assert(actions != null && actions.isNotEmpty, 'actions cannot be null');
 
-    final chatTheme = StreamChatTheme.of(context);
-    final textTheme = chatTheme.textTheme;
-    final colorTheme = chatTheme.colorTheme;
+    final spacing = context.streamSpacing;
 
-    final divider = Divider(thickness: 1, height: 0, color: colorTheme.borders);
+    final effectiveConstraints = constraints ?? _kDefaultConstraints;
 
-    return Padding(
-      padding: const EdgeInsets.all(8),
-      child: Align(
-        alignment: Alignment.centerRight,
-        child: SizedBox(
-          width: 304,
-          height: 343,
-          child: Column(
-            children: [
-              Expanded(
-                child: Card(
-                  elevation: 2,
-                  color: colorTheme.barsBg,
-                  margin: EdgeInsets.zero,
-                  shape: const RoundedRectangleBorder(
-                    borderRadius: BorderRadius.only(
-                      topRight: Radius.circular(16),
-                      topLeft: Radius.circular(16),
-                      bottomLeft: Radius.circular(16),
-                    ),
-                  ),
+    return core.StreamMessageLayout(
+      data: const core.StreamMessageLayoutData(
+        alignment: .end,
+        stackPosition: .single,
+        contentKind: .singleAttachment,
+      ),
+      child: Builder(
+        builder: (context) => Align(
+          alignment: core.StreamMessageLayout.alignmentDirectionalOf(context),
+          child: Padding(
+            padding: .symmetric(horizontal: spacing.md),
+            child: ConstrainedBox(
+              constraints: effectiveConstraints,
+              child: core.StreamMessageContent(
+                footer: StreamMessageMetadata(message: message),
+                child: core.StreamMessageBubble(
                   child: Column(
+                    mainAxisSize: .min,
+                    crossAxisAlignment: .stretch,
                     children: [
-                      Padding(
-                        padding: const EdgeInsets.all(8),
-                        child: GiphyHeader(title: giphy.title),
+                      GiphyHeader(title: context.translations.onlyVisibleToYouText),
+                      StreamGiphyAttachment(
+                        message: message,
+                        giphy: giphy,
+                        constraints: _kDefaultGiphyConstraints,
                       ),
-                      divider,
-                      Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.all(2),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(2),
-                            child: StreamGiphyAttachmentThumbnail(
-                              giphy: giphy,
-                              width: double.infinity,
-                              height: double.infinity,
-                            ),
-                          ),
-                        ),
-                      ),
-                      divider,
-                      SizedBox(
-                        height: 48,
-                        child: Padding(
-                          padding: const EdgeInsets.all(2),
-                          child: GiphyActions(
-                            giphy: giphy,
-                            onActionPressed: onActionPressed,
-                          ),
-                        ),
-                      ),
+                      GiphyActions(actions: actions!, onActionPressed: onActionPressed),
                     ],
                   ),
                 ),
               ),
-              const SizedBox(height: 4),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  const StreamVisibleFootnote(),
-                  const SizedBox(width: 8),
-                  StreamTimestamp(
-                    date: message.createdAt.toLocal(),
-                    formatter: (_, date) => Jiffy.parseFromDateTime(date).jm,
-                    style: textTheme.footnote.copyWith(
-                      color: colorTheme.textLowEmphasis,
-                    ),
-                  ),
-                ],
-              ),
-            ],
+            ),
           ),
         ),
       ),
@@ -129,68 +91,51 @@ class GiphyActions extends StatelessWidget {
   /// {@macro giphyActions}
   const GiphyActions({
     super.key,
-    required this.giphy,
+    required this.actions,
     required this.onActionPressed,
   });
 
   /// The underlying [Attachment] object which this widget represents.
-  final Attachment giphy;
+  final List<Action> actions;
 
   /// Callback called when an action is pressed.
   final GiffyAction? onActionPressed;
 
   @override
   Widget build(BuildContext context) {
-    final theme = StreamChatTheme.of(context);
-    final textTheme = theme.textTheme;
-    final colorTheme = theme.colorTheme;
+    final spacing = context.streamSpacing;
 
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: [
-        Expanded(
-          child: TextButton(
-            onPressed: switch (onActionPressed) {
-              final onPressed? => () => onPressed('image_action', 'cancel'),
-              _ => null,
+    return Padding(
+      padding: .symmetric(horizontal: spacing.xxs),
+      child: Row(
+        mainAxisSize: .min,
+        spacing: spacing.xs,
+        mainAxisAlignment: .spaceEvenly,
+        children: [
+          ...actions.map(
+            (action) {
+              final style = switch (action.style) {
+                'primary' => core.StreamButtonStyle.primary,
+                _ => core.StreamButtonStyle.secondary,
+              };
+
+              return core.StreamButton(
+                label: action.text,
+                style: style,
+                type: .ghost,
+                size: .small,
+                onTap: switch (onActionPressed) {
+                  final onPressed? => () => onPressed(
+                    action.name.toLowerCase(),
+                    action.text.toLowerCase(),
+                  ),
+                  _ => null,
+                },
+              );
             },
-            style: TextButton.styleFrom(
-              textStyle: textTheme.bodyBold,
-              foregroundColor: colorTheme.textLowEmphasis,
-            ),
-            child: Text(context.translations.cancelLabel.sentenceCase),
           ),
-        ),
-        VerticalDivider(thickness: 1, width: 4, color: colorTheme.borders),
-        Expanded(
-          child: TextButton(
-            onPressed: switch (onActionPressed) {
-              final onPressed? => () => onPressed('image_action', 'shuffle'),
-              _ => null,
-            },
-            style: TextButton.styleFrom(
-              textStyle: textTheme.bodyBold,
-              foregroundColor: colorTheme.textLowEmphasis,
-            ),
-            child: Text(context.translations.shuffleLabel.sentenceCase),
-          ),
-        ),
-        VerticalDivider(thickness: 1, width: 4, color: colorTheme.borders),
-        Expanded(
-          child: TextButton(
-            onPressed: switch (onActionPressed) {
-              final onPressed? => () => onPressed('image_action', 'send'),
-              _ => null,
-            },
-            style: TextButton.styleFrom(
-              textStyle: textTheme.bodyBold,
-              foregroundColor: colorTheme.accentPrimary,
-            ),
-            child: Text(context.translations.sendLabel.sentenceCase),
-          ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -200,36 +145,31 @@ class GiphyActions extends StatelessWidget {
 /// {@endtemplate}
 class GiphyHeader extends StatelessWidget {
   /// {@macro giphyHeader}
-  const GiphyHeader({super.key, this.title});
+  const GiphyHeader({super.key, required this.title});
 
   /// The title of the giphy.
-  final String? title;
+  final String title;
 
   @override
   Widget build(BuildContext context) {
-    final colorTheme = StreamChatTheme.of(context).colorTheme;
-    return Row(
-      children: [
-        const StreamSvgIcon(icon: StreamSvgIcons.giphy),
-        const SizedBox(width: 8),
-        Text(
-          context.translations.giphyLabel,
-          style: const TextStyle(fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(width: 8),
-        if (title != null)
-          Expanded(
-            child: Text(
-              title!,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                // ignore: deprecated_member_use
-                color: colorTheme.textHighEmphasis.withOpacity(0.5),
-              ),
-            ),
-          ),
-      ],
+    final icons = context.streamIcons;
+    final spacing = context.streamSpacing;
+    final textTheme = context.streamTextTheme;
+    final colorScheme = context.streamColorScheme;
+
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        vertical: spacing.xs,
+        horizontal: spacing.sm,
+      ),
+      child: Row(
+        mainAxisSize: .min,
+        spacing: spacing.xs,
+        children: [
+          Icon(icons.eyeFill16, size: 16, color: colorScheme.brand.shade900),
+          Text(title, style: textTheme.captionEmphasis.copyWith(color: colorScheme.brand.shade900)),
+        ],
+      ),
     );
   }
 }

@@ -28,7 +28,7 @@ class ComparableField<T> implements Comparable<ComparableField<T>> {
       (final DateTime a, final DateTime b) => a.compareTo(b),
       (final bool a, final bool b) when a == b => 0,
       (final bool a, final bool b) => a && !b ? 1 : -1, // true > false
-      _ => 0 // All comparisons were equal or incomparable types
+      _ => 0, // All comparisons were equal or incomparable types
     };
   }
 }

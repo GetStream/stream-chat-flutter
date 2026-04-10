@@ -2,6 +2,7 @@ import 'package:alchemist/alchemist.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart';
 import '../material_app_wrapper.dart';
 
 void main() {
@@ -28,7 +29,7 @@ void main() {
   );
 
   goldenTest(
-    'golden test for StreamSendingIndicator with StreamSvgIcon.checkAll',
+    'golden test for StreamSendingIndicator with Icon checkAll',
     fileName: 'sending_indicator_0',
     constraints: const BoxConstraints.tightFor(width: 50, height: 50),
     builder: () => MaterialAppWrapper(
@@ -47,7 +48,7 @@ void main() {
   );
 
   goldenTest(
-    'golden test for StreamSendingIndicator with StreamSvgIcon.checkAll '
+    'golden test for StreamSendingIndicator with Icon checkAll '
     '(delivered)',
     fileName: 'sending_indicator_1',
     constraints: const BoxConstraints.tightFor(width: 50, height: 50),
@@ -69,7 +70,7 @@ void main() {
   );
 
   goldenTest(
-    'golden test for StreamSendingIndicator with StreamSvgIcon.check',
+    'golden test for StreamSendingIndicator with Icon check',
     fileName: 'sending_indicator_2',
     constraints: const BoxConstraints.tightFor(width: 50, height: 50),
     builder: () => MaterialAppWrapper(
@@ -89,7 +90,7 @@ void main() {
   );
 
   goldenTest(
-    'golden test for StreamSendingIndicator with StreamSvgIcons.time',
+    'golden test for StreamSendingIndicator with clock icon',
     fileName: 'sending_indicator_3',
     constraints: const BoxConstraints.tightFor(width: 50, height: 50),
     builder: () => MaterialAppWrapper(
@@ -129,13 +130,13 @@ void main() {
         ),
       );
 
-      final streamSvgIcon = tester.widget<StreamSvgIcon>(
-        find.byType(StreamSvgIcon),
+      final icon = tester.widget<Icon>(
+        find.byType(Icon),
       );
 
-      expect(streamSvgIcon.icon, StreamSvgIcons.checkAll);
+      expect(icon.icon, StreamIconData.checks16);
       expect(
-        streamSvgIcon.color,
+        icon.color,
         StreamChatThemeData.light().colorTheme.textLowEmphasis,
       );
     },
@@ -162,13 +163,13 @@ void main() {
         ),
       );
 
-      final streamSvgIcon = tester.widget<StreamSvgIcon>(
-        find.byType(StreamSvgIcon),
+      final icon = tester.widget<Icon>(
+        find.byType(Icon),
       );
 
-      expect(streamSvgIcon.icon, StreamSvgIcons.checkAll);
+      expect(icon.icon, StreamIconData.checks16);
       expect(
-        streamSvgIcon.color,
+        icon.color,
         StreamChatThemeData.light().colorTheme.accentPrimary,
       );
     },
@@ -196,14 +197,14 @@ void main() {
         ),
       );
 
-      final streamSvgIcon = tester.widget<StreamSvgIcon>(
-        find.byType(StreamSvgIcon),
+      final icon = tester.widget<Icon>(
+        find.byType(Icon),
       );
 
-      expect(streamSvgIcon.icon, StreamSvgIcons.checkAll);
+      expect(icon.icon, StreamIconData.checks16);
       // Should use accentPrimary (read) not textLowEmphasis (delivered)
       expect(
-        streamSvgIcon.color,
+        icon.color,
         StreamChatThemeData.light().colorTheme.accentPrimary,
       );
     },

@@ -51,13 +51,13 @@ sealed class RecordStateRecording extends AudioRecorderState {
   }) {
     return switch (this) {
       RecordStateRecordingHold() => RecordStateRecordingHold(
-          duration: duration ?? this.duration,
-          waveform: waveform ?? this.waveform,
-        ),
+        duration: duration ?? this.duration,
+        waveform: waveform ?? this.waveform,
+      ),
       RecordStateRecordingLocked() => RecordStateRecordingLocked(
-          duration: duration ?? this.duration,
-          waveform: waveform ?? this.waveform,
-        ),
+        duration: duration ?? this.duration,
+        waveform: waveform ?? this.waveform,
+      ),
     };
   }
 }

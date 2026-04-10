@@ -12,18 +12,17 @@ class LocalNotificationObserver extends NavigatorObserver {
   ) {
     _subscription = client
         .on(
-      EventType.messageNew,
-      EventType.notificationMessageNew,
-    )
+          EventType.messageNew,
+          EventType.notificationMessageNew,
+        )
         .listen((event) {
-      _handleEvent(event, client, navigatorKey);
-    });
+          _handleEvent(event, client, navigatorKey);
+        });
   }
   Route? currentRoute;
   late final StreamSubscription _subscription;
 
-  void _handleEvent(Event event, StreamChatClient client,
-      GlobalKey<NavigatorState> navigatorKey) {
+  void _handleEvent(Event event, StreamChatClient client, GlobalKey<NavigatorState> navigatorKey) {
     if (event.message?.user?.id == client.state.currentUser?.id) {
       return;
     }

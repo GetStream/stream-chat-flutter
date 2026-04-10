@@ -241,12 +241,10 @@ void main() {
     });
 
     test('setOGAttachment replaces existing OG attachment', () {
-      final oldOGAttachment =
-          Attachment(ogScrapeUrl: 'https://old.example.com');
+      final oldOGAttachment = Attachment(ogScrapeUrl: 'https://old.example.com');
       controller.addAttachment(oldOGAttachment);
 
-      final newOGAttachment =
-          Attachment(ogScrapeUrl: 'https://new.example.com');
+      final newOGAttachment = Attachment(ogScrapeUrl: 'https://new.example.com');
       controller.setOGAttachment(newOGAttachment);
 
       expect(controller.attachments.length, 1);
@@ -382,6 +380,63 @@ void main() {
     });
   });
 
+  group('Edit Message', () {
+    test('editMessage sets state to MessageState.updating', () {
+      final existingMessage = Message(id: 'msg-1', text: 'Original text');
+      controller.editMessage(existingMessage);
+
+      expect(controller.message.state.isInitial, isFalse);
+      expect(controller.message.state.isUpdating, isTrue);
+    });
+
+    test('editMessage preserves the message id and text', () {
+      final existingMessage = Message(id: 'msg-1', text: 'Original text');
+      controller.editMessage(existingMessage);
+
+      expect(controller.message.id, 'msg-1');
+      expect(controller.message.text, 'Original text');
+    });
+
+    test('editMessage stores original in editingOriginalMessage', () {
+      final existingMessage = Message(id: 'msg-1', text: 'Original text');
+      controller.editMessage(existingMessage);
+
+      expect(controller.editingOriginalMessage, isNotNull);
+      expect(controller.editingOriginalMessage!.id, 'msg-1');
+      expect(controller.editingOriginalMessage!.text, 'Original text');
+    });
+
+    test('editingOriginalMessage text is not affected by subsequent typing', () {
+      final existingMessage = Message(id: 'msg-1', text: 'Original text');
+      controller.editMessage(existingMessage);
+
+      controller.text = 'Edited text';
+
+      expect(controller.editingOriginalMessage!.text, 'Original text');
+      expect(controller.message.text, 'Edited text');
+    });
+
+    test('cancelEditMessage clears editingOriginalMessage', () {
+      final existingMessage = Message(id: 'msg-1', text: 'Original text');
+      controller.editMessage(existingMessage);
+
+      controller.cancelEditMessage();
+
+      expect(controller.editingOriginalMessage, isNull);
+    });
+
+    test('cancelEditMessage resets controller to empty state, not the edited message', () {
+      final existingMessage = Message(id: 'msg-1', text: 'Original text');
+      controller.editMessage(existingMessage);
+      controller.text = 'Edited text';
+
+      controller.cancelEditMessage();
+
+      expect(controller.text, isEmpty);
+      expect(controller.message.state.isInitial, isTrue);
+    });
+  });
+
   group('Reset and Clear', () {
     test('clear resets the message to empty state', () {
       controller.text = 'Some text';
@@ -501,8 +556,7 @@ class _RestorableWidget extends StatefulWidget {
   State<_RestorableWidget> createState() => _RestorableWidgetState();
 }
 
-class _RestorableWidgetState extends State<_RestorableWidget>
-    with RestorationMixin {
+class _RestorableWidgetState extends State<_RestorableWidget> with RestorationMixin {
   final controller = StreamRestorableMessageInputController();
 
   @override

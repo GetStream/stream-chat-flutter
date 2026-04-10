@@ -43,11 +43,7 @@ class StreamUserMentionTile extends StatelessWidget {
           const SizedBox(
             width: 16,
           ),
-          leading ??
-              StreamUserAvatar(
-                user: user,
-                constraints: BoxConstraints.tight(const Size(40, 40)),
-              ),
+          leading ?? StreamUserAvatar(size: .lg, user: user),
           const SizedBox(width: 8),
           Expanded(
             child: Align(
@@ -83,8 +79,8 @@ class StreamUserMentionTile extends StatelessWidget {
                   right: 18,
                   left: 8,
                 ),
-                child: StreamSvgIcon(
-                  icon: StreamSvgIcons.mentions,
+                child: Icon(
+                  context.streamIcons.mention20,
                   color: chatThemeData.colorTheme.accentPrimary,
                 ),
               ),

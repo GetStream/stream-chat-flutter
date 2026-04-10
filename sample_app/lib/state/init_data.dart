@@ -31,6 +31,5 @@ class InitData {
   final StreamChatClient client;
   final StreamingSharedPreferences preferences;
 
-  InitData copyWith({required StreamChatClient client}) =>
-      InitData(client, preferences);
+  InitData copyWith({required StreamChatClient client}) => InitData(client, preferences);
 }

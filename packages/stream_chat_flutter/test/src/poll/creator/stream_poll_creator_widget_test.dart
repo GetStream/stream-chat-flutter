@@ -28,8 +28,7 @@ void main() {
     expect(find.byType(PollSwitchListTile), findsNWidgets(4));
   });
 
-  testWidgets('StreamPollCreatorWidget updates poll state correctly',
-      (tester) async {
+  testWidgets('StreamPollCreatorWidget updates poll state correctly', (tester) async {
     final controller = StreamPollController(
       config: const PollConfig(
         nameRange: (min: 1, max: 150),

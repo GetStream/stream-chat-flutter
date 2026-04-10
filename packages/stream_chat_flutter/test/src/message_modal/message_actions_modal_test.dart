@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart' show StreamIconData;
 
 void main() {
   final message = Message(
@@ -14,27 +15,26 @@ void main() {
     user: User(id: 'test-user', name: 'Test User'),
   );
 
-  final messageActions = <StreamMessageAction>[
-    StreamMessageAction(
-      title: const Text('Reply'),
-      leading: const StreamSvgIcon(icon: StreamSvgIcons.reply),
-      action: QuotedReply(message: message),
+  final messageActions = <StreamContextMenuAction<MessageAction>>[
+    StreamContextMenuAction<MessageAction>(
+      label: const Text('Reply'),
+      leading: const Icon(StreamIconData.reply20),
+      value: QuotedReply(message: message),
     ),
-    StreamMessageAction(
-      title: const Text('Thread Reply'),
-      leading: const StreamSvgIcon(icon: StreamSvgIcons.threadReply),
-      action: ThreadReply(message: message),
+    StreamContextMenuAction<MessageAction>(
+      label: const Text('Thread Reply'),
+      leading: const Icon(StreamIconData.thread20),
+      value: ThreadReply(message: message),
     ),
-    StreamMessageAction(
-      title: const Text('Copy Message'),
-      leading: const StreamSvgIcon(icon: StreamSvgIcons.copy),
-      action: CopyMessage(message: message),
+    StreamContextMenuAction<MessageAction>(
+      label: const Text('Copy Message'),
+      leading: const Icon(StreamIconData.copy20),
+      value: CopyMessage(message: message),
     ),
-    StreamMessageAction(
-      isDestructive: true,
-      title: const Text('Delete Message'),
-      leading: const StreamSvgIcon(icon: StreamSvgIcons.delete),
-      action: DeleteMessage(message: message),
+    StreamContextMenuAction<MessageAction>.destructive(
+      label: const Text('Delete Message'),
+      leading: const Icon(StreamIconData.delete20),
+      value: DeleteMessage(message: message),
     ),
   ];
 
@@ -46,6 +46,7 @@ void main() {
             message: message,
             messageActions: messageActions,
             messageWidget: const Text('Message Widget'),
+            alignment: AlignmentDirectional.centerStart,
           ),
         ),
       );
@@ -66,6 +67,7 @@ void main() {
             message: message,
             messageActions: messageActions,
             messageWidget: const Text('Message Widget'),
+            alignment: AlignmentDirectional.centerStart,
             showReactionPicker: true,
           ),
         ),
@@ -73,63 +75,71 @@ void main() {
 
       // Use a longer timeout to ensure everything is rendered
       await tester.pumpAndSettle(const Duration(seconds: 1));
-      expect(find.byType(StreamReactionPicker), findsOneWidget);
+      expect(find.byType(StreamMessageReactionPicker), findsOneWidget);
     });
 
     testWidgets(
-      'calls onActionTap with SelectReaction when reaction is selected',
+      'pops with SelectReaction when reaction is selected',
       (tester) async {
         MessageAction? messageAction;
 
-        // Define custom reaction icons for testing
-        final testReactionIcons = [
-          StreamReactionIcon(
-            type: 'like',
-            builder: (context, isActive, size) => const Icon(Icons.thumb_up),
-          ),
-          StreamReactionIcon(
-            type: 'love',
-            builder: (context, isActive, size) => const Icon(Icons.favorite),
-          ),
-        ];
+        // Define custom reaction icons via resolver for testing.
+        const testReactionResolver = _TestReactionIconResolver(
+          defaultReactionTypes: {'like', 'love'},
+        );
 
         await tester.pumpWidget(
           _wrapWithMaterialApp(
-            StreamMessageActionsModal(
-              message: message,
-              messageActions: messageActions,
-              messageWidget: const Text('Message Widget'),
-              showReactionPicker: true,
-              onActionTap: (action) => messageAction = action,
+            reactionIconResolver: testReactionResolver,
+            Builder(
+              builder: (context) => TextButton(
+                onPressed: () async {
+                  messageAction = await showStreamDialog(
+                    context: context,
+                    builder: (_) => StreamMessageActionsModal(
+                      message: message,
+                      messageActions: messageActions,
+                      messageWidget: const Text('Message Widget'),
+                      alignment: AlignmentDirectional.centerStart,
+                      showReactionPicker: true,
+                    ),
+                  );
+                },
+                child: const Text('Open Dialog'),
+              ),
             ),
-            reactionIcons: testReactionIcons,
           ),
         );
+        await tester.tap(find.text('Open Dialog'));
 
         // Use a longer timeout to ensure everything is rendered
         await tester.pumpAndSettle(const Duration(seconds: 1));
 
         // Verify reaction picker is shown
-        expect(find.byType(StreamReactionPicker), findsOneWidget);
+        expect(find.byType(StreamMessageReactionPicker), findsOneWidget);
 
-        // Find and tap the first reaction (like)
-        final reactionIconFinder = find.byIcon(Icons.thumb_up);
-        expect(reactionIconFinder, findsOneWidget);
-        await tester.tap(reactionIconFinder);
+        // Reactions are rendered as StreamEmojiButton widgets. The resolver
+        // maps 'like' → 👍 and 'love' → ❤️. Find and tap the 'like' emoji.
+        final likeEmoji = find.text('👍');
+        expect(likeEmoji, findsOneWidget);
+        await tester.tap(likeEmoji);
         await tester.pumpAndSettle();
 
         expect(messageAction, isA<SelectReaction>());
-        // Verify callback was called with correct reaction type
+        // Verify the popped value has correct reaction type
         expect((messageAction! as SelectReaction).reaction.type, 'like');
 
-        // Find and tap the second reaction (love)
-        final loveIconFinder = find.byIcon(Icons.favorite);
-        expect(loveIconFinder, findsOneWidget);
-        await tester.tap(loveIconFinder);
+        // Open dialog again and tap the second reaction (love)
+        await tester.tap(find.text('Open Dialog'));
+        await tester.pumpAndSettle(const Duration(seconds: 1));
+
+        final loveEmoji = find.text('❤️');
+        expect(loveEmoji, findsOneWidget);
+        await tester.tap(loveEmoji);
         await tester.pumpAndSettle();
 
         expect(messageAction, isA<SelectReaction>());
-        // Verify callback was called with correct reaction type
+        // Verify the popped value has correct reaction type
         expect((messageAction! as SelectReaction).reaction.type, 'love');
       },
     );
@@ -173,6 +183,7 @@ void main() {
             message: message,
             messageActions: messageActions,
             messageWidget: buildMessageWidget(),
+            alignment: AlignmentDirectional.centerStart,
           ),
         ),
       );
@@ -187,6 +198,7 @@ void main() {
             message: message,
             messageActions: messageActions,
             messageWidget: buildMessageWidget(),
+            alignment: AlignmentDirectional.centerStart,
             showReactionPicker: true,
           ),
         ),
@@ -202,7 +214,7 @@ void main() {
             message: message,
             messageActions: messageActions,
             messageWidget: buildMessageWidget(reverse: true),
-            reverse: true,
+            alignment: AlignmentDirectional.centerEnd,
           ),
         ),
       );
@@ -217,8 +229,8 @@ void main() {
             message: message,
             messageActions: messageActions,
             messageWidget: buildMessageWidget(reverse: true),
+            alignment: AlignmentDirectional.centerEnd,
             showReactionPicker: true,
-            reverse: true,
           ),
         ),
       );
@@ -229,30 +241,59 @@ void main() {
 Widget _wrapWithMaterialApp(
   Widget child, {
   Brightness? brightness,
-  List<StreamReactionIcon>? reactionIcons,
+  ReactionIconResolver? reactionIconResolver,
 }) {
   return Portal(
     child: MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: StreamChatConfiguration(
-        data: StreamChatConfigurationData(reactionIcons: reactionIcons),
+      theme: ThemeData(brightness: brightness),
+      builder: (context, child) => StreamChatConfiguration(
+        data: StreamChatConfigurationData(
+          reactionIconResolver: reactionIconResolver ?? const _TestReactionIconResolver(),
+        ),
         child: StreamChatTheme(
           data: StreamChatThemeData(brightness: brightness),
-          child: Builder(builder: (context) {
-            final theme = StreamChatTheme.of(context);
-            return Scaffold(
-              backgroundColor: theme.colorTheme.appBg,
-              body: ColoredBox(
-                color: theme.colorTheme.overlay,
-                child: Padding(
-                  padding: const EdgeInsets.all(8),
-                  child: child,
-                ),
-              ),
-            );
-          }),
+          child: child ?? const SizedBox.shrink(),
         ),
+      ),
+      home: Builder(
+        builder: (context) {
+          final theme = StreamChatTheme.of(context);
+          return Scaffold(
+            backgroundColor: theme.colorTheme.appBg,
+            body: ColoredBox(
+              color: theme.colorTheme.overlay,
+              child: Padding(
+                padding: const EdgeInsets.all(8),
+                child: child,
+              ),
+            ),
+          );
+        },
       ),
     ),
   );
+}
+
+class _TestReactionIconResolver extends ReactionIconResolver {
+  const _TestReactionIconResolver({
+    this.defaultReactionTypes = const {'like', 'love', 'haha', 'wow', 'sad'},
+  });
+
+  final Set<String> defaultReactionTypes;
+
+  @override
+  Set<String> get defaultReactions => defaultReactionTypes;
+
+  @override
+  Set<String> get supportedReactions => defaultReactionTypes;
+
+  @override
+  String? emojiCode(String type) => streamSupportedEmojis[type]?.emoji;
+
+  @override
+  StreamEmojiContent resolve(String type) {
+    if (emojiCode(type) case final emoji?) return StreamUnicodeEmoji(emoji);
+    return const StreamUnicodeEmoji('❓');
+  }
 }

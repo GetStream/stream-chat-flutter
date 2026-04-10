@@ -39,49 +39,48 @@ class Attachment extends Equatable {
     Map<String, Object?> extraData = const {},
     this.file,
     this.uploadState = const UploadState.preparing(),
-  })  : id = id ?? const Uuid().v4(),
-        _type = switch (type) {
-          String() => AttachmentType(type),
-          _ => null,
-        },
-        title = title ?? file?.name,
-        localUri = file?.path != null ? Uri.parse(file!.path!) : null,
-        // For backwards compatibility,
-        // set 'file_size', 'mime_type' in [extraData].
-        extraData = {
-          ...extraData,
-          if (file?.size != null) 'file_size': file?.size,
-          if (file?.mediaType != null) 'mime_type': file?.mediaType?.mimeType,
-        };
+  }) : id = id ?? const Uuid().v4(),
+       _type = switch (type) {
+         String() => AttachmentType(type),
+         _ => null,
+       },
+       title = title ?? file?.name,
+       localUri = file?.path != null ? Uri.parse(file!.path!) : null,
+       // For backwards compatibility,
+       // set 'file_size', 'mime_type' in [extraData].
+       extraData = {
+         ...extraData,
+         if (file?.size != null) 'file_size': file?.size,
+         if (file?.mediaType != null) 'mime_type': file?.mediaType?.mimeType,
+       };
 
   /// Create a new instance from a json
-  factory Attachment.fromJson(Map<String, dynamic> json) =>
-      _$AttachmentFromJson(
-        Serializer.moveToExtraDataFromRoot(json, topLevelFields),
-      );
+  factory Attachment.fromJson(Map<String, dynamic> json) => _$AttachmentFromJson(
+    Serializer.moveToExtraDataFromRoot(json, topLevelFields),
+  );
 
   /// Create a new instance from a db data
-  factory Attachment.fromData(Map<String, dynamic> json) =>
-      _$AttachmentFromJson(Serializer.moveToExtraDataFromRoot(
-        json,
-        topLevelFields + dbSpecificTopLevelFields,
-      ));
+  factory Attachment.fromData(Map<String, dynamic> json) => _$AttachmentFromJson(
+    Serializer.moveToExtraDataFromRoot(
+      json,
+      topLevelFields + dbSpecificTopLevelFields,
+    ),
+  );
 
-  factory Attachment.fromOGAttachment(OGAttachmentResponse ogAttachment) =>
-      Attachment(
-        // If the type is not specified, we default to urlPreview.
-        type: ogAttachment.type ?? AttachmentType.urlPreview,
-        title: ogAttachment.title,
-        titleLink: ogAttachment.titleLink,
-        text: ogAttachment.text,
-        imageUrl: ogAttachment.imageUrl,
-        thumbUrl: ogAttachment.thumbUrl,
-        authorName: ogAttachment.authorName,
-        authorLink: ogAttachment.authorLink,
-        assetUrl: ogAttachment.assetUrl,
-        ogScrapeUrl: ogAttachment.ogScrapeUrl,
-        uploadState: const UploadState.success(),
-      );
+  factory Attachment.fromOGAttachment(OGAttachmentResponse ogAttachment) => Attachment(
+    // If the type is not specified, we default to urlPreview.
+    type: ogAttachment.type ?? AttachmentType.urlPreview,
+    title: ogAttachment.title,
+    titleLink: ogAttachment.titleLink,
+    text: ogAttachment.text,
+    imageUrl: ogAttachment.imageUrl,
+    thumbUrl: ogAttachment.thumbUrl,
+    authorName: ogAttachment.authorName,
+    authorLink: ogAttachment.authorLink,
+    assetUrl: ogAttachment.assetUrl,
+    ogScrapeUrl: ogAttachment.ogScrapeUrl,
+    uploadState: const UploadState.success(),
+  );
 
   ///The attachment type based on the URL resource. This can be: audio,
   ///image or video
@@ -219,8 +218,7 @@ class Attachment extends Equatable {
         ..removeWhere((key, value) => dbSpecificTopLevelFields.contains(key));
 
   /// Serialize to db data
-  Map<String, dynamic> toData() =>
-      Serializer.moveFromExtraDataToRoot(_$AttachmentToJson(this));
+  Map<String, dynamic> toData() => Serializer.moveFromExtraDataToRoot(_$AttachmentToJson(this));
 
   Attachment copyWith({
     String? id,
@@ -247,33 +245,32 @@ class Attachment extends Equatable {
     AttachmentFile? file,
     UploadState? uploadState,
     Map<String, Object?>? extraData,
-  }) =>
-      Attachment(
-        id: id ?? this.id,
-        type: type ?? this.type,
-        titleLink: titleLink ?? this.titleLink,
-        title: title ?? this.title,
-        thumbUrl: thumbUrl ?? this.thumbUrl,
-        text: text ?? this.text,
-        pretext: pretext ?? this.pretext,
-        ogScrapeUrl: ogScrapeUrl ?? this.ogScrapeUrl,
-        imageUrl: imageUrl ?? this.imageUrl,
-        footerIcon: footerIcon ?? this.footerIcon,
-        footer: footer ?? this.footer,
-        fields: fields ?? this.fields,
-        fallback: fallback ?? this.fallback,
-        color: color ?? this.color,
-        authorName: authorName ?? this.authorName,
-        authorLink: authorLink ?? this.authorLink,
-        authorIcon: authorIcon ?? this.authorIcon,
-        assetUrl: assetUrl ?? this.assetUrl,
-        actions: actions ?? this.actions,
-        originalWidth: originalWidth ?? this.originalWidth,
-        originalHeight: originalHeight ?? this.originalHeight,
-        file: file ?? this.file,
-        uploadState: uploadState ?? this.uploadState,
-        extraData: extraData ?? this.extraData,
-      );
+  }) => Attachment(
+    id: id ?? this.id,
+    type: type ?? this.type,
+    titleLink: titleLink ?? this.titleLink,
+    title: title ?? this.title,
+    thumbUrl: thumbUrl ?? this.thumbUrl,
+    text: text ?? this.text,
+    pretext: pretext ?? this.pretext,
+    ogScrapeUrl: ogScrapeUrl ?? this.ogScrapeUrl,
+    imageUrl: imageUrl ?? this.imageUrl,
+    footerIcon: footerIcon ?? this.footerIcon,
+    footer: footer ?? this.footer,
+    fields: fields ?? this.fields,
+    fallback: fallback ?? this.fallback,
+    color: color ?? this.color,
+    authorName: authorName ?? this.authorName,
+    authorLink: authorLink ?? this.authorLink,
+    authorIcon: authorIcon ?? this.authorIcon,
+    assetUrl: assetUrl ?? this.assetUrl,
+    actions: actions ?? this.actions,
+    originalWidth: originalWidth ?? this.originalWidth,
+    originalHeight: originalHeight ?? this.originalHeight,
+    file: file ?? this.file,
+    uploadState: uploadState ?? this.uploadState,
+    extraData: extraData ?? this.extraData,
+  );
 
   Attachment merge(Attachment? other) {
     if (other == null) return this;
@@ -306,31 +303,31 @@ class Attachment extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        type,
-        titleLink,
-        title,
-        thumbUrl,
-        text,
-        pretext,
-        ogScrapeUrl,
-        imageUrl,
-        footerIcon,
-        footer,
-        fields,
-        fallback,
-        color,
-        authorName,
-        authorLink,
-        authorIcon,
-        assetUrl,
-        actions,
-        originalWidth,
-        originalHeight,
-        file,
-        uploadState,
-        extraData,
-      ];
+    id,
+    type,
+    titleLink,
+    title,
+    thumbUrl,
+    text,
+    pretext,
+    ogScrapeUrl,
+    imageUrl,
+    footerIcon,
+    footer,
+    fields,
+    fallback,
+    color,
+    authorName,
+    authorLink,
+    authorIcon,
+    assetUrl,
+    actions,
+    originalWidth,
+    originalHeight,
+    file,
+    uploadState,
+    extraData,
+  ];
 }
 
 /// {@template attachmentType}

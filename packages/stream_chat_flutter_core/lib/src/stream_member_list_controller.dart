@@ -36,9 +36,9 @@ class StreamMemberListController extends PagedValueNotifier<int, Member> {
     this.filter,
     this.sort = defaultMemberListSort,
     this.limit = defaultMemberPagedLimit,
-  })  : _activeFilter = filter,
-        _activeSort = sort,
-        super(const PagedValue.loading());
+  }) : _activeFilter = filter,
+       _activeSort = sort,
+       super(const PagedValue.loading());
 
   /// Creates a [StreamMemberListController] from the passed [value].
   StreamMemberListController.fromValue(
@@ -47,8 +47,8 @@ class StreamMemberListController extends PagedValueNotifier<int, Member> {
     this.filter,
     this.sort = defaultMemberListSort,
     this.limit = defaultMemberPagedLimit,
-  })  : _activeFilter = filter,
-        _activeSort = sort;
+  }) : _activeFilter = filter,
+       _activeSort = sort;
 
   /// The client to use for the channels list.
   final Channel channel;
@@ -97,11 +97,11 @@ class StreamMemberListController extends PagedValueNotifier<int, Member> {
     super.value = switch (_activeSort) {
       null => newValue,
       final memberSort => newValue.maybeMap(
-          orElse: () => newValue,
-          (success) => success.copyWith(
-            items: success.items.sorted(memberSort.compare),
-          ),
+        orElse: () => newValue,
+        (success) => success.copyWith(
+          items: success.items.sorted(memberSort.compare),
         ),
+      ),
     };
   }
 

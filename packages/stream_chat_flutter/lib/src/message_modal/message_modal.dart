@@ -8,28 +8,30 @@ import 'package:stream_chat_flutter/src/utils/extensions.dart';
 /// message-related dialog content. It handles layout, animation, and keyboard
 /// adjustments automatically.
 ///
-/// The dialog can contain a header (optional) and content section (required),
-/// and will adjust its position when the keyboard appears.
+/// The dialog is laid out as a [Column] with three optional sections:
+/// header, content, and footer. It adjusts its position when the keyboard
+/// appears.
 /// {@endtemplate}
 class StreamMessageDialog extends StatelessWidget {
   /// Creates a Stream message dialog.
   ///
   /// The [contentBuilder] parameter is required to build the main content
-  /// of the dialog. The [headerBuilder] is optional and can be used to add
-  /// a header above the main content.
+  /// of the dialog. The [headerBuilder] and [footerBuilder] are optional and
+  /// can be used to add sections above and below the main content.
   const StreamMessageDialog({
     super.key,
     this.spacing = 8.0,
     this.headerBuilder,
     required this.contentBuilder,
+    this.footerBuilder,
     this.useSafeArea = true,
     this.insetAnimationDuration = const Duration(milliseconds: 100),
     this.insetAnimationCurve = Curves.decelerate,
-    this.insetPadding = const EdgeInsets.all(8),
+    this.insetPadding = const EdgeInsets.all(16),
     this.alignment = Alignment.center,
   });
 
-  /// Vertical spacing between header and content sections.
+  /// Vertical spacing between sections.
   final double spacing;
 
   /// Optional builder for the header section of the dialog.
@@ -37,6 +39,9 @@ class StreamMessageDialog extends StatelessWidget {
 
   /// Required builder for the main content of the dialog.
   final WidgetBuilder contentBuilder;
+
+  /// Optional builder for the footer section of the dialog.
+  final WidgetBuilder? footerBuilder;
 
   /// Whether to use a [SafeArea] to avoid system UI intrusions.
   ///
@@ -83,7 +88,8 @@ class StreamMessageDialog extends StatelessWidget {
             crossAxisAlignment: alignment.toColumnCrossAxisAlignment(),
             children: [
               if (headerBuilder case final builder?) builder(context),
-              Flexible(child: contentBuilder(context)),
+              contentBuilder(context),
+              if (footerBuilder case final builder?) Flexible(child: builder(context)),
             ],
           ),
         ),

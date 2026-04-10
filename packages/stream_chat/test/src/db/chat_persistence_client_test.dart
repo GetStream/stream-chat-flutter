@@ -46,32 +46,27 @@ class TestPersistenceClient extends ChatPersistenceClient {
   Future<void> deletePinnedMessageByCids(List<String> cids) => Future.value();
 
   @override
-  Future<void> deletePinnedMessageByIds(List<String> messageIds) =>
-      Future.value();
+  Future<void> deletePinnedMessageByIds(List<String> messageIds) => Future.value();
 
   @override
-  Future<void> deleteMessagesFromUser(
-          {String? cid,
-          required String userId,
-          bool hardDelete = false,
-          DateTime? deletedAt}) =>
-      throw UnimplementedError();
+  Future<void> deleteMessagesFromUser({
+    String? cid,
+    required String userId,
+    bool hardDelete = false,
+    DateTime? deletedAt,
+  }) => throw UnimplementedError();
 
   @override
-  Future<void> deleteReactionsByMessageId(List<String> messageIds) =>
-      Future.value();
+  Future<void> deleteReactionsByMessageId(List<String> messageIds) => Future.value();
 
   @override
-  Future<void> deletePinnedMessageReactionsByMessageId(
-          List<String> messageIds) =>
-      Future.value();
+  Future<void> deletePinnedMessageReactionsByMessageId(List<String> messageIds) => Future.value();
 
   @override
   Future<void> deletePollVotesByPollIds(List<String> pollIds) => Future.value();
 
   @override
-  Future<void> deleteDraftMessageByCid(String cid, {String? parentId}) =>
-      Future.value();
+  Future<void> deleteDraftMessageByCid(String cid, {String? parentId}) => Future.value();
 
   @override
   Future<void> disconnect({bool flush = false}) => throw UnimplementedError();
@@ -80,23 +75,21 @@ class TestPersistenceClient extends ChatPersistenceClient {
   Future<void> flush() => throw UnimplementedError();
 
   @override
-  Future<ChannelModel?> getChannelByCid(String cid) async =>
-      ChannelModel(cid: cid);
+  Future<ChannelModel?> getChannelByCid(String cid) async => ChannelModel(cid: cid);
 
   @override
   Future<List<String>> getChannelCids() => throw UnimplementedError();
 
   @override
-  Future<List<ChannelState>> getChannelStates(
-          {Filter? filter,
-          SortOrder<ChannelState>? channelStateSort,
-          int? messageLimit,
-          PaginationParams? paginationParams}) =>
-      throw UnimplementedError();
+  Future<List<ChannelState>> getChannelStates({
+    Filter? filter,
+    SortOrder<ChannelState>? channelStateSort,
+    int? messageLimit,
+    PaginationParams? paginationParams,
+  }) => throw UnimplementedError();
 
   @override
-  Future<Map<String, List<Message>>> getChannelThreads(String cid) =>
-      throw UnimplementedError();
+  Future<Map<String, List<Message>>> getChannelThreads(String cid) => throw UnimplementedError();
 
   @override
   Future<Event?> getConnectionInfo() => throw UnimplementedError();
@@ -108,14 +101,10 @@ class TestPersistenceClient extends ChatPersistenceClient {
   Future<List<Member>> getMembersByCid(String cid) async => [];
 
   @override
-  Future<List<Message>> getMessagesByCid(String cid,
-          {PaginationParams? messagePagination}) async =>
-      [];
+  Future<List<Message>> getMessagesByCid(String cid, {PaginationParams? messagePagination}) async => [];
 
   @override
-  Future<List<Message>> getPinnedMessagesByCid(String cid,
-          {PaginationParams? messagePagination}) async =>
-      [];
+  Future<List<Message>> getPinnedMessagesByCid(String cid, {PaginationParams? messagePagination}) async => [];
 
   @override
   Future<List<Read>> getReadsByCid(String cid) async => [];
@@ -124,22 +113,18 @@ class TestPersistenceClient extends ChatPersistenceClient {
   Future<Draft?> getDraftMessageByCid(
     String cid, {
     String? parentId,
-  }) async =>
-      Draft(
-        channelCid: cid,
-        parentId: parentId,
-        createdAt: DateTime.now(),
-        message: DraftMessage(id: 'message-id', text: 'message-text'),
-      );
+  }) async => Draft(
+    channelCid: cid,
+    parentId: parentId,
+    createdAt: DateTime.now(),
+    message: DraftMessage(id: 'message-id', text: 'message-text'),
+  );
 
   @override
-  Future<List<Message>> getReplies(String parentId,
-          {PaginationParams? options}) =>
-      throw UnimplementedError();
+  Future<List<Message>> getReplies(String parentId, {PaginationParams? options}) => throw UnimplementedError();
 
   @override
-  Future<void> updateChannelQueries(Filter? filter, List<String> cids,
-          {bool clearQueryCache = false}) =>
+  Future<void> updateChannelQueries(Filter? filter, List<String> cids, {bool clearQueryCache = false}) =>
       throw UnimplementedError();
 
   @override
@@ -149,15 +134,13 @@ class TestPersistenceClient extends ChatPersistenceClient {
   Future<void> updateConnectionInfo(Event event) => throw UnimplementedError();
 
   @override
-  Future<void> updateLastSyncAt(DateTime lastSyncAt) =>
-      throw UnimplementedError();
+  Future<void> updateLastSyncAt(DateTime lastSyncAt) => throw UnimplementedError();
 
   @override
   Future<void> updateReactions(List<Reaction> reactions) => Future.value();
 
   @override
-  Future<void> updatePinnedMessageReactions(List<Reaction> reactions) =>
-      Future.value();
+  Future<void> updatePinnedMessageReactions(List<Reaction> reactions) => Future.value();
 
   @override
   Future<void> updatePollVotes(List<PollVote> pollVotes) => Future.value();
@@ -166,20 +149,16 @@ class TestPersistenceClient extends ChatPersistenceClient {
   Future<void> updateUsers(List<User> users) => Future.value();
 
   @override
-  Future<void> bulkUpdateMembers(Map<String, List<Member>?> members) =>
-      Future.value();
+  Future<void> bulkUpdateMembers(Map<String, List<Member>?> members) => Future.value();
 
   @override
-  Future<void> bulkUpdateMessages(Map<String, List<Message>?> messages) =>
-      Future.value();
+  Future<void> bulkUpdateMessages(Map<String, List<Message>?> messages) => Future.value();
 
   @override
-  Future<void> bulkUpdatePinnedMessages(Map<String, List<Message>?> messages) =>
-      Future.value();
+  Future<void> bulkUpdatePinnedMessages(Map<String, List<Message>?> messages) => Future.value();
 
   @override
-  Future<void> bulkUpdateReads(Map<String, List<Read>?> reads) =>
-      Future.value();
+  Future<void> bulkUpdateReads(Map<String, List<Read>?> reads) => Future.value();
 
   @override
   Future<void> deletePollsByIds(List<String> pollIds) => Future.value();
@@ -203,8 +182,7 @@ class TestPersistenceClient extends ChatPersistenceClient {
   Future<void> deleteLocationsByCid(String cid) => Future.value();
 
   @override
-  Future<void> deleteLocationsByMessageIds(List<String> messageIds) =>
-      Future.value();
+  Future<void> deleteLocationsByMessageIds(List<String> messageIds) => Future.value();
 }
 
 void main() {
@@ -273,8 +251,8 @@ void main() {
             user: user,
             ownReactions: [Reaction(type: 'test', user: user)],
             latestReactions: [Reaction(type: 'test', user: user)],
-          )
-        ]
+          ),
+        ],
       };
       persistenceClient.updateChannelThreads(cid, threads);
     });
@@ -296,7 +274,7 @@ void main() {
             user: user,
             ownReactions: [Reaction(type: 'test', user: user)],
             latestReactions: [Reaction(type: 'test', user: user)],
-          )
+          ),
         ],
         pinnedMessages: [
           Message(
@@ -305,13 +283,10 @@ void main() {
             user: user,
             ownReactions: [Reaction(type: 'test', user: user)],
             latestReactions: [Reaction(type: 'test', user: user)],
-          )
+          ),
         ],
         read: [
-          Read(
-              lastRead: DateTime.now(),
-              user: user,
-              lastReadMessageId: 'last-test-message'),
+          Read(lastRead: DateTime.now(), user: user, lastReadMessageId: 'last-test-message'),
         ],
         members: [Member(user: user)],
       );

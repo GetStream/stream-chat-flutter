@@ -54,8 +54,8 @@ class _PinnedMessagesScreenState extends State<PinnedMessagesScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                StreamSvgIcon(
-                  icon: StreamSvgIcons.pin,
+                Icon(
+                  context.streamIcons.pin32,
                   size: 136,
                   color: StreamChatTheme.of(context).colorTheme.disabled,
                 ),
@@ -64,37 +64,32 @@ class _PinnedMessagesScreenState extends State<PinnedMessagesScreen> {
                   AppLocalizations.of(context).noPinnedItems,
                   style: TextStyle(
                     fontSize: 17,
-                    color:
-                        StreamChatTheme.of(context).colorTheme.textHighEmphasis,
+                    color: StreamChatTheme.of(context).colorTheme.textHighEmphasis,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 const SizedBox(height: 8),
                 RichText(
                   textAlign: TextAlign.center,
-                  text: TextSpan(children: [
-                    TextSpan(
-                      text: '${AppLocalizations.of(context).longPressMessage} ',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: StreamChatTheme.of(context)
-                            .colorTheme
-                            .textHighEmphasis
-                            .withOpacity(0.5),
+                  text: TextSpan(
+                    children: [
+                      TextSpan(
+                        text: '${AppLocalizations.of(context).longPressMessage} ',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: StreamChatTheme.of(context).colorTheme.textHighEmphasis.withOpacity(0.5),
+                        ),
                       ),
-                    ),
-                    TextSpan(
-                      text: AppLocalizations.of(context).pinToConversation,
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: StreamChatTheme.of(context)
-                            .colorTheme
-                            .textHighEmphasis
-                            .withOpacity(0.5),
+                      TextSpan(
+                        text: AppLocalizations.of(context).pinToConversation,
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: StreamChatTheme.of(context).colorTheme.textHighEmphasis.withOpacity(0.5),
+                        ),
                       ),
-                    ),
-                  ]),
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -111,7 +106,7 @@ class _PinnedMessagesScreenState extends State<PinnedMessagesScreen> {
           if (channel.state == null) {
             await channel.watch();
           }
-          router.pushNamed(
+          router.goNamed(
             Routes.CHANNEL_PAGE.name,
             pathParameters: Routes.CHANNEL_PAGE.params(channel),
             queryParameters: Routes.CHANNEL_PAGE.queryParams(message),

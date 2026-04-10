@@ -10,8 +10,7 @@ part 'location_dao.g.dart';
 
 /// The Data Access Object for operations in [Locations] table.
 @DriftAccessor(tables: [Locations])
-class LocationDao extends DatabaseAccessor<DriftChatDatabase>
-    with _$LocationDaoMixin {
+class LocationDao extends DatabaseAccessor<DriftChatDatabase> with _$LocationDaoMixin {
   /// Creates a new location dao instance
   LocationDao(this._db) : super(_db);
 
@@ -31,10 +30,10 @@ class LocationDao extends DatabaseAccessor<DriftChatDatabase>
 
     final message = await switch (entity.messageId) {
       final id? => _db.messageDao.getMessageById(
-          id,
-          fetchDraft: fetchDraft,
-          fetchSharedLocation: fetchSharedLocation,
-        ),
+        id,
+        fetchDraft: fetchDraft,
+        fetchSharedLocation: fetchSharedLocation,
+      ),
       _ => null,
     };
 
@@ -54,8 +53,9 @@ class LocationDao extends DatabaseAccessor<DriftChatDatabase>
 
   /// Get location by message ID
   Future<Location?> getLocationByMessageId(String messageId) async {
-    final query = select(locations) //
-      ..where((tbl) => tbl.messageId.equals(messageId));
+    final query =
+        select(locations) //
+          ..where((tbl) => tbl.messageId.equals(messageId));
 
     final result = await query.getSingleOrNull();
     if (result == null) return null;
@@ -74,8 +74,7 @@ class LocationDao extends DatabaseAccessor<DriftChatDatabase>
   }
 
   /// Delete locations by channel ID
-  Future<void> deleteLocationsByCid(String cid) =>
-      (delete(locations)..where((tbl) => tbl.channelCid.equals(cid))).go();
+  Future<void> deleteLocationsByCid(String cid) => (delete(locations)..where((tbl) => tbl.channelCid.equals(cid))).go();
 
   /// Delete locations by message IDs
   Future<void> deleteLocationsByMessageIds(List<String> messageIds) =>

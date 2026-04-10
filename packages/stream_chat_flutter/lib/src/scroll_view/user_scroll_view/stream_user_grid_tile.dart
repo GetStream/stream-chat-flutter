@@ -45,33 +45,21 @@ class StreamUserGridTile extends StatelessWidget {
     Widget? footer,
     GestureTapCallback? onTap,
     GestureLongPressCallback? onLongPress,
-  }) =>
-      StreamUserGridTile(
-        key: key ?? this.key,
-        user: user ?? this.user,
-        footer: footer ?? this.footer,
-        onTap: onTap ?? this.onTap,
-        onLongPress: onLongPress ?? this.onLongPress,
-        child: child ?? this.child,
-      );
+  }) => StreamUserGridTile(
+    key: key ?? this.key,
+    user: user ?? this.user,
+    footer: footer ?? this.footer,
+    onTap: onTap ?? this.onTap,
+    onLongPress: onLongPress ?? this.onLongPress,
+    child: child ?? this.child,
+  );
 
   @override
   Widget build(BuildContext context) {
-    final child = this.child ??
-        StreamUserAvatar(
-          user: user,
-          borderRadius: BorderRadius.circular(32),
-          constraints: const BoxConstraints.tightFor(
-            height: 64,
-            width: 64,
-          ),
-          onlineIndicatorConstraints: const BoxConstraints.tightFor(
-            height: 12,
-            width: 12,
-          ),
-        );
+    final child = this.child ?? StreamUserAvatar(size: .xl, user: user);
 
-    final footer = this.footer ??
+    final footer =
+        this.footer ??
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8),
           child: Text(

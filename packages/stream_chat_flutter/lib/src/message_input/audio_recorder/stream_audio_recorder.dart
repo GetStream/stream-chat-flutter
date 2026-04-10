@@ -5,14 +5,13 @@ import 'package:flutter_portal/flutter_portal.dart';
 import 'package:stream_chat_flutter/src/audio/audio_playlist_controller.dart';
 import 'package:stream_chat_flutter/src/audio/audio_playlist_state.dart';
 import 'package:stream_chat_flutter/src/audio/audio_sampling.dart';
-import 'package:stream_chat_flutter/src/icons/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/message_input/audio_recorder/audio_recorder_feedback.dart';
 import 'package:stream_chat_flutter/src/message_input/audio_recorder/audio_recorder_state.dart';
 import 'package:stream_chat_flutter/src/message_input/stream_message_input_icon_button.dart';
-import 'package:stream_chat_flutter/src/misc/audio_waveform.dart';
 import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 /// {@template audioRecorderBuilder}
 /// A builder function for constructing the audio recorder UI.
@@ -21,11 +20,12 @@ import 'package:stream_chat_flutter/src/utils/extensions.dart';
 ///   - [StreamAudioRecorderButton], which uses this builder function.
 ///   - [StreamAudioRecorderState], which provides the state of the recorder.
 /// {@endtemplate}
-typedef AudioRecorderBuilder = Widget Function(
-  BuildContext,
-  AudioRecorderState,
-  Widget,
-);
+typedef AudioRecorderBuilder =
+    Widget Function(
+      BuildContext,
+      AudioRecorderState,
+      Widget,
+    );
 
 /// {@template streamAudioRecorderButton}
 /// A configurable audio recording button with interactive states and gestures.
@@ -172,49 +172,49 @@ class StreamAudioRecorderButton extends StatelessWidget {
         state: recordState,
         button: RecordButton(
           onPressed: () {}, // Allows showing ripple effect on tap.
-          icon: const StreamSvgIcon(icon: StreamSvgIcons.mic),
+          icon: Icon(context.streamIcons.voice20),
         ),
         builder: (context, state, recordButton) => switch (state) {
           // Show only the record button if the recording is not in progress.
           RecordStateIdle() => RecordStateIdleContent(
-              state: state,
-              recordButton: recordButton,
-            ),
+            state: state,
+            recordButton: recordButton,
+          ),
           RecordStateRecordingHold() => RecordStateHoldRecordingContent(
-              state: state,
-              recordButton: recordButton,
-              cancelThreshold: cancelRecordThreshold,
-            ),
+            state: state,
+            recordButton: recordButton,
+            cancelThreshold: cancelRecordThreshold,
+          ),
           RecordStateRecordingLocked() => RecordStateLockedRecordingContent(
-              state: state,
-              onRecordEnd: () async {
-                await feedback.onRecordFinish(context);
-                return onRecordFinish?.call();
-              },
-              onRecordPause: () async {
-                await feedback.onRecordPause(context);
-                return onRecordPause?.call();
-              },
-              onRecordCancel: () async {
-                await feedback.onRecordCancel(context);
-                return onRecordCancel?.call();
-              },
-              onRecordStop: () async {
-                await feedback.onRecordStop(context);
-                return onRecordStop?.call();
-              },
-            ),
+            state: state,
+            onRecordEnd: () async {
+              await feedback.onRecordFinish(context);
+              return onRecordFinish?.call();
+            },
+            onRecordPause: () async {
+              await feedback.onRecordPause(context);
+              return onRecordPause?.call();
+            },
+            onRecordCancel: () async {
+              await feedback.onRecordCancel(context);
+              return onRecordCancel?.call();
+            },
+            onRecordStop: () async {
+              await feedback.onRecordStop(context);
+              return onRecordStop?.call();
+            },
+          ),
           RecordStateStopped() => RecordStateStoppedContent(
-              state: state,
-              onRecordCancel: () async {
-                await feedback.onRecordCancel(context);
-                return onRecordCancel?.call();
-              },
-              onRecordFinish: () async {
-                await feedback.onRecordFinish(context);
-                return onRecordFinish?.call();
-              },
-            ),
+            state: state,
+            onRecordCancel: () async {
+              await feedback.onRecordCancel(context);
+              return onRecordCancel?.call();
+            },
+            onRecordFinish: () async {
+              await feedback.onRecordFinish(context);
+              return onRecordFinish?.call();
+            },
+          ),
         },
       ),
     );
@@ -448,20 +448,20 @@ class RecordStateLockedRecordingContent extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               StreamMessageInputIconButton(
-                icon: const StreamSvgIcon(icon: StreamSvgIcons.delete),
+                icon: Icon(context.streamIcons.delete20),
                 color: theme.colorTheme.accentPrimary,
                 onPressed: onRecordCancel,
               ),
               StreamMessageInputIconButton(
-                icon: const StreamSvgIcon(icon: StreamSvgIcons.stop),
+                icon: Icon(context.streamIcons.stopFill20),
                 color: theme.colorTheme.accentError,
                 onPressed: onRecordStop,
               ),
               StreamMessageInputIconButton(
-                icon: const StreamSvgIcon(icon: StreamSvgIcons.checkSend),
+                icon: Icon(context.streamIcons.checkmark20),
                 color: theme.colorTheme.accentPrimary,
                 onPressed: onRecordEnd,
-              )
+              ),
             ],
           ),
         ],
@@ -498,8 +498,7 @@ class RecordStateStoppedContent extends StatefulWidget {
   final VoidCallback? onRecordFinish;
 
   @override
-  State<RecordStateStoppedContent> createState() =>
-      _RecordStateStoppedContentState();
+  State<RecordStateStoppedContent> createState() => _RecordStateStoppedContentState();
 }
 
 class _RecordStateStoppedContentState extends State<RecordStateStoppedContent> {
@@ -607,15 +606,15 @@ class _RecordStateStoppedContentState extends State<RecordStateStoppedContent> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               StreamMessageInputIconButton(
-                icon: const StreamSvgIcon(icon: StreamSvgIcons.delete),
+                icon: Icon(context.streamIcons.delete20),
                 color: theme.colorTheme.accentPrimary,
                 onPressed: widget.onRecordCancel,
               ),
               StreamMessageInputIconButton(
-                icon: const StreamSvgIcon(icon: StreamSvgIcons.checkSend),
+                icon: Icon(context.streamIcons.checkmark20),
                 color: theme.colorTheme.accentPrimary,
                 onPressed: widget.onRecordFinish,
-              )
+              ),
             ],
           ),
         ],
@@ -643,29 +642,31 @@ class SwipeToLockButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = StreamChatTheme.of(context);
+    final streamIcons = context.streamIcons;
+    final colorScheme = context.streamColorScheme;
+
     return Container(
-      padding: const EdgeInsets.all(8),
+      padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(24),
-        color: theme.colorTheme.inputBg,
+        color: colorScheme.backgroundElevation1,
+        border: Border.all(color: colorScheme.borderDefault),
+        boxShadow: context.streamBoxShadow.elevation1,
       ),
       child: Column(
         spacing: 8,
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          StreamSvgIcon(
-            icon: StreamSvgIcons.lock,
-            size: kDefaultMessageInputIconSize,
-            color: switch (isLocked) {
-              true => theme.colorTheme.accentPrimary,
-              false => theme.colorTheme.textLowEmphasis,
-            },
+          Icon(
+            isLocked ? streamIcons.lock20 : streamIcons.unlock20,
+            size: 20,
+            color: colorScheme.textPrimary,
           ),
           if (!isLocked) ...[
-            StreamSvgIcon(
-              icon: StreamSvgIcons.up,
-              color: theme.colorTheme.textLowEmphasis,
+            Icon(
+              streamIcons.chevronUp20,
+              size: 20,
+              color: colorScheme.textPrimary,
             ),
           ],
         ],
@@ -718,24 +719,24 @@ class PlaybackControlButton extends StatelessWidget {
       },
       icon: switch (state) {
         TrackState.loading => Builder(
-            builder: (context) {
-              final iconTheme = IconTheme.of(context);
-              return SizedBox.fromSize(
-                size: Size.square(iconTheme.size!),
-                child: Padding(
-                  padding: const EdgeInsets.all(8),
-                  child: CircularProgressIndicator.adaptive(
-                    valueColor: AlwaysStoppedAnimation(
-                      theme.colorTheme.accentPrimary,
-                    ),
+          builder: (context) {
+            final iconTheme = IconTheme.of(context);
+            return SizedBox.fromSize(
+              size: Size.square(iconTheme.size!),
+              child: Padding(
+                padding: const EdgeInsets.all(8),
+                child: CircularProgressIndicator.adaptive(
+                  valueColor: AlwaysStoppedAnimation(
+                    theme.colorTheme.accentPrimary,
                   ),
                 ),
-              );
-            },
-          ),
-        TrackState.idle => const StreamSvgIcon(icon: StreamSvgIcons.play),
-        TrackState.paused => const StreamSvgIcon(icon: StreamSvgIcons.play),
-        TrackState.playing => const StreamSvgIcon(icon: StreamSvgIcons.pause),
+              ),
+            );
+          },
+        ),
+        TrackState.idle => Icon(context.streamIcons.playFill20),
+        TrackState.paused => Icon(context.streamIcons.playFill20),
+        TrackState.playing => Icon(context.streamIcons.pauseFill20),
       },
     );
   }
@@ -763,8 +764,8 @@ class PlaybackTimerIndicator extends StatelessWidget {
     final theme = StreamChatTheme.of(context);
     return Row(
       children: [
-        StreamSvgIcon(
-          icon: StreamSvgIcons.mic,
+        Icon(
+          context.streamIcons.voice20,
           size: kDefaultMessageInputIconSize,
           color: switch (duration.inSeconds) {
             > 0 => theme.colorTheme.accentError,
@@ -854,8 +855,8 @@ class SlideToCancelIndicator extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 8),
-          StreamSvgIcon(
-            icon: StreamSvgIcons.left,
+          Icon(
+            context.streamIcons.chevronLeft20,
             color: theme.colorTheme.textLowEmphasis,
           ),
         ],
@@ -949,13 +950,16 @@ class _SlideTransitionWidgetState extends State<SlideTransitionWidget>
 
   @override
   Widget build(BuildContext context) {
-    final position = Tween<Offset>(
-      begin: widget.begin,
-      end: widget.end,
-    ).animate(CurvedAnimation(
-      parent: _controller,
-      curve: widget.curve,
-    ));
+    final position =
+        Tween<Offset>(
+          begin: widget.begin,
+          end: widget.end,
+        ).animate(
+          CurvedAnimation(
+            parent: _controller,
+            curve: widget.curve,
+          ),
+        );
 
     return SlideTransition(
       position: position,
@@ -985,8 +989,8 @@ class HoldToRecordInfoTooltip extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = StreamChatTheme.of(context);
 
-    const recordButtonWidth = kDefaultMessageInputIconSize +
-        kDefaultMessageInputIconPadding * 2; // right, left padding.
+    const recordButtonWidth =
+        kDefaultMessageInputIconSize + kDefaultMessageInputIconPadding * 2; // right, left padding.
 
     const arrowSize = Size(recordButtonWidth / 2, 6);
 

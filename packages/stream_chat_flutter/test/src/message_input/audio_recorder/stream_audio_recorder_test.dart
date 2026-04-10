@@ -3,9 +3,8 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:stream_chat_flutter/src/misc/audio_waveform.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-import '../../utils/finders.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 void main() {
   group('StreamAudioRecorderButton', () {
@@ -32,7 +31,7 @@ void main() {
           ),
         );
 
-        expect(find.bySvgIcon(StreamSvgIcons.mic), findsOneWidget);
+        expect(find.byIcon(StreamIconData.voice20), findsOneWidget);
       },
     );
 
@@ -176,9 +175,9 @@ void main() {
         );
 
         expect(find.byType(StreamAudioWaveform), findsOneWidget);
-        expect(find.bySvgIcon(StreamSvgIcons.delete), findsOneWidget);
-        expect(find.bySvgIcon(StreamSvgIcons.stop), findsOneWidget);
-        expect(find.bySvgIcon(StreamSvgIcons.checkSend), findsOneWidget);
+        expect(find.byIcon(StreamIconData.delete20), findsOneWidget);
+        expect(find.byIcon(StreamIconData.stopFill20), findsOneWidget);
+        expect(find.byIcon(StreamIconData.checkmark20), findsOneWidget);
       },
     );
 
@@ -200,7 +199,7 @@ void main() {
           ),
         );
 
-        await tester.tap(find.bySvgIcon(StreamSvgIcons.delete));
+        await tester.tap(find.byIcon(StreamIconData.delete20));
 
         expect(onRecordCancelCalled, true);
       },
@@ -224,7 +223,7 @@ void main() {
           ),
         );
 
-        await tester.tap(find.bySvgIcon(StreamSvgIcons.stop));
+        await tester.tap(find.byIcon(StreamIconData.stopFill20));
 
         expect(onRecordStopCalled, true);
       },
@@ -248,7 +247,7 @@ void main() {
           ),
         );
 
-        await tester.tap(find.bySvgIcon(StreamSvgIcons.checkSend));
+        await tester.tap(find.byIcon(StreamIconData.checkmark20));
 
         expect(onRecordFinishCalled, true);
       },
@@ -270,8 +269,8 @@ void main() {
         expect(find.byType(PlaybackControlButton), findsOneWidget);
         expect(find.byType(PlaybackTimerText), findsOneWidget);
         expect(find.byType(StreamAudioWaveformSlider), findsOneWidget);
-        expect(find.bySvgIcon(StreamSvgIcons.delete), findsOneWidget);
-        expect(find.bySvgIcon(StreamSvgIcons.checkSend), findsOneWidget);
+        expect(find.byIcon(StreamIconData.delete20), findsOneWidget);
+        expect(find.byIcon(StreamIconData.checkmark20), findsOneWidget);
       },
     );
 
@@ -292,7 +291,7 @@ void main() {
           ),
         );
 
-        await tester.tap(find.bySvgIcon(StreamSvgIcons.checkSend));
+        await tester.tap(find.byIcon(StreamIconData.checkmark20));
 
         expect(onRecordFinishCalled, true);
       },
@@ -315,7 +314,7 @@ void main() {
           ),
         );
 
-        await tester.tap(find.bySvgIcon(StreamSvgIcons.delete));
+        await tester.tap(find.byIcon(StreamIconData.delete20));
 
         expect(onRecordCancelCalled, true);
       },
@@ -455,7 +454,7 @@ void main() {
           ),
         );
 
-        await tester.tap(find.bySvgIcon(StreamSvgIcons.stop));
+        await tester.tap(find.byIcon(StreamIconData.stopFill20));
 
         expect(feedbackCalled, isTrue);
       },
@@ -482,7 +481,7 @@ void main() {
           ),
         );
 
-        await tester.tap(find.bySvgIcon(StreamSvgIcons.delete));
+        await tester.tap(find.byIcon(StreamIconData.delete20));
 
         expect(feedbackCalled, isTrue);
       },
@@ -509,7 +508,7 @@ void main() {
           ),
         );
 
-        await tester.tap(find.bySvgIcon(StreamSvgIcons.checkSend));
+        await tester.tap(find.byIcon(StreamIconData.checkmark20));
 
         expect(feedbackCalled, isTrue);
       },
@@ -535,7 +534,7 @@ void main() {
           ),
         );
 
-        await tester.tap(find.bySvgIcon(StreamSvgIcons.delete));
+        await tester.tap(find.byIcon(StreamIconData.delete20));
 
         expect(feedbackCalled, isTrue);
       },
@@ -561,7 +560,7 @@ void main() {
           ),
         );
 
-        await tester.tap(find.bySvgIcon(StreamSvgIcons.checkSend));
+        await tester.tap(find.byIcon(StreamIconData.checkmark20));
 
         expect(feedbackCalled, isTrue);
       },
@@ -637,8 +636,7 @@ void main() {
 
       goldenTest(
         '[${brightness.name}] -> should look fine in recording hold state',
-        fileName:
-            'stream_audio_recorder_button_recording_hold_${brightness.name}',
+        fileName: 'stream_audio_recorder_button_recording_hold_${brightness.name}',
         constraints: const BoxConstraints.tightFor(width: 400, height: 160),
         builder: () => _wrapWithStreamChatApp(
           brightness: brightness,
@@ -653,8 +651,7 @@ void main() {
 
       goldenTest(
         '[${brightness.name}] -> should look fine in recording locked state',
-        fileName:
-            'stream_audio_recorder_button_recording_locked_${brightness.name}',
+        fileName: 'stream_audio_recorder_button_recording_locked_${brightness.name}',
         constraints: const BoxConstraints.tightFor(width: 400, height: 160),
         builder: () => _wrapWithStreamChatApp(
           brightness: brightness,
@@ -672,8 +669,7 @@ void main() {
 
       goldenTest(
         '[${brightness.name}] -> should look fine in recording stopped state',
-        fileName:
-            'stream_audio_recorder_button_recording_stopped_${brightness.name}',
+        fileName: 'stream_audio_recorder_button_recording_stopped_${brightness.name}',
         constraints: const BoxConstraints.tightFor(width: 400, height: 160),
         builder: () => _wrapWithStreamChatApp(
           brightness: brightness,
@@ -695,24 +691,27 @@ Widget _wrapWithStreamChatApp(
   Brightness? brightness,
 }) {
   return MaterialApp(
+    theme: ThemeData(brightness: brightness),
     debugShowCheckedModeBanner: false,
     home: Portal(
       child: StreamChatTheme(
         data: StreamChatThemeData(brightness: brightness),
-        child: Builder(builder: (context) {
-          final theme = StreamChatTheme.of(context);
-          return Scaffold(
-            backgroundColor: theme.colorTheme.appBg,
-            bottomNavigationBar: Material(
-              elevation: 10,
-              color: theme.colorTheme.barsBg,
-              child: Padding(
-                padding: const EdgeInsets.all(8),
-                child: widget,
+        child: Builder(
+          builder: (context) {
+            final theme = StreamChatTheme.of(context);
+            return Scaffold(
+              backgroundColor: theme.colorTheme.appBg,
+              bottomNavigationBar: Material(
+                elevation: 10,
+                color: theme.colorTheme.barsBg,
+                child: Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: widget,
+                ),
               ),
-            ),
-          );
-        }),
+            );
+          },
+        ),
       ),
     ),
   );

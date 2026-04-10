@@ -2,9 +2,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 /// A generic widget builder function.
-typedef PlatformBuilder<T> = T Function(
-  BuildContext context,
-);
+typedef PlatformBuilder<T> =
+    T Function(
+      BuildContext context,
+    );
 
 /// An abstract class used as a building block for creating [PlatformWidget]s.
 ///
@@ -21,8 +22,7 @@ typedef PlatformBuilder<T> = T Function(
 /// * M = Mobile
 /// * D = Desktop
 /// * W = Web
-abstract class PlatformWidgetBase<M extends Widget, D extends Widget,
-    W extends Widget> extends StatelessWidget {
+abstract class PlatformWidgetBase<M extends Widget, D extends Widget, W extends Widget> extends StatelessWidget {
   /// Builds a [PlatformWidgetBase].
   const PlatformWidgetBase({
     super.key,

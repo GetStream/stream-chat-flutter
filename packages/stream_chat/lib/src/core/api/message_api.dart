@@ -257,6 +257,28 @@ class MessageApi {
     return QueryReactionsResponse.fromJson(response.data);
   }
 
+  /// Queries reactions for a [messageId] with optional [filter], [sort],
+  /// and [pagination].
+  ///
+  /// Unlike [getReactions], this method supports filtering by reaction type,
+  /// user ID, or creation date, sorting, and cursor-based pagination.
+  Future<QueryReactionsResponse> queryReactions(
+    String messageId, {
+    Filter? filter,
+    SortOrder<Reaction>? sort,
+    PaginationParams? pagination,
+  }) async {
+    final response = await _client.post(
+      '/messages/$messageId/reactions',
+      data: jsonEncode({
+        if (filter != null) 'filter': filter.toJson(),
+        if (sort != null) 'sort': sort.map((e) => e.toJson()).toList(),
+        if (pagination != null) ...pagination.toJson(),
+      }),
+    );
+    return QueryReactionsResponse.fromJson(response.data);
+  }
+
   /// Translates the [messageId] in provided [language]
   Future<TranslateMessageResponse> translateMessage(
     String messageId,

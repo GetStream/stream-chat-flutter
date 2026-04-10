@@ -25,14 +25,13 @@ void main() {
       when(() => channel.nameStream).thenAnswer((_) => Stream.value('test'));
       when(() => channel.name).thenReturn('test');
       when(() => channelState.unreadCount).thenReturn(1);
-      when(() => channelState.unreadCountStream)
-          .thenAnswer((i) => Stream.value(1));
+      when(() => channelState.unreadCountStream).thenAnswer((i) => Stream.value(1));
       when(() => channelState.membersStream).thenAnswer(
         (_) => Stream.value([
           Member(
             userId: 'user-id',
             user: User(id: 'user-id'),
-          )
+          ),
         ]),
       );
       when(() => channelState.members).thenReturn([
@@ -45,14 +44,14 @@ void main() {
         Message(
           text: 'hello',
           user: User(id: 'other-user'),
-        )
+        ),
       ]);
       when(() => channelState.messagesStream).thenAnswer(
         (i) => Stream.value([
           Message(
             text: 'hello',
             user: User(id: 'other-user'),
-          )
+          ),
         ]),
       );
 

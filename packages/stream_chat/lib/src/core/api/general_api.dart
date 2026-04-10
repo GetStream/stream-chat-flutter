@@ -60,8 +60,7 @@ class GeneralApi {
           'filter_conditions': filter,
           if (sort != null) 'sort': sort,
           if (query != null) 'query': query,
-          if (messageFilters != null)
-            'message_filter_conditions': messageFilters,
+          if (messageFilters != null) 'message_filter_conditions': messageFilters,
           if (pagination != null) ...pagination.toJson(),
         }),
       },
@@ -85,10 +84,7 @@ class GeneralApi {
         'payload': jsonEncode({
           'type': channelType,
           'filter_conditions': filter ?? {},
-          if (channelId != null)
-            'id': channelId
-          else if (members != null)
-            'members': members,
+          if (channelId != null) 'id': channelId else if (members != null) 'members': members,
           if (sort != null) 'sort': sort,
           if (pagination != null) ...pagination.toJson(),
         }),

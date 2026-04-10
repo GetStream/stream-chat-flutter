@@ -1,18 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:stream_chat_flutter/src/attachment_actions_modal/attachment_actions_modal.dart';
-import 'package:stream_chat_flutter/src/icons/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/theme/themes.dart';
 import 'package:stream_chat_flutter/src/utils/utils.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 /// {@template streamGalleryHeader}
 /// Header/AppBar widget for media display screen
 /// {@endtemplate}
-class StreamGalleryHeader extends StatelessWidget
-    implements PreferredSizeWidget {
+class StreamGalleryHeader extends StatelessWidget implements PreferredSizeWidget {
   /// {@macro streamGalleryHeader}
   const StreamGalleryHeader({
     super.key,
@@ -79,33 +77,27 @@ class StreamGalleryHeader extends StatelessWidget
   @override
   Widget build(BuildContext context) {
     final galleryHeaderThemeData = StreamGalleryHeaderTheme.of(context);
-    final theme = Theme.of(context);
-    return AppBar(
-      toolbarTextStyle: theme.textTheme.bodyMedium,
-      titleTextStyle: theme.textTheme.titleLarge,
-      systemOverlayStyle: theme.brightness == Brightness.dark
-          ? SystemUiOverlayStyle.light
-          : SystemUiOverlayStyle.dark,
+    final textTheme = context.streamTextTheme;
+
+    return StreamAppBar(
       elevation: elevation,
       leading: showBackButton
           ? IconButton(
-              icon: StreamSvgIcon(
-                icon: StreamSvgIcons.close,
+              icon: Icon(
+                context.streamIcons.arrowLeft20,
                 color: galleryHeaderThemeData.closeButtonColor,
-                size: 24,
+                size: 20,
               ),
               onPressed: onBackPressed,
             )
           : const Empty(),
-      surfaceTintColor:
-          backgroundColor ?? galleryHeaderThemeData.backgroundColor,
-      backgroundColor:
-          backgroundColor ?? galleryHeaderThemeData.backgroundColor,
+      surfaceTintColor: backgroundColor ?? galleryHeaderThemeData.backgroundColor,
+      backgroundColor: backgroundColor ?? galleryHeaderThemeData.backgroundColor,
       actions: <Widget>[
         if (!message.isEphemeral)
           IconButton(
-            icon: StreamSvgIcon(
-              icon: StreamSvgIcons.menuPoint,
+            icon: Icon(
+              context.streamIcons.more20,
               color: galleryHeaderThemeData.iconMenuPointColor,
             ),
             onPressed: () => _showMessageActionModalBottomSheet(context),
@@ -124,11 +116,13 @@ class StreamGalleryHeader extends StatelessWidget
                   children: <Widget>[
                     Text(
                       userName,
-                      style: galleryHeaderThemeData.titleTextStyle,
+                      style: galleryHeaderThemeData.titleTextStyle ?? textTheme.headingSm,
                     ),
                     Text(
                       sentAt,
-                      style: galleryHeaderThemeData.subtitleTextStyle,
+                      style:
+                          galleryHeaderThemeData.subtitleTextStyle ??
+                          textTheme.captionDefault.copyWith(color: context.streamColorScheme.textSecondary),
                     ),
                   ],
                 ),
@@ -143,8 +137,7 @@ class StreamGalleryHeader extends StatelessWidget
 
   Future<void> _showMessageActionModalBottomSheet(BuildContext context) async {
     final channel = StreamChannel.of(context).channel;
-    final galleryHeaderThemeData =
-        StreamChatTheme.of(context).galleryHeaderTheme;
+    final galleryHeaderThemeData = StreamChatTheme.of(context).galleryHeaderTheme;
 
     final defaultModal = AttachmentActionsModal(
       attachment: attachment,
@@ -153,7 +146,8 @@ class StreamGalleryHeader extends StatelessWidget
       onReply: onReplyMessage,
     );
 
-    final effectiveModal = attachmentActionsModalBuilder?.call(
+    final effectiveModal =
+        attachmentActionsModalBuilder?.call(
           context,
           attachment,
           defaultModal,

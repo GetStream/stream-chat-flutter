@@ -1,13 +1,13 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/icons/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/src/poll/stream_poll_option_votes_dialog.dart';
 import 'package:stream_chat_flutter/src/scroll_view/poll_vote_scroll_view/stream_poll_vote_list_tile.dart';
 import 'package:stream_chat_flutter/src/theme/poll_results_dialog_theme.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 /// {@template showStreamPollResultsDialog}
 /// Displays an interactive dialog to show the results of a poll.
@@ -270,9 +270,7 @@ class PollVotesByOptionItem extends StatelessWidget {
         vertical: 12,
         horizontal: 16,
       ),
-      decoration: isOptionWinner
-          ? theme.pollOptionsWinnerDecoration
-          : theme.pollOptionsDecoration,
+      decoration: isOptionWinner ? theme.pollOptionsWinnerDecoration : theme.pollOptionsDecoration,
       child: Column(
         spacing: 16,
         mainAxisSize: MainAxisSize.min,
@@ -283,24 +281,20 @@ class PollVotesByOptionItem extends StatelessWidget {
               Expanded(
                 child: Text(
                   option.text,
-                  style: isOptionWinner
-                      ? theme.pollOptionsWinnerTextStyle
-                      : theme.pollOptionsTextStyle,
+                  style: isOptionWinner ? theme.pollOptionsWinnerTextStyle : theme.pollOptionsTextStyle,
                 ),
               ),
               const SizedBox(width: 8),
               if (isOptionWinner) ...[
-                StreamSvgIcon(
-                  icon: StreamSvgIcons.award,
+                Icon(
+                  context.streamIcons.trophy20,
                   color: theme.pollOptionsWinnerVoteCountTextStyle?.color,
                 ),
                 const SizedBox(width: 8),
               ],
               Text(
                 context.translations.voteCountLabel(count: pollVotesCount),
-                style: isOptionWinner
-                    ? theme.pollOptionsWinnerVoteCountTextStyle
-                    : theme.pollOptionsVoteCountTextStyle,
+                style: isOptionWinner ? theme.pollOptionsWinnerVoteCountTextStyle : theme.pollOptionsVoteCountTextStyle,
               ),
             ],
           ),

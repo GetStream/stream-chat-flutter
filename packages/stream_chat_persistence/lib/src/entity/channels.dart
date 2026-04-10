@@ -15,8 +15,7 @@ class Channels extends Table {
   TextColumn get cid => text()();
 
   /// List of user permissions on this channel
-  TextColumn get ownCapabilities =>
-      text().nullable().map(ListConverter<String>())();
+  TextColumn get ownCapabilities => text().nullable().map(ListConverter<String>())();
 
   /// The channel configuration data
   TextColumn get config => text().map(MapConverter())();

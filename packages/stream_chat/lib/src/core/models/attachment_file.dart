@@ -19,23 +19,22 @@ class AttachmentFile {
     this.path,
     String? name,
     this.bytes,
-  })  : assert(
-          path != null || bytes != null,
-          'Either path or bytes should be != null',
-        ),
-        assert(
-          !CurrentPlatform.isWeb || bytes != null,
-          'File by path is not supported in web, Please provide bytes',
-        ),
-        assert(
-          name == null || name.isEmpty || name.contains('.'),
-          'Invalid file name, should also contain file extension',
-        ),
-        _name = name;
+  }) : assert(
+         path != null || bytes != null,
+         'Either path or bytes should be != null',
+       ),
+       assert(
+         !CurrentPlatform.isWeb || bytes != null,
+         'File by path is not supported in web, Please provide bytes',
+       ),
+       assert(
+         name == null || name.isEmpty || name.contains('.'),
+         'Invalid file name, should also contain file extension',
+       ),
+       _name = name;
 
   /// Create a new instance from a json
-  factory AttachmentFile.fromJson(Map<String, dynamic> json) =>
-      _$AttachmentFileFromJson(json);
+  factory AttachmentFile.fromJson(Map<String, dynamic> json) => _$AttachmentFileFromJson(json);
 
   /// The absolute path for a cached copy of this file. It can be used to
   /// create a file instance with a descriptor for the given path.
@@ -73,15 +72,15 @@ class AttachmentFile {
   Future<MultipartFile> toMultipartFile() async {
     return switch (CurrentPlatform.type) {
       PlatformType.web => MultipartFile.fromBytes(
-          bytes!,
-          filename: name,
-          contentType: mediaType,
-        ),
+        bytes!,
+        filename: name,
+        contentType: mediaType,
+      ),
       _ => await MultipartFile.fromFile(
-          path!,
-          filename: name,
-          contentType: mediaType,
-        ),
+        path!,
+        filename: name,
+        contentType: mediaType,
+      ),
     };
   }
 
@@ -124,8 +123,7 @@ sealed class UploadState with _$UploadState {
   const factory UploadState.failed({required String error}) = Failed;
 
   /// Creates a new instance from a json
-  factory UploadState.fromJson(Map<String, dynamic> json) =>
-      _$UploadStateFromJson(json);
+  factory UploadState.fromJson(Map<String, dynamic> json) => _$UploadStateFromJson(json);
 
   /// Returns true if state is [Preparing]
   bool get isPreparing => this is Preparing;

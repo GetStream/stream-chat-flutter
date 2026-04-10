@@ -26,8 +26,7 @@ class MockAttachmentDownloader extends Mock {
 
 void main() {
   setUpAll(() {
-    registerFallbackValue(
-        MaterialPageRoute(builder: (context) => const SizedBox()));
+    registerFallbackValue(MaterialPageRoute(builder: (context) => const SizedBox()));
     registerFallbackValue(Message());
   });
 
@@ -265,8 +264,7 @@ void main() {
       final clientState = MockClientState();
       final mockChannel = MockChannel();
 
-      when(() => mockChannel.updateMessage(any()))
-          .thenAnswer((_) async => UpdateMessageResponse());
+      when(() => mockChannel.updateMessage(any())).thenAnswer((_) async => UpdateMessageResponse());
       when(() => client.state).thenReturn(clientState);
       when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
 
@@ -306,11 +304,15 @@ void main() {
         ),
       );
       await tester.tap(find.text('Delete'));
-      verify(() => mockChannel.updateMessage(message.copyWith(
+      verify(
+        () => mockChannel.updateMessage(
+          message.copyWith(
             attachments: [
               message.attachments[1],
             ],
-          ))).called(1);
+          ),
+        ),
+      ).called(1);
     },
   );
 
@@ -321,8 +323,7 @@ void main() {
       final clientState = MockClientState();
       final mockChannel = MockChannel();
 
-      when(() => mockChannel.updateMessage(any()))
-          .thenAnswer((_) async => UpdateMessageResponse());
+      when(() => mockChannel.updateMessage(any())).thenAnswer((_) async => UpdateMessageResponse());
       when(() => client.state).thenReturn(clientState);
       when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
 
@@ -357,9 +358,13 @@ void main() {
         ),
       );
       await tester.tap(find.text('Delete'));
-      verify(() => mockChannel.updateMessage(message.copyWith(
+      verify(
+        () => mockChannel.updateMessage(
+          message.copyWith(
             attachments: [],
-          ))).called(1);
+          ),
+        ),
+      ).called(1);
     },
   );
 
@@ -371,8 +376,7 @@ void main() {
       final clientState = MockClientState();
       final mockChannel = MockChannel();
 
-      when(() => mockChannel.deleteMessage(any()))
-          .thenAnswer((_) async => EmptyResponse());
+      when(() => mockChannel.deleteMessage(any())).thenAnswer((_) async => EmptyResponse());
       when(() => client.state).thenReturn(clientState);
       when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
 

@@ -3,8 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_chat_flutter/conditional_parent_builder/conditional_parent_builder.dart';
 
 void main() {
-  testWidgets('ConditionalParentBuilder builds the parent widget',
-      (tester) async {
+  testWidgets('ConditionalParentBuilder builds the parent widget', (tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -26,8 +25,7 @@ void main() {
     expect(find.byType(Text), findsOneWidget);
   });
 
-  testWidgets('ConditionalParentBuilder does not build the parent widget',
-      (tester) async {
+  testWidgets('ConditionalParentBuilder does not build the parent widget', (tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(

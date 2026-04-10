@@ -115,8 +115,7 @@ void main() {
     expect(message.shadowed, entity.shadowed);
     expect(message.showInChannel, entity.showInChannel);
     for (var i = 0; i < message.mentionedUsers.length; i++) {
-      final entityMentionedUser =
-          User.fromJson(jsonDecode(entity.mentionedUsers[i]));
+      final entityMentionedUser = User.fromJson(jsonDecode(entity.mentionedUsers[i]));
       expect(message.mentionedUsers[i].id, entityMentionedUser.id);
     }
     expect(message.replyCount, entity.replyCount);
@@ -249,8 +248,7 @@ void main() {
     expect(entity.shadowed, message.shadowed);
     expect(entity.showInChannel, message.showInChannel);
     expect(entity.replyCount, message.replyCount);
-    expect(
-        entity.mentionedUsers, message.mentionedUsers.map(jsonEncode).toList());
+    expect(entity.mentionedUsers, message.mentionedUsers.map(jsonEncode).toList());
     expect(entity.state, jsonEncode(message.state));
     expect(entity.localUpdatedAt, isSameDateAs(message.localUpdatedAt));
     expect(entity.remoteUpdatedAt, isSameDateAs(message.remoteUpdatedAt));

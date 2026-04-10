@@ -44,9 +44,7 @@ void main() {
       (key, value) => MapEntry(key, value.length),
     );
 
-    final users = latestVotesByOption.values
-        .expand((it) => it.map((it) => it.user!))
-        .toList();
+    final users = latestVotesByOption.values.expand((it) => it.map((it) => it.user!)).toList();
 
     final poll = Poll(
       id: pollId,
@@ -114,11 +112,13 @@ void main() {
     final fetchedPollVotes = await pollVoteDao.getPollVotes(pollId);
     expect(fetchedPollVotes.length, pollVotes.length + 1);
     expect(
-      fetchedPollVotes.any((it) =>
-          it.id == newPollVote.id &&
-          it.pollId == newPollVote.pollId &&
-          it.optionId == newPollVote.optionId &&
-          it.answerText == newPollVote.answerText),
+      fetchedPollVotes.any(
+        (it) =>
+            it.id == newPollVote.id &&
+            it.pollId == newPollVote.pollId &&
+            it.optionId == newPollVote.optionId &&
+            it.answerText == newPollVote.answerText,
+      ),
       true,
     );
   });

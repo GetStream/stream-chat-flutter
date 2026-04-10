@@ -3,16 +3,18 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/message_input/attachment_picker/stream_attachment_picker_controller.dart';
 
 /// Function signature for building the attachment picker option view.
-typedef AttachmentPickerOptionViewBuilder = Widget Function(
-  BuildContext context,
-  StreamAttachmentPickerController controller,
-);
+typedef AttachmentPickerOptionViewBuilder =
+    Widget Function(
+      BuildContext context,
+      StreamAttachmentPickerController controller,
+    );
 
 /// Function signature for system attachment picker option callback.
-typedef OnSystemAttachmentPickerOptionTap = Future<void> Function(
-  BuildContext context,
-  StreamAttachmentPickerController controller,
-);
+typedef OnSystemAttachmentPickerOptionTap =
+    Future<void> Function(
+      BuildContext context,
+      StreamAttachmentPickerController controller,
+    );
 
 /// Base class for attachment picker options.
 abstract class AttachmentPickerOption {
@@ -29,7 +31,7 @@ abstract class AttachmentPickerOption {
   final String? key;
 
   /// The icon of the option.
-  final Widget icon;
+  final IconData icon;
 
   /// The title of the option.
   final String? title;
@@ -148,8 +150,11 @@ sealed class AttachmentPickerType {
   /// The option will allow to create a poll.
   static const poll = PollPickerType();
 
+  /// The option will allow to pick commands.
+  static const command = CommandPickerType();
+
   /// A list of all predefined attachment picker types.
-  static const values = [images, videos, audios, files, poll];
+  static const values = [images, videos, audios, files, poll, command];
 }
 
 /// A predefined attachment picker type that allows picking images.
@@ -180,6 +185,12 @@ final class FilesPickerType extends AttachmentPickerType {
 final class PollPickerType extends AttachmentPickerType {
   /// Creates a new poll picker type.
   const PollPickerType();
+}
+
+/// A predefined attachment picker type that allows picking commands.
+final class CommandPickerType extends AttachmentPickerType {
+  /// Creates a new command picker type.
+  const CommandPickerType();
 }
 
 /// A custom picker type that can be extended to support custom types of

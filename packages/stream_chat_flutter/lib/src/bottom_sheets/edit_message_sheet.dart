@@ -89,8 +89,8 @@ class _EditMessageSheetState extends State<EditMessageSheet> {
                   children: [
                     Padding(
                       padding: const EdgeInsets.all(8),
-                      child: StreamSvgIcon(
-                        icon: StreamSvgIcons.edit,
+                      child: Icon(
+                        context.streamIcons.edit20,
                         color: streamChatThemeData.colorTheme.disabled,
                       ),
                     ),
@@ -100,8 +100,8 @@ class _EditMessageSheetState extends State<EditMessageSheet> {
                     ),
                     IconButton(
                       visualDensity: VisualDensity.compact,
-                      icon: StreamSvgIcon(
-                        icon: StreamSvgIcons.closeSmall,
+                      icon: Icon(
+                        context.streamIcons.xmark16,
                         color: streamChatThemeData.colorTheme.textLowEmphasis,
                       ),
                       onPressed: Navigator.of(context).pop,
@@ -113,7 +113,6 @@ class _EditMessageSheetState extends State<EditMessageSheet> {
                 widget.editMessageInputBuilder!(context, widget.message)
               else
                 StreamMessageInput(
-                  elevation: 0,
                   messageInputController: controller,
                   preMessageSending: (m) {
                     FocusScope.of(context).unfocus();

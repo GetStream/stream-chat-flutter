@@ -1,6 +1,5 @@
 import 'package:flutter/widgets.dart';
-import 'package:stream_chat_flutter/src/localization/translations.dart'
-    show Translations;
+import 'package:stream_chat_flutter/src/localization/translations.dart' show Translations;
 
 /// Defines the localized resource values used by the StreamChatFlutter widgets.
 ///

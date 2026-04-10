@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter_portal/flutter_portal.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 /// {@template streamChannelHeader}
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/packages/stream_chat_flutter/screenshots/channel_header.png)
@@ -50,8 +51,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// and the [StreamChatThemeData.channelHeaderTheme] property. Modify it to
 /// change the widget's appearance.
 /// {@endtemplate}
-class StreamChannelHeader extends StatelessWidget
-    implements PreferredSizeWidget {
+class StreamChannelHeader extends StatelessWidget implements PreferredSizeWidget {
   /// {@macro streamChannelHeader}
   const StreamChannelHeader({
     super.key,
@@ -63,12 +63,13 @@ class StreamChannelHeader extends StatelessWidget
     this.showConnectionStateTile = false,
     this.title,
     this.subtitle,
-    this.centerTitle,
+    this.centerTitle = true,
     this.leading,
     this.actions,
     this.bottom,
     this.backgroundColor,
-    this.elevation = 1,
+    this.elevation = 0,
+    this.scrolledUnderElevation = 0,
     this.bottomOpacity = 1,
   });
 
@@ -103,7 +104,7 @@ class StreamChannelHeader extends StatelessWidget
   final Widget? subtitle;
 
   /// Whether the title should be centered
-  final bool? centerTitle;
+  final bool centerTitle;
 
   /// Leading widget
   final Widget? leading;
@@ -121,6 +122,9 @@ class StreamChannelHeader extends StatelessWidget
 
   /// The elevation for this [StreamChannelHeader].
   final double elevation;
+
+  /// The scrolled under elevation for this [StreamChannelHeader].
+  final double scrolledUnderElevation;
 
   /// The opacity of the bottom widget.
   final double bottomOpacity;
@@ -141,7 +145,8 @@ class StreamChannelHeader extends StatelessWidget
     final channel = StreamChannel.of(context).channel;
     final channelHeaderTheme = StreamChannelHeaderTheme.of(context);
 
-    final leadingWidget = leading ??
+    final leadingWidget =
+        leading ??
         (showBackButton
             ? StreamBackButton(
                 onPressed: onBackPressed,
@@ -149,86 +154,113 @@ class StreamChannelHeader extends StatelessWidget
               )
             : const SizedBox());
 
-    return StreamConnectionStatusBuilder(
-      statusBuilder: (context, status) {
-        var statusString = '';
-        var showStatus = true;
+    return Portal(
+      child: StreamConnectionStatusBuilder(
+        statusBuilder: (context, status) {
+          var statusString = '';
+          var showStatus = true;
 
-        switch (status) {
-          case ConnectionStatus.connected:
-            statusString = context.translations.connectedLabel;
-            showStatus = false;
-            break;
-          case ConnectionStatus.connecting:
-            statusString = context.translations.reconnectingLabel;
-            break;
-          case ConnectionStatus.disconnected:
-            statusString = context.translations.disconnectedLabel;
-            break;
-        }
+          switch (status) {
+            case ConnectionStatus.connected:
+              statusString = context.translations.connectedLabel;
+              showStatus = false;
+              break;
+            case ConnectionStatus.connecting:
+              statusString = context.translations.reconnectingLabel;
+              break;
+            case ConnectionStatus.disconnected:
+              statusString = context.translations.disconnectedLabel;
+              break;
+          }
 
-        final theme = Theme.of(context);
-
-        return StreamInfoTile(
-          showMessage: showConnectionStateTile && showStatus,
-          message: statusString,
-          child: AppBar(
-            toolbarTextStyle: theme.textTheme.bodyMedium,
-            titleTextStyle: theme.textTheme.titleLarge,
-            systemOverlayStyle: theme.brightness == Brightness.dark
-                ? SystemUiOverlayStyle.light
-                : SystemUiOverlayStyle.dark,
-            elevation: elevation,
-            leading: leadingWidget,
-            bottom: bottom,
-            bottomOpacity: bottomOpacity,
-            backgroundColor: backgroundColor ?? channelHeaderTheme.color,
-            actions: actions ??
-                <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.only(right: 10),
-                    child: Center(
+          return StreamInfoTile(
+            showMessage: showConnectionStateTile && showStatus,
+            message: statusString,
+            child: StreamAppBar(
+              titleTextStyle: Theme.of(context).textTheme.titleLarge,
+              elevation: elevation,
+              scrolledUnderElevation: scrolledUnderElevation,
+              leading: Padding(
+                padding: .directional(start: context.streamSpacing.sm),
+                child: leadingWidget,
+              ),
+              leadingWidth: StreamAvatarSize.lg.value,
+              titleSpacing: context.streamSpacing.sm,
+              bottom: bottom,
+              bottomOpacity: bottomOpacity,
+              backgroundColor: backgroundColor ?? channelHeaderTheme.color,
+              actions:
+                  actions ??
+                  <Widget>[
+                    if (effectiveCenterTitle)
+                      Padding(
+                        padding: .directional(end: context.streamSpacing.sm),
+                        child: Center(
+                          child: GestureDetector(
+                            onTap: onImageTap,
+                            child: StreamChannelAvatar(
+                              size: .lg,
+                              channel: channel,
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+              centerTitle: centerTitle,
+              title: Row(
+                spacing: context.streamSpacing.sm,
+                children: [
+                  if (!effectiveCenterTitle) ...[
+                    GestureDetector(
+                      onTap: onImageTap,
                       child: StreamChannelAvatar(
+                        size: .lg,
                         channel: channel,
-                        borderRadius:
-                            channelHeaderTheme.avatarTheme?.borderRadius,
-                        constraints:
-                            channelHeaderTheme.avatarTheme?.constraints,
-                        onTap: onImageTap,
+                      ),
+                    ),
+                  ],
+                  Expanded(
+                    child: InkWell(
+                      onTap: onTitleTap,
+                      child: SizedBox(
+                        height: preferredSize.height,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: effectiveCenterTitle
+                              ? CrossAxisAlignment.center
+                              : CrossAxisAlignment.stretch,
+                          children: <Widget>[
+                            title ??
+                                StreamChannelName(
+                                  channel: channel,
+                                  textStyle:
+                                      channelHeaderTheme.titleStyle ??
+                                      context.streamTextTheme.headingSm.copyWith(
+                                        color: context.streamColorScheme.textPrimary,
+                                      ),
+                                ),
+                            const SizedBox(height: 2),
+                            subtitle ??
+                                StreamChannelInfo(
+                                  showTypingIndicator: showTypingIndicator,
+                                  channel: channel,
+                                  textStyle:
+                                      channelHeaderTheme.subtitleStyle ??
+                                      context.streamTextTheme.captionDefault.copyWith(
+                                        color: context.streamColorScheme.textSecondary,
+                                      ),
+                                ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
                 ],
-            centerTitle: centerTitle,
-            title: InkWell(
-              onTap: onTitleTap,
-              child: SizedBox(
-                height: preferredSize.height,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: effectiveCenterTitle
-                      ? CrossAxisAlignment.center
-                      : CrossAxisAlignment.stretch,
-                  children: <Widget>[
-                    title ??
-                        StreamChannelName(
-                          channel: channel,
-                          textStyle: channelHeaderTheme.titleStyle,
-                        ),
-                    const SizedBox(height: 2),
-                    subtitle ??
-                        StreamChannelInfo(
-                          showTypingIndicator: showTypingIndicator,
-                          channel: channel,
-                          textStyle: channelHeaderTheme.subtitleStyle,
-                        ),
-                  ],
-                ),
               ),
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 }

@@ -113,10 +113,9 @@ Future<bool?> showConfirmationBottomSheet(
                         onPressed: () => Navigator.of(context).pop(false),
                         style: TextButton.styleFrom(
                           textStyle: chatThemeData.textTheme.bodyBold,
-                          foregroundColor:
-                              chatThemeData.colorTheme.textHighEmphasis
-                                  // ignore: deprecated_member_use
-                                  .withOpacity(0.5),
+                          foregroundColor: chatThemeData.colorTheme.textHighEmphasis
+                              // ignore: deprecated_member_use
+                              .withOpacity(0.5),
                         ),
                         child: Text(cancelText),
                       ),
@@ -155,8 +154,7 @@ Future<bool?> showInfoBottomSheet(
 }) {
   final chatThemeData = StreamChatTheme.of(context);
   return showModalBottomSheet(
-    backgroundColor:
-        theme?.colorTheme.barsBg ?? chatThemeData.colorTheme.barsBg,
+    backgroundColor: theme?.colorTheme.barsBg ?? chatThemeData.colorTheme.barsBg,
     context: context,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.only(
@@ -177,8 +175,7 @@ Future<bool?> showInfoBottomSheet(
           ),
           Text(
             title,
-            style: theme?.textTheme.headlineBold ??
-                chatThemeData.textTheme.headlineBold,
+            style: theme?.textTheme.headlineBold ?? chatThemeData.textTheme.headlineBold,
           ),
           const SizedBox(
             height: 7,
@@ -188,10 +185,9 @@ Future<bool?> showInfoBottomSheet(
             height: 36,
           ),
           Container(
-            // ignore: deprecated_member_use
-            color: theme?.colorTheme.textHighEmphasis.withOpacity(0.08) ??
-                // ignore: deprecated_member_use
-                chatThemeData.colorTheme.textHighEmphasis.withOpacity(0.08),
+            color:
+                theme?.colorTheme.textHighEmphasis.withValues(alpha: 0.08) ??
+                chatThemeData.colorTheme.textHighEmphasis.withValues(alpha: 0.08),
             height: 1,
           ),
           Center(
@@ -203,8 +199,7 @@ Future<bool?> showInfoBottomSheet(
                 okText,
                 style: TextStyle(
                   // ignore: deprecated_member_use
-                  color: theme?.colorTheme.textHighEmphasis.withOpacity(0.5) ??
-                      chatThemeData.colorTheme.accentPrimary,
+                  color: theme?.colorTheme.textHighEmphasis.withOpacity(0.5) ?? chatThemeData.colorTheme.accentPrimary,
                   fontWeight: FontWeight.w400,
                 ),
               ),
@@ -217,8 +212,7 @@ Future<bool?> showInfoBottomSheet(
 }
 
 /// Get random png with initials
-String getRandomPicUrl(User user) =>
-    'https://getstream.io/random_png/?id=${user.id}&name=${user.name}';
+String getRandomPicUrl(User user) => 'https://getstream.io/random_png/?id=${user.id}&name=${user.name}';
 
 /// Get websiteName from [hostName]
 String? getWebsiteName(String hostName) {
@@ -308,8 +302,7 @@ String fileSize(dynamic size, [int round = 2]) {
     return '${(_size / divider / divider / divider).toStringAsFixed(round)} GB';
   }
 
-  if (_size < divider * divider * divider * divider * divider &&
-      _size % divider == 0) {
+  if (_size < divider * divider * divider * divider * divider && _size % divider == 0) {
     final num r = _size / divider / divider / divider / divider;
     return '${r.toStringAsFixed(0)} TB';
   }
@@ -319,8 +312,7 @@ String fileSize(dynamic size, [int round = 2]) {
     return '${r.toStringAsFixed(round)} TB';
   }
 
-  if (_size < divider * divider * divider * divider * divider * divider &&
-      _size % divider == 0) {
+  if (_size < divider * divider * divider * divider * divider * divider && _size % divider == 0) {
     final num r = _size / divider / divider / divider / divider / divider;
     return '${r.toStringAsFixed(0)} PB';
   } else {
@@ -346,8 +338,7 @@ StreamSvgIcon getFileTypeImage([String? mimeType]) {
       'application/zip' => StreamSvgIcons.filetypeCompressionZip,
       'application/x-7z-compressed' => StreamSvgIcons.filetypeCompression7z,
       'application/x-arj' => StreamSvgIcons.filetypeCompressionArj,
-      'application/vnd.debian.binary-package' =>
-        StreamSvgIcons.filetypeCompressionDeb,
+      'application/vnd.debian.binary-package' => StreamSvgIcons.filetypeCompressionDeb,
       'application/x-apple-diskimage' => StreamSvgIcons.filetypeCompressionPkg,
       'application/x-rar-compressed' => StreamSvgIcons.filetypeCompressionRar,
       'application/x-rpm' => StreamSvgIcons.filetypeCompressionRpm,
@@ -357,20 +348,14 @@ StreamSvgIcon getFileTypeImage([String? mimeType]) {
       'application/vnd.openxmlformats-officedocument.presentationml.presentation' =>
         StreamSvgIcons.filetypePresentationPptx,
       'application/vnd.apple.keynote' => StreamSvgIcons.filetypePresentationKey,
-      'application/vnd.oasis.opendocument.presentation' =>
-        StreamSvgIcons.filetypePresentationOdp,
+      'application/vnd.oasis.opendocument.presentation' => StreamSvgIcons.filetypePresentationOdp,
       'application/vnd.ms-excel' => StreamSvgIcons.filetypeSpreadsheetXls,
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' =>
-        StreamSvgIcons.filetypeSpreadsheetXlsx,
-      'application/vnd.ms-excel.sheet.macroEnabled.12' =>
-        StreamSvgIcons.filetypeSpreadsheetXlsm,
-      'application/vnd.oasis.opendocument.spreadsheet' =>
-        StreamSvgIcons.filetypeSpreadsheetOds,
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' => StreamSvgIcons.filetypeSpreadsheetXlsx,
+      'application/vnd.ms-excel.sheet.macroEnabled.12' => StreamSvgIcons.filetypeSpreadsheetXlsm,
+      'application/vnd.oasis.opendocument.spreadsheet' => StreamSvgIcons.filetypeSpreadsheetOds,
       'application/msword' => StreamSvgIcons.filetypeTextDoc,
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document' =>
-        StreamSvgIcons.filetypeTextDocx,
-      'application/vnd.oasis.opendocument.text' =>
-        StreamSvgIcons.filetypeTextOdt,
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document' => StreamSvgIcons.filetypeTextDocx,
+      'application/vnd.oasis.opendocument.text' => StreamSvgIcons.filetypeTextOdt,
       'text/plain' => StreamSvgIcons.filetypeTextTxt,
       'application/rtf' => StreamSvgIcons.filetypeTextRtf,
       'application/x-tex' => StreamSvgIcons.filetypeTextTex,

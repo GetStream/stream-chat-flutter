@@ -51,8 +51,7 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
   String attachmentsUploadProgressText({
     required int remaining,
     required int total,
-  }) =>
-      'अपलोडिंग $remaining/$total ...';
+  }) => 'अपलोडिंग $remaining/$total ...';
 
   @override
   String pinnedByUserText({
@@ -165,7 +164,7 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
   String get somethingWentWrongError => 'लोड करने में समस्या';
 
   @override
-  String get addMoreFilesLabel => 'और फ़ाइलें जोड़ें';
+  String get addMoreFilesLabel => 'और जोड़ें';
 
   @override
   String get enablePhotoAndVideoAccessMessage =>
@@ -178,8 +177,7 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
   String get flagMessageLabel => 'फ्लैग संदेश';
 
   @override
-  String get flagMessageQuestion =>
-      'क्या आप आगे की जांच के लिए इस संदेश की एक प्रति मॉडरेटर को भेजना चाहते हैं?';
+  String get flagMessageQuestion => 'क्या आप आगे की जांच के लिए इस संदेश की एक प्रति मॉडरेटर को भेजना चाहते हैं?';
 
   @override
   String get flagLabel => 'फ्लैग';
@@ -191,8 +189,7 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
   String get flagMessageSuccessfulLabel => 'संदेश फ्लैग हो गया';
 
   @override
-  String get flagMessageSuccessfulText =>
-      'संदेश की रिपोर्ट एक मॉडरेटर को कर दी गई है।';
+  String get flagMessageSuccessfulText => 'संदेश की रिपोर्ट एक मॉडरेटर को कर दी गई है।';
 
   @override
   String get deleteLabel => 'हटाएँ';
@@ -201,12 +198,10 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
   String get deleteMessageLabel => 'संदेश हटाएं';
 
   @override
-  String get deleteMessageQuestion =>
-      'क्या आप वाकई इस संदेश को स्थायी रूप से हटाना चाहते हैं?';
+  String get deleteMessageQuestion => 'क्या आप वाकई इस संदेश को स्थायी रूप से हटाना चाहते हैं?';
 
   @override
-  String get operationCouldNotBeCompletedText =>
-      'कार्रवाई पूरी नहीं की जा सकी.';
+  String get operationCouldNotBeCompletedText => 'कार्रवाई पूरी नहीं की जा सकी.';
 
   @override
   String get replyLabel => 'जवाब दें';
@@ -276,8 +271,7 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
   String get letsStartChattingLabel => 'चलो चैट करना शुरू करें!';
 
   @override
-  String get sendingFirstMessageLabel =>
-      'किसी मित्र को अपना पहला संदेश भेजने के बारे में क्या विचार है?';
+  String get sendingFirstMessageLabel => 'किसी मित्र को अपना पहला संदेश भेजने के बारे में क्या विचार है?';
 
   @override
   String get startAChatLabel => 'चैट शुरू करें';
@@ -289,11 +283,10 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
   String get deleteConversationLabel => 'वार्तालाप हटाए';
 
   @override
-  String get deleteConversationQuestion =>
-      'क्या आप वाकई इस वार्तालाप को हटाना चाहते हैं?';
+  String get deleteConversationQuestion => 'क्या आप वाकई इस वार्तालाप को हटाना चाहते हैं?';
 
   @override
-  String get streamChatLabel => 'स्ट्रीम चैट';
+  String get streamChatLabel => 'चैट';
 
   @override
   String get searchingForNetworkText => 'नेटवर्क खोज रहे हैं';
@@ -329,8 +322,7 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
   String get leaveConversationLabel => 'वार्तालाप छोड़े';
 
   @override
-  String get leaveConversationQuestion =>
-      'क्या आप वाकई इस बातचीत को छोड़ना चाहते हैं?';
+  String get leaveConversationQuestion => 'क्या आप वाकई इस बातचीत को छोड़ना चाहते हैं?';
 
   @override
   String get showInChatLabel => 'चैट में दिखाएं';
@@ -366,8 +358,7 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
   String galleryPaginationText({
     required int currentPage,
     required int totalPages,
-  }) =>
-      '${currentPage + 1} ऑफ़ $totalPages';
+  }) => '${currentPage + 1} ऑफ़ $totalPages';
 
   @override
   String get fileText => 'फ़ाइल';
@@ -376,7 +367,8 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
   String get replyToMessageLabel => 'संदेश का जवाब';
 
   @override
-  String attachmentLimitExceedError(int limit) => '''
+  String attachmentLimitExceedError(int limit) =>
+      '''
 अटैचमेंट लिमिट: $limit अटैचमेंट से अधिक जोड़ना संभव नहीं है
   ''';
 
@@ -435,8 +427,7 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
   }
 
   @override
-  String get linkDisabledDetails =>
-      'इस बातचीत में लिंक भेजने की अनुमति नहीं है.';
+  String get linkDisabledDetails => 'इस बातचीत में लिंक भेजने की अनुमति नहीं है.';
 
   @override
   String get linkDisabledError => 'लिंक भेजना प्रतिबंधित';
@@ -445,8 +436,7 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
   String unreadMessagesSeparatorText() => 'नए संदेश।';
 
   @override
-  String get enableFileAccessMessage =>
-      'कृपया फ़ाइलों तक पहुंच सक्षम करें ताकि आप उन्हें मित्रों के साथ साझा कर सकें।';
+  String get enableFileAccessMessage => 'कृपया फ़ाइलों तक पहुंच सक्षम करें ताकि आप उन्हें मित्रों के साथ साझा कर सकें।';
 
   @override
   String get allowFileAccessMessage => 'फाइलों तक पहुंच की अनुमति दें';
@@ -548,15 +538,13 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
   String get enterYourCommentLabel => 'अपनी टिप्पणी दर्ज करें';
 
   @override
-  String get endVoteConfirmationText =>
-      'क्या आप वाकई मतदान समाप्त करना चाहते हैं?';
+  String get endVoteConfirmationText => 'क्या आप वाकई मतदान समाप्त करना चाहते हैं?';
 
   @override
   String get deletePollOptionLabel => 'विकल्प हटाएं';
 
   @override
-  String get deletePollOptionQuestion =>
-      'क्या आप वाकई इस विकल्प को हटाना चाहते हैं?';
+  String get deletePollOptionQuestion => 'क्या आप वाकई इस विकल्प को हटाना चाहते हैं?';
 
   @override
   String get endLabel => 'समाप्त';
@@ -632,15 +620,13 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
   String get slideToCancelLabel => 'रद्द करने के लिए स्लाइड करें';
 
   @override
-  String get holdToRecordLabel =>
-      'रिकॉर्ड करने के लिए दबाए रखें, भेजने के लिए छोड़ें';
+  String get holdToRecordLabel => 'रिकॉर्ड करने के लिए दबाए रखें, भेजने के लिए छोड़ें';
 
   @override
   String get sendAnywayLabel => 'फिर भी भेजें';
 
   @override
-  String get moderatedMessageBlockedText =>
-      'मॉडरेशन नीतियों द्वारा संदेश अवरुद्ध किया गया';
+  String get moderatedMessageBlockedText => 'मॉडरेशन नीतियों द्वारा संदेश अवरुद्ध किया गया';
 
   @override
   String get moderationReviewModalTitle => 'क्या आप निश्चित हैं?';
@@ -665,6 +651,18 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
   String get videoAttachmentText => 'वीडियो';
 
   @override
+  String get fileAttachmentText => 'फ़ाइल';
+
+  @override
+  String filesAttachmentCountText(int count) => count == 1 ? 'फ़ाइल' : '$count फ़ाइलें';
+
+  @override
+  String photosAttachmentCountText(int count) => count == 1 ? 'फ़ोटो' : '$count फ़ोटो';
+
+  @override
+  String videosAttachmentCountText(int count) => count == 1 ? 'वीडियो' : '$count वीडियो';
+
+  @override
   String get pollYouVotedText => 'आपने वोट दिया';
 
   @override
@@ -681,7 +679,52 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
 
   @override
   String locationLabel({bool isLive = false}) {
-    if (isLive) return '📍 लाइव लोकेशन';
-    return '📍 लोकेशन';
+    if (isLive) return 'लाइव लोकेशन';
+    return 'लोकेशन';
   }
+
+  @override
+  String get noConversationsYetText => 'अभी तक कोई बातचीत नहीं';
+
+  @override
+  String get replyToStartThreadText => 'थ्रेड शुरू करने के लिए किसी संदेश का जवाब दें';
+
+  @override
+  String get sendMessageToStartConversationText => 'बातचीत शुरू करने के लिए एक संदेश भेजें';
+
+  @override
+  String get savedForLaterLabel => 'बाद के लिए सहेजा गया';
+
+  @override
+  String get repliedToThreadAnnotationLabel => 'एक थ्रेड का जवाब दिया';
+
+  @override
+  String get alsoSentInChannelAnnotationLabel => 'चैनल में भी भेजा गया';
+
+  @override
+  String get viewLabel => 'देखें';
+
+  @override
+  String get reminderSetLabel => 'रिमाइंडर सेट';
+
+  @override
+  String reminderAtText(String time) => 'आज $time पर';
+
+  @override
+  String get createPollPromptLabel => 'पोल बनाएं और सबको वोट करने दें!';
+
+  @override
+  String get takePhotoAndShareLabel => 'फ़ोटो लें और साझा करें';
+
+  @override
+  String get takeVideoAndShareLabel => 'वीडियो लें और साझा करें';
+
+  @override
+  String get openCameraLabel => 'कैमरा खोलें';
+
+  @override
+  String get selectFilesToShareLabel => 'साझा करने के लिए फ़ाइलें चुनें';
+
+  @override
+  String get openFilesLabel => 'फ़ाइलें खोलें';
 }

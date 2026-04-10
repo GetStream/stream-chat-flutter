@@ -7,10 +7,8 @@ void main() {
   for (final language in kStreamChatSupportedLanguages) {
     test('translations exist for $language', () async {
       final locale = Locale(language);
-      expect(
-          GlobalStreamChatLocalizations.delegate.isSupported(locale), isTrue);
-      final localizations =
-          await GlobalStreamChatLocalizations.delegate.load(locale);
+      expect(GlobalStreamChatLocalizations.delegate.isSupported(locale), isTrue);
+      final localizations = await GlobalStreamChatLocalizations.delegate.load(locale);
       expect(localizations.launchUrlError, isNotNull);
       expect(localizations.loadingUsersError, isNotNull);
       expect(localizations.noUsersLabel, isNotNull);
@@ -194,18 +192,15 @@ void main() {
       expect(localizations.couldNotReadBytesFromFileError, isNotNull);
       expect(localizations.toggleMuteUnmuteAction(isMuted: false), isNotNull);
       expect(localizations.downloadLabel, isNotNull);
-      expect(localizations.toggleMuteUnmuteGroupQuestion(isMuted: true),
-          isNotNull);
+      expect(localizations.toggleMuteUnmuteGroupQuestion(isMuted: true), isNotNull);
       expect(localizations.toggleMuteUnmuteGroupText(isMuted: true), isNotNull);
-      expect(
-          localizations.toggleMuteUnmuteUserQuestion(isMuted: true), isNotNull);
+      expect(localizations.toggleMuteUnmuteUserQuestion(isMuted: true), isNotNull);
       expect(localizations.toggleMuteUnmuteUserText(isMuted: true), isNotNull);
       expect(localizations.viewLibrary, isNotNull);
       expect(localizations.unreadMessagesSeparatorText(), isNotNull);
       expect(localizations.enableFileAccessMessage, isNotNull);
       expect(localizations.allowFileAccessMessage, isNotNull);
-      expect(
-          localizations.unreadCountIndicatorLabel(unreadCount: 2), isNotNull);
+      expect(localizations.unreadCountIndicatorLabel(unreadCount: 2), isNotNull);
       expect(localizations.unreadMessagesSeparatorText(), isNotNull);
       expect(localizations.markUnreadError, isNotNull);
       expect(localizations.markAsUnreadLabel, isNotNull);
@@ -306,6 +301,10 @@ void main() {
       expect(localizations.audioAttachmentText, isNotNull);
       expect(localizations.imageAttachmentText, isNotNull);
       expect(localizations.videoAttachmentText, isNotNull);
+      expect(localizations.fileAttachmentText, isNotNull);
+      expect(localizations.filesAttachmentCountText(3), isNotNull);
+      expect(localizations.photosAttachmentCountText(3), isNotNull);
+      expect(localizations.videosAttachmentCountText(3), isNotNull);
       expect(localizations.pollYouVotedText, isNotNull);
       expect(localizations.pollSomeoneVotedText('TestUser'), isNotNull);
       expect(localizations.pollYouCreatedText, isNotNull);
@@ -313,6 +312,21 @@ void main() {
       expect(localizations.systemMessageLabel, isNotNull);
       expect(localizations.draftLabel, isNotNull);
       expect(localizations.locationLabel(), isNotNull);
+      expect(localizations.noConversationsYetText, isNotNull);
+      expect(localizations.replyToStartThreadText, isNotNull);
+      expect(localizations.sendMessageToStartConversationText, isNotNull);
+      expect(localizations.savedForLaterLabel, isNotNull);
+      expect(localizations.repliedToThreadAnnotationLabel, isNotNull);
+      expect(localizations.alsoSentInChannelAnnotationLabel, isNotNull);
+      expect(localizations.viewLabel, isNotNull);
+      expect(localizations.reminderSetLabel, isNotNull);
+      expect(localizations.reminderAtText('3:00 PM'), isNotNull);
+      expect(localizations.createPollPromptLabel, isNotNull);
+      expect(localizations.takePhotoAndShareLabel, isNotNull);
+      expect(localizations.takeVideoAndShareLabel, isNotNull);
+      expect(localizations.openCameraLabel, isNotNull);
+      expect(localizations.selectFilesToShareLabel, isNotNull);
+      expect(localizations.openFilesLabel, isNotNull);
     });
   }
 

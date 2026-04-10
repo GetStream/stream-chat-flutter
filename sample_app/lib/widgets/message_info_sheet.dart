@@ -158,7 +158,7 @@ class MessageInfoSheet extends StatelessWidget {
           ),
           IconButton(
             iconSize: 32,
-            icon: const StreamSvgIcon(icon: StreamSvgIcons.close),
+            icon: Icon(context.streamIcons.xmark32),
             onPressed: Navigator.of(context).maybePop,
             color: colorTheme.textHighEmphasis,
             padding: const EdgeInsets.all(4),
@@ -251,11 +251,8 @@ class _UserReadTile extends StatelessWidget {
         children: [
           // User avatar
           StreamUserAvatar(
+            size: .lg,
             user: read.user,
-            constraints: const BoxConstraints.tightFor(
-              height: 40,
-              width: 40,
-            ),
           ),
 
           const SizedBox(width: 12),
@@ -271,9 +268,9 @@ class _UserReadTile extends StatelessWidget {
           ),
 
           // Status icon
-          StreamSvgIcon(
+          Icon(
+            context.streamIcons.checks20,
             size: 18,
-            icon: StreamSvgIcons.checkAll,
             color: switch (isDelivered) {
               true => theme.colorTheme.textLowEmphasis,
               false => theme.colorTheme.accentPrimary,

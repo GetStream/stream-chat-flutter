@@ -92,8 +92,7 @@ class ChannelState implements ComparableFieldProvider {
   final List<Location>? activeLiveLocations;
 
   /// Create a new instance from a json
-  static ChannelState fromJson(Map<String, dynamic> json) =>
-      _$ChannelStateFromJson(json);
+  static ChannelState fromJson(Map<String, dynamic> json) => _$ChannelStateFromJson(json);
 
   /// Serialize to json
   Map<String, dynamic> toJson() => _$ChannelStateToJson(this);
@@ -112,21 +111,20 @@ class ChannelState implements ComparableFieldProvider {
     List<Message>? pendingMessages,
     ChannelPushPreference? pushPreferences,
     List<Location>? activeLiveLocations,
-  }) =>
-      ChannelState(
-        channel: channel ?? this.channel,
-        messages: messages ?? this.messages,
-        members: members ?? this.members,
-        pinnedMessages: pinnedMessages ?? this.pinnedMessages,
-        watcherCount: watcherCount ?? this.watcherCount,
-        watchers: watchers ?? this.watchers,
-        read: read ?? this.read,
-        membership: membership ?? this.membership,
-        draft: draft == _nullConst ? this.draft : draft as Draft?,
-        pendingMessages: pendingMessages ?? this.pendingMessages,
-        pushPreferences: pushPreferences ?? this.pushPreferences,
-        activeLiveLocations: activeLiveLocations ?? this.activeLiveLocations,
-      );
+  }) => ChannelState(
+    channel: channel ?? this.channel,
+    messages: messages ?? this.messages,
+    members: members ?? this.members,
+    pinnedMessages: pinnedMessages ?? this.pinnedMessages,
+    watcherCount: watcherCount ?? this.watcherCount,
+    watchers: watchers ?? this.watchers,
+    read: read ?? this.read,
+    membership: membership ?? this.membership,
+    draft: draft == _nullConst ? this.draft : draft as Draft?,
+    pendingMessages: pendingMessages ?? this.pendingMessages,
+    pushPreferences: pushPreferences ?? this.pushPreferences,
+    activeLiveLocations: activeLiveLocations ?? this.activeLiveLocations,
+  );
 
   @override
   ComparableField? getComparableField(String sortKey) {

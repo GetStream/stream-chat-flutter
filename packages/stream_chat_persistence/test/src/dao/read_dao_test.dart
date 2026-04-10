@@ -56,10 +56,8 @@ void main() {
       expect(fetchedRead.user.id, insertedRead.user.id);
       expect(fetchedRead.lastRead, isSameDateAs(insertedRead.lastRead));
       expect(fetchedRead.unreadMessages, insertedRead.unreadMessages);
-      expect(fetchedRead.lastDeliveredAt,
-          isSameDateAs(insertedRead.lastDeliveredAt));
-      expect(fetchedRead.lastDeliveredMessageId,
-          insertedRead.lastDeliveredMessageId);
+      expect(fetchedRead.lastDeliveredAt, isSameDateAs(insertedRead.lastDeliveredAt));
+      expect(fetchedRead.lastDeliveredMessageId, insertedRead.lastDeliveredMessageId);
     }
   });
 
@@ -89,16 +87,12 @@ void main() {
     final fetchedReads = await readDao.getReadsByCid(cid);
     expect(fetchedReads.length, insertedReads.length + 1);
     expect(
-      fetchedReads
-          .firstWhere((it) => it.user.id == copyRead.user.id)
-          .unreadMessages,
+      fetchedReads.firstWhere((it) => it.user.id == copyRead.user.id).unreadMessages,
       33,
     );
     expect(
       fetchedReads
-          .where((it) =>
-              it.user.id == newRead.user.id &&
-              it.unreadMessages == newRead.unreadMessages)
+          .where((it) => it.user.id == newRead.user.id && it.unreadMessages == newRead.unreadMessages)
           .isNotEmpty,
       true,
     );

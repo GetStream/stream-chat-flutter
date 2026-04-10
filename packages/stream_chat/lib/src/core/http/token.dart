@@ -29,10 +29,10 @@ class Token extends Equatable {
   /// The token that can be used when user is unknown.
   /// Is used by `anonymous` token provider.
   factory Token.anonymous({String? userId}) => Token._(
-        rawValue: '',
-        userId: userId ?? randomId(),
-        authType: AuthType.anonymous,
-      );
+    rawValue: '',
+    userId: userId ?? randomId(),
+    authType: AuthType.anonymous,
+  );
 
   /// Creates a [Token] instance from the provided [rawValue] if it's valid.
   factory Token.fromRawValue(String rawValue) {

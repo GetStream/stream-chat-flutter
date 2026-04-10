@@ -11,21 +11,23 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: Builder(builder: (context) {
-              return Center(
-                child: ElevatedButton(
-                  child: const Text('Show Modal'),
-                  onPressed: () => showModalBottomSheet(
-                    context: context,
-                    builder: (_) => AttachmentModalSheet(
-                      onFileTap: () {},
-                      onPhotoTap: () {},
-                      onVideoTap: () {},
+            body: Builder(
+              builder: (context) {
+                return Center(
+                  child: ElevatedButton(
+                    child: const Text('Show Modal'),
+                    onPressed: () => showModalBottomSheet(
+                      context: context,
+                      builder: (_) => AttachmentModalSheet(
+                        onFileTap: () {},
+                        onPhotoTap: () {},
+                        onVideoTap: () {},
+                      ),
                     ),
                   ),
-                ),
-              );
-            }),
+                );
+              },
+            ),
           ),
         ),
       );
@@ -42,15 +44,17 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: Builder(builder: (context) {
-              return Center(
-                child: AttachmentModalSheet(
-                  onPhotoTap: () => called = 1,
-                  onFileTap: () {},
-                  onVideoTap: () {},
-                ),
-              );
-            }),
+            body: Builder(
+              builder: (context) {
+                return Center(
+                  child: AttachmentModalSheet(
+                    onPhotoTap: () => called = 1,
+                    onFileTap: () {},
+                    onVideoTap: () {},
+                  ),
+                );
+              },
+            ),
           ),
         ),
       );
@@ -68,15 +72,17 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: Builder(builder: (context) {
-              return Center(
-                child: AttachmentModalSheet(
-                  onPhotoTap: () {},
-                  onVideoTap: () => called = 1,
-                  onFileTap: () {},
-                ),
-              );
-            }),
+            body: Builder(
+              builder: (context) {
+                return Center(
+                  child: AttachmentModalSheet(
+                    onPhotoTap: () {},
+                    onVideoTap: () => called = 1,
+                    onFileTap: () {},
+                  ),
+                );
+              },
+            ),
           ),
         ),
       );
@@ -94,15 +100,17 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: Builder(builder: (context) {
-              return Center(
-                child: AttachmentModalSheet(
-                  onPhotoTap: () {},
-                  onVideoTap: () {},
-                  onFileTap: () => called = 1,
-                ),
-              );
-            }),
+            body: Builder(
+              builder: (context) {
+                return Center(
+                  child: AttachmentModalSheet(
+                    onPhotoTap: () {},
+                    onVideoTap: () {},
+                    onFileTap: () => called = 1,
+                  ),
+                );
+              },
+            ),
           ),
         ),
       );
@@ -121,15 +129,17 @@ void main() {
       constraints: const BoxConstraints.tightFor(width: 300, height: 300),
       builder: () => MaterialAppWrapper(
         home: Scaffold(
-          body: Builder(builder: (context) {
-            return Center(
-              child: AttachmentModalSheet(
-                onPhotoTap: () {},
-                onVideoTap: () {},
-                onFileTap: () {},
-              ),
-            );
-          }),
+          body: Builder(
+            builder: (context) {
+              return Center(
+                child: AttachmentModalSheet(
+                  onPhotoTap: () {},
+                  onVideoTap: () {},
+                  onFileTap: () {},
+                ),
+              );
+            },
+          ),
         ),
       ),
     );

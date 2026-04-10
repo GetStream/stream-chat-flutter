@@ -3,16 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_localizations/stream_chat_localizations.dart';
 
-class _CustomStreamChatLocalizationsDelegate
-    extends LocalizationsDelegate<StreamChatLocalizations> {
+class _CustomStreamChatLocalizationsDelegate extends LocalizationsDelegate<StreamChatLocalizations> {
   const _CustomStreamChatLocalizationsDelegate();
 
   @override
   bool isSupported(Locale locale) => locale.languageCode == 'en';
 
   @override
-  Future<StreamChatLocalizations> load(Locale locale) =>
-      SynchronousFuture(CustomStreamChatLocalizationsEn());
+  Future<StreamChatLocalizations> load(Locale locale) => SynchronousFuture(CustomStreamChatLocalizationsEn());
 
   @override
   bool shouldReload(_CustomStreamChatLocalizationsDelegate old) => false;
@@ -89,34 +87,34 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => MaterialApp(
-        theme: ThemeData.light(),
-        darkTheme: ThemeData.dark(),
-        // Add all the supported locales
-        supportedLocales: const [
-          Locale('en'),
-          Locale('hi'),
-          Locale('fr'),
-          Locale('it'),
-          Locale('es'),
-          Locale('ja'),
-          Locale('ko'),
-          Locale('pt'),
-        ],
-        // Add overridden "CustomStreamChatLocalizationsEn.delegate" along with
-        // "GlobalStreamChatLocalizations.delegates"
-        localizationsDelegates: const [
-          CustomStreamChatLocalizationsEn.delegate,
-          ...GlobalStreamChatLocalizations.delegates,
-        ],
-        builder: (context, widget) => StreamChat(
-          client: client,
-          child: widget,
-        ),
-        home: StreamChannel(
-          channel: channel,
-          child: const ChannelPage(),
-        ),
-      );
+    theme: ThemeData.light(),
+    darkTheme: ThemeData.dark(),
+    // Add all the supported locales
+    supportedLocales: const [
+      Locale('en'),
+      Locale('hi'),
+      Locale('fr'),
+      Locale('it'),
+      Locale('es'),
+      Locale('ja'),
+      Locale('ko'),
+      Locale('pt'),
+    ],
+    // Add overridden "CustomStreamChatLocalizationsEn.delegate" along with
+    // "GlobalStreamChatLocalizations.delegates"
+    localizationsDelegates: const [
+      CustomStreamChatLocalizationsEn.delegate,
+      ...GlobalStreamChatLocalizations.delegates,
+    ],
+    builder: (context, widget) => StreamChat(
+      client: client,
+      child: widget,
+    ),
+    home: StreamChannel(
+      channel: channel,
+      child: const ChannelPage(),
+    ),
+  );
 }
 
 /// A list of messages sent in the current channel.

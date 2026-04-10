@@ -57,9 +57,9 @@ class Poll extends Equatable implements ComparableFieldProvider {
     this.createdBy,
     this.ownVotesAndAnswers = const [],
     this.extraData = const {},
-  })  : id = id ?? const Uuid().v4(),
-        createdAt = createdAt ?? DateTime.now(),
-        updatedAt = updatedAt ?? DateTime.now();
+  }) : id = id ?? const Uuid().v4(),
+       createdAt = createdAt ?? DateTime.now(),
+       updatedAt = updatedAt ?? DateTime.now();
 
   /// Create a new instance from a json
   factory Poll.fromJson(Map<String, dynamic> json) =>
@@ -167,8 +167,7 @@ class Poll extends Equatable implements ComparableFieldProvider {
   final Map<String, Object?> extraData;
 
   /// Serialize to json
-  Map<String, dynamic> toJson() =>
-      Serializer.moveFromExtraDataToRoot(_$PollToJson(this));
+  Map<String, dynamic> toJson() => Serializer.moveFromExtraDataToRoot(_$PollToJson(this));
 
   /// Creates a copy of [Poll] with specified attributes overridden.
   Poll copyWith({
@@ -193,33 +192,29 @@ class Poll extends Equatable implements ComparableFieldProvider {
     DateTime? createdAt,
     DateTime? updatedAt,
     Map<String, Object?>? extraData,
-  }) =>
-      Poll(
-        id: id ?? this.id,
-        name: name ?? this.name,
-        description: description ?? this.description,
-        options: options ?? this.options,
-        votingVisibility: votingVisibility ?? this.votingVisibility,
-        enforceUniqueVote: enforceUniqueVote ?? this.enforceUniqueVote,
-        maxVotesAllowed: maxVotesAllowed == _nullConst
-            ? this.maxVotesAllowed
-            : maxVotesAllowed as int?,
-        allowUserSuggestedOptions:
-            allowUserSuggestedOptions ?? this.allowUserSuggestedOptions,
-        allowAnswers: allowAnswers ?? this.allowAnswers,
-        isClosed: isClosed ?? this.isClosed,
-        voteCountsByOption: voteCountsByOption ?? this.voteCountsByOption,
-        ownVotesAndAnswers: ownVotesAndAnswers ?? this.ownVotesAndAnswers,
-        voteCount: voteCount ?? this.voteCount,
-        answersCount: answersCount ?? this.answersCount,
-        latestVotesByOption: latestVotesByOption ?? this.latestVotesByOption,
-        latestAnswers: latestAnswers ?? this.latestAnswers,
-        createdById: createdById ?? this.createdById,
-        createdBy: createdBy ?? this.createdBy,
-        createdAt: createdAt ?? this.createdAt,
-        updatedAt: updatedAt ?? this.updatedAt,
-        extraData: extraData ?? this.extraData,
-      );
+  }) => Poll(
+    id: id ?? this.id,
+    name: name ?? this.name,
+    description: description ?? this.description,
+    options: options ?? this.options,
+    votingVisibility: votingVisibility ?? this.votingVisibility,
+    enforceUniqueVote: enforceUniqueVote ?? this.enforceUniqueVote,
+    maxVotesAllowed: maxVotesAllowed == _nullConst ? this.maxVotesAllowed : maxVotesAllowed as int?,
+    allowUserSuggestedOptions: allowUserSuggestedOptions ?? this.allowUserSuggestedOptions,
+    allowAnswers: allowAnswers ?? this.allowAnswers,
+    isClosed: isClosed ?? this.isClosed,
+    voteCountsByOption: voteCountsByOption ?? this.voteCountsByOption,
+    ownVotesAndAnswers: ownVotesAndAnswers ?? this.ownVotesAndAnswers,
+    voteCount: voteCount ?? this.voteCount,
+    answersCount: answersCount ?? this.answersCount,
+    latestVotesByOption: latestVotesByOption ?? this.latestVotesByOption,
+    latestAnswers: latestAnswers ?? this.latestAnswers,
+    createdById: createdById ?? this.createdById,
+    createdBy: createdBy ?? this.createdBy,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    extraData: extraData ?? this.extraData,
+  );
 
   /// Known top level fields.
   ///
@@ -250,27 +245,27 @@ class Poll extends Equatable implements ComparableFieldProvider {
 
   @override
   List<Object?> get props => [
-        id,
-        name,
-        description,
-        options,
-        votingVisibility,
-        enforceUniqueVote,
-        maxVotesAllowed,
-        allowUserSuggestedOptions,
-        allowAnswers,
-        isClosed,
-        voteCountsByOption,
-        ownVotesAndAnswers,
-        voteCount,
-        answersCount,
-        latestVotesByOption,
-        latestAnswers,
-        createdById,
-        createdBy,
-        createdAt,
-        updatedAt,
-      ];
+    id,
+    name,
+    description,
+    options,
+    votingVisibility,
+    enforceUniqueVote,
+    maxVotesAllowed,
+    allowUserSuggestedOptions,
+    allowAnswers,
+    isClosed,
+    voteCountsByOption,
+    ownVotesAndAnswers,
+    voteCount,
+    answersCount,
+    latestVotesByOption,
+    latestAnswers,
+    createdById,
+    createdBy,
+    createdAt,
+    updatedAt,
+  ];
 
   @override
   ComparableField? getComparableField(String sortKey) {
@@ -319,31 +314,28 @@ extension PollX on Poll {
 
   /// Whether the poll is already closed and the provided option is the one,
   /// and **the only one** with the most votes.
-  bool isOptionWinner(PollOption option) =>
-      isClosed && isOptionWithMostVotes(option);
+  bool isOptionWinner(PollOption option) => isClosed && isOptionWithMostVotes(option);
 
   /// Whether the poll is already closed and the provided option is one of that
   /// has the most votes.
-  bool isOptionOneOfTheWinners(PollOption option) =>
-      isClosed && isOptionWithMaximumVotes(option);
+  bool isOptionOneOfTheWinners(PollOption option) => isClosed && isOptionWithMaximumVotes(option);
 
   /// Whether the provided option is the one, and **the only one** with the most
   /// votes.
   bool isOptionWithMostVotes(PollOption option) {
     final optionsWithMostVotes = {
       for (final entry in voteCountsByOption.entries)
-        if (entry.value == currentMaximumVoteCount) entry.key: entry.value
+        if (entry.value == currentMaximumVoteCount) entry.key: entry.value,
     };
 
-    return optionsWithMostVotes.length == 1 &&
-        optionsWithMostVotes[option.id] != null;
+    return optionsWithMostVotes.length == 1 && optionsWithMostVotes[option.id] != null;
   }
 
   /// Whether the provided option is one of that has the most votes.
   bool isOptionWithMaximumVotes(PollOption option) {
     final optionsWithMostVotes = {
       for (final entry in voteCountsByOption.entries)
-        if (entry.value == currentMaximumVoteCount) entry.key: entry.value
+        if (entry.value == currentMaximumVoteCount) entry.key: entry.value,
     };
 
     return optionsWithMostVotes[option.id] != null;
@@ -368,6 +360,5 @@ extension PollX on Poll {
 
   /// Returns a Boolean value indicating whether the current user has voted the
   /// given option.
-  bool hasCurrentUserVotedFor(PollOption option) =>
-      ownVotesAndAnswers.any((it) => it.optionId == option.id);
+  bool hasCurrentUserVotedFor(PollOption option) => ownVotesAndAnswers.any((it) => it.optionId == option.id);
 }

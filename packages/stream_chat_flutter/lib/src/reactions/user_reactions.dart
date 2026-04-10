@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/avatars/user_avatar.dart';
+import 'package:stream_chat_flutter/src/components/avatar/stream_user_avatar.dart';
 import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
-import 'package:stream_chat_flutter/src/misc/reaction_icon.dart';
-import 'package:stream_chat_flutter/src/reactions/indicator/reaction_indicator_icon_list.dart';
-import 'package:stream_chat_flutter/src/reactions/reaction_bubble_overlay.dart';
 import 'package:stream_chat_flutter/src/stream_chat_configuration.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 /// {@template streamUserReactions}
 /// A widget that displays the reactions of a user to a message.
@@ -100,13 +98,7 @@ class _UserReactionItem extends StatelessWidget {
     final theme = StreamChatTheme.of(context);
     final messageTheme = theme.getMessageTheme(reverse: isCurrentUserReaction);
 
-    final config = StreamChatConfiguration.of(context);
-    final reactionIcons = config.reactionIcons;
-
-    final reactionIcon = reactionIcons.firstWhere(
-      (it) => it.type == reaction.type,
-      orElse: () => const StreamReactionIcon.unknown(),
-    );
+    final resolver = StreamChatConfiguration.of(context).reactionIconResolver;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -115,40 +107,39 @@ class _UserReactionItem extends StatelessWidget {
         Stack(
           clipBehavior: Clip.none,
           children: [
-            StreamUserAvatar(
-              onTap: onTap,
-              user: reactionUser,
-              showOnlineStatus: false,
-              borderRadius: BorderRadius.circular(32),
-              constraints: const BoxConstraints.tightFor(height: 64, width: 64),
+            GestureDetector(
+              onTap: switch (onTap) {
+                final onTap? => () => onTap(reactionUser),
+                _ => null,
+              },
+              child: StreamUserAvatar(
+                size: .xl,
+                user: reactionUser,
+                showOnlineIndicator: false,
+              ),
             ),
             PositionedDirectional(
               bottom: 8,
               end: isCurrentUserReaction ? null : 0,
               start: isCurrentUserReaction ? 0 : null,
-              child: IgnorePointer(
-                child: RepaintBoundary(
-                  child: CustomPaint(
-                    painter: ReactionBubblePainter(
-                      config: ReactionBubbleConfig(
-                        flipTail: isCurrentUserReaction,
-                        fillColor: messageTheme.reactionsBackgroundColor,
-                        borderColor: messageTheme.reactionsBorderColor,
-                        maskColor: messageTheme.reactionsMaskColor,
-                      ),
+              child: Container(
+                padding: const EdgeInsets.all(2),
+                decoration: BoxDecoration(
+                  color: messageTheme.reactionsMaskColor,
+                  borderRadius: const BorderRadius.all(Radius.circular(26)),
+                ),
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: messageTheme.reactionsBackgroundColor,
+                    border: Border.all(
+                      color: messageTheme.reactionsBorderColor ?? Colors.transparent,
                     ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(8),
-                      child: ReactionIndicatorIconList(
-                        indicatorIcons: [
-                          ReactionIndicatorIcon(
-                            type: reactionIcon.type,
-                            isSelected: isCurrentUserReaction,
-                            builder: reactionIcon.builder,
-                          ),
-                        ],
-                      ),
-                    ),
+                    borderRadius: const BorderRadius.all(Radius.circular(24)),
+                  ),
+                  child: StreamEmoji(
+                    size: StreamEmojiSize.sm,
+                    emoji: resolver.resolve(reaction.type),
                   ),
                 ),
               ),

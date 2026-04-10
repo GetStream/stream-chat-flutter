@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 /// {@template streamThreadHeader}
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/packages/stream_chat_flutter/screenshots/thread_header.png)
@@ -57,8 +57,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// and the [ChannelTheme.channelHeaderTheme] property. Modify it to change
 /// the widget's appearance.
 /// {@endtemplate}
-class StreamThreadHeader extends StatelessWidget
-    implements PreferredSizeWidget {
+class StreamThreadHeader extends StatelessWidget implements PreferredSizeWidget {
   /// {@macro streamThreadHeader}
   const StreamThreadHeader({
     super.key,
@@ -67,13 +66,14 @@ class StreamThreadHeader extends StatelessWidget
     this.onBackPressed,
     this.title,
     this.subtitle,
-    this.centerTitle,
+    this.centerTitle = true,
     this.leading,
     this.actions,
     this.onTitleTap,
     this.showTypingIndicator = true,
     this.backgroundColor,
-    this.elevation = 1,
+    this.elevation = 0,
+    this.scrolledUnderElevation = 0,
   }) : preferredSize = const Size.fromHeight(kToolbarHeight);
 
   /// Whether to show the leading back button.
@@ -99,7 +99,7 @@ class StreamThreadHeader extends StatelessWidget
   final Widget? subtitle;
 
   /// Whether the title should be centered
-  final bool? centerTitle;
+  final bool centerTitle;
 
   /// Leading widget
   final Widget? leading;
@@ -118,6 +118,9 @@ class StreamThreadHeader extends StatelessWidget
   /// The elevation for this [StreamThreadHeader].
   final double elevation;
 
+  /// The scrolled under elevation for this [StreamThreadHeader].
+  final double scrolledUnderElevation;
+
   @override
   Widget build(BuildContext context) {
     final effectiveCenterTitle = getEffectiveCenterTitle(
@@ -127,35 +130,34 @@ class StreamThreadHeader extends StatelessWidget
     );
 
     final channelHeaderTheme = StreamChannelHeaderTheme.of(context);
+    final textTheme = context.streamTextTheme;
+    final colorScheme = context.streamColorScheme;
 
-    final defaultSubtitle = subtitle ??
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              '${context.translations.withText} ',
-              style: channelHeaderTheme.subtitleStyle,
-            ),
-            Flexible(
-              child: StreamChannelName(
-                channel: StreamChannel.of(context).channel,
-                textStyle: channelHeaderTheme.subtitleStyle,
-              ),
-            ),
-          ],
-        );
+    final replyCount = parent.replyCount;
 
-    final theme = Theme.of(context);
-    return AppBar(
+    final defaultSubtitle =
+        subtitle ??
+        (replyCount != null
+            ? Row(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    context.translations.threadReplyCountText(replyCount),
+                    style:
+                        channelHeaderTheme.subtitleStyle ??
+                        textTheme.captionDefault.copyWith(color: colorScheme.textSecondary),
+                  ),
+                ],
+              )
+            : const SizedBox.shrink());
+
+    return StreamAppBar(
       automaticallyImplyLeading: false,
-      toolbarTextStyle: theme.textTheme.bodyMedium,
-      titleTextStyle: theme.textTheme.titleLarge,
-      systemOverlayStyle: theme.brightness == Brightness.dark
-          ? SystemUiOverlayStyle.light
-          : SystemUiOverlayStyle.dark,
       elevation: elevation,
-      leading: leading ??
+      scrolledUnderElevation: scrolledUnderElevation,
+      leading:
+          leading ??
           (showBackButton
               ? StreamBackButton(
                   channelId: StreamChannel.of(context).channel.cid,
@@ -173,20 +175,20 @@ class StreamThreadHeader extends StatelessWidget
           width: 250,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: effectiveCenterTitle
-                ? CrossAxisAlignment.center
-                : CrossAxisAlignment.stretch,
+            crossAxisAlignment: effectiveCenterTitle ? CrossAxisAlignment.center : CrossAxisAlignment.stretch,
             children: [
               title ??
                   Text(
                     context.translations.threadReplyLabel,
-                    style: channelHeaderTheme.titleStyle,
+                    style: channelHeaderTheme.titleStyle ?? textTheme.headingSm,
                   ),
               const SizedBox(height: 2),
               if (showTypingIndicator)
                 StreamTypingIndicator(
                   channel: StreamChannel.of(context).channel,
-                  style: channelHeaderTheme.subtitleStyle,
+                  style:
+                      channelHeaderTheme.subtitleStyle ??
+                      textTheme.captionDefault.copyWith(color: colorScheme.textSecondary),
                   parentId: parent.id,
                   alternativeWidget: defaultSubtitle,
                 )

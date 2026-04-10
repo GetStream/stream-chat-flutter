@@ -30,21 +30,11 @@ void main() {
       expect(
         userBlock.toJson(),
         {
-          'user': {
-            'id': 'user-1',
-            'teams': [],
-            'online': false,
-            'banned': false
-          },
-          'blocked_user': {
-            'id': 'user-2',
-            'teams': [],
-            'online': false,
-            'banned': false
-          },
+          'user': {'id': 'user-1', 'teams': [], 'online': false, 'banned': false},
+          'blocked_user': {'id': 'user-2', 'teams': [], 'online': false, 'banned': false},
           'user_id': 'user-1',
           'blocked_user_id': 'user-2',
-          'created_at': '2020-01-28T22:17:30.830150Z'
+          'created_at': '2020-01-28T22:17:30.830150Z',
         },
       );
     });

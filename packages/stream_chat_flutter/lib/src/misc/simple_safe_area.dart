@@ -20,10 +20,10 @@ class SimpleSafeArea extends StatelessWidget {
     this.minimum = EdgeInsets.zero,
     this.maintainBottomViewPadding = false,
     required this.child,
-  })  : left = enabled ?? true,
-        top = enabled ?? true,
-        right = enabled ?? true,
-        bottom = enabled ?? true;
+  }) : left = enabled ?? true,
+       top = enabled ?? true,
+       right = enabled ?? true,
+       bottom = enabled ?? true;
 
   /// Creates a [SimpleSafeArea] that avoids system intrusions only on the
   /// specified sides.

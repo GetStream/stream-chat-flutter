@@ -19,7 +19,7 @@ void main() {
           'name': 'Sahil',
           'age': 22,
           'country': 'India',
-        }
+        },
       });
     });
 
@@ -30,7 +30,7 @@ void main() {
           'name': 'Sahil',
           'age': 22,
           'country': 'India',
-        }
+        },
       });
       expect(serializer, {
         'test': 'test',

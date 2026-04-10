@@ -54,9 +54,7 @@ class TypewriterValue {
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
-    return other is TypewriterValue &&
-        other.text == text &&
-        other.state == state;
+    return other is TypewriterValue && other.text == text && other.state == state;
   }
 
   @override
@@ -205,11 +203,12 @@ class TypewriterController extends ValueNotifier<TypewriterValue> {
 /// A widget builder for a [StreamTypewriterBuilder]. It allows you to build a
 /// widget depending on the [TypewriterValue]'s value.
 /// {@endtemplate}
-typedef TypewriterWidgetBuilder = Widget Function(
-  BuildContext context,
-  TypewriterValue value,
-  Widget? child,
-);
+typedef TypewriterWidgetBuilder =
+    Widget Function(
+      BuildContext context,
+      TypewriterValue value,
+      Widget? child,
+    );
 
 /// {@template streamTypewriterBuilder}
 /// A widget that listens to a [TypewriterController] and rebuilds whenever the

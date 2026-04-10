@@ -229,9 +229,7 @@ void main() {
       final event2 = Event(type: EventType.messageUpdated);
 
       final streamEvents = <Event>[];
-      controller
-          .where((event) => event.type == EventType.messageNew)
-          .listen(streamEvents.add);
+      controller.where((event) => event.type == EventType.messageNew).listen(streamEvents.add);
 
       controller.add(event1);
       controller.add(event2);

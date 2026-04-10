@@ -5,12 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sample_app/pages/thread_page.dart';
 import 'package:sample_app/routes/routes.dart';
-import 'package:sample_app/widgets/location/location_attachment.dart';
-import 'package:sample_app/widgets/location/location_detail_dialog.dart';
 import 'package:sample_app/widgets/location/location_picker_dialog.dart';
 import 'package:sample_app/widgets/location/location_picker_option.dart';
-import 'package:sample_app/widgets/message_info_sheet.dart';
-import 'package:sample_app/widgets/reminder_dialog.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 class ChannelPage extends StatefulWidget {
@@ -46,6 +42,13 @@ class _ChannelPageState extends State<ChannelPage> {
 
   void _reply(Message message) {
     _messageInputController.quotedMessage = message;
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      _focusNode!.requestFocus();
+    });
+  }
+
+  void _editMessage(Message message) {
+    _messageInputController.editMessage(message);
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       _focusNode!.requestFocus();
     });
@@ -98,9 +101,10 @@ class _ChannelPageState extends State<ChannelPage> {
                   initialScrollIndex: widget.initialScrollIndex,
                   initialAlignment: widget.initialAlignment,
                   highlightInitialMessage: widget.highlightInitialMessage,
-                  //onMessageSwiped: _reply,
+                  onEditMessageTap: _editMessage,
+                  onReplyTap: _reply,
+                  swipeToReply: true,
                   messageFilter: defaultFilter,
-                  messageBuilder: customMessageBuilder,
                   threadBuilder: (_, parentMessage) {
                     return ThreadPage(parent: parentMessage!);
                   },
@@ -133,8 +137,7 @@ class _ChannelPageState extends State<ChannelPage> {
             enableVoiceRecording: true,
             allowedAttachmentPickerTypes: [
               ...AttachmentPickerType.values,
-              if (config?.sharedLocations == true && channel.canShareLocation)
-                const LocationPickerType(),
+              if (config?.sharedLocations == true && channel.canShareLocation) const LocationPickerType(),
             ],
             onAttachmentPickerResult: (result) {
               return _onCustomAttachmentPickerResult(channel, result);
@@ -143,7 +146,7 @@ class _ChannelPageState extends State<ChannelPage> {
               ...defaultOptions,
               TabbedAttachmentPickerOption(
                 key: 'location-picker',
-                icon: const Icon(Icons.near_me_rounded),
+                icon: Icons.near_me_rounded,
                 supportedTypes: [const LocationPickerType()],
                 isEnabled: (value) {
                   // Enable if nothing has been selected yet.
@@ -154,15 +157,11 @@ class _ChannelPageState extends State<ChannelPage> {
                 },
                 optionViewBuilder: (context, controller) => LocationPicker(
                   onLocationPicked: (locationResult) {
-                    if (locationResult == null) return Navigator.pop(context);
+                    if (locationResult == null) return;
 
-                    controller.extraData = {
-                      ...controller.value.extraData,
-                      'location': locationResult,
-                    };
-
-                    final result = LocationPicked(location: locationResult);
-                    return Navigator.pop(context, result);
+                    controller.notifyCustomResult(
+                      LocationPicked(location: locationResult),
+                    );
                   },
                 ),
               ),
@@ -199,212 +198,6 @@ class _ChannelPageState extends State<ChannelPage> {
     return channel.sendStaticLocation(location: result.coordinates);
   }
 
-  Widget customMessageBuilder(
-    BuildContext context,
-    MessageDetails details,
-    List<Message> messages,
-    StreamMessageWidget defaultMessageWidget,
-  ) {
-    final theme = StreamChatTheme.of(context);
-    final textTheme = theme.textTheme;
-    final colorTheme = theme.colorTheme;
-
-    final message = details.message;
-    final reminder = message.reminder;
-    final channel = StreamChannel.of(context).channel;
-    final channelConfig = channel.config;
-
-    final currentUser = StreamChat.of(context).currentUser;
-    final isSentByCurrentUser = message.user?.id == currentUser?.id;
-    final canDeleteOwnMessage = channel.canDeleteOwnMessage;
-
-    final customOptions = <StreamMessageAction>[
-      if (isSentByCurrentUser && canDeleteOwnMessage)
-        StreamMessageAction(
-          isDestructive: true,
-          title: const Text('Delete Message for Me'),
-          action: DeleteMessageForMe(message: message),
-          leading: const StreamSvgIcon(icon: StreamSvgIcons.delete),
-        ),
-      if (channelConfig?.userMessageReminders == true) ...[
-        if (reminder != null) ...[
-          StreamMessageAction(
-            title: const Text('Edit Reminder'),
-            leading: const StreamSvgIcon(icon: StreamSvgIcons.time),
-            action: EditReminder(message: message, reminder: reminder),
-          ),
-          StreamMessageAction(
-            title: const Text('Remove from later'),
-            leading: const StreamSvgIcon(icon: StreamSvgIcons.checkAll),
-            action: RemoveReminder(message: message, reminder: reminder),
-          ),
-        ] else ...[
-          StreamMessageAction(
-            title: const Text('Remind me'),
-            leading: const StreamSvgIcon(icon: StreamSvgIcons.time),
-            action: CreateReminder(message: message),
-          ),
-          StreamMessageAction(
-            title: const Text('Save for later'),
-            leading: const Icon(Icons.bookmark_border),
-            action: CreateBookmark(message: message),
-          ),
-        ],
-      ],
-      if (channelConfig?.deliveryEvents == true)
-        StreamMessageAction(
-          title: const Text('Message Info'),
-          leading: const Icon(Icons.info_outline_rounded),
-          action: ShowMessageInfo(message: message),
-        ),
-    ];
-
-    final locationAttachmentBuilder = LocationAttachmentBuilder(
-      onAttachmentTap: (location) => showLocationDetailDialog(
-        context: context,
-        location: location,
-      ),
-    );
-
-    return Container(
-      color: reminder != null ? colorTheme.accentPrimary.withOpacity(.1) : null,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          if (reminder != null)
-            Align(
-              alignment: switch (defaultMessageWidget.reverse) {
-                true => AlignmentDirectional.centerEnd,
-                false => AlignmentDirectional.centerStart,
-              },
-              child: Padding(
-                padding: const EdgeInsetsDirectional.fromSTEB(16, 4, 16, 8),
-                child: Row(
-                  spacing: 4,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      size: 16,
-                      Icons.bookmark_rounded,
-                      color: colorTheme.accentPrimary,
-                    ),
-                    Text(
-                      'Saved for later',
-                      style: textTheme.footnote.copyWith(
-                        color: colorTheme.accentPrimary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          defaultMessageWidget.copyWith(
-            onReplyTap: _reply,
-            customActions: customOptions,
-            showEditMessage: message.sharedLocation == null,
-            onCustomActionTap: (it) async => await switch (it) {
-              CreateReminder() => _createReminder(it.message),
-              CreateBookmark() => _createBookmark(it.message),
-              EditReminder() => _editReminder(it.message, it.reminder),
-              RemoveReminder() => _removeReminder(it.message, it.reminder),
-              DeleteMessageForMe() => _deleteMessageForMe(it.message),
-              ShowMessageInfo() => _showMessageInfo(it.message),
-              _ => null,
-            },
-            attachmentBuilders: [locationAttachmentBuilder],
-            onShowMessage: (message, channel) => GoRouter.of(context).goNamed(
-              Routes.CHANNEL_PAGE.name,
-              pathParameters: Routes.CHANNEL_PAGE.params(channel),
-              queryParameters: Routes.CHANNEL_PAGE.queryParams(message),
-            ),
-            bottomRowBuilderWithDefaultWidget: (_, __, defaultWidget) {
-              return defaultWidget.copyWith(
-                deletedBottomRowBuilder: (context, message) {
-                  return const StreamVisibleFootnote();
-                },
-              );
-            },
-          ),
-          // If the message has a reminder, add some space below it.
-          if (reminder != null) const SizedBox(height: 4),
-        ],
-      ),
-    );
-  }
-
-  Future<void> _editReminder(
-    Message message,
-    MessageReminder reminder,
-  ) async {
-    final option = await showDialog<ReminderOption>(
-      context: context,
-      builder: (_) => EditReminderDialog(
-        isBookmarkReminder: reminder.remindAt == null,
-      ),
-    );
-
-    if (option == null) return;
-    final client = StreamChat.of(context).client;
-    final messageId = message.id;
-    final remindAt = option.remindAt;
-
-    return client.updateReminder(messageId, remindAt: remindAt).ignore();
-  }
-
-  Future<void> _removeReminder(
-    Message message,
-    MessageReminder reminder,
-  ) async {
-    final client = StreamChat.of(context).client;
-    final messageId = message.id;
-
-    return client.deleteReminder(messageId).ignore();
-  }
-
-  Future<void> _createReminder(Message message) async {
-    final reminder = await showDialog<ScheduledReminder>(
-      context: context,
-      builder: (_) => const CreateReminderDialog(),
-    );
-
-    if (reminder == null) return;
-    final client = StreamChat.of(context).client;
-    final messageId = message.id;
-    final remindAt = reminder.remindAt;
-
-    return client.createReminder(messageId, remindAt: remindAt).ignore();
-  }
-
-  Future<void> _createBookmark(Message message) async {
-    final client = StreamChat.of(context).client;
-    final messageId = message.id;
-
-    return client.createReminder(messageId).ignore();
-  }
-
-  Future<void> _deleteMessageForMe(Message message) async {
-    final confirmDelete = await showStreamDialog<bool>(
-      context: context,
-      builder: (context) => const StreamMessageActionConfirmationModal(
-        isDestructiveAction: true,
-        title: Text('Delete for me'),
-        content: Text('Are you sure you want to delete this message for you?'),
-        cancelActionTitle: Text('Cancel'),
-        confirmActionTitle: Text('Delete'),
-      ),
-    );
-
-    if (confirmDelete != true) return;
-
-    final channel = StreamChannel.of(context).channel;
-    return channel.deleteMessageForMe(message).ignore();
-  }
-
-  Future<void> _showMessageInfo(Message message) async {
-    return MessageInfoSheet.show(context: context, message: message);
-  }
-
   bool defaultFilter(Message m) {
     final currentUser = StreamChat.of(context).currentUser;
     final isMyMessage = m.user?.id == currentUser?.id;
@@ -412,49 +205,4 @@ class _ChannelPageState extends State<ChannelPage> {
     if (isDeletedOrShadowed && !isMyMessage) return false;
     return true;
   }
-}
-
-class ReminderMessageAction extends CustomMessageAction {
-  const ReminderMessageAction({
-    required super.message,
-    this.reminder,
-  });
-
-  final MessageReminder? reminder;
-}
-
-final class CreateReminder extends ReminderMessageAction {
-  const CreateReminder({required super.message});
-}
-
-final class CreateBookmark extends ReminderMessageAction {
-  const CreateBookmark({required super.message});
-}
-
-final class EditReminder extends ReminderMessageAction {
-  const EditReminder({
-    required super.message,
-    required this.reminder,
-  }) : super(reminder: reminder);
-
-  @override
-  final MessageReminder reminder;
-}
-
-final class RemoveReminder extends ReminderMessageAction {
-  const RemoveReminder({
-    required super.message,
-    required this.reminder,
-  }) : super(reminder: reminder);
-
-  @override
-  final MessageReminder reminder;
-}
-
-final class DeleteMessageForMe extends CustomMessageAction {
-  const DeleteMessageForMe({required super.message});
-}
-
-final class ShowMessageInfo extends CustomMessageAction {
-  const ShowMessageInfo({required super.message});
 }

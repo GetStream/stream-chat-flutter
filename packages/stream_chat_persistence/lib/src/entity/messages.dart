@@ -28,8 +28,7 @@ class Messages extends Table {
   TextColumn get mentionedUsers => text().map(ListConverter<String>())();
 
   /// A map describing the reaction group for every reaction
-  TextColumn get reactionGroups =>
-      text().map(ReactionGroupsConverter()).nullable()();
+  TextColumn get reactionGroups => text().map(ReactionGroupsConverter()).nullable()();
 
   /// The ID of the parent message, if the message is a thread reply.
   TextColumn get parentId => text().nullable()();
@@ -124,16 +123,13 @@ class Messages extends Table {
   TextColumn get pinnedByUserId => text().nullable()();
 
   /// The channel cid of which this message is part of
-  TextColumn get channelCid =>
-      text().references(Channels, #cid, onDelete: KeyAction.cascade)();
+  TextColumn get channelCid => text().references(Channels, #cid, onDelete: KeyAction.cascade)();
 
   /// A Map of [messageText] translations.
-  TextColumn get i18n =>
-      text().nullable().map(NullableMapConverter<String>())();
+  TextColumn get i18n => text().nullable().map(NullableMapConverter<String>())();
 
   /// The list of user ids that should be able to see the message.
-  TextColumn get restrictedVisibility =>
-      text().nullable().map(ListConverter<String>())();
+  TextColumn get restrictedVisibility => text().nullable().map(ListConverter<String>())();
 
   /// Message custom extraData
   TextColumn get extraData => text().nullable().map(MapConverter())();

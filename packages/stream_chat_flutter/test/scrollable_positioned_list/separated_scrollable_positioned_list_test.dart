@@ -75,30 +75,17 @@ void main() {
     expect(find.text('Separator 6'), findsNothing);
     expect(find.text('Item 7'), findsNothing);
 
+    expect(itemPositionsListener.itemPositions.value.firstWhere((position) => position.index == 0).itemLeadingEdge, 0);
     expect(
-        itemPositionsListener.itemPositions.value
-            .firstWhere((position) => position.index == 0)
-            .itemLeadingEdge,
-        0);
-    expect(
-        itemPositionsListener.itemPositions.value
-            .firstWhere((position) => position.index == 5)
-            .itemTrailingEdge,
-        1 - _screenProportion(numberOfItems: 1, numberOfSeparators: 1));
+      itemPositionsListener.itemPositions.value.firstWhere((position) => position.index == 5).itemTrailingEdge,
+      1 - _screenProportion(numberOfItems: 1, numberOfSeparators: 1),
+    );
 
-    expect(
-        itemPositionsListener.itemPositions.value
-            .firstWhere((position) => position.index == 6)
-            .itemTrailingEdge,
-        1);
-    expect(
-        itemPositionsListener.itemPositions.value
-            .where((position) => position.index == 7),
-        isEmpty);
+    expect(itemPositionsListener.itemPositions.value.firstWhere((position) => position.index == 6).itemTrailingEdge, 1);
+    expect(itemPositionsListener.itemPositions.value.where((position) => position.index == 7), isEmpty);
   });
 
-  testWidgets('List positioned with 0 at top - use default values',
-      (WidgetTester tester) async {
+  testWidgets('List positioned with 0 at top - use default values', (WidgetTester tester) async {
     final itemPositionsListener = ItemPositionsListener.create();
     tester.view.devicePixelRatio = 1.0;
     tester.view.physicalSize = const Size(screenWidth, screenHeight);
@@ -126,32 +113,19 @@ void main() {
     expect(find.text('Separator 6'), findsNothing);
     expect(find.text('Item 7'), findsNothing);
 
+    expect(itemPositionsListener.itemPositions.value.firstWhere((position) => position.index == 0).itemLeadingEdge, 0);
     expect(
-        itemPositionsListener.itemPositions.value
-            .firstWhere((position) => position.index == 0)
-            .itemLeadingEdge,
-        0);
-    expect(
-        itemPositionsListener.itemPositions.value
-            .firstWhere((position) => position.index == 5)
-            .itemTrailingEdge,
-        1 - _screenProportion(numberOfItems: 1, numberOfSeparators: 1));
+      itemPositionsListener.itemPositions.value.firstWhere((position) => position.index == 5).itemTrailingEdge,
+      1 - _screenProportion(numberOfItems: 1, numberOfSeparators: 1),
+    );
 
-    expect(
-        itemPositionsListener.itemPositions.value
-            .firstWhere((position) => position.index == 6)
-            .itemTrailingEdge,
-        1);
-    expect(
-        itemPositionsListener.itemPositions.value
-            .where((position) => position.index == 7),
-        isEmpty);
+    expect(itemPositionsListener.itemPositions.value.firstWhere((position) => position.index == 6).itemTrailingEdge, 1);
+    expect(itemPositionsListener.itemPositions.value.where((position) => position.index == 7), isEmpty);
   });
 
   testWidgets('List positioned with 5 at top', (WidgetTester tester) async {
     final itemPositionsListener = ItemPositionsListener.create();
-    await setUpWidgetTest(tester,
-        itemPositionsListener: itemPositionsListener, initialIndex: 5);
+    await setUpWidgetTest(tester, itemPositionsListener: itemPositionsListener, initialIndex: 5);
 
     expect(find.text('Item 4'), findsNothing);
     expect(find.text('Separator 4'), findsNothing);
@@ -161,58 +135,44 @@ void main() {
     expect(find.text('Item 11'), findsOneWidget);
     expect(find.text('Separator 11'), findsNothing);
 
-    expect(
-        itemPositionsListener.itemPositions.value
-            .where((position) => position.index == 4),
-        isEmpty);
-    expect(
-        itemPositionsListener.itemPositions.value
-            .firstWhere((position) => position.index == 5)
-            .itemLeadingEdge,
-        0);
+    expect(itemPositionsListener.itemPositions.value.where((position) => position.index == 4), isEmpty);
+    expect(itemPositionsListener.itemPositions.value.firstWhere((position) => position.index == 5).itemLeadingEdge, 0);
   });
 
   testWidgets('List positioned with 9 at middle', (WidgetTester tester) async {
     final itemPositionsListener = ItemPositionsListener.create();
-    await setUpWidgetTest(tester,
-        itemPositionsListener: itemPositionsListener,
-        initialIndex: 9,
-        initialAlignment: 0.5);
+    await setUpWidgetTest(tester, itemPositionsListener: itemPositionsListener, initialIndex: 9, initialAlignment: 0.5);
 
     expect(tester.getTopLeft(find.text('Item 9')).dy, screenHeight / 2);
-    expect(tester.getTopLeft(find.text('Item 8')).dy,
-        screenHeight / 2 - itemHeight - separatorHeight);
-    expect(tester.getTopLeft(find.text('Item 10')).dy,
-        screenHeight / 2 + itemHeight + separatorHeight);
+    expect(tester.getTopLeft(find.text('Item 8')).dy, screenHeight / 2 - itemHeight - separatorHeight);
+    expect(tester.getTopLeft(find.text('Item 10')).dy, screenHeight / 2 + itemHeight + separatorHeight);
 
     expect(
-        itemPositionsListener.itemPositions.value
-            .firstWhere((position) => position.index == 9)
-            .itemLeadingEdge,
-        0.5);
+      itemPositionsListener.itemPositions.value.firstWhere((position) => position.index == 9).itemLeadingEdge,
+      0.5,
+    );
     expect(
-        itemPositionsListener.itemPositions.value
-            .firstWhere((position) => position.index == 8)
-            .itemLeadingEdge,
-        0.5 - _screenProportion(numberOfItems: 1, numberOfSeparators: 1));
+      itemPositionsListener.itemPositions.value.firstWhere((position) => position.index == 8).itemLeadingEdge,
+      0.5 - _screenProportion(numberOfItems: 1, numberOfSeparators: 1),
+    );
     expect(
-        itemPositionsListener.itemPositions.value
-            .firstWhere((position) => position.index == 10)
-            .itemLeadingEdge,
-        0.5 + _screenProportion(numberOfItems: 1, numberOfSeparators: 1));
+      itemPositionsListener.itemPositions.value.firstWhere((position) => position.index == 10).itemLeadingEdge,
+      0.5 + _screenProportion(numberOfItems: 1, numberOfSeparators: 1),
+    );
   });
 
   testWidgets('Scroll to 9 half way off top', (WidgetTester tester) async {
     final itemPositionsListener = ItemPositionsListener.create();
     final itemScrollController = ItemScrollController();
-    await setUpWidgetTest(tester,
-        itemPositionsListener: itemPositionsListener,
-        itemScrollController: itemScrollController);
+    await setUpWidgetTest(
+      tester,
+      itemPositionsListener: itemPositionsListener,
+      itemScrollController: itemScrollController,
+    );
 
-    unawaited(itemScrollController.scrollTo(
-        index: 9,
-        duration: scrollDuration,
-        alignment: -(itemHeight / screenHeight) / 2));
+    unawaited(
+      itemScrollController.scrollTo(index: 9, duration: scrollDuration, alignment: -(itemHeight / screenHeight) / 2),
+    );
     await tester.pump();
     await tester.pump();
     await tester.pump(scrollDuration + scrollDurationTolerance);
@@ -220,76 +180,68 @@ void main() {
     expect(tester.getTopLeft(find.text('Item 9')).dy, -itemHeight / 2);
 
     expect(
-        itemPositionsListener.itemPositions.value
-            .firstWhere((position) => position.index == 9)
-            .itemLeadingEdge,
-        _screenProportion(numberOfItems: -0.5, numberOfSeparators: 0));
+      itemPositionsListener.itemPositions.value.firstWhere((position) => position.index == 9).itemLeadingEdge,
+      _screenProportion(numberOfItems: -0.5, numberOfSeparators: 0),
+    );
     expect(
-        itemPositionsListener.itemPositions.value
-            .firstWhere((position) => position.index == 9)
-            .itemTrailingEdge,
-        _screenProportion(numberOfItems: 0.5, numberOfSeparators: 0));
+      itemPositionsListener.itemPositions.value.firstWhere((position) => position.index == 9).itemTrailingEdge,
+      _screenProportion(numberOfItems: 0.5, numberOfSeparators: 0),
+    );
   });
 
   testWidgets('Jump to 9 half way off top', (WidgetTester tester) async {
     final itemPositionsListener = ItemPositionsListener.create();
     final itemScrollController = ItemScrollController();
-    await setUpWidgetTest(tester,
-        itemPositionsListener: itemPositionsListener,
-        itemScrollController: itemScrollController);
+    await setUpWidgetTest(
+      tester,
+      itemPositionsListener: itemPositionsListener,
+      itemScrollController: itemScrollController,
+    );
 
-    itemScrollController.jumpTo(
-        index: 9, alignment: -(itemHeight / screenHeight) / 2);
+    itemScrollController.jumpTo(index: 9, alignment: -(itemHeight / screenHeight) / 2);
     await tester.pump();
 
     expect(tester.getTopLeft(find.text('Item 9')).dy, -itemHeight / 2);
 
     expect(
-        itemPositionsListener.itemPositions.value
-            .firstWhere((position) => position.index == 9)
-            .itemLeadingEdge,
-        _screenProportion(numberOfItems: -0.5, numberOfSeparators: 0));
+      itemPositionsListener.itemPositions.value.firstWhere((position) => position.index == 9).itemLeadingEdge,
+      _screenProportion(numberOfItems: -0.5, numberOfSeparators: 0),
+    );
     expect(
-        itemPositionsListener.itemPositions.value
-            .firstWhere((position) => position.index == 9)
-            .itemTrailingEdge,
-        _screenProportion(numberOfItems: 0.5, numberOfSeparators: 0));
+      itemPositionsListener.itemPositions.value.firstWhere((position) => position.index == 9).itemTrailingEdge,
+      _screenProportion(numberOfItems: 0.5, numberOfSeparators: 0),
+    );
   });
 
-  testWidgets('List positioned with 9 at middle scroll to 16 at bottom',
-      (WidgetTester tester) async {
+  testWidgets('List positioned with 9 at middle scroll to 16 at bottom', (WidgetTester tester) async {
     final itemScrollController = ItemScrollController();
     final itemPositionsListener = ItemPositionsListener.create();
-    await setUpWidgetTest(tester,
-        itemScrollController: itemScrollController,
-        itemPositionsListener: itemPositionsListener,
-        initialIndex: 9,
-        initialAlignment: 0.5);
+    await setUpWidgetTest(
+      tester,
+      itemScrollController: itemScrollController,
+      itemPositionsListener: itemPositionsListener,
+      initialIndex: 9,
+      initialAlignment: 0.5,
+    );
 
-    unawaited(itemScrollController.scrollTo(
-        index: 16, duration: scrollDuration, alignment: 1));
+    unawaited(itemScrollController.scrollTo(index: 16, duration: scrollDuration, alignment: 1));
     await tester.pump();
     await tester.pump();
     await tester.pump(scrollDuration + scrollDurationTolerance);
 
-    expect(tester.getBottomRight(find.text('Item 15')).dy,
-        screenHeight - separatorHeight);
+    expect(tester.getBottomRight(find.text('Item 15')).dy, screenHeight - separatorHeight);
 
     expect(
-        itemPositionsListener.itemPositions.value
-            .firstWhere((position) => position.index == 15)
-            .itemTrailingEdge,
-        1 - _screenProportion(numberOfItems: 0, numberOfSeparators: 1));
+      itemPositionsListener.itemPositions.value.firstWhere((position) => position.index == 15).itemTrailingEdge,
+      1 - _screenProportion(numberOfItems: 0, numberOfSeparators: 1),
+    );
   });
 
   testWidgets('physics', (WidgetTester tester) async {
     final itemScrollController = ItemScrollController();
-    await setUpWidgetTest(tester,
-        itemScrollController: itemScrollController,
-        physics: const BouncingScrollPhysics());
+    await setUpWidgetTest(tester, itemScrollController: itemScrollController, physics: const BouncingScrollPhysics());
 
-    await tester.drag(
-        find.byType(ScrollablePositionedList), const Offset(0, 50));
+    await tester.drag(find.byType(ScrollablePositionedList), const Offset(0, 50));
     await tester.pump(const Duration(milliseconds: 200));
 
     expect(tester.getTopLeft(find.text('Item 0')).dy, greaterThan(0));
@@ -297,14 +249,12 @@ void main() {
     await tester.pumpAndSettle();
     expect(tester.getTopLeft(find.text('Item 0')).dy, 0);
 
-    unawaited(
-        itemScrollController.scrollTo(index: 100, duration: scrollDuration));
+    unawaited(itemScrollController.scrollTo(index: 100, duration: scrollDuration));
     await tester.pumpAndSettle();
     itemScrollController.jumpTo(index: 0);
     await tester.pumpAndSettle();
 
-    await tester.drag(
-        find.byType(ScrollablePositionedList), const Offset(0, 50));
+    await tester.drag(find.byType(ScrollablePositionedList), const Offset(0, 50));
     await tester.pump(const Duration(milliseconds: 200));
 
     expect(tester.getTopLeft(find.text('Item 0')).dy, greaterThan(0));
@@ -316,15 +266,16 @@ void main() {
   testWidgets('correct index semantics', (WidgetTester tester) async {
     await setUpWidgetTest(tester, initialIndex: 5);
 
-    await tester.drag(
-        find.byType(ScrollablePositionedList), const Offset(0, itemHeight * 4));
+    await tester.drag(find.byType(ScrollablePositionedList), const Offset(0, itemHeight * 4));
     await tester.pumpAndSettle();
 
-    final indexSemantics3 = tester.widget<IndexedSemantics>(find.ancestor(
-        of: find.text('Item 3'), matching: find.byType(IndexedSemantics)));
+    final indexSemantics3 = tester.widget<IndexedSemantics>(
+      find.ancestor(of: find.text('Item 3'), matching: find.byType(IndexedSemantics)),
+    );
     expect(indexSemantics3.index, 3);
-    final indexSemantics4 = tester.widget<IndexedSemantics>(find.ancestor(
-        of: find.text('Item 4'), matching: find.byType(IndexedSemantics)));
+    final indexSemantics4 = tester.widget<IndexedSemantics>(
+      find.ancestor(of: find.text('Item 4'), matching: find.byType(IndexedSemantics)),
+    );
     expect(indexSemantics4.index, 4);
   });
 
@@ -339,8 +290,7 @@ void main() {
 
     expect(find.byType(IndexedSemantics), findsNothing);
 
-    unawaited(
-        itemScrollController.scrollTo(index: 100, duration: scrollDuration));
+    unawaited(itemScrollController.scrollTo(index: 100, duration: scrollDuration));
     await tester.pumpAndSettle();
 
     expect(find.byType(IndexedSemantics), findsNothing);
@@ -355,16 +305,13 @@ void main() {
       itemScrollController: itemScrollController,
     );
 
-    final customScrollView =
-        tester.widget<CustomScrollView>(find.byType(UnboundedCustomScrollView));
+    final customScrollView = tester.widget<CustomScrollView>(find.byType(UnboundedCustomScrollView));
     expect(customScrollView.semanticChildCount, 30);
 
-    unawaited(
-        itemScrollController.scrollTo(index: 100, duration: scrollDuration));
+    unawaited(itemScrollController.scrollTo(index: 100, duration: scrollDuration));
     await tester.pumpAndSettle();
 
-    final customScrollView2 =
-        tester.widget<CustomScrollView>(find.byType(UnboundedCustomScrollView));
+    final customScrollView2 = tester.widget<CustomScrollView>(find.byType(UnboundedCustomScrollView));
     expect(customScrollView2.semanticChildCount, 30);
   });
 
@@ -375,16 +322,13 @@ void main() {
       itemScrollController: itemScrollController,
     );
 
-    final customScrollView =
-        tester.widget<CustomScrollView>(find.byType(UnboundedCustomScrollView));
+    final customScrollView = tester.widget<CustomScrollView>(find.byType(UnboundedCustomScrollView));
     expect(customScrollView.semanticChildCount, defaultItemCount);
 
-    unawaited(
-        itemScrollController.scrollTo(index: 100, duration: scrollDuration));
+    unawaited(itemScrollController.scrollTo(index: 100, duration: scrollDuration));
     await tester.pumpAndSettle();
 
-    final customScrollView2 =
-        tester.widget<CustomScrollView>(find.byType(UnboundedCustomScrollView));
+    final customScrollView2 = tester.widget<CustomScrollView>(find.byType(UnboundedCustomScrollView));
     expect(customScrollView2.semanticChildCount, defaultItemCount);
   });
 
@@ -397,25 +341,19 @@ void main() {
     );
 
     expect(tester.getTopLeft(find.text('Item 0')), const Offset(10, 10));
-    expect(tester.getTopLeft(find.text('Item 1')),
-        const Offset(10, itemHeight + 10 + separatorHeight));
-    expect(tester.getTopRight(find.text('Item 1')),
-        const Offset(screenWidth - 10, itemHeight + 10 + separatorHeight));
+    expect(tester.getTopLeft(find.text('Item 1')), const Offset(10, itemHeight + 10 + separatorHeight));
+    expect(tester.getTopRight(find.text('Item 1')), const Offset(screenWidth - 10, itemHeight + 10 + separatorHeight));
 
-    unawaited(
-        itemScrollController.scrollTo(index: 494, duration: scrollDuration));
+    unawaited(itemScrollController.scrollTo(index: 494, duration: scrollDuration));
     await tester.pumpAndSettle();
 
-    await tester.drag(
-        find.byType(ScrollablePositionedList), const Offset(0, -500));
+    await tester.drag(find.byType(ScrollablePositionedList), const Offset(0, -500));
     await tester.pumpAndSettle();
 
-    expect(tester.getBottomRight(find.text('Item 499')),
-        const Offset(screenWidth - 10, screenHeight - 10));
+    expect(tester.getBottomRight(find.text('Item 499')), const Offset(screenWidth - 10, screenHeight - 10));
   });
 
-  testWidgets('padding test - centered sliver not at top',
-      (WidgetTester tester) async {
+  testWidgets('padding test - centered sliver not at top', (WidgetTester tester) async {
     final itemScrollController = ItemScrollController();
     await setUpWidgetTest(
       tester,
@@ -424,17 +362,15 @@ void main() {
       padding: const EdgeInsets.all(10),
     );
 
-    await tester.drag(
-        find.byType(ScrollablePositionedList), const Offset(0, 200));
+    await tester.drag(find.byType(ScrollablePositionedList), const Offset(0, 200));
     await tester.pumpAndSettle();
 
     expect(tester.getTopLeft(find.text('Item 0')), const Offset(10, 10));
-    expect(tester.getTopLeft(find.text('Item 2')),
-        const Offset(10, 10 + 2 * (separatorHeight + itemHeight)));
+    expect(tester.getTopLeft(find.text('Item 2')), const Offset(10, 10 + 2 * (separatorHeight + itemHeight)));
     expect(
-        tester.getTopRight(find.text('Item 3')),
-        const Offset(
-            screenWidth - 10, 10 + 3 * (itemHeight + separatorHeight)));
+      tester.getTopRight(find.text('Item 3')),
+      const Offset(screenWidth - 10, 10 + 3 * (itemHeight + separatorHeight)),
+    );
   });
 
   testWidgets('no repaint bounderies', (WidgetTester tester) async {
@@ -448,12 +384,13 @@ void main() {
     );
 
     expect(
-        tester
-            .widgetList(find.descendant(
-                of: find.byType(ScrollablePositionedList),
-                matching: find.byType(RepaintBoundary)))
-            .length,
-        lessThan(5));
+      tester
+          .widgetList(
+            find.descendant(of: find.byType(ScrollablePositionedList), matching: find.byType(RepaintBoundary)),
+          )
+          .length,
+      lessThan(5),
+    );
   });
 
   testWidgets('no automatic keep alives', (WidgetTester tester) async {
@@ -467,10 +404,9 @@ void main() {
     );
 
     expect(
-        find.descendant(
-            of: find.byType(ScrollablePositionedList),
-            matching: find.byType(AutomaticKeepAlive)),
-        findsNothing);
+      find.descendant(of: find.byType(ScrollablePositionedList), matching: find.byType(AutomaticKeepAlive)),
+      findsNothing,
+    );
   });
 
   testWidgets('List can be keyed', (WidgetTester tester) async {
@@ -481,8 +417,7 @@ void main() {
     expect(find.byKey(key), findsOneWidget);
   });
 
-  testWidgets('Empty list then update to single item list',
-      (WidgetTester tester) async {
+  testWidgets('Empty list then update to single item list', (WidgetTester tester) async {
     tester.view.devicePixelRatio = 1.0;
     tester.view.physicalSize = const Size(screenWidth, screenHeight);
 
@@ -522,8 +457,7 @@ void main() {
     expect(find.text('Separator 0'), findsNothing);
   });
 
-  testWidgets('ItemPositions: Empty list then update to 10 items list',
-      (WidgetTester tester) async {
+  testWidgets('ItemPositions: Empty list then update to 10 items list', (WidgetTester tester) async {
     tester.view.devicePixelRatio = 1.0;
     tester.view.physicalSize = const Size(screenWidth, screenHeight);
 
@@ -570,30 +504,16 @@ void main() {
     expect(find.text('Item 7'), findsNothing);
 
     expect(itemPositionsListener.itemPositions.value, isNotEmpty);
+    expect(itemPositionsListener.itemPositions.value.firstWhere((position) => position.index == 0).itemLeadingEdge, 0);
     expect(
-        itemPositionsListener.itemPositions.value
-            .firstWhere((position) => position.index == 0)
-            .itemLeadingEdge,
-        0);
-    expect(
-        itemPositionsListener.itemPositions.value
-            .firstWhere((position) => position.index == 5)
-            .itemTrailingEdge,
-        1 - _screenProportion(numberOfItems: 1, numberOfSeparators: 1));
+      itemPositionsListener.itemPositions.value.firstWhere((position) => position.index == 5).itemTrailingEdge,
+      1 - _screenProportion(numberOfItems: 1, numberOfSeparators: 1),
+    );
 
-    expect(
-        itemPositionsListener.itemPositions.value
-            .firstWhere((position) => position.index == 6)
-            .itemTrailingEdge,
-        1);
-    expect(
-        itemPositionsListener.itemPositions.value
-            .where((position) => position.index == 7),
-        isEmpty);
+    expect(itemPositionsListener.itemPositions.value.firstWhere((position) => position.index == 6).itemTrailingEdge, 1);
+    expect(itemPositionsListener.itemPositions.value.where((position) => position.index == 7), isEmpty);
   });
 }
 
-double _screenProportion(
-        {required double numberOfItems, required double numberOfSeparators}) =>
-    (numberOfItems * itemHeight + numberOfSeparators * separatorHeight) /
-    screenHeight;
+double _screenProportion({required double numberOfItems, required double numberOfSeparators}) =>
+    (numberOfItems * itemHeight + numberOfSeparators * separatorHeight) / screenHeight;

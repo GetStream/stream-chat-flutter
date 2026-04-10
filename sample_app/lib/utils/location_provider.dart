@@ -44,35 +44,36 @@ class LocationProvider {
 
     final settings = switch (CurrentPlatform.type) {
       PlatformType.android => AndroidSettings(
-          accuracy: accuracy,
-          distanceFilter: distanceFilter,
-          foregroundNotificationConfig: const ForegroundNotificationConfig(
-            setOngoing: true,
-            notificationText: notificationText,
-            notificationTitle: notificationTitle,
-            notificationIcon: AndroidResource(name: 'ic_notification'),
-          ),
+        accuracy: accuracy,
+        distanceFilter: distanceFilter,
+        foregroundNotificationConfig: const ForegroundNotificationConfig(
+          setOngoing: true,
+          notificationText: notificationText,
+          notificationTitle: notificationTitle,
+          notificationIcon: AndroidResource(name: 'ic_notification'),
         ),
+      ),
       PlatformType.ios || PlatformType.macOS => AppleSettings(
-          accuracy: accuracy,
-          activityType: activityType,
-          distanceFilter: distanceFilter,
-          showBackgroundLocationIndicator: true,
-          pauseLocationUpdatesAutomatically: true,
-        ),
+        accuracy: accuracy,
+        activityType: activityType,
+        distanceFilter: distanceFilter,
+        showBackgroundLocationIndicator: true,
+        pauseLocationUpdatesAutomatically: true,
+      ),
       _ => LocationSettings(
-          accuracy: accuracy,
-          distanceFilter: distanceFilter,
-        )
+        accuracy: accuracy,
+        distanceFilter: distanceFilter,
+      ),
     };
 
     _positionSubscription?.cancel(); // avoid duplicate subscriptions
-    _positionSubscription = Geolocator.getPositionStream(
-      locationSettings: settings,
-    ).listen(
-      _positionStreamController.safeAdd,
-      onError: _positionStreamController.safeAddError,
-    );
+    _positionSubscription =
+        Geolocator.getPositionStream(
+          locationSettings: settings,
+        ).listen(
+          _positionStreamController.safeAdd,
+          onError: _positionStreamController.safeAddError,
+        );
   }
 
   /// Stop live tracking

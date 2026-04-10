@@ -3,8 +3,7 @@ import 'package:photo_manager/photo_manager.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 ///
-class StreamPhotoGalleryController
-    extends PagedValueNotifier<int, AssetEntity> {
+class StreamPhotoGalleryController extends PagedValueNotifier<int, AssetEntity> {
   ///
   StreamPhotoGalleryController({
     this.limit = 50,

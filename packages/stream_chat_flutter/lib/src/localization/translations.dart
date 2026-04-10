@@ -537,6 +537,18 @@ abstract class Translations {
   /// The text for video attachment in channel list preview
   String get videoAttachmentText;
 
+  /// The text for file attachment in channel list preview
+  String get fileAttachmentText;
+
+  /// The text for multiple files attachment in channel list preview
+  String filesAttachmentCountText(int count);
+
+  /// The text for multiple photos attachment in channel list preview
+  String photosAttachmentCountText(int count);
+
+  /// The text for multiple videos attachment in channel list preview
+  String videosAttachmentCountText(int count);
+
   /// The text for poll when current user voted
   String get pollYouVotedText;
 
@@ -556,6 +568,53 @@ abstract class Translations {
   ///
   /// [isLive] indicates if the location is live or not.
   String locationLabel({bool isLive = false});
+
+  /// The text shown when there are no conversations yet.
+  String get noConversationsYetText;
+
+  /// The text shown when there are no threads yet.
+  String get replyToStartThreadText;
+
+  /// The text shown to prompt the user to send a message.
+  String get sendMessageToStartConversationText;
+
+  /// The label for the "Saved for later" message annotation.
+  String get savedForLaterLabel;
+
+  /// The annotation label shown on a message that was replied to a thread,
+  /// displayed in channel view (e.g. "Replied to a thread").
+  String get repliedToThreadAnnotationLabel;
+
+  /// The annotation label shown on a message that was also sent in channel,
+  /// displayed in thread view (e.g. "Also sent in channel").
+  String get alsoSentInChannelAnnotationLabel;
+
+  /// The "View" link label used in message annotations.
+  String get viewLabel;
+
+  /// The annotation label for a reminder (e.g. "Reminder set").
+  String get reminderSetLabel;
+
+  /// The text displaying the reminder time (e.g. "Today at 3:00 PM").
+  String reminderAtText(String time);
+
+  /// The label for "Create a poll and let everyone vote!"
+  String get createPollPromptLabel;
+
+  /// The label for "Take a photo and share"
+  String get takePhotoAndShareLabel;
+
+  /// The label for "Take a video and share"
+  String get takeVideoAndShareLabel;
+
+  /// The label for "Open camera"
+  String get openCameraLabel;
+
+  /// The label for "Select files to share"
+  String get selectFilesToShareLabel;
+
+  /// The label for "Open files"
+  String get openFilesLabel;
 }
 
 /// Default implementation of Translation strings for the stream chat widgets
@@ -597,20 +656,19 @@ class DefaultTranslations implements Translations {
   }
 
   @override
-  String get threadReplyLabel => 'Thread Reply';
+  String get threadReplyLabel => 'Thread';
 
   @override
   String get onlyVisibleToYouText => 'Only visible to you';
 
   @override
-  String threadReplyCountText(int count) => '$count Thread Replies';
+  String threadReplyCountText(int count) => count == 1 ? '1 reply' : '$count replies';
 
   @override
   String attachmentsUploadProgressText({
     required int remaining,
     required int total,
-  }) =>
-      'Uploading $remaining/$total ...';
+  }) => 'Uploading $remaining/$total ...';
 
   @override
   String pinnedByUserText({
@@ -623,8 +681,7 @@ class DefaultTranslations implements Translations {
   }
 
   @override
-  String get sendMessagePermissionError =>
-      "You don't have permission to send messages";
+  String get sendMessagePermissionError => "You don't have permission to send messages";
 
   @override
   String get emptyMessagesText => 'There are no messages currently';
@@ -658,8 +715,8 @@ class DefaultTranslations implements Translations {
 
   @override
   String threadSeparatorText(int replyCount) {
-    if (replyCount == 1) return '1 Reply';
-    return '$replyCount Replies';
+    if (replyCount == 1) return '1 reply';
+    return '$replyCount replies';
   }
 
   @override
@@ -672,7 +729,7 @@ class DefaultTranslations implements Translations {
   String get reconnectingLabel => 'Reconnecting...';
 
   @override
-  String get alsoSendAsDirectMessageLabel => 'Also send as direct message';
+  String get alsoSendAsDirectMessageLabel => 'Also send in Channel';
 
   @override
   String get addACommentOrSendLabel => 'Add a comment or send';
@@ -697,8 +754,7 @@ class DefaultTranslations implements Translations {
       'The file is too large to upload. The file size limit is $limitInMB MB.';
 
   @override
-  String get couldNotReadBytesFromFileError =>
-      'Could not read bytes from file.';
+  String get couldNotReadBytesFromFileError => 'Could not read bytes from file.';
 
   @override
   String get addAFileLabel => 'Add a file';
@@ -725,7 +781,7 @@ class DefaultTranslations implements Translations {
   String get somethingWentWrongError => 'Something went wrong';
 
   @override
-  String get addMoreFilesLabel => 'Add more files';
+  String get addMoreFilesLabel => 'Add more';
 
   @override
   String get enablePhotoAndVideoAccessMessage =>
@@ -752,8 +808,7 @@ class DefaultTranslations implements Translations {
   String get flagMessageSuccessfulLabel => 'Message flagged';
 
   @override
-  String get flagMessageSuccessfulText =>
-      'The message has been reported to a moderator.';
+  String get flagMessageSuccessfulText => 'The message has been reported to a moderator.';
 
   @override
   String get deleteLabel => 'DELETE';
@@ -762,12 +817,10 @@ class DefaultTranslations implements Translations {
   String get deleteMessageLabel => 'Delete Message';
 
   @override
-  String get deleteMessageQuestion =>
-      'Are you sure you want to permanently delete this message?';
+  String get deleteMessageQuestion => 'Are you sure you want to permanently delete this message?';
 
   @override
-  String get operationCouldNotBeCompletedText =>
-      "The operation couldn't be completed.";
+  String get operationCouldNotBeCompletedText => "The operation couldn't be completed.";
 
   @override
   String get replyLabel => 'Reply';
@@ -845,8 +898,7 @@ class DefaultTranslations implements Translations {
   String get letsStartChattingLabel => 'Let’s start chatting!';
 
   @override
-  String get sendingFirstMessageLabel =>
-      'How about sending your first message to a friend?';
+  String get sendingFirstMessageLabel => 'How about sending your first message to a friend?';
 
   @override
   String get startAChatLabel => 'Start a chat';
@@ -858,8 +910,7 @@ class DefaultTranslations implements Translations {
   String get deleteConversationLabel => 'Delete Conversation';
 
   @override
-  String get deleteConversationQuestion =>
-      'Are you sure you want to delete this conversation?';
+  String get deleteConversationQuestion => 'Are you sure you want to delete this conversation?';
 
   @override
   String get streamChatLabel => 'Stream Chat';
@@ -898,8 +949,7 @@ class DefaultTranslations implements Translations {
   String get leaveConversationLabel => 'Leave conversation';
 
   @override
-  String get leaveConversationQuestion =>
-      'Are you sure you want to leave this conversation?';
+  String get leaveConversationQuestion => 'Are you sure you want to leave this conversation?';
 
   @override
   String get showInChatLabel => 'Show in Chat';
@@ -935,8 +985,7 @@ class DefaultTranslations implements Translations {
   String galleryPaginationText({
     required int currentPage,
     required int totalPages,
-  }) =>
-      '${currentPage + 1} of $totalPages';
+  }) => '${currentPage + 1} of $totalPages';
 
   @override
   String get fileText => 'File';
@@ -1003,8 +1052,7 @@ Attachment limit exceeded: it's not possible to add more than $limit attachments
   }
 
   @override
-  String get linkDisabledDetails =>
-      'Sending links is not allowed in this conversation.';
+  String get linkDisabledDetails => 'Sending links is not allowed in this conversation.';
 
   @override
   String get linkDisabledError => 'Links are disabled';
@@ -1013,7 +1061,8 @@ Attachment limit exceeded: it's not possible to add more than $limit attachments
   String unreadMessagesSeparatorText() => 'New messages';
 
   @override
-  String get enableFileAccessMessage => 'Please enable access to files'
+  String get enableFileAccessMessage =>
+      'Please enable access to files'
       '\nso you can share them with friends.';
 
   @override
@@ -1114,15 +1163,13 @@ Attachment limit exceeded: it's not possible to add more than $limit attachments
   String get enterYourCommentLabel => 'Enter your comment';
 
   @override
-  String get endVoteConfirmationText =>
-      'Are you sure you want to end the vote?';
+  String get endVoteConfirmationText => 'Are you sure you want to end the vote?';
 
   @override
   String get deletePollOptionLabel => 'Delete Option';
 
   @override
-  String get deletePollOptionQuestion =>
-      'Are you sure you want to delete this option?';
+  String get deletePollOptionQuestion => 'Are you sure you want to delete this option?';
 
   @override
   String get createLabel => 'Create';
@@ -1166,10 +1213,10 @@ Attachment limit exceeded: it's not possible to add more than $limit attachments
 
   @override
   String voteCountLabel({int? count}) => switch (count) {
-        null || < 1 => '0 votes',
-        1 => '1 vote',
-        _ => '$count votes',
-      };
+    null || < 1 => '0 votes',
+    1 => '1 vote',
+    _ => '$count votes',
+  };
 
   @override
   String get noPollVotesLabel => 'There are no poll votes currently';
@@ -1196,8 +1243,7 @@ Attachment limit exceeded: it's not possible to add more than $limit attachments
   String get sendAnywayLabel => 'Send Anyway';
 
   @override
-  String get moderatedMessageBlockedText =>
-      'Message was blocked by moderation policies';
+  String get moderatedMessageBlockedText => 'Message was blocked by moderation policies';
 
   @override
   String get moderationReviewModalTitle => 'Are you sure?';
@@ -1222,6 +1268,18 @@ Attachment limit exceeded: it's not possible to add more than $limit attachments
   String get videoAttachmentText => 'Video';
 
   @override
+  String get fileAttachmentText => 'File';
+
+  @override
+  String filesAttachmentCountText(int count) => count == 1 ? 'File' : '$count files';
+
+  @override
+  String photosAttachmentCountText(int count) => count == 1 ? 'Photo' : '$count photos';
+
+  @override
+  String videosAttachmentCountText(int count) => count == 1 ? 'Video' : '$count videos';
+
+  @override
   String get pollYouVotedText => 'You voted';
 
   @override
@@ -1238,7 +1296,52 @@ Attachment limit exceeded: it's not possible to add more than $limit attachments
 
   @override
   String locationLabel({bool isLive = false}) {
-    if (isLive) return '📍 Live Location';
-    return '📍 Location';
+    if (isLive) return 'Live Location';
+    return 'Location';
   }
+
+  @override
+  String get noConversationsYetText => 'No conversations yet';
+
+  @override
+  String get replyToStartThreadText => 'Reply to a message to start a thread';
+
+  @override
+  String get sendMessageToStartConversationText => 'Send a message to start the conversation';
+
+  @override
+  String get savedForLaterLabel => 'Saved for later';
+
+  @override
+  String get repliedToThreadAnnotationLabel => 'Replied to a thread';
+
+  @override
+  String get alsoSentInChannelAnnotationLabel => 'Also sent in channel';
+
+  @override
+  String get viewLabel => 'View';
+
+  @override
+  String get reminderSetLabel => 'Reminder set';
+
+  @override
+  String reminderAtText(String time) => 'Today at $time';
+
+  @override
+  String get createPollPromptLabel => 'Create a poll and let everyone vote!';
+
+  @override
+  String get takePhotoAndShareLabel => 'Take a photo and share';
+
+  @override
+  String get takeVideoAndShareLabel => 'Take a video and share';
+
+  @override
+  String get openCameraLabel => 'Open camera';
+
+  @override
+  String get selectFilesToShareLabel => 'Select files to share';
+
+  @override
+  String get openFilesLabel => 'Open files';
 }

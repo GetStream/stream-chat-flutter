@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_portal/flutter_portal.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 
 /// Shows a modal dialog with customized transitions and backdrop effects.
@@ -54,8 +55,8 @@ Future<T?> showStreamDialog<T>({
       );
     },
     pageBuilder: (context, animation, secondaryAnimation) {
-      final pageChild = Builder(builder: builder);
-      return capturedThemes.wrap(pageChild);
+      final pageChild = Portal(child: Builder(builder: builder));
+      return StreamChatTheme(data: theme, child: capturedThemes.wrap(pageChild));
     },
   );
 }

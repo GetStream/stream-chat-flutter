@@ -175,13 +175,13 @@ class AudioRecorderFeedbackWrapper extends AudioRecorderFeedback {
     _FeedbackCallback? onCancel,
     _FeedbackCallback? onStartCancel,
     _FeedbackCallback? onStop,
-  })  : _onStop = onStop,
-        _onStartCancel = onStartCancel,
-        _onCancel = onCancel,
-        _onLock = onLock,
-        _onFinish = onFinish,
-        _onPause = onPause,
-        _onStart = onStart;
+  }) : _onStop = onStop,
+       _onStartCancel = onStartCancel,
+       _onCancel = onCancel,
+       _onLock = onLock,
+       _onFinish = onFinish,
+       _onPause = onPause,
+       _onStart = onStart;
 
   // Callback for when recording starts.
   final _FeedbackCallback? _onStart;

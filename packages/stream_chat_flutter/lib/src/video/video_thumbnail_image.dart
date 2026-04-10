@@ -41,8 +41,7 @@ import 'package:stream_chat_flutter/src/video/video_service.dart';
 /// ```
 /// {@end-tool}
 /// {@endtemplate}
-class StreamVideoThumbnailImage
-    extends ImageProvider<StreamVideoThumbnailImage> {
+class StreamVideoThumbnailImage extends ImageProvider<StreamVideoThumbnailImage> {
   /// {@macro video_thumbnail_image}
   const StreamVideoThumbnailImage({
     required this.video,
@@ -131,9 +130,7 @@ class StreamVideoThumbnailImage
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is StreamVideoThumbnailImage &&
-        other.video == video &&
-        other.scale == scale;
+    return other is StreamVideoThumbnailImage && other.video == video && other.scale == scale;
   }
 
   @override

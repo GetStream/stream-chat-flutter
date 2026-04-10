@@ -12,7 +12,7 @@ class ChannelQueries extends Table {
 
   @override
   Set<Column> get primaryKey => {
-        queryHash,
-        channelCid,
-      };
+    queryHash,
+    channelCid,
+  };
 }

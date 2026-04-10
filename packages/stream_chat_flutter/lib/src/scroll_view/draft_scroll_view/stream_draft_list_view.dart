@@ -2,22 +2,20 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/scroll_view/stream_scroll_view_error_widget.dart';
 import 'package:stream_chat_flutter/src/scroll_view/stream_scroll_view_load_more_error.dart';
-import 'package:stream_chat_flutter/src/scroll_view/stream_scroll_view_load_more_indicator.dart';
 import 'package:stream_chat_flutter/src/scroll_view/stream_scroll_view_loading_widget.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 /// Default separator builder for [StreamDraftListView].
 Widget defaultDraftListViewSeparatorBuilder(
   BuildContext context,
   List<Draft> drafts,
   int index,
-) =>
-    const StreamDraftListSeparator();
+) => const StreamDraftListSeparator();
 
 /// Signature for the item builder that creates the children of the
 /// [StreamDraftListView].
-typedef StreamDraftListViewIndexedWidgetBuilder
-    = StreamScrollViewIndexedWidgetBuilder<Draft, StreamDraftListTile>;
+typedef StreamDraftListViewIndexedWidgetBuilder = StreamScrollViewIndexedWidgetBuilder<Draft, StreamDraftListTile>;
 
 /// {@template streamDraftListView}
 /// A [ListView] that shows a list of [Draft]'s. It uses a
@@ -318,9 +316,9 @@ class StreamDraftListView extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.all(8),
                 child: StreamScrollViewEmptyWidget(
-                  emptyIcon: StreamSvgIcon(
+                  emptyIcon: Icon(
+                    context.streamIcons.edit32,
                     size: 148,
-                    icon: StreamSvgIcons.edit,
                     color: chatThemeData.colorTheme.disabled,
                   ),
                   emptyTitle: Text(
@@ -331,15 +329,14 @@ class StreamDraftListView extends StatelessWidget {
               ),
             );
       },
-      loadMoreErrorBuilder: (context, error) =>
-          StreamScrollViewLoadMoreError.list(
+      loadMoreErrorBuilder: (context, error) => StreamScrollViewLoadMoreError.list(
         onTap: controller.retry,
         error: Text(context.translations.loadingMessagesError),
       ),
-      loadMoreIndicatorBuilder: (context) => const Center(
+      loadMoreIndicatorBuilder: (context) => Center(
         child: Padding(
-          padding: EdgeInsets.all(16),
-          child: StreamScrollViewLoadMoreIndicator(),
+          padding: const EdgeInsets.all(16),
+          child: StreamLoadingSpinner(),
         ),
       ),
       loadingBuilder: (context) =>

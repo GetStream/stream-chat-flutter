@@ -78,8 +78,7 @@ Future<AttachmentData> downloadAttachmentData(
     queryParameters: queryParameters,
     cancelToken: cancelToken,
     // set responseType to `bytes`
-    options: options?.copyWith(responseType: ResponseType.bytes) ??
-        Options(responseType: ResponseType.bytes),
+    options: options?.copyWith(responseType: ResponseType.bytes) ?? Options(responseType: ResponseType.bytes),
   );
 
   final bytes = Uint8List.fromList(response.data!);

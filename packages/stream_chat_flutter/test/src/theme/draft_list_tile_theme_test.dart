@@ -5,8 +5,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 String _dummyFormatter(BuildContext context, DateTime date) => 'formatted';
 
 void main() {
-  testWidgets('StreamDraftListTileTheme merges with ancestor theme',
-      (tester) async {
+  testWidgets('StreamDraftListTileTheme merges with ancestor theme', (tester) async {
     const backgroundColor = Colors.blue;
     const childBackgroundColor = Colors.red;
 
@@ -164,14 +163,14 @@ void main() {
 
     // t = 0.5 should return something in between
     final lerpedAt05 = data1.lerp(data1, data2, 0.5);
-    expect(lerpedAt05.backgroundColor,
-        Color.lerp(Colors.black, Colors.white, 0.5));
+    expect(lerpedAt05.backgroundColor, Color.lerp(Colors.black, Colors.white, 0.5));
     expect(
-        lerpedAt05.padding,
-        EdgeInsetsGeometry.lerp(
-          const EdgeInsets.all(8),
-          const EdgeInsets.all(16),
-          0.5,
-        ));
+      lerpedAt05.padding,
+      EdgeInsetsGeometry.lerp(
+        const EdgeInsets.all(8),
+        const EdgeInsets.all(16),
+        0.5,
+      ),
+    );
   });
 }

@@ -20,8 +20,7 @@ class Moderation extends Equatable {
   });
 
   /// Create a new instance from a json
-  factory Moderation.fromJson(Map<String, dynamic> json) =>
-      _$ModerationFromJson(json);
+  factory Moderation.fromJson(Map<String, dynamic> json) => _$ModerationFromJson(json);
 
   /// The action taken by the moderation system.
   @JsonKey(
@@ -53,14 +52,14 @@ class Moderation extends Equatable {
 
   @override
   List<Object?> get props => [
-        action,
-        originalText,
-        textHarms,
-        imageHarms,
-        blocklistMatched,
-        semanticFilterMatched,
-        platformCircumvented,
-      ];
+    action,
+    originalText,
+    textHarms,
+    imageHarms,
+    blocklistMatched,
+    semanticFilterMatched,
+    platformCircumvented,
+  ];
 }
 
 /// The moderation action performed over the message.

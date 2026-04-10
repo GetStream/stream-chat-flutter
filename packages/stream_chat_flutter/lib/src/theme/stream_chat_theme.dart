@@ -1,7 +1,6 @@
 // ignore_for_file: deprecated_member_use_from_same_package
 
 import 'package:flutter/material.dart' hide TextTheme;
-import 'package:stream_chat_flutter/src/misc/audio_waveform.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template streamChatTheme}
@@ -23,8 +22,7 @@ class StreamChatTheme extends InheritedWidget {
 
   /// Use this method to get the current [StreamChatThemeData] instance
   static StreamChatThemeData of(BuildContext context) {
-    final streamChatTheme =
-        context.dependOnInheritedWidgetOfExactType<StreamChatTheme>();
+    final streamChatTheme = context.dependOnInheritedWidgetOfExactType<StreamChatTheme>();
 
     assert(
       streamChatTheme != null,
@@ -64,9 +62,8 @@ class StreamChatThemeData {
     StreamPollOptionVotesDialogThemeData? pollOptionVotesDialogTheme,
     StreamThreadListTileThemeData? threadListTileTheme,
     StreamDraftListTileThemeData? draftListTileTheme,
-    StreamAudioWaveformThemeData? audioWaveformTheme,
-    StreamAudioWaveformSliderThemeData? audioWaveformSliderTheme,
     StreamVoiceRecordingAttachmentThemeData? voiceRecordingAttachmentTheme,
+    StreamChannelListItemThemeData? channelListItemTheme,
   }) {
     brightness ??= colorTheme?.brightness ?? Brightness.light;
     textTheme ??= StreamTextTheme(brightness: brightness);
@@ -98,21 +95,18 @@ class StreamChatThemeData {
       pollOptionVotesDialogTheme: pollOptionVotesDialogTheme,
       threadListTileTheme: threadListTileTheme,
       draftListTileTheme: draftListTileTheme,
-      audioWaveformTheme: audioWaveformTheme,
-      audioWaveformSliderTheme: audioWaveformSliderTheme,
       voiceRecordingAttachmentTheme: voiceRecordingAttachmentTheme,
+      channelListItemTheme: channelListItemTheme,
     );
 
     return defaultData.merge(customizedData);
   }
 
   /// Theme initialized with light
-  factory StreamChatThemeData.light() =>
-      StreamChatThemeData(brightness: Brightness.light);
+  factory StreamChatThemeData.light() => StreamChatThemeData(brightness: Brightness.light);
 
   /// Theme initialized with dark
-  factory StreamChatThemeData.dark() =>
-      StreamChatThemeData(brightness: Brightness.dark);
+  factory StreamChatThemeData.dark() => StreamChatThemeData(brightness: Brightness.dark);
 
   /// Raw theme initialization
   const StreamChatThemeData.raw({
@@ -136,9 +130,8 @@ class StreamChatThemeData {
     required this.pollOptionVotesDialogTheme,
     required this.threadListTileTheme,
     required this.draftListTileTheme,
-    required this.audioWaveformTheme,
-    required this.audioWaveformSliderTheme,
     required this.voiceRecordingAttachmentTheme,
+    required this.channelListItemTheme,
   });
 
   /// Creates a theme from a Material [Theme]
@@ -169,10 +162,6 @@ class StreamChatThemeData {
         ),
       ),
       color: colorTheme.barsBg,
-      titleStyle: textTheme.headlineBold,
-      subtitleStyle: textTheme.footnote.copyWith(
-        color: colorTheme.textLowEmphasis,
-      ),
     );
     final channelPreviewTheme = StreamChannelPreviewThemeData(
       unreadCounterColor: colorTheme.accentError,
@@ -194,20 +183,6 @@ class StreamChatThemeData {
       indicatorIconSize: 16,
     );
 
-    final audioWaveformTheme = StreamAudioWaveformThemeData(
-      color: colorTheme.textLowEmphasis,
-      progressColor: colorTheme.accentPrimary,
-      minBarHeight: 2,
-      spacingRatio: 0.3,
-      heightScale: 1,
-    );
-
-    final audioWaveformSliderTheme = StreamAudioWaveformSliderThemeData(
-      audioWaveformTheme: audioWaveformTheme,
-      thumbColor: Colors.white,
-      thumbBorderColor: colorTheme.borders,
-    );
-
     return StreamChatThemeData.raw(
       textTheme: textTheme,
       colorTheme: colorTheme,
@@ -226,18 +201,15 @@ class StreamChatThemeData {
       ),
       channelHeaderTheme: channelHeaderTheme,
       ownMessageTheme: StreamMessageThemeData(
-        messageAuthorStyle:
-            textTheme.footnote.copyWith(color: colorTheme.textLowEmphasis),
+        messageAuthorStyle: textTheme.footnote.copyWith(color: colorTheme.textLowEmphasis),
         messageTextStyle: textTheme.body,
         messageDeletedStyle: textTheme.body.copyWith(
           color: colorTheme.textLowEmphasis,
           fontStyle: FontStyle.italic,
         ),
-        createdAtStyle:
-            textTheme.footnote.copyWith(color: colorTheme.textLowEmphasis),
+        createdAtStyle: textTheme.footnote.copyWith(color: colorTheme.textLowEmphasis),
         repliesStyle: textTheme.footnoteBold.copyWith(color: accentColor),
         messageBackgroundColor: colorTheme.inputBg,
-        messageBorderColor: colorTheme.borders,
         reactionsBackgroundColor: colorTheme.barsBg,
         reactionsBorderColor: colorTheme.borders,
         reactionsMaskColor: colorTheme.appBg,
@@ -265,14 +237,11 @@ class StreamChatThemeData {
           color: colorTheme.textLowEmphasis,
           fontStyle: FontStyle.italic,
         ),
-        createdAtStyle:
-            textTheme.footnote.copyWith(color: colorTheme.textLowEmphasis),
-        messageAuthorStyle:
-            textTheme.footnote.copyWith(color: colorTheme.textLowEmphasis),
+        createdAtStyle: textTheme.footnote.copyWith(color: colorTheme.textLowEmphasis),
+        messageAuthorStyle: textTheme.footnote.copyWith(color: colorTheme.textLowEmphasis),
         repliesStyle: textTheme.footnoteBold.copyWith(color: accentColor),
         messageLinksStyle: TextStyle(color: accentColor),
         messageBackgroundColor: colorTheme.barsBg,
-        messageBorderColor: colorTheme.borders,
         avatarTheme: StreamAvatarThemeData(
           borderRadius: BorderRadius.circular(20),
           constraints: const BoxConstraints.tightFor(
@@ -378,44 +347,7 @@ class StreamChatThemeData {
           color: colorTheme.textHighEmphasis,
         ),
       ),
-      pollInteractorTheme: StreamPollInteractorThemeData(
-        pollTitleStyle: textTheme.headlineBold.copyWith(
-          color: colorTheme.textHighEmphasis,
-        ),
-        pollSubtitleStyle: textTheme.footnote.copyWith(
-          color: colorTheme.textLowEmphasis,
-        ),
-        pollOptionTextStyle: textTheme.headline.copyWith(
-          color: colorTheme.textHighEmphasis,
-        ),
-        pollOptionVoteCountTextStyle: textTheme.footnote.copyWith(
-          color: colorTheme.textLowEmphasis,
-        ),
-        pollOptionCheckboxShape: const CircleBorder(),
-        pollOptionCheckboxCheckColor: Colors.white,
-        pollOptionCheckboxActiveColor: colorTheme.accentPrimary,
-        pollOptionCheckboxBorderSide: BorderSide(
-          width: 2,
-          color: colorTheme.disabled,
-        ),
-        pollOptionVotesProgressBarMinHeight: 4,
-        pollOptionVotesProgressBarTrackColor: colorTheme.disabled,
-        pollOptionVotesProgressBarValueColor: colorTheme.accentPrimary,
-        pollOptionVotesProgressBarWinnerColor: colorTheme.accentInfo,
-        pollOptionVotesProgressBarBorderRadius: BorderRadius.circular(4),
-        pollActionButtonStyle: TextButton.styleFrom(
-          textStyle: textTheme.headline,
-          foregroundColor: colorTheme.accentPrimary,
-        ),
-        pollActionDialogTitleStyle: textTheme.headlineBold.copyWith(
-          color: colorTheme.textHighEmphasis,
-        ),
-        pollActionDialogTextFieldStyle: textTheme.headline.copyWith(
-          color: colorTheme.textHighEmphasis,
-        ),
-        pollActionDialogTextFieldBorderRadius: BorderRadius.circular(12),
-        pollActionDialogTextFieldFillColor: colorTheme.inputBg,
-      ),
+      pollInteractorTheme: const StreamPollInteractorThemeData(),
       pollResultsDialogTheme: StreamPollResultsDialogThemeData(
         backgroundColor: colorTheme.appBg,
         appBarElevation: 1,
@@ -516,30 +448,7 @@ class StreamChatThemeData {
         pollOptionVoteItemBackgroundColor: colorTheme.inputBg,
         pollOptionVoteItemBorderRadius: BorderRadius.circular(12),
       ),
-      threadListTileTheme: StreamThreadListTileThemeData(
-        backgroundColor: colorTheme.barsBg,
-        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
-        threadUnreadMessageCountStyle: textTheme.footnoteBold.copyWith(
-          color: Colors.white,
-        ),
-        threadUnreadMessageCountBackgroundColor:
-            channelPreviewTheme.unreadCounterColor,
-        threadChannelNameStyle: textTheme.bodyBold.copyWith(
-          color: colorTheme.textHighEmphasis,
-        ),
-        threadReplyToMessageStyle: textTheme.footnote.copyWith(
-          color: colorTheme.textLowEmphasis,
-        ),
-        threadLatestReplyTimestampStyle: textTheme.footnote.copyWith(
-          color: colorTheme.textLowEmphasis,
-        ),
-        threadLatestReplyUsernameStyle: textTheme.bodyBold.copyWith(
-          color: colorTheme.textHighEmphasis,
-        ),
-        threadLatestReplyMessageStyle: textTheme.body.copyWith(
-          color: colorTheme.textLowEmphasis,
-        ),
-      ),
+      threadListTileTheme: const StreamThreadListTileThemeData(),
       draftListTileTheme: StreamDraftListTileThemeData(
         backgroundColor: colorTheme.barsBg,
         padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
@@ -553,47 +462,8 @@ class StreamChatThemeData {
           color: colorTheme.textLowEmphasis,
         ),
       ),
-      audioWaveformTheme: audioWaveformTheme,
-      audioWaveformSliderTheme: audioWaveformSliderTheme,
-      voiceRecordingAttachmentTheme: StreamVoiceRecordingAttachmentThemeData(
-        backgroundColor: colorTheme.barsBg,
-        playIcon: const StreamSvgIcon(icon: StreamSvgIcons.play),
-        pauseIcon: const StreamSvgIcon(icon: StreamSvgIcons.pause),
-        loadingIndicator: SizedBox.fromSize(
-          size: const Size.square(24 - /* Padding */ 2),
-          child: Center(
-            child: CircularProgressIndicator.adaptive(
-              valueColor: AlwaysStoppedAnimation(colorTheme.accentPrimary),
-            ),
-          ),
-        ),
-        audioControlButtonStyle: ElevatedButton.styleFrom(
-          elevation: 2,
-          iconColor: Colors.black,
-          padding: const EdgeInsets.symmetric(horizontal: 6),
-          backgroundColor: Colors.white,
-          shape: const CircleBorder(),
-          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          minimumSize: const Size(36, 36),
-        ),
-        titleTextStyle: textTheme.bodyBold.copyWith(
-          color: colorTheme.textHighEmphasis,
-        ),
-        durationTextStyle: textTheme.footnote.copyWith(
-          color: colorTheme.textLowEmphasis,
-        ),
-        speedControlButtonStyle: ElevatedButton.styleFrom(
-          elevation: 2,
-          textStyle: textTheme.footnote,
-          foregroundColor: Colors.black,
-          padding: const EdgeInsets.symmetric(horizontal: 8),
-          backgroundColor: Colors.white,
-          shape: const StadiumBorder(),
-          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          minimumSize: const Size(40, 28),
-        ),
-        audioWaveformSliderTheme: audioWaveformSliderTheme,
-      ),
+      voiceRecordingAttachmentTheme: const StreamVoiceRecordingAttachmentThemeData(),
+      channelListItemTheme: const StreamChannelListItemThemeData(),
     );
   }
 
@@ -656,14 +526,11 @@ class StreamChatThemeData {
   /// Theme configuration for the [StreamThreadListTile] widget.
   final StreamThreadListTileThemeData threadListTileTheme;
 
-  /// Theme configuration for the [StreamAudioWaveform] widget.
-  final StreamAudioWaveformThemeData audioWaveformTheme;
-
-  /// Theme configuration for the [StreamAudioWaveformSlider] widget.
-  final StreamAudioWaveformSliderThemeData audioWaveformSliderTheme;
-
   /// Theme configuration for the [StreamVoiceRecordingAttachment] widget.
   final StreamVoiceRecordingAttachmentThemeData voiceRecordingAttachmentTheme;
+
+  /// Theme configuration for the [StreamChannelListItem] widget.
+  final StreamChannelListItemThemeData channelListItemTheme;
 
   /// Theme configuration for the [StreamDraftListTile] widget.
   final StreamDraftListTileThemeData draftListTileTheme;
@@ -702,50 +569,38 @@ class StreamChatThemeData {
     StreamPollOptionVotesDialogThemeData? pollOptionVotesDialogTheme,
     StreamThreadListTileThemeData? threadListTileTheme,
     StreamDraftListTileThemeData? draftListTileTheme,
-    StreamAudioWaveformThemeData? audioWaveformTheme,
-    StreamAudioWaveformSliderThemeData? audioWaveformSliderTheme,
     StreamVoiceRecordingAttachmentThemeData? voiceRecordingAttachmentTheme,
-  }) =>
-      StreamChatThemeData.raw(
-        channelListHeaderTheme:
-            this.channelListHeaderTheme.merge(channelListHeaderTheme),
-        textTheme: this.textTheme.merge(textTheme),
-        colorTheme: this.colorTheme.merge(colorTheme),
-        primaryIconTheme: this.primaryIconTheme.merge(primaryIconTheme),
-        channelPreviewTheme:
-            this.channelPreviewTheme.merge(channelPreviewTheme),
-        channelHeaderTheme: this.channelHeaderTheme.merge(channelHeaderTheme),
-        ownMessageTheme: this.ownMessageTheme.merge(ownMessageTheme),
-        otherMessageTheme: this.otherMessageTheme.merge(otherMessageTheme),
-        messageInputTheme: this.messageInputTheme.merge(messageInputTheme),
-        galleryHeaderTheme: galleryHeaderTheme ?? this.galleryHeaderTheme,
-        galleryFooterTheme: galleryFooterTheme ?? this.galleryFooterTheme,
-        messageListViewTheme: messageListViewTheme ?? this.messageListViewTheme,
-        pollCreatorTheme: pollCreatorTheme ?? this.pollCreatorTheme,
-        pollInteractorTheme: pollInteractorTheme ?? this.pollInteractorTheme,
-        pollResultsDialogTheme:
-            pollResultsDialogTheme ?? this.pollResultsDialogTheme,
-        pollOptionsDialogTheme:
-            pollOptionsDialogTheme ?? this.pollOptionsDialogTheme,
-        pollCommentsDialogTheme:
-            pollCommentsDialogTheme ?? this.pollCommentsDialogTheme,
-        pollOptionVotesDialogTheme:
-            pollOptionVotesDialogTheme ?? this.pollOptionVotesDialogTheme,
-        threadListTileTheme: threadListTileTheme ?? this.threadListTileTheme,
-        draftListTileTheme: draftListTileTheme ?? this.draftListTileTheme,
-        audioWaveformTheme: audioWaveformTheme ?? this.audioWaveformTheme,
-        audioWaveformSliderTheme:
-            audioWaveformSliderTheme ?? this.audioWaveformSliderTheme,
-        voiceRecordingAttachmentTheme:
-            voiceRecordingAttachmentTheme ?? this.voiceRecordingAttachmentTheme,
-      );
+    StreamChannelListItemThemeData? channelListItemTheme,
+  }) => StreamChatThemeData.raw(
+    channelListHeaderTheme: this.channelListHeaderTheme.merge(channelListHeaderTheme),
+    textTheme: this.textTheme.merge(textTheme),
+    colorTheme: this.colorTheme.merge(colorTheme),
+    primaryIconTheme: this.primaryIconTheme.merge(primaryIconTheme),
+    channelPreviewTheme: this.channelPreviewTheme.merge(channelPreviewTheme),
+    channelHeaderTheme: this.channelHeaderTheme.merge(channelHeaderTheme),
+    ownMessageTheme: this.ownMessageTheme.merge(ownMessageTheme),
+    otherMessageTheme: this.otherMessageTheme.merge(otherMessageTheme),
+    messageInputTheme: this.messageInputTheme.merge(messageInputTheme),
+    galleryHeaderTheme: galleryHeaderTheme ?? this.galleryHeaderTheme,
+    galleryFooterTheme: galleryFooterTheme ?? this.galleryFooterTheme,
+    messageListViewTheme: messageListViewTheme ?? this.messageListViewTheme,
+    pollCreatorTheme: pollCreatorTheme ?? this.pollCreatorTheme,
+    pollInteractorTheme: pollInteractorTheme ?? this.pollInteractorTheme,
+    pollResultsDialogTheme: pollResultsDialogTheme ?? this.pollResultsDialogTheme,
+    pollOptionsDialogTheme: pollOptionsDialogTheme ?? this.pollOptionsDialogTheme,
+    pollCommentsDialogTheme: pollCommentsDialogTheme ?? this.pollCommentsDialogTheme,
+    pollOptionVotesDialogTheme: pollOptionVotesDialogTheme ?? this.pollOptionVotesDialogTheme,
+    threadListTileTheme: threadListTileTheme ?? this.threadListTileTheme,
+    draftListTileTheme: draftListTileTheme ?? this.draftListTileTheme,
+    voiceRecordingAttachmentTheme: voiceRecordingAttachmentTheme ?? this.voiceRecordingAttachmentTheme,
+    channelListItemTheme: channelListItemTheme ?? this.channelListItemTheme,
+  );
 
   /// Merge themes
   StreamChatThemeData merge(StreamChatThemeData? other) {
     if (other == null) return this;
     return copyWith(
-      channelListHeaderTheme:
-          channelListHeaderTheme.merge(other.channelListHeaderTheme),
+      channelListHeaderTheme: channelListHeaderTheme.merge(other.channelListHeaderTheme),
       textTheme: textTheme.merge(other.textTheme),
       colorTheme: colorTheme.merge(other.colorTheme),
       primaryIconTheme: other.primaryIconTheme,
@@ -756,25 +611,17 @@ class StreamChatThemeData {
       messageInputTheme: messageInputTheme.merge(other.messageInputTheme),
       galleryHeaderTheme: galleryHeaderTheme.merge(other.galleryHeaderTheme),
       galleryFooterTheme: galleryFooterTheme.merge(other.galleryFooterTheme),
-      messageListViewTheme:
-          messageListViewTheme.merge(other.messageListViewTheme),
+      messageListViewTheme: messageListViewTheme.merge(other.messageListViewTheme),
       pollCreatorTheme: pollCreatorTheme.merge(other.pollCreatorTheme),
       pollInteractorTheme: pollInteractorTheme.merge(other.pollInteractorTheme),
-      pollResultsDialogTheme:
-          pollResultsDialogTheme.merge(other.pollResultsDialogTheme),
-      pollOptionsDialogTheme:
-          pollOptionsDialogTheme.merge(other.pollOptionsDialogTheme),
-      pollCommentsDialogTheme:
-          pollCommentsDialogTheme.merge(other.pollCommentsDialogTheme),
-      pollOptionVotesDialogTheme:
-          pollOptionVotesDialogTheme.merge(other.pollOptionVotesDialogTheme),
+      pollResultsDialogTheme: pollResultsDialogTheme.merge(other.pollResultsDialogTheme),
+      pollOptionsDialogTheme: pollOptionsDialogTheme.merge(other.pollOptionsDialogTheme),
+      pollCommentsDialogTheme: pollCommentsDialogTheme.merge(other.pollCommentsDialogTheme),
+      pollOptionVotesDialogTheme: pollOptionVotesDialogTheme.merge(other.pollOptionVotesDialogTheme),
       threadListTileTheme: threadListTileTheme.merge(other.threadListTileTheme),
       draftListTileTheme: draftListTileTheme.merge(other.draftListTileTheme),
-      audioWaveformTheme: audioWaveformTheme.merge(other.audioWaveformTheme),
-      audioWaveformSliderTheme:
-          audioWaveformSliderTheme.merge(other.audioWaveformSliderTheme),
-      voiceRecordingAttachmentTheme: voiceRecordingAttachmentTheme
-          .merge(other.voiceRecordingAttachmentTheme),
+      voiceRecordingAttachmentTheme: voiceRecordingAttachmentTheme.merge(other.voiceRecordingAttachmentTheme),
+      channelListItemTheme: channelListItemTheme.merge(other.channelListItemTheme),
     );
   }
 }

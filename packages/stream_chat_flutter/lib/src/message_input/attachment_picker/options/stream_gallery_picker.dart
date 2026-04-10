@@ -4,15 +4,14 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:photo_manager/photo_manager.dart';
-import 'package:stream_chat_flutter/src/icons/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/message_input/attachment_picker/stream_attachment_picker.dart';
 import 'package:stream_chat_flutter/src/message_input/attachment_picker/stream_attachment_picker_controller.dart';
 import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/src/scroll_view/photo_gallery/stream_photo_gallery.dart';
 import 'package:stream_chat_flutter/src/scroll_view/photo_gallery/stream_photo_gallery_controller.dart';
-import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/utils/utils.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 /// Max image resolution which can be resized by the CDN.
 /// Taken from https://getstream.io/chat/docs/flutter-dart/file_uploads/?language=dart#image-resizing
@@ -80,9 +79,9 @@ class _StreamGalleryPickerState extends State<StreamGalleryPicker> {
       builder: (context, snapshot) {
         if (!snapshot.hasData) return const Empty();
 
-        final theme = StreamChatTheme.of(context);
-        final textTheme = theme.textTheme;
-        final colorTheme = theme.colorTheme;
+        final spacing = context.streamSpacing;
+        final textTheme = context.streamTextTheme;
+        final colorScheme = context.streamColorScheme;
 
         // Available on both Android and iOS.
         final isAuthorized = snapshot.data == PermissionState.authorized;
@@ -92,44 +91,32 @@ class _StreamGalleryPickerState extends State<StreamGalleryPicker> {
         final isPermissionGranted = isAuthorized || isLimited;
 
         return OptionDrawer(
-          actions: [
-            if (isLimited)
-              IconButton(
-                color: colorTheme.accentPrimary,
-                icon: const Icon(Icons.add_circle_outline_rounded),
-                onPressed: () async {
-                  await PhotoManager.presentLimited();
-                  _controller.doInitialLoad();
-                },
-              ),
-          ],
+          margin: .zero,
           child: Builder(
             builder: (context) {
               if (!isPermissionGranted) {
                 return Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    StreamSvgIcon(
-                      size: 240,
-                      icon: StreamSvgIcons.pictures,
-                      color: colorTheme.disabled,
+                    Icon(
+                      size: 32,
+                      context.streamIcons.image32,
+                      color: colorScheme.textTertiary,
                     ),
+                    SizedBox(height: spacing.xs),
                     Text(
                       context.translations.enablePhotoAndVideoAccessMessage,
-                      style: textTheme.body.copyWith(
-                        color: colorTheme.textLowEmphasis,
+                      style: textTheme.bodyDefault.copyWith(
+                        color: colorScheme.textSecondary,
                       ),
                       textAlign: TextAlign.center,
                     ),
-                    const SizedBox(height: 8),
-                    TextButton(
-                      onPressed: PhotoManager.openSetting,
-                      child: Text(
-                        context.translations.allowGalleryAccessMessage,
-                        style: textTheme.bodyBold.copyWith(
-                          color: colorTheme.accentPrimary,
-                        ),
-                      ),
+                    SizedBox(height: spacing.md),
+                    StreamButton(
+                      type: .outline,
+                      style: .secondary,
+                      onTap: PhotoManager.openSetting,
+                      label: context.translations.allowGalleryAccessMessage,
                     ),
                   ],
                 );
@@ -145,6 +132,14 @@ class _StreamGalleryPickerState extends State<StreamGalleryPicker> {
                 thumbnailFormat: widget.config.mediaThumbnailFormat,
                 thumbnailQuality: widget.config.mediaThumbnailQuality,
                 thumbnailScale: widget.config.mediaThumbnailScale,
+                addMoreBuilder: isLimited
+                    ? (context) => _AddMoreTile(
+                        onTap: () async {
+                          await PhotoManager.presentLimited();
+                          _controller.doInitialLoad();
+                        },
+                      )
+                    : null,
                 itemBuilder: (context, mediaItems, index, defaultWidget) {
                   final media = mediaItems[index];
                   return defaultWidget.copyWith(
@@ -156,6 +151,49 @@ class _StreamGalleryPickerState extends State<StreamGalleryPicker> {
           ),
         );
       },
+    );
+  }
+}
+
+class _AddMoreTile extends StatelessWidget {
+  const _AddMoreTile({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = context.streamColorScheme;
+    final textTheme = context.streamTextTheme;
+    final spacing = context.streamSpacing;
+
+    return Material(
+      color: colorScheme.backgroundSurfaceCard,
+      child: InkWell(
+        onTap: onTap,
+        overlayColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.pressed)) return colorScheme.backgroundPressed;
+          if (states.contains(WidgetState.hovered)) return colorScheme.backgroundHover;
+          return StreamColors.transparent;
+        }),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              context.streamIcons.plus20,
+              size: 20,
+              color: colorScheme.textTertiary,
+            ),
+            SizedBox(height: spacing.xs),
+            Text(
+              context.translations.addMoreFilesLabel,
+              style: textTheme.captionEmphasis.copyWith(
+                color: colorScheme.textTertiary,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -232,6 +270,10 @@ extension StreamImagePickerX on StreamAttachmentPickerController {
 
     extraDataMap['file_size'] = file.size!;
 
+    if (type == AssetType.video) {
+      extraDataMap['duration'] = asset.videoDuration.inSeconds;
+    }
+
     final attachment = Attachment(
       id: asset.id,
       file: file,
@@ -248,8 +290,7 @@ extension StreamImagePickerX on StreamAttachmentPickerController {
       final image = await asset.originFile;
       if (image != null) {
         final tempDir = await getTemporaryDirectory();
-        final cachedFile =
-            File('${tempDir.path}/${image.path.split('/').last}');
+        final cachedFile = File('${tempDir.path}/${image.path.split('/').last}');
         if (cachedFile.existsSync()) {
           cachedFile.deleteSync();
         }

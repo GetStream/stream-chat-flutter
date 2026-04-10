@@ -12,14 +12,14 @@ class SystemEnvironmentManager {
   SystemEnvironmentManager({
     SystemEnvironment? environment,
   }) : _environment = switch (environment) {
-          final env? => env,
-          _ => SystemEnvironment(
-              sdkName: 'stream-chat',
-              sdkIdentifier: 'dart',
-              sdkVersion: PACKAGE_VERSION,
-              osName: CurrentPlatform.name,
-            ),
-        };
+         final env? => env,
+         _ => SystemEnvironment(
+           sdkName: 'stream-chat',
+           sdkIdentifier: 'dart',
+           sdkVersion: PACKAGE_VERSION,
+           osName: CurrentPlatform.name,
+         ),
+       };
 
   /// Returns the Stream client user agent string based on the current
   /// [environment] value.

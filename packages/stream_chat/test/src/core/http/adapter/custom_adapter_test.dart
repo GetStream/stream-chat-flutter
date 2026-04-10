@@ -15,11 +15,12 @@ void main() {
     final mockAdapter = MockHttpClientAdapter();
     final httpClient = StreamHttpClient(apiKey, httpClientAdapter: mockAdapter);
 
-    when(() => mockAdapter.fetch(any(), any(), any()))
-        .thenAnswer((_) async => ResponseBody(
-              Stream.value(Uint8List(0)),
-              200,
-            ));
+    when(() => mockAdapter.fetch(any(), any(), any())).thenAnswer(
+      (_) async => ResponseBody(
+        Stream.value(Uint8List(0)),
+        200,
+      ),
+    );
 
     await httpClient.get('/');
 

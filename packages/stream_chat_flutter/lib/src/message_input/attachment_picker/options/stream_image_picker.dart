@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 /// Widget used to pick images from the device.
 class StreamImagePicker extends StatelessWidget {
@@ -36,52 +37,74 @@ class StreamImagePicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = StreamChatTheme.of(context);
+    final spacing = context.streamSpacing;
+    final textTheme = context.streamTextTheme;
+    final colorScheme = context.streamColorScheme;
+
+    Future<void> onPickImage() async {
+      final pickedImage = await runInPermissionRequestLock(() {
+        return StreamAttachmentHandler.instance.pickImage(
+          source: source,
+          maxWidth: maxWidth,
+          maxHeight: maxHeight,
+          imageQuality: imageQuality,
+          preferredCameraDevice: preferredCameraDevice,
+        );
+      });
+
+      return onImagePicked.call(pickedImage);
+    }
+
     return OptionDrawer(
       child: EndOfFrameCallbackWidget(
-        child: StreamSvgIcon(
-          size: 240,
-          icon: StreamSvgIcons.camera,
-          color: theme.colorTheme.disabled,
+        child: Center(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                size: 32,
+                context.streamIcons.camera32,
+                color: colorScheme.textTertiary,
+              ),
+              SizedBox(height: spacing.xs),
+              Text(
+                context.translations.takePhotoAndShareLabel,
+                style: textTheme.bodyDefault.copyWith(color: colorScheme.textSecondary),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: spacing.md),
+              StreamButton(
+                type: .outline,
+                style: .secondary,
+                onTap: onPickImage,
+                label: context.translations.openCameraLabel,
+              ),
+            ],
+          ),
         ),
-        onEndOfFrame: (_) async {
-          final pickedImage = await runInPermissionRequestLock(() {
-            return StreamAttachmentHandler.instance.pickImage(
-              source: source,
-              maxWidth: maxWidth,
-              maxHeight: maxHeight,
-              imageQuality: imageQuality,
-              preferredCameraDevice: preferredCameraDevice,
-            );
-          });
-
-          onImagePicked.call(pickedImage);
-        },
+        onEndOfFrame: (_) => onPickImage(),
         errorBuilder: (context, error, stacktrace) {
           return Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              StreamSvgIcon(
-                size: 240,
-                icon: StreamSvgIcons.camera,
-                color: theme.colorTheme.disabled,
+              Icon(
+                size: 32,
+                context.streamIcons.camera32,
+                color: colorScheme.textTertiary,
               ),
+              SizedBox(height: spacing.xs),
               Text(
                 context.translations.enablePhotoAndVideoAccessMessage,
-                style: theme.textTheme.body.copyWith(
-                  color: theme.colorTheme.textLowEmphasis,
-                ),
+                style: textTheme.bodyDefault.copyWith(color: colorScheme.textSecondary),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 8),
-              TextButton(
-                onPressed: PhotoManager.openSetting,
-                child: Text(
-                  context.translations.allowGalleryAccessMessage,
-                  style: theme.textTheme.bodyBold.copyWith(
-                    color: theme.colorTheme.accentPrimary,
-                  ),
-                ),
+              SizedBox(height: spacing.md),
+              StreamButton(
+                type: .outline,
+                style: .secondary,
+                onTap: PhotoManager.openSetting,
+                label: context.translations.allowGalleryAccessMessage,
               ),
             ],
           );

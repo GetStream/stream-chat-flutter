@@ -7,11 +7,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_app_badger/flutter_app_badger.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import 'package:sample_app/pages/draft_list_page.dart';
 import 'package:sample_app/pages/reminders_page.dart';
 import 'package:sample_app/pages/thread_list_page.dart';
 import 'package:sample_app/pages/user_mentions_page.dart';
 import 'package:sample_app/routes/routes.dart';
+import 'package:sample_app/state/init_data.dart';
 import 'package:sample_app/utils/localizations.dart';
 import 'package:sample_app/utils/shared_location_service.dart';
 import 'package:sample_app/widgets/channel_list.dart';
@@ -33,16 +35,16 @@ class _ChannelListPageState extends State<ChannelListPage> {
   bool _isSelected(int index) => _currentIndex == index;
 
   List<BottomNavigationBarItem> get _navBarItems {
+    final icons = context.streamIcons;
+
     return <BottomNavigationBarItem>[
       BottomNavigationBarItem(
         icon: Stack(
           clipBehavior: Clip.none,
           children: [
-            StreamSvgIcon(
-              icon: StreamSvgIcons.message,
-              color: _isSelected(0)
-                  ? StreamChatTheme.of(context).colorTheme.textHighEmphasis
-                  : Colors.grey,
+            Icon(
+              _isSelected(0) ? icons.messageBubbleFill20 : icons.messageBubble20,
+              color: _isSelected(0) ? StreamChatTheme.of(context).colorTheme.textHighEmphasis : Colors.grey,
             ),
             const PositionedDirectional(
               top: -4,
@@ -54,11 +56,9 @@ class _ChannelListPageState extends State<ChannelListPage> {
         label: AppLocalizations.of(context).chats,
       ),
       BottomNavigationBarItem(
-        icon: StreamSvgIcon(
-          icon: StreamSvgIcons.mentions,
-          color: _isSelected(1)
-              ? StreamChatTheme.of(context).colorTheme.textHighEmphasis
-              : Colors.grey,
+        icon: Icon(
+          _isSelected(1) ? icons.mention32 : icons.mention20,
+          color: _isSelected(1) ? StreamChatTheme.of(context).colorTheme.textHighEmphasis : Colors.grey,
         ),
         label: AppLocalizations.of(context).mentions,
       ),
@@ -67,10 +67,8 @@ class _ChannelListPageState extends State<ChannelListPage> {
           clipBehavior: Clip.none,
           children: [
             Icon(
-              Icons.message_outlined,
-              color: _isSelected(2)
-                  ? StreamChatTheme.of(context).colorTheme.textHighEmphasis
-                  : Colors.grey,
+              _isSelected(2) ? icons.threadFill20 : icons.thread20,
+              color: _isSelected(2) ? StreamChatTheme.of(context).colorTheme.textHighEmphasis : Colors.grey,
             ),
             PositionedDirectional(
               top: -4,
@@ -83,19 +81,15 @@ class _ChannelListPageState extends State<ChannelListPage> {
       ),
       BottomNavigationBarItem(
         icon: Icon(
-          Icons.edit_note_rounded,
-          color: _isSelected(3)
-              ? StreamChatTheme.of(context).colorTheme.textHighEmphasis
-              : Colors.grey,
+          _isSelected(3) ? icons.edit32 : icons.edit20,
+          color: _isSelected(3) ? StreamChatTheme.of(context).colorTheme.textHighEmphasis : Colors.grey,
         ),
         label: 'Drafts',
       ),
       BottomNavigationBarItem(
         icon: Icon(
-          Icons.bookmark_border_rounded,
-          color: _isSelected(4)
-              ? StreamChatTheme.of(context).colorTheme.textHighEmphasis
-              : Colors.grey,
+          icons.save20,
+          color: _isSelected(4) ? StreamChatTheme.of(context).colorTheme.textHighEmphasis : Colors.grey,
         ),
         label: 'Reminders',
       ),
@@ -115,11 +109,18 @@ class _ChannelListPageState extends State<ChannelListPage> {
     return Scaffold(
       backgroundColor: StreamChatTheme.of(context).colorTheme.appBg,
       appBar: StreamChannelListHeader(
+        titleBuilder: _currentIndex == 0
+            ? null
+            : (context, status, client) {
+                return Text(
+                  _navBarItems[_currentIndex].label!,
+                  style: context.streamTextTheme.headingSm,
+                );
+              },
         onNewChatButtonTap: () {
           GoRouter.of(context).pushNamed(Routes.NEW_CHAT.name);
         },
-        preNavigationCallback: () =>
-            FocusScope.of(context).requestFocus(FocusNode()),
+        preNavigationCallback: () => FocusScope.of(context).requestFocus(FocusNode()),
       ),
       drawer: LeftDrawer(
         user: user,
@@ -130,11 +131,9 @@ class _ChannelListPageState extends State<ChannelListPage> {
         currentIndex: _currentIndex,
         items: _navBarItems,
         selectedLabelStyle: StreamChatTheme.of(context).textTheme.footnoteBold,
-        unselectedLabelStyle:
-            StreamChatTheme.of(context).textTheme.footnoteBold,
+        unselectedLabelStyle: StreamChatTheme.of(context).textTheme.footnoteBold,
         type: BottomNavigationBarType.fixed,
-        selectedItemColor:
-            StreamChatTheme.of(context).colorTheme.textHighEmphasis,
+        selectedItemColor: StreamChatTheme.of(context).colorTheme.textHighEmphasis,
         unselectedItemColor: Colors.grey,
         onTap: (index) {
           setState(() => _currentIndex = index);
@@ -159,11 +158,7 @@ class _ChannelListPageState extends State<ChannelListPage> {
   void initState() {
     super.initState();
     if (!kIsWeb) {
-      badgeListener = StreamChat.of(context)
-          .client
-          .state
-          .totalUnreadCountStream
-          .listen((count) {
+      badgeListener = StreamChat.of(context).client.state.totalUnreadCountStream.listen((count) {
         if (count > 0) {
           FlutterAppBadger.updateBadgeCount(count);
         } else {
@@ -211,10 +206,9 @@ class LeftDrawer extends StatelessWidget {
                   child: Row(
                     children: [
                       StreamUserAvatar(
+                        size: .lg,
                         user: user,
-                        showOnlineStatus: false,
-                        constraints:
-                            BoxConstraints.tight(const Size.fromRadius(20)),
+                        showOnlineIndicator: false,
                       ),
                       Padding(
                         padding: const EdgeInsets.only(left: 16),
@@ -230,12 +224,9 @@ class LeftDrawer extends StatelessWidget {
                   ),
                 ),
                 ListTile(
-                  leading: StreamSvgIcon(
-                    icon: StreamSvgIcons.penWrite,
-                    color: StreamChatTheme.of(context)
-                        .colorTheme
-                        .textHighEmphasis
-                        .withOpacity(.5),
+                  leading: Icon(
+                    context.streamIcons.edit20,
+                    color: StreamChatTheme.of(context).colorTheme.textHighEmphasis.withOpacity(.5),
                   ),
                   onTap: () {
                     Navigator.of(context).pop();
@@ -249,12 +240,9 @@ class LeftDrawer extends StatelessWidget {
                   ),
                 ),
                 ListTile(
-                  leading: StreamSvgIcon(
-                    color: StreamChatTheme.of(context)
-                        .colorTheme
-                        .textHighEmphasis
-                        .withOpacity(.5),
-                    icon: StreamSvgIcons.contacts,
+                  leading: Icon(
+                    context.streamIcons.users20,
+                    color: StreamChatTheme.of(context).colorTheme.textHighEmphasis.withOpacity(.5),
                   ),
                   onTap: () {
                     Navigator.of(context).pop();
@@ -265,6 +253,27 @@ class LeftDrawer extends StatelessWidget {
                     style: const TextStyle(
                       fontSize: 14.5,
                     ),
+                  ),
+                ),
+                PreferenceBuilder<bool>(
+                  preference: context.read<InitNotifier>().initData!.preferences.getBool(
+                    'forceRtl',
+                    defaultValue: false,
+                  ),
+                  builder: (context, forceRtl) => SwitchListTile(
+                    secondary: Icon(
+                      Icons.format_textdirection_r_to_l,
+                      color: StreamChatTheme.of(context).colorTheme.textHighEmphasis.withOpacity(.5),
+                    ),
+                    title: const Text(
+                      'Force RTL',
+                      style: TextStyle(fontSize: 14.5),
+                    ),
+                    value: forceRtl,
+                    onChanged: (value) async {
+                      final sp = await StreamingSharedPreferences.instance;
+                      sp.setBool('forceRtl', value);
+                    },
                   ),
                 ),
                 Expanded(
@@ -284,12 +293,9 @@ class LeftDrawer extends StatelessWidget {
 
                         router.goNamed(Routes.CHOOSE_USER.name);
                       },
-                      leading: StreamSvgIcon(
-                        icon: StreamSvgIcons.user,
-                        color: StreamChatTheme.of(context)
-                            .colorTheme
-                            .textHighEmphasis
-                            .withOpacity(.5),
+                      leading: Icon(
+                        context.streamIcons.user20,
+                        color: StreamChatTheme.of(context).colorTheme.textHighEmphasis.withOpacity(.5),
                       ),
                       title: Text(
                         AppLocalizations.of(context).signOut,
@@ -300,9 +306,7 @@ class LeftDrawer extends StatelessWidget {
                       trailing: IconButton(
                         iconSize: 24,
                         icon: const StreamSvgIcon(icon: StreamSvgIcons.moon),
-                        color: StreamChatTheme.of(context)
-                            .colorTheme
-                            .textLowEmphasis,
+                        color: StreamChatTheme.of(context).colorTheme.textLowEmphasis,
                         onPressed: () async {
                           final theme = Theme.of(context);
                           final sp = await StreamingSharedPreferences.instance;

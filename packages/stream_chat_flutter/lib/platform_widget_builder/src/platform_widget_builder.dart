@@ -2,10 +2,11 @@ import 'package:flutter/widgets.dart';
 import 'package:stream_chat_flutter/platform_widget_builder/src/platform_widget.dart';
 
 /// A widget-building function that includes the child widget.
-typedef PlatformTargetBuilder = Widget? Function(
-  BuildContext context,
-  Widget? child,
-)?;
+typedef PlatformTargetBuilder =
+    Widget? Function(
+      BuildContext context,
+      Widget? child,
+    )?;
 
 /// A widget that utilizes [PlatformTargetBuilder]s to build different widgets
 /// for each specified platform.

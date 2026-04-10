@@ -1,6 +1,7 @@
 import 'package:alchemist/alchemist.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:stream_chat_flutter/src/audio/audio_playlist_state.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import '../mocks.dart';
@@ -46,33 +47,6 @@ void main() {
         );
 
         expect(find.byType(StreamVoiceRecordingAttachment), findsNWidgets(2));
-      },
-    );
-
-    testWidgets(
-      'uses custom shape when provided',
-      (WidgetTester tester) async {
-        final customShape = RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        );
-
-        await tester.pumpWidget(
-          _wrapWithStreamChatApp(
-            StreamVoiceRecordingAttachmentPlaylist(
-              message: MockMessage(),
-              voiceRecordings: [fakeAudioRecording1],
-              shape: customShape,
-            ),
-          ),
-        );
-
-        expect(find.byType(StreamVoiceRecordingAttachment), findsOneWidget);
-
-        final attachment = tester.widget<StreamVoiceRecordingAttachment>(
-          find.byType(StreamVoiceRecordingAttachment),
-        );
-
-        expect(attachment.shape, customShape);
       },
     );
 
@@ -142,7 +116,7 @@ void main() {
           find.byType(StreamVoiceRecordingAttachment),
         );
 
-        expect(attachment.constraints, constraints);
+        expect(attachment.props.constraints, constraints);
       },
     );
 
@@ -171,6 +145,63 @@ void main() {
         );
 
         expect(playlist.padding, padding);
+      },
+    );
+
+    testWidgets(
+      'does not play audio when track seek changes',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          _wrapWithStreamChatApp(
+            StreamVoiceRecordingAttachmentPlaylist(
+              message: MockMessage(),
+              voiceRecordings: [fakeAudioRecording1],
+            ),
+          ),
+        );
+
+        final attachment = tester.widget<StreamVoiceRecordingAttachment>(
+          find.byType(StreamVoiceRecordingAttachment),
+        );
+
+        // onTrackSeekEnd must be null so that play() is never called
+        // when the user lifts their finger after scrubbing.
+        expect(attachment.props.onTrackSeekEnd, isNull);
+      },
+    );
+
+    testWidgets(
+      'seek callback does not resume playback',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          _wrapWithStreamChatApp(
+            StreamVoiceRecordingAttachmentPlaylist(
+              message: MockMessage(),
+              voiceRecordings: [fakeAudioRecording1],
+            ),
+          ),
+        );
+
+        final attachmentFinder = find.byType(StreamVoiceRecordingAttachment);
+        final attachment = tester.widget<StreamVoiceRecordingAttachment>(
+          attachmentFinder,
+        );
+
+        // Invoking onTrackSeekChanged should not throw and should not change
+        // the track to a playing state (track is idle, no AudioPlayer action
+        // is triggered because there is no active audio source).
+        expect(
+          () => attachment.props.onTrackSeekChanged?.call(0.5),
+          returnsNormally,
+        );
+
+        await tester.pump();
+
+        // The track should still not be in a playing state.
+        final updatedAttachment = tester.widget<StreamVoiceRecordingAttachment>(
+          attachmentFinder,
+        );
+        expect(updatedAttachment.props.track.state, isNot(TrackState.playing));
       },
     );
 
@@ -253,15 +284,26 @@ Widget _wrapWithStreamChatApp(
   Brightness? brightness,
 }) {
   return MaterialApp(
+    theme: ThemeData(
+      brightness: .light,
+      extensions: [StreamTheme.light()],
+    ),
+    darkTheme: ThemeData(
+      brightness: .dark,
+      extensions: [StreamTheme.dark()],
+    ),
+    themeMode: brightness == Brightness.light ? ThemeMode.light : ThemeMode.dark,
     home: StreamChatTheme(
       data: StreamChatThemeData(brightness: brightness),
-      child: Builder(builder: (context) {
-        final theme = StreamChatTheme.of(context);
-        return Scaffold(
-          backgroundColor: theme.colorTheme.appBg,
-          body: widget,
-        );
-      }),
+      child: Builder(
+        builder: (context) {
+          final theme = StreamChatTheme.of(context);
+          return Scaffold(
+            backgroundColor: theme.colorTheme.appBg,
+            body: widget,
+          );
+        },
+      ),
     ),
   );
 }

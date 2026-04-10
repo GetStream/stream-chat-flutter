@@ -13,16 +13,15 @@ class MaterialAppWrapper extends MaterialApp {
     TransitionBuilder? builder,
     Widget? home,
   }) : super(
-          key: key,
-          builder: builder,
-          localizationsDelegates: localizations,
-          supportedLocales: localeOverrides ?? const [Locale('en')],
-          theme: theme?.copyWith(platform: platform) ??
-              ThemeData(platform: platform, useMaterial3: false),
-          debugShowCheckedModeBanner: false,
-          home: home,
-          navigatorObservers: [
-            if (navigatorObserver != null) navigatorObserver,
-          ],
-        );
+         key: key,
+         builder: builder,
+         localizationsDelegates: localizations,
+         supportedLocales: localeOverrides ?? const [Locale('en')],
+         theme: theme?.copyWith(platform: platform) ?? ThemeData(platform: platform, useMaterial3: false),
+         debugShowCheckedModeBanner: false,
+         home: home,
+         navigatorObservers: [
+           if (navigatorObserver != null) navigatorObserver,
+         ],
+       );
 }

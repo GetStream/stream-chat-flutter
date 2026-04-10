@@ -78,10 +78,10 @@ class StreamChatNetworkError extends StreamChatError {
     this.data,
     StackTrace? stacktrace,
     this.isRequestCancelledError = false,
-  })  : code = errorCode.code,
-        statusCode = statusCode ?? data?.statusCode,
-        stackTrace = stacktrace ?? StackTrace.current,
-        super(errorCode.message);
+  }) : code = errorCode.code,
+       statusCode = statusCode ?? data?.statusCode,
+       stackTrace = stacktrace ?? StackTrace.current,
+       super(errorCode.message);
 
   ///
   StreamChatNetworkError.raw({
@@ -91,8 +91,8 @@ class StreamChatNetworkError extends StreamChatError {
     this.data,
     StackTrace? stacktrace,
     this.isRequestCancelledError = false,
-  })  : stackTrace = stacktrace ?? StackTrace.current,
-        super(message);
+  }) : stackTrace = stacktrace ?? StackTrace.current,
+       super(message);
 
   ///
   factory StreamChatNetworkError.fromDioException(DioException exception) {
@@ -106,10 +106,7 @@ class StreamChatNetworkError extends StreamChatError {
     }
     return StreamChatNetworkError.raw(
       code: errorResponse?.code ?? -1,
-      message: errorResponse?.message ??
-          response?.statusMessage ??
-          exception.message ??
-          '',
+      message: errorResponse?.message ?? response?.statusMessage ?? exception.message ?? '',
       statusCode: errorResponse?.statusCode ?? response?.statusCode,
       data: errorResponse,
       stacktrace: exception.stackTrace,

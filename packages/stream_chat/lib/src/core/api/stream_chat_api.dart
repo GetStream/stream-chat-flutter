@@ -28,23 +28,23 @@ class StreamChatApi {
     TokenManager? tokenManager,
     ConnectionIdManager? connectionIdManager,
     SystemEnvironmentManager? systemEnvironmentManager,
-    AttachmentFileUploaderProvider attachmentFileUploaderProvider =
-        StreamAttachmentFileUploader.new,
+    AttachmentFileUploaderProvider attachmentFileUploaderProvider = StreamAttachmentFileUploader.new,
     Logger? logger,
     Iterable<Interceptor>? interceptors,
     HttpClientAdapter? httpClientAdapter,
-  })  : _fileUploaderProvider = attachmentFileUploaderProvider,
-        _client = client ??
-            StreamHttpClient(
-              apiKey,
-              options: options,
-              tokenManager: tokenManager,
-              connectionIdManager: connectionIdManager,
-              systemEnvironmentManager: systemEnvironmentManager,
-              logger: logger,
-              interceptors: interceptors,
-              httpClientAdapter: httpClientAdapter,
-            );
+  }) : _fileUploaderProvider = attachmentFileUploaderProvider,
+       _client =
+           client ??
+           StreamHttpClient(
+             apiKey,
+             options: options,
+             tokenManager: tokenManager,
+             connectionIdManager: connectionIdManager,
+             systemEnvironmentManager: systemEnvironmentManager,
+             logger: logger,
+             interceptors: interceptors,
+             httpClientAdapter: httpClientAdapter,
+           );
 
   final StreamHttpClient _client;
   final AttachmentFileUploaderProvider _fileUploaderProvider;
@@ -90,7 +90,6 @@ class StreamChatApi {
   GeneralApi? _general;
 
   /// Class responsible for uploading images and files to a given channel
-  AttachmentFileUploader get fileUploader =>
-      _fileUploader ??= _fileUploaderProvider.call(_client);
+  AttachmentFileUploader get fileUploader => _fileUploader ??= _fileUploaderProvider.call(_client);
   AttachmentFileUploader? _fileUploader;
 }

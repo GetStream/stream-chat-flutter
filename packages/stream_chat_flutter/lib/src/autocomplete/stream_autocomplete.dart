@@ -19,7 +19,8 @@ enum OptionsAlignment {
   /// The options are displayed above the field.
   ///
   /// This is the default.
-  above;
+  above
+  ;
 
   Anchor _toAnchor() {
     switch (this) {
@@ -45,11 +46,12 @@ enum OptionsAlignment {
 /// See also:
 ///
 ///   * [StreamAutocomplete.fieldViewBuilder], which is of this type.
-typedef StreamAutocompleteFieldViewBuilder = Widget Function(
-  BuildContext context,
-  StreamMessageEditingController messageEditingController,
-  FocusNode focusNode,
-);
+typedef StreamAutocompleteFieldViewBuilder =
+    Widget Function(
+      BuildContext context,
+      StreamMessageEditingController messageEditingController,
+      FocusNode focusNode,
+    );
 
 /// The type of the [StreamAutocompleteTrigger] callback which returns a
 /// [Widget] that displays the specified [options].
@@ -57,11 +59,12 @@ typedef StreamAutocompleteFieldViewBuilder = Widget Function(
 /// See also:
 ///
 ///   * [StreamAutocompleteTrigger.optionsViewBuilder], which is of this type.
-typedef StreamAutocompleteOptionsViewBuilder = Widget Function(
-  BuildContext context,
-  StreamAutocompleteQuery autocompleteQuery,
-  StreamMessageEditingController messageEditingController,
-);
+typedef StreamAutocompleteOptionsViewBuilder =
+    Widget Function(
+      BuildContext context,
+      StreamAutocompleteQuery autocompleteQuery,
+      StreamMessageEditingController messageEditingController,
+    );
 
 /// The query to determine the autocomplete options.
 class StreamAutocompleteQuery {
@@ -148,8 +151,7 @@ class StreamAutocompleteTrigger {
     final cursorPosition = textEditingValue.selection.baseOffset;
 
     // Find the first [trigger] location before the input cursor.
-    final firstTriggerIndexBeforeCursor =
-        text.substring(0, cursorPosition).lastIndexOf(trigger);
+    final firstTriggerIndexBeforeCursor = text.substring(0, cursorPosition).lastIndexOf(trigger);
 
     // If the [trigger] is not found before the cursor, then it's not a trigger.
     if (firstTriggerIndexBeforeCursor == -1) return null;
@@ -164,9 +166,7 @@ class StreamAutocompleteTrigger {
     // valid examples: "@user", "Hello @user"
     // invalid examples: "Hello@user"
     final textBeforeTrigger = text.substring(0, firstTriggerIndexBeforeCursor);
-    if (triggerOnlyAfterSpace &&
-        textBeforeTrigger.isNotEmpty &&
-        !textBeforeTrigger.endsWith(' ')) {
+    if (triggerOnlyAfterSpace && textBeforeTrigger.isNotEmpty && !textBeforeTrigger.endsWith(' ')) {
       return null;
     }
 
@@ -287,10 +287,7 @@ class _StreamAutocompleteState extends State<StreamAutocomplete> {
 
   // True if the state indicates that the options should be visible.
   bool get _shouldShowOptions {
-    return !_hideOptions &&
-        _focusNode.hasFocus &&
-        _currentQuery != null &&
-        _currentTrigger != null;
+    return !_hideOptions && _focusNode.hasFocus && _currentQuery != null && _currentTrigger != null;
   }
 
   /// Accepts and replaces the current query with the given [option] and closes
@@ -467,8 +464,7 @@ class _StreamAutocompleteState extends State<StreamAutocomplete> {
   @override
   void initState() {
     super.initState();
-    _messageEditingController =
-        widget.messageEditingController ?? StreamMessageEditingController();
+    _messageEditingController = widget.messageEditingController ?? StreamMessageEditingController();
     _messageEditingController.addListener(_onChangedField);
     _focusNode = widget.focusNode ?? FocusNode();
     _focusNode.addListener(_onChangedFocus);
@@ -495,7 +491,8 @@ class _StreamAutocompleteState extends State<StreamAutocomplete> {
       _focusNode.dispose();
     }
     _onChangedField.cancel();
-    closeSuggestions();
+    _currentQuery = null;
+    _currentTrigger = null;
     super.dispose();
   }
 
@@ -554,6 +551,72 @@ class _StreamAutocompleteField extends StatelessWidget {
 const _kDefaultStreamAutocompleteOptionsShape = RoundedRectangleBorder(
   borderRadius: BorderRadius.all(Radius.circular(8)),
 );
+
+/// Defines the visual style of autocomplete options overlay.
+enum AutocompleteOptionsStyle {
+  /// Flat overlay with no elevation or margin.
+  ///
+  /// Used for overlays that appear directly above the composer (default).
+  fixed,
+
+  /// Floating card with elevation and rounded corners.
+  ///
+  /// Used for overlays that appear in open space away from the composer.
+  floating,
+}
+
+/// Resolves visual parameters for a [StreamAutocompleteOptions] widget based
+/// on [AutocompleteOptionsStyle].
+extension AutocompleteOptionsStyleX on AutocompleteOptionsStyle {
+  /// Returns the elevation, margin, and shape for [StreamAutocompleteOptions].
+  ///
+  /// [borderColor] is used for the top border (fixed) or outline (floating).
+  ({double elevation, EdgeInsetsGeometry margin, ShapeBorder shape}) resolve(
+    Color borderColor,
+  ) {
+    return switch (this) {
+      AutocompleteOptionsStyle.fixed => (
+        elevation: 0.0,
+        margin: EdgeInsets.zero,
+        shape: _TopBorderShape(BorderSide(color: borderColor)),
+      ),
+      AutocompleteOptionsStyle.floating => (
+        elevation: 4.0,
+        margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        shape: RoundedRectangleBorder(
+          borderRadius: const BorderRadius.all(Radius.circular(24)),
+          side: BorderSide(color: borderColor),
+        ),
+      ),
+    };
+  }
+}
+
+/// A [ShapeBorder] that paints only a top border, with no rounding or sides.
+class _TopBorderShape extends ShapeBorder {
+  const _TopBorderShape(this.top);
+
+  final BorderSide top;
+
+  @override
+  EdgeInsetsGeometry get dimensions => EdgeInsets.only(top: top.width);
+
+  @override
+  Path getInnerPath(Rect rect, {TextDirection? textDirection}) => Path()..addRect(rect);
+
+  @override
+  Path getOuterPath(Rect rect, {TextDirection? textDirection}) => Path()..addRect(rect);
+
+  @override
+  void paint(Canvas canvas, Rect rect, {TextDirection? textDirection}) {
+    final paint = top.toPaint()..strokeCap = StrokeCap.square;
+    final y = rect.top + top.width / 2;
+    canvas.drawLine(Offset(rect.left, y), Offset(rect.right, y), paint);
+  }
+
+  @override
+  ShapeBorder scale(double t) => _TopBorderShape(top.scale(t));
+}
 
 /// A helper widget used to show the options of a [StreamAutocomplete].
 class StreamAutocompleteOptions<T extends Object> extends StatelessWidget {
@@ -621,10 +684,7 @@ class StreamAutocompleteOptions<T extends Object> extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (headerBuilder != null) ...[
-            headerBuilder!(context),
-            Divider(height: 0, color: colorTheme.borders),
-          ],
+          if (headerBuilder != null) headerBuilder!(context),
           LimitedBox(
             maxHeight: maxHeight ?? height * 0.5,
             child: ListView.builder(

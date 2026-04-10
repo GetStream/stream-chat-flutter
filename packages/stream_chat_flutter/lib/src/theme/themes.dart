@@ -1,5 +1,3 @@
-export 'audio_waveform_slider_theme.dart';
-export 'audio_waveform_theme.dart';
 export 'avatar_theme.dart';
 export 'channel_header_theme.dart';
 export 'channel_list_header_theme.dart';
@@ -17,6 +15,7 @@ export 'poll_interactor_theme.dart';
 export 'poll_option_votes_dialog_theme.dart';
 export 'poll_options_dialog_theme.dart';
 export 'poll_results_dialog_theme.dart';
+export 'stream_channel_list_item_theme.dart';
 export 'text_theme.dart';
 export 'thread_list_tile_theme.dart';
 export 'voice_recording_attachment_theme.dart';

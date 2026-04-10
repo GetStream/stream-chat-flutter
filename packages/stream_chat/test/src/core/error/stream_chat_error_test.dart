@@ -92,7 +92,8 @@ void main() {
       const statusCode = 666;
       const message = 'test-error-message';
       final options = RequestOptions(path: 'test-path');
-      const data = '''
+      const data =
+          '''
       {
         "code": $code,
         "StatusCode": $statusCode,

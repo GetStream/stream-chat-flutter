@@ -8,10 +8,10 @@ import '../../mocks.dart';
 
 void main() {
   Response successResponse(String path, {Object? data}) => Response(
-        data: data,
-        requestOptions: RequestOptions(path: path),
-        statusCode: 200,
-      );
+    data: data,
+    requestOptions: RequestOptions(path: path),
+    statusCode: 200,
+  );
 
   late final client = MockHttpClient();
   late DeviceApi deviceApi;
@@ -40,19 +40,16 @@ void main() {
           path,
           data: data,
         );
-      }).thenAnswer(
-          (_) async => successResponse(path, data: <String, dynamic>{}));
+      }).thenAnswer((_) async => successResponse(path, data: <String, dynamic>{}));
 
-      final res =
-          await deviceApi.addDevice(deviceId, pushProviderMapEntry.value);
+      final res = await deviceApi.addDevice(deviceId, pushProviderMapEntry.value);
 
       expect(res, isNotNull);
 
       verify(() => client.post(path, data: data)).called(1);
     }
     verifyNoMoreInteractions(client);
-    expect(pushProvidersMap.length, PushProvider.values.length,
-        reason: 'All PushProvider should be tested');
+    expect(pushProvidersMap.length, PushProvider.values.length, reason: 'All PushProvider should be tested');
   });
 
   test('addDevice should work with pushProviderName', () async {
@@ -62,16 +59,16 @@ void main() {
 
     const path = '/devices';
 
-    when(() => client.post(
-              path,
-              data: {
-                'id': deviceId,
-                'push_provider': pushProvider.name,
-                'push_provider_name': pushProviderName,
-              },
-            ))
-        .thenAnswer(
-            (_) async => successResponse(path, data: <String, dynamic>{}));
+    when(
+      () => client.post(
+        path,
+        data: {
+          'id': deviceId,
+          'push_provider': pushProvider.name,
+          'push_provider_name': pushProviderName,
+        },
+      ),
+    ).thenAnswer((_) async => successResponse(path, data: <String, dynamic>{}));
 
     final res = await deviceApi.addDevice(
       deviceId,
@@ -97,9 +94,12 @@ void main() {
     );
 
     when(() => client.get(path)).thenAnswer(
-      (_) async => successResponse(path, data: {
-        'devices': [...devices.map((it) => it.toJson())]
-      }),
+      (_) async => successResponse(
+        path,
+        data: {
+          'devices': [...devices.map((it) => it.toJson())],
+        },
+      ),
     );
 
     final res = await deviceApi.getDevices();
@@ -141,10 +141,13 @@ void main() {
     ];
 
     when(() => client.post(path, data: any(named: 'data'))).thenAnswer(
-      (_) async => successResponse(path, data: {
-        'user_preferences': <String, dynamic>{},
-        'user_channel_preferences': <String, dynamic>{},
-      }),
+      (_) async => successResponse(
+        path,
+        data: {
+          'user_preferences': <String, dynamic>{},
+          'user_channel_preferences': <String, dynamic>{},
+        },
+      ),
     );
 
     final res = await deviceApi.setPushPreferences(preferences);
@@ -170,10 +173,13 @@ void main() {
     ];
 
     when(() => client.post(path, data: any(named: 'data'))).thenAnswer(
-      (_) async => successResponse(path, data: {
-        'user_preferences': <String, dynamic>{},
-        'user_channel_preferences': <String, dynamic>{},
-      }),
+      (_) async => successResponse(
+        path,
+        data: {
+          'user_preferences': <String, dynamic>{},
+          'user_channel_preferences': <String, dynamic>{},
+        },
+      ),
     );
 
     final res = await deviceApi.setPushPreferences(preferences);
@@ -195,10 +201,13 @@ void main() {
     ];
 
     when(() => client.post(path, data: any(named: 'data'))).thenAnswer(
-      (_) async => successResponse(path, data: {
-        'user_preferences': <String, dynamic>{},
-        'user_channel_preferences': <String, dynamic>{},
-      }),
+      (_) async => successResponse(
+        path,
+        data: {
+          'user_preferences': <String, dynamic>{},
+          'user_channel_preferences': <String, dynamic>{},
+        },
+      ),
     );
 
     final res = await deviceApi.setPushPreferences(preferences);

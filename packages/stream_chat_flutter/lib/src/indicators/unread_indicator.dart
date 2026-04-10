@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 /// {@template streamUnreadIndicator}
 /// Shows different unread counts of the user.
@@ -31,31 +32,30 @@ class StreamUnreadIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = StreamChatTheme.of(context);
     final client = StreamChat.of(context).client;
 
     final stream = switch (_unreadType) {
       _TotalUnreadCount() => client.state.totalUnreadCountStream,
       _UnreadChannels(cid: final cid) => switch (cid) {
-          final cid? => client.state.channels[cid]?.state?.unreadCountStream,
-          _ => client.state.unreadChannelsStream,
-        },
+        final cid? => client.state.channels[cid]?.state?.unreadCountStream,
+        _ => client.state.unreadChannelsStream,
+      },
       _UnreadThreads(id: final id) => switch (id) {
-          // TODO: Handle id once it's supported
-          _ => client.state.unreadThreadsStream,
-        }
+        // TODO: Handle id once it's supported
+        _ => client.state.unreadThreadsStream,
+      },
     };
 
     final initialData = switch (_unreadType) {
       _TotalUnreadCount() => client.state.totalUnreadCount,
       _UnreadChannels(cid: final cid) => switch (cid) {
-          final cid? => client.state.channels[cid]?.state?.unreadCount,
-          _ => client.state.unreadChannels,
-        },
+        final cid? => client.state.channels[cid]?.state?.unreadCount,
+        _ => client.state.unreadChannels,
+      },
       _UnreadThreads(id: final id) => switch (id) {
-          // TODO: Handle id once it's supported
-          _ => client.state.unreadThreads,
-        }
+        // TODO: Handle id once it's supported
+        _ => client.state.unreadThreads,
+      },
     };
 
     return IgnorePointer(
@@ -65,16 +65,12 @@ class StreamUnreadIndicator extends StatelessWidget {
         builder: (context, unreadCount) {
           if (unreadCount == 0) return const Empty();
 
-          return Badge(
-            textColor: Colors.white,
-            textStyle: theme.textTheme.footnoteBold,
-            backgroundColor: theme.channelPreviewTheme.unreadCounterColor,
-            label: Text(
-              switch (unreadCount) {
-                > 99 => '99+',
-                _ => '$unreadCount',
-              },
-            ),
+          return StreamBadgeNotification(
+            size: StreamBadgeNotificationSize.xs,
+            label: switch (unreadCount) {
+              > 99 => '99+',
+              _ => '$unreadCount',
+            },
           );
         },
       ),

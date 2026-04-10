@@ -45,10 +45,8 @@ void main() {
         expect(updatedMessage.reactionGroups!.containsKey('like'), isTrue);
         expect(updatedMessage.reactionGroups!['like']!.count, 1);
         expect(updatedMessage.reactionGroups!['like']!.sumScores, 1);
-        expect(updatedMessage.reactionGroups!['like']!.firstReactionAt,
-            testReaction.createdAt);
-        expect(updatedMessage.reactionGroups!['like']!.lastReactionAt,
-            testReaction.createdAt);
+        expect(updatedMessage.reactionGroups!['like']!.firstReactionAt, testReaction.createdAt);
+        expect(updatedMessage.reactionGroups!['like']!.lastReactionAt, testReaction.createdAt);
       });
 
       test('should add reaction to a message with existing reactions', () {
@@ -151,8 +149,7 @@ void main() {
         expect(updatedMessage.ownReactions, isNotNull);
         expect(updatedMessage.ownReactions!.length, 2);
 
-        final reactionTypes =
-            updatedMessage.ownReactions!.map((r) => r.type).toList();
+        final reactionTypes = updatedMessage.ownReactions!.map((r) => r.type).toList();
         expect(reactionTypes, contains('like'));
         expect(reactionTypes, contains('love'));
 

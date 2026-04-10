@@ -33,19 +33,15 @@ class StreamMessageListViewTheme extends InheritedTheme {
   /// MessageListViewTheme theme = MessageListViewTheme.of(context);
   /// ```
   static StreamMessageListViewThemeData of(BuildContext context) {
-    final messageListViewTheme = context
-        .dependOnInheritedWidgetOfExactType<StreamMessageListViewTheme>();
-    return messageListViewTheme?.data ??
-        StreamChatTheme.of(context).messageListViewTheme;
+    final messageListViewTheme = context.dependOnInheritedWidgetOfExactType<StreamMessageListViewTheme>();
+    return messageListViewTheme?.data ?? StreamChatTheme.of(context).messageListViewTheme;
   }
 
   @override
-  Widget wrap(BuildContext context, Widget child) =>
-      StreamMessageListViewTheme(data: data, child: child);
+  Widget wrap(BuildContext context, Widget child) => StreamMessageListViewTheme(data: data, child: child);
 
   @override
-  bool updateShouldNotify(StreamMessageListViewTheme oldWidget) =>
-      data != oldWidget.data;
+  bool updateShouldNotify(StreamMessageListViewTheme oldWidget) => data != oldWidget.data;
 }
 
 /// {@template messageListViewThemeData}

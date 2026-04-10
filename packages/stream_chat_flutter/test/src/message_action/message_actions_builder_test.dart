@@ -30,9 +30,9 @@ Message createTestMessage({
     replyCount: replyCount,
     moderation: switch (type) {
       MessageType.error => const Moderation(
-          action: ModerationAction.bounce,
-          originalText: 'Original message text that violated policy',
-        ),
+        action: ModerationAction.bounce,
+        originalText: 'Original message text that violated policy',
+      ),
       _ => null,
     },
   );
@@ -83,10 +83,12 @@ void main() {
     await tester.pumpWidget(
       StreamChatTheme(
         data: StreamChatThemeData.light(),
-        child: Builder(builder: (ctx) {
-          context = ctx;
-          return const SizedBox.shrink();
-        }),
+        child: Builder(
+          builder: (ctx) {
+            context = ctx;
+            return const SizedBox.shrink();
+          },
+        ),
       ),
     );
     return context;
@@ -128,31 +130,6 @@ void main() {
     );
 
     expect(actions.isEmpty, isTrue);
-  });
-
-  testWidgets('includes custom actions', (tester) async {
-    final context = await _getContext(tester);
-    final customAction = StreamMessageAction(
-      title: const Text('Custom'),
-      leading: const Icon(Icons.star),
-      action: CustomMessageAction(
-        message: message,
-        extraData: {'customKey': 'customValue'},
-      ),
-    );
-
-    final channel = _getChannelWithCapabilities(allChannelCapabilities);
-    final actions = StreamMessageActionsBuilder.buildActions(
-      context: context,
-      message: message,
-      channel: channel,
-      currentUser: currentUser,
-      customActions: [customAction],
-    );
-
-    actions.expects<CustomMessageAction>(
-      reason: 'Custom action should be included',
-    );
   });
 
   group('permission-based actions', () {
@@ -437,8 +414,7 @@ void main() {
         // Thread message
         final channel = _getChannelWithCapabilities(allChannelCapabilities);
         final threadMessage = createTestMessage(parentId: 'parent-message-id');
-        final actionsForThreadMessage =
-            StreamMessageActionsBuilder.buildActions(
+        final actionsForThreadMessage = StreamMessageActionsBuilder.buildActions(
           context: context,
           message: threadMessage,
           channel: channel,
@@ -512,6 +488,37 @@ void main() {
         reason: 'Mark unread unavailable without read events capability',
       );
     });
+
+    testWidgets(
+      'excludes mark unread action for own messages even if parent message',
+      (tester) async {
+        final context = await _getContext(tester);
+
+        final channelWithReadEvents = _getChannelWithCapabilities([
+          ChannelCapability.sendMessage,
+          ChannelCapability.sendReply,
+          ChannelCapability.readEvents,
+        ]);
+
+        final ownParentMessage = createTestMessage(
+          userId: currentUser.id,
+          replyCount: 5,
+        );
+
+        final actions = StreamMessageActionsBuilder.buildActions(
+          context: context,
+          message: ownParentMessage,
+          channel: channelWithReadEvents,
+          currentUser: currentUser,
+        );
+
+        actions.notExpects<MarkUnread>(
+          reason:
+              'Mark unread should not be available for own messages, '
+              'even if it is a parent message',
+        );
+      },
+    );
   });
 
   group('buildBouncedErrorActions', () {
@@ -556,15 +563,15 @@ void main() {
   });
 }
 
-/// Extension on Set<StreamMessageAction> to simplify action type checks.
-extension StreamMessageActionSetExtension on List<StreamMessageAction> {
+/// Extension on action lists to simplify message action type checks.
+extension StreamMessageActionSetExtension on List<StreamContextMenuAction> {
   void expects<T extends MessageAction>({String? reason}) {
-    final containsActionType = this.any((it) => it.action is T);
+    final containsActionType = this.any((it) => it.props.value is T);
     return expect(containsActionType, isTrue, reason: reason);
   }
 
   void notExpects<T extends MessageAction>({String? reason}) {
-    final containsActionType = this.any((it) => it.action is T);
+    final containsActionType = this.any((it) => it.props.value is T);
     return expect(containsActionType, isFalse, reason: reason);
   }
 }

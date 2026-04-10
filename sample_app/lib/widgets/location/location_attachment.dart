@@ -15,7 +15,7 @@ class LocationAttachmentBuilder extends StreamAttachmentWidgetBuilder {
   /// {@macro locationAttachmentBuilder}
   const LocationAttachmentBuilder({
     this.constraints = _defaultLocationConstraints,
-    this.padding = const EdgeInsets.all(4),
+    this.padding = const .symmetric(horizontal: 8),
     this.onAttachmentTap,
   });
 
@@ -26,14 +26,22 @@ class LocationAttachmentBuilder extends StreamAttachmentWidgetBuilder {
   final EdgeInsetsGeometry padding;
 
   /// Optional callback to handle tap events on the attachment.
-  final ValueSetter<Location>? onAttachmentTap;
+  ///
+  /// Receives the [BuildContext] from the widget tree where the attachment
+  /// is rendered, along with the [Location] data. This allows showing
+  /// dialogs or navigating from the correct context.
+  final void Function(BuildContext context, Location location)? onAttachmentTap;
 
   @override
   bool canHandle(Message message, _) => message.sharedLocation != null;
 
   @override
-  Widget build(BuildContext context, Message message, _) {
-    assert(debugAssertCanHandle(message, _), '');
+  Widget build(
+    BuildContext context,
+    Message message,
+    Map<String, List<Attachment>> attachments,
+  ) {
+    assert(debugAssertCanHandle(message, attachments), '');
 
     final user = message.user;
     final location = message.sharedLocation!;
@@ -43,7 +51,7 @@ class LocationAttachmentBuilder extends StreamAttachmentWidgetBuilder {
       constraints: constraints,
       padding: padding,
       onLocationTap: switch (onAttachmentTap) {
-        final onTap? => () => onTap(location),
+        final onTap? => () => onTap(context, location),
         _ => null,
       },
     );
@@ -58,7 +66,7 @@ class LocationAttachment extends StatelessWidget {
     required this.user,
     required this.sharedLocation,
     this.constraints = _defaultLocationConstraints,
-    this.padding = const EdgeInsets.all(2),
+    this.padding = const .symmetric(horizontal: 8),
     this.onLocationTap,
   });
 
@@ -99,12 +107,12 @@ class LocationAttachment extends StatelessWidget {
                   onTap: onLocationTap,
                   child: IgnorePointer(
                     child: SimpleMapView(
-                      markerSize: 40,
+                      markerSize: MarkerSize.lg,
                       showLocateMeButton: false,
                       coordinates: sharedLocation.coordinates,
                       markerBuilder: (_, __, size) => LocationUserMarker(
                         user: user,
-                        markerSize: size,
+                        size: size,
                         sharedLocation: sharedLocation,
                       ),
                     ),

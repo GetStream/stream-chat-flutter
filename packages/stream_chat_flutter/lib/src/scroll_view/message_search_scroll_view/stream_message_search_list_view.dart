@@ -2,23 +2,21 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/scroll_view/stream_scroll_view_error_widget.dart';
 import 'package:stream_chat_flutter/src/scroll_view/stream_scroll_view_load_more_error.dart';
-import 'package:stream_chat_flutter/src/scroll_view/stream_scroll_view_load_more_indicator.dart';
 import 'package:stream_chat_flutter/src/scroll_view/stream_scroll_view_loading_widget.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 /// Default separator builder for [StreamMessageSearchListView].
 Widget defaultMessageSearchListViewSeparatorBuilder(
   BuildContext context,
   List<GetMessageResponse> responses,
   int index,
-) =>
-    const StreamMessageSearchListSeparator();
+) => const StreamMessageSearchListSeparator();
 
 /// Signature for the item builder that creates the children of the
 /// [StreamMessageSearchListView].
-typedef StreamMessageSearchListViewIndexedWidgetBuilder
-    = StreamScrollViewIndexedWidgetBuilder<GetMessageResponse,
-        StreamMessageSearchListTile>;
+typedef StreamMessageSearchListViewIndexedWidgetBuilder =
+    StreamScrollViewIndexedWidgetBuilder<GetMessageResponse, StreamMessageSearchListTile>;
 
 /// A [ListView] that shows a list of [GetMessageResponse]s,
 /// it uses [StreamMessageSearchListTile] as a default item.
@@ -81,8 +79,7 @@ class StreamMessageSearchListView extends StatelessWidget {
   final StreamMessageSearchListViewIndexedWidgetBuilder? itemBuilder;
 
   /// A builder that is called to build the list separator.
-  final PagedValueScrollViewIndexedWidgetBuilder<GetMessageResponse>
-      separatorBuilder;
+  final PagedValueScrollViewIndexedWidgetBuilder<GetMessageResponse> separatorBuilder;
 
   /// A builder that is called to build the empty state of the list.
   final WidgetBuilder? emptyBuilder;
@@ -308,8 +305,7 @@ class StreamMessageSearchListView extends StatelessWidget {
         final streamMessageSearchListTile = StreamMessageSearchListTile(
           messageResponse: messageResponse,
           onTap: onTap == null ? null : () => onTap(messageResponse),
-          onLongPress:
-              onLongPress == null ? null : () => onLongPress(messageResponse),
+          onLongPress: onLongPress == null ? null : () => onLongPress(messageResponse),
         );
 
         return itemBuilder?.call(
@@ -327,9 +323,9 @@ class StreamMessageSearchListView extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.all(8),
                 child: StreamScrollViewEmptyWidget(
-                  emptyIcon: StreamSvgIcon(
+                  emptyIcon: Icon(
+                    context.streamIcons.messageBubble32,
                     size: 148,
-                    icon: StreamSvgIcons.message,
                     color: chatThemeData.colorTheme.disabled,
                   ),
                   emptyTitle: Text(
@@ -340,15 +336,14 @@ class StreamMessageSearchListView extends StatelessWidget {
               ),
             );
       },
-      loadMoreErrorBuilder: (context, error) =>
-          StreamScrollViewLoadMoreError.list(
+      loadMoreErrorBuilder: (context, error) => StreamScrollViewLoadMoreError.list(
         onTap: controller.retry,
         error: Text(context.translations.loadingMessagesError),
       ),
-      loadMoreIndicatorBuilder: (context) => const Center(
+      loadMoreIndicatorBuilder: (context) => Center(
         child: Padding(
-          padding: EdgeInsets.all(16),
-          child: StreamScrollViewLoadMoreIndicator(),
+          padding: const EdgeInsets.all(16),
+          child: StreamLoadingSpinner(),
         ),
       ),
       loadingBuilder: (context) =>

@@ -12,12 +12,11 @@ class ReactionGroup extends Equatable {
     this.sumScores = 0,
     DateTime? firstReactionAt,
     DateTime? lastReactionAt,
-  })  : firstReactionAt = firstReactionAt ?? DateTime.timestamp(),
-        lastReactionAt = lastReactionAt ?? DateTime.timestamp();
+  }) : firstReactionAt = firstReactionAt ?? DateTime.timestamp(),
+       lastReactionAt = lastReactionAt ?? DateTime.timestamp();
 
   /// Create a new instance from a json
-  factory ReactionGroup.fromJson(Map<String, dynamic> json) =>
-      _$ReactionGroupFromJson(json);
+  factory ReactionGroup.fromJson(Map<String, dynamic> json) => _$ReactionGroupFromJson(json);
 
   /// The number of users that reacted with this reaction.
   final int count;
@@ -51,11 +50,11 @@ class ReactionGroup extends Equatable {
 
   @override
   List<Object?> get props => [
-        count,
-        sumScores,
-        firstReactionAt,
-        lastReactionAt,
-      ];
+    count,
+    sumScores,
+    firstReactionAt,
+    lastReactionAt,
+  ];
 }
 
 /// A group of comparators for sorting [ReactionGroup]s.

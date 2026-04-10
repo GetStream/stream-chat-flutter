@@ -122,8 +122,7 @@ void main() {
 
       when(() => client.state).thenReturn(clientState);
       when(() => clientState.totalUnreadCount).thenAnswer((_) => 0);
-      when(() => clientState.totalUnreadCountStream)
-          .thenAnswer((_) => Stream.value(0));
+      when(() => clientState.totalUnreadCountStream).thenAnswer((_) => Stream.value(0));
 
       await tester.pumpWidget(
         MaterialApp(

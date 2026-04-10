@@ -8,8 +8,7 @@ import '../../utils.dart';
 void main() {
   group('src/models/attachment_file', () {
     test('should parse json correctly', () {
-      final attachment =
-          AttachmentFile.fromJson(jsonFixture('attachment_file.json'));
+      final attachment = AttachmentFile.fromJson(jsonFixture('attachment_file.json'));
       expect(attachment.name, 'test.jpg');
       expect(attachment.size, 12);
       expect(

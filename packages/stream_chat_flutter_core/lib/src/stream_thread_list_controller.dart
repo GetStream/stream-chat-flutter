@@ -29,11 +29,11 @@ class StreamThreadListController extends PagedValueNotifier<String, Thread> {
     this.sort,
     this.options = const ThreadOptions(),
     this.limit = defaultThreadsPagedLimit,
-  })  : _activeFilter = filter,
-        _activeSort = sort,
-        _activeOptions = options,
-        _eventHandler = eventHandler ?? StreamThreadListEventHandler(),
-        super(const PagedValue.loading());
+  }) : _activeFilter = filter,
+       _activeSort = sort,
+       _activeOptions = options,
+       _eventHandler = eventHandler ?? StreamThreadListEventHandler(),
+       super(const PagedValue.loading());
 
   /// Creates a [StreamThreadListController] from the passed [value].
   StreamThreadListController.fromValue(
@@ -44,10 +44,10 @@ class StreamThreadListController extends PagedValueNotifier<String, Thread> {
     this.sort,
     this.options = const ThreadOptions(),
     this.limit = defaultThreadsPagedLimit,
-  })  : _activeFilter = filter,
-        _activeSort = sort,
-        _activeOptions = options,
-        _eventHandler = eventHandler ?? StreamThreadListEventHandler();
+  }) : _activeFilter = filter,
+       _activeSort = sort,
+       _activeOptions = options,
+       _eventHandler = eventHandler ?? StreamThreadListEventHandler();
 
   /// The Stream client used to perform the queries.
   final StreamChatClient client;
@@ -129,11 +129,11 @@ class StreamThreadListController extends PagedValueNotifier<String, Thread> {
     super.value = switch (_activeSort) {
       null => newValue,
       final threadSort => newValue.maybeMap(
-          orElse: () => newValue,
-          (success) => success.copyWith(
-            items: success.items.sorted(threadSort.compare),
-          ),
+        orElse: () => newValue,
+        (success) => success.copyWith(
+          items: success.items.sorted(threadSort.compare),
         ),
+      ),
     };
   }
 
@@ -338,11 +338,9 @@ class StreamThreadListController extends PagedValueNotifier<String, Thread> {
       final handlerFunc = switch (event.type) {
         EventType.threadUpdated => _eventHandler.onThreadUpdated,
         EventType.connectionRecovered => _eventHandler.onConnectionRecovered,
-        EventType.notificationThreadMessageNew =>
-          _eventHandler.onNotificationThreadMessageNew,
+        EventType.notificationThreadMessageNew => _eventHandler.onNotificationThreadMessageNew,
         EventType.messageRead => _eventHandler.onMessageRead,
-        EventType.notificationMarkUnread =>
-          _eventHandler.onNotificationMarkUnread,
+        EventType.notificationMarkUnread => _eventHandler.onNotificationMarkUnread,
         EventType.channelDeleted => _eventHandler.onChannelDeleted,
         EventType.channelTruncated => _eventHandler.onChannelTruncated,
         EventType.messageNew => _eventHandler.onMessageNew,

@@ -9,12 +9,7 @@ import 'package:flutter/services.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 export 'package:flutter/services.dart'
-    show
-        TextInputType,
-        TextInputAction,
-        TextCapitalization,
-        SmartQuotesType,
-        SmartDashesType;
+    show TextInputType, TextInputAction, TextCapitalization, SmartQuotesType, SmartDashesType;
 
 /// A widget the wraps the [TextField] and adds some StreamChat specifics.
 class StreamMessageTextField extends StatefulWidget {
@@ -119,42 +114,36 @@ class StreamMessageTextField extends StatefulWidget {
     this.scribbleEnabled = true,
     this.enableIMEPersonalizedLearning = true,
     this.contentInsertionConfiguration,
-  })  : assert(obscuringCharacter.length == 1, ''),
-        smartDashesType = smartDashesType ??
-            (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
-        smartQuotesType = smartQuotesType ??
-            (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
-        assert(maxLines == null || maxLines > 0, ''),
-        assert(minLines == null || minLines > 0, ''),
-        assert(
-          (maxLines == null) || (minLines == null) || (maxLines >= minLines),
-          "minLines can't be greater than maxLines",
-        ),
-        assert(
-          !expands || (maxLines == null && minLines == null),
-          'minLines and maxLines must be null when expands is true.',
-        ),
-        assert(!obscureText || maxLines == 1,
-            'Obscured fields cannot be multiline.'),
-        assert(
-            maxLength == null ||
-                maxLength == TextField.noMaxLength ||
-                maxLength > 0,
-            'maxLength must be null or a positive integer.'),
+  }) : assert(obscuringCharacter.length == 1, ''),
+       smartDashesType = smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
+       smartQuotesType = smartQuotesType ?? (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
+       assert(maxLines == null || maxLines > 0, ''),
+       assert(minLines == null || minLines > 0, ''),
+       assert(
+         (maxLines == null) || (minLines == null) || (maxLines >= minLines),
+         "minLines can't be greater than maxLines",
+       ),
+       assert(
+         !expands || (maxLines == null && minLines == null),
+         'minLines and maxLines must be null when expands is true.',
+       ),
+       assert(!obscureText || maxLines == 1, 'Obscured fields cannot be multiline.'),
+       assert(
+         maxLength == null || maxLength == TextField.noMaxLength || maxLength > 0,
+         'maxLength must be null or a positive integer.',
+       ),
 
-        // Assert the following instead of setting it directly to avoid
-        // surprising the user by silently changing the value they set.
-        assert(
-          !identical(textInputAction, TextInputAction.newline) ||
-              maxLines == 1 ||
-              !identical(keyboardType, TextInputType.text),
-          'Use keyboardType TextInputType.multiline when using '
-          'TextInputAction.newline on a multiline TextField.',
-        ),
-        keyboardType = keyboardType ??
-            (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
-        enableInteractiveSelection =
-            enableInteractiveSelection ?? (!readOnly || !obscureText);
+       // Assert the following instead of setting it directly to avoid
+       // surprising the user by silently changing the value they set.
+       assert(
+         !identical(textInputAction, TextInputAction.newline) ||
+             maxLines == 1 ||
+             !identical(keyboardType, TextInputType.text),
+         'Use keyboardType TextInputType.multiline when using '
+         'TextInputAction.newline on a multiline TextField.',
+       ),
+       keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
+       enableInteractiveSelection = enableInteractiveSelection ?? (!readOnly || !obscureText);
 
   /// Controls the message being edited.
   ///
@@ -522,93 +511,78 @@ class StreamMessageTextField extends StatefulWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties
-      ..add(DiagnosticsProperty<StreamMessageInputController>(
-          'controller', controller,
-          defaultValue: null))
-      ..add(DiagnosticsProperty<FocusNode>('focusNode', focusNode,
-          defaultValue: null))
+      ..add(DiagnosticsProperty<StreamMessageInputController>('controller', controller, defaultValue: null))
+      ..add(DiagnosticsProperty<FocusNode>('focusNode', focusNode, defaultValue: null))
       ..add(DiagnosticsProperty<bool>('enabled', enabled, defaultValue: null))
-      ..add(DiagnosticsProperty<InputDecoration>('decoration', decoration,
-          defaultValue: const InputDecoration()))
-      ..add(DiagnosticsProperty<TextInputType>('keyboardType', keyboardType,
-          defaultValue: TextInputType.text))
+      ..add(DiagnosticsProperty<InputDecoration>('decoration', decoration, defaultValue: const InputDecoration()))
+      ..add(DiagnosticsProperty<TextInputType>('keyboardType', keyboardType, defaultValue: TextInputType.text))
       ..add(DiagnosticsProperty<TextStyle>('style', style, defaultValue: null))
-      ..add(DiagnosticsProperty<bool>('autofocus', autofocus,
-          defaultValue: false))
-      ..add(DiagnosticsProperty<String>(
-          'obscuringCharacter', obscuringCharacter,
-          defaultValue: '•'))
-      ..add(DiagnosticsProperty<bool>('obscureText', obscureText,
-          defaultValue: false))
-      ..add(DiagnosticsProperty<bool>('autocorrect', autocorrect,
-          defaultValue: true))
-      ..add(EnumProperty<SmartDashesType>('smartDashesType', smartDashesType,
-          defaultValue:
-              obscureText ? SmartDashesType.disabled : SmartDashesType.enabled))
-      ..add(EnumProperty<SmartQuotesType>('smartQuotesType', smartQuotesType,
-          defaultValue:
-              obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled))
-      ..add(DiagnosticsProperty<bool>('enableSuggestions', enableSuggestions,
-          defaultValue: true))
+      ..add(DiagnosticsProperty<bool>('autofocus', autofocus, defaultValue: false))
+      ..add(DiagnosticsProperty<String>('obscuringCharacter', obscuringCharacter, defaultValue: '•'))
+      ..add(DiagnosticsProperty<bool>('obscureText', obscureText, defaultValue: false))
+      ..add(DiagnosticsProperty<bool>('autocorrect', autocorrect, defaultValue: true))
+      ..add(
+        EnumProperty<SmartDashesType>(
+          'smartDashesType',
+          smartDashesType,
+          defaultValue: obscureText ? SmartDashesType.disabled : SmartDashesType.enabled,
+        ),
+      )
+      ..add(
+        EnumProperty<SmartQuotesType>(
+          'smartQuotesType',
+          smartQuotesType,
+          defaultValue: obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled,
+        ),
+      )
+      ..add(DiagnosticsProperty<bool>('enableSuggestions', enableSuggestions, defaultValue: true))
       ..add(IntProperty('maxLines', maxLines, defaultValue: 1))
       ..add(IntProperty('minLines', minLines, defaultValue: null))
       ..add(DiagnosticsProperty<bool>('expands', expands, defaultValue: false))
       ..add(IntProperty('maxLength', maxLength, defaultValue: null))
-      ..add(EnumProperty<MaxLengthEnforcement>(
-          'maxLengthEnforcement', maxLengthEnforcement,
-          defaultValue: null))
-      ..add(EnumProperty<TextInputAction>('textInputAction', textInputAction,
-          defaultValue: null))
-      ..add(EnumProperty<TextCapitalization>(
-          'textCapitalization', textCapitalization,
-          defaultValue: TextCapitalization.none))
-      ..add(EnumProperty<TextAlign>('textAlign', textAlign,
-          defaultValue: TextAlign.start))
-      ..add(DiagnosticsProperty<TextAlignVertical>(
-          'textAlignVertical', textAlignVertical,
-          defaultValue: null))
-      ..add(EnumProperty<TextDirection>('textDirection', textDirection,
-          defaultValue: null))
+      ..add(EnumProperty<MaxLengthEnforcement>('maxLengthEnforcement', maxLengthEnforcement, defaultValue: null))
+      ..add(EnumProperty<TextInputAction>('textInputAction', textInputAction, defaultValue: null))
+      ..add(
+        EnumProperty<TextCapitalization>(
+          'textCapitalization',
+          textCapitalization,
+          defaultValue: TextCapitalization.none,
+        ),
+      )
+      ..add(EnumProperty<TextAlign>('textAlign', textAlign, defaultValue: TextAlign.start))
+      ..add(DiagnosticsProperty<TextAlignVertical>('textAlignVertical', textAlignVertical, defaultValue: null))
+      ..add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null))
       ..add(DoubleProperty('cursorWidth', cursorWidth, defaultValue: 2.0))
       ..add(DoubleProperty('cursorHeight', cursorHeight, defaultValue: null))
-      ..add(DiagnosticsProperty<Radius>('cursorRadius', cursorRadius,
-          defaultValue: null))
+      ..add(DiagnosticsProperty<Radius>('cursorRadius', cursorRadius, defaultValue: null))
       ..add(ColorProperty('cursorColor', cursorColor, defaultValue: null))
-      ..add(DiagnosticsProperty<Brightness>(
-          'keyboardAppearance', keyboardAppearance,
-          defaultValue: null))
-      ..add(DiagnosticsProperty<EdgeInsetsGeometry>(
-          'scrollPadding', scrollPadding,
-          defaultValue: const EdgeInsets.all(20)))
-      ..add(FlagProperty('selectionEnabled',
-          value: selectionEnabled,
-          defaultValue: true,
-          ifFalse: 'selection disabled'))
-      ..add(DiagnosticsProperty<TextSelectionControls>(
-          'selectionControls', selectionControls,
-          defaultValue: null))
-      ..add(DiagnosticsProperty<ScrollController>(
-          'scrollController', scrollController,
-          defaultValue: null))
-      ..add(DiagnosticsProperty<ScrollPhysics>('scrollPhysics', scrollPhysics,
-          defaultValue: null))
-      ..add(DiagnosticsProperty<Clip>('clipBehavior', clipBehavior,
-          defaultValue: Clip.hardEdge))
-      ..add(DiagnosticsProperty<bool>('scribbleEnabled', scribbleEnabled,
-          defaultValue: true))
-      ..add(DiagnosticsProperty<bool>(
-          'enableIMEPersonalizedLearning', enableIMEPersonalizedLearning,
-          defaultValue: true))
-      ..add(DiagnosticsProperty<ContentInsertionConfiguration>(
-          'contentInsertionConfiguration', contentInsertionConfiguration,
-          defaultValue: null));
+      ..add(DiagnosticsProperty<Brightness>('keyboardAppearance', keyboardAppearance, defaultValue: null))
+      ..add(
+        DiagnosticsProperty<EdgeInsetsGeometry>('scrollPadding', scrollPadding, defaultValue: const EdgeInsets.all(20)),
+      )
+      ..add(
+        FlagProperty('selectionEnabled', value: selectionEnabled, defaultValue: true, ifFalse: 'selection disabled'),
+      )
+      ..add(DiagnosticsProperty<TextSelectionControls>('selectionControls', selectionControls, defaultValue: null))
+      ..add(DiagnosticsProperty<ScrollController>('scrollController', scrollController, defaultValue: null))
+      ..add(DiagnosticsProperty<ScrollPhysics>('scrollPhysics', scrollPhysics, defaultValue: null))
+      ..add(DiagnosticsProperty<Clip>('clipBehavior', clipBehavior, defaultValue: Clip.hardEdge))
+      ..add(DiagnosticsProperty<bool>('scribbleEnabled', scribbleEnabled, defaultValue: true))
+      ..add(
+        DiagnosticsProperty<bool>('enableIMEPersonalizedLearning', enableIMEPersonalizedLearning, defaultValue: true),
+      )
+      ..add(
+        DiagnosticsProperty<ContentInsertionConfiguration>(
+          'contentInsertionConfiguration',
+          contentInsertionConfiguration,
+          defaultValue: null,
+        ),
+      );
   }
 }
 
-class _StreamMessageTextFieldState extends State<StreamMessageTextField>
-    with RestorationMixin<StreamMessageTextField> {
-  StreamMessageInputController get _effectiveController =>
-      widget.controller ?? _controller!.value;
+class _StreamMessageTextFieldState extends State<StreamMessageTextField> with RestorationMixin<StreamMessageTextField> {
+  StreamMessageInputController get _effectiveController => widget.controller ?? _controller!.value;
   StreamRestorableMessageInputController? _controller;
 
   @override
@@ -653,63 +627,62 @@ class _StreamMessageTextFieldState extends State<StreamMessageTextField>
 
   @override
   Widget build(BuildContext context) => TextField(
-        controller: _effectiveController.textFieldController,
-        focusNode: widget.focusNode,
-        decoration: widget.decoration,
-        keyboardType: widget.keyboardType,
-        textInputAction: widget.textInputAction ??
-            (widget.keyboardType == TextInputType.multiline
-                ? TextInputAction.newline
-                : TextInputAction.send),
-        textCapitalization: widget.textCapitalization,
-        style: widget.style,
-        strutStyle: widget.strutStyle,
-        textAlign: widget.textAlign,
-        textAlignVertical: widget.textAlignVertical,
-        textDirection: widget.textDirection,
-        readOnly: widget.readOnly,
-        showCursor: widget.showCursor,
-        autofocus: widget.autofocus,
-        obscuringCharacter: widget.obscuringCharacter,
-        obscureText: widget.obscureText,
-        autocorrect: widget.autocorrect,
-        smartDashesType: widget.smartDashesType,
-        smartQuotesType: widget.smartQuotesType,
-        enableSuggestions: widget.enableSuggestions,
-        maxLines: widget.maxLines,
-        minLines: widget.minLines,
-        expands: widget.expands,
-        maxLength: widget.maxLength,
-        maxLengthEnforcement: widget.maxLengthEnforcement,
-        onEditingComplete: widget.onEditingComplete,
-        onSubmitted: widget.onSubmitted,
-        onAppPrivateCommand: widget.onAppPrivateCommand,
-        inputFormatters: widget.inputFormatters,
-        enabled: widget.enabled,
-        cursorWidth: widget.cursorWidth,
-        cursorHeight: widget.cursorHeight,
-        cursorRadius: widget.cursorRadius,
-        cursorColor: widget.cursorColor,
-        selectionHeightStyle: widget.selectionHeightStyle,
-        selectionWidthStyle: widget.selectionWidthStyle,
-        keyboardAppearance: widget.keyboardAppearance,
-        scrollPadding: widget.scrollPadding,
-        dragStartBehavior: widget.dragStartBehavior,
-        enableInteractiveSelection: widget.enableInteractiveSelection,
-        selectionControls: widget.selectionControls,
-        onTap: widget.onTap,
-        mouseCursor: widget.mouseCursor,
-        buildCounter: widget.buildCounter,
-        scrollController: widget.scrollController,
-        scrollPhysics: widget.scrollPhysics,
-        autofillHints: widget.autofillHints,
-        clipBehavior: widget.clipBehavior,
-        restorationId: widget.restorationId,
-        // ignore: deprecated_member_use
-        scribbleEnabled: widget.scribbleEnabled,
-        enableIMEPersonalizedLearning: widget.enableIMEPersonalizedLearning,
-        contentInsertionConfiguration: widget.contentInsertionConfiguration,
-      );
+    controller: _effectiveController.textFieldController,
+    focusNode: widget.focusNode,
+    decoration: widget.decoration,
+    keyboardType: widget.keyboardType,
+    textInputAction:
+        widget.textInputAction ??
+        (widget.keyboardType == TextInputType.multiline ? TextInputAction.newline : TextInputAction.send),
+    textCapitalization: widget.textCapitalization,
+    style: widget.style,
+    strutStyle: widget.strutStyle,
+    textAlign: widget.textAlign,
+    textAlignVertical: widget.textAlignVertical,
+    textDirection: widget.textDirection,
+    readOnly: widget.readOnly,
+    showCursor: widget.showCursor,
+    autofocus: widget.autofocus,
+    obscuringCharacter: widget.obscuringCharacter,
+    obscureText: widget.obscureText,
+    autocorrect: widget.autocorrect,
+    smartDashesType: widget.smartDashesType,
+    smartQuotesType: widget.smartQuotesType,
+    enableSuggestions: widget.enableSuggestions,
+    maxLines: widget.maxLines,
+    minLines: widget.minLines,
+    expands: widget.expands,
+    maxLength: widget.maxLength,
+    maxLengthEnforcement: widget.maxLengthEnforcement,
+    onEditingComplete: widget.onEditingComplete,
+    onSubmitted: widget.onSubmitted,
+    onAppPrivateCommand: widget.onAppPrivateCommand,
+    inputFormatters: widget.inputFormatters,
+    enabled: widget.enabled,
+    cursorWidth: widget.cursorWidth,
+    cursorHeight: widget.cursorHeight,
+    cursorRadius: widget.cursorRadius,
+    cursorColor: widget.cursorColor,
+    selectionHeightStyle: widget.selectionHeightStyle,
+    selectionWidthStyle: widget.selectionWidthStyle,
+    keyboardAppearance: widget.keyboardAppearance,
+    scrollPadding: widget.scrollPadding,
+    dragStartBehavior: widget.dragStartBehavior,
+    enableInteractiveSelection: widget.enableInteractiveSelection,
+    selectionControls: widget.selectionControls,
+    onTap: widget.onTap,
+    mouseCursor: widget.mouseCursor,
+    buildCounter: widget.buildCounter,
+    scrollController: widget.scrollController,
+    scrollPhysics: widget.scrollPhysics,
+    autofillHints: widget.autofillHints,
+    clipBehavior: widget.clipBehavior,
+    restorationId: widget.restorationId,
+    // ignore: deprecated_member_use
+    scribbleEnabled: widget.scribbleEnabled,
+    enableIMEPersonalizedLearning: widget.enableIMEPersonalizedLearning,
+    contentInsertionConfiguration: widget.contentInsertionConfiguration,
+  );
 
   @override
   void dispose() {

@@ -9,24 +9,22 @@ part of 'attachment_widget_builder.dart';
 /// The widget is built when the message has at least one voice recording
 /// attachment.
 /// {@endtemplate}
-class VoiceRecordingAttachmentPlaylistBuilder
-    extends StreamAttachmentWidgetBuilder {
+class VoiceRecordingAttachmentPlaylistBuilder extends StreamAttachmentWidgetBuilder {
   /// {@macro voiceRecordingAttachmentPlaylistBuilder}
   const VoiceRecordingAttachmentPlaylistBuilder({
-    this.shape,
-    this.padding = const EdgeInsets.all(16),
-    this.constraints = const BoxConstraints(),
+    this.style,
+    this.constraints,
     this.onAttachmentTap,
   });
 
-  /// The shape of the video attachment.
-  final ShapeBorder? shape;
-
-  /// The padding to apply to the video attachment widget.
-  final EdgeInsetsGeometry padding;
+  /// The style of the voice recording attachment container.
+  ///
+  /// When null, a default style with a rounded rectangle shape and border
+  /// is used.
+  final StreamMessageAttachmentStyle? style;
 
   /// The constraints to apply to the video attachment widget.
-  final BoxConstraints constraints;
+  final BoxConstraints? constraints;
 
   /// The callback to call when the attachment is tapped.
   final StreamAttachmentWidgetTapCallback? onAttachmentTap;
@@ -41,7 +39,7 @@ class VoiceRecordingAttachmentPlaylistBuilder
   }
 
   @override
-  Widget build(
+  Widget? build(
     BuildContext context,
     Message message,
     Map<String, List<Attachment>> attachments,
@@ -50,15 +48,37 @@ class VoiceRecordingAttachmentPlaylistBuilder
 
     final playlist = attachments[AttachmentType.voiceRecording]!;
 
-    return Padding(
-      padding: padding,
+    return StreamVoiceRecordingAttachmentTheme(
+      data: _StreamVoiceRecordingAttachmentDefaults(context),
       child: StreamVoiceRecordingAttachmentPlaylist(
-        shape: shape,
         message: message,
         voiceRecordings: playlist,
         constraints: constraints,
-        separatorBuilder: (_, __) => SizedBox(height: padding.vertical / 2),
+        itemDecorator: (context, index, child) {
+          return StreamMessageAttachment(style: style, child: child);
+        },
       ),
     );
   }
+}
+
+// Default values for [StreamVoiceRecordingAttachmentThemeData] backed by stream design tokens.
+class _StreamVoiceRecordingAttachmentDefaults extends StreamVoiceRecordingAttachmentThemeData {
+  _StreamVoiceRecordingAttachmentDefaults(this._context);
+
+  final BuildContext _context;
+
+  late final _alignment = StreamMessageLayout.messageAlignmentOf(_context);
+  late final StreamColorScheme _colorScheme = _context.streamColorScheme;
+
+  Color get _borderColor => switch (_alignment) {
+    .start => _colorScheme.borderStrong,
+    .end => _colorScheme.brand.shade300,
+  };
+
+  @override
+  StreamButtonThemeStyle get controlButtonStyle => .from(borderColor: _borderColor);
+
+  @override
+  StreamPlaybackSpeedToggleStyle get speedToggleStyle => .from(borderColor: _borderColor);
 }

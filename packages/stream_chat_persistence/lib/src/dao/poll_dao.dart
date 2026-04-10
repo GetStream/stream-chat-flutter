@@ -45,28 +45,27 @@ class PollDao extends DatabaseAccessor<DriftChatDatabase> with _$PollDaoMixin {
   }
 
   /// Returns the poll by matching [Polls.id] with [pollId]
-  Future<Poll?> getPollById(String pollId) async =>
-      await (select(polls)..where((it) => it.id.equals(pollId)))
-          .join([leftOuterJoin(users, polls.createdById.equalsExp(users.id))])
-          .map(_pollFromJoinRow)
-          .getSingleOrNull();
+  Future<Poll?> getPollById(String pollId) async => await (select(polls)..where((it) => it.id.equals(pollId)))
+      .join([leftOuterJoin(users, polls.createdById.equalsExp(users.id))])
+      .map(_pollFromJoinRow)
+      .getSingleOrNull();
 
   /// Updates all the polls using the new [pollList] data
   Future<void> updatePolls(List<Poll> pollList) => batch(
-        (it) => it.insertAllOnConflictUpdate(
-          polls,
-          pollList.map((it) => it.toEntity()),
-        ),
-      );
+    (it) => it.insertAllOnConflictUpdate(
+      polls,
+      pollList.map((it) => it.toEntity()),
+    ),
+  );
 
   /// Returns the list of all the polls stored in db
-  Future<List<Poll>> getPolls() async => Future.wait(await (select(polls)
-        ..orderBy([(it) => OrderingTerm.desc(it.createdAt)]))
-      .join([leftOuterJoin(users, polls.createdById.equalsExp(users.id))])
-      .map(_pollFromJoinRow)
-      .get());
+  Future<List<Poll>> getPolls() async => Future.wait(
+    await (select(polls)..orderBy([(it) => OrderingTerm.desc(it.createdAt)]))
+        .join([leftOuterJoin(users, polls.createdById.equalsExp(users.id))])
+        .map(_pollFromJoinRow)
+        .get(),
+  );
 
   /// Deletes all the polls whose [Polls.id] is present in [pollIds]
-  Future<void> deletePollsByIds(List<String> pollIds) =>
-      (delete(polls)..where((tbl) => tbl.id.isIn(pollIds))).go();
+  Future<void> deletePollsByIds(List<String> pollIds) => (delete(polls)..where((tbl) => tbl.id.isIn(pollIds))).go();
 }

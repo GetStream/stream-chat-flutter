@@ -11,6 +11,9 @@ import 'package:stream_chat_flutter/src/utils/date_formatter.dart';
 ///
 ///  * [StreamChannelPreviewThemeData], which is used to configure this theme.
 /// {@endtemplate}
+///
+/// This is deprecated, but currently still used by `StreamChannelInfoBottomSheet`.
+@Deprecated('Use StreamChannelListItemTheme instead.')
 class StreamChannelPreviewTheme extends InheritedTheme {
   /// Creates a [StreamChannelPreviewTheme].
   ///
@@ -35,19 +38,15 @@ class StreamChannelPreviewTheme extends InheritedTheme {
   /// final theme = ChannelPreviewTheme.of(context);
   /// ```
   static StreamChannelPreviewThemeData of(BuildContext context) {
-    final channelPreviewTheme =
-        context.dependOnInheritedWidgetOfExactType<StreamChannelPreviewTheme>();
-    return channelPreviewTheme?.data ??
-        StreamChatTheme.of(context).channelPreviewTheme;
+    final channelPreviewTheme = context.dependOnInheritedWidgetOfExactType<StreamChannelPreviewTheme>();
+    return channelPreviewTheme?.data ?? StreamChatTheme.of(context).channelPreviewTheme;
   }
 
   @override
-  Widget wrap(BuildContext context, Widget child) =>
-      StreamChannelPreviewTheme(data: data, child: child);
+  Widget wrap(BuildContext context, Widget child) => StreamChannelPreviewTheme(data: data, child: child);
 
   @override
-  bool updateShouldNotify(StreamChannelPreviewTheme oldWidget) =>
-      data != oldWidget.data;
+  bool updateShouldNotify(StreamChannelPreviewTheme oldWidget) => data != oldWidget.data;
 }
 
 /// {@template channelPreviewThemeData}
@@ -124,8 +123,7 @@ class StreamChannelPreviewThemeData with Diagnosticable {
       avatarTheme: avatarTheme ?? this.avatarTheme,
       unreadCounterColor: unreadCounterColor ?? this.unreadCounterColor,
       indicatorIconSize: indicatorIconSize ?? this.indicatorIconSize,
-      lastMessageAtFormatter:
-          lastMessageAtFormatter ?? this.lastMessageAtFormatter,
+      lastMessageAtFormatter: lastMessageAtFormatter ?? this.lastMessageAtFormatter,
     );
   }
 
@@ -136,17 +134,13 @@ class StreamChannelPreviewThemeData with Diagnosticable {
     double t,
   ) {
     return StreamChannelPreviewThemeData(
-      avatarTheme:
-          const StreamAvatarThemeData().lerp(a.avatarTheme!, b.avatarTheme!, t),
+      avatarTheme: const StreamAvatarThemeData().lerp(a.avatarTheme!, b.avatarTheme!, t),
       indicatorIconSize: a.indicatorIconSize,
-      lastMessageAtStyle:
-          TextStyle.lerp(a.lastMessageAtStyle, b.lastMessageAtStyle, t),
+      lastMessageAtStyle: TextStyle.lerp(a.lastMessageAtStyle, b.lastMessageAtStyle, t),
       subtitleStyle: TextStyle.lerp(a.subtitleStyle, b.subtitleStyle, t),
       titleStyle: TextStyle.lerp(a.titleStyle, b.titleStyle, t),
-      unreadCounterColor:
-          Color.lerp(a.unreadCounterColor, b.unreadCounterColor, t),
-      lastMessageAtFormatter:
-          t < 0.5 ? a.lastMessageAtFormatter : b.lastMessageAtFormatter,
+      unreadCounterColor: Color.lerp(a.unreadCounterColor, b.unreadCounterColor, t),
+      lastMessageAtFormatter: t < 0.5 ? a.lastMessageAtFormatter : b.lastMessageAtFormatter,
     );
   }
 
@@ -155,14 +149,11 @@ class StreamChannelPreviewThemeData with Diagnosticable {
     if (other == null) return this;
     return copyWith(
       titleStyle: titleStyle?.merge(other.titleStyle) ?? other.titleStyle,
-      subtitleStyle:
-          subtitleStyle?.merge(other.subtitleStyle) ?? other.subtitleStyle,
-      lastMessageAtStyle: lastMessageAtStyle?.merge(other.lastMessageAtStyle) ??
-          other.lastMessageAtStyle,
+      subtitleStyle: subtitleStyle?.merge(other.subtitleStyle) ?? other.subtitleStyle,
+      lastMessageAtStyle: lastMessageAtStyle?.merge(other.lastMessageAtStyle) ?? other.lastMessageAtStyle,
       avatarTheme: avatarTheme?.merge(other.avatarTheme) ?? other.avatarTheme,
       unreadCounterColor: other.unreadCounterColor,
-      lastMessageAtFormatter:
-          other.lastMessageAtFormatter ?? lastMessageAtFormatter,
+      lastMessageAtFormatter: other.lastMessageAtFormatter ?? lastMessageAtFormatter,
     );
   }
 
@@ -198,7 +189,6 @@ class StreamChannelPreviewThemeData with Diagnosticable {
       ..add(DiagnosticsProperty('lastMessageAtStyle', lastMessageAtStyle))
       ..add(DiagnosticsProperty('avatarTheme', avatarTheme))
       ..add(ColorProperty('unreadCounterColor', unreadCounterColor))
-      ..add(DiagnosticsProperty(
-          'lastMessageAtFormatter', lastMessageAtFormatter));
+      ..add(DiagnosticsProperty('lastMessageAtFormatter', lastMessageAtFormatter));
   }
 }

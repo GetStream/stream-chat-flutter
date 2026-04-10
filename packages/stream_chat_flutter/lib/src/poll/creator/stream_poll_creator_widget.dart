@@ -67,12 +67,10 @@ class StreamPollCreatorWidget extends StatelessWidget {
                 allowDuplicate: config.allowDuplicateOptions,
                 optionsRange: config.optionsRange,
                 initialOptions: [
-                  for (final option in poll.options)
-                    PollOptionItem(id: option.id, text: option.text),
+                  for (final option in poll.options) PollOptionItem(id: option.id, text: option.text),
                 ],
                 onOptionsChanged: (options) => controller.options = [
-                  for (final option in options)
-                    PollOption(id: option.id, text: option.text),
+                  for (final option in options) PollOption(id: option.id, text: option.text),
                 ],
               ),
               const SizedBox(height: 32),
@@ -118,7 +116,8 @@ class StreamPollCreatorWidget extends StatelessWidget {
               PollSwitchListTile(
                 title: translations.anonymousPollLabel,
                 value: poll.votingVisibility == VotingVisibility.anonymous,
-                onChanged: (anon) => controller.votingVisibility = anon //
+                onChanged: (anon) => controller.votingVisibility =
+                    anon //
                     ? VotingVisibility.anonymous
                     : VotingVisibility.public,
               ),

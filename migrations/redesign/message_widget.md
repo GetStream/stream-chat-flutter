@@ -1,0 +1,500 @@
+# Message Widget & Message List Migration Guide
+
+This guide covers migrating the message widget and message list view from the old design (`feat/design-refresh`) to the new redesigned API.
+
+---
+
+## Table of Contents
+
+- [Quick Reference](#quick-reference)
+- [Architecture Changes](#architecture-changes)
+- [StreamMessageWidget](#streammessagewidget)
+  - [Removed Parameters](#removed-parameters)
+  - [New Parameters](#new-parameters)
+  - [Changed Signatures](#changed-signatures)
+- [StreamMessageListView](#streammessagelistview)
+  - [Builder Signature Changes](#builder-signature-changes)
+  - [New List-Level Callbacks](#new-list-level-callbacks)
+  - [Removed: MessageDetails](#removed-messagedetails)
+- [Custom Actions Migration](#custom-actions-migration)
+- [Theme Migration](#theme-migration)
+- [Swipeable Message Example](#swipeable-message-example)
+- [Deleted Classes & Files](#deleted-classes--files)
+- [Typedef Changes](#typedef-changes)
+- [Migration Checklist](#migration-checklist)
+
+---
+
+## Quick Reference
+
+| Old | New |
+|-----|-----|
+| `StreamMessageWidget` (50+ params) | `StreamMessageWidget` (thin shell) + `StreamMessageWidgetProps` |
+| `MessageWidgetContent` | `DefaultStreamMessage` + `StreamMessageContent` |
+| `BottomRow` | `StreamMessageMetadata` |
+| `StreamMessageText` (message_text.dart) | `StreamMessageText` (components/stream_message_text.dart) |
+| `StreamDeletedMessage` | `StreamMessageDeleted` |
+| `MessageCard` | `core.StreamMessageBubble` |
+| `TextBubble` | `core.StreamMessageBubble` |
+| `PinnedMessage` | `StreamMessageAnnotations` widget |
+| `QuotedMessage` | Inline in `StreamMessageContent` |
+| `Username` | Inline in `StreamMessageMetadata` |
+| `SendingIndicatorBuilder` | `StreamMessageSendingStatus` |
+| `ThreadReplyPainter` | `core.StreamMessageReplies` |
+| `ThreadParticipants` | Inline in `core.StreamMessageReplies` |
+| `UserAvatarTransform` | `StreamUserAvatar` (inline in `DefaultStreamMessage`) |
+| `DisplayWidget` enum | `StreamVisibility` (from theme) |
+| `MessageBuilder` typedef | `StreamMessageWidgetBuilder` typedef |
+| `ParentMessageBuilder` typedef | `StreamMessageWidgetBuilder` typedef |
+| `OnQuotedMessageTap = void Function(String?)` | `void Function(Message quotedMessage)` |
+| `StreamMessageWidget.customActions` | `StreamMessageWidgetProps.actionsBuilder` |
+| `StreamMessageWidget.onCustomActionTap` | Use `onTap` per `StreamContextMenuAction` |
+| `CustomMessageAction` | Removed — use `StreamContextMenuAction` with `onTap` |
+| `StreamMessageWidget.copyWith()` | `StreamMessageWidgetProps.copyWith()` |
+
+---
+
+## Architecture Changes
+
+The old design used a single monolithic `StreamMessageWidget` with 50+ parameters controlling every aspect of rendering. The new design splits responsibilities:
+
+- **`StreamMessageWidget`** — thin shell that resolves the `StreamComponentFactory` and delegates to the factory builder or `DefaultStreamMessage`.
+- **`StreamMessageWidgetProps`** — plain data class holding all configuration. Supports `copyWith()`.
+- **`DefaultStreamMessage`** — the default rendering implementation. Composes the sub-components below.
+- **`StreamMessageContent`** — bubble, attachments, text, reactions. Thread replies are passed in as a pre-built widget from `DefaultStreamMessage`.
+- **`StreamMessageMetadata`** — username, timestamp, sending status, edited indicator.
+- **`StreamMessageAnnotations`** — pinned, saved-for-later, show-in-channel annotations.
+- **`StreamUserAvatar`** — author avatar (inline in `DefaultStreamMessage`).
+- **`StreamMessageReactions`** — clustered reaction chips around the bubble.
+- **`StreamMessageText`** — markdown-rendered message text.
+- **`StreamMessageDeleted`** — deleted message placeholder.
+- **`StreamMessageSendingStatus`** — delivery status icon.
+
+### Component Factory Pattern
+
+The new design adds a **component factory** layer for app-wide customization. The `messageBuilder` / `parentMessageBuilder` callbacks on `StreamMessageListView` are still supported for per-list customization.
+
+**App-wide customization via component factory:**
+```dart
+StreamChat(
+  client: client,
+  componentBuilders: StreamComponentBuilders(
+    extensions: streamChatComponentBuilders(
+      messageWidget: (context, props) {
+        return DefaultStreamMessage(
+          props: props.copyWith(
+            actionsBuilder: (context, defaultActions) {
+              return [...defaultActions, myCustomAction];
+            },
+          ),
+        );
+      },
+    ),
+  ),
+  child: ...,
+)
+```
+
+**Per-list customization via `messageBuilder` (still supported):**
+```dart
+StreamMessageListView(
+  messageBuilder: (context, message, defaultProps) {
+    return StreamMessageWidget.fromProps(props: defaultProps);
+  },
+)
+```
+
+Both can be combined — the component factory applies first, then the per-list `messageBuilder` can further customize or wrap the result.
+
+---
+
+## StreamMessageWidget
+
+### Removed Parameters
+
+These parameters have been removed entirely. See the **Migration Path** column for how to achieve the same result.
+
+#### Visibility Booleans
+
+| Old Parameter | Migration Path |
+|---|---|
+| `showReactions` | Controlled via `StreamMessageItemThemeData` visibility |
+| `showDeleteMessage` | Controlled via channel permissions (`canDeleteOwnMessage`, `canDeleteAnyMessage`) |
+| `showEditMessage` | Controlled via channel permissions (`canUpdateOwnMessage`, `canUpdateAnyMessage`) |
+| `showReplyMessage` | Controlled via channel permissions (`canSendReply`) |
+| `showThreadReplyMessage` | Controlled via channel permissions (`canSendReply`) |
+| `showMarkUnreadMessage` | Shown automatically when applicable |
+| `showResendMessage` | Shown automatically for failed messages |
+| `showCopyMessage` | Shown automatically when message has text |
+| `showFlagButton` | Controlled via channel permissions (`canFlagMessage`) |
+| `showPinButton` | Controlled via channel permissions (`canPinMessage`) |
+| `showPinHighlight` | Controlled via `StreamMessageItemThemeData` background color |
+| `showReactionPicker` | Removed |
+| `showUsername` | Controlled via `StreamMessageItemThemeData.metadataVisibility` |
+| `showTimestamp` | Controlled via `StreamMessageItemThemeData.metadataVisibility` |
+| `showEditedLabel` | Controlled via `StreamMessageItemThemeData.metadataVisibility` |
+| `showSendingIndicator` | Controlled via `StreamMessageItemThemeData.metadataVisibility` |
+| `showThreadReplyIndicator` | Controlled via `StreamMessageItemThemeData.repliesVisibility` |
+| `showInChannelIndicator` | Shown automatically via `StreamMessageAnnotations` |
+| `showUserAvatar` (`DisplayWidget`) | Controlled via `StreamMessageItemThemeData.avatarVisibility` |
+
+#### Builder Callbacks
+
+| Old Parameter | Migration Path |
+|---|---|
+| `userAvatarBuilder` | Use component factory to replace `DefaultStreamMessage` |
+| `textBuilder` | Use component factory to replace `StreamMessageContent` |
+| `quotedMessageBuilder` | Use component factory to replace `StreamMessageContent` |
+| `deletedMessageBuilder` | Use component factory to replace `StreamMessageContent` |
+| `editMessageInputBuilder` | Removed; use `onEditMessageTap` callback instead |
+| `bottomRowBuilderWithDefaultWidget` | Use component factory; `StreamMessageMetadata` is the new equivalent |
+| `reactionPickerBuilder` | Configured globally via `StreamChatConfigurationData.reactionIconResolver` |
+| `reactionIndicatorBuilder` | Replaced by `StreamMessageReactions` component |
+
+#### Shape & Style
+
+| Old Parameter | Migration Path |
+|---|---|
+| `shape` | Controlled via `StreamMessageBubble` theming in `stream_core_flutter` |
+| `borderSide` | Controlled via `StreamMessageBubble` theming |
+| `borderRadiusGeometry` | Controlled via `StreamMessageBubble` theming |
+| `attachmentShape` | Controlled via attachment builder theming |
+| `textPadding` | Controlled via `StreamMessageBubble` content padding theming |
+| `attachmentPadding` | Configured internally by `ParseAttachments` |
+| `messageTheme` | Resolved from context via `StreamMessageItemTheme.of(context)` |
+
+#### Other Removed Parameters
+
+| Old Parameter | Migration Path |
+|---|---|
+| `reverse` | Determined by `StreamMessagePlacement` context (set by list view) |
+| `translateUserAvatar` | Removed; avatar positioning is theme-driven |
+| `onConfirmDeleteTap` | Handled internally by `StreamMessageActionsBuilder` |
+| `onShowMessage` | Removed |
+| `onReactionsHover` | Removed |
+| `customActions` | Use `actionsBuilder` on `StreamMessageWidgetProps` |
+| `onCustomActionTap` | Use `actionsBuilder` on `StreamMessageWidgetProps` |
+| `onAttachmentTap` | Handle in custom attachment builders |
+| `imageAttachmentThumbnailSize` | Configured in attachment builders |
+| `imageAttachmentThumbnailResizeType` | Configured in attachment builders |
+| `imageAttachmentThumbnailCropType` | Configured in attachment builders |
+| `attachmentActionsModalBuilder` | Configured in attachment builders |
+| `attachmentBuilders` | Moved to `StreamChatConfigurationData.attachmentBuilders` (still overridable per-message via `StreamMessageWidgetProps.attachmentBuilders`) |
+| `copyWith()` on `StreamMessageWidget` | Use `StreamMessageWidgetProps.copyWith()` instead |
+
+### New Parameters
+
+| New Parameter | Description |
+|---|---|
+| `padding` | Outer padding around the message item (overrides theme) |
+| `spacing` | Horizontal spacing between avatar and content (overrides theme) |
+| `backgroundColor` | Background color for the message row (overrides theme) |
+| `maxWidth` | Max content width in logical pixels (default: `264`) |
+| `onMessageLinkTap` | `void Function(Message, String)` — receives message and URL |
+| `onUserMentionTap` | `void Function(User)` — receives the mentioned user |
+| `onQuotedMessageTap` | `void Function(Message)` — receives the quoted message object |
+| `onReactionsTap` | `void Function(Message)` — overrides default reaction detail sheet |
+| `reactionSorting` | `Comparator<ReactionGroup>` for reaction display order |
+| `actionsBuilder` | `MessageActionsBuilder` for customizing the actions list |
+| `onMessageActions` | Override the default long-press modal entirely |
+| `onBouncedErrorMessageActions` | Override the bounced-error modal entirely |
+| `onEditMessageTap` | Called when edit action is selected |
+
+### Changed Signatures
+
+| Callback | Old Signature | New Signature |
+|---|---|---|
+| Link tap | `void Function(String url)` | `void Function(Message message, String url)` |
+| Mention tap | `void Function(User user)` | `void Function(User user)` (renamed: `onMentionTap` → `onUserMentionTap`) |
+| Quoted message tap | `void Function(String? quotedMessageId)` | `void Function(Message quotedMessage)` |
+| Thread tap | `void Function(Message message)` | `void Function(Message message)` (unchanged signature, renamed: `onThreadTap`) |
+| Reply tap | `void Function(Message message)` | `void Function(Message message)` (new: `onReplyTap`) |
+
+---
+
+## StreamMessageListView
+
+### Builder Signature Changes
+
+Both `messageBuilder` and `parentMessageBuilder` now use the same typedef:
+
+**Before:**
+```dart
+typedef MessageBuilder = Widget Function(
+  BuildContext context,
+  MessageDetails details,
+  List<Message> messages,
+  StreamMessageWidget defaultMessageWidget,
+);
+
+typedef ParentMessageBuilder = Widget Function(
+  BuildContext context,
+  Message? parentMessage,
+  StreamMessageWidget defaultMessageWidget,
+);
+```
+
+**After:**
+```dart
+typedef StreamMessageWidgetBuilder = Widget Function(
+  BuildContext context,
+  Message message,
+  StreamMessageWidgetProps defaultProps,
+);
+```
+
+The old builders received a pre-built `StreamMessageWidget` that you could `copyWith`. The new builders receive `StreamMessageWidgetProps` — raw configuration data. Use `StreamMessageWidget.fromProps(props:)` to build the default widget through the component factory.
+
+**Before:**
+```dart
+StreamMessageListView(
+  messageBuilder: (context, details, messages, defaultWidget) {
+    return defaultWidget.copyWith(showReactions: false);
+  },
+)
+```
+
+**After:**
+```dart
+StreamMessageListView(
+  messageBuilder: (context, message, defaultProps) {
+    // Build default widget (goes through component factory)
+    return StreamMessageWidget.fromProps(props: defaultProps);
+
+    // Or customize props before building
+    return StreamMessageWidget.fromProps(
+      props: defaultProps.copyWith(
+        actionsBuilder: (context, actions) => [...actions, myAction],
+      ),
+    );
+
+    // Or replace entirely
+    return MyCustomMessageWidget(message: message);
+  },
+)
+```
+
+> **Important:** The `messageBuilder` callback now receives a `BuildContext` that has `StreamMessagePlacement` in its ancestor chain. You can call `StreamMessagePlacement.alignmentDirectionalOf(context)` to determine message alignment.
+
+### New List-Level Callbacks
+
+These callbacks were previously only configurable per-message on `StreamMessageWidget`. They are now available at the list level and forwarded to all messages:
+
+| New Parameter | Type |
+|---|---|
+| `onEditMessageTap` | `void Function(Message)?` |
+| `onReplyTap` | `void Function(Message)?` |
+| `onUserAvatarTap` | `void Function(User)?` |
+| `onReactionsTap` | `void Function(Message)?` |
+| `onQuotedMessageTap` | `void Function(Message)?` |
+| `onMessageLinkTap` | `void Function(Message, String)?` |
+| `onUserMentionTap` | `void Function(User)?` |
+
+### Changed: `showUnreadCountOnScrollToBottom` Default
+
+```dart
+// Old
+showUnreadCountOnScrollToBottom: false
+
+// New
+showUnreadCountOnScrollToBottom: true
+```
+
+### Removed: MessageDetails
+
+The old `messageBuilder` received `MessageDetails` which contained `userId`, `message`, `messages`, and `index`. The new builder receives just `Message` and `StreamMessageWidgetProps`. The user ID is accessible via `StreamChat.of(context).currentUser?.id`. Message alignment is provided by `StreamMessagePlacement.of(context)`.
+
+---
+
+## Custom Actions Migration
+
+**Before (using `customActions` + `onCustomActionTap`):**
+```dart
+StreamMessageWidget(
+  message: message,
+  messageTheme: theme,
+  customActions: [
+    StreamMessageAction(
+      leading: Icon(Icons.info),
+      title: Text('Info'),
+      onTap: (message) => showInfo(message),
+    ),
+  ],
+  onCustomActionTap: (action) {
+    // handle CustomMessageAction
+  },
+)
+```
+
+**After (using `actionsBuilder` via component factory):**
+```dart
+StreamChat(
+  client: client,
+  componentBuilders: StreamComponentBuilders(
+    extensions: streamChatComponentBuilders(
+      messageWidget: (context, props) {
+        return DefaultStreamMessage(
+          props: props.copyWith(
+            actionsBuilder: (context, defaultActions) {
+              return StreamContextMenuAction.partitioned(
+                items: [
+                  ...defaultActions,
+                  StreamContextMenuAction(
+                    leading: Icon(context.streamIcons.informationCircle),
+                    label: Text('Info'),
+                    onTap: () => showInfo(props.message),
+                  ),
+                ],
+              );
+            },
+          ),
+        );
+      },
+    ),
+  ),
+  child: ...,
+)
+```
+
+**After (removing a default action):**
+```dart
+actionsBuilder: (context, defaultActions) {
+  return StreamContextMenuAction.partitioned(
+    items: defaultActions.where(
+      (a) => a.props.value is! DeleteMessage,
+    ).toList(),
+  );
+},
+```
+
+> **Important:**
+> - `customActions` and `onCustomActionTap` are removed
+> - `CustomMessageAction` class is removed — use `StreamContextMenuAction` with `onTap`
+> - `actionsBuilder` receives defaults already filtered by channel permissions
+> - Return `List<Widget>` — you can mix `StreamContextMenuAction` and `StreamContextMenuSeparator`
+
+---
+
+## Theme Migration
+
+**Before (explicit `messageTheme` parameter):**
+```dart
+StreamMessageWidget(
+  message: message,
+  messageTheme: isMyMessage
+      ? streamTheme.ownMessageTheme
+      : streamTheme.otherMessageTheme,
+)
+```
+
+**After (theme resolved automatically from context):**
+```dart
+StreamMessageWidget(message: message)
+```
+
+`StreamMessageItemTheme` is provided by `StreamChatTheme` and resolved based on `StreamMessagePlacement` (alignment, stack position, etc.).
+
+### StreamMessageItemThemeData
+
+The old per-property visibility booleans are replaced by a structured visibility system:
+
+```dart
+StreamMessageItemThemeData(
+  avatarVisibility: StreamMessageStyleVisibility(
+    incoming: StreamVisibility.visible,
+    outgoing: StreamVisibility.gone,
+  ),
+  annotationVisibility: StreamMessageStyleVisibility(...),
+  metadataVisibility: StreamMessageStyleVisibility(...),
+  repliesVisibility: StreamMessageStyleVisibility(...),
+
+  incoming: StreamMessageItemStyle(
+    padding: EdgeInsets.all(4),
+    backgroundColor: Colors.white,
+  ),
+  outgoing: StreamMessageItemStyle(
+    padding: EdgeInsets.all(4),
+    backgroundColor: Colors.blue.shade50,
+  ),
+)
+```
+
+---
+
+## Swipeable Message Example
+
+```dart
+StreamMessageListView(
+  messageBuilder: (context, message, defaultProps) {
+    final defaultWidget = StreamMessageWidget.fromProps(props: defaultProps);
+
+    if (message.isDeleted || message.state.isFailed) return defaultWidget;
+
+    final alignment = StreamMessagePlacement.alignmentDirectionalOf(context);
+    final isEnd = alignment == AlignmentDirectional.centerEnd;
+
+    return Swipeable(
+      key: ValueKey(message.id),
+      direction: isEnd ? SwipeDirection.endToStart : SwipeDirection.startToEnd,
+      swipeThreshold: 0.2,
+      onSwiped: (_) => onReply(message),
+      child: defaultWidget,
+    );
+  },
+)
+```
+
+---
+
+## Deleted Classes & Files
+
+| Old File | Old Class | Replacement |
+|---|---|---|
+| `message_widget_content.dart` | `MessageWidgetContent` | `DefaultStreamMessage` + `StreamMessageContent` |
+| `message_widget_content_components.dart` | Various internal helpers | Merged into `components/` sub-widgets |
+| `bottom_row.dart` | `BottomRow` | `StreamMessageMetadata` |
+| `message_text.dart` | `StreamMessageText` | `components/stream_message_text.dart` |
+| `deleted_message.dart` | `StreamDeletedMessage` | `StreamMessageDeleted` |
+| `message_card.dart` | `MessageCard` | `core.StreamMessageBubble` |
+| `text_bubble.dart` | `TextBubble` | `core.StreamMessageBubble` |
+| `pinned_message.dart` | `PinnedMessage` | `StreamMessageAnnotations` widget |
+| `quoted_message.dart` | `QuotedMessage` | Inline in `StreamMessageContent` |
+| `thread_painter.dart` | `ThreadReplyPainter` | `core.StreamMessageReplies` |
+| `thread_participants.dart` | `ThreadParticipants` | Inline in `core.StreamMessageReplies` |
+| `user_avatar_transform.dart` | `UserAvatarTransform` | `StreamUserAvatar` (inline in `DefaultStreamMessage`) |
+| `username.dart` | `Username` | Inline in `StreamMessageMetadata` |
+| `sending_indicator_builder.dart` | `SendingIndicatorBuilder` | `StreamMessageSendingStatus` |
+
+---
+
+## Typedef Changes
+
+| Old Typedef | New Typedef |
+|---|---|
+| `MessageBuilder = Widget Function(BuildContext, MessageDetails, List<Message>, StreamMessageWidget)` | `StreamMessageWidgetBuilder = Widget Function(BuildContext, Message, StreamMessageWidgetProps)` |
+| `ParentMessageBuilder = Widget Function(BuildContext, Message?, StreamMessageWidget)` | `StreamMessageWidgetBuilder` (same as above) |
+| `OnQuotedMessageTap = void Function(String?)` | Removed — use `void Function(Message)` directly |
+| — | `MessageActionsBuilder<T> = List<Widget> Function(BuildContext, List<StreamContextMenuAction<T>>)` (new) |
+
+> **Note:** `MessageBuilder` and `ParentMessageBuilder` are removed from `typedefs.dart`. The new `StreamMessageWidgetBuilder` is defined in `message_list_view.dart` and exported via the barrel file.
+
+---
+
+## Migration Checklist
+
+- [ ] Replace `StreamMessageWidget(message:, messageTheme:, ...)` with `StreamMessageWidget(message:)` — theme is now resolved from context
+- [ ] Remove all `show*` boolean parameters — visibility is now controlled via `StreamMessageItemThemeData` and channel permissions
+- [ ] Remove `customActions` and `onCustomActionTap` — use `actionsBuilder` via component factory or `StreamMessageWidgetProps.copyWith()`
+- [ ] Remove all per-widget builder callbacks (`userAvatarBuilder`, `textBuilder`, `quotedMessageBuilder`, `deletedMessageBuilder`, `bottomRowBuilderWithDefaultWidget`, `reactionPickerBuilder`, `reactionIndicatorBuilder`) — use component factory instead
+- [ ] Remove `shape`, `borderSide`, `borderRadiusGeometry`, `attachmentShape`, `textPadding`, `attachmentPadding` — controlled via `StreamMessageBubble` theming
+- [ ] Remove `reverse` — determined by `StreamMessagePlacement` context
+- [ ] Remove `translateUserAvatar` — avatar positioning is theme-driven
+- [ ] Update `messageBuilder` / `parentMessageBuilder` callbacks to new `StreamMessageWidgetBuilder` signature
+- [ ] Replace `MessageDetails` usage — use `StreamMessagePlacement.of(context)` for alignment, `StreamChat.of(context).currentUser` for user ID
+- [ ] Update `onLinkTap` to `onMessageLinkTap` with new signature `void Function(Message, String)`
+- [ ] Update `onMentionTap` to `onUserMentionTap`
+- [ ] Update `onQuotedMessageTap` from `void Function(String?)` to `void Function(Message)`
+- [ ] Replace `StreamDeletedMessage` with `StreamMessageDeleted`
+- [ ] Replace `StreamMessageAction` with `StreamContextMenuAction` (see [message_actions.md](message_actions.md))
+- [ ] Replace `StreamSvgIcon(icon: StreamSvgIcons.*)` with `Icon(context.streamIcons.*)`
+- [ ] Remove `StreamMessageWidget.copyWith()` usage — use `StreamMessageWidgetProps.copyWith()` instead

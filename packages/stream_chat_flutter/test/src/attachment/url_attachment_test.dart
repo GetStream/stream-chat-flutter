@@ -24,10 +24,8 @@ void main() {
             child: StreamChannel(
               channel: channel,
               child: SizedBox(
-                child: StreamUrlAttachment(
-                  messageTheme: streamTheme.ownMessageTheme,
+                child: StreamLinkPreviewAttachment(
                   message: Message(),
-                  hostDisplayName: 'Test',
                   urlAttachment: Attachment(
                     title: 'Flutter',
                     titleLink: 'https://flutter.dev',

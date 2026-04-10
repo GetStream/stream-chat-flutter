@@ -17,9 +17,9 @@ class StreamVisibleFootnote extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        StreamSvgIcon(
+        Icon(
+          context.streamIcons.eyeFill16,
           size: 16,
-          icon: StreamSvgIcons.eye,
           color: chatThemeData.colorTheme.textLowEmphasis,
         ),
         const SizedBox(width: 8),

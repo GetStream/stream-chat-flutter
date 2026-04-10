@@ -8,9 +8,10 @@ List<Message> generateConversation(
   int unreadCount = 0,
 }) {
   assert(
-      users == null || noOfUsers == null,
-      'Only one of users or noOfUsers '
-      'should be provided');
+    users == null || noOfUsers == null,
+    'Only one of users or noOfUsers '
+    'should be provided',
+  );
   assert(count > 0, 'Count should be greater than 0');
   assert(count > unreadCount, 'Count should be greater than unreadCount');
 
@@ -38,8 +39,7 @@ List<Message> generateConversation(
         id: faker.datatype.uuid(),
         text: faker.lorem.sentence(),
         user: user,
-        createdAt:
-            DateTime.now().subtract(Duration(minutes: i + count - unreadCount)),
+        createdAt: DateTime.now().subtract(Duration(minutes: i + count - unreadCount)),
       ),
     );
   }

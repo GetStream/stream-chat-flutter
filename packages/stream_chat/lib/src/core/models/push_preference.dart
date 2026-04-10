@@ -82,8 +82,7 @@ class PushPreference extends Equatable {
   });
 
   /// Create a new instance from a json
-  factory PushPreference.fromJson(Map<String, dynamic> json) =>
-      _$PushPreferenceFromJson(json);
+  factory PushPreference.fromJson(Map<String, dynamic> json) => _$PushPreferenceFromJson(json);
 
   /// Push preference for calls
   final CallLevel? callLevel;
@@ -111,8 +110,7 @@ class ChannelPushPreference extends Equatable {
   });
 
   /// Create a new instance from a json
-  factory ChannelPushPreference.fromJson(Map<String, dynamic> json) =>
-      _$ChannelPushPreferenceFromJson(json);
+  factory ChannelPushPreference.fromJson(Map<String, dynamic> json) => _$ChannelPushPreferenceFromJson(json);
 
   /// Push preference for chat messages
   final ChatLevel? chatLevel;

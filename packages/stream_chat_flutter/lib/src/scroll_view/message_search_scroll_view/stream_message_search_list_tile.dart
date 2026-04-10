@@ -91,20 +91,19 @@ class StreamMessageSearchListTile extends StatelessWidget {
     Color? tileColor,
     VisualDensity? visualDensity,
     EdgeInsetsGeometry? contentPadding,
-  }) =>
-      StreamMessageSearchListTile(
-        key: key ?? this.key,
-        messageResponse: messageResponse ?? this.messageResponse,
-        leading: leading ?? this.leading,
-        title: title ?? this.title,
-        subtitle: subtitle ?? this.subtitle,
-        trailing: trailing ?? this.trailing,
-        onTap: onTap ?? this.onTap,
-        onLongPress: onLongPress ?? this.onLongPress,
-        tileColor: tileColor ?? this.tileColor,
-        visualDensity: visualDensity ?? this.visualDensity,
-        contentPadding: contentPadding ?? this.contentPadding,
-      );
+  }) => StreamMessageSearchListTile(
+    key: key ?? this.key,
+    messageResponse: messageResponse ?? this.messageResponse,
+    leading: leading ?? this.leading,
+    title: title ?? this.title,
+    subtitle: subtitle ?? this.subtitle,
+    trailing: trailing ?? this.trailing,
+    onTap: onTap ?? this.onTap,
+    onLongPress: onLongPress ?? this.onLongPress,
+    tileColor: tileColor ?? this.tileColor,
+    visualDensity: visualDensity ?? this.visualDensity,
+    contentPadding: contentPadding ?? this.contentPadding,
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -112,23 +111,17 @@ class StreamMessageSearchListTile extends StatelessWidget {
     final user = message.user!;
     final channelPreviewTheme = StreamChannelPreviewTheme.of(context);
 
-    final leading = this.leading ??
-        StreamUserAvatar(
-          user: user,
-          constraints: const BoxConstraints.tightFor(
-            height: 40,
-            width: 40,
-          ),
-        );
+    final leading = this.leading ?? StreamUserAvatar(size: .lg, user: user);
 
-    final title = this.title ??
+    final title =
+        this.title ??
         MessageSearchListTileTitle(
           messageResponse: messageResponse,
-          textStyle: channelPreviewTheme.titleStyle
-              ?.copyWith(overflow: TextOverflow.ellipsis),
+          textStyle: channelPreviewTheme.titleStyle?.copyWith(overflow: TextOverflow.ellipsis),
         );
 
-    final subtitle = this.subtitle ??
+    final subtitle =
+        this.subtitle ??
         Row(
           children: [
             Expanded(
@@ -185,9 +178,7 @@ class MessageSearchListTileTitle extends StatelessWidget {
       TextSpan(
         children: [
           TextSpan(
-            text: user.id == StreamChat.of(context).currentUser?.id
-                ? context.translations.youText
-                : user.name,
+            text: user.id == StreamChat.of(context).currentUser?.id ? context.translations.youText : user.name,
           ),
           if (channelName != null) ...[
             TextSpan(

@@ -49,8 +49,7 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   String attachmentsUploadProgressText({
     required int remaining,
     required int total,
-  }) =>
-      '$remaining/${total}mbのアップロード中…';
+  }) => '$remaining/${total}mbのアップロード中…';
 
   @override
   String pinnedByUserText({
@@ -129,8 +128,7 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
       '圧縮を試しましたがサイズをオーバーしました';
 
   @override
-  String fileTooLargeError(double limitInMB) =>
-      'ファイルが大きすぎてアップロードできません。ファイルサイズの制限は${limitInMB}MBです。';
+  String fileTooLargeError(double limitInMB) => 'ファイルが大きすぎてアップロードできません。ファイルサイズの制限は${limitInMB}MBです。';
 
   @override
   String get couldNotReadBytesFromFileError => 'ファイルからバイトを読み取れませんでした';
@@ -160,11 +158,10 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   String get somethingWentWrongError => 'エラーが発生しました';
 
   @override
-  String get addMoreFilesLabel => 'ファイルの追加';
+  String get addMoreFilesLabel => 'さらに追加';
 
   @override
-  String get enablePhotoAndVideoAccessMessage =>
-      'お友達と共有できるように、写真やビデオへのアクセスを有効にしてください。';
+  String get enablePhotoAndVideoAccessMessage => 'お友達と共有できるように、写真やビデオへのアクセスを有効にしてください。';
   @override
   String get allowGalleryAccessMessage => 'ギャラリーへのアクセスを許可する';
 
@@ -281,7 +278,7 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   String get deleteConversationQuestion => '本当に会話を削除しますか？';
 
   @override
-  String get streamChatLabel => 'ストリームチャット';
+  String get streamChatLabel => 'チャット';
 
   @override
   String get searchingForNetworkText => 'ネットワークを検索中';
@@ -349,8 +346,7 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   String galleryPaginationText({
     required int currentPage,
     required int totalPages,
-  }) =>
-      '${currentPage + 1} / $totalPages';
+  }) => '${currentPage + 1} / $totalPages';
 
   @override
   String get fileText => 'ファイル';
@@ -365,7 +361,8 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   String get viewLibrary => 'ライブラリを表示';
 
   @override
-  String attachmentLimitExceedError(int limit) => '''
+  String attachmentLimitExceedError(int limit) =>
+      '''
 添付ファイルの制限を超えました：$limit個のファイル以上を添付することはできません
   ''';
 
@@ -441,8 +438,7 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   }
 
   @override
-  String get markUnreadError =>
-      'メッセージを未読にする際にエラーが発生しました。最新の100件のチャンネルメッセージより古い未読メッセージはマークできません。';
+  String get markUnreadError => 'メッセージを未読にする際にエラーが発生しました。最新の100件のチャンネルメッセージより古い未読メッセージはマークできません。';
 
   @override
   String createPollLabel({bool isNew = false}) {
@@ -584,10 +580,10 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
 
   @override
   String voteCountLabel({int? count}) => switch (count) {
-        null || < 1 => '0 票',
-        1 => '1 票',
-        _ => '$count 票',
-      };
+    null || < 1 => '0 票',
+    1 => '1 票',
+    _ => '$count 票',
+  };
 
   @override
   String get noPollVotesLabel => '現在投票はありません';
@@ -619,8 +615,7 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   String get moderationReviewModalTitle => 'よろしいですか？';
 
   @override
-  String get moderationReviewModalDescription =>
-      '''あなたのコメントが他の人にどのような影響を与えるかを考え、コミュニティガイドラインに従ってください。''';
+  String get moderationReviewModalDescription => '''あなたのコメントが他の人にどのような影響を与えるかを考え、コミュニティガイドラインに従ってください。''';
 
   @override
   String get emptyMessagePreviewText => '';
@@ -636,6 +631,18 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
 
   @override
   String get videoAttachmentText => '動画';
+
+  @override
+  String get fileAttachmentText => 'ファイル';
+
+  @override
+  String filesAttachmentCountText(int count) => count == 1 ? 'ファイル' : '$count件のファイル';
+
+  @override
+  String photosAttachmentCountText(int count) => count == 1 ? '写真' : '$count枚の写真';
+
+  @override
+  String videosAttachmentCountText(int count) => count == 1 ? '動画' : '$count本の動画';
 
   @override
   String get pollYouVotedText => '投票しました';
@@ -654,7 +661,52 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
 
   @override
   String locationLabel({bool isLive = false}) {
-    if (isLive) return '📍 ライブ位置情報';
-    return '📍 位置情報';
+    if (isLive) return 'ライブ位置情報';
+    return '位置情報';
   }
+
+  @override
+  String get noConversationsYetText => 'まだ会話がありません';
+
+  @override
+  String get replyToStartThreadText => 'スレッドを開始するにはメッセージに返信してください';
+
+  @override
+  String get sendMessageToStartConversationText => '会話を始めるにはメッセージを送信してください';
+
+  @override
+  String get savedForLaterLabel => '後で確認';
+
+  @override
+  String get repliedToThreadAnnotationLabel => 'スレッドに返信しました';
+
+  @override
+  String get alsoSentInChannelAnnotationLabel => 'チャンネルにも送信されました';
+
+  @override
+  String get viewLabel => '表示';
+
+  @override
+  String get reminderSetLabel => 'リマインダー設定済み';
+
+  @override
+  String reminderAtText(String time) => '今日 $time';
+
+  @override
+  String get createPollPromptLabel => '投票を作成してみんなに投票してもらおう！';
+
+  @override
+  String get takePhotoAndShareLabel => '写真を撮って共有';
+
+  @override
+  String get takeVideoAndShareLabel => '動画を撮って共有';
+
+  @override
+  String get openCameraLabel => 'カメラを開く';
+
+  @override
+  String get selectFilesToShareLabel => '共有するファイルを選択';
+
+  @override
+  String get openFilesLabel => 'ファイルを開く';
 }

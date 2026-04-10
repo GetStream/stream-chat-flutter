@@ -3,8 +3,8 @@ import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
-import 'package:stream_chat_flutter/src/icons/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 /// Widget that displays a photo or video item from the gallery.
 class StreamPhotoGalleryTile extends StatelessWidget {
@@ -60,18 +60,17 @@ class StreamPhotoGalleryTile extends StatelessWidget {
     ThumbnailFormat? thumbnailFormat,
     int? thumbnailQuality,
     double? thumbnailScale,
-  }) =>
-      StreamPhotoGalleryTile(
-        key: key ?? this.key,
-        media: media ?? this.media,
-        selected: selected ?? this.selected,
-        onTap: onTap ?? this.onTap,
-        onLongPress: onLongPress ?? this.onLongPress,
-        thumbnailSize: thumbnailSize ?? this.thumbnailSize,
-        thumbnailFormat: thumbnailFormat ?? this.thumbnailFormat,
-        thumbnailQuality: thumbnailQuality ?? this.thumbnailQuality,
-        thumbnailScale: thumbnailScale ?? this.thumbnailScale,
-      );
+  }) => StreamPhotoGalleryTile(
+    key: key ?? this.key,
+    media: media ?? this.media,
+    selected: selected ?? this.selected,
+    onTap: onTap ?? this.onTap,
+    onLongPress: onLongPress ?? this.onLongPress,
+    thumbnailSize: thumbnailSize ?? this.thumbnailSize,
+    thumbnailFormat: thumbnailFormat ?? this.thumbnailFormat,
+    thumbnailQuality: thumbnailQuality ?? this.thumbnailQuality,
+    thumbnailScale: thumbnailScale ?? this.thumbnailScale,
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -101,45 +100,32 @@ class StreamPhotoGalleryTile extends StatelessWidget {
             child: AnimatedOpacity(
               duration: const Duration(milliseconds: 300),
               opacity: selected ? 1.0 : 0.0,
-              child: Container(
-                color:
-                    // ignore: deprecated_member_use
-                    chatThemeData.colorTheme.textHighEmphasis.withOpacity(0.5),
-                alignment: Alignment.topRight,
-                padding: const EdgeInsets.only(
-                  top: 8,
-                  right: 8,
-                ),
-                child: CircleAvatar(
-                  radius: 12,
-                  backgroundColor: chatThemeData.colorTheme.barsBg,
-                  child: StreamSvgIcon(
-                    size: 24,
-                    icon: StreamSvgIcons.check,
-                    color: chatThemeData.colorTheme.textHighEmphasis,
-                  ),
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  // ignore: deprecated_member_use
+                  color: chatThemeData.colorTheme.textHighEmphasis.withOpacity(0.15),
                 ),
               ),
             ),
           ),
         ),
-        if (media.type == AssetType.video) ...[
-          const Positioned(
-            left: 8,
-            bottom: 10,
-            child: StreamSvgIcon(icon: StreamSvgIcons.videoCall),
+        Positioned(
+          top: 8,
+          right: 8,
+          child: IgnorePointer(
+            child: _GallerySelectedIndicator(selected: selected),
           ),
+        ),
+        if (media.type == AssetType.video)
           Positioned(
-            right: 4,
-            bottom: 10,
-            child: Text(
-              media.videoDuration.format(),
-              style: TextStyle(
-                color: chatThemeData.colorTheme.barsBg,
-              ),
+            left: 8,
+            bottom: 8,
+            child: StreamMediaBadge(
+              type: MediaBadgeType.video,
+              duration: media.videoDuration,
+              durationFormat: MediaBadgeDurationFormat.exact,
             ),
           ),
-        ],
         // https://stackoverflow.com/a/59317162/10036882
         Positioned.fill(
           child: Material(
@@ -155,14 +141,31 @@ class StreamPhotoGalleryTile extends StatelessWidget {
   }
 }
 
-extension on Duration {
-  String format() {
-    final s = '$this'.split('.')[0].padLeft(8, '0');
-    if (s.startsWith('00:')) {
-      return s.replaceFirst('00:', '');
-    }
+class _GallerySelectedIndicator extends StatelessWidget {
+  const _GallerySelectedIndicator({required this.selected});
 
-    return s;
+  final bool selected;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      width: 24,
+      height: 24,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: selected ? const Color(0xFF005FFF) : Colors.transparent,
+        border: Border.all(color: Colors.white, width: 2),
+      ),
+      child: selected
+          ? Icon(
+              context.streamIcons.checkmark12,
+              fontWeight: FontWeight.w900,
+              size: 12,
+              color: Colors.white,
+            )
+          : null,
+    );
   }
 }
 
@@ -251,7 +254,8 @@ class MediaThumbnailProvider extends ImageProvider<MediaThumbnailProvider> {
   int get hashCode => Object.hash(media, size, format, quality, scale);
 
   @override
-  String toString() => '$runtimeType('
+  String toString() =>
+      '$runtimeType('
       'media: $media, '
       'size: $size, '
       'format: $format, '

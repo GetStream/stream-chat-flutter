@@ -5,6 +5,9 @@ version: 10.0.0-beta.12
 repository: https://github.com/GetStream/stream-chat-flutter
 issue_tracker: https://github.com/GetStream/stream-chat-flutter/issues
 
+# TODO: Remove this once stream_core_flutter is published to pub.dev
+publish_to: none
+
 # Note: The environment configuration and dependency versions are managed by Melos.
 #
 # Do not edit them manually.
@@ -18,8 +21,8 @@ issue_tracker: https://github.com/GetStream/stream-chat-flutter/issues
 #   2. Add it to the melos.yaml file for future updates.
 
 environment:
-  sdk: ^3.6.2
-  flutter: ">=3.27.4"
+  sdk: ^3.10.0
+  flutter: ">=3.38.1"
 
 dependencies:
   cached_network_image: ^3.3.1
@@ -48,22 +51,25 @@ dependencies:
   media_kit_video: ^2.0.0
   meta: ^1.9.1
   path_provider: ^2.1.3
-  photo_manager: ^3.2.0
+  photo_manager: ^3.8.3
   photo_view: ^0.15.0
   rate_limiter: ^1.0.0
-  record: ">=5.2.0 <7.0.0"
+  record: ^6.2.0
   rxdart: ^0.28.0
   share_plus: ">=11.0.0 <13.0.0"
   shimmer: ^3.0.0
   stream_chat_flutter_core: ^10.0.0-beta.12
+  stream_core_flutter: ^0.1.0
   svg_icon_widget: ^0.0.1
   synchronized: ^3.1.0+1
+  theme_extensions_builder_annotation: ^7.1.0
   thumblr: ^0.0.4
   url_launcher: ^6.3.0
   video_player: ^2.8.7
 
 dev_dependencies:
-  alchemist: ">=0.11.0 <0.14.0"
+  alchemist: ^0.13.0
+  build_runner: ^2.4.9
   connectivity_plus_platform_interface: ^2.0.0
   faker_dart: ^0.2.1
   flutter_test:
@@ -72,6 +78,7 @@ dev_dependencies:
   path: ^1.8.3
   path_provider_platform_interface: ^2.0.0
   plugin_platform_interface: ^2.0.0
+  theme_extensions_builder: ^7.2.0
 
 flutter:
   assets:

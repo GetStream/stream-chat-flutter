@@ -35,19 +35,15 @@ class StreamPollCreatorTheme extends InheritedTheme {
   /// StreamPollCreatorTheme theme = StreamPollCreatorTheme.of(context);
   /// ```
   static StreamPollCreatorThemeData of(BuildContext context) {
-    final pollCreatorTheme =
-        context.dependOnInheritedWidgetOfExactType<StreamPollCreatorTheme>();
-    return pollCreatorTheme?.data ??
-        StreamChatTheme.of(context).pollCreatorTheme;
+    final pollCreatorTheme = context.dependOnInheritedWidgetOfExactType<StreamPollCreatorTheme>();
+    return pollCreatorTheme?.data ?? StreamChatTheme.of(context).pollCreatorTheme;
   }
 
   @override
-  Widget wrap(BuildContext context, Widget child) =>
-      StreamPollCreatorTheme(data: data, child: child);
+  Widget wrap(BuildContext context, Widget child) => StreamPollCreatorTheme(data: data, child: child);
 
   @override
-  bool updateShouldNotify(StreamPollCreatorTheme oldWidget) =>
-      data != oldWidget.data;
+  bool updateShouldNotify(StreamPollCreatorTheme oldWidget) => data != oldWidget.data;
 }
 
 /// {@template streamPollCreatorThemeData}
@@ -173,40 +169,24 @@ class StreamPollCreatorThemeData with Diagnosticable {
       backgroundColor: backgroundColor ?? this.backgroundColor,
       appBarTitleStyle: appBarTitleStyle ?? this.appBarTitleStyle,
       appBarElevation: appBarElevation ?? this.appBarElevation,
-      appBarBackgroundColor:
-          appBarBackgroundColor ?? this.appBarBackgroundColor,
-      appBarForegroundColor:
-          appBarForegroundColor ?? this.appBarForegroundColor,
-      questionTextFieldFillColor:
-          questionTextFieldFillColor ?? this.questionTextFieldFillColor,
+      appBarBackgroundColor: appBarBackgroundColor ?? this.appBarBackgroundColor,
+      appBarForegroundColor: appBarForegroundColor ?? this.appBarForegroundColor,
+      questionTextFieldFillColor: questionTextFieldFillColor ?? this.questionTextFieldFillColor,
       questionHeaderStyle: questionHeaderStyle ?? this.questionHeaderStyle,
-      questionTextFieldStyle:
-          questionTextFieldStyle ?? this.questionTextFieldStyle,
-      questionTextFieldErrorStyle:
-          questionTextFieldErrorStyle ?? this.questionTextFieldErrorStyle,
-      questionTextFieldBorderRadius:
-          questionTextFieldBorderRadius ?? this.questionTextFieldBorderRadius,
-      optionsTextFieldFillColor:
-          optionsTextFieldFillColor ?? this.optionsTextFieldFillColor,
+      questionTextFieldStyle: questionTextFieldStyle ?? this.questionTextFieldStyle,
+      questionTextFieldErrorStyle: questionTextFieldErrorStyle ?? this.questionTextFieldErrorStyle,
+      questionTextFieldBorderRadius: questionTextFieldBorderRadius ?? this.questionTextFieldBorderRadius,
+      optionsTextFieldFillColor: optionsTextFieldFillColor ?? this.optionsTextFieldFillColor,
       optionsHeaderStyle: optionsHeaderStyle ?? this.optionsHeaderStyle,
-      optionsTextFieldStyle:
-          optionsTextFieldStyle ?? this.optionsTextFieldStyle,
-      optionsTextFieldErrorStyle:
-          optionsTextFieldErrorStyle ?? this.optionsTextFieldErrorStyle,
-      optionsTextFieldBorderRadius:
-          optionsTextFieldBorderRadius ?? this.optionsTextFieldBorderRadius,
-      switchListTileFillColor:
-          switchListTileFillColor ?? this.switchListTileFillColor,
-      switchListTileTitleStyle:
-          switchListTileTitleStyle ?? this.switchListTileTitleStyle,
-      switchListTileErrorStyle:
-          switchListTileErrorStyle ?? this.switchListTileErrorStyle,
-      switchListTileBorderRadius:
-          switchListTileBorderRadius ?? this.switchListTileBorderRadius,
-      actionDialogTitleStyle:
-          actionDialogTitleStyle ?? this.actionDialogTitleStyle,
-      actionDialogContentStyle:
-          actionDialogContentStyle ?? this.actionDialogContentStyle,
+      optionsTextFieldStyle: optionsTextFieldStyle ?? this.optionsTextFieldStyle,
+      optionsTextFieldErrorStyle: optionsTextFieldErrorStyle ?? this.optionsTextFieldErrorStyle,
+      optionsTextFieldBorderRadius: optionsTextFieldBorderRadius ?? this.optionsTextFieldBorderRadius,
+      switchListTileFillColor: switchListTileFillColor ?? this.switchListTileFillColor,
+      switchListTileTitleStyle: switchListTileTitleStyle ?? this.switchListTileTitleStyle,
+      switchListTileErrorStyle: switchListTileErrorStyle ?? this.switchListTileErrorStyle,
+      switchListTileBorderRadius: switchListTileBorderRadius ?? this.switchListTileBorderRadius,
+      actionDialogTitleStyle: actionDialogTitleStyle ?? this.actionDialogTitleStyle,
+      actionDialogContentStyle: actionDialogContentStyle ?? this.actionDialogContentStyle,
     );
   }
 
@@ -217,40 +197,24 @@ class StreamPollCreatorThemeData with Diagnosticable {
       backgroundColor: other.backgroundColor ?? backgroundColor,
       appBarTitleStyle: other.appBarTitleStyle ?? appBarTitleStyle,
       appBarElevation: other.appBarElevation ?? appBarElevation,
-      appBarBackgroundColor:
-          other.appBarBackgroundColor ?? appBarBackgroundColor,
-      appBarForegroundColor:
-          other.appBarForegroundColor ?? appBarForegroundColor,
-      questionTextFieldFillColor:
-          other.questionTextFieldFillColor ?? questionTextFieldFillColor,
+      appBarBackgroundColor: other.appBarBackgroundColor ?? appBarBackgroundColor,
+      appBarForegroundColor: other.appBarForegroundColor ?? appBarForegroundColor,
+      questionTextFieldFillColor: other.questionTextFieldFillColor ?? questionTextFieldFillColor,
       questionHeaderStyle: other.questionHeaderStyle ?? questionHeaderStyle,
-      questionTextFieldStyle:
-          other.questionTextFieldStyle ?? questionTextFieldStyle,
-      questionTextFieldErrorStyle:
-          other.questionTextFieldErrorStyle ?? questionTextFieldErrorStyle,
-      questionTextFieldBorderRadius:
-          other.questionTextFieldBorderRadius ?? questionTextFieldBorderRadius,
-      optionsTextFieldFillColor:
-          other.optionsTextFieldFillColor ?? optionsTextFieldFillColor,
+      questionTextFieldStyle: other.questionTextFieldStyle ?? questionTextFieldStyle,
+      questionTextFieldErrorStyle: other.questionTextFieldErrorStyle ?? questionTextFieldErrorStyle,
+      questionTextFieldBorderRadius: other.questionTextFieldBorderRadius ?? questionTextFieldBorderRadius,
+      optionsTextFieldFillColor: other.optionsTextFieldFillColor ?? optionsTextFieldFillColor,
       optionsHeaderStyle: other.optionsHeaderStyle ?? optionsHeaderStyle,
-      optionsTextFieldStyle:
-          other.optionsTextFieldStyle ?? optionsTextFieldStyle,
-      optionsTextFieldErrorStyle:
-          other.optionsTextFieldErrorStyle ?? optionsTextFieldErrorStyle,
-      optionsTextFieldBorderRadius:
-          other.optionsTextFieldBorderRadius ?? optionsTextFieldBorderRadius,
-      switchListTileFillColor:
-          other.switchListTileFillColor ?? switchListTileFillColor,
-      switchListTileTitleStyle:
-          other.switchListTileTitleStyle ?? switchListTileTitleStyle,
-      switchListTileErrorStyle:
-          other.switchListTileErrorStyle ?? switchListTileErrorStyle,
-      switchListTileBorderRadius:
-          other.switchListTileBorderRadius ?? switchListTileBorderRadius,
-      actionDialogTitleStyle:
-          other.actionDialogTitleStyle ?? actionDialogTitleStyle,
-      actionDialogContentStyle:
-          other.actionDialogContentStyle ?? actionDialogContentStyle,
+      optionsTextFieldStyle: other.optionsTextFieldStyle ?? optionsTextFieldStyle,
+      optionsTextFieldErrorStyle: other.optionsTextFieldErrorStyle ?? optionsTextFieldErrorStyle,
+      optionsTextFieldBorderRadius: other.optionsTextFieldBorderRadius ?? optionsTextFieldBorderRadius,
+      switchListTileFillColor: other.switchListTileFillColor ?? switchListTileFillColor,
+      switchListTileTitleStyle: other.switchListTileTitleStyle ?? switchListTileTitleStyle,
+      switchListTileErrorStyle: other.switchListTileErrorStyle ?? switchListTileErrorStyle,
+      switchListTileBorderRadius: other.switchListTileBorderRadius ?? switchListTileBorderRadius,
+      actionDialogTitleStyle: other.actionDialogTitleStyle ?? actionDialogTitleStyle,
+      actionDialogContentStyle: other.actionDialogContentStyle ?? actionDialogContentStyle,
     );
   }
 
@@ -262,45 +226,34 @@ class StreamPollCreatorThemeData with Diagnosticable {
   ) {
     return StreamPollCreatorThemeData(
       backgroundColor: Color.lerp(a.backgroundColor, b.backgroundColor, t),
-      appBarTitleStyle:
-          TextStyle.lerp(a.appBarTitleStyle, b.appBarTitleStyle, t),
+      appBarTitleStyle: TextStyle.lerp(a.appBarTitleStyle, b.appBarTitleStyle, t),
       appBarElevation: lerpDouble(a.appBarElevation, b.appBarElevation, t),
-      appBarBackgroundColor:
-          Color.lerp(a.appBarBackgroundColor, b.appBarBackgroundColor, t),
-      appBarForegroundColor:
-          Color.lerp(a.appBarForegroundColor, b.appBarForegroundColor, t),
-      questionTextFieldFillColor: Color.lerp(
-          a.questionTextFieldFillColor, b.questionTextFieldFillColor, t),
-      questionHeaderStyle:
-          TextStyle.lerp(a.questionHeaderStyle, b.questionHeaderStyle, t),
-      questionTextFieldStyle:
-          TextStyle.lerp(a.questionTextFieldStyle, b.questionTextFieldStyle, t),
-      questionTextFieldErrorStyle: TextStyle.lerp(
-          a.questionTextFieldErrorStyle, b.questionTextFieldErrorStyle, t),
+      appBarBackgroundColor: Color.lerp(a.appBarBackgroundColor, b.appBarBackgroundColor, t),
+      appBarForegroundColor: Color.lerp(a.appBarForegroundColor, b.appBarForegroundColor, t),
+      questionTextFieldFillColor: Color.lerp(a.questionTextFieldFillColor, b.questionTextFieldFillColor, t),
+      questionHeaderStyle: TextStyle.lerp(a.questionHeaderStyle, b.questionHeaderStyle, t),
+      questionTextFieldStyle: TextStyle.lerp(a.questionTextFieldStyle, b.questionTextFieldStyle, t),
+      questionTextFieldErrorStyle: TextStyle.lerp(a.questionTextFieldErrorStyle, b.questionTextFieldErrorStyle, t),
       questionTextFieldBorderRadius: BorderRadius.lerp(
-          a.questionTextFieldBorderRadius, b.questionTextFieldBorderRadius, t),
-      optionsTextFieldFillColor: Color.lerp(
-          a.optionsTextFieldFillColor, b.optionsTextFieldFillColor, t),
-      optionsHeaderStyle:
-          TextStyle.lerp(a.optionsHeaderStyle, b.optionsHeaderStyle, t),
-      optionsTextFieldStyle:
-          TextStyle.lerp(a.optionsTextFieldStyle, b.optionsTextFieldStyle, t),
-      optionsTextFieldErrorStyle: TextStyle.lerp(
-          a.optionsTextFieldErrorStyle, b.optionsTextFieldErrorStyle, t),
+        a.questionTextFieldBorderRadius,
+        b.questionTextFieldBorderRadius,
+        t,
+      ),
+      optionsTextFieldFillColor: Color.lerp(a.optionsTextFieldFillColor, b.optionsTextFieldFillColor, t),
+      optionsHeaderStyle: TextStyle.lerp(a.optionsHeaderStyle, b.optionsHeaderStyle, t),
+      optionsTextFieldStyle: TextStyle.lerp(a.optionsTextFieldStyle, b.optionsTextFieldStyle, t),
+      optionsTextFieldErrorStyle: TextStyle.lerp(a.optionsTextFieldErrorStyle, b.optionsTextFieldErrorStyle, t),
       optionsTextFieldBorderRadius: BorderRadius.lerp(
-          a.optionsTextFieldBorderRadius, b.optionsTextFieldBorderRadius, t),
-      switchListTileFillColor:
-          Color.lerp(a.switchListTileFillColor, b.switchListTileFillColor, t),
-      switchListTileTitleStyle: TextStyle.lerp(
-          a.switchListTileTitleStyle, b.switchListTileTitleStyle, t),
-      switchListTileErrorStyle: TextStyle.lerp(
-          a.switchListTileErrorStyle, b.switchListTileErrorStyle, t),
-      switchListTileBorderRadius: BorderRadius.lerp(
-          a.switchListTileBorderRadius, b.switchListTileBorderRadius, t),
-      actionDialogTitleStyle:
-          TextStyle.lerp(a.actionDialogTitleStyle, b.actionDialogTitleStyle, t),
-      actionDialogContentStyle: TextStyle.lerp(
-          a.actionDialogContentStyle, b.actionDialogContentStyle, t),
+        a.optionsTextFieldBorderRadius,
+        b.optionsTextFieldBorderRadius,
+        t,
+      ),
+      switchListTileFillColor: Color.lerp(a.switchListTileFillColor, b.switchListTileFillColor, t),
+      switchListTileTitleStyle: TextStyle.lerp(a.switchListTileTitleStyle, b.switchListTileTitleStyle, t),
+      switchListTileErrorStyle: TextStyle.lerp(a.switchListTileErrorStyle, b.switchListTileErrorStyle, t),
+      switchListTileBorderRadius: BorderRadius.lerp(a.switchListTileBorderRadius, b.switchListTileBorderRadius, t),
+      actionDialogTitleStyle: TextStyle.lerp(a.actionDialogTitleStyle, b.actionDialogTitleStyle, t),
+      actionDialogContentStyle: TextStyle.lerp(a.actionDialogContentStyle, b.actionDialogContentStyle, t),
     );
   }
 
@@ -317,8 +270,7 @@ class StreamPollCreatorThemeData with Diagnosticable {
           other.questionHeaderStyle == questionHeaderStyle &&
           other.questionTextFieldStyle == questionTextFieldStyle &&
           other.questionTextFieldErrorStyle == questionTextFieldErrorStyle &&
-          other.questionTextFieldBorderRadius ==
-              questionTextFieldBorderRadius &&
+          other.questionTextFieldBorderRadius == questionTextFieldBorderRadius &&
           other.optionsTextFieldFillColor == optionsTextFieldFillColor &&
           other.optionsHeaderStyle == optionsHeaderStyle &&
           other.optionsTextFieldStyle == optionsTextFieldStyle &&

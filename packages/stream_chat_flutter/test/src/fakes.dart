@@ -12,9 +12,7 @@ const String kApplicationDocumentsPath = 'applicationDocumentsPath';
 const String kExternalCachePath = 'externalCachePath';
 const String kExternalStoragePath = 'externalStoragePath';
 
-class FakePathProviderPlatform extends Fake
-    with MockPlatformInterfaceMixin
-    implements PathProviderPlatform {
+class FakePathProviderPlatform extends Fake with MockPlatformInterfaceMixin implements PathProviderPlatform {
   @override
   Future<String?> getTemporaryPath() async {
     return kTemporaryPath;
@@ -58,9 +56,7 @@ class FakePathProviderPlatform extends Fake
   }
 }
 
-class AllNullFakePathProviderPlatform extends Fake
-    with MockPlatformInterfaceMixin
-    implements PathProviderPlatform {
+class AllNullFakePathProviderPlatform extends Fake with MockPlatformInterfaceMixin implements PathProviderPlatform {
   @override
   Future<String?> getTemporaryPath() async {
     return null;
@@ -104,9 +100,7 @@ class AllNullFakePathProviderPlatform extends Fake
   }
 }
 
-class FakeRecordPlatform extends Fake
-    with MockPlatformInterfaceMixin
-    implements RecordPlatform {
+class FakeRecordPlatform extends Fake with MockPlatformInterfaceMixin implements RecordPlatform {
   @override
   Future<void> create(String recorderId) async {}
 
@@ -143,9 +137,7 @@ class FakeRecordPlatform extends Fake
   Future<void> dispose(String recorderId) async {}
 }
 
-class FakeConnectivityPlatform extends Fake
-    with MockPlatformInterfaceMixin
-    implements ConnectivityPlatform {
+class FakeConnectivityPlatform extends Fake with MockPlatformInterfaceMixin implements ConnectivityPlatform {
   @override
   Future<List<ConnectivityResult>> checkConnectivity() {
     return Future.value([ConnectivityResult.wifi]);

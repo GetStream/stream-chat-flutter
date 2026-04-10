@@ -7,8 +7,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart' hide Priority;
-import 'package:flutter_local_notifications/flutter_local_notifications.dart'
-    hide Message;
+import 'package:flutter_local_notifications/flutter_local_notifications.dart' hide Message;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -21,6 +20,9 @@ import 'package:sample_app/state/init_data.dart';
 import 'package:sample_app/utils/app_config.dart';
 import 'package:sample_app/utils/local_notification_observer.dart';
 import 'package:sample_app/utils/localizations.dart';
+import 'package:sample_app/widgets/custom_message_actions.dart';
+import 'package:sample_app/widgets/location/location_attachment.dart';
+import 'package:sample_app/widgets/location/location_detail_dialog.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_localizations/stream_chat_localizations.dart';
@@ -43,8 +45,7 @@ const notificationChannelDescription = 'Notifications for Stream messages';
 const bool kIsIOS = bool.fromEnvironment('dart.io.is_ios');
 
 // Initialize FlutterLocalNotificationsPlugin for background messages
-final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-    FlutterLocalNotificationsPlugin();
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
 /// Constructs callback for background notification handling.
 ///
@@ -179,8 +180,7 @@ Future<void> _showAndroidNotification({
     await flutterLocalNotificationsPlugin.initialize(
       initializationSettings,
       onDidReceiveNotificationResponse: (NotificationResponse response) async {
-        debugPrint(
-            '[onBackgroundMessage] #firebase; notification clicked: ${response.payload}');
+        debugPrint('[onBackgroundMessage] #firebase; notification clicked: ${response.payload}');
         // The payload contains the channel information (channelType:channelId)
         // This will be handled when the app is opened
       },
@@ -199,10 +199,10 @@ Future<void> _showAndroidNotification({
     );
 
     debugPrint(
-        '[onBackgroundMessage] #firebase; android notification shown successfully: ID=$notificationId, Title="$title"');
+      '[onBackgroundMessage] #firebase; android notification shown successfully: ID=$notificationId, Title="$title"',
+    );
   } catch (e) {
-    debugPrint(
-        '[onBackgroundMessage] #firebase; failed to show notification: $e');
+    debugPrint('[onBackgroundMessage] #firebase; failed to show notification: $e');
   }
 }
 
@@ -220,21 +220,17 @@ Future<void> _createNotificationChannel() async {
     );
 
     // Create the channel
-    final androidPlugin =
-        flutterLocalNotificationsPlugin.resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>();
+    final androidPlugin = flutterLocalNotificationsPlugin
+        .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
 
     if (androidPlugin != null) {
       await androidPlugin.createNotificationChannel(channel);
-      debugPrint(
-          '[onBackgroundMessage] #firebase; notification channel created');
+      debugPrint('[onBackgroundMessage] #firebase; notification channel created');
     } else {
-      debugPrint(
-          '[onBackgroundMessage] #firebase; failed to resolve Android plugin');
+      debugPrint('[onBackgroundMessage] #firebase; failed to resolve Android plugin');
     }
   } catch (e) {
-    debugPrint(
-        '[onBackgroundMessage] #firebase; notification channel failed: $e');
+    debugPrint('[onBackgroundMessage] #firebase; notification channel failed: $e');
   }
 }
 
@@ -315,10 +311,7 @@ class _StreamChatSampleAppState extends State<StreamChatSampleApp>
 
   Future<void> _initFirebaseMessaging(StreamChatClient client) async {
     userIdSubscription?.cancel();
-    userIdSubscription = client.state.currentUserStream
-        .map((it) => it?.id)
-        .distinct()
-        .listen((userId) async {
+    userIdSubscription = client.state.currentUserStream.map((it) => it?.id).distinct().listen((userId) async {
       // User logged in
       if (userId != null) {
         // Requests notification permission.
@@ -326,23 +319,24 @@ class _StreamChatSampleAppState extends State<StreamChatSampleApp>
         // Sets callback for background messages.
         FirebaseMessaging.onBackgroundMessage(_onFirebaseBackgroundMessage);
         // Sets callback for the notification click event.
-        firebaseSubscriptions.add(FirebaseMessaging.onMessageOpenedApp
-            .listen(_onFirebaseMessageOpenedApp(client)));
+        firebaseSubscriptions.add(FirebaseMessaging.onMessageOpenedApp.listen(_onFirebaseMessageOpenedApp(client)));
         // Sets callback for foreground messages
-        firebaseSubscriptions.add(FirebaseMessaging.onMessage
-            .listen(_onFirebaseForegroundMessage(client)));
+        firebaseSubscriptions.add(FirebaseMessaging.onMessage.listen(_onFirebaseForegroundMessage(client)));
         // Sets callback for the token refresh event.
-        firebaseSubscriptions.add(FirebaseMessaging.instance.onTokenRefresh
-            .listen(_onFirebaseTokenRefresh(client)));
+        firebaseSubscriptions.add(FirebaseMessaging.instance.onTokenRefresh.listen(_onFirebaseTokenRefresh(client)));
 
-        final token = await FirebaseMessaging.instance.getToken();
-        debugPrint('[onTokenInit] #firebase; token: $token');
-        if (token != null) {
-          // replace with your push provider, e.g., 'PushProvider.xiaomi'
-          const pushProvider = PushProvider.firebase;
+        try {
+          final token = await FirebaseMessaging.instance.getToken();
+          debugPrint('[onTokenInit] #firebase; token: $token');
+          if (token != null) {
+            // replace with your push provider, e.g., 'PushProvider.xiaomi'
+            const pushProvider = PushProvider.firebase;
 
-          // add Token to Stream
-          await client.addDevice(token, pushProvider);
+            // add Token to Stream
+            await client.addDevice(token, pushProvider);
+          }
+        } catch (e) {
+          debugPrint('[onTokenInit] #firebase; failed to get token: $e');
         }
       }
       // User logged out
@@ -386,8 +380,7 @@ class _StreamChatSampleAppState extends State<StreamChatSampleApp>
   /// Constructs callback for foreground notification handling.
   OnRemoteMessage _onFirebaseForegroundMessage(StreamChatClient client) {
     return (message) async {
-      debugPrint(
-          '[onForegroundMessage] #firebase; message: ${message.toMap()}');
+      debugPrint('[onForegroundMessage] #firebase; message: ${message.toMap()}');
     };
   }
 
@@ -449,8 +442,7 @@ class _StreamChatSampleAppState extends State<StreamChatSampleApp>
     if (localNotificationObserver != null) {
       localNotificationObserver!.dispose();
     }
-    localNotificationObserver = LocalNotificationObserver(
-        _initNotifier.initData!.client, _navigatorKey);
+    localNotificationObserver = LocalNotificationObserver(_initNotifier.initData!.client, _navigatorKey);
 
     return router ??= GoRouter(
       refreshListenable: _initNotifier,
@@ -458,10 +450,9 @@ class _StreamChatSampleAppState extends State<StreamChatSampleApp>
       navigatorKey: _navigatorKey,
       observers: [localNotificationObserver!],
       redirect: (context, state) {
-        final loggedIn =
-            _initNotifier.initData?.client.state.currentUser != null;
-        final loggingIn = state.matchedLocation == Routes.CHOOSE_USER.path ||
-            state.matchedLocation == Routes.ADVANCED_OPTIONS.path;
+        final loggedIn = _initNotifier.initData?.client.state.currentUser != null;
+        final loggingIn =
+            state.matchedLocation == Routes.CHOOSE_USER.path || state.matchedLocation == Routes.ADVANCED_OPTIONS.path;
 
         if (!loggedIn) {
           return loggingIn ? null : Routes.CHOOSE_USER.path;
@@ -495,32 +486,60 @@ class _StreamChatSampleAppState extends State<StreamChatSampleApp>
                     'theme',
                     defaultValue: 0,
                   ),
-                  builder: (context, snapshot) => MaterialApp.router(
-                    theme: ThemeData.light(),
-                    darkTheme: ThemeData.dark(),
-                    themeMode: const {
-                      -1: ThemeMode.dark,
-                      0: ThemeMode.system,
-                      1: ThemeMode.light,
-                    }[snapshot],
-                    supportedLocales: const [
-                      Locale('en'),
-                      Locale('it'),
-                    ],
-                    localizationsDelegates: const [
-                      AppLocalizationsDelegate(),
-                      GlobalStreamChatLocalizations.delegate,
-                      GlobalMaterialLocalizations.delegate,
-                      GlobalWidgetsLocalizations.delegate,
-                    ],
-                    builder: (context, child) => StreamChat(
-                      client: _initNotifier.initData!.client,
-                      streamChatConfigData: StreamChatConfigurationData(
-                        draftMessagesEnabled: true,
-                      ),
-                      child: child,
+                  builder: (context, snapshot) => PreferenceBuilder<bool>(
+                    preference: _initNotifier.initData!.preferences.getBool(
+                      'forceRtl',
+                      defaultValue: false,
                     ),
-                    routerConfig: _setupRouter(),
+                    builder: (context, forceRtl) => MaterialApp.router(
+                      theme: ThemeData(
+                        brightness: .light,
+                        extensions: [StreamTheme.light()],
+                      ),
+                      darkTheme: ThemeData(
+                        brightness: .dark,
+                        extensions: [StreamTheme.dark()],
+                      ),
+                      themeMode: const {
+                        -1: ThemeMode.dark,
+                        0: ThemeMode.system,
+                        1: ThemeMode.light,
+                      }[snapshot],
+                      supportedLocales: const [
+                        Locale('en'),
+                        Locale('it'),
+                      ],
+                      localizationsDelegates: const [
+                        AppLocalizationsDelegate(),
+                        GlobalStreamChatLocalizations.delegate,
+                        GlobalMaterialLocalizations.delegate,
+                        GlobalWidgetsLocalizations.delegate,
+                      ],
+                      builder: (context, child) => Directionality(
+                        textDirection: forceRtl ? TextDirection.rtl : TextDirection.ltr,
+                        child: StreamChat(
+                          client: _initNotifier.initData!.client,
+                          componentBuilders: StreamComponentBuilders(
+                            extensions: streamChatComponentBuilders(
+                              messageWidget: customMessageWidgetBuilder,
+                            ),
+                          ),
+                          streamChatConfigData: StreamChatConfigurationData(
+                            draftMessagesEnabled: true,
+                            enforceUniqueReactions: false,
+                            attachmentBuilders: [
+                              LocationAttachmentBuilder(
+                                onAttachmentTap: (context, location) {
+                                  showLocationDetailDialog(context: context, location: location);
+                                },
+                              ),
+                            ],
+                          ),
+                          child: child,
+                        ),
+                      ),
+                      routerConfig: _setupRouter(),
+                    ),
                   ),
                 );
               },

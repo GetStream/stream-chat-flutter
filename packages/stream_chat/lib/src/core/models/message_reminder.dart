@@ -38,12 +38,11 @@ class MessageReminder extends Equatable implements ComparableFieldProvider {
     this.remindAt,
     DateTime? createdAt,
     DateTime? updatedAt,
-  })  : createdAt = createdAt ?? DateTime.now(),
-        updatedAt = updatedAt ?? DateTime.now();
+  }) : createdAt = createdAt ?? DateTime.now(),
+       updatedAt = updatedAt ?? DateTime.now();
 
   /// Create a new instance from a json
-  factory MessageReminder.fromJson(Map<String, dynamic> json) =>
-      _$MessageReminderFromJson(json);
+  factory MessageReminder.fromJson(Map<String, dynamic> json) => _$MessageReminderFromJson(json);
 
   /// The channel CID where the message exists.
   final String channelCid;
@@ -124,16 +123,16 @@ class MessageReminder extends Equatable implements ComparableFieldProvider {
 
   @override
   List<Object?> get props => [
-        channelCid,
-        channel,
-        messageId,
-        message,
-        userId,
-        user,
-        remindAt,
-        createdAt,
-        updatedAt,
-      ];
+    channelCid,
+    channel,
+    messageId,
+    message,
+    userId,
+    user,
+    remindAt,
+    createdAt,
+    updatedAt,
+  ];
 
   @override
   ComparableField? getComparableField(String sortKey) {

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 /// Widget used to create a poll.
 class StreamPollCreator extends StatelessWidget {
@@ -22,7 +23,9 @@ class StreamPollCreator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = StreamChatTheme.of(context);
+    final spacing = context.streamSpacing;
+    final textTheme = context.streamTextTheme;
+    final colorScheme = context.streamColorScheme;
 
     Future<void> _openCreatePollFlow() async {
       final result = await showStreamPollCreatorDialog(
@@ -31,35 +34,53 @@ class StreamPollCreator extends StatelessWidget {
         config: config,
       );
 
-      onPollCreated?.call(result);
+      return onPollCreated?.call(result);
     }
 
     return OptionDrawer(
       child: EndOfFrameCallbackWidget(
-        child: StreamSvgIcon(
-          size: 180,
-          icon: StreamSvgIcons.polls,
-          color: theme.colorTheme.disabled,
+        child: Center(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                size: 32,
+                context.streamIcons.poll32,
+                color: colorScheme.textTertiary,
+              ),
+              SizedBox(height: spacing.xs),
+              Text(
+                context.translations.createPollPromptLabel,
+                style: textTheme.bodyDefault.copyWith(color: colorScheme.textSecondary),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: spacing.md),
+              StreamButton(
+                type: .outline,
+                style: .secondary,
+                onTap: _openCreatePollFlow,
+                label: context.translations.createPollLabel(),
+              ),
+            ],
+          ),
         ),
         onEndOfFrame: (_) => _openCreatePollFlow(),
         errorBuilder: (context, error, stacktrace) {
           return Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              StreamSvgIcon(
-                size: 240,
-                icon: StreamSvgIcons.polls,
-                color: theme.colorTheme.disabled,
+              Icon(
+                size: 32,
+                context.streamIcons.poll32,
+                color: colorScheme.textTertiary,
               ),
-              const SizedBox(height: 8),
-              TextButton(
-                onPressed: _openCreatePollFlow,
-                child: Text(
-                  context.translations.createPollLabel(isNew: true),
-                  style: theme.textTheme.bodyBold.copyWith(
-                    color: theme.colorTheme.accentPrimary,
-                  ),
-                ),
+              SizedBox(height: spacing.md),
+              StreamButton(
+                type: .outline,
+                style: .secondary,
+                onTap: _openCreatePollFlow,
+                label: context.translations.createPollLabel(isNew: true),
               ),
             ],
           );

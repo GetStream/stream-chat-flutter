@@ -1,11 +1,11 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/icons/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/src/scroll_view/poll_vote_scroll_view/stream_poll_vote_list_view.dart';
 import 'package:stream_chat_flutter/src/theme/poll_option_votes_dialog_theme.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 /// {@template showStreamPollOptionVotesDialog}
 /// Displays an interactive dialog to show all the votes for a poll option.
@@ -66,12 +66,10 @@ class StreamPollOptionVotesDialog extends StatefulWidget {
   final int? pollVotesCount;
 
   @override
-  State<StreamPollOptionVotesDialog> createState() =>
-      _StreamPollOptionVotesDialogState();
+  State<StreamPollOptionVotesDialog> createState() => _StreamPollOptionVotesDialogState();
 }
 
-class _StreamPollOptionVotesDialogState
-    extends State<StreamPollOptionVotesDialog> {
+class _StreamPollOptionVotesDialogState extends State<StreamPollOptionVotesDialog> {
   late StreamPollVoteListController _controller;
 
   @override
@@ -83,8 +81,7 @@ class _StreamPollOptionVotesDialogState
   @override
   void didUpdateWidget(covariant StreamPollOptionVotesDialog oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.poll.id != widget.poll.id ||
-        oldWidget.option.id != widget.option.id) {
+    if (oldWidget.poll.id != widget.poll.id || oldWidget.option.id != widget.option.id) {
       _controller.dispose(); // Dispose the old controller.
       _initializeController(); // Initialize a new controller.
     }
@@ -131,8 +128,8 @@ class _StreamPollOptionVotesDialogState
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 if (isOptionWinner) ...[
-                  StreamSvgIcon(
-                    icon: StreamSvgIcons.award,
+                  Icon(
+                    context.streamIcons.trophy20,
                     color: theme.pollOptionWinnerVoteCountTextStyle?.color,
                   ),
                   const SizedBox(width: 8),
@@ -141,9 +138,7 @@ class _StreamPollOptionVotesDialogState
                   context.translations.voteCountLabel(
                     count: widget.pollVotesCount,
                   ),
-                  style: isOptionWinner
-                      ? theme.pollOptionWinnerVoteCountTextStyle
-                      : theme.pollOptionVoteCountTextStyle,
+                  style: isOptionWinner ? theme.pollOptionWinnerVoteCountTextStyle : theme.pollOptionVoteCountTextStyle,
                 ),
               ],
             ),

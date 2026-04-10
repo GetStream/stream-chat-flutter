@@ -53,7 +53,7 @@ class AttachmentButton extends StatelessWidget {
       color: color,
       iconSize: size,
       onPressed: onPressed,
-      icon: icon ?? const StreamSvgIcon(icon: StreamSvgIcons.attach),
+      icon: icon ?? Icon(context.streamIcons.attachment20),
     );
   }
 }

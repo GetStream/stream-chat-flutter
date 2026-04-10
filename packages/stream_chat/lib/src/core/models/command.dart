@@ -13,8 +13,7 @@ class Command {
   });
 
   /// Create a new instance from a json
-  factory Command.fromJson(Map<String, dynamic> json) =>
-      _$CommandFromJson(json);
+  factory Command.fromJson(Map<String, dynamic> json) => _$CommandFromJson(json);
 
   /// The name of the command
   final String name;

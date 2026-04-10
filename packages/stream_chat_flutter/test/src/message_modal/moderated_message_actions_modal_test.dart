@@ -4,6 +4,7 @@ import 'package:alchemist/alchemist.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 void main() {
   final message = Message(
@@ -18,22 +19,21 @@ void main() {
     ),
   );
 
-  final messageActions = <StreamMessageAction>[
-    StreamMessageAction(
-      title: const Text('Send Anyway'),
-      leading: const StreamSvgIcon(icon: StreamSvgIcons.send),
-      action: ResendMessage(message: message),
+  final messageActions = <StreamContextMenuAction<MessageAction>>[
+    StreamContextMenuAction<MessageAction>(
+      label: const Text('Send Anyway'),
+      leading: const Icon(StreamIconData.send20),
+      value: ResendMessage(message: message),
     ),
-    StreamMessageAction(
-      title: const Text('Edit Message'),
-      leading: const StreamSvgIcon(icon: StreamSvgIcons.edit),
-      action: EditMessage(message: message),
+    StreamContextMenuAction<MessageAction>(
+      label: const Text('Edit Message'),
+      leading: const Icon(StreamIconData.edit20),
+      value: EditMessage(message: message),
     ),
-    StreamMessageAction(
-      isDestructive: true,
-      title: const Text('Delete Message'),
-      leading: const StreamSvgIcon(icon: StreamSvgIcons.delete),
-      action: HardDeleteMessage(message: message),
+    StreamContextMenuAction<MessageAction>.destructive(
+      label: const Text('Delete Message'),
+      leading: const Icon(StreamIconData.delete20),
+      value: HardDeleteMessage(message: message),
     ),
   ];
 
@@ -52,7 +52,7 @@ void main() {
       await tester.pumpAndSettle(const Duration(seconds: 1));
 
       // Check for icon, title and content
-      expect(find.byType(StreamSvgIcon), findsWidgets);
+      expect(find.byType(Icon), findsWidgets);
       expect(find.byType(Text), findsWidgets);
 
       // Check for actions
@@ -61,19 +61,30 @@ void main() {
       expect(find.text('Delete Message'), findsOneWidget);
     });
 
-    testWidgets('action buttons call the correct callbacks', (tester) async {
+    testWidgets('action buttons pop with the correct value', (tester) async {
       MessageAction? messageAction;
 
       await tester.pumpWidget(
         _wrapWithMaterialApp(
-          ModeratedMessageActionsModal(
-            message: message,
-            messageActions: messageActions,
-            onActionTap: (action) => messageAction = action,
+          Builder(
+            builder: (context) => TextButton(
+              onPressed: () async {
+                messageAction = await showStreamDialog(
+                  context: context,
+                  builder: (_) => ModeratedMessageActionsModal(
+                    message: message,
+                    messageActions: messageActions,
+                  ),
+                );
+              },
+              child: const Text('Open Dialog'),
+            ),
           ),
         ),
       );
 
+      // Open dialog and tap Send Anyway
+      await tester.tap(find.text('Open Dialog'));
       await tester.pumpAndSettle();
 
       // Tap on Send Anyway button
@@ -81,12 +92,16 @@ void main() {
       await tester.pumpAndSettle();
       expect(messageAction, isA<ResendMessage>());
 
-      // Tap on Edit Message button
+      // Open dialog and tap Edit Message
+      await tester.tap(find.text('Open Dialog'));
+      await tester.pumpAndSettle();
       await tester.tap(find.text('Edit Message'));
       await tester.pumpAndSettle();
       expect(messageAction, isA<EditMessage>());
 
-      // Tap on Delete Message button
+      // Open dialog and tap Delete Message
+      await tester.tap(find.text('Open Dialog'));
+      await tester.pumpAndSettle();
       await tester.tap(find.text('Delete Message'));
       await tester.pumpAndSettle();
       expect(messageAction, isA<HardDeleteMessage>());
@@ -119,9 +134,16 @@ Widget _wrapWithMaterialApp(
 }) {
   return MaterialApp(
     debugShowCheckedModeBanner: false,
-    home: StreamChatTheme(
-      data: StreamChatThemeData(brightness: brightness),
-      child: Builder(builder: (context) {
+    theme: ThemeData(brightness: brightness),
+    builder: (context, child) => StreamChatConfiguration(
+      data: StreamChatConfigurationData(),
+      child: StreamChatTheme(
+        data: StreamChatThemeData(brightness: brightness),
+        child: child ?? const SizedBox.shrink(),
+      ),
+    ),
+    home: Builder(
+      builder: (context) {
         final theme = StreamChatTheme.of(context);
         return Scaffold(
           backgroundColor: theme.colorTheme.appBg,
@@ -133,7 +155,7 @@ Widget _wrapWithMaterialApp(
             ),
           ),
         );
-      }),
+      },
     ),
   );
 }

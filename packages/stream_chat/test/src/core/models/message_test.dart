@@ -2,6 +2,7 @@
 
 import 'package:stream_chat/src/core/models/attachment.dart';
 import 'package:stream_chat/src/core/models/message.dart';
+import 'package:stream_chat/src/core/models/message_state.dart';
 import 'package:stream_chat/src/core/models/moderation.dart';
 import 'package:stream_chat/src/core/models/reaction.dart';
 import 'package:stream_chat/src/core/models/reaction_group.dart';
@@ -15,8 +16,7 @@ void main() {
     test('should parse json correctly', () {
       final message = Message.fromJson(jsonFixture('message.json'));
       expect(message.id, '4637f7e4-a06b-42db-ba5a-8d8270dd926f');
-      expect(message.text,
-          'https://giphy.com/gifs/the-lion-king-live-action-5zvN79uTGfLMOVfQaA');
+      expect(message.text, 'https://giphy.com/gifs/the-lion-king-live-action-5zvN79uTGfLMOVfQaA');
       expect(message.type, 'regular');
       expect(message.user, isA<User>());
       expect(message.silent, isA<bool>());
@@ -41,24 +41,19 @@ void main() {
     test('should serialize to json correctly', () {
       final message = Message(
         id: '4637f7e4-a06b-42db-ba5a-8d8270dd926f',
-        text:
-            'https://giphy.com/gifs/the-lion-king-live-action-5zvN79uTGfLMOVfQaA',
+        text: 'https://giphy.com/gifs/the-lion-king-live-action-5zvN79uTGfLMOVfQaA',
         attachments: [
           Attachment.fromJson(const {
             'type': 'giphy',
             'author_name': 'GIPHY',
             'title': 'The Lion King Disney GIF - Find \u0026 Share on GIPHY',
-            'title_link':
-                'https://media.giphy.com/media/5zvN79uTGfLMOVfQaA/giphy.gif',
+            'title_link': 'https://media.giphy.com/media/5zvN79uTGfLMOVfQaA/giphy.gif',
             'text':
                 '''Discover \u0026 share this Lion King Live Action GIF with everyone you know. GIPHY is how you search, share, discover, and create GIFs.''',
-            'image_url':
-                'https://media.giphy.com/media/5zvN79uTGfLMOVfQaA/giphy.gif',
-            'thumb_url':
-                'https://media.giphy.com/media/5zvN79uTGfLMOVfQaA/giphy.gif',
-            'asset_url':
-                'https://media.giphy.com/media/5zvN79uTGfLMOVfQaA/giphy.mp4',
-          })
+            'image_url': 'https://media.giphy.com/media/5zvN79uTGfLMOVfQaA/giphy.gif',
+            'thumb_url': 'https://media.giphy.com/media/5zvN79uTGfLMOVfQaA/giphy.gif',
+            'asset_url': 'https://media.giphy.com/media/5zvN79uTGfLMOVfQaA/giphy.mp4',
+          }),
         ],
         showInChannel: true,
         parentId: 'parentId',
@@ -348,22 +343,18 @@ void main() {
       });
 
       test('should return true when user is in restrictedVisibility list', () {
-        final message =
-            Message(restrictedVisibility: const ['user1', 'user2', 'user3']);
+        final message = Message(restrictedVisibility: const ['user1', 'user2', 'user3']);
         expect(message.isVisibleTo('user2'), true);
       });
 
-      test('should return false when user is not in restrictedVisibility list',
-          () {
-        final message =
-            Message(restrictedVisibility: const ['user1', 'user2', 'user3']);
+      test('should return false when user is not in restrictedVisibility list', () {
+        final message = Message(restrictedVisibility: const ['user1', 'user2', 'user3']);
         expect(message.isVisibleTo('user4'), false);
       });
 
       test('should handle case sensitivity correctly', () {
         final message = Message(restrictedVisibility: const ['User1', 'USER2']);
-        expect(message.isVisibleTo('user1'), false,
-            reason: 'Should be case sensitive');
+        expect(message.isVisibleTo('user1'), false, reason: 'Should be case sensitive');
         expect(message.isVisibleTo('User1'), true);
       });
     });
@@ -380,15 +371,12 @@ void main() {
       });
 
       test('should return false when user is in restrictedVisibility list', () {
-        final message =
-            Message(restrictedVisibility: const ['user1', 'user2', 'user3']);
+        final message = Message(restrictedVisibility: const ['user1', 'user2', 'user3']);
         expect(message.isNotVisibleTo('user2'), false);
       });
 
-      test('should return true when user is not in restrictedVisibility list',
-          () {
-        final message =
-            Message(restrictedVisibility: const ['user1', 'user2', 'user3']);
+      test('should return true when user is not in restrictedVisibility list', () {
+        final message = Message(restrictedVisibility: const ['user1', 'user2', 'user3']);
         expect(message.isNotVisibleTo('user4'), true);
       });
 
@@ -547,6 +535,94 @@ void main() {
       expect(message.moderation?.originalText, 'original message text');
       expect(message.isFlagged, isTrue);
     });
+  });
+
+  group('syncWith', () {
+    test('should preserve local timestamps from the other message', () {
+      final localCreatedAt = DateTime(2024, 1, 1);
+      final localUpdatedAt = DateTime(2024, 1, 2);
+      final localDeletedAt = DateTime(2024, 1, 3);
+
+      final serverMessage = Message(id: 'msg-1', text: 'Hello');
+      final localMessage = Message(
+        id: 'msg-1',
+        text: 'Hello',
+        localCreatedAt: localCreatedAt,
+        localUpdatedAt: localUpdatedAt,
+        localDeletedAt: localDeletedAt,
+      );
+
+      final synced = serverMessage.syncWith(localMessage);
+      expect(synced.localCreatedAt, localCreatedAt);
+      expect(synced.localUpdatedAt, localUpdatedAt);
+      expect(synced.localDeletedAt, localDeletedAt);
+    });
+
+    test('should return this if other is null', () {
+      final message = Message(id: 'msg-1', text: 'Hello');
+      final synced = message.syncWith(null);
+      expect(identical(synced, message), isTrue);
+    });
+
+    test(
+      'should preserve deletedForMe from local when server does not have it',
+      () {
+        final serverMessage = Message(
+          id: 'msg-1',
+          text: 'Hello',
+        );
+        final localMessage = Message(
+          id: 'msg-1',
+          text: 'Hello',
+          deletedForMe: true,
+          type: MessageType.deleted,
+          state: MessageState.deletedForMe,
+        );
+
+        final synced = serverMessage.syncWith(localMessage);
+        expect(synced.deletedForMe, isTrue);
+        expect(synced.type, MessageType.deleted);
+        expect(synced.state, MessageState.deletedForMe);
+        expect(synced.isDeleted, isTrue);
+      },
+    );
+
+    test(
+      'should keep server deletedForMe when both server and local have it',
+      () {
+        final serverMessage = Message(
+          id: 'msg-1',
+          text: 'Hello',
+          deletedForMe: true,
+          type: MessageType.deleted,
+          state: MessageState.deletedForMe,
+        );
+        final localMessage = Message(
+          id: 'msg-1',
+          text: 'Hello',
+          deletedForMe: true,
+          type: MessageType.deleted,
+          state: MessageState.deletedForMe,
+        );
+
+        final synced = serverMessage.syncWith(localMessage);
+        expect(synced.deletedForMe, isTrue);
+        expect(synced.type, MessageType.deleted);
+        expect(synced.state, MessageState.deletedForMe);
+      },
+    );
+
+    test(
+      'should not set deletedForMe when neither server nor local have it',
+      () {
+        final serverMessage = Message(id: 'msg-1', text: 'Hello');
+        final localMessage = Message(id: 'msg-1', text: 'Hello');
+
+        final synced = serverMessage.syncWith(localMessage);
+        expect(synced.deletedForMe, isNull);
+        expect(synced.type, isNot(MessageType.deleted));
+      },
+    );
   });
 }
 

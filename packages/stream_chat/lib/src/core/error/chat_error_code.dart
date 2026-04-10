@@ -94,10 +94,8 @@ enum ChatErrorCode {
 }
 
 const _errorCodeWithDescription = {
-  ChatErrorCode.undefinedToken:
-      MapEntry(1000, 'Unauthorised, token not defined'),
-  ChatErrorCode.inputError:
-      MapEntry(4, 'Wrong data/parameter is sent to the API'),
+  ChatErrorCode.undefinedToken: MapEntry(1000, 'Unauthorised, token not defined'),
+  ChatErrorCode.inputError: MapEntry(4, 'Wrong data/parameter is sent to the API'),
   ChatErrorCode.duplicateUsername: MapEntry(
     6,
     'Duplicate username is sent while enforce_unique_usernames is enabled',
@@ -112,36 +110,24 @@ const _errorCodeWithDescription = {
     21,
     'Multiple Levels Reply is not supported - the API only supports 1 level deep reply threads',
   ),
-  ChatErrorCode.customCommandEndpointCall:
-      MapEntry(45, 'Custom Command handler returned an error'),
-  ChatErrorCode.customCommandEndpointMissing:
-      MapEntry(44, 'App config does not have custom_action_handler_url'),
-  ChatErrorCode.authenticationError:
-      MapEntry(5, 'Unauthenticated, problem with authentication'),
+  ChatErrorCode.customCommandEndpointCall: MapEntry(45, 'Custom Command handler returned an error'),
+  ChatErrorCode.customCommandEndpointMissing: MapEntry(44, 'App config does not have custom_action_handler_url'),
+  ChatErrorCode.authenticationError: MapEntry(5, 'Unauthenticated, problem with authentication'),
   ChatErrorCode.tokenExpired: MapEntry(40, 'Unauthenticated, token expired'),
-  ChatErrorCode.tokenBeforeIssuedAt:
-      MapEntry(42, 'Unauthenticated, token date incorrect'),
-  ChatErrorCode.tokenNotValid:
-      MapEntry(41, 'Unauthenticated, token not valid yet'),
-  ChatErrorCode.tokenSignatureInvalid:
-      MapEntry(43, 'Unauthenticated, token signature invalid'),
+  ChatErrorCode.tokenBeforeIssuedAt: MapEntry(42, 'Unauthenticated, token date incorrect'),
+  ChatErrorCode.tokenNotValid: MapEntry(41, 'Unauthenticated, token not valid yet'),
+  ChatErrorCode.tokenSignatureInvalid: MapEntry(43, 'Unauthenticated, token signature invalid'),
   ChatErrorCode.accessKeyError: MapEntry(2, 'Access Key invalid'),
-  ChatErrorCode.notAllowed:
-      MapEntry(17, 'Unauthorised / forbidden to make request'),
+  ChatErrorCode.notAllowed: MapEntry(17, 'Unauthorised / forbidden to make request'),
   ChatErrorCode.appSuspended: MapEntry(99, 'App suspended'),
-  ChatErrorCode.cooldownError:
-      MapEntry(60, 'User tried to post a message during the cooldown period'),
+  ChatErrorCode.cooldownError: MapEntry(60, 'User tried to post a message during the cooldown period'),
   ChatErrorCode.doesNotExist: MapEntry(16, 'Resource not found'),
   ChatErrorCode.requestTimeout: MapEntry(23, 'Request timed out'),
   ChatErrorCode.payloadTooBig: MapEntry(22, 'Payload too big'),
-  ChatErrorCode.rateLimitError:
-      MapEntry(9, 'Too many requests in a certain time frame'),
-  ChatErrorCode.maximumHeaderSizeExceeded:
-      MapEntry(24, 'Request headers are too large'),
-  ChatErrorCode.internalSystemError:
-      MapEntry(-1, 'Something goes wrong in the system'),
-  ChatErrorCode.noAccessToChannels:
-      MapEntry(70, 'No access to requested channels'),
+  ChatErrorCode.rateLimitError: MapEntry(9, 'Too many requests in a certain time frame'),
+  ChatErrorCode.maximumHeaderSizeExceeded: MapEntry(24, 'Request headers are too large'),
+  ChatErrorCode.internalSystemError: MapEntry(-1, 'Something goes wrong in the system'),
+  ChatErrorCode.noAccessToChannels: MapEntry(70, 'No access to requested channels'),
 };
 
 const _authenticationErrors = [
@@ -156,8 +142,8 @@ const _authenticationErrors = [
 ];
 
 ///
-ChatErrorCode? chatErrorCodeFromCode(int code) => _errorCodeWithDescription.keys
-    .firstWhereOrNull((key) => _errorCodeWithDescription[key]!.key == code);
+ChatErrorCode? chatErrorCodeFromCode(int code) =>
+    _errorCodeWithDescription.keys.firstWhereOrNull((key) => _errorCodeWithDescription[key]!.key == code);
 
 ///
 extension ChatErrorCodeX on ChatErrorCode {

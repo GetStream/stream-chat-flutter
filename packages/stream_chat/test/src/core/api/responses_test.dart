@@ -3304,8 +3304,7 @@ void main() {
       const jsonExample = '''
       {"reactions": [{"message_id": "4637f7e4-a06b-42db-ba5a-8d8270dd926f","user_id": "c1c9b454-2bcc-402d-8bb0-2f3706ce1680","user": {"id": "c1c9b454-2bcc-402d-8bb0-2f3706ce1680","role": "user","created_at": "2020-01-28T22:17:30.83015Z","updated_at": "2020-01-28T22:17:31.19435Z","banned": false,"online": false,"image": "https://randomuser.me/api/portraits/women/2.jpg","name": "Mia Denys"},"type": "love","score": 1,"created_at": "2020-01-28T22:17:31.128376Z","updated_at": "2020-01-28T22:17:31.128376Z"}]}
       ''';
-      final response =
-          QueryReactionsResponse.fromJson(json.decode(jsonExample));
+      final response = QueryReactionsResponse.fromJson(json.decode(jsonExample));
       expect(response.reactions, isA<List<Reaction>>());
     });
 
@@ -3412,14 +3411,12 @@ void main() {
           }]
           }
       ''';
-      final response =
-          SearchMessagesResponse.fromJson(json.decode(jsonExample));
+      final response = SearchMessagesResponse.fromJson(json.decode(jsonExample));
       expect(response.results, isA<List<GetMessageResponse>>());
     });
 
     test('ListDevicesResponse', () {
-      const jsonExample =
-          '''{"devices":[{"push_provider":"firebase","id":"test"}],"duration":"0.35ms"}''';
+      const jsonExample = '''{"devices":[{"push_provider":"firebase","id":"test"}],"duration":"0.35ms"}''';
       final response = ListDevicesResponse.fromJson(json.decode(jsonExample));
       expect(response.devices, isA<List<Device>>());
     });
@@ -3517,8 +3514,7 @@ void main() {
     test('ConnectGuestUserResponse', () {
       const jsonExample =
           '''{"user":{"id":"guest-ac612aee-25fe-49fb-b1af-969e41f452a0-wild-breeze-7","role":"guest","created_at":"2020-02-03T10:19:01.538434Z","updated_at":"2020-02-03T10:19:01.539543Z","banned":false,"online":false},"access_token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiZ3Vlc3QtYWM2MTJhZWUtMjVmZS00OWZiLWIxYWYtOTY5ZTQxZjQ1MmEwLXdpbGQtYnJlZXplLTcifQ.mmoFGu7oJjpFsp7nFN78UbIpO7gowbuIbyoppsuvbXA","duration":"4.66ms"}''';
-      final response =
-          ConnectGuestUserResponse.fromJson(json.decode(jsonExample));
+      final response = ConnectGuestUserResponse.fromJson(json.decode(jsonExample));
       expect(response.user, isA<User>());
       expect(response.accessToken, isA<String>());
     });
@@ -3550,8 +3546,7 @@ void main() {
                     "updated_at": "2020-01-28T22:17:31.092262Z",
                     "mentioned_users": []
                 }],"duration":"4.66ms"}''';
-      final response =
-          GetMessagesByIdResponse.fromJson(json.decode(jsonExample));
+      final response = GetMessagesByIdResponse.fromJson(json.decode(jsonExample));
       expect(response.messages, isA<List<Message>>());
     });
 
@@ -4474,8 +4469,7 @@ void main() {
 
       final channel1Prefs = user1ChannelPrefs['channel1']!;
       expect(channel1Prefs.chatLevel, ChatLevel.all);
-      expect(
-          channel1Prefs.disabledUntil, DateTime.parse('2024-12-31T23:59:59Z'));
+      expect(channel1Prefs.disabledUntil, DateTime.parse('2024-12-31T23:59:59Z'));
 
       final channel2Prefs = user1ChannelPrefs['channel2']!;
       expect(channel2Prefs.chatLevel, ChatLevel.none);

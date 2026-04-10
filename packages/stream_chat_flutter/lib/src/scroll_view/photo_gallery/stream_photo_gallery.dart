@@ -1,17 +1,15 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:photo_manager/photo_manager.dart'
-    show AssetEntity, ThumbnailFormat, ThumbnailSize;
+import 'package:photo_manager/photo_manager.dart' show AssetEntity, ThumbnailFormat, ThumbnailSize;
 
 import 'package:stream_chat_flutter/src/scroll_view/stream_scroll_view_error_widget.dart';
 import 'package:stream_chat_flutter/src/scroll_view/stream_scroll_view_load_more_error.dart';
-import 'package:stream_chat_flutter/src/scroll_view/stream_scroll_view_load_more_indicator.dart';
 import 'package:stream_chat_flutter/src/scroll_view/stream_scroll_view_loading_widget.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 /// Default grid delegate  for [StreamPhotoGallery].
-const defaultStreamPhotoGalleryDelegate =
-    SliverGridDelegateWithFixedCrossAxisCount(
+const defaultStreamPhotoGalleryDelegate = SliverGridDelegateWithFixedCrossAxisCount(
   crossAxisCount: 3,
   mainAxisSpacing: 2,
   crossAxisSpacing: 2,
@@ -19,8 +17,8 @@ const defaultStreamPhotoGalleryDelegate =
 
 /// Signature for the item builder that creates the children of the
 /// [StreamPhotoGallery].
-typedef StreamPhotoGalleryIndexedWidgetBuilder
-    = StreamScrollViewIndexedWidgetBuilder<AssetEntity, StreamPhotoGalleryTile>;
+typedef StreamPhotoGalleryIndexedWidgetBuilder =
+    StreamScrollViewIndexedWidgetBuilder<AssetEntity, StreamPhotoGalleryTile>;
 
 /// Widget used to display a gallery of photos in the form of grid.
 class StreamPhotoGallery extends StatelessWidget {
@@ -58,6 +56,7 @@ class StreamPhotoGallery extends StatelessWidget {
     this.thumbnailFormat = ThumbnailFormat.jpeg,
     this.thumbnailQuality = 100,
     this.thumbnailScale = 1,
+    this.addMoreBuilder,
   });
 
   /// The [StreamPhotoGalleryController] used to control the grid of users.
@@ -309,6 +308,11 @@ class StreamPhotoGallery extends StatelessWidget {
   /// Scale of the image.
   final double thumbnailScale;
 
+  /// An optional builder for a leading "Add more" tile shown as the first item
+  /// in the gallery grid. Useful when the user has limited photo library access
+  /// and needs a way to expand the selection.
+  final WidgetBuilder? addMoreBuilder;
+
   @override
   Widget build(BuildContext context) {
     return PagedValueGridView<int, AssetEntity>(
@@ -330,6 +334,7 @@ class StreamPhotoGallery extends StatelessWidget {
       restorationId: restorationId,
       clipBehavior: clipBehavior,
       loadMoreTriggerIndex: loadMoreTriggerIndex,
+      leadingItemBuilder: addMoreBuilder,
       gridDelegate: gridDelegate,
       itemBuilder: (context, mediaList, index) {
         final media = mediaList[index];
@@ -361,9 +366,9 @@ class StreamPhotoGallery extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.all(8),
                 child: StreamScrollViewEmptyWidget(
-                  emptyIcon: StreamSvgIcon(
+                  emptyIcon: Icon(
+                    context.streamIcons.image32,
                     size: 148,
-                    icon: StreamSvgIcons.pictures,
                     color: chatThemeData.colorTheme.disabled,
                   ),
                   emptyTitle: Text(
@@ -384,10 +389,10 @@ class StreamPhotoGallery extends StatelessWidget {
         );
       },
       loadMoreIndicatorBuilder: (context) {
-        return const Center(
+        return Center(
           child: Padding(
-            padding: EdgeInsets.all(16),
-            child: StreamScrollViewLoadMoreIndicator(),
+            padding: const EdgeInsets.all(16),
+            child: StreamLoadingSpinner(),
           ),
         );
       },

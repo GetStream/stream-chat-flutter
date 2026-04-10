@@ -2,13 +2,11 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:stream_chat_flutter/src/icons/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/message_input/stream_message_input_icon_button.dart';
 import 'package:stream_chat_flutter/src/message_input/stream_message_send_button.dart';
 import 'package:stream_chat_flutter/src/theme/message_input_theme.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
-
-import '../utils/finders.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 void main() {
   group('StreamMessageSendButton', () {
@@ -49,7 +47,7 @@ void main() {
         expect(iconButton.onPressed, isNull);
 
         // Verify default idle icon is shown
-        expect(find.bySvgIcon(StreamSvgIcons.sendMessage), findsOneWidget);
+        expect(find.byIcon(StreamIconData.send20), findsOneWidget);
       },
     );
 
@@ -73,7 +71,7 @@ void main() {
         expect(iconButton.onPressed, isNotNull);
 
         // Verify default active icon is shown
-        expect(find.bySvgIcon(StreamSvgIcons.circleUp), findsOneWidget);
+        expect(find.byIcon(StreamIconData.arrowUp20), findsOneWidget);
       },
     );
 
@@ -93,7 +91,7 @@ void main() {
         );
 
         expect(find.byKey(const Key('custom_idle')), findsOneWidget);
-        expect(find.byType(StreamSvgIcon), findsNothing);
+        expect(find.byType(Icon), findsNothing);
       },
     );
 
@@ -113,7 +111,7 @@ void main() {
         );
 
         expect(find.byKey(const Key('custom_active')), findsOneWidget);
-        expect(find.byType(StreamSvgIcon), findsNothing);
+        expect(find.byType(Icon), findsNothing);
       },
     );
 
@@ -176,20 +174,22 @@ Widget _wrapWithStreamChatApp(
     debugShowCheckedModeBanner: false,
     home: StreamChatTheme(
       data: StreamChatThemeData(brightness: brightness),
-      child: Builder(builder: (context) {
-        final theme = StreamChatTheme.of(context);
-        return Scaffold(
-          backgroundColor: theme.colorTheme.appBg,
-          bottomNavigationBar: Material(
-            elevation: 10,
-            color: theme.colorTheme.barsBg,
-            child: Padding(
-              padding: const EdgeInsets.all(8),
-              child: widget,
+      child: Builder(
+        builder: (context) {
+          final theme = StreamChatTheme.of(context);
+          return Scaffold(
+            backgroundColor: theme.colorTheme.appBg,
+            bottomNavigationBar: Material(
+              elevation: 10,
+              color: theme.colorTheme.barsBg,
+              child: Padding(
+                padding: const EdgeInsets.all(8),
+                child: widget,
+              ),
             ),
-          ),
-        );
-      }),
+          );
+        },
+      ),
     ),
   );
 }

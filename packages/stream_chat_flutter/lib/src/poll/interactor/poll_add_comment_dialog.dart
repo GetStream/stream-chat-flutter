@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/poll/stream_poll_text_field.dart';
-import 'package:stream_chat_flutter/src/theme/poll_interactor_theme.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
 
@@ -8,23 +7,32 @@ import 'package:stream_chat_flutter/src/utils/extensions.dart';
 /// Shows a dialog that allows the user to add a poll comment.
 ///
 /// Optionally, you can provide an [initialValue] to pre-fill the text field.
+///
+/// See also:
+///
+///  * [PollAddCommentDialog], the dialog widget shown by this function.
+///  * [StreamPollInteractor], which invokes this via [StreamPollInteractor.onAddComment].
 /// {@endtemplate}
 Future<String?> showPollAddCommentDialog({
   required BuildContext context,
   String initialValue = '',
-}) =>
-    showDialog<String?>(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => PollAddCommentDialog(
-        initialValue: initialValue,
-      ),
-    );
+}) => showDialog<String?>(
+  context: context,
+  barrierDismissible: false,
+  builder: (_) => PollAddCommentDialog(
+    initialValue: initialValue,
+  ),
+);
 
 /// {@template pollAddCommentDialog}
 /// A dialog that allows the user to add or update a poll comment.
 ///
 /// Optionally, you can provide an [initialValue] to pre-fill the text field.
+///
+/// See also:
+///
+///  * [showPollAddCommentDialog], the convenience function to show this dialog.
+///  * [StreamPollInteractor], the parent widget that triggers this dialog.
 /// {@endtemplate}
 class PollAddCommentDialog extends StatefulWidget {
   /// {@macro pollAddCommentDialog}
@@ -48,7 +56,6 @@ class _PollAddCommentDialogState extends State<PollAddCommentDialog> {
   @override
   Widget build(BuildContext context) {
     final theme = StreamChatTheme.of(context);
-    final pollInteractorTheme = StreamPollInteractorTheme.of(context);
 
     final actions = [
       TextButton(
@@ -80,7 +87,6 @@ class _PollAddCommentDialogState extends State<PollAddCommentDialog> {
           true => context.translations.addACommentLabel,
           false => context.translations.updateYourCommentLabel,
         },
-        style: pollInteractorTheme.pollActionDialogTitleStyle,
       ),
       actions: actions,
       titlePadding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
@@ -96,9 +102,10 @@ class _PollAddCommentDialogState extends State<PollAddCommentDialog> {
           vertical: 12,
           horizontal: 16,
         ),
-        style: pollInteractorTheme.pollActionDialogTextFieldStyle,
-        fillColor: pollInteractorTheme.pollActionDialogTextFieldFillColor,
-        borderRadius: pollInteractorTheme.pollActionDialogTextFieldBorderRadius,
+        // TODO: Fix when working on poll create screen
+        // style: pollInteractorTheme.pollActionDialogTextFieldStyle,
+        // fillColor: pollInteractorTheme.pollActionDialogTextFieldFillColor,
+        // borderRadius: pollInteractorTheme.pollActionDialogTextFieldBorderRadius,
         onChanged: (value) => setState(() => _comment = value),
       ),
     );

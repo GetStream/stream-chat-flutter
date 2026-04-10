@@ -92,8 +92,7 @@ class StreamPollCreatorDialog extends StatefulWidget {
   final EdgeInsets padding;
 
   @override
-  State<StreamPollCreatorDialog> createState() =>
-      _StreamPollCreatorDialogState();
+  State<StreamPollCreatorDialog> createState() => _StreamPollCreatorDialogState();
 }
 
 class _StreamPollCreatorDialogState extends State<StreamPollCreatorDialog> {
@@ -202,12 +201,10 @@ class StreamPollCreatorFullScreenDialog extends StatefulWidget {
   final EdgeInsets padding;
 
   @override
-  State<StreamPollCreatorFullScreenDialog> createState() =>
-      _StreamPollCreatorFullScreenDialogState();
+  State<StreamPollCreatorFullScreenDialog> createState() => _StreamPollCreatorFullScreenDialogState();
 }
 
-class _StreamPollCreatorFullScreenDialogState
-    extends State<StreamPollCreatorFullScreenDialog> {
+class _StreamPollCreatorFullScreenDialogState extends State<StreamPollCreatorFullScreenDialog> {
   late final _controller = StreamPollController(
     poll: widget.poll,
     config: widget.config,
@@ -244,7 +241,7 @@ class _StreamPollCreatorFullScreenDialogState
               return IconButton(
                 color: colorTheme.accentPrimary,
                 disabledColor: colorTheme.disabled,
-                icon: const StreamSvgIcon(icon: StreamSvgIcons.send),
+                icon: Icon(context.streamIcons.send20),
                 onPressed: isValid
                     ? () {
                         final errors = _controller.validateGranularly();

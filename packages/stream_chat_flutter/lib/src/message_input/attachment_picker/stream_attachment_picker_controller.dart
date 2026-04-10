@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:stream_chat_flutter/src/attachment/handler/stream_attachment_handler.dart';
+import 'package:stream_chat_flutter/src/message_input/attachment_picker/stream_attachment_picker_result.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 /// The default maximum size for media attachments.
@@ -10,8 +13,7 @@ const kDefaultMaxAttachmentSize = 100 * 1024 * 1024; // 100MB in Bytes
 const kDefaultMaxAttachmentCount = 10;
 
 /// Controller class for [StreamAttachmentPicker].
-class StreamAttachmentPickerController
-    extends ValueNotifier<AttachmentPickerValue> {
+class StreamAttachmentPickerController extends ValueNotifier<AttachmentPickerValue> {
   /// Creates a new instance of [StreamAttachmentPickerController].
   factory StreamAttachmentPickerController({
     Poll? initialPoll,
@@ -35,11 +37,13 @@ class StreamAttachmentPickerController
     this.initialValue, {
     this.maxAttachmentSize = kDefaultMaxAttachmentSize,
     this.maxAttachmentCount = kDefaultMaxAttachmentCount,
-  })  : assert(
-          (initialValue.attachments.length) <= maxAttachmentCount,
-          '''The initial attachments count must be less than or equal to maxAttachmentCount''',
-        ),
-        super(initialValue);
+  }) : assert(
+         (initialValue.attachments.length) <= maxAttachmentCount,
+         '''The initial attachments count must be less than or equal to maxAttachmentCount''',
+       ),
+       super(initialValue);
+
+  final _customResultController = StreamController<CustomAttachmentPickerResult>.broadcast();
 
   /// Initial value for the controller.
   final AttachmentPickerValue initialValue;
@@ -67,6 +71,26 @@ class StreamAttachmentPickerController
   /// attachment picker option is used.
   set extraData(Map<String, Object?>? extraData) {
     value = value.copyWith(extraData: extraData);
+  }
+
+  /// A stream of custom attachment picker results emitted via
+  /// [notifyCustomResult].
+  Stream<CustomAttachmentPickerResult> get customResults => _customResultController.stream;
+
+  /// Emits a [CustomAttachmentPickerResult] to notify the parent widget
+  /// (e.g. [StreamMessageInput]) that a custom attachment has been picked.
+  ///
+  /// Use this from a [TabbedAttachmentPickerOption.optionViewBuilder] instead
+  /// of calling `Navigator.pop` — the picker is an inline widget, not a modal
+  /// route, so popping the navigator would close the wrong page.
+  void notifyCustomResult(CustomAttachmentPickerResult result) {
+    if (!_customResultController.isClosed) _customResultController.add(result);
+  }
+
+  @override
+  void dispose() {
+    _customResultController.close();
+    super.dispose();
   }
 
   Future<String> _saveToCache(AttachmentFile file) async {
@@ -106,14 +130,16 @@ class StreamAttachmentPickerController
     // Cache the attachment in a temporary file.
     final tempFilePath = await _saveToCache(file);
 
-    value = value.copyWith(attachments: [
-      ...value.attachments,
-      attachment.copyWith(
-        file: file.copyWith(
-          path: tempFilePath,
+    value = value.copyWith(
+      attachments: [
+        ...value.attachments,
+        attachment.copyWith(
+          file: file.copyWith(
+            path: tempFilePath,
+          ),
         ),
-      ),
-    ]);
+      ],
+    );
   }
 
   /// Removes the specified [attachment] from the message.
@@ -271,9 +297,9 @@ class AttachmentTooLargeError extends StreamChatError {
     required this.fileSize,
     required this.maxSize,
   }) : super(
-          'The size of the attachment is $fileSize bytes, '
-          'but the maximum size allowed is $maxSize bytes.',
-        );
+         'The size of the attachment is $fileSize bytes, '
+         'but the maximum size allowed is $maxSize bytes.',
+       );
 
   /// The actual size of the attachment in bytes.
   final int fileSize;
@@ -285,7 +311,8 @@ class AttachmentTooLargeError extends StreamChatError {
   List<Object?> get props => [...super.props, fileSize, maxSize];
 
   @override
-  String toString() => 'AttachmentTooLargeError: '
+  String toString() =>
+      'AttachmentTooLargeError: '
       'The size of the attachment is $fileSize bytes, '
       'but the maximum size allowed is $maxSize bytes.';
 }
@@ -309,6 +336,7 @@ class AttachmentLimitReachedError extends StreamChatError {
   List<Object?> get props => [...super.props, maxCount];
 
   @override
-  String toString() => 'AttachmentLimitReachedError: '
+  String toString() =>
+      'AttachmentLimitReachedError: '
       'The maximum number of attachments is $maxCount.';
 }

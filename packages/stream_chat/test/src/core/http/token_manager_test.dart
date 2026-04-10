@@ -32,8 +32,7 @@ void main() {
     expect(tokenManager.userId, isNull);
 
     const userId = 'test-user-id';
-    Future<String> tokenProvider(String userId) async =>
-        Token.development(userId).rawValue;
+    Future<String> tokenProvider(String userId) async => Token.development(userId).rawValue;
     final returnedToken = await tokenManager.setTokenOrProvider(
       userId,
       provider: tokenProvider,
@@ -65,8 +64,7 @@ void main() {
 
       const userId = 'test-user-id';
       final token = Token.development(userId);
-      Future<String> tokenProvider(String userId) async =>
-          Token.development(userId).rawValue;
+      Future<String> tokenProvider(String userId) async => Token.development(userId).rawValue;
       try {
         await tokenManager.setTokenOrProvider(
           userId,

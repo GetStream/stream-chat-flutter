@@ -20,18 +20,24 @@ class SearchTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final spacing = context.streamSpacing;
+    final colorScheme = context.streamColorScheme;
+    final textTheme = context.streamTextTheme;
+
     return Container(
-      height: 36,
+      height: 44,
       decoration: BoxDecoration(
-        color: StreamChatTheme.of(context).colorTheme.barsBg,
+        color: Colors.transparent,
         border: Border.all(
-          color: StreamChatTheme.of(context).colorTheme.borders,
+          color: colorScheme.borderDefault,
         ),
         borderRadius: BorderRadius.circular(24),
       ),
-      margin: const EdgeInsets.symmetric(
-        vertical: 8,
-        horizontal: 8,
+      margin: EdgeInsets.only(
+        top: spacing.md,
+        bottom: spacing.xs,
+        left: spacing.md,
+        right: spacing.md,
       ),
       child: Row(
         children: [
@@ -41,27 +47,19 @@ class SearchTextField extends StatelessWidget {
               controller: controller,
               onChanged: onChanged,
               decoration: InputDecoration(
-                prefixText: '    ',
-                prefixIconConstraints: BoxConstraints.tight(const Size(40, 24)),
+                prefixIconConstraints: BoxConstraints.tight(const Size(36, 24)),
                 prefixIcon: Padding(
-                  padding: const EdgeInsets.only(
-                    left: 8,
-                    right: 8,
-                  ),
-                  child: StreamSvgIcon(
-                    icon: StreamSvgIcons.search,
-                    color:
-                        StreamChatTheme.of(context).colorTheme.textHighEmphasis,
-                    size: 24,
+                  padding: .directional(start: spacing.md),
+                  child: Icon(
+                    context.streamIcons.search20,
+                    color: colorScheme.textTertiary,
+                    size: 20,
                   ),
                 ),
                 hintText: hintText,
-                hintStyle: StreamChatTheme.of(context).textTheme.body.copyWith(
-                    color: StreamChatTheme.of(context)
-                        .colorTheme
-                        .textHighEmphasis
-                        .withOpacity(.5)),
-                contentPadding: EdgeInsets.zero,
+                hintStyle: textTheme.bodyDefault.copyWith(
+                  color: colorScheme.textTertiary,
+                ),
                 border: OutlineInputBorder(
                   borderSide: BorderSide.none,
                   borderRadius: BorderRadius.circular(24),
@@ -75,7 +73,7 @@ class SearchTextField extends StatelessWidget {
               child: IconButton(
                 color: Colors.grey,
                 padding: EdgeInsets.zero,
-                icon: const StreamSvgIcon(icon: StreamSvgIcons.closeSmall),
+                icon: Icon(context.streamIcons.xmark16),
                 splashRadius: 24,
                 onPressed: () {
                   if (controller!.text.isNotEmpty) {

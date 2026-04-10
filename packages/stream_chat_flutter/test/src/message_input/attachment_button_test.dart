@@ -26,7 +26,7 @@ void main() {
 
     final button = find.byType(IconButton);
     expect(button, findsOneWidget);
-    expect(find.byType(StreamSvgIcon), findsOneWidget);
+    expect(find.byType(Icon), findsOneWidget);
     await tester.tap(button);
     expect(count, 1);
   });
@@ -78,9 +78,7 @@ void main() {
       home: Scaffold(
         body: Center(
           child: AttachmentButton(
-            color: StreamChatThemeData.light()
-                .messageInputTheme
-                .actionButtonIdleColor,
+            color: StreamChatThemeData.light().messageInputTheme.actionButtonIdleColor,
             onPressed: () {},
           ),
         ),

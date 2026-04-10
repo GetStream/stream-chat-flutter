@@ -51,8 +51,7 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
   String attachmentsUploadProgressText({
     required int remaining,
     required int total,
-  }) =>
-      'Transferència en curs $remaining/$total ...';
+  }) => 'Transferència en curs $remaining/$total ...';
 
   @override
   String pinnedByUserText({
@@ -65,8 +64,7 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
   }
 
   @override
-  String get sendMessagePermissionError =>
-      'No tens permís per enviar missatges';
+  String get sendMessagePermissionError => 'No tens permís per enviar missatges';
 
   @override
   String get emptyMessagesText => 'Actualment no hi ha missatges';
@@ -75,8 +73,7 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
   String get genericErrorText => 'Hi ha hagut un problema';
 
   @override
-  String get loadingMessagesError =>
-      'Hi ha hagut un error mentre carregava el missatge';
+  String get loadingMessagesError => 'Hi ha hagut un error mentre carregava el missatge';
 
   @override
   String resultCountText(int count) => '$count resultats';
@@ -115,8 +112,7 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
   String get reconnectingLabel => 'Reconnectant...';
 
   @override
-  String get alsoSendAsDirectMessageLabel =>
-      'Enviar també com a missatge directe';
+  String get alsoSendAsDirectMessageLabel => 'Enviar també com a missatge directe';
 
   @override
   String get addACommentOrSendLabel => 'Afegir un comentari o enviar';
@@ -142,8 +138,7 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
       'La mida màxima del fitxer és de $limitInMB MB.';
 
   @override
-  String get couldNotReadBytesFromFileError =>
-      "No s'han pogut llegir els bytes del fitxer.";
+  String get couldNotReadBytesFromFileError => "No s'han pogut llegir els bytes del fitxer.";
 
   @override
   String get addAFileLabel => 'Afegeix un fitxer';
@@ -170,7 +165,7 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
   String get somethingWentWrongError => 'Alguna cosa ha anat malament';
 
   @override
-  String get addMoreFilesLabel => 'Afegir més fitxers';
+  String get addMoreFilesLabel => 'Afegir més';
 
   @override
   String get enablePhotoAndVideoAccessMessage =>
@@ -196,8 +191,7 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
   String get flagMessageSuccessfulLabel => 'Missatge reportat';
 
   @override
-  String get flagMessageSuccessfulText =>
-      'Aquest missatge ha estat reportat a un moderador';
+  String get flagMessageSuccessfulText => 'Aquest missatge ha estat reportat a un moderador';
 
   @override
   String get deleteLabel => 'ESBORRA';
@@ -206,12 +200,10 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
   String get deleteMessageLabel => 'Esborra el missatge';
 
   @override
-  String get deleteMessageQuestion =>
-      'Estàs segur que vols esborrar aquest missatge de forma permanent?';
+  String get deleteMessageQuestion => 'Estàs segur que vols esborrar aquest missatge de forma permanent?';
 
   @override
-  String get operationCouldNotBeCompletedText =>
-      "L'operació no s'ha pogut completar";
+  String get operationCouldNotBeCompletedText => "L'operació no s'ha pogut completar";
 
   @override
   String get replyLabel => 'Respondre';
@@ -281,8 +273,7 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
   String get letsStartChattingLabel => 'Comencem a parlar!';
 
   @override
-  String get sendingFirstMessageLabel =>
-      'Què et sembla enviar el teu primer missatge?';
+  String get sendingFirstMessageLabel => 'Què et sembla enviar el teu primer missatge?';
 
   @override
   String get startAChatLabel => 'Inicia una conversa';
@@ -294,11 +285,10 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
   String get deleteConversationLabel => 'Esborra la conversa';
 
   @override
-  String get deleteConversationQuestion =>
-      'Estàs segur que vols esborrar aquesta conversa?';
+  String get deleteConversationQuestion => 'Estàs segur que vols esborrar aquesta conversa?';
 
   @override
-  String get streamChatLabel => 'Stream Chat';
+  String get streamChatLabel => 'Converses';
 
   @override
   String get searchingForNetworkText => 'Cercant xarxa';
@@ -334,8 +324,7 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
   String get leaveConversationLabel => 'Surt de la conversa';
 
   @override
-  String get leaveConversationQuestion =>
-      "Estàs segur que vols sortir d'aquesta conversa?";
+  String get leaveConversationQuestion => "Estàs segur que vols sortir d'aquesta conversa?";
 
   @override
   String get showInChatLabel => 'Mostra al xat';
@@ -371,8 +360,7 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
   String galleryPaginationText({
     required int currentPage,
     required int totalPages,
-  }) =>
-      '${currentPage + 1} de $totalPages';
+  }) => '${currentPage + 1} de $totalPages';
 
   @override
   String get fileText => 'Fitxer';
@@ -381,8 +369,7 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
   String get replyToMessageLabel => 'Respondre al missatge';
 
   @override
-  String attachmentLimitExceedError(int limit) =>
-      'No és possible afegir més de $limit fitxers adjunts';
+  String attachmentLimitExceedError(int limit) => 'No és possible afegir més de $limit fitxers adjunts';
 
   @override
   String get viewLibrary => 'Veure llibreria';
@@ -439,8 +426,7 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
   }
 
   @override
-  String get linkDisabledDetails =>
-      'No es permet enviar enllaços a aquesta conversa';
+  String get linkDisabledDetails => 'No es permet enviar enllaços a aquesta conversa';
 
   @override
   String get linkDisabledError => 'Els enllaços estan deshabilitats';
@@ -449,8 +435,7 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
   String unreadMessagesSeparatorText() => 'Missatges nous';
 
   @override
-  String get enableFileAccessMessage =>
-      "Habilita l'accés als fitxers per poder compartir-los amb amics";
+  String get enableFileAccessMessage => "Habilita l'accés als fitxers per poder compartir-los amb amics";
 
   @override
   String get allowFileAccessMessage => "Permet l'accés als fitxers";
@@ -559,15 +544,13 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
   String get enterYourCommentLabel => 'Introdueix el teu comentari';
 
   @override
-  String get endVoteConfirmationText =>
-      'Estàs segur que vols finalitzar la votació?';
+  String get endVoteConfirmationText => 'Estàs segur que vols finalitzar la votació?';
 
   @override
   String get deletePollOptionLabel => 'Eliminar opció';
 
   @override
-  String get deletePollOptionQuestion =>
-      'Estàs segur que vols eliminar aquesta opció?';
+  String get deletePollOptionQuestion => 'Estàs segur que vols eliminar aquesta opció?';
 
   @override
   String get createLabel => 'Crear';
@@ -611,10 +594,10 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
 
   @override
   String voteCountLabel({int? count}) => switch (count) {
-        null || < 1 => '0 vots',
-        1 => '1 vot',
-        _ => '$count vots',
-      };
+    null || < 1 => '0 vots',
+    1 => '1 vot',
+    _ => '$count vots',
+  };
 
   @override
   String get noPollVotesLabel => 'No hi ha vots en aquest moment';
@@ -635,15 +618,13 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
   String get slideToCancelLabel => 'Llisca per cancel·lar';
 
   @override
-  String get holdToRecordLabel =>
-      'Mantén premut per gravar, deixa anar per enviar';
+  String get holdToRecordLabel => 'Mantén premut per gravar, deixa anar per enviar';
 
   @override
   String get sendAnywayLabel => 'Enviar igualment';
 
   @override
-  String get moderatedMessageBlockedText =>
-      'Missatge bloquejat per les polítiques de moderació';
+  String get moderatedMessageBlockedText => 'Missatge bloquejat per les polítiques de moderació';
 
   @override
   String get moderationReviewModalTitle => 'Estàs segur?';
@@ -668,6 +649,18 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
   String get videoAttachmentText => 'Vídeo';
 
   @override
+  String get fileAttachmentText => 'Fitxer';
+
+  @override
+  String filesAttachmentCountText(int count) => count == 1 ? 'Fitxer' : '$count fitxers';
+
+  @override
+  String photosAttachmentCountText(int count) => count == 1 ? 'Foto' : '$count fotos';
+
+  @override
+  String videosAttachmentCountText(int count) => count == 1 ? 'Vídeo' : '$count vídeos';
+
+  @override
   String get pollYouVotedText => 'Has votat';
 
   @override
@@ -684,7 +677,52 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
 
   @override
   String locationLabel({bool isLive = false}) {
-    if (isLive) return '📍 Ubicació en directe';
-    return '📍 Ubicació';
+    if (isLive) return 'Ubicació en directe';
+    return 'Ubicació';
   }
+
+  @override
+  String get noConversationsYetText => 'Encara no hi ha converses';
+
+  @override
+  String get replyToStartThreadText => 'Respon a un missatge per iniciar un fil';
+
+  @override
+  String get sendMessageToStartConversationText => 'Envia un missatge per iniciar la conversa';
+
+  @override
+  String get savedForLaterLabel => 'Desat per a més tard';
+
+  @override
+  String get repliedToThreadAnnotationLabel => 'Ha respost a un fil';
+
+  @override
+  String get alsoSentInChannelAnnotationLabel => 'També enviat al canal';
+
+  @override
+  String get viewLabel => 'Veure';
+
+  @override
+  String get reminderSetLabel => 'Recordatori establert';
+
+  @override
+  String reminderAtText(String time) => 'Avui a les $time';
+
+  @override
+  String get createPollPromptLabel => 'Crea una enquesta i deixa que tothom voti!';
+
+  @override
+  String get takePhotoAndShareLabel => 'Fes una foto i comparteix';
+
+  @override
+  String get takeVideoAndShareLabel => 'Grava un vídeo i comparteix';
+
+  @override
+  String get openCameraLabel => 'Obrir càmera';
+
+  @override
+  String get selectFilesToShareLabel => 'Seleccioneu fitxers per compartir';
+
+  @override
+  String get openFilesLabel => 'Obrir fitxers';
 }

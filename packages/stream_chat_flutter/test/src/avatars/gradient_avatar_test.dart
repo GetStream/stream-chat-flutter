@@ -28,8 +28,7 @@ void main() {
                 child: SizedBox(
                   width: 100,
                   height: 100,
-                  child: StreamGradientAvatar(
-                      name: 'demo user', userId: 'demo123'),
+                  child: StreamGradientAvatar(name: 'demo user', userId: 'demo123'),
                 ),
               ),
             ),
@@ -368,16 +367,18 @@ Widget _wrapWithMaterialApp(
   return MaterialApp(
     home: StreamChatTheme(
       data: StreamChatThemeData(brightness: brightness),
-      child: Builder(builder: (context) {
-        final theme = StreamChatTheme.of(context);
-        return Scaffold(
-          backgroundColor: theme.colorTheme.appBg,
-          body: Container(
-            padding: const EdgeInsets.all(16),
-            child: Center(child: widget),
-          ),
-        );
-      }),
+      child: Builder(
+        builder: (context) {
+          final theme = StreamChatTheme.of(context);
+          return Scaffold(
+            backgroundColor: theme.colorTheme.appBg,
+            body: Container(
+              padding: const EdgeInsets.all(16),
+              child: Center(child: widget),
+            ),
+          );
+        },
+      ),
     ),
   );
 }

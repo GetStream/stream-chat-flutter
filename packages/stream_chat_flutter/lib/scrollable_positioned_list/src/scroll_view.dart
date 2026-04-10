@@ -28,9 +28,9 @@ class UnboundedCustomScrollView extends CustomScrollView {
     super.semanticChildCount,
     super.dragStartBehavior,
     super.keyboardDismissBehavior,
-  })  : _shrinkWrap = shrinkWrap,
-        _anchor = anchor,
-        super(shrinkWrap: false);
+  }) : _shrinkWrap = shrinkWrap,
+       _anchor = anchor,
+       super(shrinkWrap: false);
 
   final bool _shrinkWrap;
 

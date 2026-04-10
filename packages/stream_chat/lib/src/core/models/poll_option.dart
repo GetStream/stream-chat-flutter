@@ -23,10 +23,9 @@ class PollOption extends Equatable {
   });
 
   /// Create a new instance from a json
-  factory PollOption.fromJson(Map<String, dynamic> json) =>
-      _$PollOptionFromJson(
-        Serializer.moveToExtraDataFromRoot(json, topLevelFields),
-      );
+  factory PollOption.fromJson(Map<String, dynamic> json) => _$PollOptionFromJson(
+    Serializer.moveToExtraDataFromRoot(json, topLevelFields),
+  );
 
   /// The unique identifier of the poll option.
   @JsonKey(includeIfNull: false)
@@ -39,20 +38,18 @@ class PollOption extends Equatable {
   final Map<String, Object?> extraData;
 
   /// Serialize to json
-  Map<String, dynamic> toJson() =>
-      Serializer.moveFromExtraDataToRoot(_$PollOptionToJson(this));
+  Map<String, dynamic> toJson() => Serializer.moveFromExtraDataToRoot(_$PollOptionToJson(this));
 
   /// Creates a copy of [PollOption] with specified attributes overridden.
   PollOption copyWith({
     Object? id = _nullConst,
     String? text,
     Map<String, Object?>? extraData,
-  }) =>
-      PollOption(
-        id: id == _nullConst ? this.id : id as String?,
-        text: text ?? this.text,
-        extraData: extraData ?? this.extraData,
-      );
+  }) => PollOption(
+    id: id == _nullConst ? this.id : id as String?,
+    text: text ?? this.text,
+    extraData: extraData ?? this.extraData,
+  );
 
   /// Known top level fields.
   ///

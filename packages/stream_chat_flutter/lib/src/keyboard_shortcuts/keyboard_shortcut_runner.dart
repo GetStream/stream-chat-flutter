@@ -37,8 +37,7 @@ class KeyboardShortcutRunner extends StatelessWidget {
       shortcuts: {
         if (onEnterKeypress != null) enterKeySet: EnterKeyIntent(),
         if (onEscapeKeypress != null) escapeKeySet: EscapeKeyIntent(),
-        if (onRightArrowKeypress != null)
-          rightArrowKeySet: RightArrowKeyIntent(),
+        if (onRightArrowKeypress != null) rightArrowKeySet: RightArrowKeyIntent(),
         if (onLeftArrowKeypress != null) leftArrowKeySet: LeftArrowKeyIntent(),
       },
       actions: {

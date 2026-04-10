@@ -5,11 +5,10 @@ import 'package:flutter/material.dart';
 ///
 /// Used by [StreamChannelListView], [StreamMessageSearchListView]
 /// and [StreamUserListView].
-typedef StreamScrollViewIndexedWidgetBuilder<ItemType,
-        WidgetType extends Widget>
-    = Widget Function(
-  BuildContext context,
-  List<ItemType> items,
-  int index,
-  WidgetType defaultWidget,
-);
+typedef StreamScrollViewIndexedWidgetBuilder<ItemType, WidgetType extends Widget> =
+    Widget Function(
+      BuildContext context,
+      List<ItemType> items,
+      int index,
+      WidgetType defaultWidget,
+    );

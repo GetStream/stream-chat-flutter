@@ -5,8 +5,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 String _dummyFormatter(BuildContext context, DateTime date) => 'formatted';
 
 void main() {
-  testWidgets('StreamThreadListTileTheme merges with ancestor theme',
-      (tester) async {
+  testWidgets('StreamThreadListTileTheme merges with ancestor theme', (tester) async {
     const backgroundColor = Colors.blue;
     const childBackgroundColor = Colors.red;
 
@@ -116,12 +115,9 @@ void main() {
     expect(copied.padding, newPadding);
     // Unchanged properties should remain the same
     expect(copied.threadChannelNameStyle, original.threadChannelNameStyle);
-    expect(
-        copied.threadReplyToMessageStyle, original.threadReplyToMessageStyle);
-    expect(copied.threadLatestReplyTimestampStyle,
-        original.threadLatestReplyTimestampStyle);
-    expect(copied.threadLatestReplyTimestampFormatter,
-        original.threadLatestReplyTimestampFormatter);
+    expect(copied.threadReplyToMessageStyle, original.threadReplyToMessageStyle);
+    expect(copied.threadLatestReplyTimestampStyle, original.threadLatestReplyTimestampStyle);
+    expect(copied.threadLatestReplyTimestampFormatter, original.threadLatestReplyTimestampFormatter);
   });
 
   test('StreamThreadListTileThemeData merge', () {
@@ -147,12 +143,9 @@ void main() {
     expect(merged.padding, other.padding);
     // Null properties in 'other' should not override 'original'
     expect(merged.threadChannelNameStyle, original.threadChannelNameStyle);
-    expect(
-        merged.threadReplyToMessageStyle, original.threadReplyToMessageStyle);
-    expect(merged.threadLatestReplyTimestampStyle,
-        original.threadLatestReplyTimestampStyle);
-    expect(merged.threadLatestReplyTimestampFormatter,
-        original.threadLatestReplyTimestampFormatter);
+    expect(merged.threadReplyToMessageStyle, original.threadReplyToMessageStyle);
+    expect(merged.threadLatestReplyTimestampStyle, original.threadLatestReplyTimestampStyle);
+    expect(merged.threadLatestReplyTimestampFormatter, original.threadLatestReplyTimestampFormatter);
 
     // Merging with null should return original
     final mergedWithNull = original.merge(null);
@@ -176,29 +169,26 @@ void main() {
     final lerpedAt0 = data1.lerp(data1, data2, 0);
     expect(lerpedAt0.backgroundColor, data1.backgroundColor);
     expect(lerpedAt0.padding, data1.padding);
-    expect(lerpedAt0.threadLatestReplyTimestampFormatter,
-        data1.threadLatestReplyTimestampFormatter);
+    expect(lerpedAt0.threadLatestReplyTimestampFormatter, data1.threadLatestReplyTimestampFormatter);
 
     // t = 1 should return data2
     final lerpedAt1 = data1.lerp(data1, data2, 1);
     expect(lerpedAt1.backgroundColor, data2.backgroundColor);
     expect(lerpedAt1.padding, data2.padding);
-    expect(lerpedAt1.threadLatestReplyTimestampFormatter,
-        data2.threadLatestReplyTimestampFormatter);
+    expect(lerpedAt1.threadLatestReplyTimestampFormatter, data2.threadLatestReplyTimestampFormatter);
 
     // t = 0.5 should return something in between
     final lerpedAt05 = data1.lerp(data1, data2, 0.5);
-    expect(lerpedAt05.backgroundColor,
-        Color.lerp(Colors.black, Colors.white, 0.5));
+    expect(lerpedAt05.backgroundColor, Color.lerp(Colors.black, Colors.white, 0.5));
     expect(
-        lerpedAt05.padding,
-        EdgeInsetsGeometry.lerp(
-          const EdgeInsets.all(8),
-          const EdgeInsets.all(16),
-          0.5,
-        ));
+      lerpedAt05.padding,
+      EdgeInsetsGeometry.lerp(
+        const EdgeInsets.all(8),
+        const EdgeInsets.all(16),
+        0.5,
+      ),
+    );
     // For t < 0.5, should use data1's formatter
-    expect(lerpedAt05.threadLatestReplyTimestampFormatter,
-        data1.threadLatestReplyTimestampFormatter);
+    expect(lerpedAt05.threadLatestReplyTimestampFormatter, data1.threadLatestReplyTimestampFormatter);
   });
 }

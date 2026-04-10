@@ -48,15 +48,9 @@ List<MessageReminder> generateMessageReminders({
     final channelCid = channelCids != null && index < channelCids.length
         ? channelCids[index]
         : 'messaging:${baseId + index}';
-    final messageId = messageIds != null && index < messageIds.length
-        ? messageIds[index]
-        : 'message_${baseId + index}';
-    final userId = userIds != null && index < userIds.length
-        ? userIds[index]
-        : 'user_${baseId + index}';
-    final text = texts != null && index < texts.length
-        ? texts[index]
-        : 'Reminder ${index + 1}';
+    final messageId = messageIds != null && index < messageIds.length ? messageIds[index] : 'message_${baseId + index}';
+    final userId = userIds != null && index < userIds.length ? userIds[index] : 'user_${baseId + index}';
+    final text = texts != null && index < texts.length ? texts[index] : 'Reminder ${index + 1}';
 
     return generateMessageReminder(
       channelCid: channelCid,
@@ -110,22 +104,26 @@ void main() {
         ..reminders = reminders
         ..next = null;
 
-      when(() => client.queryReminders(
-            filter: any(named: 'filter'),
-            sort: any(named: 'sort'),
-            pagination: any(named: 'pagination'),
-          )).thenAnswer((_) async => response);
+      when(
+        () => client.queryReminders(
+          filter: any(named: 'filter'),
+          sort: any(named: 'sort'),
+          pagination: any(named: 'pagination'),
+        ),
+      ).thenAnswer((_) async => response);
 
       final controller = StreamMessageReminderListController(client: client);
 
       await controller.doInitialLoad();
       await pumpEventQueue();
 
-      verify(() => client.queryReminders(
-            filter: any(named: 'filter'),
-            sort: any(named: 'sort'),
-            pagination: any(named: 'pagination'),
-          )).called(1);
+      verify(
+        () => client.queryReminders(
+          filter: any(named: 'filter'),
+          sort: any(named: 'sort'),
+          pagination: any(named: 'pagination'),
+        ),
+      ).called(1);
 
       expect(controller.value, isA<Success<String, MessageReminder>>());
       expect(controller.value.asSuccess.items, equals(reminders));
@@ -133,11 +131,13 @@ void main() {
 
     test('handles StreamChatError exceptions properly', () async {
       const chatError = StreamChatError('Network error');
-      when(() => client.queryReminders(
-            filter: any(named: 'filter'),
-            sort: any(named: 'sort'),
-            pagination: any(named: 'pagination'),
-          )).thenThrow(chatError);
+      when(
+        () => client.queryReminders(
+          filter: any(named: 'filter'),
+          sort: any(named: 'sort'),
+          pagination: any(named: 'pagination'),
+        ),
+      ).thenThrow(chatError);
 
       final controller = StreamMessageReminderListController(client: client);
 
@@ -166,11 +166,13 @@ void main() {
         ..reminders = additionalReminders
         ..next = null;
 
-      when(() => client.queryReminders(
-            filter: any(named: 'filter'),
-            sort: any(named: 'sort'),
-            pagination: any(named: 'pagination'),
-          )).thenAnswer((_) async => response);
+      when(
+        () => client.queryReminders(
+          filter: any(named: 'filter'),
+          sort: any(named: 'sort'),
+          pagination: any(named: 'pagination'),
+        ),
+      ).thenAnswer((_) async => response);
 
       final controller = StreamMessageReminderListController.fromValue(
         PagedValue<String, MessageReminder>(
@@ -198,11 +200,13 @@ void main() {
       final existingReminders = generateMessageReminders();
       const chatError = StreamChatError('Network error');
 
-      when(() => client.queryReminders(
-            filter: any(named: 'filter'),
-            sort: any(named: 'sort'),
-            pagination: any(named: 'pagination'),
-          )).thenThrow(chatError);
+      when(
+        () => client.queryReminders(
+          filter: any(named: 'filter'),
+          sort: any(named: 'sort'),
+          pagination: any(named: 'pagination'),
+        ),
+      ).thenThrow(chatError);
 
       final controller = StreamMessageReminderListController.fromValue(
         PagedValue<String, MessageReminder>(
@@ -275,9 +279,7 @@ void main() {
       );
     });
 
-    test(
-        'deleteReminder removes reminder and returns true when reminder exists',
-        () {
+    test('deleteReminder removes reminder and returns true when reminder exists', () {
       final reminders = generateMessageReminders();
       final controller = StreamMessageReminderListController.fromValue(
         PagedValue<String, MessageReminder>(items: reminders),
@@ -292,9 +294,9 @@ void main() {
         equals(reminders.length - 1),
       );
       expect(
-        controller.value.asSuccess.items.any((r) =>
-            r.messageId == reminders[0].messageId &&
-            r.userId == reminders[0].userId),
+        controller.value.asSuccess.items.any(
+          (r) => r.messageId == reminders[0].messageId && r.userId == reminders[0].userId,
+        ),
         isFalse,
       );
     });
@@ -438,9 +440,7 @@ void main() {
 
       expect(
         controller.value.asSuccess.items.any(
-          (r) =>
-              r.messageId == initialReminders[0].messageId &&
-              r.userId == initialReminders[0].userId,
+          (r) => r.messageId == initialReminders[0].messageId && r.userId == initialReminders[0].userId,
         ),
         isFalse,
       );

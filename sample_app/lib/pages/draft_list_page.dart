@@ -39,9 +39,9 @@ class _DraftListPageState extends State<DraftListPage> {
               children: [
                 CustomSlidableAction(
                   backgroundColor: Colors.red,
-                  child: const StreamSvgIcon(
+                  child: Icon(
+                    context.streamIcons.delete20,
                     size: 24,
-                    icon: StreamSvgIcons.delete,
                     color: Colors.white,
                   ),
                   onPressed: (context) {
@@ -71,8 +71,8 @@ class _DraftListPageState extends State<DraftListPage> {
                   initialMessageId: draft.parentId,
                   child: switch (draft.parentMessage) {
                     final parent? => ThreadPage(
-                        parent: parent.copyWith(draft: draft),
-                      ),
+                      parent: parent.copyWith(draft: draft),
+                    ),
                     _ => const ChannelPage(),
                   },
                 );
