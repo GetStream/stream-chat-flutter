@@ -107,7 +107,7 @@ class _DefaultStreamThreadListTile extends StatelessWidget {
     final participantUsers = thread.threadParticipants.map((it) => it.user).nonNulls.toList(growable: false);
 
     return StreamListTileTheme(
-      data: context.streamListTileTheme.copyWith(
+      data: StreamListTileThemeData(
         contentPadding: effectivePadding,
         backgroundColor: WidgetStatePropertyAll(effectiveBackgroundColor),
       ),
