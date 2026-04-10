@@ -1,21 +1,8 @@
-## Unreleased
-
-✅ Added
-
-- Added `onViewInChannelTap` callback to `StreamMessageListView` and `StreamMessageWidgetProps`.
-  Tapping "View" on "Also sent in channel" in a thread now pops the thread and scrolls to the
-  message in the channel. Override this callback to customise navigation (e.g. when the thread
-  is opened from a thread list instead of a channel).
+## 10.0.0-beta.13
 
 🛑️ Breaking
-
-- **`onThreadTap` on `StreamMessageWidgetProps` now receives two parameters:**
-  `(Message parentMessage, Message? threadMessage)` instead of just the parent message.
-  When a reply with `showInChannel: true` is tapped, `threadMessage` contains the reply so the
-  thread view can scroll to and highlight it. Pass `null` for `threadMessage` when not applicable.
-- **`onThreadTap` is no longer called from thread views.** It now only fires for channel-side
-  taps. The "View" button in threads uses the new `onViewInChannelTap` instead.
-  Migrate any thread-side `onThreadTap` logic to `onViewInChannelTap`.
+- SDK Redesign Changes. For more details, please refer to the [migration guide](https://github.com/GetStream/stream-chat-flutter/blob/210ff93f955be3f85c62e860309bd9aa240a5446/migrations/v10-migration.md).
+  The SDK redesign introduces a fresher default UI, but also better APIs for customization of the components.
 
 ## 10.0.0-beta.12
 
