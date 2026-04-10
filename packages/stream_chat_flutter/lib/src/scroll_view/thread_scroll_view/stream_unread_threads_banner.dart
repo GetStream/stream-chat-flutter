@@ -4,12 +4,15 @@ import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 /// {@template unreadThreadsBanner}
-/// A wrapper widget that displays an unread-threads banner above its [child],
-/// similar to how [RefreshIndicator] wraps a scrollable.
+/// A widget that displays an unread-threads banner.
+///
+/// When a [child] is provided, the banner appears above it — similar to how
+/// [RefreshIndicator] wraps a scrollable. When [child] is omitted, the widget
+/// renders only the banner itself.
 ///
 /// When [enabled] is `false` (the default), the banner is hidden and only the
-/// [child] is rendered. Set [enabled] to `true` and provide [unreadThreads] to
-/// show the banner.
+/// [child] (if any) is rendered. Set [enabled] to `true` and provide
+/// [unreadThreads] to show the banner.
 ///
 /// Example:
 ///
@@ -29,7 +32,7 @@ class StreamUnreadThreadsBanner extends StatefulWidget {
   /// {@macro unreadThreadsBanner}
   const StreamUnreadThreadsBanner({
     super.key,
-    required this.child,
+    this.child,
     this.enabled = false,
     this.unreadThreads = const {},
     this.onRefresh,
@@ -38,7 +41,9 @@ class StreamUnreadThreadsBanner extends StatefulWidget {
   });
 
   /// The widget below the banner in the tree.
-  final Widget child;
+  ///
+  /// When `null`, only the banner is rendered without any wrapped content.
+  final Widget? child;
 
   /// Whether the banner is enabled.
   ///
@@ -67,8 +72,7 @@ class StreamUnreadThreadsBanner extends StatefulWidget {
   final EdgeInsetsGeometry? padding;
 
   @override
-  State<StreamUnreadThreadsBanner> createState() =>
-      _StreamUnreadThreadsBannerState();
+  State<StreamUnreadThreadsBanner> createState() => _StreamUnreadThreadsBannerState();
 }
 
 class _StreamUnreadThreadsBannerState extends State<StreamUnreadThreadsBanner> {
@@ -87,10 +91,15 @@ class _StreamUnreadThreadsBannerState extends State<StreamUnreadThreadsBanner> {
 
   @override
   Widget build(BuildContext context) {
+    final banner = widget.enabled ? _buildBanner(context) : null;
+    final child = widget.child;
+
+    if (child == null) return banner ?? const Empty();
+
     return Column(
       children: [
-        if (widget.enabled) _buildBanner(context),
-        Expanded(child: widget.child),
+        if (banner != null) banner,
+        Expanded(child: child),
       ],
     );
   }
