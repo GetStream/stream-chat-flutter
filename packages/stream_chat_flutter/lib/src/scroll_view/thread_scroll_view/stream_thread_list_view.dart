@@ -19,11 +19,24 @@ Widget defaultThreadListViewSeparatorBuilder(
 ///
 typedef StreamThreadListViewIndexedWidgetBuilder = StreamScrollViewIndexedWidgetBuilder<Thread, StreamThreadListTile>;
 
+/// Signature for a builder that creates a custom unread threads banner.
+typedef StreamUnreadThreadsBannerBuilder =
+    Widget Function(
+      BuildContext context,
+      Set<String> unreadThreadIds,
+    );
+
 /// {@template streamThreadListView}
 /// A [ListView] that shows a list of [Thread]'s the current user participated
-/// in.
+/// in, with a built-in unread threads banner.
 ///
 /// Uses a [StreamThreadListController] to load threads in paginated form.
+///
+/// The banner is shown above the list when new unseen threads are available
+/// (driven by [StreamThreadListController.unseenThreadIds]).
+///
+/// To hide the banner, set [showUnreadThreadsBanner] to `false`.
+/// To provide a custom banner, use [unreadThreadsBannerBuilder].
 ///
 /// Each row is rendered using [StreamThreadListTile], which can be customized
 /// app-wide through [StreamComponentFactory].
@@ -55,6 +68,8 @@ class StreamThreadListView extends StatelessWidget {
     this.errorBuilder,
     this.onThreadTap,
     this.onThreadLongPress,
+    this.showUnreadThreadsBanner = true,
+    this.unreadThreadsBannerBuilder,
     this.loadMoreTriggerIndex = 3,
     this.scrollDirection = Axis.vertical,
     this.reverse = false,
@@ -97,6 +112,17 @@ class StreamThreadListView extends StatelessWidget {
 
   /// Called when the user long-presses on a thread.
   final void Function(Thread)? onThreadLongPress;
+
+  /// Whether to show the built-in unread threads banner above the list.
+  ///
+  /// Defaults to `true`.
+  final bool showUnreadThreadsBanner;
+
+  /// Optional builder for a custom unread threads banner.
+  ///
+  /// When provided, this replaces the default [StreamUnreadThreadsBanner].
+  /// The builder receives the current set of unseen thread IDs.
+  final StreamUnreadThreadsBannerBuilder? unreadThreadsBannerBuilder;
 
   /// The index to take into account when triggering [controller.loadMore].
   final int loadMoreTriggerIndex;
@@ -280,6 +306,34 @@ class StreamThreadListView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return Column(
+      children: [
+        if (showUnreadThreadsBanner) _buildBanner(),
+        Expanded(child: _buildList(context)),
+      ],
+    );
+  }
+
+  Widget _buildBanner() {
+    return ValueListenableBuilder<Set<String>>(
+      valueListenable: controller.unseenThreadIds,
+      builder: (context, unseenThreadIds, _) {
+        if (unreadThreadsBannerBuilder != null) {
+          return unreadThreadsBannerBuilder!(context, unseenThreadIds);
+        }
+
+        return StreamUnreadThreadsBanner(
+          unreadThreads: unseenThreadIds,
+          onRefresh: () async {
+            await controller.refresh(resetValue: false);
+            controller.clearUnseenThreadIds();
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildList(BuildContext context) {
     return PagedValueListView<String, Thread>(
       scrollDirection: scrollDirection,
       padding: padding,

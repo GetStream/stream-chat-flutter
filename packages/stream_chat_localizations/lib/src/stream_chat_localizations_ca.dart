@@ -615,6 +615,9 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
   }
 
   @override
+  String get loadingLabel => 'Carregant...';
+
+  @override
   String get slideToCancelLabel => 'Llisca per cancel·lar';
 
   @override

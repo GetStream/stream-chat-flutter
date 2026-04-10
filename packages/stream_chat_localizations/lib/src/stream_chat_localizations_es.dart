@@ -617,6 +617,9 @@ No es posible añadir más de $limit archivos adjuntos
   }
 
   @override
+  String get loadingLabel => 'Cargando...';
+
+  @override
   String get slideToCancelLabel => 'Desliza para cancelar';
 
   @override

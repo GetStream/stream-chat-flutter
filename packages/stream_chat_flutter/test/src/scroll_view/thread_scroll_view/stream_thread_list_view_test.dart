@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -8,6 +9,11 @@ import '../../mocks.dart';
 class MockStreamThreadListController extends Mock implements StreamThreadListController {
   @override
   PagedValue<String, Thread> value = const PagedValue.loading();
+
+  final _unseenThreadIds = ValueNotifier<Set<String>>(const {});
+
+  @override
+  ValueListenable<Set<String>> get unseenThreadIds => _unseenThreadIds;
 }
 
 void main() {

@@ -617,6 +617,9 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
   }
 
   @override
+  String get loadingLabel => 'लोड हो रहा है...';
+
+  @override
   String get slideToCancelLabel => 'रद्द करने के लिए स्लाइड करें';
 
   @override
