@@ -10,8 +10,8 @@ import 'package:stream_core_flutter/stream_core_flutter.dart' as core;
 /// Used by [GiphyEphemeralMessage.onActionPressed].
 typedef GiffyAction = void Function(String name, String value);
 
-const _kDefaultConstraints = BoxConstraints(maxWidth: 256);
-const _kDefaultGiphyConstraints = BoxConstraints(minWidth: 128, maxWidth: 256, maxHeight: 256);
+const _kDefaultConstraints = BoxConstraints(maxWidth: 282);
+const _kDefaultGiphyConstraints = BoxConstraints(minWidth: 128, maxWidth: 282, maxHeight: 282);
 
 /// {@template giphyEphemeralMessage}
 /// Shows an ephemeral message of type giphy in a [MessageWidget].
@@ -66,10 +66,12 @@ class GiphyEphemeralMessage extends StatelessWidget {
                     crossAxisAlignment: .stretch,
                     children: [
                       GiphyHeader(title: context.translations.onlyVisibleToYouText),
-                      StreamGiphyAttachment(
-                        message: message,
-                        giphy: giphy,
-                        constraints: _kDefaultGiphyConstraints,
+                      Center(
+                        child: StreamGiphyAttachment(
+                          message: message,
+                          giphy: giphy,
+                          constraints: _kDefaultGiphyConstraints,
+                        ),
                       ),
                       GiphyActions(actions: actions!, onActionPressed: onActionPressed),
                     ],
