@@ -7,7 +7,6 @@ import 'package:go_router/go_router.dart';
 import 'package:sample_app/pages/chat_info_screen.dart';
 import 'package:sample_app/pages/group_info_screen.dart';
 import 'package:sample_app/routes/routes.dart';
-import 'package:sample_app/utils/localizations.dart';
 import 'package:sample_app/widgets/search_text_field.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -96,7 +95,7 @@ class _ChannelList extends State<ChannelList> {
               child: SearchTextField(
                 controller: _controller,
                 showCloseButton: _isSearchActive,
-                hintText: AppLocalizations.of(context).search,
+                hintText: 'Search',
               ),
             ),
           ],
@@ -267,8 +266,8 @@ class _ChannelListSearch extends StatelessWidget {
                           color: Colors.grey,
                         ),
                       ),
-                      Text(
-                        AppLocalizations.of(context).noResults,
+                      const Text(
+                        'No results...',
                       ),
                     ],
                   ),
