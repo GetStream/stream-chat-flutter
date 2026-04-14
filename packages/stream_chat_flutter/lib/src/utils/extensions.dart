@@ -646,6 +646,15 @@ extension AttachmentPlaylistExtension on Iterable<Attachment> {
   }
 }
 
+/// Adapts an [Offset] for the current [TextDirection].
+extension OffsetDirectionalX on Offset {
+  /// Flips [dx] for RTL so a positive offset always means "toward trailing."
+  Offset directional([TextDirection? textDirection]) {
+    if (textDirection == null || textDirection == TextDirection.ltr) return this;
+    return Offset(-dx, dy);
+  }
+}
+
 /// Extension to convert [AlignmentGeometry] to the corresponding
 /// [CrossAxisAlignment].
 extension ColumnAlignmentExtension on AlignmentGeometry {
