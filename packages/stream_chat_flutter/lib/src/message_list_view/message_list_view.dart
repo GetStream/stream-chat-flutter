@@ -1235,15 +1235,11 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
                 onPressed: () async {
                   return scrollToBottomDefaultTapAction(unreadCount);
                 },
-                child: widget.reverse
-                    ? Icon(
-                        context.streamIcons.arrowDown,
-                        color: _streamTheme.colorTheme.textHighEmphasis,
-                      )
-                    : Icon(
-                        context.streamIcons.arrowUp,
-                        color: _streamTheme.colorTheme.textHighEmphasis,
-                      ),
+                child: Icon(
+                  widget.reverse ? context.streamIcons.arrowDown : context.streamIcons.arrowUp,
+                  color: _streamTheme.colorTheme.textHighEmphasis,
+                  size: 20,
+                ),
               ),
               if (showUnreadCount && widget.showUnreadCountOnScrollToBottom)
                 Positioned(
