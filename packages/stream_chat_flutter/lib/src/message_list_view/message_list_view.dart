@@ -1219,9 +1219,9 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
               (e) => e.userId == streamChannel!.channel.client.state.currentUser!.id,
             );
 
-        return Positioned(
+        return PositionedDirectional(
           bottom: 16,
-          right: 16,
+          end: 16,
           width: 40,
           height: 40,
           child: Stack(
@@ -1246,8 +1246,8 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
                       ),
               ),
               if (showUnreadCount && widget.showUnreadCountOnScrollToBottom)
-                Positioned(
-                  right: -4,
+                PositionedDirectional(
+                  end: -4,
                   top: -4,
                   child: StreamBadgeNotification(
                     label: '${unreadCount > 99 ? '99+' : unreadCount}',
