@@ -809,11 +809,9 @@ class PlaybackTimerText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final remaining = duration - position;
     return Text(
-      switch (position.inMilliseconds > 0) {
-        true => position.toMinutesAndSeconds(),
-        false => duration.toMinutesAndSeconds(),
-      },
+      remaining.toMinutesAndSeconds(),
       style: style?.copyWith(
         // Use mono space for each num character.
         fontFeatures: [const FontFeature.tabularFigures()],
