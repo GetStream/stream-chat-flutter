@@ -137,7 +137,7 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
           ).textTheme.headlineBold.copyWith(color: StreamChatTheme.of(context).colorTheme.textHighEmphasis),
         ),
         leading: IconButton(
-          icon: Icon(context.streamIcons.chevronLeft20),
+          icon: Icon(context.streamIcons.chevronLeft),
           color: StreamChatTheme.of(context).colorTheme.textHighEmphasis,
           onPressed: () {
             Navigator.pop(context);

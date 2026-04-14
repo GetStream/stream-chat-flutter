@@ -43,7 +43,7 @@ class _ChannelListPageState extends State<ChannelListPage> {
           clipBehavior: Clip.none,
           children: [
             Icon(
-              _isSelected(0) ? icons.messageBubbleFill20 : icons.messageBubble20,
+              _isSelected(0) ? icons.messageBubbleFill : icons.messageBubble,
               color: _isSelected(0) ? StreamChatTheme.of(context).colorTheme.textHighEmphasis : Colors.grey,
             ),
             const PositionedDirectional(
@@ -57,7 +57,7 @@ class _ChannelListPageState extends State<ChannelListPage> {
       ),
       BottomNavigationBarItem(
         icon: Icon(
-          _isSelected(1) ? icons.mention32 : icons.mention20,
+          _isSelected(1) ? icons.mention : icons.mention,
           color: _isSelected(1) ? StreamChatTheme.of(context).colorTheme.textHighEmphasis : Colors.grey,
         ),
         label: AppLocalizations.of(context).mentions,
@@ -67,7 +67,7 @@ class _ChannelListPageState extends State<ChannelListPage> {
           clipBehavior: Clip.none,
           children: [
             Icon(
-              _isSelected(2) ? icons.threadFill20 : icons.thread20,
+              _isSelected(2) ? icons.threadFill : icons.thread,
               color: _isSelected(2) ? StreamChatTheme.of(context).colorTheme.textHighEmphasis : Colors.grey,
             ),
             PositionedDirectional(
@@ -81,14 +81,14 @@ class _ChannelListPageState extends State<ChannelListPage> {
       ),
       BottomNavigationBarItem(
         icon: Icon(
-          _isSelected(3) ? icons.edit32 : icons.edit20,
+          _isSelected(3) ? icons.edit : icons.edit,
           color: _isSelected(3) ? StreamChatTheme.of(context).colorTheme.textHighEmphasis : Colors.grey,
         ),
         label: 'Drafts',
       ),
       BottomNavigationBarItem(
         icon: Icon(
-          icons.save20,
+          icons.save,
           color: _isSelected(4) ? StreamChatTheme.of(context).colorTheme.textHighEmphasis : Colors.grey,
         ),
         label: 'Reminders',
@@ -225,7 +225,7 @@ class LeftDrawer extends StatelessWidget {
                 ),
                 ListTile(
                   leading: Icon(
-                    context.streamIcons.edit20,
+                    context.streamIcons.edit,
                     color: StreamChatTheme.of(context).colorTheme.textHighEmphasis.withOpacity(.5),
                   ),
                   onTap: () {
@@ -241,7 +241,7 @@ class LeftDrawer extends StatelessWidget {
                 ),
                 ListTile(
                   leading: Icon(
-                    context.streamIcons.users20,
+                    context.streamIcons.users,
                     color: StreamChatTheme.of(context).colorTheme.textHighEmphasis.withOpacity(.5),
                   ),
                   onTap: () {
@@ -294,7 +294,7 @@ class LeftDrawer extends StatelessWidget {
                         router.goNamed(Routes.CHOOSE_USER.name);
                       },
                       leading: Icon(
-                        context.streamIcons.user20,
+                        context.streamIcons.user,
                         color: StreamChatTheme.of(context).colorTheme.textHighEmphasis.withOpacity(.5),
                       ),
                       title: Text(

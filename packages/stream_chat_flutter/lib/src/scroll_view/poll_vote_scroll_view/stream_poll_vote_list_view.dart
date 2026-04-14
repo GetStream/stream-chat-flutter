@@ -326,7 +326,7 @@ class StreamPollVoteListView extends StatelessWidget {
               padding: const EdgeInsets.all(8),
               child: StreamScrollViewEmptyWidget(
                 emptyIcon: Icon(
-                  context.streamIcons.poll32,
+                  context.streamIcons.pollLarge,
                   size: 148,
                   color: chatThemeData.colorTheme.disabled,
                 ),

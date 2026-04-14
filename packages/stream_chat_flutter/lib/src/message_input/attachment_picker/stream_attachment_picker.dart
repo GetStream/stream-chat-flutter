@@ -325,7 +325,7 @@ Widget tabbedAttachmentPickerBuilder({
   final defaultOptions = <TabbedAttachmentPickerOption>[
     TabbedAttachmentPickerOption(
       key: 'gallery-picker',
-      icon: context.streamIcons.image20,
+      icon: context.streamIcons.image,
       supportedTypes: [
         AttachmentPickerType.images,
         AttachmentPickerType.videos,
@@ -353,7 +353,7 @@ Widget tabbedAttachmentPickerBuilder({
     ),
     TabbedAttachmentPickerOption(
       key: 'file-picker',
-      icon: context.streamIcons.file20,
+      icon: context.streamIcons.file,
       supportedTypes: [AttachmentPickerType.files],
       optionViewBuilder: (context, controller) => StreamFilePicker(
         onFilePicked: (file) async {
@@ -369,7 +369,7 @@ Widget tabbedAttachmentPickerBuilder({
     ),
     TabbedAttachmentPickerOption(
       key: 'image-picker',
-      icon: context.streamIcons.camera20,
+      icon: context.streamIcons.camera,
       supportedTypes: [AttachmentPickerType.images],
       optionViewBuilder: (context, controller) => StreamImagePicker(
         onImagePicked: (image) async {
@@ -385,7 +385,7 @@ Widget tabbedAttachmentPickerBuilder({
     ),
     TabbedAttachmentPickerOption(
       key: 'video-picker',
-      icon: context.streamIcons.video20,
+      icon: context.streamIcons.video,
       supportedTypes: [AttachmentPickerType.videos],
       optionViewBuilder: (context, controller) => StreamVideoPicker(
         onVideoPicked: (video) async {
@@ -401,7 +401,7 @@ Widget tabbedAttachmentPickerBuilder({
     ),
     TabbedAttachmentPickerOption(
       key: 'poll-creator',
-      icon: context.streamIcons.poll20,
+      icon: context.streamIcons.poll,
       supportedTypes: [AttachmentPickerType.poll],
       optionViewBuilder: (context, controller) {
         final initialPoll = controller.value.poll;
@@ -418,7 +418,7 @@ Widget tabbedAttachmentPickerBuilder({
     ),
     TabbedAttachmentPickerOption(
       key: 'command-picker',
-      icon: context.streamIcons.command20,
+      icon: context.streamIcons.command,
       supportedTypes: [AttachmentPickerType.command],
       optionViewBuilder: (context, controller) => StreamCommandPicker(
         onCommandSelected: onCommandSelected,
@@ -488,7 +488,7 @@ Widget systemAttachmentPickerBuilder({
     SystemAttachmentPickerOption(
       key: 'image-picker',
       supportedTypes: [AttachmentPickerType.images],
-      icon: context.streamIcons.image20,
+      icon: context.streamIcons.image,
       title: context.translations.uploadAPhotoLabel,
       onTap: (context, controller) async {
         await pickSystemFile(controller, FileType.image);
@@ -497,7 +497,7 @@ Widget systemAttachmentPickerBuilder({
     SystemAttachmentPickerOption(
       key: 'video-picker',
       supportedTypes: [AttachmentPickerType.videos],
-      icon: context.streamIcons.video20,
+      icon: context.streamIcons.video,
       title: context.translations.uploadAVideoLabel,
       onTap: (context, controller) async {
         await pickSystemFile(controller, FileType.video);
@@ -506,7 +506,7 @@ Widget systemAttachmentPickerBuilder({
     SystemAttachmentPickerOption(
       key: 'file-picker',
       supportedTypes: [AttachmentPickerType.files],
-      icon: context.streamIcons.file20,
+      icon: context.streamIcons.file,
       title: context.translations.uploadAFileLabel,
       onTap: (context, controller) async {
         await pickSystemFile(controller, FileType.any);
@@ -515,7 +515,7 @@ Widget systemAttachmentPickerBuilder({
     SystemAttachmentPickerOption(
       key: 'poll-creator',
       supportedTypes: [AttachmentPickerType.poll],
-      icon: context.streamIcons.poll20,
+      icon: context.streamIcons.poll,
       title: context.translations.createPollLabel(isNew: true),
       onTap: (context, controller) async {
         final initialPoll = controller.value.poll;

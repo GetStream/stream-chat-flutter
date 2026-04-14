@@ -54,12 +54,12 @@ abstract final class _ReminderActions {
       return [
         StreamContextMenuAction(
           label: const Text('Edit Reminder'),
-          leading: Icon(icons.clock20),
+          leading: Icon(icons.clock),
           onTap: () => _editReminder(context, message, reminder),
         ),
         StreamContextMenuAction(
           label: const Text('Remove from later'),
-          leading: Icon(icons.checkmark20),
+          leading: Icon(icons.checkmark),
           onTap: () => _removeReminder(context, message),
         ),
       ];
@@ -68,12 +68,12 @@ abstract final class _ReminderActions {
     return [
       StreamContextMenuAction(
         label: const Text('Remind me'),
-        leading: Icon(icons.bell20),
+        leading: Icon(icons.bell),
         onTap: () => _createReminder(context, message),
       ),
       StreamContextMenuAction(
         label: const Text('Save for later'),
-        leading: Icon(icons.file20),
+        leading: Icon(icons.file),
         onTap: () => _createBookmark(context, message),
       ),
     ];
@@ -145,7 +145,7 @@ abstract final class _DeleteForMeAction {
     return [
       StreamContextMenuAction.destructive(
         label: const Text('Delete Message for Me'),
-        leading: Icon(icons.delete20),
+        leading: Icon(icons.delete),
         onTap: () => _confirmAndDelete(context, message),
       ),
     ];
@@ -188,7 +188,7 @@ abstract final class _MessageInfoAction {
     return [
       StreamContextMenuAction(
         label: const Text('Message Info'),
-        leading: Icon(icons.info20),
+        leading: Icon(icons.info),
         onTap: () => MessageInfoSheet.show(context: context, message: message),
       ),
     ];

@@ -136,7 +136,7 @@ class ChooseUserPage extends StatelessWidget {
                             ),
                           ),
                           trailing: Icon(
-                            context.streamIcons.arrowRight20,
+                            context.streamIcons.arrowRight,
                             color: StreamChatTheme.of(context).colorTheme.accentPrimary,
                           ),
                         );

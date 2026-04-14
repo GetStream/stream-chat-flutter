@@ -85,7 +85,7 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
               if (state.users.isNotEmpty)
                 IconButton(
                   color: StreamChatTheme.of(context).colorTheme.accentPrimary,
-                  icon: Icon(context.streamIcons.arrowRight20),
+                  icon: Icon(context.streamIcons.arrowRight),
                   onPressed: () async {
                     GoRouter.of(context).pushNamed(
                       Routes.NEW_GROUP_CHAT_DETAILS.name,
@@ -162,7 +162,7 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
                                                 ),
                                               ),
                                               child: Icon(
-                                                context.streamIcons.xmark20,
+                                                context.streamIcons.xmark,
                                                 color: StreamChatTheme.of(context).colorTheme.textHighEmphasis,
                                                 size: 24,
                                               ),
@@ -239,7 +239,7 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
                                       Padding(
                                         padding: const EdgeInsets.all(24),
                                         child: Icon(
-                                          context.streamIcons.search32,
+                                          context.streamIcons.search,
                                           size: 96,
                                           color: StreamChatTheme.of(context).colorTheme.textLowEmphasis,
                                         ),

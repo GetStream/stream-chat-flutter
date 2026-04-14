@@ -1237,11 +1237,11 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
                 },
                 child: widget.reverse
                     ? Icon(
-                        context.streamIcons.arrowDown20,
+                        context.streamIcons.arrowDown,
                         color: _streamTheme.colorTheme.textHighEmphasis,
                       )
                     : Icon(
-                        context.streamIcons.arrowUp20,
+                        context.streamIcons.arrowUp,
                         color: _streamTheme.colorTheme.textHighEmphasis,
                       ),
               ),

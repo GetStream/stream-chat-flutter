@@ -42,7 +42,7 @@ class _UserMentionsPageState extends State<UserMentionsPage> {
                       Padding(
                         padding: const EdgeInsets.all(24),
                         child: Icon(
-                          context.streamIcons.mention32,
+                          context.streamIcons.mention,
                           size: 96,
                           color: StreamChatTheme.of(context).colorTheme.disabled,
                         ),
