@@ -4,6 +4,7 @@
 
 - Redesigned `StreamSystemMessage` and `StreamModeratedMessage` with a pill-shaped style and
   added visual customisation props.
+- Added visual customisation props to `ThreadSeparator` and `UnreadMessagesSeparator`.
 
 🐞 Fixed
 

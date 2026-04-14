@@ -868,7 +868,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
                       }
 
                       return ThreadSeparator(
-                        parentMessage: widget.parentMessage,
+                        parentMessage: widget.parentMessage!,
                       );
                     }
                     if (i == itemCount - 3) {
