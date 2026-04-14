@@ -1,3 +1,12 @@
+## Upcoming
+
+🐞 Fixed
+
+- Fixed voice message time label displaying elapsed time instead of remaining time.
+- Fixed RTL layout for the scroll-to-bottom button in `StreamMessageListView`.
+- Fixed RTL layout for the swipe-to-reply icon being cut off.
+- Fixed RTL layout for the voice recording lock button not being mirrored.
+
 ## 10.0.0-beta.13
 
 🛑️ Breaking
