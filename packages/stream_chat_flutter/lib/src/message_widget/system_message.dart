@@ -68,8 +68,7 @@ class StreamSystemMessage extends StatelessWidget {
   ///
   /// When non-null, takes precedence over the theme default.
   ///
-  /// When null (the default), uses horizontal [core.StreamSpacing.xxl] and
-  /// vertical [core.StreamSpacing.xs].
+  /// When null (the default), uses horizontal [core.StreamSpacing.xxl].
   final EdgeInsetsGeometry? margin;
 
   /// Inner padding inside the pill container.
@@ -122,7 +121,7 @@ class StreamSystemMessage extends StatelessWidget {
     final textTheme = context.streamTextTheme;
     final colorScheme = context.streamColorScheme;
 
-    final effectiveMargin = margin ?? .symmetric(horizontal: spacing.xxl, vertical: spacing.xs);
+    final effectiveMargin = margin ?? .symmetric(horizontal: spacing.xxl);
     final effectiveContentPadding = contentPadding ?? .symmetric(horizontal: spacing.sm, vertical: spacing.xs);
     final effectiveTextStyle = textStyle ?? textTheme.metadataDefault.copyWith(color: colorScheme.textSecondary);
 
