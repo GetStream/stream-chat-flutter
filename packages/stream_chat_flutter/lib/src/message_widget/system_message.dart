@@ -139,17 +139,19 @@ class StreamSystemMessage extends StatelessWidget {
         child: Center(
           child: Container(
             margin: effectiveMargin,
-            padding: effectiveContentPadding,
             decoration: BoxDecoration(
               color: effectiveBackgroundColor,
               border: .all(color: effectiveBorderColor),
               borderRadius: effectiveBorderRadius,
             ),
-            child: Text(
-              messageText,
-              softWrap: true,
-              textAlign: .center,
-              style: effectiveTextStyle,
+            child: Padding(
+              padding: effectiveContentPadding,
+              child: Text(
+                messageText,
+                softWrap: true,
+                textAlign: .center,
+                style: effectiveTextStyle,
+              ),
             ),
           ),
         ),
