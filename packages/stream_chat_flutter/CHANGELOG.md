@@ -1,5 +1,10 @@
 ## Upcoming
 
+✅ Added
+
+- Redesigned `StreamSystemMessage` and `StreamModeratedMessage` with a pill-shaped style and
+  added visual customisation props.
+
 🐞 Fixed
 
 - Fixed voice message time label displaying elapsed time instead of remaining time.

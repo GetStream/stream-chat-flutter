@@ -102,11 +102,9 @@ void main() {
             showLoading: false,
             channel: channel,
             child: Scaffold(
-              body: Center(
-                child: StreamSystemMessage(
-                  message: Message(
-                    text: 'demo message',
-                  ),
+              body: StreamSystemMessage(
+                message: Message(
+                  text: 'demo message',
                 ),
               ),
             ),
@@ -153,11 +151,9 @@ void main() {
             showLoading: false,
             channel: channel,
             child: Scaffold(
-              body: Center(
-                child: StreamSystemMessage(
-                  message: Message(
-                    text: 'demo message',
-                  ),
+              body: StreamSystemMessage(
+                message: Message(
+                  text: 'demo message',
                 ),
               ),
             ),
