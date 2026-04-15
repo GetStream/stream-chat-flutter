@@ -23,6 +23,7 @@ Iterable<StreamComponentBuilderExtension<Object>> streamChatComponentBuilders({
   StreamComponentBuilder<StreamLinkPreviewAttachmentProps>? linkPreviewAttachment,
   StreamComponentBuilder<StreamVoiceRecordingAttachmentProps>? voiceRecordingAttachment,
   StreamComponentBuilder<StreamPollAttachmentProps>? pollAttachment,
+  StreamComponentBuilder<StreamUnsupportedAttachmentProps>? unsupportedAttachment,
 }) {
   final builders = [
     if (channelListItem != null) StreamComponentBuilderExtension(builder: channelListItem),
@@ -45,6 +46,7 @@ Iterable<StreamComponentBuilderExtension<Object>> streamChatComponentBuilders({
     if (linkPreviewAttachment != null) StreamComponentBuilderExtension(builder: linkPreviewAttachment),
     if (voiceRecordingAttachment != null) StreamComponentBuilderExtension(builder: voiceRecordingAttachment),
     if (pollAttachment != null) StreamComponentBuilderExtension(builder: pollAttachment),
+    if (unsupportedAttachment != null) StreamComponentBuilderExtension(builder: unsupportedAttachment),
   ];
 
   return builders;

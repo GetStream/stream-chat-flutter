@@ -5,6 +5,7 @@ export 'giphy_attachment.dart';
 export 'image_attachment.dart';
 export 'link_preview_attachment.dart';
 export 'poll_attachment.dart';
+export 'unsupported_attachment.dart';
 export 'video_attachment.dart';
 export 'voice_recording_attachment.dart';
 export 'voice_recording_attachment_playlist.dart';

@@ -1,3 +1,9 @@
+## Upcoming
+
+✅ Added
+
+- Added `unsupportedAttachmentLabel` translation for all supported locales.
+
 ## 10.0.0-beta.13
 
 🛑️ Breaking

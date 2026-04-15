@@ -709,4 +709,7 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
 
   @override
   String get openFilesLabel => 'ファイルを開く';
+
+  @override
+  String get unsupportedAttachmentLabel => 'サポートされていない添付ファイル';
 }

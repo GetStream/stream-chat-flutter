@@ -712,4 +712,7 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
 
   @override
   String get openFilesLabel => '파일 열기';
+
+  @override
+  String get unsupportedAttachmentLabel => '지원되지 않는 첨부파일';
 }

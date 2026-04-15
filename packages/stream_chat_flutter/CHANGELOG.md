@@ -5,6 +5,8 @@
 - Redesigned `StreamSystemMessage` and `StreamModeratedMessage` with a pill-shaped style and
   added visual customisation props.
 - Added visual customisation props to `ThreadSeparator` and `UnreadMessagesSeparator`.
+- Added `StreamUnsupportedAttachment` widget and `UnsupportedAttachmentBuilder` to display a
+  placeholder for unrecognised attachment types.
 
 🐞 Fixed
 
