@@ -103,7 +103,6 @@ class StreamMessageListView extends StatefulWidget {
     this.showUnreadCountOnScrollToBottom = true,
     this.scrollToBottomBuilder,
     this.showUnreadIndicator = true,
-    this.unreadIndicatorBuilder,
     this.markReadWhenAtTheBottom = true,
     this.messageBuilder,
     this.parentMessageBuilder,
@@ -322,29 +321,12 @@ class StreamMessageListView extends StatefulWidget {
   )?
   scrollToBottomBuilder;
 
-  /// If true will show an indicator with number of unread messages
-  /// that will scroll to latest read message when tapped and mark
-  /// channel as read when dismissed
+  /// Whether to show the jump-to-unread indicator when there are unread
+  /// messages in the channel.
+  ///
+  /// When true (the default), an indicator is shown allowing the user to
+  /// jump to the oldest unread message or dismiss it.
   final bool showUnreadIndicator;
-
-  /// Function used to build a custom unread indicator widget
-  ///
-  /// Provides the current unread messages count and a reference
-  /// to the function that is executed on tap to scroll to latest
-  /// read message by default
-  ///
-  /// As an example:
-  /// ```
-  /// MessageListView(
-  ///   unreadIndicatorBuilder: (unreadCount, defaultTapAction, dismissAction) {
-  ///     return InkWell(
-  ///       onTap: () => defaultTapAction(unreadCount),
-  ///       child: Text('Scroll To Unread'),
-  ///     );
-  ///   },
-  /// ),
-  /// ```
-  final UnreadIndicatorBuilder? unreadIndicatorBuilder;
 
   /// If true will mark channel as read when the user scrolls to the bottom of the list
   final bool markReadWhenAtTheBottom;
@@ -1010,9 +992,8 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
           Positioned(
             top: context.streamSpacing.sm,
             child: UnreadIndicatorButton(
+              onJumpTap: scrollToUnreadDefaultTapAction,
               onDismissTap: _markMessagesAsRead,
-              onTap: scrollToUnreadDefaultTapAction,
-              unreadIndicatorBuilder: widget.unreadIndicatorBuilder,
             ),
           ),
       ],
