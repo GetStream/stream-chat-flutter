@@ -1215,28 +1215,19 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
         return PositionedDirectional(
           bottom: 16,
           end: 16,
-          width: 40,
-          height: 40,
           child: Stack(
             clipBehavior: Clip.none,
             children: [
-              FloatingActionButton(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(24),
-                ),
-                backgroundColor: _streamTheme.colorTheme.barsBg,
-                onPressed: () async {
-                  return scrollToBottomDefaultTapAction(unreadCount);
+              StreamButton.icon(
+                style: .secondary,
+                type: .outline,
+                size: .medium,
+                isFloating: true,
+                icon: switch (widget.reverse) {
+                  true => context.streamIcons.arrowDown20,
+                  false => context.streamIcons.arrowUp20,
                 },
-                child: widget.reverse
-                    ? Icon(
-                        context.streamIcons.arrowDown20,
-                        color: _streamTheme.colorTheme.textHighEmphasis,
-                      )
-                    : Icon(
-                        context.streamIcons.arrowUp20,
-                        color: _streamTheme.colorTheme.textHighEmphasis,
-                      ),
+                onTap: () => scrollToBottomDefaultTapAction(unreadCount),
               ),
               if (showUnreadCount && widget.showUnreadCountOnScrollToBottom)
                 PositionedDirectional(
