@@ -297,32 +297,39 @@ typedef ThreadBuilder = Widget Function(BuildContext context, Message? parent);
 typedef ThreadTapCallback = void Function(Message, Widget?);
 
 /// {@template spacingWidgetBuilder}
-/// A widget builder for creating certain spacing after widgets.
+/// Builds the spacing widget inserted between two adjacent messages on the
+/// same calendar day in a [StreamMessageListView].
 ///
-/// This spacing can be in the form of any widgets you like.
+/// A list of [SpacingType] values describes why the gap exists — for example,
+/// a sender change ([SpacingType.otherUser]), a time gap
+/// ([SpacingType.timeDiff]), or messages within the same group
+/// ([SpacingType.defaultSpacing]).
 ///
-/// A List of [SpacingType] is provided to help inform the decision of
-/// what to build after the message (thread, difference in time between
-/// current and last message, default spacing, etc).
+/// {@tool snippet}
 ///
-/// Example:
+/// Customise spacing per reason:
+///
 /// ```dart
-/// MessageListView(
-///   spacingWidgetBuilder: (context, list) {
-///     if(list.contains(SpacingType.defaultSpacing)) {
-///       return SizedBox(height: 2.0,);
-///     } else {
-///       return SizedBox(height: 8.0,);
+/// StreamMessageListView(
+///   spacingWidgetBuilder: (context, spacingTypes) {
+///     if (spacingTypes.contains(SpacingType.otherUser)) {
+///       return const SizedBox(height: 16);
+///     } else if (spacingTypes.contains(SpacingType.timeDiff)) {
+///       return const SizedBox(height: 8);
 ///     }
+///     return const SizedBox(height: 2);
 ///   },
-/// ),
-/// ```dart
+/// )
+/// ```
+/// {@end-tool}
+///
+/// See also:
+///
+///  * [SpacingType], which describes each possible reason for the gap.
+///  * [StreamMessageListView.spacingWidgetBuilder], where this builder is
+///    provided.
 /// {@endtemplate}
-typedef SpacingWidgetBuilder =
-    Widget Function(
-      BuildContext context,
-      List<SpacingType> spacingTypes,
-    );
+typedef SpacingWidgetBuilder = Widget Function(BuildContext context, List<SpacingType> spacingTypes);
 
 /// {@template attachmentDownloader}
 /// A callback for downloading an attachment asset.
