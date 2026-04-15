@@ -50,6 +50,7 @@ class StreamDateDivider extends StatelessWidget {
     required this.dateTime,
     this.uppercase = false,
     this.formatter,
+    this.margin,
     this.contentPadding,
     this.textStyle,
     this.backgroundColor,
@@ -68,6 +69,13 @@ class StreamDateDivider extends StatelessWidget {
   ///
   /// When non-null, overrides the default date formatting logic.
   final DateFormatter? formatter;
+
+  /// Outer margin around the pill container.
+  ///
+  /// When non-null, takes precedence over the theme default.
+  ///
+  /// When null (the default), uses vertical [core.StreamSpacing.xs].
+  final EdgeInsetsGeometry? margin;
 
   /// Inner padding inside the pill container.
   ///
@@ -107,13 +115,15 @@ class StreamDateDivider extends StatelessWidget {
     final textTheme = context.streamTextTheme;
     final colorScheme = context.streamColorScheme;
 
+    final effectiveMargin = margin ?? .symmetric(vertical: spacing.xs);
     final effectiveContentPadding = contentPadding ?? .symmetric(horizontal: spacing.xs, vertical: spacing.xxs);
     final effectiveTextStyle = textStyle ?? textTheme.metadataEmphasis.copyWith(color: colorScheme.textSecondary);
     final effectiveBackgroundColor = backgroundColor ?? colorScheme.backgroundSurfaceSubtle;
     final effectiveBorderRadius = borderRadius ?? BorderRadius.all(radius.max);
 
     return Center(
-      child: DecoratedBox(
+      child: Container(
+        margin: effectiveMargin,
         decoration: BoxDecoration(
           color: effectiveBackgroundColor,
           borderRadius: effectiveBorderRadius,
