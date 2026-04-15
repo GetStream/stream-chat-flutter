@@ -1,5 +1,11 @@
 ## Upcoming
 
+🛑️ Breaking
+
+- Removed `StreamMessageListView.unreadIndicatorBuilder` — customise via
+  `StreamComponentFactory.jumpToUnreadButton` instead.
+- Renamed `UnreadIndicatorButton.onTap` → `onJumpTap`.
+
 ✅ Added
 
 - Redesigned `StreamSystemMessage` and `StreamModeratedMessage` with a pill-shaped style and
