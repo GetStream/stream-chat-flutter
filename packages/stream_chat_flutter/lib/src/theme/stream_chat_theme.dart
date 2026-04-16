@@ -302,51 +302,7 @@ class StreamChatThemeData {
       messageListViewTheme: StreamMessageListViewThemeData(
         backgroundColor: colorTheme.appBg,
       ),
-      pollCreatorTheme: StreamPollCreatorThemeData(
-        backgroundColor: colorTheme.appBg,
-        appBarBackgroundColor: colorTheme.barsBg,
-        appBarForegroundColor: colorTheme.textHighEmphasis,
-        appBarElevation: 1,
-        appBarTitleStyle: textTheme.headlineBold.copyWith(
-          color: colorTheme.textHighEmphasis,
-        ),
-        questionTextFieldFillColor: colorTheme.inputBg,
-        questionHeaderStyle: textTheme.headline.copyWith(
-          color: colorTheme.textHighEmphasis,
-        ),
-        questionTextFieldStyle: textTheme.headline.copyWith(
-          color: colorTheme.textHighEmphasis,
-        ),
-        questionTextFieldErrorStyle: textTheme.footnote.copyWith(
-          color: colorTheme.accentError,
-        ),
-        questionTextFieldBorderRadius: BorderRadius.circular(12),
-        optionsTextFieldFillColor: colorTheme.inputBg,
-        optionsHeaderStyle: textTheme.headline.copyWith(
-          color: colorTheme.textHighEmphasis,
-        ),
-        optionsTextFieldStyle: textTheme.headline.copyWith(
-          color: colorTheme.textHighEmphasis,
-        ),
-        optionsTextFieldErrorStyle: textTheme.footnote.copyWith(
-          color: colorTheme.accentError,
-        ),
-        optionsTextFieldBorderRadius: BorderRadius.circular(12),
-        switchListTileFillColor: colorTheme.inputBg,
-        switchListTileTitleStyle: textTheme.headline.copyWith(
-          color: colorTheme.textHighEmphasis,
-        ),
-        switchListTileErrorStyle: textTheme.footnote.copyWith(
-          color: colorTheme.accentError,
-        ),
-        switchListTileBorderRadius: BorderRadius.circular(12),
-        actionDialogTitleStyle: textTheme.headlineBold.copyWith(
-          color: colorTheme.textHighEmphasis,
-        ),
-        actionDialogContentStyle: textTheme.body.copyWith(
-          color: colorTheme.textHighEmphasis,
-        ),
-      ),
+      pollCreatorTheme: const StreamPollCreatorThemeData(),
       pollInteractorTheme: const StreamPollInteractorThemeData(),
       pollResultsDialogTheme: StreamPollResultsDialogThemeData(
         backgroundColor: colorTheme.appBg,
