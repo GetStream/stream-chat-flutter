@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sample_app/config/sample_app_config.dart';
 import 'package:sample_app/widgets/message_info_sheet.dart';
 import 'package:sample_app/widgets/reminder_dialog.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -44,6 +45,8 @@ abstract final class _ReminderActions {
     BuildContext context,
     Message message,
   ) {
+    if (!context.sampleAppConfig.enableReminderActions) return const [];
+
     final icons = context.streamIcons;
     final channel = StreamChannel.of(context).channel;
     final channelConfig = channel.config;
@@ -136,6 +139,8 @@ abstract final class _DeleteForMeAction {
     BuildContext context,
     Message message,
   ) {
+    if (!context.sampleAppConfig.enableDeleteForMe) return const [];
+
     final icons = context.streamIcons;
     final channel = StreamChannel.of(context).channel;
     final currentUser = StreamChat.of(context).currentUser;
@@ -181,6 +186,8 @@ abstract final class _MessageInfoAction {
     BuildContext context,
     Message message,
   ) {
+    if (!context.sampleAppConfig.enableMessageInfo) return const [];
+
     final icons = context.streamIcons;
     final channel = StreamChannel.of(context).channel;
     if (channel.config?.deliveryEvents != true) return const [];
