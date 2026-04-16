@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sample_app/routes/routes.dart';
 import 'package:sample_app/state/new_group_chat_state.dart';
-import 'package:sample_app/utils/localizations.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 class GroupChatDetailsScreen extends StatefulWidget {
@@ -56,7 +55,7 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
           backgroundColor: StreamChatTheme.of(context).colorTheme.barsBg,
           leading: const StreamBackButton(),
           title: Text(
-            AppLocalizations.of(context).nameOfGroupChat,
+            'Name of Group Chat',
             style: TextStyle(
               color: StreamChatTheme.of(context).colorTheme.textHighEmphasis,
               fontSize: 16,
@@ -70,7 +69,7 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
               child: Row(
                 children: [
                   Text(
-                    AppLocalizations.of(context).name.toUpperCase(),
+                    'Name'.toUpperCase(),
                     style: TextStyle(
                       fontSize: 12,
                       color: StreamChatTheme.of(context).colorTheme.textLowEmphasis,
@@ -88,7 +87,7 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
                         errorBorder: InputBorder.none,
                         disabledBorder: InputBorder.none,
                         contentPadding: EdgeInsets.zero,
-                        hintText: AppLocalizations.of(context).chooseAGroupChatName,
+                        hintText: 'Choose a group chat name',
                         hintStyle: TextStyle(
                           fontSize: 14,
                           color: StreamChatTheme.of(context).colorTheme.textLowEmphasis,
@@ -147,14 +146,14 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
 
             switch (status) {
               case ConnectionStatus.connected:
-                statusString = AppLocalizations.of(context).connected;
+                statusString = 'Connected';
                 showStatus = false;
                 break;
               case ConnectionStatus.connecting:
-                statusString = AppLocalizations.of(context).reconnecting;
+                statusString = 'Reconnecting...';
                 break;
               case ConnectionStatus.disconnected:
-                statusString = AppLocalizations.of(context).disconnected;
+                statusString = 'Disconnected';
                 break;
             }
             return StreamInfoTile(
@@ -175,7 +174,7 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
                         horizontal: 8,
                       ),
                       child: Text(
-                        '$_totalUsers ${_totalUsers > 1 ? AppLocalizations.of(context).members : AppLocalizations.of(context).member}',
+                        '$_totalUsers ${_totalUsers > 1 ? 'Members' : 'Member'}',
                         style: TextStyle(
                           color: StreamChatTheme.of(context).colorTheme.textLowEmphasis,
                         ),
@@ -273,13 +272,13 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
               height: 26,
             ),
             Text(
-              AppLocalizations.of(context).somethingWentWrongErrorMessage,
+              'Something went wrong',
               style: StreamChatTheme.of(context).textTheme.headlineBold,
             ),
             const SizedBox(
               height: 7,
             ),
-            Text(AppLocalizations.of(context).operationCouldNotBeCompleted),
+            const Text("The operation couldn't be completed."),
             const SizedBox(
               height: 36,
             ),
@@ -293,7 +292,7 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
                 TextButton(
                   onPressed: GoRouter.of(context).pop,
                   child: Text(
-                    AppLocalizations.of(context).ok,
+                    'OK',
                     style: StreamChatTheme.of(
                       context,
                     ).textTheme.bodyBold.copyWith(color: StreamChatTheme.of(context).colorTheme.accentPrimary),

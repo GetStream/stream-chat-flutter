@@ -3,6 +3,7 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sample_app/config/sample_app_config.dart';
 import 'package:sample_app/pages/thread_page.dart';
 import 'package:sample_app/routes/routes.dart';
 import 'package:sample_app/widgets/location/location_picker_dialog.dart';
@@ -130,42 +131,48 @@ class _ChannelPageState extends State<ChannelPage> {
               ],
             ),
           ),
-          StreamMessageInput(
-            focusNode: _focusNode,
-            messageInputController: _messageInputController,
-            onQuotedMessageCleared: _messageInputController.clearQuotedMessage,
-            enableVoiceRecording: true,
-            allowedAttachmentPickerTypes: [
-              ...AttachmentPickerType.values,
-              if (config?.sharedLocations == true && channel.canShareLocation) const LocationPickerType(),
-            ],
-            onAttachmentPickerResult: (result) {
-              return _onCustomAttachmentPickerResult(channel, result);
-            },
-            attachmentPickerOptionsBuilder: (context, defaultOptions) => [
-              ...defaultOptions,
-              TabbedAttachmentPickerOption(
-                key: 'location-picker',
-                icon: Icons.near_me_rounded,
-                supportedTypes: [const LocationPickerType()],
-                isEnabled: (value) {
-                  // Enable if nothing has been selected yet.
-                  if (value.isEmpty) return true;
+          Builder(
+            builder: (context) {
+              final appConfig = context.sampleAppConfig;
+              final locationEnabled =
+                  appConfig.enableLocationSharing && config?.sharedLocations == true && channel.canShareLocation;
 
-                  // Otherwise, enable only if there is a location.
-                  return value.extraData['location'] != null;
+              return StreamMessageInput(
+                focusNode: _focusNode,
+                messageInputController: _messageInputController,
+                onQuotedMessageCleared: _messageInputController.clearQuotedMessage,
+                enableVoiceRecording: true,
+                allowedAttachmentPickerTypes: [
+                  ...AttachmentPickerType.values,
+                  if (locationEnabled) const LocationPickerType(),
+                ],
+                onAttachmentPickerResult: (result) {
+                  return _onCustomAttachmentPickerResult(channel, result);
                 },
-                optionViewBuilder: (context, controller) => LocationPicker(
-                  onLocationPicked: (locationResult) {
-                    if (locationResult == null) return;
+                attachmentPickerOptionsBuilder: (context, defaultOptions) => [
+                  ...defaultOptions,
+                  if (locationEnabled)
+                    TabbedAttachmentPickerOption(
+                      key: 'location-picker',
+                      icon: Icons.near_me_rounded,
+                      supportedTypes: [const LocationPickerType()],
+                      isEnabled: (value) {
+                        if (value.isEmpty) return true;
+                        return value.extraData['location'] != null;
+                      },
+                      optionViewBuilder: (context, controller) => LocationPicker(
+                        onLocationPicked: (locationResult) {
+                          if (locationResult == null) return;
 
-                    controller.notifyCustomResult(
-                      LocationPicked(location: locationResult),
-                    );
-                  },
-                ),
-              ),
-            ],
+                          controller.notifyCustomResult(
+                            LocationPicked(location: locationResult),
+                          );
+                        },
+                      ),
+                    ),
+                ],
+              );
+            },
           ),
         ],
       ),
