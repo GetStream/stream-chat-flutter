@@ -61,18 +61,19 @@ class PollOptionListItem extends StatelessWidget {
     this.focusNode,
     this.onRemove,
     this.onChanged,
-  }) : onPressed = null,
+  }) : onAddOptionPressed = null,
        _variant = .option;
 
   /// Creates an "add an option" button styled to match the option list.
   const PollOptionListItem.addOption({
     super.key,
     this.hintText,
-    this.onPressed,
+    VoidCallback? onPressed,
   }) : option = null,
        focusNode = null,
        onRemove = null,
        onChanged = null,
+       onAddOptionPressed = onPressed,
        _variant = .addOption;
 
   final _PollOptionVariant _variant;
@@ -98,7 +99,7 @@ class PollOptionListItem extends StatelessWidget {
   ///
   /// If `null`, the button is disabled.
   /// Only used by the [addOption] constructor.
-  final VoidCallback? onPressed;
+  final VoidCallback? onAddOptionPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -165,7 +166,7 @@ class PollOptionListItem extends StatelessWidget {
       child: StreamButton(
         type: .outline,
         style: .secondary,
-        onTap: onPressed,
+        onTap: onAddOptionPressed,
         themeStyle: .from(
           fixedSize: .infinite,
           textStyle: effectiveTextStyle,
