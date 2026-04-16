@@ -80,7 +80,7 @@ class StreamUserMentionTile extends StatelessWidget {
                   left: 8,
                 ),
                 child: Icon(
-                  context.streamIcons.mention20,
+                  context.streamIcons.mention,
                   color: chatThemeData.colorTheme.accentPrimary,
                 ),
               ),

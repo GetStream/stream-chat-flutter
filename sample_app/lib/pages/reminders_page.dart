@@ -82,7 +82,7 @@ class _RemindersPageState extends State<RemindersPage> {
                   CustomSlidableAction(
                     backgroundColor: theme.colorTheme.inputBg,
                     child: Icon(
-                      context.streamIcons.edit20,
+                      context.streamIcons.edit,
                       size: 24,
                       color: theme.colorTheme.accentPrimary,
                     ),
@@ -106,7 +106,7 @@ class _RemindersPageState extends State<RemindersPage> {
                   CustomSlidableAction(
                     backgroundColor: theme.colorTheme.inputBg,
                     child: Icon(
-                      context.streamIcons.delete20,
+                      context.streamIcons.delete,
                       size: 24,
                       color: theme.colorTheme.accentError,
                     ),

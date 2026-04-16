@@ -67,7 +67,7 @@ class _ChannelFileDisplayScreenState extends State<ChannelFileDisplayScreen> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Icon(
-                            context.streamIcons.file32,
+                            context.streamIcons.file,
                             size: 136,
                             color: StreamChatTheme.of(context).colorTheme.disabled,
                           ),

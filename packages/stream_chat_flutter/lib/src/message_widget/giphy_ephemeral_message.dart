@@ -166,7 +166,7 @@ class GiphyHeader extends StatelessWidget {
         mainAxisSize: .min,
         spacing: spacing.xs,
         children: [
-          Icon(icons.eyeFill16, size: 16, color: colorScheme.brand.shade900),
+          Icon(icons.eyeFill, size: 16, color: colorScheme.brand.shade900),
           Text(title, style: textTheme.captionEmphasis.copyWith(color: colorScheme.brand.shade900)),
         ],
       ),

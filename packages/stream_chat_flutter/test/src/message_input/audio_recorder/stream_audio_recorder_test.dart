@@ -31,7 +31,7 @@ void main() {
           ),
         );
 
-        expect(find.byIcon(StreamIconData.voice20), findsOneWidget);
+        expect(find.byIcon(StreamIconData.voice), findsOneWidget);
       },
     );
 
@@ -175,9 +175,9 @@ void main() {
         );
 
         expect(find.byType(StreamAudioWaveform), findsOneWidget);
-        expect(find.byIcon(StreamIconData.delete20), findsOneWidget);
-        expect(find.byIcon(StreamIconData.stopFill20), findsOneWidget);
-        expect(find.byIcon(StreamIconData.checkmark20), findsOneWidget);
+        expect(find.byIcon(StreamIconData.delete), findsOneWidget);
+        expect(find.byIcon(StreamIconData.stopFill), findsOneWidget);
+        expect(find.byIcon(StreamIconData.checkmark), findsOneWidget);
       },
     );
 
@@ -199,7 +199,7 @@ void main() {
           ),
         );
 
-        await tester.tap(find.byIcon(StreamIconData.delete20));
+        await tester.tap(find.byIcon(StreamIconData.delete));
 
         expect(onRecordCancelCalled, true);
       },
@@ -223,7 +223,7 @@ void main() {
           ),
         );
 
-        await tester.tap(find.byIcon(StreamIconData.stopFill20));
+        await tester.tap(find.byIcon(StreamIconData.stopFill));
 
         expect(onRecordStopCalled, true);
       },
@@ -247,7 +247,7 @@ void main() {
           ),
         );
 
-        await tester.tap(find.byIcon(StreamIconData.checkmark20));
+        await tester.tap(find.byIcon(StreamIconData.checkmark));
 
         expect(onRecordFinishCalled, true);
       },
@@ -269,8 +269,8 @@ void main() {
         expect(find.byType(PlaybackControlButton), findsOneWidget);
         expect(find.byType(PlaybackTimerText), findsOneWidget);
         expect(find.byType(StreamAudioWaveformSlider), findsOneWidget);
-        expect(find.byIcon(StreamIconData.delete20), findsOneWidget);
-        expect(find.byIcon(StreamIconData.checkmark20), findsOneWidget);
+        expect(find.byIcon(StreamIconData.delete), findsOneWidget);
+        expect(find.byIcon(StreamIconData.checkmark), findsOneWidget);
       },
     );
 
@@ -291,7 +291,7 @@ void main() {
           ),
         );
 
-        await tester.tap(find.byIcon(StreamIconData.checkmark20));
+        await tester.tap(find.byIcon(StreamIconData.checkmark));
 
         expect(onRecordFinishCalled, true);
       },
@@ -314,7 +314,7 @@ void main() {
           ),
         );
 
-        await tester.tap(find.byIcon(StreamIconData.delete20));
+        await tester.tap(find.byIcon(StreamIconData.delete));
 
         expect(onRecordCancelCalled, true);
       },
@@ -454,7 +454,7 @@ void main() {
           ),
         );
 
-        await tester.tap(find.byIcon(StreamIconData.stopFill20));
+        await tester.tap(find.byIcon(StreamIconData.stopFill));
 
         expect(feedbackCalled, isTrue);
       },
@@ -481,7 +481,7 @@ void main() {
           ),
         );
 
-        await tester.tap(find.byIcon(StreamIconData.delete20));
+        await tester.tap(find.byIcon(StreamIconData.delete));
 
         expect(feedbackCalled, isTrue);
       },
@@ -508,7 +508,7 @@ void main() {
           ),
         );
 
-        await tester.tap(find.byIcon(StreamIconData.checkmark20));
+        await tester.tap(find.byIcon(StreamIconData.checkmark));
 
         expect(feedbackCalled, isTrue);
       },
@@ -534,7 +534,7 @@ void main() {
           ),
         );
 
-        await tester.tap(find.byIcon(StreamIconData.delete20));
+        await tester.tap(find.byIcon(StreamIconData.delete));
 
         expect(feedbackCalled, isTrue);
       },
@@ -560,7 +560,7 @@ void main() {
           ),
         );
 
-        await tester.tap(find.byIcon(StreamIconData.checkmark20));
+        await tester.tap(find.byIcon(StreamIconData.checkmark));
 
         expect(feedbackCalled, isTrue);
       },

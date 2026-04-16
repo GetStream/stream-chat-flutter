@@ -134,7 +134,7 @@ void main() {
         find.byType(Icon),
       );
 
-      expect(icon.icon, StreamIconData.checks16);
+      expect(icon.icon, StreamIconData.checks);
       expect(
         icon.color,
         StreamChatThemeData.light().colorTheme.textLowEmphasis,
@@ -167,7 +167,7 @@ void main() {
         find.byType(Icon),
       );
 
-      expect(icon.icon, StreamIconData.checks16);
+      expect(icon.icon, StreamIconData.checks);
       expect(
         icon.color,
         StreamChatThemeData.light().colorTheme.accentPrimary,
@@ -201,7 +201,7 @@ void main() {
         find.byType(Icon),
       );
 
-      expect(icon.icon, StreamIconData.checks16);
+      expect(icon.icon, StreamIconData.checks);
       // Should use accentPrimary (read) not textLowEmphasis (delivered)
       expect(
         icon.color,

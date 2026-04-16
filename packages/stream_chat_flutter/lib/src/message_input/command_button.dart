@@ -53,7 +53,7 @@ class CommandButton extends StatelessWidget {
       color: color,
       iconSize: size,
       onPressed: onPressed,
-      icon: icon ?? Icon(context.streamIcons.bolt20),
+      icon: icon ?? Icon(context.streamIcons.bolt),
     );
   }
 }

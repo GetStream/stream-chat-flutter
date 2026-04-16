@@ -183,7 +183,7 @@ class _ChannelListDefault extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Icon(
-                              isMuted ? context.streamIcons.audio20 : context.streamIcons.mute20,
+                              isMuted ? context.streamIcons.audio : context.streamIcons.mute,
                               size: 20,
                               color: Colors.white,
                             ),
@@ -212,7 +212,7 @@ class _ChannelListDefault extends StatelessWidget {
                 padding: const EdgeInsets.all(8),
                 child: StreamScrollViewEmptyWidget(
                   emptyIcon: Icon(
-                    context.streamIcons.messageBubble32,
+                    context.streamIcons.messageBubbleLarge,
                     size: 148,
                     color: StreamChatTheme.of(context).colorTheme.disabled,
                   ),
@@ -261,7 +261,7 @@ class _ChannelListSearch extends StatelessWidget {
                       Padding(
                         padding: const EdgeInsets.all(24),
                         child: Icon(
-                          context.streamIcons.search32,
+                          context.streamIcons.search,
                           size: 96,
                           color: Colors.grey,
                         ),

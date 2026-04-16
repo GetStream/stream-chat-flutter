@@ -222,7 +222,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
                                 showOnlineIndicator: false,
                               ),
                             ),
-                            Icon(context.streamIcons.xmark20),
+                            Icon(context.streamIcons.xmark),
                           ],
                         ),
                       );
@@ -248,7 +248,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
                             StreamNeumorphicButton(
                               child: Center(
                                 child: Icon(
-                                  context.streamIcons.users20,
+                                  context.streamIcons.users,
                                   color: StreamChatTheme.of(context).colorTheme.accentPrimary,
                                   size: 24,
                                 ),
@@ -325,7 +325,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
                                               Padding(
                                                 padding: const EdgeInsets.all(24),
                                                 child: Icon(
-                                                  context.streamIcons.search32,
+                                                  context.streamIcons.search,
                                                   size: 96,
                                                   color: Colors.grey,
                                                 ),
