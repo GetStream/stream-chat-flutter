@@ -100,7 +100,7 @@ class _StreamGalleryPickerState extends State<StreamGalleryPicker> {
                   children: [
                     Icon(
                       size: 32,
-                      context.streamIcons.image32,
+                      context.streamIcons.imageLarge,
                       color: colorScheme.textTertiary,
                     ),
                     SizedBox(height: spacing.xs),
@@ -179,7 +179,7 @@ class _AddMoreTile extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              context.streamIcons.plus20,
+              context.streamIcons.plus,
               size: 20,
               color: colorScheme.textTertiary,
             ),

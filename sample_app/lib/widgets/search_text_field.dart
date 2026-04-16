@@ -51,7 +51,7 @@ class SearchTextField extends StatelessWidget {
                 prefixIcon: Padding(
                   padding: .directional(start: spacing.md),
                   child: Icon(
-                    context.streamIcons.search20,
+                    context.streamIcons.search,
                     color: colorScheme.textTertiary,
                     size: 20,
                   ),
@@ -71,9 +71,9 @@ class SearchTextField extends StatelessWidget {
             Material(
               color: Colors.transparent,
               child: IconButton(
-                color: Colors.grey,
+                color: colorScheme.textTertiary,
                 padding: EdgeInsets.zero,
-                icon: Icon(context.streamIcons.xmark16),
+                icon: Icon(context.streamIcons.xCircle, size: 20),
                 splashRadius: 24,
                 onPressed: () {
                   if (controller!.text.isNotEmpty) {

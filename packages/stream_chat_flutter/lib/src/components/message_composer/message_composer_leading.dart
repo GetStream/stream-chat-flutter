@@ -57,7 +57,7 @@ class DefaultStreamMessageComposerLeading extends StatelessWidget {
                 duration: const Duration(milliseconds: 150),
                 curve: Curves.easeOut,
                 child: StreamButton.icon(
-                  icon: context.streamIcons.plus20,
+                  icon: context.streamIcons.plus,
                   style: StreamButtonStyle.secondary,
                   type: StreamButtonType.outline,
                   size: StreamButtonSize.large,

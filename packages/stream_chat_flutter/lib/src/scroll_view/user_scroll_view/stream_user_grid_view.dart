@@ -348,7 +348,7 @@ class StreamUserGridView extends StatelessWidget {
                 padding: const EdgeInsets.all(8),
                 child: StreamScrollViewEmptyWidget(
                   emptyIcon: Icon(
-                    context.streamIcons.user32,
+                    context.streamIcons.user,
                     size: 148,
                     color: chatThemeData.colorTheme.disabled,
                   ),

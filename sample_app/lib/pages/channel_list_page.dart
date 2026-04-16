@@ -46,14 +46,14 @@ class _ChannelListPageState extends State<ChannelListPage> {
 
     final allTabs = <_TabDef>[
       _TabDef(
-        icon: StreamUnreadIndicator(child: Icon(icons.messageBubble20)),
-        selectedIcon: StreamUnreadIndicator(child: Icon(icons.messageBubbleFill20)),
+        icon: StreamUnreadIndicator(child: Icon(icons.messageBubble)),
+        selectedIcon: StreamUnreadIndicator(child: Icon(icons.messageBubbleFill)),
         label: 'Chats',
         page: const ChannelList(),
       ),
       _TabDef(
-        icon: StreamUnreadIndicator.threads(child: Icon(icons.thread20)),
-        selectedIcon: StreamUnreadIndicator.threads(child: Icon(icons.threadFill20)),
+        icon: StreamUnreadIndicator.threads(child: Icon(icons.thread)),
+        selectedIcon: StreamUnreadIndicator.threads(child: Icon(icons.threadFill)),
         label: 'Threads',
         page: const ThreadListPage(),
       ),
@@ -210,7 +210,7 @@ class LeftDrawer extends StatelessWidget {
                 children: [
                   StreamListTile(
                     contentPadding: EdgeInsets.symmetric(horizontal: spacing.sm, vertical: spacing.xxxs),
-                    leading: Icon(icons.edit20, size: 24),
+                    leading: Icon(icons.edit, size: 24),
                     title: const Text('New direct message'),
                     onTap: () {
                       Navigator.of(context).pop();
@@ -219,7 +219,7 @@ class LeftDrawer extends StatelessWidget {
                   ),
                   StreamListTile(
                     contentPadding: EdgeInsets.symmetric(horizontal: spacing.sm, vertical: spacing.xxxs),
-                    leading: Icon(icons.users20, size: 24),
+                    leading: Icon(icons.users, size: 24),
                     title: const Text('New group'),
                     onTap: () {
                       Navigator.of(context).pop();
@@ -262,7 +262,7 @@ class LeftDrawer extends StatelessWidget {
                   Expanded(
                     child: StreamListTile(
                       contentPadding: EdgeInsets.symmetric(horizontal: spacing.sm, vertical: spacing.xxxs),
-                      leading: Icon(icons.leave20, size: 24, color: colorScheme.accentError),
+                      leading: Icon(icons.leave, size: 24, color: colorScheme.accentError),
                       title: Text(
                         'Sign out',
                         style: textTheme.bodyDefault.copyWith(color: colorScheme.accentError),

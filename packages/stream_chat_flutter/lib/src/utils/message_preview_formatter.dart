@@ -335,7 +335,7 @@ class StreamMessagePreviewFormatter implements MessagePreviewFormatter {
         WidgetSpan(
           alignment: PlaceholderAlignment.middle,
           child: Icon(
-            context.streamIcons.noSign16,
+            context.streamIcons.noSign,
             size: iconSize,
             color: context.streamColorScheme.textTertiary,
           ),
@@ -518,20 +518,20 @@ class StreamMessagePreviewFormatter implements MessagePreviewFormatter {
     return switch (type) {
       AttachmentType.audio || AttachmentType.voiceRecording => WidgetSpan(
         alignment: PlaceholderAlignment.middle,
-        child: Icon(icons.voice16, size: size),
+        child: Icon(icons.voice, size: size),
       ),
       AttachmentType.image => WidgetSpan(
         alignment: PlaceholderAlignment.middle,
-        child: Icon(icons.camera16, size: size),
+        child: Icon(icons.camera, size: size),
       ),
       AttachmentType.video => WidgetSpan(
         alignment: PlaceholderAlignment.middle,
-        child: Icon(icons.video16, size: size),
+        child: Icon(icons.video, size: size),
       ),
       AttachmentType.giphy => const TextSpan(text: '/giphy'),
       _ => WidgetSpan(
         alignment: PlaceholderAlignment.middle,
-        child: Icon(icons.file16, size: size),
+        child: Icon(icons.file, size: size),
       ),
     };
   }
@@ -613,7 +613,7 @@ class StreamMessagePreviewFormatter implements MessagePreviewFormatter {
       children: [
         WidgetSpan(
           alignment: PlaceholderAlignment.middle,
-          child: Icon(context.streamIcons.poll16, size: iconSize),
+          child: Icon(context.streamIcons.poll, size: iconSize),
         ),
         if (latestVoterSpan case final latestVoterSpan?) ...[
           WidgetSpan(
@@ -669,7 +669,7 @@ class StreamMessagePreviewFormatter implements MessagePreviewFormatter {
       children: [
         WidgetSpan(
           alignment: PlaceholderAlignment.middle,
-          child: Icon(context.streamIcons.location16, size: iconSize),
+          child: Icon(context.streamIcons.location, size: iconSize),
         ),
         WidgetSpan(
           alignment: PlaceholderAlignment.middle,

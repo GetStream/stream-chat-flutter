@@ -274,7 +274,7 @@ class RemoveAttachmentButton extends StatelessWidget {
       onPressed: onPressed,
       color: colorTheme.barsBg,
       padding: EdgeInsets.zero,
-      icon: Icon(context.streamIcons.xmark20),
+      icon: Icon(context.streamIcons.xmark),
       style: IconButton.styleFrom(
         minimumSize: const Size(24, 24),
         tapTargetSize: MaterialTapTargetSize.shrinkWrap,

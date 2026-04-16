@@ -129,7 +129,7 @@ class _StreamPollOptionVotesDialogState extends State<StreamPollOptionVotesDialo
               children: [
                 if (isOptionWinner) ...[
                   Icon(
-                    context.streamIcons.trophy20,
+                    context.streamIcons.trophy,
                     color: theme.pollOptionWinnerVoteCountTextStyle?.color,
                   ),
                   const SizedBox(width: 8),

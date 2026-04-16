@@ -14,7 +14,7 @@ class StreamMessageListEmptyState extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Icon(
-            context.streamIcons.messageBubble32,
+            context.streamIcons.messageBubbleLarge,
             size: 32,
           ),
           SizedBox(height: context.streamSpacing.sm),

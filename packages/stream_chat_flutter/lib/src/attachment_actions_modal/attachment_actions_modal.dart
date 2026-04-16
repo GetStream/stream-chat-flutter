@@ -112,7 +112,7 @@ class AttachmentActionsModal extends StatelessWidget {
                               context,
                               context.translations.replyLabel,
                               Icon(
-                                context.streamIcons.reply20,
+                                context.streamIcons.reply,
                                 size: 24,
                                 color: theme.colorTheme.textLowEmphasis,
                               ),
@@ -123,7 +123,7 @@ class AttachmentActionsModal extends StatelessWidget {
                               context,
                               context.translations.showInChatLabel,
                               Icon(
-                                context.streamIcons.eyeFill20,
+                                context.streamIcons.eyeFill,
                                 size: 24,
                                 color: theme.colorTheme.textHighEmphasis,
                               ),
@@ -136,7 +136,7 @@ class AttachmentActionsModal extends StatelessWidget {
                                   ? context.translations.saveVideoLabel
                                   : context.translations.saveImageLabel,
                               Icon(
-                                context.streamIcons.save20,
+                                context.streamIcons.save,
                                 size: 24,
                                 color: theme.colorTheme.textLowEmphasis,
                               ),
@@ -196,7 +196,7 @@ class AttachmentActionsModal extends StatelessWidget {
                               context,
                               context.translations.deleteLabel.sentenceCase,
                               Icon(
-                                context.streamIcons.delete20,
+                                context.streamIcons.delete,
                                 size: 24,
                                 color: theme.colorTheme.accentError,
                               ),
@@ -329,7 +329,7 @@ class AttachmentActionsModal extends StatelessWidget {
                             height: 100,
                             width: 100,
                             child: Icon(
-                              context.streamIcons.exclamationCircleFill20,
+                              context.streamIcons.exclamationCircleFill,
                               color: theme.colorTheme.disabled,
                             ),
                           )
@@ -339,7 +339,7 @@ class AttachmentActionsModal extends StatelessWidget {
                             height: 160,
                             width: 160,
                             child: Icon(
-                              context.streamIcons.checkmark20,
+                              context.streamIcons.checkmark,
                               color: theme.colorTheme.disabled,
                             ),
                           )

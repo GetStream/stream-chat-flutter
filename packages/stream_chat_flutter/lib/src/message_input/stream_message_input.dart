@@ -1088,7 +1088,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
       showInfoBottomSheet(
         context,
         icon: Icon(
-          context.streamIcons.exclamationCircleFill20,
+          context.streamIcons.exclamationCircleFill,
           color: StreamChatTheme.of(context).colorTheme.accentError,
           size: 24,
         ),

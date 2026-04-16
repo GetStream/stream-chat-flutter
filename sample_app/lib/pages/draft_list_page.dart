@@ -40,7 +40,7 @@ class _DraftListPageState extends State<DraftListPage> {
                 CustomSlidableAction(
                   backgroundColor: Colors.red,
                   child: Icon(
-                    context.streamIcons.delete20,
+                    context.streamIcons.delete,
                     size: 24,
                     color: Colors.white,
                   ),

@@ -126,5 +126,5 @@ class _StreamChannelAvatarPlaceholder extends StatelessWidget {
   const _StreamChannelAvatarPlaceholder();
 
   @override
-  Widget build(BuildContext context) => Icon(context.streamIcons.users20);
+  Widget build(BuildContext context) => Icon(context.streamIcons.users);
 }

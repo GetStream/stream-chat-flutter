@@ -84,7 +84,7 @@ class StreamGalleryHeader extends StatelessWidget implements PreferredSizeWidget
       leading: showBackButton
           ? IconButton(
               icon: Icon(
-                context.streamIcons.arrowLeft20,
+                context.streamIcons.arrowLeft,
                 color: galleryHeaderThemeData.closeButtonColor,
                 size: 20,
               ),
@@ -97,7 +97,7 @@ class StreamGalleryHeader extends StatelessWidget implements PreferredSizeWidget
         if (!message.isEphemeral)
           IconButton(
             icon: Icon(
-              context.streamIcons.more20,
+              context.streamIcons.more,
               color: galleryHeaderThemeData.iconMenuPointColor,
             ),
             onPressed: () => _showMessageActionModalBottomSheet(context),
