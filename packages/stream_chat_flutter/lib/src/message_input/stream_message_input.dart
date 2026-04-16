@@ -747,8 +747,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
       PlatformType.android || PlatformType.ios => false,
       _ => true,
     };
-    final useSystemPicker =
-        widget.useSystemAttachmentPicker || isWebOrDesktop;
+    final useSystemPicker = widget.useSystemAttachmentPicker || isWebOrDesktop;
 
     final child = useSystemPicker
         ? systemAttachmentPickerBuilder(
