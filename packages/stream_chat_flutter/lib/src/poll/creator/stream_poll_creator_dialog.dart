@@ -231,7 +231,7 @@ class _StreamPollCreatorFullScreenDialogState extends State<StreamPollCreatorFul
               style: .secondary,
               type: .outline,
               size: .medium,
-              icon: context.streamIcons.xmark20,
+              icon: context.streamIcons.xmark,
               onTap: Navigator.of(context).maybePop,
               themeStyle: effectiveSecondaryActionStyle,
             ),
@@ -248,7 +248,7 @@ class _StreamPollCreatorFullScreenDialogState extends State<StreamPollCreatorFul
                 style: .primary,
                 type: .solid,
                 size: .medium,
-                icon: context.streamIcons.checkmark20,
+                icon: context.streamIcons.checkmark,
                 themeStyle: effectivePrimaryActionStyle,
                 onTap: switch (isValid) {
                   false => null,

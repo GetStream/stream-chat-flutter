@@ -371,7 +371,7 @@ void main() {
       );
 
       // Find the delete buttons
-      final deleteButtons = find.byIcon(StreamIconData.minusCircle20);
+      final deleteButtons = find.byIcon(StreamIconData.minusCircle);
       expect(deleteButtons, findsNWidgets(3));
 
       // Tap the first delete button
@@ -409,7 +409,7 @@ void main() {
       expect(find.byType(TextField), findsNWidgets(3));
 
       // Find and tap the delete button for the first option
-      final deleteButtons = find.byIcon(StreamIconData.minusCircle20);
+      final deleteButtons = find.byIcon(StreamIconData.minusCircle);
       await tester.tap(deleteButtons.first);
       await tester.pumpAndSettle();
 
@@ -443,7 +443,7 @@ void main() {
       expect(find.byType(TextField), findsNWidgets(3));
 
       // Find and tap the delete button for the first option
-      final deleteButtons = find.byIcon(StreamIconData.minusCircle20);
+      final deleteButtons = find.byIcon(StreamIconData.minusCircle);
       await tester.tap(deleteButtons.first);
       await tester.pumpAndSettle();
 
@@ -477,7 +477,7 @@ void main() {
         expect(find.byType(TextField), findsNWidgets(2));
 
         // Try to delete the first option
-        final deleteButtons = find.byIcon(StreamIconData.minusCircle20);
+        final deleteButtons = find.byIcon(StreamIconData.minusCircle);
         await tester.tap(deleteButtons.first);
         await tester.pumpAndSettle();
 

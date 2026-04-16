@@ -123,12 +123,12 @@ class PollOptionListItem extends StatelessWidget {
       helperState: option!.error != null ? StreamHelperState.error : null,
       leading: MouseRegion(
         cursor: SystemMouseCursors.grab,
-        child: Icon(icons.reorder20),
+        child: Icon(icons.reorder),
       ),
       trailing: StreamButton.icon(
         type: .ghost,
         style: .secondary,
-        icon: icons.minusCircle20,
+        icon: icons.minusCircle,
         themeStyle: .from(
           fixedSize: const .square(20),
           tapTargetSize: .shrinkWrap,
