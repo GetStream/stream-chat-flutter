@@ -9,9 +9,6 @@ import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 /// The default maximum size for media attachments.
 const kDefaultMaxAttachmentSize = 100 * 1024 * 1024; // 100MB in Bytes
 
-/// The default maximum number of media attachments.
-const kDefaultMaxAttachmentCount = 10;
-
 /// Controller class for [StreamAttachmentPicker].
 class StreamAttachmentPickerController extends ValueNotifier<AttachmentPickerValue> {
   /// Creates a new instance of [StreamAttachmentPickerController].
@@ -20,7 +17,7 @@ class StreamAttachmentPickerController extends ValueNotifier<AttachmentPickerVal
     List<Attachment>? initialAttachments,
     Map<String, Object?>? initialExtraData,
     int maxAttachmentSize = kDefaultMaxAttachmentSize,
-    int maxAttachmentCount = kDefaultMaxAttachmentCount,
+    int? maxAttachmentCount,
   }) {
     return StreamAttachmentPickerController._fromValue(
       AttachmentPickerValue(
@@ -36,10 +33,10 @@ class StreamAttachmentPickerController extends ValueNotifier<AttachmentPickerVal
   StreamAttachmentPickerController._fromValue(
     this.initialValue, {
     this.maxAttachmentSize = kDefaultMaxAttachmentSize,
-    this.maxAttachmentCount = kDefaultMaxAttachmentCount,
+    this.maxAttachmentCount,
   }) : assert(
-         (initialValue.attachments.length) <= maxAttachmentCount,
-         '''The initial attachments count must be less than or equal to maxAttachmentCount''',
+         maxAttachmentCount == null || initialValue.attachments.length <= maxAttachmentCount,
+         'The initial attachments count must be less than or equal to maxAttachmentCount',
        ),
        super(initialValue);
 
@@ -51,13 +48,13 @@ class StreamAttachmentPickerController extends ValueNotifier<AttachmentPickerVal
   /// The max attachment size allowed in bytes.
   final int maxAttachmentSize;
 
-  /// The max attachment count allowed.
-  final int maxAttachmentCount;
+  /// The max attachment count allowed, or `null` for no limit.
+  final int? maxAttachmentCount;
 
   @override
   set value(AttachmentPickerValue newValue) {
-    if (newValue.attachments.length > maxAttachmentCount) {
-      throw AttachmentLimitReachedError(maxCount: maxAttachmentCount);
+    if (maxAttachmentCount case final maxCount? when newValue.attachments.length > maxCount) {
+      throw AttachmentLimitReachedError(maxCount: maxCount);
     }
     super.value = newValue;
   }
