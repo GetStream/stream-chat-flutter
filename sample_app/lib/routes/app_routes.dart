@@ -58,7 +58,6 @@ final appRoutes = [
                 channel: channel!,
                 child: ChatInfoScreen(
                   user: state.extra as User?,
-                  messageTheme: StreamChatTheme.of(context).ownMessageTheme,
                 ),
               );
             },
@@ -70,9 +69,7 @@ final appRoutes = [
               final channel = StreamChat.of(context).client.state.channels[state.pathParameters['cid']];
               return StreamChannel(
                 channel: channel!,
-                child: GroupInfoScreen(
-                  messageTheme: StreamChatTheme.of(context).ownMessageTheme,
-                ),
+                child: const GroupInfoScreen(),
               );
             },
           ),

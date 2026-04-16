@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:stream_chat_flutter/src/ai_assistant/streaming_message_view.dart';
-import 'package:stream_chat_flutter/src/theme/message_theme.dart';
 
 import 'package:stream_chat_flutter/src/utils/device_segmentation.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart' as core;
 
 /// {@template streamMarkdownMessage}
 /// A widget that displays a markdown message. This widget uses the markdown
@@ -36,7 +36,7 @@ class StreamMarkdownMessage extends StatelessWidget {
   final MarkdownTapLinkCallback? onTapLink;
 
   /// The theme to apply to the message text.
-  final StreamMessageThemeData? messageTheme;
+  final core.StreamMessageStyle? messageTheme;
 
   /// Optional style sheet to customize the markdown output.
   ///
@@ -91,17 +91,13 @@ class StreamMarkdownMessage extends StatelessWidget {
           MarkdownStyleSheet.fromTheme(
                 themeData.copyWith(
                   textTheme: themeData.textTheme.apply(
-                    bodyColor: messageTheme?.messageTextStyle?.color,
-                    decoration: messageTheme?.messageTextStyle?.decoration,
-                    decorationColor: messageTheme?.messageTextStyle?.decorationColor,
-                    decorationStyle: messageTheme?.messageTextStyle?.decorationStyle,
-                    fontFamily: messageTheme?.messageTextStyle?.fontFamily,
+                    bodyColor: messageTheme?.textColor,
                   ),
                 ),
               )
               .copyWith(
-                a: messageTheme?.messageLinksStyle,
-                p: messageTheme?.messageTextStyle,
+                a: TextStyle(color: messageTheme?.textLinkColor),
+                p: TextStyle(color: messageTheme?.textColor),
               )
               .merge(styleSheet),
     );

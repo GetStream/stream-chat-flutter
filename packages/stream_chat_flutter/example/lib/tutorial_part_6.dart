@@ -74,19 +74,6 @@ class MyApp extends StatelessWidget {
           fit: BoxFit.cover,
         ),
       ),
-      ownMessageTheme: const StreamMessageThemeData(
-        urlAttachmentTitleMaxLine: 1,
-      ),
-      otherMessageTheme: StreamMessageThemeData(
-        messageBackgroundColor: colorTheme.textHighEmphasis,
-        messageTextStyle: TextStyle(
-          color: colorTheme.barsBg,
-        ),
-        avatarTheme: StreamAvatarThemeData(
-          borderRadius: BorderRadius.circular(8),
-        ),
-        urlAttachmentTitleMaxLine: 1,
-      ),
     ).merge(defaultTheme);
 
     return MaterialApp(

@@ -364,7 +364,6 @@ class StreamMessageInputState extends State<StreamMessageInput>
   late final CurvedAnimation _pickerAnimation;
 
   late StreamChatThemeData _streamChatTheme;
-  late StreamMessageInputThemeData _messageInputTheme;
 
   bool get _isEditing => !_effectiveController.message.state.isInitial;
 
@@ -495,7 +494,6 @@ class StreamMessageInputState extends State<StreamMessageInput>
   @override
   void didChangeDependencies() {
     _streamChatTheme = StreamChatTheme.of(context);
-    _messageInputTheme = StreamMessageInputTheme.of(context);
     super.didChangeDependencies();
   }
 
@@ -587,7 +585,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
     };
 
     final spacing = context.streamSpacing;
-    final safeAreaEnabled = widget.enableSafeArea ?? _messageInputTheme.enableSafeArea ?? true;
+    final safeAreaEnabled = widget.enableSafeArea ?? true;
     final viewPadding = MediaQuery.paddingOf(context);
 
     return Material(
@@ -745,13 +743,12 @@ class StreamMessageInputState extends State<StreamMessageInput>
 
     final allowedTypes = _getAllowedAttachmentPickerTypes();
 
-    final messageInputTheme = StreamMessageInputTheme.of(context);
     final isWebOrDesktop = switch (CurrentPlatform.type) {
       PlatformType.android || PlatformType.ios => false,
       _ => true,
     };
     final useSystemPicker =
-        widget.useSystemAttachmentPicker || (messageInputTheme.useSystemAttachmentPicker ?? false) || isWebOrDesktop;
+        widget.useSystemAttachmentPicker || isWebOrDesktop;
 
     final child = useSystemPicker
         ? systemAttachmentPickerBuilder(
@@ -794,7 +791,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 15),
       child: Text(
         context.translations.sendMessagePermissionError,
-        style: _messageInputTheme.inputTextStyle,
+        style: context.streamTextInputTheme.style?.textStyle,
       ),
     );
   }

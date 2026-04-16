@@ -11,14 +11,11 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 class ChatInfoScreen extends StatefulWidget {
   const ChatInfoScreen({
     super.key,
-    required this.messageTheme,
     this.user,
   });
 
   /// User in consideration
   final User? user;
-
-  final StreamMessageThemeData messageTheme;
 
   @override
   State<ChatInfoScreen> createState() => _ChatInfoScreenState();
@@ -207,9 +204,7 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
               MaterialPageRoute(
                 builder: (context) => StreamChannel(
                   channel: channel,
-                  child: ChannelMediaDisplayScreen(
-                    messageTheme: widget.messageTheme,
-                  ),
+                  child: const ChannelMediaDisplayScreen(),
                 ),
               ),
             );
@@ -239,9 +234,7 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
               MaterialPageRoute(
                 builder: (context) => StreamChannel(
                   channel: channel,
-                  child: ChannelFileDisplayScreen(
-                    messageTheme: widget.messageTheme,
-                  ),
+                  child: const ChannelFileDisplayScreen(),
                 ),
               ),
             );

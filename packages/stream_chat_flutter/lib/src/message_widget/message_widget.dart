@@ -325,9 +325,6 @@ class StreamMessageWidgetProps {
   final void Function(BuildContext context, Message message)? onBouncedErrorMessageActions;
 
   /// Called when the edit-message action is selected.
-  ///
-  /// When provided, this callback replaces the default behaviour of showing
-  /// the edit-message bottom sheet via [showEditMessageSheet].
   final void Function(Message message)? onEditMessageTap;
 
   /// Custom attachment builders for rendering message attachments.
