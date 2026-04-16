@@ -118,7 +118,7 @@ class _PollQuestionTextFieldState extends State<PollQuestionTextField> {
 
     final spacing = context.streamSpacing;
 
-    final effectiveTitleStyle = theme.headerTextStyle ?? defaults.headerTextStyle;
+    final effectiveHeaderStyle = theme.headerTextStyle ?? defaults.headerTextStyle;
     final effectiveInputStyle = theme.questionInputStyle ?? defaults.questionInputStyle;
 
     return Column(
@@ -126,7 +126,7 @@ class _PollQuestionTextFieldState extends State<PollQuestionTextField> {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (widget.title case final title?) Text(title, style: effectiveTitleStyle),
+        if (widget.title case final title?) Text(title, style: effectiveHeaderStyle),
         StreamTextInput(
           initialValue: _question.text,
           hintText: widget.hintText,
