@@ -114,7 +114,7 @@ class DefaultStreamUnsupportedAttachment extends StatelessWidget {
               mainAxisSize: .min,
               spacing: spacing.xs,
               children: [
-                Icon(context.streamIcons.file20),
+                Icon(context.streamIcons.unsupportedAttachment),
                 Expanded(child: Text(context.translations.unsupportedAttachmentLabel)),
               ],
             ),

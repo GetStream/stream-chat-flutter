@@ -147,12 +147,3 @@ final class _UnreadThreads extends _UnreadTypes {
   /// Optional parent message id to filter unread count.
   final String? id;
 }
-
-/// Adapts an [Offset] for the current [TextDirection].
-extension on Offset {
-  /// Flips [dx] for RTL so a positive offset always means "toward trailing."
-  Offset directional([TextDirection? textDirection]) {
-    if (textDirection == null || textDirection == TextDirection.ltr) return this;
-    return Offset(-dx, dy);
-  }
-}
