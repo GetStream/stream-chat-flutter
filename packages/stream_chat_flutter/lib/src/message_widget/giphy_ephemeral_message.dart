@@ -10,8 +10,7 @@ import 'package:stream_core_flutter/stream_core_flutter.dart' as core;
 /// Used by [GiphyEphemeralMessage.onActionPressed].
 typedef GiffyAction = void Function(String name, String value);
 
-const _kDefaultConstraints = BoxConstraints(maxWidth: 282);
-const _kDefaultGiphyConstraints = BoxConstraints(minWidth: 128, maxWidth: 282, maxHeight: 282);
+const _kDefaultGiphyConstraints = BoxConstraints(minWidth: 128, maxWidth: 256, maxHeight: 256);
 
 /// {@template giphyEphemeralMessage}
 /// Shows an ephemeral message of type giphy in a [MessageWidget].
@@ -21,15 +20,11 @@ class GiphyEphemeralMessage extends StatelessWidget {
   const GiphyEphemeralMessage({
     super.key,
     required this.message,
-    this.constraints,
     this.onActionPressed,
   });
 
   /// The underlying [Message] object which this widget represents.
   final Message message;
-
-  /// The constraints to apply to the overall widget layout.
-  final BoxConstraints? constraints;
 
   /// Callback called when an action is pressed.
   final GiffyAction? onActionPressed;
@@ -43,8 +38,6 @@ class GiphyEphemeralMessage extends StatelessWidget {
 
     final spacing = context.streamSpacing;
 
-    final effectiveConstraints = constraints ?? _kDefaultConstraints;
-
     return core.StreamMessageLayout(
       data: const core.StreamMessageLayoutData(
         alignment: .end,
@@ -56,26 +49,22 @@ class GiphyEphemeralMessage extends StatelessWidget {
           alignment: core.StreamMessageLayout.alignmentDirectionalOf(context),
           child: Padding(
             padding: .symmetric(horizontal: spacing.md),
-            child: ConstrainedBox(
-              constraints: effectiveConstraints,
-              child: core.StreamMessageContent(
-                footer: StreamMessageMetadata(message: message),
-                child: core.StreamMessageBubble(
-                  child: Column(
-                    mainAxisSize: .min,
-                    crossAxisAlignment: .stretch,
-                    children: [
-                      GiphyHeader(title: context.translations.onlyVisibleToYouText),
-                      Center(
-                        child: StreamGiphyAttachment(
-                          message: message,
-                          giphy: giphy,
-                          constraints: _kDefaultGiphyConstraints,
-                        ),
+            child: core.StreamMessageContent(
+              footer: StreamMessageMetadata(message: message),
+              child: core.StreamMessageBubble(
+                child: core.StreamIntrinsicColumn(
+                  crossAxisAlignment: .start,
+                  children: [
+                    GiphyHeader(title: context.translations.onlyVisibleToYouText),
+                    Center(
+                      child: StreamGiphyAttachment(
+                        message: message,
+                        giphy: giphy,
+                        constraints: _kDefaultGiphyConstraints,
                       ),
-                      GiphyActions(actions: actions!, onActionPressed: onActionPressed),
-                    ],
-                  ),
+                    ),
+                    GiphyActions(actions: actions!, onActionPressed: onActionPressed),
+                  ],
                 ),
               ),
             ),
@@ -108,11 +97,9 @@ class GiphyActions extends StatelessWidget {
     final spacing = context.streamSpacing;
 
     return Padding(
-      padding: .symmetric(horizontal: spacing.xxs),
-      child: Row(
-        mainAxisSize: .min,
-        spacing: spacing.xs,
-        mainAxisAlignment: .spaceEvenly,
+      padding: .symmetric(horizontal: spacing.xs),
+      child: Wrap(
+        alignment: .spaceEvenly,
         children: [
           ...actions.map(
             (action) {
