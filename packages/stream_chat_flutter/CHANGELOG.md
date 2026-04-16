@@ -1,3 +1,8 @@
+## NEXT_VERSION
+
+🛑️ Breaking
+- Renamed stream icons to remove the size suffix from the icon names.
+
 ## 10.0.0-beta.13
 
 🛑️ Breaking

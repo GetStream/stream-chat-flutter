@@ -5,7 +5,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sample_app/routes/routes.dart';
-import 'package:sample_app/utils/localizations.dart';
 import 'package:sample_app/widgets/chips_input_text_field.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -146,7 +145,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
         backgroundColor: StreamChatTheme.of(context).colorTheme.barsBg,
         leading: const StreamBackButton(),
         title: Text(
-          AppLocalizations.of(context).newChat,
+          'New Chat',
           style: StreamChatTheme.of(
             context,
           ).textTheme.headlineBold.copyWith(color: StreamChatTheme.of(context).colorTheme.textHighEmphasis),
@@ -160,14 +159,14 @@ class _NewChatScreenState extends State<NewChatScreen> {
 
           switch (status) {
             case ConnectionStatus.connected:
-              statusString = AppLocalizations.of(context).connected;
+              statusString = 'Connected';
               showStatus = false;
               break;
             case ConnectionStatus.connecting:
-              statusString = AppLocalizations.of(context).reconnecting;
+              statusString = 'Reconnecting...';
               break;
             case ConnectionStatus.disconnected:
-              statusString = AppLocalizations.of(context).disconnected;
+              statusString = 'Disconnected';
               break;
           }
           return StreamInfoTile(
@@ -185,7 +184,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
                     key: _chipInputTextFieldStateKey,
                     controller: _controller,
                     focusNode: _searchFocusNode,
-                    hint: AppLocalizations.of(context).typeANameHint,
+                    hint: 'Type a name',
                     chipBuilder: (context, user) {
                       return GestureDetector(
                         onTap: () {
@@ -223,7 +222,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
                                 showOnlineIndicator: false,
                               ),
                             ),
-                            Icon(context.streamIcons.xmark20),
+                            Icon(context.streamIcons.xmark),
                           ],
                         ),
                       );
@@ -249,7 +248,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
                             StreamNeumorphicButton(
                               child: Center(
                                 child: Icon(
-                                  context.streamIcons.users20,
+                                  context.streamIcons.users,
                                   color: StreamChatTheme.of(context).colorTheme.accentPrimary,
                                   size: 24,
                                 ),
@@ -257,7 +256,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
                             ),
                             const SizedBox(width: 8),
                             Text(
-                              AppLocalizations.of(context).createAGroup,
+                              'Create a Group',
                               style: StreamChatTheme.of(context).textTheme.bodyBold,
                             ),
                           ],
@@ -276,9 +275,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
                           horizontal: 8,
                         ),
                         child: Text(
-                          _isSearchActive
-                              ? '${AppLocalizations.of(context).matchesFor} "$_userNameQuery"'
-                              : AppLocalizations.of(context).onThePlatorm,
+                          _isSearchActive ? 'Matches for "$_userNameQuery"' : 'On the platform',
                           style: StreamChatTheme.of(context).textTheme.footnote.copyWith(
                             color: StreamChatTheme.of(context).colorTheme.textHighEmphasis.withOpacity(.5),
                           ),
@@ -328,13 +325,13 @@ class _NewChatScreenState extends State<NewChatScreen> {
                                               Padding(
                                                 padding: const EdgeInsets.all(24),
                                                 child: Icon(
-                                                  context.streamIcons.search32,
+                                                  context.streamIcons.search,
                                                   size: 96,
                                                   color: Colors.grey,
                                                 ),
                                               ),
                                               Text(
-                                                AppLocalizations.of(context).noUserMatchesTheseKeywords,
+                                                'No user matches these keywords...',
                                                 style: StreamChatTheme.of(context).textTheme.footnote.copyWith(
                                                   color: StreamChatTheme.of(
                                                     context,
@@ -360,7 +357,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
 
                               return Center(
                                 child: Text(
-                                  AppLocalizations.of(context).noChatsHereYet,
+                                  'No chats here yet...',
                                   style: TextStyle(
                                     fontSize: 12,
                                     color: StreamChatTheme.of(context).colorTheme.textHighEmphasis.withOpacity(.5),

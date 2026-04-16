@@ -7,7 +7,6 @@ import 'package:provider/provider.dart';
 import 'package:sample_app/routes/routes.dart';
 import 'package:sample_app/state/init_data.dart';
 import 'package:sample_app/utils/app_config.dart';
-import 'package:sample_app/utils/localizations.dart';
 import 'package:sample_app/widgets/stream_version.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -46,12 +45,12 @@ class ChooseUserPage extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.only(bottom: 13),
               child: Text(
-                AppLocalizations.of(context).welcomeToStreamChat,
+                'Welcome to Stream Chat',
                 style: StreamChatTheme.of(context).textTheme.title,
               ),
             ),
             Text(
-              '${AppLocalizations.of(context).selectUserToTryFlutterSDK}:',
+              'Select a user to try the Flutter SDK:',
               style: StreamChatTheme.of(context).textTheme.body,
             ),
             Expanded(
@@ -130,13 +129,13 @@ class ChooseUserPage extends StatelessWidget {
                             style: StreamChatTheme.of(context).textTheme.bodyBold,
                           ),
                           subtitle: Text(
-                            AppLocalizations.of(context).streamTestAccount,
+                            'Stream test account',
                             style: StreamChatTheme.of(context).textTheme.footnote.copyWith(
                               color: StreamChatTheme.of(context).colorTheme.textLowEmphasis,
                             ),
                           ),
                           trailing: Icon(
-                            context.streamIcons.arrowRight20,
+                            context.streamIcons.arrowRight,
                             color: StreamChatTheme.of(context).colorTheme.accentPrimary,
                           ),
                         );
@@ -151,11 +150,11 @@ class ChooseUserPage extends StatelessWidget {
                           ),
                         ),
                         title: Text(
-                          AppLocalizations.of(context).advancedOptions,
+                          'Advanced Options',
                           style: StreamChatTheme.of(context).textTheme.bodyBold,
                         ),
                         subtitle: Text(
-                          AppLocalizations.of(context).customSettings,
+                          'Custom settings',
                           style: StreamChatTheme.of(context).textTheme.footnote.copyWith(
                             color: StreamChatTheme.of(context).colorTheme.textLowEmphasis,
                           ),

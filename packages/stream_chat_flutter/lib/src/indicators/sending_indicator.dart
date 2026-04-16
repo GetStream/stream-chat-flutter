@@ -34,7 +34,7 @@ class StreamSendingIndicator extends StatelessWidget {
 
     if (isMessageRead) {
       return Icon(
-        context.streamIcons.checks16,
+        context.streamIcons.checks,
         size: size,
         color: colorTheme.accentPrimary,
       );
@@ -42,7 +42,7 @@ class StreamSendingIndicator extends StatelessWidget {
 
     if (isMessageDelivered) {
       return Icon(
-        context.streamIcons.checks16,
+        context.streamIcons.checks,
         size: size,
         color: colorTheme.textLowEmphasis,
       );
@@ -50,7 +50,7 @@ class StreamSendingIndicator extends StatelessWidget {
 
     if (message.state.isCompleted) {
       return Icon(
-        context.streamIcons.checkmark20,
+        context.streamIcons.checkmark,
         size: size,
         color: colorTheme.textLowEmphasis,
       );
@@ -58,7 +58,7 @@ class StreamSendingIndicator extends StatelessWidget {
 
     if (message.state.isOutgoing) {
       return Icon(
-        context.streamIcons.clock20,
+        context.streamIcons.clock,
         size: size,
         color: colorTheme.textLowEmphasis,
       );

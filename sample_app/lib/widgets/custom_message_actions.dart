@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sample_app/config/sample_app_config.dart';
 import 'package:sample_app/widgets/message_info_sheet.dart';
 import 'package:sample_app/widgets/reminder_dialog.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -44,6 +45,8 @@ abstract final class _ReminderActions {
     BuildContext context,
     Message message,
   ) {
+    if (!context.sampleAppConfig.enableReminderActions) return const [];
+
     final icons = context.streamIcons;
     final channel = StreamChannel.of(context).channel;
     final channelConfig = channel.config;
@@ -54,12 +57,12 @@ abstract final class _ReminderActions {
       return [
         StreamContextMenuAction(
           label: const Text('Edit Reminder'),
-          leading: Icon(icons.clock20),
+          leading: Icon(icons.clock),
           onTap: () => _editReminder(context, message, reminder),
         ),
         StreamContextMenuAction(
           label: const Text('Remove from later'),
-          leading: Icon(icons.checkmark20),
+          leading: Icon(icons.checkmark),
           onTap: () => _removeReminder(context, message),
         ),
       ];
@@ -68,12 +71,12 @@ abstract final class _ReminderActions {
     return [
       StreamContextMenuAction(
         label: const Text('Remind me'),
-        leading: Icon(icons.bell20),
+        leading: Icon(icons.bell),
         onTap: () => _createReminder(context, message),
       ),
       StreamContextMenuAction(
         label: const Text('Save for later'),
-        leading: Icon(icons.file20),
+        leading: Icon(icons.file),
         onTap: () => _createBookmark(context, message),
       ),
     ];
@@ -136,6 +139,8 @@ abstract final class _DeleteForMeAction {
     BuildContext context,
     Message message,
   ) {
+    if (!context.sampleAppConfig.enableDeleteForMe) return const [];
+
     final icons = context.streamIcons;
     final channel = StreamChannel.of(context).channel;
     final currentUser = StreamChat.of(context).currentUser;
@@ -145,7 +150,7 @@ abstract final class _DeleteForMeAction {
     return [
       StreamContextMenuAction.destructive(
         label: const Text('Delete Message for Me'),
-        leading: Icon(icons.delete20),
+        leading: Icon(icons.delete),
         onTap: () => _confirmAndDelete(context, message),
       ),
     ];
@@ -181,6 +186,8 @@ abstract final class _MessageInfoAction {
     BuildContext context,
     Message message,
   ) {
+    if (!context.sampleAppConfig.enableMessageInfo) return const [];
+
     final icons = context.streamIcons;
     final channel = StreamChannel.of(context).channel;
     if (channel.config?.deliveryEvents != true) return const [];
@@ -188,7 +195,7 @@ abstract final class _MessageInfoAction {
     return [
       StreamContextMenuAction(
         label: const Text('Message Info'),
-        leading: Icon(icons.info20),
+        leading: Icon(icons.info),
         onTap: () => MessageInfoSheet.show(context: context, message: message),
       ),
     ];

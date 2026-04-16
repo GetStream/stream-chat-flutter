@@ -256,7 +256,7 @@ class StreamChannelListTile extends StatelessWidget {
 
     final muteIcon = isMuted
         ? Icon(
-            context.streamIcons.mute20,
+            context.streamIcons.mute,
             size: 20,
             color: context.streamColorScheme.textTertiary,
           )
@@ -467,25 +467,25 @@ class _ChannelListDeliveryStatus extends StatelessWidget {
         final Widget icon;
         if (isRead) {
           icon = Icon(
-            context.streamIcons.checks16,
+            context.streamIcons.checks,
             size: 16,
             color: colorTheme.outgoing?.textReadColor ?? colorScheme.accentPrimary,
           );
         } else if (isDelivered) {
           icon = Icon(
-            context.streamIcons.checks16,
+            context.streamIcons.checks,
             size: 16,
             color: colorTheme.outgoing?.textTimestampColor ?? colorScheme.textTertiary,
           );
         } else if (message.state.isCompleted) {
           icon = Icon(
-            context.streamIcons.checkmark16,
+            context.streamIcons.checkmark,
             size: 16,
             color: colorTheme.outgoing?.textTimestampColor ?? colorScheme.textTertiary,
           );
         } else if (message.state.isOutgoing) {
           icon = Icon(
-            context.streamIcons.clock16,
+            context.streamIcons.clock,
             size: 16,
             color: colorTheme.outgoing?.textTimestampColor ?? colorScheme.textTertiary,
           );

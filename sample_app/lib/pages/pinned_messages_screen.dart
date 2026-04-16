@@ -3,7 +3,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sample_app/routes/routes.dart';
-import 'package:sample_app/utils/localizations.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 class PinnedMessagesScreen extends StatefulWidget {
@@ -38,7 +37,7 @@ class _PinnedMessagesScreenState extends State<PinnedMessagesScreen> {
         elevation: 1,
         centerTitle: true,
         title: Text(
-          AppLocalizations.of(context).pinnedMessages,
+          'Pinned Messages',
           style: TextStyle(
             color: StreamChatTheme.of(context).colorTheme.textHighEmphasis,
             fontSize: 16,
@@ -55,13 +54,13 @@ class _PinnedMessagesScreenState extends State<PinnedMessagesScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(
-                  context.streamIcons.pin32,
+                  context.streamIcons.pinLarge,
                   size: 136,
                   color: StreamChatTheme.of(context).colorTheme.disabled,
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  AppLocalizations.of(context).noPinnedItems,
+                  'No pinned items',
                   style: TextStyle(
                     fontSize: 17,
                     color: StreamChatTheme.of(context).colorTheme.textHighEmphasis,
@@ -74,14 +73,14 @@ class _PinnedMessagesScreenState extends State<PinnedMessagesScreen> {
                   text: TextSpan(
                     children: [
                       TextSpan(
-                        text: '${AppLocalizations.of(context).longPressMessage} ',
+                        text: '${'Long-press an important message and\nchoose'} ',
                         style: TextStyle(
                           fontSize: 14,
                           color: StreamChatTheme.of(context).colorTheme.textHighEmphasis.withOpacity(0.5),
                         ),
                       ),
                       TextSpan(
-                        text: AppLocalizations.of(context).pinToConversation,
+                        text: 'Pin to conversation',
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
