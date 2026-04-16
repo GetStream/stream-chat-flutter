@@ -59,9 +59,9 @@ dependencies:
   shimmer: ^3.0.0
   stream_chat_flutter_core: ^10.0.0-beta.13
   stream_core_flutter:
-    git: # TODO: remove publish_to:none once stream_core_flutter is updated
+    git:
       url: https://github.com/GetStream/stream-core-flutter.git
-      ref: d1bd95ba61004fc67bb61c2fbb36ddd3e4f43585
+      ref: 4254624cdb88b04a318d9ad8d4607f5598cbf9e1
       path: packages/stream_core_flutter
   svg_icon_widget: ^0.0.1
   synchronized: ^3.1.0+1
