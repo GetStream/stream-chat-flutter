@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
+import 'package:stream_chat_flutter/src/message_widget/system_message.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter/src/utils/typedefs.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
@@ -7,51 +7,98 @@ import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 /// {@template streamModeratedMessage}
 /// A widget that displays a message that has been moderated.
 ///
-/// This widget is responsible for rendering messages that have been flagged or
+/// [StreamModeratedMessage] renders messages that have been flagged or
 /// moderated according to content policies. It displays either the original
-/// message text (if available) or a default message indicating the content
-/// was blocked.
+/// message text (when available) or a localised fallback indicating the
+/// content was blocked.
+///
+/// {@tool snippet}
+///
+/// Display a moderated message with default styling:
+///
+/// ```dart
+/// StreamModeratedMessage(
+///   message: message,
+/// )
+/// ```
+/// {@end-tool}
+///
+/// See also:
+///
+///  * [StreamSystemMessage], which displays system messages with the same
+///    pill style.
+///  * [StreamMessageListView], which hosts moderated messages in the chat list.
 /// {@endtemplate}
 class StreamModeratedMessage extends StatelessWidget {
-  /// {@macro streamModeratedMessage}
+  /// Creates a moderated message widget.
+  ///
+  /// The [message] is required. All other parameters are optional.
   const StreamModeratedMessage({
     super.key,
     required this.message,
     this.onMessageTap,
+    this.margin,
+    this.contentPadding,
+    this.textStyle,
+    this.backgroundColor,
+    this.borderColor,
+    this.borderRadius,
   });
 
-  /// The message which got moderated by the system.
+  /// The moderated message to display.
   final Message message;
 
-  /// The action to perform when tapping on the message.
+  /// Called when the message is tapped.
+  ///
+  /// If null, no tap gesture is registered on the message.
   final OnMessageTap? onMessageTap;
+
+  /// Outer margin around the pill container.
+  ///
+  /// When non-null, takes precedence over the theme default.
+  final EdgeInsetsGeometry? margin;
+
+  /// Inner padding inside the pill container.
+  ///
+  /// When non-null, takes precedence over the theme default.
+  final EdgeInsetsGeometry? contentPadding;
+
+  /// Text style for the moderated message text.
+  ///
+  /// When non-null, takes precedence over the theme default.
+  final TextStyle? textStyle;
+
+  /// Background color of the pill container.
+  ///
+  /// When non-null, takes precedence over the theme default.
+  final Color? backgroundColor;
+
+  /// Border color of the pill container.
+  ///
+  /// When non-null, takes precedence over the theme default.
+  final Color? borderColor;
+
+  /// Border radius of the pill container.
+  ///
+  /// When non-null, takes precedence over the theme default.
+  final BorderRadius? borderRadius;
 
   @override
   Widget build(BuildContext context) {
-    final theme = StreamChatTheme.of(context);
-
-    final message = this.message.replaceMentions(linkify: false);
     final moderatedText = switch (message.text) {
       final messageText? when messageText.isNotEmpty => messageText,
       _ => context.translations.moderatedMessageBlockedText,
     };
 
-    return Material(
-      type: MaterialType.transparency,
-      child: InkWell(
-        onTap: switch (onMessageTap) {
-          final onTap? => () => onTap(message),
-          _ => null,
-        },
-        child: Text(
-          moderatedText,
-          softWrap: true,
-          textAlign: TextAlign.center,
-          style: theme.textTheme.captionBold.copyWith(
-            color: theme.colorTheme.textLowEmphasis,
-          ),
-        ),
-      ),
+    return StreamSystemMessage(
+      message: message.copyWith(text: moderatedText),
+      onMessageTap: onMessageTap,
+      margin: margin,
+      contentPadding: contentPadding,
+      textStyle: textStyle,
+      backgroundColor: backgroundColor,
+      borderColor: borderColor,
+      borderRadius: borderRadius,
     );
   }
 }

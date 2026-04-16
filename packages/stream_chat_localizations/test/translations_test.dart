@@ -327,6 +327,7 @@ void main() {
       expect(localizations.openCameraLabel, isNotNull);
       expect(localizations.selectFilesToShareLabel, isNotNull);
       expect(localizations.openFilesLabel, isNotNull);
+      expect(localizations.unsupportedAttachmentLabel, isNotNull);
     });
   }
 

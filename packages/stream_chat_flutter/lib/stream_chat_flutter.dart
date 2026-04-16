@@ -6,6 +6,7 @@ export 'package:stream_core_flutter/stream_core_flutter.dart'
         StreamAvatarGroupSize,
         StreamAvatarSize,
         StreamAvatarStackSize,
+        StreamButton,
         StreamButtonThemeStyle,
         StreamCheckbox,
         StreamCheckboxSize,

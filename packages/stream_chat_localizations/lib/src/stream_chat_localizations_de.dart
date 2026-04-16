@@ -723,4 +723,7 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
 
   @override
   String get openFilesLabel => 'Dateien öffnen';
+
+  @override
+  String get unsupportedAttachmentLabel => 'Nicht unterstützter Anhang';
 }

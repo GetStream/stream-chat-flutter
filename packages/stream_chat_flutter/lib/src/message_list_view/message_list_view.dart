@@ -103,7 +103,6 @@ class StreamMessageListView extends StatefulWidget {
     this.showUnreadCountOnScrollToBottom = true,
     this.scrollToBottomBuilder,
     this.showUnreadIndicator = true,
-    this.unreadIndicatorBuilder,
     this.markReadWhenAtTheBottom = true,
     this.messageBuilder,
     this.parentMessageBuilder,
@@ -322,29 +321,12 @@ class StreamMessageListView extends StatefulWidget {
   )?
   scrollToBottomBuilder;
 
-  /// If true will show an indicator with number of unread messages
-  /// that will scroll to latest read message when tapped and mark
-  /// channel as read when dismissed
+  /// Whether to show the jump-to-unread indicator when there are unread
+  /// messages in the channel.
+  ///
+  /// When true (the default), an indicator is shown allowing the user to
+  /// jump to the oldest unread message or dismiss it.
   final bool showUnreadIndicator;
-
-  /// Function used to build a custom unread indicator widget
-  ///
-  /// Provides the current unread messages count and a reference
-  /// to the function that is executed on tap to scroll to latest
-  /// read message by default
-  ///
-  /// As an example:
-  /// ```
-  /// MessageListView(
-  ///   unreadIndicatorBuilder: (unreadCount, defaultTapAction, dismissAction) {
-  ///     return InkWell(
-  ///       onTap: () => defaultTapAction(unreadCount),
-  ///       child: Text('Scroll To Unread'),
-  ///     );
-  ///   },
-  /// ),
-  /// ```
-  final UnreadIndicatorBuilder? unreadIndicatorBuilder;
 
   /// If true will mark channel as read when the user scrolls to the bottom of the list
   final bool markReadWhenAtTheBottom;
@@ -462,15 +444,12 @@ class StreamMessageListView extends StatefulWidget {
     BuildContext context,
     List<SpacingType> spacingTypes,
   ) {
-    if (spacingTypes.contains(SpacingType.otherUser)) {
-      return const SizedBox(height: 8);
-    } else if (spacingTypes.contains(SpacingType.thread)) {
-      return const SizedBox(height: 8);
-    } else if (spacingTypes.contains(SpacingType.timeDiff)) {
-      return const SizedBox(height: 8);
-    }
+    final spacing = context.streamSpacing;
 
-    return const SizedBox(height: 2);
+    if (spacingTypes.contains(SpacingType.otherUser)) return SizedBox(height: spacing.md);
+    if (spacingTypes.contains(SpacingType.timeDiff)) return SizedBox(height: spacing.xs);
+
+    return SizedBox(height: spacing.xxs);
   }
 
   @override
@@ -845,9 +824,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
                     }) {
                       if (unreadCount == 0) return separator;
                       if (_isThreadConversation) return separator;
-                      if (_firstUnreadMessage?.id != message.id) {
-                        return separator;
-                      }
+                      if (_firstUnreadMessage?.id != message.id) return separator;
 
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -868,7 +845,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
                       }
 
                       return ThreadSeparator(
-                        parentMessage: widget.parentMessage,
+                        parentMessage: widget.parentMessage!,
                       );
                     }
                     if (i == itemCount - 3) {
@@ -906,42 +883,15 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
 
                     Widget separator;
 
-                    final isPartOfThread = message.replyCount! > 0 || message.showInChannel == true;
-
-                    final createdAt = Jiffy.parseFromDateTime(
-                      message.createdAt.toLocal(),
+                    final spacingRules = _resolveSpacingRules(
+                      message: message,
+                      nextMessage: nextMessage,
                     );
 
-                    final nextCreatedAt = Jiffy.parseFromDateTime(
-                      nextMessage.createdAt.toLocal(),
-                    );
-
-                    if (!createdAt.isSame(nextCreatedAt, unit: Unit.day)) {
+                    if (spacingRules == null) {
                       separator = _buildDateDivider(nextMessage);
                     } else {
-                      final hasTimeDiff = !createdAt.isSame(
-                        nextCreatedAt,
-                        unit: Unit.minute,
-                      );
-
-                      final isNextUserSame = message.user!.id == nextMessage.user?.id;
-                      final isDeleted = message.isDeleted;
-
-                      final spacingRules = [
-                        if (hasTimeDiff) SpacingType.timeDiff,
-                        if (!isNextUserSame) SpacingType.otherUser,
-                        if (isPartOfThread) SpacingType.thread,
-                        if (isDeleted) SpacingType.deleted,
-                      ];
-
-                      if (spacingRules.isEmpty) {
-                        spacingRules.add(SpacingType.defaultSpacing);
-                      }
-
-                      separator = widget.spacingWidgetBuilder.call(
-                        context,
-                        spacingRules,
-                      );
+                      separator = widget.spacingWidgetBuilder.call(context, spacingRules);
                     }
 
                     return maybeBuildWithUnreadMessagesSeparator(
@@ -1012,7 +962,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
         ),
         if (widget.showFloatingDateDivider)
           Positioned(
-            top: 20,
+            top: context.streamSpacing.sm,
             child: FloatingDateDivider(
               itemCount: itemCount,
               reverse: widget.reverse,
@@ -1033,20 +983,17 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
               valueListenable: _showScrollToBottom,
               child: _buildScrollToBottom(),
               builder: (context, value, child) {
-                if (!snapshot || value) {
-                  return child!;
-                }
+                if (!snapshot || value) return child!;
                 return const Empty();
               },
             ),
           ),
         if (widget.showUnreadIndicator && !_isThreadConversation)
           Positioned(
-            top: 8,
+            top: context.streamSpacing.sm,
             child: UnreadIndicatorButton(
+              onJumpTap: scrollToUnreadDefaultTapAction,
               onDismissTap: _markMessagesAsRead,
-              onTap: scrollToUnreadDefaultTapAction,
-              unreadIndicatorBuilder: widget.unreadIndicatorBuilder,
             ),
           ),
       ],
@@ -1144,14 +1091,60 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     }
   }
 
+  // Determines the applicable [SpacingType]s between two adjacent messages.
+  //
+  // Returns `null` when the messages fall on different days, indicating a
+  // date divider should be shown instead of spacing.
+  //
+  // Otherwise, evaluates multiple conditions and returns the list of spacing
+  // rules that apply. If no specific rule matches, [SpacingType.defaultSpacing]
+  // is returned.
+  //
+  // The rules are evaluated in the following order:
+  // - [SpacingType.timeDiff] — messages are more than a minute apart.
+  // - [SpacingType.otherUser] — messages belong to different groups. A group
+  //   boundary is forced when either message is a system or moderated message.
+  // - [SpacingType.thread] — the current message is part of a thread.
+  // - [SpacingType.deleted] — the current message has been deleted.
+  List<SpacingType>? _resolveSpacingRules({
+    required Message message,
+    required Message nextMessage,
+  }) {
+    final createdAt = Jiffy.parseFromDateTime(message.createdAt.toLocal());
+    final nextCreatedAt = Jiffy.parseFromDateTime(nextMessage.createdAt.toLocal());
+
+    // Different days — a date divider is needed instead of spacing.
+    if (!createdAt.isSame(nextCreatedAt, unit: Unit.day)) return null;
+
+    // Time-based: messages are more than a minute apart.
+    final hasTimeDiff = !createdAt.isSame(nextCreatedAt, unit: Unit.minute);
+
+    // System messages always form their own group.
+    final isSystem = message.isSystem || nextMessage.isSystem;
+    // Moderated (non-bounced error) messages always form their own group.
+    final isModerated = (message.isError && !message.isBounced) || (nextMessage.isError && !nextMessage.isBounced);
+
+    // Two messages are from the same user group only if neither is system/moderated and they share the same sender.
+    final isNextUserSame = !isSystem && !isModerated && message.user!.id == nextMessage.user?.id;
+
+    // Thread messages shown in channel are part of a thread.
+    final isPartOfThread = message.replyCount! > 0 || message.showInChannel == true;
+
+    final rules = [
+      if (hasTimeDiff) SpacingType.timeDiff,
+      if (!isNextUserSame) SpacingType.otherUser,
+      if (isPartOfThread) SpacingType.thread,
+      if (message.isDeleted) SpacingType.deleted,
+    ];
+
+    return rules.isEmpty ? [SpacingType.defaultSpacing] : rules;
+  }
+
   Widget _buildDateDivider(Message message) {
     final createdAt = message.createdAt.toLocal();
     return switch (widget.dateDividerBuilder) {
       final builder? => builder(createdAt),
-      _ => Padding(
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        child: StreamDateDivider(dateTime: createdAt),
-      ),
+      _ => StreamDateDivider(dateTime: createdAt),
     };
   }
 
@@ -1219,31 +1212,26 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
               (e) => e.userId == streamChannel!.channel.client.state.currentUser!.id,
             );
 
-        return Positioned(
+        return PositionedDirectional(
           bottom: 16,
-          right: 16,
-          width: 40,
-          height: 40,
+          end: 16,
           child: Stack(
             clipBehavior: Clip.none,
             children: [
-              FloatingActionButton(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(24),
-                ),
-                backgroundColor: _streamTheme.colorTheme.barsBg,
-                onPressed: () async {
-                  return scrollToBottomDefaultTapAction(unreadCount);
+              StreamButton.icon(
+                style: .secondary,
+                type: .outline,
+                size: .medium,
+                isFloating: true,
+                icon: switch (widget.reverse) {
+                  true => context.streamIcons.arrowDown,
+                  false => context.streamIcons.arrowUp,
                 },
-                child: Icon(
-                  widget.reverse ? context.streamIcons.arrowDown : context.streamIcons.arrowUp,
-                  color: _streamTheme.colorTheme.textHighEmphasis,
-                  size: 20,
-                ),
+                onTap: () => scrollToBottomDefaultTapAction(unreadCount),
               ),
               if (showUnreadCount && widget.showUnreadCountOnScrollToBottom)
-                Positioned(
-                  right: -4,
+                PositionedDirectional(
+                  end: -4,
                   top: -4,
                   child: StreamBadgeNotification(
                     label: '${unreadCount > 99 ? '99+' : unreadCount}',
@@ -1372,7 +1360,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
           }
         },
         builder: (_, color, child) => ColoredBox(color: color!, child: child),
-        child: Padding(padding: const EdgeInsets.symmetric(vertical: 4), child: child),
+        child: child,
       );
     }
 

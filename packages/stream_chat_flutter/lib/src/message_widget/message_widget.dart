@@ -1,5 +1,4 @@
 import 'dart:math' as math;
-import 'dart:ui' show lerpDouble;
 
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
@@ -1007,8 +1006,15 @@ class _SwipeToReplyWrapper extends StatelessWidget {
       swipeThreshold: _swipeThreshold,
       onSwiped: (_) => onReplyTap(message),
       backgroundBuilder: (context, details) {
+        final colorScheme = context.streamColorScheme;
+        final textDirection = Directionality.of(context);
+
         final progress = math.min(details.progress, _swipeThreshold) / _swipeThreshold;
-        final offset = Offset.lerp(const Offset(-24, 0), const Offset(12, 0), progress)!;
+        final offset = Offset.lerp(
+          const Offset(-24, 0).directional(textDirection),
+          const Offset(12, 0).directional(textDirection),
+          progress,
+        )!;
 
         return Align(
           alignment: AlignmentDirectional.centerStart,
@@ -1021,12 +1027,13 @@ class _SwipeToReplyWrapper extends StatelessWidget {
                 child: CustomPaint(
                   painter: AnimatedCircleBorderPainter(
                     progress: progress,
-                    color: context.streamColorScheme.borderDefault,
+                    color: colorScheme.backgroundSurface,
                   ),
                   child: Center(
                     child: Icon(
                       context.streamIcons.reply,
-                      size: lerpDouble(0, 20, progress),
+                      color: colorScheme.textPrimary,
+                      size: 20,
                     ),
                   ),
                 ),

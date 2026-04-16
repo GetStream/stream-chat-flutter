@@ -751,6 +751,9 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
 
   @override
   String get openFilesLabel => 'Open files';
+
+  @override
+  String get unsupportedAttachmentLabel => 'Unsupported Attachment';
 }
 
 void main() async {

@@ -711,4 +711,7 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
 
   @override
   String get openFilesLabel => 'Åpne filer';
+
+  @override
+  String get unsupportedAttachmentLabel => 'Vedlegg støttes ikke';
 }

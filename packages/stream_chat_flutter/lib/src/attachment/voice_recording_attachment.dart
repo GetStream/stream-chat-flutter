@@ -270,7 +270,7 @@ class AudioTitleText extends StatelessWidget {
 /// {@template audioDurationText}
 /// Displays duration for audio playback with dynamic formatting.
 ///
-/// Shows either current position or total duration based on playback state.
+/// Shows either remaining time or total duration based on playback state.
 /// {@endtemplate}
 class AudioDurationText extends StatelessWidget {
   /// {@macro audioDurationText}
@@ -292,11 +292,9 @@ class AudioDurationText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final remaining = duration - position;
     return Text(
-      switch (position.inMilliseconds > 0) {
-        true => position.toMinutesAndSeconds(),
-        false => duration.toMinutesAndSeconds(),
-      },
+      remaining.toMinutesAndSeconds(),
       style: style?.copyWith(
         // Use mono space for each num character.
         fontFeatures: [const FontFeature.tabularFigures()],

@@ -1,7 +1,26 @@
-## NEXT_VERSION
+## Upcoming
 
 🛑️ Breaking
+
+- Removed `StreamMessageListView.unreadIndicatorBuilder` — customise via
+  `StreamComponentFactory.jumpToUnreadButton` instead.
+- Renamed `UnreadIndicatorButton.onTap` → `onJumpTap`.
 - Renamed stream icons to remove the size suffix from the icon names.
+
+✅ Added
+
+- Redesigned `StreamSystemMessage` and `StreamModeratedMessage` with a pill-shaped style and
+  added visual customisation props.
+- Added visual customisation props to `ThreadSeparator` and `UnreadMessagesSeparator`.
+- Added `StreamUnsupportedAttachment` widget and `UnsupportedAttachmentBuilder` to display a
+  placeholder for unrecognised attachment types.
+
+🐞 Fixed
+
+- Fixed voice message time label displaying elapsed time instead of remaining time.
+- Fixed RTL layout for the scroll-to-bottom button in `StreamMessageListView`.
+- Fixed RTL layout for the swipe-to-reply icon being cut off.
+- Fixed RTL layout for the voice recording lock button not being mirrored.
 
 ## 10.0.0-beta.13
 

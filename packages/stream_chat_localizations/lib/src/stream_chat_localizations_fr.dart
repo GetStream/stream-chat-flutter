@@ -729,4 +729,7 @@ Limite de pièces jointes dépassée : il n'est pas possible d'ajouter plus de $
 
   @override
   String get openFilesLabel => 'Ouvrir des fichiers';
+
+  @override
+  String get unsupportedAttachmentLabel => 'Pièce jointe non prise en charge';
 }
