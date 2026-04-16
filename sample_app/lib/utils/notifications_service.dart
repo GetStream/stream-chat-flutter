@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart' hide Message;
 import 'package:go_router/go_router.dart';
 import 'package:sample_app/routes/routes.dart';
-import 'package:sample_app/utils/localizations.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 void showLocalNotification(
@@ -30,8 +29,6 @@ void showLocalNotification(
     android: AndroidInitializationSettings('ic_notification_in_app'),
   );
 
-  final appLocalizations = AppLocalizations.of(context);
-
   await flutterLocalNotificationsPlugin.initialize(
     initializationSettings,
     onDidReceiveNotificationResponse: (response) async {
@@ -58,15 +55,15 @@ void showLocalNotification(
     event.message!.id.hashCode,
     event.message!.user!.name,
     event.message!.text,
-    NotificationDetails(
+    const NotificationDetails(
       android: AndroidNotificationDetails(
         'message channel',
-        appLocalizations.messageChannelName,
-        channelDescription: appLocalizations.messageChannelDescription,
+        'Message channel',
+        channelDescription: 'Channel used for showing messages',
         priority: Priority.high,
         importance: Importance.high,
       ),
-      iOS: const DarwinNotificationDetails(),
+      iOS: DarwinNotificationDetails(),
     ),
     payload: '${event.channelType}:${event.channelId}',
   );

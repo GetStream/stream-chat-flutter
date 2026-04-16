@@ -48,7 +48,7 @@ class StreamMessageAnnotations extends core.NullableStatelessWidget {
     Widget? savedForLaterAnnotation;
     if (message.reminder case final reminder? when reminder.remindAt == null) {
       savedForLaterAnnotation = core.StreamMessageAnnotation(
-        leading: Icon(icons.save20, color: colorScheme.accentPrimary),
+        leading: Icon(icons.save, color: colorScheme.accentPrimary),
         label: Text(translations.savedForLaterLabel, style: TextStyle(color: colorScheme.accentPrimary)),
       );
     }
@@ -57,7 +57,7 @@ class StreamMessageAnnotations extends core.NullableStatelessWidget {
     if (message.pinned case true) {
       final currentUser = StreamChat.of(context).currentUser!;
       pinnedAnnotation = core.StreamMessageAnnotation(
-        leading: Icon(icons.pin20),
+        leading: Icon(icons.pin),
         label: Text(
           translations.pinnedByUserText(
             pinnedBy: message.pinnedBy ?? currentUser,
@@ -77,7 +77,7 @@ class StreamMessageAnnotations extends core.NullableStatelessWidget {
 
       showInChannelAnnotation = core.StreamMessageAnnotation(
         onTap: onViewChannelTap,
-        leading: Icon(icons.arrowUpRight20),
+        leading: Icon(icons.arrowUpRight),
         label: Text.rich(
           TextSpan(
             text: annotationLabel,
@@ -95,7 +95,7 @@ class StreamMessageAnnotations extends core.NullableStatelessWidget {
     Widget? reminderAnnotation;
     if (message.reminder?.remindAt?.toLocal() case final remindAt?) {
       reminderAnnotation = core.StreamMessageAnnotation(
-        leading: Icon(icons.bell20),
+        leading: Icon(icons.bell),
         label: Text.rich(
           TextSpan(
             text: '${translations.reminderSetLabel} · ',

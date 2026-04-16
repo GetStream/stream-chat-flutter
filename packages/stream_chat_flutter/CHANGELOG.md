@@ -5,6 +5,7 @@
 - Removed `StreamMessageListView.unreadIndicatorBuilder` — customise via
   `StreamComponentFactory.jumpToUnreadButton` instead.
 - Renamed `UnreadIndicatorButton.onTap` → `onJumpTap`.
+- Renamed stream icons to remove the size suffix from the icon names.
 
 ✅ Added
 

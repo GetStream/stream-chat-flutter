@@ -1224,8 +1224,8 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
                 size: .medium,
                 isFloating: true,
                 icon: switch (widget.reverse) {
-                  true => context.streamIcons.arrowDown20,
-                  false => context.streamIcons.arrowUp20,
+                  true => context.streamIcons.arrowDown,
+                  false => context.streamIcons.arrowUp,
                 },
                 onTap: () => scrollToBottomDefaultTapAction(unreadCount),
               ),

@@ -186,43 +186,15 @@ class DefaultStreamGalleryAttachment extends StatelessWidget {
       );
     }
 
-    // Both the images are portrait.
+    // Portrait, mixed, or unknown — strict 50/50 width split with cover crop.
     // -----------
     // |    |    |
     // |    |    |
     // |    |    |
-    // -----------
-    if (!isLandscape1 && !isLandscape2) {
-      return FlexGrid(
-        pattern: const [
-          [1, 1],
-        ],
-        spacing: spacing,
-        runSpacing: runSpacing,
-        children: [
-          itemBuilder(context, 0),
-          itemBuilder(context, 1),
-        ],
-      );
-    }
-
-    // Layout on the basis of isLandscape1.
-    // 1. True
-    // -----------
-    // |      |  |
-    // |      |  |
-    // |      |  |
-    // -----------
-    //
-    // 2. False
-    // -----------
-    // |  |      |
-    // |  |      |
-    // |  |      |
     // -----------
     return FlexGrid(
-      pattern: [
-        if (isLandscape1) [2, 1] else [1, 2],
+      pattern: const [
+        [1, 1],
       ],
       spacing: spacing,
       runSpacing: runSpacing,

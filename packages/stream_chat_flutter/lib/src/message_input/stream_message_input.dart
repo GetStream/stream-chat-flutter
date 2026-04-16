@@ -837,42 +837,46 @@ class StreamMessageInputState extends State<StreamMessageInput>
     }
 
     setState(() {
-      final attachmentLimit = widget.attachmentLimit;
-      _pickerController = attachmentLimit != null
-          ? StreamAttachmentPickerController(
-              initialAttachments: _effectiveController.attachments,
-              initialPoll: _effectiveController.poll,
-              maxAttachmentCount: attachmentLimit,
-              maxAttachmentSize: widget.maxAttachmentSize,
-            )
-          : StreamAttachmentPickerController(
-              initialAttachments: _effectiveController.attachments,
-              initialPoll: _effectiveController.poll,
-              maxAttachmentSize: widget.maxAttachmentSize,
-            );
-      _pickerController!.addListener(_syncPickerToMessage);
-      _effectiveController.addListener(_syncMessageToPicker);
-      _customResultSubscription = _pickerController!.customResults.listen(_onCustomResult);
+      _pickerController = StreamAttachmentPickerController(
+        initialAttachments: _effectiveController.attachments,
+        initialPoll: _effectiveController.poll,
+        maxAttachmentCount: widget.attachmentLimit,
+        maxAttachmentSize: widget.maxAttachmentSize,
+      );
+
+      _startPickerSync();
 
       if (_effectiveFocusNode.hasFocus) {
         _effectiveFocusNode.unfocus();
       }
     });
+
     _pickerAnimationController.forward();
   }
 
   void _hidePicker() {
     if (!_isPickerVisible) return;
+
+    _stopPickerSync();
     _pickerAnimationController.reverse().then((_) {
-      if (mounted) setState(_disposePickerResources);
+      if (mounted) _disposePickerController();
     });
   }
 
-  void _disposePickerResources() {
+  void _startPickerSync() {
+    _pickerController?.addListener(_syncPickerToMessage);
+    _effectiveController.addListener(_syncMessageToPicker);
+    _customResultSubscription = _pickerController?.customResults.listen(_onCustomResult);
+  }
+
+  void _stopPickerSync() {
     _customResultSubscription?.cancel();
     _customResultSubscription = null;
     _pickerController?.removeListener(_syncPickerToMessage);
     _effectiveController.removeListener(_syncMessageToPicker);
+  }
+
+  void _disposePickerController() {
     _pickerController?.dispose();
     _pickerController = null;
   }
@@ -1084,7 +1088,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
       showInfoBottomSheet(
         context,
         icon: Icon(
-          context.streamIcons.exclamationCircleFill20,
+          context.streamIcons.exclamationCircleFill,
           color: StreamChatTheme.of(context).colorTheme.accentError,
           size: 24,
         ),
@@ -1230,7 +1234,8 @@ class StreamMessageInputState extends State<StreamMessageInput>
   void dispose() {
     _pickerAnimation.dispose();
     _pickerAnimationController.dispose();
-    _disposePickerResources();
+    _stopPickerSync();
+    _disposePickerController();
     _effectiveController
       ..removeListener(_onChangedThrottled)
       ..removeListener(_onChangedDebounced);

@@ -75,7 +75,7 @@ class StreamUnreadThreadsBanner extends StatelessWidget {
               ),
             ),
             Icon(
-              context.streamIcons.refresh20,
+              context.streamIcons.refresh,
               color: theme.colorTheme.barsBg,
             ),
           ],
