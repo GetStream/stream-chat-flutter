@@ -61,7 +61,6 @@ export 'package:stream_core_flutter/stream_core_flutter.dart'
         StreamTextInputStyle,
         StreamTextInputTheme,
         StreamTextInputThemeData,
-        StreamSwitch,
         StreamSwitchStyle,
         StreamSwitchTheme,
         StreamSwitchThemeData,
