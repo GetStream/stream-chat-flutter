@@ -54,7 +54,7 @@ class SampleAppConfigScreen extends StatelessWidget {
                 ),
                 _LocaleRow(config: config),
                 _SwitchRow(
-                  icon: icons.reorder20,
+                  icon: icons.reorder,
                   title: 'Force RTL',
                   subtitle: 'Right-to-left layout direction',
                   value: config.forceRtl,
@@ -71,28 +71,28 @@ class SampleAppConfigScreen extends StatelessWidget {
             _SettingsCard(
               children: [
                 _SwitchRow(
-                  icon: icons.bell20,
+                  icon: icons.bell,
                   title: 'Reminders',
                   subtitle: 'Remind me, Save for later, Edit',
                   value: config.enableReminderActions,
                   onChanged: (v) => SampleAppConfig.update(context, config.copyWith(enableReminderActions: v)),
                 ),
                 _SwitchRow(
-                  icon: icons.delete20,
+                  icon: icons.delete,
                   title: 'Delete for Me',
                   subtitle: 'Delete message for current user',
                   value: config.enableDeleteForMe,
                   onChanged: (v) => SampleAppConfig.update(context, config.copyWith(enableDeleteForMe: v)),
                 ),
                 _SwitchRow(
-                  icon: icons.info20,
+                  icon: icons.info,
                   title: 'Message Info',
                   subtitle: 'Show delivery info sheet',
                   value: config.enableMessageInfo,
                   onChanged: (v) => SampleAppConfig.update(context, config.copyWith(enableMessageInfo: v)),
                 ),
                 _SwitchRow(
-                  icon: icons.location20,
+                  icon: icons.location,
                   title: 'Location Sharing',
                   subtitle: 'Attachment builder and picker',
                   value: config.enableLocationSharing,
@@ -109,14 +109,14 @@ class SampleAppConfigScreen extends StatelessWidget {
             _SettingsCard(
               children: [
                 _SwitchRow(
-                  icon: icons.edit20,
+                  icon: icons.edit,
                   title: 'Draft Messages',
                   subtitle: 'Enable draft message saving',
                   value: config.draftMessagesEnabled,
                   onChanged: (v) => SampleAppConfig.update(context, config.copyWith(draftMessagesEnabled: v)),
                 ),
                 _SwitchRow(
-                  icon: icons.emoji20,
+                  icon: icons.emoji,
                   title: 'Unique Reactions',
                   subtitle: 'New reaction replaces existing',
                   value: config.enforceUniqueReactions,
@@ -365,7 +365,7 @@ class _LocaleRow extends StatelessWidget {
     final currentLabel = config.locale == null ? 'System' : _localeLabels[config.locale!.languageCode] ?? 'System';
 
     return StreamListTile(
-      leading: Icon(icons.translate20, size: 24),
+      leading: Icon(icons.translate, size: 24),
       title: const Text('Language'),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
