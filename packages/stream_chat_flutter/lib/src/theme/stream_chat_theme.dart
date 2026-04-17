@@ -43,7 +43,6 @@ class StreamChatThemeData {
     StreamTextTheme? textTheme,
     StreamColorTheme? colorTheme,
     StreamChannelListHeaderThemeData? channelListHeaderTheme,
-    StreamChannelPreviewThemeData? channelPreviewTheme,
     StreamChannelHeaderThemeData? channelHeaderTheme,
     Widget Function(BuildContext, User)? defaultUserImage,
     PlaceholderUserImage? placeholderUserImage,
@@ -73,7 +72,6 @@ class StreamChatThemeData {
 
     final customizedData = defaultData.copyWith(
       channelListHeaderTheme: channelListHeaderTheme,
-      channelPreviewTheme: channelPreviewTheme,
       channelHeaderTheme: channelHeaderTheme,
       defaultUserImage: defaultUserImage,
       placeholderUserImage: placeholderUserImage,
@@ -107,7 +105,6 @@ class StreamChatThemeData {
     required this.textTheme,
     required this.colorTheme,
     required this.channelListHeaderTheme,
-    required this.channelPreviewTheme,
     required this.channelHeaderTheme,
     required this.primaryIconTheme,
     required this.galleryHeaderTheme,
@@ -153,31 +150,11 @@ class StreamChatThemeData {
       ),
       color: colorTheme.barsBg,
     );
-    final channelPreviewTheme = StreamChannelPreviewThemeData(
-      unreadCounterColor: colorTheme.accentError,
-      avatarTheme: StreamAvatarThemeData(
-        borderRadius: BorderRadius.circular(20),
-        constraints: const BoxConstraints.tightFor(
-          height: 40,
-          width: 40,
-        ),
-      ),
-      titleStyle: textTheme.bodyBold,
-      subtitleStyle: textTheme.footnote.copyWith(
-        color: const Color(0xff7A7A7A),
-      ),
-      lastMessageAtStyle: textTheme.footnote.copyWith(
-        // ignore: deprecated_member_use
-        color: colorTheme.textHighEmphasis.withOpacity(0.5),
-      ),
-      indicatorIconSize: 16,
-    );
 
     return StreamChatThemeData.raw(
       textTheme: textTheme,
       colorTheme: colorTheme,
       primaryIconTheme: iconTheme,
-      channelPreviewTheme: channelPreviewTheme,
       channelListHeaderTheme: StreamChannelListHeaderThemeData(
         avatarTheme: StreamAvatarThemeData(
           borderRadius: BorderRadius.circular(20),
@@ -195,7 +172,6 @@ class StreamChatThemeData {
         backgroundColor: channelHeaderTheme.color,
         iconMenuPointColor: colorTheme.textHighEmphasis,
         titleTextStyle: textTheme.headlineBold,
-        subtitleTextStyle: channelPreviewTheme.subtitleStyle,
         bottomSheetBarrierColor: colorTheme.overlay,
       ),
       galleryFooterTheme: StreamGalleryFooterThemeData(
@@ -338,9 +314,6 @@ class StreamChatThemeData {
   /// The color themes used in the widgets
   final StreamColorTheme colorTheme;
 
-  /// Theme of the [StreamChannelPreview]
-  final StreamChannelPreviewThemeData channelPreviewTheme;
-
   /// Theme of the [StreamChannelListHeader]
   final StreamChannelListHeaderThemeData channelListHeaderTheme;
 
@@ -396,7 +369,6 @@ class StreamChatThemeData {
   StreamChatThemeData copyWith({
     StreamTextTheme? textTheme,
     StreamColorTheme? colorTheme,
-    StreamChannelPreviewThemeData? channelPreviewTheme,
     StreamChannelHeaderThemeData? channelHeaderTheme,
     Widget Function(BuildContext, User)? defaultUserImage,
     PlaceholderUserImage? placeholderUserImage,
@@ -420,7 +392,6 @@ class StreamChatThemeData {
     textTheme: this.textTheme.merge(textTheme),
     colorTheme: this.colorTheme.merge(colorTheme),
     primaryIconTheme: this.primaryIconTheme.merge(primaryIconTheme),
-    channelPreviewTheme: this.channelPreviewTheme.merge(channelPreviewTheme),
     channelHeaderTheme: this.channelHeaderTheme.merge(channelHeaderTheme),
     galleryHeaderTheme: galleryHeaderTheme ?? this.galleryHeaderTheme,
     galleryFooterTheme: galleryFooterTheme ?? this.galleryFooterTheme,
@@ -445,7 +416,6 @@ class StreamChatThemeData {
       textTheme: textTheme.merge(other.textTheme),
       colorTheme: colorTheme.merge(other.colorTheme),
       primaryIconTheme: other.primaryIconTheme,
-      channelPreviewTheme: channelPreviewTheme.merge(other.channelPreviewTheme),
       channelHeaderTheme: channelHeaderTheme.merge(other.channelHeaderTheme),
       galleryHeaderTheme: galleryHeaderTheme.merge(other.galleryHeaderTheme),
       galleryFooterTheme: galleryFooterTheme.merge(other.galleryFooterTheme),

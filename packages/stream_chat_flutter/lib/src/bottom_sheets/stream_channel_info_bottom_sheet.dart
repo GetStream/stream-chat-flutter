@@ -43,7 +43,6 @@ class StreamChannelInfoBottomSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     final themeData = StreamChatTheme.of(context);
     final colorTheme = themeData.colorTheme;
-    final channelPreviewTheme = StreamChannelPreviewTheme.of(context);
 
     final currentUser = channel.client.state.currentUser;
     final isOneToOneChannel = channel.isDistinct && channel.memberCount == 2;
@@ -74,7 +73,7 @@ class StreamChannelInfoBottomSheet extends StatelessWidget {
           child: StreamChannelInfo(
             showTypingIndicator: false,
             channel: channel,
-            textStyle: channelPreviewTheme.subtitleStyle,
+            textStyle: context.streamTextTheme.captionDefault,
           ),
         ),
         const SizedBox(height: 17),
