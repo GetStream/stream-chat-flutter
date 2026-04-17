@@ -149,8 +149,8 @@ void main() {
     Widget buildMessageWidget({bool reverse = false}) {
       return Builder(
         builder: (context) {
-          final theme = StreamChatTheme.of(context);
-          final messageTheme = theme.getMessageTheme(reverse: reverse);
+          final messageTheme = context.streamMessageTheme.mergeWithDefaults(context);
+          final messageStyle = reverse ? messageTheme.outgoing! : messageTheme.incoming!;
 
           return Container(
             padding: const EdgeInsets.symmetric(
@@ -159,11 +159,11 @@ void main() {
             ),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(14),
-              color: messageTheme.messageBackgroundColor,
+              color: messageStyle.backgroundColor,
             ),
             child: Text(
               message.text ?? '',
-              style: messageTheme.messageTextStyle,
+              style: TextStyle(color: messageStyle.textColor),
             ),
           );
         },

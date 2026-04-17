@@ -13,11 +13,7 @@ import 'package:sample_app/routes/routes.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 class GroupInfoScreen extends StatefulWidget {
-  const GroupInfoScreen({
-    super.key,
-    required this.messageTheme,
-  });
-  final StreamMessageThemeData messageTheme;
+  const GroupInfoScreen({super.key});
 
   @override
   State<GroupInfoScreen> createState() => _GroupInfoScreenState();
@@ -493,9 +489,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
               MaterialPageRoute(
                 builder: (context) => StreamChannel(
                   channel: channel,
-                  child: ChannelMediaDisplayScreen(
-                    messageTheme: widget.messageTheme,
-                  ),
+                  child: const ChannelMediaDisplayScreen(),
                 ),
               ),
             );
@@ -514,9 +508,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
               MaterialPageRoute(
                 builder: (context) => StreamChannel(
                   channel: channel,
-                  child: ChannelFileDisplayScreen(
-                    messageTheme: widget.messageTheme,
-                  ),
+                  child: const ChannelFileDisplayScreen(),
                 ),
               ),
             );

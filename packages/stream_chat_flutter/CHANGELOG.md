@@ -6,6 +6,8 @@
   `StreamComponentFactory.jumpToUnreadButton` instead.
 - Renamed `UnreadIndicatorButton.onTap` → `onJumpTap`.
 - Renamed stream icons to remove the size suffix from the icon names.
+- Removed `StreamMessageThemeData` (ownMessageTheme and otherMessageTheme) and `StreamMessageInputThemeData` (messageInputTheme).
+- Removed `AttachmentButton`, `StreamQuotedMessageWidget`, `EditMessageSheet`, `StreamMessageSendButton` and `DesktopReactionsBuilder`.
 
 ✅ Added
 
