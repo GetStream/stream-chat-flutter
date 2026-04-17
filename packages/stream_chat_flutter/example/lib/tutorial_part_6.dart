@@ -61,11 +61,6 @@ class MyApp extends StatelessWidget {
     );
     final defaultTheme = StreamChatThemeData.fromTheme(themeData);
     final customTheme = StreamChatThemeData(
-      channelPreviewTheme: StreamChannelPreviewThemeData(
-        avatarTheme: StreamAvatarThemeData(
-          borderRadius: BorderRadius.circular(8),
-        ),
-      ),
       messageListViewTheme: const StreamMessageListViewThemeData(
         backgroundColor: Colors.grey,
         backgroundImage: DecorationImage(

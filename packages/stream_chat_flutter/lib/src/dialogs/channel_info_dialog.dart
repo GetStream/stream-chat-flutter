@@ -39,7 +39,7 @@ class ChannelInfoDialog extends StatelessWidget {
             children: [
               StreamChannelInfo(
                 channel: channel,
-                textStyle: StreamChatTheme.of(context).channelPreviewTheme.subtitleStyle,
+                textStyle: context.streamTextTheme.captionDefault,
               ),
             ],
           ),
