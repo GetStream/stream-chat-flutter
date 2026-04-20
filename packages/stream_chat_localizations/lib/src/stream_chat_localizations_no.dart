@@ -49,9 +49,9 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
 
   @override
   String attachmentsUploadProgressText({
-    required int remaining,
+    required int completed,
     required int total,
-  }) => 'Laster opp $remaining/$total ...';
+  }) => 'Lastet opp $completed av $total ...';
 
   @override
   String pinnedByUserText({

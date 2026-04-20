@@ -58,9 +58,7 @@ class EditMessageSheet extends StatefulWidget {
 }
 
 class _EditMessageSheetState extends State<EditMessageSheet> {
-  late final controller = StreamMessageInputController(
-    message: widget.message,
-  );
+  late final controller = StreamMessageInputController()..editMessage(widget.message);
 
   @override
   void dispose() {

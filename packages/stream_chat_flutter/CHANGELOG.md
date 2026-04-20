@@ -6,14 +6,22 @@
   `StreamComponentFactory.jumpToUnreadButton` instead.
 - Renamed `UnreadIndicatorButton.onTap` → `onJumpTap`.
 - Renamed stream icons to remove the size suffix from the icon names.
+- Removed `StreamAttachmentUploadStateBuilder.successBuilder` and the `SuccessBuilder` typedef.
+  The overlay already clears as soon as the upload completes, so the hook was unreachable.
+- Renamed `StreamFileTypeIconSize` variants: `s48` → `xl`, `s40` → `lg`.
+- Renamed `StreamMessageInputController.editingOriginalMessage` → `messageBeingEdited`.
 
 ✅ Added
 
+- Video attachments now use the shared `StreamVideoPlayIndicator` for the play-button overlay
+  (replaces a hand-rolled circle + `playFill` icon in `StreamVideoAttachment` and
+  `GalleryAttachmentBuilder`).
 - Redesigned `StreamSystemMessage` and `StreamModeratedMessage` with a pill-shaped style and
   added visual customisation props.
 - Added visual customisation props to `ThreadSeparator` and `UnreadMessagesSeparator`.
 - Added `StreamUnsupportedAttachment` widget and `UnsupportedAttachmentBuilder` to display a
   placeholder for unrecognised attachment types.
+- Added `StreamFileTypeIconSize.md` and `StreamFileTypeIconSize.sm` variants.
 
 🐞 Fixed
 
@@ -21,6 +29,10 @@
 - Fixed RTL layout for the scroll-to-bottom button in `StreamMessageListView`.
 - Fixed RTL layout for the swipe-to-reply icon being cut off.
 - Fixed RTL layout for the voice recording lock button not being mirrored.
+- Fixed cancelling an edit losing the pre-edit draft when a remote update arrived
+  for the message being edited.
+- Fixed draft stream updates clobbering the composer while the user was editing
+  a message.
 
 ## 10.0.0-beta.13
 

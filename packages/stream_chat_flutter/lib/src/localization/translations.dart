@@ -42,7 +42,7 @@ abstract class Translations {
 
   /// The text for showing the attachments upload progress
   String attachmentsUploadProgressText({
-    required int remaining,
+    required int completed,
     required int total,
   });
 
@@ -669,9 +669,9 @@ class DefaultTranslations implements Translations {
 
   @override
   String attachmentsUploadProgressText({
-    required int remaining,
+    required int completed,
     required int total,
-  }) => 'Uploading $remaining/$total ...';
+  }) => 'Uploaded $completed of $total ...';
 
   @override
   String pinnedByUserText({

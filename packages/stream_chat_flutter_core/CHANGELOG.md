@@ -1,3 +1,14 @@
+## Upcoming
+
+🛑️ Breaking
+
+- Renamed `StreamMessageInputController.editingOriginalMessage` → `messageBeingEdited`.
+
+🐞 Fixed
+
+- Fixed `StreamMessageInputController.cancelEditMessage` not restoring the user's
+  pre-edit draft when a remote update arrived for the message being edited.
+
 ## 10.0.0-beta.13
 
 🛑️ Breaking

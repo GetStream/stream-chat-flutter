@@ -97,23 +97,27 @@ class GalleryAttachmentBuilder extends StreamAttachmentWidgetBuilder {
           }
 
           return StreamMessageAttachment(
-            style: StreamMessageAttachmentStyle.from(padding: EdgeInsets.zero),
+            style: .from(padding: .zero),
             child: InkWell(
               onTap: onTap,
               child: Stack(
                 fit: .expand,
+                alignment: .center,
                 children: [
                   StreamMediaAttachmentThumbnail(
                     media: attachment,
                     fit: BoxFit.cover,
                   ),
-                  Padding(
-                    padding: const EdgeInsets.all(8),
-                    child: StreamAttachmentUploadStateBuilder(
-                      message: message,
-                      attachment: attachment,
+                  if (attachment.type == .video && attachment.uploadState.isSuccess) ...[
+                    const Center(child: StreamVideoPlayIndicator(size: .lg)),
+                  ] else ...[
+                    Positioned.fill(
+                      child: StreamAttachmentUploadStateBuilder(
+                        message: message,
+                        attachment: attachment,
+                      ),
                     ),
-                  ),
+                  ],
                 ],
               ),
             ),

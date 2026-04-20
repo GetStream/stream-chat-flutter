@@ -29,17 +29,21 @@ class StreamMessageSendingStatus extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final hasNonUrlAttachments = message.attachments.any((it) => it.type != AttachmentType.urlPreview);
+    final attachments = message.attachments;
+
+    final hasNonUrlAttachments = attachments.any((it) => it.type != AttachmentType.urlPreview);
 
     if (hasNonUrlAttachments && message.state.isOutgoing) {
-      final totalAttachments = message.attachments.length;
-      final attachmentsToUpload = message.attachments.where((it) => !it.uploadState.isSuccess);
+      final attachments = message.attachments;
 
-      if (attachmentsToUpload.isNotEmpty) {
+      final totalAttachments = attachments.length;
+      final uploadedCount = attachments.where((it) => it.uploadState.isSuccess).length;
+
+      if (uploadedCount < totalAttachments) {
         return Text(
           context.translations.attachmentsUploadProgressText(
-            remaining: attachmentsToUpload.length,
             total: totalAttachments,
+            completed: uploadedCount,
           ),
         );
       }

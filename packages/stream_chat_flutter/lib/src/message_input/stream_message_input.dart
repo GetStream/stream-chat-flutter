@@ -366,7 +366,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
   late StreamChatThemeData _streamChatTheme;
   late StreamMessageInputThemeData _messageInputTheme;
 
-  bool get _isEditing => !_effectiveController.message.state.isInitial;
+  bool get _isEditing => _effectiveController.isEditing;
 
   late final _audioRecorderController = StreamAudioRecorderController();
 
@@ -478,6 +478,9 @@ class StreamMessageInputState extends State<StreamMessageInput>
   }
 
   void _onDraftUpdate(Draft? draft) {
+    // Don't let draft changes clobber an in-progress edit.
+    if (_isEditing) return;
+
     // If the draft is removed, reset the controller.
     if (draft == null) return _effectiveController.reset();
 
@@ -1133,22 +1136,17 @@ class StreamMessageInputState extends State<StreamMessageInput>
     required Channel channel,
   }) async {
     try {
+      // A message is considered fresh if it doesn't have a remoteCreatedAt.
+      final isFreshMessage = message.remoteCreatedAt == null;
+
       // Note: edited messages which are bounced back with an error needs to be
       // sent as new messages as the backend doesn't store them.
-      // Use message.state directly rather than _isEditing, because the
-      // controller is reset before this method is called.
-      final isEditing = !message.state.isInitial;
-      final resp = await switch (isEditing && !message.isBouncedWithError) {
+      final resp = await switch (!isFreshMessage && !message.isBouncedWithError) {
         true => channel.updateMessage(message),
         false => channel.sendMessage(message),
       };
 
-      // We don't want to start the cooldown if an already sent message is
-      // being edited.
-      if (!isEditing) {
-        _effectiveController.startCooldown(channel.getRemainingCooldown());
-      }
-
+      _effectiveController.startCooldown(channel.getRemainingCooldown());
       widget.onMessageSent?.call(resp.message);
     } catch (e, stk) {
       if (widget.onError != null) {

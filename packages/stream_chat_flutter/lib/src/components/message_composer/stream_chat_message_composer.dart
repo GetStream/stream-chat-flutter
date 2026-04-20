@@ -349,7 +349,7 @@ class DefaultStreamChatMessageComposer extends StatelessWidget {
                 placeholder: props.placeholder,
                 focusNode: props.focusNode,
                 command: inputController.message.command?.toUpperCase(),
-                onDismissCommand: inputController.clear,
+                onDismissCommand: inputController.clearCommand,
                 textInputAction: props.textInputAction,
                 keyboardType: props.keyboardType,
                 textCapitalization: props.textCapitalization,

@@ -49,9 +49,9 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
 
   @override
   String attachmentsUploadProgressText({
-    required int remaining,
+    required int completed,
     required int total,
-  }) => 'अपलोडिंग $remaining/$total ...';
+  }) => '$total में से $completed अपलोड किए ...';
 
   @override
   String pinnedByUserText({

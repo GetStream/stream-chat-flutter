@@ -66,6 +66,8 @@ export 'package:stream_core_flutter/stream_core_flutter.dart'
         StreamSwitchTheme,
         StreamSwitchThemeData,
         StreamUnicodeEmoji,
+        StreamVideoPlayIndicator,
+        StreamVideoPlayIndicatorSize,
         streamSupportedEmojis;
 
 export 'src/ai_assistant/ai_typing_indicator_view.dart';
@@ -116,7 +118,6 @@ export 'src/icons/stream_svg_icon.dart';
 export 'src/indicators/sending_indicator.dart';
 export 'src/indicators/typing_indicator.dart';
 export 'src/indicators/unread_indicator.dart';
-export 'src/indicators/upload_progress_indicator.dart';
 export 'src/keyboard_shortcuts/keyboard_shortcut_runner.dart';
 export 'src/localization/stream_chat_localizations.dart';
 export 'src/localization/translations.dart' show DefaultTranslations;

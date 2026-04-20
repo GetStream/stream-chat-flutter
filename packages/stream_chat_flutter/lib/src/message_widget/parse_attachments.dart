@@ -107,9 +107,10 @@ class ParseAttachments extends core.NullableStatelessWidget {
   ) async {
     // If the current attachment is a url preview attachment, open the url
     // in the browser.
+    final isFile = attachment.type == AttachmentType.file;
     final isUrlPreview = attachment.type == AttachmentType.urlPreview;
-    if (isUrlPreview) {
-      final url = attachment.ogScrapeUrl;
+    if (isFile || isUrlPreview) {
+      final url = attachment.assetUrl ?? attachment.ogScrapeUrl;
       if (url == null) return;
 
       if (onLinkTap case final onTap?) return onTap(url);
