@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/attachment/thumbnail/image_attachment_thumbnail.dart';
 import 'package:stream_chat_flutter/src/attachment/thumbnail/thumbnail_error.dart';
 import 'package:stream_chat_flutter/src/attachment/thumbnail/video_attachment_thumbnail.dart';
-import 'package:stream_chat_flutter/src/utils/helpers.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:stream_core_flutter/stream_core_flutter.dart';
 
