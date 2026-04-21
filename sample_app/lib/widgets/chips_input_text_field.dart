@@ -1,7 +1,6 @@
 // ignore_for_file: deprecated_member_use
 
 import 'package:flutter/material.dart';
-import 'package:sample_app/utils/localizations.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 typedef ChipBuilder<T> = Widget Function(BuildContext context, T chip);
@@ -76,7 +75,7 @@ class ChipInputTextFieldState<T> extends State<ChipsInputTextField<T>> {
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 4),
                 child: Text(
-                  '${AppLocalizations.of(context).to.toUpperCase()}:',
+                  'TO:',
                   style: StreamChatTheme.of(context).textTheme.footnote.copyWith(
                     color: StreamChatTheme.of(context).colorTheme.textHighEmphasis.withOpacity(.5),
                   ),
@@ -123,12 +122,12 @@ class ChipInputTextFieldState<T> extends State<ChipsInputTextField<T>> {
                 child: IconButton(
                   icon: _chips.isEmpty
                       ? Icon(
-                          context.streamIcons.user20,
+                          context.streamIcons.user,
                           color: StreamChatTheme.of(context).colorTheme.textHighEmphasis.withOpacity(0.5),
                           size: 24,
                         )
                       : Icon(
-                          context.streamIcons.userAdd20,
+                          context.streamIcons.userAdd,
                           color: StreamChatTheme.of(context).colorTheme.textHighEmphasis.withOpacity(0.5),
                           size: 24,
                         ),

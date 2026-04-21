@@ -224,11 +224,11 @@ void main() {
       await tester.pumpAndSettle();
     });
 
-    expect(find.byType(FloatingActionButton), findsOneWidget);
+    expect(find.byType(StreamButton), findsOneWidget);
 
-    await tester.tap(find.byType(FloatingActionButton));
+    await tester.tap(find.byType(StreamButton));
     await tester.pumpAndSettle();
 
-    expect(find.byType(FloatingActionButton), findsNothing);
+    expect(find.byType(StreamButton), findsNothing);
   });
 }

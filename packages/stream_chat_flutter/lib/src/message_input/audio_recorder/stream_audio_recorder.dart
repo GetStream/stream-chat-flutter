@@ -172,7 +172,7 @@ class StreamAudioRecorderButton extends StatelessWidget {
         state: recordState,
         button: RecordButton(
           onPressed: () {}, // Allows showing ripple effect on tap.
-          icon: Icon(context.streamIcons.voice20),
+          icon: Icon(context.streamIcons.voice),
         ),
         builder: (context, state, recordButton) => switch (state) {
           // Show only the record button if the recording is not in progress.
@@ -448,17 +448,17 @@ class RecordStateLockedRecordingContent extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               StreamMessageInputIconButton(
-                icon: Icon(context.streamIcons.delete20),
+                icon: Icon(context.streamIcons.delete),
                 color: theme.colorTheme.accentPrimary,
                 onPressed: onRecordCancel,
               ),
               StreamMessageInputIconButton(
-                icon: Icon(context.streamIcons.stopFill20),
+                icon: Icon(context.streamIcons.stopFill),
                 color: theme.colorTheme.accentError,
                 onPressed: onRecordStop,
               ),
               StreamMessageInputIconButton(
-                icon: Icon(context.streamIcons.checkmark20),
+                icon: Icon(context.streamIcons.checkmark),
                 color: theme.colorTheme.accentPrimary,
                 onPressed: onRecordEnd,
               ),
@@ -606,12 +606,12 @@ class _RecordStateStoppedContentState extends State<RecordStateStoppedContent> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               StreamMessageInputIconButton(
-                icon: Icon(context.streamIcons.delete20),
+                icon: Icon(context.streamIcons.delete),
                 color: theme.colorTheme.accentPrimary,
                 onPressed: widget.onRecordCancel,
               ),
               StreamMessageInputIconButton(
-                icon: Icon(context.streamIcons.checkmark20),
+                icon: Icon(context.streamIcons.checkmark),
                 color: theme.colorTheme.accentPrimary,
                 onPressed: widget.onRecordFinish,
               ),
@@ -658,13 +658,13 @@ class SwipeToLockButton extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           Icon(
-            isLocked ? streamIcons.lock20 : streamIcons.unlock20,
+            isLocked ? streamIcons.lock : streamIcons.unlock,
             size: 20,
             color: colorScheme.textPrimary,
           ),
           if (!isLocked) ...[
             Icon(
-              streamIcons.chevronUp20,
+              streamIcons.chevronUp,
               size: 20,
               color: colorScheme.textPrimary,
             ),
@@ -734,9 +734,9 @@ class PlaybackControlButton extends StatelessWidget {
             );
           },
         ),
-        TrackState.idle => Icon(context.streamIcons.playFill20),
-        TrackState.paused => Icon(context.streamIcons.playFill20),
-        TrackState.playing => Icon(context.streamIcons.pauseFill20),
+        TrackState.idle => Icon(context.streamIcons.playFill),
+        TrackState.paused => Icon(context.streamIcons.playFill),
+        TrackState.playing => Icon(context.streamIcons.pauseFill),
       },
     );
   }
@@ -765,7 +765,7 @@ class PlaybackTimerIndicator extends StatelessWidget {
     return Row(
       children: [
         Icon(
-          context.streamIcons.voice20,
+          context.streamIcons.voice,
           size: kDefaultMessageInputIconSize,
           color: switch (duration.inSeconds) {
             > 0 => theme.colorTheme.accentError,
@@ -809,11 +809,9 @@ class PlaybackTimerText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final remaining = duration - position;
     return Text(
-      switch (position.inMilliseconds > 0) {
-        true => position.toMinutesAndSeconds(),
-        false => duration.toMinutesAndSeconds(),
-      },
+      remaining.toMinutesAndSeconds(),
       style: style?.copyWith(
         // Use mono space for each num character.
         fontFeatures: [const FontFeature.tabularFigures()],
@@ -856,7 +854,7 @@ class SlideToCancelIndicator extends StatelessWidget {
           ),
           const SizedBox(width: 8),
           Icon(
-            context.streamIcons.chevronLeft20,
+            context.streamIcons.chevronLeft,
             color: theme.colorTheme.textLowEmphasis,
           ),
         ],

@@ -142,7 +142,7 @@ class StreamUserListTile extends StatelessWidget {
     final selectedWidget =
         this.selectedWidget ??
         Icon(
-          context.streamIcons.checkmark20,
+          context.streamIcons.checkmark,
           color: chatThemeData.colorTheme.accentPrimary,
         );
 

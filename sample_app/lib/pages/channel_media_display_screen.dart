@@ -3,16 +3,11 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sample_app/routes/routes.dart';
-import 'package:sample_app/utils/localizations.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:video_player/video_player.dart';
 
 class ChannelMediaDisplayScreen extends StatefulWidget {
-  const ChannelMediaDisplayScreen({
-    super.key,
-    required this.messageTheme,
-  });
-  final StreamMessageThemeData messageTheme;
+  const ChannelMediaDisplayScreen({super.key});
 
   @override
   State<ChannelMediaDisplayScreen> createState() => _ChannelMediaDisplayScreenState();
@@ -45,7 +40,7 @@ class _ChannelMediaDisplayScreenState extends State<ChannelMediaDisplayScreen> {
         elevation: 1,
         centerTitle: true,
         title: Text(
-          AppLocalizations.of(context).photosAndVideos,
+          'Photos & Videos',
           style: TextStyle(
             color: StreamChatTheme.of(context).colorTheme.textHighEmphasis,
             fontSize: 16,
@@ -65,13 +60,13 @@ class _ChannelMediaDisplayScreenState extends State<ChannelMediaDisplayScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(
-                        context.streamIcons.image32,
+                        context.streamIcons.imageLarge,
                         size: 136,
                         color: StreamChatTheme.of(context).colorTheme.disabled,
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        AppLocalizations.of(context).noMedia,
+                        'No Media',
                         style: TextStyle(
                           fontSize: 14,
                           color: StreamChatTheme.of(context).colorTheme.textHighEmphasis,
@@ -79,7 +74,7 @@ class _ChannelMediaDisplayScreenState extends State<ChannelMediaDisplayScreen> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        AppLocalizations.of(context).photosOrVideosWillAppearHere,
+                        'Photos or videos sent in this chat will \nappear here',
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 14,

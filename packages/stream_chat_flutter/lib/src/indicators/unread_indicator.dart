@@ -5,11 +5,24 @@ import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 /// {@template streamUnreadIndicator}
 /// Shows different unread counts of the user.
+///
+/// When [child] is provided, the badge is overlaid on top of the child widget.
+///
+/// ```dart
+/// // Standalone badge (no child).
+/// const StreamUnreadIndicator()
+///
+/// // Badge overlaid on an icon.
+/// StreamUnreadIndicator(child: Icon(Icons.chat_bubble_outline))
+/// ```
 /// {@endtemplate}
 class StreamUnreadIndicator extends StatelessWidget {
   /// Displays the total unread count.
   const StreamUnreadIndicator({
     super.key,
+    this.child,
+    this.alignment,
+    this.offset,
   }) : _unreadType = const _TotalUnreadCount();
 
   /// Displays the unreadChannel count.
@@ -18,6 +31,9 @@ class StreamUnreadIndicator extends StatelessWidget {
   StreamUnreadIndicator.channels({
     super.key,
     String? cid,
+    this.child,
+    this.alignment,
+    this.offset,
   }) : _unreadType = _UnreadChannels(cid: cid);
 
   /// Displays the unreadThreads count.
@@ -26,9 +42,34 @@ class StreamUnreadIndicator extends StatelessWidget {
   StreamUnreadIndicator.threads({
     super.key,
     String? id,
+    this.child,
+    this.alignment,
+    this.offset,
   }) : _unreadType = _UnreadThreads(id: id);
 
   final _UnreadTypes _unreadType;
+
+  /// Optional child widget to overlay the badge on.
+  ///
+  /// When non-null, the badge is positioned on top of this widget.
+  /// When null, only the badge itself is rendered (or nothing when
+  /// the count is zero).
+  final Widget? child;
+
+  /// The alignment of the badge relative to the [child].
+  ///
+  /// Only used when [child] is non-null.
+  ///
+  /// Defaults to [AlignmentDirectional.topEnd].
+  final AlignmentGeometry? alignment;
+
+  /// Additional pixel offset applied after [alignment].
+  ///
+  /// Only used when [child] is non-null.
+  ///
+  /// Defaults to `Offset(8, -6)` for [TextDirection.ltr] or
+  /// `Offset(-8, -6)` for [TextDirection.rtl].
+  final Offset? offset;
 
   @override
   Widget build(BuildContext context) {
@@ -58,22 +99,29 @@ class StreamUnreadIndicator extends StatelessWidget {
       },
     };
 
-    return IgnorePointer(
-      child: BetterStreamBuilder<int>(
-        stream: stream,
-        initialData: initialData,
-        builder: (context, unreadCount) {
-          if (unreadCount == 0) return const Empty();
+    return BetterStreamBuilder<int>(
+      stream: stream,
+      initialData: initialData,
+      builder: (context, unreadCount) {
+        if (child == null && unreadCount == 0) return const Empty();
+        if (child case final child? when unreadCount == 0) return child;
 
-          return StreamBadgeNotification(
-            size: StreamBadgeNotificationSize.xs,
-            label: switch (unreadCount) {
-              > 99 => '99+',
-              _ => '$unreadCount',
-            },
-          );
-        },
-      ),
+        final textDirection = Directionality.maybeOf(context);
+
+        final effectiveAlignment = alignment ?? AlignmentDirectional.topEnd;
+        final effectiveOffset = offset ?? const Offset(8, -6).directional(textDirection);
+
+        return StreamBadgeNotification(
+          size: StreamBadgeNotificationSize.xs,
+          label: switch (unreadCount) {
+            > 99 => '99+',
+            _ => '$unreadCount',
+          },
+          alignment: effectiveAlignment,
+          offset: effectiveOffset,
+          child: child,
+        );
+      },
     );
   }
 }

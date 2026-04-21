@@ -174,7 +174,7 @@ class StreamChannelListHeader extends StatelessWidget implements PreferredSizeWi
                         };
 
                         return StreamButton.icon(
-                          icon: context.streamIcons.plus20,
+                          icon: context.streamIcons.plus,
                           onTap: callback,
                         );
                       },

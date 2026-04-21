@@ -54,7 +54,7 @@ class ModeratedMessageActionsModal extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       backgroundColor: colorTheme.barsBg,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      icon: Icon(context.streamIcons.flag20),
+      icon: Icon(context.streamIcons.flag),
       iconColor: colorTheme.accentPrimary,
       title: Text(context.translations.moderationReviewModalTitle),
       titleTextStyle: textTheme.headline.copyWith(

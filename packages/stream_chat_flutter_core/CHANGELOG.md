@@ -1,3 +1,9 @@
+## 10.0.0-beta.13
+
+🛑️ Breaking
+- SDK Redesign Changes. For more details, please refer to the [migration guide](https://github.com/GetStream/stream-chat-flutter/blob/210ff93f955be3f85c62e860309bd9aa240a5446/migrations).
+  The SDK redesign introduces a fresher default UI, but also better APIs for customization of the components.
+
 ## 10.0.0-beta.12
 
 - Included the changes from version [`9.23.0`](https://pub.dev/packages/stream_chat_flutter_core/changelog).

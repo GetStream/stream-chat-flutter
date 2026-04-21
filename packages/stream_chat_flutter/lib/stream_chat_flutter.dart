@@ -6,7 +6,10 @@ export 'package:stream_core_flutter/stream_core_flutter.dart'
         StreamAvatarGroupSize,
         StreamAvatarSize,
         StreamAvatarStackSize,
+        StreamButton,
         StreamButtonThemeStyle,
+        StreamCheckbox,
+        StreamCheckboxSize,
         StreamCheckboxStyle,
         StreamProgressBarStyle,
         StreamPlaybackSpeedToggleStyle,
@@ -48,6 +51,20 @@ export 'package:stream_core_flutter/stream_core_flutter.dart'
         StreamReactionPickerThemeData,
         StreamReactionsPosition,
         StreamReactionsType,
+        StreamListTile,
+        StreamListTileContainer,
+        StreamSwitch,
+        StreamStepper,
+        StreamStepperProps,
+        StreamStepperStyle,
+        StreamStepperTheme,
+        StreamStepperThemeData,
+        StreamTextInputStyle,
+        StreamTextInputTheme,
+        StreamTextInputThemeData,
+        StreamSwitchStyle,
+        StreamSwitchTheme,
+        StreamSwitchThemeData,
         StreamUnicodeEmoji,
         streamSupportedEmojis;
 
@@ -73,7 +90,6 @@ export 'src/attachment_actions_modal/attachment_actions_modal.dart';
 export 'src/autocomplete/stream_autocomplete.dart';
 export 'src/avatars/gradient_avatar.dart';
 export 'src/bottom_sheets/attachment_modal_sheet.dart';
-export 'src/bottom_sheets/edit_message_sheet.dart';
 export 'src/bottom_sheets/error_alert_sheet.dart';
 export 'src/bottom_sheets/stream_channel_info_bottom_sheet.dart';
 export 'src/channel/channel_header.dart';
@@ -116,10 +132,8 @@ export 'src/message_input/audio_recorder/audio_recorder_state.dart';
 export 'src/message_input/audio_recorder/stream_audio_recorder.dart';
 export 'src/message_input/countdown_button.dart';
 export 'src/message_input/enums.dart';
-export 'src/message_input/quoted_message_widget.dart';
 export 'src/message_input/stream_message_composer_attachment_list.dart';
 export 'src/message_input/stream_message_input.dart';
-export 'src/message_input/stream_message_send_button.dart';
 export 'src/message_input/stream_message_text_field.dart';
 export 'src/message_list_view/message_details.dart';
 export 'src/message_list_view/message_list_view.dart';
@@ -153,19 +167,14 @@ export 'src/poll/stream_poll_comments_dialog.dart';
 export 'src/poll/stream_poll_option_votes_dialog.dart';
 export 'src/poll/stream_poll_options_dialog.dart';
 export 'src/poll/stream_poll_results_dialog.dart';
-export 'src/poll/stream_poll_text_field.dart';
 export 'src/reactions/detail/reaction_detail_sheet.dart';
 export 'src/reactions/picker/reaction_picker.dart';
-export 'src/reactions/user_reactions.dart';
-export 'src/scroll_view/channel_scroll_view/stream_channel_grid_tile.dart';
-export 'src/scroll_view/channel_scroll_view/stream_channel_grid_view.dart';
 export 'src/scroll_view/channel_scroll_view/stream_channel_list_item.dart';
 export 'src/scroll_view/channel_scroll_view/stream_channel_list_view.dart';
 export 'src/scroll_view/draft_scroll_view/stream_draft_list_tile.dart';
 export 'src/scroll_view/draft_scroll_view/stream_draft_list_view.dart';
 export 'src/scroll_view/member_scroll_view/stream_member_grid_view.dart';
 export 'src/scroll_view/member_scroll_view/stream_member_list_view.dart';
-export 'src/scroll_view/message_search_scroll_view/stream_message_search_grid_view.dart';
 export 'src/scroll_view/message_search_scroll_view/stream_message_search_list_tile.dart';
 export 'src/scroll_view/message_search_scroll_view/stream_message_search_list_view.dart';
 export 'src/scroll_view/photo_gallery/stream_photo_gallery.dart';

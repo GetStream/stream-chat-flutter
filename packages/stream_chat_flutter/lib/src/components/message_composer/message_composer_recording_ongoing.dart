@@ -30,7 +30,7 @@ class StreamMessageComposerRecordingOngoing extends StatelessWidget {
             width: 48,
             alignment: Alignment.center,
             child: Icon(
-              icons.voice20,
+              icons.voice,
               color: context.streamColorScheme.accentError,
               size: 20,
             ),
@@ -57,7 +57,7 @@ class StreamMessageComposerRecordingOngoing extends StatelessWidget {
             ),
           ),
           SizedBox(width: context.streamSpacing.xxs),
-          Icon(icons.chevronLeft20, color: colorScheme.textTertiary, size: 20),
+          Icon(icons.chevronLeft, color: colorScheme.textTertiary, size: 20),
         ],
       ),
     );

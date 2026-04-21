@@ -1,16 +1,11 @@
 // ignore_for_file: deprecated_member_use
 
 import 'package:flutter/material.dart';
-import 'package:sample_app/utils/localizations.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:video_player/video_player.dart';
 
 class ChannelFileDisplayScreen extends StatefulWidget {
-  const ChannelFileDisplayScreen({
-    super.key,
-    required this.messageTheme,
-  });
-  final StreamMessageThemeData messageTheme;
+  const ChannelFileDisplayScreen({super.key});
 
   @override
   State<ChannelFileDisplayScreen> createState() => _ChannelFileDisplayScreenState();
@@ -43,7 +38,7 @@ class _ChannelFileDisplayScreenState extends State<ChannelFileDisplayScreen> {
         elevation: 1,
         centerTitle: true,
         title: Text(
-          AppLocalizations.of(context).files,
+          'Files',
           style: TextStyle(
             color: StreamChatTheme.of(context).colorTheme.textHighEmphasis,
             fontSize: 16,
@@ -68,13 +63,13 @@ class _ChannelFileDisplayScreenState extends State<ChannelFileDisplayScreen> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Icon(
-                            context.streamIcons.file32,
+                            context.streamIcons.file,
                             size: 136,
                             color: StreamChatTheme.of(context).colorTheme.disabled,
                           ),
                           const SizedBox(height: 16),
                           Text(
-                            AppLocalizations.of(context).noFiles,
+                            'No Files',
                             style: TextStyle(
                               fontSize: 14,
                               color: StreamChatTheme.of(context).colorTheme.textHighEmphasis,
@@ -82,7 +77,7 @@ class _ChannelFileDisplayScreenState extends State<ChannelFileDisplayScreen> {
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            AppLocalizations.of(context).filesAppearHere,
+                            'Files sent in this chat will appear here',
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               fontSize: 14,

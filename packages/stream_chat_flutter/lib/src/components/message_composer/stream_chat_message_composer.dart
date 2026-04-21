@@ -146,12 +146,16 @@ class _StreamChatMessageComposerState extends State<StreamChatMessageComposer> {
         };
 
         final streamSpacing = context.streamSpacing;
+        final textDirection = Directionality.maybeOf(context);
+
+        const targetAlignment = AlignmentDirectional.topEnd;
+        const followerAlignment = AlignmentDirectional.bottomEnd;
 
         return PortalTarget(
           anchor: Aligned(
-            offset: Offset(-streamSpacing.md, -streamSpacing.md),
-            target: Alignment.topRight,
-            follower: Alignment.bottomRight,
+            target: targetAlignment.resolve(textDirection),
+            follower: followerAlignment.resolve(textDirection),
+            offset: Offset(-streamSpacing.md, -streamSpacing.md).directional(textDirection),
           ),
           visible: state is RecordStateRecording,
           portalFollower: SwipeToLockButton(isLocked: state is RecordStateRecordingLocked),

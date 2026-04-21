@@ -84,15 +84,19 @@ command:
       share_plus: ">=11.0.0 <13.0.0"
       shimmer: ^3.0.0
       sqlite3_flutter_libs: ^0.5.26
-      stream_chat: ^10.0.0-beta.12
-      stream_chat_flutter: ^10.0.0-beta.12
-      stream_chat_flutter_core: ^10.0.0-beta.12
-      stream_chat_localizations: ^10.0.0-beta.12
-      stream_chat_persistence: ^10.0.0-beta.12
+      stream_chat: ^10.0.0-beta.13
+      stream_chat_flutter: ^10.0.0-beta.13
+      stream_chat_flutter_core: ^10.0.0-beta.13
+      stream_chat_localizations: ^10.0.0-beta.13
+      stream_chat_persistence: ^10.0.0-beta.13
       streaming_shared_preferences: ^2.0.0
       svg_icon_widget: ^0.0.1
       # TODO: Replace with hosted version before merging PR
-      stream_core_flutter: ^0.1.0
+      stream_core_flutter:
+        git:
+          url: https://github.com/GetStream/stream-core-flutter.git
+          ref: 953e5aaacd9deef43939173299bb6d6f5ac47513
+          path: packages/stream_core_flutter
       synchronized: ^3.1.0+1
       thumblr: ^0.0.4
       url_launcher: ^6.3.0

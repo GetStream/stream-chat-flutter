@@ -618,6 +618,9 @@ abstract class Translations {
 
   /// The label for "Open files"
   String get openFilesLabel;
+
+  /// The label for unsupported attachment types
+  String get unsupportedAttachmentLabel;
 }
 
 /// Default implementation of Translation strings for the stream chat widgets
@@ -1350,4 +1353,7 @@ Attachment limit exceeded: it's not possible to add more than $limit attachments
 
   @override
   String get openFilesLabel => 'Open files';
+
+  @override
+  String get unsupportedAttachmentLabel => 'Unsupported Attachment';
 }

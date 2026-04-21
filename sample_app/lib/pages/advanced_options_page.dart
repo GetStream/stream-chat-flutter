@@ -6,7 +6,6 @@ import 'package:sample_app/app.dart';
 import 'package:sample_app/pages/choose_user_page.dart';
 import 'package:sample_app/routes/routes.dart';
 import 'package:sample_app/state/init_data.dart';
-import 'package:sample_app/utils/localizations.dart';
 import 'package:sample_app/widgets/stream_version.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -104,7 +103,7 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
         ]);
       } catch (e) {
         debugPrint(e.toString());
-        var errorText = AppLocalizations.of(context).errorConnecting;
+        var errorText = 'Error connecting, retry';
         if (e is Map) {
           errorText = e['message'] ?? errorText;
         }
@@ -131,13 +130,13 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
         elevation: 1,
         centerTitle: true,
         title: Text(
-          AppLocalizations.of(context).advancedOptions,
+          'Custom settings',
           style: StreamChatTheme.of(
             context,
           ).textTheme.headlineBold.copyWith(color: StreamChatTheme.of(context).colorTheme.textHighEmphasis),
         ),
         leading: IconButton(
-          icon: Icon(context.streamIcons.chevronLeft20),
+          icon: Icon(context.streamIcons.chevronLeft),
           color: StreamChatTheme.of(context).colorTheme.textHighEmphasis,
           onPressed: () {
             Navigator.pop(context);
@@ -165,7 +164,7 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                     validator: (value) {
                       if (value!.isEmpty) {
                         setState(() {
-                          _apiKeyError = AppLocalizations.of(context).apiKeyError.toUpperCase();
+                          _apiKeyError = 'Please enter the Chat API Key'.toUpperCase();
                         });
                         return _apiKeyError;
                       }
@@ -191,8 +190,8 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                       fillColor: StreamChatTheme.of(context).colorTheme.inputBg,
                       filled: true,
                       labelText: _apiKeyError != null
-                          ? '${AppLocalizations.of(context).chatApiKey.toUpperCase()}: $_apiKeyError'
-                          : AppLocalizations.of(context).chatApiKey,
+                          ? '${'Chat API Key'.toUpperCase()}: $_apiKeyError'
+                          : 'Chat API Key',
                     ),
                     textInputAction: TextInputAction.next,
                   ),
@@ -209,7 +208,7 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                     validator: (value) {
                       if (value!.isEmpty) {
                         setState(() {
-                          _userIdError = AppLocalizations.of(context).userIdError.toUpperCase();
+                          _userIdError = 'Please enter the User ID'.toUpperCase();
                         });
                         return _userIdError;
                       }
@@ -235,9 +234,7 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                       ),
                       fillColor: StreamChatTheme.of(context).colorTheme.inputBg,
                       filled: true,
-                      labelText: _userIdError != null
-                          ? '${AppLocalizations.of(context).userId.toUpperCase()}: $_userIdError'
-                          : AppLocalizations.of(context).userId,
+                      labelText: _userIdError != null ? '${'User ID'.toUpperCase()}: $_userIdError' : 'User ID',
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -253,7 +250,7 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                     validator: (value) {
                       if (value!.isEmpty) {
                         setState(() {
-                          _userTokenError = AppLocalizations.of(context).userTokenError.toUpperCase();
+                          _userTokenError = 'Please enter the user token'.toUpperCase();
                         });
                         return _userTokenError;
                       }
@@ -280,8 +277,8 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                       fillColor: StreamChatTheme.of(context).colorTheme.inputBg,
                       filled: true,
                       labelText: _userTokenError != null
-                          ? '${AppLocalizations.of(context).userToken.toUpperCase()}: $_userTokenError'
-                          : AppLocalizations.of(context).userToken,
+                          ? '${'User Token'.toUpperCase()}: $_userTokenError'
+                          : 'User Token',
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -300,7 +297,7 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                       ),
                       fillColor: StreamChatTheme.of(context).colorTheme.inputBg,
                       filled: true,
-                      labelText: AppLocalizations.of(context).usernameOptional,
+                      labelText: 'Username (optional)',
                     ),
                   ),
                   const Spacer(),
@@ -321,7 +318,7 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                     ),
                     onPressed: _login,
                     child: Text(
-                      AppLocalizations.of(context).login,
+                      'Login',
                       style: TextStyle(
                         fontSize: 16,
                         color: Theme.of(context).brightness != Brightness.light

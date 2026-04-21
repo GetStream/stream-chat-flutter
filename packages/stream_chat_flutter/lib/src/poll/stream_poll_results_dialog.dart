@@ -287,7 +287,7 @@ class PollVotesByOptionItem extends StatelessWidget {
               const SizedBox(width: 8),
               if (isOptionWinner) ...[
                 Icon(
-                  context.streamIcons.trophy20,
+                  context.streamIcons.trophy,
                   color: theme.pollOptionsWinnerVoteCountTextStyle?.color,
                 ),
                 const SizedBox(width: 8),

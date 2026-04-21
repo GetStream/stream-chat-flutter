@@ -729,4 +729,7 @@ Não é possível adicionar mais de $limit arquivos de uma vez
 
   @override
   String get openFilesLabel => 'Abrir arquivos';
+
+  @override
+  String get unsupportedAttachmentLabel => 'Anexo não suportado';
 }

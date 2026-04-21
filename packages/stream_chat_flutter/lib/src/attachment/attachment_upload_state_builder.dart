@@ -125,7 +125,7 @@ class _PreparingState extends StatelessWidget {
           alignment: Alignment.topRight,
           child: _IconButton(
             icon: Icon(
-              context.streamIcons.xmark20,
+              context.streamIcons.xmark,
               color: StreamChatTheme.of(context).colorTheme.barsBg,
             ),
             onPressed: () => channel.cancelAttachmentUpload(attachmentId),
@@ -165,7 +165,7 @@ class _InProgressState extends StatelessWidget {
           alignment: Alignment.topRight,
           child: _IconButton(
             icon: Icon(
-              context.streamIcons.xmark20,
+              context.streamIcons.xmark,
               color: StreamChatTheme.of(context).colorTheme.barsBg,
             ),
             onPressed: () => channel.cancelAttachmentUpload(attachmentId),
@@ -204,7 +204,7 @@ class _FailedState extends StatelessWidget {
       children: [
         _IconButton(
           icon: Icon(
-            context.streamIcons.retry20,
+            context.streamIcons.retry,
             color: theme.colorTheme.barsBg,
           ),
           onPressed: () {
@@ -248,7 +248,7 @@ class _SuccessState extends StatelessWidget {
         maxRadius: 10,
         child: Icon(
           size: 16,
-          context.streamIcons.checkmark16,
+          context.streamIcons.checkmark,
           color: StreamChatTheme.of(context).colorTheme.barsBg,
         ),
       ),

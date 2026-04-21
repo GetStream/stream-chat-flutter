@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/poll/stream_poll_text_field.dart';
+import 'package:flutter/services.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 /// {@template showPollAddCommentDialog}
 /// Shows a dialog that allows the user to add a poll comment.
@@ -94,18 +95,12 @@ class _PollAddCommentDialogState extends State<PollAddCommentDialog> {
       contentPadding: const EdgeInsets.all(16),
       actionsPadding: const EdgeInsets.all(8),
       backgroundColor: theme.colorTheme.appBg,
-      content: StreamPollTextField(
-        autoFocus: true,
+      content: StreamTextInput(
+        autofocus: true,
         initialValue: _comment,
         hintText: context.translations.enterYourCommentLabel,
-        contentPadding: const EdgeInsets.symmetric(
-          vertical: 12,
-          horizontal: 16,
-        ),
-        // TODO: Fix when working on poll create screen
-        // style: pollInteractorTheme.pollActionDialogTextFieldStyle,
-        // fillColor: pollInteractorTheme.pollActionDialogTextFieldFillColor,
-        // borderRadius: pollInteractorTheme.pollActionDialogTextFieldBorderRadius,
+        inputFormatters: [FilteringTextInputFormatter.deny(RegExp(r'^\s'))],
+        style: const .new(contentPadding: .symmetric(vertical: 12, horizontal: 16)),
         onChanged: (value) => setState(() => _comment = value),
       ),
     );

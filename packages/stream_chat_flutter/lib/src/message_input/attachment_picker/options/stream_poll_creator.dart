@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 /// Widget used to create a poll.
 class StreamPollCreator extends StatelessWidget {
@@ -46,7 +45,7 @@ class StreamPollCreator extends StatelessWidget {
             children: [
               Icon(
                 size: 32,
-                context.streamIcons.poll32,
+                context.streamIcons.pollLarge,
                 color: colorScheme.textTertiary,
               ),
               SizedBox(height: spacing.xs),
@@ -72,7 +71,7 @@ class StreamPollCreator extends StatelessWidget {
             children: [
               Icon(
                 size: 32,
-                context.streamIcons.poll32,
+                context.streamIcons.pollLarge,
                 color: colorScheme.textTertiary,
               ),
               SizedBox(height: spacing.md),

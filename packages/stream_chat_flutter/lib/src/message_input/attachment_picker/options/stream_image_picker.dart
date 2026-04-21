@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 /// Widget used to pick images from the device.
 class StreamImagePicker extends StatelessWidget {
@@ -64,7 +63,7 @@ class StreamImagePicker extends StatelessWidget {
             children: [
               Icon(
                 size: 32,
-                context.streamIcons.camera32,
+                context.streamIcons.cameraLarge,
                 color: colorScheme.textTertiary,
               ),
               SizedBox(height: spacing.xs),
@@ -90,7 +89,7 @@ class StreamImagePicker extends StatelessWidget {
             children: [
               Icon(
                 size: 32,
-                context.streamIcons.camera32,
+                context.streamIcons.cameraLarge,
                 color: colorScheme.textTertiary,
               ),
               SizedBox(height: spacing.xs),

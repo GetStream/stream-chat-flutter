@@ -728,4 +728,7 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
 
   @override
   String get openFilesLabel => 'Obrir fitxers';
+
+  @override
+  String get unsupportedAttachmentLabel => 'Adjunt no compatible';
 }

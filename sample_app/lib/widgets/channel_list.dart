@@ -7,7 +7,6 @@ import 'package:go_router/go_router.dart';
 import 'package:sample_app/pages/chat_info_screen.dart';
 import 'package:sample_app/pages/group_info_screen.dart';
 import 'package:sample_app/routes/routes.dart';
-import 'package:sample_app/utils/localizations.dart';
 import 'package:sample_app/widgets/search_text_field.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -96,7 +95,7 @@ class _ChannelList extends State<ChannelList> {
               child: SearchTextField(
                 controller: _controller,
                 showCloseButton: _isSearchActive,
-                hintText: AppLocalizations.of(context).search,
+                hintText: 'Search',
               ),
             ),
           ],
@@ -152,15 +151,12 @@ class _ChannelListDefault extends StatelessWidget {
                                       channel: channel,
                                       child: isOneToOne
                                           ? ChatInfoScreen(
-                                              messageTheme: chatTheme.ownMessageTheme,
                                               user: channel.state!.members
                                                   .where((m) => m.userId != channel.client.state.currentUser!.id)
                                                   .first
                                                   .user,
                                             )
-                                          : GroupInfoScreen(
-                                              messageTheme: chatTheme.ownMessageTheme,
-                                            ),
+                                          : const GroupInfoScreen(),
                                     );
                                   },
                                 ),
@@ -184,7 +180,7 @@ class _ChannelListDefault extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Icon(
-                              isMuted ? context.streamIcons.audio20 : context.streamIcons.mute20,
+                              isMuted ? context.streamIcons.audio : context.streamIcons.mute,
                               size: 20,
                               color: Colors.white,
                             ),
@@ -213,7 +209,7 @@ class _ChannelListDefault extends StatelessWidget {
                 padding: const EdgeInsets.all(8),
                 child: StreamScrollViewEmptyWidget(
                   emptyIcon: Icon(
-                    context.streamIcons.messageBubble32,
+                    context.streamIcons.messageBubbleLarge,
                     size: 148,
                     color: StreamChatTheme.of(context).colorTheme.disabled,
                   ),
@@ -262,13 +258,13 @@ class _ChannelListSearch extends StatelessWidget {
                       Padding(
                         padding: const EdgeInsets.all(24),
                         child: Icon(
-                          context.streamIcons.search32,
+                          context.streamIcons.search,
                           size: 96,
                           color: Colors.grey,
                         ),
                       ),
-                      Text(
-                        AppLocalizations.of(context).noResults,
+                      const Text(
+                        'No results...',
                       ),
                     ],
                   ),

@@ -364,7 +364,6 @@ class StreamMessageInputState extends State<StreamMessageInput>
   late final CurvedAnimation _pickerAnimation;
 
   late StreamChatThemeData _streamChatTheme;
-  late StreamMessageInputThemeData _messageInputTheme;
 
   bool get _isEditing => !_effectiveController.message.state.isInitial;
 
@@ -495,7 +494,6 @@ class StreamMessageInputState extends State<StreamMessageInput>
   @override
   void didChangeDependencies() {
     _streamChatTheme = StreamChatTheme.of(context);
-    _messageInputTheme = StreamMessageInputTheme.of(context);
     super.didChangeDependencies();
   }
 
@@ -587,7 +585,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
     };
 
     final spacing = context.streamSpacing;
-    final safeAreaEnabled = widget.enableSafeArea ?? _messageInputTheme.enableSafeArea ?? true;
+    final safeAreaEnabled = widget.enableSafeArea ?? true;
     final viewPadding = MediaQuery.paddingOf(context);
 
     return Material(
@@ -745,13 +743,11 @@ class StreamMessageInputState extends State<StreamMessageInput>
 
     final allowedTypes = _getAllowedAttachmentPickerTypes();
 
-    final messageInputTheme = StreamMessageInputTheme.of(context);
     final isWebOrDesktop = switch (CurrentPlatform.type) {
       PlatformType.android || PlatformType.ios => false,
       _ => true,
     };
-    final useSystemPicker =
-        widget.useSystemAttachmentPicker || (messageInputTheme.useSystemAttachmentPicker ?? false) || isWebOrDesktop;
+    final useSystemPicker = widget.useSystemAttachmentPicker || isWebOrDesktop;
 
     final child = useSystemPicker
         ? systemAttachmentPickerBuilder(
@@ -794,7 +790,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 15),
       child: Text(
         context.translations.sendMessagePermissionError,
-        style: _messageInputTheme.inputTextStyle,
+        style: context.streamTextInputTheme.style?.textStyle,
       ),
     );
   }
@@ -837,42 +833,46 @@ class StreamMessageInputState extends State<StreamMessageInput>
     }
 
     setState(() {
-      final attachmentLimit = widget.attachmentLimit;
-      _pickerController = attachmentLimit != null
-          ? StreamAttachmentPickerController(
-              initialAttachments: _effectiveController.attachments,
-              initialPoll: _effectiveController.poll,
-              maxAttachmentCount: attachmentLimit,
-              maxAttachmentSize: widget.maxAttachmentSize,
-            )
-          : StreamAttachmentPickerController(
-              initialAttachments: _effectiveController.attachments,
-              initialPoll: _effectiveController.poll,
-              maxAttachmentSize: widget.maxAttachmentSize,
-            );
-      _pickerController!.addListener(_syncPickerToMessage);
-      _effectiveController.addListener(_syncMessageToPicker);
-      _customResultSubscription = _pickerController!.customResults.listen(_onCustomResult);
+      _pickerController = StreamAttachmentPickerController(
+        initialAttachments: _effectiveController.attachments,
+        initialPoll: _effectiveController.poll,
+        maxAttachmentCount: widget.attachmentLimit,
+        maxAttachmentSize: widget.maxAttachmentSize,
+      );
+
+      _startPickerSync();
 
       if (_effectiveFocusNode.hasFocus) {
         _effectiveFocusNode.unfocus();
       }
     });
+
     _pickerAnimationController.forward();
   }
 
   void _hidePicker() {
     if (!_isPickerVisible) return;
+
+    _stopPickerSync();
     _pickerAnimationController.reverse().then((_) {
-      if (mounted) setState(_disposePickerResources);
+      if (mounted) _disposePickerController();
     });
   }
 
-  void _disposePickerResources() {
+  void _startPickerSync() {
+    _pickerController?.addListener(_syncPickerToMessage);
+    _effectiveController.addListener(_syncMessageToPicker);
+    _customResultSubscription = _pickerController?.customResults.listen(_onCustomResult);
+  }
+
+  void _stopPickerSync() {
     _customResultSubscription?.cancel();
     _customResultSubscription = null;
     _pickerController?.removeListener(_syncPickerToMessage);
     _effectiveController.removeListener(_syncMessageToPicker);
+  }
+
+  void _disposePickerController() {
     _pickerController?.dispose();
     _pickerController = null;
   }
@@ -1084,7 +1084,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
       showInfoBottomSheet(
         context,
         icon: Icon(
-          context.streamIcons.exclamationCircleFill20,
+          context.streamIcons.exclamationCircleFill,
           color: StreamChatTheme.of(context).colorTheme.accentError,
           size: 24,
         ),
@@ -1230,7 +1230,8 @@ class StreamMessageInputState extends State<StreamMessageInput>
   void dispose() {
     _pickerAnimation.dispose();
     _pickerAnimationController.dispose();
-    _disposePickerResources();
+    _stopPickerSync();
+    _disposePickerController();
     _effectiveController
       ..removeListener(_onChangedThrottled)
       ..removeListener(_onChangedDebounced);

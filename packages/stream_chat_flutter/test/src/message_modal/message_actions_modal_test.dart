@@ -18,22 +18,22 @@ void main() {
   final messageActions = <StreamContextMenuAction<MessageAction>>[
     StreamContextMenuAction<MessageAction>(
       label: const Text('Reply'),
-      leading: const Icon(StreamIconData.reply20),
+      leading: const Icon(StreamIconData.reply),
       value: QuotedReply(message: message),
     ),
     StreamContextMenuAction<MessageAction>(
       label: const Text('Thread Reply'),
-      leading: const Icon(StreamIconData.thread20),
+      leading: const Icon(StreamIconData.thread),
       value: ThreadReply(message: message),
     ),
     StreamContextMenuAction<MessageAction>(
       label: const Text('Copy Message'),
-      leading: const Icon(StreamIconData.copy20),
+      leading: const Icon(StreamIconData.copy),
       value: CopyMessage(message: message),
     ),
     StreamContextMenuAction<MessageAction>.destructive(
       label: const Text('Delete Message'),
-      leading: const Icon(StreamIconData.delete20),
+      leading: const Icon(StreamIconData.delete),
       value: DeleteMessage(message: message),
     ),
   ];
@@ -149,8 +149,8 @@ void main() {
     Widget buildMessageWidget({bool reverse = false}) {
       return Builder(
         builder: (context) {
-          final theme = StreamChatTheme.of(context);
-          final messageTheme = theme.getMessageTheme(reverse: reverse);
+          final messageTheme = context.streamMessageTheme.mergeWithDefaults(context);
+          final messageStyle = reverse ? messageTheme.outgoing! : messageTheme.incoming!;
 
           return Container(
             padding: const EdgeInsets.symmetric(
@@ -159,11 +159,11 @@ void main() {
             ),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(14),
-              color: messageTheme.messageBackgroundColor,
+              color: messageStyle.backgroundColor,
             ),
             child: Text(
               message.text ?? '',
-              style: messageTheme.messageTextStyle,
+              style: TextStyle(color: messageStyle.textColor),
             ),
           );
         },

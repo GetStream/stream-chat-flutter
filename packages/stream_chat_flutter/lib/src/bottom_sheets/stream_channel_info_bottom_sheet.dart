@@ -43,7 +43,6 @@ class StreamChannelInfoBottomSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     final themeData = StreamChatTheme.of(context);
     final colorTheme = themeData.colorTheme;
-    final channelPreviewTheme = StreamChannelPreviewTheme.of(context);
 
     final currentUser = channel.client.state.currentUser;
     final isOneToOneChannel = channel.isDistinct && channel.memberCount == 2;
@@ -74,7 +73,7 @@ class StreamChannelInfoBottomSheet extends StatelessWidget {
           child: StreamChannelInfo(
             showTypingIndicator: false,
             channel: channel,
-            textStyle: channelPreviewTheme.subtitleStyle,
+            textStyle: context.streamTextTheme.captionDefault,
           ),
         ),
         const SizedBox(height: 17),
@@ -121,7 +120,7 @@ class StreamChannelInfoBottomSheet extends StatelessWidget {
           leading: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Icon(
-              context.streamIcons.user20,
+              context.streamIcons.user,
               color: colorTheme.textLowEmphasis,
             ),
           ),
@@ -134,7 +133,7 @@ class StreamChannelInfoBottomSheet extends StatelessWidget {
             leading: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Icon(
-                context.streamIcons.userRemove20,
+                context.streamIcons.userRemove,
                 color: colorTheme.textLowEmphasis,
               ),
             ),
@@ -145,7 +144,7 @@ class StreamChannelInfoBottomSheet extends StatelessWidget {
             leading: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Icon(
-                context.streamIcons.delete20,
+                context.streamIcons.delete,
                 color: colorTheme.accentError,
               ),
             ),
@@ -157,7 +156,7 @@ class StreamChannelInfoBottomSheet extends StatelessWidget {
           leading: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Icon(
-              context.streamIcons.xmark20,
+              context.streamIcons.xmark,
               color: colorTheme.textLowEmphasis,
             ),
           ),
