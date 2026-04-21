@@ -308,6 +308,98 @@ void main() {
         },
       );
     });
+
+    group('syncWith', () {
+      test('should preserve reactions from original message', () {
+        final user1 = User(id: 'user1');
+        final originalMessage = Message(
+          id: 'msg1',
+          text: 'Hello',
+          latestReactions: [
+            Reaction(type: 'like', user: user1),
+          ],
+          ownReactions: [
+            Reaction(type: 'like', user: user1),
+          ],
+          reactionGroups: {
+            'like': ReactionGroup(
+              count: 1,
+              sumScores: 1,
+              firstReactionAt: DateTime.now(),
+              lastReactionAt: DateTime.now(),
+            ),
+          },
+        );
+
+        final updatedMessage = Message(
+          id: 'msg1',
+          text: 'Hello',
+          latestReactions: null,
+        );
+
+        final synced = updatedMessage.syncWith(originalMessage);
+
+        expect(synced.latestReactions, isNotNull);
+        expect(synced.latestReactions!.length, 1);
+        expect(synced.latestReactions!.first.type, 'like');
+        expect(synced.ownReactions, isNotNull);
+        expect(synced.ownReactions!.length, 1);
+        expect(synced.reactionGroups, isNotNull);
+        expect(synced.reactionGroups!['like']!.count, 1);
+      });
+
+      test('should use updated reactions if present', () {
+        final user1 = User(id: 'user1');
+        final user2 = User(id: 'user2');
+        final originalMessage = Message(
+          id: 'msg1',
+          text: 'Hello',
+          latestReactions: [
+            Reaction(type: 'like', user: user1),
+          ],
+        );
+
+        final updatedMessage = Message(
+          id: 'msg1',
+          text: 'Hello',
+          latestReactions: [
+            Reaction(type: 'love', user: user2),
+          ],
+        );
+
+        final synced = updatedMessage.syncWith(originalMessage);
+
+        expect(synced.latestReactions, isNotNull);
+        expect(synced.latestReactions!.length, 1);
+        expect(synced.latestReactions!.first.type, 'love');
+        expect(synced.latestReactions!.first.user?.id, 'user2');
+      });
+
+      test('should preserve local timestamps', () {
+        final localCreatedAt = DateTime(2023, 1, 1);
+        final localUpdatedAt = DateTime(2023, 1, 2);
+        final localDeletedAt = DateTime(2023, 1, 3);
+
+        final originalMessage = Message(
+          id: 'msg1',
+          text: 'Hello',
+          localCreatedAt: localCreatedAt,
+          localUpdatedAt: localUpdatedAt,
+          localDeletedAt: localDeletedAt,
+        );
+
+        final updatedMessage = Message(
+          id: 'msg1',
+          text: 'Hello updated',
+        );
+
+        final synced = updatedMessage.syncWith(originalMessage);
+
+        expect(synced.localCreatedAt, localCreatedAt);
+        expect(synced.localUpdatedAt, localUpdatedAt);
+        expect(synced.localDeletedAt, localDeletedAt);
+      });
+    });
   });
 
   group('MessageVisibility Extension Tests', () {

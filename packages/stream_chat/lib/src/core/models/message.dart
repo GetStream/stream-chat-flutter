@@ -592,6 +592,9 @@ class Message extends Equatable implements ComparableFieldProvider {
       localCreatedAt: other.localCreatedAt,
       localUpdatedAt: other.localUpdatedAt,
       localDeletedAt: other.localDeletedAt,
+      latestReactions: latestReactions ?? other.latestReactions,
+      ownReactions: ownReactions ?? other.ownReactions,
+      reactionGroups: reactionGroups ?? other.reactionGroups,
     );
   }
 
