@@ -67,7 +67,7 @@ class StreamChatLocalizationsFr extends GlobalStreamChatLocalizations {
   String get sendMessagePermissionError => "Vous n'êtes pas autorisé à envoyer des messages";
 
   @override
-  String get emptyMessagesText => "Il n'y a pas de messages actuellement";
+  String get emptyMessagesText => 'Aucun message pour le moment';
 
   @override
   String get genericErrorText => 'Il y a eu un problème';
@@ -121,7 +121,7 @@ class StreamChatLocalizationsFr extends GlobalStreamChatLocalizations {
   String get searchGifLabel => 'Recherche de GIFs';
 
   @override
-  String get writeAMessageLabel => 'Écrire un message';
+  String get writeAMessageLabel => 'Envoyer un message';
 
   @override
   String get instantCommandsLabel => 'Commandes instantanées';
@@ -309,6 +309,16 @@ class StreamChatLocalizationsFr extends GlobalStreamChatLocalizations {
   String watchersCountText(int count) {
     if (count == 1) return '1 En ligne';
     return '$count En ligne';
+  }
+
+  @override
+  String membersCountWithOnlineText({
+    required int memberCount,
+    required int onlineCount,
+  }) {
+    final members = membersCountText(memberCount);
+    if (onlineCount <= 0) return members;
+    return '$members, ${watchersCountText(onlineCount)}';
   }
 
   @override
@@ -656,6 +666,9 @@ Limite de pièces jointes dépassée : il n'est pas possible d'ajouter plus de $
   String get fileAttachmentText => 'Fichier';
 
   @override
+  String get linkAttachmentText => 'Lien';
+
+  @override
   String filesAttachmentCountText(int count) => count == 1 ? 'Fichier' : '$count fichiers';
 
   @override
@@ -732,4 +745,40 @@ Limite de pièces jointes dépassée : il n'est pas possible d'ajouter plus de $
 
   @override
   String get unsupportedAttachmentLabel => 'Pièce jointe non prise en charge';
+
+  @override
+  String get confirmLabel => 'CONFIRMER';
+
+  @override
+  String get emptyReactionsText => 'Pas encore de réactions';
+
+  @override
+  String get loadingReactionsError => 'Erreur lors du chargement des réactions';
+
+  @override
+  String get tapToRemoveReactionLabel => 'Appuyer pour supprimer';
+
+  @override
+  String get justNowLabel => "À l'instant";
+
+  @override
+  String replyToUserLabel(String userName) => 'Répondre à $userName';
+
+  @override
+  String get multipleAnswersDescription => "Sélectionner plus d'une option";
+
+  @override
+  String maximumVotesPerPersonDescription([Range<int>? range]) {
+    final (:min, :max) = range ?? (min: 2, max: 10);
+    return 'Choisir entre $min et $max options';
+  }
+
+  @override
+  String get anonymousPollDescription => 'Masquer qui a voté';
+
+  @override
+  String get suggestAnOptionDescription => 'Laisser les autres ajouter des options';
+
+  @override
+  String get addACommentDescription => "Permettre aux autres d'ajouter des commentaires";
 }

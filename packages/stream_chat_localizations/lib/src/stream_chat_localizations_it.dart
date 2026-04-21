@@ -72,7 +72,7 @@ class StreamChatLocalizationsIt extends GlobalStreamChatLocalizations {
   String get sendMessagePermissionError => "Non hai l'autorizzazione per inviare messaggi";
 
   @override
-  String get emptyMessagesText => "Non c'é nessun messaggio al momento";
+  String get emptyMessagesText => 'Nessun messaggio ancora';
 
   @override
   String get genericErrorText => 'Qualcosa è andato storto';
@@ -126,7 +126,7 @@ class StreamChatLocalizationsIt extends GlobalStreamChatLocalizations {
   String get searchGifLabel => 'Cerca una GIF';
 
   @override
-  String get writeAMessageLabel => 'Scrivi un messaggio';
+  String get writeAMessageLabel => 'Invia un messaggio';
 
   @override
   String get instantCommandsLabel => 'Commandi istantanei';
@@ -312,6 +312,16 @@ Il file è troppo grande per essere caricato. Il limite è di $limitInMB MB.''';
   String watchersCountText(int count) {
     if (count == 1) return '1 Online';
     return '$count Online';
+  }
+
+  @override
+  String membersCountWithOnlineText({
+    required int memberCount,
+    required int onlineCount,
+  }) {
+    final members = membersCountText(memberCount);
+    if (onlineCount <= 0) return members;
+    return '$members, ${watchersCountText(onlineCount)}';
   }
 
   @override
@@ -659,6 +669,9 @@ Attenzione: il limite massimo di $limit file è stato superato.
   String get fileAttachmentText => 'File';
 
   @override
+  String get linkAttachmentText => 'Link';
+
+  @override
   String filesAttachmentCountText(int count) => count == 1 ? 'File' : '$count file';
 
   @override
@@ -735,4 +748,40 @@ Attenzione: il limite massimo di $limit file è stato superato.
 
   @override
   String get unsupportedAttachmentLabel => 'Allegato non supportato';
+
+  @override
+  String get confirmLabel => 'CONFERMA';
+
+  @override
+  String get emptyReactionsText => 'Ancora nessuna reazione';
+
+  @override
+  String get loadingReactionsError => 'Errore durante il caricamento delle reazioni';
+
+  @override
+  String get tapToRemoveReactionLabel => 'Tocca per rimuovere';
+
+  @override
+  String get justNowLabel => 'Proprio ora';
+
+  @override
+  String replyToUserLabel(String userName) => 'Rispondi a $userName';
+
+  @override
+  String get multipleAnswersDescription => "Seleziona più di un'opzione";
+
+  @override
+  String maximumVotesPerPersonDescription([Range<int>? range]) {
+    final (:min, :max) = range ?? (min: 2, max: 10);
+    return 'Scegli tra $min\u2013$max opzioni';
+  }
+
+  @override
+  String get anonymousPollDescription => 'Nascondi chi ha votato';
+
+  @override
+  String get suggestAnOptionDescription => 'Permetti agli altri di aggiungere opzioni';
+
+  @override
+  String get addACommentDescription => 'Permetti agli altri di aggiungere commenti';
 }

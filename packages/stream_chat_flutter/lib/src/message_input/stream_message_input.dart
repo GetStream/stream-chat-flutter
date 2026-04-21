@@ -317,18 +317,11 @@ class StreamMessageInput extends StatefulWidget {
   static String? _defaultHintGetter(
     BuildContext context,
     HintType type,
-  ) {
-    switch (type) {
-      case HintType.searchGif:
-        return context.translations.searchGifLabel;
-      case HintType.addACommentOrSend:
-        return context.translations.addACommentOrSendLabel;
-      case HintType.slowModeOn:
-        return context.translations.slowModeOnLabel;
-      case HintType.writeAMessage:
-        return context.translations.writeAMessageLabel;
-    }
-  }
+  ) => switch (type) {
+    .searchGif => context.translations.searchGifLabel,
+    .slowModeOn => context.translations.slowModeOnLabel,
+    .addACommentOrSend || .writeAMessage => context.translations.writeAMessageLabel,
+  };
 
   static bool _defaultOgPreviewFilter(
     Uri matchedUri,
@@ -862,7 +855,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
 
     _stopPickerSync();
     _pickerAnimationController.reverse().then((_) {
-      if (mounted) _disposePickerController();
+      if (mounted) setState(_disposePickerController);
     });
   }
 

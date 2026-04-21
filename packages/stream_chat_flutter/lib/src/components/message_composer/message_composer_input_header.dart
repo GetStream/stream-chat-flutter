@@ -98,7 +98,7 @@ class _DefaultStreamMessageComposerInputHeader extends StatelessWidget {
                 padding: contentPadding,
                 child: StreamVoiceRecordingAttachmentPlaylist(
                   voiceRecordings: voiceRecordings,
-                  voiceRecordingTitle: 'Voice Message',
+                  voiceRecordingTitle: context.translations.voiceRecordingText,
                   message: props.controller.message,
                   itemDecorator: (context, index, child) {
                     final attachment = voiceRecordings.elementAtOrNull(index);
@@ -228,10 +228,14 @@ class _QuotedMessageInHeader extends StatelessWidget {
       trailing = null;
     }
 
-    return
-    // TODO: localize strings
-    MessageComposerReplyAttachment(
-      title: Text(isIncoming ? 'Reply to ${quotedMessage.user?.name}' : 'You'),
+    final translations = context.translations;
+    final title = switch (isIncoming) {
+      true => translations.replyToUserLabel(quotedMessage.user?.name ?? ''),
+      false => translations.youText,
+    };
+
+    return MessageComposerReplyAttachment(
+      title: Text(title),
       subtitle: StreamMessagePreviewText(message: quotedMessage),
       onRemovePressed: onRemovePressed,
       trailing: trailing,

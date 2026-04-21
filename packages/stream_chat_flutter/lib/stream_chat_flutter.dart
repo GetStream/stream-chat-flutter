@@ -34,6 +34,9 @@ export 'package:stream_core_flutter/stream_core_flutter.dart'
         StreamEmojiData,
         StreamEmojiPickerSheet,
         StreamEmojiSize,
+        StreamFileType,
+        StreamFileTypeIcon,
+        StreamFileTypeIconSize,
         StreamImageEmoji,
         StreamMessageAlignment,
         StreamMessageLayout,
@@ -80,7 +83,6 @@ export 'src/attachment/handler/stream_attachment_handler.dart';
 export 'src/attachment/image_attachment.dart';
 export 'src/attachment/link_preview_attachment.dart';
 export 'src/attachment/stream_attachment_package.dart';
-export 'src/attachment/thumbnail/file_attachment_thumbnail.dart';
 export 'src/attachment/thumbnail/giphy_attachment_thumbnail.dart';
 export 'src/attachment/thumbnail/image_attachment_thumbnail.dart';
 export 'src/attachment/thumbnail/media_attachment_thumbnail.dart';

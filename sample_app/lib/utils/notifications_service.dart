@@ -51,10 +51,19 @@ void showLocalNotification(
     },
   );
 
+  // Resolve the notification body via [MessagePreviewFormatter] so
+  // attachment-only messages (photo, video, voice, file, poll, ...) render
+  // a readable label instead of an empty string.
+  final currentUser = StreamChat.maybeOf(context)?.currentUser;
+  final formatter = StreamChatConfiguration.of(context).messagePreviewFormatter;
+  final previewSpan = formatter.formatMessage(context, event.message!, currentUser: currentUser);
+
+  print('Showing notification for message: ${event.message!.text}, preview: ${previewSpan.toPlainText()}');
+
   await flutterLocalNotificationsPlugin.show(
     event.message!.id.hashCode,
     event.message!.user!.name,
-    event.message!.text,
+    previewSpan.toPlainText(includePlaceholders: false).trim(),
     const NotificationDetails(
       android: AndroidNotificationDetails(
         'message channel',

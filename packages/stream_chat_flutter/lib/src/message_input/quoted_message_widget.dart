@@ -251,10 +251,7 @@ class _ParseAttachments extends StatelessWidget {
     attachmentBuilders ??= _createDefaultAttachmentBuilders();
 
     // Build the attachment widget using the builder for the attachment type.
-    final attachmentWidget = attachmentBuilders[attachment.type]?.call(
-      context,
-      attachment,
-    );
+    final attachmentWidget = attachmentBuilders[attachment.type]?.call(context, attachment);
 
     // Return empty container if no attachment widget is returned.
     if (attachmentWidget == null) return const Empty();
@@ -305,34 +302,10 @@ class _ParseAttachments extends StatelessWidget {
     }
 
     Widget _createFileThumbnail(BuildContext context, Attachment file) {
-      Widget thumbnail = StreamFileAttachmentThumbnail(
-        file: file,
-        width: double.infinity,
-        height: double.infinity,
-        fit: BoxFit.cover,
+      return StreamFileTypeIcon.fromMimeType(
+        size: .lg,
+        mimeType: file.title?.mediaType?.mimeType,
       );
-
-      final mediaType = file.title?.mediaType;
-      final isImage = mediaType?.type == AttachmentType.image;
-      final isVideo = mediaType?.type == AttachmentType.video;
-      if (isImage || isVideo) {
-        final colorTheme = StreamChatTheme.of(context).colorTheme;
-        thumbnail = Container(
-          clipBehavior: Clip.hardEdge,
-          decoration: ShapeDecoration(
-            shape: RoundedRectangleBorder(
-              side: BorderSide(
-                color: colorTheme.borders,
-                strokeAlign: BorderSide.strokeAlignOutside,
-              ),
-              borderRadius: BorderRadius.circular(8),
-            ),
-          ),
-          child: thumbnail,
-        );
-      }
-
-      return thumbnail;
     }
 
     return {

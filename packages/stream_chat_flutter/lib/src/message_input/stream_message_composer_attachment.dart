@@ -151,7 +151,7 @@ class MessageInputVoiceRecordingAttachment extends StatelessWidget {
             _ => null,
           },
           child: StreamVoiceRecordingAttachment(
-            title: 'Voice Message',
+            title: context.translations.voiceRecordingText,
             showTitle: true,
             track: track,
             speed: state.speed,

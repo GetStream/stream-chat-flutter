@@ -258,7 +258,7 @@ class _EndOfFrameCallbackWidgetState extends State<EndOfFrameCallbackWidget> {
       if (errorBuilder != null) {
         return errorBuilder(context, error, stackTrace);
       }
-      return const Text('An error occurred');
+      return Text(context.translations.genericErrorText);
     }
 
     _error = null;

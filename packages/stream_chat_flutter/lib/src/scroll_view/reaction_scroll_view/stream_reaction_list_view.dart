@@ -195,7 +195,7 @@ class StreamReactionListView extends StatelessWidget {
                 color: StreamChatTheme.of(context).colorTheme.disabled,
               ),
               emptyTitle: Text(
-                'No reactions yet',
+                context.translations.emptyReactionsText,
                 style: StreamChatTheme.of(context).textTheme.headline,
               ),
             ),
@@ -203,7 +203,7 @@ class StreamReactionListView extends StatelessWidget {
         ),
     loadMoreErrorBuilder: (context, error) => StreamScrollViewLoadMoreError.list(
       onTap: controller.retry,
-      error: const Text('Error loading reactions'),
+      error: Text(context.translations.loadingReactionsError),
     ),
     loadMoreIndicatorBuilder: (context) => Center(
       child: Padding(
@@ -216,7 +216,7 @@ class StreamReactionListView extends StatelessWidget {
         errorBuilder?.call(context, error) ??
         Center(
           child: StreamScrollViewErrorWidget(
-            errorTitle: const Text('Error loading reactions'),
+            errorTitle: Text(context.translations.loadingReactionsError),
             onRetryPressed: controller.refresh,
           ),
         ),

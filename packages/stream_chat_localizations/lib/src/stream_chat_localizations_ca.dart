@@ -67,7 +67,7 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
   String get sendMessagePermissionError => 'No tens permís per enviar missatges';
 
   @override
-  String get emptyMessagesText => 'Actualment no hi ha missatges';
+  String get emptyMessagesText => 'Encara no hi ha missatges';
 
   @override
   String get genericErrorText => 'Hi ha hagut un problema';
@@ -121,7 +121,7 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
   String get searchGifLabel => 'Cerca de GIFs';
 
   @override
-  String get writeAMessageLabel => 'Escriure un missatge';
+  String get writeAMessageLabel => 'Enviar un missatge';
 
   @override
   String get instantCommandsLabel => 'Commandes instantànies';
@@ -309,6 +309,16 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
   String watchersCountText(int count) {
     if (count == 1) return '1 En línia';
     return '$count En línia';
+  }
+
+  @override
+  String membersCountWithOnlineText({
+    required int memberCount,
+    required int onlineCount,
+  }) {
+    final members = membersCountText(memberCount);
+    if (onlineCount <= 0) return members;
+    return '$members, ${watchersCountText(onlineCount)}';
   }
 
   @override
@@ -652,6 +662,9 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
   String get fileAttachmentText => 'Fitxer';
 
   @override
+  String get linkAttachmentText => 'Enllaç';
+
+  @override
   String filesAttachmentCountText(int count) => count == 1 ? 'Fitxer' : '$count fitxers';
 
   @override
@@ -728,4 +741,40 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
 
   @override
   String get unsupportedAttachmentLabel => 'Adjunt no compatible';
+
+  @override
+  String get confirmLabel => 'CONFIRMAR';
+
+  @override
+  String get emptyReactionsText => 'Encara no hi ha reaccions';
+
+  @override
+  String get loadingReactionsError => 'Error en carregar les reaccions';
+
+  @override
+  String get tapToRemoveReactionLabel => 'Toca per eliminar';
+
+  @override
+  String get justNowLabel => 'Ara mateix';
+
+  @override
+  String replyToUserLabel(String userName) => 'Respon a $userName';
+
+  @override
+  String get multipleAnswersDescription => "Selecciona més d'una opció";
+
+  @override
+  String maximumVotesPerPersonDescription([Range<int>? range]) {
+    final (:min, :max) = range ?? (min: 2, max: 10);
+    return 'Tria entre $min\u2013$max opcions';
+  }
+
+  @override
+  String get anonymousPollDescription => 'Amaga qui ha votat';
+
+  @override
+  String get suggestAnOptionDescription => 'Permet que altres afegeixin opcions';
+
+  @override
+  String get addACommentDescription => 'Permet que altres afegeixin comentaris';
 }

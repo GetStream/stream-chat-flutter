@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/attachment/thumbnail/file_attachment_thumbnail.dart';
 import 'package:stream_chat_flutter/src/components/stream_chat_component_builders.dart';
-import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/utils/utils.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:stream_core_flutter/stream_core_flutter.dart';
@@ -132,7 +130,10 @@ class DefaultStreamFileAttachment extends StatelessWidget {
         child: Row(
           spacing: spacing.sm,
           children: [
-            _FileTypeImage(file: file),
+            StreamFileTypeIcon.fromMimeType(
+              size: .lg,
+              mimeType: file.title?.mediaType?.mimeType,
+            ),
             Expanded(
               child: Column(
                 spacing: spacing.xxs,
@@ -158,45 +159,6 @@ class DefaultStreamFileAttachment extends StatelessWidget {
         ),
       ),
     );
-  }
-}
-
-class _FileTypeImage extends StatelessWidget {
-  const _FileTypeImage({required this.file});
-
-  final Attachment file;
-
-  // TODO: Improve image memory.
-  // This is using the full image instead of a smaller version (thumbnail)
-  @override
-  Widget build(BuildContext context) {
-    Widget child = StreamFileAttachmentThumbnail(
-      file: file,
-      width: double.infinity,
-      height: double.infinity,
-    );
-
-    final mediaType = file.title?.mediaType;
-    final isImage = mediaType?.type == AttachmentType.image;
-    final isVideo = mediaType?.type == AttachmentType.video;
-    if (isImage || isVideo) {
-      final colorTheme = StreamChatTheme.of(context).colorTheme;
-      child = Container(
-        clipBehavior: Clip.hardEdge,
-        decoration: ShapeDecoration(
-          shape: RoundedRectangleBorder(
-            side: BorderSide(
-              color: colorTheme.borders,
-              strokeAlign: BorderSide.strokeAlignOutside,
-            ),
-            borderRadius: BorderRadius.circular(8),
-          ),
-        ),
-        child: child,
-      );
-    }
-
-    return child;
   }
 }
 

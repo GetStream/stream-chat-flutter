@@ -67,7 +67,7 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
   String get sendMessagePermissionError => 'Du har ikke tillatelse til å sende meldinger';
 
   @override
-  String get emptyMessagesText => 'Det er ingen meldinger akkurat nå';
+  String get emptyMessagesText => 'Ingen meldinger ennå';
 
   @override
   String get genericErrorText => 'Noe gikk galt';
@@ -121,7 +121,7 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
   String get searchGifLabel => 'Søk GIFs';
 
   @override
-  String get writeAMessageLabel => 'Skriv en melding';
+  String get writeAMessageLabel => 'Send en melding';
 
   @override
   String get instantCommandsLabel => 'Direkte kommandoer';
@@ -304,6 +304,16 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
   String watchersCountText(int count) {
     if (count == 1) return '1 pålogget';
     return '$count pålogget';
+  }
+
+  @override
+  String membersCountWithOnlineText({
+    required int memberCount,
+    required int onlineCount,
+  }) {
+    final members = membersCountText(memberCount);
+    if (onlineCount <= 0) return members;
+    return '$members, ${watchersCountText(onlineCount)}';
   }
 
   @override
@@ -638,6 +648,9 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
   String get fileAttachmentText => 'Fil';
 
   @override
+  String get linkAttachmentText => 'Lenke';
+
+  @override
   String filesAttachmentCountText(int count) => count == 1 ? 'Fil' : '$count filer';
 
   @override
@@ -714,4 +727,40 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
 
   @override
   String get unsupportedAttachmentLabel => 'Vedlegg støttes ikke';
+
+  @override
+  String get confirmLabel => 'BEKREFT';
+
+  @override
+  String get emptyReactionsText => 'Ingen reaksjoner ennå';
+
+  @override
+  String get loadingReactionsError => 'Kunne ikke laste reaksjoner';
+
+  @override
+  String get tapToRemoveReactionLabel => 'Trykk for å fjerne';
+
+  @override
+  String get justNowLabel => 'Akkurat nå';
+
+  @override
+  String replyToUserLabel(String userName) => 'Svar til $userName';
+
+  @override
+  String get multipleAnswersDescription => 'Velg mer enn ett alternativ';
+
+  @override
+  String maximumVotesPerPersonDescription([Range<int>? range]) {
+    final (:min, :max) = range ?? (min: 2, max: 10);
+    return 'Velg mellom $min\u2013$max alternativer';
+  }
+
+  @override
+  String get anonymousPollDescription => 'Skjul hvem som stemte';
+
+  @override
+  String get suggestAnOptionDescription => 'La andre legge til alternativer';
+
+  @override
+  String get addACommentDescription => 'La andre legge til kommentarer';
 }

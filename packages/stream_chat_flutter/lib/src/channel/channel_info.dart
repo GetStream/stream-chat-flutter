@@ -86,13 +86,11 @@ class _ConnectedTitleState extends StatelessWidget {
   Widget build(BuildContext context) {
     Widget? alternativeWidget;
 
+    final translations = context.translations;
     final memberCount = channel.memberCount;
     if (memberCount != null && memberCount > 2) {
-      var text = context.translations.membersCountText(memberCount);
       final onlineCount = members?.where((m) => m.user?.online == true).length ?? 0;
-      if (onlineCount > 0) {
-        text += ', ${context.translations.watchersCountText(onlineCount)}';
-      }
+      final text = translations.membersCountWithOnlineText(memberCount: memberCount, onlineCount: onlineCount);
       alternativeWidget = Text(text, style: textStyle);
     } else {
       final userId = StreamChat.of(context).currentUser?.id;
@@ -102,14 +100,11 @@ class _ConnectedTitleState extends StatelessWidget {
 
       if (otherMember != null) {
         if (otherMember.user?.online == true) {
-          alternativeWidget = Text(
-            context.translations.userOnlineText,
-            style: textStyle,
-          );
+          alternativeWidget = Text(translations.userOnlineText, style: textStyle);
         } else {
           final lastActive = otherMember.user?.lastActive ?? DateTime.now();
           alternativeWidget = Text(
-            '${context.translations.userLastOnlineText} '
+            '${translations.userLastOnlineText} '
             '${Jiffy.parseFromDateTime(lastActive).fromNow()}',
             style: textStyle,
           );

@@ -64,7 +64,7 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
   }
 
   @override
-  String get emptyMessagesText => 'Derzeit sind keine Nachrichten vorhanden';
+  String get emptyMessagesText => 'Noch keine Nachrichten';
 
   @override
   String get genericErrorText => 'Etwas ist schief gelaufen';
@@ -118,7 +118,7 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
   String get searchGifLabel => 'GIFs suchen';
 
   @override
-  String get writeAMessageLabel => 'Nachricht schreiben';
+  String get writeAMessageLabel => 'Nachricht senden';
 
   @override
   String get instantCommandsLabel => 'Sofort-Befehle';
@@ -304,6 +304,16 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
   @override
   String watchersCountText(int count) {
     return '$count Online';
+  }
+
+  @override
+  String membersCountWithOnlineText({
+    required int memberCount,
+    required int onlineCount,
+  }) {
+    final members = membersCountText(memberCount);
+    if (onlineCount <= 0) return members;
+    return '$members, ${watchersCountText(onlineCount)}';
   }
 
   @override
@@ -650,6 +660,9 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
   String get fileAttachmentText => 'Datei';
 
   @override
+  String get linkAttachmentText => 'Link';
+
+  @override
   String filesAttachmentCountText(int count) => count == 1 ? 'Datei' : '$count Dateien';
 
   @override
@@ -726,4 +739,40 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
 
   @override
   String get unsupportedAttachmentLabel => 'Nicht unterstützter Anhang';
+
+  @override
+  String get confirmLabel => 'BESTÄTIGEN';
+
+  @override
+  String get emptyReactionsText => 'Noch keine Reaktionen';
+
+  @override
+  String get loadingReactionsError => 'Fehler beim Laden der Reaktionen';
+
+  @override
+  String get tapToRemoveReactionLabel => 'Zum Entfernen tippen';
+
+  @override
+  String get justNowLabel => 'Gerade eben';
+
+  @override
+  String replyToUserLabel(String userName) => 'Antwort an $userName';
+
+  @override
+  String get multipleAnswersDescription => 'Mehr als eine Option auswählen';
+
+  @override
+  String maximumVotesPerPersonDescription([Range<int>? range]) {
+    final (:min, :max) = range ?? (min: 2, max: 10);
+    return 'Wähle zwischen $min\u2013$max Optionen';
+  }
+
+  @override
+  String get anonymousPollDescription => 'Verbergen, wer abgestimmt hat';
+
+  @override
+  String get suggestAnOptionDescription => 'Anderen erlauben, Optionen hinzuzufügen';
+
+  @override
+  String get addACommentDescription => 'Anderen erlauben, Kommentare hinzuzufügen';
 }
