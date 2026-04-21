@@ -772,6 +772,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
   void _onCommandSelectedFromPicker(Command command) {
     _hidePicker();
     _effectiveController.command = command.name;
+    _effectiveFocusNode.requestFocus();
   }
 
   bool _shouldShowSendToChannelCheckbox() {

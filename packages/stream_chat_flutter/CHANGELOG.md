@@ -30,6 +30,7 @@
 - Fixed draft stream updates clobbering the composer while editing a message.
 - Fixed retries of in-flight sends being routed through `updateMessage` instead of `sendMessage`.
 - Fixed composer attachment button staying rotated at 45° after the inline picker was dismissed.
+- Fixed composer focus being lost after selecting a command from the attachment picker.
 
 ## 10.0.0-beta.13
 

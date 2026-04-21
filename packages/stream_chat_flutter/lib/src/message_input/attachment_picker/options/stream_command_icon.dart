@@ -13,20 +13,20 @@ class StreamCommandIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const size = 20.0;
-    final color = context.streamColorScheme.textSecondary;
+    final icons = context.streamIcons;
+    final colorScheme = context.streamColorScheme;
 
     return IconTheme.merge(
-      data: IconThemeData(size: size, color: color),
+      data: IconThemeData(size: 20, color: colorScheme.textSecondary),
       child: switch (command.name) {
-        'giphy' => const StreamSvgIcon(icon: StreamSvgIcons.giphy),
-        'imgur' => const StreamSvgIcon(icon: StreamSvgIcons.imgur),
-        'ban' => Icon(context.streamIcons.userRemove),
-        'flag' => Icon(context.streamIcons.flag),
-        'mute' => Icon(context.streamIcons.mute),
-        'unban' => Icon(context.streamIcons.userAdd),
-        'unmute' => Icon(context.streamIcons.audio),
-        _ => Icon(context.streamIcons.bolt),
+        'giphy' => StreamSvgIcon(icon: icons.giphy),
+        'imgur' => StreamSvgIcon(icon: icons.imgur),
+        'ban' => Icon(icons.userRemove),
+        'flag' => Icon(icons.flag),
+        'mute' => Icon(icons.mute),
+        'unban' => Icon(icons.userAdd),
+        'unmute' => Icon(icons.audio),
+        _ => Icon(icons.bolt),
       },
     );
   }
