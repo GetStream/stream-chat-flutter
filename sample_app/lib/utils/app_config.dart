@@ -42,13 +42,13 @@ final defaultUsers = <String, User>{
       'image': 'https://avatars.githubusercontent.com/u/88735?s=400&v=4',
     },
   ),
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiZGV2ZW4ifQ.z3zI4PqJnNhc-1o-VKcmb6BnnQ0oxFNCRHwEulHqcWc': User(
-    id: 'deven',
-    extraData: const {
-      'name': 'Deven Joshi',
-      'image': 'https://avatars.githubusercontent.com/u/26357843?s=400&u=0c61d890866e67bf69f58878be58915e9bfd39ee&v=4',
-    },
-  ),
+  // 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiZGV2ZW4ifQ.z3zI4PqJnNhc-1o-VKcmb6BnnQ0oxFNCRHwEulHqcWc': User(
+  //   id: 'deven',
+  //   extraData: const {
+  //     'name': 'Deven Joshi',
+  //     'image': 'https://avatars.githubusercontent.com/u/26357843?s=400&u=0c61d890866e67bf69f58878be58915e9bfd39ee&v=4',
+  //   },
+  // ),
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoibmVldmFzaCJ9.3EdHegTxibrz3A9cTiKmpEyawwcCVB8FXnoFzr4eKvw': User(
     id: 'neevash',
     extraData: const {
