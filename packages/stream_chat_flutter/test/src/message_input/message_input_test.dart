@@ -369,7 +369,12 @@ void main() {
           (_) async => UpdateMessageResponse()..message = Message(id: 'msg-1', text: 'Edited text'),
         );
 
-        final existingMessage = Message(id: 'msg-1', text: 'Original text');
+        final existingMessage = Message(
+          id: 'msg-1',
+          text: 'Original text',
+          createdAt: DateTime.now(),
+        );
+
         final messageInputController = StreamMessageInputController()..editMessage(existingMessage);
         addTearDown(messageInputController.dispose);
 
