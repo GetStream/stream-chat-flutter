@@ -140,7 +140,7 @@ class _StreamUnreadThreadsBannerState extends State<StreamUnreadThreadsBanner> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Icon(
-          context.streamIcons.refresh20,
+          context.streamIcons.refresh,
           size: 20,
           color: context.streamColorScheme.textSecondary,
         ),
