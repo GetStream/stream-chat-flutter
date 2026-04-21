@@ -52,7 +52,7 @@ class StreamMessagePreviewText extends StatelessWidget {
     return Text.rich(
       maxLines: 1,
       previewTextSpan,
-      style: textStyle?.copyWith(color: Colors.red),
+      style: textStyle,
       overflow: TextOverflow.ellipsis,
       textAlign: TextAlign.start,
     );
