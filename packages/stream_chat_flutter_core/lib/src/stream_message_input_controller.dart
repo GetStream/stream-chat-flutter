@@ -449,12 +449,19 @@ class StreamRestorableMessageInputController extends RestorableChangeNotifier<St
 
   @override
   StreamMessageInputController fromPrimitives(Object? data) {
-    final message = Message.fromJson(json.decode(data! as String));
-    return StreamMessageInputController(message: message);
+    final restoredData = json.decode(data! as String);
+
+    final message = Message.fromJson(restoredData['message']);
+    final state = MessageState.fromJson(restoredData['message_state']);
+
+    return StreamMessageInputController(message: message.copyWith(state: state));
   }
 
   @override
-  String toPrimitives() => json.encode(value.message);
+  String toPrimitives() => json.encode({
+    'message': value.message.toJson(),
+    'message_state': value.message.state.toJson(),
+  });
 }
 
 Timer _setPeriodicTimer(
