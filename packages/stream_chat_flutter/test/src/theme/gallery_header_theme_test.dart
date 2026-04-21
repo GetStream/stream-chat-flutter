@@ -101,64 +101,43 @@ void main() {
 }
 
 // Light theme test control.
-final _galleryHeaderThemeDataControl = StreamGalleryHeaderThemeData(
-  closeButtonColor: const Color(0xff000000),
-  backgroundColor: const Color(0xffffffff),
-  iconMenuPointColor: const Color(0xff000000),
-  titleTextStyle: const TextStyle(
+const _galleryHeaderThemeDataControl = StreamGalleryHeaderThemeData(
+  closeButtonColor: Color(0xff000000),
+  backgroundColor: Color(0xffffffff),
+  iconMenuPointColor: Color(0xff000000),
+  titleTextStyle: TextStyle(
     fontSize: 16,
     fontWeight: FontWeight.w500,
     color: Colors.black,
   ),
-  subtitleTextStyle:
-      const TextStyle(
-        fontSize: 12,
-        color: Colors.black,
-        fontWeight: FontWeight.w400,
-      ).copyWith(
-        color: const Color(0xff7A7A7A),
-      ),
-  bottomSheetBarrierColor: const Color.fromRGBO(0, 0, 0, 0.2),
+  subtitleTextStyle: null,
+  bottomSheetBarrierColor: Color.fromRGBO(0, 0, 0, 0.2),
 );
 
 // Light theme test control.
-final _galleryHeaderThemeDataHalfLerpControl = StreamGalleryHeaderThemeData(
-  closeButtonColor: const Color(0xff7f7f7f),
-  backgroundColor: const Color(0xff88898a),
-  iconMenuPointColor: const Color(0xff7f7f7f),
-  titleTextStyle: const TextStyle(
+const _galleryHeaderThemeDataHalfLerpControl = StreamGalleryHeaderThemeData(
+  closeButtonColor: Color(0xff7f7f7f),
+  backgroundColor: Color(0xff88898a),
+  iconMenuPointColor: Color(0xff7f7f7f),
+  titleTextStyle: TextStyle(
     fontSize: 16,
     fontWeight: FontWeight.w500,
     color: Color(0xff7f7f7f),
   ),
-  subtitleTextStyle:
-      const TextStyle(
-        fontSize: 12,
-        color: Color(0xff7a7a7a),
-        fontWeight: FontWeight.w400,
-      ).copyWith(
-        color: const Color(0xff7A7A7A),
-      ),
-  bottomSheetBarrierColor: const Color(0x4c000000),
+  subtitleTextStyle: null,
+  bottomSheetBarrierColor: Color(0x4c000000),
 );
 
 // Dark theme test control.
-final _galleryHeaderThemeDataDarkControl = StreamGalleryHeaderThemeData(
-  closeButtonColor: const Color(0xffffffff),
-  backgroundColor: const Color(0xff121416),
-  iconMenuPointColor: const Color(0xffffffff),
-  titleTextStyle: const TextStyle(
+const _galleryHeaderThemeDataDarkControl = StreamGalleryHeaderThemeData(
+  closeButtonColor: Color(0xffffffff),
+  backgroundColor: Color(0xff121416),
+  iconMenuPointColor: Color(0xffffffff),
+  titleTextStyle: TextStyle(
     fontSize: 16,
     fontWeight: FontWeight.w500,
     color: Colors.white,
   ),
-  subtitleTextStyle:
-      const TextStyle(
-        fontSize: 12,
-        color: Colors.white,
-        fontWeight: FontWeight.w400,
-      ).copyWith(
-        color: const Color(0xff7A7A7A),
-      ),
-  bottomSheetBarrierColor: const Color.fromRGBO(0, 0, 0, 0.4),
+  subtitleTextStyle: null,
+  bottomSheetBarrierColor: Color.fromRGBO(0, 0, 0, 0.4),
 );

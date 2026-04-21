@@ -7,6 +7,10 @@
 - Renamed stream icons to remove the size suffix from the icon names.
 - Removed `StreamAttachmentUploadStateBuilder.successBuilder` and the `SuccessBuilder` typedef (unreachable).
 - Removed `StreamFileAttachmentThumbnail`; use `StreamImageAttachmentThumbnail` / `StreamVideoAttachmentThumbnail` or `StreamFileTypeIcon.fromMimeType(...)`.
+- Removed `StreamMessageThemeData` (ownMessageTheme / otherMessageTheme) and `StreamMessageInputThemeData` (messageInputTheme).
+- Removed `StreamChannelPreviewThemeData` (channelPreviewTheme).
+- Removed `AttachmentButton`, `StreamQuotedMessageWidget`, `EditMessageSheet`, `StreamMessageSendButton` and `DesktopReactionsBuilder`.
+- Removed `StreamChannelGridView`, `StreamChannelGridTile` and `StreamMessageSearchGridView`.
 - `StreamMessageActionConfirmationModal.cancelActionTitle` / `confirmActionTitle` are now nullable and fall back to `Translations.cancelLabel` / `confirmLabel`.
 - Renamed `Translations.attachmentsUploadProgressText` parameter `remaining` → `completed`.
 - Updated several `Translations` default strings and added new abstract members — see [`migrations/redesign/localizations.md`](../../migrations/redesign/localizations.md).

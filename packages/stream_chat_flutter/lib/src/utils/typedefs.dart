@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/message_input/attachment_button.dart';
 import 'package:stream_chat_flutter/src/message_input/command_button.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -177,18 +176,6 @@ typedef CommandButtonBuilder =
     Widget Function(
       BuildContext context,
       CommandButton commandButton,
-    );
-
-/// {@template actionButtonBuilder}
-/// A widget builder for building a custom action button.
-///
-/// [attachmentButton] is the default [AttachmentButton] configuration,
-/// use [attachmentButton.copyWith] to easily customize it.
-/// {@endtemplate}
-typedef AttachmentButtonBuilder =
-    Widget Function(
-      BuildContext context,
-      AttachmentButton attachmentButton,
     );
 
 /// {@template quotedMessageAttachmentThumbnailBuilder}

@@ -151,15 +151,12 @@ class _ChannelListDefault extends StatelessWidget {
                                       channel: channel,
                                       child: isOneToOne
                                           ? ChatInfoScreen(
-                                              messageTheme: chatTheme.ownMessageTheme,
                                               user: channel.state!.members
                                                   .where((m) => m.userId != channel.client.state.currentUser!.id)
                                                   .first
                                                   .user,
                                             )
-                                          : GroupInfoScreen(
-                                              messageTheme: chatTheme.ownMessageTheme,
-                                            ),
+                                          : const GroupInfoScreen(),
                                     );
                                   },
                                 ),

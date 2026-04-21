@@ -5,11 +5,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:video_player/video_player.dart';
 
 class ChannelFileDisplayScreen extends StatefulWidget {
-  const ChannelFileDisplayScreen({
-    super.key,
-    required this.messageTheme,
-  });
-  final StreamMessageThemeData messageTheme;
+  const ChannelFileDisplayScreen({super.key});
 
   @override
   State<ChannelFileDisplayScreen> createState() => _ChannelFileDisplayScreenState();

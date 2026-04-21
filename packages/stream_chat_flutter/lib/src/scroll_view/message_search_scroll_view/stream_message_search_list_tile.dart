@@ -109,7 +109,6 @@ class StreamMessageSearchListTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final message = messageResponse.message;
     final user = message.user!;
-    final channelPreviewTheme = StreamChannelPreviewTheme.of(context);
 
     final leading = this.leading ?? StreamUserAvatar(size: .lg, user: user);
 
@@ -117,7 +116,7 @@ class StreamMessageSearchListTile extends StatelessWidget {
         this.title ??
         MessageSearchListTileTitle(
           messageResponse: messageResponse,
-          textStyle: channelPreviewTheme.titleStyle?.copyWith(overflow: TextOverflow.ellipsis),
+          textStyle: context.streamTextTheme.metadataEmphasis.copyWith(overflow: TextOverflow.ellipsis),
         );
 
     final subtitle =
@@ -127,14 +126,17 @@ class StreamMessageSearchListTile extends StatelessWidget {
             Expanded(
               child: StreamMessagePreviewText(
                 message: message,
-                textStyle: channelPreviewTheme.subtitleStyle,
+                textStyle: context.streamTextTheme.metadataDefault.copyWith(
+                  color: context.streamColorScheme.textSecondary,
+                ),
               ),
             ),
             const SizedBox(width: 16),
             MessageSearchTileMessageDate(
               message: message,
-              textStyle: channelPreviewTheme.lastMessageAtStyle,
-              formatter: channelPreviewTheme.lastMessageAtFormatter,
+              textStyle: context.streamTextTheme.metadataDefault.copyWith(
+                color: context.streamColorScheme.textSecondary,
+              ),
             ),
           ],
         );

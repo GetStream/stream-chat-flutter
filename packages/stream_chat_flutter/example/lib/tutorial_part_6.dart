@@ -60,32 +60,13 @@ class MyApp extends StatelessWidget {
       ),
     );
     final defaultTheme = StreamChatThemeData.fromTheme(themeData);
-    final colorTheme = defaultTheme.colorTheme;
     final customTheme = StreamChatThemeData(
-      channelPreviewTheme: StreamChannelPreviewThemeData(
-        avatarTheme: StreamAvatarThemeData(
-          borderRadius: BorderRadius.circular(8),
-        ),
-      ),
       messageListViewTheme: const StreamMessageListViewThemeData(
         backgroundColor: Colors.grey,
         backgroundImage: DecorationImage(
           image: AssetImage('assets/background_doodle.png'),
           fit: BoxFit.cover,
         ),
-      ),
-      ownMessageTheme: const StreamMessageThemeData(
-        urlAttachmentTitleMaxLine: 1,
-      ),
-      otherMessageTheme: StreamMessageThemeData(
-        messageBackgroundColor: colorTheme.textHighEmphasis,
-        messageTextStyle: TextStyle(
-          color: colorTheme.barsBg,
-        ),
-        avatarTheme: StreamAvatarThemeData(
-          borderRadius: BorderRadius.circular(8),
-        ),
-        urlAttachmentTitleMaxLine: 1,
       ),
     ).merge(defaultTheme);
 
