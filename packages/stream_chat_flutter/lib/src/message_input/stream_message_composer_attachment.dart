@@ -74,9 +74,9 @@ class DefaultMessageComposerAttachment extends StatelessWidget {
       return SizedBox(
         width: 268,
         child: MessageComposerFileAttachment(
-          fileTypeIcon: StreamFileTypeIcon.fromMimeType(mimeType: attachment.file?.mediaType?.mimeType ?? ''),
-          title: attachment.title ?? context.translations.fileText,
-          subtitle: _FileAttachmentSubtitle(attachment: attachment),
+          title: Text(attachment.title ?? context.translations.fileText),
+          subtitle: Text(fileSize(attachment.file?.size ?? attachment.extraData['file_size'])),
+          fileTypeIcon: .fromMimeType(mimeType: attachment.file?.mediaType?.mimeType),
           onRemovePressed: onRemovePressed != null ? () => onRemovePressed!(attachment) : null,
         ),
       );
@@ -109,38 +109,6 @@ class DefaultMessageComposerAttachment extends StatelessWidget {
     return StreamMediaAttachmentBuilder(
       attachment: attachment,
       onRemovePressed: onRemovePressed,
-    );
-  }
-}
-
-class _FileAttachmentSubtitle extends StatelessWidget {
-  const _FileAttachmentSubtitle({
-    required this.attachment,
-  });
-
-  final Attachment attachment;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = StreamChatTheme.of(context);
-    final size = attachment.file?.size ?? attachment.extraData['file_size'];
-    final textStyle = theme.textTheme.footnote.copyWith(
-      color: theme.colorTheme.textLowEmphasis,
-    );
-    return attachment.uploadState.when(
-      preparing: () => Text(fileSize(size), style: textStyle),
-      inProgress: (sent, total) => StreamUploadProgressIndicator(
-        uploaded: sent,
-        total: total,
-        showBackground: false,
-        textStyle: textStyle,
-        progressIndicatorColor: theme.colorTheme.accentPrimary,
-      ),
-      success: () => Text(fileSize(size), style: textStyle),
-      failed: (_) => Text(
-        context.translations.uploadErrorLabel,
-        style: textStyle,
-      ),
     );
   }
 }
@@ -183,7 +151,7 @@ class MessageInputVoiceRecordingAttachment extends StatelessWidget {
             _ => null,
           },
           child: StreamVoiceRecordingAttachment(
-            title: 'Voice Message',
+            title: context.translations.voiceRecordingText,
             showTitle: true,
             track: track,
             speed: state.speed,
@@ -252,34 +220,6 @@ class StreamMediaAttachmentBuilder extends StatelessWidget {
           height: double.infinity,
           fit: BoxFit.cover,
         ),
-      ),
-    );
-  }
-}
-
-/// Material Button used for removing attachments.
-class RemoveAttachmentButton extends StatelessWidget {
-  /// Creates a new remove attachment button.
-  const RemoveAttachmentButton({super.key, this.onPressed});
-
-  /// Callback when the remove attachment button is pressed.
-  final VoidCallback? onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = StreamChatTheme.of(context);
-    final colorTheme = theme.colorTheme;
-
-    return IconButton.filled(
-      onPressed: onPressed,
-      color: colorTheme.barsBg,
-      padding: EdgeInsets.zero,
-      icon: Icon(context.streamIcons.xmark),
-      style: IconButton.styleFrom(
-        minimumSize: const Size(24, 24),
-        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-        // ignore: deprecated_member_use
-        backgroundColor: colorTheme.textHighEmphasis.withOpacity(0.6),
       ),
     );
   }

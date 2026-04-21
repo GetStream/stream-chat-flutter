@@ -48,9 +48,7 @@ class StreamMessageMetadata extends StatelessWidget {
     if (message.createdAt case final createdAt) {
       timestampWidget = StreamTimestamp(
         date: createdAt.toLocal(),
-        formatter: (context, date) {
-          return Jiffy.parseFromDateTime(date).jm;
-        },
+        formatter: (context, date) => Jiffy.parseFromDateTime(date).jm,
       );
     }
 

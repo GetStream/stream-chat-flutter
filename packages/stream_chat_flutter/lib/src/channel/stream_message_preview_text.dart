@@ -10,6 +10,7 @@ class StreamMessagePreviewText extends StatelessWidget {
     this.channel,
     this.language,
     this.textStyle,
+    this.showCaption = true,
   });
 
   /// The message to display.
@@ -24,10 +25,16 @@ class StreamMessagePreviewText extends StatelessWidget {
   /// The style to use for the text.
   final TextStyle? textStyle;
 
+  /// Whether to include the message text caption alongside the type label.
+  ///
+  /// Set to `false` for tight previews (e.g. quoted / edit headers) where
+  /// only the attachment type label should be shown.
+  final bool showCaption;
+
   @override
   Widget build(BuildContext context) {
-    final currentUser = StreamChat.of(context).currentUser!;
-    final translationLanguage = language ?? currentUser.language ?? 'en';
+    final currentUser = StreamChat.maybeOf(context)?.currentUser;
+    final translationLanguage = language ?? currentUser?.language ?? 'en';
     final translatedMessage = message.translate(translationLanguage);
     final previewMessage = translatedMessage.replaceMentions(linkify: false);
 
@@ -39,12 +46,13 @@ class StreamMessagePreviewText extends StatelessWidget {
       previewMessage,
       channel: channel,
       currentUser: currentUser,
-      textStyle: textStyle,
+      showCaption: showCaption,
     );
 
     return Text.rich(
       maxLines: 1,
       previewTextSpan,
+      style: textStyle,
       overflow: TextOverflow.ellipsis,
       textAlign: TextAlign.start,
     );

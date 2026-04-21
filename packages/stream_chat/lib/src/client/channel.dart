@@ -664,9 +664,14 @@ class Channel {
             });
       }),
     ).whenComplete(() {
-      if (message!.attachments.every((it) => it.uploadState.isSuccess)) {
-        _messageAttachmentsUploadCompleter.remove(messageId)?.complete(message);
-      }
+      final completer = _messageAttachmentsUploadCompleter.remove(messageId);
+      if (completer == null || completer.isCompleted) return;
+
+      // Always complete with the latest message view so callers can decide
+      // success vs. partial failure by inspecting per-attachment upload
+      // states. Cancellation is still surfaced via `completeError` from the
+      // sendMessage/updateMessage/deleteMessage entry points.
+      completer.complete(message);
     });
   }
 
@@ -723,6 +728,11 @@ class Channel {
 
         // ignore: parameter_assignments
         message = await attachmentsUploadCompleter.future;
+
+        // Fail the whole message if any attachment failed to upload
+        if (message.attachments.any((it) => it.uploadState.isFailed)) {
+          throw const StreamChatError('Failed to upload one or more attachments');
+        }
       }
 
       // Validate the final message before sending it to the server.
@@ -818,6 +828,11 @@ class Channel {
 
         // ignore: parameter_assignments
         message = await attachmentsUploadCompleter.future;
+
+        // Fail the whole message if any attachment failed to upload
+        if (message.attachments.any((it) => it.uploadState.isFailed)) {
+          throw const StreamChatError('Failed to upload one or more attachments');
+        }
       }
 
       // Wait for the previous update call to finish. Otherwise, the order of

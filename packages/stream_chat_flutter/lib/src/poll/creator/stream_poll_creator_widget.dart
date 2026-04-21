@@ -82,7 +82,7 @@ class StreamPollCreatorWidget extends StatelessWidget {
               SizedBox(height: spacing.xxl),
               PollConfigOption(
                 title: translations.multipleAnswersLabel,
-                description: 'Select more than one option',
+                description: translations.multipleAnswersDescription,
                 value: poll.enforceUniqueVote == false,
                 onChanged: (value) {
                   controller.enforceUniqueVote = !value;
@@ -92,10 +92,9 @@ class StreamPollCreatorWidget extends StatelessWidget {
                 child: PollConfigOption(
                   contentPadding: EdgeInsets.zero,
                   title: translations.maximumVotesPerPersonLabel,
-                  description: switch (config.allowedVotesRange) {
-                    final range? => 'Choose between ${range.min ?? 2}\u2013${range.max ?? 10} options',
-                    _ => 'Choose between 2\u201310 options',
-                  },
+                  description: translations.maximumVotesPerPersonDescription(
+                    config.allowedVotesRange,
+                  ),
                   value: poll.maxVotesAllowed != null,
                   onChanged: (enabled) {
                     controller.maxVotesAllowed = enabled ? config.allowedVotesRange?.min ?? 2 : null;
@@ -112,21 +111,21 @@ class StreamPollCreatorWidget extends StatelessWidget {
               SizedBox(height: spacing.md),
               PollConfigOption(
                 title: translations.anonymousPollLabel,
-                description: 'Hide who voted',
+                description: translations.anonymousPollDescription,
                 value: poll.votingVisibility == .anonymous,
                 onChanged: (anon) => controller.votingVisibility = anon ? .anonymous : .public,
               ),
               SizedBox(height: spacing.md),
               PollConfigOption(
                 title: translations.suggestAnOptionLabel,
-                description: 'Let others add options',
+                description: translations.suggestAnOptionDescription,
                 value: poll.allowUserSuggestedOptions,
                 onChanged: (allow) => controller.allowSuggestions = allow,
               ),
               SizedBox(height: spacing.md),
               PollConfigOption(
                 title: translations.addACommentLabel,
-                description: 'Allow others to add comments',
+                description: translations.addACommentDescription,
                 value: poll.allowAnswers,
                 onChanged: (allow) => controller.allowComments = allow,
               ),

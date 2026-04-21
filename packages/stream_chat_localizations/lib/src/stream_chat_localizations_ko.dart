@@ -47,9 +47,9 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
 
   @override
   String attachmentsUploadProgressText({
-    required int remaining,
+    required int completed,
     required int total,
-  }) => '$remaining/${total}mb를 업로드중...';
+  }) => '$total개 중 $completed개 업로드됨...';
 
   @override
   String pinnedByUserText({
@@ -65,7 +65,7 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
   String get sendMessagePermissionError => '메시지를 보낼 수 있는 권한이 없습니다';
 
   @override
-  String get emptyMessagesText => '현재 메시지가 없습니다';
+  String get emptyMessagesText => '아직 메시지가 없습니다';
 
   @override
   String get genericErrorText => '뭔가 잘못됐습니다';
@@ -116,7 +116,7 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
   String get searchGifLabel => 'GIF 검색';
 
   @override
-  String get writeAMessageLabel => '메시지 쓰기';
+  String get writeAMessageLabel => '메시지 보내기';
 
   @override
   String get instantCommandsLabel => '인스턴트 커맨즈';
@@ -295,6 +295,16 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
 
   @override
   String watchersCountText(int count) => '$count명이 온라인';
+
+  @override
+  String membersCountWithOnlineText({
+    required int memberCount,
+    required int onlineCount,
+  }) {
+    final members = membersCountText(memberCount);
+    if (onlineCount <= 0) return members;
+    return '$members, ${watchersCountText(onlineCount)}';
+  }
 
   @override
   String get viewInfoLabel => '정보를 보기';
@@ -639,6 +649,9 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
   String get fileAttachmentText => '파일';
 
   @override
+  String get linkAttachmentText => '링크';
+
+  @override
   String filesAttachmentCountText(int count) => count == 1 ? '파일' : '파일 $count개';
 
   @override
@@ -715,4 +728,40 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
 
   @override
   String get unsupportedAttachmentLabel => '지원되지 않는 첨부파일';
+
+  @override
+  String get confirmLabel => '확인';
+
+  @override
+  String get emptyReactionsText => '아직 반응이 없습니다';
+
+  @override
+  String get loadingReactionsError => '반응을 불러오는 중 오류가 발생했습니다';
+
+  @override
+  String get tapToRemoveReactionLabel => '탭하여 제거';
+
+  @override
+  String get justNowLabel => '방금';
+
+  @override
+  String replyToUserLabel(String userName) => '$userName님에게 답장';
+
+  @override
+  String get multipleAnswersDescription => '여러 옵션 선택';
+
+  @override
+  String maximumVotesPerPersonDescription([Range<int>? range]) {
+    final (:min, :max) = range ?? (min: 2, max: 10);
+    return '$min\u2013$max개의 옵션 중에서 선택';
+  }
+
+  @override
+  String get anonymousPollDescription => '투표자 숨기기';
+
+  @override
+  String get suggestAnOptionDescription => '다른 사람이 옵션을 추가하도록 허용';
+
+  @override
+  String get addACommentDescription => '다른 사람이 댓글을 추가하도록 허용';
 }

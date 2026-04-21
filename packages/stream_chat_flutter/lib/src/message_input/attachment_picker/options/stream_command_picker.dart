@@ -18,57 +18,58 @@ class StreamCommandPicker extends StatelessWidget {
     final channel = StreamChannel.of(context).channel;
     final commands = channel.config?.commands ?? const [];
 
-    final textTheme = StreamChatTheme.of(context).textTheme;
-    final colorTheme = StreamChatTheme.of(context).colorTheme;
     final spacing = context.streamSpacing;
+
+    final textTheme = context.streamTextTheme;
+    final colorScheme = context.streamColorScheme;
 
     return OptionDrawer(
       margin: EdgeInsets.zero,
-      child: ListView.builder(
-        padding: EdgeInsets.zero,
-        itemCount: commands.length + 1,
-        itemBuilder: (context, index) {
-          final command = index == 0 ? null : commands[index - 1];
-          if (command == null) {
-            return Padding(
-              padding: EdgeInsets.symmetric(horizontal: spacing.md),
-              child: Text(context.translations.instantCommandsLabel, style: textTheme.headlineBold),
-            );
-          }
-
-          return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4),
-            child: InkWell(
-              borderRadius: BorderRadius.circular(12),
-              onTap: onCommandSelected == null ? null : () => onCommandSelected!(command),
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: spacing.sm, vertical: spacing.xs),
-                child: Row(
-                  spacing: spacing.sm,
-                  children: [
-                    StreamCommandIcon(command: command),
-                    Text(
-                      command.name.sentenceCase,
-                      style: textTheme.bodyBold.copyWith(
-                        color: colorTheme.textHighEmphasis,
+      child: Material(
+        type: .transparency,
+        child: Column(
+          spacing: spacing.md,
+          crossAxisAlignment: .start,
+          children: [
+            Padding(
+              padding: .symmetric(horizontal: spacing.md),
+              child: Text(context.translations.instantCommandsLabel, style: textTheme.headingSm),
+            ),
+            Expanded(
+              child: ListView.builder(
+                padding: .symmetric(horizontal: spacing.xxs, vertical: spacing.xxxs),
+                itemCount: commands.length,
+                itemBuilder: (context, index) {
+                  final command = commands[index];
+                  return InkWell(
+                    onTap: onCommandSelected == null ? null : () => onCommandSelected!(command),
+                    child: Padding(
+                      padding: .symmetric(horizontal: spacing.sm, vertical: spacing.xs),
+                      child: Row(
+                        spacing: spacing.sm,
+                        children: [
+                          StreamCommandIcon(command: command),
+                          Text(
+                            command.name.sentenceCase,
+                            style: textTheme.bodyEmphasis.copyWith(color: colorScheme.textPrimary),
+                          ),
+                          Expanded(
+                            child: Text(
+                              '/${command.name} ${command.args}',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: textTheme.bodyDefault.copyWith(color: colorScheme.textTertiary),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    Expanded(
-                      child: Text(
-                        '/${command.name} ${command.args}',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: textTheme.body.copyWith(
-                          color: colorTheme.textLowEmphasis,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+                  );
+                },
               ),
             ),
-          );
-        },
+          ],
+        ),
       ),
     );
   }

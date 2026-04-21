@@ -50,7 +50,7 @@ class StreamMessageComposerRecordingOngoing extends StatelessWidget {
           ),
           const SizedBox(width: 23),
           _GradientText(
-            'Slide to cancel',
+            context.translations.slideToCancelLabel,
             style: context.streamTextTheme.bodyDefault,
             gradient: LinearGradient(
               colors: [colorScheme.textPrimary, colorScheme.textTertiary],

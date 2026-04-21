@@ -1,3 +1,10 @@
+## Upcoming
+
+🐞 Fixed
+
+- Fixed `Channel.sendMessage` and `Channel.updateMessage` hanging forever when
+  any attachment upload failed; they now throw `StreamChatError` instead.
+
 ## 10.0.0-beta.13
 
 🛑️ Breaking

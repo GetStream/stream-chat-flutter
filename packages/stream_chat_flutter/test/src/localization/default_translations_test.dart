@@ -27,7 +27,7 @@ void main() {
     expect(translations.onlyVisibleToYouText, isNotNull);
     expect(translations.threadReplyCountText(3), isNotNull);
     expect(
-      translations.attachmentsUploadProgressText(remaining: 3, total: 10),
+      translations.attachmentsUploadProgressText(completed: 3, total: 10),
       isNotNull,
     );
     expect(

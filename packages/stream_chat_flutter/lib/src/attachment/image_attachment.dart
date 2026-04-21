@@ -132,15 +132,14 @@ class DefaultStreamImageAttachment extends StatelessWidget {
         aspectRatio: imageSize?.aspectRatio ?? 1,
         child: Stack(
           fit: .expand,
-          alignment: Alignment.center,
+          alignment: .center,
           children: [
             StreamImageAttachmentThumbnail(
               image: props.image,
               fit: fit,
               resize: props.resize,
             ),
-            Padding(
-              padding: const EdgeInsets.all(8),
+            Positioned.fill(
               child: StreamAttachmentUploadStateBuilder(
                 message: props.message,
                 attachment: props.image,

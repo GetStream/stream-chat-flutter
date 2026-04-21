@@ -50,7 +50,12 @@ class StreamMessageInputController extends ValueNotifier<Message> {
   StreamMessageInputController._({
     required Message initialMessage,
     Map<RegExp, TextStyleBuilder>? textPatternStyle,
-  }) : _initialMessage = initialMessage,
+  }) : assert(
+         initialMessage.state.isInitial,
+         'Controllers must be created with an initial (draft) message. '
+         'Call editMessage() to enter edit mode on an existing message.',
+       ),
+       _initialMessage = initialMessage,
        _textFieldController = MessageTextFieldController.fromValue(
          _textEditingValueFromMessage(initialMessage),
          textPatternStyle: textPatternStyle,
@@ -181,14 +186,85 @@ class StreamMessageInputController extends ValueNotifier<Message> {
     );
   }
 
-  /// Sets a command for the message.
+  // Snapshot of the composer message taken when [command] is first set, so
+  // [clearCommand] can restore the user's content.
+  Message? _messageBeforeCommand;
+
+  /// Sets a command on the message.
+  ///
+  /// Replaces the composer's content with an empty message tagged with
+  /// [command] so the UI can reflect command mode. Call [clearCommand] to
+  /// exit command mode and restore the composer to the content it had
+  /// before. Passing `null` is equivalent to calling [clearCommand].
+  ///
+  /// Safe to call repeatedly during an active command; [clearCommand] still
+  /// restores the content that was in the composer before the first call.
   set command(String? command) {
-    // Setting the command should also clear the text and attachments.
+    if (command == null) return clearCommand();
+    _messageBeforeCommand ??= message;
+
     message = message.copyWith(
       text: '',
       attachments: [],
       command: command,
     );
+  }
+
+  /// Clears the active command and restores the composer to the content it
+  /// had before [command] was set.
+  ///
+  /// No-op if there is no active command.
+  void clearCommand() {
+    if (_messageBeforeCommand case final message?) {
+      this.message = message;
+      _messageBeforeCommand = null;
+    }
+  }
+
+  /// Whether the controller is currently in edit mode.
+  ///
+  /// Equivalent to `messageBeingEdited != null`.
+  bool get isEditing => _messageBeingEdited != null;
+
+  /// The message currently being edited, unmodified by the user's changes.
+  ///
+  /// Set by [editMessage] and cleared by [cancelEditMessage]. Use this to
+  /// display a stable preview of the original message while the user is
+  /// typing their edits.
+  Message? get messageBeingEdited => _messageBeingEdited;
+  Message? _messageBeingEdited;
+
+  // Snapshot of the composer message taken when [editMessage] is first called,
+  // so [cancelEditMessage] can restore the user's draft.
+  Message? _messageBeforeEdit;
+
+  /// Switches the controller to edit mode for the given [message].
+  ///
+  /// Replaces the composer's content with [message] and exposes it via
+  /// [messageBeingEdited] so the UI can show a preview of the message being
+  /// edited. Call [cancelEditMessage] to exit edit mode and restore the
+  /// composer to the content it had before.
+  ///
+  /// Safe to call repeatedly during an active edit (e.g. when a newer
+  /// version of the same message arrives); [cancelEditMessage] still
+  /// restores the content that was in the composer before the first call.
+  void editMessage(Message message) {
+    _messageBeforeEdit ??= this.message;
+    _messageBeingEdited = message;
+
+    this.message = message.copyWith(state: MessageState.updating);
+  }
+
+  /// Cancels the active edit and restores the composer to the content it
+  /// had before [editMessage] was called.
+  ///
+  /// No-op if there is no active edit.
+  void cancelEditMessage() {
+    _messageBeingEdited = null;
+    if (_messageBeforeEdit case final message?) {
+      this.message = message;
+      _messageBeforeEdit = null;
+    }
   }
 
   /// Sets the [showInChannel] flag of the message.
@@ -304,7 +380,8 @@ class StreamMessageInputController extends ValueNotifier<Message> {
   /// Sets the [message], to empty.
   ///
   /// After calling this function, [text], [attachments] and [mentionedUsers]
-  /// will all be empty.
+  /// will all be empty, and any active command is dropped. Any active edit
+  /// session is preserved — use [cancelEditMessage] to exit edit mode.
   ///
   /// Calling this will notify all the listeners of this
   /// [StreamMessageInputController] that they need to update
@@ -312,45 +389,20 @@ class StreamMessageInputController extends ValueNotifier<Message> {
   /// this method should only be called between frames, e.g. in response to user
   /// actions, not during the build, layout, or paint phases.
   void clear() {
+    // Clear the command state, if any.
+    _messageBeforeCommand = null;
     message = Message();
-  }
-
-  /// The original message being edited, before any user changes.
-  ///
-  /// This is set by [editMessage] and cleared by [cancelEditMessage].
-  /// Use this to display a stable preview of the original message while the
-  /// user is typing their edits.
-  Message? get editingOriginalMessage => _editingOriginalMessage;
-  Message? _editingOriginalMessage;
-
-  Message? _preEditMessage;
-
-  /// Sets the controller to edit an existing [message].
-  ///
-  /// Stores a snapshot of [message] in [editingOriginalMessage] so the
-  /// original content stays visible while the user types.
-  /// Saves the current composer state so [cancelEditMessage] can restore it.
-  void editMessage(Message message) {
-    _preEditMessage = this.message;
-    _editingOriginalMessage = message;
-    this.message = message.copyWith(state: MessageState.updating);
-  }
-
-  /// Cancels the current edit and restores the composer to the state it was
-  /// in before editing began.
-  void cancelEditMessage() {
-    _editingOriginalMessage = null;
-    if (_preEditMessage != null) {
-      message = _preEditMessage!;
-      _preEditMessage = null;
-    } else {
-      _initialMessage = Message();
-      reset();
-    }
   }
 
   /// Sets the [message] to the initial [Message] value.
   void reset({bool resetId = true}) {
+    // Reset the edit state, if any.
+    _messageBeingEdited = null;
+    _messageBeforeEdit = null;
+
+    // Reset the command state, if any.
+    _messageBeforeCommand = null;
+
     if (resetId) {
       final newId = const Uuid().v4();
       _initialMessage = _initialMessage.copyWith(id: newId);
@@ -397,12 +449,19 @@ class StreamRestorableMessageInputController extends RestorableChangeNotifier<St
 
   @override
   StreamMessageInputController fromPrimitives(Object? data) {
-    final message = Message.fromJson(json.decode(data! as String));
-    return StreamMessageInputController(message: message);
+    final restoredData = json.decode(data! as String);
+
+    final message = Message.fromJson(restoredData['message']);
+    final state = MessageState.fromJson(restoredData['message_state']);
+
+    return StreamMessageInputController(message: message.copyWith(state: state));
   }
 
   @override
-  String toPrimitives() => json.encode(value.message);
+  String toPrimitives() => json.encode({
+    'message': value.message.toJson(),
+    'message_state': value.message.state.toJson(),
+  });
 }
 
 Timer _setPeriodicTimer(

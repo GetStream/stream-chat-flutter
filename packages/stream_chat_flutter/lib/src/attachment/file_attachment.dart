@@ -1,9 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/attachment/handler/stream_attachment_handler.dart';
-import 'package:stream_chat_flutter/src/attachment/thumbnail/file_attachment_thumbnail.dart';
 import 'package:stream_chat_flutter/src/components/stream_chat_component_builders.dart';
-import 'package:stream_chat_flutter/src/indicators/upload_progress_indicator.dart';
-import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/utils/utils.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:stream_core_flutter/stream_core_flutter.dart';
@@ -134,10 +130,9 @@ class DefaultStreamFileAttachment extends StatelessWidget {
         child: Row(
           spacing: spacing.sm,
           children: [
-            SizedBox(
-              width: 32,
-              height: 40,
-              child: _FileTypeImage(file: file),
+            StreamFileTypeIcon.fromMimeType(
+              size: .lg,
+              mimeType: file.title?.mediaType?.mimeType,
             ),
             Expanded(
               child: Column(
@@ -145,176 +140,23 @@ class DefaultStreamFileAttachment extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    maxLines: 2,
-                    file.title ?? context.translations.fileText,
+                  DefaultTextStyle.merge(
+                    maxLines: 1,
+                    overflow: .ellipsis,
                     style: textTheme.captionEmphasis.copyWith(color: colorScheme.textPrimary),
-                    overflow: TextOverflow.ellipsis,
+                    child: Text(file.title ?? context.translations.fileText),
                   ),
-                  _FileAttachmentSubtitle(attachment: file),
+                  DefaultTextStyle.merge(
+                    maxLines: 1,
+                    overflow: .ellipsis,
+                    style: textTheme.metadataDefault.copyWith(color: colorScheme.textPrimary),
+                    child: _FileAttachmentSubtitle(attachment: file),
+                  ),
                 ],
               ),
             ),
-            Material(
-              type: MaterialType.transparency,
-              child: props.trailing ?? _Trailing(attachment: file, message: props.message),
-            ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _FileTypeImage extends StatelessWidget {
-  const _FileTypeImage({required this.file});
-
-  final Attachment file;
-
-  // TODO: Improve image memory.
-  // This is using the full image instead of a smaller version (thumbnail)
-  @override
-  Widget build(BuildContext context) {
-    Widget child = StreamFileAttachmentThumbnail(
-      file: file,
-      width: double.infinity,
-      height: double.infinity,
-    );
-
-    final mediaType = file.title?.mediaType;
-    final isImage = mediaType?.type == AttachmentType.image;
-    final isVideo = mediaType?.type == AttachmentType.video;
-    if (isImage || isVideo) {
-      final colorTheme = StreamChatTheme.of(context).colorTheme;
-      child = Container(
-        clipBehavior: Clip.hardEdge,
-        decoration: ShapeDecoration(
-          shape: RoundedRectangleBorder(
-            side: BorderSide(
-              color: colorTheme.borders,
-              strokeAlign: BorderSide.strokeAlignOutside,
-            ),
-            borderRadius: BorderRadius.circular(8),
-          ),
-        ),
-        child: child,
-      );
-    }
-
-    return child;
-  }
-}
-
-class _Trailing extends StatelessWidget {
-  const _Trailing({
-    required this.attachment,
-    required this.message,
-  });
-
-  final Attachment attachment;
-  final Message message;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = StreamChatTheme.of(context);
-    final channel = StreamChannel.of(context).channel;
-    final attachmentId = attachment.id;
-
-    if (message.state.isCompleted) {
-      return IconButton(
-        icon: Icon(context.streamIcons.arrowDown),
-        color: theme.colorTheme.textHighEmphasis,
-        visualDensity: VisualDensity.compact,
-        onPressed: () async {
-          final assetUrl = attachment.assetUrl;
-          if (assetUrl != null) {
-            if (isMobileDeviceOrWeb) {
-              launchURL(context, assetUrl);
-            } else {
-              StreamAttachmentHandler.instance.downloadAttachment(attachment);
-            }
-          }
-        },
-      );
-    }
-
-    return attachment.uploadState.when(
-      preparing: () => Padding(
-        padding: const EdgeInsets.all(8),
-        child: _TrailingButton(
-          icon: Icon(
-            context.streamIcons.xmark,
-            color: theme.colorTheme.barsBg,
-          ),
-          fillColor: theme.colorTheme.overlayDark,
-          onPressed: () => channel.cancelAttachmentUpload(attachmentId),
-        ),
-      ),
-      inProgress: (_, __) => Padding(
-        padding: const EdgeInsets.all(8),
-        child: _TrailingButton(
-          icon: Icon(
-            context.streamIcons.xmark,
-            color: theme.colorTheme.barsBg,
-          ),
-          fillColor: theme.colorTheme.overlayDark,
-          onPressed: () => channel.cancelAttachmentUpload(attachmentId),
-        ),
-      ),
-      success: () => Padding(
-        padding: const EdgeInsets.all(8),
-        child: CircleAvatar(
-          backgroundColor: theme.colorTheme.accentPrimary,
-          maxRadius: 12,
-          child: Icon(
-            context.streamIcons.checkmark,
-            color: theme.colorTheme.barsBg,
-          ),
-        ),
-      ),
-      failed: (_) => Padding(
-        padding: const EdgeInsets.all(8),
-        child: _TrailingButton(
-          icon: Icon(
-            context.streamIcons.retry,
-            color: theme.colorTheme.barsBg,
-          ),
-          fillColor: theme.colorTheme.overlayDark,
-          onPressed: () => channel.retryAttachmentUpload(
-            message.id,
-            attachmentId,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _TrailingButton extends StatelessWidget {
-  const _TrailingButton({
-    this.onPressed,
-    this.fillColor,
-    this.icon,
-  });
-
-  final VoidCallback? onPressed;
-  final Color? fillColor;
-  final Widget? icon;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 24,
-      width: 24,
-      child: RawMaterialButton(
-        elevation: 0,
-        highlightElevation: 0,
-        focusElevation: 0,
-        hoverElevation: 0,
-        onPressed: onPressed,
-        fillColor: fillColor,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        child: icon,
       ),
     );
   }
@@ -329,22 +171,38 @@ class _FileAttachmentSubtitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = context.streamTextTheme;
+    final icons = context.streamIcons;
+    final spacing = context.streamSpacing;
+
     final colorScheme = context.streamColorScheme;
 
-    final size = attachment.file?.size ?? attachment.extraData['file_size'];
-    final textStyle = textTheme.metadataDefault.copyWith(color: colorScheme.textPrimary);
+    final attachmentSize = attachment.file?.size ?? attachment.extraData['file_size'];
+
     return attachment.uploadState.when(
-      preparing: () => Text(fileSize(size), style: textStyle),
-      inProgress: (sent, total) => StreamUploadProgressIndicator(
-        uploaded: sent,
-        total: total,
-        showBackground: false,
-        textStyle: textStyle,
-        progressIndicatorColor: colorScheme.accentPrimary,
+      success: () => Text(fileSize(attachmentSize)),
+      preparing: () => Text(fileSize(attachmentSize)),
+      inProgress: (sent, total) {
+        // Fall back to an indeterminate spinner when the total size is unknown
+        // (e.g. `total` reported as `-1` or `0`) instead of rendering a fake 0%.
+        final progress = total > 0 ? sent / total : null;
+
+        return Row(
+          mainAxisSize: .min,
+          spacing: spacing.xxs,
+          children: [
+            StreamLoadingSpinner(value: progress, size: .xs),
+            Text('${fileSize(sent)} / ${fileSize(total)}'),
+          ],
+        );
+      },
+      failed: (_) => Row(
+        mainAxisSize: .min,
+        spacing: spacing.xxs,
+        children: [
+          Icon(icons.exclamationTriangleFill, size: 16, color: colorScheme.accentError),
+          Text(context.translations.uploadErrorLabel),
+        ],
       ),
-      success: () => Text(fileSize(size), style: textStyle),
-      failed: (_) => Text(context.translations.uploadErrorLabel, style: textStyle),
     );
   }
 }

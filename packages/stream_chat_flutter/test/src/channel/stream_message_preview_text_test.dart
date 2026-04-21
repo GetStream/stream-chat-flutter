@@ -348,7 +348,7 @@ void main() {
       expect(_extractText(tester), contains('02:05'));
     });
 
-    testWidgets('giphy attachment shows /giphy text prefix (no icon)', (tester) async {
+    testWidgets('giphy attachment with caption shows file icon and caption', (tester) async {
       final message = Message(
         text: 'funny cat',
         user: User(id: 'other-user-id', name: 'Other User'),
@@ -357,9 +357,72 @@ void main() {
 
       await pumpMessagePreview(tester, message);
 
-      expect(_findIcons(tester), isEmpty);
-      expect(_extractText(tester), contains('/giphy'));
-      expect(_extractText(tester), contains('funny cat'));
+      expect(_findIcons(tester), hasLength(1));
+      expect(_extractText(tester), 'funny cat');
+    });
+
+    testWidgets('giphy attachment without caption shows file icon and Giphy label', (tester) async {
+      final message = Message(
+        text: '',
+        user: User(id: 'other-user-id', name: 'Other User'),
+        attachments: [Attachment(type: AttachmentType.giphy)],
+      );
+
+      await pumpMessagePreview(tester, message);
+
+      expect(_findIcons(tester), hasLength(1));
+      expect(_extractText(tester), 'Giphy');
+    });
+
+    testWidgets('link preview with caption shows link icon and caption', (tester) async {
+      final message = Message(
+        text: 'check out this article',
+        user: User(id: 'other-user-id', name: 'Other User'),
+        attachments: [
+          Attachment(
+            type: AttachmentType.urlPreview,
+            title: 'Example article',
+            titleLink: 'https://example.com',
+          ),
+        ],
+      );
+
+      await pumpMessagePreview(tester, message);
+
+      expect(_findIcons(tester), hasLength(1));
+      expect(_extractText(tester), 'check out this article');
+    });
+
+    testWidgets('link preview without caption falls back to attachment title', (tester) async {
+      final message = Message(
+        text: '',
+        user: User(id: 'other-user-id', name: 'Other User'),
+        attachments: [
+          Attachment(
+            type: AttachmentType.urlPreview,
+            title: 'Example article',
+            titleLink: 'https://example.com',
+          ),
+        ],
+      );
+
+      await pumpMessagePreview(tester, message);
+
+      expect(_findIcons(tester), hasLength(1));
+      expect(_extractText(tester), 'Example article');
+    });
+
+    testWidgets('link preview without caption or title falls back to "Link"', (tester) async {
+      final message = Message(
+        text: '',
+        user: User(id: 'other-user-id', name: 'Other User'),
+        attachments: [Attachment(type: AttachmentType.urlPreview)],
+      );
+
+      await pumpMessagePreview(tester, message);
+
+      expect(_findIcons(tester), hasLength(1));
+      expect(_extractText(tester), 'Link');
     });
 
     testWidgets('unknown attachment type shows file icon with text', (tester) async {
@@ -546,7 +609,7 @@ void main() {
       expect(_extractText(tester), isEmpty);
     });
 
-    testWidgets('poll in group channel doesnt includes sender prefix', (tester) async {
+    testWidgets('poll in group channel includes sender prefix', (tester) async {
       final channel = ChannelModel(
         id: 'test-channel',
         type: 'messaging',
@@ -569,7 +632,7 @@ void main() {
       expect(_findIcons(tester), hasLength(1));
 
       final text = _extractText(tester);
-      expect(text, isNot(contains('You: ')));
+      expect(text, contains('You: '));
       expect(text, contains('Lunch spot?'));
     });
   });
@@ -803,7 +866,7 @@ void main() {
   group('Custom MessagePreviewFormatter', () {
     const customFormatter = _CustomMessagePreviewFormatter();
 
-    testWidgets('can remove current user prefix via formatGroupMessage', (tester) async {
+    testWidgets('can remove current user prefix via formatCurrentUserMessage', (tester) async {
       final channel = ChannelModel(
         id: 'test-channel',
         type: 'messaging',
@@ -969,22 +1032,20 @@ void main() {
 // Helpers
 // ---------------------------------------------------------------------------
 
-/// Extracts concatenated text from all [TextSpan]s in the preview, ignoring
-/// [WidgetSpan]s (icons, spacers).
+/// Extracts concatenated text from all [TextSpan]s in the preview, skipping
+/// icon placeholders ([WidgetSpan]s).
 String _extractText(WidgetTester tester) {
   final span = _getPreviewSpan(tester);
-  return _spanText(span);
+  return _spanText(span).trim();
 }
 
 String _spanText(InlineSpan span) {
-  if (span is TextSpan) {
-    final buffer = StringBuffer(span.text ?? '');
-    for (final child in span.children ?? <InlineSpan>[]) {
-      buffer.write(_spanText(child));
-    }
-    return buffer.toString();
+  if (span is! TextSpan) return '';
+  final buffer = StringBuffer(span.text ?? '');
+  for (final child in span.children ?? <InlineSpan>[]) {
+    buffer.write(_spanText(child));
   }
-  return '';
+  return buffer.toString();
 }
 
 /// Returns the root [TextSpan] rendered by the [StreamMessagePreviewText].
@@ -999,27 +1060,61 @@ TextSpan _getPreviewSpan(WidgetTester tester) {
 }
 
 /// Recursively collects all leaf [TextSpan]s that have non-null [text].
-List<TextSpan> _findTextSpans(InlineSpan span) {
+///
+/// The returned spans carry their *effective* style — merged top-down with
+/// every ancestor [TextSpan.style] — since the formatter applies style at
+/// the root and lets children inherit it via Flutter's normal span-style
+/// inheritance.
+List<TextSpan> _findTextSpans(InlineSpan span, [TextStyle? inheritedStyle]) {
   final result = <TextSpan>[];
-  if (span is TextSpan) {
-    if (span.text != null) result.add(span);
-    for (final child in span.children ?? <InlineSpan>[]) {
-      result.addAll(_findTextSpans(child));
-    }
+  if (span is! TextSpan) return result;
+
+  final effectiveStyle = inheritedStyle?.merge(span.style) ?? span.style;
+  if (span.text != null) {
+    result.add(TextSpan(text: span.text, style: effectiveStyle));
+  }
+  for (final child in span.children ?? <InlineSpan>[]) {
+    result.addAll(_findTextSpans(child, effectiveStyle));
   }
   return result;
 }
 
-/// Finds all [Icon] widgets rendered inside the [StreamMessagePreviewText].
-List<Icon> _findIcons(WidgetTester tester) {
-  return tester
-      .widgetList<Icon>(
-        find.descendant(
-          of: find.byType(StreamMessagePreviewText),
-          matching: find.byType(Icon),
-        ),
-      )
-      .toList();
+/// Finds all icon [WidgetSpan]s rendered inside the [StreamMessagePreviewText].
+///
+/// Icons are emitted as [WidgetSpan]s wrapping an [Icon] so they can be
+/// vertically centered against the surrounding text via
+/// [PlaceholderAlignment.middle].
+List<_PreviewIcon> _findIcons(WidgetTester tester) {
+  final span = _getPreviewSpan(tester);
+  final result = <_PreviewIcon>[];
+  void visit(InlineSpan span) {
+    if (span is WidgetSpan) {
+      final child = span.child;
+      if (child is Icon) {
+        result.add(_PreviewIcon(icon: child.icon, size: child.size));
+      }
+      return;
+    }
+    if (span is TextSpan) {
+      for (final child in span.children ?? <InlineSpan>[]) {
+        visit(child);
+      }
+    }
+  }
+
+  visit(span);
+  return result;
+}
+
+/// Minimal stand-in for the old `Icon` widget in tests.
+class _PreviewIcon {
+  const _PreviewIcon({this.icon, this.size});
+
+  /// The [IconData] rendered.
+  final IconData? icon;
+
+  /// Nominal icon render size.
+  final double? size;
 }
 
 // ---------------------------------------------------------------------------
@@ -1036,11 +1131,10 @@ class _CustomMessagePreviewFormatter extends StreamMessagePreviewFormatter {
     bool showCaption = true,
     ChannelModel? channel,
     User? currentUser,
-    TextStyle? textStyle,
   }) {
     if (channel != null && channel.memberCount <= 2) {
       final text = message.text ?? '';
-      return TextSpan(text: '💬 $text', style: textStyle);
+      return TextSpan(text: '💬 $text');
     }
     return super.formatMessage(
       context,
@@ -1048,31 +1142,33 @@ class _CustomMessagePreviewFormatter extends StreamMessagePreviewFormatter {
       showCaption: showCaption,
       channel: channel,
       currentUser: currentUser,
-      textStyle: textStyle,
     );
   }
 
   @override
-  TextSpan? formatGroupMessage(
-    BuildContext context,
-    User? messageAuthor,
-    User? currentUser,
-  ) {
-    if (messageAuthor?.id == currentUser?.id) return null;
-
-    final authorName = messageAuthor?.name;
-    if (authorName == null || authorName.isEmpty) return null;
-
-    return TextSpan(text: '$authorName says: ');
+  TextSpan formatCurrentUserMessage(BuildContext context, TextSpan messageBody) {
+    return messageBody;
   }
 
   @override
-  TextSpan formatPollMessage(
+  TextSpan formatGroupMessage(
     BuildContext context,
-    Poll poll,
-    User? currentUser, {
-    TextStyle? textStyle,
-  }) {
+    User? messageAuthor,
+    TextSpan messageBody,
+  ) {
+    final authorName = messageAuthor?.name;
+    if (authorName == null || authorName.isEmpty) return messageBody;
+
+    return TextSpan(
+      children: [
+        TextSpan(text: '$authorName says: '),
+        messageBody,
+      ],
+    );
+  }
+
+  @override
+  TextSpan formatPollMessage(BuildContext context, Poll poll, User? currentUser) {
     return TextSpan(
       text: poll.name.trim().isEmpty ? '📊 Poll' : '📊 Poll: ${poll.name}',
     );
@@ -1084,7 +1180,6 @@ class _CustomMessagePreviewFormatter extends StreamMessagePreviewFormatter {
     Message message,
     Location location, {
     bool showCaption = true,
-    TextStyle? textStyle,
   }) {
     return const TextSpan(text: '🗺️ -> Location Shared');
   }
@@ -1094,9 +1189,7 @@ class _CustomMessagePreviewFormatter extends StreamMessagePreviewFormatter {
     BuildContext context,
     String? messageText,
     Iterable<Attachment> attachments, {
-    List<User> mentionedUsers = const [],
     bool showCaption = true,
-    TextStyle? textStyle,
   }) {
     final attachment = attachments.firstOrNull;
 
@@ -1109,9 +1202,7 @@ class _CustomMessagePreviewFormatter extends StreamMessagePreviewFormatter {
       context,
       messageText,
       attachments,
-      mentionedUsers: mentionedUsers,
       showCaption: showCaption,
-      textStyle: textStyle,
     );
   }
 }

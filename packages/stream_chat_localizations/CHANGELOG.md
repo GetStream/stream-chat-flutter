@@ -1,8 +1,31 @@
 ## Upcoming
 
+🛑️ Breaking
+
+- Renamed `attachmentsUploadProgressText` parameter `remaining` → `completed`
+  and reworded the translation across all locales to report completed count
+  instead of remaining.
+
 ✅ Added
 
 - Added `unsupportedAttachmentLabel` translation for all supported locales.
+- Added `linkAttachmentText` translation for all supported locales (used by
+  `MessagePreviewFormatter` for link-preview attachments).
+- Added `confirmLabel`, `emptyReactionsText`, `loadingReactionsError`, and
+  `tapToRemoveReactionLabel` translations for all supported locales.
+- Added `justNowLabel`, `replyToUserLabel`, `multipleAnswersDescription`,
+  `maximumVotesPerPersonDescription`, `anonymousPollDescription`,
+  `suggestAnOptionDescription`, and `addACommentDescription` translations for
+  all supported locales.
+
+🔄 Changed
+
+- Reworded `emptyMessagesText` across all locales to the shorter "No messages
+  yet" style (English default: `'There are no messages currently'` →
+  `'No messages yet'`) to match the redesigned empty state copy.
+- Reworded `writeAMessageLabel` across all locales to use a "Send a message"
+  style (English default: `'Write a message'` → `'Send a message'`) to match
+  the redesigned message composer placeholder.
 
 ## 10.0.0-beta.13
 
