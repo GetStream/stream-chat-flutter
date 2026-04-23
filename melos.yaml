@@ -33,6 +33,7 @@ command:
       cupertino_icons: ^1.0.3
       desktop_drop: '>=0.5.0 <0.8.0'
       device_info_plus: '>=11.0.0 <13.0.0'
+      device_preview: ^1.2.0
       diacritic: ^0.1.5
       dio: ^5.4.3+1
       drift: ^2.28.0
@@ -105,7 +106,7 @@ command:
 
     # List of all the dev_dependencies used in the project.
     dev_dependencies:
-      alchemist: ^0.13.0
+      alchemist: ^0.14.0
       build_runner: ^2.4.9
       connectivity_plus_platform_interface: ^2.0.0
       drift_dev: ^2.28.0
@@ -118,6 +119,11 @@ command:
       path: ^1.8.3
       path_provider_platform_interface: ^2.0.0
       plugin_platform_interface: ^2.0.0
+      stream_core_flutter:
+        git:
+          url: https://github.com/GetStream/stream-core-flutter.git
+          ref: b76e39961f25334e691934f289022fbda863aed2
+          path: packages/stream_core_flutter
       test: ^1.24.6
       theme_extensions_builder: ^7.2.0
 
