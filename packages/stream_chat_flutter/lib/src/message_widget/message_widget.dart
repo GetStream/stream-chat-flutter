@@ -533,7 +533,7 @@ class DefaultStreamMessage extends StatelessWidget {
       animateColor: true,
       color: effectiveBackgroundColor,
       child: PlatformWidgetBuilder(
-        mobile: (context, child) => InkWell(
+        mobile: (context, child) => GestureDetector(
           onTap: switch (props.onMessageTap) {
             final onMessageTap? => () => onMessageTap(message),
             _ => null,
