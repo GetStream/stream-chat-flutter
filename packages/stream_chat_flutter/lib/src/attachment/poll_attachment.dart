@@ -77,7 +77,7 @@ class StreamPollAttachmentProps {
   final BoxConstraints? constraints;
 }
 
-const _maxVisibleOptionCount = 10;
+const _maxVisibleOptionCount = 5;
 const _kDefaultConstraints = BoxConstraints(maxWidth: 270);
 
 /// The default implementation of [StreamPollAttachment].

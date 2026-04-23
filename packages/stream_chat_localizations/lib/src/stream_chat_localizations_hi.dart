@@ -49,9 +49,9 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
 
   @override
   String attachmentsUploadProgressText({
-    required int remaining,
+    required int completed,
     required int total,
-  }) => 'अपलोडिंग $remaining/$total ...';
+  }) => '$total में से $completed अपलोड किए ...';
 
   @override
   String pinnedByUserText({
@@ -67,7 +67,7 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
   String get sendMessagePermissionError => 'आपको संदेश भेजने की अनुमति नहीं है';
 
   @override
-  String get emptyMessagesText => 'वर्तमान में कोई संदेश नहीं है';
+  String get emptyMessagesText => 'अभी तक कोई संदेश नहीं';
 
   @override
   String get genericErrorText => 'कुछ समस्या हो गई';
@@ -121,7 +121,7 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
   String get searchGifLabel => 'जीआईएफ खोजें';
 
   @override
-  String get writeAMessageLabel => 'एक सन्देश लिखिए';
+  String get writeAMessageLabel => 'संदेश भेजें';
 
   @override
   String get instantCommandsLabel => 'तत्काल आदेश';
@@ -307,6 +307,16 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
   String watchersCountText(int count) {
     if (count == 1) return '1 ऑनलाइन';
     return '$count ऑनलाइन';
+  }
+
+  @override
+  String membersCountWithOnlineText({
+    required int memberCount,
+    required int onlineCount,
+  }) {
+    final members = membersCountText(memberCount);
+    if (onlineCount <= 0) return members;
+    return '$members, ${watchersCountText(onlineCount)}';
   }
 
   @override
@@ -657,6 +667,9 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
   String get fileAttachmentText => 'फ़ाइल';
 
   @override
+  String get linkAttachmentText => 'लिंक';
+
+  @override
   String filesAttachmentCountText(int count) => count == 1 ? 'फ़ाइल' : '$count फ़ाइलें';
 
   @override
@@ -733,4 +746,40 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
 
   @override
   String get unsupportedAttachmentLabel => 'असमर्थित अटैचमेंट';
+
+  @override
+  String get confirmLabel => 'पुष्टि करें';
+
+  @override
+  String get emptyReactionsText => 'अभी तक कोई प्रतिक्रिया नहीं';
+
+  @override
+  String get loadingReactionsError => 'प्रतिक्रियाएँ लोड करने में त्रुटि';
+
+  @override
+  String get tapToRemoveReactionLabel => 'हटाने के लिए टैप करें';
+
+  @override
+  String get justNowLabel => 'अभी अभी';
+
+  @override
+  String replyToUserLabel(String userName) => '$userName को जवाब दें';
+
+  @override
+  String get multipleAnswersDescription => 'एक से अधिक विकल्प चुनें';
+
+  @override
+  String maximumVotesPerPersonDescription([Range<int>? range]) {
+    final (:min, :max) = range ?? (min: 2, max: 10);
+    return '$min\u2013$max विकल्पों में से चुनें';
+  }
+
+  @override
+  String get anonymousPollDescription => 'छिपाएँ कि किसने वोट दिया';
+
+  @override
+  String get suggestAnOptionDescription => 'दूसरों को विकल्प जोड़ने दें';
+
+  @override
+  String get addACommentDescription => 'दूसरों को टिप्पणियाँ जोड़ने दें';
 }

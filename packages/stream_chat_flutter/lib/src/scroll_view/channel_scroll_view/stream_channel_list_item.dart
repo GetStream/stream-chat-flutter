@@ -629,8 +629,11 @@ class _ChannelLastMessageWithStatusState extends State<_ChannelLastMessageWithSt
       builder: (context, data) {
         final (draft, messages) = data;
 
+        final config = StreamChatConfiguration.maybeOf(context);
+        final draftMessagesEnabled = config?.draftMessagesEnabled == true;
+
         // If there's a draft, show only the draft preview (no delivery status).
-        if (draft?.message case final draftMessage?) {
+        if (draft?.message case final draftMessage? when draftMessagesEnabled) {
           return StreamDraftMessagePreviewText(
             draftMessage: draftMessage,
             textStyle: widget.textStyle,
@@ -638,9 +641,7 @@ class _ChannelLastMessageWithStatusState extends State<_ChannelLastMessageWithSt
         }
 
         // Find the last valid message.
-        final message = messages.lastWhereOrNull(
-          _defaultLastMessagePredicate,
-        );
+        final message = messages.lastWhereOrNull(_defaultLastMessagePredicate);
         final latestLastMessage = [message, _currentLastMessage].latest;
 
         if (latestLastMessage == null) {

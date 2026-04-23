@@ -41,29 +41,26 @@ class StreamMessageAnnotations extends core.NullableStatelessWidget {
   Widget? nullableBuild(BuildContext context) {
     final translations = context.translations;
     final icons = context.streamIcons;
-    final textTheme = context.streamTextTheme;
     final colorScheme = context.streamColorScheme;
     final crossAxisAlignment = core.StreamMessageLayout.crossAxisAlignmentOf(context);
 
     Widget? savedForLaterAnnotation;
     if (message.reminder case final reminder? when reminder.remindAt == null) {
       savedForLaterAnnotation = core.StreamMessageAnnotation(
-        leading: Icon(icons.save, color: colorScheme.accentPrimary),
-        label: Text(translations.savedForLaterLabel, style: TextStyle(color: colorScheme.accentPrimary)),
+        leading: Icon(icons.save),
+        label: Text(translations.savedForLaterLabel),
+        style: .from(textColor: colorScheme.accentPrimary, iconColor: colorScheme.accentPrimary),
       );
     }
 
     Widget? pinnedAnnotation;
     if (message.pinned case true) {
       final currentUser = StreamChat.of(context).currentUser!;
+      final pinnedBy = message.pinnedBy ?? currentUser;
+
       pinnedAnnotation = core.StreamMessageAnnotation(
         leading: Icon(icons.pin),
-        label: Text(
-          translations.pinnedByUserText(
-            pinnedBy: message.pinnedBy ?? currentUser,
-            currentUser: currentUser,
-          ),
-        ),
+        label: Text(translations.pinnedByUserText(pinnedBy: pinnedBy, currentUser: currentUser)),
       );
     }
 
@@ -71,24 +68,16 @@ class StreamMessageAnnotations extends core.NullableStatelessWidget {
     if (message.showInChannel case true) {
       final listKind = core.StreamMessageLayout.listKindOf(context);
       final annotationLabel = switch (listKind) {
-        .channel => '${translations.repliedToThreadAnnotationLabel} · ',
-        .thread => '${translations.alsoSentInChannelAnnotationLabel} · ',
+        .channel => '${translations.repliedToThreadAnnotationLabel} ·',
+        .thread => '${translations.alsoSentInChannelAnnotationLabel} ·',
       };
 
       showInChannelAnnotation = core.StreamMessageAnnotation(
         onTap: onViewChannelTap,
         leading: Icon(icons.arrowUpRight),
-        label: Text.rich(
-          TextSpan(
-            text: annotationLabel,
-            children: [
-              TextSpan(
-                text: translations.viewLabel,
-                style: textTheme.metadataDefault.copyWith(color: colorScheme.textLink),
-              ),
-            ],
-          ),
-        ),
+        label: Text(annotationLabel),
+        trailing: Text(translations.viewLabel),
+        style: .from(trailingTextColor: colorScheme.textLink),
       );
     }
 
@@ -96,17 +85,8 @@ class StreamMessageAnnotations extends core.NullableStatelessWidget {
     if (message.reminder?.remindAt?.toLocal() case final remindAt?) {
       reminderAnnotation = core.StreamMessageAnnotation(
         leading: Icon(icons.bell),
-        label: Text.rich(
-          TextSpan(
-            text: '${translations.reminderSetLabel} · ',
-            children: [
-              TextSpan(
-                text: translations.reminderAtText(Jiffy.parseFromDateTime(remindAt).jm),
-                style: textTheme.metadataDefault,
-              ),
-            ],
-          ),
-        ),
+        label: Text('${translations.reminderSetLabel} ·'),
+        trailing: Text(translations.reminderAtText(Jiffy.parseFromDateTime(remindAt).jm)),
       );
     }
 

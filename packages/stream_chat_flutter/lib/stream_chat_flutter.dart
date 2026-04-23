@@ -34,6 +34,9 @@ export 'package:stream_core_flutter/stream_core_flutter.dart'
         StreamEmojiData,
         StreamEmojiPickerSheet,
         StreamEmojiSize,
+        StreamFileType,
+        StreamFileTypeIcon,
+        StreamFileTypeIconSize,
         StreamImageEmoji,
         StreamMessageAlignment,
         StreamMessageLayout,
@@ -66,6 +69,8 @@ export 'package:stream_core_flutter/stream_core_flutter.dart'
         StreamSwitchTheme,
         StreamSwitchThemeData,
         StreamUnicodeEmoji,
+        StreamVideoPlayIndicator,
+        StreamVideoPlayIndicatorSize,
         streamSupportedEmojis;
 
 export 'src/ai_assistant/ai_typing_indicator_view.dart';
@@ -78,7 +83,6 @@ export 'src/attachment/handler/stream_attachment_handler.dart';
 export 'src/attachment/image_attachment.dart';
 export 'src/attachment/link_preview_attachment.dart';
 export 'src/attachment/stream_attachment_package.dart';
-export 'src/attachment/thumbnail/file_attachment_thumbnail.dart';
 export 'src/attachment/thumbnail/giphy_attachment_thumbnail.dart';
 export 'src/attachment/thumbnail/image_attachment_thumbnail.dart';
 export 'src/attachment/thumbnail/media_attachment_thumbnail.dart';
@@ -115,7 +119,6 @@ export 'src/icons/stream_svg_icon.dart';
 export 'src/indicators/sending_indicator.dart';
 export 'src/indicators/typing_indicator.dart';
 export 'src/indicators/unread_indicator.dart';
-export 'src/indicators/upload_progress_indicator.dart';
 export 'src/keyboard_shortcuts/keyboard_shortcut_runner.dart';
 export 'src/localization/stream_chat_localizations.dart';
 export 'src/localization/translations.dart' show DefaultTranslations;

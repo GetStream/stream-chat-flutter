@@ -69,9 +69,9 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
 
   @override
   String attachmentsUploadProgressText({
-    required int remaining,
+    required int completed,
     required int total,
-  }) => 'Uploading $remaining/$total ...';
+  }) => 'Uploaded $completed of $total ...';
 
   @override
   String pinnedByUserText({
@@ -87,7 +87,7 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
   String get sendMessagePermissionError => "You don't have permission to send messages";
 
   @override
-  String get emptyMessagesText => 'There are no messages currently';
+  String get emptyMessagesText => 'No messages yet';
 
   @override
   String get genericErrorText => 'Something went wrong';
@@ -141,7 +141,7 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
   String get searchGifLabel => 'Search GIFs';
 
   @override
-  String get writeAMessageLabel => 'Write a message';
+  String get writeAMessageLabel => 'Send a message';
 
   @override
   String get instantCommandsLabel => 'Instant Commands';
@@ -330,6 +330,16 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
   String watchersCountText(int count) {
     if (count == 1) return '1 Online';
     return '$count Online';
+  }
+
+  @override
+  String membersCountWithOnlineText({
+    required int memberCount,
+    required int onlineCount,
+  }) {
+    final members = membersCountText(memberCount);
+    if (onlineCount <= 0) return members;
+    return '$members, ${watchersCountText(onlineCount)}';
   }
 
   @override
@@ -696,6 +706,9 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
   String get fileAttachmentText => 'File';
 
   @override
+  String get linkAttachmentText => 'Link';
+
+  @override
   String filesAttachmentCountText(int count) {
     return count == 1 ? 'File' : '$count files';
   }
@@ -757,6 +770,42 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
 
   @override
   String get unsupportedAttachmentLabel => 'Unsupported Attachment';
+
+  @override
+  String get confirmLabel => 'CONFIRM';
+
+  @override
+  String get emptyReactionsText => 'No reactions yet';
+
+  @override
+  String get loadingReactionsError => 'Error loading reactions';
+
+  @override
+  String get tapToRemoveReactionLabel => 'Tap to remove';
+
+  @override
+  String get justNowLabel => 'Just now';
+
+  @override
+  String replyToUserLabel(String userName) => 'Reply to $userName';
+
+  @override
+  String get multipleAnswersDescription => 'Select more than one option';
+
+  @override
+  String maximumVotesPerPersonDescription([Range<int>? range]) {
+    final (:min, :max) = range ?? (min: 2, max: 10);
+    return 'Choose between $min\u2013$max options';
+  }
+
+  @override
+  String get anonymousPollDescription => 'Hide who voted';
+
+  @override
+  String get suggestAnOptionDescription => 'Let others add options';
+
+  @override
+  String get addACommentDescription => 'Allow others to add comments';
 }
 
 void main() async {

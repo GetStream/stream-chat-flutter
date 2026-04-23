@@ -39,7 +39,7 @@ class _DefaultStreamMessageComposerInputHeader extends StatelessWidget {
   }
 
   Widget _buildContent(BuildContext context) {
-    final isEditing = !controller.message.state.isInitial;
+    final isEditing = controller.isEditing;
     final quotedMessage = !isEditing ? controller.message.quotedMessage : null;
     final ogAttachment = controller.ogAttachment;
     final nonOGAttachments = controller.attachments
@@ -77,7 +77,7 @@ class _DefaultStreamMessageComposerInputHeader extends StatelessWidget {
               Padding(
                 padding: contentPadding,
                 child: _EditMessageInHeader(
-                  message: controller.editingOriginalMessage ?? controller.message,
+                  message: controller.messageBeingEdited ?? controller.message,
                   onRemovePressed: controller.cancelEditMessage,
                 ),
               )
@@ -98,7 +98,7 @@ class _DefaultStreamMessageComposerInputHeader extends StatelessWidget {
                 padding: contentPadding,
                 child: StreamVoiceRecordingAttachmentPlaylist(
                   voiceRecordings: voiceRecordings,
-                  voiceRecordingTitle: 'Voice Message',
+                  voiceRecordingTitle: context.translations.voiceRecordingText,
                   message: props.controller.message,
                   itemDecorator: (context, index, child) {
                     final attachment = voiceRecordings.elementAtOrNull(index);
@@ -228,10 +228,14 @@ class _QuotedMessageInHeader extends StatelessWidget {
       trailing = null;
     }
 
-    return
-    // TODO: localize strings
-    MessageComposerReplyAttachment(
-      title: Text(isIncoming ? 'Reply to ${quotedMessage.user?.name}' : 'You'),
+    final translations = context.translations;
+    final title = switch (isIncoming) {
+      true => translations.replyToUserLabel(quotedMessage.user?.name ?? ''),
+      false => translations.youText,
+    };
+
+    return MessageComposerReplyAttachment(
+      title: Text(title),
       subtitle: StreamMessagePreviewText(message: quotedMessage),
       onRemovePressed: onRemovePressed,
       trailing: trailing,

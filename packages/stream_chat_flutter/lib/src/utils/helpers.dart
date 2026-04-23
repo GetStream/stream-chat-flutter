@@ -321,57 +321,6 @@ String fileSize(dynamic size, [int round = 2]) {
   }
 }
 
-// TODO: Use file extension instead of mime type to get the file type icon.
-/// Returns a [StreamSvgIcon] based on the [mimeType] of the file.
-StreamSvgIcon getFileTypeImage([String? mimeType]) {
-  return StreamSvgIcon(
-    size: 40,
-    icon: switch (mimeType) {
-      'audio/mpeg' => StreamSvgIcons.filetypeAudioMp3,
-      'audio/aac' => StreamSvgIcons.filetypeAudioAac,
-      'audio/wav' || 'audio/x-wav' => StreamSvgIcons.filetypeAudioWav,
-      'audio/flac' => StreamSvgIcons.filetypeAudioFlac,
-      'audio/mp4' => StreamSvgIcons.filetypeAudioM4a,
-      'audio/ogg' => StreamSvgIcons.filetypeAudioOgg,
-      'audio/aiff' => StreamSvgIcons.filetypeAudioAiff,
-      'audio/alac' => StreamSvgIcons.filetypeAudioAlac,
-      'application/zip' => StreamSvgIcons.filetypeCompressionZip,
-      'application/x-7z-compressed' => StreamSvgIcons.filetypeCompression7z,
-      'application/x-arj' => StreamSvgIcons.filetypeCompressionArj,
-      'application/vnd.debian.binary-package' => StreamSvgIcons.filetypeCompressionDeb,
-      'application/x-apple-diskimage' => StreamSvgIcons.filetypeCompressionPkg,
-      'application/x-rar-compressed' => StreamSvgIcons.filetypeCompressionRar,
-      'application/x-rpm' => StreamSvgIcons.filetypeCompressionRpm,
-      'application/x-tar' => StreamSvgIcons.filetypeCodeTar,
-      'application/x-compress' => StreamSvgIcons.filetypeCompressionZ,
-      'application/vnd.ms-powerpoint' => StreamSvgIcons.filetypePresentationPpt,
-      'application/vnd.openxmlformats-officedocument.presentationml.presentation' =>
-        StreamSvgIcons.filetypePresentationPptx,
-      'application/vnd.apple.keynote' => StreamSvgIcons.filetypePresentationKey,
-      'application/vnd.oasis.opendocument.presentation' => StreamSvgIcons.filetypePresentationOdp,
-      'application/vnd.ms-excel' => StreamSvgIcons.filetypeSpreadsheetXls,
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' => StreamSvgIcons.filetypeSpreadsheetXlsx,
-      'application/vnd.ms-excel.sheet.macroEnabled.12' => StreamSvgIcons.filetypeSpreadsheetXlsm,
-      'application/vnd.oasis.opendocument.spreadsheet' => StreamSvgIcons.filetypeSpreadsheetOds,
-      'application/msword' => StreamSvgIcons.filetypeTextDoc,
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document' => StreamSvgIcons.filetypeTextDocx,
-      'application/vnd.oasis.opendocument.text' => StreamSvgIcons.filetypeTextOdt,
-      'text/plain' => StreamSvgIcons.filetypeTextTxt,
-      'application/rtf' => StreamSvgIcons.filetypeTextRtf,
-      'application/x-tex' => StreamSvgIcons.filetypeTextTex,
-      'application/vnd.wordperfect' => StreamSvgIcons.filetypeTextWdp,
-      'text/html' => StreamSvgIcons.filetypeCodeHtml,
-      'text/csv' => StreamSvgIcons.filetypeCodeCsv,
-      'application/xml' => StreamSvgIcons.filetypeCodeXml,
-      'text/markdown' => StreamSvgIcons.filetypeCodeMd,
-      'application/octet-stream' => StreamSvgIcons.filetypeOtherStandard,
-      'application/pdf' => StreamSvgIcons.filetypeOtherPdf,
-      'application/x-wiki' => StreamSvgIcons.filetypeOtherWkq,
-      _ => StreamSvgIcons.filetypeOtherStandard,
-    },
-  );
-}
-
 /// Wraps attachment widget with custom shape
 class WrapAttachmentWidget extends StatelessWidget {
   /// Builds a [WrapAttachmentWidget].

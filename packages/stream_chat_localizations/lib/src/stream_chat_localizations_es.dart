@@ -49,9 +49,9 @@ class StreamChatLocalizationsEs extends GlobalStreamChatLocalizations {
 
   @override
   String attachmentsUploadProgressText({
-    required int remaining,
+    required int completed,
     required int total,
-  }) => 'Transferencia en curso $remaining/$total ...';
+  }) => 'Subidos $completed de $total ...';
 
   @override
   String pinnedByUserText({
@@ -67,7 +67,7 @@ class StreamChatLocalizationsEs extends GlobalStreamChatLocalizations {
   String get sendMessagePermissionError => 'No tienes permiso para enviar mensajes';
 
   @override
-  String get emptyMessagesText => 'Actualmente no hay mensajes';
+  String get emptyMessagesText => 'Aún no hay mensajes';
 
   @override
   String get genericErrorText => 'Hubo un problema';
@@ -121,7 +121,7 @@ class StreamChatLocalizationsEs extends GlobalStreamChatLocalizations {
   String get searchGifLabel => 'Búsqueda de GIFs';
 
   @override
-  String get writeAMessageLabel => 'Escribir un mensaje';
+  String get writeAMessageLabel => 'Enviar un mensaje';
 
   @override
   String get instantCommandsLabel => 'Comandos instantáneos';
@@ -309,6 +309,16 @@ class StreamChatLocalizationsEs extends GlobalStreamChatLocalizations {
   String watchersCountText(int count) {
     if (count == 1) return '1 En línea';
     return '$count En línea';
+  }
+
+  @override
+  String membersCountWithOnlineText({
+    required int memberCount,
+    required int onlineCount,
+  }) {
+    final members = membersCountText(memberCount);
+    if (onlineCount <= 0) return members;
+    return '$members, ${watchersCountText(onlineCount)}';
   }
 
   @override
@@ -657,6 +667,9 @@ No es posible añadir más de $limit archivos adjuntos
   String get fileAttachmentText => 'Archivo';
 
   @override
+  String get linkAttachmentText => 'Enlace';
+
+  @override
   String filesAttachmentCountText(int count) => count == 1 ? 'Archivo' : '$count archivos';
 
   @override
@@ -733,4 +746,40 @@ No es posible añadir más de $limit archivos adjuntos
 
   @override
   String get unsupportedAttachmentLabel => 'Archivo adjunto no compatible';
+
+  @override
+  String get confirmLabel => 'CONFIRMAR';
+
+  @override
+  String get emptyReactionsText => 'Aún no hay reacciones';
+
+  @override
+  String get loadingReactionsError => 'Error al cargar las reacciones';
+
+  @override
+  String get tapToRemoveReactionLabel => 'Toca para eliminar';
+
+  @override
+  String get justNowLabel => 'Ahora mismo';
+
+  @override
+  String replyToUserLabel(String userName) => 'Responder a $userName';
+
+  @override
+  String get multipleAnswersDescription => 'Seleccionar más de una opción';
+
+  @override
+  String maximumVotesPerPersonDescription([Range<int>? range]) {
+    final (:min, :max) = range ?? (min: 2, max: 10);
+    return 'Elige entre $min\u2013$max opciones';
+  }
+
+  @override
+  String get anonymousPollDescription => 'Ocultar quién votó';
+
+  @override
+  String get suggestAnOptionDescription => 'Permitir que otros añadan opciones';
+
+  @override
+  String get addACommentDescription => 'Permitir que otros añadan comentarios';
 }

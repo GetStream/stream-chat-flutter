@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 /// A video attachment component with a play indicator.
 ///
@@ -105,32 +104,22 @@ class DefaultStreamVideoAttachment extends StatelessWidget {
       constraints: constraints,
       child: Stack(
         fit: .expand,
-        alignment: Alignment.center,
+        alignment: .center,
         children: [
           StreamVideoAttachmentThumbnail(
             video: props.video,
             fit: BoxFit.cover,
           ),
-          Center(
-            child: Material(
-              color: StreamColors.black75,
-              shape: const CircleBorder(),
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: Icon(
-                  context.streamIcons.playFill,
-                  color: context.streamColorScheme.textOnAccent,
-                ),
+          if (props.video.uploadState.isSuccess) ...[
+            const Center(child: StreamVideoPlayIndicator(size: .lg)),
+          ] else ...[
+            Positioned.fill(
+              child: StreamAttachmentUploadStateBuilder(
+                message: props.message,
+                attachment: props.video,
               ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8),
-            child: StreamAttachmentUploadStateBuilder(
-              message: props.message,
-              attachment: props.video,
-            ),
-          ),
+          ],
         ],
       ),
     );

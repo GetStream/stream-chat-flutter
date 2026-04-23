@@ -2,29 +2,35 @@
 
 🛑️ Breaking
 
-- Removed `StreamMessageListView.unreadIndicatorBuilder` — customise via
-  `StreamComponentFactory.jumpToUnreadButton` instead.
+- Removed `StreamMessageListView.unreadIndicatorBuilder`; use `StreamComponentFactory.jumpToUnreadButton`.
 - Renamed `UnreadIndicatorButton.onTap` → `onJumpTap`.
 - Renamed stream icons to remove the size suffix from the icon names.
-- Removed `StreamMessageThemeData` (ownMessageTheme and otherMessageTheme) and `StreamMessageInputThemeData` (messageInputTheme).
-- Removed `AttachmentButton`, `StreamQuotedMessageWidget`, `EditMessageSheet`, `StreamMessageSendButton` and `DesktopReactionsBuilder`.
+- Removed `StreamAttachmentUploadStateBuilder.successBuilder` and the `SuccessBuilder` typedef (unreachable).
+- Removed `StreamFileAttachmentThumbnail`; use `StreamImageAttachmentThumbnail` / `StreamVideoAttachmentThumbnail` or `StreamFileTypeIcon.fromMimeType(...)`.
+- Removed `StreamMessageThemeData` (ownMessageTheme / otherMessageTheme) and `StreamMessageInputThemeData` (messageInputTheme).
 - Removed `StreamChannelPreviewThemeData` (channelPreviewTheme).
+- Removed `AttachmentButton`, `StreamQuotedMessageWidget`, `EditMessageSheet`, `StreamMessageSendButton` and `DesktopReactionsBuilder`.
 - Removed `StreamChannelGridView`, `StreamChannelGridTile` and `StreamMessageSearchGridView`.
+- `StreamMessageActionConfirmationModal.cancelActionTitle` / `confirmActionTitle` are now nullable and fall back to `Translations.cancelLabel` / `confirmLabel`.
+- Renamed `Translations.attachmentsUploadProgressText` parameter `remaining` → `completed`.
+- Updated several `Translations` default strings and added new abstract members — see [`migrations/redesign/localizations.md`](../../migrations/redesign/localizations.md).
 
 ✅ Added
 
-- Redesigned `StreamSystemMessage` and `StreamModeratedMessage` with a pill-shaped style and
-  added visual customisation props.
+- Video attachments use the shared `StreamVideoPlayIndicator` for the play-button overlay.
+- Redesigned `StreamSystemMessage` / `StreamModeratedMessage` with a pill-shaped style and visual customisation props.
 - Added visual customisation props to `ThreadSeparator` and `UnreadMessagesSeparator`.
-- Added `StreamUnsupportedAttachment` widget and `UnsupportedAttachmentBuilder` to display a
-  placeholder for unrecognised attachment types.
+- Added `StreamUnsupportedAttachment` and `UnsupportedAttachmentBuilder` for unrecognised attachment types.
+- `MessagePreviewFormatter` now renders `AttachmentType.urlPreview` messages with a link icon and caption / OG title / `linkAttachmentText` fallback.
 
 🐞 Fixed
 
 - Fixed voice message time label displaying elapsed time instead of remaining time.
-- Fixed RTL layout for the scroll-to-bottom button in `StreamMessageListView`.
-- Fixed RTL layout for the swipe-to-reply icon being cut off.
-- Fixed RTL layout for the voice recording lock button not being mirrored.
+- Fixed RTL layout for the scroll-to-bottom button, swipe-to-reply icon, and voice recording lock button.
+- Fixed draft stream updates clobbering the composer while editing a message.
+- Fixed retries of in-flight sends being routed through `updateMessage` instead of `sendMessage`.
+- Fixed composer attachment button staying rotated at 45° after the inline picker was dismissed.
+- Fixed composer focus being lost after selecting a command from the attachment picker.
 
 ## 10.0.0-beta.13
 

@@ -4,6 +4,7 @@ import 'package:stream_chat_flutter/src/message_action/message_action.dart';
 import 'package:stream_chat_flutter/src/scroll_view/reaction_scroll_view/stream_reaction_list_view.dart';
 import 'package:stream_chat_flutter/src/stream_chat.dart';
 import 'package:stream_chat_flutter/src/stream_chat_configuration.dart';
+import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:stream_core_flutter/stream_core_flutter.dart';
 
@@ -209,7 +210,7 @@ class _ReactionDetailSheetState extends State<ReactionDetailSheet> {
               return StreamListTile(
                 leading: StreamUserAvatar(size: .md, user: user, showOnlineIndicator: false),
                 title: Text(user.name),
-                subtitle: isOwnReaction ? const Text('Tap to remove') : null,
+                subtitle: isOwnReaction ? Text(context.translations.tapToRemoveReactionLabel) : null,
                 trailing: StreamEmoji(size: .md, emoji: resolver.resolve(reaction.type)),
                 onTap: switch (isOwnReaction) {
                   true => () {

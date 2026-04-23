@@ -47,9 +47,9 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
 
   @override
   String attachmentsUploadProgressText({
-    required int remaining,
+    required int completed,
     required int total,
-  }) => '$remaining/${total}mbのアップロード中…';
+  }) => '$total 件中 $completed 件アップロード済み…';
 
   @override
   String pinnedByUserText({
@@ -65,7 +65,7 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   String get sendMessagePermissionError => 'メッセージを送信する権限がありません';
 
   @override
-  String get emptyMessagesText => '現在、メッセージはありません。';
+  String get emptyMessagesText => 'メッセージはまだありません';
 
   @override
   String get genericErrorText => 'エラーが発生しました';
@@ -116,7 +116,7 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   String get searchGifLabel => 'GIFの検索';
 
   @override
-  String get writeAMessageLabel => 'メッセージを書く';
+  String get writeAMessageLabel => 'メッセージを送る';
 
   @override
   String get instantCommandsLabel => 'インスタントコマンド';
@@ -294,6 +294,16 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
 
   @override
   String watchersCountText(int count) => '$count人がオンライン';
+
+  @override
+  String membersCountWithOnlineText({
+    required int memberCount,
+    required int onlineCount,
+  }) {
+    final members = membersCountText(memberCount);
+    if (onlineCount <= 0) return members;
+    return '$members、${watchersCountText(onlineCount)}';
+  }
 
   @override
   String get viewInfoLabel => '情報を見る';
@@ -639,6 +649,9 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   String get fileAttachmentText => 'ファイル';
 
   @override
+  String get linkAttachmentText => 'リンク';
+
+  @override
   String filesAttachmentCountText(int count) => count == 1 ? 'ファイル' : '$count件のファイル';
 
   @override
@@ -715,4 +728,40 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
 
   @override
   String get unsupportedAttachmentLabel => 'サポートされていない添付ファイル';
+
+  @override
+  String get confirmLabel => '確認';
+
+  @override
+  String get emptyReactionsText => 'まだリアクションはありません';
+
+  @override
+  String get loadingReactionsError => 'リアクションの読み込み中にエラーが発生しました';
+
+  @override
+  String get tapToRemoveReactionLabel => 'タップして削除';
+
+  @override
+  String get justNowLabel => 'たった今';
+
+  @override
+  String replyToUserLabel(String userName) => '$userNameに返信';
+
+  @override
+  String get multipleAnswersDescription => '複数の選択肢を選ぶ';
+
+  @override
+  String maximumVotesPerPersonDescription([Range<int>? range]) {
+    final (:min, :max) = range ?? (min: 2, max: 10);
+    return '$min〜$max個の選択肢から選ぶ';
+  }
+
+  @override
+  String get anonymousPollDescription => '投票者を非表示';
+
+  @override
+  String get suggestAnOptionDescription => '他のユーザーに選択肢の追加を許可';
+
+  @override
+  String get addACommentDescription => '他のユーザーにコメントの追加を許可';
 }

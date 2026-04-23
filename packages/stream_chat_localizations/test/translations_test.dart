@@ -35,7 +35,7 @@ void main() {
       expect(localizations.editedMessageLabel, isNotNull);
       expect(localizations.threadReplyCountText(3), isNotNull);
       expect(
-        localizations.attachmentsUploadProgressText(remaining: 3, total: 10),
+        localizations.attachmentsUploadProgressText(completed: 3, total: 10),
         isNotNull,
       );
       expect(
@@ -162,6 +162,16 @@ void main() {
       expect(localizations.watchersCountText(1), isNotNull);
       // 3 members
       expect(localizations.watchersCountText(3), isNotNull);
+      // no online members
+      expect(
+        localizations.membersCountWithOnlineText(memberCount: 5, onlineCount: 0),
+        isNotNull,
+      );
+      // with online members
+      expect(
+        localizations.membersCountWithOnlineText(memberCount: 5, onlineCount: 2),
+        isNotNull,
+      );
       expect(localizations.viewInfoLabel, isNotNull);
       expect(localizations.leaveGroupLabel, isNotNull);
       expect(localizations.leaveLabel, isNotNull);
@@ -303,6 +313,7 @@ void main() {
       expect(localizations.imageAttachmentText, isNotNull);
       expect(localizations.videoAttachmentText, isNotNull);
       expect(localizations.fileAttachmentText, isNotNull);
+      expect(localizations.linkAttachmentText, isNotNull);
       expect(localizations.filesAttachmentCountText(3), isNotNull);
       expect(localizations.photosAttachmentCountText(3), isNotNull);
       expect(localizations.videosAttachmentCountText(3), isNotNull);
@@ -329,6 +340,23 @@ void main() {
       expect(localizations.selectFilesToShareLabel, isNotNull);
       expect(localizations.openFilesLabel, isNotNull);
       expect(localizations.unsupportedAttachmentLabel, isNotNull);
+      expect(localizations.confirmLabel, isNotNull);
+      expect(localizations.emptyReactionsText, isNotNull);
+      expect(localizations.loadingReactionsError, isNotNull);
+      expect(localizations.tapToRemoveReactionLabel, isNotNull);
+      expect(localizations.justNowLabel, isNotNull);
+      expect(localizations.replyToUserLabel('TestUser'), isNotNull);
+      expect(localizations.multipleAnswersDescription, isNotNull);
+      // default range
+      expect(localizations.maximumVotesPerPersonDescription(), isNotNull);
+      // explicit range
+      expect(
+        localizations.maximumVotesPerPersonDescription(const (min: 1, max: 5)),
+        isNotNull,
+      );
+      expect(localizations.anonymousPollDescription, isNotNull);
+      expect(localizations.suggestAnOptionDescription, isNotNull);
+      expect(localizations.addACommentDescription, isNotNull);
     });
   }
 

@@ -12,11 +12,6 @@ typedef InProgressBuilder = Widget Function(BuildContext, int, int);
 /// {@endtemplate}
 typedef FailedBuilder = Widget Function(BuildContext, String);
 
-/// {@template successBuilder}
-/// A widget builder for representing successful attachment uploads.
-/// {@endtemplate}
-typedef SuccessBuilder = WidgetBuilder;
-
 /// {@template preparingBuilder}
 /// A widget builder for representing pre-upload attachment state.
 /// {@endtemplate}

@@ -124,6 +124,75 @@ void main() {
       expect(controller.text, isEmpty);
       expect(controller.attachments, isEmpty);
     });
+
+    test('clearCommand restores the content that was in the composer before', () {
+      controller.text = 'Draft text';
+      controller.addAttachment(Attachment(type: 'image'));
+
+      controller.command = 'giphy';
+      controller.text = 'giphy search';
+
+      controller.clearCommand();
+
+      expect(controller.message.command, isNull);
+      expect(controller.text, 'Draft text');
+      expect(controller.attachments, hasLength(1));
+    });
+
+    test('clearCommand without an active command is a no-op', () {
+      controller.text = 'Draft text';
+
+      controller.clearCommand();
+
+      expect(controller.text, 'Draft text');
+      expect(controller.message.command, isNull);
+    });
+
+    test('setting command again during an active command keeps the original snapshot', () {
+      controller.text = 'Draft text';
+
+      controller.command = 'giphy';
+      controller.text = 'mid-command typing';
+      controller.command = 'ban';
+
+      controller.clearCommand();
+
+      expect(controller.text, 'Draft text');
+      expect(controller.message.command, isNull);
+    });
+
+    test('setting command to null is equivalent to clearCommand', () {
+      controller.text = 'Draft text';
+
+      controller.command = 'giphy';
+      controller.command = null;
+
+      expect(controller.text, 'Draft text');
+      expect(controller.message.command, isNull);
+    });
+
+    test('reset clears active command tracking', () {
+      controller.text = 'Draft text';
+      controller.command = 'giphy';
+
+      controller.reset();
+
+      controller.clearCommand();
+
+      expect(controller.text, isNot('Draft text'));
+    });
+
+    test('clear clears active command tracking', () {
+      controller.text = 'Draft text';
+      controller.command = 'giphy';
+
+      controller.clear();
+
+      controller.clearCommand();
+
+      expect(controller.text, isEmpty);
+      expect(controller.message.command, isNull);
+    });
   });
 
   group('Show In Channel', () {
@@ -381,6 +450,26 @@ void main() {
   });
 
   group('Edit Message', () {
+    test('constructing with a non-initial message throws an assertion', () {
+      final existingMessage = Message(
+        id: 'msg-1',
+        text: 'Existing text',
+        state: MessageState.updating,
+      );
+
+      expect(
+        () => StreamMessageInputController(message: existingMessage),
+        throwsA(isA<AssertionError>()),
+      );
+    });
+
+    test('constructing with a fresh message does not enter edit mode', () {
+      final editController = StreamMessageInputController.fromText('Some draft');
+      addTearDown(editController.dispose);
+
+      expect(editController.messageBeingEdited, isNull);
+    });
+
     test('editMessage sets state to MessageState.updating', () {
       final existingMessage = Message(id: 'msg-1', text: 'Original text');
       controller.editMessage(existingMessage);
@@ -397,32 +486,32 @@ void main() {
       expect(controller.message.text, 'Original text');
     });
 
-    test('editMessage stores original in editingOriginalMessage', () {
+    test('editMessage stores original in messageBeingEdited', () {
       final existingMessage = Message(id: 'msg-1', text: 'Original text');
       controller.editMessage(existingMessage);
 
-      expect(controller.editingOriginalMessage, isNotNull);
-      expect(controller.editingOriginalMessage!.id, 'msg-1');
-      expect(controller.editingOriginalMessage!.text, 'Original text');
+      expect(controller.messageBeingEdited, isNotNull);
+      expect(controller.messageBeingEdited!.id, 'msg-1');
+      expect(controller.messageBeingEdited!.text, 'Original text');
     });
 
-    test('editingOriginalMessage text is not affected by subsequent typing', () {
+    test('messageBeingEdited text is not affected by subsequent typing', () {
       final existingMessage = Message(id: 'msg-1', text: 'Original text');
       controller.editMessage(existingMessage);
 
       controller.text = 'Edited text';
 
-      expect(controller.editingOriginalMessage!.text, 'Original text');
+      expect(controller.messageBeingEdited!.text, 'Original text');
       expect(controller.message.text, 'Edited text');
     });
 
-    test('cancelEditMessage clears editingOriginalMessage', () {
+    test('cancelEditMessage clears messageBeingEdited', () {
       final existingMessage = Message(id: 'msg-1', text: 'Original text');
       controller.editMessage(existingMessage);
 
       controller.cancelEditMessage();
 
-      expect(controller.editingOriginalMessage, isNull);
+      expect(controller.messageBeingEdited, isNull);
     });
 
     test('cancelEditMessage resets controller to empty state, not the edited message', () {
@@ -434,6 +523,42 @@ void main() {
 
       expect(controller.text, isEmpty);
       expect(controller.message.state.isInitial, isTrue);
+    });
+
+    test('cancelEditMessage restores the draft that was in the composer before edit', () {
+      final draftController = StreamMessageInputController.fromText('Draft text');
+      addTearDown(draftController.dispose);
+
+      draftController.editMessage(Message(id: 'msg-1', text: 'Original text'));
+      draftController.text = 'Edited text';
+      draftController.cancelEditMessage();
+
+      expect(draftController.text, 'Draft text');
+      expect(draftController.messageBeingEdited, isNull);
+    });
+
+    test('editMessage called again during an edit keeps the original pre-edit draft', () {
+      final draftController = StreamMessageInputController.fromText('Draft text');
+      addTearDown(draftController.dispose);
+
+      draftController.editMessage(Message(id: 'msg-1', text: 'Original text'));
+      draftController.text = 'Edited text';
+      // Simulates a remote update arriving for the message being edited.
+      draftController.editMessage(Message(id: 'msg-1', text: 'Remote update'));
+      draftController.cancelEditMessage();
+
+      expect(draftController.text, 'Draft text');
+      expect(draftController.messageBeingEdited, isNull);
+    });
+
+    test('cancelEditMessage without an active edit is a no-op', () {
+      final draftController = StreamMessageInputController.fromText('Draft text');
+      addTearDown(draftController.dispose);
+
+      draftController.cancelEditMessage();
+
+      expect(draftController.text, 'Draft text');
+      expect(draftController.messageBeingEdited, isNull);
     });
   });
 
@@ -471,6 +596,26 @@ void main() {
 
       expect(initialController.message.id, 'message-id');
       initialController.dispose();
+    });
+
+    test('reset clears active edit tracking', () {
+      controller.editMessage(Message(id: 'msg-1', text: 'Original text'));
+      expect(controller.messageBeingEdited, isNotNull);
+
+      controller.reset();
+
+      expect(controller.messageBeingEdited, isNull);
+    });
+
+    test('clear preserves the active edit session', () {
+      controller.editMessage(Message(id: 'msg-1', text: 'Original text'));
+      controller.text = 'Edited text';
+
+      controller.clear();
+
+      expect(controller.text, isEmpty);
+      expect(controller.messageBeingEdited, isNotNull);
+      expect(controller.messageBeingEdited!.id, 'msg-1');
     });
   });
 

@@ -133,27 +133,18 @@ class DefaultStreamGiphyAttachment extends StatelessWidget {
         aspectRatio: giphySize?.aspectRatio ?? 1,
         child: Stack(
           fit: .expand,
-          alignment: Alignment.center,
+          alignment: .center,
           children: [
             StreamGiphyAttachmentThumbnail(
               type: props.type,
               giphy: props.giphy,
               fit: fit,
             ),
-            if (props.giphy.uploadState.isSuccess)
-              PositionedDirectional(
-                bottom: 8,
-                start: 8,
-                child: StreamImageSourceBadge.giphy,
-              )
-            else
-              Padding(
-                padding: const EdgeInsets.all(8),
-                child: StreamAttachmentUploadStateBuilder(
-                  message: props.message,
-                  attachment: props.giphy,
-                ),
-              ),
+            PositionedDirectional(
+              bottom: 8,
+              start: 8,
+              child: StreamImageSourceBadge.giphy,
+            ),
           ],
         ),
       ),

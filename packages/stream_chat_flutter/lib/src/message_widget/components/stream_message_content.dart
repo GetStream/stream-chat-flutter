@@ -171,28 +171,31 @@ class _StreamMessageContentState extends State<StreamMessageContent> {
                     children: [
                       if (widget.message.quotedMessage case final quotedMessage?)
                         // TODO: Refactor this with attachments
-                        GestureDetector(
-                          onTap: !quotedMessage.isDeleted && widget.onQuotedMessageTap != null
-                              ? () => widget.onQuotedMessageTap!(quotedMessage)
-                              : null,
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 8),
-                            child: core.StreamMessageTheme(
-                              data: core.StreamMessageThemeData(
-                                incoming: core.StreamMessageStyle(
-                                  backgroundColor: context.streamColorScheme.backgroundSurfaceStrong,
+                        ConstrainedBox(
+                          constraints: const .tightFor(width: 272),
+                          child: GestureDetector(
+                            onTap: !quotedMessage.isDeleted && widget.onQuotedMessageTap != null
+                                ? () => widget.onQuotedMessageTap!(quotedMessage)
+                                : null,
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 8),
+                              child: core.StreamMessageTheme(
+                                data: core.StreamMessageThemeData(
+                                  incoming: core.StreamMessageStyle(
+                                    backgroundColor: context.streamColorScheme.backgroundSurfaceStrong,
+                                  ),
+                                  outgoing: core.StreamMessageStyle(
+                                    backgroundColor: context.streamColorScheme.brand.shade150,
+                                  ),
                                 ),
-                                outgoing: core.StreamMessageStyle(
-                                  backgroundColor: context.streamColorScheme.brand.shade150,
+                                child: core.MessageComposerReplyAttachment(
+                                  title: Text(quotedMessage.user?.name ?? ''),
+                                  subtitle: StreamMessagePreviewText(message: quotedMessage),
+                                  style: switch (core.StreamMessageLayout.messageAlignmentOf(context)) {
+                                    core.StreamMessageAlignment.start => .incoming,
+                                    core.StreamMessageAlignment.end => .outgoing,
+                                  },
                                 ),
-                              ),
-                              child: core.MessageComposerReplyAttachment(
-                                title: Text(quotedMessage.user?.name ?? ''),
-                                subtitle: StreamMessagePreviewText(message: quotedMessage),
-                                style: switch (core.StreamMessageLayout.messageAlignmentOf(context)) {
-                                  core.StreamMessageAlignment.start => .incoming,
-                                  core.StreamMessageAlignment.end => .outgoing,
-                                },
                               ),
                             ),
                           ),

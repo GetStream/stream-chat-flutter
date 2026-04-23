@@ -258,7 +258,7 @@ class _EndOfFrameCallbackWidgetState extends State<EndOfFrameCallbackWidget> {
       if (errorBuilder != null) {
         return errorBuilder(context, error, stackTrace);
       }
-      return const Text('An error occurred');
+      return Text(context.translations.genericErrorText);
     }
 
     _error = null;
@@ -352,22 +352,6 @@ Widget tabbedAttachmentPickerBuilder({
       },
     ),
     TabbedAttachmentPickerOption(
-      key: 'file-picker',
-      icon: context.streamIcons.file,
-      supportedTypes: [AttachmentPickerType.files],
-      optionViewBuilder: (context, controller) => StreamFilePicker(
-        onFilePicked: (file) async {
-          try {
-            if (file != null) await controller.addAttachment(file);
-          } catch (e, stk) {
-            onError?.call(
-              AttachmentPickerError(error: e, stackTrace: stk),
-            );
-          }
-        },
-      ),
-    ),
-    TabbedAttachmentPickerOption(
       key: 'image-picker',
       icon: context.streamIcons.camera,
       supportedTypes: [AttachmentPickerType.images],
@@ -391,6 +375,22 @@ Widget tabbedAttachmentPickerBuilder({
         onVideoPicked: (video) async {
           try {
             if (video != null) await controller.addAttachment(video);
+          } catch (e, stk) {
+            onError?.call(
+              AttachmentPickerError(error: e, stackTrace: stk),
+            );
+          }
+        },
+      ),
+    ),
+    TabbedAttachmentPickerOption(
+      key: 'file-picker',
+      icon: context.streamIcons.file,
+      supportedTypes: [AttachmentPickerType.files],
+      optionViewBuilder: (context, controller) => StreamFilePicker(
+        onFilePicked: (file) async {
+          try {
+            if (file != null) await controller.addAttachment(file);
           } catch (e, stk) {
             onError?.call(
               AttachmentPickerError(error: e, stackTrace: stk),

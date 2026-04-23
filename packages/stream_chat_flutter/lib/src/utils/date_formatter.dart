@@ -29,7 +29,9 @@ String formatRecentDateTime(
   final now = (referenceDate ?? DateTime.now()).toLocal();
   final difference = now.difference(localDate).abs();
 
-  if (difference < const Duration(minutes: 1)) return 'Just now';
+  if (difference < const Duration(minutes: 1)) {
+    return context.translations.justNowLabel;
+  }
 
   final jiffyDate = Jiffy.parseFromDateTime(localDate);
   final time = jiffyDate.format(pattern: 'H:mm');

@@ -1,18 +1,22 @@
 import 'package:flutter/widgets.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_chat_flutter/src/utils/extensions.dart';
+import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:stream_core_flutter/stream_core_flutter.dart';
 
-/// {@template messagePreviewFormatter}
-/// Formats message previews for display.
+/// Formats a [Message] or [DraftMessage] into a preview [TextSpan] suitable
+/// for channel lists, quoted replies, and similar compact contexts.
 ///
-/// This interface provides two main methods for formatting message previews:
-/// [formatMessage] for regular messages and [formatDraftMessage] for drafts.
+/// Implementations are responsible for producing a single [TextSpan] that
+/// combines the message body, any attachment summary, and — when relevant —
+/// the sender's name. The returned span can be rendered with a standard
+/// [Text.rich] widget.
 ///
-/// ## Default Implementation
+/// The default implementation is [StreamMessagePreviewFormatter]; the unnamed
+/// factory constructor returns an instance of it.
 ///
-/// The factory constructor returns [StreamMessagePreviewFormatter], which
-/// provides context-aware formatting based on message type, sender, and
-/// channel configuration.
+/// {@tool snippet}
+///
+/// Format a message using the default implementation:
 ///
 /// ```dart
 /// final formatter = MessagePreviewFormatter();
@@ -23,10 +27,11 @@ import 'package:stream_core_flutter/stream_core_flutter.dart';
 ///   currentUser: currentUser,
 /// );
 /// ```
+/// {@end-tool}
 ///
-/// ## Configuration
+/// {@tool snippet}
 ///
-/// Set a custom formatter globally via [StreamChatConfigurationData]:
+/// Install a custom formatter globally via [StreamChatConfigurationData]:
 ///
 /// ```dart
 /// StreamChat(
@@ -37,135 +42,125 @@ import 'package:stream_core_flutter/stream_core_flutter.dart';
 ///   child: child,
 /// );
 /// ```
+/// {@end-tool}
 ///
-/// ## Custom Implementation
+/// ## Customization
 ///
-/// Extend [StreamMessagePreviewFormatter] to customize specific behaviors:
+/// To change only part of the preview, extend [StreamMessagePreviewFormatter]
+/// and override one of its `format*` methods — each one returns a [TextSpan]
+/// fragment and is composed together by [formatMessage].
 ///
-/// ```dart
-/// class CustomFormatter extends StreamMessagePreviewFormatter {
-///   @override
-///   TextSpan? formatGroupMessage(
-///     BuildContext context,
-///     User? messageAuthor,
-///     User? currentUser,
-///   ) {
-///     final name = messageAuthor?.name;
-///     if (name == null || name.isEmpty) return null;
-///     return TextSpan(text: '$name says: ');
-///   }
-/// }
-/// ```
-/// {@endtemplate}
+/// See also:
+///
+///  * [StreamMessagePreviewFormatter], the default implementation.
+///  * [StreamChatConfigurationData.messagePreviewFormatter], which configures
+///    the formatter used across the Stream Chat widget tree.
 abstract interface class MessagePreviewFormatter {
   /// Creates a [MessagePreviewFormatter].
   ///
   /// Returns the default [StreamMessagePreviewFormatter] implementation.
-  factory MessagePreviewFormatter() {
-    return const StreamMessagePreviewFormatter();
-  }
+  factory MessagePreviewFormatter() => const StreamMessagePreviewFormatter();
 
-  /// A formatted message preview.
+  /// Formats [message] as a preview [TextSpan].
   ///
-  /// Formats [message] based on its type, [channel], and [currentUser].
-  /// Mentions are bolded. The [textStyle] applies to all text.
+  /// The output adapts to the message kind (regular, deleted, system, poll,
+  /// location) and to the surrounding [channel] — for example, group channels
+  /// prepend a bold "You:" or "FirstName:" prefix. Mentions in the message
+  /// text are automatically bolded.
+  ///
+  /// [showCaption] controls how attachment and location previews label
+  /// themselves: when `true` (the default) they display the message text; when
+  /// `false` (for example in quoted-reply previews) they fall back to a
+  /// type-based label such as "Photo", "2 Videos", or "Location". Pure text
+  /// messages always show their text.
+  ///
+  /// The returned span carries structural style only (bold mentions, bold
+  /// sender prefix, tinted deleted-message text). Base text color and font
+  /// should be applied by the caller via [Text.rich]'s `style` parameter or
+  /// an ambient [DefaultTextStyle]; inline icons pick up their color from the
+  /// ambient [IconTheme].
   TextSpan formatMessage(
     BuildContext context,
     Message message, {
     ChannelModel? channel,
     User? currentUser,
-    TextStyle? textStyle,
+    bool showCaption = true,
   });
 
-  /// A formatted draft message preview with highlighted prefix.
+  /// Formats [draftMessage] as a preview [TextSpan] with a highlighted
+  /// "Draft:" prefix.
   ///
-  /// Adds a bold, accent-colored "Draft:" prefix to [draftMessage].
-  /// The [textStyle] applies to the message text.
+  /// The prefix is rendered in bold using the theme's accent color. The
+  /// draft body is formatted using the same rules as a regular message —
+  /// plain text, attachments, and polls all get a rich preview — with
+  /// mentions bolded automatically.
+  ///
+  /// [currentUser] is forwarded to body formatters that need viewer context
+  /// (for example, [formatPollMessage] to resolve the current user's vote).
+  ///
+  /// [showCaption] controls how attachment and location previews label
+  /// themselves: when `true` (the default) they display the draft text;
+  /// when `false` they fall back to a type-based label such as "Photo" or
+  /// "2 Videos". Pure text drafts always show their text.
+  ///
+  /// Like [formatMessage], the returned span carries only the structural
+  /// overrides the preview needs; the caller is responsible for the base
+  /// text style.
   TextSpan formatDraftMessage(
     BuildContext context,
     DraftMessage draftMessage, {
-    TextStyle? textStyle,
+    User? currentUser,
+    bool showCaption = true,
   });
 }
 
-/// {@template streamMessagePreviewFormatter}
-/// Default implementation of [MessagePreviewFormatter].
+/// The default implementation of [MessagePreviewFormatter].
 ///
-/// This formatter applies context-aware formatting based on message type,
-/// sender identity, and channel configuration. It handles various message
-/// types including regular text, attachments, polls, locations, system
-/// messages, and deleted messages.
+/// The preview is assembled in two layers, each produced by a separate
+/// `format*` method so subclasses can override a specific piece without
+/// reimplementing the rest:
 ///
-/// ## Message Type Handling
+///  * A body span for the message kind — [formatRegularMessage] (plain text
+///    and/or attachments), [formatDeletedMessage], [formatSystemMessage],
+///    [formatPollMessage], [formatLocationMessage], or [formatEmptyMessage].
+///  * A channel-context prefix — [formatCurrentUserMessage] ("You: "),
+///    [formatGroupMessage] ("FirstName: "), or [formatDirectMessage] (no
+///    prefix by default).
 ///
-/// The formatter handles messages differently based on their type:
+/// Mentions are applied to the body automatically and do not need to be
+/// handled in overrides.
 ///
-/// * **Deleted messages** - Shows a ban icon with localized deleted label
-/// * **System messages** - Shows the message text directly
-/// * **Poll messages** - Shows a poll icon with the poll name
-/// * **Location messages** - Shows a map pin icon with location label or
-///   message caption
-/// * **Regular messages** - Shows text with optional attachment previews
+/// {@tool snippet}
 ///
-/// ## Sender Context
-///
-/// In group channels (member count > 2), [formatGroupMessage] prepends
-/// a sender prefix:
-///
-/// * **Current user** - Adds bold "You:" prefix
-/// * **Other users** - Adds bold first-name prefix
-///
-/// In direct (1-on-1) channels, no sender prefix is added.
-///
-/// ## Customization
-///
-/// All formatting methods are marked [@protected] and can be overridden:
+/// Customize only the "You:" prefix and poll rendering:
 ///
 /// ```dart
 /// class ShortFormatter extends StreamMessagePreviewFormatter {
 ///   @override
-///   TextSpan? formatGroupMessage(
+///   TextSpan formatCurrentUserMessage(
 ///     BuildContext context,
-///     User? messageAuthor,
-///     User? currentUser,
+///     TextSpan messageBody,
 ///   ) {
-///     // Remove sender prefix for cleaner display.
-///     return null;
+///     // Remove the "You:" prefix for cleaner display.
+///     return messageBody;
 ///   }
 ///
 ///   @override
 ///   TextSpan formatPollMessage(
 ///     BuildContext context,
 ///     Poll poll,
-///     User? currentUser, {
-///     TextStyle? textStyle,
-///   }) {
+///     User? currentUser,
+///   ) {
 ///     return TextSpan(text: poll.name.isEmpty ? 'Poll' : poll.name);
 ///   }
 /// }
 /// ```
+/// {@end-tool}
 ///
-/// ## Protected Methods
+/// See also:
 ///
-/// These methods can be overridden for customization:
-///
-/// **Content Extraction:**
-/// * [formatRegularMessage] - Extracts message content (text + attachments)
-/// * [formatMessageAttachments] - Formats attachment previews with icons
-///
-/// **Message Types:**
-/// * [formatDeletedMessage] - Formats deleted messages
-/// * [formatSystemMessage] - Formats system messages
-/// * [formatEmptyMessage] - Formats empty messages
-/// * [formatPollMessage] - Formats poll messages
-/// * [formatLocationMessage] - Formats shared location messages
-///
-/// **Sender Context:**
-/// * [formatGroupMessage] - Adds sender prefix in group channels
-///
-/// **Draft Messages:**
-/// * [getDraftPrefix] - Returns the draft message prefix text
-/// {@endtemplate}
+///  * [MessagePreviewFormatter], the public interface.
+///  * [formatMessage], which composes the final preview span.
 class StreamMessagePreviewFormatter implements MessagePreviewFormatter {
   /// Creates a [StreamMessagePreviewFormatter].
   const StreamMessagePreviewFormatter();
@@ -177,32 +172,39 @@ class StreamMessagePreviewFormatter implements MessagePreviewFormatter {
     bool showCaption = true,
     ChannelModel? channel,
     User? currentUser,
-    TextStyle? textStyle,
   }) {
-    final effectiveTextStyle = textStyle ?? DefaultTextStyle.of(context).style;
-
-    final previewText = _buildPreviewText(
+    final rawContent = _formatContent(
       context,
       message,
-      channel,
-      currentUser,
+      currentUser: currentUser,
       showCaption: showCaption,
-      textStyle: effectiveTextStyle,
     );
 
-    return TextSpan(children: [previewText], style: textStyle);
+    final content = _applyMentions(rawContent, message.mentionedUsers);
+
+    if (channel == null) return content;
+
+    if (message.user?.id == currentUser?.id) {
+      return formatCurrentUserMessage(context, content);
+    }
+
+    if (channel.memberCount > 2) {
+      return formatGroupMessage(context, message.user, content);
+    }
+
+    return formatDirectMessage(context, content);
   }
 
-  TextSpan _buildPreviewText(
+  // Dispatches to the `format*` method that matches the kind of [message].
+  // Returns the bare body span, without the author prefix or mention pass.
+  TextSpan _formatContent(
     BuildContext context,
-    Message message,
-    ChannelModel? channel,
-    User? currentUser, {
+    Message message, {
+    User? currentUser,
     bool showCaption = true,
-    TextStyle? textStyle,
   }) {
     if (message.isDeleted) {
-      return formatDeletedMessage(context, message, textStyle: textStyle);
+      return formatDeletedMessage(context, message);
     }
 
     if (message.isSystem) {
@@ -210,521 +212,516 @@ class StreamMessagePreviewFormatter implements MessagePreviewFormatter {
     }
 
     if (message.poll case final poll?) {
-      return formatPollMessage(context, poll, currentUser, textStyle: textStyle);
+      return formatPollMessage(context, poll, currentUser);
     }
-
-    TextSpan? messageSpan;
 
     if (message.sharedLocation case final location?) {
-      messageSpan = formatLocationMessage(
-        context,
-        message,
-        location,
-        showCaption: showCaption,
-        textStyle: textStyle,
-      );
-    } else {
-      messageSpan = formatRegularMessage(
-        context,
-        message,
-        showCaption: showCaption,
-        textStyle: textStyle,
-      );
+      return formatLocationMessage(context, message, location, showCaption: showCaption);
     }
 
-    if (messageSpan == null) return formatEmptyMessage(context, message);
+    final regular = formatRegularMessage(context, message, showCaption: showCaption);
+    if (regular != null) return regular;
 
-    if (channel == null) return messageSpan;
-
-    return TextSpan(
-      children: [
-        if (channel.memberCount > 2) ?formatGroupMessage(context, message.user, currentUser),
-        messageSpan,
-      ],
-    );
+    return formatEmptyMessage(context, message);
   }
 
-  TextSpan _textSpanWithMentions(String text, List<User> mentionedUsers, StreamColorScheme colorScheme) {
-    if (mentionedUsers.isEmpty) return TextSpan(text: text);
-
-    final mentionRegex = RegExp(
-      mentionedUsers.map((it) => '@${RegExp.escape(it.name)}').join('|'),
-    );
-
-    final parts = text.splitByRegExp(mentionRegex);
-    if (parts.length <= 1) return TextSpan(text: text);
-
-    return TextSpan(
-      children: parts.map((part) {
-        if (mentionedUsers.any((it) => '@${it.name}' == part)) {
-          return TextSpan(
-            text: part,
-            style: TextStyle(fontWeight: FontWeight.bold, color: colorScheme.accentPrimary),
-          );
-        }
-        return TextSpan(text: part);
-      }).toList(),
-    );
-  }
-
-  /// The content of a regular [message] as a [TextSpan], including attachment
-  /// previews.
+  /// Formats a regular [message] — plain text, attachments, or both — as a
+  /// preview [TextSpan].
   ///
-  /// Extracts the message text and formats any attachments using
-  /// [formatMessageAttachments]. Mentions within the text are bolded.
-  /// Returns `null` if the message has no text or attachments.
+  /// When the message has attachments, the message text is used as their
+  /// caption (subject to [showCaption]). Otherwise the plain message text is
+  /// shown on its own.
   ///
-  /// When [showCaption] is `true` and the message has both text and
-  /// attachments, the text is shown alongside the attachment icon.
-  ///
-  /// Override to customize how message content is extracted:
-  ///
-  /// ```dart
-  /// @override
-  /// TextSpan? formatRegularMessage(
-  ///   BuildContext context,
-  ///   Message message, {
-  ///   bool showCaption = true,
-  ///   TextStyle? textStyle,
-  /// }) {
-  ///   final text = message.text;
-  ///   if (text == null || text.isEmpty) return null;
-  ///   return TextSpan(text: text);
-  /// }
-  /// ```
+  /// Returns `null` when the message has neither text nor attachments.
   @protected
   TextSpan? formatRegularMessage(
     BuildContext context,
     Message message, {
     bool showCaption = true,
-    TextStyle? textStyle,
   }) {
-    final messageText = switch (message.text?.trim()) {
-      final text? when text.isNotEmpty => text,
-      _ => null,
-    };
-
+    final messageText = message.text?.trim().nullIfEmpty;
     final attachments = message.attachments;
-    final mentionedUsers = message.mentionedUsers;
-    final colorScheme = context.streamColorScheme;
 
-    if (attachments.isEmpty) {
-      return messageText != null ? _textSpanWithMentions(messageText, mentionedUsers, colorScheme) : null;
+    if (attachments.isNotEmpty) {
+      return formatMessageAttachments(context, messageText, attachments, showCaption: showCaption);
     }
 
-    return formatMessageAttachments(
-      context,
-      messageText,
-      message.attachments,
-      mentionedUsers: mentionedUsers,
-      showCaption: showCaption,
-      textStyle: textStyle,
-    );
+    if (messageText == null) return null;
+    return _labeledIcon(label: messageText);
   }
 
-  /// The preview [TextSpan] for a deleted [message].
+  /// Formats a deleted [message] as a preview [TextSpan].
   ///
-  /// Shows a ban icon followed by the localized deleted message label,
-  /// both styled with the tertiary text color.
+  /// Shows a "no-sign" icon followed by the localized "Message deleted"
+  /// label, both tinted with the theme's tertiary text color to signal the
+  /// deleted state. The tint overrides the ambient text/icon color.
   @protected
-  TextSpan formatDeletedMessage(BuildContext context, Message message, {TextStyle? textStyle}) {
-    final iconSize = (textStyle?.fontSize ?? 16) + 2;
-    return TextSpan(
-      style: textStyle,
-      children: [
-        WidgetSpan(
-          alignment: PlaceholderAlignment.middle,
-          child: Icon(
-            context.streamIcons.noSign,
-            size: iconSize,
-            color: context.streamColorScheme.textTertiary,
-          ),
-        ),
-        WidgetSpan(
-          alignment: PlaceholderAlignment.middle,
-          child: SizedBox(width: context.streamSpacing.xxs),
-        ),
-        TextSpan(
-          text: context.translations.messageDeletedLabel,
-          style: TextStyle(color: context.streamColorScheme.textTertiary),
-        ),
-      ],
+  TextSpan formatDeletedMessage(BuildContext context, Message message) {
+    return _labeledIcon(
+      icon: context.streamIcons.noSign,
+      label: context.translations.messageDeletedLabel,
+      foregroundColor: context.streamColorScheme.textTertiary,
     );
   }
 
-  /// The preview [TextSpan] for a system [message].
+  /// Formats a system [message] as a preview [TextSpan].
   ///
-  /// Returns the message text if available, otherwise a localized
-  /// system message label.
+  /// Uses the message text directly, or a localized fallback label when the
+  /// text is missing or empty.
   @protected
   TextSpan formatSystemMessage(BuildContext context, Message message) {
-    if (message.text case final text? when text.isNotEmpty) return TextSpan(text: text);
-    return TextSpan(text: context.translations.systemMessageLabel);
+    return TextSpan(text: message.text?.nullIfEmpty ?? context.translations.systemMessageLabel);
   }
 
-  /// The preview [TextSpan] for an empty [message].
+  /// Formats an empty [message] — no text and no attachments — as a preview
+  /// [TextSpan].
   ///
-  /// Returns the localized empty message preview text, styled with the
-  /// tertiary text color.
+  /// Shows a localized "no-content" fallback label.
   @protected
   TextSpan formatEmptyMessage(BuildContext context, Message message) {
-    return TextSpan(
-      text: context.translations.emptyMessagePreviewText,
-      style: TextStyle(color: context.streamColorScheme.textTertiary),
-    );
+    return TextSpan(text: context.translations.emptyMessagePreviewText);
   }
 
-  /// A bold sender prefix [TextSpan] for group channel previews.
+  /// Formats a regular message sent by the current user.
   ///
-  /// Returns a "You: " prefix when [messageAuthor] matches [currentUser],
-  /// or the author's first name followed by ": " for other users. Returns
-  /// `null` if the author name is unavailable.
+  /// Prepends a bold, localized "You: " prefix to [messageBody] and returns
+  /// the combined span. Override to customize or remove the prefix:
   ///
-  /// Override to customize the sender prefix:
+  /// {@tool snippet}
+  ///
+  /// Remove the "You:" prefix entirely:
   ///
   /// ```dart
   /// @override
-  /// TextSpan? formatGroupMessage(
+  /// TextSpan formatCurrentUserMessage(
+  ///   BuildContext context,
+  ///   TextSpan messageBody,
+  /// ) {
+  ///   return messageBody;
+  /// }
+  /// ```
+  /// {@end-tool}
+  @protected
+  TextSpan formatCurrentUserMessage(BuildContext context, TextSpan messageBody) {
+    return TextSpan(children: [_boldSpan('${context.translations.youText}: '), messageBody]);
+  }
+
+  /// Formats a regular message shown in a 1-on-1 channel.
+  ///
+  /// No prefix is added by default — the other user's identity is clear from
+  /// the channel itself. Override to add context (for example a 💬 badge):
+  ///
+  /// {@tool snippet}
+  ///
+  /// ```dart
+  /// @override
+  /// TextSpan formatDirectMessage(
+  ///   BuildContext context,
+  ///   TextSpan messageBody,
+  /// ) {
+  ///   return TextSpan(children: [
+  ///     const TextSpan(text: '💬 '),
+  ///     messageBody,
+  ///   ]);
+  /// }
+  /// ```
+  /// {@end-tool}
+  @protected
+  TextSpan formatDirectMessage(BuildContext context, TextSpan messageBody) {
+    return messageBody;
+  }
+
+  /// Formats a regular message sent by another user in a group channel.
+  ///
+  /// Prepends a bold "FirstName: " prefix (the first word of
+  /// [messageAuthor]'s name) to [messageBody] and returns the combined span.
+  /// Returns [messageBody] unchanged when [messageAuthor] is `null` or has
+  /// no renderable name.
+  ///
+  /// Override to customize the prefix text:
+  ///
+  /// {@tool snippet}
+  ///
+  /// ```dart
+  /// @override
+  /// TextSpan formatGroupMessage(
   ///   BuildContext context,
   ///   User? messageAuthor,
-  ///   User? currentUser,
+  ///   TextSpan messageBody,
   /// ) {
-  ///   final name = messageAuthor?.name;
-  ///   if (name == null || name.isEmpty) return null;
-  ///   return TextSpan(text: '$name: ');
+  ///   final authorName = messageAuthor?.name;
+  ///   if (authorName == null || authorName.isEmpty) return messageBody;
+  ///   return TextSpan(children: [
+  ///     TextSpan(text: '$authorName says: '),
+  ///     messageBody,
+  ///   ]);
   /// }
   /// ```
+  /// {@end-tool}
   @protected
-  TextSpan? formatGroupMessage(
+  TextSpan formatGroupMessage(
     BuildContext context,
     User? messageAuthor,
-    User? currentUser,
+    TextSpan messageBody,
   ) {
-    if (messageAuthor?.id == currentUser?.id) {
-      return TextSpan(
-        text: '${context.translations.youText}: ',
-        style: TextStyle(
-          fontWeight: FontWeight.bold,
-          color: context.streamColorScheme.textTertiary,
-        ),
-      );
-    }
+    final authorName = messageAuthor?.name.trim().nullIfEmpty;
+    if (authorName == null) return formatDirectMessage(context, messageBody);
 
-    final authorName = messageAuthor?.name.split(' ')[0];
-    if (authorName == null || authorName.isEmpty) return null;
-
-    return TextSpan(
-      text: '$authorName: ',
-      style: TextStyle(
-        fontWeight: FontWeight.bold,
-        color: context.streamColorScheme.textTertiary,
-      ),
-    );
+    // Use only the first name to keep the prefix compact in narrow
+    // single-line preview rows.
+    final firstName = authorName.split(RegExp(r'\s+')).first;
+    return TextSpan(children: [_boldSpan('$firstName: '), messageBody]);
   }
 
-  /// The formatted preview [TextSpan] for [attachments].
+  /// Formats a list of [attachments] as a preview [TextSpan].
   ///
-  /// Renders an icon prefix based on the attachment type, followed by either
-  /// the [messageText] (when [showCaption] is `true`) or a descriptive suffix
-  /// (attachment name, count, or duration). [mentionedUsers] in the message
-  /// text are bolded.
+  /// Produces an "icon + label" preview, where the label prefers
+  /// [messageText] (when [showCaption] is `true`), then any
+  /// attachment-intrinsic text (filename, voice duration, link title), then
+  /// a localized type-based fallback ("Photo", "Video", "Audio", "File",
+  /// "Link", or pluralized counts for multi-attachment groups).
   ///
-  /// Returns `null` if [attachments] is empty and [messageText] is `null`.
+  /// Grouping rules, summarized:
   ///
-  /// When attachments have mixed types, a generic file icon is used with the
-  /// total file count. For uniform types, a type-specific icon is shown:
-  /// Audio/Voice Recording (microphone), Image (camera), Video (video),
-  /// Giphy (/giphy), and File (file).
+  ///  * Single attachment → type-specific icon + caption, filename/title, or
+  ///    a localized singular label ("Photo", "Video", "Audio", "File",
+  ///    "Link").
+  ///  * Multiple same-type attachments → type-specific icon + pluralized
+  ///    count ("2 Photos", "3 Videos", "4 files").
+  ///  * Mixed-type attachments → file icon + "N files".
+  ///  * Voice recording → voice icon + "Voice Recording (mm:ss)" when no
+  ///    caption is available.
+  ///  * Giphy → file icon + caption, or "Giphy" when no caption is set.
+  ///  * Unknown / custom types → unsupported-attachment icon + caption (if
+  ///    any).
   ///
-  /// Override to handle custom attachment types:
-  ///
-  /// ```dart
-  /// @override
-  /// TextSpan? formatMessageAttachments(
-  ///   BuildContext context,
-  ///   String? messageText,
-  ///   Iterable<Attachment> attachments, {
-  ///   List<User> mentionedUsers = const [],
-  ///   bool showCaption = true,
-  ///   TextStyle? textStyle,
-  /// }) {
-  ///   final attachment = attachments.firstOrNull;
-  ///   if (attachment?.type == 'product') {
-  ///     return TextSpan(text: '🛍️ Product');
-  ///   }
-  ///   return super.formatMessageAttachments(
-  ///     context,
-  ///     messageText,
-  ///     attachments,
-  ///     mentionedUsers: mentionedUsers,
-  ///     showCaption: showCaption,
-  ///     textStyle: textStyle,
-  ///   );
-  /// }
-  /// ```
+  /// Returns `null` when both [attachments] and [messageText] are empty.
   @protected
   TextSpan? formatMessageAttachments(
     BuildContext context,
     String? messageText,
     Iterable<Attachment> attachments, {
-    List<User> mentionedUsers = const [],
     bool showCaption = true,
-    TextStyle? textStyle,
   }) {
-    final colorScheme = context.streamColorScheme;
-    final attachment = attachments.firstOrNull;
-    if (attachment == null) {
-      return messageText != null ? _textSpanWithMentions(messageText, mentionedUsers, colorScheme) : null;
+    if (attachments.isEmpty) {
+      if (messageText == null) return null;
+      return _labeledIcon(label: messageText);
     }
 
-    final mixedTypes = attachments.any((it) => it.type != attachment.type);
-    final prefix = _attachmentPrefix(context, mixedTypes ? null : attachment.type, textStyle: textStyle);
+    final caption = showCaption ? messageText : null;
+    final preview = _resolveAttachmentPreview(context, attachments, caption);
 
-    if (showCaption && messageText != null) {
-      return TextSpan(
-        children: [
-          prefix,
-          WidgetSpan(
-            alignment: PlaceholderAlignment.middle,
-            child: SizedBox(width: context.streamSpacing.xxs),
-          ),
-          _textSpanWithMentions(messageText, mentionedUsers, colorScheme),
-        ],
-      );
-    }
-
-    final suffix = _attachmentSuffix(
-      context,
-      attachment,
-      count: attachments.length,
-      isMixed: mixedTypes,
-    );
-
-    return TextSpan(
-      children: [
-        prefix,
-        WidgetSpan(
-          alignment: PlaceholderAlignment.middle,
-          child: SizedBox(width: context.streamSpacing.xxs),
-        ),
-        ?suffix,
-      ],
-    );
+    return _labeledIcon(icon: preview.icon, label: preview.label);
   }
 
-  InlineSpan _attachmentPrefix(BuildContext context, String? type, {TextStyle? textStyle}) {
-    final size = (textStyle?.fontSize ?? 14) + 2;
-    final icons = context.streamIcons;
-    return switch (type) {
-      AttachmentType.audio || AttachmentType.voiceRecording => WidgetSpan(
-        alignment: PlaceholderAlignment.middle,
-        child: Icon(icons.voice, size: size),
-      ),
-      AttachmentType.image => WidgetSpan(
-        alignment: PlaceholderAlignment.middle,
-        child: Icon(icons.camera, size: size),
-      ),
-      AttachmentType.video => WidgetSpan(
-        alignment: PlaceholderAlignment.middle,
-        child: Icon(icons.video, size: size),
-      ),
-      AttachmentType.giphy => const TextSpan(text: '/giphy'),
-      _ => WidgetSpan(
-        alignment: PlaceholderAlignment.middle,
-        child: Icon(icons.file, size: size),
-      ),
-    };
-  }
-
-  TextSpan? _attachmentSuffix(
-    BuildContext context,
-    Attachment attachment, {
-    required int count,
-    required bool isMixed,
-  }) {
-    final translations = context.translations;
-
-    if (isMixed) return TextSpan(text: translations.filesAttachmentCountText(count));
-
-    return switch (attachment.type) {
-      AttachmentType.audio => TextSpan(text: translations.audioAttachmentText),
-      AttachmentType.voiceRecording => TextSpan(
-        text: '${translations.voiceRecordingText} (${attachment.duration.toMinutesAndSeconds()})',
-      ),
-      AttachmentType.file => TextSpan(
-        text: (count == 1 ? attachment.file?.name : null) ?? translations.filesAttachmentCountText(count),
-      ),
-      AttachmentType.image => TextSpan(text: translations.photosAttachmentCountText(count)),
-      AttachmentType.video => TextSpan(text: translations.videosAttachmentCountText(count)),
-      _ => null,
-    };
-  }
-
-  /// The formatted preview [TextSpan] for a [poll] message.
+  /// Formats a [poll] message as a preview [TextSpan].
   ///
-  /// Shows a poll chart icon followed by the latest vote activity when
-  /// available, or the poll name as a fallback. Specifically:
+  /// Shows the poll chart icon followed by the poll name. When the poll name
+  /// is empty, only the icon is shown.
   ///
-  /// - If the [currentUser] cast the latest vote, shows "You voted: {answer}".
-  /// - If another user cast the latest vote, shows "{name} voted: {answer}".
-  /// - Otherwise, falls back to displaying the [poll] name (trimmed). If the
-  ///   name is empty, only the icon is shown.
-  ///
-  /// Override to customize poll formatting:
-  ///
-  /// ```dart
-  /// @override
-  /// TextSpan formatPollMessage(
-  ///   BuildContext context,
-  ///   Poll poll,
-  ///   User? currentUser, {
-  ///   TextStyle? textStyle,
-  /// }) {
-  ///   return TextSpan(
-  ///     text: poll.name.isEmpty ? 'Poll' : poll.name,
-  ///   );
-  /// }
-  /// ```
+  /// [currentUser] is unused by the default implementation and provided for
+  /// overrides that want to render current-user context (for example, a
+  /// "You voted X" hint).
   @protected
-  TextSpan formatPollMessage(
-    BuildContext context,
-    Poll poll,
-    User? currentUser, {
-    TextStyle? textStyle,
-  }) {
-    final translations = context.translations;
-    final iconSize = (textStyle?.fontSize ?? 16) + 2;
-    TextSpan? latestVoterSpan;
-
-    if (poll.latestVotes.firstOrNull case final latestVote?
-        when latestVote.answerText != null && latestVote.answerText!.isNotEmpty) {
-      final answerText = latestVote.answerText!;
-      if (latestVote.user?.id == currentUser?.id) {
-        final youVoted = translations.pollYouVotedText;
-        latestVoterSpan = TextSpan(text: '$youVoted: $answerText');
-      } else if (latestVote.user case final latestVoter?) {
-        final someoneVoted = translations.pollSomeoneVotedText(latestVoter.name.split(' ')[0]);
-        latestVoterSpan = TextSpan(text: '$someoneVoted: $answerText');
-      }
-    }
-
-    return TextSpan(
-      style: textStyle,
-      children: [
-        WidgetSpan(
-          alignment: PlaceholderAlignment.middle,
-          child: Icon(context.streamIcons.poll, size: iconSize),
-        ),
-        if (latestVoterSpan case final latestVoterSpan?) ...[
-          WidgetSpan(
-            alignment: PlaceholderAlignment.middle,
-            child: SizedBox(width: context.streamSpacing.xxs),
-          ),
-          latestVoterSpan,
-        ] else if (poll.name.trim() case final pollName when pollName.isNotEmpty) ...[
-          WidgetSpan(
-            alignment: PlaceholderAlignment.middle,
-            child: SizedBox(width: context.streamSpacing.xxs),
-          ),
-          TextSpan(text: pollName),
-        ],
-      ],
-    );
+  TextSpan formatPollMessage(BuildContext context, Poll poll, User? currentUser) {
+    return _labeledIcon(icon: context.streamIcons.poll, label: poll.name.trim());
   }
 
-  /// The formatted preview [TextSpan] for a shared [location] message.
+  /// Formats a shared [location] message as a preview [TextSpan].
   ///
-  /// Shows a map pin icon followed by the [message] text (when [showCaption]
-  /// is `true` and text is available) or a localized location label. Live
-  /// locations use a distinct label from static ones.
-  ///
-  /// Override to customize shared location formatting:
-  ///
-  /// ```dart
-  /// @override
-  /// TextSpan formatLocationMessage(
-  ///   BuildContext context,
-  ///   Message message,
-  ///   Location location, {
-  ///   bool showCaption = true,
-  ///   TextStyle? textStyle,
-  /// }) {
-  ///   return TextSpan(
-  ///     text: '(${location.latitude}, ${location.longitude})',
-  ///   );
-  /// }
-  /// ```
+  /// Shows the map-pin icon followed by the [message] text when
+  /// [showCaption] is `true` (and text is available), or a localized
+  /// type-based fallback otherwise. Live locations and static locations use
+  /// distinct fallback labels.
   @protected
   TextSpan formatLocationMessage(
     BuildContext context,
     Message message,
     Location location, {
     bool showCaption = true,
-    TextStyle? textStyle,
   }) {
-    final colorScheme = context.streamColorScheme;
-    final iconSize = (textStyle?.fontSize ?? 16) + 2;
-    return TextSpan(
-      style: textStyle,
-      children: [
-        WidgetSpan(
-          alignment: PlaceholderAlignment.middle,
-          child: Icon(context.streamIcons.location, size: iconSize),
-        ),
-        WidgetSpan(
-          alignment: PlaceholderAlignment.middle,
-          child: SizedBox(width: context.streamSpacing.xxs),
-        ),
-        if (message.text?.trim() case final messageText? when messageText.isNotEmpty && showCaption) ...[
-          _textSpanWithMentions(messageText, message.mentionedUsers, colorScheme),
-        ] else ...[
-          TextSpan(text: context.translations.locationLabel(isLive: location.isLive)),
-        ],
-      ],
-    );
+    final caption = showCaption ? message.text?.trim().nullIfEmpty : null;
+    final label = caption ?? context.translations.locationLabel(isLive: location.isLive);
+
+    return _labeledIcon(icon: context.streamIcons.location, label: label);
   }
 
   @override
   TextSpan formatDraftMessage(
     BuildContext context,
     DraftMessage draftMessage, {
-    TextStyle? textStyle,
+    User? currentUser,
+    bool showCaption = true,
   }) {
-    final colorScheme = context.streamColorScheme;
+    final message = draftMessage.toMessage();
+
+    // Mirror [formatMessage]: build the kind-specific content first, then
+    // apply the mention-bolding pass. This keeps polls, attachments, and
+    // plain-text drafts all getting a rich preview — not just the raw
+    // text — while keeping the "Draft:" prefix out of the mention pass.
+    final rawContent = _formatContent(
+      context,
+      message,
+      currentUser: currentUser,
+      showCaption: showCaption,
+    );
+
+    final content = _applyMentions(rawContent, message.mentionedUsers);
+
+    final prefix = _labeledIcon(
+      label: getDraftPrefix(context),
+      textStyle: const TextStyle(fontWeight: FontWeight.bold),
+      foregroundColor: context.streamColorScheme.accentPrimary,
+    );
 
     return TextSpan(
       children: [
-        TextSpan(
-          text: getDraftPrefix(context),
-          style: (textStyle ?? context.streamTextTheme.captionEmphasis).copyWith(
-            color: colorScheme.accentPrimary,
-          ),
-        ),
-        const TextSpan(text: ' '), // Space between prefix and message
-        TextSpan(text: draftMessage.text, style: textStyle),
+        prefix,
+        const TextSpan(text: ' '),
+        content,
       ],
     );
   }
 
-  /// The draft message prefix text.
+  /// The text shown as the bold prefix of a draft preview.
   ///
-  /// Returns the localized "Draft" label. Override to customize the prefix:
+  /// Defaults to the localized "Draft:" label.
+  ///
+  /// {@tool snippet}
+  ///
+  /// Override to customize the prefix:
   ///
   /// ```dart
   /// @override
-  /// String getDraftPrefix(BuildContext context) {
-  ///   return 'Unsent';
-  /// }
+  /// String getDraftPrefix(BuildContext context) => 'Unsent:';
   /// ```
+  /// {@end-tool}
   @protected
   String getDraftPrefix(BuildContext context) {
     return '${context.translations.draftLabel}:';
   }
 }
 
+// ---------------------------------------------------------------------------
+// Span primitives
+//
+// The preview is composed from three small helpers:
+//
+//  * [_iconSpan]       — an inline icon as a [WidgetSpan].
+//  * [_labeledIcon]    — the common "icon + space + label" pattern.
+//  * [_applyMentions]  — a single post-pass that bolds "@Mention" fragments
+//                         anywhere in the assembled span tree.
+//
+// Most `format*` methods above reduce to a single call to [_labeledIcon], and
+// mention handling stays out of every individual formatter — it's applied
+// once at the root by [formatMessage].
+// ---------------------------------------------------------------------------
+
+// Builds an "icon + space + label" [TextSpan]. The icon slot is dropped
+// when [icon] is null; the text slot (and separator) is dropped when
+// [label] is empty.
+//
+// [textStyle] sets typography; [foregroundColor] tints the label and
+// overrides [textStyle.color]. The inline icon always renders at the
+// resulting effective text color so text and icon stay in sync.
+TextSpan _labeledIcon({
+  IconData? icon,
+  required String label,
+  TextStyle? textStyle,
+  Color? foregroundColor,
+}) {
+  final effectiveTextStyle = (textStyle ?? const TextStyle()).copyWith(color: foregroundColor);
+
+  return TextSpan(
+    style: effectiveTextStyle,
+    children: [
+      if (icon != null) ...[
+        _iconSpan(icon, color: effectiveTextStyle.color),
+        if (label.isNotEmpty) const TextSpan(text: ' '),
+      ],
+      if (label.isNotEmpty) TextSpan(text: label),
+    ],
+  );
+}
+
+// Builds an inline icon [WidgetSpan] that vertically centers against the
+// surrounding text.
+//
+// Uses [PlaceholderAlignment.middle] so the icon anchors to the line's
+// vertical midline rather than a text baseline — this keeps icons visually
+// aligned regardless of the icon font's intrinsic baseline, which rarely
+// matches the body font.
+WidgetSpan _iconSpan(
+  IconData icon, {
+  double size = 16,
+  Color? color,
+}) {
+  return WidgetSpan(
+    alignment: PlaceholderAlignment.middle,
+    child: Icon(icon, size: size, color: color),
+  );
+}
+
+// Walks the assembled [span] tree once and bolds any text fragments that
+// match a [mentionedUsers] entry (as "@UserName").
+//
+// Kept as a single post-pass so individual `format*` methods don't need to
+// know about mentions. [WidgetSpan]s (e.g. inline icons) and styled
+// descendants pass through untouched; only plain text fragments are split
+// and re-wrapped.
+TextSpan _applyMentions(TextSpan span, List<User> mentionedUsers) {
+  if (mentionedUsers.isEmpty) return span;
+
+  final regex = RegExp(mentionedUsers.map((it) => '@${RegExp.escape(it.name)}').join('|'));
+  bool isMention(String s) => mentionedUsers.any((it) => '@${it.name}' == s);
+
+  InlineSpan visit(InlineSpan node) {
+    if (node is! TextSpan) return node;
+
+    final mappedChildren = node.children?.map(visit).toList(growable: false);
+    final text = node.text;
+
+    if (text == null || text.isEmpty || !regex.hasMatch(text)) {
+      return TextSpan(text: text, style: node.style, children: mappedChildren);
+    }
+
+    // Only the bolded mention fragments need an explicit style override;
+    // non-mention fragments inherit from [node.style] (and ancestors).
+    const boldStyle = TextStyle(fontWeight: FontWeight.bold);
+    return TextSpan(
+      style: node.style,
+      children: [
+        for (final part in text.splitByRegExp(regex))
+          if (isMention(part)) TextSpan(text: part, style: boldStyle) else TextSpan(text: part),
+        if (mappedChildren != null) ...mappedChildren,
+      ],
+    );
+  }
+
+  return visit(span) as TextSpan;
+}
+
+// Builds a bold [TextSpan] wrapping [text]. Used for the "You:" / "FirstName:"
+// sender prefix.
+TextSpan _boldSpan(String text) => TextSpan(
+  text: text,
+  style: const TextStyle(fontWeight: FontWeight.bold),
+);
+
+// ---------------------------------------------------------------------------
+// Attachment presentation
+//
+// Resolving an attachment preview is split into three helpers:
+//
+//  * [_resolveAttachmentPreview]          — dispatcher: single vs multiple.
+//  * [_resolveSingleAttachmentPreview]    — one attachment, one flat switch
+//                                            over [AttachmentType].
+//  * [_resolveMultipleAttachmentsPreview] — 2+ attachments: same-type groups
+//                                            get a pluralized count,
+//                                            mixed-type groups fall back to
+//                                            the generic "N files" label.
+// ---------------------------------------------------------------------------
+
+// A resolved attachment preview: the inline [icon] (null = no icon) and the
+// text [label] to render next to it.
+typedef _AttachmentPreview = ({IconData? icon, String label});
+
+// Resolves the icon + label to show for a message with [attachments],
+// optionally falling back to [caption] when provided.
+//
+// Thin dispatcher that picks between the single- and multi-attachment
+// resolvers so `format*` callers don't need to branch on attachment count.
+// Assumes [attachments] is non-empty.
+_AttachmentPreview _resolveAttachmentPreview(
+  BuildContext context,
+  Iterable<Attachment> attachments,
+  String? caption,
+) {
+  if (attachments.length > 1) {
+    return _resolveMultipleAttachmentsPreview(context, attachments, caption);
+  }
+  return _resolveSingleAttachmentPreview(context, attachments.first, caption);
+}
+
+// Resolves the preview for a message with a single [attachment].
+//
+// Produces a type-specific icon + label, preferring [caption], then any
+// attachment-intrinsic text (filename, OG title, voice duration), and
+// finally a localized type label ("Photo", "Video", "Audio", "File", "Link").
+_AttachmentPreview _resolveSingleAttachmentPreview(
+  BuildContext context,
+  Attachment attachment,
+  String? caption,
+) {
+  final icons = context.streamIcons;
+  final translations = context.translations;
+
+  return switch (attachment.type) {
+    // Giphy previews are branded — fall back to the literal "Giphy" label
+    // when no caption is available rather than a localized type name.
+    .giphy => (icon: icons.file, label: caption ?? 'Giphy'),
+    // Voice recordings embed the duration (mm:ss) in the label.
+    .voiceRecording => (
+      icon: icons.voice,
+      label: caption ?? '${translations.voiceRecordingText} (${attachment.duration.toMinutesAndSeconds()})',
+    ),
+    .image => (icon: icons.camera, label: caption ?? translations.photosAttachmentCountText(1)),
+    .video => (icon: icons.video, label: caption ?? translations.videosAttachmentCountText(1)),
+    .file => (icon: icons.file, label: caption ?? attachment.title ?? translations.fileAttachmentText),
+    .audio => (icon: icons.voice, label: caption ?? translations.audioAttachmentText),
+    // Link previews are auto-generated from message text. Prefer the caption
+    // (original message text) or the OG-scraped title; fall back to "Link".
+    .urlPreview => (icon: icons.link, label: caption ?? attachment.title ?? translations.linkAttachmentText),
+    // Unknown / custom types: unsupported icon + caption (if any).
+    _ => (icon: icons.unsupportedAttachment, label: caption ?? ''),
+  };
+}
+
+// Resolves the preview for a message with two or more [attachments].
+//
+// Same-type groups get a type-specific pluralized count ("2 Photos",
+// "3 Videos", "4 files"). Mixed-type groups fall back to a generic file icon
+// with "N files". Rarer same-type groups (audio, voice recording, giphy,
+// link preview, custom) delegate to [_resolveSingleAttachmentPreview] of the
+// first attachment — plural forms aren't defined for them.
+//
+// Assumes [attachments] has at least two entries.
+_AttachmentPreview _resolveMultipleAttachmentsPreview(
+  BuildContext context,
+  Iterable<Attachment> attachments,
+  String? caption,
+) {
+  final icons = context.streamIcons;
+  final translations = context.translations;
+
+  final first = attachments.first;
+  final count = attachments.length;
+
+  final hasMixedTypes = attachments.any((it) => it.type != first.type);
+  if (hasMixedTypes) return (icon: icons.file, label: caption ?? translations.filesAttachmentCountText(count));
+
+  return switch (first.type) {
+    .image => (icon: icons.camera, label: caption ?? translations.photosAttachmentCountText(count)),
+    .video => (icon: icons.video, label: caption ?? translations.videosAttachmentCountText(count)),
+    .file => (icon: icons.file, label: caption ?? translations.filesAttachmentCountText(count)),
+    _ => _resolveSingleAttachmentPreview(context, first, caption),
+  };
+}
+
+// Small [String] helpers used by the formatter.
 extension on String {
+  // Returns the string, or `null` when it is empty. Lets call sites collapse
+  // "missing or blank" into a single null-check.
+  String? get nullIfEmpty => isEmpty ? null : this;
+
+  // Splits the string on every match of [regex], keeping the matched
+  // fragments in the result.
+  //
+  // Unlike [String.split], this preserves the delimiters as their own
+  // entries, so a mention-matching regex can split "Hi @Alice!" into
+  // `["Hi ", "@Alice", "!"]` — the caller can then style only the mention
+  // fragment.
   List<String> splitByRegExp(RegExp regex) {
-    // If the pattern is empty, return the whole string
     if (regex.pattern.isEmpty) return [this];
 
     final result = <String>[];

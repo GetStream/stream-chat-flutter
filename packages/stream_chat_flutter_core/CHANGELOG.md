@@ -1,3 +1,27 @@
+## Upcoming
+
+🛑️ Breaking
+
+- Renamed `StreamMessageInputController.editingOriginalMessage` → `messageBeingEdited`.
+- `StreamMessageInputController` constructor no longer accepts non-initial messages;
+  use `editMessage()` to enter edit mode.
+- `StreamMessageInputController.cancelEditMessage()` is now a no-op when no edit is active.
+- `StreamMessageInputController.clear()` no longer exits edit mode;
+  use `cancelEditMessage()` instead.
+
+✅ Added
+
+- Added `StreamMessageInputController.isEditing` getter.
+- Added `StreamMessageInputController.clearCommand()`; setting `command = null` is
+  now an alias for it.
+- `StreamMessageInputController.editMessage()` and the `command` setter are now
+  re-entrant — repeated calls preserve the original restore snapshot.
+
+🐞 Fixed
+
+- Fixed `StreamMessageInputController.cancelEditMessage` losing the pre-edit
+  draft when a remote update arrived for the message being edited.
+
 ## 10.0.0-beta.13
 
 🛑️ Breaking

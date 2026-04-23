@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/misc/adaptive_dialog_action.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
+import 'package:stream_chat_flutter/src/utils/extensions.dart';
 
 /// {@template streamMessageActionConfirmationModal}
 /// A confirmation modal dialog for message actions in Stream Chat.
@@ -34,16 +35,18 @@ import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 class StreamMessageActionConfirmationModal extends StatelessWidget {
   /// Creates a message action confirmation modal.
   ///
-  /// The [cancelActionTitle] defaults to a Text widget with 'Cancel'.
-  /// The [confirmActionTitle] defaults to a Text widget with 'Confirm'.
+  /// [cancelActionTitle] defaults to a [Text] with the localized
+  /// [Translations.cancelLabel].
+  /// [confirmActionTitle] defaults to a [Text] with the localized
+  /// [Translations.confirmLabel].
   /// Set [isDestructiveAction] to true for actions like deletion that should
   /// be highlighted as destructive.
   const StreamMessageActionConfirmationModal({
     super.key,
     this.title,
     this.content,
-    this.cancelActionTitle = const Text('Cancel'),
-    this.confirmActionTitle = const Text('Confirm'),
+    this.cancelActionTitle,
+    this.confirmActionTitle,
     this.isDestructiveAction = false,
   });
 
@@ -59,15 +62,17 @@ class StreamMessageActionConfirmationModal extends StatelessWidget {
 
   /// The widget to display as the cancel action button.
   ///
-  /// Defaults to a [Text] widget with 'Cancel'.
-  /// When pressed, this action dismisses the dialog and returns false.
-  final Widget cancelActionTitle;
+  /// When null, falls back to a [Text] with the localized
+  /// [Translations.cancelLabel]. When pressed, this action dismisses the
+  /// dialog and returns false.
+  final Widget? cancelActionTitle;
 
   /// The widget to display as the confirm action button.
   ///
-  /// Defaults to a [Text] widget with 'Confirm'.
-  /// When pressed, this action dismisses the dialog and returns true.
-  final Widget confirmActionTitle;
+  /// When null, falls back to a [Text] with the localized
+  /// [Translations.confirmLabel]. When pressed, this action dismisses the
+  /// dialog and returns true.
+  final Widget? confirmActionTitle;
 
   /// Whether the confirm action is destructive (like deletion).
   ///
@@ -81,16 +86,18 @@ class StreamMessageActionConfirmationModal extends StatelessWidget {
     final colorTheme = theme.colorTheme;
     final textTheme = theme.textTheme;
 
+    final translations = context.translations;
+
     final actions = <Widget>[
       AdaptiveDialogAction(
         onPressed: () => Navigator.of(context).maybePop(false),
-        child: cancelActionTitle,
+        child: cancelActionTitle ?? Text(translations.cancelLabel),
       ),
       AdaptiveDialogAction(
         onPressed: () => Navigator.of(context).maybePop(true),
         isDefaultAction: true,
         isDestructiveAction: isDestructiveAction,
-        child: confirmActionTitle,
+        child: confirmActionTitle ?? Text(translations.confirmLabel),
       ),
     ];
 
