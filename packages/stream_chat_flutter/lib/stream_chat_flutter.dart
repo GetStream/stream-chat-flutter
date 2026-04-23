@@ -11,6 +11,8 @@ export 'package:stream_core_flutter/stream_core_flutter.dart'
         StreamCheckbox,
         StreamCheckboxSize,
         StreamCheckboxStyle,
+        StreamColorScheme,
+        StreamColorSwatch,
         StreamProgressBarStyle,
         StreamPlaybackSpeedToggleStyle,
         StreamAudioWaveformSlider,
@@ -72,6 +74,11 @@ export 'package:stream_core_flutter/stream_core_flutter.dart'
         StreamUnicodeEmoji,
         StreamVideoPlayIndicator,
         StreamVideoPlayIndicatorSize,
+        StreamMessageItemTheme,
+        StreamMessageItemThemeData,
+        StreamMessageLayoutProperty,
+        StreamMessageLayoutVisibility,
+        StreamVisibility,
         streamSupportedEmojis;
 
 export 'src/ai_assistant/ai_typing_indicator_view.dart';
