@@ -1,3 +1,11 @@
+## Upcoming
+
+🐞 Fixed
+
+- Fixed channel list re-sorting on refresh or when returning from background. `DateTime` columns
+  are now stored as ISO-8601 text instead of Unix-seconds integers, preserving sub-second
+  precision so the on-disk order matches the backend order.
+
 ## 10.0.0-beta.13
 
 🛑️ Breaking
