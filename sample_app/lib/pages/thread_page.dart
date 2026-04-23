@@ -57,7 +57,6 @@ class _ThreadPageState extends State<ThreadPage> {
               initialAlignment: widget.initialAlignment,
               onReplyTap: _reply,
               swipeToReply: true,
-              messageFilter: defaultFilter,
               showScrollToBottom: false,
               highlightInitialMessage: true,
               onViewInChannelTap: widget.onViewInChannelTap,
@@ -72,13 +71,5 @@ class _ThreadPageState extends State<ThreadPage> {
         ],
       ),
     );
-  }
-
-  bool defaultFilter(Message m) {
-    final currentUser = StreamChat.of(context).currentUser;
-    final isMyMessage = m.user?.id == currentUser?.id;
-    final isDeletedOrShadowed = m.isDeleted == true || m.shadowed == true;
-    if (isDeletedOrShadowed && !isMyMessage) return false;
-    return true;
   }
 }
