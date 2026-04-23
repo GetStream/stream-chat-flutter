@@ -629,6 +629,9 @@ Limite de pièces jointes dépassée : il n'est pas possible d'ajouter plus de $
   }
 
   @override
+  String get loadingLabel => 'Chargement...';
+
+  @override
   String get slideToCancelLabel => 'Glissez pour annuler';
 
   @override

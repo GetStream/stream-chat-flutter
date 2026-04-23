@@ -632,6 +632,9 @@ Attenzione: il limite massimo di $limit file è stato superato.
   }
 
   @override
+  String get loadingLabel => 'Caricamento...';
+
+  @override
   String get slideToCancelLabel => 'Scorri per annullare';
 
   @override

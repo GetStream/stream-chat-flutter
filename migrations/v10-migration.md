@@ -29,6 +29,7 @@ This guide covers all breaking changes in **Stream Chat Flutter SDK v10.0.0**. W
     - [MessageState](#messagestate)
 - [File Upload](#file-upload)
     - [AttachmentFileUploader](#attachmentfileuploader)
+- [Unread Threads Banner](#unread-threads-banner)
 - [Appendix: Beta Release Timeline](#appendix-beta-release-timeline)
 - [Migration Checklist](#migration-checklist)
 
@@ -60,6 +61,7 @@ Each breaking change section includes an **"Introduced in"** tag so you can quic
 | [**Message UI**](#message-ui) | New `onAttachmentTap` signature with fallback support, generic `StreamMessageAction` |
 | [**Message State**](#message-state--deletion) | `MessageDeleteScope` replaces `bool hard`, delete-for-me support |
 | [**File Upload**](#file-upload) | Four new abstract methods on `AttachmentFileUploader` |
+| [**Unread Threads Banner**](#unread-threads-banner) | Wrapper pattern with `child`, `enabled`, `onRefresh`; removed `onTap`, `minHeight` |
 
 ---
 
@@ -991,6 +993,58 @@ class CustomAttachmentFileUploader implements AttachmentFileUploader {
 
 ---
 
+## Unread Threads Banner
+
+#### Key Changes:
+
+- `StreamUnreadThreadsBanner` is now a **wrapper widget** instead of a standalone banner placed in a `Column`.
+- New `child` parameter — wrap your `StreamThreadListView` instead of placing the banner as a sibling.
+- `onTap` (`VoidCallback?`) replaced by `onRefresh` (`Future<void> Function()?`) — shows a loading spinner while the future is pending.
+- `minHeight` parameter **removed**.
+- `margin` default changed from `EdgeInsets.symmetric(horizontal: 8, vertical: 6)` to `EdgeInsets.zero`.
+- `padding` default changed from `EdgeInsets.symmetric(horizontal: 16)` to `EdgeInsets.all(spacing.sm)`.
+
+#### Migration Steps:
+
+**Before:**
+```dart
+Column(
+  children: [
+    ValueListenableBuilder(
+      valueListenable: controller.unseenThreadIds,
+      builder: (_, unreadThreads, __) => StreamUnreadThreadsBanner(
+        unreadThreads: unreadThreads,
+        onTap: () => controller
+            .refresh(resetValue: false)
+            .then((_) => controller.clearUnseenThreadIds()),
+      ),
+    ),
+    Expanded(
+      child: StreamThreadListView(controller: controller),
+    ),
+  ],
+);
+```
+
+**After:**
+```dart
+ValueListenableBuilder<Set<String>>(
+  valueListenable: controller.unseenThreadIds,
+  builder: (context, unseenThreadIds, child) => StreamUnreadThreadsBanner(
+    enabled: unseenThreadIds.isNotEmpty,
+    unreadThreads: unseenThreadIds,
+    onRefresh: () async {
+      await controller.refresh(resetValue: false);
+      controller.clearUnseenThreadIds();
+    },
+    child: child!,
+  ),
+  child: StreamThreadListView(controller: controller),
+);
+```
+
+---
+
 ## Appendix: Beta Release Timeline
 
 This appendix provides a chronological reference of breaking changes by beta version for users upgrading from specific pre-release versions.
@@ -1035,6 +1089,12 @@ This appendix provides a chronological reference of breaking changes by beta ver
 ---
 
 ## Migration Checklist
+
+### Unread Threads Banner
+- [ ] Replace `Column` + `Expanded` layout with `StreamUnreadThreadsBanner(child: StreamThreadListView(...))`
+- [ ] Replace `onTap` with `onRefresh` (returns `Future<void>`)
+- [ ] Add `enabled: true` to show the banner (defaults to hidden)
+- [ ] Remove `minHeight` parameter if used
 
 ### For v10.0.0-beta.12:
 - [ ] Replace `ArgumentError('The size of the attachment is...')` with `AttachmentTooLargeError` (provides `fileSize` and `maxSize` properties)

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/misc/timestamp.dart';
 import 'package:stream_chat_flutter/src/utils/date_formatter.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 /// {@template streamThreadListTile}
 /// A widget that displays a thread in a list.
@@ -105,75 +106,77 @@ class _DefaultStreamThreadListTile extends StatelessWidget {
         channel?.formatName(currentUser: currentUser) ?? avatarUser?.name ?? context.translations.noTitleText;
     final participantUsers = thread.threadParticipants.map((it) => it.user).nonNulls.toList(growable: false);
 
-    return Material(
-      color: effectiveBackgroundColor,
-      child: InkWell(
+    return StreamListTileTheme(
+      data: StreamListTileThemeData(
+        contentPadding: effectivePadding,
+        backgroundColor: WidgetStatePropertyAll(effectiveBackgroundColor),
+      ),
+      child: StreamListTileContainer(
+        enabled: true,
+        selected: false,
         onTap: props.onTap,
         onLongPress: props.onLongPress,
-        child: Padding(
-          padding: effectivePadding,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (avatarUser case final user?)
-                Padding(
-                  padding: const EdgeInsetsDirectional.only(end: 12),
-                  child: StreamUserAvatar(
-                    user: user,
-                    size: StreamAvatarSize.xl,
-                  ),
-                )
-              else
-                const Padding(
-                  padding: EdgeInsetsDirectional.only(end: 12),
-                  child: SizedBox.square(dimension: 40),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (avatarUser case final user?)
+              Padding(
+                padding: const EdgeInsetsDirectional.only(end: 12),
+                child: StreamUserAvatar(
+                  user: user,
+                  size: StreamAvatarSize.xl,
                 ),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: ThreadTitle(
-                            channelName: channelName,
-                            style: effectiveChannelNameStyle,
-                          ),
-                        ),
-                        if (unreadMessageCount case final count? when count > 0) ...[
-                          const SizedBox(width: 8),
-                          ThreadUnreadCount(
-                            unreadCount: count,
-                            style: effectiveUnreadCountStyle,
-                            backgroundColor: effectiveUnreadCountBackgroundColor,
-                          ),
-                        ],
-                      ],
-                    ),
-                    const SizedBox(height: 2),
-                    ThreadRootMessagePreview(
-                      parentMessage: parentMessage,
-                      channel: channel,
-                      language: language,
-                      style: effectiveReplyToMessageStyle,
-                      emptyStyle: effectiveLatestReplyMessageStyle,
-                    ),
-                    const SizedBox(height: 8),
-                    ThreadFooter(
-                      participantUsers: participantUsers,
-                      replyCount: thread.replyCount,
-                      latestActivityAt: latestActivityAt,
-                      replyCountStyle: effectiveReplyCountStyle,
-                      timestampStyle: effectiveTimestampStyle,
-                      timestampFormatter: effectiveTimestampFormatter,
-                    ),
-                  ],
-                ),
+              )
+            else
+              const Padding(
+                padding: EdgeInsetsDirectional.only(end: 12),
+                child: SizedBox.square(dimension: 40),
               ),
-            ],
-          ),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: ThreadTitle(
+                          channelName: channelName,
+                          style: effectiveChannelNameStyle,
+                        ),
+                      ),
+                      if (unreadMessageCount case final count? when count > 0) ...[
+                        const SizedBox(width: 8),
+                        ThreadUnreadCount(
+                          unreadCount: count,
+                          style: effectiveUnreadCountStyle,
+                          backgroundColor: effectiveUnreadCountBackgroundColor,
+                        ),
+                      ],
+                    ],
+                  ),
+                  const SizedBox(height: 2),
+                  ThreadRootMessagePreview(
+                    parentMessage: parentMessage,
+                    channel: channel,
+                    language: language,
+                    style: effectiveReplyToMessageStyle,
+                    emptyStyle: effectiveLatestReplyMessageStyle,
+                  ),
+                  const SizedBox(height: 8),
+                  ThreadFooter(
+                    participantUsers: participantUsers,
+                    replyCount: thread.replyCount,
+                    latestActivityAt: latestActivityAt,
+                    replyCountStyle: effectiveReplyCountStyle,
+                    timestampStyle: effectiveTimestampStyle,
+                    timestampFormatter: effectiveTimestampFormatter,
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );

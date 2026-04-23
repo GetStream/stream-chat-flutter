@@ -623,6 +623,9 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
   }
 
   @override
+  String get loadingLabel => 'Wird geladen...';
+
+  @override
   String get slideToCancelLabel => 'Zum Abbrechen schieben';
 
   @override

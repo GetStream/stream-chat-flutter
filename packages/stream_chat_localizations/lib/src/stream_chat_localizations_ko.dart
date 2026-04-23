@@ -613,6 +613,9 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
   }
 
   @override
+  String get loadingLabel => '로딩 중...';
+
+  @override
   String get slideToCancelLabel => '슬라이드하여 취소';
 
   @override

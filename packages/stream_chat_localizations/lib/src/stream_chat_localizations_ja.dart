@@ -610,6 +610,9 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   }
 
   @override
+  String get loadingLabel => '読み込み中...';
+
+  @override
   String get slideToCancelLabel => 'スライドでキャンセル';
 
   @override

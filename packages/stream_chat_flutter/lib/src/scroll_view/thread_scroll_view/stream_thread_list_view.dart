@@ -25,6 +25,9 @@ typedef StreamThreadListViewIndexedWidgetBuilder = StreamScrollViewIndexedWidget
 ///
 /// Uses a [StreamThreadListController] to load threads in paginated form.
 ///
+/// Wrap with [StreamUnreadThreadsBanner] to show a banner above the list when
+/// new unseen threads are available.
+///
 /// Each row is rendered using [StreamThreadListTile], which can be customized
 /// app-wide through [StreamComponentFactory].
 ///
@@ -40,6 +43,7 @@ typedef StreamThreadListViewIndexedWidgetBuilder = StreamScrollViewIndexedWidget
 /// ```
 ///
 /// See also:
+/// * [StreamUnreadThreadsBanner], which wraps this view to show new threads.
 /// * [StreamMessageWidget], which renders each thread's parent message.
 /// * [StreamThreadListController]
 /// {@endtemplate}

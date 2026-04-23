@@ -544,6 +544,9 @@ abstract class Translations {
   /// The label for "$count new threads"
   String newThreadsLabel({required int count});
 
+  /// The label for "Loading..."
+  String get loadingLabel;
+
   /// The label for "Slide to cancel"
   String get slideToCancelLabel;
 
@@ -1325,6 +1328,9 @@ Attachment limit exceeded: it's not possible to add more than $limit attachments
     if (count == 1) return '1 new thread';
     return '$count new threads';
   }
+
+  @override
+  String get loadingLabel => 'Loading...';
 
   @override
   String get slideToCancelLabel => 'Slide to cancel';
