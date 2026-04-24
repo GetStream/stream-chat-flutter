@@ -280,6 +280,7 @@ void main() {
         client: client,
         controller: controller,
         banner: const StreamUnreadThreadsBanner(
+          enabled: true,
           unreadThreads: {'thread-1', 'thread-2', 'thread-3'},
         ),
       );
