@@ -123,78 +123,79 @@ class _ChannelListDefault extends StatelessWidget {
           controller: channelListController,
           itemBuilder: (context, channels, index, defaultWidget) {
             final channel = channels[index];
-            return StreamBuilder<bool>(
-              stream: channel.isMutedStream,
-              initialData: channel.isMuted,
-              builder: (context, snapshot) {
-                final isMuted = snapshot.data ?? false;
-                return Slidable(
-                  groupTag: 'channels-actions',
-                  endActionPane: ActionPane(
-                    extentRatio: 0.4,
-                    motion: const BehindMotion(),
-                    children: [
-                      CustomSlidableAction(
-                        backgroundColor: context.streamColorScheme.backgroundSurface,
-                        onPressed: (_) {
-                          showChannelInfoModalBottomSheet(
-                            context: context,
-                            channel: channel,
-                            onViewInfoTap: () {
-                              Navigator.pop(context);
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) {
-                                    final isOneToOne = channel.memberCount == 2 && channel.isDistinct;
-                                    return StreamChannel(
-                                      channel: channel,
-                                      child: isOneToOne
-                                          ? ChatInfoScreen(
-                                              user: channel.state!.members
-                                                  .where((m) => m.userId != channel.client.state.currentUser!.id)
-                                                  .first
-                                                  .user,
-                                            )
-                                          : const GroupInfoScreen(),
-                                    );
-                                  },
-                                ),
-                              );
-                            },
+            return Slidable(
+              groupTag: 'channels-actions',
+              endActionPane: ActionPane(
+                extentRatio: 0.4,
+                motion: const BehindMotion(),
+                children: [
+                  CustomSlidableAction(
+                    backgroundColor: context.streamColorScheme.backgroundSurface,
+                    onPressed: (_) {
+                      showChannelInfoModalBottomSheet(
+                        context: context,
+                        channel: channel,
+                        onViewInfoTap: () {
+                          Navigator.pop(context);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) {
+                                final isOneToOne = channel.memberCount == 2 && channel.isDistinct;
+                                return StreamChannel(
+                                  channel: channel,
+                                  child: isOneToOne
+                                      ? ChatInfoScreen(
+                                          user: channel.state!.members
+                                              .where((m) => m.userId != channel.client.state.currentUser!.id)
+                                              .first
+                                              .user,
+                                        )
+                                      : const GroupInfoScreen(),
+                                );
+                              },
+                            ),
                           );
                         },
-                        child: const Icon(Icons.more_horiz),
-                      ),
-                      CustomSlidableAction(
-                        backgroundColor: chatTheme.colorTheme.accentPrimary,
-                        foregroundColor: Colors.white,
-                        onPressed: (_) async {
-                          if (isMuted) {
-                            await channel.unmute();
-                          } else {
-                            await channel.mute();
-                          }
-                        },
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              isMuted ? context.streamIcons.audio : context.streamIcons.mute,
-                              size: 20,
-                              color: Colors.white,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
+                      );
+                    },
+                    child: const Icon(Icons.more_horiz),
                   ),
-                  child: ColoredBox(
-                    color: channel.isPinned ? chatTheme.colorTheme.highlight : Colors.transparent,
-                    child: defaultWidget,
+                  BetterStreamBuilder<bool>(
+                    stream: channel.isMutedStream,
+                    initialData: channel.isMuted,
+                    builder: (context, isMuted) => CustomSlidableAction(
+                      backgroundColor: chatTheme.colorTheme.accentPrimary,
+                      foregroundColor: Colors.white,
+                      onPressed: (_) async {
+                        if (isMuted) {
+                          await channel.unmute();
+                        } else {
+                          await channel.mute();
+                        }
+                      },
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            isMuted ? context.streamIcons.audio : context.streamIcons.mute,
+                            size: 20,
+                            color: Colors.white,
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
-                );
-              },
+                ],
+              ),
+              child: BetterStreamBuilder<bool>(
+                stream: channel.isPinnedStream,
+                initialData: channel.isPinned,
+                builder: (context, isPinned) => ColoredBox(
+                  color: isPinned ? chatTheme.colorTheme.highlight : Colors.transparent,
+                  child: defaultWidget,
+                ),
+              ),
             );
           },
           onChannelTap: (channel) {
