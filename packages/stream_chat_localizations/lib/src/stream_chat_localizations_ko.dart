@@ -460,7 +460,7 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
   }
 
   @override
-  String get questionsLabel => '질문';
+  String questionLabel({bool isPlural = false}) => '질문';
 
   @override
   String get askAQuestionLabel => '질문하기';
@@ -543,7 +543,10 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
   String get enterYourCommentLabel => '댓글 입력';
 
   @override
-  String get endVoteConfirmationText => '투표를 종료하시겠습니까?';
+  String get endVoteConfirmationTitle => '투표를 종료하시겠습니까?';
+
+  @override
+  String get endVoteConfirmationMessage => '지금 이 투표를 종료하시겠습니까? 종료하면 더 이상 아무도 이 투표에 참여할 수 없습니다.';
 
   @override
   String get deletePollOptionLabel => '옵션을 삭제합니다.';
@@ -586,16 +589,29 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
   String get pollResultsLabel => '투표 결과';
 
   @override
+  String get pollVotesLabel => '투표';
+
+  @override
   String showAllVotesLabel({int? count}) {
     if (count == null) return '모든 투표 보기';
     return '모든 $count 투표 보기';
   }
 
   @override
+  String get viewAllLabel => '모두 보기';
+
+  @override
   String voteCountLabel({int? count}) => switch (count) {
     null || < 1 => '0 표',
     1 => '1 표',
     _ => '$count 표',
+  };
+
+  @override
+  String totalVoteCountLabel({int? count}) => switch (count) {
+    null || < 1 => '총 0 표',
+    1 => '총 1 표',
+    _ => '총 $count 표',
   };
 
   @override

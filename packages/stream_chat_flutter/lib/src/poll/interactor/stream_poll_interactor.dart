@@ -109,7 +109,6 @@ class StreamPollInteractor extends StatelessWidget {
           removeBottom: true,
           child: PollOptionsListView(
             poll: poll,
-            showProgressBar: true,
             visibleOptionCount: visibleOptionCount,
             onSeeMoreOptions: onSeeMoreOptions,
             onCastVote: onCastVote,

@@ -56,6 +56,10 @@ export 'package:stream_core_flutter/stream_core_flutter.dart'
         StreamReactionsType,
         StreamListTile,
         StreamListTileContainer,
+        StreamSheetHeader,
+        StreamSheetHeaderStyle,
+        StreamSheetHeaderTheme,
+        StreamSheetHeaderThemeData,
         StreamSwitch,
         StreamStepper,
         StreamStepperProps,
@@ -166,10 +170,10 @@ export 'src/misc/visible_footnote.dart';
 export 'src/poll/creator/stream_poll_creator_dialog.dart';
 export 'src/poll/creator/stream_poll_creator_widget.dart';
 export 'src/poll/interactor/stream_poll_interactor.dart';
-export 'src/poll/stream_poll_comments_dialog.dart';
-export 'src/poll/stream_poll_option_votes_dialog.dart';
-export 'src/poll/stream_poll_options_dialog.dart';
-export 'src/poll/stream_poll_results_dialog.dart';
+export 'src/poll/stream_poll_comments_sheet.dart';
+export 'src/poll/stream_poll_option_votes_sheet.dart';
+export 'src/poll/stream_poll_options_sheet.dart';
+export 'src/poll/stream_poll_results_sheet.dart';
 export 'src/reactions/detail/reaction_detail_sheet.dart';
 export 'src/reactions/picker/reaction_picker.dart';
 export 'src/scroll_view/channel_scroll_view/stream_channel_list_item.dart';

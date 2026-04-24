@@ -9,6 +9,11 @@
 - Removed `StreamFileAttachmentThumbnail`; use `StreamImageAttachmentThumbnail` / `StreamVideoAttachmentThumbnail` or `StreamFileTypeIcon.fromMimeType(...)`.
 - Removed `StreamMessageThemeData` (ownMessageTheme / otherMessageTheme) and `StreamMessageInputThemeData` (messageInputTheme).
 - Removed `StreamChannelPreviewThemeData` (channelPreviewTheme).
+- Renamed `StreamPollOptionsDialog` / `StreamPollResultsDialog` / `StreamPollOptionVotesDialog` / `StreamPollCommentsDialog` (and their `show*` helpers and `...DialogThemeData` types) → `...Sheet`. They now render as modal bottom sheets.
+- Redesigned `StreamPollOptionsSheetThemeData`, `StreamPollResultsSheetThemeData`, `StreamPollOptionVotesSheetThemeData` and `StreamPollCommentsSheetThemeData` — see [`migrations/redesign/attachments_and_polls.md`](../../migrations/redesign/attachments_and_polls.md).
+- Renamed `Translations.questionsLabel` getter → `questionLabel({bool isPlural = false})` method.
+- Renamed `Translations.endVoteConfirmationText` → `endVoteConfirmationTitle`; English default changed to `'End This Poll?'`.
+- Reworded `Translations.endVoteLabel` English default to `'End Poll'`.
 - Removed `AttachmentButton`, `StreamQuotedMessageWidget`, `EditMessageSheet`, `StreamMessageSendButton` and `DesktopReactionsBuilder`.
 - Removed `StreamChannelGridView`, `StreamChannelGridTile` and `StreamMessageSearchGridView`.
 - `StreamMessageActionConfirmationModal.cancelActionTitle` / `confirmActionTitle` are now nullable and fall back to `Translations.cancelLabel` / `confirmLabel`.
@@ -22,6 +27,11 @@
 - Added visual customisation props to `ThreadSeparator` and `UnreadMessagesSeparator`.
 - Added `StreamUnsupportedAttachment` and `UnsupportedAttachmentBuilder` for unrecognised attachment types.
 - `MessagePreviewFormatter` now renders `AttachmentType.urlPreview` messages with a link icon and caption / OG title / `linkAttachmentText` fallback.
+- Added `StreamPollCardStyle`, `StreamPollQuestionStyle` and `StreamPollOptionVotesStyle` shared style classes for the poll sheets.
+- Added a total vote count footer and per-option "View all" action to `StreamPollResultsSheet`.
+- Added a `sheetHeaderStyle` field to each poll sheet theme data.
+- Re-exported `StreamSheetHeader`, `StreamSheetHeaderStyle`, `StreamSheetHeaderTheme` and `StreamSheetHeaderThemeData` from `stream_core_flutter`.
+- Added `Translations.totalVoteCountLabel({int? count})`, `viewAllLabel`, `pollVotesLabel`, `endVoteConfirmationMessage` and `questionLabel({bool isPlural = false})`.
 
 🐞 Fixed
 

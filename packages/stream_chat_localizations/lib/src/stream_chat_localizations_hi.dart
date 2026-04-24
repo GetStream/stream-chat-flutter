@@ -471,7 +471,7 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
   }
 
   @override
-  String get questionsLabel => 'प्रश्न';
+  String questionLabel({bool isPlural = false}) => 'प्रश्न';
 
   @override
   String get askAQuestionLabel => 'प्रश्न पूछें';
@@ -548,7 +548,11 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
   String get enterYourCommentLabel => 'अपनी टिप्पणी दर्ज करें';
 
   @override
-  String get endVoteConfirmationText => 'क्या आप वाकई मतदान समाप्त करना चाहते हैं?';
+  String get endVoteConfirmationTitle => 'क्या आप वाकई मतदान समाप्त करना चाहते हैं?';
+
+  @override
+  String get endVoteConfirmationMessage =>
+      'क्या आप अभी इस पोल को समाप्त करना चाहते हैं? इसके बाद कोई भी इस पोल में वोट नहीं कर सकेगा।';
 
   @override
   String get deletePollOptionLabel => 'विकल्प हटाएं';
@@ -573,6 +577,9 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
 
   @override
   String get pollResultsLabel => 'पोल परिणाम';
+
+  @override
+  String get pollVotesLabel => 'वोट';
 
   @override
   String pollVotingModeLabel(PollVotingMode votingMode) {
@@ -601,6 +608,9 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
   }
 
   @override
+  String get viewAllLabel => 'सभी देखें';
+
+  @override
   String get updateYourCommentLabel => 'अपनी टिप्पणी अपडेट करें';
 
   @override
@@ -615,6 +625,14 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
       return '$count वोट';
     }
     return 'वोट';
+  }
+
+  @override
+  String totalVoteCountLabel({int? count}) {
+    if (count != null) {
+      return 'कुल $count वोट';
+    }
+    return 'कुल वोट';
   }
 
   @override

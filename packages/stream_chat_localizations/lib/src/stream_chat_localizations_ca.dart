@@ -471,7 +471,10 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
   }
 
   @override
-  String get questionsLabel => 'Preguntes';
+  String questionLabel({bool isPlural = false}) {
+    if (isPlural) return 'Preguntes';
+    return 'Pregunta';
+  }
 
   @override
   String get askAQuestionLabel => 'Fes una pregunta';
@@ -554,7 +557,11 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
   String get enterYourCommentLabel => 'Introdueix el teu comentari';
 
   @override
-  String get endVoteConfirmationText => 'Estàs segur que vols finalitzar la votació?';
+  String get endVoteConfirmationTitle => 'Estàs segur que vols finalitzar la votació?';
+
+  @override
+  String get endVoteConfirmationMessage =>
+      'Vols finalitzar aquesta enquesta ara? Ningú no podrà votar més en aquesta enquesta.';
 
   @override
   String get deletePollOptionLabel => 'Eliminar opció';
@@ -597,16 +604,29 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
   String get pollResultsLabel => 'Resultats de la votació';
 
   @override
+  String get pollVotesLabel => 'Vots';
+
+  @override
   String showAllVotesLabel({int? count}) {
     if (count == null) return 'Mostrar tots els vots';
     return 'Mostrar tots els $count vots';
   }
 
   @override
+  String get viewAllLabel => 'Veure-ho tot';
+
+  @override
   String voteCountLabel({int? count}) => switch (count) {
     null || < 1 => '0 vots',
     1 => '1 vot',
     _ => '$count vots',
+  };
+
+  @override
+  String totalVoteCountLabel({int? count}) => switch (count) {
+    null || < 1 => '0 vots en total',
+    1 => '1 vot en total',
+    _ => '$count vots en total',
   };
 
   @override

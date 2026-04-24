@@ -8,7 +8,7 @@ import 'package:stream_chat_flutter/src/utils/date_formatter.dart';
 ///
 /// See also:
 ///
-///  * [StreamPollOptionVotesDialogThemeData], which is used to configure this
+///  * [StreamPollOptionVotesSheetThemeData], which is used to configure this
 ///    theme.
 /// {@endtemplate}
 class StreamThreadListTileTheme extends InheritedTheme {
@@ -27,7 +27,7 @@ class StreamThreadListTileTheme extends InheritedTheme {
   /// The closest instance of this class that encloses the given context.
   ///
   /// If there is no enclosing [StreamThreadListTileTheme] widget, then
-  /// [StreamChatThemeData.pollOptionVotesDialogTheme] is used.
+  /// [StreamChatThemeData.pollOptionVotesSheetTheme] is used.
   static StreamThreadListTileThemeData of(BuildContext context) {
     final threadListTileTheme = context.dependOnInheritedWidgetOfExactType<StreamThreadListTileTheme>();
     return threadListTileTheme?.data ?? StreamChatTheme.of(context).threadListTileTheme;

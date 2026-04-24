@@ -66,7 +66,10 @@ class StreamPollVoteListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = StreamChatTheme.of(context);
+    final spacing = context.streamSpacing;
+
+    final textTheme = context.streamTextTheme;
+    final colorScheme = context.streamColorScheme;
 
     return InkWell(
       onTap: onTap,
@@ -78,41 +81,36 @@ class StreamPollVoteListTile extends StatelessWidget {
           borderRadius: borderRadius,
         ),
         child: Column(
+          spacing: spacing.xs,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (pollVote.answerText case final answerText? when showAnswerText) ...[
               Text(
                 answerText,
-                style: theme.textTheme.headlineBold.copyWith(
-                  color: theme.colorTheme.textHighEmphasis,
-                ),
+                style: textTheme.bodyDefault.copyWith(color: colorScheme.textPrimary),
               ),
-              const SizedBox(height: 16),
             ],
             Row(
+              spacing: spacing.sm,
               children: [
                 if (pollVote.user case final user?) ...[
                   StreamUserAvatar(
-                    size: .xs,
+                    size: .md,
                     user: user,
                     showOnlineIndicator: false,
                   ),
                   Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 4),
-                      child: Text(
-                        user.name,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.body.copyWith(
-                          color: theme.colorTheme.textHighEmphasis,
-                        ),
-                      ),
+                    child: Text(
+                      user.name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: textTheme.bodyDefault.copyWith(color: colorScheme.textPrimary),
                     ),
                   ),
                 ],
                 PollVoteUpdatedAt(
                   dateTime: pollVote.updatedAt.toLocal(),
+                  textStyle: textTheme.bodyDefault.copyWith(color: colorScheme.textTertiary),
                 ),
               ],
             ),
@@ -131,40 +129,30 @@ class PollVoteUpdatedAt extends StatelessWidget {
   const PollVoteUpdatedAt({
     super.key,
     required this.dateTime,
+    this.textStyle,
   });
 
   /// The date and time when the poll vote was last updated.
   final DateTime dateTime;
 
+  /// The text style to use for the timestamp.
+  ///
+  /// If null, defaults to the theme's body text style with low emphasis color.
+  final TextStyle? textStyle;
+
   @override
   Widget build(BuildContext context) {
-    final theme = StreamChatTheme.of(context);
+    return StreamTimestamp(
+      date: dateTime,
+      style: textStyle,
+      formatter: (context, date) {
+        if (date.isToday) return context.translations.todayLabel;
+        if (date.isYesterday) return context.translations.yesterdayLabel;
+        if (date.isWithinAWeek) return Jiffy.parseFromDateTime(date).EEEE;
+        if (date.isWithinAYear) return Jiffy.parseFromDateTime(date).MMMd;
 
-    return Row(
-      children: [
-        StreamTimestamp(
-          date: dateTime,
-          formatter: (context, date) {
-            if (date.isToday) return context.translations.todayLabel;
-            if (date.isYesterday) return context.translations.yesterdayLabel;
-            if (date.isWithinAWeek) return Jiffy.parseFromDateTime(date).EEEE;
-            if (date.isWithinAYear) return Jiffy.parseFromDateTime(date).MMMd;
-
-            return Jiffy.parseFromDateTime(date).yMMMd;
-          },
-          style: theme.textTheme.bodyBold.copyWith(
-            color: theme.colorTheme.textLowEmphasis,
-          ),
-        ),
-        const SizedBox(width: 8),
-        StreamTimestamp(
-          date: dateTime,
-          formatter: (context, date) => Jiffy.parseFromDateTime(date).jm,
-          style: theme.textTheme.body.copyWith(
-            color: theme.colorTheme.textLowEmphasis,
-          ),
-        ),
-      ],
+        return Jiffy.parseFromDateTime(date).yMMMd;
+      },
     );
   }
 }

@@ -478,7 +478,10 @@ Attenzione: il limite massimo di $limit file è stato superato.
   }
 
   @override
-  String get questionsLabel => 'Domande';
+  String questionLabel({bool isPlural = false}) {
+    if (isPlural) return 'Domande';
+    return 'Domanda';
+  }
 
   @override
   String get askAQuestionLabel => 'Fai una domanda';
@@ -561,7 +564,11 @@ Attenzione: il limite massimo di $limit file è stato superato.
   String get enterYourCommentLabel => 'Inserisci il tuo commento';
 
   @override
-  String get endVoteConfirmationText => 'Sei sicuro di voler terminare il voto?';
+  String get endVoteConfirmationTitle => 'Sei sicuro di voler terminare il voto?';
+
+  @override
+  String get endVoteConfirmationMessage =>
+      'Vuoi terminare questo sondaggio adesso? Nessuno potrà più votare in questo sondaggio.';
 
   @override
   String get deletePollOptionLabel => "Elimina l'opzione";
@@ -604,16 +611,29 @@ Attenzione: il limite massimo di $limit file è stato superato.
   String get pollResultsLabel => 'Risultati del sondaggio';
 
   @override
+  String get pollVotesLabel => 'Voti';
+
+  @override
   String showAllVotesLabel({int? count}) {
     if (count == null) return 'Mostra tutti i voti';
     return 'Mostra tutti i $count voti';
   }
 
   @override
+  String get viewAllLabel => 'Vedi tutto';
+
+  @override
   String voteCountLabel({int? count}) => switch (count) {
     null || < 1 => '0 voti',
     1 => '1 voto',
     _ => '$count voti',
+  };
+
+  @override
+  String totalVoteCountLabel({int? count}) => switch (count) {
+    null || < 1 => '0 voti in totale',
+    1 => '1 voto in totale',
+    _ => '$count voti in totale',
   };
 
   @override

@@ -469,7 +469,10 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
   }
 
   @override
-  String get questionsLabel => 'Fragen';
+  String questionLabel({bool isPlural = false}) {
+    if (isPlural) return 'Fragen';
+    return 'Frage';
+  }
 
   @override
   String get askAQuestionLabel => 'Stellen Sie eine Frage';
@@ -552,7 +555,11 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
   String get enterYourCommentLabel => 'Geben Sie Ihren Kommentar ein';
 
   @override
-  String get endVoteConfirmationText => 'Sind Sie sicher, dass Sie die Abstimmung beenden möchten?';
+  String get endVoteConfirmationTitle => 'Sind Sie sicher, dass Sie die Abstimmung beenden möchten?';
+
+  @override
+  String get endVoteConfirmationMessage =>
+      'Möchten Sie diese Umfrage jetzt beenden? Danach kann niemand mehr in dieser Umfrage abstimmen.';
 
   @override
   String get deletePollOptionLabel => 'Option löschen';
@@ -595,16 +602,29 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
   String get pollResultsLabel => 'Umfrage-Ergebnisse';
 
   @override
+  String get pollVotesLabel => 'Stimmen';
+
+  @override
   String showAllVotesLabel({int? count}) {
     if (count == null) return 'Alle Stimmen anzeigen';
     return 'Alle $count Stimmen anzeigen';
   }
 
   @override
+  String get viewAllLabel => 'Alle anzeigen';
+
+  @override
   String voteCountLabel({int? count}) => switch (count) {
     null || < 1 => '0 Stimmen',
     1 => '1 Stimme',
     _ => '$count Stimmen',
+  };
+
+  @override
+  String totalVoteCountLabel({int? count}) => switch (count) {
+    null || < 1 => '0 Stimmen insgesamt',
+    1 => '1 Stimme insgesamt',
+    _ => '$count Stimmen insgesamt',
   };
 
   @override
