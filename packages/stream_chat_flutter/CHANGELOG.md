@@ -31,6 +31,13 @@
 - Fixed retries of in-flight sends being routed through `updateMessage` instead of `sendMessage`.
 - Fixed composer attachment button staying rotated at 45° after the inline picker was dismissed.
 - Fixed composer focus being lost after selecting a command from the attachment picker.
+- Fixed gallery attachment picker empty placeholder using an oversized icon.
+- Fixed gallery attachment picker permission placeholder not being centered and inconsistent grid and "add more" tile spacing.
+- Fixed `EndOfFrameCallbackWidget` showing a generic error string when its callback throws.
+- Fixed unintended Material ink ripple on message tap.
+- Standardised empty and error states across channel, thread, draft, member, user, message search, poll vote, reaction and photo gallery scroll views.
+- Fixed `StreamPhotoGalleryTile` missing rounded corners and its badges not mirroring in RTL.
+- Fixed the "thread reply" action showing on parent messages while already inside their thread view.
 
 ## 10.0.0-beta.13
 
