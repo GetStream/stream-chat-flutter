@@ -25,11 +25,6 @@ class PushTokenManager {
   Future<void> _onTokenRefresh(String token, PushProvider provider) async {
     debugPrint('[push] token received (provider=${provider.name})');
 
-    // Clear any stale registrations (old provider, prior installs with a
-    // different token) before re-registering. Preserves rows that already
-    // match the current token so legitimate multi-device setups aren't wiped.
-    await _removeStaleDevices(currentToken: token);
-
     try {
       await client.addDevice(
         token,
@@ -39,23 +34,6 @@ class PushTokenManager {
       debugPrint('[push] addDevice OK (type=${provider.type.name}, name=${provider.name})');
     } catch (e, stk) {
       debugPrint('[push] addDevice failed: $e; $stk');
-    }
-  }
-
-  Future<void> _removeStaleDevices({required String currentToken}) async {
-    try {
-      final response = await client.getDevices();
-      for (final device in response.devices) {
-        if (device.id == currentToken) continue;
-        try {
-          await client.removeDevice(device.id);
-          debugPrint('[push] removed stale device id=${device.id} provider=${device.pushProvider}');
-        } catch (e) {
-          debugPrint('[push] failed to remove stale device id=${device.id}: $e');
-        }
-      }
-    } catch (e, stk) {
-      debugPrint('[push] getDevices failed: $e; $stk');
     }
   }
 
