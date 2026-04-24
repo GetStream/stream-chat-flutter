@@ -58,8 +58,8 @@ class StreamPollCreator extends StatelessWidget {
               StreamButton(
                 type: .outline,
                 style: .secondary,
-                onTap: _openCreatePollFlow,
-                label: context.translations.createPollLabel(),
+                onPressed: _openCreatePollFlow,
+                child: Text(context.translations.createPollLabel()),
               ),
             ],
           ),

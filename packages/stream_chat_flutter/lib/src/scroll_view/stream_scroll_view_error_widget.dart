@@ -69,8 +69,8 @@ class StreamScrollViewErrorWidget extends StatelessWidget {
       size: .medium,
       type: .outline,
       style: .secondary,
-      onTap: onRetryPressed,
-      label: context.translations.retryLabel,
+      onPressed: onRetryPressed,
+      child: Text(context.translations.retryLabel),
     );
 
     return Padding(

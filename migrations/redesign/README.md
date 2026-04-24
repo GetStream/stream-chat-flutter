@@ -58,11 +58,11 @@ class MyApp extends StatelessWidget {
       builders: StreamComponentBuilders(
         button: (context, props) => switch (props.type) {
           StreamButtonType.solid => ElevatedButton(
-            onPressed: props.onTap,
-            child: Text(props.label ?? ''),
+            onPressed: props.onPressed,
+            child: props.child ?? const SizedBox.shrink(),
           ),
-          StreamButtonType.outline => OutlinedButton(onPressed: props.onTap, child: Text(props.label ?? '')),
-          StreamButtonType.ghost => TextButton(onPressed: props.onTap, child: Text(props.label ?? '')),
+          StreamButtonType.outline => OutlinedButton(onPressed: props.onPressed, child: props.child ?? const SizedBox.shrink()),
+          StreamButtonType.ghost => TextButton(onPressed: props.onPressed, child: props.child ?? const SizedBox.shrink()),
         },
         extensions: streamChatComponentBuilders(
           channelListItem: (context, props) => StreamChannelListTile(
@@ -106,11 +106,11 @@ class MyCustomButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return switch (props.type) {
       StreamButtonType.solid => ElevatedButton(
-        onPressed: props.onTap,
-        child: Text(props.label ?? ''),
+        onPressed: props.onPressed,
+        child: props.child ?? const SizedBox.shrink(),
       ),
-      StreamButtonType.outline => OutlinedButton(onPressed: props.onTap, child: Text(props.label ?? '')),
-      StreamButtonType.ghost => TextButton(onPressed: props.onTap, child: Text(props.label ?? '')),
+      StreamButtonType.outline => OutlinedButton(onPressed: props.onPressed, child: props.child ?? const SizedBox.shrink()),
+      StreamButtonType.ghost => TextButton(onPressed: props.onPressed, child: props.child ?? const SizedBox.shrink()),
     };
   }
 }

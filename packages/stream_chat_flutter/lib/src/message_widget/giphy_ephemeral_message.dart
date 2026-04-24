@@ -109,17 +109,17 @@ class GiphyActions extends StatelessWidget {
               };
 
               return core.StreamButton(
-                label: action.text,
                 style: style,
                 type: .ghost,
                 size: .small,
-                onTap: switch (onActionPressed) {
+                onPressed: switch (onActionPressed) {
                   final onPressed? => () => onPressed(
                     action.name.toLowerCase(),
                     action.text.toLowerCase(),
                   ),
                   _ => null,
                 },
+                child: Text(action.text),
               );
             },
           ),

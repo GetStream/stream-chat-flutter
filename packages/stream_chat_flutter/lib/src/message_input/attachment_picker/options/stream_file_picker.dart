@@ -101,8 +101,8 @@ class StreamFilePicker extends StatelessWidget {
               StreamButton(
                 type: .outline,
                 style: .secondary,
-                onTap: onPickFile,
-                label: context.translations.openFilesLabel,
+                onPressed: onPickFile,
+                child: Text(context.translations.openFilesLabel),
               ),
             ],
           ),

@@ -204,8 +204,8 @@ class LocationNotFound extends StatelessWidget {
           StreamButton(
             type: .outline,
             style: .secondary,
-            onTap: onOpenAppSettings,
-            label: 'Open Settings',
+            onPressed: onOpenAppSettings,
+            child: const Text('Open Settings'),
           ),
         ],
       ),

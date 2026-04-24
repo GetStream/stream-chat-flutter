@@ -175,8 +175,8 @@ class _TabbedAttachmentPickerOptions extends StatelessWidget {
                     style: StreamButtonStyle.secondary,
                     type: StreamButtonType.ghost,
                     size: StreamButtonSize.large,
-                    icon: option.icon,
-                    onTap: onPressed,
+                    icon: Icon(option.icon),
+                    onPressed: onPressed,
                     isSelected: isSelected,
                   );
                 },

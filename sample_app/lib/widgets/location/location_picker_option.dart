@@ -55,8 +55,8 @@ class LocationPicker extends StatelessWidget {
               StreamButton(
                 type: .outline,
                 style: .secondary,
-                onTap: openLocationPicker,
-                label: 'Open location',
+                onPressed: openLocationPicker,
+                child: const Text('Open location'),
               ),
             ],
           ),
