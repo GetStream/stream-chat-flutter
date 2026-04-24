@@ -65,25 +65,6 @@ class StreamPollCreator extends StatelessWidget {
           ),
         ),
         onEndOfFrame: (_) => _openCreatePollFlow(),
-        errorBuilder: (context, error, stacktrace) {
-          return Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                size: 32,
-                context.streamIcons.pollLarge,
-                color: colorScheme.textTertiary,
-              ),
-              SizedBox(height: spacing.md),
-              StreamButton(
-                type: .outline,
-                style: .secondary,
-                onTap: _openCreatePollFlow,
-                label: context.translations.createPollLabel(isNew: true),
-              ),
-            ],
-          );
-        },
       ),
     );
   }

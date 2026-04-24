@@ -1,6 +1,5 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:photo_manager/photo_manager.dart';
 import 'package:stream_chat_flutter/src/attachment/handler/stream_attachment_handler.dart';
 import 'package:stream_chat_flutter/src/message_input/attachment_picker/stream_attachment_picker.dart';
 import 'package:stream_chat_flutter/src/utils/utils.dart';
@@ -109,33 +108,6 @@ class StreamFilePicker extends StatelessWidget {
           ),
         ),
         onEndOfFrame: (_) => onPickFile(),
-        errorBuilder: (context, error, stacktrace) {
-          return Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                size: 32,
-                context.streamIcons.file,
-                color: colorScheme.textTertiary,
-              ),
-              SizedBox(height: spacing.xs),
-              Text(
-                context.translations.enablePhotoAndVideoAccessMessage,
-                style: textTheme.bodyDefault.copyWith(
-                  color: colorScheme.textSecondary,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              SizedBox(height: spacing.md),
-              StreamButton(
-                type: .outline,
-                style: .secondary,
-                onTap: PhotoManager.openSetting,
-                label: context.translations.allowGalleryAccessMessage,
-              ),
-            ],
-          );
-        },
       ),
     );
   }
