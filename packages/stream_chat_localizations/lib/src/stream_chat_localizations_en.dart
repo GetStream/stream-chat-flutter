@@ -629,7 +629,7 @@ class StreamChatLocalizationsEn extends GlobalStreamChatLocalizations {
   String get slideToCancelLabel => 'Slide to cancel';
 
   @override
-  String get holdToRecordLabel => 'Hold to record, release to send.';
+  String get holdToRecordLabel => 'Hold to record. Release to save.';
 
   @override
   String get sendAnywayLabel => 'Send Anyway';

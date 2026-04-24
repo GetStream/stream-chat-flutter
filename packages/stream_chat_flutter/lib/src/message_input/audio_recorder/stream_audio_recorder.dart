@@ -985,30 +985,23 @@ class HoldToRecordInfoTooltip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = StreamChatTheme.of(context);
+    final spacing = context.streamSpacing;
+    final colorScheme = context.streamColorScheme;
+    final radius = context.streamRadius;
+    final textTheme = context.streamTextTheme;
 
-    const recordButtonWidth =
-        kDefaultMessageInputIconSize + kDefaultMessageInputIconPadding * 2; // right, left padding.
-
-    const arrowSize = Size(recordButtonWidth / 2, 6);
-
-    return Padding(
-      padding: EdgeInsets.only(bottom: arrowSize.height),
-      child: CustomPaint(
-        painter: TooltipPainter(
-          arrowSize: arrowSize,
-          arrowMargin: arrowSize.width / 2,
-          color: theme.colorTheme.textLowEmphasis,
-          borderRadius: BorderRadius.circular(24),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 12),
-          child: Text(
-            message,
-            style: theme.textTheme.body.copyWith(
-              color: theme.colorTheme.barsBg,
-            ),
-          ),
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      padding: EdgeInsets.symmetric(vertical: spacing.sm, horizontal: spacing.xs * 2),
+      decoration: ShapeDecoration(
+        color: colorScheme.backgroundInverse,
+        shape: RoundedSuperellipseBorder(borderRadius: .all(radius.max)),
+      ),
+      child: Text(
+        message,
+        textAlign: TextAlign.center,
+        style: textTheme.captionDefault.copyWith(
+          color: colorScheme.textOnInverse,
         ),
       ),
     );
