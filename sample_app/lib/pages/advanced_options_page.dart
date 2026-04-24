@@ -1,11 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
-import 'package:sample_app/app.dart';
-import 'package:sample_app/pages/choose_user_page.dart';
+import 'package:sample_app/auth/auth_controller.dart';
 import 'package:sample_app/routes/routes.dart';
-import 'package:sample_app/state/init_data.dart';
 import 'package:sample_app/widgets/stream_version.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -71,36 +67,19 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
         ),
       );
 
-      final client = buildStreamChatClient(apiKey);
       final router = GoRouter.of(context);
-      final initNotifier = context.read<InitNotifier>();
 
       try {
-        await client.connectUser(
-          User(
+        await authController.connect(
+          apiKey: apiKey,
+          user: User(
             id: userId,
             extraData: {
               'name': username,
             },
           ),
-          userToken,
+          token: userToken,
         );
-
-        const secureStorage = FlutterSecureStorage();
-        await Future.wait([
-          secureStorage.write(
-            key: kStreamApiKey,
-            value: apiKey,
-          ),
-          secureStorage.write(
-            key: kStreamUserId,
-            value: userId,
-          ),
-          secureStorage.write(
-            key: kStreamToken,
-            value: userToken,
-          ),
-        ]);
       } catch (e) {
         debugPrint(e.toString());
         var errorText = 'Error connecting, retry';
@@ -115,8 +94,6 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
         return;
       }
       loading = false;
-      initNotifier.initData = initNotifier.initData!.copyWith(client: client);
-
       router.goNamed(Routes.CHOOSE_USER.name);
     }
   }

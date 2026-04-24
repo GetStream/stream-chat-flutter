@@ -1,40 +1,48 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io' show Platform;
 
 import 'package:collection/collection.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter/foundation.dart' show debugPrint, kIsWeb;
+import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:flutter_local_notifications/flutter_local_notifications.dart' hide Message;
 import 'package:sample_app/notification/notification.dart';
 import 'package:sample_app/notification/notification_background_handler.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// The Android notification-channel id used for all chat notifications.
 const notificationChannelId = 'stream_chat_channel';
+
+/// The user-facing name of the Android notification channel.
 const notificationChannelName = 'Stream Chat Notifications';
+
+/// The user-facing description of the Android notification channel.
 const notificationChannelDescription = 'Notifications for Stream Chat';
 
-/// Owns the FCM + local notification pipeline for the sample app.
+/// Orchestrates FCM and `flutter_local_notifications` for the sample
+/// app.
 ///
-/// Flow:
-///  - Foreground FCM pushes → `_onForegroundMessage` → render locally via
-///    `flutter_local_notifications` so we control the title/body text.
-///  - Taps (background, terminated, or local-notification) → `_dispatchTap`
-///    → `onNotificationTap` callback → the app handles navigation.
+/// Foreground pushes are re-rendered as local banners so the app owns
+/// the title/body formatting. Background/terminated pushes are rendered
+/// by the OS, and taps funnel through [onNotificationTap] regardless of
+/// which path delivered them.
 class NotificationService {
   NotificationService(this._localNotification);
   final FlutterLocalNotificationsPlugin _localNotification;
 
-  /// Called when a user taps on a notification.
-  set onNotificationTap(OnNotificationTap it) => _onNotificationTap = it;
+  /// Called once per notification tap. Set before [initialize] so the
+  /// app-launch notification isn't missed.
+  set onNotificationTap(OnNotificationTap value) => _onNotificationTap = value;
   OnNotificationTap? _onNotificationTap;
 
+  /// Requests permission, registers handlers, and dispatches any
+  /// pending launch notification. Call once per instance.
   Future<void> initialize() async {
     _registerMessageHandlers();
     await requestPermission();
     await initLocalNotifications();
     await createNotificationChannel();
 
-    if (!kIsWeb && Platform.isIOS) {
+    if (!CurrentPlatform.isWeb && CurrentPlatform.isIos) {
       // Foreground presentation is handled entirely by our AppDelegate's
       // `willPresent` override; opting out of Firebase's own options keeps
       // iOS from double-rendering if the native override is ever removed.
@@ -50,12 +58,16 @@ class NotificationService {
     debugPrint('[notif] initialize() done');
   }
 
+  /// Requests the OS-level notification permission via Firebase.
+  /// Returns `true` for full or provisional authorization.
   Future<bool> requestPermission() async {
     final result = await FirebaseMessaging.instance.requestPermission();
     return result.authorizationStatus == .authorized || result.authorizationStatus == .provisional;
   }
 
   var _isLocalNotificationsInitialized = false;
+
+  /// Initializes `flutter_local_notifications`. Idempotent.
   Future<bool> initLocalNotifications() async {
     if (_isLocalNotificationsInitialized) return true;
 
@@ -81,7 +93,7 @@ class NotificationService {
       // iOS: the plugin's internal "permissions requested" flag is only set
       // by requestPermissions; without this call `show()` silently no-ops
       // even though system-level permissions are granted via Firebase.
-      if (!kIsWeb && Platform.isIOS) {
+      if (!CurrentPlatform.isWeb && CurrentPlatform.isIos) {
         final iosPlugin = _localNotification
             .resolvePlatformSpecificImplementation<IOSFlutterLocalNotificationsPlugin>();
         await iosPlugin?.requestPermissions(alert: true, badge: true, sound: true);
@@ -94,8 +106,9 @@ class NotificationService {
     return _isLocalNotificationsInitialized;
   }
 
+  /// Creates the chat notification channel on Android. No-op elsewhere.
   Future<void> createNotificationChannel() async {
-    if (kIsWeb || !Platform.isAndroid) return;
+    if (CurrentPlatform.isWeb || !CurrentPlatform.isAndroid) return;
     final plugin = _localNotification.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
     if (plugin == null) return;
     await plugin.createNotificationChannel(
@@ -108,6 +121,8 @@ class NotificationService {
     );
   }
 
+  /// Renders [notification] as a local banner. The id is derived from
+  /// the payload so duplicate events replace rather than stack.
   Future<void> showLocalNotification(ChatNotification notification) {
     const androidDetails = AndroidNotificationDetails(
       notificationChannelId,
@@ -158,12 +173,8 @@ class NotificationService {
 
   // Initial Notification -----------------------------------------------------
 
-  /// Returns the notification that launched the app, if any.
-  ///
-  /// Checks both the FCM getInitialMessage (for OS-rendered APNs banners) and
-  /// any flutter_local_notifications payload (for notifications we rendered
-  /// ourselves). Only Stream Chat notifications are returned; everything
-  /// else resolves to `null`.
+  /// Returns the Stream Chat notification that launched the app, if
+  /// any, from either the FCM initial message or a local payload.
   Future<ChatNotification?> _getInitialNotification() async {
     final results = await Future.wait([_initialFromFcm(), _initialFromLocal()]);
     return results.firstWhereOrNull((it) => it != null);
@@ -208,7 +219,7 @@ class NotificationService {
   }
 
   Future<void> _onForegroundMessage(RemoteMessage message) async {
-    if (kIsWeb || message.data.isEmpty) return;
+    if (CurrentPlatform.isWeb || message.data.isEmpty) return;
 
     final notification = ChatNotification.fromJson(message.data);
     if (!notification.isStreamChat) return;
@@ -249,8 +260,10 @@ class NotificationService {
     ));
   }
 
+  /// Cancels every notification currently displayed by the app.
   Future<void> clearNotifications() => _localNotification.cancelAll();
 
+  /// Cancels the FCM subscriptions started in [initialize].
   Future<void> dispose() async {
     await _onMessageSubscription?.cancel();
     await _onMessageOpenedSubscription?.cancel();
@@ -259,11 +272,13 @@ class NotificationService {
   }
 }
 
+/// Signature for [NotificationService.onNotificationTap].
 typedef OnNotificationTap = void Function(NotificationInfo info);
 
+/// The process state of the app when a notification was tapped.
 enum DeviceState { foreground, background, terminated }
 
-/// Delivered to [NotificationService.onNotificationTap].
+/// The payload delivered to [NotificationService.onNotificationTap].
 typedef NotificationInfo = ({
   DeviceState deviceState,
   ChatNotification notification,

@@ -1,14 +1,14 @@
 import 'dart:async';
-import 'dart:io' show Platform;
 
-import 'package:flutter/foundation.dart' show debugPrint, kIsWeb;
+import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:sample_app/push/push_provider.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart' hide PushProvider;
 
-/// Manages push-token registration for the current [StreamChatClient].
+/// Mirrors push tokens to [client] for the current platform.
 ///
-/// Picks the right [PushProvider] for the current platform, listens for token
-/// refreshes, and mirrors them to Stream Chat via `addDevice` / `removeDevice`.
+/// Picks [iosPushProvider] on iOS, [androidPushProvider] on Android, and
+/// no-ops on web. All token-retrieval and network errors are logged and
+/// swallowed so they never block login/logout.
 class PushTokenManager {
   PushTokenManager({
     required this.client,
@@ -38,12 +38,14 @@ class PushTokenManager {
   }
 
   PushProvider? get _currentPushProvider {
-    if (kIsWeb) return null;
-    if (Platform.isIOS) return iosPushProvider;
-    if (Platform.isAndroid) return androidPushProvider;
+    if (CurrentPlatform.isWeb) return null;
+    if (CurrentPlatform.isIos) return iosPushProvider;
+    if (CurrentPlatform.isAndroid) return androidPushProvider;
     return null;
   }
 
+  /// Subscribes to token refreshes and forwards each to [client].
+  /// Call once per manager instance.
   void registerDevice() {
     final pushProvider = _currentPushProvider;
     if (pushProvider == null) return;
@@ -54,6 +56,8 @@ class PushTokenManager {
     );
   }
 
+  /// Removes the current device token from [client]. Uses a 3s timeout
+  /// so a flaky network can't hold up logout.
   Future<void> unregisterDevice() async {
     final pushProvider = _currentPushProvider;
     if (pushProvider == null) return;
@@ -74,6 +78,7 @@ class PushTokenManager {
     }
   }
 
+  /// Cancels the token-refresh subscription. Idempotent.
   Future<void> dispose() async {
     await _tokenSubscription?.cancel();
     _tokenSubscription = null;

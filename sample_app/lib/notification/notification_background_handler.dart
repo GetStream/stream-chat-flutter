@@ -1,28 +1,29 @@
-import 'dart:io' show Platform;
-
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart' hide Message;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:sample_app/auth/auth_controller.dart';
 import 'package:sample_app/firebase_options.dart';
 import 'package:sample_app/notification/notification.dart';
 import 'package:sample_app/notification/notification_service.dart';
-import 'package:sample_app/pages/choose_user_page.dart';
 import 'package:sample_app/utils/app_config.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_persistence/stream_chat_persistence.dart';
 
-/// Background FCM handler. Runs in a separate isolate on Android; on iOS it
-/// isn't invoked for alert pushes (iOS renders the APNs banner natively and
-/// the app process stays suspended until the user taps).
+/// Top-level FCM background handler (Android only).
 ///
-/// Must be a top-level function with `@pragma('vm:entry-point')` so tree
-/// shaking doesn't strip it in release builds.
+/// Runs in a separate isolate, so Firebase has to be re-initialized
+/// from scratch. Pre-caches the referenced message to persistence and
+/// renders a local banner. iOS alert pushes are rendered natively by
+/// the OS and never reach this code path.
+///
+/// Must stay top-level and keep `@pragma('vm:entry-point')` so release
+/// tree shaking doesn't strip it.
 @pragma('vm:entry-point')
 Future<void> onBackgroundMessageHandler(RemoteMessage message) async {
   // iOS renders alert pushes natively from `aps.alert`; nothing for us to do.
-  if (kIsWeb || !Platform.isAndroid) return;
+  if (CurrentPlatform.isWeb || !CurrentPlatform.isAndroid) return;
 
   if (message.data.isEmpty) return;
 
@@ -42,8 +43,9 @@ Future<void> onBackgroundMessageHandler(RemoteMessage message) async {
   await notificationService.showLocalNotification(notification);
 }
 
-/// Fetches the incoming message and writes it to persistence so the UI can
-/// render it offline when the user taps the notification.
+/// Writes the referenced message to persistence so the UI has it
+/// offline when the user taps. Failures fall back to the normal online
+/// fetch.
 Future<void> _preCacheMessage(ChatNotification notification) async {
   final messageId = notification.messageId;
   if (messageId == null) return;

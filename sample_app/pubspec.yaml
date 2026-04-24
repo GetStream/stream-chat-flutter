@@ -37,7 +37,6 @@ dependencies:
   go_router: ^14.6.2
   latlong2: ^0.9.1
   lottie: ^3.1.2
-  provider: ^6.0.5
   rxdart: ^0.28.0
   sentry_flutter: ^8.3.0
   stream_chat_flutter: ^10.0.0-beta.13

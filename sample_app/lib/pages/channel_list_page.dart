@@ -2,11 +2,10 @@
 
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app_badger/flutter_app_badger.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sample_app/auth/auth_controller.dart';
 import 'package:sample_app/config/sample_app_config.dart';
 import 'package:sample_app/config/sample_app_config_screen.dart';
 import 'package:sample_app/pages/draft_list_page.dart';
@@ -113,7 +112,7 @@ class _ChannelListPageState extends State<ChannelListPage> {
   @override
   void initState() {
     super.initState();
-    if (!kIsWeb) {
+    if (!CurrentPlatform.isWeb) {
       badgeListener = StreamChat.of(context).client.state.totalUnreadCountStream.listen((count) {
         if (count > 0) {
           FlutterAppBadger.updateBadgeCount(count);
@@ -269,16 +268,8 @@ class LeftDrawer extends StatelessWidget {
                       ),
                       titleTextStyle: textTheme.bodyDefault.copyWith(color: colorScheme.accentError),
                       onTap: () async {
-                        final client = StreamChat.of(context).client;
                         final router = GoRouter.of(context);
-
-                        if (!kIsWeb) {
-                          const secureStorage = FlutterSecureStorage();
-                          await secureStorage.deleteAll();
-                        }
-
-                        await client.disconnectUser(flushChatPersistence: true);
-
+                        await authController.disconnect();
                         router.goNamed(Routes.CHOOSE_USER.name);
                       },
                     ),

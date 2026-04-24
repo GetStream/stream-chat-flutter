@@ -1,24 +1,29 @@
-import 'dart:io' show Platform;
-
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter/foundation.dart' show debugPrint, kIsWeb;
+import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:stream_chat_flutter/stream_chat_flutter.dart' as chat;
 
-/// Signature for a function that creates a [Stream] of push tokens.
+/// Signature for a function that produces a [Stream] of push tokens.
 typedef TokenStreamProvider = Stream<String> Function();
 
-/// Describes a push provider configured for a specific platform.
+/// A push provider configured against Stream Chat.
 ///
-/// Pairs a Stream Chat [chat.PushProvider] enum value (with its configured
-/// name) with a [TokenStreamProvider] that yields the current device token
-/// and subsequent refreshes.
+/// Pairs the Stream Chat provider [type] and dashboard [name] with a
+/// [TokenStreamProvider] that yields the current device token and all
+/// future refreshes.
 class PushProvider {
+  /// Firebase Cloud Messaging; works on both iOS and Android.
   const PushProvider.firebase({
     required this.name,
     TokenStreamProvider tokenStreamProvider = _firebaseTokenProvider,
   }) : _tokenStreamProvider = tokenStreamProvider,
        type = chat.PushProvider.firebase;
 
+  /// Raw Apple Push Notification service.
+  ///
+  /// Note: raw APNs payloads lack FCM metadata, so
+  /// `firebase_messaging.onMessageOpenedApp` never fires on tap —
+  /// prefer [PushProvider.firebase] unless integrating with
+  /// non-Firebase tooling.
   const PushProvider.apn({
     required this.name,
     TokenStreamProvider tokenStreamProvider = _apnTokenProvider,
@@ -56,13 +61,12 @@ class PushProvider {
     yield* FirebaseMessaging.instance.onTokenRefresh;
   }
 
-  /// Returns `true` if APNs has a token by the deadline, `false` otherwise.
-  /// Always returns `true` on non-iOS platforms (no-op).
+  /// Polls `getAPNSToken` up to [attempts] times. Always `true` off iOS.
   static Future<bool> _awaitApnsTokenOnIOS({
     Duration interval = const Duration(milliseconds: 500),
     int attempts = 10,
   }) async {
-    if (kIsWeb || !Platform.isIOS) return true;
+    if (chat.CurrentPlatform.isWeb || !chat.CurrentPlatform.isIos) return true;
     for (var i = 0; i < attempts; i++) {
       final apns = await FirebaseMessaging.instance.getAPNSToken();
       if (apns != null && apns.isNotEmpty) return true;
@@ -71,19 +75,19 @@ class PushProvider {
     return false;
   }
 
-  /// The name of the push provider configured in Stream Chat.
+  /// The provider name configured in the Stream dashboard.
   final String name;
 
-  /// The Stream Chat push provider type.
+  /// The Stream Chat provider type (FCM or APNs).
   final chat.PushProvider type;
 
-  /// Returns the current push token for the device.
+  /// Returns the current push token, or throws [TimeoutException] if
+  /// the token isn't available within [timeout].
   Future<String> getToken({required Duration timeout}) {
     return onTokenRefresh.first.timeout(timeout);
   }
 
-  /// Emits the current push token for the device and emits a new token
-  /// whenever the token is refreshed.
+  /// Emits the current push token (when available), then every refresh.
   Stream<String> get onTokenRefresh => _tokenStreamProvider();
   final TokenStreamProvider _tokenStreamProvider;
 }
