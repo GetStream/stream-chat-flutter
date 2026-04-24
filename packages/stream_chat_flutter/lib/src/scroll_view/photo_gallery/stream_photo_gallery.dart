@@ -359,26 +359,14 @@ class StreamPhotoGallery extends StatelessWidget {
             ) ??
             streamPhotoGalleryTile;
       },
-      emptyBuilder: (context) {
-        final chatThemeData = StreamChatTheme.of(context);
-        return emptyBuilder?.call(context) ??
-            Center(
-              child: Padding(
-                padding: const EdgeInsets.all(8),
-                child: StreamScrollViewEmptyWidget(
-                  emptyIcon: Icon(
-                    context.streamIcons.imageLarge,
-                    size: 148,
-                    color: chatThemeData.colorTheme.disabled,
-                  ),
-                  emptyTitle: Text(
-                    context.translations.noPhotoOrVideoLabel,
-                    style: chatThemeData.textTheme.headline,
-                  ),
-                ),
-              ),
-            );
-      },
+      emptyBuilder: (context) =>
+          emptyBuilder?.call(context) ??
+          Center(
+            child: StreamScrollViewEmptyWidget(
+              emptyIcon: Icon(context.streamIcons.imageLarge),
+              emptyTitle: Text(context.translations.noPhotoOrVideoLabel),
+            ),
+          ),
       loadMoreErrorBuilder: (context, error) {
         return StreamScrollViewLoadMoreError.grid(
           onTap: controller.retry,

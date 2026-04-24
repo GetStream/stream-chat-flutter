@@ -203,31 +203,6 @@ class _ChannelListDefault extends StatelessWidget {
               pathParameters: Routes.CHANNEL_PAGE.params(channel),
             );
           },
-          emptyBuilder: (_) {
-            return Center(
-              child: Padding(
-                padding: const EdgeInsets.all(8),
-                child: StreamScrollViewEmptyWidget(
-                  emptyIcon: Icon(
-                    context.streamIcons.messageBubbleLarge,
-                    size: 148,
-                    color: StreamChatTheme.of(context).colorTheme.disabled,
-                  ),
-                  emptyTitle: TextButton(
-                    onPressed: () {
-                      GoRouter.of(context).pushNamed(Routes.NEW_CHAT.name);
-                    },
-                    child: Text(
-                      'Start a chat',
-                      style: StreamChatTheme.of(context).textTheme.bodyBold.copyWith(
-                        color: StreamChatTheme.of(context).colorTheme.accentPrimary,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            );
-          },
         ),
       ),
     );

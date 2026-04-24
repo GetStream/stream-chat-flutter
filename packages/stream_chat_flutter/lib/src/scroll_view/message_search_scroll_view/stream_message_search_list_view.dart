@@ -316,26 +316,14 @@ class StreamMessageSearchListView extends StatelessWidget {
             ) ??
             streamMessageSearchListTile;
       },
-      emptyBuilder: (context) {
-        final chatThemeData = StreamChatTheme.of(context);
-        return emptyBuilder?.call(context) ??
-            Center(
-              child: Padding(
-                padding: const EdgeInsets.all(8),
-                child: StreamScrollViewEmptyWidget(
-                  emptyIcon: Icon(
-                    context.streamIcons.messageBubbleLarge,
-                    size: 148,
-                    color: chatThemeData.colorTheme.disabled,
-                  ),
-                  emptyTitle: Text(
-                    context.translations.emptyMessagesText,
-                    style: chatThemeData.textTheme.headline,
-                  ),
-                ),
-              ),
-            );
-      },
+      emptyBuilder: (context) =>
+          emptyBuilder?.call(context) ??
+          Center(
+            child: StreamScrollViewEmptyWidget(
+              emptyIcon: Icon(context.streamIcons.messageBubbleLarge),
+              emptyTitle: Text(context.translations.emptyMessagesText),
+            ),
+          ),
       loadMoreErrorBuilder: (context, error) => StreamScrollViewLoadMoreError.list(
         onTap: controller.retry,
         error: Text(context.translations.loadingMessagesError),
