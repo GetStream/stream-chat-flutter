@@ -52,9 +52,7 @@ class _StreamGalleryPickerState extends State<StreamGalleryPicker> {
   void initState() {
     super.initState();
     _controller = StreamPhotoGalleryController(limit: widget.limit);
-    requestPermission = runInPermissionRequestLock(
-      PhotoManager.requestPermissionExtend,
-    );
+    requestPermission = runInPermissionRequestLock(PhotoManager.requestPermissionExtend);
   }
 
   @override
@@ -95,30 +93,31 @@ class _StreamGalleryPickerState extends State<StreamGalleryPicker> {
           child: Builder(
             builder: (context) {
               if (!isPermissionGranted) {
-                return Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      size: 32,
-                      context.streamIcons.imageLarge,
-                      color: colorScheme.textTertiary,
-                    ),
-                    SizedBox(height: spacing.xs),
-                    Text(
-                      context.translations.enablePhotoAndVideoAccessMessage,
-                      style: textTheme.bodyDefault.copyWith(
-                        color: colorScheme.textSecondary,
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        size: 32,
+                        context.streamIcons.imageLarge,
+                        color: colorScheme.textTertiary,
                       ),
-                      textAlign: TextAlign.center,
-                    ),
-                    SizedBox(height: spacing.md),
-                    StreamButton(
-                      type: .outline,
-                      style: .secondary,
-                      onTap: PhotoManager.openSetting,
-                      label: context.translations.allowGalleryAccessMessage,
-                    ),
-                  ],
+                      SizedBox(height: spacing.xs),
+                      Text(
+                        context.translations.enablePhotoAndVideoAccessMessage,
+                        style: textTheme.bodyDefault.copyWith(color: colorScheme.textSecondary),
+                        textAlign: TextAlign.center,
+                      ),
+                      SizedBox(height: spacing.md),
+                      StreamButton(
+                        size: .medium,
+                        type: .outline,
+                        style: .secondary,
+                        onTap: PhotoManager.openSetting,
+                        label: context.translations.allowGalleryAccessMessage,
+                      ),
+                    ],
+                  ),
                 );
               }
 
@@ -127,19 +126,16 @@ class _StreamGalleryPickerState extends State<StreamGalleryPicker> {
                 controller: _controller,
                 onMediaTap: widget.onMediaItemSelected,
                 loadMoreTriggerIndex: 10,
-                padding: const EdgeInsets.all(2),
                 thumbnailSize: widget.config.mediaThumbnailSize,
                 thumbnailFormat: widget.config.mediaThumbnailFormat,
                 thumbnailQuality: widget.config.mediaThumbnailQuality,
                 thumbnailScale: widget.config.mediaThumbnailScale,
-                addMoreBuilder: isLimited
-                    ? (context) => _AddMoreTile(
-                        onTap: () async {
-                          await PhotoManager.presentLimited();
-                          _controller.doInitialLoad();
-                        },
-                      )
-                    : null,
+                addMoreBuilder: switch (isLimited) {
+                  true => (context) => _AddMoreTile(
+                    onTap: () => PhotoManager.presentLimited().then((_) => _controller.doInitialLoad()).ignore(),
+                  ),
+                  _ => null,
+                },
                 itemBuilder: (context, mediaItems, index, defaultWidget) {
                   final media = mediaItems[index];
                   return defaultWidget.copyWith(
@@ -175,23 +171,24 @@ class _AddMoreTile extends StatelessWidget {
           if (states.contains(WidgetState.hovered)) return colorScheme.backgroundHover;
           return StreamColors.transparent;
         }),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              context.streamIcons.plus,
-              size: 20,
-              color: colorScheme.textTertiary,
-            ),
-            SizedBox(height: spacing.xs),
-            Text(
-              context.translations.addMoreFilesLabel,
-              style: textTheme.captionEmphasis.copyWith(
+        child: Padding(
+          padding: .all(spacing.xs),
+          child: Column(
+            spacing: spacing.xs,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                size: 20,
+                context.streamIcons.plus,
                 color: colorScheme.textTertiary,
               ),
-              textAlign: TextAlign.center,
-            ),
-          ],
+              Text(
+                context.translations.addMoreFilesLabel,
+                style: textTheme.captionEmphasis.copyWith(color: colorScheme.textTertiary),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
         ),
       ),
     );
