@@ -16,7 +16,7 @@ class PollConfig {
   /// {@macro pollConfig}
   const PollConfig({
     this.nameRange = const (min: 1, max: 80),
-    this.optionsRange = const (min: 1, max: 10),
+    this.optionsRange = const (min: 1, max: null),
     this.allowDuplicateOptions = false,
     this.allowedVotesRange = const (min: 2, max: 10),
   });
@@ -30,7 +30,7 @@ class PollConfig {
   /// The minimum and maximum length of the poll options.
   /// if `null`, there is no limit to the length of the options.
   ///
-  /// Defaults to `2` and `10`.
+  /// Defaults to `1` and `null`.
   final Range<int>? optionsRange;
 
   /// Whether the poll allows duplicate options.
