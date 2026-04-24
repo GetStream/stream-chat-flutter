@@ -128,6 +128,7 @@ class _PollQuestionTextFieldState extends State<PollQuestionTextField> {
       children: [
         if (widget.title case final title?) Text(title, style: effectiveHeaderStyle),
         StreamTextInput(
+          autofocus: true,
           initialValue: _question.text,
           hintText: widget.hintText,
           helperText: _question.error,
