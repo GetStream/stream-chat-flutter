@@ -189,8 +189,8 @@ class _TabbedAttachmentPickerOptions extends StatelessWidget {
   }
 }
 
-/// Signature used by [EndOfFrameCallbackWidget.errorBuilder] to create a
-/// replacement widget to render.
+/// Signature used by [EndOfFrameCallbackWidget.errorBuilder] to build a
+/// replacement widget when [EndOfFrameCallbackWidget.onEndOfFrame] throws.
 typedef EndOfFrameCallbackErrorWidgetBuilder =
     Widget Function(
       BuildContext context,
@@ -198,12 +198,12 @@ typedef EndOfFrameCallbackErrorWidgetBuilder =
       StackTrace? stackTrace,
     );
 
-/// Function signature for a callback that is called when the end of the frame
-/// is reached.
+/// Signature for callbacks invoked by [EndOfFrameCallbackWidget] once the
+/// first frame has been rendered.
 typedef EndOfFrameCallback = FutureOr<void> Function(BuildContext context);
 
-/// A widget that calls the given [callback] when the end of the frame is
-/// reached.
+/// A widget that invokes [onEndOfFrame] once after the first frame has been
+/// rendered.
 class EndOfFrameCallbackWidget extends StatefulWidget {
   /// Creates a new instance of [EndOfFrameCallbackWidget].
   const EndOfFrameCallbackWidget({
@@ -216,11 +216,15 @@ class EndOfFrameCallbackWidget extends StatefulWidget {
   /// The widget below this widget in the tree.
   final Widget? child;
 
-  /// The callback that is called when the end of the frame is reached.
+  /// Called once after the first frame has been rendered.
   final EndOfFrameCallback onEndOfFrame;
 
-  /// The callback that will be called if the [onEndOfFrame] callback throws an
-  /// error.
+  /// Called to build a replacement widget when [onEndOfFrame] throws.
+  ///
+  /// If null, [child] is shown when [onEndOfFrame] throws and the error is
+  /// forwarded to [FlutterError.reportError] so it remains visible in the
+  /// console and to any error handlers registered by the host app (e.g.
+  /// Crashlytics, Sentry).
   final EndOfFrameCallbackErrorWidgetBuilder? errorBuilder;
 
   @override
@@ -235,35 +239,40 @@ class _EndOfFrameCallbackWidgetState extends State<EndOfFrameCallbackWidget> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.endOfFrame.then((_) async {
-      if (mounted) {
-        try {
-          await widget.onEndOfFrame(context);
-        } catch (error, stackTrace) {
-          setState(() {
-            _error = error;
-            _stackTrace = stackTrace;
-          });
+      if (!mounted) return;
+      try {
+        await widget.onEndOfFrame(context);
+      } catch (error, stackTrace) {
+        if (!mounted) return;
+        // When no errorBuilder is provided we fall back to [child], so the
+        // error is otherwise invisible. Forward it through Flutter's error
+        // plumbing once so host apps (Crashlytics / Sentry / console) still
+        // see it. When an errorBuilder is provided, caller owns presentation.
+        if (widget.errorBuilder == null) {
+          FlutterError.reportError(
+            FlutterErrorDetails(
+              exception: error,
+              stack: stackTrace,
+              library: 'stream_chat_flutter',
+              context: ErrorDescription('EndOfFrameCallbackWidget.onEndOfFrame threw; falling back to child'),
+            ),
+          );
         }
+        setState(() {
+          _error = error;
+          _stackTrace = stackTrace;
+        });
       }
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final error = _error;
-    final stackTrace = _stackTrace;
-
-    if (error != null) {
-      final errorBuilder = widget.errorBuilder;
-      if (errorBuilder != null) {
-        return errorBuilder(context, error, stackTrace);
+    if (_error case final error?) {
+      if (widget.errorBuilder case final errorBuilder?) {
+        return errorBuilder(context, error, _stackTrace);
       }
-      return Text(context.translations.genericErrorText);
     }
-
-    _error = null;
-    _stackTrace = null;
-
     return widget.child ?? const Empty();
   }
 }
