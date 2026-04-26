@@ -380,6 +380,9 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
   String get slowModeOnLabel => 'Langsamer Modus: EIN';
 
   @override
+  String get commandUsernameLabel => '@username';
+
+  @override
   String get linkDisabledDetails => 'Das Senden von Links ist in dieser Konversation nicht erlaubt.';
 
   @override

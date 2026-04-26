@@ -2,6 +2,8 @@
 
 🛑️ Breaking
 
+- Replaced `StreamMessageInput.hintGetter` with `placeholderBuilder` over a sealed `MessageInputPlaceholder`.
+  See [`migrations/redesign/message_composer.md`](../../migrations/redesign/message_composer.md).
 - Removed `StreamMessageListView.unreadIndicatorBuilder`; use `StreamComponentFactory.jumpToUnreadButton`.
 - Renamed `UnreadIndicatorButton.onTap` → `onJumpTap`.
 - Renamed stream icons to remove the size suffix from the icon names.

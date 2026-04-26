@@ -391,6 +391,9 @@ Limite de pièces jointes dépassée : il n'est pas possible d'ajouter plus de $
   String get slowModeOnLabel => 'Mode lent activé';
 
   @override
+  String get commandUsernameLabel => '@username';
+
+  @override
   String get downloadLabel => 'Télécharger';
 
   @override
