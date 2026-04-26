@@ -38,6 +38,7 @@
 - Fixed `EndOfFrameCallbackWidget` showing a generic error string when its callback throws.
 - Fixed unintended Material ink ripple on message tap.
 - Standardised empty and error states across channel, thread, draft, member, user, message search, poll vote, reaction and photo gallery scroll views.
+- Standardised list separators across thread, draft, member, user and message search scroll views to match the channel scroll view.
 - Fixed `StreamPhotoGalleryTile` missing rounded corners and its badges not mirroring in RTL.
 - Fixed the "thread reply" action showing on parent messages while already inside their thread view.
 
