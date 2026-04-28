@@ -93,7 +93,7 @@ void main() {
 
       // The button should be disabled since we're at max options
       final button = tester.widget<StreamButton>(addButton);
-      expect(button.props.onTap, isNull);
+      expect(button.props.onPressed, isNull);
     });
 
     testWidgets('should respect both min and max options', (tester) async {
@@ -132,7 +132,7 @@ void main() {
       // Add button should now be disabled since we reached max
       final addButton = find.addOptionButton();
       final button = tester.widget<StreamButton>(addButton);
-      expect(button.props.onTap, isNull);
+      expect(button.props.onPressed, isNull);
     });
 
     testWidgets(
@@ -153,7 +153,7 @@ void main() {
         // Add button should be enabled for unlimited options
         final addButton = find.addOptionButton();
         final button = tester.widget<StreamButton>(addButton);
-        expect(button.props.onTap, isNotNull);
+        expect(button.props.onPressed, isNotNull);
       },
     );
   });
@@ -209,7 +209,7 @@ void main() {
 
         // The button should be disabled since there's already an empty option
         final button = tester.widget<StreamButton>(addButton);
-        expect(button.props.onTap, isNull);
+        expect(button.props.onPressed, isNull);
       },
     );
 
@@ -234,7 +234,7 @@ void main() {
 
         // The button should be enabled since no empty options exist
         final button = tester.widget<StreamButton>(addButton);
-        expect(button.props.onTap, isNotNull);
+        expect(button.props.onPressed, isNotNull);
       },
     );
 
@@ -256,7 +256,7 @@ void main() {
         // Initially, add button should be disabled
         var addButton = find.addOptionButton();
         var button = tester.widget<StreamButton>(addButton);
-        expect(button.props.onTap, isNull);
+        expect(button.props.onPressed, isNull);
 
         // Fill the empty option
         final textFields = find.byType(TextField);
@@ -266,7 +266,7 @@ void main() {
         // Now add button should be enabled
         addButton = find.addOptionButton();
         button = tester.widget<StreamButton>(addButton);
-        expect(button.props.onTap, isNotNull);
+        expect(button.props.onPressed, isNotNull);
       },
     );
   });

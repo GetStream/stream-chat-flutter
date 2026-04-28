@@ -140,22 +140,12 @@ class _RemindersPageState extends State<RemindersPage> {
               ),
             );
           },
-          emptyBuilder: (context) {
-            final chatThemeData = StreamChatTheme.of(context);
-            return Center(
-              child: StreamScrollViewEmptyWidget(
-                emptyIcon: Icon(
-                  size: 48,
-                  Icons.bookmark_border_rounded,
-                  color: theme.colorTheme.textLowEmphasis,
-                ),
-                emptyTitle: Text(
-                  'No reminders yet',
-                  style: chatThemeData.textTheme.headline,
-                ),
-              ),
-            );
-          },
+          emptyBuilder: (context) => const Center(
+            child: StreamScrollViewEmptyWidget(
+              emptyIcon: Icon(Icons.bookmark_border_rounded),
+              emptyTitle: Text('No reminders yet'),
+            ),
+          ),
           loadMoreErrorBuilder: (context, error) => ListTile(
             onTap: controller.retry,
             title: Text(error.message),

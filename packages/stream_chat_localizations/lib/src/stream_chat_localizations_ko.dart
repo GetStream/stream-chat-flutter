@@ -371,6 +371,9 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
   String get slowModeOnLabel => '슬로모드 켜짐';
 
   @override
+  String get commandUsernameLabel => '@username';
+
+  @override
   @override
   String get viewLibrary => '라이브러리 보기';
 

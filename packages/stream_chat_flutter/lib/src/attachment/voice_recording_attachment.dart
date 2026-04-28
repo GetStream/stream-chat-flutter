@@ -360,12 +360,12 @@ class AudioControlButton extends StatelessWidget {
       size: size,
       themeStyle: themeStyle,
       icon: switch (state) {
-        TrackState.loading => icons.playFill,
-        TrackState.idle => icons.playFill,
-        TrackState.playing => icons.pauseFill,
-        TrackState.paused => icons.playFill,
+        TrackState.loading => Icon(icons.playFill),
+        TrackState.idle => Icon(icons.playFill),
+        TrackState.playing => Icon(icons.pauseFill),
+        TrackState.paused => Icon(icons.playFill),
       },
-      onTap: switch (state) {
+      onPressed: switch (state) {
         TrackState.loading => null,
         TrackState.idle => onPlay,
         TrackState.playing => onPause,

@@ -66,8 +66,8 @@ class StreamVideoPicker extends StatelessWidget {
               StreamButton(
                 type: .outline,
                 style: .secondary,
-                onTap: onPickVideo,
-                label: context.translations.openCameraLabel,
+                onPressed: onPickVideo,
+                child: Text(context.translations.openCameraLabel),
               ),
             ],
           ),
@@ -94,8 +94,8 @@ class StreamVideoPicker extends StatelessWidget {
               StreamButton(
                 type: .outline,
                 style: .secondary,
-                onTap: PhotoManager.openSetting,
-                label: context.translations.allowGalleryAccessMessage,
+                onPressed: PhotoManager.openSetting,
+                child: Text(context.translations.allowGalleryAccessMessage),
               ),
             ],
           );

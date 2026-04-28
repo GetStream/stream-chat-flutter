@@ -88,8 +88,8 @@ class MessageComposerRecordingLocked extends StatelessWidget {
               style: StreamButtonStyle.secondary,
               type: StreamButtonType.outline,
               size: StreamButtonSize.small,
-              icon: icons.delete,
-              onTap: audioRecorderController.cancelRecord,
+              icon: Icon(icons.delete),
+              onPressed: audioRecorderController.cancelRecord,
             ),
             if (audioRecorderController.value is RecordStateRecording)
               StreamButton.icon(
@@ -97,16 +97,16 @@ class MessageComposerRecordingLocked extends StatelessWidget {
                 style: StreamButtonStyle.destructive,
                 type: StreamButtonType.outline,
                 size: StreamButtonSize.small,
-                icon: icons.stopFill,
-                onTap: audioRecorderController.stopRecord,
+                icon: Icon(icons.stopFill),
+                onPressed: audioRecorderController.stopRecord,
               ),
             StreamButton.icon(
               key: const ValueKey('finish-record-button'),
               style: StreamButtonStyle.primary,
               type: StreamButtonType.solid,
               size: StreamButtonSize.small,
-              icon: icons.checkmark,
-              onTap: () async {
+              icon: Icon(icons.checkmark),
+              onPressed: () async {
                 await feedback.onRecordFinish(context);
                 final audio = await audioRecorderController.finishRecord();
                 if (audio != null) {
@@ -285,8 +285,8 @@ class _MessageComposerRecordingStoppedState extends State<MessageComposerRecordi
                   style: StreamButtonStyle.secondary,
                   type: StreamButtonType.outline,
                   size: StreamButtonSize.small,
-                  icon: icons.delete,
-                  onTap: widget.audioRecorderController.cancelRecord,
+                  icon: Icon(icons.delete),
+                  onPressed: widget.audioRecorderController.cancelRecord,
                 ),
                 if (widget.audioRecorderController.value is RecordStateRecording)
                   StreamButton.icon(
@@ -294,16 +294,16 @@ class _MessageComposerRecordingStoppedState extends State<MessageComposerRecordi
                     style: StreamButtonStyle.destructive,
                     type: StreamButtonType.outline,
                     size: StreamButtonSize.small,
-                    icon: icons.stopFill,
-                    onTap: widget.audioRecorderController.stopRecord,
+                    icon: Icon(icons.stopFill),
+                    onPressed: widget.audioRecorderController.stopRecord,
                   ),
                 StreamButton.icon(
                   key: const ValueKey('finish-record-button'),
                   style: StreamButtonStyle.primary,
                   type: StreamButtonType.solid,
                   size: StreamButtonSize.small,
-                  icon: icons.checkmark,
-                  onTap: () async {
+                  icon: Icon(icons.checkmark),
+                  onPressed: () async {
                     await widget.feedback.onRecordFinish(context);
                     final audio = await widget.audioRecorderController.finishRecord();
                     if (audio != null) {

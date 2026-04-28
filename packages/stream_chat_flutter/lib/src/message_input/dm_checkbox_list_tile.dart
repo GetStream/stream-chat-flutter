@@ -24,12 +24,15 @@ class DmCheckboxListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final spacing = context.streamSpacing;
     final textTheme = context.streamTextTheme;
+    final colorScheme = context.streamColorScheme;
 
-    const visualDensity = VisualDensity(
-      vertical: VisualDensity.minimumDensity,
-      horizontal: VisualDensity.minimumDensity,
-    );
+    // NOTE: Only squeeze the vertical axis. `ListTile` computes its effective
+    // horizontal title gap as `horizontalTitleGap + visualDensity.horizontal * 2`
+    // so a negative horizontal density would silently cancel out our `xs` gap
+    // (and even produce a negative gap, overlapping the checkbox and title).
+    const visualDensity = VisualDensity(vertical: VisualDensity.minimumDensity);
 
     final checkbox = ExcludeFocus(
       child: StreamCheckbox(
@@ -46,14 +49,15 @@ class DmCheckboxListTile extends StatelessWidget {
       child: ListTile(
         dense: true,
         leading: checkbox,
-        horizontalTitleGap: 16,
+        minLeadingWidth: 0,
+        horizontalTitleGap: spacing.xs,
         visualDensity: visualDensity,
         enabled: onChanged != null,
         onTap: () => onChanged?.call(!value),
         contentPadding: contentPadding,
         title: Text(
           context.translations.alsoSendAsDirectMessageLabel,
-          style: textTheme.metadataDefault,
+          style: textTheme.metadataDefault.copyWith(color: colorScheme.textPrimary),
         ),
       ),
     );

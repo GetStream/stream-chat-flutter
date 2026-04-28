@@ -231,8 +231,8 @@ class _StreamPollCreatorFullScreenDialogState extends State<StreamPollCreatorFul
               style: .secondary,
               type: .outline,
               size: .medium,
-              icon: context.streamIcons.xmark,
-              onTap: Navigator.of(context).maybePop,
+              icon: Icon(context.streamIcons.xmark),
+              onPressed: Navigator.of(context).maybePop,
               themeStyle: effectiveSecondaryActionStyle,
             ),
           ),
@@ -248,9 +248,9 @@ class _StreamPollCreatorFullScreenDialogState extends State<StreamPollCreatorFul
                 style: .primary,
                 type: .solid,
                 size: .medium,
-                icon: context.streamIcons.checkmark,
+                icon: Icon(context.streamIcons.checkmark),
                 themeStyle: effectivePrimaryActionStyle,
-                onTap: switch (isValid) {
+                onPressed: switch (isValid) {
                   false => null,
                   true => () {
                     final sanitizedPoll = _controller.sanitizedPoll;

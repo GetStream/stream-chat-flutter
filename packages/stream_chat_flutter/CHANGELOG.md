@@ -2,6 +2,8 @@
 
 🛑️ Breaking
 
+- Replaced `StreamMessageInput.hintGetter` with `placeholderBuilder` over a sealed `MessageInputPlaceholder`.
+  See [`migrations/redesign/message_composer.md`](../../migrations/redesign/message_composer.md).
 - Removed `StreamMessageInput` and `StreamMessageTextField`; migrate to `StreamMessageComposer`.
 - Removed `KeyEventPredicate` from `src/utils/typedefs.dart`; it is now exported from `stream_chat_message_composer.dart` directly.
 - `MessageComposerComponentProps` now carries additional text-input props (`canAlsoSendToChannel`, `textInputAction`, `keyboardType`, `textCapitalization`, `autofocus`, `autocorrect`).
@@ -35,6 +37,14 @@
 - Fixed retries of in-flight sends being routed through `updateMessage` instead of `sendMessage`.
 - Fixed composer attachment button staying rotated at 45° after the inline picker was dismissed.
 - Fixed composer focus being lost after selecting a command from the attachment picker.
+- Fixed gallery attachment picker empty placeholder using an oversized icon.
+- Fixed gallery attachment picker permission placeholder not being centered and inconsistent grid and "add more" tile spacing.
+- Fixed `EndOfFrameCallbackWidget` showing a generic error string when its callback throws.
+- Fixed unintended Material ink ripple on message tap.
+- Standardised empty and error states across channel, thread, draft, member, user, message search, poll vote, reaction and photo gallery scroll views.
+- Standardised list separators across thread, draft, member, user and message search scroll views to match the channel scroll view.
+- Fixed `StreamPhotoGalleryTile` missing rounded corners and its badges not mirroring in RTL.
+- Fixed the "thread reply" action showing on parent messages while already inside their thread view.
 
 ## 10.0.0-beta.13
 

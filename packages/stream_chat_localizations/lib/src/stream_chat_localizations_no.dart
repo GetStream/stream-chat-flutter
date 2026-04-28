@@ -380,6 +380,9 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
   String get slowModeOnLabel => 'Sakte modus PÅ';
 
   @override
+  String get commandUsernameLabel => '@username';
+
+  @override
   String get linkDisabledDetails => 'Sende lenker er ikke lov i denne samtalen.';
 
   @override

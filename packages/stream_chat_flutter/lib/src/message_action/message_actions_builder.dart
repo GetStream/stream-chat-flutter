@@ -108,7 +108,10 @@ class StreamMessageActionsBuilder {
       ];
     }
 
+    final listKind = StreamMessageLayout.listKindOf(context);
+
     final isSentByCurrentUser = message.user?.id == currentUser?.id;
+    final isInThreadView = listKind == .thread;
     final isThreadMessage = message.parentId != null;
     final isParentMessage = (message.replyCount ?? 0) > 0;
     final canShowInChannel = message.showInChannel ?? true;
@@ -138,7 +141,10 @@ class StreamMessageActionsBuilder {
       );
     }
 
-    if (canSendReply && !isThreadMessage) {
+    // Thread reply action is only available for parent messages that are not in a
+    // thread view, as replying in a thread that is already being viewed doesn't make sense.
+    // Additionally, the channel needs to support sending replies.
+    if (canSendReply && !isThreadMessage && !isInThreadView) {
       messageActions.add(
         StreamContextMenuAction(
           value: ThreadReply(message: message),

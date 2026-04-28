@@ -106,7 +106,6 @@ class _ChannelPageState extends State<ChannelPage> {
                   onEditMessageTap: _editMessage,
                   onReplyTap: _reply,
                   swipeToReply: true,
-                  messageFilter: defaultFilter,
                   threadBuilder: (_, parentMessage) {
                     return ThreadPage(parent: parentMessage!);
                   },
@@ -155,7 +154,7 @@ class _ChannelPageState extends State<ChannelPage> {
                   if (locationEnabled)
                     TabbedAttachmentPickerOption(
                       key: 'location-picker',
-                      icon: Icons.near_me_rounded,
+                      icon: context.streamIcons.location,
                       supportedTypes: [const LocationPickerType()],
                       isEnabled: (value) {
                         if (value.isEmpty) return true;
@@ -204,13 +203,5 @@ class _ChannelPageState extends State<ChannelPage> {
     }
 
     return channel.sendStaticLocation(location: result.coordinates);
-  }
-
-  bool defaultFilter(Message m) {
-    final currentUser = StreamChat.of(context).currentUser;
-    final isMyMessage = m.user?.id == currentUser?.id;
-    final isDeletedOrShadowed = m.isDeleted == true || m.shadowed == true;
-    if (isDeletedOrShadowed && !isMyMessage) return false;
-    return true;
   }
 }

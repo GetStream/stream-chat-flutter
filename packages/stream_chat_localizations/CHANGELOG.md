@@ -8,6 +8,9 @@
 
 ✅ Added
 
+- Added `commandUsernameLabel` translation (default `@username`) for all supported
+  locales. Used by the message composer placeholder when user-target commands
+  (`/mute`, `/unmute`, `/ban`, `/unban`) are active.
 - Added `unsupportedAttachmentLabel` translation for all supported locales.
 - Added `linkAttachmentText` translation for all supported locales (used by
   `MessagePreviewFormatter` for link-preview attachments).
