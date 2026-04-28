@@ -17,7 +17,13 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  record: ^6.2.0
   stream_chat_flutter: ^10.0.0-beta.13
+  stream_core_flutter:
+    git:
+      url: https://github.com/GetStream/stream-core-flutter.git
+      ref: 49d2b614d6dc5dc43320212b1b6c03eab841c2e8
+      path: packages/stream_core_flutter
 
 dev_dependencies:
   alchemist: ^0.14.0
@@ -26,12 +32,6 @@ dev_dependencies:
     sdk: flutter
   mocktail: ^1.0.0
   plugin_platform_interface: ^2.0.0
-  record: ">=5.2.0 <7.0.0"
-  stream_core_flutter:
-    git:
-      url: https://github.com/GetStream/stream-core-flutter.git
-      ref: b76e39961f25334e691934f289022fbda863aed2
-      path: packages/stream_core_flutter
 
 flutter:
   uses-material-design: true
