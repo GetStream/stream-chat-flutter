@@ -26,6 +26,10 @@ class MessageComposerComponentProps {
     this.textCapitalization = TextCapitalization.sentences,
     this.autofocus = false,
     this.autocorrect = true,
+    this.audioRecorderController,
+    this.voiceRecordingFeedback = const AudioRecorderFeedback(),
+    this.sendVoiceRecordingAutomatically = false,
+    this.placeholder = '',
   });
 
   /// The controller for the message composer component.
@@ -55,7 +59,7 @@ class MessageComposerComponentProps {
   /// The current user id.
   final String? currentUserId;
 
-  /// Whether the audio recording flow is active.
+  /// The current state of the audio recorder.
   final AudioRecorderState audioRecorderState;
 
   /// Callback for when the quoted message is cleared.
@@ -79,6 +83,18 @@ class MessageComposerComponentProps {
   /// Enable autocorrect.
   final bool autocorrect;
 
+  /// The audio recorder controller, present when voice recording is enabled.
+  final StreamAudioRecorderController? audioRecorderController;
+
+  /// Haptic/audio feedback for voice-recording interactions.
+  final AudioRecorderFeedback voiceRecordingFeedback;
+
+  /// Whether to automatically send voice recordings after finishing.
+  final bool sendVoiceRecordingAutomatically;
+
+  /// Placeholder text shown in the input field when empty.
+  final String placeholder;
+
   /// Whether the audio recording flow is active.
   bool get isAudioRecordingFlowActive => audioRecorderState is RecordStateRecording || isAudioRecordingFlowStopped;
 
@@ -96,7 +112,8 @@ class MessageComposerComponentProps {
 
 /// Properties for building the leading component of the message composer.
 class MessageComposerLeadingProps extends MessageComposerComponentProps {
-  const MessageComposerLeadingProps._({required super.controller, required super.onSendPressed, required super.audioRecorderState, super.isFloating, super.message, super.voiceRecordingCallback, super.onAttachmentButtonPressed, super.isPickerOpen, super.focusNode, super.currentUserId, super.onQuotedMessageCleared, super.canAlsoSendToChannel, super.textInputAction, super.keyboardType, super.textCapitalization, super.autofocus, super.autocorrect});
+  // ignore: prefer_const_constructors_in_immutables
+  MessageComposerLeadingProps._({required super.controller, required super.onSendPressed, required super.audioRecorderState, super.isFloating, super.message, super.voiceRecordingCallback, super.onAttachmentButtonPressed, super.isPickerOpen, super.focusNode, super.currentUserId, super.onQuotedMessageCleared, super.canAlsoSendToChannel, super.textInputAction, super.keyboardType, super.textCapitalization, super.autofocus, super.autocorrect, super.audioRecorderController, super.voiceRecordingFeedback, super.sendVoiceRecordingAutomatically, super.placeholder});
 
   /// Creates a [MessageComposerLeadingProps] from [props].
   factory MessageComposerLeadingProps.from(MessageComposerComponentProps props) =>
@@ -118,12 +135,17 @@ class MessageComposerLeadingProps extends MessageComposerComponentProps {
         textCapitalization: props.textCapitalization,
         autofocus: props.autofocus,
         autocorrect: props.autocorrect,
+        audioRecorderController: props.audioRecorderController,
+        voiceRecordingFeedback: props.voiceRecordingFeedback,
+        sendVoiceRecordingAutomatically: props.sendVoiceRecordingAutomatically,
+        placeholder: props.placeholder,
       );
 }
 
 /// Properties for building the trailing component of the message composer.
 class MessageComposerTrailingProps extends MessageComposerComponentProps {
-  const MessageComposerTrailingProps._({required super.controller, required super.onSendPressed, required super.audioRecorderState, super.isFloating, super.message, super.voiceRecordingCallback, super.onAttachmentButtonPressed, super.isPickerOpen, super.focusNode, super.currentUserId, super.onQuotedMessageCleared, super.canAlsoSendToChannel, super.textInputAction, super.keyboardType, super.textCapitalization, super.autofocus, super.autocorrect});
+  // ignore: prefer_const_constructors_in_immutables
+  MessageComposerTrailingProps._({required super.controller, required super.onSendPressed, required super.audioRecorderState, super.isFloating, super.message, super.voiceRecordingCallback, super.onAttachmentButtonPressed, super.isPickerOpen, super.focusNode, super.currentUserId, super.onQuotedMessageCleared, super.canAlsoSendToChannel, super.textInputAction, super.keyboardType, super.textCapitalization, super.autofocus, super.autocorrect, super.audioRecorderController, super.voiceRecordingFeedback, super.sendVoiceRecordingAutomatically, super.placeholder});
 
   /// Creates a [MessageComposerTrailingProps] from [props].
   factory MessageComposerTrailingProps.from(MessageComposerComponentProps props) =>
@@ -145,12 +167,17 @@ class MessageComposerTrailingProps extends MessageComposerComponentProps {
         textCapitalization: props.textCapitalization,
         autofocus: props.autofocus,
         autocorrect: props.autocorrect,
+        audioRecorderController: props.audioRecorderController,
+        voiceRecordingFeedback: props.voiceRecordingFeedback,
+        sendVoiceRecordingAutomatically: props.sendVoiceRecordingAutomatically,
+        placeholder: props.placeholder,
       );
 }
 
 /// Properties for building the input component of the message composer.
 class MessageComposerInputProps extends MessageComposerComponentProps {
-  const MessageComposerInputProps._({required super.controller, required super.onSendPressed, required super.audioRecorderState, super.isFloating, super.message, super.voiceRecordingCallback, super.onAttachmentButtonPressed, super.isPickerOpen, super.focusNode, super.currentUserId, super.onQuotedMessageCleared, super.canAlsoSendToChannel, super.textInputAction, super.keyboardType, super.textCapitalization, super.autofocus, super.autocorrect});
+  // ignore: prefer_const_constructors_in_immutables
+  MessageComposerInputProps._({required super.controller, required super.onSendPressed, required super.audioRecorderState, super.isFloating, super.message, super.voiceRecordingCallback, super.onAttachmentButtonPressed, super.isPickerOpen, super.focusNode, super.currentUserId, super.onQuotedMessageCleared, super.canAlsoSendToChannel, super.textInputAction, super.keyboardType, super.textCapitalization, super.autofocus, super.autocorrect, super.audioRecorderController, super.voiceRecordingFeedback, super.sendVoiceRecordingAutomatically, super.placeholder});
 
   /// Creates a [MessageComposerInputProps] from [props].
   factory MessageComposerInputProps.from(MessageComposerComponentProps props) =>
@@ -172,12 +199,17 @@ class MessageComposerInputProps extends MessageComposerComponentProps {
         textCapitalization: props.textCapitalization,
         autofocus: props.autofocus,
         autocorrect: props.autocorrect,
+        audioRecorderController: props.audioRecorderController,
+        voiceRecordingFeedback: props.voiceRecordingFeedback,
+        sendVoiceRecordingAutomatically: props.sendVoiceRecordingAutomatically,
+        placeholder: props.placeholder,
       );
 }
 
 /// Properties for building the input leading component of the message composer.
 class MessageComposerInputLeadingProps extends MessageComposerComponentProps {
-  const MessageComposerInputLeadingProps._({required super.controller, required super.onSendPressed, required super.audioRecorderState, super.isFloating, super.message, super.voiceRecordingCallback, super.onAttachmentButtonPressed, super.isPickerOpen, super.focusNode, super.currentUserId, super.onQuotedMessageCleared, super.canAlsoSendToChannel, super.textInputAction, super.keyboardType, super.textCapitalization, super.autofocus, super.autocorrect});
+  // ignore: prefer_const_constructors_in_immutables
+  MessageComposerInputLeadingProps._({required super.controller, required super.onSendPressed, required super.audioRecorderState, super.isFloating, super.message, super.voiceRecordingCallback, super.onAttachmentButtonPressed, super.isPickerOpen, super.focusNode, super.currentUserId, super.onQuotedMessageCleared, super.canAlsoSendToChannel, super.textInputAction, super.keyboardType, super.textCapitalization, super.autofocus, super.autocorrect, super.audioRecorderController, super.voiceRecordingFeedback, super.sendVoiceRecordingAutomatically, super.placeholder});
 
   /// Creates a [MessageComposerInputLeadingProps] from [props].
   factory MessageComposerInputLeadingProps.from(MessageComposerComponentProps props) =>
@@ -199,12 +231,17 @@ class MessageComposerInputLeadingProps extends MessageComposerComponentProps {
         textCapitalization: props.textCapitalization,
         autofocus: props.autofocus,
         autocorrect: props.autocorrect,
+        audioRecorderController: props.audioRecorderController,
+        voiceRecordingFeedback: props.voiceRecordingFeedback,
+        sendVoiceRecordingAutomatically: props.sendVoiceRecordingAutomatically,
+        placeholder: props.placeholder,
       );
 }
 
 /// Properties for building the input header component of the message composer.
 class MessageComposerInputHeaderProps extends MessageComposerComponentProps {
-  const MessageComposerInputHeaderProps._({required super.controller, required super.onSendPressed, required super.audioRecorderState, super.isFloating, super.message, super.voiceRecordingCallback, super.onAttachmentButtonPressed, super.isPickerOpen, super.focusNode, super.currentUserId, super.onQuotedMessageCleared, super.canAlsoSendToChannel, super.textInputAction, super.keyboardType, super.textCapitalization, super.autofocus, super.autocorrect});
+  // ignore: prefer_const_constructors_in_immutables
+  MessageComposerInputHeaderProps._({required super.controller, required super.onSendPressed, required super.audioRecorderState, super.isFloating, super.message, super.voiceRecordingCallback, super.onAttachmentButtonPressed, super.isPickerOpen, super.focusNode, super.currentUserId, super.onQuotedMessageCleared, super.canAlsoSendToChannel, super.textInputAction, super.keyboardType, super.textCapitalization, super.autofocus, super.autocorrect, super.audioRecorderController, super.voiceRecordingFeedback, super.sendVoiceRecordingAutomatically, super.placeholder});
 
   /// Creates a [MessageComposerInputHeaderProps] from [props].
   factory MessageComposerInputHeaderProps.from(MessageComposerComponentProps props) =>
@@ -226,12 +263,17 @@ class MessageComposerInputHeaderProps extends MessageComposerComponentProps {
         textCapitalization: props.textCapitalization,
         autofocus: props.autofocus,
         autocorrect: props.autocorrect,
+        audioRecorderController: props.audioRecorderController,
+        voiceRecordingFeedback: props.voiceRecordingFeedback,
+        sendVoiceRecordingAutomatically: props.sendVoiceRecordingAutomatically,
+        placeholder: props.placeholder,
       );
 }
 
 /// Properties for building the input trailing component of the message composer.
 class MessageComposerInputTrailingProps extends MessageComposerComponentProps {
-  const MessageComposerInputTrailingProps._({required super.controller, required super.onSendPressed, required super.audioRecorderState, super.isFloating, super.message, super.voiceRecordingCallback, super.onAttachmentButtonPressed, super.isPickerOpen, super.focusNode, super.currentUserId, super.onQuotedMessageCleared, super.canAlsoSendToChannel, super.textInputAction, super.keyboardType, super.textCapitalization, super.autofocus, super.autocorrect});
+  // ignore: prefer_const_constructors_in_immutables
+  MessageComposerInputTrailingProps._({required super.controller, required super.onSendPressed, required super.audioRecorderState, super.isFloating, super.message, super.voiceRecordingCallback, super.onAttachmentButtonPressed, super.isPickerOpen, super.focusNode, super.currentUserId, super.onQuotedMessageCleared, super.canAlsoSendToChannel, super.textInputAction, super.keyboardType, super.textCapitalization, super.autofocus, super.autocorrect, super.audioRecorderController, super.voiceRecordingFeedback, super.sendVoiceRecordingAutomatically, super.placeholder});
 
   /// Creates a [MessageComposerInputTrailingProps] from [props].
   factory MessageComposerInputTrailingProps.from(MessageComposerComponentProps props) =>
@@ -253,5 +295,9 @@ class MessageComposerInputTrailingProps extends MessageComposerComponentProps {
         textCapitalization: props.textCapitalization,
         autofocus: props.autofocus,
         autocorrect: props.autocorrect,
+        audioRecorderController: props.audioRecorderController,
+        voiceRecordingFeedback: props.voiceRecordingFeedback,
+        sendVoiceRecordingAutomatically: props.sendVoiceRecordingAutomatically,
+        placeholder: props.placeholder,
       );
 }

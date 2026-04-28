@@ -5,14 +5,9 @@ import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_portal/flutter_portal.dart';
-import 'package:stream_chat_flutter/src/components/message_composer/message_composer_input_header.dart';
-import 'package:stream_chat_flutter/src/components/message_composer/message_composer_input_leading.dart';
-import 'package:stream_chat_flutter/src/components/message_composer/message_composer_input_trailing.dart';
+import 'package:stream_chat_flutter/src/components/message_composer/message_composer_input.dart';
 import 'package:stream_chat_flutter/src/components/message_composer/message_composer_leading.dart';
-import 'package:stream_chat_flutter/src/components/message_composer/message_composer_recording_locked.dart';
-import 'package:stream_chat_flutter/src/components/message_composer/message_composer_recording_ongoing.dart';
 import 'package:stream_chat_flutter/src/components/message_composer/message_composer_trailing.dart';
-import 'package:stream_chat_flutter/src/message_input/dm_checkbox_list_tile.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_core_flutter/stream_core_flutter.dart' as core;
 
@@ -44,13 +39,13 @@ typedef KeyEventPredicate = bool Function(FocusNode node, KeyEvent event);
 /// recording, autocomplete, key handlers, slow-mode cooldown, drag-and-drop,
 /// back-press picker dismiss, and state restoration.
 ///
-/// Create via the default constructor, which accepts a [MessageComposerProps].
 /// Sub-components can be customised through the [StreamComponentFactory].
-class StreamMessageComposer extends StatefulWidget {
+class StreamMessageComposer extends StatelessWidget {
   /// Creates a [StreamMessageComposer].
+  // ignore: prefer_const_constructors_in_immutables
   StreamMessageComposer({
     super.key,
-    StreamMessageComposerController? controller,
+    this.controller,
     this.onMessageSent,
     this.preMessageSending,
     this.focusNode,
@@ -88,31 +83,12 @@ class StreamMessageComposer extends StatefulWidget {
     this.autoCorrect = true,
     this.isFloating = false,
     this.audioRecorderController,
-  }) : props = MessageComposerProps(
-         controller: controller,
-         isFloating: isFloating,
-         message: null,
-         onSendPressed: () {},
-         focusNode: focusNode,
-         audioRecorderController: audioRecorderController,
-         sendVoiceRecordingAutomatically: sendVoiceRecordingAutomatically,
-         feedback: voiceRecordingFeedback,
-         textInputAction: textInputAction,
-         keyboardType: keyboardType,
-         textCapitalization: textCapitalization,
-         autofocus: autofocus,
-         autocorrect: autoCorrect,
-       );
+  });
 
   /// The controller for the message composer.
   ///
   /// When not provided, a controller is created and owned internally.
-  StreamMessageComposerController? get controller => props.controller;
-
-  /// The props for the message composer.
-  final MessageComposerProps props;
-
-  // ---- Behavior props ----
+  final StreamMessageComposerController? controller;
 
   /// Called after a message is sent successfully.
   final void Function(Message)? onMessageSent;
@@ -231,8 +207,6 @@ class StreamMessageComposer extends StatefulWidget {
   /// and the recording flow is handled by this controller.
   final StreamAudioRecorderController? audioRecorderController;
 
-  // ---- Defaults ----
-
   static bool _defaultSendMessageKeyPredicate(FocusNode node, KeyEvent event) {
     if (CurrentPlatform.isAndroid || CurrentPlatform.isIos) return false;
     if (HardwareKeyboard.instance.isShiftPressed) return false;
@@ -253,19 +227,249 @@ class StreamMessageComposer extends StatefulWidget {
   static bool _defaultOgPreviewFilter(Uri matchedUri, String messageText) => true;
 
   @override
-  State<StreamMessageComposer> createState() => _StreamMessageComposerState();
+  Widget build(BuildContext context) {
+    final props = MessageComposerProps.from(this);
+    return context.chatComponentBuilder<MessageComposerProps>()?.call(context, props) ??
+        DefaultStreamMessageComposer(props: props);
+  }
 }
 
 // ---------------------------------------------------------------------------
-// State
+// MessageComposerProps — comprehensive public props for whole-composer customisation
 // ---------------------------------------------------------------------------
 
-class _StreamMessageComposerState extends State<StreamMessageComposer>
-    with RestorationMixin<StreamMessageComposer>, SingleTickerProviderStateMixin {
+/// Properties for building the whole message composer component.
+///
+/// Used by the [MessageComposerProps] factory builder in [StreamComponentFactory],
+/// and taken by [DefaultStreamMessageComposer] as its configuration.
+class MessageComposerProps {
+  /// Creates a new instance of [MessageComposerProps].
+  MessageComposerProps({
+    this.controller,
+    this.onMessageSent,
+    this.preMessageSending,
+    this.focusNode,
+    this.disableAttachments = false,
+    this.maxAttachmentSize = kDefaultMaxAttachmentSize,
+    this.canAlsoSendToChannelFromThread = true,
+    this.enableVoiceRecording = false,
+    this.sendVoiceRecordingAutomatically = false,
+    this.voiceRecordingFeedback = const AudioRecorderFeedback(),
+    this.userMentionsTileBuilder,
+    this.onError,
+    this.attachmentLimit,
+    this.allowedAttachmentPickerTypes = AttachmentPickerType.values,
+    this.onAttachmentLimitExceed,
+    this.customAutocompleteTriggers = const [],
+    this.mentionAllAppUsers = false,
+    this.shouldKeepFocusAfterMessage,
+    this.validator,
+    this.restorationId,
+    this.enableSafeArea,
+    this.enableMentionsOverlay = true,
+    this.onQuotedMessageCleared,
+    this.ogPreviewFilter = StreamMessageComposer._defaultOgPreviewFilter,
+    this.hintGetter = StreamMessageComposer._defaultHintGetter,
+    this.useSystemAttachmentPicker = false,
+    this.pollConfig,
+    this.attachmentPickerOptionsBuilder,
+    this.onAttachmentPickerResult,
+    this.sendMessageKeyPredicate = StreamMessageComposer._defaultSendMessageKeyPredicate,
+    this.clearQuotedMessageKeyPredicate = StreamMessageComposer._defaultClearQuotedMessageKeyPredicate,
+    this.textInputAction,
+    this.keyboardType,
+    this.textCapitalization = TextCapitalization.sentences,
+    this.autofocus = false,
+    this.autoCorrect = true,
+    this.isFloating = false,
+    this.audioRecorderController,
+  });
+
+  /// Creates a [MessageComposerProps] from a [StreamMessageComposer] widget.
+  factory MessageComposerProps.from(StreamMessageComposer widget) => MessageComposerProps(
+    controller: widget.controller,
+    onMessageSent: widget.onMessageSent,
+    preMessageSending: widget.preMessageSending,
+    focusNode: widget.focusNode,
+    disableAttachments: widget.disableAttachments,
+    maxAttachmentSize: widget.maxAttachmentSize,
+    canAlsoSendToChannelFromThread: widget.canAlsoSendToChannelFromThread,
+    enableVoiceRecording: widget.enableVoiceRecording,
+    sendVoiceRecordingAutomatically: widget.sendVoiceRecordingAutomatically,
+    voiceRecordingFeedback: widget.voiceRecordingFeedback,
+    userMentionsTileBuilder: widget.userMentionsTileBuilder,
+    onError: widget.onError,
+    attachmentLimit: widget.attachmentLimit,
+    allowedAttachmentPickerTypes: widget.allowedAttachmentPickerTypes,
+    onAttachmentLimitExceed: widget.onAttachmentLimitExceed,
+    customAutocompleteTriggers: widget.customAutocompleteTriggers,
+    mentionAllAppUsers: widget.mentionAllAppUsers,
+    shouldKeepFocusAfterMessage: widget.shouldKeepFocusAfterMessage,
+    validator: widget.validator,
+    restorationId: widget.restorationId,
+    enableSafeArea: widget.enableSafeArea,
+    enableMentionsOverlay: widget.enableMentionsOverlay,
+    onQuotedMessageCleared: widget.onQuotedMessageCleared,
+    ogPreviewFilter: widget.ogPreviewFilter,
+    hintGetter: widget.hintGetter,
+    useSystemAttachmentPicker: widget.useSystemAttachmentPicker,
+    pollConfig: widget.pollConfig,
+    attachmentPickerOptionsBuilder: widget.attachmentPickerOptionsBuilder,
+    onAttachmentPickerResult: widget.onAttachmentPickerResult,
+    sendMessageKeyPredicate: widget.sendMessageKeyPredicate,
+    clearQuotedMessageKeyPredicate: widget.clearQuotedMessageKeyPredicate,
+    textInputAction: widget.textInputAction,
+    keyboardType: widget.keyboardType,
+    textCapitalization: widget.textCapitalization,
+    autofocus: widget.autofocus,
+    autoCorrect: widget.autoCorrect,
+    isFloating: widget.isFloating,
+    audioRecorderController: widget.audioRecorderController,
+  );
+
+  /// The controller for the message composer.
+  final StreamMessageComposerController? controller;
+
+  /// Called after a message is sent successfully.
+  final void Function(Message)? onMessageSent;
+
+  /// Called right before sending; can transform the message.
+  final FutureOr<Message> Function(Message)? preMessageSending;
+
+  /// Focus node for the text field.
+  final FocusNode? focusNode;
+
+  /// When true, the attachment button is hidden.
+  final bool disableAttachments;
+
+  /// Maximum attachment size in bytes.
+  final int maxAttachmentSize;
+
+  /// Show "also send to channel" checkbox in threads.
+  final bool canAlsoSendToChannelFromThread;
+
+  /// Whether to show the voice-recording button.
+  final bool enableVoiceRecording;
+
+  /// Whether to automatically send voice recordings.
+  final bool sendVoiceRecordingAutomatically;
+
+  /// Haptic/audio feedback for voice-recording interactions.
+  final AudioRecorderFeedback voiceRecordingFeedback;
+
+  /// Custom tile builder for the @-mention overlay.
+  final UserMentionTileBuilder? userMentionsTileBuilder;
+
+  /// Error callback.
+  final ErrorListener? onError;
+
+  /// Maximum number of attachments per message.
+  final int? attachmentLimit;
+
+  /// Allowed attachment picker types.
+  final List<AttachmentPickerType> allowedAttachmentPickerTypes;
+
+  /// Called when [attachmentLimit] is exceeded.
+  final AttachmentLimitExceedListener? onAttachmentLimitExceed;
+
+  /// Extra autocomplete triggers.
+  final Iterable<StreamAutocompleteTrigger> customAutocompleteTriggers;
+
+  /// Search all app users for @-mentions.
+  final bool mentionAllAppUsers;
+
+  /// Keep keyboard focus after sending a message.
+  final bool? shouldKeepFocusAfterMessage;
+
+  /// Custom message validator.
+  final MessageValidator? validator;
+
+  /// Restoration ID for state persistence.
+  final String? restorationId;
+
+  /// Wrap the composer in [SafeArea].
+  final bool? enableSafeArea;
+
+  /// Disable the @-mention overlay.
+  final bool enableMentionsOverlay;
+
+  /// Called when the quoted message is cleared.
+  final VoidCallback? onQuotedMessageCleared;
+
+  /// Filter determining whether a URL should show an OG preview.
+  final OgPreviewFilter ogPreviewFilter;
+
+  /// Returns the hint text for a given [HintType].
+  final HintGetter hintGetter;
+
+  /// Use the system attachment picker instead of the inline one.
+  final bool useSystemAttachmentPicker;
+
+  /// Poll creation configuration.
+  final PollConfig? pollConfig;
+
+  /// Customise the attachment picker options.
+  final AttachmentPickerOptionsBuilder? attachmentPickerOptionsBuilder;
+
+  /// Called when the attachment picker produces a custom result.
+  final OnAttachmentPickerResult? onAttachmentPickerResult;
+
+  /// Key predicate that triggers sending the message.
+  final KeyEventPredicate sendMessageKeyPredicate;
+
+  /// Key predicate that clears the quoted message.
+  final KeyEventPredicate clearQuotedMessageKeyPredicate;
+
+  /// Keyboard action button type.
+  final TextInputAction? textInputAction;
+
+  /// Keyboard type.
+  final TextInputType? keyboardType;
+
+  /// Text capitalisation mode.
+  final TextCapitalization textCapitalization;
+
+  /// Auto-focus the text field.
+  final bool autofocus;
+
+  /// Enable autocorrect.
+  final bool autoCorrect;
+
+  /// Whether the composer is displayed in a floating container.
+  final bool isFloating;
+
+  /// Externally-managed audio recorder controller.
+  final StreamAudioRecorderController? audioRecorderController;
+}
+
+// ---------------------------------------------------------------------------
+// DefaultStreamMessageComposer — full implementation
+// ---------------------------------------------------------------------------
+
+/// Default rendering of the composer widget.
+///
+/// Contains all state and logic: restoration, controller attach/detach, focus
+/// management, attachment picker, autocomplete, drag-and-drop, key handlers,
+/// send pipeline, hint resolution, and audio-recorder lifecycle.
+///
+/// Can be used directly when constructing a custom [MessageComposerProps]
+/// builder in [StreamComponentFactory].
+class DefaultStreamMessageComposer extends StatefulWidget {
+  /// Creates a [DefaultStreamMessageComposer].
+  const DefaultStreamMessageComposer({super.key, required this.props});
+
+  /// The configuration for this composer.
+  final MessageComposerProps props;
+
+  @override
+  State<DefaultStreamMessageComposer> createState() => _DefaultStreamMessageComposerState();
+}
+
+class _DefaultStreamMessageComposerState extends State<DefaultStreamMessageComposer>
+    with RestorationMixin<DefaultStreamMessageComposer>, SingleTickerProviderStateMixin {
   // ---- Controller ----
 
-  StreamMessageComposerController get _effectiveController =>
-      widget.controller ?? _restorableController!.value;
+  StreamMessageComposerController get _effectiveController => widget.props.controller ?? _restorableController!.value;
 
   StreamRestorableMessageComposerController? _restorableController;
 
@@ -289,24 +493,24 @@ class _StreamMessageComposerState extends State<StreamMessageComposer>
       ..attach(
         StreamChannel.of(context),
         draftMessagesEnabled: StreamChatConfiguration.of(context).draftMessagesEnabled,
-        ogPreviewFilter: (uri, text) => widget.ogPreviewFilter.call(uri, text),
-        onError: widget.onError,
+        ogPreviewFilter: (uri, text) => widget.props.ogPreviewFilter.call(uri, text),
+        onError: widget.props.onError,
       );
   }
 
-  /// Notifies [widget.onQuotedMessageCleared] when the controller clears
-  /// the quoted message externally (e.g. the quoted message was deleted).
+  /// Notifies [MessageComposerProps.onQuotedMessageCleared] when the controller
+  /// clears the quoted message externally (e.g. the quoted message was deleted).
   void _onControllerChanged() {
     final current = _effectiveController.message.quotedMessageId;
     if (_prevQuotedMessageId != null && current == null) {
-      widget.onQuotedMessageCleared?.call();
+      widget.props.onQuotedMessageCleared?.call();
     }
     _prevQuotedMessageId = current;
   }
 
   // ---- Focus ----
 
-  FocusNode get _effectiveFocusNode => widget.focusNode ?? _effectiveController.focusNode;
+  FocusNode get _effectiveFocusNode => widget.props.focusNode ?? _effectiveController.focusNode;
 
   // ---- Picker ----
 
@@ -323,7 +527,7 @@ class _StreamMessageComposerState extends State<StreamMessageComposer>
   late final StreamAudioRecorderController _audioRecorderController = StreamAudioRecorderController();
 
   StreamAudioRecorderController get _effectiveAudioRecorderController =>
-      widget.audioRecorderController ?? _audioRecorderController;
+      widget.props.audioRecorderController ?? _audioRecorderController;
 
   // ---- Theme ----
 
@@ -343,14 +547,14 @@ class _StreamMessageComposerState extends State<StreamMessageComposer>
       curve: Curves.easeInOut,
     );
 
-    if (widget.controller == null) {
+    if (widget.props.controller == null) {
       _createLocalController();
     }
 
     _effectiveFocusNode.addListener(_focusNodeListener);
 
     WidgetsBinding.instance.endOfFrame.then((_) {
-      if (mounted && widget.controller != null) {
+      if (mounted && widget.props.controller != null) {
         _initController();
       }
     });
@@ -363,12 +567,12 @@ class _StreamMessageComposerState extends State<StreamMessageComposer>
   }
 
   @override
-  void didUpdateWidget(covariant StreamMessageComposer oldWidget) {
+  void didUpdateWidget(covariant DefaultStreamMessageComposer oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    if (widget.controller == null && oldWidget.controller != null) {
-      _createLocalController(oldWidget.controller!.message);
-    } else if (widget.controller != null && oldWidget.controller == null) {
+    if (widget.props.controller == null && oldWidget.props.controller != null) {
+      _createLocalController(oldWidget.props.controller!.message);
+    } else if (widget.props.controller != null && oldWidget.props.controller == null) {
       if (_restorableController != null) {
         unregisterFromRestoration(_restorableController!);
         _restorableController!.dispose();
@@ -377,8 +581,8 @@ class _StreamMessageComposerState extends State<StreamMessageComposer>
       _initController();
     }
 
-    if (widget.focusNode != oldWidget.focusNode) {
-      (oldWidget.focusNode ?? _effectiveController.focusNode).removeListener(_focusNodeListener);
+    if (widget.props.focusNode != oldWidget.props.focusNode) {
+      (oldWidget.props.focusNode ?? _effectiveController.focusNode).removeListener(_focusNodeListener);
       _effectiveFocusNode.addListener(_focusNodeListener);
     }
   }
@@ -391,7 +595,7 @@ class _StreamMessageComposerState extends State<StreamMessageComposer>
   }
 
   @override
-  String? get restorationId => widget.restorationId;
+  String? get restorationId => widget.props.restorationId;
 
   @override
   void deactivate() {
@@ -409,7 +613,7 @@ class _StreamMessageComposerState extends State<StreamMessageComposer>
     _disposePickerController();
     _effectiveFocusNode.removeListener(_focusNodeListener);
     _restorableController?.dispose();
-    if (widget.audioRecorderController == null) {
+    if (widget.props.audioRecorderController == null) {
       _audioRecorderController.dispose();
     }
     super.dispose();
@@ -426,15 +630,15 @@ class _StreamMessageComposerState extends State<StreamMessageComposer>
   // ---- Key handler ----
 
   KeyEventResult _handleKeyPressed(FocusNode node, KeyEvent event) {
-    if (widget.sendMessageKeyPredicate(node, event)) {
+    if (widget.props.sendMessageKeyPredicate(node, event)) {
       _sendMessage();
       return KeyEventResult.handled;
     }
-    if (widget.clearQuotedMessageKeyPredicate(node, event)) {
+    if (widget.props.clearQuotedMessageKeyPredicate(node, event)) {
       final hasQuote = _effectiveController.message.quotedMessage != null;
       if (hasQuote && _effectiveController.text.isEmpty) {
         _effectiveController.clearQuotedMessage();
-        widget.onQuotedMessageCleared?.call();
+        widget.props.onQuotedMessageCleared?.call();
         return KeyEventResult.handled;
       }
       return KeyEventResult.ignored;
@@ -468,7 +672,7 @@ class _StreamMessageComposerState extends State<StreamMessageComposer>
     };
 
     final spacing = context.streamSpacing;
-    final safeAreaEnabled = widget.enableSafeArea ?? true;
+    final safeAreaEnabled = widget.props.enableSafeArea ?? true;
     final viewPadding = MediaQuery.paddingOf(context);
 
     return Material(
@@ -505,7 +709,7 @@ class _StreamMessageComposerState extends State<StreamMessageComposer>
       messageEditingController: _effectiveController,
       fieldViewBuilder: _buildMessageInput,
       autocompleteTriggers: [
-        ...widget.customAutocompleteTriggers,
+        ...widget.props.customAutocompleteTriggers,
         StreamAutocompleteTrigger(
           trigger: '/',
           triggerOnlyAtStart: true,
@@ -520,15 +724,15 @@ class _StreamMessageComposerState extends State<StreamMessageComposer>
             );
           },
         ),
-        if (widget.enableMentionsOverlay)
+        if (widget.props.enableMentionsOverlay)
           StreamAutocompleteTrigger(
             trigger: '@',
             optionsViewBuilder: (context, autocompleteQuery, messageEditingController) {
               return StreamMentionAutocompleteOptions(
                 query: autocompleteQuery.query,
                 channel: StreamChannel.of(context).channel,
-                mentionAllAppUsers: widget.mentionAllAppUsers,
-                mentionsTileBuilder: widget.userMentionsTileBuilder,
+                mentionAllAppUsers: widget.props.mentionAllAppUsers,
+                mentionsTileBuilder: widget.props.userMentionsTileBuilder,
                 onMentionUserTap: (user) {
                   _effectiveController.addMentionedUser(user);
                   StreamAutocomplete.of(context).acceptAutocompleteOption(user.name);
@@ -570,7 +774,7 @@ class _StreamMessageComposerState extends State<StreamMessageComposer>
               child: Focus(
                 skipTraversal: true,
                 onKeyEvent: _handleKeyPressed,
-                child: _buildComposerWithRecording(controller, currentUserId, focusNode),
+                child: _buildComposerRow(context, controller, currentUserId, focusNode),
               ),
             ),
             SizeTransition(
@@ -584,44 +788,29 @@ class _StreamMessageComposerState extends State<StreamMessageComposer>
     );
   }
 
-  Widget _buildComposerWithRecording(
+  Widget _buildComposerRow(
+    BuildContext context,
     StreamMessageComposerController controller,
     String? currentUserId,
     FocusNode focusNode,
   ) {
-    final audioController = widget.enableVoiceRecording ? _effectiveAudioRecorderController : null;
+    final audioController = widget.props.enableVoiceRecording ? _effectiveAudioRecorderController : null;
+
     if (audioController == null) {
-      return DefaultStreamMessageComposer(
-        props: _buildComponentProps(controller, currentUserId, focusNode, const RecordStateIdle()),
-        inputController: controller,
-        isFloating: widget.isFloating,
-        placeholder: _getHint(context) ?? '',
+      final componentProps = _buildComponentProps(
+        context,
+        controller,
+        currentUserId,
+        focusNode,
+        const RecordStateIdle(),
       );
+      return _buildRow(context, componentProps);
     }
 
     return ValueListenableBuilder(
       valueListenable: audioController,
       builder: (context, state, _) {
-        final body = switch (state) {
-          RecordStateRecordingLocked() => MessageComposerRecordingLocked(
-            audioRecorderController: audioController,
-            feedback: widget.voiceRecordingFeedback,
-            messageInputController: controller,
-            sendMessageCallback: widget.sendVoiceRecordingAutomatically ? _sendMessage : null,
-            state: state,
-          ),
-          RecordStateStopped() => MessageComposerRecordingStopped(
-            audioRecorderController: audioController,
-            feedback: widget.voiceRecordingFeedback,
-            messageInputController: controller,
-            sendMessageCallback: widget.sendVoiceRecordingAutomatically ? _sendMessage : null,
-            recordingState: state,
-          ),
-          RecordStateRecording() => StreamMessageComposerRecordingOngoing(
-            audioRecorderController: audioController,
-          ),
-          _ => null,
-        };
+        final componentProps = _buildComponentProps(context, controller, currentUserId, focusNode, state);
 
         final streamSpacing = context.streamSpacing;
         final textDirection = Directionality.maybeOf(context);
@@ -637,20 +826,38 @@ class _StreamMessageComposerState extends State<StreamMessageComposer>
           ),
           visible: state is RecordStateRecording,
           portalFollower: SwipeToLockButton(isLocked: state is RecordStateRecordingLocked),
-          child: DefaultStreamMessageComposer(
-            props: _buildComponentProps(controller, currentUserId, focusNode, state),
-            inputController: controller,
-            isFloating: widget.isFloating,
-            placeholder: _getHint(context) ?? '',
-            audioRecorderState: state,
-            body: body,
-          ),
+          child: _buildRow(context, componentProps),
         );
       },
     );
   }
 
+  Widget _buildRow(BuildContext context, MessageComposerComponentProps componentProps) {
+    final spacing = context.streamSpacing;
+    return Container(
+      padding: EdgeInsets.only(top: spacing.md),
+      decoration: widget.props.isFloating
+          ? null
+          : BoxDecoration(
+              border: Border(
+                top: BorderSide(color: context.streamColorScheme.borderDefault),
+              ),
+            ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          SizedBox(width: spacing.md),
+          StreamMessageComposerLeading(props: componentProps),
+          Expanded(child: StreamMessageComposerInput(props: componentProps)),
+          StreamMessageComposerTrailing(props: componentProps),
+          SizedBox(width: spacing.md),
+        ],
+      ),
+    );
+  }
+
   MessageComposerComponentProps _buildComponentProps(
+    BuildContext context,
     StreamMessageComposerController controller,
     String? currentUserId,
     FocusNode focusNode,
@@ -658,25 +865,29 @@ class _StreamMessageComposerState extends State<StreamMessageComposer>
   ) {
     return MessageComposerComponentProps(
       controller: controller,
-      isFloating: widget.isFloating,
+      isFloating: widget.props.isFloating,
       message: controller.message,
       currentUserId: currentUserId,
       onSendPressed: _sendMessage,
       voiceRecordingCallback: _createVoiceRecordingCallback(context),
-      onAttachmentButtonPressed: widget.disableAttachments ? null : _onAttachmentButtonPressed,
+      onAttachmentButtonPressed: widget.props.disableAttachments ? null : _onAttachmentButtonPressed,
       isPickerOpen: _isPickerVisible,
       audioRecorderState: audioRecorderState,
       focusNode: focusNode,
       onQuotedMessageCleared: () {
         _effectiveController.clearQuotedMessage();
-        widget.onQuotedMessageCleared?.call();
+        widget.props.onQuotedMessageCleared?.call();
       },
       canAlsoSendToChannel: _shouldShowSendToChannelCheckbox(),
-      textInputAction: widget.textInputAction,
-      keyboardType: widget.keyboardType,
-      textCapitalization: widget.textCapitalization,
-      autofocus: widget.autofocus,
-      autocorrect: widget.autoCorrect,
+      textInputAction: widget.props.textInputAction,
+      keyboardType: widget.props.keyboardType,
+      textCapitalization: widget.props.textCapitalization,
+      autofocus: widget.props.autofocus,
+      autocorrect: widget.props.autoCorrect,
+      audioRecorderController: widget.props.enableVoiceRecording ? _effectiveAudioRecorderController : null,
+      voiceRecordingFeedback: widget.props.voiceRecordingFeedback,
+      sendVoiceRecordingAutomatically: widget.props.sendVoiceRecordingAutomatically,
+      placeholder: _getHint(context) ?? '',
     );
   }
 
@@ -691,15 +902,15 @@ class _StreamMessageComposerState extends State<StreamMessageComposer>
       PlatformType.android || PlatformType.ios => false,
       _ => true,
     };
-    final useSystemPicker = widget.useSystemAttachmentPicker || isWebOrDesktop;
+    final useSystemPicker = widget.props.useSystemAttachmentPicker || isWebOrDesktop;
 
     final child = useSystemPicker
         ? systemAttachmentPickerBuilder(
             context: context,
             controller: _pickerController!,
             allowedTypes: allowedTypes,
-            pollConfig: widget.pollConfig,
-            optionsBuilder: widget.attachmentPickerOptionsBuilder,
+            pollConfig: widget.props.pollConfig,
+            optionsBuilder: widget.props.attachmentPickerOptionsBuilder,
             onError: _onPickerError,
             onPollCreated: _onPollCreated,
           )
@@ -707,8 +918,8 @@ class _StreamMessageComposerState extends State<StreamMessageComposer>
             context: context,
             controller: _pickerController!,
             allowedTypes: allowedTypes,
-            pollConfig: widget.pollConfig,
-            optionsBuilder: widget.attachmentPickerOptionsBuilder,
+            pollConfig: widget.props.pollConfig,
+            optionsBuilder: widget.props.attachmentPickerOptionsBuilder,
             onError: _onPickerError,
             onPollCreated: _onPollCreated,
             onCommandSelected: _onCommandSelectedFromPicker,
@@ -724,7 +935,7 @@ class _StreamMessageComposerState extends State<StreamMessageComposer>
   }
 
   bool _shouldShowSendToChannelCheckbox() {
-    if (!widget.canAlsoSendToChannelFromThread) return false;
+    if (!widget.props.canAlsoSendToChannelFromThread) return false;
     return _effectiveController.message.parentId != null;
   }
 
@@ -746,13 +957,15 @@ class _StreamMessageComposerState extends State<StreamMessageComposer>
   }
 
   List<AttachmentPickerType> _getAllowedAttachmentPickerTypes() {
-    return widget.allowedAttachmentPickerTypes.where((type) {
-      if (type != AttachmentPickerType.poll) return true;
-      if (_effectiveController.isEditing) return false;
-      if (_effectiveController.message.parentId != null) return false;
-      final channel = StreamChannel.of(context).channel;
-      return channel.config?.polls == true && channel.canSendPoll;
-    }).toList(growable: false);
+    return widget.props.allowedAttachmentPickerTypes
+        .where((type) {
+          if (type != AttachmentPickerType.poll) return true;
+          if (_effectiveController.isEditing) return false;
+          if (_effectiveController.message.parentId != null) return false;
+          final channel = StreamChannel.of(context).channel;
+          return channel.config?.polls == true && channel.canSendPoll;
+        })
+        .toList(growable: false);
   }
 
   void _onAttachmentButtonPressed() => _isPickerVisible ? _hidePicker() : _showPicker();
@@ -767,8 +980,8 @@ class _StreamMessageComposerState extends State<StreamMessageComposer>
       _pickerController = StreamAttachmentPickerController(
         initialAttachments: _effectiveController.attachments,
         initialPoll: _effectiveController.poll,
-        maxAttachmentCount: widget.attachmentLimit,
-        maxAttachmentSize: widget.maxAttachmentSize,
+        maxAttachmentCount: widget.props.attachmentLimit,
+        maxAttachmentSize: widget.props.maxAttachmentSize,
       );
       _startPickerSync();
       if (_effectiveFocusNode.hasFocus) {
@@ -807,7 +1020,7 @@ class _StreamMessageComposerState extends State<StreamMessageComposer>
   }
 
   Future<void> _onCustomResult(CustomAttachmentPickerResult result) async {
-    final handled = await widget.onAttachmentPickerResult?.call(result) ?? false;
+    final handled = await widget.props.onAttachmentPickerResult?.call(result) ?? false;
     if (handled && mounted) _hidePicker();
   }
 
@@ -844,7 +1057,7 @@ class _StreamMessageComposerState extends State<StreamMessageComposer>
   }
 
   void _onPickerError(AttachmentPickerError error) {
-    widget.onError?.call(error.error, error.stackTrace);
+    widget.props.onError?.call(error.error, error.stackTrace);
   }
 
   // ---- Hint text ----
@@ -860,16 +1073,16 @@ class _StreamMessageComposerState extends State<StreamMessageComposer>
     } else {
       hintType = HintType.writeAMessage;
     }
-    return widget.hintGetter.call(context, hintType);
+    return widget.props.hintGetter.call(context, hintType);
   }
 
   // ---- Attachments from drag-drop ----
 
   void _addAttachments(Iterable<Attachment> attachments) {
-    if (widget.attachmentLimit case final limit?) {
+    if (widget.props.attachmentLimit case final limit?) {
       final total = _effectiveController.attachments.length + attachments.length;
       if (total > limit) {
-        final onExceed = widget.onAttachmentLimitExceed;
+        final onExceed = widget.props.onAttachmentLimitExceed;
         if (onExceed != null) {
           return onExceed(limit, context.translations.attachmentLimitExceedError(limit));
         }
@@ -889,16 +1102,16 @@ class _StreamMessageComposerState extends State<StreamMessageComposer>
     final commandWasActive = _effectiveController.message.command != null;
 
     await _effectiveController.sendMessage(
-      preMessageSending: widget.preMessageSending,
-      validator: widget.validator,
-      onMessageSent: widget.onMessageSent,
-      onError: widget.onError,
+      preMessageSending: widget.props.preMessageSending,
+      validator: widget.props.validator,
+      onMessageSent: widget.props.onMessageSent,
+      onError: widget.props.onError,
       onLinkDisabled: () => _showLinkDisabledDialog(context),
-      onQuotedMessageCleared: widget.onQuotedMessageCleared,
+      onQuotedMessageCleared: widget.props.onQuotedMessageCleared,
     );
 
     if (mounted) {
-      if (widget.shouldKeepFocusAfterMessage ?? !commandWasActive) {
+      if (widget.props.shouldKeepFocusAfterMessage ?? !commandWasActive) {
         FocusScope.of(context).requestFocus(_effectiveFocusNode);
       } else {
         FocusScope.of(context).unfocus();
@@ -939,41 +1152,41 @@ class _StreamMessageComposerState extends State<StreamMessageComposer>
   // ---- Voice recording helpers ----
 
   core.VoiceRecordingCallback? _createVoiceRecordingCallback(BuildContext context) {
-    if (!widget.enableVoiceRecording) return null;
+    if (!widget.props.enableVoiceRecording) return null;
     final audioRecorderController = _effectiveAudioRecorderController;
 
     return core.VoiceRecordingCallback(
       onLongPressStart: () async {
         if (audioRecorderController.isRecording) return;
-        await widget.voiceRecordingFeedback.onRecordStart(context);
+        await widget.props.voiceRecordingFeedback.onRecordStart(context);
         return audioRecorderController.startRecord();
       },
       onLongPressEnd: (_) async {
         if (!audioRecorderController.isRecording || audioRecorderController.isLocked) return;
-        await widget.voiceRecordingFeedback.onRecordFinish(context);
+        await widget.props.voiceRecordingFeedback.onRecordFinish(context);
         final audio = await audioRecorderController.finishRecord();
         if (audio != null) {
           _effectiveController.addAttachment(audio);
         }
         audioRecorderController.cancelRecord(discardTrack: false);
-        if (widget.sendVoiceRecordingAutomatically) {
+        if (widget.props.sendVoiceRecordingAutomatically) {
           return _sendMessage();
         }
       },
       onLongPressCancel: () async {
         if (audioRecorderController.isRecording) return;
-        await widget.voiceRecordingFeedback.onRecordStartCancel(context);
+        await widget.props.voiceRecordingFeedback.onRecordStartCancel(context);
         audioRecorderController.showInfo(context.translations.holdToRecordLabel);
       },
       onLongPressMoveUpdate: (details) async {
         if (!audioRecorderController.isRecording || audioRecorderController.isLocked) return;
         final dragOffset = details.offsetFromOrigin;
         if (dragOffset.dy <= -50) {
-          await widget.voiceRecordingFeedback.onRecordLock(context);
+          await widget.props.voiceRecordingFeedback.onRecordLock(context);
           return audioRecorderController.lockRecord();
         }
         if (dragOffset.dx <= -75) {
-          await widget.voiceRecordingFeedback.onRecordCancel(context);
+          await widget.props.voiceRecordingFeedback.onRecordCancel(context);
           return audioRecorderController.cancelRecord();
         }
         return audioRecorderController.dragRecord(dragOffset);
@@ -982,178 +1195,7 @@ class _StreamMessageComposerState extends State<StreamMessageComposer>
   }
 }
 
-// ---------------------------------------------------------------------------
-// Props class — internal plumbing for sub-components
-// ---------------------------------------------------------------------------
-
-/// Properties to build the main message composer component.
-class MessageComposerProps {
-  /// Creates a new instance of [MessageComposerProps].
-  const MessageComposerProps({
-    this.controller,
-    this.isFloating = false,
-    this.message,
-    this.placeholder = '',
-    this.onSendPressed,
-    this.onAttachmentButtonPressed,
-    this.isPickerOpen = false,
-    this.focusNode,
-    this.currentUserId,
-    this.audioRecorderController,
-    this.sendVoiceRecordingAutomatically = false,
-    this.feedback = const AudioRecorderFeedback(),
-    this.canAlsoSendToChannel = false,
-    this.onQuotedMessageCleared,
-    this.textInputAction,
-    this.keyboardType,
-    this.textCapitalization = TextCapitalization.sentences,
-    this.autofocus = false,
-    this.autocorrect = true,
-  });
-
-  /// The controller for the message composer.
-  final StreamMessageComposerController? controller;
-
-  /// Whether the message composer is floating.
-  final bool isFloating;
-
-  /// The message for the message composer.
-  final Message? message;
-
-  /// The placeholder text.
-  final String placeholder;
-
-  /// Called when the send button is pressed.
-  final VoidCallback? onSendPressed;
-
-  /// Called when the attachment button is pressed.
-  final VoidCallback? onAttachmentButtonPressed;
-
-  /// Whether the inline attachment picker is open.
-  final bool isPickerOpen;
-
-  /// Focus node for the text field.
-  final FocusNode? focusNode;
-
-  /// The current user id.
-  final String? currentUserId;
-
-  /// Audio recorder controller for voice recording.
-  final StreamAudioRecorderController? audioRecorderController;
-
-  /// Whether to send voice recordings automatically.
-  final bool sendVoiceRecordingAutomatically;
-
-  /// Feedback for audio recorder interactions.
-  final AudioRecorderFeedback feedback;
-
-  /// Show "also send to channel" checkbox in threads.
-  final bool canAlsoSendToChannel;
-
-  /// Called when the quoted message is cleared.
-  final VoidCallback? onQuotedMessageCleared;
-
-  /// Keyboard action button type.
-  final TextInputAction? textInputAction;
-
-  /// Keyboard type.
-  final TextInputType? keyboardType;
-
-  /// Text capitalisation mode.
-  final TextCapitalization textCapitalization;
-
-  /// Auto-focus the text field.
-  final bool autofocus;
-
-  /// Enable autocorrect.
-  final bool autocorrect;
-}
-
 extension on StreamAudioRecorderController {
   bool get isRecording => value is RecordStateRecording;
   bool get isLocked => isRecording && value is! RecordStateRecordingHold;
-}
-
-// ---------------------------------------------------------------------------
-// Default renderer
-// ---------------------------------------------------------------------------
-
-/// Default rendering of the composer widget.
-///
-/// Delegates to [core.StreamCoreMessageComposer] with the chat-specific
-/// sub-components wired in.
-class DefaultStreamMessageComposer extends StatelessWidget {
-  /// Creates a [DefaultStreamMessageComposer].
-  const DefaultStreamMessageComposer({
-    super.key,
-    required this.props,
-    required this.inputController,
-    required this.isFloating,
-    required this.placeholder,
-    this.audioRecorderState = const RecordStateIdle(),
-    this.body,
-  });
-
-  /// The component properties.
-  final MessageComposerComponentProps props;
-
-  /// The message composer controller.
-  final StreamMessageComposerController inputController;
-
-  /// Whether the composer is in a floating container.
-  final bool isFloating;
-
-  /// Placeholder text.
-  final String placeholder;
-
-  /// Current audio recorder state.
-  final AudioRecorderState audioRecorderState;
-
-  /// Optional override for the input body.
-  final Widget? body;
-
-  @override
-  Widget build(BuildContext context) {
-    return core.StreamCoreMessageComposer(
-      placeholder: placeholder,
-      controller: inputController.textFieldController,
-      isFloating: isFloating,
-      focusNode: props.focusNode,
-      composerLeading: StreamMessageComposerLeading(props: props),
-      composerTrailing: StreamMessageComposerTrailing(props: props),
-      inputHeader: StreamMessageComposerInputHeader(props: props),
-      inputTrailing: StreamMessageComposerInputTrailing(props: props),
-      inputLeading: StreamMessageComposerInputLeading(props: props),
-      inputBody:
-          body ??
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              core.StreamMessageComposerInputField(
-                controller: inputController.textFieldController,
-                placeholder: placeholder,
-                focusNode: props.focusNode,
-                command: inputController.message.command?.toUpperCase(),
-                onDismissCommand: inputController.clearCommand,
-                textInputAction: props.textInputAction,
-                keyboardType: props.keyboardType,
-                textCapitalization: props.textCapitalization,
-                autofocus: props.autofocus,
-                autocorrect: props.autocorrect,
-              ),
-              if (props.canAlsoSendToChannel) 
-                DmCheckboxListTile(
-                  value: props.controller.showInChannel,
-                  contentPadding: EdgeInsets.only(
-                    right: context.streamSpacing.md,
-                    left: context.streamSpacing.md,
-                    bottom: context.streamSpacing.md - 8,
-                  ),
-                  onChanged: (value) => props.controller.showInChannel = value,
-                ),
-            ],
-          ),
-    );
-  }
-
 }
