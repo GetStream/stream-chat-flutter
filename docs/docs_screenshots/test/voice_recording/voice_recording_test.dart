@@ -214,7 +214,7 @@ void main() {
         child: MessageComposerRecordingLocked(
           audioRecorderController: _makeRecorderController(lockedState),
           feedback: const AudioRecorderFeedback(),
-          messageInputController: StreamMessageComposerController(),
+          messageComposerController: StreamMessageComposerController(),
           sendMessageCallback: null,
           state: lockedState,
         ),
@@ -246,7 +246,7 @@ void main() {
         child: MessageComposerRecordingStopped(
           audioRecorderController: _makeRecorderController(stoppedState),
           feedback: const AudioRecorderFeedback(),
-          messageInputController: StreamMessageComposerController(),
+          messageComposerController: StreamMessageComposerController(),
           sendMessageCallback: null,
           recordingState: stoppedState,
         ),

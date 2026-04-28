@@ -337,5 +337,5 @@ typedef OnScrollToBottom = Function(int unreadCount);
 typedef MessageRelatedBuilder =
     Widget Function(
       BuildContext context,
-      StreamMessageComposerController messageInputController,
+      StreamMessageComposerController messageComposerController,
     );
