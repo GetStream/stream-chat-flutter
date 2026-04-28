@@ -384,6 +384,9 @@ Não é possível adicionar mais de $limit arquivos de uma vez
   String get slowModeOnLabel => 'Modo lento ativado';
 
   @override
+  String get commandUsernameLabel => '@username';
+
+  @override
   String get downloadLabel => 'Download';
 
   @override

@@ -12,31 +12,7 @@ const _kMentionTrigger = '@';
 
 /// Signature for the function that determines if a [matchedUri] should be
 /// previewed as an OG Attachment.
-typedef OgPreviewFilter =
-    bool Function(
-      Uri matchedUri,
-      String messageText,
-    );
-
-/// Different types of hints that can be shown in [StreamMessageInput].
-enum HintType {
-  /// Hint for [StreamMessageInput] when the command is enabled and the command
-  /// is 'giphy'.
-  searchGif,
-
-  /// Hint for [StreamMessageInput] when there are attachments.
-  addACommentOrSend,
-
-  /// Hint for [StreamMessageInput] when slow mode is enabled.
-  slowModeOn,
-
-  /// Hint for [StreamMessageInput] when other conditions are not met.
-  writeAMessage,
-}
-
-/// Function that returns the hint text for [StreamMessageInput] based on
-/// [type].
-typedef HintGetter = String? Function(BuildContext context, HintType type);
+typedef OgPreviewFilter = bool Function(Uri matchedUri, String messageText);
 
 /// Inactive state:
 ///
@@ -108,7 +84,7 @@ class StreamMessageInput extends StatefulWidget {
     this.enableMentionsOverlay = true,
     this.onQuotedMessageCleared,
     this.ogPreviewFilter = _defaultOgPreviewFilter,
-    this.hintGetter = _defaultHintGetter,
+    this.placeholderBuilder = _defaultPlaceholderBuilder,
     this.useSystemAttachmentPicker = false,
     this.pollConfig,
     this.attachmentPickerOptionsBuilder,
@@ -244,8 +220,27 @@ class StreamMessageInput extends StatefulWidget {
   /// preview.
   final OgPreviewFilter ogPreviewFilter;
 
-  /// Returns the hint text for the message input.
-  final HintGetter hintGetter;
+  /// Resolves the placeholder text shown inside the input field.
+  ///
+  /// Receives the current [MessageInputPlaceholder] state (resolved from the
+  /// active [StreamMessageInputController]) and returns the string to display.
+  /// Override this callback to provide custom placeholders for
+  /// backend-defined commands or any other input state — pattern-match
+  /// exhaustively over the sealed [MessageInputPlaceholder] cases:
+  ///
+  /// ```dart
+  /// placeholderBuilder: (context, placeholder) {
+  ///   final translations = context.translations;
+  ///   return switch (placeholder) {
+  ///     SlowModePlaceholder() => translations.slowModeOnLabel,
+  ///     CommandPlaceholder(command: 'weather') => 'Type a city name',
+  ///     CommandPlaceholder() => translations.writeAMessageLabel,
+  ///     AttachmentsPlaceholder() => translations.addACommentOrSendLabel,
+  ///     WriteMessagePlaceholder() => translations.writeAMessageLabel,
+  ///   };
+  /// }
+  /// ```
+  final MessageInputPlaceholderBuilder placeholderBuilder;
 
   /// If True, allows you to use the system’s default media picker instead of
   /// the custom media picker provided by the library. This can be beneficial
@@ -304,24 +299,24 @@ class StreamMessageInput extends StatefulWidget {
   final bool autoCorrect;
 
   static bool _defaultSendMessageKeyPredicate(FocusNode node, KeyEvent event) {
+    // Do not handle the event if the user is using a mobile device.
     if (CurrentPlatform.isAndroid || CurrentPlatform.isIos) return false;
+
+    // Do not send the message if the shift key is pressed. Generally, this
+    // means the user is trying to add a new line.
     if (HardwareKeyboard.instance.isShiftPressed) return false;
-    return event.logicalKey == LogicalKeyboardKey.enter && event is KeyDownEvent;
+
+    // Otherwise, send the message when the user presses the enter key.
+    return event.logicalKey == .enter && event is KeyDownEvent;
   }
 
   static bool _defaultClearQuotedMessageKeyPredicate(FocusNode node, KeyEvent event) {
+    // Do not handle the event if the user is using a mobile device.
     if (CurrentPlatform.isAndroid || CurrentPlatform.isIos) return false;
-    return event.logicalKey == LogicalKeyboardKey.escape && event is KeyDownEvent;
-  }
 
-  static String? _defaultHintGetter(
-    BuildContext context,
-    HintType type,
-  ) => switch (type) {
-    .searchGif => context.translations.searchGifLabel,
-    .slowModeOn => context.translations.slowModeOnLabel,
-    .addACommentOrSend || .writeAMessage => context.translations.writeAMessageLabel,
-  };
+    // Otherwise, Clear the quoted message when the user presses the escape key.
+    return event.logicalKey == .escape && event is KeyDownEvent;
+  }
 
   static bool _defaultOgPreviewFilter(
     Uri matchedUri,
@@ -337,6 +332,19 @@ class StreamMessageInput extends StatefulWidget {
     final hasPoll = message.pollId != null;
 
     return hasText || hasAttachments || hasPoll;
+  }
+
+  static String? _defaultPlaceholderBuilder(
+    BuildContext context,
+    MessageInputPlaceholder placeholder,
+  ) {
+    final translations = context.translations;
+    return switch (placeholder) {
+      SlowModePlaceholder() => translations.slowModeOnLabel,
+      CommandPlaceholder(command: 'giphy') => translations.searchGifLabel,
+      CommandPlaceholder(command: 'mute' || 'unmute' || 'ban' || 'unban') => translations.commandUsernameLabel,
+      CommandPlaceholder() || AttachmentsPlaceholder() || WriteMessagePlaceholder() => translations.writeAMessageLabel,
+    };
   }
 
   @override
@@ -704,7 +712,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
                   currentUserId: currentUserId,
                   onAttachmentButtonPressed: widget.disableAttachments ? null : _onAttachmentButtonPressed,
                   isPickerOpen: _isPickerVisible,
-                  placeholder: _getHint(context) ?? '',
+                  placeholder: _buildPlaceholder(context),
                   focusNode: focusNode,
                   onSendPressed: sendMessage,
                   canAlsoSendToChannel: _shouldShowSendToChannelCheckbox(),
@@ -952,20 +960,9 @@ class StreamMessageInputState extends State<StreamMessageInput>
     leading: true,
   );
 
-  String? _getHint(BuildContext context) {
-    HintType hintType;
-
-    if (_commandEnabled && _effectiveController.message.command == 'giphy') {
-      hintType = HintType.searchGif;
-    } else if (_effectiveController.attachments.isNotEmpty) {
-      hintType = HintType.addACommentOrSend;
-    } else if (_effectiveController.isSlowModeActive) {
-      hintType = HintType.slowModeOn;
-    } else {
-      hintType = HintType.writeAMessage;
-    }
-
-    return widget.hintGetter.call(context, hintType);
+  String? _buildPlaceholder(BuildContext context) {
+    final state = MessageInputPlaceholder.resolve(_effectiveController);
+    return widget.placeholderBuilder.call(context, state);
   }
 
   String? _lastSearchedContainsUrlText;

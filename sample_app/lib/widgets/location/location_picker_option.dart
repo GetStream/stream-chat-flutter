@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:sample_app/utils/location_provider.dart';
 import 'package:sample_app/widgets/location/location_picker_dialog.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -22,54 +21,47 @@ class LocationPicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = StreamChatTheme.of(context);
-    final colorTheme = theme.colorTheme;
+    final spacing = context.streamSpacing;
+    final textTheme = context.streamTextTheme;
+    final colorScheme = context.streamColorScheme;
+
+    Future<void> openLocationPicker() async {
+      final result = await runInPermissionRequestLock(() {
+        return showLocationPickerDialog(context: context);
+      });
+
+      onLocationPicked?.call(result);
+    }
 
     return OptionDrawer(
       child: EndOfFrameCallbackWidget(
         child: Center(
-          child: Icon(
-            size: 148,
-            Icons.near_me_rounded,
-            color: colorTheme.disabled,
-          ),
-        ),
-        onEndOfFrame: (context) async {
-          final result = await runInPermissionRequestLock(() {
-            return showLocationPickerDialog(context: context);
-          });
-
-          onLocationPicked?.call(result);
-        },
-        errorBuilder: (context, error, stacktrace) {
-          return Column(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(
-                size: 148,
-                Icons.near_me_rounded,
-                color: theme.colorTheme.disabled,
+                size: 32,
+                context.streamIcons.location,
+                color: colorScheme.textTertiary,
               ),
+              SizedBox(height: spacing.xs),
               Text(
-                'Please enable access to your location',
-                style: theme.textTheme.body.copyWith(
-                  color: theme.colorTheme.textLowEmphasis,
-                ),
+                'Share your location on the map and choose how to send it.',
+                style: textTheme.bodyDefault.copyWith(color: colorScheme.textSecondary),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 8),
-              TextButton(
-                onPressed: LocationProvider().openLocationSettings,
-                child: Text(
-                  'Allow Location Access',
-                  style: theme.textTheme.bodyBold.copyWith(
-                    color: theme.colorTheme.accentPrimary,
-                  ),
-                ),
+              SizedBox(height: spacing.md),
+              StreamButton(
+                type: .outline,
+                style: .secondary,
+                onPressed: openLocationPicker,
+                child: const Text('Open location'),
               ),
             ],
-          );
-        },
+          ),
+        ),
+        onEndOfFrame: (_) => openLocationPicker(),
       ),
     );
   }

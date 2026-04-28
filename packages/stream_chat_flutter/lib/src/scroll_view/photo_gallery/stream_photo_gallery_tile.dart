@@ -3,7 +3,6 @@ import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
-import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 /// Widget that displays a photo or video item from the gallery.
@@ -74,69 +73,66 @@ class StreamPhotoGalleryTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final chatThemeData = StreamChatTheme.of(context);
-    return Stack(
-      children: [
-        AspectRatio(
-          aspectRatio: 1,
-          child: FadeInImage(
-            fadeInDuration: const Duration(milliseconds: 300),
-            placeholder: const AssetImage(
-              'lib/assets/images/placeholder.png',
-              package: 'stream_chat_flutter',
-            ),
-            fit: BoxFit.cover,
-            image: MediaThumbnailProvider(
-              media: media,
-              size: thumbnailSize,
-              format: thumbnailFormat,
-              quality: thumbnailQuality,
-              scale: thumbnailScale,
-            ),
-          ),
-        ),
-        Positioned.fill(
-          child: IgnorePointer(
-            child: AnimatedOpacity(
-              duration: const Duration(milliseconds: 300),
-              opacity: selected ? 1.0 : 0.0,
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  // ignore: deprecated_member_use
-                  color: chatThemeData.colorTheme.textHighEmphasis.withOpacity(0.15),
-                ),
+    final radius = context.streamRadius;
+    final colorScheme = context.streamColorScheme;
+
+    return ClipRRect(
+      clipBehavior: .hardEdge,
+      borderRadius: .all(radius.xxs),
+      child: Stack(
+        children: [
+          AspectRatio(
+            aspectRatio: 1,
+            child: FadeInImage(
+              fadeInDuration: const Duration(milliseconds: 300),
+              placeholder: const AssetImage(
+                'lib/assets/images/placeholder.png',
+                package: 'stream_chat_flutter',
+              ),
+              fit: BoxFit.cover,
+              image: MediaThumbnailProvider(
+                media: media,
+                size: thumbnailSize,
+                format: thumbnailFormat,
+                quality: thumbnailQuality,
+                scale: thumbnailScale,
               ),
             ),
           ),
-        ),
-        Positioned(
-          top: 8,
-          right: 8,
-          child: IgnorePointer(
+          Positioned.fill(
+            child: AnimatedOpacity(
+              opacity: selected ? 1.0 : 0.0,
+              duration: const Duration(milliseconds: 300),
+              child: ColoredBox(color: colorScheme.backgroundSelected),
+            ),
+          ),
+          PositionedDirectional(
+            top: 8,
+            end: 8,
             child: _GallerySelectedIndicator(selected: selected),
           ),
-        ),
-        if (media.type == AssetType.video)
-          Positioned(
-            left: 8,
-            bottom: 8,
-            child: StreamMediaBadge(
-              type: MediaBadgeType.video,
-              duration: media.videoDuration,
-              durationFormat: MediaBadgeDurationFormat.exact,
+          if (media.type == AssetType.video)
+            PositionedDirectional(
+              start: 8,
+              bottom: 8,
+              child: StreamMediaBadge(
+                type: MediaBadgeType.video,
+                duration: media.videoDuration,
+                durationFormat: MediaBadgeDurationFormat.exact,
+              ),
+            ),
+          // https://stackoverflow.com/a/59317162/10036882
+          Positioned.fill(
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: onTap,
+                onLongPress: onLongPress,
+              ),
             ),
           ),
-        // https://stackoverflow.com/a/59317162/10036882
-        Positioned.fill(
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: onTap,
-              onLongPress: onLongPress,
-            ),
-          ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -148,21 +144,24 @@ class _GallerySelectedIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final icons = context.streamIcons;
+    final colorScheme = context.streamColorScheme;
+
     return AnimatedContainer(
-      duration: const Duration(milliseconds: 200),
       width: 24,
       height: 24,
+      duration: const Duration(milliseconds: 200),
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: selected ? const Color(0xFF005FFF) : Colors.transparent,
-        border: Border.all(color: Colors.white, width: 2),
+        color: selected ? colorScheme.accentPrimary : Colors.transparent,
+        border: .all(color: colorScheme.borderOnAccent, width: 2, strokeAlign: BorderSide.strokeAlignOutside),
       ),
       child: selected
           ? Icon(
-              context.streamIcons.checkmark,
-              fontWeight: FontWeight.w900,
               size: 12,
-              color: Colors.white,
+              icons.checkmark,
+              fontWeight: .w900,
+              color: colorScheme.textOnAccent,
             )
           : null,
     );

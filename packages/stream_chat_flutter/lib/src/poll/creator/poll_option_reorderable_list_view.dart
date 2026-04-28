@@ -128,12 +128,12 @@ class PollOptionListItem extends StatelessWidget {
       trailing: StreamButton.icon(
         type: .ghost,
         style: .secondary,
-        icon: icons.minusCircle,
+        icon: Icon(icons.minusCircle),
         themeStyle: .from(
           fixedSize: const .square(20),
           tapTargetSize: .shrinkWrap,
         ),
-        onTap: switch (onRemove) {
+        onPressed: switch (onRemove) {
           final onRemove? => () => onRemove.call(option!),
           _ => null,
         },
@@ -166,7 +166,7 @@ class PollOptionListItem extends StatelessWidget {
       child: StreamButton(
         type: .outline,
         style: .secondary,
-        onTap: onAddOptionPressed,
+        onPressed: onAddOptionPressed,
         themeStyle: .from(
           fixedSize: .infinite,
           textStyle: effectiveTextStyle,
@@ -176,7 +176,7 @@ class PollOptionListItem extends StatelessWidget {
           alignment: AlignmentDirectional.centerStart,
           shape: RoundedRectangleBorder(borderRadius: effectiveBorderRadius),
         ),
-        label: hintText ?? context.translations.addAnOptionLabel,
+        child: Text(hintText ?? context.translations.addAnOptionLabel),
       ),
     );
   }

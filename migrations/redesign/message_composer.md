@@ -9,6 +9,7 @@ This guide covers the migration for the message composer components in the Strea
 - [Overview](#overview)
 - [StreamMessageInput](#streammessageinput)
 - [StreamChatMessageComposer (new)](#streamchatmessagecomposer-new)
+- [Message Input Placeholder API](#message-input-placeholder-api)
 - [Attachment Customization](#attachment-customization)
 - [Migration Checklist](#migration-checklist)
 
@@ -158,7 +159,7 @@ Use this when you want the new design system visuals with custom business logic.
 | `isPickerOpen` | `bool` | `false` | Whether the inline attachment picker is currently open |
 | `focusNode` | `FocusNode?` | `null` | Focus node for the text field |
 | `currentUserId` | `String?` | `null` | Current user's ID |
-| `placeholder` | `String` | `''` | Placeholder text for the input field |
+| `placeholder` | `String?` | `null` | Placeholder text for the input field. `StreamChatMessageComposer` is a pure UI component — when wiring it up directly, compute this string yourself (use `MessageInputPlaceholder.resolve(controller)` from the [Message Input Placeholder API](#message-input-placeholder-api) if you want the built-in state machine), or pass `null` for no placeholder. `StreamMessageInput` resolves it for you reactively from its controller. |
 | `audioRecorderController` | `StreamAudioRecorderController?` | `null` | Enables the voice recording UI when provided |
 | `sendVoiceRecordingAutomatically` | `bool` | `false` | Sends the voice recording immediately on finish |
 | `feedback` | `AudioRecorderFeedback` | `const AudioRecorderFeedback()` | Haptic/audio feedback callbacks for the recording flow |
@@ -196,6 +197,156 @@ StreamComponentFactory(
   child: ...,
 )
 ```
+
+---
+
+## Message Input Placeholder API
+
+The input placeholder text (the dimmed text shown inside the input field when it is empty) is now driven by a sealed-class hierarchy that adapts to the current input state. The previous `HintType` enum and `HintGetter` typedef have been removed, and the customization hook on `StreamMessageInput` is now called `placeholderBuilder`.
+
+The new placeholder types live in `lib/src/message_input/message_input_placeholder.dart` and are re-exported from `package:stream_chat_flutter/stream_chat_flutter.dart`.
+
+> **Layered model.** The placeholder *resolution* (state machine that turns controller state into a string) lives on `StreamMessageInput`, the higher-level full-featured widget. The lower-level `StreamChatMessageComposer` design-system component stays a pure UI primitive and accepts a plain `String placeholder` — see [StreamChatMessageComposer (new)](#streamchatmessagecomposer-new). If you build directly on `StreamChatMessageComposer`, call `MessageInputPlaceholder.resolve(controller)` and your own builder yourself, then pass the resulting string in.
+
+### What was removed
+
+| Removed | Replacement |
+|---------|-------------|
+| `enum HintType` (`searchGif`, `addACommentOrSend`, `slowModeOn`, `command`, `writeAMessage`) | `sealed class MessageInputPlaceholder` with `final` cases `WriteMessagePlaceholder`, `SlowModePlaceholder`, `CommandPlaceholder`, `AttachmentsPlaceholder` (each carries the contextual data for that state — see [Sealed-class state shape](#sealed-class-state-shape)) |
+| `typedef HintGetter = String? Function(BuildContext, HintType, Command?)` | `typedef MessageInputPlaceholderBuilder = String? Function(BuildContext, MessageInputPlaceholder)` |
+| `HintType resolveMessageInputHintType(controller)` | `MessageInputPlaceholder.resolve(controller)` factory |
+| `Command? resolveActiveMessageInputCommand(context, controller)` | Removed. Use `controller.message.command` (a `String?`) directly. The SDK no longer looks up the full `Command` object from the channel config when resolving the placeholder. |
+| `String? defaultMessageInputHintGetter(...)` | Removed from the public API. The default behaviour is now baked into `StreamMessageInput.placeholderBuilder`'s default value. To customize, supply your own builder with an exhaustive `switch` over [`MessageInputPlaceholder`](#sealed-class-state-shape). |
+| `StreamMessageInput.hintGetter` | `StreamMessageInput.placeholderBuilder` |
+
+### Behavior change: precedence
+
+The order in which input states are evaluated to pick a placeholder has changed:
+
+| | Old order | New order |
+|---|---|---|
+| 1 | `command` | `slowMode` |
+| 2 | `attachments` | `command` |
+| 3 | `slowMode` | `attachments` |
+| 4 | `writeMessage` | `writeMessage` |
+
+When slow mode is active and a command is also active (or attachments are present), the slow-mode placeholder now wins. This matches the iOS SDK. To restore the old order, override `placeholderBuilder` and short-circuit on `CommandPlaceholder` / `AttachmentsPlaceholder` before falling back to the default.
+
+### Behavior change: default placeholders for built-in commands
+
+The default builder now renders dedicated placeholders for Stream's built-in user-target commands, matching the redesigned Figma:
+
+| Command | Placeholder (English) | Localization key |
+|---------|----------------------|-------------------|
+| `/giphy` | `Search GIFs` | `searchGifLabel` |
+| `/mute`, `/unmute`, `/ban`, `/unban` | `@username` | `commandUsernameLabel` (new) |
+| Any other backend command | `Send a message` | `writeAMessageLabel` |
+
+`commandUsernameLabel` is a new translation key — see the [Localizations migration guide](localizations.md) if you have a custom `Translations` subclass.
+
+> **Note:** The previous default fell back to `Command.args` (the server-provided argument template, e.g. `[@username] [text]`) for unknown commands. The new default uses `writeAMessageLabel`. If you want command-aware placeholders for backend-defined custom commands, override `placeholderBuilder` and pattern-match on `CommandPlaceholder.command`.
+
+### Behavior change: default placeholder for pending attachments
+
+The default builder no longer uses `addACommentOrSendLabel` ("Add a comment or send") when the input only has attachments and no text — it now falls back to `writeAMessageLabel` ("Send a message"), matching the empty/idle state. The `addACommentOrSendLabel` translation key is still part of the public `Translations` interface, so to restore the old behaviour override `placeholderBuilder` and map `AttachmentsPlaceholder()` to `translations.addACommentOrSendLabel` yourself.
+
+### Sealed-class state shape
+
+Each case carries the contextual data relevant to that input state. Pattern-match on these fields in your `placeholderBuilder` to render rich, state-aware placeholders.
+
+| Case | Field | Type | Description |
+|------|-------|------|-------------|
+| `WriteMessagePlaceholder` | `isEditing` | `bool` | `true` when the input is editing an existing message instead of composing a new one. Useful for swapping the placeholder while editing. |
+| `SlowModePlaceholder` | `cooldownTimeOut` | `int` | Remaining slow-mode cooldown in seconds. Mirrors `StreamMessageInputController.cooldownTimeOut`. |
+| `SlowModePlaceholder` | `cooldown` | `Duration` | Convenience getter wrapping `cooldownTimeOut` for formatting timer strings. |
+| `CommandPlaceholder` | `command` | `String` | Active command name (e.g. `'giphy'`, `'mute'`, `'ban'`, or any backend-defined command). |
+| `AttachmentsPlaceholder` | `attachments` | `List<Attachment>` | Pending attachments held by the input. OG link previews are still included — filter via `Attachment.ogScrapeUrl` if you only want user-added ones. |
+
+Example using the new fields (note that the sealed type forces an exhaustive switch — every case must be handled):
+
+```dart
+StreamMessageInput(
+  placeholderBuilder: (context, placeholder) {
+    final translations = context.translations;
+    return switch (placeholder) {
+      SlowModePlaceholder(:final cooldownTimeOut) =>
+        'Slow mode on – ${cooldownTimeOut}s left',
+      CommandPlaceholder(command: 'giphy') => translations.searchGifLabel,
+      CommandPlaceholder(command: 'mute' || 'unmute' || 'ban' || 'unban') =>
+        translations.commandUsernameLabel,
+      CommandPlaceholder() => translations.writeAMessageLabel,
+      AttachmentsPlaceholder(:final attachments)
+          when attachments.every((a) => a.type == AttachmentType.image) =>
+        'Add a comment to your photo',
+      AttachmentsPlaceholder(:final attachments)
+          when attachments.every((a) => a.type == AttachmentType.video) =>
+        'Add a comment to your video',
+      AttachmentsPlaceholder() => translations.addACommentOrSendLabel,
+      WriteMessagePlaceholder(isEditing: true) => 'Edit your message…',
+      WriteMessagePlaceholder() => translations.writeAMessageLabel,
+    };
+  },
+)
+```
+
+### Migration
+
+**Before:**
+
+```dart
+StreamMessageInput(
+  hintGetter: (context, type, command) {
+    return switch (type) {
+      HintType.searchGif => 'Search a GIF',
+      HintType.slowModeOn => 'Slow mode is on',
+      HintType.addACommentOrSend => 'Add a comment...',
+      HintType.command => command?.args ?? 'Type a message',
+      HintType.writeAMessage => 'Write a message',
+    };
+  },
+)
+```
+
+**After:**
+
+```dart
+StreamMessageInput(
+  placeholderBuilder: (context, placeholder) {
+    return switch (placeholder) {
+      SlowModePlaceholder() => 'Slow mode is on',
+      CommandPlaceholder(command: 'giphy') => 'Search a GIF',
+      CommandPlaceholder(command: 'mute' || 'ban') => '@username',
+      CommandPlaceholder() => 'Type a message',
+      AttachmentsPlaceholder() => 'Add a comment...',
+      WriteMessagePlaceholder() => 'Write a message',
+    };
+  },
+)
+```
+
+For backend-defined custom commands, pattern-match the relevant `CommandPlaceholder.command` values and use the SDK's localized labels for everything else:
+
+```dart
+StreamMessageInput(
+  placeholderBuilder: (context, placeholder) {
+    final translations = context.translations;
+    return switch (placeholder) {
+      SlowModePlaceholder() => translations.slowModeOnLabel,
+      CommandPlaceholder(command: 'weather') => 'Type a city name',
+      CommandPlaceholder(command: 'tip') => 'Type @user amount',
+      CommandPlaceholder(command: 'poll') => 'Type your question',
+      CommandPlaceholder(command: 'giphy') => translations.searchGifLabel,
+      CommandPlaceholder(command: 'mute' || 'unmute' || 'ban' || 'unban') =>
+        translations.commandUsernameLabel,
+      CommandPlaceholder() => translations.writeAMessageLabel,
+      AttachmentsPlaceholder() => translations.addACommentOrSendLabel,
+      WriteMessagePlaceholder() => translations.writeAMessageLabel,
+    };
+  },
+)
+```
+
+The exhaustive `switch` over `MessageInputPlaceholder` means adding a new case in a future SDK release will be a compile error rather than a silent fallthrough — your override stays explicit about which states it handles.
 
 ---
 
@@ -280,3 +431,6 @@ The following public widgets are provided as building blocks for custom attachme
 - [ ] Replace `quotedMessageBuilder` / `quotedMessageAttachmentThumbnailBuilders` with `messageComposerInputHeader` or `messageComposerAttachment` overrides in `StreamComponentFactory`
 - [ ] If adopting `StreamChatMessageComposer` directly, wire up your own send/attachment logic via `onSendPressed` and `onAttachmentButtonPressed`
 - [ ] Move any composer UI customizations to `StreamComponentFactory`
+- [ ] Rename `StreamMessageInput.hintGetter` to `placeholderBuilder` and rewrite the callback to switch over `MessageInputPlaceholder` cases (`SlowModePlaceholder`, `CommandPlaceholder`, `AttachmentsPlaceholder`, `WriteMessagePlaceholder`) instead of the removed `HintType` enum. If you build directly on `StreamChatMessageComposer`, compute the placeholder string yourself via `MessageInputPlaceholder.resolve(controller)` and pass it via the `placeholder: String` parameter.
+- [ ] Review the new placeholder precedence (`slowMode > command > attachments > writeMessage`) and override `placeholderBuilder` if you need to preserve the old order
+- [ ] Add command-specific placeholders for any backend-defined commands you ship by pattern-matching on `CommandPlaceholder.command` in your `placeholderBuilder`

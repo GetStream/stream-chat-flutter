@@ -186,19 +186,9 @@ class StreamReactionListView extends StatelessWidget {
     emptyBuilder: (context) =>
         emptyBuilder?.call(context) ??
         Center(
-          child: Padding(
-            padding: const EdgeInsets.all(8),
-            child: StreamScrollViewEmptyWidget(
-              emptyIcon: Icon(
-                context.streamIcons.emoji,
-                size: 148,
-                color: StreamChatTheme.of(context).colorTheme.disabled,
-              ),
-              emptyTitle: Text(
-                context.translations.emptyReactionsText,
-                style: StreamChatTheme.of(context).textTheme.headline,
-              ),
-            ),
+          child: StreamScrollViewEmptyWidget(
+            emptyIcon: Icon(context.streamIcons.emoji),
+            emptyTitle: Text(context.translations.emptyReactionsText),
           ),
         ),
     loadMoreErrorBuilder: (context, error) => StreamScrollViewLoadMoreError.list(

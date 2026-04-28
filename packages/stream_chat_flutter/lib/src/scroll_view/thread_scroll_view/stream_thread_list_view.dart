@@ -2,7 +2,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/scroll_view/stream_scroll_view_error_widget.dart';
 import 'package:stream_chat_flutter/src/scroll_view/stream_scroll_view_load_more_error.dart';
-import 'package:stream_chat_flutter/src/scroll_view/thread_scroll_view/stream_thread_list_empty_state.dart';
 import 'package:stream_chat_flutter/src/scroll_view/thread_scroll_view/stream_thread_list_skeleton_loading.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_core_flutter/stream_core_flutter.dart';
@@ -317,7 +316,14 @@ class StreamThreadListView extends StatelessWidget {
 
         return itemBuilder?.call(context, threads, index, tile) ?? tile;
       },
-      emptyBuilder: (context) => emptyBuilder?.call(context) ?? const StreamThreadListEmptyState(),
+      emptyBuilder: (context) =>
+          emptyBuilder?.call(context) ??
+          Center(
+            child: StreamScrollViewEmptyWidget(
+              emptyIcon: Icon(context.streamIcons.messageBubblesLarge),
+              emptyTitle: Text(context.translations.replyToStartThreadText),
+            ),
+          ),
       loadMoreErrorBuilder: (context, error) => StreamScrollViewLoadMoreError.list(
         onTap: controller.retry,
         error: Text(context.translations.loadingMessagesError),
@@ -353,11 +359,7 @@ class StreamThreadListSeparator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final effect = StreamChatTheme.of(context).colorTheme.borderBottom;
-    return Container(
-      height: 1,
-      // ignore: deprecated_member_use
-      color: effect.color!.withOpacity(effect.alpha ?? 1.0),
-    );
+    final colorScheme = context.streamColorScheme;
+    return Divider(height: 1, color: colorScheme.borderSubtle);
   }
 }
