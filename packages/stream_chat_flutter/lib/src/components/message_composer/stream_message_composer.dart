@@ -492,6 +492,9 @@ class _DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompo
     assert(_restorableController != null, '');
     registerForRestoration(_restorableController!, 'messageComposerController');
     _initController();
+    // Add the focus listener here since _effectiveController.value is only
+    // accessible after the restorable has been registered.
+    _effectiveFocusNode.addListener(_focusNodeListener);
   }
 
   String? _prevQuotedMessageId;
@@ -559,15 +562,14 @@ class _DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompo
 
     if (widget.props.controller == null) {
       _createLocalController();
+      // Focus listener and controller init happen later in _registerController,
+      // which is called from restoreState — after the restorable is registered.
+    } else {
+      _effectiveFocusNode.addListener(_focusNodeListener);
+      WidgetsBinding.instance.endOfFrame.then((_) {
+        if (mounted) _initController();
+      });
     }
-
-    _effectiveFocusNode.addListener(_focusNodeListener);
-
-    WidgetsBinding.instance.endOfFrame.then((_) {
-      if (mounted && widget.props.controller != null) {
-        _initController();
-      }
-    });
   }
 
   @override
