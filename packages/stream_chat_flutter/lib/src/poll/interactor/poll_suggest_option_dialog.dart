@@ -63,18 +63,18 @@ class _PollSuggestOptionDialogState extends State<PollSuggestOptionDialog> {
         type: .ghost,
         style: .secondary,
         size: .small,
-        label: context.translations.cancelLabel.toUpperCase(),
-        onTap: Navigator.of(context).pop,
+        onPressed: Navigator.of(context).pop,
+        child: Text(context.translations.cancelLabel.toUpperCase()),
       ),
       StreamButton(
         type: .ghost,
         style: .primary,
         size: .small,
-        label: context.translations.sendLabel.toUpperCase(),
-        onTap: switch (_option == widget.initialOption) {
+        onPressed: switch (_option == widget.initialOption) {
           true => null,
           false => () => Navigator.of(context).pop(_option),
         },
+        child: Text(context.translations.sendLabel.toUpperCase()),
       ),
     ];
 

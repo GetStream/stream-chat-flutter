@@ -61,18 +61,18 @@ class _PollAddCommentDialogState extends State<PollAddCommentDialog> {
         type: .ghost,
         style: .secondary,
         size: .small,
-        label: context.translations.cancelLabel.toUpperCase(),
-        onTap: Navigator.of(context).pop,
+        onPressed: Navigator.of(context).pop,
+        child: Text(context.translations.cancelLabel.toUpperCase()),
       ),
       StreamButton(
         type: .ghost,
         style: .primary,
         size: .small,
-        label: context.translations.sendLabel.toUpperCase(),
-        onTap: switch (_comment == widget.initialValue) {
+        onPressed: switch (_comment == widget.initialValue) {
           true => null,
           false => () => Navigator.of(context).pop(_comment),
         },
+        child: Text(context.translations.sendLabel.toUpperCase()),
       ),
     ];
 
