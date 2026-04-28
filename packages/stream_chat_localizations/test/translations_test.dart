@@ -202,6 +202,7 @@ void main() {
       expect(localizations.couldNotReadBytesFromFileError, isNotNull);
       expect(localizations.toggleMuteUnmuteAction(isMuted: false), isNotNull);
       expect(localizations.downloadLabel, isNotNull);
+      expect(localizations.commandUsernameLabel, isNotNull);
       expect(localizations.toggleMuteUnmuteGroupQuestion(isMuted: true), isNotNull);
       expect(localizations.toggleMuteUnmuteGroupText(isMuted: true), isNotNull);
       expect(localizations.toggleMuteUnmuteUserQuestion(isMuted: true), isNotNull);
