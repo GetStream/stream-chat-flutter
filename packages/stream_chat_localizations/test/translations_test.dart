@@ -272,6 +272,7 @@ void main() {
       expect(localizations.pollCommentsLabel, isNotNull);
       expect(localizations.pollOptionsLabel, isNotNull);
       expect(localizations.pollResultsLabel, isNotNull);
+      expect(localizations.pollVotesLabel, isNotNull);
       // Voting mode
       expect(
         localizations.pollVotingModeLabel(const PollVotingMode.disabled()),
