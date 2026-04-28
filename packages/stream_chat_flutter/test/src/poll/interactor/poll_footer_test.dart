@@ -19,7 +19,7 @@ void main() async {
   );
 
   testWidgets(
-    'End Vote button is visible and enabled for the creator on open poll',
+    'End Poll button is visible and enabled for the creator on open poll',
     (WidgetTester tester) async {
       await tester.pumpWidget(
         _wrapWithMaterialApp(
@@ -32,7 +32,7 @@ void main() async {
       );
 
       final endVoteButton = find.ancestor(
-        of: find.text('End Vote'),
+        of: find.text('End Poll'),
         matching: find.byType(StreamButton),
       );
 
@@ -46,7 +46,7 @@ void main() async {
   );
 
   testWidgets(
-    'End Vote button is not visible for non-creator',
+    'End Poll button is not visible for non-creator',
     (WidgetTester tester) async {
       await tester.pumpWidget(
         _wrapWithMaterialApp(
@@ -59,7 +59,7 @@ void main() async {
       );
 
       final endVoteButton = find.ancestor(
-        of: find.text('End Vote'),
+        of: find.text('End Poll'),
         matching: find.byType(StreamButton),
       );
 
@@ -68,7 +68,7 @@ void main() async {
   );
 
   testWidgets(
-    'End Vote button is not visible for closed poll',
+    'End Poll button is not visible for closed poll',
     (WidgetTester tester) async {
       await tester.pumpWidget(
         _wrapWithMaterialApp(
@@ -84,7 +84,7 @@ void main() async {
       );
 
       final endVoteButton = find.ancestor(
-        of: find.text('End Vote'),
+        of: find.text('End Poll'),
         matching: find.byType(StreamButton),
       );
 
