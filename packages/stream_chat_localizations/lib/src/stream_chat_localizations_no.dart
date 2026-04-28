@@ -460,7 +460,7 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
   }
 
   @override
-  String get questionsLabel => 'Spørsmål';
+  String questionLabel({bool isPlural = false}) => 'Spørsmål';
 
   @override
   String get askAQuestionLabel => 'Still et spørsmål';
@@ -543,7 +543,11 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
   String get enterYourCommentLabel => 'Skriv inn kommentaren din';
 
   @override
-  String get endVoteConfirmationText => 'Er du sikker på at du vil avslutte avstemningen?';
+  String get endVoteConfirmationTitle => 'Er du sikker på at du vil avslutte avstemningen?';
+
+  @override
+  String get endVoteConfirmationMessage =>
+      'Vil du avslutte denne avstemningen nå? Ingen vil kunne stemme i denne avstemningen lenger.';
 
   @override
   String get deletePollOptionLabel => 'Slett alternativ';
@@ -586,16 +590,29 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
   String get pollResultsLabel => 'Resultater for avstemningen';
 
   @override
+  String get pollVotesLabel => 'Stemmer';
+
+  @override
   String showAllVotesLabel({int? count}) {
     if (count == null) return 'Vis alle stemmer';
     return 'Vis alle $count stemmer';
   }
 
   @override
+  String get viewAllLabel => 'Vis alle';
+
+  @override
   String voteCountLabel({int? count}) => switch (count) {
     null || < 1 => '0 stemmer',
     1 => '1 stemme',
     _ => '$count stemmer',
+  };
+
+  @override
+  String totalVoteCountLabel({int? count}) => switch (count) {
+    null || < 1 => '0 stemmer totalt',
+    1 => '1 stemme totalt',
+    _ => '$count stemmer totalt',
   };
 
   @override

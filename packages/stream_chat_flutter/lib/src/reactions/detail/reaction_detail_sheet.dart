@@ -60,8 +60,8 @@ class ReactionDetailSheet extends StatefulWidget {
       backgroundColor: colorScheme.backgroundElevation1,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadiusDirectional.only(
-          topStart: radius.xl,
-          topEnd: radius.xl,
+          topStart: radius.xxxxl,
+          topEnd: radius.xxxxl,
         ),
       ),
       builder: (context) => DraggableScrollableSheet(

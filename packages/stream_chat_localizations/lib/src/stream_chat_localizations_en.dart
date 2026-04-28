@@ -472,7 +472,10 @@ class StreamChatLocalizationsEn extends GlobalStreamChatLocalizations {
   }
 
   @override
-  String get questionsLabel => 'Questions';
+  String questionLabel({bool isPlural = false}) {
+    if (isPlural) return 'Questions';
+    return 'Question';
+  }
 
   @override
   String get askAQuestionLabel => 'Ask a question';
@@ -555,7 +558,11 @@ class StreamChatLocalizationsEn extends GlobalStreamChatLocalizations {
   String get enterYourCommentLabel => 'Enter your comment';
 
   @override
-  String get endVoteConfirmationText => 'Are you sure you want to end the vote?';
+  String get endVoteConfirmationTitle => 'End This Poll?';
+
+  @override
+  String get endVoteConfirmationMessage =>
+      'Do you want to end this poll now? Nobody will be able to vote in this poll anymore.';
 
   @override
   String get deletePollOptionLabel => 'Delete Option';
@@ -592,10 +599,13 @@ class StreamChatLocalizationsEn extends GlobalStreamChatLocalizations {
   String get viewResultsLabel => 'View Results';
 
   @override
-  String get endVoteLabel => 'End Vote';
+  String get endVoteLabel => 'End Poll';
 
   @override
   String get pollResultsLabel => 'Poll Results';
+
+  @override
+  String get pollVotesLabel => 'Votes';
 
   @override
   String showAllVotesLabel({int? count}) {
@@ -604,10 +614,20 @@ class StreamChatLocalizationsEn extends GlobalStreamChatLocalizations {
   }
 
   @override
+  String get viewAllLabel => 'View all';
+
+  @override
   String voteCountLabel({int? count}) => switch (count) {
     null || < 1 => '0 votes',
     1 => '1 vote',
     _ => '$count votes',
+  };
+
+  @override
+  String totalVoteCountLabel({int? count}) => switch (count) {
+    null || < 1 => '0 votes total',
+    1 => '1 vote total',
+    _ => '$count votes total',
   };
 
   @override

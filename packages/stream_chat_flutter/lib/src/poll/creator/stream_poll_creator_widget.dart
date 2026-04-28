@@ -62,7 +62,7 @@ class StreamPollCreatorWidget extends StatelessWidget {
             children: [
               PollQuestionTextField(
                 questionRange: config.nameRange,
-                title: translations.questionsLabel,
+                title: translations.questionLabel(),
                 hintText: translations.askAQuestionLabel,
                 initialQuestion: PollQuestion(id: poll.id, text: poll.name),
                 onChanged: (question) => controller.question = question.text,

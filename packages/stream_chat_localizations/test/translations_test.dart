@@ -219,7 +219,8 @@ void main() {
       expect(localizations.createPollLabel(), isNotNull);
       // Create a new poll
       expect(localizations.createPollLabel(isNew: true), isNotNull);
-      expect(localizations.questionsLabel, isNotNull);
+      expect(localizations.questionLabel(), isNotNull);
+      expect(localizations.questionLabel(isPlural: true), isNotNull);
       expect(localizations.askAQuestionLabel, isNotNull);
       // Question must be at least 5 characters long
       expect(
@@ -259,7 +260,8 @@ void main() {
       expect(localizations.anonymousPollLabel, isNotNull);
       expect(localizations.suggestAnOptionLabel, isNotNull);
       expect(localizations.addACommentLabel, isNotNull);
-      expect(localizations.endVoteConfirmationText, isNotNull);
+      expect(localizations.endVoteConfirmationTitle, isNotNull);
+      expect(localizations.endVoteConfirmationMessage, isNotNull);
       expect(localizations.createLabel, isNotNull);
       expect(localizations.endLabel, isNotNull);
       expect(localizations.endVoteLabel, isNotNull);
@@ -270,6 +272,7 @@ void main() {
       expect(localizations.pollCommentsLabel, isNotNull);
       expect(localizations.pollOptionsLabel, isNotNull);
       expect(localizations.pollResultsLabel, isNotNull);
+      expect(localizations.pollVotesLabel, isNotNull);
       // Voting mode
       expect(
         localizations.pollVotingModeLabel(const PollVotingMode.disabled()),
@@ -293,12 +296,16 @@ void main() {
       expect(localizations.seeAllOptionsLabel(count: 3), isNotNull);
       expect(localizations.showAllVotesLabel(), isNotNull);
       expect(localizations.showAllVotesLabel(count: 3), isNotNull);
+      expect(localizations.viewAllLabel, isNotNull);
       expect(localizations.updateYourCommentLabel, isNotNull);
       expect(localizations.viewCommentsLabel, isNotNull);
       expect(localizations.viewResultsLabel, isNotNull);
       // Vote count
       expect(localizations.voteCountLabel(), isNotNull);
       expect(localizations.voteCountLabel(count: 3), isNotNull);
+      // Total vote count
+      expect(localizations.totalVoteCountLabel(), isNotNull);
+      expect(localizations.totalVoteCountLabel(count: 3), isNotNull);
       expect(localizations.repliedToLabel, isNotNull);
       expect(localizations.newThreadsLabel(count: 3), isNotNull);
       expect(localizations.loadingLabel, isNotNull);

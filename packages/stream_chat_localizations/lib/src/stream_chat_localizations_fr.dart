@@ -478,7 +478,10 @@ Limite de pièces jointes dépassée : il n'est pas possible d'ajouter plus de $
   }
 
   @override
-  String get questionsLabel => 'Questions';
+  String questionLabel({bool isPlural = false}) {
+    if (isPlural) return 'Questions';
+    return 'Question';
+  }
 
   @override
   String get askAQuestionLabel => 'Poser une question';
@@ -561,7 +564,11 @@ Limite de pièces jointes dépassée : il n'est pas possible d'ajouter plus de $
   String get enterYourCommentLabel => 'Entrez votre commentaire';
 
   @override
-  String get endVoteConfirmationText => 'Êtes-vous sûr de vouloir terminer le vote?';
+  String get endVoteConfirmationTitle => 'Êtes-vous sûr de vouloir terminer le vote?';
+
+  @override
+  String get endVoteConfirmationMessage =>
+      'Voulez-vous terminer ce sondage maintenant ? Plus personne ne pourra voter dans ce sondage.';
 
   @override
   String get deletePollOptionLabel => "Supprimer l'option";
@@ -604,16 +611,29 @@ Limite de pièces jointes dépassée : il n'est pas possible d'ajouter plus de $
   String get pollResultsLabel => 'Résultats du sondage';
 
   @override
+  String get pollVotesLabel => 'Votes';
+
+  @override
   String showAllVotesLabel({int? count}) {
     if (count == null) return 'Afficher tous les votes';
     return 'Afficher tous les $count votes';
   }
 
   @override
+  String get viewAllLabel => 'Voir tout';
+
+  @override
   String voteCountLabel({int? count}) => switch (count) {
     null || < 1 => '0 vote',
     1 => '1 vote',
     _ => '$count votes',
+  };
+
+  @override
+  String totalVoteCountLabel({int? count}) => switch (count) {
+    null || < 1 => '0 vote au total',
+    1 => '1 vote au total',
+    _ => '$count votes au total',
   };
 
   @override

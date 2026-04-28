@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
-import 'package:stream_chat_flutter/src/utils/extensions.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template showPollEndVoteDialog}
 /// Shows a dialog that allows the user to end vote for a poll.
@@ -33,37 +32,30 @@ class PollEndVoteDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = StreamChatTheme.of(context);
+    final colorScheme = context.streamColorScheme;
 
     final actions = [
-      TextButton(
+      StreamButton(
+        type: .ghost,
+        style: .secondary,
+        size: .small,
         onPressed: () => Navigator.of(context).maybePop(false),
-        style: TextButton.styleFrom(
-          textStyle: theme.textTheme.headlineBold,
-          foregroundColor: theme.colorTheme.accentPrimary,
-          disabledForegroundColor: theme.colorTheme.disabled,
-        ),
         child: Text(context.translations.cancelLabel.toUpperCase()),
       ),
-      TextButton(
+      StreamButton(
+        type: .ghost,
+        style: .destructive,
+        size: .small,
         onPressed: () => Navigator.of(context).maybePop(true),
-        style: TextButton.styleFrom(
-          textStyle: theme.textTheme.headlineBold,
-          foregroundColor: theme.colorTheme.accentPrimary,
-          disabledForegroundColor: theme.colorTheme.disabled,
-        ),
         child: Text(context.translations.endLabel.toUpperCase()),
       ),
     ];
 
     return AlertDialog(
-      title: Text(context.translations.endVoteConfirmationText),
       actions: actions,
-      titlePadding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      contentPadding: const EdgeInsets.all(16),
-      actionsPadding: const EdgeInsets.all(8),
-      backgroundColor: theme.colorTheme.appBg,
+      title: Text(context.translations.endVoteConfirmationTitle),
+      content: Text(context.translations.endVoteConfirmationMessage),
+      backgroundColor: colorScheme.backgroundElevation1,
     );
   }
 }

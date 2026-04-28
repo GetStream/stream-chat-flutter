@@ -52,10 +52,10 @@ class StreamChatThemeData {
     StreamMessageListViewThemeData? messageListViewTheme,
     StreamPollCreatorThemeData? pollCreatorTheme,
     StreamPollInteractorThemeData? pollInteractorTheme,
-    StreamPollOptionsDialogThemeData? pollOptionsDialogTheme,
-    StreamPollResultsDialogThemeData? pollResultsDialogTheme,
-    StreamPollCommentsDialogThemeData? pollCommentsDialogTheme,
-    StreamPollOptionVotesDialogThemeData? pollOptionVotesDialogTheme,
+    StreamPollOptionsSheetThemeData? pollOptionsSheetTheme,
+    StreamPollResultsSheetThemeData? pollResultsSheetTheme,
+    StreamPollCommentsSheetThemeData? pollCommentsSheetTheme,
+    StreamPollOptionVotesSheetThemeData? pollOptionVotesSheetTheme,
     StreamThreadListTileThemeData? threadListTileTheme,
     StreamDraftListTileThemeData? draftListTileTheme,
     StreamVoiceRecordingAttachmentThemeData? voiceRecordingAttachmentTheme,
@@ -81,10 +81,10 @@ class StreamChatThemeData {
       messageListViewTheme: messageListViewTheme,
       pollCreatorTheme: pollCreatorTheme,
       pollInteractorTheme: pollInteractorTheme,
-      pollOptionsDialogTheme: pollOptionsDialogTheme,
-      pollResultsDialogTheme: pollResultsDialogTheme,
-      pollCommentsDialogTheme: pollCommentsDialogTheme,
-      pollOptionVotesDialogTheme: pollOptionVotesDialogTheme,
+      pollOptionsSheetTheme: pollOptionsSheetTheme,
+      pollResultsSheetTheme: pollResultsSheetTheme,
+      pollCommentsSheetTheme: pollCommentsSheetTheme,
+      pollOptionVotesSheetTheme: pollOptionVotesSheetTheme,
       threadListTileTheme: threadListTileTheme,
       draftListTileTheme: draftListTileTheme,
       voiceRecordingAttachmentTheme: voiceRecordingAttachmentTheme,
@@ -112,10 +112,10 @@ class StreamChatThemeData {
     required this.messageListViewTheme,
     required this.pollCreatorTheme,
     required this.pollInteractorTheme,
-    required this.pollResultsDialogTheme,
-    required this.pollOptionsDialogTheme,
-    required this.pollCommentsDialogTheme,
-    required this.pollOptionVotesDialogTheme,
+    required this.pollResultsSheetTheme,
+    required this.pollOptionsSheetTheme,
+    required this.pollCommentsSheetTheme,
+    required this.pollOptionVotesSheetTheme,
     required this.threadListTileTheme,
     required this.draftListTileTheme,
     required this.voiceRecordingAttachmentTheme,
@@ -189,106 +189,10 @@ class StreamChatThemeData {
       ),
       pollCreatorTheme: const StreamPollCreatorThemeData(),
       pollInteractorTheme: const StreamPollInteractorThemeData(),
-      pollResultsDialogTheme: StreamPollResultsDialogThemeData(
-        backgroundColor: colorTheme.appBg,
-        appBarElevation: 1,
-        appBarBackgroundColor: colorTheme.barsBg,
-        appBarForegroundColor: colorTheme.textHighEmphasis,
-        appBarTitleTextStyle: textTheme.headlineBold.copyWith(
-          color: colorTheme.textHighEmphasis,
-        ),
-        pollTitleTextStyle: textTheme.headlineBold.copyWith(
-          color: colorTheme.textHighEmphasis,
-        ),
-        pollTitleDecoration: BoxDecoration(
-          color: colorTheme.inputBg,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        pollOptionsDecoration: BoxDecoration(
-          color: colorTheme.inputBg,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        pollOptionsWinnerDecoration: BoxDecoration(
-          color: colorTheme.inputBg,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        pollOptionsTextStyle: textTheme.headlineBold.copyWith(
-          color: colorTheme.textHighEmphasis,
-        ),
-        pollOptionsWinnerTextStyle: textTheme.headlineBold.copyWith(
-          color: colorTheme.textHighEmphasis,
-        ),
-        pollOptionsVoteCountTextStyle: textTheme.headline.copyWith(
-          color: colorTheme.textHighEmphasis,
-        ),
-        pollOptionsWinnerVoteCountTextStyle: textTheme.headline.copyWith(
-          color: colorTheme.textHighEmphasis,
-        ),
-        pollOptionsShowAllVotesButtonStyle: TextButton.styleFrom(
-          textStyle: textTheme.headline,
-          foregroundColor: colorTheme.accentPrimary,
-        ),
-      ),
-      pollOptionsDialogTheme: StreamPollOptionsDialogThemeData(
-        backgroundColor: colorTheme.appBg,
-        appBarElevation: 1,
-        appBarBackgroundColor: colorTheme.barsBg,
-        appBarForegroundColor: colorTheme.textHighEmphasis,
-        appBarTitleTextStyle: textTheme.headlineBold.copyWith(
-          color: colorTheme.textHighEmphasis,
-        ),
-        pollTitleTextStyle: textTheme.headlineBold.copyWith(
-          color: colorTheme.textHighEmphasis,
-        ),
-        pollTitleDecoration: BoxDecoration(
-          color: colorTheme.inputBg,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        pollOptionsListViewDecoration: BoxDecoration(
-          color: colorTheme.inputBg,
-          borderRadius: BorderRadius.circular(12),
-        ),
-      ),
-      pollCommentsDialogTheme: StreamPollCommentsDialogThemeData(
-        backgroundColor: colorTheme.appBg,
-        appBarElevation: 1,
-        appBarBackgroundColor: colorTheme.barsBg,
-        appBarForegroundColor: colorTheme.textHighEmphasis,
-        appBarTitleTextStyle: textTheme.headlineBold.copyWith(
-          color: colorTheme.textHighEmphasis,
-        ),
-        pollCommentItemBackgroundColor: colorTheme.inputBg,
-        pollCommentItemBorderRadius: BorderRadius.circular(12),
-        updateYourCommentButtonStyle: TextButton.styleFrom(
-          textStyle: textTheme.headlineBold,
-          foregroundColor: colorTheme.accentPrimary,
-          backgroundColor: colorTheme.inputBg,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          padding: const EdgeInsets.symmetric(
-            vertical: 18,
-            horizontal: 16,
-          ),
-        ),
-      ),
-      pollOptionVotesDialogTheme: StreamPollOptionVotesDialogThemeData(
-        backgroundColor: colorTheme.appBg,
-        appBarElevation: 1,
-        appBarBackgroundColor: colorTheme.barsBg,
-        appBarForegroundColor: colorTheme.textHighEmphasis,
-        appBarTitleTextStyle: textTheme.headlineBold.copyWith(
-          color: colorTheme.textHighEmphasis,
-        ),
-        pollOptionVoteCountTextStyle: textTheme.headline.copyWith(
-          color: colorTheme.textHighEmphasis,
-        ),
-        pollOptionWinnerVoteCountTextStyle: textTheme.headline.copyWith(
-          color: colorTheme.textHighEmphasis,
-        ),
-        pollOptionVoteItemBackgroundColor: colorTheme.inputBg,
-        pollOptionVoteItemBorderRadius: BorderRadius.circular(12),
-      ),
+      pollResultsSheetTheme: const StreamPollResultsSheetThemeData(),
+      pollOptionsSheetTheme: const StreamPollOptionsSheetThemeData(),
+      pollCommentsSheetTheme: const StreamPollCommentsSheetThemeData(),
+      pollOptionVotesSheetTheme: const StreamPollOptionVotesSheetThemeData(),
       threadListTileTheme: const StreamThreadListTileThemeData(),
       draftListTileTheme: StreamDraftListTileThemeData(
         backgroundColor: colorTheme.barsBg,
@@ -340,17 +244,17 @@ class StreamChatThemeData {
   /// Theme configuration for the [StreamPollInteractor] widget.
   final StreamPollInteractorThemeData pollInteractorTheme;
 
-  /// Theme configuration for the [StreamPollResultsDialog] widget.
-  final StreamPollResultsDialogThemeData pollResultsDialogTheme;
+  /// Theme configuration for the [StreamPollResultsSheet] widget.
+  final StreamPollResultsSheetThemeData pollResultsSheetTheme;
 
-  /// Theme configuration for the [StreamPollOptionsDialog] widget.
-  final StreamPollOptionsDialogThemeData pollOptionsDialogTheme;
+  /// Theme configuration for the [StreamPollOptionsSheet] widget.
+  final StreamPollOptionsSheetThemeData pollOptionsSheetTheme;
 
-  /// Theme configuration for the [StreamPollCommentsDialog] widget.
-  final StreamPollCommentsDialogThemeData pollCommentsDialogTheme;
+  /// Theme configuration for the [StreamPollCommentsSheet] widget.
+  final StreamPollCommentsSheetThemeData pollCommentsSheetTheme;
 
-  /// Theme configuration for the [StreamPollOptionVotesDialog] widget.
-  final StreamPollOptionVotesDialogThemeData pollOptionVotesDialogTheme;
+  /// Theme configuration for the [StreamPollOptionVotesSheet] widget.
+  final StreamPollOptionVotesSheetThemeData pollOptionVotesSheetTheme;
 
   /// Theme configuration for the [StreamThreadListTile] widget.
   final StreamThreadListTileThemeData threadListTileTheme;
@@ -379,10 +283,10 @@ class StreamChatThemeData {
     StreamMessageListViewThemeData? messageListViewTheme,
     StreamPollCreatorThemeData? pollCreatorTheme,
     StreamPollInteractorThemeData? pollInteractorTheme,
-    StreamPollResultsDialogThemeData? pollResultsDialogTheme,
-    StreamPollOptionsDialogThemeData? pollOptionsDialogTheme,
-    StreamPollCommentsDialogThemeData? pollCommentsDialogTheme,
-    StreamPollOptionVotesDialogThemeData? pollOptionVotesDialogTheme,
+    StreamPollResultsSheetThemeData? pollResultsSheetTheme,
+    StreamPollOptionsSheetThemeData? pollOptionsSheetTheme,
+    StreamPollCommentsSheetThemeData? pollCommentsSheetTheme,
+    StreamPollOptionVotesSheetThemeData? pollOptionVotesSheetTheme,
     StreamThreadListTileThemeData? threadListTileTheme,
     StreamDraftListTileThemeData? draftListTileTheme,
     StreamVoiceRecordingAttachmentThemeData? voiceRecordingAttachmentTheme,
@@ -398,10 +302,10 @@ class StreamChatThemeData {
     messageListViewTheme: messageListViewTheme ?? this.messageListViewTheme,
     pollCreatorTheme: pollCreatorTheme ?? this.pollCreatorTheme,
     pollInteractorTheme: pollInteractorTheme ?? this.pollInteractorTheme,
-    pollResultsDialogTheme: pollResultsDialogTheme ?? this.pollResultsDialogTheme,
-    pollOptionsDialogTheme: pollOptionsDialogTheme ?? this.pollOptionsDialogTheme,
-    pollCommentsDialogTheme: pollCommentsDialogTheme ?? this.pollCommentsDialogTheme,
-    pollOptionVotesDialogTheme: pollOptionVotesDialogTheme ?? this.pollOptionVotesDialogTheme,
+    pollResultsSheetTheme: pollResultsSheetTheme ?? this.pollResultsSheetTheme,
+    pollOptionsSheetTheme: pollOptionsSheetTheme ?? this.pollOptionsSheetTheme,
+    pollCommentsSheetTheme: pollCommentsSheetTheme ?? this.pollCommentsSheetTheme,
+    pollOptionVotesSheetTheme: pollOptionVotesSheetTheme ?? this.pollOptionVotesSheetTheme,
     threadListTileTheme: threadListTileTheme ?? this.threadListTileTheme,
     draftListTileTheme: draftListTileTheme ?? this.draftListTileTheme,
     voiceRecordingAttachmentTheme: voiceRecordingAttachmentTheme ?? this.voiceRecordingAttachmentTheme,
@@ -422,10 +326,10 @@ class StreamChatThemeData {
       messageListViewTheme: messageListViewTheme.merge(other.messageListViewTheme),
       pollCreatorTheme: pollCreatorTheme.merge(other.pollCreatorTheme),
       pollInteractorTheme: pollInteractorTheme.merge(other.pollInteractorTheme),
-      pollResultsDialogTheme: pollResultsDialogTheme.merge(other.pollResultsDialogTheme),
-      pollOptionsDialogTheme: pollOptionsDialogTheme.merge(other.pollOptionsDialogTheme),
-      pollCommentsDialogTheme: pollCommentsDialogTheme.merge(other.pollCommentsDialogTheme),
-      pollOptionVotesDialogTheme: pollOptionVotesDialogTheme.merge(other.pollOptionVotesDialogTheme),
+      pollResultsSheetTheme: pollResultsSheetTheme.merge(other.pollResultsSheetTheme),
+      pollOptionsSheetTheme: pollOptionsSheetTheme.merge(other.pollOptionsSheetTheme),
+      pollCommentsSheetTheme: pollCommentsSheetTheme.merge(other.pollCommentsSheetTheme),
+      pollOptionVotesSheetTheme: pollOptionVotesSheetTheme.merge(other.pollOptionVotesSheetTheme),
       threadListTileTheme: threadListTileTheme.merge(other.threadListTileTheme),
       draftListTileTheme: draftListTileTheme.merge(other.draftListTileTheme),
       voiceRecordingAttachmentTheme: voiceRecordingAttachmentTheme.merge(other.voiceRecordingAttachmentTheme),
