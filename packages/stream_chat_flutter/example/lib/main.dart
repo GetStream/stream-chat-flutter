@@ -220,7 +220,7 @@ class ChannelPage extends StatefulWidget {
 }
 
 class _ChannelPageState extends State<ChannelPage> {
-  late final messageInputController = StreamMessageInputController();
+  late final messageInputController = StreamMessageComposerController();
   final focusNode = FocusNode();
 
   @override
@@ -256,11 +256,11 @@ class _ChannelPageState extends State<ChannelPage> {
               swipeToReply: true,
             ),
           ),
-          StreamMessageInput(
+          StreamChatMessageComposer(
             enableVoiceRecording: true,
             onQuotedMessageCleared: messageInputController.clearQuotedMessage,
             focusNode: focusNode,
-            messageInputController: messageInputController,
+            controller: messageInputController,
           ),
         ],
       ),
@@ -303,9 +303,9 @@ class ThreadPage extends StatelessWidget {
               parentMessage: parent,
             ),
           ),
-          StreamMessageInput(
+          StreamChatMessageComposer(
             enableVoiceRecording: true,
-            messageInputController: StreamMessageInputController(
+            controller: StreamMessageComposerController(
               message: Message(parentId: parent.id),
             ),
           ),

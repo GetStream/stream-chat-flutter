@@ -314,7 +314,7 @@ class _MessageScreenState extends State<MessageScreen> {
                       onTap: () async {
                         if (messageInputController.text.isNotEmpty) {
                           await channel.sendMessage(
-                            messageInputController.message,
+                            Message(text: messageInputController.text),
                           );
                           messageInputController.clear();
                           if (mounted) {

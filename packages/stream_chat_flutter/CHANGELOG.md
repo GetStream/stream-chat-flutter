@@ -2,6 +2,10 @@
 
 🛑️ Breaking
 
+- Removed `StreamMessageInput` and `StreamMessageTextField`; migrate to `StreamChatMessageComposer`.
+- Removed `KeyEventPredicate` from `src/utils/typedefs.dart`; it is now exported from `stream_chat_message_composer.dart` directly.
+- `MessageComposerComponentProps` now carries additional text-input props (`canAlsoSendToChannel`, `textInputAction`, `keyboardType`, `textCapitalization`, `autofocus`, `autocorrect`).
+
 - Removed `StreamMessageListView.unreadIndicatorBuilder`; use `StreamComponentFactory.jumpToUnreadButton`.
 - Renamed `UnreadIndicatorButton.onTap` → `onJumpTap`.
 - Renamed stream icons to remove the size suffix from the icon names.

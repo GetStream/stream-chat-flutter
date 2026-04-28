@@ -3,12 +3,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart' as core;
 
 export 'stream_command_autocomplete_options.dart';
 export 'stream_mention_autocomplete_options.dart';
 
-/// {@macro stream_chat_flutter.StreamMessageInputController}
-typedef StreamMessageEditingController = StreamMessageInputController;
+/// {@macro stream_chat_flutter_core.StreamMessageComposerController}
+typedef StreamMessageEditingController = StreamMessageComposerController;
 
 /// Positions the [AutocompleteTrigger] options around the [TextField] or
 /// [TextFormField] that triggered the autocomplete.
@@ -541,8 +542,9 @@ class _StreamAutocompleteField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return StreamMessageTextField(
-      controller: messageEditingController,
+    return core.StreamMessageComposerInputField(
+      controller: messageEditingController.inputController.textFieldController,
+      placeholder: '',
       focusNode: focusNode,
     );
   }

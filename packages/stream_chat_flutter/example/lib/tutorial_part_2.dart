@@ -1,4 +1,4 @@
-// ignore_for_file: public_member_api_docs
+// ignore_for_file: public_member_api_docs, prefer_const_constructors
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -126,14 +126,14 @@ class ChannelPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
+    return Scaffold(
       appBar: StreamChannelHeader(),
       body: Column(
         children: <Widget>[
           Expanded(
             child: StreamMessageListView(),
           ),
-          StreamMessageInput(),
+          StreamChatMessageComposer(),
         ],
       ),
     );

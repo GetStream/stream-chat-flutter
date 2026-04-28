@@ -31,8 +31,8 @@ class MessageComposerRecordingLocked extends StatelessWidget {
   /// The feedback for the audio recorder.
   final AudioRecorderFeedback feedback;
 
-  /// The controller for the message input.
-  final StreamMessageInputController messageInputController;
+  /// The controller for the message composer.
+  final StreamMessageComposerController messageInputController;
 
   /// The callback for when the message is sent automatically.
   /// This callback should be null when the message is not supposed to be sent automatically.
@@ -151,8 +151,8 @@ class MessageComposerRecordingStopped extends StatefulWidget {
   /// The feedback for the audio recorder.
   final AudioRecorderFeedback feedback;
 
-  /// The controller for the message input.
-  final StreamMessageInputController messageInputController;
+  /// The controller for the message composer.
+  final StreamMessageComposerController messageInputController;
 
   /// The callback for when the message is sent automatically.
   /// This callback should be null when the message is not supposed to be sent automatically.

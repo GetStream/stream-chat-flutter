@@ -143,8 +143,6 @@ export 'src/message_input/audio_recorder/stream_audio_recorder.dart';
 export 'src/message_input/countdown_button.dart';
 export 'src/message_input/enums.dart';
 export 'src/message_input/stream_message_composer_attachment_list.dart';
-export 'src/message_input/stream_message_input.dart';
-export 'src/message_input/stream_message_text_field.dart';
 export 'src/message_list_view/message_details.dart';
 export 'src/message_list_view/message_list_view.dart';
 export 'src/message_list_view/unread_indicator_button.dart';

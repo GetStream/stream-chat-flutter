@@ -27,7 +27,7 @@ class ChannelPage extends StatefulWidget {
 
 class _ChannelPageState extends State<ChannelPage> {
   FocusNode? _focusNode;
-  final _messageInputController = StreamMessageInputController();
+  final _messageInputController = StreamMessageComposerController();
 
   @override
   void initState() {
@@ -38,6 +38,7 @@ class _ChannelPageState extends State<ChannelPage> {
   @override
   void dispose() {
     _focusNode!.dispose();
+    _messageInputController.dispose();
     super.dispose();
   }
 
@@ -137,9 +138,9 @@ class _ChannelPageState extends State<ChannelPage> {
               final locationEnabled =
                   appConfig.enableLocationSharing && config?.sharedLocations == true && channel.canShareLocation;
 
-              return StreamMessageInput(
+              return StreamChatMessageComposer(
                 focusNode: _focusNode,
-                messageInputController: _messageInputController,
+                controller: _messageInputController,
                 onQuotedMessageCleared: _messageInputController.clearQuotedMessage,
                 enableVoiceRecording: true,
                 allowedAttachmentPickerTypes: [

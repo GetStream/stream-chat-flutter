@@ -35,7 +35,7 @@ class DefaultStreamMessageComposerInputTrailing extends StatelessWidget {
   /// The properties for the message composer component.
   final MessageComposerComponentProps props;
 
-  StreamMessageInputController get _controller => props.controller;
+  StreamMessageComposerController get _controller => props.controller;
 
   @override
   Widget build(BuildContext context) {
@@ -64,7 +64,7 @@ class DefaultStreamMessageComposerInputTrailing extends StatelessWidget {
         return props.isAudioRecordingFlowLocked || props.isAudioRecordingFlowStopped
             ? const SizedBox.shrink()
             : StreamCoreMessageComposerInputTrailing(
-                controller: _controller.textFieldController,
+                controller: _controller.inputController.textFieldController,
                 onSendPressed: isEnabled ? props.onSendPressed : null,
                 voiceRecordingCallback: props.voiceRecordingCallback,
                 buttonState: buttonState,

@@ -2,6 +2,12 @@
 
 🛑️ Breaking
 
+- Replaced `StreamMessageInputController` with `StreamMessageComposerController` — a `ValueNotifier<Message>` that owns the full message state (text, attachments, quoted message, OG preview, poll, mentions, cooldown, and draft sync).  The old `StreamMessageInputController` class is removed; `StreamMessageInputController` now re-exported as `core.StreamMessageInputController` from `stream_core_flutter` for low-level text-only input use.
+- `StreamRestorableMessageInputController` has been removed; use `StreamRestorableMessageComposerController` instead.
+- Added `StreamMessageComposerController`, `StreamRestorableMessageComposerController`, and `StreamMessageValueListenableBuilder` to the public API.
+- Added `ErrorListener`, `MessageValidator`, `PreMessageSending`, `OgPreviewFilter` typedefs.
+- `MessageTextFieldController` and `TextStyleBuilder` are now re-exported from `stream_core_flutter`.
+
 - Renamed `StreamMessageInputController.editingOriginalMessage` → `messageBeingEdited`.
 - `StreamMessageInputController` constructor no longer accepts non-initial messages;
   use `editMessage()` to enter edit mode.

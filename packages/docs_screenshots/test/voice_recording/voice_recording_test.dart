@@ -42,7 +42,7 @@ Widget _buildVoiceRecordingMessageInputScaffold({
           body: Column(
             children: [
               Expanded(child: Container()),
-              const StreamMessageInput(enableVoiceRecording: true),
+              StreamChatMessageComposer(enableVoiceRecording: true),
             ],
           ),
         ),
@@ -111,7 +111,7 @@ Widget _buildVoiceRecordingContextScaffold({
                   ],
                 ),
               ),
-              const StreamMessageInput(enableVoiceRecording: true),
+              StreamChatMessageComposer(enableVoiceRecording: true),
             ],
           ),
         ),
@@ -214,7 +214,7 @@ void main() {
         child: MessageComposerRecordingLocked(
           audioRecorderController: _makeRecorderController(lockedState),
           feedback: const AudioRecorderFeedback(),
-          messageInputController: StreamMessageInputController(),
+          messageInputController: StreamMessageComposerController(),
           sendMessageCallback: null,
           state: lockedState,
         ),
@@ -246,7 +246,7 @@ void main() {
         child: MessageComposerRecordingStopped(
           audioRecorderController: _makeRecorderController(stoppedState),
           feedback: const AudioRecorderFeedback(),
-          messageInputController: StreamMessageInputController(),
+          messageInputController: StreamMessageComposerController(),
           sendMessageCallback: null,
           recordingState: stoppedState,
         ),

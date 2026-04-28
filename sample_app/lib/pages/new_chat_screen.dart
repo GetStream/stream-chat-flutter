@@ -367,7 +367,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
                             },
                           ),
                   ),
-                  StreamMessageInput(
+                  StreamChatMessageComposer(
                     focusNode: _messageInputFocusNode,
                     preMessageSending: (message) async {
                       await channel!.watch();

@@ -100,19 +100,6 @@ typedef AttachmentActionsBuilder =
       AttachmentActionsModal defaultActionsModal,
     );
 
-/// {@template errorListener}
-/// A callback that can be passed to [StreamMessageInput.onError].
-///
-/// This callback should not throw.
-///
-/// It exists merely for error reporting, and should not be used otherwise.
-/// {@endtemplate}
-typedef ErrorListener =
-    void Function(
-      Object error,
-      StackTrace? stackTrace,
-    );
-
 /// {@template attachmentLimitExceededListener}
 /// A callback that can be passed to
 /// [StreamMessageInput.onAttachmentLimitExceed].
@@ -335,11 +322,6 @@ typedef DownloadedPathCallback = void Function(String? path);
 /// {@endtemplate}
 typedef UserTapCallback = void Function(User, Widget?);
 
-/// {@template rawKeyEventPredicate}
-/// Callback called to react to a key event
-/// {@endtemplate}
-typedef KeyEventPredicate = bool Function(FocusNode, KeyEvent);
-
 /// {@template userItemBuilder}
 /// Builder used to create a custom [ListUserItem] from a [User]
 /// {@endtemplate}
@@ -351,12 +333,9 @@ typedef UserItemBuilder = Widget Function(BuildContext, User, bool);
 typedef OnScrollToBottom = Function(int unreadCount);
 
 /// Widget builder for widgets that may require data from the
-/// [MessageInputController].
+/// [StreamMessageComposerController].
 typedef MessageRelatedBuilder =
     Widget Function(
       BuildContext context,
-      StreamMessageInputController messageInputController,
+      StreamMessageComposerController messageInputController,
     );
-
-/// A function that returns true if the message is valid and can be sent.
-typedef MessageValidator = bool Function(Message message);
