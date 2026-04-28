@@ -306,7 +306,7 @@ class _StreamChatMessageComposerState extends State<StreamChatMessageComposer>
 
   // ---- Focus ----
 
-  FocusNode get _effectiveFocusNode => widget.focusNode ?? _effectiveController.inputController.focusNode;
+  FocusNode get _effectiveFocusNode => widget.focusNode ?? _effectiveController.focusNode;
 
   // ---- Picker ----
 
@@ -378,7 +378,7 @@ class _StreamChatMessageComposerState extends State<StreamChatMessageComposer>
     }
 
     if (widget.focusNode != oldWidget.focusNode) {
-      (oldWidget.focusNode ?? _effectiveController.inputController.focusNode).removeListener(_focusNodeListener);
+      (oldWidget.focusNode ?? _effectiveController.focusNode).removeListener(_focusNodeListener);
       _effectiveFocusNode.addListener(_focusNodeListener);
     }
   }
@@ -1116,7 +1116,7 @@ class DefaultStreamChatMessageComposer extends StatelessWidget {
   Widget build(BuildContext context) {
     return core.StreamCoreMessageComposer(
       placeholder: placeholder,
-      controller: inputController.inputController.textFieldController,
+      controller: inputController.textFieldController,
       isFloating: isFloating,
       focusNode: props.focusNode,
       composerLeading: StreamMessageComposerLeading(props: props),
@@ -1130,7 +1130,7 @@ class DefaultStreamChatMessageComposer extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               core.StreamMessageComposerInputField(
-                controller: inputController.inputController.textFieldController,
+                controller: inputController.textFieldController,
                 placeholder: placeholder,
                 focusNode: props.focusNode,
                 command: inputController.message.command?.toUpperCase(),

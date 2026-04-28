@@ -5,17 +5,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/stream_chat.dart';
-import 'package:stream_chat_flutter_core/src/stream_message_input_controller.dart';
+import 'package:stream_chat_flutter_core/src/stream_message_composer_controller.dart';
 
 class ValueNotifierListenerMock extends Mock {
   void call();
 }
 
 void main() {
-  late StreamMessageInputController controller;
+  late StreamMessageComposerController controller;
 
   setUp(() {
-    controller = StreamMessageInputController();
+    controller = StreamMessageComposerController();
   });
 
   tearDown(() {
@@ -31,7 +31,7 @@ void main() {
     });
 
     test('fromText constructor initializes with proper text', () {
-      final textController = StreamMessageInputController.fromText('Hello');
+      final textController = StreamMessageComposerController.fromText('Hello');
       expect(textController.text, 'Hello');
       textController.dispose();
     });
@@ -41,12 +41,10 @@ void main() {
         Attachment(type: 'image', title: 'test'),
       ];
 
-      final controller = StreamMessageInputController.fromAttachments(
-        attachments,
-      );
+      final attachController = StreamMessageComposerController.fromAttachments(attachments);
 
-      expect(controller.attachments, attachments);
-      controller.dispose();
+      expect(attachController.attachments, attachments);
+      attachController.dispose();
     });
 
     test('can initialize with text pattern styles', () {
@@ -56,12 +54,12 @@ void main() {
         },
       };
 
-      final controller = StreamMessageInputController(
+      final patternController = StreamMessageComposerController(
         textPatternStyle: patterns,
       );
 
-      expect(controller.textFieldController.textPatternStyle, patterns);
-      controller.dispose();
+      expect(patternController.textFieldController.textPatternStyle, patterns);
+      patternController.dispose();
     });
   });
 
@@ -428,22 +426,17 @@ void main() {
 
     test('cooldown timer triggers notifications on changes', () {
       fakeAsync((async) {
-        // Setup a mock listener to track notifications
         final listener = ValueNotifierListenerMock();
         controller.addListener(listener.call);
 
-        // Start cooldown
         controller.startCooldown(10);
 
-        // Verify the listener was called when cooldown was set
         verify(listener.call).called(1);
 
         async.elapse(const Duration(seconds: 10));
 
-        // Verify the listener was called 10 times (once for each second)
         verify(listener.call).called(10);
 
-        // Clean up
         controller.removeListener(listener.call);
       });
     });
@@ -458,13 +451,13 @@ void main() {
       );
 
       expect(
-        () => StreamMessageInputController(message: existingMessage),
+        () => StreamMessageComposerController(message: existingMessage),
         throwsA(isA<AssertionError>()),
       );
     });
 
     test('constructing with a fresh message does not enter edit mode', () {
-      final editController = StreamMessageInputController.fromText('Some draft');
+      final editController = StreamMessageComposerController.fromText('Some draft');
       addTearDown(editController.dispose);
 
       expect(editController.messageBeingEdited, isNull);
@@ -526,7 +519,7 @@ void main() {
     });
 
     test('cancelEditMessage restores the draft that was in the composer before edit', () {
-      final draftController = StreamMessageInputController.fromText('Draft text');
+      final draftController = StreamMessageComposerController.fromText('Draft text');
       addTearDown(draftController.dispose);
 
       draftController.editMessage(Message(id: 'msg-1', text: 'Original text'));
@@ -538,7 +531,7 @@ void main() {
     });
 
     test('editMessage called again during an edit keeps the original pre-edit draft', () {
-      final draftController = StreamMessageInputController.fromText('Draft text');
+      final draftController = StreamMessageComposerController.fromText('Draft text');
       addTearDown(draftController.dispose);
 
       draftController.editMessage(Message(id: 'msg-1', text: 'Original text'));
@@ -552,7 +545,7 @@ void main() {
     });
 
     test('cancelEditMessage without an active edit is a no-op', () {
-      final draftController = StreamMessageInputController.fromText('Draft text');
+      final draftController = StreamMessageComposerController.fromText('Draft text');
       addTearDown(draftController.dispose);
 
       draftController.cancelEditMessage();
@@ -576,7 +569,7 @@ void main() {
     });
 
     test('reset restores the initial message', () {
-      final initialController = StreamMessageInputController(
+      final initialController = StreamMessageComposerController(
         message: Message(text: 'Initial text'),
       );
 
@@ -589,7 +582,7 @@ void main() {
 
     test('reset with resetId=false keeps the same message ID', () {
       final message = Message(id: 'message-id', text: 'Initial text');
-      final initialController = StreamMessageInputController(message: message);
+      final initialController = StreamMessageComposerController(message: message);
 
       initialController.text = 'Updated text';
       initialController.reset(resetId: false);
@@ -624,7 +617,6 @@ void main() {
       final listener = ValueNotifierListenerMock();
       controller.addListener(listener.call);
 
-      // Changing the message should trigger the listener
       controller.message = Message(text: 'New message');
 
       verify(listener.call).called(1);
@@ -636,20 +628,18 @@ void main() {
       final listener = ValueNotifierListenerMock();
       controller.addListener(listener.call);
 
-      // Test various setters
       controller.text = 'New text';
       controller.quotedMessage = Message(id: 'quoted');
       controller.showInChannel = true;
       controller.addAttachment(Attachment(type: 'image'));
 
-      // Verify listener was called multiple times
       verify(listener.call).called(4);
 
       controller.removeListener(listener.call);
     });
   });
 
-  group('RestorableMessageInputController', () {
+  group('RestorableMessageComposerController', () {
     testWidgets(
       'restores old state correctly',
       (tester) async {
@@ -702,7 +692,7 @@ class _RestorableWidget extends StatefulWidget {
 }
 
 class _RestorableWidgetState extends State<_RestorableWidget> with RestorationMixin {
-  final controller = StreamRestorableMessageInputController();
+  final controller = StreamRestorableMessageComposerController();
 
   @override
   String get restorationId => 'widget';
@@ -723,10 +713,10 @@ class _RestorableWidgetState extends State<_RestorableWidget> with RestorationMi
     return ListenableBuilder(
       listenable: controller,
       builder: (context, child) {
-        final value = controller.value;
+        final composerController = controller.value;
 
         return Text(
-          value.text,
+          composerController.text,
           textDirection: TextDirection.ltr,
         );
       },

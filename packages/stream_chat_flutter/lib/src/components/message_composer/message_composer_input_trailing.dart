@@ -64,7 +64,7 @@ class DefaultStreamMessageComposerInputTrailing extends StatelessWidget {
         return props.isAudioRecordingFlowLocked || props.isAudioRecordingFlowStopped
             ? const SizedBox.shrink()
             : StreamCoreMessageComposerInputTrailing(
-                controller: _controller.inputController.textFieldController,
+                controller: _controller.textFieldController,
                 onSendPressed: isEnabled ? props.onSendPressed : null,
                 voiceRecordingCallback: props.voiceRecordingCallback,
                 buttonState: buttonState,

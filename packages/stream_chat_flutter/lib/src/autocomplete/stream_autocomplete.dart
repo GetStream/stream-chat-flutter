@@ -543,7 +543,7 @@ class _StreamAutocompleteField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return core.StreamMessageComposerInputField(
-      controller: messageEditingController.inputController.textFieldController,
+      controller: messageEditingController.textFieldController,
       placeholder: '',
       focusNode: focusNode,
     );

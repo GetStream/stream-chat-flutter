@@ -4,9 +4,8 @@ import 'dart:convert';
 import 'package:collection/collection.dart';
 import 'package:flutter/widgets.dart';
 import 'package:stream_chat/stream_chat.dart';
-import 'package:stream_chat_flutter_core/src/stream_channel.dart';
 import 'package:stream_chat_flutter_core/src/message_text_field_controller.dart';
-import 'package:stream_chat_flutter_core/src/stream_message_input_controller.dart';
+import 'package:stream_chat_flutter_core/src/stream_channel.dart';
 import 'package:stream_chat_flutter_core/src/typedef.dart';
 
 /// A value listenable builder related to a [Message].
@@ -25,66 +24,113 @@ typedef StreamMessageValueListenableBuilder = ValueListenableBuilder<Message>;
 class StreamMessageComposerController extends ValueNotifier<Message> {
   /// Creates a [StreamMessageComposerController].
   ///
-  /// Optionally inject an existing [inputController]. When not provided,
-  /// one is created and owned internally (and disposed on [dispose]).
+  /// Optionally inject an existing [textFieldController] or [focusNode].
+  /// When not provided, they are created and owned internally (and disposed
+  /// on [dispose]).
   factory StreamMessageComposerController({
     Message? message,
-    StreamMessageInputController? inputController,
+    MessageTextFieldController? textFieldController,
     Map<RegExp, TextStyleBuilder>? textPatternStyle,
+    FocusNode? focusNode,
   }) => StreamMessageComposerController._(
     initialMessage: message ?? Message(),
-    inputController: inputController,
+    textFieldController: textFieldController,
     textPatternStyle: textPatternStyle,
+    focusNode: focusNode,
+  );
+
+  /// Creates a [StreamMessageComposerController] with initial [text].
+  factory StreamMessageComposerController.fromText(
+    String text, {
+    MessageTextFieldController? textFieldController,
+    Map<RegExp, TextStyleBuilder>? textPatternStyle,
+    FocusNode? focusNode,
+  }) => StreamMessageComposerController._(
+    initialMessage: Message(text: text),
+    textFieldController: textFieldController,
+    textPatternStyle: textPatternStyle,
+    focusNode: focusNode,
+  );
+
+  /// Creates a [StreamMessageComposerController] with initial [attachments].
+  factory StreamMessageComposerController.fromAttachments(
+    List<Attachment> attachments, {
+    MessageTextFieldController? textFieldController,
+    Map<RegExp, TextStyleBuilder>? textPatternStyle,
+    FocusNode? focusNode,
+  }) => StreamMessageComposerController._(
+    initialMessage: Message(attachments: attachments),
+    textFieldController: textFieldController,
+    textPatternStyle: textPatternStyle,
+    focusNode: focusNode,
   );
 
   StreamMessageComposerController._({
     required Message initialMessage,
-    StreamMessageInputController? inputController,
+    MessageTextFieldController? textFieldController,
     Map<RegExp, TextStyleBuilder>? textPatternStyle,
+    FocusNode? focusNode,
   }) : assert(
          initialMessage.state.isInitial,
          'Controllers must be created with an initial (draft) message. '
          'Call editMessage() to enter edit mode on an existing message.',
        ),
        _initialMessage = initialMessage,
-       _ownedInputController = inputController == null,
-       _inputController =
-           inputController ??
-           StreamMessageInputController(
+       _ownedTextFieldController = textFieldController == null,
+       _textFieldController =
+           textFieldController ??
+           MessageTextFieldController(
+             text: initialMessage.text,
              textPatternStyle: textPatternStyle,
            ),
+       _ownedFocusNode = focusNode == null,
+       _focusNode = focusNode,
        super(initialMessage) {
-    _inputController.addListener(_onInputControllerChanged);
+    _textFieldController.addListener(_onTextFieldChanged);
   }
 
-  // ---------- input controller ----------
+  // ---------- text field controller ----------
 
-  final bool _ownedInputController;
+  final bool _ownedTextFieldController;
 
-  /// The underlying [StreamMessageInputController].
+  /// The underlying [MessageTextFieldController].
   ///
-  /// Provides access to the text field controller, focus node, command label,
-  /// and cooldown state.
-  StreamMessageInputController get inputController => _inputController;
-  final StreamMessageInputController _inputController;
+  /// Pass this directly to a [TextField] or [TextFormField] widget.
+  MessageTextFieldController get textFieldController => _textFieldController;
+  final MessageTextFieldController _textFieldController;
 
-  void _onInputControllerChanged() {
-    final newText = _inputController.text;
+  void _onTextFieldChanged() {
+    // If the change was triggered by set value (which already notified via
+    // super.value), skip to avoid a redundant second notification.
+    if (_suppressTextSync) return;
+
+    final newText = _textFieldController.text;
     if (newText != (value.text ?? '')) {
-      // Sync text from input controller → message value, suppressing the
-      // reverse sync so we don't create an infinite loop.
+      // Text changed: update the message. The super.value call notifies listeners.
       _suppressTextSync = true;
       try {
         super.value = value.copyWith(text: newText);
       } finally {
         _suppressTextSync = false;
       }
+    } else {
+      // Only selection/composing region changed; notify so widgets (e.g.
+      // send button, autocomplete) can react to cursor movement.
+      notifyListeners();
     }
-    // Forward notifications so ValueListenableBuilder rebuilds.
-    notifyListeners();
   }
 
   bool _suppressTextSync = false;
+
+  // ---------- focus node ----------
+
+  final bool _ownedFocusNode;
+  FocusNode? _focusNode;
+
+  /// The [FocusNode] for the input field.
+  ///
+  /// Lazily created and owned internally if none was injected at construction.
+  FocusNode get focusNode => _focusNode ??= FocusNode();
 
   // ---------- message value ----------
 
@@ -102,11 +148,18 @@ class StreamMessageComposerController extends ValueNotifier<Message> {
 
     if (!_suppressTextSync) {
       final newText = newMessage.text ?? '';
-      if (_inputController.text != newText) {
-        _inputController.textEditingValue = TextEditingValue(
-          text: newText,
-          selection: TextSelection.collapsed(offset: newText.length),
-        );
+      if (_textFieldController.text != newText) {
+        // Wrap in _suppressTextSync so _onTextFieldChanged skips its
+        // notifyListeners(); super.value above already notified.
+        _suppressTextSync = true;
+        try {
+          _textFieldController.value = TextEditingValue(
+            text: newText,
+            selection: TextSelection.collapsed(offset: newText.length),
+          );
+        } finally {
+          _suppressTextSync = false;
+        }
       }
     }
   }
@@ -114,27 +167,27 @@ class StreamMessageComposerController extends ValueNotifier<Message> {
   // ---------- text bridging ----------
 
   /// The current text of the composer.
-  String get text => _inputController.text;
+  String get text => _textFieldController.text;
 
   /// Sets the text of the composer.
   set text(String newText) {
-    _inputController.text = newText;
+    _textFieldController.text = newText;
   }
 
   /// The current text selection.
-  TextSelection get selection => _inputController.selection;
+  TextSelection get selection => _textFieldController.selection;
 
   /// Sets the text selection.
   set selection(TextSelection newSelection) {
-    _inputController.selection = newSelection;
+    _textFieldController.selection = newSelection;
   }
 
   /// The full [TextEditingValue].
-  TextEditingValue get textEditingValue => _inputController.textEditingValue;
+  TextEditingValue get textEditingValue => _textFieldController.value;
 
   /// Sets the full [TextEditingValue].
   set textEditingValue(TextEditingValue v) {
-    _inputController.textEditingValue = v;
+    _textFieldController.value = v;
   }
 
   // ---------- edit mode ----------
@@ -170,7 +223,6 @@ class StreamMessageComposerController extends ValueNotifier<Message> {
   set command(String? command) {
     if (command == null) return clearCommand();
     _messageBeforeCommand ??= message;
-    _inputController.command = command;
     message = message.copyWith(text: '', attachments: [], command: command);
   }
 
@@ -178,7 +230,7 @@ class StreamMessageComposerController extends ValueNotifier<Message> {
 
   /// Clears the active command and restores the previous content.
   void clearCommand() {
-    _inputController.clearCommand();
+    if (message.command == null) return;
     if (_messageBeforeCommand case final prev?) {
       message = prev;
       _messageBeforeCommand = null;
@@ -312,13 +364,47 @@ class StreamMessageComposerController extends ValueNotifier<Message> {
     mentionedUsers = [];
   }
 
-  // ---------- cooldown (delegated to inputController) ----------
+  // ---------- cooldown ----------
 
   /// Whether slow-mode is currently active.
-  bool get isSlowModeActive => _inputController.isSlowModeActive;
+  bool get isSlowModeActive => _cooldownTimeOut > 0;
 
   /// Remaining cooldown seconds.
-  int get cooldownTimeOut => _inputController.cooldownTimeOut;
+  int get cooldownTimeOut => _cooldownTimeOut;
+  var _cooldownTimeOut = 0;
+
+  Timer? _cooldownTimer;
+
+  /// Starts the slow-mode countdown from [cooldown] seconds.
+  ///
+  /// If [cooldown] is 0 or negative, this is a no-op.
+  void startCooldown(int cooldown) {
+    if (cooldown <= 0) return;
+
+    _cooldownTimer ??= _setPeriodicTimer(
+      const Duration(seconds: 1),
+      immediate: true,
+      (timer) {
+        final elapsed = timer.tick;
+        if (elapsed >= cooldown) return cancelCooldown();
+
+        final updatedTimeOut = cooldown - elapsed;
+        if (_cooldownTimeOut == updatedTimeOut) return;
+
+        _cooldownTimeOut = updatedTimeOut;
+        if (hasListeners) notifyListeners();
+      },
+    );
+  }
+
+  /// Cancels the slow-mode countdown timer.
+  void cancelCooldown() {
+    _cooldownTimer?.cancel();
+    _cooldownTimer = null;
+
+    _cooldownTimeOut = 0;
+    if (hasListeners) notifyListeners();
+  }
 
   // ---------- channel-attached behavior ----------
 
@@ -362,7 +448,7 @@ class StreamMessageComposerController extends ValueNotifier<Message> {
 
     // Cooldown bootstrap.
     if (!isEditing && channel.state != null) {
-      _inputController.startCooldown(channel.getRemainingCooldown());
+      startCooldown(channel.getRemainingCooldown());
     }
 
     // Draft sync.
@@ -379,7 +465,7 @@ class StreamMessageComposerController extends ValueNotifier<Message> {
     _messageDeletedSubscription = channel.on(EventType.messageDeleted).listen(_onMessageDeleted);
 
     // Wire text changes → typing keystroke throttle + OG debounce.
-    _inputController.addListener(_onTextChanged);
+    _textFieldController.addListener(_onTextChanged);
   }
 
   /// Detaches from the channel, cancelling all subscriptions, timers, and
@@ -394,7 +480,7 @@ class StreamMessageComposerController extends ValueNotifier<Message> {
       _maybeUpdateOrDeleteDraftMessage();
     }
 
-    _inputController.removeListener(_onTextChanged);
+    _textFieldController.removeListener(_onTextChanged);
     _draftSubscription?.cancel();
     _draftSubscription = null;
     _messageUpdatedSubscription?.cancel();
@@ -462,7 +548,7 @@ class StreamMessageComposerController extends ValueNotifier<Message> {
     // Throttled keystroke (fire on leading edge, then gate for 350 ms).
     _keystrokeThrottle ??= Timer(const Duration(milliseconds: 350), () {
       _keystrokeThrottle = null;
-      final currentText = _inputController.text.trim();
+      final currentText = _textFieldController.text.trim();
       if (currentText.isNotEmpty && channel.canUseTypingEvents) {
         channel.keyStroke(message.parentId).onError(
           (error, stackTrace) => _attachedOnError?.call(error!, stackTrace),
@@ -477,7 +563,7 @@ class StreamMessageComposerController extends ValueNotifier<Message> {
     _ogDebounceTimer = Timer(
       const Duration(milliseconds: 350),
       () {
-        final text = _inputController.text.trim();
+        final text = _textFieldController.text.trim();
         _checkContainsUrl(text, channel);
       },
     );
@@ -576,7 +662,7 @@ class StreamMessageComposerController extends ValueNotifier<Message> {
   }) async {
     final channelState = _attachedChannel;
     if (channelState == null) return;
-    if (_inputController.isSlowModeActive) return;
+    if (isSlowModeActive) return;
 
     final effectiveValidator = validator ?? _defaultValidator;
     if (!effectiveValidator(message)) return;
@@ -617,7 +703,7 @@ class StreamMessageComposerController extends ValueNotifier<Message> {
         true => channel.updateMessage(message),
         false => channel.sendMessage(message),
       };
-      _inputController.startCooldown(channel.getRemainingCooldown());
+      startCooldown(channel.getRemainingCooldown());
       onMessageSent?.call(resp.message);
     } catch (e, stk) {
       if (onError != null) {
@@ -678,7 +764,6 @@ class StreamMessageComposerController extends ValueNotifier<Message> {
   /// Active edit state is preserved — use [cancelEditMessage] to exit edit mode.
   void clear() {
     _messageBeforeCommand = null;
-    _inputController.clear();
     message = Message();
   }
 
@@ -697,8 +782,11 @@ class StreamMessageComposerController extends ValueNotifier<Message> {
   @override
   void dispose() {
     detach();
-    _inputController.removeListener(_onInputControllerChanged);
-    if (_ownedInputController) _inputController.dispose();
+    _cooldownTimer?.cancel();
+    _cooldownTimer = null;
+    _textFieldController.removeListener(_onTextFieldChanged);
+    if (_ownedTextFieldController) _textFieldController.dispose();
+    if (_ownedFocusNode) _focusNode?.dispose();
     super.dispose();
   }
 }
@@ -748,4 +836,14 @@ extension _NullableUriX on Uri? {
     if (uri.hasScheme) return uri;
     return Uri.tryParse('http://${uri.toString()}');
   }
+}
+
+Timer _setPeriodicTimer(
+  Duration duration,
+  void Function(Timer) callback, {
+  bool immediate = false,
+}) {
+  final timer = Timer.periodic(duration, callback);
+  if (immediate) callback.call(timer);
+  return timer;
 }

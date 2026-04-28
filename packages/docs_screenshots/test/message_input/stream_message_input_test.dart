@@ -82,7 +82,7 @@ void main() {
       );
 
       final controller = StreamMessageComposerController();
-      controller.inputController.textFieldController.text = 'Hello world!';
+      controller.textFieldController.text = 'Hello world!';
 
       return MaterialApp(
         theme: docsScreenshotsTheme(),

@@ -188,8 +188,8 @@ class MessageScreen extends StatefulWidget {
 }
 
 class _MessageScreenState extends State<MessageScreen> {
-  final StreamMessageInputController messageInputController =
-      StreamMessageInputController();
+  final StreamMessageComposerController messageInputController =
+      StreamMessageComposerController();
   late final ScrollController _scrollController;
   final messageListController = MessageListController();
 
