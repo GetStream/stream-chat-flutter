@@ -368,6 +368,9 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   String get slowModeOnLabel => 'スローモードオン';
 
   @override
+  String get commandUsernameLabel => '@username';
+
+  @override
   String get viewLibrary => 'ライブラリを表示';
 
   @override

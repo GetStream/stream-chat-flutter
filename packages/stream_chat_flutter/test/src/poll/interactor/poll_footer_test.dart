@@ -39,7 +39,7 @@ void main() async {
       expect(endVoteButton, findsOneWidget);
 
       expect(
-        tester.widget<StreamButton>(endVoteButton).props.onTap,
+        tester.widget<StreamButton>(endVoteButton).props.onPressed,
         isNotNull,
       );
     },
@@ -112,7 +112,7 @@ void main() async {
 
       expect(addCommentButton, findsOneWidget);
       expect(
-        tester.widget<StreamButton>(addCommentButton).props.onTap,
+        tester.widget<StreamButton>(addCommentButton).props.onPressed,
         isNotNull,
       );
     },
@@ -163,7 +163,7 @@ void main() async {
 
       expect(viewCommentsButton, findsOneWidget);
       expect(
-        tester.widget<StreamButton>(viewCommentsButton).props.onTap,
+        tester.widget<StreamButton>(viewCommentsButton).props.onPressed,
         isNotNull,
       );
     },
@@ -215,7 +215,7 @@ void main() async {
 
       expect(suggestOptionButton, findsOneWidget);
       expect(
-        tester.widget<StreamButton>(suggestOptionButton).props.onTap,
+        tester.widget<StreamButton>(suggestOptionButton).props.onPressed,
         isNotNull,
       );
     },
@@ -266,7 +266,7 @@ void main() async {
 
       expect(viewResultsButton, findsOneWidget);
       expect(
-        tester.widget<StreamButton>(viewResultsButton).props.onTap,
+        tester.widget<StreamButton>(viewResultsButton).props.onPressed,
         isNotNull,
       );
     },

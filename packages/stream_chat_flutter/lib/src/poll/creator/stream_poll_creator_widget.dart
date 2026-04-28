@@ -55,6 +55,7 @@ class StreamPollCreatorWidget extends StatelessWidget {
         return SingleChildScrollView(
           padding: padding,
           physics: physics,
+          keyboardDismissBehavior: .onDrag,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,

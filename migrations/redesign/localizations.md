@@ -137,6 +137,10 @@ String membersCountWithOnlineText({
   if (onlineCount <= 0) return members;
   return '$members, ${watchersCountText(onlineCount)}';
 }
+
+// Composer placeholder for user-target commands (`/mute`, `/unmute`, `/ban`, `/unban`)
+@override
+String get commandUsernameLabel => '@username';
 ```
 
 > **Note:** The values shown above are the English defaults from `DefaultTranslations`. Provide your own translated strings in place of these.
@@ -163,5 +167,5 @@ If your app overrides these in a `Translations` subclass, your custom values are
 ## Migration Checklist
 
 - [ ] Search your codebase for any class that `extends Translations` or `extends DefaultTranslations`
-- [ ] Add implementations for all 31 new abstract members listed above — the compiler will flag missing ones
+- [ ] Add implementations for all 32 new abstract members listed above — the compiler will flag missing ones
 - [ ] Review the four changed default string values and decide whether to keep the new defaults or override them to preserve the old text

@@ -406,6 +406,9 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
   String get slowModeOnLabel => 'Slow mode ON';
 
   @override
+  String get commandUsernameLabel => '@username';
+
+  @override
   String get downloadLabel => 'Download';
 
   @override

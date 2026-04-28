@@ -212,8 +212,8 @@ class _PollFooterButton extends StatelessWidget {
         size: .small,
         style: .secondary,
         type: type,
-        onTap: onPressed,
-        label: label,
+        onPressed: onPressed,
+        child: Text(label),
       ),
     );
   }

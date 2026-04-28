@@ -30,7 +30,7 @@ class StreamChatMessageComposer extends StatefulWidget {
     bool isPickerOpen = false,
     FocusNode? focusNode,
     String? currentUserId,
-    String placeholder = '',
+    String? placeholder,
     StreamAudioRecorderController? audioRecorderController,
     bool sendVoiceRecordingAutomatically = false,
     AudioRecorderFeedback feedback = const AudioRecorderFeedback(),
@@ -200,7 +200,7 @@ class MessageComposerProps {
     this.controller,
     this.isFloating = false,
     this.message,
-    this.placeholder = '',
+    this.placeholder,
     required this.onSendPressed,
     this.onAttachmentButtonPressed,
     this.isPickerOpen = false,
@@ -228,7 +228,13 @@ class MessageComposerProps {
   final Message? message;
 
   /// The placeholder text of the message composer.
-  final String placeholder;
+  ///
+  /// May be `null` to render the input with no placeholder. The wrapping
+  /// [StreamMessageInput] resolves this string reactively from its
+  /// [StreamMessageInputController] via [MessageInputPlaceholder.resolve] and
+  /// [StreamMessageInput.placeholderBuilder]; when using
+  /// [StreamChatMessageComposer] directly, supply the string yourself.
+  final String? placeholder;
 
   /// The callback for when the send button is pressed.
   final VoidCallback onSendPressed;

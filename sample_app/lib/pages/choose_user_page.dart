@@ -1,18 +1,11 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
+import 'package:sample_app/auth/auth_controller.dart';
 import 'package:sample_app/routes/routes.dart';
-import 'package:sample_app/state/init_data.dart';
 import 'package:sample_app/utils/app_config.dart';
 import 'package:sample_app/widgets/stream_version.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-
-const kStreamApiKey = 'STREAM_API_KEY';
-const kStreamUserId = 'STREAM_USER_ID';
-const kStreamToken = 'STREAM_TOKEN';
 
 class ChooseUserPage extends StatelessWidget {
   const ChooseUserPage({super.key});
@@ -91,33 +84,22 @@ class ChooseUserPage extends StatelessWidget {
                               ),
                             );
 
-                            final client = context.read<InitNotifier>().initData!.client;
-
                             final router = GoRouter.of(context);
 
-                            await client.connectUser(
-                              user,
-                              token,
-                            );
-
-                            if (!kIsWeb) {
-                              const secureStorage = FlutterSecureStorage();
-                              secureStorage.write(
-                                key: kStreamApiKey,
-                                value: kDefaultStreamApiKey,
+                            try {
+                              await authController.connect(
+                                apiKey: kDefaultStreamApiKey,
+                                user: user,
+                                token: token,
                               );
-                              secureStorage.write(
-                                key: kStreamUserId,
-                                value: user.id,
-                              );
-                              secureStorage.write(
-                                key: kStreamToken,
-                                value: token,
-                              );
+                            } finally {
+                              // Pop the progress dialog regardless of outcome.
+                              router.pop();
                             }
 
-                            // Pop the progress dialog.
-                            router.pop();
+                            // The router's redirect will forward an
+                            // Authenticated user to the channel list, but
+                            // nudge it along explicitly for snappiness.
                             router.replaceNamed(Routes.CHANNEL_LIST_PAGE.name);
                           },
                           leading: StreamUserAvatar(

@@ -58,11 +58,11 @@ class MyApp extends StatelessWidget {
       builders: StreamComponentBuilders(
         button: (context, props) => switch (props.type) {
           StreamButtonType.solid => ElevatedButton(
-            onPressed: props.onTap,
-            child: Text(props.label ?? ''),
+            onPressed: props.onPressed,
+            child: props.child ?? const SizedBox.shrink(),
           ),
-          StreamButtonType.outline => OutlinedButton(onPressed: props.onTap, child: Text(props.label ?? '')),
-          StreamButtonType.ghost => TextButton(onPressed: props.onTap, child: Text(props.label ?? '')),
+          StreamButtonType.outline => OutlinedButton(onPressed: props.onPressed, child: props.child ?? const SizedBox.shrink()),
+          StreamButtonType.ghost => TextButton(onPressed: props.onPressed, child: props.child ?? const SizedBox.shrink()),
         },
         extensions: streamChatComponentBuilders(
           channelListItem: (context, props) => StreamChannelListTile(
@@ -106,11 +106,11 @@ class MyCustomButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return switch (props.type) {
       StreamButtonType.solid => ElevatedButton(
-        onPressed: props.onTap,
-        child: Text(props.label ?? ''),
+        onPressed: props.onPressed,
+        child: props.child ?? const SizedBox.shrink(),
       ),
-      StreamButtonType.outline => OutlinedButton(onPressed: props.onTap, child: Text(props.label ?? '')),
-      StreamButtonType.ghost => TextButton(onPressed: props.onTap, child: Text(props.label ?? '')),
+      StreamButtonType.outline => OutlinedButton(onPressed: props.onPressed, child: props.child ?? const SizedBox.shrink()),
+      StreamButtonType.ghost => TextButton(onPressed: props.onPressed, child: props.child ?? const SizedBox.shrink()),
     };
   }
 }
@@ -128,6 +128,7 @@ class MyCustomButton extends StatelessWidget {
 | Message Widget & Message List | [message_widget.md](message_widget.md) |
 | Message Composer | [message_composer.md](message_composer.md) |
 | Unread Indicator | [unread_indicator.md](unread_indicator.md) |
+| Unread Indicator Button | [unread_indicator_button.md](unread_indicator_button.md) |
 | Reaction List & Detail Sheet | [reaction_list.md](reaction_list.md) |
 | Audio Waveform Theme | [audio_theme.md](audio_theme.md) |
 | Attachments & Polls | [attachments_and_polls.md](attachments_and_polls.md) |

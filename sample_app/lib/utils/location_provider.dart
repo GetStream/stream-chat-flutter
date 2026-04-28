@@ -19,6 +19,12 @@ class LocationProvider {
 
   StreamSubscription<Position>? _positionSubscription;
 
+  /// Opens the device's app settings page.
+  ///
+  /// Returns [true] if the app settings page could be opened, otherwise
+  /// [false] is returned.
+  Future<bool> openAppSettings() => Geolocator.openAppSettings();
+
   /// Opens the device's location settings page.
   ///
   /// Returns [true] if the location settings page could be opened, otherwise

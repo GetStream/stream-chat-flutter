@@ -343,26 +343,14 @@ class StreamMemberGridView extends StatelessWidget {
             ) ??
             streamMemberGridTile;
       },
-      emptyBuilder: (context) {
-        final chatThemeData = StreamChatTheme.of(context);
-        return emptyBuilder?.call(context) ??
-            Center(
-              child: Padding(
-                padding: const EdgeInsets.all(8),
-                child: StreamScrollViewEmptyWidget(
-                  emptyIcon: Icon(
-                    context.streamIcons.user,
-                    size: 148,
-                    color: chatThemeData.colorTheme.disabled,
-                  ),
-                  emptyTitle: Text(
-                    context.translations.noUsersLabel,
-                    style: chatThemeData.textTheme.headline,
-                  ),
-                ),
-              ),
-            );
-      },
+      emptyBuilder: (context) =>
+          emptyBuilder?.call(context) ??
+          Center(
+            child: StreamScrollViewEmptyWidget(
+              emptyIcon: Icon(context.streamIcons.user),
+              emptyTitle: Text(context.translations.noUsersLabel),
+            ),
+          ),
       loadMoreErrorBuilder: (context, error) => StreamScrollViewLoadMoreError.grid(
         onTap: controller.retry,
         error: Text(

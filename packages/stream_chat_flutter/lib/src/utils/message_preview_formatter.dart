@@ -173,14 +173,12 @@ class StreamMessagePreviewFormatter implements MessagePreviewFormatter {
     ChannelModel? channel,
     User? currentUser,
   }) {
-    final rawContent = _formatContent(
+    final content = _formatContent(
       context,
       message,
       currentUser: currentUser,
       showCaption: showCaption,
     );
-
-    final content = _applyMentions(rawContent, message.mentionedUsers);
 
     if (channel == null) return content;
 
@@ -455,18 +453,12 @@ class StreamMessagePreviewFormatter implements MessagePreviewFormatter {
   }) {
     final message = draftMessage.toMessage();
 
-    // Mirror [formatMessage]: build the kind-specific content first, then
-    // apply the mention-bolding pass. This keeps polls, attachments, and
-    // plain-text drafts all getting a rich preview — not just the raw
-    // text — while keeping the "Draft:" prefix out of the mention pass.
-    final rawContent = _formatContent(
+    final content = _formatContent(
       context,
       message,
       currentUser: currentUser,
       showCaption: showCaption,
     );
-
-    final content = _applyMentions(rawContent, message.mentionedUsers);
 
     final prefix = _labeledIcon(
       label: getDraftPrefix(context),
@@ -569,6 +561,7 @@ WidgetSpan _iconSpan(
 // know about mentions. [WidgetSpan]s (e.g. inline icons) and styled
 // descendants pass through untouched; only plain text fragments are split
 // and re-wrapped.
+// ignore: unused_element
 TextSpan _applyMentions(TextSpan span, List<User> mentionedUsers) {
   if (mentionedUsers.isEmpty) return span;
 

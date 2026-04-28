@@ -534,6 +534,9 @@ class DefaultStreamMessage extends StatelessWidget {
       color: effectiveBackgroundColor,
       child: PlatformWidgetBuilder(
         mobile: (context, child) => InkWell(
+          // Disable splash and highlight effects for the message row.
+          splashFactory: NoSplash.splashFactory,
+          overlayColor: .all(core.StreamColors.transparent),
           onTap: switch (props.onMessageTap) {
             final onMessageTap? => () => onMessageTap(message),
             _ => null,

@@ -119,6 +119,13 @@ abstract class Translations {
   /// The label for slow mode enabled in [StreamMessageInput]
   String get slowModeOnLabel;
 
+  /// The placeholder shown in the composer when a user-target command (for
+  /// example `/mute`, `/unmute`, `/ban`, `/unban`) is active.
+  ///
+  /// Renders literally, for example as `@username`, to hint that the user
+  /// should select or type a username.
+  String get commandUsernameLabel;
+
   /// The label for instant commands in [StreamMessageInput]
   String get instantCommandsLabel;
 
@@ -1073,6 +1080,9 @@ class DefaultTranslations implements Translations {
 
   @override
   String get slowModeOnLabel => 'Slow mode ON';
+
+  @override
+  String get commandUsernameLabel => '@username';
 
   @override
   String get viewLibrary => 'View library';
