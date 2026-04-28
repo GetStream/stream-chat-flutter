@@ -763,6 +763,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
                   key: (initialIndex != 0 && initialAlignment != 0)
                       ? ValueKey('$initialIndex-$initialAlignment')
                       : null,
+                  padding: .symmetric(vertical: context.streamSpacing.sm),
                   keyboardDismissBehavior: widget.keyboardDismissBehavior,
                   itemPositionsListener: _itemPositionListener,
                   initialScrollIndex: initialIndex,
@@ -858,14 +859,13 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
                           );
                         }
 
-                        if (_isThreadConversation) return const Empty();
-                        return const SizedBox(height: 52);
+                        return const Empty();
                       }
                       return const SizedBox(height: 8);
                     }
                     if (i == 0) {
                       if (widget.reverse ? widget.footerBuilder == null : widget.headerBuilder == null) {
-                        return const SizedBox(height: 30);
+                        return const Empty();
                       }
                       return const SizedBox(height: 8);
                     }
