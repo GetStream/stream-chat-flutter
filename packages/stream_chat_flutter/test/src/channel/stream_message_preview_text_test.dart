@@ -149,7 +149,7 @@ void main() {
   });
 
   group('Mentions', () {
-    testWidgets('renders mentioned users with bold styling', (tester) async {
+    testWidgets('renders mentioned users as plain text', (tester) async {
       final mentionedUser = User(id: 'mentioned-id', name: 'Mentioned User');
       final message = Message(
         text: 'Hello @Mentioned User, how are you?',
@@ -162,13 +162,14 @@ void main() {
       expect(find.text('Hello @Mentioned User, how are you?'), findsOneWidget);
 
       final span = _getPreviewSpan(tester);
-      final mentionSpan = _findTextSpans(span).firstWhere(
-        (s) => s.text == '@Mentioned User',
+      final textSpans = _findTextSpans(span);
+      expect(
+        textSpans.any((s) => s.style?.fontWeight == FontWeight.bold),
+        isFalse,
       );
-      expect(mentionSpan.style?.fontWeight, FontWeight.bold);
     });
 
-    testWidgets('renders multiple mentions with bold styling', (tester) async {
+    testWidgets('renders multiple mentions as plain text', (tester) async {
       final user1 = User(id: 'user-1', name: 'Alice');
       final user2 = User(id: 'user-2', name: 'Bob');
       final message = Message(
@@ -183,10 +184,10 @@ void main() {
 
       final span = _getPreviewSpan(tester);
       final textSpans = _findTextSpans(span);
-      final aliceSpan = textSpans.firstWhere((s) => s.text == '@Alice');
-      final bobSpan = textSpans.firstWhere((s) => s.text == '@Bob');
-      expect(aliceSpan.style?.fontWeight, FontWeight.bold);
-      expect(bobSpan.style?.fontWeight, FontWeight.bold);
+      expect(
+        textSpans.any((s) => s.style?.fontWeight == FontWeight.bold),
+        isFalse,
+      );
     });
 
     testWidgets('renders message without matching mention as plain text', (tester) async {
