@@ -8,7 +8,7 @@ This guide covers the migration for the message composer components in the Strea
 
 - [Overview](#overview)
 - [StreamMessageInput](#streammessageinput)
-- [StreamMessageComposer (new)](#streamchatmessagecomposer-new)
+- [StreamMessageComposer (new)](#streammessagecomposer-new)
 - [Message Input Placeholder API](#message-input-placeholder-api)
 - [Attachment Customization](#attachment-customization)
 - [Migration Checklist](#migration-checklist)
@@ -154,7 +154,7 @@ Use this when you want the new design system visuals with custom business logic.
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
 | `onSendPressed` | `VoidCallback` | **required** | Called when the send button is pressed |
-| `controller` | `StreamMessageInputController?` | `null` | Controller for the input; created internally if not provided |
+| `controller` | `StreamMessageComposerController?` | `null` | Controller for the input; created internally if not provided |
 | `onAttachmentButtonPressed` | `VoidCallback?` | `null` | Called when the attachment button is pressed. When `null`, the attachment button is hidden. |
 | `isPickerOpen` | `bool` | `false` | Whether the inline attachment picker is currently open |
 | `focusNode` | `FocusNode?` | `null` | Focus node for the text field |

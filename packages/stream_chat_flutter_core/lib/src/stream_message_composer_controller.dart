@@ -402,6 +402,7 @@ class StreamMessageComposerController extends ValueNotifier<Message> {
     _cooldownTimer?.cancel();
     _cooldownTimer = null;
 
+    if (_cooldownTimeOut == 0) return;
     _cooldownTimeOut = 0;
     if (hasListeners) notifyListeners();
   }
@@ -494,6 +495,7 @@ class StreamMessageComposerController extends ValueNotifier<Message> {
     _enrichUrlOperation?.cancel();
     _enrichUrlOperation = null;
     _lastSearchedUrl = null;
+    cancelCooldown();
     _attachedChannel = null;
     _attachedOnError = null;
   }
@@ -572,7 +574,7 @@ class StreamMessageComposerController extends ValueNotifier<Message> {
   }
 
   static final _urlRegex = RegExp(
-    r'https?://(www\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\.[a-z]{2,4}\b([-a-zA-Z0-9@:%_+.~#?&//=]*)',
+    r'https?://(www\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\.[a-z]{2,}\b([-a-zA-Z0-9@:%_+.~#?&//=]*)',
     caseSensitive: false,
   );
 
@@ -814,9 +816,12 @@ class StreamRestorableMessageComposerController extends RestorableChangeNotifier
     final restoredData = json.decode(data! as String);
 
     final message = Message.fromJson(restoredData['message']);
-    final state = MessageState.fromJson(restoredData['message_state']);
+    final restoredState = MessageState.fromJson(restoredData['message_state']);
+    // Only restore initial (draft) state — non-initial states (e.g. updating)
+    // violate the controller's constructor assertion.
+    final finalState = restoredState.isInitial ? restoredState : const MessageState.initial();
 
-    return StreamMessageComposerController(message: message.copyWith(state: state));
+    return StreamMessageComposerController(message: message.copyWith(state: finalState));
   }
 
   @override

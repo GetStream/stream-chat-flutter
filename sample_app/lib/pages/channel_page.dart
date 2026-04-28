@@ -27,7 +27,7 @@ class ChannelPage extends StatefulWidget {
 
 class _ChannelPageState extends State<ChannelPage> {
   FocusNode? _focusNode;
-  final _messageInputController = StreamMessageComposerController();
+  final _messageComposerController = StreamMessageComposerController();
 
   @override
   void initState() {
@@ -38,19 +38,19 @@ class _ChannelPageState extends State<ChannelPage> {
   @override
   void dispose() {
     _focusNode!.dispose();
-    _messageInputController.dispose();
+    _messageComposerController.dispose();
     super.dispose();
   }
 
   void _reply(Message message) {
-    _messageInputController.quotedMessage = message;
+    _messageComposerController.quotedMessage = message;
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       _focusNode!.requestFocus();
     });
   }
 
   void _editMessage(Message message) {
-    _messageInputController.editMessage(message);
+    _messageComposerController.editMessage(message);
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       _focusNode!.requestFocus();
     });
@@ -139,8 +139,8 @@ class _ChannelPageState extends State<ChannelPage> {
 
               return StreamMessageComposer(
                 focusNode: _focusNode,
-                controller: _messageInputController,
-                onQuotedMessageCleared: _messageInputController.clearQuotedMessage,
+                controller: _messageComposerController,
+                onQuotedMessageCleared: _messageComposerController.clearQuotedMessage,
                 enableVoiceRecording: true,
                 allowedAttachmentPickerTypes: [
                   ...AttachmentPickerType.values,

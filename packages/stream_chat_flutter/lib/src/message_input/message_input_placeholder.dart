@@ -5,10 +5,10 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// [StreamMessageInput].
 ///
 /// The state is resolved once per rebuild from the current
-/// [StreamMessageInputController] using [MessageInputPlaceholder.resolve],
+/// [StreamMessageComposerController] using [MessageInputPlaceholder.resolve],
 /// then handed to a [MessageInputPlaceholderBuilder] to produce the actual
 /// placeholder string that gets passed down to the underlying
-/// [StreamChatMessageComposer].
+/// [StreamMessageComposer].
 ///
 /// Each case carries the contextual data relevant to that state — for example
 /// [SlowModePlaceholder.cooldownTimeOut] for the remaining cooldown, or
@@ -47,7 +47,7 @@ sealed class MessageInputPlaceholder {
   /// Precedence (highest to lowest):
   /// 1. [SlowModePlaceholder] when the channel is in slow mode for the
   ///    current user.
-  /// 2. [CommandPlaceholder] when [StreamMessageInputController.message] has
+  /// 2. [CommandPlaceholder] when [StreamMessageComposerController.message] has
   ///    an active command.
   /// 3. [AttachmentsPlaceholder] when there are pending attachments but no
   ///    text yet.

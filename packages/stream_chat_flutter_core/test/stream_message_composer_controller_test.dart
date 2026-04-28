@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/stream_chat.dart';
-import 'package:stream_chat_flutter_core/src/stream_message_composer_controller.dart';
+import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 class ValueNotifierListenerMock extends Mock {
   void call();

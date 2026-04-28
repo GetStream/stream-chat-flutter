@@ -123,7 +123,7 @@ class ChannelPage extends StatelessWidget {
   }
 }
 
-class ThreadPage extends StatelessWidget {
+class ThreadPage extends StatefulWidget {
   const ThreadPage({
     super.key,
     this.parent,
@@ -132,22 +132,41 @@ class ThreadPage extends StatelessWidget {
   final Message? parent;
 
   @override
+  State<ThreadPage> createState() => _ThreadPageState();
+}
+
+class _ThreadPageState extends State<ThreadPage> {
+  late final StreamMessageComposerController _threadComposerController;
+
+  @override
+  void initState() {
+    super.initState();
+    _threadComposerController = StreamMessageComposerController(
+      message: Message(parentId: widget.parent!.id),
+    );
+  }
+
+  @override
+  void dispose() {
+    _threadComposerController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: StreamThreadHeader(
-        parent: parent!,
+        parent: widget.parent!,
       ),
       body: Column(
         children: <Widget>[
           Expanded(
             child: StreamMessageListView(
-              parentMessage: parent,
+              parentMessage: widget.parent,
             ),
           ),
           StreamMessageComposer(
-            controller: StreamMessageComposerController(
-              message: Message(parentId: parent!.id),
-            ),
+            controller: _threadComposerController,
           ),
         ],
       ),
