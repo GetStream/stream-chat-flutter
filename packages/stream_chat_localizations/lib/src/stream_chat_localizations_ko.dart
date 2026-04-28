@@ -371,6 +371,9 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
   String get slowModeOnLabel => '슬로모드 켜짐';
 
   @override
+  String get commandUsernameLabel => '@username';
+
+  @override
   @override
   String get viewLibrary => '라이브러리 보기';
 
@@ -627,6 +630,9 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
   String newThreadsLabel({required int count}) {
     return '$count개의 새 스레드';
   }
+
+  @override
+  String get loadingLabel => '로딩 중...';
 
   @override
   String get slideToCancelLabel => '슬라이드하여 취소';

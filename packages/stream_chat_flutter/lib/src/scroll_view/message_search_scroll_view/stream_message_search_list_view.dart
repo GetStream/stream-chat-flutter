@@ -316,26 +316,14 @@ class StreamMessageSearchListView extends StatelessWidget {
             ) ??
             streamMessageSearchListTile;
       },
-      emptyBuilder: (context) {
-        final chatThemeData = StreamChatTheme.of(context);
-        return emptyBuilder?.call(context) ??
-            Center(
-              child: Padding(
-                padding: const EdgeInsets.all(8),
-                child: StreamScrollViewEmptyWidget(
-                  emptyIcon: Icon(
-                    context.streamIcons.messageBubbleLarge,
-                    size: 148,
-                    color: chatThemeData.colorTheme.disabled,
-                  ),
-                  emptyTitle: Text(
-                    context.translations.emptyMessagesText,
-                    style: chatThemeData.textTheme.headline,
-                  ),
-                ),
-              ),
-            );
-      },
+      emptyBuilder: (context) =>
+          emptyBuilder?.call(context) ??
+          Center(
+            child: StreamScrollViewEmptyWidget(
+              emptyIcon: Icon(context.streamIcons.messageBubbleLarge),
+              emptyTitle: Text(context.translations.emptyMessagesText),
+            ),
+          ),
       loadMoreErrorBuilder: (context, error) => StreamScrollViewLoadMoreError.list(
         onTap: controller.retry,
         error: Text(context.translations.loadingMessagesError),
@@ -371,11 +359,7 @@ class StreamMessageSearchListSeparator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final effect = StreamChatTheme.of(context).colorTheme.borderBottom;
-    return Container(
-      height: 1,
-      // ignore: deprecated_member_use
-      color: effect.color!.withOpacity(effect.alpha ?? 1.0),
-    );
+    final colorScheme = context.streamColorScheme;
+    return Divider(height: 1, color: colorScheme.borderSubtle);
   }
 }

@@ -202,6 +202,7 @@ void main() {
       expect(localizations.couldNotReadBytesFromFileError, isNotNull);
       expect(localizations.toggleMuteUnmuteAction(isMuted: false), isNotNull);
       expect(localizations.downloadLabel, isNotNull);
+      expect(localizations.commandUsernameLabel, isNotNull);
       expect(localizations.toggleMuteUnmuteGroupQuestion(isMuted: true), isNotNull);
       expect(localizations.toggleMuteUnmuteGroupText(isMuted: true), isNotNull);
       expect(localizations.toggleMuteUnmuteUserQuestion(isMuted: true), isNotNull);
@@ -306,6 +307,7 @@ void main() {
       expect(localizations.totalVoteCountLabel(count: 3), isNotNull);
       expect(localizations.repliedToLabel, isNotNull);
       expect(localizations.newThreadsLabel(count: 3), isNotNull);
+      expect(localizations.loadingLabel, isNotNull);
       expect(localizations.slideToCancelLabel, isNotNull);
       expect(localizations.holdToRecordLabel, isNotNull);
       expect(localizations.sendAnywayLabel, isNotNull);

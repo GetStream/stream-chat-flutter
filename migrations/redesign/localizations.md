@@ -139,6 +139,10 @@ String membersCountWithOnlineText({
   return '$members, ${watchersCountText(onlineCount)}';
 }
 
+// Composer placeholder for user-target commands (`/mute`, `/unmute`, `/ban`, `/unban`)
+@override
+String get commandUsernameLabel => '@username';
+
 // Poll results dialog footer
 @override
 String totalVoteCountLabel({int? count}) => switch (count) {

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/misc/adaptive_dialog_action.dart';
-import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 /// {@template streamMessageActionConfirmationModal}
 /// A confirmation modal dialog for message actions in Stream Chat.
@@ -82,38 +81,32 @@ class StreamMessageActionConfirmationModal extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = StreamChatTheme.of(context);
-    final colorTheme = theme.colorTheme;
-    final textTheme = theme.textTheme;
+    final colorScheme = context.streamColorScheme;
 
     final translations = context.translations;
 
-    final actions = <Widget>[
-      AdaptiveDialogAction(
+    final actions = [
+      StreamButton(
+        type: .ghost,
+        style: .secondary,
+        size: .small,
         onPressed: () => Navigator.of(context).maybePop(false),
         child: cancelActionTitle ?? Text(translations.cancelLabel),
       ),
-      AdaptiveDialogAction(
+      StreamButton(
+        type: .ghost,
+        style: .destructive,
+        size: .small,
         onPressed: () => Navigator.of(context).maybePop(true),
-        isDefaultAction: true,
-        isDestructiveAction: isDestructiveAction,
         child: confirmActionTitle ?? Text(translations.confirmLabel),
       ),
     ];
 
-    return AlertDialog.adaptive(
-      clipBehavior: Clip.antiAlias,
-      backgroundColor: colorTheme.barsBg,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+    return AlertDialog(
       title: title,
-      titleTextStyle: textTheme.headline.copyWith(
-        color: colorTheme.textHighEmphasis,
-      ),
       content: content,
-      contentTextStyle: textTheme.body.copyWith(
-        color: colorTheme.textLowEmphasis,
-      ),
       actions: actions,
+      backgroundColor: colorScheme.backgroundElevation1,
     );
   }
 }

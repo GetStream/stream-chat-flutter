@@ -1,3 +1,9 @@
+## Upcoming
+
+🐞 Fixed
+
+- Fixed channel list re-sorting on refresh or when returning from background.
+
 ## 10.0.0-beta.13
 
 🛑️ Breaking

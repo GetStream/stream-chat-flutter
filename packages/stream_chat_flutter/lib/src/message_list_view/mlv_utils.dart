@@ -153,9 +153,10 @@ StreamMessageContentKind resolveContentKind(Message message) {
   final hasText = message.text?.isNotEmpty == true;
   final hasQuote = message.quotedMessage != null;
   final hasPoll = message.poll != null;
+  final hasSharedLocation = message.sharedLocation != null;
   final attachmentCount = message.attachments.length;
 
-  if (!hasText && !hasQuote && (hasPoll || attachmentCount == 1)) {
+  if (!hasText && !hasQuote && (hasPoll || hasSharedLocation || attachmentCount == 1)) {
     return .singleAttachment;
   }
 

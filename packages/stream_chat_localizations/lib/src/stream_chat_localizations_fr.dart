@@ -391,6 +391,9 @@ Limite de pièces jointes dépassée : il n'est pas possible d'ajouter plus de $
   String get slowModeOnLabel => 'Mode lent activé';
 
   @override
+  String get commandUsernameLabel => '@username';
+
+  @override
   String get downloadLabel => 'Télécharger';
 
   @override
@@ -647,6 +650,9 @@ Limite de pièces jointes dépassée : il n'est pas possible d'ajouter plus de $
     if (count == 1) return '1 Nouveau fil';
     return '$count Nouveaux fils';
   }
+
+  @override
+  String get loadingLabel => 'Chargement...';
 
   @override
   String get slideToCancelLabel => 'Glissez pour annuler';

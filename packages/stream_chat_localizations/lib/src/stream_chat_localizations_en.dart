@@ -384,6 +384,9 @@ class StreamChatLocalizationsEn extends GlobalStreamChatLocalizations {
   String get slowModeOnLabel => 'Slow mode ON';
 
   @override
+  String get commandUsernameLabel => '@username';
+
+  @override
   String get downloadLabel => 'Download';
 
   @override
@@ -641,6 +644,9 @@ class StreamChatLocalizationsEn extends GlobalStreamChatLocalizations {
     if (count == 1) return '1 new thread';
     return '$count new threads';
   }
+
+  @override
+  String get loadingLabel => 'Loading...';
 
   @override
   String get slideToCancelLabel => 'Slide to cancel';

@@ -380,6 +380,9 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
   String get slowModeOnLabel => 'Sakte modus PÅ';
 
   @override
+  String get commandUsernameLabel => '@username';
+
+  @override
   String get linkDisabledDetails => 'Sende lenker er ikke lov i denne samtalen.';
 
   @override
@@ -626,6 +629,9 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
     if (count == 1) return '1 ny tråd';
     return '$count nye tråder';
   }
+
+  @override
+  String get loadingLabel => 'Laster...';
 
   @override
   String get slideToCancelLabel => 'Gli for å avbryte';

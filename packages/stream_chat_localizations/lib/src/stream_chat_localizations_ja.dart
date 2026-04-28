@@ -368,6 +368,9 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   String get slowModeOnLabel => 'スローモードオン';
 
   @override
+  String get commandUsernameLabel => '@username';
+
+  @override
   String get viewLibrary => 'ライブラリを表示';
 
   @override
@@ -624,6 +627,9 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   String newThreadsLabel({required int count}) {
     return '$count 件の新しいスレッド';
   }
+
+  @override
+  String get loadingLabel => '読み込み中...';
 
   @override
   String get slideToCancelLabel => 'スライドでキャンセル';

@@ -389,6 +389,9 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
   String get slowModeOnLabel => 'स्लो मोड चालू';
 
   @override
+  String get commandUsernameLabel => '@username';
+
+  @override
   String get downloadLabel => 'डाउनलोड';
 
   @override
@@ -643,6 +646,9 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
     if (count == 1) return '1 नया थ्रेड';
     return '$count नए थ्रेड्स';
   }
+
+  @override
+  String get loadingLabel => 'लोड हो रहा है...';
 
   @override
   String get slideToCancelLabel => 'रद्द करने के लिए स्लाइड करें';

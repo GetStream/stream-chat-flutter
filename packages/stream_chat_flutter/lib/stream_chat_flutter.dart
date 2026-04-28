@@ -11,6 +11,8 @@ export 'package:stream_core_flutter/stream_core_flutter.dart'
         StreamCheckbox,
         StreamCheckboxSize,
         StreamCheckboxStyle,
+        StreamColorScheme,
+        StreamColorSwatch,
         StreamProgressBarStyle,
         StreamPlaybackSpeedToggleStyle,
         StreamAudioWaveformSlider,
@@ -68,6 +70,7 @@ export 'package:stream_core_flutter/stream_core_flutter.dart'
         StreamStepperThemeData,
         StreamTextInputStyle,
         StreamTextInputTheme,
+        StreamTextInput,
         StreamTextInputThemeData,
         StreamSwitchStyle,
         StreamSwitchTheme,
@@ -75,6 +78,11 @@ export 'package:stream_core_flutter/stream_core_flutter.dart'
         StreamUnicodeEmoji,
         StreamVideoPlayIndicator,
         StreamVideoPlayIndicatorSize,
+        StreamMessageItemTheme,
+        StreamMessageItemThemeData,
+        StreamMessageLayoutProperty,
+        StreamMessageLayoutVisibility,
+        StreamVisibility,
         streamSupportedEmojis;
 
 export 'src/ai_assistant/ai_typing_indicator_view.dart';
@@ -139,6 +147,7 @@ export 'src/message_input/audio_recorder/audio_recorder_state.dart';
 export 'src/message_input/audio_recorder/stream_audio_recorder.dart';
 export 'src/message_input/countdown_button.dart';
 export 'src/message_input/enums.dart';
+export 'src/message_input/message_input_placeholder.dart';
 export 'src/message_input/stream_message_composer_attachment_list.dart';
 export 'src/message_input/stream_message_input.dart';
 export 'src/message_input/stream_message_text_field.dart';

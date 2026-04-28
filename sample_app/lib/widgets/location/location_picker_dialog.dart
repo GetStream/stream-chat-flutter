@@ -57,8 +57,38 @@ class LocationPickerDialog extends StatefulWidget {
   State<LocationPickerDialog> createState() => _LocationPickerDialogState();
 }
 
-class _LocationPickerDialogState extends State<LocationPickerDialog> {
+class _LocationPickerDialogState extends State<LocationPickerDialog> with WidgetsBindingObserver {
   LocationCoordinates? _currentLocation;
+
+  /// After opening app settings, reload location when the user returns.
+  bool _retryLocationAfterResume = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed && _retryLocationAfterResume) {
+      setState(() => _retryLocationAfterResume = false);
+    }
+  }
+
+  Future<void> _openAppSettingsForPermission() async {
+    setState(() => _retryLocationAfterResume = true);
+
+    final wasOpened = await LocationProvider().openLocationSettings();
+    // If we couldn't open location settings, try opening app settings as a fallback.
+    if (!wasOpened) await LocationProvider().openAppSettings();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -85,7 +115,7 @@ class _LocationPickerDialogState extends State<LocationPickerDialog> {
 
               final position = snapshot.data;
               if (snapshot.hasError || position == null) {
-                return const Center(child: LocationNotFound());
+                return Center(child: LocationNotFound(onOpenAppSettings: _openAppSettingsForPermission));
               }
 
               final coordinates = _currentLocation = LocationCoordinates(
@@ -140,36 +170,45 @@ class _LocationPickerDialogState extends State<LocationPickerDialog> {
 }
 
 class LocationNotFound extends StatelessWidget {
-  const LocationNotFound({super.key});
+  const LocationNotFound({
+    super.key,
+    required this.onOpenAppSettings,
+  });
+
+  final VoidCallback onOpenAppSettings;
 
   @override
   Widget build(BuildContext context) {
-    final chatThemeData = StreamChatTheme.of(context);
-    final colorTheme = chatThemeData.colorTheme;
-    final textTheme = chatThemeData.textTheme;
+    final spacing = context.streamSpacing;
+    final textTheme = context.streamTextTheme;
+    final colorScheme = context.streamColorScheme;
 
-    return Column(
-      spacing: 8,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(
-          size: 48,
-          Icons.near_me_disabled_rounded,
-          color: colorTheme.accentError,
-        ),
-        Text(
-          'Something went wrong',
-          style: textTheme.headline.copyWith(
-            color: colorTheme.textHighEmphasis,
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: spacing.lg),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Icon(
+            size: 32,
+            context.streamIcons.location,
+            color: colorScheme.textTertiary,
           ),
-        ),
-        Text(
-          'Please check your location settings and try again.',
-          style: textTheme.body.copyWith(
-            color: colorTheme.textLowEmphasis,
+          SizedBox(height: spacing.xs),
+          Text(
+            'Please enable location access in Settings so you can share your position.',
+            style: textTheme.bodyDefault.copyWith(color: colorScheme.textSecondary),
+            textAlign: TextAlign.center,
           ),
-        ),
-      ],
+          SizedBox(height: spacing.md),
+          StreamButton(
+            type: .outline,
+            style: .secondary,
+            onPressed: onOpenAppSettings,
+            child: const Text('Open Settings'),
+          ),
+        ],
+      ),
     );
   }
 }

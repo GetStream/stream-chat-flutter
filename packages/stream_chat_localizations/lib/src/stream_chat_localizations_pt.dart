@@ -384,6 +384,9 @@ Não é possível adicionar mais de $limit arquivos de uma vez
   String get slowModeOnLabel => 'Modo lento ativado';
 
   @override
+  String get commandUsernameLabel => '@username';
+
+  @override
   String get downloadLabel => 'Download';
 
   @override
@@ -644,6 +647,9 @@ Não é possível adicionar mais de $limit arquivos de uma vez
     if (count == 1) return '1 novo tópico';
     return '$count novos tópicos';
   }
+
+  @override
+  String get loadingLabel => 'Carregando...';
 
   @override
   String get slideToCancelLabel => 'Deslize para cancelar';

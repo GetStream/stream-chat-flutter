@@ -119,6 +119,13 @@ abstract class Translations {
   /// The label for slow mode enabled in [StreamMessageInput]
   String get slowModeOnLabel;
 
+  /// The placeholder shown in the composer when a user-target command (for
+  /// example `/mute`, `/unmute`, `/ban`, `/unban`) is active.
+  ///
+  /// Renders literally, for example as `@username`, to hint that the user
+  /// should select or type a username.
+  String get commandUsernameLabel;
+
   /// The label for instant commands in [StreamMessageInput]
   String get instantCommandsLabel;
 
@@ -560,6 +567,9 @@ abstract class Translations {
 
   /// The label for "$count new threads"
   String newThreadsLabel({required int count});
+
+  /// The label for "Loading..."
+  String get loadingLabel;
 
   /// The label for "Slide to cancel"
   String get slideToCancelLabel;
@@ -1089,6 +1099,9 @@ class DefaultTranslations implements Translations {
   String get slowModeOnLabel => 'Slow mode ON';
 
   @override
+  String get commandUsernameLabel => '@username';
+
+  @override
   String get viewLibrary => 'View library';
 
   @override
@@ -1362,6 +1375,9 @@ Attachment limit exceeded: it's not possible to add more than $limit attachments
     if (count == 1) return '1 new thread';
     return '$count new threads';
   }
+
+  @override
+  String get loadingLabel => 'Loading...';
 
   @override
   String get slideToCancelLabel => 'Slide to cancel';

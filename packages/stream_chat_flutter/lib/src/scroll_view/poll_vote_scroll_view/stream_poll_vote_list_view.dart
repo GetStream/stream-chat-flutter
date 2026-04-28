@@ -6,7 +6,6 @@ import 'package:stream_chat_flutter/src/scroll_view/stream_scroll_view_error_wid
 import 'package:stream_chat_flutter/src/scroll_view/stream_scroll_view_indexed_widget_builder.dart';
 import 'package:stream_chat_flutter/src/scroll_view/stream_scroll_view_load_more_error.dart';
 import 'package:stream_chat_flutter/src/scroll_view/stream_scroll_view_loading_widget.dart';
-import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:stream_core_flutter/stream_core_flutter.dart';
@@ -318,26 +317,14 @@ class StreamPollVoteListView extends StatelessWidget {
           ) ??
           streamPollVoteListTile;
     },
-    emptyBuilder: (context) {
-      final chatThemeData = StreamChatTheme.of(context);
-      return emptyBuilder?.call(context) ??
-          Center(
-            child: Padding(
-              padding: const EdgeInsets.all(8),
-              child: StreamScrollViewEmptyWidget(
-                emptyIcon: Icon(
-                  context.streamIcons.pollLarge,
-                  size: 148,
-                  color: chatThemeData.colorTheme.disabled,
-                ),
-                emptyTitle: Text(
-                  context.translations.noPollVotesLabel,
-                  style: chatThemeData.textTheme.headline,
-                ),
-              ),
-            ),
-          );
-    },
+    emptyBuilder: (context) =>
+        emptyBuilder?.call(context) ??
+        Center(
+          child: StreamScrollViewEmptyWidget(
+            emptyIcon: Icon(context.streamIcons.pollLarge),
+            emptyTitle: Text(context.translations.noPollVotesLabel),
+          ),
+        ),
     loadMoreErrorBuilder: (context, error) => StreamScrollViewLoadMoreError.list(
       onTap: controller.retry,
       error: Text(context.translations.loadingPollVotesError),

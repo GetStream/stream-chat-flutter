@@ -380,6 +380,9 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
   String get slowModeOnLabel => 'Langsamer Modus: EIN';
 
   @override
+  String get commandUsernameLabel => '@username';
+
+  @override
   String get linkDisabledDetails => 'Das Senden von Links ist in dieser Konversation nicht erlaubt.';
 
   @override
@@ -641,6 +644,9 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
     if (count == 1) return '1 neuer Thread';
     return '$count neue Threads';
   }
+
+  @override
+  String get loadingLabel => 'Wird geladen...';
 
   @override
   String get slideToCancelLabel => 'Zum Abbrechen schieben';

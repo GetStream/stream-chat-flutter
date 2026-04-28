@@ -1,26 +1,26 @@
 # Unread Indicator Migration Guide
 
-This guide covers the migration for the unread indicator components in the Stream Chat Flutter SDK design refresh.
+This guide covers the migration for `StreamUnreadIndicator` — the small badge
+that shows an unread count.
 
----
-
-## Table of Contents
-
-- [StreamUnreadIndicator](#streamunreadindicator)
-- [UnreadIndicatorButton](#unreadindicatorbutton)
-- [Migration Checklist](#migration-checklist)
+For the floating jump-to-unread button shown inside `StreamMessageListView`,
+see [unread_indicator_button.md](unread_indicator_button.md).
 
 ---
 
 ## StreamUnreadIndicator
 
-`StreamUnreadIndicator` shows a small badge with an unread count. It now wraps `StreamBadgeNotification` (from `stream_core_flutter`) and the custom styling parameters have been removed.
+`StreamUnreadIndicator` shows a small badge with an unread count. It now wraps
+`StreamBadgeNotification` (from `stream_core_flutter`) and the custom styling
+parameters have been removed.
 
 ### Breaking Changes
 
-- `backgroundColor`, `textColor`, and `textStyle` constructor parameters removed — styling is now controlled via `StreamTheme`
-- The widget is now wrapped in `IgnorePointer`; it does not respond to taps itself
-- Now supports named constructors for different unread count types
+- `backgroundColor`, `textColor`, and `textStyle` constructor parameters
+  removed — styling is now controlled via `StreamTheme`.
+- The widget is now wrapped in `IgnorePointer`; it does not respond to taps
+  itself.
+- Now supports named constructors for different unread count types.
 
 ### Named Constructors
 
@@ -29,6 +29,26 @@ This guide covers the migration for the unread indicator components in the Strea
 | `StreamUnreadIndicator()` | Shows total unread message count |
 | `StreamUnreadIndicator.channels({String? cid})` | Shows unread channel count; optionally filtered to a specific channel by `cid` |
 | `StreamUnreadIndicator.threads({String? id})` | Shows unread thread count |
+
+### Overlay Mode
+
+`StreamUnreadIndicator` can now be overlaid on top of another widget by
+passing a `child`. When `child` is non-null, the badge is positioned over the
+child using `alignment` and `offset`.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `child` | `Widget?` | `null` | Widget to overlay the badge on. When `null`, only the badge is rendered. |
+| `alignment` | `AlignmentGeometry?` | `AlignmentDirectional.topEnd` | Alignment of the badge relative to `child`. |
+| `offset` | `Offset?` | `Offset(8, -6)` (mirrored in RTL) | Pixel offset applied after `alignment`. |
+
+```dart
+// Standalone badge (no child).
+const StreamUnreadIndicator()
+
+// Badge overlaid on an icon.
+StreamUnreadIndicator(child: Icon(Icons.chat_bubble_outline))
+```
 
 ### Migration
 
@@ -43,7 +63,7 @@ StreamUnreadIndicator(
 
 **After:**
 ```dart
-// Styling via StreamTheme — see README.md for theming setup
+// Styling via StreamTheme — see README.md for theming setup.
 StreamUnreadIndicator()
 ```
 
@@ -51,90 +71,13 @@ StreamUnreadIndicator()
 
 ---
 
-## UnreadIndicatorButton
-
-`UnreadIndicatorButton` is the floating button shown inside `StreamMessageListView` to indicate unread messages below. It has been completely redesigned.
-
-### Breaking Changes
-
-#### New layout (40px height Material container):
-- Arrow-up icon → unread count label → vertical divider → dismiss (×) icon
-- Replaces the old simple badge button
-
-#### New callback types
-
-| Type | Signature | Description |
-|------|-----------|-------------|
-| `OnUnreadIndicatorTap` | `Future<void> Function(String? lastReadMessageId)` | Called when the main area is tapped; receives the last-read message ID |
-| `OnUnreadIndicatorDismissTap` | `Future<void> Function()` | Called when the dismiss (×) button is tapped |
-
-Both callbacks are `Future<void>` — ensure your implementations are async-compatible.
-
-#### New `UnreadIndicatorProps` class
-
-A new `UnreadIndicatorProps` class carries configuration through the component factory:
-
-```dart
-class UnreadIndicatorProps {
-  final int unreadCount;
-  final OnUnreadIndicatorTap onTap;
-  final OnUnreadIndicatorDismissTap onDismissTap;
-}
-```
-
-### Constructor Parameters
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `onTap` | `OnUnreadIndicatorTap` | yes | Called when indicator is tapped; receives `lastReadMessageId` |
-| `onDismissTap` | `OnUnreadIndicatorDismissTap` | yes | Called when dismiss button is tapped |
-| `unreadIndicatorBuilder` | `UnreadIndicatorBuilder?` | no | Optional inline builder; takes priority over component factory |
-
-### Migration
-
-**Before:**
-```dart
-UnreadIndicatorButton(
-  onTap: () => _scrollToUnread(),
-  onDismiss: () => _markAllRead(),
-)
-```
-
-**After:**
-```dart
-UnreadIndicatorButton(
-  onTap: (lastReadMessageId) async => _scrollToUnread(lastReadMessageId),
-  onDismissTap: () async => _markAllRead(),
-)
-```
-
-### Customization via Component Factory
-
-To fully replace the unread indicator button, provide a builder for `UnreadIndicatorProps`:
-
-```dart
-StreamComponentFactory(
-  builders: StreamComponentBuilders(
-    extensions: streamChatComponentBuilders(
-      unreadIndicator: (context, props) => MyCustomUnreadButton(
-        count: props.unreadCount,
-        onTap: props.onTap,
-        onDismiss: props.onDismissTap,
-      ),
-    ),
-  ),
-  child: ...,
-)
-```
-
-Alternatively, pass `unreadIndicatorBuilder` directly to `UnreadIndicatorButton` for one-off overrides.
-
----
-
 ## Migration Checklist
 
-- [ ] Remove `backgroundColor`, `textColor`, `textStyle` from `StreamUnreadIndicator` usages
-- [ ] Use the appropriate named constructor (`StreamUnreadIndicator()`, `.channels()`, `.threads()`)
-- [ ] Update `UnreadIndicatorButton` callbacks: `onDismiss` → `onDismissTap`, `onTap` now receives `String? lastReadMessageId`
-- [ ] Make callback implementations `async` (return `Future<void>`)
-- [ ] Move custom indicator layouts to `StreamComponentFactory` or `unreadIndicatorBuilder`
+- [ ] Remove `backgroundColor`, `textColor`, `textStyle` from
+      `StreamUnreadIndicator` usages.
+- [ ] Use the appropriate named constructor (`StreamUnreadIndicator()`,
+      `.channels()`, `.threads()`).
+- [ ] If overlaying the badge on an icon or button, pass it as `child` instead
+      of wrapping `StreamUnreadIndicator` in a `Stack`.
+- [ ] For the floating jump-to-unread button inside `StreamMessageListView`,
+      follow [unread_indicator_button.md](unread_indicator_button.md).

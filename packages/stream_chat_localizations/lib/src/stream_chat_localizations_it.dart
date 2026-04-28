@@ -394,6 +394,9 @@ Attenzione: il limite massimo di $limit file è stato superato.
   String get slowModeOnLabel => 'Slowmode attiva';
 
   @override
+  String get commandUsernameLabel => '@username';
+
+  @override
   String get downloadLabel => 'Scaricamento';
 
   @override
@@ -650,6 +653,9 @@ Attenzione: il limite massimo di $limit file è stato superato.
     if (count == 1) return '1 nuovo thread';
     return '$count nuovi thread';
   }
+
+  @override
+  String get loadingLabel => 'Caricamento...';
 
   @override
   String get slideToCancelLabel => 'Scorri per annullare';

@@ -1,0 +1,5 @@
+# The existence of this file prevents warnings about unrecognized tags when running Alchemist tests.
+
+tags:
+  golden:
+    timeout: 15s
