@@ -42,7 +42,7 @@ Widget _buildVoiceRecordingMessageInputScaffold({
           body: Column(
             children: [
               Expanded(child: Container()),
-              StreamChatMessageComposer(enableVoiceRecording: true),
+              StreamMessageComposer(enableVoiceRecording: true),
             ],
           ),
         ),
@@ -111,7 +111,7 @@ Widget _buildVoiceRecordingContextScaffold({
                   ],
                 ),
               ),
-              StreamChatMessageComposer(enableVoiceRecording: true),
+              StreamMessageComposer(enableVoiceRecording: true),
             ],
           ),
         ),

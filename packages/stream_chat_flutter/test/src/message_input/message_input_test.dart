@@ -25,7 +25,7 @@ void main() {
     (WidgetTester tester) async {
       await tester.pumpWidget(
         buildWidget(
-          StreamChatMessageComposer(),
+          StreamMessageComposer(),
         ),
       );
 
@@ -99,7 +99,7 @@ void main() {
             child: StreamChannel(
               channel: channel,
               child: Scaffold(
-                body: StreamChatMessageComposer(),
+                body: StreamMessageComposer(),
               ),
             ),
           ),
@@ -152,7 +152,7 @@ void main() {
               child: StreamChannel(
                 channel: channel,
                 child: Scaffold(
-                  bottomNavigationBar: StreamChatMessageComposer(),
+                  bottomNavigationBar: StreamMessageComposer(),
                 ),
               ),
             ),
@@ -194,7 +194,7 @@ void main() {
               child: StreamChannel(
                 channel: channel,
                 child: Scaffold(
-                  bottomNavigationBar: StreamChatMessageComposer(),
+                  bottomNavigationBar: StreamMessageComposer(),
                 ),
               ),
             ),
@@ -242,7 +242,7 @@ void main() {
               child: StreamChannel(
                 channel: channel,
                 child: Scaffold(
-                  bottomNavigationBar: StreamChatMessageComposer(
+                  bottomNavigationBar: StreamMessageComposer(
                     controller: messageInputController,
                     onQuotedMessageCleared: () {
                       onQuotedMessageClearedCalled = true;
@@ -291,7 +291,7 @@ void main() {
               child: StreamChannel(
                 channel: channel,
                 child: Scaffold(
-                  bottomNavigationBar: StreamChatMessageComposer(
+                  bottomNavigationBar: StreamMessageComposer(
                     controller: messageInputController,
                     onQuotedMessageCleared: () {
                       onQuotedMessageClearedCalled = true;
@@ -388,7 +388,7 @@ void main() {
               child: StreamChannel(
                 channel: channel,
                 child: Scaffold(
-                  bottomNavigationBar: StreamChatMessageComposer(
+                  bottomNavigationBar: StreamMessageComposer(
                     key: key,
                     controller: messageInputController,
                   ),
@@ -432,7 +432,7 @@ void main() {
               child: StreamChannel(
                 channel: channel,
                 child: Scaffold(
-                  bottomNavigationBar: StreamChatMessageComposer(
+                  bottomNavigationBar: StreamMessageComposer(
                     key: key,
                     controller: messageInputController,
                   ),
@@ -501,7 +501,7 @@ void main() {
               child: StreamChannel(
                 channel: channel,
                 child: Scaffold(
-                  bottomNavigationBar: StreamChatMessageComposer(
+                  bottomNavigationBar: StreamMessageComposer(
                     canAlsoSendToChannelFromThread: false,
                   ),
                 ),
@@ -527,7 +527,7 @@ void main() {
               child: StreamChannel(
                 channel: channel,
                 child: Scaffold(
-                  bottomNavigationBar: StreamChatMessageComposer(),
+                  bottomNavigationBar: StreamMessageComposer(),
                 ),
               ),
             ),
@@ -556,7 +556,7 @@ void main() {
               child: StreamChannel(
                 channel: channel,
                 child: Scaffold(
-                  bottomNavigationBar: StreamChatMessageComposer(
+                  bottomNavigationBar: StreamMessageComposer(
                     controller: messageInputController,
                   ),
                 ),
@@ -592,7 +592,7 @@ void main() {
               child: StreamChannel(
                 channel: channel,
                 child: Scaffold(
-                  bottomNavigationBar: StreamChatMessageComposer(
+                  bottomNavigationBar: StreamMessageComposer(
                     controller: messageInputController,
                   ),
                 ),
@@ -681,7 +681,7 @@ void main() {
                 child: StreamChannel(
                   channel: channel,
                   child: Scaffold(
-                    bottomNavigationBar: StreamChatMessageComposer(
+                    bottomNavigationBar: StreamMessageComposer(
                       controller: controller,
                       onQuotedMessageCleared: () {
                         onQuotedMessageClearedCalled = true;
@@ -733,7 +733,7 @@ void main() {
                 child: StreamChannel(
                   channel: channel,
                   child: Scaffold(
-                    bottomNavigationBar: StreamChatMessageComposer(
+                    bottomNavigationBar: StreamMessageComposer(
                       controller: controller,
                       onQuotedMessageCleared: () {
                         onQuotedMessageClearedCalled = true;
@@ -783,7 +783,7 @@ void main() {
                 child: StreamChannel(
                   channel: channel,
                   child: Scaffold(
-                    bottomNavigationBar: StreamChatMessageComposer(
+                    bottomNavigationBar: StreamMessageComposer(
                       controller: controller,
                     ),
                   ),
@@ -835,7 +835,7 @@ void main() {
                 child: StreamChannel(
                   channel: channel,
                   child: Scaffold(
-                    bottomNavigationBar: StreamChatMessageComposer(
+                    bottomNavigationBar: StreamMessageComposer(
                       controller: controller,
                     ),
                   ),
@@ -881,7 +881,7 @@ void main() {
                 child: StreamChannel(
                   channel: channel,
                   child: Scaffold(
-                    bottomNavigationBar: StreamChatMessageComposer(
+                    bottomNavigationBar: StreamMessageComposer(
                       controller: controller,
                     ),
                   ),
@@ -929,7 +929,7 @@ void main() {
                 child: StreamChannel(
                   channel: channel,
                   child: Scaffold(
-                    bottomNavigationBar: StreamChatMessageComposer(
+                    bottomNavigationBar: StreamMessageComposer(
                       controller: controller,
                     ),
                   ),
@@ -973,7 +973,7 @@ void main() {
                 child: StreamChannel(
                   channel: channel,
                   child: Scaffold(
-                    bottomNavigationBar: StreamChatMessageComposer(
+                    bottomNavigationBar: StreamMessageComposer(
                       controller: controller,
                     ),
                   ),
@@ -1017,7 +1017,7 @@ void main() {
                 child: StreamChannel(
                   channel: channel,
                   child: Scaffold(
-                    bottomNavigationBar: StreamChatMessageComposer(
+                    bottomNavigationBar: StreamMessageComposer(
                       controller: controller,
                     ),
                   ),
@@ -1043,7 +1043,7 @@ void main() {
   });
 }
 
-MaterialApp buildWidget(StreamChatMessageComposer input) {
+MaterialApp buildWidget(StreamMessageComposer input) {
   final client = MockClient();
   final clientState = MockClientState();
   final channel = MockChannel();

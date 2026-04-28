@@ -256,7 +256,7 @@ class _ChannelPageState extends State<ChannelPage> {
               swipeToReply: true,
             ),
           ),
-          StreamChatMessageComposer(
+          StreamMessageComposer(
             enableVoiceRecording: true,
             onQuotedMessageCleared: messageInputController.clearQuotedMessage,
             focusNode: focusNode,
@@ -303,7 +303,7 @@ class ThreadPage extends StatelessWidget {
               parentMessage: parent,
             ),
           ),
-          StreamChatMessageComposer(
+          StreamMessageComposer(
             enableVoiceRecording: true,
             controller: StreamMessageComposerController(
               message: Message(parentId: parent.id),

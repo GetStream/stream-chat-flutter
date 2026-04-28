@@ -16,7 +16,7 @@ import 'package:stream_chat_flutter/src/message_input/dm_checkbox_list_tile.dart
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_core_flutter/stream_core_flutter.dart' as core;
 
-/// Different types of hints that can be shown in [StreamChatMessageComposer].
+/// Different types of hints that can be shown in [StreamMessageComposer].
 enum HintType {
   /// Shown when a 'giphy' command is active.
   searchGif,
@@ -31,7 +31,7 @@ enum HintType {
   writeAMessage,
 }
 
-/// Function that returns the hint text for [StreamChatMessageComposer].
+/// Function that returns the hint text for [StreamMessageComposer].
 typedef HintGetter = String? Function(BuildContext context, HintType type);
 
 /// Predicate that determines whether a [KeyEvent] should trigger an action.
@@ -46,9 +46,9 @@ typedef KeyEventPredicate = bool Function(FocusNode node, KeyEvent event);
 ///
 /// Create via the default constructor, which accepts a [MessageComposerProps].
 /// Sub-components can be customised through the [StreamComponentFactory].
-class StreamChatMessageComposer extends StatefulWidget {
-  /// Creates a [StreamChatMessageComposer].
-  StreamChatMessageComposer({
+class StreamMessageComposer extends StatefulWidget {
+  /// Creates a [StreamMessageComposer].
+  StreamMessageComposer({
     super.key,
     StreamMessageComposerController? controller,
     this.onMessageSent,
@@ -253,15 +253,15 @@ class StreamChatMessageComposer extends StatefulWidget {
   static bool _defaultOgPreviewFilter(Uri matchedUri, String messageText) => true;
 
   @override
-  State<StreamChatMessageComposer> createState() => _StreamChatMessageComposerState();
+  State<StreamMessageComposer> createState() => _StreamMessageComposerState();
 }
 
 // ---------------------------------------------------------------------------
 // State
 // ---------------------------------------------------------------------------
 
-class _StreamChatMessageComposerState extends State<StreamChatMessageComposer>
-    with RestorationMixin<StreamChatMessageComposer>, SingleTickerProviderStateMixin {
+class _StreamMessageComposerState extends State<StreamMessageComposer>
+    with RestorationMixin<StreamMessageComposer>, SingleTickerProviderStateMixin {
   // ---- Controller ----
 
   StreamMessageComposerController get _effectiveController =>
@@ -363,7 +363,7 @@ class _StreamChatMessageComposerState extends State<StreamChatMessageComposer>
   }
 
   @override
-  void didUpdateWidget(covariant StreamChatMessageComposer oldWidget) {
+  void didUpdateWidget(covariant StreamMessageComposer oldWidget) {
     super.didUpdateWidget(oldWidget);
 
     if (widget.controller == null && oldWidget.controller != null) {
@@ -591,7 +591,7 @@ class _StreamChatMessageComposerState extends State<StreamChatMessageComposer>
   ) {
     final audioController = widget.enableVoiceRecording ? _effectiveAudioRecorderController : null;
     if (audioController == null) {
-      return DefaultStreamChatMessageComposer(
+      return DefaultStreamMessageComposer(
         props: _buildComponentProps(controller, currentUserId, focusNode, const RecordStateIdle()),
         inputController: controller,
         isFloating: widget.isFloating,
@@ -637,7 +637,7 @@ class _StreamChatMessageComposerState extends State<StreamChatMessageComposer>
           ),
           visible: state is RecordStateRecording,
           portalFollower: SwipeToLockButton(isLocked: state is RecordStateRecordingLocked),
-          child: DefaultStreamChatMessageComposer(
+          child: DefaultStreamMessageComposer(
             props: _buildComponentProps(controller, currentUserId, focusNode, state),
             inputController: controller,
             isFloating: widget.isFloating,
@@ -1082,9 +1082,9 @@ extension on StreamAudioRecorderController {
 ///
 /// Delegates to [core.StreamCoreMessageComposer] with the chat-specific
 /// sub-components wired in.
-class DefaultStreamChatMessageComposer extends StatelessWidget {
-  /// Creates a [DefaultStreamChatMessageComposer].
-  const DefaultStreamChatMessageComposer({
+class DefaultStreamMessageComposer extends StatelessWidget {
+  /// Creates a [DefaultStreamMessageComposer].
+  const DefaultStreamMessageComposer({
     super.key,
     required this.props,
     required this.inputController,

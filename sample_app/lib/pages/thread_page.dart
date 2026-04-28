@@ -65,7 +65,7 @@ class _ThreadPageState extends State<ThreadPage> {
             ),
           ),
           if (widget.parent.type != 'deleted')
-            StreamChatMessageComposer(
+            StreamMessageComposer(
               focusNode: _focusNode,
               controller: _messageInputController,
               enableVoiceRecording: true,

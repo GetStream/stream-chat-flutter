@@ -8,7 +8,7 @@ This guide covers the migration for the message composer components in the Strea
 
 - [Overview](#overview)
 - [StreamMessageInput](#streammessageinput)
-- [StreamChatMessageComposer (new)](#streamchatmessagecomposer-new)
+- [StreamMessageComposer (new)](#streamchatmessagecomposer-new)
 - [Attachment Customization](#attachment-customization)
 - [Migration Checklist](#migration-checklist)
 
@@ -21,9 +21,9 @@ There are two distinct composer components with different responsibilities:
 | Component | Responsibility |
 |-----------|---------------|
 | `StreamMessageInput` | Full-featured widget: handles sending, editing, attachments, autocomplete, mentions, commands, OG previews, voice recording flow, etc. |
-| `StreamChatMessageComposer` | UI-only component: renders the composer layout using design system primitives. No business logic. |
+| `StreamMessageComposer` | UI-only component: renders the composer layout using design system primitives. No business logic. |
 
-`StreamMessageInput` wraps `StreamChatMessageComposer` for its visual layer. If you are using `StreamMessageInput` today, it remains the right choice — it is not deprecated. `StreamChatMessageComposer` exists for cases where you want to build your own message-sending logic and use the new design system UI.
+`StreamMessageInput` wraps `StreamMessageComposer` for its visual layer. If you are using `StreamMessageInput` today, it remains the right choice — it is not deprecated. `StreamMessageComposer` exists for cases where you want to build your own message-sending logic and use the new design system UI.
 
 ---
 
@@ -87,7 +87,7 @@ Many parameters that existed in older versions of `StreamMessageInput` have been
 
 #### Layout and visual parameters
 
-These parameters have been removed. The composer layout is now fully owned by `StreamChatMessageComposer` and its sub-components, customizable via `StreamComponentFactory`.
+These parameters have been removed. The composer layout is now fully owned by `StreamMessageComposer` and its sub-components, customizable via `StreamComponentFactory`.
 
 | Removed parameter | Migration path |
 |-------------------|---------------|
@@ -138,13 +138,13 @@ These parameters have been removed. Attachment rendering in the composer input h
 
 Previously, the attachment button was always rendered (though inactive) when `disableAttachments: true` was set. The button is now fully hidden (removed from the layout) when no attachment callback is wired up. When you pass `disableAttachments: true` to `StreamMessageInput`, the attachment button no longer appears at all.
 
-If you are using `StreamChatMessageComposer` directly, the button hides when `onAttachmentButtonPressed` is `null`.
+If you are using `StreamMessageComposer` directly, the button hides when `onAttachmentButtonPressed` is `null`.
 
 ---
 
-## StreamChatMessageComposer (new)
+## StreamMessageComposer (new)
 
-`StreamChatMessageComposer` is a pure UI component from the new design system. It renders the composer layout but contains no message-sending logic — your code is responsible for wiring up the controller and callbacks.
+`StreamMessageComposer` is a pure UI component from the new design system. It renders the composer layout but contains no message-sending logic — your code is responsible for wiring up the controller and callbacks.
 
 Use this when you want the new design system visuals with custom business logic. If you want the full out-of-the-box experience (send, edit, attachments, mentions, commands, etc.), use `StreamMessageInput` instead.
 
@@ -278,5 +278,5 @@ The following public widgets are provided as building blocks for custom attachme
 - [ ] Replace attachment list builder params (`attachmentListBuilder`, `fileAttachmentListBuilder`, `mediaAttachmentListBuilder`, `voiceRecordingAttachmentListBuilder`) with the `messageComposerAttachmentList` builder in `StreamComponentFactory`
 - [ ] Replace attachment item builder params (`fileAttachmentBuilder`, `mediaAttachmentBuilder`, `voiceRecordingAttachmentBuilder`) with the `messageComposerAttachment` builder in `StreamComponentFactory`
 - [ ] Replace `quotedMessageBuilder` / `quotedMessageAttachmentThumbnailBuilders` with `messageComposerInputHeader` or `messageComposerAttachment` overrides in `StreamComponentFactory`
-- [ ] If adopting `StreamChatMessageComposer` directly, wire up your own send/attachment logic via `onSendPressed` and `onAttachmentButtonPressed`
+- [ ] If adopting `StreamMessageComposer` directly, wire up your own send/attachment logic via `onSendPressed` and `onAttachmentButtonPressed`
 - [ ] Move any composer UI customizations to `StreamComponentFactory`

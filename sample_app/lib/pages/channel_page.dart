@@ -138,7 +138,7 @@ class _ChannelPageState extends State<ChannelPage> {
               final locationEnabled =
                   appConfig.enableLocationSharing && config?.sharedLocations == true && channel.canShareLocation;
 
-              return StreamChatMessageComposer(
+              return StreamMessageComposer(
                 focusNode: _focusNode,
                 controller: _messageInputController,
                 onQuotedMessageCleared: _messageInputController.clearQuotedMessage,

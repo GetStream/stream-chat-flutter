@@ -27,7 +27,7 @@ Widget _buildMessageInputScaffold({
           body: Column(
             children: [
               Expanded(child: Container()),
-              messageComposer ?? StreamChatMessageComposer(),
+              messageComposer ?? StreamMessageComposer(),
             ],
           ),
         ),
@@ -104,7 +104,7 @@ void main() {
               body: Column(
                 children: [
                   const Expanded(child: SizedBox()),
-                  StreamChatMessageComposer(controller: controller),
+                  StreamMessageComposer(controller: controller),
                 ],
               ),
             ),
@@ -144,7 +144,7 @@ void main() {
       return _buildMessageInputScaffold(
         client: client,
         channel: channel,
-        messageComposer: StreamChatMessageComposer(controller: controller),
+        messageComposer: StreamMessageComposer(controller: controller),
       );
     },
   );

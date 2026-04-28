@@ -139,7 +139,7 @@ class ChannelPage extends StatelessWidget {
           Expanded(
             child: StreamMessageListView(),
           ),
-          StreamChatMessageComposer(),
+          StreamMessageComposer(),
         ],
       ),
     );
