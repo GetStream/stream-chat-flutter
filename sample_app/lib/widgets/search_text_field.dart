@@ -10,84 +10,37 @@ class SearchTextField extends StatelessWidget {
     this.onChanged,
     this.onTap,
     this.hintText = 'Search',
-    this.showCloseButton = true,
   });
+
   final TextEditingController? controller;
   final ValueChanged<String>? onChanged;
   final String hintText;
   final VoidCallback? onTap;
-  final bool showCloseButton;
 
   @override
   Widget build(BuildContext context) {
+    final radius = context.streamRadius;
     final spacing = context.streamSpacing;
     final colorScheme = context.streamColorScheme;
-    final textTheme = context.streamTextTheme;
 
-    return Container(
-      height: 44,
-      decoration: BoxDecoration(
-        color: Colors.transparent,
-        border: Border.all(
-          color: colorScheme.borderDefault,
-        ),
-        borderRadius: BorderRadius.circular(24),
-      ),
-      margin: EdgeInsets.only(
+    return Padding(
+      padding: .directional(
+        start: spacing.md,
+        end: spacing.md,
         top: spacing.md,
         bottom: spacing.xs,
-        left: spacing.md,
-        right: spacing.md,
       ),
-      child: Row(
-        children: [
-          Expanded(
-            child: TextField(
-              onTap: onTap,
-              controller: controller,
-              onChanged: onChanged,
-              decoration: InputDecoration(
-                prefixIconConstraints: BoxConstraints.tight(const Size(36, 24)),
-                prefixIcon: Padding(
-                  padding: .directional(start: spacing.md),
-                  child: Icon(
-                    context.streamIcons.search,
-                    color: colorScheme.textTertiary,
-                    size: 20,
-                  ),
-                ),
-                hintText: hintText,
-                hintStyle: textTheme.bodyDefault.copyWith(
-                  color: colorScheme.textTertiary,
-                ),
-                border: OutlineInputBorder(
-                  borderSide: BorderSide.none,
-                  borderRadius: BorderRadius.circular(24),
-                ),
-              ),
-            ),
-          ),
-          if (showCloseButton)
-            Material(
-              color: Colors.transparent,
-              child: IconButton(
-                color: colorScheme.textTertiary,
-                padding: EdgeInsets.zero,
-                icon: Icon(context.streamIcons.xCircle, size: 20),
-                splashRadius: 24,
-                onPressed: () {
-                  if (controller!.text.isNotEmpty) {
-                    Future.microtask(
-                      () => [
-                        controller!.clear(),
-                        if (onChanged != null) onChanged!(''),
-                      ],
-                    );
-                  }
-                },
-              ),
-            ),
-        ],
+      child: StreamTextInput(
+        hintText: hintText,
+        onTap: onTap,
+        controller: controller,
+        onChanged: onChanged,
+        textAlignVertical: .center,
+        leading: Icon(context.streamIcons.search),
+        style: StreamTextInputStyle(
+          borderRadius: .all(radius.max),
+          focusBorder: BorderSide(color: colorScheme.borderDefault),
+        ),
       ),
     );
   }

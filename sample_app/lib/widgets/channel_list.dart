@@ -94,7 +94,6 @@ class _ChannelList extends State<ChannelList> {
             SliverToBoxAdapter(
               child: SearchTextField(
                 controller: _controller,
-                showCloseButton: _isSearchActive,
                 hintText: 'Search',
               ),
             ),
