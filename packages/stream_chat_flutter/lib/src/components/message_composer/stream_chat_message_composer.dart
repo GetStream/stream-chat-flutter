@@ -161,9 +161,7 @@ class _StreamChatMessageComposerState extends State<StreamChatMessageComposer> {
             follower: Alignment.bottomCenter,
             offset: Offset(0, -streamSpacing.md),
           ),
-          portalFollower: showIdleTooltip
-              ? HoldToRecordInfoTooltip(message: idleMessage)
-              : const SizedBox.shrink(),
+          portalFollower: showIdleTooltip ? HoldToRecordInfoTooltip(message: idleMessage) : const SizedBox.shrink(),
           child: PortalTarget(
             anchor: Aligned(
               target: targetAlignment.resolve(textDirection),
