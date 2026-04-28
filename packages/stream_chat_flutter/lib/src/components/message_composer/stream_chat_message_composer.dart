@@ -151,19 +151,31 @@ class _StreamChatMessageComposerState extends State<StreamChatMessageComposer> {
         const targetAlignment = AlignmentDirectional.topEnd;
         const followerAlignment = AlignmentDirectional.bottomEnd;
 
+        final idleMessage = state is RecordStateIdle ? state.message : null;
+        final showIdleTooltip = idleMessage != null && idleMessage.isNotEmpty;
+
         return PortalTarget(
+          visible: showIdleTooltip,
           anchor: Aligned(
-            target: targetAlignment.resolve(textDirection),
-            follower: followerAlignment.resolve(textDirection),
-            offset: Offset(-streamSpacing.md, -streamSpacing.md).directional(textDirection),
+            target: Alignment.topCenter,
+            follower: Alignment.bottomCenter,
+            offset: Offset(0, -streamSpacing.md),
           ),
-          visible: state is RecordStateRecording,
-          portalFollower: SwipeToLockButton(isLocked: state is RecordStateRecordingLocked),
-          child: DefaultStreamChatMessageComposer(
-            props: widget.props,
-            inputController: _controller,
-            audioRecorderState: state,
-            body: body,
+          portalFollower: showIdleTooltip ? HoldToRecordInfoTooltip(message: idleMessage) : const SizedBox.shrink(),
+          child: PortalTarget(
+            anchor: Aligned(
+              target: targetAlignment.resolve(textDirection),
+              follower: followerAlignment.resolve(textDirection),
+              offset: Offset(-streamSpacing.md, -streamSpacing.md).directional(textDirection),
+            ),
+            visible: state is RecordStateRecording,
+            portalFollower: SwipeToLockButton(isLocked: state is RecordStateRecordingLocked),
+            child: DefaultStreamChatMessageComposer(
+              props: widget.props,
+              inputController: _controller,
+              audioRecorderState: state,
+              body: body,
+            ),
           ),
         );
       },

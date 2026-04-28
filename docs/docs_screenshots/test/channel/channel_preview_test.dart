@@ -2,6 +2,7 @@ import 'package:alchemist/alchemist.dart';
 import 'package:device_preview/device_preview.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import '../src/golden_client_stubs.dart';
@@ -194,6 +195,166 @@ void main() {
                   ),
                 ),
               ],
+            ),
+          ),
+        ),
+      );
+    },
+  );
+
+  goldenTest(
+    'slidable channel list with header',
+    fileName: 'slidable_channel_list',
+    constraints: const BoxConstraints.tightFor(width: 430, height: 932),
+    builder: () {
+      final client = MockClient();
+      final clientState = MockClientState();
+      when(() => client.state).thenReturn(clientState);
+      when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id', name: 'Alice'));
+
+      final channels = [
+        fakeChannel(
+          client: client,
+          id: 'general',
+          name: 'General',
+          messages: [
+            Message(
+              id: 'msg-1',
+              text: 'Hey, how is everyone doing?',
+              user: User(id: 'user-2', name: 'Bob'),
+              createdAt: DateTime(2024, 6, 1, 10, 30),
+            ),
+          ],
+          unreadCount: 2,
+        ),
+        fakeChannel(
+          client: client,
+          id: 'design',
+          name: 'Design',
+          messages: [
+            Message(
+              id: 'msg-2',
+              text: 'New mockups are ready!',
+              user: User(id: 'user-3', name: 'Carol'),
+              createdAt: DateTime(2024, 6, 1, 9, 15),
+            ),
+          ],
+        ),
+        fakeChannel(
+          client: client,
+          id: 'random',
+          name: 'Random',
+          messages: [
+            Message(
+              id: 'msg-3',
+              text: 'Anyone up for lunch?',
+              user: User(id: 'user-4', name: 'Dave'),
+              createdAt: DateTime(2024, 5, 31, 12, 0),
+            ),
+          ],
+        ),
+        fakeChannel(
+          client: client,
+          id: 'engineering',
+          name: 'Engineering',
+          messages: [
+            Message(
+              id: 'msg-4',
+              text: 'PR #42 is ready for review',
+              user: User(id: 'user-5', name: 'Eve'),
+              createdAt: DateTime(2024, 5, 30, 15, 45),
+            ),
+          ],
+        ),
+      ];
+
+      final controller = StreamChannelListController.fromValue(
+        PagedValue(items: channels),
+        client: client,
+      );
+
+      stubQueryChannelsForGoldens(client, channels);
+
+      return DeviceFrame(
+        device: Devices.ios.iPhone13,
+        isFrameVisible: true,
+        screen: MaterialApp(
+          theme: docsScreenshotsTheme(),
+          debugShowCheckedModeBanner: false,
+          home: StreamChat(
+            client: client,
+            streamChatThemeData: docsStreamChatThemeData(),
+            connectivityStream: Stream.value([ConnectivityResult.mobile]),
+            child: Builder(
+              builder: (context) {
+                final chatTheme = StreamChatTheme.of(context);
+                final backgroundColor = chatTheme.colorTheme.inputBg;
+                return Scaffold(
+                  appBar: const StreamChannelListHeader(),
+                  body: Column(
+                    children: [
+                      // First channel shown swiped to reveal slidable actions
+                      SizedBox(
+                        height: 80,
+                        child: Stack(
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                SizedBox(
+                                  width: 80,
+                                  height: 80,
+                                  child: ColoredBox(
+                                    color: backgroundColor,
+                                    child: const Column(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Icon(Icons.more_horiz),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(
+                                  width: 80,
+                                  height: 80,
+                                  child: ColoredBox(
+                                    color: backgroundColor,
+                                    child: Column(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Icon(
+                                          Icons.delete_outline,
+                                          color: chatTheme.colorTheme.accentError,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Transform.translate(
+                              offset: const Offset(-160, 0),
+                              child: ColoredBox(
+                                color: Colors.white,
+                                child: StreamChannelListItem(channel: channels[0]),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Expanded(
+                        child: StreamChannelListView(
+                          controller: StreamChannelListController.fromValue(
+                            PagedValue(items: channels.sublist(1)),
+                            client: client,
+                          ),
+                          shrinkWrap: true,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
             ),
           ),
         ),

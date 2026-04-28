@@ -3,6 +3,7 @@ export 'package:photo_manager/photo_manager.dart' show ThumbnailSize, ThumbnailF
 export 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 export 'package:stream_core_flutter/stream_core_flutter.dart'
     show
+        StreamAudioWaveformThemeData,
         StreamAvatarGroupSize,
         StreamAvatarSize,
         StreamAvatarStackSize,
