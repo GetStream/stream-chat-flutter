@@ -11,24 +11,6 @@ import 'package:stream_chat_flutter/src/components/message_composer/message_comp
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_core_flutter/stream_core_flutter.dart' as core;
 
-/// Different types of hints that can be shown in [StreamMessageComposer].
-enum HintType {
-  /// Shown when a 'giphy' command is active.
-  searchGif,
-
-  /// Shown when the composer has attachments and no other hint applies.
-  addACommentOrSend,
-
-  /// Shown when slow mode is active.
-  slowModeOn,
-
-  /// Default hint.
-  writeAMessage,
-}
-
-/// Function that returns the hint text for [StreamMessageComposer].
-typedef HintGetter = String? Function(BuildContext context, HintType type);
-
 /// Predicate that determines whether a [KeyEvent] should trigger an action.
 typedef KeyEventPredicate = bool Function(FocusNode node, KeyEvent event);
 
@@ -69,7 +51,7 @@ class StreamMessageComposer extends StatelessWidget {
     this.enableMentionsOverlay = true,
     this.onQuotedMessageCleared,
     this.ogPreviewFilter = _defaultOgPreviewFilter,
-    this.hintGetter = _defaultHintGetter,
+    this.placeholderBuilder = _defaultPlaceholderBuilder,
     this.useSystemAttachmentPicker = false,
     this.pollConfig,
     this.attachmentPickerOptionsBuilder,
@@ -162,8 +144,27 @@ class StreamMessageComposer extends StatelessWidget {
   /// Filter determining whether a URL should show an OG preview.
   final OgPreviewFilter ogPreviewFilter;
 
-  /// Returns the hint text for a given [HintType].
-  final HintGetter hintGetter;
+  /// Resolves the placeholder text shown inside the input field.
+  ///
+  /// Receives the current [MessageInputPlaceholder] state (resolved from the
+  /// active [StreamMessageComposerController]) and returns the string to display.
+  /// Override this callback to provide custom placeholders for
+  /// backend-defined commands or any other input state — pattern-match
+  /// exhaustively over the sealed [MessageInputPlaceholder] cases:
+  ///
+  /// ```dart
+  /// placeholderBuilder: (context, placeholder) {
+  ///   final translations = context.translations;
+  ///   return switch (placeholder) {
+  ///     SlowModePlaceholder() => translations.slowModeOnLabel,
+  ///     CommandPlaceholder(command: 'weather') => 'Type a city name',
+  ///     CommandPlaceholder() => translations.writeAMessageLabel,
+  ///     AttachmentsPlaceholder() => translations.addACommentOrSendLabel,
+  ///     WriteMessagePlaceholder() => translations.writeAMessageLabel,
+  ///   };
+  /// }
+  /// ```
+  final MessageInputPlaceholderBuilder placeholderBuilder;
 
   /// Use the system attachment picker instead of the inline one.
   final bool useSystemAttachmentPicker;
@@ -218,11 +219,18 @@ class StreamMessageComposer extends StatelessWidget {
     return event.logicalKey == LogicalKeyboardKey.escape && event is KeyDownEvent;
   }
 
-  static String? _defaultHintGetter(BuildContext context, HintType type) => switch (type) {
-    HintType.searchGif => context.translations.searchGifLabel,
-    HintType.slowModeOn => context.translations.slowModeOnLabel,
-    HintType.addACommentOrSend || HintType.writeAMessage => context.translations.writeAMessageLabel,
-  };
+  static String? _defaultPlaceholderBuilder(
+    BuildContext context,
+    MessageInputPlaceholder placeholder,
+  ) {
+    final translations = context.translations;
+    return switch (placeholder) {
+      SlowModePlaceholder() => translations.slowModeOnLabel,
+      CommandPlaceholder(command: 'giphy') => translations.searchGifLabel,
+      CommandPlaceholder(command: 'mute' || 'unmute' || 'ban' || 'unban') => translations.commandUsernameLabel,
+      CommandPlaceholder() || AttachmentsPlaceholder() || WriteMessagePlaceholder() => translations.writeAMessageLabel,
+    };
+  }
 
   static bool _defaultOgPreviewFilter(Uri matchedUri, String messageText) => true;
 
@@ -269,7 +277,7 @@ class MessageComposerProps {
     this.enableMentionsOverlay = true,
     this.onQuotedMessageCleared,
     this.ogPreviewFilter = StreamMessageComposer._defaultOgPreviewFilter,
-    this.hintGetter = StreamMessageComposer._defaultHintGetter,
+    this.placeholderBuilder = StreamMessageComposer._defaultPlaceholderBuilder,
     this.useSystemAttachmentPicker = false,
     this.pollConfig,
     this.attachmentPickerOptionsBuilder,
@@ -311,7 +319,7 @@ class MessageComposerProps {
     enableMentionsOverlay: widget.enableMentionsOverlay,
     onQuotedMessageCleared: widget.onQuotedMessageCleared,
     ogPreviewFilter: widget.ogPreviewFilter,
-    hintGetter: widget.hintGetter,
+    placeholderBuilder: widget.placeholderBuilder,
     useSystemAttachmentPicker: widget.useSystemAttachmentPicker,
     pollConfig: widget.pollConfig,
     attachmentPickerOptionsBuilder: widget.attachmentPickerOptionsBuilder,
@@ -399,8 +407,10 @@ class MessageComposerProps {
   /// Filter determining whether a URL should show an OG preview.
   final OgPreviewFilter ogPreviewFilter;
 
-  /// Returns the hint text for a given [HintType].
-  final HintGetter hintGetter;
+  /// Resolves the placeholder text shown inside the input field.
+  ///
+  /// See [StreamMessageComposer.placeholderBuilder].
+  final MessageInputPlaceholderBuilder placeholderBuilder;
 
   /// Use the system attachment picker instead of the inline one.
   final bool useSystemAttachmentPicker;
@@ -887,7 +897,7 @@ class _DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompo
       audioRecorderController: widget.props.enableVoiceRecording ? _effectiveAudioRecorderController : null,
       voiceRecordingFeedback: widget.props.voiceRecordingFeedback,
       sendVoiceRecordingAutomatically: widget.props.sendVoiceRecordingAutomatically,
-      placeholder: _getHint(context) ?? '',
+      placeholder: _buildPlaceholder(context),
     );
   }
 
@@ -1060,20 +1070,11 @@ class _DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompo
     widget.props.onError?.call(error.error, error.stackTrace);
   }
 
-  // ---- Hint text ----
+  // ---- Placeholder text ----
 
-  String? _getHint(BuildContext context) {
-    final HintType hintType;
-    if (_effectiveController.message.command == 'giphy') {
-      hintType = HintType.searchGif;
-    } else if (_effectiveController.attachments.isNotEmpty) {
-      hintType = HintType.addACommentOrSend;
-    } else if (_effectiveController.isSlowModeActive) {
-      hintType = HintType.slowModeOn;
-    } else {
-      hintType = HintType.writeAMessage;
-    }
-    return widget.props.hintGetter.call(context, hintType);
+  String? _buildPlaceholder(BuildContext context) {
+    final state = MessageInputPlaceholder.resolve(_effectiveController);
+    return widget.props.placeholderBuilder.call(context, state);
   }
 
   // ---- Attachments from drag-drop ----

@@ -544,7 +544,6 @@ class _StreamAutocompleteField extends StatelessWidget {
   Widget build(BuildContext context) {
     return core.StreamMessageComposerInputField(
       controller: messageEditingController.textFieldController,
-      placeholder: '',
       focusNode: focusNode,
     );
   }

@@ -53,7 +53,7 @@ sealed class MessageInputPlaceholder {
   ///    text yet.
   /// 4. [WriteMessagePlaceholder] otherwise.
   factory MessageInputPlaceholder.resolve(
-    StreamMessageInputController controller,
+    StreamMessageComposerController controller,
   ) {
     if (controller.isSlowModeActive) {
       return SlowModePlaceholder(cooldownTimeOut: controller.cooldownTimeOut);

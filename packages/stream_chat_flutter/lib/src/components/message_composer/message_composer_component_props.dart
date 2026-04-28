@@ -29,7 +29,7 @@ class MessageComposerComponentProps {
     this.audioRecorderController,
     this.voiceRecordingFeedback = const AudioRecorderFeedback(),
     this.sendVoiceRecordingAutomatically = false,
-    this.placeholder = '',
+    this.placeholder,
   });
 
   /// The controller for the message composer component.
@@ -93,7 +93,7 @@ class MessageComposerComponentProps {
   final bool sendVoiceRecordingAutomatically;
 
   /// Placeholder text shown in the input field when empty.
-  final String placeholder;
+  final String? placeholder;
 
   /// Whether the audio recording flow is active.
   bool get isAudioRecordingFlowActive => audioRecorderState is RecordStateRecording || isAudioRecordingFlowStopped;
@@ -113,103 +113,188 @@ class MessageComposerComponentProps {
 /// Properties for building the leading component of the message composer.
 class MessageComposerLeadingProps extends MessageComposerComponentProps {
   // ignore: prefer_const_constructors_in_immutables
-  MessageComposerLeadingProps._({required super.controller, required super.onSendPressed, required super.audioRecorderState, super.isFloating, super.message, super.voiceRecordingCallback, super.onAttachmentButtonPressed, super.isPickerOpen, super.focusNode, super.currentUserId, super.onQuotedMessageCleared, super.canAlsoSendToChannel, super.textInputAction, super.keyboardType, super.textCapitalization, super.autofocus, super.autocorrect, super.audioRecorderController, super.voiceRecordingFeedback, super.sendVoiceRecordingAutomatically, super.placeholder});
+  MessageComposerLeadingProps._({
+    required super.controller,
+    required super.onSendPressed,
+    required super.audioRecorderState,
+    super.isFloating,
+    super.message,
+    super.voiceRecordingCallback,
+    super.onAttachmentButtonPressed,
+    super.isPickerOpen,
+    super.focusNode,
+    super.currentUserId,
+    super.onQuotedMessageCleared,
+    super.canAlsoSendToChannel,
+    super.textInputAction,
+    super.keyboardType,
+    super.textCapitalization,
+    super.autofocus,
+    super.autocorrect,
+    super.audioRecorderController,
+    super.voiceRecordingFeedback,
+    super.sendVoiceRecordingAutomatically,
+    super.placeholder,
+  });
 
   /// Creates a [MessageComposerLeadingProps] from [props].
-  factory MessageComposerLeadingProps.from(MessageComposerComponentProps props) =>
-      MessageComposerLeadingProps._(
-        controller: props.controller,
-        isFloating: props.isFloating,
-        message: props.message,
-        onSendPressed: props.onSendPressed,
-        voiceRecordingCallback: props.voiceRecordingCallback,
-        onAttachmentButtonPressed: props.onAttachmentButtonPressed,
-        isPickerOpen: props.isPickerOpen,
-        focusNode: props.focusNode,
-        currentUserId: props.currentUserId,
-        audioRecorderState: props.audioRecorderState,
-        onQuotedMessageCleared: props.onQuotedMessageCleared,
-        canAlsoSendToChannel: props.canAlsoSendToChannel,
-        textInputAction: props.textInputAction,
-        keyboardType: props.keyboardType,
-        textCapitalization: props.textCapitalization,
-        autofocus: props.autofocus,
-        autocorrect: props.autocorrect,
-        audioRecorderController: props.audioRecorderController,
-        voiceRecordingFeedback: props.voiceRecordingFeedback,
-        sendVoiceRecordingAutomatically: props.sendVoiceRecordingAutomatically,
-        placeholder: props.placeholder,
-      );
+  factory MessageComposerLeadingProps.from(MessageComposerComponentProps props) => MessageComposerLeadingProps._(
+    controller: props.controller,
+    isFloating: props.isFloating,
+    message: props.message,
+    onSendPressed: props.onSendPressed,
+    voiceRecordingCallback: props.voiceRecordingCallback,
+    onAttachmentButtonPressed: props.onAttachmentButtonPressed,
+    isPickerOpen: props.isPickerOpen,
+    focusNode: props.focusNode,
+    currentUserId: props.currentUserId,
+    audioRecorderState: props.audioRecorderState,
+    onQuotedMessageCleared: props.onQuotedMessageCleared,
+    canAlsoSendToChannel: props.canAlsoSendToChannel,
+    textInputAction: props.textInputAction,
+    keyboardType: props.keyboardType,
+    textCapitalization: props.textCapitalization,
+    autofocus: props.autofocus,
+    autocorrect: props.autocorrect,
+    audioRecorderController: props.audioRecorderController,
+    voiceRecordingFeedback: props.voiceRecordingFeedback,
+    sendVoiceRecordingAutomatically: props.sendVoiceRecordingAutomatically,
+    placeholder: props.placeholder,
+  );
 }
 
 /// Properties for building the trailing component of the message composer.
 class MessageComposerTrailingProps extends MessageComposerComponentProps {
   // ignore: prefer_const_constructors_in_immutables
-  MessageComposerTrailingProps._({required super.controller, required super.onSendPressed, required super.audioRecorderState, super.isFloating, super.message, super.voiceRecordingCallback, super.onAttachmentButtonPressed, super.isPickerOpen, super.focusNode, super.currentUserId, super.onQuotedMessageCleared, super.canAlsoSendToChannel, super.textInputAction, super.keyboardType, super.textCapitalization, super.autofocus, super.autocorrect, super.audioRecorderController, super.voiceRecordingFeedback, super.sendVoiceRecordingAutomatically, super.placeholder});
+  MessageComposerTrailingProps._({
+    required super.controller,
+    required super.onSendPressed,
+    required super.audioRecorderState,
+    super.isFloating,
+    super.message,
+    super.voiceRecordingCallback,
+    super.onAttachmentButtonPressed,
+    super.isPickerOpen,
+    super.focusNode,
+    super.currentUserId,
+    super.onQuotedMessageCleared,
+    super.canAlsoSendToChannel,
+    super.textInputAction,
+    super.keyboardType,
+    super.textCapitalization,
+    super.autofocus,
+    super.autocorrect,
+    super.audioRecorderController,
+    super.voiceRecordingFeedback,
+    super.sendVoiceRecordingAutomatically,
+    super.placeholder,
+  });
 
   /// Creates a [MessageComposerTrailingProps] from [props].
-  factory MessageComposerTrailingProps.from(MessageComposerComponentProps props) =>
-      MessageComposerTrailingProps._(
-        controller: props.controller,
-        isFloating: props.isFloating,
-        message: props.message,
-        onSendPressed: props.onSendPressed,
-        voiceRecordingCallback: props.voiceRecordingCallback,
-        onAttachmentButtonPressed: props.onAttachmentButtonPressed,
-        isPickerOpen: props.isPickerOpen,
-        focusNode: props.focusNode,
-        currentUserId: props.currentUserId,
-        audioRecorderState: props.audioRecorderState,
-        onQuotedMessageCleared: props.onQuotedMessageCleared,
-        canAlsoSendToChannel: props.canAlsoSendToChannel,
-        textInputAction: props.textInputAction,
-        keyboardType: props.keyboardType,
-        textCapitalization: props.textCapitalization,
-        autofocus: props.autofocus,
-        autocorrect: props.autocorrect,
-        audioRecorderController: props.audioRecorderController,
-        voiceRecordingFeedback: props.voiceRecordingFeedback,
-        sendVoiceRecordingAutomatically: props.sendVoiceRecordingAutomatically,
-        placeholder: props.placeholder,
-      );
+  factory MessageComposerTrailingProps.from(MessageComposerComponentProps props) => MessageComposerTrailingProps._(
+    controller: props.controller,
+    isFloating: props.isFloating,
+    message: props.message,
+    onSendPressed: props.onSendPressed,
+    voiceRecordingCallback: props.voiceRecordingCallback,
+    onAttachmentButtonPressed: props.onAttachmentButtonPressed,
+    isPickerOpen: props.isPickerOpen,
+    focusNode: props.focusNode,
+    currentUserId: props.currentUserId,
+    audioRecorderState: props.audioRecorderState,
+    onQuotedMessageCleared: props.onQuotedMessageCleared,
+    canAlsoSendToChannel: props.canAlsoSendToChannel,
+    textInputAction: props.textInputAction,
+    keyboardType: props.keyboardType,
+    textCapitalization: props.textCapitalization,
+    autofocus: props.autofocus,
+    autocorrect: props.autocorrect,
+    audioRecorderController: props.audioRecorderController,
+    voiceRecordingFeedback: props.voiceRecordingFeedback,
+    sendVoiceRecordingAutomatically: props.sendVoiceRecordingAutomatically,
+    placeholder: props.placeholder,
+  );
 }
 
 /// Properties for building the input component of the message composer.
 class MessageComposerInputProps extends MessageComposerComponentProps {
   // ignore: prefer_const_constructors_in_immutables
-  MessageComposerInputProps._({required super.controller, required super.onSendPressed, required super.audioRecorderState, super.isFloating, super.message, super.voiceRecordingCallback, super.onAttachmentButtonPressed, super.isPickerOpen, super.focusNode, super.currentUserId, super.onQuotedMessageCleared, super.canAlsoSendToChannel, super.textInputAction, super.keyboardType, super.textCapitalization, super.autofocus, super.autocorrect, super.audioRecorderController, super.voiceRecordingFeedback, super.sendVoiceRecordingAutomatically, super.placeholder});
+  MessageComposerInputProps._({
+    required super.controller,
+    required super.onSendPressed,
+    required super.audioRecorderState,
+    super.isFloating,
+    super.message,
+    super.voiceRecordingCallback,
+    super.onAttachmentButtonPressed,
+    super.isPickerOpen,
+    super.focusNode,
+    super.currentUserId,
+    super.onQuotedMessageCleared,
+    super.canAlsoSendToChannel,
+    super.textInputAction,
+    super.keyboardType,
+    super.textCapitalization,
+    super.autofocus,
+    super.autocorrect,
+    super.audioRecorderController,
+    super.voiceRecordingFeedback,
+    super.sendVoiceRecordingAutomatically,
+    super.placeholder,
+  });
 
   /// Creates a [MessageComposerInputProps] from [props].
-  factory MessageComposerInputProps.from(MessageComposerComponentProps props) =>
-      MessageComposerInputProps._(
-        controller: props.controller,
-        isFloating: props.isFloating,
-        message: props.message,
-        onSendPressed: props.onSendPressed,
-        voiceRecordingCallback: props.voiceRecordingCallback,
-        onAttachmentButtonPressed: props.onAttachmentButtonPressed,
-        isPickerOpen: props.isPickerOpen,
-        focusNode: props.focusNode,
-        currentUserId: props.currentUserId,
-        audioRecorderState: props.audioRecorderState,
-        onQuotedMessageCleared: props.onQuotedMessageCleared,
-        canAlsoSendToChannel: props.canAlsoSendToChannel,
-        textInputAction: props.textInputAction,
-        keyboardType: props.keyboardType,
-        textCapitalization: props.textCapitalization,
-        autofocus: props.autofocus,
-        autocorrect: props.autocorrect,
-        audioRecorderController: props.audioRecorderController,
-        voiceRecordingFeedback: props.voiceRecordingFeedback,
-        sendVoiceRecordingAutomatically: props.sendVoiceRecordingAutomatically,
-        placeholder: props.placeholder,
-      );
+  factory MessageComposerInputProps.from(MessageComposerComponentProps props) => MessageComposerInputProps._(
+    controller: props.controller,
+    isFloating: props.isFloating,
+    message: props.message,
+    onSendPressed: props.onSendPressed,
+    voiceRecordingCallback: props.voiceRecordingCallback,
+    onAttachmentButtonPressed: props.onAttachmentButtonPressed,
+    isPickerOpen: props.isPickerOpen,
+    focusNode: props.focusNode,
+    currentUserId: props.currentUserId,
+    audioRecorderState: props.audioRecorderState,
+    onQuotedMessageCleared: props.onQuotedMessageCleared,
+    canAlsoSendToChannel: props.canAlsoSendToChannel,
+    textInputAction: props.textInputAction,
+    keyboardType: props.keyboardType,
+    textCapitalization: props.textCapitalization,
+    autofocus: props.autofocus,
+    autocorrect: props.autocorrect,
+    audioRecorderController: props.audioRecorderController,
+    voiceRecordingFeedback: props.voiceRecordingFeedback,
+    sendVoiceRecordingAutomatically: props.sendVoiceRecordingAutomatically,
+    placeholder: props.placeholder,
+  );
 }
 
 /// Properties for building the input leading component of the message composer.
 class MessageComposerInputLeadingProps extends MessageComposerComponentProps {
   // ignore: prefer_const_constructors_in_immutables
-  MessageComposerInputLeadingProps._({required super.controller, required super.onSendPressed, required super.audioRecorderState, super.isFloating, super.message, super.voiceRecordingCallback, super.onAttachmentButtonPressed, super.isPickerOpen, super.focusNode, super.currentUserId, super.onQuotedMessageCleared, super.canAlsoSendToChannel, super.textInputAction, super.keyboardType, super.textCapitalization, super.autofocus, super.autocorrect, super.audioRecorderController, super.voiceRecordingFeedback, super.sendVoiceRecordingAutomatically, super.placeholder});
+  MessageComposerInputLeadingProps._({
+    required super.controller,
+    required super.onSendPressed,
+    required super.audioRecorderState,
+    super.isFloating,
+    super.message,
+    super.voiceRecordingCallback,
+    super.onAttachmentButtonPressed,
+    super.isPickerOpen,
+    super.focusNode,
+    super.currentUserId,
+    super.onQuotedMessageCleared,
+    super.canAlsoSendToChannel,
+    super.textInputAction,
+    super.keyboardType,
+    super.textCapitalization,
+    super.autofocus,
+    super.autocorrect,
+    super.audioRecorderController,
+    super.voiceRecordingFeedback,
+    super.sendVoiceRecordingAutomatically,
+    super.placeholder,
+  });
 
   /// Creates a [MessageComposerInputLeadingProps] from [props].
   factory MessageComposerInputLeadingProps.from(MessageComposerComponentProps props) =>
@@ -241,7 +326,29 @@ class MessageComposerInputLeadingProps extends MessageComposerComponentProps {
 /// Properties for building the input header component of the message composer.
 class MessageComposerInputHeaderProps extends MessageComposerComponentProps {
   // ignore: prefer_const_constructors_in_immutables
-  MessageComposerInputHeaderProps._({required super.controller, required super.onSendPressed, required super.audioRecorderState, super.isFloating, super.message, super.voiceRecordingCallback, super.onAttachmentButtonPressed, super.isPickerOpen, super.focusNode, super.currentUserId, super.onQuotedMessageCleared, super.canAlsoSendToChannel, super.textInputAction, super.keyboardType, super.textCapitalization, super.autofocus, super.autocorrect, super.audioRecorderController, super.voiceRecordingFeedback, super.sendVoiceRecordingAutomatically, super.placeholder});
+  MessageComposerInputHeaderProps._({
+    required super.controller,
+    required super.onSendPressed,
+    required super.audioRecorderState,
+    super.isFloating,
+    super.message,
+    super.voiceRecordingCallback,
+    super.onAttachmentButtonPressed,
+    super.isPickerOpen,
+    super.focusNode,
+    super.currentUserId,
+    super.onQuotedMessageCleared,
+    super.canAlsoSendToChannel,
+    super.textInputAction,
+    super.keyboardType,
+    super.textCapitalization,
+    super.autofocus,
+    super.autocorrect,
+    super.audioRecorderController,
+    super.voiceRecordingFeedback,
+    super.sendVoiceRecordingAutomatically,
+    super.placeholder,
+  });
 
   /// Creates a [MessageComposerInputHeaderProps] from [props].
   factory MessageComposerInputHeaderProps.from(MessageComposerComponentProps props) =>
@@ -273,7 +380,29 @@ class MessageComposerInputHeaderProps extends MessageComposerComponentProps {
 /// Properties for building the input trailing component of the message composer.
 class MessageComposerInputTrailingProps extends MessageComposerComponentProps {
   // ignore: prefer_const_constructors_in_immutables
-  MessageComposerInputTrailingProps._({required super.controller, required super.onSendPressed, required super.audioRecorderState, super.isFloating, super.message, super.voiceRecordingCallback, super.onAttachmentButtonPressed, super.isPickerOpen, super.focusNode, super.currentUserId, super.onQuotedMessageCleared, super.canAlsoSendToChannel, super.textInputAction, super.keyboardType, super.textCapitalization, super.autofocus, super.autocorrect, super.audioRecorderController, super.voiceRecordingFeedback, super.sendVoiceRecordingAutomatically, super.placeholder});
+  MessageComposerInputTrailingProps._({
+    required super.controller,
+    required super.onSendPressed,
+    required super.audioRecorderState,
+    super.isFloating,
+    super.message,
+    super.voiceRecordingCallback,
+    super.onAttachmentButtonPressed,
+    super.isPickerOpen,
+    super.focusNode,
+    super.currentUserId,
+    super.onQuotedMessageCleared,
+    super.canAlsoSendToChannel,
+    super.textInputAction,
+    super.keyboardType,
+    super.textCapitalization,
+    super.autofocus,
+    super.autocorrect,
+    super.audioRecorderController,
+    super.voiceRecordingFeedback,
+    super.sendVoiceRecordingAutomatically,
+    super.placeholder,
+  });
 
   /// Creates a [MessageComposerInputTrailingProps] from [props].
   factory MessageComposerInputTrailingProps.from(MessageComposerComponentProps props) =>

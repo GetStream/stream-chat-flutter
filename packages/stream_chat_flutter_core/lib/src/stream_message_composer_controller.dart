@@ -550,9 +550,11 @@ class StreamMessageComposerController extends ValueNotifier<Message> {
       _keystrokeThrottle = null;
       final currentText = _textFieldController.text.trim();
       if (currentText.isNotEmpty && channel.canUseTypingEvents) {
-        channel.keyStroke(message.parentId).onError(
-          (error, stackTrace) => _attachedOnError?.call(error!, stackTrace),
-        );
+        channel
+            .keyStroke(message.parentId)
+            .onError(
+              (error, stackTrace) => _attachedOnError?.call(error!, stackTrace),
+            );
       }
     });
 
@@ -592,18 +594,19 @@ class StreamMessageComposerController extends ValueNotifier<Message> {
     final firstUrl = matchedUrls.first.group(0)!;
     if (ogAttachment?.titleLink == firstUrl) return;
 
-    _enrichUrlOperation = CancelableOperation.fromFuture(
-      _enrichUrl(firstUrl, channel.client),
-    ).then(
-      (ogResponse) {
-        final attachment = Attachment.fromOGAttachment(ogResponse);
-        setOGAttachment(attachment);
-      },
-      onError: (error, stackTrace) {
-        clearOGAttachment();
-        _attachedOnError?.call(error, stackTrace);
-      },
-    );
+    _enrichUrlOperation =
+        CancelableOperation.fromFuture(
+          _enrichUrl(firstUrl, channel.client),
+        ).then(
+          (ogResponse) {
+            final attachment = Attachment.fromOGAttachment(ogResponse);
+            setOGAttachment(attachment);
+          },
+          onError: (error, stackTrace) {
+            clearOGAttachment();
+            _attachedOnError?.call(error, stackTrace);
+          },
+        );
   }
 
   Future<OGAttachmentResponse> _enrichUrl(
@@ -797,16 +800,14 @@ class StreamMessageComposerController extends ValueNotifier<Message> {
 
 /// A [RestorableProperty] that stores and restores a
 /// [StreamMessageComposerController].
-class StreamRestorableMessageComposerController
-    extends RestorableChangeNotifier<StreamMessageComposerController> {
+class StreamRestorableMessageComposerController extends RestorableChangeNotifier<StreamMessageComposerController> {
   /// Creates a [StreamRestorableMessageComposerController].
   StreamRestorableMessageComposerController({Message? message}) : _initialValue = message ?? Message();
 
   final Message _initialValue;
 
   @override
-  StreamMessageComposerController createDefaultValue() =>
-      StreamMessageComposerController(message: _initialValue);
+  StreamMessageComposerController createDefaultValue() => StreamMessageComposerController(message: _initialValue);
 
   @override
   StreamMessageComposerController fromPrimitives(Object? data) {

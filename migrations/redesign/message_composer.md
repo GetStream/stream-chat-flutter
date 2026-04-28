@@ -202,11 +202,9 @@ StreamComponentFactory(
 
 ## Message Input Placeholder API
 
-The input placeholder text (the dimmed text shown inside the input field when it is empty) is now driven by a sealed-class hierarchy that adapts to the current input state. The previous `HintType` enum and `HintGetter` typedef have been removed, and the customization hook on `StreamMessageInput` is now called `placeholderBuilder`.
+The input placeholder text (the dimmed text shown inside the input field when it is empty) is now driven by a sealed-class hierarchy that adapts to the current input state. The previous `HintType` enum and `HintGetter` typedef have been removed, and the customization hook on `StreamMessageComposer` is now called `placeholderBuilder`.
 
 The new placeholder types live in `lib/src/message_input/message_input_placeholder.dart` and are re-exported from `package:stream_chat_flutter/stream_chat_flutter.dart`.
-
-> **Layered model.** The placeholder *resolution* (state machine that turns controller state into a string) lives on `StreamMessageInput`, the higher-level full-featured widget. The lower-level `StreamChatMessageComposer` design-system component stays a pure UI primitive and accepts a plain `String placeholder` — see [StreamChatMessageComposer (new)](#streamchatmessagecomposer-new). If you build directly on `StreamChatMessageComposer`, call `MessageInputPlaceholder.resolve(controller)` and your own builder yourself, then pass the resulting string in.
 
 ### What was removed
 
@@ -216,8 +214,8 @@ The new placeholder types live in `lib/src/message_input/message_input_placehold
 | `typedef HintGetter = String? Function(BuildContext, HintType, Command?)` | `typedef MessageInputPlaceholderBuilder = String? Function(BuildContext, MessageInputPlaceholder)` |
 | `HintType resolveMessageInputHintType(controller)` | `MessageInputPlaceholder.resolve(controller)` factory |
 | `Command? resolveActiveMessageInputCommand(context, controller)` | Removed. Use `controller.message.command` (a `String?`) directly. The SDK no longer looks up the full `Command` object from the channel config when resolving the placeholder. |
-| `String? defaultMessageInputHintGetter(...)` | Removed from the public API. The default behaviour is now baked into `StreamMessageInput.placeholderBuilder`'s default value. To customize, supply your own builder with an exhaustive `switch` over [`MessageInputPlaceholder`](#sealed-class-state-shape). |
-| `StreamMessageInput.hintGetter` | `StreamMessageInput.placeholderBuilder` |
+| `String? defaultMessageInputHintGetter(...)` | Removed from the public API. The default behaviour is now baked into `StreamMessageComposer.placeholderBuilder`'s default value. To customize, supply your own builder with an exhaustive `switch` over [`MessageInputPlaceholder`](#sealed-class-state-shape). |
+| `StreamMessageInput.hintGetter` | `StreamMessageComposer.placeholderBuilder` |
 
 ### Behavior change: precedence
 
@@ -257,7 +255,7 @@ Each case carries the contextual data relevant to that input state. Pattern-matc
 | Case | Field | Type | Description |
 |------|-------|------|-------------|
 | `WriteMessagePlaceholder` | `isEditing` | `bool` | `true` when the input is editing an existing message instead of composing a new one. Useful for swapping the placeholder while editing. |
-| `SlowModePlaceholder` | `cooldownTimeOut` | `int` | Remaining slow-mode cooldown in seconds. Mirrors `StreamMessageInputController.cooldownTimeOut`. |
+| `SlowModePlaceholder` | `cooldownTimeOut` | `int` | Remaining slow-mode cooldown in seconds. Mirrors `StreamMessageComposerController.cooldownTimeOut`. |
 | `SlowModePlaceholder` | `cooldown` | `Duration` | Convenience getter wrapping `cooldownTimeOut` for formatting timer strings. |
 | `CommandPlaceholder` | `command` | `String` | Active command name (e.g. `'giphy'`, `'mute'`, `'ban'`, or any backend-defined command). |
 | `AttachmentsPlaceholder` | `attachments` | `List<Attachment>` | Pending attachments held by the input. OG link previews are still included — filter via `Attachment.ogScrapeUrl` if you only want user-added ones. |
@@ -265,7 +263,7 @@ Each case carries the contextual data relevant to that input state. Pattern-matc
 Example using the new fields (note that the sealed type forces an exhaustive switch — every case must be handled):
 
 ```dart
-StreamMessageInput(
+StreamMessageComposer(
   placeholderBuilder: (context, placeholder) {
     final translations = context.translations;
     return switch (placeholder) {
@@ -310,7 +308,7 @@ StreamMessageInput(
 **After:**
 
 ```dart
-StreamMessageInput(
+StreamMessageComposer(
   placeholderBuilder: (context, placeholder) {
     return switch (placeholder) {
       SlowModePlaceholder() => 'Slow mode is on',
@@ -327,7 +325,7 @@ StreamMessageInput(
 For backend-defined custom commands, pattern-match the relevant `CommandPlaceholder.command` values and use the SDK's localized labels for everything else:
 
 ```dart
-StreamMessageInput(
+StreamMessageComposer(
   placeholderBuilder: (context, placeholder) {
     final translations = context.translations;
     return switch (placeholder) {
@@ -431,6 +429,6 @@ The following public widgets are provided as building blocks for custom attachme
 - [ ] Replace `quotedMessageBuilder` / `quotedMessageAttachmentThumbnailBuilders` with `messageComposerInputHeader` or `messageComposerAttachment` overrides in `StreamComponentFactory`
 - [ ] If adopting `StreamMessageComposer` directly, wire up your own send/attachment logic via `onSendPressed` and `onAttachmentButtonPressed`
 - [ ] Move any composer UI customizations to `StreamComponentFactory`
-- [ ] Rename `StreamMessageInput.hintGetter` to `placeholderBuilder` and rewrite the callback to switch over `MessageInputPlaceholder` cases (`SlowModePlaceholder`, `CommandPlaceholder`, `AttachmentsPlaceholder`, `WriteMessagePlaceholder`) instead of the removed `HintType` enum. If you build directly on `StreamChatMessageComposer`, compute the placeholder string yourself via `MessageInputPlaceholder.resolve(controller)` and pass it via the `placeholder: String` parameter.
+- [ ] Rename `StreamMessageInput.hintGetter` to `StreamMessageComposer.placeholderBuilder` and rewrite the callback to switch over `MessageInputPlaceholder` cases (`SlowModePlaceholder`, `CommandPlaceholder`, `AttachmentsPlaceholder`, `WriteMessagePlaceholder`) instead of the removed `HintType` enum.
 - [ ] Review the new placeholder precedence (`slowMode > command > attachments > writeMessage`) and override `placeholderBuilder` if you need to preserve the old order
 - [ ] Add command-specific placeholders for any backend-defined commands you ship by pattern-matching on `CommandPlaceholder.command` in your `placeholderBuilder`
