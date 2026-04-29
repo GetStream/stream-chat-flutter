@@ -18,6 +18,7 @@ This guide covers the migration for the redesigned attachment components, voice 
 - [Attachment Builders](#attachment-builders)
 - [StreamPollInteractorThemeData](#streampollinteractorthemedata)
 - [Poll Dialogs → Poll Sheets](#poll-dialogs--poll-sheets)
+- [Poll Creator Dialog → Sheet](#poll-creator-dialog--sheet)
 - [StreamVoiceRecordingAttachmentThemeData](#streamvoicerecordingattachmentthemedata)
 - [Migration Checklist](#migration-checklist)
 
@@ -37,6 +38,7 @@ This guide covers the migration for the redesigned attachment components, voice 
 | `StreamPollInteractorThemeData` | Fully redesigned — old properties removed, new structured theme |
 | `StreamPollOptionsDialog` / `StreamPollResultsDialog` / `StreamPollOptionVotesDialog` / `StreamPollCommentsDialog` | **Renamed** to `...Sheet` and now presented as modal bottom sheets |
 | `StreamPollOptionsDialogThemeData` / `StreamPollResultsDialogThemeData` / `StreamPollOptionVotesDialogThemeData` / `StreamPollCommentsDialogThemeData` | **Renamed** to `...SheetThemeData` and fully redesigned |
+| `StreamPollCreatorDialog` / `StreamPollCreatorFullScreenDialog` | **Replaced** by `StreamPollCreatorSheet` — see [Poll Creator Dialog → Sheet](#poll-creator-dialog--sheet) |
 | `StreamVoiceRecordingAttachmentThemeData` | Fully redesigned — old properties removed, new design-token-based theme |
 
 ---
@@ -333,7 +335,9 @@ StreamPollInteractorThemeData(
 
 ### Breaking Changes:
 
-The four poll dialogs — `StreamPollOptionsDialog`, `StreamPollResultsDialog`, `StreamPollOptionVotesDialog`, and `StreamPollCommentsDialog` — have been renamed to `...Sheet` and now present as modal bottom sheets (`showModalBottomSheet` + `DraggableScrollableSheet`) instead of full-screen `MaterialPageRoute`s. The previous `Scaffold` + `StreamAppBar` chrome has been replaced by a `StreamSheetHeader` at the top of each sheet.
+The four poll dialogs — `StreamPollOptionsDialog`, `StreamPollResultsDialog`, `StreamPollOptionVotesDialog`, and `StreamPollCommentsDialog` — have been renamed to `...Sheet` and now present as modal bottom sheets via the new `showStreamSheet` helper from `stream_core_flutter` (a Stream-styled sheet route with scroll-aware drag-to-dismiss) instead of full-screen page routes. The previous `Scaffold` + `StreamAppBar` chrome has been replaced by a `StreamSheetHeader` at the top of each sheet.
+
+Each sheet is now full-size with a small fixed peek from the screen top, and the previous snap-to-half affordance from `DraggableScrollableSheet` is gone — dragging down on the body's scroll view past its top now dismisses the sheet directly.
 
 **Renamed symbols:**
 
@@ -438,6 +442,81 @@ StreamChatThemeData(
 
 ---
 
+## Poll Creator Dialog → Sheet
+
+### Breaking Changes:
+
+The poll creator UI has been unified into a single bottom-sheet surface. The previous responsive split between a desktop `AlertDialog` (`StreamPollCreatorDialog`) and a mobile full-screen page (`StreamPollCreatorFullScreenDialog`) has been replaced by a single `StreamPollCreatorSheet` that renders as a modal bottom sheet via the new `showStreamSheet` helper from `stream_core_flutter`, matching the other poll sheets.
+
+**Renamed / removed symbols:**
+
+| Old | New |
+|-----|-----|
+| `showStreamPollCreatorDialog` | `showStreamPollCreatorSheet` |
+| `StreamPollCreatorDialog` | `StreamPollCreatorSheet` |
+| `StreamPollCreatorFullScreenDialog` | `StreamPollCreatorSheet` |
+
+`showStreamPollCreatorSheet` keeps the `poll`, `config`, and `padding` parameters from the old dialog helper; the dialog-specific parameters (`barrierDismissible`, `barrierColor`, `barrierLabel`, `useSafeArea`, `useRootNavigator`, `routeSettings`, `anchorPoint`, `traversalEdgeBehavior`) are no longer accepted — the sheet always presents as a modal bottom sheet over a safe area.
+
+`StreamPollCreatorWidget` also gained an optional `scrollController` parameter so it can be embedded inside a `DraggableScrollableSheet`.
+
+### Migration:
+
+**Before:**
+```dart
+final poll = await showStreamPollCreatorDialog(
+  context: context,
+  poll: initialPoll,
+  config: pollConfig,
+);
+```
+
+**After:**
+```dart
+final poll = await showStreamPollCreatorSheet(
+  context: context,
+  poll: initialPoll,
+  config: pollConfig,
+);
+```
+
+If you were directly instantiating either of the legacy widgets, replace them with `StreamPollCreatorSheet`:
+
+**Before:**
+```dart
+StreamPollCreatorDialog(poll: poll, config: config);
+StreamPollCreatorFullScreenDialog(poll: poll, config: config);
+```
+
+**After:**
+```dart
+StreamPollCreatorSheet(poll: poll, config: config);
+```
+
+#### Theme changes
+
+`StreamPollCreatorThemeData` now exposes a `sheetHeaderStyle` (`StreamSheetHeaderStyle`) that styles the sheet's `StreamSheetHeader` — matching the other poll sheet theme datas. The previous `primaryActionStyle` and `secondaryActionStyle` fields have been removed; style the sheet's leading/trailing action buttons through `sheetHeaderStyle.leadingStyle` / `sheetHeaderStyle.trailingStyle` instead.
+
+**Before:**
+```dart
+StreamPollCreatorThemeData(
+  primaryActionStyle: StreamButtonThemeStyle.from(...),
+  secondaryActionStyle: StreamButtonThemeStyle.from(...),
+)
+```
+
+**After:**
+```dart
+StreamPollCreatorThemeData(
+  sheetHeaderStyle: StreamSheetHeaderStyle(
+    trailingStyle: StreamButtonThemeStyle.from(...),
+    leadingStyle: StreamButtonThemeStyle.from(...),
+  ),
+)
+```
+
+---
+
 ## StreamVoiceRecordingAttachmentThemeData
 
 ### Breaking Changes:
@@ -493,6 +572,7 @@ StreamVoiceRecordingAttachmentThemeData(
 - [ ] Remove `shape` and `padding` from attachment builder usages
 - [ ] Update `StreamPollInteractorThemeData` — see property mapping above
 - [ ] Rename `StreamPoll*Dialog` widgets, `show*Dialog` helpers, and their theme types to the `...Sheet` variants
+- [ ] Replace `StreamPollCreatorDialog` / `StreamPollCreatorFullScreenDialog` (and `showStreamPollCreatorDialog`) with `StreamPollCreatorSheet` / `showStreamPollCreatorSheet`
 - [ ] Update `StreamPoll*SheetThemeData` entries on `StreamChatThemeData` — see property mapping above
 - [ ] Update `StreamVoiceRecordingAttachmentThemeData` — see property mapping above
 - [ ] If using custom attachment builders, update to new Props-based constructors

@@ -12,6 +12,8 @@
 - Removed `StreamMessageThemeData` (ownMessageTheme / otherMessageTheme) and `StreamMessageInputThemeData` (messageInputTheme).
 - Removed `StreamChannelPreviewThemeData` (channelPreviewTheme).
 - Renamed `StreamPollOptionsDialog` / `StreamPollResultsDialog` / `StreamPollOptionVotesDialog` / `StreamPollCommentsDialog` (and their `show*` helpers and `...DialogThemeData` types) → `...Sheet`. They now render as modal bottom sheets.
+- Replaced `StreamPollCreatorDialog` / `StreamPollCreatorFullScreenDialog` (and `showStreamPollCreatorDialog`) with a single `StreamPollCreatorSheet` (`showStreamPollCreatorSheet`) that renders as a modal bottom sheet, matching the other poll sheets. `StreamPollCreatorWidget` gained an optional `scrollController` parameter.
+- Removed `primaryActionStyle` and `secondaryActionStyle` from `StreamPollCreatorThemeData`. Use the new `sheetHeaderStyle.trailingStyle` / `sheetHeaderStyle.leadingStyle` instead — see [`migrations/redesign/attachments_and_polls.md`](../../migrations/redesign/attachments_and_polls.md).
 - Redesigned `StreamPollOptionsSheetThemeData`, `StreamPollResultsSheetThemeData`, `StreamPollOptionVotesSheetThemeData` and `StreamPollCommentsSheetThemeData` — see [`migrations/redesign/attachments_and_polls.md`](../../migrations/redesign/attachments_and_polls.md).
 - Renamed `Translations.questionsLabel` getter → `questionLabel({bool isPlural = false})` method.
 - Renamed `Translations.endVoteConfirmationText` → `endVoteConfirmationTitle`; English default changed to `'End This Poll?'`.
@@ -31,8 +33,9 @@
 - `MessagePreviewFormatter` now renders `AttachmentType.urlPreview` messages with a link icon and caption / OG title / `linkAttachmentText` fallback.
 - Added `StreamPollCardStyle`, `StreamPollQuestionStyle` and `StreamPollOptionVotesStyle` shared style classes for the poll sheets.
 - Added a total vote count footer and per-option "View all" action to `StreamPollResultsSheet`.
-- Added a `sheetHeaderStyle` field to each poll sheet theme data.
+- Added a `sheetHeaderStyle` field to each poll sheet theme data (including `StreamPollCreatorThemeData`).
 - Re-exported `StreamSheetHeader`, `StreamSheetHeaderStyle`, `StreamSheetHeaderTheme` and `StreamSheetHeaderThemeData` from `stream_core_flutter`.
+- Re-exported `showStreamSheet`, `StreamSheet`, `StreamSheetDragHandle`, `StreamSheetRoute`, `StreamSheetTransition`, `StreamSheetScrollableWidgetBuilder`, `StreamSheetTheme` and `StreamSheetThemeData` from `stream_core_flutter`. Poll sheets (`StreamPollOptionsSheet`, `StreamPollResultsSheet`, `StreamPollOptionVotesSheet`, `StreamPollCommentsSheet`, `StreamPollCreatorSheet`) now present as Stream-styled modal bottom sheets via `showStreamSheet`. See [`migrations/redesign/attachments_and_polls.md`](../../migrations/redesign/attachments_and_polls.md).
 - Added `Translations.totalVoteCountLabel({int? count})`, `viewAllLabel`, `pollVotesLabel`, `endVoteConfirmationMessage` and `questionLabel({bool isPlural = false})`.
 
 🐞 Fixed

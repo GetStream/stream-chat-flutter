@@ -24,55 +24,36 @@ Future<T?> showStreamPollCommentsSheet<T extends Object?>({
   required BuildContext context,
   required ValueListenable<Message> messageNotifier,
 }) {
-  final radius = context.streamRadius;
-  final colorScheme = context.streamColorScheme;
-
-  return showModalBottomSheet<T>(
+  return showStreamSheet<T>(
     context: context,
-    useSafeArea: true,
-    isScrollControlled: true,
-    backgroundColor: colorScheme.backgroundElevation1,
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadiusDirectional.only(
-        topStart: radius.xxxxl,
-        topEnd: radius.xxxxl,
-      ),
-    ),
-    builder: (_) => StreamChannel(
+    builder: (_, scrollController) => StreamChannel(
       channel: StreamChannel.of(context).channel,
-      child: DraggableScrollableSheet(
-        snap: true,
-        expand: false,
-        minChildSize: 0.5,
-        initialChildSize: 1,
-        snapSizes: const [0.5, 1],
-        builder: (_, scrollController) => ValueListenableBuilder(
-          valueListenable: messageNotifier,
-          builder: (context, message, _) {
-            final poll = message.poll;
-            if (poll == null) return const Empty();
+      child: ValueListenableBuilder(
+        valueListenable: messageNotifier,
+        builder: (context, message, _) {
+          final poll = message.poll;
+          if (poll == null) return const Empty();
 
-            final channel = StreamChannel.of(context).channel;
+          final channel = StreamChannel.of(context).channel;
 
-            Future<void> onUpdateComment() async {
-              final commentText = await showPollAddCommentDialog(
-                context: context,
-                // We use the first answer as the initial value because the
-                // user can only add one comment per poll.
-                initialValue: poll.ownAnswers.firstOrNull?.answerText ?? '',
-              );
-
-              if (commentText == null) return;
-              channel.addPollAnswer(message, poll, answerText: commentText);
-            }
-
-            return StreamPollCommentsSheet(
-              poll: poll,
-              scrollController: scrollController,
-              onUpdateComment: onUpdateComment,
+          Future<void> onUpdateComment() async {
+            final commentText = await showPollAddCommentDialog(
+              context: context,
+              // We use the first answer as the initial value because the
+              // user can only add one comment per poll.
+              initialValue: poll.ownAnswers.firstOrNull?.answerText ?? '',
             );
-          },
-        ),
+
+            if (commentText == null) return;
+            channel.addPollAnswer(message, poll, answerText: commentText);
+          }
+
+          return StreamPollCommentsSheet(
+            poll: poll,
+            scrollController: scrollController,
+            onUpdateComment: onUpdateComment,
+          );
+        },
       ),
     ),
   );
