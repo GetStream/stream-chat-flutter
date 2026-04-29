@@ -30,6 +30,11 @@ mixin _$StreamPollCreatorThemeData {
     }
 
     return StreamPollCreatorThemeData(
+      sheetHeaderStyle: StreamSheetHeaderStyle.lerp(
+        a.sheetHeaderStyle,
+        b.sheetHeaderStyle,
+        t,
+      ),
       headerTextStyle: TextStyle.lerp(a.headerTextStyle, b.headerTextStyle, t),
       questionInputStyle: StreamTextInputStyle.lerp(
         a.questionInputStyle,
@@ -46,36 +51,24 @@ mixin _$StreamPollCreatorThemeData {
         b.configOptionStyle,
         t,
       ),
-      primaryActionStyle: StreamButtonThemeStyle.lerp(
-        a.primaryActionStyle,
-        b.primaryActionStyle,
-        t,
-      ),
-      secondaryActionStyle: StreamButtonThemeStyle.lerp(
-        a.secondaryActionStyle,
-        b.secondaryActionStyle,
-        t,
-      ),
     );
   }
 
   StreamPollCreatorThemeData copyWith({
+    StreamSheetHeaderStyle? sheetHeaderStyle,
     TextStyle? headerTextStyle,
     StreamTextInputStyle? questionInputStyle,
     StreamTextInputStyle? optionInputStyle,
     StreamPollConfigOptionStyle? configOptionStyle,
-    StreamButtonThemeStyle? primaryActionStyle,
-    StreamButtonThemeStyle? secondaryActionStyle,
   }) {
     final _this = (this as StreamPollCreatorThemeData);
 
     return StreamPollCreatorThemeData(
+      sheetHeaderStyle: sheetHeaderStyle ?? _this.sheetHeaderStyle,
       headerTextStyle: headerTextStyle ?? _this.headerTextStyle,
       questionInputStyle: questionInputStyle ?? _this.questionInputStyle,
       optionInputStyle: optionInputStyle ?? _this.optionInputStyle,
       configOptionStyle: configOptionStyle ?? _this.configOptionStyle,
-      primaryActionStyle: primaryActionStyle ?? _this.primaryActionStyle,
-      secondaryActionStyle: secondaryActionStyle ?? _this.secondaryActionStyle,
     );
   }
 
@@ -91,6 +84,9 @@ mixin _$StreamPollCreatorThemeData {
     }
 
     return copyWith(
+      sheetHeaderStyle:
+          _this.sheetHeaderStyle?.merge(other.sheetHeaderStyle) ??
+          other.sheetHeaderStyle,
       headerTextStyle:
           _this.headerTextStyle?.merge(other.headerTextStyle) ??
           other.headerTextStyle,
@@ -103,12 +99,6 @@ mixin _$StreamPollCreatorThemeData {
       configOptionStyle:
           _this.configOptionStyle?.merge(other.configOptionStyle) ??
           other.configOptionStyle,
-      primaryActionStyle:
-          _this.primaryActionStyle?.merge(other.primaryActionStyle) ??
-          other.primaryActionStyle,
-      secondaryActionStyle:
-          _this.secondaryActionStyle?.merge(other.secondaryActionStyle) ??
-          other.secondaryActionStyle,
     );
   }
 
@@ -125,12 +115,11 @@ mixin _$StreamPollCreatorThemeData {
     final _this = (this as StreamPollCreatorThemeData);
     final _other = (other as StreamPollCreatorThemeData);
 
-    return _other.headerTextStyle == _this.headerTextStyle &&
+    return _other.sheetHeaderStyle == _this.sheetHeaderStyle &&
+        _other.headerTextStyle == _this.headerTextStyle &&
         _other.questionInputStyle == _this.questionInputStyle &&
         _other.optionInputStyle == _this.optionInputStyle &&
-        _other.configOptionStyle == _this.configOptionStyle &&
-        _other.primaryActionStyle == _this.primaryActionStyle &&
-        _other.secondaryActionStyle == _this.secondaryActionStyle;
+        _other.configOptionStyle == _this.configOptionStyle;
   }
 
   @override
@@ -139,12 +128,11 @@ mixin _$StreamPollCreatorThemeData {
 
     return Object.hash(
       runtimeType,
+      _this.sheetHeaderStyle,
       _this.headerTextStyle,
       _this.questionInputStyle,
       _this.optionInputStyle,
       _this.configOptionStyle,
-      _this.primaryActionStyle,
-      _this.secondaryActionStyle,
     );
   }
 }

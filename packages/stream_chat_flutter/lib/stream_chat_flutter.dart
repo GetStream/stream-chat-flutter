@@ -185,7 +185,7 @@ export 'src/misc/stream_neumorphic_button.dart';
 export 'src/misc/swipeable.dart';
 export 'src/misc/thread_header.dart';
 export 'src/misc/visible_footnote.dart';
-export 'src/poll/creator/stream_poll_creator_dialog.dart';
+export 'src/poll/creator/stream_poll_creator_sheet.dart';
 export 'src/poll/creator/stream_poll_creator_widget.dart';
 export 'src/poll/interactor/stream_poll_interactor.dart';
 export 'src/poll/stream_poll_comments_sheet.dart';

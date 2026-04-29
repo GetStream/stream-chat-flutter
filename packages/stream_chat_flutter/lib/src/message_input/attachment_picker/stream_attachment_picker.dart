@@ -528,7 +528,7 @@ Widget systemAttachmentPickerBuilder({
       title: context.translations.createPollLabel(isNew: true),
       onTap: (context, controller) async {
         final initialPoll = controller.value.poll;
-        final poll = await showStreamPollCreatorDialog(
+        final poll = await showStreamPollCreatorSheet(
           context: context,
           poll: initialPoll,
           config: pollConfig,

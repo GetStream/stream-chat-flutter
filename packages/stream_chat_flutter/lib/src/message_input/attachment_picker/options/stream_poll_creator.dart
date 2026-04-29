@@ -27,7 +27,7 @@ class StreamPollCreator extends StatelessWidget {
     final colorScheme = context.streamColorScheme;
 
     Future<void> _openCreatePollFlow() async {
-      final result = await showStreamPollCreatorDialog(
+      final result = await showStreamPollCreatorSheet(
         context: context,
         poll: poll,
         config: config,

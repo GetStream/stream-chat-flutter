@@ -90,13 +90,20 @@ class StreamPollCreatorTheme extends InheritedTheme {
 class StreamPollCreatorThemeData with _$StreamPollCreatorThemeData {
   /// Creates poll creator theme data with optional style overrides.
   const StreamPollCreatorThemeData({
+    this.sheetHeaderStyle,
     this.headerTextStyle,
     this.questionInputStyle,
     this.optionInputStyle,
     this.configOptionStyle,
-    this.primaryActionStyle,
-    this.secondaryActionStyle,
   });
+
+  /// The visual styling for the [StreamSheetHeader] rendered at the top of
+  /// the [StreamPollCreatorSheet].
+  ///
+  /// Scoped to the sheet's header via an inner [StreamSheetHeaderTheme] so
+  /// overrides here do not leak into other sheet headers on the screen.
+  /// When null, the header inherits the ambient [StreamSheetHeaderTheme].
+  final StreamSheetHeaderStyle? sheetHeaderStyle;
 
   /// The text style for section header labels (e.g. "Questions", "Options").
   ///
@@ -116,12 +123,6 @@ class StreamPollCreatorThemeData with _$StreamPollCreatorThemeData {
   /// The visual styling for option toggle cards (e.g. "Multiple answers",
   /// "Anonymous poll").
   final StreamPollConfigOptionStyle? configOptionStyle;
-
-  /// The visual styling for the primary action button (e.g. create/confirm).
-  final StreamButtonThemeStyle? primaryActionStyle;
-
-  /// The visual styling for secondary action buttons (e.g. close/cancel).
-  final StreamButtonThemeStyle? secondaryActionStyle;
 
   /// Linearly interpolate between two [StreamPollCreatorThemeData] objects.
   static StreamPollCreatorThemeData? lerp(
