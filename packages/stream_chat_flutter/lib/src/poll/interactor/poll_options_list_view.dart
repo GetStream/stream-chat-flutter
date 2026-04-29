@@ -258,11 +258,8 @@ class PollOptionItem extends StatelessWidget {
                   ),
                   StreamProgressBarTheme(
                     data: .new(style: effectiveProgressBarStyle),
-                    child: TweenAnimationBuilder<double>(
-                      curve: Curves.easeOutCubic,
-                      duration: Durations.medium2,
-                      tween: Tween(begin: 0, end: poll.voteRatioFor(option)),
-                      builder: (_, value, _) => StreamProgressBar(value: value),
+                    child: _AnimatedPollOptionProgressBar(
+                      value: poll.voteRatioFor(option),
                     ),
                   ),
                 ],
@@ -271,6 +268,43 @@ class PollOptionItem extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+// A progress bar that animates only when [value] changes between widget
+// updates, not every time the widget's State is recreated.
+//
+// This avoids the progress bar visually "refilling" from 0 each time a poll
+// option is re-mounted (e.g. when the poll message scrolls back into view in
+// the message list).
+class _AnimatedPollOptionProgressBar extends StatefulWidget {
+  const _AnimatedPollOptionProgressBar({required this.value});
+
+  final double value;
+
+  @override
+  State<_AnimatedPollOptionProgressBar> createState() => _AnimatedPollOptionProgressBarState();
+}
+
+class _AnimatedPollOptionProgressBarState extends State<_AnimatedPollOptionProgressBar> {
+  // Tracks the value the bar is currently displaying so we can animate from
+  // it to a new target value when [widget.value] changes.
+  late double _previousValue = widget.value;
+
+  @override
+  void didUpdateWidget(covariant _AnimatedPollOptionProgressBar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _previousValue = oldWidget.value;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return TweenAnimationBuilder<double>(
+      curve: Curves.easeOutCubic,
+      duration: Durations.medium2,
+      tween: Tween(begin: _previousValue, end: widget.value),
+      builder: (_, value, _) => StreamProgressBar(value: value),
     );
   }
 }
