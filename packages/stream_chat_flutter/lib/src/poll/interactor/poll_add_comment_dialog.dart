@@ -68,9 +68,10 @@ class _PollAddCommentDialogState extends State<PollAddCommentDialog> {
         type: .ghost,
         style: .primary,
         size: .small,
-        onPressed: switch (_comment == widget.initialValue) {
-          true => null,
-          false => () => Navigator.of(context).pop(_comment),
+        onPressed: switch (_comment.trim()) {
+          final comment when comment.isEmpty => null,
+          final comment when comment == widget.initialValue => null,
+          final comment => () => Navigator.of(context).pop(comment),
         },
         child: Text(context.translations.sendLabel.toUpperCase()),
       ),
