@@ -33,6 +33,7 @@
 - Added a total vote count footer and per-option "View all" action to `StreamPollResultsSheet`.
 - Added a `sheetHeaderStyle` field to each poll sheet theme data.
 - Re-exported `StreamSheetHeader`, `StreamSheetHeaderStyle`, `StreamSheetHeaderTheme` and `StreamSheetHeaderThemeData` from `stream_core_flutter`.
+- Re-exported `showStreamSheet`, `StreamSheet`, `StreamSheetDragHandle`, `StreamSheetRoute`, `StreamSheetTransition`, `StreamSheetScrollableWidgetBuilder`, `StreamSheetTheme` and `StreamSheetThemeData` from `stream_core_flutter`. Poll sheets (`StreamPollOptionsSheet`, `StreamPollResultsSheet`, `StreamPollOptionVotesSheet`, `StreamPollCommentsSheet`) now present as Stream-styled modal bottom sheets via `showStreamSheet`. See [`migrations/redesign/attachments_and_polls.md`](../../migrations/redesign/attachments_and_polls.md).
 - Added `Translations.totalVoteCountLabel({int? count})`, `viewAllLabel`, `pollVotesLabel`, `endVoteConfirmationMessage` and `questionLabel({bool isPlural = false})`.
 
 🐞 Fixed

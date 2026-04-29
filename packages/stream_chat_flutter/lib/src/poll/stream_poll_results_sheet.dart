@@ -20,50 +20,31 @@ Future<T?> showStreamPollResultsSheet<T extends Object?>({
   required BuildContext context,
   required ValueListenable<Message> messageNotifier,
 }) {
-  final radius = context.streamRadius;
-  final colorScheme = context.streamColorScheme;
-
-  return showModalBottomSheet<T>(
+  return showStreamSheet<T>(
     context: context,
-    useSafeArea: true,
-    isScrollControlled: true,
-    backgroundColor: colorScheme.backgroundElevation1,
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadiusDirectional.only(
-        topStart: radius.xxxxl,
-        topEnd: radius.xxxxl,
-      ),
-    ),
-    builder: (_) => StreamChannel(
+    builder: (_, scrollController) => StreamChannel(
       channel: StreamChannel.of(context).channel,
-      child: DraggableScrollableSheet(
-        snap: true,
-        expand: false,
-        minChildSize: 0.5,
-        initialChildSize: 1,
-        snapSizes: const [0.5, 1],
-        builder: (_, scrollController) => ValueListenableBuilder(
-          valueListenable: messageNotifier,
-          builder: (context, message, _) {
-            final poll = message.poll;
-            if (poll == null) return const Empty();
+      child: ValueListenableBuilder(
+        valueListenable: messageNotifier,
+        builder: (context, message, _) {
+          final poll = message.poll;
+          if (poll == null) return const Empty();
 
-            void onShowAllVotesPressed(PollOption option) {
-              showStreamPollOptionVotesSheet(
-                context: context,
-                messageNotifier: messageNotifier,
-                option: option,
-              );
-            }
-
-            return StreamPollResultsSheet(
-              poll: poll,
-              visibleVotesCount: 5,
-              scrollController: scrollController,
-              onShowAllVotesPressed: onShowAllVotesPressed,
+          void onShowAllVotesPressed(PollOption option) {
+            showStreamPollOptionVotesSheet(
+              context: context,
+              messageNotifier: messageNotifier,
+              option: option,
             );
-          },
-        ),
+          }
+
+          return StreamPollResultsSheet(
+            poll: poll,
+            visibleVotesCount: 5,
+            scrollController: scrollController,
+            onShowAllVotesPressed: onShowAllVotesPressed,
+          );
+        },
       ),
     ),
   );

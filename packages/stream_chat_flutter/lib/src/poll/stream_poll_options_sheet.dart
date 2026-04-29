@@ -14,52 +14,33 @@ Future<T?> showStreamPollOptionsSheet<T extends Object?>({
   required BuildContext context,
   required ValueListenable<Message> messageNotifier,
 }) {
-  final radius = context.streamRadius;
-  final colorScheme = context.streamColorScheme;
-
-  return showModalBottomSheet<T>(
+  return showStreamSheet<T>(
     context: context,
-    useSafeArea: true,
-    isScrollControlled: true,
-    backgroundColor: colorScheme.backgroundElevation1,
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadiusDirectional.only(
-        topStart: radius.xxxxl,
-        topEnd: radius.xxxxl,
-      ),
-    ),
-    builder: (_) => StreamChannel(
+    builder: (_, scrollController) => StreamChannel(
       channel: StreamChannel.of(context).channel,
-      child: DraggableScrollableSheet(
-        snap: true,
-        expand: false,
-        minChildSize: 0.5,
-        initialChildSize: 1,
-        snapSizes: const [0.5, 1],
-        builder: (_, scrollController) => ValueListenableBuilder(
-          valueListenable: messageNotifier,
-          builder: (context, message, _) {
-            final poll = message.poll;
-            if (poll == null) return const Empty();
+      child: ValueListenableBuilder(
+        valueListenable: messageNotifier,
+        builder: (context, message, _) {
+          final poll = message.poll;
+          if (poll == null) return const Empty();
 
-            final channel = StreamChannel.of(context).channel;
+          final channel = StreamChannel.of(context).channel;
 
-            void onCastVote(PollOption option) {
-              channel.castPollVote(message, poll, option);
-            }
+          void onCastVote(PollOption option) {
+            channel.castPollVote(message, poll, option);
+          }
 
-            void onRemoveVote(PollVote vote) {
-              channel.removePollVote(message, poll, vote);
-            }
+          void onRemoveVote(PollVote vote) {
+            channel.removePollVote(message, poll, vote);
+          }
 
-            return StreamPollOptionsSheet(
-              poll: poll,
-              scrollController: scrollController,
-              onCastVote: onCastVote,
-              onRemoveVote: onRemoveVote,
-            );
-          },
-        ),
+          return StreamPollOptionsSheet(
+            poll: poll,
+            scrollController: scrollController,
+            onCastVote: onCastVote,
+            onRemoveVote: onRemoveVote,
+          );
+        },
       ),
     ),
   );

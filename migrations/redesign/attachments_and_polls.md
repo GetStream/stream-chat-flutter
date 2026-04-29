@@ -333,7 +333,9 @@ StreamPollInteractorThemeData(
 
 ### Breaking Changes:
 
-The four poll dialogs — `StreamPollOptionsDialog`, `StreamPollResultsDialog`, `StreamPollOptionVotesDialog`, and `StreamPollCommentsDialog` — have been renamed to `...Sheet` and now present as modal bottom sheets (`showModalBottomSheet` + `DraggableScrollableSheet`) instead of full-screen `MaterialPageRoute`s. The previous `Scaffold` + `StreamAppBar` chrome has been replaced by a `StreamSheetHeader` at the top of each sheet.
+The four poll dialogs — `StreamPollOptionsDialog`, `StreamPollResultsDialog`, `StreamPollOptionVotesDialog`, and `StreamPollCommentsDialog` — have been renamed to `...Sheet` and now present as modal bottom sheets via the new `showStreamSheet` helper from `stream_core_flutter` (a Stream-styled sheet route with scroll-aware drag-to-dismiss) instead of full-screen page routes. The previous `Scaffold` + `StreamAppBar` chrome has been replaced by a `StreamSheetHeader` at the top of each sheet.
+
+Each sheet is now full-size with a small fixed peek from the screen top, and the previous snap-to-half affordance from `DraggableScrollableSheet` is gone — dragging down on the body's scroll view past its top now dismisses the sheet directly.
 
 **Renamed symbols:**
 

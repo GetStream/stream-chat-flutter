@@ -59,10 +59,17 @@ export 'package:stream_core_flutter/stream_core_flutter.dart'
         StreamReactionsType,
         StreamListTile,
         StreamListTileContainer,
+        StreamSheet,
+        StreamSheetDragHandle,
         StreamSheetHeader,
         StreamSheetHeaderStyle,
         StreamSheetHeaderTheme,
         StreamSheetHeaderThemeData,
+        StreamSheetRoute,
+        StreamSheetScrollableWidgetBuilder,
+        StreamSheetTheme,
+        StreamSheetThemeData,
+        StreamSheetTransition,
         StreamSwitch,
         StreamStepper,
         StreamStepperProps,
@@ -84,6 +91,7 @@ export 'package:stream_core_flutter/stream_core_flutter.dart'
         StreamMessageLayoutProperty,
         StreamMessageLayoutVisibility,
         StreamVisibility,
+        showStreamSheet,
         streamSupportedEmojis;
 
 export 'src/ai_assistant/ai_typing_indicator_view.dart';

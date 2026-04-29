@@ -21,42 +21,23 @@ Future<T?> showStreamPollOptionVotesSheet<T extends Object?>({
   required ValueListenable<Message> messageNotifier,
   required PollOption option,
 }) {
-  final radius = context.streamRadius;
-  final colorScheme = context.streamColorScheme;
-
-  return showModalBottomSheet<T>(
+  return showStreamSheet<T>(
     context: context,
-    useSafeArea: true,
-    isScrollControlled: true,
-    backgroundColor: colorScheme.backgroundElevation1,
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadiusDirectional.only(
-        topStart: radius.xxxxl,
-        topEnd: radius.xxxxl,
-      ),
-    ),
-    builder: (_) => StreamChannel(
+    builder: (_, scrollController) => StreamChannel(
       channel: StreamChannel.of(context).channel,
-      child: DraggableScrollableSheet(
-        snap: true,
-        expand: false,
-        minChildSize: 0.5,
-        initialChildSize: 1,
-        snapSizes: const [0.5, 1],
-        builder: (_, scrollController) => ValueListenableBuilder(
-          valueListenable: messageNotifier,
-          builder: (context, message, _) {
-            final poll = message.poll;
-            if (poll == null) return const Empty();
-            if (option.id == null) return const Empty();
+      child: ValueListenableBuilder(
+        valueListenable: messageNotifier,
+        builder: (context, message, _) {
+          final poll = message.poll;
+          if (poll == null) return const Empty();
+          if (option.id == null) return const Empty();
 
-            return StreamPollOptionVotesSheet(
-              poll: poll,
-              option: option,
-              scrollController: scrollController,
-            );
-          },
-        ),
+          return StreamPollOptionVotesSheet(
+            poll: poll,
+            option: option,
+            scrollController: scrollController,
+          );
+        },
       ),
     ),
   );
