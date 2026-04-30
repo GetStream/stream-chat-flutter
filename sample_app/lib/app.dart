@@ -82,11 +82,7 @@ class _StreamChatSampleAppState extends State<StreamChatSampleApp>
     }
 
     unawaited(() async {
-      var channel = client.state.channels[cid];
-      if (channel == null) {
-        channel = client.channel(channelType, id: channelId);
-        await channel.watch();
-      }
+      final channel = client.channel(channelType, id: channelId);
 
       final ctx = _navigatorKey.currentContext;
       if (ctx == null) {
