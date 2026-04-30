@@ -1052,17 +1052,7 @@ class _DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompo
     if (_isSyncingControllers) return;
     _isSyncingControllers = true;
     try {
-      final pickerAttachments = _pickerController?.value.attachments ?? [];
-      final pickerIds = pickerAttachments.map((a) => a.id).toSet();
-
-      // Preserve attachments that were added outside the picker (e.g. via
-      // the audio recorder while the picker is already open). These are never
-      // present in the picker's own list, so a plain full-replace would drop them.
-      final unpickedAttachments = _effectiveController.attachments
-          .where((a) => !pickerIds.contains(a.id))
-          .toList(growable: false);
-
-      _effectiveController.attachments = [...pickerAttachments, ...unpickedAttachments];
+      _effectiveController.attachments = _pickerController?.value.attachments ?? [];
     } finally {
       _isSyncingControllers = false;
     }
@@ -1074,16 +1064,24 @@ class _DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompo
     final pickerController = _pickerController;
     if (pickerController == null) return;
 
-    final messageIds = _effectiveController.attachments.map((a) => a.id).toSet();
+    final messageAttachments = _effectiveController.attachments;
+    final messageIds = messageAttachments.map((a) => a.id).toSet();
     final pickerIds = pickerController.value.attachments.map((a) => a.id).toSet();
 
     final removedIds = pickerIds.difference(messageIds);
-    if (removedIds.isEmpty) return;
+    final addedIds = messageIds.difference(pickerIds);
+
+    if (removedIds.isEmpty && addedIds.isEmpty) return;
+
+    final addedAttachments = messageAttachments.where((a) => addedIds.contains(a.id)).toList();
 
     _isSyncingControllers = true;
     try {
       for (final id in removedIds) {
         pickerController.removeAttachmentById(id);
+      }
+      for (final attachment in addedAttachments) {
+        pickerController.addAttachment(attachment);
       }
     } finally {
       _isSyncingControllers = false;
