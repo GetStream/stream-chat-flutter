@@ -25,7 +25,7 @@ typedef KeyEventPredicate = bool Function(FocusNode node, KeyEvent event);
 class StreamMessageComposer extends StatelessWidget {
   /// Creates a [StreamMessageComposer].
   // ignore: prefer_const_constructors_in_immutables
-  StreamMessageComposer({
+  const StreamMessageComposer({
     super.key,
     this.controller,
     this.onMessageSent,
@@ -830,15 +830,27 @@ class _DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompo
         const targetAlignment = AlignmentDirectional.topEnd;
         const followerAlignment = AlignmentDirectional.bottomEnd;
 
+        final idleMessage = state is RecordStateIdle ? state.message : null;
+        final showIdleTooltip = idleMessage != null && idleMessage.isNotEmpty;
+
         return PortalTarget(
+          visible: showIdleTooltip,
           anchor: Aligned(
-            target: targetAlignment.resolve(textDirection),
-            follower: followerAlignment.resolve(textDirection),
-            offset: Offset(-streamSpacing.md, -streamSpacing.md).directional(textDirection),
+            target: Alignment.topCenter,
+            follower: Alignment.bottomCenter,
+            offset: Offset(0, -streamSpacing.md),
           ),
-          visible: state is RecordStateRecording,
-          portalFollower: SwipeToLockButton(isLocked: state is RecordStateRecordingLocked),
-          child: _buildRow(context, componentProps),
+          portalFollower: showIdleTooltip ? HoldToRecordInfoTooltip(message: idleMessage) : const SizedBox.shrink(),
+          child: PortalTarget(
+            anchor: Aligned(
+              target: targetAlignment.resolve(textDirection),
+              follower: followerAlignment.resolve(textDirection),
+              offset: Offset(-streamSpacing.md, -streamSpacing.md).directional(textDirection),
+            ),
+            visible: state is RecordStateRecording,
+            portalFollower: SwipeToLockButton(isLocked: state is RecordStateRecordingLocked),
+            child: _buildRow(context, componentProps),
+          ),
         );
       },
     );

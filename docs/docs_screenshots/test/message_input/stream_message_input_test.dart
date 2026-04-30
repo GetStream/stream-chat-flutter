@@ -161,7 +161,7 @@ void main() {
               body: Column(
                 children: [
                   Expanded(child: Container()),
-                  const StreamMessageInput(),
+                  const StreamMessageComposer(),
                 ],
               ),
             ),

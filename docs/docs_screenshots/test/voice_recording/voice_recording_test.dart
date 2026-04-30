@@ -25,7 +25,7 @@ StreamAudioRecorderController _makeRecorderController(AudioRecorderState initial
 Widget _buildVoiceRecordingMessageInputScaffold({
   required MockClient client,
   required MockChannel channel,
-  StreamMessageInputController? messageInputController,
+  StreamMessageComposerController? controller,
 }) {
   return MaterialApp(
     theme: docsScreenshotsTheme(),
@@ -43,7 +43,7 @@ Widget _buildVoiceRecordingMessageInputScaffold({
               Expanded(child: Container()),
               StreamMessageComposer(
                 enableVoiceRecording: true,
-                messageInputController: messageInputController,
+                controller: controller,
               ),
             ],
           ),
@@ -134,14 +134,10 @@ Widget _buildVoiceRecordingComposerScaffold({
                       decoration: BoxDecoration(
                         color: context.streamColorScheme.backgroundElevation1,
                       ),
-                      child: Padding(
-                        padding: EdgeInsets.only(bottom: context.streamSpacing.md),
-                        child: StreamChatMessageComposer(
-                          onSendPressed: () {},
-                          onAttachmentButtonPressed: () {},
-                          placeholder: 'Send a message',
-                          audioRecorderController: audioRecorderController,
-                        ),
+                      child: StreamMessageComposer(
+                        enableVoiceRecording: true,
+                        controller: StreamMessageComposerController(),
+                        audioRecorderController: audioRecorderController,
                       ),
                     ),
                   );
@@ -254,13 +250,7 @@ void main() {
       return _buildVoiceRecordingComposerScaffold(
         client: client,
         channel: channel,
-        child: MessageComposerRecordingLocked(
-          audioRecorderController: _makeRecorderController(lockedState),
-          feedback: const AudioRecorderFeedback(),
-          messageComposerController: StreamMessageComposerController(),
-          sendMessageCallback: null,
-          state: lockedState,
-        ),
+        audioRecorderController: _makeRecorderController(lockedState),
       );
     },
   );
@@ -290,13 +280,6 @@ void main() {
 
       return _buildVoiceRecordingComposerScaffold(
         client: client,
-        child: MessageComposerRecordingStopped(
-          audioRecorderController: _makeRecorderController(stoppedState),
-          feedback: const AudioRecorderFeedback(),
-          messageComposerController: StreamMessageComposerController(),
-          sendMessageCallback: null,
-          recordingState: stoppedState,
-        ),
         channel: channel,
         audioRecorderController: _makeRecorderController(stoppedState),
       );
@@ -314,7 +297,7 @@ void main() {
       final channelState = MockChannelState();
       _setupChannel(client, clientState, channel, channelState);
 
-      final messageInputController = StreamMessageInputController()
+      final controller = StreamMessageComposerController()
         ..addAttachment(
           Attachment(
             type: 'voiceRecording',
@@ -330,7 +313,7 @@ void main() {
       return _buildVoiceRecordingMessageInputScaffold(
         client: client,
         channel: channel,
-        messageInputController: messageInputController,
+        controller: controller,
       );
     },
   );
