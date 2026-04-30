@@ -155,7 +155,7 @@ void main() {
     Future<void> pumpStreamChatCore(
       WidgetTester tester, {
       void Function(Event)? onBackgroundEventReceived,
-      Duration backgroundKeepAlive = const Duration(minutes: 1),
+      Duration backgroundKeepAlive = const Duration(seconds: 15),
     }) async {
       await tester.pumpWidget(
         MaterialApp(
