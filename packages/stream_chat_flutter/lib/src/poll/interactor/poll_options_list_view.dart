@@ -22,6 +22,7 @@ class PollOptionsListView extends StatelessWidget {
   const PollOptionsListView({
     super.key,
     required this.poll,
+    this.padding,
     this.spacing,
     this.optionStyle,
     this.visibleOptionCount,
@@ -32,6 +33,11 @@ class PollOptionsListView extends StatelessWidget {
 
   /// The poll to display the options for.
   final Poll poll;
+
+  /// Padding applied around the list of options.
+  ///
+  /// If null, defaults to `EdgeInsets.symmetric(horizontal: context.streamSpacing.xs)`.
+  final EdgeInsetsGeometry? padding;
 
   /// The vertical spacing between poll options.
   ///
@@ -90,55 +96,54 @@ class PollOptionsListView extends StatelessWidget {
     final translations = context.translations;
 
     final effectiveSpacing = spacing ?? streamSpacing.xxxs;
+    final effectivePadding = padding ?? .symmetric(horizontal: streamSpacing.xs);
 
-    return Padding(
-      padding: .symmetric(horizontal: streamSpacing.xs),
-      child: Column(
-        mainAxisSize: .min,
-        crossAxisAlignment: .stretch,
-        children: [
-          ListView.separated(
-            shrinkWrap: true,
-            itemCount: options.length,
-            physics: const NeverScrollableScrollPhysics(),
-            separatorBuilder: (_, __) => SizedBox(height: effectiveSpacing),
-            itemBuilder: (context, index) {
-              final option = options.elementAt(index);
-              return PollOptionItem(
-                key: ValueKey(option.id),
-                poll: poll,
-                option: option,
-                style: optionStyle,
-                onChanged: (checked) {
-                  if (checked == null) return;
+    return Column(
+      mainAxisSize: .min,
+      crossAxisAlignment: .stretch,
+      children: [
+        ListView.separated(
+          shrinkWrap: true,
+          itemCount: options.length,
+          padding: effectivePadding,
+          physics: const NeverScrollableScrollPhysics(),
+          separatorBuilder: (_, __) => SizedBox(height: effectiveSpacing),
+          itemBuilder: (context, index) {
+            final option = options.elementAt(index);
+            return PollOptionItem(
+              key: ValueKey(option.id),
+              poll: poll,
+              option: option,
+              style: optionStyle,
+              onChanged: (checked) {
+                if (checked == null) return;
 
-                  // Handle voting based on the voting mode.
-                  poll.votingMode.when(
-                    disabled: () {}, // Do nothing
-                    all: () => _handleVoteAction(option, checked: checked),
-                    // Note: We don't need to remove the other votes in the unique
-                    // voting mode as the backend handles it.
-                    unique: () => _handleVoteAction(option, checked: checked),
-                    limited: (count) => _handleVoteAction(
-                      option,
-                      checked: checked && poll.ownVotes.length < count,
-                    ),
-                  );
-                },
-              );
-            },
+                // Handle voting based on the voting mode.
+                poll.votingMode.when(
+                  disabled: () {}, // Do nothing
+                  all: () => _handleVoteAction(option, checked: checked),
+                  // Note: We don't need to remove the other votes in the unique
+                  // voting mode as the backend handles it.
+                  unique: () => _handleVoteAction(option, checked: checked),
+                  limited: (count) => _handleVoteAction(
+                    option,
+                    checked: checked && poll.ownVotes.length < count,
+                  ),
+                );
+              },
+            );
+          },
+        ),
+        if (visibleOptionCount case final count? when count < poll.options.length)
+          StreamButton(
+            size: .small,
+            style: .secondary,
+            type: .ghost,
+            onPressed: onSeeMoreOptions,
+            themeStyle: .from(tapTargetSize: .shrinkWrap),
+            child: Text(translations.seeAllOptionsLabel(count: poll.options.length)),
           ),
-          if (visibleOptionCount case final count? when count < poll.options.length)
-            StreamButton(
-              size: .small,
-              style: .secondary,
-              type: .ghost,
-              onPressed: onSeeMoreOptions,
-              themeStyle: .from(tapTargetSize: .shrinkWrap),
-              child: Text(translations.seeAllOptionsLabel(count: poll.options.length)),
-            ),
-        ],
-      ),
+      ],
     );
   }
 }
