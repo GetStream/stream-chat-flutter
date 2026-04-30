@@ -44,7 +44,7 @@ class StreamChatCore extends StatefulWidget {
     required this.client,
     required this.child,
     this.onBackgroundEventReceived,
-    this.backgroundKeepAlive = const Duration(minutes: 1),
+    this.backgroundKeepAlive = const Duration(seconds: 15),
     this.connectivityStream,
   });
 
@@ -226,6 +226,9 @@ class StreamChatCoreState extends State<StreamChatCore>
     WidgetsBinding.instance.addObserver(this);
     _subscribeToConnectivityChange(widget.connectivityStream);
 
+    // Disable the client-level state recovery on reconnect since we handle it via the list controllers.
+    client.recoverStateOnReconnect = false;
+
     // Update the client system environment.
     unawaited(_getSystemEnvironment.then(client.updateSystemEnvironment));
   }
@@ -256,6 +259,9 @@ class StreamChatCoreState extends State<StreamChatCore>
   @override
   void didUpdateWidget(StreamChatCore oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (widget.client != oldWidget.client) {
+      widget.client.recoverStateOnReconnect = false;
+    }
     final connectivityStream = widget.connectivityStream;
     if (connectivityStream != oldWidget.connectivityStream) {
       _unsubscribeFromConnectivityChange();
@@ -284,7 +290,7 @@ final class _ChatLifecycleManager {
   _ChatLifecycleManager({
     required this.client,
     this.onBackgroundEvent,
-    this.backgroundKeepAlive = const Duration(minutes: 1),
+    this.backgroundKeepAlive = const Duration(seconds: 15),
   });
 
   final StreamChatClient client;
@@ -314,21 +320,16 @@ final class _ChatLifecycleManager {
     return client.maybeReconnect().ignore();
   }
 
-  void _onBackground() {
-    _cancelBackgroundTimer();
-
-    final handler = onBackgroundEvent;
-    if (handler == null) return client.maybeDisconnect();
-
-    return _startBackgroundEventListening(handler);
-  }
-
   Timer? _backgroundTimer;
   StreamSubscription? _eventSubscription;
 
-  void _startBackgroundEventListening(EventHandler handler) {
+  void _onBackground() {
+    _cancelBackgroundTimer();
     _cancelEventSubscription();
-    _eventSubscription = client.on().listen(handler);
+
+    if (onBackgroundEvent case final handler?) {
+      _eventSubscription = client.on().listen(handler);
+    }
 
     _backgroundTimer = Timer(backgroundKeepAlive, () {
       _cancelEventSubscription();

@@ -88,7 +88,8 @@ class StreamChatClient {
         StreamAttachmentFileUploader.new,
     Iterable<Interceptor>? chatApiInterceptors,
     HttpClientAdapter? httpClientAdapter,
-  }) {
+    bool recoverStateOnReconnect = true,
+  }) : _recoverStateOnReconnect = recoverStateOnReconnect {
     logger.info('Initiating new StreamChatClient');
 
     final options = StreamHttpClientOptions(
@@ -191,6 +192,21 @@ class StreamChatClient {
 
   /// The retry policy options getter
   RetryPolicy get retryPolicy => _retryPolicy;
+
+  /// Whether the client should automatically refresh local state from the
+  /// server when the WebSocket connection recovers.
+  ///
+  /// When `true` (default), the client re-queries the active channels on
+  /// reconnect (capped at 30, ordered by `state.channels.keys`). The set of
+  /// state recovered on reconnect may grow in the future to cover threads,
+  /// reminders, etc.
+  ///
+  /// Setting this to `false` disables that client-level recovery. Consumers
+  /// that opt out are responsible for refreshing their own state when the
+  /// [EventType.connectionRecovered] event fires — for example, by re-running
+  /// their channel list query.
+  set recoverStateOnReconnect(bool value) => _recoverStateOnReconnect = value;
+  bool _recoverStateOnReconnect;
 
   /// By default the Chat client will write all messages with level Warn or
   /// Error to stdout.
@@ -530,13 +546,17 @@ class StreamChatClient {
       // connection recovered
       final cids = [...state.channels.keys.toSet()];
       if (cids.isNotEmpty) {
-        await queryChannelsOnline(
-          filter: Filter.in_('cid', cids),
-          paginationParams: const PaginationParams(limit: 30),
-        );
-
         // Sync the persistence client if available
         if (persistenceEnabled) await sync(cids: cids);
+
+        // Recover the channels that were active before the connection was lost,
+        // only if the client is configured to do so.
+        if (_recoverStateOnReconnect) {
+          await queryChannelsOnline(
+            filter: Filter.in_('cid', cids),
+            paginationParams: const PaginationParams(limit: 30),
+          );
+        }
       }
 
       handleEvent(Event(
