@@ -582,13 +582,32 @@ class _DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompo
   void didUpdateWidget(covariant DefaultStreamMessageComposer oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    if (widget.props.controller == null && oldWidget.props.controller != null) {
-      _createLocalController(oldWidget.props.controller!.message);
-    } else if (widget.props.controller != null && oldWidget.props.controller == null) {
-      if (_restorableController != null) {
+    final oldController = oldWidget.props.controller;
+    final newController = widget.props.controller;
+
+    if (oldController != newController) {
+      // Tear down whichever side was active before.
+      if (oldController != null) {
+        // Old side was an external controller — detach it.
+        oldController
+          ..removeListener(_onControllerChanged)
+          ..detach();
+      } else if (_restorableController != null) {
+        // Old side was a local controller — detach, unregister, and dispose it.
+        _restorableController!.value
+          ..removeListener(_onControllerChanged)
+          ..detach();
         unregisterFromRestoration(_restorableController!);
         _restorableController!.dispose();
         _restorableController = null;
+      }
+
+      // Set up the new side.
+      if (newController == null) {
+        // New side is local — create and register a controller seeded with the
+        // previous message so text/attachments are preserved across the swap.
+        _createLocalController(oldController!.message);
+        registerForRestoration(_restorableController!, 'messageComposerController');
       }
       _initController();
     }
