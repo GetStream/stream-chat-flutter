@@ -896,8 +896,8 @@ class DefaultStreamMessage extends StatelessWidget {
       builder: (context) => StreamMessageActionConfirmationModal(
         title: Text(context.translations.deleteMessageLabel),
         content: Text(context.translations.deleteMessageQuestion),
-        cancelActionTitle: Text(context.translations.cancelLabel.sentenceCase),
-        confirmActionTitle: Text(context.translations.deleteLabel.sentenceCase),
+        cancelActionTitle: Text(context.translations.cancelLabel),
+        confirmActionTitle: Text(context.translations.deleteLabel),
         isDestructiveAction: true,
       ),
     );
@@ -918,8 +918,8 @@ class DefaultStreamMessage extends StatelessWidget {
       builder: (context) => StreamMessageActionConfirmationModal(
         title: Text(context.translations.flagMessageLabel),
         content: Text(context.translations.flagMessageQuestion),
-        cancelActionTitle: Text(context.translations.cancelLabel.sentenceCase),
-        confirmActionTitle: Text(context.translations.flagLabel.sentenceCase),
+        cancelActionTitle: Text(context.translations.cancelLabel),
+        confirmActionTitle: Text(context.translations.flagLabel),
         isDestructiveAction: true,
       ),
     );

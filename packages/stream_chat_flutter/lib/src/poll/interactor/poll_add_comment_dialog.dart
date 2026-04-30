@@ -62,7 +62,7 @@ class _PollAddCommentDialogState extends State<PollAddCommentDialog> {
         style: .secondary,
         size: .small,
         onPressed: Navigator.of(context).pop,
-        child: Text(context.translations.cancelLabel.toUpperCase()),
+        child: Text(context.translations.cancelLabel),
       ),
       StreamButton(
         type: .ghost,
@@ -73,7 +73,7 @@ class _PollAddCommentDialogState extends State<PollAddCommentDialog> {
           final comment when comment == widget.initialValue => null,
           final comment => () => Navigator.of(context).pop(comment),
         },
-        child: Text(context.translations.sendLabel.toUpperCase()),
+        child: Text(context.translations.sendLabel),
       ),
     ];
 

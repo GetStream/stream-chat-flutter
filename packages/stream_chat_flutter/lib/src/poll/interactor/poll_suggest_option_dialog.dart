@@ -64,7 +64,7 @@ class _PollSuggestOptionDialogState extends State<PollSuggestOptionDialog> {
         style: .secondary,
         size: .small,
         onPressed: Navigator.of(context).pop,
-        child: Text(context.translations.cancelLabel.toUpperCase()),
+        child: Text(context.translations.cancelLabel),
       ),
       StreamButton(
         type: .ghost,
@@ -75,7 +75,7 @@ class _PollSuggestOptionDialogState extends State<PollSuggestOptionDialog> {
           final option when option == widget.initialOption => null,
           final option => () => Navigator.of(context).pop(option),
         },
-        child: Text(context.translations.sendLabel.toUpperCase()),
+        child: Text(context.translations.sendLabel),
       ),
     ];
 

@@ -177,10 +177,10 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
       'Ønsker du å sende en kopi av denne meldingen til en moderator for videre undersøkelser';
 
   @override
-  String get flagLabel => 'RAPPORTER';
+  String get flagLabel => 'Rapporter';
 
   @override
-  String get cancelLabel => 'AVBRYT';
+  String get cancelLabel => 'Avbryt';
 
   @override
   String get flagMessageSuccessfulLabel => 'Melding rapportert';
@@ -189,7 +189,7 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
   String get flagMessageSuccessfulText => 'Meldingen har blitt rapportert til en moderator.';
 
   @override
-  String get deleteLabel => 'SLETT';
+  String get deleteLabel => 'Slett';
 
   @override
   String get deleteMessageLabel => 'Slett melding';

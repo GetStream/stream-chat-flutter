@@ -885,10 +885,10 @@ class DefaultTranslations implements Translations {
       'Do you want to send a copy of this message to a moderator for further investigation?';
 
   @override
-  String get flagLabel => 'FLAG';
+  String get flagLabel => 'Flag';
 
   @override
-  String get cancelLabel => 'CANCEL';
+  String get cancelLabel => 'Cancel';
 
   @override
   String get flagMessageSuccessfulLabel => 'Message flagged';
@@ -897,7 +897,7 @@ class DefaultTranslations implements Translations {
   String get flagMessageSuccessfulText => 'The message has been reported to a moderator.';
 
   @override
-  String get deleteLabel => 'DELETE';
+  String get deleteLabel => 'Delete';
 
   @override
   String get deleteMessageLabel => 'Delete Message';

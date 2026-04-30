@@ -40,14 +40,14 @@ class PollEndVoteDialog extends StatelessWidget {
         style: .secondary,
         size: .small,
         onPressed: () => Navigator.of(context).maybePop(false),
-        child: Text(context.translations.cancelLabel.toUpperCase()),
+        child: Text(context.translations.cancelLabel),
       ),
       StreamButton(
         type: .ghost,
         style: .destructive,
         size: .small,
         onPressed: () => Navigator.of(context).maybePop(true),
-        child: Text(context.translations.endLabel.toUpperCase()),
+        child: Text(context.translations.endLabel),
       ),
     ];
 

@@ -194,7 +194,7 @@ class AttachmentActionsModal extends StatelessWidget {
                           if (StreamChat.of(context).currentUser?.id == message.user?.id && showDelete)
                             _buildButton(
                               context,
-                              context.translations.deleteLabel.sentenceCase,
+                              context.translations.deleteLabel,
                               Icon(
                                 context.streamIcons.delete,
                                 size: 24,
