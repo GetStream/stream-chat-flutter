@@ -33,6 +33,10 @@ ThemeData docsScreenshotsTheme() {
   return ThemeData(
     useMaterial3: true,
     brightness: Brightness.light,
+    scaffoldBackgroundColor: const Color(0xFFFFFFFF),
+    appBarTheme: const AppBarTheme(
+      backgroundColor: Color(0xFFFFFFFF),
+    ),
     extensions: [
       StreamTheme(brightness: Brightness.light, textTheme: streamTextTheme),
     ],
