@@ -4285,6 +4285,195 @@ void main() {
     });
   });
 
+  group('recoverStateOnReconnect', () {
+    const apiKey = 'test-api-key';
+    final user = User(id: 'test-user-id');
+    final token = Token.development(user.id).rawValue;
+
+    late FakeChatApi api;
+    late FakeWebSocket ws;
+    late StreamChatClient client;
+
+    setUpAll(() {
+      registerFallbackValue(const PaginationParams());
+      registerFallbackValue(Filter.equal('cid', ''));
+    });
+
+    setUp(() {
+      api = FakeChatApi();
+      ws = FakeWebSocket();
+
+      // Stub queryChannels for every test — it's the API the recovery path
+      // calls when enabled, and a missing stub would surface as an unhandled
+      // async error inside the connection-status listener.
+      when(
+        () => api.channel.queryChannels(
+          filter: any(named: 'filter'),
+          sort: any(named: 'sort'),
+          state: any(named: 'state'),
+          watch: any(named: 'watch'),
+          presence: any(named: 'presence'),
+          memberLimit: any(named: 'memberLimit'),
+          messageLimit: any(named: 'messageLimit'),
+          paginationParams: any(named: 'paginationParams'),
+        ),
+      ).thenAnswer((_) async => QueryChannelsResponse()..channels = []);
+    });
+
+    tearDown(() async {
+      await client.dispose();
+    });
+
+    // Drives the FakeWebSocket through a connected → disconnected → connected
+    // transition so the client's pairwise listener fires the recovery path.
+    Future<void> simulateReconnect() async {
+      ws.connectionStatus = ConnectionStatus.disconnected;
+      await delay(100);
+      ws.connectionStatus = ConnectionStatus.connected;
+      await delay(300);
+    }
+
+    test('should re-query active channels on reconnect when enabled (default)', () async {
+      // Setup: connect with default flag, register two channels.
+      client = StreamChatClient(apiKey, chatApi: api, ws: ws);
+      await client.connectUser(user, token);
+      await delay(300);
+
+      final channel1 = Channel.fromState(client, ChannelState(channel: ChannelModel(cid: 'messaging:c1')));
+      final channel2 = Channel.fromState(client, ChannelState(channel: ChannelModel(cid: 'messaging:c2')));
+      client.state.addChannels({'messaging:c1': channel1, 'messaging:c2': channel2});
+
+      // Drop interactions from the initial connect's (empty-channel) recovery
+      // so we only count the reconnect call.
+      clearInteractions(api.channel);
+
+      await simulateReconnect();
+
+      verify(
+        () => api.channel.queryChannels(
+          filter: Filter.in_('cid', const ['messaging:c1', 'messaging:c2']),
+          sort: any(named: 'sort'),
+          state: any(named: 'state'),
+          watch: any(named: 'watch'),
+          presence: any(named: 'presence'),
+          memberLimit: any(named: 'memberLimit'),
+          messageLimit: any(named: 'messageLimit'),
+          paginationParams: const PaginationParams(limit: 30),
+        ),
+      ).called(1);
+    });
+
+    test('should skip the re-query on reconnect when disabled', () async {
+      client = StreamChatClient(apiKey, chatApi: api, ws: ws, recoverStateOnReconnect: false);
+      await client.connectUser(user, token);
+      await delay(300);
+
+      final channel = Channel.fromState(client, ChannelState(channel: ChannelModel(cid: 'messaging:c1')));
+      client.state.addChannels({'messaging:c1': channel});
+      clearInteractions(api.channel);
+
+      await simulateReconnect();
+
+      verifyNever(
+        () => api.channel.queryChannels(
+          filter: any(named: 'filter'),
+          sort: any(named: 'sort'),
+          state: any(named: 'state'),
+          watch: any(named: 'watch'),
+          presence: any(named: 'presence'),
+          memberLimit: any(named: 'memberLimit'),
+          messageLimit: any(named: 'messageLimit'),
+          paginationParams: any(named: 'paginationParams'),
+        ),
+      );
+    });
+
+    test('should still emit `connectionRecovered` when disabled', () async {
+      client = StreamChatClient(apiKey, chatApi: api, ws: ws, recoverStateOnReconnect: false);
+      await client.connectUser(user, token);
+      await delay(300);
+
+      final channel = Channel.fromState(client, ChannelState(channel: ChannelModel(cid: 'messaging:c1')));
+      client.state.addChannels({'messaging:c1': channel});
+
+      // Subscribe AFTER the initial connect so the captured event is the
+      // one fired by the manual reconnect.
+      final recoveredEvents = <Event>[];
+      final sub = client.on(EventType.connectionRecovered).listen(recoveredEvents.add);
+
+      await simulateReconnect();
+      await sub.cancel();
+
+      expect(recoveredEvents, hasLength(1));
+    });
+
+    test('should skip the re-query when no active channels are tracked', () async {
+      client = StreamChatClient(apiKey, chatApi: api, ws: ws);
+      await client.connectUser(user, token);
+      await delay(300);
+
+      // No channels added — the cids.isNotEmpty guard should short-circuit.
+      clearInteractions(api.channel);
+
+      await simulateReconnect();
+
+      verifyNever(
+        () => api.channel.queryChannels(
+          filter: any(named: 'filter'),
+          sort: any(named: 'sort'),
+          state: any(named: 'state'),
+          watch: any(named: 'watch'),
+          presence: any(named: 'presence'),
+          memberLimit: any(named: 'memberLimit'),
+          messageLimit: any(named: 'messageLimit'),
+          paginationParams: any(named: 'paginationParams'),
+        ),
+      );
+    });
+
+    test('should respect runtime toggling via the setter', () async {
+      client = StreamChatClient(apiKey, chatApi: api, ws: ws);
+      await client.connectUser(user, token);
+      await delay(300);
+
+      final channel = Channel.fromState(client, ChannelState(channel: ChannelModel(cid: 'messaging:c1')));
+      client.state.addChannels({'messaging:c1': channel});
+      clearInteractions(api.channel);
+
+      // Disable mid-flight → no re-query on reconnect.
+      client.recoverStateOnReconnect = false;
+      await simulateReconnect();
+      verifyNever(
+        () => api.channel.queryChannels(
+          filter: any(named: 'filter'),
+          sort: any(named: 'sort'),
+          state: any(named: 'state'),
+          watch: any(named: 'watch'),
+          presence: any(named: 'presence'),
+          memberLimit: any(named: 'memberLimit'),
+          messageLimit: any(named: 'messageLimit'),
+          paginationParams: any(named: 'paginationParams'),
+        ),
+      );
+
+      // Re-enable → re-query on the next reconnect.
+      client.recoverStateOnReconnect = true;
+      await simulateReconnect();
+      verify(
+        () => api.channel.queryChannels(
+          filter: any(named: 'filter'),
+          sort: any(named: 'sort'),
+          state: any(named: 'state'),
+          watch: any(named: 'watch'),
+          presence: any(named: 'presence'),
+          memberLimit: any(named: 'memberLimit'),
+          messageLimit: any(named: 'messageLimit'),
+          paginationParams: any(named: 'paginationParams'),
+        ),
+      ).called(1);
+    });
+  });
+
   group('WS events', () {
     late StreamChatClient client;
 
