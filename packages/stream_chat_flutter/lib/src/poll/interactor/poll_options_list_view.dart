@@ -22,15 +22,26 @@ class PollOptionsListView extends StatelessWidget {
   const PollOptionsListView({
     super.key,
     required this.poll,
+    this.spacing,
+    this.optionStyle,
     this.visibleOptionCount,
     this.onSeeMoreOptions,
-    this.showProgressBar = false,
     this.onCastVote,
     this.onRemoveVote,
   });
 
   /// The poll to display the options for.
   final Poll poll;
+
+  /// The vertical spacing between poll options.
+  ///
+  /// If null, defaults to `context.streamSpacing.xxxs`.
+  final double? spacing;
+
+  /// The style used to render each [PollOptionItem].
+  ///
+  /// If null, defaults to [StreamPollInteractorThemeData.optionStyle].
+  final StreamPollOptionStyle? optionStyle;
 
   /// The number of visible options in the poll.
   ///
@@ -42,11 +53,6 @@ class PollOptionsListView extends StatelessWidget {
   /// This is only available if the poll has more options than the
   /// [visibleOptionCount].
   final VoidCallback? onSeeMoreOptions;
-
-  /// Whether to show the voting progress bar.
-  ///
-  /// Note: This is only used when the poll is public.
-  final bool showProgressBar;
 
   /// Callback invoked when the user wants to cast a vote.
   ///
@@ -80,11 +86,13 @@ class PollOptionsListView extends StatelessWidget {
       _ => poll.options,
     };
 
-    final spacing = context.streamSpacing;
+    final streamSpacing = context.streamSpacing;
     final translations = context.translations;
 
+    final effectiveSpacing = spacing ?? streamSpacing.xxxs;
+
     return Padding(
-      padding: .symmetric(horizontal: spacing.xs),
+      padding: .symmetric(horizontal: streamSpacing.xs),
       child: Column(
         mainAxisSize: .min,
         crossAxisAlignment: .stretch,
@@ -93,14 +101,14 @@ class PollOptionsListView extends StatelessWidget {
             shrinkWrap: true,
             itemCount: options.length,
             physics: const NeverScrollableScrollPhysics(),
-            separatorBuilder: (_, __) => SizedBox(height: spacing.xxxs),
+            separatorBuilder: (_, __) => SizedBox(height: effectiveSpacing),
             itemBuilder: (context, index) {
               final option = options.elementAt(index);
               return PollOptionItem(
                 key: ValueKey(option.id),
                 poll: poll,
                 option: option,
-                showProgressBar: showProgressBar,
+                style: optionStyle,
                 onChanged: (checked) {
                   if (checked == null) return;
 
@@ -154,7 +162,7 @@ class PollOptionItem extends StatelessWidget {
     super.key,
     required this.poll,
     required this.option,
-    this.showProgressBar = true,
+    this.style,
     this.onChanged,
   });
 
@@ -164,10 +172,10 @@ class PollOptionItem extends StatelessWidget {
   /// The poll option the user can interact with.
   final PollOption option;
 
-  /// Whether to show the progress bar.
+  /// The style used to render this item.
   ///
-  /// Note: This is only used when the poll is public.
-  final bool showProgressBar;
+  /// If null, defaults to [StreamPollInteractorThemeData.optionStyle].
+  final StreamPollOptionStyle? style;
 
   /// Callback invoked when the user interacts with the option.
   ///
@@ -176,7 +184,7 @@ class PollOptionItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = StreamPollInteractorTheme.of(context).optionStyle;
+    final theme = style ?? StreamPollInteractorTheme.of(context).optionStyle;
     final defaults = _StreamPollOptionDefaults(context);
 
     final radius = context.streamRadius;
@@ -248,16 +256,15 @@ class PollOptionItem extends StatelessWidget {
                       ),
                     ],
                   ),
-                  if (showProgressBar)
-                    StreamProgressBarTheme(
-                      data: .new(style: effectiveProgressBarStyle),
-                      child: TweenAnimationBuilder<double>(
-                        curve: Curves.easeOutCubic,
-                        duration: Durations.medium2,
-                        tween: Tween(begin: 0, end: poll.voteRatioFor(option)),
-                        builder: (_, value, _) => StreamProgressBar(value: value),
-                      ),
+                  StreamProgressBarTheme(
+                    data: .new(style: effectiveProgressBarStyle),
+                    child: TweenAnimationBuilder<double>(
+                      curve: Curves.easeOutCubic,
+                      duration: Durations.medium2,
+                      tween: Tween(begin: 0, end: poll.voteRatioFor(option)),
+                      builder: (_, value, _) => StreamProgressBar(value: value),
                     ),
+                  ),
                 ],
               ),
             ),

@@ -5,6 +5,10 @@
 - Renamed `attachmentsUploadProgressText` parameter `remaining` → `completed`
   and reworded the translation across all locales to report completed count
   instead of remaining.
+- Renamed `questionsLabel` getter → `questionLabel({bool isPlural = false})`
+  method across all supported locales.
+- Renamed `endVoteConfirmationText` → `endVoteConfirmationTitle` across all
+  supported locales; English default changed to `'End This Poll?'`.
 
 ✅ Added
 
@@ -20,6 +24,11 @@
   `maximumVotesPerPersonDescription`, `anonymousPollDescription`,
   `suggestAnOptionDescription`, and `addACommentDescription` translations for
   all supported locales.
+- Added `totalVoteCountLabel({int? count})` translation for all supported
+  locales.
+- Added `viewAllLabel` translation for all supported locales.
+- Added `pollVotesLabel` translation for all supported locales.
+- Added `endVoteConfirmationMessage` translation for all supported locales.
 
 🔄 Changed
 
@@ -29,6 +38,7 @@
 - Reworded `writeAMessageLabel` across all locales to use a "Send a message"
   style (English default: `'Write a message'` → `'Send a message'`) to match
   the redesigned message composer placeholder.
+- Reworded `endVoteLabel` English override from `'End Vote'` to `'End Poll'`.
 
 ## 10.0.0-beta.13
 

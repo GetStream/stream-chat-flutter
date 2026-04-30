@@ -7,6 +7,7 @@ This guide covers the breaking changes to `Translations` and `StreamChatLocaliza
 ## Table of Contents
 
 - [New Required Abstract Members](#new-required-abstract-members)
+- [Renamed Abstract Members](#renamed-abstract-members)
 - [Changed Default String Values](#changed-default-string-values)
 - [Migration Checklist](#migration-checklist)
 
@@ -141,9 +142,58 @@ String membersCountWithOnlineText({
 // Composer placeholder for user-target commands (`/mute`, `/unmute`, `/ban`, `/unban`)
 @override
 String get commandUsernameLabel => '@username';
+
+// Poll results dialog footer
+@override
+String totalVoteCountLabel({int? count}) => switch (count) {
+  null || < 1 => '0 votes total',
+  1 => '1 vote total',
+  _ => '$count votes total',
+};
+
+// Generic "view all" CTA (used by the poll results dialog footer action)
+@override
+String get viewAllLabel => 'View all';
+
+// Poll option votes dialog app bar title
+@override
+String get pollVotesLabel => 'Votes';
+
+// Poll end-vote confirmation dialog body
+@override
+String get endVoteConfirmationMessage =>
+    'Do you want to end this poll now? Nobody will be able to vote in this poll anymore.';
 ```
 
 > **Note:** The values shown above are the English defaults from `DefaultTranslations`. Provide your own translated strings in place of these.
+
+---
+
+## Renamed Abstract Members
+
+The following members were renamed. If you have overridden them in a custom `Translations` subclass you must update the override signature; otherwise the compiler will flag the old name as an unknown member.
+
+| Old member | New member | Notes |
+|------------|------------|-------|
+| `String get questionsLabel` | `String questionLabel({bool isPlural = false})` | Now mirrors `optionLabel({bool isPlural})`. Pass `isPlural: true` to get the previous plural value, or call with no arguments for the singular "Question" label used in the poll results/options dialogs. |
+| `String get endVoteConfirmationText` | `String get endVoteConfirmationTitle` | Renamed to reflect that this string is the dialog title rather than body text; see also the new default value in [Changed Default String Values](#changed-default-string-values). |
+
+Example migration:
+
+```dart
+// Before
+@override
+String get questionsLabel => 'Questions';
+
+// After
+@override
+String questionLabel({bool isPlural = false}) {
+  if (isPlural) return 'Questions';
+  return 'Question';
+}
+```
+
+If you previously read `translations.questionsLabel`, replace it with `translations.questionLabel(isPlural: true)` to preserve the original plural behavior, or `translations.questionLabel()` where the singular form is appropriate.
 
 ---
 
@@ -159,6 +209,8 @@ The following strings changed their default English value in `DefaultTranslation
 | `addMoreFilesLabel` | `'Add more files'` | `'Add more'` |
 | `emptyMessagesText` | `'There are no messages currently'` | `'No messages yet'` |
 | `writeAMessageLabel` | `'Write a message'` | `'Send a message'` |
+| `endVoteConfirmationTitle` (was `endVoteConfirmationText`) | `'Are you sure you want to end the vote?'` | `'End This Poll?'` |
+| `endVoteLabel` | `'End Vote'` | `'End Poll'` |
 
 If your app overrides these in a `Translations` subclass, your custom values are unaffected.
 
@@ -167,5 +219,7 @@ If your app overrides these in a `Translations` subclass, your custom values are
 ## Migration Checklist
 
 - [ ] Search your codebase for any class that `extends Translations` or `extends DefaultTranslations`
-- [ ] Add implementations for all 32 new abstract members listed above — the compiler will flag missing ones
-- [ ] Review the four changed default string values and decide whether to keep the new defaults or override them to preserve the old text
+- [ ] Add implementations for all 35 new abstract members listed above — the compiler will flag missing ones
+- [ ] Update the signature of any `questionsLabel` override to `questionLabel({bool isPlural = false})`, and replace any call to `translations.questionsLabel` with `translations.questionLabel(isPlural: true)`
+- [ ] Rename any `endVoteConfirmationText` override (and consumer) to `endVoteConfirmationTitle`
+- [ ] Review the changed default string values and decide whether to keep the new defaults or override them to preserve the old text

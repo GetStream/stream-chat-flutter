@@ -3,8 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:record/record.dart';
-import 'package:stream_chat_flutter/src/components/message_composer/message_composer_recording_locked.dart';
-import 'package:stream_chat_flutter/src/components/message_composer/message_composer_recording_ongoing.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import '../src/fakes.dart';
@@ -27,6 +25,7 @@ StreamAudioRecorderController _makeRecorderController(AudioRecorderState initial
 Widget _buildVoiceRecordingMessageInputScaffold({
   required MockClient client,
   required MockChannel channel,
+  StreamMessageInputController? messageInputController,
 }) {
   return MaterialApp(
     theme: docsScreenshotsTheme(),
@@ -42,30 +41,12 @@ Widget _buildVoiceRecordingMessageInputScaffold({
           body: Column(
             children: [
               Expanded(child: Container()),
-              StreamMessageComposer(enableVoiceRecording: true),
+              StreamMessageComposer(
+                enableVoiceRecording: true,
+                messageInputController: messageInputController,
+              ),
             ],
           ),
-        ),
-      ),
-    ),
-  );
-}
-
-Widget _buildVoiceRecorderScaffold({
-  required MockClient client,
-  required Widget child,
-}) {
-  return MaterialApp(
-    theme: docsScreenshotsTheme(),
-    debugShowCheckedModeBanner: false,
-    home: StreamChat(
-      client: client,
-      streamChatThemeData: docsStreamChatThemeData(),
-      connectivityStream: Stream.value([ConnectivityResult.mobile]),
-      child: Scaffold(
-        body: Padding(
-          padding: const EdgeInsets.all(8),
-          child: Center(child: child),
         ),
       ),
     ),
@@ -78,13 +59,14 @@ Widget _buildVoiceRecordingContextScaffold({
   required MockClient client,
   required MockChannel channel,
   required Widget voiceWidget,
+  StreamChatThemeData? streamChatThemeData,
 }) {
   return MaterialApp(
     theme: docsScreenshotsTheme(),
     debugShowCheckedModeBanner: false,
     home: StreamChat(
       client: client,
-      streamChatThemeData: docsStreamChatThemeData(),
+      streamChatThemeData: streamChatThemeData ?? docsStreamChatThemeData(),
       connectivityStream: Stream.value([ConnectivityResult.mobile]),
       child: StreamChannel(
         showLoading: false,
@@ -112,6 +94,59 @@ Widget _buildVoiceRecordingContextScaffold({
                 ),
               ),
               StreamMessageComposer(enableVoiceRecording: true),
+            ],
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+/// Scaffold that shows a full message input bar (with attachment button and
+/// placeholder) using [StreamChatMessageComposer] so we can inject a custom
+/// [audioRecorderController] to control the recording state.
+///
+/// The outer [Material] + bottom padding mirrors what [StreamMessageInput]
+/// wraps around [StreamChatMessageComposer] internally.
+Widget _buildVoiceRecordingComposerScaffold({
+  required MockClient client,
+  required MockChannel channel,
+  required StreamAudioRecorderController audioRecorderController,
+}) {
+  return MaterialApp(
+    theme: docsScreenshotsTheme(),
+    debugShowCheckedModeBanner: false,
+    home: StreamChat(
+      client: client,
+      streamChatThemeData: docsStreamChatThemeData(),
+      connectivityStream: Stream.value([ConnectivityResult.mobile]),
+      child: StreamChannel(
+        showLoading: false,
+        channel: channel,
+        child: Scaffold(
+          body: Column(
+            children: [
+              Expanded(child: Container()),
+              Builder(
+                builder: (context) {
+                  return Material(
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: context.streamColorScheme.backgroundElevation1,
+                      ),
+                      child: Padding(
+                        padding: EdgeInsets.only(bottom: context.streamSpacing.md),
+                        child: StreamChatMessageComposer(
+                          onSendPressed: () {},
+                          onAttachmentButtonPressed: () {},
+                          placeholder: 'Send a message',
+                          audioRecorderController: audioRecorderController,
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
             ],
           ),
         ),
@@ -179,20 +214,23 @@ void main() {
   goldenTest(
     'voice recording hold recording state',
     fileName: 'voice_recording_hold_recording',
-    constraints: const BoxConstraints.tightFor(width: 375, height: 56),
+    constraints: const BoxConstraints.tightFor(width: 375, height: 200),
     builder: () {
       final client = MockClient();
+      final clientState = MockClientState();
+      final channel = MockChannel();
+      final channelState = MockChannelState();
+      _setupChannel(client, clientState, channel, channelState);
 
       final holdState = RecordStateRecordingHold(
         duration: const Duration(seconds: 5),
         waveform: List.generate(20, (i) => (i % 5) / 5.0),
       );
 
-      return _buildVoiceRecorderScaffold(
+      return _buildVoiceRecordingComposerScaffold(
         client: client,
-        child: StreamMessageComposerRecordingOngoing(
-          audioRecorderController: _makeRecorderController(holdState),
-        ),
+        channel: channel,
+        audioRecorderController: _makeRecorderController(holdState),
       );
     },
   );
@@ -200,17 +238,22 @@ void main() {
   goldenTest(
     'voice recording locked recording state',
     fileName: 'voice_recording_locked_recording',
-    constraints: const BoxConstraints.tightFor(width: 375, height: 120),
+    constraints: const BoxConstraints.tightFor(width: 375, height: 200),
     builder: () {
       final client = MockClient();
+      final clientState = MockClientState();
+      final channel = MockChannel();
+      final channelState = MockChannelState();
+      _setupChannel(client, clientState, channel, channelState);
 
       final lockedState = RecordStateRecordingLocked(
         duration: const Duration(seconds: 12),
         waveform: List.generate(20, (i) => (i % 5) / 5.0),
       );
 
-      return _buildVoiceRecorderScaffold(
+      return _buildVoiceRecordingComposerScaffold(
         client: client,
+        channel: channel,
         child: MessageComposerRecordingLocked(
           audioRecorderController: _makeRecorderController(lockedState),
           feedback: const AudioRecorderFeedback(),
@@ -223,11 +266,15 @@ void main() {
   );
 
   goldenTest(
-    'voice recording finished state',
-    fileName: 'voice_recording_finished',
-    constraints: const BoxConstraints.tightFor(width: 375, height: 120),
+    'voice recording stopped state',
+    fileName: 'voice_recording_stopped',
+    constraints: const BoxConstraints.tightFor(width: 375, height: 150),
     builder: () {
       final client = MockClient();
+      final clientState = MockClientState();
+      final channel = MockChannel();
+      final channelState = MockChannelState();
+      _setupChannel(client, clientState, channel, channelState);
 
       final stoppedState = RecordStateStopped(
         audioRecording: Attachment(
@@ -241,7 +288,7 @@ void main() {
         ),
       );
 
-      return _buildVoiceRecorderScaffold(
+      return _buildVoiceRecordingComposerScaffold(
         client: client,
         child: MessageComposerRecordingStopped(
           audioRecorderController: _makeRecorderController(stoppedState),
@@ -250,6 +297,40 @@ void main() {
           sendMessageCallback: null,
           recordingState: stoppedState,
         ),
+        channel: channel,
+        audioRecorderController: _makeRecorderController(stoppedState),
+      );
+    },
+  );
+
+  goldenTest(
+    'voice recording finished state',
+    fileName: 'voice_recording_finished',
+    constraints: const BoxConstraints.tightFor(width: 375, height: 200),
+    builder: () {
+      final client = MockClient();
+      final clientState = MockClientState();
+      final channel = MockChannel();
+      final channelState = MockChannelState();
+      _setupChannel(client, clientState, channel, channelState);
+
+      final messageInputController = StreamMessageInputController()
+        ..addAttachment(
+          Attachment(
+            type: 'voiceRecording',
+            assetUrl: 'https://example.com/recording.m4a',
+            uploadState: const UploadState.success(),
+            extraData: const {
+              'duration': 15.0,
+              'waveform_data': <double>[0.1, 0.5, 0.9, 0.4, 0.2],
+            },
+          ),
+        );
+
+      return _buildVoiceRecordingMessageInputScaffold(
+        client: client,
+        channel: channel,
+        messageInputController: messageInputController,
       );
     },
   );
@@ -327,6 +408,29 @@ void main() {
   );
 
   goldenTest(
+    'voice recording idle tooltip',
+    fileName: 'voice_recording_idle_tooltip',
+    constraints: const BoxConstraints.tightFor(width: 375, height: 150),
+    builder: () {
+      final client = MockClient();
+      final clientState = MockClientState();
+      final channel = MockChannel();
+      final channelState = MockChannelState();
+      _setupChannel(client, clientState, channel, channelState);
+
+      final audioRecorderController = _makeRecorderController(
+        const RecordStateIdle(message: 'Hold to record, release to send.'),
+      );
+
+      return _buildVoiceRecordingComposerScaffold(
+        client: client,
+        channel: channel,
+        audioRecorderController: audioRecorderController,
+      );
+    },
+  );
+
+  goldenTest(
     'voice recording attachment playing',
     fileName: 'voice_recording_attachment_playing',
     constraints: const BoxConstraints.tightFor(width: 375, height: 400),
@@ -394,6 +498,100 @@ void main() {
         client: client,
         channel: channel,
         voiceWidget: StreamMessageWidget(message: voiceMessage),
+      );
+    },
+  );
+
+  goldenTest(
+    'voice recording attachment custom theme',
+    fileName: 'voice_recording_attachment_custom',
+    constraints: const BoxConstraints.tightFor(width: 375, height: 400),
+    builder: () {
+      final client = MockClient();
+      final clientState = MockClientState();
+      final channel = MockChannel();
+      final channelState = MockChannelState();
+      _setupChannel(client, clientState, channel, channelState);
+
+      const roboto = TextStyle(fontFamily: 'Roboto');
+      final customTheme = docsStreamChatThemeData().copyWith(
+        voiceRecordingAttachmentTheme: StreamVoiceRecordingAttachmentThemeData(
+          titleTextStyle: roboto.copyWith(color: Colors.black54),
+          durationTextStyle: roboto.copyWith(color: Colors.black54),
+          activeDurationTextStyle: roboto.copyWith(color: Colors.black),
+          controlButtonStyle: StreamButtonThemeStyle.from(
+            backgroundColor: Colors.green,
+            foregroundColor: Colors.white,
+          ),
+          speedToggleStyle: StreamPlaybackSpeedToggleStyle.from(
+            backgroundColor: Colors.green,
+            foregroundColor: Colors.white,
+          ),
+          waveformStyle: const StreamAudioWaveformThemeData(
+            color: Colors.black54,
+            progressColor: Colors.black,
+          ),
+        ),
+      );
+
+      final voiceMessage = Message(
+        id: 'voice-msg-custom',
+        user: User(id: 'user-2', name: 'Bob'),
+        attachments: [
+          Attachment(
+            type: 'voiceRecording',
+            assetUrl: 'https://example.com/recording.m4a',
+            uploadState: const UploadState.success(),
+            extraData: const {
+              'duration': 15.0,
+              'waveform_data': <double>[
+                0.1,
+                0.3,
+                0.5,
+                0.7,
+                0.9,
+                0.7,
+                0.5,
+                0.3,
+                0.1,
+                0.2,
+                0.4,
+                0.6,
+                0.8,
+                0.6,
+                0.4,
+                0.2,
+                0.5,
+                0.8,
+                0.6,
+                0.3,
+                0.1,
+                0.4,
+                0.7,
+                0.9,
+                0.6,
+                0.3,
+                0.1,
+                0.4,
+                0.7,
+                0.5,
+                0.2,
+                0.6,
+                0.8,
+                0.4,
+                0.2,
+              ],
+            },
+          ),
+        ],
+        createdAt: DateTime(2024, 6, 1, 10, 0),
+      );
+
+      return _buildVoiceRecordingContextScaffold(
+        client: client,
+        channel: channel,
+        voiceWidget: StreamMessageWidget(message: voiceMessage),
+        streamChatThemeData: customTheme,
       );
     },
   );

@@ -5,9 +5,9 @@ import 'package:stream_chat_flutter/src/poll/interactor/poll_add_comment_dialog.
 import 'package:stream_chat_flutter/src/poll/interactor/poll_end_vote_dialog.dart';
 import 'package:stream_chat_flutter/src/poll/interactor/poll_suggest_option_dialog.dart';
 import 'package:stream_chat_flutter/src/poll/interactor/stream_poll_interactor.dart';
-import 'package:stream_chat_flutter/src/poll/stream_poll_comments_dialog.dart';
-import 'package:stream_chat_flutter/src/poll/stream_poll_options_dialog.dart';
-import 'package:stream_chat_flutter/src/poll/stream_poll_results_dialog.dart';
+import 'package:stream_chat_flutter/src/poll/stream_poll_comments_sheet.dart';
+import 'package:stream_chat_flutter/src/poll/stream_poll_options_sheet.dart';
+import 'package:stream_chat_flutter/src/poll/stream_poll_results_sheet.dart';
 import 'package:stream_chat_flutter/src/stream_chat.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:stream_core_flutter/stream_core_flutter.dart';
@@ -178,15 +178,15 @@ class _DefaultStreamPollAttachmentState extends State<DefaultStreamPollAttachmen
             onSuggestOption: onSuggestOption,
             // We need to pass the notifier here instead of the poll because the
             // options dialog will have no way to update the poll itself.
-            onViewComments: () => showStreamPollCommentsDialog(
+            onViewComments: () => showStreamPollCommentsSheet(
               context: context,
               messageNotifier: _messageNotifier,
             ),
-            onSeeMoreOptions: () => showStreamPollOptionsDialog(
+            onSeeMoreOptions: () => showStreamPollOptionsSheet(
               context: context,
               messageNotifier: _messageNotifier,
             ),
-            onViewResults: () => showStreamPollResultsDialog(
+            onViewResults: () => showStreamPollResultsSheet(
               context: context,
               messageNotifier: _messageNotifier,
             ),

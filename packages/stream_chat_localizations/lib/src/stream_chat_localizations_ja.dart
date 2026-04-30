@@ -460,7 +460,7 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   }
 
   @override
-  String get questionsLabel => '問';
+  String questionLabel({bool isPlural = false}) => '問';
 
   @override
   String get askAQuestionLabel => '質問する';
@@ -543,7 +543,10 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   String get enterYourCommentLabel => 'コメントを入力';
 
   @override
-  String get endVoteConfirmationText => '投票を終了してもよろしいですか？';
+  String get endVoteConfirmationTitle => '投票を終了してもよろしいですか？';
+
+  @override
+  String get endVoteConfirmationMessage => 'この投票を今すぐ終了しますか？終了後は誰も投票できなくなります。';
 
   @override
   String get deletePollOptionLabel => 'オプションを削除する';
@@ -586,16 +589,29 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   String get pollResultsLabel => '投票結果';
 
   @override
+  String get pollVotesLabel => '投票';
+
+  @override
   String showAllVotesLabel({int? count}) {
     if (count == null) return 'すべての投票を表示';
     return 'すべての $count 投票を表示';
   }
 
   @override
+  String get viewAllLabel => 'すべて表示';
+
+  @override
   String voteCountLabel({int? count}) => switch (count) {
     null || < 1 => '0 票',
     1 => '1 票',
     _ => '$count 票',
+  };
+
+  @override
+  String totalVoteCountLabel({int? count}) => switch (count) {
+    null || < 1 => '合計 0 票',
+    1 => '合計 1 票',
+    _ => '合計 $count 票',
   };
 
   @override

@@ -406,8 +406,10 @@ abstract class Translations {
   /// If [isNew] is true, it returns "Create a new poll".
   String createPollLabel({bool isNew = false});
 
-  /// The label for "Questions".
-  String get questionsLabel;
+  /// The label for "Question".
+  ///
+  /// If [isPlural] is true, it returns "Questions".
+  String questionLabel({bool isPlural = false});
 
   /// The label for "Ask a question".
   String get askAQuestionLabel;
@@ -491,8 +493,11 @@ abstract class Translations {
   /// The label for "Enter your comment".
   String get enterYourCommentLabel;
 
-  /// The confirmation text shown when the user tries to end a poll.
-  String get endVoteConfirmationText;
+  /// The confirmation title shown when the user tries to end a poll.
+  String get endVoteConfirmationTitle;
+
+  /// The confirmation body message shown when the user tries to end a poll.
+  String get endVoteConfirmationMessage;
 
   /// The label for "delete poll option"
   String get deletePollOptionLabel;
@@ -525,19 +530,31 @@ abstract class Translations {
   /// The label for "View Results".
   String get viewResultsLabel;
 
-  /// The label for "End Vote".
+  /// The label for "End Poll".
   String get endVoteLabel;
 
   /// The label for "Poll Results".
   String get pollResultsLabel;
 
+  /// The label for the poll votes screen app bar title (shown when viewing
+  /// all votes for a specific poll option).
+  String get pollVotesLabel;
+
   /// The label for "$count votes".
   String voteCountLabel({int? count});
+
+  /// The label for the total vote count footer in the poll results dialog,
+  /// e.g. "$count votes total".
+  String totalVoteCountLabel({int? count});
 
   /// The label for "Show all votes".
   ///
   /// If [count] is provided, it returns "Show all $count votes".
   String showAllVotesLabel({int? count});
+
+  /// The label for a generic "View all" call-to-action, e.g. the footer
+  /// action of a truncated list.
+  String get viewAllLabel;
 
   /// The label for "There are no poll votes currently".
   String get noPollVotesLabel;
@@ -1168,7 +1185,10 @@ Attachment limit exceeded: it's not possible to add more than $limit attachments
   }
 
   @override
-  String get questionsLabel => 'Questions';
+  String questionLabel({bool isPlural = false}) {
+    if (isPlural) return 'Questions';
+    return 'Question';
+  }
 
   @override
   String get askAQuestionLabel => 'Ask a question';
@@ -1269,7 +1289,11 @@ Attachment limit exceeded: it's not possible to add more than $limit attachments
   String get enterYourCommentLabel => 'Enter your comment';
 
   @override
-  String get endVoteConfirmationText => 'Are you sure you want to end the vote?';
+  String get endVoteConfirmationTitle => 'End This Poll?';
+
+  @override
+  String get endVoteConfirmationMessage =>
+      'Do you want to end this poll now? Nobody will be able to vote in this poll anymore.';
 
   @override
   String get deletePollOptionLabel => 'Delete Option';
@@ -1306,10 +1330,13 @@ Attachment limit exceeded: it's not possible to add more than $limit attachments
   String get viewResultsLabel => 'View Results';
 
   @override
-  String get endVoteLabel => 'End Vote';
+  String get endVoteLabel => 'End Poll';
 
   @override
   String get pollResultsLabel => 'Poll Results';
+
+  @override
+  String get pollVotesLabel => 'Votes';
 
   @override
   String showAllVotesLabel({int? count}) {
@@ -1318,10 +1345,20 @@ Attachment limit exceeded: it's not possible to add more than $limit attachments
   }
 
   @override
+  String get viewAllLabel => 'View all';
+
+  @override
   String voteCountLabel({int? count}) => switch (count) {
     null || < 1 => '0 votes',
     1 => '1 vote',
     _ => '$count votes',
+  };
+
+  @override
+  String totalVoteCountLabel({int? count}) => switch (count) {
+    null || < 1 => '0 votes total',
+    1 => '1 vote total',
+    _ => '$count votes total',
   };
 
   @override
@@ -1346,7 +1383,7 @@ Attachment limit exceeded: it's not possible to add more than $limit attachments
   String get slideToCancelLabel => 'Slide to cancel';
 
   @override
-  String get holdToRecordLabel => 'Hold to record, release to send.';
+  String get holdToRecordLabel => 'Hold to record. Release to save.';
 
   @override
   String get sendAnywayLabel => 'Send Anyway';

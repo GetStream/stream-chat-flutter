@@ -22,6 +22,7 @@ class StreamPollCreatorWidget extends StatelessWidget {
     this.shrinkWrap = false,
     this.physics,
     this.padding = const EdgeInsets.all(16),
+    this.scrollController,
   });
 
   /// The padding around the poll creator.
@@ -35,6 +36,13 @@ class StreamPollCreatorWidget extends StatelessWidget {
 
   /// The controller used to manage the state of the poll.
   final StreamPollController controller;
+
+  /// Optional scroll controller for the underlying scroll view.
+  ///
+  /// When the creator is hosted inside a [DraggableScrollableSheet] (e.g. by
+  /// [showStreamPollCreatorSheet]), pass the controller provided by the sheet
+  /// so drag gestures expand and collapse the sheet correctly.
+  final ScrollController? scrollController;
 
   @override
   Widget build(BuildContext context) {
@@ -55,6 +63,7 @@ class StreamPollCreatorWidget extends StatelessWidget {
         return SingleChildScrollView(
           padding: padding,
           physics: physics,
+          controller: scrollController,
           keyboardDismissBehavior: .onDrag,
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -62,7 +71,7 @@ class StreamPollCreatorWidget extends StatelessWidget {
             children: [
               PollQuestionTextField(
                 questionRange: config.nameRange,
-                title: translations.questionsLabel,
+                title: translations.questionLabel(),
                 hintText: translations.askAQuestionLabel,
                 initialQuestion: PollQuestion(id: poll.id, text: poll.name),
                 onChanged: (question) => controller.question = question.text,

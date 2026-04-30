@@ -1,15 +1,13 @@
-// ignore_for_file: lines_longer_than_80_chars
-
 import 'package:alchemist/alchemist.dart';
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/poll/stream_poll_results_dialog.dart';
+import 'package:stream_chat_flutter/src/poll/stream_poll_options_sheet.dart';
 import 'package:stream_chat_flutter/src/stream_chat_configuration.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 void main() {
   final currentUser = User(id: 'curr-user', name: 'Current User');
-  final createdAt = DateTime.parse('2021-07-20T16:00:00.000Z');
+
   final latestVotesByOption = {
     'option-1': [
       for (var i = 0; i < 5; i++)
@@ -17,8 +15,7 @@ void main() {
           userId: 'user-$i',
           user: User(id: 'user-$i', name: 'User $i'),
           optionId: 'option-1',
-          createdAt: createdAt,
-          updatedAt: createdAt,
+          createdAt: DateTime.now(),
         ),
     ],
     'option-2': [
@@ -27,8 +24,7 @@ void main() {
           userId: 'user-$i',
           user: User(id: 'user-$i', name: 'User $i'),
           optionId: 'option-2',
-          createdAt: createdAt,
-          updatedAt: createdAt,
+          createdAt: DateTime.now(),
         ),
     ],
     'option-3': [
@@ -36,8 +32,7 @@ void main() {
         user: currentUser,
         userId: currentUser.id,
         optionId: 'option-3',
-        createdAt: createdAt,
-        updatedAt: createdAt,
+        createdAt: DateTime.now(),
       ),
     ],
   };
@@ -51,8 +46,7 @@ void main() {
       user: currentUser,
       userId: currentUser.id,
       answerText: 'I also like yellow',
-      createdAt: createdAt,
-      updatedAt: createdAt,
+      createdAt: DateTime.now(),
     ),
   ];
 
@@ -80,26 +74,12 @@ void main() {
 
   for (final brightness in Brightness.values) {
     goldenTest(
-      '[${brightness.name}] -> StreamPollResultsDialog looks fine',
-      fileName: 'stream_poll_results_dialog_${brightness.name}',
+      '[${brightness.name}] -> StreamPollOptionsSheet looks fine',
+      fileName: 'stream_poll_options_sheet_${brightness.name}',
       constraints: const BoxConstraints.tightFor(width: 412, height: 916),
       builder: () => _wrapWithMaterialApp(
         brightness: brightness,
-        StreamPollResultsDialog(poll: poll),
-      ),
-    );
-
-    goldenTest(
-      '[${brightness.name}] -> StreamPollResultsDialog with Show all looks fine',
-      fileName: 'stream_poll_results_dialog_with_show_all_${brightness.name}',
-      constraints: const BoxConstraints.tightFor(width: 412, height: 916),
-      builder: () => _wrapWithMaterialApp(
-        brightness: brightness,
-        StreamPollResultsDialog(
-          poll: poll,
-          visibleVotesCount: 2,
-          onShowAllVotesPressed: (_) {},
-        ),
+        StreamPollOptionsSheet(poll: poll),
       ),
     );
   }

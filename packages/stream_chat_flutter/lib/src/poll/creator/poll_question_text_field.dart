@@ -82,6 +82,16 @@ class PollQuestionTextField extends StatefulWidget {
 class _PollQuestionTextFieldState extends State<PollQuestionTextField> {
   late var _question = widget.initialQuestion;
 
+  final _focusNode = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _focusNode.requestFocus();
+    });
+  }
+
   @override
   void didUpdateWidget(covariant PollQuestionTextField oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -99,12 +109,15 @@ class _PollQuestionTextFieldState extends State<PollQuestionTextField> {
     }
   }
 
+  @override
+  void dispose() {
+    _focusNode.dispose();
+    super.dispose();
+  }
+
   String? _validateQuestion(String question) {
     if (widget.questionRange case final range?) {
-      return context.translations.pollQuestionValidationError(
-        question.length,
-        range,
-      );
+      return context.translations.pollQuestionValidationError(question.length, range);
     }
 
     return null;
@@ -127,7 +140,7 @@ class _PollQuestionTextFieldState extends State<PollQuestionTextField> {
       children: [
         if (widget.title case final title?) Text(title, style: effectiveHeaderStyle),
         StreamTextInput(
-          autofocus: true,
+          focusNode: _focusNode,
           initialValue: _question.text,
           hintText: widget.hintText,
           helperText: _question.error,

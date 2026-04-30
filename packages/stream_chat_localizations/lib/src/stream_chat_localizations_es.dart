@@ -476,7 +476,10 @@ No es posible añadir más de $limit archivos adjuntos
   }
 
   @override
-  String get questionsLabel => 'Preguntas';
+  String questionLabel({bool isPlural = false}) {
+    if (isPlural) return 'Preguntas';
+    return 'Pregunta';
+  }
 
   @override
   String get askAQuestionLabel => 'Hacer una pregunta';
@@ -559,7 +562,11 @@ No es posible añadir más de $limit archivos adjuntos
   String get enterYourCommentLabel => 'Ingresa tu comentario';
 
   @override
-  String get endVoteConfirmationText => '¿Estás seguro de que quieres finalizar la votación?';
+  String get endVoteConfirmationTitle => '¿Estás seguro de que quieres finalizar la votación?';
+
+  @override
+  String get endVoteConfirmationMessage =>
+      '¿Quieres finalizar esta encuesta ahora? Nadie podrá votar en esta encuesta.';
 
   @override
   String get deletePollOptionLabel => 'Eliminar opción';
@@ -602,16 +609,29 @@ No es posible añadir más de $limit archivos adjuntos
   String get pollResultsLabel => 'Resultados de la encuesta';
 
   @override
+  String get pollVotesLabel => 'Votos';
+
+  @override
   String showAllVotesLabel({int? count}) {
     if (count == null) return 'Mostrar todos los votos';
     return 'Mostrar todos los $count votos';
   }
 
   @override
+  String get viewAllLabel => 'Ver todo';
+
+  @override
   String voteCountLabel({int? count}) => switch (count) {
     null || < 1 => '0 votos',
     1 => '1 voto',
     _ => '$count votos',
+  };
+
+  @override
+  String totalVoteCountLabel({int? count}) => switch (count) {
+    null || < 1 => '0 votos en total',
+    1 => '1 voto en total',
+    _ => '$count votos en total',
   };
 
   @override

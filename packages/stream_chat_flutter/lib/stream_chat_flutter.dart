@@ -3,6 +3,7 @@ export 'package:photo_manager/photo_manager.dart' show ThumbnailSize, ThumbnailF
 export 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 export 'package:stream_core_flutter/stream_core_flutter.dart'
     show
+        StreamAudioWaveformThemeData,
         StreamAvatarGroupSize,
         StreamAvatarSize,
         StreamAvatarStackSize,
@@ -58,6 +59,17 @@ export 'package:stream_core_flutter/stream_core_flutter.dart'
         StreamReactionsType,
         StreamListTile,
         StreamListTileContainer,
+        StreamSheet,
+        StreamSheetDragHandle,
+        StreamSheetHeader,
+        StreamSheetHeaderStyle,
+        StreamSheetHeaderTheme,
+        StreamSheetHeaderThemeData,
+        StreamSheetRoute,
+        StreamSheetScrollableWidgetBuilder,
+        StreamSheetTheme,
+        StreamSheetThemeData,
+        StreamSheetTransition,
         StreamSwitch,
         StreamStepper,
         StreamStepperProps,
@@ -79,6 +91,7 @@ export 'package:stream_core_flutter/stream_core_flutter.dart'
         StreamMessageLayoutProperty,
         StreamMessageLayoutVisibility,
         StreamVisibility,
+        showStreamSheet,
         streamSupportedEmojis;
 
 export 'src/ai_assistant/ai_typing_indicator_view.dart';
@@ -170,13 +183,13 @@ export 'src/misc/stream_neumorphic_button.dart';
 export 'src/misc/swipeable.dart';
 export 'src/misc/thread_header.dart';
 export 'src/misc/visible_footnote.dart';
-export 'src/poll/creator/stream_poll_creator_dialog.dart';
+export 'src/poll/creator/stream_poll_creator_sheet.dart';
 export 'src/poll/creator/stream_poll_creator_widget.dart';
 export 'src/poll/interactor/stream_poll_interactor.dart';
-export 'src/poll/stream_poll_comments_dialog.dart';
-export 'src/poll/stream_poll_option_votes_dialog.dart';
-export 'src/poll/stream_poll_options_dialog.dart';
-export 'src/poll/stream_poll_results_dialog.dart';
+export 'src/poll/stream_poll_comments_sheet.dart';
+export 'src/poll/stream_poll_option_votes_sheet.dart';
+export 'src/poll/stream_poll_options_sheet.dart';
+export 'src/poll/stream_poll_results_sheet.dart';
 export 'src/reactions/detail/reaction_detail_sheet.dart';
 export 'src/reactions/picker/reaction_picker.dart';
 export 'src/scroll_view/channel_scroll_view/stream_channel_list_item.dart';
