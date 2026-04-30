@@ -1040,7 +1040,17 @@ class _DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompo
     if (_isSyncingControllers) return;
     _isSyncingControllers = true;
     try {
-      _effectiveController.attachments = _pickerController?.value.attachments ?? [];
+      final pickerAttachments = _pickerController?.value.attachments ?? [];
+      final pickerIds = pickerAttachments.map((a) => a.id).toSet();
+
+      // Preserve attachments that were added outside the picker (e.g. via
+      // the audio recorder while the picker is already open). These are never
+      // present in the picker's own list, so a plain full-replace would drop them.
+      final unpickedAttachments = _effectiveController.attachments
+          .where((a) => !pickerIds.contains(a.id))
+          .toList(growable: false);
+
+      _effectiveController.attachments = [...pickerAttachments, ...unpickedAttachments];
     } finally {
       _isSyncingControllers = false;
     }
