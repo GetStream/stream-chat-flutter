@@ -129,7 +129,7 @@ class ChannelPage extends StatelessWidget {
     return Scaffold(
       appBar: StreamChannelHeader(),
       body: Column(
-        children: <Widget>[
+        children: const <Widget>[
           Expanded(
             child: StreamMessageListView(),
           ),

@@ -93,7 +93,7 @@ Widget _buildVoiceRecordingContextScaffold({
                   ],
                 ),
               ),
-              StreamMessageComposer(enableVoiceRecording: true),
+              const StreamMessageComposer(enableVoiceRecording: true),
             ],
           ),
         ),

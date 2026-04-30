@@ -146,7 +146,7 @@ class ChannelPage extends StatelessWidget {
               ),
             ),
           ),
-          StreamMessageComposer(),
+          const StreamMessageComposer(),
         ],
       ),
     );

@@ -133,7 +133,7 @@ class ChannelPage extends StatelessWidget {
           showBackButton: false,
         ),
         body: Column(
-          children: <Widget>[
+          children: const <Widget>[
             Expanded(
               child: StreamMessageListView(),
             ),

@@ -25,7 +25,7 @@ void main() {
     (WidgetTester tester) async {
       await tester.pumpWidget(
         buildWidget(
-          StreamMessageComposer(),
+          const StreamMessageComposer(),
         ),
       );
 
@@ -98,7 +98,7 @@ void main() {
             client: client,
             child: StreamChannel(
               channel: channel,
-              child: Scaffold(
+              child: const Scaffold(
                 body: StreamMessageComposer(),
               ),
             ),
@@ -151,7 +151,7 @@ void main() {
               client: client,
               child: StreamChannel(
                 channel: channel,
-                child: Scaffold(
+                child: const Scaffold(
                   bottomNavigationBar: StreamMessageComposer(),
                 ),
               ),
@@ -193,7 +193,7 @@ void main() {
               client: client,
               child: StreamChannel(
                 channel: channel,
-                child: Scaffold(
+                child: const Scaffold(
                   bottomNavigationBar: StreamMessageComposer(),
                 ),
               ),
@@ -500,7 +500,7 @@ void main() {
               client: client,
               child: StreamChannel(
                 channel: channel,
-                child: Scaffold(
+                child: const Scaffold(
                   bottomNavigationBar: StreamMessageComposer(
                     canAlsoSendToChannelFromThread: false,
                   ),
@@ -526,7 +526,7 @@ void main() {
               client: client,
               child: StreamChannel(
                 channel: channel,
-                child: Scaffold(
+                child: const Scaffold(
                   bottomNavigationBar: StreamMessageComposer(),
                 ),
               ),

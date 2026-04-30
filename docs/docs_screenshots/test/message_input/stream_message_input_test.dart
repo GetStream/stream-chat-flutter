@@ -28,7 +28,7 @@ Widget _buildMessageInputScaffold({
           body: Column(
             children: [
               Expanded(child: Container()),
-              messageComposer ?? StreamMessageComposer(),
+              messageComposer ?? const StreamMessageComposer(),
             ],
           ),
         ),
