@@ -1,9 +1,11 @@
-// ignore_for_file: avoid_redundant_argument_values, lines_longer_than_80_chars
+// ignore_for_file: avoid_redundant_argument_values, lines_longer_than_80_chars, deprecated_member_use_from_same_package
 
 import 'package:stream_chat/src/core/models/attachment.dart';
 import 'package:stream_chat/src/core/models/message.dart';
 import 'package:stream_chat/src/core/models/message_state.dart';
 import 'package:stream_chat/src/core/models/moderation.dart';
+import 'package:stream_chat/src/core/models/poll.dart';
+import 'package:stream_chat/src/core/models/poll_option.dart';
 import 'package:stream_chat/src/core/models/reaction.dart';
 import 'package:stream_chat/src/core/models/reaction_group.dart';
 import 'package:stream_chat/src/core/models/user.dart';
@@ -624,27 +626,218 @@ void main() {
       },
     );
   });
+
+  group('updateWith', () {
+    test('returns this unchanged when other is null', () {
+      final message = createTestMessage(id: 'msg-1', text: 'Hello');
+      final merged = message.updateWith(null);
+      expect(identical(merged, message), isTrue);
+    });
+
+    test('preserves local timestamps from this onto the server payload', () {
+      final localCreatedAt = DateTime(2024, 1, 1);
+      final localUpdatedAt = DateTime(2024, 1, 2);
+      final localDeletedAt = DateTime(2024, 1, 3);
+
+      final localMessage = Message(
+        id: 'msg-1',
+        text: 'Hello',
+        localCreatedAt: localCreatedAt,
+        localUpdatedAt: localUpdatedAt,
+        localDeletedAt: localDeletedAt,
+      );
+      final serverMessage = Message(id: 'msg-1', text: 'Hello (edited)');
+
+      final merged = localMessage.updateWith(serverMessage);
+
+      expect(merged.text, 'Hello (edited)');
+      expect(merged.localCreatedAt, localCreatedAt);
+      expect(merged.localUpdatedAt, localUpdatedAt);
+      expect(merged.localDeletedAt, localDeletedAt);
+    });
+
+    test(
+      'promotes deletedForMe + type/state when local was deleted-for-me but '
+      'the server payload omits the flag',
+      () {
+        final localMessage = createTestMessage(
+          id: 'msg-1',
+          text: 'Hello',
+          deletedForMe: true,
+          type: MessageType.deleted,
+          state: MessageState.deletedForMe,
+        );
+        final serverMessage = createTestMessage(id: 'msg-1', text: 'Hello');
+
+        final merged = localMessage.updateWith(serverMessage);
+
+        expect(merged.deletedForMe, isTrue);
+        expect(merged.type, MessageType.deleted);
+        expect(merged.state, MessageState.deletedForMe);
+        expect(merged.isDeleted, isTrue);
+      },
+    );
+
+    test(
+      'preserves the local `poll` when the server payload omits it '
+      '(regression: thread reply destroys poll on parent message)',
+      () {
+        final poll = Poll(
+          id: 'poll-1',
+          name: 'My poll',
+          options: const [PollOption(id: 'a', text: 'A')],
+          createdById: 'u',
+        );
+        final localMessage = createTestMessage(id: 'msg-1', text: 'Vote!', poll: poll, pollId: poll.id);
+
+        // Server bumps `replyCount` but does not echo the `poll` object back.
+        final serverMessage = createTestMessage(id: 'msg-1', text: 'Vote!', pollId: poll.id, replyCount: 1);
+
+        final merged = localMessage.updateWith(serverMessage);
+
+        expect(merged.replyCount, 1);
+        expect(merged.poll, isNotNull);
+        expect(merged.poll!.id, poll.id);
+        expect(merged.poll!.name, poll.name);
+      },
+    );
+
+    test('the server `poll`, when present, takes precedence over the local one', () {
+      final localPoll = Poll(
+        id: 'poll-1',
+        name: 'Original',
+        options: const [PollOption(id: 'a', text: 'A')],
+        createdById: 'u',
+      );
+      final updatedPoll = localPoll.copyWith(name: 'Edited');
+
+      final localMessage = createTestMessage(id: 'msg-1', text: 'Vote!', poll: localPoll, pollId: localPoll.id);
+      final serverMessage = createTestMessage(id: 'msg-1', text: 'Vote!', poll: updatedPoll, pollId: updatedPoll.id);
+
+      final merged = localMessage.updateWith(serverMessage);
+
+      expect(merged.poll!.name, 'Edited');
+    });
+
+    test(
+      'recursively preserves the embedded quotedMessage poll when the '
+      'server returns a stripped nested `quoted_message` (regression #59)',
+      () {
+        final poll = Poll(
+          id: 'poll-1',
+          name: 'My poll',
+          options: const [PollOption(id: 'a', text: 'A')],
+          createdById: 'u',
+        );
+        final pollMessage = createTestMessage(id: 'poll-msg', poll: poll, pollId: poll.id);
+        final localReply = createTestMessage(
+          id: 'reply-1',
+          text: 'My pick',
+          quotedMessageId: pollMessage.id,
+          quotedMessage: pollMessage,
+        );
+        // Constructed directly because copyWith cannot clear `poll` — see
+        // Message.copyWith.
+        final strippedQuoted = createTestMessage(id: pollMessage.id, pollId: pollMessage.pollId);
+        final serverReply = localReply.copyWith(quotedMessage: strippedQuoted);
+
+        final merged = localReply.updateWith(serverReply);
+
+        expect(merged.quotedMessage, isNotNull);
+        expect(merged.quotedMessage!.id, pollMessage.id);
+        expect(merged.quotedMessage!.poll, isNotNull);
+        expect(merged.quotedMessage!.poll!.id, poll.id);
+      },
+    );
+
+    test(
+      'preserves the entire local quotedMessage when the server payload '
+      'has no nested `quoted_message` at all',
+      () {
+        final quoted = createTestMessage(id: 'quoted-1', text: 'Original');
+        final localReply = createTestMessage(
+          id: 'reply-1',
+          text: 'Reply',
+          quotedMessageId: quoted.id,
+          quotedMessage: quoted,
+        );
+        final serverReply = createTestMessage(
+          id: 'reply-1',
+          text: 'Reply (edited)',
+          quotedMessageId: quoted.id,
+        );
+
+        final merged = localReply.updateWith(serverReply);
+
+        expect(merged.text, 'Reply (edited)');
+        expect(merged.quotedMessage, isNotNull);
+        expect(merged.quotedMessage!.id, quoted.id);
+        expect(merged.quotedMessage!.text, 'Original');
+      },
+    );
+
+    test(
+      'when the user changes which message is being quoted, the server '
+      'payload wins without recursive merging into the previous quote',
+      () {
+        final originalQuoted = createTestMessage(id: 'quoted-1', text: 'First');
+        final newQuoted = createTestMessage(id: 'quoted-2', text: 'Second');
+        final localReply = createTestMessage(
+          id: 'reply-1',
+          text: 'Reply',
+          quotedMessageId: originalQuoted.id,
+          quotedMessage: originalQuoted,
+        );
+        final serverReply = createTestMessage(
+          id: 'reply-1',
+          text: 'Reply',
+          quotedMessageId: newQuoted.id,
+          quotedMessage: newQuoted,
+        );
+
+        final merged = localReply.updateWith(serverReply);
+
+        expect(merged.quotedMessage, isNotNull);
+        expect(merged.quotedMessage!.id, newQuoted.id);
+        expect(merged.quotedMessage!.text, 'Second');
+      },
+    );
+  });
 }
 
 /// Helper function to create a Message for testing
 Message createTestMessage({
   String? id,
-  required String text,
+  String? text,
   String type = 'regular',
   DateTime? createdAt,
   DateTime? updatedAt,
   User? user,
   Map<String, Object?>? extraData,
   List<String>? restrictedVisibility,
+  Poll? poll,
+  String? pollId,
+  Message? quotedMessage,
+  String? quotedMessageId,
+  int replyCount = 0,
+  bool? deletedForMe,
+  MessageState state = const MessageState.initial(),
 }) {
   return Message(
     id: id,
     text: text,
     type: type,
+    state: state,
     localCreatedAt: createdAt,
     localUpdatedAt: updatedAt,
     user: user,
     extraData: extraData ?? {},
     restrictedVisibility: restrictedVisibility,
+    poll: poll,
+    pollId: pollId,
+    quotedMessage: quotedMessage,
+    quotedMessageId: quotedMessageId,
+    replyCount: replyCount,
+    deletedForMe: deletedForMe,
   );
 }

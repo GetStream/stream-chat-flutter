@@ -756,8 +756,8 @@ class Channel {
         ),
       );
 
-      final sentMessage = response.message
-          .syncWith(message)
+      final sentMessage = message
+          .updateWith(response.message)
           .copyWith(
             // Update the message state to sent.
             state: MessageState.sent,
@@ -845,12 +845,11 @@ class Channel {
         ),
       );
 
-      final updateMessage = response.message
-          .syncWith(message)
+      final updateMessage = message
+          .updateWith(response.message)
           .copyWith(
             // Update the message state to updated.
             state: MessageState.updated,
-            ownReactions: message.ownReactions,
           );
 
       state?.updateMessage(updateMessage);
@@ -912,12 +911,11 @@ class Channel {
         ),
       );
 
-      final updatedMessage = response.message
-          .syncWith(message)
+      final updatedMessage = message
+          .updateWith(response.message)
           .copyWith(
             // Update the message state to updated.
             state: MessageState.updated,
-            ownReactions: message.ownReactions,
           );
 
       state?.updateMessage(updatedMessage);
@@ -4007,32 +4005,25 @@ class ChannelClientState {
   }) {
     if (toMerge.isEmpty) return existing;
 
+    // Reconcile each pair via Message.updateWith.
     final mergedMessages = existing.merge(
       toMerge,
       key: (message) => message.id,
-      update: (original, updated) {
-        var merged = updated.syncWith(original);
-
-        // Preserve quotedMessage if the updated doesn't include it.
-        if (updated.quotedMessageId != null && updated.quotedMessage == null) {
-          merged = merged.copyWith(quotedMessage: original.quotedMessage);
-        }
-
-        return merged;
-      },
+      update: (original, updated) => original.updateWith(updated),
     );
 
-    final toUpdateMap = {for (final m in toMerge) m.id: m};
-    final updatedMessages = mergedMessages.map((it) {
-      // Continue if the message doesn't quote any of the updated messages.
-      if (!toUpdateMap.containsKey(it.quotedMessageId)) return it;
+    // Replace each embedded quotedMessage with the fully-formed top-level
+    // copy from the merged state, so quoted parents that aren't in the
+    // current batch are still resolved correctly.
+    final mergedList = mergedMessages.toList(growable: false);
+    final mergedById = {for (final m in mergedList) m.id: m};
 
-      final updatedQuotedMessage = toUpdateMap[it.quotedMessageId];
+    return mergedList.map((message) {
+      final quoted = mergedById[message.quotedMessageId];
+      if (quoted == null) return message;
       // Update the quotedMessage reference in the message.
-      return it.copyWith(quotedMessage: updatedQuotedMessage);
+      return message.copyWith(quotedMessage: quoted);
     });
-
-    return updatedMessages;
   }
 
   void _removeMessages(Iterable<Message> messages) {
