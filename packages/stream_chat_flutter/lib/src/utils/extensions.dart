@@ -578,7 +578,7 @@ extension VoiceRecordingAttachmentExtension on Attachment {
     final duration = extraData['duration'] as num?;
     if (duration == null) return Duration.zero;
 
-    return Duration(milliseconds: duration.round() * 1000);
+    return Duration(milliseconds: (duration * 1000).round());
   }
 
   /// Returns the waveform data of the voice recording attachment if available

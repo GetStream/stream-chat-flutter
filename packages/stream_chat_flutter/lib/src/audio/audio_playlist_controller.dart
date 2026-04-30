@@ -170,7 +170,9 @@ class StreamAudioPlaylistController extends ValueNotifier<AudioPlaylistState> {
       tracks: [
         ...tracks.mapIndexed((i, track) {
           if (i != index) return track;
-          return track.copyWith(duration: duration);
+          // Prefer the larger of the two to guard against tiny clock jitter
+          // between what was stored and what the decoder reports.
+          return track.copyWith(duration: [track.duration, ?duration].max);
         }),
       ],
     );

@@ -179,7 +179,7 @@ class PlaylistTrack {
 
   @override
   int get hashCode {
-    return Object.hash(uri, title, duration, waveform, position, state);
+    return Object.hash(uri, title, duration, Object.hashAll(waveform), position, state);
   }
 
   @override
@@ -190,7 +190,7 @@ class PlaylistTrack {
           uri == other.uri &&
           title == other.title &&
           duration == other.duration &&
-          waveform == other.waveform &&
+          const ListEquality<double>().equals(waveform, other.waveform) &&
           position == other.position &&
           state == other.state;
 }
