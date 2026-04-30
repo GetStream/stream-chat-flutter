@@ -86,6 +86,8 @@ export 'package:stream_core_flutter/stream_core_flutter.dart'
         StreamUnicodeEmoji,
         StreamVideoPlayIndicator,
         StreamVideoPlayIndicatorSize,
+        StreamMessageAttachment,
+        StreamMessageAttachmentStyle,
         StreamMessageItemTheme,
         StreamMessageItemThemeData,
         StreamMessageLayoutProperty,
