@@ -199,14 +199,17 @@ class _AddMoreTile extends StatelessWidget {
 class GalleryPickerConfig {
   /// Creates a [GalleryPickerConfig] instance.
   const GalleryPickerConfig({
-    this.mediaThumbnailSize = const ThumbnailSize(400, 400),
+    this.mediaThumbnailSize,
     this.mediaThumbnailFormat = ThumbnailFormat.jpeg,
     this.mediaThumbnailQuality = 100,
     this.mediaThumbnailScale = 1,
   });
 
-  /// Size of the attachment thumbnails.
-  final ThumbnailSize mediaThumbnailSize;
+  /// Size of the attachment thumbnails in pixels.
+  ///
+  /// When null (the default), each tile auto-calculates its size from its
+  /// own layout constraints and the device pixel ratio.
+  final ThumbnailSize? mediaThumbnailSize;
 
   /// Format of the attachment thumbnails.
   final ThumbnailFormat mediaThumbnailFormat;
