@@ -1212,34 +1212,30 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
               (e) => e.userId == streamChannel!.channel.client.state.currentUser!.id,
             );
 
+        Widget button = StreamButton.icon(
+          style: .secondary,
+          type: .outline,
+          size: .medium,
+          isFloating: true,
+          icon: switch (widget.reverse) {
+            true => Icon(context.streamIcons.arrowDown),
+            false => Icon(context.streamIcons.arrowUp),
+          },
+          onPressed: () => scrollToBottomDefaultTapAction(unreadCount),
+        );
+
+        if (showUnreadCount && widget.showUnreadCountOnScrollToBottom) {
+          button = StreamBadgeNotification(
+            label: '${unreadCount > 99 ? '99+' : unreadCount}',
+            size: StreamBadgeNotificationSize.sm,
+            child: button,
+          );
+        }
+
         return PositionedDirectional(
           bottom: 16,
           end: 16,
-          child: Stack(
-            clipBehavior: Clip.none,
-            children: [
-              StreamButton.icon(
-                style: .secondary,
-                type: .outline,
-                size: .medium,
-                isFloating: true,
-                icon: switch (widget.reverse) {
-                  true => Icon(context.streamIcons.arrowDown),
-                  false => Icon(context.streamIcons.arrowUp),
-                },
-                onPressed: () => scrollToBottomDefaultTapAction(unreadCount),
-              ),
-              if (showUnreadCount && widget.showUnreadCountOnScrollToBottom)
-                PositionedDirectional(
-                  end: -4,
-                  top: -4,
-                  child: StreamBadgeNotification(
-                    label: '${unreadCount > 99 ? '99+' : unreadCount}',
-                    size: StreamBadgeNotificationSize.sm,
-                  ),
-                ),
-            ],
-          ),
+          child: button,
         );
       },
     );
