@@ -1553,8 +1553,11 @@ class Channel {
       );
       return reactionResp;
     } catch (_) {
-      // Reset the message if the update fails
-      state?.updateMessage(message);
+      // Reset the message if the update fails. Use replace (not merge)
+      // so the rollback wins over the optimistic local state — otherwise
+      // `Message.updateWith`'s enrichment preservation would keep the
+      // optimistic `ownReactions` for messages that previously had none.
+      state?.replaceMessage(message);
       rethrow;
     }
   }
@@ -1579,8 +1582,9 @@ class Channel {
       );
       return deleteResponse;
     } catch (_) {
-      // Reset the message if the update fails
-      state?.updateMessage(message);
+      // Reset the message if the update fails. Use replace (not merge)
+      // for symmetry with `sendReaction` — see that method for context.
+      state?.replaceMessage(message);
       rethrow;
     }
   }
@@ -3278,7 +3282,21 @@ class ChannelClientState {
   }
 
   /// Updates the [message] in the state if it exists. Adds it otherwise.
+  ///
+  /// Reconciles via `Message.updateWith`, so locally-known enrichment
+  /// (poll, sharedLocation, ownReactions, nested quotedMessage) is
+  /// preserved when [message] omits those fields. Use [replaceMessage]
+  /// for paths that need a strict overwrite.
   void updateMessage(Message message) => _updateMessages([message]);
+
+  /// Replaces the [message] in the state if it exists, no-op otherwise.
+  ///
+  /// Unlike [updateMessage], this does **not** merge with the existing
+  /// state — [message] is used as-is. Useful for local rollbacks of an
+  /// optimistic update, where the caller has the full prior snapshot and
+  /// doesn't want the merge falling back to the optimistic values.
+  void replaceMessage(Message message) =>
+      _updateMessages([message], merge: false);
 
   /// Cleans up all the stale error messages which requires no action.
   void cleanUpStaleErrorMessages() {
@@ -3866,16 +3884,16 @@ class ChannelClientState {
     return _updateMessages(messages);
   }
 
-  void _updateMessages(Iterable<Message> messages) {
+  void _updateMessages(Iterable<Message> messages, {bool merge = true}) {
     if (messages.isEmpty) return;
 
-    _updateThreadMessages(messages);
-    _updateChannelMessages(messages);
-    _updatePinnedMessages(messages);
+    _updateThreadMessages(messages, merge: merge);
+    _updateChannelMessages(messages, merge: merge);
+    _updatePinnedMessages(messages, merge: merge);
     _updateActiveLiveLocations(messages);
   }
 
-  void _updateThreadMessages(Iterable<Message> messages) {
+  void _updateThreadMessages(Iterable<Message> messages, {bool merge = true}) {
     if (messages.isEmpty) return;
 
     final affectedThreads = {...messages.map((it) => it.parentId).nonNulls};
@@ -3888,6 +3906,7 @@ class ChannelClientState {
       final updatedThreadMessages = _mergeMessagesIntoExisting(
         existing: threadMessages,
         toMerge: messages,
+        merge: merge,
       );
 
       // Update the thread with the modified message list.
@@ -3898,7 +3917,7 @@ class ChannelClientState {
     _threads = updatedThreads;
   }
 
-  void _updateChannelMessages(Iterable<Message> messages) {
+  void _updateChannelMessages(Iterable<Message> messages, {bool merge = true}) {
     if (messages.isEmpty) return;
 
     final affectedMessages = messages.map((it) {
@@ -3917,6 +3936,7 @@ class ChannelClientState {
     final updatedChannelMessages = _mergeMessagesIntoExisting(
       existing: channelMessages,
       toMerge: affectedMessages,
+      merge: merge,
     );
 
     // Calculate the new last message at time.
@@ -3933,13 +3953,14 @@ class ChannelClientState {
     );
   }
 
-  void _updatePinnedMessages(Iterable<Message> messages) {
+  void _updatePinnedMessages(Iterable<Message> messages, {bool merge = true}) {
     if (messages.isEmpty) return;
 
     final pinnedMessages = [...this.pinnedMessages];
     final updatedPinnedMessages = _mergePinnedMessagesIntoExisting(
       existing: pinnedMessages,
       toMerge: messages,
+      merge: merge,
     );
 
     _channelState = _channelState.copyWith(
@@ -3992,24 +4013,31 @@ class ChannelClientState {
   Iterable<Message> _mergePinnedMessagesIntoExisting({
     required Iterable<Message> existing,
     required Iterable<Message> toMerge,
+    bool merge = true,
   }) {
     return _mergeMessagesIntoExisting(
       existing: existing,
       toMerge: toMerge,
+      merge: merge,
     ).where(_pinIsValid);
   }
 
   Iterable<Message> _mergeMessagesIntoExisting({
     required Iterable<Message> existing,
     required Iterable<Message> toMerge,
+    bool merge = true,
   }) {
     if (toMerge.isEmpty) return existing;
 
-    // Reconcile each pair via Message.updateWith.
+    // When [merge] is false, take the new payload as-is — used by local
+    // rollback paths that already hold the prior snapshot and don't want
+    // `updateWith`'s enrichment fallback to keep optimistic values.
     final mergedMessages = existing.merge(
       toMerge,
       key: (message) => message.id,
-      update: (original, updated) => original.updateWith(updated),
+      update: merge
+          ? (original, updated) => original.updateWith(updated)
+          : (_, updated) => updated,
     );
 
     // Replace each embedded quotedMessage with the fully-formed top-level
