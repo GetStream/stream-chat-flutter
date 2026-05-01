@@ -597,7 +597,6 @@ class Message extends Equatable implements ComparableFieldProvider {
       // fields, as the backend may strip them on partial payloads.
       poll: other.poll ?? poll,
       sharedLocation: other.sharedLocation ?? sharedLocation,
-      ownReactions: other.ownReactions ?? ownReactions,
       // Recursively merge so nested enrichment survives a stripped payload.
       quotedMessage: switch ((other.quotedMessage, quotedMessage)) {
         // Same target — merge to preserve local enrichment.
