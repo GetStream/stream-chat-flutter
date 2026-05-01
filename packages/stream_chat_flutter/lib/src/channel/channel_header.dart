@@ -182,9 +182,8 @@ class StreamChannelHeader extends StatelessWidget implements PreferredSizeWidget
               scrolledUnderElevation: scrolledUnderElevation,
               leading: Padding(
                 padding: .directional(start: context.streamSpacing.sm),
-                child: leadingWidget,
+                child: Center(child: leadingWidget),
               ),
-              leadingWidth: StreamAvatarSize.lg.value,
               titleSpacing: context.streamSpacing.sm,
               bottom: bottom,
               bottomOpacity: bottomOpacity,

@@ -1,9 +1,20 @@
 ## Upcoming
 
+✅ Added
+
+- Added `StreamChatClient.recoverStateOnReconnect` (defaults to `true`); when `false`, the client no longer auto-re-queries active channels on connection recovery — useful for consumers driving their own refresh from the `connectionRecovered` event.
+- Added `Message.updateWith(Message? other)` — merges a server-side update onto the local message while preserving locally-known `poll`, `sharedLocation`, `ownReactions`, and nested `quotedMessage` enrichment when the server omits them.
+
+⚠️ Deprecated
+
+- Deprecated `Message.syncWith` in favor of `Message.updateWith`. Note the arguments are flipped: `local.updateWith(remote)` replaces `remote.syncWith(local)`.
+
 🐞 Fixed
 
-- Fixed `Channel.sendMessage` and `Channel.updateMessage` hanging forever when
-  any attachment upload failed; they now throw `StreamChatError` instead.
+- Fixed reactions, polls, and quoted-message enrichment briefly flickering after the app returned from the background. The reconnect path now refreshes channels and advances `lastSyncAt` to the current time instead of replaying every event since `lastSyncAt` through `handleEvent`. `client.sync()` remains available for consumers that need event-level replay.
+- Fixed `Channel.sendMessage` / `Channel.updateMessage` hanging forever when any attachment upload failed; they now throw `StreamChatError`.
+- Fixed quoted poll messages losing their poll, shared-location, or nested-quote content when the server omits it from the `quoted_message` payload during channel re-sync.
+- Fixed a poll attached to a parent message disappearing when a thread reply was added; partial `message.updated` events no longer clobber locally-known `poll` / `sharedLocation` on the parent.
 
 ## 10.0.0-beta.13
 

@@ -113,6 +113,7 @@ class StreamPollOptionsSheet extends StatelessWidget {
                     removeBottom: true,
                     child: PollOptionsListView(
                       poll: poll,
+                      padding: .zero,
                       onCastVote: onCastVote,
                       onRemoveVote: onRemoveVote,
                       optionStyle: effectiveTheme.optionStyle,

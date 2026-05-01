@@ -182,10 +182,10 @@ class StreamChatLocalizationsEs extends GlobalStreamChatLocalizations {
       '¿Quiere enviar una copia de este mensaje a un moderador para una mayor investigación?';
 
   @override
-  String get flagLabel => 'REPORTAR';
+  String get flagLabel => 'Reportar';
 
   @override
-  String get cancelLabel => 'CANCELAR';
+  String get cancelLabel => 'Cancelar';
 
   @override
   String get flagMessageSuccessfulLabel => 'Mensaje reportado';
@@ -194,7 +194,7 @@ class StreamChatLocalizationsEs extends GlobalStreamChatLocalizations {
   String get flagMessageSuccessfulText => 'Este mensaje ha sido reportado a un moderador.';
 
   @override
-  String get deleteLabel => 'BORRAR';
+  String get deleteLabel => 'Borrar';
 
   @override
   String get deleteMessageLabel => 'Borrar el mensaje';

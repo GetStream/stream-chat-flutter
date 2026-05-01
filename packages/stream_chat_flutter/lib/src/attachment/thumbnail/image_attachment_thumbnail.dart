@@ -61,6 +61,7 @@ class StreamImageAttachmentThumbnail extends StatelessWidget {
             targetSize: constraints.biggest,
             originalSize: image.originalSize,
             pixelRatio: MediaQuery.devicePixelRatioOf(context),
+            fit: fit,
           );
 
           if (size != null) effectiveResize = .new(width: size.width, height: size.height);

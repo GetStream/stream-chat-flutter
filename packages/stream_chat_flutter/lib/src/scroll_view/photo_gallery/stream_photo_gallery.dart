@@ -52,7 +52,7 @@ class StreamPhotoGallery extends StatelessWidget {
     this.keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
     this.restorationId,
     this.clipBehavior = Clip.hardEdge,
-    this.thumbnailSize = const ThumbnailSize(400, 400),
+    this.thumbnailSize,
     this.thumbnailFormat = ThumbnailFormat.jpeg,
     this.thumbnailQuality = 100,
     this.thumbnailScale = 1,
@@ -293,8 +293,11 @@ class StreamPhotoGallery extends StatelessWidget {
   /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
 
-  /// The thumbnail size.
-  final ThumbnailSize thumbnailSize;
+  /// The thumbnail size in pixels to request from the platform.
+  ///
+  /// When null (the default), each tile auto-calculates its size from its
+  /// own layout constraints and the device pixel ratio.
+  final ThumbnailSize? thumbnailSize;
 
   /// {@macro photo_manager.ThumbnailFormat}
   final ThumbnailFormat thumbnailFormat;

@@ -46,9 +46,7 @@ class StreamAttachmentUploadStateBuilder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Hide the overlay once this individual attachment is done uploading
-    // or the whole message has been delivered. Matches the iOS (SwiftUI)
-    // media attachment behaviour where the uploading overlay clears on
-    // completion.
+    // or the whole message has been delivered.
     if (attachment.uploadState.isSuccess || message.state.isCompleted) return const Empty();
 
     final colorScheme = context.streamColorScheme;

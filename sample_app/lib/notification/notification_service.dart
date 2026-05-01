@@ -123,28 +123,36 @@ class NotificationService {
 
   /// Renders [notification] as a local banner. The id is derived from
   /// the payload so duplicate events replace rather than stack.
-  Future<void> showLocalNotification(ChatNotification notification) {
-    const androidDetails = AndroidNotificationDetails(
+  ///
+  /// Notifications are grouped by channel cid: iOS uses `threadIdentifier`
+  /// to collapse banners automatically; Android needs an explicit summary
+  /// notification (see [_showAndroidGroupSummary]) on top of `groupKey`.
+  Future<void> showLocalNotification(ChatNotification notification) async {
+    final groupKey = notification.cid;
+
+    final androidDetails = AndroidNotificationDetails(
       notificationChannelId,
       notificationChannelName,
       channelDescription: notificationChannelDescription,
       importance: Importance.high,
       priority: Priority.high,
+      groupKey: groupKey,
     );
 
     // `presentAlert` is the pre-iOS 14 flag; on iOS 14+ you must opt in to
     // `presentBanner` + `presentList` explicitly or the foreground
     // notification is silently dropped.
-    const iosDetails = DarwinNotificationDetails(
+    final iosDetails = DarwinNotificationDetails(
       presentAlert: true,
       presentBanner: true,
       presentList: true,
       presentBadge: true,
       presentSound: true,
       interruptionLevel: InterruptionLevel.active,
+      threadIdentifier: groupKey,
     );
 
-    const notificationDetails = NotificationDetails(iOS: iosDetails, android: androidDetails);
+    final notificationDetails = NotificationDetails(iOS: iosDetails, android: androidDetails);
     final payload = jsonEncode({'data': notification.toJson()});
 
     // Stable id derived from the event — not `notification.hashCode` — so
@@ -157,12 +165,44 @@ class NotificationService {
       'cid=${notification.cid} title="${notification.title}" body="${notification.body}"',
     );
 
-    return _localNotification.show(
+    await _localNotification.show(
       id: id,
       title: notification.title ?? 'New Notification',
       body: notification.body ?? 'You have a new notification.',
       notificationDetails: notificationDetails,
       payload: payload,
+    );
+
+    // Android needs an explicit summary notification to visually group the
+    // children; iOS handles grouping automatically via `threadIdentifier`.
+    if (!CurrentPlatform.isWeb && CurrentPlatform.isAndroid) {
+      await _showAndroidGroupSummary(groupKey);
+    }
+  }
+
+  /// Posts (or refreshes) the Android summary notification for [groupKey].
+  ///
+  /// Android only collapses children into a group once a summary with the
+  /// same `groupKey` exists. The summary id is stable per cid so subsequent
+  /// messages in the same channel update the summary in place.
+  Future<void> _showAndroidGroupSummary(String groupKey) {
+    final summaryDetails = AndroidNotificationDetails(
+      notificationChannelId,
+      notificationChannelName,
+      channelDescription: notificationChannelDescription,
+      importance: Importance.high,
+      priority: Priority.high,
+      groupKey: groupKey,
+      setAsGroupSummary: true,
+      // Children make the sound; the summary is silent so a new message in
+      // an already-grouped channel doesn't double-buzz.
+      groupAlertBehavior: GroupAlertBehavior.children,
+    );
+
+    return _localNotification.show(
+      id: _summaryNotificationIdFor(groupKey),
+      title: 'New messages',
+      notificationDetails: NotificationDetails(android: summaryDetails),
     );
   }
 
@@ -170,6 +210,10 @@ class NotificationService {
     final key = notification.messageId ?? '${notification.type}:${notification.cid}';
     return key.hashCode;
   }
+
+  // Different namespace from [_notificationIdFor] so a child notification
+  // and its group summary can never collide on hashCode.
+  static int _summaryNotificationIdFor(String groupKey) => 'summary:$groupKey'.hashCode;
 
   // Initial Notification -----------------------------------------------------
 

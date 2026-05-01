@@ -117,7 +117,8 @@ class StreamVoiceRecordingAttachmentPlaylist extends StatefulWidget {
   State<StreamVoiceRecordingAttachmentPlaylist> createState() => _StreamVoiceRecordingAttachmentPlaylistState();
 }
 
-class _StreamVoiceRecordingAttachmentPlaylistState extends State<StreamVoiceRecordingAttachmentPlaylist> {
+class _StreamVoiceRecordingAttachmentPlaylistState extends State<StreamVoiceRecordingAttachmentPlaylist>
+    with WidgetsBindingObserver {
   late final _controller = StreamAudioPlaylistController(
     widget.voiceRecordings.toPlaylist(),
   );
@@ -125,7 +126,15 @@ class _StreamVoiceRecordingAttachmentPlaylistState extends State<StreamVoiceReco
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _controller.initialize();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // Pause playback when the app goes to background or is detached.
+    final isBackground = ![AppLifecycleState.resumed, AppLifecycleState.inactive].contains(state);
+    if (isBackground) _controller.pause();
   }
 
   @override
@@ -133,15 +142,17 @@ class _StreamVoiceRecordingAttachmentPlaylistState extends State<StreamVoiceReco
     covariant StreamVoiceRecordingAttachmentPlaylist oldWidget,
   ) {
     super.didUpdateWidget(oldWidget);
-    final equals = const ListEquality().equals;
-    if (!equals(widget.voiceRecordings, oldWidget.voiceRecordings)) {
+    final newPlaylist = widget.voiceRecordings.toPlaylist();
+    final oldPlaylist = oldWidget.voiceRecordings.toPlaylist();
+    if (!const ListEquality().equals(newPlaylist, oldPlaylist)) {
       // If the playlist have changed, update the playlist.
-      _controller.updatePlaylist(widget.voiceRecordings.toPlaylist());
+      _controller.updatePlaylist(newPlaylist);
     }
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _controller.dispose();
     super.dispose();
   }

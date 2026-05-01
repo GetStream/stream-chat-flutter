@@ -24,32 +24,18 @@ class StreamBackButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = StreamChatTheme.of(context);
-
-    Widget icon = Icon(
-      context.streamIcons.arrowLeft,
-      size: 20,
-      color: theme.colorTheme.textHighEmphasis,
-    );
-
+    Widget icon = Icon(context.streamIcons.arrowLeft);
     if (showUnreadCount) {
-      icon = Stack(
-        clipBehavior: Clip.none,
-        children: <Widget>[
-          icon,
-          PositionedDirectional(
-            top: -4,
-            start: 12,
-            child: switch (channelId) {
-              final cid? => StreamUnreadIndicator.channels(cid: cid),
-              _ => const StreamUnreadIndicator(),
-            },
-          ),
-        ],
-      );
+      icon = switch (channelId) {
+        final cid? => StreamUnreadIndicator.channels(cid: cid, child: icon),
+        _ => StreamUnreadIndicator(child: icon),
+      };
     }
 
-    return IconButton(
+    return StreamButton.icon(
+      type: .ghost,
+      size: .medium,
+      style: .secondary,
       icon: icon,
       onPressed: () {
         if (onPressed case final onPressed?) {

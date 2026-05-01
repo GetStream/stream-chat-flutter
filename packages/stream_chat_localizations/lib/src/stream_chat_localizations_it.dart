@@ -185,10 +185,10 @@ Il file è troppo grande per essere caricato. Il limite è di $limitInMB MB.''';
   String get flagMessageQuestion => 'Vuoi mandare una copia di questo messaggio ad un moderatore?';
 
   @override
-  String get flagLabel => 'SEGNALA';
+  String get flagLabel => 'Segnala';
 
   @override
-  String get cancelLabel => 'ANNULLA';
+  String get cancelLabel => 'Annulla';
 
   @override
   String get flagMessageSuccessfulLabel => 'Messaggio segnalato';
@@ -197,7 +197,7 @@ Il file è troppo grande per essere caricato. Il limite è di $limitInMB MB.''';
   String get flagMessageSuccessfulText => 'Questo messaggio è stato segnalato ad un moderatore.';
 
   @override
-  String get deleteLabel => 'CANCELLA';
+  String get deleteLabel => 'Cancella';
 
   @override
   String get deleteMessageLabel => 'Cancella messaggio';

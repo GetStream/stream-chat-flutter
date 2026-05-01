@@ -85,20 +85,15 @@ class Message extends Equatable implements ComparableFieldProvider {
       Serializer.moveToExtraDataFromRoot(json, topLevelFields),
     );
 
-    // TODO: Remove this once type are properly enriched on the backend.
-    var type = message.type;
-    if (message.deletedForMe ?? false) {
-      type = MessageType.deleted;
-    }
-
-    var state = MessageState.sent;
-    if (message.deletedForMe ?? false) {
-      state = MessageState.deletedForMe;
-    } else if (message.deletedAt != null) {
-      state = MessageState.softDeleted;
-    } else if (message.updatedAt.isAfter(message.createdAt)) {
-      state = MessageState.updated;
-    }
+    final isDeletedForMe = message.deletedForMe ?? false;
+    // TODO: Remove this override once type is properly enriched on the backend.
+    final type = isDeletedForMe ? MessageType.deleted : message.type;
+    final state = switch (message) {
+      _ when isDeletedForMe => MessageState.deletedForMe,
+      _ when message.deletedAt != null => MessageState.softDeleted,
+      _ when message.updatedAt.isAfter(message.createdAt) => MessageState.updated,
+      _ => MessageState.sent,
+    };
 
     return message.copyWith(type: type, state: state);
   }
@@ -570,37 +565,67 @@ class Message extends Equatable implements ComparableFieldProvider {
     );
   }
 
-  /// Returns a new [Message] that is [other] with local changes applied to it.
+  /// Returns a new [Message] that is [other] reconciled with this message.
   ///
-  /// This ensures that the local sync changes are not lost when the message is
-  /// updated on the server.
+  /// `this` is the locally-known message and [other] is the incoming
+  /// payload. Local-only timestamps ([localCreatedAt], [localUpdatedAt],
+  /// [localDeletedAt]) are carried over from `this`. [poll],
+  /// [sharedLocation], and the nested [quotedMessage] fall back to the
+  /// local value when [other] omits them. The nested [quotedMessage] is
+  /// reconciled recursively.
   ///
-  /// For example, when a message is sent, it is immediately shown
-  /// optimistically in the UI. When the message is received from the server,
-  /// it will not contain the local changes. This method can be used to merge
-  /// the local changes back into the message.
-  ///
-  /// This also helps in maintaining the order of the messages in the channel
-  /// when the messages are sorted by the [createdAt] field.
-  Message syncWith(Message? other) {
+  /// If [other] is `null`, returns this message unchanged.
+  Message updateWith(Message? other) {
     if (other == null) return this;
 
-    var synced = copyWith(
-      localCreatedAt: other.localCreatedAt,
-      localUpdatedAt: other.localUpdatedAt,
-      localDeletedAt: other.localDeletedAt,
+    // If we kept the local `deletedForMe` flag, the `type` and `state` on
+    // [other] were derived without it, so we re-promote them here to keep
+    // the message reading as deleted.
+    final preservedDeletedForMe = other.deletedForMe ?? deletedForMe;
+    final shouldPromoteDeletedForMe = preservedDeletedForMe == true && other.deletedForMe != true;
+
+    return other.copyWith(
+      // Local-only timestamps — the server cannot know about these,
+      // so they are always taken from this instance.
+      localCreatedAt: localCreatedAt,
+      localUpdatedAt: localUpdatedAt,
+      localDeletedAt: localDeletedAt,
+      deletedForMe: preservedDeletedForMe,
+      type: shouldPromoteDeletedForMe ? MessageType.deleted : null,
+      state: shouldPromoteDeletedForMe ? MessageState.deletedForMe : null,
+      // Preserve enrichment from this instance when [other] omits these
+      // fields, as the backend may strip them on partial payloads.
+      poll: other.poll ?? poll,
+      sharedLocation: other.sharedLocation ?? sharedLocation,
+      ownReactions: other.ownReactions ?? ownReactions,
+      // Recursively merge so nested enrichment survives a stripped payload.
+      quotedMessage: switch ((other.quotedMessage, quotedMessage)) {
+        // Same target — merge to preserve local enrichment.
+        (final incoming?, final local?) when incoming.id == local.id => local.updateWith(incoming),
+        // Different target — trust the new payload.
+        (final incoming?, _) => incoming,
+        // Server omitted the nested quote — keep the locally-known copy.
+        (_, final local) => local,
+      },
     );
+  }
 
-    // The backend does not always enrich this deletedForMe field
-    if (other.deletedForMe == true && synced.deletedForMe != true) {
-      synced = synced.copyWith(
-        deletedForMe: true,
-        type: MessageType.deleted,
-        state: MessageState.deletedForMe,
-      );
-    }
-
-    return synced;
+  /// Returns a new [Message] that is this message reconciled with the local
+  /// changes from [other].
+  ///
+  /// The argument convention is the inverse of [updateWith]: here `this` is
+  /// the server payload and [other] is the locally-known message.
+  /// `serverResponse.syncWith(localMessage)` is equivalent to
+  /// `localMessage.updateWith(serverResponse)`.
+  ///
+  /// See also:
+  ///
+  ///  * [updateWith], which performs the same reconciliation with the
+  ///    arguments flipped.
+  @Deprecated('Use updateWith instead — note the arguments are flipped')
+  Message syncWith(Message? other) {
+    if (other == null) return this;
+    return other.updateWith(this);
   }
 
   @override

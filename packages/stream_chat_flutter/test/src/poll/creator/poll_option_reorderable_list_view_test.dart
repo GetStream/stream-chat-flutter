@@ -384,8 +384,8 @@ void main() {
         find.text('Are you sure you want to delete this option?'),
         findsOneWidget,
       );
-      expect(find.text('CANCEL'), findsOneWidget);
-      expect(find.text('DELETE'), findsOneWidget);
+      expect(find.text('Cancel'), findsOneWidget);
+      expect(find.text('Delete'), findsOneWidget);
     });
 
     testWidgets('should delete option when confirmed', (tester) async {
@@ -414,7 +414,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Confirm deletion
-      await tester.tap(find.text('DELETE'));
+      await tester.tap(find.text('Delete'));
       await tester.pumpAndSettle();
 
       // Should now have 2 options
@@ -448,7 +448,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Cancel deletion
-      await tester.tap(find.text('CANCEL'));
+      await tester.tap(find.text('Cancel'));
       await tester.pumpAndSettle();
 
       // Should still have 3 options
@@ -482,7 +482,7 @@ void main() {
         await tester.pumpAndSettle();
 
         // Confirm deletion
-        await tester.tap(find.text('DELETE'));
+        await tester.tap(find.text('Delete'));
         await tester.pumpAndSettle();
 
         // Should still have 2 options (minimum enforced)

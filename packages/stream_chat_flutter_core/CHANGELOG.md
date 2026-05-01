@@ -17,10 +17,16 @@
 - `StreamMessageInputController.editMessage()` and the `command` setter are now
   re-entrant — repeated calls preserve the original restore snapshot.
 
+🔄 Changed
+
+- `StreamChatCore` now sets `client.recoverStateOnReconnect = false` on mount; refreshes on `connectionRecovered` are driven by the list controllers in this package, avoiding a duplicate `queryChannels` round-trip and the historical event-replay flicker on reactions, polls, and quoted messages.
+- Apps watching a `Channel` outside any list controller (e.g. a deep link into a single channel screen) should subscribe to `client.on(EventType.connectionRecovered)` and call `channel.watch()` themselves to refresh state on reconnect.
+- Changed the default `backgroundKeepAlive` from 1 minute to 15 seconds — covers quick app-switches and notification-shade checks while closing cleanly before the server's 35-second read timeout. Still configurable.
+
 🐞 Fixed
 
-- Fixed `StreamMessageInputController.cancelEditMessage` losing the pre-edit
-  draft when a remote update arrived for the message being edited.
+- Fixed `StreamChatCore` disconnecting the WebSocket immediately on background when no `onBackgroundEventReceived` handler was provided; the keep-alive timer now fires before the connection closes regardless of whether a handler is set.
+- Fixed `StreamMessageInputController.cancelEditMessage` losing the pre-edit draft when a remote update arrived for the message being edited.
 
 ## 10.0.0-beta.13
 
