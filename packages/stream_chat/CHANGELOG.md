@@ -3,6 +3,11 @@
 ✅ Added
 
 - Added `StreamChatClient.recoverStateOnReconnect` (defaults to `true`); when `false`, the client no longer auto-re-queries active channels on connection recovery — useful for consumers driving their own refresh from the `connectionRecovered` event.
+- Added `Message.updateWith(Message? other)` — merges a server-side update onto the local message while preserving locally-known `poll`, `sharedLocation`, `ownReactions`, and nested `quotedMessage` enrichment when the server omits them.
+
+⚠️ Deprecated
+
+- Deprecated `Message.syncWith` in favor of `Message.updateWith`. Note the arguments are flipped: `local.updateWith(remote)` replaces `remote.syncWith(local)`.
 
 🐞 Fixed
 
