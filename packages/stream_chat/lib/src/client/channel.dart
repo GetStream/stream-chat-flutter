@@ -3295,14 +3295,12 @@ class ChannelClientState {
   /// state — [message] is used as-is. Useful for local rollbacks of an
   /// optimistic update, where the caller has the full prior snapshot and
   /// doesn't want the merge falling back to the optimistic values.
-  void replaceMessage(Message message) =>
-      _updateMessages([message], update: _replaceUpdate);
+  void replaceMessage(Message message) => _updateMessages([message], update: _replaceUpdate);
 
   // Default `update` for [_updateMessages]: merge incoming with the
   // locally-known message via `Message.updateWith`, preserving enrichment
   // the server may strip on partial payloads.
-  static Message _mergeUpdate(Message original, Message updated) =>
-      original.updateWith(updated);
+  static Message _mergeUpdate(Message original, Message updated) => original.updateWith(updated);
 
   // Replace `update` for [_updateMessages]: take the incoming as-is. Used
   // by local rollback paths.
