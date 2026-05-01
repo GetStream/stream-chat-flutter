@@ -2,6 +2,7 @@
 
 🛑️ Breaking
 
+- Removed `StreamDraftListView`, `StreamDraftListTile`, `StreamDraftListTileTheme`, and `StreamDraftListTileThemeData` from the SDK. Also removed `StreamChatThemeData.draftListTileTheme`. Refer to the sample app for a reference implementation using `StreamDraftListController` and `PagedValueListView`.
 - Replaced `StreamMessageInput.hintGetter` with `placeholderBuilder` over a sealed `MessageInputPlaceholder`.
   See [`migrations/redesign/message_composer.md`](../../migrations/redesign/message_composer.md).
 - Removed `StreamMessageListView.unreadIndicatorBuilder`; use `StreamComponentFactory.jumpToUnreadButton`.
