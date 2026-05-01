@@ -173,15 +173,23 @@ void main() {
     testWidgets(
       'should close connection when app goes to background without handler',
       (tester) async {
-        // Arrange
-        await pumpStreamChatCore(tester);
+        await tester.runAsync(() async {
+          // Arrange
+          await pumpStreamChatCore(
+            tester,
+            backgroundKeepAlive: const Duration(milliseconds: 100),
+          );
 
-        // Act
-        tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
-        await tester.pumpAndSettle();
+          // Act
+          tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+          await tester.pumpAndSettle();
 
-        // Assert
-        verify(mockClient.closeConnection).called(1);
+          // Wait for timer to expire
+          await Future.delayed(const Duration(milliseconds: 200));
+
+          // Assert
+          verify(mockClient.closeConnection).called(1);
+        });
       },
     );
 
