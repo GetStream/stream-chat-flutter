@@ -28,7 +28,7 @@ void main() {
 
       expect(find.byType(AlertDialog), findsOneWidget);
       expect(find.text('Delete Message'), findsOneWidget);
-      expect(find.text('DELETE'), findsOneWidget);
+      expect(find.text('Delete'), findsOneWidget);
     });
 
     goldenTest(
