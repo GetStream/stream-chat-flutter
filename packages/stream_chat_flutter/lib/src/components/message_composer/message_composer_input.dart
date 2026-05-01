@@ -37,6 +37,11 @@ class StreamMessageComposerInput extends StatelessWidget {
 /// - [RecordStateStopped] → [MessageComposerRecordingStopped]
 /// - [RecordStateRecording] → [StreamMessageComposerRecordingOngoing]
 /// - otherwise → the default text field with optional "also send to channel" checkbox.
+///
+/// This class is exported publicly so that consumers who partially customise
+/// the composer through [StreamComponentFactory] can reuse it as a building
+/// block (for example, wrapping it with additional decoration while keeping
+/// the default text-field and recording UI unchanged).
 class DefaultStreamMessageComposerInput extends StatelessWidget {
   /// Creates a new instance of [DefaultStreamMessageComposerInput].
   const DefaultStreamMessageComposerInput({super.key, required this.props});

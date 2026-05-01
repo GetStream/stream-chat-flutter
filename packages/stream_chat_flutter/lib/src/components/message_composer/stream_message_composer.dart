@@ -62,7 +62,7 @@ class StreamMessageComposer extends StatelessWidget {
     this.keyboardType,
     this.textCapitalization = TextCapitalization.sentences,
     this.autofocus = false,
-    this.autoCorrect = true,
+    this.autocorrect = true,
     this.isFloating = false,
     this.audioRecorderController,
   });
@@ -125,8 +125,12 @@ class StreamMessageComposer extends StatelessWidget {
   /// Defaults to true unless a command was active.
   final bool? shouldKeepFocusAfterMessage;
 
-  /// Custom message validator. Defaults to requiring non-empty text,
-  /// attachments, or a poll.
+  /// Custom message validator.
+  ///
+  /// When `null` (the default) the controller falls back to its built-in
+  /// validator, which requires the message to have non-empty text, at least
+  /// one attachment, or a poll — so leaving this unset preserves the same
+  /// guard that the legacy [StreamMessageInput] applied.
   final MessageValidator? validator;
 
   /// Restoration ID for state persistence.
@@ -196,8 +200,8 @@ class StreamMessageComposer extends StatelessWidget {
   /// Auto-focus the text field.
   final bool autofocus;
 
-  /// Enable autocorrect.
-  final bool autoCorrect;
+  /// Enable autocorrect on the text field.
+  final bool autocorrect;
 
   /// Whether the composer is displayed in a floating container.
   final bool isFloating;
@@ -288,7 +292,7 @@ class MessageComposerProps {
     this.keyboardType,
     this.textCapitalization = TextCapitalization.sentences,
     this.autofocus = false,
-    this.autoCorrect = true,
+    this.autocorrect = true,
     this.isFloating = false,
     this.audioRecorderController,
   });
@@ -330,7 +334,7 @@ class MessageComposerProps {
     keyboardType: widget.keyboardType,
     textCapitalization: widget.textCapitalization,
     autofocus: widget.autofocus,
-    autoCorrect: widget.autoCorrect,
+    autocorrect: widget.autocorrect,
     isFloating: widget.isFloating,
     audioRecorderController: widget.audioRecorderController,
   );
@@ -390,6 +394,10 @@ class MessageComposerProps {
   final bool? shouldKeepFocusAfterMessage;
 
   /// Custom message validator.
+  ///
+  /// When `null` (the default) the controller falls back to its built-in
+  /// validator, which requires the message to have non-empty text, at least
+  /// one attachment, or a poll.
   final MessageValidator? validator;
 
   /// Restoration ID for state persistence.
@@ -442,8 +450,8 @@ class MessageComposerProps {
   /// Auto-focus the text field.
   final bool autofocus;
 
-  /// Enable autocorrect.
-  final bool autoCorrect;
+  /// Enable autocorrect on the text field.
+  final bool autocorrect;
 
   /// Whether the composer is displayed in a floating container.
   final bool isFloating;
@@ -634,6 +642,19 @@ class _DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompo
       ..detach()
       ..removeListener(_onControllerChanged);
     super.deactivate();
+  }
+
+  // Re-attach the controller if Flutter temporarily removes and then re-inserts
+  // this widget (e.g. inside a PageView or an Overlay).  Without this override
+  // the controller would stay detached after the widget comes back, silently
+  // breaking draft sync, OG enrichment, and the send pipeline.
+  //
+  // `attach()` calls `detach()` internally, so calling it when already attached
+  // is safe and idempotent.
+  @override
+  void activate() {
+    super.activate();
+    _initController();
   }
 
   @override
@@ -926,7 +947,7 @@ class _DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompo
       keyboardType: widget.props.keyboardType,
       textCapitalization: widget.props.textCapitalization,
       autofocus: widget.props.autofocus,
-      autocorrect: widget.props.autoCorrect,
+      autocorrect: widget.props.autocorrect,
       audioRecorderController: widget.props.enableVoiceRecording ? _effectiveAudioRecorderController : null,
       voiceRecordingFeedback: widget.props.voiceRecordingFeedback,
       sendVoiceRecordingAutomatically: widget.props.sendVoiceRecordingAutomatically,
