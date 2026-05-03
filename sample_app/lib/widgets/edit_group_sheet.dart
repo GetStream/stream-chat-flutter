@@ -75,10 +75,19 @@ class _EditGroupSheetState extends State<EditGroupSheet> {
   @override
   Widget build(BuildContext context) {
     final spacing = context.streamSpacing;
+    // The sheet route consumes the top inset via its own SafeArea, but
+    // intentionally leaves the bottom inset so descendants can opt in.
+    // The keyboard inset arrives via viewInsets — pad the body's bottom
+    // by it so the text input never disappears behind the keyboard.
+    final viewInsets = MediaQuery.viewInsetsOf(context);
 
     return SafeArea(
       top: false,
       child: Column(
+        // The Expanded child below forces the column to fill the
+        // available height, which in turn drags the sheet up to its
+        // full-screen rest position — matching the Figma's "full sheet"
+        // edit flow.
         mainAxisSize: MainAxisSize.min,
         children: [
           StreamSheetHeader(
@@ -90,25 +99,29 @@ class _EditGroupSheetState extends State<EditGroupSheet> {
               onPressed: _isDirty && !_saving ? _save : null,
             ),
           ),
-          Padding(
-            padding: EdgeInsets.fromLTRB(
-              spacing.md,
-              spacing.md,
-              spacing.md,
-              spacing.lg,
-            ),
-            child: _AvatarPreview(
-              imageOverride: _imageOverride,
-              imageRemoved: _imageRemoved,
-              onTap: _openAvatarPicker,
-            ),
-          ),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: spacing.md),
-            child: StreamTextInput(
-              controller: _nameController,
-              autofocus: true,
-              hintText: 'Group name',
+          Expanded(
+            child: SingleChildScrollView(
+              padding: EdgeInsets.only(
+                left: spacing.md,
+                right: spacing.md,
+                top: spacing.md,
+                bottom: spacing.md + viewInsets.bottom,
+              ),
+              child: Column(
+                children: [
+                  _AvatarPreview(
+                    imageOverride: _imageOverride,
+                    imageRemoved: _imageRemoved,
+                    onTap: _openAvatarPicker,
+                  ),
+                  SizedBox(height: spacing.md),
+                  StreamTextInput(
+                    controller: _nameController,
+                    autofocus: true,
+                    hintText: 'Group name',
+                  ),
+                ],
+              ),
             ),
           ),
         ],
