@@ -40,14 +40,20 @@ class EditGroupSheet extends StatefulWidget {
 
 class _EditGroupSheetState extends State<EditGroupSheet> {
   late final Channel _channel = StreamChannel.of(context).channel;
+  late final StreamChatClient _client = StreamChat.of(context).client;
   late final TextEditingController _nameController = TextEditingController(
     text: _channel.name ?? '',
   );
 
-  // CDN URL of an image the user picked + uploaded as a standalone
-  // attachment in this session. `null` means "no override" — the current
-  // channel image flows through StreamChannelAvatar unchanged. Persisted
-  // to the channel only when the save checkmark is tapped.
+  // Path to the picked image file on the local device. Drives the
+  // preview via Image.file so the swap is instant (no CDN round-trip),
+  // independent of the upload's URL state. Mirrors the LLC's
+  // sendMessage attachment flow — local file is the source of truth
+  // until the URL takes over on the server.
+  String? _pickedPath;
+
+  // CDN URL returned from the standalone upload. Used only to persist
+  // the avatar on save — the in-sheet preview reads from [_pickedPath].
   String? _imageOverride;
 
   // True when the user tapped Reset Picture. Persisted as an `image`
@@ -61,12 +67,18 @@ class _EditGroupSheetState extends State<EditGroupSheet> {
   // save checkmark so users can't persist before the URL has settled.
   double? _uploadProgress;
 
+  // Standalone uploads we've kicked off in this session. On save, we
+  // strip the URL we're about to persist and delete the rest — they
+  // were superseded by a later pick. On dispose without save, we
+  // delete every entry so abandoned uploads don't leak on the CDN.
+  final List<String> _trackedUploads = [];
+
   String get _name => _nameController.text.trim();
   String get _initialName => (_channel.extraData['name'] as String?) ?? '';
 
   bool get _isDirty {
     if (_name != _initialName) return true;
-    if (_imageOverride != null) return true;
+    if (_pickedPath != null) return true;
     if (_imageRemoved) return true;
     return false;
   }
@@ -85,7 +97,21 @@ class _EditGroupSheetState extends State<EditGroupSheet> {
   @override
   void dispose() {
     _nameController.dispose();
+    // Sheet was dismissed without saving — delete every standalone
+    // upload we held on to. Save() clears the list before pop, so this
+    // only fires for the abandon case.
+    for (final url in _trackedUploads) {
+      _deleteOrphan(url);
+    }
+    _trackedUploads.clear();
     super.dispose();
+  }
+
+  // Fire-and-forget cleanup of a CDN upload via the standalone delete
+  // API. Failure to delete just leaks one orphan, which the user can
+  // survive.
+  void _deleteOrphan(String url) {
+    _client.deleteImage(url, _channel.id!, _channel.type).ignore();
   }
 
   @override
@@ -126,7 +152,7 @@ class _EditGroupSheetState extends State<EditGroupSheet> {
             child: Column(
               children: [
                 _AvatarPreview(
-                  imageOverride: _imageOverride,
+                  pickedPath: _pickedPath,
                   imageRemoved: _imageRemoved,
                   uploadProgress: _uploadProgress,
                   onTap: _openAvatarPicker,
@@ -171,15 +197,23 @@ class _EditGroupSheetState extends State<EditGroupSheet> {
       name: picked.name,
     );
 
-    // Start with `0` so the spinner shows up immediately as a determinate
-    // bar at 0%; the first onSendProgress callback may not arrive for a
-    // few hundred ms on slow networks.
-    setState(() => _uploadProgress = 0);
+    // Show the local file in the preview immediately (LLC pattern —
+    // sendMessage's attachments render via attachment.file.path until
+    // the upload settles). Clear any prior URL since it's superseded.
+    setState(() {
+      _pickedPath = picked.path;
+      _imageOverride = null;
+      _imageRemoved = false;
+      // Start at `0` so the spinner appears as a determinate bar
+      // immediately; the first onSendProgress callback may not arrive
+      // for a few hundred ms on slow networks.
+      _uploadProgress = 0;
+    });
+
     try {
-      final client = StreamChat.of(context).client;
       // Standalone upload — returns a CDN URL we can persist on the
       // channel without creating a message.
-      final response = await client.sendImage(
+      final response = await _client.sendImage(
         attachmentFile,
         _channel.id!,
         _channel.type,
@@ -195,16 +229,13 @@ class _EditGroupSheetState extends State<EditGroupSheet> {
       );
       final url = response.file;
       if (url == null || !mounted) return;
-      // Stash the URL locally — we don't touch `channel.image` until the
-      // user taps the save checkmark, so dismissing the sheet leaves the
-      // channel untouched even though the bytes have already shipped to
-      // the CDN.
-      setState(() {
-        _imageOverride = url;
-        _imageRemoved = false;
-      });
+      _trackedUploads.add(url);
+      setState(() => _imageOverride = url);
     } catch (e) {
       if (mounted) {
+        // Drop the local preview so the user sees the channel revert —
+        // the snackbar tells them why and they can re-pick.
+        setState(() => _pickedPath = null);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Upload failed: $e')),
         );
@@ -216,6 +247,7 @@ class _EditGroupSheetState extends State<EditGroupSheet> {
 
   void _resetPicture() {
     setState(() {
+      _pickedPath = null;
       _imageOverride = null;
       _imageRemoved = true;
     });
@@ -244,6 +276,16 @@ class _EditGroupSheetState extends State<EditGroupSheet> {
         await _channel.updatePartial(set: set, unset: unset);
       }
 
+      // Strip the saved URL from the orphan list so dispose() doesn't
+      // delete what we just persisted; everything else (a previous pick
+      // the user replaced before saving) is now genuinely orphaned —
+      // delete it via the standalone API.
+      if (_imageOverride case final saved?) _trackedUploads.remove(saved);
+      for (final url in _trackedUploads) {
+        _deleteOrphan(url);
+      }
+      _trackedUploads.clear();
+
       if (!mounted) return;
       navigator.pop(true);
     } catch (e) {
@@ -253,23 +295,26 @@ class _EditGroupSheetState extends State<EditGroupSheet> {
   }
 }
 
-/// The hero avatar block — large channel avatar (or a session-level
-/// override / reset preview) with an _Upload_ button below. While an
-/// upload is in flight, a translucent overlay + [StreamLoadingSpinner]
-/// is layered on top of the avatar — same pattern as
-/// `StreamAttachmentUploadStateBuilder` in the SDK.
+/// The hero avatar block — local picked-file preview, the session
+/// "removed" preview, or the channel's current avatar — with an
+/// _Upload_ button below. While an upload is in flight, a translucent
+/// overlay + [StreamLoadingSpinner] is layered on top of the avatar —
+/// same pattern as `StreamAttachmentUploadStateBuilder` in the SDK.
 class _AvatarPreview extends StatelessWidget {
   const _AvatarPreview({
-    required this.imageOverride,
+    required this.pickedPath,
     required this.imageRemoved,
     required this.uploadProgress,
     required this.onTap,
   });
 
-  /// Session-only override URL — set after a successful upload and
-  /// cleared on save. While set, the override is shown instead of the
-  /// channel's persisted image.
-  final String? imageOverride;
+  /// Path to the picked image file on the local device. While set,
+  /// the preview reads from this file directly — never from the
+  /// uploaded URL — so there's no flicker waiting for the CDN copy
+  /// to round-trip through CachedNetworkImage. Mirrors the SDK's
+  /// attachment thumbnail flow (local file beats URL when both are
+  /// available).
+  final String? pickedPath;
 
   /// `true` after the user explicitly tapped Reset Picture. Falls back
   /// to the member-group avatar even if the channel still carries an
@@ -291,15 +336,20 @@ class _AvatarPreview extends StatelessWidget {
     final channel = StreamChannel.of(context).channel;
     final size = StreamAvatarGroupSize.xxl.value;
 
-    final base = switch ((imageOverride, imageRemoved)) {
-      // Just-uploaded image — render via StreamAvatar so the diameter
-      // (80) and the 1px border match StreamChannelAvatar's image
-      // branch exactly. Without this, the preview shifts visually
-      // between "current channel image" and "freshly uploaded image".
-      (final url?, _) => StreamAvatar(
-        imageUrl: url,
+    final base = switch ((pickedPath, imageRemoved)) {
+      // Just-picked image — render the local file via Image.file slotted
+      // into StreamAvatar's placeholder so the surrounding container
+      // (size, 1px border, circle clip) matches StreamChannelAvatar's
+      // image branch pixel-for-pixel.
+      (final path?, _) => StreamAvatar(
+        imageUrl: null,
         size: .xxl,
-        placeholder: (_) => _MemberFallbackAvatar(channel: channel),
+        placeholder: (_) => Image.file(
+          File(path),
+          width: size,
+          height: size,
+          fit: BoxFit.cover,
+        ),
       ),
       // User reset — render the member-group fallback even if the
       // channel still carries an image (it'll be unset on save).
