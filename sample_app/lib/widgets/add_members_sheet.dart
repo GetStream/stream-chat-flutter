@@ -177,7 +177,17 @@ class _AddMembersSheetState extends State<AddMembersSheet> {
                     onTap: _saving ? null : () => _toggle(user),
                   );
                 },
-                emptyBuilder: (_) => const _NoResults(),
+                // Match the empty/loading pattern other Stream scroll
+                // views use — centered StreamScrollViewEmptyWidget — so
+                // typography, spacing, and icon size are consistent
+                // across the app. Loading falls through to the default
+                // (centered StreamScrollViewLoadingWidget).
+                emptyBuilder: (context) => Center(
+                  child: StreamScrollViewEmptyWidget(
+                    emptyIcon: Icon(context.streamIcons.search),
+                    emptyTitle: const Text('No user found'),
+                  ),
+                ),
               ),
             ),
           ),
@@ -210,37 +220,6 @@ class _UserRow extends StatelessWidget {
         onChanged: onTap == null ? null : (_) => onTap!(),
       ),
       onTap: onTap,
-    );
-  }
-}
-
-/// Empty / no-result state — search icon over a "No user found" caption.
-class _NoResults extends StatelessWidget {
-  const _NoResults();
-
-  @override
-  Widget build(BuildContext context) {
-    final spacing = context.streamSpacing;
-    final colorScheme = context.streamColorScheme;
-    final textTheme = context.streamTextTheme;
-
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: spacing.xxl),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            context.streamIcons.search,
-            size: 40,
-            color: colorScheme.textTertiary,
-          ),
-          SizedBox(height: spacing.sm),
-          Text(
-            'No user found',
-            style: textTheme.bodyDefault.copyWith(color: colorScheme.textSecondary),
-          ),
-        ],
-      ),
     );
   }
 }
