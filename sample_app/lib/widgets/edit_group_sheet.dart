@@ -44,31 +44,22 @@ class _EditGroupSheetState extends State<EditGroupSheet> {
     text: _channel.name ?? '',
   );
 
-  // Override URL the user picked + uploaded in this session. `null` means
-  // "no override" — the current channel image flows through unchanged.
-  String? _imageOverride;
-  bool _imageRemoved = false;
   bool _saving = false;
 
   // Determinate upload progress in [0, 1], or `null` when no upload is in
-  // flight. Drives the spinner overlay on the avatar preview and gates the
-  // save checkmark so users can't persist before the URL has settled.
+  // flight. Drives the spinner overlay on the avatar preview only — image
+  // state itself flows through `channel.imageStream` (we save eagerly on
+  // pick / reset).
   double? _uploadProgress;
 
   String get _name => _nameController.text.trim();
   String get _initialName => (_channel.extraData['name'] as String?) ?? '';
 
-  bool get _isDirty {
-    if (_name != _initialName) return true;
-    if (_imageOverride != null) return true;
-    if (_imageRemoved) return true;
-    return false;
-  }
-
-  // Save is gated on at least one change *and* a non-empty name — an empty
-  // group name isn't a meaningful identifier, so the API won't accept it —
-  // *and* on no upload being in flight, so we never persist a stale URL.
-  bool get _canSave => _isDirty && _name.isNotEmpty && !_saving && _uploadProgress == null;
+  // Save is only for the channel name — image changes are persisted
+  // eagerly via channel.updateImage / updatePartial. Gated on a non-empty
+  // name (the API won't accept blanks), no in-flight save, and no
+  // in-flight upload.
+  bool get _canSave => _name != _initialName && _name.isNotEmpty && !_saving && _uploadProgress == null;
 
   @override
   void initState() {
@@ -102,10 +93,11 @@ class _EditGroupSheetState extends State<EditGroupSheet> {
         children: [
           StreamSheetHeader(
             title: const Text('Edit'),
+            // Default `.medium` size — matches the auto-implied close
+            // button on the leading side so the header stays balanced.
             trailing: StreamButton.icon(
               icon: Icon(context.streamIcons.checkmark),
               type: .solid,
-              size: .small,
               onPressed: _canSave ? _save : null,
             ),
           ),
@@ -119,8 +111,6 @@ class _EditGroupSheetState extends State<EditGroupSheet> {
             child: Column(
               children: [
                 _AvatarPreview(
-                  imageOverride: _imageOverride,
-                  imageRemoved: _imageRemoved,
                   uploadProgress: _uploadProgress,
                   onTap: _openAvatarPicker,
                 ),
@@ -147,10 +137,7 @@ class _EditGroupSheetState extends State<EditGroupSheet> {
       case _AvatarPickerAction.chooseImage:
         await _pickAndUpload(ImageSource.gallery);
       case _AvatarPickerAction.resetPicture:
-        setState(() {
-          _imageOverride = null;
-          _imageRemoved = true;
-        });
+        await _resetPicture();
     }
   }
 
@@ -190,11 +177,11 @@ class _EditGroupSheetState extends State<EditGroupSheet> {
         },
       );
       final url = response.file;
-      if (url == null || !mounted) return;
-      setState(() {
-        _imageOverride = url;
-        _imageRemoved = false;
-      });
+      if (url == null) return;
+      // Eagerly persist — channel.imageStream emits the new URL,
+      // StreamChannelAvatar (in this sheet and across the app) reloads
+      // automatically via its BetterStreamBuilder.
+      await _channel.updateImage(url);
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -206,26 +193,27 @@ class _EditGroupSheetState extends State<EditGroupSheet> {
     }
   }
 
+  Future<void> _resetPicture() async {
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      // Eager unset — channel.imageStream emits `null`, the channel
+      // avatar reverts to the member-group fallback automatically.
+      await _channel.updatePartial(unset: ['image']);
+    } catch (e) {
+      messenger.showSnackBar(SnackBar(content: Text('Failed to reset: $e')));
+    }
+  }
+
   Future<void> _save() async {
     final navigator = Navigator.of(context);
     final messenger = ScaffoldMessenger.of(context);
 
     setState(() => _saving = true);
     try {
-      final set = <String, Object?>{};
-      final unset = <String>[];
-
-      if (_name != _initialName) set['name'] = _name;
-      if (_imageOverride != null) {
-        set['image'] = _imageOverride;
-      } else if (_imageRemoved) {
-        unset.add('image');
-      }
-
-      if (set.isNotEmpty || unset.isNotEmpty) {
-        await _channel.updatePartial(set: set, unset: unset);
-      }
-
+      // Image changes are already persisted eagerly — save handles only
+      // the deferred name edit, which we batch through the rest of the
+      // typing session via the controller listener.
+      await _channel.updateName(_name);
       if (!mounted) return;
       navigator.pop(true);
     } catch (e) {
@@ -235,24 +223,17 @@ class _EditGroupSheetState extends State<EditGroupSheet> {
   }
 }
 
-/// The hero avatar block — large channel avatar (or a session-level
-/// override) with an _Upload_ text button below. While an upload is in
-/// flight, a translucent overlay + [StreamLoadingSpinner] is layered on
-/// top of the avatar — same pattern as
-/// `StreamAttachmentUploadStateBuilder` in the SDK.
+/// The hero avatar block — reactive [StreamChannelAvatar] (it reloads
+/// automatically off [Channel.imageStream] when the user picks or resets
+/// a picture, since both flows persist eagerly) with an _Upload_ button
+/// below. While an upload is in flight, a translucent overlay +
+/// [StreamLoadingSpinner] is layered on top of the avatar — same pattern
+/// as `StreamAttachmentUploadStateBuilder` in the SDK.
 class _AvatarPreview extends StatelessWidget {
   const _AvatarPreview({
-    required this.imageOverride,
-    required this.imageRemoved,
     required this.uploadProgress,
     required this.onTap,
   });
-
-  /// Session-only override URL — set after a successful upload.
-  final String? imageOverride;
-
-  /// `true` after the user explicitly removed the picture.
-  final bool imageRemoved;
 
   /// Determinate upload progress in [0, 1], or `null` when no upload is in
   /// flight. A `null` value while uploading is rendered as an indeterminate
@@ -268,53 +249,30 @@ class _AvatarPreview extends StatelessWidget {
     final channel = StreamChannel.of(context).channel;
     final size = StreamAvatarGroupSize.xxl.value;
 
-    final base = switch ((imageOverride, imageRemoved)) {
-      // Just-uploaded image — render via StreamAvatar so the diameter
-      // (80) and the 1px border match StreamChannelAvatar's image
-      // branch exactly. Without this, the preview shifts visually
-      // between "current channel image" and "freshly uploaded image".
-      // Placeholder is required by the API — fall back to the
-      // member-group avatar if the network image fails to load.
-      (final url?, _) => StreamAvatar(
-        imageUrl: url,
-        size: .xxl,
-        placeholder: (_) => _MemberFallbackAvatar(channel: channel),
-      ),
-      // User reset — render the member-group fallback even if the channel
-      // still carries an image (it'll be unset on save).
-      (null, true) => _MemberFallbackAvatar(channel: channel),
-      // Untouched — defer to the channel's current avatar.
-      _ => StreamChannelAvatar(channel: channel, size: .xxl),
-    };
-
     return Column(
       children: [
         // Avatar is purely a preview — only the Upload button below
         // triggers the picker. Avoids two overlapping hit targets and
         // keeps the affordance unambiguous.
-        SizedBox(
-          width: size,
-          height: size,
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              base,
-              if (uploadProgress != null)
-                ClipOval(
-                  child: ColoredBox(
-                    color: colorScheme.backgroundOverlayLight,
-                    child: SizedBox.expand(
-                      child: Center(
-                        child: StreamLoadingSpinner(
-                          value: uploadProgress,
-                          size: .md,
-                        ),
-                      ),
-                    ),
-                  ),
+        Stack(
+          alignment: Alignment.center,
+          children: [
+            StreamChannelAvatar(channel: channel, size: .xxl),
+            if (uploadProgress != null)
+              Container(
+                width: size,
+                height: size,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: colorScheme.backgroundOverlayLight,
                 ),
-            ],
-          ),
+                alignment: Alignment.center,
+                child: StreamLoadingSpinner(
+                  value: uploadProgress,
+                  size: .md,
+                ),
+              ),
+          ],
         ),
         SizedBox(height: spacing.xs),
         StreamButton(
@@ -325,29 +283,6 @@ class _AvatarPreview extends StatelessWidget {
           child: const Text('Upload'),
         ),
       ],
-    );
-  }
-}
-
-/// Renders the member-group avatar fallback — used to preview the "reset
-/// picture" state before the save round-trips.
-class _MemberFallbackAvatar extends StatelessWidget {
-  const _MemberFallbackAvatar({required this.channel});
-
-  final Channel channel;
-
-  @override
-  Widget build(BuildContext context) {
-    return BetterStreamBuilder<List<Member>>(
-      stream: channel.state!.membersStream,
-      initialData: channel.state!.members,
-      builder: (context, members) {
-        final users = [
-          for (final m in members)
-            if (m.user case final user?) user,
-        ];
-        return StreamUserAvatarGroup(users: users, size: .xxl);
-      },
     );
   }
 }

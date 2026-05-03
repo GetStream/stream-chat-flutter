@@ -127,11 +127,12 @@ class AllMembersSheet extends StatelessWidget {
           children: [
             StreamSheetHeader(
               title: Text('${members.length} Members'),
+              // Default `.medium` size — matches the auto-implied close
+              // button on the leading side so the header stays balanced.
               trailing: StreamButton.icon(
                 icon: Icon(context.streamIcons.userAdd),
                 type: .outline,
                 style: .secondary,
-                size: .small,
                 onPressed: () => _showNotImplementedSnack(context, 'Adding members'),
               ),
             ),
