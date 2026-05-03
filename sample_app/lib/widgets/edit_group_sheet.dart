@@ -60,6 +60,10 @@ class _EditGroupSheetState extends State<EditGroupSheet> {
     return false;
   }
 
+  // Save is gated on at least one change *and* a non-empty name — an empty
+  // group name isn't a meaningful identifier, so the API won't accept it.
+  bool get _canSave => _isDirty && _name.isNotEmpty && !_saving;
+
   @override
   void initState() {
     super.initState();
@@ -96,7 +100,7 @@ class _EditGroupSheetState extends State<EditGroupSheet> {
               icon: Icon(context.streamIcons.checkmark),
               type: .solid,
               size: .small,
-              onPressed: _isDirty && !_saving ? _save : null,
+              onPressed: _canSave ? _save : null,
             ),
           ),
           Expanded(
