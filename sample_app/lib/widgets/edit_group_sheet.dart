@@ -271,12 +271,16 @@ class _AvatarPreview extends StatelessWidget {
     final size = StreamAvatarGroupSize.xxl.value;
 
     final base = switch ((imageOverride, imageRemoved)) {
-      // Just-uploaded image — show it directly. The xxl group-avatar
-      // diameter is 80; mirror it here so the preview swap is visually
-      // seamless.
-      (final url?, _) => CircleAvatar(
-        radius: size / 2,
-        backgroundImage: NetworkImage(url),
+      // Just-uploaded image — render via StreamAvatar so the diameter
+      // (80) and the 1px border match StreamChannelAvatar's image
+      // branch exactly. Without this, the preview shifts visually
+      // between "current channel image" and "freshly uploaded image".
+      // Placeholder is required by the API — fall back to the
+      // member-group avatar if the network image fails to load.
+      (final url?, _) => StreamAvatar(
+        imageUrl: url,
+        size: .xxl,
+        placeholder: (_) => _MemberFallbackAvatar(channel: channel),
       ),
       // User reset — render the member-group fallback even if the channel
       // still carries an image (it'll be unset on save).
