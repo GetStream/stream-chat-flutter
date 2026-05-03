@@ -157,12 +157,17 @@ class _AddMembersSheetState extends State<AddMembersSheet> {
             ),
           ),
           SearchTextField(controller: _searchController),
-          Flexible(
+          // Expanded (not Flexible) — forces the Column to fill available
+          // height so the list gets bounded constraints and can scroll
+          // independently of the sheet. Shrink-wrapping the list looked
+          // fine for short result sets but glued the sheet's height to
+          // however many rows happened to be loaded, which fights the
+          // pagination and the keyboard.
+          Expanded(
             child: Padding(
               padding: EdgeInsets.only(bottom: viewInsets.bottom),
               child: StreamUserListView(
                 controller: _userListController,
-                shrinkWrap: true,
                 scrollController: widget.scrollController,
                 itemBuilder: (context, users, index, _) {
                   final user = users[index];
