@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:sample_app/pages/channel_file_display_screen.dart';
 import 'package:sample_app/pages/channel_media_display_screen.dart';
 import 'package:sample_app/pages/pinned_messages_screen.dart';
+import 'package:sample_app/widgets/all_members_sheet.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// Detail screen for a group channel.
@@ -197,10 +198,20 @@ class _MembersSection extends StatelessWidget {
         return _Section(
           children: [
             _MembersHeader(count: members.length),
-            for (final member in preview) _MemberTile(member: member, isCurrentUser: member.userId == currentUserId),
+            for (final member in preview)
+              ChannelMemberTile(
+                member: member,
+                isCurrentUser: member.userId == currentUserId,
+                onTap: member.userId == currentUserId
+                    ? null
+                    : () {
+                        final user = member.user;
+                        if (user != null) openContactDetail(context, user);
+                      },
+              ),
             if (overflow > 0)
               _ViewAllTile(
-                onTap: () => _showNotImplementedSnack(context, 'The all-members sheet'),
+                onTap: () => showAllMembersSheet(context, channel),
               ),
           ],
         );
@@ -248,50 +259,6 @@ class _MembersHeader extends StatelessWidget {
         ],
       ),
     );
-  }
-}
-
-/// A single member row — avatar with online indicator, name (with "You"
-/// substitution for the current user), online / last-seen subtitle, and an
-/// optional _Admin_ trailing label for moderators / owners.
-class _MemberTile extends StatelessWidget {
-  const _MemberTile({required this.member, required this.isCurrentUser});
-
-  final Member member;
-  final bool isCurrentUser;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = context.streamColorScheme;
-    final textTheme = context.streamTextTheme;
-    final user = member.user;
-    if (user == null) return const SizedBox.shrink();
-
-    final name = isCurrentUser ? 'You' : user.name;
-    final isAdmin = const {'admin', 'channel_moderator', 'owner'}.contains(member.channelRole);
-
-    return StreamListTile(
-      leading: StreamUserAvatar(
-        user: user,
-        size: .md,
-        showOnlineIndicator: user.online,
-      ),
-      title: Text(name),
-      subtitle: Text(_userStatus(user)),
-      trailing: isAdmin
-          ? Text(
-              'Admin',
-              style: textTheme.captionDefault.copyWith(color: colorScheme.textTertiary),
-            )
-          : null,
-    );
-  }
-
-  String _userStatus(User user) {
-    if (user.online) return 'Online';
-    final lastActive = user.lastActive;
-    if (lastActive == null) return 'Offline';
-    return 'Last seen ${Jiffy.parseFromDateTime(lastActive).fromNow()}';
   }
 }
 
