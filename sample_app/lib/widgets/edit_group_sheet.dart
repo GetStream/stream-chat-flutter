@@ -238,8 +238,6 @@ class _AvatarPreview extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final spacing = context.streamSpacing;
-    final colorScheme = context.streamColorScheme;
-    final textTheme = context.streamTextTheme;
     final channel = StreamChannel.of(context).channel;
 
     return Column(
@@ -261,13 +259,13 @@ class _AvatarPreview extends StatelessWidget {
             _ => StreamChannelAvatar(channel: channel, size: .xxl),
           },
         ),
-        SizedBox(height: spacing.sm),
-        TextButton(
+        SizedBox(height: spacing.xs),
+        StreamButton(
+          type: .ghost,
+          style: .primary,
+          size: .small,
           onPressed: onTap,
-          child: Text(
-            'Upload',
-            style: textTheme.bodyDefault.copyWith(color: colorScheme.accentPrimary),
-          ),
+          child: const Text('Upload'),
         ),
       ],
     );
