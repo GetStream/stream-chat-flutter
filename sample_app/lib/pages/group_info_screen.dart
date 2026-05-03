@@ -3,6 +3,7 @@ import 'package:sample_app/pages/channel_file_display_screen.dart';
 import 'package:sample_app/pages/channel_media_display_screen.dart';
 import 'package:sample_app/pages/pinned_messages_screen.dart';
 import 'package:sample_app/widgets/all_members_sheet.dart';
+import 'package:sample_app/widgets/edit_group_sheet.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// Detail screen for a group channel.
@@ -33,10 +34,7 @@ class GroupInfoScreen extends StatelessWidget {
                 type: .outline,
                 style: .secondary,
                 size: .small,
-                onPressed: () => _showNotImplementedSnack(
-                  context,
-                  'Editing the group',
-                ),
+                onPressed: () => showEditGroupSheet(context, channel),
                 child: const Text('Edit'),
               ),
             ),
