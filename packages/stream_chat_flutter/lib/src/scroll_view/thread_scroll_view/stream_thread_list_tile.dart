@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/misc/timestamp.dart';
 import 'package:stream_chat_flutter/src/utils/date_formatter.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 /// {@template streamThreadListTile}
 /// A widget that displays a thread in a list.

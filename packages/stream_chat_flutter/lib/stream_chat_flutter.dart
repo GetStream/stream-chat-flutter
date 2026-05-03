@@ -59,6 +59,8 @@ export 'package:stream_core_flutter/stream_core_flutter.dart'
         StreamReactionsType,
         StreamListTile,
         StreamListTileContainer,
+        StreamListTileTheme,
+        StreamListTileThemeData,
         StreamSheet,
         StreamSheetDragHandle,
         StreamSheetHeader,
