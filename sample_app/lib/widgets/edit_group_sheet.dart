@@ -153,6 +153,7 @@ class _EditGroupSheetState extends State<EditGroupSheet> {
               children: [
                 _AvatarPreview(
                   pickedPath: _pickedPath,
+                  imageOverride: _imageOverride,
                   imageRemoved: _imageRemoved,
                   uploadProgress: _uploadProgress,
                   onTap: _openAvatarPicker,
@@ -295,26 +296,31 @@ class _EditGroupSheetState extends State<EditGroupSheet> {
   }
 }
 
-/// The hero avatar block — local picked-file preview, the session
-/// "removed" preview, or the channel's current avatar — with an
-/// _Upload_ button below. While an upload is in flight, a translucent
-/// overlay + [StreamLoadingSpinner] is layered on top of the avatar —
-/// same pattern as `StreamAttachmentUploadStateBuilder` in the SDK.
+/// The hero avatar block — local picked-file preview, the uploaded
+/// CDN URL once it's settled, the session "removed" preview, or the
+/// channel's current avatar — with an _Upload_ button below. While an
+/// upload is in flight, a translucent overlay + [StreamLoadingSpinner]
+/// is layered on top of the avatar — same pattern as
+/// `StreamAttachmentUploadStateBuilder` in the SDK.
 class _AvatarPreview extends StatelessWidget {
   const _AvatarPreview({
     required this.pickedPath,
+    required this.imageOverride,
     required this.imageRemoved,
     required this.uploadProgress,
     required this.onTap,
   });
 
-  /// Path to the picked image file on the local device. While set,
-  /// the preview reads from this file directly — never from the
-  /// uploaded URL — so there's no flicker waiting for the CDN copy
-  /// to round-trip through CachedNetworkImage. Mirrors the SDK's
-  /// attachment thumbnail flow (local file beats URL when both are
-  /// available).
+  /// Path to the picked image file on the local device. Used as the
+  /// placeholder for the URL branch so the swap is seamless — while
+  /// the CDN copy is being fetched, the file shows through.
   final String? pickedPath;
+
+  /// CDN URL returned by the standalone upload. Once set, the preview
+  /// reads from the URL (so memory doesn't hold the file image once we
+  /// have the canonical CDN copy) — the [pickedPath] keeps acting as
+  /// the placeholder during the brief network round-trip.
+  final String? imageOverride;
 
   /// `true` after the user explicitly tapped Reset Picture. Falls back
   /// to the member-group avatar even if the channel still carries an
@@ -336,24 +342,38 @@ class _AvatarPreview extends StatelessWidget {
     final channel = StreamChannel.of(context).channel;
     final size = StreamAvatarGroupSize.xxl.value;
 
-    final base = switch ((pickedPath, imageRemoved)) {
-      // Just-picked image — render the local file via Image.file slotted
-      // into StreamAvatar's placeholder so the surrounding container
-      // (size, 1px border, circle clip) matches StreamChannelAvatar's
-      // image branch pixel-for-pixel.
-      (final path?, _) => StreamAvatar(
+    Widget? filePlaceholder(String? path) {
+      if (path == null) return null;
+      return Image.file(
+        File(path),
+        width: size,
+        height: size,
+        fit: BoxFit.cover,
+      );
+    }
+
+    final base = switch ((imageOverride, pickedPath, imageRemoved)) {
+      // Upload finished — render the CDN URL via StreamAvatar; the
+      // local file (if still around) acts as the placeholder during
+      // CachedNetworkImage's first fetch so there's no flicker on the
+      // file→URL swap.
+      (final url?, final path, _) => StreamAvatar(
+        imageUrl: url,
+        size: .xxl,
+        placeholder: (_) => filePlaceholder(path) ?? _MemberFallbackAvatar(channel: channel),
+      ),
+      // Picked but upload not yet settled — render the local file via
+      // Image.file slotted into StreamAvatar's placeholder so the
+      // surrounding chrome (size, 1px border, circle clip) matches
+      // StreamChannelAvatar's image branch pixel-for-pixel.
+      (null, final path?, _) => StreamAvatar(
         imageUrl: null,
         size: .xxl,
-        placeholder: (_) => Image.file(
-          File(path),
-          width: size,
-          height: size,
-          fit: BoxFit.cover,
-        ),
+        placeholder: (_) => filePlaceholder(path)!,
       ),
       // User reset — render the member-group fallback even if the
       // channel still carries an image (it'll be unset on save).
-      (null, true) => _MemberFallbackAvatar(channel: channel),
+      (null, null, true) => _MemberFallbackAvatar(channel: channel),
       // Untouched — defer to the channel's current avatar; reloads
       // automatically off `channel.imageStream` if the image changes
       // out from under us.
