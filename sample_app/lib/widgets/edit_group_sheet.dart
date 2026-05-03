@@ -291,31 +291,31 @@ class _AvatarPreview extends StatelessWidget {
 
     return Column(
       children: [
-        GestureDetector(
-          onTap: onTap,
-          child: SizedBox(
-            width: size,
-            height: size,
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                base,
-                if (uploadProgress != null)
-                  ClipOval(
-                    child: ColoredBox(
-                      color: colorScheme.backgroundOverlayLight,
-                      child: SizedBox.expand(
-                        child: Center(
-                          child: StreamLoadingSpinner(
-                            value: uploadProgress,
-                            size: .md,
-                          ),
+        // Avatar is purely a preview — only the Upload button below
+        // triggers the picker. Avoids two overlapping hit targets and
+        // keeps the affordance unambiguous.
+        SizedBox(
+          width: size,
+          height: size,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              base,
+              if (uploadProgress != null)
+                ClipOval(
+                  child: ColoredBox(
+                    color: colorScheme.backgroundOverlayLight,
+                    child: SizedBox.expand(
+                      child: Center(
+                        child: StreamLoadingSpinner(
+                          value: uploadProgress,
+                          size: .md,
                         ),
                       ),
                     ),
                   ),
-              ],
-            ),
+                ),
+            ],
           ),
         ),
         SizedBox(height: spacing.xs),
