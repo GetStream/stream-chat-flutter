@@ -94,10 +94,10 @@ class _EditGroupSheetState extends State<EditGroupSheet> {
     return SafeArea(
       top: false,
       child: Column(
-        // The Expanded child below forces the column to fill the
-        // available height, which in turn drags the sheet up to its
-        // full-screen rest position — matching the Figma's "full sheet"
-        // edit flow.
+        // Shrink-wrap to content height — the sheet sits as high as it
+        // needs to be (header + avatar + input + keyboard inset) and no
+        // higher. With Stack(StackFit.loose) upstream the StreamSheet
+        // honours the min size and rests just above the keyboard.
         mainAxisSize: MainAxisSize.min,
         children: [
           StreamSheetHeader(
@@ -109,30 +109,28 @@ class _EditGroupSheetState extends State<EditGroupSheet> {
               onPressed: _canSave ? _save : null,
             ),
           ),
-          Expanded(
-            child: SingleChildScrollView(
-              padding: EdgeInsets.only(
-                left: spacing.md,
-                right: spacing.md,
-                top: spacing.md,
-                bottom: spacing.md + viewInsets.bottom,
-              ),
-              child: Column(
-                children: [
-                  _AvatarPreview(
-                    imageOverride: _imageOverride,
-                    imageRemoved: _imageRemoved,
-                    uploadProgress: _uploadProgress,
-                    onTap: _openAvatarPicker,
-                  ),
-                  SizedBox(height: spacing.md),
-                  StreamTextInput(
-                    controller: _nameController,
-                    autofocus: true,
-                    hintText: 'Group name',
-                  ),
-                ],
-              ),
+          Padding(
+            padding: EdgeInsets.only(
+              left: spacing.md,
+              right: spacing.md,
+              top: spacing.md,
+              bottom: spacing.md + viewInsets.bottom,
+            ),
+            child: Column(
+              children: [
+                _AvatarPreview(
+                  imageOverride: _imageOverride,
+                  imageRemoved: _imageRemoved,
+                  uploadProgress: _uploadProgress,
+                  onTap: _openAvatarPicker,
+                ),
+                SizedBox(height: spacing.md),
+                StreamTextInput(
+                  controller: _nameController,
+                  autofocus: true,
+                  hintText: 'Group name',
+                ),
+              ],
             ),
           ),
         ],
