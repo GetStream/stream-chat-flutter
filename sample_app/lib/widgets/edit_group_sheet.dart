@@ -50,6 +50,11 @@ class _EditGroupSheetState extends State<EditGroupSheet> {
   bool _imageRemoved = false;
   bool _saving = false;
 
+  // Determinate upload progress in [0, 1], or `null` when no upload is in
+  // flight. Drives the spinner overlay on the avatar preview and gates the
+  // save checkmark so users can't persist before the URL has settled.
+  double? _uploadProgress;
+
   String get _name => _nameController.text.trim();
   String get _initialName => (_channel.extraData['name'] as String?) ?? '';
 
@@ -61,8 +66,9 @@ class _EditGroupSheetState extends State<EditGroupSheet> {
   }
 
   // Save is gated on at least one change *and* a non-empty name — an empty
-  // group name isn't a meaningful identifier, so the API won't accept it.
-  bool get _canSave => _isDirty && _name.isNotEmpty && !_saving;
+  // group name isn't a meaningful identifier, so the API won't accept it —
+  // *and* on no upload being in flight, so we never persist a stale URL.
+  bool get _canSave => _isDirty && _name.isNotEmpty && !_saving && _uploadProgress == null;
 
   @override
   void initState() {
@@ -116,6 +122,7 @@ class _EditGroupSheetState extends State<EditGroupSheet> {
                   _AvatarPreview(
                     imageOverride: _imageOverride,
                     imageRemoved: _imageRemoved,
+                    uploadProgress: _uploadProgress,
                     onTap: _openAvatarPicker,
                   ),
                   SizedBox(height: spacing.md),
@@ -162,7 +169,10 @@ class _EditGroupSheetState extends State<EditGroupSheet> {
       name: picked.name,
     );
 
-    setState(() => _saving = true);
+    // Start with `0` so the spinner shows up immediately as a determinate
+    // bar at 0%; the first onSendProgress callback may not arrive for a
+    // few hundred ms on slow networks.
+    setState(() => _uploadProgress = 0);
     try {
       final client = StreamChat.of(context).client;
       // Standalone upload — returns a CDN URL we can persist on the
@@ -171,6 +181,15 @@ class _EditGroupSheetState extends State<EditGroupSheet> {
         attachmentFile,
         _channel.id!,
         _channel.type,
+        onSendProgress: (count, total) {
+          if (!mounted) return;
+          // Fall back to indeterminate (`null`) when the server doesn't
+          // report a content length — prevents the spinner from claiming
+          // a fake 0% for the entire upload.
+          setState(() {
+            _uploadProgress = total > 0 ? count / total : null;
+          });
+        },
       );
       final url = response.file;
       if (url == null || !mounted) return;
@@ -185,7 +204,7 @@ class _EditGroupSheetState extends State<EditGroupSheet> {
         );
       }
     } finally {
-      if (mounted) setState(() => _saving = false);
+      if (mounted) setState(() => _uploadProgress = null);
     }
   }
 
@@ -219,11 +238,15 @@ class _EditGroupSheetState extends State<EditGroupSheet> {
 }
 
 /// The hero avatar block — large channel avatar (or a session-level
-/// override) with an _Upload_ text button below.
+/// override) with an _Upload_ text button below. While an upload is in
+/// flight, a translucent overlay + [StreamLoadingSpinner] is layered on
+/// top of the avatar — same pattern as
+/// `StreamAttachmentUploadStateBuilder` in the SDK.
 class _AvatarPreview extends StatelessWidget {
   const _AvatarPreview({
     required this.imageOverride,
     required this.imageRemoved,
+    required this.uploadProgress,
     required this.onTap,
   });
 
@@ -233,31 +256,63 @@ class _AvatarPreview extends StatelessWidget {
   /// `true` after the user explicitly removed the picture.
   final bool imageRemoved;
 
+  /// Determinate upload progress in [0, 1], or `null` when no upload is in
+  /// flight. A `null` value while uploading is rendered as an indeterminate
+  /// spinner — matches the SDK's fallback when content length is unknown.
+  final double? uploadProgress;
+
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final spacing = context.streamSpacing;
+    final colorScheme = context.streamColorScheme;
     final channel = StreamChannel.of(context).channel;
+    final size = StreamAvatarGroupSize.xxl.value;
+
+    final base = switch ((imageOverride, imageRemoved)) {
+      // Just-uploaded image — show it directly. The xxl group-avatar
+      // diameter is 80; mirror it here so the preview swap is visually
+      // seamless.
+      (final url?, _) => CircleAvatar(
+        radius: size / 2,
+        backgroundImage: NetworkImage(url),
+      ),
+      // User reset — render the member-group fallback even if the channel
+      // still carries an image (it'll be unset on save).
+      (null, true) => _MemberFallbackAvatar(channel: channel),
+      // Untouched — defer to the channel's current avatar.
+      _ => StreamChannelAvatar(channel: channel, size: .xxl),
+    };
 
     return Column(
       children: [
         GestureDetector(
           onTap: onTap,
-          child: switch ((imageOverride, imageRemoved)) {
-            // Just-uploaded image — show it directly. The xxl group-avatar
-            // diameter is 80; mirror it here so the preview swap is
-            // visually seamless.
-            (final url?, _) => CircleAvatar(
-              radius: StreamAvatarGroupSize.xxl.value / 2,
-              backgroundImage: NetworkImage(url),
+          child: SizedBox(
+            width: size,
+            height: size,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                base,
+                if (uploadProgress != null)
+                  ClipOval(
+                    child: ColoredBox(
+                      color: colorScheme.backgroundOverlayLight,
+                      child: SizedBox.expand(
+                        child: Center(
+                          child: StreamLoadingSpinner(
+                            value: uploadProgress,
+                            size: .md,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
             ),
-            // User reset — render the member-group fallback even if the
-            // channel still carries an image (it'll be unset on save).
-            (null, true) => _MemberFallbackAvatar(channel: channel),
-            // Untouched — defer to the channel's current avatar.
-            _ => StreamChannelAvatar(channel: channel, size: .xxl),
-          },
+          ),
         ),
         SizedBox(height: spacing.xs),
         StreamButton(

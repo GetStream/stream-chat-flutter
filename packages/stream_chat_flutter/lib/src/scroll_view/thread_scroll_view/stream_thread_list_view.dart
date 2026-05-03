@@ -4,7 +4,6 @@ import 'package:stream_chat_flutter/src/scroll_view/stream_scroll_view_error_wid
 import 'package:stream_chat_flutter/src/scroll_view/stream_scroll_view_load_more_error.dart';
 import 'package:stream_chat_flutter/src/scroll_view/thread_scroll_view/stream_thread_list_skeleton_loading.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 /// Default separator builder for [StreamThreadListView].
 Widget defaultThreadListViewSeparatorBuilder(
