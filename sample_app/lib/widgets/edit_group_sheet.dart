@@ -134,10 +134,6 @@ class _EditGroupSheetState extends State<EditGroupSheet> {
   }
 
   Future<void> _openAvatarPicker() async {
-    // Drop keyboard focus before pushing the picker so the stacked sheet
-    // animation isn't fighting the keyboard inset on the way up.
-    FocusScope.of(context).unfocus();
-
     final action = await _showAvatarPickerSheet(context);
     if (action == null || !mounted) return;
     switch (action) {
