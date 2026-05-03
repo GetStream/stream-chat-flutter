@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:sample_app/widgets/search_text_field.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template showAddMembersSheet}
@@ -138,7 +139,6 @@ class _AddMembersSheetState extends State<AddMembersSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final spacing = context.streamSpacing;
     final viewInsets = MediaQuery.viewInsetsOf(context);
 
     return SafeArea(
@@ -156,14 +156,7 @@ class _AddMembersSheetState extends State<AddMembersSheet> {
               onPressed: _canConfirm ? _confirm : null,
             ),
           ),
-          Padding(
-            padding: EdgeInsets.fromLTRB(spacing.md, 0, spacing.md, spacing.xs),
-            child: StreamTextInput(
-              controller: _searchController,
-              hintText: 'Search',
-              leading: Icon(context.streamIcons.search),
-            ),
-          ),
+          SearchTextField(controller: _searchController),
           Flexible(
             child: Padding(
               padding: EdgeInsets.only(bottom: viewInsets.bottom),
