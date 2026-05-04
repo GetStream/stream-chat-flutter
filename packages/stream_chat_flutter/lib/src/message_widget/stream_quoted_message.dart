@@ -13,9 +13,8 @@ import 'package:stream_core_flutter/stream_core_flutter.dart';
 /// a media or file attachment. It is rendered above the body of a message
 /// that has a non-null [Message.quotedMessage].
 ///
-/// The card chrome (background, shape, outer margin) is supplied by the
-/// surrounding [StreamMessageAttachment], so this widget only renders its
-/// content (indicator, title, subtitle, optional trailing thumbnail).
+/// The card chrome (background, shape, outer padding) and the inner content
+/// padding are all controlled via [StreamQuotedMessageThemeData].
 ///
 /// {@tool snippet}
 ///
@@ -87,10 +86,10 @@ class StreamQuotedMessageProps {
   final VoidCallback? onTap;
 }
 
-const _kDefaultConstraints = BoxConstraints.tightFor(width: 272);
+const _kDefaultConstraints = BoxConstraints(minWidth: 272, minHeight: 56);
+
 const _kIndicatorWidth = 2.0;
 const _kIndicatorHeight = 36.0;
-const _kInnerRowMinHeight = 40.0;
 const _kTrailingSize = Size(40, 40);
 
 /// The default implementation of [StreamQuotedMessage].
@@ -125,26 +124,33 @@ class DefaultStreamQuotedMessage extends StatelessWidget {
     final effectiveTitleTextStyle = theme.titleTextStyle ?? defaults.titleTextStyle;
     final effectiveSubtitleTextStyle = theme.subtitleTextStyle ?? defaults.subtitleTextStyle;
     final effectiveIndicatorColor = theme.indicatorColor ?? defaults.indicatorColor;
-    final effectiveContentPadding = theme.contentPadding ?? defaults.contentPadding;
+    final effectiveBackgroundColor = theme.backgroundColor ?? defaults.backgroundColor;
+
+    final effectiveShape = theme.shape ?? defaults.shape;
+    final effectiveMargin = theme.margin ?? defaults.margin;
+    final effectivePadding = theme.padding ?? defaults.padding;
 
     final canTap = !quotedMessage.isDeleted && props.onTap != null;
     final constraints = props.constraints ?? _kDefaultConstraints;
     final trailing = _buildTrailing(context, quotedMessage);
 
-    return StreamMessageAttachment(
-      child: ConstrainedBox(
-        constraints: constraints,
-        child: InkWell(
-          onTap: canTap ? props.onTap : null,
-          child: Padding(
-            padding: effectiveContentPadding,
-            child: Row(
-              spacing: spacing.xs,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(minHeight: _kInnerRowMinHeight),
+    return Padding(
+      padding: effectiveMargin,
+      child: Material(
+        clipBehavior: Clip.hardEdge,
+        shape: effectiveShape,
+        color: effectiveBackgroundColor,
+        child: ConstrainedBox(
+          constraints: constraints,
+          child: InkWell(
+            onTap: canTap ? props.onTap : null,
+            child: Padding(
+              padding: effectivePadding,
+              child: Row(
+                spacing: spacing.xs,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Expanded(
                     child: Row(
                       spacing: spacing.xs,
                       crossAxisAlignment: CrossAxisAlignment.center,
@@ -182,9 +188,9 @@ class DefaultStreamQuotedMessage extends StatelessWidget {
                       ],
                     ),
                   ),
-                ),
-                ?trailing,
-              ],
+                  ?trailing,
+                ],
+              ),
             ),
           ),
         ),
@@ -201,14 +207,20 @@ class DefaultStreamQuotedMessage extends StatelessWidget {
 
     if (type == AttachmentType.image || type == AttachmentType.video || type == AttachmentType.giphy) {
       return ClipRRect(
-        borderRadius: BorderRadius.all(context.streamRadius.md),
+        borderRadius: .all(context.streamRadius.md),
         child: SizedBox.fromSize(
           size: _kTrailingSize,
-          child: StreamMediaAttachmentThumbnail(
-            media: attachment,
-            width: _kTrailingSize.width,
-            height: _kTrailingSize.height,
-            fit: BoxFit.cover,
+          child: Stack(
+            alignment: .center,
+            children: [
+              StreamMediaAttachmentThumbnail(
+                media: attachment,
+                width: _kTrailingSize.width,
+                height: _kTrailingSize.height,
+                fit: BoxFit.cover,
+              ),
+              if (type == AttachmentType.video) const StreamVideoPlayIndicator(size: .sm),
+            ],
           ),
         ),
       );
@@ -219,7 +231,7 @@ class DefaultStreamQuotedMessage extends StatelessWidget {
       final mimeType = attachment.mimeType;
       if (mimeType == null) return null;
       if (attachments.any((it) => it.mimeType != mimeType)) return null;
-      return StreamFileTypeIcon.fromMimeType(mimeType: mimeType);
+      return StreamFileTypeIcon.fromMimeType(mimeType: mimeType, size: .lg);
     }
 
     return null;
@@ -235,7 +247,9 @@ class _StreamQuotedMessageDefaults extends StreamQuotedMessageThemeData {
   final BuildContext _context;
 
   late final _alignment = StreamMessageLayout.messageAlignmentOf(_context);
+
   late final StreamSpacing _spacing = _context.streamSpacing;
+  late final StreamRadius _radius = _context.streamRadius;
   late final StreamColorScheme _colorScheme = _context.streamColorScheme;
   late final StreamTextTheme _textTheme = _context.streamTextTheme;
 
@@ -257,7 +271,19 @@ class _StreamQuotedMessageDefaults extends StreamQuotedMessageThemeData {
   };
 
   @override
-  EdgeInsetsGeometry get contentPadding => EdgeInsetsDirectional.only(
+  Color get backgroundColor => switch (_alignment) {
+    .start => _colorScheme.backgroundSurfaceStrong,
+    .end => _colorScheme.brand.shade150,
+  };
+
+  @override
+  ShapeBorder get shape => RoundedSuperellipseBorder(borderRadius: .all(_radius.lg));
+
+  @override
+  EdgeInsetsGeometry get margin => EdgeInsets.symmetric(horizontal: _spacing.xs);
+
+  @override
+  EdgeInsetsGeometry get padding => EdgeInsetsDirectional.only(
     start: _spacing.sm,
     end: _spacing.xs,
     top: _spacing.xs,

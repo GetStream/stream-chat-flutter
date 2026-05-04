@@ -4,8 +4,8 @@ import 'package:stream_chat_flutter/src/attachment/builder/attachment_widget_bui
 import 'package:stream_chat_flutter/src/message_widget/components/stream_message_deleted.dart';
 import 'package:stream_chat_flutter/src/message_widget/components/stream_message_reactions.dart';
 import 'package:stream_chat_flutter/src/message_widget/components/stream_message_text.dart';
-import 'package:stream_chat_flutter/src/message_widget/components/stream_quoted_message.dart';
 import 'package:stream_chat_flutter/src/message_widget/parse_attachments.dart';
+import 'package:stream_chat_flutter/src/message_widget/stream_quoted_message.dart';
 import 'package:stream_chat_flutter/src/utils/typedefs.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:stream_core_flutter/stream_core_flutter.dart' as core;
@@ -165,8 +165,8 @@ class _StreamMessageContentState extends State<StreamMessageContent> {
                 final bubbleContent = ConstrainedBox(
                   constraints: const BoxConstraints().copyWith(maxWidth: widthLimit),
                   child: core.StreamColumn(
-                    spacing: spacing.xxs,
                     mainAxisSize: .min,
+                    spacing: spacing.xs,
                     crossAxisAlignment: .start,
                     children: [
                       if (widget.message.quotedMessage case final quotedMessage?)
