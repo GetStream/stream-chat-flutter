@@ -5,6 +5,9 @@ export 'package:stream_core_flutter/stream_core_flutter.dart'
     show
         StreamAppBar,
         StreamAppBarProps,
+        StreamAppBarStyle,
+        StreamAppBarTheme,
+        StreamAppBarThemeData,
         StreamAudioWaveformThemeData,
         StreamAvatar,
         StreamAvatarGroupSize,
@@ -101,6 +104,8 @@ export 'package:stream_core_flutter/stream_core_flutter.dart'
         StreamMessageLayoutProperty,
         StreamMessageLayoutVisibility,
         StreamVisibility,
+        StreamColors,
+        kStreamHeaderHeight,
         showStreamSheet,
         streamSupportedEmojis;
 

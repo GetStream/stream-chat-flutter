@@ -1,10 +1,7 @@
 export 'avatar_theme.dart';
-export 'channel_header_theme.dart';
-export 'channel_list_header_theme.dart';
 export 'color_theme.dart';
 export 'draft_list_tile_theme.dart';
 export 'gallery_footer_theme.dart';
-export 'gallery_header_theme.dart';
 export 'message_list_view_theme.dart';
 export 'poll_card_style.dart';
 export 'poll_comments_sheet_theme.dart';

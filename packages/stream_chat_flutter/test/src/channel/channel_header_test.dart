@@ -1,4 +1,3 @@
-import 'package:alchemist/alchemist.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -77,7 +76,6 @@ void main() {
 
       expect(find.text('test'), findsOneWidget);
       expect(find.byType(StreamChannelAvatar), findsOneWidget);
-      expect(find.byType(StreamBackButton), findsOneWidget);
       expect(find.byType(StreamChannelInfo), findsOneWidget);
     },
   );
@@ -268,12 +266,9 @@ void main() {
               channel: channel,
               child: const Scaffold(
                 body: StreamChannelHeader(
-                  centerTitle: true,
                   leading: Text('leading'),
                   subtitle: Text('subtitle'),
-                  actions: [
-                    Text('action'),
-                  ],
+                  trailing: Text('action'),
                   title: Text('title'),
                 ),
               ),
@@ -346,8 +341,8 @@ void main() {
               channel: channel,
               child: const Scaffold(
                 body: StreamChannelHeader(
-                  showTypingIndicator: false,
-                  showBackButton: false,
+                  automaticallyImplyLeading: false,
+                  leading: SizedBox(),
                 ),
               ),
             ),
@@ -359,10 +354,6 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(StreamBackButton), findsNothing);
-      expect(
-        tester.widget<StreamChannelInfo>(find.byType(StreamChannelInfo)).showTypingIndicator,
-        false,
-      );
       expect(tester.widget<StreamInfoTile>(find.byType(StreamInfoTile)).showMessage, false);
     },
   );
@@ -421,9 +412,15 @@ void main() {
               channel: channel,
               child: Scaffold(
                 body: StreamChannelHeader(
-                  onBackPressed: () => backPressed = true,
-                  onImageTap: () => imageTapped = true,
-                  onTitleTap: () => titleTapped = true,
+                  leading: StreamBackButton(onPressed: () => backPressed = true),
+                  trailing: GestureDetector(
+                    onTap: () => imageTapped = true,
+                    child: StreamChannelAvatar(size: .lg, channel: channel),
+                  ),
+                  title: GestureDetector(
+                    onTap: () => titleTapped = true,
+                    child: StreamChannelName(channel: channel),
+                  ),
                 ),
               ),
             ),
@@ -441,70 +438,6 @@ void main() {
       expect(backPressed, true);
       expect(imageTapped, true);
       expect(titleTapped, true);
-    },
-  );
-
-  goldenTest(
-    'golden test for StreamChannelHeader with bottom widget',
-    fileName: 'channel_header_bottom_widget',
-    constraints: const BoxConstraints.tightFor(width: 300, height: 60),
-    builder: () {
-      final client = MockClient();
-      final clientState = MockClientState();
-      final channel = MockChannel();
-      final channelState = MockChannelState();
-      final user = OwnUser(id: 'user-id');
-      final lastMessageAt = DateTime.parse('2020-06-22 12:00:00');
-
-      when(() => client.state).thenReturn(clientState);
-      when(() => clientState.currentUser).thenReturn(user);
-      when(() => clientState.currentUserStream).thenAnswer((_) => Stream.value(user));
-      when(() => channel.lastMessageAt).thenReturn(lastMessageAt);
-      when(() => channel.state).thenReturn(channelState);
-      when(() => channel.client).thenReturn(client);
-      when(() => channel.isMuted).thenReturn(false);
-      when(() => channel.isMutedStream).thenAnswer((i) => Stream.value(false));
-      when(() => channel.nameStream).thenAnswer((_) => Stream.value('test'));
-      when(() => channel.name).thenReturn('test');
-      when(() => channel.imageStream).thenAnswer((i) => Stream.value('https://bit.ly/321RmWb'));
-      when(() => channel.image).thenReturn('https://bit.ly/321RmWb');
-      when(() => channelState.unreadCount).thenReturn(1);
-      when(() => client.wsConnectionStatusStream).thenAnswer((_) => Stream.value(ConnectionStatus.connected));
-      when(() => channelState.unreadCountStream).thenAnswer((i) => Stream.value(1));
-      when(() => clientState.totalUnreadCount).thenAnswer((i) => 1);
-      when(() => clientState.totalUnreadCountStream).thenAnswer((i) => Stream.value(1));
-      when(() => channelState.membersStream).thenAnswer(
-        (i) => Stream.value([
-          Member(
-            userId: 'user-id',
-            user: User(id: 'user-id'),
-          ),
-        ]),
-      );
-      when(() => channelState.members).thenReturn([
-        Member(
-          userId: 'user-id',
-          user: User(id: 'user-id'),
-        ),
-      ]);
-
-      return MaterialAppWrapper(
-        home: StreamChat(
-          client: client,
-          connectivityStream: Stream.value([ConnectivityResult.wifi]),
-          child: StreamChannel(
-            channel: channel,
-            child: const Scaffold(
-              body: StreamChannelHeader(
-                bottom: PreferredSize(
-                  preferredSize: Size.fromHeight(1),
-                  child: Divider(height: 1, color: Colors.red),
-                ),
-              ),
-            ),
-          ),
-        ),
-      );
     },
   );
 }

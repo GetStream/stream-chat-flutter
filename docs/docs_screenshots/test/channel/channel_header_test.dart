@@ -22,7 +22,12 @@ Widget _buildChannelHeaderScaffold({
         showLoading: false,
         channel: channel,
         child: Scaffold(
-          appBar: header ?? const StreamChannelHeader(showBackButton: false),
+          appBar:
+              header ??
+              const StreamChannelHeader(
+                automaticallyImplyLeading: false,
+                leading: SizedBox(),
+              ),
         ),
       ),
     ),
@@ -76,7 +81,8 @@ void main() {
         client: client,
         channel: channel,
         header: const StreamChannelHeader(
-          showBackButton: false,
+          automaticallyImplyLeading: false,
+          leading: SizedBox(),
           title: Text('My Custom Title'),
         ),
       );

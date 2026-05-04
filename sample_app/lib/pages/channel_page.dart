@@ -67,10 +67,7 @@ class _ChannelPageState extends State<ChannelPage> {
     return Scaffold(
       backgroundColor: colorTheme.appBg,
       appBar: StreamChannelHeader(
-        showTypingIndicator: false,
-        onBackPressed: () => GoRouter.of(context).pop(),
-        onImageTap: () async {
-          final channel = StreamChannel.of(context).channel;
+        onChannelAvatarPressed: (channel) {
           final router = GoRouter.of(context);
 
           if (channel.memberCount == 2 && channel.isDistinct) {
@@ -86,7 +83,7 @@ class _ChannelPageState extends State<ChannelPage> {
               );
             }
           } else {
-            GoRouter.of(context).pushNamed(
+            router.pushNamed(
               Routes.GROUP_INFO_SCREEN.name,
               pathParameters: Routes.GROUP_INFO_SCREEN.params(channel),
             );
