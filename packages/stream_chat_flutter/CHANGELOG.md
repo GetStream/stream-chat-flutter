@@ -30,6 +30,7 @@
 - Redesigned `StreamSystemMessage` / `StreamModeratedMessage` with a pill-shaped style and visual customisation props.
 - Added visual customisation props to `ThreadSeparator` and `UnreadMessagesSeparator`.
 - Added `StreamUnsupportedAttachment` and `UnsupportedAttachmentBuilder` for unrecognised attachment types.
+- Added `StreamQuotedMessage` and `StreamQuotedMessageThemeData` for the quoted message preview.
 - `MessagePreviewFormatter` now renders `AttachmentType.urlPreview` messages with a link icon and caption / OG title / `linkAttachmentText` fallback.
 - Added `StreamPollCardStyle`, `StreamPollQuestionStyle` and `StreamPollOptionVotesStyle` shared style classes for the poll sheets.
 - Added a total vote count footer and per-option "View all" action to `StreamPollResultsSheet`.
