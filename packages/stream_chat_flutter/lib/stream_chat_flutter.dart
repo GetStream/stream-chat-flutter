@@ -169,6 +169,7 @@ export 'src/message_modal/message_action_confirmation_modal.dart';
 export 'src/message_modal/message_actions_modal.dart';
 export 'src/message_modal/message_modal.dart';
 export 'src/message_modal/moderated_message_actions_modal.dart';
+export 'src/message_widget/components/stream_quoted_message.dart';
 export 'src/message_widget/message_widget.dart';
 export 'src/message_widget/moderated_message.dart';
 export 'src/message_widget/system_message.dart';
