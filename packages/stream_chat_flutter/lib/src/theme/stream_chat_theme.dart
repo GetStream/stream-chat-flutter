@@ -59,6 +59,7 @@ class StreamChatThemeData {
     StreamThreadListTileThemeData? threadListTileTheme,
     StreamDraftListTileThemeData? draftListTileTheme,
     StreamVoiceRecordingAttachmentThemeData? voiceRecordingAttachmentTheme,
+    StreamQuotedMessageThemeData? quotedMessageTheme,
     StreamChannelListItemThemeData? channelListItemTheme,
   }) {
     brightness ??= colorTheme?.brightness ?? Brightness.light;
@@ -88,6 +89,7 @@ class StreamChatThemeData {
       threadListTileTheme: threadListTileTheme,
       draftListTileTheme: draftListTileTheme,
       voiceRecordingAttachmentTheme: voiceRecordingAttachmentTheme,
+      quotedMessageTheme: quotedMessageTheme,
       channelListItemTheme: channelListItemTheme,
     );
 
@@ -119,6 +121,7 @@ class StreamChatThemeData {
     required this.threadListTileTheme,
     required this.draftListTileTheme,
     required this.voiceRecordingAttachmentTheme,
+    required this.quotedMessageTheme,
     required this.channelListItemTheme,
   });
 
@@ -208,6 +211,7 @@ class StreamChatThemeData {
         ),
       ),
       voiceRecordingAttachmentTheme: const StreamVoiceRecordingAttachmentThemeData(),
+      quotedMessageTheme: const StreamQuotedMessageThemeData(),
       channelListItemTheme: const StreamChannelListItemThemeData(),
     );
   }
@@ -262,6 +266,9 @@ class StreamChatThemeData {
   /// Theme configuration for the [StreamVoiceRecordingAttachment] widget.
   final StreamVoiceRecordingAttachmentThemeData voiceRecordingAttachmentTheme;
 
+  /// Theme configuration for the [StreamQuotedMessage] widget.
+  final StreamQuotedMessageThemeData quotedMessageTheme;
+
   /// Theme configuration for the [StreamChannelListItem] widget.
   final StreamChannelListItemThemeData channelListItemTheme;
 
@@ -290,6 +297,7 @@ class StreamChatThemeData {
     StreamThreadListTileThemeData? threadListTileTheme,
     StreamDraftListTileThemeData? draftListTileTheme,
     StreamVoiceRecordingAttachmentThemeData? voiceRecordingAttachmentTheme,
+    StreamQuotedMessageThemeData? quotedMessageTheme,
     StreamChannelListItemThemeData? channelListItemTheme,
   }) => StreamChatThemeData.raw(
     channelListHeaderTheme: this.channelListHeaderTheme.merge(channelListHeaderTheme),
@@ -309,6 +317,7 @@ class StreamChatThemeData {
     threadListTileTheme: threadListTileTheme ?? this.threadListTileTheme,
     draftListTileTheme: draftListTileTheme ?? this.draftListTileTheme,
     voiceRecordingAttachmentTheme: voiceRecordingAttachmentTheme ?? this.voiceRecordingAttachmentTheme,
+    quotedMessageTheme: quotedMessageTheme ?? this.quotedMessageTheme,
     channelListItemTheme: channelListItemTheme ?? this.channelListItemTheme,
   );
 
@@ -333,6 +342,7 @@ class StreamChatThemeData {
       threadListTileTheme: threadListTileTheme.merge(other.threadListTileTheme),
       draftListTileTheme: draftListTileTheme.merge(other.draftListTileTheme),
       voiceRecordingAttachmentTheme: voiceRecordingAttachmentTheme.merge(other.voiceRecordingAttachmentTheme),
+      quotedMessageTheme: quotedMessageTheme.merge(other.quotedMessageTheme),
       channelListItemTheme: channelListItemTheme.merge(other.channelListItemTheme),
     );
   }
