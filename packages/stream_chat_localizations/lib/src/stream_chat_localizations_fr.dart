@@ -785,6 +785,9 @@ Limite de pièces jointes dépassée : il n'est pas possible d'ajouter plus de $
   String get tapToRemoveReactionLabel => 'Appuyer pour supprimer';
 
   @override
+  String reactionsCountText(int count) => '$count Réactions';
+
+  @override
   String get justNowLabel => "À l'instant";
 
   @override
