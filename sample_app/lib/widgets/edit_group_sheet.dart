@@ -143,12 +143,7 @@ class _EditGroupSheetState extends State<EditGroupSheet> {
             ),
           ),
           Padding(
-            padding: EdgeInsets.only(
-              left: spacing.md,
-              right: spacing.md,
-              top: spacing.md,
-              bottom: spacing.md + viewInsets.bottom,
-            ),
+            padding: EdgeInsets.all(spacing.md) + viewInsets,
             child: Column(
               children: [
                 _AvatarPreview(
@@ -158,7 +153,7 @@ class _EditGroupSheetState extends State<EditGroupSheet> {
                   uploadProgress: _uploadProgress,
                   onTap: _openAvatarPicker,
                 ),
-                SizedBox(height: spacing.md),
+                SizedBox(height: spacing.xxl),
                 StreamTextInput(
                   controller: _nameController,
                   autofocus: true,
@@ -462,13 +457,11 @@ class _AvatarPickerSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final spacing = context.streamSpacing;
-    final colorScheme = context.streamColorScheme;
     final icons = context.streamIcons;
 
     void emit(_AvatarPickerAction action) => Navigator.of(context).pop(action);
 
     return SafeArea(
-      top: false,
       child: IconTheme.merge(
         data: const IconThemeData(size: 20),
         child: Column(
@@ -476,38 +469,70 @@ class _AvatarPickerSheet extends StatelessWidget {
           children: [
             StreamSheetHeader(title: const Text('Edit Group Picture')),
             Padding(
-              padding: EdgeInsets.symmetric(vertical: spacing.xs),
+              padding: EdgeInsets.symmetric(horizontal: spacing.xxs),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  StreamListTile(
-                    leading: Icon(icons.camera),
-                    title: const Text('Take Photo'),
+                  _PickerTile(
+                    icon: icons.camera,
+                    label: 'Take Photo',
                     onTap: () => emit(_AvatarPickerAction.takePhoto),
                   ),
-                  StreamListTile(
-                    leading: Icon(icons.image),
-                    title: const Text('Choose Image'),
+                  _PickerTile(
+                    icon: icons.image,
+                    label: 'Choose Image',
                     onTap: () => emit(_AvatarPickerAction.chooseImage),
                   ),
-                  // Destructive — paint icon + label with accentError via a
-                  // local theme override.
-                  StreamListTileTheme(
-                    data: context.streamListTileTheme.copyWith(
-                      iconColor: WidgetStateProperty.all<Color?>(colorScheme.accentError),
-                      titleColor: WidgetStateProperty.all<Color?>(colorScheme.accentError),
-                    ),
-                    child: StreamListTile(
-                      leading: Icon(icons.delete),
-                      title: const Text('Reset Picture'),
-                      onTap: () => emit(_AvatarPickerAction.resetPicture),
-                    ),
+                  _PickerTile(
+                    icon: icons.delete,
+                    label: 'Reset Picture',
+                    destructive: true,
+                    onTap: () => emit(_AvatarPickerAction.resetPicture),
                   ),
                 ],
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// A single tappable row in [_AvatarPickerSheet]. Mirrors the `_Tile` shape
+/// used by `GroupInfoScreen` / `ChatInfoScreen` — same min tap target and
+/// content padding, with a [destructive] flag that flips the icon and
+/// label to [StreamColorScheme.accentError] via a local
+/// [StreamListTileTheme] override.
+class _PickerTile extends StatelessWidget {
+  const _PickerTile({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+    this.destructive = false,
+  });
+
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+  final bool destructive;
+
+  @override
+  Widget build(BuildContext context) {
+    final spacing = context.streamSpacing;
+    final colorScheme = context.streamColorScheme;
+
+    return StreamListTileTheme(
+      data: StreamListTileThemeData(
+        iconColor: destructive ? .all(colorScheme.accentError) : null,
+        titleColor: destructive ? .all(colorScheme.accentError) : null,
+        minTileHeight: 44,
+        contentPadding: .symmetric(horizontal: spacing.sm),
+      ),
+      child: StreamListTile(
+        leading: Icon(icon),
+        title: Text(label),
+        onTap: onTap,
       ),
     );
   }

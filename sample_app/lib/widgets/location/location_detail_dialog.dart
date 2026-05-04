@@ -53,10 +53,7 @@ class LocationDetailDialog extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: colorTheme.appBg,
-      appBar: AppBar(
-        backgroundColor: colorTheme.barsBg,
-        title: const Text('Shared Location'),
-      ),
+      appBar: StreamAppBar(title: const Text('Shared Location')),
       body: BetterStreamBuilder(
         stream: locationStream,
         errorBuilder: (_, __) => const Center(child: LocationNotFound()),

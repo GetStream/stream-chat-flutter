@@ -10,21 +10,12 @@ class SampleAppConfigScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final config = context.sampleAppConfig;
     final colorScheme = context.streamColorScheme;
-    final textTheme = context.streamTextTheme;
     final spacing = context.streamSpacing;
     final icons = context.streamIcons;
 
     return Scaffold(
       backgroundColor: colorScheme.backgroundApp,
-      appBar: AppBar(
-        title: Text(
-          'Configuration',
-          style: textTheme.headingSm.copyWith(color: colorScheme.textPrimary),
-        ),
-        backgroundColor: colorScheme.backgroundSurfaceCard,
-        surfaceTintColor: Colors.transparent,
-        iconTheme: IconThemeData(color: colorScheme.textPrimary),
-      ),
+      appBar: StreamAppBar(title: const Text('Configuration')),
       body: SingleChildScrollView(
         padding: EdgeInsets.symmetric(horizontal: spacing.md),
         child: Column(
@@ -453,12 +444,13 @@ class _LocaleRow extends StatelessWidget {
                             fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
                           ),
                         ),
-                        subtitle: item.code != null
-                            ? Text(
-                                item.code!,
-                                style: textTheme.captionDefault.copyWith(color: colorScheme.textTertiary),
-                              )
-                            : null,
+                        subtitle: switch (item.code) {
+                          final code? => Text(
+                            code,
+                            style: textTheme.captionDefault.copyWith(color: colorScheme.textTertiary),
+                          ),
+                          null => null,
+                        },
                         trailing: StreamCheckbox.circular(
                           value: isSelected,
                           size: StreamCheckboxSize.sm,

@@ -68,31 +68,20 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
         final state = groupChatState;
         return Scaffold(
           backgroundColor: StreamChatTheme.of(context).colorTheme.appBg,
-          appBar: AppBar(
-            elevation: 1,
-            backgroundColor: StreamChatTheme.of(context).colorTheme.barsBg,
-            leading: const StreamBackButton(),
-            title: Text(
-              'Add Group Members',
-              style: TextStyle(
-                color: StreamChatTheme.of(context).colorTheme.textHighEmphasis,
-                fontSize: 16,
+          appBar: StreamAppBar(
+            title: const Text('Add Group Members'),
+            trailing: switch (state.users.isNotEmpty) {
+              true => StreamButton.icon(
+                icon: Icon(context.streamIcons.arrowRight),
+                onPressed: () async {
+                  GoRouter.of(context).pushNamed(
+                    Routes.NEW_GROUP_CHAT_DETAILS.name,
+                    extra: state,
+                  );
+                },
               ),
-            ),
-            centerTitle: true,
-            actions: [
-              if (state.users.isNotEmpty)
-                IconButton(
-                  color: StreamChatTheme.of(context).colorTheme.accentPrimary,
-                  icon: Icon(context.streamIcons.arrowRight),
-                  onPressed: () async {
-                    GoRouter.of(context).pushNamed(
-                      Routes.NEW_GROUP_CHAT_DETAILS.name,
-                      extra: state,
-                    );
-                  },
-                ),
-            ],
+              false => null,
+            },
           ),
           body: StreamConnectionStatusBuilder(
             statusBuilder: (context, status) {

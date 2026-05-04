@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:sample_app/pages/channel_file_display_screen.dart';
 import 'package:sample_app/pages/channel_media_display_screen.dart';
@@ -27,42 +28,38 @@ class GroupInfoScreen extends StatelessWidget {
       backgroundColor: colorScheme.backgroundApp,
       appBar: StreamAppBar(
         title: const Text('Group Info'),
-        actions: [
-          if (channel.canUpdateChannel)
-            Padding(
-              padding: EdgeInsetsDirectional.only(end: spacing.sm),
-              child: StreamButton(
-                type: .outline,
-                style: .secondary,
-                size: .small,
-                onPressed: () => showEditGroupSheet(context, channel),
-                child: const Text('Edit'),
-              ),
-            ),
-        ],
+        trailing: switch (channel.canUpdateChannel) {
+          true => StreamButton(
+            type: .outline,
+            style: .secondary,
+            size: .small,
+            onPressed: () => showEditGroupSheet(context, channel),
+            child: const Text('Edit'),
+          ),
+          false => null,
+        },
       ),
       // Action / chevron icons share a uniform 20px size — set once at the
       // top of the body so individual rows stay style-free.
       body: IconTheme.merge(
         data: const IconThemeData(size: 20),
         child: SingleChildScrollView(
+          padding: .directional(
+            top: spacing.xxl,
+            bottom: spacing.xxxl,
+            start: spacing.md,
+            end: spacing.md,
+          ),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+            mainAxisSize: .min,
             children: [
               const _GroupInfoHeader(),
-              Padding(
-                padding: EdgeInsets.fromLTRB(spacing.md, 0, spacing.md, spacing.md),
-                child: const _MediaSection(),
-              ),
-              Padding(
-                padding: EdgeInsets.fromLTRB(spacing.md, 0, spacing.md, spacing.md),
-                child: const _MembersSection(),
-              ),
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: spacing.md),
-                child: const _ActionsSection(),
-              ),
+              SizedBox(height: spacing.xxl),
+              const _MediaSection(),
               SizedBox(height: spacing.md),
+              const _MembersSection(),
+              SizedBox(height: spacing.md),
+              const _ActionsSection(),
             ],
           ),
         ),
@@ -84,46 +81,40 @@ class _GroupInfoHeader extends StatelessWidget {
     final textTheme = context.streamTextTheme;
     final channel = StreamChannel.of(context).channel;
 
-    return Padding(
-      padding: EdgeInsets.symmetric(
-        horizontal: spacing.md,
-        vertical: spacing.xl,
-      ),
-      child: Column(
-        children: [
-          StreamChannelAvatar(channel: channel, size: .xxl),
-          SizedBox(height: spacing.sm),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            spacing: spacing.xxs,
-            children: [
-              Flexible(
-                child: StreamChannelName(
-                  channel: channel,
-                  textStyle: textTheme.headingLg.copyWith(color: colorScheme.textPrimary),
-                ),
+    return Column(
+      children: [
+        StreamChannelAvatar(channel: channel, size: .xxl),
+        SizedBox(height: spacing.md),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          spacing: spacing.xxs,
+          children: [
+            Flexible(
+              child: StreamChannelName(
+                channel: channel,
+                textStyle: textTheme.headingLg.copyWith(color: colorScheme.textPrimary),
               ),
-              BetterStreamBuilder<bool>(
-                stream: channel.isMutedStream,
-                initialData: channel.isMuted,
-                builder: (context, isMuted) {
-                  if (!isMuted) return const SizedBox.shrink();
-                  return Icon(
-                    context.streamIcons.mute,
-                    color: colorScheme.textTertiary,
-                  );
-                },
-              ),
-            ],
-          ),
-          SizedBox(height: spacing.xxs),
-          StreamChannelInfo(
-            channel: channel,
-            showTypingIndicator: false,
-            textStyle: textTheme.bodyDefault.copyWith(color: colorScheme.textSecondary),
-          ),
-        ],
-      ),
+            ),
+            BetterStreamBuilder<bool>(
+              stream: channel.isMutedStream,
+              initialData: channel.isMuted,
+              builder: (context, isMuted) {
+                if (!isMuted) return const SizedBox.shrink();
+                return Icon(
+                  context.streamIcons.mute,
+                  color: colorScheme.textTertiary,
+                );
+              },
+            ),
+          ],
+        ),
+        SizedBox(height: spacing.xs),
+        StreamChannelInfo(
+          channel: channel,
+          showTypingIndicator: false,
+          textStyle: textTheme.captionDefault.copyWith(color: colorScheme.textSecondary),
+        ),
+      ],
     );
   }
 }
@@ -143,12 +134,12 @@ class _MediaSection extends StatelessWidget {
           onTap: () => _push(context, const PinnedMessagesScreen()),
         ),
         _Tile(
-          icon: icons.imageLarge,
+          icon: icons.image,
           label: 'Photos & Videos',
           onTap: () => _push(context, const ChannelMediaDisplayScreen()),
         ),
         _Tile(
-          icon: icons.file,
+          icon: icons.folder,
           label: 'Files',
           onTap: () => _push(context, const ChannelFileDisplayScreen()),
         ),
@@ -185,14 +176,17 @@ class _MembersSection extends StatelessWidget {
       builder: (context, members) {
         // Sort the current user to the top so the "You" row is always the
         // first member rendered, matching the Figma.
-        final sorted = [...members]
-          ..sort((a, b) {
-            if (a.userId == currentUserId) return -1;
-            if (b.userId == currentUserId) return 1;
-            return 0;
-          });
+        final sorted = [...members].sorted((a, b) {
+          if (a.userId == currentUserId) return -1;
+          if (b.userId == currentUserId) return 1;
+          return 0;
+        });
+
         final preview = sorted.take(_kPreviewLimit).toList();
         final overflow = sorted.length - preview.length;
+
+        final spacing = context.streamSpacing;
+        final colorScheme = context.streamColorScheme;
 
         return _Section(
           children: [
@@ -201,17 +195,25 @@ class _MembersSection extends StatelessWidget {
               ChannelMemberTile(
                 member: member,
                 isCurrentUser: member.userId == currentUserId,
-                onTap: member.userId == currentUserId
-                    ? null
-                    : () {
-                        final user = member.user;
-                        if (user != null) openContactDetail(context, user);
-                      },
+                onTap: switch (member.userId) {
+                  final id? when id != currentUserId => () {
+                    final user = member.user;
+                    if (user != null) openContactDetail(context, user);
+                  },
+                  _ => null,
+                },
               ),
-            if (overflow > 0)
-              _ViewAllTile(
-                onTap: () => showAllMembersSheet(context, channel),
+            if (overflow > 0) ...[
+              SizedBox(height: spacing.sm),
+              Divider(height: 1, color: colorScheme.borderDefault),
+              StreamButton(
+                type: .ghost,
+                style: .secondary,
+                size: .small,
+                onPressed: () => showAllMembersSheet(context, channel),
+                child: const Text('View all'),
               ),
+            ],
           ],
         );
       },
@@ -235,56 +237,33 @@ class _MembersHeader extends StatelessWidget {
     final channel = StreamChannel.of(context).channel;
 
     return Padding(
-      padding: EdgeInsets.symmetric(
-        horizontal: spacing.md,
-        vertical: spacing.sm,
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Text(
-              '$count members',
-              style: textTheme.bodyDefault.copyWith(color: colorScheme.textPrimary),
+      padding: .symmetric(horizontal: spacing.md),
+      // Pin a min height so the header stays the same size whether or not
+      // the _Add_ button is rendered — without it, hiding the button
+      // (distinct channels, insufficient permissions) collapses the row to
+      // the title's natural text height.
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: 48),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                '$count members',
+                style: textTheme.headingSm.copyWith(color: colorScheme.textPrimary),
+              ),
             ),
-          ),
-          if (channel.canUpdateChannel)
-            StreamButton(
-              type: .outline,
-              style: .secondary,
-              size: .small,
-              onPressed: () => showAddMembersSheet(context, channel),
-              child: const Text('Add'),
-            ),
-        ],
-      ),
-    );
-  }
-}
-
-/// Footer row at the bottom of the members card — full-width tappable
-/// _View all_ that pushes the all-members sheet.
-class _ViewAllTile extends StatelessWidget {
-  const _ViewAllTile({required this.onTap});
-
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final spacing = context.streamSpacing;
-    final colorScheme = context.streamColorScheme;
-    final textTheme = context.streamTextTheme;
-
-    return InkWell(
-      onTap: onTap,
-      child: Container(
-        decoration: BoxDecoration(
-          border: Border(top: BorderSide(color: colorScheme.borderSubtle)),
-        ),
-        padding: EdgeInsets.symmetric(vertical: spacing.sm),
-        alignment: Alignment.center,
-        child: Text(
-          'View all',
-          style: textTheme.headingSm.copyWith(color: colorScheme.textPrimary),
+            // Hide the affordance when the channel is distinct (1:1) — the
+            // API rejects member changes on those, so showing a tappable
+            // button that always errors is worse than no button at all.
+            if (channel.canUpdateChannelMembers && !channel.isDistinct)
+              StreamButton(
+                type: .outline,
+                style: .secondary,
+                size: .small,
+                onPressed: () => showAddMembersSheet(context, channel),
+                child: const Text('Add'),
+              ),
+          ],
         ),
       ),
     );
@@ -348,7 +327,9 @@ class _ActionsSection extends StatelessWidget {
     if (confirmed != true) return;
 
     await channel.removeMembers([currentUserId]);
-    if (navigator.canPop()) navigator.pop();
+    // Pop every screen until we land on the channel list — going back to
+    // the channel page would crash since we're no longer a member.
+    navigator.popUntil((route) => route.isFirst);
   }
 }
 
@@ -362,14 +343,19 @@ class _Section extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = context.streamColorScheme;
     final radius = context.streamRadius;
+    final spacing = context.streamSpacing;
+
+    final colorScheme = context.streamColorScheme;
 
     return Material(
       color: colorScheme.backgroundSurfaceCard,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(radius.lg)),
+      shape: RoundedSuperellipseBorder(borderRadius: .all(radius.lg)),
       clipBehavior: Clip.antiAlias,
-      child: Column(children: children),
+      child: Padding(
+        padding: .symmetric(vertical: spacing.xs, horizontal: spacing.xxs),
+        child: Column(mainAxisSize: .min, children: children),
+      ),
     );
   }
 }
@@ -396,31 +382,28 @@ class _Tile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = context.streamColorScheme;
     final icons = context.streamIcons;
+    final spacing = context.streamSpacing;
+
+    final colorScheme = context.streamColorScheme;
 
     final effectiveTrailing =
-        trailing ?? (onTap != null ? Icon(icons.chevronRight, color: colorScheme.textTertiary) : null);
+        trailing ?? (onTap != null ? Icon(icons.chevronRight, color: colorScheme.textSecondary) : null);
 
-    Widget tile = StreamListTile(
-      leading: Icon(icon),
-      title: Text(label),
-      trailing: effectiveTrailing,
-      onTap: onTap,
+    return StreamListTileTheme(
+      data: StreamListTileThemeData(
+        iconColor: destructive ? .all(colorScheme.accentError) : null,
+        titleColor: destructive ? .all(colorScheme.accentError) : null,
+        minTileHeight: 44, // Matches the design's tap target size for action rows
+        contentPadding: .symmetric(horizontal: spacing.sm),
+      ),
+      child: StreamListTile(
+        leading: Icon(icon),
+        trailing: effectiveTrailing,
+        title: Text(label),
+        onTap: onTap,
+      ),
     );
-
-    if (destructive) {
-      final errorColor = WidgetStateProperty.all<Color?>(colorScheme.accentError);
-      tile = StreamListTileTheme(
-        data: context.streamListTileTheme.copyWith(
-          iconColor: errorColor,
-          titleColor: errorColor,
-        ),
-        child: tile,
-      );
-    }
-
-    return tile;
   }
 }
 

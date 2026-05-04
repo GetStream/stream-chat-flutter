@@ -141,58 +141,44 @@ class _AddMembersSheetState extends State<AddMembersSheet> {
   Widget build(BuildContext context) {
     final viewInsets = MediaQuery.viewInsetsOf(context);
 
-    return SafeArea(
-      top: false,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          StreamSheetHeader(
-            title: const Text('Add Members'),
-            // Default `.medium` size — matches the auto-implied close
-            // button on the leading side so the header stays balanced.
-            trailing: StreamButton.icon(
-              icon: Icon(context.streamIcons.checkmark),
-              type: .solid,
-              onPressed: _canConfirm ? _confirm : null,
-            ),
+    final spacing = context.streamSpacing;
+
+    return Column(
+      children: [
+        StreamSheetHeader(
+          title: const Text('Add Members'),
+          trailing: StreamButton.icon(
+            icon: Icon(context.streamIcons.checkmark),
+            type: .solid,
+            onPressed: _canConfirm ? _confirm : null,
           ),
-          SearchTextField(controller: _searchController),
-          // Expanded (not Flexible) — forces the Column to fill available
-          // height so the list gets bounded constraints and can scroll
-          // independently of the sheet. Shrink-wrapping the list looked
-          // fine for short result sets but glued the sheet's height to
-          // however many rows happened to be loaded, which fights the
-          // pagination and the keyboard.
-          Expanded(
-            child: Padding(
-              padding: EdgeInsets.only(bottom: viewInsets.bottom),
-              child: StreamUserListView(
-                controller: _userListController,
-                scrollController: widget.scrollController,
-                itemBuilder: (context, users, index, _) {
-                  final user = users[index];
-                  return _UserRow(
-                    user: user,
-                    selected: _selectedIds.contains(user.id),
-                    onTap: _saving ? null : () => _toggle(user),
-                  );
-                },
-                // Match the empty/loading pattern other Stream scroll
-                // views use — centered StreamScrollViewEmptyWidget — so
-                // typography, spacing, and icon size are consistent
-                // across the app. Loading falls through to the default
-                // (centered StreamScrollViewLoadingWidget).
-                emptyBuilder: (context) => Center(
-                  child: StreamScrollViewEmptyWidget(
-                    emptyIcon: Icon(context.streamIcons.search),
-                    emptyTitle: const Text('No user found'),
-                  ),
+        ),
+        SearchTextField(controller: _searchController),
+        Expanded(
+          child: Padding(
+            padding: EdgeInsets.only(bottom: viewInsets.bottom),
+            child: StreamUserListView(
+              controller: _userListController,
+              scrollController: widget.scrollController,
+              separatorBuilder: (_, _, _) => SizedBox(height: spacing.xxs),
+              itemBuilder: (context, users, index, _) {
+                final user = users[index];
+                return _UserRow(
+                  user: user,
+                  selected: _selectedIds.contains(user.id),
+                  onTap: _saving ? null : () => _toggle(user),
+                );
+              },
+              emptyBuilder: (context) => Center(
+                child: StreamScrollViewEmptyWidget(
+                  emptyIcon: Icon(context.streamIcons.search),
+                  emptyTitle: const Text('No user found'),
                 ),
               ),
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
@@ -212,14 +198,25 @@ class _UserRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return StreamListTile(
-      leading: StreamUserAvatar(user: user, size: .md),
-      title: Text(user.name),
-      trailing: StreamCheckbox.circular(
-        value: selected,
-        onChanged: onTap == null ? null : (_) => onTap!(),
+    final spacing = context.streamSpacing;
+
+    return Padding(
+      padding: .symmetric(horizontal: spacing.xxs),
+      child: StreamListTileTheme(
+        data: StreamListTileThemeData(
+          minTileHeight: 48, // Matches the design's tap target size for action rows
+          contentPadding: .symmetric(horizontal: spacing.sm),
+        ),
+        child: StreamListTile(
+          leading: StreamUserAvatar(user: user, size: .md),
+          title: Text(user.name),
+          trailing: StreamCheckbox.circular(
+            value: selected,
+            onChanged: onTap == null ? null : (_) => onTap!(),
+          ),
+          onTap: onTap,
+        ),
       ),
-      onTap: onTap,
     );
   }
 }

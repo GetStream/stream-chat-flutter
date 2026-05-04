@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sample_app/routes/routes.dart';
@@ -116,12 +117,11 @@ class AllMembersSheet extends StatelessWidget {
       stream: channel.state!.membersStream,
       initialData: channel.state!.members,
       builder: (context, members) {
-        final sorted = [...members]
-          ..sort((a, b) {
-            if (a.userId == currentUserId) return -1;
-            if (b.userId == currentUserId) return 1;
-            return 0;
-          });
+        final sorted = [...members].sorted((a, b) {
+          if (a.userId == currentUserId) return -1;
+          if (b.userId == currentUserId) return 1;
+          return 0;
+        });
 
         return Column(
           mainAxisSize: MainAxisSize.min,
@@ -130,33 +130,38 @@ class AllMembersSheet extends StatelessWidget {
               title: Text('${members.length} Members'),
               // Default `.medium` size — matches the auto-implied close
               // button on the leading side so the header stays balanced.
-              trailing: StreamButton.icon(
-                icon: Icon(context.streamIcons.userAdd),
-                type: .outline,
-                style: .secondary,
-                onPressed: () => showAddMembersSheet(context, channel),
-              ),
-            ),
-            Flexible(
-              child: ListView.builder(
-                controller: scrollController,
-                padding: EdgeInsets.symmetric(
-                  horizontal: spacing.md,
-                  vertical: spacing.xs,
+              //
+              // Hide the affordance when the channel is distinct (1:1) —
+              // the API rejects member changes on those, so showing a
+              // tappable button that always errors is worse than no
+              // button at all.
+              trailing: switch (channel.canUpdateChannelMembers && !channel.isDistinct) {
+                true => StreamButton.icon(
+                  icon: Icon(context.streamIcons.userAdd),
+                  type: .outline,
+                  style: .secondary,
+                  onPressed: () => showAddMembersSheet(context, channel),
                 ),
+                false => null,
+              },
+            ),
+            Expanded(
+              child: ListView.builder(
                 itemCount: sorted.length,
+                controller: scrollController,
+                padding: .symmetric(horizontal: spacing.xxs),
                 itemBuilder: (context, index) {
                   final member = sorted[index];
-                  final isCurrentUser = member.userId == currentUserId;
                   return ChannelMemberTile(
                     member: member,
-                    isCurrentUser: isCurrentUser,
-                    onTap: isCurrentUser
-                        ? null
-                        : () {
-                            final user = member.user;
-                            if (user != null) openContactDetail(context, user);
-                          },
+                    isCurrentUser: member.userId == currentUserId,
+                    onTap: switch (member.userId) {
+                      final id? when id != currentUserId => () {
+                        final user = member.user;
+                        if (user != null) openContactDetail(context, user);
+                      },
+                      _ => null,
+                    },
                   );
                 },
               ),
@@ -190,35 +195,23 @@ class ContactDetailSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final spacing = context.streamSpacing;
-    final colorScheme = context.streamColorScheme;
     final icons = context.streamIcons;
     final client = StreamChat.of(context).client;
 
     void emit(ContactDetailAction action) => Navigator.of(context).pop(action);
 
     return SafeArea(
-      top: false,
       child: IconTheme.merge(
         data: const IconThemeData(size: 20),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Padding(
-              padding: EdgeInsets.fromLTRB(
-                spacing.md,
-                spacing.lg,
-                spacing.md,
-                spacing.md,
-              ),
+              padding: EdgeInsets.symmetric(vertical: spacing.xl, horizontal: spacing.sm),
               child: _ContactDetailHeader(user: user),
             ),
-            Divider(
-              height: 1,
-              thickness: 1,
-              color: colorScheme.borderSubtle,
-            ),
             Padding(
-              padding: EdgeInsets.symmetric(vertical: spacing.xs),
+              padding: EdgeInsets.symmetric(horizontal: spacing.xxs),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -281,7 +274,7 @@ class _ContactDetailHeader extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
-            spacing: spacing.xxxs,
+            spacing: spacing.xxs,
             children: [
               Text(
                 user.name,
@@ -311,13 +304,16 @@ class _ActionTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final spacing = context.streamSpacing;
-    return StreamListTile(
-      leading: Icon(icon),
-      title: Text(label),
-      onTap: onTap,
-      contentPadding: EdgeInsets.symmetric(
-        horizontal: spacing.md,
-        vertical: spacing.xxs,
+
+    return StreamListTileTheme(
+      data: StreamListTileThemeData(
+        minTileHeight: 44, // Matches the design's tap target size for action rows
+        contentPadding: .symmetric(horizontal: spacing.sm),
+      ),
+      child: StreamListTile(
+        leading: Icon(icon),
+        title: Text(label),
+        onTap: onTap,
       ),
     );
   }
@@ -360,6 +356,7 @@ class ChannelMemberTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = context.streamColorScheme;
     final textTheme = context.streamTextTheme;
+    final spacing = context.streamSpacing;
     final user = member.user;
     if (user == null) return const SizedBox.shrink();
 
@@ -370,12 +367,29 @@ class ChannelMemberTile extends StatelessWidget {
       leading: StreamUserAvatar(user: user, size: .md, showOnlineIndicator: user.online),
       title: Text(name),
       subtitle: Text(_userStatus(user)),
-      trailing: isAdmin
-          ? Text(
-              'Admin',
-              style: textTheme.captionDefault.copyWith(color: colorScheme.textTertiary),
-            )
-          : null,
+      // Reactively rebuild the trailing row as the global mute list changes
+      // — pairs a mute icon with the Admin label when both apply.
+      trailing: BetterStreamBuilder<bool>(
+        stream: StreamChat.of(
+          context,
+        ).client.state.currentUserStream.map((u) => u?.mutes.any((m) => m.target.id == user.id) ?? false).distinct(),
+        initialData: StreamChat.of(context).client.state.currentUser?.mutes.any((m) => m.target.id == user.id) ?? false,
+        builder: (context, isMuted) {
+          if (!isMuted && !isAdmin) return const SizedBox.shrink();
+          return Row(
+            mainAxisSize: MainAxisSize.min,
+            spacing: spacing.xxs,
+            children: [
+              if (isMuted) Icon(context.streamIcons.mute, color: colorScheme.textTertiary),
+              if (isAdmin)
+                Text(
+                  'Admin',
+                  style: textTheme.bodyDefault.copyWith(color: colorScheme.textTertiary),
+                ),
+            ],
+          );
+        },
+      ),
       onTap: onTap,
     );
   }

@@ -35,19 +35,20 @@ class ChatInfoScreen extends StatelessWidget {
       body: IconTheme.merge(
         data: const IconThemeData(size: 20),
         child: SingleChildScrollView(
+          padding: .directional(
+            top: spacing.xxl,
+            bottom: spacing.xxxl,
+            start: spacing.md,
+            end: spacing.md,
+          ),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+            mainAxisSize: .min,
             children: [
               _ContactInfoHeader(user: user),
-              Padding(
-                padding: EdgeInsets.fromLTRB(spacing.md, 0, spacing.md, spacing.md),
-                child: const _MediaSection(),
-              ),
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: spacing.md),
-                child: const _ActionsSection(),
-              ),
+              SizedBox(height: spacing.xxl),
+              const _MediaSection(),
               SizedBox(height: spacing.md),
+              const _ActionsSection(),
             ],
           ),
         ),
@@ -70,50 +71,44 @@ class _ContactInfoHeader extends StatelessWidget {
     final textTheme = context.streamTextTheme;
     final channel = StreamChannel.of(context).channel;
 
-    return Padding(
-      padding: EdgeInsets.symmetric(
-        horizontal: spacing.md,
-        vertical: spacing.xl,
-      ),
-      child: Column(
-        children: [
-          StreamUserAvatar(
-            user: user,
-            size: .xxl,
-            showOnlineIndicator: user.online,
-          ),
-          SizedBox(height: spacing.sm),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            spacing: spacing.xxs,
-            children: [
-              Flexible(
-                child: Text(
-                  user.name,
-                  style: textTheme.headingLg.copyWith(color: colorScheme.textPrimary),
-                  overflow: TextOverflow.ellipsis,
-                ),
+    return Column(
+      children: [
+        StreamUserAvatar(
+          user: user,
+          size: .xxl,
+          showOnlineIndicator: user.online,
+        ),
+        SizedBox(height: spacing.md),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          spacing: spacing.xxs,
+          children: [
+            Flexible(
+              child: Text(
+                user.name,
+                style: textTheme.headingLg.copyWith(color: colorScheme.textPrimary),
+                overflow: TextOverflow.ellipsis,
               ),
-              BetterStreamBuilder<bool>(
-                stream: channel.isMutedStream,
-                initialData: channel.isMuted,
-                builder: (context, isMuted) {
-                  if (!isMuted) return const SizedBox.shrink();
-                  return Icon(
-                    context.streamIcons.mute,
-                    color: colorScheme.textTertiary,
-                  );
-                },
-              ),
-            ],
-          ),
-          SizedBox(height: spacing.xxs),
-          Text(
-            _onlineLabel(user),
-            style: textTheme.bodyDefault.copyWith(color: colorScheme.textSecondary),
-          ),
-        ],
-      ),
+            ),
+            BetterStreamBuilder<bool>(
+              stream: channel.isMutedStream,
+              initialData: channel.isMuted,
+              builder: (context, isMuted) {
+                if (!isMuted) return const SizedBox.shrink();
+                return Icon(
+                  context.streamIcons.mute,
+                  color: colorScheme.textTertiary,
+                );
+              },
+            ),
+          ],
+        ),
+        SizedBox(height: spacing.xs),
+        Text(
+          _onlineLabel(user),
+          style: textTheme.captionDefault.copyWith(color: colorScheme.textSecondary),
+        ),
+      ],
     );
   }
 
@@ -141,12 +136,12 @@ class _MediaSection extends StatelessWidget {
           onTap: () => _push(context, const PinnedMessagesScreen()),
         ),
         _Tile(
-          icon: icons.imageLarge,
+          icon: icons.image,
           label: 'Photos & Videos',
           onTap: () => _push(context, const ChannelMediaDisplayScreen()),
         ),
         _Tile(
-          icon: icons.file,
+          icon: icons.folder,
           label: 'Files',
           onTap: () => _push(context, const ChannelFileDisplayScreen()),
         ),
@@ -228,7 +223,10 @@ class _ActionsSection extends StatelessWidget {
     if (confirmed != true) return;
 
     await channel.delete();
-    if (navigator.canPop()) navigator.pop();
+    // Pop every screen until we land on the channel list — going back to
+    // the channel page would crash trying to read state from the now
+    // deleted channel.
+    navigator.popUntil((route) => route.isFirst);
   }
 }
 
@@ -242,14 +240,19 @@ class _Section extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = context.streamColorScheme;
     final radius = context.streamRadius;
+    final spacing = context.streamSpacing;
+
+    final colorScheme = context.streamColorScheme;
 
     return Material(
       color: colorScheme.backgroundSurfaceCard,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(radius.lg)),
+      shape: RoundedSuperellipseBorder(borderRadius: .all(radius.lg)),
       clipBehavior: Clip.antiAlias,
-      child: Column(children: children),
+      child: Padding(
+        padding: .symmetric(vertical: spacing.xs, horizontal: spacing.xxs),
+        child: Column(mainAxisSize: .min, children: children),
+      ),
     );
   }
 }
@@ -277,31 +280,30 @@ class _Tile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = context.streamColorScheme;
     final icons = context.streamIcons;
+    final spacing = context.streamSpacing;
 
-    final effectiveTrailing =
-        trailing ?? (onTap != null ? Icon(icons.chevronRight, color: colorScheme.textTertiary) : null);
+    final colorScheme = context.streamColorScheme;
 
-    Widget tile = StreamListTile(
-      leading: Icon(icon),
-      title: Text(label),
-      trailing: effectiveTrailing,
-      onTap: onTap,
-    );
-
-    if (destructive) {
-      final errorColor = WidgetStateProperty.all<Color?>(colorScheme.accentError);
-      tile = StreamListTileTheme(
-        data: context.streamListTileTheme.copyWith(
-          iconColor: errorColor,
-          titleColor: errorColor,
-        ),
-        child: tile,
-      );
+    var trailing = this.trailing;
+    if (trailing == null && onTap != null) {
+      trailing = Icon(icons.chevronRight, color: colorScheme.textSecondary);
     }
 
-    return tile;
+    return StreamListTileTheme(
+      data: StreamListTileThemeData(
+        iconColor: destructive ? .all(colorScheme.accentError) : null,
+        titleColor: destructive ? .all(colorScheme.accentError) : null,
+        minTileHeight: 44, // Matches the design's tap target size for action rows
+        contentPadding: .symmetric(horizontal: spacing.sm),
+      ),
+      child: StreamListTile(
+        leading: Icon(icon),
+        trailing: trailing,
+        title: Text(label),
+        onTap: onTap,
+      ),
+    );
   }
 }
 
