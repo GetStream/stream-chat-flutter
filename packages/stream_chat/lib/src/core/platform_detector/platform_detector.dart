@@ -1,3 +1,4 @@
+import 'package:meta/meta.dart' show visibleForTesting;
 import 'package:stream_chat/src/core/platform_detector/platform_detector_stub.dart'
     if (dart.library.html) 'platform_detector_web.dart'
     if (dart.library.io) 'platform_detector_io.dart';
@@ -67,6 +68,30 @@ class CurrentPlatform {
     };
   }
 
+  /// Override the value reported by [type] in tests.
+  ///
+  /// Setting this affects all reads of [type], [name], and the per-platform
+  /// flags ([isAndroid], [isWeb], …). Reset to `null` after each test (e.g.
+  /// in `tearDown`) to avoid leaking state.
+  ///
+  /// The override is honored only when asserts are enabled (debug, profile,
+  /// and tests); release builds tree-shake it away. Mirrors Flutter's
+  /// `debugDefaultTargetPlatformOverride`.
+  @visibleForTesting
+  static PlatformType? debugCurrentPlatformOverride;
+
   /// Get current platform type
-  static PlatformType get type => currentPlatform;
+  static PlatformType get type {
+    var result = currentPlatform;
+    assert(
+      () {
+        if (debugCurrentPlatformOverride case final override?) {
+          result = override;
+        }
+        return true;
+      }(),
+      'debugCurrentPlatformOverride applied',
+    );
+    return result;
+  }
 }
