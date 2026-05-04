@@ -8,7 +8,6 @@ import 'package:stream_chat_flutter/src/fullscreen_media/full_screen_media_widge
 import 'package:stream_chat_flutter/src/fullscreen_media/gallery_navigation_item.dart';
 import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 /// Returns an instance of [FullScreenMediaDesktop].
 ///
