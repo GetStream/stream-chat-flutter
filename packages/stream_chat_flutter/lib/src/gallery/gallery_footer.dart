@@ -21,7 +21,7 @@ class StreamGalleryFooter extends StatefulWidget implements PreferredSizeWidget 
     required this.mediaAttachmentPackages,
     this.mediaSelectedCallBack,
     this.backgroundColor,
-  }) : preferredSize = const Size.fromHeight(kToolbarHeight);
+  });
 
   /// Callback to call when pressing the back button.
   /// By default it calls [Navigator.pop]
@@ -52,7 +52,7 @@ class StreamGalleryFooter extends StatefulWidget implements PreferredSizeWidget 
   _StreamGalleryFooterState createState() => _StreamGalleryFooterState();
 
   @override
-  final Size preferredSize;
+  Size get preferredSize => const Size.fromHeight(kStreamHeaderHeight);
 }
 
 class _StreamGalleryFooterState extends State<StreamGalleryFooter> {
