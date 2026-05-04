@@ -39,6 +39,7 @@
 - Re-exported `StreamMessageAttachment` and `StreamMessageAttachmentStyle` from `stream_core_flutter`.
 - Added a `BoxFit? fit` parameter to `ThumbnailSizeCalculator.calculate` (null defaults to `BoxFit.scaleDown`, matching `paintImage`) so callers using `cover` / `fill` get a bitmap large enough to render without upscale blur.
 - Added `Translations.totalVoteCountLabel({int? count})`, `viewAllLabel`, `pollVotesLabel`, `endVoteConfirmationMessage` and `questionLabel({bool isPlural = false})`.
+- Added `Translations.reactionsCountText(int count)` for the reaction-detail sheet header.
 
 🔄 Changed
 

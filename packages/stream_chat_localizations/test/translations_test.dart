@@ -352,6 +352,9 @@ void main() {
       expect(localizations.emptyReactionsText, isNotNull);
       expect(localizations.loadingReactionsError, isNotNull);
       expect(localizations.tapToRemoveReactionLabel, isNotNull);
+      // singular vs. plural — both branches exercised
+      expect(localizations.reactionsCountText(1), isNotNull);
+      expect(localizations.reactionsCountText(5), isNotNull);
       expect(localizations.justNowLabel, isNotNull);
       expect(localizations.replyToUserLabel('TestUser'), isNotNull);
       expect(localizations.multipleAnswersDescription, isNotNull);
