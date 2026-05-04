@@ -37,11 +37,10 @@ mixin _$StreamQuotedMessageThemeData {
         t,
       ),
       indicatorColor: Color.lerp(a.indicatorColor, b.indicatorColor, t),
-      contentPadding: EdgeInsetsGeometry.lerp(
-        a.contentPadding,
-        b.contentPadding,
-        t,
-      ),
+      backgroundColor: Color.lerp(a.backgroundColor, b.backgroundColor, t),
+      shape: ShapeBorder.lerp(a.shape, b.shape, t),
+      margin: EdgeInsetsGeometry.lerp(a.margin, b.margin, t),
+      padding: EdgeInsetsGeometry.lerp(a.padding, b.padding, t),
     );
   }
 
@@ -49,7 +48,10 @@ mixin _$StreamQuotedMessageThemeData {
     TextStyle? titleTextStyle,
     TextStyle? subtitleTextStyle,
     Color? indicatorColor,
-    EdgeInsetsGeometry? contentPadding,
+    Color? backgroundColor,
+    ShapeBorder? shape,
+    EdgeInsetsGeometry? margin,
+    EdgeInsetsGeometry? padding,
   }) {
     final _this = (this as StreamQuotedMessageThemeData);
 
@@ -57,7 +59,10 @@ mixin _$StreamQuotedMessageThemeData {
       titleTextStyle: titleTextStyle ?? _this.titleTextStyle,
       subtitleTextStyle: subtitleTextStyle ?? _this.subtitleTextStyle,
       indicatorColor: indicatorColor ?? _this.indicatorColor,
-      contentPadding: contentPadding ?? _this.contentPadding,
+      backgroundColor: backgroundColor ?? _this.backgroundColor,
+      shape: shape ?? _this.shape,
+      margin: margin ?? _this.margin,
+      padding: padding ?? _this.padding,
     );
   }
 
@@ -80,7 +85,10 @@ mixin _$StreamQuotedMessageThemeData {
           _this.subtitleTextStyle?.merge(other.subtitleTextStyle) ??
           other.subtitleTextStyle,
       indicatorColor: other.indicatorColor,
-      contentPadding: other.contentPadding,
+      backgroundColor: other.backgroundColor,
+      shape: other.shape,
+      margin: other.margin,
+      padding: other.padding,
     );
   }
 
@@ -100,7 +108,10 @@ mixin _$StreamQuotedMessageThemeData {
     return _other.titleTextStyle == _this.titleTextStyle &&
         _other.subtitleTextStyle == _this.subtitleTextStyle &&
         _other.indicatorColor == _this.indicatorColor &&
-        _other.contentPadding == _this.contentPadding;
+        _other.backgroundColor == _this.backgroundColor &&
+        _other.shape == _this.shape &&
+        _other.margin == _this.margin &&
+        _other.padding == _this.padding;
   }
 
   @override
@@ -112,7 +123,10 @@ mixin _$StreamQuotedMessageThemeData {
       _this.titleTextStyle,
       _this.subtitleTextStyle,
       _this.indicatorColor,
-      _this.contentPadding,
+      _this.backgroundColor,
+      _this.shape,
+      _this.margin,
+      _this.padding,
     );
   }
 }

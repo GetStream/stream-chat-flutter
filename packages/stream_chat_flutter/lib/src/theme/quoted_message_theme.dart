@@ -77,7 +77,7 @@ class StreamQuotedMessageTheme extends InheritedTheme {
 /// StreamChatThemeData(
 ///   quotedMessageTheme: StreamQuotedMessageThemeData(
 ///     titleTextStyle: TextStyle(fontWeight: FontWeight.w700),
-///     contentPadding: EdgeInsetsDirectional.all(12),
+///     padding: EdgeInsetsDirectional.all(12),
 ///   ),
 /// )
 /// ```
@@ -95,7 +95,10 @@ class StreamQuotedMessageThemeData with _$StreamQuotedMessageThemeData {
     this.titleTextStyle,
     this.subtitleTextStyle,
     this.indicatorColor,
-    this.contentPadding,
+    this.backgroundColor,
+    this.shape,
+    this.margin,
+    this.padding,
   });
 
   /// The text style for the quoted user's name.
@@ -117,14 +120,30 @@ class StreamQuotedMessageThemeData with _$StreamQuotedMessageThemeData {
   /// for outgoing.
   final Color? indicatorColor;
 
+  /// Background fill color of the quoted-message card.
+  ///
+  /// If null, the consuming widget falls back to a direction-aware default:
+  /// `colorScheme.backgroundSurfaceStrong` for incoming,
+  /// `colorScheme.brand.shade150` for outgoing.
+  final Color? backgroundColor;
+
+  /// Shape of the quoted-message card.
+  ///
+  /// If null, defaults to
+  /// `RoundedSuperellipseBorder(borderRadius: BorderRadius.all(radius.lg))`.
+  final ShapeBorder? shape;
+
+  /// Outer margin applied around the quoted-message card.
+  ///
+  /// If null, defaults to `EdgeInsets.symmetric(horizontal: spacing.xs)`.
+  final EdgeInsetsGeometry? margin;
+
   /// Inner padding around the indicator, text content, and optional trailing
-  /// thumbnail. This is the spacing between the card edge and its contents —
-  /// the surrounding card chrome (background, shape, outer margin) is
-  /// provided by the wrapping [StreamMessageAttachment].
+  /// thumbnail. This is the spacing between the card edge and its contents.
   ///
   /// If null, defaults to `EdgeInsetsDirectional.only(start: spacing.sm,
   /// end: spacing.xs, top: spacing.xs, bottom: spacing.xs)`.
-  final EdgeInsetsGeometry? contentPadding;
+  final EdgeInsetsGeometry? padding;
 
   /// Linearly interpolate between two [StreamQuotedMessageThemeData] objects.
   static StreamQuotedMessageThemeData? lerp(
