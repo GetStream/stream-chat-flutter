@@ -9,7 +9,6 @@ class MessageComposerComponentProps {
   /// Creates a new instance of [MessageComposerComponentProps].
   /// [controller] is the controller for the message composer component.
   /// [isFloating] is whether the message composer is floating.
-  /// [message] is the message for the message composer component.
   /// [onSendPressed] is the callback for when the send button is pressed.
   /// [onMicrophonePressed] is the callback for when the microphone button is pressed.
   /// [onAttachmentButtonPressed] is the callback for when the attachment button is pressed.

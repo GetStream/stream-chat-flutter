@@ -84,7 +84,7 @@ StreamMessageComposer(
 
 ### Removed parameters
 
-Many parameters that existed in older versions of `StreamMessageComposer` have been removed. The table below lists each removed parameter and the recommended migration path.
+Many parameters that existed in `StreamMessageInput` have been removed from `StreamMessageComposer`. The table below lists each removed parameter and the recommended migration path.
 
 #### Layout and visual parameters
 

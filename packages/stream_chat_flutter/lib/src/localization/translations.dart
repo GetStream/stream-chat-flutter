@@ -100,7 +100,7 @@ abstract class Translations {
   String get reconnectingLabel;
 
   /// The label for also send
-  /// as direct message "checkbox"" in [StreamMessageComposer]
+  /// as direct message "checkbox" in [StreamMessageComposer]
   String get alsoSendAsDirectMessageLabel;
 
   /// The label for search Gif

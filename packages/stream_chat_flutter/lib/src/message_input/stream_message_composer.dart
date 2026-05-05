@@ -135,6 +135,15 @@ class StreamMessageComposer extends StatelessWidget {
          autoCorrect: autoCorrect,
        );
 
+  /// Creates a [StreamMessageComposer] from a pre-built [MessageComposerProps].
+  ///
+  /// Use this constructor when you have already assembled a [MessageComposerProps]
+  /// instance and want to avoid re-specifying every field individually.
+  const StreamMessageComposer.fromProps({
+    super.key,
+    required this.props,
+  });
+
   /// The properties for the message composer.
   final MessageComposerProps props;
 
@@ -1018,7 +1027,7 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     if (removedIds.isEmpty && addedIds.isEmpty) return;
 
     final addedAttachments = addedIds
-        .map((id) => pickerController.value.attachments.firstWhere((a) => a.id == id))
+        .map((id) => _effectiveController.value.attachments.firstWhere((a) => a.id == id))
         .toList();
 
     _isSyncingControllers = true;
