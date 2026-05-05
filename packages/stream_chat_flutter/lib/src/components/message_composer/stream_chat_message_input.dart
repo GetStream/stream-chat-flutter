@@ -13,7 +13,7 @@ import 'package:stream_core_flutter/stream_core_flutter.dart' as core;
 
 /// A widget that shows the message composer.
 /// Uses the factory to show custom components or the default implementation.
-class StreamChatMessageInput extends StatefulWidget {
+class StreamChatMessageInput extends StatelessWidget {
   /// Creates a new instance of [StreamChatMessageInput].
   /// [controller] is the controller for the message composer.
   /// [onSendPressed] is the callback for when the send button is pressed.
@@ -41,7 +41,7 @@ class StreamChatMessageInput extends StatefulWidget {
     TextCapitalization textCapitalization = TextCapitalization.sentences,
     bool autofocus = false,
     bool autocorrect = true,
-  }) : props = MessageComposerProps(
+  }) : props = StreamChatMessageInputProps(
          controller: controller,
          isFloating: false,
          message: null,
@@ -67,125 +67,17 @@ class StreamChatMessageInput extends StatefulWidget {
   StreamMessageInputController? get controller => props.controller;
 
   /// The properties for the message composer.
-  final MessageComposerProps props;
-
-  @override
-  State<StreamChatMessageInput> createState() => _StreamChatMessageInputState();
-}
-
-class _StreamChatMessageInputState extends State<StreamChatMessageInput> {
-  late StreamMessageInputController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _initController();
-  }
-
-  @override
-  void didUpdateWidget(StreamChatMessageInput oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.controller != oldWidget.controller) {
-      _disposeController(oldWidget);
-      _initController();
-    }
-  }
-
-  @override
-  void dispose() {
-    _disposeController(widget);
-    super.dispose();
-  }
-
-  void _initController() {
-    _controller = widget.controller ?? StreamMessageInputController();
-  }
-
-  void _disposeController(StreamChatMessageInput widget) {
-    if (widget.controller == null) {
-      _controller.dispose();
-    }
-  }
+  final StreamChatMessageInputProps props;
 
   @override
   Widget build(BuildContext context) {
-    if (context.chatComponentBuilder<MessageComposerProps>()?.call(context, widget.props) case final messageComposer?) {
-      return messageComposer;
-    }
-
-    final audioRecorderController = widget.props.audioRecorderController;
-    if (audioRecorderController == null) {
-      return DefaultStreamChatMessageInput(
-        props: widget.props,
-        inputController: _controller,
-      );
-    }
-
-    return ValueListenableBuilder(
-      valueListenable: audioRecorderController,
-      builder: (context, state, _) {
-        final body = switch (state) {
-          RecordStateRecordingLocked() => MessageComposerRecordingLocked(
-            audioRecorderController: audioRecorderController,
-            feedback: widget.props.feedback,
-            messageInputController: _controller,
-            sendMessageCallback: widget.props.sendVoiceRecordingAutomatically ? widget.props.onSendPressed : null,
-            state: state,
-          ),
-          RecordStateStopped() => MessageComposerRecordingStopped(
-            audioRecorderController: audioRecorderController,
-            feedback: widget.props.feedback,
-            messageInputController: _controller,
-            sendMessageCallback: widget.props.sendVoiceRecordingAutomatically ? widget.props.onSendPressed : null,
-            recordingState: state,
-          ),
-          RecordStateRecording() => StreamMessageComposerRecordingOngoing(
-            audioRecorderController: audioRecorderController,
-          ),
-          _ => null,
-        };
-
-        final streamSpacing = context.streamSpacing;
-        final textDirection = Directionality.maybeOf(context);
-
-        const targetAlignment = AlignmentDirectional.topEnd;
-        const followerAlignment = AlignmentDirectional.bottomEnd;
-
-        final idleMessage = state is RecordStateIdle ? state.message : null;
-        final showIdleTooltip = idleMessage != null && idleMessage.isNotEmpty;
-
-        return PortalTarget(
-          visible: showIdleTooltip,
-          anchor: Aligned(
-            target: Alignment.topCenter,
-            follower: Alignment.bottomCenter,
-            offset: Offset(0, -streamSpacing.md),
-          ),
-          portalFollower: showIdleTooltip ? HoldToRecordInfoTooltip(message: idleMessage) : const SizedBox.shrink(),
-          child: PortalTarget(
-            anchor: Aligned(
-              target: targetAlignment.resolve(textDirection),
-              follower: followerAlignment.resolve(textDirection),
-              offset: Offset(-streamSpacing.md, -streamSpacing.md).directional(textDirection),
-            ),
-            visible: state is RecordStateRecording,
-            portalFollower: SwipeToLockButton(isLocked: state is RecordStateRecordingLocked),
-            child: DefaultStreamChatMessageInput(
-              props: widget.props,
-              inputController: _controller,
-              audioRecorderState: state,
-              body: body,
-            ),
-          ),
-        );
-      },
-    );
+    return DefaultStreamChatMessageInput(props: props);
   }
 }
 
-/// Properties to build the main message composer component
-class MessageComposerProps {
-  /// Creates a new instance of [MessageComposerProps].
+/// Properties for [StreamChatMessageInput] and [DefaultStreamChatMessageInput].
+class StreamChatMessageInputProps {
+  /// Creates a new instance of [StreamChatMessageInputProps].
   /// [isFloating] is whether the message composer is floating.
   /// [message] is the message for the message composer.
   /// [placeholder] is the placeholder text of the message composer.
@@ -194,7 +86,7 @@ class MessageComposerProps {
   /// [onAttachmentButtonPressed] is the callback for when the attachment button is pressed.
   /// [focusNode] is the focus node for the message composer.
   /// [currentUserId] is the current user id.
-  const MessageComposerProps({
+  const StreamChatMessageInputProps({
     this.controller,
     this.isFloating = false,
     this.message,
@@ -290,39 +182,141 @@ extension on StreamAudioRecorderController {
 }
 
 /// Default implementation of the message composer.
-/// Shows the message composer with the default components.
-/// Does not include the audio recording flow in the body.
-class DefaultStreamChatMessageInput extends StatelessWidget {
+/// Manages the controller lifecycle and handles the audio recording state.
+class DefaultStreamChatMessageInput extends StatefulWidget {
   /// Creates a new instance of [DefaultStreamChatMessageInput].
   /// [props] contains the properties for the message composer.
-  /// [inputController] is the controller for the message input.
-  /// [audioRecorderState] is the state of the audio recorder.
-  /// [body] is the body of the message composer.
-  const DefaultStreamChatMessageInput({
-    super.key,
+  const DefaultStreamChatMessageInput({super.key, required this.props});
+
+  /// The properties for the message composer.
+  final StreamChatMessageInputProps props;
+
+  @override
+  State<DefaultStreamChatMessageInput> createState() => _DefaultStreamChatMessageInputState();
+}
+
+class _DefaultStreamChatMessageInputState extends State<DefaultStreamChatMessageInput> {
+  late StreamMessageInputController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _initController();
+  }
+
+  @override
+  void didUpdateWidget(DefaultStreamChatMessageInput oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.props.controller != oldWidget.props.controller) {
+      _disposeController(oldWidget.props);
+      _initController();
+    }
+  }
+
+  @override
+  void dispose() {
+    _disposeController(widget.props);
+    super.dispose();
+  }
+
+  void _initController() {
+    _controller = widget.props.controller ?? StreamMessageInputController();
+  }
+
+  void _disposeController(StreamChatMessageInputProps props) {
+    if (props.controller == null) {
+      _controller.dispose();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final audioRecorderController = widget.props.audioRecorderController;
+    if (audioRecorderController == null) {
+      return _StreamChatMessageInputContent(
+        props: widget.props,
+        inputController: _controller,
+      );
+    }
+
+    return ValueListenableBuilder(
+      valueListenable: audioRecorderController,
+      builder: (context, state, _) {
+        final body = switch (state) {
+          RecordStateRecordingLocked() => MessageComposerRecordingLocked(
+            audioRecorderController: audioRecorderController,
+            feedback: widget.props.feedback,
+            messageInputController: _controller,
+            sendMessageCallback: widget.props.sendVoiceRecordingAutomatically ? widget.props.onSendPressed : null,
+            state: state,
+          ),
+          RecordStateStopped() => MessageComposerRecordingStopped(
+            audioRecorderController: audioRecorderController,
+            feedback: widget.props.feedback,
+            messageInputController: _controller,
+            sendMessageCallback: widget.props.sendVoiceRecordingAutomatically ? widget.props.onSendPressed : null,
+            recordingState: state,
+          ),
+          RecordStateRecording() => StreamMessageComposerRecordingOngoing(
+            audioRecorderController: audioRecorderController,
+          ),
+          _ => null,
+        };
+
+        final streamSpacing = context.streamSpacing;
+        final textDirection = Directionality.maybeOf(context);
+
+        const targetAlignment = AlignmentDirectional.topEnd;
+        const followerAlignment = AlignmentDirectional.bottomEnd;
+
+        final idleMessage = state is RecordStateIdle ? state.message : null;
+        final showIdleTooltip = idleMessage != null && idleMessage.isNotEmpty;
+
+        return PortalTarget(
+          visible: showIdleTooltip,
+          anchor: Aligned(
+            target: Alignment.topCenter,
+            follower: Alignment.bottomCenter,
+            offset: Offset(0, -streamSpacing.md),
+          ),
+          portalFollower: showIdleTooltip ? HoldToRecordInfoTooltip(message: idleMessage) : const SizedBox.shrink(),
+          child: PortalTarget(
+            anchor: Aligned(
+              target: targetAlignment.resolve(textDirection),
+              follower: followerAlignment.resolve(textDirection),
+              offset: Offset(-streamSpacing.md, -streamSpacing.md).directional(textDirection),
+            ),
+            visible: state is RecordStateRecording,
+            portalFollower: SwipeToLockButton(isLocked: state is RecordStateRecordingLocked),
+            child: _StreamChatMessageInputContent(
+              props: widget.props,
+              inputController: _controller,
+              audioRecorderState: state,
+              body: body,
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+// The actual UI content of the message composer.
+// Does not include the audio recording flow in the body.
+class _StreamChatMessageInputContent extends StatelessWidget {
+  const _StreamChatMessageInputContent({
     required this.props,
     required this.inputController,
     this.audioRecorderState = const RecordStateIdle(),
     this.body,
   });
 
-  /// The properties for the message composer.
-  final MessageComposerProps props;
-
-  /// The controller for the message input.
+  final StreamChatMessageInputProps props;
   final StreamMessageInputController inputController;
-
-  /// The state of the audio recorder.
-  /// Used for the microphone button state.
   final AudioRecorderState audioRecorderState;
-
-  /// The body of the message composer.
   final Widget? body;
 
-  /// The threshold to lock the recording.
   static const double _lockRecordThreshold = 50;
-
-  /// The threshold to cancel the recording.
   static const double _cancelRecordThreshold = 75;
 
   @override

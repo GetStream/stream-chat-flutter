@@ -128,13 +128,13 @@ class ChannelPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Navigator(
     onGenerateRoute: (settings) => MaterialPageRoute(
-      builder: (context) => const Scaffold(
-        appBar: StreamChannelHeader(
+      builder: (context) => Scaffold(
+        appBar: const StreamChannelHeader(
           showBackButton: false,
         ),
         body: Column(
           children: <Widget>[
-            Expanded(
+            const Expanded(
               child: StreamMessageListView(),
             ),
             StreamMessageComposer(),

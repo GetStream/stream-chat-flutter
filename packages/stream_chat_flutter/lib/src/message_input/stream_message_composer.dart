@@ -56,10 +56,99 @@ typedef OgPreviewFilter = bool Function(Uri matchedUri, String messageText);
 ///
 /// The widget renders the ui based on the first ancestor of
 /// type [StreamChatTheme]. Modify it to change the widget appearance.
-class StreamMessageComposer extends StatefulWidget {
-  /// Instantiate a new MessageComposer
-  const StreamMessageComposer({
+class StreamMessageComposer extends StatelessWidget {
+  /// Instantiate a new StreamMessageComposer
+  StreamMessageComposer({
     super.key,
+    void Function(Message)? onMessageSent,
+    FutureOr<Message> Function(Message)? preMessageSending,
+    StreamMessageInputController? messageInputController,
+    FocusNode? focusNode,
+    bool disableAttachments = false,
+    int maxAttachmentSize = kDefaultMaxAttachmentSize,
+    bool canAlsoSendToChannelFromThread = true,
+    bool enableVoiceRecording = false,
+    bool sendVoiceRecordingAutomatically = false,
+    AudioRecorderFeedback voiceRecordingFeedback = const AudioRecorderFeedback(),
+    UserMentionTileBuilder? userMentionsTileBuilder,
+    ErrorListener? onError,
+    int? attachmentLimit,
+    List<AttachmentPickerType> allowedAttachmentPickerTypes = AttachmentPickerType.values,
+    AttachmentLimitExceedListener? onAttachmentLimitExceed,
+    Iterable<StreamAutocompleteTrigger> customAutocompleteTriggers = const [],
+    bool mentionAllAppUsers = false,
+    bool? shouldKeepFocusAfterMessage,
+    MessageValidator validator = MessageComposerProps._defaultValidator,
+    String? restorationId,
+    bool? enableSafeArea,
+    bool enableMentionsOverlay = true,
+    VoidCallback? onQuotedMessageCleared,
+    OgPreviewFilter ogPreviewFilter = MessageComposerProps._defaultOgPreviewFilter,
+    MessageInputPlaceholderBuilder placeholderBuilder = MessageComposerProps._defaultPlaceholderBuilder,
+    bool useSystemAttachmentPicker = false,
+    PollConfig? pollConfig,
+    AttachmentPickerOptionsBuilder? attachmentPickerOptionsBuilder,
+    OnAttachmentPickerResult? onAttachmentPickerResult,
+    KeyEventPredicate sendMessageKeyPredicate = MessageComposerProps._defaultSendMessageKeyPredicate,
+    KeyEventPredicate clearQuotedMessageKeyPredicate = MessageComposerProps._defaultClearQuotedMessageKeyPredicate,
+    TextInputAction? textInputAction,
+    TextInputType? keyboardType,
+    TextCapitalization textCapitalization = TextCapitalization.sentences,
+    bool autofocus = false,
+    bool autoCorrect = true,
+  }) : props = MessageComposerProps(
+         onMessageSent: onMessageSent,
+         preMessageSending: preMessageSending,
+         messageInputController: messageInputController,
+         focusNode: focusNode,
+         disableAttachments: disableAttachments,
+         maxAttachmentSize: maxAttachmentSize,
+         canAlsoSendToChannelFromThread: canAlsoSendToChannelFromThread,
+         enableVoiceRecording: enableVoiceRecording,
+         sendVoiceRecordingAutomatically: sendVoiceRecordingAutomatically,
+         voiceRecordingFeedback: voiceRecordingFeedback,
+         userMentionsTileBuilder: userMentionsTileBuilder,
+         onError: onError,
+         attachmentLimit: attachmentLimit,
+         allowedAttachmentPickerTypes: allowedAttachmentPickerTypes,
+         onAttachmentLimitExceed: onAttachmentLimitExceed,
+         customAutocompleteTriggers: customAutocompleteTriggers,
+         mentionAllAppUsers: mentionAllAppUsers,
+         shouldKeepFocusAfterMessage: shouldKeepFocusAfterMessage,
+         validator: validator,
+         restorationId: restorationId,
+         enableSafeArea: enableSafeArea,
+         enableMentionsOverlay: enableMentionsOverlay,
+         onQuotedMessageCleared: onQuotedMessageCleared,
+         ogPreviewFilter: ogPreviewFilter,
+         placeholderBuilder: placeholderBuilder,
+         useSystemAttachmentPicker: useSystemAttachmentPicker,
+         pollConfig: pollConfig,
+         attachmentPickerOptionsBuilder: attachmentPickerOptionsBuilder,
+         onAttachmentPickerResult: onAttachmentPickerResult,
+         sendMessageKeyPredicate: sendMessageKeyPredicate,
+         clearQuotedMessageKeyPredicate: clearQuotedMessageKeyPredicate,
+         textInputAction: textInputAction,
+         keyboardType: keyboardType,
+         textCapitalization: textCapitalization,
+         autofocus: autofocus,
+         autoCorrect: autoCorrect,
+       );
+
+  /// The properties for the message composer.
+  final MessageComposerProps props;
+
+  @override
+  Widget build(BuildContext context) {
+    return context.chatComponentBuilder<MessageComposerProps>()?.call(context, props) ??
+        DefaultStreamMessageComposer(props: props);
+  }
+}
+
+/// Properties for [StreamMessageComposer] and [DefaultStreamMessageComposer].
+class MessageComposerProps {
+  /// Creates a new instance of [MessageComposerProps].
+  const MessageComposerProps({
     this.onMessageSent,
     this.preMessageSending,
     this.messageInputController,
@@ -97,9 +186,6 @@ class StreamMessageComposer extends StatefulWidget {
     this.autofocus = false,
     this.autoCorrect = true,
   });
-
-  /// List of triggers for showing autocomplete.
-  final Iterable<StreamAutocompleteTrigger> customAutocompleteTriggers;
 
   /// Function called after sending the message.
   final void Function(Message)? onMessageSent;
@@ -191,6 +277,9 @@ class StreamMessageComposer extends StatefulWidget {
   /// This will override the default error alert behaviour.
   final AttachmentLimitExceedListener? onAttachmentLimitExceed;
 
+  /// List of triggers for showing autocomplete.
+  final Iterable<StreamAutocompleteTrigger> customAutocompleteTriggers;
+
   /// When enabled mentions search users across the entire app.
   ///
   /// Defaults to false.
@@ -242,7 +331,7 @@ class StreamMessageComposer extends StatefulWidget {
   /// ```
   final MessageInputPlaceholderBuilder placeholderBuilder;
 
-  /// If True, allows you to use the system’s default media picker instead of
+  /// If True, allows you to use the system's default media picker instead of
   /// the custom media picker provided by the library. This can be beneficial
   /// for several reasons:
   ///
@@ -346,14 +435,27 @@ class StreamMessageComposer extends StatefulWidget {
       CommandPlaceholder() || AttachmentsPlaceholder() || WriteMessagePlaceholder() => translations.writeAMessageLabel,
     };
   }
-
-  @override
-  StreamMessageComposerState createState() => StreamMessageComposerState();
 }
 
-/// State of [StreamMessageComposer]
-class StreamMessageComposerState extends State<StreamMessageComposer>
-    with RestorationMixin<StreamMessageComposer>, SingleTickerProviderStateMixin {
+/// Default implementation of [StreamMessageComposer].
+///
+/// Contains the full stateful implementation. To provide a custom composer,
+/// register a [StreamComponentBuilder] for [MessageComposerProps] via
+/// [StreamComponentFactory] instead of subclassing this widget.
+class DefaultStreamMessageComposer extends StatefulWidget {
+  /// Creates a new instance of [DefaultStreamMessageComposer].
+  const DefaultStreamMessageComposer({super.key, required this.props});
+
+  /// The properties for the message composer.
+  final MessageComposerProps props;
+
+  @override
+  DefaultStreamMessageComposerState createState() => DefaultStreamMessageComposerState();
+}
+
+/// State of [DefaultStreamMessageComposer].
+class DefaultStreamMessageComposerState extends State<DefaultStreamMessageComposer>
+    with RestorationMixin<DefaultStreamMessageComposer>, SingleTickerProviderStateMixin {
   bool get _commandEnabled => _effectiveController.message.command != null;
 
   bool get _isPickerVisible => _pickerController != null;
@@ -370,10 +472,10 @@ class StreamMessageComposerState extends State<StreamMessageComposer>
 
   late final _audioRecorderController = StreamAudioRecorderController();
 
-  FocusNode get _effectiveFocusNode => widget.focusNode ?? (_focusNode ??= FocusNode());
+  FocusNode get _effectiveFocusNode => widget.props.focusNode ?? (_focusNode ??= FocusNode());
   FocusNode? _focusNode;
 
-  StreamMessageInputController get _effectiveController => widget.messageInputController ?? _controller!.value;
+  StreamMessageInputController get _effectiveController => widget.props.messageInputController ?? _controller!.value;
   StreamRestorableMessageInputController? _controller;
 
   void _createLocalController([Message? message]) {
@@ -411,7 +513,7 @@ class StreamMessageComposerState extends State<StreamMessageComposer>
       parent: _pickerAnimationController,
       curve: Curves.easeInOut,
     );
-    if (widget.messageInputController == null) {
+    if (widget.props.messageInputController == null) {
       _createLocalController();
     } else {
       _initialiseEffectiveController();
@@ -469,7 +571,7 @@ class StreamMessageComposerState extends State<StreamMessageComposer>
     if (deletedMessageId == null) return;
 
     if (_effectiveController.message.quotedMessageId == deletedMessageId) {
-      widget.onQuotedMessageCleared?.call();
+      widget.props.onQuotedMessageCleared?.call();
     }
 
     if (_isEditing && _effectiveController.message.id == deletedMessageId) {
@@ -502,11 +604,11 @@ class StreamMessageComposerState extends State<StreamMessageComposer>
   }
 
   @override
-  void didUpdateWidget(covariant StreamMessageComposer oldWidget) {
+  void didUpdateWidget(covariant DefaultStreamMessageComposer oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.messageInputController == null && oldWidget.messageInputController != null) {
-      _createLocalController(oldWidget.messageInputController!.message);
-    } else if (widget.messageInputController != null && oldWidget.messageInputController == null) {
+    if (widget.props.messageInputController == null && oldWidget.props.messageInputController != null) {
+      _createLocalController(oldWidget.props.messageInputController!.message);
+    } else if (widget.props.messageInputController != null && oldWidget.props.messageInputController == null) {
       unregisterFromRestoration(_controller!);
       _controller!.dispose();
       _controller = null;
@@ -514,9 +616,9 @@ class StreamMessageComposerState extends State<StreamMessageComposer>
     }
 
     // Update _focusNode
-    if (widget.focusNode != oldWidget.focusNode) {
-      (oldWidget.focusNode ?? _focusNode)?.removeListener(_focusNodeListener);
-      (widget.focusNode ?? _focusNode)?.addListener(_focusNodeListener);
+    if (widget.props.focusNode != oldWidget.props.focusNode) {
+      (oldWidget.props.focusNode ?? _focusNode)?.removeListener(_focusNodeListener);
+      (widget.props.focusNode ?? _focusNode)?.addListener(_focusNodeListener);
     }
   }
 
@@ -528,7 +630,7 @@ class StreamMessageComposerState extends State<StreamMessageComposer>
   }
 
   @override
-  String? get restorationId => widget.restorationId;
+  String? get restorationId => widget.props.restorationId;
 
   void _focusNodeListener() {
     if (_effectiveFocusNode.hasFocus && _isPickerVisible) {
@@ -537,15 +639,15 @@ class StreamMessageComposerState extends State<StreamMessageComposer>
   }
 
   KeyEventResult _handleKeyPressed(FocusNode node, KeyEvent event) {
-    if (widget.sendMessageKeyPredicate(node, event)) {
+    if (widget.props.sendMessageKeyPredicate(node, event)) {
       sendMessage();
       return KeyEventResult.handled;
     }
-    if (widget.clearQuotedMessageKeyPredicate(node, event)) {
+    if (widget.props.clearQuotedMessageKeyPredicate(node, event)) {
       final hasQuote = _effectiveController.message.quotedMessage != null;
       if (hasQuote && _effectiveController.text.isEmpty) {
         _effectiveController.clearQuotedMessage();
-        widget.onQuotedMessageCleared?.call();
+        widget.props.onQuotedMessageCleared?.call();
         return KeyEventResult.handled;
       }
       return KeyEventResult.ignored;
@@ -589,7 +691,7 @@ class StreamMessageComposerState extends State<StreamMessageComposer>
     };
 
     final spacing = context.streamSpacing;
-    final safeAreaEnabled = widget.enableSafeArea ?? true;
+    final safeAreaEnabled = widget.props.enableSafeArea ?? true;
     final viewPadding = MediaQuery.paddingOf(context);
 
     return Material(
@@ -626,7 +728,7 @@ class StreamMessageComposerState extends State<StreamMessageComposer>
       messageEditingController: _effectiveController,
       fieldViewBuilder: _buildMessageInput,
       autocompleteTriggers: [
-        ...widget.customAutocompleteTriggers,
+        ...widget.props.customAutocompleteTriggers,
         StreamAutocompleteTrigger(
           trigger: _kCommandTrigger,
           triggerOnlyAtStart: true,
@@ -648,7 +750,7 @@ class StreamMessageComposerState extends State<StreamMessageComposer>
                 );
               },
         ),
-        if (widget.enableMentionsOverlay)
+        if (widget.props.enableMentionsOverlay)
           StreamAutocompleteTrigger(
             trigger: _kMentionTrigger,
             optionsViewBuilder:
@@ -661,8 +763,8 @@ class StreamMessageComposerState extends State<StreamMessageComposer>
                   return StreamMentionAutocompleteOptions(
                     query: query,
                     channel: StreamChannel.of(context).channel,
-                    mentionAllAppUsers: widget.mentionAllAppUsers,
-                    mentionsTileBuilder: widget.userMentionsTileBuilder,
+                    mentionAllAppUsers: widget.props.mentionAllAppUsers,
+                    mentionsTileBuilder: widget.props.userMentionsTileBuilder,
                     onMentionUserTap: (user) {
                       // adding the mentioned user to the controller.
                       _effectiveController.addMentionedUser(user);
@@ -710,24 +812,24 @@ class StreamMessageComposerState extends State<StreamMessageComposer>
                 child: StreamChatMessageInput(
                   controller: controller,
                   currentUserId: currentUserId,
-                  onAttachmentButtonPressed: widget.disableAttachments ? null : _onAttachmentButtonPressed,
+                  onAttachmentButtonPressed: widget.props.disableAttachments ? null : _onAttachmentButtonPressed,
                   isPickerOpen: _isPickerVisible,
                   placeholder: _buildPlaceholder(context),
                   focusNode: focusNode,
                   onSendPressed: sendMessage,
                   canAlsoSendToChannel: _shouldShowSendToChannelCheckbox(),
-                  audioRecorderController: widget.enableVoiceRecording ? _audioRecorderController : null,
-                  sendVoiceRecordingAutomatically: widget.sendVoiceRecordingAutomatically,
-                  feedback: widget.voiceRecordingFeedback,
+                  audioRecorderController: widget.props.enableVoiceRecording ? _audioRecorderController : null,
+                  sendVoiceRecordingAutomatically: widget.props.sendVoiceRecordingAutomatically,
+                  feedback: widget.props.voiceRecordingFeedback,
                   onQuotedMessageCleared: () {
                     _effectiveController.clearQuotedMessage();
-                    widget.onQuotedMessageCleared?.call();
+                    widget.props.onQuotedMessageCleared?.call();
                   },
-                  textInputAction: widget.textInputAction,
-                  keyboardType: widget.keyboardType,
-                  textCapitalization: widget.textCapitalization,
-                  autofocus: widget.autofocus,
-                  autocorrect: widget.autoCorrect,
+                  textInputAction: widget.props.textInputAction,
+                  keyboardType: widget.props.keyboardType,
+                  textCapitalization: widget.props.textCapitalization,
+                  autofocus: widget.props.autofocus,
+                  autocorrect: widget.props.autoCorrect,
                 ),
               ),
             ),
@@ -751,15 +853,15 @@ class StreamMessageComposerState extends State<StreamMessageComposer>
       PlatformType.android || PlatformType.ios => false,
       _ => true,
     };
-    final useSystemPicker = widget.useSystemAttachmentPicker || isWebOrDesktop;
+    final useSystemPicker = widget.props.useSystemAttachmentPicker || isWebOrDesktop;
 
     final child = useSystemPicker
         ? systemAttachmentPickerBuilder(
             context: context,
             controller: _pickerController!,
             allowedTypes: allowedTypes,
-            pollConfig: widget.pollConfig,
-            optionsBuilder: widget.attachmentPickerOptionsBuilder,
+            pollConfig: widget.props.pollConfig,
+            optionsBuilder: widget.props.attachmentPickerOptionsBuilder,
             onError: _onPickerError,
             onPollCreated: _onPollCreated,
           )
@@ -767,8 +869,8 @@ class StreamMessageComposerState extends State<StreamMessageComposer>
             context: context,
             controller: _pickerController!,
             allowedTypes: allowedTypes,
-            pollConfig: widget.pollConfig,
-            optionsBuilder: widget.attachmentPickerOptionsBuilder,
+            pollConfig: widget.props.pollConfig,
+            optionsBuilder: widget.props.attachmentPickerOptionsBuilder,
             onError: _onPickerError,
             onPollCreated: _onPollCreated,
             onCommandSelected: _onCommandSelectedFromPicker,
@@ -784,7 +886,7 @@ class StreamMessageComposerState extends State<StreamMessageComposer>
   }
 
   bool _shouldShowSendToChannelCheckbox() {
-    if (!widget.canAlsoSendToChannelFromThread) return false;
+    if (!widget.props.canAlsoSendToChannelFromThread) return false;
 
     final insideThread = _effectiveController.message.parentId != null;
     return insideThread;
@@ -812,7 +914,7 @@ class StreamMessageComposerState extends State<StreamMessageComposer>
   // Returns the list of allowed attachment picker types based on the
   // current channel configuration and context.
   List<AttachmentPickerType> _getAllowedAttachmentPickerTypes() {
-    final allowedTypes = widget.allowedAttachmentPickerTypes.where((type) {
+    final allowedTypes = widget.props.allowedAttachmentPickerTypes.where((type) {
       if (type != AttachmentPickerType.poll) return true;
 
       // We don't allow editing polls.
@@ -841,8 +943,8 @@ class StreamMessageComposerState extends State<StreamMessageComposer>
       _pickerController = StreamAttachmentPickerController(
         initialAttachments: _effectiveController.attachments,
         initialPoll: _effectiveController.poll,
-        maxAttachmentCount: widget.attachmentLimit,
-        maxAttachmentSize: widget.maxAttachmentSize,
+        maxAttachmentCount: widget.props.attachmentLimit,
+        maxAttachmentSize: widget.props.maxAttachmentSize,
       );
 
       _startPickerSync();
@@ -883,7 +985,7 @@ class StreamMessageComposerState extends State<StreamMessageComposer>
   }
 
   Future<void> _onCustomResult(CustomAttachmentPickerResult result) async {
-    final handled = await widget.onAttachmentPickerResult?.call(result) ?? false;
+    final handled = await widget.props.onAttachmentPickerResult?.call(result) ?? false;
     if (handled && mounted) _hidePicker();
   }
 
@@ -924,7 +1026,7 @@ class StreamMessageComposerState extends State<StreamMessageComposer>
   }
 
   void _onPickerError(AttachmentPickerError error) {
-    widget.onError?.call(error.error, error.stackTrace);
+    widget.props.onError?.call(error.error, error.stackTrace);
   }
 
   late final _onChangedThrottled = throttle(
@@ -938,7 +1040,7 @@ class StreamMessageComposerState extends State<StreamMessageComposer>
       if (value.isNotEmpty && channel.canUseTypingEvents) {
         channel.keyStroke(_effectiveController.message.parentId).onError(
           (error, stackTrace) {
-            widget.onError?.call(error!, stackTrace);
+            widget.props.onError?.call(error!, stackTrace);
           },
         );
       }
@@ -962,7 +1064,7 @@ class StreamMessageComposerState extends State<StreamMessageComposer>
 
   String? _buildPlaceholder(BuildContext context) {
     final state = MessageInputPlaceholder.resolve(_effectiveController);
-    return widget.placeholderBuilder.call(context, state);
+    return widget.props.placeholderBuilder.call(context, state);
   }
 
   String? _lastSearchedContainsUrlText;
@@ -984,7 +1086,7 @@ class StreamMessageComposerState extends State<StreamMessageComposer>
       final _parsedMatch = Uri.tryParse(it.group(0) ?? '')?.withScheme;
       if (_parsedMatch == null) return false;
 
-      return _parsedMatch.host.split('.').last.isValidTLD() && widget.ogPreviewFilter.call(_parsedMatch, value);
+      return _parsedMatch.host.split('.').last.isValidTLD() && widget.props.ogPreviewFilter.call(_parsedMatch, value);
     }).toList();
 
     // Reset the og attachment if the text doesn't contain any url
@@ -1013,7 +1115,7 @@ class StreamMessageComposerState extends State<StreamMessageComposer>
           onError: (error, stackTrace) {
             // Reset the ogAttachment if there was an error
             _effectiveController.clearOGAttachment();
-            widget.onError?.call(error, stackTrace);
+            widget.props.onError?.call(error, stackTrace);
           },
         );
   }
@@ -1038,10 +1140,10 @@ class StreamMessageComposerState extends State<StreamMessageComposer>
 
   /// Adds an attachment to the [messageInputController.attachments] map
   void _addAttachments(Iterable<Attachment> attachments) {
-    if (widget.attachmentLimit case final limit?) {
+    if (widget.props.attachmentLimit case final limit?) {
       final length = _effectiveController.attachments.length + attachments.length;
       if (length > limit) {
-        final onAttachmentLimitExceed = widget.onAttachmentLimitExceed;
+        final onAttachmentLimitExceed = widget.props.onAttachmentLimitExceed;
         if (onAttachmentLimitExceed != null) {
           return onAttachmentLimitExceed(
             limit,
@@ -1061,7 +1163,7 @@ class StreamMessageComposerState extends State<StreamMessageComposer>
   /// Sends the current message
   Future<void> sendMessage() async {
     if (_effectiveController.isSlowModeActive) return;
-    if (!widget.validator(_effectiveController.message)) return;
+    if (!widget.props.validator(_effectiveController.message)) return;
 
     _hidePicker();
 
@@ -1090,10 +1192,10 @@ class StreamMessageComposerState extends State<StreamMessageComposer>
     }
 
     _maybeDeleteDraftMessage(message, channel);
-    widget.onQuotedMessageCleared?.call();
+    widget.props.onQuotedMessageCleared?.call();
     _effectiveController.reset();
 
-    if (widget.preMessageSending case final onPreMessageSending?) {
+    if (widget.props.preMessageSending case final onPreMessageSending?) {
       message = await onPreMessageSending.call(message);
     }
 
@@ -1110,7 +1212,7 @@ class StreamMessageComposerState extends State<StreamMessageComposer>
     await _sendOrUpdateMessage(message: message, channel: channel);
 
     if (mounted) {
-      if (widget.shouldKeepFocusAfterMessage ?? !_commandEnabled) {
+      if (widget.props.shouldKeepFocusAfterMessage ?? !_commandEnabled) {
         FocusScope.of(context).requestFocus(_effectiveFocusNode);
       } else {
         FocusScope.of(context).unfocus();
@@ -1134,10 +1236,10 @@ class StreamMessageComposerState extends State<StreamMessageComposer>
       };
 
       _effectiveController.startCooldown(channel.getRemainingCooldown());
-      widget.onMessageSent?.call(resp.message);
+      widget.props.onMessageSent?.call(resp.message);
     } catch (e, stk) {
-      if (widget.onError != null) {
-        return widget.onError?.call(e, stk);
+      if (widget.props.onError != null) {
+        return widget.props.onError?.call(e, stk);
       }
 
       rethrow;
@@ -1165,7 +1267,7 @@ class StreamMessageComposerState extends State<StreamMessageComposer>
     if (channel == null) return;
 
     final message = _effectiveController.message;
-    final isMessageValid = widget.validator.call(message);
+    final isMessageValid = widget.props.validator.call(message);
 
     // If the message is valid, we need to create or update it as a draft
     // message for the channel or thread.
@@ -1184,7 +1286,7 @@ class StreamMessageComposerState extends State<StreamMessageComposer>
     final draftMessage = message.toDraftMessage();
 
     // If the draft message is not valid, we don't need to update it.
-    final isDraftValid = widget.validator.call(draftMessage.toMessage());
+    final isDraftValid = widget.props.validator.call(draftMessage.toMessage());
     if (!isDraftValid) return;
 
     // If the draft message didn't change, we don't need to update it.

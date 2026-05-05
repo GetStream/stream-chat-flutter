@@ -25,7 +25,7 @@ void main() {
     (WidgetTester tester) async {
       await tester.pumpWidget(
         buildWidget(
-          const StreamMessageComposer(),
+          StreamMessageComposer(),
         ),
       );
 
@@ -98,7 +98,7 @@ void main() {
             client: client,
             child: StreamChannel(
               channel: channel,
-              child: const Scaffold(
+              child: Scaffold(
                 body: StreamMessageComposer(),
               ),
             ),
@@ -151,7 +151,7 @@ void main() {
               client: client,
               child: StreamChannel(
                 channel: channel,
-                child: const Scaffold(
+                child: Scaffold(
                   bottomNavigationBar: StreamMessageComposer(),
                 ),
               ),
@@ -193,7 +193,7 @@ void main() {
               client: client,
               child: StreamChannel(
                 channel: channel,
-                child: const Scaffold(
+                child: Scaffold(
                   bottomNavigationBar: StreamMessageComposer(),
                 ),
               ),
@@ -378,7 +378,7 @@ void main() {
         final messageInputController = StreamMessageInputController()..editMessage(existingMessage);
         addTearDown(messageInputController.dispose);
 
-        final key = GlobalKey<StreamMessageComposerState>();
+        final key = GlobalKey<DefaultStreamMessageComposerState>();
 
         await tester.pumpWidget(
           MaterialApp(
@@ -420,7 +420,7 @@ void main() {
         );
         addTearDown(messageInputController.dispose);
 
-        final key = GlobalKey<StreamMessageComposerState>();
+        final key = GlobalKey<DefaultStreamMessageComposerState>();
 
         await tester.pumpWidget(
           MaterialApp(
@@ -496,7 +496,7 @@ void main() {
               client: client,
               child: StreamChannel(
                 channel: channel,
-                child: const Scaffold(
+                child: Scaffold(
                   bottomNavigationBar: StreamMessageComposer(
                     canAlsoSendToChannelFromThread: false,
                   ),
@@ -522,7 +522,7 @@ void main() {
               client: client,
               child: StreamChannel(
                 channel: channel,
-                child: const Scaffold(
+                child: Scaffold(
                   bottomNavigationBar: StreamMessageComposer(),
                 ),
               ),
