@@ -21,7 +21,6 @@ void main() {
 
   testWidgets(
     'checks message input features',
-    skip: true,
     (WidgetTester tester) async {
       await tester.pumpWidget(
         buildWidget(
@@ -33,13 +32,11 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(TextField), findsOneWidget);
-      expect(find.byKey(const Key('messageInputText')), findsOneWidget);
     },
   );
 
   testWidgets(
     'checks message input slow mode',
-    skip: true,
     (WidgetTester tester) async {
       final client = MockClient();
       final clientState = MockClientState();
@@ -136,7 +133,6 @@ void main() {
 
     testWidgets(
       'should send message when Enter key is pressed on desktop',
-      skip: true,
       (tester) async {
         when(() => channel.sendMessage(any())).thenAnswer(
           (i) async => SendMessageResponse()
@@ -162,7 +158,7 @@ void main() {
         await tester.pumpAndSettle();
 
         // Add some text to the input field
-        final textField = find.byType(StreamMessageTextField);
+        final textField = find.byType(TextField);
         await tester.enterText(textField, 'Hello world');
         await tester.pump();
 
@@ -178,7 +174,6 @@ void main() {
 
     testWidgets(
       'should not send message when Shift+Enter key is pressed on desktop',
-      skip: true,
       (tester) async {
         when(() => channel.sendMessage(any())).thenAnswer(
           (_) async => SendMessageResponse()
@@ -204,7 +199,7 @@ void main() {
         await tester.pumpAndSettle();
 
         // Add some text to the input field
-        final textField = find.byType(StreamMessageTextField);
+        final textField = find.byType(TextField);
         await tester.enterText(textField, 'Hello world');
         await tester.pump();
 
@@ -224,7 +219,6 @@ void main() {
 
     testWidgets(
       'should clear quoted message when Esc key is pressed on desktop',
-      skip: true,
       (tester) async {
         final quotedMessage = Message(text: 'I am a quoted message');
         final initialMessage = Message(quotedMessage: quotedMessage);
@@ -257,7 +251,7 @@ void main() {
         await tester.pumpAndSettle();
 
         // Tap the message input to focus it
-        final textField = find.byType(StreamMessageTextField);
+        final textField = find.byType(TextField);
         await tester.tap(textField);
         await tester.pump();
 
@@ -273,7 +267,6 @@ void main() {
 
     testWidgets(
       'should not clear quoted message contains text and Esc key is pressed on desktop',
-      skip: true,
       (tester) async {
         final quotedMessage = Message(text: 'I am a quoted message');
         final initialMessage = Message(quotedMessage: quotedMessage);
@@ -306,7 +299,7 @@ void main() {
         await tester.pumpAndSettle();
 
         // Add some text to the input field
-        final textField = find.byType(StreamMessageTextField);
+        final textField = find.byType(TextField);
         await tester.enterText(textField, 'Hello world');
         await tester.pump();
 
@@ -492,7 +485,6 @@ void main() {
 
     testWidgets(
       'should not show DmCheckboxListTile when hideSendAsDm is true',
-      skip: true,
       (tester) async {
         await tester.pumpWidget(
           MaterialApp(
@@ -518,7 +510,6 @@ void main() {
 
     testWidgets(
       'should not show DmCheckboxListTile when not in a thread',
-      skip: true,
       (tester) async {
         await tester.pumpWidget(
           MaterialApp(
@@ -542,7 +533,6 @@ void main() {
 
     testWidgets(
       'should show DmCheckboxListTile when in a thread and hideSendAsDm is false',
-      skip: true,
       (tester) async {
         // Set up a message controller with a parent message ID (thread)
         final messageInputController = StreamMessageInputController(
@@ -573,7 +563,6 @@ void main() {
 
     testWidgets(
       'should toggle showInChannel value when DmCheckboxListTile is tapped',
-      skip: true,
       (tester) async {
         // Set up a message controller with a parent message ID (thread)
         final messageInputController = StreamMessageInputController(
