@@ -19,6 +19,7 @@ categories:
 
 command:
   bootstrap:
+    runPubGetInParallel: false
     # Dart and Flutter environment used in the project.
     environment:
       sdk: ^3.10.0
