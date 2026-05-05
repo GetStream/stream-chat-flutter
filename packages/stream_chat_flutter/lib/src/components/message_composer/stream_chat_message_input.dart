@@ -13,8 +13,8 @@ import 'package:stream_core_flutter/stream_core_flutter.dart' as core;
 
 /// A widget that shows the message composer.
 /// Uses the factory to show custom components or the default implementation.
-class StreamChatMessageComposer extends StatefulWidget {
-  /// Creates a new instance of [StreamChatMessageComposer].
+class StreamChatMessageInput extends StatefulWidget {
+  /// Creates a new instance of [StreamChatMessageInput].
   /// [controller] is the controller for the message composer.
   /// [onSendPressed] is the callback for when the send button is pressed.
   /// [onMicrophonePressed] is the callback for when the microphone button is pressed.
@@ -22,7 +22,7 @@ class StreamChatMessageComposer extends StatefulWidget {
   /// [focusNode] is the focus node for the message composer.
   /// [currentUserId] is the current user id.
   /// [placeholder] is the placeholder text of the message composer.
-  StreamChatMessageComposer({
+  StreamChatMessageInput({
     super.key,
     StreamMessageInputController? controller,
     required VoidCallback onSendPressed,
@@ -70,10 +70,10 @@ class StreamChatMessageComposer extends StatefulWidget {
   final MessageComposerProps props;
 
   @override
-  State<StreamChatMessageComposer> createState() => _StreamChatMessageComposerState();
+  State<StreamChatMessageInput> createState() => _StreamChatMessageInputState();
 }
 
-class _StreamChatMessageComposerState extends State<StreamChatMessageComposer> {
+class _StreamChatMessageInputState extends State<StreamChatMessageInput> {
   late StreamMessageInputController _controller;
 
   @override
@@ -83,7 +83,7 @@ class _StreamChatMessageComposerState extends State<StreamChatMessageComposer> {
   }
 
   @override
-  void didUpdateWidget(StreamChatMessageComposer oldWidget) {
+  void didUpdateWidget(StreamChatMessageInput oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.controller != oldWidget.controller) {
       _disposeController(oldWidget);
@@ -101,7 +101,7 @@ class _StreamChatMessageComposerState extends State<StreamChatMessageComposer> {
     _controller = widget.controller ?? StreamMessageInputController();
   }
 
-  void _disposeController(StreamChatMessageComposer widget) {
+  void _disposeController(StreamChatMessageInput widget) {
     if (widget.controller == null) {
       _controller.dispose();
     }
@@ -115,7 +115,7 @@ class _StreamChatMessageComposerState extends State<StreamChatMessageComposer> {
 
     final audioRecorderController = widget.props.audioRecorderController;
     if (audioRecorderController == null) {
-      return DefaultStreamChatMessageComposer(
+      return DefaultStreamChatMessageInput(
         props: widget.props,
         inputController: _controller,
       );
@@ -170,7 +170,7 @@ class _StreamChatMessageComposerState extends State<StreamChatMessageComposer> {
             ),
             visible: state is RecordStateRecording,
             portalFollower: SwipeToLockButton(isLocked: state is RecordStateRecordingLocked),
-            child: DefaultStreamChatMessageComposer(
+            child: DefaultStreamChatMessageInput(
               props: widget.props,
               inputController: _controller,
               audioRecorderState: state,
@@ -228,10 +228,10 @@ class MessageComposerProps {
   /// The placeholder text of the message composer.
   ///
   /// May be `null` to render the input with no placeholder. The wrapping
-  /// [StreamMessageInput] resolves this string reactively from its
+  /// [StreamMessageComposer] resolves this string reactively from its
   /// [StreamMessageInputController] via [MessageInputPlaceholder.resolve] and
-  /// [StreamMessageInput.placeholderBuilder]; when using
-  /// [StreamChatMessageComposer] directly, supply the string yourself.
+  /// [StreamMessageComposer.placeholderBuilder]; when using
+  /// [StreamChatMessageInput] directly, supply the string yourself.
   final String? placeholder;
 
   /// The callback for when the send button is pressed.
@@ -292,13 +292,13 @@ extension on StreamAudioRecorderController {
 /// Default implementation of the message composer.
 /// Shows the message composer with the default components.
 /// Does not include the audio recording flow in the body.
-class DefaultStreamChatMessageComposer extends StatelessWidget {
-  /// Creates a new instance of [DefaultStreamChatMessageComposer].
+class DefaultStreamChatMessageInput extends StatelessWidget {
+  /// Creates a new instance of [DefaultStreamChatMessageInput].
   /// [props] contains the properties for the message composer.
   /// [inputController] is the controller for the message input.
   /// [audioRecorderState] is the state of the audio recorder.
   /// [body] is the body of the message composer.
-  const DefaultStreamChatMessageComposer({
+  const DefaultStreamChatMessageInput({
     super.key,
     required this.props,
     required this.inputController,

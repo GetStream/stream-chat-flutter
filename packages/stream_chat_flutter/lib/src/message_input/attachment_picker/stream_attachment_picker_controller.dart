@@ -75,7 +75,7 @@ class StreamAttachmentPickerController extends ValueNotifier<AttachmentPickerVal
   Stream<CustomAttachmentPickerResult> get customResults => _customResultController.stream;
 
   /// Emits a [CustomAttachmentPickerResult] to notify the parent widget
-  /// (e.g. [StreamMessageInput]) that a custom attachment has been picked.
+  /// (e.g. [StreamMessageComposer]) that a custom attachment has been picked.
   ///
   /// Use this from a [TabbedAttachmentPickerOption.optionViewBuilder] instead
   /// of calling `Navigator.pop` — the picker is an inline widget, not a modal

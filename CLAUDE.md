@@ -91,13 +91,13 @@ Full UI package. Key architectural points:
 **Key UI components:**
 - `StreamChannelListView` + `StreamChannelListTile` — channel list using `StreamChannelListController`
 - `StreamMessageListView` — message list with floating date dividers, unread indicators, thread separators
-- `StreamMessageInput` (legacy) / `StreamChatMessageComposer` (new design system) — message composition
+- `StreamMessageComposer` (full-featured) / `StreamChatMessageInput` (new design system, UI-only) — message composition
 - `StreamMessageWidget` — renders individual messages with attachments, reactions, threads
 - Scroll views in `lib/src/scroll_view/` — generic paged scroll views for channels, threads, members, users, drafts, polls
 
 **New design system components** (`lib/src/components/`):
 - `StreamUserAvatar`, `StreamChannelAvatar`, `StreamUserAvatarGroup` — avatar components; these are chat-domain wrappers around the base components in `stream_core_flutter`
-- `StreamChatMessageComposer` — new composer using `MessageComposerFactory` for custom layouts
+- `StreamChatMessageInput` — new composer using `MessageComposerFactory` for custom layouts
 
 **Golden tests:** Use `alchemist` package. Platform goldens used locally, CI goldens used in CI (detected via `CI`/`GITHUB_ACTIONS` env vars). Goldens stored alongside tests in `goldens/` subdirectories.
 

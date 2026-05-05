@@ -44,7 +44,7 @@ typedef OgPreviewFilter = bool Function(Uri matchedUri, String messageText);
 ///                 ),
 ///               ),
 ///             ),
-///             const StreamMessageInput(),
+///             const StreamMessageComposer(),
 ///           ],
 ///         ),
 ///       );
@@ -56,9 +56,9 @@ typedef OgPreviewFilter = bool Function(Uri matchedUri, String messageText);
 ///
 /// The widget renders the ui based on the first ancestor of
 /// type [StreamChatTheme]. Modify it to change the widget appearance.
-class StreamMessageInput extends StatefulWidget {
-  /// Instantiate a new MessageInput
-  const StreamMessageInput({
+class StreamMessageComposer extends StatefulWidget {
+  /// Instantiate a new MessageComposer
+  const StreamMessageComposer({
     super.key,
     this.onMessageSent,
     this.preMessageSending,
@@ -147,7 +147,7 @@ class StreamMessageInput extends StatefulWidget {
   ///
   /// To disable feedback:
   /// ```dart
-  /// StreamMessageInput(
+  /// StreamMessageComposer(
   ///   voiceRecordingFeedback: const AudioRecorderFeedback.disabled(),
   /// )
   /// ```
@@ -165,7 +165,7 @@ class StreamMessageInput extends StatefulWidget {
   ///   }
   /// }
   ///
-  /// StreamMessageInput(
+  /// StreamMessageComposer(
   ///   voiceRecordingFeedback: CustomFeedback(),
   /// )
   /// ```
@@ -196,7 +196,7 @@ class StreamMessageInput extends StatefulWidget {
   /// Defaults to false.
   final bool mentionAllAppUsers;
 
-  /// Defines if the [StreamMessageInput] loses focuses after a message is sent.
+  /// Defines if the [StreamMessageComposer] loses focuses after a message is sent.
   /// The default behaviour keeps focus until a command is enabled.
   final bool? shouldKeepFocusAfterMessage;
 
@@ -206,7 +206,7 @@ class StreamMessageInput extends StatefulWidget {
   /// Restoration ID to save and restore the state of the MessageInput.
   final String? restorationId;
 
-  /// Wrap [StreamMessageInput] with a [SafeArea widget]
+  /// Wrap [StreamMessageComposer] with a [SafeArea widget]
   final bool? enableSafeArea;
 
   /// Disable the mentions overlay by passing false
@@ -348,12 +348,12 @@ class StreamMessageInput extends StatefulWidget {
   }
 
   @override
-  StreamMessageInputState createState() => StreamMessageInputState();
+  StreamMessageComposerState createState() => StreamMessageComposerState();
 }
 
-/// State of [StreamMessageInput]
-class StreamMessageInputState extends State<StreamMessageInput>
-    with RestorationMixin<StreamMessageInput>, SingleTickerProviderStateMixin {
+/// State of [StreamMessageComposer]
+class StreamMessageComposerState extends State<StreamMessageComposer>
+    with RestorationMixin<StreamMessageComposer>, SingleTickerProviderStateMixin {
   bool get _commandEnabled => _effectiveController.message.command != null;
 
   bool get _isPickerVisible => _pickerController != null;
@@ -502,7 +502,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
   }
 
   @override
-  void didUpdateWidget(covariant StreamMessageInput oldWidget) {
+  void didUpdateWidget(covariant StreamMessageComposer oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.messageInputController == null && oldWidget.messageInputController != null) {
       _createLocalController(oldWidget.messageInputController!.message);
@@ -707,7 +707,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
               child: Focus(
                 skipTraversal: true,
                 onKeyEvent: _handleKeyPressed,
-                child: StreamChatMessageComposer(
+                child: StreamChatMessageInput(
                   controller: controller,
                   currentUserId: currentUserId,
                   onAttachmentButtonPressed: widget.disableAttachments ? null : _onAttachmentButtonPressed,

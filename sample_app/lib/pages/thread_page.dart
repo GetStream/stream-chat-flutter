@@ -63,7 +63,7 @@ class _ThreadPageState extends State<ThreadPage> {
             ),
           ),
           if (widget.parent.type != 'deleted')
-            StreamMessageInput(
+            StreamMessageComposer(
               focusNode: _focusNode,
               messageInputController: _messageInputController,
               enableVoiceRecording: true,

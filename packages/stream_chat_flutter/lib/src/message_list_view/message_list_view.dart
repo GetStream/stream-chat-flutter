@@ -79,7 +79,7 @@ typedef StreamMessageWidgetBuilder =
 ///               },
 ///             ),
 ///           ),
-///           StreamMessageInput(),
+///           StreamMessageComposer(),
 ///         ],
 ///       ),
 ///     );

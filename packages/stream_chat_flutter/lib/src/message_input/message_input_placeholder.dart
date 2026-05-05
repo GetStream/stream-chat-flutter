@@ -2,13 +2,13 @@ import 'package:flutter/widgets.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// Sealed hierarchy describing why a particular placeholder is shown in
-/// [StreamMessageInput].
+/// [StreamMessageComposer].
 ///
 /// The state is resolved once per rebuild from the current
 /// [StreamMessageInputController] using [MessageInputPlaceholder.resolve],
 /// then handed to a [MessageInputPlaceholderBuilder] to produce the actual
 /// placeholder string that gets passed down to the underlying
-/// [StreamChatMessageComposer].
+/// [StreamChatMessageInput].
 ///
 /// Each case carries the contextual data relevant to that state — for example
 /// [SlowModePlaceholder.cooldownTimeOut] for the remaining cooldown, or
@@ -133,7 +133,7 @@ final class AttachmentsPlaceholder extends MessageInputPlaceholder {
   final List<Attachment> attachments;
 }
 
-/// Returns the placeholder string shown inside [StreamMessageInput]'s text
+/// Returns the placeholder string shown inside [StreamMessageComposer]'s text
 /// field.
 ///
 /// Receives the current [MessageInputPlaceholder] state and may return a
