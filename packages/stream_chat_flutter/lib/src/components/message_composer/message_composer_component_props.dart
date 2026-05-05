@@ -18,7 +18,6 @@ class MessageComposerComponentProps {
   const MessageComposerComponentProps({
     required this.controller,
     this.isFloating = false,
-    this.message,
     required this.onSendPressed,
     this.voiceRecordingCallback,
     this.onAttachmentButtonPressed,
@@ -34,9 +33,6 @@ class MessageComposerComponentProps {
 
   /// Whether the message composer is floating.
   final bool isFloating;
-
-  /// The message for the message composer component.
-  final Message? message;
 
   /// The callback for when the send button is pressed.
   final VoidCallback onSendPressed;
@@ -77,7 +73,6 @@ class MessageComposerLeadingProps extends MessageComposerComponentProps {
   const MessageComposerLeadingProps._({
     required super.controller,
     required super.isFloating,
-    required super.message,
     required super.onSendPressed,
     required super.voiceRecordingCallback,
     required super.onAttachmentButtonPressed,
@@ -93,7 +88,6 @@ class MessageComposerLeadingProps extends MessageComposerComponentProps {
     return MessageComposerLeadingProps._(
       controller: props.controller,
       isFloating: props.isFloating,
-      message: props.message,
       onSendPressed: props.onSendPressed,
       voiceRecordingCallback: props.voiceRecordingCallback,
       onAttachmentButtonPressed: props.onAttachmentButtonPressed,
@@ -111,7 +105,6 @@ class MessageComposerTrailingProps extends MessageComposerComponentProps {
   const MessageComposerTrailingProps._({
     required super.controller,
     required super.isFloating,
-    required super.message,
     required super.onSendPressed,
     required super.voiceRecordingCallback,
     required super.onAttachmentButtonPressed,
@@ -127,7 +120,6 @@ class MessageComposerTrailingProps extends MessageComposerComponentProps {
     return MessageComposerTrailingProps._(
       controller: props.controller,
       isFloating: props.isFloating,
-      message: props.message,
       onSendPressed: props.onSendPressed,
       voiceRecordingCallback: props.voiceRecordingCallback,
       onAttachmentButtonPressed: props.onAttachmentButtonPressed,
@@ -145,7 +137,6 @@ class MessageComposerInputProps extends MessageComposerComponentProps {
   const MessageComposerInputProps._({
     required super.controller,
     required super.isFloating,
-    required super.message,
     required super.onSendPressed,
     required super.voiceRecordingCallback,
     required super.onAttachmentButtonPressed,
@@ -184,7 +175,6 @@ class MessageComposerInputProps extends MessageComposerComponentProps {
     return MessageComposerInputProps._(
       controller: componentProps.controller,
       isFloating: componentProps.isFloating,
-      message: componentProps.message,
       onSendPressed: componentProps.onSendPressed,
       voiceRecordingCallback: componentProps.voiceRecordingCallback,
       onAttachmentButtonPressed: componentProps.onAttachmentButtonPressed,
@@ -242,7 +232,6 @@ class MessageComposerInputLeadingProps extends MessageComposerComponentProps {
   const MessageComposerInputLeadingProps._({
     required super.controller,
     required super.isFloating,
-    required super.message,
     required super.onSendPressed,
     required super.voiceRecordingCallback,
     required super.onAttachmentButtonPressed,
@@ -258,7 +247,6 @@ class MessageComposerInputLeadingProps extends MessageComposerComponentProps {
     return MessageComposerInputLeadingProps._(
       controller: props.controller,
       isFloating: props.isFloating,
-      message: props.message,
       onSendPressed: props.onSendPressed,
       voiceRecordingCallback: props.voiceRecordingCallback,
       onAttachmentButtonPressed: props.onAttachmentButtonPressed,
@@ -276,7 +264,6 @@ class MessageComposerInputHeaderProps extends MessageComposerComponentProps {
   const MessageComposerInputHeaderProps._({
     required super.controller,
     required super.isFloating,
-    required super.message,
     required super.onSendPressed,
     required super.voiceRecordingCallback,
     required super.onAttachmentButtonPressed,
@@ -292,7 +279,6 @@ class MessageComposerInputHeaderProps extends MessageComposerComponentProps {
     return MessageComposerInputHeaderProps._(
       controller: props.controller,
       isFloating: props.isFloating,
-      message: props.message,
       onSendPressed: props.onSendPressed,
       voiceRecordingCallback: props.voiceRecordingCallback,
       onAttachmentButtonPressed: props.onAttachmentButtonPressed,
@@ -310,7 +296,6 @@ class MessageComposerInputTrailingProps extends MessageComposerComponentProps {
   const MessageComposerInputTrailingProps._({
     required super.controller,
     required super.isFloating,
-    required super.message,
     required super.onSendPressed,
     required super.voiceRecordingCallback,
     required super.onAttachmentButtonPressed,
@@ -326,7 +311,6 @@ class MessageComposerInputTrailingProps extends MessageComposerComponentProps {
     return MessageComposerInputTrailingProps._(
       controller: props.controller,
       isFloating: props.isFloating,
-      message: props.message,
       onSendPressed: props.onSendPressed,
       voiceRecordingCallback: props.voiceRecordingCallback,
       onAttachmentButtonPressed: props.onAttachmentButtonPressed,

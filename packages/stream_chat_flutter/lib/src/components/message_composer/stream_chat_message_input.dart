@@ -38,6 +38,7 @@ class StreamChatMessageInput extends StatefulWidget {
     this.textCapitalization = TextCapitalization.sentences,
     this.autofocus = false,
     this.autocorrect = true,
+    this.isFloating = false,
   });
 
   /// The controller for the message composer.
@@ -97,6 +98,9 @@ class StreamChatMessageInput extends StatefulWidget {
 
   /// Whether to enable autocorrect.
   final bool autocorrect;
+
+  /// Whether the message composer is floating.
+  final bool isFloating;
 
   @override
   State<StreamChatMessageInput> createState() => _StreamChatMessageInputState();
@@ -204,8 +208,7 @@ class _StreamChatMessageInputContent extends StatelessWidget {
   Widget build(BuildContext context) {
     final componentProps = MessageComposerComponentProps(
       controller: inputController,
-      isFloating: false,
-      message: null,
+      isFloating: widget.isFloating,
       currentUserId: widget.currentUserId,
       onSendPressed: widget.onSendPressed,
       voiceRecordingCallback: _createVoiceRecordingCallback(context),
