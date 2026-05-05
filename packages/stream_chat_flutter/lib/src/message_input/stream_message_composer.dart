@@ -1013,12 +1013,21 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     final pickerIds = pickerController.value.attachments.map((a) => a.id).toSet();
 
     final removedIds = pickerIds.difference(messageIds);
-    if (removedIds.isEmpty) return;
+    final addedIds = messageIds.difference(pickerIds);
+
+    if (removedIds.isEmpty && addedIds.isEmpty) return;
+
+    final addedAttachments = addedIds
+        .map((id) => pickerController.value.attachments.firstWhere((a) => a.id == id))
+        .toList();
 
     _isSyncingControllers = true;
     try {
       for (final id in removedIds) {
         pickerController.removeAttachmentById(id);
+      }
+      for (final attachment in addedAttachments) {
+        pickerController.addAttachment(attachment);
       }
     } finally {
       _isSyncingControllers = false;
