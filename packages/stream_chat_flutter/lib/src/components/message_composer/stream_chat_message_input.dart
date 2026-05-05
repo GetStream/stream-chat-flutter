@@ -236,7 +236,7 @@ class _StreamChatMessageInputContent extends StatelessWidget {
     return core.StreamCoreMessageComposer(
       placeholder: widget.placeholder,
       controller: inputController.textFieldController,
-      isFloating: false,
+      isFloating: widget.isFloating,
       focusNode: widget.focusNode,
       composerLeading: StreamMessageComposerLeading(props: componentProps),
       composerTrailing: StreamMessageComposerTrailing(props: componentProps),
