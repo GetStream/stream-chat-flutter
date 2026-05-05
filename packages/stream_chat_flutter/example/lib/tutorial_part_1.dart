@@ -91,7 +91,7 @@ class ChannelPage extends StatelessWidget {
   @override
   // ignore: prefer_expression_function_bodies
   Widget build(BuildContext context) {
-    return  Scaffold(
+    return Scaffold(
       appBar: const StreamChannelHeader(),
       body: Column(
         children: <Widget>[
