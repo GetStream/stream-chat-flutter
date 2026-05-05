@@ -387,9 +387,11 @@ void main() {
               child: StreamChannel(
                 channel: channel,
                 child: Scaffold(
-                  bottomNavigationBar: StreamMessageComposer(
+                  bottomNavigationBar: DefaultStreamMessageComposer(
                     key: key,
-                    messageInputController: messageInputController,
+                    props: MessageComposerProps(
+                      messageInputController: messageInputController,
+                    ),
                   ),
                 ),
               ),
@@ -429,9 +431,11 @@ void main() {
               child: StreamChannel(
                 channel: channel,
                 child: Scaffold(
-                  bottomNavigationBar: StreamMessageComposer(
+                  bottomNavigationBar: DefaultStreamMessageComposer(
                     key: key,
-                    messageInputController: messageInputController,
+                    props: MessageComposerProps(
+                      messageInputController: messageInputController,
+                    ),
                   ),
                 ),
               ),
