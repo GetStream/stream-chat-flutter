@@ -154,24 +154,87 @@ class MessageComposerInputProps extends MessageComposerComponentProps {
     required super.currentUserId,
     required super.audioRecorderState,
     required super.onQuotedMessageCleared,
+    this.placeholder,
+    this.textInputAction,
+    this.keyboardType,
+    this.textCapitalization = TextCapitalization.sentences,
+    this.autofocus = false,
+    this.autocorrect = true,
+    this.canAlsoSendToChannel = false,
+    this.audioRecorderController,
+    this.feedback = const AudioRecorderFeedback(),
+    this.sendVoiceRecordingAutomatically = false,
   }) : super();
 
-  /// Creates a new instance of [MessageComposerInputProps] from a [MessageComposerComponentProps].
-  factory MessageComposerInputProps.from(MessageComposerComponentProps props) {
+  /// Creates a new instance of [MessageComposerInputProps] from a
+  /// [MessageComposerComponentProps] and named input-level configuration values.
+  factory MessageComposerInputProps.from(
+    MessageComposerComponentProps componentProps, {
+    String? placeholder,
+    TextInputAction? textInputAction,
+    TextInputType? keyboardType,
+    TextCapitalization textCapitalization = TextCapitalization.sentences,
+    bool autofocus = false,
+    bool autocorrect = true,
+    bool canAlsoSendToChannel = false,
+    StreamAudioRecorderController? audioRecorderController,
+    AudioRecorderFeedback feedback = const AudioRecorderFeedback(),
+    bool sendVoiceRecordingAutomatically = false,
+  }) {
     return MessageComposerInputProps._(
-      controller: props.controller,
-      isFloating: props.isFloating,
-      message: props.message,
-      onSendPressed: props.onSendPressed,
-      voiceRecordingCallback: props.voiceRecordingCallback,
-      onAttachmentButtonPressed: props.onAttachmentButtonPressed,
-      isPickerOpen: props.isPickerOpen,
-      focusNode: props.focusNode,
-      currentUserId: props.currentUserId,
-      audioRecorderState: props.audioRecorderState,
-      onQuotedMessageCleared: props.onQuotedMessageCleared,
+      controller: componentProps.controller,
+      isFloating: componentProps.isFloating,
+      message: componentProps.message,
+      onSendPressed: componentProps.onSendPressed,
+      voiceRecordingCallback: componentProps.voiceRecordingCallback,
+      onAttachmentButtonPressed: componentProps.onAttachmentButtonPressed,
+      isPickerOpen: componentProps.isPickerOpen,
+      focusNode: componentProps.focusNode,
+      currentUserId: componentProps.currentUserId,
+      audioRecorderState: componentProps.audioRecorderState,
+      onQuotedMessageCleared: componentProps.onQuotedMessageCleared,
+      placeholder: placeholder,
+      textInputAction: textInputAction,
+      keyboardType: keyboardType,
+      textCapitalization: textCapitalization,
+      autofocus: autofocus,
+      autocorrect: autocorrect,
+      canAlsoSendToChannel: canAlsoSendToChannel,
+      audioRecorderController: audioRecorderController,
+      feedback: feedback,
+      sendVoiceRecordingAutomatically: sendVoiceRecordingAutomatically,
     );
   }
+
+  /// The placeholder text shown inside the input field when it is empty.
+  final String? placeholder;
+
+  /// The type of action button to use for the keyboard.
+  final TextInputAction? textInputAction;
+
+  /// The type of keyboard to use for editing the text.
+  final TextInputType? keyboardType;
+
+  /// {@macro flutter.widgets.editableText.textCapitalization}
+  final TextCapitalization textCapitalization;
+
+  /// Whether the text field should be focused initially.
+  final bool autofocus;
+
+  /// Whether to enable autocorrect.
+  final bool autocorrect;
+
+  /// Whether to show the "also send to channel" checkbox.
+  final bool canAlsoSendToChannel;
+
+  /// The audio recorder controller.
+  final StreamAudioRecorderController? audioRecorderController;
+
+  /// The feedback handler for voice recording interactions.
+  final AudioRecorderFeedback feedback;
+
+  /// Whether to send the voice recording automatically when recording stops.
+  final bool sendVoiceRecordingAutomatically;
 }
 
 /// Properties for building the input leading component of the message composer.
