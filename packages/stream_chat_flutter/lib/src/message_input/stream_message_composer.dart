@@ -97,6 +97,7 @@ class StreamMessageComposer extends StatelessWidget {
     TextCapitalization textCapitalization = TextCapitalization.sentences,
     bool autofocus = false,
     bool autoCorrect = true,
+    bool isFloating = false,
   }) : props = MessageComposerProps(
          onMessageSent: onMessageSent,
          preMessageSending: preMessageSending,
@@ -134,6 +135,7 @@ class StreamMessageComposer extends StatelessWidget {
          textCapitalization: textCapitalization,
          autofocus: autofocus,
          autoCorrect: autoCorrect,
+         isFloating: isFloating,
        );
 
   /// Creates a [StreamMessageComposer] from a pre-built [MessageComposerProps].
@@ -195,6 +197,7 @@ class MessageComposerProps {
     this.textCapitalization = TextCapitalization.sentences,
     this.autofocus = false,
     this.autoCorrect = true,
+    this.isFloating = false,
   });
 
   /// Function called after sending the message.
@@ -397,6 +400,9 @@ class MessageComposerProps {
   ///
   /// Defaults to true.
   final bool autoCorrect;
+
+  /// Whether the message composer is floating.
+  final bool isFloating;
 
   static bool _defaultSendMessageKeyPredicate(FocusNode node, KeyEvent event) {
     // Do not handle the event if the user is using a mobile device.
@@ -714,9 +720,10 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     final viewPadding = MediaQuery.paddingOf(context);
 
     return Material(
+      color: Colors.transparent,
       child: DecoratedBox(
         decoration: BoxDecoration(
-          color: context.streamColorScheme.backgroundElevation1,
+          color: widget.props.isFloating ? null : context.streamColorScheme.backgroundElevation1,
         ),
         child: AnimatedBuilder(
           animation: _pickerAnimation,
@@ -849,6 +856,7 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
                   textCapitalization: widget.props.textCapitalization,
                   autofocus: widget.props.autofocus,
                   autocorrect: widget.props.autoCorrect,
+                  isFloating: widget.props.isFloating,
                 ),
               ),
             ),

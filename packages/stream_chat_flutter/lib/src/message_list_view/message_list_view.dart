@@ -124,6 +124,7 @@ class StreamMessageListView extends StatefulWidget {
     this.onMessageLongPress,
     this.config = const StreamMessageListViewConfiguration(),
     this.builders = const StreamMessageListViewBuilders(),
+    this.bottomPadding = 0,
   });
 
   /// Predicate used to filter messages.
@@ -256,6 +257,12 @@ class StreamMessageListView extends StatefulWidget {
   ///
   /// Defaults to [StreamMessageListViewBuilders] with no overrides.
   final StreamMessageListViewBuilders builders;
+
+  /// Bottom padding added to the message list scroll view.
+  ///
+  /// Used by the floating composer layout to keep the last message visible
+  /// above the composer without requiring a separate [setState] call.
+  final double bottomPadding;
 
   @override
   _StreamMessageListViewState createState() => _StreamMessageListViewState();
@@ -588,7 +595,10 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
                 },
                 child: ScrollablePositionedList.separated(
                   key: Key('mlv-${streamChannel?.channel.cid}-${widget.parentMessage?.id}'),
-                  padding: .symmetric(vertical: context.streamSpacing.sm),
+                  padding: .only(
+                    top: context.streamSpacing.sm,
+                    bottom: max(widget.bottomPadding, context.streamSpacing.sm),
+                  ),
                   keyboardDismissBehavior: widget.config.keyboardDismissBehavior,
                   itemPositionsListener: _itemPositionListener,
                   initialScrollIndex: initialIndex,
@@ -1035,7 +1045,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
         }
 
         return PositionedDirectional(
-          bottom: 16,
+          bottom: max(16, widget.bottomPadding),
           end: 16,
           child: button,
         );
