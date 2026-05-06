@@ -125,6 +125,7 @@ class StreamMessageListView extends StatefulWidget {
     this.onMessageLongPress,
     this.config = const StreamMessageListViewConfiguration(),
     this.builders = const StreamMessageListViewBuilders(),
+    this.topPadding = 0,
     this.bottomPadding = 0,
   });
 
@@ -258,6 +259,12 @@ class StreamMessageListView extends StatefulWidget {
   ///
   /// Defaults to [StreamMessageListViewBuilders] with no overrides.
   final StreamMessageListViewBuilders builders;
+
+  /// Top padding added to the message list scroll view.
+  ///
+  /// Used by the floating app bar layout to keep the first message visible
+  /// below the app bar without requiring a separate [setState] call.
+  final double topPadding;
 
   /// Bottom padding added to the message list scroll view.
   ///
@@ -601,7 +608,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
                 child: ScrollablePositionedList.separated(
                   key: Key('mlv-${streamChannel?.channel.cid}-${widget.parentMessage?.id}'),
                   padding: .only(
-                    top: context.streamSpacing.sm,
+                    top: max(widget.topPadding, context.streamSpacing.sm),
                     bottom: max(widget.bottomPadding, context.streamSpacing.sm),
                   ),
                   keyboardDismissBehavior: widget.config.keyboardDismissBehavior,
@@ -758,7 +765,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
         ),
         if (widget.config.showFloatingDateDivider)
           Positioned(
-            top: context.streamSpacing.sm,
+            top: max(widget.topPadding, context.streamSpacing.sm),
             child: FloatingDateDivider(
               itemCount: itemCount,
               reverse: widget.config.reverse,
@@ -786,7 +793,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
           ),
         if (widget.config.showUnreadIndicator && !_isThreadConversation)
           Positioned(
-            top: context.streamSpacing.sm,
+            top: max(widget.topPadding, context.streamSpacing.sm),
             child: UnreadIndicatorButton(
               onJumpTap: scrollToUnreadDefaultTapAction,
               onDismissTap: _markMessagesAsRead,
