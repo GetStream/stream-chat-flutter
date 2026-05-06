@@ -46,8 +46,9 @@ final appRoutes = [
               builder: (context) {
                 return (parentMessage != null)
                     ? ThreadPage(parent: parentMessage)
-                    : ChannelPage(
+                    : StreamChannelPage(
                         highlightInitialMessage: messageId != null,
+                        isFloating: true,
                       );
               },
             ),

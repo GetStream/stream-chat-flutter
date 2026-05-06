@@ -95,6 +95,7 @@ class StreamMessageComposer extends StatelessWidget {
     TextCapitalization textCapitalization = TextCapitalization.sentences,
     bool autofocus = false,
     bool autoCorrect = true,
+    bool isFloating = false,
   }) : props = .new(
          onMessageSent: onMessageSent,
          preMessageSending: preMessageSending,
@@ -130,6 +131,7 @@ class StreamMessageComposer extends StatelessWidget {
          textCapitalization: textCapitalization,
          autofocus: autofocus,
          autoCorrect: autoCorrect,
+         isFloating: isFloating,
        );
 
   /// Creates a [StreamMessageComposer] from a pre-built [MessageComposerProps].
@@ -190,6 +192,7 @@ class MessageComposerProps {
     this.textCapitalization = TextCapitalization.sentences,
     this.autofocus = false,
     this.autoCorrect = true,
+    this.isFloating = false,
   });
 
   /// Function called after sending the message.
@@ -384,6 +387,8 @@ class MessageComposerProps {
   /// Defaults to true.
   final bool autoCorrect;
 
+  /// Whether the message composer is floating.
+  final bool isFloating;
   /// Returns a copy of this [MessageComposerProps] with the given fields
   /// replaced with new values.
   MessageComposerProps copyWith({
@@ -789,25 +794,30 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     final viewPadding = MediaQuery.paddingOf(context);
 
     return Material(
-      color: context.streamColorScheme.backgroundElevation1,
-      child: AnimatedBuilder(
-        animation: _pickerAnimation,
-        builder: (context, child) {
-          final safeAreaPadding = safeAreaEnabled
-              ? EdgeInsets.lerp(
-                  EdgeInsets.only(
-                    left: viewPadding.left,
-                    top: viewPadding.top,
-                    right: viewPadding.right,
-                    bottom: math.max(viewPadding.bottom, spacing.md),
-                  ),
-                  EdgeInsets.zero,
-                  _pickerAnimation.value,
-                )!
-              : EdgeInsets.zero;
-          return Padding(padding: safeAreaPadding, child: child);
-        },
-        child: Center(heightFactor: 1, child: messageInput),
+      color: Colors.transparent,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: widget.props.isFloating ? null : context.streamColorScheme.backgroundElevation1,
+        ),
+        child: AnimatedBuilder(
+          animation: _pickerAnimation,
+          builder: (context, child) {
+            final safeAreaPadding = safeAreaEnabled
+                ? EdgeInsets.lerp(
+                    EdgeInsets.only(
+                      left: viewPadding.left,
+                      top: viewPadding.top,
+                      right: viewPadding.right,
+                      bottom: math.max(viewPadding.bottom, spacing.md),
+                    ),
+                    EdgeInsets.zero,
+                    _pickerAnimation.value,
+                  )!
+                : EdgeInsets.zero;
+            return Padding(padding: safeAreaPadding, child: child);
+          },
+          child: Center(heightFactor: 1, child: messageInput),
+        ),
       ),
     );
   }
@@ -920,6 +930,7 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
                   textCapitalization: widget.props.textCapitalization,
                   autofocus: widget.props.autofocus,
                   autocorrect: widget.props.autoCorrect,
+                  isFloating: widget.props.isFloating,
                 ),
               ),
             ),
