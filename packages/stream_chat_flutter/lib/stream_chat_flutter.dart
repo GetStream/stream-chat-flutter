@@ -152,6 +152,7 @@ export 'src/channel/channel_header.dart';
 export 'src/channel/channel_info.dart';
 export 'src/channel/channel_list_header.dart';
 export 'src/channel/channel_name.dart';
+export 'src/channel/channel_page.dart';
 export 'src/channel/stream_channel_name.dart';
 export 'src/channel/stream_draft_message_preview_text.dart';
 export 'src/channel/stream_message_preview_text.dart';
