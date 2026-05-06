@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:jiffy/jiffy.dart';
 import 'package:sample_app/widgets/stream_draft_list_tile_theme.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
