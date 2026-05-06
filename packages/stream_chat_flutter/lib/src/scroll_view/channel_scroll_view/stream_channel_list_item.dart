@@ -454,9 +454,6 @@ class _ChannelListDeliveryStatus extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorTheme = context.streamMessageTheme.mergeWithDefaults(context);
-    final colorScheme = context.streamColorScheme;
-
     return BetterStreamBuilder<List<Read>>(
       stream: channel.state?.readStream,
       initialData: channel.state?.read,
@@ -464,38 +461,11 @@ class _ChannelListDeliveryStatus extends StatelessWidget {
         final isRead = data.readsOf(message: message).isNotEmpty;
         final isDelivered = data.deliveriesOf(message: message).isNotEmpty;
 
-        final Widget icon;
-        if (isRead) {
-          icon = Icon(
-            context.streamIcons.checks,
-            size: 16,
-            color: colorTheme.outgoing?.textReadColor ?? colorScheme.accentPrimary,
-          );
-        } else if (isDelivered) {
-          icon = Icon(
-            context.streamIcons.checks,
-            size: 16,
-            color: colorTheme.outgoing?.textTimestampColor ?? colorScheme.textTertiary,
-          );
-        } else if (message.state.isCompleted) {
-          icon = Icon(
-            context.streamIcons.checkmark,
-            size: 16,
-            color: colorTheme.outgoing?.textTimestampColor ?? colorScheme.textTertiary,
-          );
-        } else if (message.state.isOutgoing) {
-          icon = Icon(
-            context.streamIcons.clock,
-            size: 16,
-            color: colorTheme.outgoing?.textTimestampColor ?? colorScheme.textTertiary,
-          );
-        } else {
-          return const Empty();
-        }
-
-        return Padding(
-          padding: const EdgeInsetsDirectional.only(end: 4),
-          child: icon,
+        return StreamSendingIndicator(
+          size: 16,
+          message: message,
+          isMessageRead: isRead,
+          isMessageDelivered: isDelivered,
         );
       },
     );
@@ -627,6 +597,8 @@ class _ChannelLastMessageWithStatusState extends State<_ChannelLastMessageWithSt
       ),
       initialData: (channelState.draft, channelState.messages),
       builder: (context, data) {
+        final spacing = context.streamSpacing;
+
         final (draft, messages) = data;
 
         final config = StreamChatConfiguration.maybeOf(context);
@@ -656,21 +628,22 @@ class _ChannelLastMessageWithStatusState extends State<_ChannelLastMessageWithSt
         final isOwnMessage = currentUser != null && latestLastMessage.user?.id == currentUser.id;
 
         // Show delivery status prefix only for own messages.
-        final Widget deliveryPrefix;
+        Widget? deliveryPrefix;
         if (isOwnMessage) {
-          deliveryPrefix =
-              widget.sendingIndicatorBuilder?.call(context, latestLastMessage) ??
-              _ChannelListDeliveryStatus(
-                channel: widget.channel,
-                message: latestLastMessage,
-              );
-        } else {
-          deliveryPrefix = const Empty();
+          if (widget.sendingIndicatorBuilder case final builder?) {
+            deliveryPrefix = builder(context, latestLastMessage);
+          } else {
+            deliveryPrefix = _ChannelListDeliveryStatus(
+              channel: widget.channel,
+              message: latestLastMessage,
+            );
+          }
         }
 
         return Row(
+          spacing: spacing.xxs,
           children: [
-            if (!latestLastMessage.isDeleted) deliveryPrefix,
+            if (!latestLastMessage.isDeleted) ?deliveryPrefix,
             Flexible(
               child: StreamMessagePreviewText(
                 message: latestLastMessage,

@@ -86,11 +86,10 @@ class StreamQuotedMessageProps {
   final VoidCallback? onTap;
 }
 
-const _kDefaultConstraints = BoxConstraints(minWidth: 272, minHeight: 56);
+const _kDefaultConstraints = BoxConstraints.tightFor(width: 272);
 
 const _kIndicatorWidth = 2.0;
-const _kIndicatorHeight = 36.0;
-const _kTrailingSize = Size(40, 40);
+const _kIndicatorVerticalMargin = 2.0;
 
 /// The default implementation of [StreamQuotedMessage].
 ///
@@ -126,13 +125,45 @@ class DefaultStreamQuotedMessage extends StatelessWidget {
     final effectiveIndicatorColor = theme.indicatorColor ?? defaults.indicatorColor;
     final effectiveBackgroundColor = theme.backgroundColor ?? defaults.backgroundColor;
 
-    final effectiveShape = theme.shape ?? defaults.shape;
+    final effectiveSide = theme.side ?? defaults.side;
+    final effectiveShape = (theme.shape ?? defaults.shape).copyWith(side: effectiveSide);
     final effectiveMargin = theme.margin ?? defaults.margin;
     final effectivePadding = theme.padding ?? defaults.padding;
+    final effectiveThumbnailSide = theme.thumbnailSide ?? defaults.thumbnailSide;
+    final effectiveThumbnailShape = (theme.thumbnailShape ?? defaults.thumbnailShape).copyWith(
+      side: effectiveThumbnailSide,
+    );
+    final effectiveThumbnailSize = theme.thumbnailSize ?? defaults.thumbnailSize;
 
     final canTap = !quotedMessage.isDeleted && props.onTap != null;
     final constraints = props.constraints ?? _kDefaultConstraints;
-    final trailing = _buildTrailing(context, quotedMessage);
+
+    final effectiveTitle = DefaultTextStyle.merge(
+      style: effectiveTitleTextStyle,
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      child: Text(quotedMessage.user?.name ?? ''),
+    );
+
+    final effectiveSubtitle = DefaultTextStyle.merge(
+      style: effectiveSubtitleTextStyle,
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      child: StreamMessagePreviewText(message: quotedMessage),
+    );
+
+    Widget? effectiveThumbnail;
+    if (_buildThumbnail(context, quotedMessage) case final thumbnail?) {
+      effectiveThumbnail = SizedBox.fromSize(
+        size: effectiveThumbnailSize,
+        child: Material(
+          type: MaterialType.transparency,
+          clipBehavior: Clip.hardEdge,
+          shape: effectiveThumbnailShape,
+          child: thumbnail,
+        ),
+      );
+    }
 
     return Padding(
       padding: effectiveMargin,
@@ -146,50 +177,31 @@ class DefaultStreamQuotedMessage extends StatelessWidget {
             onTap: canTap ? props.onTap : null,
             child: Padding(
               padding: effectivePadding,
-              child: Row(
-                spacing: spacing.xs,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Expanded(
-                    child: Row(
-                      spacing: spacing.xs,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Container(
-                          width: _kIndicatorWidth,
-                          height: _kIndicatorHeight,
-                          decoration: BoxDecoration(
-                            color: effectiveIndicatorColor,
-                            borderRadius: BorderRadius.all(radius.max),
-                          ),
-                        ),
-                        Expanded(
-                          child: Column(
-                            spacing: spacing.xxxs,
-                            mainAxisSize: MainAxisSize.min,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              DefaultTextStyle.merge(
-                                maxLines: 1,
-                                style: effectiveTitleTextStyle,
-                                overflow: TextOverflow.ellipsis,
-                                child: Text(quotedMessage.user?.name ?? ''),
-                              ),
-                              DefaultTextStyle.merge(
-                                maxLines: 1,
-                                style: effectiveSubtitleTextStyle,
-                                overflow: TextOverflow.ellipsis,
-                                child: StreamMessagePreviewText(message: quotedMessage),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
+              child: IntrinsicHeight(
+                child: Row(
+                  mainAxisSize: .min,
+                  spacing: spacing.xs,
+                  children: [
+                    VerticalDivider(
+                      width: _kIndicatorWidth,
+                      thickness: _kIndicatorWidth,
+                      indent: _kIndicatorVerticalMargin,
+                      endIndent: _kIndicatorVerticalMargin,
+                      radius: BorderRadius.all(radius.max),
+                      color: effectiveIndicatorColor,
                     ),
-                  ),
-                  ?trailing,
-                ],
+                    Expanded(
+                      child: Column(
+                        mainAxisSize: .min,
+                        spacing: spacing.xxxs,
+                        mainAxisAlignment: .center,
+                        crossAxisAlignment: .start,
+                        children: [effectiveTitle, effectiveSubtitle],
+                      ),
+                    ),
+                    ?effectiveThumbnail,
+                  ],
+                ),
               ),
             ),
           ),
@@ -198,35 +210,18 @@ class DefaultStreamQuotedMessage extends StatelessWidget {
     );
   }
 
-  Widget? _buildTrailing(BuildContext context, Message message) {
+  Widget? _buildThumbnail(BuildContext context, Message message) {
     final attachments = message.attachments;
-    if (attachments.isEmpty) return null;
+    if (attachments.isEmpty || attachments.length > 1) return null;
 
     final attachment = attachments.first;
     final type = attachment.type;
 
-    if (type == AttachmentType.image || type == AttachmentType.video || type == AttachmentType.giphy) {
-      return ClipRRect(
-        borderRadius: .all(context.streamRadius.md),
-        child: SizedBox.fromSize(
-          size: _kTrailingSize,
-          child: Stack(
-            alignment: .center,
-            children: [
-              StreamMediaAttachmentThumbnail(
-                media: attachment,
-                width: _kTrailingSize.width,
-                height: _kTrailingSize.height,
-                fit: BoxFit.cover,
-              ),
-              if (type == AttachmentType.video) const StreamVideoPlayIndicator(size: .sm),
-            ],
-          ),
-        ),
-      );
+    if (type == .image || type == .video || type == .giphy) {
+      return StreamMediaAttachmentThumbnail(media: attachment, fit: .cover);
     }
 
-    if (type == AttachmentType.file) {
+    if (type == .file) {
       // Only show a single file-type icon when every file shares a mime type.
       final mimeType = attachment.mimeType;
       if (mimeType == null) return null;
@@ -277,7 +272,10 @@ class _StreamQuotedMessageDefaults extends StreamQuotedMessageThemeData {
   };
 
   @override
-  ShapeBorder get shape => RoundedSuperellipseBorder(borderRadius: .all(_radius.lg));
+  OutlinedBorder get shape => RoundedSuperellipseBorder(borderRadius: .all(_radius.lg));
+
+  @override
+  BorderSide get side => BorderSide.none;
 
   @override
   EdgeInsetsGeometry get margin => EdgeInsets.symmetric(horizontal: _spacing.xs);
@@ -289,4 +287,10 @@ class _StreamQuotedMessageDefaults extends StreamQuotedMessageThemeData {
     top: _spacing.xs,
     bottom: _spacing.xs,
   );
+
+  @override
+  OutlinedBorder get thumbnailShape => RoundedSuperellipseBorder(borderRadius: .all(_radius.md));
+
+  @override
+  Size get thumbnailSize => const Size.square(40);
 }

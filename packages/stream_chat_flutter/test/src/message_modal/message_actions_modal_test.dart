@@ -149,8 +149,9 @@ void main() {
     Widget buildMessageWidget({bool reverse = false}) {
       return Builder(
         builder: (context) {
-          final messageTheme = context.streamMessageTheme.mergeWithDefaults(context);
-          final messageStyle = reverse ? messageTheme.outgoing! : messageTheme.incoming!;
+          final colorScheme = context.streamColorScheme;
+          final backgroundColor = reverse ? colorScheme.brand.shade100 : colorScheme.backgroundSurface;
+          final textColor = reverse ? colorScheme.brand.shade900 : colorScheme.textPrimary;
 
           return Container(
             padding: const EdgeInsets.symmetric(
@@ -159,11 +160,11 @@ void main() {
             ),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(14),
-              color: messageStyle.backgroundColor,
+              color: backgroundColor,
             ),
             child: Text(
               message.text ?? '',
-              style: TextStyle(color: messageStyle.textColor),
+              style: TextStyle(color: textColor),
             ),
           );
         },

@@ -97,8 +97,12 @@ class StreamQuotedMessageThemeData with _$StreamQuotedMessageThemeData {
     this.indicatorColor,
     this.backgroundColor,
     this.shape,
+    this.side,
     this.margin,
     this.padding,
+    this.thumbnailShape,
+    this.thumbnailSide,
+    this.thumbnailSize,
   });
 
   /// The text style for the quoted user's name.
@@ -129,9 +133,15 @@ class StreamQuotedMessageThemeData with _$StreamQuotedMessageThemeData {
 
   /// Shape of the quoted-message card.
   ///
-  /// If null, defaults to
-  /// `RoundedSuperellipseBorder(borderRadius: BorderRadius.all(radius.lg))`.
-  final ShapeBorder? shape;
+  /// Composed with [side] to draw the card's border. If null, defaults to a
+  /// [RoundedSuperellipseBorder] with radius [StreamRadius.lg].
+  final OutlinedBorder? shape;
+
+  /// Border side drawn around the quoted-message card.
+  ///
+  /// Composed onto [shape] via [OutlinedBorder.copyWith]. If null, defaults to
+  /// [BorderSide.none].
+  final BorderSide? side;
 
   /// Outer margin applied around the quoted-message card.
   ///
@@ -144,6 +154,23 @@ class StreamQuotedMessageThemeData with _$StreamQuotedMessageThemeData {
   /// If null, defaults to `EdgeInsetsDirectional.only(start: spacing.sm,
   /// end: spacing.xs, top: spacing.xs, bottom: spacing.xs)`.
   final EdgeInsetsGeometry? padding;
+
+  /// Outer shape of the trailing thumbnail.
+  ///
+  /// Composed with [thumbnailSide] to draw the thumbnail's border. If null,
+  /// defaults to a [RoundedSuperellipseBorder] with radius [StreamRadius.md].
+  final OutlinedBorder? thumbnailShape;
+
+  /// Border side drawn around the trailing thumbnail.
+  ///
+  /// Composed onto [thumbnailShape] via [OutlinedBorder.copyWith]. If null,
+  /// defaults to [BorderSide.none].
+  final BorderSide? thumbnailSide;
+
+  /// Dimensions of the trailing thumbnail.
+  ///
+  /// If null, defaults to `Size.square(40)`.
+  final Size? thumbnailSize;
 
   /// Linearly interpolate between two [StreamQuotedMessageThemeData] objects.
   static StreamQuotedMessageThemeData? lerp(

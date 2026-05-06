@@ -179,7 +179,6 @@ export 'src/misc/back_button.dart';
 export 'src/misc/connection_status_builder.dart';
 export 'src/misc/date_divider.dart';
 export 'src/misc/info_tile.dart';
-export 'src/misc/markdown_message.dart';
 export 'src/misc/option_list_tile.dart';
 export 'src/misc/reaction_icon_resolver.dart';
 

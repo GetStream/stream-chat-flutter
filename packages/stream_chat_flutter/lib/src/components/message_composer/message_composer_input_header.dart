@@ -1,8 +1,7 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-import 'package:stream_core_flutter/stream_core_flutter.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart' as core;
 
 /// A widget that shows the input header of the message composer.
 /// Uses the factory to show custom components or used the default implementation.
@@ -104,7 +103,7 @@ class _DefaultStreamMessageComposerInputHeader extends StatelessWidget {
                     final attachment = voiceRecordings.elementAtOrNull(index);
                     if (attachment == null) return child;
 
-                    return StreamMessageComposerAttachmentContainer(
+                    return core.StreamMessageComposerAttachment(
                       onRemovePressed: () => _onAttachmentRemovePressed(attachment),
                       child: child,
                     );
@@ -119,11 +118,14 @@ class _DefaultStreamMessageComposerInputHeader extends StatelessWidget {
             if (ogAttachment != null)
               Padding(
                 padding: contentPadding,
-                child: MessageComposerLinkPreviewAttachment(
-                  title: ogAttachment.title,
-                  subtitle: ogAttachment.text,
-                  image: ogAttachment.imageUrl != null ? CachedNetworkImageProvider(ogAttachment.imageUrl!) : null,
-                  url: ogAttachment.titleLink,
+                child: core.StreamMessageComposerLinkPreviewAttachment(
+                  title: ogAttachment.title != null ? Text(ogAttachment.title!) : null,
+                  subtitle: ogAttachment.text != null ? Text(ogAttachment.text!) : null,
+                  caption: ogAttachment.titleLink != null ? Text(ogAttachment.titleLink!) : null,
+                  thumbnail: switch (ogAttachment.imageUrl) {
+                    final imageUrl? when imageUrl.isNotEmpty => core.StreamNetworkImage(imageUrl, fit: .cover),
+                    _ => null,
+                  },
                   onRemovePressed: () {
                     controller.clearOGAttachment();
                     props.focusNode?.unfocus();
@@ -162,11 +164,10 @@ class _EditMessageInHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MessageComposerReplyAttachment(
+    return core.StreamMessageComposerEditMessageAttachment(
       title: Text(context.translations.editMessageLabel),
       subtitle: StreamMessagePreviewText(message: message),
       onRemovePressed: onRemovePressed,
-      style: ReplyStyle.outgoing,
     );
   }
 }
@@ -182,51 +183,31 @@ class _QuotedMessageInHeader extends StatelessWidget {
   final VoidCallback onRemovePressed;
   final String? currentUserId;
 
-  ImageProvider<Object>? _imageProvider(Message message) {
+  Widget? _buildThumbnail(BuildContext context, Message message) {
     final attachments = message.attachments;
     if (attachments.isEmpty || attachments.length > 1) return null;
 
     final attachment = attachments.first;
-    if (attachment.type == AttachmentType.file) return null;
-    final imageUrl = attachment.imageUrl ?? attachment.thumbUrl ?? attachment.assetUrl;
+    final type = attachment.type;
 
-    if (imageUrl == null) return null;
-    return CachedNetworkImageProvider(imageUrl);
-  }
+    if (type == .image || type == .video || type == .giphy) {
+      return StreamMediaAttachmentThumbnail(media: attachment, fit: .cover);
+    }
 
-  String? _mimeTypeAttachment(Message message) {
-    final attachments = message.attachments;
-    if (attachments.isEmpty) return null;
-    final attachment = attachments.first;
+    if (type == .file) {
+      // Only show a single file-type icon when every file shares a mime type.
+      final mimeType = attachment.mimeType;
+      if (mimeType == null) return null;
+      if (attachments.any((it) => it.mimeType != mimeType)) return null;
+      return StreamFileTypeIcon.fromMimeType(mimeType: mimeType, size: .lg);
+    }
 
-    if (attachment.type != AttachmentType.file) return null;
-    if (attachments.any((it) => it.mimeType != attachment.mimeType)) return null;
-
-    return attachment.mimeType;
+    return null;
   }
 
   @override
   Widget build(BuildContext context) {
     final isIncoming = currentUserId != quotedMessage.user?.id;
-
-    final image = _imageProvider(quotedMessage);
-    final mimeType = _mimeTypeAttachment(quotedMessage);
-
-    Widget? trailing;
-    if (image != null) {
-      Container(
-        width: 40,
-        height: 40,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.all(context.streamRadius.md),
-          image: DecorationImage(image: image, fit: BoxFit.cover),
-        ),
-      );
-    } else if (mimeType != null) {
-      trailing = StreamFileTypeIcon.fromMimeType(mimeType: mimeType);
-    } else {
-      trailing = null;
-    }
 
     final translations = context.translations;
     final title = switch (isIncoming) {
@@ -234,12 +215,12 @@ class _QuotedMessageInHeader extends StatelessWidget {
       false => translations.youText,
     };
 
-    return MessageComposerReplyAttachment(
+    return core.StreamMessageComposerReplyAttachment(
       title: Text(title),
       subtitle: StreamMessagePreviewText(message: quotedMessage),
       onRemovePressed: onRemovePressed,
-      trailing: trailing,
-      style: isIncoming ? .incoming : .outgoing,
+      thumbnail: _buildThumbnail(context, quotedMessage),
+      direction: isIncoming ? .incoming : .outgoing,
     );
   }
 }
