@@ -104,10 +104,18 @@ class _StreamChannelPageState extends State<StreamChannelPage> {
     );
 
     if (widget.isFloating) {
+      final floatingAppBar = StreamChannelHeader(
+        showTypingIndicator: false,
+        onBackPressed: widget.onBackPressed,
+        onImageTap: widget.onHeaderImageTap,
+        backgroundColor: Colors.transparent,
+      );
+
       return Scaffold(
         backgroundColor: colorTheme.appBg,
-        appBar: appBar,
+        appBar: floatingAppBar,
         extendBody: true,
+        extendBodyBehindAppBar: true,
         bottomNavigationBar: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -121,7 +129,7 @@ class _StreamChannelPageState extends State<StreamChannelPage> {
         ),
         body: Builder(
           builder: (context) {
-            final bottomInset = MediaQuery.of(context).padding.bottom;
+            final insets = MediaQuery.of(context).padding;
             return StreamMessageListView(
               initialScrollIndex: widget.initialScrollIndex,
               initialAlignment: widget.initialAlignment,
@@ -132,7 +140,8 @@ class _StreamChannelPageState extends State<StreamChannelPage> {
               threadBuilder: (_, parentMessage) {
                 return StreamThreadPage(parent: parentMessage!);
               },
-              bottomPadding: bottomInset,
+              topPadding: insets.top,
+              bottomPadding: insets.bottom,
             );
           },
         ),
