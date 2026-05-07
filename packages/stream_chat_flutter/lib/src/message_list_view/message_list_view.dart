@@ -1227,7 +1227,6 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
         if (showUnreadCount && widget.showUnreadCountOnScrollToBottom) {
           button = StreamBadgeNotification(
             label: '${unreadCount > 99 ? '99+' : unreadCount}',
-            size: StreamBadgeNotificationSize.sm,
             child: button,
           );
         }

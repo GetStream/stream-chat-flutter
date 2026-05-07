@@ -112,7 +112,6 @@ class StreamUnreadIndicator extends StatelessWidget {
         final effectiveOffset = offset ?? const Offset(8, -6).directional(textDirection);
 
         return StreamBadgeNotification(
-          size: StreamBadgeNotificationSize.xs,
           label: switch (unreadCount) {
             > 99 => '99+',
             _ => '$unreadCount',
