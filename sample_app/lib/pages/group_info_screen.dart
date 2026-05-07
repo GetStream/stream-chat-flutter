@@ -129,18 +129,21 @@ class _MediaSection extends StatelessWidget {
     return _Section(
       children: [
         _Tile(
-          icon: icons.pin,
-          label: 'Pinned Messages',
+          icon: Icon(icons.pin),
+          label: const Text('Pinned Messages'),
+          trailing: Icon(icons.chevronRight),
           onTap: () => _push(context, const PinnedMessagesScreen()),
         ),
         _Tile(
-          icon: icons.image,
-          label: 'Photos & Videos',
+          icon: Icon(icons.image),
+          label: const Text('Photos & Videos'),
+          trailing: Icon(icons.chevronRight),
           onTap: () => _push(context, const ChannelMediaDisplayScreen()),
         ),
         _Tile(
-          icon: icons.folder,
-          label: 'Files',
+          icon: Icon(icons.folder),
+          label: const Text('Files'),
+          trailing: Icon(icons.chevronRight),
           onTap: () => _push(context, const ChannelFileDisplayScreen()),
         ),
       ],
@@ -270,9 +273,9 @@ class _MembersHeader extends StatelessWidget {
   }
 }
 
-/// Card grouping the conversation-level actions — mute and leave. Group
-/// channels intentionally don't expose a destructive delete here; that
-/// action lives on the channel-list long-press sheet.
+/// Card grouping the conversation-level actions — mute, leave, and (for
+/// admins) delete. Mirrors the destructive actions exposed on the
+/// channel-list long-press sheet so both surfaces stay in sync.
 class _ActionsSection extends StatelessWidget {
   const _ActionsSection();
 
@@ -287,8 +290,8 @@ class _ActionsSection extends StatelessWidget {
           stream: channel.isMutedStream,
           initialData: channel.isMuted,
           builder: (context, isMuted) => _Tile(
-            icon: isMuted ? icons.audio : icons.mute,
-            label: isMuted ? 'Unmute Group' : 'Mute Group',
+            icon: Icon(isMuted ? icons.audio : icons.mute),
+            label: Text(isMuted ? 'Unmute Group' : 'Mute Group'),
             trailing: StreamSwitch(
               value: isMuted,
               onChanged: (_) {
@@ -303,10 +306,17 @@ class _ActionsSection extends StatelessWidget {
         ),
         if (channel.canLeaveChannel)
           _Tile(
-            icon: icons.leave,
-            label: 'Leave Group',
+            icon: Icon(icons.leave),
+            label: const Text('Leave Group'),
             destructive: true,
             onTap: () => _confirmLeave(context),
+          ),
+        if (channel.canDeleteChannel)
+          _Tile(
+            icon: Icon(icons.delete),
+            label: const Text('Delete Group'),
+            destructive: true,
+            onTap: () => _confirmDelete(context),
           ),
       ],
     );
@@ -329,6 +339,25 @@ class _ActionsSection extends StatelessWidget {
     await channel.removeMembers([currentUserId]);
     // Pop every screen until we land on the channel list — going back to
     // the channel page would crash since we're no longer a member.
+    navigator.popUntil((route) => route.isFirst);
+  }
+
+  Future<void> _confirmDelete(BuildContext context) async {
+    final navigator = Navigator.of(context);
+    final channel = StreamChannel.of(context).channel;
+
+    final confirmed = await _showConfirmationDialog(
+      context: context,
+      title: 'Delete group',
+      content: 'Are you sure you want to delete this group?',
+      confirmLabel: 'Delete',
+    );
+    if (confirmed != true) return;
+
+    await channel.delete();
+    // Pop every screen until we land on the channel list — going back to
+    // the channel page would crash trying to read state from the now
+    // deleted channel.
     navigator.popUntil((route) => route.isFirst);
   }
 }
@@ -360,11 +389,12 @@ class _Section extends StatelessWidget {
   }
 }
 
-/// A single row inside a [_Section] — leading icon, label, optional
-/// trailing widget. Defaults the trailing to a chevron when [onTap] is
-/// provided and no explicit [trailing] is passed. [destructive] paints
-/// both the icon and the label with [StreamColorScheme.accentError] via a
-/// local [StreamListTileTheme] override.
+/// A single row inside a [_Section] — leading icon, label, and an optional
+/// [trailing] widget. Navigation rows should pass an explicit chevron;
+/// action rows that confirm or toggle in place pass [trailing] only when
+/// they need a control (e.g. a switch). Setting [destructive] paints both
+/// the icon and the label with [StreamColorScheme.accentError] via a local
+/// [StreamListTileTheme] override.
 class _Tile extends StatelessWidget {
   const _Tile({
     required this.icon,
@@ -374,21 +404,16 @@ class _Tile extends StatelessWidget {
     this.destructive = false,
   });
 
-  final IconData icon;
-  final String label;
+  final Widget icon;
+  final Widget label;
   final VoidCallback? onTap;
   final Widget? trailing;
   final bool destructive;
 
   @override
   Widget build(BuildContext context) {
-    final icons = context.streamIcons;
     final spacing = context.streamSpacing;
-
     final colorScheme = context.streamColorScheme;
-
-    final effectiveTrailing =
-        trailing ?? (onTap != null ? Icon(icons.chevronRight, color: colorScheme.textSecondary) : null);
 
     return StreamListTileTheme(
       data: StreamListTileThemeData(
@@ -398,9 +423,9 @@ class _Tile extends StatelessWidget {
         contentPadding: .symmetric(horizontal: spacing.sm),
       ),
       child: StreamListTile(
-        leading: Icon(icon),
-        trailing: effectiveTrailing,
-        title: Text(label),
+        leading: icon,
+        trailing: trailing,
+        title: label,
         onTap: onTap,
       ),
     );

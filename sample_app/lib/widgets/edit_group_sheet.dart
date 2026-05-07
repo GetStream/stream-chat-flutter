@@ -474,18 +474,18 @@ class _AvatarPickerSheet extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   _PickerTile(
-                    icon: icons.camera,
-                    label: 'Take Photo',
+                    icon: Icon(icons.camera),
+                    label: const Text('Take Photo'),
                     onTap: () => emit(_AvatarPickerAction.takePhoto),
                   ),
                   _PickerTile(
-                    icon: icons.image,
-                    label: 'Choose Image',
+                    icon: Icon(icons.image),
+                    label: const Text('Choose Image'),
                     onTap: () => emit(_AvatarPickerAction.chooseImage),
                   ),
                   _PickerTile(
-                    icon: icons.delete,
-                    label: 'Reset Picture',
+                    icon: Icon(icons.delete),
+                    label: const Text('Reset Picture'),
                     destructive: true,
                     onTap: () => emit(_AvatarPickerAction.resetPicture),
                   ),
@@ -512,8 +512,8 @@ class _PickerTile extends StatelessWidget {
     this.destructive = false,
   });
 
-  final IconData icon;
-  final String label;
+  final Widget icon;
+  final Widget label;
   final VoidCallback onTap;
   final bool destructive;
 
@@ -530,8 +530,8 @@ class _PickerTile extends StatelessWidget {
         contentPadding: .symmetric(horizontal: spacing.sm),
       ),
       child: StreamListTile(
-        leading: Icon(icon),
-        title: Text(label),
+        leading: icon,
+        title: label,
         onTap: onTap,
       ),
     );
