@@ -55,6 +55,7 @@
 
 🐞 Fixed
 
+- Fixed `StreamCommandAutocompleteOptions` and `StreamMentionAutocompleteOptions` expanding to half the screen height — both now cap at a fixed max height (208px / 176px) and scroll internally so the list can't dominate the screen or overlap the header.
 - Fixed voice recording duration label jumping by ~1 second when playback starts. The recording timer tracks duration in whole seconds, so the stored value can be up to 1 second longer than the actual audio file. The player now resolves this by keeping the larger of the stored and player-reported durations, matching the strategy used by the iOS SDK.
 - Fixed voice message time label displaying elapsed time instead of remaining time.
 - Fixed RTL layout for the scroll-to-bottom button, swipe-to-reply icon, and voice recording lock button.

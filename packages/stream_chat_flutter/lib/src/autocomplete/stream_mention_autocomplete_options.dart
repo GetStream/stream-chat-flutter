@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+// Caps the card height so a long mention list scrolls internally
+// instead of pushing the composer / header off the screen.
+const _kMaxHeight = 176.0;
+
 /// {@template user_mentions_overlay}
 /// Overlay for displaying users that can be mentioned.
 /// {@endtemplate}
@@ -93,6 +97,7 @@ class _StreamMentionAutocompleteOptionsState extends State<StreamMentionAutocomp
 
         return StreamAutocompleteOptions<User>(
           options: users,
+          maxHeight: _kMaxHeight,
           elevation: elevation,
           margin: margin,
           shape: shape,
