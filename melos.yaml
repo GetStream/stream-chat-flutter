@@ -19,6 +19,9 @@ categories:
 
 command:
   bootstrap:
+    # Run `pub get` sequentially to avoid races on the shared git-dep cache.
+    runPubGetInParallel: false
+
     # Dart and Flutter environment used in the project.
     environment:
       sdk: ^3.10.0
