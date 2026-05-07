@@ -78,6 +78,8 @@
 - Fixed `PollAddCommentDialog` and `PollSuggestOptionDialog` accepting whitespace-only or unchanged submissions; the confirm action now disables when the trimmed text is empty or matches the initial value.
 - Fixed `StreamPhotoGalleryTile` using a hand-rolled icon as its loading placeholder and silently rendering nothing on decode failure. Now uses the shared `StreamImageLoadingPlaceholder` while loading and `StreamImageErrorPlaceholder` if the thumbnail fails to load.
 - Fixed poll, attachment-action, and message-action dialog buttons rendering their labels in uppercase (e.g. `CANCEL`, `SEND`, `FLAG`, `DELETE`); they now use the localized labels as-is so they match the rest of the system.
+- Fixed tapping a quoted parent message inside a thread doing nothing (or kicking back to the channel). The thread message list now resolves the parent slot directly and scrolls/highlights it instead of falling through to `loadChannelAtMessage`.
+- Fixed the jump-to-message highlight starting before the scroll settled, which made the fade barely visible (or invisible if the target hadn't been mounted yet). The message list now awaits the scroll, then plays a 1s hold + 1s ease-out fade — closer to the highlight feel in Slack's permalink jump.
 
 ## 10.0.0-beta.13
 
