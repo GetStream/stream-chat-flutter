@@ -87,13 +87,8 @@ void main() {
         ),
       );
 
-      // Find the add button
-      final addButton = find.addOptionButton();
-      expect(addButton, findsOneWidget);
-
-      // The button should be disabled since we're at max options
-      final button = tester.widget<StreamButton>(addButton);
-      expect(button.props.onPressed, isNull);
+      // The add button should be hidden since we're at max options.
+      expect(find.addOptionButton(), findsNothing);
     });
 
     testWidgets('should respect both min and max options', (tester) async {
@@ -129,10 +124,8 @@ void main() {
       // Should now have 4 options (max reached)
       expect(find.byType(TextField), findsNWidgets(4));
 
-      // Add button should now be disabled since we reached max
-      final addButton = find.addOptionButton();
-      final button = tester.widget<StreamButton>(addButton);
-      expect(button.props.onPressed, isNull);
+      // Add button should now be hidden since we reached max.
+      expect(find.addOptionButton(), findsNothing);
     });
 
     testWidgets(
@@ -188,7 +181,7 @@ void main() {
 
   group('Empty Options Prevention', () {
     testWidgets(
-      'should disable add button when empty option exists',
+      'should hide add button when empty option exists',
       (tester) async {
         await tester.pumpWidget(
           _wrapWithMaterialApp(
@@ -203,18 +196,13 @@ void main() {
           ),
         );
 
-        // Find the add button
-        final addButton = find.addOptionButton();
-        expect(addButton, findsOneWidget);
-
-        // The button should be disabled since there's already an empty option
-        final button = tester.widget<StreamButton>(addButton);
-        expect(button.props.onPressed, isNull);
+        // The button should be hidden since there's already an empty option.
+        expect(find.addOptionButton(), findsNothing);
       },
     );
 
     testWidgets(
-      'should enable add button when no empty options exist',
+      'should show add button when no empty options exist',
       (tester) async {
         await tester.pumpWidget(
           _wrapWithMaterialApp(
@@ -228,18 +216,16 @@ void main() {
           ),
         );
 
-        // Find the add button
+        // The button should be visible since no empty options exist.
         final addButton = find.addOptionButton();
         expect(addButton, findsOneWidget);
-
-        // The button should be enabled since no empty options exist
         final button = tester.widget<StreamButton>(addButton);
         expect(button.props.onPressed, isNotNull);
       },
     );
 
     testWidgets(
-      'should re-enable add button after filling empty option',
+      'should reveal add button after filling empty option',
       (tester) async {
         await tester.pumpWidget(
           _wrapWithMaterialApp(
@@ -253,19 +239,18 @@ void main() {
           ),
         );
 
-        // Initially, add button should be disabled
-        var addButton = find.addOptionButton();
-        var button = tester.widget<StreamButton>(addButton);
-        expect(button.props.onPressed, isNull);
+        // Initially, the add button should be hidden.
+        expect(find.addOptionButton(), findsNothing);
 
-        // Fill the empty option
+        // Fill the empty option.
         final textFields = find.byType(TextField);
         await tester.enterText(textFields.last, 'Option 2');
         await tester.pumpAndSettle();
 
-        // Now add button should be enabled
-        addButton = find.addOptionButton();
-        button = tester.widget<StreamButton>(addButton);
+        // The add button should now be visible and enabled.
+        final addButton = find.addOptionButton();
+        expect(addButton, findsOneWidget);
+        final button = tester.widget<StreamButton>(addButton);
         expect(button.props.onPressed, isNotNull);
       },
     );
