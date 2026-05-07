@@ -124,42 +124,37 @@ class _EditGroupSheetState extends State<EditGroupSheet> {
     final viewInsets = MediaQuery.viewInsetsOf(context);
 
     return SafeArea(
-      top: false,
       child: Column(
-        // Shrink-wrap to content height — the sheet sits as high as it
-        // needs to be (header + avatar + input + keyboard inset) and no
-        // higher. With Stack(StackFit.loose) upstream the StreamSheet
-        // honours the min size and rests just above the keyboard.
-        mainAxisSize: MainAxisSize.min,
         children: [
           StreamSheetHeader(
             title: const Text('Edit'),
-            // Default `.medium` size — matches the auto-implied close
-            // button on the leading side so the header stays balanced.
             trailing: StreamButton.icon(
               icon: Icon(context.streamIcons.checkmark),
               type: .solid,
               onPressed: _canSave ? _save : null,
             ),
           ),
-          Padding(
-            padding: EdgeInsets.all(spacing.md) + viewInsets,
-            child: Column(
-              children: [
-                _AvatarPreview(
-                  pickedPath: _pickedPath,
-                  imageOverride: _imageOverride,
-                  imageRemoved: _imageRemoved,
-                  uploadProgress: _uploadProgress,
-                  onTap: _openAvatarPicker,
-                ),
-                SizedBox(height: spacing.xxl),
-                StreamTextInput(
-                  controller: _nameController,
-                  autofocus: true,
-                  hintText: 'Group name',
-                ),
-              ],
+          Expanded(
+            child: Padding(
+              padding: EdgeInsets.all(spacing.md) + viewInsets,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _AvatarPreview(
+                    pickedPath: _pickedPath,
+                    imageOverride: _imageOverride,
+                    imageRemoved: _imageRemoved,
+                    uploadProgress: _uploadProgress,
+                    onTap: _openAvatarPicker,
+                  ),
+                  SizedBox(height: spacing.xxl),
+                  StreamTextInput(
+                    controller: _nameController,
+                    autofocus: true,
+                    hintText: 'Group name',
+                  ),
+                ],
+              ),
             ),
           ),
         ],
