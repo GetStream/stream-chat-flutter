@@ -1,6 +1,5 @@
 // ignore_for_file: deprecated_member_use, avoid_redundant_argument_values
 
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sample_app/config/sample_app_config.dart';
@@ -68,26 +67,13 @@ class _ChannelPageState extends State<ChannelPage> {
       backgroundColor: colorTheme.appBg,
       appBar: StreamChannelHeader(
         onChannelAvatarPressed: (channel) {
-          final router = GoRouter.of(context);
+          final isOneToOne = channel.isOneToOne;
+          final currentUserId = StreamChat.of(context).currentUser?.id;
 
-          if (channel.memberCount == 2 && channel.isDistinct) {
-            final currentUser = StreamChat.of(context).currentUser;
-            final otherUser = channel.state!.members.firstWhereOrNull(
-              (element) => element.user!.id != currentUser!.id,
-            );
-            if (otherUser != null) {
-              router.pushNamed(
-                Routes.CHAT_INFO_SCREEN.name,
-                pathParameters: Routes.CHAT_INFO_SCREEN.params(channel),
-                extra: otherUser.user,
-              );
-            }
-          } else {
-            router.pushNamed(
-              Routes.GROUP_INFO_SCREEN.name,
-              pathParameters: Routes.GROUP_INFO_SCREEN.params(channel),
-            );
-          }
+          final channelMembers = channel.state?.members ?? [];
+          final otherUser = isOneToOne ? channelMembers.firstWhere((m) => m.userId != currentUserId).user : null;
+
+          _pushChannelInfo(context, channel, otherUser);
         },
       ),
       body: Column(
@@ -200,4 +186,25 @@ class _ChannelPageState extends State<ChannelPage> {
 
     return channel.sendStaticLocation(location: result.coordinates);
   }
+}
+
+// Pushes the chat / group info screen depending on whether [user] was
+// resolved. 1-1 channels pass the other member here (forwarded as `extra`
+// to the chat-info route); group channels pass `null` and route to the
+// group info screen.
+Future<void> _pushChannelInfo(BuildContext context, Channel channel, User? user) {
+  final router = GoRouter.of(context);
+
+  if (user != null) {
+    return router.pushNamed(
+      Routes.CHAT_INFO_SCREEN.name,
+      pathParameters: Routes.CHAT_INFO_SCREEN.params(channel),
+      extra: user,
+    );
+  }
+
+  return router.pushNamed(
+    Routes.GROUP_INFO_SCREEN.name,
+    pathParameters: Routes.GROUP_INFO_SCREEN.params(channel),
+  );
 }

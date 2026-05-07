@@ -1,25 +1,31 @@
 import 'package:flutter/material.dart';
+import 'package:sample_app/utils/client_extensions.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template channelDetailAction}
 /// A sealed class that represents the actions a user can pick from a
 /// [ChannelDetailSheet].
 ///
-/// Mirrors the dispatch pattern used by `StreamMessageWidget` and
-/// `MessageAction`: the sheet pops itself with one of these values when an
-/// action is tapped, and callers switch on the returned action to decide
-/// what to do.
+/// The sheet pops itself with one of these values when an action is tapped,
+/// and callers switch on the returned action to decide what to do.
 /// {@endtemplate}
 sealed class ChannelDetailAction {
   /// {@macro channelDetailAction}
   const ChannelDetailAction();
 }
 
-/// User tapped _View Info_ — caller is expected to navigate to the chat or
-/// group info screen.
+/// User tapped _View Info_ — caller is expected to push the chat or group
+/// info screen depending on whether [user] is set.
+///
+/// On 1-1 channels, [user] carries the other member; the caller pushes
+/// `ChatInfoScreen` for that user. On group channels, [user] is `null` and
+/// the caller pushes `GroupInfoScreen`.
 final class ViewChannelInfo extends ChannelDetailAction {
   /// {@macro channelDetailAction}
-  const ViewChannelInfo();
+  const ViewChannelInfo({this.user});
+
+  /// The other member of the 1-1 channel, or `null` for group channels.
+  final User? user;
 }
 
 /// User tapped _Pin Chat_ — caller is expected to invoke [Channel.pin].
@@ -32,6 +38,40 @@ final class PinChannel extends ChannelDetailAction {
 final class UnpinChannel extends ChannelDetailAction {
   /// {@macro channelDetailAction}
   const UnpinChannel();
+}
+
+/// User tapped _Mute User_ — caller is expected to invoke
+/// [StreamChatClient.muteUser] for [user].
+final class MuteChannelMember extends ChannelDetailAction {
+  /// {@macro channelDetailAction}
+  const MuteChannelMember({required this.user});
+
+  /// The mute target — the other member of the 1-1 channel.
+  final User user;
+}
+
+/// User tapped _Unmute User_ — caller is expected to invoke
+/// [StreamChatClient.unmuteUser] for [user].
+final class UnmuteChannelMember extends ChannelDetailAction {
+  /// {@macro channelDetailAction}
+  const UnmuteChannelMember({required this.user});
+
+  /// The unmute target — the other member of the 1-1 channel.
+  final User user;
+}
+
+/// User tapped _Block User_ — caller is expected to invoke
+/// [StreamChatClient.blockUser] for [user].
+///
+/// Block is one-way from this sheet: blocked users' channels are filtered out
+/// of the channel list, so the sheet can never re-open for an already-blocked
+/// user. Unblock lives on a different surface (e.g. blocked-users settings).
+final class BlockChannelMember extends ChannelDetailAction {
+  /// {@macro channelDetailAction}
+  const BlockChannelMember({required this.user});
+
+  /// The block target — the other member of the 1-1 channel.
+  final User user;
 }
 
 /// User tapped _Leave Group_ — caller is expected to confirm and remove the
@@ -82,6 +122,7 @@ Future<ChannelDetailAction?> showChannelDetailSheet({
 ///  * A header with the channel avatar, name (with mute / pin state
 ///    indicators), and member count.
 ///  * A list of channel actions — _View Info_, _Pin / Unpin Chat_,
+///    _Mute / Unmute User_, _Block / Unblock User_ (1-1 only),
 ///    _Leave Group_, _Delete Group / Conversation_.
 ///
 /// Tapping an action pops the route with the corresponding
@@ -102,18 +143,23 @@ class ChannelDetailSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final spacing = context.streamSpacing;
     final icons = context.streamIcons;
+    final spacing = context.streamSpacing;
 
-    final currentUserId = StreamChat.of(context).currentUser?.id;
-    final isOneToOne = channel.isDistinct && channel.memberCount == 2;
-    final canLeave = currentUserId != null && !isOneToOne && channel.canLeaveChannel;
+    final client = StreamChat.of(context).client;
+    final currentUserId = client.state.currentUser?.id;
+
+    final isOneToOne = channel.isOneToOne;
+    final canLeave = !isOneToOne && channel.canLeaveChannel;
     final canDelete = channel.canDeleteChannel;
+
+    // For 1-1 channels, mute/block actions target the other member.
+    final channelMembers = channel.state?.members ?? [];
+    final otherUser = isOneToOne ? channelMembers.firstWhere((m) => m.userId != currentUserId).user : null;
 
     void emit(ChannelDetailAction action) => Navigator.of(context).pop(action);
 
     return SafeArea(
-      top: false,
       child: IconTheme.merge(
         data: const IconThemeData(size: 20),
         child: Column(
@@ -131,7 +177,7 @@ class ChannelDetailSheet extends StatelessWidget {
                   _ChannelDetailAction(
                     icon: icons.info,
                     label: 'View Info',
-                    onTap: () => emit(const ViewChannelInfo()),
+                    onTap: () => emit(ViewChannelInfo(user: otherUser)),
                   ),
                   BetterStreamBuilder<bool>(
                     stream: channel.isPinnedStream,
@@ -139,11 +185,27 @@ class ChannelDetailSheet extends StatelessWidget {
                     builder: (context, isPinned) => _ChannelDetailAction(
                       icon: isPinned ? icons.unpin : icons.pin,
                       label: isPinned ? 'Unpin Chat' : 'Pin Chat',
-                      onTap: () => emit(
-                        isPinned ? const UnpinChannel() : const PinChannel(),
-                      ),
+                      onTap: () => emit(isPinned ? const UnpinChannel() : const PinChannel()),
                     ),
                   ),
+                  if (otherUser != null) ...[
+                    BetterStreamBuilder<bool>(
+                      stream: client.userMutedStream(otherUser.id),
+                      initialData: client.isUserMuted(otherUser.id),
+                      builder: (context, isMuted) => _ChannelDetailAction(
+                        icon: isMuted ? icons.audio : icons.mute,
+                        label: isMuted ? 'Unmute User' : 'Mute User',
+                        onTap: () => emit(
+                          isMuted ? UnmuteChannelMember(user: otherUser) : MuteChannelMember(user: otherUser),
+                        ),
+                      ),
+                    ),
+                    _ChannelDetailAction(
+                      icon: icons.noSign,
+                      label: 'Block User',
+                      onTap: () => emit(BlockChannelMember(user: otherUser)),
+                    ),
+                  ],
                   if (canLeave)
                     _ChannelDetailAction(
                       icon: icons.leave,
@@ -154,7 +216,7 @@ class ChannelDetailSheet extends StatelessWidget {
                   if (canDelete)
                     _ChannelDetailAction(
                       icon: icons.delete,
-                      label: isOneToOne ? 'Delete Conversation' : 'Delete Group',
+                      label: isOneToOne ? 'Delete Chat' : 'Delete Group',
                       destructive: true,
                       onTap: () => emit(const DeleteChannel()),
                     ),

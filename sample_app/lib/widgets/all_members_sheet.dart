@@ -2,6 +2,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sample_app/routes/routes.dart';
+import 'package:sample_app/utils/client_extensions.dart';
 import 'package:sample_app/widgets/add_members_sheet.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -46,46 +47,49 @@ Future<ContactDetailAction?> showContactDetailSheet({
 
 /// Opens [showContactDetailSheet] and dispatches the action the user picks.
 ///
-/// Mirrors the dispatch pattern used by `StreamMessageWidget._onActionTap`:
-/// callers don't have to know what each action means — they just plug this
+/// Callers don't have to know what each action means — they just plug this
 /// into a member-row's `onTap`.
 Future<void> openContactDetail(BuildContext context, User user) async {
   final action = await showContactDetailSheet(context: context, user: user);
   if (action == null || !context.mounted) return;
-  await _onContactDetailAction(context, user, action);
+  await _onContactDetailAction(context, action);
 }
 
 /// {@template contactDetailAction}
 /// A sealed class representing the actions a user can pick from a
-/// [ContactDetailSheet].
+/// [ContactDetailSheet]. Each action carries the [user] it targets so the
+/// dispatcher has everything it needs without re-deriving context.
 /// {@endtemplate}
 sealed class ContactDetailAction {
   /// {@macro contactDetailAction}
-  const ContactDetailAction();
+  const ContactDetailAction({required this.user});
+
+  /// The user this action targets.
+  final User user;
 }
 
 /// User tapped _Send Direct Message_.
 final class SendDirectMessage extends ContactDetailAction {
   /// {@macro contactDetailAction}
-  const SendDirectMessage();
+  const SendDirectMessage({required super.user});
 }
 
 /// User tapped _Mute User_.
 final class MuteUser extends ContactDetailAction {
   /// {@macro contactDetailAction}
-  const MuteUser();
+  const MuteUser({required super.user});
 }
 
 /// User tapped _Unmute User_.
 final class UnmuteUser extends ContactDetailAction {
   /// {@macro contactDetailAction}
-  const UnmuteUser();
+  const UnmuteUser({required super.user});
 }
 
 /// User tapped _Block User_.
 final class BlockUser extends ContactDetailAction {
   /// {@macro contactDetailAction}
-  const BlockUser();
+  const BlockUser({required super.user});
 }
 
 // ---------------------------------------------------------------------------
@@ -128,13 +132,6 @@ class AllMembersSheet extends StatelessWidget {
           children: [
             StreamSheetHeader(
               title: Text('${members.length} Members'),
-              // Default `.medium` size — matches the auto-implied close
-              // button on the leading side so the header stays balanced.
-              //
-              // Hide the affordance when the channel is distinct (1:1) —
-              // the API rejects member changes on those, so showing a
-              // tappable button that always errors is worse than no
-              // button at all.
               trailing: switch (channel.canUpdateChannelMembers && !channel.isDistinct) {
                 true => StreamButton.icon(
                   icon: Icon(context.streamIcons.userAdd),
@@ -218,29 +215,23 @@ class ContactDetailSheet extends StatelessWidget {
                   _ActionTile(
                     icon: icons.messageBubble,
                     label: 'Send Direct Message',
-                    onTap: () => emit(const SendDirectMessage()),
+                    onTap: () => emit(SendDirectMessage(user: user)),
                   ),
                   // Reactively flip Mute / Unmute as the global mute list
                   // updates — emits MuteUser when not yet muted.
                   BetterStreamBuilder<bool>(
-                    stream: client.state.currentUserStream
-                        .map(
-                          (u) => u?.mutes.any((m) => m.target.id == user.id) ?? false,
-                        )
-                        .distinct(),
-                    initialData: client.state.currentUser?.mutes.any((m) => m.target.id == user.id) ?? false,
+                    stream: client.userMutedStream(user.id),
+                    initialData: client.isUserMuted(user.id),
                     builder: (context, isMuted) => _ActionTile(
                       icon: isMuted ? icons.audio : icons.mute,
                       label: isMuted ? 'Unmute User' : 'Mute User',
-                      onTap: () => emit(
-                        isMuted ? const UnmuteUser() : const MuteUser(),
-                      ),
+                      onTap: () => emit(isMuted ? UnmuteUser(user: user) : MuteUser(user: user)),
                     ),
                   ),
                   _ActionTile(
                     icon: icons.noSign,
                     label: 'Block User',
-                    onTap: () => emit(const BlockUser()),
+                    onTap: () => emit(BlockUser(user: user)),
                   ),
                 ],
               ),
@@ -357,6 +348,7 @@ class ChannelMemberTile extends StatelessWidget {
     final colorScheme = context.streamColorScheme;
     final textTheme = context.streamTextTheme;
     final spacing = context.streamSpacing;
+
     final user = member.user;
     if (user == null) return const SizedBox.shrink();
 
@@ -367,13 +359,9 @@ class ChannelMemberTile extends StatelessWidget {
       leading: StreamUserAvatar(user: user, size: .md, showOnlineIndicator: user.online),
       title: Text(name),
       subtitle: Text(_userStatus(user)),
-      // Reactively rebuild the trailing row as the global mute list changes
-      // — pairs a mute icon with the Admin label when both apply.
       trailing: BetterStreamBuilder<bool>(
-        stream: StreamChat.of(
-          context,
-        ).client.state.currentUserStream.map((u) => u?.mutes.any((m) => m.target.id == user.id) ?? false).distinct(),
-        initialData: StreamChat.of(context).client.state.currentUser?.mutes.any((m) => m.target.id == user.id) ?? false,
+        stream: StreamChat.of(context).client.userMutedStream(user.id),
+        initialData: StreamChat.of(context).client.isUserMuted(user.id),
         builder: (context, isMuted) {
           if (!isMuted && !isAdmin) return const SizedBox.shrink();
           return Row(
@@ -401,13 +389,12 @@ class ChannelMemberTile extends StatelessWidget {
 
 Future<void> _onContactDetailAction(
   BuildContext context,
-  User user,
   ContactDetailAction action,
 ) async => switch (action) {
-  SendDirectMessage() => _openDirectChannel(context, user),
-  MuteUser() => StreamChat.of(context).client.muteUser(user.id),
-  UnmuteUser() => StreamChat.of(context).client.unmuteUser(user.id),
-  BlockUser() => _showNotImplementedSnack(context, 'Blocking users'),
+  SendDirectMessage(:final user) => _openDirectChannel(context, user),
+  MuteUser(:final user) => StreamChat.of(context).client.muteUser(user.id),
+  UnmuteUser(:final user) => StreamChat.of(context).client.unmuteUser(user.id),
+  BlockUser(:final user) => StreamChat.of(context).client.blockUser(user.id),
 };
 
 /// Finds (or creates) a 1-1 distinct messaging channel between the current
@@ -456,12 +443,6 @@ Future<void> _openDirectChannel(BuildContext context, User user) async {
   router.pushNamed(
     Routes.CHANNEL_PAGE.name,
     pathParameters: Routes.CHANNEL_PAGE.params(channel),
-  );
-}
-
-void _showNotImplementedSnack(BuildContext context, String feature) {
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(content: Text('$feature is not implemented yet.')),
   );
 }
 

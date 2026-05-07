@@ -4,8 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:go_router/go_router.dart';
-import 'package:sample_app/pages/chat_info_screen.dart';
-import 'package:sample_app/pages/group_info_screen.dart';
 import 'package:sample_app/routes/routes.dart';
 import 'package:sample_app/widgets/channel_detail_sheet.dart';
 import 'package:sample_app/widgets/search_text_field.dart';
@@ -153,33 +151,29 @@ class _ChannelListDefault extends StatelessWidget {
                   ),
                 ],
               ),
-              child: BetterStreamBuilder<bool>(
-                stream: channel.isPinnedStream,
-                initialData: channel.isPinned,
-                builder: (context, isPinned) => ColoredBox(
-                  color: isPinned ? colorScheme.backgroundHighlight : Colors.transparent,
-                  child: defaultWidget,
-                ),
-              ),
+              child: defaultWidget,
             );
           },
-          onChannelTap: (channel) {
-            GoRouter.of(context).pushNamed(
-              Routes.CHANNEL_PAGE.name,
-              pathParameters: Routes.CHANNEL_PAGE.params(channel),
-            );
-          },
+          onChannelTap: (channel) => _openChannelPage(context, channel),
+          onChannelLongPress: (channel) => _openChannelDetailSheet(context, channel),
         ),
       ),
     );
   }
 }
 
+// Pushes the channel page for [channel] via [GoRouter].
+Future<void> _openChannelPage(BuildContext context, Channel channel) {
+  return GoRouter.of(context).pushNamed(
+    Routes.CHANNEL_PAGE.name,
+    pathParameters: Routes.CHANNEL_PAGE.params(channel),
+  );
+}
+
 // Opens the channel detail sheet and dispatches on the user's selection.
 //
 // The sheet pops itself with a [ChannelDetailAction] subtype; this function
-// awaits that result and routes to the matching handler — mirroring the
-// `_onActionTap` switch in `StreamMessageWidget`.
+// awaits that result and routes to the matching handler.
 Future<void> _openChannelDetailSheet(
   BuildContext context,
   Channel channel,
@@ -196,30 +190,38 @@ Future<void> _onChannelDetailAction(
   BuildContext context,
   Channel channel,
   ChannelDetailAction action,
-) async => switch (action) {
-  ViewChannelInfo() => _viewChannelInfo(context, channel),
-  PinChannel() => channel.pin(),
-  UnpinChannel() => channel.unpin(),
-  LeaveChannel() => _maybeLeaveChannel(context, channel),
-  DeleteChannel() => _maybeDeleteChannel(context, channel),
-};
+) async {
+  final client = StreamChat.of(context).client;
+  return switch (action) {
+    ViewChannelInfo(:final user) => _pushChannelInfo(context, channel, user),
+    PinChannel() => channel.pin(),
+    UnpinChannel() => channel.unpin(),
+    MuteChannelMember(:final user) => client.muteUser(user.id),
+    UnmuteChannelMember(:final user) => client.unmuteUser(user.id),
+    BlockChannelMember(:final user) => client.blockUser(user.id),
+    LeaveChannel() => _maybeLeaveChannel(context, channel),
+    DeleteChannel() => _maybeDeleteChannel(context, channel),
+  };
+}
 
-// Pushes the chat / group info screen depending on whether the channel is a
-// 1-1 conversation or a group.
-Future<void> _viewChannelInfo(BuildContext context, Channel channel) async {
-  final currentUserId = StreamChat.of(context).currentUser?.id;
-  final isOneToOne = channel.memberCount == 2 && channel.isDistinct;
-  await Navigator.of(context).push(
-    MaterialPageRoute<void>(
-      builder: (_) => StreamChannel(
-        channel: channel,
-        child: isOneToOne
-            ? ChatInfoScreen(
-                user: channel.state!.members.where((m) => m.userId != currentUserId).first.user,
-              )
-            : const GroupInfoScreen(),
-      ),
-    ),
+// Pushes the chat / group info screen depending on whether [user] was
+// resolved. 1-1 channels pass the other member here (forwarded as `extra`
+// to the chat-info route); group channels pass `null` and route to the
+// group info screen.
+Future<void> _pushChannelInfo(BuildContext context, Channel channel, User? user) {
+  final router = GoRouter.of(context);
+
+  if (user != null) {
+    return router.pushNamed(
+      Routes.CHAT_INFO_SCREEN.name,
+      pathParameters: Routes.CHAT_INFO_SCREEN.params(channel),
+      extra: user,
+    );
+  }
+
+  return router.pushNamed(
+    Routes.GROUP_INFO_SCREEN.name,
+    pathParameters: Routes.GROUP_INFO_SCREEN.params(channel),
   );
 }
 
@@ -246,8 +248,7 @@ Future<void> _maybeLeaveChannel(BuildContext context, Channel channel) async {
 // channel route).
 Future<void> _maybeDeleteChannel(BuildContext context, Channel channel) async {
   final router = GoRouter.of(context);
-  final isOneToOne = channel.memberCount == 2 && channel.isDistinct;
-  final subject = isOneToOne ? 'conversation' : 'group';
+  final subject = channel.isOneToOne ? 'conversation' : 'group';
 
   final confirmed = await _showConfirmationDialog(
     context: context,
@@ -331,12 +332,6 @@ class _ChannelListSearch extends StatelessWidget {
 
 // Shows a Stream-styled confirmation [AlertDialog] with a destructive
 // primary action — used by the leave / delete handlers above.
-//
-// Mirrors the dialog pattern used by the poll interactor (e.g.
-// `showPollEndVoteDialog` / `showPollDeleteOptionDialog`) and the
-// SDK-internal `StreamMessageActionConfirmationModal`: a Material
-// [AlertDialog] with two ghost [StreamButton]s, secondary for cancel and
-// destructive for confirm.
 //
 // Resolves to `true` when the user taps confirm, `false` when they tap
 // cancel, and `null` if the dialog is dismissed without a choice.
