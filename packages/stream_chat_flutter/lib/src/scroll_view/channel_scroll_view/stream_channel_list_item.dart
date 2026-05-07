@@ -297,7 +297,7 @@ class StreamChannelListTile extends StatelessWidget {
                 child: Column(
                   mainAxisSize: .min,
                   spacing: spacing.xxs,
-                  crossAxisAlignment: .center,
+                  crossAxisAlignment: .start,
                   children: [
                     _TitleRow(
                       title: title,
