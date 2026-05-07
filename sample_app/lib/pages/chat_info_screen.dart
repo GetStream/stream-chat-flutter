@@ -312,8 +312,8 @@ class _Tile extends StatelessWidget {
 // Mirrors the dialog pattern used by the poll interactor (e.g.
 // `showPollEndVoteDialog` / `showPollDeleteOptionDialog`) and the
 // SDK-internal `StreamMessageActionConfirmationModal`: a Material
-// [AlertDialog] with two ghost [StreamButton]s, secondary for cancel and
-// destructive for confirm.
+// [AlertDialog] with a ghost secondary cancel and a solid destructive
+// confirm.
 //
 // Resolves to `true` on confirm, `false` on cancel, `null` on dismiss.
 Future<bool?> _showConfirmationDialog({
@@ -360,7 +360,7 @@ class _ConfirmationDialog extends StatelessWidget {
           child: Text(context.translations.cancelLabel),
         ),
         StreamButton(
-          type: .ghost,
+          type: .solid,
           style: .destructive,
           size: .small,
           onPressed: () => Navigator.of(context).maybePop(true),

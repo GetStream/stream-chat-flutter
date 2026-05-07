@@ -43,7 +43,7 @@ class PollEndVoteDialog extends StatelessWidget {
         child: Text(context.translations.cancelLabel),
       ),
       StreamButton(
-        type: .ghost,
+        type: .solid,
         style: .destructive,
         size: .small,
         onPressed: () => Navigator.of(context).maybePop(true),
