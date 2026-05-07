@@ -29,6 +29,7 @@
 - Added `viewAllLabel` translation for all supported locales.
 - Added `pollVotesLabel` translation for all supported locales.
 - Added `endVoteConfirmationMessage` translation for all supported locales.
+- Added `reactionsCountText(int count)` translation for all supported locales.
 
 🔄 Changed
 

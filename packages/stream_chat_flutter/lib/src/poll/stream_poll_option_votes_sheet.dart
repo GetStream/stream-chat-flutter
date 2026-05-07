@@ -123,7 +123,6 @@ class _StreamPollOptionVotesSheetState extends State<StreamPollOptionVotesSheet>
     final optionNumber = optionIndex >= 0 ? optionIndex + 1 : 1;
 
     return Column(
-      mainAxisSize: .min,
       children: [
         StreamSheetHeader(
           style: effectiveTheme.sheetHeaderStyle,

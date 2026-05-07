@@ -21,9 +21,7 @@ Widget _buildChannelHeaderScaffold({
       child: StreamChannel(
         showLoading: false,
         channel: channel,
-        child: Scaffold(
-          appBar: header ?? const StreamChannelHeader(showBackButton: false),
-        ),
+        child: Scaffold(appBar: header),
       ),
     ),
   );
@@ -35,29 +33,7 @@ void main() {
   goldenTest(
     'channel header default',
     fileName: 'channel_header',
-    constraints: const BoxConstraints.tightFor(width: 375, height: 56),
-    builder: () {
-      final client = MockClient();
-      final clientState = MockClientState();
-      final channel = MockChannel();
-      final channelState = MockChannelState();
-
-      setupMockChannel(
-        client: client,
-        clientState: clientState,
-        channel: channel,
-        channelState: channelState,
-        channelName: 'General',
-      );
-
-      return _buildChannelHeaderScaffold(client: client, channel: channel);
-    },
-  );
-
-  goldenTest(
-    'channel header with custom title',
-    fileName: 'channel_header_custom_title',
-    constraints: const BoxConstraints.tightFor(width: 375, height: 56),
+    constraints: const BoxConstraints.tightFor(width: 375, height: 72),
     builder: () {
       final client = MockClient();
       final clientState = MockClientState();
@@ -76,8 +52,36 @@ void main() {
         client: client,
         channel: channel,
         header: const StreamChannelHeader(
-          showBackButton: false,
+          automaticallyImplyLeading: false,
+        ),
+      );
+    },
+  );
+
+  goldenTest(
+    'channel header with custom title',
+    fileName: 'channel_header_custom_title',
+    constraints: const BoxConstraints.tightFor(width: 375, height: 72),
+    builder: () {
+      final client = MockClient();
+      final clientState = MockClientState();
+      final channel = MockChannel();
+      final channelState = MockChannelState();
+
+      setupMockChannel(
+        client: client,
+        clientState: clientState,
+        channel: channel,
+        channelState: channelState,
+        channelName: 'General',
+      );
+
+      return _buildChannelHeaderScaffold(
+        client: client,
+        channel: channel,
+        header: const StreamChannelHeader(
           title: Text('My Custom Title'),
+          automaticallyImplyLeading: false,
         ),
       );
     },

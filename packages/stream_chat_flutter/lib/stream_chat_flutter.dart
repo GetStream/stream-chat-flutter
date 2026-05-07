@@ -3,7 +3,13 @@ export 'package:photo_manager/photo_manager.dart' show ThumbnailSize, ThumbnailF
 export 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 export 'package:stream_core_flutter/stream_core_flutter.dart'
     show
+        StreamAppBar,
+        StreamAppBarProps,
+        StreamAppBarStyle,
+        StreamAppBarTheme,
+        StreamAppBarThemeData,
         StreamAudioWaveformThemeData,
+        StreamAvatar,
         StreamAvatarGroupSize,
         StreamAvatarSize,
         StreamAvatarStackSize,
@@ -45,6 +51,7 @@ export 'package:stream_core_flutter/stream_core_flutter.dart'
         StreamMessageLayout,
         StreamMessageStackPosition,
         StreamMessageChannelKind,
+        StreamNetworkImage,
         StreamMessageListKind,
         StreamMessageContentKind,
         StreamMessageText,
@@ -59,6 +66,10 @@ export 'package:stream_core_flutter/stream_core_flutter.dart'
         StreamReactionsType,
         StreamListTile,
         StreamListTileContainer,
+        StreamListTileTheme,
+        StreamListTileThemeData,
+        StreamLoadingSpinner,
+        StreamLoadingSpinnerSize,
         StreamSheet,
         StreamSheetDragHandle,
         StreamSheetHeader,
@@ -93,6 +104,8 @@ export 'package:stream_core_flutter/stream_core_flutter.dart'
         StreamMessageLayoutProperty,
         StreamMessageLayoutVisibility,
         StreamVisibility,
+        StreamColors,
+        kStreamHeaderHeight,
         showStreamSheet,
         streamSupportedEmojis;
 
@@ -116,9 +129,6 @@ export 'src/attachment/voice_recording_attachment_playlist.dart';
 export 'src/attachment_actions_modal/attachment_actions_modal.dart';
 export 'src/autocomplete/stream_autocomplete.dart';
 export 'src/avatars/gradient_avatar.dart';
-export 'src/bottom_sheets/attachment_modal_sheet.dart';
-export 'src/bottom_sheets/error_alert_sheet.dart';
-export 'src/bottom_sheets/stream_channel_info_bottom_sheet.dart';
 export 'src/channel/channel_header.dart';
 export 'src/channel/channel_info.dart';
 export 'src/channel/channel_list_header.dart';
@@ -211,7 +221,9 @@ export 'src/scroll_view/poll_vote_scroll_view/stream_poll_vote_list_tile.dart';
 export 'src/scroll_view/poll_vote_scroll_view/stream_poll_vote_list_view.dart';
 export 'src/scroll_view/reaction_scroll_view/stream_reaction_list_view.dart';
 export 'src/scroll_view/stream_scroll_view_empty_widget.dart';
+export 'src/scroll_view/stream_scroll_view_error_widget.dart';
 export 'src/scroll_view/stream_scroll_view_indexed_widget_builder.dart';
+export 'src/scroll_view/stream_scroll_view_loading_widget.dart';
 export 'src/scroll_view/thread_scroll_view/stream_thread_list_tile.dart';
 export 'src/scroll_view/thread_scroll_view/stream_thread_list_view.dart';
 export 'src/scroll_view/thread_scroll_view/stream_unread_threads_banner.dart';

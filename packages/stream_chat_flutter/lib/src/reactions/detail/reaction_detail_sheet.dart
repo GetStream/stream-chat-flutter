@@ -158,10 +158,7 @@ class _ReactionDetailSheetState extends State<ReactionDetailSheet> {
         Padding(
           padding: .symmetric(horizontal: spacing.sm),
           child: Text(
-            switch (visibleCount) {
-              1 => '1 Reaction',
-              _ => '$visibleCount Reactions',
-            },
+            context.translations.reactionsCountText(visibleCount),
             textAlign: .center,
             style: textTheme.headingSm,
           ),

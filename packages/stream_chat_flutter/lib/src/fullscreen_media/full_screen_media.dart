@@ -128,17 +128,16 @@ class _FullScreenMediaState extends State<StreamFullScreenMedia> {
                   return AnimatedPositionedDirectional(
                     duration: kThemeAnimationDuration,
                     curve: Curves.easeInOut,
-                    top: isDisplayingDetail ? 0 : -(topPadding + kToolbarHeight),
+                    top: isDisplayingDetail ? 0 : -(topPadding + kStreamHeaderHeight),
                     start: 0,
                     end: 0,
-                    height: topPadding + kToolbarHeight,
+                    height: topPadding + kStreamHeaderHeight,
                     child: StreamGalleryHeader(
                       userName: widget.userName,
                       sentAt: context.translations.sentAtText(
                         date: _currentAttachmentPackage.message.createdAt,
                         time: _currentAttachmentPackage.message.createdAt,
                       ),
-                      onBackPressed: Navigator.of(context).pop,
                       message: _currentMessage,
                       attachment: _currentAttachment,
                       onShowMessage: widget.onShowMessage != null
@@ -174,10 +173,10 @@ class _FullScreenMediaState extends State<StreamFullScreenMedia> {
                     return AnimatedPositionedDirectional(
                       duration: kThemeAnimationDuration,
                       curve: Curves.easeInOut,
-                      bottom: isDisplayingDetail ? 0 : -(bottomPadding + kToolbarHeight),
+                      bottom: isDisplayingDetail ? 0 : -(bottomPadding + kStreamHeaderHeight),
                       start: 0,
                       end: 0,
-                      height: bottomPadding + kToolbarHeight,
+                      height: bottomPadding + kStreamHeaderHeight,
                       child: StreamGalleryFooter(
                         currentPage: currentPage,
                         totalPages: widget.mediaAttachmentPackages.length,
@@ -276,12 +275,12 @@ class _FullScreenMediaState extends State<StreamFullScreenMedia> {
                     return AnimatedContainer(
                       duration: kThemeChangeDuration,
                       color: switch (isDisplayingDetail) {
-                        true => StreamChannelHeaderTheme.of(context).color,
-                        false => Colors.black,
+                        true => context.streamColorScheme.backgroundApp,
+                        false => StreamColors.black,
                       },
                       padding: EdgeInsetsDirectional.only(
-                        top: padding.top + kToolbarHeight,
-                        bottom: padding.bottom + kToolbarHeight,
+                        top: padding.top + kStreamHeaderHeight,
+                        bottom: padding.bottom + kStreamHeaderHeight,
                       ),
                       child: child,
                     );

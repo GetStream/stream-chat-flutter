@@ -1,158 +1,155 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 /// {@template streamChannelHeader}
-/// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/packages/stream_chat_flutter/screenshots/channel_header.png)
-/// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/packages/stream_chat_flutter/screenshots/channel_header_paint.png)
+/// A top-of-screen header for a single channel.
 ///
-/// Shows information about the current [Channel].
+/// [StreamChannelHeader] renders a [StreamAppBar] whose default title is
+/// the channel's name (via [StreamChannelName]) and whose default subtitle
+/// is the channel's typing / member status (via [StreamChannelInfo]).
+///
+/// The default leading is a [StreamBackButton] that pops the route when
+/// tapped, gated by [automaticallyImplyLeading] — set it to `false` to
+/// suppress the default, or pass [leading] to replace it entirely.
+///
+/// The default trailing is the channel avatar (via [StreamChannelAvatar]).
+/// Tap behaviour is wired through [onChannelAvatarPressed]; when the
+/// callback is null the avatar is rendered non-interactive. Pass [trailing]
+/// to replace the avatar with a custom action — the callback is then
+/// ignored.
+///
+/// A [StreamChannel] ancestor is required so the title and subtitle can
+/// observe the channel's stream of updates. When [showConnectionStateTile]
+/// is true, a [StreamInfoTile] banner is rendered above the bar while the
+/// client is reconnecting or offline.
+///
+/// [StreamChannelHeader] implements [PreferredSizeWidget] so it can be
+/// passed directly to [Scaffold.appBar].
+///
+/// {@tool snippet}
+///
+/// Basic usage as a [Scaffold.appBar] — the back button and channel
+/// avatar are auto-populated from the enclosing [StreamChannel]:
 ///
 /// ```dart
-/// class MyApp extends StatelessWidget {
-///   final StreamChatClient client;
-///   final Channel channel;
-///
-///   MyApp(this.client, this.channel);
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     return MaterialApp(
-///       home: StreamChat(
-///         client: client,
-///         child: StreamChannel(
-///           channel: channel,
-///           child: Scaffold(
-///             appBar: ChannelHeader(),
-///           ),
-///         ),
-///       ),
-///     );
-///   }
-/// }
+/// Scaffold(
+///   appBar: const StreamChannelHeader(),
+///   body: const StreamMessageListView(),
+/// )
 /// ```
+/// {@end-tool}
 ///
-/// Usually you would use this widget as an [AppBar] inside a [Scaffold].
-/// However, you can also use it as a normal widget.
+/// {@tool snippet}
 ///
-/// Make sure to have a [StreamChannel] ancestor in order to provide the
-/// information about the channel.
+/// With a tap handler that opens a channel-detail screen:
 ///
-/// Every part of the widget uses a [StreamBuilder] to render the channel
-/// information as soon as it updates.
+/// ```dart
+/// StreamChannelHeader(
+///   onChannelAvatarPressed: (channel) => GoRouter.of(context).pushNamed(
+///     'channel-detail',
+///     extra: channel,
+///   ),
+/// )
+/// ```
+/// {@end-tool}
 ///
-/// By default the widget shows a backButton that calls [Navigator.pop].
-/// You can disable this button using the [showBackButton] property.
-/// Alternatively, you can override this behaviour via the [onBackPressed]
-/// callback.
+/// ## Theming
 ///
-/// The UI is rendered based on the first ancestor of type [StreamChatTheme]
-/// and the [StreamChatThemeData.channelHeaderTheme] property. Modify it to
-/// change the widget's appearance.
+/// [StreamChannelHeader] reads its chrome (background, padding, typography,
+/// divider) from [StreamChatThemeData.channelHeaderTheme], which is a
+/// [StreamAppBarThemeData]. Per-instance overrides go on [style].
+///
+/// See also:
+///
+///  * [StreamAppBar], the underlying app bar component.
+///  * [StreamAppBarThemeData], for customizing appearance globally.
+///  * [StreamChannelListHeader], the equivalent header for the channel
+///    list.
+///  * [StreamThreadHeader], the equivalent header for a thread.
 /// {@endtemplate}
 class StreamChannelHeader extends StatelessWidget implements PreferredSizeWidget {
   /// {@macro streamChannelHeader}
   const StreamChannelHeader({
     super.key,
-    this.showBackButton = true,
-    this.onBackPressed,
-    this.onTitleTap,
-    this.showTypingIndicator = true,
-    this.onImageTap,
+    this.onChannelAvatarPressed,
     this.showConnectionStateTile = false,
+    this.leading,
+    this.automaticallyImplyLeading = true,
     this.title,
     this.subtitle,
-    this.centerTitle = true,
-    this.leading,
-    this.actions,
-    this.bottom,
-    this.backgroundColor,
-    this.elevation = 0,
-    this.scrolledUnderElevation = 0,
-    this.bottomOpacity = 1,
+    this.trailing,
+    this.primary = true,
+    this.style,
   });
 
-  /// Whether to show the leading back button
+  /// Called when the default channel-avatar trailing is pressed.
   ///
-  /// Defaults to `true`
-  final bool showBackButton;
+  /// Ignored when [trailing] is provided. When null, the avatar is rendered
+  /// non-interactive.
+  final void Function(Channel channel)? onChannelAvatarPressed;
 
-  /// The action to perform when the back button is pressed.
-  ///
-  /// By default it calls [Navigator.pop]
-  final VoidCallback? onBackPressed;
-
-  /// The action to perform when the header is tapped.
-  final VoidCallback? onTitleTap;
-
-  /// The action to perform when the image is tapped.
-  final VoidCallback? onImageTap;
-
-  /// Whether to show the typing indicator
-  ///
-  /// Defaults to `true`
-  final bool showTypingIndicator;
-
-  /// Whether to show the connection state tile
+  /// Whether to show the connection-state banner above the bar.
   final bool showConnectionStateTile;
 
-  /// Title widget
-  final Widget? title;
-
-  /// Subtitle widget
-  final Widget? subtitle;
-
-  /// Whether the title should be centered
-  final bool centerTitle;
-
-  /// Leading widget
+  /// {@macro StreamAppBar.leading}
+  ///
+  /// Defaults to a [StreamBackButton] when [automaticallyImplyLeading] is
+  /// `true`.
   final Widget? leading;
 
-  /// The bottom widget
-  final PreferredSizeWidget? bottom;
-
-  /// {@macro flutter.material.appbar.actions}
+  /// Whether to render a default [StreamBackButton] as the leading when
+  /// [leading] is null.
   ///
-  /// The [StreamChannelAvatar] is shown by default
-  final List<Widget>? actions;
+  /// Defaults to `true`. Set to `false` to suppress the back button.
+  final bool automaticallyImplyLeading;
 
-  /// The background color for this [StreamChannelHeader].
-  final Color? backgroundColor;
+  /// {@macro StreamAppBar.title}
+  ///
+  /// Defaults to a [StreamChannelName] for the enclosing channel.
+  final Widget? title;
 
-  /// The elevation for this [StreamChannelHeader].
-  final double elevation;
+  /// {@macro StreamAppBar.subtitle}
+  ///
+  /// Defaults to a [StreamChannelInfo] showing typing / member status.
+  final Widget? subtitle;
 
-  /// The scrolled under elevation for this [StreamChannelHeader].
-  final double scrolledUnderElevation;
+  /// {@macro StreamAppBar.trailing}
+  ///
+  /// Defaults to a [StreamChannelAvatar] for the enclosing channel wired to
+  /// [onChannelAvatarPressed].
+  final Widget? trailing;
 
-  /// The opacity of the bottom widget.
-  final double bottomOpacity;
+  /// {@macro StreamAppBar.primary}
+  final bool primary;
+
+  /// {@macro StreamAppBar.style}
+  ///
+  /// Per-instance override; merges over
+  /// [StreamChatThemeData.channelHeaderTheme].
+  final StreamAppBarStyle? style;
 
   @override
-  Size get preferredSize {
-    final bottomHeight = bottom?.preferredSize.height ?? 0;
-    return Size.fromHeight(kToolbarHeight + bottomHeight);
-  }
+  Size get preferredSize => const Size.fromHeight(kStreamHeaderHeight);
 
   @override
   Widget build(BuildContext context) {
-    final effectiveCenterTitle = getEffectiveCenterTitle(
-      Theme.of(context),
-      actions: actions,
-      centerTitle: centerTitle,
-    );
     final channel = StreamChannel.of(context).channel;
-    final channelHeaderTheme = StreamChannelHeaderTheme.of(context);
+    final headerTheme = StreamChatTheme.of(context).channelHeaderTheme;
 
-    final leadingWidget =
-        leading ??
-        (showBackButton
-            ? StreamBackButton(
-                onPressed: onBackPressed,
-                showUnreadCount: true,
-              )
-            : const SizedBox());
+    var leading = this.leading;
+    if (leading == null && automaticallyImplyLeading) {
+      leading = const StreamBackButton(showUnreadCount: true);
+    }
+
+    var title = this.title;
+    title ??= StreamChannelName(channel: channel);
+
+    var subtitle = this.subtitle;
+    subtitle ??= StreamChannelInfo(channel: channel);
+
+    var trailing = this.trailing;
+    trailing ??= _DefaultChannelAvatar(channel: channel, onPressed: onChannelAvatarPressed);
 
     return Portal(
       child: StreamConnectionStatusBuilder(
@@ -176,89 +173,56 @@ class StreamChannelHeader extends StatelessWidget implements PreferredSizeWidget
           return StreamInfoTile(
             showMessage: showConnectionStateTile && showStatus,
             message: statusString,
-            child: StreamAppBar(
-              titleTextStyle: Theme.of(context).textTheme.titleLarge,
-              elevation: elevation,
-              scrolledUnderElevation: scrolledUnderElevation,
-              leading: Padding(
-                padding: .directional(start: context.streamSpacing.sm),
-                child: Center(child: leadingWidget),
-              ),
-              titleSpacing: context.streamSpacing.sm,
-              bottom: bottom,
-              bottomOpacity: bottomOpacity,
-              backgroundColor: backgroundColor ?? channelHeaderTheme.color,
-              actions:
-                  actions ??
-                  <Widget>[
-                    if (effectiveCenterTitle)
-                      Padding(
-                        padding: .directional(end: context.streamSpacing.sm),
-                        child: Center(
-                          child: GestureDetector(
-                            onTap: onImageTap,
-                            child: StreamChannelAvatar(
-                              size: .lg,
-                              channel: channel,
-                            ),
-                          ),
-                        ),
-                      ),
-                  ],
-              centerTitle: centerTitle,
-              title: Row(
-                spacing: context.streamSpacing.sm,
-                children: [
-                  if (!effectiveCenterTitle) ...[
-                    GestureDetector(
-                      onTap: onImageTap,
-                      child: StreamChannelAvatar(
-                        size: .lg,
-                        channel: channel,
-                      ),
-                    ),
-                  ],
-                  Expanded(
-                    child: InkWell(
-                      onTap: onTitleTap,
-                      child: SizedBox(
-                        height: preferredSize.height,
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: effectiveCenterTitle
-                              ? CrossAxisAlignment.center
-                              : CrossAxisAlignment.stretch,
-                          children: <Widget>[
-                            title ??
-                                StreamChannelName(
-                                  channel: channel,
-                                  textStyle:
-                                      channelHeaderTheme.titleStyle ??
-                                      context.streamTextTheme.headingSm.copyWith(
-                                        color: context.streamColorScheme.textPrimary,
-                                      ),
-                                ),
-                            const SizedBox(height: 2),
-                            subtitle ??
-                                StreamChannelInfo(
-                                  showTypingIndicator: showTypingIndicator,
-                                  channel: channel,
-                                  textStyle:
-                                      channelHeaderTheme.subtitleStyle ??
-                                      context.streamTextTheme.captionDefault.copyWith(
-                                        color: context.streamColorScheme.textSecondary,
-                                      ),
-                                ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
+            // Wrap the bar in a [StreamAppBarTheme] so the per-header chat
+            // theme drives all default styling (background, padding,
+            // typography, divider) — the bar internally merges in any
+            // [style] override the caller passed.
+            child: StreamAppBarTheme(
+              data: headerTheme,
+              child: StreamAppBar(
+                leading: leading,
+                automaticallyImplyLeading: false,
+                title: title,
+                subtitle: subtitle,
+                trailing: trailing,
+                primary: primary,
+                style: style,
               ),
             ),
           );
         },
+      ),
+    );
+  }
+}
+
+class _DefaultChannelAvatar extends StatelessWidget {
+  const _DefaultChannelAvatar({required this.channel, this.onPressed});
+
+  final Channel channel;
+  final void Function(Channel channel)? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final effectiveOnTap = switch (onPressed) {
+      final cb? => () => cb(channel),
+      _ => null,
+    };
+
+    // Match the 48×48 tap target StreamAppBar's auto-implied leading uses
+    // (StreamButton.icon medium = 40 visible + Material padded tap target),
+    // so the avatar slot sizes and hit-tests consistently with other bars.
+    return SizedBox.square(
+      dimension: 48,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: effectiveOnTap,
+        child: Center(
+          child: StreamChannelAvatar(
+            size: .lg,
+            channel: channel,
+          ),
+        ),
       ),
     );
   }
