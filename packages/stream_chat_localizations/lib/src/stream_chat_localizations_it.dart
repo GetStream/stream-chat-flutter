@@ -788,6 +788,14 @@ Attenzione: il limite massimo di $limit file è stato superato.
   String get tapToRemoveReactionLabel => 'Tocca per rimuovere';
 
   @override
+  String reactionsCountText(int count) {
+    if (count == 1) {
+      return '1 Reazione';
+    }
+    return '$count Reazioni';
+  }
+
+  @override
   String get justNowLabel => 'Proprio ora';
 
   @override

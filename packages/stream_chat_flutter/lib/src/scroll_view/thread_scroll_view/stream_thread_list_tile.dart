@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/misc/timestamp.dart';
 import 'package:stream_chat_flutter/src/utils/date_formatter.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 /// {@template streamThreadListTile}
 /// A widget that displays a thread in a list.
@@ -76,6 +75,8 @@ class _DefaultStreamThreadListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final spacing = context.streamSpacing;
+
     final theme = StreamThreadListTileTheme.of(context);
     final defaults = _StreamThreadListTileThemeDefaults(context);
 
@@ -106,77 +107,70 @@ class _DefaultStreamThreadListTile extends StatelessWidget {
         channel?.formatName(currentUser: currentUser) ?? avatarUser?.name ?? context.translations.noTitleText;
     final participantUsers = thread.threadParticipants.map((it) => it.user).nonNulls.toList(growable: false);
 
-    return StreamListTileTheme(
-      data: StreamListTileThemeData(
-        contentPadding: effectivePadding,
-        backgroundColor: WidgetStatePropertyAll(effectiveBackgroundColor),
-      ),
-      child: StreamListTileContainer(
-        enabled: true,
-        selected: false,
-        onTap: props.onTap,
-        onLongPress: props.onLongPress,
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (avatarUser case final user?)
-              Padding(
-                padding: const EdgeInsetsDirectional.only(end: 12),
-                child: StreamUserAvatar(
+    return Padding(
+      padding: EdgeInsets.all(spacing.xxs),
+      child: StreamListTileTheme(
+        data: StreamListTileThemeData(
+          contentPadding: effectivePadding,
+          backgroundColor: .all(effectiveBackgroundColor),
+        ),
+        child: StreamListTileContainer(
+          onTap: props.onTap,
+          onLongPress: props.onLongPress,
+          child: Row(
+            spacing: spacing.sm,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (avatarUser case final user?)
+                StreamUserAvatar(
                   user: user,
                   size: StreamAvatarSize.xl,
                 ),
-              )
-            else
-              const Padding(
-                padding: EdgeInsetsDirectional.only(end: 12),
-                child: SizedBox.square(dimension: 40),
-              ),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: ThreadTitle(
-                          channelName: channelName,
-                          style: effectiveChannelNameStyle,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Row(
+                      spacing: spacing.sm,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: ThreadTitle(
+                            channelName: channelName,
+                            style: effectiveChannelNameStyle,
+                          ),
                         ),
-                      ),
-                      if (unreadMessageCount case final count? when count > 0) ...[
-                        const SizedBox(width: 8),
-                        ThreadUnreadCount(
-                          unreadCount: count,
-                          style: effectiveUnreadCountStyle,
-                          backgroundColor: effectiveUnreadCountBackgroundColor,
-                        ),
+                        if (unreadMessageCount case final count? when count > 0)
+                          ThreadUnreadCount(
+                            unreadCount: count,
+                            style: effectiveUnreadCountStyle,
+                            backgroundColor: effectiveUnreadCountBackgroundColor,
+                          ),
                       ],
-                    ],
-                  ),
-                  const SizedBox(height: 2),
-                  ThreadRootMessagePreview(
-                    parentMessage: parentMessage,
-                    channel: channel,
-                    language: language,
-                    style: effectiveReplyToMessageStyle,
-                    emptyStyle: effectiveLatestReplyMessageStyle,
-                  ),
-                  const SizedBox(height: 8),
-                  ThreadFooter(
-                    participantUsers: participantUsers,
-                    replyCount: thread.replyCount,
-                    latestActivityAt: latestActivityAt,
-                    replyCountStyle: effectiveReplyCountStyle,
-                    timestampStyle: effectiveTimestampStyle,
-                    timestampFormatter: effectiveTimestampFormatter,
-                  ),
-                ],
+                    ),
+                    SizedBox(height: spacing.xxs),
+                    ThreadRootMessagePreview(
+                      parentMessage: parentMessage,
+                      channel: channel,
+                      language: language,
+                      style: effectiveReplyToMessageStyle,
+                      emptyStyle: effectiveLatestReplyMessageStyle,
+                    ),
+                    SizedBox(height: spacing.xs),
+                    ThreadFooter(
+                      participantUsers: participantUsers,
+                      replyCount: thread.replyCount,
+                      latestActivityAt: latestActivityAt,
+                      replyCountStyle: effectiveReplyCountStyle,
+                      timestampStyle: effectiveTimestampStyle,
+                      timestampFormatter: effectiveTimestampFormatter,
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -340,22 +334,21 @@ class ThreadFooter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final spacing = context.streamSpacing;
+
     return Row(
+      spacing: spacing.xs,
       children: [
         if (participantUsers.isNotEmpty)
-          Padding(
-            padding: const EdgeInsetsDirectional.only(end: 6),
-            child: StreamUserAvatarStack(
-              users: participantUsers,
-              size: StreamAvatarStackSize.sm,
-              max: 3,
-            ),
+          StreamUserAvatarStack(
+            users: participantUsers,
+            size: StreamAvatarStackSize.sm,
+            max: 3,
           ),
         Text(
           context.translations.threadReplyCountText(replyCount),
           style: replyCountStyle,
         ),
-        const SizedBox(width: 8),
         StreamTimestamp(
           date: latestActivityAt.toLocal(),
           style: timestampStyle,
@@ -371,11 +364,12 @@ class _StreamThreadListTileThemeDefaults extends StreamThreadListTileThemeData {
 
   final BuildContext _context;
 
+  late final _spacing = _context.streamSpacing;
   late final _colorScheme = _context.streamColorScheme;
   late final _textTheme = _context.streamTextTheme;
 
   @override
-  EdgeInsetsGeometry get padding => const EdgeInsets.symmetric(vertical: 14, horizontal: 8);
+  EdgeInsetsGeometry get padding => EdgeInsets.all(_spacing.sm);
 
   @override
   Color get backgroundColor => _colorScheme.backgroundApp;

@@ -18,9 +18,7 @@ Widget _buildListHeaderScaffold({
       client: client,
       streamChatThemeData: docsStreamChatThemeData(),
       connectivityStream: Stream.value([ConnectivityResult.mobile]),
-      child: Scaffold(
-        appBar: header ?? const StreamChannelListHeader(),
-      ),
+      child: Scaffold(appBar: header),
     ),
   );
 }
@@ -31,21 +29,24 @@ void main() {
   goldenTest(
     'channel list header default',
     fileName: 'channel_list_header',
-    constraints: const BoxConstraints.tightFor(width: 375, height: 56),
+    constraints: const BoxConstraints.tightFor(width: 375, height: 72),
     builder: () {
       final client = MockClient();
       final clientState = MockClientState();
       when(() => client.state).thenReturn(clientState);
       when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id', name: 'Alice'));
 
-      return _buildListHeaderScaffold(client: client);
+      return _buildListHeaderScaffold(
+        client: client,
+        header: const StreamChannelListHeader(),
+      );
     },
   );
 
   goldenTest(
     'channel list header with custom subtitle',
     fileName: 'channel_list_header_custom_subtitle',
-    constraints: const BoxConstraints.tightFor(width: 375, height: 56),
+    constraints: const BoxConstraints.tightFor(width: 375, height: 72),
     builder: () {
       final client = MockClient();
       final clientState = MockClientState();

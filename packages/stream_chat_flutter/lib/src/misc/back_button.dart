@@ -24,7 +24,12 @@ class StreamBackButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget icon = Icon(context.streamIcons.arrowLeft);
+    final iconData = switch (Theme.of(context).platform) {
+      .iOS || .macOS => context.streamIcons.chevronLeft,
+      _ => context.streamIcons.arrowLeft,
+    };
+
+    Widget icon = Icon(iconData);
     if (showUnreadCount) {
       icon = switch (channelId) {
         final cid? => StreamUnreadIndicator.channels(cid: cid, child: icon),

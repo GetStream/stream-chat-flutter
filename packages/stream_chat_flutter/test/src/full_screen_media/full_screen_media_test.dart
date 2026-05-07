@@ -8,7 +8,7 @@ import '../mocks.dart';
 
 void main() {
   testWidgets(
-    'it should show channel typing',
+    'renders the photo with header and footer icons',
     (WidgetTester tester) async {
       final client = MockClient();
       final clientState = MockClientState();
@@ -83,25 +83,40 @@ void main() {
       );
       await tester.pumpWidget(
         MaterialApp(
-          home: StreamChat(
+          builder: (context, child) => StreamChat(
             client: client,
             child: StreamChannel(
               channel: channel,
-              child: StreamFullScreenMedia(
-                mediaAttachmentPackages: [
-                  StreamAttachmentPackage(
-                    attachment: attachment,
-                    message: message,
+              child: child!,
+            ),
+          ),
+          home: Builder(
+            builder: (context) => Scaffold(
+              body: Center(
+                child: ElevatedButton(
+                  onPressed: () => Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => StreamFullScreenMedia(
+                        mediaAttachmentPackages: [
+                          StreamAttachmentPackage(
+                            attachment: attachment,
+                            message: message,
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
-                ],
+                  child: const Text('Open media'),
+                ),
               ),
             ),
           ),
         ),
       );
 
-      // wait for the initial state to be rendered.
-      await tester.pump(Duration.zero);
+      await tester.pumpAndSettle();
+      await tester.tap(find.byType(ElevatedButton));
+      await tester.pumpAndSettle();
 
       expect(find.byType(PhotoView), findsOneWidget);
       expect(find.byType(Icon), findsNWidgets(4));

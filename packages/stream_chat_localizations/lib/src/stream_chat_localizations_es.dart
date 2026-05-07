@@ -783,6 +783,9 @@ No es posible añadir más de $limit archivos adjuntos
   String get tapToRemoveReactionLabel => 'Toca para eliminar';
 
   @override
+  String reactionsCountText(int count) => '$count reacciones';
+
+  @override
   String get justNowLabel => 'Ahora mismo';
 
   @override

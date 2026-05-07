@@ -23,6 +23,8 @@
 - `StreamMessageActionConfirmationModal.cancelActionTitle` / `confirmActionTitle` are now nullable and fall back to `Translations.cancelLabel` / `confirmLabel`.
 - Renamed `Translations.attachmentsUploadProgressText` parameter `remaining` → `completed`.
 - Updated several `Translations` default strings and added new abstract members — see [`migrations/redesign/localizations.md`](../../migrations/redesign/localizations.md).
+- Renamed `MuteIconPosition` → `AttributePosition` (values `title` → `inlineTitle`, `subtitle` → `trailingBottom`) and `StreamChannelListItemThemeData.muteIconPosition` → `attributePosition`. Now controls both mute and pin icons in `StreamChannelListTile`.
+- Removed `AttachmentModalSheet`, `ErrorAlertSheet` and `StreamChannelInfoBottomSheet`.
 
 ✅ Added
 
@@ -40,6 +42,8 @@
 - Re-exported `StreamMessageAttachment` and `StreamMessageAttachmentStyle` from `stream_core_flutter`.
 - Added a `BoxFit? fit` parameter to `ThumbnailSizeCalculator.calculate` (null defaults to `BoxFit.scaleDown`, matching `paintImage`) so callers using `cover` / `fill` get a bitmap large enough to render without upscale blur.
 - Added `Translations.totalVoteCountLabel({int? count})`, `viewAllLabel`, `pollVotesLabel`, `endVoteConfirmationMessage` and `questionLabel({bool isPlural = false})`.
+- Added `Translations.reactionsCountText(int count)` for the reaction-detail sheet header.
+- Added `StreamChannelListTile.isPinned` — renders a pin icon alongside the existing mute icon for pinned channels.
 
 🔄 Changed
 

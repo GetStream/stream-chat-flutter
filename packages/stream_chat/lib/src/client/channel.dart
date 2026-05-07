@@ -143,19 +143,57 @@ class Channel {
     _extraData.addAll(extraData);
   }
 
+  /// Whether this channel is identified by its member set rather than an
+  /// explicit id.
+  ///
+  /// Stream auto-generates ids of the form `!members-<hash>` for channels
+  /// created with members but no id, so the same set of users always
+  /// references the same channel.
+  ///
+  /// Distinct channels can lose members but can't gain them after creation.
+  ///
+  /// See [isOneToOne] for the typical 1-to-1 predicate built on this.
+  bool get isDistinct => id?.startsWith('!members') == true;
+
+  /// Whether this is a group channel.
+  ///
+  /// True when the channel has more than two members, or isn't [isDistinct].
+  /// Custom-id channels are treated as groups regardless of current member
+  /// count because they aren't bounded — they can grow back into
+  /// multi-person conversations.
+  ///
+  /// Near-inverse of [isOneToOne].
+  bool get isGroup => (memberCount ?? 0) > 2 || !isDistinct;
+
+  /// Whether this is a 1-to-1 conversation.
+  ///
+  /// True when the channel is [isDistinct] and has exactly two members.
+  /// Distinct channels can't gain members, so a 2-member distinct channel
+  /// is permanently bounded to two participants — including channels that
+  /// shrunk down from a larger group DM.
+  ///
+  /// This is a structural predicate without a current-user check. Combine
+  /// with capability / permission checks at the call site if you need
+  /// perspective gating.
+  ///
+  /// Near-inverse of [isGroup].
+  bool get isOneToOne => isDistinct && memberCount == 2;
+
   /// Returns true if the channel is muted.
-  bool get isMuted => _client.state.currentUser?.channelMutes.any((element) => element.channel.cid == cid) == true;
+  bool get isMuted {
+    final channelMutes = _client.state.currentUser?.channelMutes;
+    if (channelMutes == null) return false;
+
+    return channelMutes.any((it) => it.channel.cid == cid);
+  }
 
   /// Returns true if the channel is muted, as a stream.
-  Stream<bool> get isMutedStream => _client.state.currentUserStream
-      .map((event) => event?.channelMutes.any((element) => element.channel.cid == cid) == true)
-      .distinct();
+  Stream<bool> get isMutedStream => _client.state.currentUserStream.map((user) {
+    final channelMutes = user?.channelMutes;
+    if (channelMutes == null) return false;
 
-  /// True if the channel is a group.
-  bool get isGroup => memberCount != 2;
-
-  /// True if the channel is distinct.
-  bool get isDistinct => id?.startsWith('!members') == true;
+    return channelMutes.any((it) => it.channel.cid == cid);
+  }).distinct();
 
   /// Channel configuration.
   ChannelConfig? get config {

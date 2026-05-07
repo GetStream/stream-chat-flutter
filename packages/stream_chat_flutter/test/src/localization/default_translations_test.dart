@@ -44,6 +44,9 @@ void main() {
     expect(translations.messageDeletedText, isNotNull);
     expect(translations.messageDeletedLabel, isNotNull);
     expect(translations.messageReactionsLabel, isNotNull);
+    // singular vs. plural — both branches exercised
+    expect(translations.reactionsCountText(1), isNotNull);
+    expect(translations.reactionsCountText(5), isNotNull);
     expect(translations.emptyChatMessagesText, isNotNull);
     expect(translations.threadSeparatorText(3), isNotNull);
     expect(translations.connectedLabel, isNotNull);

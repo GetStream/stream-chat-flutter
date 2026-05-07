@@ -761,6 +761,9 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   String get tapToRemoveReactionLabel => 'タップして削除';
 
   @override
+  String reactionsCountText(int count) => '$count件のリアクション';
+
+  @override
   String get justNowLabel => 'たった今';
 
   @override

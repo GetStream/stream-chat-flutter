@@ -77,9 +77,7 @@ class _ChannelListPageState extends State<ChannelListPage> {
     return Scaffold(
       backgroundColor: colorScheme.backgroundApp,
       appBar: StreamChannelListHeader(
-        titleBuilder: (_, __, ___) => Text(enabledTabs[_currentIndex].label, style: textTheme.headingSm),
-        onNewChatButtonTap: () => GoRouter.of(context).pushNamed(Routes.NEW_CHAT.name),
-        preNavigationCallback: () => FocusScope.of(context).requestFocus(FocusNode()),
+        title: Text(enabledTabs[_currentIndex].label, style: textTheme.headingSm),
       ),
       drawer: LeftDrawer(user: user),
       bottomNavigationBar: DecoratedBox(

@@ -1,12 +1,15 @@
-// ignore_for_file: deprecated_member_use
-
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sample_app/routes/routes.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-import 'package:video_player/video_player.dart';
 
+/// Lists every photo + video shared in the enclosing channel as a 3-up
+/// grid. Tapping a tile opens the [StreamFullScreenMedia] gallery.
+///
+/// Matches Figma frames `8833:437788` (grid), `13495:418984` (scrolled),
+/// and `8833:437329` (empty).
 class ChannelMediaDisplayScreen extends StatefulWidget {
+  /// Creates a [ChannelMediaDisplayScreen].
   const ChannelMediaDisplayScreen({super.key});
 
   @override
@@ -14,189 +17,187 @@ class ChannelMediaDisplayScreen extends StatefulWidget {
 }
 
 class _ChannelMediaDisplayScreenState extends State<ChannelMediaDisplayScreen> {
-  final Map<String?, VideoPlayerController?> controllerCache = {};
-
-  late final controller = StreamMessageSearchListController(
+  late final StreamMessageSearchListController _controller = StreamMessageSearchListController(
     client: StreamChat.of(context).client,
-    filter: Filter.in_(
-      'cid',
-      [StreamChannel.of(context).channel.cid!],
-    ),
-    messageFilter: Filter.in_(
-      'attachments.type',
-      const ['image', 'video'],
-    ),
-    sort: [
-      const SortOption.asc('created_at'),
-    ],
+    filter: Filter.in_('cid', [StreamChannel.of(context).channel.cid!]),
+    messageFilter: Filter.in_('attachments.type', const ['image', 'video']),
+    sort: const [SortOption.asc('created_at')],
     limit: 20,
   );
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: StreamChatTheme.of(context).colorTheme.barsBg,
-      appBar: AppBar(
-        elevation: 1,
-        centerTitle: true,
-        title: Text(
-          'Photos & Videos',
-          style: TextStyle(
-            color: StreamChatTheme.of(context).colorTheme.textHighEmphasis,
-            fontSize: 16,
-          ),
-        ),
-        leading: const StreamBackButton(),
-        backgroundColor: StreamChatTheme.of(context).colorTheme.barsBg,
-      ),
-      body: ValueListenableBuilder(
-        valueListenable: controller,
-        builder: (BuildContext context, PagedValue<String, GetMessageResponse> value, Widget? child) {
-          return value.when(
-            (items, nextPageKey, error) {
-              if (items.isEmpty) {
-                return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        context.streamIcons.imageLarge,
-                        size: 136,
-                        color: StreamChatTheme.of(context).colorTheme.disabled,
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'No Media',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: StreamChatTheme.of(context).colorTheme.textHighEmphasis,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Photos or videos sent in this chat will \nappear here',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: StreamChatTheme.of(context).colorTheme.textHighEmphasis.withOpacity(0.5),
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              }
-              final media = <_AssetPackage>[];
-
-              for (final item in value.asSuccess.items) {
-                item.message.attachments
-                    .where((e) => (e.type == 'image' || e.type == 'video') && e.ogScrapeUrl == null)
-                    .forEach((e) {
-                      VideoPlayerController? controller;
-                      if (e.type == 'video') {
-                        final cachedController = controllerCache[e.assetUrl];
-
-                        if (cachedController == null) {
-                          final url = Uri.parse(e.assetUrl!);
-                          controller = VideoPlayerController.networkUrl(url);
-                          controller.initialize();
-                          controllerCache[e.assetUrl] = controller;
-                        } else {
-                          controller = cachedController;
-                        }
-                      }
-                      media.add(_AssetPackage(e, item.message, controller));
-                    });
-              }
-
-              return LazyLoadScrollView(
-                onEndOfPage: () async {
-                  if (nextPageKey != null) {
-                    controller.loadMore(nextPageKey);
-                  }
-                },
-                child: GridView.builder(
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
-                  itemBuilder: (context, position) {
-                    final channel = StreamChannel.of(context).channel;
-                    return Padding(
-                      padding: const EdgeInsets.all(1),
-                      child: InkWell(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => StreamChannel(
-                                channel: channel,
-                                child: StreamFullScreenMedia(
-                                  mediaAttachmentPackages: media
-                                      .map(
-                                        (e) => StreamAttachmentPackage(
-                                          attachment: e.attachment,
-                                          message: e.message,
-                                        ),
-                                      )
-                                      .toList(),
-                                  startIndex: position,
-                                  userName: media[position].message.user!.name,
-                                  onShowMessage: (m, c) async {
-                                    final router = GoRouter.of(context);
-                                    if (channel.state == null) {
-                                      await channel.watch();
-                                    }
-                                    router.pushNamed(
-                                      Routes.CHANNEL_PAGE.name,
-                                      pathParameters: Routes.CHANNEL_PAGE.params(channel),
-                                      queryParameters: Routes.CHANNEL_PAGE.queryParams(m),
-                                    );
-                                  },
-                                ),
-                              ),
-                            ),
-                          );
-                        },
-                        child: media[position].attachment.type == 'image'
-                            ? IgnorePointer(
-                                child: StreamImageAttachment(
-                                  image: media[position].attachment,
-                                  message: media[position].message,
-                                  // showTitle: false,
-                                  // messageTheme: widget.messageTheme,
-                                ),
-                              )
-                            : VideoPlayer(media[position].videoPlayer!),
-                      ),
-                    );
-                  },
-                  itemCount: media.length,
-                ),
-              );
-            },
-            loading: () => const Center(
-              child: CircularProgressIndicator(),
-            ),
-            error: (_) => const Offstage(),
-          );
-        },
-      ),
-    );
+  void initState() {
+    super.initState();
+    _controller.doInitialLoad();
   }
 
   @override
   void dispose() {
-    controller.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
   @override
-  void initState() {
-    controller.doInitialLoad();
-    super.initState();
+  Widget build(BuildContext context) {
+    final colorScheme = context.streamColorScheme;
+    return Scaffold(
+      backgroundColor: colorScheme.backgroundApp,
+      appBar: StreamAppBar(title: const Text('Photos & Videos')),
+      body: ValueListenableBuilder<PagedValue<String, GetMessageResponse>>(
+        valueListenable: _controller,
+        builder: (context, value, _) => value.when(
+          (items, nextPageKey, _) {
+            // Flatten messages → individual image/video attachments.
+            // Excludes link previews (`ogScrapeUrl != null`) so we don't
+            // render every shared URL's thumbnail in the grid.
+            final media = <_MediaItem>[
+              for (final response in items)
+                for (final attachment in response.message.attachments)
+                  if ((attachment.type == 'image' || attachment.type == 'video') && attachment.ogScrapeUrl == null)
+                    _MediaItem(attachment, response.message),
+            ];
+
+            if (media.isEmpty) return const Center(child: _EmptyState());
+
+            return LazyLoadScrollView(
+              onEndOfPage: () async {
+                if (nextPageKey != null) await _controller.loadMore(nextPageKey);
+              },
+              child: GridView.builder(
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 3,
+                  mainAxisSpacing: 1,
+                  crossAxisSpacing: 1,
+                ),
+                itemCount: media.length,
+                itemBuilder: (context, index) => _MediaTile(
+                  index: index,
+                  items: media,
+                ),
+              ),
+            );
+          },
+          loading: () => const Center(child: StreamScrollViewLoadingWidget()),
+          error: (_) => Center(
+            child: StreamScrollViewErrorWidget(
+              errorTitle: const Text('Failed to load media'),
+              onRetryPressed: _controller.refresh,
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
 
-class _AssetPackage {
-  _AssetPackage(this.attachment, this.message, this.videoPlayer);
-  Attachment attachment;
-  Message message;
-  VideoPlayerController? videoPlayer;
+/// Single attachment + its enclosing message — paired so the full-screen
+/// gallery can show sender / timestamp metadata when opened.
+class _MediaItem {
+  const _MediaItem(this.attachment, this.message);
+
+  final Attachment attachment;
+  final Message message;
+}
+
+/// One cell in the photo grid. Renders the attachment's thumbnail
+/// (image or video) via [StreamNetworkImage]; videos overlay a
+/// [StreamVideoPlayIndicator]. Tapping opens the full-screen gallery
+/// at this index — every other media item in the channel is wired up
+/// as a swipeable sibling.
+class _MediaTile extends StatelessWidget {
+  const _MediaTile({required this.index, required this.items});
+
+  final int index;
+  final List<_MediaItem> items;
+
+  @override
+  Widget build(BuildContext context) {
+    final item = items[index];
+    final attachment = item.attachment;
+    final isVideo = attachment.type == 'video';
+    final thumbUrl = attachment.thumbUrl ?? attachment.imageUrl ?? attachment.assetUrl;
+
+    return GestureDetector(
+      onTap: () => _open(context),
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          if (thumbUrl != null)
+            StreamNetworkImage(thumbUrl, fit: BoxFit.cover)
+          else
+            ColoredBox(color: context.streamColorScheme.backgroundSurfaceCard),
+          if (isVideo) const Center(child: StreamVideoPlayIndicator()),
+        ],
+      ),
+    );
+  }
+
+  void _open(BuildContext context) {
+    final channel = StreamChannel.of(context).channel;
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => StreamChannel(
+          channel: channel,
+          child: StreamFullScreenMedia(
+            mediaAttachmentPackages: [
+              for (final m in items) StreamAttachmentPackage(attachment: m.attachment, message: m.message),
+            ],
+            startIndex: index,
+            userName: items[index].message.user?.name ?? '',
+            onShowMessage: (message, _) async {
+              final router = GoRouter.of(context);
+              if (channel.state == null) await channel.watch();
+              router.pushNamed(
+                Routes.CHANNEL_PAGE.name,
+                pathParameters: Routes.CHANNEL_PAGE.params(channel),
+                queryParameters: Routes.CHANNEL_PAGE.queryParams(message),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Empty state for [ChannelMediaDisplayScreen] — image icon, "No photos
+/// or videos" headline, and a centered subtitle ("Share a photo or
+/// video to see it here").
+class _EmptyState extends StatelessWidget {
+  const _EmptyState();
+
+  @override
+  Widget build(BuildContext context) {
+    final spacing = context.streamSpacing;
+    final colorScheme = context.streamColorScheme;
+    final textTheme = context.streamTextTheme;
+
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        horizontal: spacing.md,
+        vertical: spacing.xxxl,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            context.streamIcons.image,
+            size: 32,
+            color: colorScheme.textTertiary,
+          ),
+          SizedBox(height: spacing.sm),
+          Text(
+            'No photos or videos',
+            style: textTheme.headingSm.copyWith(color: colorScheme.textPrimary),
+          ),
+          SizedBox(height: spacing.xxs),
+          Text(
+            'Share a photo or video to see it here',
+            style: textTheme.captionDefault.copyWith(color: colorScheme.textSecondary),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
 }
