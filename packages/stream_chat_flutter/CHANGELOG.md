@@ -24,6 +24,7 @@
 - Renamed `Translations.attachmentsUploadProgressText` parameter `remaining` → `completed`.
 - Updated several `Translations` default strings and added new abstract members — see [`migrations/redesign/localizations.md`](../../migrations/redesign/localizations.md).
 - Renamed `MuteIconPosition` → `AttributePosition` (values `title` → `inlineTitle`, `subtitle` → `trailingBottom`) and `StreamChannelListItemThemeData.muteIconPosition` → `attributePosition`. Now controls both mute and pin icons in `StreamChannelListTile`.
+- Removed `AttachmentModalSheet`, `ErrorAlertSheet` and `StreamChannelInfoBottomSheet`.
 
 ✅ Added
 
