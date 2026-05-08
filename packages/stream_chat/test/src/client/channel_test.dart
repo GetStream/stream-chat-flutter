@@ -247,6 +247,64 @@ void main() {
       }
     });
 
+    group('message retention', () {
+      List<Message> messages(int start, int count) {
+        final createdAt = DateTime.utc(2026);
+        return List.generate(count, (index) {
+          final id = start + index;
+          return Message(
+            id: 'm-$id',
+            text: 'message $id',
+            createdAt: createdAt.add(Duration(milliseconds: id)),
+          );
+        });
+      }
+
+      test('retains newest messages at the live edge', () {
+        channel.state!.setMessageRetentionLimit(3);
+
+        for (final message in messages(0, 5)) {
+          channel.state!.updateMessage(message);
+        }
+
+        expect(
+          channel.state!.messages.map((it) => it.id),
+          ['m-2', 'm-3', 'm-4'],
+        );
+      });
+
+      test('retains older messages while reading history', () {
+        channel.state!.setMessageRetentionLimit(3);
+        channel.state!.updateMessageRetentionViewport(atLiveEdge: false);
+        channel.state!.updateChannelState(
+          _generateChannelState(channelId, channelType).copyWith(
+            messages: messages(0, 5),
+          ),
+        );
+
+        expect(channel.state!.isUpToDate, false);
+        expect(
+          channel.state!.messages.map((it) => it.id),
+          ['m-0', 'm-1', 'm-2'],
+        );
+      });
+
+      test('re-applies retention when the limit changes', () {
+        channel.state!.updateChannelState(
+          _generateChannelState(channelId, channelType).copyWith(
+            messages: messages(0, 5),
+          ),
+        );
+
+        channel.state!.setMessageRetentionLimit(2);
+
+        expect(
+          channel.state!.messages.map((it) => it.id),
+          ['m-3', 'm-4'],
+        );
+      });
+    });
+
     group('`.sendMessage`', () {
       test('should work fine', () async {
         final message = Message(

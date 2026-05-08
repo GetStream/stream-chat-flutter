@@ -129,10 +129,14 @@ class StreamMessageListView extends StatefulWidget {
     this.reverse = true,
     this.shrinkWrap = false,
     this.paginationLimit = 20,
+    this.messageRetentionLimit,
     this.paginationLoadingIndicatorBuilder,
     this.keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.onDrag,
     this.spacingWidgetBuilder = _defaultSpacingWidgetBuilder,
-  });
+  }) : assert(
+          messageRetentionLimit == null || messageRetentionLimit > 0,
+          'messageRetentionLimit must be greater than zero',
+        );
 
   /// [ScrollViewKeyboardDismissBehavior] the defines how this [PositionedList] will
   /// dismiss the keyboard automatically.
@@ -158,6 +162,15 @@ class StreamMessageListView extends StatefulWidget {
 
   /// Limit used during pagination
   final int paginationLimit;
+
+  /// Maximum number of channel messages retained in local SDK state.
+  ///
+  /// When set, the channel message list is capped before [MessageListCore]
+  /// receives it. At the live edge the newest messages are retained. Once the
+  /// user scrolls away from the live edge, new live messages are not appended
+  /// to the retained state until the list catches up through pagination or a
+  /// reload.
+  final int? messageRetentionLimit;
 
   /// {@macro systemMessageBuilder}
   final SystemMessageBuilder? systemMessageBuilder;
@@ -448,6 +461,8 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
         );
       }
 
+      _syncMessageRetentionLimit();
+
       _messageNewListener =
           streamChannel!.channel.on(EventType.messageNew).listen((event) {
         if (_upToDate) {
@@ -476,7 +491,20 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
   }
 
   @override
+  void didUpdateWidget(covariant StreamMessageListView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (widget.messageRetentionLimit != oldWidget.messageRetentionLimit) {
+      _syncMessageRetentionLimit();
+    }
+  }
+
+  @override
   void dispose() {
+    if (widget.messageRetentionLimit != null) {
+      streamChannel?.channel.state?.setMessageRetentionLimit(null);
+    }
+
     debouncedMarkRead.cancel();
     debouncedMarkThreadRead.cancel();
     _messageNewListener?.cancel();
@@ -1466,7 +1494,20 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     }
 
     if (mounted) _showScrollToBottom.value = !isLastItemFullyVisible;
+    _updateMessageRetentionViewport(atLiveEdge: isLastItemFullyVisible);
     if (isLastItemFullyVisible) return _handleLastItemFullyVisible();
+  }
+
+  void _syncMessageRetentionLimit() {
+    streamChannel?.channel.state?.setMessageRetentionLimit(
+      widget.messageRetentionLimit,
+    );
+  }
+
+  void _updateMessageRetentionViewport({required bool atLiveEdge}) {
+    streamChannel?.channel.state?.updateMessageRetentionViewport(
+      atLiveEdge: atLiveEdge,
+    );
   }
 
   Message? _lastFullyVisibleMessage;

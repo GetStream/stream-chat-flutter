@@ -3031,9 +3031,11 @@ class ChannelClientState {
         lastMessageAt = [lastMessageAt, message.createdAt].max;
       }
 
+      final sortedMessages = newMessages.sorted(_sortByCreatedAt);
+
       // Apply the updated lists to the channel state.
       _channelState = _channelState.copyWith(
-        messages: newMessages.sorted(_sortByCreatedAt),
+        messages: _applyMessageRetention(sortedMessages),
         pinnedMessages: newPinnedMessages,
         channel: _channelState.channel?.copyWith(
           lastMessageAt: lastMessageAt,
@@ -3406,7 +3408,7 @@ class ChannelClientState {
     _checkExpiredAttachmentMessages(updatedState);
 
     _channelState = _channelState.copyWith(
-      messages: newMessages,
+      messages: _applyMessageRetention(newMessages),
       channel: _channelState.channel?.merge(updatedState.channel),
       watchers: newWatchers,
       watcherCount: updatedState.watcherCount,
@@ -3422,6 +3424,59 @@ class ChannelClientState {
 
   int _sortByCreatedAt(Message a, Message b) =>
       a.createdAt.compareTo(b.createdAt);
+
+  int? _messageRetentionLimit;
+  bool _messageRetentionAtLiveEdge = true;
+
+  /// Maximum number of channel messages retained in local state.
+  int? get messageRetentionLimit => _messageRetentionLimit;
+
+  /// Updates the local channel message retention limit.
+  ///
+  /// When enabled, retention is applied to channel messages before they are
+  /// emitted through [messagesStream].
+  void setMessageRetentionLimit(int? limit) {
+    assert(limit == null || limit > 0, 'limit must be greater than zero');
+
+    if (_messageRetentionLimit == limit) return;
+    _messageRetentionLimit = limit;
+    _channelState = _channelState.copyWith(
+      messages: _applyMessageRetention(messages),
+    );
+  }
+
+  /// Updates the viewport state used by local message retention.
+  void updateMessageRetentionViewport({required bool atLiveEdge}) {
+    if (_messageRetentionAtLiveEdge == atLiveEdge) return;
+
+    _messageRetentionAtLiveEdge = atLiveEdge;
+
+    if (_messageRetentionLimit != null && !atLiveEdge) {
+      isUpToDate = false;
+    }
+  }
+
+  List<Message> _applyMessageRetention(List<Message> source) {
+    final limit = _messageRetentionLimit;
+    if (limit == null || source.length <= limit) return source;
+
+    final retainedMessages = _messageRetentionAtLiveEdge
+        ? source.skip(source.length - limit).toList()
+        : source.take(limit).toList();
+
+    final retainedMessageIds = retainedMessages.map((it) => it.id).toSet();
+    final protectedMessages = source.where((message) {
+      if (retainedMessageIds.contains(message.id)) return false;
+      return _shouldRetainMessage(message);
+    });
+
+    return [...retainedMessages, ...protectedMessages].sorted(_sortByCreatedAt);
+  }
+
+  bool _shouldRetainMessage(Message message) {
+    if (message.isError) return true;
+    return message.state.isOutgoing || message.state.isFailed;
+  }
 
   /// The channel state related to this client.
   ChannelState get _channelState => _channelStateController.value;
