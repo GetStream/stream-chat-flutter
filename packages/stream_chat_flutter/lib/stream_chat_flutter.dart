@@ -15,6 +15,12 @@ export 'package:stream_core_flutter/stream_core_flutter.dart'
         StreamAvatarStackSize,
         StreamButton,
         StreamButtonThemeStyle,
+        StreamBadgeCount,
+        StreamBadgeCountTheme,
+        StreamBadgeCountThemeData,
+        StreamBadgeNotification,
+        StreamBadgeNotificationTheme,
+        StreamBadgeNotificationThemeData,
         StreamCheckbox,
         StreamCheckboxSize,
         StreamCheckboxStyle,
@@ -181,6 +187,7 @@ export 'src/message_modal/message_modal.dart';
 export 'src/message_modal/moderated_message_actions_modal.dart';
 export 'src/message_widget/message_widget.dart';
 export 'src/message_widget/moderated_message.dart';
+export 'src/message_widget/stream_quoted_message.dart';
 export 'src/message_widget/system_message.dart';
 export 'src/misc/adaptive_dialog_action.dart';
 export 'src/misc/animated_circle_border_painter.dart';
@@ -188,7 +195,6 @@ export 'src/misc/back_button.dart';
 export 'src/misc/connection_status_builder.dart';
 export 'src/misc/date_divider.dart';
 export 'src/misc/info_tile.dart';
-export 'src/misc/markdown_message.dart';
 export 'src/misc/option_list_tile.dart';
 export 'src/misc/reaction_icon_resolver.dart';
 

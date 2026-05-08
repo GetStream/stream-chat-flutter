@@ -67,7 +67,7 @@ class _PollSuggestOptionDialogState extends State<PollSuggestOptionDialog> {
         child: Text(context.translations.cancelLabel),
       ),
       StreamButton(
-        type: .ghost,
+        type: .solid,
         style: .primary,
         size: .small,
         onPressed: switch (_option.trim()) {

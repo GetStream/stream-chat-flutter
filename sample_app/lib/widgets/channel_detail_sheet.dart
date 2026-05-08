@@ -175,16 +175,16 @@ class ChannelDetailSheet extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   _ChannelDetailAction(
-                    icon: icons.info,
-                    label: 'View Info',
+                    icon: Icon(icons.info),
+                    label: const Text('View Info'),
                     onTap: () => emit(ViewChannelInfo(user: otherUser)),
                   ),
                   BetterStreamBuilder<bool>(
                     stream: channel.isPinnedStream,
                     initialData: channel.isPinned,
                     builder: (context, isPinned) => _ChannelDetailAction(
-                      icon: isPinned ? icons.unpin : icons.pin,
-                      label: isPinned ? 'Unpin Chat' : 'Pin Chat',
+                      icon: Icon(isPinned ? icons.unpin : icons.pin),
+                      label: Text(isPinned ? 'Unpin Chat' : 'Pin Chat'),
                       onTap: () => emit(isPinned ? const UnpinChannel() : const PinChannel()),
                     ),
                   ),
@@ -193,30 +193,30 @@ class ChannelDetailSheet extends StatelessWidget {
                       stream: client.userMutedStream(otherUser.id),
                       initialData: client.isUserMuted(otherUser.id),
                       builder: (context, isMuted) => _ChannelDetailAction(
-                        icon: isMuted ? icons.audio : icons.mute,
-                        label: isMuted ? 'Unmute User' : 'Mute User',
+                        icon: Icon(isMuted ? icons.audio : icons.mute),
+                        label: Text(isMuted ? 'Unmute User' : 'Mute User'),
                         onTap: () => emit(
                           isMuted ? UnmuteChannelMember(user: otherUser) : MuteChannelMember(user: otherUser),
                         ),
                       ),
                     ),
                     _ChannelDetailAction(
-                      icon: icons.noSign,
-                      label: 'Block User',
+                      icon: Icon(icons.noSign),
+                      label: const Text('Block User'),
                       onTap: () => emit(BlockChannelMember(user: otherUser)),
                     ),
                   ],
                   if (canLeave)
                     _ChannelDetailAction(
-                      icon: icons.leave,
-                      label: 'Leave Group',
+                      icon: Icon(icons.leave),
+                      label: const Text('Leave Group'),
                       destructive: true,
                       onTap: () => emit(const LeaveChannel()),
                     ),
                   if (canDelete)
                     _ChannelDetailAction(
-                      icon: icons.delete,
-                      label: isOneToOne ? 'Delete Chat' : 'Delete Group',
+                      icon: Icon(icons.delete),
+                      label: Text(isOneToOne ? 'Delete Chat' : 'Delete Group'),
                       destructive: true,
                       onTap: () => emit(const DeleteChannel()),
                     ),
@@ -337,8 +337,8 @@ class _ChannelDetailAction extends StatelessWidget {
     this.destructive = false,
   });
 
-  final IconData icon;
-  final String label;
+  final Widget icon;
+  final Widget label;
   final VoidCallback? onTap;
   final bool destructive;
 
@@ -355,8 +355,8 @@ class _ChannelDetailAction extends StatelessWidget {
         contentPadding: .symmetric(horizontal: spacing.sm),
       ),
       child: StreamListTile(
-        leading: Icon(icon),
-        title: Text(label),
+        leading: icon,
+        title: label,
         onTap: onTap,
       ),
     );

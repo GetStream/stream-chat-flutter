@@ -124,42 +124,37 @@ class _EditGroupSheetState extends State<EditGroupSheet> {
     final viewInsets = MediaQuery.viewInsetsOf(context);
 
     return SafeArea(
-      top: false,
       child: Column(
-        // Shrink-wrap to content height — the sheet sits as high as it
-        // needs to be (header + avatar + input + keyboard inset) and no
-        // higher. With Stack(StackFit.loose) upstream the StreamSheet
-        // honours the min size and rests just above the keyboard.
-        mainAxisSize: MainAxisSize.min,
         children: [
           StreamSheetHeader(
             title: const Text('Edit'),
-            // Default `.medium` size — matches the auto-implied close
-            // button on the leading side so the header stays balanced.
             trailing: StreamButton.icon(
               icon: Icon(context.streamIcons.checkmark),
               type: .solid,
               onPressed: _canSave ? _save : null,
             ),
           ),
-          Padding(
-            padding: EdgeInsets.all(spacing.md) + viewInsets,
-            child: Column(
-              children: [
-                _AvatarPreview(
-                  pickedPath: _pickedPath,
-                  imageOverride: _imageOverride,
-                  imageRemoved: _imageRemoved,
-                  uploadProgress: _uploadProgress,
-                  onTap: _openAvatarPicker,
-                ),
-                SizedBox(height: spacing.xxl),
-                StreamTextInput(
-                  controller: _nameController,
-                  autofocus: true,
-                  hintText: 'Group name',
-                ),
-              ],
+          Expanded(
+            child: Padding(
+              padding: EdgeInsets.all(spacing.md) + viewInsets,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _AvatarPreview(
+                    pickedPath: _pickedPath,
+                    imageOverride: _imageOverride,
+                    imageRemoved: _imageRemoved,
+                    uploadProgress: _uploadProgress,
+                    onTap: _openAvatarPicker,
+                  ),
+                  SizedBox(height: spacing.xxl),
+                  StreamTextInput(
+                    controller: _nameController,
+                    autofocus: true,
+                    hintText: 'Group name',
+                  ),
+                ],
+              ),
             ),
           ),
         ],
@@ -474,18 +469,18 @@ class _AvatarPickerSheet extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   _PickerTile(
-                    icon: icons.camera,
-                    label: 'Take Photo',
+                    icon: Icon(icons.camera),
+                    label: const Text('Take Photo'),
                     onTap: () => emit(_AvatarPickerAction.takePhoto),
                   ),
                   _PickerTile(
-                    icon: icons.image,
-                    label: 'Choose Image',
+                    icon: Icon(icons.image),
+                    label: const Text('Choose Image'),
                     onTap: () => emit(_AvatarPickerAction.chooseImage),
                   ),
                   _PickerTile(
-                    icon: icons.delete,
-                    label: 'Reset Picture',
+                    icon: Icon(icons.delete),
+                    label: const Text('Reset Picture'),
                     destructive: true,
                     onTap: () => emit(_AvatarPickerAction.resetPicture),
                   ),
@@ -512,8 +507,8 @@ class _PickerTile extends StatelessWidget {
     this.destructive = false,
   });
 
-  final IconData icon;
-  final String label;
+  final Widget icon;
+  final Widget label;
   final VoidCallback onTap;
   final bool destructive;
 
@@ -530,8 +525,8 @@ class _PickerTile extends StatelessWidget {
         contentPadding: .symmetric(horizontal: spacing.sm),
       ),
       child: StreamListTile(
-        leading: Icon(icon),
-        title: Text(label),
+        leading: icon,
+        title: label,
         onTap: onTap,
       ),
     );

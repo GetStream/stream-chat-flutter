@@ -131,18 +131,21 @@ class _MediaSection extends StatelessWidget {
     return _Section(
       children: [
         _Tile(
-          icon: icons.pin,
-          label: 'Pinned Messages',
+          icon: Icon(icons.pin),
+          label: const Text('Pinned Messages'),
+          trailing: Icon(icons.chevronRight),
           onTap: () => _push(context, const PinnedMessagesScreen()),
         ),
         _Tile(
-          icon: icons.image,
-          label: 'Photos & Videos',
+          icon: Icon(icons.image),
+          label: const Text('Photos & Videos'),
+          trailing: Icon(icons.chevronRight),
           onTap: () => _push(context, const ChannelMediaDisplayScreen()),
         ),
         _Tile(
-          icon: icons.folder,
-          label: 'Files',
+          icon: Icon(icons.folder),
+          label: const Text('Files'),
+          trailing: Icon(icons.chevronRight),
           onTap: () => _push(context, const ChannelFileDisplayScreen()),
         ),
       ],
@@ -174,8 +177,8 @@ class _ActionsSection extends StatelessWidget {
           stream: channel.isMutedStream,
           initialData: channel.isMuted,
           builder: (context, isMuted) => _Tile(
-            icon: isMuted ? icons.audio : icons.mute,
-            label: isMuted ? 'Unmute User' : 'Mute User',
+            icon: Icon(isMuted ? icons.audio : icons.mute),
+            label: Text(isMuted ? 'Unmute User' : 'Mute User'),
             trailing: StreamSwitch(
               value: isMuted,
               onChanged: (_) {
@@ -189,14 +192,14 @@ class _ActionsSection extends StatelessWidget {
           ),
         ),
         _Tile(
-          icon: icons.noSign,
-          label: 'Block User',
+          icon: Icon(icons.noSign),
+          label: const Text('Block User'),
           onTap: () => _showNotImplementedSnack(context),
         ),
         if (channel.canDeleteChannel)
           _Tile(
-            icon: icons.delete,
-            label: 'Delete Conversation',
+            icon: Icon(icons.delete),
+            label: const Text('Delete Conversation'),
             destructive: true,
             onTap: () => _confirmDelete(context),
           ),
@@ -257,11 +260,11 @@ class _Section extends StatelessWidget {
   }
 }
 
-/// A single row inside a [_Section] — leading icon, label, trailing widget.
-///
-/// Defaults the trailing to a chevron when [onTap] is provided and no
-/// explicit [trailing] was passed. Setting [destructive] paints both the
-/// icon and the label with [StreamColorScheme.accentError] via a local
+/// A single row inside a [_Section] — leading icon, label, and an optional
+/// [trailing] widget. Navigation rows should pass an explicit chevron;
+/// action rows that confirm or toggle in place pass [trailing] only when
+/// they need a control (e.g. a switch). Setting [destructive] paints both
+/// the icon and the label with [StreamColorScheme.accentError] via a local
 /// [StreamListTileTheme] override.
 class _Tile extends StatelessWidget {
   const _Tile({
@@ -272,23 +275,16 @@ class _Tile extends StatelessWidget {
     this.destructive = false,
   });
 
-  final IconData icon;
-  final String label;
+  final Widget icon;
+  final Widget label;
   final VoidCallback? onTap;
   final Widget? trailing;
   final bool destructive;
 
   @override
   Widget build(BuildContext context) {
-    final icons = context.streamIcons;
     final spacing = context.streamSpacing;
-
     final colorScheme = context.streamColorScheme;
-
-    var trailing = this.trailing;
-    if (trailing == null && onTap != null) {
-      trailing = Icon(icons.chevronRight, color: colorScheme.textSecondary);
-    }
 
     return StreamListTileTheme(
       data: StreamListTileThemeData(
@@ -298,9 +294,9 @@ class _Tile extends StatelessWidget {
         contentPadding: .symmetric(horizontal: spacing.sm),
       ),
       child: StreamListTile(
-        leading: Icon(icon),
+        leading: icon,
         trailing: trailing,
-        title: Text(label),
+        title: label,
         onTap: onTap,
       ),
     );
@@ -312,8 +308,8 @@ class _Tile extends StatelessWidget {
 // Mirrors the dialog pattern used by the poll interactor (e.g.
 // `showPollEndVoteDialog` / `showPollDeleteOptionDialog`) and the
 // SDK-internal `StreamMessageActionConfirmationModal`: a Material
-// [AlertDialog] with two ghost [StreamButton]s, secondary for cancel and
-// destructive for confirm.
+// [AlertDialog] with a ghost secondary cancel and a solid destructive
+// confirm.
 //
 // Resolves to `true` on confirm, `false` on cancel, `null` on dismiss.
 Future<bool?> _showConfirmationDialog({
@@ -360,7 +356,7 @@ class _ConfirmationDialog extends StatelessWidget {
           child: Text(context.translations.cancelLabel),
         ),
         StreamButton(
-          type: .ghost,
+          type: .solid,
           style: .destructive,
           size: .small,
           onPressed: () => Navigator.of(context).maybePop(true),

@@ -25,6 +25,7 @@
 - Updated several `Translations` default strings and added new abstract members — see [`migrations/redesign/localizations.md`](../../migrations/redesign/localizations.md).
 - Renamed `MuteIconPosition` → `AttributePosition` (values `title` → `inlineTitle`, `subtitle` → `trailingBottom`) and `StreamChannelListItemThemeData.muteIconPosition` → `attributePosition`. Now controls both mute and pin icons in `StreamChannelListTile`.
 - Removed `AttachmentModalSheet`, `ErrorAlertSheet` and `StreamChannelInfoBottomSheet`.
+- Removed `StreamMarkdownMessage`; use `StreamMessageText` (re-exported from `stream_core_flutter`) instead.
 
 ✅ Added
 
@@ -32,6 +33,7 @@
 - Redesigned `StreamSystemMessage` / `StreamModeratedMessage` with a pill-shaped style and visual customisation props.
 - Added visual customisation props to `ThreadSeparator` and `UnreadMessagesSeparator`.
 - Added `StreamUnsupportedAttachment` and `UnsupportedAttachmentBuilder` for unrecognised attachment types.
+- Added `StreamQuotedMessage` and `StreamQuotedMessageThemeData` for the quoted message preview.
 - `MessagePreviewFormatter` now renders `AttachmentType.urlPreview` messages with a link icon and caption / OG title / `linkAttachmentText` fallback.
 - Added `StreamPollCardStyle`, `StreamPollQuestionStyle` and `StreamPollOptionVotesStyle` shared style classes for the poll sheets.
 - Added a total vote count footer and per-option "View all" action to `StreamPollResultsSheet`.
@@ -43,6 +45,7 @@
 - Added `Translations.totalVoteCountLabel({int? count})`, `viewAllLabel`, `pollVotesLabel`, `endVoteConfirmationMessage` and `questionLabel({bool isPlural = false})`.
 - Added `Translations.reactionsCountText(int count)` for the reaction-detail sheet header.
 - Added `StreamChannelListTile.isPinned` — renders a pin icon alongside the existing mute icon for pinned channels.
+- Added `StreamChatConfigurationData.reactionOverlap` and `StreamMessageReactions.overlap` to control whether reactions overlap the message bubble edge. When unset, falls back to the platform-based default (overlap on mobile, no overlap on desktop and web).
 
 🔄 Changed
 
@@ -52,6 +55,8 @@
 
 🐞 Fixed
 
+- Fixed `StreamCommandAutocompleteOptions` and `StreamMentionAutocompleteOptions` expanding to half the screen height — both now cap at a fixed max height (208px / 176px) and scroll internally so the list can't dominate the screen or overlap the header.
+- Fixed the "Add an option" button in the poll creator looking like a tappable empty option row while disabled. The button is now hidden when adding a new option isn't allowed (an existing option is empty, or the maximum has been reached) instead of rendering as a disabled lookalike.
 - Fixed voice recording duration label jumping by ~1 second when playback starts. The recording timer tracks duration in whole seconds, so the stored value can be up to 1 second longer than the actual audio file. The player now resolves this by keeping the larger of the stored and player-reported durations, matching the strategy used by the iOS SDK.
 - Fixed voice message time label displaying elapsed time instead of remaining time.
 - Fixed RTL layout for the scroll-to-bottom button, swipe-to-reply icon, and voice recording lock button.
@@ -73,6 +78,8 @@
 - Fixed `PollAddCommentDialog` and `PollSuggestOptionDialog` accepting whitespace-only or unchanged submissions; the confirm action now disables when the trimmed text is empty or matches the initial value.
 - Fixed `StreamPhotoGalleryTile` using a hand-rolled icon as its loading placeholder and silently rendering nothing on decode failure. Now uses the shared `StreamImageLoadingPlaceholder` while loading and `StreamImageErrorPlaceholder` if the thumbnail fails to load.
 - Fixed poll, attachment-action, and message-action dialog buttons rendering their labels in uppercase (e.g. `CANCEL`, `SEND`, `FLAG`, `DELETE`); they now use the localized labels as-is so they match the rest of the system.
+- Fixed tapping a quoted parent message inside a thread doing nothing (or kicking back to the channel). The thread message list now resolves the parent slot directly and scrolls/highlights it instead of falling through to `loadChannelAtMessage`.
+- Fixed the jump-to-message highlight starting before the scroll settled, which made the fade barely visible (or invisible if the target hadn't been mounted yet). The message list now awaits the scroll, then plays a 1s hold + 1s ease-out fade — closer to the highlight feel in Slack's permalink jump.
 
 ## 10.0.0-beta.13
 

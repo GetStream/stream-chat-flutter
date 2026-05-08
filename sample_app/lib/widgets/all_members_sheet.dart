@@ -213,8 +213,8 @@ class ContactDetailSheet extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   _ActionTile(
-                    icon: icons.messageBubble,
-                    label: 'Send Direct Message',
+                    icon: Icon(icons.messageBubble),
+                    label: const Text('Send Direct Message'),
                     onTap: () => emit(SendDirectMessage(user: user)),
                   ),
                   // Reactively flip Mute / Unmute as the global mute list
@@ -223,14 +223,14 @@ class ContactDetailSheet extends StatelessWidget {
                     stream: client.userMutedStream(user.id),
                     initialData: client.isUserMuted(user.id),
                     builder: (context, isMuted) => _ActionTile(
-                      icon: isMuted ? icons.audio : icons.mute,
-                      label: isMuted ? 'Unmute User' : 'Mute User',
+                      icon: Icon(isMuted ? icons.audio : icons.mute),
+                      label: Text(isMuted ? 'Unmute User' : 'Mute User'),
                       onTap: () => emit(isMuted ? UnmuteUser(user: user) : MuteUser(user: user)),
                     ),
                   ),
                   _ActionTile(
-                    icon: icons.noSign,
-                    label: 'Block User',
+                    icon: Icon(icons.noSign),
+                    label: const Text('Block User'),
                     onTap: () => emit(BlockUser(user: user)),
                   ),
                 ],
@@ -288,8 +288,8 @@ class _ContactDetailHeader extends StatelessWidget {
 class _ActionTile extends StatelessWidget {
   const _ActionTile({required this.icon, required this.label, this.onTap});
 
-  final IconData icon;
-  final String label;
+  final Widget icon;
+  final Widget label;
   final VoidCallback? onTap;
 
   @override
@@ -302,8 +302,8 @@ class _ActionTile extends StatelessWidget {
         contentPadding: .symmetric(horizontal: spacing.sm),
       ),
       child: StreamListTile(
-        leading: Icon(icon),
-        title: Text(label),
+        leading: icon,
+        title: label,
         onTap: onTap,
       ),
     );

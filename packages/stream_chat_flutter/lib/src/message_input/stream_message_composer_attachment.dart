@@ -68,47 +68,62 @@ class DefaultMessageComposerAttachment extends StatelessWidget {
   /// Controller used for audio/voice-recording attachment playback.
   StreamAudioPlaylistController? get audioPlaylistController => props.audioPlaylistController;
 
+  // Adapts the [ValueSetter<Attachment>] callback shape used in this package
+  // to the [VoidCallback] shape expected by core composer attachments.
+  VoidCallback? get _onRemoveAttachment {
+    final callback = onRemovePressed;
+    if (callback == null) return null;
+    return () => callback(attachment);
+  }
+
   @override
   Widget build(BuildContext context) {
-    if (attachment.type == AttachmentType.file) {
-      return SizedBox(
-        width: 268,
-        child: MessageComposerFileAttachment(
-          title: Text(attachment.title ?? context.translations.fileText),
-          subtitle: Text(fileSize(attachment.file?.size ?? attachment.extraData['file_size'])),
-          fileTypeIcon: .fromMimeType(mimeType: attachment.file?.mediaType?.mimeType),
-          onRemovePressed: onRemovePressed != null ? () => onRemovePressed!(attachment) : null,
-        ),
-      );
-    }
+    return switch (attachment.type) {
+      .file => _buildFileAttachment(context),
+      .audio || .voiceRecording => _buildVoiceRecordingAttachment(context),
+      .image || .video || .giphy => _buildMediaAttachment(context),
+      _ => _buildUnsupportedAttachment(context),
+    };
+  }
 
-    if (attachment.type == AttachmentType.audio || attachment.type == AttachmentType.voiceRecording) {
-      if (audioPlaylistController == null) {
-        return const SizedBox.shrink();
-      }
+  Widget _buildFileAttachment(BuildContext context) {
+    final fileSizeBytes = attachment.file?.size ?? attachment.extraData['file_size'];
+    final mimeType = attachment.file?.mediaType?.mimeType;
 
-      final hasTrack = audioPlaylistController!.value.tracks.any((it) => it.key == attachment);
+    return StreamMessageComposerFileAttachment(
+      title: Text(attachment.title ?? context.translations.fileText),
+      subtitle: Text(fileSize(fileSizeBytes)),
+      fileTypeIcon: .fromMimeType(mimeType: mimeType),
+      onRemovePressed: _onRemoveAttachment,
+    );
+  }
 
-      if (!hasTrack) {
-        return const SizedBox.shrink();
-      }
+  Widget _buildVoiceRecordingAttachment(BuildContext context) {
+    final controller = audioPlaylistController;
+    if (controller == null) return const SizedBox.shrink();
 
-      final trackIndex = audioPlaylistController!.value.tracks.indexWhere((it) => it.key == attachment);
+    final trackIndex = controller.value.tracks.indexWhere((it) => it.key == attachment);
+    if (trackIndex < 0) return const SizedBox.shrink();
 
-      return SizedBox(
-        width: 268,
-        child: MessageInputVoiceRecordingAttachment(
-          attachment: attachment,
-          index: trackIndex,
-          controller: audioPlaylistController!,
-          onRemovePressed: onRemovePressed,
-        ),
-      );
-    }
+    return MessageInputVoiceRecordingAttachment(
+      attachment: attachment,
+      index: trackIndex,
+      controller: controller,
+      onRemovePressed: onRemovePressed,
+    );
+  }
 
+  Widget _buildMediaAttachment(BuildContext context) {
     return StreamMediaAttachmentBuilder(
       attachment: attachment,
       onRemovePressed: onRemovePressed,
+    );
+  }
+
+  Widget _buildUnsupportedAttachment(BuildContext context) {
+    return StreamMessageComposerUnsupportedAttachment(
+      label: Text(context.translations.unsupportedAttachmentLabel),
+      onRemovePressed: _onRemoveAttachment,
     );
   }
 }
@@ -145,7 +160,7 @@ class MessageInputVoiceRecordingAttachment extends StatelessWidget {
         final track = state.tracks.firstWhereOrNull((it) => it.key == attachment);
         if (track == null) return const SizedBox.shrink();
 
-        return StreamMessageComposerAttachmentContainer(
+        return core.StreamMessageComposerAttachment(
           onRemovePressed: switch (onRemovePressed) {
             final callback? => () => callback(attachment),
             _ => null,
@@ -205,21 +220,17 @@ class StreamMediaAttachmentBuilder extends StatelessWidget {
     final durationSecs = attachment.extraData['duration'] as num?;
     final videoDuration = durationSecs != null ? Duration(seconds: durationSecs.round()) : null;
 
-    final mediaBadge = attachment.type == AttachmentType.video
-        ? StreamMediaBadge(type: MediaBadgeType.video, duration: videoDuration)
-        : null;
+    Widget? effectiveMediaBadge;
+    if (attachment.type == .video) {
+      effectiveMediaBadge = StreamMediaBadge(type: .video, duration: videoDuration);
+    }
 
     return Container(
       key: Key(attachment.id),
-      child: MessageComposerMediaFileAttachment(
-        mediaBadge: mediaBadge,
+      child: StreamMessageComposerMediaAttachment(
+        mediaBadge: effectiveMediaBadge,
         onRemovePressed: onRemovePressed != null ? () => onRemovePressed!(attachment) : null,
-        child: StreamMediaAttachmentThumbnail(
-          media: attachment,
-          width: double.infinity,
-          height: double.infinity,
-          fit: BoxFit.cover,
-        ),
+        child: StreamMediaAttachmentThumbnail(media: attachment, fit: BoxFit.cover),
       ),
     );
   }

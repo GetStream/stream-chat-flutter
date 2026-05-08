@@ -3,6 +3,10 @@ import 'package:stream_chat_flutter/src/message_input/attachment_picker/options/
 import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+// Caps the card height so a long command list scrolls internally
+// instead of pushing the composer / header off the screen.
+const _kMaxHeight = 208.0;
+
 /// {@template commands_overlay}
 /// Overlay for displaying commands that can be used
 /// to interact with the channel.
@@ -48,6 +52,7 @@ class StreamCommandAutocompleteOptions extends StatelessWidget {
 
     return StreamAutocompleteOptions<Command>(
       options: commands,
+      maxHeight: _kMaxHeight,
       elevation: elevation,
       margin: margin,
       shape: shape,

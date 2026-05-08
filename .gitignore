@@ -34,6 +34,7 @@ coverage_helper_test.dart
 **/doc/api/
 pubspec.lock
 pubspec_overrides.yaml
+devtools_options.yaml
 flutter_export_environment.sh
 generated_plugin_registrant.*
 GeneratedPluginRegistrant.*

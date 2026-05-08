@@ -592,6 +592,17 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     super.dispose();
   }
 
+  // Duration of the programmatic scroll triggered by [_moveToAndHighlight].
+  static const _kScrollToDuration = Duration(seconds: 1);
+
+  // The highlight pulses on the target message after a jump: it stays at full
+  // color for [_kHighlightHoldDuration], then fades to transparent over
+  // [_kHighlightFadeDuration]. Tuned to feel like Slack's permalink jump —
+  // a clearly visible hold so the user can confirm "this is the message",
+  // followed by a graceful fade.
+  static const _kHighlightHoldDuration = Duration(seconds: 1);
+  static const _kHighlightFadeDuration = Duration(seconds: 1);
+
   void _highlightMessage(String messageId) {
     setState(() {
       _highlightedMessageId = messageId;
@@ -606,13 +617,21 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     bool scrollTo = true,
   }) async {
     if (messageId != null) {
-      final index = messages.indexWhere((m) => m.id == messageId);
+      // In a thread the parent message lives outside the `messages` list and
+      // is rendered as the very last item, so search for it explicitly when a
+      // thread reply quotes it.
+      final isThreadParent = _isThreadConversation && messageId == widget.parentMessage?.id;
+      final index = isThreadParent ? messages.length + 2 : messages.indexWhere((m) => m.id == messageId);
 
       if (index >= 0) {
+        // Wait for the scroll to settle before flagging the message as
+        // highlighted; otherwise the highlight tween fires while the list is
+        // still animating (or before the target item is even mounted) and the
+        // user only sees the tail end of the fade.
         if (scrollTo) {
-          _scrollController?.scrollTo(
+          await _scrollController?.scrollTo(
             index: index + 2, // +2 to account for loader and footer
-            duration: const Duration(seconds: 1),
+            duration: _kScrollToDuration,
             curve: Curves.easeInOut,
             alignment: 0.1,
           );
@@ -640,9 +659,38 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       );
     }
 
-    if (messageId != null) {
+    if (messageId != null && mounted) {
       _highlightMessage(messageId);
     }
+  }
+
+  // Wraps [child] in the highlight pulse if [message] is the currently
+  // highlighted message. Holds at full color for [_kHighlightHoldDuration],
+  // then fades to transparent over [_kHighlightFadeDuration].
+  Widget _maybeWrapWithHighlight({required Message message, required Widget child}) {
+    if (_highlightedMessageId != message.id) return child;
+
+    final colorScheme = context.streamColorScheme;
+    final highlightColor = widget.messageHighlightColor ?? colorScheme.backgroundHighlight;
+
+    // Drive the whole sequence (hold + fade) with a single tween whose curve is
+    // clamped to the trailing fade window — this gives us the hold for free.
+    final totalMs = _kHighlightHoldDuration.inMilliseconds + _kHighlightFadeDuration.inMilliseconds;
+    final fadeStart = _kHighlightHoldDuration.inMilliseconds / totalMs;
+
+    return TweenAnimationBuilder<Color?>(
+      key: ValueKey('highlight-$_highlightGeneration'),
+      tween: ColorTween(begin: highlightColor, end: highlightColor.withValues(alpha: 0)),
+      duration: Duration(milliseconds: totalMs),
+      curve: Interval(fadeStart, 1, curve: Curves.easeOut),
+      onEnd: () {
+        if (_highlightedMessageId == message.id) {
+          setState(() => _highlightedMessageId = null);
+        }
+      },
+      builder: (_, color, child) => ColoredBox(color: color!, child: child),
+      child: child,
+    );
   }
 
   @override
@@ -1174,7 +1222,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     final contentKind = resolveContentKind(message);
     final isInThread = widget.parentMessage != null;
 
-    return StreamMessageLayout(
+    final layout = StreamMessageLayout(
       data: StreamMessageLayoutData(
         stackPosition: .single,
         alignment: isMyMessage ? .end : .start,
@@ -1188,6 +1236,8 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
         },
       ),
     );
+
+    return _maybeWrapWithHighlight(message: message, child: layout);
   }
 
   Widget _buildScrollToBottom() {
@@ -1227,7 +1277,6 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
         if (showUnreadCount && widget.showUnreadCountOnScrollToBottom) {
           button = StreamBadgeNotification(
             label: '${unreadCount > 99 ? '99+' : unreadCount}',
-            size: StreamBadgeNotificationSize.sm,
             child: button,
           );
         }
@@ -1328,7 +1377,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     final isInThread = widget.parentMessage != null;
     final stackPosition = computeStackPosition(message: message, previous: prevMessage, next: nextMessage);
 
-    Widget child = StreamMessageLayout(
+    final layout = StreamMessageLayout(
       data: StreamMessageLayoutData(
         stackPosition: stackPosition,
         alignment: isMyMessage ? .end : .start,
@@ -1343,24 +1392,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       ),
     );
 
-    if (_highlightedMessageId == message.id) {
-      final colorScheme = context.streamColorScheme;
-      final highlightColor = widget.messageHighlightColor ?? colorScheme.backgroundHighlight;
-      child = TweenAnimationBuilder<Color?>(
-        key: ValueKey('highlight-$_highlightGeneration'),
-        tween: ColorTween(begin: highlightColor, end: highlightColor.withValues(alpha: 0)),
-        duration: const Duration(seconds: 3),
-        onEnd: () {
-          if (_highlightedMessageId == message.id) {
-            setState(() => _highlightedMessageId = null);
-          }
-        },
-        builder: (_, color, child) => ColoredBox(color: color!, child: child),
-        child: child,
-      );
-    }
-
-    return child;
+    return _maybeWrapWithHighlight(message: message, child: layout);
   }
 
   void _handleItemPositionsChanged() {
