@@ -3370,6 +3370,21 @@ class ChannelClientState {
     );
   }
 
+  /// Drops the oldest messages, keeping at most [maxMessages].
+  ///
+  /// No-op when [maxMessages] is non-positive, when the current count is
+  /// already within the limit, or when [isUpToDate] is `false`.
+  void pruneOldest(int maxMessages) {
+    if (maxMessages <= 0) return;
+    if (!isUpToDate) return;
+
+    final current = messages;
+    if (current.length <= maxMessages) return;
+
+    final pruned = current.sublist(current.length - maxMessages);
+    _channelState = _channelState.copyWith(messages: pruned);
+  }
+
   final List<String> _updatedMessagesIds = [];
 
   /// Update channelState with updated information.

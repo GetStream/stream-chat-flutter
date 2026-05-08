@@ -129,6 +129,7 @@ class StreamMessageListView extends StatefulWidget {
     this.reverse = true,
     this.shrinkWrap = false,
     this.paginationLimit = 20,
+    this.maximumMessageLimit,
     this.paginationLoadingIndicatorBuilder,
     this.keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.onDrag,
     this.spacingWidgetBuilder = _defaultSpacingWidgetBuilder,
@@ -158,6 +159,17 @@ class StreamMessageListView extends StatefulWidget {
 
   /// Limit used during pagination
   final int paginationLimit;
+
+  /// Maximum number of messages kept in [ChannelClientState] while the
+  /// user is viewing the latest messages.
+  ///
+  /// Trimming fires when a new message arrives or the user paginates
+  /// bottom and the count exceeds the limit plus the trim buffer.
+  /// Top pagination, edits, reactions, deletions, jump-to-message, and
+  /// threads do not trigger trimming.
+  ///
+  /// When `null`, no pruning is performed.
+  final int? maximumMessageLimit;
 
   /// {@macro systemMessageBuilder}
   final SystemMessageBuilder? systemMessageBuilder;
@@ -493,6 +505,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       child: ScaffoldMessenger(
         child: MessageListCore(
           paginationLimit: widget.paginationLimit,
+          maximumMessageLimit: widget.maximumMessageLimit,
           messageFilter: widget.messageFilter,
           loadingBuilder: widget.loadingBuilder ??
               (context) => const Center(
