@@ -48,7 +48,7 @@ class AttachmentActionsModal extends StatelessWidget {
   /// List of custom actions
   final List<AttachmentAction> customActions;
 
-  /// Creates a copy of [StreamMessageWidget] with
+  /// Creates a copy of [AttachmentActionsModal] with
   /// specified attributes overridden.
   AttachmentActionsModal copyWith({
     Key? key,

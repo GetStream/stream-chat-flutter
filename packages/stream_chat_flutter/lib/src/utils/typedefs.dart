@@ -239,7 +239,7 @@ typedef MessageSearchItemBuilder =
     );
 
 // Legacy MessageBuilder and ParentMessageBuilder typedefs removed.
-// Use StreamMessageWidgetBuilder from message_list_view.dart instead.
+// Use StreamMessageItemBuilder from message_list_view.dart instead.
 
 /// {@template systemMessageBuilder}
 /// A widget builder for creating custom system messages.

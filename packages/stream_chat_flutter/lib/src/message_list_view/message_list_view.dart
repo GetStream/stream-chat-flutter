@@ -12,7 +12,7 @@ import 'package:stream_chat_flutter/src/message_list_view/stream_message_list_em
 import 'package:stream_chat_flutter/src/message_list_view/stream_message_list_skeleton_loading.dart';
 import 'package:stream_chat_flutter/src/message_list_view/thread_separator.dart';
 import 'package:stream_chat_flutter/src/message_list_view/unread_messages_separator.dart';
-import 'package:stream_chat_flutter/src/message_widget/ephemeral_message.dart';
+import 'package:stream_chat_flutter/src/message_widget/stream_ephemeral_message.dart';
 import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_core_flutter/stream_core_flutter.dart';
@@ -38,18 +38,18 @@ enum SpacingType {
 }
 
 /// Signature for a function that builds a message widget from its
-/// [StreamMessageWidgetProps].
+/// [StreamMessageItemProps].
 ///
 /// Receives the [BuildContext], the [Message] data, and the pre-configured
-/// [StreamMessageWidgetProps] with all list-level callbacks already wired in.
+/// [StreamMessageItemProps] with all list-level callbacks already wired in.
 ///
-/// Use [DefaultStreamMessage] to build the default UI, optionally modifying
-/// the props via [StreamMessageWidgetProps.copyWith] first.
-typedef StreamMessageWidgetBuilder =
+/// Use [DefaultStreamMessageItem] to build the default UI, optionally modifying
+/// the props via [StreamMessageItemProps.copyWith] first.
+typedef StreamMessageItemBuilder =
     Widget Function(
       BuildContext context,
       Message message,
-      StreamMessageWidgetProps defaultProps,
+      StreamMessageItemProps defaultProps,
     );
 
 /// {@template streamMessageListView}
@@ -168,19 +168,19 @@ class StreamMessageListView extends StatefulWidget {
   /// Optional builder for per-instance message customization.
   ///
   /// When set, this builder is called for each regular message with
-  /// pre-configured [StreamMessageWidgetProps] that have all list-level
-  /// callbacks already wired in. Use [StreamMessageWidgetProps.copyWith]
-  /// to modify properties, and [DefaultStreamMessage] to build the default
+  /// pre-configured [StreamMessageItemProps] that have all list-level
+  /// callbacks already wired in. Use [StreamMessageItemProps.copyWith]
+  /// to modify properties, and [DefaultStreamMessageItem] to build the default
   /// widget.
   ///
   /// For app-wide customization, use [StreamComponentFactory] instead.
-  final StreamMessageWidgetBuilder? messageBuilder;
+  final StreamMessageItemBuilder? messageBuilder;
 
   /// Optional builder for the parent message at the top of a thread.
   ///
   /// Works the same as [messageBuilder] but is called for the parent
   /// message only.
-  final StreamMessageWidgetBuilder? parentMessageBuilder;
+  final StreamMessageItemBuilder? parentMessageBuilder;
 
   /// Whether the view scrolls in the reading direction.
   ///
@@ -238,43 +238,43 @@ class StreamMessageListView extends StatefulWidget {
 
   /// Called when the reply action is triggered on a message.
   ///
-  /// Forwarded to each [StreamMessageWidget] in the list.
+  /// Forwarded to each [StreamMessageItem] in the list.
   final void Function(Message)? onReplyTap;
 
   /// Called when the "show in chat" action is tapped in the full-screen
   /// media gallery.
   ///
-  /// Forwarded to each [StreamMessageWidget] in the list.
+  /// Forwarded to each [StreamMessageItem] in the list.
   final ShowMessageCallback? onShowMessage;
 
   /// Widget builder for the attachment actions modal shown in the full-screen
   /// media gallery.
   ///
-  /// Forwarded to each [StreamMessageWidget] in the list.
+  /// Forwarded to each [StreamMessageItem] in the list.
   final AttachmentActionsBuilder? attachmentActionsModalBuilder;
 
   /// Whether swiping a message triggers a quoted-reply action.
   ///
-  /// Forwarded to each [StreamMessageWidget] in the list via
-  /// [StreamMessageWidgetProps.swipeToReply].
+  /// Forwarded to each [StreamMessageItem] in the list via
+  /// [StreamMessageItemProps.swipeToReply].
   ///
   /// Defaults to false.
   final bool swipeToReply;
 
   /// Called when a user avatar is tapped.
   ///
-  /// Forwarded to each [StreamMessageWidget] in the list.
+  /// Forwarded to each [StreamMessageItem] in the list.
   final void Function(User)? onUserAvatarTap;
 
   /// Called when the message reactions are tapped.
   ///
-  /// Forwarded to each [StreamMessageWidget] in the list.
+  /// Forwarded to each [StreamMessageItem] in the list.
   final void Function(Message)? onReactionsTap;
 
   /// Called when a quoted message is tapped.
   ///
   /// When provided, this callback is forwarded to each
-  /// [StreamMessageWidget] in the list.
+  /// [StreamMessageItem] in the list.
   ///
   /// When null (the default), tapping a quoted message scrolls to it in
   /// the list, loading it if necessary.
@@ -283,12 +283,12 @@ class StreamMessageListView extends StatefulWidget {
   /// Called when a link is tapped in message text.
   ///
   /// Receives the [Message] containing the link and the tapped URL.
-  /// Forwarded to each [StreamMessageWidget] in the list.
+  /// Forwarded to each [StreamMessageItem] in the list.
   final void Function(Message message, String url)? onMessageLinkTap;
 
   /// Called when a user mention is tapped in message text.
   ///
-  /// Forwarded to each [StreamMessageWidget] in the list.
+  /// Forwarded to each [StreamMessageItem] in the list.
   final void Function(User user)? onUserMentionTap;
 
   /// If true will show a scroll to bottom button when
@@ -1199,7 +1199,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
   Widget buildParentMessage(
     Message message,
   ) {
-    final parentMessageProps = StreamMessageWidgetProps(
+    final parentMessageProps = StreamMessageItemProps(
       message: message,
       swipeToReply: widget.swipeToReply,
       onThreadTap: _onThreadTap,
@@ -1232,7 +1232,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       child: Builder(
         builder: (context) => switch (widget.parentMessageBuilder) {
           final builder? => builder.call(context, message, parentMessageProps),
-          _ => StreamMessageWidget.fromProps(props: parentMessageProps),
+          _ => StreamMessageItem.fromProps(props: parentMessageProps),
         },
       ),
     );
@@ -1336,7 +1336,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       return buildModeratedMessage(message);
     }
 
-    final messageWidgetProps = StreamMessageWidgetProps(
+    final messageItemProps = StreamMessageItemProps(
       message: message,
       swipeToReply: widget.swipeToReply,
       onThreadTap: _onThreadTap,
@@ -1386,8 +1386,8 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       ),
       child: Builder(
         builder: (context) => switch (widget.messageBuilder) {
-          final builder? => builder.call(context, message, messageWidgetProps),
-          _ => StreamMessageWidget.fromProps(props: messageWidgetProps),
+          final builder? => builder.call(context, message, messageItemProps),
+          _ => StreamMessageItem.fromProps(props: messageItemProps),
         },
       ),
     );
