@@ -227,6 +227,8 @@ export 'src/scroll_view/reaction_scroll_view/stream_reaction_list_view.dart';
 export 'src/scroll_view/stream_scroll_view_empty_widget.dart';
 export 'src/scroll_view/stream_scroll_view_error_widget.dart';
 export 'src/scroll_view/stream_scroll_view_indexed_widget_builder.dart';
+export 'src/scroll_view/stream_scroll_view_load_more_error.dart';
+export 'src/scroll_view/stream_scroll_view_load_more_indicator.dart';
 export 'src/scroll_view/stream_scroll_view_loading_widget.dart';
 export 'src/scroll_view/thread_scroll_view/stream_thread_list_tile.dart';
 export 'src/scroll_view/thread_scroll_view/stream_thread_list_view.dart';

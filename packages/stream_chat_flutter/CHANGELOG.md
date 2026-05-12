@@ -58,6 +58,7 @@
 - Added `Translations.reactionsCountText(int count)` for the reaction-detail sheet header.
 - Added `StreamChannelListTile.isPinned` — renders a pin icon alongside the existing mute icon for pinned channels.
 - Added `StreamChatConfigurationData.reactionOverlap` and `StreamMessageReactions.overlap` to control whether reactions overlap the message bubble edge. When unset, falls back to the platform-based default (overlap on mobile, no overlap on desktop and web).
+- Exported `StreamScrollViewLoadMoreError` and `StreamScrollViewLoadMoreIndicator` from the public API.
 
 🔄 Changed
 
