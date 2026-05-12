@@ -102,24 +102,7 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: StreamChatTheme.of(context).colorTheme.appBg,
-      appBar: AppBar(
-        backgroundColor: StreamChatTheme.of(context).colorTheme.barsBg,
-        elevation: 1,
-        centerTitle: true,
-        title: Text(
-          'Custom settings',
-          style: StreamChatTheme.of(
-            context,
-          ).textTheme.headlineBold.copyWith(color: StreamChatTheme.of(context).colorTheme.textHighEmphasis),
-        ),
-        leading: IconButton(
-          icon: Icon(context.streamIcons.chevronLeft),
-          color: StreamChatTheme.of(context).colorTheme.textHighEmphasis,
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-      ),
+      appBar: StreamAppBar(title: const Text('Custom settings')),
       body: Builder(
         builder: (context) {
           return Padding(

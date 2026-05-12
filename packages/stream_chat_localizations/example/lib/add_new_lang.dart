@@ -807,6 +807,9 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
   String get tapToRemoveReactionLabel => 'Tap to remove';
 
   @override
+  String reactionsCountText(int count) => count == 1 ? '1 Reaction' : '$count Reactions';
+
+  @override
   String get justNowLabel => 'Just now';
 
   @override

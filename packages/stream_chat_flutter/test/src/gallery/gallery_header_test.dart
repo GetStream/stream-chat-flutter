@@ -1,6 +1,5 @@
 import 'package:alchemist/alchemist.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -13,7 +12,6 @@ void main() {
   late MockClientState clientState;
   late MockChannel channel;
   late MockChannelState channelState;
-  const methodChannel = MethodChannel('dev.fluttercommunity.plus/connectivity_status');
 
   setUpAll(() {
     client = MockClient();
@@ -39,41 +37,34 @@ void main() {
     });
   });
 
-  setUp(() {
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(methodChannel, (
-      MethodCall methodCall,
-    ) async {
-      if (methodCall.method == 'listen') {
-        try {
-          await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
-            methodChannel.name,
-            methodChannel.codec.encodeSuccessEnvelope(['wifi']),
-            (_) {},
-          );
-        } catch (e) {
-          print(e);
-        }
-      }
-      return null;
-    });
-  });
-
   testWidgets(
-    'it should show channel typing',
+    'renders auto-implied back button alongside the overflow action',
     (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          home: StreamChat(
+          builder: (context, child) => StreamChat(
             client: client,
+            connectivityStream: .value([.wifi]),
             child: StreamChannel(
               channel: channel,
-              child: PopScope(
-                onPopInvokedWithResult: (bool didPop, res) async => false,
-                child: Scaffold(
-                  appBar: StreamGalleryHeader(
-                    attachment: MockAttachment(),
-                    message: Message(),
+              child: child!,
+            ),
+          ),
+          home: Builder(
+            builder: (context) => Scaffold(
+              body: Center(
+                child: ElevatedButton(
+                  onPressed: () => Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => Scaffold(
+                        appBar: StreamGalleryHeader(
+                          attachment: MockAttachment(),
+                          message: Message(),
+                        ),
+                      ),
+                    ),
                   ),
+                  child: const Text('Open gallery'),
                 ),
               ),
             ),
@@ -81,7 +72,8 @@ void main() {
         ),
       );
 
-      // wait for the initial state to be rendered.
+      await tester.pumpAndSettle();
+      await tester.tap(find.byType(ElevatedButton));
       await tester.pumpAndSettle();
 
       expect(find.byType(Icon), findsNWidgets(2));
@@ -96,6 +88,7 @@ void main() {
       return MaterialAppWrapper(
         home: StreamChat(
           client: client,
+          connectivityStream: .value([.wifi]),
           child: StreamChannel(
             channel: channel,
             child: PopScope(
@@ -114,8 +107,4 @@ void main() {
       );
     },
   );
-
-  tearDown(() {
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(methodChannel, null);
-  });
 }

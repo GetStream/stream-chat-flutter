@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:stream_chat_flutter/src/attachment/builder/attachment_widget_builder.dart';
-import 'package:stream_chat_flutter/src/channel/stream_message_preview_text.dart';
 import 'package:stream_chat_flutter/src/message_widget/components/stream_message_deleted.dart';
 import 'package:stream_chat_flutter/src/message_widget/components/stream_message_reactions.dart';
 import 'package:stream_chat_flutter/src/message_widget/components/stream_message_text.dart';
 import 'package:stream_chat_flutter/src/message_widget/parse_attachments.dart';
+import 'package:stream_chat_flutter/src/message_widget/stream_quoted_message.dart';
 import 'package:stream_chat_flutter/src/utils/typedefs.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:stream_core_flutter/stream_core_flutter.dart' as core;
@@ -165,40 +165,17 @@ class _StreamMessageContentState extends State<StreamMessageContent> {
                 final bubbleContent = ConstrainedBox(
                   constraints: const BoxConstraints().copyWith(maxWidth: widthLimit),
                   child: core.StreamColumn(
-                    spacing: spacing.xxs,
                     mainAxisSize: .min,
+                    spacing: spacing.xs,
                     crossAxisAlignment: .start,
                     children: [
                       if (widget.message.quotedMessage case final quotedMessage?)
-                        // TODO: Refactor this with attachments
-                        ConstrainedBox(
-                          constraints: const .tightFor(width: 272),
-                          child: GestureDetector(
-                            onTap: !quotedMessage.isDeleted && widget.onQuotedMessageTap != null
-                                ? () => widget.onQuotedMessageTap!(quotedMessage)
-                                : null,
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 8),
-                              child: core.StreamMessageTheme(
-                                data: core.StreamMessageThemeData(
-                                  incoming: core.StreamMessageStyle(
-                                    backgroundColor: context.streamColorScheme.backgroundSurfaceStrong,
-                                  ),
-                                  outgoing: core.StreamMessageStyle(
-                                    backgroundColor: context.streamColorScheme.brand.shade150,
-                                  ),
-                                ),
-                                child: core.MessageComposerReplyAttachment(
-                                  title: Text(quotedMessage.user?.name ?? ''),
-                                  subtitle: StreamMessagePreviewText(message: quotedMessage),
-                                  style: switch (core.StreamMessageLayout.messageAlignmentOf(context)) {
-                                    core.StreamMessageAlignment.start => .incoming,
-                                    core.StreamMessageAlignment.end => .outgoing,
-                                  },
-                                ),
-                              ),
-                            ),
-                          ),
+                        StreamQuotedMessage(
+                          quotedMessage: quotedMessage,
+                          onTap: switch (widget.onQuotedMessageTap) {
+                            final onTap? => () => onTap(quotedMessage),
+                            _ => null,
+                          },
                         ),
                       ParseAttachments(
                         key: attachmentsKey,

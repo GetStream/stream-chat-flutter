@@ -4,9 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:go_router/go_router.dart';
-import 'package:sample_app/pages/chat_info_screen.dart';
-import 'package:sample_app/pages/group_info_screen.dart';
 import 'package:sample_app/routes/routes.dart';
+import 'package:sample_app/widgets/channel_detail_sheet.dart';
 import 'package:sample_app/widgets/search_text_field.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -114,7 +113,6 @@ class _ChannelListDefault extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final chatTheme = StreamChatTheme.of(context);
     return SlidableAutoCloseBehavior(
       child: RefreshIndicator(
         onRefresh: channelListController.refresh,
@@ -122,6 +120,10 @@ class _ChannelListDefault extends StatelessWidget {
           controller: channelListController,
           itemBuilder: (context, channels, index, defaultWidget) {
             final channel = channels[index];
+
+            final icons = context.streamIcons;
+            final colorScheme = context.streamColorScheme;
+
             return Slidable(
               groupTag: 'channels-actions',
               endActionPane: ActionPane(
@@ -129,84 +131,135 @@ class _ChannelListDefault extends StatelessWidget {
                 motion: const BehindMotion(),
                 children: [
                   CustomSlidableAction(
-                    backgroundColor: context.streamColorScheme.backgroundSurface,
-                    onPressed: (_) {
-                      showChannelInfoModalBottomSheet(
-                        context: context,
-                        channel: channel,
-                        onViewInfoTap: () {
-                          Navigator.pop(context);
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) {
-                                final isOneToOne = channel.memberCount == 2 && channel.isDistinct;
-                                return StreamChannel(
-                                  channel: channel,
-                                  child: isOneToOne
-                                      ? ChatInfoScreen(
-                                          user: channel.state!.members
-                                              .where((m) => m.userId != channel.client.state.currentUser!.id)
-                                              .first
-                                              .user,
-                                        )
-                                      : const GroupInfoScreen(),
-                                );
-                              },
-                            ),
-                          );
-                        },
-                      );
-                    },
-                    child: const Icon(Icons.more_horiz),
+                    foregroundColor: colorScheme.textPrimary,
+                    backgroundColor: colorScheme.backgroundSurface,
+                    onPressed: (_) => _openChannelDetailSheet(context, channel),
+                    child: Icon(icons.more, size: 20),
                   ),
                   BetterStreamBuilder<bool>(
                     stream: channel.isMutedStream,
                     initialData: channel.isMuted,
                     builder: (context, isMuted) => CustomSlidableAction(
-                      backgroundColor: chatTheme.colorTheme.accentPrimary,
-                      foregroundColor: Colors.white,
-                      onPressed: (_) async {
-                        if (isMuted) {
-                          await channel.unmute();
-                        } else {
-                          await channel.mute();
-                        }
+                      foregroundColor: colorScheme.textOnAccent,
+                      backgroundColor: colorScheme.accentPrimary,
+                      onPressed: (_) {
+                        if (isMuted) return channel.unmute().ignore();
+                        return channel.mute().ignore();
                       },
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            isMuted ? context.streamIcons.audio : context.streamIcons.mute,
-                            size: 20,
-                            color: Colors.white,
-                          ),
-                        ],
-                      ),
+                      child: Icon(isMuted ? icons.audio : icons.mute, size: 20),
                     ),
                   ),
                 ],
               ),
-              child: BetterStreamBuilder<bool>(
-                stream: channel.isPinnedStream,
-                initialData: channel.isPinned,
-                builder: (context, isPinned) => ColoredBox(
-                  color: isPinned ? chatTheme.colorTheme.highlight : Colors.transparent,
-                  child: defaultWidget,
-                ),
-              ),
+              child: defaultWidget,
             );
           },
-          onChannelTap: (channel) {
-            GoRouter.of(context).pushNamed(
-              Routes.CHANNEL_PAGE.name,
-              pathParameters: Routes.CHANNEL_PAGE.params(channel),
-            );
-          },
+          onChannelTap: (channel) => _openChannelPage(context, channel),
+          onChannelLongPress: (channel) => _openChannelDetailSheet(context, channel),
         ),
       ),
     );
   }
+}
+
+// Pushes the channel page for [channel] via [GoRouter].
+Future<void> _openChannelPage(BuildContext context, Channel channel) {
+  return GoRouter.of(context).pushNamed(
+    Routes.CHANNEL_PAGE.name,
+    pathParameters: Routes.CHANNEL_PAGE.params(channel),
+  );
+}
+
+// Opens the channel detail sheet and dispatches on the user's selection.
+//
+// The sheet pops itself with a [ChannelDetailAction] subtype; this function
+// awaits that result and routes to the matching handler.
+Future<void> _openChannelDetailSheet(
+  BuildContext context,
+  Channel channel,
+) async {
+  final action = await showChannelDetailSheet(context: context, channel: channel);
+
+  if (action == null || !context.mounted) return;
+  return _onChannelDetailAction(context, channel, action).ignore();
+}
+
+// Switches on a [ChannelDetailAction] and dispatches to the per-action
+// handler.
+Future<void> _onChannelDetailAction(
+  BuildContext context,
+  Channel channel,
+  ChannelDetailAction action,
+) async {
+  final client = StreamChat.of(context).client;
+  return switch (action) {
+    ViewChannelInfo(:final user) => _pushChannelInfo(context, channel, user),
+    PinChannel() => channel.pin(),
+    UnpinChannel() => channel.unpin(),
+    MuteChannelMember(:final user) => client.muteUser(user.id),
+    UnmuteChannelMember(:final user) => client.unmuteUser(user.id),
+    BlockChannelMember(:final user) => client.blockUser(user.id),
+    LeaveChannel() => _maybeLeaveChannel(context, channel),
+    DeleteChannel() => _maybeDeleteChannel(context, channel),
+  };
+}
+
+// Pushes the chat / group info screen depending on whether [user] was
+// resolved. 1-1 channels pass the other member here (forwarded as `extra`
+// to the chat-info route); group channels pass `null` and route to the
+// group info screen.
+Future<void> _pushChannelInfo(BuildContext context, Channel channel, User? user) {
+  final router = GoRouter.of(context);
+
+  if (user != null) {
+    return router.pushNamed(
+      Routes.CHAT_INFO_SCREEN.name,
+      pathParameters: Routes.CHAT_INFO_SCREEN.params(channel),
+      extra: user,
+    );
+  }
+
+  return router.pushNamed(
+    Routes.GROUP_INFO_SCREEN.name,
+    pathParameters: Routes.GROUP_INFO_SCREEN.params(channel),
+  );
+}
+
+// Shows a confirmation dialog before removing the current user from the
+// channel. Leave is only surfaced for group channels in the detail sheet,
+// so the copy is group-specific here.
+Future<void> _maybeLeaveChannel(BuildContext context, Channel channel) async {
+  final currentUserId = StreamChat.of(context).currentUser?.id;
+  if (currentUserId == null) return;
+
+  final confirmed = await _showConfirmationDialog(
+    context: context,
+    title: 'Leave group',
+    content: 'Are you sure you want to leave this group?',
+    confirmLabel: 'Leave',
+  );
+
+  if (confirmed != true) return;
+  await channel.removeMembers([currentUserId]);
+}
+
+// Shows a confirmation dialog before deleting the channel. On success, pops
+// the channel page if currently visible (e.g. when invoked from inside a
+// channel route).
+Future<void> _maybeDeleteChannel(BuildContext context, Channel channel) async {
+  final router = GoRouter.of(context);
+  final subject = channel.isOneToOne ? 'conversation' : 'group';
+
+  final confirmed = await _showConfirmationDialog(
+    context: context,
+    title: 'Delete ${subject.toLowerCase()}',
+    content: 'Are you sure you want to delete this $subject?',
+    confirmLabel: 'Delete',
+  );
+
+  if (confirmed != true) return;
+  await channel.delete();
+  if (router.canPop()) router.pop();
 }
 
 class _ChannelListSearch extends StatelessWidget {
@@ -249,36 +302,90 @@ class _ChannelListSearch extends StatelessWidget {
           },
         );
       },
-      itemBuilder:
-          (
-            context,
-            messageResponses,
-            index,
-            defaultWidget,
-          ) {
-            final messageResponse = messageResponses[index];
+      itemBuilder: (context, messageResponses, index, defaultWidget) {
+        final messageResponse = messageResponses[index];
 
-            return defaultWidget.copyWith(
-              onTap: () async {
-                FocusScope.of(context).requestFocus(FocusNode());
-                final client = StreamChat.of(context).client;
-                final router = GoRouter.of(context);
-                final message = messageResponse.message;
-                final channel = client.channel(
-                  messageResponse.channel!.type,
-                  id: messageResponse.channel!.id,
-                );
-                if (channel.state == null) {
-                  await channel.watch();
-                }
-                router.pushNamed(
-                  Routes.CHANNEL_PAGE.name,
-                  pathParameters: Routes.CHANNEL_PAGE.params(channel),
-                  queryParameters: Routes.CHANNEL_PAGE.queryParams(message),
-                );
-              },
+        return defaultWidget.copyWith(
+          onTap: () async {
+            FocusScope.of(context).requestFocus(FocusNode());
+            final client = StreamChat.of(context).client;
+            final router = GoRouter.of(context);
+            final message = messageResponse.message;
+            final channel = client.channel(
+              messageResponse.channel!.type,
+              id: messageResponse.channel!.id,
+            );
+            if (channel.state == null) {
+              await channel.watch();
+            }
+            router.pushNamed(
+              Routes.CHANNEL_PAGE.name,
+              pathParameters: Routes.CHANNEL_PAGE.params(channel),
+              queryParameters: Routes.CHANNEL_PAGE.queryParams(message),
             );
           },
+        );
+      },
+    );
+  }
+}
+
+// Shows a Stream-styled confirmation [AlertDialog] with a destructive
+// primary action — used by the leave / delete handlers above.
+//
+// Resolves to `true` when the user taps confirm, `false` when they tap
+// cancel, and `null` if the dialog is dismissed without a choice.
+Future<bool?> _showConfirmationDialog({
+  required BuildContext context,
+  required String title,
+  required String content,
+  required String confirmLabel,
+}) {
+  return showDialog<bool>(
+    context: context,
+    builder: (_) => _ConfirmationDialog(
+      title: title,
+      content: content,
+      confirmLabel: confirmLabel,
+    ),
+  );
+}
+
+class _ConfirmationDialog extends StatelessWidget {
+  const _ConfirmationDialog({
+    required this.title,
+    required this.content,
+    required this.confirmLabel,
+  });
+
+  final String title;
+  final String content;
+  final String confirmLabel;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = context.streamColorScheme;
+
+    return AlertDialog(
+      backgroundColor: colorScheme.backgroundElevation1,
+      title: Text(title),
+      content: Text(content),
+      actions: [
+        StreamButton(
+          type: .ghost,
+          style: .secondary,
+          size: .small,
+          onPressed: () => Navigator.of(context).maybePop(false),
+          child: Text(context.translations.cancelLabel),
+        ),
+        StreamButton(
+          type: .solid,
+          style: .destructive,
+          size: .small,
+          onPressed: () => Navigator.of(context).maybePop(true),
+          child: Text(confirmLabel),
+        ),
+      ],
     );
   }
 }

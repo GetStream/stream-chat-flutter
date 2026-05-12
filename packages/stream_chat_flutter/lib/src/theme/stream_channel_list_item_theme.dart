@@ -4,6 +4,24 @@ import 'package:theme_extensions_builder_annotation/theme_extensions_builder_ann
 
 part 'stream_channel_list_item_theme.g.theme.dart';
 
+/// Predefined attribute positions for [StreamChannelListTile].
+///
+/// Each position controls where the channel attribute icons are rendered
+/// within the tile.
+///
+/// See also:
+///
+///  * [StreamChannelListTile], which uses these position variants.
+///  * [StreamChannelListItemThemeData.attributePosition], for setting a
+///    global default position.
+enum AttributePosition {
+  /// Inline with the channel name in the title row.
+  inlineTitle,
+
+  /// At the trailing end of the subtitle row.
+  trailingBottom,
+}
+
 /// Applies a channel list item theme to descendant
 /// [StreamChannelListItem] widgets.
 ///
@@ -91,7 +109,7 @@ class StreamChannelListItemThemeData with _$StreamChannelListItemThemeData {
     this.timestampStyle,
     this.backgroundColor,
     this.borderColor,
-    this.muteIconPosition,
+    this.attributePosition,
   });
 
   /// The text style for the channel title.
@@ -119,10 +137,10 @@ class StreamChannelListItemThemeData with _$StreamChannelListItemThemeData {
   /// Falls back to [StreamColorScheme.borderSubtle].
   final Color? borderColor;
 
-  /// The position of the mute icon.
+  /// Position of channel attribute icons.
   ///
-  /// Falls back to [MuteIconPosition.title].
-  final MuteIconPosition? muteIconPosition;
+  /// Defaults to [AttributePosition.inlineTitle].
+  final AttributePosition? attributePosition;
 
   /// Linearly interpolate between two [StreamChannelListItemThemeData] objects.
   static StreamChannelListItemThemeData? lerp(
@@ -130,15 +148,4 @@ class StreamChannelListItemThemeData with _$StreamChannelListItemThemeData {
     StreamChannelListItemThemeData? b,
     double t,
   ) => _$StreamChannelListItemThemeData.lerp(a, b, t);
-}
-
-/// The position of the mute icon.
-/// By default the mute icon will be shown directly next to the title.
-/// When choosing for subtitle, the mute icon will be shown at the end of the list item.
-enum MuteIconPosition {
-  /// Top row of the list item, next to the title.
-  title,
-
-  /// Bottom row, at the end of the list item.
-  subtitle,
 }

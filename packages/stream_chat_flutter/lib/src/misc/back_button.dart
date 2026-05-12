@@ -24,19 +24,16 @@ class StreamBackButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget icon = Icon(context.streamIcons.arrowLeft);
-    if (showUnreadCount) {
-      icon = switch (channelId) {
-        final cid? => StreamUnreadIndicator.channels(cid: cid, child: icon),
-        _ => StreamUnreadIndicator(child: icon),
-      };
-    }
+    final iconData = switch (Theme.of(context).platform) {
+      .iOS || .macOS => context.streamIcons.chevronLeft,
+      _ => context.streamIcons.arrowLeft,
+    };
 
-    return StreamButton.icon(
+    Widget button = StreamButton.icon(
       type: .ghost,
       size: .medium,
       style: .secondary,
-      icon: icon,
+      icon: Icon(iconData),
       onPressed: () {
         if (onPressed case final onPressed?) {
           return onPressed();
@@ -45,5 +42,14 @@ class StreamBackButton extends StatelessWidget {
         Navigator.maybePop(context);
       },
     );
+
+    if (showUnreadCount) {
+      button = switch (channelId) {
+        final cid? => StreamUnreadIndicator.channels(offset: .zero, cid: cid, child: button),
+        _ => StreamUnreadIndicator(offset: .zero, child: button),
+      };
+    }
+
+    return button;
   }
 }

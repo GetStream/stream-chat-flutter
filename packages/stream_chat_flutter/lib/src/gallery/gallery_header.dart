@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/attachment_actions_modal/attachment_actions_modal.dart';
-import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
-import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
-import 'package:stream_chat_flutter/src/theme/themes.dart';
-import 'package:stream_chat_flutter/src/utils/utils.dart';
-import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
-import 'package:stream_core_flutter/stream_core_flutter.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template streamGalleryHeader}
-/// Header/AppBar widget for media display screen
+/// Header bar for the gallery / media display screen.
+///
+/// Renders a [StreamAppBar] whose default title is the sender's [userName]
+/// and whose default subtitle is the [sentAt] timestamp. The default
+/// trailing action opens an [AttachmentActionsModal] for the focused
+/// [attachment].
+///
+/// The bar's chrome (background, padding, typography, divider) is themed via
+/// `StreamChatThemeData.galleryHeaderTheme`. Per-instance overrides go on
+/// [style].
 /// {@endtemplate}
 class StreamGalleryHeader extends StatelessWidget implements PreferredSizeWidget {
   /// {@macro streamGalleryHeader}
@@ -16,27 +19,19 @@ class StreamGalleryHeader extends StatelessWidget implements PreferredSizeWidget
     super.key,
     required this.message,
     required this.attachment,
-    this.showBackButton = true,
-    this.onBackPressed,
     this.onShowMessage,
     this.onReplyMessage,
-    this.onTitleTap,
-    this.onImageTap,
     this.userName = '',
     this.sentAt = '',
-    this.backgroundColor,
     this.attachmentActionsModalBuilder,
-    this.elevation = 1.0,
-  }) : preferredSize = const Size.fromHeight(kToolbarHeight);
-
-  /// Whether to show the leading back button.
-  ///
-  /// Defaults to `true`.
-  final bool showBackButton;
-
-  /// Callback to call when pressing the back button.
-  /// By default it calls [Navigator.pop]
-  final VoidCallback? onBackPressed;
+    this.leading,
+    this.automaticallyImplyLeading = true,
+    this.title,
+    this.subtitle,
+    this.trailing,
+    this.primary = true,
+    this.style,
+  });
 
   /// Callback to call when pressing the show message button.
   final VoidCallback? onShowMessage;
@@ -44,100 +39,97 @@ class StreamGalleryHeader extends StatelessWidget implements PreferredSizeWidget
   /// Callback to call when pressing the reply message button.
   final VoidCallback? onReplyMessage;
 
-  /// Callback to call when the header is tapped.
-  final VoidCallback? onTitleTap;
-
-  /// Callback to call when the image is tapped.
-  final VoidCallback? onImageTap;
-
-  /// Message which attachments are attached to
+  /// Message which attachments are attached to.
   final Message message;
 
-  /// The attachment that's currently in focus
+  /// The attachment that's currently in focus.
   final Attachment attachment;
 
-  /// Username of sender
+  /// Username of sender.
   final String userName;
 
-  /// Text which connotes the time the message was sent
+  /// Text which connotes the time the message was sent.
   final String sentAt;
-
-  /// The background color of this [StreamGalleryHeader].
-  final Color? backgroundColor;
 
   /// {@macro attachmentActionsBuilder}
   final AttachmentActionsBuilder? attachmentActionsModalBuilder;
 
-  /// The elevation of this [StreamGalleryHeader].
+  /// {@macro StreamAppBar.leading}
+  final Widget? leading;
+
+  /// {@macro StreamAppBar.automaticallyImplyLeading}
+  final bool automaticallyImplyLeading;
+
+  /// {@macro StreamAppBar.title}
   ///
-  /// Defaults to `1.0`. When used for desktop & web platforms, it should
-  /// be set to `0.0`.
-  final double elevation;
+  /// Defaults to a [Text] showing [userName].
+  final Widget? title;
+
+  /// {@macro StreamAppBar.subtitle}
+  ///
+  /// Defaults to a [Text] showing [sentAt].
+  final Widget? subtitle;
+
+  /// {@macro StreamAppBar.trailing}
+  ///
+  /// Defaults to an icon button that opens the attachment actions modal.
+  final Widget? trailing;
+
+  /// {@macro StreamAppBar.primary}
+  final bool primary;
+
+  /// {@macro StreamAppBar.style}
+  ///
+  /// Per-instance override; merges over
+  /// `StreamChatThemeData.galleryHeaderTheme`.
+  final StreamAppBarStyle? style;
+
+  @override
+  Size get preferredSize => const Size.fromHeight(kStreamHeaderHeight);
 
   @override
   Widget build(BuildContext context) {
-    final galleryHeaderThemeData = StreamGalleryHeaderTheme.of(context);
-    final textTheme = context.streamTextTheme;
+    final headerTheme = StreamChatTheme.of(context).galleryHeaderTheme;
 
-    return StreamAppBar(
-      elevation: elevation,
-      leading: showBackButton
-          ? IconButton(
-              icon: Icon(
-                context.streamIcons.arrowLeft,
-                color: galleryHeaderThemeData.closeButtonColor,
-                size: 20,
-              ),
-              onPressed: onBackPressed,
-            )
-          : const Empty(),
-      surfaceTintColor: backgroundColor ?? galleryHeaderThemeData.backgroundColor,
-      backgroundColor: backgroundColor ?? galleryHeaderThemeData.backgroundColor,
-      actions: <Widget>[
-        if (!message.isEphemeral)
-          IconButton(
-            icon: Icon(
-              context.streamIcons.more,
-              color: galleryHeaderThemeData.iconMenuPointColor,
-            ),
-            onPressed: () => _showMessageActionModalBottomSheet(context),
-          ),
-      ],
-      centerTitle: true,
-      title: !message.isEphemeral
-          ? InkWell(
-              onTap: onTitleTap,
-              child: SizedBox(
-                height: preferredSize.height,
-                width: preferredSize.width,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    Text(
-                      userName,
-                      style: galleryHeaderThemeData.titleTextStyle ?? textTheme.headingSm,
-                    ),
-                    Text(
-                      sentAt,
-                      style:
-                          galleryHeaderThemeData.subtitleTextStyle ??
-                          textTheme.captionDefault.copyWith(color: context.streamColorScheme.textSecondary),
-                    ),
-                  ],
-                ),
-              ),
-            )
-          : const Empty(),
+    // Ephemeral messages (e.g. previews of unsent attachments) don't have
+    // sender / timestamp metadata to surface, so the title / subtitle /
+    // overflow-action defaults are suppressed — caller-provided slots
+    // still flow through.
+    var title = this.title;
+    if (title == null && !message.isEphemeral) {
+      title = Text(userName);
+    }
+
+    var subtitle = this.subtitle;
+    if (subtitle == null && !message.isEphemeral) {
+      subtitle = Text(sentAt);
+    }
+
+    var trailing = this.trailing;
+    if (trailing == null && !message.isEphemeral) {
+      trailing = IconButton(
+        icon: Icon(context.streamIcons.more),
+        onPressed: () => _showMessageActionModalBottomSheet(context),
+      );
+    }
+
+    return StreamAppBarTheme(
+      data: headerTheme,
+      child: StreamAppBar(
+        leading: leading,
+        automaticallyImplyLeading: automaticallyImplyLeading,
+        title: title,
+        subtitle: subtitle,
+        trailing: trailing,
+        primary: primary,
+        style: style,
+      ),
     );
   }
 
-  @override
-  final Size preferredSize;
-
   Future<void> _showMessageActionModalBottomSheet(BuildContext context) async {
     final channel = StreamChannel.of(context).channel;
-    final galleryHeaderThemeData = StreamChatTheme.of(context).galleryHeaderTheme;
+    final colorTheme = StreamChatTheme.of(context).colorTheme;
 
     final defaultModal = AttachmentActionsModal(
       attachment: attachment,
@@ -157,7 +149,7 @@ class StreamGalleryHeader extends StatelessWidget implements PreferredSizeWidget
     final result = await showDialog(
       useRootNavigator: false,
       context: context,
-      barrierColor: galleryHeaderThemeData.bottomSheetBarrierColor,
+      barrierColor: colorTheme.overlay,
       builder: (context) => StreamChannel(
         channel: channel,
         child: effectiveModal,

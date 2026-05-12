@@ -94,8 +94,8 @@ class StreamMessageActionConfirmationModal extends StatelessWidget {
         child: cancelActionTitle ?? Text(translations.cancelLabel),
       ),
       StreamButton(
-        type: .ghost,
-        style: .destructive,
+        type: .solid,
+        style: isDestructiveAction ? .destructive : .primary,
         size: .small,
         onPressed: () => Navigator.of(context).maybePop(true),
         child: confirmActionTitle ?? Text(translations.confirmLabel),

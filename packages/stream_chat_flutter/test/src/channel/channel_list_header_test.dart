@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 import '../mocks.dart';
 
@@ -31,7 +30,6 @@ void main() {
 
       final userAvatar = tester.widget<StreamUserAvatar>(find.byType(StreamUserAvatar));
       expect(userAvatar.user, clientState.currentUser);
-      expect(find.byType(StreamButton), findsOneWidget);
       expect(find.text('Stream Chat'), findsOneWidget);
     },
   );
@@ -108,12 +106,9 @@ void main() {
             client: client,
             child: Scaffold(
               body: StreamChannelListHeader(
-                titleBuilder: (context, status, client) => const Text('TITLE'),
+                title: const Text('TITLE'),
                 subtitle: const Text('SUBTITLE'),
-                leading: const Text('LEADING'),
-                actions: const [
-                  Text('ACTION'),
-                ],
+                trailing: const Text('ACTION'),
                 client: client,
               ),
             ),
@@ -124,46 +119,12 @@ void main() {
 
       expect(find.text('TITLE'), findsOneWidget);
       expect(find.text('SUBTITLE'), findsOneWidget);
-      expect(find.text('LEADING'), findsOneWidget);
       expect(find.text('ACTION'), findsOneWidget);
     },
   );
 
   testWidgets(
-    'it should apply prenavigationcallback',
-    (WidgetTester tester) async {
-      final client = MockClient();
-      final clientState = MockClientState();
-
-      when(() => client.state).thenReturn(clientState);
-      when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
-      when(() => client.wsConnectionStatusStream).thenAnswer((_) => Stream.value(ConnectionStatus.connecting));
-
-      var tapped = false;
-
-      await tester.pumpWidget(
-        MaterialApp(
-          home: StreamChat(
-            client: client,
-            child: Scaffold(
-              body: StreamChannelListHeader(
-                preNavigationCallback: () {
-                  tapped = true;
-                },
-              ),
-            ),
-          ),
-        ),
-      );
-      await tester.pump();
-
-      await tester.tap(find.byType(StreamUserAvatar));
-      expect(tapped, true);
-    },
-  );
-
-  testWidgets(
-    'it should apply passed callbacks',
+    'trailing slot receives caller-provided widget',
     (WidgetTester tester) async {
       final client = MockClient();
       final clientState = MockClientState();
@@ -172,19 +133,17 @@ void main() {
       when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
       when(() => client.wsConnectionStatusStream).thenAnswer((_) => Stream.value(ConnectionStatus.connected));
 
-      var tapped = 0;
+      var trailingTapped = 0;
       await tester.pumpWidget(
         MaterialApp(
           home: StreamChat(
             client: client,
             child: Scaffold(
               body: StreamChannelListHeader(
-                onUserAvatarTap: (u) {
-                  tapped++;
-                },
-                onNewChatButtonTap: () {
-                  tapped++;
-                },
+                trailing: GestureDetector(
+                  onTap: () => trailingTapped++,
+                  child: const Text('trailing-slot'),
+                ),
               ),
             ),
           ),
@@ -192,9 +151,8 @@ void main() {
       );
       await tester.pump();
 
-      await tester.tap(find.byType(StreamUserAvatar));
-      await tester.tap(find.byIcon(StreamIconData.plus));
-      expect(tapped, 2);
+      await tester.tap(find.text('trailing-slot'));
+      expect(trailingTapped, 1);
     },
   );
 }

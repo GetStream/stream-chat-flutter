@@ -37,7 +37,7 @@ void main() {
         );
 
         // Expect 2 file attachments and 1 media attachment
-        expect(find.byType(MessageComposerFileAttachment), findsNWidgets(2));
+        expect(find.byType(StreamMessageComposerFileAttachment), findsNWidgets(2));
         expect(find.byType(MessageInputMediaAttachments), findsOneWidget);
         expect(find.byType(StreamMediaAttachmentThumbnail), findsOneWidget);
       },
@@ -113,7 +113,7 @@ void main() {
         );
 
         // Expect 2 file attachments
-        expect(find.byType(MessageComposerFileAttachment), findsNWidgets(2));
+        expect(find.byType(StreamMessageComposerFileAttachment), findsNWidgets(2));
       },
     );
 
@@ -154,8 +154,8 @@ void main() {
       'MessageInputMediaAttachments should render media attachments',
       (WidgetTester tester) async {
         final attachments = [
-          Attachment(type: 'media', id: 'media1'),
-          Attachment(type: 'media', id: 'media2'),
+          Attachment(type: 'image', id: 'image1'),
+          Attachment(type: 'video', id: 'video1'),
         ];
 
         await tester.pumpWidget(
@@ -186,6 +186,27 @@ void main() {
 
         // Expect an empty box
         expect(find.byType(SizedBox), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'MessageInputMediaAttachments should render unsupported attachment for unknown types',
+      (WidgetTester tester) async {
+        final attachments = [
+          Attachment(type: 'unknown', id: 'unknown1'),
+          Attachment(type: 'something_else', id: 'unknown2'),
+        ];
+
+        await tester.pumpWidget(
+          wrapWithStreamChat(
+            MessageInputMediaAttachments(
+              attachments: attachments,
+            ),
+          ),
+        );
+
+        // Expect a fallback unsupported attachment widget for each unknown type.
+        expect(find.byType(StreamMessageComposerUnsupportedAttachment), findsNWidgets(2));
       },
     );
   });

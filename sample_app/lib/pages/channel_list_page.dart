@@ -77,9 +77,7 @@ class _ChannelListPageState extends State<ChannelListPage> {
     return Scaffold(
       backgroundColor: colorScheme.backgroundApp,
       appBar: StreamChannelListHeader(
-        titleBuilder: (_, __, ___) => Text(enabledTabs[_currentIndex].label, style: textTheme.headingSm),
-        onNewChatButtonTap: () => GoRouter.of(context).pushNamed(Routes.NEW_CHAT.name),
-        preNavigationCallback: () => FocusScope.of(context).requestFocus(FocusNode()),
+        title: Text(enabledTabs[_currentIndex].label, style: textTheme.headingSm),
       ),
       drawer: LeftDrawer(user: user),
       bottomNavigationBar: DecoratedBox(
@@ -87,24 +85,27 @@ class _ChannelListPageState extends State<ChannelListPage> {
           color: colorScheme.backgroundElevation1,
           border: Border(top: BorderSide(color: colorScheme.borderSubtle)),
         ),
-        child: BottomNavigationBar(
-          elevation: 0,
-          iconSize: 20,
-          currentIndex: _currentIndex,
-          type: BottomNavigationBarType.fixed,
-          selectedItemColor: colorScheme.textPrimary,
-          unselectedItemColor: colorScheme.textTertiary,
-          backgroundColor: Colors.transparent,
-          selectedLabelStyle: textTheme.metadataEmphasis,
-          unselectedLabelStyle: textTheme.metadataEmphasis,
-          onTap: (index) => setState(() => _currentIndex = index),
-          items: enabledTabs.map((tab) {
-            return BottomNavigationBarItem(
-              icon: tab.icon,
-              activeIcon: tab.selectedIcon,
-              label: tab.label,
-            );
-          }).toList(),
+        child: StreamBadgeNotificationTheme(
+          data: const .new(size: .xs),
+          child: BottomNavigationBar(
+            elevation: 0,
+            iconSize: 20,
+            currentIndex: _currentIndex,
+            type: BottomNavigationBarType.fixed,
+            selectedItemColor: colorScheme.textPrimary,
+            unselectedItemColor: colorScheme.textTertiary,
+            backgroundColor: Colors.transparent,
+            selectedLabelStyle: textTheme.metadataEmphasis,
+            unselectedLabelStyle: textTheme.metadataEmphasis,
+            onTap: (index) => setState(() => _currentIndex = index),
+            items: enabledTabs.map((tab) {
+              return BottomNavigationBarItem(
+                icon: tab.icon,
+                activeIcon: tab.selectedIcon,
+                label: tab.label,
+              );
+            }).toList(),
+          ),
         ),
       ),
       body: IndexedStack(

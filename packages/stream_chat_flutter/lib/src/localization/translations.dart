@@ -701,6 +701,10 @@ abstract class Translations {
   /// The label hint shown next to the viewer's own reaction indicating the
   /// reaction can be tapped to remove it.
   String get tapToRemoveReactionLabel;
+
+  /// The header text for the reaction detail sheet showing the count of
+  /// visible reactions (e.g. "1 Reaction" / "5 Reactions").
+  String reactionsCountText(int count);
 }
 
 /// Default implementation of Translation strings for the stream chat widgets
@@ -1508,4 +1512,7 @@ Attachment limit exceeded: it's not possible to add more than $limit attachments
 
   @override
   String get tapToRemoveReactionLabel => 'Tap to remove';
+
+  @override
+  String reactionsCountText(int count) => count == 1 ? '1 Reaction' : '$count Reactions';
 }

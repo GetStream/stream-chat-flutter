@@ -50,94 +50,38 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
       },
       child: Scaffold(
         backgroundColor: StreamChatTheme.of(context).colorTheme.appBg,
-        appBar: AppBar(
-          elevation: 1,
-          backgroundColor: StreamChatTheme.of(context).colorTheme.barsBg,
-          leading: const StreamBackButton(),
-          title: Text(
-            'Name of Group Chat',
-            style: TextStyle(
-              color: StreamChatTheme.of(context).colorTheme.textHighEmphasis,
-              fontSize: 16,
-            ),
+        appBar: StreamAppBar(
+          title: const Text('Name of Group Chat'),
+          trailing: StreamButton.icon(
+            icon: Icon(context.streamIcons.checkmark),
+            onPressed: _isGroupNameEmpty
+                ? null
+                : () async {
+                    try {
+                      final groupName = _groupNameController.text;
+                      final client = StreamChat.of(context).client;
+                      final router = GoRouter.of(context);
+                      final channel = client.channel(
+                        'messaging',
+                        id: const Uuid().v4(),
+                        extraData: {
+                          'members': [
+                            client.state.currentUser!.id,
+                            ...widget.groupChatState.users.map((e) => e.id),
+                          ],
+                          'name': groupName,
+                        },
+                      );
+                      await channel.watch();
+                      router.goNamed(
+                        Routes.CHANNEL_PAGE.name,
+                        pathParameters: Routes.CHANNEL_PAGE.params(channel),
+                      );
+                    } catch (err) {
+                      _showErrorAlert();
+                    }
+                  },
           ),
-          centerTitle: true,
-          bottom: PreferredSize(
-            preferredSize: const Size.fromHeight(kToolbarHeight),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
-              child: Row(
-                children: [
-                  Text(
-                    'Name'.toUpperCase(),
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: StreamChatTheme.of(context).colorTheme.textLowEmphasis,
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: TextField(
-                      controller: _groupNameController,
-                      decoration: InputDecoration(
-                        isDense: true,
-                        border: InputBorder.none,
-                        focusedBorder: InputBorder.none,
-                        enabledBorder: InputBorder.none,
-                        errorBorder: InputBorder.none,
-                        disabledBorder: InputBorder.none,
-                        contentPadding: EdgeInsets.zero,
-                        hintText: 'Choose a group chat name',
-                        hintStyle: TextStyle(
-                          fontSize: 14,
-                          color: StreamChatTheme.of(context).colorTheme.textLowEmphasis,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          actions: [
-            StreamNeumorphicButton(
-              child: IconButton(
-                iconSize: 24,
-                padding: EdgeInsets.zero,
-                color: _isGroupNameEmpty
-                    ? StreamChatTheme.of(context).colorTheme.textLowEmphasis
-                    : StreamChatTheme.of(context).colorTheme.accentPrimary,
-                icon: Icon(context.streamIcons.checkmark),
-                onPressed: _isGroupNameEmpty
-                    ? null
-                    : () async {
-                        try {
-                          final groupName = _groupNameController.text;
-                          final client = StreamChat.of(context).client;
-                          final router = GoRouter.of(context);
-                          final channel = client.channel(
-                            'messaging',
-                            id: const Uuid().v4(),
-                            extraData: {
-                              'members': [
-                                client.state.currentUser!.id,
-                                ...widget.groupChatState.users.map((e) => e.id),
-                              ],
-                              'name': groupName,
-                            },
-                          );
-                          await channel.watch();
-                          router.goNamed(
-                            Routes.CHANNEL_PAGE.name,
-                            pathParameters: Routes.CHANNEL_PAGE.params(channel),
-                          );
-                        } catch (err) {
-                          _showErrorAlert();
-                        }
-                      },
-              ),
-            ),
-          ],
         ),
         body: StreamConnectionStatusBuilder(
           statusBuilder: (context, status) {
@@ -163,6 +107,40 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
               message: statusString,
               child: Column(
                 children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
+                    child: Row(
+                      children: [
+                        Text(
+                          'Name'.toUpperCase(),
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: StreamChatTheme.of(context).colorTheme.textLowEmphasis,
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: TextField(
+                            controller: _groupNameController,
+                            decoration: InputDecoration(
+                              isDense: true,
+                              border: InputBorder.none,
+                              focusedBorder: InputBorder.none,
+                              enabledBorder: InputBorder.none,
+                              errorBorder: InputBorder.none,
+                              disabledBorder: InputBorder.none,
+                              contentPadding: EdgeInsets.zero,
+                              hintText: 'Choose a group chat name',
+                              hintStyle: TextStyle(
+                                fontSize: 14,
+                                color: StreamChatTheme.of(context).colorTheme.textLowEmphasis,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                   Container(
                     width: double.maxFinite,
                     decoration: BoxDecoration(

@@ -55,7 +55,7 @@ void main() {
               child: Scaffold(
                 body: StreamThreadHeader(
                   parent: Message(replyCount: 1),
-                  showTypingIndicator: false,
+                  subtitle: const Text('1 reply'),
                 ),
               ),
             ),
@@ -66,7 +66,6 @@ void main() {
       // wait for the initial state to be rendered.
       await tester.pumpAndSettle();
 
-      expect(find.byType(StreamBackButton), findsOneWidget);
       expect(find.text('1 reply'), findsOneWidget);
       expect(find.text('Thread'), findsOneWidget);
     },
@@ -125,13 +124,11 @@ void main() {
                   parent: Message(),
                   subtitle: const Text('subtitle'),
                   leading: const Text('leading'),
-                  title: const Text('title'),
-                  onTitleTap: () {
-                    tapped = true;
-                  },
-                  actions: const [
-                    Text('action'),
-                  ],
+                  title: GestureDetector(
+                    onTap: () => tapped = true,
+                    child: const Text('title'),
+                  ),
+                  trailing: const Text('action'),
                 ),
               ),
             ),

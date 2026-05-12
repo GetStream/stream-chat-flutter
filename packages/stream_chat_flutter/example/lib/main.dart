@@ -227,25 +227,37 @@ class _ChannelPageState extends State<ChannelPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: StreamChannelHeader(
-        onBackPressed: widget.onBackPressed != null
-            ? () {
-                widget.onBackPressed!(context);
-              }
-            : null,
-        onImageTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) {
-                return StreamChannel(
-                  channel: StreamChannel.of(context).channel,
-                  child: const DebugChannelPage(),
-                );
-              },
-            ),
-          );
+        leading: switch ((widget.showBackButton, widget.onBackPressed)) {
+          (true, final cb?) => StreamBackButton(
+            channelId: StreamChannel.of(context).channel.cid,
+            onPressed: () => cb(context),
+            showUnreadCount: true,
+          ),
+          (true, null) => StreamBackButton(
+            channelId: StreamChannel.of(context).channel.cid,
+            showUnreadCount: true,
+          ),
+          _ => const SizedBox(),
         },
-        showBackButton: widget.showBackButton,
+        trailing: GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) {
+                  return StreamChannel(
+                    channel: StreamChannel.of(context).channel,
+                    child: const DebugChannelPage(),
+                  );
+                },
+              ),
+            );
+          },
+          child: StreamChannelAvatar(
+            size: .lg,
+            channel: StreamChannel.of(context).channel,
+          ),
+        ),
       ),
       body: Column(
         children: <Widget>[

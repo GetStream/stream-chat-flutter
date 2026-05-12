@@ -97,10 +97,7 @@ class _LocationPickerDialogState extends State<LocationPickerDialog> with Widget
 
     return Scaffold(
       backgroundColor: colorTheme.appBg,
-      appBar: AppBar(
-        backgroundColor: colorTheme.barsBg,
-        title: const Text('Share Location'),
-      ),
+      appBar: StreamAppBar(title: const Text('Share Location')),
       body: Stack(
         alignment: AlignmentDirectional.bottomCenter,
         children: [

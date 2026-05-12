@@ -65,7 +65,7 @@ class _PollAddCommentDialogState extends State<PollAddCommentDialog> {
         child: Text(context.translations.cancelLabel),
       ),
       StreamButton(
-        type: .ghost,
+        type: .solid,
         style: .primary,
         size: .small,
         onPressed: switch (_comment.trim()) {
