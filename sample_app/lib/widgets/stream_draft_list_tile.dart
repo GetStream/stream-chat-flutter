@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:sample_app/widgets/stream_draft_list_tile_theme.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// A widget that displays a draft in a list.
@@ -30,15 +29,16 @@ class StreamDraftListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = StreamDraftListTileTheme.of(context);
+    final chatTheme = StreamChatTheme.of(context);
+    final colorTheme = chatTheme.colorTheme;
 
     return Material(
-      color: theme.backgroundColor,
+      color: colorTheme.barsBg,
       child: InkWell(
         onTap: onTap,
         onLongPress: onLongPress,
-        child: Container(
-          padding: theme.padding,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
           child: Column(
             spacing: 6,
             mainAxisSize: MainAxisSize.min,
@@ -47,12 +47,10 @@ class StreamDraftListTile extends StatelessWidget {
               if (draft.channel case final channel?)
                 _DraftTitle(
                   channelName: channel.formatName(currentUser: currentUser),
-                  theme: theme,
                 ),
               _DraftMessageContent(
                 draft: draft,
                 currentUser: currentUser,
-                theme: theme,
               ),
             ],
           ),
@@ -63,31 +61,28 @@ class StreamDraftListTile extends StatelessWidget {
 }
 
 class _DraftTitle extends StatelessWidget {
-  const _DraftTitle({
-    this.channelName,
-    required this.theme,
-  });
+  const _DraftTitle({this.channelName});
 
   final String? channelName;
-  final StreamDraftListTileThemeData theme;
 
   @override
   Widget build(BuildContext context) {
+    final chatTheme = StreamChatTheme.of(context);
+    final style = chatTheme.textTheme.bodyBold.copyWith(
+      color: chatTheme.colorTheme.textHighEmphasis,
+    );
+
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(
-          Icons.edit_note_rounded,
-          size: 16,
-          color: theme.draftChannelNameStyle?.color,
-        ),
+        Icon(Icons.edit_note_rounded, size: 16, color: style.color),
         const SizedBox(width: 4),
         Flexible(
           child: Text(
             channelName ?? context.translations.noTitleText,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: theme.draftChannelNameStyle,
+            style: style,
           ),
         ),
       ],
@@ -99,32 +94,34 @@ class _DraftMessageContent extends StatelessWidget {
   const _DraftMessageContent({
     required this.draft,
     this.currentUser,
-    required this.theme,
   });
 
   final Draft draft;
   final User? currentUser;
-  final StreamDraftListTileThemeData theme;
 
   @override
   Widget build(BuildContext context) {
+    final chatTheme = StreamChatTheme.of(context);
+    final subtleStyle = chatTheme.textTheme.footnote.copyWith(
+      color: chatTheme.colorTheme.textLowEmphasis,
+    );
+
     final date = draft.createdAt.toLocal();
-    final formatter = theme.draftTimestampFormatter;
-    final timestamp = formatter != null ? formatter(context, date) : _formatDate(date);
+    final timestamp = _formatDate(date);
 
     return Row(
       children: [
         Expanded(
           child: StreamDraftMessagePreviewText(
             draftMessage: draft.message,
-            textStyle: theme.draftMessageStyle,
+            textStyle: subtleStyle,
           ),
         ),
         Text(
           timestamp,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: theme.draftTimestampStyle,
+          style: subtleStyle,
         ),
       ],
     );
