@@ -41,7 +41,7 @@ typedef StreamThreadListViewIndexedWidgetBuilder = StreamScrollViewIndexedWidget
 ///
 /// See also:
 /// * [StreamUnreadThreadsBanner], which wraps this view to show new threads.
-/// * [StreamMessageWidget], which renders each thread's parent message.
+/// * [StreamMessageItem], which renders each thread's parent message.
 /// * [StreamThreadListController]
 /// {@endtemplate}
 class StreamThreadListView extends StatelessWidget {

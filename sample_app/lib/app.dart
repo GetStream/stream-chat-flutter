@@ -205,7 +205,7 @@ class _StreamChatSampleAppState extends State<StreamChatSampleApp>
                             client: client,
                             componentBuilders: StreamComponentBuilders(
                               extensions: streamChatComponentBuilders(
-                                messageWidget: customMessageWidgetBuilder,
+                                messageItem: customMessageItemBuilder,
                               ),
                             ),
                             streamChatConfigData: config.toStreamChatConfigData(),

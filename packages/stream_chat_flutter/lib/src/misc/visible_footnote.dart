@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template streamVisibleFootnote}
-/// Informs the user about a [StreamMessageWidget]'s visibility to the current
+/// Informs the user about a [StreamMessageItem]'s visibility to the current
 /// user.
 ///
 /// Used in [StreamGiphyAttachment].

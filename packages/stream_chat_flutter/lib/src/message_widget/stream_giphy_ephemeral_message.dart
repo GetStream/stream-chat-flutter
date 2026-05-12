@@ -1,23 +1,23 @@
 import 'package:flutter/material.dart' hide Action;
 import 'package:stream_chat_flutter/src/attachment/giphy_attachment.dart';
-import 'package:stream_chat_flutter/src/message_widget/components/stream_message_metadata.dart';
+import 'package:stream_chat_flutter/src/message_widget/components/stream_message_footer.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:stream_core_flutter/stream_core_flutter.dart' as core;
 
-/// Signature for the action callback passed to [GiphyEphemeralMessage].
+/// Signature for the action callback passed to [StreamGiphyEphemeralMessage].
 ///
-/// Used by [GiphyEphemeralMessage.onActionPressed].
+/// Used by [StreamGiphyEphemeralMessage.onActionPressed].
 typedef GiffyAction = void Function(String name, String value);
 
 const _kDefaultGiphyConstraints = BoxConstraints(minWidth: 128);
 
-/// {@template giphyEphemeralMessage}
+/// {@template streamGiphyEphemeralMessage}
 /// Shows an ephemeral message of type giphy in a [MessageWidget].
 /// {@endtemplate}
-class GiphyEphemeralMessage extends StatelessWidget {
-  /// {@macro giphyEphemeralMessage}
-  const GiphyEphemeralMessage({
+class StreamGiphyEphemeralMessage extends StatelessWidget {
+  /// {@macro streamGiphyEphemeralMessage}
+  const StreamGiphyEphemeralMessage({
     super.key,
     required this.message,
     this.onActionPressed,
@@ -50,7 +50,7 @@ class GiphyEphemeralMessage extends StatelessWidget {
           child: Padding(
             padding: .symmetric(horizontal: spacing.md),
             child: core.StreamMessageContent(
-              footer: StreamMessageMetadata(message: message),
+              footer: StreamMessageFooter(message: message),
               child: core.StreamMessageBubble(
                 child: core.StreamIntrinsicColumn(
                   crossAxisAlignment: .start,

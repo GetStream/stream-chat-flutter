@@ -63,15 +63,15 @@ class StreamChat extends StatefulWidget {
   ///
   /// {@tool snippet}
   ///
-  /// Override the default message widget with a custom builder:
+  /// Override the default message item with a custom builder:
   ///
   /// ```dart
   /// StreamChat(
   ///   client: client,
   ///   componentBuilders: StreamComponentBuilders(
   ///     extensions: streamChatComponentBuilders(
-  ///       messageWidget: (context, props) {
-  ///         return DefaultStreamMessage(
+  ///       messageItem: (context, props) {
+  ///         return DefaultStreamMessageItem(
   ///           props: props.copyWith(
   ///             actionsBuilder: myActionsBuilder,
   ///           ),

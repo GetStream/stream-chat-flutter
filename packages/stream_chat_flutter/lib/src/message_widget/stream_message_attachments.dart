@@ -18,7 +18,7 @@ import 'package:stream_core_flutter/stream_core_flutter.dart' as core;
 ///
 /// Example with custom location attachments:
 /// ```dart
-/// StreamMessageWidget(
+/// StreamMessageItem(
 ///   message: message,
 ///   onAttachmentTap: (context, message, attachment) async {
 ///     if (attachment.type == 'location') {
@@ -32,14 +32,14 @@ import 'package:stream_core_flutter/stream_core_flutter.dart' as core;
 /// {@endtemplate}
 typedef OnAttachmentWidgetTap = FutureOr<bool> Function(BuildContext context, Message message, Attachment attachment);
 
-/// {@template parseAttachments}
-/// Parses the attachments of a [StreamMessageWidget].
+/// {@template streamMessageAttachments}
+/// Renders the attachments of a [StreamMessageItem].
 ///
-/// Used in [MessageCard]. Should not be used elsewhere.
+/// Used inside [StreamMessageContent]. Should not be used elsewhere.
 /// {@endtemplate}
-class ParseAttachments extends core.NullableStatelessWidget {
-  /// {@macro parseAttachments}
-  const ParseAttachments({
+class StreamMessageAttachments extends core.NullableStatelessWidget {
+  /// {@macro streamMessageAttachments}
+  const StreamMessageAttachments({
     super.key,
     required this.message,
     this.attachmentBuilders,

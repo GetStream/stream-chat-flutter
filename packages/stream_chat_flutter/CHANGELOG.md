@@ -26,6 +26,17 @@
 - Renamed `MuteIconPosition` → `AttributePosition` (values `title` → `inlineTitle`, `subtitle` → `trailingBottom`) and `StreamChannelListItemThemeData.muteIconPosition` → `attributePosition`. Now controls both mute and pin icons in `StreamChannelListTile`.
 - Removed `AttachmentModalSheet`, `ErrorAlertSheet` and `StreamChannelInfoBottomSheet`.
 - Removed `StreamMarkdownMessage`; use `StreamMessageText` (re-exported from `stream_core_flutter`) instead.
+- Renamed message item components to align with Android Compose and SwiftUI conventions:
+  - `StreamMessageWidget` → `StreamMessageItem` (file moved to `message_item.dart`).
+  - `DefaultStreamMessage` → `DefaultStreamMessageItem`.
+  - `StreamMessageWidgetProps` → `StreamMessageItemProps`.
+  - `StreamMessageWidgetBuilder` typedef → `StreamMessageItemBuilder`.
+  - `StreamMessageAnnotations` → `StreamMessageHeader`.
+  - `StreamMessageMetadata` → `StreamMessageFooter`.
+  - `ParseAttachments` → `StreamMessageAttachments`.
+  - `streamChatComponentBuilders(messageWidget: ...)` → `messageItem: ...`.
+  - `StreamMessageContent(annotation: ..., metadata: ...)` → `header: ..., footer: ...`.
+  See [`migrations/redesign/message_widget.md`](../../migrations/redesign/message_widget.md).
 
 ✅ Added
 

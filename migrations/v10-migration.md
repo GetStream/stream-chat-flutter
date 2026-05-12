@@ -23,7 +23,7 @@ This guide covers all breaking changes in **Stream Chat Flutter SDK v10.0.0**. W
     - [StreamMessageReactionsModal](#streammessagereactionsmodal)
 - [Message UI](#message-ui)
     - [onAttachmentTap](#onattachmenttap)
-    - [StreamMessageWidget](#streammessagewidget)
+    - [StreamMessageItem](#streammessageitem)
     - [StreamMessageAction](#streammessageaction)
 - [Message State & Deletion](#message-state--deletion)
     - [MessageState](#messagestate)
@@ -664,7 +664,7 @@ Updates to message widgets, attachment handling, and custom action patterns.
 
 **Before:**
 ```dart
-StreamMessageWidget(
+StreamMessageItem(
   message: message,
   onAttachmentTap: (message, attachment) {
     // Could only override - no way to fallback to default behavior
@@ -678,7 +678,7 @@ StreamMessageWidget(
 
 **After:**
 ```dart
-StreamMessageWidget(
+StreamMessageItem(
   message: message,
   onAttachmentTap: (context, message, attachment) async {
     if (attachment.type == 'location') {
@@ -692,7 +692,7 @@ StreamMessageWidget(
 
 **Example: Handling multiple custom types**
 ```dart
-StreamMessageWidget(
+StreamMessageItem(
   message: message,
   onAttachmentTap: (context, message, attachment) async {
     switch (attachment.type) {
@@ -722,7 +722,7 @@ StreamMessageWidget(
 
 ---
 
-### StreamMessageWidget
+### StreamMessageItem
 
 > **Introduced in:** [v10.0.0-beta.1](https://pub.dev/packages/stream_chat_flutter/versions/10.0.0-beta.1)
 
@@ -735,7 +735,7 @@ StreamMessageWidget(
 
 **Before:**
 ```dart
-StreamMessageWidget(
+StreamMessageItem(
   message: message,
   showReactionTail: true,
 );
@@ -743,7 +743,7 @@ StreamMessageWidget(
 
 **After:**
 ```dart
-StreamMessageWidget(
+StreamMessageItem(
   message: message,
 );
 ```
@@ -789,7 +789,7 @@ final customAction = StreamMessageAction<CustomMessageAction>(
   iconColor: Colors.blue,
 );
 
-StreamMessageWidget(
+StreamMessageItem(
   message: message,
   customActions: [customAction],
   onCustomActionTap: (CustomMessageAction action) {
@@ -1054,7 +1054,7 @@ This appendix provides a chronological reference of breaking changes by beta ver
 - [StreamReactionPicker](#streamreactionpicker)
 - [StreamMessageAction](#streammessageaction)
 - [StreamMessageReactionsModal](#streammessagereactionsmodal)
-- [StreamMessageWidget](#streammessagewidget)
+- [StreamMessageItem](#streammessageitem)
 
 ### v10.0.0-beta.3
 

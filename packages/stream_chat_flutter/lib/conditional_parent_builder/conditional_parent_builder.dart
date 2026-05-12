@@ -33,7 +33,7 @@ typedef ParentBuilder =
 /// ),
 /// ```
 /// This example can be found in the `stream_chat_flutter` source code under
-/// `src/message_widget/message_widget.dart`.
+/// `src/message_widget/stream_message_item.dart`.
 /// {@endtemplate}
 class ConditionalParentBuilder extends StatelessWidget {
   /// {@macro conditionalParentBuilder}
