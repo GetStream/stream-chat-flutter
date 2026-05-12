@@ -49,7 +49,7 @@ dependencies:
   yaml: ^3.1.2
 
 dev_dependencies:
-  flutter_launcher_icons: ^0.14.2
+  flutter_launcher_icons: ^0.14.4
 
 flutter:
   uses-material-design: true

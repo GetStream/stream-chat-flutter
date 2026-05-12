@@ -30,8 +30,8 @@ dev_dependencies:
   device_preview: ^1.2.0
   flutter_test:
     sdk: flutter
-  mocktail: ^1.0.0
-  plugin_platform_interface: ^2.0.0
+  mocktail: ^1.0.5
+  plugin_platform_interface: ^2.1.8
 
 flutter:
   uses-material-design: true
