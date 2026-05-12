@@ -291,12 +291,14 @@ class _StreamChatMessageInputContent extends StatelessWidget {
           // Return if the recording is already started.
           if (audioRecorderController.isRecording) return;
 
+          // Capture the label before the async gap to avoid using a potentially
+          // unmounted BuildContext after awaiting.
+          final holdLabel = context.translations.holdToRecordLabel;
+
           // Notify the parent that the recorder is canceled before it starts.
           await widget.feedback.onRecordStartCancel(context);
           // Show a message to the user to hold to record.
-          audioRecorderController.showInfo(
-            context.translations.holdToRecordLabel,
-          );
+          audioRecorderController.showInfo(holdLabel);
         },
         onLongPressMoveUpdate: (details) async {
           // Return if the recording not yet started or already locked.
