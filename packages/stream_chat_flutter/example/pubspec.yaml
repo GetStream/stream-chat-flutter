@@ -20,7 +20,7 @@ environment:
   flutter: ">=3.38.1"
 
 dependencies:
-  collection: ^1.17.2
+  collection: ^1.19.1
   cupertino_icons: ^1.0.3
   flutter:
     sdk: flutter

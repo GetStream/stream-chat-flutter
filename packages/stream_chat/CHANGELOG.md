@@ -12,8 +12,13 @@
 
 🔄 Changed
 
+- Raised minimum versions of bundled Dart dependencies (`async`, `collection`, `dio`, `equatable`, `http_parser`, `json_annotation`, `logging`, `synchronized`, `uuid`, `web_socket_channel`) to current resolved versions.
 - Tightened `Channel.isGroup` from `memberCount != 2` to `memberCount > 2 || !isDistinct`. Two-member non-distinct channels now correctly report as groups, and 1-member distinct channels no longer do. Migrate via `!channel.isOneToOne` or `channel.memberCount != 2`.
 - Tightened `Channel.isDistinct` to require the `!members-` prefix (with trailing dash), matching the backend's `DistinctChannelPrefix` constant. Real server-generated ids always include the dash; only malformed/test ids that previously matched the looser `!members` check are affected.
+
+🔒 Security
+
+- Bumped `jose` floor to `0.3.5+1` to address [CVE-2026-34240](https://github.com/advisories/GHSA-vm9r-h74p-hg97) (untrusted JWK header accepted during signature verification). The SDK only uses `JsonWebToken.unverified` and is not directly exploitable, but the floor bump ensures consumers resolve to a patched version.
 
 🐞 Fixed
 

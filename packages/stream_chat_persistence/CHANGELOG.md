@@ -1,5 +1,9 @@
 ## Upcoming
 
+🔄 Changed
+
+- Raised minimum versions of bundled dependencies (`drift`, `path`, `path_provider`) to current resolved versions.
+
 🐞 Fixed
 
 - Fixed channel list re-sorting on refresh or when returning from background.
