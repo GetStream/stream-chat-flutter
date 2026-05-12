@@ -9,7 +9,7 @@ const _kDefaultWaveformHeight = 20.0;
 const _kDefaultWaveformLimit = 35;
 
 /// Widget to display the recording locked state.
-/// This widget can be used inside of the [StreamBaseMessageComposer] instead of the default `inputBody`.
+/// This widget can be used inside of the [StreamBaseMessageComposer] instead of the default `inputCenter`.
 class MessageComposerRecordingLocked extends StatelessWidget {
   /// Creates a new instance of [MessageComposerRecordingLocked].
   /// [audioRecorderController] is the controller for the audio recorder.
@@ -129,7 +129,7 @@ class MessageComposerRecordingLocked extends StatelessWidget {
 }
 
 /// Widget to display the recording stopped state.
-/// This widget can be used inside of the [StreamBaseMessageComposer] instead of the default `inputBody`.
+/// This widget can be used inside of the [StreamBaseMessageComposer] instead of the default `inputCenter`.
 class MessageComposerRecordingStopped extends StatefulWidget {
   /// Creates a new instance of [MessageComposerRecordingStopped].
   /// [audioRecorderController] is the controller for the audio recorder.

@@ -1,6 +1,29 @@
 import 'package:flutter/widgets.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-import 'package:stream_core_flutter/stream_core_flutter.dart' as core;
+
+/// Callback object that wires long-press gesture events from the voice-recording
+/// button through to the audio-recorder controller.
+class VoiceRecordingCallback {
+  /// Creates a [VoiceRecordingCallback].
+  VoiceRecordingCallback({
+    required this.onLongPressStart,
+    required this.onLongPressCancel,
+    required this.onLongPressEnd,
+    this.onLongPressMoveUpdate,
+  });
+
+  /// Called when the long-press gesture starts.
+  final VoidCallback onLongPressStart;
+
+  /// Called when the long-press gesture is cancelled before it registers.
+  final VoidCallback onLongPressCancel;
+
+  /// Called when the long-press gesture ends.
+  final GestureLongPressEndCallback onLongPressEnd;
+
+  /// Called when the pointer moves during a long-press gesture.
+  final GestureLongPressMoveUpdateCallback? onLongPressMoveUpdate;
+}
 
 /// Properties to build any of the sub-components.
 /// These properties are all the same, so features such as 'add attachment',
@@ -37,7 +60,7 @@ class MessageComposerComponentProps {
   final VoidCallback onSendPressed;
 
   /// The callback for when the microphone button is pressed.
-  final core.VoiceRecordingCallback? voiceRecordingCallback;
+  final VoiceRecordingCallback? voiceRecordingCallback;
 
   /// The callback for when the attachment button is pressed.
   final VoidCallback? onAttachmentButtonPressed;
@@ -131,9 +154,41 @@ class MessageComposerTrailingProps extends MessageComposerComponentProps {
   }
 }
 
-/// Properties for building the input component of the message composer.
+/// Properties for building the input container component of the message composer.
 class MessageComposerInputProps extends MessageComposerComponentProps {
   const MessageComposerInputProps._({
+    required super.controller,
+    required super.isFloating,
+    required super.onSendPressed,
+    required super.voiceRecordingCallback,
+    required super.onAttachmentButtonPressed,
+    required super.isPickerOpen,
+    required super.focusNode,
+    required super.currentUserId,
+    required super.audioRecorderState,
+    required super.onQuotedMessageCleared,
+  }) : super();
+
+  /// Creates a new instance of [MessageComposerInputProps] from a [MessageComposerComponentProps].
+  factory MessageComposerInputProps.from(MessageComposerComponentProps props) {
+    return MessageComposerInputProps._(
+      controller: props.controller,
+      isFloating: props.isFloating,
+      onSendPressed: props.onSendPressed,
+      voiceRecordingCallback: props.voiceRecordingCallback,
+      onAttachmentButtonPressed: props.onAttachmentButtonPressed,
+      isPickerOpen: props.isPickerOpen,
+      focusNode: props.focusNode,
+      currentUserId: props.currentUserId,
+      audioRecorderState: props.audioRecorderState,
+      onQuotedMessageCleared: props.onQuotedMessageCleared,
+    );
+  }
+}
+
+/// Properties for building the center content of the message composer input.
+class MessageComposerInputCenterProps extends MessageComposerComponentProps {
+  const MessageComposerInputCenterProps._({
     required super.controller,
     required super.isFloating,
     required super.onSendPressed,
@@ -156,9 +211,9 @@ class MessageComposerInputProps extends MessageComposerComponentProps {
     this.sendVoiceRecordingAutomatically = false,
   }) : super();
 
-  /// Creates a new instance of [MessageComposerInputProps] from a
+  /// Creates a new instance of [MessageComposerInputCenterProps] from a
   /// [MessageComposerComponentProps] and named input-level configuration values.
-  factory MessageComposerInputProps.from(
+  factory MessageComposerInputCenterProps.from(
     MessageComposerComponentProps componentProps, {
     String? placeholder,
     TextInputAction? textInputAction,
@@ -171,7 +226,7 @@ class MessageComposerInputProps extends MessageComposerComponentProps {
     AudioRecorderFeedback feedback = const AudioRecorderFeedback(),
     bool sendVoiceRecordingAutomatically = false,
   }) {
-    return MessageComposerInputProps._(
+    return MessageComposerInputCenterProps._(
       controller: componentProps.controller,
       isFloating: componentProps.isFloating,
       onSendPressed: componentProps.onSendPressed,

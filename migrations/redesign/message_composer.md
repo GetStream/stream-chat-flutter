@@ -132,8 +132,8 @@ These parameters have been removed. Attachment rendering in the composer input h
 | `fileAttachmentBuilder` | Override `messageComposerAttachment` in `StreamComponentFactory`. |
 | `mediaAttachmentBuilder` | Override `messageComposerAttachment` in `StreamComponentFactory`. |
 | `voiceRecordingAttachmentBuilder` | Override `messageComposerAttachment` in `StreamComponentFactory`. |
-| `quotedMessageBuilder` | Override `messageComposerInputHeader` in `StreamComponentFactory`. |
-| `quotedMessageAttachmentThumbnailBuilders` | Override `messageComposerInputHeader` or `messageComposerAttachment` in `StreamComponentFactory`. |
+| `quotedMessageBuilder` | Override `messageComposerInputHeader` or `messageComposerInput` in `StreamComponentFactory`. |
+| `quotedMessageAttachmentThumbnailBuilders` | Override `messageComposerInputHeader`, `messageComposerInput`, or `messageComposerAttachment` in `StreamComponentFactory`. |
 
 ### Attachment button visibility
 
@@ -179,8 +179,10 @@ The layout is composed of named default sub-widgets that can be replaced via the
 |---------------|-------------|
 | `DefaultMessageComposerLeading` | Left side of the composer row (e.g., attachment button) |
 | `DefaultMessageComposerTrailing` | Right side of the composer row (e.g., send/mic button) |
-| `DefaultMessageComposerInputLeading` | Left side inside the input area |
-| `DefaultMessageComposerInputTrailing` | Right side inside the input area |
+| `DefaultStreamMessageComposerInput` | The whole input container (header + leading + center + trailing) |
+| `DefaultStreamMessageComposerInputLeading` | Left side inside the input area |
+| `DefaultStreamMessageComposerInputCenter` | The actual text field area (text input or audio recording UI) |
+| `DefaultStreamMessageComposerInputTrailing` | Right side inside the input area |
 | `DefaultMessageComposerInputHeader` | Header above the input (e.g., reply/edit preview, attachment thumbnails) |
 
 ### Customization via Component Factory
@@ -417,6 +419,32 @@ The following public widgets are provided as building blocks for custom attachme
 | `StreamFileAttachmentBuilder` | Renders a generic file attachment with file type icon, name, and size |
 | `StreamMediaAttachmentBuilder` | Renders an image, video, or GIF attachment thumbnail with an optional media badge |
 | `RemoveAttachmentButton` | The standard filled icon button used to dismiss an attachment |
+
+---
+
+## Renames
+
+The following breaking renames were made to align the building-block naming across `stream_core_flutter` and `stream_chat_flutter`:
+
+### `stream_core_flutter`
+
+| Old | New |
+|-----|-----|
+| `inputBody` parameter on `StreamCoreMessageComposer` | `inputCenter` |
+| `inputBody` parameter on `StreamMessageComposerInput` | `inputCenter` |
+
+### `stream_chat_flutter`
+
+| Old | New |
+|-----|-----|
+| `StreamMessageComposerInput` widget | `StreamMessageComposerInputCenter` |
+| `DefaultStreamMessageComposerInput` widget | `DefaultStreamMessageComposerInputCenter` |
+| `MessageComposerInputProps` (the props class carrying text-field configuration) | `MessageComposerInputCenterProps` |
+| `messageComposerInput` builder key in `streamChatComponentBuilders` | `messageComposerInputCenter` |
+
+The name `StreamMessageComposerInput` is now used for the **input container** (the widget that assembles the header, leading, center, and trailing sub-components). Its corresponding props class is `MessageComposerInputProps` and its builder key in `streamChatComponentBuilders` is `messageComposerInput`.
+
+`inputHeader` / `StreamMessageComposerInputHeader` / `MessageComposerInputHeaderProps` / `messageComposerInputHeader` are **unchanged**.
 
 ---
 

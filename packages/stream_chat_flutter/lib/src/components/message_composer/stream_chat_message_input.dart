@@ -1,13 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 import 'package:stream_chat_flutter/src/components/message_composer/message_composer_input.dart';
-import 'package:stream_chat_flutter/src/components/message_composer/message_composer_input_header.dart';
-import 'package:stream_chat_flutter/src/components/message_composer/message_composer_input_leading.dart';
-import 'package:stream_chat_flutter/src/components/message_composer/message_composer_input_trailing.dart';
 import 'package:stream_chat_flutter/src/components/message_composer/message_composer_leading.dart';
 import 'package:stream_chat_flutter/src/components/message_composer/message_composer_trailing.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-import 'package:stream_core_flutter/stream_core_flutter.dart' as core;
 
 /// A widget that shows the message composer.
 /// Uses the factory to show custom components or the default implementation.
@@ -219,7 +215,7 @@ class _StreamChatMessageInputContent extends StatelessWidget {
       onQuotedMessageCleared: widget.onQuotedMessageCleared,
     );
 
-    final inputProps = MessageComposerInputProps.from(
+    final inputCenterProps = MessageComposerInputCenterProps.from(
       componentProps,
       placeholder: widget.placeholder,
       textInputAction: widget.textInputAction,
@@ -233,23 +229,38 @@ class _StreamChatMessageInputContent extends StatelessWidget {
       sendVoiceRecordingAutomatically: widget.sendVoiceRecordingAutomatically,
     );
 
-    return core.StreamCoreMessageComposer(
-      placeholder: widget.placeholder,
-      controller: inputController.textFieldController,
-      isFloating: widget.isFloating,
-      focusNode: widget.focusNode,
-      composerLeading: StreamMessageComposerLeading(props: componentProps),
-      composerTrailing: StreamMessageComposerTrailing(props: componentProps),
-      inputHeader: StreamMessageComposerInputHeader(props: componentProps),
-      inputTrailing: StreamMessageComposerInputTrailing(props: componentProps),
-      inputLeading: StreamMessageComposerInputLeading(props: componentProps),
-      inputBody: StreamMessageComposerInput(props: inputProps),
+    final spacing = context.streamSpacing;
+
+    return Container(
+      padding: EdgeInsets.only(top: spacing.md),
+      decoration: widget.isFloating
+          ? null
+          : BoxDecoration(
+              border: Border(
+                top: BorderSide(color: context.streamColorScheme.borderDefault),
+              ),
+            ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          SizedBox(width: spacing.md),
+          StreamMessageComposerLeading(props: componentProps),
+          Expanded(
+            child: StreamMessageComposerInput(
+              props: MessageComposerInputProps.from(componentProps),
+              inputCenterProps: inputCenterProps,
+            ),
+          ),
+          StreamMessageComposerTrailing(props: componentProps),
+          SizedBox(width: spacing.md),
+        ],
+      ),
     );
   }
 
-  core.VoiceRecordingCallback? _createVoiceRecordingCallback(BuildContext context) {
+  VoiceRecordingCallback? _createVoiceRecordingCallback(BuildContext context) {
     if (widget.audioRecorderController case final audioRecorderController?) {
-      return core.VoiceRecordingCallback(
+      return VoiceRecordingCallback(
         onLongPressStart: () async {
           // Return if the recording is already started.
           if (audioRecorderController.isRecording) return;
