@@ -42,12 +42,13 @@ class StreamChatThemeData {
     Brightness? brightness,
     StreamTextTheme? textTheme,
     StreamColorTheme? colorTheme,
-    StreamChannelListHeaderThemeData? channelListHeaderTheme,
-    StreamChannelHeaderThemeData? channelHeaderTheme,
+    StreamAppBarThemeData? channelHeaderTheme,
+    StreamAppBarThemeData? channelListHeaderTheme,
+    StreamAppBarThemeData? threadHeaderTheme,
+    StreamAppBarThemeData? galleryHeaderTheme,
     Widget Function(BuildContext, User)? defaultUserImage,
     PlaceholderUserImage? placeholderUserImage,
     IconThemeData? primaryIconTheme,
-    StreamGalleryHeaderThemeData? imageHeaderTheme,
     StreamGalleryFooterThemeData? imageFooterTheme,
     StreamMessageListViewThemeData? messageListViewTheme,
     StreamPollCreatorThemeData? pollCreatorTheme,
@@ -58,6 +59,7 @@ class StreamChatThemeData {
     StreamPollOptionVotesSheetThemeData? pollOptionVotesSheetTheme,
     StreamThreadListTileThemeData? threadListTileTheme,
     StreamVoiceRecordingAttachmentThemeData? voiceRecordingAttachmentTheme,
+    StreamQuotedMessageThemeData? quotedMessageTheme,
     StreamChannelListItemThemeData? channelListItemTheme,
   }) {
     brightness ??= colorTheme?.brightness ?? Brightness.light;
@@ -70,12 +72,13 @@ class StreamChatThemeData {
     );
 
     final customizedData = defaultData.copyWith(
-      channelListHeaderTheme: channelListHeaderTheme,
       channelHeaderTheme: channelHeaderTheme,
+      channelListHeaderTheme: channelListHeaderTheme,
+      threadHeaderTheme: threadHeaderTheme,
+      galleryHeaderTheme: galleryHeaderTheme,
       defaultUserImage: defaultUserImage,
       placeholderUserImage: placeholderUserImage,
       primaryIconTheme: primaryIconTheme,
-      galleryHeaderTheme: imageHeaderTheme,
       galleryFooterTheme: imageFooterTheme,
       messageListViewTheme: messageListViewTheme,
       pollCreatorTheme: pollCreatorTheme,
@@ -86,6 +89,7 @@ class StreamChatThemeData {
       pollOptionVotesSheetTheme: pollOptionVotesSheetTheme,
       threadListTileTheme: threadListTileTheme,
       voiceRecordingAttachmentTheme: voiceRecordingAttachmentTheme,
+      quotedMessageTheme: quotedMessageTheme,
       channelListItemTheme: channelListItemTheme,
     );
 
@@ -102,10 +106,11 @@ class StreamChatThemeData {
   const StreamChatThemeData.raw({
     required this.textTheme,
     required this.colorTheme,
-    required this.channelListHeaderTheme,
     required this.channelHeaderTheme,
-    required this.primaryIconTheme,
+    required this.channelListHeaderTheme,
+    required this.threadHeaderTheme,
     required this.galleryHeaderTheme,
+    required this.primaryIconTheme,
     required this.galleryFooterTheme,
     required this.messageListViewTheme,
     required this.pollCreatorTheme,
@@ -116,6 +121,7 @@ class StreamChatThemeData {
     required this.pollOptionVotesSheetTheme,
     required this.threadListTileTheme,
     required this.voiceRecordingAttachmentTheme,
+    required this.quotedMessageTheme,
     required this.channelListItemTheme,
   });
 
@@ -137,40 +143,19 @@ class StreamChatThemeData {
     StreamTextTheme textTheme,
   ) {
     final iconTheme = IconThemeData(color: colorTheme.textLowEmphasis);
-    final channelHeaderTheme = StreamChannelHeaderThemeData(
-      avatarTheme: StreamAvatarThemeData(
-        borderRadius: BorderRadius.circular(20),
-        constraints: const BoxConstraints.tightFor(
-          height: 40,
-          width: 40,
-        ),
-      ),
-      color: colorTheme.barsBg,
-    );
 
     return StreamChatThemeData.raw(
       textTheme: textTheme,
       colorTheme: colorTheme,
       primaryIconTheme: iconTheme,
-      channelListHeaderTheme: StreamChannelListHeaderThemeData(
-        avatarTheme: StreamAvatarThemeData(
-          borderRadius: BorderRadius.circular(20),
-          constraints: const BoxConstraints.tightFor(
-            height: 40,
-            width: 40,
-          ),
-        ),
-        color: colorTheme.barsBg,
-        titleStyle: textTheme.headlineBold,
-      ),
-      channelHeaderTheme: channelHeaderTheme,
-      galleryHeaderTheme: StreamGalleryHeaderThemeData(
-        closeButtonColor: colorTheme.textHighEmphasis,
-        backgroundColor: channelHeaderTheme.color,
-        iconMenuPointColor: colorTheme.textHighEmphasis,
-        titleTextStyle: textTheme.headlineBold,
-        bottomSheetBarrierColor: colorTheme.overlay,
-      ),
+      // Header chrome flows through per-header [StreamAppBarThemeData]
+      // entries — defaults are resolved by the design system (background,
+      // divider, padding, typography). Override individual fields per
+      // header type to customise globally.
+      channelHeaderTheme: const StreamAppBarThemeData(),
+      channelListHeaderTheme: const StreamAppBarThemeData(),
+      threadHeaderTheme: const StreamAppBarThemeData(),
+      galleryHeaderTheme: const StreamAppBarThemeData(),
       galleryFooterTheme: StreamGalleryFooterThemeData(
         backgroundColor: colorTheme.barsBg,
         shareIconColor: colorTheme.textHighEmphasis,
@@ -192,6 +177,7 @@ class StreamChatThemeData {
       pollOptionVotesSheetTheme: const StreamPollOptionVotesSheetThemeData(),
       threadListTileTheme: const StreamThreadListTileThemeData(),
       voiceRecordingAttachmentTheme: const StreamVoiceRecordingAttachmentThemeData(),
+      quotedMessageTheme: const StreamQuotedMessageThemeData(),
       channelListItemTheme: const StreamChannelListItemThemeData(),
     );
   }
@@ -202,15 +188,17 @@ class StreamChatThemeData {
   /// The color themes used in the widgets
   final StreamColorTheme colorTheme;
 
-  /// Theme of the [StreamChannelListHeader]
-  final StreamChannelListHeaderThemeData channelListHeaderTheme;
+  /// The default [StreamAppBar] style applied to [StreamChannelHeader].
+  final StreamAppBarThemeData channelHeaderTheme;
 
-  /// Theme of the chat widgets dedicated to a channel header
-  final StreamChannelHeaderThemeData channelHeaderTheme;
+  /// The default [StreamAppBar] style applied to [StreamChannelListHeader].
+  final StreamAppBarThemeData channelListHeaderTheme;
 
-  /// The default style for [StreamGalleryHeader]s below the overall
-  /// [StreamChatTheme].
-  final StreamGalleryHeaderThemeData galleryHeaderTheme;
+  /// The default [StreamAppBar] style applied to [StreamThreadHeader].
+  final StreamAppBarThemeData threadHeaderTheme;
+
+  /// The default [StreamAppBar] style applied to [StreamGalleryHeader].
+  final StreamAppBarThemeData galleryHeaderTheme;
 
   /// The default style for [StreamGalleryFooter]s below the overall
   /// [StreamChatTheme].
@@ -246,6 +234,9 @@ class StreamChatThemeData {
   /// Theme configuration for the [StreamVoiceRecordingAttachment] widget.
   final StreamVoiceRecordingAttachmentThemeData voiceRecordingAttachmentTheme;
 
+  /// Theme configuration for the [StreamQuotedMessage] widget.
+  final StreamQuotedMessageThemeData quotedMessageTheme;
+
   /// Theme configuration for the [StreamChannelListItem] widget.
   final StreamChannelListItemThemeData channelListItemTheme;
 
@@ -254,12 +245,13 @@ class StreamChatThemeData {
   StreamChatThemeData copyWith({
     StreamTextTheme? textTheme,
     StreamColorTheme? colorTheme,
-    StreamChannelHeaderThemeData? channelHeaderTheme,
+    StreamAppBarThemeData? channelHeaderTheme,
+    StreamAppBarThemeData? channelListHeaderTheme,
+    StreamAppBarThemeData? threadHeaderTheme,
+    StreamAppBarThemeData? galleryHeaderTheme,
     Widget Function(BuildContext, User)? defaultUserImage,
     PlaceholderUserImage? placeholderUserImage,
     IconThemeData? primaryIconTheme,
-    StreamChannelListHeaderThemeData? channelListHeaderTheme,
-    StreamGalleryHeaderThemeData? galleryHeaderTheme,
     StreamGalleryFooterThemeData? galleryFooterTheme,
     StreamMessageListViewThemeData? messageListViewTheme,
     StreamPollCreatorThemeData? pollCreatorTheme,
@@ -270,14 +262,16 @@ class StreamChatThemeData {
     StreamPollOptionVotesSheetThemeData? pollOptionVotesSheetTheme,
     StreamThreadListTileThemeData? threadListTileTheme,
     StreamVoiceRecordingAttachmentThemeData? voiceRecordingAttachmentTheme,
+    StreamQuotedMessageThemeData? quotedMessageTheme,
     StreamChannelListItemThemeData? channelListItemTheme,
   }) => StreamChatThemeData.raw(
-    channelListHeaderTheme: this.channelListHeaderTheme.merge(channelListHeaderTheme),
     textTheme: this.textTheme.merge(textTheme),
     colorTheme: this.colorTheme.merge(colorTheme),
-    primaryIconTheme: this.primaryIconTheme.merge(primaryIconTheme),
     channelHeaderTheme: this.channelHeaderTheme.merge(channelHeaderTheme),
-    galleryHeaderTheme: galleryHeaderTheme ?? this.galleryHeaderTheme,
+    channelListHeaderTheme: this.channelListHeaderTheme.merge(channelListHeaderTheme),
+    threadHeaderTheme: this.threadHeaderTheme.merge(threadHeaderTheme),
+    galleryHeaderTheme: this.galleryHeaderTheme.merge(galleryHeaderTheme),
+    primaryIconTheme: this.primaryIconTheme.merge(primaryIconTheme),
     galleryFooterTheme: galleryFooterTheme ?? this.galleryFooterTheme,
     messageListViewTheme: messageListViewTheme ?? this.messageListViewTheme,
     pollCreatorTheme: pollCreatorTheme ?? this.pollCreatorTheme,
@@ -288,6 +282,7 @@ class StreamChatThemeData {
     pollOptionVotesSheetTheme: pollOptionVotesSheetTheme ?? this.pollOptionVotesSheetTheme,
     threadListTileTheme: threadListTileTheme ?? this.threadListTileTheme,
     voiceRecordingAttachmentTheme: voiceRecordingAttachmentTheme ?? this.voiceRecordingAttachmentTheme,
+    quotedMessageTheme: quotedMessageTheme ?? this.quotedMessageTheme,
     channelListItemTheme: channelListItemTheme ?? this.channelListItemTheme,
   );
 
@@ -295,12 +290,13 @@ class StreamChatThemeData {
   StreamChatThemeData merge(StreamChatThemeData? other) {
     if (other == null) return this;
     return copyWith(
-      channelListHeaderTheme: channelListHeaderTheme.merge(other.channelListHeaderTheme),
       textTheme: textTheme.merge(other.textTheme),
       colorTheme: colorTheme.merge(other.colorTheme),
-      primaryIconTheme: other.primaryIconTheme,
       channelHeaderTheme: channelHeaderTheme.merge(other.channelHeaderTheme),
+      channelListHeaderTheme: channelListHeaderTheme.merge(other.channelListHeaderTheme),
+      threadHeaderTheme: threadHeaderTheme.merge(other.threadHeaderTheme),
       galleryHeaderTheme: galleryHeaderTheme.merge(other.galleryHeaderTheme),
+      primaryIconTheme: other.primaryIconTheme,
       galleryFooterTheme: galleryFooterTheme.merge(other.galleryFooterTheme),
       messageListViewTheme: messageListViewTheme.merge(other.messageListViewTheme),
       pollCreatorTheme: pollCreatorTheme.merge(other.pollCreatorTheme),
@@ -311,6 +307,7 @@ class StreamChatThemeData {
       pollOptionVotesSheetTheme: pollOptionVotesSheetTheme.merge(other.pollOptionVotesSheetTheme),
       threadListTileTheme: threadListTileTheme.merge(other.threadListTileTheme),
       voiceRecordingAttachmentTheme: voiceRecordingAttachmentTheme.merge(other.voiceRecordingAttachmentTheme),
+      quotedMessageTheme: quotedMessageTheme.merge(other.quotedMessageTheme),
       channelListItemTheme: channelListItemTheme.merge(other.channelListItemTheme),
     );
   }

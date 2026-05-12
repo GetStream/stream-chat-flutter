@@ -701,6 +701,10 @@ abstract class Translations {
   /// The label hint shown next to the viewer's own reaction indicating the
   /// reaction can be tapped to remove it.
   String get tapToRemoveReactionLabel;
+
+  /// The header text for the reaction detail sheet showing the count of
+  /// visible reactions (e.g. "1 Reaction" / "5 Reactions").
+  String reactionsCountText(int count);
 }
 
 /// Default implementation of Translation strings for the stream chat widgets
@@ -885,10 +889,10 @@ class DefaultTranslations implements Translations {
       'Do you want to send a copy of this message to a moderator for further investigation?';
 
   @override
-  String get flagLabel => 'FLAG';
+  String get flagLabel => 'Flag';
 
   @override
-  String get cancelLabel => 'CANCEL';
+  String get cancelLabel => 'Cancel';
 
   @override
   String get flagMessageSuccessfulLabel => 'Message flagged';
@@ -897,7 +901,7 @@ class DefaultTranslations implements Translations {
   String get flagMessageSuccessfulText => 'The message has been reported to a moderator.';
 
   @override
-  String get deleteLabel => 'DELETE';
+  String get deleteLabel => 'Delete';
 
   @override
   String get deleteMessageLabel => 'Delete Message';
@@ -1508,4 +1512,7 @@ Attachment limit exceeded: it's not possible to add more than $limit attachments
 
   @override
   String get tapToRemoveReactionLabel => 'Tap to remove';
+
+  @override
+  String reactionsCountText(int count) => count == 1 ? '1 Reaction' : '$count Reactions';
 }

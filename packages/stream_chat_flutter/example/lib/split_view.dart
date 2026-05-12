@@ -130,7 +130,7 @@ class ChannelPage extends StatelessWidget {
     onGenerateRoute: (settings) => MaterialPageRoute(
       builder: (context) => const Scaffold(
         appBar: StreamChannelHeader(
-          showBackButton: false,
+          automaticallyImplyLeading: false,
         ),
         body: Column(
           children: <Widget>[

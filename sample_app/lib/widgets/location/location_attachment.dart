@@ -14,16 +14,19 @@ const _defaultLocationConstraints = BoxConstraints(
 class LocationAttachmentBuilder extends StreamAttachmentWidgetBuilder {
   /// {@macro locationAttachmentBuilder}
   const LocationAttachmentBuilder({
-    this.constraints = _defaultLocationConstraints,
-    this.padding = const .symmetric(horizontal: 8),
+    this.style,
+    this.constraints,
     this.onAttachmentTap,
   });
 
-  /// The constraints to apply to the file attachment widget.
-  final BoxConstraints constraints;
+  /// The style of the image attachment container.
+  ///
+  /// When null, a default style with a rounded rectangle shape and border
+  /// is used.
+  final StreamMessageAttachmentStyle? style;
 
-  /// The padding to apply to the file attachment widget.
-  final EdgeInsetsGeometry padding;
+  /// The constraints to apply to the image attachment widget.
+  final BoxConstraints? constraints;
 
   /// Optional callback to handle tap events on the attachment.
   ///
@@ -45,15 +48,18 @@ class LocationAttachmentBuilder extends StreamAttachmentWidgetBuilder {
 
     final user = message.user;
     final location = message.sharedLocation!;
-    return LocationAttachment(
-      user: user,
-      sharedLocation: location,
-      constraints: constraints,
-      padding: padding,
-      onLocationTap: switch (onAttachmentTap) {
-        final onTap? => () => onTap(context, location),
-        _ => null,
-      },
+
+    return StreamMessageAttachment(
+      style: style,
+      child: LocationAttachment(
+        user: user,
+        sharedLocation: location,
+        constraints: constraints,
+        onLocationTap: switch (onAttachmentTap) {
+          final onTap? => () => onTap(context, location),
+          _ => null,
+        },
+      ),
     );
   }
 }
@@ -65,8 +71,7 @@ class LocationAttachment extends StatelessWidget {
     super.key,
     required this.user,
     required this.sharedLocation,
-    this.constraints = _defaultLocationConstraints,
-    this.padding = const .symmetric(horizontal: 8),
+    this.constraints,
     this.onLocationTap,
   });
 
@@ -77,10 +82,7 @@ class LocationAttachment extends StatelessWidget {
   final Location sharedLocation;
 
   /// The constraints to apply to the file attachment widget.
-  final BoxConstraints constraints;
-
-  /// The padding to apply to the file attachment widget.
-  final EdgeInsetsGeometry padding;
+  final BoxConstraints? constraints;
 
   /// Optional callback to handle tap events on the location attachment.
   final VoidCallback? onLocationTap;
@@ -90,56 +92,54 @@ class LocationAttachment extends StatelessWidget {
     final currentUser = StreamChat.of(context).currentUser;
     final sharedLocationEndAt = sharedLocation.endAt;
 
-    return Padding(
-      padding: padding,
-      child: ConstrainedBox(
-        constraints: constraints,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Expanded(
-              child: Material(
-                clipBehavior: Clip.antiAlias,
-                type: MaterialType.transparency,
-                borderRadius: BorderRadius.circular(14),
-                child: InkWell(
-                  onTap: onLocationTap,
-                  child: IgnorePointer(
-                    child: SimpleMapView(
-                      markerSize: MarkerSize.lg,
-                      showLocateMeButton: false,
-                      coordinates: sharedLocation.coordinates,
-                      markerBuilder: (_, __, size) => LocationUserMarker(
-                        user: user,
-                        size: size,
-                        sharedLocation: sharedLocation,
-                      ),
+    final effectiveConstraints = constraints ?? _defaultLocationConstraints;
+
+    return ConstrainedBox(
+      constraints: effectiveConstraints,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Expanded(
+            child: Material(
+              clipBehavior: Clip.antiAlias,
+              type: MaterialType.transparency,
+              child: InkWell(
+                onTap: onLocationTap,
+                child: IgnorePointer(
+                  child: SimpleMapView(
+                    markerSize: MarkerSize.lg,
+                    showLocateMeButton: false,
+                    coordinates: sharedLocation.coordinates,
+                    markerBuilder: (_, __, size) => LocationUserMarker(
+                      user: user,
+                      size: size,
+                      sharedLocation: sharedLocation,
                     ),
                   ),
                 ),
               ),
             ),
-            if (sharedLocationEndAt != null && currentUser != null)
-              LocationAttachmentFooter(
-                currentUser: currentUser,
-                sharingEndAt: sharedLocationEndAt,
-                sharedLocation: sharedLocation,
-                onStopSharingPressed: () {
-                  final client = StreamChat.of(context).client;
+          ),
+          if (sharedLocationEndAt != null && currentUser != null)
+            LocationAttachmentFooter(
+              currentUser: currentUser,
+              sharingEndAt: sharedLocationEndAt,
+              sharedLocation: sharedLocation,
+              onStopSharingPressed: () {
+                final client = StreamChat.of(context).client;
 
-                  final location = sharedLocation;
-                  final messageId = location.messageId;
-                  if (messageId == null) return;
+                final location = sharedLocation;
+                final messageId = location.messageId;
+                if (messageId == null) return;
 
-                  client.stopLiveLocation(
-                    messageId: messageId,
-                    createdByDeviceId: location.createdByDeviceId,
-                  );
-                },
-              ),
-          ],
-        ),
+                client.stopLiveLocation(
+                  messageId: messageId,
+                  createdByDeviceId: location.createdByDeviceId,
+                );
+              },
+            ),
+        ],
       ),
     );
   }

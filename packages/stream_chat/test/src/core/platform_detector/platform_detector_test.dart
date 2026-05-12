@@ -22,4 +22,25 @@ void main() {
     expect(CurrentPlatform.isWindows, isFalse);
     expect(CurrentPlatform.isFuchsia, isFalse);
   });
+
+  group('debugCurrentPlatformOverride', () {
+    tearDown(() => CurrentPlatform.debugCurrentPlatformOverride = null);
+
+    test('changes type, name, and flags', () {
+      CurrentPlatform.debugCurrentPlatformOverride = PlatformType.web;
+
+      expect(CurrentPlatform.type, PlatformType.web);
+      expect(CurrentPlatform.name, 'web');
+      expect(CurrentPlatform.isWeb, isTrue);
+      expect(CurrentPlatform.isLinux, isFalse);
+    });
+
+    test('clearing the override restores the real platform', () {
+      CurrentPlatform.debugCurrentPlatformOverride = PlatformType.windows;
+      CurrentPlatform.debugCurrentPlatformOverride = null;
+
+      expect(CurrentPlatform.type, PlatformType.linux);
+      expect(CurrentPlatform.isWindows, isFalse);
+    });
+  });
 }

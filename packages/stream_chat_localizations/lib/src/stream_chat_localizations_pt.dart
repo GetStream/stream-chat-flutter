@@ -178,10 +178,10 @@ class StreamChatLocalizationsPt extends GlobalStreamChatLocalizations {
   String get flagMessageQuestion => 'Gostaria de enviar esta mensagem ao moderador para maior investigação?';
 
   @override
-  String get flagLabel => 'DENUNCIAR';
+  String get flagLabel => 'Denunciar';
 
   @override
-  String get cancelLabel => 'CANCELAR';
+  String get cancelLabel => 'Cancelar';
 
   @override
   String get flagMessageSuccessfulLabel => 'Mensagem denunciada';
@@ -190,7 +190,7 @@ class StreamChatLocalizationsPt extends GlobalStreamChatLocalizations {
   String get flagMessageSuccessfulText => 'Esta mensagem foi enviada a um moderador.';
 
   @override
-  String get deleteLabel => 'APAGAR';
+  String get deleteLabel => 'Apagar';
 
   @override
   String get deleteMessageLabel => 'Apagar mensagem';
@@ -780,6 +780,9 @@ Não é possível adicionar mais de $limit arquivos de uma vez
 
   @override
   String get tapToRemoveReactionLabel => 'Toque para remover';
+
+  @override
+  String reactionsCountText(int count) => '$count reações';
 
   @override
   String get justNowLabel => 'Agora mesmo';

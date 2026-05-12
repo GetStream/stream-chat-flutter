@@ -182,10 +182,10 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
       "Vols enviar una còpia d'aquest missatge a un moderador per una major investigació?";
 
   @override
-  String get flagLabel => 'REPORTA';
+  String get flagLabel => 'Reporta';
 
   @override
-  String get cancelLabel => 'CANCEL·LA';
+  String get cancelLabel => 'Cancel·la';
 
   @override
   String get flagMessageSuccessfulLabel => 'Missatge reportat';
@@ -194,7 +194,7 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
   String get flagMessageSuccessfulText => 'Aquest missatge ha estat reportat a un moderador';
 
   @override
-  String get deleteLabel => 'ESBORRA';
+  String get deleteLabel => 'Esborra';
 
   @override
   String get deleteMessageLabel => 'Esborra el missatge';
@@ -779,6 +779,9 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
 
   @override
   String get tapToRemoveReactionLabel => 'Toca per eliminar';
+
+  @override
+  String reactionsCountText(int count) => '$count reaccions';
 
   @override
   String get justNowLabel => 'Ara mateix';

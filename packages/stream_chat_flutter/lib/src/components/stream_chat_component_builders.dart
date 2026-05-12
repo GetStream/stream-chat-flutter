@@ -12,7 +12,7 @@ Iterable<StreamComponentBuilderExtension<Object>> streamChatComponentBuilders({
   StreamComponentBuilder<MessageComposerInputLeadingProps>? messageComposerInputLeading,
   StreamComponentBuilder<MessageComposerInputHeaderProps>? messageComposerInputHeader,
   StreamComponentBuilder<MessageComposerInputTrailingProps>? messageComposerInputTrailing,
-  StreamComponentBuilder<StreamMessageWidgetProps>? messageWidget,
+  StreamComponentBuilder<StreamMessageItemProps>? messageItem,
   StreamComponentBuilder<StreamMessageComposerAttachmentListProps>? messageComposerAttachmentList,
   StreamComponentBuilder<StreamMessageComposerAttachmentProps>? messageComposerAttachment,
   StreamComponentBuilder<StreamImageAttachmentProps>? imageAttachment,
@@ -23,6 +23,7 @@ Iterable<StreamComponentBuilderExtension<Object>> streamChatComponentBuilders({
   StreamComponentBuilder<StreamLinkPreviewAttachmentProps>? linkPreviewAttachment,
   StreamComponentBuilder<StreamVoiceRecordingAttachmentProps>? voiceRecordingAttachment,
   StreamComponentBuilder<StreamPollAttachmentProps>? pollAttachment,
+  StreamComponentBuilder<StreamQuotedMessageProps>? quotedMessage,
   StreamComponentBuilder<StreamUnsupportedAttachmentProps>? unsupportedAttachment,
 }) {
   final builders = [
@@ -35,7 +36,7 @@ Iterable<StreamComponentBuilderExtension<Object>> streamChatComponentBuilders({
     if (messageComposerInputLeading != null) StreamComponentBuilderExtension(builder: messageComposerInputLeading),
     if (messageComposerInputHeader != null) StreamComponentBuilderExtension(builder: messageComposerInputHeader),
     if (messageComposerInputTrailing != null) StreamComponentBuilderExtension(builder: messageComposerInputTrailing),
-    if (messageWidget != null) StreamComponentBuilderExtension(builder: messageWidget),
+    if (messageItem != null) StreamComponentBuilderExtension(builder: messageItem),
     if (messageComposerAttachmentList != null) StreamComponentBuilderExtension(builder: messageComposerAttachmentList),
     if (messageComposerAttachment != null) StreamComponentBuilderExtension(builder: messageComposerAttachment),
     if (imageAttachment != null) StreamComponentBuilderExtension(builder: imageAttachment),
@@ -46,6 +47,7 @@ Iterable<StreamComponentBuilderExtension<Object>> streamChatComponentBuilders({
     if (linkPreviewAttachment != null) StreamComponentBuilderExtension(builder: linkPreviewAttachment),
     if (voiceRecordingAttachment != null) StreamComponentBuilderExtension(builder: voiceRecordingAttachment),
     if (pollAttachment != null) StreamComponentBuilderExtension(builder: pollAttachment),
+    if (quotedMessage != null) StreamComponentBuilderExtension(builder: quotedMessage),
     if (unsupportedAttachment != null) StreamComponentBuilderExtension(builder: unsupportedAttachment),
   ];
 

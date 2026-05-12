@@ -25,17 +25,22 @@ final appRoutes = [
         name: Routes.CHANNEL_PAGE.name,
         path: Routes.CHANNEL_PAGE.path,
         builder: (context, state) {
-          final channel = StreamChat.of(context).client.state.channels[state.pathParameters['cid']];
+          final channel = _resolveChannel(context, state);
           final messageId = state.uri.queryParameters['mid'];
           final parentId = state.uri.queryParameters['pid'];
 
+          // Thread deep-links require the parent message to already be in
+          // channel state. On cold cids (e.g. notification-tap into an
+          // unwatched channel) the state is null and we fall through to
+          // ChannelPage; the user lands on the channel rather than the
+          // thread, which is a degraded but functional UX.
           Message? parentMessage;
           if (parentId != null) {
-            parentMessage = channel?.state!.messages.firstWhereOrNull((it) => it.id == parentId);
+            parentMessage = channel.state?.messages.firstWhereOrNull((it) => it.id == parentId);
           }
 
           return StreamChannel(
-            channel: channel!,
+            channel: channel,
             initialMessageId: messageId,
             child: Builder(
               builder: (context) {
@@ -53,9 +58,8 @@ final appRoutes = [
             name: Routes.CHAT_INFO_SCREEN.name,
             path: Routes.CHAT_INFO_SCREEN.path,
             builder: (BuildContext context, GoRouterState state) {
-              final channel = StreamChat.of(context).client.state.channels[state.pathParameters['cid']];
               return StreamChannel(
-                channel: channel!,
+                channel: _resolveChannel(context, state),
                 child: ChatInfoScreen(
                   user: state.extra as User?,
                 ),
@@ -66,9 +70,8 @@ final appRoutes = [
             name: Routes.GROUP_INFO_SCREEN.name,
             path: Routes.GROUP_INFO_SCREEN.path,
             builder: (BuildContext context, GoRouterState state) {
-              final channel = StreamChat.of(context).client.state.channels[state.pathParameters['cid']];
               return StreamChannel(
-                channel: channel!,
+                channel: _resolveChannel(context, state),
                 child: const GroupInfoScreen(),
               );
             },
@@ -110,3 +113,12 @@ final appRoutes = [
     builder: (BuildContext context, GoRouterState state) => const AdvancedOptionsPage(),
   ),
 ];
+
+// Resolves the channel for a `:cid`-bearing route. Returns the existing
+// watched instance from client state when available; otherwise returns
+// an unwatched shell — `StreamChannel` will watch it on mount, which is
+// what triggers the unread-anchoring / `initialMessageId` behaviour.
+Channel _resolveChannel(BuildContext context, GoRouterState state) {
+  final [type, id] = state.pathParameters['cid']!.split(':');
+  return StreamChat.of(context).client.channel(type, id: id);
+}

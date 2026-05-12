@@ -29,6 +29,7 @@
 - Added `viewAllLabel` translation for all supported locales.
 - Added `pollVotesLabel` translation for all supported locales.
 - Added `endVoteConfirmationMessage` translation for all supported locales.
+- Added `reactionsCountText(int count)` translation for all supported locales.
 
 🔄 Changed
 
@@ -39,6 +40,7 @@
   style (English default: `'Write a message'` → `'Send a message'`) to match
   the redesigned message composer placeholder.
 - Reworded `endVoteLabel` English override from `'End Vote'` to `'End Poll'`.
+- Reworded `flagLabel`, `cancelLabel` and `deleteLabel` defaults from uppercase to sentence case across all supported locales (e.g. English: `'FLAG'` → `'Flag'`, `'CANCEL'` → `'Cancel'`, `'DELETE'` → `'Delete'`) so dialog buttons render in the same case as the rest of the system.
 
 ## 10.0.0-beta.13
 

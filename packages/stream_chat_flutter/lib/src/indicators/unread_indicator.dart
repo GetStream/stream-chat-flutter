@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 /// {@template streamUnreadIndicator}
 /// Shows different unread counts of the user.
@@ -112,7 +111,6 @@ class StreamUnreadIndicator extends StatelessWidget {
         final effectiveOffset = offset ?? const Offset(8, -6).directional(textDirection);
 
         return StreamBadgeNotification(
-          size: StreamBadgeNotificationSize.xs,
           label: switch (unreadCount) {
             > 99 => '99+',
             _ => '$unreadCount',

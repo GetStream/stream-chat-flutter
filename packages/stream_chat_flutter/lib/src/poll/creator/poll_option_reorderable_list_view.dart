@@ -463,13 +463,11 @@ class _PollOptionReorderableListViewState extends State<PollOptionReorderableLis
     final effectiveInputStyle = theme.optionInputStyle ?? defaults.optionInputStyle;
 
     return Column(
+      spacing: spacing.xs,
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (widget.title case final title?) ...[
-          Text(title, style: effectiveTitleStyle),
-          SizedBox(height: spacing.xs),
-        ],
+        if (widget.title case final title?) Text(title, style: effectiveTitleStyle),
         Flexible(
           child: StreamTextInputTheme(
             data: .new(style: effectiveInputStyle),
@@ -495,11 +493,11 @@ class _PollOptionReorderableListViewState extends State<PollOptionReorderableLis
             ),
           ),
         ),
-        SizedBox(height: spacing.xs),
-        PollOptionListItem.addOption(
-          hintText: widget.itemHintText,
-          onPressed: _canAddMoreOptions ? _onAddOptionPressed : null,
-        ),
+        if (_canAddMoreOptions)
+          PollOptionListItem.addOption(
+            hintText: widget.itemHintText,
+            onPressed: _onAddOptionPressed,
+          ),
       ],
     );
   }

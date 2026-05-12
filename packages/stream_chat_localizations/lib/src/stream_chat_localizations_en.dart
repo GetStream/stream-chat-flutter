@@ -181,10 +181,10 @@ class StreamChatLocalizationsEn extends GlobalStreamChatLocalizations {
       'Do you want to send a copy of this message to a moderator for further investigation?';
 
   @override
-  String get flagLabel => 'FLAG';
+  String get flagLabel => 'Flag';
 
   @override
-  String get cancelLabel => 'CANCEL';
+  String get cancelLabel => 'Cancel';
 
   @override
   String get flagMessageSuccessfulLabel => 'Message flagged';
@@ -193,7 +193,7 @@ class StreamChatLocalizationsEn extends GlobalStreamChatLocalizations {
   String get flagMessageSuccessfulText => 'The message has been reported to a moderator.';
 
   @override
-  String get deleteLabel => 'DELETE';
+  String get deleteLabel => 'Delete';
 
   @override
   String get deleteMessageLabel => 'Delete Message';
@@ -777,6 +777,9 @@ class StreamChatLocalizationsEn extends GlobalStreamChatLocalizations {
 
   @override
   String get tapToRemoveReactionLabel => 'Tap to remove';
+
+  @override
+  String reactionsCountText(int count) => count == 1 ? '1 Reaction' : '$count Reactions';
 
   @override
   String get justNowLabel => 'Just now';

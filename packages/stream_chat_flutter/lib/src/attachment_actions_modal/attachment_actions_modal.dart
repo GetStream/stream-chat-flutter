@@ -48,7 +48,7 @@ class AttachmentActionsModal extends StatelessWidget {
   /// List of custom actions
   final List<AttachmentAction> customActions;
 
-  /// Creates a copy of [StreamMessageWidget] with
+  /// Creates a copy of [AttachmentActionsModal] with
   /// specified attributes overridden.
   AttachmentActionsModal copyWith({
     Key? key,
@@ -113,7 +113,7 @@ class AttachmentActionsModal extends StatelessWidget {
                               context.translations.replyLabel,
                               Icon(
                                 context.streamIcons.reply,
-                                size: 24,
+                                size: 20,
                                 color: theme.colorTheme.textLowEmphasis,
                               ),
                               onReply,
@@ -123,9 +123,9 @@ class AttachmentActionsModal extends StatelessWidget {
                               context,
                               context.translations.showInChatLabel,
                               Icon(
-                                context.streamIcons.eyeFill,
-                                size: 24,
-                                color: theme.colorTheme.textHighEmphasis,
+                                context.streamIcons.messageBubble,
+                                size: 20,
+                                color: theme.colorTheme.textLowEmphasis,
                               ),
                               onShowMessage,
                             ),
@@ -136,8 +136,8 @@ class AttachmentActionsModal extends StatelessWidget {
                                   ? context.translations.saveVideoLabel
                                   : context.translations.saveImageLabel,
                               Icon(
-                                context.streamIcons.save,
-                                size: 24,
+                                context.streamIcons.arrowDownCircle,
+                                size: 20,
                                 color: theme.colorTheme.textLowEmphasis,
                               ),
                               () {
@@ -194,10 +194,10 @@ class AttachmentActionsModal extends StatelessWidget {
                           if (StreamChat.of(context).currentUser?.id == message.user?.id && showDelete)
                             _buildButton(
                               context,
-                              context.translations.deleteLabel.sentenceCase,
+                              context.translations.deleteLabel,
                               Icon(
                                 context.streamIcons.delete,
-                                size: 24,
+                                size: 20,
                                 color: theme.colorTheme.accentError,
                               ),
                               () {

@@ -141,15 +141,9 @@ class _DefaultStreamChannelListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final channelState = props.channel.state!;
-    final textTheme = context.streamTextTheme;
 
-    final avatar = props.leading ?? StreamChannelAvatar(channel: props.channel, size: StreamAvatarGroupSize.xl);
-    final titleWidget =
-        props.title ??
-        StreamChannelName(
-          channel: props.channel,
-          textStyle: textTheme.headingSm.copyWith(height: 1),
-        );
+    final avatar = props.leading ?? StreamChannelAvatar(channel: props.channel, size: .xl);
+    final titleWidget = props.title ?? StreamChannelName(channel: props.channel);
     final subtitleWidget =
         props.subtitle ??
         ChannelListTileSubtitle(
@@ -158,25 +152,29 @@ class _DefaultStreamChannelListItem extends StatelessWidget {
         );
     final timestampWidget = props.trailing ?? ChannelLastMessageDate(channel: props.channel);
 
-    return BetterStreamBuilder<bool>(
-      stream: props.channel.isMutedStream,
-      initialData: props.channel.isMuted,
-      builder: (context, isMuted) => BetterStreamBuilder<int>(
-        stream: channelState.unreadCountStream,
-        initialData: channelState.unreadCount,
-        builder: (context, unreadCount) {
-          return StreamChannelListTile(
-            avatar: avatar,
-            title: titleWidget,
-            subtitle: subtitleWidget,
-            timestamp: timestampWidget,
-            unreadCount: unreadCount,
-            isMuted: isMuted,
-            onTap: props.onTap,
-            onLongPress: props.onLongPress,
-            selected: props.selected,
-          );
-        },
+    return BetterStreamBuilder(
+      initialData: (
+        isMuted: props.channel.isMuted,
+        isPinned: props.channel.isPinned,
+        unreadCount: channelState.unreadCount,
+      ),
+      stream: Rx.combineLatest3(
+        props.channel.isMutedStream,
+        props.channel.isPinnedStream,
+        channelState.unreadCountStream,
+        (isMuted, isPinned, unreadCount) => (isMuted: isMuted, isPinned: isPinned, unreadCount: unreadCount),
+      ),
+      builder: (context, state) => StreamChannelListTile(
+        avatar: avatar,
+        title: titleWidget,
+        subtitle: subtitleWidget,
+        timestamp: timestampWidget,
+        unreadCount: state.unreadCount,
+        isMuted: state.isMuted,
+        isPinned: state.isPinned,
+        onTap: props.onTap,
+        onLongPress: props.onLongPress,
+        selected: props.selected,
       ),
     );
   }
@@ -195,6 +193,7 @@ class StreamChannelListTile extends StatelessWidget {
     this.timestamp,
     this.unreadCount = 0,
     this.isMuted = false,
+    this.isPinned = false,
     this.onTap,
     this.onLongPress,
     this.selected = false,
@@ -234,6 +233,11 @@ class StreamChannelListTile extends StatelessWidget {
   /// When true, a mute icon is displayed in the title or subtitle.
   final bool isMuted;
 
+  /// Whether the channel is pinned by the current user.
+  ///
+  /// When true, a pin icon is displayed alongside the mute icon.
+  final bool isPinned;
+
   /// Called when the list item is tapped.
   final VoidCallback? onTap;
 
@@ -245,72 +249,74 @@ class StreamChannelListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final icons = context.streamIcons;
     final spacing = context.streamSpacing;
+
     final channelListItemTheme = StreamChannelListItemTheme.of(context);
     final defaults = _StreamChannelListItemThemeDefaults(context);
 
     final effectiveTitleStyle = channelListItemTheme.titleStyle ?? defaults.titleStyle;
     final effectiveSubtitleStyle = channelListItemTheme.subtitleStyle ?? defaults.subtitleStyle;
     final effectiveTimestampStyle = channelListItemTheme.timestampStyle ?? defaults.timestampStyle;
-    final effectiveMuteIconPosition = channelListItemTheme.muteIconPosition ?? defaults.muteIconPosition;
+    final effectiveAttributePosition = channelListItemTheme.attributePosition ?? defaults.attributePosition;
 
-    final muteIcon = isMuted
-        ? Icon(
-            context.streamIcons.mute,
-            size: 20,
-            color: context.streamColorScheme.textTertiary,
-          )
-        : null;
+    final channelAttributes = [
+      if (isMuted) Icon(icons.mute),
+      if (isPinned) Icon(icons.pin),
+    ];
 
-    final hasMuteIconInSubtitle = effectiveMuteIconPosition == MuteIconPosition.subtitle && isMuted;
+    Widget? attributesRow;
+    if (channelAttributes.isNotEmpty) {
+      attributesRow = Row(
+        mainAxisSize: .min,
+        spacing: spacing.xxs,
+        children: channelAttributes,
+      );
+    }
 
-    return StreamListTileTheme(
-      data: context.streamListTileTheme.copyWith(
-        contentPadding: EdgeInsets.all(spacing.md - 4),
-        backgroundColor: channelListItemTheme.backgroundColor,
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(4),
-        child: Material(
-          type: MaterialType.transparency,
-          child: StreamListTileContainer(
-            enabled: true,
-            selected: selected,
-            onTap: onTap,
-            onLongPress: onLongPress,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              spacing: spacing.md,
-              children: [
-                avatar,
-                Expanded(
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(vertical: spacing.xxxs),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      spacing: spacing.xxs,
-                      children: [
-                        _TitleRow(
-                          title: title,
-                          titleTrailing: effectiveMuteIconPosition == MuteIconPosition.title ? muteIcon : null,
-                          timestamp: timestamp,
-                          unreadCount: unreadCount,
-                          titleStyle: effectiveTitleStyle,
-                          timestampStyle: effectiveTimestampStyle,
-                          spacing: spacing,
-                        ),
-                        if (subtitle != null || hasMuteIconInSubtitle)
-                          _SubtitleRow(
-                            subtitle: subtitle,
-                            subtitleTrailing: effectiveMuteIconPosition == MuteIconPosition.subtitle ? muteIcon : null,
-                            subtitleStyle: effectiveSubtitleStyle,
-                          ),
-                      ],
+    final titleTrailing = effectiveAttributePosition == .inlineTitle ? attributesRow : null;
+    final subtitleTrailing = effectiveAttributePosition == .trailingBottom ? attributesRow : null;
+
+    return Padding(
+      padding: EdgeInsets.all(spacing.xxs),
+      child: StreamListTileTheme(
+        data: StreamListTileThemeData(
+          contentPadding: EdgeInsets.all(spacing.sm),
+          backgroundColor: channelListItemTheme.backgroundColor,
+        ),
+        child: StreamListTileContainer(
+          onTap: onTap,
+          onLongPress: onLongPress,
+          selected: selected,
+          child: Row(
+            mainAxisSize: .min,
+            spacing: spacing.md,
+            children: [
+              avatar,
+              Expanded(
+                child: Column(
+                  mainAxisSize: .min,
+                  spacing: spacing.xxs,
+                  crossAxisAlignment: .start,
+                  children: [
+                    _TitleRow(
+                      title: title,
+                      titleTrailing: titleTrailing,
+                      timestamp: timestamp,
+                      unreadCount: unreadCount,
+                      titleStyle: effectiveTitleStyle,
+                      timestampStyle: effectiveTimestampStyle,
                     ),
-                  ),
+                    if (subtitle != null || subtitleTrailing != null)
+                      _SubtitleRow(
+                        subtitle: subtitle,
+                        subtitleTrailing: subtitleTrailing,
+                        subtitleStyle: effectiveSubtitleStyle,
+                      ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
@@ -326,7 +332,6 @@ class _TitleRow extends StatelessWidget {
     required this.unreadCount,
     required this.titleStyle,
     required this.timestampStyle,
-    required this.spacing,
   });
 
   final Widget title;
@@ -335,46 +340,43 @@ class _TitleRow extends StatelessWidget {
   final int unreadCount;
   final TextStyle titleStyle;
   final TextStyle timestampStyle;
-  final StreamSpacing spacing;
 
   @override
   Widget build(BuildContext context) {
+    final spacing = context.streamSpacing;
+    final colorScheme = context.streamColorScheme;
+
     return Row(
+      mainAxisSize: .min,
       spacing: spacing.md,
       children: [
         Expanded(
           child: Row(
-            spacing: spacing.xxs,
+            mainAxisSize: .min,
+            spacing: spacing.xs,
             children: [
               Flexible(
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(minHeight: StreamBadgeNotificationSize.sm.value),
-                  child: Align(
-                    alignment: AlignmentDirectional.centerStart,
-                    widthFactor: 1,
-                    child: DefaultTextStyle.merge(
-                      style: titleStyle,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      child: title,
-                    ),
-                  ),
+                child: DefaultTextStyle.merge(
+                  style: titleStyle,
+                  maxLines: 1,
+                  overflow: .ellipsis,
+                  child: title,
                 ),
               ),
-              ?titleTrailing,
+              if (titleTrailing case final trailing?)
+                IconTheme.merge(
+                  data: .new(size: 20, color: colorScheme.textTertiary),
+                  child: trailing,
+                ),
             ],
           ),
         ),
         if (timestamp != null || unreadCount > 0)
           Row(
-            mainAxisSize: MainAxisSize.min,
+            mainAxisSize: .min,
             spacing: spacing.xs,
             children: [
-              if (timestamp case final timestamp?)
-                DefaultTextStyle.merge(
-                  style: timestampStyle,
-                  child: timestamp,
-                ),
+              if (timestamp case final timestamp?) DefaultTextStyle.merge(style: timestampStyle, child: timestamp),
               if (unreadCount > 0) StreamBadgeNotification(label: '$unreadCount'),
             ],
           ),
@@ -396,16 +398,27 @@ class _SubtitleRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DefaultTextStyle(
-      style: subtitleStyle,
-      maxLines: 1,
-      overflow: TextOverflow.ellipsis,
-      child: Row(
-        children: [
-          Expanded(child: subtitle ?? const SizedBox.shrink()),
-          ?subtitleTrailing,
-        ],
-      ),
+    final spacing = context.streamSpacing;
+    final colorScheme = context.streamColorScheme;
+
+    return Row(
+      mainAxisSize: .min,
+      spacing: spacing.md,
+      children: [
+        Flexible(
+          child: DefaultTextStyle.merge(
+            style: subtitleStyle,
+            maxLines: 1,
+            overflow: .ellipsis,
+            child: subtitle ?? const Empty(),
+          ),
+        ),
+        if (subtitleTrailing case final trailing?)
+          IconTheme.merge(
+            data: .new(size: 20, color: colorScheme.textTertiary),
+            child: trailing,
+          ),
+      ],
     );
   }
 }
@@ -419,6 +432,9 @@ class _StreamChannelListItemThemeDefaults extends StreamChannelListItemThemeData
   late final _textTheme = _context.streamTextTheme;
 
   @override
+  AttributePosition get attributePosition => .inlineTitle;
+
+  @override
   TextStyle get titleStyle => _textTheme.headingSm.copyWith(color: _colorScheme.textPrimary);
 
   @override
@@ -429,9 +445,6 @@ class _StreamChannelListItemThemeDefaults extends StreamChannelListItemThemeData
 
   @override
   Color get borderColor => _colorScheme.borderSubtle;
-
-  @override
-  MuteIconPosition get muteIconPosition => MuteIconPosition.title;
 }
 
 /// Shows the delivery status icon + "You:" prefix for outgoing messages in
@@ -454,9 +467,6 @@ class _ChannelListDeliveryStatus extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorTheme = context.streamMessageTheme.mergeWithDefaults(context);
-    final colorScheme = context.streamColorScheme;
-
     return BetterStreamBuilder<List<Read>>(
       stream: channel.state?.readStream,
       initialData: channel.state?.read,
@@ -464,38 +474,11 @@ class _ChannelListDeliveryStatus extends StatelessWidget {
         final isRead = data.readsOf(message: message).isNotEmpty;
         final isDelivered = data.deliveriesOf(message: message).isNotEmpty;
 
-        final Widget icon;
-        if (isRead) {
-          icon = Icon(
-            context.streamIcons.checks,
-            size: 16,
-            color: colorTheme.outgoing?.textReadColor ?? colorScheme.accentPrimary,
-          );
-        } else if (isDelivered) {
-          icon = Icon(
-            context.streamIcons.checks,
-            size: 16,
-            color: colorTheme.outgoing?.textTimestampColor ?? colorScheme.textTertiary,
-          );
-        } else if (message.state.isCompleted) {
-          icon = Icon(
-            context.streamIcons.checkmark,
-            size: 16,
-            color: colorTheme.outgoing?.textTimestampColor ?? colorScheme.textTertiary,
-          );
-        } else if (message.state.isOutgoing) {
-          icon = Icon(
-            context.streamIcons.clock,
-            size: 16,
-            color: colorTheme.outgoing?.textTimestampColor ?? colorScheme.textTertiary,
-          );
-        } else {
-          return const Empty();
-        }
-
-        return Padding(
-          padding: const EdgeInsetsDirectional.only(end: 4),
-          child: icon,
+        return StreamSendingIndicator(
+          size: 16,
+          message: message,
+          isMessageRead: isRead,
+          isMessageDelivered: isDelivered,
         );
       },
     );
@@ -627,6 +610,8 @@ class _ChannelLastMessageWithStatusState extends State<_ChannelLastMessageWithSt
       ),
       initialData: (channelState.draft, channelState.messages),
       builder: (context, data) {
+        final spacing = context.streamSpacing;
+
         final (draft, messages) = data;
 
         final config = StreamChatConfiguration.maybeOf(context);
@@ -656,21 +641,22 @@ class _ChannelLastMessageWithStatusState extends State<_ChannelLastMessageWithSt
         final isOwnMessage = currentUser != null && latestLastMessage.user?.id == currentUser.id;
 
         // Show delivery status prefix only for own messages.
-        final Widget deliveryPrefix;
+        Widget? deliveryPrefix;
         if (isOwnMessage) {
-          deliveryPrefix =
-              widget.sendingIndicatorBuilder?.call(context, latestLastMessage) ??
-              _ChannelListDeliveryStatus(
-                channel: widget.channel,
-                message: latestLastMessage,
-              );
-        } else {
-          deliveryPrefix = const Empty();
+          if (widget.sendingIndicatorBuilder case final builder?) {
+            deliveryPrefix = builder(context, latestLastMessage);
+          } else {
+            deliveryPrefix = _ChannelListDeliveryStatus(
+              channel: widget.channel,
+              message: latestLastMessage,
+            );
+          }
         }
 
         return Row(
+          spacing: spacing.xxs,
           children: [
-            if (!latestLastMessage.isDeleted) deliveryPrefix,
+            if (!latestLastMessage.isDeleted) ?deliveryPrefix,
             Flexible(
               child: StreamMessagePreviewText(
                 message: latestLastMessage,

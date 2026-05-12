@@ -40,7 +40,7 @@ mixin _$StreamChannelListItemThemeData {
         Color.lerp,
       ),
       borderColor: Color.lerp(a.borderColor, b.borderColor, t),
-      muteIconPosition: t < 0.5 ? a.muteIconPosition : b.muteIconPosition,
+      attributePosition: t < 0.5 ? a.attributePosition : b.attributePosition,
     );
   }
 
@@ -50,7 +50,7 @@ mixin _$StreamChannelListItemThemeData {
     TextStyle? timestampStyle,
     WidgetStateProperty<Color?>? backgroundColor,
     Color? borderColor,
-    MuteIconPosition? muteIconPosition,
+    AttributePosition? attributePosition,
   }) {
     final _this = (this as StreamChannelListItemThemeData);
 
@@ -60,7 +60,7 @@ mixin _$StreamChannelListItemThemeData {
       timestampStyle: timestampStyle ?? _this.timestampStyle,
       backgroundColor: backgroundColor ?? _this.backgroundColor,
       borderColor: borderColor ?? _this.borderColor,
-      muteIconPosition: muteIconPosition ?? _this.muteIconPosition,
+      attributePosition: attributePosition ?? _this.attributePosition,
     );
   }
 
@@ -85,7 +85,7 @@ mixin _$StreamChannelListItemThemeData {
           other.timestampStyle,
       backgroundColor: other.backgroundColor,
       borderColor: other.borderColor,
-      muteIconPosition: other.muteIconPosition,
+      attributePosition: other.attributePosition,
     );
   }
 
@@ -107,7 +107,7 @@ mixin _$StreamChannelListItemThemeData {
         _other.timestampStyle == _this.timestampStyle &&
         _other.backgroundColor == _this.backgroundColor &&
         _other.borderColor == _this.borderColor &&
-        _other.muteIconPosition == _this.muteIconPosition;
+        _other.attributePosition == _this.attributePosition;
   }
 
   @override
@@ -121,7 +121,7 @@ mixin _$StreamChannelListItemThemeData {
       _this.timestampStyle,
       _this.backgroundColor,
       _this.borderColor,
-      _this.muteIconPosition,
+      _this.attributePosition,
     );
   }
 }

@@ -12,7 +12,7 @@ import 'package:stream_chat_flutter/src/message_list_view/stream_message_list_em
 import 'package:stream_chat_flutter/src/message_list_view/stream_message_list_skeleton_loading.dart';
 import 'package:stream_chat_flutter/src/message_list_view/thread_separator.dart';
 import 'package:stream_chat_flutter/src/message_list_view/unread_messages_separator.dart';
-import 'package:stream_chat_flutter/src/message_widget/ephemeral_message.dart';
+import 'package:stream_chat_flutter/src/message_widget/stream_ephemeral_message.dart';
 import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_core_flutter/stream_core_flutter.dart';
@@ -38,18 +38,18 @@ enum SpacingType {
 }
 
 /// Signature for a function that builds a message widget from its
-/// [StreamMessageWidgetProps].
+/// [StreamMessageItemProps].
 ///
 /// Receives the [BuildContext], the [Message] data, and the pre-configured
-/// [StreamMessageWidgetProps] with all list-level callbacks already wired in.
+/// [StreamMessageItemProps] with all list-level callbacks already wired in.
 ///
-/// Use [DefaultStreamMessage] to build the default UI, optionally modifying
-/// the props via [StreamMessageWidgetProps.copyWith] first.
-typedef StreamMessageWidgetBuilder =
+/// Use [DefaultStreamMessageItem] to build the default UI, optionally modifying
+/// the props via [StreamMessageItemProps.copyWith] first.
+typedef StreamMessageItemBuilder =
     Widget Function(
       BuildContext context,
       Message message,
-      StreamMessageWidgetProps defaultProps,
+      StreamMessageItemProps defaultProps,
     );
 
 /// {@template streamMessageListView}
@@ -168,19 +168,19 @@ class StreamMessageListView extends StatefulWidget {
   /// Optional builder for per-instance message customization.
   ///
   /// When set, this builder is called for each regular message with
-  /// pre-configured [StreamMessageWidgetProps] that have all list-level
-  /// callbacks already wired in. Use [StreamMessageWidgetProps.copyWith]
-  /// to modify properties, and [DefaultStreamMessage] to build the default
+  /// pre-configured [StreamMessageItemProps] that have all list-level
+  /// callbacks already wired in. Use [StreamMessageItemProps.copyWith]
+  /// to modify properties, and [DefaultStreamMessageItem] to build the default
   /// widget.
   ///
   /// For app-wide customization, use [StreamComponentFactory] instead.
-  final StreamMessageWidgetBuilder? messageBuilder;
+  final StreamMessageItemBuilder? messageBuilder;
 
   /// Optional builder for the parent message at the top of a thread.
   ///
   /// Works the same as [messageBuilder] but is called for the parent
   /// message only.
-  final StreamMessageWidgetBuilder? parentMessageBuilder;
+  final StreamMessageItemBuilder? parentMessageBuilder;
 
   /// Whether the view scrolls in the reading direction.
   ///
@@ -238,43 +238,43 @@ class StreamMessageListView extends StatefulWidget {
 
   /// Called when the reply action is triggered on a message.
   ///
-  /// Forwarded to each [StreamMessageWidget] in the list.
+  /// Forwarded to each [StreamMessageItem] in the list.
   final void Function(Message)? onReplyTap;
 
   /// Called when the "show in chat" action is tapped in the full-screen
   /// media gallery.
   ///
-  /// Forwarded to each [StreamMessageWidget] in the list.
+  /// Forwarded to each [StreamMessageItem] in the list.
   final ShowMessageCallback? onShowMessage;
 
   /// Widget builder for the attachment actions modal shown in the full-screen
   /// media gallery.
   ///
-  /// Forwarded to each [StreamMessageWidget] in the list.
+  /// Forwarded to each [StreamMessageItem] in the list.
   final AttachmentActionsBuilder? attachmentActionsModalBuilder;
 
   /// Whether swiping a message triggers a quoted-reply action.
   ///
-  /// Forwarded to each [StreamMessageWidget] in the list via
-  /// [StreamMessageWidgetProps.swipeToReply].
+  /// Forwarded to each [StreamMessageItem] in the list via
+  /// [StreamMessageItemProps.swipeToReply].
   ///
   /// Defaults to false.
   final bool swipeToReply;
 
   /// Called when a user avatar is tapped.
   ///
-  /// Forwarded to each [StreamMessageWidget] in the list.
+  /// Forwarded to each [StreamMessageItem] in the list.
   final void Function(User)? onUserAvatarTap;
 
   /// Called when the message reactions are tapped.
   ///
-  /// Forwarded to each [StreamMessageWidget] in the list.
+  /// Forwarded to each [StreamMessageItem] in the list.
   final void Function(Message)? onReactionsTap;
 
   /// Called when a quoted message is tapped.
   ///
   /// When provided, this callback is forwarded to each
-  /// [StreamMessageWidget] in the list.
+  /// [StreamMessageItem] in the list.
   ///
   /// When null (the default), tapping a quoted message scrolls to it in
   /// the list, loading it if necessary.
@@ -283,12 +283,12 @@ class StreamMessageListView extends StatefulWidget {
   /// Called when a link is tapped in message text.
   ///
   /// Receives the [Message] containing the link and the tapped URL.
-  /// Forwarded to each [StreamMessageWidget] in the list.
+  /// Forwarded to each [StreamMessageItem] in the list.
   final void Function(Message message, String url)? onMessageLinkTap;
 
   /// Called when a user mention is tapped in message text.
   ///
-  /// Forwarded to each [StreamMessageWidget] in the list.
+  /// Forwarded to each [StreamMessageItem] in the list.
   final void Function(User user)? onUserMentionTap;
 
   /// If true will show a scroll to bottom button when
@@ -592,6 +592,17 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     super.dispose();
   }
 
+  // Duration of the programmatic scroll triggered by [_moveToAndHighlight].
+  static const _kScrollToDuration = Duration(seconds: 1);
+
+  // The highlight pulses on the target message after a jump: it stays at full
+  // color for [_kHighlightHoldDuration], then fades to transparent over
+  // [_kHighlightFadeDuration]. Tuned to feel like Slack's permalink jump —
+  // a clearly visible hold so the user can confirm "this is the message",
+  // followed by a graceful fade.
+  static const _kHighlightHoldDuration = Duration(seconds: 1);
+  static const _kHighlightFadeDuration = Duration(seconds: 1);
+
   void _highlightMessage(String messageId) {
     setState(() {
       _highlightedMessageId = messageId;
@@ -606,13 +617,21 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     bool scrollTo = true,
   }) async {
     if (messageId != null) {
-      final index = messages.indexWhere((m) => m.id == messageId);
+      // In a thread the parent message lives outside the `messages` list and
+      // is rendered as the very last item, so search for it explicitly when a
+      // thread reply quotes it.
+      final isThreadParent = _isThreadConversation && messageId == widget.parentMessage?.id;
+      final index = isThreadParent ? messages.length + 2 : messages.indexWhere((m) => m.id == messageId);
 
       if (index >= 0) {
+        // Wait for the scroll to settle before flagging the message as
+        // highlighted; otherwise the highlight tween fires while the list is
+        // still animating (or before the target item is even mounted) and the
+        // user only sees the tail end of the fade.
         if (scrollTo) {
-          _scrollController?.scrollTo(
+          await _scrollController?.scrollTo(
             index: index + 2, // +2 to account for loader and footer
-            duration: const Duration(seconds: 1),
+            duration: _kScrollToDuration,
             curve: Curves.easeInOut,
             alignment: 0.1,
           );
@@ -640,9 +659,38 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       );
     }
 
-    if (messageId != null) {
+    if (messageId != null && mounted) {
       _highlightMessage(messageId);
     }
+  }
+
+  // Wraps [child] in the highlight pulse if [message] is the currently
+  // highlighted message. Holds at full color for [_kHighlightHoldDuration],
+  // then fades to transparent over [_kHighlightFadeDuration].
+  Widget _maybeWrapWithHighlight({required Message message, required Widget child}) {
+    if (_highlightedMessageId != message.id) return child;
+
+    final colorScheme = context.streamColorScheme;
+    final highlightColor = widget.messageHighlightColor ?? colorScheme.backgroundHighlight;
+
+    // Drive the whole sequence (hold + fade) with a single tween whose curve is
+    // clamped to the trailing fade window — this gives us the hold for free.
+    final totalMs = _kHighlightHoldDuration.inMilliseconds + _kHighlightFadeDuration.inMilliseconds;
+    final fadeStart = _kHighlightHoldDuration.inMilliseconds / totalMs;
+
+    return TweenAnimationBuilder<Color?>(
+      key: ValueKey('highlight-$_highlightGeneration'),
+      tween: ColorTween(begin: highlightColor, end: highlightColor.withValues(alpha: 0)),
+      duration: Duration(milliseconds: totalMs),
+      curve: Interval(fadeStart, 1, curve: Curves.easeOut),
+      onEnd: () {
+        if (_highlightedMessageId == message.id) {
+          setState(() => _highlightedMessageId = null);
+        }
+      },
+      builder: (_, color, child) => ColoredBox(color: color!, child: child),
+      child: child,
+    );
   }
 
   @override
@@ -1151,7 +1199,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
   Widget buildParentMessage(
     Message message,
   ) {
-    final parentMessageProps = StreamMessageWidgetProps(
+    final parentMessageProps = StreamMessageItemProps(
       message: message,
       swipeToReply: widget.swipeToReply,
       onThreadTap: _onThreadTap,
@@ -1174,7 +1222,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     final contentKind = resolveContentKind(message);
     final isInThread = widget.parentMessage != null;
 
-    return StreamMessageLayout(
+    final layout = StreamMessageLayout(
       data: StreamMessageLayoutData(
         stackPosition: .single,
         alignment: isMyMessage ? .end : .start,
@@ -1184,10 +1232,12 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       child: Builder(
         builder: (context) => switch (widget.parentMessageBuilder) {
           final builder? => builder.call(context, message, parentMessageProps),
-          _ => StreamMessageWidget.fromProps(props: parentMessageProps),
+          _ => StreamMessageItem.fromProps(props: parentMessageProps),
         },
       ),
     );
+
+    return _maybeWrapWithHighlight(message: message, child: layout);
   }
 
   Widget _buildScrollToBottom() {
@@ -1212,34 +1262,29 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
               (e) => e.userId == streamChannel!.channel.client.state.currentUser!.id,
             );
 
+        Widget button = StreamButton.icon(
+          style: .secondary,
+          type: .outline,
+          size: .medium,
+          isFloating: true,
+          icon: switch (widget.reverse) {
+            true => Icon(context.streamIcons.arrowDown),
+            false => Icon(context.streamIcons.arrowUp),
+          },
+          onPressed: () => scrollToBottomDefaultTapAction(unreadCount),
+        );
+
+        if (showUnreadCount && widget.showUnreadCountOnScrollToBottom) {
+          button = StreamBadgeNotification(
+            label: '${unreadCount > 99 ? '99+' : unreadCount}',
+            child: button,
+          );
+        }
+
         return PositionedDirectional(
           bottom: 16,
           end: 16,
-          child: Stack(
-            clipBehavior: Clip.none,
-            children: [
-              StreamButton.icon(
-                style: .secondary,
-                type: .outline,
-                size: .medium,
-                isFloating: true,
-                icon: switch (widget.reverse) {
-                  true => Icon(context.streamIcons.arrowDown),
-                  false => Icon(context.streamIcons.arrowUp),
-                },
-                onPressed: () => scrollToBottomDefaultTapAction(unreadCount),
-              ),
-              if (showUnreadCount && widget.showUnreadCountOnScrollToBottom)
-                PositionedDirectional(
-                  end: -4,
-                  top: -4,
-                  child: StreamBadgeNotification(
-                    label: '${unreadCount > 99 ? '99+' : unreadCount}',
-                    size: StreamBadgeNotificationSize.sm,
-                  ),
-                ),
-            ],
-          ),
+          child: button,
         );
       },
     );
@@ -1291,7 +1336,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       return buildModeratedMessage(message);
     }
 
-    final messageWidgetProps = StreamMessageWidgetProps(
+    final messageItemProps = StreamMessageItemProps(
       message: message,
       swipeToReply: widget.swipeToReply,
       onThreadTap: _onThreadTap,
@@ -1332,7 +1377,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     final isInThread = widget.parentMessage != null;
     final stackPosition = computeStackPosition(message: message, previous: prevMessage, next: nextMessage);
 
-    Widget child = StreamMessageLayout(
+    final layout = StreamMessageLayout(
       data: StreamMessageLayoutData(
         stackPosition: stackPosition,
         alignment: isMyMessage ? .end : .start,
@@ -1341,30 +1386,13 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       ),
       child: Builder(
         builder: (context) => switch (widget.messageBuilder) {
-          final builder? => builder.call(context, message, messageWidgetProps),
-          _ => StreamMessageWidget.fromProps(props: messageWidgetProps),
+          final builder? => builder.call(context, message, messageItemProps),
+          _ => StreamMessageItem.fromProps(props: messageItemProps),
         },
       ),
     );
 
-    if (_highlightedMessageId == message.id) {
-      final colorScheme = context.streamColorScheme;
-      final highlightColor = widget.messageHighlightColor ?? colorScheme.backgroundHighlight;
-      child = TweenAnimationBuilder<Color?>(
-        key: ValueKey('highlight-$_highlightGeneration'),
-        tween: ColorTween(begin: highlightColor, end: highlightColor.withValues(alpha: 0)),
-        duration: const Duration(seconds: 3),
-        onEnd: () {
-          if (_highlightedMessageId == message.id) {
-            setState(() => _highlightedMessageId = null);
-          }
-        },
-        builder: (_, color, child) => ColoredBox(color: color!, child: child),
-        child: child,
-      );
-    }
-
-    return child;
+    return _maybeWrapWithHighlight(message: message, child: layout);
   }
 
   void _handleItemPositionsChanged() {

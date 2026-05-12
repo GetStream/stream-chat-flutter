@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/audio/audio_playlist_state.dart';
 import 'package:stream_chat_flutter/src/audio/audio_sampling.dart' as sampling;
@@ -292,7 +293,7 @@ class AudioDurationText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final remaining = duration - position;
+    final remaining = [duration - position, Duration.zero].max;
     return Text(
       remaining.toMinutesAndSeconds(),
       style: style?.copyWith(

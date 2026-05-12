@@ -1,9 +1,26 @@
 ## Upcoming
 
+✅ Added
+
+- Added `StreamChatClient.recoverStateOnReconnect` (defaults to `true`); when `false`, the client no longer auto-re-queries active channels on connection recovery — useful for consumers driving their own refresh from the `connectionRecovered` event.
+- Added `Message.updateWith(Message? other)` — merges a server-side update onto the local message while preserving locally-known `poll`, `sharedLocation`, `ownReactions`, and nested `quotedMessage` enrichment when the server omits them.
+- Added `Channel.isOneToOne` — true when the channel is `isDistinct` and has exactly two members. For the looser count-only check, inline `channel.memberCount == 2`.
+
+⚠️ Deprecated
+
+- Deprecated `Message.syncWith` in favor of `Message.updateWith`. Note the arguments are flipped: `local.updateWith(remote)` replaces `remote.syncWith(local)`.
+
+🔄 Changed
+
+- Tightened `Channel.isGroup` from `memberCount != 2` to `memberCount > 2 || !isDistinct`. Two-member non-distinct channels now correctly report as groups, and 1-member distinct channels no longer do. Migrate via `!channel.isOneToOne` or `channel.memberCount != 2`.
+- Tightened `Channel.isDistinct` to require the `!members-` prefix (with trailing dash), matching the backend's `DistinctChannelPrefix` constant. Real server-generated ids always include the dash; only malformed/test ids that previously matched the looser `!members` check are affected.
+
 🐞 Fixed
 
-- Fixed `Channel.sendMessage` and `Channel.updateMessage` hanging forever when
-  any attachment upload failed; they now throw `StreamChatError` instead.
+- Fixed reactions, polls, and quoted-message enrichment briefly flickering after the app returned from the background. The reconnect path now refreshes channels and advances `lastSyncAt` to the current time instead of replaying every event since `lastSyncAt` through `handleEvent`. `client.sync()` remains available for consumers that need event-level replay.
+- Fixed `Channel.sendMessage` / `Channel.updateMessage` hanging forever when any attachment upload failed; they now throw `StreamChatError`.
+- Fixed quoted poll messages losing their poll, shared-location, or nested-quote content when the server omits it from the `quoted_message` payload during channel re-sync.
+- Fixed a poll attached to a parent message disappearing when a thread reply was added; partial `message.updated` events no longer clobber locally-known `poll` / `sharedLocation` on the parent.
 
 ## 10.0.0-beta.13
 

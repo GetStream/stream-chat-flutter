@@ -29,7 +29,7 @@ void main() {
         await tester.tap(find.text('Delete Option'));
         await tester.pumpAndSettle();
 
-        await tester.tap(find.text('DELETE'));
+        await tester.tap(find.text('Delete'));
         await tester.pumpAndSettle();
 
         expect(value, isTrue);
@@ -59,7 +59,7 @@ void main() {
         await tester.tap(find.text('Delete Option'));
         await tester.pumpAndSettle();
 
-        await tester.tap(find.text('CANCEL'));
+        await tester.tap(find.text('Cancel'));
         await tester.pumpAndSettle();
 
         expect(value, isFalse);

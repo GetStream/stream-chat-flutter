@@ -5,7 +5,8 @@ import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:stream_core_flutter/stream_core_flutter.dart' as core;
 
-/// Displays contextual annotations for the given [message].
+/// Displays contextual annotations above the message bubble for the given
+/// [message].
 ///
 /// Annotations are shown in the following order when applicable:
 ///
@@ -22,10 +23,11 @@ import 'package:stream_core_flutter/stream_core_flutter.dart' as core;
 ///
 /// See also:
 ///
-///  * [DefaultStreamMessage], which controls annotation visibility.
-class StreamMessageAnnotations extends core.NullableStatelessWidget {
-  /// Creates message annotations for the given [message].
-  const StreamMessageAnnotations({
+///  * [StreamMessageFooter], the symmetric slot below the message bubble.
+///  * [DefaultStreamMessageItem], which controls header visibility.
+class StreamMessageHeader extends core.NullableStatelessWidget {
+  /// Creates a message header for the given [message].
+  const StreamMessageHeader({
     super.key,
     required this.message,
     this.onViewChannelTap,

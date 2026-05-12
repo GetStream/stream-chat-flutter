@@ -2,11 +2,8 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart' show AssetEntity, ThumbnailFormat, ThumbnailSize;
 
-import 'package:stream_chat_flutter/src/scroll_view/stream_scroll_view_error_widget.dart';
 import 'package:stream_chat_flutter/src/scroll_view/stream_scroll_view_load_more_error.dart';
-import 'package:stream_chat_flutter/src/scroll_view/stream_scroll_view_loading_widget.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 /// Default grid delegate  for [StreamPhotoGallery].
 const defaultStreamPhotoGalleryDelegate = SliverGridDelegateWithFixedCrossAxisCount(
@@ -52,7 +49,7 @@ class StreamPhotoGallery extends StatelessWidget {
     this.keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
     this.restorationId,
     this.clipBehavior = Clip.hardEdge,
-    this.thumbnailSize = const ThumbnailSize(400, 400),
+    this.thumbnailSize,
     this.thumbnailFormat = ThumbnailFormat.jpeg,
     this.thumbnailQuality = 100,
     this.thumbnailScale = 1,
@@ -293,8 +290,11 @@ class StreamPhotoGallery extends StatelessWidget {
   /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
 
-  /// The thumbnail size.
-  final ThumbnailSize thumbnailSize;
+  /// The thumbnail size in pixels to request from the platform.
+  ///
+  /// When null (the default), each tile auto-calculates its size from its
+  /// own layout constraints and the device pixel ratio.
+  final ThumbnailSize? thumbnailSize;
 
   /// {@macro photo_manager.ThumbnailFormat}
   final ThumbnailFormat thumbnailFormat;

@@ -143,19 +143,57 @@ class Channel {
     _extraData.addAll(extraData);
   }
 
+  /// Whether this channel is identified by its member set rather than an
+  /// explicit id.
+  ///
+  /// Stream auto-generates ids of the form `!members-<hash>` for channels
+  /// created with members but no id, so the same set of users always
+  /// references the same channel.
+  ///
+  /// Distinct channels can lose members but can't gain them after creation.
+  ///
+  /// See [isOneToOne] for the typical 1-to-1 predicate built on this.
+  bool get isDistinct => id?.startsWith('!members') == true;
+
+  /// Whether this is a group channel.
+  ///
+  /// True when the channel has more than two members, or isn't [isDistinct].
+  /// Custom-id channels are treated as groups regardless of current member
+  /// count because they aren't bounded — they can grow back into
+  /// multi-person conversations.
+  ///
+  /// Near-inverse of [isOneToOne].
+  bool get isGroup => (memberCount ?? 0) > 2 || !isDistinct;
+
+  /// Whether this is a 1-to-1 conversation.
+  ///
+  /// True when the channel is [isDistinct] and has exactly two members.
+  /// Distinct channels can't gain members, so a 2-member distinct channel
+  /// is permanently bounded to two participants — including channels that
+  /// shrunk down from a larger group DM.
+  ///
+  /// This is a structural predicate without a current-user check. Combine
+  /// with capability / permission checks at the call site if you need
+  /// perspective gating.
+  ///
+  /// Near-inverse of [isGroup].
+  bool get isOneToOne => isDistinct && memberCount == 2;
+
   /// Returns true if the channel is muted.
-  bool get isMuted => _client.state.currentUser?.channelMutes.any((element) => element.channel.cid == cid) == true;
+  bool get isMuted {
+    final channelMutes = _client.state.currentUser?.channelMutes;
+    if (channelMutes == null) return false;
+
+    return channelMutes.any((it) => it.channel.cid == cid);
+  }
 
   /// Returns true if the channel is muted, as a stream.
-  Stream<bool> get isMutedStream => _client.state.currentUserStream
-      .map((event) => event?.channelMutes.any((element) => element.channel.cid == cid) == true)
-      .distinct();
+  Stream<bool> get isMutedStream => _client.state.currentUserStream.map((user) {
+    final channelMutes = user?.channelMutes;
+    if (channelMutes == null) return false;
 
-  /// True if the channel is a group.
-  bool get isGroup => memberCount != 2;
-
-  /// True if the channel is distinct.
-  bool get isDistinct => id?.startsWith('!members') == true;
+    return channelMutes.any((it) => it.channel.cid == cid);
+  }).distinct();
 
   /// Channel configuration.
   ChannelConfig? get config {
@@ -756,8 +794,8 @@ class Channel {
         ),
       );
 
-      final sentMessage = response.message
-          .syncWith(message)
+      final sentMessage = message
+          .updateWith(response.message)
           .copyWith(
             // Update the message state to sent.
             state: MessageState.sent,
@@ -845,12 +883,11 @@ class Channel {
         ),
       );
 
-      final updateMessage = response.message
-          .syncWith(message)
+      final updateMessage = message
+          .updateWith(response.message)
           .copyWith(
             // Update the message state to updated.
             state: MessageState.updated,
-            ownReactions: message.ownReactions,
           );
 
       state?.updateMessage(updateMessage);
@@ -912,12 +949,11 @@ class Channel {
         ),
       );
 
-      final updatedMessage = response.message
-          .syncWith(message)
+      final updatedMessage = message
+          .updateWith(response.message)
           .copyWith(
             // Update the message state to updated.
             state: MessageState.updated,
-            ownReactions: message.ownReactions,
           );
 
       state?.updateMessage(updatedMessage);
@@ -1555,8 +1591,11 @@ class Channel {
       );
       return reactionResp;
     } catch (_) {
-      // Reset the message if the update fails
-      state?.updateMessage(message);
+      // Reset the message if the update fails. Use replace (not merge)
+      // so the rollback wins over the optimistic local state — otherwise
+      // `Message.updateWith`'s enrichment preservation would keep the
+      // optimistic `ownReactions` for messages that previously had none.
+      state?.replaceMessage(message);
       rethrow;
     }
   }
@@ -1581,8 +1620,9 @@ class Channel {
       );
       return deleteResponse;
     } catch (_) {
-      // Reset the message if the update fails
-      state?.updateMessage(message);
+      // Reset the message if the update fails. Use replace (not merge)
+      // for symmetry with `sendReaction` — see that method for context.
+      state?.replaceMessage(message);
       rethrow;
     }
   }
@@ -3280,7 +3320,29 @@ class ChannelClientState {
   }
 
   /// Updates the [message] in the state if it exists. Adds it otherwise.
+  ///
+  /// Reconciles via `Message.updateWith`, so locally-known enrichment
+  /// (poll, sharedLocation, ownReactions, nested quotedMessage) is
+  /// preserved when [message] omits those fields. Use [replaceMessage]
+  /// for paths that need a strict overwrite.
   void updateMessage(Message message) => _updateMessages([message]);
+
+  /// Replaces the [message] in the state if it exists, no-op otherwise.
+  ///
+  /// Unlike [updateMessage], this does **not** merge with the existing
+  /// state — [message] is used as-is. Useful for local rollbacks of an
+  /// optimistic update, where the caller has the full prior snapshot and
+  /// doesn't want the merge falling back to the optimistic values.
+  void replaceMessage(Message message) => _updateMessages([message], update: _replaceUpdate);
+
+  // Default `update` for [_updateMessages]: merge incoming with the
+  // locally-known message via `Message.updateWith`, preserving enrichment
+  // the server may strip on partial payloads.
+  static Message _mergeUpdate(Message original, Message updated) => original.updateWith(updated);
+
+  // Replace `update` for [_updateMessages]: take the incoming as-is. Used
+  // by local rollback paths.
+  static Message _replaceUpdate(Message _, Message updated) => updated;
 
   /// Cleans up all the stale error messages which requires no action.
   void cleanUpStaleErrorMessages() {
@@ -3868,16 +3930,22 @@ class ChannelClientState {
     return _updateMessages(messages);
   }
 
-  void _updateMessages(Iterable<Message> messages) {
+  void _updateMessages(
+    Iterable<Message> messages, {
+    Message Function(Message original, Message updated) update = _mergeUpdate,
+  }) {
     if (messages.isEmpty) return;
 
-    _updateThreadMessages(messages);
-    _updateChannelMessages(messages);
-    _updatePinnedMessages(messages);
+    _updateThreadMessages(messages, update: update);
+    _updateChannelMessages(messages, update: update);
+    _updatePinnedMessages(messages, update: update);
     _updateActiveLiveLocations(messages);
   }
 
-  void _updateThreadMessages(Iterable<Message> messages) {
+  void _updateThreadMessages(
+    Iterable<Message> messages, {
+    Message Function(Message original, Message updated) update = _mergeUpdate,
+  }) {
     if (messages.isEmpty) return;
 
     final affectedThreads = {...messages.map((it) => it.parentId).nonNulls};
@@ -3890,6 +3958,7 @@ class ChannelClientState {
       final updatedThreadMessages = _mergeMessagesIntoExisting(
         existing: threadMessages,
         toMerge: messages,
+        update: update,
       );
 
       // Update the thread with the modified message list.
@@ -3900,7 +3969,10 @@ class ChannelClientState {
     _threads = updatedThreads;
   }
 
-  void _updateChannelMessages(Iterable<Message> messages) {
+  void _updateChannelMessages(
+    Iterable<Message> messages, {
+    Message Function(Message original, Message updated) update = _mergeUpdate,
+  }) {
     if (messages.isEmpty) return;
 
     final affectedMessages = messages.map((it) {
@@ -3919,6 +3991,7 @@ class ChannelClientState {
     final updatedChannelMessages = _mergeMessagesIntoExisting(
       existing: channelMessages,
       toMerge: affectedMessages,
+      update: update,
     );
 
     // Calculate the new last message at time.
@@ -3935,13 +4008,17 @@ class ChannelClientState {
     );
   }
 
-  void _updatePinnedMessages(Iterable<Message> messages) {
+  void _updatePinnedMessages(
+    Iterable<Message> messages, {
+    Message Function(Message original, Message updated) update = _mergeUpdate,
+  }) {
     if (messages.isEmpty) return;
 
     final pinnedMessages = [...this.pinnedMessages];
     final updatedPinnedMessages = _mergePinnedMessagesIntoExisting(
       existing: pinnedMessages,
       toMerge: messages,
+      update: update,
     );
 
     _channelState = _channelState.copyWith(
@@ -3994,45 +4071,43 @@ class ChannelClientState {
   Iterable<Message> _mergePinnedMessagesIntoExisting({
     required Iterable<Message> existing,
     required Iterable<Message> toMerge,
+    Message Function(Message original, Message updated) update = _mergeUpdate,
   }) {
     return _mergeMessagesIntoExisting(
       existing: existing,
       toMerge: toMerge,
+      update: update,
     ).where(_pinIsValid);
   }
 
   Iterable<Message> _mergeMessagesIntoExisting({
     required Iterable<Message> existing,
     required Iterable<Message> toMerge,
+    Message Function(Message original, Message updated) update = _mergeUpdate,
   }) {
     if (toMerge.isEmpty) return existing;
 
+    // [update] decides whether each pair is reconciled (default — see
+    // `_mergeUpdate`) or replaced (`_replaceUpdate`, used by local rollback
+    // paths that don't want enrichment fallback to keep optimistic values).
     final mergedMessages = existing.merge(
       toMerge,
       key: (message) => message.id,
-      update: (original, updated) {
-        var merged = updated.syncWith(original);
-
-        // Preserve quotedMessage if the updated doesn't include it.
-        if (updated.quotedMessageId != null && updated.quotedMessage == null) {
-          merged = merged.copyWith(quotedMessage: original.quotedMessage);
-        }
-
-        return merged;
-      },
+      update: update,
     );
 
-    final toUpdateMap = {for (final m in toMerge) m.id: m};
-    final updatedMessages = mergedMessages.map((it) {
-      // Continue if the message doesn't quote any of the updated messages.
-      if (!toUpdateMap.containsKey(it.quotedMessageId)) return it;
+    // Replace each embedded quotedMessage with the fully-formed top-level
+    // copy from the merged state, so quoted parents that aren't in the
+    // current batch are still resolved correctly.
+    final mergedList = mergedMessages.toList(growable: false);
+    final mergedById = {for (final m in mergedList) m.id: m};
 
-      final updatedQuotedMessage = toUpdateMap[it.quotedMessageId];
+    return mergedList.map((message) {
+      final quoted = mergedById[message.quotedMessageId];
+      if (quoted == null) return message;
       // Update the quotedMessage reference in the message.
-      return it.copyWith(quotedMessage: updatedQuotedMessage);
+      return message.copyWith(quotedMessage: quoted);
     });
-
-    return updatedMessages;
   }
 
   void _removeMessages(Iterable<Message> messages) {

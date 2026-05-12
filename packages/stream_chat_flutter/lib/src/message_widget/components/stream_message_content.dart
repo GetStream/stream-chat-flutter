@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:stream_chat_flutter/src/attachment/builder/attachment_widget_builder.dart';
-import 'package:stream_chat_flutter/src/channel/stream_message_preview_text.dart';
 import 'package:stream_chat_flutter/src/message_widget/components/stream_message_deleted.dart';
 import 'package:stream_chat_flutter/src/message_widget/components/stream_message_reactions.dart';
 import 'package:stream_chat_flutter/src/message_widget/components/stream_message_text.dart';
-import 'package:stream_chat_flutter/src/message_widget/parse_attachments.dart';
+import 'package:stream_chat_flutter/src/message_widget/stream_message_attachments.dart';
+import 'package:stream_chat_flutter/src/message_widget/stream_quoted_message.dart';
 import 'package:stream_chat_flutter/src/utils/typedefs.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:stream_core_flutter/stream_core_flutter.dart' as core;
@@ -16,9 +16,9 @@ import 'package:stream_core_flutter/stream_core_flutter.dart' as core;
 /// For deleted messages a [StreamMessageDeleted] placeholder is shown.
 /// Otherwise the content displays attachments, message text, and reactions.
 ///
-/// The [annotation], [metadata], and [replies] slots are passed in from
-/// [DefaultStreamMessage] and rendered in the appropriate positions via the
-/// core [core.StreamMessageContent] layout.
+/// The [header], [footer], and [replies] slots are passed in from
+/// [DefaultStreamMessageItem] and rendered in the appropriate positions via
+/// the core [core.StreamMessageContent] layout.
 ///
 /// When the message consists of three or fewer emoji-only characters, the
 /// bubble background is hidden so the emoji appear at a larger visual size.
@@ -27,15 +27,15 @@ import 'package:stream_core_flutter/stream_core_flutter.dart' as core;
 ///
 ///  * [StreamMessageReactions], which renders reactions around the bubble.
 ///  * [StreamMessageText], which renders the markdown message text.
-///  * [DefaultStreamMessage], which hosts this widget.
+///  * [DefaultStreamMessageItem], which hosts this widget.
 class StreamMessageContent extends StatefulWidget {
   /// Creates a message content widget for the given [message].
   const StreamMessageContent({
     super.key,
     required this.message,
-    this.annotation,
+    this.header,
     this.errorBadge,
-    this.metadata,
+    this.footer,
     this.replies,
     this.attachmentBuilders,
     this.onLinkTap,
@@ -51,11 +51,11 @@ class StreamMessageContent extends StatefulWidget {
   /// The message to display.
   final Message message;
 
-  /// Optional annotation widget displayed above the message content column.
+  /// Optional header widget displayed above the message content column.
   ///
-  /// Typically a [StreamMessageAnnotations] containing pinned, reminder,
+  /// Typically a [StreamMessageHeader] containing pinned, reminder,
   /// or show-in-channel annotations.
-  final Widget? annotation;
+  final Widget? header;
 
   /// Optional error badge widget overlaid on the message bubble.
   ///
@@ -63,11 +63,11 @@ class StreamMessageContent extends StatefulWidget {
   /// bubble using a [Stack] with [PositionedDirectional].
   final Widget? errorBadge;
 
-  /// Optional metadata widget displayed below the message content column.
+  /// Optional footer widget displayed below the message content column.
   ///
-  /// Typically a [StreamMessageMetadata] containing the author name, timestamp,
+  /// Typically a [StreamMessageFooter] containing the author name, timestamp,
   /// and sending status.
-  final Widget? metadata;
+  final Widget? footer;
 
   /// Optional replies indicator widget displayed below the bubble.
   ///
@@ -77,8 +77,8 @@ class StreamMessageContent extends StatefulWidget {
 
   /// Custom attachment builders for rendering message attachments.
   ///
-  /// When non-null, these builders are passed to [ParseAttachments] and
-  /// take priority over the default builders.
+  /// When non-null, these builders are passed to [StreamMessageAttachments]
+  /// and take priority over the default builders.
   final List<StreamAttachmentWidgetBuilder>? attachmentBuilders;
 
   /// Called when a link is tapped in the rendered message text.
@@ -124,7 +124,7 @@ class StreamMessageContent extends StatefulWidget {
 class _StreamMessageContentState extends State<StreamMessageContent> {
   // Tracks the rendered width of the attachments to constrain the bubble.
   double? widthLimit;
-  late final attachmentsKey = GlobalKey(debugLabel: 'ParseAttachments');
+  late final attachmentsKey = GlobalKey(debugLabel: 'StreamMessageAttachments');
 
   // Measures the attachment width after layout and constrains the bubble.
   void _updateWidthLimit() {
@@ -150,8 +150,8 @@ class _StreamMessageContentState extends State<StreamMessageContent> {
     if (widget.message.isDeleted) return const StreamMessageDeleted();
 
     return core.StreamMessageContent(
-      header: widget.annotation,
-      footer: widget.metadata,
+      header: widget.header,
+      footer: widget.footer,
       child: core.StreamColumn(
         mainAxisSize: .min,
         crossAxisAlignment: crossAxisAlignment,
@@ -165,42 +165,19 @@ class _StreamMessageContentState extends State<StreamMessageContent> {
                 final bubbleContent = ConstrainedBox(
                   constraints: const BoxConstraints().copyWith(maxWidth: widthLimit),
                   child: core.StreamColumn(
-                    spacing: spacing.xxs,
                     mainAxisSize: .min,
+                    spacing: spacing.xs,
                     crossAxisAlignment: .start,
                     children: [
                       if (widget.message.quotedMessage case final quotedMessage?)
-                        // TODO: Refactor this with attachments
-                        ConstrainedBox(
-                          constraints: const .tightFor(width: 272),
-                          child: GestureDetector(
-                            onTap: !quotedMessage.isDeleted && widget.onQuotedMessageTap != null
-                                ? () => widget.onQuotedMessageTap!(quotedMessage)
-                                : null,
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 8),
-                              child: core.StreamMessageTheme(
-                                data: core.StreamMessageThemeData(
-                                  incoming: core.StreamMessageStyle(
-                                    backgroundColor: context.streamColorScheme.backgroundSurfaceStrong,
-                                  ),
-                                  outgoing: core.StreamMessageStyle(
-                                    backgroundColor: context.streamColorScheme.brand.shade150,
-                                  ),
-                                ),
-                                child: core.MessageComposerReplyAttachment(
-                                  title: Text(quotedMessage.user?.name ?? ''),
-                                  subtitle: StreamMessagePreviewText(message: quotedMessage),
-                                  style: switch (core.StreamMessageLayout.messageAlignmentOf(context)) {
-                                    core.StreamMessageAlignment.start => .incoming,
-                                    core.StreamMessageAlignment.end => .outgoing,
-                                  },
-                                ),
-                              ),
-                            ),
-                          ),
+                        StreamQuotedMessage(
+                          quotedMessage: quotedMessage,
+                          onTap: switch (widget.onQuotedMessageTap) {
+                            final onTap? => () => onTap(quotedMessage),
+                            _ => null,
+                          },
                         ),
-                      ParseAttachments(
+                      StreamMessageAttachments(
                         key: attachmentsKey,
                         message: widget.message,
                         attachmentBuilders: widget.attachmentBuilders,

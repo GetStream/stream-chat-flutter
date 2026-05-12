@@ -6,16 +6,16 @@ import 'package:flutter/services.dart';
 import 'package:stream_chat_flutter/platform_widget_builder/src/platform_widget_builder.dart';
 import 'package:stream_chat_flutter/src/context_menu/context_menu.dart';
 import 'package:stream_chat_flutter/src/context_menu/context_menu_region.dart';
-import 'package:stream_chat_flutter/src/message_widget/components/stream_message_annotations.dart';
 import 'package:stream_chat_flutter/src/message_widget/components/stream_message_content.dart';
-import 'package:stream_chat_flutter/src/message_widget/components/stream_message_metadata.dart';
+import 'package:stream_chat_flutter/src/message_widget/components/stream_message_footer.dart';
+import 'package:stream_chat_flutter/src/message_widget/components/stream_message_header.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_core_flutter/stream_core_flutter.dart' as core;
 
 /// A chat message widget that renders a single message with its attachments,
 /// reactions, and interaction callbacks.
 ///
-/// [StreamMessageWidget] displays a single [Message] within a chat message
+/// [StreamMessageItem] displays a single [Message] within a chat message
 /// list. It handles the complete message layout including the author avatar,
 /// message content (text, attachments, polls, quoted messages), reactions,
 /// thread indicators, and user interaction gestures such as tap, long-press,
@@ -26,17 +26,17 @@ import 'package:stream_core_flutter/stream_core_flutter.dart' as core;
 /// web, those same actions appear in a right-click context menu.
 ///
 /// This widget delegates rendering to either a custom builder registered via
-/// [StreamComponentFactory], or [DefaultStreamMessage] when no custom builder
+/// [StreamComponentFactory], or [DefaultStreamMessageItem] when no custom builder
 /// is provided. Register a custom builder through [StreamChatConfigurationData]
 /// to fully replace the default message layout while still receiving the same
-/// [StreamMessageWidgetProps].
+/// [StreamMessageItemProps].
 ///
 /// {@tool snippet}
 ///
 /// Display a message with default settings:
 ///
 /// ```dart
-/// StreamMessageWidget(
+/// StreamMessageItem(
 ///   message: message,
 /// )
 /// ```
@@ -47,7 +47,7 @@ import 'package:stream_core_flutter/stream_core_flutter.dart' as core;
 /// Customise interaction callbacks:
 ///
 /// ```dart
-/// StreamMessageWidget(
+/// StreamMessageItem(
 ///   message: message,
 ///   onMessageTap: (msg) => print('Tapped: ${msg.id}'),
 ///   onThreadTap: (parent, threadMsg) => Navigator.push(...),
@@ -58,17 +58,17 @@ import 'package:stream_core_flutter/stream_core_flutter.dart' as core;
 ///
 /// See also:
 ///
-///  * [StreamMessageWidgetProps], which holds every configurable property.
-///  * [DefaultStreamMessage], the default implementation used when no custom
+///  * [StreamMessageItemProps], which holds every configurable property.
+///  * [DefaultStreamMessageItem], the default implementation used when no custom
 ///    builder is registered.
 ///  * [StreamMessageActionsModal], the modal shown on long-press (mobile).
 ///  * [StreamMessageListView], which hosts a scrollable list of these widgets.
-class StreamMessageWidget extends StatelessWidget {
+class StreamMessageItem extends StatelessWidget {
   /// Creates a chat message widget.
   ///
   /// The [message] is required. All other parameters are optional and have
   /// sensible defaults resolved from the ambient theme and message data.
-  StreamMessageWidget({
+  StreamMessageItem({
     super.key,
     required Message message,
     EdgeInsetsGeometry? padding,
@@ -122,20 +122,20 @@ class StreamMessageWidget extends StatelessWidget {
        );
 
   /// Creates a chat message widget from pre-built [props].
-  const StreamMessageWidget.fromProps({super.key, required this.props});
+  const StreamMessageItem.fromProps({super.key, required this.props});
 
   /// The properties that configure this message widget.
-  final StreamMessageWidgetProps props;
+  final StreamMessageItemProps props;
 
   @override
   Widget build(BuildContext context) {
-    final builder = context.chatComponentBuilder<StreamMessageWidgetProps>();
+    final builder = context.chatComponentBuilder<StreamMessageItemProps>();
     if (builder != null) return builder(context, props);
-    return DefaultStreamMessage(props: props);
+    return DefaultStreamMessageItem(props: props);
   }
 }
 
-/// Properties for configuring a [StreamMessageWidget].
+/// Properties for configuring a [StreamMessageItem].
 ///
 /// This class holds every configuration option for a chat message widget,
 /// allowing them to be passed through the [StreamComponentFactory] when a
@@ -147,11 +147,11 @@ class StreamMessageWidget extends StatelessWidget {
 ///
 /// See also:
 ///
-///  * [StreamMessageWidget], which uses these properties.
-///  * [DefaultStreamMessage], the default implementation.
-class StreamMessageWidgetProps {
+///  * [StreamMessageItem], which uses these properties.
+///  * [DefaultStreamMessageItem], the default implementation.
+class StreamMessageItemProps {
   /// Creates properties for a chat message widget.
-  const StreamMessageWidgetProps({
+  const StreamMessageItemProps({
     required this.message,
     this.padding,
     this.spacing,
@@ -350,9 +350,9 @@ class StreamMessageWidgetProps {
   /// when the user taps the actions button in the gallery header.
   final AttachmentActionsBuilder? attachmentActionsModalBuilder;
 
-  /// Returns a copy of this [StreamMessageWidgetProps] with the given fields
+  /// Returns a copy of this [StreamMessageItemProps] with the given fields
   /// replaced with new values.
-  StreamMessageWidgetProps copyWith({
+  StreamMessageItemProps copyWith({
     Message? message,
     EdgeInsetsGeometry? padding,
     double? spacing,
@@ -378,7 +378,7 @@ class StreamMessageWidgetProps {
     ShowMessageCallback? onShowMessage,
     AttachmentActionsBuilder? attachmentActionsModalBuilder,
   }) {
-    return StreamMessageWidgetProps(
+    return StreamMessageItemProps(
       message: message ?? this.message,
       padding: padding ?? this.padding,
       spacing: spacing ?? this.spacing,
@@ -407,7 +407,7 @@ class StreamMessageWidgetProps {
   }
 }
 
-/// The default implementation of [StreamMessageWidget].
+/// The default implementation of [StreamMessageItem].
 ///
 /// Composes a full message row with an author avatar, content bubble,
 /// header annotations, footer metadata, and platform-adaptive interaction
@@ -415,19 +415,19 @@ class StreamMessageWidgetProps {
 /// desktop and web).
 ///
 /// Message actions can be customised through
-/// [StreamMessageWidgetProps.actionsBuilder].
+/// [StreamMessageItemProps.actionsBuilder].
 ///
 /// See also:
 ///
-///  * [StreamMessageWidget], the public API widget.
-///  * [StreamMessageWidgetProps], which configures this widget.
+///  * [StreamMessageItem], the public API widget.
+///  * [StreamMessageItemProps], which configures this widget.
 ///  * [StreamMessageItemTheme], provides theme data to this widget.
-class DefaultStreamMessage extends StatelessWidget {
+class DefaultStreamMessageItem extends StatelessWidget {
   /// Creates a default chat message widget with the given [props].
-  const DefaultStreamMessage({super.key, required this.props});
+  const DefaultStreamMessageItem({super.key, required this.props});
 
   /// The properties that configure this widget.
-  final StreamMessageWidgetProps props;
+  final StreamMessageItemProps props;
 
   @override
   Widget build(BuildContext context) {
@@ -435,7 +435,7 @@ class DefaultStreamMessage extends StatelessWidget {
 
     final placement = StreamMessageLayout.of(context);
     final theme = core.StreamMessageItemTheme.of(context);
-    final defaults = _StreamMessageWidgetDefaults(
+    final defaults = _StreamMessageItemDefaults(
       context,
       isPinned: message.pinned,
       isEdited: message.messageTextUpdatedAt != null,
@@ -466,8 +466,8 @@ class DefaultStreamMessage extends StatelessWidget {
       );
     }
 
-    final annotationWidget = effectiveAnnotationVisibility.apply(
-      StreamMessageAnnotations(
+    final headerWidget = effectiveAnnotationVisibility.apply(
+      StreamMessageHeader(
         message: message,
         onViewChannelTap: switch (props.onViewInChannelTap) {
           final onTap? => () => onTap(message),
@@ -476,8 +476,8 @@ class DefaultStreamMessage extends StatelessWidget {
       ),
     );
 
-    final metadataWidget = effectiveMetadataVisibility.apply(
-      StreamMessageMetadata(message: message),
+    final footerWidget = effectiveMetadataVisibility.apply(
+      StreamMessageFooter(message: message),
     );
 
     Widget? repliesWidget;
@@ -501,9 +501,9 @@ class DefaultStreamMessage extends StatelessWidget {
 
     final contentWidget = StreamMessageContent(
       message: message,
-      annotation: annotationWidget,
+      header: headerWidget,
       errorBadge: errorBadgeWidget,
-      metadata: metadataWidget,
+      footer: footerWidget,
       replies: repliesWidget,
       attachmentBuilders: props.attachmentBuilders,
       reactionSorting: props.reactionSorting,
@@ -803,7 +803,7 @@ class DefaultStreamMessage extends StatelessWidget {
 
     final layout = StreamMessageLayout.of(context);
     final theme = core.StreamMessageItemTheme.of(context);
-    final defaults = _StreamMessageWidgetDefaults(
+    final defaults = _StreamMessageItemDefaults(
       context,
       isPinned: message.pinned,
       isEdited: message.messageTextUpdatedAt != null,
@@ -834,8 +834,8 @@ class DefaultStreamMessage extends StatelessWidget {
             leadingInset: leadingInset,
             messageWidget: StreamChannel(
               channel: channel,
-              child: StreamMessageWidget(
-                key: const Key('MessageWidget'),
+              child: StreamMessageItem(
+                key: const Key('MessageItem'),
                 message: message.trimmed,
                 padding: EdgeInsets.zero,
                 backgroundColor: core.StreamColors.transparent,
@@ -896,8 +896,8 @@ class DefaultStreamMessage extends StatelessWidget {
       builder: (context) => StreamMessageActionConfirmationModal(
         title: Text(context.translations.deleteMessageLabel),
         content: Text(context.translations.deleteMessageQuestion),
-        cancelActionTitle: Text(context.translations.cancelLabel.sentenceCase),
-        confirmActionTitle: Text(context.translations.deleteLabel.sentenceCase),
+        cancelActionTitle: Text(context.translations.cancelLabel),
+        confirmActionTitle: Text(context.translations.deleteLabel),
         isDestructiveAction: true,
       ),
     );
@@ -918,8 +918,8 @@ class DefaultStreamMessage extends StatelessWidget {
       builder: (context) => StreamMessageActionConfirmationModal(
         title: Text(context.translations.flagMessageLabel),
         content: Text(context.translations.flagMessageQuestion),
-        cancelActionTitle: Text(context.translations.cancelLabel.sentenceCase),
-        confirmActionTitle: Text(context.translations.flagLabel.sentenceCase),
+        cancelActionTitle: Text(context.translations.cancelLabel),
+        confirmActionTitle: Text(context.translations.flagLabel),
         isDestructiveAction: true,
       ),
     );
@@ -1047,12 +1047,12 @@ class _SwipeToReplyWrapper extends StatelessWidget {
   }
 }
 
-// Built-in fallback theme values for [DefaultStreamMessage].
+// Built-in fallback theme values for [DefaultStreamMessageItem].
 //
 // Used when neither the explicit props nor the ambient
 // [StreamMessageItemThemeData] provide a value for a given property.
-class _StreamMessageWidgetDefaults extends core.StreamMessageItemThemeData {
-  _StreamMessageWidgetDefaults(
+class _StreamMessageItemDefaults extends core.StreamMessageItemThemeData {
+  _StreamMessageItemDefaults(
     this._context, {
     this.isPinned = false,
     this.isEdited = false,

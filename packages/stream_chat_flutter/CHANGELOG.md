@@ -24,6 +24,20 @@
 - `StreamMessageActionConfirmationModal.cancelActionTitle` / `confirmActionTitle` are now nullable and fall back to `Translations.cancelLabel` / `confirmLabel`.
 - Renamed `Translations.attachmentsUploadProgressText` parameter `remaining` → `completed`.
 - Updated several `Translations` default strings and added new abstract members — see [`migrations/redesign/localizations.md`](../../migrations/redesign/localizations.md).
+- Renamed `MuteIconPosition` → `AttributePosition` (values `title` → `inlineTitle`, `subtitle` → `trailingBottom`) and `StreamChannelListItemThemeData.muteIconPosition` → `attributePosition`. Now controls both mute and pin icons in `StreamChannelListTile`.
+- Removed `AttachmentModalSheet`, `ErrorAlertSheet` and `StreamChannelInfoBottomSheet`.
+- Removed `StreamMarkdownMessage`; use `StreamMessageText` (re-exported from `stream_core_flutter`) instead.
+- Renamed message item components to align with Android Compose and SwiftUI conventions:
+  - `StreamMessageWidget` → `StreamMessageItem` (file moved to `message_item.dart`).
+  - `DefaultStreamMessage` → `DefaultStreamMessageItem`.
+  - `StreamMessageWidgetProps` → `StreamMessageItemProps`.
+  - `StreamMessageWidgetBuilder` typedef → `StreamMessageItemBuilder`.
+  - `StreamMessageAnnotations` → `StreamMessageHeader`.
+  - `StreamMessageMetadata` → `StreamMessageFooter`.
+  - `ParseAttachments` → `StreamMessageAttachments`.
+  - `streamChatComponentBuilders(messageWidget: ...)` → `messageItem: ...`.
+  - `StreamMessageContent(annotation: ..., metadata: ...)` → `header: ..., footer: ...`.
+  See [`migrations/redesign/message_widget.md`](../../migrations/redesign/message_widget.md).
 
 ✅ Added
 
@@ -31,16 +45,31 @@
 - Redesigned `StreamSystemMessage` / `StreamModeratedMessage` with a pill-shaped style and visual customisation props.
 - Added visual customisation props to `ThreadSeparator` and `UnreadMessagesSeparator`.
 - Added `StreamUnsupportedAttachment` and `UnsupportedAttachmentBuilder` for unrecognised attachment types.
+- Added `StreamQuotedMessage` and `StreamQuotedMessageThemeData` for the quoted message preview.
 - `MessagePreviewFormatter` now renders `AttachmentType.urlPreview` messages with a link icon and caption / OG title / `linkAttachmentText` fallback.
 - Added `StreamPollCardStyle`, `StreamPollQuestionStyle` and `StreamPollOptionVotesStyle` shared style classes for the poll sheets.
 - Added a total vote count footer and per-option "View all" action to `StreamPollResultsSheet`.
 - Added a `sheetHeaderStyle` field to each poll sheet theme data (including `StreamPollCreatorThemeData`).
 - Re-exported `StreamSheetHeader`, `StreamSheetHeaderStyle`, `StreamSheetHeaderTheme` and `StreamSheetHeaderThemeData` from `stream_core_flutter`.
 - Re-exported `showStreamSheet`, `StreamSheet`, `StreamSheetDragHandle`, `StreamSheetRoute`, `StreamSheetTransition`, `StreamSheetScrollableWidgetBuilder`, `StreamSheetTheme` and `StreamSheetThemeData` from `stream_core_flutter`. Poll sheets (`StreamPollOptionsSheet`, `StreamPollResultsSheet`, `StreamPollOptionVotesSheet`, `StreamPollCommentsSheet`, `StreamPollCreatorSheet`) now present as Stream-styled modal bottom sheets via `showStreamSheet`. See [`migrations/redesign/attachments_and_polls.md`](../../migrations/redesign/attachments_and_polls.md).
+- Re-exported `StreamMessageAttachment` and `StreamMessageAttachmentStyle` from `stream_core_flutter`.
+- Added a `BoxFit? fit` parameter to `ThumbnailSizeCalculator.calculate` (null defaults to `BoxFit.scaleDown`, matching `paintImage`) so callers using `cover` / `fill` get a bitmap large enough to render without upscale blur.
 - Added `Translations.totalVoteCountLabel({int? count})`, `viewAllLabel`, `pollVotesLabel`, `endVoteConfirmationMessage` and `questionLabel({bool isPlural = false})`.
+- Added `Translations.reactionsCountText(int count)` for the reaction-detail sheet header.
+- Added `StreamChannelListTile.isPinned` — renders a pin icon alongside the existing mute icon for pinned channels.
+- Added `StreamChatConfigurationData.reactionOverlap` and `StreamMessageReactions.overlap` to control whether reactions overlap the message bubble edge. When unset, falls back to the platform-based default (overlap on mobile, no overlap on desktop and web).
+
+🔄 Changed
+
+- Changed the default `StreamChat.backgroundKeepAlive` from 1 minute to 15 seconds,
+  matching `StreamChatCore`. See `stream_chat_flutter_core` changelog for rationale.
+- `StreamPhotoGalleryTile` now auto-sizes the platform thumbnail request from the tile's layout × DPR (132px fallback) instead of always asking for 400×400, so cells decode only what they paint. Pass an explicit `thumbnailSize` to override.
 
 🐞 Fixed
 
+- Fixed `StreamCommandAutocompleteOptions` and `StreamMentionAutocompleteOptions` expanding to half the screen height — both now cap at a fixed max height (208px / 176px) and scroll internally so the list can't dominate the screen or overlap the header.
+- Fixed the "Add an option" button in the poll creator looking like a tappable empty option row while disabled. The button is now hidden when adding a new option isn't allowed (an existing option is empty, or the maximum has been reached) instead of rendering as a disabled lookalike.
+- Fixed voice recording duration label jumping by ~1 second when playback starts. The recording timer tracks duration in whole seconds, so the stored value can be up to 1 second longer than the actual audio file. The player now resolves this by keeping the larger of the stored and player-reported durations, matching the strategy used by the iOS SDK.
 - Fixed voice message time label displaying elapsed time instead of remaining time.
 - Fixed RTL layout for the scroll-to-bottom button, swipe-to-reply icon, and voice recording lock button.
 - Fixed draft stream updates clobbering the composer while editing a message.
@@ -55,6 +84,14 @@
 - Standardised list separators across thread, draft, member, user and message search scroll views to match the channel scroll view.
 - Fixed `StreamPhotoGalleryTile` missing rounded corners and its badges not mirroring in RTL.
 - Fixed the "thread reply" action showing on parent messages while already inside their thread view.
+- Fixed poll vote progress bars re-animating from zero whenever the poll message was re-mounted in the message list (e.g. on jump-to-message, scrolling, or after new messages were sent).
+- Voice recording playback now pauses automatically when the app moves to the background.
+- Fixed voice recording playback resetting on the first tap after the app returned from the background. `StreamVoiceRecordingAttachmentPlaylist.didUpdateWidget` now compares the projected playlist (content-based equality on track uri / title / duration / waveform) instead of the raw `Attachment` list, so re-syncs that mint fresh client-side `Attachment` UUIDs no longer trip a needless `updatePlaylist()` mid-playback.
+- Fixed `PollAddCommentDialog` and `PollSuggestOptionDialog` accepting whitespace-only or unchanged submissions; the confirm action now disables when the trimmed text is empty or matches the initial value.
+- Fixed `StreamPhotoGalleryTile` using a hand-rolled icon as its loading placeholder and silently rendering nothing on decode failure. Now uses the shared `StreamImageLoadingPlaceholder` while loading and `StreamImageErrorPlaceholder` if the thumbnail fails to load.
+- Fixed poll, attachment-action, and message-action dialog buttons rendering their labels in uppercase (e.g. `CANCEL`, `SEND`, `FLAG`, `DELETE`); they now use the localized labels as-is so they match the rest of the system.
+- Fixed tapping a quoted parent message inside a thread doing nothing (or kicking back to the channel). The thread message list now resolves the parent slot directly and scrolls/highlights it instead of falling through to `loadChannelAtMessage`.
+- Fixed the jump-to-message highlight starting before the scroll settled, which made the fade barely visible (or invisible if the target hadn't been mounted yet). The message list now awaits the scroll, then plays a 1s hold + 1s ease-out fade — closer to the highlight feel in Slack's permalink jump.
 
 ## 10.0.0-beta.13
 

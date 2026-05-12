@@ -140,18 +140,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: StreamChatTheme.of(context).colorTheme.appBg,
-      appBar: AppBar(
-        elevation: 0,
-        backgroundColor: StreamChatTheme.of(context).colorTheme.barsBg,
-        leading: const StreamBackButton(),
-        title: Text(
-          'New Chat',
-          style: StreamChatTheme.of(
-            context,
-          ).textTheme.headlineBold.copyWith(color: StreamChatTheme.of(context).colorTheme.textHighEmphasis),
-        ),
-        centerTitle: true,
-      ),
+      appBar: StreamAppBar(title: const Text('New Chat')),
       body: StreamConnectionStatusBuilder(
         statusBuilder: (context, status) {
           var statusString = '';

@@ -31,7 +31,7 @@ void main() {
         await tester.tap(find.text('End Vote'));
         await tester.pumpAndSettle();
 
-        await tester.tap(find.text('END'));
+        await tester.tap(find.text('End'));
         await tester.pumpAndSettle();
 
         expect(value, isTrue);
@@ -61,7 +61,7 @@ void main() {
         await tester.tap(find.text('End Vote'));
         await tester.pumpAndSettle();
 
-        await tester.tap(find.text('CANCEL'));
+        await tester.tap(find.text('Cancel'));
         await tester.pumpAndSettle();
 
         expect(value, isFalse);

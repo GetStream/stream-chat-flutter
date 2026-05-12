@@ -24,6 +24,7 @@ class StreamMessageReactions extends StatelessWidget {
     required this.message,
     this.type,
     this.position,
+    this.overlap,
     this.sorting,
     this.onPressed,
     this.child,
@@ -42,6 +43,11 @@ class StreamMessageReactions extends StatelessWidget {
   /// Defaults to [core.StreamReactionsPosition.footer] on desktop and web,
   /// and [core.StreamReactionsPosition.header] on mobile.
   final core.StreamReactionsPosition? position;
+
+  /// Whether reactions overlap the message bubble edge.
+  ///
+  /// When null, defaults to `true` on mobile and `false` on desktop and web.
+  final bool? overlap;
 
   /// Controls how reaction groups are sorted when displayed.
   ///
@@ -64,6 +70,7 @@ class StreamMessageReactions extends StatelessWidget {
 
     final effectiveType = type ?? config.reactionType ?? core.StreamReactionsType.segmented;
     final effectivePosition = position ?? config.reactionPosition ?? core.StreamReactionsPosition.header;
+    final effectiveOverlap = overlap ?? config.reactionOverlap ?? !isDesktopDeviceOrWeb;
 
     final reactionGroups = message.reactionGroups?.entries;
     final effectiveReactionSorting = sorting ?? ReactionSorting.byFirstReactionAt;
@@ -79,7 +86,7 @@ class StreamMessageReactions extends StatelessWidget {
     return core.StreamReactions(
       type: effectiveType,
       position: effectivePosition,
-      overlap: !isDesktopDeviceOrWeb,
+      overlap: effectiveOverlap,
       onPressed: onPressed,
       items: [...?items],
       child: child,

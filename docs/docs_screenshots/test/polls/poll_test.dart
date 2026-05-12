@@ -129,7 +129,7 @@ void main() {
         client: client,
         channel: channel,
         child: Center(
-          child: StreamMessageWidget(message: pollMessage),
+          child: StreamMessageItem(message: pollMessage),
         ),
       );
     },

@@ -3,6 +3,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
+import 'package:stream_chat_flutter/src/attachment/thumbnail/thumbnail_size_calculator.dart';
 import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 /// Widget that displays a photo or video item from the gallery.
@@ -14,8 +15,9 @@ class StreamPhotoGalleryTile extends StatelessWidget {
     this.selected = false,
     this.onTap,
     this.onLongPress,
-    this.thumbnailSize = const ThumbnailSize(400, 400),
-    this.thumbnailFormat = ThumbnailFormat.jpeg,
+    this.fit = .cover,
+    this.thumbnailSize,
+    this.thumbnailFormat = .jpeg,
     this.thumbnailQuality = 100,
     this.thumbnailScale = 1,
   });
@@ -32,8 +34,15 @@ class StreamPhotoGalleryTile extends StatelessWidget {
   /// Called when the user long-presses on this grid tile.
   final GestureLongPressCallback? onLongPress;
 
-  /// The thumbnail size.
-  final ThumbnailSize thumbnailSize;
+  /// Fit of the underlying thumbnail image. Defaults to [BoxFit.cover].
+  final BoxFit fit;
+
+  /// The thumbnail size in pixels to request from the platform.
+  ///
+  /// When null (the default), the size is auto-calculated from the tile's
+  /// layout constraints and the device pixel ratio so we don't decode more
+  /// pixels than the tile actually displays.
+  final ThumbnailSize? thumbnailSize;
 
   /// {@macro photo_manager.ThumbnailFormat}
   final ThumbnailFormat thumbnailFormat;
@@ -55,6 +64,7 @@ class StreamPhotoGalleryTile extends StatelessWidget {
     bool? selected,
     GestureTapCallback? onTap,
     GestureLongPressCallback? onLongPress,
+    BoxFit? fit,
     ThumbnailSize? thumbnailSize,
     ThumbnailFormat? thumbnailFormat,
     int? thumbnailQuality,
@@ -65,6 +75,7 @@ class StreamPhotoGalleryTile extends StatelessWidget {
     selected: selected ?? this.selected,
     onTap: onTap ?? this.onTap,
     onLongPress: onLongPress ?? this.onLongPress,
+    fit: fit ?? this.fit,
     thumbnailSize: thumbnailSize ?? this.thumbnailSize,
     thumbnailFormat: thumbnailFormat ?? this.thumbnailFormat,
     thumbnailQuality: thumbnailQuality ?? this.thumbnailQuality,
@@ -83,20 +94,13 @@ class StreamPhotoGalleryTile extends StatelessWidget {
         children: [
           AspectRatio(
             aspectRatio: 1,
-            child: FadeInImage(
-              fadeInDuration: const Duration(milliseconds: 300),
-              placeholder: const AssetImage(
-                'lib/assets/images/placeholder.png',
-                package: 'stream_chat_flutter',
-              ),
-              fit: BoxFit.cover,
-              image: MediaThumbnailProvider(
-                media: media,
-                size: thumbnailSize,
-                format: thumbnailFormat,
-                quality: thumbnailQuality,
-                scale: thumbnailScale,
-              ),
+            child: _GalleryThumbnail(
+              fit: fit,
+              media: media,
+              size: thumbnailSize,
+              format: thumbnailFormat,
+              quality: thumbnailQuality,
+              scale: thumbnailScale,
             ),
           ),
           Positioned.fill(
@@ -134,6 +138,68 @@ class StreamPhotoGalleryTile extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+class _GalleryThumbnail extends StatelessWidget {
+  const _GalleryThumbnail({
+    required this.media,
+    required this.fit,
+    required this.size,
+    required this.format,
+    required this.quality,
+    required this.scale,
+  });
+
+  final AssetEntity media;
+  final BoxFit fit;
+  final ThumbnailSize? size;
+  final ThumbnailFormat format;
+  final int quality;
+  final double scale;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final effectiveSize = size ?? _autoSize(context, constraints);
+
+        return Image(
+          fit: fit,
+          image: MediaThumbnailProvider(
+            media: media,
+            size: effectiveSize,
+            format: format,
+            quality: quality,
+            scale: scale,
+          ),
+          frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
+            if (wasSynchronouslyLoaded || frame != null) return child;
+            return const StreamImageLoadingPlaceholder();
+          },
+          errorBuilder: (context, error, stackTrace) {
+            return const StreamImageErrorPlaceholder();
+          },
+        );
+      },
+    );
+  }
+
+  ThumbnailSize _autoSize(BuildContext context, BoxConstraints constraints) {
+    // orientatedSize accounts for EXIF rotation so portrait shots get the
+    // right aspect ratio. It's (0, 0) when EXIF parsing fails — the
+    // calculator returns null for that, and we fall back to the default
+    // tile size from Figma. fit drives cover vs contain sizing so the
+    // bitmap matches what the Image will actually paint, no upscale blur.
+    final size = ThumbnailSizeCalculator.calculate(
+      targetSize: constraints.biggest,
+      originalSize: media.orientatedSize,
+      pixelRatio: MediaQuery.devicePixelRatioOf(context),
+      fit: fit,
+    );
+
+    if (size == null) return const .square(132);
+    return .new(size.width.round(), size.height.round());
   }
 }
 
@@ -175,9 +241,8 @@ class MediaThumbnailProvider extends ImageProvider<MediaThumbnailProvider> {
   /// {@macro mediaThumbnailProvider}
   const MediaThumbnailProvider({
     required this.media,
-    // TODO: Are these sizes optimal? Consider web/desktop
-    this.size = const ThumbnailSize(400, 400),
-    this.format = ThumbnailFormat.jpeg,
+    this.size = const .square(132),
+    this.format = .jpeg,
     this.quality = 100,
     this.scale = 1,
   });
