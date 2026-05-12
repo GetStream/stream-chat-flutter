@@ -58,7 +58,6 @@ class StreamChatThemeData {
     StreamPollCommentsSheetThemeData? pollCommentsSheetTheme,
     StreamPollOptionVotesSheetThemeData? pollOptionVotesSheetTheme,
     StreamThreadListTileThemeData? threadListTileTheme,
-    StreamDraftListTileThemeData? draftListTileTheme,
     StreamVoiceRecordingAttachmentThemeData? voiceRecordingAttachmentTheme,
     StreamQuotedMessageThemeData? quotedMessageTheme,
     StreamChannelListItemThemeData? channelListItemTheme,
@@ -89,7 +88,6 @@ class StreamChatThemeData {
       pollCommentsSheetTheme: pollCommentsSheetTheme,
       pollOptionVotesSheetTheme: pollOptionVotesSheetTheme,
       threadListTileTheme: threadListTileTheme,
-      draftListTileTheme: draftListTileTheme,
       voiceRecordingAttachmentTheme: voiceRecordingAttachmentTheme,
       quotedMessageTheme: quotedMessageTheme,
       channelListItemTheme: channelListItemTheme,
@@ -122,7 +120,6 @@ class StreamChatThemeData {
     required this.pollCommentsSheetTheme,
     required this.pollOptionVotesSheetTheme,
     required this.threadListTileTheme,
-    required this.draftListTileTheme,
     required this.voiceRecordingAttachmentTheme,
     required this.quotedMessageTheme,
     required this.channelListItemTheme,
@@ -179,19 +176,6 @@ class StreamChatThemeData {
       pollCommentsSheetTheme: const StreamPollCommentsSheetThemeData(),
       pollOptionVotesSheetTheme: const StreamPollOptionVotesSheetThemeData(),
       threadListTileTheme: const StreamThreadListTileThemeData(),
-      draftListTileTheme: StreamDraftListTileThemeData(
-        backgroundColor: colorTheme.barsBg,
-        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
-        draftChannelNameStyle: textTheme.bodyBold.copyWith(
-          color: colorTheme.textHighEmphasis,
-        ),
-        draftMessageStyle: textTheme.footnote.copyWith(
-          color: colorTheme.textLowEmphasis,
-        ),
-        draftTimestampStyle: textTheme.footnote.copyWith(
-          color: colorTheme.textLowEmphasis,
-        ),
-      ),
       voiceRecordingAttachmentTheme: const StreamVoiceRecordingAttachmentThemeData(),
       quotedMessageTheme: const StreamQuotedMessageThemeData(),
       channelListItemTheme: const StreamChannelListItemThemeData(),
@@ -256,9 +240,6 @@ class StreamChatThemeData {
   /// Theme configuration for the [StreamChannelListItem] widget.
   final StreamChannelListItemThemeData channelListItemTheme;
 
-  /// Theme configuration for the [StreamDraftListTile] widget.
-  final StreamDraftListTileThemeData draftListTileTheme;
-
   /// Creates a copy of [StreamChatThemeData] with specified attributes
   /// overridden.
   StreamChatThemeData copyWith({
@@ -280,7 +261,6 @@ class StreamChatThemeData {
     StreamPollCommentsSheetThemeData? pollCommentsSheetTheme,
     StreamPollOptionVotesSheetThemeData? pollOptionVotesSheetTheme,
     StreamThreadListTileThemeData? threadListTileTheme,
-    StreamDraftListTileThemeData? draftListTileTheme,
     StreamVoiceRecordingAttachmentThemeData? voiceRecordingAttachmentTheme,
     StreamQuotedMessageThemeData? quotedMessageTheme,
     StreamChannelListItemThemeData? channelListItemTheme,
@@ -301,7 +281,6 @@ class StreamChatThemeData {
     pollCommentsSheetTheme: pollCommentsSheetTheme ?? this.pollCommentsSheetTheme,
     pollOptionVotesSheetTheme: pollOptionVotesSheetTheme ?? this.pollOptionVotesSheetTheme,
     threadListTileTheme: threadListTileTheme ?? this.threadListTileTheme,
-    draftListTileTheme: draftListTileTheme ?? this.draftListTileTheme,
     voiceRecordingAttachmentTheme: voiceRecordingAttachmentTheme ?? this.voiceRecordingAttachmentTheme,
     quotedMessageTheme: quotedMessageTheme ?? this.quotedMessageTheme,
     channelListItemTheme: channelListItemTheme ?? this.channelListItemTheme,
@@ -327,7 +306,6 @@ class StreamChatThemeData {
       pollCommentsSheetTheme: pollCommentsSheetTheme.merge(other.pollCommentsSheetTheme),
       pollOptionVotesSheetTheme: pollOptionVotesSheetTheme.merge(other.pollOptionVotesSheetTheme),
       threadListTileTheme: threadListTileTheme.merge(other.threadListTileTheme),
-      draftListTileTheme: draftListTileTheme.merge(other.draftListTileTheme),
       voiceRecordingAttachmentTheme: voiceRecordingAttachmentTheme.merge(other.voiceRecordingAttachmentTheme),
       quotedMessageTheme: quotedMessageTheme.merge(other.quotedMessageTheme),
       channelListItemTheme: channelListItemTheme.merge(other.channelListItemTheme),
