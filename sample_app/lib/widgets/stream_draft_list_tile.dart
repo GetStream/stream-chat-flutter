@@ -106,9 +106,6 @@ class _DraftMessageContent extends StatelessWidget {
       color: chatTheme.colorTheme.textLowEmphasis,
     );
 
-    final date = draft.createdAt.toLocal();
-    final timestamp = _formatDate(date);
-
     return Row(
       children: [
         Expanded(
@@ -117,23 +114,11 @@ class _DraftMessageContent extends StatelessWidget {
             textStyle: subtleStyle,
           ),
         ),
-        Text(
-          timestamp,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
+        StreamTimestamp(
+          date: draft.createdAt.toLocal(),
           style: subtleStyle,
         ),
       ],
     );
-  }
-
-  String _formatDate(DateTime date) {
-    final jiffy = Jiffy.parseFromDateTime(date);
-    final now = DateTime.now();
-    if (now.difference(date).inDays == 0 && now.day == date.day) {
-      return jiffy.jm;
-    }
-    if (now.difference(date).inDays < 7) return jiffy.EEEE;
-    return jiffy.yMd;
   }
 }
