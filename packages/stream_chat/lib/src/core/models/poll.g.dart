@@ -12,7 +12,11 @@ Poll _$PollFromJson(Map<String, dynamic> json) => Poll(
   description: json['description'] as String?,
   options: (json['options'] as List<dynamic>).map((e) => PollOption.fromJson(e as Map<String, dynamic>)).toList(),
   votingVisibility:
-      $enumDecodeNullable(_$VotingVisibilityEnumMap, json['voting_visibility']) ?? VotingVisibility.public,
+      $enumDecodeNullable(
+        _$VotingVisibilityEnumMap,
+        json['voting_visibility'],
+      ) ??
+      VotingVisibility.public,
   enforceUniqueVote: json['enforce_unique_vote'] as bool? ?? true,
   maxVotesAllowed: (json['max_votes_allowed'] as num?)?.toInt(),
   allowAnswers: json['allow_answers'] as bool? ?? false,
@@ -32,7 +36,10 @@ Poll _$PollFromJson(Map<String, dynamic> json) => Poll(
   voteCount: (json['vote_count'] as num?)?.toInt() ?? 0,
   latestVotesByOption:
       (json['latest_votes_by_option'] as Map<String, dynamic>?)?.map(
-        (k, e) => MapEntry(k, (e as List<dynamic>).map((e) => PollVote.fromJson(e as Map<String, dynamic>)).toList()),
+        (k, e) => MapEntry(
+          k,
+          (e as List<dynamic>).map((e) => PollVote.fromJson(e as Map<String, dynamic>)).toList(),
+        ),
       ) ??
       const {},
   createdById: json['created_by_id'] as String?,

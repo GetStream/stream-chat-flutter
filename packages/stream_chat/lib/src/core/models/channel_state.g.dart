@@ -23,13 +23,17 @@ ChannelState _$ChannelStateFromJson(Map<String, dynamic> json) => ChannelState(
       .toList(),
   pushPreferences: json['push_preferences'] == null
       ? null
-      : ChannelPushPreference.fromJson(json['push_preferences'] as Map<String, dynamic>),
+      : ChannelPushPreference.fromJson(
+          json['push_preferences'] as Map<String, dynamic>,
+        ),
   activeLiveLocations: (json['active_live_locations'] as List<dynamic>?)
       ?.map((e) => Location.fromJson(e as Map<String, dynamic>))
       .toList(),
 );
 
-Map<String, dynamic> _$ChannelStateToJson(ChannelState instance) => <String, dynamic>{
+Map<String, dynamic> _$ChannelStateToJson(
+  ChannelState instance,
+) => <String, dynamic>{
   'channel': instance.channel?.toJson(),
   'messages': instance.messages?.map((e) => e.toJson()).toList(),
   'members': instance.members?.map((e) => e.toJson()).toList(),

@@ -23,6 +23,6 @@ Location _$LocationFromJson(Map<String, dynamic> json) => Location(
 Map<String, dynamic> _$LocationToJson(Location instance) => <String, dynamic>{
   'latitude': instance.latitude,
   'longitude': instance.longitude,
-  if (instance.createdByDeviceId case final value?) 'created_by_device_id': value,
-  if (instance.endAt?.toIso8601String() case final value?) 'end_at': value,
+  'created_by_device_id': ?instance.createdByDeviceId,
+  'end_at': ?instance.endAt?.toIso8601String(),
 };

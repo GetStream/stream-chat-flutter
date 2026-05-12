@@ -8,4 +8,14 @@ mixin _$ReactionDaoMixin on DatabaseAccessor<DriftChatDatabase> {
   $MessagesTable get messages => attachedDatabase.messages;
   $ReactionsTable get reactions => attachedDatabase.reactions;
   $UsersTable get users => attachedDatabase.users;
+  ReactionDaoManager get managers => ReactionDaoManager(this);
+}
+
+class ReactionDaoManager {
+  final _$ReactionDaoMixin _db;
+  ReactionDaoManager(this._db);
+  $$ChannelsTableTableManager get channels => $$ChannelsTableTableManager(_db.attachedDatabase, _db.channels);
+  $$MessagesTableTableManager get messages => $$MessagesTableTableManager(_db.attachedDatabase, _db.messages);
+  $$ReactionsTableTableManager get reactions => $$ReactionsTableTableManager(_db.attachedDatabase, _db.reactions);
+  $$UsersTableTableManager get users => $$UsersTableTableManager(_db.attachedDatabase, _db.users);
 }

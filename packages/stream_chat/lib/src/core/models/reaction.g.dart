@@ -21,6 +21,6 @@ Reaction _$ReactionFromJson(Map<String, dynamic> json) => Reaction(
 Map<String, dynamic> _$ReactionToJson(Reaction instance) => <String, dynamic>{
   'type': instance.type,
   'score': instance.score,
-  if (instance.emojiCode case final value?) 'emoji_code': value,
+  'emoji_code': ?instance.emojiCode,
   'extra_data': instance.extraData,
 };

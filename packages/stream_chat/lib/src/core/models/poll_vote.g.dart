@@ -18,7 +18,7 @@ PollVote _$PollVoteFromJson(Map<String, dynamic> json) => PollVote(
 );
 
 Map<String, dynamic> _$PollVoteToJson(PollVote instance) => <String, dynamic>{
-  if (instance.id case final value?) 'id': value,
-  if (instance.optionId case final value?) 'option_id': value,
-  if (instance.answerText case final value?) 'answer_text': value,
+  'id': ?instance.id,
+  'option_id': ?instance.optionId,
+  'answer_text': ?instance.answerText,
 };

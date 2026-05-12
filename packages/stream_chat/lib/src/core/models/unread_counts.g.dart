@@ -12,7 +12,9 @@ UnreadCountsChannel _$UnreadCountsChannelFromJson(Map<String, dynamic> json) => 
   lastRead: DateTime.parse(json['last_read'] as String),
 );
 
-Map<String, dynamic> _$UnreadCountsChannelToJson(UnreadCountsChannel instance) => <String, dynamic>{
+Map<String, dynamic> _$UnreadCountsChannelToJson(
+  UnreadCountsChannel instance,
+) => <String, dynamic>{
   'channel_id': instance.channelId,
   'unread_count': instance.unreadCount,
   'last_read': instance.lastRead.toIso8601String(),
@@ -32,13 +34,17 @@ Map<String, dynamic> _$UnreadCountsThreadToJson(UnreadCountsThread instance) => 
   'parent_message_id': instance.parentMessageId,
 };
 
-UnreadCountsChannelType _$UnreadCountsChannelTypeFromJson(Map<String, dynamic> json) => UnreadCountsChannelType(
+UnreadCountsChannelType _$UnreadCountsChannelTypeFromJson(
+  Map<String, dynamic> json,
+) => UnreadCountsChannelType(
   channelType: json['channel_type'] as String,
   channelCount: (json['channel_count'] as num).toInt(),
   unreadCount: (json['unread_count'] as num).toInt(),
 );
 
-Map<String, dynamic> _$UnreadCountsChannelTypeToJson(UnreadCountsChannelType instance) => <String, dynamic>{
+Map<String, dynamic> _$UnreadCountsChannelTypeToJson(
+  UnreadCountsChannelType instance,
+) => <String, dynamic>{
   'channel_type': instance.channelType,
   'channel_count': instance.channelCount,
   'unread_count': instance.unreadCount,

@@ -137,9 +137,7 @@ SearchMessagesResponse _$SearchMessagesResponseFromJson(
   ..duration = json['duration'] as String?
   ..results =
       (json['results'] as List<dynamic>?)
-          ?.map(
-            (e) => GetMessageResponse.fromJson(e as Map<String, dynamic>),
-          )
+          ?.map((e) => GetMessageResponse.fromJson(e as Map<String, dynamic>))
           .toList() ??
       []
   ..next = json['next'] as String?
@@ -376,19 +374,13 @@ GetUnreadCountResponse _$GetUnreadCountResponseFromJson(
     (k, e) => MapEntry(k, (e as num).toInt()),
   )
   ..channels = (json['channels'] as List<dynamic>)
-      .map(
-        (e) => UnreadCountsChannel.fromJson(e as Map<String, dynamic>),
-      )
+      .map((e) => UnreadCountsChannel.fromJson(e as Map<String, dynamic>))
       .toList()
   ..channelType = (json['channel_type'] as List<dynamic>)
-      .map(
-        (e) => UnreadCountsChannelType.fromJson(e as Map<String, dynamic>),
-      )
+      .map((e) => UnreadCountsChannelType.fromJson(e as Map<String, dynamic>))
       .toList()
   ..threads = (json['threads'] as List<dynamic>)
-      .map(
-        (e) => UnreadCountsThread.fromJson(e as Map<String, dynamic>),
-      )
+      .map((e) => UnreadCountsThread.fromJson(e as Map<String, dynamic>))
       .toList();
 
 UpsertPushPreferencesResponse _$UpsertPushPreferencesResponseFromJson(

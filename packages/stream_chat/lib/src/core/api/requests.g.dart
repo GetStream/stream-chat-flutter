@@ -28,21 +28,23 @@ PaginationParams _$PaginationParamsFromJson(Map<String, dynamic> json) => Pagina
 
 Map<String, dynamic> _$PaginationParamsToJson(PaginationParams instance) => <String, dynamic>{
   'limit': instance.limit,
-  if (instance.offset case final value?) 'offset': value,
-  if (instance.next case final value?) 'next': value,
-  if (instance.idAround case final value?) 'id_around': value,
-  if (instance.greaterThan case final value?) 'id_gt': value,
-  if (instance.greaterThanOrEqual case final value?) 'id_gte': value,
-  if (instance.lessThan case final value?) 'id_lt': value,
-  if (instance.lessThanOrEqual case final value?) 'id_lte': value,
-  if (instance.createdAtAfterOrEqual?.toIso8601String() case final value?) 'created_at_after_or_equal': value,
-  if (instance.createdAtAfter?.toIso8601String() case final value?) 'created_at_after': value,
-  if (instance.createdAtBeforeOrEqual?.toIso8601String() case final value?) 'created_at_before_or_equal': value,
-  if (instance.createdAtBefore?.toIso8601String() case final value?) 'created_at_before': value,
-  if (instance.createdAtAround?.toIso8601String() case final value?) 'created_at_around': value,
+  'offset': ?instance.offset,
+  'next': ?instance.next,
+  'id_around': ?instance.idAround,
+  'id_gt': ?instance.greaterThan,
+  'id_gte': ?instance.greaterThanOrEqual,
+  'id_lt': ?instance.lessThan,
+  'id_lte': ?instance.lessThanOrEqual,
+  'created_at_after_or_equal': ?instance.createdAtAfterOrEqual?.toIso8601String(),
+  'created_at_after': ?instance.createdAtAfter?.toIso8601String(),
+  'created_at_before_or_equal': ?instance.createdAtBeforeOrEqual?.toIso8601String(),
+  'created_at_before': ?instance.createdAtBefore?.toIso8601String(),
+  'created_at_around': ?instance.createdAtAround?.toIso8601String(),
 };
 
-Map<String, dynamic> _$PartialUpdateUserRequestToJson(PartialUpdateUserRequest instance) => <String, dynamic>{
+Map<String, dynamic> _$PartialUpdateUserRequestToJson(
+  PartialUpdateUserRequest instance,
+) => <String, dynamic>{
   'stringify': instance.stringify,
   'hash_code': instance.hashCode,
   'id': instance.id,
@@ -61,7 +63,9 @@ Map<String, dynamic> _$ThreadOptionsToJson(ThreadOptions instance) => <String, d
   'props': instance.props,
 };
 
-Map<String, dynamic> _$MemberUpdatePayloadToJson(MemberUpdatePayload instance) => <String, dynamic>{
-  if (instance.archived case final value?) 'archived': value,
-  if (instance.pinned case final value?) 'pinned': value,
+Map<String, dynamic> _$MemberUpdatePayloadToJson(
+  MemberUpdatePayload instance,
+) => <String, dynamic>{
+  'archived': ?instance.archived,
+  'pinned': ?instance.pinned,
 };

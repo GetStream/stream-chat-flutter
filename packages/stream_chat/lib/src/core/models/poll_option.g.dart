@@ -13,7 +13,7 @@ PollOption _$PollOptionFromJson(Map<String, dynamic> json) => PollOption(
 );
 
 Map<String, dynamic> _$PollOptionToJson(PollOption instance) => <String, dynamic>{
-  if (instance.id case final value?) 'id': value,
+  'id': ?instance.id,
   'text': instance.text,
   'extra_data': instance.extraData,
 };
