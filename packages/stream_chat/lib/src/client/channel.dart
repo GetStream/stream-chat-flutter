@@ -3303,9 +3303,9 @@ class ChannelClientState {
   List<Read> get read => _channelState.read ?? <Read>[];
 
   /// Channel read list as a stream.
-  Stream<List<Read>> get readStream {
-    return channelStateStream.map((cs) => cs.read ?? <Read>[]);
-  }
+  Stream<List<Read>> get readStream => channelStateStream
+      .map((cs) => cs.read ?? <Read>[])
+      .distinct(const ListEquality().equals);
 
   /// Channel read for the logged in user.
   Read? get currentUserRead {
@@ -3320,9 +3320,8 @@ class ChannelClientState {
   }
 
   /// Unread count getter as a stream.
-  Stream<int> get unreadCountStream {
-    return currentUserReadStream.map((read) => read?.unreadMessages ?? 0);
-  }
+  Stream<int> get unreadCountStream =>
+      currentUserReadStream.map((read) => read?.unreadMessages ?? 0).distinct();
 
   /// Unread count getter.
   int get unreadCount => currentUserRead?.unreadMessages ?? 0;

@@ -456,12 +456,8 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
         if (event.message?.parentId == widget.parentMessage?.id &&
             event.message!.user!.id ==
                 streamChannel!.channel.client.state.currentUser!.id) {
-          setState(() => unreadCount = 0);
-
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            _scrollController?.jumpTo(
-              index: 0,
-            );
+            _scrollController?.jumpTo(index: 0);
           });
         }
       });
@@ -970,11 +966,13 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
   late final debouncedMarkRead = debounce(
     ([String? id]) => streamChannel?.channel.markRead(messageId: id),
     const Duration(seconds: 1),
+    leading: true,
   );
 
   late final debouncedMarkThreadRead = debounce(
     (String parentId) => streamChannel?.channel.markThreadRead(parentId),
     const Duration(seconds: 1),
+    leading: true,
   );
 
   Future<void> _markMessagesAsRead() async {
@@ -1532,7 +1530,9 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
           MaterialPageRoute(
             builder: (_) => BetterStreamBuilder<Message>(
               stream: streamChannel!.channel.state!.messagesStream.map(
-                (messages) => messages.firstWhere((m) => m.id == message.id),
+                (messages) =>
+                    messages.firstWhereOrNull((m) => m.id == message.id) ??
+                    message,
               ),
               initialData: message,
               builder: (_, data) => StreamChannel(
