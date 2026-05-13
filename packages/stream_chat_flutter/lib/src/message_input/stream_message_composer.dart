@@ -530,6 +530,11 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
       _initialiseEffectiveController();
     }
     _effectiveFocusNode.addListener(_focusNodeListener);
+    _audioRecorderController.addListener(() {
+      if (_audioRecorderController.value is RecordStateRecordingLocked) {
+        _hidePicker();
+      }
+    });
 
     WidgetsBinding.instance.endOfFrame.then((_) {
       if (mounted) return _initializeState();
