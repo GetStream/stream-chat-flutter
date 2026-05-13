@@ -256,6 +256,9 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
   @override
   String get photosLabel => 'Photos';
 
+  @override
+  String get photosAndVideosLabel => 'Photos & Videos';
+
   String _getDay(DateTime dateTime) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);

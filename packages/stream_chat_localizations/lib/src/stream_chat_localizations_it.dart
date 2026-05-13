@@ -238,6 +238,9 @@ Il file è troppo grande per essere caricato. Il limite è di $limitInMB MB.''';
   @override
   String get photosLabel => 'Foto';
 
+  @override
+  String get photosAndVideosLabel => 'Foto e video';
+
   String _getDay(DateTime dateTime) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);

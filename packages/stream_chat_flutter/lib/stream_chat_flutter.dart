@@ -13,7 +13,14 @@ export 'package:stream_core_flutter/stream_core_flutter.dart'
         StreamAvatarGroupSize,
         StreamAvatarSize,
         StreamAvatarStackSize,
+        StreamBottomAppBar,
+        StreamBottomAppBarStyle,
+        StreamBottomAppBarTheme,
+        StreamBottomAppBarThemeData,
         StreamButton,
+        StreamButtonSize,
+        StreamButtonStyle,
+        StreamButtonType,
         StreamButtonThemeStyle,
         StreamBadgeCount,
         StreamBadgeCountTheme,
@@ -32,6 +39,8 @@ export 'package:stream_core_flutter/stream_core_flutter.dart'
         StreamAudioWaveform,
         StreamTheme,
         StreamIcons,
+        StreamImageErrorPlaceholder,
+        StreamImageLoadingPlaceholder,
         StreamImageSourceBadge,
         StreamThemeExtension,
         StreamComponentFactory,
@@ -105,13 +114,19 @@ export 'package:stream_core_flutter/stream_core_flutter.dart'
         StreamVideoPlayIndicatorSize,
         StreamMessageAttachment,
         StreamMessageAttachmentStyle,
+        StreamMediaBadge,
+        MediaBadgeType,
+        MediaBadgeDurationFormat,
+        StreamMediaViewer,
+        StreamMediaViewerTheme,
+        StreamMediaViewerThemeData,
         StreamMessageItemTheme,
         StreamMessageItemThemeData,
         StreamMessageLayoutProperty,
         StreamMessageLayoutVisibility,
         StreamVisibility,
         StreamColors,
-        kStreamHeaderHeight,
+        kStreamToolbarHeight,
         showStreamSheet,
         streamSupportedEmojis;
 
@@ -124,7 +139,6 @@ export 'src/attachment/gallery_attachment.dart';
 export 'src/attachment/handler/stream_attachment_handler.dart';
 export 'src/attachment/image_attachment.dart';
 export 'src/attachment/link_preview_attachment.dart';
-export 'src/attachment/stream_attachment_package.dart';
 export 'src/attachment/thumbnail/giphy_attachment_thumbnail.dart';
 export 'src/attachment/thumbnail/image_attachment_thumbnail.dart';
 export 'src/attachment/thumbnail/media_attachment_thumbnail.dart';
@@ -150,10 +164,6 @@ export 'src/components/avatar/stream_user_avatar_stack.dart';
 export 'src/components/message_composer/message_composer.dart';
 export 'src/components/stream_chat_component_builders.dart';
 // endregion
-export 'src/fullscreen_media/full_screen_media.dart';
-export 'src/fullscreen_media/full_screen_media_builder.dart';
-export 'src/gallery/gallery_footer.dart';
-export 'src/gallery/gallery_header.dart';
 export 'src/icons/stream_svg_icon.dart';
 export 'src/indicators/sending_indicator.dart';
 export 'src/indicators/typing_indicator.dart';
@@ -161,6 +171,14 @@ export 'src/indicators/unread_indicator.dart';
 export 'src/keyboard_shortcuts/keyboard_shortcut_runner.dart';
 export 'src/localization/stream_chat_localizations.dart';
 export 'src/localization/translations.dart' show DefaultTranslations;
+export 'src/media_gallery/stream_media_gallery.dart';
+export 'src/media_gallery/stream_media_gallery_attachment.dart';
+export 'src/media_gallery/stream_media_gallery_item.dart';
+export 'src/media_gallery_preview/stream_media_gallery_preview.dart';
+export 'src/media_gallery_preview/stream_media_gallery_preview_footer.dart';
+export 'src/media_gallery_preview/stream_media_gallery_preview_header.dart';
+export 'src/media_gallery_preview/stream_media_gallery_preview_item.dart';
+export 'src/media_gallery_preview/video_player/stream_video_player.dart';
 export 'src/message_action/message_action.dart';
 export 'src/message_action/message_actions_builder.dart';
 export 'src/message_input/attachment_picker/stream_attachment_picker.dart';

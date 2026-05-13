@@ -233,6 +233,9 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
   @override
   String get photosLabel => 'फ़ोटोज';
 
+  @override
+  String get photosAndVideosLabel => 'फ़ोटोज़ और वीडियो';
+
   String _getDay(DateTime dateTime) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);

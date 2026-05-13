@@ -130,7 +130,7 @@ class StreamChannelHeader extends StatelessWidget implements PreferredSizeWidget
   final StreamAppBarStyle? style;
 
   @override
-  Size get preferredSize => const Size.fromHeight(kStreamHeaderHeight);
+  Size get preferredSize => const Size.fromHeight(kStreamToolbarHeight);
 
   @override
   Widget build(BuildContext context) {
