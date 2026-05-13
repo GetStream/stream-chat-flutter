@@ -3,7 +3,7 @@ import 'package:flutter/widgets.dart';
 
 /// The "enter" keyset.
 ///
-/// Use to quickly send a message in [StreamMessageInput].
+/// Use to quickly send a message in [StreamMessageComposer].
 final enterKeySet = LogicalKeySet(
   LogicalKeyboardKey.enter,
 );
@@ -11,7 +11,7 @@ final enterKeySet = LogicalKeySet(
 /// The "escape" keyset.
 ///
 /// Use for:
-/// * Removing a reply from [StreamMessageInput].
+/// * Removing a reply from [StreamMessageComposer].
 /// * Closing [FullScreenMediaDesktop].
 final escapeKeySet = LogicalKeySet(
   LogicalKeyboardKey.escape,

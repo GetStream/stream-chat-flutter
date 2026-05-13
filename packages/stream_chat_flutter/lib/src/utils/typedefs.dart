@@ -101,7 +101,7 @@ typedef AttachmentActionsBuilder =
     );
 
 /// {@template errorListener}
-/// A callback that can be passed to [StreamMessageInput.onError].
+/// A callback that can be passed to [StreamMessageComposer.onError].
 ///
 /// This callback should not throw.
 ///
@@ -115,7 +115,7 @@ typedef ErrorListener =
 
 /// {@template attachmentLimitExceededListener}
 /// A callback that can be passed to
-/// [StreamMessageInput.onAttachmentLimitExceed].
+/// [StreamMessageComposer.onAttachmentLimitExceed].
 ///
 /// This callback should not throw.
 ///

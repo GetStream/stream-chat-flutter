@@ -7,8 +7,8 @@ This guide covers the migration for the message composer components in the Strea
 ## Table of Contents
 
 - [Overview](#overview)
-- [StreamMessageInput](#streammessageinput)
-- [StreamChatMessageComposer (new)](#streamchatmessagecomposer-new)
+- [StreamMessageComposer](#streammessagecomposer)
+- [StreamChatMessageInput (new)](#streamchatmessageinput-new)
 - [Message Input Placeholder API](#message-input-placeholder-api)
 - [Attachment Customization](#attachment-customization)
 - [Migration Checklist](#migration-checklist)
@@ -21,16 +21,16 @@ There are two distinct composer components with different responsibilities:
 
 | Component | Responsibility |
 |-----------|---------------|
-| `StreamMessageInput` | Full-featured widget: handles sending, editing, attachments, autocomplete, mentions, commands, OG previews, voice recording flow, etc. |
-| `StreamChatMessageComposer` | UI-only component: renders the composer layout using design system primitives. No business logic. |
+| `StreamMessageComposer` | Full-featured widget: handles sending, editing, attachments, autocomplete, mentions, commands, OG previews, voice recording flow, etc. |
+| `StreamChatMessageInput` | UI-only component: renders the composer layout using design system primitives. No business logic. |
 
-`StreamMessageInput` wraps `StreamChatMessageComposer` for its visual layer. If you are using `StreamMessageInput` today, it remains the right choice — it is not deprecated. `StreamChatMessageComposer` exists for cases where you want to build your own message-sending logic and use the new design system UI.
+`StreamMessageComposer` wraps `StreamChatMessageInput` for its visual layer. If you are using `StreamMessageComposer` today, it remains the right choice — it is not deprecated. `StreamChatMessageInput` exists for cases where you want to build your own message-sending logic and use the new design system UI.
 
 ---
 
-## StreamMessageInput
+## StreamMessageComposer
 
-`StreamMessageInput` handles all message composition logic. This section documents all breaking changes.
+`StreamMessageComposer` handles all message composition logic. This section documents all breaking changes.
 
 ### Breaking Change: `hideSendAsDm` renamed to `canAlsoSendToChannelFromThread` (logic inverted)
 
@@ -50,7 +50,7 @@ StreamMessageInput(
 
 **After:**
 ```dart
-StreamMessageInput(
+StreamMessageComposer(
   canAlsoSendToChannelFromThread: false,  // hide the checkbox
 )
 ```
@@ -70,25 +70,25 @@ StreamMessageInput(
 
 **After (with limit):**
 ```dart
-StreamMessageInput(
+StreamMessageComposer(
   attachmentLimit: 5,
 )
 ```
 
 **After (no limit — new default behaviour):**
 ```dart
-StreamMessageInput(
+StreamMessageComposer(
   // attachmentLimit not set — no limit applied
 )
 ```
 
 ### Removed parameters
 
-Many parameters that existed in older versions of `StreamMessageInput` have been removed. The table below lists each removed parameter and the recommended migration path.
+Many parameters that existed in `StreamMessageInput` have been removed from `StreamMessageComposer`. The table below lists each removed parameter and the recommended migration path.
 
 #### Layout and visual parameters
 
-These parameters have been removed. The composer layout is now fully owned by `StreamChatMessageComposer` and its sub-components, customizable via `StreamComponentFactory`.
+These parameters have been removed. The composer layout is now fully owned by `StreamChatMessageInput` and its sub-components, customizable via `StreamComponentFactory`.
 
 | Removed parameter | Migration path |
 |-------------------|---------------|
@@ -132,22 +132,22 @@ These parameters have been removed. Attachment rendering in the composer input h
 | `fileAttachmentBuilder` | Override `messageComposerAttachment` in `StreamComponentFactory`. |
 | `mediaAttachmentBuilder` | Override `messageComposerAttachment` in `StreamComponentFactory`. |
 | `voiceRecordingAttachmentBuilder` | Override `messageComposerAttachment` in `StreamComponentFactory`. |
-| `quotedMessageBuilder` | Override `messageComposerInputHeader` in `StreamComponentFactory`. |
-| `quotedMessageAttachmentThumbnailBuilders` | Override `messageComposerInputHeader` or `messageComposerAttachment` in `StreamComponentFactory`. |
+| `quotedMessageBuilder` | Override `messageComposerInputHeader` or `messageComposerInput` in `StreamComponentFactory`. |
+| `quotedMessageAttachmentThumbnailBuilders` | Override `messageComposerInputHeader`, `messageComposerInput`, or `messageComposerAttachment` in `StreamComponentFactory`. |
 
 ### Attachment button visibility
 
-Previously, the attachment button was always rendered (though inactive) when `disableAttachments: true` was set. The button is now fully hidden (removed from the layout) when no attachment callback is wired up. When you pass `disableAttachments: true` to `StreamMessageInput`, the attachment button no longer appears at all.
+Previously, the attachment button was always rendered (though inactive) when `disableAttachments: true` was set. The button is now fully hidden (removed from the layout) when no attachment callback is wired up. When you pass `disableAttachments: true` to `StreamMessageComposer`, the attachment button no longer appears at all.
 
-If you are using `StreamChatMessageComposer` directly, the button hides when `onAttachmentButtonPressed` is `null`.
+If you are using `StreamChatMessageInput` directly, the button hides when `onAttachmentButtonPressed` is `null`.
 
 ---
 
-## StreamChatMessageComposer (new)
+## StreamChatMessageInput (new)
 
-`StreamChatMessageComposer` is a pure UI component from the new design system. It renders the composer layout but contains no message-sending logic — your code is responsible for wiring up the controller and callbacks.
+`StreamChatMessageInput` is a pure UI component from the new design system. It renders the composer layout but contains no message-sending logic — your code is responsible for wiring up the controller and callbacks.
 
-Use this when you want the new design system visuals with custom business logic. If you want the full out-of-the-box experience (send, edit, attachments, mentions, commands, etc.), use `StreamMessageInput` instead.
+Use this when you want the new design system visuals with custom business logic. If you want the full out-of-the-box experience (send, edit, attachments, mentions, commands, etc.), use `StreamMessageComposer` instead.
 
 ### Constructor Parameters
 
@@ -159,7 +159,7 @@ Use this when you want the new design system visuals with custom business logic.
 | `isPickerOpen` | `bool` | `false` | Whether the inline attachment picker is currently open |
 | `focusNode` | `FocusNode?` | `null` | Focus node for the text field |
 | `currentUserId` | `String?` | `null` | Current user's ID |
-| `placeholder` | `String?` | `null` | Placeholder text for the input field. `StreamChatMessageComposer` is a pure UI component — when wiring it up directly, compute this string yourself (use `MessageInputPlaceholder.resolve(controller)` from the [Message Input Placeholder API](#message-input-placeholder-api) if you want the built-in state machine), or pass `null` for no placeholder. `StreamMessageInput` resolves it for you reactively from its controller. |
+| `placeholder` | `String?` | `null` | Placeholder text for the input field. `StreamChatMessageInput` is a pure UI component — when wiring it up directly, compute this string yourself (use `MessageInputPlaceholder.resolve(controller)` from the [Message Input Placeholder API](#message-input-placeholder-api) if you want the built-in state machine), or pass `null` for no placeholder. `StreamMessageComposer` resolves it for you reactively from its controller. |
 | `audioRecorderController` | `StreamAudioRecorderController?` | `null` | Enables the voice recording UI when provided |
 | `sendVoiceRecordingAutomatically` | `bool` | `false` | Sends the voice recording immediately on finish |
 | `feedback` | `AudioRecorderFeedback` | `const AudioRecorderFeedback()` | Haptic/audio feedback callbacks for the recording flow |
@@ -173,15 +173,17 @@ Use this when you want the new design system visuals with custom business logic.
 
 ### Sub-components
 
-The layout is composed of named default sub-widgets that can be replaced via the `StreamComponentFactory`:
+The layout is composed of named default sub-widgets that can be replaced via the `StreamComponentFactory`. Use the factory builder keys below to override any slot; the public default class (where one exists) can be referenced when you want to call the built-in implementation from inside a custom override.
 
-| Sub-component | Description |
-|---------------|-------------|
-| `DefaultMessageComposerLeading` | Left side of the composer row (e.g., attachment button) |
-| `DefaultMessageComposerTrailing` | Right side of the composer row (e.g., send/mic button) |
-| `DefaultMessageComposerInputLeading` | Left side inside the input area |
-| `DefaultMessageComposerInputTrailing` | Right side inside the input area |
-| `DefaultMessageComposerInputHeader` | Header above the input (e.g., reply/edit preview, attachment thumbnails) |
+| Factory builder key | Description | Public default class |
+|---------------------|-------------|----------------------|
+| `messageComposerLeading` | Left side of the composer row (e.g., attachment button) | `DefaultStreamMessageComposerLeading` |
+| `messageComposerTrailing` | Right side of the composer row (empty by default; add a custom widget here to extend the outer row) | — |
+| `messageComposerInput` | The whole input container (assembles header, leading, center, and trailing) | `DefaultStreamMessageComposerInput` |
+| `messageComposerInputLeading` | Left side inside the input area (empty by default) | — |
+| `messageComposerInputCenter` | The actual text field area (text input or audio recording UI) | `DefaultStreamMessageComposerInputCenter` |
+| `messageComposerInputTrailing` | Right side inside the input area (send/mic button) | `DefaultStreamMessageComposerInputTrailing` |
+| `messageComposerInputHeader` | Header above the input (reply/edit preview, attachment thumbnails) | — |
 
 ### Customization via Component Factory
 
@@ -202,11 +204,11 @@ StreamComponentFactory(
 
 ## Message Input Placeholder API
 
-The input placeholder text (the dimmed text shown inside the input field when it is empty) is now driven by a sealed-class hierarchy that adapts to the current input state. The previous `HintType` enum and `HintGetter` typedef have been removed, and the customization hook on `StreamMessageInput` is now called `placeholderBuilder`.
+The input placeholder text (the dimmed text shown inside the input field when it is empty) is now driven by a sealed-class hierarchy that adapts to the current input state. The previous `HintType` enum and `HintGetter` typedef have been removed, and the customization hook on `StreamMessageComposer` is now called `placeholderBuilder`.
 
 The new placeholder types live in `lib/src/message_input/message_input_placeholder.dart` and are re-exported from `package:stream_chat_flutter/stream_chat_flutter.dart`.
 
-> **Layered model.** The placeholder *resolution* (state machine that turns controller state into a string) lives on `StreamMessageInput`, the higher-level full-featured widget. The lower-level `StreamChatMessageComposer` design-system component stays a pure UI primitive and accepts a plain `String placeholder` — see [StreamChatMessageComposer (new)](#streamchatmessagecomposer-new). If you build directly on `StreamChatMessageComposer`, call `MessageInputPlaceholder.resolve(controller)` and your own builder yourself, then pass the resulting string in.
+> **Layered model.** The placeholder *resolution* (state machine that turns controller state into a string) lives on `StreamMessageComposer`, the higher-level full-featured widget. The lower-level `StreamChatMessageInput` design-system component stays a pure UI primitive and accepts a plain `String placeholder` — see [StreamChatMessageInput (new)](#streamchatmessageinput-new). If you build directly on `StreamChatMessageInput`, call `MessageInputPlaceholder.resolve(controller)` and your own builder yourself, then pass the resulting string in.
 
 ### What was removed
 
@@ -216,8 +218,8 @@ The new placeholder types live in `lib/src/message_input/message_input_placehold
 | `typedef HintGetter = String? Function(BuildContext, HintType, Command?)` | `typedef MessageInputPlaceholderBuilder = String? Function(BuildContext, MessageInputPlaceholder)` |
 | `HintType resolveMessageInputHintType(controller)` | `MessageInputPlaceholder.resolve(controller)` factory |
 | `Command? resolveActiveMessageInputCommand(context, controller)` | Removed. Use `controller.message.command` (a `String?`) directly. The SDK no longer looks up the full `Command` object from the channel config when resolving the placeholder. |
-| `String? defaultMessageInputHintGetter(...)` | Removed from the public API. The default behaviour is now baked into `StreamMessageInput.placeholderBuilder`'s default value. To customize, supply your own builder with an exhaustive `switch` over [`MessageInputPlaceholder`](#sealed-class-state-shape). |
-| `StreamMessageInput.hintGetter` | `StreamMessageInput.placeholderBuilder` |
+| `String? defaultMessageInputHintGetter(...)` | Removed from the public API. The default behaviour is now baked into `StreamMessageComposer.placeholderBuilder`'s default value. To customize, supply your own builder with an exhaustive `switch` over [`MessageInputPlaceholder`](#sealed-class-state-shape). |
+| `StreamMessageInput.hintGetter` | `StreamMessageComposer.placeholderBuilder` |
 
 ### Behavior change: precedence
 
@@ -265,7 +267,7 @@ Each case carries the contextual data relevant to that input state. Pattern-matc
 Example using the new fields (note that the sealed type forces an exhaustive switch — every case must be handled):
 
 ```dart
-StreamMessageInput(
+StreamMessageComposer(
   placeholderBuilder: (context, placeholder) {
     final translations = context.translations;
     return switch (placeholder) {
@@ -310,7 +312,7 @@ StreamMessageInput(
 **After:**
 
 ```dart
-StreamMessageInput(
+StreamMessageComposer(
   placeholderBuilder: (context, placeholder) {
     return switch (placeholder) {
       SlowModePlaceholder() => 'Slow mode is on',
@@ -327,7 +329,7 @@ StreamMessageInput(
 For backend-defined custom commands, pattern-match the relevant `CommandPlaceholder.command` values and use the SDK's localized labels for everything else:
 
 ```dart
-StreamMessageInput(
+StreamMessageComposer(
   placeholderBuilder: (context, placeholder) {
     final translations = context.translations;
     return switch (placeholder) {
@@ -422,15 +424,16 @@ The following public widgets are provided as building blocks for custom attachme
 
 ## Migration Checklist
 
-- [ ] Rename `hideSendAsDm` to `canAlsoSendToChannelFromThread` in all `StreamMessageInput` usages and invert the value
+- [ ] Rename `StreamMessageInput` to `StreamMessageComposer` in all usages
+- [ ] Rename `hideSendAsDm` to `canAlsoSendToChannelFromThread` in all `StreamMessageComposer` usages and invert the value
 - [ ] Review usages of `attachmentLimit` — it is now `int?` and defaults to no limit; set an explicit value if you relied on the old default of `10`
 - [ ] Remove any usage of `maxHeight`, `maxLines`, `minLines`, `padding`, `textInputMargin`, `elevation`, `shadow`, `enableActionAnimation`, `contentInsertionConfiguration`, `sendButtonLocation`
 - [ ] Replace `actionsBuilder` / `actionsLocation` / button builder params (`attachmentButtonBuilder`, `commandButtonBuilder`, `sendButtonBuilder`, `idleSendIcon`, `activeSendIcon`, `showCommandsButton`) with sub-component overrides via `StreamComponentFactory`
 - [ ] Replace attachment list builder params (`attachmentListBuilder`, `fileAttachmentListBuilder`, `mediaAttachmentListBuilder`, `voiceRecordingAttachmentListBuilder`) with the `messageComposerAttachmentList` builder in `StreamComponentFactory`
 - [ ] Replace attachment item builder params (`fileAttachmentBuilder`, `mediaAttachmentBuilder`, `voiceRecordingAttachmentBuilder`) with the `messageComposerAttachment` builder in `StreamComponentFactory`
 - [ ] Replace `quotedMessageBuilder` / `quotedMessageAttachmentThumbnailBuilders` with `messageComposerInputHeader` or `messageComposerAttachment` overrides in `StreamComponentFactory`
-- [ ] If adopting `StreamChatMessageComposer` directly, wire up your own send/attachment logic via `onSendPressed` and `onAttachmentButtonPressed`
+- [ ] If adopting `StreamChatMessageInput` directly, wire up your own send/attachment logic via `onSendPressed` and `onAttachmentButtonPressed`
 - [ ] Move any composer UI customizations to `StreamComponentFactory`
-- [ ] Rename `StreamMessageInput.hintGetter` to `placeholderBuilder` and rewrite the callback to switch over `MessageInputPlaceholder` cases (`SlowModePlaceholder`, `CommandPlaceholder`, `AttachmentsPlaceholder`, `WriteMessagePlaceholder`) instead of the removed `HintType` enum. If you build directly on `StreamChatMessageComposer`, compute the placeholder string yourself via `MessageInputPlaceholder.resolve(controller)` and pass it via the `placeholder: String` parameter.
+- [ ] Rename `StreamMessageInput.hintGetter` to `placeholderBuilder` and rewrite the callback to switch over `MessageInputPlaceholder` cases (`SlowModePlaceholder`, `CommandPlaceholder`, `AttachmentsPlaceholder`, `WriteMessagePlaceholder`) instead of the removed `HintType` enum. If you build directly on `StreamChatMessageInput`, compute the placeholder string yourself via `MessageInputPlaceholder.resolve(controller)` and pass it via the `placeholder: String` parameter.
 - [ ] Review the new placeholder precedence (`slowMode > command > attachments > writeMessage`) and override `placeholderBuilder` if you need to preserve the old order
 - [ ] Add command-specific placeholders for any backend-defined commands you ship by pattern-matching on `CommandPlaceholder.command` in your `placeholderBuilder`

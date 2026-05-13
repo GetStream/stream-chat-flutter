@@ -267,7 +267,7 @@ StreamSystemAttachmentPickerBottomSheet(
 
 **Before:**
 ```dart
-StreamMessageInput(
+StreamMessageComposer(
   customAttachmentPickerOptions: [
     TabbedAttachmentPickerOption(
       key: 'custom-location',
@@ -283,7 +283,7 @@ StreamMessageInput(
 
 **After:**
 ```dart
-StreamMessageInput(
+StreamMessageComposer(
   attachmentPickerOptionsBuilder: (context, defaultOptions) {
     // You can now modify, filter, reorder, or extend default options
     return [
@@ -303,7 +303,7 @@ StreamMessageInput(
 
 **Example: Filtering default options**
 ```dart
-StreamMessageInput(
+StreamMessageComposer(
   attachmentPickerOptionsBuilder: (context, defaultOptions) {
     // Remove poll option
     return defaultOptions.where((option) => option.key != 'poll').toList();
@@ -313,7 +313,7 @@ StreamMessageInput(
 
 **Example: Reordering options**
 ```dart
-StreamMessageInput(
+StreamMessageComposer(
   attachmentPickerOptionsBuilder: (context, defaultOptions) {
     // Reverse the order
     return defaultOptions.reversed.toList();
@@ -360,7 +360,7 @@ final result = await showStreamAttachmentPickerModalBottomSheet(
 
 **Before:**
 ```dart
-StreamMessageInput(
+StreamMessageComposer(
   onCustomAttachmentPickerResult: (result) {
     if (result is CustomAttachmentPickerResult) {
       final data = result.data;
@@ -372,7 +372,7 @@ StreamMessageInput(
 
 **After:**
 ```dart
-StreamMessageInput(
+StreamMessageComposer(
   onAttachmentPickerResult: (result) {
     if (result is CustomAttachmentPickerResult) {
       final data = result.data;

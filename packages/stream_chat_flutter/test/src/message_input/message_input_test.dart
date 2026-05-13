@@ -21,11 +21,10 @@ void main() {
 
   testWidgets(
     'checks message input features',
-    skip: true,
     (WidgetTester tester) async {
       await tester.pumpWidget(
         buildWidget(
-          const StreamMessageInput(),
+          StreamMessageComposer(),
         ),
       );
 
@@ -33,13 +32,11 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(TextField), findsOneWidget);
-      expect(find.byKey(const Key('messageInputText')), findsOneWidget);
     },
   );
 
   testWidgets(
     'checks message input slow mode',
-    skip: true,
     (WidgetTester tester) async {
       final client = MockClient();
       final clientState = MockClientState();
@@ -98,8 +95,8 @@ void main() {
             client: client,
             child: StreamChannel(
               channel: channel,
-              child: const Scaffold(
-                body: StreamMessageInput(),
+              child: Scaffold(
+                body: StreamMessageComposer(),
               ),
             ),
           ),
@@ -136,7 +133,6 @@ void main() {
 
     testWidgets(
       'should send message when Enter key is pressed on desktop',
-      skip: true,
       (tester) async {
         when(() => channel.sendMessage(any())).thenAnswer(
           (i) async => SendMessageResponse()
@@ -151,8 +147,8 @@ void main() {
               client: client,
               child: StreamChannel(
                 channel: channel,
-                child: const Scaffold(
-                  bottomNavigationBar: StreamMessageInput(),
+                child: Scaffold(
+                  bottomNavigationBar: StreamMessageComposer(),
                 ),
               ),
             ),
@@ -162,7 +158,7 @@ void main() {
         await tester.pumpAndSettle();
 
         // Add some text to the input field
-        final textField = find.byType(StreamMessageTextField);
+        final textField = find.byType(TextField);
         await tester.enterText(textField, 'Hello world');
         await tester.pump();
 
@@ -178,7 +174,6 @@ void main() {
 
     testWidgets(
       'should not send message when Shift+Enter key is pressed on desktop',
-      skip: true,
       (tester) async {
         when(() => channel.sendMessage(any())).thenAnswer(
           (_) async => SendMessageResponse()
@@ -193,8 +188,8 @@ void main() {
               client: client,
               child: StreamChannel(
                 channel: channel,
-                child: const Scaffold(
-                  bottomNavigationBar: StreamMessageInput(),
+                child: Scaffold(
+                  bottomNavigationBar: StreamMessageComposer(),
                 ),
               ),
             ),
@@ -204,7 +199,7 @@ void main() {
         await tester.pumpAndSettle();
 
         // Add some text to the input field
-        final textField = find.byType(StreamMessageTextField);
+        final textField = find.byType(TextField);
         await tester.enterText(textField, 'Hello world');
         await tester.pump();
 
@@ -224,7 +219,6 @@ void main() {
 
     testWidgets(
       'should clear quoted message when Esc key is pressed on desktop',
-      skip: true,
       (tester) async {
         final quotedMessage = Message(text: 'I am a quoted message');
         final initialMessage = Message(quotedMessage: quotedMessage);
@@ -242,7 +236,7 @@ void main() {
               child: StreamChannel(
                 channel: channel,
                 child: Scaffold(
-                  bottomNavigationBar: StreamMessageInput(
+                  bottomNavigationBar: StreamMessageComposer(
                     messageInputController: messageInputController,
                     onQuotedMessageCleared: () {
                       onQuotedMessageClearedCalled = true;
@@ -257,7 +251,7 @@ void main() {
         await tester.pumpAndSettle();
 
         // Tap the message input to focus it
-        final textField = find.byType(StreamMessageTextField);
+        final textField = find.byType(TextField);
         await tester.tap(textField);
         await tester.pump();
 
@@ -273,7 +267,6 @@ void main() {
 
     testWidgets(
       'should not clear quoted message contains text and Esc key is pressed on desktop',
-      skip: true,
       (tester) async {
         final quotedMessage = Message(text: 'I am a quoted message');
         final initialMessage = Message(quotedMessage: quotedMessage);
@@ -291,7 +284,7 @@ void main() {
               child: StreamChannel(
                 channel: channel,
                 child: Scaffold(
-                  bottomNavigationBar: StreamMessageInput(
+                  bottomNavigationBar: StreamMessageComposer(
                     messageInputController: messageInputController,
                     onQuotedMessageCleared: () {
                       onQuotedMessageClearedCalled = true;
@@ -306,7 +299,7 @@ void main() {
         await tester.pumpAndSettle();
 
         // Add some text to the input field
-        final textField = find.byType(StreamMessageTextField);
+        final textField = find.byType(TextField);
         await tester.enterText(textField, 'Hello world');
         await tester.pump();
 
@@ -378,7 +371,7 @@ void main() {
         final messageInputController = StreamMessageInputController()..editMessage(existingMessage);
         addTearDown(messageInputController.dispose);
 
-        final key = GlobalKey<StreamMessageInputState>();
+        final key = GlobalKey<DefaultStreamMessageComposerState>();
 
         await tester.pumpWidget(
           MaterialApp(
@@ -387,9 +380,11 @@ void main() {
               child: StreamChannel(
                 channel: channel,
                 child: Scaffold(
-                  bottomNavigationBar: StreamMessageInput(
+                  bottomNavigationBar: DefaultStreamMessageComposer(
                     key: key,
-                    messageInputController: messageInputController,
+                    props: MessageComposerProps(
+                      messageInputController: messageInputController,
+                    ),
                   ),
                 ),
               ),
@@ -420,7 +415,7 @@ void main() {
         );
         addTearDown(messageInputController.dispose);
 
-        final key = GlobalKey<StreamMessageInputState>();
+        final key = GlobalKey<DefaultStreamMessageComposerState>();
 
         await tester.pumpWidget(
           MaterialApp(
@@ -429,9 +424,11 @@ void main() {
               child: StreamChannel(
                 channel: channel,
                 child: Scaffold(
-                  bottomNavigationBar: StreamMessageInput(
+                  bottomNavigationBar: DefaultStreamMessageComposer(
                     key: key,
-                    messageInputController: messageInputController,
+                    props: MessageComposerProps(
+                      messageInputController: messageInputController,
+                    ),
                   ),
                 ),
               ),
@@ -488,7 +485,6 @@ void main() {
 
     testWidgets(
       'should not show DmCheckboxListTile when hideSendAsDm is true',
-      skip: true,
       (tester) async {
         await tester.pumpWidget(
           MaterialApp(
@@ -496,8 +492,8 @@ void main() {
               client: client,
               child: StreamChannel(
                 channel: channel,
-                child: const Scaffold(
-                  bottomNavigationBar: StreamMessageInput(
+                child: Scaffold(
+                  bottomNavigationBar: StreamMessageComposer(
                     canAlsoSendToChannelFromThread: false,
                   ),
                 ),
@@ -514,7 +510,6 @@ void main() {
 
     testWidgets(
       'should not show DmCheckboxListTile when not in a thread',
-      skip: true,
       (tester) async {
         await tester.pumpWidget(
           MaterialApp(
@@ -522,8 +517,8 @@ void main() {
               client: client,
               child: StreamChannel(
                 channel: channel,
-                child: const Scaffold(
-                  bottomNavigationBar: StreamMessageInput(),
+                child: Scaffold(
+                  bottomNavigationBar: StreamMessageComposer(),
                 ),
               ),
             ),
@@ -538,7 +533,6 @@ void main() {
 
     testWidgets(
       'should show DmCheckboxListTile when in a thread and hideSendAsDm is false',
-      skip: true,
       (tester) async {
         // Set up a message controller with a parent message ID (thread)
         final messageInputController = StreamMessageInputController(
@@ -552,7 +546,7 @@ void main() {
               child: StreamChannel(
                 channel: channel,
                 child: Scaffold(
-                  bottomNavigationBar: StreamMessageInput(
+                  bottomNavigationBar: StreamMessageComposer(
                     messageInputController: messageInputController,
                   ),
                 ),
@@ -569,7 +563,6 @@ void main() {
 
     testWidgets(
       'should toggle showInChannel value when DmCheckboxListTile is tapped',
-      skip: true,
       (tester) async {
         // Set up a message controller with a parent message ID (thread)
         final messageInputController = StreamMessageInputController(
@@ -588,7 +581,7 @@ void main() {
               child: StreamChannel(
                 channel: channel,
                 child: Scaffold(
-                  bottomNavigationBar: StreamMessageInput(
+                  bottomNavigationBar: StreamMessageComposer(
                     messageInputController: messageInputController,
                   ),
                 ),
@@ -677,7 +670,7 @@ void main() {
                 child: StreamChannel(
                   channel: channel,
                   child: Scaffold(
-                    bottomNavigationBar: StreamMessageInput(
+                    bottomNavigationBar: StreamMessageComposer(
                       messageInputController: controller,
                       onQuotedMessageCleared: () {
                         onQuotedMessageClearedCalled = true;
@@ -729,7 +722,7 @@ void main() {
                 child: StreamChannel(
                   channel: channel,
                   child: Scaffold(
-                    bottomNavigationBar: StreamMessageInput(
+                    bottomNavigationBar: StreamMessageComposer(
                       messageInputController: controller,
                       onQuotedMessageCleared: () {
                         onQuotedMessageClearedCalled = true;
@@ -779,7 +772,7 @@ void main() {
                 child: StreamChannel(
                   channel: channel,
                   child: Scaffold(
-                    bottomNavigationBar: StreamMessageInput(
+                    bottomNavigationBar: StreamMessageComposer(
                       messageInputController: controller,
                     ),
                   ),
@@ -831,7 +824,7 @@ void main() {
                 child: StreamChannel(
                   channel: channel,
                   child: Scaffold(
-                    bottomNavigationBar: StreamMessageInput(
+                    bottomNavigationBar: StreamMessageComposer(
                       messageInputController: controller,
                     ),
                   ),
@@ -877,7 +870,7 @@ void main() {
                 child: StreamChannel(
                   channel: channel,
                   child: Scaffold(
-                    bottomNavigationBar: StreamMessageInput(
+                    bottomNavigationBar: StreamMessageComposer(
                       messageInputController: controller,
                     ),
                   ),
@@ -925,7 +918,7 @@ void main() {
                 child: StreamChannel(
                   channel: channel,
                   child: Scaffold(
-                    bottomNavigationBar: StreamMessageInput(
+                    bottomNavigationBar: StreamMessageComposer(
                       messageInputController: controller,
                     ),
                   ),
@@ -969,7 +962,7 @@ void main() {
                 child: StreamChannel(
                   channel: channel,
                   child: Scaffold(
-                    bottomNavigationBar: StreamMessageInput(
+                    bottomNavigationBar: StreamMessageComposer(
                       messageInputController: controller,
                     ),
                   ),
@@ -1013,7 +1006,7 @@ void main() {
                 child: StreamChannel(
                   channel: channel,
                   child: Scaffold(
-                    bottomNavigationBar: StreamMessageInput(
+                    bottomNavigationBar: StreamMessageComposer(
                       messageInputController: controller,
                     ),
                   ),
@@ -1039,7 +1032,7 @@ void main() {
   });
 }
 
-MaterialApp buildWidget(StreamMessageInput input) {
+MaterialApp buildWidget(StreamMessageComposer input) {
   final client = MockClient();
   final clientState = MockClientState();
   final channel = MockChannel();

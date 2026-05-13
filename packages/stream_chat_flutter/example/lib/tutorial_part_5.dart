@@ -120,7 +120,7 @@ class ChannelPage extends StatelessWidget {
               messageBuilder: _messageBuilder,
             ),
           ),
-          const StreamMessageInput(),
+          StreamMessageComposer(),
         ],
       ),
     );

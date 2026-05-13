@@ -116,7 +116,7 @@ class ChannelPage extends StatelessWidget {
               ),
             ),
           ),
-          const StreamMessageInput(),
+          StreamMessageComposer(),
         ],
       ),
     );
@@ -144,7 +144,7 @@ class ThreadPage extends StatelessWidget {
               parentMessage: parent,
             ),
           ),
-          StreamMessageInput(
+          StreamMessageComposer(
             messageInputController: StreamMessageInputController(
               message: Message(parentId: parent!.id),
             ),
