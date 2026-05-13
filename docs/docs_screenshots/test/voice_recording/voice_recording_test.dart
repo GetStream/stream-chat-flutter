@@ -26,7 +26,7 @@ StreamAudioRecorderController _makeRecorderController(AudioRecorderState initial
 Widget _buildVoiceRecordingMessageInputScaffold({
   required MockClient client,
   required MockChannel channel,
-  StreamMessageInputController? messageInputController,
+  StreamMessageComposerController? messageComposerController,
 }) {
   return MaterialApp(
     theme: docsScreenshotsTheme(),
@@ -44,7 +44,7 @@ Widget _buildVoiceRecordingMessageInputScaffold({
               Expanded(child: Container()),
               StreamMessageComposer(
                 enableVoiceRecording: true,
-                messageInputController: messageInputController,
+                messageComposerController: messageComposerController,
               ),
             ],
           ),
@@ -302,7 +302,7 @@ void main() {
       final channelState = MockChannelState();
       _setupChannel(client, clientState, channel, channelState);
 
-      final messageInputController = StreamMessageInputController()
+      final messageComposerController = StreamMessageComposerController()
         ..addAttachment(
           Attachment(
             type: 'voiceRecording',
@@ -318,7 +318,7 @@ void main() {
       return _buildVoiceRecordingMessageInputScaffold(
         client: client,
         channel: channel,
-        messageInputController: messageInputController,
+        messageComposerController: messageComposerController,
       );
     },
   );

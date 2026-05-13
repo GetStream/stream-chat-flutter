@@ -147,8 +147,8 @@ class StreamMessageTextField extends StatefulWidget {
 
   /// Controls the message being edited.
   ///
-  /// If null, this widget will create its own [StreamMessageInputController].
-  final StreamMessageInputController? controller;
+  /// If null, this widget will create its own [StreamMessageComposerController].
+  final StreamMessageComposerController? controller;
 
   /// Defines the keyboard focus for this widget.
   ///
@@ -511,7 +511,7 @@ class StreamMessageTextField extends StatefulWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties
-      ..add(DiagnosticsProperty<StreamMessageInputController>('controller', controller, defaultValue: null))
+      ..add(DiagnosticsProperty<StreamMessageComposerController>('controller', controller, defaultValue: null))
       ..add(DiagnosticsProperty<FocusNode>('focusNode', focusNode, defaultValue: null))
       ..add(DiagnosticsProperty<bool>('enabled', enabled, defaultValue: null))
       ..add(DiagnosticsProperty<InputDecoration>('decoration', decoration, defaultValue: const InputDecoration()))
@@ -582,8 +582,8 @@ class StreamMessageTextField extends StatefulWidget {
 }
 
 class _StreamMessageTextFieldState extends State<StreamMessageTextField> with RestorationMixin<StreamMessageTextField> {
-  StreamMessageInputController get _effectiveController => widget.controller ?? _controller!.value;
-  StreamRestorableMessageInputController? _controller;
+  StreamMessageComposerController get _effectiveController => widget.controller ?? _controller!.value;
+  StreamRestorableMessageComposerController? _controller;
 
   @override
   void initState() {
@@ -595,7 +595,7 @@ class _StreamMessageTextFieldState extends State<StreamMessageTextField> with Re
 
   void _createLocalController([Message? message]) {
     assert(_controller == null, '');
-    _controller = StreamRestorableMessageInputController(message: message);
+    _controller = StreamRestorableMessageComposerController(message: message);
   }
 
   @override

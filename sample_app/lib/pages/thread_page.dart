@@ -20,12 +20,12 @@ class ThreadPage extends StatefulWidget {
 
 class _ThreadPageState extends State<ThreadPage> {
   final FocusNode _focusNode = FocusNode();
-  late StreamMessageInputController _messageInputController;
+  late StreamMessageComposerController _messageComposerController;
 
   @override
   void initState() {
     super.initState();
-    _messageInputController = StreamMessageInputController(
+    _messageComposerController = StreamMessageComposerController(
       message: Message(parentId: widget.parent.id),
     );
   }
@@ -37,7 +37,7 @@ class _ThreadPageState extends State<ThreadPage> {
   }
 
   void _reply(Message message) {
-    _messageInputController.quotedMessage = message;
+    _messageComposerController.quotedMessage = message;
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       _focusNode.requestFocus();
     });
@@ -65,7 +65,7 @@ class _ThreadPageState extends State<ThreadPage> {
           if (widget.parent.type != 'deleted')
             StreamMessageComposer(
               focusNode: _focusNode,
-              messageInputController: _messageInputController,
+              messageComposerController: _messageComposerController,
               enableVoiceRecording: true,
             ),
         ],

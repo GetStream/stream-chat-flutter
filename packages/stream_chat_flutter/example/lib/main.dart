@@ -220,7 +220,7 @@ class ChannelPage extends StatefulWidget {
 }
 
 class _ChannelPageState extends State<ChannelPage> {
-  late final messageInputController = StreamMessageInputController();
+  late final messageComposerController = StreamMessageComposerController();
   final focusNode = FocusNode();
 
   @override
@@ -270,9 +270,9 @@ class _ChannelPageState extends State<ChannelPage> {
           ),
           StreamMessageComposer(
             enableVoiceRecording: true,
-            onQuotedMessageCleared: messageInputController.clearQuotedMessage,
+            onQuotedMessageCleared: messageComposerController.clearQuotedMessage,
             focusNode: focusNode,
-            messageInputController: messageInputController,
+            messageComposerController: messageComposerController,
           ),
         ],
       ),
@@ -280,7 +280,7 @@ class _ChannelPageState extends State<ChannelPage> {
   }
 
   void reply(Message message) {
-    messageInputController.quotedMessage = message;
+    messageComposerController.quotedMessage = message;
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       focusNode.requestFocus();
     });
@@ -289,7 +289,7 @@ class _ChannelPageState extends State<ChannelPage> {
   @override
   void dispose() {
     focusNode.dispose();
-    messageInputController.dispose();
+    messageComposerController.dispose();
     super.dispose();
   }
 }
@@ -317,7 +317,7 @@ class ThreadPage extends StatelessWidget {
           ),
           StreamMessageComposer(
             enableVoiceRecording: true,
-            messageInputController: StreamMessageInputController(
+            messageComposerController: StreamMessageComposerController(
               message: Message(parentId: parent.id),
             ),
           ),

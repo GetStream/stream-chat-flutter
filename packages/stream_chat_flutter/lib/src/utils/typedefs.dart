@@ -351,11 +351,11 @@ typedef UserItemBuilder = Widget Function(BuildContext, User, bool);
 typedef OnScrollToBottom = Function(int unreadCount);
 
 /// Widget builder for widgets that may require data from the
-/// [MessageInputController].
+/// [StreamMessageComposerController].
 typedef MessageRelatedBuilder =
     Widget Function(
       BuildContext context,
-      StreamMessageInputController messageInputController,
+      StreamMessageComposerController messageComposerController,
     );
 
 /// A function that returns true if the message is valid and can be sent.

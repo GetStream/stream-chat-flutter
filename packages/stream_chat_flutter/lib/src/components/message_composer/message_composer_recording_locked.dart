@@ -14,13 +14,13 @@ class MessageComposerRecordingLocked extends StatelessWidget {
   /// Creates a new instance of [MessageComposerRecordingLocked].
   /// [audioRecorderController] is the controller for the audio recorder.
   /// [feedback] is the feedback for the audio recorder.
-  /// [messageInputController] is the controller for the message input.
+  /// [messageComposerController] is the controller for the message composer.
   /// [sendMessageCallback] is the callback for when the message is sent automatically.
   const MessageComposerRecordingLocked({
     super.key,
     required this.audioRecorderController,
     required this.feedback,
-    required this.messageInputController,
+    required this.messageComposerController,
     required this.sendMessageCallback,
     required this.state,
   });
@@ -31,8 +31,8 @@ class MessageComposerRecordingLocked extends StatelessWidget {
   /// The feedback for the audio recorder.
   final AudioRecorderFeedback feedback;
 
-  /// The controller for the message input.
-  final StreamMessageInputController messageInputController;
+  /// The controller for the message composer.
+  final StreamMessageComposerController messageComposerController;
 
   /// The callback for when the message is sent automatically.
   /// This callback should be null when the message is not supposed to be sent automatically.
@@ -110,7 +110,7 @@ class MessageComposerRecordingLocked extends StatelessWidget {
                 await feedback.onRecordFinish(context);
                 final audio = await audioRecorderController.finishRecord();
                 if (audio != null) {
-                  messageInputController.addAttachment(audio);
+                  messageComposerController.addAttachment(audio);
                 }
 
                 // Once the recording is finished, cancel the recorder.
@@ -134,13 +134,13 @@ class MessageComposerRecordingStopped extends StatefulWidget {
   /// Creates a new instance of [MessageComposerRecordingStopped].
   /// [audioRecorderController] is the controller for the audio recorder.
   /// [feedback] is the feedback for the audio recorder.
-  /// [messageInputController] is the controller for the message input.
+  /// [messageComposerController] is the controller for the message composer.
   /// [sendMessageCallback] is the callback for when the message is sent automatically.
   const MessageComposerRecordingStopped({
     super.key,
     required this.audioRecorderController,
     required this.feedback,
-    required this.messageInputController,
+    required this.messageComposerController,
     required this.sendMessageCallback,
     required this.recordingState,
   });
@@ -151,8 +151,8 @@ class MessageComposerRecordingStopped extends StatefulWidget {
   /// The feedback for the audio recorder.
   final AudioRecorderFeedback feedback;
 
-  /// The controller for the message input.
-  final StreamMessageInputController messageInputController;
+  /// The controller for the message composer.
+  final StreamMessageComposerController messageComposerController;
 
   /// The callback for when the message is sent automatically.
   /// This callback should be null when the message is not supposed to be sent automatically.
@@ -307,7 +307,7 @@ class _MessageComposerRecordingStoppedState extends State<MessageComposerRecordi
                     await widget.feedback.onRecordFinish(context);
                     final audio = await widget.audioRecorderController.finishRecord();
                     if (audio != null) {
-                      widget.messageInputController.addAttachment(audio);
+                      widget.messageComposerController.addAttachment(audio);
                     }
 
                     // Once the recording is finished, cancel the recorder.

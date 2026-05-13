@@ -188,8 +188,8 @@ class MessageScreen extends StatefulWidget {
 }
 
 class _MessageScreenState extends State<MessageScreen> {
-  final StreamMessageInputController messageInputController =
-      StreamMessageInputController();
+  final StreamMessageComposerController messageComposerController =
+      StreamMessageComposerController();
   late final ScrollController _scrollController;
   final messageListController = MessageListController();
 
@@ -201,7 +201,7 @@ class _MessageScreenState extends State<MessageScreen> {
 
   @override
   void dispose() {
-    messageInputController.dispose();
+    messageComposerController.dispose();
     _scrollController.dispose();
     super.dispose();
   }
@@ -300,7 +300,7 @@ class _MessageScreenState extends State<MessageScreen> {
                 children: [
                   Expanded(
                     child: TextField(
-                      controller: messageInputController.textFieldController,
+                      controller: messageComposerController.textFieldController,
                       decoration: const InputDecoration(
                         hintText: 'Enter your message',
                       ),
@@ -312,11 +312,11 @@ class _MessageScreenState extends State<MessageScreen> {
                     clipBehavior: Clip.hardEdge,
                     child: InkWell(
                       onTap: () async {
-                        if (messageInputController.text.isNotEmpty) {
+                        if (messageComposerController.text.isNotEmpty) {
                           await channel.sendMessage(
-                            messageInputController.message,
+                            messageComposerController.message,
                           );
-                          messageInputController.clear();
+                          messageComposerController.clear();
                           if (mounted) {
                             _updateList();
                           }
