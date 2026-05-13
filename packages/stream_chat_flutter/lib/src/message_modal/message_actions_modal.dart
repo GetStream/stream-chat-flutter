@@ -30,7 +30,7 @@ class StreamMessageActionsModal extends StatelessWidget {
   /// List of widgets that will be displayed as actions in the modal.
   ///
   /// Typically built by [StreamMessageActionsBuilder] and optionally modified
-  /// by [StreamMessageWidget.actionsBuilder]. Each item is rendered directly
+  /// by [StreamMessageItem.actionsBuilder]. Each item is rendered directly
   /// as a child of [StreamContextMenu].
   final List<Widget> messageActions;
 

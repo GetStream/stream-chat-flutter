@@ -6,6 +6,7 @@
 
 🛑️ Breaking
 
+- Removed `StreamDraftListView`, `StreamDraftListTile`, `StreamDraftListTileTheme`, and `StreamDraftListTileThemeData` from the SDK. Also removed `StreamChatThemeData.draftListTileTheme`. Refer to the sample app for a reference implementation using `StreamDraftListController` and `PagedValueListView`.
 - Renamed `StreamMessageComposerInput` → `StreamMessageComposerInputCenter` (and `DefaultStreamMessageComposerInput` → `DefaultStreamMessageComposerInputCenter`). The name `StreamMessageComposerInput` is now the input container widget (assembles header, leading, center, trailing).
 - Renamed `MessageComposerInputProps` → `MessageComposerInputCenterProps`. The name `MessageComposerInputProps` now refers to the new container widget's props.
 - Renamed `messageComposerInput` builder key in `streamChatComponentBuilders` → `messageComposerInputCenter`. The name `messageComposerInput` now overrides the whole input container.
@@ -33,6 +34,17 @@
 - Renamed `MuteIconPosition` → `AttributePosition` (values `title` → `inlineTitle`, `subtitle` → `trailingBottom`) and `StreamChannelListItemThemeData.muteIconPosition` → `attributePosition`. Now controls both mute and pin icons in `StreamChannelListTile`.
 - Removed `AttachmentModalSheet`, `ErrorAlertSheet` and `StreamChannelInfoBottomSheet`.
 - Removed `StreamMarkdownMessage`; use `StreamMessageText` (re-exported from `stream_core_flutter`) instead.
+- Renamed message item components to align with Android Compose and SwiftUI conventions:
+  - `StreamMessageWidget` → `StreamMessageItem` (file moved to `message_item.dart`).
+  - `DefaultStreamMessage` → `DefaultStreamMessageItem`.
+  - `StreamMessageWidgetProps` → `StreamMessageItemProps`.
+  - `StreamMessageWidgetBuilder` typedef → `StreamMessageItemBuilder`.
+  - `StreamMessageAnnotations` → `StreamMessageHeader`.
+  - `StreamMessageMetadata` → `StreamMessageFooter`.
+  - `ParseAttachments` → `StreamMessageAttachments`.
+  - `streamChatComponentBuilders(messageWidget: ...)` → `messageItem: ...`.
+  - `StreamMessageContent(annotation: ..., metadata: ...)` → `header: ..., footer: ...`.
+  See [`migrations/redesign/message_widget.md`](../../migrations/redesign/message_widget.md).
 
 ✅ Added
 
@@ -53,6 +65,8 @@
 - Added `Translations.reactionsCountText(int count)` for the reaction-detail sheet header.
 - Added `StreamChannelListTile.isPinned` — renders a pin icon alongside the existing mute icon for pinned channels.
 - Added `StreamChatConfigurationData.reactionOverlap` and `StreamMessageReactions.overlap` to control whether reactions overlap the message bubble edge. When unset, falls back to the platform-based default (overlap on mobile, no overlap on desktop and web).
+- Exported `StreamScrollViewLoadMoreError` and `StreamScrollViewLoadMoreIndicator` from the public API.
+- Exported `StreamTimestamp`, `DateFormatter`, `formatDate` and `formatRecentDateTime` from the public API.
 
 🔄 Changed
 

@@ -7,10 +7,10 @@ import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:stream_core_flutter/stream_core_flutter.dart' as core;
 
-/// Displays the message metadata containing the author name, sending status,
-/// creation timestamp, and an edited indicator.
+/// Displays the row below the message bubble containing the author name,
+/// sending status, creation timestamp, and an edited indicator.
 ///
-/// The metadata can show up to four pieces depending on the message:
+/// The footer can show up to four pieces depending on the message:
 ///
 ///  * **Username** — for messages from other users.
 ///  * **Sending status** — for the current user's own messages.
@@ -19,12 +19,13 @@ import 'package:stream_core_flutter/stream_core_flutter.dart' as core;
 ///
 /// See also:
 ///
+///  * [StreamMessageHeader], the symmetric slot above the message bubble.
 ///  * [StreamMessageSendingStatus], which renders the sent/delivered/read
 ///    indicator.
-///  * [DefaultStreamMessage], which controls metadata visibility.
-class StreamMessageMetadata extends StatelessWidget {
-  /// Creates message metadata for the given [message].
-  const StreamMessageMetadata({super.key, required this.message});
+///  * [DefaultStreamMessageItem], which controls footer visibility.
+class StreamMessageFooter extends StatelessWidget {
+  /// Creates a message footer for the given [message].
+  const StreamMessageFooter({super.key, required this.message});
 
   /// The message whose metadata to display.
   final Message message;

@@ -83,7 +83,7 @@ Widget _buildVoiceRecordingContextScaffold({
                       padding: const EdgeInsets.all(8),
                       child: voiceWidget,
                     ),
-                    StreamMessageWidget(
+                    StreamMessageItem(
                       message: Message(
                         id: 'ctx-msg',
                         text: 'Hey, listen to this!',
@@ -390,7 +390,7 @@ void main() {
       return _buildVoiceRecordingContextScaffold(
         client: client,
         channel: channel,
-        voiceWidget: StreamMessageWidget(message: voiceMessage),
+        voiceWidget: StreamMessageItem(message: voiceMessage),
       );
     },
   );
@@ -485,7 +485,7 @@ void main() {
       return _buildVoiceRecordingContextScaffold(
         client: client,
         channel: channel,
-        voiceWidget: StreamMessageWidget(message: voiceMessage),
+        voiceWidget: StreamMessageItem(message: voiceMessage),
       );
     },
   );
@@ -578,7 +578,7 @@ void main() {
       return _buildVoiceRecordingContextScaffold(
         client: client,
         channel: channel,
-        voiceWidget: StreamMessageWidget(message: voiceMessage),
+        voiceWidget: StreamMessageItem(message: voiceMessage),
         streamChatThemeData: customTheme,
       );
     },

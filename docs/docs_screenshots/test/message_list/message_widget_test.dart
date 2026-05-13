@@ -104,7 +104,7 @@ void main() {
               message: message,
               showReactionPicker: true,
               leadingInset: leadingInset,
-              messageWidget: StreamMessageWidget(message: message),
+              messageWidget: StreamMessageItem(message: message),
               messageActions: [
                 StreamContextMenuAction(
                   value: const _ReplyAction(),
@@ -192,7 +192,7 @@ void main() {
                         ),
                       ),
                     ),
-                    child: StreamMessageWidget(message: message),
+                    child: StreamMessageItem(message: message),
                   ),
                 ),
               ),
@@ -241,7 +241,7 @@ void main() {
         configData: StreamChatConfigurationData(
           reactionIconResolver: const _CelebrationReactionResolver(),
         ),
-        child: Center(child: StreamMessageWidget(message: message)),
+        child: Center(child: StreamMessageItem(message: message)),
       );
     },
   );
@@ -267,7 +267,7 @@ void main() {
       return _buildMessageScaffold(
         client: client,
         channel: channel,
-        child: Center(child: StreamMessageWidget(message: message)),
+        child: Center(child: StreamMessageItem(message: message)),
       );
     },
   );
@@ -309,7 +309,7 @@ void main() {
                         ),
                       ),
                     ),
-                    child: StreamMessageWidget(
+                    child: StreamMessageItem(
                       message: Message(
                         id: 'msg-from-other',
                         text: 'This is a message from Bob.',
@@ -333,7 +333,7 @@ void main() {
                           ),
                         ),
                       ),
-                      child: StreamMessageWidget(
+                      child: StreamMessageItem(
                         message: Message(
                           id: 'msg-from-me',
                           text: 'And this is my reply!',

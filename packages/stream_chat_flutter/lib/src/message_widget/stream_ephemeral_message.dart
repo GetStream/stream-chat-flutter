@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/message_widget/giphy_ephemeral_message.dart';
+import 'package:stream_chat_flutter/src/message_widget/stream_giphy_ephemeral_message.dart';
 import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/src/utils/typedefs.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
@@ -36,7 +36,7 @@ class StreamEphemeralMessage extends StatelessWidget {
             final onTap? => () => onTap(message),
             _ => null,
           },
-          child: GiphyEphemeralMessage(
+          child: StreamGiphyEphemeralMessage(
             message: message,
             onActionPressed: (name, value) {
               return streamChannel.channel.sendAction(message, {

@@ -12,7 +12,7 @@ This guide covers the migration for the redesigned message action components in 
 - [StreamMessageActionsModal](#streammessageactionsmodal)
 - [StreamMessageReactionsModal](#streammessagereactionsmodal)
 - [ModeratedMessageActionsModal](#moderatedmessageactionsmodal)
-- [StreamMessageWidget.customActions → actionsBuilder](#streammessagewidgetcustomactions)
+- [StreamMessageItem.customActions → actionsBuilder](#streammessageitemcustomactions)
 - [StreamMessageActionsBuilder](#streammessageactionsbuilder)
 - [New Components](#new-components)
 - [Migration Checklist](#migration-checklist)
@@ -33,11 +33,11 @@ This guide covers the migration for the redesigned message action components in 
 | `StreamMessageReactionsModal.onReactionPicked` | **Removed** — await the dialog return value (`SelectReaction`) |
 | `ModeratedMessageActionsModal.onActionTap` | **Removed** — use `onTap` per-action or await the dialog return value |
 | `ModeratedMessageActionsModal.messageActions` | **Type changed**: `List<StreamMessageAction>` → `List<StreamContextMenuAction>` |
-| `StreamMessageWidget.customActions` | **Removed** — replaced by `actionsBuilder` (`MessageActionsBuilder?`) |
-| `StreamMessageWidget.onCustomActionTap` | **Removed** — use `onTap` directly on each `StreamContextMenuAction` in `actionsBuilder` |
+| `StreamMessageItem.customActions` | **Removed** — replaced by `actionsBuilder` (`MessageActionsBuilder?`) |
+| `StreamMessageItem.onCustomActionTap` | **Removed** — use `onTap` directly on each `StreamContextMenuAction` in `actionsBuilder` |
 | `CustomMessageAction` | **Removed** — no longer needed; custom actions use `onTap` directly |
 | `OnMessageActionTap` | **Removed** — no longer needed |
-| `StreamMessageWidget.actionsBuilder` | **New** — `MessageActionsBuilder?` for the normal long-press menu |
+| `StreamMessageItem.actionsBuilder` | **New** — `MessageActionsBuilder?` for the normal long-press menu |
 | `StreamMessageActionsBuilder.buildActions` | **Changed**: return type `List<StreamContextMenuAction>`, `customActions` param **removed** |
 | `StreamMessageActionsBuilder.buildBouncedErrorActions` | **Return type changed**: `List<StreamMessageAction>` → `List<StreamContextMenuAction>` |
 | `MessageActionsBuilder<T>` | **New typedef** — `List<Widget> Function(BuildContext, List<StreamContextMenuAction<T>>)` |
@@ -346,7 +346,7 @@ if (action is ResendMessage) _resend(action.message);
 
 ---
 
-## StreamMessageWidget.customActions
+## StreamMessageItem.customActions
 
 ### Breaking Change
 
@@ -360,7 +360,7 @@ typedef MessageActionsBuilder<T extends MessageAction> =
     );
 ```
 
-`StreamMessageWidget.actionsBuilder` is declared as `MessageActionsBuilder?` (i.e. `MessageActionsBuilder<MessageAction>?`), so `defaultActions` is typed as `List<StreamContextMenuAction<MessageAction>>` — each item's `.props.value` is a `MessageAction?`.
+`StreamMessageItem.actionsBuilder` is declared as `MessageActionsBuilder?` (i.e. `MessageActionsBuilder<MessageAction>?`), so `defaultActions` is typed as `List<StreamContextMenuAction<MessageAction>>` — each item's `.props.value` is a `MessageAction?`.
 
 The `defaultActions` list passed into the builder is already filtered by the widget's `show*` flags, so callers always start from a clean, ready-to-render baseline.
 
@@ -370,7 +370,7 @@ The `defaultActions` list passed into the builder is already filtered by the wid
 
 **Before (append a custom action):**
 ```dart
-StreamMessageWidget(
+StreamMessageItem(
   message: message,
   messageTheme: messageTheme,
   customActions: [
@@ -391,7 +391,7 @@ StreamMessageWidget(
 
 **After:**
 ```dart
-StreamMessageWidget(
+StreamMessageItem(
   message: message,
   messageTheme: messageTheme,
   actionsBuilder: (context, defaultActions) => [
@@ -407,7 +407,7 @@ StreamMessageWidget(
 
 **After (remove an existing action and add a custom one):**
 ```dart
-StreamMessageWidget(
+StreamMessageItem(
   message: message,
   messageTheme: messageTheme,
   actionsBuilder: (context, defaultActions) => [
@@ -433,7 +433,7 @@ StreamMessageWidget(
 
 ### Breaking Changes
 
-Both static methods now return `List<StreamContextMenuAction>` instead of `List<StreamMessageAction>`. Additionally, the `customActions` parameter of `buildActions` has been **removed** — appending custom actions is now handled by `StreamMessageWidget.actionsBuilder`.
+Both static methods now return `List<StreamContextMenuAction>` instead of `List<StreamMessageAction>`. Additionally, the `customActions` parameter of `buildActions` has been **removed** — appending custom actions is now handled by `StreamMessageItem.actionsBuilder`.
 
 | Method / Parameter | Old type | New type |
 |--------------------|----------|----------|
@@ -570,7 +570,7 @@ StreamContextMenu(
 - [ ] Remove `onActionTap` from `StreamMessageActionsModal`; handle via per-action `onTap` or await the dialog return value
 - [ ] Remove `onReactionPicked` from `StreamMessageReactionsModal`; await a `SelectReaction` return value
 - [ ] Remove `onActionTap` from `ModeratedMessageActionsModal`; handle via per-action `onTap` or await the dialog return value
-- [ ] Replace `StreamMessageWidget.customActions` with `actionsBuilder`
+- [ ] Replace `StreamMessageItem.customActions` with `actionsBuilder`
 - [ ] Update `StreamMessageActionsBuilder.buildActions` call sites — return type is now `List<StreamContextMenuAction>` and `customActions` parameter no longer exists
 - [ ] Update `StreamMessageActionsBuilder.buildBouncedErrorActions` call sites — return type is now `List<StreamContextMenuAction>`
 - [ ] Replace `StreamSvgIcon` leading widgets in custom actions with `Icon(context.streamIcons.*)`

@@ -4,22 +4,22 @@ import 'package:sample_app/widgets/message_info_sheet.dart';
 import 'package:sample_app/widgets/reminder_dialog.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// Custom [StreamComponentBuilder] for [StreamMessageWidgetProps] that
+/// Custom [StreamComponentBuilder] for [StreamMessageItemProps] that
 /// composes app-specific message action customizations via a delegation
 /// chain.
 ///
 /// Delegation chain:
 /// ```
-/// customMessageWidgetBuilder
+/// customMessageItemBuilder
 ///   → _ReminderActions    (remind me, save for later, edit/remove reminder)
 ///   → _DeleteForMeAction  (delete message for current user only)
 ///   → _MessageInfoAction  (show message delivery info sheet)
 /// ```
-Widget customMessageWidgetBuilder(
+Widget customMessageItemBuilder(
   BuildContext context,
-  StreamMessageWidgetProps props,
+  StreamMessageItemProps props,
 ) {
-  return DefaultStreamMessage(
+  return DefaultStreamMessageItem(
     props: props.copyWith(
       actionsBuilder: (context, defaultActions) {
         final message = props.message;

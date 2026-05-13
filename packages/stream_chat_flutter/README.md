@@ -101,7 +101,7 @@ Every widget uses the `StreamChat` or `StreamChannel` widgets to manage the stat
 - [StreamChannelListView](https://getstream.io/chat/docs/sdk/flutter/stream_chat_flutter/stream_channel_list_view/)
 - [StreamMessageComposer](https://getstream.io/chat/docs/sdk/flutter/stream_chat_flutter/stream_message_composer/)
 - [StreamMessageListView](https://getstream.io/chat/docs/sdk/flutter/stream_chat_flutter/stream_message_list_view/)
-- [StreamMessageWidget](https://getstream.io/chat/docs/sdk/flutter/stream_chat_flutter/stream_message_widget/)
+- [StreamMessageItem](https://getstream.io/chat/docs/sdk/flutter/stream_chat_flutter/stream_message_widget/)
 - [StreamChatTheme](https://getstream.io/chat/docs/sdk/flutter/stream_chat_flutter/stream_chat_and_theming/)
 - ...
 
