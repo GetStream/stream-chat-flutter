@@ -15,11 +15,10 @@ class StreamMessageComposerInputHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return context.chatComponentBuilder<MessageComposerInputHeaderProps>()?.call(
-          context,
-          MessageComposerInputHeaderProps.from(props),
-        ) ??
-        _DefaultStreamMessageComposerInputHeader(props: props);
+    final headerProps = MessageComposerInputHeaderProps.from(props);
+
+    return context.chatComponentBuilder<MessageComposerInputHeaderProps>()?.call(context, headerProps) ??
+        _DefaultStreamMessageComposerInputHeader(props: headerProps);
   }
 }
 

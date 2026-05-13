@@ -215,7 +215,7 @@ class _StreamChatMessageInputContent extends StatelessWidget {
       onQuotedMessageCleared: widget.onQuotedMessageCleared,
     );
 
-    final inputCenterProps = MessageComposerInputCenterProps.from(
+    final inputProps = MessageComposerInputProps.from(
       componentProps,
       placeholder: widget.placeholder,
       textInputAction: widget.textInputAction,
@@ -246,10 +246,7 @@ class _StreamChatMessageInputContent extends StatelessWidget {
           SizedBox(width: spacing.md),
           StreamMessageComposerLeading(props: componentProps),
           Expanded(
-            child: StreamMessageComposerInput(
-              props: MessageComposerInputProps.from(componentProps),
-              inputCenterProps: inputCenterProps,
-            ),
+            child: StreamMessageComposerInput(props: inputProps),
           ),
           StreamMessageComposerTrailing(props: componentProps),
           SizedBox(width: spacing.md),

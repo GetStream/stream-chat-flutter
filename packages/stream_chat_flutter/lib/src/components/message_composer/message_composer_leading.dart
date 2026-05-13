@@ -15,11 +15,10 @@ class StreamMessageComposerLeading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return context.chatComponentBuilder<MessageComposerLeadingProps>()?.call(
-          context,
-          MessageComposerLeadingProps.from(props),
-        ) ??
-        DefaultStreamMessageComposerLeading(props: props);
+    final leadingProps = MessageComposerLeadingProps.from(props);
+
+    return context.chatComponentBuilder<MessageComposerLeadingProps>()?.call(context, leadingProps) ??
+        DefaultStreamMessageComposerLeading(props: leadingProps);
   }
 }
 

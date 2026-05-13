@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:record/record.dart';
+import 'package:stream_chat_flutter/src/message_input/stream_chat_message_input.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import '../src/fakes.dart';

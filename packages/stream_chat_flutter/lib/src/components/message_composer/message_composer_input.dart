@@ -11,28 +11,20 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// sub-components.
 class StreamMessageComposerInput extends StatelessWidget {
   /// Creates a new instance of [StreamMessageComposerInput].
-  /// [props] contains the properties for the message composer input container.
-  /// [inputCenterProps] contains the extra properties needed to build the
-  /// center content (text-field configuration, audio recording settings, etc.).
+  /// [props] contains the properties for the message composer input container,
+  /// including all text-field and audio-recording configuration.
   const StreamMessageComposerInput({
     super.key,
     required this.props,
-    required this.inputCenterProps,
   });
 
   /// The properties for the message composer input container.
   final MessageComposerInputProps props;
 
-  /// The properties for the center content of the input.
-  final MessageComposerInputCenterProps inputCenterProps;
-
   @override
   Widget build(BuildContext context) {
     return context.chatComponentBuilder<MessageComposerInputProps>()?.call(context, props) ??
-        DefaultStreamMessageComposerInput(
-          props: props,
-          inputCenterProps: inputCenterProps,
-        );
+        DefaultStreamMessageComposerInput(props: props);
   }
 }
 
@@ -46,14 +38,10 @@ class DefaultStreamMessageComposerInput extends StatelessWidget {
   const DefaultStreamMessageComposerInput({
     super.key,
     required this.props,
-    required this.inputCenterProps,
   });
 
   /// The properties for the message composer input container.
   final MessageComposerInputProps props;
-
-  /// The properties for the center content of the input.
-  final MessageComposerInputCenterProps inputCenterProps;
 
   @override
   Widget build(BuildContext context) {
@@ -81,7 +69,9 @@ class DefaultStreamMessageComposerInput extends StatelessWidget {
             children: [
               StreamMessageComposerInputLeading(props: props),
               Expanded(
-                child: StreamMessageComposerInputCenter(props: inputCenterProps),
+                child: StreamMessageComposerInputCenter(
+                  props: MessageComposerInputCenterProps.from(props),
+                ),
               ),
               StreamMessageComposerInputTrailing(props: props),
             ],

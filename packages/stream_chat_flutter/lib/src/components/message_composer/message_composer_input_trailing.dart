@@ -16,11 +16,10 @@ class StreamMessageComposerInputTrailing extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return context.chatComponentBuilder<MessageComposerInputTrailingProps>()?.call(
-          context,
-          MessageComposerInputTrailingProps.from(props),
-        ) ??
-        DefaultStreamMessageComposerInputTrailing(props: props);
+    final trailingProps = MessageComposerInputTrailingProps.from(props);
+
+    return context.chatComponentBuilder<MessageComposerInputTrailingProps>()?.call(context, trailingProps) ??
+        DefaultStreamMessageComposerInputTrailing(props: trailingProps);
   }
 }
 
