@@ -3315,8 +3315,11 @@ class ChannelClientState {
 
   /// Channel read for the logged in user as a stream.
   Stream<Read?> get currentUserReadStream {
-    final currentUser = _client.state.currentUserStream;
-    return currentUser.switchMap((it) => userReadStreamOf(userId: it?.id));
+    final currentUser =
+        _client.state.currentUserStream.mapNotNull((it) => it?.id).distinct();
+    return currentUser
+        .switchMap((id) => userReadStreamOf(userId: id))
+        .distinct();
   }
 
   /// Unread count getter as a stream.

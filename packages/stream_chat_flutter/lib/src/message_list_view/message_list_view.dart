@@ -368,7 +368,20 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
   int? _messageListLength;
   StreamChannelState? streamChannel;
   late StreamChatThemeData _streamTheme;
-  late int unreadCount;
+
+  // Drives the unread-messages separator. Held in a [ValueNotifier] so read
+  // events can update it without rebuilding the entire list view.
+  final _unreadState = ValueNotifier<({int count, String? firstUnreadId})>(
+    (count: 0, firstUnreadId: null),
+  );
+
+  // Snapshot of the current user's unread state, sourced from the channel. Used
+  // both to seed [_unreadState] on channel attach and to refresh it from the
+  // [Channel.currentUserReadStream] listener.
+  ({int count, String? firstUnreadId}) _readUnreadSnapshot() => (
+        count: streamChannel?.channel.state?.unreadCount ?? 0,
+        firstUnreadId: streamChannel?.getFirstUnreadMessage()?.id,
+      );
 
   double get _initialAlignment {
     final initialAlignment = widget.initialAlignment;
@@ -386,7 +399,6 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
   double initialAlignment = 0;
 
   List<Message> messages = <Message>[];
-  Map<String, int> messagesIndex = {};
 
   bool initialMessageHighlightComplete = false;
 
@@ -399,8 +411,6 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
 
   StreamSubscription? _messageNewListener;
   StreamSubscription? _userReadListener;
-
-  Message? _firstUnreadMessage;
 
   @override
   void initState() {
@@ -430,8 +440,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       _messageNewListener?.cancel();
       _userReadListener?.cancel();
 
-      unreadCount = streamChannel?.channel.state?.unreadCount ?? 0;
-      _firstUnreadMessage = streamChannel?.getFirstUnreadMessage();
+      _unreadState.value = _readUnreadSnapshot();
 
       initialIndex = getInitialIndex(
         widget.initialScrollIndex,
@@ -462,17 +471,16 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
         }
       });
 
-      _userReadListener = streamChannel!.channel.state?.readStream.listen(
-        (event) => setState(() {
-          unreadCount = streamChannel!.channel.state?.unreadCount ?? 0;
-          _firstUnreadMessage = streamChannel?.getFirstUnreadMessage();
-        }),
-      );
+      _userReadListener =
+          streamChannel!.channel.state?.currentUserReadStream.listen((_) {
+        _unreadState.value = _readUnreadSnapshot();
+      });
     }
   }
 
   @override
   void dispose() {
+    _unreadState.dispose();
     debouncedMarkRead.cancel();
     debouncedMarkThreadRead.cancel();
     _messageNewListener?.cancel();
@@ -528,9 +536,6 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
   Widget _buildListView(List<Message> data) {
     messages = data;
 
-    for (var index = 0; index < messages.length; index++) {
-      messagesIndex[messages[index].id] = index;
-    }
     final newMessagesListLength = messages.length;
 
     if (_messageListLength != null) {
@@ -629,6 +634,10 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
                   //
                   // Related issues: https://github.com/flutter/flutter/issues/107123
                   //
+                  // Re-enabling this also requires rebuilding a
+                  // `Map<String, int> messagesIndex` from `messages` in
+                  // `_buildListView` for the lookup below.
+                  //
                   // findChildIndexCallback: (Key key) {
                   //   final indexedKey = key as IndexedKey;
                   //   final valueKey = indexedKey.key as ValueKey<String>?;
@@ -668,18 +677,24 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
                       required Message message,
                       required Widget separator,
                     }) {
-                      if (unreadCount == 0) return separator;
                       if (_isThreadConversation) return separator;
-                      if (_firstUnreadMessage?.id != message.id) {
-                        return separator;
-                      }
+                      return ValueListenableBuilder(
+                        valueListenable: _unreadState,
+                        builder: (context, state, _) {
+                          if (state.count == 0) return separator;
+                          if (state.firstUnreadId != message.id) {
+                            return separator;
+                          }
 
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          separator,
-                          _buildUnreadMessagesSeparator(unreadCount),
-                        ],
+                          return Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              separator,
+                              _buildUnreadMessagesSeparator(state.count),
+                            ],
+                          );
+                        },
                       );
                     }
 
@@ -946,10 +961,13 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
   }
 
   Future<void> scrollToUnreadDefaultTapAction(String? lastReadMessageId) async {
+    final firstUnreadId = _unreadState.value.firstUnreadId;
+    if (firstUnreadId == null) return;
+
     // Scroll to the first unread message in the list.
-    final firstUnreadMessageIndex = messages.indexWhere((it) {
-      return it.id == _firstUnreadMessage?.id;
-    });
+    final firstUnreadMessageIndex = messages.indexWhere(
+      (it) => it.id == firstUnreadId,
+    );
 
     if (firstUnreadMessageIndex == -1) return;
 
@@ -1446,7 +1464,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
   }
 
   void _handleItemPositionsChanged() {
-    final itemPositions = _itemPositionListener.itemPositions.value.toList();
+    final itemPositions = _itemPositionListener.itemPositions.value;
     if (itemPositions.isEmpty) return;
 
     // Index of the last item in the list view is 2 as 1 is the progress
