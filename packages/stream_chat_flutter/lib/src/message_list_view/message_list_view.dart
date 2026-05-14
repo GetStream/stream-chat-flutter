@@ -1113,7 +1113,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
   }
 
   Widget _buildScrollToBottom() {
-    return ValueListenableBuilder<({int count, String? firstUnreadId})>(
+    return ValueListenableBuilder(
       valueListenable: _unreadState,
       builder: (_, state, __) {
         final unreadCount = state.count;
