@@ -1,4 +1,18 @@
-## 9.23.0
+## Upcoming Changes
+
+🚀 Performance
+
+- `MessageListCore` now caches the resolved `messagesStream`, avoiding subscription churn on
+  every parent rebuild.
+- `MessageListCore` now applies its message filter and reversal in a single lazy pass, dropping
+  two intermediate `List<Message>` allocations per emission.
+- `MessageListCore` no longer applies a redundant `ListEquality` comparator on its
+  `BetterStreamBuilder` outputs.
+
+🐞 Fixed
+
+- Fixed `MessageListController.paginateData` not being cleared when `MessageListCore` is
+  disposed or its controller is swapped.
 
 - Updated `stream_chat` dependency to [`9.23.0`](https://pub.dev/packages/stream_chat/changelog).
 
