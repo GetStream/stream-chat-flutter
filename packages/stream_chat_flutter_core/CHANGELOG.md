@@ -13,6 +13,12 @@
 
 - Fixed `MessageListController.paginateData` not being cleared when `MessageListCore` is
   disposed or its controller is swapped.
+- Fixed `BetterStreamBuilder` rendering the previous stream's last value for one frame after
+  the stream changes.
+- Fixed `BetterStreamBuilder` getting stuck on the error state when the next stream event
+  equals the cached value.
+- Fixed `BetterStreamBuilder` silently swallowing stream errors when no `errorBuilder` is
+  provided; errors now route through `FlutterError.reportError`.
 
 - Updated `stream_chat` dependency to [`9.23.0`](https://pub.dev/packages/stream_chat/changelog).
 
