@@ -1113,15 +1113,10 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
   }
 
   Widget _buildScrollToBottom() {
-    return StreamBuilder<int>(
-      stream: streamChannel!.channel.state!.unreadCountStream,
-      builder: (_, snapshot) {
-        if (snapshot.hasError) {
-          return const Empty();
-        } else if (!snapshot.hasData) {
-          return const Empty();
-        }
-        final unreadCount = snapshot.data!;
+    return ValueListenableBuilder<({int count, String? firstUnreadId})>(
+      valueListenable: _unreadState,
+      builder: (_, state, __) {
+        final unreadCount = state.count;
         if (widget.scrollToBottomBuilder != null) {
           return widget.scrollToBottomBuilder!(
             unreadCount,
