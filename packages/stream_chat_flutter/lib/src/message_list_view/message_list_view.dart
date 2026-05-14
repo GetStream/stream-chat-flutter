@@ -1128,10 +1128,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
             scrollToBottomDefaultTapAction,
           );
         }
-        final showUnreadCount = unreadCount > 0 &&
-            streamChannel!.channel.state!.members.any((e) =>
-                e.userId ==
-                streamChannel!.channel.client.state.currentUser!.id);
+        final showUnreadCount = unreadCount > 0;
 
         return Positioned(
           bottom: 8,
