@@ -4,7 +4,7 @@ import 'package:stream_chat_flutter/src/theme/audio_waveform_slider_theme.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 
 /// {@template streamVoiceRecordingAttachmentTheme}
-/// Overrides the default style of `StreamVoiceRecordingAttachment` descendants.
+/// Overrides the default style of [StreamVoiceRecordingAttachment] descendants.
 ///
 /// See also:
 ///
@@ -53,7 +53,7 @@ class StreamVoiceRecordingAttachmentTheme extends InheritedTheme {
 
 /// {@template streamVoiceRecordingAttachmentThemeData}
 /// A style that overrides the default appearance of
-/// `StreamVoiceRecordingAttachment` widgets when used with
+/// [StreamVoiceRecordingAttachment] widgets when used with
 /// [StreamVoiceRecordingAttachmentTheme] or with the overall
 /// [StreamChatTheme]'s [StreamChatThemeData.voiceRecordingAttachmentTheme].
 /// {@endtemplate}

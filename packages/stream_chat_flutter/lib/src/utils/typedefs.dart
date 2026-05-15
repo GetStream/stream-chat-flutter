@@ -235,7 +235,7 @@ typedef OnReactionsHover = void Function(bool isHovering);
 typedef MessageSearchItemTapCallback = void Function(GetMessageResponse);
 
 /// {@template messageSearchItemBuilder}
-/// A widget builder used to create a custom `ListUserItem` from a [User].
+/// A widget builder used to create a custom [ListUserItem] from a [User].
 /// {@endtemplate}
 typedef MessageSearchItemBuilder = Widget Function(
   BuildContext,

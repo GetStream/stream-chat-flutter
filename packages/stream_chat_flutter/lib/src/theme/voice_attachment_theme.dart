@@ -146,7 +146,7 @@ class StreamVoiceRecordingLoadingThemeData with Diagnosticable {
 
 /// {@template StreamAudioPlayerSliderTheme}
 /// The theme data for the voice recording attachment builder audio player
-/// slider `StreamVoiceRecordingSlider`.
+/// slider [StreamVoiceRecordingSlider].
 /// {@endtemplate}
 @Deprecated("Use 'StreamVoiceRecordingAttachmentThemeData' instead.")
 class StreamVoiceRecordingSliderTheme with Diagnosticable {

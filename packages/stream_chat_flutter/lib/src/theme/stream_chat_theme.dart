@@ -675,10 +675,10 @@ class StreamChatThemeData {
   /// Theme configuration for the [StreamAudioWaveform] widget.
   final StreamAudioWaveformThemeData audioWaveformTheme;
 
-  /// Theme configuration for the `StreamAudioWaveformSlider` widget.
+  /// Theme configuration for the [StreamAudioWaveformSlider] widget.
   final StreamAudioWaveformSliderThemeData audioWaveformSliderTheme;
 
-  /// Theme configuration for the `StreamVoiceRecordingAttachment` widget.
+  /// Theme configuration for the [StreamVoiceRecordingAttachment] widget.
   final StreamVoiceRecordingAttachmentThemeData voiceRecordingAttachmentTheme;
 
   /// Theme configuration for the [StreamDraftListTile] widget.
