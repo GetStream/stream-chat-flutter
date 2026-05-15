@@ -3,7 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 
 /// {@template galleryFooterTheme}
-/// Overrides the default style of [GalleryFooter] descendants.
+/// Overrides the default style of [StreamGalleryFooter] descendants.
 ///
 /// See also:
 ///
@@ -49,15 +49,16 @@ class StreamGalleryFooterTheme extends InheritedTheme {
 }
 
 /// {@template galleryFooterThemeData}
-/// A style that overrides the default appearance of [GalleryFooter]s when used
-/// with [StreamGalleryFooterTheme] or with the overall [StreamChatTheme]'s
-/// [StreamChatThemeData.galleryFooterTheme].
+/// A style that overrides the default appearance of [StreamGalleryFooter]s
+/// when used with [StreamGalleryFooterTheme] or with the overall
+/// [StreamChatTheme]'s [StreamChatThemeData.galleryFooterTheme].
 ///
 /// See also:
 ///
 /// * [StreamGalleryFooterTheme], the theme which is configured with this class.
 /// * [StreamChatThemeData.galleryFooterTheme], which can be used to override
-/// the default style for [GalleryFooter]s below the overall [StreamChatTheme].
+/// the default style for [StreamGalleryFooter]s below the overall
+/// [StreamChatTheme].
 /// {@endtemplate}
 class StreamGalleryFooterThemeData with Diagnosticable {
   /// Creates an [StreamGalleryFooterThemeData].
@@ -72,24 +73,24 @@ class StreamGalleryFooterThemeData with Diagnosticable {
     this.bottomSheetCloseIconColor,
   });
 
-  /// The background color for the [GalleryFooter] widget.
+  /// The background color for the [StreamGalleryFooter] widget.
   ///
-  /// Defaults to [ColorTheme.barsBg].
+  /// Defaults to [StreamColorTheme.barsBg].
   final Color? backgroundColor;
 
   /// The color for the "share" icon.
   ///
-  /// Defaults to [ColorTheme.textHighEmphasis].
+  /// Defaults to [StreamColorTheme.textHighEmphasis].
   final Color? shareIconColor;
 
-  /// The [TextStyle] to use for the [GalleryFooter] title text.
+  /// The [TextStyle] to use for the [StreamGalleryFooter] title text.
   ///
-  /// Defaults to [TextTheme.headlineBold].
+  /// Defaults to [StreamTextTheme.headlineBold].
   final TextStyle? titleTextStyle;
 
   /// The color to use for the "grid" icon.
   ///
-  /// Defaults to [ColorTheme.textHighEmphasis].
+  /// Defaults to [StreamColorTheme.textHighEmphasis].
   final Color? gridIconButtonColor;
 
   /// The color to use behind the bottom sheet.
@@ -99,17 +100,17 @@ class StreamGalleryFooterThemeData with Diagnosticable {
 
   /// The background color to use for the bottom sheet.
   ///
-  /// Defaults to [ColorTheme.barsBg].
+  /// Defaults to [StreamColorTheme.barsBg].
   final Color? bottomSheetBackgroundColor;
 
   /// The [TextStyle] to use for the "photos" text in the bottom sheet.
   ///
-  /// Defaults to [TextTheme.headlineBold].
+  /// Defaults to [StreamTextTheme.headlineBold].
   final TextStyle? bottomSheetPhotosTextStyle;
 
   /// The color to use for the "close" icon.
   ///
-  /// Defaults to [ColorTheme.textHighEmphasis].
+  /// Defaults to [StreamColorTheme.textHighEmphasis].
   final Color? bottomSheetCloseIconColor;
 
   /// Copies this [StreamGalleryFooterThemeData] to another.
@@ -139,7 +140,7 @@ class StreamGalleryFooterThemeData with Diagnosticable {
     );
   }
 
-  /// Linearly interpolate between two [GalleryFooter] themes.
+  /// Linearly interpolate between two [StreamGalleryFooter] themes.
   ///
   /// All the properties must be non-null.
   StreamGalleryFooterThemeData lerp(

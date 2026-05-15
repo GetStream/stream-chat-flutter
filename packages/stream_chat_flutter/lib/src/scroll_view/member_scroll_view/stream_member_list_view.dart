@@ -176,7 +176,6 @@ class StreamMemberListView extends StatelessWidget {
   /// {@endtemplate}
   final ScrollController? scrollController;
 
-  /// {@template flutter.widgets.scroll_view.primary}
   /// Whether this is the primary scroll view associated with the parent
   /// [PrimaryScrollController].
   ///
@@ -191,7 +190,6 @@ class StreamMemberListView extends StatelessWidget {
   ///
   /// On iOS, this also identifies the scroll view that will scroll to top in
   /// response to a tap in the status bar.
-  /// {@endtemplate}
   ///
   /// Defaults to true when [scrollController] is null.
   final bool? primary;

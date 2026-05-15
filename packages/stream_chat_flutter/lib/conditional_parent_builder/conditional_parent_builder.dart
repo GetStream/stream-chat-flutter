@@ -1,3 +1,4 @@
+/// Widget that conditionally wraps its child with a parent widget.
 library conditional_parent_builder;
 
 import 'package:flutter/material.dart';

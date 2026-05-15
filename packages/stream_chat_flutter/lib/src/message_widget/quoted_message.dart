@@ -4,7 +4,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// {@template quotedMessage}
 /// A quoted message in a chat.
 ///
-/// Used in [QuotedMessageCard]. Should not be used elsewhere.
+/// Used in [MessageCard]. Should not be used elsewhere.
 /// {@endtemplate}
 class QuotedMessage extends StatelessWidget {
   /// {@macro quotedMessage}

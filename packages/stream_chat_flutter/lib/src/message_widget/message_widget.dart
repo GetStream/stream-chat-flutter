@@ -32,7 +32,7 @@ enum DisplayWidget {
 /// Shows a message with reactions, replies and user avatar.
 ///
 /// Usually you don't use this widget as it's the default message widget used by
-/// [MessageListView].
+/// [StreamMessageListView].
 ///
 /// The widget components render the ui based on the first ancestor of type
 /// [StreamChatTheme].

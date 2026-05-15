@@ -27,10 +27,10 @@ class StreamInfoTile extends StatelessWidget {
   /// Flag to show message
   final bool showMessage;
 
-  /// Anchor for tile - [portalAnchor] for [PortalEntry]
+  /// Anchor for tile - [portalAnchor] for `PortalEntry`
   final Alignment? tileAnchor;
 
-  /// Alignment for child - [childAnchor] for [PortalEntry]
+  /// Alignment for child - [childAnchor] for `PortalEntry`
   final Alignment? childAnchor;
 
   /// [TextStyle] for message

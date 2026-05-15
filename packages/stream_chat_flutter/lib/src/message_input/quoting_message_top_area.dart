@@ -4,7 +4,7 @@ import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template quotingMessageTopArea}
-/// The area that appears above [MessageInput] when the user is quoting a
+/// The area that appears above [StreamMessageInput] when the user is quoting a
 /// message.
 ///
 /// Should only be used on mobile platforms.

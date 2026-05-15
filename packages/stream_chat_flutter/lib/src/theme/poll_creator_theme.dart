@@ -210,7 +210,7 @@ class StreamPollCreatorThemeData with Diagnosticable {
     );
   }
 
-  /// Merges [this] [StreamPollCreatorThemeData] with the [other]
+  /// Merges this [StreamPollCreatorThemeData] with the [other]
   StreamPollCreatorThemeData merge(StreamPollCreatorThemeData? other) {
     if (other == null) return this;
     return copyWith(

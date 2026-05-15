@@ -3,8 +3,8 @@ import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template loadingIndicatorMLV}
-/// A loading indicator for [MessageListView]. Not intended for use outside of
-/// [MessageListView].
+/// A loading indicator for [StreamMessageListView]. Not intended for use
+/// outside of [StreamMessageListView].
 /// {@endtemplate}
 class LoadingIndicator extends StatelessWidget {
   /// {@macro loadingIndicatorMLV}

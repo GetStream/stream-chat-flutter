@@ -23,7 +23,7 @@ typedef StreamMessageSearchListViewIndexedWidgetBuilder
 /// A [ListView] that shows a list of [GetMessageResponse]s,
 /// it uses [StreamMessageSearchListTile] as a default item.
 ///
-/// This is the new version of [MessageSearchListView] that uses
+/// This is the new version of [StreamMessageSearchListView] that uses
 /// [StreamMessageSearchListController].
 ///
 /// Example:
@@ -179,7 +179,6 @@ class StreamMessageSearchListView extends StatelessWidget {
   /// {@endtemplate}
   final ScrollController? scrollController;
 
-  /// {@template flutter.widgets.scroll_view.primary}
   /// Whether this is the primary scroll view associated with the parent
   /// [PrimaryScrollController].
   ///
@@ -194,7 +193,6 @@ class StreamMessageSearchListView extends StatelessWidget {
   ///
   /// On iOS, this also identifies the scroll view that will scroll to top in
   /// response to a tap in the status bar.
-  /// {@endtemplate}
   ///
   /// Defaults to true when [scrollController] is null.
   final bool? primary;

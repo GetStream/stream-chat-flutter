@@ -209,11 +209,12 @@ abstract class Translations {
   /// The label for "Reply"
   String get replyLabel;
 
-  /// The text for showing pin/un-pin functionality in [MessageWidget]
+  /// The text for showing pin/un-pin functionality in [StreamMessageWidget]
   /// based on [pinned]
   String togglePinUnpinText({required bool pinned});
 
-  /// The text for marking message as unread functionality in [MessageWidget]
+  /// The text for marking message as unread functionality in
+  /// [StreamMessageWidget]
   String get markAsUnreadLabel;
 
   /// The text for unread count indicator

@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 /// A widget that displays a typing indicator for the AI.
 ///
 /// This widget is used to indicate the various states of the AI such as
-/// [AI_STATE_THINKING], [AI_STATE_CHECKING_SOURCES] etc.
+/// [AITypingState.thinking], [AITypingState.checkingSources] etc.
 ///
 /// The widget displays a text and a series of animated dots.
 ///

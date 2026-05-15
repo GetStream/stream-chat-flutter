@@ -5,7 +5,7 @@ import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/theme/themes.dart';
 
 /// {@template channel_header_theme}
-/// Overrides the default style of [ChannelHeader] descendants.
+/// Overrides the default style of [StreamChannelHeader] descendants.
 ///
 /// See also:
 ///
@@ -51,15 +51,16 @@ class StreamChannelHeaderTheme extends InheritedTheme {
 }
 
 /// {@template channel_header_theme_data}
-/// A style that overrides the default appearance of [ChannelHeader]s when used
-/// with [StreamChannelHeaderTheme] or with the overall [StreamChatTheme]'s
-/// [StreamChatThemeData.channelHeaderTheme].
+/// A style that overrides the default appearance of [StreamChannelHeader]s
+/// when used with [StreamChannelHeaderTheme] or with the overall
+/// [StreamChatTheme]'s [StreamChatThemeData.channelHeaderTheme].
 ///
 /// See also:
 ///
 /// * [StreamChannelHeaderTheme], the theme which is configured with this class.
 /// * [StreamChatThemeData.channelHeaderTheme], which can be used to override
-/// the default style for [ChannelHeader]s below the overall [StreamChatTheme].
+/// the default style for [StreamChannelHeader]s below the overall
+/// [StreamChatTheme].
 /// {@endtemplate}
 class StreamChannelHeaderThemeData with Diagnosticable {
   /// Creates a [StreamChannelHeaderThemeData]

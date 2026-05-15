@@ -10,7 +10,7 @@ import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 /// {@template streamFileAttachment}
 /// Displays file attachments that have been sent in a chat.
 ///
-/// Used in [MessageWidget].
+/// Used in [StreamMessageWidget].
 /// {@endtemplate}
 class StreamFileAttachment extends StatelessWidget {
   /// {@macro streamFileAttachment}

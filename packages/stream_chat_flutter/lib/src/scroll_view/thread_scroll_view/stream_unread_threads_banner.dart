@@ -8,7 +8,7 @@ import 'package:stream_chat_flutter/src/utils/extensions.dart';
 /// A widget that shows a banner with the number of unread threads.
 ///
 /// This widget can be used to show a banner with the number of unread threads
-/// on the top of the [ThreadListView].
+/// on the top of the [StreamThreadListView].
 /// {@endtemplate}
 class StreamUnreadThreadsBanner extends StatelessWidget {
   /// {@macro unreadThreadsBanner}

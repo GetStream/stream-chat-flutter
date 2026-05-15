@@ -163,7 +163,7 @@ class _StreamAudioWaveformSliderState extends State<StreamAudioWaveformSlider> {
 }
 
 /// {@template streamAudioWaveformSliderThumb}
-/// A widget that represents the thumb of the [StreamAudioWaveformSlider].
+/// A widget that represents the thumb of the `StreamAudioWaveformSlider`.
 /// {@endtemplate}
 class StreamAudioWaveformSliderThumb extends StatelessWidget {
   /// {@macro streamAudioWaveformSliderThumb}

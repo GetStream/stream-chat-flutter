@@ -199,7 +199,7 @@ class StreamPollInteractorThemeData with Diagnosticable {
     );
   }
 
-  /// Merges [this] [StreamPollInteractorThemeData] with the [other]
+  /// Merges this [StreamPollInteractorThemeData] with the [other]
   StreamPollInteractorThemeData merge(StreamPollInteractorThemeData? other) {
     if (other == null) return this;
     return copyWith(

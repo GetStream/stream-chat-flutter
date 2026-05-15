@@ -141,7 +141,6 @@ class StreamUserGridView extends StatelessWidget {
   /// {@endtemplate}
   final ScrollController? scrollController;
 
-  /// {@template flutter.widgets.scroll_view.primary}
   /// Whether this is the primary scroll view associated with the parent
   /// [PrimaryScrollController].
   ///
@@ -157,7 +156,6 @@ class StreamUserGridView extends StatelessWidget {
   ///
   /// On iOS, this also identifies the scroll view that will scroll to top in
   /// response to a tap in the status bar.
-  /// {@endtemplate}
   ///
   /// Defaults to true when [scrollDirection] is [Axis.vertical] and
   /// [controller] is null.

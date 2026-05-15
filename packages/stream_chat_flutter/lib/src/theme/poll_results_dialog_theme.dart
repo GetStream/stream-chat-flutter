@@ -162,7 +162,7 @@ class StreamPollResultsDialogThemeData with Diagnosticable {
     );
   }
 
-  /// Merges [this] [StreamPollResultsDialogThemeData] with the [other]
+  /// Merges this [StreamPollResultsDialogThemeData] with the [other]
   StreamPollResultsDialogThemeData merge(
     StreamPollResultsDialogThemeData? other,
   ) {

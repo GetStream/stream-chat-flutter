@@ -3,7 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 
 /// {@template messageListViewTheme}
-/// Overrides the default style of [MessageListView] descendants.
+/// Overrides the default style of [StreamMessageListView] descendants.
 ///
 /// See also:
 ///
@@ -49,8 +49,8 @@ class StreamMessageListViewTheme extends InheritedTheme {
 }
 
 /// {@template messageListViewThemeData}
-/// A style that overrides the default appearance of [MessageListView]s when
-/// used with [StreamMessageListViewTheme] or with
+/// A style that overrides the default appearance of [StreamMessageListView]s
+/// when used with [StreamMessageListViewTheme] or with
 /// the overall [StreamChatTheme]'s
 /// [StreamChatThemeData.messageListViewTheme].
 ///
@@ -59,7 +59,7 @@ class StreamMessageListViewTheme extends InheritedTheme {
 /// * [StreamMessageListViewTheme], the theme
 /// which is configured with this class.
 /// * [StreamChatThemeData.messageListViewTheme], which can be used to override
-/// the default style for [MessageListView]s below the overall
+/// the default style for [StreamMessageListView]s below the overall
 /// [StreamChatTheme].
 /// {@endtemplate}
 class StreamMessageListViewThemeData with Diagnosticable {
@@ -69,10 +69,10 @@ class StreamMessageListViewThemeData with Diagnosticable {
     this.backgroundImage,
   });
 
-  /// The color of the [MessageListView] background.
+  /// The color of the [StreamMessageListView] background.
   final Color? backgroundColor;
 
-  /// The image of the [MessageListView] background.
+  /// The image of the [StreamMessageListView] background.
   final DecorationImage? backgroundImage;
 
   /// Copies this [StreamMessageListViewThemeData] to another.
@@ -86,7 +86,7 @@ class StreamMessageListViewThemeData with Diagnosticable {
     );
   }
 
-  /// Linearly interpolate between two [MessageListView] themes.
+  /// Linearly interpolate between two [StreamMessageListView] themes.
   ///
   /// All the properties must be non-null.
   StreamMessageListViewThemeData lerp(

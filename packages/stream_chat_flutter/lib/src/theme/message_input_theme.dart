@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template messageInputTheme}
-/// Overrides the default style of [MessageInput] descendants.
+/// Overrides the default style of [StreamMessageInput] descendants.
 ///
 /// See also:
 ///
@@ -51,8 +51,8 @@ class StreamMessageInputTheme extends InheritedTheme {
 }
 
 /// {@template messageInputThemeData}
-/// A style that overrides the default appearance of [MessageInput] widgets
-/// when used with [StreamMessageInputTheme]
+/// A style that overrides the default appearance of [StreamMessageInput]
+/// widgets when used with [StreamMessageInputTheme]
 /// or with the overall [StreamChatTheme]'s
 /// [StreamChatThemeData.messageInputTheme].
 /// {@endtemplate}
@@ -78,52 +78,52 @@ class StreamMessageInputThemeData with Diagnosticable {
     this.useSystemAttachmentPicker,
   });
 
-  /// Duration of the [MessageInput] send button animation
+  /// Duration of the [StreamMessageInput] send button animation
   final Duration? sendAnimationDuration;
 
-  /// Background color of [MessageInput] send button
+  /// Background color of [StreamMessageInput] send button
   final Color? sendButtonColor;
 
   /// Color of a link
   final Color? linkHighlightColor;
 
-  /// Background color of [MessageInput] action buttons
+  /// Background color of [StreamMessageInput] action buttons
   final Color? actionButtonColor;
 
-  /// Background color of [MessageInput] send button
+  /// Background color of [StreamMessageInput] send button
   final Color? sendButtonIdleColor;
 
-  /// Background color of [MessageInput] action buttons
+  /// Background color of [StreamMessageInput] action buttons
   final Color? actionButtonIdleColor;
 
-  /// Background color of [MessageInput] expand button
+  /// Background color of [StreamMessageInput] expand button
   final Color? expandButtonColor;
 
-  /// Background color of [MessageInput]
+  /// Background color of [StreamMessageInput]
   final Color? inputBackgroundColor;
 
-  /// TextStyle of [MessageInput]
+  /// TextStyle of [StreamMessageInput]
   final TextStyle? inputTextStyle;
 
-  /// InputDecoration of [MessageInput]
+  /// InputDecoration of [StreamMessageInput]
   final InputDecoration? inputDecoration;
 
-  /// Border gradient when the [MessageInput] is not focused
+  /// Border gradient when the [StreamMessageInput] is not focused
   final Gradient? idleBorderGradient;
 
-  /// Border gradient when the [MessageInput] is focused
+  /// Border gradient when the [StreamMessageInput] is focused
   final Gradient? activeBorderGradient;
 
-  /// Border radius of [MessageInput]
+  /// Border radius of [StreamMessageInput]
   final BorderRadius? borderRadius;
 
-  /// Wrap [MessageInput] with a [SafeArea widget]
+  /// Wrap [StreamMessageInput] with a [SafeArea widget]
   final bool? enableSafeArea;
 
-  /// Elevation of the [MessageInput]
+  /// Elevation of the [StreamMessageInput]
   final double? elevation;
 
-  /// Shadow for the [MessageInput] widget
+  /// Shadow for the [StreamMessageInput] widget
   final BoxShadow? shadow;
 
   /// If True, allows you to use the system’s default media picker instead of
@@ -218,7 +218,7 @@ class StreamMessageInputThemeData with Diagnosticable {
     );
   }
 
-  /// Merges [this] [StreamMessageInputThemeData] with the [other]
+  /// Merges this [StreamMessageInputThemeData] with the [other]
   StreamMessageInputThemeData merge(StreamMessageInputThemeData? other) {
     if (other == null) return this;
     return copyWith(

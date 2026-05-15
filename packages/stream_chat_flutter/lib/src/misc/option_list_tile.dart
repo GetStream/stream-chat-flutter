@@ -3,7 +3,7 @@ import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 
 /// {@template streamOptionListTile}
-/// List tile for [ChannelBottomSheet]
+/// List tile for [StreamChannelInfoBottomSheet]
 /// {@endtemplate}
 class StreamOptionListTile extends StatelessWidget {
   /// {@macro streamOptionListTile}

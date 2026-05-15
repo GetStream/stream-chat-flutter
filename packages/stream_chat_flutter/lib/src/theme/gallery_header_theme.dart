@@ -3,7 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 
 /// {@template galleryHeaderTheme}
-/// Overrides the default style of [GalleryHeader] descendants.
+/// Overrides the default style of [StreamGalleryHeader] descendants.
 ///
 /// See also:
 ///
@@ -49,15 +49,16 @@ class StreamGalleryHeaderTheme extends InheritedTheme {
 }
 
 /// {@template galleryHeaderThemeData}
-/// A style that overrides the default appearance of [GalleryHeader]s when used
-/// with [StreamGalleryHeaderTheme] or with the overall [StreamChatTheme]'s
-/// [StreamChatThemeData.galleryHeaderTheme].
+/// A style that overrides the default appearance of [StreamGalleryHeader]s
+/// when used with [StreamGalleryHeaderTheme] or with the overall
+/// [StreamChatTheme]'s [StreamChatThemeData.galleryHeaderTheme].
 ///
 /// See also:
 ///
 /// * [StreamGalleryHeaderTheme], the theme which is configured with this class.
 /// * [StreamChatThemeData.galleryHeaderTheme], which can be used to override
-/// the default style for [GalleryHeader]s below the overall [StreamChatTheme].
+/// the default style for [StreamGalleryHeader]s below the overall
+/// [StreamChatTheme].
 /// {@endtemplate}
 class StreamGalleryHeaderThemeData with Diagnosticable {
   /// Creates an [StreamGalleryHeaderThemeData].
@@ -72,23 +73,23 @@ class StreamGalleryHeaderThemeData with Diagnosticable {
 
   /// The color of the "close" button.
   ///
-  /// Defaults to [ColorTheme.textHighEmphasis].
+  /// Defaults to [StreamColorTheme.textHighEmphasis].
   final Color? closeButtonColor;
 
-  /// The background color of the [GalleryHeader] widget.
+  /// The background color of the [StreamGalleryHeader] widget.
   ///
   /// Defaults to [ChannelHeaderTheme.color].
   final Color? backgroundColor;
 
-  /// Defaults to [ColorTheme.textHighEmphasis].
+  /// Defaults to [StreamColorTheme.textHighEmphasis].
   final Color? iconMenuPointColor;
 
-  /// The [TextStyle] to use for the [GalleryHeader] title text.
+  /// The [TextStyle] to use for the [StreamGalleryHeader] title text.
   ///
-  /// Defaults to [TextTheme.headlineBold].
+  /// Defaults to [StreamTextTheme.headlineBold].
   final TextStyle? titleTextStyle;
 
-  /// The [TextStyle] to use for the [GalleryHeader] subtitle text.
+  /// The [TextStyle] to use for the [StreamGalleryHeader] subtitle text.
   ///
   /// Defaults to [ChannelPreviewTheme.subtitleStyle].
   final TextStyle? subtitleTextStyle;
@@ -116,7 +117,7 @@ class StreamGalleryHeaderThemeData with Diagnosticable {
     );
   }
 
-  /// Linearly interpolate between two [GalleryHeader] themes.
+  /// Linearly interpolate between two [StreamGalleryHeader] themes.
   ///
   /// All the properties must be non-null.
   StreamGalleryHeaderThemeData lerp(

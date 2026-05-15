@@ -1,3 +1,5 @@
+/// Stream Chat Flutter Core — low-level Flutter SDK building blocks for
+/// Stream Chat. Provides controllers, state, and event handling without UI.
 library stream_chat_flutter_core;
 
 export 'package:connectivity_plus/connectivity_plus.dart';

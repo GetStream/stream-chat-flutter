@@ -19,7 +19,7 @@ import 'package:stream_chat_flutter/src/utils/extensions.dart';
 ///
 /// See also:
 ///   - [StreamAudioRecorderButton], which uses this builder function.
-///   - [StreamAudioRecorderState], which provides the state of the recorder.
+///   - [AudioRecorderState], which provides the state of the recorder.
 /// {@endtemplate}
 typedef AudioRecorderBuilder = Widget Function(
   BuildContext,
@@ -873,7 +873,7 @@ class SlideToCancelIndicator extends StatelessWidget {
 ///
 /// see also:
 ///  - [StreamAudioRecorderButton], which uses this builder function.
-///  - [StreamAudioRecorderState], which provides the state of the recorder.
+///  - [AudioRecorderState], which provides the state of the recorder.
 /// {@endtemplate}
 class StreamAudioRecorder extends StatelessWidget {
   /// {@macro streamAudioRecorder}

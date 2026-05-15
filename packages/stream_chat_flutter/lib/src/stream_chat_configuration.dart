@@ -49,7 +49,7 @@ You must have a StreamChatConfigurationProvider widget at the top of your widget
 /// to retrieve it.
 ///
 /// If no [StreamChatConfigurationData] is provided, the
-/// [StreamChatConfiguration.defaults] factory constructor is used to provide a
+/// [StreamChatConfigurationData] factory constructor is used to provide a
 /// default configuration.
 ///
 /// If you want to keep some of the default values, but not others, you can use

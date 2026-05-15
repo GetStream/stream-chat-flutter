@@ -1,3 +1,4 @@
+/// Helpers for building platform-specific widgets.
 library platform_widget_builder;
 
 export 'src/desktop_widget_builder.dart';

@@ -14,7 +14,7 @@ import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 typedef GiffyAction = void Function(String name, String value);
 
 /// {@template giphyEphemeralMessage}
-/// Shows an ephemeral message of type giphy in a [MessageWidget].
+/// Shows an ephemeral message of type giphy in a [StreamMessageWidget].
 /// {@endtemplate}
 class GiphyEphemeralMessage extends StatelessWidget {
   /// {@macro giphyEphemeralMessage}

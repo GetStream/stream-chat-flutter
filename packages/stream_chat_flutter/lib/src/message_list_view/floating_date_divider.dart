@@ -6,7 +6,7 @@ import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template floatingDateDivider}
-/// Not intended for use outside of [MessageListView].
+/// Not intended for use outside of [StreamMessageListView].
 /// {@endtemplate}
 class FloatingDateDivider extends StatelessWidget {
   /// {@macro floatingDateDivider}

@@ -5,7 +5,7 @@ import 'package:stream_chat_flutter/src/utils/typedefs.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 /// {@template streamEphemeralMessage}
-/// Shows an ephemeral message in a [MessageWidget].
+/// Shows an ephemeral message in a [StreamMessageWidget].
 /// {@endtemplate}
 class StreamEphemeralMessage extends StatelessWidget {
   /// {@macro streamEphemeralMessage}

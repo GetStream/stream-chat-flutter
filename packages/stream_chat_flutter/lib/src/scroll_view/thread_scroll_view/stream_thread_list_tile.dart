@@ -6,7 +6,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// {@template streamThreadListTile}
 /// A widget that displays a thread in a list.
 ///
-/// This widget is used in the [ThreadListView] to display a thread.
+/// This widget is used in the [StreamThreadListView] to display a thread.
 ///
 /// The widget displays the channel name, the message the thread is replying to,
 /// the latest reply, and the unread message count.

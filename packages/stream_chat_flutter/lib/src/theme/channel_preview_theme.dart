@@ -5,7 +5,7 @@ import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/utils/date_formatter.dart';
 
 /// {@template channelPreviewTheme}
-/// Overrides the default style of [ChannelPreview] descendants.
+/// Overrides the default style of [StreamChannelListTile] descendants.
 ///
 /// See also:
 ///
@@ -51,16 +51,17 @@ class StreamChannelPreviewTheme extends InheritedTheme {
 }
 
 /// {@template channelPreviewThemeData}
-/// A style that overrides the default appearance of [ChannelPreview]s when used
-/// with [StreamChannelPreviewTheme] or with the overall [StreamChatTheme]'s
-/// [StreamChatThemeData.channelPreviewTheme].
+/// A style that overrides the default appearance of [StreamChannelListTile]s
+/// when used with [StreamChannelPreviewTheme] or with the overall
+/// [StreamChatTheme]'s [StreamChatThemeData.channelPreviewTheme].
 ///
 /// See also:
 ///
 /// * [StreamChannelPreviewTheme], the theme
 /// which is configured with this class.
 /// * [StreamChatThemeData.channelPreviewTheme], which can be used to override
-/// the default style for [ChannelHeader]s below the overall [StreamChatTheme].
+/// the default style for [StreamChannelHeader]s below the overall
+/// [StreamChatTheme].
 /// {@endtemplate}
 class StreamChannelPreviewThemeData with Diagnosticable {
   /// Creates a [StreamChannelPreviewThemeData].

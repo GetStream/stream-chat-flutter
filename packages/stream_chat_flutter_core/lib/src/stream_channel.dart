@@ -270,7 +270,7 @@ class StreamChannelState extends State<StreamChannel> {
     }
   }
 
-  /// Calls [channel.query] updating [queryMessage] stream
+  /// Calls [channel.query] updating `queryMessage` stream
   Future<void> queryMessages({
     QueryDirection? direction = QueryDirection.top,
     int limit = 30,
@@ -367,7 +367,7 @@ class StreamChannelState extends State<StreamChannel> {
     }
   }
 
-  /// Calls [channel.getReplies] updating [queryMessage] stream
+  /// Calls [Channel.getReplies] updating `queryMessage` stream
   Future<void> queryReplies(
     String parentId, {
     int limit = 30,
@@ -379,7 +379,7 @@ class StreamChannelState extends State<StreamChannel> {
     return _queryBottomReplies(parentId, limit: limit);
   }
 
-  /// Calls [channel.getReplies] updating [queryMessage] stream
+  /// Calls [Channel.getReplies] updating `queryMessage` stream
   Future<void> getReplies(
     String parentId, {
     int limit = 30,

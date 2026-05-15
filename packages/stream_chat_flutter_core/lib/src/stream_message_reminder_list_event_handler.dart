@@ -20,7 +20,7 @@ mixin class StreamMessageReminderListEventHandler {
   }
 
   /// Function which gets called for the event
-  /// [EventType.messageReminderUpdated].
+  /// [EventType.reminderUpdated].
   ///
   /// This event is fired when a message reminder is updated.
   ///
@@ -36,7 +36,7 @@ mixin class StreamMessageReminderListEventHandler {
   }
 
   /// Function which gets called for the event
-  /// [EventType.messageReminderUpdated].
+  /// [EventType.reminderUpdated].
   ///
   /// This event is fired when a message reminder is updated.
   ///
@@ -52,7 +52,7 @@ mixin class StreamMessageReminderListEventHandler {
   }
 
   /// Function which gets called for the event
-  /// [EventType.messageReminderDeleted].
+  /// [EventType.reminderDeleted].
   ///
   /// This event is fired when a message reminder is deleted.
   ///

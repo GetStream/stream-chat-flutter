@@ -53,7 +53,7 @@ class StreamAudioWaveformTheme extends InheritedTheme {
 
 /// {@template streamVoiceRecordingAttachmentThemeData}
 /// A style that overrides the default appearance of
-/// [StreamAudioWaveformSlider] widgets when used with
+/// `StreamAudioWaveformSlider` widgets when used with
 /// [StreamAudioWaveformTheme] or with the overall
 /// [StreamChatTheme]'s [StreamChatThemeData.audioWaveformSliderTheme].
 /// {@endtemplate}

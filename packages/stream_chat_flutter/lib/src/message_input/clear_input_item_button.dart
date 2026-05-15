@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template clearInputItemButton}
-/// Used to clear items from the [MessageInput] field, such as attachments
+/// Used to clear items from the [StreamMessageInput] field, such as attachments
 /// or message quotes.
 /// {@endtemplate}
 class ClearInputItemButton extends StatelessWidget {

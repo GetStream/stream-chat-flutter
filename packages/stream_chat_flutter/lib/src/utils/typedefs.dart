@@ -60,13 +60,13 @@ typedef OnUserAvatarPress = void Function(User);
 typedef PlaceholderUserImage = Widget Function(BuildContext, User);
 
 /// {@template editMessageInputBuilder}
-/// A widget builder for building a pre-populated [MessageInput] for use in
-/// editing messages.
+/// A widget builder for building a pre-populated [StreamMessageInput] for use
+/// in editing messages.
 /// {@endtemplate}
 typedef EditMessageInputBuilder = Widget Function(BuildContext, Message);
 
 /// {@template channelListHeaderTitleBuilder}
-/// A widget builder for custom [ChannelListHeader] title widgets.
+/// A widget builder for custom [StreamChannelListHeader] title widgets.
 /// {@endtemplate}
 typedef ChannelListHeaderTitleBuilder = Widget Function(
   BuildContext context,
@@ -230,12 +230,12 @@ typedef OnReactionsHover = void Function(bool isHovering);
 
 /// {@template messageSearchItemTapCallback}
 /// The action to perform when tapping or clicking on a user in a
-/// [MessageSearchListView].
+/// [StreamMessageSearchListView].
 /// {@endtemplate}
 typedef MessageSearchItemTapCallback = void Function(GetMessageResponse);
 
 /// {@template messageSearchItemBuilder}
-/// A widget builder used to create a custom [ListUserItem] from a [User].
+/// A widget builder used to create a custom `ListUserItem` from a [User].
 /// {@endtemplate}
 typedef MessageSearchItemBuilder = Widget Function(
   BuildContext,
@@ -355,13 +355,13 @@ typedef UserTapCallback = void Function(User, Widget?);
 typedef KeyEventPredicate = bool Function(FocusNode, KeyEvent);
 
 /// {@template userItemBuilder}
-/// Builder used to create a custom [ListUserItem] from a [User]
+/// Builder used to create a custom `ListUserItem` from a [User]
 /// {@endtemplate}
 // ignore: avoid_positional_boolean_parameters
 typedef UserItemBuilder = Widget Function(BuildContext, User, bool);
 
 /// The action to perform when the "scroll to bottom" button is pressed
-/// within a [MessageListView].
+/// within a [StreamMessageListView].
 typedef OnScrollToBottom = Function(int unreadCount);
 
 /// Widget builder for widgets that may require data from the

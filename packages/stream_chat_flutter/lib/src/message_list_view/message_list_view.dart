@@ -332,7 +332,7 @@ class StreamMessageListView extends StatefulWidget {
 
   /// A [MessageListController] allows pagination.
   ///
-  /// Use [ChannelListController.paginateData] pagination.
+  /// Use [MessageListController.paginateData] pagination.
   final MessageListController? messageListController;
 
   /// Builder used to build the loading indicator shown while paginating.

@@ -4,7 +4,7 @@ import 'package:stream_chat_flutter/src/theme/audio_waveform_theme.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 
 /// {@template streamAudioWaveformSliderTheme}
-/// Overrides the default style of [StreamAudioWaveformSlider] descendants.
+/// Overrides the default style of `StreamAudioWaveformSlider` descendants.
 ///
 /// See also:
 ///
@@ -53,7 +53,7 @@ class StreamAudioWaveformSliderTheme extends InheritedTheme {
 
 /// {@template streamAudioWaveformSliderThemeData}
 /// A style that overrides the default appearance of
-/// [StreamAudioWaveformSlider] widgets when used with
+/// `StreamAudioWaveformSlider` widgets when used with
 /// [StreamAudioWaveformSliderTheme] or with the overall
 /// [StreamChatTheme]'s [StreamChatThemeData.audioWaveformSliderTheme].
 /// {@endtemplate}

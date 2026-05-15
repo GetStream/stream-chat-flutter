@@ -2,8 +2,8 @@ import 'package:collection/collection.dart';
 import 'package:stream_chat_flutter/scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// Determines at which point in the [MessageListView] the initial index should
-/// be.
+/// Determines at which point in the [StreamMessageListView] the initial
+/// index should be.
 int getInitialIndex(
   int? initialScrollIndex,
   StreamChannelState channelState,

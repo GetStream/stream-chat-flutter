@@ -4,7 +4,7 @@ import 'package:stream_chat_flutter/src/theme/avatar_theme.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 
 /// {@template channelListHeaderTheme}
-/// Overrides the default style of [ChannelListHeader] descendants.
+/// Overrides the default style of [StreamChannelListHeader] descendants.
 ///
 /// See also:
 ///
@@ -51,7 +51,7 @@ class StreamChannelListHeaderTheme extends InheritedTheme {
 }
 
 /// {@template channel_list_header_theme_data}
-/// Theme dedicated to the [ChannelListHeader]
+/// Theme dedicated to the [StreamChannelListHeader]
 /// {@endtemplate}
 class StreamChannelListHeaderThemeData with Diagnosticable {
   /// Returns a new [StreamChannelListHeaderThemeData]
@@ -99,7 +99,7 @@ class StreamChannelListHeaderThemeData with Diagnosticable {
     );
   }
 
-  /// Merges [this] [StreamChannelListHeaderThemeData] with the [other]
+  /// Merges this [StreamChannelListHeaderThemeData] with the [other]
   StreamChannelListHeaderThemeData merge(
     StreamChannelListHeaderThemeData? other,
   ) {
