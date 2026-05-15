@@ -37,6 +37,7 @@ class _ChannelPageState extends State<ChannelPage> {
   @override
   void dispose() {
     _focusNode!.dispose();
+    _messageComposerController.dispose();
     super.dispose();
   }
 

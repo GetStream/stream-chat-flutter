@@ -33,6 +33,7 @@ class _ThreadPageState extends State<ThreadPage> {
   @override
   void dispose() {
     _focusNode.dispose();
+    _messageComposerController.dispose();
     super.dispose();
   }
 

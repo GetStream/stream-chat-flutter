@@ -630,6 +630,15 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
       _controller!.dispose();
       _controller = null;
       _initialiseEffectiveController();
+    } else if (widget.props.messageComposerController != null && oldWidget.props.messageComposerController != null &&
+        widget.props.messageComposerController != oldWidget.props.messageComposerController) {
+      // External controller instance was swapped — detach all listeners from
+      // the old instance and rebind them to the new one.
+      oldWidget.props.messageComposerController!
+        ..removeListener(_onChangedThrottled)
+        ..removeListener(_onChangedDebounced)
+        ..removeListener(_syncMessageToPicker);
+      _initialiseEffectiveController();
     }
 
     // Update _focusNode
