@@ -11,14 +11,11 @@ const defaultInitialPagedLimitMultiplier = 3;
 typedef PagedValueListenableBuilder<Key, Value>
     = ValueListenableBuilder<PagedValue<Key, Value>>;
 
-/// A [PagedValueNotifier] that uses a [PagedListenable] to load data.
+/// A [ValueNotifier] that emits a [PagedValue] whenever data is loaded
+/// or an error occurs.
 ///
-/// This class is useful when you need to load data from a server
-/// using a [PagedListenable] and want to keep the UI-driven refresh
-/// signals in the [PagedListenable].
-///
-/// [PagedValueNotifier] is a [ValueNotifier] that emits a [PagedValue]
-/// whenever the data is loaded or an error occurs.
+/// This class is useful when you need to load paginated data from a server
+/// and expose UI-driven refresh signals to listeners.
 abstract class PagedValueNotifier<Key, Value>
     extends ValueNotifier<PagedValue<Key, Value>> {
   /// Creates a [PagedValueNotifier]

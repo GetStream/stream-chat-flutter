@@ -254,7 +254,7 @@ class MessageListCoreState extends State<MessageListCore> {
   }
 }
 
-/// Controller used for paginating data in [ChannelListView]
+/// Controller used for paginating data in [MessageListCore].
 class MessageListController {
   /// Call this function to load further data
   Future<void> Function({QueryDirection direction})? paginateData;

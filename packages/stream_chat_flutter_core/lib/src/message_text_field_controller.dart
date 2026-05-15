@@ -6,7 +6,7 @@ typedef TextStyleBuilder = TextStyle? Function(
   String text,
 );
 
-/// Controller for the [StreamMessageText] widget.
+/// Controller for the stream message text field widget.
 class MessageTextFieldController extends TextEditingController {
   /// Returns a new MessageTextFieldController
   MessageTextFieldController({

@@ -79,7 +79,7 @@ class PagedValueListView<K, V> extends StatefulWidget {
   /// A builder that is called to build the error state of the list.
   final Widget Function(BuildContext, StreamChatError) errorBuilder;
 
-  /// The index to take into account when triggering [controller.loadMore].
+  /// The index to take into account when triggering the `loadMore action`.
   final int loadMoreTriggerIndex;
 
   /// {@template flutter.widgets.scroll_view.scrollDirection}
@@ -232,9 +232,9 @@ class PagedValueListView<K, V> extends StatefulWidget {
   /// physics should be updated.)
   /// {@endtemplate}
   ///
-  /// If an explicit [ScrollBehavior] is provided to [scrollBehavior], the
-  /// [ScrollPhysics] provided by that behavior will take precedence after
-  /// [physics].
+  /// If an explicit [ScrollBehavior] is provided to the underlying scroll
+  /// view, the [ScrollPhysics] provided by that behavior will take
+  /// precedence after [physics].
   final ScrollPhysics? physics;
 
   /// {@macro flutter.rendering.RenderViewportBase.cacheExtent}
@@ -410,7 +410,7 @@ class PagedValueGridView<K, V> extends StatefulWidget {
   /// A builder that is called to build the error state of the list.
   final Widget Function(BuildContext, StreamChatError) errorBuilder;
 
-  /// The index to take into account when triggering [controller.loadMore].
+  /// The index to take into account when triggering [PagedValueNotifier.loadMore].
   final int loadMoreTriggerIndex;
 
   /// {@template flutter.widgets.scroll_view.scrollDirection}
@@ -509,9 +509,9 @@ class PagedValueGridView<K, V> extends StatefulWidget {
   /// physics should be updated.)
   /// {@endtemplate}
   ///
-  /// If an explicit [ScrollBehavior] is provided to [scrollBehavior], the
-  /// [ScrollPhysics] provided by that behavior will take precedence after
-  /// [physics].
+  /// If an explicit [ScrollBehavior] is provided to the underlying scroll
+  /// view, the [ScrollPhysics] provided by that behavior will take
+  /// precedence after [physics].
   final ScrollPhysics? physics;
 
   /// {@template flutter.widgets.scroll_view.shrinkWrap}
