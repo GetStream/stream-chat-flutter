@@ -100,7 +100,7 @@ abstract class Translations {
   String get reconnectingLabel;
 
   /// The label for also send
-  /// as direct message "checkbox"" in [StreamMessageInput]
+  /// as direct message "checkbox" in [StreamMessageComposer]
   String get alsoSendAsDirectMessageLabel;
 
   /// The label for search Gif
@@ -110,13 +110,13 @@ abstract class Translations {
   String get sendMessagePermissionError;
 
   /// The label for add a comment or send in case of
-  /// attachments inside [StreamMessageInput]
+  /// attachments inside [StreamMessageComposer]
   String get addACommentOrSendLabel;
 
-  /// The label for write a message in [StreamMessageInput]
+  /// The label for write a message in [StreamMessageComposer]
   String get writeAMessageLabel;
 
-  /// The label for slow mode enabled in [StreamMessageInput]
+  /// The label for slow mode enabled in [StreamMessageComposer]
   String get slowModeOnLabel;
 
   /// The placeholder shown in the composer when a user-target command (for
@@ -126,15 +126,15 @@ abstract class Translations {
   /// should select or type a username.
   String get commandUsernameLabel;
 
-  /// The label for instant commands in [StreamMessageInput]
+  /// The label for instant commands in [StreamMessageComposer]
   String get instantCommandsLabel;
 
   /// The error shown in case the file is too large even after compression
-  /// while uploading via [StreamMessageInput]
+  /// while uploading via [StreamMessageComposer]
   String fileTooLargeAfterCompressionError(double limitInMB);
 
   /// The error shown in case the file is too large
-  /// while uploading via [StreamMessageInput]
+  /// while uploading via [StreamMessageComposer]
   String fileTooLargeError(double limitInMB);
 
   /// The error shown when the file being read has no bytes

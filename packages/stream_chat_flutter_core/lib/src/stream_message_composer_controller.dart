@@ -9,45 +9,45 @@ import 'package:stream_chat_flutter_core/src/message_text_field_controller.dart'
 
 /// A value listenable builder related to a [Message].
 ///
-/// Pass in a [StreamMessageInputController] as the `valueListenable`.
+/// Pass in a [StreamMessageComposerController] as the `valueListenable`.
 typedef StreamMessageValueListenableBuilder = ValueListenableBuilder<Message>;
 
-/// {@template stream_chat_flutter.StreamMessageInputController}
+/// {@template stream_chat_flutter.StreamMessageComposerController}
 /// Controller for storing and mutating a [Message] value.
 /// {@endtemplate}
-class StreamMessageInputController extends ValueNotifier<Message> {
+class StreamMessageComposerController extends ValueNotifier<Message> {
   /// Creates a controller for an editable text field.
   ///
   /// This constructor treats a null [message] argument as if it were the empty
   /// message.
-  factory StreamMessageInputController({
+  factory StreamMessageComposerController({
     Message? message,
     Map<RegExp, TextStyleBuilder>? textPatternStyle,
-  }) => StreamMessageInputController._(
+  }) => StreamMessageComposerController._(
     initialMessage: message ?? Message(),
     textPatternStyle: textPatternStyle,
   );
 
   /// Creates a controller for an editable text field from an initial [text].
-  factory StreamMessageInputController.fromText(
+  factory StreamMessageComposerController.fromText(
     String? text, {
     Map<RegExp, TextStyleBuilder>? textPatternStyle,
-  }) => StreamMessageInputController._(
+  }) => StreamMessageComposerController._(
     initialMessage: Message(text: text),
     textPatternStyle: textPatternStyle,
   );
 
   /// Creates a controller for an editable text field from initial
   /// [attachments].
-  factory StreamMessageInputController.fromAttachments(
+  factory StreamMessageComposerController.fromAttachments(
     List<Attachment> attachments, {
     Map<RegExp, TextStyleBuilder>? textPatternStyle,
-  }) => StreamMessageInputController._(
+  }) => StreamMessageComposerController._(
     initialMessage: Message(attachments: attachments),
     textPatternStyle: textPatternStyle,
   );
 
-  StreamMessageInputController._({
+  StreamMessageComposerController._({
     required Message initialMessage,
     Map<RegExp, TextStyleBuilder>? textPatternStyle,
   }) : assert(
@@ -384,7 +384,7 @@ class StreamMessageInputController extends ValueNotifier<Message> {
   /// session is preserved — use [cancelEditMessage] to exit edit mode.
   ///
   /// Calling this will notify all the listeners of this
-  /// [StreamMessageInputController] that they need to update
+  /// [StreamMessageComposerController] that they need to update
   /// (calls [notifyListeners]). For this reason,
   /// this method should only be called between frames, e.g. in response to user
   /// actions, not during the build, layout, or paint phases.
@@ -423,45 +423,75 @@ class StreamMessageInputController extends ValueNotifier<Message> {
 }
 
 /// A [RestorableProperty] that knows how to store and restore a
-/// [StreamMessageInputController].
+/// [StreamMessageComposerController].
 ///
-/// The [StreamMessageInputController] is accessible via the [value] getter.
+/// The [StreamMessageComposerController] is accessible via the [value] getter.
 /// During state restoration,
-/// the property will restore [StreamMessageInputController.message]
+/// the property will restore [StreamMessageComposerController.message]
 /// to the value it had when the restoration data it is getting restored from
 /// was collected.
-class StreamRestorableMessageInputController extends RestorableChangeNotifier<StreamMessageInputController> {
-  /// Creates a [StreamRestorableMessageInputController].
+class StreamRestorableMessageComposerController extends RestorableChangeNotifier<StreamMessageComposerController> {
+  /// Creates a [StreamRestorableMessageComposerController].
   ///
   /// This constructor creates a default [Message] when no `message` argument
   /// is supplied.
-  StreamRestorableMessageInputController({Message? message}) : _initialValue = message ?? Message();
+  StreamRestorableMessageComposerController({Message? message}) : _initialValue = message ?? Message();
 
-  /// Creates a [StreamRestorableMessageInputController] from an initial
+  /// Creates a [StreamRestorableMessageComposerController] from an initial
   /// [text] value.
-  factory StreamRestorableMessageInputController.fromText(String? text) =>
-      StreamRestorableMessageInputController(message: Message(text: text));
+  factory StreamRestorableMessageComposerController.fromText(String? text) =>
+      StreamRestorableMessageComposerController(message: Message(text: text));
 
   final Message _initialValue;
 
   @override
-  StreamMessageInputController createDefaultValue() => StreamMessageInputController(message: _initialValue);
+  StreamMessageComposerController createDefaultValue() => StreamMessageComposerController(message: _initialValue);
 
   @override
-  StreamMessageInputController fromPrimitives(Object? data) {
-    final restoredData = json.decode(data! as String);
+  StreamMessageComposerController fromPrimitives(Object? data) {
+    final restoredData = json.decode(data! as String) as Map<String, dynamic>;
 
-    final message = Message.fromJson(restoredData['message']);
-    final state = MessageState.fromJson(restoredData['message_state']);
+    final currentMessage = Message.fromJson(restoredData['message'] as Map<String, dynamic>);
 
-    return StreamMessageInputController(message: message.copyWith(state: state));
+    final messageBeingEditedJson = restoredData['message_being_edited'];
+    if (messageBeingEditedJson != null) {
+      // Restore edit mode: construct the controller with the pre-edit draft,
+      // call editMessage() to re-enter edit mode, then overlay the current
+      // (possibly user-modified) composed text.
+      final messageBeingEdited = Message.fromJson(messageBeingEditedJson as Map<String, dynamic>);
+      final messageBeforeEdit = Message.fromJson(
+        restoredData['message_before_edit'] as Map<String, dynamic>,
+      );
+
+      final controller =
+          StreamMessageComposerController(
+              message: messageBeforeEdit.copyWith(state: const MessageState.initial()),
+            )
+            ..editMessage(messageBeingEdited)
+            // Restore any edits the user made while in edit mode.
+            ..message = currentMessage;
+      return controller;
+    }
+
+    // Normal draft: reset state to initial (the controller invariant requires
+    // it; any non-initial state serialized here is unrecoverable anyway).
+    return StreamMessageComposerController(
+      message: currentMessage.copyWith(state: const MessageState.initial()),
+    );
   }
 
   @override
-  String toPrimitives() => json.encode({
-    'message': value.message.toJson(),
-    'message_state': value.message.state.toJson(),
-  });
+  String toPrimitives() {
+    final controller = value;
+    final data = <String, dynamic>{
+      'message': controller.message.toJson(),
+    };
+    if (controller.isEditing) {
+      data['message_being_edited'] = controller.messageBeingEdited!.toJson();
+      data['message_before_edit'] = controller._messageBeforeEdit!.toJson();
+    }
+    return json.encode(data);
+  }
 }
 
 Timer _setPeriodicTimer(

@@ -1,8 +1,16 @@
 ## Upcoming
 
+🔄 Internal / Non-breaking
+
+- Composer UI primitives (`StreamMessageComposerInputField`, `VoiceRecordingCallback`, and the outer/inner layout containers) are now owned by `stream_chat_flutter` and exported from this package. They were previously supplied by `stream_core_flutter`. The public API of `StreamMessageComposer` / `StreamChatMessageInput` and its sub-components is unchanged.
+
 🛑️ Breaking
 
+- Renamed `StreamMessageComposer.messageInputController` parameter to `messageComposerController`.
 - Removed `StreamDraftListView`, `StreamDraftListTile`, `StreamDraftListTileTheme`, and `StreamDraftListTileThemeData` from the SDK. Also removed `StreamChatThemeData.draftListTileTheme`. Refer to the sample app for a reference implementation using `StreamDraftListController` and `PagedValueListView`.
+- Renamed `StreamMessageComposerInput` → `StreamMessageComposerInputCenter` (and `DefaultStreamMessageComposerInput` → `DefaultStreamMessageComposerInputCenter`). The name `StreamMessageComposerInput` is now the input container widget (assembles header, leading, center, trailing).
+- Renamed `MessageComposerInputProps` → `MessageComposerInputCenterProps`. The name `MessageComposerInputProps` now refers to the new container widget's props.
+- Renamed `messageComposerInput` builder key in `streamChatComponentBuilders` → `messageComposerInputCenter`. The name `messageComposerInput` now overrides the whole input container.
 - Replaced `StreamMessageInput.hintGetter` with `placeholderBuilder` over a sealed `MessageInputPlaceholder`.
   See [`migrations/redesign/message_composer.md`](../../migrations/redesign/message_composer.md).
 - Removed `StreamMessageListView.unreadIndicatorBuilder`; use `StreamComponentFactory.jumpToUnreadButton`.

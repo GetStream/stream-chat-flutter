@@ -193,8 +193,8 @@ export 'src/message_input/audio_recorder/stream_audio_recorder.dart';
 export 'src/message_input/countdown_button.dart';
 export 'src/message_input/enums.dart';
 export 'src/message_input/message_input_placeholder.dart';
+export 'src/message_input/stream_message_composer.dart';
 export 'src/message_input/stream_message_composer_attachment_list.dart';
-export 'src/message_input/stream_message_input.dart';
 export 'src/message_input/stream_message_text_field.dart';
 export 'src/message_list_view/message_details.dart';
 export 'src/message_list_view/message_list_view.dart';
@@ -215,7 +215,6 @@ export 'src/misc/date_divider.dart';
 export 'src/misc/info_tile.dart';
 export 'src/misc/option_list_tile.dart';
 export 'src/misc/reaction_icon_resolver.dart';
-
 export 'src/misc/stream_modal.dart';
 export 'src/misc/stream_neumorphic_button.dart';
 export 'src/misc/swipeable.dart';

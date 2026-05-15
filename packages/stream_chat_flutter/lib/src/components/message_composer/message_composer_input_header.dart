@@ -15,11 +15,10 @@ class StreamMessageComposerInputHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return context.chatComponentBuilder<MessageComposerInputHeaderProps>()?.call(
-          context,
-          MessageComposerInputHeaderProps.from(props),
-        ) ??
-        _DefaultStreamMessageComposerInputHeader(props: props);
+    final headerProps = MessageComposerInputHeaderProps.from(props);
+
+    return context.chatComponentBuilder<MessageComposerInputHeaderProps>()?.call(context, headerProps) ??
+        _DefaultStreamMessageComposerInputHeader(props: headerProps);
   }
 }
 
@@ -27,7 +26,7 @@ class _DefaultStreamMessageComposerInputHeader extends StatelessWidget {
   const _DefaultStreamMessageComposerInputHeader({required this.props});
 
   final MessageComposerComponentProps props;
-  StreamMessageInputController get controller => props.controller;
+  StreamMessageComposerController get controller => props.controller;
 
   @override
   Widget build(BuildContext context) {

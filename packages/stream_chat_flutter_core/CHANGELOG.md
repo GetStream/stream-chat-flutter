@@ -2,19 +2,21 @@
 
 🛑️ Breaking
 
-- Renamed `StreamMessageInputController.editingOriginalMessage` → `messageBeingEdited`.
-- `StreamMessageInputController` constructor no longer accepts non-initial messages;
+- Renamed `StreamMessageInputController` → `StreamMessageComposerController`.
+- Renamed `StreamRestorableMessageInputController` → `StreamRestorableMessageComposerController`.
+- Renamed `StreamMessageComposerController.editingOriginalMessage` → `messageBeingEdited`.
+- `StreamMessageComposerController` constructor no longer accepts non-initial messages;
   use `editMessage()` to enter edit mode.
-- `StreamMessageInputController.cancelEditMessage()` is now a no-op when no edit is active.
-- `StreamMessageInputController.clear()` no longer exits edit mode;
+- `StreamMessageComposerController.cancelEditMessage()` is now a no-op when no edit is active.
+- `StreamMessageComposerController.clear()` no longer exits edit mode;
   use `cancelEditMessage()` instead.
 
 ✅ Added
 
-- Added `StreamMessageInputController.isEditing` getter.
-- Added `StreamMessageInputController.clearCommand()`; setting `command = null` is
+- Added `StreamMessageComposerController.isEditing` getter.
+- Added `StreamMessageComposerController.clearCommand()`; setting `command = null` is
   now an alias for it.
-- `StreamMessageInputController.editMessage()` and the `command` setter are now
+- `StreamMessageComposerController.editMessage()` and the `command` setter are now
   re-entrant — repeated calls preserve the original restore snapshot.
 
 🔄 Changed
@@ -26,7 +28,7 @@
 🐞 Fixed
 
 - Fixed `StreamChatCore` disconnecting the WebSocket immediately on background when no `onBackgroundEventReceived` handler was provided; the keep-alive timer now fires before the connection closes regardless of whether a handler is set.
-- Fixed `StreamMessageInputController.cancelEditMessage` losing the pre-edit draft when a remote update arrived for the message being edited.
+- Fixed `StreamMessageComposerController.cancelEditMessage` losing the pre-edit draft when a remote update arrived for the message being edited.
 
 ## 10.0.0-beta.13
 

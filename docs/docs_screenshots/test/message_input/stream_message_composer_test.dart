@@ -12,7 +12,7 @@ import '../src/mocks.dart';
 Widget _buildMessageInputScaffold({
   required MockClient client,
   required MockChannel channel,
-  StreamMessageInput? messageInput,
+  StreamMessageComposer? messageInput,
 }) {
   return MaterialApp(
     theme: docsScreenshotsTheme(),
@@ -28,7 +28,7 @@ Widget _buildMessageInputScaffold({
           body: Column(
             children: [
               Expanded(child: Container()),
-              messageInput ?? const StreamMessageInput(),
+              messageInput ?? StreamMessageComposer(),
             ],
           ),
         ),
@@ -46,7 +46,7 @@ void main() {
 
   goldenTest(
     'default state',
-    fileName: 'stream_message_input_default',
+    fileName: 'stream_message_composer_default',
     constraints: const BoxConstraints.tightFor(width: 375, height: 100),
     builder: () {
       final client = MockClient();
@@ -103,7 +103,7 @@ void main() {
         channelState: channelState,
       );
 
-      final controller = StreamMessageInputController();
+      final controller = StreamMessageComposerController();
 
       return MaterialApp(
         theme: docsScreenshotsTheme(),
@@ -125,7 +125,7 @@ void main() {
               body: Column(
                 children: [
                   const Expanded(child: SizedBox()),
-                  StreamMessageInput(messageInputController: controller),
+                  StreamMessageComposer(messageComposerController: controller),
                 ],
               ),
             ),
@@ -181,7 +181,7 @@ void main() {
               body: Column(
                 children: [
                   Expanded(child: Container()),
-                  const StreamMessageInput(),
+                  StreamMessageComposer(),
                 ],
               ),
             ),
@@ -208,7 +208,7 @@ void main() {
         channelState: channelState,
       );
 
-      final controller = StreamMessageInputController()
+      final controller = StreamMessageComposerController()
         ..quotedMessage = Message(
           id: 'quoted-msg',
           text: 'This is the original message',
@@ -218,7 +218,7 @@ void main() {
       return _buildMessageInputScaffold(
         client: client,
         channel: channel,
-        messageInput: StreamMessageInput(messageInputController: controller),
+        messageInput: StreamMessageComposer(messageComposerController: controller),
       );
     },
   );
