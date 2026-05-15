@@ -194,7 +194,7 @@ class StreamPollVoteListController
   }
 
   /// Event listener, which can be set in order to listen
-  /// [client] web-socket events.
+  /// client web-socket events.
   ///
   /// Return `true` if the event is handled. Return `false` to
   /// allow the event to be handled internally.

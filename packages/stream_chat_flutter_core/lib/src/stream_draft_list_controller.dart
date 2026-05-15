@@ -234,8 +234,8 @@ class StreamDraftListController extends PagedValueNotifier<String, Draft> {
     return true;
   }
 
-  /// Deletes the draft with the given [channelCid] and optional [parentId]
-  /// from the list.
+  /// Deletes the draft with the given [Draft.channelCid] and optional
+  /// [Draft.parentId] from the list.
   ///
   /// Returns `true` if the draft is deleted successfully. Otherwise, `false`.
   bool deleteDraft(Draft draft) {

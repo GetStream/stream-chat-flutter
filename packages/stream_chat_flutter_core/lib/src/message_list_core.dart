@@ -68,7 +68,7 @@ bool Function(Message) defaultMessageFilter(String currentUserId) =>
 /// The widget uses a [ListView.custom] to render the list of channels.
 ///
 class MessageListCore extends StatefulWidget {
-  /// Instantiate a new [MessageListView].
+  /// Instantiate a new [MessageListCore].
   const MessageListCore({
     super.key,
     required this.loadingBuilder,

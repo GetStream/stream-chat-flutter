@@ -10,8 +10,8 @@ import 'package:stream_chat/src/core/util/utils.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:synchronized/synchronized.dart';
 
-/// The maximum time the incoming [Event.typingStart] event is valid before a
-/// [Event.typingStop] event is emitted automatically.
+/// The maximum time the incoming [EventType.typingStart] event is valid before
+/// a [EventType.typingStop] event is emitted automatically.
 const incomingTypingStartEventTimeout = 7;
 
 /// Class that manages a specific channel.
@@ -2122,8 +2122,8 @@ class Channel {
     return canUseTypingEvents && currentUser.isTypingIndicatorsEnabled;
   }
 
-  /// Sends the [Event.typingStart] event and schedules a timer to invoke the
-  /// [Event.typingStop] event.
+  /// Sends the [EventType.typingStart] event and schedules a timer to invoke
+  /// the [EventType.typingStop] event.
   ///
   /// This is meant to be called every time the user presses a key.
   Future<void> keyStroke([String? parentId]) async {

@@ -270,7 +270,10 @@ class StreamChannelState extends State<StreamChannel> {
     }
   }
 
-  /// Calls [channel.query] updating [queryMessage] stream
+  /// Loads an additional page of messages from the channel.
+  ///
+  /// Use [direction] to choose whether to load older messages
+  /// ([QueryDirection.top]) or newer ones ([QueryDirection.bottom]).
   Future<void> queryMessages({
     QueryDirection? direction = QueryDirection.top,
     int limit = 30,
@@ -367,7 +370,11 @@ class StreamChannelState extends State<StreamChannel> {
     }
   }
 
-  /// Calls [Channel.getReplies] updating [queryMessage] stream
+  /// Loads an additional page of replies in the thread identified by
+  /// [parentId].
+  ///
+  /// Use [direction] to choose whether to load older replies
+  /// ([QueryDirection.top]) or newer ones ([QueryDirection.bottom]).
   Future<void> queryReplies(
     String parentId, {
     int limit = 30,
@@ -379,7 +386,9 @@ class StreamChannelState extends State<StreamChannel> {
     return _queryBottomReplies(parentId, limit: limit);
   }
 
-  /// Calls [Channel.getReplies] updating [queryMessage] stream
+  /// Loads the latest replies in the thread identified by [parentId].
+  ///
+  /// Pass [preferOffline] to read from local persistence when available.
   Future<void> getReplies(
     String parentId, {
     int limit = 30,
