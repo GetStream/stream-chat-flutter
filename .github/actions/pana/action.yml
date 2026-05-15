@@ -8,6 +8,7 @@ inputs:
   pana_version:
     required: false
     type: string
+    default: "0.23.9"
   runs_on:
     required: false
     type: string
