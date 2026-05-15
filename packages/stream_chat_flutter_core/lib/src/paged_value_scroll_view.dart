@@ -410,7 +410,7 @@ class PagedValueGridView<K, V> extends StatefulWidget {
   /// A builder that is called to build the error state of the list.
   final Widget Function(BuildContext, StreamChatError) errorBuilder;
 
-  /// The index to take into account when triggering [PagedValueNotifier.loadMore].
+  /// The index to take into account when triggering the 'loadMore' action.
   final int loadMoreTriggerIndex;
 
   /// {@template flutter.widgets.scroll_view.scrollDirection}
