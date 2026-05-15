@@ -1,3 +1,9 @@
+# Upcoming
+
+🐞 Fixed
+
+- Fixed `StreamChatClient.queryDrafts` not forwarding the `filter` argument to the API.
+
 ## 9.23.0
 
 - Minor bug fixes and improvements
