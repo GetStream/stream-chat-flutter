@@ -198,6 +198,8 @@ export 'src/message_input/stream_message_composer_attachment_list.dart';
 export 'src/message_input/stream_message_text_field.dart';
 export 'src/message_list_view/message_details.dart';
 export 'src/message_list_view/message_list_view.dart';
+export 'src/message_list_view/stream_message_list_builders.dart';
+export 'src/message_list_view/stream_message_list_configuration.dart';
 export 'src/message_list_view/unread_indicator_button.dart';
 export 'src/message_modal/message_action_confirmation_modal.dart';
 export 'src/message_modal/message_actions_modal.dart';

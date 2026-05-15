@@ -63,6 +63,7 @@ class StreamMessageListViewThemeData with Diagnosticable {
   const StreamMessageListViewThemeData({
     this.backgroundColor,
     this.backgroundImage,
+    this.messageHighlightColor,
   });
 
   /// The color of the [MessageListView] background.
@@ -71,14 +72,22 @@ class StreamMessageListViewThemeData with Diagnosticable {
   /// The image of the [MessageListView] background.
   final DecorationImage? backgroundImage;
 
+  /// The highlight color used when jumping to and highlighting a message.
+  ///
+  /// When null (the default), falls back to the color scheme's
+  /// `backgroundHighlight` color.
+  final Color? messageHighlightColor;
+
   /// Copies this [StreamMessageListViewThemeData] to another.
   StreamMessageListViewThemeData copyWith({
     Color? backgroundColor,
     DecorationImage? backgroundImage,
+    Color? messageHighlightColor,
   }) {
     return StreamMessageListViewThemeData(
       backgroundColor: backgroundColor ?? this.backgroundColor,
       backgroundImage: backgroundImage ?? this.backgroundImage,
+      messageHighlightColor: messageHighlightColor ?? this.messageHighlightColor,
     );
   }
 
@@ -93,6 +102,7 @@ class StreamMessageListViewThemeData with Diagnosticable {
     return StreamMessageListViewThemeData(
       backgroundColor: Color.lerp(a.backgroundColor, b.backgroundColor, t),
       backgroundImage: t < 0.5 ? a.backgroundImage : b.backgroundImage,
+      messageHighlightColor: Color.lerp(a.messageHighlightColor, b.messageHighlightColor, t),
     );
   }
 
@@ -102,6 +112,7 @@ class StreamMessageListViewThemeData with Diagnosticable {
     return copyWith(
       backgroundColor: other.backgroundColor,
       backgroundImage: other.backgroundImage,
+      messageHighlightColor: other.messageHighlightColor,
     );
   }
 
@@ -111,10 +122,11 @@ class StreamMessageListViewThemeData with Diagnosticable {
       other is StreamMessageListViewThemeData &&
           runtimeType == other.runtimeType &&
           backgroundColor == other.backgroundColor &&
-          backgroundImage == other.backgroundImage;
+          backgroundImage == other.backgroundImage &&
+          messageHighlightColor == other.messageHighlightColor;
 
   @override
-  int get hashCode => backgroundColor.hashCode + backgroundImage.hashCode;
+  int get hashCode => Object.hash(backgroundColor, backgroundImage, messageHighlightColor);
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -127,6 +139,7 @@ class StreamMessageListViewThemeData with Diagnosticable {
           backgroundImage,
           defaultValue: null,
         ),
-      );
+      )
+      ..add(ColorProperty('messageHighlightColor', messageHighlightColor));
   }
 }
