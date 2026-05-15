@@ -37,6 +37,7 @@ pubspec_overrides.yaml
 flutter_export_environment.sh
 generated_plugin_registrant.*
 GeneratedPluginRegistrant.*
+**/Flutter/ephemeral/**
 
 # Android related
 **/android/**/gradle-wrapper.jar
