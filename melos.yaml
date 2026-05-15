@@ -99,7 +99,10 @@ command:
       svg_icon_widget: ^0.0.1
       # TODO: Replace with hosted version before merging PR
       stream_core_flutter:
-        path: /Users/xsahil03x/StudioProjects/stream-core-flutter/packages/stream_core_flutter
+        git:
+          url: https://github.com/GetStream/stream-core-flutter.git
+          ref: 333f7b72485f308b282cc85973223a2919fd8153
+          path: packages/stream_core_flutter
       synchronized: ^3.1.0+1
       thumblr: ^0.0.4
       url_launcher: ^6.3.0
