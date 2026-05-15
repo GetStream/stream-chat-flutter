@@ -192,6 +192,11 @@ class StreamChatClient {
   /// The retry policy options getter
   RetryPolicy get retryPolicy => _retryPolicy;
 
+  // In-memory timestamp of the last successful sync. Used as a fallback when
+  // persistence is not enabled, so that reconnects can still use /sync instead
+  // of a full queryChannels call.
+  DateTime? _lastSyncAt;
+
   /// By default the Chat client will write all messages with level Warn or
   /// Error to stdout.
   ///
@@ -504,6 +509,15 @@ class StreamChatClient {
     if (event.type == EventType.healthCheck) {
       return _handleHealthCheckEvent(event);
     }
+    // Track the timestamp of the latest real server event so that reconnect
+    // sync only fetches events missed during the actual gap, not events that
+    // were already delivered over the WebSocket.
+    if (!event.isLocal) {
+      final eventTime = event.createdAt;
+      if (_lastSyncAt == null || eventTime.isAfter(_lastSyncAt!)) {
+        _lastSyncAt = eventTime;
+      }
+    }
     state.updateUser(event.user);
     return _eventController.add(event);
   }
@@ -530,13 +544,11 @@ class StreamChatClient {
       // connection recovered
       final cids = [...state.channels.keys.toSet()];
       if (cids.isNotEmpty) {
-        await queryChannelsOnline(
-          filter: Filter.in_('cid', cids),
-          paginationParams: const PaginationParams(limit: 30),
-        );
-
-        // Sync the persistence client if available
-        if (persistenceEnabled) await sync(cids: cids);
+        // Use /sync to replay missed events since the last known timestamp.
+        // This is significantly cheaper than a full queryChannels call and
+        // works whether or not persistence is enabled (falls back to the
+        // in-memory _lastSyncAt set on the previous connect/sync).
+        await sync(cids: cids);
       }
 
       handleEvent(Event(
@@ -565,17 +577,26 @@ class StreamChatClient {
   // Lock to make sure only one sync process is running at a time.
   final _syncLock = Lock();
 
-  /// Get the events missed while offline to sync the offline storage
-  /// Will automatically fetch [cids] and [lastSyncedAt] if [persistenceEnabled]
+  /// Get the events missed while offline to sync the offline storage.
+  ///
+  /// When [persistenceEnabled] is true, [cids] and [lastSyncAt] are fetched
+  /// from the persistence client if not provided. When persistence is not
+  /// enabled, [_lastSyncAt] is used as a fallback so that a full
+  /// [queryChannelsOnline] call is avoided on every reconnect.
   Future<void> sync({List<String>? cids, DateTime? lastSyncAt}) {
     return _syncLock.synchronized(() async {
       final channels = cids ?? await chatPersistenceClient?.getChannelCids();
       if (channels == null || channels.isEmpty) return;
 
-      final syncAt = lastSyncAt ?? await chatPersistenceClient?.getLastSyncAt();
+      // Prefer the explicitly provided timestamp, then the persistence store,
+      // then the in-memory fallback set on the last successful sync/connect.
+      final syncAt = lastSyncAt ?? await chatPersistenceClient?.getLastSyncAt() ?? _lastSyncAt;
       if (syncAt == null) {
+        // First session — record the current time so the next reconnect can
+        // use /sync instead of a full queryChannels call.
         logger.info('Fresh sync start: lastSyncAt initialized to now.');
-        return chatPersistenceClient?.updateLastSyncAt(DateTime.now());
+        _lastSyncAt = DateTime.now();
+        return chatPersistenceClient?.updateLastSyncAt(_lastSyncAt!);
       }
 
       try {
@@ -592,20 +613,22 @@ class StreamChatClient {
         }
 
         final updatedSyncAt = events.lastOrNull?.createdAt ?? DateTime.now();
+        _lastSyncAt = updatedSyncAt;
         return chatPersistenceClient?.updateLastSyncAt(updatedSyncAt);
       } catch (error, stk) {
         // If we got a 400 error, it means that either the sync time is too
         // old or the channel list is too long or too many events need to be
-        // synced. In this case, we should just flush the persistence client
-        // and start over.
+        // synced. In this case, we should flush the persistence client and
+        // reset the in-memory timestamp so the next reconnect starts fresh.
         if (error is StreamChatNetworkError && error.statusCode == 400) {
           logger.warning(
             'Failed to sync events due to stale or oversized state. '
             'Resetting the persistence client to enable a fresh start.',
           );
 
+          _lastSyncAt = DateTime.now();
           await chatPersistenceClient?.flush();
-          return chatPersistenceClient?.updateLastSyncAt(DateTime.now());
+          return chatPersistenceClient?.updateLastSyncAt(_lastSyncAt!);
         }
 
         logger.warning('Error syncing events', error, stk);
@@ -2164,6 +2187,9 @@ class StreamChatClient {
     // resetting credentials.
     _tokenManager.reset();
     _connectionIdManager.reset();
+
+    // Reset the in-memory sync timestamp so a fresh user session starts clean.
+    _lastSyncAt = null;
 
     // closing persistence connection.
     return closePersistenceConnection(flush: flushChatPersistence);

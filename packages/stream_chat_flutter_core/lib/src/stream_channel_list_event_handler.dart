@@ -98,12 +98,16 @@ mixin class StreamChannelListEventHandler {
   ///
   /// This event is fired when the client web-socket connection recovers.
   ///
-  /// By default, this refreshes the whole channel list.
+  /// By default, this re-sorts the current in-memory items. A full
+  /// [StreamChannelListController.refresh] (network call) is not needed
+  /// because missed events are replayed via the `/sync` endpoint before this
+  /// event fires, so each individual event handler has already updated the
+  /// list. Re-sorting ensures the sort order is correct after bulk updates.
   void onConnectionRecovered(
     Event event,
     StreamChannelListController controller,
   ) {
-    controller.refresh();
+    controller.channels = [...controller.currentItems];
   }
 
   /// Function which gets called for the event [EventType.messageNew].

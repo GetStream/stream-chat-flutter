@@ -3828,4 +3828,128 @@ void main() {
       });
     });
   });
+
+  group('Reconnect sync behavior', () {
+    const apiKey = 'test-api-key';
+
+    final user = User(id: 'test-user-id');
+    final token = Token.development(user.id).rawValue;
+
+    // Fresh api/client/ws per test to avoid cross-test interaction contamination.
+    late FakeChatApi api;
+    late StreamChatClient client;
+    late FakeWebSocket ws;
+
+    setUpAll(() {
+      registerFallbackValue(FakeChannelState());
+      registerFallbackValue(const PaginationParams());
+    });
+
+    setUp(() async {
+      api = FakeChatApi();
+      ws = FakeWebSocket();
+      client = StreamChatClient(apiKey, chatApi: api, ws: ws);
+      await client.connectUser(user, token);
+      await delay(300);
+      expect(client.persistenceEnabled, isFalse);
+      expect(client.wsConnectionStatus, ConnectionStatus.connected);
+    });
+
+    tearDown(() async {
+      await client.dispose();
+    });
+
+    test(
+      'uses /sync on reconnect instead of queryChannels',
+      () async {
+        // Put a channel in state so the reconnect handler has CIDs to sync.
+        final channel = client.channel('messaging', id: 'test-id');
+        client.state.addChannels({'messaging:test-id': channel});
+
+        // Stub sync for both the seed call and the reconnect call.
+        when(() => api.general.sync(any(), any()))
+            .thenAnswer((_) async => SyncResponse()..events = []);
+
+        // Seed _lastSyncAt by calling sync explicitly.
+        await client.sync(
+          cids: ['messaging:test-id'],
+          lastSyncAt: DateTime.now().subtract(const Duration(hours: 1)),
+        );
+
+        // Simulate reconnect (disconnect → reconnect triggers _onConnectionStatusChanged).
+        ws.connectionStatus = ConnectionStatus.disconnected;
+        ws.connectionStatus = ConnectionStatus.connected;
+        await delay(300);
+
+        // sync should have been called twice: once for seed, once for reconnect.
+        verify(() => api.general.sync(any(), any())).called(2);
+
+        // queryChannels should NOT have been called at all.
+        verifyNever(
+          () => api.channel.queryChannels(
+            filter: any(named: 'filter'),
+            sort: any(named: 'sort'),
+            state: any(named: 'state'),
+            watch: any(named: 'watch'),
+            presence: any(named: 'presence'),
+            memberLimit: any(named: 'memberLimit'),
+            messageLimit: any(named: 'messageLimit'),
+            paginationParams: any(named: 'paginationParams'),
+          ),
+        );
+      },
+    );
+
+    test(
+      'sync() uses in-memory _lastSyncAt as fallback without persistence',
+      () async {
+        const cids = ['test-cid-1'];
+        final firstSyncAt = DateTime.now().subtract(const Duration(hours: 1));
+
+        when(() => api.general.sync(any(), any()))
+            .thenAnswer((_) async => SyncResponse()..events = []);
+
+        // First explicit sync seeds _lastSyncAt in memory.
+        await client.sync(cids: cids, lastSyncAt: firstSyncAt);
+
+        // A second sync call with no explicit lastSyncAt and no persistence
+        // should use the in-memory _lastSyncAt rather than returning early.
+        // If the fallback works, the API will be called a second time.
+        await client.sync(cids: cids);
+
+        verify(() => api.general.sync(any(), any())).called(2);
+      },
+    );
+
+    test(
+      'disconnectUser resets in-memory _lastSyncAt so next session starts fresh',
+      () async {
+        const cids = ['test-cid-1'];
+        final seedTime = DateTime.now().subtract(const Duration(hours: 1));
+
+        // Seed _lastSyncAt via an explicit sync call.
+        when(() => api.general.sync(any(), any()))
+            .thenAnswer((_) async => SyncResponse()..events = []);
+        await client.sync(cids: cids, lastSyncAt: seedTime);
+
+        // Disconnect resets _lastSyncAt — the client is fully torn down.
+        await client.disconnectUser();
+
+        // Reconnect as same user with a fresh client (same shared api instance).
+        ws = FakeWebSocket();
+        client = StreamChatClient(apiKey, chatApi: api, ws: ws);
+        await client.connectUser(user, token);
+        await delay(300);
+
+        // Calling sync() with only cids (no persistence, no explicit lastSyncAt,
+        // and _lastSyncAt was reset by disconnectUser) should initialize to now
+        // and NOT call the API endpoint.
+        await client.sync(cids: cids);
+
+        // Total calls: exactly 1 (the explicit seed before disconnect).
+        // The post-reconnect sync() should have returned early.
+        verify(() => api.general.sync(any(), any())).called(1);
+      },
+    );
+  });
 }
