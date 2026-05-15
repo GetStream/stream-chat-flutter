@@ -112,8 +112,6 @@ class StreamMessageListView extends StatefulWidget {
     this.onViewInChannelTap,
     this.onEditMessageTap,
     this.onReplyTap,
-    this.onShowMessage,
-    this.attachmentActionsModalBuilder,
     this.swipeToReply = false,
     this.onUserAvatarTap,
     this.onReactionsTap,
@@ -240,18 +238,6 @@ class StreamMessageListView extends StatefulWidget {
   ///
   /// Forwarded to each [StreamMessageItem] in the list.
   final void Function(Message)? onReplyTap;
-
-  /// Called when the "show in chat" action is tapped in the full-screen
-  /// media gallery.
-  ///
-  /// Forwarded to each [StreamMessageItem] in the list.
-  final ShowMessageCallback? onShowMessage;
-
-  /// Widget builder for the attachment actions modal shown in the full-screen
-  /// media gallery.
-  ///
-  /// Forwarded to each [StreamMessageItem] in the list.
-  final AttachmentActionsBuilder? attachmentActionsModalBuilder;
 
   /// Whether swiping a message triggers a quoted-reply action.
   ///
@@ -1207,8 +1193,6 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       onMessageLongPress: widget.onMessageLongPress,
       onEditMessageTap: widget.onEditMessageTap,
       onReplyTap: widget.onReplyTap,
-      onShowMessage: widget.onShowMessage,
-      attachmentActionsModalBuilder: widget.attachmentActionsModalBuilder,
       onUserAvatarTap: widget.onUserAvatarTap,
       onReactionsTap: widget.onReactionsTap,
       onQuotedMessageTap: widget.onQuotedMessageTap,
@@ -1347,14 +1331,6 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       onMessageLongPress: widget.onMessageLongPress,
       onEditMessageTap: widget.onEditMessageTap,
       onReplyTap: widget.onReplyTap,
-      onShowMessage: switch (widget.onShowMessage) {
-        final onTap? => onTap,
-        _ => (message, _) => _moveToAndHighlight(
-          messageId: message.id,
-          messages: messages,
-        ),
-      },
-      attachmentActionsModalBuilder: widget.attachmentActionsModalBuilder,
       onUserAvatarTap: widget.onUserAvatarTap,
       onReactionsTap: widget.onReactionsTap,
       onMessageLinkTap: widget.onMessageLinkTap,

@@ -12,21 +12,21 @@ final enterKeySet = LogicalKeySet(
 ///
 /// Use for:
 /// * Removing a reply from [StreamMessageComposer].
-/// * Closing [FullScreenMediaDesktop].
+/// * Closing [StreamMediaGalleryPreview].
 final escapeKeySet = LogicalKeySet(
   LogicalKeyboardKey.escape,
 );
 
 /// The "right arrow" keyset.
 ///
-/// Use for navigating to the next [FullScreenMediaDesktop] item.
+/// Use for navigating to the next [StreamMediaGalleryPreview] page.
 final rightArrowKeySet = LogicalKeySet(
   LogicalKeyboardKey.arrowRight,
 );
 
 /// The "left arrow" keyset.
 ///
-/// Use for navigating to the previous [FullScreenMediaDesktop] item.
+/// Use for navigating to the previous [StreamMediaGalleryPreview] page.
 final leftArrowKeySet = LogicalKeySet(
   LogicalKeyboardKey.arrowLeft,
 );

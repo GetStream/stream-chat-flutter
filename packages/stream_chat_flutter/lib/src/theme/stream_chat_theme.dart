@@ -45,11 +45,9 @@ class StreamChatThemeData {
     StreamAppBarThemeData? channelHeaderTheme,
     StreamAppBarThemeData? channelListHeaderTheme,
     StreamAppBarThemeData? threadHeaderTheme,
-    StreamAppBarThemeData? galleryHeaderTheme,
     Widget Function(BuildContext, User)? defaultUserImage,
     PlaceholderUserImage? placeholderUserImage,
     IconThemeData? primaryIconTheme,
-    StreamGalleryFooterThemeData? imageFooterTheme,
     StreamMessageListViewThemeData? messageListViewTheme,
     StreamPollCreatorThemeData? pollCreatorTheme,
     StreamPollInteractorThemeData? pollInteractorTheme,
@@ -75,11 +73,9 @@ class StreamChatThemeData {
       channelHeaderTheme: channelHeaderTheme,
       channelListHeaderTheme: channelListHeaderTheme,
       threadHeaderTheme: threadHeaderTheme,
-      galleryHeaderTheme: galleryHeaderTheme,
       defaultUserImage: defaultUserImage,
       placeholderUserImage: placeholderUserImage,
       primaryIconTheme: primaryIconTheme,
-      galleryFooterTheme: imageFooterTheme,
       messageListViewTheme: messageListViewTheme,
       pollCreatorTheme: pollCreatorTheme,
       pollInteractorTheme: pollInteractorTheme,
@@ -109,9 +105,7 @@ class StreamChatThemeData {
     required this.channelHeaderTheme,
     required this.channelListHeaderTheme,
     required this.threadHeaderTheme,
-    required this.galleryHeaderTheme,
     required this.primaryIconTheme,
-    required this.galleryFooterTheme,
     required this.messageListViewTheme,
     required this.pollCreatorTheme,
     required this.pollInteractorTheme,
@@ -148,27 +142,10 @@ class StreamChatThemeData {
       textTheme: textTheme,
       colorTheme: colorTheme,
       primaryIconTheme: iconTheme,
-      // Header chrome flows through per-header [StreamAppBarThemeData]
-      // entries — defaults are resolved by the design system (background,
-      // divider, padding, typography). Override individual fields per
-      // header type to customise globally.
       channelHeaderTheme: const StreamAppBarThemeData(),
       channelListHeaderTheme: const StreamAppBarThemeData(),
       threadHeaderTheme: const StreamAppBarThemeData(),
-      galleryHeaderTheme: const StreamAppBarThemeData(),
-      galleryFooterTheme: StreamGalleryFooterThemeData(
-        backgroundColor: colorTheme.barsBg,
-        shareIconColor: colorTheme.textHighEmphasis,
-        titleTextStyle: textTheme.headlineBold,
-        gridIconButtonColor: colorTheme.textHighEmphasis,
-        bottomSheetBarrierColor: colorTheme.overlay,
-        bottomSheetBackgroundColor: colorTheme.barsBg,
-        bottomSheetPhotosTextStyle: textTheme.headlineBold,
-        bottomSheetCloseIconColor: colorTheme.textHighEmphasis,
-      ),
-      messageListViewTheme: StreamMessageListViewThemeData(
-        backgroundColor: colorTheme.appBg,
-      ),
+      messageListViewTheme: StreamMessageListViewThemeData(backgroundColor: colorTheme.appBg),
       pollCreatorTheme: const StreamPollCreatorThemeData(),
       pollInteractorTheme: const StreamPollInteractorThemeData(),
       pollResultsSheetTheme: const StreamPollResultsSheetThemeData(),
@@ -196,13 +173,6 @@ class StreamChatThemeData {
 
   /// The default [StreamAppBar] style applied to [StreamThreadHeader].
   final StreamAppBarThemeData threadHeaderTheme;
-
-  /// The default [StreamAppBar] style applied to [StreamGalleryHeader].
-  final StreamAppBarThemeData galleryHeaderTheme;
-
-  /// The default style for [StreamGalleryFooter]s below the overall
-  /// [StreamChatTheme].
-  final StreamGalleryFooterThemeData galleryFooterTheme;
 
   /// Primary icon theme
   final IconThemeData primaryIconTheme;
@@ -248,11 +218,9 @@ class StreamChatThemeData {
     StreamAppBarThemeData? channelHeaderTheme,
     StreamAppBarThemeData? channelListHeaderTheme,
     StreamAppBarThemeData? threadHeaderTheme,
-    StreamAppBarThemeData? galleryHeaderTheme,
     Widget Function(BuildContext, User)? defaultUserImage,
     PlaceholderUserImage? placeholderUserImage,
     IconThemeData? primaryIconTheme,
-    StreamGalleryFooterThemeData? galleryFooterTheme,
     StreamMessageListViewThemeData? messageListViewTheme,
     StreamPollCreatorThemeData? pollCreatorTheme,
     StreamPollInteractorThemeData? pollInteractorTheme,
@@ -270,9 +238,7 @@ class StreamChatThemeData {
     channelHeaderTheme: this.channelHeaderTheme.merge(channelHeaderTheme),
     channelListHeaderTheme: this.channelListHeaderTheme.merge(channelListHeaderTheme),
     threadHeaderTheme: this.threadHeaderTheme.merge(threadHeaderTheme),
-    galleryHeaderTheme: this.galleryHeaderTheme.merge(galleryHeaderTheme),
     primaryIconTheme: this.primaryIconTheme.merge(primaryIconTheme),
-    galleryFooterTheme: galleryFooterTheme ?? this.galleryFooterTheme,
     messageListViewTheme: messageListViewTheme ?? this.messageListViewTheme,
     pollCreatorTheme: pollCreatorTheme ?? this.pollCreatorTheme,
     pollInteractorTheme: pollInteractorTheme ?? this.pollInteractorTheme,
@@ -295,9 +261,7 @@ class StreamChatThemeData {
       channelHeaderTheme: channelHeaderTheme.merge(other.channelHeaderTheme),
       channelListHeaderTheme: channelListHeaderTheme.merge(other.channelListHeaderTheme),
       threadHeaderTheme: threadHeaderTheme.merge(other.threadHeaderTheme),
-      galleryHeaderTheme: galleryHeaderTheme.merge(other.galleryHeaderTheme),
       primaryIconTheme: other.primaryIconTheme,
-      galleryFooterTheme: galleryFooterTheme.merge(other.galleryFooterTheme),
       messageListViewTheme: messageListViewTheme.merge(other.messageListViewTheme),
       pollCreatorTheme: pollCreatorTheme.merge(other.pollCreatorTheme),
       pollInteractorTheme: pollInteractorTheme.merge(other.pollInteractorTheme),

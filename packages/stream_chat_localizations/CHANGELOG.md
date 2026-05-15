@@ -30,6 +30,9 @@
 - Added `pollVotesLabel` translation for all supported locales.
 - Added `endVoteConfirmationMessage` translation for all supported locales.
 - Added `reactionsCountText(int count)` translation for all supported locales.
+- Added `photosAndVideosLabel` translation (default `Photos & Videos`) for all
+  supported locales. Used by the new media gallery preview footer's thumbnail-
+  grid sheet header.
 
 🔄 Changed
 

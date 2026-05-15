@@ -247,6 +247,9 @@ abstract class Translations {
   /// The label for "Photos"
   String get photosLabel;
 
+  /// The label for "Photos & Videos"
+  String get photosAndVideosLabel;
+
   /// The text for showing on which [date] and [time] the message was sent
   String sentAtText({required DateTime date, required DateTime time});
 
@@ -949,6 +952,9 @@ class DefaultTranslations implements Translations {
 
   @override
   String get photosLabel => 'Photos';
+
+  @override
+  String get photosAndVideosLabel => 'Photos & Videos';
 
   String _getDay(DateTime dateTime) {
     final now = DateTime.now();

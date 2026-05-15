@@ -46,6 +46,15 @@
   - `streamChatComponentBuilders(messageWidget: ...)` → `messageItem: ...`.
   - `StreamMessageContent(annotation: ..., metadata: ...)` → `header: ..., footer: ...`.
   See [`migrations/redesign/message_widget.md`](../../migrations/redesign/message_widget.md).
+- Redesigned the full-screen media viewer:
+  - Replaced `StreamFullScreenMedia` (and its `StreamFullScreenMediaBuilder` / `FullScreenMediaWidget` / `FullScreenMediaDesktop` / `fsm_stub` variants) with a single cross-platform `StreamMediaGalleryPreview`. Renamed `mediaAttachmentPackages` → `attachments`, `startIndex` → `initialIndex`; dropped `userName`, `sentAt`, `onReplyMessage`, `onShowMessage` and `attachmentActionsModalBuilder` from its surface.
+  - Renamed `StreamGalleryHeader` → `StreamMediaGalleryPreviewHeader` and `StreamGalleryFooter` → `StreamMediaGalleryPreviewFooter`, rebuilt on `StreamAppBar` / `StreamBottomAppBar`. Both shrank to a `title` (+ optional `subtitle`) and minimal action callbacks; the more-actions overflow header was removed.
+  - Renamed `StreamAttachmentPackage` → `StreamMediaGalleryAttachment` and added a `Message.toMediaGalleryAttachments({filter})` extension.
+  - Removed `VideoPackage`, `DesktopVideoPackage` and `GalleryNavigationItem` from the public API — each preview page now owns its own player state internally.
+  - Removed `StreamMessageItem.onShowMessage` / `attachmentActionsModalBuilder` and the matching `StreamMessageListView` / `StreamMessageContent` props; those callbacks no longer have a destination after the gallery overflow was removed.
+  - Removed `StreamChatThemeData.galleryHeaderTheme`, `StreamChatThemeData.galleryFooterTheme` (and the `imageFooterTheme:` constructor parameter) and the `StreamGalleryFooterThemeData` class. Header / footer chrome now flows through `StreamAppBarThemeData` / `StreamBottomAppBarThemeData`.
+  - Removed the unused `StreamAvatarThemeData`.
+  See [`migrations/redesign/media_viewer.md`](../../migrations/redesign/media_viewer.md).
 
 ✅ Added
 
@@ -53,6 +62,10 @@
 - Redesigned `StreamSystemMessage` / `StreamModeratedMessage` with a pill-shaped style and visual customisation props.
 - Added visual customisation props to `ThreadSeparator` and `UnreadMessagesSeparator`.
 - Added `StreamUnsupportedAttachment` and `UnsupportedAttachmentBuilder` for unrecognised attachment types.
+- Added `StreamMediaGallery` — a 3-up thumbnail grid that pairs with `StreamMediaGalleryPreview`. Each tile surfaces the sender's avatar (`StreamUserAvatar`) plus a video duration badge for video attachments. Used by `StreamMediaGalleryPreviewFooter`'s gallery-grid sheet and ready to drop into channel-level media listings. Customisable via `streamChatComponentBuilders(mediaGallery: ...)`.
+- Added `StreamMediaGalleryPreview` — the redesigned full-screen swipeable viewer. Built on the design system's `StreamMediaViewer`, `StreamAppBar` and `StreamBottomAppBar`. Customisable via `streamChatComponentBuilders(mediaGalleryPreview: ...)`. Exposes `StreamMediaGalleryPreviewScope` so per-page widgets (e.g. videos) can react to the active page.
+- Added `StreamVideoPlayer` — the platform-aware video backend used by `StreamMediaGalleryPreview`. Pauses itself when its page is no longer active and resumes on return.
+- Added `Translations.photosAndVideosLabel` — used by the footer's thumbnail-grid sheet header.
 - Added `StreamQuotedMessage` and `StreamQuotedMessageThemeData` for the quoted message preview.
 - `MessagePreviewFormatter` now renders `AttachmentType.urlPreview` messages with a link icon and caption / OG title / `linkAttachmentText` fallback.
 - Added `StreamPollCardStyle`, `StreamPollQuestionStyle` and `StreamPollOptionVotesStyle` shared style classes for the poll sheets.
