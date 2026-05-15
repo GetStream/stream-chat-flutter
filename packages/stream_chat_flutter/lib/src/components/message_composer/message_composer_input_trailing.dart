@@ -34,7 +34,7 @@ class DefaultStreamMessageComposerInputTrailing extends StatelessWidget {
   /// The properties for the message composer component.
   final MessageComposerComponentProps props;
 
-  StreamMessageInputController get _controller => props.controller;
+  StreamMessageComposerController get _controller => props.controller;
 
   @override
   Widget build(BuildContext context) {

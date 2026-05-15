@@ -64,7 +64,7 @@ class StreamMessageComposer extends StatelessWidget {
     super.key,
     void Function(Message)? onMessageSent,
     FutureOr<Message> Function(Message)? preMessageSending,
-    StreamMessageInputController? messageInputController,
+    StreamMessageComposerController? messageComposerController,
     FocusNode? focusNode,
     bool disableAttachments = false,
     int maxAttachmentSize = kDefaultMaxAttachmentSize,
@@ -101,7 +101,7 @@ class StreamMessageComposer extends StatelessWidget {
   }) : props = MessageComposerProps(
          onMessageSent: onMessageSent,
          preMessageSending: preMessageSending,
-         messageInputController: messageInputController,
+         messageComposerController: messageComposerController,
          focusNode: focusNode,
          disableAttachments: disableAttachments,
          maxAttachmentSize: maxAttachmentSize,
@@ -162,7 +162,7 @@ class MessageComposerProps {
   const MessageComposerProps({
     this.onMessageSent,
     this.preMessageSending,
-    this.messageInputController,
+    this.messageComposerController,
     this.focusNode,
     this.disableAttachments = false,
     this.maxAttachmentSize = kDefaultMaxAttachmentSize,
@@ -206,8 +206,8 @@ class MessageComposerProps {
   /// Use this to transform the message.
   final FutureOr<Message> Function(Message)? preMessageSending;
 
-  /// The text controller of the TextField.
-  final StreamMessageInputController? messageInputController;
+  /// The controller for the message composer.
+  final StreamMessageComposerController? messageComposerController;
 
   /// The focus node associated to the TextField.
   final FocusNode? focusNode;
@@ -323,7 +323,7 @@ class MessageComposerProps {
   /// Resolves the placeholder text shown inside the input field.
   ///
   /// Receives the current [MessageInputPlaceholder] state (resolved from the
-  /// active [StreamMessageInputController]) and returns the string to display.
+  /// active [StreamMessageComposerController]) and returns the string to display.
   /// Override this callback to provide custom placeholders for
   /// backend-defined commands or any other input state — pattern-match
   /// exhaustively over the sealed [MessageInputPlaceholder] cases:
@@ -486,18 +486,19 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
   FocusNode get _effectiveFocusNode => widget.props.focusNode ?? (_focusNode ??= FocusNode());
   FocusNode? _focusNode;
 
-  StreamMessageInputController get _effectiveController => widget.props.messageInputController ?? _controller!.value;
-  StreamRestorableMessageInputController? _controller;
+  StreamMessageComposerController get _effectiveController =>
+      widget.props.messageComposerController ?? _controller!.value;
+  StreamRestorableMessageComposerController? _controller;
 
   void _createLocalController([Message? message]) {
     assert(_controller == null, '');
-    _controller = StreamRestorableMessageInputController(message: message);
+    _controller = StreamRestorableMessageComposerController(message: message);
   }
 
   void _registerController() {
     assert(_controller != null, '');
 
-    registerForRestoration(_controller!, 'messageInputController');
+    registerForRestoration(_controller!, 'messageComposerController');
     _initialiseEffectiveController();
   }
 
@@ -524,7 +525,7 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
       parent: _pickerAnimationController,
       curve: Curves.easeInOut,
     );
-    if (widget.props.messageInputController == null) {
+    if (widget.props.messageComposerController == null) {
       _createLocalController();
     } else {
       _initialiseEffectiveController();
@@ -622,12 +623,22 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
   @override
   void didUpdateWidget(covariant DefaultStreamMessageComposer oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.props.messageInputController == null && oldWidget.props.messageInputController != null) {
-      _createLocalController(oldWidget.props.messageInputController!.message);
-    } else if (widget.props.messageInputController != null && oldWidget.props.messageInputController == null) {
+    if (widget.props.messageComposerController == null && oldWidget.props.messageComposerController != null) {
+      _createLocalController(oldWidget.props.messageComposerController!.message);
+    } else if (widget.props.messageComposerController != null && oldWidget.props.messageComposerController == null) {
       unregisterFromRestoration(_controller!);
       _controller!.dispose();
       _controller = null;
+      _initialiseEffectiveController();
+    } else if (widget.props.messageComposerController != null &&
+        oldWidget.props.messageComposerController != null &&
+        widget.props.messageComposerController != oldWidget.props.messageComposerController) {
+      // External controller instance was swapped — detach all listeners from
+      // the old instance and rebind them to the new one.
+      oldWidget.props.messageComposerController!
+        ..removeListener(_onChangedThrottled)
+        ..removeListener(_onChangedDebounced)
+        ..removeListener(_syncMessageToPicker);
       _initialiseEffectiveController();
     }
 
@@ -741,7 +752,7 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
   Widget _buildAutocompleteMessageInput(BuildContext context) {
     return StreamAutocomplete(
       focusNode: _effectiveFocusNode,
-      messageEditingController: _effectiveController,
+      messageComposerController: _effectiveController,
       fieldViewBuilder: _buildMessageInput,
       autocompleteTriggers: [
         ...widget.props.customAutocompleteTriggers,
@@ -752,7 +763,7 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
               (
                 context,
                 autocompleteQuery,
-                messageEditingController,
+                messageComposerController,
               ) {
                 final query = autocompleteQuery.query;
                 return StreamCommandAutocompleteOptions(
@@ -773,7 +784,7 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
                 (
                   context,
                   autocompleteQuery,
-                  messageEditingController,
+                  messageComposerController,
                 ) {
                   final query = autocompleteQuery.query;
                   return StreamMentionAutocompleteOptions(
@@ -797,7 +808,7 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
 
   Widget _buildMessageInput(
     BuildContext context,
-    StreamMessageEditingController controller,
+    StreamMessageComposerController controller,
     FocusNode focusNode,
   ) {
     final currentUserId = StreamChat.of(context).currentUser?.id;
@@ -1163,7 +1174,7 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     return response;
   }
 
-  /// Adds an attachment to the [messageInputController.attachments] map
+  /// Adds an attachment to the [messageComposerController.attachments] list
   void _addAttachments(Iterable<Attachment> attachments) {
     if (widget.props.attachmentLimit case final limit?) {
       final length = _effectiveController.attachments.length + attachments.length;

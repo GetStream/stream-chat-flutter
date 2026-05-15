@@ -103,7 +103,7 @@ void main() {
         channelState: channelState,
       );
 
-      final controller = StreamMessageInputController();
+      final controller = StreamMessageComposerController();
 
       return MaterialApp(
         theme: docsScreenshotsTheme(),
@@ -125,7 +125,7 @@ void main() {
               body: Column(
                 children: [
                   const Expanded(child: SizedBox()),
-                  StreamMessageComposer(messageInputController: controller),
+                  StreamMessageComposer(messageComposerController: controller),
                 ],
               ),
             ),
@@ -208,7 +208,7 @@ void main() {
         channelState: channelState,
       );
 
-      final controller = StreamMessageInputController()
+      final controller = StreamMessageComposerController()
         ..quotedMessage = Message(
           id: 'quoted-msg',
           text: 'This is the original message',
@@ -218,7 +218,7 @@ void main() {
       return _buildMessageInputScaffold(
         client: client,
         channel: channel,
-        messageInput: StreamMessageComposer(messageInputController: controller),
+        messageInput: StreamMessageComposer(messageComposerController: controller),
       );
     },
   );

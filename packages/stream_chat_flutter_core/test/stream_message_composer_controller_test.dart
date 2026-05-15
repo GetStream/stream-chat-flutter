@@ -1,21 +1,23 @@
 // ignore_for_file: cascade_invocations
 
+import 'dart:convert';
+
 import 'package:fake_async/fake_async.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/stream_chat.dart';
-import 'package:stream_chat_flutter_core/src/stream_message_input_controller.dart';
+import 'package:stream_chat_flutter_core/src/stream_message_composer_controller.dart';
 
 class ValueNotifierListenerMock extends Mock {
   void call();
 }
 
 void main() {
-  late StreamMessageInputController controller;
+  late StreamMessageComposerController controller;
 
   setUp(() {
-    controller = StreamMessageInputController();
+    controller = StreamMessageComposerController();
   });
 
   tearDown(() {
@@ -31,7 +33,7 @@ void main() {
     });
 
     test('fromText constructor initializes with proper text', () {
-      final textController = StreamMessageInputController.fromText('Hello');
+      final textController = StreamMessageComposerController.fromText('Hello');
       expect(textController.text, 'Hello');
       textController.dispose();
     });
@@ -41,7 +43,7 @@ void main() {
         Attachment(type: 'image', title: 'test'),
       ];
 
-      final controller = StreamMessageInputController.fromAttachments(
+      final controller = StreamMessageComposerController.fromAttachments(
         attachments,
       );
 
@@ -56,7 +58,7 @@ void main() {
         },
       };
 
-      final controller = StreamMessageInputController(
+      final controller = StreamMessageComposerController(
         textPatternStyle: patterns,
       );
 
@@ -458,13 +460,13 @@ void main() {
       );
 
       expect(
-        () => StreamMessageInputController(message: existingMessage),
+        () => StreamMessageComposerController(message: existingMessage),
         throwsA(isA<AssertionError>()),
       );
     });
 
     test('constructing with a fresh message does not enter edit mode', () {
-      final editController = StreamMessageInputController.fromText('Some draft');
+      final editController = StreamMessageComposerController.fromText('Some draft');
       addTearDown(editController.dispose);
 
       expect(editController.messageBeingEdited, isNull);
@@ -526,7 +528,7 @@ void main() {
     });
 
     test('cancelEditMessage restores the draft that was in the composer before edit', () {
-      final draftController = StreamMessageInputController.fromText('Draft text');
+      final draftController = StreamMessageComposerController.fromText('Draft text');
       addTearDown(draftController.dispose);
 
       draftController.editMessage(Message(id: 'msg-1', text: 'Original text'));
@@ -538,7 +540,7 @@ void main() {
     });
 
     test('editMessage called again during an edit keeps the original pre-edit draft', () {
-      final draftController = StreamMessageInputController.fromText('Draft text');
+      final draftController = StreamMessageComposerController.fromText('Draft text');
       addTearDown(draftController.dispose);
 
       draftController.editMessage(Message(id: 'msg-1', text: 'Original text'));
@@ -552,7 +554,7 @@ void main() {
     });
 
     test('cancelEditMessage without an active edit is a no-op', () {
-      final draftController = StreamMessageInputController.fromText('Draft text');
+      final draftController = StreamMessageComposerController.fromText('Draft text');
       addTearDown(draftController.dispose);
 
       draftController.cancelEditMessage();
@@ -576,7 +578,7 @@ void main() {
     });
 
     test('reset restores the initial message', () {
-      final initialController = StreamMessageInputController(
+      final initialController = StreamMessageComposerController(
         message: Message(text: 'Initial text'),
       );
 
@@ -589,7 +591,7 @@ void main() {
 
     test('reset with resetId=false keeps the same message ID', () {
       final message = Message(id: 'message-id', text: 'Initial text');
-      final initialController = StreamMessageInputController(message: message);
+      final initialController = StreamMessageComposerController(message: message);
 
       initialController.text = 'Updated text';
       initialController.reset(resetId: false);
@@ -649,7 +651,7 @@ void main() {
     });
   });
 
-  group('RestorableMessageInputController', () {
+  group('RestorableMessageComposerController', () {
     testWidgets(
       'restores old state correctly',
       (tester) async {
@@ -691,6 +693,122 @@ void main() {
         expect(find.text(text), findsOneWidget);
       },
     );
+
+    testWidgets(
+      'edit mode survives restartAndRestore',
+      (tester) async {
+        final stateKey = GlobalKey<_RestorableEditWidgetState>();
+
+        await tester.pumpWidget(
+          MaterialApp(
+            restorationScopeId: 'app',
+            home: _RestorableEditWidget(key: stateKey),
+          ),
+        );
+
+        await tester.pumpAndSettle();
+
+        stateKey.currentState!.controller.value
+          ..editMessage(Message(id: 'msg-1', text: 'Original message'))
+          ..text = 'My edits';
+        await tester.pumpAndSettle();
+
+        // Verify edit mode is active and rendering before the restart.
+        expect(find.text('editing:msg-1:My edits'), findsOneWidget);
+
+        await tester.restartAndRestore();
+
+        // After restoration both the edit context and the composed text must
+        // still be present.
+        expect(find.text('editing:msg-1:My edits'), findsOneWidget);
+      },
+    );
+
+    group('fromPrimitives', () {
+      // fromPrimitives is a pure factory: it does not access `this.value`, so
+      // it can be called directly without going through the Flutter restoration
+      // machinery.
+      late StreamRestorableMessageComposerController restorable;
+
+      setUp(() => restorable = StreamRestorableMessageComposerController());
+      tearDown(() => restorable.dispose());
+
+      StreamMessageComposerController restore(Map<String, dynamic> data) {
+        final controller = restorable.fromPrimitives(jsonEncode(data));
+        addTearDown(controller.dispose);
+        return controller;
+      }
+
+      test('restores text and attachments from a normal draft', () {
+        final controller = restore({
+          'message': Message(
+            text: 'Hello!',
+            // Attachment.id is a client-side tracking field that is not
+            // serialised by the SDK, so verify the type survives instead.
+            attachments: [Attachment(type: 'image')],
+          ).toJson(),
+        });
+
+        expect(controller.text, 'Hello!');
+        expect(controller.attachments, hasLength(1));
+        expect(controller.attachments.first.type, 'image');
+        expect(controller.message.state.isInitial, isTrue);
+        expect(controller.isEditing, isFalse);
+      });
+
+      test('always resets message state to initial, even for old serialized non-initial state', () {
+        // Old format stored a message_state key alongside the message. New code
+        // ignores it and always constructs with MessageState.initial().
+        final controller = restore({
+          'message': Message(text: 'Hi').toJson(),
+          'message_state': MessageState.sending.toJson(),
+        });
+
+        expect(controller.message.state.isInitial, isTrue);
+        expect(controller.isEditing, isFalse);
+      });
+
+      test('restores isEditing, messageBeingEdited, and current composed text', () {
+        final messageBeingEdited = Message(id: 'msg-1', text: 'Original');
+
+        final controller = restore({
+          'message': messageBeingEdited
+              .copyWith(
+                text: 'Edited text',
+                state: MessageState.updating,
+              )
+              .toJson(),
+          'message_being_edited': messageBeingEdited.toJson(),
+          'message_before_edit': Message(text: 'Draft before edit').toJson(),
+        });
+
+        expect(controller.isEditing, isTrue);
+        expect(controller.messageBeingEdited?.id, 'msg-1');
+        expect(controller.messageBeingEdited?.text, 'Original');
+        expect(controller.text, 'Edited text');
+      });
+
+      test('cancelEditMessage after restore returns to the pre-edit draft', () {
+        final messageBeingEdited = Message(id: 'msg-1', text: 'Original');
+
+        final controller = restore({
+          'message': messageBeingEdited
+              .copyWith(
+                text: 'Edited text',
+                state: MessageState.updating,
+              )
+              .toJson(),
+          'message_being_edited': messageBeingEdited.toJson(),
+          'message_before_edit': Message(text: 'Draft before edit').toJson(),
+        });
+
+        controller.cancelEditMessage();
+
+        expect(controller.isEditing, isFalse);
+        expect(controller.text, 'Draft before edit');
+        expect(controller.message.state.isInitial, isTrue);
+      });
+    });
   });
 }
 
@@ -702,7 +820,7 @@ class _RestorableWidget extends StatefulWidget {
 }
 
 class _RestorableWidgetState extends State<_RestorableWidget> with RestorationMixin {
-  final controller = StreamRestorableMessageInputController();
+  final controller = StreamRestorableMessageComposerController();
 
   @override
   String get restorationId => 'widget';
@@ -729,6 +847,48 @@ class _RestorableWidgetState extends State<_RestorableWidget> with RestorationMi
           value.text,
           textDirection: TextDirection.ltr,
         );
+      },
+    );
+  }
+}
+
+class _RestorableEditWidget extends StatefulWidget {
+  const _RestorableEditWidget({super.key});
+
+  @override
+  State<_RestorableEditWidget> createState() => _RestorableEditWidgetState();
+}
+
+class _RestorableEditWidgetState extends State<_RestorableEditWidget> with RestorationMixin {
+  final controller = StreamRestorableMessageComposerController();
+
+  @override
+  String get restorationId => 'edit_widget';
+
+  @override
+  void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
+    registerForRestoration(controller, 'controller');
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // ListenableBuilder ensures setState is called when the controller changes,
+    // which causes RestorationMixin to flush the latest primitives to the
+    // bucket before restartAndRestore captures the state.
+    return ListenableBuilder(
+      listenable: controller,
+      builder: (context, _) {
+        final value = controller.value;
+        // Encode the relevant state into a single text node so tests can
+        // use find.text() to assert on the restored state.
+        final label = value.isEditing ? 'editing:${value.messageBeingEdited?.id}:${value.text}' : 'draft:${value.text}';
+        return Text(label, textDirection: TextDirection.ltr);
       },
     );
   }

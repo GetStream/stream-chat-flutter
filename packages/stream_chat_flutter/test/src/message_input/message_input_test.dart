@@ -223,7 +223,7 @@ void main() {
         final quotedMessage = Message(text: 'I am a quoted message');
         final initialMessage = Message(quotedMessage: quotedMessage);
 
-        final messageInputController = StreamMessageInputController(
+        final messageInputController = StreamMessageComposerController(
           message: initialMessage,
         );
 
@@ -237,7 +237,7 @@ void main() {
                 channel: channel,
                 child: Scaffold(
                   bottomNavigationBar: StreamMessageComposer(
-                    messageInputController: messageInputController,
+                    messageComposerController: messageInputController,
                     onQuotedMessageCleared: () {
                       onQuotedMessageClearedCalled = true;
                     },
@@ -271,7 +271,7 @@ void main() {
         final quotedMessage = Message(text: 'I am a quoted message');
         final initialMessage = Message(quotedMessage: quotedMessage);
 
-        final messageInputController = StreamMessageInputController(
+        final messageInputController = StreamMessageComposerController(
           message: initialMessage,
         );
 
@@ -285,7 +285,7 @@ void main() {
                 channel: channel,
                 child: Scaffold(
                   bottomNavigationBar: StreamMessageComposer(
-                    messageInputController: messageInputController,
+                    messageComposerController: messageInputController,
                     onQuotedMessageCleared: () {
                       onQuotedMessageClearedCalled = true;
                     },
@@ -368,7 +368,7 @@ void main() {
           createdAt: DateTime.now(),
         );
 
-        final messageInputController = StreamMessageInputController()..editMessage(existingMessage);
+        final messageInputController = StreamMessageComposerController()..editMessage(existingMessage);
         addTearDown(messageInputController.dispose);
 
         final key = GlobalKey<DefaultStreamMessageComposerState>();
@@ -383,7 +383,7 @@ void main() {
                   bottomNavigationBar: DefaultStreamMessageComposer(
                     key: key,
                     props: MessageComposerProps(
-                      messageInputController: messageInputController,
+                      messageComposerController: messageInputController,
                     ),
                   ),
                 ),
@@ -410,7 +410,7 @@ void main() {
           (_) async => SendMessageResponse()..message = Message(text: 'Hello'),
         );
 
-        final messageInputController = StreamMessageInputController(
+        final messageInputController = StreamMessageComposerController(
           message: Message(text: 'Hello'),
         );
         addTearDown(messageInputController.dispose);
@@ -427,7 +427,7 @@ void main() {
                   bottomNavigationBar: DefaultStreamMessageComposer(
                     key: key,
                     props: MessageComposerProps(
-                      messageInputController: messageInputController,
+                      messageComposerController: messageInputController,
                     ),
                   ),
                 ),
@@ -535,7 +535,7 @@ void main() {
       'should show DmCheckboxListTile when in a thread and hideSendAsDm is false',
       (tester) async {
         // Set up a message controller with a parent message ID (thread)
-        final messageInputController = StreamMessageInputController(
+        final messageInputController = StreamMessageComposerController(
           message: Message(parentId: 'parent-message-id'),
         );
 
@@ -547,7 +547,7 @@ void main() {
                 channel: channel,
                 child: Scaffold(
                   bottomNavigationBar: StreamMessageComposer(
-                    messageInputController: messageInputController,
+                    messageComposerController: messageInputController,
                   ),
                 ),
               ),
@@ -565,7 +565,7 @@ void main() {
       'should toggle showInChannel value when DmCheckboxListTile is tapped',
       (tester) async {
         // Set up a message controller with a parent message ID (thread)
-        final messageInputController = StreamMessageInputController(
+        final messageInputController = StreamMessageComposerController(
           message: Message(parentId: 'parent-message-id'),
         );
 
@@ -582,7 +582,7 @@ void main() {
                 channel: channel,
                 child: Scaffold(
                   bottomNavigationBar: StreamMessageComposer(
-                    messageInputController: messageInputController,
+                    messageComposerController: messageInputController,
                   ),
                 ),
               ),
@@ -653,7 +653,7 @@ void main() {
             text: 'Original message',
             user: User(id: 'other-user'),
           );
-          final controller = StreamMessageInputController(
+          final controller = StreamMessageComposerController(
             message: Message(
               quotedMessage: quotedMessage,
               quotedMessageId: quotedMessage.id,
@@ -671,7 +671,7 @@ void main() {
                   channel: channel,
                   child: Scaffold(
                     bottomNavigationBar: StreamMessageComposer(
-                      messageInputController: controller,
+                      messageComposerController: controller,
                       onQuotedMessageCleared: () {
                         onQuotedMessageClearedCalled = true;
                       },
@@ -705,7 +705,7 @@ void main() {
             text: 'Original message',
             user: User(id: 'other-user'),
           );
-          final controller = StreamMessageInputController(
+          final controller = StreamMessageComposerController(
             message: Message(
               quotedMessage: quotedMessage,
               quotedMessageId: quotedMessage.id,
@@ -723,7 +723,7 @@ void main() {
                   channel: channel,
                   child: Scaffold(
                     bottomNavigationBar: StreamMessageComposer(
-                      messageInputController: controller,
+                      messageComposerController: controller,
                       onQuotedMessageCleared: () {
                         onQuotedMessageClearedCalled = true;
                       },
@@ -757,7 +757,7 @@ void main() {
             text: 'Original text',
             user: User(id: 'other-user'),
           );
-          final controller = StreamMessageInputController(
+          final controller = StreamMessageComposerController(
             message: Message(
               quotedMessage: quotedMessage,
               quotedMessageId: quotedMessage.id,
@@ -773,7 +773,7 @@ void main() {
                   channel: channel,
                   child: Scaffold(
                     bottomNavigationBar: StreamMessageComposer(
-                      messageInputController: controller,
+                      messageComposerController: controller,
                     ),
                   ),
                 ),
@@ -809,7 +809,7 @@ void main() {
             text: 'Original text',
             user: User(id: 'other-user'),
           );
-          final controller = StreamMessageInputController(
+          final controller = StreamMessageComposerController(
             message: Message(
               quotedMessage: quotedMessage,
               quotedMessageId: quotedMessage.id,
@@ -825,7 +825,7 @@ void main() {
                   channel: channel,
                   child: Scaffold(
                     bottomNavigationBar: StreamMessageComposer(
-                      messageInputController: controller,
+                      messageComposerController: controller,
                     ),
                   ),
                 ),
@@ -860,7 +860,7 @@ void main() {
             text: 'Original text',
             user: User(id: 'user-id'),
           );
-          final controller = StreamMessageInputController()..editMessage(existingMessage);
+          final controller = StreamMessageComposerController()..editMessage(existingMessage);
           addTearDown(controller.dispose);
 
           await tester.pumpWidget(
@@ -871,7 +871,7 @@ void main() {
                   channel: channel,
                   child: Scaffold(
                     bottomNavigationBar: StreamMessageComposer(
-                      messageInputController: controller,
+                      messageComposerController: controller,
                     ),
                   ),
                 ),
@@ -908,7 +908,7 @@ void main() {
             text: 'Original text',
             user: User(id: 'user-id'),
           );
-          final controller = StreamMessageInputController()..editMessage(existingMessage);
+          final controller = StreamMessageComposerController()..editMessage(existingMessage);
           addTearDown(controller.dispose);
 
           await tester.pumpWidget(
@@ -919,7 +919,7 @@ void main() {
                   channel: channel,
                   child: Scaffold(
                     bottomNavigationBar: StreamMessageComposer(
-                      messageInputController: controller,
+                      messageComposerController: controller,
                     ),
                   ),
                 ),
@@ -952,7 +952,7 @@ void main() {
             text: 'Being edited',
             user: User(id: 'user-id'),
           );
-          final controller = StreamMessageInputController()..editMessage(existingMessage);
+          final controller = StreamMessageComposerController()..editMessage(existingMessage);
           addTearDown(controller.dispose);
 
           await tester.pumpWidget(
@@ -963,7 +963,7 @@ void main() {
                   channel: channel,
                   child: Scaffold(
                     bottomNavigationBar: StreamMessageComposer(
-                      messageInputController: controller,
+                      messageComposerController: controller,
                     ),
                   ),
                 ),
@@ -996,7 +996,7 @@ void main() {
             text: 'Being edited',
             user: User(id: 'user-id'),
           );
-          final controller = StreamMessageInputController()..editMessage(existingMessage);
+          final controller = StreamMessageComposerController()..editMessage(existingMessage);
           addTearDown(controller.dispose);
 
           await tester.pumpWidget(
@@ -1007,7 +1007,7 @@ void main() {
                   channel: channel,
                   child: Scaffold(
                     bottomNavigationBar: StreamMessageComposer(
-                      messageInputController: controller,
+                      messageComposerController: controller,
                     ),
                   ),
                 ),

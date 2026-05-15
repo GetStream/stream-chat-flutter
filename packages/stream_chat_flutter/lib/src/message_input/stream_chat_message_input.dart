@@ -38,7 +38,7 @@ class StreamChatMessageInput extends StatefulWidget {
   });
 
   /// The controller for the message composer.
-  final StreamMessageInputController? controller;
+  final StreamMessageComposerController? controller;
 
   /// The callback for when the send button is pressed.
   final VoidCallback onSendPressed;
@@ -59,7 +59,7 @@ class StreamChatMessageInput extends StatefulWidget {
   ///
   /// May be `null` to render the input with no placeholder. The wrapping
   /// [StreamMessageComposer] resolves this string reactively from its
-  /// [StreamMessageInputController] via [MessageInputPlaceholder.resolve] and
+  /// [StreamMessageComposerController] via [MessageInputPlaceholder.resolve] and
   /// [StreamMessageComposer.placeholderBuilder]; when using
   /// [StreamChatMessageInput] directly, supply the string yourself.
   final String? placeholder;
@@ -103,7 +103,7 @@ class StreamChatMessageInput extends StatefulWidget {
 }
 
 class _StreamChatMessageInputState extends State<StreamChatMessageInput> {
-  late StreamMessageInputController _controller;
+  late StreamMessageComposerController _controller;
 
   @override
   void initState() {
@@ -127,7 +127,7 @@ class _StreamChatMessageInputState extends State<StreamChatMessageInput> {
   }
 
   void _initController() {
-    _controller = widget.controller ?? StreamMessageInputController();
+    _controller = widget.controller ?? StreamMessageComposerController();
   }
 
   @override
@@ -194,7 +194,7 @@ class _StreamChatMessageInputContent extends StatelessWidget {
   });
 
   final StreamChatMessageInput widget;
-  final StreamMessageInputController inputController;
+  final StreamMessageComposerController inputController;
   final AudioRecorderState audioRecorderState;
 
   static const double _lockRecordThreshold = 50;

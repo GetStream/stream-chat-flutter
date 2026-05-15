@@ -51,7 +51,7 @@ class MessageComposerComponentProps {
   });
 
   /// The controller for the message composer component.
-  final StreamMessageInputController controller;
+  final StreamMessageComposerController controller;
 
   /// Whether the message composer is floating.
   final bool isFloating;

@@ -26,7 +26,7 @@ class _DefaultStreamMessageComposerInputHeader extends StatelessWidget {
   const _DefaultStreamMessageComposerInputHeader({required this.props});
 
   final MessageComposerComponentProps props;
-  StreamMessageInputController get controller => props.controller;
+  StreamMessageComposerController get controller => props.controller;
 
   @override
   Widget build(BuildContext context) {

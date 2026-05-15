@@ -7,9 +7,6 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 export 'stream_command_autocomplete_options.dart';
 export 'stream_mention_autocomplete_options.dart';
 
-/// {@macro stream_chat_flutter.StreamMessageInputController}
-typedef StreamMessageEditingController = StreamMessageInputController;
-
 /// Positions the [AutocompleteTrigger] options around the [TextField] or
 /// [TextFormField] that triggered the autocomplete.
 enum OptionsAlignment {
@@ -49,7 +46,7 @@ enum OptionsAlignment {
 typedef StreamAutocompleteFieldViewBuilder =
     Widget Function(
       BuildContext context,
-      StreamMessageEditingController messageEditingController,
+      StreamMessageComposerController messageComposerController,
       FocusNode focusNode,
     );
 
@@ -63,7 +60,7 @@ typedef StreamAutocompleteOptionsViewBuilder =
     Widget Function(
       BuildContext context,
       StreamAutocompleteQuery autocompleteQuery,
-      StreamMessageEditingController messageEditingController,
+      StreamMessageComposerController messageComposerController,
     );
 
 /// The query to determine the autocomplete options.
@@ -204,19 +201,19 @@ class StreamAutocomplete extends StatefulWidget {
   const StreamAutocomplete({
     super.key,
     this.focusNode,
-    this.messageEditingController,
+    this.messageComposerController,
     required this.autocompleteTriggers,
     this.fieldViewBuilder = _defaultFieldViewBuilder,
     this.optionsAlignment = OptionsAlignment.above,
     this.debounceDuration = const Duration(milliseconds: 300),
-  }) : assert((focusNode == null) == (messageEditingController == null), '');
+  }) : assert((focusNode == null) == (messageComposerController == null), '');
 
   /// The triggers that trigger autocomplete.
   final Iterable<StreamAutocompleteTrigger> autocompleteTriggers;
 
   /// Builds the field whose input is used to get the options.
   ///
-  /// Pass the provided [StreamMessageEditingController] to the field built
+  /// Pass the provided [StreamMessageComposerController] to the field built
   /// here so that StreamAutocomplete can listen for changes.
   final StreamAutocompleteFieldViewBuilder fieldViewBuilder;
 
@@ -230,17 +227,17 @@ class StreamAutocomplete extends StatefulWidget {
   /// When following this pattern, [fieldViewBuilder] can return
   /// `EmptyWidget()` so that nothing is drawn where the text field would
   /// normally be. A separate text field can be created elsewhere, and a
-  /// FocusNode and StreamMessageEditingController can be passed both to that
+  /// FocusNode and StreamMessageComposerController can be passed both to that
   /// text field and to StreamAutocomplete.
   ///
-  /// If this parameter is not null, then [messageEditingController] must also
+  /// If this parameter is not null, then [messageComposerController] must also
   /// be not null.
   final FocusNode? focusNode;
 
-  /// The [StreamMessageEditingController] that is used for the text field.
+  /// The [StreamMessageComposerController] that is used for the text field.
   ///
   /// If this parameter is not null, then [focusNode] must also be not null.
-  final StreamMessageEditingController? messageEditingController;
+  final StreamMessageComposerController? messageComposerController;
 
   /// The alignment of the options.
   ///
@@ -248,19 +245,19 @@ class StreamAutocomplete extends StatefulWidget {
   final OptionsAlignment optionsAlignment;
 
   /// The duration of the debounce period for the
-  /// [StreamMessageEditingController].
+  /// [StreamMessageComposerController].
   ///
   /// The default value is [300ms].
   final Duration debounceDuration;
 
   static Widget _defaultFieldViewBuilder(
     BuildContext context,
-    StreamMessageEditingController messageEditingController,
+    StreamMessageComposerController messageComposerController,
     FocusNode focusNode,
   ) {
     return _StreamAutocompleteField(
       focusNode: focusNode,
-      messageEditingController: messageEditingController,
+      messageComposerController: messageComposerController,
     );
   }
 
@@ -276,7 +273,7 @@ class StreamAutocomplete extends StatefulWidget {
 }
 
 class _StreamAutocompleteState extends State<StreamAutocomplete> {
-  late StreamMessageEditingController _messageEditingController;
+  late StreamMessageComposerController _messageComposerController;
   late FocusNode _focusNode;
 
   StreamAutocompleteQuery? _currentQuery;
@@ -305,7 +302,7 @@ class _StreamAutocompleteState extends State<StreamAutocomplete> {
     if (query == null || trigger == null) return;
 
     final querySelection = query.selection;
-    final text = _messageEditingController.text;
+    final text = _messageComposerController.text;
 
     var start = querySelection.baseOffset;
     if (!keepTrigger) start -= 1;
@@ -325,7 +322,7 @@ class _StreamAutocompleteState extends State<StreamAutocomplete> {
     final newText = text.replaceRange(start, end, option);
     final newSelection = TextSelection.collapsed(offset: selectionOffset);
 
-    _messageEditingController.textEditingValue = TextEditingValue(
+    _messageComposerController.textEditingValue = TextEditingValue(
       text: newText,
       selection: newSelection,
     );
@@ -372,11 +369,11 @@ class _StreamAutocompleteState extends State<StreamAutocomplete> {
     return null;
   }
 
-  // Called when _textEditingController changes.
+  // Called when _messageComposerController changes.
   late final _onChangedField = debounce(
     () {
-      final messageValue = _messageEditingController.message;
-      final textEditingValue = _messageEditingController.textEditingValue;
+      final messageValue = _messageComposerController.message;
+      final textEditingValue = _messageComposerController.textEditingValue;
 
       // If the content has not changed, then there is nothing to do.
       if (textEditingValue.text == _lastFieldText) return;
@@ -416,28 +413,28 @@ class _StreamAutocompleteState extends State<StreamAutocomplete> {
     if (mounted) setState(() {});
   }
 
-  // Handle a potential change in textEditingController by properly disposing of
-  // the old one and setting up the new one, if needed.
+  // Handle a potential change in messageComposerController by properly
+  // disposing of the old one and setting up the new one, if needed.
   void _updateTextEditingController(
-    StreamMessageEditingController? old,
-    StreamMessageEditingController? current,
+    StreamMessageComposerController? old,
+    StreamMessageComposerController? current,
   ) {
     if ((old == null && current == null) || old == current) {
       return;
     }
     if (old == null) {
-      _messageEditingController
+      _messageComposerController
         ..removeListener(_onChangedField)
         ..dispose();
-      _messageEditingController = current!;
+      _messageComposerController = current!;
     } else if (current == null) {
-      _messageEditingController.removeListener(_onChangedField);
-      _messageEditingController = StreamMessageEditingController();
+      _messageComposerController.removeListener(_onChangedField);
+      _messageComposerController = StreamMessageComposerController();
     } else {
-      _messageEditingController.removeListener(_onChangedField);
-      _messageEditingController = current;
+      _messageComposerController.removeListener(_onChangedField);
+      _messageComposerController = current;
     }
-    _messageEditingController.addListener(_onChangedField);
+    _messageComposerController.addListener(_onChangedField);
   }
 
   // Handle a potential change in focusNode by properly disposing of the old one
@@ -464,8 +461,8 @@ class _StreamAutocompleteState extends State<StreamAutocomplete> {
   @override
   void initState() {
     super.initState();
-    _messageEditingController = widget.messageEditingController ?? StreamMessageEditingController();
-    _messageEditingController.addListener(_onChangedField);
+    _messageComposerController = widget.messageComposerController ?? StreamMessageComposerController();
+    _messageComposerController.addListener(_onChangedField);
     _focusNode = widget.focusNode ?? FocusNode();
     _focusNode.addListener(_onChangedFocus);
   }
@@ -474,17 +471,17 @@ class _StreamAutocompleteState extends State<StreamAutocomplete> {
   void didUpdateWidget(StreamAutocomplete oldWidget) {
     super.didUpdateWidget(oldWidget);
     _updateTextEditingController(
-      oldWidget.messageEditingController,
-      widget.messageEditingController,
+      oldWidget.messageComposerController,
+      widget.messageComposerController,
     );
     _updateFocusNode(oldWidget.focusNode, widget.focusNode);
   }
 
   @override
   void dispose() {
-    _messageEditingController.removeListener(_onChangedField);
-    if (widget.messageEditingController == null) {
-      _messageEditingController.dispose();
+    _messageComposerController.removeListener(_onChangedField);
+    if (widget.messageComposerController == null) {
+      _messageComposerController.dispose();
     }
     _focusNode.removeListener(_onChangedFocus);
     if (widget.focusNode == null) {
@@ -508,7 +505,7 @@ class _StreamAutocompleteState extends State<StreamAutocomplete> {
                 child: _currentTrigger!.optionsViewBuilder(
                   context,
                   _currentQuery!,
-                  _messageEditingController,
+                  _messageComposerController,
                 ),
               )
             : null;
@@ -519,7 +516,7 @@ class _StreamAutocompleteState extends State<StreamAutocomplete> {
           portalFollower: optionViewBuilder,
           child: widget.fieldViewBuilder(
             context,
-            _messageEditingController,
+            _messageComposerController,
             _focusNode,
           ),
         );
@@ -532,17 +529,17 @@ class _StreamAutocompleteState extends State<StreamAutocomplete> {
 class _StreamAutocompleteField extends StatelessWidget {
   const _StreamAutocompleteField({
     required this.focusNode,
-    required this.messageEditingController,
+    required this.messageComposerController,
   });
 
   final FocusNode focusNode;
 
-  final StreamMessageEditingController messageEditingController;
+  final StreamMessageComposerController messageComposerController;
 
   @override
   Widget build(BuildContext context) {
     return StreamMessageTextField(
-      controller: messageEditingController,
+      controller: messageComposerController,
       focusNode: focusNode,
     );
   }

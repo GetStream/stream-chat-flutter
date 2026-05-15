@@ -47,14 +47,14 @@ class DefaultStreamMessageComposerInputCenter extends StatelessWidget {
         RecordStateRecordingLocked() => MessageComposerRecordingLocked(
           audioRecorderController: recorder,
           feedback: props.feedback,
-          messageInputController: props.controller,
+          messageComposerController: props.controller,
           sendMessageCallback: sendMessageCallback,
           state: audioState,
         ),
         RecordStateStopped() => MessageComposerRecordingStopped(
           audioRecorderController: recorder,
           feedback: props.feedback,
-          messageInputController: props.controller,
+          messageComposerController: props.controller,
           sendMessageCallback: sendMessageCallback,
           recordingState: audioState,
         ),
