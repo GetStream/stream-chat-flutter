@@ -449,19 +449,49 @@ class StreamRestorableMessageComposerController extends RestorableChangeNotifier
 
   @override
   StreamMessageComposerController fromPrimitives(Object? data) {
-    final restoredData = json.decode(data! as String);
+    final restoredData = json.decode(data! as String) as Map<String, dynamic>;
 
-    final message = Message.fromJson(restoredData['message']);
-    final state = MessageState.fromJson(restoredData['message_state']);
+    final currentMessage = Message.fromJson(restoredData['message'] as Map<String, dynamic>);
 
-    return StreamMessageComposerController(message: message.copyWith(state: state));
+    final messageBeingEditedJson = restoredData['message_being_edited'];
+    if (messageBeingEditedJson != null) {
+      // Restore edit mode: construct the controller with the pre-edit draft,
+      // call editMessage() to re-enter edit mode, then overlay the current
+      // (possibly user-modified) composed text.
+      final messageBeingEdited = Message.fromJson(messageBeingEditedJson as Map<String, dynamic>);
+      final messageBeforeEdit = Message.fromJson(
+        restoredData['message_before_edit'] as Map<String, dynamic>,
+      );
+
+      final controller =
+          StreamMessageComposerController(
+              message: messageBeforeEdit.copyWith(state: const MessageState.initial()),
+            )
+            ..editMessage(messageBeingEdited)
+            // Restore any edits the user made while in edit mode.
+            ..message = currentMessage;
+      return controller;
+    }
+
+    // Normal draft: reset state to initial (the controller invariant requires
+    // it; any non-initial state serialized here is unrecoverable anyway).
+    return StreamMessageComposerController(
+      message: currentMessage.copyWith(state: const MessageState.initial()),
+    );
   }
 
   @override
-  String toPrimitives() => json.encode({
-    'message': value.message.toJson(),
-    'message_state': value.message.state.toJson(),
-  });
+  String toPrimitives() {
+    final controller = value;
+    final data = <String, dynamic>{
+      'message': controller.message.toJson(),
+    };
+    if (controller.isEditing) {
+      data['message_being_edited'] = controller.messageBeingEdited!.toJson();
+      data['message_before_edit'] = controller._messageBeforeEdit!.toJson();
+    }
+    return json.encode(data);
+  }
 }
 
 Timer _setPeriodicTimer(
