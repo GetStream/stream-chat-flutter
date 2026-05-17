@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:collection/collection.dart' show IterableExtension;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 import 'package:stream_chat_flutter/scrollable_positioned_list/src/item_positions_listener.dart';
@@ -36,6 +37,7 @@ class ScrollablePositionedList extends StatefulWidget {
     required this.itemCount,
     required this.itemBuilder,
     super.key,
+    this.itemKeyBuilder,
     this.itemScrollController,
     this.shrinkWrap = false,
     ItemPositionsListener? itemPositionsListener,
@@ -50,7 +52,6 @@ class ScrollablePositionedList extends StatefulWidget {
     this.addAutomaticKeepAlives = true,
     this.addRepaintBoundaries = true,
     this.minCacheExtent,
-    this.findChildIndexCallback,
     this.keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
   })  : itemPositionsNotifier = itemPositionsListener as ItemPositionsNotifier?,
         separatorBuilder = null;
@@ -62,8 +63,9 @@ class ScrollablePositionedList extends StatefulWidget {
     required this.itemBuilder,
     required IndexedWidgetBuilder this.separatorBuilder,
     super.key,
-    this.shrinkWrap = false,
+    this.itemKeyBuilder,
     this.itemScrollController,
+    this.shrinkWrap = false,
     ItemPositionsListener? itemPositionsListener,
     this.initialScrollIndex = 0,
     this.initialAlignment = 0,
@@ -76,7 +78,6 @@ class ScrollablePositionedList extends StatefulWidget {
     this.addAutomaticKeepAlives = true,
     this.addRepaintBoundaries = true,
     this.minCacheExtent,
-    this.findChildIndexCallback,
     this.keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
   }) : itemPositionsNotifier = itemPositionsListener as ItemPositionsNotifier?;
 
@@ -168,17 +169,25 @@ class ScrollablePositionedList extends StatefulWidget {
   /// cache extent.
   final double? minCacheExtent;
 
-  /// Called to find the new index of a child based on its key in case of reordering.
+  /// Optional stable identifier for the item at [index].
   ///
-  /// If not provided, a child widget may not map to its existing [RenderObject]
-  /// when the order of children returned from the children builder changes.
-  /// This may result in state-loss.
+  /// When non-null, [ScrollablePositionedList] uses the key for two
+  /// things:
   ///
-  /// This callback should take an input [Key], and it should return the
-  /// index of the child element with that associated key, or null if not found.
+  /// * **Anchor preservation.** The list tracks the key of the visually
+  ///   topmost item; if that key ends up at a different index in the
+  ///   next build, the internal scroll target is updated so the same
+  ///   content stays at the same screen position — no remount, no
+  ///   flicker, no separate scroll animation.
   ///
-  /// See [SliverChildBuilderDelegate.findChildIndexCallback].
-  final ChildIndexGetter? findChildIndexCallback;
+  /// * **Element reuse.** The keyed item's [Element] (and its
+  ///   [State]) is reused across rebuilds when it shifts position,
+  ///   preserving things like animation controllers, video playback,
+  ///   and expand/collapse state.
+  ///
+  /// Return `null` for items that don't have a meaningful stable
+  /// identity (e.g. headers, footers, loaders).
+  final Object? Function(int index)? itemKeyBuilder;
 
   /// Defines how this [ScrollView] will dismiss the keyboard automatically.
   ///
@@ -196,6 +205,28 @@ class ItemScrollController {
   ///
   /// If `false`, then [jumpTo] and [scrollTo] must not be called.
   bool get isAttached => _scrollableListState != null;
+
+  /// Whether the underlying scrollable is currently in motion — a
+  /// user drag, ballistic activity following a drag, or an in-flight
+  /// programmatic [scrollTo] animation. Mirrors Compose's
+  /// `LazyListState.isScrollInProgress` 1:1.
+  ///
+  /// Returns `false` while the controller is unattached or before the
+  /// underlying [ScrollPosition] has been laid out for the first
+  /// time. Safe to read synchronously from event handlers.
+  bool get isScrolling => _scrollableListState?._isScrolling ?? false;
+
+  /// [Listenable] that notifies whenever [isScrolling] flips. Useful
+  /// for callers that want to react to scroll-state transitions
+  /// (e.g. "re-enable auto-scroll once the user's gesture has
+  /// settled"); reading the bool synchronously via [isScrolling] is
+  /// enough for one-shot checks at the moment an event fires.
+  ///
+  /// Returns a no-op listenable while the controller is unattached,
+  /// so callers can register a listener at any time without a null
+  /// check.
+  Listenable get isScrollingListenable =>
+      _scrollableListState?._isScrollingListenable ?? const _NoopListenable();
 
   _ScrollablePositionedListState? _scrollableListState;
 
@@ -295,6 +326,66 @@ class _ScrollablePositionedListState extends State<ScrollablePositionedList>
 
   AnimationController? _animationController;
 
+  // --- Anchor preservation snapshot ---------------------------------
+  //
+  // These four fields together describe "where the first visible item
+  // was at the end of the last layout." They're captured by
+  // [_updatePositions] every time the position-listener fires, and
+  // read by [_updateFirstVisibleItemIfNeeded] when [didUpdateWidget]
+  // sees the item count change. Together they implement the same
+  // behaviour that Compose's `LazyListState` does internally: when
+  // items are prepended/removed, the SPL re-targets so the same
+  // content stays at the same screen position.
+  //
+  // Cleared by [_jumpTo] and [_scrollTo] so anchor preservation gets
+  // out of the way of an explicit position change. The next
+  // [_updatePositions] tick captures a fresh snapshot at the new
+  // position.
+
+  /// Identity of the topmost visible item at the end of the most
+  /// recent layout. `null` before the first layout, after an explicit
+  /// jump/scroll, or when the topmost item has no [itemKeyBuilder]
+  /// key.
+  Object? _lastKnownFirstItemKey;
+
+  /// Index of the topmost visible item at the end of the most recent
+  /// layout. Used as the fallback re-target when
+  /// [_lastKnownFirstItemKey] can't be found in the current item list
+  /// (i.e. the item it pointed at was removed) — whatever is at this
+  /// index in the new list becomes the new first visible, producing
+  /// the natural "slide up to fill" feel after a deletion.
+  int _lastKnownFirstItemIndex = 0;
+
+  /// `itemLeadingEdge` fraction of the topmost visible item at the end
+  /// of the most recent layout. Reapplied to [primary.alignment] in
+  /// the reanchor so the saved item lands at the same screen fraction
+  /// in the next layout.
+  double _firstVisibleItemAlignment = 0;
+
+  /// `primary.scrollController.position.pixels` at the time
+  /// [_firstVisibleItemAlignment] was recorded. The reanchor folds
+  /// `(currentPixels − this) / viewport` into the alignment so drag
+  /// and fling deltas accumulated since the last settled layout are
+  /// reflected in the new alignment — i.e. the user's in-progress
+  /// gesture survives an item-count change without snapping back.
+  double _firstVisibleItemAlignmentAtPixels = 0;
+
+  /// Aggregates the underlying [ScrollPosition.isScrollingNotifier] of
+  /// the active controller into a stable [Listenable] that survives
+  /// the primary/secondary swap on a long-distance `scrollTo`.
+  ///
+  /// Surfaced publicly via [ItemScrollController.isScrolling] and
+  /// [ItemScrollController.isScrollingListenable] so consumers can
+  /// reach Compose's `isScrollInProgress` semantics without listening
+  /// to bubbling scroll notifications.
+  final ValueNotifier<bool> _isScrollingListenable = ValueNotifier(false);
+  bool get _isScrolling => _isScrollingListenable.value;
+
+  /// The [ScrollPosition.isScrollingNotifier] we're currently
+  /// subscribed to. Tracked so we can detach when the position or
+  /// primary controller changes.
+  ValueListenable<bool>? _subscribedScrollingNotifier;
+
   @override
   void initState() {
     super.initState();
@@ -308,6 +399,34 @@ class _ScrollablePositionedListState extends State<ScrollablePositionedList>
     widget.itemScrollController?._attach(this);
     primary.itemPositionsNotifier.itemPositions.addListener(_updatePositions);
     secondary.itemPositionsNotifier.itemPositions.addListener(_updatePositions);
+    // The primary controller doesn't attach to its `ScrollPosition`
+    // until the first build; defer the isScrolling subscription until
+    // a position exists.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _bindIsScrollingNotifier();
+    });
+  }
+
+  /// (Re)subscribe to the current primary controller's
+  /// `isScrollingNotifier`. Called on first frame and on
+  /// primary/secondary swap.
+  void _bindIsScrollingNotifier() {
+    if (!mounted) return;
+    final controller = primary.scrollController;
+    if (!controller.hasClients) return;
+    final newNotifier = controller.position.isScrollingNotifier;
+    if (identical(newNotifier, _subscribedScrollingNotifier)) return;
+    _subscribedScrollingNotifier?.removeListener(_onIsScrollingChanged);
+    _subscribedScrollingNotifier = newNotifier;
+    _subscribedScrollingNotifier!.addListener(_onIsScrollingChanged);
+    _onIsScrollingChanged();
+  }
+
+  void _onIsScrollingChanged() {
+    final value = _subscribedScrollingNotifier?.value ?? false;
+    if (_isScrollingListenable.value != value) {
+      _isScrollingListenable.value = value;
+    }
   }
 
   @override
@@ -322,6 +441,8 @@ class _ScrollablePositionedListState extends State<ScrollablePositionedList>
         .removeListener(_updatePositions);
     secondary.itemPositionsNotifier.itemPositions
         .removeListener(_updatePositions);
+    _subscribedScrollingNotifier?.removeListener(_onIsScrollingChanged);
+    _isScrollingListenable.dispose();
     _animationController?.dispose();
     super.dispose();
   }
@@ -347,7 +468,101 @@ class _ScrollablePositionedListState extends State<ScrollablePositionedList>
       if (secondary.target > widget.itemCount - 1) {
         secondary.target = widget.itemCount - 1;
       }
+      // Anchor preservation. Only fires when the item set actually
+      // changed (different count), so it doesn't interfere with
+      // ordinary user scrolling on rebuilds that don't touch the list.
+      if (widget.itemCount != oldWidget.itemCount) {
+        _updateFirstVisibleItemIfNeeded();
+      }
     }
+  }
+
+  /// Looks up the new index of [_lastKnownFirstItemKey] in the current
+  /// item list. Falls back to [_lastKnownFirstItemIndex] when the key is
+  /// no longer present so the slot vacated by the removed item is taken
+  /// by whatever item is at that numerical position now — the natural
+  /// "slide up to fill" behaviour after a deletion.
+  ///
+  /// Callers must ensure [_lastKnownFirstItemKey] is non-null and
+  /// `widget.itemCount > 0`; see [_updateFirstVisibleItemIfNeeded].
+  int _findFirstVisibleItemIndex(Object? Function(int) keyBuilder) {
+    final savedKey = _lastKnownFirstItemKey!;
+    final savedIndex = _lastKnownFirstItemIndex;
+    // Fast path: same key still at the same index. Skips the O(N) scan
+    // in the common case where items haven't shifted.
+    if (savedIndex < widget.itemCount && keyBuilder(savedIndex) == savedKey) {
+      return savedIndex;
+    }
+    // Full key→index scan.
+    for (var i = 0; i < widget.itemCount; i++) {
+      if (keyBuilder(i) == savedKey) return i;
+    }
+    // Key is gone — preserve the index slot.
+    return savedIndex.clamp(0, widget.itemCount - 1);
+  }
+
+  /// Re-targets the list so the previously topmost visible item stays at
+  /// the same screen position after the list mutates — even mid-gesture,
+  /// when the user has dragged or flung past the point
+  /// [_updatePositions] last captured.
+  ///
+  /// When the saved key is still present the anchor moves with it. When
+  /// the key is gone the saved index is preserved; whatever item is now
+  /// at that index becomes the new first visible, which produces a
+  /// natural slide-up effect after a deletion.
+  ///
+  /// Two adjustments that the [PositionedList] (target + alignment +
+  /// pixels) layout model requires on top of the index lookup:
+  ///
+  /// 1. The saved alignment corresponds to
+  ///    [_firstVisibleItemAlignmentAtPixels]. If the user has dragged
+  ///    since, [primary.scrollController.position.pixels] has moved but
+  ///    the saved alignment has not. We fold the pixel delta into the
+  ///    alignment so the new value reflects what the user *currently*
+  ///    sees — drag and fling deltas included. Without this every
+  ///    reanchor would silently revert the user's in-progress scroll
+  ///    and the list would feel locked in place.
+  ///
+  /// 2. The scroll offset is brought to zero via
+  ///    [ScrollPosition.correctBy], not [ScrollController.jumpTo].
+  ///    `correctBy` mutates `pixels` directly without firing `goIdle()`
+  ///    or dispatching scroll notifications, so an in-flight
+  ///    `DragScrollActivity` or `BallisticScrollActivity` keeps
+  ///    integrating its delta against the new baseline instead of
+  ///    being cancelled.
+  void _updateFirstVisibleItemIfNeeded() {
+    final keyBuilder = widget.itemKeyBuilder;
+    if (keyBuilder == null || _lastKnownFirstItemKey == null) return;
+
+    final newIndex = _findFirstVisibleItemIndex(keyBuilder);
+
+    final hasClients = primary.scrollController.hasClients;
+    final position = hasClients ? primary.scrollController.position : null;
+    final pixels = position?.pixels ?? 0.0;
+    final viewport = position?.viewportDimension ?? 0.0;
+    final pixelDelta = pixels - _firstVisibleItemAlignmentAtPixels;
+    final currentAlignment = viewport > 0
+        ? _firstVisibleItemAlignment - pixelDelta / viewport
+        : _firstVisibleItemAlignment;
+
+    if (newIndex == primary.target &&
+        primary.alignment == currentAlignment &&
+        pixels == 0) {
+      return;
+    }
+    primary
+      ..target = newIndex
+      ..alignment = currentAlignment;
+    if (hasClients && pixels != 0) {
+      position!.correctBy(-pixels);
+    }
+    // The reanchor itself moves the pixel baseline to 0; record that
+    // alongside the (now-applied) anchor so subsequent reanchors that
+    // fire before the next layout compute deltas against the right
+    // starting point.
+    _firstVisibleItemAlignmentAtPixels = 0;
+    _lastKnownFirstItemIndex = newIndex;
+    _firstVisibleItemAlignment = currentAlignment;
   }
 
   @override
@@ -385,7 +600,7 @@ class _ScrollablePositionedListState extends State<ScrollablePositionedList>
                       padding: widget.padding,
                       addAutomaticKeepAlives: widget.addAutomaticKeepAlives,
                       addRepaintBoundaries: widget.addRepaintBoundaries,
-                      findChildIndexCallback: widget.findChildIndexCallback,
+                      itemKeyBuilder: widget.itemKeyBuilder,
                       keyboardDismissBehavior: widget.keyboardDismissBehavior,
                     ),
                   ),
@@ -417,7 +632,7 @@ class _ScrollablePositionedListState extends State<ScrollablePositionedList>
                         padding: widget.padding,
                         addAutomaticKeepAlives: widget.addAutomaticKeepAlives,
                         addRepaintBoundaries: widget.addRepaintBoundaries,
-                        findChildIndexCallback: widget.findChildIndexCallback,
+                        itemKeyBuilder: widget.itemKeyBuilder,
                         keyboardDismissBehavior: widget.keyboardDismissBehavior,
                       ),
                     ),
@@ -443,6 +658,15 @@ class _ScrollablePositionedListState extends State<ScrollablePositionedList>
     if (index > widget.itemCount - 1) {
       index = widget.itemCount - 1;
     }
+    // Invalidate the anchor-preservation snapshot. Otherwise any
+    // `didUpdateWidget` racing in between this jump and the next
+    // position-listener tick (very common when items are arriving at
+    // ≥50/s, since the listener can't tick faster than the frame rate)
+    // would call `_updateFirstVisibleItemIfNeeded`, read the stale
+    // bookmark, and overwrite the target we just set. With the key
+    // cleared, that path early-returns; the next layout's
+    // `_updatePositions` will capture fresh state.
+    _lastKnownFirstItemKey = null;
     setState(() {
       primary.scrollController.jumpTo(0);
       primary
@@ -461,6 +685,16 @@ class _ScrollablePositionedListState extends State<ScrollablePositionedList>
     if (index > widget.itemCount - 1) {
       index = widget.itemCount - 1;
     }
+    // Invalidate the anchor-preservation snapshot for the same reason
+    // as in [_jumpTo]: an explicit scroll is the user (or app)
+    // overriding the implicit anchor, so the saved "topmost" key from
+    // the previous layout is no longer meaningful. Without this, an
+    // incoming `didUpdateWidget` mid-animation (or right after it
+    // finishes) would call `_updateFirstVisibleItemIfNeeded`, read
+    // the stale key, and yank the target back to wherever the old
+    // anchor lived. The next [_updatePositions] tick after the scroll
+    // settles will capture fresh state.
+    _lastKnownFirstItemKey = null;
     if (_isTransitioning) {
       final scrollCompleter = Completer<void>();
       _stopScroll(canceled: true);
@@ -576,6 +810,11 @@ class _ScrollablePositionedListState extends State<ScrollablePositionedList>
         _isTransitioning = false;
         opacity.parent = const AlwaysStoppedAnimation<double>(0);
       });
+      // After a primary/secondary swap, the active controller's
+      // `isScrollingNotifier` is different — re-subscribe.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _bindIsScrollingNotifier();
+      });
     }
   }
 
@@ -603,11 +842,28 @@ class _ScrollablePositionedListState extends State<ScrollablePositionedList>
         .where((ItemPosition position) =>
             position.itemLeadingEdge < 1 && position.itemTrailingEdge > 0);
     if (itemPositions.isNotEmpty) {
-      PageStorage.of(context).writeState(
-        context,
-        itemPositions.reduce((value, element) =>
-            value.itemLeadingEdge < element.itemLeadingEdge ? value : element),
-      );
+      // The visually topmost item — smallest `itemLeadingEdge` along the
+      // scroll axis.
+      final topmost = itemPositions
+          .reduce((a, b) => a.itemLeadingEdge < b.itemLeadingEdge ? a : b);
+      PageStorage.of(context).writeState(context, topmost);
+
+      // Capture the topmost item's identity + position so the next
+      // reanchor can preserve it across an item-set change. Skipped when
+      // [widget.itemKeyBuilder] is null.
+      final keyBuilder = widget.itemKeyBuilder;
+      if (keyBuilder != null) {
+        final key = keyBuilder(topmost.index);
+        if (key != null) {
+          _lastKnownFirstItemKey = key;
+          _lastKnownFirstItemIndex = topmost.index;
+          _firstVisibleItemAlignment = topmost.itemLeadingEdge;
+          _firstVisibleItemAlignmentAtPixels =
+              primary.scrollController.hasClients
+                  ? primary.scrollController.position.pixels
+                  : 0.0;
+        }
+      }
     }
     widget.itemPositionsNotifier?.itemPositions.value = itemPositions;
   }
@@ -628,4 +884,19 @@ class _ListDisplayDetails {
   double alignment = 0;
 
   final Key key;
+}
+
+/// Returned by [ItemScrollController.isScrollingListenable] when the
+/// controller isn't attached to a list yet. Notifies no listeners and
+/// holds no state — callers can register a listener safely, it just
+/// never fires until [ItemScrollController._attach] runs and the real
+/// notifier takes its place.
+class _NoopListenable extends Listenable {
+  const _NoopListenable();
+
+  @override
+  void addListener(VoidCallback listener) {}
+
+  @override
+  void removeListener(VoidCallback listener) {}
 }

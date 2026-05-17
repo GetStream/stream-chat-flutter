@@ -1920,20 +1920,24 @@ void main() {
     expect(find.text('Item 100'), findsOneWidget);
   });
 
-  testWidgets('Position list when not enough above top item to fill viewport',
-      (WidgetTester tester) async {
-    const alignment = 0.8;
+  testWidgets(
+    'short content pins to the axis-leading edge regardless of alignment',
+    (WidgetTester tester) async {
+      // 2 items × itemHeight = far less than the viewport. The viewport
+      // overrides the requested alignment with a "fit anchor" so the
+      // content sticks to the leading edge of the axis (top of viewport
+      // for reverse=false), instead of leaving an empty strip above.
+      await setUpWidgetTest(
+        tester,
+        itemCount: 2,
+        initialAlignment: 0.8,
+      );
 
-    await setUpWidgetTest(
-      tester,
-      itemCount: 2,
-      initialAlignment: alignment,
-    );
+      await tester.pumpAndSettle();
 
-    await tester.pumpAndSettle();
-
-    expect(tester.getTopLeft(find.text('Item 0')).dy, screenHeight * alignment);
-  });
+      expect(tester.getTopLeft(find.text('Item 0')).dy, 0);
+    },
+  );
 
   testWidgets('Rebuild with scroll controller', (WidgetTester tester) async {
     tester.view.devicePixelRatio = 1.0;

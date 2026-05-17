@@ -365,7 +365,6 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
   void Function(Message)? _onThreadTap;
   final ValueNotifier<bool> _showScrollToBottom = ValueNotifier(false);
   late final ItemPositionsListener _itemPositionListener;
-  int? _messageListLength;
   StreamChannelState? streamChannel;
   late StreamChatThemeData _streamTheme;
 
@@ -383,7 +382,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
         firstUnreadId: streamChannel?.getFirstUnreadMessage()?.id,
       );
 
-  double get _initialAlignment {
+  double _resolveInitialAlignment() {
     final initialAlignment = widget.initialAlignment;
     if (initialAlignment != null) return initialAlignment;
     return initialIndex == 0 ? 0 : 0.5;
@@ -393,16 +392,12 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
 
   bool get _isThreadConversation => widget.parentMessage != null;
 
-  bool _bottomPaginationActive = false;
-
   int initialIndex = 0;
   double initialAlignment = 0;
 
   List<Message> messages = <Message>[];
 
   bool initialMessageHighlightComplete = false;
-
-  bool _inBetweenList = false;
 
   late final _defaultController = MessageListController();
 
@@ -448,26 +443,63 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
         widget.messageFilter,
       );
 
-      initialAlignment = _initialAlignment;
-
-      if (_scrollController?.isAttached == true) {
-        _scrollController?.jumpTo(
-          index: initialIndex,
-          alignment: initialAlignment,
-        );
-      }
+      initialAlignment = _resolveInitialAlignment();
 
       _messageNewListener =
           streamChannel!.channel.on(EventType.messageNew).listen((event) {
-        if (_upToDate) {
-          _bottomPaginationActive = false;
-        }
-        if (event.message?.parentId == widget.parentMessage?.id &&
-            event.message!.user!.id ==
-                streamChannel!.channel.client.state.currentUser!.id) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            _scrollController?.jumpTo(index: 0);
-          });
+        final message = event.message;
+        if (message == null) return;
+
+        // Only handle messages destined for the current scope (main
+        // channel vs an open thread).
+        if (message.parentId != widget.parentMessage?.id) return;
+
+        // Don't yank the user back to the bottom while a scroll is in
+        // motion — drag, ballistic fling, or a still-running animated
+        // `scrollTo`. Read directly from the underlying scroll position
+        // via `ItemScrollController.isScrolling`, which mirrors
+        // Compose's `LazyListState.isScrollInProgress` exactly.
+        if (_scrollController?.isScrolling == true) return;
+
+        final currentUser = streamChannel?.channel.client.state.currentUser;
+        final isOwnMessage = message.user?.id == currentUser?.id;
+
+        // Own messages always reveal the new bottom. For other users'
+        // messages, only auto-scroll when the user is currently at
+        // the bottom (the newest message is fully visible — the same
+        // signal that hides the scroll-to-bottom button). The SPL's
+        // `itemKeyBuilder`-based anchor preservation pins the visible
+        // content in place for the "far from bottom" path.
+        //
+        // Mirrors the Android Compose SDK's
+        // `shouldScrollToBottomOnNewMessage` (`firstVisibleItemIndex < 3
+        // || newMessageState is MyOwn`); see
+        // `stream-chat-android-compose .../ui/messages/list/Messages.kt`.
+        final isAtBottom = !_showScrollToBottom.value;
+        if (!isOwnMessage && !isAtBottom) return;
+
+        // Animated scroll, matching Compose's
+        // `lazyListState.animateScrollToItem(0)` in the same code
+        // path. Called synchronously (not via `addPostFrameCallback`):
+        // `SPL._scrollTo` clears `_lastKnownFirstItemKey` immediately,
+        // so by the time this message's `didUpdateWidget` runs the
+        // anchor-preservation path early-returns and the rebuild lays
+        // out at the bottom without the "shift, then animate" glitch.
+        //
+        // `isAttached` guard: the controller is created in `initState`
+        // but only attached to the SPL once its own `initState` runs;
+        // an event firing in that short window would otherwise hit
+        // `ItemScrollController`'s null-check assertion.
+        //
+        // Discarding the future is intentional — if more messages
+        // arrive while the animation is in flight, SPL cancels and
+        // restarts (see `_stopScroll`), so we don't want to await.
+        if (_scrollController?.isAttached ?? false) {
+          _scrollController?.scrollTo(
+            index: 0,
+            duration: const Duration(milliseconds: 250),
+            curve: Curves.easeOut,
+          );
         }
       });
 
@@ -536,26 +568,6 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
   Widget _buildListView(List<Message> data) {
     messages = data;
 
-    final newMessagesListLength = messages.length;
-
-    if (_messageListLength != null) {
-      if (_bottomPaginationActive || (_inBetweenList && _upToDate)) {
-        if (_itemPositionListener.itemPositions.value.isNotEmpty) {
-          final first = _itemPositionListener.itemPositions.value.first;
-          final diff = newMessagesListLength - _messageListLength!;
-          if (diff > 0) {
-            if (messages[0].user?.id !=
-                streamChannel!.channel.client.state.currentUser?.id) {
-              initialIndex = first.index + diff;
-              initialAlignment = first.itemLeadingEdge;
-            }
-          }
-        }
-      }
-    }
-
-    _messageListLength = newMessagesListLength;
-
     final itemCount = messages.length + // total messages
             2 + // top + bottom loading indicator
             2 + // header + footer
@@ -589,9 +601,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
               message: statusString,
               child: LazyLoadScrollView(
                 onStartOfPage: () async {
-                  _inBetweenList = false;
                   if (!_upToDate) {
-                    _bottomPaginationActive = true;
                     return _paginateData(
                       streamChannel,
                       QueryDirection.bottom,
@@ -599,20 +609,12 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
                   }
                 },
                 onEndOfPage: () async {
-                  _inBetweenList = false;
-                  _bottomPaginationActive = false;
                   return _paginateData(
                     streamChannel,
                     QueryDirection.top,
                   );
                 },
-                onInBetweenOfPage: () {
-                  _inBetweenList = true;
-                },
                 child: ScrollablePositionedList.separated(
-                  key: (initialIndex != 0 && initialAlignment != 0)
-                      ? ValueKey('$initialIndex-$initialAlignment')
-                      : null,
                   keyboardDismissBehavior: widget.keyboardDismissBehavior,
                   itemPositionsListener: _itemPositionListener,
                   initialScrollIndex: initialIndex,
@@ -622,37 +624,17 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
                   reverse: widget.reverse,
                   shrinkWrap: widget.shrinkWrap,
                   itemCount: itemCount,
-
-                  // Commented out as it is not working as expected.
-                  // The list view gets broken in the following case:
-                  // * The list view is loaded at a particular message (eg: Last Read, or a quoted message)
-                  //   and a new message is added to the list view.
-                  //
-                  // Issues faced:
-                  // * https://github.com/GetStream/stream-chat-flutter/issues/1576
-                  // * https://github.com/GetStream/stream-chat-flutter/issues/1414
-                  //
-                  // Related issues: https://github.com/flutter/flutter/issues/107123
-                  //
-                  // Re-enabling this also requires rebuilding a
-                  // `Map<String, int> messagesIndex` from `messages` in
-                  // `_buildListView` for the lookup below.
-                  //
-                  // findChildIndexCallback: (Key key) {
-                  //   final indexedKey = key as IndexedKey;
-                  //   final valueKey = indexedKey.key as ValueKey<String>?;
-                  //   if (valueKey != null) {
-                  //     final index = messagesIndex[valueKey.value];
-                  //     if (index != null) {
-                  //       // The calculation is as follows:
-                  //       // * Add 2 to the index retrieved to account for the footer and the bottom loader.
-                  //       // * Multiply the result by 2 to account for the separators between each pair of items.
-                  //       // * Subtract 1 to adjust for the 0-based indexing of the list view.
-                  //       return ((index + 2) * 2) - 1;
-                  //     }
-                  //   }
-                  //   return null;
-                  // },
+                  itemKeyBuilder: (index) {
+                    // Layout (see comment block below): indices 0/1 and the
+                    // top 3 indices are fixed slots (footer, loaders,
+                    // header, parent message). Anything in between is a
+                    // message at `messages[index - 2]`.
+                    if (index < 2) return null;
+                    if (index >= itemCount - 3) return null;
+                    final messageIndex = index - 2;
+                    if (messageIndex >= messages.length) return null;
+                    return messages[messageIndex].id;
+                  },
 
                   // Item Count -> 8 (1 parent, 2 header+footer, 2 top+bottom, 3 messages)
                   // eg:     |Type|         rev(|Index(item)|)     rev(|Index(separator)|)    |Index(item)|    |Index(separator)|
@@ -673,31 +655,6 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
                   //     Footer         ->        0                                             (count-8)
 
                   separatorBuilder: (context, i) {
-                    Widget maybeBuildWithUnreadMessagesSeparator({
-                      required Message message,
-                      required Widget separator,
-                    }) {
-                      if (_isThreadConversation) return separator;
-                      return ValueListenableBuilder(
-                        valueListenable: _unreadState,
-                        builder: (context, state, _) {
-                          if (state.count == 0) return separator;
-                          if (state.firstUnreadId != message.id) {
-                            return separator;
-                          }
-
-                          return Column(
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              separator,
-                              _buildUnreadMessagesSeparator(state.count),
-                            ],
-                          );
-                        },
-                      );
-                    }
-
                     if (i == itemCount - 2) {
                       if (widget.parentMessage == null) {
                         return const Empty();
@@ -718,7 +675,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
                           : widget.footerBuilder == null) {
                         if (messages.isNotEmpty) {
                           final message = messages.last;
-                          return maybeBuildWithUnreadMessagesSeparator(
+                          return _maybeBuildWithUnreadMessagesSeparator(
                             message: message,
                             separator: _buildDateDivider(message),
                           );
@@ -791,7 +748,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
                       );
                     }
 
-                    return maybeBuildWithUnreadMessagesSeparator(
+                    return _maybeBuildWithUnreadMessagesSeparator(
                       message: nextMessage,
                       separator: separator,
                     );
@@ -852,10 +809,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
                     final messageIndex = i - 2;
                     final message = messages[messageIndex];
 
-                    return KeyedSubtree(
-                      key: ValueKey(message.id),
-                      child: buildMessage(message, messages, messageIndex),
-                    );
+                    return buildMessage(message, messages, messageIndex);
                   },
                 ),
               ),
@@ -928,6 +882,32 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     return unreadMessagesSeparator;
   }
 
+  // Wraps an already-built [separator] with the unread-messages line if
+  // [message] happens to be the first unread one. Defined as a method
+  // (rather than a closure inside [separatorBuilder]) so a fresh inner
+  // closure isn't allocated for every visible separator on every rebuild.
+  Widget _maybeBuildWithUnreadMessagesSeparator({
+    required Message message,
+    required Widget separator,
+  }) {
+    if (_isThreadConversation) return separator;
+    return ValueListenableBuilder(
+      valueListenable: _unreadState,
+      builder: (context, state, _) {
+        if (state.count == 0) return separator;
+        if (state.firstUnreadId != message.id) return separator;
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            separator,
+            _buildUnreadMessagesSeparator(state.count),
+          ],
+        );
+      },
+    );
+  }
+
   Future<void> _paginateData(
     StreamChannelState? channel,
     QueryDirection direction,
@@ -941,7 +921,6 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       // Reset the pagination variables.
       initialIndex = 0;
       initialAlignment = 0;
-      _bottomPaginationActive = false;
 
       // Reload the channel to get the latest messages.
       await streamChannel!.reloadChannel();
@@ -1020,10 +999,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     final isMyMessage =
         message.user!.id == StreamChat.of(context).currentUser!.id;
     final isOnlyEmoji = message.text?.isOnlyEmoji ?? false;
-    final currentUser = StreamChat.of(context).currentUser;
-    final members = StreamChannel.of(context).channel.state?.members ?? [];
-    final currentUserMember =
-        members.firstWhereOrNull((e) => e.user!.id == currentUser!.id);
+    final currentUserMember = StreamChannel.of(context).channel.membership;
 
     final hasFileAttachment =
         message.attachments.any((it) => it.type == AttachmentType.file);
@@ -1293,10 +1269,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
 
     final borderSide = isOnlyEmoji ? BorderSide.none : null;
 
-    final currentUser = StreamChat.of(context).currentUser;
-    final members = StreamChannel.of(context).channel.state?.members ?? [];
-    final currentUserMember =
-        members.firstWhereOrNull((e) => e.user!.id == currentUser!.id);
+    final currentUserMember = StreamChannel.of(context).channel.membership;
 
     Widget messageWidget = StreamMessageWidget(
       message: message,
