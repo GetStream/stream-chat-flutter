@@ -379,18 +379,21 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
         firstUnreadId: streamChannel?.getFirstUnreadMessage()?.id,
       );
 
-  double _resolveInitialAlignment() {
-    final initialAlignment = widget.initialAlignment;
-    if (initialAlignment != null) return initialAlignment;
-    return initialIndex == 0 ? 0 : 0.5;
-  }
-
   bool get _upToDate => streamChannel!.channel.state!.isUpToDate;
 
   bool get _isThreadConversation => widget.parentMessage != null;
 
-  int initialIndex = 0;
-  double initialAlignment = 0;
+  late final int initialIndex = getInitialIndex(
+    widget.initialScrollIndex,
+    streamChannel!,
+    widget.messageFilter,
+  );
+
+  late final double initialAlignment = () {
+    final initialAlignment = widget.initialAlignment;
+    if (initialAlignment != null) return initialAlignment;
+    return initialIndex == 0 ? 0.0 : 0.5;
+  }();
 
   List<Message> messages = <Message>[];
 
@@ -433,14 +436,6 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       _userReadListener?.cancel();
 
       _unreadState.value = _readUnreadSnapshot();
-
-      initialIndex = getInitialIndex(
-        widget.initialScrollIndex,
-        streamChannel!,
-        widget.messageFilter,
-      );
-
-      initialAlignment = _resolveInitialAlignment();
 
       _messageNewListener =
           streamChannel!.channel.on(EventType.messageNew).listen((event) {
@@ -884,27 +879,18 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       _messageListController.paginateData!(direction: direction);
 
   Future<void> scrollToBottomDefaultTapAction(int unreadCount) async {
-    // If the channel is not up to date, we need to reload it before scrolling
-    // to the end of the list.
+    // If the channel is not up to date, reload it before scrolling so the
+    // latest messages are in the rendered list, then wait one frame for
+    // the BetterStreamBuilder rebuild to flush.
     if (!_upToDate) {
-      // Reset the pagination variables.
-      initialIndex = 0;
-      initialAlignment = 0;
-
-      // Reload the channel to get the latest messages.
       await streamChannel!.reloadChannel();
-
-      // Wait for the frame to be rendered with the updated channel state.
+      if (!mounted) return;
       await WidgetsBinding.instance.endOfFrame;
+      if (!mounted) return;
     }
 
-    // Scroll to the end of the list.
-    if (_scrollController?.isAttached == true) {
-      return _scrollController!.scrollTo(
-        index: 0,
-        duration: const Duration(seconds: 1),
-        curve: Curves.easeInOut,
-      );
+    if (_scrollController case final controller? when controller.isAttached) {
+      return controller.scrollTo(index: 0);
     }
   }
 
@@ -919,12 +905,10 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
 
     if (firstUnreadMessageIndex == -1) return;
 
-    if (_scrollController?.isAttached == true) {
-      return _scrollController!.scrollTo(
+    if (_scrollController case final controller? when controller.isAttached) {
+      return controller.scrollTo(
         index: max(firstUnreadMessageIndex + 2, 0),
         alignment: 0.5, // center the message in the viewport
-        duration: const Duration(seconds: 1),
-        curve: Curves.easeInOut,
       );
     }
   }
@@ -1253,21 +1237,29 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       showUserAvatar: showUserAvatar,
       showMarkUnreadMessage: showMarkUnread,
       onQuotedMessageTap: (quotedMessageId) async {
-        if (messages.map((e) => e.id).contains(quotedMessageId)) {
-          final index = messages.indexWhere((m) => m.id == quotedMessageId);
-          _scrollController?.scrollTo(
-            index: index + 2, // +2 to account for loader and footer
-            duration: const Duration(seconds: 1),
-            curve: Curves.easeInOut,
+        bool isTarget(Message m) => m.id == quotedMessageId;
+
+        // `this.messages` (the State field), not the closure-captured
+        // `messages` parameter: the parameter is the snapshot at tap
+        // time and would be stale after a paginate.
+        var index = this.messages.indexWhere(isTarget);
+        if (index == -1) {
+          // Paginate around the target, wait one frame for the
+          // BetterStreamBuilder rebuild to flush, then re-scan.
+          await streamChannel!.loadChannelAtMessage(quotedMessageId);
+          if (!mounted) return;
+          await WidgetsBinding.instance.endOfFrame;
+          if (!mounted) return;
+          index = this.messages.indexWhere(isTarget);
+          if (index == -1) return;
+        }
+
+        if (_scrollController case final controller?
+            when controller.isAttached) {
+          return controller.scrollTo(
+            index: index + 2, // SPL leading loader/footer slots
             alignment: 0.1,
           );
-        } else {
-          await streamChannel!
-              .loadChannelAtMessage(quotedMessageId)
-              .then((_) async {
-            initialIndex = 21; // 19 + 2 | 19 is the index of the message
-            initialAlignment = 0.1;
-          });
         }
       },
       showEditMessage: isMyMessage,
