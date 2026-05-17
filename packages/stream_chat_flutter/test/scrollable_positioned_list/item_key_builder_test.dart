@@ -18,7 +18,7 @@ const _tolerance = 1e-3;
 // Used to detect whether an item's [Element] was reused across rebuilds: if
 // it was, no new `initState` runs.
 class _CountingItem extends StatefulWidget {
-  const _CountingItem({super.key, required this.label});
+  const _CountingItem({required this.label});
 
   final String label;
 
@@ -51,9 +51,7 @@ ItemPosition _topmost(ItemPositionsListener listener) {
 }
 
 void main() {
-  setUp(() {
-    _CountingItem.reset();
-  });
+  setUp(_CountingItem.reset);
 
   Future<void> pump(
     WidgetTester tester, {
@@ -265,9 +263,10 @@ void main() {
         );
         final initialMounts = _CountingItem.initStateCount;
 
-        // Remove a few items.
-        items.removeAt(5);
-        items.removeAt(5);
+        // Remove a couple of items from the middle.
+        items
+          ..removeAt(5)
+          ..removeAt(5);
         await pump(
           tester,
           items: items.toList(),
