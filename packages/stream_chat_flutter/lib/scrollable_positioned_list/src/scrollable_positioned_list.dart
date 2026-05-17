@@ -198,6 +198,9 @@ class ScrollablePositionedList extends StatefulWidget {
   State<StatefulWidget> createState() => _ScrollablePositionedListState();
 }
 
+const Curve _kDefaultScrollCurve = Curves.fastOutSlowIn;
+const Duration _kDefaultScrollDuration = Duration(milliseconds: 250);
+
 /// Controller to jump or scroll to a particular position in a
 /// [ScrollablePositionedList].
 class ItemScrollController {
@@ -274,8 +277,8 @@ class ItemScrollController {
   Future<void> scrollTo({
     required int index,
     double alignment = 0,
-    required Duration duration,
-    Curve curve = Curves.linear,
+    Duration duration = _kDefaultScrollDuration,
+    Curve curve = _kDefaultScrollCurve,
     List<double> opacityAnimationWeights = const [40, 20, 40],
   }) {
     assert(

@@ -96,10 +96,7 @@ class StreamMessageListView extends StatefulWidget {
     this.onThreadTap,
     this.dateDividerBuilder,
     this.floatingDateDividerBuilder,
-    // we need to use ClampingScrollPhysics to avoid the list view to bounce
-    // when we are at the either end of the list view and try to use 'animateTo'
-    // to animate in the same direction.
-    this.scrollPhysics = const ClampingScrollPhysics(),
+    this.scrollPhysics,
     this.initialScrollIndex,
     this.initialAlignment,
     this.scrollController,
@@ -449,57 +446,29 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
           streamChannel!.channel.on(EventType.messageNew).listen((event) {
         final message = event.message;
         if (message == null) return;
-
-        // Only handle messages destined for the current scope (main
-        // channel vs an open thread).
         if (message.parentId != widget.parentMessage?.id) return;
 
-        // Don't yank the user back to the bottom while a scroll is in
-        // motion — drag, ballistic fling, or a still-running animated
-        // `scrollTo`. Read directly from the underlying scroll position
-        // via `ItemScrollController.isScrolling`, which mirrors
-        // Compose's `LazyListState.isScrollInProgress` exactly.
+        // Don't fight a scroll already in motion (drag, fling, or
+        // still-running animated scrollTo).
         if (_scrollController?.isScrolling == true) return;
 
         final currentUser = streamChannel?.channel.client.state.currentUser;
         final isOwnMessage = message.user?.id == currentUser?.id;
-
-        // Own messages always reveal the new bottom. For other users'
-        // messages, only auto-scroll when the user is currently at
-        // the bottom (the newest message is fully visible — the same
-        // signal that hides the scroll-to-bottom button). The SPL's
-        // `itemKeyBuilder`-based anchor preservation pins the visible
-        // content in place for the "far from bottom" path.
-        //
-        // Mirrors the Android Compose SDK's
-        // `shouldScrollToBottomOnNewMessage` (`firstVisibleItemIndex < 3
-        // || newMessageState is MyOwn`); see
-        // `stream-chat-android-compose .../ui/messages/list/Messages.kt`.
         final isAtBottom = !_showScrollToBottom.value;
+
+        // Auto-scroll on own messages always; on others only when the
+        // user is already at the bottom. For "far from bottom", SPL's
+        // itemKeyBuilder anchor preservation keeps the visible
+        // content pinned.
         if (!isOwnMessage && !isAtBottom) return;
 
-        // Animated scroll, matching Compose's
-        // `lazyListState.animateScrollToItem(0)` in the same code
-        // path. Called synchronously (not via `addPostFrameCallback`):
-        // `SPL._scrollTo` clears `_lastKnownFirstItemKey` immediately,
-        // so by the time this message's `didUpdateWidget` runs the
-        // anchor-preservation path early-returns and the rebuild lays
-        // out at the bottom without the "shift, then animate" glitch.
-        //
-        // `isAttached` guard: the controller is created in `initState`
-        // but only attached to the SPL once its own `initState` runs;
-        // an event firing in that short window would otherwise hit
-        // `ItemScrollController`'s null-check assertion.
-        //
-        // Discarding the future is intentional — if more messages
-        // arrive while the animation is in flight, SPL cancels and
-        // restarts (see `_stopScroll`), so we don't want to await.
-        if (_scrollController?.isAttached ?? false) {
-          _scrollController?.scrollTo(
-            index: 0,
-            duration: const Duration(milliseconds: 250),
-            curve: Curves.easeOut,
-          );
+        // Synchronous (not post-frame) so SPL's `_scrollTo` clears
+        // its anchor key before the next `didUpdateWidget` — otherwise
+        // anchor preservation would yank the layout back and produce
+        // a visible "shift, then animate" glitch.
+        if (_scrollController case final controller?
+            when controller.isAttached) {
+          controller.scrollTo(index: 0);
         }
       });
 
