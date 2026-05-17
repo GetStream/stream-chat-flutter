@@ -223,19 +223,22 @@ class MessageListCoreState extends State<MessageListCore> {
 
     if (parentMessage?.id case final parentMessageId?) {
       _initialMessages = state?.threads[parentMessageId];
-      _messagesStream = state?.threadsStream.mapNotNull((it) => it[parentMessageId]);
+      _messagesStream =
+          state?.threadsStream.mapNotNull((it) => it[parentMessageId]);
       return;
     }
 
     _initialMessages = state?.messages;
-    _messagesStream = state?.messagesStream.where((it) => it.isNotEmpty || _upToDate);
+    _messagesStream =
+        state?.messagesStream.where((it) => it.isNotEmpty || _upToDate);
   }
 
   List<Message> _filterAndReverse(List<Message> source) {
     if (source.isEmpty) return const [];
 
     final currentUser = _streamChannel?.channel.client.state.currentUser;
-    final filter = widget.messageFilter ?? defaultMessageFilter(currentUser?.id);
+    final filter =
+        widget.messageFilter ?? defaultMessageFilter(currentUser?.id);
 
     return source.reversed.where(filter).toList();
   }
