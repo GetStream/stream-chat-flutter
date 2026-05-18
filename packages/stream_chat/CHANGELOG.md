@@ -33,6 +33,8 @@
 - Removed proactive re-fetching of messages with expired CDN attachment URLs on every channel
   state update. URL refreshes now flow through normal server events.
 
+## 9.23.0
+
 - Minor bug fixes and improvements
 
 ## 9.22.0
