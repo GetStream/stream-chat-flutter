@@ -3321,10 +3321,13 @@ class ChannelClientState {
   }
 
   /// Channel read for the logged in user as a stream.
+  ///
+  /// Re-subscribes only when the user id actually changes; null still
+  /// propagates downstream so consumers see the logged-out transition.
   Stream<Read?> get currentUserReadStream {
-    final currentUser =
-        _client.state.currentUserStream.mapNotNull((it) => it?.id).distinct();
-    return currentUser
+    final currentUserId =
+        _client.state.currentUserStream.map((it) => it?.id).distinct();
+    return currentUserId
         .switchMap((id) => userReadStreamOf(userId: id))
         .distinct();
   }

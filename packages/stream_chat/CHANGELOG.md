@@ -11,6 +11,11 @@
   events that don't touch the messages list. Reactions targeted at thread messages no longer scan
   the channel-level message list.
 
+🔄 Changed
+
+- `Channel.currentUserReadStream` now emits `null` when the user logs out (previously the
+  transition was swallowed).
+
 - `Channel.readStream`, `Channel.currentUserReadStream`, and `Channel.unreadCountStream` now dedupe
   consecutive equal values via `.distinct()`. Previously all three were derived from
   `channelStateStream` without deduplication, so every channel state mutation (new message, reaction,
