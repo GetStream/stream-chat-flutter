@@ -1,5 +1,10 @@
 ## 9.23.0
 
+✅ Added
+
+- Added `SortedListX` and `ListX` extensions on `List` for keyed merge, sorted insert/upsert and
+  conditional update.
+
 🚀 Performance
 
 - `Channel.readStream`, `Channel.currentUserReadStream`, and `Channel.unreadCountStream` now dedupe
