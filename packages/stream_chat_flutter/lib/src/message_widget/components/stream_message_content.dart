@@ -6,7 +6,6 @@ import 'package:stream_chat_flutter/src/message_widget/components/stream_message
 import 'package:stream_chat_flutter/src/message_widget/components/stream_message_text.dart';
 import 'package:stream_chat_flutter/src/message_widget/stream_message_attachments.dart';
 import 'package:stream_chat_flutter/src/message_widget/stream_quoted_message.dart';
-import 'package:stream_chat_flutter/src/utils/typedefs.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:stream_core_flutter/stream_core_flutter.dart' as core;
 
@@ -43,9 +42,6 @@ class StreamMessageContent extends StatefulWidget {
     this.onReactionsTap,
     this.onQuotedMessageTap,
     this.reactionSorting,
-    this.onShowMessage,
-    this.onReplyTap,
-    this.attachmentActionsModalBuilder,
   });
 
   /// The message to display.
@@ -105,17 +101,6 @@ class StreamMessageContent extends StatefulWidget {
   ///
   /// Passed through to [StreamMessageReactions.sorting].
   final Comparator<ReactionGroup>? reactionSorting;
-
-  /// Called when the "show in chat" action is tapped in the full-screen
-  /// media gallery.
-  final ShowMessageCallback? onShowMessage;
-
-  /// Called when the reply action is tapped in the full-screen media gallery.
-  final void Function(Message)? onReplyTap;
-
-  /// Widget builder for the attachment actions modal in the full-screen
-  /// media gallery.
-  final AttachmentActionsBuilder? attachmentActionsModalBuilder;
 
   @override
   State<StreamMessageContent> createState() => _StreamMessageContentState();
@@ -181,9 +166,6 @@ class _StreamMessageContentState extends State<StreamMessageContent> {
                         key: attachmentsKey,
                         message: widget.message,
                         attachmentBuilders: widget.attachmentBuilders,
-                        onShowMessage: widget.onShowMessage,
-                        onReplyTap: widget.onReplyTap,
-                        attachmentActionsModalBuilder: widget.attachmentActionsModalBuilder,
                       ),
                       if (widget.message.text case final text? when text.isNotEmpty)
                         StreamMessageText(

@@ -1,8 +1,17 @@
 ## Upcoming
 
+🔄 Internal / Non-breaking
+
+- Composer UI primitives (`StreamMessageComposerInputField`, `VoiceRecordingCallback`, and the outer/inner layout containers) are now owned by `stream_chat_flutter` and exported from this package. They were previously supplied by `stream_core_flutter`. The public API of `StreamMessageComposer` / `StreamChatMessageInput` and its sub-components is unchanged.
+
 🛑️ Breaking
 
 - Bumped `file_picker` to `^11.0.0` to resolve [#2599](https://github.com/GetStream/stream-chat-flutter/issues/2599). Apps depending on `file_picker` directly must also upgrade past `11.0.0`, which replaces the instance-based `FilePicker.platform.*` API with static `FilePicker.*` methods.
+- Renamed `StreamMessageComposer.messageInputController` parameter to `messageComposerController`.
+- Removed `StreamDraftListView`, `StreamDraftListTile`, `StreamDraftListTileTheme`, and `StreamDraftListTileThemeData` from the SDK. Also removed `StreamChatThemeData.draftListTileTheme`. Refer to the sample app for a reference implementation using `StreamDraftListController` and `PagedValueListView`.
+- Renamed `StreamMessageComposerInput` → `StreamMessageComposerInputCenter` (and `DefaultStreamMessageComposerInput` → `DefaultStreamMessageComposerInputCenter`). The name `StreamMessageComposerInput` is now the input container widget (assembles header, leading, center, trailing).
+- Renamed `MessageComposerInputProps` → `MessageComposerInputCenterProps`. The name `MessageComposerInputProps` now refers to the new container widget's props.
+- Renamed `messageComposerInput` builder key in `streamChatComponentBuilders` → `messageComposerInputCenter`. The name `messageComposerInput` now overrides the whole input container.
 - Replaced `StreamMessageInput.hintGetter` with `placeholderBuilder` over a sealed `MessageInputPlaceholder`.
   See [`migrations/redesign/message_composer.md`](../../migrations/redesign/message_composer.md).
 - Removed `StreamMessageListView.unreadIndicatorBuilder`; use `StreamComponentFactory.jumpToUnreadButton`.
@@ -38,6 +47,15 @@
   - `streamChatComponentBuilders(messageWidget: ...)` → `messageItem: ...`.
   - `StreamMessageContent(annotation: ..., metadata: ...)` → `header: ..., footer: ...`.
   See [`migrations/redesign/message_widget.md`](../../migrations/redesign/message_widget.md).
+- Redesigned the full-screen media viewer:
+  - Replaced `StreamFullScreenMedia` (and its `StreamFullScreenMediaBuilder` / `FullScreenMediaWidget` / `FullScreenMediaDesktop` / `fsm_stub` variants) with a single cross-platform `StreamMediaGalleryPreview`. Renamed `mediaAttachmentPackages` → `attachments`, `startIndex` → `initialIndex`; dropped `userName`, `sentAt`, `onReplyMessage`, `onShowMessage` and `attachmentActionsModalBuilder` from its surface.
+  - Renamed `StreamGalleryHeader` → `StreamMediaGalleryPreviewHeader` and `StreamGalleryFooter` → `StreamMediaGalleryPreviewFooter`, rebuilt on `StreamAppBar` / `StreamBottomAppBar`. Both shrank to a `title` (+ optional `subtitle`) and minimal action callbacks; the more-actions overflow header was removed.
+  - Renamed `StreamAttachmentPackage` → `StreamMediaGalleryAttachment` and added a `Message.toMediaGalleryAttachments({filter})` extension.
+  - Removed `VideoPackage`, `DesktopVideoPackage` and `GalleryNavigationItem` from the public API — each preview page now owns its own player state internally.
+  - Removed `StreamMessageItem.onShowMessage` / `attachmentActionsModalBuilder` and the matching `StreamMessageListView` / `StreamMessageContent` props; those callbacks no longer have a destination after the gallery overflow was removed.
+  - Removed `StreamChatThemeData.galleryHeaderTheme`, `StreamChatThemeData.galleryFooterTheme` (and the `imageFooterTheme:` constructor parameter) and the `StreamGalleryFooterThemeData` class. Header / footer chrome now flows through `StreamAppBarThemeData` / `StreamBottomAppBarThemeData`.
+  - Removed the unused `StreamAvatarThemeData`.
+  See [`migrations/redesign/media_viewer.md`](../../migrations/redesign/media_viewer.md).
 
 ✅ Added
 
@@ -45,6 +63,10 @@
 - Redesigned `StreamSystemMessage` / `StreamModeratedMessage` with a pill-shaped style and visual customisation props.
 - Added visual customisation props to `ThreadSeparator` and `UnreadMessagesSeparator`.
 - Added `StreamUnsupportedAttachment` and `UnsupportedAttachmentBuilder` for unrecognised attachment types.
+- Added `StreamMediaGallery` — a 3-up thumbnail grid that pairs with `StreamMediaGalleryPreview`. Each tile surfaces the sender's avatar (`StreamUserAvatar`) plus a video duration badge for video attachments. Used by `StreamMediaGalleryPreviewFooter`'s gallery-grid sheet and ready to drop into channel-level media listings. Customisable via `streamChatComponentBuilders(mediaGallery: ...)`.
+- Added `StreamMediaGalleryPreview` — the redesigned full-screen swipeable viewer. Built on the design system's `StreamMediaViewer`, `StreamAppBar` and `StreamBottomAppBar`. Customisable via `streamChatComponentBuilders(mediaGalleryPreview: ...)`. Exposes `StreamMediaGalleryPreviewScope` so per-page widgets (e.g. videos) can react to the active page.
+- Added `StreamVideoPlayer` — the platform-aware video backend used by `StreamMediaGalleryPreview`. Pauses itself when its page is no longer active and resumes on return.
+- Added `Translations.photosAndVideosLabel` — used by the footer's thumbnail-grid sheet header.
 - Added `StreamQuotedMessage` and `StreamQuotedMessageThemeData` for the quoted message preview.
 - `MessagePreviewFormatter` now renders `AttachmentType.urlPreview` messages with a link icon and caption / OG title / `linkAttachmentText` fallback.
 - Added `StreamPollCardStyle`, `StreamPollQuestionStyle` and `StreamPollOptionVotesStyle` shared style classes for the poll sheets.
@@ -58,6 +80,8 @@
 - Added `Translations.reactionsCountText(int count)` for the reaction-detail sheet header.
 - Added `StreamChannelListTile.isPinned` — renders a pin icon alongside the existing mute icon for pinned channels.
 - Added `StreamChatConfigurationData.reactionOverlap` and `StreamMessageReactions.overlap` to control whether reactions overlap the message bubble edge. When unset, falls back to the platform-based default (overlap on mobile, no overlap on desktop and web).
+- Exported `StreamScrollViewLoadMoreError` and `StreamScrollViewLoadMoreIndicator` from the public API.
+- Exported `StreamTimestamp`, `DateFormatter`, `formatDate` and `formatRecentDateTime` from the public API.
 
 🔄 Changed
 

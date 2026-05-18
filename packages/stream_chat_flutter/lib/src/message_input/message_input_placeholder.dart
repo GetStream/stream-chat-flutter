@@ -2,13 +2,13 @@ import 'package:flutter/widgets.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// Sealed hierarchy describing why a particular placeholder is shown in
-/// [StreamMessageInput].
+/// [StreamMessageComposer].
 ///
 /// The state is resolved once per rebuild from the current
-/// [StreamMessageInputController] using [MessageInputPlaceholder.resolve],
+/// [StreamMessageComposerController] using [MessageInputPlaceholder.resolve],
 /// then handed to a [MessageInputPlaceholderBuilder] to produce the actual
 /// placeholder string that gets passed down to the underlying
-/// [StreamChatMessageComposer].
+/// [StreamChatMessageInput].
 ///
 /// Each case carries the contextual data relevant to that state — for example
 /// [SlowModePlaceholder.cooldownTimeOut] for the remaining cooldown, or
@@ -47,13 +47,13 @@ sealed class MessageInputPlaceholder {
   /// Precedence (highest to lowest):
   /// 1. [SlowModePlaceholder] when the channel is in slow mode for the
   ///    current user.
-  /// 2. [CommandPlaceholder] when [StreamMessageInputController.message] has
+  /// 2. [CommandPlaceholder] when [StreamMessageComposerController.message] has
   ///    an active command.
   /// 3. [AttachmentsPlaceholder] when there are pending attachments but no
   ///    text yet.
   /// 4. [WriteMessagePlaceholder] otherwise.
   factory MessageInputPlaceholder.resolve(
-    StreamMessageInputController controller,
+    StreamMessageComposerController controller,
   ) {
     if (controller.isSlowModeActive) {
       return SlowModePlaceholder(cooldownTimeOut: controller.cooldownTimeOut);
@@ -96,7 +96,7 @@ final class SlowModePlaceholder extends MessageInputPlaceholder {
 
   /// The remaining slow-mode cooldown in seconds.
   ///
-  /// Mirrors [StreamMessageInputController.cooldownTimeOut].
+  /// Mirrors [StreamMessageComposerController.cooldownTimeOut].
   final int cooldownTimeOut;
 
   /// The remaining slow-mode cooldown as a [Duration].
@@ -133,7 +133,7 @@ final class AttachmentsPlaceholder extends MessageInputPlaceholder {
   final List<Attachment> attachments;
 }
 
-/// Returns the placeholder string shown inside [StreamMessageInput]'s text
+/// Returns the placeholder string shown inside [StreamMessageComposer]'s text
 /// field.
 ///
 /// Receives the current [MessageInputPlaceholder] state and may return a

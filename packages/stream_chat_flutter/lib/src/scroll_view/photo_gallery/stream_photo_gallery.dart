@@ -2,7 +2,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart' show AssetEntity, ThumbnailFormat, ThumbnailSize;
 
-import 'package:stream_chat_flutter/src/scroll_view/stream_scroll_view_load_more_error.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// Default grid delegate  for [StreamPhotoGallery].

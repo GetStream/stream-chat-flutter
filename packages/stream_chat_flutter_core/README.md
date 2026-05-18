@@ -75,7 +75,7 @@ Controllers are used to handle the business logic of the chat. You can use them 
 * StreamChannelListController
 * StreamUserListController
 * StreamMessageSearchListController
-* StreamMessageInputController
+* StreamMessageComposerController
 * LazyLoadScrollView
 * PagedValueListenableBuilder
 

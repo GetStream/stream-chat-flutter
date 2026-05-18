@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/message_input/attachment_picker/options/options.dart';
 import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 /// Inline widget for the system attachment picker interface.
 ///

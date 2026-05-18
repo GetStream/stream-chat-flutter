@@ -256,6 +256,9 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
   @override
   String get photosLabel => 'Photos';
 
+  @override
+  String get photosAndVideosLabel => 'Photos & Videos';
+
   String _getDay(DateTime dateTime) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
@@ -943,14 +946,14 @@ class ChannelPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      appBar: StreamChannelHeader(),
+    return Scaffold(
+      appBar: const StreamChannelHeader(),
       body: Column(
         children: <Widget>[
-          Expanded(
+          const Expanded(
             child: StreamMessageListView(),
           ),
-          StreamMessageInput(),
+          StreamMessageComposer(),
         ],
       ),
     );

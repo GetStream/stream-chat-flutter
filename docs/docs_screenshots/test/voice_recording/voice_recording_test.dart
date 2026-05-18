@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:record/record.dart';
+import 'package:stream_chat_flutter/src/message_input/stream_chat_message_input.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import '../src/fakes.dart';
@@ -25,7 +26,7 @@ StreamAudioRecorderController _makeRecorderController(AudioRecorderState initial
 Widget _buildVoiceRecordingMessageInputScaffold({
   required MockClient client,
   required MockChannel channel,
-  StreamMessageInputController? messageInputController,
+  StreamMessageComposerController? messageComposerController,
 }) {
   return MaterialApp(
     theme: docsScreenshotsTheme(),
@@ -41,9 +42,9 @@ Widget _buildVoiceRecordingMessageInputScaffold({
           body: Column(
             children: [
               Expanded(child: Container()),
-              StreamMessageInput(
+              StreamMessageComposer(
                 enableVoiceRecording: true,
-                messageInputController: messageInputController,
+                messageComposerController: messageComposerController,
               ),
             ],
           ),
@@ -93,7 +94,7 @@ Widget _buildVoiceRecordingContextScaffold({
                   ],
                 ),
               ),
-              const StreamMessageInput(enableVoiceRecording: true),
+              StreamMessageComposer(enableVoiceRecording: true),
             ],
           ),
         ),
@@ -103,11 +104,11 @@ Widget _buildVoiceRecordingContextScaffold({
 }
 
 /// Scaffold that shows a full message input bar (with attachment button and
-/// placeholder) using [StreamChatMessageComposer] so we can inject a custom
+/// placeholder) using [StreamChatMessageInput] so we can inject a custom
 /// [audioRecorderController] to control the recording state.
 ///
-/// The outer [Material] + bottom padding mirrors what [StreamMessageInput]
-/// wraps around [StreamChatMessageComposer] internally.
+/// The outer [Material] + bottom padding mirrors what [StreamMessageComposer]
+/// wraps around [StreamChatMessageInput] internally.
 Widget _buildVoiceRecordingComposerScaffold({
   required MockClient client,
   required MockChannel channel,
@@ -136,7 +137,7 @@ Widget _buildVoiceRecordingComposerScaffold({
                       ),
                       child: Padding(
                         padding: EdgeInsets.only(bottom: context.streamSpacing.md),
-                        child: StreamChatMessageComposer(
+                        child: StreamChatMessageInput(
                           onSendPressed: () {},
                           onAttachmentButtonPressed: () {},
                           placeholder: 'Send a message',
@@ -301,7 +302,7 @@ void main() {
       final channelState = MockChannelState();
       _setupChannel(client, clientState, channel, channelState);
 
-      final messageInputController = StreamMessageInputController()
+      final messageComposerController = StreamMessageComposerController()
         ..addAttachment(
           Attachment(
             type: 'voiceRecording',
@@ -317,7 +318,7 @@ void main() {
       return _buildVoiceRecordingMessageInputScaffold(
         client: client,
         channel: channel,
-        messageInputController: messageInputController,
+        messageComposerController: messageComposerController,
       );
     },
   );

@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-import 'package:sample_app/routes/routes.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// Lists every photo + video shared in the enclosing channel as a 3-up
-/// grid. Tapping a tile opens the [StreamFullScreenMedia] gallery.
+/// grid. Tapping a tile opens [StreamMediaGalleryPreview].
 ///
 /// Matches Figma frames `8833:437788` (grid), `13495:418984` (scrolled),
 /// and `8833:437329` (empty).
@@ -42,7 +40,7 @@ class _ChannelMediaDisplayScreenState extends State<ChannelMediaDisplayScreen> {
     final colorScheme = context.streamColorScheme;
     return Scaffold(
       backgroundColor: colorScheme.backgroundApp,
-      appBar: StreamAppBar(title: const Text('Photos & Videos')),
+      appBar: StreamAppBar(title: Text(context.translations.photosAndVideosLabel)),
       body: ValueListenableBuilder<PagedValue<String, GetMessageResponse>>(
         valueListenable: _controller,
         builder: (context, value, _) => value.when(
@@ -50,30 +48,23 @@ class _ChannelMediaDisplayScreenState extends State<ChannelMediaDisplayScreen> {
             // Flatten messages → individual image/video attachments.
             // Excludes link previews (`ogScrapeUrl != null`) so we don't
             // render every shared URL's thumbnail in the grid.
-            final media = <_MediaItem>[
+            final attachments = <StreamMediaGalleryAttachment>[
               for (final response in items)
-                for (final attachment in response.message.attachments)
-                  if ((attachment.type == 'image' || attachment.type == 'video') && attachment.ogScrapeUrl == null)
-                    _MediaItem(attachment, response.message),
+                ...response.message.toMediaGalleryAttachments(
+                  filter: (a) =>
+                      (a.type == AttachmentType.image || a.type == AttachmentType.video) && a.ogScrapeUrl == null,
+                ),
             ];
 
-            if (media.isEmpty) return const Center(child: _EmptyState());
+            if (attachments.isEmpty) return const Center(child: _EmptyState());
 
             return LazyLoadScrollView(
               onEndOfPage: () async {
                 if (nextPageKey != null) await _controller.loadMore(nextPageKey);
               },
-              child: GridView.builder(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 3,
-                  mainAxisSpacing: 1,
-                  crossAxisSpacing: 1,
-                ),
-                itemCount: media.length,
-                itemBuilder: (context, index) => _MediaTile(
-                  index: index,
-                  items: media,
-                ),
+              child: StreamMediaGallery(
+                attachments: attachments,
+                onItemTap: (index) => _openPreview(context, attachments, index),
               ),
             );
           },
@@ -88,71 +79,20 @@ class _ChannelMediaDisplayScreenState extends State<ChannelMediaDisplayScreen> {
       ),
     );
   }
-}
 
-/// Single attachment + its enclosing message — paired so the full-screen
-/// gallery can show sender / timestamp metadata when opened.
-class _MediaItem {
-  const _MediaItem(this.attachment, this.message);
-
-  final Attachment attachment;
-  final Message message;
-}
-
-/// One cell in the photo grid. Renders the attachment's thumbnail
-/// (image or video) via [StreamNetworkImage]; videos overlay a
-/// [StreamVideoPlayIndicator]. Tapping opens the full-screen gallery
-/// at this index — every other media item in the channel is wired up
-/// as a swipeable sibling.
-class _MediaTile extends StatelessWidget {
-  const _MediaTile({required this.index, required this.items});
-
-  final int index;
-  final List<_MediaItem> items;
-
-  @override
-  Widget build(BuildContext context) {
-    final item = items[index];
-    final attachment = item.attachment;
-    final isVideo = attachment.type == 'video';
-    final thumbUrl = attachment.thumbUrl ?? attachment.imageUrl ?? attachment.assetUrl;
-
-    return GestureDetector(
-      onTap: () => _open(context),
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          if (thumbUrl != null)
-            StreamNetworkImage(thumbUrl, fit: BoxFit.cover)
-          else
-            ColoredBox(color: context.streamColorScheme.backgroundSurfaceCard),
-          if (isVideo) const Center(child: StreamVideoPlayIndicator()),
-        ],
-      ),
-    );
-  }
-
-  void _open(BuildContext context) {
+  void _openPreview(
+    BuildContext context,
+    List<StreamMediaGalleryAttachment> attachments,
+    int index,
+  ) {
     final channel = StreamChannel.of(context).channel;
     Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (_) => StreamChannel(
           channel: channel,
-          child: StreamFullScreenMedia(
-            mediaAttachmentPackages: [
-              for (final m in items) StreamAttachmentPackage(attachment: m.attachment, message: m.message),
-            ],
-            startIndex: index,
-            userName: items[index].message.user?.name ?? '',
-            onShowMessage: (message, _) async {
-              final router = GoRouter.of(context);
-              if (channel.state == null) await channel.watch();
-              router.pushNamed(
-                Routes.CHANNEL_PAGE.name,
-                pathParameters: Routes.CHANNEL_PAGE.params(channel),
-                queryParameters: Routes.CHANNEL_PAGE.queryParams(message),
-              );
-            },
+          child: StreamMediaGalleryPreview(
+            attachments: attachments,
+            initialIndex: index,
           ),
         ),
       ),

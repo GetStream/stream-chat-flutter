@@ -16,11 +16,10 @@ class StreamMessageComposerInputTrailing extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return context.chatComponentBuilder<MessageComposerInputTrailingProps>()?.call(
-          context,
-          MessageComposerInputTrailingProps.from(props),
-        ) ??
-        DefaultStreamMessageComposerInputTrailing(props: props);
+    final trailingProps = MessageComposerInputTrailingProps.from(props);
+
+    return context.chatComponentBuilder<MessageComposerInputTrailingProps>()?.call(context, trailingProps) ??
+        DefaultStreamMessageComposerInputTrailing(props: trailingProps);
   }
 }
 
@@ -35,7 +34,7 @@ class DefaultStreamMessageComposerInputTrailing extends StatelessWidget {
   /// The properties for the message composer component.
   final MessageComposerComponentProps props;
 
-  StreamMessageInputController get _controller => props.controller;
+  StreamMessageComposerController get _controller => props.controller;
 
   @override
   Widget build(BuildContext context) {
@@ -46,30 +45,100 @@ class DefaultStreamMessageComposerInputTrailing extends StatelessWidget {
         final hasContent = hasText || _controller.attachments.isNotEmpty;
         final isEditing = _controller.isEditing;
         final hasCommand = _controller.message.command != null;
-        var buttonState = StreamMessageComposerInputTrailingState.microphone;
+        var buttonState = _ButtonState.microphone;
         if (props.isAudioRecordingFlowActive) {
-          buttonState = StreamMessageComposerInputTrailingState.voiceRecordingActive;
+          buttonState = _ButtonState.voiceRecordingActive;
         }
 
         if (isEditing) {
-          buttonState = StreamMessageComposerInputTrailingState.edit;
+          buttonState = _ButtonState.edit;
         } else if (hasCommand) {
-          buttonState = StreamMessageComposerInputTrailingState.command;
+          buttonState = _ButtonState.command;
         } else if (hasContent) {
-          buttonState = StreamMessageComposerInputTrailingState.send;
+          buttonState = _ButtonState.send;
         }
 
         final isEnabled = (!isEditing && !hasCommand) || hasContent;
 
-        return props.isAudioRecordingFlowLocked || props.isAudioRecordingFlowStopped
-            ? const SizedBox.shrink()
-            : StreamCoreMessageComposerInputTrailing(
-                controller: _controller.textFieldController,
-                onSendPressed: isEnabled ? props.onSendPressed : null,
-                voiceRecordingCallback: props.voiceRecordingCallback,
-                buttonState: buttonState,
-              );
+        if (props.isAudioRecordingFlowLocked || props.isAudioRecordingFlowStopped) {
+          return const SizedBox.shrink();
+        }
+
+        final voiceRecordingCallback = props.voiceRecordingCallback;
+        if (buttonState == _ButtonState.send ||
+            buttonState == _ButtonState.edit ||
+            buttonState == _ButtonState.command ||
+            voiceRecordingCallback == null) {
+          return StreamButton.icon(
+            key: _sendKey,
+            icon: Icon(
+              buttonState == _ButtonState.edit || buttonState == _ButtonState.command
+                  ? context.streamIcons.checkmark
+                  : context.streamIcons.send,
+            ),
+            size: StreamButtonSize.small,
+            onPressed: isEnabled ? props.onSendPressed : null,
+          );
+        }
+
+        return _VoiceRecordingButton(
+          voiceRecordingCallback: voiceRecordingCallback,
+          isRecording: buttonState == _ButtonState.voiceRecordingActive,
+        );
       },
     );
   }
 }
+
+enum _ButtonState {
+  send,
+  edit,
+  command,
+  microphone,
+  voiceRecordingActive,
+}
+
+class _VoiceRecordingButton extends StatelessWidget {
+  const _VoiceRecordingButton({
+    required this.voiceRecordingCallback,
+    required this.isRecording,
+  });
+
+  final VoiceRecordingCallback voiceRecordingCallback;
+  final bool isRecording;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      key: _microphoneKey,
+      onLongPress: voiceRecordingCallback.onLongPressStart,
+      onLongPressCancel: voiceRecordingCallback.onLongPressCancel,
+      onLongPressEnd: voiceRecordingCallback.onLongPressEnd,
+      onLongPressMoveUpdate: voiceRecordingCallback.onLongPressMoveUpdate,
+      behavior: HitTestBehavior.translucent,
+      child: StreamButtonTheme(
+        data: StreamButtonThemeData(
+          secondary: StreamButtonTypeStyle(
+            ghost: StreamButtonThemeStyle(
+              backgroundColor: isRecording
+                  ? WidgetStateProperty.all(
+                      context.streamColorScheme.backgroundPressed,
+                    )
+                  : null,
+            ),
+          ),
+        ),
+        child: StreamButton.icon(
+          icon: Icon(context.streamIcons.voice),
+          type: StreamButtonType.ghost,
+          style: StreamButtonStyle.secondary,
+          size: StreamButtonSize.small,
+          onPressed: () {},
+        ),
+      ),
+    );
+  }
+}
+
+final _sendKey = UniqueKey();
+final _microphoneKey = UniqueKey();

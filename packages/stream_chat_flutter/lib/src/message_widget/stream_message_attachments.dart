@@ -44,10 +44,7 @@ class StreamMessageAttachments extends core.NullableStatelessWidget {
     required this.message,
     this.attachmentBuilders,
     this.onAttachmentTap,
-    this.onShowMessage,
     this.onLinkTap,
-    this.onReplyTap,
-    this.attachmentActionsModalBuilder,
   });
 
   /// {@macro message}
@@ -59,17 +56,8 @@ class StreamMessageAttachments extends core.NullableStatelessWidget {
   /// {@macro onAttachmentTap}
   final OnAttachmentWidgetTap? onAttachmentTap;
 
-  /// {@macro onShowMessage}
-  final ShowMessageCallback? onShowMessage;
-
   /// {@macro onLinkTap}
   final void Function(String)? onLinkTap;
-
-  /// {@macro onReplyTap}
-  final void Function(Message)? onReplyTap;
-
-  /// {@macro attachmentActionsBuilder}
-  final AttachmentActionsBuilder? attachmentActionsModalBuilder;
 
   @override
   Widget? nullableBuild(BuildContext context) {
@@ -125,7 +113,7 @@ class StreamMessageAttachments extends core.NullableStatelessWidget {
     // attachment in full screen.
     final isMedia = isImage || isVideo || isGiphy;
     if (isMedia) {
-      final attachments = message.toAttachmentPackage(
+      final attachments = message.toMediaGalleryAttachments(
         filter: (it) {
           final isImage = it.type == AttachmentType.image;
           final isVideo = it.type == AttachmentType.video;
@@ -136,7 +124,7 @@ class StreamMessageAttachments extends core.NullableStatelessWidget {
 
       final navigator = Navigator.of(context);
       final channel = StreamChannel.of(context).channel;
-      final startIndex = attachments.indexWhere(
+      final initialIndex = attachments.indexWhere(
         (it) => it.attachment.id == attachment.id,
       );
 
@@ -144,39 +132,13 @@ class StreamMessageAttachments extends core.NullableStatelessWidget {
         MaterialPageRoute(
           builder: (_) => StreamChannel(
             channel: channel,
-            child: StreamFullScreenMediaBuilder(
-              userName: message.user!.name,
-              mediaAttachmentPackages: attachments,
-              startIndex: math.max(0, startIndex),
-              onReplyMessage: onReplyTap,
-              onShowMessage: onShowMessage,
-              attachmentActionsModalBuilder: attachmentActionsModalBuilder,
+            child: StreamMediaGalleryPreview(
+              attachments: attachments,
+              initialIndex: math.max(0, initialIndex),
             ),
           ),
         ),
       );
     }
-  }
-}
-
-extension on Message {
-  List<StreamAttachmentPackage> toAttachmentPackage({
-    bool Function(Attachment)? filter,
-  }) {
-    // Create a copy of the attachments list.
-    var attachments = [...this.attachments];
-    if (filter != null) {
-      attachments = [...attachments.where(filter)];
-    }
-
-    // Create a list of StreamAttachmentPackage from the attachments list.
-    return [
-      ...attachments.map((it) {
-        return StreamAttachmentPackage(
-          attachment: it,
-          message: this,
-        );
-      }),
-    ];
   }
 }

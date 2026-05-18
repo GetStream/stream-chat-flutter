@@ -105,7 +105,7 @@ class MockChannelState extends Mock implements ChannelClientState {
   }
 }
 
-/// Sets up a [MockChannel] with all stubs required by [StreamMessageInput].
+/// Sets up a [MockChannel] with all stubs required by [StreamMessageComposer].
 void setupMockChannel({
   required MockClient client,
   required MockClientState clientState,

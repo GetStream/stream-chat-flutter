@@ -116,6 +116,7 @@ void main() {
         isNotNull,
       );
       expect(localizations.photosLabel, isNotNull);
+      expect(localizations.photosAndVideosLabel, isNotNull);
       // today
       expect(
         localizations.sentAtText(

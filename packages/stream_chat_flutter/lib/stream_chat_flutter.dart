@@ -13,7 +13,14 @@ export 'package:stream_core_flutter/stream_core_flutter.dart'
         StreamAvatarGroupSize,
         StreamAvatarSize,
         StreamAvatarStackSize,
+        StreamBottomAppBar,
+        StreamBottomAppBarStyle,
+        StreamBottomAppBarTheme,
+        StreamBottomAppBarThemeData,
         StreamButton,
+        StreamButtonSize,
+        StreamButtonStyle,
+        StreamButtonType,
         StreamButtonThemeStyle,
         StreamBadgeCount,
         StreamBadgeCountTheme,
@@ -32,6 +39,8 @@ export 'package:stream_core_flutter/stream_core_flutter.dart'
         StreamAudioWaveform,
         StreamTheme,
         StreamIcons,
+        StreamImageErrorPlaceholder,
+        StreamImageLoadingPlaceholder,
         StreamImageSourceBadge,
         StreamThemeExtension,
         StreamComponentFactory,
@@ -105,13 +114,19 @@ export 'package:stream_core_flutter/stream_core_flutter.dart'
         StreamVideoPlayIndicatorSize,
         StreamMessageAttachment,
         StreamMessageAttachmentStyle,
+        StreamMediaBadge,
+        MediaBadgeType,
+        MediaBadgeDurationFormat,
+        StreamMediaViewer,
+        StreamMediaViewerTheme,
+        StreamMediaViewerThemeData,
         StreamMessageItemTheme,
         StreamMessageItemThemeData,
         StreamMessageLayoutProperty,
         StreamMessageLayoutVisibility,
         StreamVisibility,
         StreamColors,
-        kStreamHeaderHeight,
+        kStreamToolbarHeight,
         showStreamSheet,
         streamSupportedEmojis;
 
@@ -124,7 +139,6 @@ export 'src/attachment/gallery_attachment.dart';
 export 'src/attachment/handler/stream_attachment_handler.dart';
 export 'src/attachment/image_attachment.dart';
 export 'src/attachment/link_preview_attachment.dart';
-export 'src/attachment/stream_attachment_package.dart';
 export 'src/attachment/thumbnail/giphy_attachment_thumbnail.dart';
 export 'src/attachment/thumbnail/image_attachment_thumbnail.dart';
 export 'src/attachment/thumbnail/media_attachment_thumbnail.dart';
@@ -150,10 +164,6 @@ export 'src/components/avatar/stream_user_avatar_stack.dart';
 export 'src/components/message_composer/message_composer.dart';
 export 'src/components/stream_chat_component_builders.dart';
 // endregion
-export 'src/fullscreen_media/full_screen_media.dart';
-export 'src/fullscreen_media/full_screen_media_builder.dart';
-export 'src/gallery/gallery_footer.dart';
-export 'src/gallery/gallery_header.dart';
 export 'src/icons/stream_svg_icon.dart';
 export 'src/indicators/sending_indicator.dart';
 export 'src/indicators/typing_indicator.dart';
@@ -161,6 +171,14 @@ export 'src/indicators/unread_indicator.dart';
 export 'src/keyboard_shortcuts/keyboard_shortcut_runner.dart';
 export 'src/localization/stream_chat_localizations.dart';
 export 'src/localization/translations.dart' show DefaultTranslations;
+export 'src/media_gallery/stream_media_gallery.dart';
+export 'src/media_gallery/stream_media_gallery_attachment.dart';
+export 'src/media_gallery/stream_media_gallery_item.dart';
+export 'src/media_gallery_preview/stream_media_gallery_preview.dart';
+export 'src/media_gallery_preview/stream_media_gallery_preview_footer.dart';
+export 'src/media_gallery_preview/stream_media_gallery_preview_header.dart';
+export 'src/media_gallery_preview/stream_media_gallery_preview_item.dart';
+export 'src/media_gallery_preview/video_player/stream_video_player.dart';
 export 'src/message_action/message_action.dart';
 export 'src/message_action/message_actions_builder.dart';
 export 'src/message_input/attachment_picker/stream_attachment_picker.dart';
@@ -175,8 +193,8 @@ export 'src/message_input/audio_recorder/stream_audio_recorder.dart';
 export 'src/message_input/countdown_button.dart';
 export 'src/message_input/enums.dart';
 export 'src/message_input/message_input_placeholder.dart';
+export 'src/message_input/stream_message_composer.dart';
 export 'src/message_input/stream_message_composer_attachment_list.dart';
-export 'src/message_input/stream_message_input.dart';
 export 'src/message_input/stream_message_text_field.dart';
 export 'src/message_list_view/message_details.dart';
 export 'src/message_list_view/message_list_view.dart';
@@ -197,11 +215,11 @@ export 'src/misc/date_divider.dart';
 export 'src/misc/info_tile.dart';
 export 'src/misc/option_list_tile.dart';
 export 'src/misc/reaction_icon_resolver.dart';
-
 export 'src/misc/stream_modal.dart';
 export 'src/misc/stream_neumorphic_button.dart';
 export 'src/misc/swipeable.dart';
 export 'src/misc/thread_header.dart';
+export 'src/misc/timestamp.dart';
 export 'src/misc/visible_footnote.dart';
 export 'src/poll/creator/stream_poll_creator_sheet.dart';
 export 'src/poll/creator/stream_poll_creator_widget.dart';
@@ -214,8 +232,6 @@ export 'src/reactions/detail/reaction_detail_sheet.dart';
 export 'src/reactions/picker/reaction_picker.dart';
 export 'src/scroll_view/channel_scroll_view/stream_channel_list_item.dart';
 export 'src/scroll_view/channel_scroll_view/stream_channel_list_view.dart';
-export 'src/scroll_view/draft_scroll_view/stream_draft_list_tile.dart';
-export 'src/scroll_view/draft_scroll_view/stream_draft_list_view.dart';
 export 'src/scroll_view/member_scroll_view/stream_member_grid_view.dart';
 export 'src/scroll_view/member_scroll_view/stream_member_list_view.dart';
 export 'src/scroll_view/message_search_scroll_view/stream_message_search_list_tile.dart';
@@ -229,6 +245,8 @@ export 'src/scroll_view/reaction_scroll_view/stream_reaction_list_view.dart';
 export 'src/scroll_view/stream_scroll_view_empty_widget.dart';
 export 'src/scroll_view/stream_scroll_view_error_widget.dart';
 export 'src/scroll_view/stream_scroll_view_indexed_widget_builder.dart';
+export 'src/scroll_view/stream_scroll_view_load_more_error.dart';
+export 'src/scroll_view/stream_scroll_view_load_more_indicator.dart';
 export 'src/scroll_view/stream_scroll_view_loading_widget.dart';
 export 'src/scroll_view/thread_scroll_view/stream_thread_list_tile.dart';
 export 'src/scroll_view/thread_scroll_view/stream_thread_list_view.dart';
@@ -239,10 +257,10 @@ export 'src/scroll_view/user_scroll_view/stream_user_list_tile.dart';
 export 'src/scroll_view/user_scroll_view/stream_user_list_view.dart';
 export 'src/stream_chat.dart';
 export 'src/stream_chat_configuration.dart';
-export 'src/theme/draft_list_tile_theme.dart';
 export 'src/theme/stream_chat_theme.dart';
 export 'src/theme/themes.dart';
 export 'src/user/user_mention_tile.dart';
+export 'src/utils/date_formatter.dart';
 export 'src/utils/device_segmentation.dart';
 export 'src/utils/extensions.dart';
 export 'src/utils/helpers.dart';
