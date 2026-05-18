@@ -1258,7 +1258,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
             when controller.isAttached) {
           return controller.scrollTo(
             index: index + 2, // SPL leading loader/footer slots
-            alignment: 0.1,
+            alignment: 0.5, // center the message in the viewport
           );
         }
       },

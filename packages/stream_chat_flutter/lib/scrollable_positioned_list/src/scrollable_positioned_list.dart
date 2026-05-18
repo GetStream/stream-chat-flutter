@@ -199,7 +199,7 @@ class ScrollablePositionedList extends StatefulWidget {
 }
 
 const Curve _kDefaultScrollCurve = Curves.fastOutSlowIn;
-const Duration _kDefaultScrollDuration = Duration(milliseconds: 250);
+const Duration _kDefaultScrollDuration = Duration(milliseconds: 400);
 
 /// Controller to jump or scroll to a particular position in a
 /// [ScrollablePositionedList].
