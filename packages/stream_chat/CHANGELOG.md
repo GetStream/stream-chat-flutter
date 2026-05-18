@@ -1,5 +1,11 @@
 ## Upcoming Changes
 
+🔒 Security
+
+- Bumped `jose` floor to `0.3.5+1` to address [CVE-2026-34240](https://github.com/advisories/GHSA-vm9r-h74p-hg97)
+  (untrusted JWK header accepted during signature verification). The SDK only uses `JsonWebToken.unverified` and
+  is not directly exploitable, but the floor bump ensures consumers resolve to a patched version.
+
 🐞 Fixed
 
 - Fixed `StreamChatClient.queryDrafts` not forwarding the `filter` argument to the API.
