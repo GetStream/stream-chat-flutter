@@ -40,7 +40,7 @@ dependencies:
 
 dev_dependencies:
   build_runner: ^2.15.0
-  freezed: ">=2.4.2 <4.0.0"
+  freezed: ^3.0.0
   json_serializable: ^6.13.2
   mocktail: ^1.0.5
   test: ^1.31.1

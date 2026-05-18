@@ -27,7 +27,7 @@ dependencies:
   cached_network_image: ^3.4.1
   chewie: ^1.13.1
   collection: ^1.19.1
-  desktop_drop: ">=0.7.1 <0.8.0"
+  desktop_drop: ^0.7.1
   diacritic: ^0.1.6
   dio: ^5.9.2
   ezanimation: ^0.6.0
@@ -44,7 +44,7 @@ dependencies:
   image_picker: ^1.2.2
   image_size_getter: ^2.4.1
   jiffy: ^6.4.4
-  just_audio: ">=0.10.5 <0.11.0"
+  just_audio: ^0.10.5
   lottie: ^3.3.3
   media_kit: ^1.2.6
   media_kit_video: ^2.0.1

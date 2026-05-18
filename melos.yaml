@@ -35,9 +35,9 @@ command:
       cached_network_image: ^3.4.1
       chewie: ^1.13.1
       collection: ^1.19.1
-      connectivity_plus: ">=7.1.1 <8.0.0"
+      connectivity_plus: ^7.1.1
       cupertino_icons: ^1.0.3
-      desktop_drop: '>=0.7.1 <0.8.0'
+      desktop_drop: ^0.7.1
       device_info_plus: '>=12.4.0 <14.0.0'
       device_preview: ^1.2.0
       diacritic: ^0.1.6
@@ -69,7 +69,7 @@ command:
       jiffy: ^6.4.4
       jose: ^0.3.5+1
       json_annotation: ^4.11.0
-      just_audio: ">=0.10.5 <0.11.0"
+      just_audio: ^0.10.5
       latlong2: ^0.9.1
       logging: ^1.3.0
       lottie: ^3.3.3
@@ -119,7 +119,7 @@ command:
       fake_async: ^1.3.3
       faker_dart: ^0.2.3
       flutter_launcher_icons: ^0.14.4
-      freezed: ">=2.4.2 <4.0.0"
+      freezed: ^3.0.0
       json_serializable: ^6.13.2
       mocktail: ^1.0.5
       path: ^1.9.1
