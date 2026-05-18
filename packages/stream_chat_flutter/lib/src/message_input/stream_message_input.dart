@@ -1510,8 +1510,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
     final channel = streamChannel.channel;
     var message = _effectiveController.value;
 
-    if (!channel.canSendLinks &&
-        _urlRegex.hasMatch(message.text ?? '')) {
+    if (!channel.canSendLinks && _urlRegex.hasMatch(message.text ?? '')) {
       showInfoBottomSheet(
         context,
         icon: StreamSvgIcon(
