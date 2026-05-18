@@ -1,5 +1,10 @@
 ## 9.23.0
 
+✅ Added
+
+- `StreamMessageListView` now accepts `maximumMessageLimit` to cap the loaded message list. See
+  `MessageListCore` for the trim semantics.
+
 🐞 Fixed
 
 - Fixed `StreamChannelAvatar` crashing with `RangeError` when user/channel name is empty.

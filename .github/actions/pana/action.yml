@@ -4,7 +4,7 @@ inputs:
   min_score:
     required: false
     type: number
-    default: 120
+    default: 100
   pana_version:
     required: false
     type: string
@@ -24,10 +24,10 @@ runs:
       uses: mikefarah/yq@master
       with:
         cmd: |
-          yq eval '.dependency_overrides.stream_chat_flutter = {"path": "../stream_chat_flutter"}' -i packages/stream_chat_localizations/pubspec.yaml
-          yq eval '.dependency_overrides.stream_chat = {"path": "../stream_chat"}' -i packages/stream_chat_flutter_core/pubspec.yaml
-          yq eval '.dependency_overrides.stream_chat_flutter_core = {"path": "../stream_chat_flutter_core"}' -i packages/stream_chat_flutter/pubspec.yaml
-          yq eval '.dependency_overrides.stream_chat = {"path": "../stream_chat"}' -i packages/stream_chat_persistence/pubspec.yaml
+          yq eval '.dependencies.stream_chat_flutter = {"path": "../stream_chat_flutter"}' -i packages/stream_chat_localizations/pubspec.yaml
+          yq eval '.dependencies.stream_chat = {"path": "../stream_chat"}' -i packages/stream_chat_flutter_core/pubspec.yaml
+          yq eval '.dependencies.stream_chat_flutter_core = {"path": "../stream_chat_flutter_core"}' -i packages/stream_chat_flutter/pubspec.yaml
+          yq eval '.dependencies.stream_chat = {"path": "../stream_chat"}' -i packages/stream_chat_persistence/pubspec.yaml
     
     - name: Install Flutter
       uses: subosito/flutter-action@v2

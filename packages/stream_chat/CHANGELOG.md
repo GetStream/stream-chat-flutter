@@ -1,18 +1,39 @@
-# Upcoming
+## Upcoming Changes
 
 🐞 Fixed
 
 - Fixed `StreamChatClient.queryDrafts` not forwarding the `filter` argument to the API.
 
-## 9.23.0
+✅ Added
+
+- Added `SortedListX` and `ListX` extensions on `List` for keyed merge, sorted insert/upsert and
+  conditional update.
+
+- Added `ChannelClientState.pruneOldest(int)` that drops the oldest messages and keeps at most the
+  requested number. No-op when the channel isn't up to date. Prefer `StreamChannel.pruneOldest`
+  from `stream_chat_flutter_core` when available — it also resets top-pagination.
 
 🚀 Performance
+
+- Faster channel state updates, especially for read receipts, reactions, and other partial-state
+  events that don't touch the messages list. Reactions targeted at thread messages no longer scan
+  the channel-level message list.
 
 - `Channel.readStream`, `Channel.currentUserReadStream`, and `Channel.unreadCountStream` now dedupe
   consecutive equal values via `.distinct()`. Previously all three were derived from
   `channelStateStream` without deduplication, so every channel state mutation (new message, reaction,
   edit, member change, etc.) would push through to subscribers — causing UI listeners that only
   cared about read state to rebuild on unrelated events.
+
+🔄 Changed
+
+- `Channel.currentUserReadStream` now emits `null` when the user logs out (previously the
+  transition was swallowed).
+
+- Removed proactive re-fetching of messages with expired CDN attachment URLs on every channel
+  state update. URL refreshes now flow through normal server events.
+
+## 9.23.0
 
 - Minor bug fixes and improvements
 
