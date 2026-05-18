@@ -2826,17 +2826,21 @@ class ChannelClientState {
     }));
   }
 
-  // Locates a known version of [message] in either the channel-level
-  // `messages` list or its thread, dispatching by `parentId` first so we
-  // avoid scanning the (potentially large) channel list for messages
-  // that can only live in a thread.
+  // Mirrors `updateMessage`'s two-store write: replies live in `threads`,
+  // and a reply with `show_in_channel = true` is also kept in `messages`.
   Message? _findMessage(Message? message) {
     if (message == null) return null;
-    final parentId = message.parentId;
-    if (parentId != null) {
-      return threads[parentId]?.firstWhereOrNull((it) => it.id == message.id);
+    bool sameId(Message it) => it.id == message.id;
+
+    if (message.parentId case final parentId?) {
+      // Fast path: reply found in its loaded thread.
+      final fromThread = threads[parentId]?.firstWhereOrNull(sameId);
+      if (fromThread != null) return fromThread;
+      // Thread-only replies can't be in `messages`; skip the scan.
+      if (message.showInChannel != true) return null;
     }
-    return messages.firstWhereOrNull((it) => it.id == message.id);
+
+    return messages.firstWhereOrNull(sameId);
   }
 
   void _listenMessageDeleted() {

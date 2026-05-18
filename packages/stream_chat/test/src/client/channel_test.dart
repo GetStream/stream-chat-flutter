@@ -4356,6 +4356,177 @@ void main() {
       },
     );
 
+    // A reply with `show_in_channel = true` is mirrored into both `messages`
+    // and `threads[parentId]`. When the thread isn't loaded (fresh hydration,
+    // user never opened the thread) the channel-level copy is the only place
+    // locally-cached fields like `ownReactions`/`poll` survive — so reaction
+    // and message-update events for such replies must still find it.
+    group(
+      'reply events with `show_in_channel = true` and unloaded thread',
+      () {
+        const channelId = 'test-channel-id';
+        const channelType = 'test-channel-type';
+        const replyId = 'mirrored-reply-id';
+        const parentId = 'parent-message-id';
+        // Pinned createdAt keeps oldIndex lookups stable in `updateMessage`.
+        final createdAt = DateTime.utc(2026, 1, 1);
+        late Channel channel;
+
+        setUp(() {
+          final channelState = _generateChannelState(
+            channelId,
+            channelType,
+            mockChannelConfig: true,
+            ownCapabilities: const [ChannelCapability.readEvents],
+          );
+          channel = Channel.fromState(client, channelState);
+        });
+
+        tearDown(() => channel.dispose());
+
+        // Seeds a single reply into the channel-level `messages` while leaving
+        // `threads[parentId]` empty — the exact regression scenario.
+        Message seedMirroredReply({
+          List<Reaction> ownReactions = const [],
+          Poll? poll,
+        }) {
+          final reply = Message(
+            id: replyId,
+            parentId: parentId,
+            showInChannel: true,
+            user: client.state.currentUser,
+            createdAt: createdAt,
+            ownReactions: ownReactions,
+            poll: poll,
+            pollId: poll?.id,
+          );
+          channel.state!.updateChannelState(
+            channel.state!.channelState.copyWith(messages: [reply]),
+          );
+          return reply;
+        }
+
+        test(
+          '`reaction.new` from another user preserves `ownReactions`',
+          () async {
+            final ownReaction = Reaction(
+              type: 'like',
+              messageId: replyId,
+              user: client.state.currentUser,
+            );
+            seedMirroredReply(ownReactions: [ownReaction]);
+            // Pre-condition: thread is not loaded.
+            expect(channel.state!.threads, isEmpty);
+
+            // Server reaction events don't echo back the recipient's own
+            // reactions, so the listener must pull them from the cached copy.
+            final otherUserReaction = Reaction(
+              type: 'love',
+              messageId: replyId,
+              user: User(id: 'other-user'),
+            );
+            client.addEvent(Event(
+              cid: channel.cid,
+              type: EventType.reactionNew,
+              reaction: otherUserReaction,
+              message: Message(
+                id: replyId,
+                parentId: parentId,
+                showInChannel: true,
+                user: client.state.currentUser,
+                createdAt: createdAt,
+                latestReactions: [otherUserReaction],
+              ),
+            ));
+
+            await Future.delayed(Duration.zero);
+
+            final stored = channel.state!.messages
+                .firstWhere((it) => it.id == replyId);
+            expect(stored.ownReactions, [ownReaction]);
+          },
+        );
+
+        test(
+          '`reaction.deleted` strips only the removed reaction',
+          () async {
+            final kept = Reaction(
+              type: 'like',
+              messageId: replyId,
+              user: client.state.currentUser,
+            );
+            final removed = Reaction(
+              type: 'love',
+              messageId: replyId,
+              user: client.state.currentUser,
+            );
+            seedMirroredReply(ownReactions: [kept, removed]);
+            expect(channel.state!.threads, isEmpty);
+
+            client.addEvent(Event(
+              cid: channel.cid,
+              type: EventType.reactionDeleted,
+              reaction: removed,
+              message: Message(
+                id: replyId,
+                parentId: parentId,
+                showInChannel: true,
+                user: client.state.currentUser,
+                createdAt: createdAt,
+              ),
+            ));
+
+            await Future.delayed(Duration.zero);
+
+            final stored = channel.state!.messages
+                .firstWhere((it) => it.id == replyId);
+            expect(stored.ownReactions, [kept]);
+          },
+        );
+
+        test(
+          '`message.updated` preserves `poll`, `pollId`, and `ownReactions`',
+          () async {
+            final ownReaction = Reaction(
+              type: 'like',
+              messageId: replyId,
+              user: client.state.currentUser,
+            );
+            // Partial server updates can omit poll/pollId/ownReactions; the
+            // cached copy is what backfills them.
+            final poll = Poll(
+              id: 'poll-1',
+              name: 'Pick one',
+              options: const [PollOption(text: 'A'), PollOption(text: 'B')],
+            );
+            seedMirroredReply(ownReactions: [ownReaction], poll: poll);
+            expect(channel.state!.threads, isEmpty);
+
+            client.addEvent(Event(
+              cid: channel.cid,
+              type: EventType.messageUpdated,
+              message: Message(
+                id: replyId,
+                parentId: parentId,
+                showInChannel: true,
+                user: client.state.currentUser,
+                createdAt: createdAt,
+                text: 'edited',
+              ),
+            ));
+
+            await Future.delayed(Duration.zero);
+
+            final stored = channel.state!.messages
+                .firstWhere((it) => it.id == replyId);
+            expect(stored.ownReactions, [ownReaction]);
+            expect(stored.poll?.id, poll.id);
+            expect(stored.pollId, poll.id);
+          },
+        );
+      },
+    );
+
     group('Member Events', () {
       const channelId = 'test-channel-id';
       const channelType = 'test-channel-type';
