@@ -4,6 +4,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter_core/src/typedef.dart';
 
@@ -44,7 +45,7 @@ class StreamChatCore extends StatefulWidget {
     required this.client,
     required this.child,
     this.onBackgroundEventReceived,
-    this.backgroundKeepAlive = const Duration(minutes: 1),
+    this.backgroundKeepAlive = const Duration(seconds: 15),
     this.connectivityStream,
   });
 
@@ -136,6 +137,11 @@ class StreamChatCore extends StatefulWidget {
   }
 }
 
+// Long enough to absorb a typical cellular handover (≤2 s of repeated
+// state changes), short enough to stay below the user-perceptual "chat
+// feels slow" threshold on a real reconnect.
+const _connectivityDebounceDuration = Duration(seconds: 3);
+
 /// State class associated with [StreamChatCore].
 class StreamChatCoreState extends State<StreamChatCore>
     with WidgetsBindingObserver {
@@ -226,6 +232,10 @@ class StreamChatCoreState extends State<StreamChatCore>
     WidgetsBinding.instance.addObserver(this);
     _subscribeToConnectivityChange(widget.connectivityStream);
 
+    // Disable the client-level state recovery on reconnect since we handle
+    // it via the list controllers.
+    client.recoverStateOnReconnect = false;
+
     // Update the client system environment.
     unawaited(_getSystemEnvironment.then(client.updateSystemEnvironment));
   }
@@ -241,11 +251,15 @@ class StreamChatCoreState extends State<StreamChatCore>
     // Skip the first connectivity event which emits immediately on subscription
     // to avoid racing with initial connectUser call.
     // See: https://github.com/GetStream/stream-chat-flutter/issues/2409
-    final skippedStream = stream.skip(1);
-
-    _connectivitySubscription = skippedStream.listen(
-      _lifecycleManager.onConnectivityChanged,
-    );
+    //
+    // Debounce so rapid flaps (cell handovers, brief drops) collapse into a
+    // single reconnect — otherwise each emit forces a fresh openConnection,
+    // bypassing the WS backoff and firing a connectionRecovered (which
+    // drives a queryChannels refresh in every channel-list controller).
+    _connectivitySubscription = stream
+        .skip(1)
+        .debounceTime(_connectivityDebounceDuration)
+        .listen(_lifecycleManager.onConnectivityChanged);
   }
 
   void _unsubscribeFromConnectivityChange() {
@@ -256,6 +270,9 @@ class StreamChatCoreState extends State<StreamChatCore>
   @override
   void didUpdateWidget(StreamChatCore oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (widget.client != oldWidget.client) {
+      widget.client.recoverStateOnReconnect = false;
+    }
     final connectivityStream = widget.connectivityStream;
     if (connectivityStream != oldWidget.connectivityStream) {
       _unsubscribeFromConnectivityChange();
@@ -284,7 +301,7 @@ final class _ChatLifecycleManager {
   _ChatLifecycleManager({
     required this.client,
     this.onBackgroundEvent,
-    this.backgroundKeepAlive = const Duration(minutes: 1),
+    this.backgroundKeepAlive = const Duration(seconds: 15),
   });
 
   final StreamChatClient client;
@@ -314,21 +331,16 @@ final class _ChatLifecycleManager {
     return client.maybeReconnect().ignore();
   }
 
-  void _onBackground() {
-    _cancelBackgroundTimer();
-
-    final handler = onBackgroundEvent;
-    if (handler == null) return client.maybeDisconnect();
-
-    return _startBackgroundEventListening(handler);
-  }
-
   Timer? _backgroundTimer;
   StreamSubscription? _eventSubscription;
 
-  void _startBackgroundEventListening(EventHandler handler) {
+  void _onBackground() {
+    _cancelBackgroundTimer();
     _cancelEventSubscription();
-    _eventSubscription = client.on().listen(handler);
+
+    if (onBackgroundEvent case final handler?) {
+      _eventSubscription = client.on().listen(handler);
+    }
 
     _backgroundTimer = Timer(backgroundKeepAlive, () {
       _cancelEventSubscription();

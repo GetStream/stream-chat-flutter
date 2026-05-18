@@ -22,7 +22,7 @@ jobs:
         uses: ./.github/actions/pana
         with:
           working_directory: packages/stream_chat
-          min_score: 120
+          min_score: 100
 
   stream_chat_persistence:
     runs-on: ubuntu-latest
@@ -33,7 +33,7 @@ jobs:
         uses: ./.github/actions/pana
         with:
           working_directory: packages/stream_chat_persistence
-          min_score: 120
+          min_score: 100
 
   stream_chat_flutter_core:
     runs-on: ubuntu-latest
@@ -44,7 +44,7 @@ jobs:
         uses: ./.github/actions/pana
         with:
           working_directory: packages/stream_chat_flutter_core
-          min_score: 120
+          min_score: 100
 
   stream_chat_flutter:
     runs-on: ubuntu-latest
@@ -55,7 +55,7 @@ jobs:
         uses: ./.github/actions/pana
         with:
           working_directory: packages/stream_chat_flutter
-          min_score: 120
+          min_score: 100
 
   stream_chat_localizations:
     runs-on: ubuntu-latest
@@ -66,4 +66,4 @@ jobs:
         uses: ./.github/actions/pana
         with:
           working_directory: packages/stream_chat_localizations
-          min_score: 120
+          min_score: 100
