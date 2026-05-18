@@ -400,9 +400,10 @@ void main() {
       final mockChannel = MockChannel();
       final initialMessages = _generateMessages(count: 10);
       // A new arrival shifts the tail — that's what should trigger pruning.
+      // `offset` keeps the appended id distinct from `initialMessages`.
       final withNewArrival = [
         ...initialMessages,
-        _generateMessages(count: 1).first,
+        _generateMessages(count: 1, offset: initialMessages.length).first,
       ];
       final controller = StreamController<List<Message>>.broadcast();
       addTearDown(controller.close);
