@@ -15,45 +15,45 @@ void main() {
     bool threads = false,
   }) {
     final users = List.generate(count, (index) {
-      index = count + offset;
-      return User(id: 'testUserId$index');
+      final i = index + offset;
+      return User(id: 'testUserId$i');
     });
     final messages = List.generate(
       count,
       (index) {
-        index = index + offset;
+        final i = index + offset;
         return Message(
-          id: 'testMessageId$index',
+          id: 'testMessageId$i',
           type: 'testType',
           user: users[index],
           createdAt: DateTime.now(),
-          replyCount: index,
+          replyCount: i,
           updatedAt: DateTime.now(),
           extraData: const {'extra_test_field': 'extraTestData'},
-          text: 'Dummy text #$index',
+          text: 'Dummy text #$i',
           pinned: true,
           pinnedAt: DateTime.now(),
-          pinnedBy: User(id: 'testUserId$index'),
+          pinnedBy: User(id: 'testUserId$i'),
         );
       },
     );
     final threadMessages = List.generate(
       count,
       (index) {
-        index = index + offset;
+        final i = index + offset;
         return Message(
-          id: 'testThreadMessageId$index',
+          id: 'testThreadMessageId$i',
           type: 'testType',
           user: users[index],
           parentId: messages[0].id,
           createdAt: DateTime.now(),
-          replyCount: index,
+          replyCount: i,
           updatedAt: DateTime.now(),
           extraData: const {'extra_test_field': 'extraTestData'},
-          text: 'Dummy text #$index',
+          text: 'Dummy text #$i',
           pinned: true,
           pinnedAt: DateTime.now(),
-          pinnedBy: User(id: 'testUserId$index'),
+          pinnedBy: User(id: 'testUserId$i'),
         );
       },
     );
