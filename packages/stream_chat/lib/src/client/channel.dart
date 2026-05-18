@@ -3367,7 +3367,7 @@ class ChannelClientState {
       channel: _channelState.channel?.merge(updatedState.channel),
       watchers: newWatchers,
       watcherCount: updatedState.watcherCount,
-      members: [...?updatedState.members],
+      members: updatedState.members,
       membership: updatedState.membership,
       read: newReads,
       draft: updatedState.draft,
