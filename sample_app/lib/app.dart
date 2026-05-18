@@ -358,28 +358,37 @@ class _StreamChatSampleAppState extends State<StreamChatSampleApp>
   }
 
   /// Constructs callback for notification click event.
-  OnRemoteMessage _onFirebaseMessageOpenedApp(StreamChatClient client) {
+OnRemoteMessage _onFirebaseMessageOpenedApp(StreamChatClient client) {
     return (message) async {
       debugPrint('[onMessageOpenedApp] #firebase; message: ${message.toMap()}');
-      // This callback is getting invoked when the user clicks
-      // on the notification in case if notification was shown by OS.
+      
       final channelCid = (message.data['cid'] as String?) ?? '';
+      if (channelCid.isEmpty) return;
+
       final parts = channelCid.split(':');
       final channelType = parts[0];
       final channelId = parts[1];
+      
+      // Assigns the channel if it exists in the state, 
+      // otherwise creates a new channel instance.
       var channel = client.state.channels[channelCid];
-      if (channel == null) {
-        channel = client.channel(
-          channelType,
-          id: channelId,
-        );
+      channel ??= client.channel(channelType, id: channelId);
+
+      // Synchronizes the channel state before navigating to the UI.
+      // This ensures that unread counts and message lists are accurate
+      // upon the first frame of the ChannelPage.
+      try {
         await channel.watch();
+      } catch (e) {
+        debugPrint('Error synchronizing channel: $e');
       }
-      // Navigates to Channel page, which is associated with the notification.
-      GoRouter.of(_navigatorKey.currentContext!).pushNamed(
-        Routes.CHANNEL_PAGE.name,
-        pathParameters: Routes.CHANNEL_PAGE.params(channel),
-      );
+
+      if (_navigatorKey.currentContext != null) {
+        GoRouter.of(_navigatorKey.currentContext!).pushNamed(
+          Routes.CHANNEL_PAGE.name,
+          pathParameters: Routes.CHANNEL_PAGE.params(channel),
+        );
+      }
     };
   }
 

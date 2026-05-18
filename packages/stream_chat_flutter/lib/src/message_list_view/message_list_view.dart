@@ -1,4 +1,4 @@
-// ignore_for_file: lines_longer_than_80_chars
+// ignore_for_file: lines_longer_than_80_chars 
 import 'dart:async';
 import 'dart:math';
 
@@ -538,7 +538,11 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     final newMessagesListLength = messages.length;
 
     if (_messageListLength != null) {
-      if (_bottomPaginationActive || (_inBetweenList && _upToDate)) {
+// MODIFICATION: Channel status stability check added.
+ // The scrolling is adjusted if the SDK confirms that the data is synchronized. (isUpToDate).
+      final isChannelStable = streamChannel?.channel.state?.isUpToDate ?? false;
+
+      if (isChannelStable && (_bottomPaginationActive || (_inBetweenList && _upToDate))) {
         if (_itemPositionListener.itemPositions.value.isNotEmpty) {
           final first = _itemPositionListener.itemPositions.value.first;
           final diff = newMessagesListLength - _messageListLength!;
