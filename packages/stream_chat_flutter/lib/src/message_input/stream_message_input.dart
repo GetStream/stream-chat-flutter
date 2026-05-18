@@ -10,7 +10,6 @@ import 'package:stream_chat_flutter/src/message_input/command_button.dart';
 import 'package:stream_chat_flutter/src/message_input/dm_checkbox_list_tile.dart';
 import 'package:stream_chat_flutter/src/message_input/quoting_message_top_area.dart';
 import 'package:stream_chat_flutter/src/message_input/stream_message_input_icon_button.dart';
-import 'package:stream_chat_flutter/src/message_input/tld.dart';
 import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/src/misc/gradient_box_border.dart';
 import 'package:stream_chat_flutter/src/misc/simple_safe_area.dart';
@@ -1306,7 +1305,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
   String? _lastSearchedContainsUrlText;
   CancelableOperation? _enrichUrlOperation;
   final _urlRegex = RegExp(
-    r'https?://(www\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\.[a-z]{2,4}\b([-a-zA-Z0-9@:%_+.~#?&//=]*)',
+    r'https?://(www\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\.[a-z]{2,}\b([-a-zA-Z0-9@:%_+.~#?&//=]*)',
     caseSensitive: false,
   );
 
@@ -1322,8 +1321,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
       final _parsedMatch = Uri.tryParse(it.group(0) ?? '')?.withScheme;
       if (_parsedMatch == null) return false;
 
-      return _parsedMatch.host.split('.').last.isValidTLD() &&
-          widget.ogPreviewFilter.call(_parsedMatch, value);
+      return widget.ogPreviewFilter.call(_parsedMatch, value);
     }).toList();
 
     // Reset the og attachment if the text doesn't contain any url
@@ -1512,9 +1510,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
     final channel = streamChannel.channel;
     var message = _effectiveController.value;
 
-    if (!channel.canSendLinks &&
-        _urlRegex.allMatches(message.text ?? '').any((element) =>
-            element.group(0)?.split('.').last.isValidTLD() == true)) {
+    if (!channel.canSendLinks && _urlRegex.hasMatch(message.text ?? '')) {
       showInfoBottomSheet(
         context,
         icon: StreamSvgIcon(
