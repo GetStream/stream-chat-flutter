@@ -2821,10 +2821,7 @@ class ChannelClientState {
 
   void _listenReactionDeleted() {
     _subscriptions.add(_channel.on(EventType.reactionDeleted).listen((event) {
-      final oldMessage =
-          messages.firstWhereOrNull((it) => it.id == event.message?.id) ??
-              threads[event.message?.parentId]
-                  ?.firstWhereOrNull((e) => e.id == event.message?.id);
+      final oldMessage = _findMessage(event.message);
       final reaction = event.reaction;
       final ownReactions = oldMessage?.ownReactions
           ?.whereNot((it) =>
@@ -2843,10 +2840,7 @@ class ChannelClientState {
 
   void _listenReactions() {
     _subscriptions.add(_channel.on(EventType.reactionNew).listen((event) {
-      final oldMessage =
-          messages.firstWhereOrNull((it) => it.id == event.message?.id) ??
-              threads[event.message?.parentId]
-                  ?.firstWhereOrNull((e) => e.id == event.message?.id);
+      final oldMessage = _findMessage(event.message);
       final message = event.message!.copyWith(
         ownReactions: oldMessage?.ownReactions,
       );
@@ -2861,10 +2855,7 @@ class ChannelClientState {
       EventType.reactionUpdated,
     )
         .listen((event) {
-      final oldMessage =
-          messages.firstWhereOrNull((it) => it.id == event.message?.id) ??
-              threads[event.message?.parentId]
-                  ?.firstWhereOrNull((e) => e.id == event.message?.id);
+      final oldMessage = _findMessage(event.message);
       final message = event.message!.copyWith(
         poll: oldMessage?.poll,
         pollId: oldMessage?.pollId,
@@ -2872,6 +2863,19 @@ class ChannelClientState {
       );
       updateMessage(message);
     }));
+  }
+
+  // Locates a known version of [message] in either the channel-level
+  // `messages` list or its thread, dispatching by `parentId` first so we
+  // avoid scanning the (potentially large) channel list for messages
+  // that can only live in a thread.
+  Message? _findMessage(Message? message) {
+    if (message == null) return null;
+    final parentId = message.parentId;
+    if (parentId != null) {
+      return threads[parentId]?.firstWhereOrNull((it) => it.id == message.id);
+    }
+    return messages.firstWhereOrNull((it) => it.id == message.id);
   }
 
   void _listenMessageDeleted() {
@@ -2914,14 +2918,11 @@ class ChannelClientState {
 
   /// Updates the [read] in the state if it exists. Adds it otherwise.
   void updateRead([Iterable<Read>? read]) {
-    final existingReads = <Read>[...?channelState.read];
-    final updatedReads = <Read>[
-      ...existingReads.merge(
-        read,
-        key: (read) => read.user.id,
-        update: (original, updated) => updated,
-      ),
-    ];
+    final existingReads = channelState.read ?? const <Read>[];
+    final updatedReads = existingReads.merge(
+      read,
+      key: (read) => read.user.id,
+    );
 
     updateChannelState(
       channelState.copyWith(
@@ -2976,49 +2977,51 @@ class ChannelClientState {
   void updateMessage(Message message) {
     // Determine if the message should be displayed in the channel view.
     if (message.parentId == null || message.showInChannel == true) {
-      // Create a new list of messages to avoid modifying the original
-      // list directly.
-      var newMessages = [...messages];
-      final oldIndex = newMessages.indexWhere((m) => m.id == message.id);
+      // Locate the existing version (if any). One lookup feeds both the
+      // quoted-rewrite below and the `sortedUpsertAt` further down — no
+      // duplicate scan.
 
-      if (oldIndex != -1) {
-        // If the message already exists, prepare it for update.
-        final oldMessage = newMessages[oldIndex];
-        var updatedMessage = message.syncWith(oldMessage);
+      final oldIndex = () {
+        if (messages.isEmpty) return -1;
+        if (message.createdAt.isAfter(messages.last.createdAt)) return -1;
+        return messages.indexWhere((it) => it.id == message.id);
+      }();
 
-        // Preserve quotedMessage if the update doesn't include a new
-        // quotedMessage.
-        if (message.quotedMessageId != null &&
-            message.quotedMessage == null &&
-            oldMessage.quotedMessage != null) {
-          updatedMessage = updatedMessage.copyWith(
-            quotedMessage: oldMessage.quotedMessage,
-          );
-        }
+      final oldMessage = oldIndex == -1 ? null : messages[oldIndex];
 
-        // Update the message in the list.
-        newMessages[oldIndex] = updatedMessage;
+      // Carry over local-only timestamps; no-op when there's no prior.
+      var updatedMessage = message.syncWith(oldMessage);
 
-        // Update quotedMessage references in all messages.
-        newMessages = newMessages.map((it) {
-          // Skip if the current message does not quote the updated message.
-          if (it.quotedMessageId != message.id) return it;
+      // Restore `quotedMessage` stripped by a partial-update payload —
+      // the server omits it when only updating other fields.
+      if (oldMessage != null &&
+          updatedMessage.quotedMessageId != null &&
+          updatedMessage.quotedMessage == null &&
+          oldMessage.quotedMessage != null) {
+        updatedMessage = updatedMessage.copyWith(
+          quotedMessage: oldMessage.quotedMessage,
+        );
+      }
 
-          // Update the quotedMessage only if the updatedMessage indicates
-          // deletion.
-          if (message.isDeleted) {
-            return it.copyWith(
-              quotedMessage: updatedMessage.copyWith(
-                type: message.type,
-                deletedAt: message.deletedAt,
-              ),
-            );
-          }
-          return it;
-        }).toList();
-      } else {
-        // If the message is new, add it to the list.
-        newMessages.add(message);
+      var newMessages = messages.sortedUpsertAt(
+        oldIndex,
+        updatedMessage,
+        compare: _sortByCreatedAt,
+      );
+
+      // When the target of a quote is deleted, rewrite the embedded
+      // `quotedMessage` in every message quoting it. `updateIf` returns
+      // the same list reference when nothing matches.
+      if (oldMessage != null && message.isDeleted) {
+        newMessages = newMessages.updateIf(
+          (it) => it.quotedMessageId == message.id,
+          (it) => it.copyWith(
+            quotedMessage: updatedMessage.copyWith(
+              type: message.type,
+              deletedAt: message.deletedAt,
+            ),
+          ),
+        );
       }
 
       // Handle updates to pinned messages.
@@ -3033,7 +3036,7 @@ class ChannelClientState {
 
       // Apply the updated lists to the channel state.
       _channelState = _channelState.copyWith(
-        messages: newMessages.sorted(_sortByCreatedAt),
+        messages: newMessages,
         pinnedMessages: newPinnedMessages,
         channel: _channelState.channel?.copyWith(
           lastMessageAt: lastMessageAt,
@@ -3060,6 +3063,10 @@ class ChannelClientState {
   /// Updates the list of pinned messages based on the current message's
   /// pinned status.
   List<Message> _updatePinnedMessages(Message message) {
+    // Fast path: incoming isn't pinned and we have no pinned messages,
+    // so there's nothing to add or remove.
+    if (!message.pinned && pinnedMessages.isEmpty) return pinnedMessages;
+
     final newPinnedMessages = [...pinnedMessages];
     final oldPinnedIndex =
         newPinnedMessages.indexWhere((m) => m.id == message.id);
@@ -3376,43 +3383,31 @@ class ChannelClientState {
 
   /// Update channelState with updated information.
   void updateChannelState(ChannelState updatedState) {
-    final _existingStateMessages = <Message>[...messages];
-    final newMessages = <Message>[
-      ..._existingStateMessages.merge(
-        updatedState.messages,
-        key: (message) => message.id,
-        update: (original, updated) => updated.syncWith(original),
-      ),
-    ].sorted(_sortByCreatedAt);
-
-    final _existingStateWatchers = <User>[...?_channelState.watchers];
-    final newWatchers = <User>[
-      ..._existingStateWatchers.merge(
-        updatedState.watchers,
-        key: (watcher) => watcher.id,
-        update: (original, updated) => updated,
-      ),
-    ];
-
-    final _existingStateRead = <Read>[...?_channelState.read];
-    final newReads = <Read>[
-      ..._existingStateRead.merge(
-        updatedState.read,
-        key: (read) => read.user.id,
-        update: (original, updated) => updated,
-      ),
-    ];
-
-    final newMembers = <Member>[...?updatedState.members];
-
     _checkExpiredAttachmentMessages(updatedState);
+
+    final newMessages = messages.merge(
+      updatedState.messages,
+      key: (message) => message.id,
+      update: (original, updated) => updated.syncWith(original),
+      compare: _sortByCreatedAt,
+    );
+
+    final newWatchers = (_channelState.watchers ?? const <User>[]).merge(
+      updatedState.watchers,
+      key: (watcher) => watcher.id,
+    );
+
+    final newReads = (_channelState.read ?? const <Read>[]).merge(
+      updatedState.read,
+      key: (read) => read.user.id,
+    );
 
     _channelState = _channelState.copyWith(
       messages: newMessages,
       channel: _channelState.channel?.merge(updatedState.channel),
       watchers: newWatchers,
       watcherCount: updatedState.watcherCount,
-      members: newMembers,
+      members: [...?updatedState.members],
       membership: updatedState.membership,
       read: newReads,
       draft: updatedState.draft,
@@ -3484,13 +3479,12 @@ class ChannelClientState {
   void updateThreadInfo(String parentId, List<Message> messages) {
     final newThreads = {...threads}..update(
         parentId,
-        (original) => <Message>[
-          ...original.merge(
-            messages,
-            key: (message) => message.id,
-            update: (original, updated) => updated.syncWith(original),
-          ),
-        ].sorted(_sortByCreatedAt),
+        (original) => original.merge(
+          messages,
+          key: (message) => message.id,
+          update: (original, updated) => updated.syncWith(original),
+          compare: _sortByCreatedAt,
+        ),
         ifAbsent: () => messages.sorted(_sortByCreatedAt),
       );
 

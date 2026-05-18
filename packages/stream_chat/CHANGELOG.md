@@ -7,6 +7,10 @@
 
 🚀 Performance
 
+- Faster channel state updates, especially for read receipts, reactions, and other partial-state
+  events that don't touch the messages list. Reactions targeted at thread messages no longer scan
+  the channel-level message list.
+
 - `Channel.readStream`, `Channel.currentUserReadStream`, and `Channel.unreadCountStream` now dedupe
   consecutive equal values via `.distinct()`. Previously all three were derived from
   `channelStateStream` without deduplication, so every channel state mutation (new message, reaction,
