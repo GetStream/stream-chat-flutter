@@ -3347,6 +3347,10 @@ class ChannelClientState {
   ///
   /// No-op when [maxMessages] is non-positive, when the current count is
   /// already within the limit, or when [isUpToDate] is `false`.
+  ///
+  /// Prefer `StreamChannel.pruneOldest` when a [StreamChannel] is present:
+  /// it also resets the widget-layer "top reached" marker so top-pagination
+  /// can resume. Calling this directly leaves that marker untouched.
   void pruneOldest(int maxMessages) {
     if (maxMessages <= 0) return;
     if (!isUpToDate) return;

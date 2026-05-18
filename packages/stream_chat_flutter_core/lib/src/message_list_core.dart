@@ -193,7 +193,7 @@ class MessageListCoreState extends State<MessageListCore> {
     if (widget.parentMessage?.id != oldWidget.parentMessage?.id) {
       _resolveMessagesStream(widget.parentMessage);
       _loadThreadReplies(widget.parentMessage);
-      _retentionGate.reset();
+      _retentionGate.seed(_initialMessages ?? const []);
     }
 
     if (widget.maximumMessageLimit != oldWidget.maximumMessageLimit ||
@@ -202,11 +202,6 @@ class MessageListCoreState extends State<MessageListCore> {
         limit: widget.maximumMessageLimit,
         trimBuffer: widget.retentionTrimBuffer,
       );
-      // Defer to post-frame to avoid mutating channel state during build.
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) return;
-        _evaluateLimitChange();
-      });
     }
   }
 
@@ -245,8 +240,8 @@ class MessageListCoreState extends State<MessageListCore> {
   void _setupChannel(StreamChannelState channel) {
     final isFirstAttach = _streamChannel == null;
     _streamChannel = channel;
-    _retentionGate.reset();
     _resolveMessagesStream(widget.parentMessage);
+    _retentionGate.seed(_initialMessages ?? const []);
     if (isFirstAttach) _loadThreadReplies(widget.parentMessage);
   }
 
@@ -270,36 +265,18 @@ class MessageListCoreState extends State<MessageListCore> {
     _initialMessages = state?.messages;
     _messagesStream = state?.messagesStream
         .where((it) => it.isNotEmpty || _upToDate)
-        .map(_pruneIfNeeded);
+        .doOnData(_pruneIfNeeded);
   }
 
-  List<Message> _pruneIfNeeded(List<Message> data) {
+  void _pruneIfNeeded(List<Message> data) {
     final streamChannel = _streamChannel;
     final state = streamChannel?.channel.state;
-    final shouldPrune = _retentionGate.shouldPrune(
+    final shouldPrune = _retentionGate.evaluate(
       data: data,
       isUpToDate: state?.isUpToDate ?? true,
     );
-
-    if (!shouldPrune || streamChannel == null || state == null) return data;
-
+    if (!shouldPrune || streamChannel == null || state == null) return;
     streamChannel.pruneOldest(widget.maximumMessageLimit!);
-    final pruned = state.messages;
-    _retentionGate.noteEmission(pruned);
-    return pruned;
-  }
-
-  void _evaluateLimitChange() {
-    if (_isThreadConversation) return;
-    final limit = widget.maximumMessageLimit;
-    if (limit == null) return;
-    final streamChannel = _streamChannel;
-    final state = streamChannel?.channel.state;
-    if (streamChannel == null || state == null || !state.isUpToDate) return;
-    if (state.messages.length <= limit + widget.retentionTrimBuffer) return;
-
-    streamChannel.pruneOldest(limit);
-    _retentionGate.noteEmission(state.messages);
   }
 
   List<Message> _filterAndReverse(List<Message> source) {
@@ -368,35 +345,36 @@ class MessageRetentionGate {
   int get trimBuffer => _trimBuffer;
 
   /// Updates the cap and trim buffer. Does not clear the cached tail.
-  void configure({required int? limit, required int trimBuffer}) {
+  void configure({
+    required int? limit,
+    required int trimBuffer,
+  }) {
     _limit = limit;
     _trimBuffer = trimBuffer;
   }
 
-  /// Clears the cached tail.
-  void reset() => _lastSeenTailId = null;
-
-  /// Records the tail of [messages] as the most recently observed one.
-  void noteEmission(List<Message> messages) {
+  /// Primes the cached tail without evaluating whether a prune should fire.
+  ///
+  /// Call on mount and on channel/thread transitions so the first stream
+  /// emission compares against itself and cached history isn't pruned.
+  void seed(List<Message> messages) {
     _lastSeenTailId = messages.isEmpty ? null : messages.last.id;
   }
 
   /// Whether [data] should be auto-pruned. Updates the cached tail.
-  bool shouldPrune({
+  bool evaluate({
     required List<Message> data,
     required bool isUpToDate,
   }) {
     final newTailId = data.isEmpty ? null : data.last.id;
-    final limit = _limit;
+    final previousTailId = _lastSeenTailId;
+    _lastSeenTailId = newTailId;
 
+    final limit = _limit;
     if (limit == null || !isUpToDate || data.length <= limit + _trimBuffer) {
-      _lastSeenTailId = newTailId;
       return false;
     }
 
-    final tailUnchanged =
-        _lastSeenTailId != null && _lastSeenTailId == newTailId;
-    _lastSeenTailId = newTailId;
-    return !tailUnchanged;
+    return previousTailId == null || previousTailId != newTailId;
   }
 }

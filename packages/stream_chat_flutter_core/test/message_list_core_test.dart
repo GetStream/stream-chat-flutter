@@ -381,8 +381,8 @@ void main() {
   );
 
   testWidgets(
-    'should call channel.state.pruneOldest when message count exceeds '
-    'maximumMessageLimit',
+    'should call channel.state.pruneOldest when a new message arrives and '
+    'count exceeds maximumMessageLimit',
     (tester) async {
       const messageListCoreKey = Key('messageListCore');
       const maximumMessageLimit = 5;
@@ -398,13 +398,20 @@ void main() {
       );
 
       final mockChannel = MockChannel();
-      final messages = _generateMessages(count: 10);
+      final initialMessages = _generateMessages(count: 10);
+      // A new arrival shifts the tail — that's what should trigger pruning.
+      final withNewArrival = [
+        ...initialMessages,
+        _generateMessages(count: 1).first,
+      ];
+      final controller = StreamController<List<Message>>.broadcast();
+      addTearDown(controller.close);
 
       when(() => mockChannel.state.isUpToDate).thenReturn(true);
       when(() => mockChannel.state.unreadCount).thenReturn(0);
-      when(() => mockChannel.state.messages).thenReturn(messages);
+      when(() => mockChannel.state.messages).thenReturn(initialMessages);
       when(() => mockChannel.state.messagesStream)
-          .thenAnswer((_) => Stream.value(messages));
+          .thenAnswer((_) => controller.stream);
       when(() => mockChannel.state.pruneOldest(any())).thenReturn(null);
 
       await tester.pumpWidget(
@@ -417,8 +424,16 @@ void main() {
         ),
       );
 
+      // First emission carries the seeded tail — gate compares against
+      // itself and does not prune (matches Android's "wait for new message
+      // event before enforcing the cap on cached history").
+      controller.add(initialMessages);
       await tester.pumpAndSettle();
+      verifyNever(() => mockChannel.state.pruneOldest(any()));
 
+      // Subsequent emission with a new tail does trigger a prune.
+      controller.add(withNewArrival);
+      await tester.pumpAndSettle();
       verify(() => mockChannel.state.pruneOldest(maximumMessageLimit))
           .called(greaterThanOrEqualTo(1));
     },
@@ -639,6 +654,123 @@ void main() {
   );
 
   testWidgets(
+    'should not call channel.state.pruneOldest when the tail message is '
+    'edited (tail id unchanged)',
+    (tester) async {
+      const messageListCoreKey = Key('messageListCore');
+      const maximumMessageLimit = 5;
+
+      final messageListCore = MessageListCore(
+        key: messageListCoreKey,
+        maximumMessageLimit: maximumMessageLimit,
+        retentionTrimBuffer: 0,
+        messageListBuilder: (_, __) => const Offstage(),
+        loadingBuilder: (BuildContext context) => const Offstage(),
+        emptyBuilder: (BuildContext context) => const Offstage(),
+        errorBuilder: (BuildContext context, Object error) => const Offstage(),
+      );
+
+      final mockChannel = MockChannel();
+
+      // List is already over the cap; the gate is seeded with this tail.
+      final initial = [for (var i = 0; i < 10; i++) _testMessage('msg-$i')];
+      // Same ids, but the tail message is replaced with an edited copy.
+      // Same length, same tail id — only the content of msg-9 changed.
+      final edited = [
+        ...initial.sublist(0, initial.length - 1),
+        initial.last.copyWith(text: 'edited'),
+      ];
+
+      final controller = StreamController<List<Message>>();
+      addTearDown(controller.close);
+
+      when(() => mockChannel.state.isUpToDate).thenReturn(true);
+      when(() => mockChannel.state.unreadCount).thenReturn(0);
+      when(() => mockChannel.state.messages).thenReturn(initial);
+      when(() => mockChannel.state.messagesStream)
+          .thenAnswer((_) => controller.stream);
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: StreamChannel(
+            channel: mockChannel,
+            child: messageListCore,
+          ),
+        ),
+      );
+
+      controller.add(initial);
+      await tester.pumpAndSettle();
+
+      when(() => mockChannel.state.messages).thenReturn(edited);
+      controller.add(edited);
+      await tester.pumpAndSettle();
+
+      // Edits never shift the tail id, so retention must stay quiet — even
+      // when the cap is already exceeded. Matches Android's "trim only on
+      // new message arrivals" semantics; an edit on the latest message does
+      // not invalidate the trimmed window.
+      verifyNever(() => mockChannel.state.pruneOldest(any()));
+    },
+  );
+
+  testWidgets(
+    'should not call channel.state.pruneOldest when a non-tail message is '
+    'edited',
+    (tester) async {
+      const messageListCoreKey = Key('messageListCore');
+      const maximumMessageLimit = 5;
+
+      final messageListCore = MessageListCore(
+        key: messageListCoreKey,
+        maximumMessageLimit: maximumMessageLimit,
+        retentionTrimBuffer: 0,
+        messageListBuilder: (_, __) => const Offstage(),
+        loadingBuilder: (BuildContext context) => const Offstage(),
+        emptyBuilder: (BuildContext context) => const Offstage(),
+        errorBuilder: (BuildContext context, Object error) => const Offstage(),
+      );
+
+      final mockChannel = MockChannel();
+
+      final initial = [for (var i = 0; i < 10; i++) _testMessage('msg-$i')];
+      // Edit a message mid-list (reactions, soft-delete and content edits
+      // all flow through this shape).
+      final edited = [...initial]..[3] =
+          initial[3].copyWith(text: 'edited mid-list');
+
+      final controller = StreamController<List<Message>>();
+      addTearDown(controller.close);
+
+      when(() => mockChannel.state.isUpToDate).thenReturn(true);
+      when(() => mockChannel.state.unreadCount).thenReturn(0);
+      when(() => mockChannel.state.messages).thenReturn(initial);
+      when(() => mockChannel.state.messagesStream)
+          .thenAnswer((_) => controller.stream);
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: StreamChannel(
+            channel: mockChannel,
+            child: messageListCore,
+          ),
+        ),
+      );
+
+      controller.add(initial);
+      await tester.pumpAndSettle();
+
+      when(() => mockChannel.state.messages).thenReturn(edited);
+      controller.add(edited);
+      await tester.pumpAndSettle();
+
+      verifyNever(() => mockChannel.state.pruneOldest(any()));
+    },
+  );
+
+  testWidgets(
     'should not call channel.state.pruneOldest in a thread conversation',
     (tester) async {
       const messageListCoreKey = Key('messageListCore');
@@ -758,94 +890,93 @@ void main() {
     test('does not prune when limit is null', () {
       final gate = MessageRetentionGate(limit: null);
       final data = [for (var i = 0; i < 100; i++) msg('m$i')];
-      expect(gate.shouldPrune(data: data, isUpToDate: true), isFalse);
+      expect(gate.evaluate(data: data, isUpToDate: true), isFalse);
     });
 
     test('does not prune when channel is not up to date', () {
       final gate = MessageRetentionGate(limit: 5, trimBuffer: 0);
       final data = [for (var i = 0; i < 10; i++) msg('m$i')];
-      expect(gate.shouldPrune(data: data, isUpToDate: false), isFalse);
+      expect(gate.evaluate(data: data, isUpToDate: false), isFalse);
     });
 
     test('does not prune when count is at or below limit + buffer', () {
       final gate = MessageRetentionGate(limit: 5, trimBuffer: 5);
       final atThreshold = [for (var i = 0; i < 10; i++) msg('m$i')];
-      expect(gate.shouldPrune(data: atThreshold, isUpToDate: true), isFalse);
+      expect(gate.evaluate(data: atThreshold, isUpToDate: true), isFalse);
     });
 
     test('prunes when count exceeds limit + buffer and tail changed', () {
       final gate = MessageRetentionGate(limit: 5, trimBuffer: 5);
-      // First emission seeds the cached tail; never prunes (no prior tail).
+      // First emission has no prior tail — gate treats it as a change.
       final first = [for (var i = 0; i < 11; i++) msg('m$i')];
-      expect(gate.shouldPrune(data: first, isUpToDate: true), isTrue);
+      expect(gate.evaluate(data: first, isUpToDate: true), isTrue);
     });
 
     test('does not prune when tail is unchanged across emissions', () {
       final gate = MessageRetentionGate(limit: 5, trimBuffer: 0);
       final first = [for (var i = 0; i < 10; i++) msg('m$i')];
-      gate.shouldPrune(data: first, isUpToDate: true);
+      gate.evaluate(data: first, isUpToDate: true);
       // Same tail, more head (top-pagination shape).
       final prepended = [
         for (var i = 0; i < 5; i++) msg('older-$i'),
         ...first,
       ];
-      expect(gate.shouldPrune(data: prepended, isUpToDate: true), isFalse);
+      expect(gate.evaluate(data: prepended, isUpToDate: true), isFalse);
     });
 
     test('prunes again when tail changes after a prepend-only emission', () {
       final gate = MessageRetentionGate(limit: 5, trimBuffer: 0);
       final first = [for (var i = 0; i < 10; i++) msg('m$i')];
-      gate.shouldPrune(data: first, isUpToDate: true);
+      gate.evaluate(data: first, isUpToDate: true);
       // Pagination top — no prune.
       final prepended = [msg('older-0'), ...first];
-      gate.shouldPrune(data: prepended, isUpToDate: true);
+      gate.evaluate(data: prepended, isUpToDate: true);
       // New live message — prune fires.
       final appended = [...prepended, msg('m-new')];
-      expect(gate.shouldPrune(data: appended, isUpToDate: true), isTrue);
-    });
-
-    test('reset clears cached tail so the next emission seeds fresh', () {
-      final gate = MessageRetentionGate(limit: 5, trimBuffer: 0);
-      final first = [for (var i = 0; i < 10; i++) msg('m$i')];
-      gate
-        ..shouldPrune(data: first, isUpToDate: true)
-        ..reset();
-      // After reset, the same tail re-appearing is treated as a first
-      // observation — gate would prune (no prior tail to compare).
-      expect(gate.shouldPrune(data: first, isUpToDate: true), isTrue);
+      expect(gate.evaluate(data: appended, isUpToDate: true), isTrue);
     });
 
     test('configure updates limit without clearing cached tail', () {
       final gate = MessageRetentionGate(limit: 100, trimBuffer: 0);
       final data = [for (var i = 0; i < 50; i++) msg('m$i')];
       gate
-        ..shouldPrune(data: data, isUpToDate: true)
+        ..evaluate(data: data, isUpToDate: true)
         // Below the original limit — no prune.
         ..configure(limit: 10, trimBuffer: 0);
       // Now the same data should prune because the limit shrank, but the
       // tail hasn't changed since the previous observation, so the gate
       // still reports false. This is intentional: a configure-only path
       // doesn't force-prune mid-stream — the caller drives that.
-      expect(gate.shouldPrune(data: data, isUpToDate: true), isFalse);
+      expect(gate.evaluate(data: data, isUpToDate: true), isFalse);
     });
 
-    test('noteEmission keeps the cached tail in sync with external mutations',
-        () {
+    test('seed keeps the cached tail in sync with external mutations', () {
       final gate = MessageRetentionGate(limit: 5, trimBuffer: 0);
       final initial = [for (var i = 0; i < 10; i++) msg('m$i')];
-      gate.shouldPrune(data: initial, isUpToDate: true);
+      gate.evaluate(data: initial, isUpToDate: true);
       // Caller pruned externally — tell the gate the new tail.
       final pruned = initial.sublist(5);
-      gate.noteEmission(pruned);
+      gate.seed(pruned);
       // Re-emitting the pruned list with the same tail is treated as
       // unchanged → no prune.
-      expect(gate.shouldPrune(data: pruned, isUpToDate: true), isFalse);
+      expect(gate.evaluate(data: pruned, isUpToDate: true), isFalse);
+    });
+
+    test('seed with cached history suppresses prune on the first emission', () {
+      final gate = MessageRetentionGate(limit: 5, trimBuffer: 0);
+      final initial = [for (var i = 0; i < 10; i++) msg('m$i')];
+      // Mount-time seed primes the gate with whatever the channel had
+      // cached. The next emission carrying the same tail must NOT
+      // trigger a prune — that's how Android-parity cached history is
+      // preserved on attach.
+      gate.seed(initial);
+      expect(gate.evaluate(data: initial, isUpToDate: true), isFalse);
     });
 
     test('handles empty emissions without throwing', () {
       final gate = MessageRetentionGate(limit: 5, trimBuffer: 0);
       expect(
-        () => gate.shouldPrune(data: const [], isUpToDate: true),
+        () => gate.evaluate(data: const [], isUpToDate: true),
         returnsNormally,
       );
     });
@@ -888,7 +1019,7 @@ void main() {
     }
 
     testWidgets(
-      'resets gate when channel changes so the new tail is treated fresh',
+      'reseeds gate when channel changes so the new tail is treated fresh',
       (tester) async {
         const coreKey = Key('messageListCore');
 
@@ -917,10 +1048,9 @@ void main() {
         ));
         await tester.pumpAndSettle();
 
-        // Channel A's first emission seeds the gate's tail; with no prior
-        // tail to compare, prune fires once.
-        verify(() => channelA.state.pruneOldest(5))
-            .called(greaterThanOrEqualTo(1));
+        // Channel A's first emission is compared against the seeded tail —
+        // no prune on cached history.
+        verifyNever(() => channelA.state.pruneOldest(any()));
 
         await tester.pumpWidget(_hostListCore(
           channel: channelB,
@@ -929,16 +1059,15 @@ void main() {
         ));
         await tester.pumpAndSettle();
 
-        // After the channel switch the gate is reset, so channel B's first
-        // emission also triggers a prune (instead of comparing against
-        // channel A's stale tail).
-        verify(() => channelB.state.pruneOldest(5))
-            .called(greaterThanOrEqualTo(1));
+        // After the channel switch the gate is re-seeded with channel B's
+        // tail, so channel B's first emission also doesn't prune (and the
+        // gate doesn't compare against channel A's stale tail).
+        verifyNever(() => channelB.state.pruneOldest(any()));
       },
     );
 
     testWidgets(
-      'resets gate when toggling thread mode',
+      'reseeds gate when toggling thread mode',
       (tester) async {
         const coreKey = Key('messageListCore');
 
@@ -965,7 +1094,8 @@ void main() {
               options: any(named: 'options'),
             )).thenAnswer((_) async => QueryRepliesResponse()..messages = []);
 
-        // Start on main channel so the gate sees a tail of mainMessages.
+        // Start on main channel — first emission is compared against the
+        // seeded tail and does not prune.
         await tester.pumpWidget(_hostListCore(
           channel: mockChannel,
           coreKey: coreKey,
@@ -973,9 +1103,10 @@ void main() {
         ));
         await tester.pumpAndSettle();
 
+        verifyNever(() => mockChannel.state.pruneOldest(any()));
         clearInteractions(mockChannel.state);
 
-        // Switch to thread mode — gate should reset.
+        // Switch to thread mode — gate is re-seeded with the thread tail.
         await tester.pumpWidget(_hostListCore(
           channel: mockChannel,
           coreKey: coreKey,
@@ -988,9 +1119,10 @@ void main() {
         // out of scope for this auto-prune logic).
         verifyNever(() => mockChannel.state.pruneOldest(any()));
 
-        // Switch back to main — the gate was reset on entry to thread, so
-        // the first main emission seeds again, and with the limit
-        // exceeded the gate triggers a prune.
+        // Switch back to main — the gate is re-seeded with the main
+        // channel's tail; the first emission still doesn't prune cached
+        // history (consistent with the seed semantics on every channel /
+        // mode transition).
         clearInteractions(mockChannel.state);
         await tester.pumpWidget(_hostListCore(
           channel: mockChannel,
@@ -999,46 +1131,7 @@ void main() {
         ));
         await tester.pumpAndSettle();
 
-        verify(() => mockChannel.state.pruneOldest(5))
-            .called(greaterThanOrEqualTo(1));
-      },
-    );
-
-    testWidgets(
-      'enforces a tightened limit via a post-frame re-evaluation',
-      (tester) async {
-        const coreKey = Key('messageListCore');
-
-        final mockChannel = MockChannel();
-        final messages = [for (var i = 0; i < 50; i++) msg('m-$i')];
-
-        when(() => mockChannel.state.isUpToDate).thenReturn(true);
-        when(() => mockChannel.state.unreadCount).thenReturn(0);
-        when(() => mockChannel.state.messages).thenReturn(messages);
-        when(() => mockChannel.state.messagesStream)
-            .thenAnswer((_) => Stream.value(messages));
-        when(() => mockChannel.state.pruneOldest(any())).thenReturn(null);
-
-        // Start with no limit — no prune happens.
-        await tester.pumpWidget(_hostListCore(
-          channel: mockChannel,
-          coreKey: coreKey,
-        ));
-        await tester.pumpAndSettle();
-
         verifyNever(() => mockChannel.state.pruneOldest(any()));
-
-        // Tighten the limit. The post-frame callback should run a prune
-        // since the existing list exceeds the new threshold.
-        await tester.pumpWidget(_hostListCore(
-          channel: mockChannel,
-          coreKey: coreKey,
-          maximumMessageLimit: 5,
-        ));
-        await tester.pumpAndSettle();
-
-        verify(() => mockChannel.state.pruneOldest(5))
-            .called(greaterThanOrEqualTo(1));
       },
     );
 
