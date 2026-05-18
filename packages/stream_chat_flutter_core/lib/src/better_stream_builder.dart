@@ -90,7 +90,7 @@ class _BetterStreamBuilderState<T extends Object>
     super.dispose();
   }
 
-  void _onError(error) {
+  void _onError(Object? error) {
     if (widget.errorBuilder != null && error != _lastError) {
       _lastError = error;
       if (mounted) {
