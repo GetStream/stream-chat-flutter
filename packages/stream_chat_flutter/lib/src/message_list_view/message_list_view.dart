@@ -476,13 +476,18 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
 
   @override
   void dispose() {
-    _unreadState.dispose();
-    debouncedMarkRead.cancel();
-    debouncedMarkThreadRead.cancel();
+    // Tear down anything that could write to [_unreadState] or
+    // [_showScrollToBottom] before disposing them.
     _messageNewListener?.cancel();
+    _messageNewListener = null;
     _userReadListener?.cancel();
+    _userReadListener = null;
     _itemPositionListener.itemPositions
         .removeListener(_handleItemPositionsChanged);
+    debouncedMarkRead.cancel();
+    debouncedMarkThreadRead.cancel();
+
+    _unreadState.dispose();
     super.dispose();
   }
 
