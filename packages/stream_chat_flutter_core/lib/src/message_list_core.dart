@@ -339,6 +339,7 @@ class MessageRetentionGate {
   int? _limit;
   int _trimBuffer;
   String? _lastSeenTailId;
+  int _lastSeenCount = 0;
 
   /// Configured cap, or `null` if pruning is disabled.
   int? get limit => _limit;
@@ -363,6 +364,7 @@ class MessageRetentionGate {
   /// emission compares against itself and cached history isn't pruned.
   void seed(List<Message> messages) {
     _lastSeenTailId = messages.isEmpty ? null : messages.last.id;
+    _lastSeenCount = messages.length;
   }
 
   /// Whether [data] should be auto-pruned. Updates the cached tail.
@@ -372,13 +374,17 @@ class MessageRetentionGate {
   }) {
     final newTailId = data.isEmpty ? null : data.last.id;
     final previousTailId = _lastSeenTailId;
+    final previousCount = _lastSeenCount;
     _lastSeenTailId = newTailId;
+    _lastSeenCount = data.length;
 
     final limit = _limit;
     if (limit == null || !isUpToDate || data.length <= limit + _trimBuffer) {
       return false;
     }
 
-    return previousTailId == null || previousTailId != newTailId;
+    // Require both a new tail and a longer list so deletions and edits
+    // at the tail can't masquerade as "new data" and trigger a prune.
+    return newTailId != previousTailId && data.length > previousCount;
   }
 }

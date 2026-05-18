@@ -936,6 +936,24 @@ void main() {
       expect(gate.evaluate(data: appended, isUpToDate: true), isTrue);
     });
 
+    test('does not prune when the tail message is deleted', () {
+      final gate = MessageRetentionGate(limit: 5, trimBuffer: 0);
+      // Push the cached count above threshold via top-pagination (tail
+      // unchanged) so a later tail-id change can't be explained by growth.
+      final first = [for (var i = 0; i < 10; i++) msg('m$i')];
+      gate.evaluate(data: first, isUpToDate: true);
+      final prepended = [
+        for (var i = 0; i < 5; i++) msg('older-$i'),
+        ...first,
+      ];
+      gate.evaluate(data: prepended, isUpToDate: true);
+      // Deleting the tail shrinks the list and rotates the tail id — must
+      // not be mistaken for "new data" or pruning would also reset the
+      // top-pagination tracker on StreamChannel.
+      final tailDeleted = prepended.sublist(0, prepended.length - 1);
+      expect(gate.evaluate(data: tailDeleted, isUpToDate: true), isFalse);
+    });
+
     test('configure updates limit without clearing cached tail', () {
       final gate = MessageRetentionGate(limit: 100, trimBuffer: 0);
       final data = [for (var i = 0; i < 50; i++) msg('m$i')];
