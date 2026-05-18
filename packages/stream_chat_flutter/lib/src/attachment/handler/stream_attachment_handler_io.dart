@@ -68,7 +68,6 @@ class StreamAttachmentHandler extends StreamAttachmentHandlerBase {
   static StreamAttachmentHandler get instance => _instance ??= StreamAttachmentHandler._();
 
   late final _imagePicker = ImagePicker();
-  late final _filePicker = FilePicker.platform;
 
   @override
   Future<Attachment?> pickImage({
@@ -135,7 +134,7 @@ class StreamAttachmentHandler extends StreamAttachmentHandlerBase {
     bool withReadStream = false,
     bool lockParentWindow = true,
   }) async {
-    final result = await _filePicker.pickFiles(
+    final result = await FilePicker.pickFiles(
       dialogTitle: dialogTitle,
       initialDirectory: initialDirectory,
       type: type,

@@ -6,9 +6,8 @@ part of 'message_state.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-MessageInitial _$MessageInitialFromJson(Map<String, dynamic> json) => MessageInitial(
-  $type: json['runtimeType'] as String?,
-);
+MessageInitial _$MessageInitialFromJson(Map<String, dynamic> json) =>
+    MessageInitial($type: json['runtimeType'] as String?);
 
 Map<String, dynamic> _$MessageInitialToJson(MessageInitial instance) => <String, dynamic>{
   'runtimeType': instance.$type,
@@ -46,17 +45,13 @@ Map<String, dynamic> _$MessageFailedToJson(MessageFailed instance) => <String, d
   'runtimeType': instance.$type,
 };
 
-Sending _$SendingFromJson(Map<String, dynamic> json) => Sending(
-  $type: json['runtimeType'] as String?,
-);
+Sending _$SendingFromJson(Map<String, dynamic> json) => Sending($type: json['runtimeType'] as String?);
 
 Map<String, dynamic> _$SendingToJson(Sending instance) => <String, dynamic>{
   'runtimeType': instance.$type,
 };
 
-Updating _$UpdatingFromJson(Map<String, dynamic> json) => Updating(
-  $type: json['runtimeType'] as String?,
-);
+Updating _$UpdatingFromJson(Map<String, dynamic> json) => Updating($type: json['runtimeType'] as String?);
 
 Map<String, dynamic> _$UpdatingToJson(Updating instance) => <String, dynamic>{
   'runtimeType': instance.$type,
@@ -74,17 +69,13 @@ Map<String, dynamic> _$DeletingToJson(Deleting instance) => <String, dynamic>{
   'runtimeType': instance.$type,
 };
 
-Sent _$SentFromJson(Map<String, dynamic> json) => Sent(
-  $type: json['runtimeType'] as String?,
-);
+Sent _$SentFromJson(Map<String, dynamic> json) => Sent($type: json['runtimeType'] as String?);
 
 Map<String, dynamic> _$SentToJson(Sent instance) => <String, dynamic>{
   'runtimeType': instance.$type,
 };
 
-Updated _$UpdatedFromJson(Map<String, dynamic> json) => Updated(
-  $type: json['runtimeType'] as String?,
-);
+Updated _$UpdatedFromJson(Map<String, dynamic> json) => Updated($type: json['runtimeType'] as String?);
 
 Map<String, dynamic> _$UpdatedToJson(Updated instance) => <String, dynamic>{
   'runtimeType': instance.$type,
@@ -126,14 +117,18 @@ Map<String, dynamic> _$UpdatingFailedToJson(UpdatingFailed instance) => <String,
   'runtimeType': instance.$type,
 };
 
-PartialUpdatingFailed _$PartialUpdatingFailedFromJson(Map<String, dynamic> json) => PartialUpdatingFailed(
+PartialUpdatingFailed _$PartialUpdatingFailedFromJson(
+  Map<String, dynamic> json,
+) => PartialUpdatingFailed(
   set: json['set'] as Map<String, dynamic>?,
   unset: (json['unset'] as List<dynamic>?)?.map((e) => e as String).toList(),
   skipEnrichUrl: json['skip_enrich_url'] as bool? ?? false,
   $type: json['runtimeType'] as String?,
 );
 
-Map<String, dynamic> _$PartialUpdatingFailedToJson(PartialUpdatingFailed instance) => <String, dynamic>{
+Map<String, dynamic> _$PartialUpdatingFailedToJson(
+  PartialUpdatingFailed instance,
+) => <String, dynamic>{
   'set': instance.set,
   'unset': instance.unset,
   'skip_enrich_url': instance.skipEnrichUrl,

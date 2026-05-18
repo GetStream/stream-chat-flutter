@@ -21,7 +21,7 @@ environment:
 
 dependencies:
   avatar_glow: ^3.0.0
-  collection: ^1.17.2
+  collection: ^1.19.1
   firebase_core: ^4.0.0
   firebase_messaging: ^16.0.0
   flutter:
@@ -32,24 +32,24 @@ dependencies:
   flutter_map_animations: ^0.9.0
   flutter_secure_storage: ^9.2.2
   flutter_slidable: ^3.1.1
-  flutter_svg: ^2.0.10+1
+  flutter_svg: ^2.3.0
   geolocator: ^13.0.0
   go_router: ^14.6.2
-  image_picker: ^1.1.2
+  image_picker: ^1.2.2
   latlong2: ^0.9.1
-  lottie: ^3.1.2
+  lottie: ^3.3.3
   rxdart: ^0.28.0
   sentry_flutter: ^8.3.0
   stream_chat_flutter: ^10.0.0-beta.13
   stream_chat_localizations: ^10.0.0-beta.13
   stream_chat_persistence: ^10.0.0-beta.13
   streaming_shared_preferences: ^2.0.0
-  uuid: ^4.4.0
-  video_player: ^2.8.7
+  uuid: ^4.5.3
+  video_player: ^2.11.1
   yaml: ^3.1.2
 
 dev_dependencies:
-  flutter_launcher_icons: ^0.14.2
+  flutter_launcher_icons: ^0.14.4
 
 flutter:
   uses-material-design: true

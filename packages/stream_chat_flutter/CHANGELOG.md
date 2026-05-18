@@ -6,6 +6,7 @@
 
 🛑️ Breaking
 
+- Bumped `file_picker` to `^11.0.0` to resolve [#2599](https://github.com/GetStream/stream-chat-flutter/issues/2599). Apps depending on `file_picker` directly must also upgrade past `11.0.0`, which replaces the instance-based `FilePicker.platform.*` API with static `FilePicker.*` methods.
 - Renamed `StreamMessageComposer.messageInputController` parameter to `messageComposerController`.
 - Removed `StreamDraftListView`, `StreamDraftListTile`, `StreamDraftListTileTheme`, and `StreamDraftListTileThemeData` from the SDK. Also removed `StreamChatThemeData.draftListTileTheme`. Refer to the sample app for a reference implementation using `StreamDraftListController` and `PagedValueListView`.
 - Renamed `StreamMessageComposerInput` → `StreamMessageComposerInputCenter` (and `DefaultStreamMessageComposerInput` → `DefaultStreamMessageComposerInputCenter`). The name `StreamMessageComposerInput` is now the input container widget (assembles header, leading, center, trailing).
@@ -84,6 +85,7 @@
 
 🔄 Changed
 
+- Widened `share_plus` to `>=12.0.2 <14.0.0` so apps can adopt the latest major. Raised minimum versions of bundled UI/media dependencies (`cached_network_image`, `chewie`, `desktop_drop`, `diacritic`, `file_selector`, `flutter_markdown`, `flutter_svg`, `gal`, `image_picker`, `image_size_getter`, `jiffy`, `just_audio`, `lottie`, `media_kit`, `media_kit_video`, `photo_manager`, `url_launcher`, `video_player`) to current resolved versions.
 - Changed the default `StreamChat.backgroundKeepAlive` from 1 minute to 15 seconds,
   matching `StreamChatCore`. See `stream_chat_flutter_core` changelog for rationale.
 - `StreamPhotoGalleryTile` now auto-sizes the platform thumbnail request from the tile's layout × DPR (132px fallback) instead of always asking for 400×400, so cells decode only what they paint. Pass an explicit `thumbnailSize` to override.

@@ -21,6 +21,7 @@
 
 🔄 Changed
 
+- Widened `device_info_plus` to `>=12.4.0 <14.0.0`, `package_info_plus` to `>=9.0.1 <11.0.0`, and `connectivity_plus` to `>=7.1.1 <8.0.0` so apps can adopt the latest majors. Floors raised to current resolved versions.
 - `StreamChatCore` now sets `client.recoverStateOnReconnect = false` on mount; refreshes on `connectionRecovered` are driven by the list controllers in this package, avoiding a duplicate `queryChannels` round-trip and the historical event-replay flicker on reactions, polls, and quoted messages.
 - Apps watching a `Channel` outside any list controller (e.g. a deep link into a single channel screen) should subscribe to `client.on(EventType.connectionRecovered)` and call `channel.watch()` themselves to refresh state on reconnect.
 - Changed the default `backgroundKeepAlive` from 1 minute to 15 seconds — covers quick app-switches and notification-shade checks while closing cleanly before the server's 35-second read timeout. Still configurable.
