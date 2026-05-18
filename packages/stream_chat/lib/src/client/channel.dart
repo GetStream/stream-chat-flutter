@@ -2193,8 +2193,6 @@ class ChannelClientState {
     // Update the persistence storage with the seeded channel state.
     _debouncedUpdatePersistenceChannelState.call([channelState]);
 
-    _checkExpiredAttachmentMessages(channelState);
-
     _listenTypingEvents();
 
     _listenMessageNew();
@@ -2281,43 +2279,6 @@ class ChannelClientState {
   final Channel _channel;
   StreamChatClient get _client => _channel._client;
   final _subscriptions = CompositeSubscription();
-
-  void _checkExpiredAttachmentMessages(ChannelState channelState) async {
-    final expiredAttachmentMessagesId = channelState.messages
-        ?.where((m) =>
-            !_updatedMessagesIds.contains(m.id) &&
-            m.attachments.isNotEmpty &&
-            m.attachments.any((e) {
-              final url = e.imageUrl ?? e.assetUrl;
-              if (url == null || !url.contains('')) {
-                return false;
-              }
-              try {
-                final uri = Uri.parse(url);
-                if (!uri.host.endsWith('stream-io-cdn.com') ||
-                    uri.queryParameters['Expires'] == null) {
-                  return false;
-                }
-                final secondsFromEpoch =
-                    int.parse(uri.queryParameters['Expires']!);
-                final expiration = DateTime.fromMillisecondsSinceEpoch(
-                  secondsFromEpoch * 1000,
-                );
-                return expiration.isBefore(DateTime.now());
-              } catch (_) {
-                return false;
-              }
-            }))
-        .map((e) => e.id)
-        .toList();
-
-    if (expiredAttachmentMessagesId != null &&
-        expiredAttachmentMessagesId.isNotEmpty) {
-      await _channel.initialized;
-      _updatedMessagesIds.addAll(expiredAttachmentMessagesId);
-      _channel.getMessagesById(expiredAttachmentMessagesId);
-    }
-  }
 
   void _listenMemberAdded() {
     _subscriptions.add(_channel.on(EventType.memberAdded).listen((Event e) {
@@ -3382,12 +3343,8 @@ class ChannelClientState {
     );
   }
 
-  final List<String> _updatedMessagesIds = [];
-
   /// Update channelState with updated information.
   void updateChannelState(ChannelState updatedState) {
-    _checkExpiredAttachmentMessages(updatedState);
-
     final newMessages = messages.merge(
       updatedState.messages,
       key: (message) => message.id,

@@ -16,6 +16,9 @@
 - `Channel.currentUserReadStream` now emits `null` when the user logs out (previously the
   transition was swallowed).
 
+- Removed proactive re-fetching of messages with expired CDN attachment URLs on every channel
+  state update. URL refreshes now flow through normal server events.
+
 - `Channel.readStream`, `Channel.currentUserReadStream`, and `Channel.unreadCountStream` now dedupe
   consecutive equal values via `.distinct()`. Previously all three were derived from
   `channelStateStream` without deduplication, so every channel state mutation (new message, reaction,
