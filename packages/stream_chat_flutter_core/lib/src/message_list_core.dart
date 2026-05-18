@@ -328,7 +328,9 @@ class MessageRetentionGate {
   MessageRetentionGate({
     required int? limit,
     int trimBuffer = defaultTrimBuffer,
-  })  : _limit = limit,
+  })  : assert(limit == null || limit >= 0, '`limit` must be non-negative'),
+        assert(trimBuffer >= 0, '`trimBuffer` must be non-negative'),
+        _limit = limit,
         _trimBuffer = trimBuffer;
 
   /// Default trim buffer.
@@ -349,6 +351,8 @@ class MessageRetentionGate {
     required int? limit,
     required int trimBuffer,
   }) {
+    assert(limit == null || limit >= 0, '`limit` must be non-negative');
+    assert(trimBuffer >= 0, '`trimBuffer` must be non-negative');
     _limit = limit;
     _trimBuffer = trimBuffer;
   }
