@@ -75,6 +75,7 @@ GeneratedPluginRegistrant.*
 **/ios/Flutter/flutter_export_environment.sh
 **/ios/ServiceDefinitions.json
 **/ios/Runner/GeneratedPluginRegistrant.*
+**/ios/Flutter/ephemeral/**
 Podfile.lock
 
 # Exceptions to iOS rules
