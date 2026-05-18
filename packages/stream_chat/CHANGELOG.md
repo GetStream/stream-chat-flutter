@@ -5,6 +5,10 @@
 - Added `SortedListX` and `ListX` extensions on `List` for keyed merge, sorted insert/upsert and
   conditional update.
 
+- Added `ChannelClientState.pruneOldest(int)` that drops the oldest messages and keeps at most the
+  requested number. No-op when the channel isn't up to date. Prefer `StreamChannel.pruneOldest`
+  from `stream_chat_flutter_core` when available — it also resets top-pagination.
+
 🚀 Performance
 
 - Faster channel state updates, especially for read receipts, reactions, and other partial-state

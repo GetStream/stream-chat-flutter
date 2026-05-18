@@ -3621,6 +3621,136 @@ void main() {
         verify(() => client.sendMessage(any(), channelId, channelType));
       });
     });
+
+    group('`.state.pruneOldest`', () {
+      List<Message> _generateMessages(int count) => List.generate(
+            count,
+            (i) => Message(
+              id: 'msg-$i',
+              text: 'Hello $i',
+              createdAt: DateTime(2024).add(Duration(seconds: i)),
+            ),
+          );
+
+      test('keeps only the [maxMessages] most recent messages', () {
+        final initial = _generateMessages(10);
+        channel.state!.updateChannelState(
+          _generateChannelState(channelId, channelType)
+              .copyWith(messages: initial),
+        );
+        expect(channel.state!.messages, hasLength(10));
+
+        channel.state!.pruneOldest(4);
+
+        final pruned = channel.state!.messages;
+        expect(pruned, hasLength(4));
+        expect(pruned.map((m) => m.id), ['msg-6', 'msg-7', 'msg-8', 'msg-9']);
+      });
+
+      test('emits the pruned list on `messagesStream`', () async {
+        final initial = _generateMessages(6);
+        channel.state!.updateChannelState(
+          _generateChannelState(channelId, channelType)
+              .copyWith(messages: initial),
+        );
+
+        final next = channel.state!.messagesStream
+            .firstWhere((messages) => messages.length == 3);
+
+        channel.state!.pruneOldest(3);
+
+        final emitted = await next;
+        expect(emitted.map((m) => m.id), ['msg-3', 'msg-4', 'msg-5']);
+      });
+
+      test('is a no-op when message count is within the limit', () {
+        final initial = _generateMessages(3);
+        channel.state!.updateChannelState(
+          _generateChannelState(channelId, channelType)
+              .copyWith(messages: initial),
+        );
+
+        channel.state!.pruneOldest(5);
+        expect(channel.state!.messages, hasLength(3));
+
+        channel.state!.pruneOldest(3);
+        expect(channel.state!.messages, hasLength(3));
+      });
+
+      test('is a no-op when [maxMessages] is zero or negative', () {
+        final initial = _generateMessages(5);
+        channel.state!.updateChannelState(
+          _generateChannelState(channelId, channelType)
+              .copyWith(messages: initial),
+        );
+
+        channel.state!.pruneOldest(0);
+        expect(channel.state!.messages, hasLength(5));
+
+        channel.state!.pruneOldest(-1);
+        expect(channel.state!.messages, hasLength(5));
+      });
+
+      test('is a no-op when `isUpToDate` is false', () {
+        final initial = _generateMessages(10);
+        channel.state!.updateChannelState(
+          _generateChannelState(channelId, channelType)
+              .copyWith(messages: initial),
+        );
+
+        channel.state!.isUpToDate = false;
+        channel.state!.pruneOldest(3);
+        expect(channel.state!.messages, hasLength(10));
+      });
+
+      test('only mutates `messages`; other channel state fields untouched',
+          () {
+        final initial = _generateMessages(10);
+        final pinned = [
+          Message(
+            id: 'pinned-1',
+            text: 'pinned message',
+            createdAt: DateTime(2024),
+          ),
+        ];
+
+        channel.state!.updateChannelState(
+          _generateChannelState(channelId, channelType).copyWith(
+            messages: initial,
+            pinnedMessages: pinned,
+          ),
+        );
+
+        channel.state!.pruneOldest(3);
+
+        expect(channel.state!.messages, hasLength(3));
+        expect(channel.state!.pinnedMessages, equals(pinned));
+      });
+
+      test('does not emit on `messagesStream` for no-op calls', () async {
+        final initial = _generateMessages(5);
+        channel.state!.updateChannelState(
+          _generateChannelState(channelId, channelType)
+              .copyWith(messages: initial),
+        );
+
+        // Skip the seeded emission from updateChannelState.
+        await pumpEventQueue();
+
+        final emissions = <List<Message>>[];
+        final sub = channel.state!.messagesStream.skip(1).listen(emissions.add);
+        addTearDown(sub.cancel);
+
+        channel.state!.pruneOldest(0); // non-positive guard
+        channel.state!.pruneOldest(-1); // non-positive guard
+        channel.state!.pruneOldest(10); // within limit guard
+        channel.state!.isUpToDate = false;
+        channel.state!.pruneOldest(2); // !isUpToDate guard
+
+        await pumpEventQueue();
+        expect(emissions, isEmpty);
+      });
+    });
   });
 
   group('WS events', () {
