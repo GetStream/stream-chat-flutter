@@ -81,8 +81,8 @@ void main() {
         itemScrollController: itemScrollController,
         itemPositionsListener: itemPositionsListener);
 
-    unawaited(
-        itemScrollController.scrollTo(index: 1, duration: scrollDuration));
+    unawaited(itemScrollController.scrollTo(
+        index: 1, duration: scrollDuration, curve: Curves.linear));
     await tester.pump();
     await tester.pump(scrollDuration);
     expect(find.text('Item 0'), findsNothing);
@@ -93,8 +93,8 @@ void main() {
         0);
     expect(tester.getTopLeft(find.text('Item 1')).dy, 0);
 
-    unawaited(
-        itemScrollController.scrollTo(index: 2, duration: scrollDuration));
+    unawaited(itemScrollController.scrollTo(
+        index: 2, duration: scrollDuration, curve: Curves.linear));
     await tester.pump();
     await tester.pump(scrollDuration);
 
@@ -122,11 +122,11 @@ void main() {
         itemScrollController: itemScrollController,
         itemPositionsListener: itemPositionsListener);
 
-    unawaited(
-        itemScrollController.scrollTo(index: 5, duration: scrollDuration));
+    unawaited(itemScrollController.scrollTo(
+        index: 5, duration: scrollDuration, curve: Curves.linear));
     await tester.pumpAndSettle();
-    unawaited(
-        itemScrollController.scrollTo(index: 0, duration: scrollDuration));
+    unawaited(itemScrollController.scrollTo(
+        index: 0, duration: scrollDuration, curve: Curves.linear));
     await tester.pumpAndSettle();
 
     expect(find.text('Item 0'), findsOneWidget);
@@ -153,8 +153,8 @@ void main() {
         itemScrollController: itemScrollController,
         itemPositionsListener: itemPositionsListener);
 
-    unawaited(
-        itemScrollController.scrollTo(index: 100, duration: scrollDuration));
+    unawaited(itemScrollController.scrollTo(
+        index: 100, duration: scrollDuration, curve: Curves.linear));
     await tester.pumpAndSettle();
 
     expect(find.text('Item 99'), findsNothing);
@@ -212,8 +212,8 @@ void main() {
     expect(tester.getBottomRight(find.text('Item 1')),
         const Offset(screenWidth - 10, 10 + itemHeight * 2));
 
-    unawaited(
-        itemScrollController.scrollTo(index: 490, duration: scrollDuration));
+    unawaited(itemScrollController.scrollTo(
+        index: 490, duration: scrollDuration, curve: Curves.linear));
     await tester.pumpAndSettle();
 
     await tester.drag(

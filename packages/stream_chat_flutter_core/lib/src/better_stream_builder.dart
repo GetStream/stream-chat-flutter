@@ -24,7 +24,8 @@ class BetterStreamBuilder<T extends Object> extends StatefulWidget {
   /// The initial data available
   final T? initialData;
 
-  /// Comparator used to check if the new data is different than the last one
+  /// Comparator used to check if the new data is different than the last one.
+  /// Runs on every emission, must handle null on either side. Defaults to `==`.
   final bool Function(T?, T?)? comparator;
 
   /// Builder that builds based on the new snapshot
@@ -43,8 +44,35 @@ class BetterStreamBuilder<T extends Object> extends StatefulWidget {
 class _BetterStreamBuilderState<T extends Object>
     extends State<BetterStreamBuilder<T>> {
   T? _lastEvent;
-  StreamSubscription<T?>? _subscription;
   Object? _lastError;
+  StreamSubscription<T?>? _subscription;
+
+  @override
+  void initState() {
+    super.initState();
+    _lastEvent = widget.initialData;
+    _subscription = widget.stream?.listen(_onEvent, onError: _onError);
+  }
+
+  @override
+  void didUpdateWidget(covariant BetterStreamBuilder<T> oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.stream != widget.stream) {
+      // Avoid rendering the previous stream's last value before the new
+      // stream's first emission lands.
+      _lastEvent = widget.initialData;
+      _lastError = null;
+
+      _subscription?.cancel();
+      _subscription = widget.stream?.listen(_onEvent, onError: _onError);
+    }
+  }
+
+  @override
+  void dispose() {
+    _subscription?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -57,58 +85,42 @@ class _BetterStreamBuilderState<T extends Object>
     }
     final event = _lastEvent;
     if (event == null) {
-      return widget.noDataBuilder?.call(context) ?? const Offstage();
+      return widget.noDataBuilder?.call(context) ?? const SizedBox.shrink();
     }
     return widget.builder(context, event);
   }
 
-  @override
-  void initState() {
-    _lastEvent = widget.initialData;
-    _subscription = widget.stream?.listen(
-      _onEvent,
-      onError: _onError,
-    );
-    super.initState();
-  }
-
-  @override
-  void didUpdateWidget(covariant BetterStreamBuilder<T> oldWidget) {
-    if (oldWidget.stream != widget.stream) {
-      _subscription?.cancel();
-      _subscription = widget.stream?.listen(
-        _onEvent,
-        onError: _onError,
-      );
-    }
-    super.didUpdateWidget(oldWidget);
-  }
-
-  @override
-  void dispose() {
-    _subscription?.cancel();
-    super.dispose();
-  }
-
-  void _onError(Object? error) {
-    if (widget.errorBuilder != null && error != _lastError) {
-      _lastError = error;
-      if (mounted) {
-        // ignore: no-empty-block
-        setState(() {});
-      }
-    }
-  }
-
   void _onEvent(T? event) {
-    _lastError = null;
+    if (!mounted) return;
+    final wasErrored = _lastError != null;
     final isEqual =
         widget.comparator?.call(_lastEvent, event) ?? event == _lastEvent;
-    if (!isEqual) {
-      _lastEvent = event;
-      if (mounted) {
-        setState(() {}); // ignore: no-empty-block
-      }
+    if (isEqual && !wasErrored) return;
+
+    _lastError = null;
+    if (!isEqual) _lastEvent = event;
+    setState(() {}); // ignore: no-empty-block
+  }
+
+  void _onError(Object error, StackTrace stackTrace) {
+    if (!mounted) return;
+
+    if (error == _lastError) return;
+    _lastError = error;
+
+    if (widget.errorBuilder == null) {
+      // No errorBuilder → log so the failure isn't completely silent.
+      FlutterError.reportError(FlutterErrorDetails(
+        exception: error,
+        stack: stackTrace,
+        library: 'stream_chat_flutter_core',
+        context: ErrorDescription(
+          'while listening to a BetterStreamBuilder stream',
+        ),
+      ));
+      return;
     }
+
+    setState(() {}); // ignore: no-empty-block
   }
 }

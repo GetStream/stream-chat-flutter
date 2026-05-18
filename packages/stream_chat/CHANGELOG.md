@@ -6,6 +6,14 @@
 
 ## 9.23.0
 
+🚀 Performance
+
+- `Channel.readStream`, `Channel.currentUserReadStream`, and `Channel.unreadCountStream` now dedupe
+  consecutive equal values via `.distinct()`. Previously all three were derived from
+  `channelStateStream` without deduplication, so every channel state mutation (new message, reaction,
+  edit, member change, etc.) would push through to subscribers — causing UI listeners that only
+  cared about read state to rebuild on unrelated events.
+
 - Minor bug fixes and improvements
 
 ## 9.22.0

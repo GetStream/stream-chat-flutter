@@ -1,20 +1,23 @@
 import 'dart:async';
 
-import 'package:collection/collection.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter_core/src/better_stream_builder.dart';
 import 'package:stream_chat_flutter_core/src/stream_channel.dart';
 import 'package:stream_chat_flutter_core/src/typedef.dart';
 
 /// Default filter for the message list
-bool Function(Message) defaultMessageFilter(String currentUserId) =>
-    (Message m) {
-      final isMyMessage = m.user?.id == currentUserId;
-      if (m.shadowed && !isMyMessage) return false;
-      return true;
-    };
+bool Function(Message) defaultMessageFilter([
+  String? currentUserId,
+]) {
+  return (Message m) {
+    final isMyMessage = currentUserId != null && m.user?.id == currentUserId;
+    if (m.shadowed && !isMyMessage) return false;
+    return true;
+  };
+}
 
 /// [MessageListCore] is a simplified class that allows fetching a list of
 /// messages while exposing UI builders.
@@ -119,50 +122,54 @@ class MessageListCore extends StatefulWidget {
 class MessageListCoreState extends State<MessageListCore> {
   StreamChannelState? _streamChannel;
 
-  bool get _upToDate => _streamChannel!.channel.state?.isUpToDate ?? true;
+  List<Message>? _initialMessages;
+  Stream<List<Message>>? _messagesStream;
 
   bool get _isThreadConversation => widget.parentMessage != null;
-
-  OwnUser? get _currentUser => _streamChannel!.channel.client.state.currentUser;
-
-  var _messages = <Message>[];
+  bool get _upToDate => _streamChannel?.channel.state?.isUpToDate ?? true;
 
   @override
   Widget build(BuildContext context) {
-    final messagesStream = _isThreadConversation
-        ? _streamChannel!.channel.state?.threadsStream
-            .where((threads) => threads.containsKey(widget.parentMessage!.id))
-            .map((threads) => threads[widget.parentMessage!.id])
-        : _streamChannel!.channel.state?.messagesStream;
-
-    final initialData = _isThreadConversation
-        ? _streamChannel!.channel.state?.threads[widget.parentMessage!.id]
-        : _streamChannel!.channel.state?.messages;
-
     return BetterStreamBuilder<List<Message>>(
-      initialData: initialData,
-      comparator: const ListEquality().equals,
-      stream: messagesStream,
+      stream: _messagesStream,
+      initialData: _initialMessages,
       errorBuilder: widget.errorBuilder,
       noDataBuilder: widget.loadingBuilder,
       builder: (context, data) {
-        final messageList = data
-            .where(
-              widget.messageFilter ?? defaultMessageFilter(_currentUser!.id),
-            )
-            .toList(growable: false)
-            .reversed
-            .toList(growable: false);
-        if (messageList.isEmpty && !_isThreadConversation) {
-          if (_upToDate) {
-            return widget.emptyBuilder(context);
-          }
-        } else {
-          _messages = messageList;
+        final messageList = _filterAndReverse(data);
+        if (messageList.isEmpty && _upToDate && !_isThreadConversation) {
+          return widget.emptyBuilder(context);
         }
-        return widget.messageListBuilder(context, _messages);
+        return widget.messageListBuilder(context, messageList);
       },
     );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _setupController(widget.messageListController);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final newStreamChannel = StreamChannel.of(context);
+    if (newStreamChannel != _streamChannel) _setupChannel(newStreamChannel);
+  }
+
+  @override
+  void didUpdateWidget(covariant MessageListCore oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.messageListController != oldWidget.messageListController) {
+      _teardownController(oldWidget.messageListController);
+      _setupController(widget.messageListController);
+    }
+
+    if (widget.parentMessage?.id != oldWidget.parentMessage?.id) {
+      _resolveMessagesStream(widget.parentMessage);
+      _loadThreadReplies(widget.parentMessage);
+    }
   }
 
   /// Fetches more messages with updated pagination and updates the widget.
@@ -172,66 +179,68 @@ class MessageListCoreState extends State<MessageListCore> {
   Future<void> paginateData({
     QueryDirection direction = QueryDirection.top,
   }) {
-    if (!_isThreadConversation) {
-      return _streamChannel!.queryMessages(
-        direction: direction,
-        limit: widget.paginationLimit,
-      );
-    } else {
+    if (widget.parentMessage?.id case final parentMessageId?) {
       return _streamChannel!.queryReplies(
-        widget.parentMessage!.id,
+        parentMessageId,
         direction: direction,
         limit: widget.paginationLimit,
       );
     }
+
+    return _streamChannel!.queryMessages(
+      direction: direction,
+      limit: widget.paginationLimit,
+    );
   }
 
-  @override
-  void didChangeDependencies() {
-    final newStreamChannel = StreamChannel.of(context);
-
-    if (newStreamChannel != _streamChannel) {
-      if (_streamChannel == null /*only first time*/ && _isThreadConversation) {
-        newStreamChannel.getReplies(
-          widget.parentMessage!.id,
-          limit: widget.paginationLimit,
-        );
-      }
-      _streamChannel = newStreamChannel;
-    }
-
-    super.didChangeDependencies();
+  void _setupController(MessageListController? controller) {
+    if (controller == null) return;
+    controller.paginateData = paginateData;
   }
 
-  @override
-  void didUpdateWidget(covariant MessageListCore oldWidget) {
-    super.didUpdateWidget(oldWidget);
-
-    if (widget.messageListController != oldWidget.messageListController) {
-      _setupController();
-    }
-
-    if (widget.parentMessage?.id != oldWidget.parentMessage?.id) {
-      if (_isThreadConversation) {
-        _streamChannel!.getReplies(
-          widget.parentMessage!.id,
-          limit: widget.paginationLimit,
-        );
-      }
-    }
+  void _teardownController(MessageListController? controller) {
+    if (controller == null) return;
+    if (controller.paginateData != paginateData) return;
+    controller.paginateData = null;
   }
 
-  @override
-  void initState() {
-    _setupController();
-
-    super.initState();
+  void _setupChannel(StreamChannelState channel) {
+    final isFirstAttach = _streamChannel == null;
+    _streamChannel = channel;
+    _resolveMessagesStream(widget.parentMessage);
+    if (isFirstAttach) _loadThreadReplies(widget.parentMessage);
   }
 
-  void _setupController() {
-    if (widget.messageListController != null) {
-      widget.messageListController!.paginateData = paginateData;
+  void _loadThreadReplies(Message? parentMessage) {
+    if (parentMessage == null) return;
+    _streamChannel?.getReplies(parentMessage.id, limit: widget.paginationLimit);
+  }
+
+  // Cached so [BetterStreamBuilder] doesn't resubscribe on every parent
+  // rebuild.
+  void _resolveMessagesStream(Message? parentMessage) {
+    final state = _streamChannel?.channel.state;
+
+    if (parentMessage?.id case final parentMessageId?) {
+      _initialMessages = state?.threads[parentMessageId];
+      _messagesStream =
+          state?.threadsStream.mapNotNull((it) => it[parentMessageId]);
+      return;
     }
+
+    _initialMessages = state?.messages;
+    _messagesStream =
+        state?.messagesStream.where((it) => it.isNotEmpty || _upToDate);
+  }
+
+  List<Message> _filterAndReverse(List<Message> source) {
+    if (source.isEmpty) return const [];
+
+    final currentUser = _streamChannel?.channel.client.state.currentUser;
+    final filter =
+        widget.messageFilter ?? defaultMessageFilter(currentUser?.id);
+
+    return source.reversed.where(filter).toList();
   }
 
   Future<void> _reloadChannelIfNeeded() async {
@@ -249,6 +258,7 @@ class MessageListCoreState extends State<MessageListCore> {
 
   @override
   void dispose() {
+    _teardownController(widget.messageListController);
     _reloadChannelIfNeeded();
     super.dispose();
   }
