@@ -1922,6 +1922,7 @@ class StreamChatClient {
     PaginationParams? pagination,
   }) =>
       _chatApi.message.queryDrafts(
+        filter: filter,
         sort: sort,
         pagination: pagination,
       );

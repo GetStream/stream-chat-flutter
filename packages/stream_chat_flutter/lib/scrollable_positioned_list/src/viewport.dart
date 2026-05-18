@@ -65,11 +65,21 @@ class UnboundedRenderViewport extends RenderViewport {
     super.children,
     super.center,
     super.cacheExtent,
-  }) : _anchor = anchor;
+  })  : _requestedAnchor = anchor,
+        _effectiveAnchor = anchor;
 
   static const int _maxLayoutCycles = 10;
 
-  double _anchor;
+  /// The anchor the widget asked for. Used as the starting point each
+  /// layout pass; may be overridden by the "fit anchor" fallback when
+  /// total content is smaller than the viewport.
+  double _requestedAnchor;
+
+  /// The anchor actually used in the most recent layout. Read by
+  /// callers like [RenderViewport.getOffsetToReveal] and the
+  /// [PositionedList] item-position calculation, which must reflect
+  /// where content really ended up — not where it was requested to be.
+  double _effectiveAnchor;
 
   // Out-of-band data computed during layout.
   late double _minScrollExtent;
@@ -84,12 +94,13 @@ class UnboundedRenderViewport extends RenderViewport {
   double? _calculatedCacheExtent;
 
   @override
-  double get anchor => _anchor;
+  double get anchor => _effectiveAnchor;
 
   @override
   set anchor(double value) {
-    if (value == _anchor) return;
-    _anchor = value;
+    if (value == _requestedAnchor) return;
+    _requestedAnchor = value;
+    _effectiveAnchor = value;
     markNeedsLayout();
   }
 
@@ -166,20 +177,57 @@ class UnboundedRenderViewport extends RenderViewport {
 
     final centerOffsetAdjustment = center!.centerOffsetAdjustment;
 
+    // Starts at the requested anchor and may be overridden after the
+    // first pass once we know the total content extent — see the
+    // "content fits the viewport" branch below.
+    var effectiveAnchor = _requestedAnchor;
+    var anchorEvaluated = false;
+
     double correction;
     var count = 0;
     do {
+      // Publish the in-flight anchor so any `getOffsetToReveal` or
+      // other anchor-reading call that happens during this attempt
+      // sees the same value the layout is using.
+      _effectiveAnchor = effectiveAnchor;
       correction = _attemptLayout(
         mainAxisExtent,
         crossAxisExtent,
         offset.pixels + centerOffsetAdjustment,
+        effectiveAnchor,
       );
       if (correction != 0.0) {
         offset.correctBy(correction);
       } else {
         // *** Difference from [RenderViewport].
-        final top = _minScrollExtent + mainAxisExtent * anchor;
-        final bottom = _maxScrollExtent - mainAxisExtent * (1.0 - anchor);
+        // When the total content fits in the viewport, the requested
+        // anchor produces a surprising layout: an `alignment: 0.5`
+        // intended to center a target message would also center a list
+        // that has only two short items, leaving an empty strip below.
+        // For a list that doesn't fill the viewport the natural
+        // behaviour is to pin it against the axis-leading edge — the
+        // bottom of the screen for `reverse: true` (chat), the top for
+        // `reverse: false`. We override `effectiveAnchor` accordingly
+        // and re-layout once.
+        if (!anchorEvaluated) {
+          anchorEvaluated = true;
+          final totalExtent = _minScrollExtent.abs() + _maxScrollExtent;
+          if (totalExtent < mainAxisExtent) {
+            // Placing leading content flush against the axis-leading
+            // edge requires `centerOffset = _minScrollExtent.abs()`,
+            // which corresponds to this anchor.
+            final fitAnchor = _minScrollExtent.abs() / mainAxisExtent;
+            if (fitAnchor != effectiveAnchor) {
+              effectiveAnchor = fitAnchor;
+              count += 1;
+              continue;
+            }
+          }
+        }
+
+        final top = _minScrollExtent + mainAxisExtent * effectiveAnchor;
+        final bottom =
+            _maxScrollExtent - mainAxisExtent * (1.0 - effectiveAnchor);
         final maxScrollOffset = math.max<double>(math.min(0, top), bottom);
         final minScrollOffset = math.min<double>(top, maxScrollOffset);
         if (offset.applyContentDimensions(minScrollOffset, maxScrollOffset)) {
@@ -219,6 +267,7 @@ class UnboundedRenderViewport extends RenderViewport {
     double mainAxisExtent,
     double crossAxisExtent,
     double correctedOffset,
+    double anchor,
   ) {
     assert(!mainAxisExtent.isNaN, 'The main axis extent cannot be NaN.');
     assert(mainAxisExtent >= 0.0, 'The main axis extent cannot be negative.');

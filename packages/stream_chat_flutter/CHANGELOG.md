@@ -1,10 +1,26 @@
 ## 9.23.0
 
+✅ Added
+
+- `StreamMessageListView` now accepts `maximumMessageLimit` to cap the loaded message list. See
+  `MessageListCore` for the trim semantics.
+
 🐞 Fixed
 
 - Fixed `StreamChannelAvatar` crashing with `RangeError` when user/channel name is empty.
 - Fixed audio tone bleeding into recorded voice message when playing custom feedback sound on recording start.
 - Fixed poll dialog AppBar back button color not being themeable. [[#2484]](https://github.com/GetStream/stream-chat-flutter/issues/2484)
+- Fixed `StreamMessageListView` thread page crashing with `StateError` when the parent message was no
+  longer present in the channel's loaded messages (e.g. filtered, shadowed, or paginated out). The
+  thread now falls back to the captured parent message in that case.
+
+🚀 Improved
+
+- `StreamMessageListView`'s `markRead` / `markThreadRead` now fire on the leading edge of their 1s
+  debounce window, so the first read receipt after entering a channel or sending a message hits the
+  server immediately instead of waiting for the trailing edge. The redundant local `unreadCount = 0`
+  short-circuit on own-message send was removed — the leading-edge mark plus `readStream` updates
+  now keep the unread badge in sync without an extra `setState`.
 
 ## 9.22.0
 

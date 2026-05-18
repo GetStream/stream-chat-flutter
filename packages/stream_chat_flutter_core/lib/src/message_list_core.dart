@@ -1,20 +1,23 @@
 import 'dart:async';
 
-import 'package:collection/collection.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter_core/src/better_stream_builder.dart';
 import 'package:stream_chat_flutter_core/src/stream_channel.dart';
 import 'package:stream_chat_flutter_core/src/typedef.dart';
 
 /// Default filter for the message list
-bool Function(Message) defaultMessageFilter(String currentUserId) =>
-    (Message m) {
-      final isMyMessage = m.user?.id == currentUserId;
-      if (m.shadowed && !isMyMessage) return false;
-      return true;
-    };
+bool Function(Message) defaultMessageFilter([
+  String? currentUserId,
+]) {
+  return (Message m) {
+    final isMyMessage = currentUserId != null && m.user?.id == currentUserId;
+    if (m.shadowed && !isMyMessage) return false;
+    return true;
+  };
+}
 
 /// [MessageListCore] is a simplified class that allows fetching a list of
 /// messages while exposing UI builders.
@@ -79,6 +82,8 @@ class MessageListCore extends StatefulWidget {
     this.messageListController,
     this.messageFilter,
     this.paginationLimit = 20,
+    this.maximumMessageLimit,
+    this.retentionTrimBuffer = MessageRetentionGate.defaultTrimBuffer,
   });
 
   /// A [MessageListController] allows pagination.
@@ -111,6 +116,22 @@ class MessageListCore extends StatefulWidget {
   /// Predicate used to filter messages
   final bool Function(Message)? messageFilter;
 
+  /// Maximum number of messages kept in [ChannelClientState] while the
+  /// user is viewing the latest messages.
+  ///
+  /// Trimming fires when a new message arrives or the user paginates
+  /// bottom and the count exceeds the limit plus [retentionTrimBuffer].
+  /// Top pagination, edits, reactions, deletions, jump-to-message, and
+  /// threads do not trigger trimming.
+  ///
+  /// When `null` (default), no pruning is performed.
+  final int? maximumMessageLimit;
+
+  /// Slack over [maximumMessageLimit] before trimming is triggered.
+  ///
+  /// Defaults to 30. Has no effect when [maximumMessageLimit] is `null`.
+  final int retentionTrimBuffer;
+
   @override
   MessageListCoreState createState() => MessageListCoreState();
 }
@@ -119,50 +140,69 @@ class MessageListCore extends StatefulWidget {
 class MessageListCoreState extends State<MessageListCore> {
   StreamChannelState? _streamChannel;
 
-  bool get _upToDate => _streamChannel!.channel.state?.isUpToDate ?? true;
+  List<Message>? _initialMessages;
+  Stream<List<Message>>? _messagesStream;
 
   bool get _isThreadConversation => widget.parentMessage != null;
+  bool get _upToDate => _streamChannel?.channel.state?.isUpToDate ?? true;
 
-  OwnUser? get _currentUser => _streamChannel!.channel.client.state.currentUser;
-
-  var _messages = <Message>[];
+  late MessageRetentionGate _retentionGate;
 
   @override
   Widget build(BuildContext context) {
-    final messagesStream = _isThreadConversation
-        ? _streamChannel!.channel.state?.threadsStream
-            .where((threads) => threads.containsKey(widget.parentMessage!.id))
-            .map((threads) => threads[widget.parentMessage!.id])
-        : _streamChannel!.channel.state?.messagesStream;
-
-    final initialData = _isThreadConversation
-        ? _streamChannel!.channel.state?.threads[widget.parentMessage!.id]
-        : _streamChannel!.channel.state?.messages;
-
     return BetterStreamBuilder<List<Message>>(
-      initialData: initialData,
-      comparator: const ListEquality().equals,
-      stream: messagesStream,
+      stream: _messagesStream,
+      initialData: _initialMessages,
       errorBuilder: widget.errorBuilder,
       noDataBuilder: widget.loadingBuilder,
       builder: (context, data) {
-        final messageList = data
-            .where(
-              widget.messageFilter ?? defaultMessageFilter(_currentUser!.id),
-            )
-            .toList(growable: false)
-            .reversed
-            .toList(growable: false);
-        if (messageList.isEmpty && !_isThreadConversation) {
-          if (_upToDate) {
-            return widget.emptyBuilder(context);
-          }
-        } else {
-          _messages = messageList;
+        final messageList = _filterAndReverse(data);
+        if (messageList.isEmpty && _upToDate && !_isThreadConversation) {
+          return widget.emptyBuilder(context);
         }
-        return widget.messageListBuilder(context, _messages);
+        return widget.messageListBuilder(context, messageList);
       },
     );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _retentionGate = MessageRetentionGate(
+      limit: widget.maximumMessageLimit,
+      trimBuffer: widget.retentionTrimBuffer,
+    );
+    _setupController(widget.messageListController);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final newStreamChannel = StreamChannel.of(context);
+    if (newStreamChannel != _streamChannel) _setupChannel(newStreamChannel);
+  }
+
+  @override
+  void didUpdateWidget(covariant MessageListCore oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.messageListController != oldWidget.messageListController) {
+      _teardownController(oldWidget.messageListController);
+      _setupController(widget.messageListController);
+    }
+
+    if (widget.parentMessage?.id != oldWidget.parentMessage?.id) {
+      _resolveMessagesStream(widget.parentMessage);
+      _loadThreadReplies(widget.parentMessage);
+      _retentionGate.seed(_initialMessages ?? const []);
+    }
+
+    if (widget.maximumMessageLimit != oldWidget.maximumMessageLimit ||
+        widget.retentionTrimBuffer != oldWidget.retentionTrimBuffer) {
+      _retentionGate.configure(
+        limit: widget.maximumMessageLimit,
+        trimBuffer: widget.retentionTrimBuffer,
+      );
+    }
   }
 
   /// Fetches more messages with updated pagination and updates the widget.
@@ -172,66 +212,81 @@ class MessageListCoreState extends State<MessageListCore> {
   Future<void> paginateData({
     QueryDirection direction = QueryDirection.top,
   }) {
-    if (!_isThreadConversation) {
-      return _streamChannel!.queryMessages(
-        direction: direction,
-        limit: widget.paginationLimit,
-      );
-    } else {
+    if (widget.parentMessage?.id case final parentMessageId?) {
       return _streamChannel!.queryReplies(
-        widget.parentMessage!.id,
+        parentMessageId,
         direction: direction,
         limit: widget.paginationLimit,
       );
     }
+
+    return _streamChannel!.queryMessages(
+      direction: direction,
+      limit: widget.paginationLimit,
+    );
   }
 
-  @override
-  void didChangeDependencies() {
-    final newStreamChannel = StreamChannel.of(context);
-
-    if (newStreamChannel != _streamChannel) {
-      if (_streamChannel == null /*only first time*/ && _isThreadConversation) {
-        newStreamChannel.getReplies(
-          widget.parentMessage!.id,
-          limit: widget.paginationLimit,
-        );
-      }
-      _streamChannel = newStreamChannel;
-    }
-
-    super.didChangeDependencies();
+  void _setupController(MessageListController? controller) {
+    if (controller == null) return;
+    controller.paginateData = paginateData;
   }
 
-  @override
-  void didUpdateWidget(covariant MessageListCore oldWidget) {
-    super.didUpdateWidget(oldWidget);
-
-    if (widget.messageListController != oldWidget.messageListController) {
-      _setupController();
-    }
-
-    if (widget.parentMessage?.id != oldWidget.parentMessage?.id) {
-      if (_isThreadConversation) {
-        _streamChannel!.getReplies(
-          widget.parentMessage!.id,
-          limit: widget.paginationLimit,
-        );
-      }
-    }
+  void _teardownController(MessageListController? controller) {
+    if (controller == null) return;
+    if (controller.paginateData != paginateData) return;
+    controller.paginateData = null;
   }
 
-  @override
-  void initState() {
-    _setupController();
-
-    super.initState();
+  void _setupChannel(StreamChannelState channel) {
+    final isFirstAttach = _streamChannel == null;
+    _streamChannel = channel;
+    _resolveMessagesStream(widget.parentMessage);
+    _retentionGate.seed(_initialMessages ?? const []);
+    if (isFirstAttach) _loadThreadReplies(widget.parentMessage);
   }
 
-  void _setupController() {
-    if (widget.messageListController != null) {
-      widget.messageListController!.paginateData = paginateData;
+  void _loadThreadReplies(Message? parentMessage) {
+    if (parentMessage == null) return;
+    _streamChannel?.getReplies(parentMessage.id, limit: widget.paginationLimit);
+  }
+
+  // Cached so [BetterStreamBuilder] doesn't resubscribe on every parent
+  // rebuild.
+  void _resolveMessagesStream(Message? parentMessage) {
+    final state = _streamChannel?.channel.state;
+
+    if (parentMessage?.id case final parentMessageId?) {
+      _initialMessages = state?.threads[parentMessageId];
+      _messagesStream =
+          state?.threadsStream.mapNotNull((it) => it[parentMessageId]);
+      return;
     }
+
+    _initialMessages = state?.messages;
+    _messagesStream = state?.messagesStream
+        .where((it) => it.isNotEmpty || _upToDate)
+        .doOnData(_pruneIfNeeded);
+  }
+
+  void _pruneIfNeeded(List<Message> data) {
+    final streamChannel = _streamChannel;
+    final state = streamChannel?.channel.state;
+    final shouldPrune = _retentionGate.evaluate(
+      data: data,
+      isUpToDate: state?.isUpToDate ?? true,
+    );
+    if (!shouldPrune || streamChannel == null || state == null) return;
+    streamChannel.pruneOldest(widget.maximumMessageLimit!);
+  }
+
+  List<Message> _filterAndReverse(List<Message> source) {
+    if (source.isEmpty) return const [];
+
+    final currentUser = _streamChannel?.channel.client.state.currentUser;
+    final filter =
+        widget.messageFilter ?? defaultMessageFilter(currentUser?.id);
+
+    return source.reversed.where(filter).toList();
   }
 
   Future<void> _reloadChannelIfNeeded() async {
@@ -249,6 +304,7 @@ class MessageListCoreState extends State<MessageListCore> {
 
   @override
   void dispose() {
+    _teardownController(widget.messageListController);
     _reloadChannelIfNeeded();
     super.dispose();
   }
@@ -258,4 +314,77 @@ class MessageListCoreState extends State<MessageListCore> {
 class MessageListController {
   /// Call this function to load further data
   Future<void> Function({QueryDirection direction})? paginateData;
+}
+
+/// Decides when [MessageListCore] should auto-prune.
+///
+/// Pruning fires when the list grows past `limit + trimBuffer` and the
+/// most recent message id changes — i.e. a new message arrived or the
+/// user paginated bottom. Top pagination, edits, reactions, deletions,
+/// and jump-to-message do not trigger it.
+@visibleForTesting
+class MessageRetentionGate {
+  /// Creates a new retention gate.
+  MessageRetentionGate({
+    required int? limit,
+    int trimBuffer = defaultTrimBuffer,
+  })  : assert(limit == null || limit >= 0, '`limit` must be non-negative'),
+        assert(trimBuffer >= 0, '`trimBuffer` must be non-negative'),
+        _limit = limit,
+        _trimBuffer = trimBuffer;
+
+  /// Default trim buffer.
+  static const defaultTrimBuffer = 30;
+
+  int? _limit;
+  int _trimBuffer;
+  String? _lastSeenTailId;
+  int _lastSeenCount = 0;
+
+  /// Configured cap, or `null` if pruning is disabled.
+  int? get limit => _limit;
+
+  /// Configured trim buffer.
+  int get trimBuffer => _trimBuffer;
+
+  /// Updates the cap and trim buffer. Does not clear the cached tail.
+  void configure({
+    required int? limit,
+    required int trimBuffer,
+  }) {
+    assert(limit == null || limit >= 0, '`limit` must be non-negative');
+    assert(trimBuffer >= 0, '`trimBuffer` must be non-negative');
+    _limit = limit;
+    _trimBuffer = trimBuffer;
+  }
+
+  /// Primes the cached tail without evaluating whether a prune should fire.
+  ///
+  /// Call on mount and on channel/thread transitions so the first stream
+  /// emission compares against itself and cached history isn't pruned.
+  void seed(List<Message> messages) {
+    _lastSeenTailId = messages.isEmpty ? null : messages.last.id;
+    _lastSeenCount = messages.length;
+  }
+
+  /// Whether [data] should be auto-pruned. Updates the cached tail.
+  bool evaluate({
+    required List<Message> data,
+    required bool isUpToDate,
+  }) {
+    final newTailId = data.isEmpty ? null : data.last.id;
+    final previousTailId = _lastSeenTailId;
+    final previousCount = _lastSeenCount;
+    _lastSeenTailId = newTailId;
+    _lastSeenCount = data.length;
+
+    final limit = _limit;
+    if (limit == null || !isUpToDate || data.length <= limit + _trimBuffer) {
+      return false;
+    }
+
+    // Require both a new tail and a longer list so deletions and edits
+    // at the tail can't masquerade as "new data" and trigger a prune.
+    return newTailId != previousTailId && data.length > previousCount;
+  }
 }

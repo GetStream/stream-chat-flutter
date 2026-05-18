@@ -1,3 +1,38 @@
+## Upcoming Changes
+
+✅ Added
+
+- `MessageListCore` now accepts `maximumMessageLimit` and `retentionTrimBuffer` to cap the loaded
+  message list. Trim fires on new messages past `limit + buffer`; top pagination, edits, deletions,
+  jump-to-message, and threads don't trigger it. Disabled by default.
+- Added `StreamChannel.pruneOldest(int)` — delegates to `ChannelClientState.pruneOldest` and resets
+  the top-pagination tracker.
+
+🔄 Changed
+
+- `defaultMessageFilter` now accepts an optional `currentUserId`; passing `null` treats every
+  message as not-my-message.
+
+🚀 Performance
+
+- `MessageListCore` now caches the resolved `messagesStream`, avoiding subscription churn on
+  every parent rebuild.
+- `MessageListCore` now applies its message filter and reversal in a single lazy pass, dropping
+  two intermediate `List<Message>` allocations per emission.
+- `MessageListCore` no longer applies a redundant `ListEquality` comparator on its
+  `BetterStreamBuilder` outputs.
+
+🐞 Fixed
+
+- Fixed `MessageListController.paginateData` not being cleared when `MessageListCore` is
+  disposed or its controller is swapped.
+- Fixed `BetterStreamBuilder` rendering the previous stream's last value for one frame after
+  the stream changes.
+- Fixed `BetterStreamBuilder` getting stuck on the error state when the next stream event
+  equals the cached value.
+- Fixed `BetterStreamBuilder` silently swallowing stream errors when no `errorBuilder` is
+  provided; errors now route through `FlutterError.reportError`.
+
 ## 9.23.0
 
 - Updated `stream_chat` dependency to [`9.23.0`](https://pub.dev/packages/stream_chat/changelog).

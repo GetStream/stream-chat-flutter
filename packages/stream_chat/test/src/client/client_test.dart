@@ -3448,6 +3448,10 @@ void main() {
       const channelId = 'test-channel-id';
       const channelType = 'test-channel-type';
 
+      final filter = Filter.equal('channel_cid', '$channelType:$channelId');
+      final sort = [const SortOption<Draft>.desc('created_at')];
+      const pagination = PaginationParams(limit: 20);
+
       final drafts = [
         Draft(
           channelCid: '$channelType:$channelId',
@@ -3456,15 +3460,26 @@ void main() {
         )
       ];
 
-      when(() => api.message.queryDrafts())
-          .thenAnswer((_) async => QueryDraftsResponse()..drafts = drafts);
+      when(() => api.message.queryDrafts(
+            filter: filter,
+            sort: sort,
+            pagination: pagination,
+          )).thenAnswer((_) async => QueryDraftsResponse()..drafts = drafts);
 
-      final res = await client.queryDrafts();
+      final res = await client.queryDrafts(
+        filter: filter,
+        sort: sort,
+        pagination: pagination,
+      );
 
       expect(res, isNotNull);
       expect(res.drafts.length, drafts.length);
 
-      verify(() => api.message.queryDrafts()).called(1);
+      verify(() => api.message.queryDrafts(
+            filter: filter,
+            sort: sort,
+            pagination: pagination,
+          )).called(1);
       verifyNoMoreInteractions(api.message);
     });
 
