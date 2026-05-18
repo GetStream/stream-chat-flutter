@@ -37,7 +37,6 @@ pubspec_overrides.yaml
 flutter_export_environment.sh
 generated_plugin_registrant.*
 GeneratedPluginRegistrant.*
-**/Flutter/ephemeral/**
 
 # Android related
 **/android/**/gradle-wrapper.jar
@@ -76,6 +75,7 @@ GeneratedPluginRegistrant.*
 **/ios/Flutter/flutter_export_environment.sh
 **/ios/ServiceDefinitions.json
 **/ios/Runner/GeneratedPluginRegistrant.*
+**/ios/Flutter/ephemeral/**
 Podfile.lock
 
 # Exceptions to iOS rules
