@@ -3,7 +3,7 @@ import 'package:drift/drift.dart';
 import 'package:stream_chat_persistence/src/converter/map_converter.dart';
 import 'package:stream_chat_persistence/src/entity/messages.dart';
 
-/// Represents a [Reactions] table in [MoorChatDatabase].
+/// Represents a [Reactions] table in [DriftChatDatabase].
 @DataClassName('ReactionEntity')
 class Reactions extends Table {
   /// The id of the user that sent the reaction

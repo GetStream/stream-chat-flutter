@@ -3,7 +3,7 @@ import 'package:drift/drift.dart';
 import 'package:stream_chat_persistence/src/entity/pinned_messages.dart';
 import 'package:stream_chat_persistence/src/entity/reactions.dart';
 
-/// Represents a [PinnedMessageReactions] table in [MoorChatDatabase].
+/// Represents a [PinnedMessageReactions] table in [DriftChatDatabase].
 @DataClassName('PinnedMessageReactionEntity')
 class PinnedMessageReactions extends Reactions {
   /// The messageId to which the reaction belongs

@@ -3,7 +3,7 @@ import 'package:drift/drift.dart';
 import 'package:stream_chat_persistence/src/converter/map_converter.dart';
 import 'package:stream_chat_persistence/src/entity/channels.dart';
 
-/// Represents a [Members] table in [MoorChatDatabase].
+/// Represents a [Members] table in [DriftChatDatabase].
 @DataClassName('MemberEntity')
 class Members extends Table {
   /// The interested user id

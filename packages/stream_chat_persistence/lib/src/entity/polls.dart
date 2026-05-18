@@ -4,7 +4,7 @@ import 'package:stream_chat_persistence/src/converter/list_converter.dart';
 import 'package:stream_chat_persistence/src/converter/map_converter.dart';
 import 'package:stream_chat_persistence/src/converter/voting_visibility_converter.dart';
 
-/// Represents a [Polls] table in [MoorChatDatabase].
+/// Represents a [Polls] table in [DriftChatDatabase].
 @DataClassName('PollEntity')
 class Polls extends Table {
   /// The unique identifier of the poll.
