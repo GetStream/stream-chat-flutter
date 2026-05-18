@@ -2,11 +2,22 @@
 
 🚀 Performance
 
-- `Channel.readStream` and `Channel.unreadCountStream` now dedupe consecutive equal values via
-  `.distinct()`. Previously both were derived from `channelStateStream` without deduplication, so
-  every channel state mutation (new message, reaction, edit, member change, etc.) would push through
-  to subscribers — causing UI listeners that only cared about read state to rebuild on unrelated
-  events.
+- `Channel.readStream`, `Channel.currentUserReadStream`, and `Channel.unreadCountStream` now dedupe
+  consecutive equal values via `.distinct()`. Previously all three were derived from
+  `channelStateStream` without deduplication, so every channel state mutation (new message, reaction,
+  edit, member change, etc.) would push through to subscribers — causing UI listeners that only
+  cared about read state to rebuild on unrelated events.
+- `ChannelClientState.updateMessage` now maintains the `messages` list in sorted order via binary
+  insertion instead of re-sorting the entire list on every change. At high message throughput
+  (e.g. livestream channels with 100+ msg/s) the previous full sort was the dominant CPU cost,
+  scaling O(n log n) per message. The new path is O(n) for insertion (or O(1) when the new
+  message is the latest — the common case) and avoids the costly `DateTime.compareTo` chain on
+  the whole list per message.
+- `ChannelClientState.updateChannelState` now skips the merge + full sort when the incoming
+  `updatedState.messages` reference is identical to the existing list (the common case for
+  callers like `unreadCount=` → `updateRead` that only change read/watcher state). When new
+  messages are introduced, the sort still runs; when only in-place updates happen, the sort is
+  skipped (order is preserved by the merge).
 
 - Minor bug fixes and improvements
 
