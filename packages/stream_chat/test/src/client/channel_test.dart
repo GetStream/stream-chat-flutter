@@ -3703,8 +3703,7 @@ void main() {
         expect(channel.state!.messages, hasLength(10));
       });
 
-      test('only mutates `messages`; other channel state fields untouched',
-          () {
+      test('only mutates `messages`; other channel state fields untouched', () {
         final initial = _generateMessages(10);
         final pinned = [
           Message(
@@ -4441,8 +4440,8 @@ void main() {
 
             await Future.delayed(Duration.zero);
 
-            final stored = channel.state!.messages
-                .firstWhere((it) => it.id == replyId);
+            final stored =
+                channel.state!.messages.firstWhere((it) => it.id == replyId);
             expect(stored.ownReactions, [ownReaction]);
           },
         );
@@ -4478,8 +4477,8 @@ void main() {
 
             await Future.delayed(Duration.zero);
 
-            final stored = channel.state!.messages
-                .firstWhere((it) => it.id == replyId);
+            final stored =
+                channel.state!.messages.firstWhere((it) => it.id == replyId);
             expect(stored.ownReactions, [kept]);
           },
         );
@@ -4517,8 +4516,8 @@ void main() {
 
             await Future.delayed(Duration.zero);
 
-            final stored = channel.state!.messages
-                .firstWhere((it) => it.id == replyId);
+            final stored =
+                channel.state!.messages.firstWhere((it) => it.id == replyId);
             expect(stored.ownReactions, [ownReaction]);
             expect(stored.poll?.id, poll.id);
             expect(stored.pollId, poll.id);
