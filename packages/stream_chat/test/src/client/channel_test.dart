@@ -3702,6 +3702,54 @@ void main() {
         channel.state!.pruneOldest(3);
         expect(channel.state!.messages, hasLength(10));
       });
+
+      test('only mutates `messages`; other channel state fields untouched',
+          () {
+        final initial = _generateMessages(10);
+        final pinned = [
+          Message(
+            id: 'pinned-1',
+            text: 'pinned message',
+            createdAt: DateTime(2024),
+          ),
+        ];
+
+        channel.state!.updateChannelState(
+          _generateChannelState(channelId, channelType).copyWith(
+            messages: initial,
+            pinnedMessages: pinned,
+          ),
+        );
+
+        channel.state!.pruneOldest(3);
+
+        expect(channel.state!.messages, hasLength(3));
+        expect(channel.state!.pinnedMessages, equals(pinned));
+      });
+
+      test('does not emit on `messagesStream` for no-op calls', () async {
+        final initial = _generateMessages(5);
+        channel.state!.updateChannelState(
+          _generateChannelState(channelId, channelType)
+              .copyWith(messages: initial),
+        );
+
+        // Skip the seeded emission from updateChannelState.
+        await pumpEventQueue();
+
+        final emissions = <List<Message>>[];
+        final sub = channel.state!.messagesStream.skip(1).listen(emissions.add);
+        addTearDown(sub.cancel);
+
+        channel.state!.pruneOldest(0); // non-positive guard
+        channel.state!.pruneOldest(-1); // non-positive guard
+        channel.state!.pruneOldest(10); // within limit guard
+        channel.state!.isUpToDate = false;
+        channel.state!.pruneOldest(2); // !isUpToDate guard
+
+        await pumpEventQueue();
+        expect(emissions, isEmpty);
+      });
     });
   });
 
