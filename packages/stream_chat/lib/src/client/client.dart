@@ -37,6 +37,7 @@ import 'package:stream_chat/src/core/models/poll_vote.dart';
 import 'package:stream_chat/src/core/models/push_preference.dart';
 import 'package:stream_chat/src/core/models/thread.dart';
 import 'package:stream_chat/src/core/models/user.dart';
+import 'package:stream_chat/src/core/util/in_flight_cache.dart';
 import 'package:stream_chat/src/core/util/utils.dart';
 import 'package:stream_chat/src/db/chat_persistence_client.dart';
 import 'package:stream_chat/src/event_type.dart';
@@ -633,7 +634,7 @@ class StreamChatClient {
     });
   }
 
-  final _queryChannelsStreams = <String, Future<List<Channel>>>{};
+  final _queryChannelsCache = InFlightCache<String, List<Channel>>();
 
   /// Requests channels with a given query.
   Stream<List<Channel>> queryChannels({
@@ -663,19 +664,7 @@ class StreamChatClient {
       paginationParams,
     ]);
 
-    // Return results from cache if available
-    if (_queryChannelsStreams.containsKey(hash)) {
-      try {
-        yield await _queryChannelsStreams[hash]!;
-        return;
-      } catch (e, stk) {
-        logger.severe('Error retrieving cached query results', e, stk);
-        // Cache is invalid, continue with fresh query
-        _queryChannelsStreams.remove(hash);
-      }
-    }
-
-    // Get offline results first
+    // Per-caller offline emit — local persistence, not coalesced.
     var offlineChannels = <Channel>[];
     try {
       offlineChannels = await queryChannelsOffline(
@@ -691,31 +680,30 @@ class StreamChatClient {
     }
 
     try {
-      final newQueryChannelsFuture = queryChannelsOnline(
-        filter: filter,
-        sort: channelStateSort,
-        state: state,
-        watch: watch,
-        presence: presence,
-        memberLimit: memberLimit,
-        messageLimit: messageLimit,
-        paginationParams: paginationParams,
-        waitForConnect: waitForConnect,
-      ).timeout(
-        const Duration(seconds: 30),
-        onTimeout: () {
-          logger.warning('Online channel query timed out');
-          throw TimeoutException('Channel query timed out');
-        },
-      ).whenComplete(() {
-        // Always clean up cache reference when done
-        _queryChannelsStreams.remove(hash);
-      });
-
-      // Store the future in cache
-      _queryChannelsStreams[hash] = newQueryChannelsFuture;
-
-      yield await newQueryChannelsFuture;
+      // Coalesce concurrent identical online queries — concurrent callers
+      // share both success and failure outcomes. See [InFlightCache] for
+      // the lifecycle details.
+      final result = await _queryChannelsCache.run(
+        hash,
+        () => queryChannelsOnline(
+          filter: filter,
+          sort: channelStateSort,
+          state: state,
+          watch: watch,
+          presence: presence,
+          memberLimit: memberLimit,
+          messageLimit: messageLimit,
+          paginationParams: paginationParams,
+          waitForConnect: waitForConnect,
+        ).timeout(
+          const Duration(seconds: 30),
+          onTimeout: () {
+            logger.warning('Online channel query timed out');
+            throw TimeoutException('Channel query timed out');
+          },
+        ),
+      );
+      yield result;
     } catch (e, stk) {
       logger.severe('Error querying channels online', e, stk);
       // Only rethrow if we have no channels to show the user

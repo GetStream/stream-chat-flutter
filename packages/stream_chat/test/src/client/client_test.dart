@@ -941,6 +941,199 @@ void main() {
               )).called(1);
         },
       );
+
+      test(
+        'should coalesce concurrent identical calls into a single HTTP request',
+        () async {
+          // Regression test for a TOCTOU race in the _queryChannelsStreams
+          // cache: the cache write previously happened after an offline-await,
+          // so N sibling calls in the same event-loop tick all missed the
+          // cache and each fired its own queryChannels HTTP request.
+          //
+          // With the fix, the cache slot is reserved synchronously after the
+          // hash check, so concurrent callers find the in-flight future and
+          // share its result.
+          final channelStates = List.generate(
+            3,
+            (index) => ChannelState(
+              channel: ChannelModel(cid: 'test-type-$index:test-id-$index'),
+            ),
+          );
+
+          // Slow down the API so all concurrent callers are guaranteed to be
+          // in flight at the same time when the cache write happens.
+          when(() => api.channel.queryChannels(
+                filter: any(named: 'filter'),
+                sort: any(named: 'sort'),
+                state: any(named: 'state'),
+                watch: any(named: 'watch'),
+                presence: any(named: 'presence'),
+                memberLimit: any(named: 'memberLimit'),
+                messageLimit: any(named: 'messageLimit'),
+                paginationParams: any(named: 'paginationParams'),
+              )).thenAnswer((_) async {
+            await delay(100);
+            return QueryChannelsResponse()..channels = channelStates;
+          });
+
+          // Fire 5 identical calls back-to-back in the same tick.
+          final results = await Future.wait(
+            List.generate(5, (_) => client.queryChannels().toList()),
+          );
+
+          // All callers should receive the same channels.
+          for (final emitted in results) {
+            expect(emitted, hasLength(1));
+            expect(emitted.single, channelStates.map(isCorrectChannelFor));
+          }
+
+          // But only ONE HTTP request should have been issued.
+          verify(() => api.channel.queryChannels(
+                filter: any(named: 'filter'),
+                sort: any(named: 'sort'),
+                state: any(named: 'state'),
+                watch: any(named: 'watch'),
+                presence: any(named: 'presence'),
+                memberLimit: any(named: 'memberLimit'),
+                messageLimit: any(named: 'messageLimit'),
+                paginationParams: any(named: 'paginationParams'),
+              )).called(1);
+        },
+      );
+
+      test(
+        'should fire a fresh request once the cached future has settled',
+        () async {
+          // After the in-flight future completes, the cache slot is freed and
+          // the next call must hit the API again — only concurrent callers
+          // share the future, not sequential ones.
+          final channelStates = List.generate(
+            3,
+            (index) => ChannelState(
+              channel: ChannelModel(cid: 'test-type-$index:test-id-$index'),
+            ),
+          );
+
+          when(() => api.channel.queryChannels(
+                filter: any(named: 'filter'),
+                sort: any(named: 'sort'),
+                state: any(named: 'state'),
+                watch: any(named: 'watch'),
+                presence: any(named: 'presence'),
+                memberLimit: any(named: 'memberLimit'),
+                messageLimit: any(named: 'messageLimit'),
+                paginationParams: any(named: 'paginationParams'),
+              )).thenAnswer(
+            (_) async => QueryChannelsResponse()..channels = channelStates,
+          );
+
+          await client.queryChannels().toList();
+          await client.queryChannels().toList();
+
+          verify(() => api.channel.queryChannels(
+                filter: any(named: 'filter'),
+                sort: any(named: 'sort'),
+                state: any(named: 'state'),
+                watch: any(named: 'watch'),
+                presence: any(named: 'presence'),
+                memberLimit: any(named: 'memberLimit'),
+                messageLimit: any(named: 'messageLimit'),
+                paginationParams: any(named: 'paginationParams'),
+              )).called(2);
+        },
+      );
+
+      test(
+        'concurrent calls with different filters do not share the cache',
+        () async {
+          // The cache is keyed on a hash of the query parameters. Callers
+          // with different filters/limits must each fire their own request.
+          when(() => api.channel.queryChannels(
+                filter: any(named: 'filter'),
+                sort: any(named: 'sort'),
+                state: any(named: 'state'),
+                watch: any(named: 'watch'),
+                presence: any(named: 'presence'),
+                memberLimit: any(named: 'memberLimit'),
+                messageLimit: any(named: 'messageLimit'),
+                paginationParams: any(named: 'paginationParams'),
+              )).thenAnswer((_) async {
+            await delay(100);
+            return QueryChannelsResponse()..channels = [];
+          });
+
+          await Future.wait([
+            client
+                .queryChannels(filter: Filter.in_('cid', const ['a']))
+                .toList(),
+            client
+                .queryChannels(filter: Filter.in_('cid', const ['b']))
+                .toList(),
+          ]);
+
+          verify(() => api.channel.queryChannels(
+                filter: any(named: 'filter'),
+                sort: any(named: 'sort'),
+                state: any(named: 'state'),
+                watch: any(named: 'watch'),
+                presence: any(named: 'presence'),
+                memberLimit: any(named: 'memberLimit'),
+                messageLimit: any(named: 'messageLimit'),
+                paginationParams: any(named: 'paginationParams'),
+              )).called(2);
+        },
+      );
+
+      test(
+        'concurrent calls share the same error when the request fails',
+        () async {
+          // If the in-flight HTTP request fails, every concurrent caller
+          // awaiting the shared future should see the same error rather than
+          // each firing its own retry request.
+          when(() => api.channel.queryChannels(
+                filter: any(named: 'filter'),
+                sort: any(named: 'sort'),
+                state: any(named: 'state'),
+                watch: any(named: 'watch'),
+                presence: any(named: 'presence'),
+                memberLimit: any(named: 'memberLimit'),
+                messageLimit: any(named: 'messageLimit'),
+                paginationParams: any(named: 'paginationParams'),
+              )).thenAnswer((_) async {
+            await delay(100);
+            throw StreamChatNetworkError(ChatErrorCode.inputError);
+          });
+
+          final errors = await Future.wait(
+            List.generate(5, (_) async {
+              try {
+                await client.queryChannels().toList();
+                return null;
+              } catch (e) {
+                return e;
+              }
+            }),
+          );
+
+          // Every caller surfaces the same error type.
+          expect(errors, hasLength(5));
+          for (final error in errors) {
+            expect(error, isA<StreamChatNetworkError>());
+          }
+
+          // But only ONE HTTP request was made — the rest piggybacked.
+          verify(() => api.channel.queryChannels(
+                filter: any(named: 'filter'),
+                sort: any(named: 'sort'),
+                state: any(named: 'state'),
+                watch: any(named: 'watch'),
+                presence: any(named: 'presence'),
+                memberLimit: any(named: 'memberLimit'),
+                messageLimit: any(named: 'messageLimit'),
+                paginationParams: any(named: 'paginationParams'),
+              )).called(1);
+        },
+      );
     });
 
     test('`.queryUsers`', () async {
