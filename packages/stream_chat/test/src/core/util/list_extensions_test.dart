@@ -294,6 +294,32 @@ void main() {
         throwsA(isA<AssertionError>()),
       );
     });
+
+    test('two-pointer path: asserts when receiver has duplicate keys', () {
+      // Sorted by `pos` but keys collide on `a` — would otherwise emit both
+      // copies via the two-pointer fast path.
+      const withDupes = [_Item('a', 1), _Item('a', 2)];
+      expect(
+        () => withDupes.merge(
+          const [_Item('b', 3)],
+          key: _itemKey,
+          compare: _itemCompare,
+        ),
+        throwsA(isA<AssertionError>()),
+      );
+    });
+
+    test('two-pointer path: asserts when other has duplicate keys', () {
+      const sorted = [_Item('a', 1)];
+      expect(
+        () => sorted.merge(
+          const [_Item('b', 2), _Item('b', 3)],
+          key: _itemKey,
+          compare: _itemCompare,
+        ),
+        throwsA(isA<AssertionError>()),
+      );
+    });
   });
 
   group('ListX.updateIf', () {

@@ -119,6 +119,18 @@ extension SortedListX<T extends Object> on List<T> {
         'merge: `other` must be sorted by `compare` when `compare` '
         'is provided.',
       );
+      assert(
+        _hasUniqueKeys(this, key),
+        'merge: receiver must have unique keys when `compare` is '
+        'provided (the two-pointer fast path would otherwise emit '
+        'duplicate-keyed entries).',
+      );
+      assert(
+        _hasUniqueKeys(otherList, key),
+        'merge: `other` must have unique keys when `compare` is '
+        'provided (the two-pointer fast path would otherwise emit '
+        'duplicate-keyed entries).',
+      );
       // Non-overlapping fast paths — the steady state for chat lists
       // (livestream appends, paginated history prepends). Single
       // comparison detects, then we just concatenate.
@@ -213,6 +225,15 @@ int _upperBound<T>(List<T> list, T element, Comparator<T> compare) {
 bool _isSorted<T>(List<T> list, Comparator<T> compare) {
   for (var i = 1; i < list.length; i++) {
     if (compare(list[i - 1], list[i]) > 0) return false;
+  }
+  return true;
+}
+
+// Debug-only uniqueness check for `merge`'s two-pointer precondition.
+bool _hasUniqueKeys<T, K>(List<T> list, K Function(T item) key) {
+  final seen = <K>{};
+  for (final item in list) {
+    if (!seen.add(key(item))) return false;
   }
   return true;
 }
