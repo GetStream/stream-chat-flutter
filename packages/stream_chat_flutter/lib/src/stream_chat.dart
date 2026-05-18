@@ -38,7 +38,7 @@ class StreamChat extends StatefulWidget {
     this.streamChatThemeData,
     this.streamChatConfigData,
     this.onBackgroundEventReceived,
-    this.backgroundKeepAlive = const Duration(minutes: 1),
+    this.backgroundKeepAlive = const Duration(seconds: 15),
     this.connectivityStream,
   });
 

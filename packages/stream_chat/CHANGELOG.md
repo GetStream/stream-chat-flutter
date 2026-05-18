@@ -4,6 +4,9 @@
 
 - Fixed `StreamChatClient.queryDrafts` not forwarding the `filter` argument to the API.
 
+- Coalesced concurrent `queryChannels` calls with identical parameters via an in-flight cache.
+  Rapid reconnect bursts no longer fire multiple duplicate requests in parallel.
+
 ✅ Added
 
 - Added `SortedListX` and `ListX` extensions on `List` for keyed merge, sorted insert/upsert and
@@ -12,6 +15,10 @@
 - Added `ChannelClientState.pruneOldest(int)` that drops the oldest messages and keeps at most the
   requested number. No-op when the channel isn't up to date. Prefer `StreamChannel.pruneOldest`
   from `stream_chat_flutter_core` when available — it also resets top-pagination.
+
+- Added `StreamChatClient.recoverStateOnReconnect` setter (default `true`). Controls whether the
+  client re-queries active channels on WebSocket reconnect. Set to `false` if your app handles its
+  own state recovery — e.g. via channel-list controllers.
 
 🚀 Performance
 

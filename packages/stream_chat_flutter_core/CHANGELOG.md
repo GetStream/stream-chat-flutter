@@ -32,6 +32,9 @@
   equals the cached value.
 - Fixed `BetterStreamBuilder` silently swallowing stream errors when no `errorBuilder` is
   provided; errors now route through `FlutterError.reportError`.
+- Debounced connectivity events by 3 seconds in `StreamChatCore`. Rapid network flaps (cellular
+  handovers, brief drops) now collapse into a single reconnect instead of firing a fresh
+  `connectionRecovered` per emission.
 
 ## 9.23.0
 
