@@ -46,28 +46,20 @@ class DefaultStreamMessageComposerInput extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isFloating = props.isFloating;
+    final borderColor =
+        props.isSlowModeActive ? context.streamColorScheme.borderDisabled : context.streamColorScheme.borderDefault;
 
-    return ValueListenableBuilder(
-      valueListenable: props.controller,
-      builder: (context, value, child) {
-        final borderColor = props.controller.isSlowModeActive
-            ? context.streamColorScheme.borderDisabled
-            : context.streamColorScheme.borderDefault;
-
-        return Container(
-          clipBehavior: Clip.antiAlias,
-          foregroundDecoration: BoxDecoration(
-            borderRadius: BorderRadius.all(context.streamRadius.xxxl),
-            border: Border.all(color: borderColor),
-          ),
-          decoration: BoxDecoration(
-            color: context.streamColorScheme.backgroundElevation1,
-            borderRadius: BorderRadius.all(context.streamRadius.xxxl),
-            boxShadow: isFloating ? context.streamBoxShadow.elevation3 : null,
-          ),
-          child: child,
-        );
-      },
+    return Container(
+      clipBehavior: Clip.antiAlias,
+      foregroundDecoration: BoxDecoration(
+        borderRadius: BorderRadius.all(context.streamRadius.xxxl),
+        border: Border.all(color: borderColor),
+      ),
+      decoration: BoxDecoration(
+        color: context.streamColorScheme.backgroundElevation1,
+        borderRadius: BorderRadius.all(context.streamRadius.xxxl),
+        boxShadow: isFloating ? context.streamBoxShadow.elevation3 : null,
+      ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [

@@ -48,6 +48,7 @@ class MessageComposerComponentProps {
     this.currentUserId,
     required this.audioRecorderState,
     this.onQuotedMessageCleared,
+    this.cooldownTimeOut,
   });
 
   /// The controller for the message composer component.
@@ -80,6 +81,17 @@ class MessageComposerComponentProps {
   /// Callback for when the quoted message is cleared.
   final VoidCallback? onQuotedMessageCleared;
 
+  /// Remaining slow-mode cooldown in seconds, or `null` when slow mode is not
+  /// active for the current user.
+  ///
+  /// Non-null (even if zero is never emitted) means the composer should be
+  /// locked: text input disabled, attachment button disabled, border dimmed,
+  /// and the send button replaced by a countdown indicator.
+  final int? cooldownTimeOut;
+
+  /// Whether slow mode is currently active for the current user.
+  bool get isSlowModeActive => cooldownTimeOut != null;
+
   /// Whether the audio recording flow is active.
   bool get isAudioRecordingFlowActive => audioRecorderState is RecordStateRecording || isAudioRecordingFlowStopped;
 
@@ -103,6 +115,7 @@ class MessageComposerLeadingProps extends MessageComposerComponentProps {
     required super.currentUserId,
     required super.audioRecorderState,
     required super.onQuotedMessageCleared,
+    required super.cooldownTimeOut,
   }) : super();
 
   /// Creates a new instance of [MessageComposerLeadingProps] from a [MessageComposerComponentProps].
@@ -118,6 +131,7 @@ class MessageComposerLeadingProps extends MessageComposerComponentProps {
       currentUserId: props.currentUserId,
       audioRecorderState: props.audioRecorderState,
       onQuotedMessageCleared: props.onQuotedMessageCleared,
+      cooldownTimeOut: props.cooldownTimeOut,
     );
   }
 }
@@ -135,6 +149,7 @@ class MessageComposerTrailingProps extends MessageComposerComponentProps {
     required super.currentUserId,
     required super.audioRecorderState,
     required super.onQuotedMessageCleared,
+    required super.cooldownTimeOut,
   }) : super();
 
   /// Creates a new instance of [MessageComposerTrailingProps] from a [MessageComposerComponentProps].
@@ -150,6 +165,7 @@ class MessageComposerTrailingProps extends MessageComposerComponentProps {
       currentUserId: props.currentUserId,
       audioRecorderState: props.audioRecorderState,
       onQuotedMessageCleared: props.onQuotedMessageCleared,
+      cooldownTimeOut: props.cooldownTimeOut,
     );
   }
 }
@@ -167,6 +183,7 @@ class MessageComposerInputProps extends MessageComposerComponentProps {
     required super.currentUserId,
     required super.audioRecorderState,
     required super.onQuotedMessageCleared,
+    required super.cooldownTimeOut,
     this.placeholder,
     this.textInputAction,
     this.keyboardType,
@@ -205,6 +222,7 @@ class MessageComposerInputProps extends MessageComposerComponentProps {
       currentUserId: props.currentUserId,
       audioRecorderState: props.audioRecorderState,
       onQuotedMessageCleared: props.onQuotedMessageCleared,
+      cooldownTimeOut: props.cooldownTimeOut,
       placeholder: placeholder,
       textInputAction: textInputAction,
       keyboardType: keyboardType,
@@ -262,6 +280,7 @@ class MessageComposerInputCenterProps extends MessageComposerComponentProps {
     required super.currentUserId,
     required super.audioRecorderState,
     required super.onQuotedMessageCleared,
+    required super.cooldownTimeOut,
     this.placeholder,
     this.textInputAction,
     this.keyboardType,
@@ -288,6 +307,7 @@ class MessageComposerInputCenterProps extends MessageComposerComponentProps {
       currentUserId: inputProps.currentUserId,
       audioRecorderState: inputProps.audioRecorderState,
       onQuotedMessageCleared: inputProps.onQuotedMessageCleared,
+      cooldownTimeOut: inputProps.cooldownTimeOut,
       placeholder: inputProps.placeholder,
       textInputAction: inputProps.textInputAction,
       keyboardType: inputProps.keyboardType,
@@ -345,6 +365,7 @@ class MessageComposerInputLeadingProps extends MessageComposerComponentProps {
     required super.currentUserId,
     required super.audioRecorderState,
     required super.onQuotedMessageCleared,
+    required super.cooldownTimeOut,
   }) : super();
 
   /// Creates a new instance of [MessageComposerInputLeadingProps] from a [MessageComposerComponentProps].
@@ -360,6 +381,7 @@ class MessageComposerInputLeadingProps extends MessageComposerComponentProps {
       currentUserId: props.currentUserId,
       audioRecorderState: props.audioRecorderState,
       onQuotedMessageCleared: props.onQuotedMessageCleared,
+      cooldownTimeOut: props.cooldownTimeOut,
     );
   }
 }
@@ -377,6 +399,7 @@ class MessageComposerInputHeaderProps extends MessageComposerComponentProps {
     required super.currentUserId,
     required super.audioRecorderState,
     required super.onQuotedMessageCleared,
+    required super.cooldownTimeOut,
   }) : super();
 
   /// Creates a new instance of [MessageComposerInputHeaderProps] from a [MessageComposerComponentProps].
@@ -392,6 +415,7 @@ class MessageComposerInputHeaderProps extends MessageComposerComponentProps {
       currentUserId: props.currentUserId,
       audioRecorderState: props.audioRecorderState,
       onQuotedMessageCleared: props.onQuotedMessageCleared,
+      cooldownTimeOut: props.cooldownTimeOut,
     );
   }
 }
@@ -409,6 +433,7 @@ class MessageComposerInputTrailingProps extends MessageComposerComponentProps {
     required super.currentUserId,
     required super.audioRecorderState,
     required super.onQuotedMessageCleared,
+    required super.cooldownTimeOut,
   }) : super();
 
   /// Creates a new instance of [MessageComposerInputTrailingProps] from a [MessageComposerComponentProps].
@@ -424,6 +449,7 @@ class MessageComposerInputTrailingProps extends MessageComposerComponentProps {
       currentUserId: props.currentUserId,
       audioRecorderState: props.audioRecorderState,
       onQuotedMessageCleared: props.onQuotedMessageCleared,
+      cooldownTimeOut: props.cooldownTimeOut,
     );
   }
 }

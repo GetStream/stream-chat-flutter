@@ -45,10 +45,10 @@ class DefaultStreamMessageComposerInputTrailing extends StatelessWidget {
           return const SizedBox.shrink();
         }
 
-        if (_controller.isSlowModeActive) {
+        if (props.isSlowModeActive) {
           return _SlowModeCountdownButton(
             key: _slowModeKey,
-            cooldownTimeOut: _controller.cooldownTimeOut,
+            cooldownTimeOut: props.cooldownTimeOut!,
           );
         }
 

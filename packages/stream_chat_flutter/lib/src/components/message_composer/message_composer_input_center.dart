@@ -83,7 +83,7 @@ class DefaultStreamMessageComposerInputCenter extends StatelessWidget {
           textCapitalization: props.textCapitalization,
           autofocus: props.autofocus,
           autocorrect: props.autocorrect,
-          enabled: !controller.isSlowModeActive,
+          enabled: !props.isSlowModeActive,
         ),
         if (props.canAlsoSendToChannel)
           DmCheckboxListTile(
