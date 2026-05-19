@@ -119,13 +119,21 @@ platform :ios do
   end
 
   desc "Upload dSYMs from the most recent archive to Firebase Crashlytics"
-  # Uses the upload-symbols binary shipped with the FirebaseCrashlytics
-  # CocoaPod and the iOS app's GoogleService-Info.plist for auth. Run after
-  # `build_ipa` so the dSYMs exist under the Runner.xcarchive.
+  # Uses the upload-symbols binary shipped with FirebaseCrashlytics and the
+  # iOS app's GoogleService-Info.plist for auth. Run after `build_ipa` so
+  # the dSYMs exist under the Runner.xcarchive.
   private_lane :upload_crashlytics_symbols do
+    # Flutter 3.x can integrate Firebase via either CocoaPods or Swift Package
+    # Manager depending on the plugin's manifest. Prefer the Pods location and
+    # fall back to the SPM checkout — matches the auto-generated flutterfire
+    # Run Script Phase behavior.
+    pods_binary = "#{root_path}/ios/Pods/FirebaseCrashlytics/upload-symbols"
+    spm_binary = "#{root_path}/build/ios/SourcePackages/checkouts/firebase-ios-sdk/Crashlytics/upload-symbols"
+    binary_path = File.exist?(pods_binary) ? pods_binary : spm_binary
+
     upload_symbols_to_crashlytics(
       dsym_path: "#{root_path}/build/ios/archive/Runner.xcarchive/dSYMs",
-      binary_path: "#{root_path}/ios/Pods/FirebaseCrashlytics/upload-symbols",
+      binary_path: binary_path,
       gsp_path: "#{root_path}/ios/Runner/GoogleService-Info.plist"
     )
   end
