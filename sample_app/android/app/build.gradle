@@ -10,7 +10,10 @@ plugins {
 
 android {
     namespace "io.getstream.chat.android.flutter.sample"
-    compileSdkVersion flutter.compileSdkVersion
+    // Pin a floor of 36 so AAR metadata checks pass for transitive
+    // dependencies that require it until Flutter's bundled
+    // compileSdkVersion catches up.
+    compileSdkVersion Math.max(flutter.compileSdkVersion, 36)
     ndkVersion "27.0.12077973"
 
     compileOptions {
