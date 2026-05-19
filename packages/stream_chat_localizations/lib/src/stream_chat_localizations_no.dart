@@ -380,7 +380,7 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
   String attachmentLimitExceedError(int limit) => 'Antall vedlegg oversteget, maks antall: $limit';
 
   @override
-  String get slowModeOnLabel => 'Sakte modus PÅ';
+  String slowModeOnLabel(int cooldownTimeOut) => 'Sakte modus, vent ${cooldownTimeOut}s\u2026';
 
   @override
   String get commandUsernameLabel => '@username';

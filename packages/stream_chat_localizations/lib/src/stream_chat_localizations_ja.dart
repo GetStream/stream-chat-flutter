@@ -368,7 +368,7 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   String get replyToMessageLabel => 'メッセージに返信';
 
   @override
-  String get slowModeOnLabel => 'スローモードオン';
+  String slowModeOnLabel(int cooldownTimeOut) => 'スローモード、$cooldownTimeOut秒お待ちください\u2026';
 
   @override
   String get commandUsernameLabel => '@username';

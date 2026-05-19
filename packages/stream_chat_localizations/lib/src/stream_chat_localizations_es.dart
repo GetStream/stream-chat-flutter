@@ -391,7 +391,7 @@ No es posible añadir más de $limit archivos adjuntos
   String get viewLibrary => 'Ver Librería';
 
   @override
-  String get slowModeOnLabel => 'Modo lento activado';
+  String slowModeOnLabel(int cooldownTimeOut) => 'Modo lento, espera ${cooldownTimeOut}s\u2026';
 
   @override
   String get commandUsernameLabel => '@username';

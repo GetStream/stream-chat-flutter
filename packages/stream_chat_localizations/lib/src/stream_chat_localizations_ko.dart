@@ -371,7 +371,7 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
   String get replyToMessageLabel => '메시지에 회신합니다.';
 
   @override
-  String get slowModeOnLabel => '슬로모드 켜짐';
+  String slowModeOnLabel(int cooldownTimeOut) => '슬로모드, $cooldownTimeOut초만 기다려 주세요\u2026';
 
   @override
   String get commandUsernameLabel => '@username';

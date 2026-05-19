@@ -332,7 +332,8 @@ class MessageComposerProps {
   /// placeholderBuilder: (context, placeholder) {
   ///   final translations = context.translations;
   ///   return switch (placeholder) {
-  ///     SlowModePlaceholder() => translations.slowModeOnLabel,
+  ///     SlowModePlaceholder(:final cooldownTimeOut) =>
+  ///       translations.slowModeOnLabel(cooldownTimeOut),
   ///     CommandPlaceholder(command: 'weather') => 'Type a city name',
   ///     CommandPlaceholder() => translations.writeAMessageLabel,
   ///     AttachmentsPlaceholder() => translations.addACommentOrSendLabel,
@@ -440,7 +441,7 @@ class MessageComposerProps {
   ) {
     final translations = context.translations;
     return switch (placeholder) {
-      SlowModePlaceholder() => translations.slowModeOnLabel,
+      SlowModePlaceholder(:final cooldownTimeOut) => translations.slowModeOnLabel(cooldownTimeOut),
       CommandPlaceholder(command: 'giphy') => translations.searchGifLabel,
       CommandPlaceholder(command: 'mute' || 'unmute' || 'ban' || 'unban') => translations.commandUsernameLabel,
       CommandPlaceholder() || AttachmentsPlaceholder() || WriteMessagePlaceholder() => translations.writeAMessageLabel,

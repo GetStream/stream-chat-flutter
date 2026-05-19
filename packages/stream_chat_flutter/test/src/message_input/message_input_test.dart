@@ -106,7 +106,14 @@ void main() {
       // wait for the initial state to be rendered.
       await tester.pumpAndSettle();
 
-      expect(find.text('Slow mode ON'), findsOneWidget);
+      expect(find.text('Slow mode, wait 10s\u2026'), findsOneWidget);
+
+      // The text field is locked while slow mode is active.
+      final textField = tester.widget<TextField>(find.byType(TextField));
+      expect(textField.enabled, isFalse);
+
+      // The trailing button shows the remaining cooldown instead of send / mic.
+      expect(find.text('10'), findsOneWidget);
     },
   );
 

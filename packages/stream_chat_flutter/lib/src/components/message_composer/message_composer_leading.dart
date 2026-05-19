@@ -35,39 +35,46 @@ class DefaultStreamMessageComposerLeading extends StatelessWidget {
   Widget build(BuildContext context) {
     // 45 degrees = 0.125 turns
     const closedRotation = 0.125;
-    final showButton =
-        props.onAttachmentButtonPressed != null &&
-        !props.isAudioRecordingFlowActive &&
-        props.controller.message.command == null;
 
-    return AnimatedOpacity(
-      opacity: showButton ? 1.0 : 0.0,
-      duration: showButton ? const Duration(milliseconds: 200) : Duration.zero,
-      curve: Curves.easeInQuint,
-      child: AnimatedSize(
-        duration: const Duration(milliseconds: 200),
-        alignment: Alignment.bottomCenter,
-        child: Row(
-          children: [
-            if (showButton) ...[
-              AnimatedRotation(
-                turns: props.isPickerOpen ? closedRotation : 0,
-                duration: const Duration(milliseconds: 150),
-                curve: Curves.easeOut,
-                child: StreamButton.icon(
-                  icon: Icon(context.streamIcons.plus),
-                  style: StreamButtonStyle.secondary,
-                  type: StreamButtonType.outline,
-                  size: StreamButtonSize.large,
-                  isFloating: props.isFloating,
-                  onPressed: () => props.onAttachmentButtonPressed?.call(),
-                ),
-              ),
-              SizedBox(width: context.streamSpacing.xs),
-            ],
-          ],
-        ),
-      ),
+    return ValueListenableBuilder(
+      valueListenable: props.controller,
+      builder: (context, value, child) {
+        final isSlowModeActive = props.controller.isSlowModeActive;
+        final showButton =
+            props.onAttachmentButtonPressed != null &&
+            !props.isAudioRecordingFlowActive &&
+            props.controller.message.command == null;
+
+        return AnimatedOpacity(
+          opacity: showButton ? 1.0 : 0.0,
+          duration: showButton ? const Duration(milliseconds: 200) : Duration.zero,
+          curve: Curves.easeInQuint,
+          child: AnimatedSize(
+            duration: const Duration(milliseconds: 200),
+            alignment: Alignment.bottomCenter,
+            child: Row(
+              children: [
+                if (showButton) ...[
+                  AnimatedRotation(
+                    turns: props.isPickerOpen ? closedRotation : 0,
+                    duration: const Duration(milliseconds: 150),
+                    curve: Curves.easeOut,
+                    child: StreamButton.icon(
+                      icon: Icon(context.streamIcons.plus),
+                      style: StreamButtonStyle.secondary,
+                      type: StreamButtonType.outline,
+                      size: StreamButtonSize.large,
+                      isFloating: props.isFloating,
+                      onPressed: isSlowModeActive ? null : () => props.onAttachmentButtonPressed?.call(),
+                    ),
+                  ),
+                  SizedBox(width: context.streamSpacing.xs),
+                ],
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

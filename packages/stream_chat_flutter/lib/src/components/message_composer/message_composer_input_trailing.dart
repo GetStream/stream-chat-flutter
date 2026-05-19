@@ -41,6 +41,17 @@ class DefaultStreamMessageComposerInputTrailing extends StatelessWidget {
     return ValueListenableBuilder(
       valueListenable: _controller,
       builder: (context, value, child) {
+        if (props.isAudioRecordingFlowLocked || props.isAudioRecordingFlowStopped) {
+          return const SizedBox.shrink();
+        }
+
+        if (_controller.isSlowModeActive) {
+          return _SlowModeCountdownButton(
+            key: _slowModeKey,
+            cooldownTimeOut: _controller.cooldownTimeOut,
+          );
+        }
+
         final hasText = _controller.text.trim().isNotEmpty;
         final hasContent = hasText || _controller.attachments.isNotEmpty;
         final isEditing = _controller.isEditing;
@@ -59,10 +70,6 @@ class DefaultStreamMessageComposerInputTrailing extends StatelessWidget {
         }
 
         final isEnabled = (!isEditing && !hasCommand) || hasContent;
-
-        if (props.isAudioRecordingFlowLocked || props.isAudioRecordingFlowStopped) {
-          return const SizedBox.shrink();
-        }
 
         final voiceRecordingCallback = props.voiceRecordingCallback;
         if (buttonState == _ButtonState.send ||
@@ -96,6 +103,22 @@ enum _ButtonState {
   command,
   microphone,
   voiceRecordingActive,
+}
+
+class _SlowModeCountdownButton extends StatelessWidget {
+  const _SlowModeCountdownButton({super.key, required this.cooldownTimeOut});
+
+  final int cooldownTimeOut;
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamButton.icon(
+      icon: Text('$cooldownTimeOut'),
+      style: StreamButtonStyle.secondary,
+      size: StreamButtonSize.small,
+      onPressed: null,
+    );
+  }
 }
 
 class _VoiceRecordingButton extends StatelessWidget {
@@ -142,3 +165,4 @@ class _VoiceRecordingButton extends StatelessWidget {
 
 final _sendKey = UniqueKey();
 final _microphoneKey = UniqueKey();
+final _slowModeKey = UniqueKey();

@@ -27,6 +27,7 @@
 - Redesigned `StreamPollOptionsSheetThemeData`, `StreamPollResultsSheetThemeData`, `StreamPollOptionVotesSheetThemeData` and `StreamPollCommentsSheetThemeData` — see [`migrations/redesign/attachments_and_polls.md`](../../migrations/redesign/attachments_and_polls.md).
 - Renamed `Translations.questionsLabel` getter → `questionLabel({bool isPlural = false})` method.
 - Renamed `Translations.endVoteConfirmationText` → `endVoteConfirmationTitle`; English default changed to `'End This Poll?'`.
+- Renamed `Translations.slowModeOnLabel` getter → `slowModeOnLabel(int cooldownTimeOut)` method; English default changed from `'Slow mode ON'` to `'Slow mode, wait ${cooldownTimeOut}s\u2026'`. While slow mode is active for the current user the composer text input is now disabled and the trailing send button is replaced by a disabled countdown button showing the remaining seconds, matching the redesigned Figma. See [`migrations/redesign/message_composer.md`](../../migrations/redesign/message_composer.md).
 - Reworded `Translations.endVoteLabel` English default to `'End Poll'`.
 - Removed `AttachmentButton`, `StreamQuotedMessageWidget`, `EditMessageSheet`, `StreamMessageSendButton` and `DesktopReactionsBuilder`.
 - Removed `StreamChannelGridView`, `StreamChannelGridTile` and `StreamMessageSearchGridView`.

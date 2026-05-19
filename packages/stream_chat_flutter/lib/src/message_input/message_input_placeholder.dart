@@ -26,7 +26,8 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// ) {
 ///   final translations = context.translations;
 ///   return switch (placeholder) {
-///     SlowModePlaceholder() => translations.slowModeOnLabel,
+///     SlowModePlaceholder(:final cooldownTimeOut) =>
+///       translations.slowModeOnLabel(cooldownTimeOut),
 ///     CommandPlaceholder(command: 'giphy') => translations.searchGifLabel,
 ///     CommandPlaceholder(command: 'mute' || 'unmute' || 'ban' || 'unban') =>
 ///       translations.commandUsernameLabel,

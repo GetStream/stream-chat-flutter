@@ -389,7 +389,7 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
   String get viewLibrary => 'पुस्तकालय देखिये';
 
   @override
-  String get slowModeOnLabel => 'स्लो मोड चालू';
+  String slowModeOnLabel(int cooldownTimeOut) => 'स्लो मोड, $cooldownTimeOut सेकंड प्रतीक्षा करें\u2026';
 
   @override
   String get commandUsernameLabel => '@username';

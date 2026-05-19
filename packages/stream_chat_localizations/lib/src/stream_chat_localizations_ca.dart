@@ -388,7 +388,7 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
   String get viewLibrary => 'Veure llibreria';
 
   @override
-  String get slowModeOnLabel => 'Mode lent activat';
+  String slowModeOnLabel(int cooldownTimeOut) => 'Mode lent, espera ${cooldownTimeOut}s\u2026';
 
   @override
   String get commandUsernameLabel => '@username';

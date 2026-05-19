@@ -406,7 +406,7 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
   String attachmentLimitExceedError(int limit) => 'Attachment limit exceeded, limit: $limit';
 
   @override
-  String get slowModeOnLabel => 'Slow mode ON';
+  String slowModeOnLabel(int cooldownTimeOut) => 'Slow mode, wait ${cooldownTimeOut}s\u2026';
 
   @override
   String get commandUsernameLabel => '@username';

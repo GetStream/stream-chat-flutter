@@ -394,7 +394,7 @@ Attenzione: il limite massimo di $limit file è stato superato.
   String get viewLibrary => 'Vedi la biblioteca';
 
   @override
-  String get slowModeOnLabel => 'Slowmode attiva';
+  String slowModeOnLabel(int cooldownTimeOut) => 'Modalità lenta, attendi ${cooldownTimeOut}s\u2026';
 
   @override
   String get commandUsernameLabel => '@username';
