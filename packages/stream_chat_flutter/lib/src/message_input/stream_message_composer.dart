@@ -613,11 +613,6 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
   }
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-  }
-
-  @override
   void didUpdateWidget(covariant DefaultStreamMessageComposer oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.props.messageComposerController == null && oldWidget.props.messageComposerController != null) {

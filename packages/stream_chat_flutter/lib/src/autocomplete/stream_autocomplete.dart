@@ -633,7 +633,7 @@ class StreamAutocompleteOptions<T extends Object> extends StatelessWidget {
 
   /// The background color of the options card.
   ///
-  /// Defaults to [StreamColorTheme.barsBg].
+  /// Defaults to [context.streamColorScheme.backgroundElevation1].
   final Color? color;
 
   /// The elevation of the options card.
