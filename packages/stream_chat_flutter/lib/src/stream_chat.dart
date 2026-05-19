@@ -191,22 +191,12 @@ class StreamChatState extends State<StreamChat> {
       data: theme,
       child: Builder(
         builder: (context) {
-          final materialTheme = Theme.of(context);
-          final streamTheme = StreamChatTheme.of(context);
-          return Theme(
-            data: materialTheme.copyWith(
-              primaryIconTheme: streamTheme.primaryIconTheme,
-              colorScheme: materialTheme.colorScheme.copyWith(
-                secondary: context.streamColorScheme.accentPrimary,
-              ),
-            ),
-            child: StreamChatCore(
-              client: client,
-              onBackgroundEventReceived: widget.onBackgroundEventReceived,
-              backgroundKeepAlive: widget.backgroundKeepAlive,
-              connectivityStream: widget.connectivityStream,
-              child: widget.child ?? const Empty(),
-            ),
+          return StreamChatCore(
+            client: client,
+            onBackgroundEventReceived: widget.onBackgroundEventReceived,
+            backgroundKeepAlive: widget.backgroundKeepAlive,
+            connectivityStream: widget.connectivityStream,
+            child: widget.child ?? const Empty(),
           );
         },
       ),

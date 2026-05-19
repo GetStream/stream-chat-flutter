@@ -42,7 +42,6 @@ class StreamChatThemeData {
     StreamAppBarThemeData? channelHeaderTheme,
     StreamAppBarThemeData? channelListHeaderTheme,
     StreamAppBarThemeData? threadHeaderTheme,
-    IconThemeData? primaryIconTheme,
     StreamMessageListViewThemeData? messageListViewTheme,
     StreamPollCreatorThemeData? pollCreatorTheme,
     StreamPollInteractorThemeData? pollInteractorTheme,
@@ -59,7 +58,6 @@ class StreamChatThemeData {
       channelHeaderTheme: channelHeaderTheme ?? const StreamAppBarThemeData(),
       channelListHeaderTheme: channelListHeaderTheme ?? const StreamAppBarThemeData(),
       threadHeaderTheme: threadHeaderTheme ?? const StreamAppBarThemeData(),
-      primaryIconTheme: primaryIconTheme ?? const IconThemeData(),
       messageListViewTheme: messageListViewTheme ?? const StreamMessageListViewThemeData(),
       pollCreatorTheme: pollCreatorTheme ?? const StreamPollCreatorThemeData(),
       pollInteractorTheme: pollInteractorTheme ?? const StreamPollInteractorThemeData(),
@@ -79,7 +77,6 @@ class StreamChatThemeData {
     required this.channelHeaderTheme,
     required this.channelListHeaderTheme,
     required this.threadHeaderTheme,
-    required this.primaryIconTheme,
     required this.messageListViewTheme,
     required this.pollCreatorTheme,
     required this.pollInteractorTheme,
@@ -101,9 +98,6 @@ class StreamChatThemeData {
 
   /// The default [StreamAppBar] style applied to [StreamThreadHeader].
   final StreamAppBarThemeData threadHeaderTheme;
-
-  /// Primary icon theme
-  final IconThemeData primaryIconTheme;
 
   /// Theme configuration for the [StreamMessageListView] widget.
   final StreamMessageListViewThemeData messageListViewTheme;
@@ -144,7 +138,6 @@ class StreamChatThemeData {
     StreamAppBarThemeData? channelHeaderTheme,
     StreamAppBarThemeData? channelListHeaderTheme,
     StreamAppBarThemeData? threadHeaderTheme,
-    IconThemeData? primaryIconTheme,
     StreamMessageListViewThemeData? messageListViewTheme,
     StreamPollCreatorThemeData? pollCreatorTheme,
     StreamPollInteractorThemeData? pollInteractorTheme,
@@ -160,7 +153,6 @@ class StreamChatThemeData {
     channelHeaderTheme: this.channelHeaderTheme.merge(channelHeaderTheme),
     channelListHeaderTheme: this.channelListHeaderTheme.merge(channelListHeaderTheme),
     threadHeaderTheme: this.threadHeaderTheme.merge(threadHeaderTheme),
-    primaryIconTheme: this.primaryIconTheme.merge(primaryIconTheme),
     messageListViewTheme: messageListViewTheme ?? this.messageListViewTheme,
     pollCreatorTheme: pollCreatorTheme ?? this.pollCreatorTheme,
     pollInteractorTheme: pollInteractorTheme ?? this.pollInteractorTheme,
@@ -181,7 +173,6 @@ class StreamChatThemeData {
       channelHeaderTheme: channelHeaderTheme.merge(other.channelHeaderTheme),
       channelListHeaderTheme: channelListHeaderTheme.merge(other.channelListHeaderTheme),
       threadHeaderTheme: threadHeaderTheme.merge(other.threadHeaderTheme),
-      primaryIconTheme: other.primaryIconTheme,
       messageListViewTheme: messageListViewTheme.merge(other.messageListViewTheme),
       pollCreatorTheme: pollCreatorTheme.merge(other.pollCreatorTheme),
       pollInteractorTheme: pollInteractorTheme.merge(other.pollInteractorTheme),
