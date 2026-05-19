@@ -22,6 +22,7 @@ environment:
 dependencies:
   collection: ^1.17.2
   firebase_core: ^3.0.0
+  firebase_crashlytics: ^4.0.0
   firebase_messaging: ^15.0.0
   flutter:
     sdk: flutter
@@ -33,7 +34,6 @@ dependencies:
   go_router: ^14.6.2
   lottie: ^3.1.2
   provider: ^6.0.5
-  sentry_flutter: ^8.3.0
   stream_chat_flutter: ^9.23.0
   stream_chat_localizations: ^9.23.0
   stream_chat_persistence: ^9.23.0

@@ -655,7 +655,13 @@ void main() {
                   clearQueryCache: any(named: 'clearQueryCache')))
               .thenAnswer((_) => Future.value());
 
-          expectLater(
+          // setUp's `connectUser` schedules debounced persistence writes
+          // (1s window) that would otherwise fire during this test's wait
+          // and pollute the call counts. Wait past the debounce, then clear.
+          await delay(1100);
+          clearInteractions(persistence);
+
+          await expectLater(
             client.queryChannels(),
             emitsInOrder([
               // emits persistent channels first
@@ -665,9 +671,10 @@ void main() {
             ]),
           );
 
-          // Hack as `teardown` gets called even
-          // before our stream starts emitting data
-          await delay(1050);
+          // Wait safely past the 1s debounce on persistence writes
+          // (updateChannelState, updateChannelThreads) so all trailing
+          // invocations have fired before we verify counts.
+          await delay(1500);
 
           verify(() => persistence.getChannelStates(
                 filter: any(named: 'filter'),
@@ -738,7 +745,13 @@ void main() {
           when(() => persistence.updateChannelThreads(any(), any()))
               .thenAnswer((_) async => {});
 
-          expectLater(
+          // setUp's `connectUser` schedules debounced persistence writes
+          // (1s window) that would otherwise fire during this test's wait
+          // and pollute the call counts. Wait past the debounce, then clear.
+          await delay(1100);
+          clearInteractions(persistence);
+
+          await expectLater(
             client.queryChannels(),
             emitsInOrder([
               // emits persistent channels
@@ -746,9 +759,10 @@ void main() {
             ]),
           );
 
-          // Hack as `teardown` gets called even
-          // before our stream starts emitting data
-          await delay(1050);
+          // Wait safely past the 1s debounce on persistence writes
+          // (updateChannelState, updateChannelThreads) so all trailing
+          // invocations have fired before we verify counts.
+          await delay(1500);
 
           verify(() => persistence.getChannelStates(
                 filter: any(named: 'filter'),
