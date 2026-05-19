@@ -27,7 +27,7 @@ dependencies:
   equatable: ^2.0.5
   freezed_annotation: ">=2.4.1 <4.0.0"
   http_parser: ^4.0.2
-  jose: ^0.3.4
+  jose: ^0.3.5+1
   json_annotation: ^4.9.0
   logging: ^1.2.0
   meta: ^1.9.1
