@@ -2942,12 +2942,9 @@ class ChannelClientState {
   void updateMessage(Message message) {
     // Determine if the message should be displayed in the channel view.
     if (message.parentId == null || message.showInChannel == true) {
-      // Locate the existing version (if any). Scanning from the tail
-      // makes the common case — updates that target a recent message
-      // (server echo, edit, reaction on the latest) — finish in a few
-      // comparisons instead of walking the full list. One lookup feeds
-      // both the quoted-rewrite below and the `sortedUpsertAt` further
-      // down — no duplicate scan.
+      // Scan from the tail: server echoes, edits, and reactions almost
+      // always target a recent message, so `lastIndexWhere` exits in a
+      // handful of comparisons instead of walking the full list.
       final oldIndex = messages.lastIndexWhere((m) => m.id == message.id);
       final oldMessage = oldIndex == -1 ? null : messages[oldIndex];
 
