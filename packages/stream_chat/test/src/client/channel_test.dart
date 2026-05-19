@@ -4192,6 +4192,104 @@ void main() {
             ).called(1);
           },
         );
+
+        test(
+          'should not duplicate when server echoes back an optimistically '
+          'inserted message with a later createdAt',
+          () async {
+            // Local message used as the input to `channel.sendMessage`.
+            final localCreatedAt =
+                initialLastMessageAt.add(const Duration(seconds: 3));
+            final localMessage = Message(
+              id: 'test-message-id',
+              text: 'Hello world!',
+              user: client.state.currentUser,
+              createdAt: localCreatedAt,
+            );
+
+            // Mock the network send to return the message unchanged so the
+            // optimistic insert + sent-state update both land on the same
+            // `createdAt`. The bug fires later, on the WS echo.
+            final sendMessageResponse = SendMessageResponse()
+              ..message = localMessage.copyWith(state: MessageState.sent);
+            when(() => client.sendMessage(any(), channelId, channelType))
+                .thenAnswer((_) async => sendMessageResponse);
+
+            await channel.sendMessage(localMessage);
+
+            expect(channel.state!.messages, hasLength(1));
+
+            // Server then broadcasts the same message via a `message.new`
+            // event with a slightly later `createdAt` (server-assigned
+            // timestamp).
+            final serverMessage = localMessage.copyWith(
+              createdAt: localCreatedAt.add(const Duration(milliseconds: 50)),
+            );
+            client.addEvent(createNewMessageEvent(serverMessage));
+
+            // Wait for the event to get processed
+            await Future.delayed(Duration.zero);
+
+            // The state should contain exactly one message with that id,
+            // not a duplicate.
+            final matching =
+                channel.state!.messages.where((it) => it.id == localMessage.id);
+            expect(matching, hasLength(1));
+            expect(channel.state!.messages, hasLength(1));
+          },
+        );
+
+        test(
+          'should not duplicate when the locally-sent message is no longer '
+          'the latest (retry-after-offline scenario)',
+          () async {
+            // Mirrors the offline-retry flow: a local message is sent, then
+            // another message arrives via WS while the local one is still
+            // pending. When the retry finally succeeds the server response's
+            // `createdAt` is later than the intervening message, so the
+            // locally-sent copy is no longer `messages.last`.
+            final localCreatedAt =
+                initialLastMessageAt.add(const Duration(seconds: 1));
+            final localMessage = Message(
+              id: 'local-message-id',
+              text: 'Hello world!',
+              user: client.state.currentUser,
+              createdAt: localCreatedAt,
+            );
+
+            final sendMessageResponse = SendMessageResponse()
+              ..message = localMessage.copyWith(state: MessageState.sent);
+            when(() => client.sendMessage(any(), channelId, channelType))
+                .thenAnswer((_) async => sendMessageResponse);
+
+            await channel.sendMessage(localMessage);
+
+            // Another message arrives via WS with a later `createdAt`,
+            // pushing the locally-sent message off the tail.
+            final otherMessage = Message(
+              id: 'other-message-id',
+              user: User(id: 'other-user'),
+              createdAt: localCreatedAt.add(const Duration(seconds: 2)),
+            );
+            client.addEvent(createNewMessageEvent(otherMessage));
+            await Future.delayed(Duration.zero);
+
+            // Server then broadcasts the locally-sent message via
+            // `message.new` with a `createdAt` that is later than the
+            // intervening message — exactly the shape produced by a
+            // successful retry after another message arrived in between.
+            final serverEcho = localMessage.copyWith(
+              createdAt: otherMessage.createdAt.add(const Duration(seconds: 1)),
+            );
+            client.addEvent(createNewMessageEvent(serverEcho));
+            await Future.delayed(Duration.zero);
+
+            final localMatches =
+                channel.state!.messages.where((it) => it.id == localMessage.id);
+            expect(localMatches, hasLength(1));
+            expect(channel.state!.messages, hasLength(2));
+          },
+        );
       },
     );
 
