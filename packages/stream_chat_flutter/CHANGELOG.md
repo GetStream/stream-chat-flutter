@@ -1,4 +1,4 @@
-## 9.23.0
+## 9.24.0
 
 ✅ Added
 
@@ -7,9 +7,6 @@
 
 🐞 Fixed
 
-- Fixed `StreamChannelAvatar` crashing with `RangeError` when user/channel name is empty.
-- Fixed audio tone bleeding into recorded voice message when playing custom feedback sound on recording start.
-- Fixed poll dialog AppBar back button color not being themeable. [[#2484]](https://github.com/GetStream/stream-chat-flutter/issues/2484)
 - Fixed `StreamMessageListView` thread page crashing with `StateError` when the parent message was no
   longer present in the channel's loaded messages (e.g. filtered, shadowed, or paginated out). The
   thread now falls back to the captured parent message in that case.
@@ -21,6 +18,14 @@
   server immediately instead of waiting for the trailing edge. The redundant local `unreadCount = 0`
   short-circuit on own-message send was removed — the leading-edge mark plus `readStream` updates
   now keep the unread badge in sync without an extra `setState`.
+
+## 9.23.0
+
+🐞 Fixed
+
+- Fixed `StreamChannelAvatar` crashing with `RangeError` when user/channel name is empty.
+- Fixed audio tone bleeding into recorded voice message when playing custom feedback sound on recording start.
+- Fixed poll dialog AppBar back button color not being themeable. [[#2484]](https://github.com/GetStream/stream-chat-flutter/issues/2484)
 
 ## 9.22.0
 
