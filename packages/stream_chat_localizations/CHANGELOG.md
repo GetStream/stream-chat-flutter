@@ -1,3 +1,7 @@
+## 9.24.0
+
+- Updated `stream_chat_flutter` dependency to [`9.24.0`](https://pub.dev/packages/stream_chat_flutter/changelog).
+
 ## 9.23.0
 
 - Fixed Italian translation for `unreadMessagesSeparatorText` (was incorrectly showing French text "Nouveaux messages" instead of Italian "Nuovi messaggi").
