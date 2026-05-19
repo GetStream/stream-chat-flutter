@@ -36,6 +36,7 @@ Future<void> main() async {
     // In debug, return false so the embedder logs the error and the IDE can
     // break on it. In release, hand it to Crashlytics and mark it handled.
     if (kDebugMode) return false;
+
     FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
     return true;
   };
