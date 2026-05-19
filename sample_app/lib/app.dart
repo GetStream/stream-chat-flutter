@@ -3,6 +3,7 @@
 import 'dart:async';
 
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -21,7 +22,6 @@ import 'package:sample_app/state/init_data.dart';
 import 'package:sample_app/utils/app_config.dart';
 import 'package:sample_app/utils/local_notification_observer.dart';
 import 'package:sample_app/utils/localizations.dart';
-import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_localizations/stream_chat_localizations.dart';
 import 'package:stream_chat_persistence/stream_chat_persistence.dart';
@@ -245,11 +245,12 @@ final chatPersistentClient = StreamChatPersistenceClient(
 void _sampleAppLogHandler(LogRecord record) async {
   if (kDebugMode) StreamChatClient.defaultLogHandler(record);
 
-  // report errors to sentry.io
+  // report errors to Firebase Crashlytics
   if (record.error != null || record.stackTrace != null) {
-    await Sentry.captureException(
+    await FirebaseCrashlytics.instance.recordError(
       record.error,
-      stackTrace: record.stackTrace,
+      record.stackTrace,
+      reason: record.message,
     );
   }
 }
