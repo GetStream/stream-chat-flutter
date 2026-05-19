@@ -46,13 +46,6 @@ dev_dependencies:
   flutter_launcher_icons: ^0.14.2
 
 flutter:
-  # Force CocoaPods integration on iOS/macOS. SPM-integrated plugins fail
-  # codesigning during `fastlane match` archive on macos-15 runners with
-  # "requires a development team" because DEVELOPMENT_TEAM does not
-  # propagate to SPM packages. CocoaPods is the documented fallback (see
-  # https://docs.flutter.dev/packages-and-plugins/swift-package-manager/for-app-developers).
-  config:
-    enable-swift-package-manager: false
   uses-material-design: true
   assets:
     - assets/

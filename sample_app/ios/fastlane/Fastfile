@@ -59,6 +59,12 @@ platform :ios do
     # issue: https://github.com/flutter/flutter/issues/113977
     ENV["FLUTTER_XCODE_CODE_SIGN_IDENTITY"] = codesign_identity[export_method]
     ENV["FLUTTER_XCODE_PROVISIONING_PROFILE_SPECIFIER"] = profile[export_method]
+    # SPM-built plugin targets (firebase-ios-sdk, image_picker_ios, etc.) do
+    # not inherit DEVELOPMENT_TEAM from the Runner target, so an archive with
+    # signing enabled fails for them. Pass it explicitly as an xcodebuild
+    # build setting (via the FLUTTER_XCODE_* env-var convention) so all
+    # targets — including SPM packages — pick it up.
+    ENV["FLUTTER_XCODE_DEVELOPMENT_TEAM"] = CredentialsManager::AppfileConfig.try_fetch_value(:team_id)
 
     # Generate the full command
     command = "flutter build ipa --suppress-analytics --export-options-plist=#{export_options_plist}"
