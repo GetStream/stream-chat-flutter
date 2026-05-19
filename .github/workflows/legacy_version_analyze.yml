@@ -28,6 +28,10 @@ jobs:
     outputs:
       packages: ${{ steps.filter.outputs.packages }}
     steps:
+      # paths-filter needs a checkout on push events (it diffs against the
+      # previous commit via git history). On pull_request events it uses
+      # the API and the checkout is unused, but is cheap.
+      - uses: actions/checkout@v6
       - uses: dorny/paths-filter@v3
         id: filter
         with:
