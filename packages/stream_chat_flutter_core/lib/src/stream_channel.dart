@@ -752,7 +752,7 @@ class StreamChannelState extends State<StreamChannel> {
     }
 
     // Find the index of the last read message
-    final lastReadIndex = messages.indexWhere(
+    final lastReadIndex = messages.lastIndexWhere(
       (message) => message.id == lastReadMessageId,
     );
 

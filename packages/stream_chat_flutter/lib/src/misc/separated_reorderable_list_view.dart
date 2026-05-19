@@ -27,6 +27,7 @@ class SeparatedReorderableListView extends ReorderableListView {
     super.physics,
     super.shrinkWrap,
     super.anchor,
+    // ignore: deprecated_member_use
     super.cacheExtent,
     super.dragStartBehavior,
     super.keyboardDismissBehavior,
@@ -56,6 +57,7 @@ class SeparatedReorderableListView extends ReorderableListView {
 
             return separator;
           },
+          // ignore: deprecated_member_use
           onReorder: (int oldIndex, int newIndex) {
             // Adjust the indexes due to an issue in the ReorderableListView
             // which isn't going to be fixed in the near future.
