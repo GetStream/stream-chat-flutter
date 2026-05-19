@@ -369,6 +369,7 @@ class MessageInputMediaAttachments extends StatelessWidget {
       child: ListView(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 8),
+        // ignore: deprecated_member_use
         cacheExtent: 104 * 10, // Cache 10 items ahead.
         children: attachments.map<Widget>(
           (attachment) {
