@@ -59,15 +59,6 @@ platform :ios do
     # issue: https://github.com/flutter/flutter/issues/113977
     ENV["FLUTTER_XCODE_CODE_SIGN_IDENTITY"] = codesign_identity[export_method]
     ENV["FLUTTER_XCODE_PROVISIONING_PROFILE_SPECIFIER"] = profile[export_method]
-    # SPM-built plugin targets (firebase-ios-sdk, image_picker_ios, etc.) do
-    # not inherit signing config from the Runner target. Without these the
-    # archive fails for SPM packages with either "requires a development
-    # team" or "conflicting provisioning settings (automatically signed but
-    # profile X has been manually specified)". Force every target onto the
-    # same manual-signing setup as the Runner via the FLUTTER_XCODE_*
-    # env-var convention.
-    ENV["FLUTTER_XCODE_CODE_SIGN_STYLE"] = "Manual"
-    ENV["FLUTTER_XCODE_DEVELOPMENT_TEAM"] = CredentialsManager::AppfileConfig.try_fetch_value(:team_id)
 
     # Generate the full command
     command = "flutter build ipa --suppress-analytics --export-options-plist=#{export_options_plist}"
@@ -91,7 +82,6 @@ platform :ios do
 
     build_number = (latest_release&.dig(:buildVersion) || 0).to_i + 1
     build_ipa(export_method: "ad-hoc", build_number: build_number)
-    upload_crashlytics_symbols
 
     firebase_app_distribution(
       app: app_id,
@@ -114,7 +104,6 @@ platform :ios do
 
     build_number = (current_build_number || 0).to_i + 1
     build_ipa(export_method: "app-store", build_number: build_number)
-    upload_crashlytics_symbols
 
     upload_to_testflight(
       api_key: appstore_api_key,
@@ -124,26 +113,6 @@ platform :ios do
       groups: ['Internal Testers', 'External Testers'],
       changelog: 'Lots of amazing new features to test out!',
       skip_waiting_for_build_processing: true,
-    )
-  end
-
-  desc "Upload dSYMs from the most recent archive to Firebase Crashlytics"
-  # Uses the upload-symbols binary shipped with FirebaseCrashlytics and the
-  # iOS app's GoogleService-Info.plist for auth. Run after `build_ipa` so
-  # the dSYMs exist under the Runner.xcarchive.
-  private_lane :upload_crashlytics_symbols do
-    # Flutter 3.x can integrate Firebase via either CocoaPods or Swift Package
-    # Manager depending on the plugin's manifest. Prefer the Pods location and
-    # fall back to the SPM checkout — matches the auto-generated flutterfire
-    # Run Script Phase behavior.
-    pods_binary = "#{root_path}/ios/Pods/FirebaseCrashlytics/upload-symbols"
-    spm_binary = "#{root_path}/build/ios/SourcePackages/checkouts/firebase-ios-sdk/Crashlytics/upload-symbols"
-    binary_path = File.exist?(pods_binary) ? pods_binary : spm_binary
-
-    upload_symbols_to_crashlytics(
-      dsym_path: "#{root_path}/build/ios/archive/Runner.xcarchive/dSYMs",
-      binary_path: binary_path,
-      gsp_path: "#{root_path}/ios/Runner/GoogleService-Info.plist"
     )
   end
 
