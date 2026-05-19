@@ -1,9 +1,9 @@
 // TODO(perf-migration): once `stream_chat` adopts `stream_core`, delete this
 // file and import equivalents from
 // `package:stream_core/src/utils/list_extensions.dart`. The signatures below
-// mirror `stream_core`'s so the migration is a one-line import swap; the
-// two-pointer optimization inside `merge` is the only behavioral diff (see
-// the precondition note on `merge`).
+// mirror `stream_core`'s so the migration is a one-line import swap. The
+// two-pointer `merge` here is a runtime optimization; `stream_core` does
+// keyed-map-merge-and-sort. Both produce the same result for sorted inputs.
 
 /// Useful extension functions for sorted [List]s.
 extension SortedListX<T extends Object> on List<T> {
@@ -71,23 +71,21 @@ extension SortedListX<T extends Object> on List<T> {
 
   /// Merges this list with [other], deduplicating by [key].
   ///
-  /// Duplicates are resolved via [update] (defaults to preferring the element
-  /// from [other]).
+  /// Duplicates between the two lists are resolved via [update] (defaults to
+  /// preferring the element from [other]). Duplicates within a single input
+  /// list are tolerated and may be propagated to the output — the merge does
+  /// not assert input uniqueness.
   ///
   /// - When [compare] is **not** provided, the merge uses an O(N+M) keyed-map
   ///   merge and the result is returned in insertion order (this list's
-  ///   items first, new items from [other] last).
+  ///   items first, new items from [other] last). Duplicate keys within a
+  ///   single input collapse to the last occurrence.
   ///
   /// - When [compare] **is** provided, the merge runs an O(N+M) two-pointer
-  ///   pass with non-overlapping fast paths (append / prepend). This path
-  ///   requires both inputs to be:
-  ///   1. **Pre-sorted by [compare]** — asserted in debug.
-  ///   2. **Consistent with [key]**: elements with the same key must have
-  ///      the same [compare] value. In other words, [compare] must totally
-  ///      order distinct keys; duplicate-key elements must tie under
-  ///      [compare]. (Stream messages satisfy this via `id ↔ createdAt`.)
-  ///   When the second condition is violated, the fast paths may emit
-  ///   duplicate-keyed elements.
+  ///   pass where the keyset of [other] takes precedence: any element of
+  ///   this list whose key appears in [other] is dropped before merging.
+  ///   Both inputs **must be pre-sorted by [compare]** — if either is not,
+  ///   the behavior is undefined.
   ///
   /// Returns the receiver unchanged (same reference) when [other] is null,
   /// empty, or identical to this list.
@@ -109,35 +107,6 @@ extension SortedListX<T extends Object> on List<T> {
     if (compare != null) {
       final otherList =
           other is List<T> ? other : other.toList(growable: false);
-      assert(
-        _isSorted(this, compare),
-        'merge: receiver must be sorted by `compare` when `compare` '
-        'is provided.',
-      );
-      assert(
-        _isSorted(otherList, compare),
-        'merge: `other` must be sorted by `compare` when `compare` '
-        'is provided.',
-      );
-      assert(
-        _hasUniqueKeys(this, key),
-        'merge: receiver must have unique keys when `compare` is '
-        'provided (the two-pointer fast path would otherwise emit '
-        'duplicate-keyed entries).',
-      );
-      assert(
-        _hasUniqueKeys(otherList, key),
-        'merge: `other` must have unique keys when `compare` is '
-        'provided (the two-pointer fast path would otherwise emit '
-        'duplicate-keyed entries).',
-      );
-      // Non-overlapping fast paths — the steady state for chat lists
-      // (livestream appends, paginated history prepends). Single
-      // comparison detects, then we just concatenate.
-      if (isNotEmpty && otherList.isNotEmpty) {
-        if (compare(last, otherList.first) < 0) return [...this, ...otherList];
-        if (compare(otherList.last, first) < 0) return [...otherList, ...this];
-      }
       return _mergeSortedTwoPointer(
         this,
         otherList,
@@ -219,23 +188,6 @@ int _upperBound<T>(List<T> list, T element, Comparator<T> compare) {
     }
   }
   return start;
-}
-
-// Debug-only sortedness check for `merge`'s two-pointer precondition.
-bool _isSorted<T>(List<T> list, Comparator<T> compare) {
-  for (var i = 1; i < list.length; i++) {
-    if (compare(list[i - 1], list[i]) > 0) return false;
-  }
-  return true;
-}
-
-// Debug-only uniqueness check for `merge`'s two-pointer precondition.
-bool _hasUniqueKeys<T, K>(List<T> list, K Function(T item) key) {
-  final seen = <K>{};
-  for (final item in list) {
-    if (!seen.add(key(item))) return false;
-  }
-  return true;
 }
 
 /// Useful extension functions for [List].
