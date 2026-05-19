@@ -172,6 +172,12 @@ jobs:
           xcode-version: '26.3'
       - name: "Install Tools"
         run: flutter pub global activate melos
+      - name: "Install FlutterFire CLI"
+        # The iOS Runner Xcode project has a Run Script phase that calls
+        # `flutterfire upload-crashlytics-symbols`, which fails the build
+        # if the CLI is not on PATH. See invertase/flutterfire_cli#257.
+        if: matrix.platform == 'ios'
+        run: flutter pub global activate flutterfire_cli
       - name: "Bootstrap Workspace"
         run: melos bootstrap
       - name: Setup Ruby and Gems
