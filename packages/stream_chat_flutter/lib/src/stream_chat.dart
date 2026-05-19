@@ -185,7 +185,7 @@ class StreamChatState extends State<StreamChat> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = _getTheme(context, widget.streamChatThemeData);
+    final theme = _getTheme(widget.streamChatThemeData);
 
     Widget child = StreamChatTheme(
       data: theme,
@@ -221,12 +221,8 @@ class StreamChatState extends State<StreamChat> {
     );
   }
 
-  StreamChatThemeData _getTheme(
-    BuildContext context,
-    StreamChatThemeData? themeData,
-  ) {
-    final appBrightness = Theme.of(context).brightness;
-    final defaultTheme = StreamChatThemeData(brightness: appBrightness);
+  StreamChatThemeData _getTheme(StreamChatThemeData? themeData) {
+    final defaultTheme = StreamChatThemeData();
     return defaultTheme.merge(themeData);
   }
 

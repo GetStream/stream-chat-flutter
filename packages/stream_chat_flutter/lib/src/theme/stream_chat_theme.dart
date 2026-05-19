@@ -39,12 +39,9 @@ class StreamChatTheme extends InheritedWidget {
 class StreamChatThemeData {
   /// Creates a theme from scratch
   factory StreamChatThemeData({
-    Brightness? brightness,
     StreamAppBarThemeData? channelHeaderTheme,
     StreamAppBarThemeData? channelListHeaderTheme,
     StreamAppBarThemeData? threadHeaderTheme,
-    Widget Function(BuildContext, User)? defaultUserImage,
-    PlaceholderUserImage? placeholderUserImage,
     IconThemeData? primaryIconTheme,
     StreamMessageListViewThemeData? messageListViewTheme,
     StreamPollCreatorThemeData? pollCreatorTheme,
@@ -77,12 +74,6 @@ class StreamChatThemeData {
     );
   }
 
-  /// Theme initialized with light
-  factory StreamChatThemeData.light() => StreamChatThemeData(brightness: Brightness.light);
-
-  /// Theme initialized with dark
-  factory StreamChatThemeData.dark() => StreamChatThemeData(brightness: Brightness.dark);
-
   /// Raw theme initialization
   const StreamChatThemeData.raw({
     required this.channelHeaderTheme,
@@ -101,11 +92,6 @@ class StreamChatThemeData {
     required this.quotedMessageTheme,
     required this.channelListItemTheme,
   });
-
-  /// Creates a theme from a Material [Theme]
-  factory StreamChatThemeData.fromTheme(ThemeData theme) {
-    return StreamChatThemeData(brightness: theme.brightness);
-  }
 
   /// The default [StreamAppBar] style applied to [StreamChannelHeader].
   final StreamAppBarThemeData channelHeaderTheme;
@@ -158,8 +144,6 @@ class StreamChatThemeData {
     StreamAppBarThemeData? channelHeaderTheme,
     StreamAppBarThemeData? channelListHeaderTheme,
     StreamAppBarThemeData? threadHeaderTheme,
-    Widget Function(BuildContext, User)? defaultUserImage,
-    PlaceholderUserImage? placeholderUserImage,
     IconThemeData? primaryIconTheme,
     StreamMessageListViewThemeData? messageListViewTheme,
     StreamPollCreatorThemeData? pollCreatorTheme,
