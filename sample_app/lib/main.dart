@@ -33,14 +33,10 @@ Future<void> main() async {
   /// errors thrown outside the Flutter framework (e.g. from native iOS and
   /// Android code via platform channels).
   PlatformDispatcher.instance.onError = (error, stack) {
-    if (kDebugMode) {
-      // Print the full stacktrace in debug mode.
-      debugPrint('Uncaught platform error: $error\n$stack');
-    } else {
-      // Send the exception and stack trace to Crashlytics in production mode.
-      FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
-    }
-    // Returning true marks the error as handled so it does not propagate.
+    // In debug, return false so the embedder logs the error and the IDE can
+    // break on it. In release, hand it to Crashlytics and mark it handled.
+    if (kDebugMode) return false;
+    FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
     return true;
   };
 
