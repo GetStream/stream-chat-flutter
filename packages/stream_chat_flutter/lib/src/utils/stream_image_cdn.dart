@@ -16,8 +16,7 @@ enum ResizeMode {
 
   /// Resizes the image to fill the given dimensions, preserving the
   /// aspect ratio. Parts of the image may be cropped.
-  fill('fill')
-  ;
+  fill('fill');
 
   const ResizeMode(this.value);
 
@@ -42,8 +41,7 @@ enum CropMode {
   left('left'),
 
   /// Crop from the right of the image.
-  right('right')
-  ;
+  right('right');
 
   const CropMode(this.value);
 
