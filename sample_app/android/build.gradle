@@ -16,8 +16,10 @@ subprojects {
                 android.namespace = project.group
             }
 
-            // Align the compileSdkVersion with Flutter's compileSdkVersion
-            android.compileSdkVersion = flutter.compileSdkVersion
+            // Align the compileSdkVersion with Flutter's compileSdkVersion, but
+            // floor at 36 so transitive AndroidX 1.18.x deps (pulled in by
+            // firebase_crashlytics) compile cleanly on older Flutter SDKs.
+            android.compileSdkVersion = Math.max(flutter.compileSdkVersion, 36)
         }
     }
 
