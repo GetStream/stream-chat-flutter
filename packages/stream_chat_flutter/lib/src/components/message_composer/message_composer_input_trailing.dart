@@ -116,7 +116,6 @@ class _SlowModeCountdownButton extends StatelessWidget {
       icon: Text('$cooldownTimeOut'),
       style: StreamButtonStyle.secondary,
       size: StreamButtonSize.small,
-      onPressed: null,
     );
   }
 }
