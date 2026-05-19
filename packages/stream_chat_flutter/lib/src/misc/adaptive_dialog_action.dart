@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// A platform-adaptive dialog action button that renders appropriately based on
 /// the platform.
@@ -43,12 +43,13 @@ class AdaptiveDialogAction extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = StreamChatTheme.of(context);
+    final colorScheme = context.streamColorScheme;
+    final textTheme = context.streamTextTheme;
 
     return switch (Theme.of(context).platform) {
       TargetPlatform.iOS || TargetPlatform.macOS => CupertinoTheme(
         data: CupertinoTheme.of(context).copyWith(
-          primaryColor: theme.colorTheme.accentPrimary,
+          primaryColor: colorScheme.accentPrimary,
         ),
         child: CupertinoDialogAction(
           onPressed: onPressed,
@@ -60,9 +61,9 @@ class AdaptiveDialogAction extends StatelessWidget {
       _ => TextButton(
         onPressed: onPressed,
         style: TextButton.styleFrom(
-          textStyle: theme.textTheme.body,
-          foregroundColor: theme.colorTheme.accentPrimary,
-          disabledForegroundColor: theme.colorTheme.disabled,
+          textStyle: textTheme.bodyDefault,
+          foregroundColor: colorScheme.accentPrimary,
+          disabledForegroundColor: colorScheme.textDisabled,
         ),
         child: child,
       ),

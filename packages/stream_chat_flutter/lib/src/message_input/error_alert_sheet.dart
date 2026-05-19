@@ -18,7 +18,8 @@ class ErrorAlertSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final _streamChatTheme = StreamChatTheme.of(context);
+    final colorScheme = context.streamColorScheme;
+    final textTheme = context.streamTextTheme;
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -27,7 +28,7 @@ class ErrorAlertSheet extends StatelessWidget {
         ),
         Icon(
           context.streamIcons.exclamationCircleFill,
-          color: _streamChatTheme.colorTheme.accentError,
+          color: colorScheme.accentError,
           size: 24,
         ),
         const SizedBox(
@@ -35,7 +36,7 @@ class ErrorAlertSheet extends StatelessWidget {
         ),
         Text(
           context.translations.somethingWentWrongError,
-          style: _streamChatTheme.textTheme.headlineBold,
+          style: textTheme.headingMd,
         ),
         const SizedBox(
           height: 7,
@@ -52,7 +53,7 @@ class ErrorAlertSheet extends StatelessWidget {
         ),
         Container(
           // ignore: deprecated_member_use
-          color: _streamChatTheme.colorTheme.textHighEmphasis.withOpacity(0.08),
+          color: colorScheme.textPrimary.withOpacity(0.08),
           height: 1,
         ),
         Row(
@@ -64,8 +65,8 @@ class ErrorAlertSheet extends StatelessWidget {
               },
               child: Text(
                 context.translations.okLabel,
-                style: _streamChatTheme.textTheme.bodyBold.copyWith(
-                  color: _streamChatTheme.colorTheme.accentPrimary,
+                style: textTheme.bodyEmphasis.copyWith(
+                  color: colorScheme.accentPrimary,
                 ),
               ),
             ),

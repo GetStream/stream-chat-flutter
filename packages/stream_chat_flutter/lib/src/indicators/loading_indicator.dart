@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template streamProgressIndicator}
 /// A simple progress indicator that can be used in place of the default
@@ -11,7 +11,7 @@ class StreamLoadingIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = StreamChatTheme.of(context).colorTheme.accentPrimary;
+    final color = context.streamColorScheme.accentPrimary;
     return CircularProgressIndicator.adaptive(
       strokeWidth: 2,
       backgroundColor: color,

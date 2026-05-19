@@ -45,14 +45,11 @@ class LocationDetailDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = StreamChatTheme.of(context);
-    final colorTheme = theme.colorTheme;
-
     final channel = StreamChannel.of(context).channel;
     final locationStream = _findLocationMessageStream(channel, sharedLocation);
 
     return Scaffold(
-      backgroundColor: colorTheme.appBg,
+      backgroundColor: context.streamColorScheme.backgroundApp,
       appBar: StreamAppBar(title: const Text('Shared Location')),
       body: BetterStreamBuilder(
         stream: locationStream,
@@ -105,10 +102,6 @@ class LocationNotFound extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final chatThemeData = StreamChatTheme.of(context);
-    final colorTheme = chatThemeData.colorTheme;
-    final textTheme = chatThemeData.textTheme;
-
     return Column(
       spacing: 8,
       mainAxisSize: MainAxisSize.min,
@@ -116,18 +109,18 @@ class LocationNotFound extends StatelessWidget {
         Icon(
           size: 48,
           Icons.near_me_disabled_rounded,
-          color: colorTheme.accentError,
+          color: context.streamColorScheme.accentError,
         ),
         Text(
           'Location not found',
-          style: textTheme.headline.copyWith(
-            color: colorTheme.textHighEmphasis,
+          style: context.streamTextTheme.headingMd.copyWith(
+            color: context.streamColorScheme.textPrimary,
           ),
         ),
         Text(
           'The location you are looking for is not available.',
-          style: textTheme.body.copyWith(
-            color: colorTheme.textLowEmphasis,
+          style: context.streamTextTheme.bodyDefault.copyWith(
+            color: context.streamColorScheme.textSecondary,
           ),
         ),
       ],
@@ -147,11 +140,8 @@ class LocationDetailBottomSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = StreamChatTheme.of(context);
-    final colorTheme = theme.colorTheme;
-
     return Material(
-      color: colorTheme.barsBg,
+      color: context.streamColorScheme.backgroundElevation1,
       borderRadius: const BorderRadiusDirectional.only(
         topEnd: Radius.circular(14),
         topStart: Radius.circular(14),
@@ -184,10 +174,6 @@ class LocationDetail extends StatelessWidget {
       'Footer should only be shown for live locations',
     );
 
-    final theme = StreamChatTheme.of(context);
-    final textTheme = theme.textTheme;
-    final colorTheme = theme.colorTheme;
-
     final updatedAt = sharedLocation.updatedAt;
     final sharingEndAt = sharedLocation.endAt!;
     const maximumButtonSize = Size(double.infinity, 40);
@@ -207,12 +193,12 @@ class LocationDetail extends StatelessWidget {
               children: [
                 Icon(
                   Icons.near_me_disabled_rounded,
-                  color: colorTheme.accentError,
+                  color: context.streamColorScheme.accentError,
                 ),
                 Text(
                   'Live location ended',
-                  style: textTheme.headlineBold.copyWith(
-                    color: colorTheme.accentError,
+                  style: context.streamTextTheme.headingMd.copyWith(
+                    color: context.streamColorScheme.accentError,
                   ),
                 ),
               ],
@@ -220,8 +206,8 @@ class LocationDetail extends StatelessWidget {
           ),
           Text(
             'Location last updated at ${jiffyUpdatedAt.jm}',
-            style: textTheme.body.copyWith(
-              color: colorTheme.textLowEmphasis,
+            style: context.streamTextTheme.bodyDefault.copyWith(
+              color: context.streamColorScheme.textSecondary,
             ),
           ),
         ],
@@ -248,12 +234,12 @@ class LocationDetail extends StatelessWidget {
               children: [
                 Icon(
                   Icons.near_me_rounded,
-                  color: colorTheme.accentPrimary,
+                  color: context.streamColorScheme.accentPrimary,
                 ),
                 Text(
                   'Live Location',
-                  style: textTheme.headlineBold.copyWith(
-                    color: colorTheme.accentPrimary,
+                  style: context.streamTextTheme.headingMd.copyWith(
+                    color: context.streamColorScheme.accentPrimary,
                   ),
                 ),
               ],
@@ -261,8 +247,8 @@ class LocationDetail extends StatelessWidget {
           ),
           Text(
             'Live until ${jiffySharingEndAt.jm}',
-            style: textTheme.body.copyWith(
-              color: colorTheme.textLowEmphasis,
+            style: context.streamTextTheme.bodyDefault.copyWith(
+              color: context.streamColorScheme.textSecondary,
             ),
           ),
         ],
@@ -272,9 +258,9 @@ class LocationDetail extends StatelessWidget {
     // Otherwise, show the "Stop Sharing" button.
     final buttonStyle = TextButton.styleFrom(
       maximumSize: maximumButtonSize,
-      textStyle: textTheme.headlineBold,
+      textStyle: context.streamTextTheme.headingMd,
       visualDensity: VisualDensity.compact,
-      foregroundColor: colorTheme.accentError,
+      foregroundColor: context.streamColorScheme.accentError,
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
     );
 
@@ -290,7 +276,7 @@ class LocationDetail extends StatelessWidget {
             onPressed: onStopSharingPressed,
             icon: Icon(
               Icons.near_me_disabled_rounded,
-              color: colorTheme.accentError,
+              color: context.streamColorScheme.accentError,
             ),
             label: const Text('Stop Sharing'),
           ),
@@ -298,8 +284,8 @@ class LocationDetail extends StatelessWidget {
         Center(
           child: Text(
             'Live until ${jiffySharingEndAt.jm}',
-            style: textTheme.body.copyWith(
-              color: colorTheme.textLowEmphasis,
+            style: context.streamTextTheme.bodyDefault.copyWith(
+              color: context.streamColorScheme.textSecondary,
             ),
           ),
         ),

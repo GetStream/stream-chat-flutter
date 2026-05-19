@@ -88,7 +88,7 @@ class AttachmentActionsModal extends StatelessWidget {
   }
 
   Widget _buildPage(BuildContext context) {
-    final theme = StreamChatTheme.of(context);
+    final colorScheme = context.streamColorScheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
@@ -114,7 +114,7 @@ class AttachmentActionsModal extends StatelessWidget {
                               Icon(
                                 context.streamIcons.reply,
                                 size: 20,
-                                color: theme.colorTheme.textLowEmphasis,
+                                color: colorScheme.textSecondary,
                               ),
                               onReply,
                             ),
@@ -125,7 +125,7 @@ class AttachmentActionsModal extends StatelessWidget {
                               Icon(
                                 context.streamIcons.messageBubble,
                                 size: 20,
-                                color: theme.colorTheme.textLowEmphasis,
+                                color: colorScheme.textSecondary,
                               ),
                               onShowMessage,
                             ),
@@ -138,7 +138,7 @@ class AttachmentActionsModal extends StatelessWidget {
                               Icon(
                                 context.streamIcons.arrowDownCircle,
                                 size: 20,
-                                color: theme.colorTheme.textLowEmphasis,
+                                color: colorScheme.textSecondary,
                               ),
                               () {
                                 // Closing attachment actions modal before opening
@@ -182,7 +182,7 @@ class AttachmentActionsModal extends StatelessWidget {
                                 showDialog(
                                   barrierDismissible: false,
                                   context: context,
-                                  barrierColor: theme.colorTheme.overlay,
+                                  barrierColor: colorScheme.backgroundOverlayLight,
                                   builder: (context) => _buildDownloadProgressDialog(
                                     context,
                                     progressNotifier,
@@ -198,7 +198,7 @@ class AttachmentActionsModal extends StatelessWidget {
                               Icon(
                                 context.streamIcons.delete,
                                 size: 20,
-                                color: theme.colorTheme.accentError,
+                                color: colorScheme.accentError,
                               ),
                               () {
                                 final channel = StreamChannel.of(context).channel;
@@ -223,7 +223,7 @@ class AttachmentActionsModal extends StatelessWidget {
                                     ..maybePop();
                                 }
                               },
-                              color: theme.colorTheme.accentError,
+                              color: colorScheme.accentError,
                             ),
                           ...customActions
                               .map(
@@ -245,7 +245,7 @@ class AttachmentActionsModal extends StatelessWidget {
                         .insertBetween(
                           Container(
                             height: 1,
-                            color: theme.colorTheme.borders,
+                            color: colorScheme.borderDefault,
                           ),
                         ),
               ),
@@ -257,7 +257,7 @@ class AttachmentActionsModal extends StatelessWidget {
   }
 
   Widget _buildButton(
-    context,
+    BuildContext context,
     String title,
     Widget icon,
     VoidCallback? onTap, {
@@ -266,7 +266,7 @@ class AttachmentActionsModal extends StatelessWidget {
   }) {
     return Material(
       key: key,
-      color: StreamChatTheme.of(context).colorTheme.barsBg,
+      color: context.streamColorScheme.backgroundElevation1,
       child: InkWell(
         onTap: onTap,
         child: Padding(
@@ -277,7 +277,7 @@ class AttachmentActionsModal extends StatelessWidget {
               const SizedBox(width: 16),
               Text(
                 title,
-                style: StreamChatTheme.of(context).textTheme.body.copyWith(color: color),
+                style: context.streamTextTheme.bodyDefault.copyWith(color: color),
               ),
             ],
           ),
@@ -291,7 +291,6 @@ class AttachmentActionsModal extends StatelessWidget {
     ValueNotifier<_DownloadProgress?> progressNotifier,
     ValueNotifier<String?> downloadedFilePathNotifier,
   ) {
-    final theme = StreamChatTheme.of(context);
     return ValueListenableBuilder(
       valueListenable: downloadedFilePathNotifier,
       builder: (_, String? path, __) {
@@ -321,7 +320,7 @@ class AttachmentActionsModal extends StatelessWidget {
                   width: 182,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(16),
-                    color: theme.colorTheme.barsBg,
+                    color: context.streamColorScheme.backgroundElevation1,
                   ),
                   child: Center(
                     child: progress == null
@@ -330,7 +329,7 @@ class AttachmentActionsModal extends StatelessWidget {
                             width: 100,
                             child: Icon(
                               context.streamIcons.exclamationCircleFill,
-                              color: theme.colorTheme.disabled,
+                              color: context.streamColorScheme.textDisabled,
                             ),
                           )
                         : _downloadComplete
@@ -340,7 +339,7 @@ class AttachmentActionsModal extends StatelessWidget {
                             width: 160,
                             child: Icon(
                               context.streamIcons.checkmark,
-                              color: theme.colorTheme.disabled,
+                              color: context.streamColorScheme.textDisabled,
                             ),
                           )
                         : SizedBox(
@@ -352,14 +351,14 @@ class AttachmentActionsModal extends StatelessWidget {
                                 CircularProgressIndicator.adaptive(
                                   strokeWidth: 8,
                                   valueColor: AlwaysStoppedAnimation<Color>(
-                                    theme.colorTheme.accentPrimary,
+                                    context.streamColorScheme.accentPrimary,
                                   ),
                                 ),
                                 Center(
                                   child: Text(
                                     '${progress.receivedValueInMB} MB',
-                                    style: theme.textTheme.headline.copyWith(
-                                      color: theme.colorTheme.textLowEmphasis,
+                                    style: context.streamTextTheme.metadataDefault.copyWith(
+                                      color: context.streamColorScheme.textSecondary,
                                     ),
                                   ),
                                 ),

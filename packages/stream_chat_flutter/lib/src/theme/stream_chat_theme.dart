@@ -40,8 +40,6 @@ class StreamChatThemeData {
   /// Creates a theme from scratch
   factory StreamChatThemeData({
     Brightness? brightness,
-    StreamTextTheme? textTheme,
-    StreamColorTheme? colorTheme,
     StreamAppBarThemeData? channelHeaderTheme,
     StreamAppBarThemeData? channelListHeaderTheme,
     StreamAppBarThemeData? threadHeaderTheme,
@@ -60,36 +58,23 @@ class StreamChatThemeData {
     StreamQuotedMessageThemeData? quotedMessageTheme,
     StreamChannelListItemThemeData? channelListItemTheme,
   }) {
-    brightness ??= colorTheme?.brightness ?? Brightness.light;
-    textTheme ??= StreamTextTheme(brightness: brightness);
-    colorTheme ??= StreamColorTheme(brightness: brightness);
-
-    final defaultData = StreamChatThemeData.fromColorAndTextTheme(
-      colorTheme,
-      textTheme,
+    return StreamChatThemeData.raw(
+      channelHeaderTheme: channelHeaderTheme ?? const StreamAppBarThemeData(),
+      channelListHeaderTheme: channelListHeaderTheme ?? const StreamAppBarThemeData(),
+      threadHeaderTheme: threadHeaderTheme ?? const StreamAppBarThemeData(),
+      primaryIconTheme: primaryIconTheme ?? const IconThemeData(),
+      messageListViewTheme: messageListViewTheme ?? const StreamMessageListViewThemeData(),
+      pollCreatorTheme: pollCreatorTheme ?? const StreamPollCreatorThemeData(),
+      pollInteractorTheme: pollInteractorTheme ?? const StreamPollInteractorThemeData(),
+      pollOptionsSheetTheme: pollOptionsSheetTheme ?? const StreamPollOptionsSheetThemeData(),
+      pollResultsSheetTheme: pollResultsSheetTheme ?? const StreamPollResultsSheetThemeData(),
+      pollCommentsSheetTheme: pollCommentsSheetTheme ?? const StreamPollCommentsSheetThemeData(),
+      pollOptionVotesSheetTheme: pollOptionVotesSheetTheme ?? const StreamPollOptionVotesSheetThemeData(),
+      threadListTileTheme: threadListTileTheme ?? const StreamThreadListTileThemeData(),
+      voiceRecordingAttachmentTheme: voiceRecordingAttachmentTheme ?? const StreamVoiceRecordingAttachmentThemeData(),
+      quotedMessageTheme: quotedMessageTheme ?? const StreamQuotedMessageThemeData(),
+      channelListItemTheme: channelListItemTheme ?? const StreamChannelListItemThemeData(),
     );
-
-    final customizedData = defaultData.copyWith(
-      channelHeaderTheme: channelHeaderTheme,
-      channelListHeaderTheme: channelListHeaderTheme,
-      threadHeaderTheme: threadHeaderTheme,
-      defaultUserImage: defaultUserImage,
-      placeholderUserImage: placeholderUserImage,
-      primaryIconTheme: primaryIconTheme,
-      messageListViewTheme: messageListViewTheme,
-      pollCreatorTheme: pollCreatorTheme,
-      pollInteractorTheme: pollInteractorTheme,
-      pollOptionsSheetTheme: pollOptionsSheetTheme,
-      pollResultsSheetTheme: pollResultsSheetTheme,
-      pollCommentsSheetTheme: pollCommentsSheetTheme,
-      pollOptionVotesSheetTheme: pollOptionVotesSheetTheme,
-      threadListTileTheme: threadListTileTheme,
-      voiceRecordingAttachmentTheme: voiceRecordingAttachmentTheme,
-      quotedMessageTheme: quotedMessageTheme,
-      channelListItemTheme: channelListItemTheme,
-    );
-
-    return defaultData.merge(customizedData);
   }
 
   /// Theme initialized with light
@@ -100,8 +85,6 @@ class StreamChatThemeData {
 
   /// Raw theme initialization
   const StreamChatThemeData.raw({
-    required this.textTheme,
-    required this.colorTheme,
     required this.channelHeaderTheme,
     required this.channelListHeaderTheme,
     required this.threadHeaderTheme,
@@ -121,49 +104,8 @@ class StreamChatThemeData {
 
   /// Creates a theme from a Material [Theme]
   factory StreamChatThemeData.fromTheme(ThemeData theme) {
-    final defaultTheme = StreamChatThemeData(brightness: theme.brightness);
-    final customizedTheme = StreamChatThemeData.fromColorAndTextTheme(
-      defaultTheme.colorTheme.copyWith(
-        accentPrimary: theme.colorScheme.secondary,
-      ),
-      defaultTheme.textTheme,
-    );
-    return defaultTheme.merge(customizedTheme);
+    return StreamChatThemeData(brightness: theme.brightness);
   }
-
-  /// Creates a theme from a [StreamColorTheme] and a [StreamTextTheme]
-  factory StreamChatThemeData.fromColorAndTextTheme(
-    StreamColorTheme colorTheme,
-    StreamTextTheme textTheme,
-  ) {
-    final iconTheme = IconThemeData(color: colorTheme.textLowEmphasis);
-
-    return StreamChatThemeData.raw(
-      textTheme: textTheme,
-      colorTheme: colorTheme,
-      primaryIconTheme: iconTheme,
-      channelHeaderTheme: const StreamAppBarThemeData(),
-      channelListHeaderTheme: const StreamAppBarThemeData(),
-      threadHeaderTheme: const StreamAppBarThemeData(),
-      messageListViewTheme: StreamMessageListViewThemeData(backgroundColor: colorTheme.appBg),
-      pollCreatorTheme: const StreamPollCreatorThemeData(),
-      pollInteractorTheme: const StreamPollInteractorThemeData(),
-      pollResultsSheetTheme: const StreamPollResultsSheetThemeData(),
-      pollOptionsSheetTheme: const StreamPollOptionsSheetThemeData(),
-      pollCommentsSheetTheme: const StreamPollCommentsSheetThemeData(),
-      pollOptionVotesSheetTheme: const StreamPollOptionVotesSheetThemeData(),
-      threadListTileTheme: const StreamThreadListTileThemeData(),
-      voiceRecordingAttachmentTheme: const StreamVoiceRecordingAttachmentThemeData(),
-      quotedMessageTheme: const StreamQuotedMessageThemeData(),
-      channelListItemTheme: const StreamChannelListItemThemeData(),
-    );
-  }
-
-  /// The text themes used in the widgets
-  final StreamTextTheme textTheme;
-
-  /// The color themes used in the widgets
-  final StreamColorTheme colorTheme;
 
   /// The default [StreamAppBar] style applied to [StreamChannelHeader].
   final StreamAppBarThemeData channelHeaderTheme;
@@ -213,8 +155,6 @@ class StreamChatThemeData {
   /// Creates a copy of [StreamChatThemeData] with specified attributes
   /// overridden.
   StreamChatThemeData copyWith({
-    StreamTextTheme? textTheme,
-    StreamColorTheme? colorTheme,
     StreamAppBarThemeData? channelHeaderTheme,
     StreamAppBarThemeData? channelListHeaderTheme,
     StreamAppBarThemeData? threadHeaderTheme,
@@ -233,8 +173,6 @@ class StreamChatThemeData {
     StreamQuotedMessageThemeData? quotedMessageTheme,
     StreamChannelListItemThemeData? channelListItemTheme,
   }) => StreamChatThemeData.raw(
-    textTheme: this.textTheme.merge(textTheme),
-    colorTheme: this.colorTheme.merge(colorTheme),
     channelHeaderTheme: this.channelHeaderTheme.merge(channelHeaderTheme),
     channelListHeaderTheme: this.channelListHeaderTheme.merge(channelListHeaderTheme),
     threadHeaderTheme: this.threadHeaderTheme.merge(threadHeaderTheme),
@@ -256,8 +194,6 @@ class StreamChatThemeData {
   StreamChatThemeData merge(StreamChatThemeData? other) {
     if (other == null) return this;
     return copyWith(
-      textTheme: textTheme.merge(other.textTheme),
-      colorTheme: colorTheme.merge(other.colorTheme),
       channelHeaderTheme: channelHeaderTheme.merge(other.channelHeaderTheme),
       channelListHeaderTheme: channelListHeaderTheme.merge(other.channelListHeaderTheme),
       threadHeaderTheme: threadHeaderTheme.merge(other.threadHeaderTheme),

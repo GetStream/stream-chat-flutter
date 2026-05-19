@@ -27,7 +27,7 @@ class QuotingMessageTopArea extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final _streamChatTheme = StreamChatTheme.of(context);
+    final colorScheme = context.streamColorScheme;
     if (hasQuotedMessage) {
       return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 4),
@@ -36,7 +36,7 @@ class QuotingMessageTopArea extends StatelessWidget {
           children: [
             StreamMessageInputIconButton(
               iconSize: 24,
-              color: _streamChatTheme.colorTheme.disabled,
+              color: colorScheme.textDisabled,
               icon: Icon(context.streamIcons.reply),
               onPressed: null,
             ),
@@ -46,7 +46,7 @@ class QuotingMessageTopArea extends StatelessWidget {
             ),
             StreamMessageInputIconButton(
               iconSize: 24,
-              color: _streamChatTheme.colorTheme.textLowEmphasis,
+              color: colorScheme.textSecondary,
               icon: Icon(context.streamIcons.xmark),
               onPressed: onQuotedMessageCleared?.call,
             ),

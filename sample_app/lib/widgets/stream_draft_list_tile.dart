@@ -29,11 +29,8 @@ class StreamDraftListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final chatTheme = StreamChatTheme.of(context);
-    final colorTheme = chatTheme.colorTheme;
-
     return Material(
-      color: colorTheme.barsBg,
+      color: context.streamColorScheme.backgroundElevation1,
       child: InkWell(
         onTap: onTap,
         onLongPress: onLongPress,
@@ -67,9 +64,9 @@ class _DraftTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final chatTheme = StreamChatTheme.of(context);
-    final style = chatTheme.textTheme.bodyBold.copyWith(
-      color: chatTheme.colorTheme.textHighEmphasis,
+    final colorScheme = context.streamColorScheme;
+    final style = context.streamTextTheme.bodyEmphasis.copyWith(
+      color: colorScheme.textPrimary,
     );
 
     return Row(
@@ -101,9 +98,9 @@ class _DraftMessageContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final chatTheme = StreamChatTheme.of(context);
-    final subtleStyle = chatTheme.textTheme.footnote.copyWith(
-      color: chatTheme.colorTheme.textLowEmphasis,
+    final colorScheme = context.streamColorScheme;
+    final subtleStyle = context.streamTextTheme.captionDefault.copyWith(
+      color: colorScheme.textSecondary,
     );
 
     return Row(

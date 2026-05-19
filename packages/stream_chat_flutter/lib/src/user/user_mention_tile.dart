@@ -35,7 +35,7 @@ class StreamUserMentionTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final chatThemeData = StreamChatTheme.of(context);
+    final colorScheme = context.streamColorScheme;
     return SizedBox(
       height: 56,
       child: Row(
@@ -57,7 +57,7 @@ class StreamUserMentionTile extends StatelessWidget {
                         user.name,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: chatThemeData.textTheme.bodyBold,
+                        style: context.streamTextTheme.bodyEmphasis,
                       ),
                   const SizedBox(height: 2),
                   subtitle ??
@@ -65,8 +65,8 @@ class StreamUserMentionTile extends StatelessWidget {
                         '@${user.id}',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: chatThemeData.textTheme.footnoteBold.copyWith(
-                          color: chatThemeData.colorTheme.textLowEmphasis,
+                        style: context.streamTextTheme.captionEmphasis.copyWith(
+                          color: colorScheme.textSecondary,
                         ),
                       ),
                 ],
@@ -81,7 +81,7 @@ class StreamUserMentionTile extends StatelessWidget {
                 ),
                 child: Icon(
                   context.streamIcons.mention,
-                  color: chatThemeData.colorTheme.accentPrimary,
+                  color: colorScheme.accentPrimary,
                 ),
               ),
         ],

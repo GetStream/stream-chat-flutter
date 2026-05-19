@@ -17,7 +17,7 @@ class ClearInputItemButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final _streamChatTheme = StreamChatTheme.of(context);
+    final colorScheme = context.streamColorScheme;
     return SizedBox(
       height: 20,
       width: 20,
@@ -32,12 +32,12 @@ class ClearInputItemButton extends StatelessWidget {
         onPressed: onTap,
         fillColor:
             // ignore: deprecated_member_use
-            _streamChatTheme.colorTheme.textHighEmphasis.withOpacity(0.5),
+            colorScheme.textPrimary.withOpacity(0.5),
         child: Center(
           child: Icon(
             context.streamIcons.xmark,
             size: 24,
-            color: _streamChatTheme.colorTheme.barsBg,
+            color: context.streamColorScheme.backgroundElevation1,
           ),
         ),
       ),

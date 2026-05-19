@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/message_action/message_action.dart';
-import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:stream_core_flutter/stream_core_flutter.dart';
@@ -36,7 +35,7 @@ class StreamMessageActionsBuilder {
         label: Text(context.translations.sendAnywayLabel),
         leading: Icon(
           icons.send,
-          color: StreamChatTheme.of(context).colorTheme.accentPrimary,
+          color: context.streamColorScheme.accentPrimary,
         ),
       ),
       StreamContextMenuAction<MessageAction>(

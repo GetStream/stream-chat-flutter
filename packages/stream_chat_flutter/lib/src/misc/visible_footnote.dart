@@ -13,20 +13,20 @@ class StreamVisibleFootnote extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final chatThemeData = StreamChatTheme.of(context);
+    final colorScheme = context.streamColorScheme;
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         Icon(
           context.streamIcons.eyeFill,
           size: 16,
-          color: chatThemeData.colorTheme.textLowEmphasis,
+          color: colorScheme.textSecondary,
         ),
         const SizedBox(width: 8),
         Text(
           context.translations.onlyVisibleToYouText,
-          style: chatThemeData.textTheme.footnote.copyWith(
-            color: chatThemeData.colorTheme.textLowEmphasis,
+          style: context.streamTextTheme.captionDefault.copyWith(
+            color: colorScheme.textSecondary,
           ),
         ),
       ],

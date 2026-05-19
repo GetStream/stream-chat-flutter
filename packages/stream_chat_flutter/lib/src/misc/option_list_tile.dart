@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
-import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template streamOptionListTile}
 /// List tile for [ChannelBottomSheet]
@@ -45,15 +45,14 @@ class StreamOptionListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final chatThemeData = StreamChatTheme.of(context);
     return Column(
       children: [
         Container(
           height: 1,
-          color: separatorColor ?? chatThemeData.colorTheme.disabled,
+          color: separatorColor ?? context.streamColorScheme.textDisabled,
         ),
         Material(
-          color: tileColor ?? chatThemeData.colorTheme.barsBg,
+          color: tileColor ?? context.streamColorScheme.backgroundElevation1,
           child: SizedBox(
             height: 63,
             child: InkWell(
@@ -68,8 +67,8 @@ class StreamOptionListTile extends StatelessWidget {
                       style:
                           titleTextStyle ??
                           (titleColor == null
-                              ? chatThemeData.textTheme.bodyBold
-                              : chatThemeData.textTheme.bodyBold.copyWith(
+                              ? context.streamTextTheme.bodyEmphasis
+                              : context.streamTextTheme.bodyEmphasis.copyWith(
                                   color: titleColor,
                                 )),
                     ),

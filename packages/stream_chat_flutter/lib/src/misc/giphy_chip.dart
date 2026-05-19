@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_core_flutter/stream_core_flutter.dart';
 
@@ -12,10 +11,10 @@ class GiphyChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorTheme = StreamChatTheme.of(context).colorTheme;
+    final colorScheme = context.streamColorScheme;
     return Container(
       decoration: BoxDecoration(
-        color: colorTheme.overlayDark,
+        color: colorScheme.backgroundOverlayDark,
         borderRadius: BorderRadius.circular(12),
       ),
       padding: const EdgeInsets.fromLTRB(4, 4, 8, 4),
@@ -24,12 +23,12 @@ class GiphyChip extends StatelessWidget {
           Icon(
             context.streamIcons.bolt,
             size: 16,
-            color: colorTheme.barsBg,
+            color: colorScheme.backgroundElevation1,
           ),
           Text(
             context.translations.giphyLabel.toUpperCase(),
             style: TextStyle(
-              color: StreamChatTheme.of(context).colorTheme.barsBg,
+              color: colorScheme.backgroundElevation1,
               fontWeight: FontWeight.bold,
               fontSize: 10,
             ),

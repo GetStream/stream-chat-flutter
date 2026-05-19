@@ -9,7 +9,6 @@ import 'package:stream_chat_flutter/src/message_input/audio_recorder/audio_recor
 import 'package:stream_chat_flutter/src/message_input/audio_recorder/audio_recorder_state.dart';
 import 'package:stream_chat_flutter/src/message_input/stream_message_input_icon_button.dart';
 import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
-import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_core_flutter/stream_core_flutter.dart';
 
@@ -273,10 +272,10 @@ class RecordStateIdleContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = StreamChatTheme.of(context);
+    final colorScheme = context.streamColorScheme;
 
     final child = IconTheme(
-      data: IconThemeData(color: theme.colorTheme.textLowEmphasis),
+      data: IconThemeData(color: colorScheme.textSecondary),
       child: recordButton,
     );
 
@@ -323,7 +322,7 @@ class RecordStateHoldRecordingContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = StreamChatTheme.of(context);
+    final colorScheme = context.streamColorScheme;
 
     final recordingTime = state.duration;
     final dragOffset = Offset(
@@ -363,10 +362,10 @@ class RecordStateHoldRecordingContent extends StatelessWidget {
           DecoratedBox(
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: theme.colorTheme.inputBg,
+              color: colorScheme.backgroundSurface,
             ),
             child: IconTheme(
-              data: IconThemeData(color: theme.colorTheme.accentPrimary),
+              data: IconThemeData(color: colorScheme.accentPrimary),
               child: recordButton,
             ),
           ),
@@ -411,7 +410,7 @@ class RecordStateLockedRecordingContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = StreamChatTheme.of(context);
+    final colorScheme = context.streamColorScheme;
 
     return PortalTarget(
       anchor: const Aligned(
@@ -427,8 +426,8 @@ class RecordStateLockedRecordingContent extends StatelessWidget {
             children: [
               PlaybackTimerText(
                 duration: state.duration,
-                style: theme.textTheme.headline.copyWith(
-                  color: theme.colorTheme.textLowEmphasis,
+                style: context.streamTextTheme.metadataDefault.copyWith(
+                  color: colorScheme.textSecondary,
                 ),
               ),
               const SizedBox(width: 8),
@@ -449,17 +448,17 @@ class RecordStateLockedRecordingContent extends StatelessWidget {
             children: [
               StreamMessageInputIconButton(
                 icon: Icon(context.streamIcons.delete),
-                color: theme.colorTheme.accentPrimary,
+                color: colorScheme.accentPrimary,
                 onPressed: onRecordCancel,
               ),
               StreamMessageInputIconButton(
                 icon: Icon(context.streamIcons.stopFill),
-                color: theme.colorTheme.accentError,
+                color: colorScheme.accentError,
                 onPressed: onRecordStop,
               ),
               StreamMessageInputIconButton(
                 icon: Icon(context.streamIcons.checkmark),
-                color: theme.colorTheme.accentPrimary,
+                color: colorScheme.accentPrimary,
                 onPressed: onRecordEnd,
               ),
             ],
@@ -522,7 +521,7 @@ class _RecordStateStoppedContentState extends State<RecordStateStoppedContent> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = StreamChatTheme.of(context);
+    final colorScheme = context.streamColorScheme;
 
     return PortalTarget(
       anchor: const Aligned(
@@ -560,8 +559,8 @@ class _RecordStateStoppedContentState extends State<RecordStateStoppedContent> {
                     PlaybackTimerText(
                       duration: track.duration,
                       position: track.position,
-                      style: theme.textTheme.headline.copyWith(
-                        color: theme.colorTheme.textLowEmphasis,
+                      style: context.streamTextTheme.metadataDefault.copyWith(
+                        color: colorScheme.textSecondary,
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -607,12 +606,12 @@ class _RecordStateStoppedContentState extends State<RecordStateStoppedContent> {
             children: [
               StreamMessageInputIconButton(
                 icon: Icon(context.streamIcons.delete),
-                color: theme.colorTheme.accentPrimary,
+                color: colorScheme.accentPrimary,
                 onPressed: widget.onRecordCancel,
               ),
               StreamMessageInputIconButton(
                 icon: Icon(context.streamIcons.checkmark),
-                color: theme.colorTheme.accentPrimary,
+                color: colorScheme.accentPrimary,
                 onPressed: widget.onRecordFinish,
               ),
             ],
@@ -707,10 +706,10 @@ class PlaybackControlButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = StreamChatTheme.of(context);
+    final colorScheme = context.streamColorScheme;
 
     return StreamMessageInputIconButton(
-      color: theme.colorTheme.accentPrimary,
+      color: colorScheme.accentPrimary,
       onPressed: switch (state) {
         TrackState.loading => null,
         TrackState.idle => onPlay,
@@ -727,7 +726,7 @@ class PlaybackControlButton extends StatelessWidget {
                 padding: const EdgeInsets.all(8),
                 child: CircularProgressIndicator.adaptive(
                   valueColor: AlwaysStoppedAnimation(
-                    theme.colorTheme.accentPrimary,
+                    colorScheme.accentPrimary,
                   ),
                 ),
               ),
@@ -761,22 +760,23 @@ class PlaybackTimerIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = StreamChatTheme.of(context);
+    final colorScheme = context.streamColorScheme;
+
     return Row(
       children: [
         Icon(
           context.streamIcons.voice,
           size: kDefaultMessageInputIconSize,
           color: switch (duration.inSeconds) {
-            > 0 => theme.colorTheme.accentError,
-            _ => theme.colorTheme.textLowEmphasis,
+            > 0 => colorScheme.accentError,
+            _ => colorScheme.textSecondary,
           },
         ),
         const SizedBox(width: 8),
         PlaybackTimerText(
           duration: duration,
-          style: theme.textTheme.headline.copyWith(
-            color: theme.colorTheme.textLowEmphasis,
+          style: context.streamTextTheme.metadataDefault.copyWith(
+            color: colorScheme.textSecondary,
           ),
         ),
       ],
@@ -839,7 +839,7 @@ class SlideToCancelIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = StreamChatTheme.of(context);
+    final colorScheme = context.streamColorScheme;
 
     return Opacity(
       opacity: 1 - progress,
@@ -848,14 +848,14 @@ class SlideToCancelIndicator extends StatelessWidget {
         children: [
           Text(
             context.translations.slideToCancelLabel,
-            style: theme.textTheme.headline.copyWith(
-              color: theme.colorTheme.textLowEmphasis,
+            style: context.streamTextTheme.metadataDefault.copyWith(
+              color: colorScheme.textSecondary,
             ),
           ),
           const SizedBox(width: 8),
           Icon(
             context.streamIcons.chevronLeft,
-            color: theme.colorTheme.textLowEmphasis,
+            color: colorScheme.textSecondary,
           ),
         ],
       ),

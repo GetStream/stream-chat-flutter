@@ -42,21 +42,3 @@ ThemeData docsScreenshotsTheme() {
     ],
   );
 }
-
-StreamChatThemeData docsStreamChatThemeData() {
-  const roboto = TextStyle(fontFamily: 'Roboto');
-  final base = StreamChatThemeData.light();
-  final textTheme = base.textTheme.merge(
-    const StreamTextTheme.light(
-      body: roboto,
-      bodyBold: roboto,
-      title: roboto,
-      headline: roboto,
-      headlineBold: roboto,
-      footnote: roboto,
-      footnoteBold: roboto,
-      captionBold: roboto,
-    ),
-  );
-  return StreamChatThemeData.fromColorAndTextTheme(base.colorTheme, textTheme);
-}

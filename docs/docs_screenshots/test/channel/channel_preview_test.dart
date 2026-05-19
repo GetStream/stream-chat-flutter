@@ -37,7 +37,6 @@ void main() {
         debugShowCheckedModeBanner: false,
         home: StreamChat(
           client: client,
-          streamChatThemeData: docsStreamChatThemeData(),
           connectivityStream: Stream.value([ConnectivityResult.mobile]),
           child: Scaffold(
             body: StreamChannelListItem(channel: channel),
@@ -125,7 +124,6 @@ void main() {
           debugShowCheckedModeBanner: false,
           home: StreamChat(
             client: client,
-            streamChatThemeData: docsStreamChatThemeData(),
             connectivityStream: Stream.value([ConnectivityResult.mobile]),
             child: Scaffold(
               appBar: AppBar(
@@ -170,7 +168,6 @@ void main() {
         debugShowCheckedModeBanner: false,
         home: StreamChat(
           client: client,
-          streamChatThemeData: docsStreamChatThemeData(),
           connectivityStream: Stream.value([ConnectivityResult.mobile]),
           child: Scaffold(
             body: Stack(
@@ -283,12 +280,11 @@ void main() {
           debugShowCheckedModeBanner: false,
           home: StreamChat(
             client: client,
-            streamChatThemeData: docsStreamChatThemeData(),
             connectivityStream: Stream.value([ConnectivityResult.mobile]),
             child: Builder(
               builder: (context) {
                 final chatTheme = StreamChatTheme.of(context);
-                final backgroundColor = chatTheme.colorTheme.inputBg;
+                final backgroundColor = context.streamColorScheme.backgroundSurface;
                 return Scaffold(
                   appBar: const StreamChannelListHeader(),
                   body: Column(
@@ -324,7 +320,7 @@ void main() {
                                       children: [
                                         Icon(
                                           Icons.delete_outline,
-                                          color: chatTheme.colorTheme.accentError,
+                                          color: context.streamColorScheme.accentError,
                                         ),
                                       ],
                                     ),

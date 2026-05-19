@@ -21,7 +21,7 @@ class StreamCountdownButton extends StatelessWidget {
       child: DecoratedBox(
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: StreamChatTheme.of(context).colorTheme.disabled,
+          color: context.streamColorScheme.textDisabled,
         ),
         child: SizedBox.square(
           dimension: kDefaultMessageInputIconSize,
