@@ -10,7 +10,6 @@ void main() {
       fileName: 'stream_unsupported_attachment_$theme',
       constraints: const BoxConstraints.tightFor(width: 300, height: 100),
       builder: () => _wrapWithStreamChatApp(
-        brightness: brightness,
         StreamUnsupportedAttachment(message: Message()),
       ),
     );
@@ -18,18 +17,15 @@ void main() {
 }
 
 Widget _wrapWithStreamChatApp(
-  Widget widget, {
-  Brightness? brightness,
-}) {
+  Widget widget,
+) {
   return MaterialApp(
-    theme: ThemeData(brightness: brightness),
     home: StreamChatTheme(
-      data: StreamChatThemeData(brightness: brightness),
+      data: StreamChatThemeData(),
       child: Builder(
         builder: (context) {
-          final theme = StreamChatTheme.of(context);
           return Scaffold(
-            backgroundColor: theme.colorTheme.appBg,
+            backgroundColor: context.streamColorScheme.backgroundApp,
             body: Center(child: widget),
           );
         },

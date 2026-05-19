@@ -4,6 +4,7 @@ import 'package:stream_chat_flutter/src/poll/stream_poll_options_sheet.dart';
 import 'package:stream_chat_flutter/src/stream_chat_configuration.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 void main() {
   final currentUser = User(id: 'curr-user', name: 'Current User');
@@ -78,7 +79,6 @@ void main() {
       fileName: 'stream_poll_options_sheet_${brightness.name}',
       constraints: const BoxConstraints.tightFor(width: 412, height: 916),
       builder: () => _wrapWithMaterialApp(
-        brightness: brightness,
         StreamPollOptionsSheet(poll: poll),
       ),
     );
@@ -86,19 +86,17 @@ void main() {
 }
 
 Widget _wrapWithMaterialApp(
-  Widget widget, {
-  Brightness? brightness,
-}) {
+  Widget widget,
+) {
   return MaterialApp(
     home: StreamChatConfiguration(
       data: StreamChatConfigurationData(),
       child: StreamChatTheme(
-        data: StreamChatThemeData(brightness: brightness),
+        data: StreamChatThemeData(),
         child: Builder(
           builder: (context) {
-            final theme = StreamChatTheme.of(context);
             return Scaffold(
-              backgroundColor: theme.colorTheme.appBg,
+              backgroundColor: context.streamColorScheme.backgroundApp,
               body: Center(child: widget),
             );
           },

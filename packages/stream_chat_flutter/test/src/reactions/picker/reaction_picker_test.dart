@@ -304,7 +304,6 @@ void main() {
           );
 
           return _wrapWithMaterialApp(
-            brightness: brightness,
             StreamMessageReactionPicker(
               message: message,
               onReactionPicked: (_) {},
@@ -333,7 +332,6 @@ void main() {
           );
 
           return _wrapWithMaterialApp(
-            brightness: brightness,
             StreamMessageReactionPicker(
               message: message,
               onReactionPicked: (_) {},
@@ -355,7 +353,6 @@ void main() {
           );
 
           return _wrapWithMaterialApp(
-            brightness: brightness,
             StreamMessageReactionPicker(
               message: message,
               onReactionPicked: (_) {},
@@ -370,26 +367,23 @@ void main() {
 
 Widget _wrapWithMaterialApp(
   Widget child, {
-  Brightness? brightness,
   ReactionIconResolver? reactionIconResolver,
 }) {
   return MaterialApp(
     debugShowCheckedModeBanner: false,
-    theme: ThemeData(brightness: brightness),
     builder: (context, child) => StreamChatConfiguration(
       data: StreamChatConfigurationData(
         reactionIconResolver: reactionIconResolver ?? const _TestReactionIconResolver(),
       ),
       child: StreamChatTheme(
-        data: StreamChatThemeData(brightness: brightness),
+        data: StreamChatThemeData(),
         child: child ?? const SizedBox.shrink(),
       ),
     ),
     home: Builder(
       builder: (context) {
-        final theme = StreamChatTheme.of(context);
         return Scaffold(
-          backgroundColor: theme.colorTheme.overlay,
+          backgroundColor: context.streamColorScheme.backgroundOverlayLight,
           body: Center(
             child: Padding(
               padding: const EdgeInsets.all(8),

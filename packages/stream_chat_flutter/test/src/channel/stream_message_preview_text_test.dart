@@ -42,7 +42,7 @@ void main() {
           body: StreamChat(
             client: client,
             streamChatConfigData: configData,
-            streamChatThemeData: StreamChatThemeData.light(),
+            streamChatThemeData: StreamChatThemeData(),
             child: Center(
               child: StreamMessagePreviewText(
                 message: message,
@@ -836,7 +836,7 @@ void main() {
           home: Scaffold(
             body: StreamChat(
               client: client,
-              streamChatThemeData: StreamChatThemeData.light(),
+              streamChatThemeData: StreamChatThemeData(),
               child: Center(
                 child: StreamMessagePreviewText(message: message),
               ),

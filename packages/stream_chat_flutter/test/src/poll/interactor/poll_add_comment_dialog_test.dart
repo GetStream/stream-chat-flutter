@@ -12,7 +12,6 @@ void main() {
       fileName: 'poll_add_comment_dialog_${brightness.name}',
       constraints: const BoxConstraints.tightFor(width: 600, height: 300),
       builder: () => _wrapWithMaterialApp(
-        brightness: brightness,
         const PollAddCommentDialog(),
       ),
     );
@@ -22,7 +21,6 @@ void main() {
       fileName: 'poll_add_comment_dialog_with_initial_value_${brightness.name}',
       constraints: const BoxConstraints.tightFor(width: 600, height: 300),
       builder: () => _wrapWithMaterialApp(
-        brightness: brightness,
         const PollAddCommentDialog(initialValue: 'This is a comment'),
       ),
     );
@@ -30,12 +28,11 @@ void main() {
 }
 
 Widget _wrapWithMaterialApp(
-  Widget widget, {
-  Brightness? brightness,
-}) {
+  Widget widget,
+) {
   return MaterialApp(
     home: StreamChatTheme(
-      data: StreamChatThemeData(brightness: brightness),
+      data: StreamChatThemeData(),
       child: widget,
     ),
   );

@@ -14,13 +14,10 @@ void main() {
 
       when(() => channel.state).thenReturn(channelState);
 
-      final themeData = ThemeData();
-      final streamTheme = StreamChatThemeData.fromTheme(themeData);
-
       await tester.pumpWidget(
         MaterialApp(
           home: StreamChatTheme(
-            data: streamTheme,
+            data: StreamChatThemeData(),
             child: StreamChannel(
               channel: channel,
               child: SizedBox(

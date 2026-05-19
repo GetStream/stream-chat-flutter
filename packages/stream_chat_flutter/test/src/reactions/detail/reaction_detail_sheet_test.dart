@@ -296,7 +296,7 @@ void main() {
         },
         builder: () => _wrapWithMaterialApp(
           client: mockClient,
-          brightness: brightness,
+
           _ReactionDetailSheetGoldenHost(message: message),
         ),
       );
@@ -324,7 +324,7 @@ void main() {
         },
         builder: () => _wrapWithMaterialApp(
           client: mockClient,
-          brightness: brightness,
+
           _ReactionDetailSheetGoldenHost(
             message: message,
             initialReactionType: 'love',
@@ -417,25 +417,23 @@ Message _buildMessage({
 Widget _wrapWithMaterialApp(
   Widget child, {
   required StreamChatClient client,
-  Brightness? brightness,
 }) {
   return MaterialApp(
     debugShowCheckedModeBanner: false,
-    theme: ThemeData(brightness: brightness),
     builder: (context, child) => StreamChat(
       client: client,
       // Mock the connectivity stream to always return wifi.
       connectivityStream: Stream.value([ConnectivityResult.wifi]),
-      streamChatThemeData: StreamChatThemeData(brightness: brightness),
+      streamChatThemeData: StreamChatThemeData(),
       child: child ?? const SizedBox.shrink(),
     ),
     home: Builder(
       builder: (context) {
-        final theme = StreamChatTheme.of(context);
+        final colorScheme = context.streamColorScheme;
         return Scaffold(
-          backgroundColor: theme.colorTheme.appBg,
+          backgroundColor: colorScheme.backgroundApp,
           body: ColoredBox(
-            color: theme.colorTheme.overlay,
+            color: colorScheme.backgroundOverlayLight,
             child: Padding(
               padding: const EdgeInsets.all(8),
               child: child,

@@ -4,6 +4,7 @@ import 'package:alchemist/alchemist.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/poll/interactor/poll_suggest_option_dialog.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 void main() {
   for (final brightness in Brightness.values) {
@@ -12,7 +13,6 @@ void main() {
       fileName: 'poll_suggest_option_dialog_${brightness.name}',
       constraints: const BoxConstraints.tightFor(width: 600, height: 300),
       builder: () => _wrapWithMaterialApp(
-        brightness: brightness,
         const PollSuggestOptionDialog(),
       ),
     );
@@ -22,7 +22,6 @@ void main() {
       fileName: 'poll_suggest_option_dialog_with_initial_option_${brightness.name}',
       constraints: const BoxConstraints.tightFor(width: 600, height: 300),
       builder: () => _wrapWithMaterialApp(
-        brightness: brightness,
         const PollSuggestOptionDialog(
           initialOption: 'New option',
         ),
@@ -32,19 +31,18 @@ void main() {
 }
 
 Widget _wrapWithMaterialApp(
-  Widget widget, {
-  Brightness? brightness,
-}) {
+  Widget widget,
+) {
   return MaterialApp(
     home: StreamChatTheme(
-      data: StreamChatThemeData(brightness: brightness),
+      data: StreamChatThemeData(),
       child: Builder(
         builder: (context) {
-          final theme = StreamChatTheme.of(context);
+          final colorScheme = context.streamColorScheme;
           return Scaffold(
-            backgroundColor: theme.colorTheme.appBg,
+            backgroundColor: colorScheme.backgroundApp,
             body: Container(
-              color: theme.colorTheme.disabled,
+              color: colorScheme.textDisabled,
               padding: const EdgeInsets.all(16),
               child: Center(child: widget),
             ),

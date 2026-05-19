@@ -139,21 +139,19 @@ class AvatarComparisonTestWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = StreamChatTheme.of(context);
-
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           'GitHub Issue #2369 - Gradient Avatar Color Fix',
-          style: theme.textTheme.title,
+          style: context.streamTextTheme.headingLg,
         ),
         const SizedBox(height: 8),
         Text(
           'Users with same-length IDs should have different colors',
-          style: theme.textTheme.headline.copyWith(
-            color: theme.colorTheme.textLowEmphasis,
+          style: context.streamTextTheme.metadataDefault.copyWith(
+            color: context.streamColorScheme.textSecondary,
           ),
         ),
         const SizedBox(height: 16),
@@ -226,22 +224,20 @@ class AvatarComparisonTestWidget extends StatelessWidget {
     required String description,
     required Widget child,
   }) {
-    final theme = StreamChatTheme.of(context);
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           title,
-          style: theme.textTheme.headline.copyWith(
-            color: theme.colorTheme.textHighEmphasis,
+          style: context.streamTextTheme.metadataDefault.copyWith(
+            color: context.streamColorScheme.textPrimary,
           ),
         ),
         const SizedBox(height: 4),
         Text(
           description,
-          style: theme.textTheme.body.copyWith(
-            color: theme.colorTheme.textLowEmphasis,
+          style: context.streamTextTheme.bodyDefault.copyWith(
+            color: context.streamColorScheme.textSecondary,
           ),
         ),
         const SizedBox(height: 16),
@@ -249,9 +245,9 @@ class AvatarComparisonTestWidget extends StatelessWidget {
           width: double.infinity,
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: theme.colorTheme.barsBg,
+            color: context.streamColorScheme.backgroundElevation1,
             borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: theme.colorTheme.borders),
+            border: Border.all(color: context.streamColorScheme.borderDefault),
           ),
           child: child,
         ),
@@ -323,8 +319,6 @@ class _AvatarItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = StreamChatTheme.of(context);
-
     return Column(
       mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.center,
@@ -340,16 +334,16 @@ class _AvatarItem extends StatelessWidget {
         const SizedBox(height: 8),
         Text(
           userId,
-          style: theme.textTheme.footnoteBold.copyWith(
-            color: theme.colorTheme.textHighEmphasis,
+          style: context.streamTextTheme.captionEmphasis.copyWith(
+            color: context.streamColorScheme.textPrimary,
           ),
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 2),
         Text(
           userName,
-          style: theme.textTheme.footnote.copyWith(
-            color: theme.colorTheme.textLowEmphasis,
+          style: context.streamTextTheme.captionDefault.copyWith(
+            color: context.streamColorScheme.textSecondary,
           ),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
@@ -361,17 +355,15 @@ class _AvatarItem extends StatelessWidget {
 }
 
 Widget _wrapWithMaterialApp(
-  Widget widget, {
-  Brightness? brightness,
-}) {
+  Widget widget,
+) {
   return MaterialApp(
     home: StreamChatTheme(
-      data: StreamChatThemeData(brightness: brightness),
+      data: StreamChatThemeData(),
       child: Builder(
         builder: (context) {
-          final theme = StreamChatTheme.of(context);
           return Scaffold(
-            backgroundColor: theme.colorTheme.appBg,
+            backgroundColor: context.streamColorScheme.backgroundApp,
             body: Container(
               padding: const EdgeInsets.all(16),
               child: Center(child: widget),

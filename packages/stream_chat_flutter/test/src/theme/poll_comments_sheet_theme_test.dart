@@ -14,7 +14,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: StreamChatTheme(
-            data: StreamChatThemeData.light().copyWith(
+            data: StreamChatThemeData().copyWith(
               pollCommentsSheetTheme: const StreamPollCommentsSheetThemeData(
                 backgroundColor: globalBg,
               ),

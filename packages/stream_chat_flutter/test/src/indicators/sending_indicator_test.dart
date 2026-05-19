@@ -12,7 +12,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: StreamChatTheme(
-            data: StreamChatThemeData.light(),
+            data: StreamChatThemeData(),
             child: Scaffold(
               body: Center(
                 child: StreamSendingIndicator(
@@ -34,7 +34,7 @@ void main() {
     constraints: const BoxConstraints.tightFor(width: 50, height: 50),
     builder: () => MaterialAppWrapper(
       home: StreamChatTheme(
-        data: StreamChatThemeData.light(),
+        data: StreamChatThemeData(),
         child: Scaffold(
           body: Center(
             child: StreamSendingIndicator(
@@ -54,7 +54,7 @@ void main() {
     constraints: const BoxConstraints.tightFor(width: 50, height: 50),
     builder: () => MaterialAppWrapper(
       home: StreamChatTheme(
-        data: StreamChatThemeData.light(),
+        data: StreamChatThemeData(),
         child: Scaffold(
           body: Center(
             child: StreamSendingIndicator(
@@ -75,7 +75,7 @@ void main() {
     constraints: const BoxConstraints.tightFor(width: 50, height: 50),
     builder: () => MaterialAppWrapper(
       home: StreamChatTheme(
-        data: StreamChatThemeData.light(),
+        data: StreamChatThemeData(),
         child: Scaffold(
           body: Center(
             child: StreamSendingIndicator(
@@ -95,7 +95,7 @@ void main() {
     constraints: const BoxConstraints.tightFor(width: 50, height: 50),
     builder: () => MaterialAppWrapper(
       home: StreamChatTheme(
-        data: StreamChatThemeData.light(),
+        data: StreamChatThemeData(),
         child: Scaffold(
           body: Center(
             child: StreamSendingIndicator(
@@ -115,7 +115,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: StreamChatTheme(
-            data: StreamChatThemeData.light(),
+            data: StreamChatThemeData(),
             child: Scaffold(
               body: Center(
                 child: StreamSendingIndicator(
@@ -137,7 +137,7 @@ void main() {
       expect(icon.icon, StreamIconData.checks);
       expect(
         icon.color,
-        StreamChatThemeData.light().colorTheme.textLowEmphasis,
+        StreamColorScheme.light().textSecondary,
       );
     },
   );
@@ -148,7 +148,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: StreamChatTheme(
-            data: StreamChatThemeData.light(),
+            data: StreamChatThemeData(),
             child: Scaffold(
               body: Center(
                 child: StreamSendingIndicator(
@@ -170,7 +170,7 @@ void main() {
       expect(icon.icon, StreamIconData.checks);
       expect(
         icon.color,
-        StreamChatThemeData.light().colorTheme.accentPrimary,
+        StreamColorScheme.light().accentPrimary,
       );
     },
   );
@@ -181,7 +181,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: StreamChatTheme(
-            data: StreamChatThemeData.light(),
+            data: StreamChatThemeData(),
             child: Scaffold(
               body: Center(
                 child: StreamSendingIndicator(
@@ -205,7 +205,7 @@ void main() {
       // Should use accentPrimary (read) not textLowEmphasis (delivered)
       expect(
         icon.color,
-        StreamChatThemeData.light().colorTheme.accentPrimary,
+        StreamColorScheme.light().accentPrimary,
       );
     },
   );

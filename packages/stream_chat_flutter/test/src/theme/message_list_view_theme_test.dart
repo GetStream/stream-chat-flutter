@@ -83,7 +83,7 @@ void main() {
       MaterialApp(
         builder: (context, child) => StreamChat(
           client: MockStreamChatClient(),
-          streamChatThemeData: StreamChatThemeData.dark(),
+          streamChatThemeData: StreamChatThemeData(),
           child: child,
         ),
         home: Builder(
@@ -105,7 +105,7 @@ void main() {
       MaterialApp(
         builder: (context, child) => StreamChat(
           client: MockStreamChatClient(),
-          streamChatThemeData: StreamChatThemeData.light().copyWith(
+          streamChatThemeData: StreamChatThemeData().copyWith(
             messageListViewTheme: _messageListViewThemeDataImage,
           ),
           child: child,
@@ -129,17 +129,11 @@ void main() {
   });
 }
 
-final _messageListViewThemeDataControl = StreamMessageListViewThemeData(
-  backgroundColor: const StreamColorTheme.light().appBg,
-);
+const _messageListViewThemeDataControl = StreamMessageListViewThemeData();
 
-const _messageListViewThemeDataControlHalfLerp = StreamMessageListViewThemeData(
-  backgroundColor: Color(0xff88898a),
-);
+const _messageListViewThemeDataControlHalfLerp = StreamMessageListViewThemeData();
 
-final _messageListViewThemeDataControlDark = StreamMessageListViewThemeData(
-  backgroundColor: const StreamColorTheme.dark().appBg,
-);
+const _messageListViewThemeDataControlDark = StreamMessageListViewThemeData();
 
 const _messageListViewThemeDataImage = StreamMessageListViewThemeData(
   backgroundImage: DecorationImage(

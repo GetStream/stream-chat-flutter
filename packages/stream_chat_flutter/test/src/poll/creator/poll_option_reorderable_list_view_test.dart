@@ -14,7 +14,6 @@ void main() {
       fileName: 'poll_option_reorderable_list_view_${brightness.name}',
       constraints: const BoxConstraints.tightFor(width: 600, height: 500),
       builder: () => _wrapWithMaterialApp(
-        brightness: brightness,
         PollOptionReorderableListView(
           title: 'Options',
           itemHintText: 'Add an option',
@@ -33,7 +32,6 @@ void main() {
       fileName: 'poll_option_reorderable_list_view_error_${brightness.name}',
       constraints: const BoxConstraints.tightFor(width: 600, height: 500),
       builder: () => _wrapWithMaterialApp(
-        brightness: brightness,
         PollOptionReorderableListView(
           title: 'Options',
           itemHintText: 'Add an option',
@@ -496,21 +494,19 @@ extension on CommonFinders {
 }
 
 Widget _wrapWithMaterialApp(
-  Widget widget, {
-  Brightness? brightness,
-}) {
+  Widget widget,
+) {
   return MaterialApp(
     builder: (context, child) {
       return StreamChatTheme(
-        data: StreamChatThemeData(brightness: brightness),
+        data: StreamChatThemeData(),
         child: child!,
       );
     },
     home: Builder(
       builder: (context) {
-        final theme = StreamChatTheme.of(context);
         return Scaffold(
-          backgroundColor: theme.colorTheme.appBg,
+          backgroundColor: context.streamColorScheme.backgroundApp,
           body: Center(
             child: Padding(
               padding: const EdgeInsets.all(8),

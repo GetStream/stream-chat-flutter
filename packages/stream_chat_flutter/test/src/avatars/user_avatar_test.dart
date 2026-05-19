@@ -27,7 +27,7 @@ void main() {
         MaterialApp(
           home: StreamChat(
             client: client,
-            streamChatThemeData: StreamChatThemeData.light(),
+            streamChatThemeData: StreamChatThemeData(),
             child: Builder(
               builder: (context) {
                 return Scaffold(
@@ -61,7 +61,7 @@ void main() {
           );
         },
         home: StreamChatTheme(
-          data: StreamChatThemeData.light(),
+          data: StreamChatThemeData(),
           child: Builder(
             builder: (context) {
               return Scaffold(
@@ -92,7 +92,7 @@ void main() {
           );
         },
         home: StreamChatTheme(
-          data: StreamChatThemeData.light(),
+          data: StreamChatThemeData(),
           child: Builder(
             builder: (context) {
               return Scaffold(

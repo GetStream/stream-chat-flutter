@@ -4,6 +4,7 @@ import 'package:alchemist/alchemist.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/poll/creator/poll_question_text_field.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 void main() {
   for (final brightness in Brightness.values) {
@@ -12,7 +13,6 @@ void main() {
       fileName: 'poll_question_text_field_${brightness.name}',
       constraints: const BoxConstraints.tightFor(width: 600, height: 150),
       builder: () => _wrapWithMaterialApp(
-        brightness: brightness,
         PollQuestionTextField(
           title: 'Question',
           hintText: 'Ask a question',
@@ -26,7 +26,6 @@ void main() {
       fileName: 'poll_question_text_field_error_${brightness.name}',
       constraints: const BoxConstraints.tightFor(width: 600, height: 150),
       builder: () => _wrapWithMaterialApp(
-        brightness: brightness,
         PollQuestionTextField(
           title: 'Question',
           hintText: 'Ask a question',
@@ -41,17 +40,15 @@ void main() {
 }
 
 Widget _wrapWithMaterialApp(
-  Widget widget, {
-  Brightness? brightness,
-}) {
+  Widget widget,
+) {
   return MaterialApp(
     home: StreamChatTheme(
-      data: StreamChatThemeData(brightness: brightness),
+      data: StreamChatThemeData(),
       child: Builder(
         builder: (context) {
-          final theme = StreamChatTheme.of(context);
           return Scaffold(
-            backgroundColor: theme.colorTheme.appBg,
+            backgroundColor: context.streamColorScheme.backgroundApp,
             body: Center(
               child: Padding(
                 padding: const EdgeInsets.all(8),
