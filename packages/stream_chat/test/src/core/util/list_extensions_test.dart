@@ -226,7 +226,7 @@ void main() {
       expect(result.map((it) => it.id).toList(), ['a', 'b']);
     });
 
-    test('non-overlapping append fast-path (livestream)', () {
+    test('two-pointer path: appends non-overlapping `other` (livestream)', () {
       const existing = [_Item('a', 1), _Item('b', 3)];
       const incoming = [_Item('c', 5), _Item('d', 7)];
       final result = existing.merge(
@@ -237,16 +237,19 @@ void main() {
       expect(result.map((it) => it.id).toList(), ['a', 'b', 'c', 'd']);
     });
 
-    test('non-overlapping prepend fast-path (pagination)', () {
-      const existing = [_Item('c', 5), _Item('d', 7)];
-      const incoming = [_Item('a', 1), _Item('b', 3)];
-      final result = existing.merge(
-        incoming,
-        key: _itemKey,
-        compare: _itemCompare,
-      );
-      expect(result.map((it) => it.id).toList(), ['a', 'b', 'c', 'd']);
-    });
+    test(
+      'two-pointer path: prepends non-overlapping `other` (pagination)',
+      () {
+        const existing = [_Item('c', 5), _Item('d', 7)];
+        const incoming = [_Item('a', 1), _Item('b', 3)];
+        final result = existing.merge(
+          incoming,
+          key: _itemKey,
+          compare: _itemCompare,
+        );
+        expect(result.map((it) => it.id).toList(), ['a', 'b', 'c', 'd']);
+      },
+    );
 
     test('two-pointer path: merges pre-sorted lists in sorted order', () {
       const existing = [_Item('a', 1), _Item('c', 5), _Item('e', 9)];
@@ -271,55 +274,60 @@ void main() {
       expect(result.map((it) => it.tag).toList(), ['', 'orig+merged', '']);
     });
 
-    test('two-pointer path: asserts when receiver is not sorted', () {
-      const unsorted = [_Item('a', 5), _Item('b', 1)];
-      expect(
-        () => unsorted.merge(
-          const [_Item('c', 3)],
-          key: _itemKey,
-          compare: _itemCompare,
-        ),
-        throwsA(isA<AssertionError>()),
-      );
-    });
-
-    test('two-pointer path: asserts when other is not sorted', () {
-      const sorted = [_Item('a', 1), _Item('b', 3)];
-      expect(
-        () => sorted.merge(
-          const [_Item('c', 5), _Item('d', 2)],
-          key: _itemKey,
-          compare: _itemCompare,
-        ),
-        throwsA(isA<AssertionError>()),
-      );
-    });
-
-    test('two-pointer path: asserts when receiver has duplicate keys', () {
-      // Sorted by `pos` but keys collide on `a` — would otherwise emit both
-      // copies via the two-pointer fast path.
-      const withDupes = [_Item('a', 1), _Item('a', 2)];
-      expect(
-        () => withDupes.merge(
+    test(
+      'two-pointer path: tolerates duplicate keys in the receiver',
+      () {
+        // The merge does not enforce input uniqueness. Duplicates in the
+        // receiver whose keys don't appear in `other` are propagated through
+        // and the sorted invariant is preserved.
+        const withDupes = [_Item('a', 1), _Item('a', 2)];
+        final result = withDupes.merge(
           const [_Item('b', 3)],
           key: _itemKey,
           compare: _itemCompare,
-        ),
-        throwsA(isA<AssertionError>()),
-      );
-    });
+        );
+        expect(
+          result.map((it) => '${it.id}:${it.value}'),
+          ['a:1', 'a:2', 'b:3'],
+        );
+      },
+    );
 
-    test('two-pointer path: asserts when other has duplicate keys', () {
-      const sorted = [_Item('a', 1)];
-      expect(
-        () => sorted.merge(
+    test(
+      'two-pointer path: tolerates duplicate keys in `other`',
+      () {
+        const sorted = [_Item('a', 1)];
+        final result = sorted.merge(
           const [_Item('b', 2), _Item('b', 3)],
           key: _itemKey,
           compare: _itemCompare,
-        ),
-        throwsA(isA<AssertionError>()),
-      );
-    });
+        );
+        expect(
+          result.map((it) => '${it.id}:${it.value}'),
+          ['a:1', 'b:2', 'b:3'],
+        );
+      },
+    );
+
+    test(
+      'two-pointer path: receiver duplicates are dropped when '
+      '`other` contains the same key',
+      () {
+        // When the duplicate-keyed entries in the receiver collide with a
+        // key from `other`, all receiver copies are dropped — the keyset of
+        // `other` takes precedence.
+        const withDupes = [_Item('a', 1), _Item('a', 2)];
+        final result = withDupes.merge(
+          const [_Item('a', 5, 'from-other'), _Item('b', 7)],
+          key: _itemKey,
+          compare: _itemCompare,
+        );
+        expect(
+          result.map((it) => '${it.id}:${it.value}:${it.tag}'),
+          ['a:5:from-other', 'b:7:'],
+        );
+      },
+    );
   });
 
   group('ListX.updateIf', () {
