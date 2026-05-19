@@ -38,6 +38,7 @@ command:
       equatable: ^2.0.5
       ezanimation: ^0.6.0
       firebase_core: ^3.0.0
+      firebase_crashlytics: ^4.0.0
       firebase_messaging: ^15.0.0
       file_picker: ^10.1.2
       file_selector: ^1.0.3
@@ -75,7 +76,6 @@ command:
       record: ">=5.2.0 <7.0.0"
       responsive_builder: ^0.7.0
       rxdart: ^0.28.0
-      sentry_flutter: ^8.3.0
       share_plus: ">=11.0.0 <13.0.0"
       shimmer: ^3.0.0
       sqlite3_flutter_libs: ^0.5.26

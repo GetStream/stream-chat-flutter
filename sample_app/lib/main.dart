@@ -1,53 +1,48 @@
-import 'dart:async';
-
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:sample_app/app.dart';
 import 'package:sample_app/firebase_options.dart';
-import 'package:sample_app/utils/app_config.dart';
-import 'package:sentry_flutter/sentry_flutter.dart';
 
 Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize Firebase before wiring Crashlytics handlers so the error
+  // reporters have a live Firebase app to talk to.
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  // Avoid sending Crashlytics reports for crashes that happen during local
+  // development; reports still flow in release/profile builds.
+  await FirebaseCrashlytics.instance
+      .setCrashlyticsCollectionEnabled(!kDebugMode);
+
   /// Captures errors reported by the Flutter framework.
   FlutterError.onError = (FlutterErrorDetails details) {
     if (kDebugMode) {
       // In development mode, simply print to console.
       FlutterError.dumpErrorToConsole(details);
     } else {
-      // In production mode, report to the application zone to report to sentry.
-      Zone.current.handleUncaughtError(details.exception, details.stack!);
+      // In production mode, report the framework error to Crashlytics as fatal
+      // so it surfaces alongside native crashes.
+      FirebaseCrashlytics.instance.recordFlutterFatalError(details);
     }
   };
 
-  /// Captures errors reported by the native environment, including native iOS
-  /// and Android code.
-  Future<void> reportError(dynamic error, StackTrace stackTrace) async {
-    // Print the exception to the console.
+  /// Captures errors reported by the platform dispatcher, including async
+  /// errors thrown outside the Flutter framework (e.g. from native iOS and
+  /// Android code via platform channels).
+  PlatformDispatcher.instance.onError = (error, stack) {
     if (kDebugMode) {
       // Print the full stacktrace in debug mode.
-      print(stackTrace);
-      return;
+      debugPrint('Uncaught platform error: $error\n$stack');
     } else {
-      // Send the Exception and Stacktrace to sentry in Production mode.
-      await Sentry.captureException(error, stackTrace: stackTrace);
+      // Send the exception and stack trace to Crashlytics in production mode.
+      FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
     }
-  }
+    // Returning true marks the error as handled so it does not propagate.
+    return true;
+  };
 
-  /// Runs the app wrapped in a [Zone] that captures errors and sends them to
-  /// sentry.
-  runZonedGuarded(
-    () async {
-      WidgetsFlutterBinding.ensureInitialized();
-
-      // Wait for Sentry and Firebase to initialize before running the app.
-      await Future.wait([
-        SentryFlutter.init((options) => options.dsn = sentryDsn),
-        Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform),
-      ]);
-
-      runApp(const StreamChatSampleApp());
-    },
-    reportError,
-  );
+  runApp(const StreamChatSampleApp());
 }
