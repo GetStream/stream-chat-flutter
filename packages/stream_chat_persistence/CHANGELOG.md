@@ -1,3 +1,9 @@
+# Upcoming
+
+🚀 Performance
+
+- Reduce the number of database reads in the `ChatPersistenceClient.getChannelStates` method.
+
 ## 9.23.0
 
 - Updated `stream_chat` dependency to [`9.23.0`](https://pub.dev/packages/stream_chat/changelog).
