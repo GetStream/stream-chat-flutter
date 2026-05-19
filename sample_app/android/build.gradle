@@ -16,8 +16,7 @@ subprojects {
                 android.namespace = project.group
             }
 
-            // Align the compileSdkVersion with Flutter's compileSdkVersion, but
-            // pin a floor of 36 so AAR metadata checks pass for transitive
+            // Pin a floor of 36 so AAR metadata checks pass for transitive
             // dependencies that require it until Flutter's bundled
             // compileSdkVersion catches up.
             android.compileSdkVersion = Math.max(flutter.compileSdkVersion, 36)

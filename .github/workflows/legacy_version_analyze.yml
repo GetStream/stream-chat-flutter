@@ -9,29 +9,42 @@ on:
   push:
     branches:
       - master
-    paths:
-      - 'packages/**'
-      - '.github/workflows/legacy_version_analyze.yml'
   pull_request:
     branches:
       - master
-    paths:
-      - 'packages/**'
-      - '.github/workflows/legacy_version_analyze.yml'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
+  # Detect whether anything that affects legacy analysis was touched in this
+  # PR. Path filtering at the job level (instead of `on.paths`) means a
+  # skipped `analyze_legacy_versions` reports as `success` to branch
+  # protection — see
+  # https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/collaborating-on-repositories-with-code-quality-features/troubleshooting-required-status-checks
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      packages: ${{ steps.filter.outputs.packages }}
+    steps:
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            packages:
+              - 'packages/**'
+              - '.github/workflows/legacy_version_analyze.yml'
+
   # Does a sanity check that packages at least pass analysis on the N-1
   # versions of Flutter stable if the package claims to support that version.
   # This is to minimize accidentally making changes that break old versions
   # (which we don't commit to supporting, but don't want to actively break)
   # without updating the constraints.
   analyze_legacy_versions:
+    needs: changes
+    if: needs.changes.outputs.packages == 'true' && github.event.pull_request.draft == false
     timeout-minutes: 15
-    if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     steps:
       - name: "Git Checkout"
