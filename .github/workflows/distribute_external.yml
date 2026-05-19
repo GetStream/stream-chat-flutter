@@ -57,7 +57,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Connect Bot
-        uses: webfactory/ssh-agent@v0.9.1
+        uses: webfactory/ssh-agent@v0.10.0
         with:
           ssh-private-key: ${{ secrets.BOT_SSH_PRIVATE_KEY }}
 
@@ -94,7 +94,7 @@ jobs:
 
     steps:
       - name: Connect Bot
-        uses: webfactory/ssh-agent@v0.9.1
+        uses: webfactory/ssh-agent@v0.10.0
         with:
           ssh-private-key: ${{ secrets.BOT_SSH_PRIVATE_KEY }}
 
