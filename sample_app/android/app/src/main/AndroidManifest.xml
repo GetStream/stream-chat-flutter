@@ -58,8 +58,8 @@
             android:name="com.google.firebase.messaging.default_notification_icon"
             android:resource="@drawable/ic_notification" />
 
-        <!-- Disable Crashlytics collection by default; main.dart re-enables it
-             at runtime only for non-debug builds. -->
+        <!-- Disable Crashlytics collection by default; re-enabled at runtime
+             for non-debug builds. -->
         <meta-data
             android:name="firebase_crashlytics_collection_enabled"
             android:value="false" />

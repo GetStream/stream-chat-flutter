@@ -12,9 +12,8 @@ Future<void> main() async {
   // reporters have a live Firebase app to talk to.
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  // Native defaults (AndroidManifest meta-data + Info.plist key) keep
-  // collection off, so the SDK never uploads during the first debug launch.
-  // Runtime re-enables it only for non-debug builds.
+  // Avoid sending Crashlytics reports for crashes that happen during local
+  // development; reports still flow in release/profile builds.
   if (!kDebugMode) {
     await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(true);
   }
