@@ -15,7 +15,7 @@ void main() {
   docsGoldenTest(
     'user list view',
     fileName: 'user_list_view',
-    constraints: const BoxConstraints.tightFor(width: 375, height: 1200),
+    constraints: const BoxConstraints.tightFor(width: 375, height: 500),
     builder: () {
       final client = MockClient();
       stubMockClientCurrentUser(client, asOwnUser(ameliaMoore));
