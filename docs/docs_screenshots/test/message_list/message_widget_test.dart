@@ -66,7 +66,7 @@ void main() {
   docsGoldenTest(
     'message widget actions',
     fileName: 'message_widget_actions',
-    constraints: const BoxConstraints.tightFor(width: 375, height: 500),
+    constraints: const BoxConstraints.tightFor(width: 375, height: 700),
     builder: () {
       final client = MockClient();
       final clientState = MockClientState();
