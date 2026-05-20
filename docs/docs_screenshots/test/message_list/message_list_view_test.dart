@@ -6,9 +6,10 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import '../src/golden_theme.dart';
 import '../src/mocks.dart';
+import '../src/sample_users.dart';
 
-final _currentUser = User(id: 'user-1', image: 'https://docs.fixture/avatar/user-1.png', name: 'Alice');
-final _otherUser = User(id: 'user-2', image: 'https://docs.fixture/avatar/user-2.png', name: 'Bob');
+final _currentUser = ameliaMoore;
+final _otherUser = noahSmith;
 
 List<Message> _buildMessages({bool withPinned = false, bool withThreads = false}) {
   return [
@@ -97,7 +98,7 @@ void main() {
         channelName: 'General',
         messages: messages,
       );
-      when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-1', image: 'https://docs.fixture/avatar/user-1.png', name: 'Alice'));
+      when(() => clientState.currentUser).thenReturn(asOwnUser(_currentUser));
 
       return _buildMessageListViewInDevice(client: client, channel: channel);
     },
@@ -122,7 +123,7 @@ void main() {
         channelName: 'General',
         messages: messages,
       );
-      when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-1', image: 'https://docs.fixture/avatar/user-1.png', name: 'Alice'));
+      when(() => clientState.currentUser).thenReturn(asOwnUser(_currentUser));
 
       return MaterialApp(
         theme: docsScreenshotsTheme(),
@@ -161,7 +162,7 @@ void main() {
         channelName: 'General',
         messages: messages,
       );
-      when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-1', image: 'https://docs.fixture/avatar/user-1.png', name: 'Alice'));
+      when(() => clientState.currentUser).thenReturn(asOwnUser(_currentUser));
 
       return MaterialApp(
         theme: docsScreenshotsTheme(),

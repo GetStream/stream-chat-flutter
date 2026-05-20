@@ -1,6 +1,8 @@
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+import 'sample_users.dart';
+
 /// [MockClient] cannot use `when(() => client.state.currentUser)` — mocktail
 /// will treat [ClientState.currentUser] as the value of [StreamChatClient.state].
 /// Use this helper instead.
@@ -118,13 +120,8 @@ void setupMockChannel({
   final allMembers = members.isNotEmpty
       ? members
       : [
-          Member(
-            userId: 'user-id',
-            user: User(
-              id: 'user-id',
-              image: 'https://docs.fixture/avatar/user-id.png',
-            ),
-          ),
+          for (final user in sampleUsers.take(3))
+            Member(userId: user.id, user: user),
         ];
 
   when(() => client.state).thenReturn(clientState);
@@ -142,9 +139,8 @@ void setupMockChannel({
   when(() => channel.extraData).thenReturn({'name': channelName});
   when(() => channel.name).thenReturn(channelName);
   when(() => channel.nameStream).thenAnswer((_) => Stream.value(channelName));
-  final channelImage = 'https://docs.fixture/avatar/${channel.id}.png';
-  when(() => channel.image).thenReturn(channelImage);
-  when(() => channel.imageStream).thenAnswer((_) => Stream.value(channelImage));
+  when(() => channel.image).thenReturn(null);
+  when(() => channel.imageStream).thenAnswer((_) => Stream.value(null));
   when(() => channelState.membersStream).thenAnswer((_) => Stream.value(allMembers));
   when(() => channelState.members).thenReturn(allMembers);
   when(() => channelState.messages).thenReturn(messages);

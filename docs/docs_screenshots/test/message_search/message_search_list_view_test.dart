@@ -5,6 +5,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import '../src/golden_client_stubs.dart';
 import '../src/golden_theme.dart';
 import '../src/mocks.dart';
+import '../src/sample_users.dart';
 
 GetMessageResponse _makeSearchResult({
   required String messageId,
@@ -36,7 +37,7 @@ void main() {
     constraints: const BoxConstraints.tightFor(width: 375, height: 500),
     builder: () {
       final client = MockClient();
-      stubMockClientCurrentUser(client, OwnUser(id: 'user-1', image: 'https://docs.fixture/avatar/user-1.png'));
+      stubMockClientCurrentUser(client, asOwnUser(ameliaMoore));
 
       final results = [
         _makeSearchResult(

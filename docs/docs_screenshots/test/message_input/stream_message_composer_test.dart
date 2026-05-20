@@ -8,6 +8,7 @@ import 'package:stream_core_flutter/stream_core_flutter.dart' as core;
 import '../src/fakes.dart';
 import '../src/golden_theme.dart';
 import '../src/mocks.dart';
+import '../src/sample_users.dart';
 
 Widget _buildMessageInputScaffold({
   required MockClient client,
@@ -232,7 +233,7 @@ void main() {
         ..quotedMessage = Message(
           id: 'quoted-msg',
           text: 'This is the original message',
-          user: User(id: 'other-user', image: 'https://docs.fixture/avatar/other-user.png', name: 'Alice'),
+          user: ameliaMoore,
         );
 
       return _buildMessageInputScaffold(

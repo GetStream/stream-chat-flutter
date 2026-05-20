@@ -5,6 +5,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import '../src/golden_theme.dart';
 import '../src/mocks.dart';
+import '../src/sample_users.dart';
 
 Widget _buildListHeaderScaffold({
   required MockClient client,
@@ -32,7 +33,7 @@ void main() {
       final client = MockClient();
       final clientState = MockClientState();
       when(() => client.state).thenReturn(clientState);
-      when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id', image: 'https://docs.fixture/avatar/user-id.png', name: 'Alice'));
+      when(() => clientState.currentUser).thenReturn(asOwnUser(ameliaMoore));
 
       return _buildListHeaderScaffold(
         client: client,
@@ -49,7 +50,7 @@ void main() {
       final client = MockClient();
       final clientState = MockClientState();
       when(() => client.state).thenReturn(clientState);
-      when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id', image: 'https://docs.fixture/avatar/user-id.png', name: 'Alice'));
+      when(() => clientState.currentUser).thenReturn(asOwnUser(ameliaMoore));
 
       return _buildListHeaderScaffold(
         client: client,

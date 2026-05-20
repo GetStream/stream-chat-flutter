@@ -5,9 +5,10 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import '../src/golden_client_stubs.dart';
 import '../src/golden_theme.dart';
 import '../src/mocks.dart';
+import '../src/sample_users.dart';
 
-final _user1 = User(id: 'user-1', image: 'https://docs.fixture/avatar/user-1.png', name: 'Alice');
-final _user2 = User(id: 'user-2', image: 'https://docs.fixture/avatar/user-2.png', name: 'Bob');
+final _user1 = ameliaMoore;
+final _user2 = noahSmith;
 
 Thread _makeThread({
   required String id,
@@ -120,7 +121,7 @@ void main() {
     constraints: const BoxConstraints.tightFor(width: 375, height: 700),
     builder: () {
       final client = MockClient();
-      stubMockClientCurrentUser(client, OwnUser(id: 'user-1', image: 'https://docs.fixture/avatar/user-1.png'));
+      stubMockClientCurrentUser(client, asOwnUser(_user1));
 
       final threads = [
         _makeThread(
@@ -161,7 +162,7 @@ void main() {
     constraints: const BoxConstraints.tightFor(width: 375, height: 700),
     builder: () {
       final client = MockClient();
-      stubMockClientCurrentUser(client, OwnUser(id: 'user-1', image: 'https://docs.fixture/avatar/user-1.png'));
+      stubMockClientCurrentUser(client, asOwnUser(_user1));
 
       final controller = StreamThreadListController.fromValue(
         const PagedValue(items: []),
@@ -202,7 +203,7 @@ void main() {
     constraints: const BoxConstraints.tightFor(width: 375, height: 120),
     builder: () {
       final client = MockClient();
-      stubMockClientCurrentUser(client, OwnUser(id: 'user-1', image: 'https://docs.fixture/avatar/user-1.png'));
+      stubMockClientCurrentUser(client, asOwnUser(_user1));
 
       final thread = _makeThread(
         id: 'general',
@@ -242,7 +243,7 @@ void main() {
     constraints: const BoxConstraints.tightFor(width: 375, height: 700),
     builder: () {
       final client = MockClient();
-      stubMockClientCurrentUser(client, OwnUser(id: 'user-1', image: 'https://docs.fixture/avatar/user-1.png'));
+      stubMockClientCurrentUser(client, asOwnUser(_user1));
 
       final threads = [
         _makeThread(
