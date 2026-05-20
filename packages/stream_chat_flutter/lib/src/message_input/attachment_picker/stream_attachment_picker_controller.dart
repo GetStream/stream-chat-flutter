@@ -106,15 +106,18 @@ class StreamAttachmentPickerController extends ValueNotifier<AttachmentPickerVal
 
   /// Adds a new attachment to the message.
   Future<void> addAttachment(Attachment attachment) async {
-    assert(attachment.fileSize != null, '');
-    if (attachment.fileSize! > maxAttachmentSize) {
-      throw AttachmentTooLargeError(
-        fileSize: attachment.fileSize!,
-        maxSize: maxAttachmentSize,
-      );
+    final file = attachment.file;
+
+    if (file != null) {
+      assert(attachment.fileSize != null, '');
+      if (attachment.fileSize! > maxAttachmentSize) {
+        throw AttachmentTooLargeError(
+          fileSize: attachment.fileSize!,
+          maxSize: maxAttachmentSize,
+        );
+      }
     }
 
-    final file = attachment.file;
     final uploadState = attachment.uploadState;
 
     // No need to cache the attachment if it's already uploaded
