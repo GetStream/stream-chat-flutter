@@ -1,4 +1,3 @@
-import 'package:alchemist/alchemist.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -31,7 +30,7 @@ GetMessageResponse _makeSearchResult({
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  goldenTest(
+  docsGoldenTest(
     'message search list view',
     fileName: 'message_search_list_view',
     constraints: const BoxConstraints.tightFor(width: 375, height: 500),

@@ -1,4 +1,3 @@
-import 'package:alchemist/alchemist.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -10,7 +9,7 @@ import '../src/mocks.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  goldenTest(
+  docsGoldenTest(
     'user list view',
     fileName: 'user_list_view',
     constraints: const BoxConstraints.tightFor(width: 375, height: 500),

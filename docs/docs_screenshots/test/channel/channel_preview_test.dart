@@ -1,4 +1,3 @@
-import 'package:alchemist/alchemist.dart';
 import 'package:device_preview/device_preview.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -12,7 +11,7 @@ import '../src/mocks.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  goldenTest(
+  docsGoldenTest(
     'channel preview tile',
     fileName: 'channel_preview',
     constraints: const BoxConstraints.tightFor(width: 375, height: 80),
@@ -46,7 +45,7 @@ void main() {
     },
   );
 
-  goldenTest(
+  docsGoldenTest(
     'channel list view',
     fileName: 'channel_list_view',
     constraints: const BoxConstraints.tightFor(width: 430, height: 932),
@@ -143,7 +142,7 @@ void main() {
     },
   );
 
-  goldenTest(
+  docsGoldenTest(
     'swipe channel to reveal actions',
     fileName: 'swipe_channel',
     constraints: const BoxConstraints.tightFor(width: 375, height: 80),
@@ -199,7 +198,7 @@ void main() {
     },
   );
 
-  goldenTest(
+  docsGoldenTest(
     'slidable channel list with header',
     fileName: 'slidable_channel_list',
     constraints: const BoxConstraints.tightFor(width: 430, height: 932),

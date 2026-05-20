@@ -1,4 +1,3 @@
-import 'package:alchemist/alchemist.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -25,7 +24,7 @@ Widget _buildListHeaderScaffold({
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  goldenTest(
+  docsGoldenTest(
     'channel list header default',
     fileName: 'channel_list_header',
     constraints: const BoxConstraints.tightFor(width: 375, height: 72),
@@ -42,7 +41,7 @@ void main() {
     },
   );
 
-  goldenTest(
+  docsGoldenTest(
     'channel list header with custom subtitle',
     fileName: 'channel_list_header_custom_subtitle',
     constraints: const BoxConstraints.tightFor(width: 375, height: 72),

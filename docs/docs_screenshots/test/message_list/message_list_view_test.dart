@@ -1,4 +1,3 @@
-import 'package:alchemist/alchemist.dart';
 import 'package:device_preview/device_preview.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -79,7 +78,7 @@ Widget _buildMessageListViewInDevice({
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  goldenTest(
+  docsGoldenTest(
     'message list view default',
     fileName: 'message_list_view',
     constraints: const BoxConstraints.tightFor(width: 430, height: 932),
@@ -104,7 +103,7 @@ void main() {
     },
   );
 
-  goldenTest(
+  docsGoldenTest(
     'message list view with pinned message',
     fileName: 'message_list_view_pin',
     constraints: const BoxConstraints.tightFor(width: 375, height: 600),
@@ -143,7 +142,7 @@ void main() {
     },
   );
 
-  goldenTest(
+  docsGoldenTest(
     'message list view with threads',
     fileName: 'message_list_view_threads',
     constraints: const BoxConstraints.tightFor(width: 375, height: 600),

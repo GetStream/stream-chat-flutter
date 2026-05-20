@@ -1,4 +1,3 @@
-import 'package:alchemist/alchemist.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -64,7 +63,7 @@ void _setupBasicChannel(
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  goldenTest(
+  docsGoldenTest(
     'message widget actions',
     fileName: 'message_widget_actions',
     constraints: const BoxConstraints.tightFor(width: 375, height: 500),
@@ -143,7 +142,7 @@ void main() {
     },
   );
 
-  goldenTest(
+  docsGoldenTest(
     'message theming',
     fileName: 'message_theming',
     constraints: const BoxConstraints.tightFor(width: 375, height: 200),
@@ -201,7 +200,7 @@ void main() {
     },
   );
 
-  goldenTest(
+  docsGoldenTest(
     'message reaction theming',
     fileName: 'message_reaction_theming',
     constraints: const BoxConstraints.tightFor(width: 375, height: 200),
@@ -244,7 +243,7 @@ void main() {
     },
   );
 
-  goldenTest(
+  docsGoldenTest(
     'message with rounded avatar',
     fileName: 'message_rounded_avatar',
     constraints: const BoxConstraints.tightFor(width: 375, height: 120),
@@ -270,7 +269,7 @@ void main() {
     },
   );
 
-  goldenTest(
+  docsGoldenTest(
     'message styles',
     fileName: 'message_styles',
     constraints: const BoxConstraints.tightFor(width: 375, height: 300),

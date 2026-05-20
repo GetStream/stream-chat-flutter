@@ -1,4 +1,3 @@
-import 'package:alchemist/alchemist.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -115,7 +114,7 @@ Widget _buildFullAppThreadScaffold({
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  goldenTest(
+  docsGoldenTest(
     'thread list view with threads',
     fileName: 'thread_list_view',
     constraints: const BoxConstraints.tightFor(width: 375, height: 700),
@@ -156,7 +155,7 @@ void main() {
     },
   );
 
-  goldenTest(
+  docsGoldenTest(
     'thread list view empty state',
     fileName: 'thread_list_view_empty',
     constraints: const BoxConstraints.tightFor(width: 375, height: 700),
@@ -197,7 +196,7 @@ void main() {
     },
   );
 
-  goldenTest(
+  docsGoldenTest(
     'thread list tile custom',
     fileName: 'thread_list_tile_custom',
     constraints: const BoxConstraints.tightFor(width: 375, height: 120),
@@ -237,7 +236,7 @@ void main() {
     },
   );
 
-  goldenTest(
+  docsGoldenTest(
     'thread list unread banner',
     fileName: 'thread_list_unread_banner',
     constraints: const BoxConstraints.tightFor(width: 375, height: 700),

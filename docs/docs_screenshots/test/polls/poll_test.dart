@@ -1,4 +1,3 @@
-import 'package:alchemist/alchemist.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -31,7 +30,7 @@ Widget _buildMessageScaffold({
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  goldenTest(
+  docsGoldenTest(
     'poll creator widget',
     fileName: 'poll_creator',
     constraints: const BoxConstraints.tightFor(width: 375, height: 650),
@@ -80,7 +79,7 @@ void main() {
     },
   );
 
-  goldenTest(
+  docsGoldenTest(
     'poll interactor widget',
     fileName: 'poll_interactor',
     constraints: const BoxConstraints.tightFor(width: 375, height: 500),
@@ -133,7 +132,7 @@ void main() {
     },
   );
 
-  goldenTest(
+  docsGoldenTest(
     'polls composer attachment picker',
     fileName: 'polls_composer',
     constraints: const BoxConstraints.tightFor(width: 375, height: 500),
