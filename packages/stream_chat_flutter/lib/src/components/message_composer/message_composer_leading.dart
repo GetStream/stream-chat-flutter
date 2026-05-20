@@ -60,7 +60,7 @@ class DefaultStreamMessageComposerLeading extends StatelessWidget {
                   type: StreamButtonType.outline,
                   size: StreamButtonSize.large,
                   isFloating: props.isFloating,
-                  onPressed: props.isSlowModeActive ? null : () => props.onAttachmentButtonPressed?.call(),
+                  onPressed: props.isSlowModeActive ? null : props.onAttachmentButtonPressed,
                 ),
               ),
               SizedBox(width: context.streamSpacing.xs),
