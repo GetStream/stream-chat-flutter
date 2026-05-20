@@ -207,7 +207,7 @@ void main() {
       final client = MockClient();
       final clientState = MockClientState();
       when(() => client.state).thenReturn(clientState);
-      when(() => clientState.currentUser).thenReturn(asOwnUser(ameliaMoore));
+      when(() => clientState.currentUser).thenReturn(ownUser);
 
       final channels = [
         fakeChannel(

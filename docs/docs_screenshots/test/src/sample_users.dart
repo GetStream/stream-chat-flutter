@@ -36,11 +36,16 @@ final sophiaLee = _user('sophia-lee', 'Sophia Lee');
 final sophieLaurent = _user('sophie-laurent', 'Sophie Laurent');
 final wesleyLau = _user('wesley-lau', 'Wesley Lau');
 
-/// Promotes a sample [User] to an [OwnUser] for `currentUser` stubs.
-OwnUser asOwnUser(User user) => OwnUser(
-  id: user.id,
-  name: user.name,
-  image: user.image,
+/// The signed-in user across every doc snapshot. Always an [OwnUser] so it
+/// drops straight into `currentUser` stubs, and because [OwnUser] is a
+/// [User] it also works anywhere a [User] is expected — message authors,
+/// `Member.user`, etc. Pinning a single identity keeps "You" labels,
+/// my-side message bubbles, and the messenger header consistent across
+/// every snapshot.
+final ownUser = OwnUser(
+  id: ameliaMoore.id,
+  name: ameliaMoore.name,
+  image: ameliaMoore.image,
 );
 
 /// All sample users in the order they appear on the Figma canvas.

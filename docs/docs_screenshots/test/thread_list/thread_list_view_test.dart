@@ -7,8 +7,7 @@ import '../src/golden_theme.dart';
 import '../src/mocks.dart';
 import '../src/sample_users.dart';
 
-final _user1 = ameliaMoore;
-final _user2 = noahSmith;
+final _otherUser = noahSmith;
 
 Thread _makeThread({
   required String id,
@@ -20,13 +19,13 @@ Thread _makeThread({
   final parentMessage = Message(
     id: 'parent-$id',
     text: parentText,
-    user: _user1,
+    user: ownUser,
     createdAt: DateTime(2024, 6, 1, 9, 0),
   );
   final latestReply = Message(
     id: 'reply-$id',
     text: latestReplyText,
-    user: _user2,
+    user: _otherUser,
     parentId: 'parent-$id',
     createdAt: DateTime(2024, 6, 1, 10, 0),
   );
@@ -47,7 +46,7 @@ Thread _makeThread({
     read: unreadCount > 0
         ? [
             Read(
-              user: _user1,
+              user: ownUser,
               lastRead: DateTime(2024, 6, 1, 8, 0),
               unreadMessages: unreadCount,
             ),
@@ -121,7 +120,7 @@ void main() {
     constraints: const BoxConstraints.tightFor(width: 375, height: 700),
     builder: () {
       final client = MockClient();
-      stubMockClientCurrentUser(client, asOwnUser(_user1));
+      stubMockClientCurrentUser(client, ownUser);
 
       final threads = [
         _makeThread(
@@ -162,7 +161,7 @@ void main() {
     constraints: const BoxConstraints.tightFor(width: 375, height: 700),
     builder: () {
       final client = MockClient();
-      stubMockClientCurrentUser(client, asOwnUser(_user1));
+      stubMockClientCurrentUser(client, ownUser);
 
       final controller = StreamThreadListController.fromValue(
         const PagedValue(items: []),
@@ -203,7 +202,7 @@ void main() {
     constraints: const BoxConstraints.tightFor(width: 375, height: 120),
     builder: () {
       final client = MockClient();
-      stubMockClientCurrentUser(client, asOwnUser(_user1));
+      stubMockClientCurrentUser(client, ownUser);
 
       final thread = _makeThread(
         id: 'general',
@@ -228,7 +227,7 @@ void main() {
               ),
               child: StreamThreadListTile(
                 thread: thread,
-                currentUser: _user1,
+                currentUser: ownUser,
               ),
             ),
           ),
@@ -243,7 +242,7 @@ void main() {
     constraints: const BoxConstraints.tightFor(width: 375, height: 700),
     builder: () {
       final client = MockClient();
-      stubMockClientCurrentUser(client, asOwnUser(_user1));
+      stubMockClientCurrentUser(client, ownUser);
 
       final threads = [
         _makeThread(

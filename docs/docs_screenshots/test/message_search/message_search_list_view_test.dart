@@ -37,7 +37,7 @@ void main() {
     constraints: const BoxConstraints.tightFor(width: 375, height: 500),
     builder: () {
       final client = MockClient();
-      stubMockClientCurrentUser(client, asOwnUser(ameliaMoore));
+      stubMockClientCurrentUser(client, ownUser);
 
       final results = [
         _makeSearchResult(

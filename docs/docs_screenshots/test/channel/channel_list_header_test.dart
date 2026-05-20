@@ -33,7 +33,7 @@ void main() {
       final client = MockClient();
       final clientState = MockClientState();
       when(() => client.state).thenReturn(clientState);
-      when(() => clientState.currentUser).thenReturn(asOwnUser(ameliaMoore));
+      when(() => clientState.currentUser).thenReturn(ownUser);
 
       return _buildListHeaderScaffold(
         client: client,
@@ -50,7 +50,7 @@ void main() {
       final client = MockClient();
       final clientState = MockClientState();
       when(() => client.state).thenReturn(clientState);
-      when(() => clientState.currentUser).thenReturn(asOwnUser(ameliaMoore));
+      when(() => clientState.currentUser).thenReturn(ownUser);
 
       return _buildListHeaderScaffold(
         client: client,

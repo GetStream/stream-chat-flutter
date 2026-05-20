@@ -9,7 +9,6 @@ import '../src/mocks.dart';
 import '../src/sample_users.dart';
 
 final _sender = noahSmith;
-final _currentUser = ameliaMoore;
 
 /// Custom reaction resolver that maps 'celebrate' to 🎉, demonstrating the
 /// [ReactionIconResolver] API.
@@ -58,7 +57,7 @@ void _setupBasicChannel(
     channelState: channelState,
     channelName: 'General',
   );
-  when(() => clientState.currentUser).thenReturn(asOwnUser(_currentUser));
+  when(() => clientState.currentUser).thenReturn(ownUser);
 }
 
 void main() {
@@ -153,12 +152,12 @@ void main() {
       final channel = MockChannel(type: 'messaging', id: 'general');
       final channelState = MockChannelState();
       _setupBasicChannel(client, clientState, channel, channelState);
-      stubMockClientCurrentUser(client, asOwnUser(_currentUser));
+      stubMockClientCurrentUser(client, ownUser);
 
       final message = Message(
         id: 'msg-2',
         text: 'This message uses a custom theme!',
-        user: _currentUser,
+        user: ownUser,
         createdAt: DateTime(2024, 6, 1, 10, 0),
       );
 
@@ -280,7 +279,7 @@ void main() {
       final channel = MockChannel(type: 'messaging', id: 'general');
       final channelState = MockChannelState();
       _setupBasicChannel(client, clientState, channel, channelState);
-      stubMockClientCurrentUser(client, asOwnUser(_currentUser));
+      stubMockClientCurrentUser(client, ownUser);
 
       return MaterialApp(
         theme: docsScreenshotsTheme(),
@@ -334,7 +333,7 @@ void main() {
                         message: Message(
                           id: 'msg-from-me',
                           text: 'And this is my reply!',
-                          user: _currentUser,
+                          user: ownUser,
                           createdAt: DateTime(2024, 6, 1, 10, 1),
                         ),
                       ),

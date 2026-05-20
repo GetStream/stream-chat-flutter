@@ -18,7 +18,7 @@ void main() {
     constraints: const BoxConstraints.tightFor(width: 375, height: 500),
     builder: () {
       final client = MockClient();
-      stubMockClientCurrentUser(client, asOwnUser(ameliaMoore));
+      stubMockClientCurrentUser(client, ownUser);
 
       // Every sample user, with online flipped pseudo-randomly. Seeded so
       // the same set of users light up across runs.

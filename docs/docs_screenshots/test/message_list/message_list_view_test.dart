@@ -8,7 +8,6 @@ import '../src/golden_theme.dart';
 import '../src/mocks.dart';
 import '../src/sample_users.dart';
 
-final _currentUser = ameliaMoore;
 final _otherUser = noahSmith;
 
 List<Message> _buildMessages({bool withPinned = false, bool withThreads = false}) {
@@ -22,7 +21,7 @@ List<Message> _buildMessages({bool withPinned = false, bool withThreads = false}
     Message(
       id: 'msg-2',
       text: 'Doing great, thanks!',
-      user: _currentUser,
+      user: ownUser,
       createdAt: DateTime(2024, 6, 1, 10, 1),
     ),
     if (withPinned)
@@ -33,7 +32,7 @@ List<Message> _buildMessages({bool withPinned = false, bool withThreads = false}
         createdAt: DateTime(2024, 6, 1, 10, 2),
         pinned: true,
         pinnedAt: DateTime(2024, 6, 1, 10, 3),
-        pinnedBy: _currentUser,
+        pinnedBy: ownUser,
       ),
     Message(
       id: 'msg-3',
@@ -45,7 +44,7 @@ List<Message> _buildMessages({bool withPinned = false, bool withThreads = false}
     Message(
       id: 'msg-4',
       text: 'Working on some Flutter features!',
-      user: _currentUser,
+      user: ownUser,
       createdAt: DateTime(2024, 6, 1, 10, 4),
     ),
   ];
@@ -98,7 +97,7 @@ void main() {
         channelName: 'General',
         messages: messages,
       );
-      when(() => clientState.currentUser).thenReturn(asOwnUser(_currentUser));
+      when(() => clientState.currentUser).thenReturn(ownUser);
 
       return _buildMessageListViewInDevice(client: client, channel: channel);
     },
@@ -123,7 +122,7 @@ void main() {
         channelName: 'General',
         messages: messages,
       );
-      when(() => clientState.currentUser).thenReturn(asOwnUser(_currentUser));
+      when(() => clientState.currentUser).thenReturn(ownUser);
 
       return MaterialApp(
         theme: docsScreenshotsTheme(),
@@ -162,7 +161,7 @@ void main() {
         channelName: 'General',
         messages: messages,
       );
-      when(() => clientState.currentUser).thenReturn(asOwnUser(_currentUser));
+      when(() => clientState.currentUser).thenReturn(ownUser);
 
       return MaterialApp(
         theme: docsScreenshotsTheme(),
