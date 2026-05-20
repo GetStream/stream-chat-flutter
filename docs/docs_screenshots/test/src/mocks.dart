@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -117,12 +119,7 @@ void setupMockChannel({
   List<Message> messages = const [],
   List<Member> members = const [],
 }) {
-  final allMembers = members.isNotEmpty
-      ? members
-      : [
-          for (final user in sampleUsers.take(3))
-            Member(userId: user.id, user: user),
-        ];
+  final allMembers = members.isNotEmpty ? members : _defaultMembers(channel.id);
 
   when(() => client.state).thenReturn(clientState);
   when(() => channel.lastMessageAt).thenReturn(DateTime.parse('2020-06-22 12:00:00'));
@@ -172,4 +169,29 @@ MockChannel fakeChannel({
   when(() => channelState.unreadCountStream).thenAnswer((_) => Stream.value(unreadCount));
 
   return channel;
+}
+
+/// Picks a stable-but-varied member list for a channel that didn't supply
+/// one. Count and selection are seeded off the channel id, so every channel
+/// gets a different group avatar across snapshots, but the same channel
+/// renders identically run-to-run.
+List<Member> _defaultMembers(String? channelId) {
+  final rng = Random(_seedFromString(channelId));
+  final count = 2 + rng.nextInt(5); // 2..6 members
+  final pool = [...sampleUsers]..shuffle(rng);
+  return [
+    for (final user in pool.take(count))
+      Member(userId: user.id, user: user),
+  ];
+}
+
+/// Deterministic 31-base content hash. Dart's `Object.hashCode` for `String`
+/// is process-randomized; we need a stable seed for golden reproducibility.
+int _seedFromString(String? value) {
+  if (value == null || value.isEmpty) return 0;
+  var hash = 0;
+  for (final code in value.codeUnits) {
+    hash = (hash * 31 + code) & 0x7fffffff;
+  }
+  return hash;
 }
