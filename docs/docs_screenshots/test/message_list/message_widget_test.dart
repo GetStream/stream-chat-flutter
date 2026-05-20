@@ -70,7 +70,24 @@ void main() {
     builder: () {
       final client = MockClient();
       final clientState = MockClientState();
-      final channel = MockChannel(type: 'messaging', id: 'general');
+      final channel = MockChannel(
+        type: 'messaging',
+        id: 'general',
+        // Full capability set so `StreamMessageActionsBuilder.buildActions`
+        // emits the canonical Reply / Thread Reply / Mark Unread / Copy /
+        // Edit / Pin / Delete list users see in production.
+        ownCapabilities: const [
+          ChannelCapability.sendMessage,
+          ChannelCapability.sendReply,
+          ChannelCapability.pinMessage,
+          ChannelCapability.quoteMessage,
+          ChannelCapability.readEvents,
+          ChannelCapability.updateAnyMessage,
+          ChannelCapability.updateOwnMessage,
+          ChannelCapability.deleteAnyMessage,
+          ChannelCapability.deleteOwnMessage,
+        ],
+      );
       final channelState = MockChannelState();
       _setupBasicChannel(client, clientState, channel, channelState);
 
@@ -103,38 +120,12 @@ void main() {
               showReactionPicker: true,
               leadingInset: leadingInset,
               messageWidget: StreamMessageItem(message: message),
-              messageActions: [
-                StreamContextMenuAction(
-                  value: const _ReplyAction(),
-                  leading: const Icon(Icons.reply),
-                  label: const Text('Reply'),
-                ),
-                StreamContextMenuAction(
-                  value: const _ThreadReplyAction(),
-                  leading: const Icon(Icons.comment_outlined),
-                  label: const Text('Thread Reply'),
-                ),
-                StreamContextMenuAction(
-                  value: const _EditAction(),
-                  leading: const Icon(Icons.edit_outlined),
-                  label: const Text('Edit Message'),
-                ),
-                StreamContextMenuAction(
-                  value: const _CopyAction(),
-                  leading: const Icon(Icons.copy_outlined),
-                  label: const Text('Copy Message'),
-                ),
-                StreamContextMenuAction(
-                  value: const _PinAction(),
-                  leading: const Icon(Icons.push_pin_outlined),
-                  label: const Text('Pin to Conversation'),
-                ),
-                StreamContextMenuAction.destructive(
-                  value: const _DeleteAction(),
-                  leading: const Icon(Icons.delete_outlined),
-                  label: const Text('Delete Message'),
-                ),
-              ],
+              messageActions: StreamMessageActionsBuilder.buildActions(
+                context: context,
+                message: message,
+                channel: channel,
+                currentUser: ownUser,
+              ),
             );
           },
         ),
@@ -349,27 +340,3 @@ void main() {
   );
 }
 
-// Placeholder action types used to populate the context menu in golden tests.
-class _ReplyAction {
-  const _ReplyAction();
-}
-
-class _ThreadReplyAction {
-  const _ThreadReplyAction();
-}
-
-class _EditAction {
-  const _EditAction();
-}
-
-class _CopyAction {
-  const _CopyAction();
-}
-
-class _PinAction {
-  const _PinAction();
-}
-
-class _DeleteAction {
-  const _DeleteAction();
-}
