@@ -85,12 +85,18 @@ Future<void> _loadEmojiFont() async {
 /// `CupertinoSystemText` (body).
 Future<void> _loadAppleSystemFont() async {
   if (!Platform.isMacOS) return;
-  const path = '/System/Library/Fonts/SFNS.ttf';
-  final file = File(path);
-  if (!file.existsSync()) return;
-  final bytes = await file.readAsBytes();
-  for (final family in const ['CupertinoSystemDisplay', 'CupertinoSystemText']) {
-    final loader = FontLoader(family)..addFont(Future.value(ByteData.sublistView(bytes)));
-    await loader.load();
+  const candidates = [
+    '/System/Library/Fonts/SFNS.ttf', // Catalina and later
+    '/System/Library/Fonts/SFNSDisplay.ttf', // pre-Catalina
+  ];
+  for (final path in candidates) {
+    final file = File(path);
+    if (!file.existsSync()) continue;
+    final bytes = await file.readAsBytes();
+    for (final family in const ['CupertinoSystemDisplay', 'CupertinoSystemText']) {
+      final loader = FontLoader(family)..addFont(Future.value(ByteData.sublistView(bytes)));
+      await loader.load();
+    }
+    return; // Stop after the first font successfully loaded.
   }
 }
