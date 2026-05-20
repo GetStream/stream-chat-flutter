@@ -121,9 +121,6 @@ platform :ios do
   end
 
   desc "Upload iOS dSYMs from the most recent `flutter build ipa` to Firebase Crashlytics"
-  # `flutter build ipa` writes the xcarchive to build/ios/archive/<PRODUCT_NAME>.xcarchive,
-  # and PRODUCT_NAME for Runner resolves to "Runner", so dSYMs land in
-  # build/ios/archive/Runner.xcarchive/dSYMs.
   private_lane :upload_dsyms_to_crashlytics do
     upload_symbols_to_crashlytics(
       dsym_path: "#{root_path}/build/ios/archive/Runner.xcarchive/dSYMs",
