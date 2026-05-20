@@ -162,6 +162,6 @@ class _VoiceRecordingButton extends StatelessWidget {
   }
 }
 
-final _sendKey = UniqueKey();
-final _microphoneKey = UniqueKey();
-final _slowModeKey = UniqueKey();
+const _sendKey = ValueKey('send_key');
+const _microphoneKey = ValueKey('microphone_key');
+const _slowModeKey = ValueKey('slow_mode_key');
