@@ -22,13 +22,6 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) async {
   // glyph with Ahem anyway.
   await _loadHostSystemFonts();
 
-  final isRunningInCi = Platform.environment.containsKey('CI') || Platform.environment.containsKey('GITHUB_ACTIONS');
-  // The macOS CI job that regenerates the committed `goldens/macos/` set
-  // sets UPDATE_PLATFORM_GOLDENS=1 to flip the variant gate back on. Without
-  // this, the default CI logic (`isRunningInCi=true → CiGoldens only`) would
-  // skip the platform variant the docs care about.
-  final updatePlatformGoldens = Platform.environment['UPDATE_PLATFORM_GOLDENS'] == '1';
-
   return AlchemistConfig.runWithConfig(
     config: AlchemistConfig(
       goldenTestTheme: GoldenTestTheme(
@@ -36,8 +29,12 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) async {
         borderColor: Colors.transparent,
         nameTextStyle: const TextStyle(fontSize: 18),
       ),
-      ciGoldensConfig: CiGoldensConfig(enabled: isRunningInCi && !updatePlatformGoldens),
-      platformGoldensConfig: PlatformGoldensConfig(enabled: !isRunningInCi || updatePlatformGoldens),
+      // Docs snapshots only ever commit the platform variant (see .gitignore:
+      // `!**/goldens/macos/*`). The CI/obscured variant is never inspected
+      // and never compared against, so don't waste compute on it — generate
+      // platform goldens locally and in CI alike.
+      ciGoldensConfig: const CiGoldensConfig(enabled: false),
+      platformGoldensConfig: const PlatformGoldensConfig(enabled: true),
     ),
     run: testMain,
   );
