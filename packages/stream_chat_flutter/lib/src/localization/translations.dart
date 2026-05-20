@@ -116,8 +116,13 @@ abstract class Translations {
   /// The label for write a message in [StreamMessageComposer]
   String get writeAMessageLabel;
 
-  /// The label for slow mode enabled in [StreamMessageComposer]
-  String get slowModeOnLabel;
+  /// The placeholder shown in [StreamMessageComposer] while slow mode is
+  /// active for the current user.
+  ///
+  /// [cooldownTimeOut] is the number of seconds remaining before the user
+  /// can send another message. Defaults to `'Slow mode, wait ${cooldownTimeOut}s\u2026'`
+  /// which renders as e.g. "Slow mode, wait 9s…".
+  String slowModeOnLabel(int cooldownTimeOut);
 
   /// The placeholder shown in the composer when a user-target command (for
   /// example `/mute`, `/unmute`, `/ban`, `/unban`) is active.
@@ -1106,7 +1111,7 @@ class DefaultTranslations implements Translations {
   String replyToUserLabel(String userName) => 'Reply to $userName';
 
   @override
-  String get slowModeOnLabel => 'Slow mode ON';
+  String slowModeOnLabel(int cooldownTimeOut) => 'Slow mode, wait ${cooldownTimeOut}s\u2026';
 
   @override
   String get commandUsernameLabel => '@username';

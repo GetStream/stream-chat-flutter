@@ -46,14 +46,15 @@ class DefaultStreamMessageComposerInput extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isFloating = props.isFloating;
+    final borderColor = props.isSlowModeActive
+        ? context.streamColorScheme.borderDisabled
+        : context.streamColorScheme.borderDefault;
 
     return Container(
       clipBehavior: Clip.antiAlias,
       foregroundDecoration: BoxDecoration(
         borderRadius: BorderRadius.all(context.streamRadius.xxxl),
-        border: Border.all(
-          color: context.streamColorScheme.borderDefault,
-        ),
+        border: Border.all(color: borderColor),
       ),
       decoration: BoxDecoration(
         color: context.streamColorScheme.backgroundElevation1,

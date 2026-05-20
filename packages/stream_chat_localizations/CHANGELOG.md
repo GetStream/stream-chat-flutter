@@ -9,6 +9,10 @@
   method across all supported locales.
 - Renamed `endVoteConfirmationText` → `endVoteConfirmationTitle` across all
   supported locales; English default changed to `'End This Poll?'`.
+- Renamed `slowModeOnLabel` getter → `slowModeOnLabel(int cooldownTimeOut)`
+  method across all supported locales. The default now renders a live
+  countdown (English default: `'Slow mode ON'` → `'Slow mode, wait
+  ${cooldownTimeOut}s\u2026'`).
 
 ✅ Added
 

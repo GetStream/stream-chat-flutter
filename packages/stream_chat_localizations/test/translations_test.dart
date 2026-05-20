@@ -196,7 +196,7 @@ void main() {
         localizations.galleryPaginationText(currentPage: 1, totalPages: 2),
         isNotNull,
       );
-      expect(localizations.slowModeOnLabel, isNotNull);
+      expect(localizations.slowModeOnLabel(10), isNotNull);
       expect(localizations.linkDisabledDetails, isNotNull);
       expect(localizations.linkDisabledError, isNotNull);
       expect(localizations.sendMessagePermissionError, isNotNull);

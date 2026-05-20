@@ -391,7 +391,7 @@ Limite de pièces jointes dépassée : il n'est pas possible d'ajouter plus de $
   String get viewLibrary => 'Voir la bibliothèque';
 
   @override
-  String get slowModeOnLabel => 'Mode lent activé';
+  String slowModeOnLabel(int cooldownTimeOut) => 'Mode lent, attendez ${cooldownTimeOut}s\u2026';
 
   @override
   String get commandUsernameLabel => '@username';

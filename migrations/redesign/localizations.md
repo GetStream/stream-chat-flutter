@@ -181,6 +181,7 @@ The following members were renamed. If you have overridden them in a custom `Tra
 |------------|------------|-------|
 | `String get questionsLabel` | `String questionLabel({bool isPlural = false})` | Now mirrors `optionLabel({bool isPlural})`. Pass `isPlural: true` to get the previous plural value, or call with no arguments for the singular "Question" label used in the poll results/options dialogs. |
 | `String get endVoteConfirmationText` | `String get endVoteConfirmationTitle` | Renamed to reflect that this string is the dialog title rather than body text; see also the new default value in [Changed Default String Values](#changed-default-string-values). |
+| `String get slowModeOnLabel` | `String slowModeOnLabel(int cooldownTimeOut)` | Now takes the remaining cooldown in seconds so the placeholder can render a live countdown (default English: `'Slow mode, wait ${cooldownTimeOut}s\u2026'`). The composer text input is also disabled and the trailing send button shows the remaining seconds while slow mode is active. |
 
 Example migration:
 
@@ -226,4 +227,5 @@ If your app overrides these in a `Translations` subclass, your custom values are
 - [ ] Add implementations for all 35 new abstract members listed above — the compiler will flag missing ones
 - [ ] Update the signature of any `questionsLabel` override to `questionLabel({bool isPlural = false})`, and replace any call to `translations.questionsLabel` with `translations.questionLabel(isPlural: true)`
 - [ ] Rename any `endVoteConfirmationText` override (and consumer) to `endVoteConfirmationTitle`
+- [ ] Update the signature of any `slowModeOnLabel` override from `String get slowModeOnLabel` to `String slowModeOnLabel(int cooldownTimeOut)`, and update consumers to pass the cooldown seconds (e.g. `translations.slowModeOnLabel(cooldownTimeOut)`)
 - [ ] Review the changed default string values and decide whether to keep the new defaults or override them to preserve the old text

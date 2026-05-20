@@ -1,6 +1,7 @@
 import 'package:alchemist/alchemist.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:record/record.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_core_flutter/stream_core_flutter.dart' as core;
@@ -185,6 +186,29 @@ void main() {
           ),
         ),
       );
+    },
+  );
+
+  goldenTest(
+    'slow mode active',
+    fileName: 'message_composer_slow_mode',
+    constraints: const BoxConstraints.tightFor(width: 375, height: 100),
+    builder: () {
+      final client = MockClient();
+      final clientState = MockClientState();
+      final channel = MockChannel();
+      final channelState = MockChannelState();
+
+      setupMockChannel(
+        client: client,
+        clientState: clientState,
+        channel: channel,
+        channelState: channelState,
+      );
+
+      when(channel.getRemainingCooldown).thenReturn(10);
+
+      return _buildMessageInputScaffold(client: client, channel: channel);
     },
   );
 

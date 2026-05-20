@@ -202,56 +202,62 @@ class _StreamChatMessageInputContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final componentProps = MessageComposerComponentProps(
-      controller: inputController,
-      isFloating: widget.isFloating,
-      currentUserId: widget.currentUserId,
-      onSendPressed: widget.onSendPressed,
-      voiceRecordingCallback: _createVoiceRecordingCallback(context),
-      onAttachmentButtonPressed: widget.onAttachmentButtonPressed,
-      isPickerOpen: widget.isPickerOpen,
-      audioRecorderState: audioRecorderState,
-      focusNode: widget.focusNode,
-      onQuotedMessageCleared: widget.onQuotedMessageCleared,
-    );
-
-    final inputProps = MessageComposerInputProps.from(
-      componentProps,
-      placeholder: widget.placeholder,
-      textInputAction: widget.textInputAction,
-      keyboardType: widget.keyboardType,
-      textCapitalization: widget.textCapitalization,
-      autofocus: widget.autofocus,
-      autocorrect: widget.autocorrect,
-      canAlsoSendToChannel: widget.canAlsoSendToChannel,
-      audioRecorderController: widget.audioRecorderController,
-      feedback: widget.feedback,
-      sendVoiceRecordingAutomatically: widget.sendVoiceRecordingAutomatically,
-    );
-
     final spacing = context.streamSpacing;
 
-    return Container(
-      padding: EdgeInsets.only(top: spacing.md),
-      decoration: widget.isFloating
-          ? null
-          : BoxDecoration(
-              border: Border(
-                top: BorderSide(color: context.streamColorScheme.borderDefault),
+    return ValueListenableBuilder(
+      valueListenable: inputController,
+      builder: (context, value, child) {
+        final cooldownTimeOut = inputController.isSlowModeActive ? inputController.cooldownTimeOut : null;
+
+        final componentProps = MessageComposerComponentProps(
+          controller: inputController,
+          isFloating: widget.isFloating,
+          currentUserId: widget.currentUserId,
+          onSendPressed: widget.onSendPressed,
+          voiceRecordingCallback: _createVoiceRecordingCallback(context),
+          onAttachmentButtonPressed: widget.onAttachmentButtonPressed,
+          isPickerOpen: widget.isPickerOpen,
+          audioRecorderState: audioRecorderState,
+          focusNode: widget.focusNode,
+          onQuotedMessageCleared: widget.onQuotedMessageCleared,
+          cooldownTimeOut: cooldownTimeOut,
+        );
+
+        final inputProps = MessageComposerInputProps.from(
+          componentProps,
+          placeholder: widget.placeholder,
+          textInputAction: widget.textInputAction,
+          keyboardType: widget.keyboardType,
+          textCapitalization: widget.textCapitalization,
+          autofocus: widget.autofocus,
+          autocorrect: widget.autocorrect,
+          canAlsoSendToChannel: widget.canAlsoSendToChannel,
+          audioRecorderController: widget.audioRecorderController,
+          feedback: widget.feedback,
+          sendVoiceRecordingAutomatically: widget.sendVoiceRecordingAutomatically,
+        );
+
+        return Container(
+          padding: EdgeInsets.only(top: spacing.md, right: spacing.md, left: spacing.md),
+          decoration: widget.isFloating
+              ? null
+              : BoxDecoration(
+                  border: Border(
+                    top: BorderSide(color: context.streamColorScheme.borderDefault),
+                  ),
+                ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              StreamMessageComposerLeading(props: componentProps),
+              Expanded(
+                child: StreamMessageComposerInput(props: inputProps),
               ),
-            ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          SizedBox(width: spacing.md),
-          StreamMessageComposerLeading(props: componentProps),
-          Expanded(
-            child: StreamMessageComposerInput(props: inputProps),
+              StreamMessageComposerTrailing(props: componentProps),
+            ],
           ),
-          StreamMessageComposerTrailing(props: componentProps),
-          SizedBox(width: spacing.md),
-        ],
-      ),
+        );
+      },
     );
   }
 

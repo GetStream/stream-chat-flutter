@@ -21,6 +21,7 @@ class StreamMessageComposerInputField extends StatelessWidget {
     this.textCapitalization = TextCapitalization.sentences,
     this.autofocus = false,
     this.autocorrect = true,
+    this.enabled = true,
   });
 
   /// The controller for the text field.
@@ -52,6 +53,15 @@ class StreamMessageComposerInputField extends StatelessWidget {
 
   /// Whether to enable autocorrect.
   final bool autocorrect;
+
+  /// Whether the text field is enabled.
+  ///
+  /// When false the text field cannot be edited and the placeholder remains
+  /// visible regardless of the underlying [controller] text. Used by the
+  /// composer to lock input while slow mode is active.
+  ///
+  /// Defaults to true.
+  final bool enabled;
 
   @override
   Widget build(BuildContext context) {
@@ -85,6 +95,7 @@ class StreamMessageComposerInputField extends StatelessWidget {
               child: TextField(
                 controller: controller,
                 focusNode: focusNode,
+                enabled: enabled,
                 textInputAction: textInputAction,
                 keyboardType: keyboardType,
                 textCapitalization: textCapitalization,

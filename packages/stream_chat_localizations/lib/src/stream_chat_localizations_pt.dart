@@ -384,7 +384,7 @@ Não é possível adicionar mais de $limit arquivos de uma vez
   ''';
 
   @override
-  String get slowModeOnLabel => 'Modo lento ativado';
+  String slowModeOnLabel(int cooldownTimeOut) => 'Modo lento, aguarde ${cooldownTimeOut}s\u2026';
 
   @override
   String get commandUsernameLabel => '@username';

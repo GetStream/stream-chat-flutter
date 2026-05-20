@@ -252,6 +252,16 @@ The default builder now renders dedicated placeholders for Stream's built-in use
 
 The default builder no longer uses `addACommentOrSendLabel` ("Add a comment or send") when the input only has attachments and no text — it now falls back to `writeAMessageLabel` ("Send a message"), matching the empty/idle state. The `addACommentOrSendLabel` translation key is still part of the public `Translations` interface, so to restore the old behaviour override `placeholderBuilder` and map `AttachmentsPlaceholder()` to `translations.addACommentOrSendLabel` yourself.
 
+### Behavior change: slow mode
+
+While slow mode is active for the current user, the composer is now visibly locked instead of just guarding the send call:
+
+- The text input is disabled (`enabled: false`) so the user cannot edit the field.
+- The trailing send button is replaced by a disabled countdown button showing the remaining seconds (e.g. `9`).
+- The placeholder shows a live countdown such as `Slow mode, wait 9s…` (English default), driven by `Translations.slowModeOnLabel(int cooldownTimeOut)`. The translation key changed signature — see the [Localizations migration guide](localizations.md).
+
+Once the cooldown reaches zero the input is automatically re-enabled and the regular send / microphone button returns. To restore the previous behaviour (editable input + normal send button while slow mode is active), supply your own `placeholderBuilder` and a custom trailing component via `streamChatComponentBuilders(messageComposerInputTrailing: ...)`.
+
 ### Sealed-class state shape
 
 Each case carries the contextual data relevant to that input state. Pattern-match on these fields in your `placeholderBuilder` to render rich, state-aware placeholders.
@@ -272,7 +282,7 @@ StreamMessageComposer(
     final translations = context.translations;
     return switch (placeholder) {
       SlowModePlaceholder(:final cooldownTimeOut) =>
-        'Slow mode on – ${cooldownTimeOut}s left',
+        translations.slowModeOnLabel(cooldownTimeOut),
       CommandPlaceholder(command: 'giphy') => translations.searchGifLabel,
       CommandPlaceholder(command: 'mute' || 'unmute' || 'ban' || 'unban') =>
         translations.commandUsernameLabel,

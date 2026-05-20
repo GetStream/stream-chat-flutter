@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// A widget that shows the leading of the message composer.
@@ -60,7 +60,7 @@ class DefaultStreamMessageComposerLeading extends StatelessWidget {
                   type: StreamButtonType.outline,
                   size: StreamButtonSize.large,
                   isFloating: props.isFloating,
-                  onPressed: () => props.onAttachmentButtonPressed?.call(),
+                  onPressed: props.isSlowModeActive ? null : props.onAttachmentButtonPressed,
                 ),
               ),
               SizedBox(width: context.streamSpacing.xs),

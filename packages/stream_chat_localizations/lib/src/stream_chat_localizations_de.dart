@@ -380,7 +380,7 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
   String attachmentLimitExceedError(int limit) => 'Dateigröße überschritten, Grenze: $limit';
 
   @override
-  String get slowModeOnLabel => 'Langsamer Modus: EIN';
+  String slowModeOnLabel(int cooldownTimeOut) => 'Langsamer Modus, warte ${cooldownTimeOut}s\u2026';
 
   @override
   String get commandUsernameLabel => '@username';
