@@ -82,7 +82,7 @@ void main() {
     late BuildContext context;
     await tester.pumpWidget(
       StreamChatTheme(
-        data: StreamChatThemeData.light(),
+        data: StreamChatThemeData(),
         child: Builder(
           builder: (ctx) {
             context = ctx;

@@ -196,6 +196,7 @@ class MessageInputMediaAttachments extends StatelessWidget {
         controller: scrollController,
         scrollDirection: Axis.horizontal,
         padding: EdgeInsets.symmetric(horizontal: context.streamSpacing.xs),
+        // ignore: deprecated_member_use
         cacheExtent: 104 * 10, // Cache 10 items ahead.
         children: attachments
             .map<Widget>(

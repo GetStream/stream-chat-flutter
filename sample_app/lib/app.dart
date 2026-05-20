@@ -214,7 +214,7 @@ class _StreamChatSampleAppState extends State<StreamChatSampleApp>
                         }
 
                         return StreamChatTheme(
-                          data: StreamChatThemeData(brightness: Theme.of(context).brightness),
+                          data: StreamChatThemeData(),
                           child: wrapped,
                         );
                       },

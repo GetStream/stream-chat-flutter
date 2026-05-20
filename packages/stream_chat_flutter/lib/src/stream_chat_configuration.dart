@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/indicators/loading_indicator.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template streamChatConfiguration}
@@ -158,9 +157,6 @@ class StreamChatConfiguration extends InheritedWidget {
 class StreamChatConfigurationData {
   /// {@macro streamChatConfigurationData}
   factory StreamChatConfigurationData({
-    Widget loadingIndicator = const StreamLoadingIndicator(),
-    Widget Function(BuildContext, User)? defaultUserImage,
-    Widget Function(BuildContext, User)? placeholderUserImage,
     ReactionIconResolver? reactionIconResolver,
     bool? enforceUniqueReactions,
     bool draftMessagesEnabled = false,
@@ -172,9 +168,6 @@ class StreamChatConfigurationData {
     bool? reactionOverlap,
   }) {
     return StreamChatConfigurationData._(
-      loadingIndicator: loadingIndicator,
-      defaultUserImage: defaultUserImage ?? _defaultUserImage,
-      placeholderUserImage: placeholderUserImage,
       reactionIconResolver: reactionIconResolver ?? const DefaultReactionIconResolver(),
       enforceUniqueReactions: enforceUniqueReactions ?? true,
       draftMessagesEnabled: draftMessagesEnabled,
@@ -188,9 +181,6 @@ class StreamChatConfigurationData {
   }
 
   const StreamChatConfigurationData._({
-    required this.loadingIndicator,
-    required this.defaultUserImage,
-    required this.placeholderUserImage,
     required this.reactionIconResolver,
     required this.enforceUniqueReactions,
     required this.draftMessagesEnabled,
@@ -205,9 +195,6 @@ class StreamChatConfigurationData {
   /// Copies the configuration options from one [StreamChatConfigurationData] to
   /// another.
   StreamChatConfigurationData copyWith({
-    Widget? loadingIndicator,
-    Widget Function(BuildContext, User)? defaultUserImage,
-    Widget Function(BuildContext, User)? placeholderUserImage,
     ReactionIconResolver? reactionIconResolver,
     bool? enforceUniqueReactions,
     bool? draftMessagesEnabled,
@@ -220,9 +207,6 @@ class StreamChatConfigurationData {
   }) {
     return StreamChatConfigurationData(
       reactionIconResolver: reactionIconResolver ?? this.reactionIconResolver,
-      defaultUserImage: defaultUserImage ?? this.defaultUserImage,
-      placeholderUserImage: placeholderUserImage ?? this.placeholderUserImage,
-      loadingIndicator: loadingIndicator ?? this.loadingIndicator,
       enforceUniqueReactions: enforceUniqueReactions ?? this.enforceUniqueReactions,
       draftMessagesEnabled: draftMessagesEnabled ?? this.draftMessagesEnabled,
       messagePreviewFormatter: messagePreviewFormatter ?? this.messagePreviewFormatter,
@@ -238,15 +222,6 @@ class StreamChatConfigurationData {
   ///
   /// Defaults to False.
   final bool draftMessagesEnabled;
-
-  /// The widget that will be shown to indicate loading.
-  final Widget loadingIndicator;
-
-  /// The widget that will be built when the user image is unavailable.
-  final Widget Function(BuildContext, User) defaultUserImage;
-
-  /// The widget that will be built when the user image is loading.
-  final Widget Function(BuildContext, User)? placeholderUserImage;
 
   /// The resolver used to convert reaction types into [StreamEmojiContent]
   /// models and to provide the list of supported/default reaction types.
@@ -295,16 +270,4 @@ class StreamChatConfigurationData {
   /// When null, the widget resolves its own default (overlap on mobile,
   /// no overlap on desktop and web).
   final bool? reactionOverlap;
-
-  static Widget _defaultUserImage(
-    BuildContext context,
-    User user,
-  ) {
-    return Center(
-      child: StreamGradientAvatar(
-        name: user.name,
-        userId: user.id,
-      ),
-    );
-  }
 }

@@ -103,12 +103,11 @@ extension on CommonFinders {
 }
 
 Widget _wrapWithMaterialApp(
-  Widget widget, {
-  Brightness? brightness,
-}) {
+  Widget widget,
+) {
   return MaterialApp(
     home: StreamChatTheme(
-      data: StreamChatThemeData(brightness: brightness),
+      data: StreamChatThemeData(),
       child: Scaffold(
         body: widget,
       ),

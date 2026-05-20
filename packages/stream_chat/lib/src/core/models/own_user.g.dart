@@ -19,10 +19,14 @@ OwnUser _$OwnUserFromJson(Map<String, dynamic> json) => OwnUser(
   blockedUserIds: (json['blocked_user_ids'] as List<dynamic>?)?.map((e) => e as String).toList() ?? const [],
   pushPreferences: json['push_preferences'] == null
       ? null
-      : PushPreference.fromJson(json['push_preferences'] as Map<String, dynamic>),
+      : PushPreference.fromJson(
+          json['push_preferences'] as Map<String, dynamic>,
+        ),
   privacySettings: json['privacy_settings'] == null
       ? null
-      : PrivacySettings.fromJson(json['privacy_settings'] as Map<String, dynamic>),
+      : PrivacySettings.fromJson(
+          json['privacy_settings'] as Map<String, dynamic>,
+        ),
   id: json['id'] as String,
   role: json['role'] as String?,
   createdAt: json['created_at'] == null ? null : DateTime.parse(json['created_at'] as String),
@@ -43,18 +47,18 @@ OwnUser _$OwnUserFromJson(Map<String, dynamic> json) => OwnUser(
 
 Map<String, dynamic> _$OwnUserToJson(OwnUser instance) => <String, dynamic>{
   'id': instance.id,
-  if (instance.role case final value?) 'role': value,
+  'role': ?instance.role,
   'teams': instance.teams,
-  if (instance.createdAt?.toIso8601String() case final value?) 'created_at': value,
-  if (instance.updatedAt?.toIso8601String() case final value?) 'updated_at': value,
-  if (instance.lastActive?.toIso8601String() case final value?) 'last_active': value,
+  'created_at': ?instance.createdAt?.toIso8601String(),
+  'updated_at': ?instance.updatedAt?.toIso8601String(),
+  'last_active': ?instance.lastActive?.toIso8601String(),
   'online': instance.online,
   'banned': instance.banned,
-  if (instance.banExpires?.toIso8601String() case final value?) 'ban_expires': value,
-  if (instance.language case final value?) 'language': value,
-  if (instance.invisible case final value?) 'invisible': value,
-  if (instance.teamsRole case final value?) 'teams_role': value,
-  if (instance.avgResponseTime case final value?) 'avg_response_time': value,
+  'ban_expires': ?instance.banExpires?.toIso8601String(),
+  'language': ?instance.language,
+  'invisible': ?instance.invisible,
+  'teams_role': ?instance.teamsRole,
+  'avg_response_time': ?instance.avgResponseTime,
   'extra_data': instance.extraData,
   'devices': instance.devices.map((e) => e.toJson()).toList(),
   'mutes': instance.mutes.map((e) => e.toJson()).toList(),
@@ -63,6 +67,6 @@ Map<String, dynamic> _$OwnUserToJson(OwnUser instance) => <String, dynamic>{
   'unread_channels': instance.unreadChannels,
   'unread_threads': instance.unreadThreads,
   'blocked_user_ids': instance.blockedUserIds,
-  if (instance.pushPreferences?.toJson() case final value?) 'push_preferences': value,
-  if (instance.privacySettings?.toJson() case final value?) 'privacy_settings': value,
+  'push_preferences': ?instance.pushPreferences?.toJson(),
+  'privacy_settings': ?instance.privacySettings?.toJson(),
 };

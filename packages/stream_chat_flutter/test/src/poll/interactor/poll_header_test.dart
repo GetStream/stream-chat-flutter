@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/poll/interactor/poll_header.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 void main() {
   final poll = Poll(
@@ -23,8 +24,8 @@ void main() {
       fileName: 'poll_header_${brightness.name}',
       constraints: const BoxConstraints.tightFor(width: 300, height: 120),
       builder: () => _wrapWithMaterialApp(
-        brightness: brightness,
         PollHeader(poll: poll),
+        brightness: brightness,
       ),
     );
 
@@ -33,12 +34,12 @@ void main() {
       fileName: 'poll_header_long_question_${brightness.name}',
       constraints: const BoxConstraints.tightFor(width: 300, height: 150),
       builder: () => _wrapWithMaterialApp(
-        brightness: brightness,
         PollHeader(
           poll: poll.copyWith(
             name: 'A very long question that does not fit in one line',
           ),
         ),
+        brightness: brightness,
       ),
     );
 
@@ -47,10 +48,10 @@ void main() {
       fileName: 'poll_header_subtitle_voting_mode_disabled_${brightness.name}',
       constraints: const BoxConstraints.tightFor(width: 300, height: 120),
       builder: () => _wrapWithMaterialApp(
-        brightness: brightness,
         PollHeader(
           poll: poll.copyWith(isClosed: true),
         ),
+        brightness: brightness,
       ),
     );
 
@@ -59,10 +60,10 @@ void main() {
       fileName: 'poll_header_subtitle_voting_mode_unique_${brightness.name}',
       constraints: const BoxConstraints.tightFor(width: 300, height: 120),
       builder: () => _wrapWithMaterialApp(
-        brightness: brightness,
         PollHeader(
           poll: poll.copyWith(enforceUniqueVote: true),
         ),
+        brightness: brightness,
       ),
     );
 
@@ -71,10 +72,10 @@ void main() {
       fileName: 'poll_header_subtitle_voting_mode_limited_${brightness.name}',
       constraints: const BoxConstraints.tightFor(width: 300, height: 120),
       builder: () => _wrapWithMaterialApp(
-        brightness: brightness,
         PollHeader(
           poll: poll.copyWith(maxVotesAllowed: 2, enforceUniqueVote: false),
         ),
+        brightness: brightness,
       ),
     );
 
@@ -83,10 +84,10 @@ void main() {
       fileName: 'poll_header_subtitle_voting_mode_all_${brightness.name}',
       constraints: const BoxConstraints.tightFor(width: 300, height: 120),
       builder: () => _wrapWithMaterialApp(
-        brightness: brightness,
         PollHeader(
           poll: poll.copyWith(maxVotesAllowed: 3, enforceUniqueVote: false),
         ),
+        brightness: brightness,
       ),
     );
   }
@@ -94,18 +95,19 @@ void main() {
 
 Widget _wrapWithMaterialApp(
   Widget widget, {
-  Brightness? brightness,
+  Brightness brightness = Brightness.light,
 }) {
   return MaterialApp(
+    theme: ThemeData(brightness: brightness),
     home: StreamChatTheme(
-      data: StreamChatThemeData(brightness: brightness),
+      data: StreamChatThemeData(),
       child: Builder(
         builder: (context) {
-          final theme = StreamChatTheme.of(context);
+          final colorScheme = context.streamColorScheme;
           return Scaffold(
-            backgroundColor: theme.colorTheme.appBg,
+            backgroundColor: colorScheme.backgroundApp,
             body: Container(
-              color: theme.colorTheme.disabled,
+              color: colorScheme.textDisabled,
               padding: const EdgeInsets.all(16),
               child: Center(child: widget),
             ),

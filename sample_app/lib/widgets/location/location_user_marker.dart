@@ -7,8 +7,7 @@ enum MarkerSize {
   sm(24),
   md(32),
   lg(40),
-  xl(64)
-  ;
+  xl(64);
 
   const MarkerSize(this.value);
 
@@ -30,16 +29,13 @@ class LocationUserMarker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = StreamChatTheme.of(context);
-    final colorTheme = theme.colorTheme;
-
     if (user case final user? when sharedLocation.isLive) {
       const borderWidth = 4.0;
 
       final avatar = Material(
         shape: const CircleBorder(),
         clipBehavior: Clip.antiAlias,
-        color: colorTheme.overlayDark,
+        color: context.streamColorScheme.backgroundElevation1,
         child: Padding(
           padding: const EdgeInsets.all(borderWidth),
           child: StreamUserAvatar(
@@ -53,7 +49,7 @@ class LocationUserMarker extends StatelessWidget {
       if (sharedLocation.isExpired) return avatar;
 
       return AvatarGlow(
-        glowColor: colorTheme.accentPrimary,
+        glowColor: context.streamColorScheme.accentPrimary,
         child: avatar,
       );
     }
@@ -61,7 +57,7 @@ class LocationUserMarker extends StatelessWidget {
     return Icon(
       size: size.value,
       Icons.person_pin,
-      color: colorTheme.accentPrimary,
+      color: context.streamColorScheme.accentPrimary,
     );
   }
 

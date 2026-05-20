@@ -18,9 +18,7 @@ Map<String, dynamic> _$AttachmentFileToJson(AttachmentFile instance) => <String,
   'size': instance.size,
 };
 
-Preparing _$PreparingFromJson(Map<String, dynamic> json) => Preparing(
-  $type: json['runtimeType'] as String?,
-);
+Preparing _$PreparingFromJson(Map<String, dynamic> json) => Preparing($type: json['runtimeType'] as String?);
 
 Map<String, dynamic> _$PreparingToJson(Preparing instance) => <String, dynamic>{
   'runtimeType': instance.$type,
@@ -38,9 +36,7 @@ Map<String, dynamic> _$InProgressToJson(InProgress instance) => <String, dynamic
   'runtimeType': instance.$type,
 };
 
-Success _$SuccessFromJson(Map<String, dynamic> json) => Success(
-  $type: json['runtimeType'] as String?,
-);
+Success _$SuccessFromJson(Map<String, dynamic> json) => Success($type: json['runtimeType'] as String?);
 
 Map<String, dynamic> _$SuccessToJson(Success instance) => <String, dynamic>{
   'runtimeType': instance.$type,

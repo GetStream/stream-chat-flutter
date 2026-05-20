@@ -312,18 +312,16 @@ void main() {
 }
 
 Widget _wrapWithStreamChatApp(
-  Widget widget, {
-  Brightness? brightness,
-}) {
+  Widget widget,
+) {
   return MaterialApp(
     debugShowCheckedModeBanner: false,
     home: StreamChatTheme(
-      data: StreamChatThemeData(brightness: brightness),
+      data: StreamChatThemeData(),
       child: Builder(
         builder: (context) {
-          final theme = StreamChatTheme.of(context);
           return Scaffold(
-            backgroundColor: theme.colorTheme.appBg,
+            backgroundColor: context.streamColorScheme.backgroundApp,
             body: widget,
           );
         },

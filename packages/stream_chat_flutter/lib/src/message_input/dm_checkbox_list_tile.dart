@@ -45,19 +45,22 @@ class DmCheckboxListTile extends StatelessWidget {
       ),
     );
 
-    return MergeSemantics(
-      child: ListTile(
-        dense: true,
-        leading: checkbox,
-        minLeadingWidth: 0,
-        horizontalTitleGap: spacing.xs,
-        visualDensity: visualDensity,
-        enabled: onChanged != null,
-        onTap: () => onChanged?.call(!value),
-        contentPadding: contentPadding,
-        title: Text(
-          context.translations.alsoSendAsDirectMessageLabel,
-          style: textTheme.metadataDefault.copyWith(color: colorScheme.textPrimary),
+    return Material(
+      type: MaterialType.transparency,
+      child: MergeSemantics(
+        child: ListTile(
+          dense: true,
+          leading: checkbox,
+          minLeadingWidth: 0,
+          horizontalTitleGap: spacing.xs,
+          visualDensity: visualDensity,
+          enabled: onChanged != null,
+          onTap: () => onChanged?.call(!value),
+          contentPadding: contentPadding,
+          title: Text(
+            context.translations.alsoSendAsDirectMessageLabel,
+            style: textTheme.metadataDefault.copyWith(color: colorScheme.textPrimary),
+          ),
         ),
       ),
     );

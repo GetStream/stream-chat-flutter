@@ -58,7 +58,6 @@ void main() {
         fileName: 'stream_audio_waveform_slider_$theme',
         constraints: const BoxConstraints.tightFor(width: 300, height: 50),
         builder: () => _wrapWithMaterialApp(
-          brightness: brightness,
           Padding(
             padding: const EdgeInsets.all(8),
             child: StreamAudioWaveformSlider(
@@ -67,6 +66,7 @@ void main() {
               onChanged: (double value) {},
             ),
           ),
+          brightness: brightness,
         ),
       );
 
@@ -75,7 +75,6 @@ void main() {
         fileName: 'stream_audio_waveform_slider_inverted_$theme',
         constraints: const BoxConstraints.tightFor(width: 300, height: 50),
         builder: () => _wrapWithMaterialApp(
-          brightness: brightness,
           Padding(
             padding: const EdgeInsets.all(8),
             child: StreamAudioWaveformSlider(
@@ -85,6 +84,7 @@ void main() {
               onChanged: (double value) {},
             ),
           ),
+          brightness: brightness,
         ),
       );
 
@@ -93,7 +93,6 @@ void main() {
         fileName: 'stream_audio_waveform_slider_progress_$theme',
         constraints: const BoxConstraints.tightFor(width: 300, height: 50),
         builder: () => _wrapWithMaterialApp(
-          brightness: brightness,
           Padding(
             padding: const EdgeInsets.all(8),
             child: StreamAudioWaveformSlider(
@@ -103,6 +102,7 @@ void main() {
               onChanged: (double value) {},
             ),
           ),
+          brightness: brightness,
         ),
       );
 
@@ -111,7 +111,6 @@ void main() {
         fileName: 'stream_audio_waveform_slider_custom_$theme',
         constraints: const BoxConstraints.tightFor(width: 300, height: 50),
         builder: () => _wrapWithMaterialApp(
-          brightness: brightness,
           Padding(
             padding: const EdgeInsets.all(8),
             child: StreamAudioWaveformSlider(
@@ -123,6 +122,7 @@ void main() {
               onChanged: (double value) {},
             ),
           ),
+          brightness: brightness,
         ),
       );
 
@@ -131,7 +131,6 @@ void main() {
         fileName: 'stream_audio_waveform_slider_empty_$theme',
         constraints: const BoxConstraints.tightFor(width: 300, height: 50),
         builder: () => _wrapWithMaterialApp(
-          brightness: brightness,
           Padding(
             padding: const EdgeInsets.all(8),
             child: StreamAudioWaveformSlider(
@@ -140,6 +139,7 @@ void main() {
               onChanged: (double value) {},
             ),
           ),
+          brightness: brightness,
         ),
       );
 
@@ -148,7 +148,6 @@ void main() {
         fileName: 'stream_audio_waveform_slider_less_data_$theme',
         constraints: const BoxConstraints.tightFor(width: 300, height: 50),
         builder: () => _wrapWithMaterialApp(
-          brightness: brightness,
           Padding(
             padding: const EdgeInsets.all(8),
             child: StreamAudioWaveformSlider(
@@ -157,6 +156,7 @@ void main() {
               onChanged: (double value) {},
             ),
           ),
+          brightness: brightness,
         ),
       );
     }
@@ -211,18 +211,17 @@ List<double> generateStaticWaveform({
 
 Widget _wrapWithMaterialApp(
   Widget widget, {
-  Brightness? brightness,
+  Brightness brightness = Brightness.light,
 }) {
   return MaterialApp(
-    theme: ThemeData(brightness: brightness),
     debugShowCheckedModeBanner: false,
+    theme: ThemeData(brightness: brightness),
     home: StreamChatTheme(
-      data: StreamChatThemeData(brightness: brightness),
+      data: StreamChatThemeData(),
       child: Builder(
         builder: (context) {
-          final theme = StreamChatTheme.of(context);
           return Scaffold(
-            backgroundColor: theme.colorTheme.appBg,
+            backgroundColor: context.streamColorScheme.backgroundApp,
             body: Center(child: widget),
           );
         },

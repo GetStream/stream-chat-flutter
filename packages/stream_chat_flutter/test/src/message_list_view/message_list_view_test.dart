@@ -86,7 +86,7 @@ void main() {
             bundle: rootBundle,
             child: StreamChat(
               client: client,
-              streamChatThemeData: StreamChatThemeData.light().copyWith(
+              streamChatThemeData: StreamChatThemeData().copyWith(
                 messageListViewTheme: const StreamMessageListViewThemeData(
                   backgroundColor: Colors.grey,
                   backgroundImage: DecorationImage(
@@ -153,7 +153,7 @@ void main() {
             bundle: rootBundle,
             child: StreamChat(
               client: client,
-              streamChatThemeData: StreamChatThemeData.light().copyWith(
+              streamChatThemeData: StreamChatThemeData().copyWith(
                 messageListViewTheme: const StreamMessageListViewThemeData(
                   backgroundColor: Colors.grey,
                   backgroundImage: DecorationImage(
@@ -200,7 +200,7 @@ void main() {
             bundle: rootBundle,
             child: StreamChat(
               client: client,
-              streamChatThemeData: StreamChatThemeData.light().copyWith(
+              streamChatThemeData: StreamChatThemeData().copyWith(
                 messageListViewTheme: const StreamMessageListViewThemeData(
                   backgroundColor: Colors.grey,
                   backgroundImage: DecorationImage(

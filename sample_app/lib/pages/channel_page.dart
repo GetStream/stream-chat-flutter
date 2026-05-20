@@ -57,15 +57,11 @@ class _ChannelPageState extends State<ChannelPage> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = StreamChatTheme.of(context);
-    final textTheme = theme.textTheme;
-    final colorTheme = theme.colorTheme;
-
     final channel = StreamChannel.of(context).channel;
     final config = channel.config;
 
     return Scaffold(
-      backgroundColor: colorTheme.appBg,
+      backgroundColor: context.streamColorScheme.backgroundApp,
       appBar: StreamChannelHeader(
         onChannelAvatarPressed: (channel) {
           final isOneToOne = channel.isOneToOne;
@@ -99,14 +95,14 @@ class _ChannelPageState extends State<ChannelPage> {
                   right: 0,
                   child: Container(
                     alignment: Alignment.centerLeft,
-                    color: colorTheme.appBg.withOpacity(.9),
+                    color: context.streamColorScheme.backgroundApp.withOpacity(.9),
                     child: StreamTypingIndicator(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 8,
                         vertical: 4,
                       ),
-                      style: textTheme.footnote.copyWith(
-                        color: colorTheme.textLowEmphasis,
+                      style: context.streamTextTheme.captionDefault.copyWith(
+                        color: context.streamColorScheme.textSecondary,
                       ),
                     ),
                   ),

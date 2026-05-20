@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/misc/adaptive_dialog_action.dart';
-import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:stream_core_flutter/stream_core_flutter.dart';
@@ -36,9 +35,7 @@ class ModeratedMessageActionsModal extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = StreamChatTheme.of(context);
-    final textTheme = theme.textTheme;
-    final colorTheme = theme.colorTheme;
+    final colorScheme = context.streamColorScheme;
 
     final actions = <Widget>[
       ...messageActions.map(
@@ -52,20 +49,20 @@ class ModeratedMessageActionsModal extends StatelessWidget {
 
     return AlertDialog.adaptive(
       clipBehavior: Clip.antiAlias,
-      backgroundColor: colorTheme.barsBg,
+      backgroundColor: colorScheme.backgroundElevation1,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       icon: Icon(context.streamIcons.flag),
-      iconColor: colorTheme.accentPrimary,
+      iconColor: colorScheme.accentPrimary,
       title: Text(context.translations.moderationReviewModalTitle),
-      titleTextStyle: textTheme.headline.copyWith(
-        color: colorTheme.textHighEmphasis,
+      titleTextStyle: context.streamTextTheme.headingMd.copyWith(
+        color: colorScheme.textPrimary,
       ),
       content: Text(
         context.translations.moderationReviewModalDescription,
         textAlign: TextAlign.center,
       ),
-      contentTextStyle: textTheme.body.copyWith(
-        color: colorTheme.textLowEmphasis,
+      contentTextStyle: context.streamTextTheme.bodyDefault.copyWith(
+        color: colorScheme.textSecondary,
       ),
       actions: actions,
       actionsAlignment: MainAxisAlignment.center,

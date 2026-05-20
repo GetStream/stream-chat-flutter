@@ -44,7 +44,7 @@ void main() {
         MaterialApp(
           home: StreamChat(
             client: client,
-            streamChatThemeData: StreamChatThemeData.light(),
+            streamChatThemeData: StreamChatThemeData(),
             child: StreamChannel(
               channel: channel,
               child: Scaffold(
@@ -74,7 +74,7 @@ void main() {
       return MaterialAppWrapper(
         home: StreamChat(
           client: client,
-          streamChatThemeData: StreamChatThemeData.light(),
+          streamChatThemeData: StreamChatThemeData(),
           child: StreamChannel(
             channel: channel,
             child: Scaffold(

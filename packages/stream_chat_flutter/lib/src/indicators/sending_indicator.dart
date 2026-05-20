@@ -29,14 +29,13 @@ class StreamSendingIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final streamChatTheme = StreamChatTheme.of(context);
-    final colorTheme = streamChatTheme.colorTheme;
+    final colorScheme = context.streamColorScheme;
 
     if (isMessageRead) {
       return Icon(
         context.streamIcons.checks,
         size: size,
-        color: colorTheme.accentPrimary,
+        color: colorScheme.accentPrimary,
       );
     }
 
@@ -44,7 +43,7 @@ class StreamSendingIndicator extends StatelessWidget {
       return Icon(
         context.streamIcons.checks,
         size: size,
-        color: colorTheme.textLowEmphasis,
+        color: colorScheme.textSecondary,
       );
     }
 
@@ -52,7 +51,7 @@ class StreamSendingIndicator extends StatelessWidget {
       return Icon(
         context.streamIcons.checkmark,
         size: size,
-        color: colorTheme.textLowEmphasis,
+        color: colorScheme.textSecondary,
       );
     }
 
@@ -60,7 +59,7 @@ class StreamSendingIndicator extends StatelessWidget {
       return Icon(
         context.streamIcons.clock,
         size: size,
-        color: colorTheme.textLowEmphasis,
+        color: colorScheme.textSecondary,
       );
     }
 

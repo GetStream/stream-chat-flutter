@@ -59,7 +59,9 @@ Message _$MessageFromJson(Map<String, dynamic> json) => Message(
   restrictedVisibility: (json['restricted_visibility'] as List<dynamic>?)?.map((e) => e as String).toList(),
   moderation: Message._moderationReadValue(json, 'moderation') == null
       ? null
-      : Moderation.fromJson(Message._moderationReadValue(json, 'moderation') as Map<String, dynamic>),
+      : Moderation.fromJson(
+          Message._moderationReadValue(json, 'moderation') as Map<String, dynamic>,
+        ),
   draft: json['draft'] == null ? null : Draft.fromJson(json['draft'] as Map<String, dynamic>),
   reminder: json['reminder'] == null ? null : MessageReminder.fromJson(json['reminder'] as Map<String, dynamic>),
   channelRole: Message._channelRoleReadValue(json, 'channel_role') as String?,
@@ -71,7 +73,7 @@ Message _$MessageFromJson(Map<String, dynamic> json) => Message(
 Map<String, dynamic> _$MessageToJson(Message instance) => <String, dynamic>{
   'id': instance.id,
   'text': instance.text,
-  if (MessageType.toJson(instance.type) case final value?) 'type': value,
+  'type': ?MessageType.toJson(instance.type),
   'attachments': instance.attachments.map((e) => e.toJson()).toList(),
   'mentioned_users': User.toIds(instance.mentionedUsers),
   'parent_id': instance.parentId,
@@ -81,7 +83,7 @@ Map<String, dynamic> _$MessageToJson(Message instance) => <String, dynamic>{
   'pinned': instance.pinned,
   'pin_expires': instance.pinExpires?.toIso8601String(),
   'poll_id': instance.pollId,
-  if (instance.restrictedVisibility case final value?) 'restricted_visibility': value,
-  if (instance.sharedLocation?.toJson() case final value?) 'shared_location': value,
+  'restricted_visibility': ?instance.restrictedVisibility,
+  'shared_location': ?instance.sharedLocation?.toJson(),
   'extra_data': instance.extraData,
 };

@@ -139,7 +139,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: StreamChatTheme.of(context).colorTheme.appBg,
+      backgroundColor: context.streamColorScheme.backgroundApp,
       appBar: StreamAppBar(title: const Text('New Chat')),
       body: StreamConnectionStatusBuilder(
         statusBuilder: (context, status) {
@@ -185,7 +185,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
                           children: [
                             Container(
                               decoration: BoxDecoration(
-                                color: StreamChatTheme.of(context).colorTheme.disabled,
+                                color: context.streamColorScheme.textDisabled,
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               padding: const EdgeInsets.only(left: 24),
@@ -195,14 +195,14 @@ class _NewChatScreenState extends State<NewChatScreen> {
                                   user.name,
                                   maxLines: 1,
                                   style: TextStyle(
-                                    color: StreamChatTheme.of(context).colorTheme.textHighEmphasis,
+                                    color: context.streamColorScheme.textPrimary,
                                   ),
                                 ),
                               ),
                             ),
                             Container(
                               foregroundDecoration: BoxDecoration(
-                                color: StreamChatTheme.of(context).colorTheme.overlay,
+                                color: context.streamColorScheme.backgroundOverlayLight,
                                 shape: BoxShape.circle,
                               ),
                               child: StreamUserAvatar(
@@ -238,7 +238,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
                               child: Center(
                                 child: Icon(
                                   context.streamIcons.users,
-                                  color: StreamChatTheme.of(context).colorTheme.accentPrimary,
+                                  color: context.streamColorScheme.accentPrimary,
                                   size: 24,
                                 ),
                               ),
@@ -246,7 +246,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
                             const SizedBox(width: 8),
                             Text(
                               'Create a Group',
-                              style: StreamChatTheme.of(context).textTheme.bodyBold,
+                              style: context.streamTextTheme.bodyEmphasis,
                             ),
                           ],
                         ),
@@ -256,7 +256,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
                     Container(
                       width: double.maxFinite,
                       decoration: BoxDecoration(
-                        gradient: StreamChatTheme.of(context).colorTheme.bgGradient,
+                        color: context.streamColorScheme.backgroundElevation1,
                       ),
                       child: Padding(
                         padding: const EdgeInsets.symmetric(
@@ -265,8 +265,8 @@ class _NewChatScreenState extends State<NewChatScreen> {
                         ),
                         child: Text(
                           _isSearchActive ? 'Matches for "$_userNameQuery"' : 'On the platform',
-                          style: StreamChatTheme.of(context).textTheme.footnote.copyWith(
-                            color: StreamChatTheme.of(context).colorTheme.textHighEmphasis.withOpacity(.5),
+                          style: context.streamTextTheme.captionDefault.copyWith(
+                            color: context.streamColorScheme.textPrimary.withOpacity(.5),
                           ),
                         ),
                       ),
@@ -321,10 +321,8 @@ class _NewChatScreenState extends State<NewChatScreen> {
                                               ),
                                               Text(
                                                 'No user matches these keywords...',
-                                                style: StreamChatTheme.of(context).textTheme.footnote.copyWith(
-                                                  color: StreamChatTheme.of(
-                                                    context,
-                                                  ).colorTheme.textHighEmphasis.withOpacity(.5),
+                                                style: context.streamTextTheme.captionDefault.copyWith(
+                                                  color: context.streamColorScheme.textPrimary.withOpacity(.5),
                                                 ),
                                               ),
                                             ],
@@ -349,7 +347,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
                                   'No chats here yet...',
                                   style: TextStyle(
                                     fontSize: 12,
-                                    color: StreamChatTheme.of(context).colorTheme.textHighEmphasis.withOpacity(.5),
+                                    color: context.streamColorScheme.textPrimary.withOpacity(.5),
                                   ),
                                 ),
                               );

@@ -104,9 +104,8 @@ class _StreamMentionAutocompleteOptionsState extends State<StreamMentionAutocomp
           optionBuilder: (context, user) {
             final mentionsTileBuilder = widget.mentionsTileBuilder;
             if (mentionsTileBuilder != null) {
-              final colorTheme = StreamChatTheme.of(context).colorTheme;
               return Material(
-                color: colorTheme.barsBg,
+                color: context.streamColorScheme.backgroundElevation1,
                 child: InkWell(
                   onTap: widget.onMentionUserTap == null ? null : () => widget.onMentionUserTap!(user),
                   child: mentionsTileBuilder(context, user),

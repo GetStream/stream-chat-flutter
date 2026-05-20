@@ -310,6 +310,7 @@ class _PagedValueListViewState<K, V> extends State<PagedValueListView<K, V>> {
           keyboardDismissBehavior: widget.keyboardDismissBehavior,
           restorationId: widget.restorationId,
           dragStartBehavior: widget.dragStartBehavior,
+          // ignore: deprecated_member_use
           cacheExtent: widget.cacheExtent,
           clipBehavior: widget.clipBehavior,
           itemCount: value.itemCount,
@@ -667,6 +668,7 @@ class _PagedValueGridViewState<K, V> extends State<PagedValueGridView<K, V>> {
           addAutomaticKeepAlives: widget.addAutomaticKeepAlives,
           addRepaintBoundaries: widget.addRepaintBoundaries,
           addSemanticIndexes: widget.addSemanticIndexes,
+          // ignore: deprecated_member_use
           cacheExtent: widget.cacheExtent,
           semanticChildCount: widget.semanticChildCount,
           dragStartBehavior: widget.dragStartBehavior,

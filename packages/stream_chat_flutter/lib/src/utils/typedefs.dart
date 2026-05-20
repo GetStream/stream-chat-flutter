@@ -86,20 +86,6 @@ typedef ChannelInfoCallback = void Function(Channel);
 /// {@endtemplate}
 typedef ViewInfoCallback = void Function(Channel);
 
-/// {@template attachmentActionsBuilder}
-/// A widget builder for representing the actions a user can take on an
-/// attachment.
-///
-/// [defaultActionsModal] is the default [AttachmentActionsModal] configuration.
-/// Use [defaultActionsModal.copyWith] to easily customize it
-/// {@endtemplate}
-typedef AttachmentActionsBuilder =
-    Widget Function(
-      BuildContext context,
-      Attachment attachment,
-      AttachmentActionsModal defaultActionsModal,
-    );
-
 /// {@template errorListener}
 /// A callback that can be passed to [StreamMessageComposer.onError].
 ///

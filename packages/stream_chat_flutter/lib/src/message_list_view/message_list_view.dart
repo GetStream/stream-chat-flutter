@@ -516,8 +516,8 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       return Center(
         child: Text(
           context.translations.genericErrorText,
-          style: _streamTheme.textTheme.footnote.copyWith(
-            color: _streamTheme.colorTheme.textHighEmphasis
+          style: context.streamTextTheme.captionDefault.copyWith(
+            color: context.streamColorScheme.textPrimary
                 // ignore: deprecated_member_use
                 .withOpacity(0.5),
           ),
