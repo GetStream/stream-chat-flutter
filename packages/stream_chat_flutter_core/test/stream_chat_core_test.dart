@@ -219,16 +219,23 @@ void main() {
     testWidgets(
       'should not listen for events when app goes to background without handler',
       (tester) async {
-        // Arrange
-        await pumpStreamChatCore(tester);
+        await tester.runAsync(() async {
+          // Arrange — short keep-alive so the timer fires quickly under test.
+          await pumpStreamChatCore(
+            tester,
+            backgroundKeepAlive: const Duration(milliseconds: 100),
+          );
 
-        // Act
-        tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
-        await tester.pumpAndSettle();
+          // Act
+          tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+          await tester.pumpAndSettle();
 
-        // Assert — the timer-expiry path is covered by a separate test;
-        // here we only verify that no event subscription is started.
-        verifyNever(mockClient.on);
+          // Wait for the keep-alive timer to expire.
+          await Future<void>.delayed(const Duration(milliseconds: 200));
+
+          // Assert
+          verify(mockClient.closeConnection).called(1);
+        });
       },
     );
 
@@ -320,9 +327,9 @@ void main() {
           () => mockClient.wsConnectionStatus,
         ).thenReturn(ConnectionStatus.disconnected);
 
-        // Act - restore connectivity
+        // Act - restore connectivity (pump past the debounce window)
         connectivityController.add([ConnectivityResult.mobile]);
-        await tester.pumpAndSettle();
+        await tester.pump(const Duration(seconds: 4));
 
         // Assert
         verify(mockClient.openConnection).called(1);
@@ -340,9 +347,9 @@ void main() {
           () => mockClient.wsConnectionStatus,
         ).thenReturn(ConnectionStatus.connected);
 
-        // Act - lose connectivity
+        // Act - lose connectivity (pump past the debounce window)
         connectivityController.add([ConnectivityResult.none]);
-        await tester.pumpAndSettle();
+        await tester.pump(const Duration(seconds: 4));
 
         // Assert
         verify(mockClient.closeConnection).called(1);
@@ -369,6 +376,50 @@ void main() {
         // Assert
         verifyNever(mockClient.openConnection);
         verifyNever(mockClient.closeConnection);
+      },
+    );
+
+    testWidgets(
+      'coalesces rapid connectivity events into a single reconnect',
+      (tester) async {
+        // Regression test for the 3 s debounce on the connectivity stream:
+        // flapping cellular emits multiple events within a short window;
+        // only the trailing-edge state should drive one reconnect.
+        await pumpStreamChatCore(tester);
+
+        when(() => mockClient.wsConnectionStatus).thenReturn(ConnectionStatus.disconnected);
+
+        // Fire three events spaced under 1 s — all inside the debounce window.
+        connectivityController.add([ConnectivityResult.none]);
+        await tester.pump(const Duration(milliseconds: 200));
+        connectivityController.add([ConnectivityResult.mobile]);
+        await tester.pump(const Duration(milliseconds: 200));
+        connectivityController.add([ConnectivityResult.wifi]);
+
+        // Still inside the debounce window — nothing should have fired yet.
+        await tester.pump(const Duration(seconds: 2));
+        verifyNever(mockClient.openConnection);
+
+        // Cross the debounce edge — exactly one reconnect for the burst.
+        await tester.pump(const Duration(seconds: 2));
+        verify(mockClient.openConnection).called(1);
+      },
+    );
+
+    testWidgets(
+      'fires separate reconnects when events are spaced past the debounce',
+      (tester) async {
+        await pumpStreamChatCore(tester);
+
+        when(() => mockClient.wsConnectionStatus).thenReturn(ConnectionStatus.disconnected);
+
+        connectivityController.add([ConnectivityResult.mobile]);
+        await tester.pump(const Duration(seconds: 4));
+        verify(mockClient.openConnection).called(1);
+
+        connectivityController.add([ConnectivityResult.wifi]);
+        await tester.pump(const Duration(seconds: 4));
+        verify(mockClient.openConnection).called(1);
       },
     );
 
@@ -406,9 +457,10 @@ void main() {
         verifyNever(mockClient.closeConnection);
         verifyNever(mockClient.openConnection);
 
-        // Now emit a connectivity change (this is the 2nd event, won't be skipped)
+        // Now emit a connectivity change (this is the 2nd event, won't be
+        // skipped). Pump past the debounce window.
         testConnectivityController.add([ConnectivityResult.wifi]);
-        await tester.pumpAndSettle();
+        await tester.pump(const Duration(seconds: 4));
 
         // Assert - second event should trigger reconnection
         verify(mockClient.closeConnection).called(1);

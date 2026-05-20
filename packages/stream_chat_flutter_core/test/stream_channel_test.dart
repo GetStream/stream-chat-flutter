@@ -763,4 +763,149 @@ void main() {
       },
     );
   });
+
+  group('pruneOldest', () {
+    final mockChannel = MockChannel();
+    tearDownAll(mockChannel.dispose);
+
+    // Mutable backing for state.messages so the mocked pruneOldest can
+    // modify the value subsequent stubs return.
+    var stateMessages = <Message>[];
+
+    Future<StreamChannelState> _pumpStreamChannel(WidgetTester tester) async {
+      StreamChannelState? channelState;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: StreamChannel(
+              channel: mockChannel,
+              child: Builder(
+                builder: (context) {
+                  channelState = StreamChannel.of(context);
+                  return const Text('Channel Content');
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      return channelState!;
+    }
+
+    List<Message> _generateMessages(int count) => List.generate(
+      count,
+      (i) => Message(
+        id: 'msg-$i',
+        createdAt: DateTime(2024).add(Duration(seconds: i)),
+        user: User(id: 'otherUserId'),
+      ),
+    );
+
+    setUp(() {
+      when(() => mockChannel.cid).thenReturn('test:channel');
+      when(() => mockChannel.state.messages).thenAnswer((_) => stateMessages);
+      when(() => mockChannel.state.isUpToDate).thenReturn(true);
+      when(() => mockChannel.state.unreadCount).thenReturn(0);
+      when(() => mockChannel.state.pruneOldest(any())).thenAnswer((invocation) {
+        final n = invocation.positionalArguments[0] as int;
+        if (n <= 0) return;
+        if (stateMessages.length <= n) return;
+        stateMessages = stateMessages.sublist(stateMessages.length - n);
+      });
+    });
+
+    tearDown(() {
+      stateMessages = <Message>[];
+      reset(mockChannel);
+    });
+
+    testWidgets('delegates to channel.state.pruneOldest', (tester) async {
+      stateMessages = _generateMessages(10);
+
+      final streamChannel = await _pumpStreamChannel(tester);
+      streamChannel.pruneOldest(4);
+
+      verify(() => mockChannel.state.pruneOldest(4)).called(1);
+      expect(stateMessages, hasLength(4));
+    });
+
+    testWidgets(
+      're-enables top pagination after a prune actually drops messages',
+      (tester) async {
+        stateMessages = _generateMessages(10);
+
+        // First top query returns fewer than the limit, which the
+        // StreamChannel uses to mark top-pagination as ended.
+        when(
+          () => mockChannel.query(
+            preferOffline: any(named: 'preferOffline'),
+            messagesPagination: any(named: 'messagesPagination'),
+          ),
+        ).thenAnswer(
+          (_) async => ChannelState(messages: _generateMessages(2)),
+        );
+
+        final streamChannel = await _pumpStreamChannel(tester);
+
+        await streamChannel.queryMessages();
+        await streamChannel.queryMessages();
+
+        // Second call short-circuits because top-pagination is now ended.
+        verify(
+          () => mockChannel.query(
+            preferOffline: any(named: 'preferOffline'),
+            messagesPagination: any(named: 'messagesPagination'),
+          ),
+        ).called(1);
+
+        // Pruning drops messages and should re-enable top pagination.
+        streamChannel.pruneOldest(4);
+        expect(stateMessages, hasLength(4));
+
+        await streamChannel.queryMessages();
+
+        verify(
+          () => mockChannel.query(
+            preferOffline: any(named: 'preferOffline'),
+            messagesPagination: any(named: 'messagesPagination'),
+          ),
+        ).called(1);
+      },
+    );
+
+    testWidgets(
+      'leaves top pagination state untouched when prune is a no-op',
+      (tester) async {
+        stateMessages = _generateMessages(3);
+
+        when(
+          () => mockChannel.query(
+            preferOffline: any(named: 'preferOffline'),
+            messagesPagination: any(named: 'messagesPagination'),
+          ),
+        ).thenAnswer(
+          (_) async => ChannelState(messages: _generateMessages(2)),
+        );
+
+        final streamChannel = await _pumpStreamChannel(tester);
+
+        await streamChannel.queryMessages();
+
+        // No-op prune (limit higher than current count).
+        streamChannel.pruneOldest(10);
+        expect(stateMessages, hasLength(3));
+
+        await streamChannel.queryMessages();
+
+        // Top pagination remains ended — only the initial query ran.
+        verify(
+          () => mockChannel.query(
+            preferOffline: any(named: 'preferOffline'),
+            messagesPagination: any(named: 'messagesPagination'),
+          ),
+        ).called(1);
+      },
+    );
+  });
 }

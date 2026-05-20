@@ -74,7 +74,7 @@ void main() {
       itemPositionsListener: itemPositionsListener,
     );
 
-    unawaited(itemScrollController.scrollTo(index: 2, duration: scrollDuration));
+    unawaited(itemScrollController.scrollTo(index: 2, duration: scrollDuration, curve: Curves.linear));
     await tester.pump();
     await tester.pump(scrollDuration);
 
@@ -98,7 +98,7 @@ void main() {
       itemPositionsListener: itemPositionsListener,
     );
 
-    unawaited(itemScrollController.scrollTo(index: 100, duration: scrollDuration));
+    unawaited(itemScrollController.scrollTo(index: 100, duration: scrollDuration, curve: Curves.linear));
     await tester.pumpAndSettle();
 
     expect(find.text('Item 99'), findsNothing);
@@ -154,7 +154,7 @@ void main() {
       const Offset(10 + itemWidth * 2 + separatorWidth, screenHeight - 10),
     );
 
-    unawaited(itemScrollController.scrollTo(index: 494, duration: scrollDuration));
+    unawaited(itemScrollController.scrollTo(index: 494, duration: scrollDuration, curve: Curves.linear));
     await tester.pumpAndSettle();
 
     await tester.drag(find.byType(ScrollablePositionedList), const Offset(-500, 0));

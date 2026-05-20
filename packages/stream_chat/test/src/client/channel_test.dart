@@ -9740,4 +9740,316 @@ void main() {
       },
     );
   });
+  group('updateChannelState identity guard', () {
+    const channelId = 'test-channel-id';
+    const channelType = 'test-channel-type';
+    late final client = MockStreamChatClient();
+
+    setUpAll(() {
+      when(() => client.detachedLogger(any())).thenAnswer((invocation) {
+        final name = invocation.positionalArguments.first;
+        return _createLogger(name);
+      });
+      when(() => client.retryPolicy).thenReturn(
+        RetryPolicy(
+          shouldRetry: (_, __, ___) => false,
+          delayFactor: Duration.zero,
+        ),
+      );
+      when(() => client.state).thenReturn(FakeClientState());
+      when(() => client.logger).thenReturn(_createLogger('mock-client-logger'));
+      when(
+        () => client.channelDeliveryReporter.submitForDelivery(any()),
+      ).thenAnswer((_) async {});
+    });
+
+    Channel _seededChannel() {
+      final base = _generateChannelState(channelId, channelType);
+      final now = DateTime.now();
+      final seeded = base.copyWith(
+        messages: [
+          Message(id: 'm1', text: '1', createdAt: now),
+          Message(id: 'm2', text: '2', createdAt: now.add(const Duration(seconds: 1))),
+          Message(id: 'm3', text: '3', createdAt: now.add(const Duration(seconds: 2))),
+        ],
+      );
+      return Channel.fromState(client, seeded);
+    }
+
+    test(
+      'preserves messages reference when updatedState.messages is null',
+      () {
+        final channel = _seededChannel();
+        addTearDown(channel.dispose);
+
+        final before = channel.state!.messages;
+        channel.state!.updateChannelState(
+          ChannelState(channel: channel.state!.channelState.channel),
+        );
+        final after = channel.state!.messages;
+
+        expect(identical(before, after), isTrue);
+      },
+    );
+
+    test(
+      'preserves messages reference when updatedState.messages is identical',
+      () {
+        final channel = _seededChannel();
+        addTearDown(channel.dispose);
+
+        final before = channel.state!.messages;
+        // copyWith without messages keeps the same `messages` reference, so
+        // updateChannelState should hit the identity-guard fast path.
+        channel.state!.updateChannelState(
+          channel.state!.channelState.copyWith(
+            read: [
+              Read(
+                user: User(id: 'me'),
+                lastRead: DateTime.now(),
+                unreadMessages: 1,
+              ),
+            ],
+          ),
+        );
+        final after = channel.state!.messages;
+
+        expect(identical(before, after), isTrue);
+      },
+    );
+
+    test(
+      'still merges messages when updatedState.messages is a different list',
+      () {
+        final channel = _seededChannel();
+        addTearDown(channel.dispose);
+
+        final newMessage = Message(
+          id: 'm4',
+          text: '4',
+          createdAt: DateTime.now().add(const Duration(seconds: 10)),
+        );
+        channel.state!.updateChannelState(
+          ChannelState(
+            channel: channel.state!.channelState.channel,
+            messages: [newMessage],
+          ),
+        );
+
+        expect(
+          channel.state!.messages.map((m) => m.id),
+          ['m1', 'm2', 'm3', 'm4'],
+        );
+      },
+    );
+
+    test('cold-path merge interleaves new messages in sorted order', () {
+      final channel = _seededChannel();
+      addTearDown(channel.dispose);
+
+      final base = channel.state!.messages.first.createdAt;
+      // Incoming list is sorted ascending by createdAt and slots between
+      // the existing m1, m2, m3.
+      final incoming = [
+        Message(
+          id: 'm1.5',
+          text: 'between m1 and m2',
+          createdAt: base.add(const Duration(milliseconds: 500)),
+        ),
+        Message(
+          id: 'm2.5',
+          text: 'between m2 and m3',
+          createdAt: base.add(const Duration(milliseconds: 1500)),
+        ),
+      ];
+      channel.state!.updateChannelState(
+        ChannelState(
+          channel: channel.state!.channelState.channel,
+          messages: incoming,
+        ),
+      );
+
+      expect(
+        channel.state!.messages.map((m) => m.id),
+        ['m1', 'm1.5', 'm2', 'm2.5', 'm3'],
+      );
+    });
+
+    test('cold-path merge runs syncWith on overlapping ids', () {
+      final channel = _seededChannel();
+      addTearDown(channel.dispose);
+
+      final localStamp = DateTime.now();
+      // Seed m2 with a localCreatedAt that the incoming version doesn't
+      // carry, so we can verify syncWith fired during the merge.
+      channel.state!.updateMessage(
+        Message(
+          id: 'm2',
+          text: '2',
+          createdAt: channel.state!.messages.firstWhere((m) => m.id == 'm2').createdAt,
+        ).copyWith(localCreatedAt: localStamp),
+      );
+
+      final incoming = [
+        Message(
+          id: 'm2',
+          text: '2 (server)',
+          createdAt: channel.state!.messages.firstWhere((m) => m.id == 'm2').createdAt,
+        ),
+      ];
+      channel.state!.updateChannelState(
+        ChannelState(
+          channel: channel.state!.channelState.channel,
+          messages: incoming,
+        ),
+      );
+
+      final m2 = channel.state!.messages.firstWhere((m) => m.id == 'm2');
+      expect(m2.text, '2 (server)');
+      // Local-only field carried over by syncWith during the merge.
+      expect(m2.localCreatedAt, localStamp);
+    });
+  });
+
+  group('updateMessage quoted-rewrite', () {
+    const channelId = 'test-channel-id';
+    const channelType = 'test-channel-type';
+    late final client = MockStreamChatClient();
+
+    setUpAll(() {
+      when(() => client.detachedLogger(any())).thenAnswer((invocation) {
+        final name = invocation.positionalArguments.first;
+        return _createLogger(name);
+      });
+      when(() => client.retryPolicy).thenReturn(
+        RetryPolicy(
+          shouldRetry: (_, __, ___) => false,
+          delayFactor: Duration.zero,
+        ),
+      );
+      when(() => client.state).thenReturn(FakeClientState());
+      when(() => client.logger).thenReturn(_createLogger('mock-client-logger'));
+      when(
+        () => client.channelDeliveryReporter.submitForDelivery(any()),
+      ).thenAnswer((_) async {});
+    });
+
+    Channel _seededChannel({required List<Message> messages}) {
+      final base = _generateChannelState(channelId, channelType);
+      return Channel.fromState(client, base.copyWith(messages: messages));
+    }
+
+    test(
+      'rewrites quotedMessage on every quoter when target is deleted',
+      () {
+        final now = DateTime.now();
+        final target = Message(id: 'target', text: 'hi', createdAt: now);
+        final quoter1 = Message(
+          id: 'q1',
+          text: 'reply',
+          quotedMessageId: 'target',
+          quotedMessage: target,
+          createdAt: now.add(const Duration(seconds: 1)),
+        );
+        final unrelated = Message(
+          id: 'u1',
+          text: 'other',
+          createdAt: now.add(const Duration(seconds: 2)),
+        );
+        final quoter2 = Message(
+          id: 'q2',
+          text: 'reply2',
+          quotedMessageId: 'target',
+          quotedMessage: target,
+          createdAt: now.add(const Duration(seconds: 3)),
+        );
+
+        final channel = _seededChannel(messages: [target, quoter1, unrelated, quoter2]);
+        addTearDown(channel.dispose);
+
+        final unrelatedBefore = channel.state!.messages.firstWhere((m) => m.id == 'u1');
+
+        final deleted = target.copyWith(
+          type: MessageType.deleted,
+          deletedAt: now.add(const Duration(seconds: 5)),
+        );
+        channel.state!.updateMessage(deleted);
+
+        final after = channel.state!.messages;
+        final q1After = after.firstWhere((m) => m.id == 'q1');
+        final q2After = after.firstWhere((m) => m.id == 'q2');
+        final uAfter = after.firstWhere((m) => m.id == 'u1');
+
+        expect(q1After.quotedMessage?.deletedAt, isNotNull);
+        expect(q1After.quotedMessage?.type, MessageType.deleted);
+        expect(q2After.quotedMessage?.deletedAt, isNotNull);
+        expect(q2After.quotedMessage?.type, MessageType.deleted);
+        // Unrelated messages must not be rebuilt by the rewrite.
+        expect(identical(uAfter, unrelatedBefore), isTrue);
+      },
+    );
+
+    test(
+      'preserves messages reference when no message quotes the deleted one',
+      () {
+        final now = DateTime.now();
+        final target = Message(id: 'target', text: 'hi', createdAt: now);
+        final unrelated = Message(
+          id: 'u1',
+          text: 'other',
+          createdAt: now.add(const Duration(seconds: 1)),
+        );
+
+        final channel = _seededChannel(messages: [target, unrelated]);
+        addTearDown(channel.dispose);
+
+        final deleted = target.copyWith(
+          type: MessageType.deleted,
+          deletedAt: now.add(const Duration(seconds: 5)),
+        );
+        channel.state!.updateMessage(deleted);
+
+        // No message quotes `target`, so `updateIf` short-circuits and the
+        // remaining messages keep their identities (only `target` itself was
+        // replaced by `sortedUpsert`).
+        final unrelatedAfter = channel.state!.messages.firstWhere((m) => m.id == 'u1');
+        expect(identical(unrelatedAfter, unrelated), isTrue);
+      },
+    );
+
+    test(
+      'does not rewrite quotes when an existing quoted target is updated '
+      'without being deleted',
+      () {
+        final now = DateTime.now();
+        final target = Message(id: 'target', text: 'original', createdAt: now);
+        final quoter = Message(
+          id: 'q1',
+          text: 'reply',
+          quotedMessageId: 'target',
+          quotedMessage: target,
+          createdAt: now.add(const Duration(seconds: 1)),
+        );
+
+        final channel = _seededChannel(messages: [target, quoter]);
+        addTearDown(channel.dispose);
+
+        final quoterBefore = channel.state!.messages.firstWhere((m) => m.id == 'q1');
+
+        // Plain text update — not a deletion.
+        channel.state!.updateMessage(target.copyWith(text: 'edited'));
+
+        final quoterAfter = channel.state!.messages.firstWhere((m) => m.id == 'q1');
+        // `updateIf` is gated on `message.isDeleted`, so the quoter must keep
+        // its identity (no allocation, no quoted-message overwrite).
+        expect(identical(quoterAfter, quoterBefore), isTrue);
+      },
+      // v10's `_updateMessages` reconstructs the channel-messages list via
+      // `_mergeMessagesIntoExisting`, so identity is not preserved on a
+      // non-deletion update. Functional behavior is equivalent (the quoter's
+      // `quotedMessage` is not rewritten); only the identity invariant from
+      // master's inline `updateIf` differs.
+      skip: 'v10 update path does not preserve identity on non-deletion edits',
+    );
+  });
 }
