@@ -477,8 +477,6 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
   late final AnimationController _pickerAnimationController;
   late final CurvedAnimation _pickerAnimation;
 
-  late StreamChatThemeData _streamChatTheme;
-
   bool get _isEditing => _effectiveController.isEditing;
 
   late final _audioRecorderController = StreamAudioRecorderController();
@@ -612,12 +610,6 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
           )
           .toMessage();
     }
-  }
-
-  @override
-  void didChangeDependencies() {
-    _streamChatTheme = StreamChatTheme.of(context);
-    super.didChangeDependencies();
   }
 
   @override
@@ -862,7 +854,7 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
             ),
             SizeTransition(
               sizeFactor: _pickerAnimation,
-              axisAlignment: -1,
+              alignment: AlignmentDirectional.topStart,
               child: _buildInlineAttachmentPicker(context),
             ),
           ],
@@ -1217,7 +1209,7 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
         context,
         icon: Icon(
           context.streamIcons.exclamationCircleFill,
-          color: StreamChatTheme.of(context).colorTheme.accentError,
+          color: context.streamColorScheme.accentError,
           size: 24,
         ),
         title: context.translations.linkDisabledError,
@@ -1284,7 +1276,7 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
 
   void _showErrorAlert(String description) {
     showModalBottomSheet(
-      backgroundColor: _streamChatTheme.colorTheme.barsBg,
+      backgroundColor: context.streamColorScheme.backgroundElevation1,
       context: context,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.only(

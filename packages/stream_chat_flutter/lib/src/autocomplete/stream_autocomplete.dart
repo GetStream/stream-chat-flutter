@@ -16,8 +16,7 @@ enum OptionsAlignment {
   /// The options are displayed above the field.
   ///
   /// This is the default.
-  above
-  ;
+  above;
 
   Anchor _toAnchor() {
     switch (this) {
@@ -633,7 +632,7 @@ class StreamAutocompleteOptions<T extends Object> extends StatelessWidget {
 
   /// The background color of the options card.
   ///
-  /// Defaults to [StreamColorTheme.barsBg].
+  /// Defaults to [context.streamColorScheme.backgroundElevation1].
   final Color? color;
 
   /// The elevation of the options card.
@@ -671,11 +670,10 @@ class StreamAutocompleteOptions<T extends Object> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final height = MediaQuery.of(context).size.height;
-    final colorTheme = StreamChatTheme.of(context).colorTheme;
     return Card(
       margin: margin,
       elevation: elevation,
-      color: color ?? colorTheme.barsBg,
+      color: color ?? context.streamColorScheme.backgroundElevation1,
       shape: shape,
       clipBehavior: clipBehavior,
       child: Column(

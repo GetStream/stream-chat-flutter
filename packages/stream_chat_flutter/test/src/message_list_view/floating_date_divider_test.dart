@@ -22,7 +22,7 @@ void main() {
   Widget buildTestWidget(Widget child) {
     return MaterialApp(
       home: StreamChatTheme(
-        data: StreamChatThemeData.light(),
+        data: StreamChatThemeData(),
         child: Scaffold(body: child),
       ),
     );

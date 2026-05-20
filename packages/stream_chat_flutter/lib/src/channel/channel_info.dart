@@ -184,7 +184,7 @@ class _DisconnectedTitleState extends StatelessWidget {
           child: Text(
             context.translations.tryAgainLabel,
             style: textStyle?.copyWith(
-              color: StreamChatTheme.of(context).colorTheme.accentPrimary,
+              color: context.streamColorScheme.accentPrimary,
             ),
           ),
         ),

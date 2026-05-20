@@ -49,7 +49,7 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
         return false;
       },
       child: Scaffold(
-        backgroundColor: StreamChatTheme.of(context).colorTheme.appBg,
+        backgroundColor: context.streamColorScheme.backgroundApp,
         appBar: StreamAppBar(
           title: const Text('Name of Group Chat'),
           trailing: StreamButton.icon(
@@ -115,7 +115,7 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
                           'Name'.toUpperCase(),
                           style: TextStyle(
                             fontSize: 12,
-                            color: StreamChatTheme.of(context).colorTheme.textLowEmphasis,
+                            color: context.streamColorScheme.textSecondary,
                           ),
                         ),
                         const SizedBox(width: 16),
@@ -133,7 +133,7 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
                               hintText: 'Choose a group chat name',
                               hintStyle: TextStyle(
                                 fontSize: 14,
-                                color: StreamChatTheme.of(context).colorTheme.textLowEmphasis,
+                                color: context.streamColorScheme.textSecondary,
                               ),
                             ),
                           ),
@@ -144,7 +144,7 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
                   Container(
                     width: double.maxFinite,
                     decoration: BoxDecoration(
-                      gradient: StreamChatTheme.of(context).colorTheme.bgGradient,
+                      color: context.streamColorScheme.backgroundElevation1,
                     ),
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
@@ -154,7 +154,7 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
                       child: Text(
                         '$_totalUsers ${_totalUsers > 1 ? 'Members' : 'Member'}',
                         style: TextStyle(
-                          color: StreamChatTheme.of(context).colorTheme.textLowEmphasis,
+                          color: context.streamColorScheme.textSecondary,
                         ),
                       ),
                     ),
@@ -170,13 +170,13 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
                             itemCount: widget.groupChatState.users.length + 1,
                             separatorBuilder: (_, __) => Container(
                               height: 1,
-                              color: StreamChatTheme.of(context).colorTheme.borders,
+                              color: context.streamColorScheme.borderDefault,
                             ),
                             itemBuilder: (_, index) {
                               if (index == widget.groupChatState.users.length) {
                                 return Container(
                                   height: 1,
-                                  color: StreamChatTheme.of(context).colorTheme.borders,
+                                  color: context.streamColorScheme.borderDefault,
                                 );
                               }
                               final user = widget.groupChatState.users.elementAt(index);
@@ -197,7 +197,7 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
                                 trailing: IconButton(
                                   icon: Icon(
                                     Icons.clear_rounded,
-                                    color: StreamChatTheme.of(context).colorTheme.textHighEmphasis,
+                                    color: context.streamColorScheme.textPrimary,
                                   ),
                                   padding: EdgeInsets.zero,
                                   splashRadius: 24,
@@ -226,7 +226,7 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
 
   void _showErrorAlert() {
     showModalBottomSheet(
-      backgroundColor: StreamChatTheme.of(context).colorTheme.barsBg,
+      backgroundColor: context.streamColorScheme.backgroundElevation1,
       context: context,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
@@ -243,7 +243,7 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
             ),
             Icon(
               context.streamIcons.exclamationCircleFill,
-              color: StreamChatTheme.of(context).colorTheme.accentError,
+              color: context.streamColorScheme.accentError,
               size: 24,
             ),
             const SizedBox(
@@ -251,7 +251,7 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
             ),
             Text(
               'Something went wrong',
-              style: StreamChatTheme.of(context).textTheme.headlineBold,
+              style: context.streamTextTheme.headingMd,
             ),
             const SizedBox(
               height: 7,
@@ -261,7 +261,7 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
               height: 36,
             ),
             Container(
-              color: StreamChatTheme.of(context).colorTheme.textHighEmphasis.withOpacity(.08),
+              color: context.streamColorScheme.textPrimary.withOpacity(.08),
               height: 1,
             ),
             Row(
@@ -271,9 +271,9 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
                   onPressed: GoRouter.of(context).pop,
                   child: Text(
                     'OK',
-                    style: StreamChatTheme.of(
-                      context,
-                    ).textTheme.bodyBold.copyWith(color: StreamChatTheme.of(context).colorTheme.accentPrimary),
+                    style: context.streamTextTheme.bodyEmphasis.copyWith(
+                      color: context.streamColorScheme.accentPrimary,
+                    ),
                   ),
                 ),
               ],

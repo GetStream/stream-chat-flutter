@@ -59,7 +59,7 @@ class MyApp extends StatelessWidget {
         accentColor: Colors.green,
       ),
     );
-    final defaultTheme = StreamChatThemeData.fromTheme(themeData);
+    final defaultTheme = StreamChatThemeData();
     final customTheme = StreamChatThemeData(
       messageListViewTheme: const StreamMessageListViewThemeData(
         backgroundColor: Colors.grey,

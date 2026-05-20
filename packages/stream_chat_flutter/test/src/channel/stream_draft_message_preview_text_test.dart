@@ -26,7 +26,7 @@ void main() {
           body: StreamChat(
             client: client,
             streamChatConfigData: configData,
-            streamChatThemeData: StreamChatThemeData.light(),
+            streamChatThemeData: StreamChatThemeData(),
             child: Center(
               child: StreamDraftMessagePreviewText(
                 textStyle: textStyle,

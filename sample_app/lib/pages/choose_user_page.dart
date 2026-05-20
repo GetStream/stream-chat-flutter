@@ -15,7 +15,7 @@ class ChooseUserPage extends StatelessWidget {
     final users = defaultUsers;
 
     return Scaffold(
-      backgroundColor: StreamChatTheme.of(context).colorTheme.appBg,
+      backgroundColor: context.streamColorScheme.backgroundApp,
       body: SafeArea(
         child: Column(
           children: [
@@ -29,7 +29,7 @@ class ChooseUserPage extends StatelessWidget {
                   'assets/logo.svg',
                   height: 40,
                   colorFilter: ColorFilter.mode(
-                    StreamChatTheme.of(context).colorTheme.accentPrimary,
+                    context.streamColorScheme.accentPrimary,
                     BlendMode.srcIn,
                   ),
                 ),
@@ -39,12 +39,12 @@ class ChooseUserPage extends StatelessWidget {
               padding: const EdgeInsets.only(bottom: 13),
               child: Text(
                 'Welcome to Stream Chat',
-                style: StreamChatTheme.of(context).textTheme.title,
+                style: context.streamTextTheme.headingLg,
               ),
             ),
             Text(
               'Select a user to try the Flutter SDK:',
-              style: StreamChatTheme.of(context).textTheme.body,
+              style: context.streamTextTheme.bodyDefault,
             ),
             Expanded(
               child: Padding(
@@ -53,7 +53,7 @@ class ChooseUserPage extends StatelessWidget {
                   separatorBuilder: (context, i) {
                     return Container(
                       height: 1,
-                      color: StreamChatTheme.of(context).colorTheme.borders,
+                      color: context.streamColorScheme.borderDefault,
                     );
                   },
                   itemCount: users.length + 1,
@@ -68,12 +68,12 @@ class ChooseUserPage extends StatelessWidget {
                             showDialog(
                               barrierDismissible: false,
                               context: context,
-                              barrierColor: StreamChatTheme.of(context).colorTheme.overlay,
+                              barrierColor: context.streamColorScheme.backgroundOverlayLight,
                               builder: (context) => Center(
                                 child: Container(
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(16),
-                                    color: StreamChatTheme.of(context).colorTheme.barsBg,
+                                    color: context.streamColorScheme.backgroundElevation1,
                                   ),
                                   height: 100,
                                   width: 100,
@@ -108,37 +108,37 @@ class ChooseUserPage extends StatelessWidget {
                           ),
                           title: Text(
                             user.name,
-                            style: StreamChatTheme.of(context).textTheme.bodyBold,
+                            style: context.streamTextTheme.bodyEmphasis,
                           ),
                           subtitle: Text(
                             'Stream test account',
-                            style: StreamChatTheme.of(context).textTheme.footnote.copyWith(
-                              color: StreamChatTheme.of(context).colorTheme.textLowEmphasis,
+                            style: context.streamTextTheme.captionDefault.copyWith(
+                              color: context.streamColorScheme.textSecondary,
                             ),
                           ),
                           trailing: Icon(
                             context.streamIcons.arrowRight,
-                            color: StreamChatTheme.of(context).colorTheme.accentPrimary,
+                            color: context.streamColorScheme.accentPrimary,
                           ),
                         );
                       }),
                       ListTile(
                         onTap: () => GoRouter.of(context).pushNamed(Routes.ADVANCED_OPTIONS.name),
                         leading: CircleAvatar(
-                          backgroundColor: StreamChatTheme.of(context).colorTheme.borders,
+                          backgroundColor: context.streamColorScheme.borderDefault,
                           child: Icon(
                             Icons.settings,
-                            color: StreamChatTheme.of(context).colorTheme.textHighEmphasis,
+                            color: context.streamColorScheme.textPrimary,
                           ),
                         ),
                         title: Text(
                           'Advanced Options',
-                          style: StreamChatTheme.of(context).textTheme.bodyBold,
+                          style: context.streamTextTheme.bodyEmphasis,
                         ),
                         subtitle: Text(
                           'Custom settings',
-                          style: StreamChatTheme.of(context).textTheme.footnote.copyWith(
-                            color: StreamChatTheme.of(context).colorTheme.textLowEmphasis,
+                          style: context.streamTextTheme.captionDefault.copyWith(
+                            color: context.streamColorScheme.textSecondary,
                           ),
                         ),
                         trailing: SvgPicture.asset(

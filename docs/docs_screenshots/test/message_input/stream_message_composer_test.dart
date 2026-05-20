@@ -19,7 +19,6 @@ Widget _buildMessageInputScaffold({
     debugShowCheckedModeBanner: false,
     home: StreamChat(
       client: client,
-      streamChatThemeData: docsStreamChatThemeData(),
       connectivityStream: Stream.value([ConnectivityResult.mobile]),
       child: StreamChannel(
         showLoading: false,
@@ -110,7 +109,6 @@ void main() {
         debugShowCheckedModeBanner: false,
         home: StreamChat(
           client: client,
-          streamChatThemeData: docsStreamChatThemeData(),
           connectivityStream: Stream.value([ConnectivityResult.mobile]),
           componentBuilders: StreamComponentBuilders(
             extensions: streamChatComponentBuilders(
@@ -172,7 +170,6 @@ void main() {
         ),
         home: StreamChat(
           client: client,
-          streamChatThemeData: docsStreamChatThemeData(),
           connectivityStream: Stream.value([ConnectivityResult.mobile]),
           child: StreamChannel(
             showLoading: false,

@@ -33,7 +33,6 @@ Widget _buildVoiceRecordingMessageInputScaffold({
     debugShowCheckedModeBanner: false,
     home: StreamChat(
       client: client,
-      streamChatThemeData: docsStreamChatThemeData(),
       connectivityStream: Stream.value([ConnectivityResult.mobile]),
       child: StreamChannel(
         showLoading: false,
@@ -67,7 +66,7 @@ Widget _buildVoiceRecordingContextScaffold({
     debugShowCheckedModeBanner: false,
     home: StreamChat(
       client: client,
-      streamChatThemeData: streamChatThemeData ?? docsStreamChatThemeData(),
+      streamChatThemeData: streamChatThemeData,
       connectivityStream: Stream.value([ConnectivityResult.mobile]),
       child: StreamChannel(
         showLoading: false,
@@ -119,7 +118,6 @@ Widget _buildVoiceRecordingComposerScaffold({
     debugShowCheckedModeBanner: false,
     home: StreamChat(
       client: client,
-      streamChatThemeData: docsStreamChatThemeData(),
       connectivityStream: Stream.value([ConnectivityResult.mobile]),
       child: StreamChannel(
         showLoading: false,
@@ -502,7 +500,7 @@ void main() {
       _setupChannel(client, clientState, channel, channelState);
 
       const roboto = TextStyle(fontFamily: 'Roboto');
-      final customTheme = docsStreamChatThemeData().copyWith(
+      final customTheme = StreamChatThemeData().copyWith(
         voiceRecordingAttachmentTheme: StreamVoiceRecordingAttachmentThemeData(
           titleTextStyle: roboto.copyWith(color: Colors.black54),
           durationTextStyle: roboto.copyWith(color: Colors.black54),

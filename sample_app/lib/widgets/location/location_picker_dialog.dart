@@ -92,11 +92,10 @@ class _LocationPickerDialogState extends State<LocationPickerDialog> with Widget
 
   @override
   Widget build(BuildContext context) {
-    final theme = StreamChatTheme.of(context);
-    final colorTheme = theme.colorTheme;
+    final colorScheme = context.streamColorScheme;
 
     return Scaffold(
-      backgroundColor: colorTheme.appBg,
+      backgroundColor: colorScheme.backgroundApp,
       appBar: StreamAppBar(title: const Text('Share Location')),
       body: Stack(
         alignment: AlignmentDirectional.bottomCenter,
@@ -125,18 +124,18 @@ class _LocationPickerDialogState extends State<LocationPickerDialog> with Widget
                 markerSize: MarkerSize.sm,
                 coordinates: coordinates,
                 markerBuilder: (context, _, size) => AvatarGlow(
-                  glowColor: colorTheme.accentPrimary,
+                  glowColor: colorScheme.accentPrimary,
                   child: Material(
                     elevation: 2,
                     shape: CircleBorder(
                       side: BorderSide(
                         width: 4,
-                        color: colorTheme.barsBg,
+                        color: colorScheme.backgroundElevation1,
                       ),
                     ),
                     child: CircleAvatar(
                       radius: size.value / 2,
-                      backgroundColor: colorTheme.accentPrimary,
+                      backgroundColor: colorScheme.accentPrimary,
                     ),
                   ),
                 ),
@@ -220,11 +219,8 @@ class LocationPickerOptionList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = StreamChatTheme.of(context);
-    final colorTheme = theme.colorTheme;
-
     return Material(
-      color: colorTheme.barsBg,
+      color: context.streamColorScheme.backgroundElevation1,
       borderRadius: const BorderRadiusDirectional.only(
         topEnd: Radius.circular(14),
         topStart: Radius.circular(14),
@@ -300,23 +296,22 @@ class LocationPickerOptionItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = StreamChatTheme.of(context);
-    final textTheme = theme.textTheme;
-    final colorTheme = theme.colorTheme;
+    final textTheme = context.streamTextTheme;
+    final colorScheme = context.streamColorScheme;
 
     return OutlinedButton(
       onPressed: onTap,
       style: OutlinedButton.styleFrom(
-        backgroundColor: colorTheme.barsBg,
-        foregroundColor: colorTheme.accentPrimary,
-        side: BorderSide(color: colorTheme.borders, width: 1.2),
+        backgroundColor: colorScheme.backgroundElevation1,
+        foregroundColor: colorScheme.accentPrimary,
+        side: BorderSide(color: colorScheme.borderDefault, width: 1.2),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
       ),
       child: IconTheme(
         data: IconTheme.of(context).copyWith(
           size: 24,
-          color: colorTheme.accentPrimary,
+          color: colorScheme.accentPrimary,
         ),
         child: Row(
           spacing: 16,
@@ -329,14 +324,14 @@ class LocationPickerOptionItem extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: textTheme.bodyBold.copyWith(
-                      color: colorTheme.textHighEmphasis,
+                    style: textTheme.bodyEmphasis.copyWith(
+                      color: colorScheme.textPrimary,
                     ),
                   ),
                   Text(
                     subtitle,
-                    style: textTheme.footnote.copyWith(
-                      color: colorTheme.textLowEmphasis,
+                    style: textTheme.captionDefault.copyWith(
+                      color: colorScheme.textSecondary,
                     ),
                   ),
                 ],
@@ -345,7 +340,7 @@ class LocationPickerOptionItem extends StatelessWidget {
             Icon(
               context.streamIcons.chevronRight,
               size: 24,
-              color: colorTheme.textLowEmphasis,
+              color: colorScheme.textSecondary,
             ),
           ],
         ),
@@ -365,18 +360,18 @@ class LiveLocationDurationDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = StreamChatTheme.of(context);
+    final colorScheme = context.streamColorScheme;
 
     return CupertinoTheme(
       data: CupertinoTheme.of(context).copyWith(
-        primaryColor: theme.colorTheme.accentPrimary,
+        primaryColor: colorScheme.accentPrimary,
       ),
       child: CupertinoActionSheet(
         title: const Text('Share Live Location'),
         message: Text(
           'Select the duration for sharing your live location.',
-          style: theme.textTheme.footnote.copyWith(
-            color: theme.colorTheme.textLowEmphasis,
+          style: context.streamTextTheme.captionDefault.copyWith(
+            color: colorScheme.textSecondary,
           ),
         ),
         actions: [
