@@ -19,6 +19,12 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) async {
   // and therefore not picked up by loadFonts(); they must be loaded explicitly.
   await _loadEmojiFont();
 
+  // Load San Francisco on macOS so Material's iOS typography renders
+  // authentically. On Linux CI the file is absent and the obscured-text CI
+  // variant replaces every glyph with Ahem regardless, so a missing font
+  // there is fine.
+  await _loadAppleSystemFont();
+
   final isRunningInCi = Platform.environment.containsKey('CI') || Platform.environment.containsKey('GITHUB_ACTIONS');
 
   return AlchemistConfig.runWithConfig(
@@ -65,5 +71,22 @@ Future<void> _loadEmojiFont() async {
       await loader.load();
       return; // Stop after the first font successfully loaded.
     }
+  }
+}
+
+/// Registers macOS's San Francisco font under the family aliases Material's
+/// iOS typography expects: `CupertinoSystemDisplay` (headlines/titles) and
+/// `CupertinoSystemText` (body). On a real device those resolve via the
+/// platform; in tests we have to wire them ourselves or text falls back to
+/// Ahem. Skipped on non-macOS hosts — the CI variant obscures text anyway.
+Future<void> _loadAppleSystemFont() async {
+  if (!Platform.isMacOS) return;
+  const path = '/System/Library/Fonts/SFNS.ttf';
+  final file = File(path);
+  if (!file.existsSync()) return;
+  final bytes = await file.readAsBytes();
+  for (final family in const ['CupertinoSystemDisplay', 'CupertinoSystemText']) {
+    final loader = FontLoader(family)..addFont(Future.value(ByteData.sublistView(bytes)));
+    await loader.load();
   }
 }

@@ -81,36 +81,24 @@ void docsGoldenTest(
 // RichText, RichText does NOT inherit DefaultTextStyle, so Flutter falls back
 // to the Ahem test font (black rectangles).
 //
-// Fix: build a StreamTheme whose textTheme has fontFamily: 'Roboto' applied.
-//
-// ---------------------------------------------------------------------------
-// StreamChatThemeData (stream_chat_flutter) — drives legacy message rendering
-// ---------------------------------------------------------------------------
-//
-// StreamChatThemeData text styles (body, footnote, …) also carry no fontFamily.
-// Same Ahem problem for any remaining legacy widgets that go through
-// StreamMarkdownMessage → MarkdownBody → RichText.
-//
-// Fix: merge fontFamily: 'Roboto' into every StreamTextTheme style.
+// Fix: apply the iOS body-text family alias (CupertinoSystemText) so message
+// content matches Material's iOS typography. The font itself is registered
+// under that alias by `_loadAppleSystemFont` in flutter_test_config.dart.
 
 ThemeData docsScreenshotsTheme() {
   final streamTextTheme = core.StreamTextTheme().apply(
     color: core.StreamColorScheme.light().systemText,
-    fontFamily: 'Roboto',
+    fontFamily: 'CupertinoSystemText',
   );
 
   return ThemeData(
     useMaterial3: true,
     brightness: Brightness.light,
     platform: docsScreenshotsTargetPlatform,
-    // Pinning the platform to iOS makes Material switch to iOS typography
-    // (San Francisco), which the test renderer can't resolve — leaving
-    // AppBar/TextField text rendered in Ahem (black rectangles). Apply
-    // Roboto across the whole textTheme to keep Material widgets readable,
-    // with emoji fonts in the fallback chain so inline emoji glyphs in plain
-    // Text widgets render instead of falling back to tofu. The matching font
-    // is loaded by `_loadEmojiFont` in flutter_test_config.dart.
-    fontFamily: 'Roboto',
+    // No fontFamily override: Material's iOS typography requests
+    // `CupertinoSystemDisplay`/`CupertinoSystemText`, which `_loadAppleSystemFont`
+    // registers from /System/Library/Fonts/SFNS.ttf on macOS. We only set the
+    // emoji fallback so inline emoji glyphs in plain Text widgets render.
     fontFamilyFallback: const ['Apple Color Emoji', 'Noto Color Emoji'],
     scaffoldBackgroundColor: const Color(0xFFFFFFFF),
     appBarTheme: const AppBarTheme(
