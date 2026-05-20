@@ -25,6 +25,12 @@ void main() {
   }) async {
     final channels = [ChannelModel(cid: cid)];
     final users = List.generate(count, (index) => User(id: 'testUserId$index'));
+    // Strictly monotonic `createdAt` per message so SQL-side pagination
+    // filters (`WHERE createdAt < cutoff`, `ORDER BY createdAt ASC`) can't be
+    // confused by ties. Drift stores `DateTime` as integer Unix seconds by
+    // default, so the offset must be at least 1 second per row — otherwise
+    // sub-second offsets all round-trip onto the same second.
+    final baseTime = DateTime.now();
     final messages = List.generate(
       count,
       (index) => Message(
@@ -32,7 +38,7 @@ void main() {
         type: 'testType',
         user: users[index],
         channelRole: 'channel_member',
-        createdAt: DateTime.now(),
+        createdAt: baseTime.add(Duration(seconds: index)),
         shadowed: math.Random().nextBool(),
         replyCount: index,
         updatedAt: DateTime.now(),
@@ -59,7 +65,7 @@ void main() {
         type: 'testType',
         user: users[index],
         channelRole: 'channel_member',
-        createdAt: DateTime.now(),
+        createdAt: baseTime.add(Duration(seconds: index)),
         shadowed: math.Random().nextBool(),
         replyCount: index,
         updatedAt: DateTime.now(),
@@ -85,7 +91,7 @@ void main() {
         channelRole: 'channel_member',
         parentId:
             mapAllThreadToFirstMessage ? messages[0].id : messages[index].id,
-        createdAt: DateTime.now(),
+        createdAt: baseTime.add(Duration(seconds: index)),
         shadowed: math.Random().nextBool(),
         replyCount: index,
         updatedAt: DateTime.now(),
@@ -294,7 +300,7 @@ void main() {
     const options = PaginationParams(
       limit: 15,
       lessThan: 'testThreadMessageId${cid}25',
-      greaterThanOrEqual: 'testThreadMessageId${cid}5',
+      greaterThan: 'testThreadMessageId${cid}5',
     );
 
     // Messages should be empty initially
@@ -320,6 +326,8 @@ void main() {
     );
     expect(threadMessages.length, 15);
     expect(threadMessages.first.parentId, parentId);
+    expect(threadMessages.first.id, 'testThreadMessageId${cid}5');
+    expect(threadMessages.last.id, 'testThreadMessageId${cid}19');
   });
 
   test('getMessagesByCid', () async {
@@ -365,11 +373,11 @@ void main() {
     const cid = 'test:Cid';
     const limit = 15;
     const lessThan = 'testMessageId${cid}25';
-    const greaterThanOrEqual = 'testMessageId${cid}5';
+    const greaterThan = 'testMessageId${cid}5';
     const pagination = PaginationParams(
       limit: limit,
       lessThan: lessThan,
-      greaterThanOrEqual: greaterThanOrEqual,
+      greaterThan: greaterThan,
     );
 
     // Should be empty initially
@@ -389,8 +397,133 @@ void main() {
       messagePagination: pagination,
     );
     expect(fetchedMessages.length, limit);
+    expect(fetchedMessages.first.id, 'testMessageId${cid}10');
     expect(fetchedMessages.last.id, 'testMessageId${cid}24');
-    expect(fetchedMessages.first.id != lessThan, true);
+  });
+
+  group('getMessagesByCid pagination', () {
+    const cid = 'test:Cid';
+
+    test('lessThan only trims messages from the end', () async {
+      await _prepareTestData(cid, count: 30);
+
+      final fetchedMessages = await messageDao.getMessagesByCid(
+        cid,
+        messagePagination: const PaginationParams(
+          limit: 100,
+          lessThan: 'testMessageId${cid}25',
+        ),
+      );
+
+      expect(fetchedMessages.length, 25);
+      expect(fetchedMessages.first.id, 'testMessageId${cid}0');
+      expect(fetchedMessages.last.id, 'testMessageId${cid}24');
+    });
+
+    test('greaterThan only trims messages from the start', () async {
+      await _prepareTestData(cid, count: 30);
+
+      final fetchedMessages = await messageDao.getMessagesByCid(
+        cid,
+        messagePagination: const PaginationParams(
+          limit: 100,
+          greaterThan: 'testMessageId${cid}5',
+        ),
+      );
+
+      expect(fetchedMessages.length, 25);
+      expect(fetchedMessages.first.id, 'testMessageId${cid}5');
+      expect(fetchedMessages.last.id, 'testMessageId${cid}29');
+    });
+
+    test('limit only keeps the last N messages', () async {
+      await _prepareTestData(cid, count: 30);
+
+      final fetchedMessages = await messageDao.getMessagesByCid(
+        cid,
+        messagePagination: const PaginationParams(limit: 15),
+      );
+
+      expect(fetchedMessages.length, 15);
+      expect(fetchedMessages.first.id, 'testMessageId${cid}15');
+      expect(fetchedMessages.last.id, 'testMessageId${cid}29');
+    });
+
+    test('lessThan id not in result set is a no-op', () async {
+      await _prepareTestData(cid, count: 30);
+
+      final fetchedMessages = await messageDao.getMessagesByCid(
+        cid,
+        messagePagination: const PaginationParams(
+          limit: 100,
+          lessThan: 'missing-id',
+        ),
+      );
+
+      expect(fetchedMessages.length, 30);
+      expect(fetchedMessages.first.id, 'testMessageId${cid}0');
+      expect(fetchedMessages.last.id, 'testMessageId${cid}29');
+    });
+
+    test('greaterThan id not in result set is a no-op', () async {
+      await _prepareTestData(cid, count: 30);
+
+      final fetchedMessages = await messageDao.getMessagesByCid(
+        cid,
+        messagePagination: const PaginationParams(
+          limit: 100,
+          greaterThan: 'missing-id',
+        ),
+      );
+
+      expect(fetchedMessages.length, 30);
+      expect(fetchedMessages.first.id, 'testMessageId${cid}0');
+      expect(fetchedMessages.last.id, 'testMessageId${cid}29');
+    });
+
+    test('default PaginationParams() applies implicit limit of 10', () async {
+      await _prepareTestData(cid, count: 30);
+
+      final fetchedMessages = await messageDao.getMessagesByCid(
+        cid,
+        messagePagination: const PaginationParams(),
+      );
+
+      expect(fetchedMessages.length, 10);
+      expect(fetchedMessages.first.id, 'testMessageId${cid}20');
+      expect(fetchedMessages.last.id, 'testMessageId${cid}29');
+    });
+
+    test('default limit + lessThan returns last 10 of filtered set', () async {
+      await _prepareTestData(cid, count: 30);
+
+      final fetchedMessages = await messageDao.getMessagesByCid(
+        cid,
+        messagePagination: const PaginationParams(
+          lessThan: 'testMessageId${cid}25',
+        ),
+      );
+
+      expect(fetchedMessages.length, 10);
+      expect(fetchedMessages.first.id, 'testMessageId${cid}15');
+      expect(fetchedMessages.last.id, 'testMessageId${cid}24');
+    });
+
+    test('default limit + greaterThan returns last 10 of filtered set',
+        () async {
+      await _prepareTestData(cid, count: 30);
+
+      final fetchedMessages = await messageDao.getMessagesByCid(
+        cid,
+        messagePagination: const PaginationParams(
+          greaterThan: 'testMessageId${cid}5',
+        ),
+      );
+
+      expect(fetchedMessages.length, 10);
+      expect(fetchedMessages.first.id, 'testMessageId${cid}20');
+      expect(fetchedMessages.last.id, 'testMessageId${cid}29');
+    });
   });
 
   test('updateMessages', () async {

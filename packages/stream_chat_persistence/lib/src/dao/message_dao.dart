@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:drift/drift.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_persistence/src/db/drift_chat_database.dart';
@@ -171,6 +169,15 @@ class MessageDao extends DatabaseAccessor<DriftChatDatabase>
     bool fetchDraft = true,
     PaginationParams? messagePagination,
   }) async {
+    final lessThanCutoff = await switch (messagePagination?.lessThan) {
+      final id? => _lookupMessageCreatedAt(id),
+      _ => null,
+    };
+    final greaterThanCutoff = await switch (messagePagination?.greaterThan) {
+      final id? => _lookupMessageCreatedAt(id),
+      _ => null,
+    };
+
     final query = select(messages).join([
       leftOuterJoin(_users, messages.userId.equalsExp(_users.id)),
       leftOuterJoin(
@@ -180,44 +187,28 @@ class MessageDao extends DatabaseAccessor<DriftChatDatabase>
     ])
       ..where(messages.channelCid.equals(cid))
       ..where(messages.parentId.isNull() | messages.showInChannel.equals(true))
-      ..orderBy([OrderingTerm.asc(messages.createdAt)]);
+      ..orderBy([
+        OrderingTerm.desc(messages.createdAt),
+        OrderingTerm.desc(messages.id),
+      ]);
 
-    final result = await query.get();
-    if (result.isEmpty) return [];
-
-    final msgList = await Future.wait(
-      result.map(
-        (row) => _messageFromJoinRow(
-          row,
-          fetchDraft: fetchDraft,
-        ),
-      ),
-    );
-
-    if (msgList.isNotEmpty) {
-      if (messagePagination?.lessThan != null) {
-        final lessThanIndex = msgList.indexWhere(
-          (m) => m.id == messagePagination!.lessThan,
-        );
-        if (lessThanIndex != -1) {
-          msgList.removeRange(lessThanIndex, msgList.length);
-        }
-      }
-      if (messagePagination?.greaterThan != null) {
-        final greaterThanIndex = msgList.indexWhere(
-          (m) => m.id == messagePagination!.greaterThan,
-        );
-        if (greaterThanIndex != -1) {
-          msgList.removeRange(0, greaterThanIndex);
-        }
-      }
-      if (messagePagination?.limit != null) {
-        return msgList
-            .skip(max(0, msgList.length - messagePagination!.limit))
-            .toList();
-      }
+    if (lessThanCutoff case final t?) {
+      query.where(messages.createdAt.isSmallerThanValue(t));
     }
-    return msgList;
+    if (greaterThanCutoff case final t?) {
+      query.where(messages.createdAt.isBiggerOrEqualValue(t));
+    }
+
+    if (messagePagination != null) {
+      query.limit(messagePagination.limit);
+    }
+
+    final rows = (await query.get()).reversed.toList();
+    if (rows.isEmpty) return [];
+
+    return Future.wait(
+      rows.map((row) => _messageFromJoinRow(row, fetchDraft: fetchDraft)),
+    );
   }
 
   /// Updates the message data of a particular channel with
@@ -240,5 +231,17 @@ class MessageDao extends DatabaseAccessor<DriftChatDatabase>
     return batch(
       (batch) => batch.insertAllOnConflictUpdate(messages, entities),
     );
+  }
+
+  /// Returns the `createdAt` of the message with [id] in the local cache,
+  /// or `null` if the message isn't cached. Used by [getMessagesByCid] to
+  /// resolve `lessThan` / `greaterThan` pagination cursors into SQL-comparable
+  /// timestamps so the filter runs in SQL instead of after the fact in Dart.
+  Future<DateTime?> _lookupMessageCreatedAt(String id) {
+    return (selectOnly(messages)
+      ..addColumns([messages.createdAt])
+      ..where(messages.id.equals(id)))
+        .map((row) => row.read(messages.createdAt))
+        .getSingleOrNull();
   }
 }
