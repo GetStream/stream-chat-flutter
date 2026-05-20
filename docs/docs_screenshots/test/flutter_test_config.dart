@@ -14,16 +14,13 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) async {
   // (including transitive packages such as stream_core_flutter's Stream Icons).
   await loadFonts();
 
-  // Load the platform emoji font so emoji glyphs render in golden screenshots
-  // instead of appearing as boxes. System fonts are not in the asset manifest
-  // and therefore not picked up by loadFonts(); they must be loaded explicitly.
-  await _loadEmojiFont();
-
-  // Load San Francisco on macOS so Material's iOS typography renders
-  // authentically. On Linux CI the file is absent and the obscured-text CI
-  // variant replaces every glyph with Ahem regardless, so a missing font
-  // there is fine.
-  await _loadAppleSystemFont();
+  // Register host system fonts that loadFonts() can't see because they live
+  // outside the asset manifest — currently the platform emoji font (so emoji
+  // glyphs render instead of tofu) and macOS's San Francisco (so Material's
+  // iOS typography aliases resolve to authentic SF). On hosts where a file is
+  // missing the loader is a no-op; CI's obscured-text variant replaces every
+  // glyph with Ahem anyway.
+  await _loadHostSystemFonts();
 
   final isRunningInCi = Platform.environment.containsKey('CI') || Platform.environment.containsKey('GITHUB_ACTIONS');
 
@@ -41,12 +38,19 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) async {
   );
 }
 
-/// Loads the platform's color emoji font into the Flutter test renderer.
+/// Registers host system fonts that aren't part of any asset manifest.
 ///
-/// [DefaultStreamEmoji] sets `fontFamilyFallback` to platform emoji font names
-/// (e.g. 'Apple Color Emoji'), but the Flutter test renderer only knows about
-/// fonts loaded via [FontLoader] — system fonts are invisible to it. Without
-/// this, every emoji glyph renders as a tofu box.
+/// Loads the platform color emoji font (so [DefaultStreamEmoji] and inline
+/// emoji glyphs can render via the `fontFamilyFallback` chain) and, on macOS
+/// only, San Francisco under the family aliases Material's iOS typography
+/// expects (`CupertinoSystemDisplay` / `CupertinoSystemText`). Hosts where a
+/// font file is missing simply skip that loader.
+Future<void> _loadHostSystemFonts() async {
+  await _loadEmojiFont();
+  await _loadAppleSystemFont();
+}
+
+/// Loads the platform's color emoji font into the Flutter test renderer.
 Future<void> _loadEmojiFont() async {
   // Each entry: (FontLoader family name, candidate file paths).
   final candidates = [
@@ -76,9 +80,7 @@ Future<void> _loadEmojiFont() async {
 
 /// Registers macOS's San Francisco font under the family aliases Material's
 /// iOS typography expects: `CupertinoSystemDisplay` (headlines/titles) and
-/// `CupertinoSystemText` (body). On a real device those resolve via the
-/// platform; in tests we have to wire them ourselves or text falls back to
-/// Ahem. Skipped on non-macOS hosts — the CI variant obscures text anyway.
+/// `CupertinoSystemText` (body).
 Future<void> _loadAppleSystemFont() async {
   if (!Platform.isMacOS) return;
   const path = '/System/Library/Fonts/SFNS.ttf';
