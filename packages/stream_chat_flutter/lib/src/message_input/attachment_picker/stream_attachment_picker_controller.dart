@@ -109,7 +109,7 @@ class StreamAttachmentPickerController extends ValueNotifier<AttachmentPickerVal
     final file = attachment.file;
 
     if (file != null) {
-      assert(attachment.fileSize != null, '');
+      assert(attachment.fileSize != null, '`attachment.fileSize` is required when the attachment has a file');
       if (attachment.fileSize! > maxAttachmentSize) {
         throw AttachmentTooLargeError(
           fileSize: attachment.fileSize!,
