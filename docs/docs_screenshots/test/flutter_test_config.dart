@@ -23,6 +23,11 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) async {
   await _loadHostSystemFonts();
 
   final isRunningInCi = Platform.environment.containsKey('CI') || Platform.environment.containsKey('GITHUB_ACTIONS');
+  // The macOS CI job that regenerates the committed `goldens/macos/` set
+  // sets UPDATE_PLATFORM_GOLDENS=1 to flip the variant gate back on. Without
+  // this, the default CI logic (`isRunningInCi=true → CiGoldens only`) would
+  // skip the platform variant the docs care about.
+  final updatePlatformGoldens = Platform.environment['UPDATE_PLATFORM_GOLDENS'] == '1';
 
   return AlchemistConfig.runWithConfig(
     config: AlchemistConfig(
@@ -31,8 +36,8 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) async {
         borderColor: Colors.transparent,
         nameTextStyle: const TextStyle(fontSize: 18),
       ),
-      ciGoldensConfig: CiGoldensConfig(enabled: isRunningInCi),
-      platformGoldensConfig: PlatformGoldensConfig(enabled: !isRunningInCi),
+      ciGoldensConfig: CiGoldensConfig(enabled: isRunningInCi && !updatePlatformGoldens),
+      platformGoldensConfig: PlatformGoldensConfig(enabled: !isRunningInCi || updatePlatformGoldens),
     ),
     run: testMain,
   );

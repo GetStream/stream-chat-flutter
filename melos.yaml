@@ -208,6 +208,22 @@ scripts:
     run: melos exec -c 1 --depends-on="alchemist" -- "flutter test --tags golden --update-goldens"
     description: Update golden files for all packages in this project.
 
+  update:goldens:sdk:
+    run: melos exec -c 1 --depends-on="alchemist" --ignore="docs_*" -- "flutter test --tags golden --update-goldens"
+    description: |
+      Update CI/obscured goldens for SDK packages (excludes docs_*).
+      Intended to run on Linux — the committed goldens live under
+      `goldens/ci/` and use obscured text for cross-host stability.
+
+  update:goldens:docs:
+    run: UPDATE_PLATFORM_GOLDENS=1 melos exec -c 1 --scope="docs_*" -- "flutter test --tags golden --update-goldens"
+    description: |
+      Update visual goldens for docs packages.
+      Intended to run on macOS — the committed goldens live under
+      `goldens/macos/` and use authentic San Francisco rendering.
+      `UPDATE_PLATFORM_GOLDENS=1` flips `flutter_test_config.dart` to
+      enable the platform variant even on CI runners.
+
   clean:flutter:
     run: melos exec -c 4 --fail-fast -- "flutter clean"
     description: Run Flutter clean for a specific package in this project.
