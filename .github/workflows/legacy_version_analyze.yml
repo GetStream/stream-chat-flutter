@@ -18,17 +18,25 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # Detect whether anything that affects legacy analysis was touched in this
-  # PR. Path filtering at the job level (instead of `on.paths`) means a
-  # skipped `analyze_legacy_versions` reports as `success` to branch
-  # protection — see
+  # Centralizes every gating decision for this workflow — path filter, draft
+  # state, and push-vs-PR semantics. Downstream jobs only need a single
+  # `if: needs.gate.outputs.should_run == 'true'`. A job skipped this way
+  # reports `success` to branch protection (vs. `on.paths` filtering, which
+  # hangs forever) — see
   # https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/collaborating-on-repositories-with-code-quality-features/troubleshooting-required-status-checks
-  changes:
+  gate:
     runs-on: ubuntu-latest
     outputs:
-      packages: ${{ steps.filter.outputs.packages }}
+      should_run: ${{ github.event_name == 'push' || (steps.filter.outputs.packages == 'true' && github.event.pull_request.draft != true) }}
     steps:
-      - uses: dorny/paths-filter@v3
+      # paths-filter needs a checkout on push events (it diffs against the
+      # previous commit via git history). On pull_request events it uses
+      # the API and the checkout is unused, but is cheap.
+      - name: "Git Checkout"
+        uses: actions/checkout@v6
+
+      - name: "Detect Path Changes"
+        uses: dorny/paths-filter@v3
         id: filter
         with:
           filters: |
@@ -42,8 +50,8 @@ jobs:
   # (which we don't commit to supporting, but don't want to actively break)
   # without updating the constraints.
   analyze_legacy_versions:
-    needs: changes
-    if: needs.changes.outputs.packages == 'true' && github.event.pull_request.draft == false
+    needs: gate
+    if: needs.gate.outputs.should_run == 'true'
     timeout-minutes: 15
     runs-on: ubuntu-latest
     steps:
