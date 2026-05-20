@@ -50,6 +50,8 @@ flutter:
   assets:
     - assets/
     - pubspec.lock
+  config:
+    enable-swift-package-manager: false
 
 flutter_icons:
   image_path: "assets/ic_launcher.png"
