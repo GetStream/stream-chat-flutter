@@ -85,7 +85,7 @@ Widget _buildVoiceRecordingContextScaffold({
                       message: Message(
                         id: 'ctx-msg',
                         text: 'Hey, listen to this!',
-                        user: User(id: 'user-2', name: 'Bob'),
+                        user: User(id: 'user-2', image: 'https://docs.fixture/avatar/user-2.png', name: 'Bob'),
                         createdAt: DateTime(2024, 6, 1, 10, 0),
                       ),
                     ),
@@ -333,7 +333,7 @@ void main() {
 
       final voiceMessage = Message(
         id: 'voice-msg',
-        user: User(id: 'user-2', name: 'Bob'),
+        user: User(id: 'user-2', image: 'https://docs.fixture/avatar/user-2.png', name: 'Bob'),
         attachments: [
           Attachment(
             type: 'voiceRecording',
@@ -428,7 +428,7 @@ void main() {
 
       final voiceMessage = Message(
         id: 'voice-msg-playing',
-        user: User(id: 'user-2', name: 'Bob'),
+        user: User(id: 'user-2', image: 'https://docs.fixture/avatar/user-2.png', name: 'Bob'),
         attachments: [
           Attachment(
             type: 'voiceRecording',
@@ -521,7 +521,7 @@ void main() {
 
       final voiceMessage = Message(
         id: 'voice-msg-custom',
-        user: User(id: 'user-2', name: 'Bob'),
+        user: User(id: 'user-2', image: 'https://docs.fixture/avatar/user-2.png', name: 'Bob'),
         attachments: [
           Attachment(
             type: 'voiceRecording',

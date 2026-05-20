@@ -232,7 +232,7 @@ void main() {
         ..quotedMessage = Message(
           id: 'quoted-msg',
           text: 'This is the original message',
-          user: User(id: 'other-user', name: 'Alice'),
+          user: User(id: 'other-user', image: 'https://docs.fixture/avatar/other-user.png', name: 'Alice'),
         );
 
       return _buildMessageInputScaffold(

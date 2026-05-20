@@ -41,7 +41,7 @@ void docsGoldenTest(
   List<String> tags = const ['golden'],
   double textScaleFactor = 1.0,
   BoxConstraints constraints = const BoxConstraints(),
-  PumpAction pumpBeforeTest = onlyPumpAndSettle,
+  PumpAction pumpBeforeTest = precacheImages,
   PumpWidget pumpWidget = onlyPumpWidget,
   Interaction? whilePerforming,
   required ValueGetter<Widget> builder,

@@ -32,7 +32,7 @@ void main() {
       final client = MockClient();
       final clientState = MockClientState();
       when(() => client.state).thenReturn(clientState);
-      when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id', name: 'Alice'));
+      when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id', image: 'https://docs.fixture/avatar/user-id.png', name: 'Alice'));
 
       return _buildListHeaderScaffold(
         client: client,
@@ -49,7 +49,7 @@ void main() {
       final client = MockClient();
       final clientState = MockClientState();
       when(() => client.state).thenReturn(clientState);
-      when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id', name: 'Alice'));
+      when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id', image: 'https://docs.fixture/avatar/user-id.png', name: 'Alice'));
 
       return _buildListHeaderScaffold(
         client: client,

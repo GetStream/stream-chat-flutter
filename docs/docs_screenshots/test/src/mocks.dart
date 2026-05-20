@@ -120,7 +120,10 @@ void setupMockChannel({
       : [
           Member(
             userId: 'user-id',
-            user: User(id: 'user-id'),
+            user: User(
+              id: 'user-id',
+              image: 'https://docs.fixture/avatar/user-id.png',
+            ),
           ),
         ];
 
@@ -139,8 +142,9 @@ void setupMockChannel({
   when(() => channel.extraData).thenReturn({'name': channelName});
   when(() => channel.name).thenReturn(channelName);
   when(() => channel.nameStream).thenAnswer((_) => Stream.value(channelName));
-  when(() => channel.image).thenReturn(null);
-  when(() => channel.imageStream).thenAnswer((_) => Stream.value(null));
+  final channelImage = 'https://docs.fixture/avatar/${channel.id}.png';
+  when(() => channel.image).thenReturn(channelImage);
+  when(() => channel.imageStream).thenAnswer((_) => Stream.value(channelImage));
   when(() => channelState.membersStream).thenAnswer((_) => Stream.value(allMembers));
   when(() => channelState.members).thenReturn(allMembers);
   when(() => channelState.messages).thenReturn(messages);

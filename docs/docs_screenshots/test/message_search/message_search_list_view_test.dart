@@ -16,7 +16,7 @@ GetMessageResponse _makeSearchResult({
     ..message = Message(
       id: messageId,
       text: text,
-      user: User(id: 'user-$messageId', name: userName),
+      user: User(id: 'user-$messageId', image: 'https://docs.fixture/avatar/user-$messageId.png', name: userName),
       createdAt: DateTime(2024, 6, 1, 10, 0),
     )
     ..channel = ChannelModel(
@@ -36,7 +36,7 @@ void main() {
     constraints: const BoxConstraints.tightFor(width: 375, height: 500),
     builder: () {
       final client = MockClient();
-      stubMockClientCurrentUser(client, OwnUser(id: 'user-1'));
+      stubMockClientCurrentUser(client, OwnUser(id: 'user-1', image: 'https://docs.fixture/avatar/user-1.png'));
 
       final results = [
         _makeSearchResult(

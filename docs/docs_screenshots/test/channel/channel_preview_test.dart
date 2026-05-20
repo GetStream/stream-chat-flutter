@@ -25,7 +25,7 @@ void main() {
           Message(
             id: 'msg-1',
             text: 'Hey everyone!',
-            user: User(id: 'user-2', name: 'Bob'),
+            user: User(id: 'user-2', image: 'https://docs.fixture/avatar/user-2.png', name: 'Bob'),
             createdAt: DateTime(2024, 6, 1, 10, 30),
           ),
         ],
@@ -61,7 +61,7 @@ void main() {
             Message(
               id: 'msg-1',
               text: 'Hey, how is everyone doing?',
-              user: User(id: 'user-2', name: 'Bob'),
+              user: User(id: 'user-2', image: 'https://docs.fixture/avatar/user-2.png', name: 'Bob'),
               createdAt: DateTime(2024, 6, 1, 10, 30),
             ),
           ],
@@ -75,7 +75,7 @@ void main() {
             Message(
               id: 'msg-2',
               text: 'New mockups are ready!',
-              user: User(id: 'user-3', name: 'Carol'),
+              user: User(id: 'user-3', image: 'https://docs.fixture/avatar/user-3.png', name: 'Carol'),
               createdAt: DateTime(2024, 6, 1, 9, 15),
             ),
           ],
@@ -88,7 +88,7 @@ void main() {
             Message(
               id: 'msg-3',
               text: 'Anyone up for lunch?',
-              user: User(id: 'user-4', name: 'Dave'),
+              user: User(id: 'user-4', image: 'https://docs.fixture/avatar/user-4.png', name: 'Dave'),
               createdAt: DateTime(2024, 5, 31, 12, 0),
             ),
           ],
@@ -101,7 +101,7 @@ void main() {
             Message(
               id: 'msg-4',
               text: 'PR #42 is ready for review',
-              user: User(id: 'user-5', name: 'Eve'),
+              user: User(id: 'user-5', image: 'https://docs.fixture/avatar/user-5.png', name: 'Eve'),
               createdAt: DateTime(2024, 5, 30, 15, 45),
             ),
           ],
@@ -156,7 +156,7 @@ void main() {
           Message(
             id: 'msg-1',
             text: 'Hey, how is everyone doing?',
-            user: User(id: 'user-2', name: 'Bob'),
+            user: User(id: 'user-2', image: 'https://docs.fixture/avatar/user-2.png', name: 'Bob'),
             createdAt: DateTime(2024, 6, 1, 10, 30),
           ),
         ],
@@ -206,7 +206,7 @@ void main() {
       final client = MockClient();
       final clientState = MockClientState();
       when(() => client.state).thenReturn(clientState);
-      when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id', name: 'Alice'));
+      when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id', image: 'https://docs.fixture/avatar/user-id.png', name: 'Alice'));
 
       final channels = [
         fakeChannel(
@@ -217,7 +217,7 @@ void main() {
             Message(
               id: 'msg-1',
               text: 'Hey, how is everyone doing?',
-              user: User(id: 'user-2', name: 'Bob'),
+              user: User(id: 'user-2', image: 'https://docs.fixture/avatar/user-2.png', name: 'Bob'),
               createdAt: DateTime(2024, 6, 1, 10, 30),
             ),
           ],
@@ -231,7 +231,7 @@ void main() {
             Message(
               id: 'msg-2',
               text: 'New mockups are ready!',
-              user: User(id: 'user-3', name: 'Carol'),
+              user: User(id: 'user-3', image: 'https://docs.fixture/avatar/user-3.png', name: 'Carol'),
               createdAt: DateTime(2024, 6, 1, 9, 15),
             ),
           ],
@@ -244,7 +244,7 @@ void main() {
             Message(
               id: 'msg-3',
               text: 'Anyone up for lunch?',
-              user: User(id: 'user-4', name: 'Dave'),
+              user: User(id: 'user-4', image: 'https://docs.fixture/avatar/user-4.png', name: 'Dave'),
               createdAt: DateTime(2024, 5, 31, 12, 0),
             ),
           ],
@@ -257,7 +257,7 @@ void main() {
             Message(
               id: 'msg-4',
               text: 'PR #42 is ready for review',
-              user: User(id: 'user-5', name: 'Eve'),
+              user: User(id: 'user-5', image: 'https://docs.fixture/avatar/user-5.png', name: 'Eve'),
               createdAt: DateTime(2024, 5, 30, 15, 45),
             ),
           ],

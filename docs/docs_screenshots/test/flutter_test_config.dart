@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'src/golden_network_image.dart';
+
 Future<void> testExecutable(FutureOr<void> Function() testMain) async {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -21,6 +23,11 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) async {
   // missing the loader is a no-op; CI's obscured-text variant replaces every
   // glyph with Ahem anyway.
   await _loadHostSystemFonts();
+
+  // Pre-render the avatar fixture palette so the synchronous networkImage
+  // component builder (`goldenNetworkImageBuilder`) can return cached
+  // providers without a FutureBuilder flicker in goldens.
+  await GoldenAvatarFixtures.precompute();
 
   return AlchemistConfig.runWithConfig(
     config: AlchemistConfig(

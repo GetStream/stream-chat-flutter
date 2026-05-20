@@ -5,7 +5,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import '../src/golden_theme.dart';
 import '../src/mocks.dart';
 
-final _sender = User(id: 'user-2', name: 'Bob');
+final _sender = User(id: 'user-2', image: 'https://docs.fixture/avatar/user-2.png', name: 'Bob');
 
 Widget _buildMessageScaffold({
   required MockClient client,

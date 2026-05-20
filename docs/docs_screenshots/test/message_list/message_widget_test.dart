@@ -7,8 +7,8 @@ import 'package:stream_core_flutter/stream_core_flutter.dart' as core;
 import '../src/golden_theme.dart';
 import '../src/mocks.dart';
 
-final _sender = User(id: 'user-2', name: 'Bob');
-final _currentUser = User(id: 'user-1', name: 'Alice');
+final _sender = User(id: 'user-2', image: 'https://docs.fixture/avatar/user-2.png', name: 'Bob');
+final _currentUser = User(id: 'user-1', image: 'https://docs.fixture/avatar/user-1.png', name: 'Alice');
 
 /// Custom reaction resolver that maps 'celebrate' to 🎉, demonstrating the
 /// [ReactionIconResolver] API.
@@ -57,7 +57,7 @@ void _setupBasicChannel(
     channelState: channelState,
     channelName: 'General',
   );
-  when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-1', name: 'Alice'));
+  when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-1', image: 'https://docs.fixture/avatar/user-1.png', name: 'Alice'));
 }
 
 void main() {
@@ -152,7 +152,7 @@ void main() {
       final channel = MockChannel(type: 'messaging', id: 'general');
       final channelState = MockChannelState();
       _setupBasicChannel(client, clientState, channel, channelState);
-      stubMockClientCurrentUser(client, OwnUser(id: 'user-1', name: 'Alice'));
+      stubMockClientCurrentUser(client, OwnUser(id: 'user-1', image: 'https://docs.fixture/avatar/user-1.png', name: 'Alice'));
 
       final message = Message(
         id: 'msg-2',
@@ -279,7 +279,7 @@ void main() {
       final channel = MockChannel(type: 'messaging', id: 'general');
       final channelState = MockChannelState();
       _setupBasicChannel(client, clientState, channel, channelState);
-      stubMockClientCurrentUser(client, OwnUser(id: 'user-1', name: 'Alice'));
+      stubMockClientCurrentUser(client, OwnUser(id: 'user-1', image: 'https://docs.fixture/avatar/user-1.png', name: 'Alice'));
 
       return MaterialApp(
         theme: docsScreenshotsTheme(),
