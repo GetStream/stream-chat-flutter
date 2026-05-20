@@ -105,17 +105,20 @@ void main() {
       constraints: const BoxConstraints.tightFor(width: 400, height: 220),
       builder: () => _wrapWithMaterialApp(
         const PollEndVoteDialog(),
+        brightness: brightness,
       ),
     );
   }
 }
 
 Widget _wrapWithMaterialApp(
-  Widget widget,
-) {
+  Widget widget, {
+  Brightness brightness = Brightness.light,
+}) {
   return StreamChatTheme(
     data: StreamChatThemeData(),
     child: MaterialApp(
+      theme: ThemeData(brightness: brightness),
       home: widget,
     ),
   );

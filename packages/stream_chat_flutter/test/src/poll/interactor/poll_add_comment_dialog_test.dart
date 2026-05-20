@@ -13,6 +13,7 @@ void main() {
       constraints: const BoxConstraints.tightFor(width: 600, height: 300),
       builder: () => _wrapWithMaterialApp(
         const PollAddCommentDialog(),
+        brightness: brightness,
       ),
     );
 
@@ -22,15 +23,18 @@ void main() {
       constraints: const BoxConstraints.tightFor(width: 600, height: 300),
       builder: () => _wrapWithMaterialApp(
         const PollAddCommentDialog(initialValue: 'This is a comment'),
+        brightness: brightness,
       ),
     );
   }
 }
 
 Widget _wrapWithMaterialApp(
-  Widget widget,
-) {
+  Widget widget, {
+  Brightness brightness = Brightness.light,
+}) {
   return MaterialApp(
+    theme: ThemeData(brightness: brightness),
     home: StreamChatTheme(
       data: StreamChatThemeData(),
       child: widget,

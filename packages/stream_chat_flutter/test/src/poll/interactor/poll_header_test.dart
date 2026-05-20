@@ -25,6 +25,7 @@ void main() {
       constraints: const BoxConstraints.tightFor(width: 300, height: 120),
       builder: () => _wrapWithMaterialApp(
         PollHeader(poll: poll),
+        brightness: brightness,
       ),
     );
 
@@ -38,6 +39,7 @@ void main() {
             name: 'A very long question that does not fit in one line',
           ),
         ),
+        brightness: brightness,
       ),
     );
 
@@ -49,6 +51,7 @@ void main() {
         PollHeader(
           poll: poll.copyWith(isClosed: true),
         ),
+        brightness: brightness,
       ),
     );
 
@@ -60,6 +63,7 @@ void main() {
         PollHeader(
           poll: poll.copyWith(enforceUniqueVote: true),
         ),
+        brightness: brightness,
       ),
     );
 
@@ -71,6 +75,7 @@ void main() {
         PollHeader(
           poll: poll.copyWith(maxVotesAllowed: 2, enforceUniqueVote: false),
         ),
+        brightness: brightness,
       ),
     );
 
@@ -82,15 +87,18 @@ void main() {
         PollHeader(
           poll: poll.copyWith(maxVotesAllowed: 3, enforceUniqueVote: false),
         ),
+        brightness: brightness,
       ),
     );
   }
 }
 
 Widget _wrapWithMaterialApp(
-  Widget widget,
-) {
+  Widget widget, {
+  Brightness brightness = Brightness.light,
+}) {
   return MaterialApp(
+    theme: ThemeData(brightness: brightness),
     home: StreamChatTheme(
       data: StreamChatThemeData(),
       child: Builder(

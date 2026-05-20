@@ -69,6 +69,7 @@ void main() {
       constraints: const BoxConstraints.tightFor(width: 600, height: 150),
       builder: () => _wrapWithMaterialApp(
         StreamThreadListTile(thread: thread, currentUser: user2),
+        brightness: brightness,
       ),
     );
   }
@@ -131,8 +132,9 @@ void main() {
 }
 
 Widget _wrapWithMaterialApp(
-  Widget widget,
-) {
+  Widget widget, {
+  Brightness brightness = Brightness.light,
+}) {
   final client = MockClient();
   final clientState = MockClientState();
   final currentUser = OwnUser(id: 'current-user-id', name: 'Current User');
@@ -141,6 +143,7 @@ Widget _wrapWithMaterialApp(
   when(() => clientState.currentUser).thenReturn(currentUser);
 
   return MaterialApp(
+    theme: ThemeData(brightness: brightness),
     home: StreamChat(
       client: client,
       streamChatConfigData: StreamChatConfigurationData(),

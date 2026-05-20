@@ -272,6 +272,7 @@ void main() {
             padding: const EdgeInsets.all(16),
             separatorBuilder: (context, index) => const SizedBox(height: 8),
           ),
+          brightness: brightness,
         ),
       );
     }
@@ -279,11 +280,12 @@ void main() {
 }
 
 Widget _wrapWithStreamChatApp(
-  Widget widget,
-) {
+  Widget widget, {
+  Brightness brightness = Brightness.light,
+}) {
   return MaterialApp(
     theme: ThemeData(
-      brightness: Brightness.light,
+      brightness: brightness,
       extensions: [StreamTheme.light()],
     ),
     home: StreamChatTheme(

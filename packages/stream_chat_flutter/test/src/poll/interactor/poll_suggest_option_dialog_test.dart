@@ -14,6 +14,7 @@ void main() {
       constraints: const BoxConstraints.tightFor(width: 600, height: 300),
       builder: () => _wrapWithMaterialApp(
         const PollSuggestOptionDialog(),
+        brightness: brightness,
       ),
     );
 
@@ -25,15 +26,18 @@ void main() {
         const PollSuggestOptionDialog(
           initialOption: 'New option',
         ),
+        brightness: brightness,
       ),
     );
   }
 }
 
 Widget _wrapWithMaterialApp(
-  Widget widget,
-) {
+  Widget widget, {
+  Brightness brightness = Brightness.light,
+}) {
   return MaterialApp(
+    theme: ThemeData(brightness: brightness),
     home: StreamChatTheme(
       data: StreamChatThemeData(),
       child: Builder(

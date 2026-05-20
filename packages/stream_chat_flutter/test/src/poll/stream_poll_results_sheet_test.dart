@@ -86,6 +86,7 @@ void main() {
       constraints: const BoxConstraints.tightFor(width: 412, height: 916),
       builder: () => _wrapWithMaterialApp(
         StreamPollResultsSheet(poll: poll),
+        brightness: brightness,
       ),
     );
 
@@ -99,15 +100,18 @@ void main() {
           visibleVotesCount: 2,
           onShowAllVotesPressed: (_) {},
         ),
+        brightness: brightness,
       ),
     );
   }
 }
 
 Widget _wrapWithMaterialApp(
-  Widget widget,
-) {
+  Widget widget, {
+  Brightness brightness = Brightness.light,
+}) {
   return MaterialApp(
+    theme: ThemeData(brightness: brightness),
     home: StreamChatConfiguration(
       data: StreamChatConfigurationData(),
       child: StreamChatTheme(

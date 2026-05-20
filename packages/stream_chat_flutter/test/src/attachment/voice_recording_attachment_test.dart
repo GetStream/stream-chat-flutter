@@ -217,6 +217,7 @@ void main() {
                 speed: StreamPlaybackSpeed.x1,
               ),
             ),
+            brightness: brightness,
           ),
         );
 
@@ -236,6 +237,7 @@ void main() {
                 speed: StreamPlaybackSpeed.x1,
               ),
             ),
+            brightness: brightness,
           ),
         );
       }
@@ -244,9 +246,11 @@ void main() {
 }
 
 Widget _wrapWithStreamChatApp(
-  Widget widget,
-) {
+  Widget widget, {
+  Brightness brightness = Brightness.light,
+}) {
   return MaterialApp(
+    theme: ThemeData(brightness: brightness),
     home: StreamChatTheme(
       data: StreamChatThemeData(),
       child: Builder(

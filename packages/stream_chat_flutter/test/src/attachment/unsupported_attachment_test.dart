@@ -11,15 +11,18 @@ void main() {
       constraints: const BoxConstraints.tightFor(width: 300, height: 100),
       builder: () => _wrapWithStreamChatApp(
         StreamUnsupportedAttachment(message: Message()),
+        brightness: brightness,
       ),
     );
   }
 }
 
 Widget _wrapWithStreamChatApp(
-  Widget widget,
-) {
+  Widget widget, {
+  Brightness brightness = Brightness.light,
+}) {
   return MaterialApp(
+    theme: ThemeData(brightness: brightness),
     home: StreamChatTheme(
       data: StreamChatThemeData(),
       child: Builder(

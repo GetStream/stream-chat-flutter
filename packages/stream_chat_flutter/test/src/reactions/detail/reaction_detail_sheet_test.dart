@@ -296,7 +296,7 @@ void main() {
         },
         builder: () => _wrapWithMaterialApp(
           client: mockClient,
-
+          brightness: brightness,
           _ReactionDetailSheetGoldenHost(message: message),
         ),
       );
@@ -324,7 +324,7 @@ void main() {
         },
         builder: () => _wrapWithMaterialApp(
           client: mockClient,
-
+          brightness: brightness,
           _ReactionDetailSheetGoldenHost(
             message: message,
             initialReactionType: 'love',
@@ -417,9 +417,11 @@ Message _buildMessage({
 Widget _wrapWithMaterialApp(
   Widget child, {
   required StreamChatClient client,
+  Brightness brightness = Brightness.light,
 }) {
   return MaterialApp(
     debugShowCheckedModeBanner: false,
+    theme: ThemeData(brightness: brightness),
     builder: (context, child) => StreamChat(
       client: client,
       // Mock the connectivity stream to always return wifi.

@@ -85,6 +85,7 @@ void main() {
           poll: poll,
           currentUser: currentUser,
         ),
+        brightness: brightness,
       ),
     );
 
@@ -99,15 +100,18 @@ void main() {
           ),
           currentUser: currentUser,
         ),
+        brightness: brightness,
       ),
     );
   }
 }
 
 Widget _wrapWithMaterialApp(
-  Widget widget,
-) {
+  Widget widget, {
+  Brightness brightness = Brightness.light,
+}) {
   return MaterialApp(
+    theme: ThemeData(brightness: brightness),
     home: StreamChatConfiguration(
       data: StreamChatConfigurationData(),
       child: StreamChatTheme(

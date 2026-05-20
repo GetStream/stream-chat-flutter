@@ -179,6 +179,7 @@ void main() {
         fileName: 'stream_message_actions_modal_$theme',
         constraints: const BoxConstraints(maxWidth: 400, maxHeight: 600),
         builder: () => _wrapWithMaterialApp(
+          brightness: brightness,
           StreamMessageActionsModal(
             message: message,
             messageActions: messageActions,
@@ -193,6 +194,7 @@ void main() {
         fileName: 'stream_message_actions_modal_with_reactions_$theme',
         constraints: const BoxConstraints(maxWidth: 400, maxHeight: 600),
         builder: () => _wrapWithMaterialApp(
+          brightness: brightness,
           StreamMessageActionsModal(
             message: message,
             messageActions: messageActions,
@@ -208,6 +210,7 @@ void main() {
         fileName: 'stream_message_actions_modal_reversed_$theme',
         constraints: const BoxConstraints(maxWidth: 400, maxHeight: 600),
         builder: () => _wrapWithMaterialApp(
+          brightness: brightness,
           StreamMessageActionsModal(
             message: message,
             messageActions: messageActions,
@@ -222,6 +225,7 @@ void main() {
         fileName: 'stream_message_actions_modal_reversed_with_reactions_$theme',
         constraints: const BoxConstraints(maxWidth: 400, maxHeight: 600),
         builder: () => _wrapWithMaterialApp(
+          brightness: brightness,
           StreamMessageActionsModal(
             message: message,
             messageActions: messageActions,
@@ -237,11 +241,13 @@ void main() {
 
 Widget _wrapWithMaterialApp(
   Widget child, {
+  Brightness brightness = Brightness.light,
   ReactionIconResolver? reactionIconResolver,
 }) {
   return Portal(
     child: MaterialApp(
       debugShowCheckedModeBanner: false,
+      theme: ThemeData(brightness: brightness),
       builder: (context, child) => StreamChatConfiguration(
         data: StreamChatConfigurationData(
           reactionIconResolver: reactionIconResolver ?? const _TestReactionIconResolver(),

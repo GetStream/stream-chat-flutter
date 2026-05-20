@@ -66,6 +66,7 @@ void main() {
               onChanged: (double value) {},
             ),
           ),
+          brightness: brightness,
         ),
       );
 
@@ -83,6 +84,7 @@ void main() {
               onChanged: (double value) {},
             ),
           ),
+          brightness: brightness,
         ),
       );
 
@@ -100,6 +102,7 @@ void main() {
               onChanged: (double value) {},
             ),
           ),
+          brightness: brightness,
         ),
       );
 
@@ -119,6 +122,7 @@ void main() {
               onChanged: (double value) {},
             ),
           ),
+          brightness: brightness,
         ),
       );
 
@@ -135,6 +139,7 @@ void main() {
               onChanged: (double value) {},
             ),
           ),
+          brightness: brightness,
         ),
       );
 
@@ -151,6 +156,7 @@ void main() {
               onChanged: (double value) {},
             ),
           ),
+          brightness: brightness,
         ),
       );
     }
@@ -204,10 +210,12 @@ List<double> generateStaticWaveform({
 }
 
 Widget _wrapWithMaterialApp(
-  Widget widget,
-) {
+  Widget widget, {
+  Brightness brightness = Brightness.light,
+}) {
   return MaterialApp(
     debugShowCheckedModeBanner: false,
+    theme: ThemeData(brightness: brightness),
     home: StreamChatTheme(
       data: StreamChatThemeData(),
       child: Builder(

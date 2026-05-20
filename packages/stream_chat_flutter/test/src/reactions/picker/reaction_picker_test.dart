@@ -309,6 +309,7 @@ void main() {
               onReactionPicked: (_) {},
             ),
             reactionIconResolver: resolver,
+            brightness: brightness,
           );
         },
       );
@@ -337,6 +338,7 @@ void main() {
               onReactionPicked: (_) {},
             ),
             reactionIconResolver: resolver,
+            brightness: brightness,
           );
         },
       );
@@ -358,6 +360,7 @@ void main() {
               onReactionPicked: (_) {},
             ),
             reactionIconResolver: const _SubsetDefaultReactionIconResolver(),
+            brightness: brightness,
           );
         },
       );
@@ -368,9 +371,11 @@ void main() {
 Widget _wrapWithMaterialApp(
   Widget child, {
   ReactionIconResolver? reactionIconResolver,
+  Brightness brightness = Brightness.light,
 }) {
   return MaterialApp(
     debugShowCheckedModeBanner: false,
+    theme: ThemeData(brightness: brightness),
     builder: (context, child) => StreamChatConfiguration(
       data: StreamChatConfigurationData(
         reactionIconResolver: reactionIconResolver ?? const _TestReactionIconResolver(),
