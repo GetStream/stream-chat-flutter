@@ -95,11 +95,6 @@ ThemeData docsScreenshotsTheme() {
     useMaterial3: true,
     brightness: Brightness.light,
     platform: docsScreenshotsTargetPlatform,
-    // No fontFamily override: Material's iOS typography requests
-    // `CupertinoSystemDisplay`/`CupertinoSystemText`, which `_loadAppleSystemFont`
-    // registers from /System/Library/Fonts/SFNS.ttf on macOS. We only set the
-    // emoji fallback so inline emoji glyphs in plain Text widgets render.
-    fontFamilyFallback: const ['Apple Color Emoji', 'Noto Color Emoji'],
     scaffoldBackgroundColor: const Color(0xFFFFFFFF),
     appBarTheme: const AppBarTheme(
       backgroundColor: Color(0xFFFFFFFF),
