@@ -62,11 +62,14 @@ void main() {
               return Scaffold(
                 appBar: StreamSheetHeader(
                   leading: StreamButton.icon(
+                    type: StreamButtonType.outline,
+                    style: StreamButtonStyle.secondary,
                     icon: Icon(icons.xmark),
                     onPressed: () {},
                   ),
                   title: const Text('Create Poll'),
                   trailing: StreamButton.icon(
+                    type: StreamButtonType.solid,
                     icon: Icon(icons.send),
                     onPressed: () {},
                   ),

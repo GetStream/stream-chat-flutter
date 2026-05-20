@@ -73,9 +73,6 @@ void main() {
       final channel = MockChannel(
         type: 'messaging',
         id: 'general',
-        // Full capability set so `StreamMessageActionsBuilder.buildActions`
-        // emits the canonical Reply / Thread Reply / Mark Unread / Copy /
-        // Edit / Pin / Delete list users see in production.
         ownCapabilities: const [
           ChannelCapability.sendMessage,
           ChannelCapability.sendReply,
@@ -120,11 +117,13 @@ void main() {
               showReactionPicker: true,
               leadingInset: leadingInset,
               messageWidget: StreamMessageItem(message: message),
-              messageActions: StreamMessageActionsBuilder.buildActions(
-                context: context,
-                message: message,
-                channel: channel,
-                currentUser: ownUser,
+              messageActions: StreamContextMenuAction.partitioned(
+                items: StreamMessageActionsBuilder.buildActions(
+                  context: context,
+                  message: message,
+                  channel: channel,
+                  currentUser: ownUser,
+                ),
               ),
             );
           },

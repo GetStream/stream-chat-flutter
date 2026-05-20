@@ -14,18 +14,20 @@ Thread _makeThread({
   required String channelName,
   required String parentText,
   required String latestReplyText,
+  required User parentAuthor,
+  User? replyAuthor,
   int unreadCount = 0,
 }) {
   final parentMessage = Message(
     id: 'parent-$id',
     text: parentText,
-    user: ownUser,
+    user: parentAuthor,
     createdAt: DateTime(2024, 6, 1, 9, 0),
   );
   final latestReply = Message(
     id: 'reply-$id',
     text: latestReplyText,
-    user: _otherUser,
+    user: replyAuthor ?? _otherUser,
     parentId: 'parent-$id',
     createdAt: DateTime(2024, 6, 1, 10, 0),
   );
@@ -33,7 +35,7 @@ Thread _makeThread({
   return Thread(
     channelCid: 'messaging:$id',
     parentMessageId: 'parent-$id',
-    createdByUserId: 'user-1',
+    createdByUserId: parentAuthor.id,
     replyCount: 3,
     participantCount: 2,
     channel: ChannelModel(
@@ -95,8 +97,6 @@ Widget _buildFullAppThreadScaffold({
                 ),
               ],
             ),
-            // Theming mirrors sample_app/lib/pages/channel_list_page.dart so
-            // the docs reflect the production chrome a real Stream app uses.
             bottomNavigationBar: DecoratedBox(
               decoration: BoxDecoration(
                 color: colorScheme.backgroundElevation1,
@@ -150,6 +150,7 @@ void main() {
           channelName: 'General',
           parentText: 'Has anyone tried the new Flutter version?',
           latestReplyText: 'Yes! The performance improvements are amazing.',
+          parentAuthor: ownUser,
           unreadCount: 2,
         ),
         _makeThread(
@@ -157,12 +158,14 @@ void main() {
           channelName: 'Design',
           parentText: 'The new color palette looks great!',
           latestReplyText: 'Agreed, especially the dark mode colors.',
+          parentAuthor: charlotteAnderson,
         ),
         _makeThread(
           id: 'engineering',
           channelName: 'Engineering',
           parentText: 'We should refactor the auth module',
           latestReplyText: 'I can take that on next sprint.',
+          parentAuthor: noahSmith,
         ),
       ];
 
@@ -192,29 +195,7 @@ void main() {
 
       stubQueryThreadsForGoldens(client, const []);
 
-      return _buildFullAppThreadScaffold(
-        client: client,
-        controller: controller,
-        emptyBuilder: (context) => const Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.forum_outlined, size: 64, color: Colors.grey),
-              SizedBox(height: 16),
-              Text(
-                'No threads yet',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-              ),
-              SizedBox(height: 8),
-              Text(
-                'Threads will appear here once\nyou reply to a message.',
-                textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.grey),
-              ),
-            ],
-          ),
-        ),
-      );
+      return _buildFullAppThreadScaffold(client: client, controller: controller);
     },
   );
 
@@ -231,6 +212,7 @@ void main() {
         channelName: 'General',
         parentText: 'Has anyone tried the new Flutter version?',
         latestReplyText: 'Yes! The performance improvements are amazing.',
+        parentAuthor: ownUser,
         unreadCount: 3,
       );
 
@@ -272,6 +254,7 @@ void main() {
           channelName: 'General',
           parentText: 'Has anyone tried the new Flutter version?',
           latestReplyText: 'Yes! The performance improvements are amazing.',
+          parentAuthor: ownUser,
           unreadCount: 2,
         ),
         _makeThread(
@@ -279,12 +262,14 @@ void main() {
           channelName: 'Design',
           parentText: 'The new color palette looks great!',
           latestReplyText: 'Agreed, especially the dark mode colors.',
+          parentAuthor: charlotteAnderson,
         ),
         _makeThread(
           id: 'engineering',
           channelName: 'Engineering',
           parentText: 'We should refactor the auth module',
           latestReplyText: 'I can take that on next sprint.',
+          parentAuthor: noahSmith,
         ),
       ];
 
