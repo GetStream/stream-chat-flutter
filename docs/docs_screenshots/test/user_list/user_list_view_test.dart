@@ -20,11 +20,13 @@ void main() {
       final client = MockClient();
       stubMockClientCurrentUser(client, ownUser);
 
-      // Every sample user, with online flipped pseudo-randomly. Seeded so
-      // the same set of users light up across runs.
+      // Take the first 5 sample users — matches the original snapshot's
+      // row count so the diff against the previous golden stays small.
+      // Online states seeded so the same users light up across runs.
       final rng = Random(42);
       final users = [
-        for (final user in sampleUsers) user.copyWith(online: rng.nextBool()),
+        for (final user in sampleUsers.take(5))
+          user.copyWith(online: rng.nextBool()),
       ];
 
       final controller = StreamUserListController.fromValue(
