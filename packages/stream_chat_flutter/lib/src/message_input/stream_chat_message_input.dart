@@ -238,7 +238,7 @@ class _StreamChatMessageInputContent extends StatelessWidget {
         );
 
         return Container(
-          padding: EdgeInsets.only(top: spacing.md),
+          padding: EdgeInsets.only(top: spacing.md, right: spacing.md, left: spacing.md),
           decoration: widget.isFloating
               ? null
               : BoxDecoration(
@@ -249,13 +249,11 @@ class _StreamChatMessageInputContent extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              SizedBox(width: spacing.md),
               StreamMessageComposerLeading(props: componentProps),
               Expanded(
                 child: StreamMessageComposerInput(props: inputProps),
               ),
               StreamMessageComposerTrailing(props: componentProps),
-              SizedBox(width: spacing.md),
             ],
           ),
         );
