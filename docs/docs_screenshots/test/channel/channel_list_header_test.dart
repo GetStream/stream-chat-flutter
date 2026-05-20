@@ -9,7 +9,7 @@ import '../src/sample_users.dart';
 
 Widget _buildListHeaderScaffold({
   required MockClient client,
-  StreamChannelListHeader? header,
+  required PreferredSizeWidget Function(BuildContext) headerBuilder,
 }) {
   return MaterialApp(
     theme: docsScreenshotsTheme(),
@@ -17,7 +17,9 @@ Widget _buildListHeaderScaffold({
     home: StreamChat(
       client: client,
       connectivityStream: Stream.value([ConnectivityResult.mobile]),
-      child: Scaffold(appBar: header),
+      child: Builder(
+        builder: (context) => Scaffold(appBar: headerBuilder(context)),
+      ),
     ),
   );
 }
@@ -37,7 +39,12 @@ void main() {
 
       return _buildListHeaderScaffold(
         client: client,
-        header: const StreamChannelListHeader(),
+        headerBuilder: (context) => StreamChannelListHeader(
+          trailing: StreamButton.icon(
+            icon: Icon(context.streamIcons.plus),
+            onPressed: () {},
+          ),
+        ),
       );
     },
   );
@@ -54,8 +61,12 @@ void main() {
 
       return _buildListHeaderScaffold(
         client: client,
-        header: const StreamChannelListHeader(
-          subtitle: Text('12 channels'),
+        headerBuilder: (context) => StreamChannelListHeader(
+          subtitle: const Text('12 channels'),
+          trailing: StreamButton.icon(
+            icon: Icon(context.streamIcons.plus),
+            onPressed: () {},
+          ),
         ),
       );
     },

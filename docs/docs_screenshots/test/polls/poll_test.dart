@@ -60,7 +60,7 @@ void main() {
             builder: (context) {
               final icons = context.streamIcons;
               return Scaffold(
-                appBar: StreamAppBar(
+                appBar: StreamSheetHeader(
                   leading: StreamButton.icon(
                     icon: Icon(icons.xmark),
                     onPressed: () {},
