@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -20,13 +18,12 @@ void main() {
       final client = MockClient();
       stubMockClientCurrentUser(client, ownUser);
 
-      // Take the first 5 sample users — matches the original snapshot's
-      // row count so the diff against the previous golden stays small.
-      // Online states seeded so the same users light up across runs.
-      final rng = Random(42);
       final users = [
-        for (final user in sampleUsers.take(5))
-          user.copyWith(online: rng.nextBool()),
+        charlotteAnderson.copyWith(online: true),
+        noahSmith.copyWith(online: false),
+        elenaBarros.copyWith(online: true),
+        liamJohnson.copyWith(online: false),
+        mayaRoss.copyWith(online: true),
       ];
 
       final controller = StreamUserListController.fromValue(

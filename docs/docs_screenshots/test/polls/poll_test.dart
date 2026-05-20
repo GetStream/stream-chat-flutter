@@ -60,18 +60,16 @@ void main() {
             builder: (context) {
               final icons = context.streamIcons;
               return Scaffold(
-                appBar: AppBar(
-                  leading: IconButton(
+                appBar: StreamAppBar(
+                  leading: StreamButton.icon(
                     icon: Icon(icons.xmark),
-                    onPressed: null,
+                    onPressed: () {},
                   ),
                   title: const Text('Create Poll'),
-                  actions: [
-                    IconButton(
-                      icon: Icon(icons.send),
-                      onPressed: null,
-                    ),
-                  ],
+                  trailing: StreamButton.icon(
+                    icon: Icon(icons.send),
+                    onPressed: () {},
+                  ),
                 ),
                 body: StreamPollCreatorWidget(
                   controller: controller,

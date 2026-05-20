@@ -126,12 +126,23 @@ void main() {
           home: StreamChat(
             client: client,
             connectivityStream: Stream.value([ConnectivityResult.mobile]),
-            child: Scaffold(
-              appBar: const StreamChannelListHeader(title: Text('Chats')),
-              body: StreamChannelListView(
-                controller: controller,
-                shrinkWrap: true,
-              ),
+            child: Builder(
+              builder: (context) {
+                final icons = context.streamIcons;
+                return Scaffold(
+                  appBar: StreamChannelListHeader(
+                    title: const Text('Chats'),
+                    trailing: StreamButton.icon(
+                      icon: Icon(icons.plus),
+                      onPressed: () {},
+                    ),
+                  ),
+                  body: StreamChannelListView(
+                    controller: controller,
+                    shrinkWrap: true,
+                  ),
+                );
+              },
             ),
           ),
         ),
@@ -303,7 +314,13 @@ void main() {
                 final icons = context.streamIcons;
                 final colorScheme = context.streamColorScheme;
                 return Scaffold(
-                  appBar: const StreamChannelListHeader(title: Text('Chats')),
+                  appBar: StreamChannelListHeader(
+                    title: const Text('Chats'),
+                    trailing: StreamButton.icon(
+                      icon: Icon(icons.plus),
+                      onPressed: () {},
+                    ),
+                  ),
                   body: Column(
                     children: [
                       // First channel shown swiped to reveal slidable actions

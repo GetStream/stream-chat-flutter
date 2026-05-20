@@ -72,7 +72,13 @@ Widget _buildFullAppThreadScaffold({
         builder: (context) {
           final icons = context.streamIcons;
           return Scaffold(
-            appBar: const StreamChannelListHeader(title: Text('Threads')),
+            appBar: StreamChannelListHeader(
+              title: const Text('Threads'),
+              trailing: StreamButton.icon(
+                icon: Icon(icons.plus),
+                onPressed: () {},
+              ),
+            ),
             body: Column(
               children: [
                 if (banner != null) banner,
