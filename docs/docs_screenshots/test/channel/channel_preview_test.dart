@@ -115,6 +115,7 @@ void main() {
       );
 
       stubQueryChannelsForGoldens(client, channels);
+      stubMockClientCurrentUser(client, ownUser);
 
       return DeviceFrame(
         device: Devices.ios.iPhone13,
@@ -126,12 +127,7 @@ void main() {
             client: client,
             connectivityStream: Stream.value([ConnectivityResult.mobile]),
             child: Scaffold(
-              appBar: AppBar(
-                title: const Text('Stream Chat'),
-                actions: const [
-                  IconButton(icon: Icon(Icons.edit_outlined), onPressed: null),
-                ],
-              ),
+              appBar: const StreamChannelListHeader(title: Text('Chats')),
               body: StreamChannelListView(
                 controller: controller,
                 shrinkWrap: true,
@@ -169,30 +165,51 @@ void main() {
         home: StreamChat(
           client: client,
           connectivityStream: Stream.value([ConnectivityResult.mobile]),
-          child: Scaffold(
-            body: Stack(
-              children: [
-                Container(
-                  color: Colors.grey[200],
-                  alignment: Alignment.centerRight,
-                  padding: const EdgeInsets.only(right: 20),
-                  child: const Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.delete, color: Colors.red),
-                      Text('Delete', style: TextStyle(color: Colors.red, fontSize: 12)),
-                    ],
-                  ),
+          child: Builder(
+            builder: (context) {
+              final icons = context.streamIcons;
+              final colorScheme = context.streamColorScheme;
+              return Scaffold(
+                body: Stack(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        SizedBox(
+                          width: 75,
+                          height: 80,
+                          child: ColoredBox(
+                            color: colorScheme.backgroundSurface,
+                            child: Center(child: Icon(icons.more, size: 20)),
+                          ),
+                        ),
+                        SizedBox(
+                          width: 75,
+                          height: 80,
+                          child: ColoredBox(
+                            color: colorScheme.accentPrimary,
+                            child: Center(
+                              child: Icon(
+                                icons.mute,
+                                size: 20,
+                                color: colorScheme.textOnAccent,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    Transform.translate(
+                      offset: const Offset(-150, 0),
+                      child: ColoredBox(
+                        color: Colors.white,
+                        child: StreamChannelListItem(channel: channel),
+                      ),
+                    ),
+                  ],
                 ),
-                Transform.translate(
-                  offset: const Offset(-80, 0),
-                  child: ColoredBox(
-                    color: Colors.white,
-                    child: StreamChannelListItem(channel: channel),
-                  ),
-                ),
-              ],
-            ),
+              );
+            },
           ),
         ),
       );
@@ -283,10 +300,10 @@ void main() {
             connectivityStream: Stream.value([ConnectivityResult.mobile]),
             child: Builder(
               builder: (context) {
-                final chatTheme = StreamChatTheme.of(context);
-                final backgroundColor = context.streamColorScheme.backgroundSurface;
+                final icons = context.streamIcons;
+                final colorScheme = context.streamColorScheme;
                 return Scaffold(
-                  appBar: const StreamChannelListHeader(),
+                  appBar: const StreamChannelListHeader(title: Text('Chats')),
                   body: Column(
                     children: [
                       // First channel shown swiped to reveal slidable actions
@@ -301,28 +318,21 @@ void main() {
                                   width: 80,
                                   height: 80,
                                   child: ColoredBox(
-                                    color: backgroundColor,
-                                    child: const Column(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        Icon(Icons.more_horiz),
-                                      ],
-                                    ),
+                                    color: colorScheme.backgroundSurface,
+                                    child: Center(child: Icon(icons.more, size: 20)),
                                   ),
                                 ),
                                 SizedBox(
                                   width: 80,
                                   height: 80,
                                   child: ColoredBox(
-                                    color: backgroundColor,
-                                    child: Column(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        Icon(
-                                          Icons.delete_outline,
-                                          color: context.streamColorScheme.accentError,
-                                        ),
-                                      ],
+                                    color: colorScheme.accentPrimary,
+                                    child: Center(
+                                      child: Icon(
+                                        icons.mute,
+                                        size: 20,
+                                        color: colorScheme.textOnAccent,
+                                      ),
                                     ),
                                   ),
                                 ),

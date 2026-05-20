@@ -68,44 +68,53 @@ Widget _buildFullAppThreadScaffold({
     home: StreamChat(
       client: client,
       connectivityStream: Stream.value([ConnectivityResult.mobile]),
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Stream Chat'),
-          actions: const [
-            IconButton(icon: Icon(Icons.edit_outlined), onPressed: null),
-          ],
-        ),
-        body: Column(
-          children: [
-            if (banner != null) banner,
-            Expanded(
-              child: StreamThreadListView(
-                controller: controller,
-                emptyBuilder: emptyBuilder,
-                itemBuilder: customItemBuilder != null
-                    ? (context, threads, index, defaultWidget) => customItemBuilder(context, threads[index])
-                    : null,
-              ),
+      child: Builder(
+        builder: (context) {
+          final icons = context.streamIcons;
+          return Scaffold(
+            appBar: const StreamChannelListHeader(title: Text('Threads')),
+            body: Column(
+              children: [
+                if (banner != null) banner,
+                Expanded(
+                  child: StreamThreadListView(
+                    controller: controller,
+                    emptyBuilder: emptyBuilder,
+                    itemBuilder: customItemBuilder != null
+                        ? (context, threads, index, defaultWidget) => customItemBuilder(context, threads[index])
+                        : null,
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-        bottomNavigationBar: BottomNavigationBar(
-          currentIndex: 2,
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.chat_bubble_outline),
-              label: 'Chats',
+            bottomNavigationBar: BottomNavigationBar(
+              type: BottomNavigationBarType.fixed,
+              currentIndex: 1,
+              items: [
+                BottomNavigationBarItem(
+                  icon: Icon(icons.messageBubble),
+                  activeIcon: Icon(icons.messageBubbleFill),
+                  label: 'Chats',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(icons.thread),
+                  activeIcon: Icon(icons.threadFill),
+                  label: 'Threads',
+                ),
+                const BottomNavigationBarItem(
+                  icon: Icon(Icons.drafts_outlined),
+                  activeIcon: Icon(Icons.drafts_rounded),
+                  label: 'Drafts',
+                ),
+                const BottomNavigationBarItem(
+                  icon: Icon(Icons.bookmark_outline_rounded),
+                  activeIcon: Icon(Icons.bookmark_rounded),
+                  label: 'Reminders',
+                ),
+              ],
             ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.alternate_email),
-              label: 'Mentions',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.comment_outlined),
-              label: 'Threads',
-            ),
-          ],
-        ),
+          );
+        },
       ),
     ),
   );

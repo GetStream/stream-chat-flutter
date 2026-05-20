@@ -56,24 +56,29 @@ void main() {
         home: StreamChat(
           client: client,
           connectivityStream: Stream.value([ConnectivityResult.mobile]),
-          child: Scaffold(
-            appBar: AppBar(
-              leading: const IconButton(
-                icon: Icon(Icons.close),
-                onPressed: null,
-              ),
-              title: const Text('Create Poll'),
-              actions: const [
-                IconButton(
-                  icon: Icon(Icons.send),
-                  onPressed: null,
+          child: Builder(
+            builder: (context) {
+              final icons = context.streamIcons;
+              return Scaffold(
+                appBar: AppBar(
+                  leading: IconButton(
+                    icon: Icon(icons.xmark),
+                    onPressed: null,
+                  ),
+                  title: const Text('Create Poll'),
+                  actions: [
+                    IconButton(
+                      icon: Icon(icons.send),
+                      onPressed: null,
+                    ),
+                  ],
                 ),
-              ],
-            ),
-            body: StreamPollCreatorWidget(
-              controller: controller,
-              shrinkWrap: true,
-            ),
+                body: StreamPollCreatorWidget(
+                  controller: controller,
+                  shrinkWrap: true,
+                ),
+              );
+            },
           ),
         ),
       );
