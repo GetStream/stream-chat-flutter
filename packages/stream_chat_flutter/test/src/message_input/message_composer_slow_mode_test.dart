@@ -1,5 +1,4 @@
 import 'package:alchemist/alchemist.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -45,9 +44,19 @@ void main() {
       when(() => channel.image).thenReturn(null);
       when(() => channel.imageStream).thenAnswer((_) => Stream.value(null));
       when(() => channelState.membersStream).thenAnswer(
-        (_) => Stream.value([Member(userId: 'user-id', user: User(id: 'user-id'))]),
+        (_) => Stream.value([
+          Member(
+            userId: 'user-id',
+            user: User(id: 'user-id'),
+          ),
+        ]),
       );
-      when(() => channelState.members).thenReturn([Member(userId: 'user-id', user: User(id: 'user-id'))]);
+      when(() => channelState.members).thenReturn([
+        Member(
+          userId: 'user-id',
+          user: User(id: 'user-id'),
+        ),
+      ]);
       when(() => channelState.messages).thenReturn([]);
       when(() => channelState.messagesStream).thenAnswer((_) => Stream.value([]));
       when(() => channelState.draft).thenReturn(null);
