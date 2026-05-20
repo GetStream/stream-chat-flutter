@@ -28,6 +28,7 @@ void main() {
     fileName: 'poll_option_reorderable_list_view_dark',
     constraints: const BoxConstraints.tightFor(width: 600, height: 500),
     builder: () => _wrapWithMaterialApp(
+      brightness: Brightness.dark,
       PollOptionReorderableListView(
         title: 'Options',
         itemHintText: 'Add an option',
@@ -61,9 +62,11 @@ void main() {
 }
 
 Widget _wrapWithMaterialApp(
-  Widget widget,
-) {
+  Widget widget, {
+  Brightness brightness = Brightness.light,
+}) {
   return MaterialApp(
+    theme: ThemeData(brightness: brightness),
     home: StreamChatTheme(
       data: StreamChatThemeData(),
       child: Builder(

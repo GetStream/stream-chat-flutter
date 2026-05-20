@@ -38,6 +38,7 @@ void main() {
     fileName: 'poll_question_text_field_dark',
     constraints: const BoxConstraints.tightFor(width: 600, height: 150),
     builder: () => _wrapWithMaterialApp(
+      brightness: Brightness.dark,
       PollQuestionTextField(
         title: 'Question',
         hintText: 'Ask a question',
@@ -48,9 +49,11 @@ void main() {
 }
 
 Widget _wrapWithMaterialApp(
-  Widget widget,
-) {
+  Widget widget, {
+  Brightness brightness = Brightness.light,
+}) {
   return MaterialApp(
+    theme: ThemeData(brightness: brightness),
     home: StreamChatTheme(
       data: StreamChatThemeData(),
       child: Builder(
