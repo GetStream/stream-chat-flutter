@@ -106,8 +106,12 @@ ThemeData docsScreenshotsTheme() {
     // Pinning the platform to iOS makes Material switch to iOS typography
     // (San Francisco), which the test renderer can't resolve — leaving
     // AppBar/TextField text rendered in Ahem (black rectangles). Apply
-    // Roboto across the whole textTheme to keep Material widgets readable.
+    // Roboto across the whole textTheme to keep Material widgets readable,
+    // with emoji fonts in the fallback chain so inline emoji glyphs in plain
+    // Text widgets render instead of falling back to tofu. The matching font
+    // is loaded by `_loadEmojiFont` in flutter_test_config.dart.
     fontFamily: 'Roboto',
+    fontFamilyFallback: const ['Apple Color Emoji', 'Noto Color Emoji'],
     scaffoldBackgroundColor: const Color(0xFFFFFFFF),
     appBarTheme: const AppBarTheme(
       backgroundColor: Color(0xFFFFFFFF),
