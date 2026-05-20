@@ -123,7 +123,7 @@ platform :ios do
   desc "Upload iOS dSYMs from the most recent `flutter build ipa` to Firebase Crashlytics"
   private_lane :upload_dsyms_to_crashlytics do
     upload_symbols_to_crashlytics(
-      dsym_path: "#{root_path}/build/ios/archive/Runner.xcarchive/dSYMs",
+      dsym_paths: Dir["#{root_path}/build/ios/archive/Runner.xcarchive/dSYMs/*.dSYM"],
       gsp_path: "#{root_path}/ios/Runner/GoogleService-Info.plist",
       binary_path: "#{root_path}/ios/Pods/FirebaseCrashlytics/upload-symbols"
     )
