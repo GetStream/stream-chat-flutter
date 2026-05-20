@@ -497,20 +497,20 @@ extension on CommonFinders {
 
 Widget _wrapWithMaterialApp(
   Widget widget, {
-  Brightness? brightness,
+  Brightness brightness = Brightness.light,
 }) {
   return MaterialApp(
+    theme: ThemeData(brightness: brightness),
     builder: (context, child) {
       return StreamChatTheme(
-        data: StreamChatThemeData(brightness: brightness),
+        data: StreamChatThemeData(),
         child: child!,
       );
     },
     home: Builder(
       builder: (context) {
-        final theme = StreamChatTheme.of(context);
         return Scaffold(
-          backgroundColor: theme.colorTheme.appBg,
+          backgroundColor: context.streamColorScheme.backgroundApp,
           body: Center(
             child: Padding(
               padding: const EdgeInsets.all(8),

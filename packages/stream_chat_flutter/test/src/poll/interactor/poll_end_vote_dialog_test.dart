@@ -104,8 +104,8 @@ void main() {
       fileName: 'poll_end_vote_dialog_${brightness.name}',
       constraints: const BoxConstraints.tightFor(width: 400, height: 220),
       builder: () => _wrapWithMaterialApp(
-        brightness: brightness,
         const PollEndVoteDialog(),
+        brightness: brightness,
       ),
     );
   }
@@ -113,11 +113,12 @@ void main() {
 
 Widget _wrapWithMaterialApp(
   Widget widget, {
-  Brightness? brightness,
+  Brightness brightness = Brightness.light,
 }) {
   return StreamChatTheme(
-    data: StreamChatThemeData(brightness: brightness),
+    data: StreamChatThemeData(),
     child: MaterialApp(
+      theme: ThemeData(brightness: brightness),
       home: widget,
     ),
   );

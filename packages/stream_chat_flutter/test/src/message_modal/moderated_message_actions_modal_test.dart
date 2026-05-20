@@ -130,7 +130,7 @@ void main() {
 
 Widget _wrapWithMaterialApp(
   Widget child, {
-  Brightness? brightness,
+  Brightness brightness = Brightness.light,
 }) {
   return MaterialApp(
     debugShowCheckedModeBanner: false,
@@ -138,17 +138,17 @@ Widget _wrapWithMaterialApp(
     builder: (context, child) => StreamChatConfiguration(
       data: StreamChatConfigurationData(),
       child: StreamChatTheme(
-        data: StreamChatThemeData(brightness: brightness),
+        data: StreamChatThemeData(),
         child: child ?? const SizedBox.shrink(),
       ),
     ),
     home: Builder(
       builder: (context) {
-        final theme = StreamChatTheme.of(context);
+        final colorScheme = context.streamColorScheme;
         return Scaffold(
-          backgroundColor: theme.colorTheme.appBg,
+          backgroundColor: colorScheme.backgroundApp,
           body: ColoredBox(
-            color: theme.colorTheme.overlay,
+            color: colorScheme.backgroundOverlayLight,
             child: Padding(
               padding: const EdgeInsets.all(8),
               child: child,

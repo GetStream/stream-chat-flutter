@@ -2,7 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_portal/flutter_portal.dart';
-import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// Shows a modal dialog with customized transitions and backdrop effects.
 ///
@@ -27,7 +27,7 @@ Future<T?> showStreamDialog<T>({
   final localizations = MaterialLocalizations.of(context);
 
   final theme = StreamChatTheme.of(context);
-  final colorTheme = theme.colorTheme;
+  final colorScheme = context.streamColorScheme;
 
   final capturedThemes = InheritedTheme.capture(
     from: context,
@@ -41,7 +41,7 @@ Future<T?> showStreamDialog<T>({
     routeSettings: routeSettings,
     transitionDuration: transitionDuration,
     barrierDismissible: barrierDismissible,
-    barrierColor: barrierColor ?? colorTheme.overlay,
+    barrierColor: barrierColor ?? colorScheme.backgroundOverlayLight,
     barrierLabel: barrierLabel ?? localizations.modalBarrierDismissLabel,
     transitionBuilder: (context, animation, secondaryAnimation, child) {
       final sigma = 10 * animation.value;

@@ -304,12 +304,12 @@ void main() {
           );
 
           return _wrapWithMaterialApp(
-            brightness: brightness,
             StreamMessageReactionPicker(
               message: message,
               onReactionPicked: (_) {},
             ),
             reactionIconResolver: resolver,
+            brightness: brightness,
           );
         },
       );
@@ -333,12 +333,12 @@ void main() {
           );
 
           return _wrapWithMaterialApp(
-            brightness: brightness,
             StreamMessageReactionPicker(
               message: message,
               onReactionPicked: (_) {},
             ),
             reactionIconResolver: resolver,
+            brightness: brightness,
           );
         },
       );
@@ -355,12 +355,12 @@ void main() {
           );
 
           return _wrapWithMaterialApp(
-            brightness: brightness,
             StreamMessageReactionPicker(
               message: message,
               onReactionPicked: (_) {},
             ),
             reactionIconResolver: const _SubsetDefaultReactionIconResolver(),
+            brightness: brightness,
           );
         },
       );
@@ -370,8 +370,8 @@ void main() {
 
 Widget _wrapWithMaterialApp(
   Widget child, {
-  Brightness? brightness,
   ReactionIconResolver? reactionIconResolver,
+  Brightness brightness = Brightness.light,
 }) {
   return MaterialApp(
     debugShowCheckedModeBanner: false,
@@ -381,15 +381,14 @@ Widget _wrapWithMaterialApp(
         reactionIconResolver: reactionIconResolver ?? const _TestReactionIconResolver(),
       ),
       child: StreamChatTheme(
-        data: StreamChatThemeData(brightness: brightness),
+        data: StreamChatThemeData(),
         child: child ?? const SizedBox.shrink(),
       ),
     ),
     home: Builder(
       builder: (context) {
-        final theme = StreamChatTheme.of(context);
         return Scaffold(
-          backgroundColor: theme.colorTheme.overlay,
+          backgroundColor: context.streamColorScheme.backgroundOverlayLight,
           body: Center(
             child: Padding(
               padding: const EdgeInsets.all(8),

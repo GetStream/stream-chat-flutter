@@ -6,6 +6,7 @@ import 'package:stream_chat_flutter/src/poll/stream_poll_results_sheet.dart';
 import 'package:stream_chat_flutter/src/stream_chat_configuration.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 void main() {
   final currentUser = User(id: 'curr-user', name: 'Current User');
@@ -84,8 +85,8 @@ void main() {
       fileName: 'stream_poll_results_sheet_${brightness.name}',
       constraints: const BoxConstraints.tightFor(width: 412, height: 916),
       builder: () => _wrapWithMaterialApp(
-        brightness: brightness,
         StreamPollResultsSheet(poll: poll),
+        brightness: brightness,
       ),
     );
 
@@ -94,12 +95,12 @@ void main() {
       fileName: 'stream_poll_results_sheet_with_show_all_${brightness.name}',
       constraints: const BoxConstraints.tightFor(width: 412, height: 916),
       builder: () => _wrapWithMaterialApp(
-        brightness: brightness,
         StreamPollResultsSheet(
           poll: poll,
           visibleVotesCount: 2,
           onShowAllVotesPressed: (_) {},
         ),
+        brightness: brightness,
       ),
     );
   }
@@ -107,18 +108,18 @@ void main() {
 
 Widget _wrapWithMaterialApp(
   Widget widget, {
-  Brightness? brightness,
+  Brightness brightness = Brightness.light,
 }) {
   return MaterialApp(
+    theme: ThemeData(brightness: brightness),
     home: StreamChatConfiguration(
       data: StreamChatConfigurationData(),
       child: StreamChatTheme(
-        data: StreamChatThemeData(brightness: brightness),
+        data: StreamChatThemeData(),
         child: Builder(
           builder: (context) {
-            final theme = StreamChatTheme.of(context);
             return Scaffold(
-              backgroundColor: theme.colorTheme.appBg,
+              backgroundColor: context.streamColorScheme.backgroundApp,
               body: Center(child: widget),
             );
           },

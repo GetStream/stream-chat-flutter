@@ -63,7 +63,6 @@ Widget _buildMessageListViewInDevice({
       debugShowCheckedModeBanner: false,
       home: StreamChat(
         client: client,
-        streamChatThemeData: docsStreamChatThemeData(),
         connectivityStream: Stream.value([ConnectivityResult.mobile]),
         child: StreamChannel(
           showLoading: false,
@@ -131,7 +130,6 @@ void main() {
         debugShowCheckedModeBanner: false,
         home: StreamChat(
           client: client,
-          streamChatThemeData: docsStreamChatThemeData(),
           connectivityStream: Stream.value([ConnectivityResult.mobile]),
           child: StreamChannel(
             showLoading: false,
@@ -171,7 +169,6 @@ void main() {
         debugShowCheckedModeBanner: false,
         home: StreamChat(
           client: client,
-          streamChatThemeData: docsStreamChatThemeData(),
           connectivityStream: Stream.value([ConnectivityResult.mobile]),
           child: StreamChannel(
             showLoading: false,

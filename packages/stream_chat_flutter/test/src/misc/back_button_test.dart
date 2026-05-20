@@ -9,7 +9,6 @@ void main() {
   testWidgets(
     'BackButton control test',
     (WidgetTester tester) async {
-      final theme = ThemeData();
       await tester.pumpWidget(
         MaterialApp(
           home: const Material(child: Text('Home')),
@@ -18,7 +17,7 @@ void main() {
               return Material(
                 child: Center(
                   child: StreamChatTheme(
-                    data: StreamChatThemeData.fromTheme(theme),
+                    data: StreamChatThemeData(),
                     child: const StreamBackButton(),
                   ),
                 ),
@@ -44,13 +43,12 @@ void main() {
   testWidgets(
     'it should not throw errors if cannot pop',
     (WidgetTester tester) async {
-      final theme = ThemeData();
       await tester.pumpWidget(
         MaterialApp(
           home: Material(
             child: Center(
               child: StreamChatTheme(
-                data: StreamChatThemeData.fromTheme(theme),
+                data: StreamChatThemeData(),
                 child: const StreamBackButton(),
               ),
             ),
@@ -71,7 +69,6 @@ void main() {
   testWidgets(
     'BackButton onPressed overrides default pop behavior',
     (WidgetTester tester) async {
-      final theme = ThemeData();
       var customCallbackWasCalled = false;
       await tester.pumpWidget(
         MaterialApp(
@@ -81,7 +78,7 @@ void main() {
               return Material(
                 child: Center(
                   child: StreamChatTheme(
-                    data: StreamChatThemeData.fromTheme(theme),
+                    data: StreamChatThemeData(),
                     child: StreamBackButton(
                       onPressed: () => customCallbackWasCalled = true,
                     ),

@@ -1,4 +1,3 @@
-export 'color_theme.dart';
 export 'message_list_view_theme.dart';
 export 'poll_card_style.dart';
 export 'poll_comments_sheet_theme.dart';
@@ -12,6 +11,5 @@ export 'poll_question_style.dart';
 export 'poll_results_sheet_theme.dart';
 export 'quoted_message_theme.dart';
 export 'stream_channel_list_item_theme.dart';
-export 'text_theme.dart';
 export 'thread_list_tile_theme.dart';
 export 'voice_recording_attachment_theme.dart';

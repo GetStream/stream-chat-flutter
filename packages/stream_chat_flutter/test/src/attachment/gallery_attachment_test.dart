@@ -14,9 +14,6 @@ void main() {
 
       when(() => channel.state).thenReturn(channelState);
 
-      final themeData = ThemeData();
-      final streamTheme = StreamChatThemeData.fromTheme(themeData);
-
       final attachments = [
         Attachment(
           type: 'image',
@@ -39,7 +36,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: StreamChatTheme(
-            data: streamTheme,
+            data: StreamChatThemeData(),
             child: StreamChannel(
               channel: channel,
               child: SizedBox(

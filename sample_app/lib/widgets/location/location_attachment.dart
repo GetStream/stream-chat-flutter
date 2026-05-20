@@ -161,10 +161,6 @@ class LocationAttachmentFooter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = StreamChatTheme.of(context);
-    final textTheme = theme.textTheme;
-    final colorTheme = theme.colorTheme;
-
     const maximumSize = Size(double.infinity, 40);
 
     // If the location sharing has ended, show a message indicating that.
@@ -178,12 +174,12 @@ class LocationAttachmentFooter extends StatelessWidget {
           children: [
             Icon(
               Icons.near_me_disabled_rounded,
-              color: colorTheme.textLowEmphasis,
+              color: context.streamColorScheme.textSecondary,
             ),
             Text(
               'Live location ended',
-              style: textTheme.bodyBold.copyWith(
-                color: colorTheme.textLowEmphasis,
+              style: context.streamTextTheme.bodyEmphasis.copyWith(
+                color: context.streamColorScheme.textSecondary,
               ),
             ),
           ],
@@ -208,12 +204,12 @@ class LocationAttachmentFooter extends StatelessWidget {
           children: [
             Icon(
               Icons.near_me_rounded,
-              color: colorTheme.accentPrimary,
+              color: context.streamColorScheme.accentPrimary,
             ),
             Text(
               'Live until ${liveUntil.jm}',
-              style: textTheme.bodyBold.copyWith(
-                color: colorTheme.accentPrimary,
+              style: context.streamTextTheme.bodyEmphasis.copyWith(
+                color: context.streamColorScheme.accentPrimary,
               ),
             ),
           ],
@@ -224,9 +220,9 @@ class LocationAttachmentFooter extends StatelessWidget {
     // Otherwise, show the "Stop Sharing" button.
     final buttonStyle = TextButton.styleFrom(
       maximumSize: maximumSize,
-      textStyle: textTheme.bodyBold,
+      textStyle: context.streamTextTheme.bodyEmphasis,
       visualDensity: VisualDensity.compact,
-      foregroundColor: colorTheme.accentError,
+      foregroundColor: context.streamColorScheme.accentError,
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
     );
 
@@ -235,7 +231,7 @@ class LocationAttachmentFooter extends StatelessWidget {
       onPressed: onStopSharingPressed,
       icon: Icon(
         Icons.near_me_disabled_rounded,
-        color: colorTheme.accentError,
+        color: context.streamColorScheme.accentError,
       ),
       label: const Text('Stop Sharing'),
     );

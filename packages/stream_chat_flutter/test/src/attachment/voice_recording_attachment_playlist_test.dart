@@ -266,13 +266,13 @@ void main() {
         fileName: 'stream_voice_recording_attachment_playlist_$theme',
         constraints: const BoxConstraints.tightFor(width: 412, height: 400),
         builder: () => _wrapWithStreamChatApp(
-          brightness: brightness,
           StreamVoiceRecordingAttachmentPlaylist(
             message: MockMessage(),
             voiceRecordings: [fakeAudioRecording1, fakeAudioRecording2],
             padding: const EdgeInsets.all(16),
             separatorBuilder: (context, index) => const SizedBox(height: 8),
           ),
+          brightness: brightness,
         ),
       );
     }
@@ -281,25 +281,19 @@ void main() {
 
 Widget _wrapWithStreamChatApp(
   Widget widget, {
-  Brightness? brightness,
+  Brightness brightness = Brightness.light,
 }) {
   return MaterialApp(
     theme: ThemeData(
-      brightness: .light,
+      brightness: brightness,
       extensions: [StreamTheme.light()],
     ),
-    darkTheme: ThemeData(
-      brightness: .dark,
-      extensions: [StreamTheme.dark()],
-    ),
-    themeMode: brightness == Brightness.light ? ThemeMode.light : ThemeMode.dark,
     home: StreamChatTheme(
-      data: StreamChatThemeData(brightness: brightness),
+      data: StreamChatThemeData(),
       child: Builder(
         builder: (context) {
-          final theme = StreamChatTheme.of(context);
           return Scaffold(
-            backgroundColor: theme.colorTheme.appBg,
+            backgroundColor: context.streamColorScheme.backgroundApp,
             body: widget,
           );
         },

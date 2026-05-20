@@ -223,34 +223,3 @@ class FlexGrid extends StatelessWidget {
     );
   }
 }
-
-/// {@template gap}
-/// A gap widget used to add spacing between children in either the horizontal
-/// or vertical direction.
-/// {@endtemplate}
-class Gap extends StatelessWidget {
-  /// {@macro gap}
-  const Gap({
-    super.key,
-    required this.direction,
-    this.spacing = 0.0,
-  });
-
-  /// The direction of the gap.
-  final Axis direction;
-
-  /// The spacing between children in the gap.
-  ///
-  /// Defaults to 0.0.
-  final double spacing;
-
-  @override
-  Widget build(BuildContext context) {
-    switch (direction) {
-      case Axis.horizontal:
-        return SizedBox(width: spacing);
-      case Axis.vertical:
-        return SizedBox(height: spacing);
-    }
-  }
-}

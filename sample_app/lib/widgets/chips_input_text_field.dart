@@ -67,7 +67,7 @@ class ChipInputTextFieldState<T> extends State<ChipsInputTextField<T>> {
       onTap: _pauseItemAddition ? resumeItemAddition : null,
       child: Material(
         elevation: 1,
-        color: StreamChatTheme.of(context).colorTheme.barsBg,
+        color: context.streamColorScheme.backgroundElevation1,
         child: Padding(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
           child: Row(
@@ -76,8 +76,8 @@ class ChipInputTextFieldState<T> extends State<ChipsInputTextField<T>> {
                 padding: const EdgeInsets.symmetric(vertical: 4),
                 child: Text(
                   'TO:',
-                  style: StreamChatTheme.of(context).textTheme.footnote.copyWith(
-                    color: StreamChatTheme.of(context).colorTheme.textHighEmphasis.withOpacity(.5),
+                  style: context.streamTextTheme.captionDefault.copyWith(
+                    color: context.streamColorScheme.textPrimary.withOpacity(.5),
                   ),
                 ),
               ),
@@ -108,8 +108,8 @@ class ChipInputTextFieldState<T> extends State<ChipsInputTextField<T>> {
                           disabledBorder: InputBorder.none,
                           contentPadding: const EdgeInsets.only(top: 4),
                           hintText: widget.hint,
-                          hintStyle: StreamChatTheme.of(context).textTheme.body.copyWith(
-                            color: StreamChatTheme.of(context).colorTheme.textHighEmphasis.withOpacity(.5),
+                          hintStyle: context.streamTextTheme.bodyDefault.copyWith(
+                            color: context.streamColorScheme.textPrimary.withOpacity(.5),
                           ),
                         ),
                       ),
@@ -123,12 +123,12 @@ class ChipInputTextFieldState<T> extends State<ChipsInputTextField<T>> {
                   icon: _chips.isEmpty
                       ? Icon(
                           context.streamIcons.user,
-                          color: StreamChatTheme.of(context).colorTheme.textHighEmphasis.withOpacity(0.5),
+                          color: context.streamColorScheme.textPrimary.withOpacity(0.5),
                           size: 24,
                         )
                       : Icon(
                           context.streamIcons.userAdd,
-                          color: StreamChatTheme.of(context).colorTheme.textHighEmphasis.withOpacity(0.5),
+                          color: context.streamColorScheme.textPrimary.withOpacity(0.5),
                           size: 24,
                         ),
                   onPressed: resumeItemAddition,

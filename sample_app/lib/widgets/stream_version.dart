@@ -28,7 +28,7 @@ class StreamVersion extends StatelessWidget {
             'Stream SDK v $streamChatDep',
             style: TextStyle(
               fontSize: 14,
-              color: StreamChatTheme.of(context).colorTheme.disabled,
+              color: context.streamColorScheme.textDisabled,
             ),
           );
         },

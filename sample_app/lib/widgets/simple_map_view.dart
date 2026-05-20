@@ -32,8 +32,7 @@ class SimpleMapView extends StatefulWidget {
 
   final MarkerBuilder markerBuilder;
   static Widget _defaultMarkerBuilder(BuildContext context, _, MarkerSize size) {
-    final theme = StreamChatTheme.of(context);
-    final iconColor = theme.colorTheme.accentPrimary;
+    final iconColor = context.streamColorScheme.accentPrimary;
     return Icon(size: size.value, Icons.person_pin, color: iconColor);
   }
 
@@ -130,8 +129,7 @@ class SimpleMapLocateMeButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = StreamChatTheme.of(context);
-    final colorTheme = theme.colorTheme;
+    final colorScheme = context.streamColorScheme;
 
     return Align(
       alignment: alignment,
@@ -140,8 +138,8 @@ class SimpleMapLocateMeButton extends StatelessWidget {
         child: FloatingActionButton.small(
           onPressed: onPressed,
           shape: const CircleBorder(),
-          foregroundColor: colorTheme.accentPrimary,
-          backgroundColor: colorTheme.barsBg,
+          foregroundColor: colorScheme.accentPrimary,
+          backgroundColor: colorScheme.backgroundElevation1,
           child: const Icon(Icons.near_me_rounded),
         ),
       ),

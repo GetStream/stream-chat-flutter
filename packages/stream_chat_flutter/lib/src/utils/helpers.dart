@@ -68,9 +68,10 @@ Future<bool?> showConfirmationBottomSheet(
   String? question,
   String? cancelText,
 }) {
-  final chatThemeData = StreamChatTheme.of(context);
+  final colorScheme = context.streamColorScheme;
+  final textTheme = context.streamTextTheme;
   return showModalBottomSheet(
-    backgroundColor: chatThemeData.colorTheme.barsBg,
+    backgroundColor: colorScheme.backgroundElevation1,
     context: context,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.only(
@@ -79,7 +80,6 @@ Future<bool?> showConfirmationBottomSheet(
       ),
     ),
     builder: (context) {
-      final effect = chatThemeData.colorTheme.borderTop;
       return SafeArea(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -89,7 +89,7 @@ Future<bool?> showConfirmationBottomSheet(
             const SizedBox(height: 26),
             Text(
               title,
-              style: chatThemeData.textTheme.headlineBold,
+              style: textTheme.headingMd,
             ),
             const SizedBox(height: 7),
             if (question != null)
@@ -99,8 +99,7 @@ Future<bool?> showConfirmationBottomSheet(
               ),
             const SizedBox(height: 36),
             Container(
-              // ignore: deprecated_member_use
-              color: effect.color!.withOpacity(effect.alpha ?? 1),
+              color: colorScheme.borderSubtle,
               height: 1,
             ),
             Row(
@@ -112,8 +111,8 @@ Future<bool?> showConfirmationBottomSheet(
                       child: TextButton(
                         onPressed: () => Navigator.of(context).pop(false),
                         style: TextButton.styleFrom(
-                          textStyle: chatThemeData.textTheme.bodyBold,
-                          foregroundColor: chatThemeData.colorTheme.textHighEmphasis
+                          textStyle: textTheme.bodyEmphasis,
+                          foregroundColor: colorScheme.textPrimary
                               // ignore: deprecated_member_use
                               .withOpacity(0.5),
                         ),
@@ -127,8 +126,8 @@ Future<bool?> showConfirmationBottomSheet(
                     child: TextButton(
                       onPressed: () => Navigator.of(context).pop(true),
                       style: TextButton.styleFrom(
-                        textStyle: chatThemeData.textTheme.bodyBold,
-                        foregroundColor: chatThemeData.colorTheme.accentError,
+                        textStyle: textTheme.bodyEmphasis,
+                        foregroundColor: colorScheme.accentError,
                       ),
                       child: Text(okText),
                     ),
@@ -152,9 +151,10 @@ Future<bool?> showInfoBottomSheet(
   String? details,
   StreamChatThemeData? theme,
 }) {
-  final chatThemeData = StreamChatTheme.of(context);
+  final colorScheme = context.streamColorScheme;
+  final textTheme = context.streamTextTheme;
   return showModalBottomSheet(
-    backgroundColor: theme?.colorTheme.barsBg ?? chatThemeData.colorTheme.barsBg,
+    backgroundColor: colorScheme.backgroundElevation1,
     context: context,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.only(
@@ -175,7 +175,7 @@ Future<bool?> showInfoBottomSheet(
           ),
           Text(
             title,
-            style: theme?.textTheme.headlineBold ?? chatThemeData.textTheme.headlineBold,
+            style: textTheme.headingMd,
           ),
           const SizedBox(
             height: 7,
@@ -185,9 +185,7 @@ Future<bool?> showInfoBottomSheet(
             height: 36,
           ),
           Container(
-            color:
-                theme?.colorTheme.textHighEmphasis.withValues(alpha: 0.08) ??
-                chatThemeData.colorTheme.textHighEmphasis.withValues(alpha: 0.08),
+            color: colorScheme.textPrimary.withValues(alpha: 0.08),
             height: 1,
           ),
           Center(
@@ -199,7 +197,7 @@ Future<bool?> showInfoBottomSheet(
                 okText,
                 style: TextStyle(
                   // ignore: deprecated_member_use
-                  color: theme?.colorTheme.textHighEmphasis.withOpacity(0.5) ?? chatThemeData.colorTheme.accentPrimary,
+                  color: colorScheme.accentPrimary,
                   fontWeight: FontWeight.w400,
                 ),
               ),

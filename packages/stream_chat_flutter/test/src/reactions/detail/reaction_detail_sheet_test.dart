@@ -417,7 +417,7 @@ Message _buildMessage({
 Widget _wrapWithMaterialApp(
   Widget child, {
   required StreamChatClient client,
-  Brightness? brightness,
+  Brightness brightness = Brightness.light,
 }) {
   return MaterialApp(
     debugShowCheckedModeBanner: false,
@@ -426,16 +426,16 @@ Widget _wrapWithMaterialApp(
       client: client,
       // Mock the connectivity stream to always return wifi.
       connectivityStream: Stream.value([ConnectivityResult.wifi]),
-      streamChatThemeData: StreamChatThemeData(brightness: brightness),
+      streamChatThemeData: StreamChatThemeData(),
       child: child ?? const SizedBox.shrink(),
     ),
     home: Builder(
       builder: (context) {
-        final theme = StreamChatTheme.of(context);
+        final colorScheme = context.streamColorScheme;
         return Scaffold(
-          backgroundColor: theme.colorTheme.appBg,
+          backgroundColor: colorScheme.backgroundApp,
           body: ColoredBox(
-            color: theme.colorTheme.overlay,
+            color: colorScheme.backgroundOverlayLight,
             child: Padding(
               padding: const EdgeInsets.all(8),
               child: child,
