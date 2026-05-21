@@ -836,7 +836,10 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
               fadeNearInlineDivider: widget.config.fadeFloatingDateDividerNearInline,
               itemPositionListener: _itemPositionListener.itemPositions,
               messages: messages,
-              dateDividerBuilder: _resolveFloatingDateDividerBuilder(),
+              dateDividerBuilder: switch (widget.builders.floatingDateDivider) {
+                final builder? => builder,
+                _ => widget.builders.dateDivider,
+              },
             ),
           ),
         if (widget.config.showScrollToBottom)
@@ -886,12 +889,6 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     if (spacingTypes.contains(SpacingType.otherUser)) return SizedBox(height: spacing.md);
     if (spacingTypes.contains(SpacingType.timeDiff)) return SizedBox(height: spacing.xs);
     return SizedBox(height: spacing.xxs);
-  }
-
-  // Resolves the builder for the floating date divider.
-  // Falls back to the inline date divider builder if no floating-specific one is set.
-  Widget Function(DateTime)? _resolveFloatingDateDividerBuilder() {
-    return widget.builders.floatingDateDivider ?? widget.builders.dateDivider;
   }
 
   Widget _buildPaginationLoadingIndicator({
@@ -1034,8 +1031,10 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
 
   Widget _buildDateDivider(Message message) {
     final createdAt = message.createdAt.toLocal();
-    if (widget.builders.dateDivider != null) return widget.builders.dateDivider!(createdAt);
-    return StreamDateDivider(dateTime: createdAt);
+    return switch (widget.builders.dateDivider) {
+      final builder? => builder(createdAt),
+      _ => StreamDateDivider(dateTime: createdAt),
+    };
   }
 
   Widget buildParentMessage(Message message) {
@@ -1068,11 +1067,9 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
         contentKind: contentKind,
       ),
       child: Builder(
-        builder: (context) {
-          if (widget.builders.parentMessage != null) {
-            return widget.builders.parentMessage!(context, message, parentMessageProps);
-          }
-          return StreamMessageItem.fromProps(props: parentMessageProps);
+        builder: (context) => switch (widget.builders.parentMessage) {
+          final builder? => builder.call(context, message, parentMessageProps),
+          _ => StreamMessageItem.fromProps(props: parentMessageProps),
         },
       ),
     );
@@ -1133,8 +1130,8 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
   }
 
   Widget buildSystemMessage(Message message) {
-    if (widget.builders.systemMessage != null) {
-      return widget.builders.systemMessage!(context, message);
+    if (widget.builders.systemMessage case final builder?) {
+      return builder(context, message);
     }
     return StreamSystemMessage(
       message: message,
@@ -1143,8 +1140,8 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
   }
 
   Widget buildModeratedMessage(Message message) {
-    if (widget.builders.moderatedMessage != null) {
-      return widget.builders.moderatedMessage!(context, message);
+    if (widget.builders.moderatedMessage case final builder?) {
+      return builder(context, message);
     }
     return StreamModeratedMessage(
       message: message,
@@ -1153,8 +1150,8 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
   }
 
   Widget buildEphemeralMessage(Message message) {
-    if (widget.builders.ephemeralMessage != null) {
-      return widget.builders.ephemeralMessage!(context, message);
+    if (widget.builders.ephemeralMessage case final builder?) {
+      return builder(context, message);
     }
     return StreamEphemeralMessage(
       message: message,
@@ -1216,11 +1213,9 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
         contentKind: contentKind,
       ),
       child: Builder(
-        builder: (context) {
-          if (widget.messageBuilder != null) {
-            return widget.messageBuilder!(context, message, messageItemProps);
-          }
-          return StreamMessageItem.fromProps(props: messageItemProps);
+        builder: (context) => switch (widget.messageBuilder) {
+          final builder? => builder.call(context, message, messageItemProps),
+          _ => StreamMessageItem.fromProps(props: messageItemProps),
         },
       ),
     );
