@@ -11,15 +11,11 @@ Widget _buildListHeaderScaffold({
   required MockClient client,
   required PreferredSizeWidget Function(BuildContext) headerBuilder,
 }) {
-  return MaterialApp(
-    theme: docsScreenshotsTheme(),
-    debugShowCheckedModeBanner: false,
-    home: StreamChat(
-      client: client,
-      connectivityStream: Stream.value([ConnectivityResult.mobile]),
-      child: Builder(
-        builder: (context) => Scaffold(appBar: headerBuilder(context)),
-      ),
+  return StreamChat(
+    client: client,
+    connectivityStream: Stream.value([ConnectivityResult.mobile]),
+    child: Builder(
+      builder: (context) => Scaffold(appBar: headerBuilder(context)),
     ),
   );
 }

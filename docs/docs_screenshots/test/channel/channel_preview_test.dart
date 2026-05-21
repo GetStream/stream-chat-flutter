@@ -1,4 +1,4 @@
-import 'package:device_preview/device_preview.dart';
+import 'package:device_preview/device_preview.dart' show Devices;
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -32,15 +32,11 @@ void main() {
         ],
       );
 
-      return MaterialApp(
-        theme: docsScreenshotsTheme(),
-        debugShowCheckedModeBanner: false,
-        home: StreamChat(
-          client: client,
-          connectivityStream: Stream.value([ConnectivityResult.mobile]),
-          child: Scaffold(
-            body: StreamChannelListItem(channel: channel),
-          ),
+      return StreamChat(
+        client: client,
+        connectivityStream: Stream.value([ConnectivityResult.mobile]),
+        child: Scaffold(
+          body: StreamChannelListItem(channel: channel),
         ),
       );
     },
@@ -50,6 +46,7 @@ void main() {
     'channel list view',
     fileName: 'channel_list_view',
     constraints: const BoxConstraints.tightFor(width: 430, height: 932),
+    deviceFrame: Devices.ios.iPhone13,
     builder: () {
       final client = MockClient();
 
@@ -117,34 +114,26 @@ void main() {
       stubQueryChannelsForGoldens(client, channels);
       stubMockClientCurrentUser(client, ownUser);
 
-      return DeviceFrame(
-        device: Devices.ios.iPhone13,
-        isFrameVisible: true,
-        screen: MaterialApp(
-          theme: docsScreenshotsTheme(),
-          debugShowCheckedModeBanner: false,
-          home: StreamChat(
-            client: client,
-            connectivityStream: Stream.value([ConnectivityResult.mobile]),
-            child: Builder(
-              builder: (context) {
-                final icons = context.streamIcons;
-                return Scaffold(
-                  appBar: StreamChannelListHeader(
-                    title: const Text('Chats'),
-                    trailing: StreamButton.icon(
-                      icon: Icon(icons.plus),
-                      onPressed: () {},
-                    ),
-                  ),
-                  body: StreamChannelListView(
-                    controller: controller,
-                    shrinkWrap: true,
-                  ),
-                );
-              },
-            ),
-          ),
+      return StreamChat(
+        client: client,
+        connectivityStream: Stream.value([ConnectivityResult.mobile]),
+        child: Builder(
+          builder: (context) {
+            final icons = context.streamIcons;
+            return Scaffold(
+              appBar: StreamChannelListHeader(
+                title: const Text('Chats'),
+                trailing: StreamButton.icon(
+                  icon: Icon(icons.plus),
+                  onPressed: () {},
+                ),
+              ),
+              body: StreamChannelListView(
+                controller: controller,
+                shrinkWrap: true,
+              ),
+            );
+          },
         ),
       );
     },
@@ -175,42 +164,38 @@ void main() {
         ],
       );
 
-      return MaterialApp(
-        theme: docsScreenshotsTheme(),
-        debugShowCheckedModeBanner: false,
-        home: StreamChat(
-          client: client,
-          connectivityStream: Stream.value([ConnectivityResult.mobile]),
-          child: Builder(
-            builder: (context) {
-              final icons = context.streamIcons;
-              final colorScheme = context.streamColorScheme;
-              return Scaffold(
-                body: Slidable(
-                  groupTag: 'channels-actions',
-                  endActionPane: ActionPane(
-                    extentRatio: 0.4,
-                    motion: const BehindMotion(),
-                    children: [
-                      CustomSlidableAction(
-                        foregroundColor: colorScheme.textPrimary,
-                        backgroundColor: colorScheme.backgroundSurface,
-                        onPressed: (_) {},
-                        child: Icon(icons.more, size: 20),
-                      ),
-                      CustomSlidableAction(
-                        foregroundColor: colorScheme.textOnAccent,
-                        backgroundColor: colorScheme.accentPrimary,
-                        onPressed: (_) {},
-                        child: Icon(icons.mute, size: 20),
-                      ),
-                    ],
-                  ),
-                  child: StreamChannelListItem(channel: channel),
+      return StreamChat(
+        client: client,
+        connectivityStream: Stream.value([ConnectivityResult.mobile]),
+        child: Builder(
+          builder: (context) {
+            final icons = context.streamIcons;
+            final colorScheme = context.streamColorScheme;
+            return Scaffold(
+              body: Slidable(
+                groupTag: 'channels-actions',
+                endActionPane: ActionPane(
+                  extentRatio: 0.4,
+                  motion: const BehindMotion(),
+                  children: [
+                    CustomSlidableAction(
+                      foregroundColor: colorScheme.textPrimary,
+                      backgroundColor: colorScheme.backgroundSurface,
+                      onPressed: (_) {},
+                      child: Icon(icons.more, size: 20),
+                    ),
+                    CustomSlidableAction(
+                      foregroundColor: colorScheme.textOnAccent,
+                      backgroundColor: colorScheme.accentPrimary,
+                      onPressed: (_) {},
+                      child: Icon(icons.mute, size: 20),
+                    ),
+                  ],
                 ),
-              );
-            },
-          ),
+                child: StreamChannelListItem(channel: channel),
+              ),
+            );
+          },
         ),
       );
     },
@@ -220,6 +205,7 @@ void main() {
     'slidable channel list with header',
     fileName: 'slidable_channel_list',
     constraints: const BoxConstraints.tightFor(width: 430, height: 932),
+    deviceFrame: Devices.ios.iPhone13,
     whilePerforming: (tester) async {
       await tester.drag(find.byType(StreamChannelListItem).first, const Offset(-200, 0));
       await tester.pumpAndSettle();
@@ -292,59 +278,51 @@ void main() {
       stubQueryChannelsForGoldens(client, channels);
       stubMockClientCurrentUser(client, ownUser);
 
-      return DeviceFrame(
-        device: Devices.ios.iPhone13,
-        isFrameVisible: true,
-        screen: MaterialApp(
-          theme: docsScreenshotsTheme(),
-          debugShowCheckedModeBanner: false,
-          home: StreamChat(
-            client: client,
-            connectivityStream: Stream.value([ConnectivityResult.mobile]),
-            child: Builder(
-              builder: (context) {
-                final icons = context.streamIcons;
-                final colorScheme = context.streamColorScheme;
-                return Scaffold(
-                  appBar: StreamChannelListHeader(
-                    title: const Text('Chats'),
-                    trailing: StreamButton.icon(
-                      icon: Icon(icons.plus),
-                      onPressed: () {},
-                    ),
-                  ),
-                  body: StreamChannelListView(
-                    controller: controller,
-                    shrinkWrap: true,
-                    itemBuilder: (context, channels, index, defaultWidget) {
-                      return Slidable(
-                        groupTag: 'channels-actions',
-                        endActionPane: ActionPane(
-                          extentRatio: 0.4,
-                          motion: const BehindMotion(),
-                          children: [
-                            CustomSlidableAction(
-                              foregroundColor: colorScheme.textPrimary,
-                              backgroundColor: colorScheme.backgroundSurface,
-                              onPressed: (_) {},
-                              child: Icon(icons.more, size: 20),
-                            ),
-                            CustomSlidableAction(
-                              foregroundColor: colorScheme.textOnAccent,
-                              backgroundColor: colorScheme.accentPrimary,
-                              onPressed: (_) {},
-                              child: Icon(icons.mute, size: 20),
-                            ),
-                          ],
+      return StreamChat(
+        client: client,
+        connectivityStream: Stream.value([ConnectivityResult.mobile]),
+        child: Builder(
+          builder: (context) {
+            final icons = context.streamIcons;
+            final colorScheme = context.streamColorScheme;
+            return Scaffold(
+              appBar: StreamChannelListHeader(
+                title: const Text('Chats'),
+                trailing: StreamButton.icon(
+                  icon: Icon(icons.plus),
+                  onPressed: () {},
+                ),
+              ),
+              body: StreamChannelListView(
+                controller: controller,
+                shrinkWrap: true,
+                itemBuilder: (context, channels, index, defaultWidget) {
+                  return Slidable(
+                    groupTag: 'channels-actions',
+                    endActionPane: ActionPane(
+                      extentRatio: 0.4,
+                      motion: const BehindMotion(),
+                      children: [
+                        CustomSlidableAction(
+                          foregroundColor: colorScheme.textPrimary,
+                          backgroundColor: colorScheme.backgroundSurface,
+                          onPressed: (_) {},
+                          child: Icon(icons.more, size: 20),
                         ),
-                        child: defaultWidget,
-                      );
-                    },
-                  ),
-                );
-              },
-            ),
-          ),
+                        CustomSlidableAction(
+                          foregroundColor: colorScheme.textOnAccent,
+                          backgroundColor: colorScheme.accentPrimary,
+                          onPressed: (_) {},
+                          child: Icon(icons.mute, size: 20),
+                        ),
+                      ],
+                    ),
+                    child: defaultWidget,
+                  );
+                },
+              ),
+            );
+          },
         ),
       );
     },

@@ -1,4 +1,5 @@
 import 'package:alchemist/alchemist.dart';
+import 'package:device_preview/device_preview.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
@@ -25,6 +26,11 @@ const docsScreenshotsTargetPlatform = TargetPlatform.iOS;
 /// A [goldenTest] wrapper that pins the platform for the duration of each
 /// snapshot.
 ///
+/// The [builder] returns the `home:` widget of a [MaterialApp]; [app] wraps
+/// it (defaulting to a standard `MaterialApp(theme: docsScreenshotsTheme())`).
+/// Override [app] for tests that need a custom theme, locale, or localization
+/// delegates.
+///
 /// Sets [CurrentPlatform.debugCurrentPlatformOverride] and
 /// [debugDefaultTargetPlatformOverride] before the widget is pumped, and
 /// resets them after the golden comparison via [Interaction]'s cleanup hook —
@@ -44,8 +50,22 @@ void docsGoldenTest(
   PumpAction pumpBeforeTest = precacheImages,
   PumpWidget pumpWidget = onlyPumpWidget,
   Interaction? whilePerforming,
+  DeviceInfo? deviceFrame,
+  Widget Function(Widget home) app = _defaultDocsScreenshotsApp,
   required ValueGetter<Widget> builder,
 }) {
+  Widget wrapped() {
+    final home = builder();
+    final framed = deviceFrame == null
+        ? home
+        : DeviceFrame(
+            device: deviceFrame,
+            isFrameVisible: true,
+            screen: home,
+          );
+    return app(framed);
+  }
+
   goldenTest(
     description,
     fileName: fileName,
@@ -67,9 +87,20 @@ void docsGoldenTest(
         debugDefaultTargetPlatformOverride = null;
       };
     },
-    builder: builder,
+    builder: wrapped,
   );
 }
+
+/// Default [MaterialApp] wrapper used by [docsGoldenTest].
+///
+/// Applies [docsScreenshotsTheme] and hides the debug banner. Tests that need
+/// a different theme, locale, or localization delegates pass their own [app]
+/// callback to [docsGoldenTest].
+Widget _defaultDocsScreenshotsApp(Widget home) => MaterialApp(
+  theme: docsScreenshotsTheme(),
+  debugShowCheckedModeBanner: false,
+  home: home,
+);
 
 // ---------------------------------------------------------------------------
 // StreamTheme (stream_core_flutter) — drives new message text rendering
@@ -101,6 +132,26 @@ ThemeData docsScreenshotsTheme() {
     ),
     extensions: [
       StreamTheme(brightness: Brightness.light, textTheme: streamTextTheme),
+    ],
+  );
+}
+
+ThemeData docsScreenshotsDarkTheme() {
+  final streamTextTheme = core.StreamTextTheme().apply(
+    color: core.StreamColorScheme.dark().systemText,
+    fontFamily: 'CupertinoSystemText',
+  );
+
+  return ThemeData(
+    useMaterial3: true,
+    brightness: Brightness.dark,
+    platform: docsScreenshotsTargetPlatform,
+    scaffoldBackgroundColor: const Color(0xFF000000),
+    appBarTheme: const AppBarTheme(
+      backgroundColor: Color(0xFF000000),
+    ),
+    extensions: [
+      StreamTheme(brightness: Brightness.dark, textTheme: streamTextTheme),
     ],
   );
 }

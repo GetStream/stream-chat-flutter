@@ -28,18 +28,14 @@ Widget _buildMessageScaffold({
   required Widget child,
   StreamChatConfigurationData? configData,
 }) {
-  return MaterialApp(
-    theme: docsScreenshotsTheme(),
-    debugShowCheckedModeBanner: false,
-    home: StreamChat(
-      client: client,
-      streamChatConfigData: configData,
-      connectivityStream: Stream.value([ConnectivityResult.mobile]),
-      child: StreamChannel(
-        showLoading: false,
-        channel: channel,
-        child: Scaffold(body: child),
-      ),
+  return StreamChat(
+    client: client,
+    streamChatConfigData: configData,
+    connectivityStream: Stream.value([ConnectivityResult.mobile]),
+    child: StreamChannel(
+      showLoading: false,
+      channel: channel,
+      child: Scaffold(body: child),
     ),
   );
 }
@@ -151,36 +147,32 @@ void main() {
         createdAt: DateTime(2024, 6, 1, 10, 0),
       );
 
-      return MaterialApp(
-        theme: docsScreenshotsTheme(),
-        debugShowCheckedModeBanner: false,
-        home: StreamChat(
-          client: client,
-          connectivityStream: Stream.value([ConnectivityResult.mobile]),
-          child: StreamChannel(
-            showLoading: false,
-            channel: channel,
-            child: Scaffold(
-              body: Center(
-                child: core.StreamMessageLayout(
-                  data: const core.StreamMessageLayoutData(
-                    alignment: core.StreamMessageAlignment.end,
-                  ),
-                  child: core.StreamMessageItemTheme(
-                    data: core.StreamMessageItemThemeData(
-                      bubble: core.StreamMessageBubbleStyle.from(
-                        backgroundColor: Colors.amber.shade300,
-                      ),
-                      text: core.StreamMessageTextStyle.from(
-                        textColor: Colors.brown,
-                        textStyle: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontFamily: 'Roboto',
-                        ),
+      return StreamChat(
+        client: client,
+        connectivityStream: Stream.value([ConnectivityResult.mobile]),
+        child: StreamChannel(
+          showLoading: false,
+          channel: channel,
+          child: Scaffold(
+            body: Center(
+              child: core.StreamMessageLayout(
+                data: const core.StreamMessageLayoutData(
+                  alignment: core.StreamMessageAlignment.end,
+                ),
+                child: core.StreamMessageItemTheme(
+                  data: core.StreamMessageItemThemeData(
+                    bubble: core.StreamMessageBubbleStyle.from(
+                      backgroundColor: Colors.amber.shade300,
+                    ),
+                    text: core.StreamMessageTextStyle.from(
+                      textColor: Colors.brown,
+                      textStyle: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'Roboto',
                       ),
                     ),
-                    child: StreamMessageItem(message: message),
                   ),
+                  child: StreamMessageItem(message: message),
                 ),
               ),
             ),
@@ -271,66 +263,62 @@ void main() {
       _setupBasicChannel(client, clientState, channel, channelState);
       stubMockClientCurrentUser(client, ownUser);
 
-      return MaterialApp(
-        theme: docsScreenshotsTheme(),
-        debugShowCheckedModeBanner: false,
-        home: StreamChat(
-          client: client,
-          connectivityStream: Stream.value([ConnectivityResult.mobile]),
-          child: StreamChannel(
-            showLoading: false,
-            channel: channel,
-            child: Scaffold(
-              body: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  core.StreamMessageItemTheme(
+      return StreamChat(
+        client: client,
+        connectivityStream: Stream.value([ConnectivityResult.mobile]),
+        child: StreamChannel(
+          showLoading: false,
+          channel: channel,
+          child: Scaffold(
+            body: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                core.StreamMessageItemTheme(
+                  data: core.StreamMessageItemThemeData(
+                    text: core.StreamMessageTextStyle.from(
+                      textColor: Colors.deepPurple,
+                      textStyle: const TextStyle(
+                        fontSize: 16,
+                        fontStyle: FontStyle.italic,
+                        fontFamily: 'Roboto',
+                      ),
+                    ),
+                  ),
+                  child: StreamMessageItem(
+                    message: Message(
+                      id: 'msg-from-other',
+                      text: 'This is a message from ${_sender.name}.',
+                      user: _sender,
+                      createdAt: DateTime(2024, 6, 1, 10, 0),
+                    ),
+                  ),
+                ),
+                core.StreamMessageLayout(
+                  data: const core.StreamMessageLayoutData(
+                    alignment: core.StreamMessageAlignment.end,
+                  ),
+                  child: core.StreamMessageItemTheme(
                     data: core.StreamMessageItemThemeData(
                       text: core.StreamMessageTextStyle.from(
-                        textColor: Colors.deepPurple,
+                        textColor: Colors.indigo,
                         textStyle: const TextStyle(
                           fontSize: 16,
-                          fontStyle: FontStyle.italic,
+                          fontWeight: FontWeight.bold,
                           fontFamily: 'Roboto',
                         ),
                       ),
                     ),
                     child: StreamMessageItem(
                       message: Message(
-                        id: 'msg-from-other',
-                        text: 'This is a message from Bob.',
-                        user: _sender,
-                        createdAt: DateTime(2024, 6, 1, 10, 0),
+                        id: 'msg-from-me',
+                        text: 'And this is my reply!',
+                        user: ownUser,
+                        createdAt: DateTime(2024, 6, 1, 10, 1),
                       ),
                     ),
                   ),
-                  core.StreamMessageLayout(
-                    data: const core.StreamMessageLayoutData(
-                      alignment: core.StreamMessageAlignment.end,
-                    ),
-                    child: core.StreamMessageItemTheme(
-                      data: core.StreamMessageItemThemeData(
-                        text: core.StreamMessageTextStyle.from(
-                          textColor: Colors.indigo,
-                          textStyle: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            fontFamily: 'Roboto',
-                          ),
-                        ),
-                      ),
-                      child: StreamMessageItem(
-                        message: Message(
-                          id: 'msg-from-me',
-                          text: 'And this is my reply!',
-                          user: ownUser,
-                          createdAt: DateTime(2024, 6, 1, 10, 1),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),
