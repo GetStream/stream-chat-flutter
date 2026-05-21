@@ -114,6 +114,9 @@ jobs:
           channel: stable
           cache-key: flutter-:os:-:channel:-:version:-:arch:-:hash:-${{ hashFiles('**/pubspec.lock') }}
 
+      - name: "Disable Swift Package Manager"
+        run: flutter config --no-enable-swift-package-manager
+
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:

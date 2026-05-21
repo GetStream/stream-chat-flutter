@@ -155,6 +155,10 @@ class StreamMessageListView extends StatefulWidget {
     this.shrinkWrap = false,
     this.paginationLimit = 20,
     this.paginationLoadingIndicatorBuilder,
+    this.maximumMessageLimit,
+    // Mirrors `MessageRetentionGate.defaultTrimBuffer` — duplicated here to
+    // avoid pulling in a `@visibleForTesting` symbol at the public API.
+    this.retentionTrimBuffer = 30,
     this.keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.onDrag,
     this.spacingWidgetBuilder = _defaultSpacingWidgetBuilder,
   });
@@ -423,6 +427,23 @@ class StreamMessageListView extends StatefulWidget {
   /// Builder used to build the loading indicator shown while paginating.
   final WidgetBuilder? paginationLoadingIndicatorBuilder;
 
+  /// Maximum number of messages kept in [ChannelClientState] while the user is
+  /// viewing the latest messages.
+  ///
+  /// Trimming fires when a new message arrives or the user paginates bottom
+  /// and the count exceeds the limit plus [retentionTrimBuffer]. Top
+  /// pagination, edits, reactions, deletions, jump-to-message, and threads do
+  /// not trigger trimming.
+  ///
+  /// When `null` (default), no pruning is performed. Forwarded to
+  /// [MessageListCore.maximumMessageLimit].
+  final int? maximumMessageLimit;
+
+  /// Slack over [maximumMessageLimit] before trimming is triggered.
+  ///
+  /// Defaults to 30. Has no effect when [maximumMessageLimit] is `null`.
+  final int retentionTrimBuffer;
+
   /// {@macro spacingWidgetBuilder}
   final SpacingWidgetBuilder spacingWidgetBuilder;
 
@@ -690,6 +711,8 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
         child: ScaffoldMessenger(
           child: MessageListCore(
             paginationLimit: widget.paginationLimit,
+            maximumMessageLimit: widget.maximumMessageLimit,
+            retentionTrimBuffer: widget.retentionTrimBuffer,
             messageFilter: widget.messageFilter,
             loadingBuilder: widget.loadingBuilder ?? (context) => const StreamMessageListSkeletonLoading(),
             emptyBuilder: widget.emptyBuilder ?? (context) => const StreamMessageListEmptyState(),
