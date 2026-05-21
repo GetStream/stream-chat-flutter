@@ -10,17 +10,13 @@ Widget _buildChannelHeaderScaffold({
   required MockChannel channel,
   StreamChannelHeader? header,
 }) {
-  return MaterialApp(
-    theme: docsScreenshotsTheme(),
-    debugShowCheckedModeBanner: false,
-    home: StreamChat(
-      client: client,
-      connectivityStream: Stream.value([ConnectivityResult.mobile]),
-      child: StreamChannel(
-        showLoading: false,
-        channel: channel,
-        child: Scaffold(appBar: header),
-      ),
+  return StreamChat(
+    client: client,
+    connectivityStream: Stream.value([ConnectivityResult.mobile]),
+    child: StreamChannel(
+      showLoading: false,
+      channel: channel,
+      child: Scaffold(appBar: header),
     ),
   );
 }

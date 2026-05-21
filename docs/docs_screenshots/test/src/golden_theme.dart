@@ -26,6 +26,11 @@ const docsScreenshotsTargetPlatform = TargetPlatform.iOS;
 /// A [goldenTest] wrapper that pins the platform for the duration of each
 /// snapshot.
 ///
+/// The [builder] returns the `home:` widget of a [MaterialApp]; [app] wraps
+/// it (defaulting to a standard `MaterialApp(theme: docsScreenshotsTheme())`).
+/// Override [app] for tests that need a custom theme, locale, or localization
+/// delegates.
+///
 /// Sets [CurrentPlatform.debugCurrentPlatformOverride] and
 /// [debugDefaultTargetPlatformOverride] before the widget is pumped, and
 /// resets them after the golden comparison via [Interaction]'s cleanup hook —
@@ -46,8 +51,21 @@ void docsGoldenTest(
   PumpWidget pumpWidget = onlyPumpWidget,
   Interaction? whilePerforming,
   DeviceInfo? deviceFrame,
+  Widget Function(Widget home) app = _defaultDocsScreenshotsApp,
   required ValueGetter<Widget> builder,
 }) {
+  Widget wrapped() {
+    final home = builder();
+    final framed = deviceFrame == null
+        ? home
+        : DeviceFrame(
+            device: deviceFrame,
+            isFrameVisible: true,
+            screen: home,
+          );
+    return app(framed);
+  }
+
   goldenTest(
     description,
     fileName: fileName,
@@ -69,16 +87,20 @@ void docsGoldenTest(
         debugDefaultTargetPlatformOverride = null;
       };
     },
-    builder: switch (deviceFrame) {
-      null => builder,
-      final device => () => DeviceFrame(
-        device: device,
-        isFrameVisible: true,
-        screen: builder(),
-      ),
-    },
+    builder: wrapped,
   );
 }
+
+/// Default [MaterialApp] wrapper used by [docsGoldenTest].
+///
+/// Applies [docsScreenshotsTheme] and hides the debug banner. Tests that need
+/// a different theme, locale, or localization delegates pass their own [app]
+/// callback to [docsGoldenTest].
+Widget _defaultDocsScreenshotsApp(Widget home) => MaterialApp(
+  theme: docsScreenshotsTheme(),
+  debugShowCheckedModeBanner: false,
+  home: home,
+);
 
 // ---------------------------------------------------------------------------
 // StreamTheme (stream_core_flutter) — drives new message text rendering

@@ -75,17 +75,13 @@ void main() {
 
       stubSearchMessagesForGoldens(client, results);
 
-      return MaterialApp(
-        theme: docsScreenshotsTheme(),
-        debugShowCheckedModeBanner: false,
-        home: StreamChat(
-          client: client,
-          connectivityStream: Stream.value([ConnectivityResult.mobile]),
-          child: Scaffold(
-            body: StreamMessageSearchListView(
-              controller: controller,
-              shrinkWrap: true,
-            ),
+      return StreamChat(
+        client: client,
+        connectivityStream: Stream.value([ConnectivityResult.mobile]),
+        child: Scaffold(
+          body: StreamMessageSearchListView(
+            controller: controller,
+            shrinkWrap: true,
           ),
         ),
       );

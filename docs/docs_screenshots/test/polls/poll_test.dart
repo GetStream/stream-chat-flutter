@@ -13,17 +13,13 @@ Widget _buildMessageScaffold({
   required MockChannel channel,
   required Widget child,
 }) {
-  return MaterialApp(
-    theme: docsScreenshotsTheme(),
-    debugShowCheckedModeBanner: false,
-    home: StreamChat(
-      client: client,
-      connectivityStream: Stream.value([ConnectivityResult.mobile]),
-      child: StreamChannel(
-        showLoading: false,
-        channel: channel,
-        child: Scaffold(body: child),
-      ),
+  return StreamChat(
+    client: client,
+    connectivityStream: Stream.value([ConnectivityResult.mobile]),
+    child: StreamChannel(
+      showLoading: false,
+      channel: channel,
+      child: Scaffold(body: child),
     ),
   );
 }
@@ -50,37 +46,33 @@ void main() {
         ),
       );
 
-      return MaterialApp(
-        theme: docsScreenshotsTheme(),
-        debugShowCheckedModeBanner: false,
-        home: StreamChat(
-          client: client,
-          connectivityStream: Stream.value([ConnectivityResult.mobile]),
-          child: Builder(
-            builder: (context) {
-              final icons = context.streamIcons;
-              return Scaffold(
-                appBar: StreamSheetHeader(
-                  leading: StreamButton.icon(
-                    type: StreamButtonType.outline,
-                    style: StreamButtonStyle.secondary,
-                    icon: Icon(icons.xmark),
-                    onPressed: () {},
-                  ),
-                  title: const Text('Create Poll'),
-                  trailing: StreamButton.icon(
-                    type: StreamButtonType.solid,
-                    icon: Icon(icons.checkmark),
-                    onPressed: () {},
-                  ),
+      return StreamChat(
+        client: client,
+        connectivityStream: Stream.value([ConnectivityResult.mobile]),
+        child: Builder(
+          builder: (context) {
+            final icons = context.streamIcons;
+            return Scaffold(
+              appBar: StreamSheetHeader(
+                leading: StreamButton.icon(
+                  type: StreamButtonType.outline,
+                  style: StreamButtonStyle.secondary,
+                  icon: Icon(icons.xmark),
+                  onPressed: () {},
                 ),
-                body: StreamPollCreatorWidget(
-                  controller: controller,
-                  shrinkWrap: true,
+                title: const Text('Create Poll'),
+                trailing: StreamButton.icon(
+                  type: StreamButtonType.solid,
+                  icon: Icon(icons.checkmark),
+                  onPressed: () {},
                 ),
-              );
-            },
-          ),
+              ),
+              body: StreamPollCreatorWidget(
+                controller: controller,
+                shrinkWrap: true,
+              ),
+            );
+          },
         ),
       );
     },
@@ -169,20 +161,16 @@ void main() {
         ),
       );
 
-      return MaterialApp(
-        theme: docsScreenshotsTheme(),
-        debugShowCheckedModeBanner: false,
-        home: StreamChat(
-          client: client,
-          connectivityStream: Stream.value([ConnectivityResult.mobile]),
-          child: StreamChannel(
-            showLoading: false,
-            channel: channel,
-            child: Scaffold(
-              body: StreamPollCreatorWidget(
-                controller: pollController,
-                shrinkWrap: true,
-              ),
+      return StreamChat(
+        client: client,
+        connectivityStream: Stream.value([ConnectivityResult.mobile]),
+        child: StreamChannel(
+          showLoading: false,
+          channel: channel,
+          child: Scaffold(
+            body: StreamPollCreatorWidget(
+              controller: pollController,
+              shrinkWrap: true,
             ),
           ),
         ),

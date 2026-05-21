@@ -70,10 +70,10 @@ List<Message> _buildMessages() {
   ];
 }
 
-Widget _buildThemingShowcase({required bool useRedTheme, required String inputText}) {
+Widget _buildThemingShowcase({required String id, required String inputText}) {
   final client = MockClient();
   final clientState = MockClientState();
-  final channel = MockChannel(type: 'messaging', id: 'theming-${useRedTheme ? 'red' : 'default'}');
+  final channel = MockChannel(type: 'messaging', id: 'theming-$id');
   final channelState = MockChannelState();
 
   setupMockChannel(
@@ -93,23 +93,19 @@ Widget _buildThemingShowcase({required bool useRedTheme, required String inputTe
 
   final controller = StreamMessageComposerController()..text = inputText;
 
-  return MaterialApp(
-    theme: useRedTheme ? _redTheme() : docsScreenshotsTheme(),
-    debugShowCheckedModeBanner: false,
-    home: StreamChat(
-      client: client,
-      connectivityStream: Stream.value([ConnectivityResult.mobile]),
-      child: StreamChannel(
-        showLoading: false,
-        channel: channel,
-        child: Scaffold(
-          appBar: const StreamChannelHeader(automaticallyImplyLeading: false),
-          body: Column(
-            children: [
-              const Expanded(child: StreamMessageListView()),
-              StreamMessageComposer(messageComposerController: controller),
-            ],
-          ),
+  return StreamChat(
+    client: client,
+    connectivityStream: Stream.value([ConnectivityResult.mobile]),
+    child: StreamChannel(
+      showLoading: false,
+      channel: channel,
+      child: Scaffold(
+        appBar: const StreamChannelHeader(automaticallyImplyLeading: false),
+        body: Column(
+          children: [
+            const Expanded(child: StreamMessageListView()),
+            StreamMessageComposer(messageComposerController: controller),
+          ],
         ),
       ),
     ),
@@ -128,7 +124,7 @@ void main() {
     fileName: 'theming_default',
     constraints: const BoxConstraints.tightFor(width: 430, height: 932),
     deviceFrame: Devices.ios.iPhone13,
-    builder: () => _buildThemingShowcase(useRedTheme: false, inputText: 'Hey in blue!'),
+    builder: () => _buildThemingShowcase(id: 'default', inputText: 'Hey in blue!'),
   );
 
   docsGoldenTest(
@@ -136,6 +132,11 @@ void main() {
     fileName: 'theming_red',
     constraints: const BoxConstraints.tightFor(width: 430, height: 932),
     deviceFrame: Devices.ios.iPhone13,
-    builder: () => _buildThemingShowcase(useRedTheme: true, inputText: 'Hey in red!'),
+    app: (home) => MaterialApp(
+      theme: _redTheme(),
+      debugShowCheckedModeBanner: false,
+      home: home,
+    ),
+    builder: () => _buildThemingShowcase(id: 'red', inputText: 'Hey in red!'),
   );
 }

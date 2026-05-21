@@ -14,22 +14,18 @@ Widget _buildMessageInputScaffold({
   required MockChannel channel,
   StreamMessageComposer? messageInput,
 }) {
-  return MaterialApp(
-    theme: docsScreenshotsTheme(),
-    debugShowCheckedModeBanner: false,
-    home: StreamChat(
-      client: client,
-      connectivityStream: Stream.value([ConnectivityResult.mobile]),
-      child: StreamChannel(
-        showLoading: false,
-        channel: channel,
-        child: Scaffold(
-          body: Column(
-            children: [
-              Expanded(child: Container()),
-              messageInput ?? StreamMessageComposer(),
-            ],
-          ),
+  return StreamChat(
+    client: client,
+    connectivityStream: Stream.value([ConnectivityResult.mobile]),
+    child: StreamChannel(
+      showLoading: false,
+      channel: channel,
+      child: Scaffold(
+        body: Column(
+          children: [
+            Expanded(child: Container()),
+            messageInput ?? StreamMessageComposer(),
+          ],
         ),
       ),
     ),
@@ -104,38 +100,34 @@ void main() {
 
       final controller = StreamMessageComposerController();
 
-      return MaterialApp(
-        theme: docsScreenshotsTheme(),
-        debugShowCheckedModeBanner: false,
-        home: StreamChat(
-          client: client,
-          connectivityStream: Stream.value([ConnectivityResult.mobile]),
-          componentBuilders: StreamComponentBuilders(
-            extensions: streamChatComponentBuilders(
-              messageComposerInputTrailing: (context, props) => const SizedBox.shrink(),
-              messageComposerTrailing: (context, props) => Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  SizedBox(width: context.streamSpacing.xs),
-                  StreamButton.icon(
-                    icon: Icon(context.streamIcons.send),
-                    size: StreamButtonSize.large,
-                    onPressed: () {},
-                  ),
-                ],
-              ),
+      return StreamChat(
+        client: client,
+        connectivityStream: Stream.value([ConnectivityResult.mobile]),
+        componentBuilders: StreamComponentBuilders(
+          extensions: streamChatComponentBuilders(
+            messageComposerInputTrailing: (context, props) => const SizedBox.shrink(),
+            messageComposerTrailing: (context, props) => Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SizedBox(width: context.streamSpacing.xs),
+                StreamButton.icon(
+                  icon: Icon(context.streamIcons.send),
+                  size: StreamButtonSize.large,
+                  onPressed: () {},
+                ),
+              ],
             ),
           ),
-          child: StreamChannel(
-            showLoading: false,
-            channel: channel,
-            child: Scaffold(
-              body: Column(
-                children: [
-                  const Expanded(child: SizedBox()),
-                  StreamMessageComposer(messageComposerController: controller),
-                ],
-              ),
+        ),
+        child: StreamChannel(
+          showLoading: false,
+          channel: channel,
+          child: Scaffold(
+            body: Column(
+              children: [
+                const Expanded(child: SizedBox()),
+                StreamMessageComposer(messageComposerController: controller),
+              ],
             ),
           ),
         ),
@@ -160,41 +152,37 @@ void main() {
         channelState: channelState,
       );
 
-      return MaterialApp(
-        debugShowCheckedModeBanner: false,
-        theme: docsScreenshotsTheme(),
-        home: Builder(
-          builder: (context) {
-            final theme = Theme.of(context);
-            final streamTheme = theme.extension<StreamTheme>()!;
-            return Theme(
-              data: theme.copyWith(
-                extensions: [
-                  ...theme.extensions.values.where((e) => e is! StreamTheme),
-                  streamTheme.copyWith(
-                    icons: const StreamIcons(send: Icons.reply_rounded),
-                  ),
-                ],
-              ),
-              child: StreamChat(
-                client: client,
-                connectivityStream: Stream.value([ConnectivityResult.mobile]),
-                child: StreamChannel(
-                  showLoading: false,
-                  channel: channel,
-                  child: Scaffold(
-                    body: Column(
-                      children: [
-                        Expanded(child: Container()),
-                        StreamMessageComposer(),
-                      ],
-                    ),
+      return Builder(
+        builder: (context) {
+          final theme = Theme.of(context);
+          final streamTheme = theme.extension<StreamTheme>()!;
+          return Theme(
+            data: theme.copyWith(
+              extensions: [
+                ...theme.extensions.values.where((e) => e is! StreamTheme),
+                streamTheme.copyWith(
+                  icons: const StreamIcons(send: Icons.reply_rounded),
+                ),
+              ],
+            ),
+            child: StreamChat(
+              client: client,
+              connectivityStream: Stream.value([ConnectivityResult.mobile]),
+              child: StreamChannel(
+                showLoading: false,
+                channel: channel,
+                child: Scaffold(
+                  body: Column(
+                    children: [
+                      Expanded(child: Container()),
+                      StreamMessageComposer(),
+                    ],
                   ),
                 ),
               ),
-            );
-          },
-        ),
+            ),
+          );
+        },
       );
     },
   );
@@ -273,39 +261,35 @@ void main() {
 
       final controller = StreamMessageComposerController();
 
-      return MaterialApp(
-        theme: docsScreenshotsTheme(),
-        debugShowCheckedModeBanner: false,
-        home: StreamChat(
-          client: client,
-          connectivityStream: Stream.value([ConnectivityResult.mobile]),
-          componentBuilders: StreamComponentBuilders(
-            extensions: streamChatComponentBuilders(
-              messageComposerLeading: (context, props) => const SizedBox.shrink(),
-              messageComposerInputLeading: (context, props) => StreamButton.icon(
-                icon: Icon(context.streamIcons.emoji),
-                type: StreamButtonType.ghost,
-                style: StreamButtonStyle.secondary,
-                size: StreamButtonSize.small,
-                onPressed: () {},
-              ),
-              messageComposerInputTrailing: (context, props) => const SizedBox.shrink(),
-              messageComposerTrailing: (context, props) => _CustomComposerTrailingButton(props: props),
+      return StreamChat(
+        client: client,
+        connectivityStream: Stream.value([ConnectivityResult.mobile]),
+        componentBuilders: StreamComponentBuilders(
+          extensions: streamChatComponentBuilders(
+            messageComposerLeading: (context, props) => const SizedBox.shrink(),
+            messageComposerInputLeading: (context, props) => StreamButton.icon(
+              icon: Icon(context.streamIcons.emoji),
+              type: StreamButtonType.ghost,
+              style: StreamButtonStyle.secondary,
+              size: StreamButtonSize.small,
+              onPressed: () {},
             ),
+            messageComposerInputTrailing: (context, props) => const SizedBox.shrink(),
+            messageComposerTrailing: (context, props) => _CustomComposerTrailingButton(props: props),
           ),
-          child: StreamChannel(
-            showLoading: false,
-            channel: channel,
-            child: Scaffold(
-              body: Column(
-                children: [
-                  const Expanded(child: SizedBox()),
-                  StreamMessageComposer(
-                    messageComposerController: controller,
-                    placeholderBuilder: (context, placeholder) => 'Type a message...',
-                  ),
-                ],
-              ),
+        ),
+        child: StreamChannel(
+          showLoading: false,
+          channel: channel,
+          child: Scaffold(
+            body: Column(
+              children: [
+                const Expanded(child: SizedBox()),
+                StreamMessageComposer(
+                  messageComposerController: controller,
+                  placeholderBuilder: (context, placeholder) => 'Type a message...',
+                ),
+              ],
             ),
           ),
         ),

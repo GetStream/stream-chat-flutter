@@ -33,17 +33,13 @@ void main() {
 
       stubQueryUsersForGoldens(client, users);
 
-      return MaterialApp(
-        theme: docsScreenshotsTheme(),
-        debugShowCheckedModeBanner: false,
-        home: StreamChat(
-          client: client,
-          connectivityStream: Stream.value([ConnectivityResult.mobile]),
-          child: Scaffold(
-            body: StreamUserListView(
-              controller: controller,
-              shrinkWrap: true,
-            ),
+      return StreamChat(
+        client: client,
+        connectivityStream: Stream.value([ConnectivityResult.mobile]),
+        child: Scaffold(
+          body: StreamUserListView(
+            controller: controller,
+            shrinkWrap: true,
           ),
         ),
       );

@@ -32,15 +32,11 @@ void main() {
         ],
       );
 
-      return MaterialApp(
-        theme: docsScreenshotsTheme(),
-        debugShowCheckedModeBanner: false,
-        home: StreamChat(
-          client: client,
-          connectivityStream: Stream.value([ConnectivityResult.mobile]),
-          child: Scaffold(
-            body: StreamChannelListItem(channel: channel),
-          ),
+      return StreamChat(
+        client: client,
+        connectivityStream: Stream.value([ConnectivityResult.mobile]),
+        child: Scaffold(
+          body: StreamChannelListItem(channel: channel),
         ),
       );
     },
@@ -118,30 +114,26 @@ void main() {
       stubQueryChannelsForGoldens(client, channels);
       stubMockClientCurrentUser(client, ownUser);
 
-      return MaterialApp(
-        theme: docsScreenshotsTheme(),
-        debugShowCheckedModeBanner: false,
-        home: StreamChat(
-          client: client,
-          connectivityStream: Stream.value([ConnectivityResult.mobile]),
-          child: Builder(
-            builder: (context) {
-              final icons = context.streamIcons;
-              return Scaffold(
-                appBar: StreamChannelListHeader(
-                  title: const Text('Chats'),
-                  trailing: StreamButton.icon(
-                    icon: Icon(icons.plus),
-                    onPressed: () {},
-                  ),
+      return StreamChat(
+        client: client,
+        connectivityStream: Stream.value([ConnectivityResult.mobile]),
+        child: Builder(
+          builder: (context) {
+            final icons = context.streamIcons;
+            return Scaffold(
+              appBar: StreamChannelListHeader(
+                title: const Text('Chats'),
+                trailing: StreamButton.icon(
+                  icon: Icon(icons.plus),
+                  onPressed: () {},
                 ),
-                body: StreamChannelListView(
-                  controller: controller,
-                  shrinkWrap: true,
-                ),
-              );
-            },
-          ),
+              ),
+              body: StreamChannelListView(
+                controller: controller,
+                shrinkWrap: true,
+              ),
+            );
+          },
         ),
       );
     },
@@ -172,42 +164,38 @@ void main() {
         ],
       );
 
-      return MaterialApp(
-        theme: docsScreenshotsTheme(),
-        debugShowCheckedModeBanner: false,
-        home: StreamChat(
-          client: client,
-          connectivityStream: Stream.value([ConnectivityResult.mobile]),
-          child: Builder(
-            builder: (context) {
-              final icons = context.streamIcons;
-              final colorScheme = context.streamColorScheme;
-              return Scaffold(
-                body: Slidable(
-                  groupTag: 'channels-actions',
-                  endActionPane: ActionPane(
-                    extentRatio: 0.4,
-                    motion: const BehindMotion(),
-                    children: [
-                      CustomSlidableAction(
-                        foregroundColor: colorScheme.textPrimary,
-                        backgroundColor: colorScheme.backgroundSurface,
-                        onPressed: (_) {},
-                        child: Icon(icons.more, size: 20),
-                      ),
-                      CustomSlidableAction(
-                        foregroundColor: colorScheme.textOnAccent,
-                        backgroundColor: colorScheme.accentPrimary,
-                        onPressed: (_) {},
-                        child: Icon(icons.mute, size: 20),
-                      ),
-                    ],
-                  ),
-                  child: StreamChannelListItem(channel: channel),
+      return StreamChat(
+        client: client,
+        connectivityStream: Stream.value([ConnectivityResult.mobile]),
+        child: Builder(
+          builder: (context) {
+            final icons = context.streamIcons;
+            final colorScheme = context.streamColorScheme;
+            return Scaffold(
+              body: Slidable(
+                groupTag: 'channels-actions',
+                endActionPane: ActionPane(
+                  extentRatio: 0.4,
+                  motion: const BehindMotion(),
+                  children: [
+                    CustomSlidableAction(
+                      foregroundColor: colorScheme.textPrimary,
+                      backgroundColor: colorScheme.backgroundSurface,
+                      onPressed: (_) {},
+                      child: Icon(icons.more, size: 20),
+                    ),
+                    CustomSlidableAction(
+                      foregroundColor: colorScheme.textOnAccent,
+                      backgroundColor: colorScheme.accentPrimary,
+                      onPressed: (_) {},
+                      child: Icon(icons.mute, size: 20),
+                    ),
+                  ],
                 ),
-              );
-            },
-          ),
+                child: StreamChannelListItem(channel: channel),
+              ),
+            );
+          },
         ),
       );
     },
@@ -290,55 +278,51 @@ void main() {
       stubQueryChannelsForGoldens(client, channels);
       stubMockClientCurrentUser(client, ownUser);
 
-      return MaterialApp(
-        theme: docsScreenshotsTheme(),
-        debugShowCheckedModeBanner: false,
-        home: StreamChat(
-          client: client,
-          connectivityStream: Stream.value([ConnectivityResult.mobile]),
-          child: Builder(
-            builder: (context) {
-              final icons = context.streamIcons;
-              final colorScheme = context.streamColorScheme;
-              return Scaffold(
-                appBar: StreamChannelListHeader(
-                  title: const Text('Chats'),
-                  trailing: StreamButton.icon(
-                    icon: Icon(icons.plus),
-                    onPressed: () {},
-                  ),
+      return StreamChat(
+        client: client,
+        connectivityStream: Stream.value([ConnectivityResult.mobile]),
+        child: Builder(
+          builder: (context) {
+            final icons = context.streamIcons;
+            final colorScheme = context.streamColorScheme;
+            return Scaffold(
+              appBar: StreamChannelListHeader(
+                title: const Text('Chats'),
+                trailing: StreamButton.icon(
+                  icon: Icon(icons.plus),
+                  onPressed: () {},
                 ),
-                body: StreamChannelListView(
-                  controller: controller,
-                  shrinkWrap: true,
-                  itemBuilder: (context, channels, index, defaultWidget) {
-                    return Slidable(
-                      groupTag: 'channels-actions',
-                      endActionPane: ActionPane(
-                        extentRatio: 0.4,
-                        motion: const BehindMotion(),
-                        children: [
-                          CustomSlidableAction(
-                            foregroundColor: colorScheme.textPrimary,
-                            backgroundColor: colorScheme.backgroundSurface,
-                            onPressed: (_) {},
-                            child: Icon(icons.more, size: 20),
-                          ),
-                          CustomSlidableAction(
-                            foregroundColor: colorScheme.textOnAccent,
-                            backgroundColor: colorScheme.accentPrimary,
-                            onPressed: (_) {},
-                            child: Icon(icons.mute, size: 20),
-                          ),
-                        ],
-                      ),
-                      child: defaultWidget,
-                    );
-                  },
-                ),
-              );
-            },
-          ),
+              ),
+              body: StreamChannelListView(
+                controller: controller,
+                shrinkWrap: true,
+                itemBuilder: (context, channels, index, defaultWidget) {
+                  return Slidable(
+                    groupTag: 'channels-actions',
+                    endActionPane: ActionPane(
+                      extentRatio: 0.4,
+                      motion: const BehindMotion(),
+                      children: [
+                        CustomSlidableAction(
+                          foregroundColor: colorScheme.textPrimary,
+                          backgroundColor: colorScheme.backgroundSurface,
+                          onPressed: (_) {},
+                          child: Icon(icons.more, size: 20),
+                        ),
+                        CustomSlidableAction(
+                          foregroundColor: colorScheme.textOnAccent,
+                          backgroundColor: colorScheme.accentPrimary,
+                          onPressed: (_) {},
+                          child: Icon(icons.mute, size: 20),
+                        ),
+                      ],
+                    ),
+                    child: defaultWidget,
+                  );
+                },
+              ),
+            );
+          },
         ),
       );
     },

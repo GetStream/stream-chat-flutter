@@ -28,25 +28,21 @@ Widget _buildVoiceRecordingMessageInputScaffold({
   required MockChannel channel,
   StreamMessageComposerController? messageComposerController,
 }) {
-  return MaterialApp(
-    theme: docsScreenshotsTheme(),
-    debugShowCheckedModeBanner: false,
-    home: StreamChat(
-      client: client,
-      connectivityStream: Stream.value([ConnectivityResult.mobile]),
-      child: StreamChannel(
-        showLoading: false,
-        channel: channel,
-        child: Scaffold(
-          body: Column(
-            children: [
-              Expanded(child: Container()),
-              StreamMessageComposer(
-                enableVoiceRecording: true,
-                messageComposerController: messageComposerController,
-              ),
-            ],
-          ),
+  return StreamChat(
+    client: client,
+    connectivityStream: Stream.value([ConnectivityResult.mobile]),
+    child: StreamChannel(
+      showLoading: false,
+      channel: channel,
+      child: Scaffold(
+        body: Column(
+          children: [
+            Expanded(child: Container()),
+            StreamMessageComposer(
+              enableVoiceRecording: true,
+              messageComposerController: messageComposerController,
+            ),
+          ],
         ),
       ),
     ),
@@ -61,41 +57,37 @@ Widget _buildVoiceRecordingContextScaffold({
   required Widget voiceWidget,
   StreamChatThemeData? streamChatThemeData,
 }) {
-  return MaterialApp(
-    theme: docsScreenshotsTheme(),
-    debugShowCheckedModeBanner: false,
-    home: StreamChat(
-      client: client,
-      streamChatThemeData: streamChatThemeData,
-      connectivityStream: Stream.value([ConnectivityResult.mobile]),
-      child: StreamChannel(
-        showLoading: false,
-        channel: channel,
-        child: Scaffold(
-          body: Column(
-            children: [
-              Expanded(
-                child: ListView(
-                  reverse: true,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(8),
-                      child: voiceWidget,
+  return StreamChat(
+    client: client,
+    streamChatThemeData: streamChatThemeData,
+    connectivityStream: Stream.value([ConnectivityResult.mobile]),
+    child: StreamChannel(
+      showLoading: false,
+      channel: channel,
+      child: Scaffold(
+        body: Column(
+          children: [
+            Expanded(
+              child: ListView(
+                reverse: true,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(8),
+                    child: voiceWidget,
+                  ),
+                  StreamMessageItem(
+                    message: Message(
+                      id: 'ctx-msg',
+                      text: 'Hey, listen to this!',
+                      user: noahSmith,
+                      createdAt: DateTime(2024, 6, 1, 10, 0),
                     ),
-                    StreamMessageItem(
-                      message: Message(
-                        id: 'ctx-msg',
-                        text: 'Hey, listen to this!',
-                        user: noahSmith,
-                        createdAt: DateTime(2024, 6, 1, 10, 0),
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-              StreamMessageComposer(enableVoiceRecording: true),
-            ],
-          ),
+            ),
+            StreamMessageComposer(enableVoiceRecording: true),
+          ],
         ),
       ),
     ),
@@ -113,41 +105,37 @@ Widget _buildVoiceRecordingComposerScaffold({
   required MockChannel channel,
   required StreamAudioRecorderController audioRecorderController,
 }) {
-  return MaterialApp(
-    theme: docsScreenshotsTheme(),
-    debugShowCheckedModeBanner: false,
-    home: StreamChat(
-      client: client,
-      connectivityStream: Stream.value([ConnectivityResult.mobile]),
-      child: StreamChannel(
-        showLoading: false,
-        channel: channel,
-        child: Scaffold(
-          body: Column(
-            children: [
-              Expanded(child: Container()),
-              Builder(
-                builder: (context) {
-                  return Material(
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        color: context.streamColorScheme.backgroundElevation1,
-                      ),
-                      child: Padding(
-                        padding: EdgeInsets.only(bottom: context.streamSpacing.md),
-                        child: StreamChatMessageInput(
-                          onSendPressed: () {},
-                          onAttachmentButtonPressed: () {},
-                          placeholder: 'Send a message',
-                          audioRecorderController: audioRecorderController,
-                        ),
+  return StreamChat(
+    client: client,
+    connectivityStream: Stream.value([ConnectivityResult.mobile]),
+    child: StreamChannel(
+      showLoading: false,
+      channel: channel,
+      child: Scaffold(
+        body: Column(
+          children: [
+            Expanded(child: Container()),
+            Builder(
+              builder: (context) {
+                return Material(
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: context.streamColorScheme.backgroundElevation1,
+                    ),
+                    child: Padding(
+                      padding: EdgeInsets.only(bottom: context.streamSpacing.md),
+                      child: StreamChatMessageInput(
+                        onSendPressed: () {},
+                        onAttachmentButtonPressed: () {},
+                        placeholder: 'Send a message',
+                        audioRecorderController: audioRecorderController,
                       ),
                     ),
-                  );
-                },
-              ),
-            ],
-          ),
+                  ),
+                );
+              },
+            ),
+          ],
         ),
       ),
     ),

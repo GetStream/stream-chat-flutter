@@ -64,71 +64,67 @@ Widget _buildFullAppThreadScaffold({
   Widget Function(BuildContext, Thread)? customItemBuilder,
   Widget? banner,
 }) {
-  return MaterialApp(
-    theme: docsScreenshotsTheme(),
-    debugShowCheckedModeBanner: false,
-    home: StreamChat(
-      client: client,
-      connectivityStream: Stream.value([ConnectivityResult.mobile]),
-      child: Builder(
-        builder: (context) {
-          final icons = context.streamIcons;
-          final textTheme = context.streamTextTheme;
-          final colorScheme = context.streamColorScheme;
-          return Scaffold(
-            appBar: StreamChannelListHeader(
-              title: const Text('Threads'),
-              trailing: StreamButton.icon(
-                icon: Icon(icons.plus),
-                onPressed: () {},
-              ),
+  return StreamChat(
+    client: client,
+    connectivityStream: Stream.value([ConnectivityResult.mobile]),
+    child: Builder(
+      builder: (context) {
+        final icons = context.streamIcons;
+        final textTheme = context.streamTextTheme;
+        final colorScheme = context.streamColorScheme;
+        return Scaffold(
+          appBar: StreamChannelListHeader(
+            title: const Text('Threads'),
+            trailing: StreamButton.icon(
+              icon: Icon(icons.plus),
+              onPressed: () {},
             ),
-            body: Column(
-              children: [
-                if (banner != null) banner,
-                Expanded(
-                  child: StreamThreadListView(
-                    controller: controller,
-                    emptyBuilder: emptyBuilder,
-                    itemBuilder: customItemBuilder != null
-                        ? (context, threads, index, defaultWidget) => customItemBuilder(context, threads[index])
-                        : null,
-                  ),
+          ),
+          body: Column(
+            children: [
+              if (banner != null) banner,
+              Expanded(
+                child: StreamThreadListView(
+                  controller: controller,
+                  emptyBuilder: emptyBuilder,
+                  itemBuilder: customItemBuilder != null
+                      ? (context, threads, index, defaultWidget) => customItemBuilder(context, threads[index])
+                      : null,
+                ),
+              ),
+            ],
+          ),
+          bottomNavigationBar: DecoratedBox(
+            decoration: BoxDecoration(
+              color: colorScheme.backgroundElevation1,
+              border: Border(top: BorderSide(color: colorScheme.borderSubtle)),
+            ),
+            child: BottomNavigationBar(
+              elevation: 0,
+              iconSize: 20,
+              currentIndex: 1,
+              type: BottomNavigationBarType.fixed,
+              selectedItemColor: colorScheme.textPrimary,
+              unselectedItemColor: colorScheme.textTertiary,
+              backgroundColor: Colors.transparent,
+              selectedLabelStyle: textTheme.metadataEmphasis,
+              unselectedLabelStyle: textTheme.metadataEmphasis,
+              items: [
+                BottomNavigationBarItem(
+                  icon: Icon(icons.messageBubble),
+                  activeIcon: Icon(icons.messageBubbleFill),
+                  label: 'Chats',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(icons.thread),
+                  activeIcon: Icon(icons.threadFill),
+                  label: 'Threads',
                 ),
               ],
             ),
-            bottomNavigationBar: DecoratedBox(
-              decoration: BoxDecoration(
-                color: colorScheme.backgroundElevation1,
-                border: Border(top: BorderSide(color: colorScheme.borderSubtle)),
-              ),
-              child: BottomNavigationBar(
-                elevation: 0,
-                iconSize: 20,
-                currentIndex: 1,
-                type: BottomNavigationBarType.fixed,
-                selectedItemColor: colorScheme.textPrimary,
-                unselectedItemColor: colorScheme.textTertiary,
-                backgroundColor: Colors.transparent,
-                selectedLabelStyle: textTheme.metadataEmphasis,
-                unselectedLabelStyle: textTheme.metadataEmphasis,
-                items: [
-                  BottomNavigationBarItem(
-                    icon: Icon(icons.messageBubble),
-                    activeIcon: Icon(icons.messageBubbleFill),
-                    label: 'Chats',
-                  ),
-                  BottomNavigationBarItem(
-                    icon: Icon(icons.thread),
-                    activeIcon: Icon(icons.threadFill),
-                    label: 'Threads',
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
-      ),
+          ),
+        );
+      },
     ),
   );
 }
@@ -216,23 +212,19 @@ void main() {
         unreadCount: 3,
       );
 
-      return MaterialApp(
-        theme: docsScreenshotsTheme(),
-        debugShowCheckedModeBanner: false,
-        home: StreamChat(
-          client: client,
-          connectivityStream: Stream.value([ConnectivityResult.mobile]),
-          child: Scaffold(
-            body: DecoratedBox(
-              decoration: BoxDecoration(
-                border: Border(
-                  left: BorderSide(color: Colors.blue.shade700, width: 4),
-                ),
+      return StreamChat(
+        client: client,
+        connectivityStream: Stream.value([ConnectivityResult.mobile]),
+        child: Scaffold(
+          body: DecoratedBox(
+            decoration: BoxDecoration(
+              border: Border(
+                left: BorderSide(color: Colors.blue.shade700, width: 4),
               ),
-              child: StreamThreadListTile(
-                thread: thread,
-                currentUser: ownUser,
-              ),
+            ),
+            child: StreamThreadListTile(
+              thread: thread,
+              currentUser: ownUser,
             ),
           ),
         ),

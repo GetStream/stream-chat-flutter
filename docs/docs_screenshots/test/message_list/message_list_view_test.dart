@@ -50,22 +50,18 @@ List<Message> _buildMessages({bool withPinned = false, bool withThreads = false}
   ];
 }
 
-Widget _buildMessageListViewInDevice({
+Widget _buildMessageListViewScaffold({
   required MockClient client,
   required MockChannel channel,
 }) {
-  return MaterialApp(
-    theme: docsScreenshotsTheme(),
-    debugShowCheckedModeBanner: false,
-    home: StreamChat(
-      client: client,
-      connectivityStream: Stream.value([ConnectivityResult.mobile]),
-      child: StreamChannel(
-        showLoading: false,
-        channel: channel,
-        child: const Scaffold(
-          body: StreamMessageListView(),
-        ),
+  return StreamChat(
+    client: client,
+    connectivityStream: Stream.value([ConnectivityResult.mobile]),
+    child: StreamChannel(
+      showLoading: false,
+      channel: channel,
+      child: const Scaffold(
+        body: StreamMessageListView(),
       ),
     ),
   );
@@ -96,7 +92,7 @@ void main() {
       );
       when(() => clientState.currentUser).thenReturn(ownUser);
 
-      return _buildMessageListViewInDevice(client: client, channel: channel);
+      return _buildMessageListViewScaffold(client: client, channel: channel);
     },
   );
 
@@ -121,21 +117,7 @@ void main() {
       );
       when(() => clientState.currentUser).thenReturn(ownUser);
 
-      return MaterialApp(
-        theme: docsScreenshotsTheme(),
-        debugShowCheckedModeBanner: false,
-        home: StreamChat(
-          client: client,
-          connectivityStream: Stream.value([ConnectivityResult.mobile]),
-          child: StreamChannel(
-            showLoading: false,
-            channel: channel,
-            child: const Scaffold(
-              body: StreamMessageListView(),
-            ),
-          ),
-        ),
-      );
+      return _buildMessageListViewScaffold(client: client, channel: channel);
     },
   );
 
@@ -160,21 +142,7 @@ void main() {
       );
       when(() => clientState.currentUser).thenReturn(ownUser);
 
-      return MaterialApp(
-        theme: docsScreenshotsTheme(),
-        debugShowCheckedModeBanner: false,
-        home: StreamChat(
-          client: client,
-          connectivityStream: Stream.value([ConnectivityResult.mobile]),
-          child: StreamChannel(
-            showLoading: false,
-            channel: channel,
-            child: const Scaffold(
-              body: StreamMessageListView(),
-            ),
-          ),
-        ),
-      );
+      return _buildMessageListViewScaffold(client: client, channel: channel);
     },
   );
 }
