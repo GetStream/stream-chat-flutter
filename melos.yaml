@@ -123,10 +123,6 @@ scripts:
     run: melos run analyze && melos run format
     description: Run all static analysis checks
 
-  analyze:all:
-    run: melos run analyze && melos run metrics
-    description: Run all
-
   analyze:
     run: |
       melos exec -c 5 --ignore="*example*" -- \
@@ -161,13 +157,11 @@ scripts:
     run: melos exec -c 5 --diff="HEAD~1...HEAD" --include-dependents -- "dart format --set-exit-if-changed ."
     description: Run `dart format` in packages changed since HEAD~1.
 
-  metrics:
-    run: |
-      melos exec -c 1 --ignore="*example*" -- \
-        flutter pub run dart_code_metrics:metrics analyze lib
-    description: |
-      Run `dart_code_metrics` in all packages.
-       - Note: you can also rely on your IDEs Dart Analysis / Issues window.
+  # Fails on circular package dependencies — cheap defensive check to run
+  # in CI before bootstrap, since a cycle here would silently break everyone.
+  lint:cycles:
+    run: melos list --cycles
+    description: Fail if any cycle exists in the workspace dependency graph.
 
   lint:pub:
     run: melos exec -c 1 --no-published --no-private --order-dependents -- "flutter pub publish -n"
@@ -187,12 +181,22 @@ scripts:
     run: melos run generate:dart && melos run generate:flutter
     description: Build all generated files for Dart & Flutter packages in this project.
 
+  # `dart run build_runner` works for both Dart and Flutter packages; the
+  # `flutter pub run` form is deprecated since Flutter 3.7 and slower (it
+  # warms up the Flutter binary unnecessarily). One script body covers both
+  # packageFilters splits via the `flutter:` filter.
   generate:dart:
-    run: melos exec -c 1 --depends-on="build_runner" --no-flutter -- "dart run build_runner build --delete-conflicting-outputs"
+    exec: dart run build_runner build --delete-conflicting-outputs
+    packageFilters:
+      flutter: false
+      dependsOn: build_runner
     description: Build all generated files for Dart packages in this project.
 
   generate:flutter:
-    run: melos exec -c 1 --depends-on="build_runner" --flutter -- "flutter pub run build_runner build --delete-conflicting-outputs"
+    exec: dart run build_runner build --delete-conflicting-outputs
+    packageFilters:
+      flutter: true
+      dependsOn: build_runner
     description: Build all generated files for Flutter packages in this project.
 
   version:update:

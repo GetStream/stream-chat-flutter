@@ -67,6 +67,11 @@ jobs:
       - name: "Install Tools"
         run: |
           flutter pub global activate melos
+      # Fail fast on circular deps — runs in ~1s and saves the bootstrap cost
+      # on a doomed run. Only added in this job (one failure fails the
+      # workflow via downstream `needs:`).
+      - name: "Lint Cycles"
+        run: melos run lint:cycles
       - name: "Bootstrap Workspace"
         run: melos bootstrap --verbose
       - name: "Dart Analyze"
