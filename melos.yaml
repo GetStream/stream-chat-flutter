@@ -135,10 +135,31 @@ scripts:
       Run `dart analyze` in all packages.
        - Note: you can also rely on your IDEs Dart Analysis / Issues window.
 
+  # Scoped to packages touched by the current branch (plus their dependents),
+  # so PR CI only analyses what the PR could have broken. Examples are
+  # intentionally included — analysing them catches API drift in the sample
+  # code we ship.
+  #
+  # Why `HEAD~1...HEAD`: GitHub's `actions/checkout` checks out the PR's
+  # auto-generated merge commit (`refs/pull/N/merge`) by default. On that
+  # commit, `HEAD~1` is the first parent — i.e. the PR's BASE branch tip
+  # (master, v10, design-refresh, whatever). So `HEAD~1...HEAD` gives the
+  # PR's own changes regardless of which branch it targets. On `push` events
+  # `HEAD~1` is just the previous tip, so the same range gives the pushed
+  # commit's changes. No workflow env plumbing needed.
+  analyze:changes:
+    run: melos exec -c 5 --diff="HEAD~1...HEAD" --include-dependents -- "dart analyze --fatal-infos ."
+    description: Run `dart analyze` in packages changed since HEAD~1.
+
   format:
     run: dart format --set-exit-if-changed .
     description: |
       Run `dart format --set-exit-if-changed .` in all packages.
+
+  # Same scoping as `analyze:changes`, same reasoning for including examples.
+  format:changes:
+    run: melos exec -c 5 --diff="HEAD~1...HEAD" --include-dependents -- "dart format --set-exit-if-changed ."
+    description: Run `dart format` in packages changed since HEAD~1.
 
   metrics:
     run: |
@@ -151,6 +172,16 @@ scripts:
   lint:pub:
     run: melos exec -c 1 --no-published --no-private --order-dependents -- "flutter pub publish -n"
     description: Dry run `pub publish` in all packages.
+
+  # Mirrors the filter shape of `lint:pub` (no `--include-dependents`); just
+  # adds diff-scoping. `pub publish --dry-run` validates this package's own
+  # pubspec/files/metadata and never reads the parent's code, so dependent
+  # expansion would add CI time without catching anything new. `--no-private`
+  # filters examples cleanly here because we're not using --include-dependents
+  # (the filter-bypass quirk only triggers during dependent expansion).
+  lint:pub:changes:
+    run: melos exec -c 1 --diff="HEAD~1...HEAD" --no-published --no-private --order-dependents -- "flutter pub publish -n"
+    description: Dry run `pub publish` in publishable packages changed since HEAD~1.
 
   generate:all:
     run: melos run generate:dart && melos run generate:flutter
@@ -185,6 +216,16 @@ scripts:
     packageFilters:
       flutter: true
       dirExists: test
+
+  # Examples are in the workspace (needed for analyze/format coverage) but
+  # have no tests. `packageFilters` is applied before `--include-dependents`
+  # in melos, so we can't filter examples out via a filter — they re-enter
+  # the set through transitive-dependent expansion. The wrapper script does
+  # the skip per-package after melos has done its math. `--no-pub` is safe
+  # because the workflow runs `melos bootstrap` first.
+  test:changes:
+    run: melos exec -c 4 --fail-fast --diff="HEAD~1...HEAD" --include-dependents -- "bash \$MELOS_ROOT_PATH/.github/workflows/scripts/test-package.sh"
+    description: Run `flutter test` in packages changed since HEAD~1.
 
   update:goldens:
     run: melos exec -c 1 --depends-on="alchemist" -- "flutter test --tags golden --update-goldens"

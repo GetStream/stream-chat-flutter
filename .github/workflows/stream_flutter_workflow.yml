@@ -1,7 +1,6 @@
 name: stream_flutter_workflow
 
 env:
-  ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
   flutter_version: "3.x"
 
 on:
@@ -27,8 +26,10 @@ jobs:
   # filtering, which hangs forever) — see
   # https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/collaborating-on-repositories-with-code-quality-features/troubleshooting-required-status-checks
   #
-  # `push` events to master always run the full suite, matching the
-  # previous `on.push.branches: [master]` behavior.
+  # `push` events always run (no draft/path gate), but downstream jobs still
+  # use the diff-aware `:changes` scripts. On a master push, `HEAD~1` is the
+  # previous tip, so the scope is exactly the merged commit's changes —
+  # matching what the PR ran.
   gate:
     runs-on: ubuntu-latest
     outputs:
@@ -69,12 +70,13 @@ jobs:
       - name: "Bootstrap Workspace"
         run: melos bootstrap --verbose
       - name: "Dart Analyze"
-        run: |
-          melos run analyze
+        run: melos run analyze:changes
+      # Only on PRs targeting master — feature branches (v10, design-refresh,
+      # etc.) often carry unreleased version numbers that aren't ready for a
+      # publish dry-run yet.
       - name: "Pub Check"
         if: github.base_ref == 'master'
-        run: |
-          melos run lint:pub
+        run: melos run lint:pub:changes
 
   format:
     needs: gate
@@ -98,7 +100,7 @@ jobs:
       - name: "Bootstrap Workspace"
         run: melos bootstrap
       - name: "Melos Format"
-        run: melos run format
+        run: melos run format:changes
       - name: "Validate Formatting"
         run: |
           ./.github/workflows/scripts/validate-formatting.sh
@@ -129,39 +131,48 @@ jobs:
       - name: "Bootstrap Workspace"
         run: melos bootstrap
       - name: "Flutter Test"
-        run: melos run test:all
+        run: melos run test:changes
       - name: "Collect Coverage"
         run: melos run coverage:ignore-file --no-select
-      - name: "Upload Coverage"
-        uses: codecov/codecov-action@v5
-        with:
-          token: ${{secrets.CODECOV_TOKEN}}
-          files: packages/*/coverage/lcov.info
+      # Coverage thresholds skip packages whose tests didn't run on this PR —
+      # `hashFiles` returns an empty string when the path is missing. Without
+      # this guard, the action errors on missing files for unaffected packages.
       - name: "Stream Chat Coverage Check"
+        if: hashFiles('packages/stream_chat/coverage/lcov.info') != ''
         uses: VeryGoodOpenSource/very_good_coverage@v3.0.0
         with:
           path: packages/stream_chat/coverage/lcov.info
           min_coverage: 70
       - name: "Stream Chat Localizations Coverage Check"
+        if: hashFiles('packages/stream_chat_localizations/coverage/lcov.info') != ''
         uses: VeryGoodOpenSource/very_good_coverage@v3.0.0
         with:
           path: packages/stream_chat_localizations/coverage/lcov.info
           min_coverage: 100
       - name: "Stream Chat Persistence Coverage Check"
+        if: hashFiles('packages/stream_chat_persistence/coverage/lcov.info') != ''
         uses: VeryGoodOpenSource/very_good_coverage@v3.0.0
         with:
           path: packages/stream_chat_persistence/coverage/lcov.info
           min_coverage: 95
       - name: "Stream Chat Flutter Core Coverage Check"
+        if: hashFiles('packages/stream_chat_flutter_core/coverage/lcov.info') != ''
         uses: VeryGoodOpenSource/very_good_coverage@v3.0.0
         with:
           path: packages/stream_chat_flutter_core/coverage/lcov.info
           min_coverage: 30
       - name: "Stream Chat Flutter Coverage Check"
+        if: hashFiles('packages/stream_chat_flutter/coverage/lcov.info') != ''
         uses: VeryGoodOpenSource/very_good_coverage@v3.0.0
         with:
           path: packages/stream_chat_flutter/coverage/lcov.info
           min_coverage: 44
+      # Upload last so we never push coverage that failed local thresholds.
+      - name: "Upload Coverage"
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{secrets.CODECOV_TOKEN}}
+          files: packages/*/coverage/lcov.info
 
   build:
     name: build (${{ matrix.platform }})
