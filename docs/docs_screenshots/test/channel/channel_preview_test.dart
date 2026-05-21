@@ -233,9 +233,6 @@ void main() {
     constraints: const BoxConstraints.tightFor(width: 430, height: 932),
     builder: () {
       final client = MockClient();
-      final clientState = MockClientState();
-      when(() => client.state).thenReturn(clientState);
-      when(() => clientState.currentUser).thenReturn(ownUser);
 
       final channels = [
         fakeChannel(
@@ -299,6 +296,7 @@ void main() {
       );
 
       stubQueryChannelsForGoldens(client, channels);
+      stubMockClientCurrentUser(client, ownUser);
 
       return DeviceFrame(
         device: Devices.ios.iPhone13,
