@@ -3988,6 +3988,12 @@ class ChannelClientState {
   }) {
     if (messages.isEmpty) return;
 
+    // Fast path: no existing pinned messages and nothing in the batch is
+    // pinned either — skip the merge / sort / copyWith churn entirely.
+    if (this.pinnedMessages.isEmpty && messages.every((m) => !m.pinned)) {
+      return;
+    }
+
     final pinnedMessages = [...this.pinnedMessages];
     final updatedPinnedMessages = _mergePinnedMessagesIntoExisting(
       existing: pinnedMessages,
