@@ -1,7 +1,7 @@
 import 'package:device_preview/device_preview.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import '../src/golden_client_stubs.dart';
@@ -154,6 +154,11 @@ void main() {
     'swipe channel to reveal actions',
     fileName: 'swipe_channel',
     constraints: const BoxConstraints.tightFor(width: 375, height: 80),
+    whilePerforming: (tester) async {
+      await tester.drag(find.byType(StreamChannelListItem), const Offset(-150, 0));
+      await tester.pumpAndSettle();
+      return null;
+    },
     builder: () {
       final client = MockClient();
       final channel = fakeChannel(
@@ -181,43 +186,27 @@ void main() {
               final icons = context.streamIcons;
               final colorScheme = context.streamColorScheme;
               return Scaffold(
-                body: Stack(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        SizedBox(
-                          width: 75,
-                          height: 80,
-                          child: ColoredBox(
-                            color: colorScheme.backgroundSurface,
-                            child: Center(child: Icon(icons.more, size: 20)),
-                          ),
-                        ),
-                        SizedBox(
-                          width: 75,
-                          height: 80,
-                          child: ColoredBox(
-                            color: colorScheme.accentPrimary,
-                            child: Center(
-                              child: Icon(
-                                icons.mute,
-                                size: 20,
-                                color: colorScheme.textOnAccent,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    Transform.translate(
-                      offset: const Offset(-150, 0),
-                      child: ColoredBox(
-                        color: Colors.white,
-                        child: StreamChannelListItem(channel: channel),
+                body: Slidable(
+                  groupTag: 'channels-actions',
+                  endActionPane: ActionPane(
+                    extentRatio: 0.4,
+                    motion: const BehindMotion(),
+                    children: [
+                      CustomSlidableAction(
+                        foregroundColor: colorScheme.textPrimary,
+                        backgroundColor: colorScheme.backgroundSurface,
+                        onPressed: (_) {},
+                        child: Icon(icons.more, size: 20),
                       ),
-                    ),
-                  ],
+                      CustomSlidableAction(
+                        foregroundColor: colorScheme.textOnAccent,
+                        backgroundColor: colorScheme.accentPrimary,
+                        onPressed: (_) {},
+                        child: Icon(icons.mute, size: 20),
+                      ),
+                    ],
+                  ),
+                  child: StreamChannelListItem(channel: channel),
                 ),
               );
             },
@@ -231,6 +220,11 @@ void main() {
     'slidable channel list with header',
     fileName: 'slidable_channel_list',
     constraints: const BoxConstraints.tightFor(width: 430, height: 932),
+    whilePerforming: (tester) async {
+      await tester.drag(find.byType(StreamChannelListItem).first, const Offset(-200, 0));
+      await tester.pumpAndSettle();
+      return null;
+    },
     builder: () {
       final client = MockClient();
 
@@ -319,60 +313,33 @@ void main() {
                       onPressed: () {},
                     ),
                   ),
-                  body: Column(
-                    children: [
-                      // First channel shown swiped to reveal slidable actions
-                      SizedBox(
-                        height: 80,
-                        child: Stack(
+                  body: StreamChannelListView(
+                    controller: controller,
+                    shrinkWrap: true,
+                    itemBuilder: (context, channels, index, defaultWidget) {
+                      return Slidable(
+                        groupTag: 'channels-actions',
+                        endActionPane: ActionPane(
+                          extentRatio: 0.4,
+                          motion: const BehindMotion(),
                           children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                SizedBox(
-                                  width: 80,
-                                  height: 80,
-                                  child: ColoredBox(
-                                    color: colorScheme.backgroundSurface,
-                                    child: Center(child: Icon(icons.more, size: 20)),
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: 80,
-                                  height: 80,
-                                  child: ColoredBox(
-                                    color: colorScheme.accentPrimary,
-                                    child: Center(
-                                      child: Icon(
-                                        icons.mute,
-                                        size: 20,
-                                        color: colorScheme.textOnAccent,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
+                            CustomSlidableAction(
+                              foregroundColor: colorScheme.textPrimary,
+                              backgroundColor: colorScheme.backgroundSurface,
+                              onPressed: (_) {},
+                              child: Icon(icons.more, size: 20),
                             ),
-                            Transform.translate(
-                              offset: const Offset(-160, 0),
-                              child: ColoredBox(
-                                color: Colors.white,
-                                child: StreamChannelListItem(channel: channels[0]),
-                              ),
+                            CustomSlidableAction(
+                              foregroundColor: colorScheme.textOnAccent,
+                              backgroundColor: colorScheme.accentPrimary,
+                              onPressed: (_) {},
+                              child: Icon(icons.mute, size: 20),
                             ),
                           ],
                         ),
-                      ),
-                      Expanded(
-                        child: StreamChannelListView(
-                          controller: StreamChannelListController.fromValue(
-                            PagedValue(items: channels.sublist(1)),
-                            client: client,
-                          ),
-                          shrinkWrap: true,
-                        ),
-                      ),
-                    ],
+                        child: defaultWidget,
+                      );
+                    },
                   ),
                 );
               },
