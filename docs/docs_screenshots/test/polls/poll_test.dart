@@ -70,7 +70,7 @@ void main() {
                   title: const Text('Create Poll'),
                   trailing: StreamButton.icon(
                     type: StreamButtonType.solid,
-                    icon: Icon(icons.send),
+                    icon: Icon(icons.checkmark),
                     onPressed: () {},
                   ),
                 ),
