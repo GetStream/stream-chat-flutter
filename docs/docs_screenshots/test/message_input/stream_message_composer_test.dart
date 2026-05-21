@@ -258,7 +258,7 @@ void main() {
   docsGoldenTest(
     'custom composer buttons',
     fileName: 'message_input_custom_buttons',
-    constraints: const BoxConstraints.tightFor(width: 375, height: 120),
+    constraints: const BoxConstraints.tightFor(width: 375, height: 100),
     builder: () {
       final client = MockClient();
       final clientState = MockClientState();
