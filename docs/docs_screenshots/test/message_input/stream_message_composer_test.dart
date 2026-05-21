@@ -347,8 +347,8 @@ class _CustomComposerTrailingButtonState extends State<_CustomComposerTrailingBu
           )
         : StreamButton.icon(
             icon: Icon(context.streamIcons.send),
-            type: StreamButtonType.outline,
-            style: StreamButtonStyle.secondary,
+            type: StreamButtonType.solid,
+            style: StreamButtonStyle.primary,
             size: StreamButtonSize.large,
             onPressed: () {},
           );
