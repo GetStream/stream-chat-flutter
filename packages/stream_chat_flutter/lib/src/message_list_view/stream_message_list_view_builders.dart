@@ -15,9 +15,9 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// )
 /// ```
 /// {@endtemplate}
-class StreamMessageListBuilders {
+class StreamMessageListViewBuilders {
   /// {@macro streamMessageListBuilders}
-  const StreamMessageListBuilders({
+  const StreamMessageListViewBuilders({
     this.empty,
     this.loading,
     this.error,
@@ -121,7 +121,7 @@ class StreamMessageListBuilders {
   final StreamMessageItemBuilder? parentMessage;
 
   /// Returns a copy of this object with the given fields replaced.
-  StreamMessageListBuilders copyWith({
+  StreamMessageListViewBuilders copyWith({
     WidgetBuilder? empty,
     WidgetBuilder? loading,
     ErrorBuilder? error,
@@ -140,7 +140,7 @@ class StreamMessageListBuilders {
     ModeratedMessageBuilder? moderatedMessage,
     StreamMessageItemBuilder? parentMessage,
   }) {
-    return StreamMessageListBuilders(
+    return StreamMessageListViewBuilders(
       empty: empty ?? this.empty,
       loading: loading ?? this.loading,
       error: error ?? this.error,
@@ -164,7 +164,7 @@ class StreamMessageListBuilders {
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
-    return other is StreamMessageListBuilders &&
+    return other is StreamMessageListViewBuilders &&
         other.empty == empty &&
         other.loading == loading &&
         other.error == error &&

@@ -122,8 +122,8 @@ class StreamMessageListView extends StatefulWidget {
     this.onEphemeralMessageTap,
     this.onModeratedMessageTap,
     this.onMessageLongPress,
-    this.config = const StreamMessageListConfiguration(),
-    this.builders = const StreamMessageListBuilders(),
+    this.config = const StreamMessageListViewConfiguration(),
+    this.builders = const StreamMessageListViewBuilders(),
   });
 
   /// Predicate used to filter messages.
@@ -242,20 +242,20 @@ class StreamMessageListView extends StatefulWidget {
 
   /// Behavior flags for this message list view.
   ///
-  /// Controls things like [StreamMessageListConfiguration.swipeToReply],
-  /// [StreamMessageListConfiguration.markReadWhenAtTheBottom], scroll
+  /// Controls things like [StreamMessageListViewConfiguration.swipeToReply],
+  /// [StreamMessageListViewConfiguration.markReadWhenAtTheBottom], scroll
   /// physics, and other non-builder, non-theme settings.
   ///
-  /// Defaults to [StreamMessageListConfiguration] with all defaults.
-  final StreamMessageListConfiguration config;
+  /// Defaults to [StreamMessageListViewConfiguration] with all defaults.
+  final StreamMessageListViewConfiguration config;
 
   /// Custom slot builders for this message list view.
   ///
   /// Use these to replace individual parts of the list UI (loading state,
   /// empty state, date dividers, scroll-to-bottom button, etc.).
   ///
-  /// Defaults to [StreamMessageListBuilders] with no overrides.
-  final StreamMessageListBuilders builders;
+  /// Defaults to [StreamMessageListViewBuilders] with no overrides.
+  final StreamMessageListViewBuilders builders;
 
   @override
   _StreamMessageListViewState createState() => _StreamMessageListViewState();

@@ -15,9 +15,9 @@ import 'package:flutter/widgets.dart';
 /// )
 /// ```
 /// {@endtemplate}
-class StreamMessageListConfiguration {
+class StreamMessageListViewConfiguration {
   /// {@macro streamMessageListConfiguration}
-  const StreamMessageListConfiguration({
+  const StreamMessageListViewConfiguration({
     this.markReadWhenAtTheBottom = true,
     this.swipeToReply = false,
     this.showScrollToBottom = true,
@@ -29,7 +29,7 @@ class StreamMessageListConfiguration {
     this.fadeFloatingDateDividerNearInline = true,
     this.reverse = true,
     this.shrinkWrap = false,
-    this.paginationLimit = 20,
+    this.paginationLimit = 25,
     this.keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.onDrag,
     this.scrollPhysics = const ClampingScrollPhysics(),
   });
@@ -117,7 +117,7 @@ class StreamMessageListConfiguration {
   final ScrollPhysics scrollPhysics;
 
   /// Returns a copy of this configuration with the given fields replaced.
-  StreamMessageListConfiguration copyWith({
+  StreamMessageListViewConfiguration copyWith({
     bool? markReadWhenAtTheBottom,
     bool? swipeToReply,
     bool? showScrollToBottom,
@@ -133,7 +133,7 @@ class StreamMessageListConfiguration {
     ScrollViewKeyboardDismissBehavior? keyboardDismissBehavior,
     ScrollPhysics? scrollPhysics,
   }) {
-    return StreamMessageListConfiguration(
+    return StreamMessageListViewConfiguration(
       markReadWhenAtTheBottom: markReadWhenAtTheBottom ?? this.markReadWhenAtTheBottom,
       swipeToReply: swipeToReply ?? this.swipeToReply,
       showScrollToBottom: showScrollToBottom ?? this.showScrollToBottom,
@@ -154,7 +154,7 @@ class StreamMessageListConfiguration {
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
-    return other is StreamMessageListConfiguration &&
+    return other is StreamMessageListViewConfiguration &&
         other.markReadWhenAtTheBottom == markReadWhenAtTheBottom &&
         other.swipeToReply == swipeToReply &&
         other.showScrollToBottom == showScrollToBottom &&

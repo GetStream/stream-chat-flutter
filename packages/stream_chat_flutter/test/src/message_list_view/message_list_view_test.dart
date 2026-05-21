@@ -49,7 +49,7 @@ void main() {
           child: StreamChannel(
             channel: channel,
             child: StreamMessageListView(
-              builders: StreamMessageListBuilders(
+              builders: StreamMessageListViewBuilders(
                 empty: (_) => Container(key: emptyWidgetKey),
               ),
             ),
