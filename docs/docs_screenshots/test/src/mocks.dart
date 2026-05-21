@@ -138,6 +138,8 @@ void setupMockChannel({
   when(() => channel.nameStream).thenAnswer((_) => Stream.value(channelName));
   when(() => channel.image).thenReturn(null);
   when(() => channel.imageStream).thenAnswer((_) => Stream.value(null));
+  when(() => channel.memberCount).thenReturn(allMembers.length);
+  when(() => channel.memberCountStream).thenAnswer((_) => Stream.value(allMembers.length));
   when(() => channelState.membersStream).thenAnswer((_) => Stream.value(allMembers));
   when(() => channelState.members).thenReturn(allMembers);
   when(() => channelState.messages).thenReturn(messages);
