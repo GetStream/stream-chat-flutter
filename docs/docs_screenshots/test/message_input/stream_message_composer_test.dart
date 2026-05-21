@@ -114,7 +114,17 @@ void main() {
           componentBuilders: StreamComponentBuilders(
             extensions: streamChatComponentBuilders(
               messageComposerInputTrailing: (context, props) => const SizedBox.shrink(),
-              messageComposerTrailing: (context, props) => DefaultStreamMessageComposerInputTrailing(props: props),
+              messageComposerTrailing: (context, props) => Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SizedBox(width: context.streamSpacing.xs),
+                  StreamButton.icon(
+                    icon: Icon(context.streamIcons.send),
+                    size: StreamButtonSize.large,
+                    onPressed: () {},
+                  ),
+                ],
+              ),
             ),
           ),
           child: StreamChannel(
@@ -161,6 +171,7 @@ void main() {
         theme: ThemeData(
           useMaterial3: true,
           brightness: Brightness.light,
+          scaffoldBackgroundColor: const Color(0xFFFFFFFF),
           extensions: [
             StreamTheme(
               brightness: Brightness.light,
