@@ -3,7 +3,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:record/record.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-import 'package:stream_core_flutter/stream_core_flutter.dart' as core;
 
 import '../src/fakes.dart';
 import '../src/golden_theme.dart';
@@ -161,40 +160,40 @@ void main() {
         channelState: channelState,
       );
 
-      final streamTextTheme = core.StreamTextTheme().apply(
-        color: core.StreamColorScheme.light().systemText,
-        fontFamily: 'Roboto',
-      );
-
       return MaterialApp(
         debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          useMaterial3: true,
-          brightness: Brightness.light,
-          scaffoldBackgroundColor: const Color(0xFFFFFFFF),
-          extensions: [
-            StreamTheme(
-              brightness: Brightness.light,
-              textTheme: streamTextTheme,
-              icons: const StreamIcons(send: Icons.reply_rounded),
-            ),
-          ],
-        ),
-        home: StreamChat(
-          client: client,
-          connectivityStream: Stream.value([ConnectivityResult.mobile]),
-          child: StreamChannel(
-            showLoading: false,
-            channel: channel,
-            child: Scaffold(
-              body: Column(
-                children: [
-                  Expanded(child: Container()),
-                  StreamMessageComposer(),
+        theme: docsScreenshotsTheme(),
+        home: Builder(
+          builder: (context) {
+            final theme = Theme.of(context);
+            final streamTheme = theme.extension<StreamTheme>()!;
+            return Theme(
+              data: theme.copyWith(
+                extensions: [
+                  ...theme.extensions.values.where((e) => e is! StreamTheme),
+                  streamTheme.copyWith(
+                    icons: const StreamIcons(send: Icons.reply_rounded),
+                  ),
                 ],
               ),
-            ),
-          ),
+              child: StreamChat(
+                client: client,
+                connectivityStream: Stream.value([ConnectivityResult.mobile]),
+                child: StreamChannel(
+                  showLoading: false,
+                  channel: channel,
+                  child: Scaffold(
+                    body: Column(
+                      children: [
+                        Expanded(child: Container()),
+                        StreamMessageComposer(),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
         ),
       );
     },
@@ -226,7 +225,7 @@ void main() {
   docsGoldenTest(
     'message input with quoted message',
     fileName: 'message_input_quoted_message',
-    constraints: const BoxConstraints.tightFor(width: 375, height: 160),
+    constraints: const BoxConstraints.tightFor(width: 375, height: 180),
     builder: () {
       final client = MockClient();
       final clientState = MockClientState();
