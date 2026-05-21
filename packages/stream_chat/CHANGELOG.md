@@ -5,6 +5,9 @@
 - Added `StreamChatClient.recoverStateOnReconnect` (defaults to `true`); when `false`, the client no longer auto-re-queries active channels on connection recovery — useful for consumers driving their own refresh from the `connectionRecovered` event.
 - Added `Message.updateWith(Message? other)` — merges a server-side update onto the local message while preserving locally-known `poll`, `sharedLocation`, `ownReactions`, and nested `quotedMessage` enrichment when the server omits them.
 - Added `Channel.isOneToOne` — true when the channel is `isDistinct` and has exactly two members. For the looser count-only check, inline `channel.memberCount == 2`.
+- Added `SortedListX` and `ListX` extensions on `List` for keyed merge, sorted insert/upsert, and conditional update. `SortedListX.merge` tolerates duplicate-keyed inputs (assertions removed; receiver duplicates are propagated and key collisions resolved via `update`).
+- Added `ChannelClientState.pruneOldest(int)` — drops the oldest messages and keeps at most the requested number. No-op when the channel isn't up to date. Prefer `StreamChannel.pruneOldest` from `stream_chat_flutter_core` when available — it also resets top-pagination.
+- Added in-flight coalescing for `Client.queryChannels`: concurrent identical queries now share a single HTTP request via a new `InFlightCache<K, V>` (success and failure outcomes both shared). Rapid reconnect bursts no longer fire duplicate requests in parallel.
 
 ⚠️ Deprecated
 
@@ -15,6 +18,13 @@
 - Raised minimum versions of bundled Dart dependencies (`async`, `collection`, `dio`, `equatable`, `http_parser`, `json_annotation`, `logging`, `synchronized`, `uuid`, `web_socket_channel`) to current resolved versions.
 - Tightened `Channel.isGroup` from `memberCount != 2` to `memberCount > 2 || !isDistinct`. Two-member non-distinct channels now correctly report as groups, and 1-member distinct channels no longer do. Migrate via `!channel.isOneToOne` or `channel.memberCount != 2`.
 - Tightened `Channel.isDistinct` to require the `!members-` prefix (with trailing dash), matching the backend's `DistinctChannelPrefix` constant. Real server-generated ids always include the dash; only malformed/test ids that previously matched the looser `!members` check are affected.
+- `Channel.readStream`, `Channel.currentUserReadStream`, and `Channel.unreadCountStream` now dedupe consecutive equal values via `.distinct()`. UI listeners that only care about read state no longer rebuild on unrelated channel state mutations.
+- `Channel.currentUserReadStream` now emits `null` when the user logs out (previously the transition was swallowed).
+- Removed proactive re-fetching of messages with expired CDN attachment URLs on every channel state update. URL refreshes now flow through normal server events; the V10 `StreamImageCDN.cacheKey` keeps the image cache valid across signed-URL rotations.
+
+🚀 Performance
+
+- Faster channel state updates, especially for read receipts, reactions, and other partial-state events that don't touch the messages list. Reactions targeted at thread messages no longer scan the channel-level message list.
 
 🔒 Security
 
@@ -26,6 +36,7 @@
 - Fixed `Channel.sendMessage` / `Channel.updateMessage` hanging forever when any attachment upload failed; they now throw `StreamChatError`.
 - Fixed quoted poll messages losing their poll, shared-location, or nested-quote content when the server omits it from the `quoted_message` payload during channel re-sync.
 - Fixed a poll attached to a parent message disappearing when a thread reply was added; partial `message.updated` events no longer clobber locally-known `poll` / `sharedLocation` on the parent.
+- Fixed `Client.queryDrafts` not forwarding the `filter` argument to the API.
 
 ## 10.0.0-beta.13
 

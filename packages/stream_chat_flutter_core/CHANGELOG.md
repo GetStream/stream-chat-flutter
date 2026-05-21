@@ -18,6 +18,14 @@
   now an alias for it.
 - `StreamMessageComposerController.editMessage()` and the `command` setter are now
   re-entrant — repeated calls preserve the original restore snapshot.
+- Added `StreamChannel.pruneOldest(int)` — wraps `ChannelClientState.pruneOldest` and additionally resets the top-pagination tracker so older messages can be re-fetched after a trim.
+- Added `MessageListCore.maximumMessageLimit` and `retentionTrimBuffer` — when set, the message list caps the in-memory message count while the user is viewing the latest messages.
+
+🚀 Performance
+
+- `MessageListCore` caches its `messagesStream` / `_initialMessages` as fields and resolves them in `didChangeDependencies` / `didUpdateWidget` instead of recomputing on every `build()`.
+- `StreamChatCore` debounces incoming connectivity events by 3 s — rapid flaps (cell handovers, brief drops) collapse into a single reconnect instead of forcing a fresh `openConnection` for each emit.
+- `StreamChannel.getFirstUnreadMessage` now scans the message list from the tail (`lastIndexWhere`) — read receipts almost always target a recent message, so the scan exits in a handful of comparisons.
 
 🔄 Changed
 

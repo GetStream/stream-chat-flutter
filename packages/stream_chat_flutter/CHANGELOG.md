@@ -1,5 +1,22 @@
 ## Upcoming
 
+✅ Added
+
+- Added `StreamMessageListView.maximumMessageLimit` (forwards to `MessageListCore.maximumMessageLimit`). When set, the view caps the in-memory message list while the user is viewing the latest messages and resets top-pagination after pruning. Defaults to `null` (no pruning). Pair with `retentionTrimBuffer` (default `30`) to control how much slack is allowed before trimming fires.
+- New `ItemScrollController.isScrolling` + `isScrollingListenable` API (mirror of Compose's `LazyListState.isScrollInProgress`); `StreamMessageListView` reads this directly instead of maintaining its own flag fed by bubbling `ScrollNotification`s.
+- New `itemKeyBuilder` on `ScrollablePositionedList` for anchor preservation across data mutations.
+- `ItemScrollController.scrollTo` gained sensible defaults (`Duration(milliseconds: 250)`, `Curves.fastOutSlowIn`).
+
+🚀 Performance
+
+- SPL `_keyToIndexMap` is now bounded to a sliding window (matches Compose's `LazyLayoutNearestRangeState`: window 30, ±100 extras, bucket-anchored). Cache invalidates only on `itemCount` or window-bucket cross. Profile: 6.00 % → 0.17 % (–333 ms over a 5.6 s flood-load window).
+- `_messageNewListener` consumes `channel.membership` directly instead of building a freshened `members` list per row and scanning with `firstWhereOrNull`. One cached field read replaces an `O(N)` list allocation + scan + `StreamChat.of(context)` lookup per row, per build.
+- `BetterStreamBuilder` correctness fixes: mounted-guard, error reporting via `FlutterError.reportError`, identity-equal emission gating.
+
+🔄 Changed
+
+- `_urlRegex` in the message composer relaxed from `[a-z]{2,4}` to `[a-z]{2,}` so newer long TLDs (`.academy`, `.foundation`, etc.) detect correctly. The bundled `tld.dart` allowlist was removed — the URL regex's TLD-shaped suffix is enough and the server already validates.
+
 🔄 Internal / Non-breaking
 
 - Composer UI primitives (`StreamMessageComposerInputField`, `VoiceRecordingCallback`, and the outer/inner layout containers) are now owned by `stream_chat_flutter` and exported from this package. They were previously supplied by `stream_core_flutter`. The public API of `StreamMessageComposer` / `StreamChatMessageInput` and its sub-components is unchanged.
