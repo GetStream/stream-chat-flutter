@@ -263,9 +263,9 @@ class _ChannelPageState extends State<ChannelPage> {
         children: <Widget>[
           Expanded(
             child: StreamMessageListView(
+              config: const StreamMessageListViewConfiguration(swipeToReply: true),
               threadBuilder: (_, parent) => ThreadPage(parent: parent!),
               onReplyTap: reply,
-              swipeToReply: true,
             ),
           ),
           StreamMessageComposer(

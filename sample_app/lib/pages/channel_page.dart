@@ -81,10 +81,12 @@ class _ChannelPageState extends State<ChannelPage> {
                 StreamMessageListView(
                   initialScrollIndex: widget.initialScrollIndex,
                   initialAlignment: widget.initialAlignment,
-                  highlightInitialMessage: widget.highlightInitialMessage,
+                  config: StreamMessageListViewConfiguration(
+                    swipeToReply: true,
+                    highlightInitialMessage: widget.highlightInitialMessage,
+                  ),
                   onEditMessageTap: _editMessage,
                   onReplyTap: _reply,
-                  swipeToReply: true,
                   threadBuilder: (_, parentMessage) {
                     return ThreadPage(parent: parentMessage!);
                   },

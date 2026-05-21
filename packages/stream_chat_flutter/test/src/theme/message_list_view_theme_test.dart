@@ -13,9 +13,9 @@ void main() {
     expect(const StreamMessageListViewThemeData().hashCode, const StreamMessageListViewThemeData().copyWith().hashCode);
   });
 
-  test('''Light MessageListViewThemeData lerps completely to dark MessageListViewThemeData''', () {
+  test('Light MessageListViewThemeData lerps completely to dark MessageListViewThemeData', () {
     expect(
-      const StreamMessageListViewThemeData().lerp(
+      StreamMessageListViewThemeData.lerp(
         _messageListViewThemeDataControl,
         _messageListViewThemeDataControlDark,
         1,
@@ -24,23 +24,20 @@ void main() {
     );
   });
 
-  test('''Light MessageListViewThemeData lerps halfway to dark MessageListViewThemeData''', () {
+  test('Light MessageListViewThemeData lerps halfway to dark MessageListViewThemeData', () {
     expect(
-      const StreamMessageListViewThemeData().lerp(
+      StreamMessageListViewThemeData.lerp(
         _messageListViewThemeDataControl,
         _messageListViewThemeDataControlDark,
         0.5,
       ),
       _messageListViewThemeDataControlHalfLerp,
-      // TODO: Remove skip, once we drop support for flutter v3.24.0
-      skip: true,
-      reason: 'Currently failing in flutter v3.27.0 due to new color alpha',
     );
   });
 
-  test('''Dark MessageListViewThemeData lerps completely to light MessageListViewThemeData''', () {
+  test('Dark MessageListViewThemeData lerps completely to light MessageListViewThemeData', () {
     expect(
-      const StreamMessageListViewThemeData().lerp(
+      StreamMessageListViewThemeData.lerp(
         _messageListViewThemeDataControlDark,
         _messageListViewThemeDataControl,
         1,
@@ -74,29 +71,43 @@ void main() {
     );
 
     final messageListViewTheme = StreamMessageListViewTheme.of(_context);
-    expect(messageListViewTheme.backgroundColor, _messageListViewThemeDataControl.backgroundColor);
+    expect(messageListViewTheme.backgroundColor, isNull);
   });
 
-  testWidgets('Passing no MessageListViewThemeData returns default dark theme values', (WidgetTester tester) async {
+  testWidgets('StreamMessageListViewTheme.of merges local theme over global theme', (WidgetTester tester) async {
     late BuildContext _context;
     await tester.pumpWidget(
       MaterialApp(
         builder: (context, child) => StreamChat(
           client: MockStreamChatClient(),
-          streamChatThemeData: StreamChatThemeData(),
+          // Global theme sets backgroundColor only.
+          streamChatThemeData: StreamChatThemeData().copyWith(
+            messageListViewTheme: const StreamMessageListViewThemeData(
+              backgroundColor: _bgColorLight,
+            ),
+          ),
           child: child,
         ),
-        home: Builder(
-          builder: (BuildContext context) {
-            _context = context;
-            return const SizedBox.shrink();
-          },
+        home: StreamMessageListViewTheme(
+          // Local theme overrides messageHighlightColor only.
+          data: const StreamMessageListViewThemeData(
+            messageHighlightColor: _highlightColorDark,
+          ),
+          child: Builder(
+            builder: (BuildContext context) {
+              _context = context;
+              return const SizedBox.shrink();
+            },
+          ),
         ),
       ),
     );
 
     final messageListViewTheme = StreamMessageListViewTheme.of(_context);
-    expect(messageListViewTheme.backgroundColor, _messageListViewThemeDataControlDark.backgroundColor);
+    // backgroundColor comes from the global theme.
+    expect(messageListViewTheme.backgroundColor, _bgColorLight);
+    // messageHighlightColor comes from the local theme.
+    expect(messageListViewTheme.messageHighlightColor, _highlightColorDark);
   });
 
   testWidgets('Pass backgroundImage to MessageListViewThemeData return backgroundImage', (WidgetTester tester) async {
@@ -129,11 +140,25 @@ void main() {
   });
 }
 
-const _messageListViewThemeDataControl = StreamMessageListViewThemeData();
+const _bgColorLight = Color(0xFFFFFFFF);
+const _bgColorDark = Color(0xFF121212);
+const _highlightColorLight = Color(0x40BBDEFB);
+const _highlightColorDark = Color(0x401A237E);
 
-const _messageListViewThemeDataControlHalfLerp = StreamMessageListViewThemeData();
+const _messageListViewThemeDataControl = StreamMessageListViewThemeData(
+  backgroundColor: _bgColorLight,
+  messageHighlightColor: _highlightColorLight,
+);
 
-const _messageListViewThemeDataControlDark = StreamMessageListViewThemeData();
+final _messageListViewThemeDataControlHalfLerp = StreamMessageListViewThemeData(
+  backgroundColor: Color.lerp(_bgColorLight, _bgColorDark, 0.5),
+  messageHighlightColor: Color.lerp(_highlightColorLight, _highlightColorDark, 0.5),
+);
+
+const _messageListViewThemeDataControlDark = StreamMessageListViewThemeData(
+  backgroundColor: _bgColorDark,
+  messageHighlightColor: _highlightColorDark,
+);
 
 const _messageListViewThemeDataImage = StreamMessageListViewThemeData(
   backgroundImage: DecorationImage(
