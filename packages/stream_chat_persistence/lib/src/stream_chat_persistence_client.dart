@@ -261,6 +261,41 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
     );
   }
 
+  /// Legacy full-hydration variant of [getChannelStates], retained for
+  /// benchmark parity. Not part of the abstract contract.
+  Future<List<ChannelState>> getChannelStatesLegacy({
+    Filter? filter,
+    SortOrder<ChannelState>? channelStateSort,
+    PaginationParams? paginationParams,
+  }) async {
+    assert(_debugIsConnected, '');
+    _logger.info('getChannelStatesLegacy');
+
+    final channels = await db!.channelQueryDao.getChannels(filter: filter);
+
+    final channelStates = await Future.wait(
+      channels.map((e) => getChannelStateByCid(e.cid)),
+    );
+
+    // Sort the channel states
+    if (channelStateSort != null && channelStateSort.isNotEmpty) {
+      channelStates.sort(channelStateSort.compare);
+    }
+
+    // Apply offset
+    if (paginationParams?.offset case final paginationOffset?) {
+      final clampedOffset = paginationOffset.clamp(0, channelStates.length);
+      channelStates.removeRange(0, clampedOffset);
+    }
+
+    // Apply limit
+    if (paginationParams?.limit case final paginationLimit?) {
+      return channelStates.take(paginationLimit).toList();
+    }
+
+    return channelStates;
+  }
+
   @override
   Future<List<ChannelState>> getChannelStates({
     Filter? filter,
@@ -300,12 +335,7 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
 
     // 6) Hydrate ONLY the page. Pass messagePagination so we don't load every
     //    cached message for every channel (matches API default).
-    return Future.wait(pagedCids.map(
-      (cid) => getChannelStateByCid(
-        cid,
-        messagePagination: const PaginationParams(limit: 25),
-      ),
-    ));
+    return Future.wait(pagedCids.map(getChannelStateByCid));
   }
 
   @override
