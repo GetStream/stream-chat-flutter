@@ -1,4 +1,3 @@
-import 'package:alchemist/alchemist.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -9,6 +8,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import '../src/fakes.dart';
 import '../src/golden_theme.dart';
 import '../src/mocks.dart';
+import '../src/sample_users.dart';
 
 class _MockAudioRecorder extends Mock implements AudioRecorder {}
 
@@ -86,7 +86,7 @@ Widget _buildVoiceRecordingContextScaffold({
                       message: Message(
                         id: 'ctx-msg',
                         text: 'Hey, listen to this!',
-                        user: User(id: 'user-2', name: 'Bob'),
+                        user: noahSmith,
                         createdAt: DateTime(2024, 6, 1, 10, 0),
                       ),
                     ),
@@ -174,7 +174,7 @@ void main() {
   setUp(() => RecordPlatform.instance = FakeRecordPlatform());
   tearDown(() => RecordPlatform.instance = originalRecordPlatform);
 
-  goldenTest(
+  docsGoldenTest(
     'voice recording idle state',
     fileName: 'voice_recording_idle',
     constraints: const BoxConstraints.tightFor(width: 375, height: 100),
@@ -192,7 +192,7 @@ void main() {
     },
   );
 
-  goldenTest(
+  docsGoldenTest(
     'voice recording enabled (mic button visible)',
     fileName: 'voice_recording_enabled',
     constraints: const BoxConstraints.tightFor(width: 375, height: 100),
@@ -210,7 +210,7 @@ void main() {
     },
   );
 
-  goldenTest(
+  docsGoldenTest(
     'voice recording hold recording state',
     fileName: 'voice_recording_hold_recording',
     constraints: const BoxConstraints.tightFor(width: 375, height: 200),
@@ -234,7 +234,7 @@ void main() {
     },
   );
 
-  goldenTest(
+  docsGoldenTest(
     'voice recording locked recording state',
     fileName: 'voice_recording_locked_recording',
     constraints: const BoxConstraints.tightFor(width: 375, height: 200),
@@ -258,7 +258,7 @@ void main() {
     },
   );
 
-  goldenTest(
+  docsGoldenTest(
     'voice recording stopped state',
     fileName: 'voice_recording_stopped',
     constraints: const BoxConstraints.tightFor(width: 375, height: 150),
@@ -289,7 +289,7 @@ void main() {
     },
   );
 
-  goldenTest(
+  docsGoldenTest(
     'voice recording finished state',
     fileName: 'voice_recording_finished',
     constraints: const BoxConstraints.tightFor(width: 375, height: 200),
@@ -321,7 +321,7 @@ void main() {
     },
   );
 
-  goldenTest(
+  docsGoldenTest(
     'voice recording attachment idle',
     fileName: 'voice_recording_attachment',
     constraints: const BoxConstraints.tightFor(width: 375, height: 400),
@@ -334,7 +334,7 @@ void main() {
 
       final voiceMessage = Message(
         id: 'voice-msg',
-        user: User(id: 'user-2', name: 'Bob'),
+        user: noahSmith,
         attachments: [
           Attachment(
             type: 'voiceRecording',
@@ -393,7 +393,7 @@ void main() {
     },
   );
 
-  goldenTest(
+  docsGoldenTest(
     'voice recording idle tooltip',
     fileName: 'voice_recording_idle_tooltip',
     constraints: const BoxConstraints.tightFor(width: 375, height: 150),
@@ -416,7 +416,7 @@ void main() {
     },
   );
 
-  goldenTest(
+  docsGoldenTest(
     'voice recording attachment playing',
     fileName: 'voice_recording_attachment_playing',
     constraints: const BoxConstraints.tightFor(width: 375, height: 400),
@@ -429,7 +429,7 @@ void main() {
 
       final voiceMessage = Message(
         id: 'voice-msg-playing',
-        user: User(id: 'user-2', name: 'Bob'),
+        user: noahSmith,
         attachments: [
           Attachment(
             type: 'voiceRecording',
@@ -488,7 +488,7 @@ void main() {
     },
   );
 
-  goldenTest(
+  docsGoldenTest(
     'voice recording attachment custom theme',
     fileName: 'voice_recording_attachment_custom',
     constraints: const BoxConstraints.tightFor(width: 375, height: 400),
@@ -522,7 +522,7 @@ void main() {
 
       final voiceMessage = Message(
         id: 'voice-msg-custom',
-        user: User(id: 'user-2', name: 'Bob'),
+        user: noahSmith,
         attachments: [
           Attachment(
             type: 'voiceRecording',

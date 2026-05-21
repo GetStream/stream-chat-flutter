@@ -1,4 +1,3 @@
-import 'package:alchemist/alchemist.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -7,9 +6,9 @@ import 'package:stream_core_flutter/stream_core_flutter.dart' as core;
 
 import '../src/golden_theme.dart';
 import '../src/mocks.dart';
+import '../src/sample_users.dart';
 
-final _sender = User(id: 'user-2', name: 'Bob');
-final _currentUser = User(id: 'user-1', name: 'Alice');
+final _sender = noahSmith;
 
 /// Custom reaction resolver that maps 'celebrate' to 🎉, demonstrating the
 /// [ReactionIconResolver] API.
@@ -58,20 +57,34 @@ void _setupBasicChannel(
     channelState: channelState,
     channelName: 'General',
   );
-  when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-1', name: 'Alice'));
+  when(() => clientState.currentUser).thenReturn(ownUser);
 }
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  goldenTest(
+  docsGoldenTest(
     'message widget actions',
     fileName: 'message_widget_actions',
-    constraints: const BoxConstraints.tightFor(width: 375, height: 500),
+    constraints: const BoxConstraints.tightFor(width: 375, height: 620),
     builder: () {
       final client = MockClient();
       final clientState = MockClientState();
-      final channel = MockChannel(type: 'messaging', id: 'general');
+      final channel = MockChannel(
+        type: 'messaging',
+        id: 'general',
+        ownCapabilities: const [
+          ChannelCapability.sendMessage,
+          ChannelCapability.sendReply,
+          ChannelCapability.pinMessage,
+          ChannelCapability.quoteMessage,
+          ChannelCapability.readEvents,
+          ChannelCapability.updateAnyMessage,
+          ChannelCapability.updateOwnMessage,
+          ChannelCapability.deleteAnyMessage,
+          ChannelCapability.deleteOwnMessage,
+        ],
+      );
       final channelState = MockChannelState();
       _setupBasicChannel(client, clientState, channel, channelState);
 
@@ -104,38 +117,14 @@ void main() {
               showReactionPicker: true,
               leadingInset: leadingInset,
               messageWidget: StreamMessageItem(message: message),
-              messageActions: [
-                StreamContextMenuAction(
-                  value: const _ReplyAction(),
-                  leading: const Icon(Icons.reply),
-                  label: const Text('Reply'),
+              messageActions: StreamContextMenuAction.partitioned(
+                items: StreamMessageActionsBuilder.buildActions(
+                  context: context,
+                  message: message,
+                  channel: channel,
+                  currentUser: ownUser,
                 ),
-                StreamContextMenuAction(
-                  value: const _ThreadReplyAction(),
-                  leading: const Icon(Icons.comment_outlined),
-                  label: const Text('Thread Reply'),
-                ),
-                StreamContextMenuAction(
-                  value: const _EditAction(),
-                  leading: const Icon(Icons.edit_outlined),
-                  label: const Text('Edit Message'),
-                ),
-                StreamContextMenuAction(
-                  value: const _CopyAction(),
-                  leading: const Icon(Icons.copy_outlined),
-                  label: const Text('Copy Message'),
-                ),
-                StreamContextMenuAction(
-                  value: const _PinAction(),
-                  leading: const Icon(Icons.push_pin_outlined),
-                  label: const Text('Pin to Conversation'),
-                ),
-                StreamContextMenuAction.destructive(
-                  value: const _DeleteAction(),
-                  leading: const Icon(Icons.delete_outlined),
-                  label: const Text('Delete Message'),
-                ),
-              ],
+              ),
             );
           },
         ),
@@ -143,7 +132,7 @@ void main() {
     },
   );
 
-  goldenTest(
+  docsGoldenTest(
     'message theming',
     fileName: 'message_theming',
     constraints: const BoxConstraints.tightFor(width: 375, height: 200),
@@ -153,12 +142,12 @@ void main() {
       final channel = MockChannel(type: 'messaging', id: 'general');
       final channelState = MockChannelState();
       _setupBasicChannel(client, clientState, channel, channelState);
-      stubMockClientCurrentUser(client, OwnUser(id: 'user-1', name: 'Alice'));
+      stubMockClientCurrentUser(client, ownUser);
 
       final message = Message(
         id: 'msg-2',
         text: 'This message uses a custom theme!',
-        user: _currentUser,
+        user: ownUser,
         createdAt: DateTime(2024, 6, 1, 10, 0),
       );
 
@@ -201,7 +190,7 @@ void main() {
     },
   );
 
-  goldenTest(
+  docsGoldenTest(
     'message reaction theming',
     fileName: 'message_reaction_theming',
     constraints: const BoxConstraints.tightFor(width: 375, height: 200),
@@ -244,7 +233,7 @@ void main() {
     },
   );
 
-  goldenTest(
+  docsGoldenTest(
     'message with rounded avatar',
     fileName: 'message_rounded_avatar',
     constraints: const BoxConstraints.tightFor(width: 375, height: 120),
@@ -270,7 +259,7 @@ void main() {
     },
   );
 
-  goldenTest(
+  docsGoldenTest(
     'message styles',
     fileName: 'message_styles',
     constraints: const BoxConstraints.tightFor(width: 375, height: 300),
@@ -280,7 +269,7 @@ void main() {
       final channel = MockChannel(type: 'messaging', id: 'general');
       final channelState = MockChannelState();
       _setupBasicChannel(client, clientState, channel, channelState);
-      stubMockClientCurrentUser(client, OwnUser(id: 'user-1', name: 'Alice'));
+      stubMockClientCurrentUser(client, ownUser);
 
       return MaterialApp(
         theme: docsScreenshotsTheme(),
@@ -334,7 +323,7 @@ void main() {
                         message: Message(
                           id: 'msg-from-me',
                           text: 'And this is my reply!',
-                          user: _currentUser,
+                          user: ownUser,
                           createdAt: DateTime(2024, 6, 1, 10, 1),
                         ),
                       ),
@@ -348,29 +337,4 @@ void main() {
       );
     },
   );
-}
-
-// Placeholder action types used to populate the context menu in golden tests.
-class _ReplyAction {
-  const _ReplyAction();
-}
-
-class _ThreadReplyAction {
-  const _ThreadReplyAction();
-}
-
-class _EditAction {
-  const _EditAction();
-}
-
-class _CopyAction {
-  const _CopyAction();
-}
-
-class _PinAction {
-  const _PinAction();
-}
-
-class _DeleteAction {
-  const _DeleteAction();
 }

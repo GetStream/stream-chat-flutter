@@ -1,4 +1,3 @@
-import 'package:alchemist/alchemist.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -6,10 +5,11 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import '../src/golden_theme.dart';
 import '../src/mocks.dart';
+import '../src/sample_users.dart';
 
 Widget _buildListHeaderScaffold({
   required MockClient client,
-  StreamChannelListHeader? header,
+  required PreferredSizeWidget Function(BuildContext) headerBuilder,
 }) {
   return MaterialApp(
     theme: docsScreenshotsTheme(),
@@ -17,7 +17,9 @@ Widget _buildListHeaderScaffold({
     home: StreamChat(
       client: client,
       connectivityStream: Stream.value([ConnectivityResult.mobile]),
-      child: Scaffold(appBar: header),
+      child: Builder(
+        builder: (context) => Scaffold(appBar: headerBuilder(context)),
+      ),
     ),
   );
 }
@@ -25,7 +27,7 @@ Widget _buildListHeaderScaffold({
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  goldenTest(
+  docsGoldenTest(
     'channel list header default',
     fileName: 'channel_list_header',
     constraints: const BoxConstraints.tightFor(width: 375, height: 72),
@@ -33,16 +35,21 @@ void main() {
       final client = MockClient();
       final clientState = MockClientState();
       when(() => client.state).thenReturn(clientState);
-      when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id', name: 'Alice'));
+      when(() => clientState.currentUser).thenReturn(ownUser);
 
       return _buildListHeaderScaffold(
         client: client,
-        header: const StreamChannelListHeader(),
+        headerBuilder: (context) => StreamChannelListHeader(
+          trailing: StreamButton.icon(
+            icon: Icon(context.streamIcons.plus),
+            onPressed: () {},
+          ),
+        ),
       );
     },
   );
 
-  goldenTest(
+  docsGoldenTest(
     'channel list header with custom subtitle',
     fileName: 'channel_list_header_custom_subtitle',
     constraints: const BoxConstraints.tightFor(width: 375, height: 72),
@@ -50,12 +57,16 @@ void main() {
       final client = MockClient();
       final clientState = MockClientState();
       when(() => client.state).thenReturn(clientState);
-      when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id', name: 'Alice'));
+      when(() => clientState.currentUser).thenReturn(ownUser);
 
       return _buildListHeaderScaffold(
         client: client,
-        header: const StreamChannelListHeader(
-          subtitle: Text('12 channels'),
+        headerBuilder: (context) => StreamChannelListHeader(
+          subtitle: const Text('12 channels'),
+          trailing: StreamButton.icon(
+            icon: Icon(context.streamIcons.plus),
+            onPressed: () {},
+          ),
         ),
       );
     },

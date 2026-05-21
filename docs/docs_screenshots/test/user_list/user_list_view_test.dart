@@ -1,4 +1,3 @@
-import 'package:alchemist/alchemist.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -6,24 +5,25 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import '../src/golden_client_stubs.dart';
 import '../src/golden_theme.dart';
 import '../src/mocks.dart';
+import '../src/sample_users.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  goldenTest(
+  docsGoldenTest(
     'user list view',
     fileName: 'user_list_view',
     constraints: const BoxConstraints.tightFor(width: 375, height: 500),
     builder: () {
       final client = MockClient();
-      stubMockClientCurrentUser(client, OwnUser(id: 'user-1'));
+      stubMockClientCurrentUser(client, ownUser);
 
       final users = [
-        User(id: 'user-2', name: 'Alice Johnson', online: true),
-        User(id: 'user-3', name: 'Bob Smith', online: false),
-        User(id: 'user-4', name: 'Carol White', online: true),
-        User(id: 'user-5', name: 'David Brown', online: false),
-        User(id: 'user-6', name: 'Eve Davis', online: true),
+        charlotteAnderson.copyWith(online: true),
+        noahSmith.copyWith(online: false),
+        elenaBarros.copyWith(online: true),
+        liamJohnson.copyWith(online: false),
+        mayaRoss.copyWith(online: true),
       ];
 
       final controller = StreamUserListController.fromValue(

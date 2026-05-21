@@ -1,4 +1,3 @@
-import 'package:alchemist/alchemist.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -6,18 +5,19 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import '../src/golden_client_stubs.dart';
 import '../src/golden_theme.dart';
 import '../src/mocks.dart';
+import '../src/sample_users.dart';
 
 GetMessageResponse _makeSearchResult({
   required String messageId,
   required String text,
-  required String userName,
+  required User user,
   required String channelName,
 }) {
   final response = GetMessageResponse()
     ..message = Message(
       id: messageId,
       text: text,
-      user: User(id: 'user-$messageId', name: userName),
+      user: user,
       createdAt: DateTime(2024, 6, 1, 10, 0),
     )
     ..channel = ChannelModel(
@@ -31,37 +31,37 @@ GetMessageResponse _makeSearchResult({
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  goldenTest(
+  docsGoldenTest(
     'message search list view',
     fileName: 'message_search_list_view',
     constraints: const BoxConstraints.tightFor(width: 375, height: 500),
     builder: () {
       final client = MockClient();
-      stubMockClientCurrentUser(client, OwnUser(id: 'user-1'));
+      stubMockClientCurrentUser(client, ownUser);
 
       final results = [
         _makeSearchResult(
           messageId: '1',
           text: 'Flutter is an amazing UI toolkit!',
-          userName: 'Alice',
+          user: ameliaMoore,
           channelName: 'General',
         ),
         _makeSearchResult(
           messageId: '2',
           text: 'Flutter 3.0 has great performance improvements.',
-          userName: 'Bob',
+          user: noahSmith,
           channelName: 'Engineering',
         ),
         _makeSearchResult(
           messageId: '3',
           text: 'I love how Flutter handles animations.',
-          userName: 'Carol',
+          user: charlotteAnderson,
           channelName: 'Design',
         ),
         _makeSearchResult(
           messageId: '4',
           text: 'Flutter Web support has come a long way.',
-          userName: 'Dave',
+          user: liamJohnson,
           channelName: 'Random',
         ),
       ];

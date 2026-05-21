@@ -1,4 +1,3 @@
-import 'package:alchemist/alchemist.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -6,27 +5,29 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import '../src/golden_client_stubs.dart';
 import '../src/golden_theme.dart';
 import '../src/mocks.dart';
+import '../src/sample_users.dart';
 
-final _user1 = User(id: 'user-1', name: 'Alice');
-final _user2 = User(id: 'user-2', name: 'Bob');
+final _otherUser = noahSmith;
 
 Thread _makeThread({
   required String id,
   required String channelName,
   required String parentText,
   required String latestReplyText,
+  required User parentAuthor,
+  User? replyAuthor,
   int unreadCount = 0,
 }) {
   final parentMessage = Message(
     id: 'parent-$id',
     text: parentText,
-    user: _user1,
+    user: parentAuthor,
     createdAt: DateTime(2024, 6, 1, 9, 0),
   );
   final latestReply = Message(
     id: 'reply-$id',
     text: latestReplyText,
-    user: _user2,
+    user: replyAuthor ?? _otherUser,
     parentId: 'parent-$id',
     createdAt: DateTime(2024, 6, 1, 10, 0),
   );
@@ -34,7 +35,7 @@ Thread _makeThread({
   return Thread(
     channelCid: 'messaging:$id',
     parentMessageId: 'parent-$id',
-    createdByUserId: 'user-1',
+    createdByUserId: parentAuthor.id,
     replyCount: 3,
     participantCount: 2,
     channel: ChannelModel(
@@ -47,7 +48,7 @@ Thread _makeThread({
     read: unreadCount > 0
         ? [
             Read(
-              user: _user1,
+              user: ownUser,
               lastRead: DateTime(2024, 6, 1, 8, 0),
               unreadMessages: unreadCount,
             ),
@@ -69,44 +70,64 @@ Widget _buildFullAppThreadScaffold({
     home: StreamChat(
       client: client,
       connectivityStream: Stream.value([ConnectivityResult.mobile]),
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Stream Chat'),
-          actions: const [
-            IconButton(icon: Icon(Icons.edit_outlined), onPressed: null),
-          ],
-        ),
-        body: Column(
-          children: [
-            if (banner != null) banner,
-            Expanded(
-              child: StreamThreadListView(
-                controller: controller,
-                emptyBuilder: emptyBuilder,
-                itemBuilder: customItemBuilder != null
-                    ? (context, threads, index, defaultWidget) => customItemBuilder(context, threads[index])
-                    : null,
+      child: Builder(
+        builder: (context) {
+          final icons = context.streamIcons;
+          final textTheme = context.streamTextTheme;
+          final colorScheme = context.streamColorScheme;
+          return Scaffold(
+            appBar: StreamChannelListHeader(
+              title: const Text('Threads'),
+              trailing: StreamButton.icon(
+                icon: Icon(icons.plus),
+                onPressed: () {},
               ),
             ),
-          ],
-        ),
-        bottomNavigationBar: BottomNavigationBar(
-          currentIndex: 2,
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.chat_bubble_outline),
-              label: 'Chats',
+            body: Column(
+              children: [
+                if (banner != null) banner,
+                Expanded(
+                  child: StreamThreadListView(
+                    controller: controller,
+                    emptyBuilder: emptyBuilder,
+                    itemBuilder: customItemBuilder != null
+                        ? (context, threads, index, defaultWidget) => customItemBuilder(context, threads[index])
+                        : null,
+                  ),
+                ),
+              ],
             ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.alternate_email),
-              label: 'Mentions',
+            bottomNavigationBar: DecoratedBox(
+              decoration: BoxDecoration(
+                color: colorScheme.backgroundElevation1,
+                border: Border(top: BorderSide(color: colorScheme.borderSubtle)),
+              ),
+              child: BottomNavigationBar(
+                elevation: 0,
+                iconSize: 20,
+                currentIndex: 1,
+                type: BottomNavigationBarType.fixed,
+                selectedItemColor: colorScheme.textPrimary,
+                unselectedItemColor: colorScheme.textTertiary,
+                backgroundColor: Colors.transparent,
+                selectedLabelStyle: textTheme.metadataEmphasis,
+                unselectedLabelStyle: textTheme.metadataEmphasis,
+                items: [
+                  BottomNavigationBarItem(
+                    icon: Icon(icons.messageBubble),
+                    activeIcon: Icon(icons.messageBubbleFill),
+                    label: 'Chats',
+                  ),
+                  BottomNavigationBarItem(
+                    icon: Icon(icons.thread),
+                    activeIcon: Icon(icons.threadFill),
+                    label: 'Threads',
+                  ),
+                ],
+              ),
             ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.comment_outlined),
-              label: 'Threads',
-            ),
-          ],
-        ),
+          );
+        },
       ),
     ),
   );
@@ -115,13 +136,13 @@ Widget _buildFullAppThreadScaffold({
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  goldenTest(
+  docsGoldenTest(
     'thread list view with threads',
     fileName: 'thread_list_view',
     constraints: const BoxConstraints.tightFor(width: 375, height: 700),
     builder: () {
       final client = MockClient();
-      stubMockClientCurrentUser(client, OwnUser(id: 'user-1'));
+      stubMockClientCurrentUser(client, ownUser);
 
       final threads = [
         _makeThread(
@@ -129,6 +150,7 @@ void main() {
           channelName: 'General',
           parentText: 'Has anyone tried the new Flutter version?',
           latestReplyText: 'Yes! The performance improvements are amazing.',
+          parentAuthor: ownUser,
           unreadCount: 2,
         ),
         _makeThread(
@@ -136,12 +158,14 @@ void main() {
           channelName: 'Design',
           parentText: 'The new color palette looks great!',
           latestReplyText: 'Agreed, especially the dark mode colors.',
+          parentAuthor: charlotteAnderson,
         ),
         _makeThread(
           id: 'engineering',
           channelName: 'Engineering',
           parentText: 'We should refactor the auth module',
           latestReplyText: 'I can take that on next sprint.',
+          parentAuthor: noahSmith,
         ),
       ];
 
@@ -156,13 +180,13 @@ void main() {
     },
   );
 
-  goldenTest(
+  docsGoldenTest(
     'thread list view empty state',
     fileName: 'thread_list_view_empty',
     constraints: const BoxConstraints.tightFor(width: 375, height: 700),
     builder: () {
       final client = MockClient();
-      stubMockClientCurrentUser(client, OwnUser(id: 'user-1'));
+      stubMockClientCurrentUser(client, ownUser);
 
       final controller = StreamThreadListController.fromValue(
         const PagedValue(items: []),
@@ -171,45 +195,24 @@ void main() {
 
       stubQueryThreadsForGoldens(client, const []);
 
-      return _buildFullAppThreadScaffold(
-        client: client,
-        controller: controller,
-        emptyBuilder: (context) => const Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.forum_outlined, size: 64, color: Colors.grey),
-              SizedBox(height: 16),
-              Text(
-                'No threads yet',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-              ),
-              SizedBox(height: 8),
-              Text(
-                'Threads will appear here once\nyou reply to a message.',
-                textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.grey),
-              ),
-            ],
-          ),
-        ),
-      );
+      return _buildFullAppThreadScaffold(client: client, controller: controller);
     },
   );
 
-  goldenTest(
+  docsGoldenTest(
     'thread list tile custom',
     fileName: 'thread_list_tile_custom',
     constraints: const BoxConstraints.tightFor(width: 375, height: 120),
     builder: () {
       final client = MockClient();
-      stubMockClientCurrentUser(client, OwnUser(id: 'user-1'));
+      stubMockClientCurrentUser(client, ownUser);
 
       final thread = _makeThread(
         id: 'general',
         channelName: 'General',
         parentText: 'Has anyone tried the new Flutter version?',
         latestReplyText: 'Yes! The performance improvements are amazing.',
+        parentAuthor: ownUser,
         unreadCount: 3,
       );
 
@@ -228,7 +231,7 @@ void main() {
               ),
               child: StreamThreadListTile(
                 thread: thread,
-                currentUser: _user1,
+                currentUser: ownUser,
               ),
             ),
           ),
@@ -237,13 +240,13 @@ void main() {
     },
   );
 
-  goldenTest(
+  docsGoldenTest(
     'thread list unread banner',
     fileName: 'thread_list_unread_banner',
     constraints: const BoxConstraints.tightFor(width: 375, height: 700),
     builder: () {
       final client = MockClient();
-      stubMockClientCurrentUser(client, OwnUser(id: 'user-1'));
+      stubMockClientCurrentUser(client, ownUser);
 
       final threads = [
         _makeThread(
@@ -251,6 +254,7 @@ void main() {
           channelName: 'General',
           parentText: 'Has anyone tried the new Flutter version?',
           latestReplyText: 'Yes! The performance improvements are amazing.',
+          parentAuthor: ownUser,
           unreadCount: 2,
         ),
         _makeThread(
@@ -258,12 +262,14 @@ void main() {
           channelName: 'Design',
           parentText: 'The new color palette looks great!',
           latestReplyText: 'Agreed, especially the dark mode colors.',
+          parentAuthor: charlotteAnderson,
         ),
         _makeThread(
           id: 'engineering',
           channelName: 'Engineering',
           parentText: 'We should refactor the auth module',
           latestReplyText: 'I can take that on next sprint.',
+          parentAuthor: noahSmith,
         ),
       ];
 

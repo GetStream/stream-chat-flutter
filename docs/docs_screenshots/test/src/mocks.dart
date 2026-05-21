@@ -1,5 +1,9 @@
+import 'dart:math';
+
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+
+import 'sample_users.dart';
 
 /// [MockClient] cannot use `when(() => client.state.currentUser)` — mocktail
 /// will treat [ClientState.currentUser] as the value of [StreamChatClient.state].
@@ -115,14 +119,7 @@ void setupMockChannel({
   List<Message> messages = const [],
   List<Member> members = const [],
 }) {
-  final allMembers = members.isNotEmpty
-      ? members
-      : [
-          Member(
-            userId: 'user-id',
-            user: User(id: 'user-id'),
-          ),
-        ];
+  final allMembers = members.isNotEmpty ? members : _defaultMembers(channel.id);
 
   when(() => client.state).thenReturn(clientState);
   when(() => channel.lastMessageAt).thenReturn(DateTime.parse('2020-06-22 12:00:00'));
@@ -141,6 +138,8 @@ void setupMockChannel({
   when(() => channel.nameStream).thenAnswer((_) => Stream.value(channelName));
   when(() => channel.image).thenReturn(null);
   when(() => channel.imageStream).thenAnswer((_) => Stream.value(null));
+  when(() => channel.memberCount).thenReturn(allMembers.length);
+  when(() => channel.memberCountStream).thenAnswer((_) => Stream.value(allMembers.length));
   when(() => channelState.membersStream).thenAnswer((_) => Stream.value(allMembers));
   when(() => channelState.members).thenReturn(allMembers);
   when(() => channelState.messages).thenReturn(messages);
@@ -172,4 +171,28 @@ MockChannel fakeChannel({
   when(() => channelState.unreadCountStream).thenAnswer((_) => Stream.value(unreadCount));
 
   return channel;
+}
+
+/// Picks a stable-but-varied member list for a channel that didn't supply
+/// one. Count and selection are seeded off the channel id, so every channel
+/// gets a different group avatar across snapshots, but the same channel
+/// renders identically run-to-run.
+List<Member> _defaultMembers(String? channelId) {
+  final rng = Random(_seedFromString(channelId));
+  final count = 2 + rng.nextInt(5); // 2..6 members
+  final pool = [...sampleUsers]..shuffle(rng);
+  return [
+    for (final user in pool.take(count)) Member(userId: user.id, user: user),
+  ];
+}
+
+/// Deterministic 31-base content hash. Dart's `Object.hashCode` for `String`
+/// is process-randomized; we need a stable seed for golden reproducibility.
+int _seedFromString(String? value) {
+  if (value == null || value.isEmpty) return 0;
+  var hash = 0;
+  for (final code in value.codeUnits) {
+    hash = (hash * 31 + code) & 0x7fffffff;
+  }
+  return hash;
 }
