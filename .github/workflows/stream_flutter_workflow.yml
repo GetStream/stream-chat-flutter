@@ -9,6 +9,7 @@ on:
     paths:
       - 'packages/**'
       - 'sample_app/**'
+      - 'docs/**'
       - '.github/workflows/stream_flutter_workflow.yml'
     types:
       - opened
