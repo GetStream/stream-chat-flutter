@@ -309,22 +309,23 @@ void main() {
         final channels = [c0, c1, c2];
         const cids = ['messaging:c0', 'messaging:c1', 'messaging:c2'];
 
-        final filter = Filter.in_('members', const ['testUserId']);
+        const currentUserId = 'test-user-id';
+        final filter = Filter.in_('members', const [currentUserId]);
 
         // pinnedAt values chosen so descending order is [c1, c2, c0]. With
         // offset 1 / limit 1 the only paged cid is c2.
         final baseDate = DateTime.utc(2025);
         final memberships = <String, Member>{
           'messaging:c0': Member(
-            userId: 'test-user-id',
+            userId: currentUserId,
             pinnedAt: baseDate.add(const Duration(days: 1)),
           ),
           'messaging:c1': Member(
-            userId: 'test-user-id',
+            userId: currentUserId,
             pinnedAt: baseDate.add(const Duration(days: 3)),
           ),
           'messaging:c2': Member(
-            userId: 'test-user-id',
+            userId: currentUserId,
             pinnedAt: baseDate.add(const Duration(days: 2)),
           ),
         };
@@ -383,7 +384,7 @@ void main() {
             .getMembershipsForChannels(captureAny(), captureAny())).captured;
         expect(capturedMembershipArgs, hasLength(2));
         expect(capturedMembershipArgs.first, equals(cids));
-        expect(capturedMembershipArgs.last, equals('test-user-id'));
+        expect(capturedMembershipArgs.last, equals(currentUserId));
 
         // Only the paged cid was hydrated — c0 and c1 were skipped.
         verify(() => mockDatabase.channelDao.getChannelByCid(pagedCid))
