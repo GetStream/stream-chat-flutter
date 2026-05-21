@@ -348,14 +348,14 @@ class _CustomComposerTrailingButtonState extends State<_CustomComposerTrailingBu
             icon: Icon(context.streamIcons.voice),
             type: StreamButtonType.solid,
             style: StreamButtonStyle.primary,
-            size: StreamButtonSize.medium,
+            size: StreamButtonSize.small,
             onPressed: () {},
           )
         : StreamButton.icon(
             icon: Icon(context.streamIcons.send),
             type: StreamButtonType.solid,
             style: StreamButtonStyle.primary,
-            size: StreamButtonSize.medium,
+            size: StreamButtonSize.small,
             onPressed: () {},
           );
   }
