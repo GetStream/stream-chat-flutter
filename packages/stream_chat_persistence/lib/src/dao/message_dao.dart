@@ -239,8 +239,8 @@ class MessageDao extends DatabaseAccessor<DriftChatDatabase>
   /// timestamps so the filter runs in SQL instead of after the fact in Dart.
   Future<DateTime?> _lookupMessageCreatedAt(String id) {
     return (selectOnly(messages)
-      ..addColumns([messages.createdAt])
-      ..where(messages.id.equals(id)))
+          ..addColumns([messages.createdAt])
+          ..where(messages.id.equals(id)))
         .map((row) => row.read(messages.createdAt))
         .getSingleOrNull();
   }
