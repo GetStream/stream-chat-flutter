@@ -3,7 +3,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:record/record.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-import 'package:stream_core_flutter/stream_core_flutter.dart' as core;
 
 import '../src/fakes.dart';
 import '../src/golden_theme.dart';
@@ -275,24 +274,12 @@ void main() {
               size: StreamButtonSize.small,
               onPressed: () {},
             ),
-            messageComposerInputTrailing: (context, props) => Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                StreamButton.icon(
-                  icon: Icon(context.streamIcons.attachment),
-                  type: StreamButtonType.ghost,
-                  style: StreamButtonStyle.secondary,
-                  size: StreamButtonSize.small,
-                  onPressed: () {},
-                ),
-                StreamButton.icon(
-                  icon: Icon(context.streamIcons.camera),
-                  type: StreamButtonType.ghost,
-                  style: StreamButtonStyle.secondary,
-                  size: StreamButtonSize.small,
-                  onPressed: () {},
-                ),
-              ],
+            messageComposerInputTrailing: (context, props) => StreamButton.icon(
+              icon: Icon(context.streamIcons.attachment),
+              type: StreamButtonType.ghost,
+              style: StreamButtonStyle.secondary,
+              size: StreamButtonSize.small,
+              onPressed: () {},
             ),
             messageComposerTrailing: (context, props) => _CustomComposerTrailingButton(props: props),
           ),
@@ -317,8 +304,8 @@ void main() {
   );
 }
 
-/// Outer trailing button modelled on WhatsApp: a solid green circle that
-/// toggles between a microphone (empty text) and a send icon (text present).
+/// Outer trailing button that toggles between a microphone (empty text) and
+/// a send icon (text present), styled with the SDK's primary solid colour.
 class _CustomComposerTrailingButton extends StatefulWidget {
   const _CustomComposerTrailingButton({required this.props});
 
@@ -329,8 +316,6 @@ class _CustomComposerTrailingButton extends StatefulWidget {
 }
 
 class _CustomComposerTrailingButtonState extends State<_CustomComposerTrailingButton> {
-  // WhatsApp brand green.
-  static const _green = Color(0xFF25D366);
   var _isEmptyText = true;
 
   @override
@@ -363,20 +348,10 @@ class _CustomComposerTrailingButtonState extends State<_CustomComposerTrailingBu
       mainAxisSize: MainAxisSize.min,
       children: [
         SizedBox(width: context.streamSpacing.xs),
-        core.StreamButtonTheme(
-          data: core.StreamButtonThemeData(
-            primary: core.StreamButtonTypeStyle(
-              solid: StreamButtonThemeStyle.from(
-                backgroundColor: _green,
-                foregroundColor: Colors.white,
-              ),
-            ),
-          ),
-          child: StreamButton.icon(
-            icon: Icon(icon),
-            size: StreamButtonSize.large,
-            onPressed: () {},
-          ),
+        StreamButton.icon(
+          icon: Icon(icon),
+          size: StreamButtonSize.large,
+          onPressed: () {},
         ),
       ],
     );
