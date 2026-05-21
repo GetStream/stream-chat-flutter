@@ -103,7 +103,7 @@ class StreamMessageListViewConfiguration {
 
   /// The number of messages fetched per pagination request.
   ///
-  /// Defaults to 20.
+  /// Defaults to 25.
   final int paginationLimit;
 
   /// Defines how the list dismisses the keyboard automatically.

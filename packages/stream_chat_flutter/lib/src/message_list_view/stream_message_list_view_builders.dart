@@ -8,7 +8,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 ///
 /// ```dart
 /// StreamMessageListView(
-///   builders: StreamMessageListBuilders(
+///   builders: StreamMessageListViewBuilders(
 ///     empty: (context) => const Center(child: Text('No messages')),
 ///     dateDivider: (dateTime) => MyDateDivider(date: dateTime),
 ///   ),
