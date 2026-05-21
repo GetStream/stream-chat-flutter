@@ -27,9 +27,10 @@ class PinnedMessageReactionDao extends DatabaseAccessor<DriftChatDatabase>
   /// [Reactions.userId] with [userId]
   Future<List<Reaction>> getReactionsByUserId(
     String messageId,
-    String userId,) {
-    final where = pinnedMessageReactions.messageId.equals(
-        messageId) & pinnedMessageReactions.userId.equals(userId);
+    String userId,
+  ) {
+    final where = pinnedMessageReactions.messageId.equals(messageId) &
+        pinnedMessageReactions.userId.equals(userId);
     return _selectReactions(where);
   }
 
