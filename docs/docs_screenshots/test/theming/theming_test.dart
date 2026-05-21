@@ -1,4 +1,4 @@
-import 'package:device_preview/device_preview.dart';
+import 'package:device_preview/device_preview.dart' show Devices;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:record/record.dart';
@@ -93,7 +93,7 @@ Widget _buildThemingShowcase({required bool useRedTheme, required String inputTe
 
   final controller = StreamMessageComposerController()..text = inputText;
 
-  final screen = MaterialApp(
+  return MaterialApp(
     theme: useRedTheme ? _redTheme() : docsScreenshotsTheme(),
     debugShowCheckedModeBanner: false,
     home: StreamChat(
@@ -114,12 +114,6 @@ Widget _buildThemingShowcase({required bool useRedTheme, required String inputTe
       ),
     ),
   );
-
-  return DeviceFrame(
-    device: Devices.ios.iPhone13,
-    isFrameVisible: true,
-    screen: screen,
-  );
 }
 
 void main() {
@@ -133,6 +127,7 @@ void main() {
     'theming default brand and chrome',
     fileName: 'theming_default',
     constraints: const BoxConstraints.tightFor(width: 430, height: 932),
+    deviceFrame: Devices.ios.iPhone13,
     builder: () => _buildThemingShowcase(useRedTheme: false, inputText: 'Hey in blue!'),
   );
 
@@ -140,6 +135,7 @@ void main() {
     'theming red brand and chrome',
     fileName: 'theming_red',
     constraints: const BoxConstraints.tightFor(width: 430, height: 932),
+    deviceFrame: Devices.ios.iPhone13,
     builder: () => _buildThemingShowcase(useRedTheme: true, inputText: 'Hey in red!'),
   );
 }

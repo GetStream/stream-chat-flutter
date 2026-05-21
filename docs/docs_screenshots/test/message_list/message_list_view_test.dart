@@ -1,4 +1,4 @@
-import 'package:device_preview/device_preview.dart';
+import 'package:device_preview/device_preview.dart' show Devices;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -54,21 +54,17 @@ Widget _buildMessageListViewInDevice({
   required MockClient client,
   required MockChannel channel,
 }) {
-  return DeviceFrame(
-    device: Devices.ios.iPhone13,
-    isFrameVisible: true,
-    screen: MaterialApp(
-      theme: docsScreenshotsTheme(),
-      debugShowCheckedModeBanner: false,
-      home: StreamChat(
-        client: client,
-        connectivityStream: Stream.value([ConnectivityResult.mobile]),
-        child: StreamChannel(
-          showLoading: false,
-          channel: channel,
-          child: const Scaffold(
-            body: StreamMessageListView(),
-          ),
+  return MaterialApp(
+    theme: docsScreenshotsTheme(),
+    debugShowCheckedModeBanner: false,
+    home: StreamChat(
+      client: client,
+      connectivityStream: Stream.value([ConnectivityResult.mobile]),
+      child: StreamChannel(
+        showLoading: false,
+        channel: channel,
+        child: const Scaffold(
+          body: StreamMessageListView(),
         ),
       ),
     ),
@@ -82,6 +78,7 @@ void main() {
     'message list view default',
     fileName: 'message_list_view',
     constraints: const BoxConstraints.tightFor(width: 430, height: 932),
+    deviceFrame: Devices.ios.iPhone13,
     builder: () {
       final messages = _buildMessages();
       final client = MockClient();

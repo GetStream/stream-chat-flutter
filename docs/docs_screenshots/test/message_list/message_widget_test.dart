@@ -298,7 +298,7 @@ void main() {
                     child: StreamMessageItem(
                       message: Message(
                         id: 'msg-from-other',
-                        text: 'This is a message from Bob.',
+                        text: 'This is a message from ${_sender.name}.',
                         user: _sender,
                         createdAt: DateTime(2024, 6, 1, 10, 0),
                       ),

@@ -1,4 +1,5 @@
 import 'package:alchemist/alchemist.dart';
+import 'package:device_preview/device_preview.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
@@ -44,6 +45,7 @@ void docsGoldenTest(
   PumpAction pumpBeforeTest = precacheImages,
   PumpWidget pumpWidget = onlyPumpWidget,
   Interaction? whilePerforming,
+  DeviceInfo? deviceFrame,
   required ValueGetter<Widget> builder,
 }) {
   goldenTest(
@@ -67,7 +69,14 @@ void docsGoldenTest(
         debugDefaultTargetPlatformOverride = null;
       };
     },
-    builder: builder,
+    builder: switch (deviceFrame) {
+      null => builder,
+      final device => () => DeviceFrame(
+        device: device,
+        isFrameVisible: true,
+        screen: builder(),
+      ),
+    },
   );
 }
 
