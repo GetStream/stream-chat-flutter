@@ -279,13 +279,7 @@ void main() {
                 size: StreamButtonSize.small,
                 onPressed: () {},
               ),
-              messageComposerInputTrailing: (context, props) => StreamButton.icon(
-                icon: Icon(context.streamIcons.attachment),
-                type: StreamButtonType.ghost,
-                style: StreamButtonStyle.secondary,
-                size: StreamButtonSize.small,
-                onPressed: () {},
-              ),
+              messageComposerInputTrailing: (context, props) => const SizedBox.shrink(),
               messageComposerTrailing: (context, props) => _CustomComposerTrailingButton(props: props),
             ),
           ),
@@ -343,20 +337,31 @@ class _CustomComposerTrailingButtonState extends State<_CustomComposerTrailingBu
 
   @override
   Widget build(BuildContext context) {
-    return _isEmptyText
+    final button = _isEmptyText
         ? StreamButton.icon(
             icon: Icon(context.streamIcons.voice),
             type: StreamButtonType.solid,
             style: StreamButtonStyle.primary,
-            size: StreamButtonSize.small,
+            size: StreamButtonSize.large,
             onPressed: () {},
           )
         : StreamButton.icon(
             icon: Icon(context.streamIcons.send),
             type: StreamButtonType.solid,
             style: StreamButtonStyle.primary,
-            size: StreamButtonSize.small,
+            size: StreamButtonSize.large,
             onPressed: () {},
           );
+    // Mirror the `SizedBox(width: spacing.xs)` that
+    // `DefaultStreamMessageComposerLeading` puts AFTER its attachment button —
+    // gives the trailing button the same gap from the input pill that the
+    // leading attachment button has on the other side.
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        SizedBox(width: context.streamSpacing.xs),
+        button,
+      ],
+    );
   }
 }
