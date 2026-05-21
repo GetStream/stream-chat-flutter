@@ -10,6 +10,8 @@ This guide covers several cross-cutting API changes in the Stream Chat Flutter S
 - [Header Widgets](#header-widgets)
 - [StreamChat.componentBuilders](#streamchatcomponentbuilders)
 - [StreamChatConfigurationData New Fields](#streamchatconfigurationdata-new-fields)
+- [StreamChatCore Behavior Changes](#streamchatcore-behavior-changes)
+- [Removed Widgets](#removed-widgets)
 - [Migration Checklist](#migration-checklist)
 
 ---
@@ -32,8 +34,8 @@ StreamSvgIcon(icon: StreamSvgIcons.copy, color: Colors.red, size: 24)
 
 **After:**
 ```dart
-Icon(context.streamIcons.reply20)
-Icon(context.streamIcons.copy20, color: Colors.red, size: 24)
+Icon(context.streamIcons.reply)
+Icon(context.streamIcons.copy, color: Colors.red, size: 24)
 ```
 
 `context.streamIcons` is a `StreamIcons` extension on `BuildContext` — it reads from the nearest `StreamTheme` in the widget tree.
@@ -41,70 +43,70 @@ Icon(context.streamIcons.copy20, color: Colors.red, size: 24)
 ### Icon Name Mapping
 
 | Old (`StreamSvgIcons.*`) | New (`context.streamIcons.*`) |
-|--------------------------|-------------------------------|
-| `arrowRight` | `arrowRight20` |
-| `attach` | `attachment20` |
-| `award` | `trophy20` |
-| `camera` | `camera20` |
-| `check` | `checkmark20` |
-| `checkAll` | `checks20` |
-| `checkSend` | `checkmark20` |
-| `circleUp` | `arrowUp20` |
-| `close` | `xmark20` |
-| `closeSmall` | `xmark16` |
-| `contacts` | `users20` |
-| `copy` | `copy20` |
-| `delete` | `delete20` |
-| `down` | `chevronDown20` |
-| `download` | `download20` |
-| `edit` | `edit20` |
-| `emptyCircleRight` | `chevronRight20` |
-| `error` | `exclamationCircleFill20` |
-| `eye` | `eyeFill20` |
-| `files` | `file20` |
-| `flag` | `flag20` |
-| `grid` | `gallery20` |
-| `group` | `users20` |
-| `left` | `chevronLeft20` |
-| `lightning` | `bolt20` |
-| `link` | `link20` |
-| `lock` | `lock20` |
-| `mentions` | `mention20` |
-| `menuPoint` | `more20` |
-| `message` | `messageBubble20` |
-| `messageUnread` | `notification20` |
-| `mic` | `voice20` |
-| `mute` | `mute20` |
-| `notification` | `bell20` |
-| `pause` | `pauseFill20` |
-| `penWrite` | `edit20` |
-| `pictures` | `image20` |
-| `pin` | `pin20` |
-| `play` | `playFill20` |
-| `polls` | `poll20` |
-| `record` | `video20` |
-| `reload` | `refresh20` |
-| `reply` | `reply20` |
-| `retry` | `retry20` |
-| `right` | `chevronRight20` |
-| `save` | `save20` |
-| `search` | `search20` |
-| `send` | `send20` |
-| `sendMessage` | `send20` |
-| `share` | `export20` |
-| `shareArrow` | `share20` |
-| `smile` | `emoji20` |
-| `stop` | `stopFill20` |
-| `threadReply` | `thread20` |
-| `time` | `clock20` |
-| `up` | `chevronUp20` |
-| `user` | `user20` |
-| `userAdd` | `userAdd20` |
-| `userDelete` | `userRemove20` |
-| `userRemove` | `userRemove20` |
-| `userSettings` | `userCheck20` |
-| `videoCall` | `videoFill20` |
-| `volumeUp` | `audio20` |
+| ------------------------ | ----------------------------- |
+| `arrowRight`             | `arrowRight`                  |
+| `attach`                 | `attachment`                  |
+| `award`                  | `trophy`                      |
+| `camera`                 | `camera`                      |
+| `check`                  | `checkmark`                   |
+| `checkAll`               | `checks`                      |
+| `checkSend`              | `checkmark`                   |
+| `circleUp`               | `arrowUp`                     |
+| `close`                  | `xmark`                       |
+| `closeSmall`             | `xmarkSmall`                  |
+| `contacts`               | `users`                       |
+| `copy`                   | `copy`                        |
+| `delete`                 | `delete`                      |
+| `down`                   | `chevronDown`                 |
+| `download`               | `download`                    |
+| `edit`                   | `edit`                        |
+| `emptyCircleRight`       | `chevronRight`                |
+| `error`                  | `exclamationCircleFill`       |
+| `eye`                    | `eyeFill`                     |
+| `files`                  | `file`                        |
+| `flag`                   | `flag`                        |
+| `grid`                   | `gallery`                     |
+| `group`                  | `users`                       |
+| `left`                   | `chevronLeft`                 |
+| `lightning`              | `bolt`                        |
+| `link`                   | `link`                        |
+| `lock`                   | `lock`                        |
+| `mentions`               | `mention`                     |
+| `menuPoint`              | `more`                        |
+| `message`                | `messageBubble`               |
+| `messageUnread`          | `notification`                |
+| `mic`                    | `voice`                       |
+| `mute`                   | `mute`                        |
+| `notification`           | `bell`                        |
+| `pause`                  | `pauseFill`                   |
+| `penWrite`               | `edit`                        |
+| `pictures`               | `image`                       |
+| `pin`                    | `pin`                         |
+| `play`                   | `playFill`                    |
+| `polls`                  | `poll`                        |
+| `record`                 | `video`                       |
+| `reload`                 | `refresh`                     |
+| `reply`                  | `reply`                       |
+| `retry`                  | `retry`                       |
+| `right`                  | `chevronRight`                |
+| `save`                   | `save`                        |
+| `search`                 | `search`                      |
+| `send`                   | `send`                        |
+| `sendMessage`            | `send`                        |
+| `share`                  | `export`                      |
+| `shareArrow`             | `share`                       |
+| `smile`                  | `emoji`                       |
+| `stop`                   | `stopFill`                    |
+| `threadReply`            | `thread`                      |
+| `time`                   | `clock`                       |
+| `up`                     | `chevronUp`                   |
+| `user`                   | `user`                        |
+| `userAdd`                | `userAdd`                     |
+| `userDelete`             | `userRemove`                  |
+| `userRemove`             | `userRemove`                  |
+| `userSettings`           | `userCheck`                   |
+| `videoCall`              | `videoFill`                   |
+| `volumeUp`               | `audio`                       |
 
 The following icons have been **removed with no equivalent** in the new set:
 `cloudDownload`, `lolReaction`, `loveReaction`, `moon`, `settings`, `thumbsDownReaction`, `thumbsUpReaction`, `wutReaction`.
@@ -149,14 +151,14 @@ type (`StreamAppBarThemeData`), replacing the legacy
 
 ### `StreamChannelHeader`
 
-| Old parameter | New equivalent |
-|---------------|----------------|
-| `showBackButton: false` | `automaticallyImplyLeading: false` |
-| `onBackPressed: cb` | `leading: StreamBackButton(onPressed: cb)` |
-| `onTitleTap: cb` | `title: GestureDetector(onTap: cb, child: ...)` |
-| `onImageTap: cb` | `onChannelAvatarPressed: (channel) => cb()` (or replace `trailing:`) |
-| `showTypingIndicator: false` | `subtitle: Text(channel.name)` (or any custom widget) |
-| `actions: [a, b]` | `trailing: Row(children: [a, b])` |
+| Old parameter                                                            | New equivalent                                                                             |
+| ------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------ |
+| `showBackButton: false`                                                  | `automaticallyImplyLeading: false`                                                         |
+| `onBackPressed: cb`                                                      | `leading: StreamBackButton(onPressed: cb)`                                                 |
+| `onTitleTap: cb`                                                         | `title: GestureDetector(onTap: cb, child: ...)`                                            |
+| `onImageTap: cb`                                                         | `onChannelAvatarPressed: (channel) => cb()` (or replace `trailing:`)                       |
+| `showTypingIndicator: false`                                             | `subtitle: Text(channel.name)` (or any custom widget)                                      |
+| `actions: [a, b]`                                                        | `trailing: Row(children: [a, b])`                                                          |
 | `centerTitle`, `elevation`, `bottom`, `bottomOpacity`, `backgroundColor` | Use `style: StreamAppBarStyle(backgroundColor: ...)` for the background; the rest are gone |
 
 **Before:**
@@ -186,12 +188,12 @@ unread badge; the default trailing is the channel avatar wrapped in a
 
 ### `StreamChannelListHeader`
 
-| Old parameter | New equivalent |
-|---------------|----------------|
-| `titleBuilder: (context, user) => ...` | `title: ...` (a `Widget`) |
-| `onUserAvatarTap: cb` | `onUserAvatarPressed: cb` (renamed) |
-| `onNewChatButtonTap: cb` | `trailing: StreamButton.icon(icon: Icon(context.streamIcons.plus), onPressed: cb)` |
-| `preNavigationCallback`, `leading`, `actions`, `centerTitle`, `elevation`, `backgroundColor` | Removed — see notes below |
+| Old parameter                                                                                | New equivalent                                                                     |
+| -------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| `titleBuilder: (context, user) => ...`                                                       | `title: ...` (a `Widget`)                                                          |
+| `onUserAvatarTap: cb`                                                                        | `onUserAvatarPressed: cb` (renamed)                                                |
+| `onNewChatButtonTap: cb`                                                                     | `trailing: StreamButton.icon(icon: Icon(context.streamIcons.plus), onPressed: cb)` |
+| `preNavigationCallback`, `leading`, `actions`, `centerTitle`, `elevation`, `backgroundColor` | Removed — see notes below                                                          |
 
 The leading slot is no longer caller-overridable: the SDK always renders
 the signed-in user's avatar. When `onUserAvatarPressed` is null the
@@ -228,27 +230,27 @@ StreamChannelListHeader(
 
 ### `StreamThreadHeader`
 
-| Old parameter | New equivalent |
-|---------------|----------------|
-| `showBackButton: false` | `automaticallyImplyLeading: false` |
-| `onBackPressed: cb` | `leading: StreamBackButton(onPressed: cb)` |
-| `onTitleTap: cb` | `title: GestureDetector(onTap: cb, child: ...)` |
-| `showTypingIndicator: false` | `subtitle: Text(...)` (or any custom widget) |
-| `actions: [a, b]` | `trailing: Row(children: [a, b])` |
-| `centerTitle`, `elevation`, `backgroundColor` | Use `style:`; the rest are gone |
+| Old parameter                                 | New equivalent                                  |
+| --------------------------------------------- | ----------------------------------------------- |
+| `showBackButton: false`                       | `automaticallyImplyLeading: false`              |
+| `onBackPressed: cb`                           | `leading: StreamBackButton(onPressed: cb)`      |
+| `onTitleTap: cb`                              | `title: GestureDetector(onTap: cb, child: ...)` |
+| `showTypingIndicator: false`                  | `subtitle: Text(...)` (or any custom widget)    |
+| `actions: [a, b]`                             | `trailing: Row(children: [a, b])`               |
+| `centerTitle`, `elevation`, `backgroundColor` | Use `style:`; the rest are gone                 |
 
 The default subtitle is a [`StreamTypingIndicator`] that falls back to
 the thread's reply count when nobody is typing.
 
 ### `StreamGalleryHeader`
 
-| Old parameter | New equivalent |
-|---------------|----------------|
-| `showBackButton: false` | `automaticallyImplyLeading: false` |
-| `onBackPressed: cb` | `leading: StreamBackButton(onPressed: cb)` |
-| `onTitleTap: cb` | `title: GestureDetector(onTap: cb, child: ...)` |
-| `onImageTap: cb` | `trailing: GestureDetector(onTap: cb, child: ...)` |
-| `elevation`, `backgroundColor` | Use `style:`; the rest are gone |
+| Old parameter                  | New equivalent                                     |
+| ------------------------------ | -------------------------------------------------- |
+| `showBackButton: false`        | `automaticallyImplyLeading: false`                 |
+| `onBackPressed: cb`            | `leading: StreamBackButton(onPressed: cb)`         |
+| `onTitleTap: cb`               | `title: GestureDetector(onTap: cb, child: ...)`    |
+| `onImageTap: cb`               | `trailing: GestureDetector(onTap: cb, child: ...)` |
+| `elevation`, `backgroundColor` | Use `style:`; the rest are gone                    |
 
 `onShowMessage`, `onReplyMessage`, and `attachmentActionsModalBuilder`
 are unchanged. The default trailing is still an icon button that opens
@@ -331,11 +333,11 @@ Three new optional fields have been added to `StreamChatConfigurationData`. Exis
 
 ### New Fields
 
-| Field | Type | Default | Description |
-|-------|------|---------|-------------|
-| `attachmentBuilders` | `List<StreamAttachmentWidgetBuilder>?` | `null` | Custom attachment widget builders. When non-null, these are **prepended** to the SDK's built-in builders so your types are matched first. |
-| `reactionType` | `StreamReactionsType?` | `null` | Controls the visual style of the reactions display (e.g. segmented). Falls back to the SDK default when `null`. |
-| `reactionPosition` | `StreamReactionsPosition?` | `null` | Controls where reactions appear relative to the message bubble (e.g. header). Falls back to the SDK default when `null`. |
+| Field                | Type                                   | Default | Description                                                                                                                               |
+| -------------------- | -------------------------------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `attachmentBuilders` | `List<StreamAttachmentWidgetBuilder>?` | `null`  | Custom attachment widget builders. When non-null, these are **prepended** to the SDK's built-in builders so your types are matched first. |
+| `reactionType`       | `StreamReactionsType?`                 | `null`  | Controls the visual style of the reactions display (e.g. segmented). Falls back to the SDK default when `null`.                           |
+| `reactionPosition`   | `StreamReactionsPosition?`             | `null`  | Controls where reactions appear relative to the message bubble (e.g. header). Falls back to the SDK default when `null`.                  |
 
 > **Note:** The `imageCDN` field was also added to `StreamChatConfigurationData`. It is covered in the [Image CDN & Thumbnails](image_cdn.md) guide.
 
@@ -366,6 +368,69 @@ StreamChat(
 
 ---
 
+## StreamChatCore Behavior Changes
+
+Two behavior changes affect how the chat client interacts with the connection lifecycle. Neither changes the public API surface, but both can affect apps that watch channels outside of the SDK's list controllers.
+
+### `client.recoverStateOnReconnect = false` on mount
+
+`StreamChatCore` now sets `client.recoverStateOnReconnect = false` when it mounts. The SDK's list controllers (`StreamChannelListController`, `StreamMessageListController`, etc.) drive their own refresh from the `EventType.connectionRecovered` event — this avoids a duplicate `queryChannels` round-trip and the historical event-replay flicker on reactions, polls, and quoted messages when reconnecting.
+
+If you watch a `Channel` directly (outside any list controller), subscribe to `connectionRecovered` yourself and call `channel.watch()` to refresh:
+
+```dart
+late final StreamSubscription _sub;
+
+@override
+void initState() {
+  super.initState();
+  _sub = client.on(EventType.connectionRecovered).listen((_) {
+    channel.watch();
+  });
+}
+
+@override
+void dispose() {
+  _sub.cancel();
+  super.dispose();
+}
+```
+
+If you do not want this behaviour, you can override it after mounting:
+
+```dart
+client.recoverStateOnReconnect = true;
+```
+
+### `StreamChat.backgroundKeepAlive` default reduced
+
+The default `StreamChat.backgroundKeepAlive` has been reduced from **1 minute** to **15 seconds**. This covers quick app-switches and notification-shade checks while closing the WebSocket cleanly before the server's 35-second read timeout. To restore the previous behaviour, pass an explicit value:
+
+```dart
+StreamChat(
+  client: client,
+  backgroundKeepAlive: const Duration(minutes: 1),
+  child: MyApp(),
+)
+```
+
+---
+
+## Removed Widgets
+
+The following miscellaneous widgets have been removed. Replace any direct references with the listed alternatives.
+
+| Removed Widget                | Replacement                                                                                                                                            |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `StreamMessageSearchGridView` | Removed — use `StreamMessageSearchListView` (still available), or build your own grid using `StreamMessageSearchListController` + `PagedValueGridView` |
+
+For composer-related removals, see [message_composer.md](message_composer.md#removed-widgets).
+For attachment-related removals, see [attachments_and_polls.md](attachments_and_polls.md#removed-attachment-widgets).
+For channel-list-related removals, see [channel_list_item.md](channel_list_item.md#removed-widgets).
+For message / reactions-related removals, see [message_widget.md](message_widget.md#removed-widgets) and [reaction_list.md](reaction_list.md#removed-widgets).
+
+---
+
 ## Migration Checklist
 
 - [ ] Replace all `StreamSvgIcon(icon: StreamSvgIcons.*)` with `Icon(context.streamIcons.*)` using the mapping table above
@@ -381,3 +446,6 @@ StreamChat(
 - [ ] If you sized custom chrome to `kToolbarHeight` next to a Stream header, switch to `kStreamHeaderHeight` (72 px)
 - [ ] Optionally move `StreamComponentFactory` wrapping into the `componentBuilders` parameter on `StreamChat`
 - [ ] Use the new `attachmentBuilders`, `reactionType`, and `reactionPosition` fields on `StreamChatConfigurationData` if you need custom attachment rendering or global reaction style control
+- [ ] If you watch a `Channel` outside any list controller, subscribe to `EventType.connectionRecovered` and call `channel.watch()` (the SDK no longer auto-recovers on reconnect when `StreamChatCore` is mounted)
+- [ ] If you relied on the old `StreamChat.backgroundKeepAlive` default of 1 minute, pass `backgroundKeepAlive: const Duration(minutes: 1)` explicitly — the new default is 15 seconds
+- [ ] Remove any `StreamMessageSearchGridView` usage — switch to `StreamMessageSearchListView` or build your own grid

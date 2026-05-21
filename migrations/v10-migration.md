@@ -30,6 +30,7 @@ This guide covers all breaking changes in **Stream Chat Flutter SDK v10.0.0**. W
 - [File Upload](#file-upload)
     - [AttachmentFileUploader](#attachmentfileuploader)
 - [Unread Threads Banner](#unread-threads-banner)
+- [Stable Release Changes](#stable-release-changes)
 - [Appendix: Beta Release Timeline](#appendix-beta-release-timeline)
 - [Migration Checklist](#migration-checklist)
 
@@ -37,16 +38,17 @@ This guide covers all breaking changes in **Stream Chat Flutter SDK v10.0.0**. W
 
 ## Who Should Read This
 
-| Upgrading From | Sections to Review |
-|----------------|-------------------|
-| **v9.x** | All sections |
-| [**v10.0.0-beta.1**](#v1000-beta1) | All sections introduced after beta.1 |
-| [**v10.0.0-beta.3**](#v1000-beta3) | Sections introduced in beta.4 and later |
-| [**v10.0.0-beta.4**](#v1000-beta4) | Sections introduced in beta.7 and later |
-| [**v10.0.0-beta.7**](#v1000-beta7) | Sections introduced in beta.8 and later |
-| [**v10.0.0-beta.8**](#v1000-beta8) | Sections introduced in beta.9 and later |
-| [**v10.0.0-beta.9**](#v1000-beta9) | Sections introduced in beta.12 |
-| [**v10.0.0-beta.12**](#v1000-beta12) | No additional changes |
+| Upgrading From                       | Sections to Review                                |
+| ------------------------------------ | ------------------------------------------------- |
+| **v9.x**                             | All sections                                      |
+| [**v10.0.0-beta.1**](#v1000-beta1)   | All sections introduced after beta.1              |
+| [**v10.0.0-beta.3**](#v1000-beta3)   | Sections introduced in beta.4 and later           |
+| [**v10.0.0-beta.4**](#v1000-beta4)   | Sections introduced in beta.7 and later           |
+| [**v10.0.0-beta.7**](#v1000-beta7)   | Sections introduced in beta.8 and later           |
+| [**v10.0.0-beta.8**](#v1000-beta8)   | Sections introduced in beta.9 and later           |
+| [**v10.0.0-beta.9**](#v1000-beta9)   | Sections introduced in beta.12                    |
+| [**v10.0.0-beta.12**](#v1000-beta12) | [Stable Release Changes](#stable-release-changes) |
+| **v10.0.0** (stable)                 | [Stable Release Changes](#stable-release-changes) |
 
 Each breaking change section includes an **"Introduced in"** tag so you can quickly identify which changes apply to your upgrade path.
 
@@ -54,14 +56,14 @@ Each breaking change section includes an **"Introduced in"** tag so you can quic
 
 ## Quick Reference
 
-| Feature Area | Key Changes |
-|-------------|-------------|
-| [**Attachment Picker**](#attachment-picker) | Sealed class hierarchy, builder pattern for options, typed result handling |
-| [**Reactions**](#reactions) | `Reaction` object API, explicit `onReactionPicked` callbacks required |
-| [**Message UI**](#message-ui) | New `onAttachmentTap` signature with fallback support, generic `StreamMessageAction` |
-| [**Message State**](#message-state--deletion) | `MessageDeleteScope` replaces `bool hard`, delete-for-me support |
-| [**File Upload**](#file-upload) | Four new abstract methods on `AttachmentFileUploader` |
-| [**Unread Threads Banner**](#unread-threads-banner) | Wrapper pattern with `child`, `enabled`, `onRefresh`; removed `onTap`, `minHeight` |
+| Feature Area                                        | Key Changes                                                                          |
+| --------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| [**Attachment Picker**](#attachment-picker)         | Sealed class hierarchy, builder pattern for options, typed result handling           |
+| [**Reactions**](#reactions)                         | `Reaction` object API, explicit `onReactionPicked` callbacks required                |
+| [**Message UI**](#message-ui)                       | New `onAttachmentTap` signature with fallback support, generic `StreamMessageAction` |
+| [**Message State**](#message-state--deletion)       | `MessageDeleteScope` replaces `bool hard`, delete-for-me support                     |
+| [**File Upload**](#file-upload)                     | Four new abstract methods on `AttachmentFileUploader`                                |
+| [**Unread Threads Banner**](#unread-threads-banner) | Wrapper pattern with `child`, `enabled`, `onRefresh`; removed `onTap`, `minHeight`   |
 
 ---
 
@@ -1045,6 +1047,153 @@ ValueListenableBuilder<Set<String>>(
 
 ---
 
+## Stable Release Changes
+
+> **Introduced in:** v10.0.0 (stable)
+
+The following breaking changes landed between beta.13 and the stable release.
+
+### StreamMessageListView Config / Builders Split
+
+Behavior flags moved to `StreamMessageListViewConfiguration`; builder callbacks moved to `StreamMessageListViewBuilders`. `messageBuilder` stays at the root.
+
+```dart
+// Before
+StreamMessageListView(
+  swipeToReply: true,
+  paginationLimit: 20,
+  loadingBuilder: (context) => const MyLoader(),
+  emptyBuilder: (context) => const MyEmpty(),
+)
+
+// After
+StreamMessageListView(
+  config: StreamMessageListViewConfiguration(
+    swipeToReply: true,
+    paginationLimit: 20,
+  ),
+  builders: StreamMessageListViewBuilders(
+    loading: (context) => const MyLoader(),
+    empty: (context) => const MyEmpty(),
+  ),
+)
+```
+
+---
+
+### StreamMessageComposerController Rename
+
+| Old                                            | New                                         |
+| ---------------------------------------------- | ------------------------------------------- |
+| `StreamMessageInputController`                 | `StreamMessageComposerController`           |
+| `StreamRestorableMessageInputController`       | `StreamRestorableMessageComposerController` |
+| `editingOriginalMessage`                       | `messageBeingEdited`                        |
+| `StreamMessageComposer.messageInputController` | `messageComposerController`                 |
+
+**Edit-mode semantics changed:**
+
+```dart
+// Before — constructor accepted a non-initial message
+final controller = StreamMessageComposerController(message: existingMessage);
+controller.clear(); // also exited edit mode
+
+// After — enter edit mode explicitly
+final controller = StreamMessageComposerController();
+controller.editMessage(existingMessage);
+controller.cancelEditMessage(); // explicit exit
+```
+
+---
+
+### StreamMessageComposerInput Rename
+
+| Old                                 | New                                                                          |
+| ----------------------------------- | ---------------------------------------------------------------------------- |
+| `StreamMessageComposerInput`        | `StreamMessageComposerInputCenter`                                           |
+| `DefaultStreamMessageComposerInput` | `DefaultStreamMessageComposerInputCenter`                                    |
+| `MessageComposerInputProps`         | `MessageComposerInputCenterProps`                                            |
+| Builder key `messageComposerInput`  | `messageComposerInputCenter` (the old key now overrides the outer container) |
+
+---
+
+### StreamDraftListView and Related Classes Removed
+
+`StreamDraftListView`, `StreamDraftListTile`, `StreamDraftListTileTheme`, `StreamDraftListTileThemeData`, and `StreamChatThemeData.draftListTileTheme` have been removed. Use `StreamDraftListController` with a generic `PagedValueListView`. See the sample app for a reference implementation.
+
+---
+
+### Removed Widgets
+
+| Removed Widget                                      | Notes                                                                                                             |
+| --------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `AttachmentButton`                                  | Replaced by the attachment button inside `StreamMessageComposer`                                                  |
+| `StreamQuotedMessageWidget`                         | Use `StreamQuotedMessage`                                                                                         |
+| `EditMessageSheet`                                  | Editing is handled inline by the composer                                                                         |
+| `StreamMessageSendButton`                           | Part of the composer internals                                                                                    |
+| `DesktopReactionsBuilder`                           | Use `ReactionDetailSheet`                                                                                         |
+| `StreamChannelGridView` / `StreamChannelGridTile`   | Removed                                                                                                           |
+| `StreamMessageSearchGridView`                       | Removed                                                                                                           |
+| `AttachmentModalSheet`                              | Removed                                                                                                           |
+| `ErrorAlertSheet`                                   | Removed                                                                                                           |
+| `StreamChannelInfoBottomSheet`                      | Removed                                                                                                           |
+| `StreamMarkdownMessage`                             | Use `StreamMessageText`                                                                                           |
+| `StreamAttachmentUploadStateBuilder.successBuilder` | Removed (unreachable)                                                                                             |
+| `StreamFileAttachmentThumbnail`                     | Use `StreamImageAttachmentThumbnail` / `StreamVideoAttachmentThumbnail` or `StreamFileTypeIcon.fromMimeType(...)` |
+
+---
+
+### Theme Removals
+
+| Removed                                                            | Notes                                         |
+| ------------------------------------------------------------------ | --------------------------------------------- |
+| `StreamMessageThemeData` / `ownMessageTheme` / `otherMessageTheme` | Use `StreamMessageItemThemeData`              |
+| `StreamMessageInputThemeData` / `messageInputTheme`                | Use design-system primitives on `StreamTheme` |
+| `StreamChannelPreviewThemeData` / `channelPreviewTheme`            | Use `StreamChannelListItemThemeData`          |
+
+---
+
+### Poll Dialogs → Sheets
+
+| Old                                                               | New                                                             |
+| ----------------------------------------------------------------- | --------------------------------------------------------------- |
+| `StreamPollCreatorDialog` / `showStreamPollCreatorDialog`         | `StreamPollCreatorSheet` / `showStreamPollCreatorSheet`         |
+| `StreamPollOptionsDialog` / `showStreamPollOptionsDialog`         | `StreamPollOptionsSheet` / `showStreamPollOptionsSheet`         |
+| `StreamPollResultsDialog` / `showStreamPollResultsDialog`         | `StreamPollResultsSheet` / `showStreamPollResultsSheet`         |
+| `StreamPollOptionVotesDialog` / `showStreamPollOptionVotesDialog` | `StreamPollOptionVotesSheet` / `showStreamPollOptionVotesSheet` |
+| `StreamPollCommentsDialog` / `showStreamPollCommentsDialog`       | `StreamPollCommentsSheet` / `showStreamPollCommentsSheet`       |
+
+---
+
+### Translations: attachmentsUploadProgressText
+
+The parameter `remaining:` has been renamed to `completed:`.
+
+```dart
+// Before
+translations.attachmentsUploadProgressText(remaining: 2, total: 5)
+
+// After
+translations.attachmentsUploadProgressText(completed: 3, total: 5)
+```
+
+---
+
+### StreamChatCore: recoverStateOnReconnect and backgroundKeepAlive
+
+`StreamChatCore` now sets `client.recoverStateOnReconnect = false` on mount. If you watch a `Channel` outside any list controller, subscribe to `client.on(EventType.connectionRecovered)` and call `channel.watch()` to refresh on reconnect.
+
+The default `StreamChat.backgroundKeepAlive` has been reduced from 1 minute to 15 seconds.
+
+---
+
+### stream_chat: Channel.isOneToOne and Message.updateWith
+
+- `Channel.isOneToOne` added — returns `true` for distinct two-member channels.
+- `Channel.isGroup` semantics changed: two-member non-distinct channels now return `true`. Use `!channel.isOneToOne` for "DM" checks.
+- `Message.syncWith` deprecated in favor of `Message.updateWith` (note the flipped arguments: `local.updateWith(remote)` replaces `remote.syncWith(local)`).
+
+---
+
 ## Appendix: Beta Release Timeline
 
 This appendix provides a chronological reference of breaking changes by beta version for users upgrading from specific pre-release versions.
@@ -1086,9 +1235,32 @@ This appendix provides a chronological reference of breaking changes by beta ver
 
 - [StreamAttachmentPickerController](#streamattachmentpickercontroller)
 
+### v10.0.0 (stable)
+
+- [Stable Release Changes](#stable-release-changes)
+
 ---
 
 ## Migration Checklist
+
+### For v10.0.0 (stable)
+- [ ] Move `StreamMessageListView` behavior flags to `config: StreamMessageListViewConfiguration(...)`
+- [ ] Move `StreamMessageListView` builder callbacks to `builders: StreamMessageListViewBuilders(...)`
+- [ ] Rename `StreamMessageInputController` → `StreamMessageComposerController`
+- [ ] Rename `StreamRestorableMessageInputController` → `StreamRestorableMessageComposerController`
+- [ ] Rename `StreamMessageComposer.messageInputController` → `messageComposerController`
+- [ ] Replace `StreamMessageComposerController(message: ...)` with `.editMessage()` to enter edit mode
+- [ ] Replace `controller.clear()` (used to exit edit mode) with `controller.cancelEditMessage()`
+- [ ] Rename `editingOriginalMessage` → `messageBeingEdited`
+- [ ] Rename `StreamMessageComposerInput` → `StreamMessageComposerInputCenter` (and related props/key)
+- [ ] Remove `StreamDraftListView`, `StreamDraftListTile`, and theme classes — use `StreamDraftListController` + `PagedValueListView`
+- [ ] Replace removed widgets: `AttachmentButton`, `StreamQuotedMessageWidget`, `EditMessageSheet`, `StreamMessageSendButton`, etc. (see table)
+- [ ] Remove `StreamMessageThemeData` / `StreamMessageInputThemeData` / `StreamChannelPreviewThemeData` usage
+- [ ] Replace `StreamPollCreatorDialog` and other poll dialog helpers with the `...Sheet` equivalents
+- [ ] Rename `attachmentsUploadProgressText(remaining: ...)` → `attachmentsUploadProgressText(completed: ...)`
+- [ ] If watching a channel outside a list controller, subscribe to `connectionRecovered` and call `channel.watch()`
+- [ ] Migrate `Message.syncWith(local)` → `local.updateWith(remote)` (arguments are flipped)
+- [ ] Review `Channel.isGroup` usage — use `channel.isOneToOne` for two-member DM checks
 
 ### Unread Threads Banner
 - [ ] Replace `Column` + `Expanded` layout with `StreamUnreadThreadsBanner(child: StreamThreadListView(...))`

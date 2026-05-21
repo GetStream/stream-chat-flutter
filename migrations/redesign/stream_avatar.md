@@ -18,12 +18,12 @@ This guide covers the migration for the redesigned avatar components in Stream C
 
 ## Quick Reference
 
-| Component | Key Changes |
-|-----------|-------------|
-| [**StreamUserAvatar**](#streamuseravatar) | `constraints` → `size` enum, `showOnlineStatus` → `showOnlineIndicator`, `onTap` removed |
-| [**StreamChannelAvatar**](#streamchannelavatar) | `constraints` → `size` enum, `onTap` and builder callbacks removed |
-| [**StreamGroupAvatar**](#streamgroupavatar) | Renamed to `StreamUserAvatarGroup`, `members` → `users` |
-| [**StreamUserAvatarStack**](#streamuseravatarstack) | New component for overlapping avatars |
+| Component                                           | Key Changes                                                                              |
+| --------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| [**StreamUserAvatar**](#streamuseravatar)           | `constraints` → `size` enum, `showOnlineStatus` → `showOnlineIndicator`, `onTap` removed |
+| [**StreamChannelAvatar**](#streamchannelavatar)     | `constraints` → `size` enum, `onTap` and builder callbacks removed                       |
+| [**StreamGroupAvatar**](#streamgroupavatar)         | Renamed to `StreamUserAvatarGroup`, `members` → `users`                                  |
+| [**StreamUserAvatarStack**](#streamuseravatarstack) | New component for overlapping avatars                                                    |
 
 ---
 
@@ -159,12 +159,12 @@ GestureDetector(
 
 ### Parameters:
 
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `users` | `Iterable<User>` | required | Users to display |
-| `size` | `StreamAvatarStackSize?` | `.sm` | Size of avatars |
-| `max` | `int` | `5` | Max avatars before overflow badge |
-| `overlap` | `double` | `0.33` | Overlap fraction (0.0 - 1.0) |
+| Parameter | Type                     | Default  | Description                       |
+| --------- | ------------------------ | -------- | --------------------------------- |
+| `users`   | `Iterable<User>`         | required | Users to display                  |
+| `size`    | `StreamAvatarStackSize?` | `.sm`    | Size of avatars                   |
+| `max`     | `int`                    | `5`      | Max avatars before overflow badge |
+| `overlap` | `double`                 | `0.33`   | Overlap fraction (0.0 - 1.0)      |
 
 ### Usage:
 
@@ -186,29 +186,29 @@ StreamUserAvatarStack(
 
 ### StreamAvatarSize
 
-| Old Constraints | New Size | Diameter |
-|-----------------|----------|----------|
-| `BoxConstraints.tight(Size(20, 20))` | `.xs` | 20px |
-| `BoxConstraints.tight(Size(24, 24))` | `.sm` | 24px |
-| `BoxConstraints.tight(Size(32, 32))` | `.md` | 32px |
-| `BoxConstraints.tight(Size(40, 40))` | `.lg` | 40px |
-| `BoxConstraints.tight(Size(48, 48))` | `.xl` | 48px |
-| `BoxConstraints.tight(Size(80, 80))` | `.xxl` | 80px |
+| Old Constraints                      | New Size | Diameter |
+| ------------------------------------ | -------- | -------- |
+| `BoxConstraints.tight(Size(20, 20))` | `.xs`    | 20px     |
+| `BoxConstraints.tight(Size(24, 24))` | `.sm`    | 24px     |
+| `BoxConstraints.tight(Size(32, 32))` | `.md`    | 32px     |
+| `BoxConstraints.tight(Size(40, 40))` | `.lg`    | 40px     |
+| `BoxConstraints.tight(Size(48, 48))` | `.xl`    | 48px     |
+| `BoxConstraints.tight(Size(80, 80))` | `.xxl`   | 80px     |
 
 ### StreamAvatarGroupSize
 
-| Old Constraints | New Size | Diameter |
-|-----------------|----------|----------|
-| `BoxConstraints.tight(Size(40, 40))` | `.lg` | 40px |
-| `BoxConstraints.tight(Size(48, 48))` | `.xl` | 48px |
-| `BoxConstraints.tight(Size(80, 80))` | `.xxl` | 80px |
+| Old Constraints                      | New Size | Diameter |
+| ------------------------------------ | -------- | -------- |
+| `BoxConstraints.tight(Size(40, 40))` | `.lg`    | 40px     |
+| `BoxConstraints.tight(Size(48, 48))` | `.xl`    | 48px     |
+| `BoxConstraints.tight(Size(80, 80))` | `.xxl`   | 80px     |
 
 ### StreamAvatarStackSize
 
-| Old Constraints | New Size | Diameter |
-|-----------------|----------|----------|
-| `BoxConstraints.tight(Size(20, 20))` | `.xs` | 20px |
-| `BoxConstraints.tight(Size(24, 24))` | `.sm` | 24px |
+| Old Constraints                      | New Size | Diameter |
+| ------------------------------------ | -------- | -------- |
+| `BoxConstraints.tight(Size(20, 20))` | `.xs`    | 20px     |
+| `BoxConstraints.tight(Size(24, 24))` | `.sm`    | 24px     |
 
 > **Note:**
 > If your old constraints don't match exactly, choose the closest available size.

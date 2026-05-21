@@ -28,10 +28,10 @@ Use `StreamComponentFactory` instead for app-wide customisation.
 
 ### 4. `UnreadIndicatorButton` callback renames
 
-| Before               | After          |
-|----------------------|----------------|
-| `onTap`              | `onJumpTap`    |
-| `onDismissTap`       | `onDismissTap` |
+| Before         | After          |
+| -------------- | -------------- |
+| `onTap`        | `onJumpTap`    |
+| `onDismissTap` | `onDismissTap` |
 
 ### 5. `streamChatComponentBuilders` — `unreadIndicator` parameter removed
 
@@ -158,10 +158,10 @@ UnreadIndicatorButton(
 
 ## Props Mapping Reference
 
-| Old (`UnreadIndicatorProps`)  | New (`StreamJumpToUnreadButtonProps`) |
-|-------------------------------|--------------------------------------|
-| `unreadCount` (int)           | `label` (String) — pre-formatted     |
-| `onTap` (callback)            | `onJumpPressed` (VoidCallback?)      |
-| `onDismissTap` (callback)     | `onDismissPressed` (VoidCallback?)   |
-| —                             | `leadingIcon` (IconData?)            |
-| —                             | `trailingIcon` (IconData?)           |
+| Old (`UnreadIndicatorProps`) | New (`StreamJumpToUnreadButtonProps`) |
+| ---------------------------- | ------------------------------------- |
+| `unreadCount` (int)          | `label` (String) — pre-formatted      |
+| `onTap` (callback)           | `onJumpPressed` (VoidCallback?)       |
+| `onDismissTap` (callback)    | `onDismissPressed` (VoidCallback?)    |
+| —                            | `leadingIcon` (IconData?)             |
+| —                            | `trailingIcon` (IconData?)            |

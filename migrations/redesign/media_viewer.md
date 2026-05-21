@@ -23,19 +23,19 @@ This guide also covers the related theme cleanups (`StreamGalleryFooterThemeData
 
 ## Quick Reference
 
-| Old | New |
-|-----|-----|
-| `StreamFullScreenMedia` / `StreamFullScreenMediaBuilder` / `FullScreenMediaWidget` / `FullScreenMediaDesktop` | `StreamMediaGalleryPreview` (single widget, all platforms) |
-| `StreamAttachmentPackage` | `StreamMediaGalleryAttachment` |
-| `StreamGalleryHeader` | `StreamMediaGalleryPreviewHeader` |
-| `StreamGalleryFooter` | `StreamMediaGalleryPreviewFooter` |
-| `VideoPackage` / `DesktopVideoPackage` / `GalleryNavigationItem` | **Removed from the public API** — each preview page now owns its own player state internally |
-| *(none)* | `StreamMediaGallery` — **new** thumbnail-grid companion |
-| `StreamMessageItem.onShowMessage` / `attachmentActionsModalBuilder` | **Removed** |
-| `StreamMessageListView.onShowMessage` / `attachmentActionsModalBuilder` | **Removed** |
-| `StreamGalleryFooterThemeData`, `StreamChatThemeData.imageFooterTheme` / `galleryFooterTheme` / `galleryHeaderTheme` | **Removed** |
-| `StreamAvatarThemeData` | **Removed** — was unused |
-| `Translations.photosAndVideosLabel` | **New** — used by the footer's thumbnail-grid sheet header |
+| Old                                                                                                                  | New                                                                                          |
+| -------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| `StreamFullScreenMedia` / `StreamFullScreenMediaBuilder` / `FullScreenMediaWidget` / `FullScreenMediaDesktop`        | `StreamMediaGalleryPreview` (single widget, all platforms)                                   |
+| `StreamAttachmentPackage`                                                                                            | `StreamMediaGalleryAttachment`                                                               |
+| `StreamGalleryHeader`                                                                                                | `StreamMediaGalleryPreviewHeader`                                                            |
+| `StreamGalleryFooter`                                                                                                | `StreamMediaGalleryPreviewFooter`                                                            |
+| `VideoPackage` / `DesktopVideoPackage` / `GalleryNavigationItem`                                                     | **Removed from the public API** — each preview page now owns its own player state internally |
+| *(none)*                                                                                                             | `StreamMediaGallery` — **new** thumbnail-grid companion                                      |
+| `StreamMessageItem.onShowMessage` / `attachmentActionsModalBuilder`                                                  | **Removed**                                                                                  |
+| `StreamMessageListView.onShowMessage` / `attachmentActionsModalBuilder`                                              | **Removed**                                                                                  |
+| `StreamGalleryFooterThemeData`, `StreamChatThemeData.imageFooterTheme` / `galleryFooterTheme` / `galleryHeaderTheme` | **Removed**                                                                                  |
+| `StreamAvatarThemeData`                                                                                              | **Removed** — was unused                                                                     |
+| `Translations.photosAndVideosLabel`                                                                                  | **New** — used by the footer's thumbnail-grid sheet header                                   |
 
 ---
 
@@ -288,12 +288,12 @@ If you relied on either callback, replace the gallery preview via the component 
 
 The following theme types and `StreamChatThemeData` fields have been removed:
 
-| Removed | Notes |
-|---------|-------|
-| `StreamGalleryFooterThemeData` | The new footer is themed via `StreamBottomAppBarThemeData` from the design system. |
-| `StreamChatThemeData.galleryFooterTheme` / `imageFooterTheme` (named param) | Footer themeing now flows through `StreamBottomAppBarThemeData`. |
-| `StreamChatThemeData.galleryHeaderTheme` | Header themeing now flows through `StreamAppBarThemeData`. |
-| `StreamAvatarThemeData` | Was unused after the avatar redesign. Use `StreamUserAvatarThemeData` from `stream_core_flutter` to theme avatars globally. |
+| Removed                                                                     | Notes                                                                                                                       |
+| --------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `StreamGalleryFooterThemeData`                                              | The new footer is themed via `StreamBottomAppBarThemeData` from the design system.                                          |
+| `StreamChatThemeData.galleryFooterTheme` / `imageFooterTheme` (named param) | Footer themeing now flows through `StreamBottomAppBarThemeData`.                                                            |
+| `StreamChatThemeData.galleryHeaderTheme`                                    | Header themeing now flows through `StreamAppBarThemeData`.                                                                  |
+| `StreamAvatarThemeData`                                                     | Was unused after the avatar redesign. Use `StreamUserAvatarThemeData` from `stream_core_flutter` to theme avatars globally. |
 
 The full-screen page background and chrome bands themselves are themed via `StreamMediaViewerThemeData` (from `stream_core_flutter`, re-exported here).
 

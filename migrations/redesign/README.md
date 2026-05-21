@@ -118,23 +118,24 @@ class MyCustomButton extends StatelessWidget {
 
 ## Components
 
-| Component | Migration Guide |
-|-----------|-----------------|
-| Stream Avatar | [stream_avatar.md](stream_avatar.md) |
-| Channel List Item | [channel_list_item.md](channel_list_item.md) |
-| Message Actions | [message_actions.md](message_actions.md) |
-| Reaction Picker / Reactions | [reaction_picker.md](reaction_picker.md) |
-| Image CDN & Thumbnails | [image_cdn.md](image_cdn.md) |
-| Message Widget & Message List | [message_widget.md](message_widget.md) |
-| Message Composer | [message_composer.md](message_composer.md) |
-| Unread Indicator | [unread_indicator.md](unread_indicator.md) |
-| Unread Indicator Button | [unread_indicator_button.md](unread_indicator_button.md) |
-| Reaction List & Detail Sheet | [reaction_list.md](reaction_list.md) |
-| Audio Waveform Theme | [audio_theme.md](audio_theme.md) |
-| Attachments & Polls | [attachments_and_polls.md](attachments_and_polls.md) |
-| Media Viewer (Full-screen Media) | [media_viewer.md](media_viewer.md) |
-| Headers, Icons & Configuration | [headers_and_icons.md](headers_and_icons.md) |
-| Localizations | [localizations.md](localizations.md) |
+| Component                        | Migration Guide                                          |
+| -------------------------------- | -------------------------------------------------------- |
+| Stream Avatar                    | [stream_avatar.md](stream_avatar.md)                     |
+| Channel List Item                | [channel_list_item.md](channel_list_item.md)             |
+| Message Actions                  | [message_actions.md](message_actions.md)                 |
+| Reaction Picker / Reactions      | [reaction_picker.md](reaction_picker.md)                 |
+| Image CDN & Thumbnails           | [image_cdn.md](image_cdn.md)                             |
+| Message Widget                   | [message_widget.md](message_widget.md)                   |
+| Message List                     | [message_list.md](message_list.md)                       |
+| Message Composer                 | [message_composer.md](message_composer.md)               |
+| Unread Indicator                 | [unread_indicator.md](unread_indicator.md)               |
+| Unread Indicator Button          | [unread_indicator_button.md](unread_indicator_button.md) |
+| Reaction List & Detail Sheet     | [reaction_list.md](reaction_list.md)                     |
+| Audio Waveform Theme             | [audio_theme.md](audio_theme.md)                         |
+| Attachments & Polls              | [attachments_and_polls.md](attachments_and_polls.md)     |
+| Media Viewer (Full-screen Media) | [media_viewer.md](media_viewer.md)                       |
+| Headers, Icons & Configuration   | [headers_and_icons.md](headers_and_icons.md)             |
+| Localizations                    | [localizations.md](localizations.md)                     |
 
 ## Need Help?
 

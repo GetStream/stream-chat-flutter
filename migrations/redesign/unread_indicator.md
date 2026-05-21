@@ -24,11 +24,11 @@ parameters have been removed.
 
 ### Named Constructors
 
-| Constructor | Description |
-|-------------|-------------|
-| `StreamUnreadIndicator()` | Shows total unread message count |
+| Constructor                                     | Description                                                                    |
+| ----------------------------------------------- | ------------------------------------------------------------------------------ |
+| `StreamUnreadIndicator()`                       | Shows total unread message count                                               |
 | `StreamUnreadIndicator.channels({String? cid})` | Shows unread channel count; optionally filtered to a specific channel by `cid` |
-| `StreamUnreadIndicator.threads({String? id})` | Shows unread thread count |
+| `StreamUnreadIndicator.threads({String? id})`   | Shows unread thread count                                                      |
 
 ### Overlay Mode
 
@@ -36,11 +36,11 @@ parameters have been removed.
 passing a `child`. When `child` is non-null, the badge is positioned over the
 child using `alignment` and `offset`.
 
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `child` | `Widget?` | `null` | Widget to overlay the badge on. When `null`, only the badge is rendered. |
-| `alignment` | `AlignmentGeometry?` | `AlignmentDirectional.topEnd` | Alignment of the badge relative to `child`. |
-| `offset` | `Offset?` | `Offset(8, -6)` (mirrored in RTL) | Pixel offset applied after `alignment`. |
+| Parameter   | Type                 | Default                           | Description                                                              |
+| ----------- | -------------------- | --------------------------------- | ------------------------------------------------------------------------ |
+| `child`     | `Widget?`            | `null`                            | Widget to overlay the badge on. When `null`, only the badge is rendered. |
+| `alignment` | `AlignmentGeometry?` | `AlignmentDirectional.topEnd`     | Alignment of the badge relative to `child`.                              |
+| `offset`    | `Offset?`            | `Offset(8, -6)` (mirrored in RTL) | Pixel offset applied after `alignment`.                                  |
 
 ```dart
 // Standalone badge (no child).

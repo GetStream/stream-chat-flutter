@@ -17,12 +17,12 @@ This guide covers the migration for the redesigned image CDN handling and thumbn
 
 ## Quick Reference
 
-| Component | Key Changes |
-|-----------|-------------|
-| [**StreamImageCDN**](#streamimagecdn) | New class replacing `getResizedImageUrl` String extension (stable cache keys now via `StreamImageCDN.cacheKey()`) |
-| [**StreamImageAttachmentThumbnail**](#streamimageattachmentthumbnail) | `thumbnailSize`, `thumbnailResizeType`, `thumbnailCropType` → single `resize` parameter |
-| [**StreamMediaAttachmentThumbnail**](#streammediaattachmentthumbnail) | `thumbnailSize`, `thumbnailResizeType`, `thumbnailCropType` → single `resize` parameter |
-| [**StreamImageAttachment**](#streamimageattachment) | `imageThumbnailSize`, `imageThumbnailResizeType`, `imageThumbnailCropType` → single `resize` parameter |
+| Component                                                             | Key Changes                                                                                                       |
+| --------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| [**StreamImageCDN**](#streamimagecdn)                                 | New class replacing `getResizedImageUrl` String extension (stable cache keys now via `StreamImageCDN.cacheKey()`) |
+| [**StreamImageAttachmentThumbnail**](#streamimageattachmentthumbnail) | `thumbnailSize`, `thumbnailResizeType`, `thumbnailCropType` → single `resize` parameter                           |
+| [**StreamMediaAttachmentThumbnail**](#streammediaattachmentthumbnail) | `thumbnailSize`, `thumbnailResizeType`, `thumbnailCropType` → single `resize` parameter                           |
+| [**StreamImageAttachment**](#streamimageattachment)                   | `imageThumbnailSize`, `imageThumbnailResizeType`, `imageThumbnailCropType` → single `resize` parameter            |
 
 ---
 

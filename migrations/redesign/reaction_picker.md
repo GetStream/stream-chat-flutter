@@ -19,18 +19,18 @@ This guide covers the migration for the redesigned reaction picker and reaction 
 
 ## Quick Reference
 
-| Symbol | Change |
-|--------|--------|
-| `StreamChatConfigurationData.reactionIcons` | **Removed** — replaced by `reactionIconResolver` |
-| `StreamChatConfigurationData.reactionIconResolver` | **New** — optional (default: `DefaultReactionIconResolver()`). Replaces `reactionIcons` |
-| `ReactionIconResolver` | **New** — abstract contract for mapping reaction type → `StreamEmojiContent` |
-| `DefaultReactionIconResolver` | **New** — ready-to-use default; extend to customize `defaultReactions`, `emojiCode`, or `resolve` |
-| `ReactionPickerIconList` / `ReactionIndicatorIconList` | **Removed** — list rendering now lives inside picker/indicator widgets |
-| `ReactionPickerIcon` / `ReactionIndicatorIcon` | **Removed** — use resolver-based reaction mapping instead |
-| `StreamReactionPicker` | **Renamed** to `StreamMessageReactionPicker` — reaction set from `config.reactionIconResolver.defaultReactions` only |
-| `StreamReactionPickerTheme` / `StreamReactionPickerThemeData` | **New** (from `stream_core_flutter`) — theme-based visual customisation for the picker |
-| `StreamReactionIndicator` | **Changed** — uses `config.reactionIconResolver.resolve(type)` only |
-| `ReactionDetailSheet` | **New** — `ReactionDetailSheet.show()` for reaction details bottom sheet |
+| Symbol                                                        | Change                                                                                                               |
+| ------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `StreamChatConfigurationData.reactionIcons`                   | **Removed** — replaced by `reactionIconResolver`                                                                     |
+| `StreamChatConfigurationData.reactionIconResolver`            | **New** — optional (default: `DefaultReactionIconResolver()`). Replaces `reactionIcons`                              |
+| `ReactionIconResolver`                                        | **New** — abstract contract for mapping reaction type → `StreamEmojiContent`                                         |
+| `DefaultReactionIconResolver`                                 | **New** — ready-to-use default; extend to customize `defaultReactions`, `emojiCode`, or `resolve`                    |
+| `ReactionPickerIconList` / `ReactionIndicatorIconList`        | **Removed** — list rendering now lives inside picker/indicator widgets                                               |
+| `ReactionPickerIcon` / `ReactionIndicatorIcon`                | **Removed** — use resolver-based reaction mapping instead                                                            |
+| `StreamReactionPicker`                                        | **Renamed** to `StreamMessageReactionPicker` — reaction set from `config.reactionIconResolver.defaultReactions` only |
+| `StreamReactionPickerTheme` / `StreamReactionPickerThemeData` | **New** (from `stream_core_flutter`) — theme-based visual customisation for the picker                               |
+| `StreamReactionIndicator`                                     | **Changed** — uses `config.reactionIconResolver.resolve(type)` only                                                  |
+| `ReactionDetailSheet`                                         | **New** — `ReactionDetailSheet.show()` for reaction details bottom sheet                                             |
 
 > **Note:** If you were using default reactions only, behavior stays the same (`like`, `haha`, `love`, `wow`, `sad`). Migration is required only for custom reaction icon/type setups.
 

@@ -21,13 +21,13 @@ The audio waveform theme types and the `StreamAudioWaveform` / `StreamAudioWavef
 
 ## What Changed
 
-| Item | Before | After |
-|------|--------|-------|
-| `StreamAudioWaveformTheme` | Defined in `stream_chat_flutter` | Moved to `stream_core_flutter`; no longer in `StreamChatThemeData` |
-| `StreamAudioWaveformSliderTheme` | Defined in `stream_chat_flutter` | Moved to `stream_core_flutter`; no longer in `StreamChatThemeData` |
-| `StreamAudioWaveform` widget | In `stream_chat_flutter` | Re-exported from `stream_core_flutter` via `stream_chat_flutter` |
-| `StreamAudioWaveformSlider` widget | In `stream_chat_flutter` | Re-exported from `stream_core_flutter` via `stream_chat_flutter` |
-| Theming entry point | `StreamChatThemeData.audioWaveformTheme` / `.audioWaveformSliderTheme` | `StreamTheme` (via `MaterialApp.theme.extensions`) |
+| Item                               | Before                                                                 | After                                                              |
+| ---------------------------------- | ---------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| `StreamAudioWaveformTheme`         | Defined in `stream_chat_flutter`                                       | Moved to `stream_core_flutter`; no longer in `StreamChatThemeData` |
+| `StreamAudioWaveformSliderTheme`   | Defined in `stream_chat_flutter`                                       | Moved to `stream_core_flutter`; no longer in `StreamChatThemeData` |
+| `StreamAudioWaveform` widget       | In `stream_chat_flutter`                                               | Re-exported from `stream_core_flutter` via `stream_chat_flutter`   |
+| `StreamAudioWaveformSlider` widget | In `stream_chat_flutter`                                               | Re-exported from `stream_core_flutter` via `stream_chat_flutter`   |
+| Theming entry point                | `StreamChatThemeData.audioWaveformTheme` / `.audioWaveformSliderTheme` | `StreamTheme` (via `MaterialApp.theme.extensions`)                 |
 
 ---
 

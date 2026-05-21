@@ -9,6 +9,7 @@ This guide covers the new reaction list controller, view, and detail sheet intro
 - [StreamReactionListController](#streamreactionlistcontroller)
 - [StreamReactionListView](#streamreactionlistview)
 - [ReactionDetailSheet](#reactiondetailsheet)
+- [Removed Widgets](#removed-widgets)
 - [Migration Checklist](#migration-checklist)
 
 ---
@@ -29,20 +30,20 @@ StreamReactionListController({
 })
 ```
 
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `client` | `StreamChatClient` | **required** | The Stream chat client |
-| `messageId` | `String` | **required** | ID of the message to load reactions for |
-| `filter` | `Filter?` | `null` | Query filter; supports fields `type`, `user_id`, `created_at` |
-| `sort` | `SortOrder<Reaction>?` | `null` | Sort order; only `created_at` is backend-supported (`ReactionSortKey.createdAt`) |
-| `limit` | `int` | `25` | Page size |
+| Parameter   | Type                   | Default      | Description                                                                      |
+| ----------- | ---------------------- | ------------ | -------------------------------------------------------------------------------- |
+| `client`    | `StreamChatClient`     | **required** | The Stream chat client                                                           |
+| `messageId` | `String`               | **required** | ID of the message to load reactions for                                          |
+| `filter`    | `Filter?`              | `null`       | Query filter; supports fields `type`, `user_id`, `created_at`                    |
+| `sort`      | `SortOrder<Reaction>?` | `null`       | Sort order; only `created_at` is backend-supported (`ReactionSortKey.createdAt`) |
+| `limit`     | `int`                  | `25`         | Page size                                                                        |
 
 ### Methods
 
-| Method | Description |
-|--------|-------------|
-| `doInitialLoad()` | Loads the first page of reactions |
-| `loadMore(String? nextPageKey)` | Loads the next page using cursor-based pagination |
+| Method                              | Description                                                                                             |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| `doInitialLoad()`                   | Loads the first page of reactions                                                                       |
+| `loadMore(String? nextPageKey)`     | Loads the next page using cursor-based pagination                                                       |
 | `refresh({bool resetValue = true})` | Reloads from the beginning; resets active filter/sort to constructor values when `resetValue` is `true` |
 
 ### Runtime Filter / Sort Changes
@@ -88,15 +89,15 @@ StreamReactionListView({
 })
 ```
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `controller` | `StreamReactionListController` | yes | Provides and paginates the reaction data |
-| `itemBuilder` | `StreamReactionListViewIndexedWidgetBuilder` | yes | Builds each reaction item |
-| `separatorBuilder` | `PagedValueScrollViewIndexedWidgetBuilder<Reaction>?` | no | Builds separators between items (defaults to `SizedBox.shrink`) |
-| `emptyBuilder` | `WidgetBuilder?` | no | Widget shown when there are no reactions |
-| `loadingBuilder` | `WidgetBuilder?` | no | Widget shown during initial load |
-| `errorBuilder` | `Widget Function(BuildContext, StreamChatError)?` | no | Widget shown on error |
-| `loadMoreTriggerIndex` | `int` | no | How many items from the end to trigger the next page load (default: 3) |
+| Parameter              | Type                                                  | Required | Description                                                            |
+| ---------------------- | ----------------------------------------------------- | -------- | ---------------------------------------------------------------------- |
+| `controller`           | `StreamReactionListController`                        | yes      | Provides and paginates the reaction data                               |
+| `itemBuilder`          | `StreamReactionListViewIndexedWidgetBuilder`          | yes      | Builds each reaction item                                              |
+| `separatorBuilder`     | `PagedValueScrollViewIndexedWidgetBuilder<Reaction>?` | no       | Builds separators between items (defaults to `SizedBox.shrink`)        |
+| `emptyBuilder`         | `WidgetBuilder?`                                      | no       | Widget shown when there are no reactions                               |
+| `loadingBuilder`       | `WidgetBuilder?`                                      | no       | Widget shown during initial load                                       |
+| `errorBuilder`         | `Widget Function(BuildContext, StreamChatError)?`     | no       | Widget shown on error                                                  |
+| `loadMoreTriggerIndex` | `int`                                                 | no       | How many items from the end to trigger the next page load (default: 3) |
 
 ### Usage
 
@@ -137,11 +138,11 @@ final action = await ReactionDetailSheet.show(
 
 ### Parameters of `show`
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `context` | `BuildContext` | yes | Build context |
-| `message` | `Message` | yes | The message whose reactions to display |
-| `initialReactionType` | `String?` | no | Pre-selects this reaction type chip when the sheet opens |
+| Parameter             | Type           | Required | Description                                              |
+| --------------------- | -------------- | -------- | -------------------------------------------------------- |
+| `context`             | `BuildContext` | yes      | Build context                                            |
+| `message`             | `Message`      | yes      | The message whose reactions to display                   |
+| `initialReactionType` | `String?`      | no       | Pre-selects this reaction type chip when the sheet opens |
 
 ### Migration from `MessageReactionsModal`
 
@@ -165,9 +166,23 @@ await ReactionDetailSheet.show(
 
 ---
 
+## Removed Widgets
+
+The following reactions-related widgets have been removed. Replace any direct references with the listed alternatives.
+
+| Removed Widget                | Replacement                                                                                                                                                                                       |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `DesktopReactionsBuilder`     | Use `ReactionDetailSheet.show(context: context, message: message)` for the full reactors list, or override `messageReactions` via `StreamComponentFactory` to customize the inline reaction chips |
+| `StreamMessageReactionsModal` | Use `ReactionDetailSheet` (see [ReactionDetailSheet](#reactiondetailsheet))                                                                                                                       |
+
+For action-related reaction widget changes (e.g. `StreamMessageReactionsModal` migration), see [message_actions.md](message_actions.md#streammessagereactionsmodal).
+
+---
+
 ## Migration Checklist
 
 - [ ] Replace `MessageReactionsModal` with `ReactionDetailSheet.show()`
 - [ ] Use `StreamReactionListController` to load/paginate reactions programmatically
 - [ ] Use `StreamReactionListView` with a `StreamReactionListController` for custom reaction list UIs
 - [ ] For runtime reaction-type filtering, set `controller.filter` and call `controller.doInitialLoad()`
+- [ ] Remove any `DesktopReactionsBuilder` usage — replace with `ReactionDetailSheet.show(...)` or a custom `messageReactions` factory override
