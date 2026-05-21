@@ -267,13 +267,6 @@ void main() {
         componentBuilders: StreamComponentBuilders(
           extensions: streamChatComponentBuilders(
             messageComposerLeading: (context, props) => const SizedBox.shrink(),
-            messageComposerInputLeading: (context, props) => StreamButton.icon(
-              icon: Icon(context.streamIcons.emoji),
-              type: StreamButtonType.ghost,
-              style: StreamButtonStyle.secondary,
-              size: StreamButtonSize.small,
-              onPressed: () {},
-            ),
             messageComposerInputTrailing: (context, props) => StreamButton.icon(
               icon: Icon(context.streamIcons.attachment),
               type: StreamButtonType.ghost,
