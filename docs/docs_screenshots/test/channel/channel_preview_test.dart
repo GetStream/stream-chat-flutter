@@ -1,18 +1,18 @@
-import 'package:alchemist/alchemist.dart';
 import 'package:device_preview/device_preview.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import '../src/golden_client_stubs.dart';
 import '../src/golden_theme.dart';
 import '../src/mocks.dart';
+import '../src/sample_users.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  goldenTest(
+  docsGoldenTest(
     'channel preview tile',
     fileName: 'channel_preview',
     constraints: const BoxConstraints.tightFor(width: 375, height: 80),
@@ -26,7 +26,7 @@ void main() {
           Message(
             id: 'msg-1',
             text: 'Hey everyone!',
-            user: User(id: 'user-2', name: 'Bob'),
+            user: noahSmith,
             createdAt: DateTime(2024, 6, 1, 10, 30),
           ),
         ],
@@ -46,7 +46,7 @@ void main() {
     },
   );
 
-  goldenTest(
+  docsGoldenTest(
     'channel list view',
     fileName: 'channel_list_view',
     constraints: const BoxConstraints.tightFor(width: 430, height: 932),
@@ -62,7 +62,7 @@ void main() {
             Message(
               id: 'msg-1',
               text: 'Hey, how is everyone doing?',
-              user: User(id: 'user-2', name: 'Bob'),
+              user: noahSmith,
               createdAt: DateTime(2024, 6, 1, 10, 30),
             ),
           ],
@@ -76,7 +76,7 @@ void main() {
             Message(
               id: 'msg-2',
               text: 'New mockups are ready!',
-              user: User(id: 'user-3', name: 'Carol'),
+              user: charlotteAnderson,
               createdAt: DateTime(2024, 6, 1, 9, 15),
             ),
           ],
@@ -89,7 +89,7 @@ void main() {
             Message(
               id: 'msg-3',
               text: 'Anyone up for lunch?',
-              user: User(id: 'user-4', name: 'Dave'),
+              user: liamJohnson,
               createdAt: DateTime(2024, 5, 31, 12, 0),
             ),
           ],
@@ -102,7 +102,7 @@ void main() {
             Message(
               id: 'msg-4',
               text: 'PR #42 is ready for review',
-              user: User(id: 'user-5', name: 'Eve'),
+              user: elenaBarros,
               createdAt: DateTime(2024, 5, 30, 15, 45),
             ),
           ],
@@ -115,162 +115,7 @@ void main() {
       );
 
       stubQueryChannelsForGoldens(client, channels);
-
-      return DeviceFrame(
-        device: Devices.ios.iPhone13,
-        isFrameVisible: true,
-        screen: MaterialApp(
-          theme: docsScreenshotsTheme(),
-          debugShowCheckedModeBanner: false,
-          home: StreamChat(
-            client: client,
-            connectivityStream: Stream.value([ConnectivityResult.mobile]),
-            child: Scaffold(
-              appBar: AppBar(
-                title: const Text('Stream Chat'),
-                actions: const [
-                  IconButton(icon: Icon(Icons.edit_outlined), onPressed: null),
-                ],
-              ),
-              body: StreamChannelListView(
-                controller: controller,
-                shrinkWrap: true,
-              ),
-            ),
-          ),
-        ),
-      );
-    },
-  );
-
-  goldenTest(
-    'swipe channel to reveal actions',
-    fileName: 'swipe_channel',
-    constraints: const BoxConstraints.tightFor(width: 375, height: 80),
-    builder: () {
-      final client = MockClient();
-      final channel = fakeChannel(
-        client: client,
-        id: 'general',
-        name: 'General',
-        messages: [
-          Message(
-            id: 'msg-1',
-            text: 'Hey, how is everyone doing?',
-            user: User(id: 'user-2', name: 'Bob'),
-            createdAt: DateTime(2024, 6, 1, 10, 30),
-          ),
-        ],
-      );
-
-      return MaterialApp(
-        theme: docsScreenshotsTheme(),
-        debugShowCheckedModeBanner: false,
-        home: StreamChat(
-          client: client,
-          connectivityStream: Stream.value([ConnectivityResult.mobile]),
-          child: Scaffold(
-            body: Stack(
-              children: [
-                Container(
-                  color: Colors.grey[200],
-                  alignment: Alignment.centerRight,
-                  padding: const EdgeInsets.only(right: 20),
-                  child: const Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.delete, color: Colors.red),
-                      Text('Delete', style: TextStyle(color: Colors.red, fontSize: 12)),
-                    ],
-                  ),
-                ),
-                Transform.translate(
-                  offset: const Offset(-80, 0),
-                  child: ColoredBox(
-                    color: Colors.white,
-                    child: StreamChannelListItem(channel: channel),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
-    },
-  );
-
-  goldenTest(
-    'slidable channel list with header',
-    fileName: 'slidable_channel_list',
-    constraints: const BoxConstraints.tightFor(width: 430, height: 932),
-    builder: () {
-      final client = MockClient();
-      final clientState = MockClientState();
-      when(() => client.state).thenReturn(clientState);
-      when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id', name: 'Alice'));
-
-      final channels = [
-        fakeChannel(
-          client: client,
-          id: 'general',
-          name: 'General',
-          messages: [
-            Message(
-              id: 'msg-1',
-              text: 'Hey, how is everyone doing?',
-              user: User(id: 'user-2', name: 'Bob'),
-              createdAt: DateTime(2024, 6, 1, 10, 30),
-            ),
-          ],
-          unreadCount: 2,
-        ),
-        fakeChannel(
-          client: client,
-          id: 'design',
-          name: 'Design',
-          messages: [
-            Message(
-              id: 'msg-2',
-              text: 'New mockups are ready!',
-              user: User(id: 'user-3', name: 'Carol'),
-              createdAt: DateTime(2024, 6, 1, 9, 15),
-            ),
-          ],
-        ),
-        fakeChannel(
-          client: client,
-          id: 'random',
-          name: 'Random',
-          messages: [
-            Message(
-              id: 'msg-3',
-              text: 'Anyone up for lunch?',
-              user: User(id: 'user-4', name: 'Dave'),
-              createdAt: DateTime(2024, 5, 31, 12, 0),
-            ),
-          ],
-        ),
-        fakeChannel(
-          client: client,
-          id: 'engineering',
-          name: 'Engineering',
-          messages: [
-            Message(
-              id: 'msg-4',
-              text: 'PR #42 is ready for review',
-              user: User(id: 'user-5', name: 'Eve'),
-              createdAt: DateTime(2024, 5, 30, 15, 45),
-            ),
-          ],
-        ),
-      ];
-
-      final controller = StreamChannelListController.fromValue(
-        PagedValue(items: channels),
-        client: client,
-      );
-
-      stubQueryChannelsForGoldens(client, channels);
+      stubMockClientCurrentUser(client, ownUser);
 
       return DeviceFrame(
         device: Devices.ios.iPhone13,
@@ -283,71 +128,218 @@ void main() {
             connectivityStream: Stream.value([ConnectivityResult.mobile]),
             child: Builder(
               builder: (context) {
-                final chatTheme = StreamChatTheme.of(context);
-                final backgroundColor = context.streamColorScheme.backgroundSurface;
+                final icons = context.streamIcons;
                 return Scaffold(
-                  appBar: const StreamChannelListHeader(),
-                  body: Column(
+                  appBar: StreamChannelListHeader(
+                    title: const Text('Chats'),
+                    trailing: StreamButton.icon(
+                      icon: Icon(icons.plus),
+                      onPressed: () {},
+                    ),
+                  ),
+                  body: StreamChannelListView(
+                    controller: controller,
+                    shrinkWrap: true,
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+    },
+  );
+
+  docsGoldenTest(
+    'swipe channel to reveal actions',
+    fileName: 'swipe_channel',
+    constraints: const BoxConstraints.tightFor(width: 375, height: 80),
+    whilePerforming: (tester) async {
+      await tester.drag(find.byType(StreamChannelListItem), const Offset(-150, 0));
+      await tester.pumpAndSettle();
+      return null;
+    },
+    builder: () {
+      final client = MockClient();
+      final channel = fakeChannel(
+        client: client,
+        id: 'general',
+        name: 'General',
+        messages: [
+          Message(
+            id: 'msg-1',
+            text: 'Hey, how is everyone doing?',
+            user: noahSmith,
+            createdAt: DateTime(2024, 6, 1, 10, 30),
+          ),
+        ],
+      );
+
+      return MaterialApp(
+        theme: docsScreenshotsTheme(),
+        debugShowCheckedModeBanner: false,
+        home: StreamChat(
+          client: client,
+          connectivityStream: Stream.value([ConnectivityResult.mobile]),
+          child: Builder(
+            builder: (context) {
+              final icons = context.streamIcons;
+              final colorScheme = context.streamColorScheme;
+              return Scaffold(
+                body: Slidable(
+                  groupTag: 'channels-actions',
+                  endActionPane: ActionPane(
+                    extentRatio: 0.4,
+                    motion: const BehindMotion(),
                     children: [
-                      // First channel shown swiped to reveal slidable actions
-                      SizedBox(
-                        height: 80,
-                        child: Stack(
+                      CustomSlidableAction(
+                        foregroundColor: colorScheme.textPrimary,
+                        backgroundColor: colorScheme.backgroundSurface,
+                        onPressed: (_) {},
+                        child: Icon(icons.more, size: 20),
+                      ),
+                      CustomSlidableAction(
+                        foregroundColor: colorScheme.textOnAccent,
+                        backgroundColor: colorScheme.accentPrimary,
+                        onPressed: (_) {},
+                        child: Icon(icons.mute, size: 20),
+                      ),
+                    ],
+                  ),
+                  child: StreamChannelListItem(channel: channel),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+    },
+  );
+
+  docsGoldenTest(
+    'slidable channel list with header',
+    fileName: 'slidable_channel_list',
+    constraints: const BoxConstraints.tightFor(width: 430, height: 932),
+    whilePerforming: (tester) async {
+      await tester.drag(find.byType(StreamChannelListItem).first, const Offset(-200, 0));
+      await tester.pumpAndSettle();
+      return null;
+    },
+    builder: () {
+      final client = MockClient();
+
+      final channels = [
+        fakeChannel(
+          client: client,
+          id: 'general',
+          name: 'General',
+          messages: [
+            Message(
+              id: 'msg-1',
+              text: 'Hey, how is everyone doing?',
+              user: noahSmith,
+              createdAt: DateTime(2024, 6, 1, 10, 30),
+            ),
+          ],
+          unreadCount: 2,
+        ),
+        fakeChannel(
+          client: client,
+          id: 'design',
+          name: 'Design',
+          messages: [
+            Message(
+              id: 'msg-2',
+              text: 'New mockups are ready!',
+              user: charlotteAnderson,
+              createdAt: DateTime(2024, 6, 1, 9, 15),
+            ),
+          ],
+        ),
+        fakeChannel(
+          client: client,
+          id: 'random',
+          name: 'Random',
+          messages: [
+            Message(
+              id: 'msg-3',
+              text: 'Anyone up for lunch?',
+              user: liamJohnson,
+              createdAt: DateTime(2024, 5, 31, 12, 0),
+            ),
+          ],
+        ),
+        fakeChannel(
+          client: client,
+          id: 'engineering',
+          name: 'Engineering',
+          messages: [
+            Message(
+              id: 'msg-4',
+              text: 'PR #42 is ready for review',
+              user: elenaBarros,
+              createdAt: DateTime(2024, 5, 30, 15, 45),
+            ),
+          ],
+        ),
+      ];
+
+      final controller = StreamChannelListController.fromValue(
+        PagedValue(items: channels),
+        client: client,
+      );
+
+      stubQueryChannelsForGoldens(client, channels);
+      stubMockClientCurrentUser(client, ownUser);
+
+      return DeviceFrame(
+        device: Devices.ios.iPhone13,
+        isFrameVisible: true,
+        screen: MaterialApp(
+          theme: docsScreenshotsTheme(),
+          debugShowCheckedModeBanner: false,
+          home: StreamChat(
+            client: client,
+            connectivityStream: Stream.value([ConnectivityResult.mobile]),
+            child: Builder(
+              builder: (context) {
+                final icons = context.streamIcons;
+                final colorScheme = context.streamColorScheme;
+                return Scaffold(
+                  appBar: StreamChannelListHeader(
+                    title: const Text('Chats'),
+                    trailing: StreamButton.icon(
+                      icon: Icon(icons.plus),
+                      onPressed: () {},
+                    ),
+                  ),
+                  body: StreamChannelListView(
+                    controller: controller,
+                    shrinkWrap: true,
+                    itemBuilder: (context, channels, index, defaultWidget) {
+                      return Slidable(
+                        groupTag: 'channels-actions',
+                        endActionPane: ActionPane(
+                          extentRatio: 0.4,
+                          motion: const BehindMotion(),
                           children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                SizedBox(
-                                  width: 80,
-                                  height: 80,
-                                  child: ColoredBox(
-                                    color: backgroundColor,
-                                    child: const Column(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        Icon(Icons.more_horiz),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: 80,
-                                  height: 80,
-                                  child: ColoredBox(
-                                    color: backgroundColor,
-                                    child: Column(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        Icon(
-                                          Icons.delete_outline,
-                                          color: context.streamColorScheme.accentError,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ],
+                            CustomSlidableAction(
+                              foregroundColor: colorScheme.textPrimary,
+                              backgroundColor: colorScheme.backgroundSurface,
+                              onPressed: (_) {},
+                              child: Icon(icons.more, size: 20),
                             ),
-                            Transform.translate(
-                              offset: const Offset(-160, 0),
-                              child: ColoredBox(
-                                color: Colors.white,
-                                child: StreamChannelListItem(channel: channels[0]),
-                              ),
+                            CustomSlidableAction(
+                              foregroundColor: colorScheme.textOnAccent,
+                              backgroundColor: colorScheme.accentPrimary,
+                              onPressed: (_) {},
+                              child: Icon(icons.mute, size: 20),
                             ),
                           ],
                         ),
-                      ),
-                      Expanded(
-                        child: StreamChannelListView(
-                          controller: StreamChannelListController.fromValue(
-                            PagedValue(items: channels.sublist(1)),
-                            client: client,
-                          ),
-                          shrinkWrap: true,
-                        ),
-                      ),
-                    ],
+                        child: defaultWidget,
+                      );
+                    },
                   ),
                 );
               },

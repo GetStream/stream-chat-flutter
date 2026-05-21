@@ -28,6 +28,7 @@ dependencies:
 dev_dependencies:
   alchemist: ^0.14.0
   device_preview: ^1.2.0
+  flutter_slidable: ^4.0.0
   flutter_test:
     sdk: flutter
   mocktail: ^1.0.5

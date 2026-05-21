@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'src/golden_network_image.dart';
+
 Future<void> testExecutable(FutureOr<void> Function() testMain) async {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -14,12 +16,18 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) async {
   // (including transitive packages such as stream_core_flutter's Stream Icons).
   await loadFonts();
 
-  // Load the platform emoji font so emoji glyphs render in golden screenshots
-  // instead of appearing as boxes. System fonts are not in the asset manifest
-  // and therefore not picked up by loadFonts(); they must be loaded explicitly.
-  await _loadEmojiFont();
+  // Register host system fonts that loadFonts() can't see because they live
+  // outside the asset manifest — currently the platform emoji font (so emoji
+  // glyphs render instead of tofu) and macOS's San Francisco (so Material's
+  // iOS typography aliases resolve to authentic SF). On hosts where a file is
+  // missing the loader is a no-op; CI's obscured-text variant replaces every
+  // glyph with Ahem anyway.
+  await _loadHostSystemFonts();
 
-  final isRunningInCi = Platform.environment.containsKey('CI') || Platform.environment.containsKey('GITHUB_ACTIONS');
+  // Pre-render the avatar fixture palette so the synchronous networkImage
+  // component builder (`goldenNetworkImageBuilder`) can return cached
+  // providers without a FutureBuilder flicker in goldens.
+  await GoldenAvatarFixtures.precompute();
 
   return AlchemistConfig.runWithConfig(
     config: AlchemistConfig(
@@ -28,19 +36,30 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) async {
         borderColor: Colors.transparent,
         nameTextStyle: const TextStyle(fontSize: 18),
       ),
-      ciGoldensConfig: CiGoldensConfig(enabled: isRunningInCi),
-      platformGoldensConfig: PlatformGoldensConfig(enabled: !isRunningInCi),
+      // Docs snapshots only ever commit the platform variant (see .gitignore:
+      // `!**/goldens/macos/*`). The CI/obscured variant is never inspected
+      // and never compared against, so don't waste compute on it — generate
+      // platform goldens locally and in CI alike.
+      ciGoldensConfig: const CiGoldensConfig(enabled: false),
+      platformGoldensConfig: const PlatformGoldensConfig(enabled: true),
     ),
     run: testMain,
   );
 }
 
-/// Loads the platform's color emoji font into the Flutter test renderer.
+/// Registers host system fonts that aren't part of any asset manifest.
 ///
-/// [DefaultStreamEmoji] sets `fontFamilyFallback` to platform emoji font names
-/// (e.g. 'Apple Color Emoji'), but the Flutter test renderer only knows about
-/// fonts loaded via [FontLoader] — system fonts are invisible to it. Without
-/// this, every emoji glyph renders as a tofu box.
+/// Loads the platform color emoji font (so [DefaultStreamEmoji] and inline
+/// emoji glyphs can render via the `fontFamilyFallback` chain) and, on macOS
+/// only, San Francisco under the family aliases Material's iOS typography
+/// expects (`CupertinoSystemDisplay` / `CupertinoSystemText`). Hosts where a
+/// font file is missing simply skip that loader.
+Future<void> _loadHostSystemFonts() async {
+  await _loadEmojiFont();
+  await _loadAppleSystemFont();
+}
+
+/// Loads the platform's color emoji font into the Flutter test renderer.
 Future<void> _loadEmojiFont() async {
   // Each entry: (FontLoader family name, candidate file paths).
   final candidates = [
@@ -65,5 +84,26 @@ Future<void> _loadEmojiFont() async {
       await loader.load();
       return; // Stop after the first font successfully loaded.
     }
+  }
+}
+
+/// Registers macOS's San Francisco font under the family aliases Material's
+/// iOS typography expects: `CupertinoSystemDisplay` (headlines/titles) and
+/// `CupertinoSystemText` (body).
+Future<void> _loadAppleSystemFont() async {
+  if (!Platform.isMacOS) return;
+  const candidates = [
+    '/System/Library/Fonts/SFNS.ttf', // Catalina and later
+    '/System/Library/Fonts/SFNSDisplay.ttf', // pre-Catalina
+  ];
+  for (final path in candidates) {
+    final file = File(path);
+    if (!file.existsSync()) continue;
+    final bytes = await file.readAsBytes();
+    for (final family in const ['CupertinoSystemDisplay', 'CupertinoSystemText']) {
+      final loader = FontLoader(family)..addFont(Future.value(ByteData.sublistView(bytes)));
+      await loader.load();
+    }
+    return; // Stop after the first font successfully loaded.
   }
 }

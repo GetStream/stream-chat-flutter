@@ -1,4 +1,3 @@
-import 'package:alchemist/alchemist.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -9,6 +8,7 @@ import 'package:stream_core_flutter/stream_core_flutter.dart' as core;
 import '../src/fakes.dart';
 import '../src/golden_theme.dart';
 import '../src/mocks.dart';
+import '../src/sample_users.dart';
 
 Widget _buildMessageInputScaffold({
   required MockClient client,
@@ -44,7 +44,7 @@ void main() {
   setUp(() => RecordPlatform.instance = FakeRecordPlatform());
   tearDown(() => RecordPlatform.instance = originalRecordPlatform);
 
-  goldenTest(
+  docsGoldenTest(
     'default state',
     fileName: 'stream_message_composer_default',
     constraints: const BoxConstraints.tightFor(width: 375, height: 100),
@@ -65,7 +65,7 @@ void main() {
     },
   );
 
-  goldenTest(
+  docsGoldenTest(
     'message input default',
     fileName: 'message_input',
     constraints: const BoxConstraints.tightFor(width: 375, height: 100),
@@ -86,7 +86,7 @@ void main() {
     },
   );
 
-  goldenTest(
+  docsGoldenTest(
     'message input actions on right',
     fileName: 'message_input_change_position',
     constraints: const BoxConstraints.tightFor(width: 375, height: 100),
@@ -134,7 +134,7 @@ void main() {
     },
   );
 
-  goldenTest(
+  docsGoldenTest(
     'custom send icon via StreamIcons',
     fileName: 'message_input_custom_send_icon',
     constraints: const BoxConstraints.tightFor(width: 375, height: 100),
@@ -189,7 +189,7 @@ void main() {
     },
   );
 
-  goldenTest(
+  docsGoldenTest(
     'slow mode active',
     fileName: 'message_composer_slow_mode',
     constraints: const BoxConstraints.tightFor(width: 375, height: 100),
@@ -212,7 +212,7 @@ void main() {
     },
   );
 
-  goldenTest(
+  docsGoldenTest(
     'message input with quoted message',
     fileName: 'message_input_quoted_message',
     constraints: const BoxConstraints.tightFor(width: 375, height: 160),
@@ -233,7 +233,7 @@ void main() {
         ..quotedMessage = Message(
           id: 'quoted-msg',
           text: 'This is the original message',
-          user: User(id: 'other-user', name: 'Alice'),
+          user: ameliaMoore,
         );
 
       return _buildMessageInputScaffold(

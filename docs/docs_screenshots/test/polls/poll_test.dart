@@ -1,12 +1,12 @@
-import 'package:alchemist/alchemist.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import '../src/golden_theme.dart';
 import '../src/mocks.dart';
+import '../src/sample_users.dart';
 
-final _sender = User(id: 'user-2', name: 'Bob');
+final _sender = noahSmith;
 
 Widget _buildMessageScaffold({
   required MockClient client,
@@ -31,7 +31,7 @@ Widget _buildMessageScaffold({
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  goldenTest(
+  docsGoldenTest(
     'poll creator widget',
     fileName: 'poll_creator',
     constraints: const BoxConstraints.tightFor(width: 375, height: 650),
@@ -56,31 +56,37 @@ void main() {
         home: StreamChat(
           client: client,
           connectivityStream: Stream.value([ConnectivityResult.mobile]),
-          child: Scaffold(
-            appBar: AppBar(
-              leading: const IconButton(
-                icon: Icon(Icons.close),
-                onPressed: null,
-              ),
-              title: const Text('Create Poll'),
-              actions: const [
-                IconButton(
-                  icon: Icon(Icons.send),
-                  onPressed: null,
+          child: Builder(
+            builder: (context) {
+              final icons = context.streamIcons;
+              return Scaffold(
+                appBar: StreamSheetHeader(
+                  leading: StreamButton.icon(
+                    type: StreamButtonType.outline,
+                    style: StreamButtonStyle.secondary,
+                    icon: Icon(icons.xmark),
+                    onPressed: () {},
+                  ),
+                  title: const Text('Create Poll'),
+                  trailing: StreamButton.icon(
+                    type: StreamButtonType.solid,
+                    icon: Icon(icons.checkmark),
+                    onPressed: () {},
+                  ),
                 ),
-              ],
-            ),
-            body: StreamPollCreatorWidget(
-              controller: controller,
-              shrinkWrap: true,
-            ),
+                body: StreamPollCreatorWidget(
+                  controller: controller,
+                  shrinkWrap: true,
+                ),
+              );
+            },
           ),
         ),
       );
     },
   );
 
-  goldenTest(
+  docsGoldenTest(
     'poll interactor widget',
     fileName: 'poll_interactor',
     constraints: const BoxConstraints.tightFor(width: 375, height: 500),
@@ -133,7 +139,7 @@ void main() {
     },
   );
 
-  goldenTest(
+  docsGoldenTest(
     'polls composer attachment picker',
     fileName: 'polls_composer',
     constraints: const BoxConstraints.tightFor(width: 375, height: 500),

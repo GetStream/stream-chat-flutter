@@ -1,4 +1,3 @@
-import 'package:alchemist/alchemist.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -29,7 +28,7 @@ Widget _buildChannelHeaderScaffold({
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  goldenTest(
+  docsGoldenTest(
     'channel header default',
     fileName: 'channel_header',
     constraints: const BoxConstraints.tightFor(width: 375, height: 72),
@@ -57,7 +56,7 @@ void main() {
     },
   );
 
-  goldenTest(
+  docsGoldenTest(
     'channel header with custom title',
     fileName: 'channel_header_custom_title',
     constraints: const BoxConstraints.tightFor(width: 375, height: 72),

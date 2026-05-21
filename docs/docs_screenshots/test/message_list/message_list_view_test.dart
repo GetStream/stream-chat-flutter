@@ -1,4 +1,3 @@
-import 'package:alchemist/alchemist.dart';
 import 'package:device_preview/device_preview.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -7,9 +6,9 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import '../src/golden_theme.dart';
 import '../src/mocks.dart';
+import '../src/sample_users.dart';
 
-final _currentUser = User(id: 'user-1', name: 'Alice');
-final _otherUser = User(id: 'user-2', name: 'Bob');
+final _otherUser = noahSmith;
 
 List<Message> _buildMessages({bool withPinned = false, bool withThreads = false}) {
   return [
@@ -22,7 +21,7 @@ List<Message> _buildMessages({bool withPinned = false, bool withThreads = false}
     Message(
       id: 'msg-2',
       text: 'Doing great, thanks!',
-      user: _currentUser,
+      user: ownUser,
       createdAt: DateTime(2024, 6, 1, 10, 1),
     ),
     if (withPinned)
@@ -33,7 +32,7 @@ List<Message> _buildMessages({bool withPinned = false, bool withThreads = false}
         createdAt: DateTime(2024, 6, 1, 10, 2),
         pinned: true,
         pinnedAt: DateTime(2024, 6, 1, 10, 3),
-        pinnedBy: _currentUser,
+        pinnedBy: ownUser,
       ),
     Message(
       id: 'msg-3',
@@ -45,7 +44,7 @@ List<Message> _buildMessages({bool withPinned = false, bool withThreads = false}
     Message(
       id: 'msg-4',
       text: 'Working on some Flutter features!',
-      user: _currentUser,
+      user: ownUser,
       createdAt: DateTime(2024, 6, 1, 10, 4),
     ),
   ];
@@ -79,7 +78,7 @@ Widget _buildMessageListViewInDevice({
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  goldenTest(
+  docsGoldenTest(
     'message list view default',
     fileName: 'message_list_view',
     constraints: const BoxConstraints.tightFor(width: 430, height: 932),
@@ -98,13 +97,13 @@ void main() {
         channelName: 'General',
         messages: messages,
       );
-      when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-1', name: 'Alice'));
+      when(() => clientState.currentUser).thenReturn(ownUser);
 
       return _buildMessageListViewInDevice(client: client, channel: channel);
     },
   );
 
-  goldenTest(
+  docsGoldenTest(
     'message list view with pinned message',
     fileName: 'message_list_view_pin',
     constraints: const BoxConstraints.tightFor(width: 375, height: 600),
@@ -123,7 +122,7 @@ void main() {
         channelName: 'General',
         messages: messages,
       );
-      when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-1', name: 'Alice'));
+      when(() => clientState.currentUser).thenReturn(ownUser);
 
       return MaterialApp(
         theme: docsScreenshotsTheme(),
@@ -143,7 +142,7 @@ void main() {
     },
   );
 
-  goldenTest(
+  docsGoldenTest(
     'message list view with threads',
     fileName: 'message_list_view_threads',
     constraints: const BoxConstraints.tightFor(width: 375, height: 600),
@@ -162,7 +161,7 @@ void main() {
         channelName: 'General',
         messages: messages,
       );
-      when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-1', name: 'Alice'));
+      when(() => clientState.currentUser).thenReturn(ownUser);
 
       return MaterialApp(
         theme: docsScreenshotsTheme(),
