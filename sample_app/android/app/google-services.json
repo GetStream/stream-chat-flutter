@@ -96,42 +96,6 @@
     },
     {
       "client_info": {
-        "mobilesdk_app_id": "1:674907137625:android:07c76802bbfd5654d7f348",
-        "android_client_info": {
-          "package_name": "com.sampleapp.rnpushtest"
-        }
-      },
-      "oauth_client": [
-        {
-          "client_id": "674907137625-o5iqvv6dtmljtn069b5djv19ad9a7js0.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
-      "api_key": [
-        {
-          "current_key": "AIzaSyBArS4RH7lUn3xbD-jhzWl5hVWZhliRgY0"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "674907137625-o5iqvv6dtmljtn069b5djv19ad9a7js0.apps.googleusercontent.com",
-              "client_type": 3
-            },
-            {
-              "client_id": "674907137625-2a06km2oshvi7e9m52v95a30u0ek36up.apps.googleusercontent.com",
-              "client_type": 2,
-              "ios_info": {
-                "bundle_id": "io.getstream.expotiktokapp"
-              }
-            }
-          ]
-        }
-      }
-    },
-    {
-      "client_info": {
         "mobilesdk_app_id": "1:674907137625:android:c02fbdcc683148e1d7f348",
         "android_client_info": {
           "package_name": "io.getstream.chat.android.compose.sample"
@@ -675,6 +639,42 @@
         "mobilesdk_app_id": "1:674907137625:android:d563721ebce8e225d7f348",
         "android_client_info": {
           "package_name": "io.getstream.feeds.flutter.sample"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "674907137625-o5iqvv6dtmljtn069b5djv19ad9a7js0.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBArS4RH7lUn3xbD-jhzWl5hVWZhliRgY0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "674907137625-o5iqvv6dtmljtn069b5djv19ad9a7js0.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "674907137625-2a06km2oshvi7e9m52v95a30u0ek36up.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "io.getstream.expotiktokapp"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:674907137625:android:cba499ae72f6ee4bd7f348",
+        "android_client_info": {
+          "package_name": "io.getstream.reactnative.sampleapp"
         }
       },
       "oauth_client": [

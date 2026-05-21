@@ -1,12 +1,12 @@
 import 'dart:async';
 
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:sample_app/push/push_provider.dart';
 import 'package:sample_app/push/push_token_manager.dart';
 import 'package:sample_app/utils/app_config.dart';
-import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart' hide PushProvider;
 import 'package:stream_chat_persistence/stream_chat_persistence.dart';
 
@@ -29,10 +29,12 @@ final _chatPersistenceClient = StreamChatPersistenceClient(
 Future<void> _sampleAppLogHandler(LogRecord record) async {
   if (kDebugMode) StreamChatClient.defaultLogHandler(record);
 
+  // report errors to Firebase Crashlytics
   if (record.error != null || record.stackTrace != null) {
-    await Sentry.captureException(
+    await FirebaseCrashlytics.instance.recordError(
       record.error,
-      stackTrace: record.stackTrace,
+      record.stackTrace,
+      reason: record.message,
     );
   }
 }

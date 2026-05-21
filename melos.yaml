@@ -46,7 +46,7 @@ command:
       equatable: ^2.0.8
       ezanimation: ^0.6.0
       firebase_core: ^4.0.0
-      firebase_crashlytics: ^4.0.0
+      firebase_crashlytics: ^5.2.0
       firebase_messaging: ^16.0.0
       file_picker: ^11.0.0
       file_selector: ^1.1.0
