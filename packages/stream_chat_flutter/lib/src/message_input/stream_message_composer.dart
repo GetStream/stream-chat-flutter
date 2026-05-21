@@ -854,7 +854,8 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
             ),
             SizeTransition(
               sizeFactor: _pickerAnimation,
-              alignment: AlignmentDirectional.topStart,
+              // ignore: deprecated_member_use
+              axisAlignment: -1,
               child: _buildInlineAttachmentPicker(context),
             ),
           ],
