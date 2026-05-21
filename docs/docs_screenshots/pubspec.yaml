@@ -33,6 +33,7 @@ dev_dependencies:
     sdk: flutter
   mocktail: ^1.0.5
   plugin_platform_interface: ^2.1.8
+  stream_chat_localizations: ^10.0.0-beta.13
 
 flutter:
   uses-material-design: true

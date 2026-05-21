@@ -104,3 +104,23 @@ ThemeData docsScreenshotsTheme() {
     ],
   );
 }
+
+ThemeData docsScreenshotsDarkTheme() {
+  final streamTextTheme = core.StreamTextTheme().apply(
+    color: core.StreamColorScheme.dark().systemText,
+    fontFamily: 'CupertinoSystemText',
+  );
+
+  return ThemeData(
+    useMaterial3: true,
+    brightness: Brightness.dark,
+    platform: docsScreenshotsTargetPlatform,
+    scaffoldBackgroundColor: const Color(0xFF000000),
+    appBarTheme: const AppBarTheme(
+      backgroundColor: Color(0xFF000000),
+    ),
+    extensions: [
+      StreamTheme(brightness: Brightness.dark, textTheme: streamTextTheme),
+    ],
+  );
+}

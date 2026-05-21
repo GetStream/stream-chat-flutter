@@ -243,4 +243,120 @@ void main() {
       );
     },
   );
+
+  docsGoldenTest(
+    'custom composer buttons',
+    fileName: 'message_input_custom_buttons',
+    constraints: const BoxConstraints.tightFor(width: 375, height: 120),
+    builder: () {
+      final client = MockClient();
+      final clientState = MockClientState();
+      final channel = MockChannel();
+      final channelState = MockChannelState();
+
+      setupMockChannel(
+        client: client,
+        clientState: clientState,
+        channel: channel,
+        channelState: channelState,
+      );
+
+      final controller = StreamMessageComposerController();
+
+      return MaterialApp(
+        theme: docsScreenshotsTheme(),
+        debugShowCheckedModeBanner: false,
+        home: StreamChat(
+          client: client,
+          connectivityStream: Stream.value([ConnectivityResult.mobile]),
+          componentBuilders: StreamComponentBuilders(
+            extensions: streamChatComponentBuilders(
+              messageComposerLeading: (context, props) => const SizedBox.shrink(),
+              messageComposerInputLeading: (context, props) => StreamButton.icon(
+                icon: Icon(context.streamIcons.emoji),
+                type: StreamButtonType.ghost,
+                style: StreamButtonStyle.secondary,
+                size: StreamButtonSize.small,
+                onPressed: () {},
+              ),
+              messageComposerInputTrailing: (context, props) => StreamButton.icon(
+                icon: Icon(context.streamIcons.attachment),
+                type: StreamButtonType.ghost,
+                style: StreamButtonStyle.secondary,
+                size: StreamButtonSize.small,
+                onPressed: () {},
+              ),
+              messageComposerTrailing: (context, props) => _CustomComposerTrailingButton(props: props),
+            ),
+          ),
+          child: StreamChannel(
+            showLoading: false,
+            channel: channel,
+            child: Scaffold(
+              body: Column(
+                children: [
+                  const Expanded(child: SizedBox()),
+                  StreamMessageComposer(
+                    messageComposerController: controller,
+                    placeholderBuilder: (context, placeholder) => 'Type a message...',
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    },
+  );
+}
+
+class _CustomComposerTrailingButton extends StatefulWidget {
+  const _CustomComposerTrailingButton({required this.props});
+
+  final MessageComposerComponentProps props;
+
+  @override
+  State<_CustomComposerTrailingButton> createState() => _CustomComposerTrailingButtonState();
+}
+
+class _CustomComposerTrailingButtonState extends State<_CustomComposerTrailingButton> {
+  var _isEmptyText = true;
+
+  @override
+  void initState() {
+    super.initState();
+    widget.props.controller.addListener(_updateIsEmptyText);
+  }
+
+  void _updateIsEmptyText() {
+    final isEmptyText = widget.props.controller.text.trim().isEmpty;
+    if (_isEmptyText != isEmptyText) {
+      setState(() => _isEmptyText = isEmptyText);
+    }
+  }
+
+  @override
+  void dispose() {
+    widget.props.controller.removeListener(_updateIsEmptyText);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return _isEmptyText
+        ? StreamButton.icon(
+            icon: Icon(context.streamIcons.voice),
+            type: StreamButtonType.solid,
+            style: StreamButtonStyle.primary,
+            size: StreamButtonSize.medium,
+            onPressed: () {},
+          )
+        : StreamButton.icon(
+            icon: Icon(context.streamIcons.send),
+            type: StreamButtonType.solid,
+            style: StreamButtonStyle.primary,
+            size: StreamButtonSize.medium,
+            onPressed: () {},
+          );
+  }
 }
