@@ -1,3 +1,12 @@
+## Upcoming Changes
+
+🚀 Performance
+
+- Read only the messages matching the `PaginationParams` from DB when calling `MessageDao.getMessagesByCid` instead of reading all messages for the channel and applying pagination in memory.
+- Read only the reactions matching the `userId` from DB when calling `ReactionDao.getReactionsByUserId` instead of reading all reactions for the message and filtering in memory.
+- Read only the reactions matching the `userId` from DB when calling `PinnedMessageReactionDao.getReactionsByUserId` instead of reading all reactions for the message and filtering in memory.
+
+
 ## 9.24.0
 
 - Updated `stream_chat` dependency to [`9.24.0`](https://pub.dev/packages/stream_chat/changelog).
