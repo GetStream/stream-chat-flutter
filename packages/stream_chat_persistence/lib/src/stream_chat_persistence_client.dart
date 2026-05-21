@@ -261,41 +261,6 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
     );
   }
 
-  /// Legacy full-hydration variant of [getChannelStates], retained for
-  /// benchmark parity. Not part of the abstract contract.
-  Future<List<ChannelState>> getChannelStatesLegacy({
-    Filter? filter,
-    SortOrder<ChannelState>? channelStateSort,
-    PaginationParams? paginationParams,
-  }) async {
-    assert(_debugIsConnected, '');
-    _logger.info('getChannelStatesLegacy');
-
-    final channels = await db!.channelQueryDao.getChannels(filter: filter);
-
-    final channelStates = await Future.wait(
-      channels.map((e) => getChannelStateByCid(e.cid)),
-    );
-
-    // Sort the channel states
-    if (channelStateSort != null && channelStateSort.isNotEmpty) {
-      channelStates.sort(channelStateSort.compare);
-    }
-
-    // Apply offset
-    if (paginationParams?.offset case final paginationOffset?) {
-      final clampedOffset = paginationOffset.clamp(0, channelStates.length);
-      channelStates.removeRange(0, clampedOffset);
-    }
-
-    // Apply limit
-    if (paginationParams?.limit case final paginationLimit?) {
-      return channelStates.take(paginationLimit).toList();
-    }
-
-    return channelStates;
-  }
-
   @override
   Future<List<ChannelState>> getChannelStates({
     Filter? filter,
