@@ -340,15 +340,15 @@ class _CustomComposerTrailingButtonState extends State<_CustomComposerTrailingBu
     final button = _isEmptyText
         ? StreamButton.icon(
             icon: Icon(context.streamIcons.voice),
-            type: StreamButtonType.solid,
-            style: StreamButtonStyle.primary,
+            type: StreamButtonType.ghost,
+            style: StreamButtonStyle.secondary,
             size: StreamButtonSize.large,
             onPressed: () {},
           )
         : StreamButton.icon(
             icon: Icon(context.streamIcons.send),
-            type: StreamButtonType.solid,
-            style: StreamButtonStyle.primary,
+            type: StreamButtonType.ghost,
+            style: StreamButtonStyle.secondary,
             size: StreamButtonSize.large,
             onPressed: () {},
           );
