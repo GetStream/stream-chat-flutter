@@ -1,4 +1,4 @@
-## Upcoming Changes
+## 9.24.0
 
 🔒 Security
 

@@ -124,6 +124,9 @@ jobs:
           channel: stable
           cache-key: flutter-:os:-:channel:-:version:-:arch:-:hash:-${{ hashFiles('**/pubspec.lock') }}
 
+      - name: "Disable Swift Package Manager"
+        run: flutter config --no-enable-swift-package-manager
+
       - name: "Install Tools"
         run: flutter pub global activate melos
 

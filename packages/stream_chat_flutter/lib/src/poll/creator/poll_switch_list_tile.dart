@@ -54,19 +54,14 @@ class PollSwitchListTile extends StatelessWidget {
     final listTile = SwitchListTile(
       value: value,
       onChanged: onChanged,
-      tileColor: fillColor,
       title: Text(title, style: theme.switchListTileTitleStyle),
       contentPadding: const EdgeInsets.only(left: 16, right: 8),
-      shape: RoundedRectangleBorder(
-        borderRadius: borderRadius ?? BorderRadius.zero,
-      ),
     );
 
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: fillColor,
-        borderRadius: borderRadius,
-      ),
+    return Material(
+      color: fillColor,
+      borderRadius: borderRadius,
+      clipBehavior: Clip.antiAlias,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
