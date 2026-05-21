@@ -182,8 +182,7 @@ List<Member> _defaultMembers(String? channelId) {
   final count = 2 + rng.nextInt(5); // 2..6 members
   final pool = [...sampleUsers]..shuffle(rng);
   return [
-    for (final user in pool.take(count))
-      Member(userId: user.id, user: user),
+    for (final user in pool.take(count)) Member(userId: user.id, user: user),
   ];
 }
 
