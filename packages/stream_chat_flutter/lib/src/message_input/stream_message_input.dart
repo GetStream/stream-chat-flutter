@@ -700,11 +700,9 @@ class StreamMessageInputState extends State<StreamMessageInput>
     final elevation = widget.elevation ?? _messageInputTheme.elevation;
     return Material(
       elevation: elevation ?? 8,
+      color: _messageInputTheme.inputBackgroundColor,
       child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: _messageInputTheme.inputBackgroundColor,
-          boxShadow: [if (shadow != null) shadow],
-        ),
+        decoration: BoxDecoration(boxShadow: [if (shadow != null) shadow]),
         child: SimpleSafeArea(
           enabled: widget.enableSafeArea ?? _messageInputTheme.enableSafeArea,
           child: Center(heightFactor: 1, child: messageInput),
