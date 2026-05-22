@@ -240,6 +240,89 @@ void main() {
     expect(fetchedPollVotes, isEmpty);
   });
 
+  group('getPollsByIds', () {
+    test('returns empty map for empty input ids', () async {
+      final result = await pollDao.getPollsByIds(const []);
+      expect(result, isEmpty);
+    });
+
+    test(
+        'returns a poll per id with votes/answers/ownVotes grouped; ids not '
+        'in the cache map to null', () async {
+      const optionA = PollOption(id: 'opt-a', text: 'A');
+      const optionB = PollOption(id: 'opt-b', text: 'B');
+
+      final dbUser = User(id: 'testUserId');
+      final otherUser = User(id: 'otherUser');
+      await database.userDao.updateUsers([dbUser, otherUser]);
+      await pollDao.updatePolls([
+        Poll(
+          id: 'poll-1',
+          name: 'Pick one',
+          options: const [optionA, optionB],
+          createdBy: dbUser,
+          createdById: dbUser.id,
+        ),
+        Poll(
+          id: 'poll-2',
+          name: 'No votes',
+          options: const [optionA, optionB],
+          createdBy: dbUser,
+          createdById: dbUser.id,
+        ),
+      ]);
+      await database.pollVoteDao.updatePollVotes([
+        PollVote(
+          id: 'p1-own-a',
+          pollId: 'poll-1',
+          userId: dbUser.id,
+          user: dbUser,
+          optionId: optionA.id,
+          createdAt: DateTime.now(),
+        ),
+        PollVote(
+          id: 'p1-other-b',
+          pollId: 'poll-1',
+          userId: otherUser.id,
+          user: otherUser,
+          optionId: optionB.id,
+          createdAt: DateTime.now(),
+        ),
+        PollVote(
+          id: 'p1-own-answer',
+          pollId: 'poll-1',
+          userId: dbUser.id,
+          user: dbUser,
+          answerText: 'because',
+          createdAt: DateTime.now(),
+        ),
+      ]);
+
+      final result = await pollDao
+          .getPollsByIds(const ['poll-1', 'poll-2', 'poll-missing']);
+
+      expect(
+          result.keys, unorderedEquals(['poll-1', 'poll-2', 'poll-missing']));
+      expect(result['poll-missing'], isNull);
+
+      final poll1 = result['poll-1']!;
+      expect(poll1.latestVotesByOption[optionA.id], hasLength(1));
+      expect(poll1.latestVotesByOption[optionB.id], hasLength(1));
+      expect(poll1.latestAnswers, hasLength(1));
+      // 1 own vote + 1 own answer = 2.
+      expect(poll1.ownVotesAndAnswers, hasLength(2));
+      expect(
+        poll1.ownVotesAndAnswers.every((v) => v.userId == dbUser.id),
+        isTrue,
+      );
+
+      final poll2 = result['poll-2']!;
+      expect(poll2.latestVotesByOption, isEmpty);
+      expect(poll2.latestAnswers, isEmpty);
+      expect(poll2.ownVotesAndAnswers, isEmpty);
+    });
+  });
+
   tearDown(() async {
     await database.disconnect();
   });

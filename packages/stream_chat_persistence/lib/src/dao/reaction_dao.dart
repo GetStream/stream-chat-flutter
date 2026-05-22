@@ -16,7 +16,11 @@ class ReactionDao extends DatabaseAccessor<DriftChatDatabase>
   ReactionDao(super.db);
 
   /// Returns all the reactions of a particular message by matching
-  /// [Reactions.messageId] with [messageId]
+  /// [Reactions.messageId] with [messageId].
+  ///
+  /// Not used in production — `MessageDao` hydrates via the batched
+  /// [getReactionsForMessages]. Kept for convenience (tests + ad-hoc
+  /// single-id lookups).
   Future<List<Reaction>> getReactions(String messageId) {
     final where = reactions.messageId.equals(messageId);
     return _selectReactions(where);
@@ -25,7 +29,10 @@ class ReactionDao extends DatabaseAccessor<DriftChatDatabase>
   /// Returns all the reactions of a particular message
   /// added by a particular user by matching
   /// [Reactions.messageId] with [messageId] and
-  /// [Reactions.userId] with [userId]
+  /// [Reactions.userId] with [userId].
+  ///
+  /// Not used in production — `MessageDao` hydrates via the batched
+  /// [getReactionsForMessagesByUserId]. Kept for convenience.
   Future<List<Reaction>> getReactionsByUserId(
     String messageId,
     String userId,

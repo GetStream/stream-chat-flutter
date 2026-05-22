@@ -224,6 +224,77 @@ void main() {
     expect(fetched, isEmpty);
   });
 
+  group('getReactionsForMessagesByUserId', () {
+    test('returns empty map for empty input ids', () async {
+      final result = await reactionDao
+          .getReactionsForMessagesByUserId(const [], 'someUser');
+      expect(result, isEmpty);
+    });
+
+    test(
+        'returns the given user\'s reactions per message id; message ids '
+        'with no reactions from that user map to an empty list', () async {
+      const cid = 'test:Cid';
+      const targetUser = 'targetUser';
+      const otherUser = 'otherUser';
+      const msgWithOwn = 'msg-with-own';
+      const msgWithoutOwn = 'msg-without-own';
+      const msgUnknown = 'msg-unknown';
+
+      final users = [User(id: targetUser), User(id: otherUser)];
+      await database.userDao.updateUsers(users);
+      await database.channelDao.updateChannels([ChannelModel(cid: cid)]);
+      await database.messageDao.updateMessages(cid, [
+        Message(
+          id: msgWithOwn,
+          user: users.first,
+          createdAt: DateTime.now(),
+          text: 'a',
+        ),
+        Message(
+          id: msgWithoutOwn,
+          user: users.first,
+          createdAt: DateTime.now(),
+          text: 'b',
+        ),
+      ]);
+      // msgWithOwn: 1 own + 1 other; msgWithoutOwn: only other-user reaction.
+      await reactionDao.updateReactions([
+        Reaction(
+          type: 'like',
+          messageId: msgWithOwn,
+          userId: targetUser,
+          createdAt: DateTime.now(),
+        ),
+        Reaction(
+          type: 'wow',
+          messageId: msgWithOwn,
+          userId: otherUser,
+          createdAt: DateTime.now(),
+        ),
+        Reaction(
+          type: 'love',
+          messageId: msgWithoutOwn,
+          userId: otherUser,
+          createdAt: DateTime.now(),
+        ),
+      ]);
+
+      final result = await reactionDao.getReactionsForMessagesByUserId(
+        const [msgWithOwn, msgWithoutOwn, msgUnknown],
+        targetUser,
+      );
+
+      expect(result.keys,
+          unorderedEquals([msgWithOwn, msgWithoutOwn, msgUnknown]));
+      expect(result[msgWithOwn], hasLength(1));
+      expect(result[msgWithOwn]!.single.userId, targetUser);
+      expect(result[msgWithOwn]!.single.type, 'like');
+      expect(result[msgWithoutOwn], isEmpty);
+      expect(result[msgUnknown], isEmpty);
+    });
+  });
+
   group('deleteReactionsByMessageIds', () {
     const messageId1 = 'testMessageId1';
     const messageId2 = 'testMessageId2';
