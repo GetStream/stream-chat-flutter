@@ -126,6 +126,82 @@ void main() {
     expect(fetchedPoll!.id, pollToFetch.id);
   });
 
+  test('getPollById returns null for an unknown id', () async {
+    final poll = await pollDao.getPollById('does-not-exist');
+    expect(poll, isNull);
+  });
+
+  test(
+      'getPollById hydrates ownVotesAndAnswers + latestVotesByOption + '
+      'latestAnswers from mixed-user/mixed-option votes', () async {
+    const pollId = 'poll-mixed';
+    const optionA = PollOption(id: 'opt-a', text: 'A');
+    const optionB = PollOption(id: 'opt-b', text: 'B');
+
+    // The test database is built with `testUserId`, so a vote with that
+    // userId is "own". Other userIds end up only in the latest-by-option
+    // / latest-answers buckets.
+    final dbUser = User(id: 'testUserId');
+    final otherUser = User(id: 'otherUser');
+    await database.userDao.updateUsers([dbUser, otherUser]);
+    await pollDao.updatePolls([
+      Poll(
+        id: pollId,
+        name: 'Pick one',
+        options: const [optionA, optionB],
+        createdBy: dbUser,
+        createdById: dbUser.id,
+      ),
+    ]);
+    await database.pollVoteDao.updatePollVotes([
+      PollVote(
+        id: 'own-vote-a',
+        pollId: pollId,
+        userId: dbUser.id,
+        user: dbUser,
+        optionId: optionA.id,
+        createdAt: DateTime.now(),
+      ),
+      PollVote(
+        id: 'other-vote-b',
+        pollId: pollId,
+        userId: otherUser.id,
+        user: otherUser,
+        optionId: optionB.id,
+        createdAt: DateTime.now().add(const Duration(seconds: 1)),
+      ),
+      PollVote(
+        id: 'own-answer',
+        pollId: pollId,
+        userId: dbUser.id,
+        user: dbUser,
+        answerText: 'because',
+        createdAt: DateTime.now().add(const Duration(seconds: 2)),
+      ),
+      PollVote(
+        id: 'other-answer',
+        pollId: pollId,
+        userId: otherUser.id,
+        user: otherUser,
+        answerText: 'just because',
+        createdAt: DateTime.now().add(const Duration(seconds: 3)),
+      ),
+    ]);
+
+    final fetched = await pollDao.getPollById(pollId);
+
+    expect(fetched, isNotNull);
+    expect(fetched!.latestVotesByOption[optionA.id], hasLength(1));
+    expect(fetched.latestVotesByOption[optionB.id], hasLength(1));
+    expect(fetched.latestAnswers, hasLength(2));
+    // 1 own vote + 1 own answer => 2.
+    expect(fetched.ownVotesAndAnswers, hasLength(2));
+    expect(
+      fetched.ownVotesAndAnswers.every((v) => v.userId == dbUser.id),
+      isTrue,
+    );
+  });
+
   test('deletePollsByIds', () async {
     // Preparing test data
     final insertedPolls = await _preparePollData();

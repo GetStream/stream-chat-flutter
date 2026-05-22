@@ -378,6 +378,50 @@ void main() {
     });
   });
 
+  test(
+      'getDraftMessageByCid hydrates parent message with draft=null '
+      '(propagates fetchDraft=false to prevent recursion)', () async {
+    const cid = 'test:fetchDraftPropagation';
+    const parentId = 'parent-msg';
+
+    final user = User(id: 'testUserId');
+    final parentMessage = Message(
+      id: parentId,
+      user: user,
+      createdAt: DateTime.now(),
+      text: 'Parent',
+    );
+
+    await database.userDao.updateUsers([user]);
+    await database.channelDao.updateChannels([ChannelModel(cid: cid)]);
+    await database.messageDao.updateMessages(cid, [parentMessage]);
+
+    await draftMessageDao.updateDraftMessages([
+      Draft(
+        channelCid: cid,
+        parentId: parentId,
+        createdAt: DateTime.now(),
+        message: DraftMessage(
+          id: 'thread-draft',
+          text: 'reply draft',
+          parentId: parentId,
+        ),
+      ),
+    ]);
+
+    final fetched =
+        await draftMessageDao.getDraftMessageByCid(cid, parentId: parentId);
+
+    expect(fetched, isNotNull);
+    expect(fetched!.parentMessage, isNotNull);
+    expect(fetched.parentMessage!.id, parentId);
+    expect(
+      fetched.parentMessage!.draft,
+      isNull,
+      reason: 'parent message hydration must pass fetchDraft=false',
+    );
+  });
+
   group('DraftMessages entity references', () {
     test(
       'should delete draft messages when referenced channel is deleted',

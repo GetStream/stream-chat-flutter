@@ -568,6 +568,412 @@ void main() {
     );
   });
 
+  // Covers message enrichment logic
+  group('hydration', () {
+    const cid = 'test:Hydration';
+
+    Future<void> _seedChannel(String channelCid) async {
+      await database.channelDao.updateChannels([ChannelModel(cid: channelCid)]);
+    }
+
+    test('getMessageById hydrates multiple latest and own reactions', () async {
+      const messageId = 'msg-multi-reactions';
+      await _seedChannel(cid);
+
+      final dbUser = User(id: 'testUserId');
+      final otherUser = User(id: 'otherUser');
+      await database.userDao.updateUsers([dbUser, otherUser]);
+
+      await messageDao.updateMessages(cid, [
+        Message(
+          id: messageId,
+          type: 'regular',
+          user: dbUser,
+          text: 'Hello',
+          createdAt: DateTime.now(),
+        ),
+      ]);
+
+      // 2 reactions by the DB user, 1 by another user.
+      await database.reactionDao.updateReactions([
+        Reaction(
+          type: 'like',
+          messageId: messageId,
+          user: dbUser,
+          createdAt: DateTime.now(),
+        ),
+        Reaction(
+          type: 'love',
+          messageId: messageId,
+          user: dbUser,
+          createdAt: DateTime.now().add(const Duration(seconds: 1)),
+        ),
+        Reaction(
+          type: 'wow',
+          messageId: messageId,
+          user: otherUser,
+          createdAt: DateTime.now().add(const Duration(seconds: 2)),
+        ),
+      ]);
+
+      final fetched = await messageDao.getMessageById(messageId);
+      expect(fetched, isNotNull);
+      expect(fetched!.latestReactions, hasLength(3));
+      expect(fetched.ownReactions, hasLength(2));
+      expect(
+        fetched.ownReactions!.every((r) => r.user?.id == dbUser.id),
+        isTrue,
+      );
+      expect(
+        fetched.latestReactions!.map((r) => r.type).toSet(),
+        equals({'like', 'love', 'wow'}),
+      );
+    });
+
+    test('getMessagesByCid hydrates reactions per row independently', () async {
+      await _seedChannel(cid);
+
+      final dbUser = User(id: 'testUserId');
+      await database.userDao.updateUsers([dbUser]);
+
+      final baseTime = DateTime.now();
+      final messages = List.generate(
+        5,
+        (i) => Message(
+          id: 'msg-iso-$i',
+          type: 'regular',
+          user: dbUser,
+          text: 'Hello $i',
+          createdAt: baseTime.add(Duration(seconds: i)),
+        ),
+      );
+      await messageDao.updateMessages(cid, messages);
+
+      // 2 reactions per message, distinct types per-row.
+      final reactions = [
+        for (var i = 0; i < messages.length; i++) ...[
+          Reaction(
+            type: 'like-$i',
+            messageId: messages[i].id,
+            user: dbUser,
+            createdAt: baseTime.add(Duration(seconds: i)),
+          ),
+          Reaction(
+            type: 'love-$i',
+            messageId: messages[i].id,
+            user: dbUser,
+            createdAt: baseTime.add(Duration(seconds: i, milliseconds: 1)),
+          ),
+        ],
+      ];
+      await database.reactionDao.updateReactions(reactions);
+
+      final fetched = await messageDao.getMessagesByCid(cid);
+      expect(fetched, hasLength(5));
+      for (final m in fetched) {
+        expect(m.latestReactions, hasLength(2));
+        // Reactions must belong to this message only — no cross-contamination
+        // between rows when batched-hydration replaces the per-row queries.
+        expect(
+          m.latestReactions!.map((r) => r.type).toSet(),
+          equals(
+              {'like-${m.id.split('-').last}', 'love-${m.id.split('-').last}'}),
+        );
+      }
+    });
+
+    test('getMessagesByCid hydrates poll with own + other-user votes',
+        () async {
+      const messageId = 'msg-with-poll';
+      const pollId = 'poll-mixed';
+      await _seedChannel(cid);
+
+      final dbUser = User(id: 'testUserId');
+      final otherUser = User(id: 'otherUser');
+      await database.userDao.updateUsers([dbUser, otherUser]);
+
+      const optionA = PollOption(id: 'opt-a', text: 'A');
+      const optionB = PollOption(id: 'opt-b', text: 'B');
+
+      final poll = Poll(
+        id: pollId,
+        name: 'Pick one',
+        options: const [optionA, optionB],
+        createdBy: dbUser,
+        createdById: dbUser.id,
+      );
+      await database.pollDao.updatePolls([poll]);
+
+      await messageDao.updateMessages(cid, [
+        Message(
+          id: messageId,
+          type: 'regular',
+          user: dbUser,
+          text: 'Vote please',
+          createdAt: DateTime.now(),
+          pollId: pollId,
+        ),
+      ]);
+
+      // 2 own votes (one per option), 2 other-user votes, 1 own answer.
+      await database.pollVoteDao.updatePollVotes([
+        PollVote(
+          id: 'v1',
+          pollId: pollId,
+          userId: dbUser.id,
+          user: dbUser,
+          optionId: optionA.id,
+          createdAt: DateTime.now(),
+        ),
+        PollVote(
+          id: 'v2',
+          pollId: pollId,
+          userId: dbUser.id,
+          user: dbUser,
+          optionId: optionB.id,
+          createdAt: DateTime.now().add(const Duration(seconds: 1)),
+        ),
+        PollVote(
+          id: 'v3',
+          pollId: pollId,
+          userId: otherUser.id,
+          user: otherUser,
+          optionId: optionA.id,
+          createdAt: DateTime.now().add(const Duration(seconds: 2)),
+        ),
+        PollVote(
+          id: 'v4',
+          pollId: pollId,
+          userId: otherUser.id,
+          user: otherUser,
+          optionId: optionB.id,
+          createdAt: DateTime.now().add(const Duration(seconds: 3)),
+        ),
+        PollVote(
+          id: 'a1',
+          pollId: pollId,
+          userId: dbUser.id,
+          user: dbUser,
+          answerText: 'because',
+          createdAt: DateTime.now().add(const Duration(seconds: 4)),
+        ),
+      ]);
+
+      final fetched = await messageDao.getMessagesByCid(cid);
+      expect(fetched, hasLength(1));
+      final hydratedPoll = fetched.first.poll;
+      expect(hydratedPoll, isNotNull);
+      expect(hydratedPoll!.id, pollId);
+      expect(hydratedPoll.latestVotesByOption[optionA.id], hasLength(2));
+      expect(hydratedPoll.latestVotesByOption[optionB.id], hasLength(2));
+      expect(hydratedPoll.latestAnswers, hasLength(1));
+      // Own votes + own answer => 3 total in ownVotesAndAnswers.
+      expect(hydratedPoll.ownVotesAndAnswers, hasLength(3));
+      expect(
+        hydratedPoll.ownVotesAndAnswers.every((v) => v.userId == dbUser.id),
+        isTrue,
+      );
+    });
+
+    test(
+        'getMessagesByCid hydrates thread draft when fetchDraft=true; '
+        'null when false', () async {
+      // `fetchDraft` attaches a thread draft (parentId == message.id) to its
+      // parent message, not the channel-level draft. See changelog entry for
+      // 9.15.0.
+      await _seedChannel(cid);
+      final dbUser = User(id: 'testUserId');
+      await database.userDao.updateUsers([dbUser]);
+
+      const parentId = 'msg-with-draft';
+      await messageDao.updateMessages(cid, [
+        Message(
+          id: parentId,
+          type: 'regular',
+          user: dbUser,
+          text: 'msg',
+          createdAt: DateTime.now(),
+        ),
+      ]);
+
+      await database.draftMessageDao.updateDraftMessages([
+        Draft(
+          channelCid: cid,
+          parentId: parentId,
+          createdAt: DateTime.now(),
+          message: DraftMessage(
+            id: 'draft-0',
+            text: 'unsent',
+            parentId: parentId,
+          ),
+        ),
+      ]);
+
+      final withDraft = await messageDao.getMessagesByCid(cid);
+      expect(withDraft.first.draft, isNotNull);
+      expect(withDraft.first.draft!.message.text, 'unsent');
+      expect(withDraft.first.draft!.parentId, parentId);
+
+      final withoutDraft =
+          await messageDao.getMessagesByCid(cid, fetchDraft: false);
+      expect(withoutDraft.first.draft, isNull);
+    });
+
+    test(
+        'getMessagesByCid hydrates quoted message with its own reactions '
+        'and poll', () async {
+      await _seedChannel(cid);
+
+      final dbUser = User(id: 'testUserId');
+      await database.userDao.updateUsers([dbUser]);
+
+      const pollId = 'poll-on-quoted';
+      const quotedMessageId = 'msg-quoted';
+      const quotingMessageId = 'msg-quoting';
+
+      final poll = Poll(
+        id: pollId,
+        name: 'Quoted poll',
+        options: const [
+          PollOption(id: 'q-opt-a', text: 'A'),
+          PollOption(id: 'q-opt-b', text: 'B'),
+        ],
+        createdBy: dbUser,
+        createdById: dbUser.id,
+      );
+      await database.pollDao.updatePolls([poll]);
+
+      final baseTime = DateTime.now();
+      await messageDao.updateMessages(cid, [
+        Message(
+          id: quotedMessageId,
+          type: 'regular',
+          user: dbUser,
+          text: 'first',
+          createdAt: baseTime,
+          pollId: pollId,
+        ),
+        Message(
+          id: quotingMessageId,
+          type: 'regular',
+          user: dbUser,
+          text: 'second',
+          createdAt: baseTime.add(const Duration(seconds: 1)),
+          quotedMessageId: quotedMessageId,
+        ),
+      ]);
+
+      await database.reactionDao.updateReactions([
+        Reaction(
+          type: 'like',
+          messageId: quotedMessageId,
+          user: dbUser,
+          createdAt: baseTime,
+        ),
+      ]);
+
+      final fetched = await messageDao.getMessagesByCid(cid);
+      final quoting = fetched.firstWhere((m) => m.id == quotingMessageId);
+      expect(quoting.quotedMessage, isNotNull);
+      expect(quoting.quotedMessage!.id, quotedMessageId);
+      expect(quoting.quotedMessage!.latestReactions, hasLength(1));
+      expect(quoting.quotedMessage!.ownReactions, hasLength(1));
+      expect(quoting.quotedMessage!.poll, isNotNull);
+      expect(quoting.quotedMessage!.poll!.id, pollId);
+    });
+
+    test('getMessagesByCid resolves a depth-2 quote chain', () async {
+      await _seedChannel(cid);
+      final dbUser = User(id: 'testUserId');
+      await database.userDao.updateUsers([dbUser]);
+
+      final baseTime = DateTime.now();
+      await messageDao.updateMessages(cid, [
+        Message(
+          id: 'C',
+          type: 'regular',
+          user: dbUser,
+          text: 'root',
+          createdAt: baseTime,
+        ),
+        Message(
+          id: 'B',
+          type: 'regular',
+          user: dbUser,
+          text: 'mid',
+          createdAt: baseTime.add(const Duration(seconds: 1)),
+          quotedMessageId: 'C',
+        ),
+        Message(
+          id: 'A',
+          type: 'regular',
+          user: dbUser,
+          text: 'top',
+          createdAt: baseTime.add(const Duration(seconds: 2)),
+          quotedMessageId: 'B',
+        ),
+      ]);
+
+      final fetched = await messageDao.getMessagesByCid(cid);
+      final top = fetched.firstWhere((m) => m.id == 'A');
+      expect(top.quotedMessage?.id, 'B');
+      expect(top.quotedMessage?.quotedMessage?.id, 'C');
+    });
+
+    test('getMessagesByCid hydrates reactions under pagination', () async {
+      await _seedChannel(cid);
+      final dbUser = User(id: 'testUserId');
+      await database.userDao.updateUsers([dbUser]);
+
+      final baseTime = DateTime.now();
+      final messages = List.generate(
+        30,
+        (i) => Message(
+          id: 'p-msg-$i',
+          type: 'regular',
+          user: dbUser,
+          text: 'msg $i',
+          createdAt: baseTime.add(Duration(seconds: i)),
+        ),
+      );
+      await messageDao.updateMessages(cid, messages);
+
+      // 2 reactions per message; surviving rows after pagination must still
+      // carry their full reaction set.
+      final reactions = [
+        for (final m in messages) ...[
+          Reaction(
+            type: 'r1',
+            messageId: m.id,
+            user: dbUser,
+            createdAt: m.createdAt,
+          ),
+          Reaction(
+            type: 'r2',
+            messageId: m.id,
+            user: dbUser,
+            createdAt: m.createdAt.add(const Duration(milliseconds: 1)),
+          ),
+        ],
+      ];
+      await database.reactionDao.updateReactions(reactions);
+
+      final page = await messageDao.getMessagesByCid(
+        cid,
+        messagePagination: const PaginationParams(
+          limit: 10,
+          lessThan: 'p-msg-25',
+        ),
+      );
+      expect(page, hasLength(10));
+      for (final m in page) {
+        expect(m.latestReactions, hasLength(2));
+        expect(m.ownReactions, hasLength(2));
+        expect(m.latestReactions!.every((r) => r.messageId == m.id), isTrue);
+      }
+    });
+  });
+
   tearDown(() async {
     await database.disconnect();
   });

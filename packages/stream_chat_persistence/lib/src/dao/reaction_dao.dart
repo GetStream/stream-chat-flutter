@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_persistence/src/db/drift_chat_database.dart';
+import 'package:stream_chat_persistence/src/db/query_utils.dart';
 import 'package:stream_chat_persistence/src/entity/reactions.dart';
 import 'package:stream_chat_persistence/src/entity/users.dart';
 import 'package:stream_chat_persistence/src/mapper/mapper.dart';
@@ -32,6 +33,45 @@ class ReactionDao extends DatabaseAccessor<DriftChatDatabase>
     final where =
         reactions.messageId.equals(messageId) & reactions.userId.equals(userId);
     return _selectReactions(where);
+  }
+
+  /// Returns reactions for every id in [messageIds], grouped by message id.
+  Future<Map<String, List<Reaction>>> getReactionsForMessages(
+    List<String> messageIds,
+  ) async {
+    if (messageIds.isEmpty) return const {};
+    final grouped = <String, List<Reaction>>{
+      for (final id in messageIds) id: <Reaction>[],
+    };
+    for (final chunk in chunked(messageIds)) {
+      final where = reactions.messageId.isIn(chunk);
+      final rows = await _selectReactions(where);
+      for (final r in rows) {
+        grouped[r.messageId]!.add(r);
+      }
+    }
+    return grouped;
+  }
+
+  /// Returns reactions for every id in [messageIds] that were added by
+  /// [userId], grouped by message id.
+  Future<Map<String, List<Reaction>>> getReactionsForMessagesByUserId(
+    List<String> messageIds,
+    String userId,
+  ) async {
+    if (messageIds.isEmpty) return const {};
+    final grouped = <String, List<Reaction>>{
+      for (final id in messageIds) id: <Reaction>[],
+    };
+    for (final chunk in chunked(messageIds)) {
+      final where =
+          reactions.messageId.isIn(chunk) & reactions.userId.equals(userId);
+      final rows = await _selectReactions(where);
+      for (final r in rows) {
+        grouped[r.messageId]!.add(r);
+      }
+    }
+    return grouped;
   }
 
   /// Updates the reactions data with the new [reactionList] data
