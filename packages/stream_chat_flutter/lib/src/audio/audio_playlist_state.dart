@@ -87,8 +87,7 @@ enum TrackState {
   playing,
 
   /// The track is currently paused.
-  paused
-  ;
+  paused;
 
   /// Returns `true` if the track is currently idle.
   bool get isIdle => this == TrackState.idle;
