@@ -488,7 +488,7 @@ void main() {
       _setupChannel(client, clientState, channel, channelState);
 
       const roboto = TextStyle(fontFamily: 'Roboto');
-      final customTheme = StreamChatThemeData().copyWith(
+      final customTheme = StreamChatThemeData(
         voiceRecordingAttachmentTheme: StreamVoiceRecordingAttachmentThemeData(
           titleTextStyle: roboto.copyWith(color: Colors.black54),
           durationTextStyle: roboto.copyWith(color: Colors.black54),
