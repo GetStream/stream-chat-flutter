@@ -90,11 +90,7 @@ jobs:
       - name: "Install Flutter"
         uses: subosito/flutter-action@v2
         with:
-          # Pin to the minimum Flutter declared in the SDK pubspecs. The
-          # `dart format` output changed between 3.10 (multi-line trailing
-          # enum semicolon) and 3.12 (collapsed), so a floating "3.x" here
-          # would reject code that's correctly formatted on the min SDK.
-          flutter-version: "3.38.1"
+          flutter-version: ${{ env.flutter_version }}
           channel: stable
           cache-key: flutter-:os:-:channel:-:version:-:arch:-:hash:-${{ hashFiles('**/pubspec.lock') }}
       - name: "Install Tools"
