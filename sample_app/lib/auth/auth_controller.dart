@@ -29,6 +29,7 @@ final _chatPersistenceClient = StreamChatPersistenceClient(
 Future<void> _sampleAppLogHandler(LogRecord record) async {
   if (kDebugMode) StreamChatClient.defaultLogHandler(record);
 
+  // report errors to Firebase Crashlytics
   if (record.error != null || record.stackTrace != null) {
     await FirebaseCrashlytics.instance.recordError(
       record.error,
