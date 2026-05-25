@@ -33,6 +33,7 @@ Future<void> _sampleAppLogHandler(LogRecord record) async {
     await FirebaseCrashlytics.instance.recordError(
       record.error,
       record.stackTrace,
+      reason: record.message,
     );
   }
 }
