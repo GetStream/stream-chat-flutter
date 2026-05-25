@@ -1,3 +1,10 @@
+## Upcoming Changes
+
+🐞 Fixed
+
+- Fixed `StreamMessageListView` not auto-scrolling to the bottom on the user's own outgoing message
+  until the server confirmed it.
+
 ## 9.24.0
 
 ✅ Added
