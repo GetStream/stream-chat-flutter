@@ -84,6 +84,7 @@
 - Added `StreamChatConfigurationData.reactionOverlap` and `StreamMessageReactions.overlap` to control whether reactions overlap the message bubble edge. When unset, falls back to the platform-based default (overlap on mobile, no overlap on desktop and web).
 - Exported `StreamScrollViewLoadMoreError` and `StreamScrollViewLoadMoreIndicator` from the public API.
 - Exported `StreamTimestamp`, `DateFormatter`, `formatDate` and `formatRecentDateTime` from the public API.
+- Added `DateTimeComparisonUtils` extension on `DateTime` (`isToday`, `isYesterday`, `isWithinLastMinute`, `isWithinLastWeek`, `isInSameYear`, `isSame(other, unit:)`) and the `DateTimeUnit` enum (`year` / `month` / `day` / `hour` / `minute` / `second` / `millisecond` / `microsecond`). All getters compare in local time and read the current instant via `package:clock`, so they're testable under `withClock(...)`.
 
 🔄 Changed
 
@@ -91,6 +92,7 @@
 - Changed the default `StreamChat.backgroundKeepAlive` from 1 minute to 15 seconds,
   matching `StreamChatCore`. See `stream_chat_flutter_core` changelog for rationale.
 - `StreamPhotoGalleryTile` now auto-sizes the platform thumbnail request from the tile's layout × DPR (132px fallback) instead of always asking for 400×400, so cells decode only what they paint. Pass an explicit `thumbnailSize` to override.
+- `formatRecentDateTime` reworked to a five-state cascade matching the Figma design system: `Just now` (< 1 min) / `Today at H:mm` / `Yesterday at H:mm` / `Weekday at H:mm` (within the last week) / `MMM do at H:mm` (older). Previously emitted `formatDate`-style output with the time appended.
 
 🐞 Fixed
 

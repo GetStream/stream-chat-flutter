@@ -5,6 +5,7 @@
 - Added `StreamChatClient.recoverStateOnReconnect` (defaults to `true`); when `false`, the client no longer auto-re-queries active channels on connection recovery — useful for consumers driving their own refresh from the `connectionRecovered` event.
 - Added `Message.updateWith(Message? other)` — merges a server-side update onto the local message while preserving locally-known `poll`, `sharedLocation`, `ownReactions`, and nested `quotedMessage` enrichment when the server omits them.
 - Added `Channel.isOneToOne` — true when the channel is `isDistinct` and has exactly two members. For the looser count-only check, inline `channel.memberCount == 2`.
+- Added `IterableMergeX.merge` (keyed-map merge on `Iterable<T>`, unsorted output) and `SortedListX.mergeSorted` (two-pointer merge on a sorted `List<T>`). Splits what `SortedListX.merge` did in 9.24.0 — see Changed below.
 
 ⚠️ Deprecated
 
@@ -15,6 +16,7 @@
 - Raised minimum versions of bundled Dart dependencies (`async`, `collection`, `dio`, `equatable`, `http_parser`, `json_annotation`, `logging`, `synchronized`, `uuid`, `web_socket_channel`) to current resolved versions.
 - Tightened `Channel.isGroup` from `memberCount != 2` to `memberCount > 2 || !isDistinct`. Two-member non-distinct channels now correctly report as groups, and 1-member distinct channels no longer do. Migrate via `!channel.isOneToOne` or `channel.memberCount != 2`.
 - Tightened `Channel.isDistinct` to require the `!members-` prefix (with trailing dash), matching the backend's `DistinctChannelPrefix` constant. Real server-generated ids always include the dash; only malformed/test ids that previously matched the looser `!members` check are affected.
+- Renamed `SortedListX.merge` (added in 9.24.0) → `SortedListX.mergeSorted` and moved the unsorted/iterable variant to `IterableMergeX.merge`. Callers on `List<T>` that want sorted output should switch to `mergeSorted`; callers on `Iterable<T>` keep using `merge`.
 
 🔒 Security
 
