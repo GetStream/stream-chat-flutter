@@ -34,50 +34,6 @@ class PinnedMessageDao extends DatabaseAccessor<DriftChatDatabase>
   Future<void> deleteMessageByCids(List<String> cids) async =>
       (delete(pinnedMessages)..where((tbl) => tbl.channelCid.isIn(cids))).go();
 
-  Future<Message> _messageFromJoinRow(
-    TypedResult rows, {
-    bool fetchDraft = false,
-  }) async {
-    final userEntity = rows.readTableOrNull(_users);
-    final pinnedByEntity = rows.readTableOrNull(_pinnedByUsers);
-    final msgEntity = rows.readTable(pinnedMessages);
-    final latestReactions =
-        await _db.pinnedMessageReactionDao.getReactions(msgEntity.id);
-    final ownReactions =
-        await _db.pinnedMessageReactionDao.getReactionsByUserId(
-      msgEntity.id,
-      _db.userId,
-    );
-
-    final quotedMessage = await switch (msgEntity.quotedMessageId) {
-      final id? => getMessageById(id),
-      _ => null,
-    };
-
-    final poll = await switch (msgEntity.pollId) {
-      final id? => _db.pollDao.getPollById(id),
-      _ => null,
-    };
-
-    final draft = await switch (fetchDraft) {
-      true => _db.draftMessageDao.getDraftMessageByCid(
-          msgEntity.channelCid,
-          parentId: msgEntity.id,
-        ),
-      _ => null,
-    };
-
-    return msgEntity.toMessage(
-      user: userEntity?.toUser(),
-      pinnedBy: pinnedByEntity?.toUser(),
-      latestReactions: latestReactions,
-      ownReactions: ownReactions,
-      quotedMessage: quotedMessage,
-      poll: poll,
-      draft: draft,
-    );
-  }
-
   /// Hydrates `rows` (from the pinned-messages table) into `Message`s using
   /// batched lookups for related entities.
   Future<List<Message>> _messagesFromJoinRows(
