@@ -196,8 +196,7 @@ enum MessageRemindersFilter {
   overdue('Overdue'),
   upcoming('Upcoming'),
   scheduled('Scheduled'),
-  savedForLater('Saved for later')
-  ;
+  savedForLater('Saved for later');
 
   const MessageRemindersFilter(this.label);
   final String label;
