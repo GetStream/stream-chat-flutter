@@ -854,6 +854,9 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
             ),
             SizeTransition(
               sizeFactor: _pickerAnimation,
+              // `alignment` replaces `axisAlignment` after Flutter 3.41, but
+              // our SDK floor is 3.38.1 — keep the deprecated property.
+              // ignore: deprecated_member_use
               axisAlignment: -1,
               child: _buildInlineAttachmentPicker(context),
             ),
