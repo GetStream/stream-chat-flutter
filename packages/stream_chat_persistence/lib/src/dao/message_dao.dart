@@ -170,27 +170,15 @@ class MessageDao extends DatabaseAccessor<DriftChatDatabase>
     PaginationParams? messagePagination,
   }) async {
     final (
-      lessThanCutoff,
-      lessThanOrEqualCutoff,
-      greaterThanCutoff,
-      greaterThanOrEqualCutoff,
+      lessThanCursor,
+      lessThanOrEqualCursor,
+      greaterThanCursor,
+      greaterThanOrEqualCursor,
     ) = await (
-      switch (messagePagination?.lessThan) {
-        final id? => _lookupMessageCreatedAt(id),
-        _ => Future<DateTime?>.value(),
-      },
-      switch (messagePagination?.lessThanOrEqual) {
-        final id? => _lookupMessageCreatedAt(id),
-        _ => Future<DateTime?>.value(),
-      },
-      switch (messagePagination?.greaterThan) {
-        final id? => _lookupMessageCreatedAt(id),
-        _ => Future<DateTime?>.value(),
-      },
-      switch (messagePagination?.greaterThanOrEqual) {
-        final id? => _lookupMessageCreatedAt(id),
-        _ => Future<DateTime?>.value(),
-      },
+      _lookupCursor(messagePagination?.lessThan),
+      _lookupCursor(messagePagination?.lessThanOrEqual),
+      _lookupCursor(messagePagination?.greaterThan),
+      _lookupCursor(messagePagination?.greaterThanOrEqual),
     ).wait;
 
     // When the caller is paginating forward (greaterThan / greaterThanOrEqual
@@ -199,9 +187,9 @@ class MessageDao extends DatabaseAccessor<DriftChatDatabase>
     // recent (closest to a `lessThan` cursor, or the channel tail when no
     // cursor is set). The final result is always reshaped to ASC for display.
     final isForwardPagination =
-        (greaterThanCutoff != null || greaterThanOrEqualCutoff != null) &&
-            lessThanCutoff == null &&
-            lessThanOrEqualCutoff == null;
+        (greaterThanCursor != null || greaterThanOrEqualCursor != null) &&
+            lessThanCursor == null &&
+            lessThanOrEqualCursor == null;
 
     final orderBy = isForwardPagination
         ? [
@@ -224,17 +212,37 @@ class MessageDao extends DatabaseAccessor<DriftChatDatabase>
       ..where(messages.parentId.isNull() | messages.showInChannel.equals(true))
       ..orderBy(orderBy);
 
-    if (lessThanCutoff case final t?) {
-      query.where(messages.createdAt.isSmallerThanValue(t));
+    // Cursor predicates compare the full `(createdAt, id)` tuple — the same
+    // key used in ORDER BY — so messages sharing a `createdAt` with the cursor
+    // fall on the correct side of the boundary. Filtering on `createdAt` alone
+    // would skip or repeat those siblings across pages.
+    if (lessThanCursor case final c?) {
+      query.where(
+        messages.createdAt.isSmallerThanValue(c.createdAt) |
+            (messages.createdAt.equals(c.createdAt) &
+                messages.id.isSmallerThanValue(c.id)),
+      );
     }
-    if (lessThanOrEqualCutoff case final t?) {
-      query.where(messages.createdAt.isSmallerOrEqualValue(t));
+    if (lessThanOrEqualCursor case final c?) {
+      query.where(
+        messages.createdAt.isSmallerThanValue(c.createdAt) |
+            (messages.createdAt.equals(c.createdAt) &
+                messages.id.isSmallerOrEqualValue(c.id)),
+      );
     }
-    if (greaterThanCutoff case final t?) {
-      query.where(messages.createdAt.isBiggerThanValue(t));
+    if (greaterThanCursor case final c?) {
+      query.where(
+        messages.createdAt.isBiggerThanValue(c.createdAt) |
+            (messages.createdAt.equals(c.createdAt) &
+                messages.id.isBiggerThanValue(c.id)),
+      );
     }
-    if (greaterThanOrEqualCutoff case final t?) {
-      query.where(messages.createdAt.isBiggerOrEqualValue(t));
+    if (greaterThanOrEqualCursor case final c?) {
+      query.where(
+        messages.createdAt.isBiggerThanValue(c.createdAt) |
+            (messages.createdAt.equals(c.createdAt) &
+                messages.id.isBiggerOrEqualValue(c.id)),
+      );
     }
 
     if (messagePagination != null) {
@@ -272,11 +280,13 @@ class MessageDao extends DatabaseAccessor<DriftChatDatabase>
     );
   }
 
-  /// Returns the `createdAt` of the message with [id] in the local cache,
-  /// or `null` if the message isn't cached or isn't visible in the channel
-  /// (i.e. a thread reply with `showInChannel = false`).
-  Future<DateTime?> _lookupMessageCreatedAt(String id) {
-    return (selectOnly(messages)
+  /// Returns the `(createdAt, id)` cursor for the message with [id] in the
+  /// local cache, or `null` if [id] is null, the message isn't cached, or
+  /// isn't visible in the channel (i.e. a thread reply with
+  /// `showInChannel = false`).
+  Future<({DateTime createdAt, String id})?> _lookupCursor(String? id) async {
+    if (id == null) return null;
+    final createdAt = await (selectOnly(messages)
           ..addColumns([messages.createdAt])
           ..where(messages.id.equals(id))
           ..where(
@@ -284,5 +294,7 @@ class MessageDao extends DatabaseAccessor<DriftChatDatabase>
           ))
         .map((row) => row.read(messages.createdAt))
         .getSingleOrNull();
+    if (createdAt == null) return null;
+    return (createdAt: createdAt, id: id);
   }
 }

@@ -610,6 +610,82 @@ void main() {
       expect(fetchedMessages.first.id, 'testMessageId${cid}5');
       expect(fetchedMessages.last.id, 'testMessageId${cid}14');
     });
+
+    test('cursor with tied createdAt does not skip or duplicate siblings',
+        () async {
+      // Three messages share an identical `createdAt`. The SQL ORDER BY uses
+      // the `(createdAt, id)` tuple, so within the trio the relative order is
+      // by id (lexicographic). A cursor at `msg_tieB` must split the trio
+      // cleanly: `msg_tieA` lands on the "before" side, `msg_tieC` on the
+      // "after" side. A `createdAt`-only WHERE predicate would collapse all
+      // three into the cursor's bucket and drop or keep them together.
+      final users = [User(id: 'tieUser')];
+      await database.userDao.updateUsers(users);
+      await database.channelDao.updateChannels([ChannelModel(cid: cid)]);
+
+      final tie = DateTime.now();
+      final earlier = tie.subtract(const Duration(seconds: 1));
+      final later = tie.add(const Duration(seconds: 1));
+
+      Message m(String id, DateTime t) => Message(
+            id: id,
+            type: 'regular',
+            user: users.first,
+            createdAt: t,
+            updatedAt: t,
+            text: id,
+          );
+
+      await messageDao.updateMessages(cid, [
+        m('msg_pre', earlier),
+        m('msg_tieA', tie),
+        m('msg_tieB', tie),
+        m('msg_tieC', tie),
+        m('msg_post', later),
+      ]);
+
+      final before = await messageDao.getMessagesByCid(
+        cid,
+        messagePagination: const PaginationParams(
+          limit: 100,
+          lessThan: 'msg_tieB',
+        ),
+      );
+      expect(before.map((m) => m.id).toList(), ['msg_pre', 'msg_tieA']);
+
+      final after = await messageDao.getMessagesByCid(
+        cid,
+        messagePagination: const PaginationParams(
+          limit: 100,
+          greaterThan: 'msg_tieB',
+        ),
+      );
+      expect(after.map((m) => m.id).toList(), ['msg_tieC', 'msg_post']);
+
+      final atOrBefore = await messageDao.getMessagesByCid(
+        cid,
+        messagePagination: const PaginationParams(
+          limit: 100,
+          lessThanOrEqual: 'msg_tieB',
+        ),
+      );
+      expect(
+        atOrBefore.map((m) => m.id).toList(),
+        ['msg_pre', 'msg_tieA', 'msg_tieB'],
+      );
+
+      final atOrAfter = await messageDao.getMessagesByCid(
+        cid,
+        messagePagination: const PaginationParams(
+          limit: 100,
+          greaterThanOrEqual: 'msg_tieB',
+        ),
+      );
+      expect(
+        atOrAfter.map((m) => m.id).toList(),
+        ['msg_tieB', 'msg_tieC', 'msg_post'],
+      );
+    });
   });
 
   test('updateMessages', () async {
