@@ -673,7 +673,6 @@ void main() {
       await messageDao.updateMessages(cid, [
         Message(
           id: messageId,
-          type: 'regular',
           user: dbUser,
           text: 'Hello',
           createdAt: DateTime.now(),
@@ -727,7 +726,6 @@ void main() {
         5,
         (i) => Message(
           id: 'msg-iso-$i',
-          type: 'regular',
           user: dbUser,
           text: 'Hello $i',
           createdAt: baseTime.add(Duration(seconds: i)),
@@ -793,7 +791,6 @@ void main() {
       await messageDao.updateMessages(cid, [
         Message(
           id: messageId,
-          type: 'regular',
           user: dbUser,
           text: 'Vote please',
           createdAt: DateTime.now(),
@@ -875,7 +872,6 @@ void main() {
       await messageDao.updateMessages(cid, [
         Message(
           id: parentId,
-          type: 'regular',
           user: dbUser,
           text: 'msg',
           createdAt: DateTime.now(),
@@ -933,7 +929,6 @@ void main() {
       await messageDao.updateMessages(cid, [
         Message(
           id: quotedMessageId,
-          type: 'regular',
           user: dbUser,
           text: 'first',
           createdAt: baseTime,
@@ -941,7 +936,6 @@ void main() {
         ),
         Message(
           id: quotingMessageId,
-          type: 'regular',
           user: dbUser,
           text: 'second',
           createdAt: baseTime.add(const Duration(seconds: 1)),
@@ -977,14 +971,12 @@ void main() {
       await messageDao.updateMessages(cid, [
         Message(
           id: 'C',
-          type: 'regular',
           user: dbUser,
           text: 'root',
           createdAt: baseTime,
         ),
         Message(
           id: 'B',
-          type: 'regular',
           user: dbUser,
           text: 'mid',
           createdAt: baseTime.add(const Duration(seconds: 1)),
@@ -992,7 +984,6 @@ void main() {
         ),
         Message(
           id: 'A',
-          type: 'regular',
           user: dbUser,
           text: 'top',
           createdAt: baseTime.add(const Duration(seconds: 2)),
@@ -1016,7 +1007,6 @@ void main() {
         30,
         (i) => Message(
           id: 'p-msg-$i',
-          type: 'regular',
           user: dbUser,
           text: 'msg $i',
           createdAt: baseTime.add(Duration(seconds: i)),
@@ -1047,7 +1037,6 @@ void main() {
       final page = await messageDao.getMessagesByCid(
         cid,
         messagePagination: const PaginationParams(
-          limit: 10,
           lessThan: 'p-msg-25',
         ),
       );

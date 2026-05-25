@@ -447,7 +447,6 @@ void main() {
       await pinnedMessageDao.updateMessages(cid, [
         Message(
           id: messageId,
-          type: 'regular',
           user: dbUser,
           text: 'Hello',
           createdAt: DateTime.now(),
@@ -495,7 +494,6 @@ void main() {
         5,
         (i) => Message(
           id: 'pmsg-iso-$i',
-          type: 'regular',
           user: dbUser,
           text: 'Hello $i',
           createdAt: baseTime.add(Duration(seconds: i)),
@@ -561,7 +559,6 @@ void main() {
       await pinnedMessageDao.updateMessages(cid, [
         Message(
           id: messageId,
-          type: 'regular',
           user: dbUser,
           text: 'Vote please',
           createdAt: DateTime.now(),
@@ -616,7 +613,6 @@ void main() {
       const parentId = 'pmsg-with-draft';
       final parentMessage = Message(
         id: parentId,
-        type: 'regular',
         user: dbUser,
         text: 'msg',
         createdAt: DateTime.now(),
@@ -677,7 +673,6 @@ void main() {
       await pinnedMessageDao.updateMessages(cid, [
         Message(
           id: quotedMessageId,
-          type: 'regular',
           user: dbUser,
           text: 'first',
           createdAt: baseTime,
@@ -685,7 +680,6 @@ void main() {
         ),
         Message(
           id: quotingMessageId,
-          type: 'regular',
           user: dbUser,
           text: 'second',
           createdAt: baseTime.add(const Duration(seconds: 1)),
@@ -721,14 +715,12 @@ void main() {
       await pinnedMessageDao.updateMessages(cid, [
         Message(
           id: 'pC',
-          type: 'regular',
           user: dbUser,
           text: 'root',
           createdAt: baseTime,
         ),
         Message(
           id: 'pB',
-          type: 'regular',
           user: dbUser,
           text: 'mid',
           createdAt: baseTime.add(const Duration(seconds: 1)),
@@ -736,7 +728,6 @@ void main() {
         ),
         Message(
           id: 'pA',
-          type: 'regular',
           user: dbUser,
           text: 'top',
           createdAt: baseTime.add(const Duration(seconds: 2)),

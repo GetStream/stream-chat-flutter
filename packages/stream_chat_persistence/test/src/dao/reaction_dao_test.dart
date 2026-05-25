@@ -164,7 +164,6 @@ void main() {
       total,
       (i) => Message(
         id: 'cmsg-$i',
-        type: 'regular',
         user: dbUser,
         text: 'Hello $i',
         createdAt: baseTime.add(Duration(seconds: i)),
@@ -232,7 +231,7 @@ void main() {
     });
 
     test(
-        'returns the given user\'s reactions per message id; message ids '
+        "returns the given user's reactions per message id; message ids "
         'with no reactions from that user map to an empty list', () async {
       const cid = 'test:Cid';
       const targetUser = 'targetUser';
