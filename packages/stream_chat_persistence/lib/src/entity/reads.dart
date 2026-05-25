@@ -2,7 +2,7 @@
 import 'package:drift/drift.dart';
 import 'package:stream_chat_persistence/src/entity/channels.dart';
 
-/// Represents a [Reads] table in [MoorChatDatabase].
+/// Represents a [Reads] table in [DriftChatDatabase].
 @DataClassName('ReadEntity')
 class Reads extends Table {
   /// Date of the read event

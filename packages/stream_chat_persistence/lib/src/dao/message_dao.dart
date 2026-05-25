@@ -353,14 +353,49 @@ class MessageDao extends DatabaseAccessor<DriftChatDatabase>
     bool fetchDraft = true,
     PaginationParams? messagePagination,
   }) async {
-    final lessThanCutoff = await switch (messagePagination?.lessThan) {
-      final id? => _lookupMessageCreatedAt(id),
-      _ => null,
-    };
-    final greaterThanCutoff = await switch (messagePagination?.greaterThan) {
-      final id? => _lookupMessageCreatedAt(id),
-      _ => null,
-    };
+    final (
+      lessThanCutoff,
+      lessThanOrEqualCutoff,
+      greaterThanCutoff,
+      greaterThanOrEqualCutoff,
+    ) = await (
+      switch (messagePagination?.lessThan) {
+        final id? => _lookupMessageCreatedAt(id),
+        _ => Future<DateTime?>.value(),
+      },
+      switch (messagePagination?.lessThanOrEqual) {
+        final id? => _lookupMessageCreatedAt(id),
+        _ => Future<DateTime?>.value(),
+      },
+      switch (messagePagination?.greaterThan) {
+        final id? => _lookupMessageCreatedAt(id),
+        _ => Future<DateTime?>.value(),
+      },
+      switch (messagePagination?.greaterThanOrEqual) {
+        final id? => _lookupMessageCreatedAt(id),
+        _ => Future<DateTime?>.value(),
+      },
+    ).wait;
+
+    // When the caller is paginating forward (greaterThan / greaterThanOrEqual
+    // only), order ASC so the SQL `LIMIT` retains the N messages immediately
+    // AFTER the cursor. Otherwise order DESC so `LIMIT` retains the N most
+    // recent (closest to a `lessThan` cursor, or the channel tail when no
+    // cursor is set). The final result is always reshaped to ASC for display.
+    final isForwardPagination =
+        (greaterThanCutoff != null || greaterThanOrEqualCutoff != null) &&
+            lessThanCutoff == null &&
+            lessThanOrEqualCutoff == null;
+
+    final orderBy = isForwardPagination
+        ? [
+            OrderingTerm.asc(messages.createdAt),
+            OrderingTerm.asc(messages.id),
+          ]
+        : [
+            OrderingTerm.desc(messages.createdAt),
+            OrderingTerm.desc(messages.id),
+          ];
 
     final query = select(messages).join([
       leftOuterJoin(_users, messages.userId.equalsExp(_users.id)),
@@ -371,15 +406,18 @@ class MessageDao extends DatabaseAccessor<DriftChatDatabase>
     ])
       ..where(messages.channelCid.equals(cid))
       ..where(messages.parentId.isNull() | messages.showInChannel.equals(true))
-      ..orderBy([
-        OrderingTerm.desc(messages.createdAt),
-        OrderingTerm.desc(messages.id),
-      ]);
+      ..orderBy(orderBy);
 
     if (lessThanCutoff case final t?) {
       query.where(messages.createdAt.isSmallerThanValue(t));
     }
+    if (lessThanOrEqualCutoff case final t?) {
+      query.where(messages.createdAt.isSmallerOrEqualValue(t));
+    }
     if (greaterThanCutoff case final t?) {
+      query.where(messages.createdAt.isBiggerThanValue(t));
+    }
+    if (greaterThanOrEqualCutoff case final t?) {
       query.where(messages.createdAt.isBiggerOrEqualValue(t));
     }
 
@@ -387,8 +425,9 @@ class MessageDao extends DatabaseAccessor<DriftChatDatabase>
       query.limit(messagePagination.limit);
     }
 
-    final rows = (await query.get()).reversed.toList();
-    return _messagesFromJoinRows(rows, fetchDraft: fetchDraft);
+    final rows = await query.get();
+    final orderedRows = isForwardPagination ? rows : rows.reversed.toList();
+    return _messagesFromJoinRows(orderedRows, fetchDraft: fetchDraft);
   }
 
   /// Updates the message data of a particular channel with
@@ -414,13 +453,15 @@ class MessageDao extends DatabaseAccessor<DriftChatDatabase>
   }
 
   /// Returns the `createdAt` of the message with [id] in the local cache,
-  /// or `null` if the message isn't cached. Used by [getMessagesByCid] to
-  /// resolve `lessThan` / `greaterThan` pagination cursors into SQL-comparable
-  /// timestamps so the filter runs in SQL instead of after the fact in Dart.
+  /// or `null` if the message isn't cached or isn't visible in the channel
+  /// (i.e. a thread reply with `showInChannel = false`).
   Future<DateTime?> _lookupMessageCreatedAt(String id) {
     return (selectOnly(messages)
           ..addColumns([messages.createdAt])
-          ..where(messages.id.equals(id)))
+          ..where(messages.id.equals(id))
+          ..where(
+            messages.parentId.isNull() | messages.showInChannel.equals(true),
+          ))
         .map((row) => row.read(messages.createdAt))
         .getSingleOrNull();
   }
