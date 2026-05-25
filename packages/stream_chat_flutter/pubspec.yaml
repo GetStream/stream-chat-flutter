@@ -26,6 +26,7 @@ environment:
 dependencies:
   cached_network_image: ^3.4.1
   chewie: ^1.13.1
+  clock: ^1.1.2
   collection: ^1.19.1
   desktop_drop: ^0.7.1
   diacritic: ^0.1.6

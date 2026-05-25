@@ -83,6 +83,8 @@ platform :ios do
     build_number = (latest_release&.dig(:buildVersion) || 0).to_i + 1
     build_ipa(export_method: "ad-hoc", build_number: build_number)
 
+    upload_dsyms_to_crashlytics
+
     firebase_app_distribution(
       app: app_id,
       ipa_path: "#{root_path}/build/ios/ipa/ChatSample.ipa",
@@ -104,6 +106,8 @@ platform :ios do
 
     build_number = (current_build_number || 0).to_i + 1
     build_ipa(export_method: "app-store", build_number: build_number)
+
+    upload_dsyms_to_crashlytics
 
     upload_to_testflight(
       api_key: appstore_api_key,
@@ -128,6 +132,8 @@ platform :ios do
     build_number = (current_build_number || 0).to_i + 1
     build_ipa(export_method: "app-store", build_number: build_number)
 
+    upload_dsyms_to_crashlytics
+
     upload_to_testflight(
       api_key: appstore_api_key,
       distribute_external: false,
@@ -136,6 +142,19 @@ platform :ios do
       groups: ['Internal Testers'],
       changelog: 'Lots of amazing new features to test out!',
       skip_waiting_for_build_processing: true,
+    )
+  end
+
+  desc "Upload iOS dSYMs from the most recent `flutter build ipa` to Firebase Crashlytics"
+  private_lane :upload_dsyms_to_crashlytics do
+    dsym_zip = zip(
+      path: "#{root_path}/build/ios/archive/Runner.xcarchive/dSYMs"
+    )
+
+    upload_symbols_to_crashlytics(
+      dsym_path: dsym_zip,
+      gsp_path: "#{root_path}/ios/Runner/GoogleService-Info.plist",
+      binary_path: "#{root_path}/ios/Pods/FirebaseCrashlytics/upload-symbols"
     )
   end
 

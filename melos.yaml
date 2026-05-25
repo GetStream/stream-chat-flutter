@@ -34,6 +34,7 @@ command:
       avatar_glow: ^3.0.0
       cached_network_image: ^3.4.1
       chewie: ^1.13.1
+      clock: ^1.1.2
       collection: ^1.19.1
       connectivity_plus: ^7.1.1
       cupertino_icons: ^1.0.3
@@ -46,6 +47,7 @@ command:
       equatable: ^2.0.8
       ezanimation: ^0.6.0
       firebase_core: ^4.0.0
+      firebase_crashlytics: ^5.2.0
       firebase_messaging: ^16.0.0
       file_picker: ^11.0.0
       file_selector: ^1.1.0
@@ -86,7 +88,6 @@ command:
       record: ^6.2.0
       responsive_builder: ^0.7.0
       rxdart: ^0.28.0
-      sentry_flutter: ^8.3.0
       share_plus: ">=12.0.2 <14.0.0"
       shimmer: ^3.0.0
       sqlite3_flutter_libs: ^0.5.26

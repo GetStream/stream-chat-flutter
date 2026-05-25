@@ -64,14 +64,14 @@ void main() {
       itemPositionsListener: itemPositionsListener,
     );
 
-    unawaited(itemScrollController.scrollTo(index: 1, duration: scrollDuration));
+    unawaited(itemScrollController.scrollTo(index: 1, duration: scrollDuration, curve: Curves.linear));
     await tester.pump();
     await tester.pump(scrollDuration);
     expect(find.text('Item 0'), findsNothing);
     expect(itemPositionsListener.itemPositions.value.firstWhere((position) => position.index == 1).itemLeadingEdge, 0);
     expect(tester.getBottomRight(find.text('Item 1')).dy, screenHeight);
 
-    unawaited(itemScrollController.scrollTo(index: 2, duration: scrollDuration));
+    unawaited(itemScrollController.scrollTo(index: 2, duration: scrollDuration, curve: Curves.linear));
     await tester.pump();
     await tester.pump(scrollDuration);
 
@@ -94,9 +94,9 @@ void main() {
       itemPositionsListener: itemPositionsListener,
     );
 
-    unawaited(itemScrollController.scrollTo(index: 5, duration: scrollDuration));
+    unawaited(itemScrollController.scrollTo(index: 5, duration: scrollDuration, curve: Curves.linear));
     await tester.pumpAndSettle();
-    unawaited(itemScrollController.scrollTo(index: 0, duration: scrollDuration));
+    unawaited(itemScrollController.scrollTo(index: 0, duration: scrollDuration, curve: Curves.linear));
     await tester.pumpAndSettle();
 
     expect(find.text('Item 0'), findsOneWidget);
@@ -116,7 +116,7 @@ void main() {
       itemPositionsListener: itemPositionsListener,
     );
 
-    unawaited(itemScrollController.scrollTo(index: 100, duration: scrollDuration));
+    unawaited(itemScrollController.scrollTo(index: 100, duration: scrollDuration, curve: Curves.linear));
     await tester.pumpAndSettle();
 
     expect(find.text('Item 99'), findsNothing);
@@ -172,7 +172,7 @@ void main() {
       const Offset(screenWidth - 10, screenHeight - (10 + itemHeight * 2)),
     );
 
-    unawaited(itemScrollController.scrollTo(index: 490, duration: scrollDuration));
+    unawaited(itemScrollController.scrollTo(index: 490, duration: scrollDuration, curve: Curves.linear));
     await tester.pumpAndSettle();
 
     await tester.drag(find.byType(ScrollablePositionedList), const Offset(0, 100));
@@ -196,5 +196,47 @@ void main() {
     expect(tester.getBottomLeft(find.text('Item 0')), const Offset(10, screenHeight - 10));
     expect(tester.getBottomLeft(find.text('Item 2')), const Offset(10, screenHeight - (10 + itemHeight * 2)));
     expect(tester.getBottomLeft(find.text('Item 3')), const Offset(10, screenHeight - (10 + itemHeight * 3)));
+  });
+
+  // Matches Compose `LazyListState.scrollToItem`: `alignment == 0` lands
+  // the target at the content-area edge, not the viewport edge.
+  testWidgets('padding - scrollTo(index: 0) from at-bottom rest is a no-op', (WidgetTester tester) async {
+    final itemScrollController = ItemScrollController();
+    await setUpWidgetTest(
+      tester,
+      itemScrollController: itemScrollController,
+      padding: const EdgeInsets.all(10),
+    );
+
+    expect(tester.getBottomLeft(find.text('Item 0')), const Offset(10, screenHeight - 10));
+
+    unawaited(itemScrollController.scrollTo(index: 0, duration: scrollDuration, curve: Curves.linear));
+    await tester.pumpAndSettle();
+
+    expect(tester.getBottomLeft(find.text('Item 0')), const Offset(10, screenHeight - 10));
+  });
+
+  testWidgets('padding - scrollTo(index: 0) from at-bottom rest does not change pixels', (WidgetTester tester) async {
+    final itemScrollController = ItemScrollController();
+    await setUpWidgetTest(
+      tester,
+      itemScrollController: itemScrollController,
+      padding: const EdgeInsets.all(10),
+    );
+
+    final scrollable = tester.state<ScrollableState>(find.byType(Scrollable).first);
+    final pixelsBefore = scrollable.position.pixels;
+
+    unawaited(itemScrollController.scrollTo(index: 0, duration: scrollDuration, curve: Curves.linear));
+
+    var maxExcursion = 0.0;
+    for (var i = 0; i < 20; i++) {
+      await tester.pump(scrollDuration ~/ 20);
+      maxExcursion = (scrollable.position.pixels - pixelsBefore).abs().clamp(maxExcursion, double.infinity);
+    }
+    await tester.pumpAndSettle();
+
+    expect(maxExcursion, 0.0);
+    expect(scrollable.position.pixels, pixelsBefore);
   });
 }

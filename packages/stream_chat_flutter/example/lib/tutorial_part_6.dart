@@ -59,7 +59,6 @@ class MyApp extends StatelessWidget {
         accentColor: Colors.green,
       ),
     );
-    final defaultTheme = StreamChatThemeData();
     final customTheme = StreamChatThemeData(
       messageListViewTheme: const StreamMessageListViewThemeData(
         backgroundColor: Colors.grey,
@@ -68,7 +67,7 @@ class MyApp extends StatelessWidget {
           fit: BoxFit.cover,
         ),
       ),
-    ).merge(defaultTheme);
+    );
 
     return MaterialApp(
       theme: themeData,

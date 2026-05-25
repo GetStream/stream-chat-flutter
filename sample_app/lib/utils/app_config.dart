@@ -1,7 +1,5 @@
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-const sentryDsn = 'https://6381ef88de4140db8f5e25ab37e0f08c@o1213503.ingest.sentry.io/6352870';
-
 const kDefaultStreamApiKey = 'kv7mcsxr24p8';
 
 final defaultUsers = <String, User>{

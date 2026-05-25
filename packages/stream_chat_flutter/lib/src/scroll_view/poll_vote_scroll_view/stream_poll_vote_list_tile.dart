@@ -146,8 +146,8 @@ class PollVoteUpdatedAt extends StatelessWidget {
       formatter: (context, date) {
         if (date.isToday) return context.translations.todayLabel;
         if (date.isYesterday) return context.translations.yesterdayLabel;
-        if (date.isWithinAWeek) return Jiffy.parseFromDateTime(date).EEEE;
-        if (date.isWithinAYear) return Jiffy.parseFromDateTime(date).MMMd;
+        if (date.isWithinLastWeek) return Jiffy.parseFromDateTime(date).EEEE;
+        if (date.isInSameYear) return Jiffy.parseFromDateTime(date).MMMd;
 
         return Jiffy.parseFromDateTime(date).yMMMd;
       },

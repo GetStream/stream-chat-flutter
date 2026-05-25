@@ -9,29 +9,50 @@ on:
   push:
     branches:
       - master
-    paths:
-      - 'packages/**'
-      - '.github/workflows/legacy_version_analyze.yml'
   pull_request:
     branches:
       - master
-    paths:
-      - 'packages/**'
-      - '.github/workflows/legacy_version_analyze.yml'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
+  # Centralizes every gating decision for this workflow — path filter, draft
+  # state, and push-vs-PR semantics. Downstream jobs only need a single
+  # `if: needs.gate.outputs.should_run == 'true'`. A job skipped this way
+  # reports `success` to branch protection (vs. `on.paths` filtering, which
+  # hangs forever) — see
+  # https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/collaborating-on-repositories-with-code-quality-features/troubleshooting-required-status-checks
+  gate:
+    runs-on: ubuntu-latest
+    outputs:
+      should_run: ${{ github.event_name == 'push' || (steps.filter.outputs.packages == 'true' && github.event.pull_request.draft != true) }}
+    steps:
+      # paths-filter needs a checkout on push events (it diffs against the
+      # previous commit via git history). On pull_request events it uses
+      # the API and the checkout is unused, but is cheap.
+      - name: "Git Checkout"
+        uses: actions/checkout@v6
+
+      - name: "Detect Path Changes"
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            packages:
+              - 'packages/**'
+              - '.github/workflows/legacy_version_analyze.yml'
+
   # Does a sanity check that packages at least pass analysis on the N-1
   # versions of Flutter stable if the package claims to support that version.
   # This is to minimize accidentally making changes that break old versions
   # (which we don't commit to supporting, but don't want to actively break)
   # without updating the constraints.
   analyze_legacy_versions:
+    needs: gate
+    if: needs.gate.outputs.should_run == 'true'
     timeout-minutes: 15
-    if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     steps:
       - name: "Git Checkout"

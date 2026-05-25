@@ -3073,6 +3073,9 @@ void main() {
             id: 'test-message-id',
             parentId: 'test-parent-id', // is thread message
             state: MessageState.sent,
+            // `Message.createdAt` falls back to `DateTime.now()` per call
+            // when not provided, which breaks merge/sort keyed on createdAt.
+            createdAt: DateTime.now(),
           );
 
           final reaction = Reaction(
@@ -3352,6 +3355,9 @@ void main() {
             ),
           },
           state: MessageState.sent,
+          // `Message.createdAt` falls back to `DateTime.now()` per call when
+          // not provided, which breaks merge/sort keyed on createdAt.
+          createdAt: DateTime.now(),
         );
 
         when(() => client.deleteReaction(messageId, type)).thenAnswer((_) async => EmptyResponse());
@@ -3406,6 +3412,9 @@ void main() {
               ),
             },
             state: MessageState.sent,
+            // `Message.createdAt` falls back to `DateTime.now()` per call
+            // when not provided, which breaks merge/sort keyed on createdAt.
+            createdAt: DateTime.now(),
           );
 
           when(
@@ -4640,6 +4649,128 @@ void main() {
         verify(() => client.sendMessage(any(), channelId, channelType));
       });
     });
+
+    group('`.state.pruneOldest`', () {
+      List<Message> _generateMessages(int count) => List.generate(
+        count,
+        (i) => Message(
+          id: 'msg-$i',
+          text: 'Hello $i',
+          createdAt: DateTime(2024).add(Duration(seconds: i)),
+        ),
+      );
+
+      test('keeps only the [maxMessages] most recent messages', () {
+        final initial = _generateMessages(10);
+        channel.state!.updateChannelState(
+          _generateChannelState(channelId, channelType).copyWith(messages: initial),
+        );
+        expect(channel.state!.messages, hasLength(10));
+
+        channel.state!.pruneOldest(4);
+
+        final pruned = channel.state!.messages;
+        expect(pruned, hasLength(4));
+        expect(pruned.map((m) => m.id), ['msg-6', 'msg-7', 'msg-8', 'msg-9']);
+      });
+
+      test('emits the pruned list on `messagesStream`', () async {
+        final initial = _generateMessages(6);
+        channel.state!.updateChannelState(
+          _generateChannelState(channelId, channelType).copyWith(messages: initial),
+        );
+
+        final next = channel.state!.messagesStream.firstWhere((messages) => messages.length == 3);
+
+        channel.state!.pruneOldest(3);
+
+        final emitted = await next;
+        expect(emitted.map((m) => m.id), ['msg-3', 'msg-4', 'msg-5']);
+      });
+
+      test('is a no-op when message count is within the limit', () {
+        final initial = _generateMessages(3);
+        channel.state!.updateChannelState(
+          _generateChannelState(channelId, channelType).copyWith(messages: initial),
+        );
+
+        channel.state!.pruneOldest(5);
+        expect(channel.state!.messages, hasLength(3));
+
+        channel.state!.pruneOldest(3);
+        expect(channel.state!.messages, hasLength(3));
+      });
+
+      test('is a no-op when [maxMessages] is zero or negative', () {
+        final initial = _generateMessages(5);
+        channel.state!.updateChannelState(
+          _generateChannelState(channelId, channelType).copyWith(messages: initial),
+        );
+
+        channel.state!.pruneOldest(0);
+        expect(channel.state!.messages, hasLength(5));
+
+        channel.state!.pruneOldest(-1);
+        expect(channel.state!.messages, hasLength(5));
+      });
+
+      test('is a no-op when `isUpToDate` is false', () {
+        final initial = _generateMessages(10);
+        channel.state!.updateChannelState(
+          _generateChannelState(channelId, channelType).copyWith(messages: initial),
+        );
+
+        channel.state!.isUpToDate = false;
+        channel.state!.pruneOldest(3);
+        expect(channel.state!.messages, hasLength(10));
+      });
+
+      test('only mutates `messages`; other channel state fields untouched', () {
+        final initial = _generateMessages(10);
+        final pinned = [
+          Message(
+            id: 'pinned-1',
+            text: 'pinned message',
+            createdAt: DateTime(2024),
+          ),
+        ];
+
+        channel.state!.updateChannelState(
+          _generateChannelState(channelId, channelType).copyWith(
+            messages: initial,
+            pinnedMessages: pinned,
+          ),
+        );
+
+        channel.state!.pruneOldest(3);
+
+        expect(channel.state!.messages, hasLength(3));
+        expect(channel.state!.pinnedMessages, equals(pinned));
+      });
+
+      test('does not emit on `messagesStream` for no-op calls', () async {
+        final initial = _generateMessages(5);
+        channel.state!.updateChannelState(
+          _generateChannelState(channelId, channelType).copyWith(messages: initial),
+        );
+
+        // Skip the seeded emission from updateChannelState.
+        await pumpEventQueue();
+
+        final emissions = <List<Message>>[];
+        final sub = channel.state!.messagesStream.skip(1).listen(emissions.add);
+        addTearDown(sub.cancel);
+
+        channel.state!.pruneOldest(0); // non-positive guard
+        channel.state!.pruneOldest(-1); // non-positive guard
+        channel.state!.pruneOldest(10); // within limit guard
+        channel.state!.isUpToDate = false;
+        channel.state!.pruneOldest(2); // !isUpToDate guard
+
+        await pumpEventQueue();
+        expect(emissions, isEmpty);
+      });
+    });
   });
 
   group('WS events', () {
@@ -5082,6 +5213,98 @@ void main() {
             ).called(1);
           },
         );
+
+        test(
+          'should not duplicate when server echoes back an optimistically '
+          'inserted message with a later createdAt',
+          () async {
+            // Local message used as the input to `channel.sendMessage`.
+            final localCreatedAt = initialLastMessageAt.add(const Duration(seconds: 3));
+            final localMessage = Message(
+              id: 'test-message-id',
+              text: 'Hello world!',
+              user: client.state.currentUser,
+              createdAt: localCreatedAt,
+            );
+
+            // Mock the network send to return the message unchanged so the
+            // optimistic insert + sent-state update both land on the same
+            // `createdAt`. The bug fires later, on the WS echo.
+            final sendMessageResponse = SendMessageResponse()
+              ..message = localMessage.copyWith(state: MessageState.sent);
+            when(() => client.sendMessage(any(), channelId, channelType)).thenAnswer((_) async => sendMessageResponse);
+
+            await channel.sendMessage(localMessage);
+
+            expect(channel.state!.messages, hasLength(1));
+
+            // Server then broadcasts the same message via a `message.new`
+            // event with a slightly later `createdAt` (server-assigned
+            // timestamp).
+            final serverMessage = localMessage.copyWith(
+              createdAt: localCreatedAt.add(const Duration(milliseconds: 50)),
+            );
+            client.addEvent(createNewMessageEvent(serverMessage));
+
+            // Wait for the event to get processed
+            await Future.delayed(Duration.zero);
+
+            // The state should contain exactly one message with that id,
+            // not a duplicate.
+            final matching = channel.state!.messages.where((it) => it.id == localMessage.id);
+            expect(matching, hasLength(1));
+            expect(channel.state!.messages, hasLength(1));
+          },
+        );
+
+        test(
+          'should not duplicate when the locally-sent message is no longer '
+          'the latest (retry-after-offline scenario)',
+          () async {
+            // Mirrors the offline-retry flow: a local message is sent, then
+            // another message arrives via WS while the local one is still
+            // pending. When the retry finally succeeds the server response's
+            // `createdAt` is later than the intervening message, so the
+            // locally-sent copy is no longer `messages.last`.
+            final localCreatedAt = initialLastMessageAt.add(const Duration(seconds: 1));
+            final localMessage = Message(
+              id: 'local-message-id',
+              text: 'Hello world!',
+              user: client.state.currentUser,
+              createdAt: localCreatedAt,
+            );
+
+            final sendMessageResponse = SendMessageResponse()
+              ..message = localMessage.copyWith(state: MessageState.sent);
+            when(() => client.sendMessage(any(), channelId, channelType)).thenAnswer((_) async => sendMessageResponse);
+
+            await channel.sendMessage(localMessage);
+
+            // Another message arrives via WS with a later `createdAt`,
+            // pushing the locally-sent message off the tail.
+            final otherMessage = Message(
+              id: 'other-message-id',
+              user: User(id: 'other-user'),
+              createdAt: localCreatedAt.add(const Duration(seconds: 2)),
+            );
+            client.addEvent(createNewMessageEvent(otherMessage));
+            await Future.delayed(Duration.zero);
+
+            // Server then broadcasts the locally-sent message via
+            // `message.new` with a `createdAt` that is later than the
+            // intervening message — exactly the shape produced by a
+            // successful retry after another message arrived in between.
+            final serverEcho = localMessage.copyWith(
+              createdAt: otherMessage.createdAt.add(const Duration(seconds: 1)),
+            );
+            client.addEvent(createNewMessageEvent(serverEcho));
+            await Future.delayed(Duration.zero);
+
+            final localMatches = channel.state!.messages.where((it) => it.id == localMessage.id);
+            expect(localMatches, hasLength(1));
+            expect(channel.state!.messages, hasLength(2));
+          },
+        );
       },
     );
 
@@ -5240,6 +5463,183 @@ void main() {
             await Future.delayed(Duration.zero);
 
             expect(channel.state?.pinnedMessages, isEmpty);
+          },
+        );
+      },
+    );
+
+    // A reply with `show_in_channel = true` is mirrored into both `messages`
+    // and `threads[parentId]`. When the thread isn't loaded (fresh hydration,
+    // user never opened the thread) the channel-level copy is the only place
+    // locally-cached fields like `ownReactions`/`poll` survive — so reaction
+    // and message-update events for such replies must still find it.
+    group(
+      'reply events with `show_in_channel = true` and unloaded thread',
+      () {
+        const channelId = 'test-channel-id';
+        const channelType = 'test-channel-type';
+        const replyId = 'mirrored-reply-id';
+        const parentId = 'parent-message-id';
+        // Pinned createdAt keeps oldIndex lookups stable in `updateMessage`.
+        final createdAt = DateTime.utc(2026, 1, 1);
+        late Channel channel;
+
+        setUp(() {
+          final channelState = _generateChannelState(
+            channelId,
+            channelType,
+            mockChannelConfig: true,
+            ownCapabilities: const [ChannelCapability.readEvents],
+          );
+          channel = Channel.fromState(client, channelState);
+        });
+
+        tearDown(() => channel.dispose());
+
+        // Seeds a single reply into the channel-level `messages` while leaving
+        // `threads[parentId]` empty — the exact regression scenario.
+        Message seedMirroredReply({
+          List<Reaction> ownReactions = const [],
+          Poll? poll,
+        }) {
+          final reply = Message(
+            id: replyId,
+            parentId: parentId,
+            showInChannel: true,
+            user: client.state.currentUser,
+            createdAt: createdAt,
+            ownReactions: ownReactions,
+            poll: poll,
+            pollId: poll?.id,
+          );
+          channel.state!.updateChannelState(
+            channel.state!.channelState.copyWith(messages: [reply]),
+          );
+          return reply;
+        }
+
+        test(
+          '`reaction.new` from another user preserves `ownReactions`',
+          () async {
+            final ownReaction = Reaction(
+              type: 'like',
+              messageId: replyId,
+              user: client.state.currentUser,
+            );
+            seedMirroredReply(ownReactions: [ownReaction]);
+            // Pre-condition: thread is not loaded.
+            expect(channel.state!.threads, isEmpty);
+
+            // Server reaction events don't echo back the recipient's own
+            // reactions, so the listener must pull them from the cached copy.
+            final otherUserReaction = Reaction(
+              type: 'love',
+              messageId: replyId,
+              user: User(id: 'other-user'),
+            );
+            client.addEvent(
+              Event(
+                cid: channel.cid,
+                type: EventType.reactionNew,
+                reaction: otherUserReaction,
+                message: Message(
+                  id: replyId,
+                  parentId: parentId,
+                  showInChannel: true,
+                  user: client.state.currentUser,
+                  createdAt: createdAt,
+                  latestReactions: [otherUserReaction],
+                ),
+              ),
+            );
+
+            await Future.delayed(Duration.zero);
+
+            final stored = channel.state!.messages.firstWhere((it) => it.id == replyId);
+            expect(stored.ownReactions, [ownReaction]);
+          },
+        );
+
+        test(
+          '`reaction.deleted` strips only the removed reaction',
+          () async {
+            final kept = Reaction(
+              type: 'like',
+              messageId: replyId,
+              user: client.state.currentUser,
+            );
+            final removed = Reaction(
+              type: 'love',
+              messageId: replyId,
+              user: client.state.currentUser,
+            );
+            seedMirroredReply(ownReactions: [kept, removed]);
+            expect(channel.state!.threads, isEmpty);
+
+            client.addEvent(
+              Event(
+                cid: channel.cid,
+                type: EventType.reactionDeleted,
+                reaction: removed,
+                message: Message(
+                  id: replyId,
+                  parentId: parentId,
+                  showInChannel: true,
+                  user: client.state.currentUser,
+                  createdAt: createdAt,
+                ),
+              ),
+            );
+
+            await Future.delayed(Duration.zero);
+
+            final stored = channel.state!.messages.firstWhere((it) => it.id == replyId);
+            expect(stored.ownReactions, [kept]);
+          },
+        );
+
+        test(
+          '`message.updated` preserves `poll`, `pollId`, and `ownReactions`',
+          () async {
+            final ownReaction = Reaction(
+              type: 'like',
+              messageId: replyId,
+              user: client.state.currentUser,
+            );
+            // Partial server updates can omit poll/pollId/ownReactions; the
+            // cached copy is what backfills them.
+            final poll = Poll(
+              id: 'poll-1',
+              name: 'Pick one',
+              options: const [
+                PollOption(text: 'A'),
+                PollOption(text: 'B'),
+              ],
+            );
+            seedMirroredReply(ownReactions: [ownReaction], poll: poll);
+            expect(channel.state!.threads, isEmpty);
+
+            client.addEvent(
+              Event(
+                cid: channel.cid,
+                type: EventType.messageUpdated,
+                message: Message(
+                  id: replyId,
+                  parentId: parentId,
+                  showInChannel: true,
+                  user: client.state.currentUser,
+                  createdAt: createdAt,
+                  text: 'edited',
+                ),
+              ),
+            );
+
+            await Future.delayed(Duration.zero);
+
+            final stored = channel.state!.messages.firstWhere((it) => it.id == replyId);
+            expect(stored.ownReactions, [ownReaction]);
+            expect(stored.poll?.id, poll.id);
+            expect(stored.pollId, poll.id);
           },
         );
       },
@@ -6244,6 +6644,9 @@ void main() {
           parentId: parentId,
           user: client.state.currentUser,
           text: 'Thread message',
+          // `Message.createdAt` falls back to `DateTime.now()` per call when
+          // not provided, which breaks merge/sort keyed on createdAt.
+          createdAt: DateTime.now(),
         );
 
         channel.state?.updateMessage(threadMessage);
@@ -6304,6 +6707,9 @@ void main() {
           user: client.state.currentUser,
           text: 'Thread message',
           reminder: initialReminder,
+          // `Message.createdAt` falls back to `DateTime.now()` per call when
+          // not provided, which breaks merge/sort keyed on createdAt.
+          createdAt: DateTime.now(),
         );
 
         channel.state?.updateMessage(threadMessage);
@@ -6363,6 +6769,10 @@ void main() {
           user: client.state.currentUser,
           text: 'Thread message',
           reminder: initialReminder,
+          // Explicit `createdAt` so `Message.createdAt` is deterministic
+          // across reads — without one it falls back to `DateTime.now()`
+          // on every call, which breaks any sort/merge keyed on createdAt.
+          createdAt: DateTime.now(),
         );
 
         channel.state?.updateMessage(threadMessage);
@@ -7442,6 +7852,109 @@ void main() {
               'msg-1', // state message
               'thread-msg-1', // state thread message
             ]),
+          );
+        },
+      );
+
+      test(
+        'should delete every authored message across threads without '
+        'cross-thread leakage (regression: _updateThreadMessages)',
+        () async {
+          // user-1 authors a top-level message AND replies in two different
+          // threads (owned by user-2). The user.messages.deleted flow
+          // collects everything from user-1 across channel + threads and
+          // routes it through a single _updateMessages batch — historically
+          // this batch was passed unfiltered to every affected thread's
+          // merge, so replies to thread A leaked into thread B and v.v.
+          final user1 = User(id: 'user-1', name: 'User 1');
+          final user2 = User(id: 'user-2', name: 'User 2');
+
+          final parentA = Message(id: 'parent-A', text: 'Thread A', user: user2);
+          final parentB = Message(id: 'parent-B', text: 'Thread B', user: user2);
+
+          final topLevelFromUser1 = Message(
+            id: 'top-1',
+            text: 'user-1 top-level message',
+            user: user1,
+          );
+          final replyA = Message(
+            id: 'reply-A',
+            text: 'user-1 reply in thread A',
+            user: user1,
+            parentId: 'parent-A',
+          );
+          final replyB = Message(
+            id: 'reply-B',
+            text: 'user-1 reply in thread B',
+            user: user1,
+            parentId: 'parent-B',
+          );
+
+          channel.state?.addNewMessage(parentA);
+          channel.state?.addNewMessage(parentB);
+          channel.state?.addNewMessage(topLevelFromUser1);
+          channel.state?.addNewMessage(replyA);
+          channel.state?.addNewMessage(replyB);
+
+          // Initial state: each thread has exactly its own reply.
+          expect(
+            channel.state?.threads['parent-A']?.map((m) => m.id),
+            equals(['reply-A']),
+          );
+          expect(
+            channel.state?.threads['parent-B']?.map((m) => m.id),
+            equals(['reply-B']),
+          );
+
+          // Trigger the multi-thread batch via user.messages.deleted.
+          final userMessagesDeletedEvent = Event(
+            cid: channel.cid,
+            type: EventType.userMessagesDeleted,
+            user: user1,
+            hardDelete: false,
+          );
+          client.addEvent(userMessagesDeletedEvent);
+          await Future.delayed(Duration.zero);
+
+          // 1) Thread membership is preserved — no cross-thread leakage.
+          //    Without the fix, replyB would leak into thread A and v.v.
+          expect(
+            channel.state?.threads['parent-A']?.map((m) => m.id),
+            equals(['reply-A']),
+            reason: 'thread A must not contain replies from thread B',
+          );
+          expect(
+            channel.state?.threads['parent-B']?.map((m) => m.id),
+            equals(['reply-B']),
+            reason: 'thread B must not contain replies from thread A',
+          );
+
+          // 2) Every message authored by user-1 is soft-deleted — top-level
+          //    AND in both threads. The fix must not narrow this scope.
+          expect(
+            channel.state?.messages.firstWhere((m) => m.id == 'top-1').type,
+            equals(MessageType.deleted),
+            reason: 'top-level user-1 message must be deleted',
+          );
+          expect(
+            channel.state?.threads['parent-A']?.first.type,
+            equals(MessageType.deleted),
+            reason: 'thread A reply from user-1 must be deleted',
+          );
+          expect(
+            channel.state?.threads['parent-B']?.first.type,
+            equals(MessageType.deleted),
+            reason: 'thread B reply from user-1 must be deleted',
+          );
+
+          // 3) Other users' messages are unaffected.
+          expect(
+            channel.state?.messages.firstWhere((m) => m.id == 'parent-A').type,
+            isNot(MessageType.deleted),
+          );
+          expect(
+            channel.state?.messages.firstWhere((m) => m.id == 'parent-B').type,
+            isNot(MessageType.deleted),
           );
         },
       );
@@ -9029,6 +9542,313 @@ void main() {
             'thread-id-123',
           ),
         ).called(1);
+      },
+    );
+  });
+
+  group('updateChannelState identity guard', () {
+    const channelId = 'test-channel-id';
+    const channelType = 'test-channel-type';
+    late final client = MockStreamChatClient();
+
+    setUpAll(() {
+      when(() => client.detachedLogger(any())).thenAnswer((invocation) {
+        final name = invocation.positionalArguments.first;
+        return _createLogger(name);
+      });
+      when(() => client.retryPolicy).thenReturn(
+        RetryPolicy(
+          shouldRetry: (_, __, ___) => false,
+          delayFactor: Duration.zero,
+        ),
+      );
+      when(() => client.state).thenReturn(FakeClientState());
+      when(() => client.logger).thenReturn(_createLogger('mock-client-logger'));
+      when(
+        () => client.channelDeliveryReporter.submitForDelivery(any()),
+      ).thenAnswer((_) async {});
+    });
+
+    Channel _seededChannel() {
+      final base = _generateChannelState(channelId, channelType);
+      final now = DateTime.now();
+      final seeded = base.copyWith(
+        messages: [
+          Message(id: 'm1', text: '1', createdAt: now),
+          Message(id: 'm2', text: '2', createdAt: now.add(const Duration(seconds: 1))),
+          Message(id: 'm3', text: '3', createdAt: now.add(const Duration(seconds: 2))),
+        ],
+      );
+      return Channel.fromState(client, seeded);
+    }
+
+    test(
+      'preserves messages reference when updatedState.messages is null',
+      () {
+        final channel = _seededChannel();
+        addTearDown(channel.dispose);
+
+        final before = channel.state!.messages;
+        channel.state!.updateChannelState(
+          ChannelState(channel: channel.state!.channelState.channel),
+        );
+        final after = channel.state!.messages;
+
+        expect(identical(before, after), isTrue);
+      },
+    );
+
+    test(
+      'preserves messages reference when updatedState.messages is identical',
+      () {
+        final channel = _seededChannel();
+        addTearDown(channel.dispose);
+
+        final before = channel.state!.messages;
+        // copyWith without messages keeps the same `messages` reference, so
+        // updateChannelState should hit the identity-guard fast path.
+        channel.state!.updateChannelState(
+          channel.state!.channelState.copyWith(
+            read: [
+              Read(
+                user: User(id: 'me'),
+                lastRead: DateTime.now(),
+                unreadMessages: 1,
+              ),
+            ],
+          ),
+        );
+        final after = channel.state!.messages;
+
+        expect(identical(before, after), isTrue);
+      },
+    );
+
+    test(
+      'still merges messages when updatedState.messages is a different list',
+      () {
+        final channel = _seededChannel();
+        addTearDown(channel.dispose);
+
+        final newMessage = Message(
+          id: 'm4',
+          text: '4',
+          createdAt: DateTime.now().add(const Duration(seconds: 10)),
+        );
+        channel.state!.updateChannelState(
+          ChannelState(
+            channel: channel.state!.channelState.channel,
+            messages: [newMessage],
+          ),
+        );
+
+        expect(
+          channel.state!.messages.map((m) => m.id),
+          ['m1', 'm2', 'm3', 'm4'],
+        );
+      },
+    );
+
+    test('cold-path merge interleaves new messages in sorted order', () {
+      final channel = _seededChannel();
+      addTearDown(channel.dispose);
+
+      final base = channel.state!.messages.first.createdAt;
+      // Incoming list is sorted ascending by createdAt and slots between
+      // the existing m1, m2, m3.
+      final incoming = [
+        Message(
+          id: 'm1.5',
+          text: 'between m1 and m2',
+          createdAt: base.add(const Duration(milliseconds: 500)),
+        ),
+        Message(
+          id: 'm2.5',
+          text: 'between m2 and m3',
+          createdAt: base.add(const Duration(milliseconds: 1500)),
+        ),
+      ];
+      channel.state!.updateChannelState(
+        ChannelState(
+          channel: channel.state!.channelState.channel,
+          messages: incoming,
+        ),
+      );
+
+      expect(
+        channel.state!.messages.map((m) => m.id),
+        ['m1', 'm1.5', 'm2', 'm2.5', 'm3'],
+      );
+    });
+
+    test('cold-path merge runs syncWith on overlapping ids', () {
+      final channel = _seededChannel();
+      addTearDown(channel.dispose);
+
+      final localStamp = DateTime.now();
+      // Seed m2 with a localCreatedAt that the incoming version doesn't
+      // carry, so we can verify syncWith fired during the merge.
+      channel.state!.updateMessage(
+        Message(
+          id: 'm2',
+          text: '2',
+          createdAt: channel.state!.messages.firstWhere((m) => m.id == 'm2').createdAt,
+        ).copyWith(localCreatedAt: localStamp),
+      );
+
+      final incoming = [
+        Message(
+          id: 'm2',
+          text: '2 (server)',
+          createdAt: channel.state!.messages.firstWhere((m) => m.id == 'm2').createdAt,
+        ),
+      ];
+      channel.state!.updateChannelState(
+        ChannelState(
+          channel: channel.state!.channelState.channel,
+          messages: incoming,
+        ),
+      );
+
+      final m2 = channel.state!.messages.firstWhere((m) => m.id == 'm2');
+      expect(m2.text, '2 (server)');
+      // Local-only field carried over by syncWith during the merge.
+      expect(m2.localCreatedAt, localStamp);
+    });
+  });
+
+  group('updateMessage quoted-rewrite', () {
+    const channelId = 'test-channel-id';
+    const channelType = 'test-channel-type';
+    late final client = MockStreamChatClient();
+
+    setUpAll(() {
+      when(() => client.detachedLogger(any())).thenAnswer((invocation) {
+        final name = invocation.positionalArguments.first;
+        return _createLogger(name);
+      });
+      when(() => client.retryPolicy).thenReturn(
+        RetryPolicy(
+          shouldRetry: (_, __, ___) => false,
+          delayFactor: Duration.zero,
+        ),
+      );
+      when(() => client.state).thenReturn(FakeClientState());
+      when(() => client.logger).thenReturn(_createLogger('mock-client-logger'));
+      when(
+        () => client.channelDeliveryReporter.submitForDelivery(any()),
+      ).thenAnswer((_) async {});
+    });
+
+    Channel _seededChannel({required List<Message> messages}) {
+      final base = _generateChannelState(channelId, channelType);
+      return Channel.fromState(client, base.copyWith(messages: messages));
+    }
+
+    test(
+      'rewrites quotedMessage on every quoter when target is deleted',
+      () {
+        final now = DateTime.now();
+        final target = Message(id: 'target', text: 'hi', createdAt: now);
+        final quoter1 = Message(
+          id: 'q1',
+          text: 'reply',
+          quotedMessageId: 'target',
+          quotedMessage: target,
+          createdAt: now.add(const Duration(seconds: 1)),
+        );
+        final unrelated = Message(
+          id: 'u1',
+          text: 'other',
+          createdAt: now.add(const Duration(seconds: 2)),
+        );
+        final quoter2 = Message(
+          id: 'q2',
+          text: 'reply2',
+          quotedMessageId: 'target',
+          quotedMessage: target,
+          createdAt: now.add(const Duration(seconds: 3)),
+        );
+
+        final channel = _seededChannel(messages: [target, quoter1, unrelated, quoter2]);
+        addTearDown(channel.dispose);
+
+        final unrelatedBefore = channel.state!.messages.firstWhere((m) => m.id == 'u1');
+
+        final deleted = target.copyWith(
+          type: MessageType.deleted,
+          deletedAt: now.add(const Duration(seconds: 5)),
+        );
+        channel.state!.updateMessage(deleted);
+
+        final after = channel.state!.messages;
+        final q1After = after.firstWhere((m) => m.id == 'q1');
+        final q2After = after.firstWhere((m) => m.id == 'q2');
+        final uAfter = after.firstWhere((m) => m.id == 'u1');
+
+        expect(q1After.quotedMessage?.deletedAt, isNotNull);
+        expect(q1After.quotedMessage?.type, MessageType.deleted);
+        expect(q2After.quotedMessage?.deletedAt, isNotNull);
+        expect(q2After.quotedMessage?.type, MessageType.deleted);
+        // Unrelated messages must not be rebuilt by the rewrite.
+        expect(identical(uAfter, unrelatedBefore), isTrue);
+      },
+    );
+
+    test(
+      'preserves messages reference when no message quotes the deleted one',
+      () {
+        final now = DateTime.now();
+        final target = Message(id: 'target', text: 'hi', createdAt: now);
+        final unrelated = Message(
+          id: 'u1',
+          text: 'other',
+          createdAt: now.add(const Duration(seconds: 1)),
+        );
+
+        final channel = _seededChannel(messages: [target, unrelated]);
+        addTearDown(channel.dispose);
+
+        final deleted = target.copyWith(
+          type: MessageType.deleted,
+          deletedAt: now.add(const Duration(seconds: 5)),
+        );
+        channel.state!.updateMessage(deleted);
+
+        // No message quotes `target`, so `updateIf` short-circuits and the
+        // remaining messages keep their identities (only `target` itself was
+        // replaced by `sortedUpsert`).
+        final unrelatedAfter = channel.state!.messages.firstWhere((m) => m.id == 'u1');
+        expect(identical(unrelatedAfter, unrelated), isTrue);
+      },
+    );
+
+    test(
+      'does not rewrite quotes when an existing quoted target is updated '
+      'without being deleted',
+      () {
+        final now = DateTime.now();
+        final target = Message(id: 'target', text: 'original', createdAt: now);
+        final quoter = Message(
+          id: 'q1',
+          text: 'reply',
+          quotedMessageId: 'target',
+          quotedMessage: target,
+          createdAt: now.add(const Duration(seconds: 1)),
+        );
+
+        final channel = _seededChannel(messages: [target, quoter]);
+        addTearDown(channel.dispose);
+
+        final quoterBefore = channel.state!.messages.firstWhere((m) => m.id == 'q1');
+
+        // Plain text update — not a deletion.
+        channel.state!.updateMessage(target.copyWith(text: 'edited'));
+
+        final quoterAfter = channel.state!.messages.firstWhere((m) => m.id == 'q1');
+        // `updateIf` is gated on `message.isDeleted`, so the quoter must keep
+        // its identity (no allocation, no quoted-message overwrite).
+        expect(identical(quoterAfter, quoterBefore), isTrue);
       },
     );
   });

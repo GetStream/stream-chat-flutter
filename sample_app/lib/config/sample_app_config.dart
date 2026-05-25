@@ -36,7 +36,8 @@ enum SampleReactionOverlap {
   overlap(true),
 
   /// Never overlap the message bubble edge.
-  noOverlap(false);
+  noOverlap(false)
+  ;
 
   // ignore: avoid_positional_boolean_parameters
   const SampleReactionOverlap(this.value);

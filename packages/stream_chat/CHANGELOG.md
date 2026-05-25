@@ -27,6 +27,54 @@
 - Fixed quoted poll messages losing their poll, shared-location, or nested-quote content when the server omits it from the `quoted_message` payload during channel re-sync.
 - Fixed a poll attached to a parent message disappearing when a thread reply was added; partial `message.updated` events no longer clobber locally-known `poll` / `sharedLocation` on the parent.
 
+## 9.24.0
+
+🔒 Security
+
+- Bumped `jose` floor to `0.3.5+1` to address [CVE-2026-34240](https://github.com/advisories/GHSA-vm9r-h74p-hg97)
+  (untrusted JWK header accepted during signature verification). The SDK only uses `JsonWebToken.unverified` and
+  is not directly exploitable, but the floor bump ensures consumers resolve to a patched version.
+
+🐞 Fixed
+
+- Fixed `StreamChatClient.queryDrafts` not forwarding the `filter` argument to the API.
+
+- Coalesced concurrent `queryChannels` calls with identical parameters via an in-flight cache.
+  Rapid reconnect bursts no longer fire multiple duplicate requests in parallel.
+
+✅ Added
+
+- Added `SortedListX` and `ListX` extensions on `List` for keyed merge, sorted insert/upsert and
+  conditional update.
+
+- Added `ChannelClientState.pruneOldest(int)` that drops the oldest messages and keeps at most the
+  requested number. No-op when the channel isn't up to date. Prefer `StreamChannel.pruneOldest`
+  from `stream_chat_flutter_core` when available — it also resets top-pagination.
+
+- Added `StreamChatClient.recoverStateOnReconnect` setter (default `true`). Controls whether the
+  client re-queries active channels on WebSocket reconnect. Set to `false` if your app handles its
+  own state recovery — e.g. via channel-list controllers.
+
+🚀 Performance
+
+- Faster channel state updates, especially for read receipts, reactions, and other partial-state
+  events that don't touch the messages list. Reactions targeted at thread messages no longer scan
+  the channel-level message list.
+
+- `Channel.readStream`, `Channel.currentUserReadStream`, and `Channel.unreadCountStream` now dedupe
+  consecutive equal values via `.distinct()`. Previously all three were derived from
+  `channelStateStream` without deduplication, so every channel state mutation (new message, reaction,
+  edit, member change, etc.) would push through to subscribers — causing UI listeners that only
+  cared about read state to rebuild on unrelated events.
+
+🔄 Changed
+
+- `Channel.currentUserReadStream` now emits `null` when the user logs out (previously the
+  transition was swallowed).
+
+- Removed proactive re-fetching of messages with expired CDN attachment URLs on every channel
+  state update. URL refreshes now flow through normal server events.
+
 ## 10.0.0-beta.13
 
 🛑️ Breaking

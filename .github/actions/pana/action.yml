@@ -4,7 +4,7 @@ inputs:
   min_score:
     required: false
     type: number
-    default: 120
+    default: 100
   pana_version:
     required: false
     type: string

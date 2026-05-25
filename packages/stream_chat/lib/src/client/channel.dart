@@ -2377,8 +2377,6 @@ class ChannelClientState {
     // Update the persistence storage with the seeded channel state.
     _debouncedUpdatePersistenceChannelState.call([channelState]);
 
-    _checkExpiredAttachmentMessages(channelState);
-
     // region TYPING EVENTS
     _listenTypingEvents();
     // endregion
@@ -2468,42 +2466,6 @@ class ChannelClientState {
   final Channel _channel;
   StreamChatClient get _client => _channel._client;
   final _subscriptions = CompositeSubscription();
-
-  void _checkExpiredAttachmentMessages(ChannelState channelState) async {
-    final expiredAttachmentMessagesId = channelState.messages
-        ?.where(
-          (m) =>
-              !_updatedMessagesIds.contains(m.id) &&
-              m.attachments.isNotEmpty &&
-              m.attachments.any((e) {
-                final url = e.imageUrl ?? e.assetUrl;
-                if (url == null || !url.contains('')) {
-                  return false;
-                }
-                try {
-                  final uri = Uri.parse(url);
-                  if (!uri.host.endsWith('stream-io-cdn.com') || uri.queryParameters['Expires'] == null) {
-                    return false;
-                  }
-                  final secondsFromEpoch = int.parse(uri.queryParameters['Expires']!);
-                  final expiration = DateTime.fromMillisecondsSinceEpoch(
-                    secondsFromEpoch * 1000,
-                  );
-                  return expiration.isBefore(DateTime.now());
-                } catch (_) {
-                  return false;
-                }
-              }),
-        )
-        .map((e) => e.id)
-        .toList();
-
-    if (expiredAttachmentMessagesId != null && expiredAttachmentMessagesId.isNotEmpty) {
-      await _channel.initialized;
-      _updatedMessagesIds.addAll(expiredAttachmentMessagesId);
-      _channel.getMessagesById(expiredAttachmentMessagesId);
-    }
-  }
 
   void _listenMemberAdded() {
     _subscriptions.add(
@@ -3261,18 +3223,15 @@ class ChannelClientState {
 
   /// Updates the [read] in the state if it exists. Adds it otherwise.
   void updateRead([Iterable<Read>? read]) {
-    final existingReads = <Read>[...?channelState.read];
-    final updatedReads = <Read>[
-      ...existingReads.merge(
-        read,
-        key: (read) => read.user.id,
-        update: (original, updated) => updated,
-      ),
-    ];
+    final existingReads = channelState.read ?? const <Read>[];
+    final updatedReads = existingReads.merge(
+      read,
+      key: (read) => read.user.id,
+    );
 
     updateChannelState(
       channelState.copyWith(
-        read: updatedReads,
+        read: updatedReads.toList(),
       ),
     );
   }
@@ -3533,9 +3492,8 @@ class ChannelClientState {
   List<Read> get read => _channelState.read ?? <Read>[];
 
   /// Channel read list as a stream.
-  Stream<List<Read>> get readStream {
-    return channelStateStream.map((cs) => cs.read ?? <Read>[]);
-  }
+  Stream<List<Read>> get readStream =>
+      channelStateStream.map((cs) => cs.read ?? <Read>[]).distinct(const ListEquality().equals);
 
   /// Channel read for the logged in user.
   Read? get currentUserRead {
@@ -3544,15 +3502,16 @@ class ChannelClientState {
   }
 
   /// Channel read for the logged in user as a stream.
+  ///
+  /// Re-subscribes only when the user id actually changes; null still
+  /// propagates downstream so consumers see the logged-out transition.
   Stream<Read?> get currentUserReadStream {
-    final currentUser = _client.state.currentUserStream;
-    return currentUser.switchMap((it) => userReadStreamOf(userId: it?.id));
+    final currentUserId = _client.state.currentUserStream.map((it) => it?.id).distinct();
+    return currentUserId.switchMap((id) => userReadStreamOf(userId: id)).distinct();
   }
 
   /// Unread count getter as a stream.
-  Stream<int> get unreadCountStream {
-    return currentUserReadStream.map((read) => read?.unreadMessages ?? 0);
-  }
+  Stream<int> get unreadCountStream => currentUserReadStream.map((read) => read?.unreadMessages ?? 0).distinct();
 
   /// Unread count getter.
   int get unreadCount => currentUserRead?.unreadMessages ?? 0;
@@ -3600,46 +3559,54 @@ class ChannelClientState {
     );
   }
 
-  final List<String> _updatedMessagesIds = [];
+  /// Drops the oldest messages, keeping at most [maxMessages].
+  ///
+  /// No-op when [maxMessages] is non-positive, when the current count is
+  /// already within the limit, or when [isUpToDate] is `false`.
+  ///
+  /// Prefer `StreamChannel.pruneOldest` when a [StreamChannel] is present:
+  /// it also resets the widget-layer "top reached" marker so top-pagination
+  /// can resume. Calling this directly leaves that marker untouched.
+  void pruneOldest(int maxMessages) {
+    if (maxMessages <= 0) return;
+    if (!isUpToDate) return;
+
+    final current = messages;
+    if (current.length <= maxMessages) return;
+
+    final pruned = current.sublist(current.length - maxMessages);
+    _channelState = _channelState.copyWith(messages: pruned);
+  }
 
   /// Update channelState with updated information.
   void updateChannelState(ChannelState updatedState) {
-    final _existingStateMessages = <Message>[...messages];
-    final newMessages = _mergeMessagesIntoExisting(
-      existing: _existingStateMessages,
-      toMerge: updatedState.messages ?? <Message>[],
-    ).sorted(_sortByCreatedAt);
+    final newMessages = messages.mergeSorted(
+      updatedState.messages,
+      key: (message) => message.id,
+      update: _mergeUpdate,
+      compare: _sortByCreatedAt,
+    );
 
-    final _existingStateWatchers = <User>[...?_channelState.watchers];
-    final newWatchers = <User>[
-      ..._existingStateWatchers.merge(
-        updatedState.watchers,
-        key: (watcher) => watcher.id,
-        update: (original, updated) => updated,
-      ),
-    ];
+    final watchers = _channelState.watchers ?? const <User>[];
+    final newWatchers = watchers.merge(
+      updatedState.watchers,
+      key: (watcher) => watcher.id,
+    );
 
-    final _existingStateRead = <Read>[...?_channelState.read];
-    final newReads = <Read>[
-      ..._existingStateRead.merge(
-        updatedState.read,
-        key: (read) => read.user.id,
-        update: (original, updated) => updated,
-      ),
-    ];
-
-    final newMembers = <Member>[...?updatedState.members];
-
-    _checkExpiredAttachmentMessages(updatedState);
+    final reads = _channelState.read ?? const <Read>[];
+    final newReads = reads.merge(
+      updatedState.read,
+      key: (read) => read.user.id,
+    );
 
     _channelState = _channelState.copyWith(
       messages: newMessages,
       channel: _channelState.channel?.merge(updatedState.channel),
-      watchers: newWatchers,
+      watchers: newWatchers.toList(),
       watcherCount: updatedState.watcherCount,
-      members: newMembers,
+      members: updatedState.members,
       membership: updatedState.membership,
-      read: newReads,
+      read: newReads.toList(),
       draft: updatedState.draft,
       pinnedMessages: updatedState.pinnedMessages,
       pendingMessages: updatedState.pendingMessages,
@@ -3709,14 +3676,14 @@ class ChannelClientState {
   void updateThreadInfo(String parentId, List<Message> messages) {
     final updatedThreads = {...threads};
 
-    final threadMessages = [...?updatedThreads[parentId]];
+    final threadMessages = updatedThreads[parentId] ?? <Message>[];
     final updatedThreadMessages = _mergeMessagesIntoExisting(
       existing: threadMessages,
       toMerge: messages,
-    ).sorted(_sortByCreatedAt);
+    );
 
     // Update the thread with the modified message list.
-    updatedThreads[parentId] = updatedThreadMessages;
+    updatedThreads[parentId] = updatedThreadMessages.toList();
 
     _threads = updatedThreads;
   }
@@ -3948,16 +3915,23 @@ class ChannelClientState {
   }) {
     if (messages.isEmpty) return;
 
-    final affectedThreads = {...messages.map((it) => it.parentId).nonNulls};
+    // Group messages by parentId so each thread merge only sees its own
+    // replies — passing the full batch to every thread would leak replies
+    // across thread boundaries (the merge dedups by id, not by parentId).
+    final messagesByThread = <String, List<Message>>{};
+    for (final m in messages) {
+      if (m.parentId case final parentId?) (messagesByThread[parentId] ??= []).add(m);
+    }
+
     // If there are no affected threads, return early.
-    if (affectedThreads.isEmpty) return;
+    if (messagesByThread.isEmpty) return;
 
     final updatedThreads = {...threads};
-    for (final thread in affectedThreads) {
-      final threadMessages = [...?updatedThreads[thread]];
+    for (final MapEntry(key: thread, :value) in messagesByThread.entries) {
+      final threadMessages = updatedThreads[thread] ?? <Message>[];
       final updatedThreadMessages = _mergeMessagesIntoExisting(
         existing: threadMessages,
-        toMerge: messages,
+        toMerge: value,
         update: update,
       );
 
@@ -4003,7 +3977,7 @@ class ChannelClientState {
     }
 
     _channelState = _channelState.copyWith(
-      messages: updatedChannelMessages.sorted(_sortByCreatedAt),
+      messages: updatedChannelMessages.toList(),
       channel: _channelState.channel?.copyWith(lastMessageAt: lastMessageAt),
     );
   }
@@ -4014,7 +3988,11 @@ class ChannelClientState {
   }) {
     if (messages.isEmpty) return;
 
-    final pinnedMessages = [...this.pinnedMessages];
+    // No-op fast path: nothing was pinned, and nothing in the batch is
+    // becoming pinned — skip the merge/copyWith churn that would otherwise
+    // land right back on an empty `pinnedMessages` list.
+    if (pinnedMessages.isEmpty && messages.every((m) => !m.pinned)) return;
+
     final updatedPinnedMessages = _mergePinnedMessagesIntoExisting(
       existing: pinnedMessages,
       toMerge: messages,
@@ -4022,7 +4000,7 @@ class ChannelClientState {
     );
 
     _channelState = _channelState.copyWith(
-      pinnedMessages: updatedPinnedMessages.sorted(_sortByCreatedAt),
+      pinnedMessages: updatedPinnedMessages.toList(),
     );
   }
 
@@ -4090,24 +4068,57 @@ class ChannelClientState {
     // [update] decides whether each pair is reconciled (default — see
     // `_mergeUpdate`) or replaced (`_replaceUpdate`, used by local rollback
     // paths that don't want enrichment fallback to keep optimistic values).
-    final mergedMessages = existing.merge(
-      toMerge,
+    final existingList = existing is List<Message> ? existing : existing.toList();
+    final toMergeList = toMerge is List<Message> ? toMerge : toMerge.toList();
+
+    // Single-message fast path. The hot ingest path (server echoes, edits,
+    // reactions, read receipts) always lands here, and `lastIndexWhere` +
+    // `sortedUpsertAt` skips the O(N) keymap build that the two-pointer
+    // merge would otherwise do up front.
+    if (toMergeList.length == 1) {
+      final message = toMergeList.first;
+      final oldIndex = existingList.lastIndexWhere((it) => it.id == message.id);
+      final resolved = oldIndex == -1 ? message : update(existingList[oldIndex], message);
+
+      final mergedMessages = existingList.sortedUpsertAt(
+        oldIndex,
+        resolved,
+        update: update,
+        compare: _sortByCreatedAt,
+      );
+
+      // Non-delete updates can't change what embedded quotedMessage copies
+      // should display, so we can skip the rewrite entirely.
+      if (!resolved.isDeleted) return mergedMessages;
+
+      return mergedMessages.updateIf(
+        (it) => it.quotedMessageId == resolved.id,
+        (it) => it.copyWith(quotedMessage: resolved),
+      );
+    }
+
+    // Batch path: receiver (`existingList`) is maintained sorted as a
+    // state invariant; `mergeSorted` sorts `toMergeList` internally and
+    // returns a sorted result.
+    final mergedMessages = existingList.mergeSorted(
+      toMergeList,
       key: (message) => message.id,
       update: update,
+      compare: _sortByCreatedAt,
     );
 
-    // Replace each embedded quotedMessage with the fully-formed top-level
-    // copy from the merged state, so quoted parents that aren't in the
-    // current batch are still resolved correctly.
-    final mergedList = mergedMessages.toList(growable: false);
-    final mergedById = {for (final m in mergedList) m.id: m};
+    // Refresh embedded `quotedMessage` refs only for messages quoting an
+    // incoming message that is now deleted. `updateIf` returns the same
+    // list reference when nothing matches, so steady-state allocates
+    // nothing for this step.
+    final deletedIds = toMergeList.where((m) => m.isDeleted).map((m) => m.id).toSet();
+    if (deletedIds.isEmpty) return mergedMessages;
 
-    return mergedList.map((message) {
-      final quoted = mergedById[message.quotedMessageId];
-      if (quoted == null) return message;
-      // Update the quotedMessage reference in the message.
-      return message.copyWith(quotedMessage: quoted);
-    });
+    final mergedById = {for (final m in mergedMessages) m.id: m};
+    return mergedMessages.updateIf(
+      (it) => deletedIds.contains(it.quotedMessageId),
+      (it) => it.copyWith(quotedMessage: mergedById[it.quotedMessageId]),
+    );
   }
 
   void _removeMessages(Iterable<Message> messages) {

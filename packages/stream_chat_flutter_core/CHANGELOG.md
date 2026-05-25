@@ -31,6 +31,44 @@
 - Fixed `StreamChatCore` disconnecting the WebSocket immediately on background when no `onBackgroundEventReceived` handler was provided; the keep-alive timer now fires before the connection closes regardless of whether a handler is set.
 - Fixed `StreamMessageComposerController.cancelEditMessage` losing the pre-edit draft when a remote update arrived for the message being edited.
 
+## 9.24.0
+
+✅ Added
+
+- `MessageListCore` now accepts `maximumMessageLimit` and `retentionTrimBuffer` to cap the loaded
+  message list. Trim fires on new messages past `limit + buffer`; top pagination, edits, deletions,
+  jump-to-message, and threads don't trigger it. Disabled by default.
+- Added `StreamChannel.pruneOldest(int)` — delegates to `ChannelClientState.pruneOldest` and resets
+  the top-pagination tracker.
+
+🔄 Changed
+
+- `defaultMessageFilter` now accepts an optional `currentUserId`; passing `null` treats every
+  message as not-my-message.
+
+🚀 Performance
+
+- `MessageListCore` now caches the resolved `messagesStream`, avoiding subscription churn on
+  every parent rebuild.
+- `MessageListCore` now applies its message filter and reversal in a single lazy pass, dropping
+  two intermediate `List<Message>` allocations per emission.
+- `MessageListCore` no longer applies a redundant `ListEquality` comparator on its
+  `BetterStreamBuilder` outputs.
+
+🐞 Fixed
+
+- Fixed `MessageListController.paginateData` not being cleared when `MessageListCore` is
+  disposed or its controller is swapped.
+- Fixed `BetterStreamBuilder` rendering the previous stream's last value for one frame after
+  the stream changes.
+- Fixed `BetterStreamBuilder` getting stuck on the error state when the next stream event
+  equals the cached value.
+- Fixed `BetterStreamBuilder` silently swallowing stream errors when no `errorBuilder` is
+  provided; errors now route through `FlutterError.reportError`.
+- Debounced connectivity events by 3 seconds in `StreamChatCore`. Rapid network flaps (cellular
+  handovers, brief drops) now collapse into a single reconnect instead of firing a fresh
+  `connectionRecovered` per emission.
+
 ## 10.0.0-beta.13
 
 🛑️ Breaking

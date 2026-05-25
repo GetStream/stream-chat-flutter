@@ -98,11 +98,6 @@ bool isElementAtIndexVisible(
   return element.itemTrailingEdge > 0 && element.itemLeadingEdge < 1;
 }
 
-/// Returns true if the message is the initial message.
-bool isInitialMessage(String id, StreamChannelState? channelState) {
-  return channelState!.initialMessageId == id;
-}
-
 /// Computes the [StreamMessageStackPosition] for [message] based on its
 /// [previous] and [next] neighbors in the message list.
 ///
@@ -132,9 +127,9 @@ bool _isGroupBoundary(Message message, Message? neighbor) {
   if (message.user?.id != neighbor.user?.id) return true;
   if (neighbor.isSystem || neighbor.isEphemeral || neighbor.isError) return true;
 
-  final createdAt = Jiffy.parseFromDateTime(message.createdAt.toLocal());
-  final neighborCreatedAt = Jiffy.parseFromDateTime(neighbor.createdAt.toLocal());
-  if (!createdAt.isSame(neighborCreatedAt, unit: Unit.minute)) return true;
+  final createdAt = message.createdAt.toLocal();
+  final neighborCreatedAt = neighbor.createdAt.toLocal();
+  if (!createdAt.isSame(neighborCreatedAt, unit: .minute)) return true;
 
   return false;
 }

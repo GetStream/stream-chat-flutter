@@ -91,7 +91,7 @@ void main() {
       itemPositionsListener: itemPositionsListener,
     );
 
-    unawaited(itemScrollController.scrollTo(index: 2, duration: scrollDuration));
+    unawaited(itemScrollController.scrollTo(index: 2, duration: scrollDuration, curve: Curves.linear));
     await tester.pump();
     await tester.pump(scrollDuration);
 
@@ -118,7 +118,7 @@ void main() {
       itemPositionsListener: itemPositionsListener,
     );
 
-    unawaited(itemScrollController.scrollTo(index: 100, duration: scrollDuration));
+    unawaited(itemScrollController.scrollTo(index: 100, duration: scrollDuration, curve: Curves.linear));
     await tester.pumpAndSettle();
 
     expect(find.text('Item 99'), findsNothing);
@@ -183,7 +183,7 @@ void main() {
     var fadeTransition = tester.widget<FadeTransition>(fadeTransitionFinder);
     final initialOpacity = fadeTransition.opacity;
 
-    unawaited(itemScrollController.scrollTo(index: 20, duration: scrollDuration));
+    unawaited(itemScrollController.scrollTo(index: 20, duration: scrollDuration, curve: Curves.linear));
     await tester.pump();
     await tester.pump();
     await tester.pump(scrollDuration ~/ 2);
@@ -209,7 +209,7 @@ void main() {
     expect(tester.getTopLeft(find.text('Item 1')), const Offset(itemWidth + 10, 10));
     expect(tester.getBottomRight(find.text('Item 1')), const Offset(10 + itemWidth * 2, screenHeight - 10));
 
-    unawaited(itemScrollController.scrollTo(index: 490, duration: scrollDuration));
+    unawaited(itemScrollController.scrollTo(index: 490, duration: scrollDuration, curve: Curves.linear));
     await tester.pumpAndSettle();
 
     await tester.drag(find.byType(ScrollablePositionedList), const Offset(-100, 0));
@@ -251,7 +251,7 @@ void main() {
       const Offset(screenWidth - (10 + itemWidth * 2), screenHeight - 10),
     );
 
-    unawaited(itemScrollController.scrollTo(index: 490, duration: scrollDuration));
+    unawaited(itemScrollController.scrollTo(index: 490, duration: scrollDuration, curve: Curves.linear));
     await tester.pumpAndSettle();
 
     await tester.drag(find.byType(ScrollablePositionedList), const Offset(100, 0));

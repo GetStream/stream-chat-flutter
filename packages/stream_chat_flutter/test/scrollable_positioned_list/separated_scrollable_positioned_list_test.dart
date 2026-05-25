@@ -249,7 +249,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(tester.getTopLeft(find.text('Item 0')).dy, 0);
 
-    unawaited(itemScrollController.scrollTo(index: 100, duration: scrollDuration));
+    unawaited(itemScrollController.scrollTo(index: 100, duration: scrollDuration, curve: Curves.linear));
     await tester.pumpAndSettle();
     itemScrollController.jumpTo(index: 0);
     await tester.pumpAndSettle();
@@ -290,7 +290,7 @@ void main() {
 
     expect(find.byType(IndexedSemantics), findsNothing);
 
-    unawaited(itemScrollController.scrollTo(index: 100, duration: scrollDuration));
+    unawaited(itemScrollController.scrollTo(index: 100, duration: scrollDuration, curve: Curves.linear));
     await tester.pumpAndSettle();
 
     expect(find.byType(IndexedSemantics), findsNothing);
@@ -308,7 +308,7 @@ void main() {
     final customScrollView = tester.widget<CustomScrollView>(find.byType(UnboundedCustomScrollView));
     expect(customScrollView.semanticChildCount, 30);
 
-    unawaited(itemScrollController.scrollTo(index: 100, duration: scrollDuration));
+    unawaited(itemScrollController.scrollTo(index: 100, duration: scrollDuration, curve: Curves.linear));
     await tester.pumpAndSettle();
 
     final customScrollView2 = tester.widget<CustomScrollView>(find.byType(UnboundedCustomScrollView));
@@ -325,7 +325,7 @@ void main() {
     final customScrollView = tester.widget<CustomScrollView>(find.byType(UnboundedCustomScrollView));
     expect(customScrollView.semanticChildCount, defaultItemCount);
 
-    unawaited(itemScrollController.scrollTo(index: 100, duration: scrollDuration));
+    unawaited(itemScrollController.scrollTo(index: 100, duration: scrollDuration, curve: Curves.linear));
     await tester.pumpAndSettle();
 
     final customScrollView2 = tester.widget<CustomScrollView>(find.byType(UnboundedCustomScrollView));
@@ -344,7 +344,7 @@ void main() {
     expect(tester.getTopLeft(find.text('Item 1')), const Offset(10, itemHeight + 10 + separatorHeight));
     expect(tester.getTopRight(find.text('Item 1')), const Offset(screenWidth - 10, itemHeight + 10 + separatorHeight));
 
-    unawaited(itemScrollController.scrollTo(index: 494, duration: scrollDuration));
+    unawaited(itemScrollController.scrollTo(index: 494, duration: scrollDuration, curve: Curves.linear));
     await tester.pumpAndSettle();
 
     await tester.drag(find.byType(ScrollablePositionedList), const Offset(0, -500));
