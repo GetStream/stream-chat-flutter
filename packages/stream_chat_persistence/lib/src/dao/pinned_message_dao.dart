@@ -1,10 +1,8 @@
 import 'package:drift/drift.dart';
-import 'package:flutter/foundation.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_persistence/src/db/drift_chat_database.dart';
 import 'package:stream_chat_persistence/src/entity/pinned_messages.dart';
 import 'package:stream_chat_persistence/src/entity/users.dart';
-
 import 'package:stream_chat_persistence/src/mapper/mapper.dart';
 
 part 'pinned_message_dao.g.dart';
@@ -277,65 +275,6 @@ class PinnedMessageDao extends DatabaseAccessor<DriftChatDatabase>
         return mutable.take(options!.limit).toList();
       }
       return mutable;
-    }
-    return msgList;
-  }
-
-  /// Pre-batched-hydration reference implementation of [getMessagesByCid].
-  /// Same shape as the current public method but uses the per-row N+1
-  /// [_messageFromJoinRow] path. Kept only as the head-to-head baseline for
-  /// `get_messages_by_cid_pinned_hydration_bench_test.dart` and the pinned
-  /// parity test — remove once we no longer need behavioral parity proof.
-  @visibleForTesting
-  Future<List<Message>> getMessagesByCidLegacy(
-    String cid, {
-    bool fetchDraft = true,
-    PaginationParams? messagePagination,
-  }) async {
-    final query = select(pinnedMessages).join([
-      leftOuterJoin(_users, pinnedMessages.userId.equalsExp(_users.id)),
-      leftOuterJoin(
-        _pinnedByUsers,
-        pinnedMessages.pinnedByUserId.equalsExp(_pinnedByUsers.id),
-      ),
-    ])
-      ..where(pinnedMessages.channelCid.equals(cid))
-      ..where(pinnedMessages.parentId.isNull() |
-          pinnedMessages.showInChannel.equals(true))
-      ..orderBy([OrderingTerm.asc(pinnedMessages.createdAt)]);
-
-    final result = await query.get();
-    if (result.isEmpty) return [];
-
-    final msgList = await Future.wait(
-      result.map(
-        (row) => _messageFromJoinRow(
-          row,
-          fetchDraft: fetchDraft,
-        ),
-      ),
-    );
-
-    if (msgList.isNotEmpty) {
-      if (messagePagination?.lessThan != null) {
-        final lessThanIndex = msgList.indexWhere(
-          (m) => m.id == messagePagination!.lessThan,
-        );
-        if (lessThanIndex != -1) {
-          msgList.removeRange(lessThanIndex, msgList.length);
-        }
-      }
-      if (messagePagination?.greaterThan != null) {
-        final greaterThanIndex = msgList.indexWhere(
-          (m) => m.id == messagePagination!.greaterThan,
-        );
-        if (greaterThanIndex != -1) {
-          msgList.removeRange(0, greaterThanIndex);
-        }
-      }
-      if (messagePagination?.limit != null) {
-        return msgList.take(messagePagination!.limit).toList();
-      }
     }
     return msgList;
   }
