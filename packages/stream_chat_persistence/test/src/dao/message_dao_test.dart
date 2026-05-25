@@ -629,7 +629,6 @@ void main() {
 
       Message m(String id, DateTime t) => Message(
             id: id,
-            type: 'regular',
             user: users.first,
             createdAt: t,
             updatedAt: t,
