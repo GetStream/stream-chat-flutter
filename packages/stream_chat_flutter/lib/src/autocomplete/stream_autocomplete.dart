@@ -16,7 +16,8 @@ enum OptionsAlignment {
   /// The options are displayed above the field.
   ///
   /// This is the default.
-  above;
+  above
+  ;
 
   Anchor _toAnchor() {
     switch (this) {

@@ -53,7 +53,8 @@ enum FilterOperator {
   nor,
 
   /// Matches any list that contains the specified value
-  contains;
+  contains
+  ;
 
   @override
   String toString() {
