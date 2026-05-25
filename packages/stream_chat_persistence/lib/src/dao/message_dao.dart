@@ -274,9 +274,7 @@ class MessageDao extends DatabaseAccessor<DriftChatDatabase>
 
   /// Returns the `createdAt` of the message with [id] in the local cache,
   /// or `null` if the message isn't cached or isn't visible in the channel
-  /// (i.e. a thread reply with `showInChannel = false`). The visibility
-  /// predicate mirrors the main [getMessagesByCid] query so a hidden cursor
-  /// behaves as a no-op, matching the pre-SQL-filter behaviour.
+  /// (i.e. a thread reply with `showInChannel = false`).
   Future<DateTime?> _lookupMessageCreatedAt(String id) {
     return (selectOnly(messages)
           ..addColumns([messages.createdAt])
