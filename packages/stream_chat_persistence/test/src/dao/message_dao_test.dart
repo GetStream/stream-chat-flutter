@@ -420,7 +420,8 @@ void main() {
       expect(fetchedMessages.last.id, 'testMessageId${cid}24');
     });
 
-    test('greaterThan only trims messages from the start', () async {
+    test('greaterThan only trims messages from the start (exclusive)',
+        () async {
       await _prepareTestData(cid, count: 30);
 
       final fetchedMessages = await messageDao.getMessagesByCid(
@@ -431,8 +432,8 @@ void main() {
         ),
       );
 
-      expect(fetchedMessages.length, 25);
-      expect(fetchedMessages.first.id, 'testMessageId${cid}5');
+      expect(fetchedMessages.length, 24);
+      expect(fetchedMessages.first.id, 'testMessageId${cid}6');
       expect(fetchedMessages.last.id, 'testMessageId${cid}29');
     });
 
@@ -481,6 +482,27 @@ void main() {
       expect(fetchedMessages.last.id, 'testMessageId${cid}29');
     });
 
+    test('thread-reply id as cursor is a no-op (not visible in channel)',
+        () async {
+      // `_prepareTestData` inserts thread replies with `parentId` set and
+      // `showInChannel` left null — i.e. not visible in the channel query.
+      // Passing such an id as a cursor must resolve to a no-op so the main
+      // query falls back to returning the full channel slice.
+      await _prepareTestData(cid, count: 30, threads: true);
+
+      final fetchedMessages = await messageDao.getMessagesByCid(
+        cid,
+        messagePagination: const PaginationParams(
+          limit: 100,
+          lessThan: 'testThreadMessageId${cid}5',
+        ),
+      );
+
+      expect(fetchedMessages.length, 30);
+      expect(fetchedMessages.first.id, 'testMessageId${cid}0');
+      expect(fetchedMessages.last.id, 'testMessageId${cid}29');
+    });
+
     test('default PaginationParams() applies implicit limit of 10', () async {
       await _prepareTestData(cid, count: 30);
 
@@ -509,7 +531,7 @@ void main() {
       expect(fetchedMessages.last.id, 'testMessageId${cid}24');
     });
 
-    test('default limit + greaterThan returns last 10 of filtered set',
+    test('default limit + greaterThan returns first 10 after the pivot',
         () async {
       await _prepareTestData(cid, count: 30);
 
@@ -521,8 +543,72 @@ void main() {
       );
 
       expect(fetchedMessages.length, 10);
-      expect(fetchedMessages.first.id, 'testMessageId${cid}20');
+      expect(fetchedMessages.first.id, 'testMessageId${cid}6');
+      expect(fetchedMessages.last.id, 'testMessageId${cid}15');
+    });
+
+    test('lessThanOrEqual is inclusive of the pivot', () async {
+      await _prepareTestData(cid, count: 30);
+
+      final fetchedMessages = await messageDao.getMessagesByCid(
+        cid,
+        messagePagination: const PaginationParams(
+          limit: 100,
+          lessThanOrEqual: 'testMessageId${cid}25',
+        ),
+      );
+
+      expect(fetchedMessages.length, 26);
+      expect(fetchedMessages.first.id, 'testMessageId${cid}0');
+      expect(fetchedMessages.last.id, 'testMessageId${cid}25');
+    });
+
+    test('greaterThanOrEqual is inclusive of the pivot', () async {
+      await _prepareTestData(cid, count: 30);
+
+      final fetchedMessages = await messageDao.getMessagesByCid(
+        cid,
+        messagePagination: const PaginationParams(
+          limit: 100,
+          greaterThanOrEqual: 'testMessageId${cid}5',
+        ),
+      );
+
+      expect(fetchedMessages.length, 25);
+      expect(fetchedMessages.first.id, 'testMessageId${cid}5');
       expect(fetchedMessages.last.id, 'testMessageId${cid}29');
+    });
+
+    test('default limit + lessThanOrEqual returns the pivot and 9 before',
+        () async {
+      await _prepareTestData(cid, count: 30);
+
+      final fetchedMessages = await messageDao.getMessagesByCid(
+        cid,
+        messagePagination: const PaginationParams(
+          lessThanOrEqual: 'testMessageId${cid}25',
+        ),
+      );
+
+      expect(fetchedMessages.length, 10);
+      expect(fetchedMessages.first.id, 'testMessageId${cid}16');
+      expect(fetchedMessages.last.id, 'testMessageId${cid}25');
+    });
+
+    test('default limit + greaterThanOrEqual returns the pivot and 9 after',
+        () async {
+      await _prepareTestData(cid, count: 30);
+
+      final fetchedMessages = await messageDao.getMessagesByCid(
+        cid,
+        messagePagination: const PaginationParams(
+          greaterThanOrEqual: 'testMessageId${cid}5',
+        ),
+      );
+
+      expect(fetchedMessages.length, 10);
+      expect(fetchedMessages.first.id, 'testMessageId${cid}5');
+      expect(fetchedMessages.last.id, 'testMessageId${cid}14');
     });
   });
 
