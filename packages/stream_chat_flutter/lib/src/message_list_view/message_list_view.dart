@@ -267,7 +267,6 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
   final ValueNotifier<bool> _showScrollToBottom = ValueNotifier(false);
   late final ItemPositionsListener _itemPositionListener;
   StreamChannelState? streamChannel;
-  late StreamChatThemeData _streamTheme;
 
   // Drives the unread-messages separator. Held in a [ValueNotifier] so read
   // events can update it without rebuilding the entire list view.
@@ -325,7 +324,6 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     final newStreamChannel = StreamChannel.of(context);
-    _streamTheme = StreamChatTheme.of(context);
 
     if (newStreamChannel != streamChannel) {
       streamChannel = newStreamChannel;
@@ -510,13 +508,9 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     Widget defaultErrorBuilder(BuildContext context, Object error) {
       if (widget.builders.error != null) return widget.builders.error!(context, error);
       return Center(
-        child: Text(
-          context.translations.genericErrorText,
-          style: context.streamTextTheme.captionDefault.copyWith(
-            color: context.streamColorScheme.textPrimary
-                // ignore: deprecated_member_use
-                .withOpacity(0.5),
-          ),
+        child: StreamScrollViewErrorWidget(
+          errorTitle: Text(context.translations.loadingMessagesError),
+          onRetryPressed: () => streamChannel?.reloadChannel(),
         ),
       );
     }
@@ -586,18 +580,11 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
               message: statusString,
               child: LazyLoadScrollView(
                 onStartOfPage: () async {
-                  if (!_upToDate) {
-                    return _paginateData(
-                      streamChannel,
-                      QueryDirection.bottom,
-                    );
-                  }
+                  if (_upToDate) return;
+                  return _paginateData(.bottom);
                 },
                 onEndOfPage: () async {
-                  return _paginateData(
-                    streamChannel,
-                    QueryDirection.top,
-                  );
+                  return _paginateData(.top);
                 },
                 child: ScrollablePositionedList.separated(
                   padding: .symmetric(vertical: context.streamSpacing.sm),
@@ -823,9 +810,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
   }) {
     return LoadingIndicator(
       direction: direction,
-      streamTheme: _streamTheme,
-      streamChannelState: streamChannel!,
-      isThreadConversation: _isThreadConversation,
+      onRetryPressed: () => _paginateData(direction),
       indicatorBuilder: widget.builders.paginationLoadingIndicator,
     );
   }
@@ -863,10 +848,9 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     );
   }
 
-  Future<void> _paginateData(
-    StreamChannelState? channel,
-    QueryDirection direction,
-  ) => _messageListController.paginateData!(direction: direction);
+  Future<void> _paginateData(QueryDirection direction) {
+    return _messageListController.paginateData!(direction: direction);
+  }
 
   Future<void> scrollToBottomDefaultTapAction(int unreadCount) async {
     // If the channel is not up to date, reload it before scrolling so the
