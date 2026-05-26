@@ -348,12 +348,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       if (highlightMessageId != null) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (!mounted) return;
-          _moveToAndHighlight(
-            messages: messages,
-            messageId: highlightMessageId,
-            initialScrollIndex: widget.initialScrollIndex,
-            scrollTo: false,
-          );
+          _scrollToMessage(messageId: highlightMessageId);
         });
       }
 
@@ -419,58 +414,50 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     _highlightState.value = (id: messageId, generation: _highlightState.value.generation + 1);
   }
 
-  Future<void> _moveToAndHighlight({
-    required List<Message> messages,
-    String? messageId,
-    int? initialScrollIndex,
-    bool scrollTo = true,
+  Future<void> _scrollToMessage({
+    required String messageId,
+    double alignment = 0.5, // center the message in the viewport by default
+    bool highlight = true,
   }) async {
-    if (messageId != null) {
-      // In a thread the parent message lives outside the `messages` list and
-      // is rendered as the very last item, so search for it explicitly when a
-      // thread reply quotes it.
-      final isThreadParent = _isThreadConversation && messageId == widget.parentMessage?.id;
-      var index = isThreadParent ? messages.length + 2 : messages.indexWhere((m) => m.id == messageId);
+    // In a thread the parent message lives outside the `messages` list and
+    // is rendered as the very last item, so search for it explicitly when a
+    // thread reply quotes it.
+    final isThreadParent = _isThreadConversation && messageId == widget.parentMessage?.id;
+    var index = isThreadParent ? messages.length + 2 : messages.indexWhere((m) => m.id == messageId);
 
-      if (index < 0) {
-        // Target isn't in the loaded window. Paginate around it, wait one
-        // frame for the BetterStreamBuilder rebuild to flush `this.messages`,
-        // then re-scan against the fresh State field (the `messages`
-        // parameter is the snapshot at call time and is stale after the
-        // await).
-        await streamChannel!.loadChannelAtMessage(messageId);
-        if (!mounted) return;
-        await WidgetsBinding.instance.endOfFrame;
-        if (!mounted) return;
-        index = this.messages.indexWhere((m) => m.id == messageId);
-        if (index < 0) return;
-      }
+    if (index < 0) {
+      // No around-reply pagination in thread mode yet — bail rather than
+      // clobber the parent channel's loaded window.
+      if (_isThreadConversation) return;
 
-      // Wait for the scroll to settle before flagging the message as
-      // highlighted; otherwise the highlight tween fires while the list is
-      // still animating (or before the target item is even mounted) and the
-      // user only sees the tail end of the fade.
-      if (scrollTo) {
-        await _scrollController?.scrollTo(
-          index: index + 2, // +2 to account for loader and footer
-          alignment: 0.5, // center the message in the viewport
-        );
-      } else {
-        _scrollController?.jumpTo(
-          index: index + 2, // +2 to account for loader and footer
-          alignment: 0.5,
-        );
-      }
-    } else if (initialScrollIndex != null) {
-      _scrollController?.jumpTo(
-        index: initialScrollIndex,
-        alignment: initialAlignment,
-      );
+      // Target isn't in the loaded channel window. Paginate around it, wait
+      // one frame for the BetterStreamBuilder rebuild to flush `messages`,
+      // then re-scan against the fresh list — `messages` is reassigned in
+      // `_buildListView` on each emission, so an index captured before the
+      // await would be stale.
+      await streamChannel!.loadChannelAtMessage(messageId);
+      if (!mounted) return;
+      await WidgetsBinding.instance.endOfFrame;
+      if (!mounted) return;
+      index = messages.indexWhere((m) => m.id == messageId);
+      if (index < 0) return;
     }
 
-    if (messageId != null && mounted) {
-      _highlightMessage(messageId);
-    }
+    // Bail when the SPL isn't attached — `scrollTo` would throw, and
+    // highlighting an off-screen message is meaningless.
+    final controller = _scrollController;
+    if (controller == null || !controller.isAttached) return;
+
+    // Wait for the scroll to settle before flagging the message as
+    // highlighted; otherwise the highlight tween fires while the list is
+    // still animating (or before the target item is even mounted) and the
+    // user only sees the tail end of the fade.
+    await controller.scrollTo(
+      index: index + 2, // +2 to account for loader and footer
+      alignment: alignment,
+    );
+
+    if (highlight && mounted) _highlightMessage(messageId);
   }
 
   // Wraps [child] in the highlight pulse if [message] is the currently
@@ -1131,10 +1118,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       onUserMentionTap: widget.onUserMentionTap,
       onQuotedMessageTap: switch (widget.onQuotedMessageTap) {
         final onTap? => onTap,
-        _ => (quotedMessage) => _moveToAndHighlight(
-          messageId: quotedMessage.id,
-          messages: messages,
-        ),
+        _ => (quotedMessage) => _scrollToMessage(messageId: quotedMessage.id),
       },
     );
 
@@ -1278,7 +1262,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
         );
 
         if (result != null && mounted) {
-          _moveToAndHighlight(messageId: result, messages: messages);
+          _scrollToMessage(messageId: result);
         }
       },
       _ => null,
@@ -1286,6 +1270,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
   }
 }
 
+// Inherits the message id that an opening thread page should highlight on first render.
 class _ThreadHighlightScope extends InheritedWidget {
   const _ThreadHighlightScope({
     required this.messageId,
@@ -1295,7 +1280,7 @@ class _ThreadHighlightScope extends InheritedWidget {
   final String messageId;
 
   static String? of(BuildContext context) {
-    return context.findAncestorWidgetOfExactType<_ThreadHighlightScope>()?.messageId;
+    return context.dependOnInheritedWidgetOfExactType<_ThreadHighlightScope>()?.messageId;
   }
 
   @override
