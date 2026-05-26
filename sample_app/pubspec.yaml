@@ -23,6 +23,7 @@ dependencies:
   avatar_glow: ^3.0.0
   collection: ^1.19.1
   firebase_core: ^4.0.0
+  firebase_crashlytics: ^5.2.0
   firebase_messaging: ^16.0.0
   flutter:
     sdk: flutter
@@ -39,7 +40,6 @@ dependencies:
   latlong2: ^0.9.1
   lottie: ^3.3.3
   rxdart: ^0.28.0
-  sentry_flutter: ^8.3.0
   stream_chat_flutter: ^10.0.0-beta.13
   stream_chat_localizations: ^10.0.0-beta.13
   stream_chat_persistence: ^10.0.0-beta.13

@@ -6,31 +6,32 @@ import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/src/video/vlc/vlc_manager.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// {@template streamChat}
-/// Widget used to provide information about the chat to the widget tree
+/// Provides chat state and configuration to the descendant widget tree.
 ///
-/// class MyApp extends StatelessWidget {
-///   final StreamChatClient client;
+/// Wrap your app (or a chat-bearing subtree) with [StreamChat] to expose the
+/// [StreamChatClient], theme, and configuration to chat widgets below. Access
+/// the state from descendants with [StreamChat.of] or [StreamChat.maybeOf].
 ///
-///   MyApp(this.client);
+/// {@tool snippet}
 ///
-///   @override
-///   Widget build(BuildContext context) {
-///     return MaterialApp(
-///       home: Container(
-///         child: StreamChat(
-///           client: client,
-///           child: ChannelListPage(),
-///         ),
-///       ),
-///     );
-///   }
-/// }
+/// ```dart
+/// MaterialApp(
+///   home: StreamChat(
+///     client: client,
+///     child: const ChannelListPage(),
+///   ),
+/// )
+/// ```
+/// {@end-tool}
 ///
-/// Use [StreamChat.of] to get the current [StreamChatState] instance.
-/// {@endtemplate}
+/// See also:
+///
+///  * [StreamChatTheme], which provides [StreamChatThemeData] to descendants.
+///  * [StreamChatConfiguration], which provides [StreamChatConfigurationData].
+///  * [StreamChatCore], the non-UI logic wrapper mounted below this widget.
 class StreamChat extends StatefulWidget {
-  /// {@macro streamChat}
+  /// Creates a [StreamChat] that exposes [client] and chat configuration to
+  /// the descendant widget tree.
   const StreamChat({
     super.key,
     required this.client,
@@ -43,16 +44,24 @@ class StreamChat extends StatefulWidget {
     this.connectivityStream,
   });
 
-  /// Client to do chat operations with
+  /// The [StreamChatClient] used by descendant widgets to perform chat
+  /// operations.
   final StreamChatClient client;
 
-  /// Child which inherits details
+  /// The subtree below this widget.
+  ///
+  /// May be `null` when [StreamChat] is mounted without UI — for example in
+  /// tests or when the chat client should run in the background only.
   final Widget? child;
 
-  /// Theme to pass on
+  /// Theme overrides applied to descendant chat widgets.
+  ///
+  /// If `null`, a default [StreamChatThemeData] is used.
   final StreamChatThemeData? streamChatThemeData;
 
-  /// Non-theme related UI configuration options.
+  /// Non-theme UI configuration options for descendant chat widgets.
+  ///
+  /// If `null`, a default [StreamChatConfigurationData] is used.
   final StreamChatConfigurationData? streamChatConfigData;
 
   /// Custom component builders for overriding default UI components.
@@ -185,22 +194,19 @@ class StreamChatState extends State<StreamChat> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = _getTheme(widget.streamChatThemeData);
-
-    Widget child = StreamChatTheme(
-      data: theme,
-      child: Builder(
-        builder: (context) {
-          return StreamChatCore(
-            client: client,
-            onBackgroundEventReceived: widget.onBackgroundEventReceived,
-            backgroundKeepAlive: widget.backgroundKeepAlive,
-            connectivityStream: widget.connectivityStream,
-            child: widget.child ?? const Empty(),
-          );
-        },
-      ),
+    Widget child = StreamChatCore(
+      client: client,
+      onBackgroundEventReceived: widget.onBackgroundEventReceived,
+      backgroundKeepAlive: widget.backgroundKeepAlive,
+      connectivityStream: widget.connectivityStream,
+      child: widget.child ?? const Empty(),
     );
+
+    final theme = widget.streamChatThemeData ?? StreamChatThemeData();
+    child = StreamChatTheme(data: theme, child: child);
+
+    final streamTheme = StreamTheme.of(context);
+    child = Theme(data: Theme.of(context).withExtension(streamTheme), child: child);
 
     if (widget.componentBuilders case final builders?) {
       child = StreamComponentFactory(builders: builders, child: child);
@@ -209,11 +215,6 @@ class StreamChatState extends State<StreamChat> {
     return Portal(
       child: StreamChatConfiguration(data: streamChatConfigData, child: child),
     );
-  }
-
-  StreamChatThemeData _getTheme(StreamChatThemeData? themeData) {
-    final defaultTheme = StreamChatThemeData();
-    return defaultTheme.merge(themeData);
   }
 
   /// The current user
@@ -226,9 +227,18 @@ class StreamChatState extends State<StreamChat> {
   void didChangeDependencies() {
     final currentLocale = Localizations.localeOf(context).toString().toLowerCase();
     final availableLocales = Jiffy.getSupportedLocales();
-    if (availableLocales.contains(currentLocale)) {
-      Jiffy.setLocale(currentLocale);
-    }
+    if (availableLocales.contains(currentLocale)) Jiffy.setLocale(currentLocale);
     super.didChangeDependencies();
+  }
+}
+
+extension on ThemeData {
+  /// Returns a copy of this [ThemeData] with [extension] added, replacing any
+  /// existing extension of the same runtime [Type].
+  ThemeData withExtension(ThemeExtension<dynamic> extension) {
+    // Trailing position is load-bearing: ThemeData.copyWith rebuilds the
+    // extensions map keyed by Type with last-wins semantics, so [extension]
+    // must come after the spread to win its slot when one is already present.
+    return copyWith(extensions: [...extensions.values, extension]);
   }
 }

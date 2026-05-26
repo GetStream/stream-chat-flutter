@@ -5,6 +5,7 @@
 - Added `StreamChatClient.recoverStateOnReconnect` (defaults to `true`); when `false`, the client no longer auto-re-queries active channels on connection recovery — useful for consumers driving their own refresh from the `connectionRecovered` event.
 - Added `Message.updateWith(Message? other)` — merges a server-side update onto the local message while preserving locally-known `poll`, `sharedLocation`, `ownReactions`, and nested `quotedMessage` enrichment when the server omits them.
 - Added `Channel.isOneToOne` — true when the channel is `isDistinct` and has exactly two members. For the looser count-only check, inline `channel.memberCount == 2`.
+- Added `IterableMergeX.merge` (keyed-map merge on `Iterable<T>`, unsorted output) and `SortedListX.mergeSorted` (two-pointer merge on a sorted `List<T>`). Splits what `SortedListX.merge` did in 9.24.0 — see Changed below.
 
 ⚠️ Deprecated
 
@@ -15,6 +16,7 @@
 - Raised minimum versions of bundled Dart dependencies (`async`, `collection`, `dio`, `equatable`, `http_parser`, `json_annotation`, `logging`, `synchronized`, `uuid`, `web_socket_channel`) to current resolved versions.
 - Tightened `Channel.isGroup` from `memberCount != 2` to `memberCount > 2 || !isDistinct`. Two-member non-distinct channels now correctly report as groups, and 1-member distinct channels no longer do. Migrate via `!channel.isOneToOne` or `channel.memberCount != 2`.
 - Tightened `Channel.isDistinct` to require the `!members-` prefix (with trailing dash), matching the backend's `DistinctChannelPrefix` constant. Real server-generated ids always include the dash; only malformed/test ids that previously matched the looser `!members` check are affected.
+- Renamed `SortedListX.merge` (added in 9.24.0) → `SortedListX.mergeSorted` and moved the unsorted/iterable variant to `IterableMergeX.merge`. Callers on `List<T>` that want sorted output should switch to `mergeSorted`; callers on `Iterable<T>` keep using `merge`.
 
 🔒 Security
 
@@ -26,6 +28,54 @@
 - Fixed `Channel.sendMessage` / `Channel.updateMessage` hanging forever when any attachment upload failed; they now throw `StreamChatError`.
 - Fixed quoted poll messages losing their poll, shared-location, or nested-quote content when the server omits it from the `quoted_message` payload during channel re-sync.
 - Fixed a poll attached to a parent message disappearing when a thread reply was added; partial `message.updated` events no longer clobber locally-known `poll` / `sharedLocation` on the parent.
+
+## 9.24.0
+
+🔒 Security
+
+- Bumped `jose` floor to `0.3.5+1` to address [CVE-2026-34240](https://github.com/advisories/GHSA-vm9r-h74p-hg97)
+  (untrusted JWK header accepted during signature verification). The SDK only uses `JsonWebToken.unverified` and
+  is not directly exploitable, but the floor bump ensures consumers resolve to a patched version.
+
+🐞 Fixed
+
+- Fixed `StreamChatClient.queryDrafts` not forwarding the `filter` argument to the API.
+
+- Coalesced concurrent `queryChannels` calls with identical parameters via an in-flight cache.
+  Rapid reconnect bursts no longer fire multiple duplicate requests in parallel.
+
+✅ Added
+
+- Added `SortedListX` and `ListX` extensions on `List` for keyed merge, sorted insert/upsert and
+  conditional update.
+
+- Added `ChannelClientState.pruneOldest(int)` that drops the oldest messages and keeps at most the
+  requested number. No-op when the channel isn't up to date. Prefer `StreamChannel.pruneOldest`
+  from `stream_chat_flutter_core` when available — it also resets top-pagination.
+
+- Added `StreamChatClient.recoverStateOnReconnect` setter (default `true`). Controls whether the
+  client re-queries active channels on WebSocket reconnect. Set to `false` if your app handles its
+  own state recovery — e.g. via channel-list controllers.
+
+🚀 Performance
+
+- Faster channel state updates, especially for read receipts, reactions, and other partial-state
+  events that don't touch the messages list. Reactions targeted at thread messages no longer scan
+  the channel-level message list.
+
+- `Channel.readStream`, `Channel.currentUserReadStream`, and `Channel.unreadCountStream` now dedupe
+  consecutive equal values via `.distinct()`. Previously all three were derived from
+  `channelStateStream` without deduplication, so every channel state mutation (new message, reaction,
+  edit, member change, etc.) would push through to subscribers — causing UI listeners that only
+  cared about read state to rebuild on unrelated events.
+
+🔄 Changed
+
+- `Channel.currentUserReadStream` now emits `null` when the user logs out (previously the
+  transition was swallowed).
+
+- Removed proactive re-fetching of messages with expired CDN attachment URLs on every channel
+  state update. URL refreshes now flow through normal server events.
 
 ## 10.0.0-beta.13
 

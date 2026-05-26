@@ -166,19 +166,19 @@ void main() {
     );
 
     // t = 0 should return data1
-    final lerpedAt0 = data1.lerp(data1, data2, 0);
+    final lerpedAt0 = StreamThreadListTileThemeData.lerp(data1, data2, 0)!;
     expect(lerpedAt0.backgroundColor, data1.backgroundColor);
     expect(lerpedAt0.padding, data1.padding);
     expect(lerpedAt0.threadLatestReplyTimestampFormatter, data1.threadLatestReplyTimestampFormatter);
 
     // t = 1 should return data2
-    final lerpedAt1 = data1.lerp(data1, data2, 1);
+    final lerpedAt1 = StreamThreadListTileThemeData.lerp(data1, data2, 1)!;
     expect(lerpedAt1.backgroundColor, data2.backgroundColor);
     expect(lerpedAt1.padding, data2.padding);
     expect(lerpedAt1.threadLatestReplyTimestampFormatter, data2.threadLatestReplyTimestampFormatter);
 
     // t = 0.5 should return something in between
-    final lerpedAt05 = data1.lerp(data1, data2, 0.5);
+    final lerpedAt05 = StreamThreadListTileThemeData.lerp(data1, data2, 0.5)!;
     expect(lerpedAt05.backgroundColor, Color.lerp(Colors.black, Colors.white, 0.5));
     expect(
       lerpedAt05.padding,

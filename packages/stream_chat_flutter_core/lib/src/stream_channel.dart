@@ -280,6 +280,21 @@ class StreamChannelState extends State<StreamChannel> {
     return _queryBottomMessages(limit: limit);
   }
 
+  /// Drops the oldest messages, keeping at most [maxMessages], and resets
+  /// the top-pagination tracker so older messages can be re-fetched.
+  ///
+  /// Delegates to [ChannelClientState.pruneOldest].
+  void pruneOldest(int maxMessages) {
+    final state = channel.state;
+    if (state == null) return;
+
+    final lengthBefore = state.messages.length;
+    state.pruneOldest(maxMessages);
+    if (state.messages.length == lengthBefore) return;
+
+    _topPaginationEnded = false;
+  }
+
   Future<void> _queryTopReplies(
     String parentId, {
     int limit = 30,
@@ -738,7 +753,7 @@ class StreamChannelState extends State<StreamChannel> {
     }
 
     // Find the index of the last read message
-    final lastReadIndex = messages.indexWhere(
+    final lastReadIndex = messages.lastIndexWhere(
       (message) => message.id == lastReadMessageId,
     );
 

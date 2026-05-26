@@ -1,43 +1,133 @@
-// ignore_for_file: deprecated_member_use_from_same_package
-
 import 'package:flutter/material.dart' hide TextTheme;
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:theme_extensions_builder_annotation/theme_extensions_builder_annotation.dart';
 
-/// {@template streamChatTheme}
-/// Inherited widget providing the [StreamChatThemeData] to the widget tree
-/// {@endtemplate}
-class StreamChatTheme extends InheritedWidget {
-  /// {@macro streamChatTheme}
+part 'stream_chat_theme.g.theme.dart';
+
+/// Applies a Stream Chat theme to descendant widgets.
+///
+/// Wrap a subtree with [StreamChatTheme] to override the styling of all
+/// Stream Chat components. Access the resolved theme using [StreamChatTheme.of].
+///
+/// {@tool snippet}
+///
+/// Override chat styling for a subtree:
+///
+/// ```dart
+/// StreamChatTheme(
+///   data: StreamChatThemeData(
+///     messageListViewTheme: const StreamMessageListViewThemeData(
+///       backgroundColor: Colors.grey,
+///     ),
+///   ),
+///   child: const ChannelPage(),
+/// )
+/// ```
+/// {@end-tool}
+///
+/// See also:
+///
+///  * [StreamChatThemeData], which describes the actual theme configuration.
+///  * [StreamChat], which provides this theme to the chat widget tree.
+class StreamChatTheme extends InheritedTheme {
+  /// Creates a [StreamChatTheme] that provides [data] to descendant widgets.
   const StreamChatTheme({
     super.key,
     required this.data,
     required super.child,
   });
 
-  /// {@macro streamChatThemeData}
+  /// The chat theme configuration for descendant widgets.
   final StreamChatThemeData data;
+
+  /// Returns the [StreamChatThemeData] from the closest [StreamChatTheme]
+  /// ancestor.
+  ///
+  /// If no [StreamChatTheme] is found in the widget tree, a default
+  /// [StreamChatThemeData] is returned.
+  ///
+  /// {@tool snippet}
+  ///
+  /// Access the theme in a widget:
+  ///
+  /// ```dart
+  /// @override
+  /// Widget build(BuildContext context) {
+  ///   final theme = StreamChatTheme.of(context);
+  ///   return Container(
+  ///     color: theme.messageListViewTheme.backgroundColor,
+  ///     child: const Text('Hello'),
+  ///   );
+  /// }
+  /// ```
+  /// {@end-tool}
+  static StreamChatThemeData of(BuildContext context) {
+    final theme = context.dependOnInheritedWidgetOfExactType<StreamChatTheme>();
+    return theme?.data ?? StreamChatThemeData();
+  }
+
+  @override
+  Widget wrap(BuildContext context, Widget child) {
+    return StreamChatTheme(data: data, child: child);
+  }
 
   @override
   bool updateShouldNotify(StreamChatTheme oldWidget) => data != oldWidget.data;
-
-  /// Use this method to get the current [StreamChatThemeData] instance
-  static StreamChatThemeData of(BuildContext context) {
-    final streamChatTheme = context.dependOnInheritedWidgetOfExactType<StreamChatTheme>();
-
-    assert(
-      streamChatTheme != null,
-      'You must have a StreamChatTheme widget at the top of your widget tree',
-    );
-
-    return streamChatTheme!.data;
-  }
 }
 
-/// {@template streamChatThemeData}
-/// Theme data for Stream Chat
-/// {@endtemplate}
-class StreamChatThemeData {
-  /// Creates a theme from scratch
+/// The main theme configuration for Stream Chat.
+///
+/// [StreamChatThemeData] aggregates all chat component themes into a single
+/// theme object. It is provided to the widget tree via [StreamChatTheme] or
+/// [StreamChat], and accessed by descendants through [StreamChatTheme.of].
+///
+/// {@tool snippet}
+///
+/// Create a default theme:
+///
+/// ```dart
+/// final theme = StreamChatThemeData();
+/// ```
+/// {@end-tool}
+/// {@tool snippet}
+///
+/// Customize a single component:
+///
+/// ```dart
+/// final theme = StreamChatThemeData(
+///   messageListViewTheme: const StreamMessageListViewThemeData(
+///     backgroundColor: Colors.grey,
+///   ),
+/// );
+/// ```
+/// {@end-tool}
+///
+/// See also:
+///
+///  * [StreamAppBarThemeData], which defines chat app bar styles.
+///  * [StreamMessageListViewThemeData], which defines message list styles.
+///  * [StreamChannelListItemThemeData], which defines channel list item styles.
+///  * [StreamQuotedMessageThemeData], which defines quoted message styles.
+///  * [StreamThreadListTileThemeData], which defines thread list tile styles.
+///  * [StreamVoiceRecordingAttachmentThemeData], which defines voice recording attachment styles.
+///  * [StreamPollCreatorThemeData], which defines poll creator styles.
+///  * [StreamPollInteractorThemeData], which defines poll interactor styles.
+///  * [StreamPollOptionsSheetThemeData], which defines poll options sheet styles.
+///  * [StreamPollResultsSheetThemeData], which defines poll results sheet styles.
+///  * [StreamPollCommentsSheetThemeData], which defines poll comments sheet styles.
+///  * [StreamPollOptionVotesSheetThemeData], which defines poll option votes sheet styles.
+@immutable
+@ThemeExtensions(constructor: 'raw', buildContextExtension: false)
+class StreamChatThemeData extends ThemeExtension<StreamChatThemeData> with _$StreamChatThemeData {
+  /// Creates a chat theme configuration.
+  ///
+  /// Any component theme that is not provided falls back to its default
+  /// `const` instance, so callers only need to supply the overrides they
+  /// care about.
+  ///
+  /// See also:
+  ///
+  ///  * [StreamChatThemeData.raw], which requires every component theme to be supplied explicitly.
   factory StreamChatThemeData({
     StreamAppBarThemeData? channelHeaderTheme,
     StreamAppBarThemeData? channelListHeaderTheme,
@@ -54,25 +144,47 @@ class StreamChatThemeData {
     StreamQuotedMessageThemeData? quotedMessageTheme,
     StreamChannelListItemThemeData? channelListItemTheme,
   }) {
+    // App bars
+    channelHeaderTheme ??= const StreamAppBarThemeData();
+    channelListHeaderTheme ??= const StreamAppBarThemeData();
+    threadHeaderTheme ??= const StreamAppBarThemeData();
+
+    // Message list
+    messageListViewTheme ??= const StreamMessageListViewThemeData();
+
+    // Polls
+    pollCreatorTheme ??= const StreamPollCreatorThemeData();
+    pollInteractorTheme ??= const StreamPollInteractorThemeData();
+    pollOptionsSheetTheme ??= const StreamPollOptionsSheetThemeData();
+    pollResultsSheetTheme ??= const StreamPollResultsSheetThemeData();
+    pollCommentsSheetTheme ??= const StreamPollCommentsSheetThemeData();
+    pollOptionVotesSheetTheme ??= const StreamPollOptionVotesSheetThemeData();
+
+    // Threads, attachments, quoted messages, channel list
+    threadListTileTheme ??= const StreamThreadListTileThemeData();
+    voiceRecordingAttachmentTheme ??= const StreamVoiceRecordingAttachmentThemeData();
+    quotedMessageTheme ??= const StreamQuotedMessageThemeData();
+    channelListItemTheme ??= const StreamChannelListItemThemeData();
+
     return StreamChatThemeData.raw(
-      channelHeaderTheme: channelHeaderTheme ?? const StreamAppBarThemeData(),
-      channelListHeaderTheme: channelListHeaderTheme ?? const StreamAppBarThemeData(),
-      threadHeaderTheme: threadHeaderTheme ?? const StreamAppBarThemeData(),
-      messageListViewTheme: messageListViewTheme ?? const StreamMessageListViewThemeData(),
-      pollCreatorTheme: pollCreatorTheme ?? const StreamPollCreatorThemeData(),
-      pollInteractorTheme: pollInteractorTheme ?? const StreamPollInteractorThemeData(),
-      pollOptionsSheetTheme: pollOptionsSheetTheme ?? const StreamPollOptionsSheetThemeData(),
-      pollResultsSheetTheme: pollResultsSheetTheme ?? const StreamPollResultsSheetThemeData(),
-      pollCommentsSheetTheme: pollCommentsSheetTheme ?? const StreamPollCommentsSheetThemeData(),
-      pollOptionVotesSheetTheme: pollOptionVotesSheetTheme ?? const StreamPollOptionVotesSheetThemeData(),
-      threadListTileTheme: threadListTileTheme ?? const StreamThreadListTileThemeData(),
-      voiceRecordingAttachmentTheme: voiceRecordingAttachmentTheme ?? const StreamVoiceRecordingAttachmentThemeData(),
-      quotedMessageTheme: quotedMessageTheme ?? const StreamQuotedMessageThemeData(),
-      channelListItemTheme: channelListItemTheme ?? const StreamChannelListItemThemeData(),
+      channelHeaderTheme: channelHeaderTheme,
+      channelListHeaderTheme: channelListHeaderTheme,
+      threadHeaderTheme: threadHeaderTheme,
+      messageListViewTheme: messageListViewTheme,
+      pollCreatorTheme: pollCreatorTheme,
+      pollInteractorTheme: pollInteractorTheme,
+      pollOptionsSheetTheme: pollOptionsSheetTheme,
+      pollResultsSheetTheme: pollResultsSheetTheme,
+      pollCommentsSheetTheme: pollCommentsSheetTheme,
+      pollOptionVotesSheetTheme: pollOptionVotesSheetTheme,
+      threadListTileTheme: threadListTileTheme,
+      voiceRecordingAttachmentTheme: voiceRecordingAttachmentTheme,
+      quotedMessageTheme: quotedMessageTheme,
+      channelListItemTheme: channelListItemTheme,
     );
   }
 
-  /// Raw theme initialization
+  /// Creates a theme configuration with every component theme supplied.
   const StreamChatThemeData.raw({
     required this.channelHeaderTheme,
     required this.channelListHeaderTheme,
@@ -90,100 +202,45 @@ class StreamChatThemeData {
     required this.channelListItemTheme,
   });
 
-  /// The default [StreamAppBar] style applied to [StreamChannelHeader].
+  /// The channel header app bar theme for this theme.
   final StreamAppBarThemeData channelHeaderTheme;
 
-  /// The default [StreamAppBar] style applied to [StreamChannelListHeader].
+  /// The channel list header app bar theme for this theme.
   final StreamAppBarThemeData channelListHeaderTheme;
 
-  /// The default [StreamAppBar] style applied to [StreamThreadHeader].
+  /// The thread header app bar theme for this theme.
   final StreamAppBarThemeData threadHeaderTheme;
 
-  /// Theme configuration for the [StreamMessageListView] widget.
+  /// The message list view theme for this theme.
   final StreamMessageListViewThemeData messageListViewTheme;
 
-  /// Theme configuration for the [StreamPollCreatorWidget] widget.
+  /// The poll creator theme for this theme.
   final StreamPollCreatorThemeData pollCreatorTheme;
 
-  /// Theme configuration for the [StreamPollInteractor] widget.
+  /// The poll interactor theme for this theme.
   final StreamPollInteractorThemeData pollInteractorTheme;
 
-  /// Theme configuration for the [StreamPollResultsSheet] widget.
+  /// The poll results sheet theme for this theme.
   final StreamPollResultsSheetThemeData pollResultsSheetTheme;
 
-  /// Theme configuration for the [StreamPollOptionsSheet] widget.
+  /// The poll options sheet theme for this theme.
   final StreamPollOptionsSheetThemeData pollOptionsSheetTheme;
 
-  /// Theme configuration for the [StreamPollCommentsSheet] widget.
+  /// The poll comments sheet theme for this theme.
   final StreamPollCommentsSheetThemeData pollCommentsSheetTheme;
 
-  /// Theme configuration for the [StreamPollOptionVotesSheet] widget.
+  /// The poll option votes sheet theme for this theme.
   final StreamPollOptionVotesSheetThemeData pollOptionVotesSheetTheme;
 
-  /// Theme configuration for the [StreamThreadListTile] widget.
+  /// The thread list tile theme for this theme.
   final StreamThreadListTileThemeData threadListTileTheme;
 
-  /// Theme configuration for the [StreamVoiceRecordingAttachment] widget.
+  /// The voice recording attachment theme for this theme.
   final StreamVoiceRecordingAttachmentThemeData voiceRecordingAttachmentTheme;
 
-  /// Theme configuration for the [StreamQuotedMessage] widget.
+  /// The quoted message theme for this theme.
   final StreamQuotedMessageThemeData quotedMessageTheme;
 
-  /// Theme configuration for the [StreamChannelListItem] widget.
+  /// The channel list item theme for this theme.
   final StreamChannelListItemThemeData channelListItemTheme;
-
-  /// Creates a copy of [StreamChatThemeData] with specified attributes
-  /// overridden.
-  StreamChatThemeData copyWith({
-    StreamAppBarThemeData? channelHeaderTheme,
-    StreamAppBarThemeData? channelListHeaderTheme,
-    StreamAppBarThemeData? threadHeaderTheme,
-    StreamMessageListViewThemeData? messageListViewTheme,
-    StreamPollCreatorThemeData? pollCreatorTheme,
-    StreamPollInteractorThemeData? pollInteractorTheme,
-    StreamPollResultsSheetThemeData? pollResultsSheetTheme,
-    StreamPollOptionsSheetThemeData? pollOptionsSheetTheme,
-    StreamPollCommentsSheetThemeData? pollCommentsSheetTheme,
-    StreamPollOptionVotesSheetThemeData? pollOptionVotesSheetTheme,
-    StreamThreadListTileThemeData? threadListTileTheme,
-    StreamVoiceRecordingAttachmentThemeData? voiceRecordingAttachmentTheme,
-    StreamQuotedMessageThemeData? quotedMessageTheme,
-    StreamChannelListItemThemeData? channelListItemTheme,
-  }) => StreamChatThemeData.raw(
-    channelHeaderTheme: this.channelHeaderTheme.merge(channelHeaderTheme),
-    channelListHeaderTheme: this.channelListHeaderTheme.merge(channelListHeaderTheme),
-    threadHeaderTheme: this.threadHeaderTheme.merge(threadHeaderTheme),
-    messageListViewTheme: messageListViewTheme ?? this.messageListViewTheme,
-    pollCreatorTheme: pollCreatorTheme ?? this.pollCreatorTheme,
-    pollInteractorTheme: pollInteractorTheme ?? this.pollInteractorTheme,
-    pollResultsSheetTheme: pollResultsSheetTheme ?? this.pollResultsSheetTheme,
-    pollOptionsSheetTheme: pollOptionsSheetTheme ?? this.pollOptionsSheetTheme,
-    pollCommentsSheetTheme: pollCommentsSheetTheme ?? this.pollCommentsSheetTheme,
-    pollOptionVotesSheetTheme: pollOptionVotesSheetTheme ?? this.pollOptionVotesSheetTheme,
-    threadListTileTheme: threadListTileTheme ?? this.threadListTileTheme,
-    voiceRecordingAttachmentTheme: voiceRecordingAttachmentTheme ?? this.voiceRecordingAttachmentTheme,
-    quotedMessageTheme: quotedMessageTheme ?? this.quotedMessageTheme,
-    channelListItemTheme: channelListItemTheme ?? this.channelListItemTheme,
-  );
-
-  /// Merge themes
-  StreamChatThemeData merge(StreamChatThemeData? other) {
-    if (other == null) return this;
-    return copyWith(
-      channelHeaderTheme: channelHeaderTheme.merge(other.channelHeaderTheme),
-      channelListHeaderTheme: channelListHeaderTheme.merge(other.channelListHeaderTheme),
-      threadHeaderTheme: threadHeaderTheme.merge(other.threadHeaderTheme),
-      messageListViewTheme: messageListViewTheme.merge(other.messageListViewTheme),
-      pollCreatorTheme: pollCreatorTheme.merge(other.pollCreatorTheme),
-      pollInteractorTheme: pollInteractorTheme.merge(other.pollInteractorTheme),
-      pollResultsSheetTheme: pollResultsSheetTheme.merge(other.pollResultsSheetTheme),
-      pollOptionsSheetTheme: pollOptionsSheetTheme.merge(other.pollOptionsSheetTheme),
-      pollCommentsSheetTheme: pollCommentsSheetTheme.merge(other.pollCommentsSheetTheme),
-      pollOptionVotesSheetTheme: pollOptionVotesSheetTheme.merge(other.pollOptionVotesSheetTheme),
-      threadListTileTheme: threadListTileTheme.merge(other.threadListTileTheme),
-      voiceRecordingAttachmentTheme: voiceRecordingAttachmentTheme.merge(other.voiceRecordingAttachmentTheme),
-      quotedMessageTheme: quotedMessageTheme.merge(other.quotedMessageTheme),
-      channelListItemTheme: channelListItemTheme.merge(other.channelListItemTheme),
-    );
-  }
 }

@@ -30,6 +30,8 @@ class StreamMessageListViewConfiguration {
     this.reverse = true,
     this.shrinkWrap = false,
     this.paginationLimit = 25,
+    this.maximumMessageLimit,
+    this.retentionTrimBuffer = 30,
     this.keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.onDrag,
     this.scrollPhysics = const ClampingScrollPhysics(),
   });
@@ -106,6 +108,22 @@ class StreamMessageListViewConfiguration {
   /// Defaults to 25.
   final int paginationLimit;
 
+  /// Maximum number of messages kept in [ChannelClientState] while the user is
+  /// viewing the latest messages.
+  ///
+  /// Trimming fires when a new message arrives or the user paginates bottom
+  /// and the count exceeds the limit plus [retentionTrimBuffer]. Top
+  /// pagination, edits, reactions, deletions, jump-to-message, and threads do
+  /// not trigger trimming.
+  ///
+  /// When `null` (default), no pruning is performed.
+  final int? maximumMessageLimit;
+
+  /// Slack over [maximumMessageLimit] before trimming is triggered.
+  ///
+  /// Defaults to 30. Has no effect when [maximumMessageLimit] is `null`.
+  final int retentionTrimBuffer;
+
   /// Defines how the list dismisses the keyboard automatically.
   ///
   /// Defaults to [ScrollViewKeyboardDismissBehavior.onDrag].
@@ -130,6 +148,8 @@ class StreamMessageListViewConfiguration {
     bool? reverse,
     bool? shrinkWrap,
     int? paginationLimit,
+    int? maximumMessageLimit,
+    int? retentionTrimBuffer,
     ScrollViewKeyboardDismissBehavior? keyboardDismissBehavior,
     ScrollPhysics? scrollPhysics,
   }) {
@@ -146,6 +166,8 @@ class StreamMessageListViewConfiguration {
       reverse: reverse ?? this.reverse,
       shrinkWrap: shrinkWrap ?? this.shrinkWrap,
       paginationLimit: paginationLimit ?? this.paginationLimit,
+      maximumMessageLimit: maximumMessageLimit ?? this.maximumMessageLimit,
+      retentionTrimBuffer: retentionTrimBuffer ?? this.retentionTrimBuffer,
       keyboardDismissBehavior: keyboardDismissBehavior ?? this.keyboardDismissBehavior,
       scrollPhysics: scrollPhysics ?? this.scrollPhysics,
     );
@@ -167,6 +189,8 @@ class StreamMessageListViewConfiguration {
         other.reverse == reverse &&
         other.shrinkWrap == shrinkWrap &&
         other.paginationLimit == paginationLimit &&
+        other.maximumMessageLimit == maximumMessageLimit &&
+        other.retentionTrimBuffer == retentionTrimBuffer &&
         other.keyboardDismissBehavior == keyboardDismissBehavior &&
         other.scrollPhysics == scrollPhysics;
   }
@@ -185,6 +209,8 @@ class StreamMessageListViewConfiguration {
     reverse,
     shrinkWrap,
     paginationLimit,
+    maximumMessageLimit,
+    retentionTrimBuffer,
     keyboardDismissBehavior,
     scrollPhysics,
   );

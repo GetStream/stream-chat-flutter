@@ -49,6 +49,10 @@
 - Reworded `endVoteLabel` English override from `'End Vote'` to `'End Poll'`.
 - Reworded `flagLabel`, `cancelLabel` and `deleteLabel` defaults from uppercase to sentence case across all supported locales (e.g. English: `'FLAG'` → `'Flag'`, `'CANCEL'` → `'Cancel'`, `'DELETE'` → `'Delete'`) so dialog buttons render in the same case as the rest of the system.
 
+## 9.24.0
+
+- Updated `stream_chat_flutter` dependency to [`9.24.0`](https://pub.dev/packages/stream_chat_flutter/changelog).
+
 ## 10.0.0-beta.13
 
 🛑️ Breaking

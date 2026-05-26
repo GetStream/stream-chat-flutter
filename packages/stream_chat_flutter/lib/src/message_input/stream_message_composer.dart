@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:stream_chat_flutter/src/message_input/error_alert_sheet.dart';
 import 'package:stream_chat_flutter/src/message_input/stream_chat_message_input.dart';
-import 'package:stream_chat_flutter/src/message_input/tld.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 const _kCommandTrigger = '/';
@@ -855,7 +854,8 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
             ),
             SizeTransition(
               sizeFactor: _pickerAnimation,
-              alignment: AlignmentDirectional.topStart,
+              // ignore: deprecated_member_use
+              axisAlignment: -1,
               child: _buildInlineAttachmentPicker(context),
             ),
           ],
@@ -1099,7 +1099,7 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
   String? _lastSearchedContainsUrlText;
   CancelableOperation? _enrichUrlOperation;
   final _urlRegex = RegExp(
-    r'https?://(www\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\.[a-z]{2,4}\b([-a-zA-Z0-9@:%_+.~#?&//=]*)',
+    r'https?://(www\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\.[a-z]{2,}\b([-a-zA-Z0-9@:%_+.~#?&//=]*)',
     caseSensitive: false,
   );
 
@@ -1115,7 +1115,7 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
       final _parsedMatch = Uri.tryParse(it.group(0) ?? '')?.withScheme;
       if (_parsedMatch == null) return false;
 
-      return _parsedMatch.host.split('.').last.isValidTLD() && widget.props.ogPreviewFilter.call(_parsedMatch, value);
+      return widget.props.ogPreviewFilter.call(_parsedMatch, value);
     }).toList();
 
     // Reset the og attachment if the text doesn't contain any url
@@ -1202,10 +1202,7 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     final channel = streamChannel.channel;
     var message = _effectiveController.value;
 
-    if (!channel.canSendLinks &&
-        _urlRegex
-            .allMatches(message.text ?? '')
-            .any((element) => element.group(0)?.split('.').last.isValidTLD() == true)) {
+    if (!channel.canSendLinks && _urlRegex.hasMatch(message.text ?? '')) {
       showInfoBottomSheet(
         context,
         icon: Icon(

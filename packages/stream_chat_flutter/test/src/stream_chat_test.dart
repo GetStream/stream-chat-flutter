@@ -139,4 +139,100 @@ void main() {
       },
     );
   });
+
+  group('StreamChat theme injection', () {
+    testWidgets(
+      'descendants find StreamTheme via Theme.of(context).extension when host '
+      'app did not register one',
+      (tester) async {
+        final mockClient = MockClient();
+        StreamTheme? captured;
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: StreamChat(
+              client: mockClient,
+              child: Builder(
+                builder: (context) {
+                  captured = Theme.of(context).extension<StreamTheme>();
+                  return const Text('Child');
+                },
+              ),
+            ),
+          ),
+        );
+
+        expect(captured, isNotNull);
+      },
+    );
+
+    testWidgets(
+      'preserves a StreamTheme that the host app already registered on '
+      'MaterialApp.theme.extensions',
+      (tester) async {
+        final mockClient = MockClient();
+        final registered = StreamTheme.light();
+        StreamTheme? captured;
+
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: ThemeData(extensions: [registered]),
+            home: StreamChat(
+              client: mockClient,
+              child: Builder(
+                builder: (context) {
+                  captured = Theme.of(context).extension<StreamTheme>();
+                  return const Text('Child');
+                },
+              ),
+            ),
+          ),
+        );
+
+        expect(captured, same(registered));
+      },
+    );
+
+    testWidgets(
+      'preserves other Material theme extensions registered above StreamChat',
+      (tester) async {
+        final mockClient = MockClient();
+        const sibling = _SiblingThemeExtension(label: 'kept');
+        _SiblingThemeExtension? captured;
+
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: ThemeData(extensions: const [sibling]),
+            home: StreamChat(
+              client: mockClient,
+              child: Builder(
+                builder: (context) {
+                  captured = Theme.of(context).extension<_SiblingThemeExtension>();
+                  return const Text('Child');
+                },
+              ),
+            ),
+          ),
+        );
+
+        expect(captured, same(sibling));
+      },
+    );
+  });
+}
+
+class _SiblingThemeExtension extends ThemeExtension<_SiblingThemeExtension> {
+  const _SiblingThemeExtension({required this.label});
+
+  final String label;
+
+  @override
+  ThemeExtension<_SiblingThemeExtension> copyWith({String? label}) =>
+      _SiblingThemeExtension(label: label ?? this.label);
+
+  @override
+  ThemeExtension<_SiblingThemeExtension> lerp(
+    covariant ThemeExtension<_SiblingThemeExtension>? other,
+    double t,
+  ) => this;
 }

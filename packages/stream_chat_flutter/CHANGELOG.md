@@ -84,6 +84,7 @@
 - Added `StreamChatConfigurationData.reactionOverlap` and `StreamMessageReactions.overlap` to control whether reactions overlap the message bubble edge. When unset, falls back to the platform-based default (overlap on mobile, no overlap on desktop and web).
 - Exported `StreamScrollViewLoadMoreError` and `StreamScrollViewLoadMoreIndicator` from the public API.
 - Exported `StreamTimestamp`, `DateFormatter`, `formatDate` and `formatRecentDateTime` from the public API.
+- Added `DateTimeComparisonUtils` extension on `DateTime` (`isToday`, `isYesterday`, `isWithinLastMinute`, `isWithinLastWeek`, `isInSameYear`, `isSame(other, unit:)`) and the `DateTimeUnit` enum (`year` / `month` / `day` / `hour` / `minute` / `second` / `millisecond` / `microsecond`). All getters compare in local time and read the current instant via `package:clock`, so they're testable under `withClock(...)`.
 
 🔄 Changed
 
@@ -91,6 +92,7 @@
 - Changed the default `StreamChat.backgroundKeepAlive` from 1 minute to 15 seconds,
   matching `StreamChatCore`. See `stream_chat_flutter_core` changelog for rationale.
 - `StreamPhotoGalleryTile` now auto-sizes the platform thumbnail request from the tile's layout × DPR (132px fallback) instead of always asking for 400×400, so cells decode only what they paint. Pass an explicit `thumbnailSize` to override.
+- `formatRecentDateTime` reworked to a five-state cascade matching the Figma design system: `Just now` (< 1 min) / `Today at H:mm` / `Yesterday at H:mm` / `Weekday at H:mm` (within the last week) / `MMM do at H:mm` (older). Previously emitted `formatDate`-style output with the time appended.
 
 🐞 Fixed
 
@@ -119,6 +121,27 @@
 - Fixed poll, attachment-action, and message-action dialog buttons rendering their labels in uppercase (e.g. `CANCEL`, `SEND`, `FLAG`, `DELETE`); they now use the localized labels as-is so they match the rest of the system.
 - Fixed tapping a quoted parent message inside a thread doing nothing (or kicking back to the channel). The thread message list now resolves the parent slot directly and scrolls/highlights it instead of falling through to `loadChannelAtMessage`.
 - Fixed the jump-to-message highlight starting before the scroll settled, which made the fade barely visible (or invisible if the target hadn't been mounted yet). The message list now awaits the scroll, then plays a 1s hold + 1s ease-out fade — closer to the highlight feel in Slack's permalink jump.
+
+## 9.24.0
+
+✅ Added
+
+- `StreamMessageListView` now accepts `maximumMessageLimit` to cap the loaded message list. See
+  `MessageListCore` for the trim semantics.
+
+🐞 Fixed
+
+- Fixed `StreamMessageListView` thread page crashing with `StateError` when the parent message was no
+  longer present in the channel's loaded messages (e.g. filtered, shadowed, or paginated out). The
+  thread now falls back to the captured parent message in that case.
+
+🚀 Improved
+
+- `StreamMessageListView`'s `markRead` / `markThreadRead` now fire on the leading edge of their 1s
+  debounce window, so the first read receipt after entering a channel or sending a message hits the
+  server immediately instead of waiting for the trailing edge. The redundant local `unreadCount = 0`
+  short-circuit on own-message send was removed — the leading-edge mark plus `readStream` updates
+  now keep the unread badge in sync without an extra `setState`.
 
 ## 10.0.0-beta.13
 

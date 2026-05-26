@@ -116,20 +116,23 @@ jobs:
       - uses: maxim-lobanov/setup-xcode@v1
         with:
           xcode-version: '26.3'
-        
+
       - name: "Install Flutter"
         uses: subosito/flutter-action@v2
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           channel: stable
           cache-key: flutter-:os:-:channel:-:version:-:arch:-:hash:-${{ hashFiles('**/pubspec.lock') }}
-          
+
+      - name: "Disable Swift Package Manager"
+        run: flutter config --no-enable-swift-package-manager
+
       - name: "Install Tools"
         run: flutter pub global activate melos
-      
+
       - name: "Bootstrap Workspace"
         run: melos bootstrap
-        
+
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
@@ -167,20 +170,23 @@ jobs:
       - uses: maxim-lobanov/setup-xcode@v1
         with:
           xcode-version: '26.3'
-        
+
       - name: "Install Flutter"
         uses: subosito/flutter-action@v2
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           channel: stable
           cache-key: flutter-:os:-:channel:-:version:-:arch:-:hash:-${{ hashFiles('**/pubspec.lock') }}
-          
+
+      - name: "Disable Swift Package Manager"
+        run: flutter config --no-enable-swift-package-manager
+
       - name: "Install Tools"
         run: flutter pub global activate melos
-      
+
       - name: "Bootstrap Workspace"
         run: melos bootstrap
-        
+
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:

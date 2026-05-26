@@ -650,7 +650,13 @@ void main() {
             () => persistence.updateChannelQueries(any(), any(), clearQueryCache: any(named: 'clearQueryCache')),
           ).thenAnswer((_) => Future.value());
 
-          expectLater(
+          // setUp's `connectUser` schedules debounced persistence writes
+          // (1s window) that would otherwise fire during this test's wait
+          // and pollute the call counts. Wait past the debounce, then clear.
+          await delay(1100);
+          clearInteractions(persistence);
+
+          await expectLater(
             client.queryChannels(),
             emitsInOrder([
               // emits persistent channels first
@@ -660,9 +666,10 @@ void main() {
             ]),
           );
 
-          // Hack as `teardown` gets called even
-          // before our stream starts emitting data
-          await delay(1050);
+          // Wait safely past the 1s debounce on persistence writes
+          // (updateChannelState, updateChannelThreads) so all trailing
+          // invocations have fired before we verify counts.
+          await delay(1500);
 
           verify(
             () => persistence.getChannelStates(
@@ -737,7 +744,13 @@ void main() {
           when(() => persistence.updateChannelState(any())).thenAnswer((_) async => {});
           when(() => persistence.updateChannelThreads(any(), any())).thenAnswer((_) async => {});
 
-          expectLater(
+          // setUp's `connectUser` schedules debounced persistence writes
+          // (1s window) that would otherwise fire during this test's wait
+          // and pollute the call counts. Wait past the debounce, then clear.
+          await delay(1100);
+          clearInteractions(persistence);
+
+          await expectLater(
             client.queryChannels(),
             emitsInOrder([
               // emits persistent channels
@@ -745,9 +758,10 @@ void main() {
             ]),
           );
 
-          // Hack as `teardown` gets called even
-          // before our stream starts emitting data
-          await delay(1050);
+          // Wait safely past the 1s debounce on persistence writes
+          // (updateChannelState, updateChannelThreads) so all trailing
+          // invocations have fired before we verify counts.
+          await delay(1500);
 
           verify(
             () => persistence.getChannelStates(
@@ -937,6 +951,211 @@ void main() {
           // before our stream starts emitting data
           await delay(300);
 
+          verify(
+            () => api.channel.queryChannels(
+              filter: any(named: 'filter'),
+              sort: any(named: 'sort'),
+              state: any(named: 'state'),
+              watch: any(named: 'watch'),
+              presence: any(named: 'presence'),
+              memberLimit: any(named: 'memberLimit'),
+              messageLimit: any(named: 'messageLimit'),
+              paginationParams: any(named: 'paginationParams'),
+            ),
+          ).called(1);
+        },
+      );
+
+      test(
+        'should coalesce concurrent identical calls into a single HTTP request',
+        () async {
+          // Regression test for a TOCTOU race in the _queryChannelsStreams
+          // cache: the cache write previously happened after an offline-await,
+          // so N sibling calls in the same event-loop tick all missed the
+          // cache and each fired its own queryChannels HTTP request.
+          //
+          // With the fix, the cache slot is reserved synchronously after the
+          // hash check, so concurrent callers find the in-flight future and
+          // share its result.
+          final channelStates = List.generate(
+            3,
+            (index) => ChannelState(
+              channel: ChannelModel(cid: 'test-type-$index:test-id-$index'),
+            ),
+          );
+
+          // Slow down the API so all concurrent callers are guaranteed to be
+          // in flight at the same time when the cache write happens.
+          when(
+            () => api.channel.queryChannels(
+              filter: any(named: 'filter'),
+              sort: any(named: 'sort'),
+              state: any(named: 'state'),
+              watch: any(named: 'watch'),
+              presence: any(named: 'presence'),
+              memberLimit: any(named: 'memberLimit'),
+              messageLimit: any(named: 'messageLimit'),
+              paginationParams: any(named: 'paginationParams'),
+            ),
+          ).thenAnswer((_) async {
+            await delay(100);
+            return QueryChannelsResponse()..channels = channelStates;
+          });
+
+          // Fire 5 identical calls back-to-back in the same tick.
+          final results = await Future.wait(
+            List.generate(5, (_) => client.queryChannels().toList()),
+          );
+
+          // All callers should receive the same channels.
+          for (final emitted in results) {
+            expect(emitted, hasLength(1));
+            expect(emitted.single, channelStates.map(isCorrectChannelFor));
+          }
+
+          // But only ONE HTTP request should have been issued.
+          verify(
+            () => api.channel.queryChannels(
+              filter: any(named: 'filter'),
+              sort: any(named: 'sort'),
+              state: any(named: 'state'),
+              watch: any(named: 'watch'),
+              presence: any(named: 'presence'),
+              memberLimit: any(named: 'memberLimit'),
+              messageLimit: any(named: 'messageLimit'),
+              paginationParams: any(named: 'paginationParams'),
+            ),
+          ).called(1);
+        },
+      );
+
+      test(
+        'should fire a fresh request once the cached future has settled',
+        () async {
+          // After the in-flight future completes, the cache slot is freed and
+          // the next call must hit the API again — only concurrent callers
+          // share the future, not sequential ones.
+          final channelStates = List.generate(
+            3,
+            (index) => ChannelState(
+              channel: ChannelModel(cid: 'test-type-$index:test-id-$index'),
+            ),
+          );
+
+          when(
+            () => api.channel.queryChannels(
+              filter: any(named: 'filter'),
+              sort: any(named: 'sort'),
+              state: any(named: 'state'),
+              watch: any(named: 'watch'),
+              presence: any(named: 'presence'),
+              memberLimit: any(named: 'memberLimit'),
+              messageLimit: any(named: 'messageLimit'),
+              paginationParams: any(named: 'paginationParams'),
+            ),
+          ).thenAnswer(
+            (_) async => QueryChannelsResponse()..channels = channelStates,
+          );
+
+          await client.queryChannels().toList();
+          await client.queryChannels().toList();
+
+          verify(
+            () => api.channel.queryChannels(
+              filter: any(named: 'filter'),
+              sort: any(named: 'sort'),
+              state: any(named: 'state'),
+              watch: any(named: 'watch'),
+              presence: any(named: 'presence'),
+              memberLimit: any(named: 'memberLimit'),
+              messageLimit: any(named: 'messageLimit'),
+              paginationParams: any(named: 'paginationParams'),
+            ),
+          ).called(2);
+        },
+      );
+
+      test(
+        'concurrent calls with different filters do not share the cache',
+        () async {
+          // The cache is keyed on a hash of the query parameters. Callers
+          // with different filters/limits must each fire their own request.
+          when(
+            () => api.channel.queryChannels(
+              filter: any(named: 'filter'),
+              sort: any(named: 'sort'),
+              state: any(named: 'state'),
+              watch: any(named: 'watch'),
+              presence: any(named: 'presence'),
+              memberLimit: any(named: 'memberLimit'),
+              messageLimit: any(named: 'messageLimit'),
+              paginationParams: any(named: 'paginationParams'),
+            ),
+          ).thenAnswer((_) async {
+            await delay(100);
+            return QueryChannelsResponse()..channels = [];
+          });
+
+          await Future.wait([
+            client.queryChannels(filter: Filter.in_('cid', const ['a'])).toList(),
+            client.queryChannels(filter: Filter.in_('cid', const ['b'])).toList(),
+          ]);
+
+          verify(
+            () => api.channel.queryChannels(
+              filter: any(named: 'filter'),
+              sort: any(named: 'sort'),
+              state: any(named: 'state'),
+              watch: any(named: 'watch'),
+              presence: any(named: 'presence'),
+              memberLimit: any(named: 'memberLimit'),
+              messageLimit: any(named: 'messageLimit'),
+              paginationParams: any(named: 'paginationParams'),
+            ),
+          ).called(2);
+        },
+      );
+
+      test(
+        'concurrent calls share the same error when the request fails',
+        () async {
+          // If the in-flight HTTP request fails, every concurrent caller
+          // awaiting the shared future should see the same error rather than
+          // each firing its own retry request.
+          when(
+            () => api.channel.queryChannels(
+              filter: any(named: 'filter'),
+              sort: any(named: 'sort'),
+              state: any(named: 'state'),
+              watch: any(named: 'watch'),
+              presence: any(named: 'presence'),
+              memberLimit: any(named: 'memberLimit'),
+              messageLimit: any(named: 'messageLimit'),
+              paginationParams: any(named: 'paginationParams'),
+            ),
+          ).thenAnswer((_) async {
+            await delay(100);
+            throw StreamChatNetworkError(ChatErrorCode.inputError);
+          });
+
+          final errors = await Future.wait(
+            List.generate(5, (_) async {
+              try {
+                await client.queryChannels().toList();
+                return null;
+              } catch (e) {
+                return e;
+              }
+            }),
+          );
+
+          // Every caller surfaces the same error type.
+          expect(errors, hasLength(5));
+          for (final error in errors) {
+            expect(error, isA<StreamChatNetworkError>());
+          }
+
+          // But only ONE HTTP request was made — the rest piggybacked.
           verify(
             () => api.channel.queryChannels(
               filter: any(named: 'filter'),
@@ -3648,6 +3867,10 @@ void main() {
       const channelId = 'test-channel-id';
       const channelType = 'test-channel-type';
 
+      final filter = Filter.equal('channel_cid', '$channelType:$channelId');
+      final sort = [const SortOption<Draft>.desc('created_at')];
+      const pagination = PaginationParams(limit: 20);
+
       final drafts = [
         Draft(
           channelCid: '$channelType:$channelId',
@@ -3656,14 +3879,30 @@ void main() {
         ),
       ];
 
-      when(() => api.message.queryDrafts()).thenAnswer((_) async => QueryDraftsResponse()..drafts = drafts);
+      when(
+        () => api.message.queryDrafts(
+          filter: filter,
+          sort: sort,
+          pagination: pagination,
+        ),
+      ).thenAnswer((_) async => QueryDraftsResponse()..drafts = drafts);
 
-      final res = await client.queryDrafts();
+      final res = await client.queryDrafts(
+        filter: filter,
+        sort: sort,
+        pagination: pagination,
+      );
 
       expect(res, isNotNull);
       expect(res.drafts.length, drafts.length);
 
-      verify(() => api.message.queryDrafts()).called(1);
+      verify(
+        () => api.message.queryDrafts(
+          filter: filter,
+          sort: sort,
+          pagination: pagination,
+        ),
+      ).called(1);
       verifyNoMoreInteractions(api.message);
     });
 

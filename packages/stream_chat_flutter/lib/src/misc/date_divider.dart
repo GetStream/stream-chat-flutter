@@ -141,8 +141,8 @@ class StreamDateDivider extends StatelessWidget {
               final timestamp = switch (date) {
                 _ when date.isToday => context.translations.todayLabel,
                 _ when date.isYesterday => context.translations.yesterdayLabel,
-                _ when date.isWithinAWeek => Jiffy.parseFromDateTime(date).EEEE,
-                _ when date.isWithinAYear => Jiffy.parseFromDateTime(date).MMMd,
+                _ when date.isWithinLastWeek => Jiffy.parseFromDateTime(date).EEEE,
+                _ when date.isInSameYear => Jiffy.parseFromDateTime(date).MMMd,
                 _ => Jiffy.parseFromDateTime(date).yMMMd,
               };
 

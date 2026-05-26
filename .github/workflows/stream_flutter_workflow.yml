@@ -6,11 +6,6 @@ env:
 
 on:
   pull_request:
-    paths:
-      - 'packages/**'
-      - 'sample_app/**'
-      - 'docs/**'
-      - '.github/workflows/stream_flutter_workflow.yml'
     types:
       - opened
       - reopened
@@ -25,9 +20,38 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # Centralizes every gating decision for this workflow — path filter,
+  # draft state, and push-vs-PR semantics. Downstream jobs only need a
+  # single `if: needs.gate.outputs.should_run == 'true'`. A job skipped
+  # this way reports `success` to branch protection (vs. `on.paths`
+  # filtering, which hangs forever) — see
+  # https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/collaborating-on-repositories-with-code-quality-features/troubleshooting-required-status-checks
+  #
+  # `push` events to master always run the full suite, matching the
+  # previous `on.push.branches: [master]` behavior.
+  gate:
+    runs-on: ubuntu-latest
+    outputs:
+      should_run: ${{ github.event_name == 'push' || (steps.filter.outputs.relevant == 'true' && github.event.pull_request.draft != true) }}
+    steps:
+      - name: "Git Checkout"
+        uses: actions/checkout@v6
+
+      - name: "Detect Path Changes"
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            relevant:
+              - 'docs/**'
+              - 'packages/**'
+              - 'sample_app/**'
+              - '.github/workflows/stream_flutter_workflow.yml'
+
   analyze:
+    needs: gate
     timeout-minutes: 15
-    if: github.event.pull_request.draft == false
+    if: needs.gate.outputs.should_run == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: "Git Checkout"
@@ -54,8 +78,9 @@ jobs:
           melos run lint:pub
 
   format:
+    needs: gate
     runs-on: ubuntu-latest
-    if: github.event.pull_request.draft == false
+    if: needs.gate.outputs.should_run == 'true'
     timeout-minutes: 15
     steps:
       - name: "Git Checkout"
@@ -80,8 +105,9 @@ jobs:
           ./.github/workflows/scripts/validate-formatting.sh
 
   test:
+    needs: gate
     runs-on: ubuntu-latest
-    if: github.event.pull_request.draft == false
+    if: needs.gate.outputs.should_run == 'true'
     timeout-minutes: 30
     steps:
       - name: "Git Checkout"
@@ -140,8 +166,9 @@ jobs:
 
   build:
     name: build (${{ matrix.platform }})
+    needs: gate
     runs-on: ${{ matrix.os }}
-    if: github.event.pull_request.draft == false
+    if: needs.gate.outputs.should_run == 'true'
     timeout-minutes: 30
     strategy:
       fail-fast: false
@@ -183,12 +210,3 @@ jobs:
       - name: "Build ${{ matrix.platform }} App"
         working-directory: ${{ matrix.working-directory }}
         run: ${{ matrix.build-command }}
-
-  draft-build:
-    runs-on: ubuntu-latest
-    if: github.event.pull_request.draft == true
-    timeout-minutes: 1
-
-    steps:
-      - name: Run a one-line script
-        run: echo Draft PR, you are good.

@@ -3,60 +3,81 @@ import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template loadingIndicatorMLV}
-/// A loading indicator for [MessageListView]. Not intended for use outside of
-/// [MessageListView].
+/// A loading indicator for pagination in [StreamMessageListView].
+///
+/// Displays the in-flight spinner while older or newer messages are loading,
+/// and a tappable retry tile when pagination fails. Driven by the
+/// [QueryDirection]-specific pagination stream from the surrounding
+/// [StreamChannel].
+///
+/// Not intended for use outside of [StreamMessageListView].
 /// {@endtemplate}
-class LoadingIndicator extends StatelessWidget {
+class LoadingIndicator extends StatefulWidget {
   /// {@macro loadingIndicatorMLV}
   const LoadingIndicator({
     super.key,
-    required this.streamTheme,
-    required this.isThreadConversation,
     required this.direction,
-    required this.streamChannelState,
+    required this.onRetryPressed,
     this.indicatorBuilder,
   });
 
-  // ignore: public_member_api_docs
-  final StreamChatThemeData streamTheme;
-
-  // ignore: public_member_api_docs
-  final bool isThreadConversation;
-
-  // ignore: public_member_api_docs
+  /// Which pagination edge — top for older, bottom for newer.
   final QueryDirection direction;
 
-  // ignore: public_member_api_docs
-  final StreamChannelState streamChannelState;
+  /// Called when the user taps the retry tile after a pagination failure.
+  final VoidCallback onRetryPressed;
 
-  // ignore: public_member_api_docs
+  /// Optional override for the in-flight spinner.
   final WidgetBuilder? indicatorBuilder;
 
   @override
+  State<LoadingIndicator> createState() => _LoadingIndicatorState();
+}
+
+class _LoadingIndicatorState extends State<LoadingIndicator> {
+  // Cached to avoid resubscribing on every parent rebuild.
+  Stream<bool>? _stream;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _resolveStream(context);
+  }
+
+  @override
+  void didUpdateWidget(covariant LoadingIndicator oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.direction != oldWidget.direction) _resolveStream(context);
+  }
+
+  void _resolveStream(BuildContext context) {
+    final channel = StreamChannel.of(context);
+    _stream = switch (widget.direction) {
+      .top => channel.queryTopMessages,
+      .bottom => channel.queryBottomMessages,
+    };
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final stream = direction == QueryDirection.top
-        ? streamChannelState.queryTopMessages
-        : streamChannelState.queryBottomMessages;
     return BetterStreamBuilder<bool>(
-      key: Key('LOADING-INDICATOR $direction'),
-      stream: stream,
+      key: Key('LOADING-INDICATOR ${widget.direction}'),
+      stream: _stream,
       initialData: false,
-      errorBuilder: (context, error) => ColoredBox(
-        // ignore: deprecated_member_use
-        color: context.streamColorScheme.accentError.withValues(alpha: 0.2),
-        child: Center(
-          child: Text(context.translations.loadingMessagesError),
-        ),
+      errorBuilder: (context, error) => StreamScrollViewLoadMoreError.list(
+        onTap: widget.onRetryPressed,
+        error: Text(context.translations.loadingMessagesError),
       ),
       builder: (context, data) {
         if (!data) return const Empty();
-        return indicatorBuilder?.call(context) ??
-            const Center(
-              child: Padding(
-                padding: EdgeInsets.all(8),
-                child: CircularProgressIndicator.adaptive(),
-              ),
-            );
+        if (widget.indicatorBuilder case final builder?) return builder(context);
+
+        return Center(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: StreamLoadingSpinner(),
+          ),
+        );
       },
     );
   }

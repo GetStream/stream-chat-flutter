@@ -8,6 +8,10 @@
 
 - Fixed channel list re-sorting on refresh or when returning from background.
 
+## 9.24.0
+
+- Updated `stream_chat` dependency to [`9.24.0`](https://pub.dev/packages/stream_chat/changelog).
+
 ## 10.0.0-beta.13
 
 🛑️ Breaking
