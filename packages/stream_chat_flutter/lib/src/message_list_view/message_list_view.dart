@@ -338,9 +338,12 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
 
       _unreadState.value = _readUnreadSnapshot();
 
-      final highlightMessageId = widget.config.highlightInitialMessage
-          ? (streamChannel?.initialMessageId ?? _ThreadHighlightScope.of(context))
-          : null;
+      final highlightInitialMessage = widget.config.highlightInitialMessage;
+      final highlightMessageId = switch ((highlightInitialMessage, _isThreadConversation)) {
+        (true, true) => _ThreadHighlightScope.of(context),
+        (true, false) => streamChannel?.initialMessageId,
+        _ => null,
+      };
 
       if (highlightMessageId != null) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
