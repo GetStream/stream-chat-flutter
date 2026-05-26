@@ -1,3 +1,10 @@
+## Upcoming
+
+🐞 Fixed
+
+- Fixed `StreamChannel.reloadChannel` merging the latest page on top of the previously loaded
+  window instead of replacing it. The reload now matches a fresh open of the channel.
+
 ## 9.24.0
 
 ✅ Added

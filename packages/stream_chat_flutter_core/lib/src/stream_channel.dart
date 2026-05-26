@@ -776,8 +776,11 @@ class StreamChannelState extends State<StreamChannel> {
     });
   }
 
-  /// Reloads the channel with latest message
-  Future<void> reloadChannel() => _queryAtMessage();
+  /// Reloads the channel with latest messages, replacing the loaded window.
+  Future<void> reloadChannel() {
+    channel.state?.truncate();
+    return _queryAtMessage();
+  }
 
   Future<void> _maybeInitChannel() async {
     // If the channel doesn't have an CID yet, it hasn't been created on the
