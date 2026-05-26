@@ -159,7 +159,7 @@ class StreamChatConfigurationData {
   factory StreamChatConfigurationData({
     ReactionIconResolver? reactionIconResolver,
     bool? enforceUniqueReactions,
-    bool draftMessagesEnabled = false,
+    bool draftMessagesEnabled = true,
     MessagePreviewFormatter? messagePreviewFormatter,
     StreamImageCDN imageCDN = const StreamImageCDN(),
     List<StreamAttachmentWidgetBuilder>? attachmentBuilders,
