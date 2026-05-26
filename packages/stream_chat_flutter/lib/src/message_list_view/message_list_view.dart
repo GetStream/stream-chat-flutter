@@ -496,17 +496,17 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
   @override
   Widget build(BuildContext context) {
     Widget defaultLoadingBuilder(BuildContext context) {
-      if (widget.builders.loading != null) return widget.builders.loading!(context);
+      if (widget.builders.loading case final builder?) return builder(context);
       return const StreamMessageListSkeletonLoading();
     }
 
     Widget defaultEmptyBuilder(BuildContext context) {
-      if (widget.builders.empty != null) return widget.builders.empty!(context);
+      if (widget.builders.empty case final builder?) return builder(context);
       return const StreamMessageListEmptyState();
     }
 
     Widget defaultErrorBuilder(BuildContext context, Object error) {
-      if (widget.builders.error != null) return widget.builders.error!(context, error);
+      if (widget.builders.error case final builder?) return builder(context, error);
       return Center(
         child: StreamScrollViewErrorWidget(
           errorTitle: Text(context.translations.loadingMessagesError),
@@ -516,7 +516,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     }
 
     Widget defaultMessageListBuilder(BuildContext context, List<Message> list) {
-      if (widget.builders.content != null) return widget.builders.content!(context, list);
+      if (widget.builders.content case final builder?) return builder(context, list);
       return _buildListView(list);
     }
 
