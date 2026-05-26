@@ -587,6 +587,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
                   return _paginateData(.top);
                 },
                 child: ScrollablePositionedList.separated(
+                  key: Key('mlv-${streamChannel?.channel.cid}-${widget.parentMessage?.id}'),
                   padding: .symmetric(vertical: context.streamSpacing.sm),
                   keyboardDismissBehavior: widget.config.keyboardDismissBehavior,
                   itemPositionsListener: _itemPositionListener,
