@@ -25,6 +25,12 @@ void main() {
   }) async {
     final channels = [ChannelModel(cid: cid)];
     final users = List.generate(count, (index) => User(id: 'testUserId$index'));
+    // Strictly monotonic `createdAt` per message so SQL-side pagination
+    // filters (`WHERE createdAt < cutoff`, `ORDER BY createdAt ASC`) can't be
+    // confused by ties. Drift stores `DateTime` as integer Unix seconds by
+    // default, so the offset must be at least 1 second per row — otherwise
+    // sub-second offsets all round-trip onto the same second.
+    final baseTime = DateTime.now();
     final messages = List.generate(
       count,
       (index) => Message(
@@ -32,7 +38,7 @@ void main() {
         type: 'testType',
         user: users[index],
         channelRole: 'channel_member',
-        createdAt: DateTime.now(),
+        createdAt: baseTime.add(Duration(seconds: index)),
         shadowed: math.Random().nextBool(),
         replyCount: index,
         updatedAt: DateTime.now(),
@@ -54,7 +60,7 @@ void main() {
         type: 'testType',
         user: users[index],
         channelRole: 'channel_member',
-        createdAt: DateTime.now(),
+        createdAt: baseTime.add(Duration(seconds: index)),
         shadowed: math.Random().nextBool(),
         replyCount: index,
         updatedAt: DateTime.now(),
@@ -75,7 +81,7 @@ void main() {
         channelRole: 'channel_member',
         parentId:
             mapAllThreadToFirstMessage ? messages[0].id : messages[index].id,
-        createdAt: DateTime.now(),
+        createdAt: baseTime.add(Duration(seconds: index)),
         shadowed: math.Random().nextBool(),
         replyCount: index,
         updatedAt: DateTime.now(),
@@ -380,8 +386,8 @@ void main() {
       messagePagination: pagination,
     );
     expect(fetchedMessages.length, limit);
-    expect(fetchedMessages.first.id, greaterThan);
-    expect(fetchedMessages.last.id != lessThan, true);
+    expect(fetchedMessages.first.id, 'testMessageId${cid}10');
+    expect(fetchedMessages.last.id, 'testMessageId${cid}24');
   });
 
   test('updateMessages', () async {
