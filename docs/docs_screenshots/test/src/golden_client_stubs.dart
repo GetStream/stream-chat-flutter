@@ -14,6 +14,7 @@ void _ensureGoldenMocktailFallbacks() {
   registerFallbackValue(<SortOption<Thread>>[]);
   registerFallbackValue(<SortOption<ChannelState>>[]);
   registerFallbackValue(<SortOption<Draft>>[]);
+  registerFallbackValue(<SortOption<Member>>[]);
   _registeredFallbacks = true;
 }
 
@@ -87,6 +88,18 @@ void stubQueryDraftsForGoldens(MockClient client, List<Draft> drafts) {
       ..drafts = drafts
       ..next = null,
   );
+}
+
+/// Stubs member queries for [StreamMemberListController] goldens using [StreamMemberListController.fromValue].
+void stubQueryMembersForGoldens(MockChannel channel, List<Member> members) {
+  _ensureGoldenMocktailFallbacks();
+  when(
+    () => channel.queryMembers(
+      filter: any(named: 'filter'),
+      sort: any(named: 'sort'),
+      pagination: any(named: 'pagination'),
+    ),
+  ).thenAnswer((_) async => QueryMembersResponse()..members = members);
 }
 
 /// Stubs search for [StreamMessageSearchListController] goldens using [StreamMessageSearchListController.fromValue].
