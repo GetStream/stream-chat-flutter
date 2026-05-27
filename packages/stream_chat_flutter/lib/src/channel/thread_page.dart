@@ -30,12 +30,12 @@ class StreamThreadPage extends StatefulWidget {
 
 class _StreamThreadPageState extends State<StreamThreadPage> {
   final FocusNode _focusNode = FocusNode();
-  late StreamMessageInputController _messageInputController;
+  late StreamMessageComposerController _messageComposerController;
 
   @override
   void initState() {
     super.initState();
-    _messageInputController = StreamMessageInputController(
+    _messageComposerController = StreamMessageComposerController(
       message: Message(parentId: widget.parent.id),
     );
   }
@@ -43,11 +43,12 @@ class _StreamThreadPageState extends State<StreamThreadPage> {
   @override
   void dispose() {
     _focusNode.dispose();
+    _messageComposerController.dispose();
     super.dispose();
   }
 
   void _reply(Message message) {
-    _messageInputController.quotedMessage = message;
+    _messageComposerController.quotedMessage = message;
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       _focusNode.requestFocus();
     });
@@ -56,7 +57,7 @@ class _StreamThreadPageState extends State<StreamThreadPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: StreamChatTheme.of(context).colorTheme.appBg,
+      backgroundColor: context.streamColorScheme.backgroundApp,
       appBar: StreamThreadHeader(parent: widget.parent),
       body: Column(
         children: <Widget>[
@@ -66,16 +67,18 @@ class _StreamThreadPageState extends State<StreamThreadPage> {
               initialScrollIndex: widget.initialScrollIndex,
               initialAlignment: widget.initialAlignment,
               onReplyTap: _reply,
-              swipeToReply: true,
-              showScrollToBottom: false,
-              highlightInitialMessage: true,
+              config: const StreamMessageListViewConfiguration(
+                swipeToReply: true,
+                showScrollToBottom: false,
+                highlightInitialMessage: true,
+              ),
               onViewInChannelTap: widget.onViewInChannelTap,
             ),
           ),
           if (widget.parent.type != 'deleted')
             StreamMessageComposer(
               focusNode: _focusNode,
-              messageInputController: _messageInputController,
+              messageComposerController: _messageComposerController,
               enableVoiceRecording: true,
             ),
         ],
