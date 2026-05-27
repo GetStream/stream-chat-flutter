@@ -81,6 +81,7 @@ class StreamChannelHeader extends StatelessWidget implements PreferredSizeWidget
     this.trailing,
     this.primary = true,
     this.style,
+    this.floating = false,
   });
 
   /// Called when the default channel-avatar trailing is pressed.
@@ -129,6 +130,9 @@ class StreamChannelHeader extends StatelessWidget implements PreferredSizeWidget
   /// [StreamChatThemeData.channelHeaderTheme].
   final StreamAppBarStyle? style;
 
+  /// Whether the header is floating.
+  final bool floating;
+
   @override
   Size get preferredSize => const Size.fromHeight(kStreamToolbarHeight);
 
@@ -139,7 +143,7 @@ class StreamChannelHeader extends StatelessWidget implements PreferredSizeWidget
 
     var leading = this.leading;
     if (leading == null && automaticallyImplyLeading) {
-      leading = const StreamBackButton(showUnreadCount: true);
+      leading = StreamBackButton(showUnreadCount: true, floating: floating);
     }
 
     var title = this.title;
@@ -187,6 +191,7 @@ class StreamChannelHeader extends StatelessWidget implements PreferredSizeWidget
                 trailing: trailing,
                 primary: primary,
                 style: style,
+                floating: floating,
               ),
             ),
           );

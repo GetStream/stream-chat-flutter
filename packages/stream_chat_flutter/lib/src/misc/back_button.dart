@@ -11,6 +11,7 @@ class StreamBackButton extends StatelessWidget {
     this.onPressed,
     this.showUnreadCount = false,
     this.channelId,
+    this.floating = false,
   });
 
   /// Callback for when button is pressed
@@ -22,6 +23,9 @@ class StreamBackButton extends StatelessWidget {
   /// Channel ID used to retrieve unread count
   final String? channelId;
 
+  /// Whether the back button is floating.
+  final bool floating;
+
   @override
   Widget build(BuildContext context) {
     final iconData = switch (Theme.of(context).platform) {
@@ -30,7 +34,8 @@ class StreamBackButton extends StatelessWidget {
     };
 
     Widget button = StreamButton.icon(
-      type: .ghost,
+      type: floating ? .outline : .ghost,
+      isFloating: floating,
       size: .medium,
       style: .secondary,
       icon: Icon(iconData),

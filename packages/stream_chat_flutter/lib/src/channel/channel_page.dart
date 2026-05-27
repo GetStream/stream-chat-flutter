@@ -98,8 +98,9 @@ class _StreamChannelPageState extends State<StreamChannelPage> {
         backgroundColor: context.streamColorScheme.backgroundApp,
         appBar: StreamChannelHeader(
           onChannelAvatarPressed: (channel) => widget.onChannelAvatarPressed?.call(context, channel),
+          floating: widget.isFloating,
         ),
-        extendBodyBehindAppBar: false,
+        extendBodyBehindAppBar: true,
         body: _FloatingChannelBody(
           composer: composer,
           typingIndicator: Container(
