@@ -14,7 +14,7 @@ class StreamChannelPage extends StatefulWidget {
     this.highlightInitialMessage = false,
     this.onBackPressed,
     this.onChannelAvatarPressed,
-    this.isFloating = true,
+    this.isFloating = false,
   });
 
   /// Initial scroll index for the message list.
