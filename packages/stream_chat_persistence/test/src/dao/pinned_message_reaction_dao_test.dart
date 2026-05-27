@@ -53,7 +53,9 @@ void main() {
 
     await database.userDao.updateUsers(users);
     await database.channelDao.updateChannels(channels);
-    await database.pinnedMessageDao.updateMessages(cid, [message]);
+    await database.pinnedMessageDao.bulkUpdateMessages({
+      cid: [message],
+    });
     await pinnedMessageReactionDao.updateReactions(reactions);
 
     return reactions;

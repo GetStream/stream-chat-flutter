@@ -53,7 +53,9 @@ void main() {
 
     await database.userDao.updateUsers(users);
     await database.channelDao.updateChannels(channels);
-    await database.messageDao.updateMessages(cid, [message]);
+    await database.messageDao.bulkUpdateMessages({
+      cid: [message],
+    });
     await reactionDao.updateReactions(reactions);
 
     return reactions;

@@ -59,13 +59,6 @@ class PollDao extends DatabaseAccessor<DriftChatDatabase> with _$PollDaoMixin {
         ),
       );
 
-  /// Returns the list of all the polls stored in db
-  Future<List<Poll>> getPolls() async => Future.wait(await (select(polls)
-        ..orderBy([(it) => OrderingTerm.desc(it.createdAt)]))
-      .join([leftOuterJoin(users, polls.createdById.equalsExp(users.id))])
-      .map(_pollFromJoinRow)
-      .get());
-
   /// Deletes all the polls whose [Polls.id] is present in [pollIds]
   Future<void> deletePollsByIds(List<String> pollIds) =>
       (delete(polls)..where((tbl) => tbl.id.isIn(pollIds))).go();

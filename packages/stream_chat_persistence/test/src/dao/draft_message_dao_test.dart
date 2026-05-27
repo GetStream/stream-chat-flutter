@@ -102,7 +102,7 @@ void main() {
     await database.channelDao.updateChannels(allChannels);
 
     if (withParentMessage || withQuotedMessage) {
-      await database.messageDao.updateMessages(cid, messages);
+      await database.messageDao.bulkUpdateMessages({cid: messages});
     }
 
     if (withPoll && polls != null) {
@@ -287,7 +287,9 @@ void main() {
 
         await database.userDao.updateUsers([user]);
         await database.channelDao.updateChannels([ChannelModel(cid: cid)]);
-        await database.messageDao.updateMessages(cid, [parentMessage]);
+        await database.messageDao.bulkUpdateMessages({
+          cid: [parentMessage],
+        });
 
         // Create first thread draft
         final firstDraft = Draft(
@@ -421,7 +423,7 @@ void main() {
 
         await database.userDao.updateUsers([user]);
         await database.channelDao.updateChannels([ChannelModel(cid: cid)]);
-        await database.messageDao.updateMessages(cid, messages);
+        await database.messageDao.bulkUpdateMessages({cid: messages});
 
         // Create a channel draft (no parent message)
         final channelDraft = Draft(

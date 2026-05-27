@@ -113,7 +113,7 @@ void main() {
     );
     await database.userDao.updateUsers(users);
     await database.channelDao.updateChannels(channels);
-    await messageDao.updateMessages(cid, allMessages);
+    await messageDao.bulkUpdateMessages({cid: allMessages});
     await database.reactionDao.updateReactions([reaction]);
     return allMessages;
   }
@@ -393,7 +393,7 @@ void main() {
     expect(fetchedMessages.first.id != lessThan, true);
   });
 
-  test('updateMessages', () async {
+  test('bulkUpdateMessages', () async {
     const cid = 'test:Cid';
 
     // Preparing test data
@@ -418,7 +418,9 @@ void main() {
       pinnedBy: User(id: 'testUserId4'),
     );
 
-    await messageDao.updateMessages(cid, [copyMessage, newMessage]);
+    await messageDao.bulkUpdateMessages({
+      cid: [copyMessage, newMessage],
+    });
 
     // Fetched messages length should be one more than inserted message.
     // copyMessage `showInChannel` modified field should be false.

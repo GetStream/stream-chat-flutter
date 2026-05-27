@@ -98,7 +98,7 @@ void main() {
     );
     await database.userDao.updateUsers(users);
     await database.channelDao.updateChannels(channels);
-    await pinnedMessageDao.updateMessages(cid, allMessages);
+    await pinnedMessageDao.bulkUpdateMessages({cid: allMessages});
     await database.pinnedMessageReactionDao.updateReactions([reaction]);
     return allMessages;
   }
@@ -222,97 +222,6 @@ void main() {
     );
   });
 
-  test('getMessageById', () async {
-    const cid = 'test:Cid';
-    const id = 'testMessageId${cid}0';
-
-    // Should be null initially
-    final message = await pinnedMessageDao.getMessageById(id);
-    expect(message, isNull);
-
-    // Adding test message with the cid and id
-    final insertedMessages = await _prepareTestData(cid, count: 1);
-    expect(insertedMessages.first.id, id);
-
-    // Fetched message id should match the inserted message id
-    final fetchedMessage = await pinnedMessageDao.getMessageById(id);
-    expect(fetchedMessage, isNotNull);
-    expect(fetchedMessage!.id, insertedMessages.first.id);
-  });
-
-  test('getThreadMessages', () async {
-    const cid = 'test:Cid';
-
-    // Messages should be empty initially
-    final messages = await pinnedMessageDao.getThreadMessages(cid);
-    expect(messages, isEmpty);
-
-    // Preparing test data
-    final insertedMessages = await _prepareTestData(cid, threads: true);
-    expect(insertedMessages, isNotEmpty);
-
-    // Should fetch all the thread messages of cid
-    final threadMessages = await pinnedMessageDao.getThreadMessages(cid);
-    expect(threadMessages, isNotEmpty);
-    for (final message in threadMessages) {
-      expect(message.parentId, isNotNull);
-    }
-  });
-
-  test('getThreadMessagesByParentId', () async {
-    const cid = 'test:Cid';
-    const parentId = 'testMessageId${cid}0';
-
-    // Messages should be empty initially
-    final messages =
-        await pinnedMessageDao.getThreadMessagesByParentId(parentId);
-    expect(messages, isEmpty);
-
-    // Preparing test data
-    final insertedMessages = await _prepareTestData(cid, threads: true);
-    expect(insertedMessages, isNotEmpty);
-
-    // Should fetch all the thread messages of parentId
-    final threadMessages =
-        await pinnedMessageDao.getThreadMessagesByParentId(parentId);
-    expect(threadMessages.length, 1);
-    expect(threadMessages.first.parentId, parentId);
-  });
-
-  test('getThreadMessagesByParentId along with pagination', () async {
-    const cid = 'test:Cid';
-    const parentId = 'testMessageId${cid}0';
-    const options = PaginationParams(
-      limit: 15,
-      lessThan: 'testThreadMessageId${cid}25',
-      greaterThanOrEqual: 'testThreadMessageId${cid}5',
-    );
-
-    // Messages should be empty initially
-    final messages = await pinnedMessageDao.getThreadMessagesByParentId(
-      parentId,
-      options: options,
-    );
-    expect(messages, isEmpty);
-
-    // Preparing test data
-    final insertedMessages = await _prepareTestData(
-      cid,
-      threads: true,
-      mapAllThreadToFirstMessage: true,
-      count: 30,
-    );
-    expect(insertedMessages, isNotEmpty);
-
-    // Should fetch all the thread messages of parentId and apply the pagination
-    final threadMessages = await pinnedMessageDao.getThreadMessagesByParentId(
-      parentId,
-      options: options,
-    );
-    expect(threadMessages.length, 15);
-    expect(threadMessages.first.parentId, parentId);
-  });
-
   test('getMessagesByCid', () async {
     const cid = 'test:Cid';
 
@@ -384,7 +293,7 @@ void main() {
     expect(fetchedMessages.last.id != lessThan, true);
   });
 
-  test('updateMessages', () async {
+  test('bulkUpdateMessages', () async {
     const cid = 'test:Cid';
 
     // Preparing test data
@@ -409,7 +318,9 @@ void main() {
       pinnedBy: User(id: 'testUserId4'),
     );
 
-    await pinnedMessageDao.updateMessages(cid, [copyMessage, newMessage]);
+    await pinnedMessageDao.bulkUpdateMessages({
+      cid: [copyMessage, newMessage],
+    });
 
     // Fetched messages length should be one more than inserted message.
     // copyMessage `showInChannel` modified field should be false.

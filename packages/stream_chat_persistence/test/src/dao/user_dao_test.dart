@@ -1,9 +1,11 @@
 import 'dart:math' as math;
 
+import 'package:drift/drift.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_persistence/src/dao/dao.dart';
 import 'package:stream_chat_persistence/src/db/drift_chat_database.dart';
+import 'package:stream_chat_persistence/src/mapper/user_mapper.dart';
 
 import '../../stream_chat_persistence_client_test.dart';
 
@@ -35,11 +37,28 @@ void main() {
     return users;
   }
 
-  test('updateUsers', () async {
+  Future<List<User>> _readPersistedUsers() => (database.select(database.users)
+        ..orderBy([(u) => OrderingTerm(expression: u.createdAt)]))
+      .map((it) => it.toUser())
+      .get();
+
+  test('updateUsers persists new users', () async {
+    expect(await _readPersistedUsers(), isEmpty);
+
+    final insertedUsers = await _prepareUserData();
+
+    final fetchedUsers = await _readPersistedUsers();
+    expect(fetchedUsers.length, insertedUsers.length);
+    for (final user in insertedUsers) {
+      expect(fetchedUsers.any((it) => it.id == user.id), isTrue);
+    }
+  });
+
+  test('updateUsers upserts existing users and inserts new ones', () async {
     // Preparing test data
     final insertedUsers = await _prepareUserData();
 
-    // Modifying one of the user and also adding one new
+    // Modifying one of the users and also adding one new
     final copyUser = insertedUsers.first.copyWith(online: false);
     final newUser = User(
       id: 'testUserId3',
@@ -55,24 +74,10 @@ void main() {
     // Fetched users length should be one more than inserted users.
     // copyUser `online` modified field should be `false`.
     // Fetched users should contain the newUser.
-    final fetchedUsers = await userDao.getUsers();
+    final fetchedUsers = await _readPersistedUsers();
     expect(fetchedUsers.length, insertedUsers.length + 1);
     expect(fetchedUsers.firstWhere((it) => it.id == copyUser.id).online, false);
-    expect(fetchedUsers.contains(newUser), true);
-  });
-
-  test('getUsers', () async {
-    // Should be empty initially
-    final users = await userDao.getUsers();
-    expect(users, isEmpty);
-
-    // Preparing test data
-    final insertedUsers = await _prepareUserData();
-    expect(insertedUsers, isNotEmpty);
-
-    // Fetched user list should match inserted user list length
-    final fetchedUsers = await userDao.getUsers();
-    expect(fetchedUsers.length, insertedUsers.length);
+    expect(fetchedUsers.any((it) => it.id == newUser.id), isTrue);
   });
 
   tearDown(() async {
