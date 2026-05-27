@@ -13,8 +13,8 @@ class StreamChannelPage extends StatefulWidget {
     this.initialAlignment,
     this.highlightInitialMessage = false,
     this.onBackPressed,
-    this.onHeaderImageTap,
-    this.isFloating = false,
+    this.onChannelAvatarPressed,
+    this.isFloating = true,
   });
 
   /// Initial scroll index for the message list.
@@ -29,8 +29,8 @@ class StreamChannelPage extends StatefulWidget {
   /// Callback for when the back button is pressed.
   final VoidCallback? onBackPressed;
 
-  /// Callback for when the header image is tapped.
-  final VoidCallback? onHeaderImageTap;
+  /// Called when the default channel-avatar trailing is pressed.
+  final void Function(Channel channel)? onChannelAvatarPressed;
 
   /// Whether the composer floats over the message list.
   ///
@@ -45,7 +45,7 @@ class StreamChannelPage extends StatefulWidget {
 
 class _StreamChannelPageState extends State<StreamChannelPage> {
   FocusNode? _focusNode;
-  final _messageInputController = StreamMessageInputController();
+  final _messageComposerController = StreamMessageComposerController();
 
   @override
   void initState() {
@@ -60,14 +60,14 @@ class _StreamChannelPageState extends State<StreamChannelPage> {
   }
 
   void _reply(Message message) {
-    _messageInputController.quotedMessage = message;
+    _messageComposerController.quotedMessage = message;
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       _focusNode!.requestFocus();
     });
   }
 
   void _editMessage(Message message) {
-    _messageInputController.editMessage(message);
+    _messageComposerController.editMessage(message);
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       _focusNode!.requestFocus();
     });
@@ -75,45 +75,30 @@ class _StreamChannelPageState extends State<StreamChannelPage> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = StreamChatTheme.of(context);
-    final textTheme = theme.textTheme;
-    final colorTheme = theme.colorTheme;
-
-    final appBar = StreamChannelHeader(
-      showTypingIndicator: false,
-      onBackPressed: widget.onBackPressed,
-      onImageTap: widget.onHeaderImageTap,
-    );
-
     final typingIndicator = StreamTypingIndicator(
       padding: const EdgeInsets.symmetric(
         horizontal: 8,
         vertical: 4,
       ),
-      style: textTheme.footnote.copyWith(
-        color: colorTheme.textLowEmphasis,
+      style: context.streamTextTheme.captionDefault.copyWith(
+        color: context.streamColorScheme.textSecondary,
       ),
     );
 
     final composer = StreamMessageComposer(
       focusNode: _focusNode,
-      messageInputController: _messageInputController,
-      onQuotedMessageCleared: _messageInputController.clearQuotedMessage,
+      messageComposerController: _messageComposerController,
+      onQuotedMessageCleared: _messageComposerController.clearQuotedMessage,
       enableVoiceRecording: true,
       isFloating: widget.isFloating,
     );
 
     if (widget.isFloating) {
-      final floatingAppBar = StreamChannelHeader(
-        showTypingIndicator: false,
-        onBackPressed: widget.onBackPressed,
-        onImageTap: widget.onHeaderImageTap,
-        backgroundColor: Colors.transparent,
-      );
-
       return Scaffold(
-        backgroundColor: colorTheme.appBg,
-        appBar: floatingAppBar,
+        backgroundColor: context.streamColorScheme.backgroundApp,
+        appBar: StreamChannelHeader(
+          onChannelAvatarPressed: widget.onChannelAvatarPressed,
+        ),
         extendBody: true,
         extendBodyBehindAppBar: true,
         bottomNavigationBar: Column(
@@ -121,7 +106,7 @@ class _StreamChannelPageState extends State<StreamChannelPage> {
           children: [
             Container(
               alignment: Alignment.centerLeft,
-              color: colorTheme.appBg.withOpacity(.9),
+              color: context.streamColorScheme.backgroundApp.withOpacity(.9),
               child: typingIndicator,
             ),
             composer,
@@ -133,10 +118,12 @@ class _StreamChannelPageState extends State<StreamChannelPage> {
             return StreamMessageListView(
               initialScrollIndex: widget.initialScrollIndex,
               initialAlignment: widget.initialAlignment,
-              highlightInitialMessage: widget.highlightInitialMessage,
+              config: StreamMessageListViewConfiguration(
+                highlightInitialMessage: widget.highlightInitialMessage,
+                swipeToReply: true,
+              ),
               onEditMessageTap: _editMessage,
               onReplyTap: _reply,
-              swipeToReply: true,
               threadBuilder: (_, parentMessage) {
                 return StreamThreadPage(parent: parentMessage!);
               },
@@ -149,8 +136,10 @@ class _StreamChannelPageState extends State<StreamChannelPage> {
     }
 
     return Scaffold(
-      backgroundColor: colorTheme.appBg,
-      appBar: appBar,
+      backgroundColor: context.streamColorScheme.backgroundApp,
+      appBar: StreamChannelHeader(
+        onChannelAvatarPressed: widget.onChannelAvatarPressed,
+      ),
       body: Column(
         children: <Widget>[
           Expanded(
@@ -159,10 +148,12 @@ class _StreamChannelPageState extends State<StreamChannelPage> {
                 StreamMessageListView(
                   initialScrollIndex: widget.initialScrollIndex,
                   initialAlignment: widget.initialAlignment,
-                  highlightInitialMessage: widget.highlightInitialMessage,
+                  config: StreamMessageListViewConfiguration(
+                    highlightInitialMessage: widget.highlightInitialMessage,
+                    swipeToReply: true,
+                  ),
                   onEditMessageTap: _editMessage,
                   onReplyTap: _reply,
-                  swipeToReply: true,
                   threadBuilder: (_, parentMessage) {
                     return StreamThreadPage(parent: parentMessage!);
                   },
@@ -173,7 +164,7 @@ class _StreamChannelPageState extends State<StreamChannelPage> {
                   right: 0,
                   child: Container(
                     alignment: Alignment.centerLeft,
-                    color: colorTheme.appBg.withOpacity(.9),
+                    color: context.streamColorScheme.backgroundApp.withOpacity(.9),
                     child: typingIndicator,
                   ),
                 ),
