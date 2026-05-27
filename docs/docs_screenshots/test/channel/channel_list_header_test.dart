@@ -58,7 +58,38 @@ void main() {
       return _buildListHeaderScaffold(
         client: client,
         headerBuilder: (context) => StreamChannelListHeader(
-          subtitle: const Text('12 channels'),
+          subtitle: const Text('My Custom Subtitle'),
+          trailing: StreamButton.icon(
+            icon: Icon(context.streamIcons.plus),
+            onPressed: () {},
+          ),
+        ),
+      );
+    },
+  );
+
+  docsGoldenTest(
+    'channel list header with custom title',
+    fileName: 'channel_list_header_custom_title',
+    constraints: const BoxConstraints.tightFor(width: 375, height: 72),
+    builder: () {
+      final client = MockClient();
+      final clientState = MockClientState();
+      when(() => client.state).thenReturn(clientState);
+      when(() => clientState.currentUser).thenReturn(ownUser);
+
+      return _buildListHeaderScaffold(
+        client: client,
+        headerBuilder: (context) => StreamChannelListHeader(
+          title: StreamConnectionStatusBuilder(
+            statusBuilder: (context, status) {
+              return switch (status) {
+                ConnectionStatus.connected => const Text('My Chat App'),
+                ConnectionStatus.connecting => const Text('Connecting...'),
+                ConnectionStatus.disconnected => const Text('Offline'),
+              };
+            },
+          ),
           trailing: StreamButton.icon(
             icon: Icon(context.streamIcons.plus),
             onPressed: () {},
