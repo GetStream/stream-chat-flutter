@@ -93,70 +93,43 @@ class _StreamChannelPageState extends State<StreamChannelPage> {
       isFloating: widget.isFloating,
     );
 
-    if (widget.isFloating) {
-      return Scaffold(
-        backgroundColor: context.streamColorScheme.backgroundApp,
-        appBar: StreamChannelHeader(
-          onChannelAvatarPressed: (channel) => widget.onChannelAvatarPressed?.call(context, channel),
-        ),
-        extendBodyBehindAppBar: false,
-        body: _FloatingChannelBody(
-          composer: composer,
-          typingIndicator: Container(
-            alignment: Alignment.centerLeft,
-            color: context.streamColorScheme.backgroundApp.withOpacity(.9),
-            child: typingIndicator,
-          ),
-          messageListBuilder: (bottomWidgetsHeight) => StreamMessageListView(
-            initialScrollIndex: widget.initialScrollIndex,
-            initialAlignment: widget.initialAlignment,
-            config: StreamMessageListViewConfiguration(
-              highlightInitialMessage: widget.highlightInitialMessage,
-              swipeToReply: true,
-            ),
-            onEditMessageTap: _editMessage,
-            onReplyTap: _reply,
-            threadBuilder: (_, parentMessage) {
-              return StreamThreadPage(parent: parentMessage!);
-            },
-            bottomPadding: bottomWidgetsHeight,
-          ),
-        ),
-      );
-    }
+    final appBar = StreamChannelHeader(
+      onChannelAvatarPressed: (channel) => widget.onChannelAvatarPressed?.call(context, channel),
+      floating: widget.isFloating,
+    );
 
-    return Scaffold(
-      backgroundColor: context.streamColorScheme.backgroundApp,
-      appBar: StreamChannelHeader(
-        onChannelAvatarPressed: (channel) => widget.onChannelAvatarPressed?.call(context, channel),
+    StreamMessageListView messageListBuilder(double bottomPadding) => StreamMessageListView(
+      initialScrollIndex: widget.initialScrollIndex,
+      initialAlignment: widget.initialAlignment,
+      config: StreamMessageListViewConfiguration(
+        highlightInitialMessage: widget.highlightInitialMessage,
+        swipeToReply: true,
       ),
-      body: Column(
+      onEditMessageTap: _editMessage,
+      onReplyTap: _reply,
+      threadBuilder: (_, parentMessage) {
+        return StreamThreadPage(parent: parentMessage!);
+      },
+      bottomPadding: bottomPadding,
+    );
+
+    final body = switch (widget.isFloating) {
+      true => _FloatingChannelBody(
+        composer: composer,
+        typingIndicator: typingIndicator,
+        messageListBuilder: messageListBuilder,
+      ),
+      false => Column(
         children: <Widget>[
           Expanded(
             child: Stack(
               children: <Widget>[
-                StreamMessageListView(
-                  initialScrollIndex: widget.initialScrollIndex,
-                  initialAlignment: widget.initialAlignment,
-                  config: StreamMessageListViewConfiguration(
-                    highlightInitialMessage: widget.highlightInitialMessage,
-                    swipeToReply: true,
-                  ),
-                  onEditMessageTap: _editMessage,
-                  onReplyTap: _reply,
-                  threadBuilder: (_, parentMessage) {
-                    return StreamThreadPage(parent: parentMessage!);
-                  },
-                ),
+                messageListBuilder(0),
                 Positioned(
                   bottom: 0,
                   left: 0,
                   right: 0,
-                  child: Container(
-                    alignment: Alignment.centerLeft,
-                    color: context.streamColorScheme.backgroundApp.withOpacity(.9),
-                    child: typingIndicator,
-                  ),
+                  child: typingIndicator,
                 ),
               ],
             ),
@@ -164,6 +137,13 @@ class _StreamChannelPageState extends State<StreamChannelPage> {
           composer,
         ],
       ),
+    };
+
+    return Scaffold(
+      backgroundColor: context.streamColorScheme.backgroundApp,
+      appBar: appBar,
+      extendBodyBehindAppBar: widget.isFloating,
+      body: body,
     );
   }
 }
