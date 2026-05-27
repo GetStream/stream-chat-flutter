@@ -30,7 +30,7 @@ class StreamChannelPage extends StatefulWidget {
   final VoidCallback? onBackPressed;
 
   /// Called when the default channel-avatar trailing is pressed.
-  final void Function(Channel channel)? onChannelAvatarPressed;
+  final void Function(BuildContext context, Channel channel)? onChannelAvatarPressed;
 
   /// Whether the composer floats over the message list.
   ///
@@ -97,8 +97,9 @@ class _StreamChannelPageState extends State<StreamChannelPage> {
       return Scaffold(
         backgroundColor: context.streamColorScheme.backgroundApp,
         appBar: StreamChannelHeader(
-          onChannelAvatarPressed: widget.onChannelAvatarPressed,
+          onChannelAvatarPressed: (channel) => widget.onChannelAvatarPressed?.call(context, channel),
         ),
+        extendBodyBehindAppBar: false,
         body: _FloatingChannelBody(
           composer: composer,
           typingIndicator: Container(
@@ -127,7 +128,7 @@ class _StreamChannelPageState extends State<StreamChannelPage> {
     return Scaffold(
       backgroundColor: context.streamColorScheme.backgroundApp,
       appBar: StreamChannelHeader(
-        onChannelAvatarPressed: widget.onChannelAvatarPressed,
+        onChannelAvatarPressed: (channel) => widget.onChannelAvatarPressed?.call(context, channel),
       ),
       body: Column(
         children: <Widget>[
