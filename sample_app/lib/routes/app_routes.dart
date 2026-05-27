@@ -49,6 +49,31 @@ final appRoutes = [
                     : StreamChannelPage(
                         highlightInitialMessage: messageId != null,
                         isFloating: true,
+                        onChannelAvatarPressed: (context, channel) {
+                          final isOneToOne = channel.isOneToOne;
+                          final currentUserId = StreamChat.of(context).currentUser?.id;
+
+                          final channelMembers = channel.state?.members ?? [];
+                          final otherUser = isOneToOne
+                              ? channelMembers.firstWhere((m) => m.userId != currentUserId).user
+                              : null;
+
+                          final router = GoRouter.of(context);
+
+                          if (otherUser != null) {
+                            router.pushNamed(
+                              Routes.CHAT_INFO_SCREEN.name,
+                              pathParameters: Routes.CHAT_INFO_SCREEN.params(channel),
+                              extra: otherUser,
+                            );
+                            return;
+                          }
+
+                          router.pushNamed(
+                            Routes.GROUP_INFO_SCREEN.name,
+                            pathParameters: Routes.GROUP_INFO_SCREEN.params(channel),
+                          );
+                        },
                       );
               },
             ),
