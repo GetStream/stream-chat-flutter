@@ -732,7 +732,6 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
                 ? EdgeInsets.lerp(
                     EdgeInsets.only(
                       left: viewPadding.left,
-                      top: viewPadding.top,
                       right: viewPadding.right,
                       bottom: math.max(viewPadding.bottom, spacing.md),
                     ),
