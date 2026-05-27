@@ -43,6 +43,7 @@ import 'package:stream_chat/src/core/models/thread.dart';
 import 'package:stream_chat/src/core/models/user.dart';
 import 'package:stream_chat/src/core/util/event_controller.dart';
 import 'package:stream_chat/src/core/util/extension.dart';
+import 'package:stream_chat/src/core/util/immutable_collection_subjects.dart';
 import 'package:stream_chat/src/core/util/in_flight_cache.dart';
 import 'package:stream_chat/src/core/util/list_extensions.dart';
 import 'package:stream_chat/src/core/util/utils.dart';
@@ -2531,7 +2532,7 @@ class ClientState {
       for (final user in userList)
         if (user != null) user.id: user,
     };
-    _usersController.safeAdd(.unmodifiable(newUsers));
+    _usersController.safeAdd(newUsers);
   }
 
   /// Update the passed [user] in state
@@ -2561,7 +2562,7 @@ class ClientState {
   set activeLiveLocations(List<Location> locations) {
     // For safe-keeping, we filter out any inactive locations before update.
     final activeLocations = locations.where((it) => it.isActive);
-    _activeLiveLocationsController.safeAdd(.unmodifiable(activeLocations));
+    _activeLiveLocationsController.safeAdd(activeLocations.toList());
   }
 
   /// The current unread channels count
@@ -2590,7 +2591,7 @@ class ClientState {
 
   @internal
   set channels(Map<String, Channel> newChannels) {
-    _channelsController.safeAdd(.unmodifiable(newChannels));
+    _channelsController.safeAdd(newChannels);
   }
 
   /// Adds a list of channels to the current list of cached channels
@@ -2632,13 +2633,13 @@ class ClientState {
     }
   }
 
-  final _channelsController = BehaviorSubject<Map<String, Channel>>.seeded(.unmodifiable(const {}));
+  final _channelsController = ImmutableMapBehaviorSubject<String, Channel>.seeded(const {});
   final _currentUserController = BehaviorSubject<OwnUser?>();
-  final _usersController = BehaviorSubject<Map<String, User>>.seeded(.unmodifiable(const {}));
+  final _usersController = ImmutableMapBehaviorSubject<String, User>.seeded(const {});
   final _unreadChannelsController = BehaviorSubject<int>.seeded(0);
   final _unreadThreadsController = BehaviorSubject<int>.seeded(0);
   final _totalUnreadCountController = BehaviorSubject<int>.seeded(0);
-  final _activeLiveLocationsController = BehaviorSubject<List<Location>>.seeded(.unmodifiable(const []));
+  final _activeLiveLocationsController = ImmutableListBehaviorSubject<Location>.seeded(const []);
 
   /// Call this method to dispose this object
   void dispose() {
