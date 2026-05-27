@@ -2561,7 +2561,7 @@ class ClientState {
   set activeLiveLocations(List<Location> locations) {
     // For safe-keeping, we filter out any inactive locations before update.
     final activeLocations = locations.where((it) => it.isActive);
-    _activeLiveLocationsController.safeAdd(.unmodifiable(activeLocations));
+    _activeLiveLocationsController.safeAdd(UnmodifiableListView(activeLocations));
   }
 
   /// The current unread channels count
@@ -2632,13 +2632,13 @@ class ClientState {
     }
   }
 
-  final _channelsController = BehaviorSubject<Map<String, Channel>>.seeded(.unmodifiable(const {}));
-  final _currentUserController = BehaviorSubject<OwnUser?>();
-  final _usersController = BehaviorSubject<Map<String, User>>.seeded(.unmodifiable(const {}));
-  final _unreadChannelsController = BehaviorSubject<int>.seeded(0);
-  final _unreadThreadsController = BehaviorSubject<int>.seeded(0);
-  final _totalUnreadCountController = BehaviorSubject<int>.seeded(0);
-  final _activeLiveLocationsController = BehaviorSubject<List<Location>>.seeded(.unmodifiable(const []));
+  final _channelsController = UnmodifiableBehaviorSubject<Map<String, Channel>>.seeded(.unmodifiable(const {}));
+  final _currentUserController = UnmodifiableBehaviorSubject<OwnUser?>();
+  final _usersController = UnmodifiableBehaviorSubject<Map<String, User>>.seeded(.unmodifiable(const {}));
+  final _unreadChannelsController = UnmodifiableBehaviorSubject<int>.seeded(0);
+  final _unreadThreadsController = UnmodifiableBehaviorSubject<int>.seeded(0);
+  final _totalUnreadCountController = UnmodifiableBehaviorSubject<int>.seeded(0);
+  final _activeLiveLocationsController = UnmodifiableBehaviorSubject<List<Location>>.seeded(UnmodifiableListView([]));
 
   /// Call this method to dispose this object
   void dispose() {
@@ -2654,6 +2654,74 @@ class ClientState {
     _channelsController.close();
     for (final channel in channels.values) {
       channel.dispose(); // Dispose any remaining channels in memory.
+    }
+  }
+}
+
+class UnmodifiableBehaviorSubject<T> {
+  final BehaviorSubject<T> _subject;
+
+  UnmodifiableBehaviorSubject._(this._subject);
+
+  factory UnmodifiableBehaviorSubject({
+    void Function()? onListen,
+    void Function()? onCancel,
+    bool sync = false,
+  }) {
+    return UnmodifiableBehaviorSubject._(
+      BehaviorSubject<T>(
+        onListen: onListen,
+        onCancel: onCancel,
+        sync: sync,
+      ),
+    );
+  }
+
+  factory UnmodifiableBehaviorSubject.seeded(
+    T seedValue, {
+    void Function()? onListen,
+    void Function()? onCancel,
+    bool sync = false,
+  }) {
+    _assertNotModifiable(seedValue);
+    return UnmodifiableBehaviorSubject._(
+      BehaviorSubject<T>.seeded(
+        seedValue,
+        onListen: onListen,
+        onCancel: onCancel,
+        sync: sync,
+      ),
+    );
+  }
+
+  /// The current value, or throws if no value has been emitted yet.
+  T get value => _subject.value;
+
+  /// The current value, or `null` if no value has been emitted yet.
+  T? get valueOrNull => _subject.valueOrNull;
+
+  /// Whether a value has been emitted.
+  bool get hasValue => _subject.hasValue;
+
+  /// The stream of values.
+  Stream<T> get stream => _subject.stream;
+
+  void safeAdd(T event) {
+    _assertNotModifiable(event);
+    _subject.safeAdd(event);
+  }
+
+  void close() => _subject.close();
+
+  static void _assertNotModifiable(dynamic value) {
+    if (value is List) {
+      assert(value is UnmodifiableListView, 'List is modifiable');
+    }
+    if (value is Map) {
+      assert(value is UnmodifiableMapView, 'Map is modifiable');
+    }
+    if (value is Set) {
+      assert(value is UnmodifiableSetView, 'Set is modifiable');
     }
   }
 }
