@@ -1,7 +1,6 @@
 // ignore_for_file: deprecated_member_use, avoid_redundant_argument_values
 
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/channel/thread_page.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// A channel page with optional floating composer support.
@@ -98,6 +97,8 @@ class _StreamChannelPageState extends State<StreamChannelPage> {
       floating: widget.isFloating,
     );
 
+    final topPadding = widget.isFloating ? appBar.preferredSize.height + MediaQuery.of(context).padding.top : 0.0;
+
     StreamMessageListView messageListBuilder(double bottomPadding) => StreamMessageListView(
       initialScrollIndex: widget.initialScrollIndex,
       initialAlignment: widget.initialAlignment,
@@ -110,6 +111,7 @@ class _StreamChannelPageState extends State<StreamChannelPage> {
       threadBuilder: (_, parentMessage) {
         return StreamThreadPage(parent: parentMessage!);
       },
+      topPadding: topPadding,
       bottomPadding: bottomPadding,
     );
 
