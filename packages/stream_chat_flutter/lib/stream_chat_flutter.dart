@@ -156,6 +156,7 @@ export 'src/channel/channel_page.dart';
 export 'src/channel/stream_channel_name.dart';
 export 'src/channel/stream_draft_message_preview_text.dart';
 export 'src/channel/stream_message_preview_text.dart';
+export 'src/channel/thread_page.dart';
 // region SDK Design Refresh Components
 export 'src/components/avatar/stream_channel_avatar.dart';
 export 'src/components/avatar/stream_user_avatar.dart';
