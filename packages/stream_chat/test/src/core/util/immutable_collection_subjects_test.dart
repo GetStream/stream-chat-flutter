@@ -6,6 +6,23 @@ import 'package:test/test.dart';
 
 void main() {
   group('ImmutableMapBehaviorSubject', () {
+    test('non-seeded constructor throws when reading `value` before any add', () {
+      final controller = ImmutableMapBehaviorSubject<String, int>();
+      addTearDown(controller.close);
+
+      expect(() => controller.value, throwsA(isA<Error>()));
+    });
+
+    test('non-seeded constructor surfaces the first add as `value`', () {
+      final controller = ImmutableMapBehaviorSubject<String, int>();
+      addTearDown(controller.close);
+
+      controller.add({'a': 1});
+
+      expect(controller.value, equals({'a': 1}));
+      expect(controller.value, isA<UnmodifiableMapView<String, int>>());
+    });
+
     test('seeded constructor exposes the seed wrapped as unmodifiable', () {
       final controller = ImmutableMapBehaviorSubject<String, int>.seeded({'a': 1});
       addTearDown(controller.close);
@@ -81,6 +98,23 @@ void main() {
   });
 
   group('ImmutableListBehaviorSubject', () {
+    test('non-seeded constructor throws when reading `value` before any add', () {
+      final controller = ImmutableListBehaviorSubject<int>();
+      addTearDown(controller.close);
+
+      expect(() => controller.value, throwsA(isA<Error>()));
+    });
+
+    test('non-seeded constructor surfaces the first add as `value`', () {
+      final controller = ImmutableListBehaviorSubject<int>();
+      addTearDown(controller.close);
+
+      controller.add([1, 2, 3]);
+
+      expect(controller.value, equals([1, 2, 3]));
+      expect(controller.value, isA<UnmodifiableListView<int>>());
+    });
+
     test('seeded constructor exposes the seed wrapped as unmodifiable', () {
       final controller = ImmutableListBehaviorSubject<int>.seeded(const [1, 2, 3]);
       addTearDown(controller.close);
