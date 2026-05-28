@@ -5,7 +5,7 @@ import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/src/core/util/extension.dart';
 
-/// A [ValueStream] of maps that guarantees every emitted value is immutable.
+/// A [Stream] of maps that guarantees every emitted value is immutable.
 ///
 /// Subscribers receive snapshots that throw `UnsupportedError` on mutation.
 /// Callers pass plain maps to [add] / [safeAdd] — the wrap is handled here
@@ -28,8 +28,7 @@ import 'package:stream_chat/src/core/util/extension.dart';
 ///
 ///  * [ImmutableListBehaviorSubject], the list counterpart.
 @internal
-class ImmutableMapBehaviorSubject<K, V> extends StreamView<Map<K, V>>
-    implements ValueStream<Map<K, V>>, Sink<Map<K, V>> {
+class ImmutableMapBehaviorSubject<K, V> extends StreamView<Map<K, V>> implements Sink<Map<K, V>> {
   /// Creates an [ImmutableMapBehaviorSubject] with no initial value.
   ///
   /// See [StreamController.broadcast] for [onListen], [onCancel] and [sync].
@@ -69,34 +68,13 @@ class ImmutableMapBehaviorSubject<K, V> extends StreamView<Map<K, V>>
   final BehaviorSubject<UnmodifiableMapView<K, V>> _subject;
 
   /// A read-only view of the underlying stream.
-  ValueStream<Map<K, V>> get stream => _subject.stream;
+  Stream<Map<K, V>> get stream => _subject.stream;
 
-  @override
+  /// The most recently emitted value.
   Map<K, V> get value => _subject.value;
 
   /// Sets and emits the new [value].
   set value(Map<K, V> value) => add(value);
-
-  @override
-  Map<K, V>? get valueOrNull => _subject.valueOrNull;
-
-  @override
-  bool get hasValue => _subject.hasValue;
-
-  @override
-  Object get error => _subject.error;
-
-  @override
-  Object? get errorOrNull => _subject.errorOrNull;
-
-  @override
-  bool get hasError => _subject.hasError;
-
-  @override
-  StackTrace? get stackTrace => _subject.stackTrace;
-
-  @override
-  StreamNotification<Map<K, V>>? get lastEventOrNull => _subject.lastEventOrNull;
 
   @override
   void add(Map<K, V> value) => _subject.add(UnmodifiableMapView(value));
@@ -108,7 +86,7 @@ class ImmutableMapBehaviorSubject<K, V> extends StreamView<Map<K, V>>
   Future<void> close() => _subject.close();
 }
 
-/// A [ValueStream] of lists that guarantees every emitted value is immutable.
+/// A [Stream] of lists that guarantees every emitted value is immutable.
 ///
 /// Subscribers receive snapshots that throw `UnsupportedError` on mutation.
 /// Callers pass plain lists to [add] / [safeAdd] — the wrap is handled here
@@ -131,7 +109,7 @@ class ImmutableMapBehaviorSubject<K, V> extends StreamView<Map<K, V>>
 ///
 ///  * [ImmutableMapBehaviorSubject], the map counterpart.
 @internal
-class ImmutableListBehaviorSubject<E> extends StreamView<List<E>> implements ValueStream<List<E>>, Sink<List<E>> {
+class ImmutableListBehaviorSubject<E> extends StreamView<List<E>> implements Sink<List<E>> {
   /// Creates an [ImmutableListBehaviorSubject] with no initial value.
   ///
   /// See [StreamController.broadcast] for [onListen], [onCancel] and [sync].
@@ -171,34 +149,13 @@ class ImmutableListBehaviorSubject<E> extends StreamView<List<E>> implements Val
   final BehaviorSubject<UnmodifiableListView<E>> _subject;
 
   /// A read-only view of the underlying stream.
-  ValueStream<List<E>> get stream => _subject.stream;
+  Stream<List<E>> get stream => _subject.stream;
 
-  @override
+  /// The most recently emitted value.
   List<E> get value => _subject.value;
 
   /// Sets and emits the new [value].
   set value(List<E> value) => add(value);
-
-  @override
-  List<E>? get valueOrNull => _subject.valueOrNull;
-
-  @override
-  bool get hasValue => _subject.hasValue;
-
-  @override
-  Object get error => _subject.error;
-
-  @override
-  Object? get errorOrNull => _subject.errorOrNull;
-
-  @override
-  bool get hasError => _subject.hasError;
-
-  @override
-  StackTrace? get stackTrace => _subject.stackTrace;
-
-  @override
-  StreamNotification<List<E>>? get lastEventOrNull => _subject.lastEventOrNull;
 
   @override
   void add(List<E> value) => _subject.add(UnmodifiableListView(value));

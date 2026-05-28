@@ -1,32 +1,22 @@
 import 'dart:async';
 import 'dart:collection';
 
-import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/src/core/util/immutable_collection_subjects.dart';
 import 'package:test/test.dart';
 
 void main() {
   group('ImmutableMapBehaviorSubject', () {
-    test('non-seeded constructor has no initial value', () {
-      final controller = ImmutableMapBehaviorSubject<String, int>();
-      addTearDown(controller.close);
-
-      expect(controller.hasValue, isFalse);
-      expect(controller.valueOrNull, isNull);
-    });
-
     test('seeded constructor exposes the seed wrapped as unmodifiable', () {
       final controller = ImmutableMapBehaviorSubject<String, int>.seeded({'a': 1});
       addTearDown(controller.close);
 
-      expect(controller.hasValue, isTrue);
       expect(controller.value, equals({'a': 1}));
       expect(controller.value, isA<UnmodifiableMapView<String, int>>());
       expect(() => controller.value['b'] = 2, throwsUnsupportedError);
     });
 
     test('`add` wraps plain maps as unmodifiable', () {
-      final controller = ImmutableMapBehaviorSubject<String, int>();
+      final controller = ImmutableMapBehaviorSubject<String, int>.seeded({});
       addTearDown(controller.close);
 
       controller.add({'a': 1});
@@ -44,7 +34,7 @@ void main() {
     });
 
     test('`safeAdd` wraps plain maps as unmodifiable', () {
-      final controller = ImmutableMapBehaviorSubject<String, int>();
+      final controller = ImmutableMapBehaviorSubject<String, int>.seeded({});
       addTearDown(controller.close);
 
       controller.safeAdd({'a': 1});
@@ -81,37 +71,27 @@ void main() {
       }
     });
 
-    test('IS-A Stream / ValueStream / Sink', () {
+    test('IS-A Stream / Sink', () {
       final controller = ImmutableMapBehaviorSubject<String, int>.seeded({'a': 1});
       addTearDown(controller.close);
 
       expect(controller, isA<Stream<Map<String, int>>>());
-      expect(controller, isA<ValueStream<Map<String, int>>>());
       expect(controller, isA<Sink<Map<String, int>>>());
     });
   });
 
   group('ImmutableListBehaviorSubject', () {
-    test('non-seeded constructor has no initial value', () {
-      final controller = ImmutableListBehaviorSubject<int>();
-      addTearDown(controller.close);
-
-      expect(controller.hasValue, isFalse);
-      expect(controller.valueOrNull, isNull);
-    });
-
     test('seeded constructor exposes the seed wrapped as unmodifiable', () {
       final controller = ImmutableListBehaviorSubject<int>.seeded(const [1, 2, 3]);
       addTearDown(controller.close);
 
-      expect(controller.hasValue, isTrue);
       expect(controller.value, equals([1, 2, 3]));
       expect(controller.value, isA<UnmodifiableListView<int>>());
       expect(() => controller.value.add(4), throwsUnsupportedError);
     });
 
     test('`add` wraps plain lists as unmodifiable', () {
-      final controller = ImmutableListBehaviorSubject<int>();
+      final controller = ImmutableListBehaviorSubject<int>.seeded(const []);
       addTearDown(controller.close);
 
       controller.add([1, 2, 3]);
@@ -129,7 +109,7 @@ void main() {
     });
 
     test('`safeAdd` wraps plain lists as unmodifiable', () {
-      final controller = ImmutableListBehaviorSubject<int>();
+      final controller = ImmutableListBehaviorSubject<int>.seeded(const []);
       addTearDown(controller.close);
 
       controller.safeAdd([1, 2, 3]);
@@ -166,12 +146,11 @@ void main() {
       }
     });
 
-    test('IS-A Stream / ValueStream / Sink', () {
+    test('IS-A Stream / Sink', () {
       final controller = ImmutableListBehaviorSubject<int>.seeded(const [1]);
       addTearDown(controller.close);
 
       expect(controller, isA<Stream<List<int>>>());
-      expect(controller, isA<ValueStream<List<int>>>());
       expect(controller, isA<Sink<List<int>>>());
     });
   });
