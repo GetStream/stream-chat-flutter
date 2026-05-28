@@ -6,6 +6,9 @@
 
 🛑️ Breaking
 
+- `StreamChatConfigurationData.draftMessagesEnabled` now defaults to `true`. Draft messages are enabled out of the box; pass `draftMessagesEnabled: false` to opt out.
+- `StreamChatConfigurationData.enforceUniqueReactions` now defaults to `false`. Users can add multiple distinct reaction types to a message by default; pass `enforceUniqueReactions: true` to restore the previous behaviour.
+- `StreamMessageComposer.enableVoiceRecording` now defaults to `true`. The voice recording button is shown out of the box; pass `enableVoiceRecording: false` to opt out.
 - `StreamMessageListView` had its large set of configuration and builder parameters reorganized. Behavior flags (e.g. `swipeToReply`, `markReadWhenAtTheBottom`, `showScrollToBottom`, `reverse`, `paginationLimit`, `scrollPhysics`, etc.) moved to `StreamMessageListViewConfiguration`, passed directly as `StreamMessageListView.config`. Custom builder callbacks (`headerBuilder`, `footerBuilder`, `loadingBuilder`, `emptyBuilder`, `errorBuilder`, `messageListBuilder`, `parentMessageBuilder`, `dateDividerBuilder`, `floatingDateDividerBuilder`, `threadSeparatorBuilder`, `unreadMessagesSeparatorBuilder`, `scrollToBottomBuilder`, `paginationLoadingIndicatorBuilder`, `spacingWidgetBuilder`, `systemMessageBuilder`, `ephemeralMessageBuilder`, `moderatedMessageBuilder`) moved to `StreamMessageListViewBuilders`, passed directly as `StreamMessageListView.builders`. The `messageBuilder` parameter is back at the root of the constructor as before.
 - Bumped `file_picker` to `^11.0.0` to resolve [#2599](https://github.com/GetStream/stream-chat-flutter/issues/2599). Apps depending on `file_picker` directly must also upgrade past `11.0.0`, which replaces the instance-based `FilePicker.platform.*` API with static `FilePicker.*` methods.
 - Renamed `StreamMessageComposer.messageInputController` parameter to `messageComposerController`.
