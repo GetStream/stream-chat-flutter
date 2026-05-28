@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 /// {@template streamChannelHeader}
 /// A top-of-screen header for a single channel.
@@ -81,7 +82,7 @@ class StreamChannelHeader extends StatelessWidget implements PreferredSizeWidget
     this.trailing,
     this.primary = true,
     this.style,
-    this.floating = false,
+    this.appBarBehavior,
   });
 
   /// Called when the default channel-avatar trailing is pressed.
@@ -131,7 +132,7 @@ class StreamChannelHeader extends StatelessWidget implements PreferredSizeWidget
   final StreamAppBarStyle? style;
 
   /// Whether the header is floating.
-  final bool floating;
+  final AppBarBehavior? appBarBehavior;
 
   @override
   Size get preferredSize => const Size.fromHeight(kStreamToolbarHeight);
@@ -143,7 +144,8 @@ class StreamChannelHeader extends StatelessWidget implements PreferredSizeWidget
 
     var leading = this.leading;
     if (leading == null && automaticallyImplyLeading) {
-      leading = StreamBackButton(showUnreadCount: true, floating: floating);
+      final effectiveAppBarBehavior = appBarBehavior ?? StreamTheme.of(context).appStyle.appBarBehavior;
+      leading = StreamBackButton(showUnreadCount: true, floating: effectiveAppBarBehavior == .floating);
     }
 
     var title = this.title;
@@ -191,7 +193,7 @@ class StreamChannelHeader extends StatelessWidget implements PreferredSizeWidget
                 trailing: trailing,
                 primary: primary,
                 style: style,
-                floating: floating,
+                appBarBehavior: appBarBehavior,
               ),
             ),
           );

@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:stream_chat_flutter/src/message_input/error_alert_sheet.dart';
 import 'package:stream_chat_flutter/src/message_input/stream_chat_message_input.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 const _kCommandTrigger = '/';
 const _kMentionTrigger = '@';
@@ -97,7 +98,7 @@ class StreamMessageComposer extends StatelessWidget {
     TextCapitalization textCapitalization = TextCapitalization.sentences,
     bool autofocus = false,
     bool autoCorrect = true,
-    bool isFloating = false,
+    ComposerLocation? composerLocation,
   }) : props = MessageComposerProps(
          onMessageSent: onMessageSent,
          preMessageSending: preMessageSending,
@@ -135,7 +136,7 @@ class StreamMessageComposer extends StatelessWidget {
          textCapitalization: textCapitalization,
          autofocus: autofocus,
          autoCorrect: autoCorrect,
-         isFloating: isFloating,
+         composerLocation: composerLocation,
        );
 
   /// Creates a [StreamMessageComposer] from a pre-built [MessageComposerProps].
@@ -197,7 +198,7 @@ class MessageComposerProps {
     this.textCapitalization = TextCapitalization.sentences,
     this.autofocus = false,
     this.autoCorrect = true,
-    this.isFloating = false,
+    this.composerLocation,
   });
 
   /// Function called after sending the message.
@@ -401,8 +402,8 @@ class MessageComposerProps {
   /// Defaults to true.
   final bool autoCorrect;
 
-  /// Whether the message composer is floating.
-  final bool isFloating;
+  /// The location of the message composer.
+  final ComposerLocation? composerLocation;
 
   static bool _defaultSendMessageKeyPredicate(FocusNode node, KeyEvent event) {
     // Do not handle the event if the user is using a mobile device.
@@ -719,11 +720,17 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     final safeAreaEnabled = widget.props.enableSafeArea ?? true;
     final viewPadding = MediaQuery.paddingOf(context);
 
+    final effectiveComposerLocation =
+        widget.props.composerLocation ?? StreamTheme.of(context).appStyle.composerLocation;
+
     return Material(
       color: Colors.transparent,
       child: DecoratedBox(
         decoration: BoxDecoration(
-          color: widget.props.isFloating ? null : context.streamColorScheme.backgroundElevation1,
+          color: switch (effectiveComposerLocation) {
+            .floating => null,
+            .docked => context.streamColorScheme.backgroundElevation1,
+          },
         ),
         child: AnimatedBuilder(
           animation: _pickerAnimation,
@@ -810,6 +817,8 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     FocusNode focusNode,
   ) {
     final currentUserId = StreamChat.of(context).currentUser?.id;
+    final effectiveComposerLocation =
+        widget.props.composerLocation ?? StreamTheme.of(context).appStyle.composerLocation;
 
     return StreamMessageValueListenableBuilder(
       valueListenable: controller,
@@ -855,7 +864,7 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
                   textCapitalization: widget.props.textCapitalization,
                   autofocus: widget.props.autofocus,
                   autocorrect: widget.props.autoCorrect,
-                  isFloating: widget.props.isFloating,
+                  isFloating: effectiveComposerLocation == .floating,
                 ),
               ),
             ),
