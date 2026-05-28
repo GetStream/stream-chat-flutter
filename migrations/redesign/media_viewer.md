@@ -2,7 +2,7 @@
 
 The full-screen media viewer and its thumbnail companion have been redesigned and split into two widgets — both built on the design system's `StreamMediaViewer`, `StreamAppBar`, and `StreamBottomAppBar` chrome. The legacy `StreamFullScreenMedia` (and its desktop/builder/stub variants) and the related `StreamMediaListView` / `StreamImageGallery` flow have all been replaced.
 
-This guide also covers the related theme cleanups (`StreamGalleryFooterThemeData`, `StreamChatThemeData.galleryHeaderTheme`, `StreamChatThemeData.galleryFooterTheme`) and the removal of the `onShowMessage` / `attachmentActionsModalBuilder` callbacks from the message widget and message list view. It also notes that `StreamAvatarThemeData` has moved to `stream_core_flutter` (it was not removed).
+This guide also covers the related theme cleanups (`StreamGalleryFooterThemeData`, `StreamChatThemeData.galleryHeaderTheme`, `StreamChatThemeData.galleryFooterTheme`) and the removal of the `onShowMessage` / `attachmentActionsModalBuilder` callbacks from the message widget and message list view. It also notes that `StreamAvatarThemeData` has moved to `stream_core_flutter` (it was not removed) and is re-exported from `stream_chat_flutter`, so existing imports continue to work.
 
 ---
 
@@ -34,7 +34,7 @@ This guide also covers the related theme cleanups (`StreamGalleryFooterThemeData
 | `StreamMessageItem.onShowMessage` / `attachmentActionsModalBuilder`                                                  | **Removed**                                                                                  |
 | `StreamMessageListView.onShowMessage` / `attachmentActionsModalBuilder`                                              | **Removed**                                                                                  |
 | `StreamGalleryFooterThemeData`, `StreamChatThemeData.imageFooterTheme` / `galleryFooterTheme` / `galleryHeaderTheme` | **Removed**                                                                                  |
-| `StreamAvatarThemeData`                                                                                              | **Moved** — now lives in `stream_core_flutter`; import directly from `package:stream_core_flutter/stream_core_flutter.dart` |
+| `StreamAvatarThemeData`                                                                                              | **Moved** — now lives in `stream_core_flutter`, re-exported from `stream_chat_flutter`; existing imports continue to work |
 | `Translations.photosAndVideosLabel`                                                                                  | **New** — used by the footer's thumbnail-grid sheet header                                   |
 
 ---
@@ -293,7 +293,7 @@ The following theme types and `StreamChatThemeData` fields have been removed:
 | `StreamGalleryFooterThemeData`                                              | The new footer is themed via `StreamBottomAppBarThemeData` from the design system.                                          |
 | `StreamChatThemeData.galleryFooterTheme` / `imageFooterTheme` (named param) | Footer themeing now flows through `StreamBottomAppBarThemeData`.                                                            |
 | `StreamChatThemeData.galleryHeaderTheme`                                    | Header themeing now flows through `StreamAppBarThemeData`.                                                                  |
-| `StreamAvatarThemeData`                                                     | The type itself was **not** removed. It moved to `stream_core_flutter` and remains in active use. Import it directly from `package:stream_core_flutter/stream_core_flutter.dart`; it is not re-exported by `stream_chat_flutter`. |
+| `StreamAvatarThemeData`                                                     | The type itself was **not** removed. It moved to `stream_core_flutter` and remains in active use; it is re-exported from `stream_chat_flutter` so existing imports continue to work. |
 
 The full-screen page background and chrome bands themselves are themed via `StreamMediaViewerThemeData` (from `stream_core_flutter`, re-exported here).
 
@@ -310,5 +310,5 @@ The full-screen page background and chrome bands themselves are themed via `Stre
 - [ ] Drop usages of `VideoPackage`, `DesktopVideoPackage`, `GalleryNavigationItem`, `FullScreenMediaWidget`, `FullScreenMediaDesktop`.
 - [ ] Drop `StreamMessageItem.onShowMessage` / `attachmentActionsModalBuilder`, `StreamMessageListView.onShowMessage` / `attachmentActionsModalBuilder` from any constructors.
 - [ ] Drop `StreamChatThemeData.galleryHeaderTheme`, `galleryFooterTheme` and `imageFooterTheme:` named-parameter usages.
-- [ ] If you import `StreamAvatarThemeData` from `stream_chat_flutter`, update the import to `package:stream_core_flutter/stream_core_flutter.dart` — the type moved to `stream_core_flutter` and is no longer re-exported by this package.
+- [ ] No action needed for `StreamAvatarThemeData` imports — the type moved to `stream_core_flutter` but is re-exported from `stream_chat_flutter`, so existing imports continue to work.
 - [ ] Optionally adopt `StreamMediaGallery` as a thumbnail grid for channel-level media listings.
