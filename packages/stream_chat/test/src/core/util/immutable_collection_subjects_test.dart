@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:collection';
 
 import 'package:stream_chat/src/core/util/immutable_collection_subjects.dart';
 import 'package:test/test.dart';
@@ -20,7 +19,7 @@ void main() {
       controller.add({'a': 1});
 
       expect(controller.value, equals({'a': 1}));
-      expect(controller.value, isA<UnmodifiableMapView<String, int>>());
+      expect(controller.value, isA<ImmutableMap<String, int>>());
     });
 
     test('seeded constructor exposes the seed wrapped as unmodifiable', () {
@@ -28,7 +27,7 @@ void main() {
       addTearDown(controller.close);
 
       expect(controller.value, equals({'a': 1}));
-      expect(controller.value, isA<UnmodifiableMapView<String, int>>());
+      expect(controller.value, isA<ImmutableMap<String, int>>());
       expect(() => controller.value['b'] = 2, throwsUnsupportedError);
     });
 
@@ -39,7 +38,7 @@ void main() {
       controller.add({'a': 1});
 
       expect(controller.value, equals({'a': 1}));
-      expect(controller.value, isA<UnmodifiableMapView<String, int>>());
+      expect(controller.value, isA<ImmutableMap<String, int>>());
       expect(() => controller.value['b'] = 2, throwsUnsupportedError);
     });
 
@@ -57,7 +56,7 @@ void main() {
       controller.safeAdd({'a': 1});
 
       expect(controller.value, equals({'a': 1}));
-      expect(controller.value, isA<UnmodifiableMapView<String, int>>());
+      expect(controller.value, isA<ImmutableMap<String, int>>());
     });
 
     test('`safeAdd` is a no-op after close', () async {
@@ -83,7 +82,7 @@ void main() {
 
       expect(received, hasLength(3));
       for (final map in received) {
-        expect(map, isA<UnmodifiableMapView<String, int>>());
+        expect(map, isA<ImmutableMap<String, int>>());
         expect(() => map['x'] = 9, throwsUnsupportedError);
       }
     });
@@ -112,7 +111,7 @@ void main() {
       controller.add([1, 2, 3]);
 
       expect(controller.value, equals([1, 2, 3]));
-      expect(controller.value, isA<UnmodifiableListView<int>>());
+      expect(controller.value, isA<ImmutableList<int>>());
     });
 
     test('seeded constructor exposes the seed wrapped as unmodifiable', () {
@@ -120,7 +119,7 @@ void main() {
       addTearDown(controller.close);
 
       expect(controller.value, equals([1, 2, 3]));
-      expect(controller.value, isA<UnmodifiableListView<int>>());
+      expect(controller.value, isA<ImmutableList<int>>());
       expect(() => controller.value.add(4), throwsUnsupportedError);
     });
 
@@ -131,7 +130,7 @@ void main() {
       controller.add([1, 2, 3]);
 
       expect(controller.value, equals([1, 2, 3]));
-      expect(controller.value, isA<UnmodifiableListView<int>>());
+      expect(controller.value, isA<ImmutableList<int>>());
       expect(() => controller.value.add(4), throwsUnsupportedError);
     });
 
@@ -149,7 +148,7 @@ void main() {
       controller.safeAdd([1, 2, 3]);
 
       expect(controller.value, equals([1, 2, 3]));
-      expect(controller.value, isA<UnmodifiableListView<int>>());
+      expect(controller.value, isA<ImmutableList<int>>());
     });
 
     test('`safeAdd` is a no-op after close', () async {
@@ -175,7 +174,7 @@ void main() {
 
       expect(received, hasLength(3));
       for (final list in received) {
-        expect(list, isA<UnmodifiableListView<int>>());
+        expect(list, isA<ImmutableList<int>>());
         expect(() => list.add(99), throwsUnsupportedError);
       }
     });

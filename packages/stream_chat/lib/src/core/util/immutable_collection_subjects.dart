@@ -5,6 +5,14 @@ import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/src/core/util/extension.dart';
 
+/// A map view that throws `UnsupportedError` on any mutating operation.
+@internal
+typedef ImmutableMap<K, V> = UnmodifiableMapView<K, V>;
+
+/// A list view that throws `UnsupportedError` on any mutating operation.
+@internal
+typedef ImmutableList<E> = UnmodifiableListView<E>;
+
 /// A [Stream] of maps that guarantees every emitted value is immutable.
 ///
 /// Subscribers receive snapshots that throw `UnsupportedError` on mutation.
@@ -28,7 +36,7 @@ import 'package:stream_chat/src/core/util/extension.dart';
 ///
 ///  * [ImmutableListBehaviorSubject], the list counterpart.
 @internal
-class ImmutableMapBehaviorSubject<K, V> extends StreamView<Map<K, V>> implements Sink<Map<K, V>> {
+class ImmutableMapBehaviorSubject<K, V> extends StreamView<ImmutableMap<K, V>> implements Sink<Map<K, V>> {
   /// Creates an [ImmutableMapBehaviorSubject] with no initial value.
   ///
   /// See [StreamController.broadcast] for [onListen], [onCancel] and [sync].
@@ -37,7 +45,7 @@ class ImmutableMapBehaviorSubject<K, V> extends StreamView<Map<K, V>> implements
     void Function()? onCancel,
     bool sync = false,
   }) => ImmutableMapBehaviorSubject._(
-    BehaviorSubject<UnmodifiableMapView<K, V>>(
+    BehaviorSubject<ImmutableMap<K, V>>(
       onListen: onListen,
       onCancel: onCancel,
       sync: sync,
@@ -55,8 +63,8 @@ class ImmutableMapBehaviorSubject<K, V> extends StreamView<Map<K, V>> implements
     void Function()? onCancel,
     bool sync = false,
   }) => ImmutableMapBehaviorSubject._(
-    BehaviorSubject<UnmodifiableMapView<K, V>>.seeded(
-      UnmodifiableMapView(seed),
+    BehaviorSubject<ImmutableMap<K, V>>.seeded(
+      ImmutableMap(seed),
       onListen: onListen,
       onCancel: onCancel,
       sync: sync,
@@ -65,22 +73,22 @@ class ImmutableMapBehaviorSubject<K, V> extends StreamView<Map<K, V>> implements
 
   ImmutableMapBehaviorSubject._(this._subject) : super(_subject);
 
-  final BehaviorSubject<UnmodifiableMapView<K, V>> _subject;
+  final BehaviorSubject<ImmutableMap<K, V>> _subject;
 
   /// A read-only view of the underlying stream.
-  Stream<Map<K, V>> get stream => _subject.stream;
+  Stream<ImmutableMap<K, V>> get stream => _subject.stream;
 
   /// The most recently emitted value.
-  Map<K, V> get value => _subject.value;
+  ImmutableMap<K, V> get value => _subject.value;
 
   /// Sets and emits the new [value].
   set value(Map<K, V> value) => add(value);
 
   @override
-  void add(Map<K, V> value) => _subject.add(UnmodifiableMapView(value));
+  void add(Map<K, V> value) => _subject.add(ImmutableMap(value));
 
   /// Adds [value] to the subject. Does nothing if the subject is closed.
-  void safeAdd(Map<K, V> value) => _subject.safeAdd(UnmodifiableMapView(value));
+  void safeAdd(Map<K, V> value) => _subject.safeAdd(ImmutableMap(value));
 
   @override
   Future<void> close() => _subject.close();
@@ -109,7 +117,7 @@ class ImmutableMapBehaviorSubject<K, V> extends StreamView<Map<K, V>> implements
 ///
 ///  * [ImmutableMapBehaviorSubject], the map counterpart.
 @internal
-class ImmutableListBehaviorSubject<E> extends StreamView<List<E>> implements Sink<List<E>> {
+class ImmutableListBehaviorSubject<E> extends StreamView<ImmutableList<E>> implements Sink<List<E>> {
   /// Creates an [ImmutableListBehaviorSubject] with no initial value.
   ///
   /// See [StreamController.broadcast] for [onListen], [onCancel] and [sync].
@@ -118,7 +126,7 @@ class ImmutableListBehaviorSubject<E> extends StreamView<List<E>> implements Sin
     void Function()? onCancel,
     bool sync = false,
   }) => ImmutableListBehaviorSubject._(
-    BehaviorSubject<UnmodifiableListView<E>>(
+    BehaviorSubject<ImmutableList<E>>(
       onListen: onListen,
       onCancel: onCancel,
       sync: sync,
@@ -136,8 +144,8 @@ class ImmutableListBehaviorSubject<E> extends StreamView<List<E>> implements Sin
     void Function()? onCancel,
     bool sync = false,
   }) => ImmutableListBehaviorSubject._(
-    BehaviorSubject<UnmodifiableListView<E>>.seeded(
-      UnmodifiableListView(seed),
+    BehaviorSubject<ImmutableList<E>>.seeded(
+      ImmutableList(seed),
       onListen: onListen,
       onCancel: onCancel,
       sync: sync,
@@ -146,22 +154,22 @@ class ImmutableListBehaviorSubject<E> extends StreamView<List<E>> implements Sin
 
   ImmutableListBehaviorSubject._(this._subject) : super(_subject);
 
-  final BehaviorSubject<UnmodifiableListView<E>> _subject;
+  final BehaviorSubject<ImmutableList<E>> _subject;
 
   /// A read-only view of the underlying stream.
-  Stream<List<E>> get stream => _subject.stream;
+  Stream<ImmutableList<E>> get stream => _subject.stream;
 
   /// The most recently emitted value.
-  List<E> get value => _subject.value;
+  ImmutableList<E> get value => _subject.value;
 
   /// Sets and emits the new [value].
   set value(List<E> value) => add(value);
 
   @override
-  void add(List<E> value) => _subject.add(UnmodifiableListView(value));
+  void add(List<E> value) => _subject.add(ImmutableList(value));
 
   /// Adds [value] to the subject. Does nothing if the subject is closed.
-  void safeAdd(List<E> value) => _subject.safeAdd(UnmodifiableListView(value));
+  void safeAdd(List<E> value) => _subject.safeAdd(ImmutableList(value));
 
   @override
   Future<void> close() => _subject.close();
