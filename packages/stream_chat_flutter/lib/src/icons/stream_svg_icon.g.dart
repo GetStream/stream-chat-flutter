@@ -503,16 +503,14 @@ abstract final class StreamSvgIcons {
   );
 
   /// Stream SVG icon named 'filetypePresentationStandard'.
-  static const StreamSvgIconData filetypePresentationStandard =
-      StreamSvgIconData(
+  static const StreamSvgIconData filetypePresentationStandard = StreamSvgIconData(
     'lib/assets/icons/colored/icon_filetype_presentation_standard.svg',
     package: package,
     preserveColors: true,
   );
 
   /// Stream SVG icon named 'filetypePresentationSpecial'.
-  static const StreamSvgIconData filetypePresentationSpecial =
-      StreamSvgIconData(
+  static const StreamSvgIconData filetypePresentationSpecial = StreamSvgIconData(
     'lib/assets/icons/colored/icon_filetype_presentation_special.svg',
     package: package,
     preserveColors: true,
@@ -652,8 +650,7 @@ abstract final class StreamSvgIcons {
   );
 
   /// Stream SVG icon named 'filetypeSpreadsheetStandard'.
-  static const StreamSvgIconData filetypeSpreadsheetStandard =
-      StreamSvgIconData(
+  static const StreamSvgIconData filetypeSpreadsheetStandard = StreamSvgIconData(
     'lib/assets/icons/colored/icon_filetype_spreadsheet_standard.svg',
     package: package,
     preserveColors: true,
@@ -828,8 +825,7 @@ abstract final class StreamSvgIcons {
   );
 
   /// Stream SVG icon named 'filetypeCompressionStandard'.
-  static const StreamSvgIconData filetypeCompressionStandard =
-      StreamSvgIconData(
+  static const StreamSvgIconData filetypeCompressionStandard = StreamSvgIconData(
     'lib/assets/icons/colored/icon_filetype_compression_standard.svg',
     package: package,
     preserveColors: true,

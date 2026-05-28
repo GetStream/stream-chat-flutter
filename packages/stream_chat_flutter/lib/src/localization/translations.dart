@@ -1,3 +1,5 @@
+// ignore_for_file: lines_longer_than_80_chars
+
 import 'package:jiffy/jiffy.dart';
 import 'package:stream_chat_flutter/src/message_list_view/message_list_view.dart';
 import 'package:stream_chat_flutter/src/misc/connection_status_builder.dart';
@@ -40,7 +42,7 @@ abstract class Translations {
 
   /// The text for showing the attachments upload progress
   String attachmentsUploadProgressText({
-    required int remaining,
+    required int completed,
     required int total,
   });
 
@@ -98,7 +100,7 @@ abstract class Translations {
   String get reconnectingLabel;
 
   /// The label for also send
-  /// as direct message "checkbox"" in [StreamMessageInput]
+  /// as direct message "checkbox" in [StreamMessageComposer]
   String get alsoSendAsDirectMessageLabel;
 
   /// The label for search Gif
@@ -108,24 +110,36 @@ abstract class Translations {
   String get sendMessagePermissionError;
 
   /// The label for add a comment or send in case of
-  /// attachments inside [StreamMessageInput]
+  /// attachments inside [StreamMessageComposer]
   String get addACommentOrSendLabel;
 
-  /// The label for write a message in [StreamMessageInput]
+  /// The label for write a message in [StreamMessageComposer]
   String get writeAMessageLabel;
 
-  /// The label for slow mode enabled in [StreamMessageInput]
-  String get slowModeOnLabel;
+  /// The placeholder shown in [StreamMessageComposer] while slow mode is
+  /// active for the current user.
+  ///
+  /// [cooldownTimeOut] is the number of seconds remaining before the user
+  /// can send another message. Defaults to `'Slow mode, wait ${cooldownTimeOut}s\u2026'`
+  /// which renders as e.g. "Slow mode, wait 9s…".
+  String slowModeOnLabel(int cooldownTimeOut);
 
-  /// The label for instant commands in [StreamMessageInput]
+  /// The placeholder shown in the composer when a user-target command (for
+  /// example `/mute`, `/unmute`, `/ban`, `/unban`) is active.
+  ///
+  /// Renders literally, for example as `@username`, to hint that the user
+  /// should select or type a username.
+  String get commandUsernameLabel;
+
+  /// The label for instant commands in [StreamMessageComposer]
   String get instantCommandsLabel;
 
   /// The error shown in case the file is too large even after compression
-  /// while uploading via [StreamMessageInput]
+  /// while uploading via [StreamMessageComposer]
   String fileTooLargeAfterCompressionError(double limitInMB);
 
   /// The error shown in case the file is too large
-  /// while uploading via [StreamMessageInput]
+  /// while uploading via [StreamMessageComposer]
   String fileTooLargeError(double limitInMB);
 
   /// The error shown when the file being read has no bytes
@@ -238,6 +252,9 @@ abstract class Translations {
   /// The label for "Photos"
   String get photosLabel;
 
+  /// The label for "Photos & Videos"
+  String get photosAndVideosLabel;
+
   /// The text for showing on which [date] and [time] the message was sent
   String sentAtText({required DateTime date, required DateTime time});
 
@@ -246,6 +263,9 @@ abstract class Translations {
 
   /// The label for "Yesterday"
   String get yesterdayLabel;
+
+  /// The label for "Just now", shown for timestamps within the last minute.
+  String get justNowLabel;
 
   /// The text for showing the channel is muted
   String get channelIsMutedText;
@@ -288,6 +308,18 @@ abstract class Translations {
 
   /// The text for showing the watchers count based on [count]
   String watchersCountText(int count);
+
+  /// The text for showing the combined members and online-watchers count in
+  /// the channel header subtitle of a group channel.
+  ///
+  /// When [onlineCount] is `0`, the returned string is equivalent to
+  /// [membersCountText]. Otherwise, the result bakes in the separator and
+  /// word order chosen by the current locale — e.g. `'42 Members, 5 Online'`
+  /// in English or `'42人、5人がオンライン'` in Japanese.
+  String membersCountWithOnlineText({
+    required int memberCount,
+    required int onlineCount,
+  });
 
   /// The label for "View Info"
   String get viewInfoLabel;
@@ -346,6 +378,10 @@ abstract class Translations {
   /// The label for "Reply to message"
   String get replyToMessageLabel;
 
+  /// The label for the composer reply header when quoting another user's
+  /// message (e.g. "Reply to Alice").
+  String replyToUserLabel(String userName);
+
   /// The label for "View library"
   String get viewLibrary;
 
@@ -378,8 +414,10 @@ abstract class Translations {
   /// If [isNew] is true, it returns "Create a new poll".
   String createPollLabel({bool isNew = false});
 
-  /// The label for "Questions".
-  String get questionsLabel;
+  /// The label for "Question".
+  ///
+  /// If [isPlural] is true, it returns "Questions".
+  String questionLabel({bool isPlural = false});
 
   /// The label for "Ask a question".
   String get askAQuestionLabel;
@@ -408,8 +446,17 @@ abstract class Translations {
   /// The label for "Multiple answers".
   String get multipleAnswersLabel;
 
+  /// The description shown under the "Multiple answers" toggle in the poll
+  /// creator (e.g. "Select more than one option").
+  String get multipleAnswersDescription;
+
   /// The label for "Maximum votes per person".
   String get maximumVotesPerPersonLabel;
+
+  /// The description shown under the "Maximum votes per person" stepper in
+  /// the poll creator, describing the allowed vote range (e.g. "Choose
+  /// between 2–10 options").
+  String maximumVotesPerPersonDescription([Range<int>? range]);
 
   /// The error shown when the max [votes] is not within the [range].
   ///
@@ -421,17 +468,29 @@ abstract class Translations {
   /// The label for "Anonymous poll".
   String get anonymousPollLabel;
 
+  /// The description shown under the "Anonymous poll" toggle in the poll
+  /// creator (e.g. "Hide who voted").
+  String get anonymousPollDescription;
+
   /// The label for "Poll Options".
   String get pollOptionsLabel;
 
   /// The label for "Suggest an option".
   String get suggestAnOptionLabel;
 
+  /// The description shown under the "Suggest an option" toggle in the poll
+  /// creator (e.g. "Let others add options").
+  String get suggestAnOptionDescription;
+
   /// The label for "Enter a new option".
   String get enterANewOptionLabel;
 
   /// The label for "Add a comment".
   String get addACommentLabel;
+
+  /// The description shown under the "Add a comment" toggle in the poll
+  /// creator (e.g. "Allow others to add comments").
+  String get addACommentDescription;
 
   /// The label for "Poll comments".
   String get pollCommentsLabel;
@@ -442,8 +501,11 @@ abstract class Translations {
   /// The label for "Enter your comment".
   String get enterYourCommentLabel;
 
-  /// The confirmation text shown when the user tries to end a poll.
-  String get endVoteConfirmationText;
+  /// The confirmation title shown when the user tries to end a poll.
+  String get endVoteConfirmationTitle;
+
+  /// The confirmation body message shown when the user tries to end a poll.
+  String get endVoteConfirmationMessage;
 
   /// The label for "delete poll option"
   String get deletePollOptionLabel;
@@ -476,19 +538,31 @@ abstract class Translations {
   /// The label for "View Results".
   String get viewResultsLabel;
 
-  /// The label for "End Vote".
+  /// The label for "End Poll".
   String get endVoteLabel;
 
   /// The label for "Poll Results".
   String get pollResultsLabel;
 
+  /// The label for the poll votes screen app bar title (shown when viewing
+  /// all votes for a specific poll option).
+  String get pollVotesLabel;
+
   /// The label for "$count votes".
   String voteCountLabel({int? count});
+
+  /// The label for the total vote count footer in the poll results dialog,
+  /// e.g. "$count votes total".
+  String totalVoteCountLabel({int? count});
 
   /// The label for "Show all votes".
   ///
   /// If [count] is provided, it returns "Show all $count votes".
   String showAllVotesLabel({int? count});
+
+  /// The label for a generic "View all" call-to-action, e.g. the footer
+  /// action of a truncated list.
+  String get viewAllLabel;
 
   /// The label for "There are no poll votes currently".
   String get noPollVotesLabel;
@@ -501,6 +575,9 @@ abstract class Translations {
 
   /// The label for "$count new threads"
   String newThreadsLabel({required int count});
+
+  /// The label for "Loading..."
+  String get loadingLabel;
 
   /// The label for "Slide to cancel"
   String get slideToCancelLabel;
@@ -535,6 +612,21 @@ abstract class Translations {
   /// The text for video attachment in channel list preview
   String get videoAttachmentText;
 
+  /// The text for file attachment in channel list preview
+  String get fileAttachmentText;
+
+  /// The text for link attachment in channel list preview
+  String get linkAttachmentText;
+
+  /// The text for multiple files attachment in channel list preview
+  String filesAttachmentCountText(int count);
+
+  /// The text for multiple photos attachment in channel list preview
+  String photosAttachmentCountText(int count);
+
+  /// The text for multiple videos attachment in channel list preview
+  String videosAttachmentCountText(int count);
+
   /// The text for poll when current user voted
   String get pollYouVotedText;
 
@@ -549,6 +641,78 @@ abstract class Translations {
 
   /// The label for draft message
   String get draftLabel;
+
+  /// The label for location attachment.
+  ///
+  /// [isLive] indicates if the location is live or not.
+  String locationLabel({bool isLive = false});
+
+  /// The text shown when there are no conversations yet.
+  String get noConversationsYetText;
+
+  /// The text shown when there are no threads yet.
+  String get replyToStartThreadText;
+
+  /// The text shown to prompt the user to send a message.
+  String get sendMessageToStartConversationText;
+
+  /// The label for the "Saved for later" message annotation.
+  String get savedForLaterLabel;
+
+  /// The annotation label shown on a message that was replied to a thread,
+  /// displayed in channel view (e.g. "Replied to a thread").
+  String get repliedToThreadAnnotationLabel;
+
+  /// The annotation label shown on a message that was also sent in channel,
+  /// displayed in thread view (e.g. "Also sent in channel").
+  String get alsoSentInChannelAnnotationLabel;
+
+  /// The "View" link label used in message annotations.
+  String get viewLabel;
+
+  /// The annotation label for a reminder (e.g. "Reminder set").
+  String get reminderSetLabel;
+
+  /// The text displaying the reminder time (e.g. "Today at 3:00 PM").
+  String reminderAtText(String time);
+
+  /// The label for "Create a poll and let everyone vote!"
+  String get createPollPromptLabel;
+
+  /// The label for "Take a photo and share"
+  String get takePhotoAndShareLabel;
+
+  /// The label for "Take a video and share"
+  String get takeVideoAndShareLabel;
+
+  /// The label for "Open camera"
+  String get openCameraLabel;
+
+  /// The label for "Select files to share"
+  String get selectFilesToShareLabel;
+
+  /// The label for "Open files"
+  String get openFilesLabel;
+
+  /// The label for unsupported attachment types
+  String get unsupportedAttachmentLabel;
+
+  /// The label for "CONFIRM" (e.g. [StreamMessageActionConfirmationModal]).
+  String get confirmLabel;
+
+  /// The text shown when there are no reactions on a message.
+  String get emptyReactionsText;
+
+  /// The error shown when the reactions list fails to load.
+  String get loadingReactionsError;
+
+  /// The label hint shown next to the viewer's own reaction indicating the
+  /// reaction can be tapped to remove it.
+  String get tapToRemoveReactionLabel;
+
+  /// The header text for the reaction detail sheet showing the count of
+  /// visible reactions (e.g. "1 Reaction" / "5 Reactions").
+  String reactionsCountText(int count);
 }
 
 /// Default implementation of Translation strings for the stream chat widgets
@@ -590,20 +754,19 @@ class DefaultTranslations implements Translations {
   }
 
   @override
-  String get threadReplyLabel => 'Thread Reply';
+  String get threadReplyLabel => 'Thread';
 
   @override
   String get onlyVisibleToYouText => 'Only visible to you';
 
   @override
-  String threadReplyCountText(int count) => '$count Thread Replies';
+  String threadReplyCountText(int count) => count == 1 ? '1 reply' : '$count replies';
 
   @override
   String attachmentsUploadProgressText({
-    required int remaining,
+    required int completed,
     required int total,
-  }) =>
-      'Uploading $remaining/$total ...';
+  }) => 'Uploaded $completed of $total ...';
 
   @override
   String pinnedByUserText({
@@ -616,11 +779,10 @@ class DefaultTranslations implements Translations {
   }
 
   @override
-  String get sendMessagePermissionError =>
-      "You don't have permission to send messages";
+  String get sendMessagePermissionError => "You don't have permission to send messages";
 
   @override
-  String get emptyMessagesText => 'There are no messages currently';
+  String get emptyMessagesText => 'No messages yet';
 
   @override
   String get genericErrorText => 'Something went wrong';
@@ -651,8 +813,8 @@ class DefaultTranslations implements Translations {
 
   @override
   String threadSeparatorText(int replyCount) {
-    if (replyCount == 1) return '1 Reply';
-    return '$replyCount Replies';
+    if (replyCount == 1) return '1 reply';
+    return '$replyCount replies';
   }
 
   @override
@@ -665,7 +827,7 @@ class DefaultTranslations implements Translations {
   String get reconnectingLabel => 'Reconnecting...';
 
   @override
-  String get alsoSendAsDirectMessageLabel => 'Also send as direct message';
+  String get alsoSendAsDirectMessageLabel => 'Also send in Channel';
 
   @override
   String get addACommentOrSendLabel => 'Add a comment or send';
@@ -674,7 +836,7 @@ class DefaultTranslations implements Translations {
   String get searchGifLabel => 'Search GIFs';
 
   @override
-  String get writeAMessageLabel => 'Write a message';
+  String get writeAMessageLabel => 'Send a message';
 
   @override
   String get instantCommandsLabel => 'Instant Commands';
@@ -690,8 +852,7 @@ class DefaultTranslations implements Translations {
       'The file is too large to upload. The file size limit is $limitInMB MB.';
 
   @override
-  String get couldNotReadBytesFromFileError =>
-      'Could not read bytes from file.';
+  String get couldNotReadBytesFromFileError => 'Could not read bytes from file.';
 
   @override
   String get addAFileLabel => 'Add a file';
@@ -718,7 +879,7 @@ class DefaultTranslations implements Translations {
   String get somethingWentWrongError => 'Something went wrong';
 
   @override
-  String get addMoreFilesLabel => 'Add more files';
+  String get addMoreFilesLabel => 'Add more';
 
   @override
   String get enablePhotoAndVideoAccessMessage =>
@@ -733,35 +894,31 @@ class DefaultTranslations implements Translations {
 
   @override
   String get flagMessageQuestion =>
-      'Do you want to send a copy of this message to a'
-      '\nmoderator for further investigation?';
+      'Do you want to send a copy of this message to a moderator for further investigation?';
 
   @override
-  String get flagLabel => 'FLAG';
+  String get flagLabel => 'Flag';
 
   @override
-  String get cancelLabel => 'CANCEL';
+  String get cancelLabel => 'Cancel';
 
   @override
   String get flagMessageSuccessfulLabel => 'Message flagged';
 
   @override
-  String get flagMessageSuccessfulText =>
-      'The message has been reported to a moderator.';
+  String get flagMessageSuccessfulText => 'The message has been reported to a moderator.';
 
   @override
-  String get deleteLabel => 'DELETE';
+  String get deleteLabel => 'Delete';
 
   @override
   String get deleteMessageLabel => 'Delete Message';
 
   @override
-  String get deleteMessageQuestion =>
-      'Are you sure you want to permanently delete this\nmessage?';
+  String get deleteMessageQuestion => 'Are you sure you want to permanently delete this message?';
 
   @override
-  String get operationCouldNotBeCompletedText =>
-      "The operation couldn't be completed.";
+  String get operationCouldNotBeCompletedText => "The operation couldn't be completed.";
 
   @override
   String get replyLabel => 'Reply';
@@ -801,6 +958,9 @@ class DefaultTranslations implements Translations {
   @override
   String get photosLabel => 'Photos';
 
+  @override
+  String get photosAndVideosLabel => 'Photos & Videos';
+
   String _getDay(DateTime dateTime) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
@@ -830,6 +990,9 @@ class DefaultTranslations implements Translations {
   String get yesterdayLabel => 'Yesterday';
 
   @override
+  String get justNowLabel => 'Just now';
+
+  @override
   String get channelIsMutedText => 'Channel is muted';
 
   @override
@@ -839,8 +1002,7 @@ class DefaultTranslations implements Translations {
   String get letsStartChattingLabel => 'Let’s start chatting!';
 
   @override
-  String get sendingFirstMessageLabel =>
-      'How about sending your first message to a friend?';
+  String get sendingFirstMessageLabel => 'How about sending your first message to a friend?';
 
   @override
   String get startAChatLabel => 'Start a chat';
@@ -852,8 +1014,7 @@ class DefaultTranslations implements Translations {
   String get deleteConversationLabel => 'Delete Conversation';
 
   @override
-  String get deleteConversationQuestion =>
-      'Are you sure you want to delete this conversation?';
+  String get deleteConversationQuestion => 'Are you sure you want to delete this conversation?';
 
   @override
   String get streamChatLabel => 'Stream Chat';
@@ -880,6 +1041,16 @@ class DefaultTranslations implements Translations {
   }
 
   @override
+  String membersCountWithOnlineText({
+    required int memberCount,
+    required int onlineCount,
+  }) {
+    final members = membersCountText(memberCount);
+    if (onlineCount <= 0) return members;
+    return '$members, ${watchersCountText(onlineCount)}';
+  }
+
+  @override
   String get viewInfoLabel => 'View Info';
 
   @override
@@ -892,8 +1063,7 @@ class DefaultTranslations implements Translations {
   String get leaveConversationLabel => 'Leave conversation';
 
   @override
-  String get leaveConversationQuestion =>
-      'Are you sure you want to leave this conversation?';
+  String get leaveConversationQuestion => 'Are you sure you want to leave this conversation?';
 
   @override
   String get showInChatLabel => 'Show in Chat';
@@ -929,8 +1099,7 @@ class DefaultTranslations implements Translations {
   String galleryPaginationText({
     required int currentPage,
     required int totalPages,
-  }) =>
-      '${currentPage + 1} of $totalPages';
+  }) => '${currentPage + 1} of $totalPages';
 
   @override
   String get fileText => 'File';
@@ -939,7 +1108,13 @@ class DefaultTranslations implements Translations {
   String get replyToMessageLabel => 'Reply to Message';
 
   @override
-  String get slowModeOnLabel => 'Slow mode ON';
+  String replyToUserLabel(String userName) => 'Reply to $userName';
+
+  @override
+  String slowModeOnLabel(int cooldownTimeOut) => 'Slow mode, wait ${cooldownTimeOut}s\u2026';
+
+  @override
+  String get commandUsernameLabel => '@username';
 
   @override
   String get viewLibrary => 'View library';
@@ -997,8 +1172,7 @@ Attachment limit exceeded: it's not possible to add more than $limit attachments
   }
 
   @override
-  String get linkDisabledDetails =>
-      'Sending links is not allowed in this conversation.';
+  String get linkDisabledDetails => 'Sending links is not allowed in this conversation.';
 
   @override
   String get linkDisabledError => 'Links are disabled';
@@ -1007,7 +1181,8 @@ Attachment limit exceeded: it's not possible to add more than $limit attachments
   String unreadMessagesSeparatorText() => 'New messages';
 
   @override
-  String get enableFileAccessMessage => 'Please enable access to files'
+  String get enableFileAccessMessage =>
+      'Please enable access to files'
       '\nso you can share them with friends.';
 
   @override
@@ -1025,7 +1200,10 @@ Attachment limit exceeded: it's not possible to add more than $limit attachments
   }
 
   @override
-  String get questionsLabel => 'Questions';
+  String questionLabel({bool isPlural = false}) {
+    if (isPlural) return 'Questions';
+    return 'Question';
+  }
 
   @override
   String get askAQuestionLabel => 'Ask a question';
@@ -1066,7 +1244,16 @@ Attachment limit exceeded: it's not possible to add more than $limit attachments
   String get multipleAnswersLabel => 'Multiple answers';
 
   @override
+  String get multipleAnswersDescription => 'Select more than one option';
+
+  @override
   String get maximumVotesPerPersonLabel => 'Maximum votes per person';
+
+  @override
+  String maximumVotesPerPersonDescription([Range<int>? range]) {
+    final (:min, :max) = range ?? (min: 2, max: 10);
+    return 'Choose between $min\u2013$max options';
+  }
 
   @override
   String? maxVotesPerPersonValidationError(int votes, Range<int> range) {
@@ -1087,16 +1274,25 @@ Attachment limit exceeded: it's not possible to add more than $limit attachments
   String get anonymousPollLabel => 'Anonymous poll';
 
   @override
+  String get anonymousPollDescription => 'Hide who voted';
+
+  @override
   String get pollOptionsLabel => 'Poll Options';
 
   @override
   String get suggestAnOptionLabel => 'Suggest an option';
 
   @override
+  String get suggestAnOptionDescription => 'Let others add options';
+
+  @override
   String get enterANewOptionLabel => 'Enter a new option';
 
   @override
   String get addACommentLabel => 'Add a comment';
+
+  @override
+  String get addACommentDescription => 'Allow others to add comments';
 
   @override
   String get pollCommentsLabel => 'Poll Comments';
@@ -1108,15 +1304,17 @@ Attachment limit exceeded: it's not possible to add more than $limit attachments
   String get enterYourCommentLabel => 'Enter your comment';
 
   @override
-  String get endVoteConfirmationText =>
-      'Are you sure you want to end the vote?';
+  String get endVoteConfirmationTitle => 'End This Poll?';
+
+  @override
+  String get endVoteConfirmationMessage =>
+      'Do you want to end this poll now? Nobody will be able to vote in this poll anymore.';
 
   @override
   String get deletePollOptionLabel => 'Delete Option';
 
   @override
-  String get deletePollOptionQuestion =>
-      'Are you sure you want to delete this option?';
+  String get deletePollOptionQuestion => 'Are you sure you want to delete this option?';
 
   @override
   String get createLabel => 'Create';
@@ -1147,10 +1345,13 @@ Attachment limit exceeded: it's not possible to add more than $limit attachments
   String get viewResultsLabel => 'View Results';
 
   @override
-  String get endVoteLabel => 'End Vote';
+  String get endVoteLabel => 'End Poll';
 
   @override
   String get pollResultsLabel => 'Poll Results';
+
+  @override
+  String get pollVotesLabel => 'Votes';
 
   @override
   String showAllVotesLabel({int? count}) {
@@ -1159,11 +1360,21 @@ Attachment limit exceeded: it's not possible to add more than $limit attachments
   }
 
   @override
+  String get viewAllLabel => 'View all';
+
+  @override
   String voteCountLabel({int? count}) => switch (count) {
-        null || < 1 => '0 votes',
-        1 => '1 vote',
-        _ => '$count votes',
-      };
+    null || < 1 => '0 votes',
+    1 => '1 vote',
+    _ => '$count votes',
+  };
+
+  @override
+  String totalVoteCountLabel({int? count}) => switch (count) {
+    null || < 1 => '0 votes total',
+    1 => '1 vote total',
+    _ => '$count votes total',
+  };
 
   @override
   String get noPollVotesLabel => 'There are no poll votes currently';
@@ -1181,17 +1392,19 @@ Attachment limit exceeded: it's not possible to add more than $limit attachments
   }
 
   @override
+  String get loadingLabel => 'Loading...';
+
+  @override
   String get slideToCancelLabel => 'Slide to cancel';
 
   @override
-  String get holdToRecordLabel => 'Hold to record, release to send.';
+  String get holdToRecordLabel => 'Hold to record. Release to save.';
 
   @override
   String get sendAnywayLabel => 'Send Anyway';
 
   @override
-  String get moderatedMessageBlockedText =>
-      'Message was blocked by moderation policies';
+  String get moderatedMessageBlockedText => 'Message was blocked by moderation policies';
 
   @override
   String get moderationReviewModalTitle => 'Are you sure?';
@@ -1216,6 +1429,21 @@ Attachment limit exceeded: it's not possible to add more than $limit attachments
   String get videoAttachmentText => 'Video';
 
   @override
+  String get fileAttachmentText => 'File';
+
+  @override
+  String get linkAttachmentText => 'Link';
+
+  @override
+  String filesAttachmentCountText(int count) => count == 1 ? 'File' : '$count files';
+
+  @override
+  String photosAttachmentCountText(int count) => count == 1 ? 'Photo' : '$count photos';
+
+  @override
+  String videosAttachmentCountText(int count) => count == 1 ? 'Video' : '$count videos';
+
+  @override
   String get pollYouVotedText => 'You voted';
 
   @override
@@ -1229,4 +1457,73 @@ Attachment limit exceeded: it's not possible to add more than $limit attachments
 
   @override
   String get draftLabel => 'Draft';
+
+  @override
+  String locationLabel({bool isLive = false}) {
+    if (isLive) return 'Live Location';
+    return 'Location';
+  }
+
+  @override
+  String get noConversationsYetText => 'No conversations yet';
+
+  @override
+  String get replyToStartThreadText => 'Reply to a message to start a thread';
+
+  @override
+  String get sendMessageToStartConversationText => 'Send a message to start the conversation';
+
+  @override
+  String get savedForLaterLabel => 'Saved for later';
+
+  @override
+  String get repliedToThreadAnnotationLabel => 'Replied to a thread';
+
+  @override
+  String get alsoSentInChannelAnnotationLabel => 'Also sent in channel';
+
+  @override
+  String get viewLabel => 'View';
+
+  @override
+  String get reminderSetLabel => 'Reminder set';
+
+  @override
+  String reminderAtText(String time) => 'Today at $time';
+
+  @override
+  String get createPollPromptLabel => 'Create a poll and let everyone vote!';
+
+  @override
+  String get takePhotoAndShareLabel => 'Take a photo and share';
+
+  @override
+  String get takeVideoAndShareLabel => 'Take a video and share';
+
+  @override
+  String get openCameraLabel => 'Open camera';
+
+  @override
+  String get selectFilesToShareLabel => 'Select files to share';
+
+  @override
+  String get openFilesLabel => 'Open files';
+
+  @override
+  String get unsupportedAttachmentLabel => 'Unsupported Attachment';
+
+  @override
+  String get confirmLabel => 'CONFIRM';
+
+  @override
+  String get emptyReactionsText => 'No reactions yet';
+
+  @override
+  String get loadingReactionsError => 'Error loading reactions';
+
+  @override
+  String get tapToRemoveReactionLabel => 'Tap to remove';
+
+  @override
+  String reactionsCountText(int count) => count == 1 ? '1 Reaction' : '$count Reactions';
 }

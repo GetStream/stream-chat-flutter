@@ -1,39 +1,89 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/audio/audio_playlist_state.dart';
 import 'package:stream_chat_flutter/src/audio/audio_sampling.dart' as sampling;
-import 'package:stream_chat_flutter/src/misc/audio_waveform.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 const _kDefaultWaveformLimit = 35;
-const _kDefaultWaveformHeight = 28.0;
+const _kDefaultWaveformHeight = 24.0;
 
-/// Signature for building trailing widgets in voice recording attachments.
+/// An inline audio player for a voice recording attachment.
 ///
-/// Provides a flexible way to customize the trailing section of the
-/// voice recording player based on the current track and playback state.
-typedef StreamVoiceRecordingAttachmentTrailingWidgetBuilder = Widget Function(
-  BuildContext context,
-  PlaylistTrack track,
-  PlaybackSpeed speed,
-  ValueChanged<PlaybackSpeed>? onChangeSpeed,
-);
-
-/// {@template streamVoiceRecordingAttachment}
-/// An embedded audio player for voice recordings with comprehensive playback
-/// controls.
+/// [StreamVoiceRecordingAttachment] displays a single voice recording with
+/// playback controls, waveform visualization, and speed adjustment.
 ///
-/// Provides a rich audio message player with features including:
-/// - Play/pause controls
-/// - Waveform visualization
-/// - Playback speed adjustment
-/// - Optional title display
+/// {@tool snippet}
 ///
-/// Supports customizable appearance and interaction through various parameters.
-/// {@endtemplate}
+/// Basic usage:
+///
+/// ```dart
+/// StreamVoiceRecordingAttachment(
+///   track: track,
+///   speed: playbackSpeed,
+/// )
+/// ```
+/// {@end-tool}
+///
+/// See also:
+///
+///  * [StreamVoiceRecordingAttachmentProps], which configures this widget.
+///  * [DefaultStreamVoiceRecordingAttachment], the default implementation.
 class StreamVoiceRecordingAttachment extends StatelessWidget {
-  /// {@macro streamVoiceRecordingAttachment}
-  const StreamVoiceRecordingAttachment({
+  /// Creates a [StreamVoiceRecordingAttachment].
+  StreamVoiceRecordingAttachment({
     super.key,
+    required PlaylistTrack track,
+    required StreamPlaybackSpeed speed,
+    VoidCallback? onTrackPause,
+    VoidCallback? onTrackPlay,
+    VoidCallback? onTrackReplay,
+    ValueChanged<double>? onTrackSeekStart,
+    ValueChanged<double>? onTrackSeekChanged,
+    ValueChanged<double>? onTrackSeekEnd,
+    ValueChanged<StreamPlaybackSpeed>? onChangeSpeed,
+    BoxConstraints constraints = const BoxConstraints(),
+    bool showTitle = false,
+    String? title,
+  }) : props = .new(
+         track: track,
+         speed: speed,
+         onTrackPause: onTrackPause,
+         onTrackPlay: onTrackPlay,
+         onTrackReplay: onTrackReplay,
+         onTrackSeekStart: onTrackSeekStart,
+         onTrackSeekChanged: onTrackSeekChanged,
+         onTrackSeekEnd: onTrackSeekEnd,
+         onChangeSpeed: onChangeSpeed,
+         constraints: constraints,
+         showTitle: showTitle,
+         title: title,
+       );
+
+  /// The properties that configure this attachment.
+  final StreamVoiceRecordingAttachmentProps props;
+
+  @override
+  Widget build(BuildContext context) {
+    final builder = context.chatComponentBuilder<StreamVoiceRecordingAttachmentProps>();
+    if (builder != null) return builder(context, props);
+    return DefaultStreamVoiceRecordingAttachment(props: props);
+  }
+}
+
+/// Properties for configuring a [StreamVoiceRecordingAttachment].
+///
+/// This class holds all the configuration options for a voice recording
+/// attachment, allowing them to be passed through the
+/// [StreamComponentFactory].
+///
+/// See also:
+///
+///  * [StreamVoiceRecordingAttachment], which uses these properties.
+///  * [DefaultStreamVoiceRecordingAttachment], the default implementation.
+class StreamVoiceRecordingAttachmentProps {
+  /// Creates properties for a voice recording attachment.
+  const StreamVoiceRecordingAttachmentProps({
     required this.track,
     required this.speed,
     this.onTrackPause,
@@ -43,17 +93,16 @@ class StreamVoiceRecordingAttachment extends StatelessWidget {
     this.onTrackSeekChanged,
     this.onTrackSeekEnd,
     this.onChangeSpeed,
-    this.shape,
     this.constraints = const BoxConstraints(),
     this.showTitle = false,
-    this.trailingBuilder = _defaultTrailingBuilder,
+    this.title,
   });
 
   /// The audio track to display.
   final PlaylistTrack track;
 
   /// The current playback speed of the audio track.
-  final PlaybackSpeed speed;
+  final StreamPlaybackSpeed speed;
 
   /// Callback when the track is paused.
   final VoidCallback? onTrackPause;
@@ -74,115 +123,102 @@ class StreamVoiceRecordingAttachment extends StatelessWidget {
   final ValueChanged<double>? onTrackSeekEnd;
 
   /// Callback when the playback speed is changed.
-  final ValueChanged<PlaybackSpeed>? onChangeSpeed;
-
-  /// The shape of the attachment.
-  ///
-  /// Defaults to [RoundedRectangleBorder] with a radius of 14.
-  final ShapeBorder? shape;
+  final ValueChanged<StreamPlaybackSpeed>? onChangeSpeed;
 
   /// The constraints to use when displaying the voice recording.
   final BoxConstraints constraints;
+
+  /// The title of the audio message to display when [showTitle] is `true`.
+  /// If not provided, the [track] title will be used.
+  final String? title;
 
   /// Whether to show the title of the audio message.
   ///
   /// Defaults to `false`.
   final bool showTitle;
+}
 
-  /// The builder to use for the trailing widget.
-  final StreamVoiceRecordingAttachmentTrailingWidgetBuilder trailingBuilder;
+/// The default implementation of [StreamVoiceRecordingAttachment].
+///
+/// Renders an inline audio player with playback controls, waveform
+/// visualization, and playback speed adjustment.
+///
+/// See also:
+///
+///  * [StreamVoiceRecordingAttachment], the public API widget.
+///  * [StreamVoiceRecordingAttachmentProps], which configures this widget.
+class DefaultStreamVoiceRecordingAttachment extends StatelessWidget {
+  /// Creates a default Stream voice recording attachment.
+  const DefaultStreamVoiceRecordingAttachment({
+    super.key,
+    required this.props,
+  });
 
-  static Widget _defaultTrailingBuilder(
-    BuildContext context,
-    PlaylistTrack track,
-    PlaybackSpeed speed,
-    ValueChanged<PlaybackSpeed>? onChangeSpeed,
-  ) {
-    return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 200),
-      child: switch (track.state.isPlaying) {
-        true => SpeedControlButton(
-            speed: speed,
-            onChangeSpeed: onChangeSpeed,
-          ),
-        false => getFileTypeImage(track.title?.mediaType?.mimeType),
-      },
-    );
-  }
+  /// The properties that configure this attachment.
+  final StreamVoiceRecordingAttachmentProps props;
 
   @override
   Widget build(BuildContext context) {
+    final spacing = context.streamSpacing;
+    final textTheme = context.streamTextTheme;
+
     final theme = StreamVoiceRecordingAttachmentTheme.of(context);
-    final waveformSliderTheme = theme.audioWaveformSliderTheme;
-    final waveformTheme = waveformSliderTheme?.audioWaveformTheme;
+    final defaults = _StreamVoiceRecordingAttachmentDefaults(context);
 
-    final shape = this.shape ??
-        RoundedRectangleBorder(
-          side: BorderSide(
-            color: StreamChatTheme.of(context).colorTheme.borders,
-            strokeAlign: BorderSide.strokeAlignOutside,
-          ),
-          borderRadius: BorderRadius.circular(14),
-        );
+    final isActive = props.track.state != TrackState.idle;
+    final isPlaying = props.track.state == TrackState.playing;
 
-    return Container(
-      constraints: constraints,
-      clipBehavior: Clip.hardEdge,
-      padding: const EdgeInsets.all(8),
-      decoration: ShapeDecoration(
-        shape: shape,
-        color: theme.backgroundColor,
-      ),
+    final effectiveDurationTextStyle = theme.durationTextStyle ?? defaults.durationTextStyle;
+    final effectiveActiveDurationTextStyle = theme.activeDurationTextStyle ?? defaults.activeDurationTextStyle;
+    final effectiveSpeedToggleStyle = theme.speedToggleStyle ?? defaults.speedToggleStyle;
+    final effectiveControlButtonStyle = theme.controlButtonStyle ?? defaults.controlButtonStyle;
+
+    return Padding(
+      padding: .all(spacing.xs),
       child: Row(
+        spacing: spacing.xs,
+        crossAxisAlignment: .center,
         children: [
           AudioControlButton(
-            state: track.state,
-            onPlay: onTrackPlay,
-            onPause: onTrackPause,
-            onReplay: onTrackReplay,
+            state: props.track.state,
+            onPlay: props.onTrackPlay,
+            onPause: props.onTrackPause,
+            onReplay: props.onTrackReplay,
+            themeStyle: effectiveControlButtonStyle,
           ),
-          const SizedBox(width: 14),
           Expanded(
             child: Column(
+              spacing: spacing.xxxs,
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (track.title case final title? when showTitle) ...[
+                if (props.title ?? props.track.title case final title? when props.showTitle)
                   AudioTitleText(
                     title: title,
-                    style: theme.titleTextStyle,
+                    style: theme.titleTextStyle ?? textTheme.metadataEmphasis,
                   ),
-                  const SizedBox(height: 6),
-                ],
                 Row(
+                  spacing: spacing.sm,
                   children: [
                     AudioDurationText(
-                      duration: track.duration,
-                      position: track.position,
-                      style: theme.durationTextStyle,
+                      duration: props.track.duration,
+                      position: props.track.position,
+                      style: isPlaying ? effectiveActiveDurationTextStyle : effectiveDurationTextStyle,
                     ),
-                    const SizedBox(width: 8),
                     Expanded(
                       child: SizedBox(
                         height: _kDefaultWaveformHeight,
                         child: StreamAudioWaveformSlider(
+                          isActive: isActive,
                           limit: _kDefaultWaveformLimit,
                           waveform: sampling.resampleWaveformData(
-                            track.waveform,
+                            props.track.waveform,
                             _kDefaultWaveformLimit,
                           ),
-                          progress: track.progress,
-                          onChangeStart: onTrackSeekStart,
-                          onChanged: onTrackSeekChanged,
-                          onChangeEnd: onTrackSeekEnd,
-                          color: waveformTheme?.color,
-                          progressColor: waveformTheme?.progressColor,
-                          minBarHeight: waveformTheme?.minBarHeight,
-                          spacingRatio: waveformTheme?.spacingRatio,
-                          heightScale: waveformTheme?.heightScale,
-                          thumbColor: waveformSliderTheme?.thumbColor,
-                          thumbBorderColor:
-                              waveformSliderTheme?.thumbBorderColor,
+                          progress: props.track.progress,
+                          onChangeStart: props.onTrackSeekStart,
+                          onChanged: props.onTrackSeekChanged,
+                          onChangeEnd: props.onTrackSeekEnd,
                         ),
                       ),
                     ),
@@ -191,8 +227,11 @@ class StreamVoiceRecordingAttachment extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(width: 14),
-          trailingBuilder(context, track, speed, onChangeSpeed),
+          StreamPlaybackSpeedToggle(
+            value: props.speed,
+            onChanged: props.onChangeSpeed,
+            style: effectiveSpeedToggleStyle,
+          ),
         ],
       ),
     );
@@ -232,7 +271,7 @@ class AudioTitleText extends StatelessWidget {
 /// {@template audioDurationText}
 /// Displays duration for audio playback with dynamic formatting.
 ///
-/// Shows either current position or total duration based on playback state.
+/// Shows either remaining time or total duration based on playback state.
 /// {@endtemplate}
 class AudioDurationText extends StatelessWidget {
   /// {@macro audioDurationText}
@@ -254,11 +293,9 @@ class AudioDurationText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final remaining = [duration - position, Duration.zero].max;
     return Text(
-      switch (position.inMilliseconds > 0) {
-        true => position.toMinutesAndSeconds(),
-        false => duration.toMinutesAndSeconds(),
-      },
+      remaining.toMinutesAndSeconds(),
       style: style?.copyWith(
         // Use mono space for each num character.
         fontFeatures: [const FontFeature.tabularFigures()],
@@ -284,6 +321,10 @@ class AudioControlButton extends StatelessWidget {
     this.onPlay,
     this.onPause,
     this.onReplay,
+    this.style = .secondary,
+    this.type = .outline,
+    this.size = .medium,
+    this.themeStyle,
   });
 
   /// The current state of the audio track.
@@ -298,58 +339,58 @@ class AudioControlButton extends StatelessWidget {
   /// Callback when the track is replayed.
   final VoidCallback? onReplay;
 
+  /// The style of the button.
+  final StreamButtonStyle style;
+
+  /// The type of the button.
+  final StreamButtonType type;
+
+  /// The size of the button.
+  final StreamButtonSize size;
+
+  /// The optional style override for the button.
+  final StreamButtonThemeStyle? themeStyle;
+
   @override
   Widget build(BuildContext context) {
-    final theme = StreamVoiceRecordingAttachmentTheme.of(context);
+    final icons = context.streamIcons;
 
-    return ElevatedButton(
-      style: theme.audioControlButtonStyle,
+    return StreamButton.icon(
+      style: style,
+      type: type,
+      size: size,
+      themeStyle: themeStyle,
+      icon: switch (state) {
+        TrackState.loading => Icon(icons.playFill),
+        TrackState.idle => Icon(icons.playFill),
+        TrackState.playing => Icon(icons.pauseFill),
+        TrackState.paused => Icon(icons.playFill),
+      },
       onPressed: switch (state) {
         TrackState.loading => null,
         TrackState.idle => onPlay,
         TrackState.playing => onPause,
         TrackState.paused => onPlay,
       },
-      child: switch (state) {
-        TrackState.loading => theme.loadingIndicator,
-        TrackState.idle => theme.playIcon,
-        TrackState.playing => theme.pauseIcon,
-        TrackState.paused => theme.playIcon,
-      },
     );
   }
 }
 
-/// {@template speedControlButton}
-/// A button for controlling audio playback speed.
-///
-/// Allows cycling through predefined playback speeds when pressed.
-/// {@endtemplate}
-class SpeedControlButton extends StatelessWidget {
-  /// {@macro speedControlButton}
-  const SpeedControlButton({
-    super.key,
-    required this.speed,
-    this.onChangeSpeed,
-  });
+// Default values for [StreamVoiceRecordingAttachmentThemeData] backed by stream design tokens.
+class _StreamVoiceRecordingAttachmentDefaults extends StreamVoiceRecordingAttachmentThemeData {
+  _StreamVoiceRecordingAttachmentDefaults(this._context);
 
-  /// The current playback speed of the audio track.
-  final PlaybackSpeed speed;
+  final BuildContext _context;
 
-  /// Callback when the playback speed is changed.
-  final ValueChanged<PlaybackSpeed>? onChangeSpeed;
+  late final StreamColorScheme _colorScheme = _context.streamColorScheme;
+  late final StreamTextTheme _textTheme = _context.streamTextTheme;
 
   @override
-  Widget build(BuildContext context) {
-    final theme = StreamVoiceRecordingAttachmentTheme.of(context);
+  TextStyle get titleTextStyle => _textTheme.captionEmphasis.copyWith(color: _colorScheme.textPrimary);
 
-    return ElevatedButton(
-      style: theme.speedControlButtonStyle,
-      onPressed: switch (onChangeSpeed) {
-        final it? => () => it(speed.next),
-        _ => null,
-      },
-      child: Text('x${speed.speed}'),
-    );
-  }
+  @override
+  TextStyle get durationTextStyle => _textTheme.metadataEmphasis.copyWith(color: _colorScheme.textPrimary);
+
+  @override
+  TextStyle get activeDurationTextStyle => _textTheme.metadataEmphasis.copyWith(color: _colorScheme.accentPrimary);
 }

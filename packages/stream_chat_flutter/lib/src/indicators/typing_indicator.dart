@@ -34,17 +34,15 @@ class StreamTypingIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final channelState =
-        channel?.state ?? StreamChannel.of(context).channel.state!;
+    final channelState = channel?.state ?? StreamChannel.of(context).channel.state!;
 
     final altWidget = alternativeWidget ?? const Empty();
 
     return BetterStreamBuilder<Iterable<User>>(
       initialData: channelState.typingEvents.keys,
-      stream: channelState.typingEventsStream.map((typingEvents) => typingEvents
-          .entries
-          .where((element) => element.value.parentId == parentId)
-          .map((e) => e.key)),
+      stream: channelState.typingEventsStream.map(
+        (typingEvents) => typingEvents.entries.where((element) => element.value.parentId == parentId).map((e) => e.key),
+      ),
       builder: (context, users) => AnimatedSwitcher(
         layoutBuilder: (currentChild, previousChildren) => Stack(
           children: <Widget>[
@@ -60,16 +58,19 @@ class StreamTypingIndicator extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   spacing: 4,
                   children: [
-                    Lottie.asset(
-                      'lib/assets/animations/typing_dots.json',
-                      package: 'stream_chat_flutter',
-                      height: 4,
-                    ),
                     Flexible(
                       child: Text(
                         context.translations.userTypingText(users),
                         maxLines: 1,
                         style: style,
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 2),
+                      child: Lottie.asset(
+                        'lib/assets/animations/typing_dots.json',
+                        package: 'stream_chat_flutter',
+                        height: 5,
                       ),
                     ),
                   ],

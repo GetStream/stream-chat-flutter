@@ -59,14 +59,7 @@ class MyApp extends StatelessWidget {
         accentColor: Colors.green,
       ),
     );
-    final defaultTheme = StreamChatThemeData.fromTheme(themeData);
-    final colorTheme = defaultTheme.colorTheme;
     final customTheme = StreamChatThemeData(
-      channelPreviewTheme: StreamChannelPreviewThemeData(
-        avatarTheme: StreamAvatarThemeData(
-          borderRadius: BorderRadius.circular(8),
-        ),
-      ),
       messageListViewTheme: const StreamMessageListViewThemeData(
         backgroundColor: Colors.grey,
         backgroundImage: DecorationImage(
@@ -74,20 +67,7 @@ class MyApp extends StatelessWidget {
           fit: BoxFit.cover,
         ),
       ),
-      ownMessageTheme: const StreamMessageThemeData(
-        urlAttachmentTitleMaxLine: 1,
-      ),
-      otherMessageTheme: StreamMessageThemeData(
-        messageBackgroundColor: colorTheme.textHighEmphasis,
-        messageTextStyle: TextStyle(
-          color: colorTheme.barsBg,
-        ),
-        avatarTheme: StreamAvatarThemeData(
-          borderRadius: BorderRadius.circular(8),
-        ),
-        urlAttachmentTitleMaxLine: 1,
-      ),
-    ).merge(defaultTheme);
+    );
 
     return MaterialApp(
       theme: themeData,
@@ -165,7 +145,7 @@ class ChannelPage extends StatelessWidget {
               ),
             ),
           ),
-          const StreamMessageInput(),
+          StreamMessageComposer(),
         ],
       ),
     );
@@ -193,8 +173,8 @@ class ThreadPage extends StatelessWidget {
               parentMessage: parent,
             ),
           ),
-          StreamMessageInput(
-            messageInputController: StreamMessageInputController(
+          StreamMessageComposer(
+            messageComposerController: StreamMessageComposerController(
               message: Message(parentId: parent!.id),
             ),
           ),

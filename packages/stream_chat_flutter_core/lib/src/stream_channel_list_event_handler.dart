@@ -171,8 +171,7 @@ mixin class StreamChannelListEventHandler {
     StreamChannelListController controller,
   ) {
     final channels = [...controller.currentItems];
-    final updatedChannels =
-        channels.where((it) => it.cid != event.channel?.cid);
+    final updatedChannels = channels.where((it) => it.cid != event.channel?.cid);
     final listChanged = channels.length != updatedChannels.length;
 
     if (!listChanged) return;

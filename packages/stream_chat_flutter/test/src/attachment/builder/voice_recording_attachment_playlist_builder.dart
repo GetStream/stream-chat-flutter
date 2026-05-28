@@ -48,11 +48,10 @@ void main() {
           await tester.pumpWidget(
             _wrapWithStreamChatApp(
               Builder(
-                builder: (context) => builder.build(
-                  context,
-                  Message(),
-                  attachments,
-                ),
+                builder: (context) {
+                  final attachment = builder.build(context, Message(), attachments);
+                  return attachment ?? const SizedBox.shrink();
+                },
               ),
             ),
           );
@@ -68,19 +67,19 @@ void main() {
 }
 
 Widget _wrapWithStreamChatApp(
-  Widget widget, {
-  Brightness? brightness,
-}) {
+  Widget widget,
+) {
   return MaterialApp(
     home: StreamChatTheme(
-      data: StreamChatThemeData(brightness: brightness),
-      child: Builder(builder: (context) {
-        final theme = StreamChatTheme.of(context);
-        return Scaffold(
-          backgroundColor: theme.colorTheme.appBg,
-          body: Center(child: widget),
-        );
-      }),
+      data: StreamChatThemeData(),
+      child: Builder(
+        builder: (context) {
+          return Scaffold(
+            backgroundColor: context.streamColorScheme.backgroundApp,
+            body: Center(child: widget),
+          );
+        },
+      ),
     ),
   );
 }

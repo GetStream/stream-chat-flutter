@@ -68,9 +68,10 @@ Future<bool?> showConfirmationBottomSheet(
   String? question,
   String? cancelText,
 }) {
-  final chatThemeData = StreamChatTheme.of(context);
+  final colorScheme = context.streamColorScheme;
+  final textTheme = context.streamTextTheme;
   return showModalBottomSheet(
-    backgroundColor: chatThemeData.colorTheme.barsBg,
+    backgroundColor: colorScheme.backgroundElevation1,
     context: context,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.only(
@@ -79,7 +80,6 @@ Future<bool?> showConfirmationBottomSheet(
       ),
     ),
     builder: (context) {
-      final effect = chatThemeData.colorTheme.borderTop;
       return SafeArea(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -89,7 +89,7 @@ Future<bool?> showConfirmationBottomSheet(
             const SizedBox(height: 26),
             Text(
               title,
-              style: chatThemeData.textTheme.headlineBold,
+              style: textTheme.headingMd,
             ),
             const SizedBox(height: 7),
             if (question != null)
@@ -99,8 +99,7 @@ Future<bool?> showConfirmationBottomSheet(
               ),
             const SizedBox(height: 36),
             Container(
-              // ignore: deprecated_member_use
-              color: effect.color!.withOpacity(effect.alpha ?? 1),
+              color: colorScheme.borderSubtle,
               height: 1,
             ),
             Row(
@@ -112,11 +111,10 @@ Future<bool?> showConfirmationBottomSheet(
                       child: TextButton(
                         onPressed: () => Navigator.of(context).pop(false),
                         style: TextButton.styleFrom(
-                          textStyle: chatThemeData.textTheme.bodyBold,
-                          foregroundColor:
-                              chatThemeData.colorTheme.textHighEmphasis
-                                  // ignore: deprecated_member_use
-                                  .withOpacity(0.5),
+                          textStyle: textTheme.bodyEmphasis,
+                          foregroundColor: colorScheme.textPrimary
+                              // ignore: deprecated_member_use
+                              .withOpacity(0.5),
                         ),
                         child: Text(cancelText),
                       ),
@@ -128,8 +126,8 @@ Future<bool?> showConfirmationBottomSheet(
                     child: TextButton(
                       onPressed: () => Navigator.of(context).pop(true),
                       style: TextButton.styleFrom(
-                        textStyle: chatThemeData.textTheme.bodyBold,
-                        foregroundColor: chatThemeData.colorTheme.accentError,
+                        textStyle: textTheme.bodyEmphasis,
+                        foregroundColor: colorScheme.accentError,
                       ),
                       child: Text(okText),
                     ),
@@ -153,10 +151,10 @@ Future<bool?> showInfoBottomSheet(
   String? details,
   StreamChatThemeData? theme,
 }) {
-  final chatThemeData = StreamChatTheme.of(context);
+  final colorScheme = context.streamColorScheme;
+  final textTheme = context.streamTextTheme;
   return showModalBottomSheet(
-    backgroundColor:
-        theme?.colorTheme.barsBg ?? chatThemeData.colorTheme.barsBg,
+    backgroundColor: colorScheme.backgroundElevation1,
     context: context,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.only(
@@ -177,8 +175,7 @@ Future<bool?> showInfoBottomSheet(
           ),
           Text(
             title,
-            style: theme?.textTheme.headlineBold ??
-                chatThemeData.textTheme.headlineBold,
+            style: textTheme.headingMd,
           ),
           const SizedBox(
             height: 7,
@@ -188,10 +185,7 @@ Future<bool?> showInfoBottomSheet(
             height: 36,
           ),
           Container(
-            // ignore: deprecated_member_use
-            color: theme?.colorTheme.textHighEmphasis.withOpacity(0.08) ??
-                // ignore: deprecated_member_use
-                chatThemeData.colorTheme.textHighEmphasis.withOpacity(0.08),
+            color: colorScheme.textPrimary.withValues(alpha: 0.08),
             height: 1,
           ),
           Center(
@@ -203,8 +197,7 @@ Future<bool?> showInfoBottomSheet(
                 okText,
                 style: TextStyle(
                   // ignore: deprecated_member_use
-                  color: theme?.colorTheme.textHighEmphasis.withOpacity(0.5) ??
-                      chatThemeData.colorTheme.accentPrimary,
+                  color: colorScheme.accentPrimary,
                   fontWeight: FontWeight.w400,
                 ),
               ),
@@ -217,8 +210,7 @@ Future<bool?> showInfoBottomSheet(
 }
 
 /// Get random png with initials
-String getRandomPicUrl(User user) =>
-    'https://getstream.io/random_png/?id=${user.id}&name=${user.name}';
+String getRandomPicUrl(User user) => 'https://getstream.io/random_png/?id=${user.id}&name=${user.name}';
 
 /// Get websiteName from [hostName]
 String? getWebsiteName(String hostName) {
@@ -308,8 +300,7 @@ String fileSize(dynamic size, [int round = 2]) {
     return '${(_size / divider / divider / divider).toStringAsFixed(round)} GB';
   }
 
-  if (_size < divider * divider * divider * divider * divider &&
-      _size % divider == 0) {
+  if (_size < divider * divider * divider * divider * divider && _size % divider == 0) {
     final num r = _size / divider / divider / divider / divider;
     return '${r.toStringAsFixed(0)} TB';
   }
@@ -319,72 +310,13 @@ String fileSize(dynamic size, [int round = 2]) {
     return '${r.toStringAsFixed(round)} TB';
   }
 
-  if (_size < divider * divider * divider * divider * divider * divider &&
-      _size % divider == 0) {
+  if (_size < divider * divider * divider * divider * divider * divider && _size % divider == 0) {
     final num r = _size / divider / divider / divider / divider / divider;
     return '${r.toStringAsFixed(0)} PB';
   } else {
     final num r = _size / divider / divider / divider / divider / divider;
     return '${r.toStringAsFixed(round)} PB';
   }
-}
-
-// TODO: Use file extension instead of mime type to get the file type icon.
-/// Returns a [StreamSvgIcon] based on the [mimeType] of the file.
-StreamSvgIcon getFileTypeImage([String? mimeType]) {
-  return StreamSvgIcon(
-    size: 40,
-    icon: switch (mimeType) {
-      'audio/mpeg' => StreamSvgIcons.filetypeAudioMp3,
-      'audio/aac' => StreamSvgIcons.filetypeAudioAac,
-      'audio/wav' || 'audio/x-wav' => StreamSvgIcons.filetypeAudioWav,
-      'audio/flac' => StreamSvgIcons.filetypeAudioFlac,
-      'audio/mp4' => StreamSvgIcons.filetypeAudioM4a,
-      'audio/ogg' => StreamSvgIcons.filetypeAudioOgg,
-      'audio/aiff' => StreamSvgIcons.filetypeAudioAiff,
-      'audio/alac' => StreamSvgIcons.filetypeAudioAlac,
-      'application/zip' => StreamSvgIcons.filetypeCompressionZip,
-      'application/x-7z-compressed' => StreamSvgIcons.filetypeCompression7z,
-      'application/x-arj' => StreamSvgIcons.filetypeCompressionArj,
-      'application/vnd.debian.binary-package' =>
-        StreamSvgIcons.filetypeCompressionDeb,
-      'application/x-apple-diskimage' => StreamSvgIcons.filetypeCompressionPkg,
-      'application/x-rar-compressed' => StreamSvgIcons.filetypeCompressionRar,
-      'application/x-rpm' => StreamSvgIcons.filetypeCompressionRpm,
-      'application/x-tar' => StreamSvgIcons.filetypeCodeTar,
-      'application/x-compress' => StreamSvgIcons.filetypeCompressionZ,
-      'application/vnd.ms-powerpoint' => StreamSvgIcons.filetypePresentationPpt,
-      'application/vnd.openxmlformats-officedocument.presentationml.presentation' =>
-        StreamSvgIcons.filetypePresentationPptx,
-      'application/vnd.apple.keynote' => StreamSvgIcons.filetypePresentationKey,
-      'application/vnd.oasis.opendocument.presentation' =>
-        StreamSvgIcons.filetypePresentationOdp,
-      'application/vnd.ms-excel' => StreamSvgIcons.filetypeSpreadsheetXls,
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' =>
-        StreamSvgIcons.filetypeSpreadsheetXlsx,
-      'application/vnd.ms-excel.sheet.macroEnabled.12' =>
-        StreamSvgIcons.filetypeSpreadsheetXlsm,
-      'application/vnd.oasis.opendocument.spreadsheet' =>
-        StreamSvgIcons.filetypeSpreadsheetOds,
-      'application/msword' => StreamSvgIcons.filetypeTextDoc,
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document' =>
-        StreamSvgIcons.filetypeTextDocx,
-      'application/vnd.oasis.opendocument.text' =>
-        StreamSvgIcons.filetypeTextOdt,
-      'text/plain' => StreamSvgIcons.filetypeTextTxt,
-      'application/rtf' => StreamSvgIcons.filetypeTextRtf,
-      'application/x-tex' => StreamSvgIcons.filetypeTextTex,
-      'application/vnd.wordperfect' => StreamSvgIcons.filetypeTextWdp,
-      'text/html' => StreamSvgIcons.filetypeCodeHtml,
-      'text/csv' => StreamSvgIcons.filetypeCodeCsv,
-      'application/xml' => StreamSvgIcons.filetypeCodeXml,
-      'text/markdown' => StreamSvgIcons.filetypeCodeMd,
-      'application/octet-stream' => StreamSvgIcons.filetypeOtherStandard,
-      'application/pdf' => StreamSvgIcons.filetypeOtherPdf,
-      'application/x-wiki' => StreamSvgIcons.filetypeOtherWkq,
-      _ => StreamSvgIcons.filetypeOtherStandard,
-    },
-  );
 }
 
 /// Wraps attachment widget with custom shape

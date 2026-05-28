@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_portal/flutter_portal.dart';
-import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template streamInfoTile}
 /// Displays a message. Often used to display connection status.
@@ -41,7 +41,8 @@ class StreamInfoTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final chatThemeData = StreamChatTheme.of(context);
+    final colorScheme = context.streamColorScheme;
+    final textTheme = context.streamTextTheme;
     return PortalTarget(
       visible: showMessage,
       anchor: Aligned(
@@ -50,14 +51,16 @@ class StreamInfoTile extends StatelessWidget {
       ),
       portalFollower: Container(
         height: 25,
-        color: backgroundColor ??
+        color:
+            backgroundColor ??
             // ignore: deprecated_member_use
-            chatThemeData.colorTheme.textLowEmphasis.withOpacity(0.9),
+            colorScheme.textSecondary.withOpacity(0.9),
         child: Center(
           child: Text(
             message,
-            style: textStyle ??
-                chatThemeData.textTheme.body.copyWith(
+            style:
+                textStyle ??
+                textTheme.bodyDefault.copyWith(
                   color: Colors.white,
                 ),
             maxLines: 1,

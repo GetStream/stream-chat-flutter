@@ -10,10 +10,10 @@ import '../../mocks.dart';
 
 void main() {
   Response successResponse(String path, {Object? data}) => Response(
-        data: data,
-        requestOptions: RequestOptions(path: path),
-        statusCode: 200,
-      );
+    data: data,
+    requestOptions: RequestOptions(path: path),
+    statusCode: 200,
+  );
 
   late final client = MockHttpClient();
   late UserApi userApi;
@@ -32,16 +32,26 @@ void main() {
 
     final users = List.generate(3, (index) => User(id: 'test-user-id-$index'));
 
-    when(() => client.get(path, queryParameters: {
+    when(
+      () => client.get(
+        path,
+        queryParameters: {
           'payload': jsonEncode({
             'presence': presence,
             'sort': sort,
             'filter_conditions': filter,
             ...pagination.toJson(),
           }),
-        })).thenAnswer((_) async => successResponse(path, data: {
-          'users': [...users.map((it) => it.toJson())]
-        }));
+        },
+      ),
+    ).thenAnswer(
+      (_) async => successResponse(
+        path,
+        data: {
+          'users': [...users.map((it) => it.toJson())],
+        },
+      ),
+    );
 
     final res = await userApi.queryUsers(
       presence: presence,
@@ -66,13 +76,17 @@ void main() {
 
     final updatedUsers = {for (final user in users) user.id: user};
 
-    when(() => client.post(path, data: {
+    when(
+      () => client.post(
+        path,
+        data: {
           'users': updatedUsers,
-        })).thenAnswer((_) async => successResponse(path,
-            data: {
-              'users': updatedUsers
-                  .map((key, value) => MapEntry(key, value.toJson()))
-            }));
+        },
+      ),
+    ).thenAnswer(
+      (_) async =>
+          successResponse(path, data: {'users': updatedUsers.map((key, value) => MapEntry(key, value.toJson()))}),
+    );
 
     final res = await userApi.updateUsers(users);
 
@@ -93,15 +107,17 @@ void main() {
 
     final updatedUser = {user.id: User(id: user.id, extraData: user.set!)};
 
-    when(() => client.patch(path, data: {
-          'users': [user],
-        })).thenAnswer(
-      (_) async => successResponse(
+    when(
+      () => client.patch(
         path,
         data: {
-          'users':
-              updatedUser.map((key, value) => MapEntry(key, value.toJson()))
+          'users': [user],
         },
+      ),
+    ).thenAnswer(
+      (_) async => successResponse(
+        path,
+        data: {'users': updatedUser.map((key, value) => MapEntry(key, value.toJson()))},
       ),
     );
 
@@ -110,9 +126,14 @@ void main() {
     expect(res, isNotNull);
     expect(res.users.length, updatedUser.length);
 
-    verify(() => client.patch(path, data: {
-          'users': [user]
-        })).called(1);
+    verify(
+      () => client.patch(
+        path,
+        data: {
+          'users': [user],
+        },
+      ),
+    ).called(1);
     verifyNoMoreInteractions(client);
   });
 
@@ -121,9 +142,14 @@ void main() {
 
     const path = '/users/block';
 
-    when(() => client.post(path, data: {
+    when(
+      () => client.post(
+        path,
+        data: {
           'blocked_user_id': targetUserId,
-        })).thenAnswer(
+        },
+      ),
+    ).thenAnswer(
       (_) async => successResponse(
         path,
         data: {
@@ -138,9 +164,14 @@ void main() {
 
     expect(res, isNotNull);
 
-    verify(() => client.post(path, data: {
+    verify(
+      () => client.post(
+        path,
+        data: {
           'blocked_user_id': targetUserId,
-        })).called(1);
+        },
+      ),
+    ).called(1);
     verifyNoMoreInteractions(client);
   });
 
@@ -149,9 +180,14 @@ void main() {
 
     const path = '/users/unblock';
 
-    when(() => client.post(path, data: {
+    when(
+      () => client.post(
+        path,
+        data: {
           'blocked_user_id': targetUserId,
-        })).thenAnswer(
+        },
+      ),
+    ).thenAnswer(
       (_) async => successResponse(
         path,
         data: <String, dynamic>{},
@@ -162,9 +198,14 @@ void main() {
 
     expect(res, isNotNull);
 
-    verify(() => client.post(path, data: {
+    verify(
+      () => client.post(
+        path,
+        data: {
           'blocked_user_id': targetUserId,
-        })).called(1);
+        },
+      ),
+    ).called(1);
     verifyNoMoreInteractions(client);
   });
 
@@ -187,50 +228,53 @@ void main() {
     const path = '/unread';
 
     when(() => client.get(path)).thenAnswer(
-      (_) async => successResponse(path, data: {
-        'duration': '5.23ms',
-        'total_unread_count': 42,
-        'total_unread_threads_count': 8,
-        'total_unread_count_by_team': {'team-1': 15, 'team-2': 27},
-        'channels': [
-          {
-            'channel_id': 'messaging:test-channel-1',
-            'unread_count': 5,
-            'last_read': '2024-01-15T10:30:00.000Z',
-          },
-          {
-            'channel_id': 'messaging:test-channel-2',
-            'unread_count': 10,
-            'last_read': '2024-01-15T09:15:00.000Z',
-          },
-        ],
-        'channel_type': [
-          {
-            'channel_type': 'messaging',
-            'channel_count': 3,
-            'unread_count': 25,
-          },
-          {
-            'channel_type': 'livestream',
-            'channel_count': 1,
-            'unread_count': 17,
-          },
-        ],
-        'threads': [
-          {
-            'unread_count': 3,
-            'last_read': '2024-01-15T10:30:00.000Z',
-            'last_read_message_id': 'message-1',
-            'parent_message_id': 'parent-message-1',
-          },
-          {
-            'unread_count': 5,
-            'last_read': '2024-01-15T09:45:00.000Z',
-            'last_read_message_id': 'message-2',
-            'parent_message_id': 'parent-message-2',
-          },
-        ],
-      }),
+      (_) async => successResponse(
+        path,
+        data: {
+          'duration': '5.23ms',
+          'total_unread_count': 42,
+          'total_unread_threads_count': 8,
+          'total_unread_count_by_team': {'team-1': 15, 'team-2': 27},
+          'channels': [
+            {
+              'channel_id': 'messaging:test-channel-1',
+              'unread_count': 5,
+              'last_read': '2024-01-15T10:30:00.000Z',
+            },
+            {
+              'channel_id': 'messaging:test-channel-2',
+              'unread_count': 10,
+              'last_read': '2024-01-15T09:15:00.000Z',
+            },
+          ],
+          'channel_type': [
+            {
+              'channel_type': 'messaging',
+              'channel_count': 3,
+              'unread_count': 25,
+            },
+            {
+              'channel_type': 'livestream',
+              'channel_count': 1,
+              'unread_count': 17,
+            },
+          ],
+          'threads': [
+            {
+              'unread_count': 3,
+              'last_read': '2024-01-15T10:30:00.000Z',
+              'last_read_message_id': 'message-1',
+              'parent_message_id': 'parent-message-1',
+            },
+            {
+              'unread_count': 5,
+              'last_read': '2024-01-15T09:45:00.000Z',
+              'last_read_message_id': 'message-2',
+              'parent_message_id': 'parent-message-2',
+            },
+          ],
+        },
+      ),
     );
 
     final res = await userApi.getUnreadCount();
@@ -244,6 +288,82 @@ void main() {
     expect(res.threads.length, 2);
 
     verify(() => client.get(path)).called(1);
+    verifyNoMoreInteractions(client);
+  });
+
+  test('getActiveLiveLocations', () async {
+    const path = '/users/live_locations';
+
+    when(() => client.get(path)).thenAnswer(
+      (_) async => successResponse(
+        path,
+        data: {'active_live_locations': []},
+      ),
+    );
+
+    final res = await userApi.getActiveLiveLocations();
+
+    expect(res, isNotNull);
+
+    verify(() => client.get(path)).called(1);
+    verifyNoMoreInteractions(client);
+  });
+
+  test('updateLiveLocation', () async {
+    const path = '/users/live_locations';
+    const messageId = 'test-message-id';
+    const createdByDeviceId = 'test-device-id';
+    final endAt = DateTime.timestamp().add(const Duration(hours: 1));
+    const coordinates = LocationCoordinates(
+      latitude: 40.7128,
+      longitude: -74.0060,
+    );
+
+    when(
+      () => client.put(
+        path,
+        data: json.encode({
+          'message_id': messageId,
+          'created_by_device_id': createdByDeviceId,
+          'latitude': coordinates.latitude,
+          'longitude': coordinates.longitude,
+          'end_at': endAt.toIso8601String(),
+        }),
+      ),
+    ).thenAnswer(
+      (_) async => successResponse(
+        path,
+        data: <String, dynamic>{
+          'message_id': messageId,
+          'created_by_device_id': createdByDeviceId,
+          'latitude': coordinates.latitude,
+          'longitude': coordinates.longitude,
+          'end_at': endAt.toIso8601String(),
+        },
+      ),
+    );
+
+    final res = await userApi.updateLiveLocation(
+      messageId: messageId,
+      createdByDeviceId: createdByDeviceId,
+      location: coordinates,
+      endAt: endAt,
+    );
+
+    expect(res, isNotNull);
+
+    verify(
+      () => client.put(
+        path,
+        data: json.encode({
+          'message_id': messageId,
+          'created_by_device_id': createdByDeviceId,
+          'latitude': coordinates.latitude,
+          'longitude': coordinates.longitude,
+          'end_at': endAt.toIso8601String(),
+        }),
+      ),
+    ).called(1);
     verifyNoMoreInteractions(client);
   });
 }

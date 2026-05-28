@@ -4,6 +4,7 @@ import 'package:alchemist/alchemist.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/poll/creator/poll_question_text_field.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 void main() {
   for (final brightness in Brightness.values) {
@@ -42,23 +43,25 @@ void main() {
 
 Widget _wrapWithMaterialApp(
   Widget widget, {
-  Brightness? brightness,
+  Brightness brightness = Brightness.light,
 }) {
   return MaterialApp(
+    theme: ThemeData(brightness: brightness),
     home: StreamChatTheme(
-      data: StreamChatThemeData(brightness: brightness),
-      child: Builder(builder: (context) {
-        final theme = StreamChatTheme.of(context);
-        return Scaffold(
-          backgroundColor: theme.colorTheme.appBg,
-          body: Center(
-            child: Padding(
-              padding: const EdgeInsets.all(8),
-              child: widget,
+      data: StreamChatThemeData(),
+      child: Builder(
+        builder: (context) {
+          return Scaffold(
+            backgroundColor: context.streamColorScheme.backgroundApp,
+            body: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(8),
+                child: widget,
+              ),
             ),
-          ),
-        );
-      }),
+          );
+        },
+      ),
     ),
   );
 }

@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/theme/poll_creator_theme.dart';
-import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 /// {@template showPollDeleteOptionDialog}
 /// Shows a dialog that allows the user to confirm deletion of a poll option.
+///
+/// See also:
+///
+///  * [PollDeleteOptionDialog], the dialog widget shown by this function.
 /// {@endtemplate}
 Future<bool?> showPollDeleteOptionDialog({
   required BuildContext context,
@@ -17,6 +20,11 @@ Future<bool?> showPollDeleteOptionDialog({
 
 /// {@template pollDeleteOptionDialog}
 /// A dialog that allows the user to confirm deletion of a poll option.
+///
+/// See also:
+///
+///  * [showPollDeleteOptionDialog], the convenience function to show this
+///    dialog.
 /// {@endtemplate}
 class PollDeleteOptionDialog extends StatelessWidget {
   /// {@macro pollDeleteOptionDialog}
@@ -24,45 +32,30 @@ class PollDeleteOptionDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = StreamChatTheme.of(context);
-    final pollCreatorTheme = StreamPollCreatorTheme.of(context);
+    final colorScheme = context.streamColorScheme;
 
     final actions = [
-      TextButton(
+      StreamButton(
+        type: .ghost,
+        style: .secondary,
+        size: .small,
         onPressed: () => Navigator.of(context).maybePop(false),
-        style: TextButton.styleFrom(
-          textStyle: theme.textTheme.headlineBold,
-          foregroundColor: theme.colorTheme.accentPrimary,
-          disabledForegroundColor: theme.colorTheme.disabled,
-        ),
-        child: Text(context.translations.cancelLabel.toUpperCase()),
+        child: Text(context.translations.cancelLabel),
       ),
-      TextButton(
+      StreamButton(
+        type: .solid,
+        style: .destructive,
+        size: .small,
         onPressed: () => Navigator.of(context).maybePop(true),
-        style: TextButton.styleFrom(
-          textStyle: theme.textTheme.headlineBold,
-          foregroundColor: theme.colorTheme.accentPrimary,
-          disabledForegroundColor: theme.colorTheme.disabled,
-        ),
-        child: Text(context.translations.deleteLabel.toUpperCase()),
+        child: Text(context.translations.deleteLabel),
       ),
     ];
 
     return AlertDialog(
-      title: Text(
-        context.translations.deletePollOptionLabel,
-        style: pollCreatorTheme.actionDialogTitleStyle,
-      ),
-      content: Text(
-        context.translations.deletePollOptionQuestion,
-        style: pollCreatorTheme.actionDialogContentStyle,
-      ),
       actions: actions,
-      titlePadding: const EdgeInsetsDirectional.fromSTEB(16, 24, 16, 4),
-      contentPadding: const EdgeInsetsDirectional.fromSTEB(16, 4, 16, 24),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      actionsPadding: const EdgeInsets.all(8),
-      backgroundColor: theme.colorTheme.appBg,
+      title: Text(context.translations.deletePollOptionLabel),
+      content: Text(context.translations.deletePollOptionQuestion),
+      backgroundColor: colorScheme.backgroundElevation1,
     );
   }
 }

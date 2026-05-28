@@ -14,27 +14,25 @@ void main() {
 
       when(() => channel.state).thenReturn(channelState);
 
-      final themeData = ThemeData();
-      final streamTheme = StreamChatThemeData.fromTheme(themeData);
-
       await tester.pumpWidget(
         MaterialApp(
           home: StreamChatTheme(
-            data: streamTheme,
+            data: StreamChatThemeData(),
             child: StreamChannel(
               channel: channel,
               child: SizedBox(
                 child: StreamGiphyAttachment(
-                  constraints: BoxConstraints.tight(const Size(
-                    300,
-                    300,
-                  )),
+                  constraints: BoxConstraints.tight(
+                    const Size(
+                      300,
+                      300,
+                    ),
+                  ),
                   message: Message(),
                   giphy: Attachment(
                     type: 'giphy',
                     title: 'example.gif',
-                    imageUrl:
-                        'https://media.giphy.com/media/35H0pwQNaO2iLTnnBf/giphy.gif',
+                    imageUrl: 'https://media.giphy.com/media/35H0pwQNaO2iLTnnBf/giphy.gif',
                     extraData: const {
                       'mime_type': 'gif',
                     },

@@ -9,15 +9,11 @@ import 'package:stream_chat_flutter_core/src/stream_channel.dart';
 import 'package:stream_chat_flutter_core/src/typedef.dart';
 
 /// Default filter for the message list
-bool Function(Message) defaultMessageFilter([
-  String? currentUserId,
-]) {
-  return (Message m) {
-    final isMyMessage = currentUserId != null && m.user?.id == currentUserId;
-    if (m.shadowed && !isMyMessage) return false;
-    return true;
-  };
-}
+bool Function(Message) defaultMessageFilter([String? currentUserId]) => (Message m) {
+  final isMyMessage = currentUserId != null && m.user?.id == currentUserId;
+  if (m.shadowed && !isMyMessage) return false;
+  return true;
+};
 
 /// [MessageListCore] is a simplified class that allows fetching a list of
 /// messages while exposing UI builders.
@@ -257,15 +253,12 @@ class MessageListCoreState extends State<MessageListCore> {
 
     if (parentMessage?.id case final parentMessageId?) {
       _initialMessages = state?.threads[parentMessageId];
-      _messagesStream =
-          state?.threadsStream.mapNotNull((it) => it[parentMessageId]);
+      _messagesStream = state?.threadsStream.mapNotNull((it) => it[parentMessageId]);
       return;
     }
 
     _initialMessages = state?.messages;
-    _messagesStream = state?.messagesStream
-        .where((it) => it.isNotEmpty || _upToDate)
-        .doOnData(_pruneIfNeeded);
+    _messagesStream = state?.messagesStream.where((it) => it.isNotEmpty || _upToDate).doOnData(_pruneIfNeeded);
   }
 
   void _pruneIfNeeded(List<Message> data) {
@@ -283,8 +276,7 @@ class MessageListCoreState extends State<MessageListCore> {
     if (source.isEmpty) return const [];
 
     final currentUser = _streamChannel?.channel.client.state.currentUser;
-    final filter =
-        widget.messageFilter ?? defaultMessageFilter(currentUser?.id);
+    final filter = widget.messageFilter ?? defaultMessageFilter(currentUser?.id);
 
     return source.reversed.where(filter).toList();
   }
@@ -328,10 +320,10 @@ class MessageRetentionGate {
   MessageRetentionGate({
     required int? limit,
     int trimBuffer = defaultTrimBuffer,
-  })  : assert(limit == null || limit >= 0, '`limit` must be non-negative'),
-        assert(trimBuffer >= 0, '`trimBuffer` must be non-negative'),
-        _limit = limit,
-        _trimBuffer = trimBuffer;
+  }) : assert(limit == null || limit >= 0, '`limit` must be non-negative'),
+       assert(trimBuffer >= 0, '`trimBuffer` must be non-negative'),
+       _limit = limit,
+       _trimBuffer = trimBuffer;
 
   /// Default trim buffer.
   static const defaultTrimBuffer = 30;

@@ -17,7 +17,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 ///
 /// We're passing a custom widget
 /// to [StreamChannelListView.itemBuilder];
-/// this will override the default [StreamChannelListTile] and allows you
+/// this will override the default [StreamChannelListItem] and allows you
 /// to create one yourself.
 ///
 /// There are a couple interesting things we do in this widget:
@@ -96,27 +96,27 @@ class _ChannelListPageState extends State<ChannelListPage> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        body: StreamChannelListView(
-          controller: _listController,
-          itemBuilder: _channelPreviewBuilder,
-          onChannelTap: (channel) {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => StreamChannel(
-                  channel: channel,
-                  child: const ChannelPage(),
-                ),
-              ),
-            );
-          },
-        ),
-      );
+    body: StreamChannelListView(
+      controller: _listController,
+      itemBuilder: _channelPreviewBuilder,
+      onChannelTap: (channel) {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => StreamChannel(
+              channel: channel,
+              child: const ChannelPage(),
+            ),
+          ),
+        );
+      },
+    ),
+  );
 
   Widget _channelPreviewBuilder(
     BuildContext context,
     List<Channel> channels,
     int index,
-    StreamChannelListTile defaultTile,
+    StreamChannelListItem defaultTile,
   ) {
     final channel = channels[index];
     final lastMessage = channel.state?.messages.reversed.firstWhereOrNull(
@@ -142,13 +142,11 @@ class _ChannelListPageState extends State<ChannelListPage> {
         channel: channel,
       ),
       title: StreamChannelName(
-        textStyle: StreamChannelPreviewTheme.of(context).titleStyle!.copyWith(
-              color: StreamChatTheme.of(context)
-                  .colorTheme
-                  .textHighEmphasis
-                  // ignore: deprecated_member_use
-                  .withOpacity(opacity),
-            ),
+        textStyle: StreamChannelListItemTheme.of(context).titleStyle!.copyWith(
+          color: context.streamColorScheme.textPrimary
+              // ignore: deprecated_member_use
+              .withOpacity(opacity),
+        ),
         channel: channel,
       ),
       subtitle: Text(subtitle),
@@ -169,14 +167,14 @@ class ChannelPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      appBar: StreamChannelHeader(),
+    return Scaffold(
+      appBar: const StreamChannelHeader(),
       body: Column(
         children: <Widget>[
-          Expanded(
+          const Expanded(
             child: StreamMessageListView(),
           ),
-          StreamMessageInput(),
+          StreamMessageComposer(),
         ],
       ),
     );

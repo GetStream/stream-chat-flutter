@@ -10,26 +10,34 @@ part 'draft_message_dao.g.dart';
 
 /// The Data Access Object for operations in [DraftMessages] table.
 @DriftAccessor(tables: [DraftMessages, Messages])
-class DraftMessageDao extends DatabaseAccessor<DriftChatDatabase>
-    with _$DraftMessageDaoMixin {
+class DraftMessageDao extends DatabaseAccessor<DriftChatDatabase> with _$DraftMessageDaoMixin {
   /// Creates a new draft message dao instance
   DraftMessageDao(this._db) : super(_db);
 
   final DriftChatDatabase _db;
 
   Future<Draft> _draftFromEntity(DraftMessageEntity entity) async {
-    // We do not want to fetch the draft message of the parent and quoted
-    // message because it will create a circular dependency and will
+    // We do not want to fetch the draft and shared location of the parent and
+    // quoted message because it will create a circular dependency and will
     // result in infinite loop.
     const fetchDraft = false;
+    const fetchSharedLocation = false;
 
     final parentMessage = await switch (entity.parentId) {
-      final id? => _db.messageDao.getMessageById(id, fetchDraft: fetchDraft),
+      final id? => _db.messageDao.getMessageById(
+        id,
+        fetchDraft: fetchDraft,
+        fetchSharedLocation: fetchSharedLocation,
+      ),
       _ => null,
     };
 
     final quotedMessage = await switch (entity.quotedMessageId) {
-      final id? => _db.messageDao.getMessageById(id, fetchDraft: fetchDraft),
+      final id? => _db.messageDao.getMessageById(
+        id,
+        fetchDraft: fetchDraft,
+        fetchSharedLocation: fetchSharedLocation,
+      ),
       _ => null,
     };
 

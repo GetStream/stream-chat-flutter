@@ -22,48 +22,49 @@ class StreamPollCreator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = StreamChatTheme.of(context);
+    final spacing = context.streamSpacing;
+    final textTheme = context.streamTextTheme;
+    final colorScheme = context.streamColorScheme;
 
     Future<void> _openCreatePollFlow() async {
-      final result = await showStreamPollCreatorDialog(
+      final result = await showStreamPollCreatorSheet(
         context: context,
         poll: poll,
         config: config,
       );
 
-      onPollCreated?.call(result);
+      return onPollCreated?.call(result);
     }
 
     return OptionDrawer(
       child: EndOfFrameCallbackWidget(
-        child: StreamSvgIcon(
-          size: 180,
-          icon: StreamSvgIcons.polls,
-          color: theme.colorTheme.disabled,
-        ),
-        onEndOfFrame: (_) => _openCreatePollFlow(),
-        errorBuilder: (context, error, stacktrace) {
-          return Column(
+        child: Center(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              StreamSvgIcon(
-                size: 240,
-                icon: StreamSvgIcons.polls,
-                color: theme.colorTheme.disabled,
+              Icon(
+                size: 32,
+                context.streamIcons.pollLarge,
+                color: colorScheme.textTertiary,
               ),
-              const SizedBox(height: 8),
-              TextButton(
+              SizedBox(height: spacing.xs),
+              Text(
+                context.translations.createPollPromptLabel,
+                style: textTheme.bodyDefault.copyWith(color: colorScheme.textSecondary),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: spacing.md),
+              StreamButton(
+                type: .outline,
+                style: .secondary,
                 onPressed: _openCreatePollFlow,
-                child: Text(
-                  context.translations.createPollLabel(isNew: true),
-                  style: theme.textTheme.bodyBold.copyWith(
-                    color: theme.colorTheme.accentPrimary,
-                  ),
-                ),
+                child: Text(context.translations.createPollLabel()),
               ),
             ],
-          );
-        },
+          ),
+        ),
+        onEndOfFrame: (_) => _openCreatePollFlow(),
       ),
     );
   }

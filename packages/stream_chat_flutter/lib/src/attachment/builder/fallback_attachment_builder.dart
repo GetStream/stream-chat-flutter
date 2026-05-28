@@ -1,10 +1,19 @@
 part of 'attachment_widget_builder.dart';
 
 /// {@template fallbackAttachmentBuilder}
-/// A widget builder for when no other builder can handle the attachments.
+/// A silent catch-all builder that prevents errors when no other
+/// [StreamAttachmentWidgetBuilder] can handle the attachments.
 ///
-/// Saves you from getting an error when you have an attachment type that is not
-/// supported by the SDK.
+/// Returns `null` (no widget), ensuring the attachment area is simply empty
+/// rather than throwing. This builder should always be the **last** entry in
+/// the builder list.
+///
+/// See also:
+///
+///  * [UnsupportedAttachmentBuilder], which renders a visible placeholder for
+///    unrecognised content types.
+///  * [StreamAttachmentWidgetBuilder.defaultBuilders], which places this
+///    builder at the end of the default list.
 /// {@endtemplate}
 class FallbackAttachmentBuilder extends StreamAttachmentWidgetBuilder {
   /// {@macro fallbackAttachmentBuilder}
@@ -21,13 +30,12 @@ class FallbackAttachmentBuilder extends StreamAttachmentWidgetBuilder {
   }
 
   @override
-  Widget build(
+  Widget? build(
     BuildContext context,
     Message message,
     Map<String, List<Attachment>> attachments,
   ) {
-    // Returns an empty widget because this builder will be used as a fallback
-    // when no other builder can handle the attachments.
-    return const Empty();
+    // No visual representation for unsupported attachment types.
+    return null;
   }
 }

@@ -33,8 +33,7 @@ void main() {
     when(() => mockRecorder.dispose()).thenAnswer((_) async {});
 
     amplitudeController = PublishSubject<Amplitude>();
-    when(() => mockRecorder.onAmplitudeChanged(any()))
-        .thenAnswer((_) => amplitudeController.stream);
+    when(() => mockRecorder.onAmplitudeChanged(any())).thenAnswer((_) => amplitudeController.stream);
 
     controller = StreamAudioRecorderController.raw(
       config: config,
@@ -53,29 +52,42 @@ void main() {
 
   group('startRecord', () {
     setUp(() {
-      when(() => mockRecorder.start(config, path: any(named: 'path')))
-          .thenAnswer((_) async {});
+      when(() => mockRecorder.start(config, path: any(named: 'path'))).thenAnswer((_) async {});
     });
 
     test(
-      'starts recording when permission is granted',
+      'starts recording when permission is already granted',
       () async {
-        when(() => mockRecorder.hasPermission()).thenAnswer((_) async => true);
+        when(() => mockRecorder.hasPermission(request: false)).thenAnswer((_) async => true);
 
         await controller.startRecord();
 
         expect(controller.value, isA<RecordStateRecordingHold>());
         verify(() => mockRecorder.start(config, path: any(named: 'path')));
+        // Should not prompt for permission when already granted.
+        verifyNever(() => mockRecorder.hasPermission(request: true));
       },
     );
 
-    test('does not start recording when permission is denied', () async {
-      when(() => mockRecorder.hasPermission()).thenAnswer((_) async => false);
+    test('does not start recording when permission is not pre-granted', () async {
+      when(() => mockRecorder.hasPermission(request: false)).thenAnswer((_) async => false);
+      when(() => mockRecorder.hasPermission(request: true)).thenAnswer((_) async => false);
 
       await controller.startRecord();
 
       expect(controller.value, isA<RecordStateIdle>());
       verifyNever(() => mockRecorder.start(config, path: any(named: 'path')));
+    });
+
+    test('requests permission when not pre-granted', () async {
+      when(() => mockRecorder.hasPermission(request: false)).thenAnswer((_) async => false);
+      when(() => mockRecorder.hasPermission(request: true)).thenAnswer((_) async => false);
+
+      await controller.startRecord();
+
+      // Should first check without prompting, then prompt the user.
+      verify(() => mockRecorder.hasPermission(request: false)).called(1);
+      verify(() => mockRecorder.hasPermission(request: true)).called(1);
     });
   });
 
@@ -84,10 +96,9 @@ void main() {
     const testPath = '$pathPrefix/audio.m4a';
 
     setUp(() async {
-      when(() => mockRecorder.hasPermission()).thenAnswer((_) async => true);
+      when(() => mockRecorder.hasPermission(request: false)).thenAnswer((_) async => true);
       when(() => mockRecorder.stop()).thenAnswer((_) async => testPath);
-      when(() => mockRecorder.start(config, path: any(named: 'path')))
-          .thenAnswer((_) async {});
+      when(() => mockRecorder.start(config, path: any(named: 'path'))).thenAnswer((_) async {});
     });
 
     test('stops recording and updates state to stopped', () async {
@@ -120,10 +131,9 @@ void main() {
 
   group('cancelRecord', () {
     setUp(() {
-      when(() => mockRecorder.hasPermission()).thenAnswer((_) async => true);
+      when(() => mockRecorder.hasPermission(request: false)).thenAnswer((_) async => true);
       when(() => mockRecorder.cancel()).thenAnswer((_) async {});
-      when(() => mockRecorder.start(config, path: any(named: 'path')))
-          .thenAnswer((_) async {});
+      when(() => mockRecorder.start(config, path: any(named: 'path'))).thenAnswer((_) async {});
     });
 
     test('cancels recording and returns to idle state', () async {
@@ -207,9 +217,8 @@ void main() {
 
   group('amplitude changes', () {
     setUp(() {
-      when(() => mockRecorder.hasPermission()).thenAnswer((_) async => true);
-      when(() => mockRecorder.start(config, path: any(named: 'path')))
-          .thenAnswer((_) async {});
+      when(() => mockRecorder.hasPermission(request: false)).thenAnswer((_) async => true);
+      when(() => mockRecorder.start(config, path: any(named: 'path'))).thenAnswer((_) async {});
     });
 
     test('updates waveform data when amplitude changes', () async {

@@ -31,7 +31,7 @@ void main() {
         await tester.tap(find.text('End Vote'));
         await tester.pumpAndSettle();
 
-        await tester.tap(find.text('END'));
+        await tester.tap(find.text('End'));
         await tester.pumpAndSettle();
 
         expect(value, isTrue);
@@ -61,7 +61,7 @@ void main() {
         await tester.tap(find.text('End Vote'));
         await tester.pumpAndSettle();
 
-        await tester.tap(find.text('CANCEL'));
+        await tester.tap(find.text('Cancel'));
         await tester.pumpAndSettle();
 
         expect(value, isFalse);
@@ -102,10 +102,10 @@ void main() {
     goldenTest(
       '[${brightness.name}] -> PollEndVoteDialog looks fine',
       fileName: 'poll_end_vote_dialog_${brightness.name}',
-      constraints: const BoxConstraints.tightFor(width: 400, height: 200),
+      constraints: const BoxConstraints.tightFor(width: 400, height: 220),
       builder: () => _wrapWithMaterialApp(
-        brightness: brightness,
         const PollEndVoteDialog(),
+        brightness: brightness,
       ),
     );
   }
@@ -113,11 +113,12 @@ void main() {
 
 Widget _wrapWithMaterialApp(
   Widget widget, {
-  Brightness? brightness,
+  Brightness brightness = Brightness.light,
 }) {
   return StreamChatTheme(
-    data: StreamChatThemeData(brightness: brightness),
+    data: StreamChatThemeData(),
     child: MaterialApp(
+      theme: ThemeData(brightness: brightness),
       home: widget,
     ),
   );

@@ -1,30 +1,37 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/poll/stream_poll_text_field.dart';
-import 'package:stream_chat_flutter/src/theme/poll_interactor_theme.dart';
-import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 /// {@template showPollAddCommentDialog}
 /// Shows a dialog that allows the user to add a poll comment.
 ///
 /// Optionally, you can provide an [initialValue] to pre-fill the text field.
+///
+/// See also:
+///
+///  * [PollAddCommentDialog], the dialog widget shown by this function.
+///  * [StreamPollInteractor], which invokes this via [StreamPollInteractor.onAddComment].
 /// {@endtemplate}
 Future<String?> showPollAddCommentDialog({
   required BuildContext context,
   String initialValue = '',
-}) =>
-    showDialog<String?>(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => PollAddCommentDialog(
-        initialValue: initialValue,
-      ),
-    );
+}) => showDialog<String?>(
+  context: context,
+  barrierDismissible: false,
+  builder: (_) => PollAddCommentDialog(
+    initialValue: initialValue,
+  ),
+);
 
 /// {@template pollAddCommentDialog}
 /// A dialog that allows the user to add or update a poll comment.
 ///
 /// Optionally, you can provide an [initialValue] to pre-fill the text field.
+///
+/// See also:
+///
+///  * [showPollAddCommentDialog], the convenience function to show this dialog.
+///  * [StreamPollInteractor], the parent widget that triggers this dialog.
 /// {@endtemplate}
 class PollAddCommentDialog extends StatefulWidget {
   /// {@macro pollAddCommentDialog}
@@ -47,58 +54,42 @@ class _PollAddCommentDialogState extends State<PollAddCommentDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = StreamChatTheme.of(context);
-    final pollInteractorTheme = StreamPollInteractorTheme.of(context);
+    final colorScheme = context.streamColorScheme;
 
     final actions = [
-      TextButton(
+      StreamButton(
+        type: .ghost,
+        style: .secondary,
+        size: .small,
         onPressed: Navigator.of(context).pop,
-        style: TextButton.styleFrom(
-          textStyle: theme.textTheme.headlineBold,
-          foregroundColor: theme.colorTheme.accentPrimary,
-          disabledForegroundColor: theme.colorTheme.disabled,
-        ),
-        child: Text(context.translations.cancelLabel.toUpperCase()),
+        child: Text(context.translations.cancelLabel),
       ),
-      TextButton(
-        onPressed: switch (_comment == widget.initialValue) {
-          true => null,
-          false => () => Navigator.of(context).pop(_comment),
+      StreamButton(
+        type: .solid,
+        style: .primary,
+        size: .small,
+        onPressed: switch (_comment.trim()) {
+          final comment when comment.isEmpty => null,
+          final comment when comment == widget.initialValue => null,
+          final comment => () => Navigator.of(context).pop(comment),
         },
-        style: TextButton.styleFrom(
-          textStyle: theme.textTheme.headlineBold,
-          foregroundColor: theme.colorTheme.accentPrimary,
-          disabledForegroundColor: theme.colorTheme.disabled,
-        ),
-        child: Text(context.translations.sendLabel.toUpperCase()),
+        child: Text(context.translations.sendLabel),
       ),
     ];
 
     return AlertDialog(
+      actions: actions,
       title: Text(
         switch (widget.initialValue.isEmpty) {
           true => context.translations.addACommentLabel,
           false => context.translations.updateYourCommentLabel,
         },
-        style: pollInteractorTheme.pollActionDialogTitleStyle,
       ),
-      actions: actions,
-      titlePadding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      contentPadding: const EdgeInsets.all(16),
-      actionsPadding: const EdgeInsets.all(8),
-      backgroundColor: theme.colorTheme.appBg,
-      content: StreamPollTextField(
-        autoFocus: true,
+      backgroundColor: colorScheme.backgroundElevation1,
+      content: StreamTextInput(
+        autofocus: true,
         initialValue: _comment,
         hintText: context.translations.enterYourCommentLabel,
-        contentPadding: const EdgeInsets.symmetric(
-          vertical: 12,
-          horizontal: 16,
-        ),
-        style: pollInteractorTheme.pollActionDialogTextFieldStyle,
-        fillColor: pollInteractorTheme.pollActionDialogTextFieldFillColor,
-        borderRadius: pollInteractorTheme.pollActionDialogTextFieldBorderRadius,
         onChanged: (value) => setState(() => _comment = value),
       ),
     );

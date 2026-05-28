@@ -1,8 +1,6 @@
 // ignore_for_file: public_member_api_docs
 
 import 'dart:async';
-import 'dart:math' as math;
-import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:responsive_builder/responsive_builder.dart';
@@ -195,16 +193,16 @@ class _ChannelListPageState extends State<ChannelListPage> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        body: StreamChannelListView(
-          onChannelTap: widget.onTap,
-          controller: _listController,
-          itemBuilder: (context, channels, index, defaultWidget) {
-            return defaultWidget.copyWith(
-              selected: channels[index] == widget.selectedChannel,
-            );
-          },
-        ),
-      );
+    body: StreamChannelListView(
+      onChannelTap: widget.onTap,
+      controller: _listController,
+      itemBuilder: (context, channels, index, defaultWidget) {
+        return defaultWidget.copyWith(
+          selected: channels[index] == widget.selectedChannel,
+        );
+      },
+    ),
+  );
 }
 
 class ChannelPage extends StatefulWidget {
@@ -222,120 +220,59 @@ class ChannelPage extends StatefulWidget {
 }
 
 class _ChannelPageState extends State<ChannelPage> {
-  late final messageInputController = StreamMessageInputController();
+  late final messageComposerController = StreamMessageComposerController();
   final focusNode = FocusNode();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: StreamChannelHeader(
-        onBackPressed: widget.onBackPressed != null
-            ? () {
-                widget.onBackPressed!(context);
-              }
-            : null,
-        onImageTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) {
-                return StreamChannel(
-                  channel: StreamChannel.of(context).channel,
-                  child: const DebugChannelPage(),
-                );
-              },
-            ),
-          );
+        leading: switch ((widget.showBackButton, widget.onBackPressed)) {
+          (true, final cb?) => StreamBackButton(
+            channelId: StreamChannel.of(context).channel.cid,
+            onPressed: () => cb(context),
+            showUnreadCount: true,
+          ),
+          (true, null) => StreamBackButton(
+            channelId: StreamChannel.of(context).channel.cid,
+            showUnreadCount: true,
+          ),
+          _ => const SizedBox(),
         },
-        showBackButton: widget.showBackButton,
+        trailing: GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) {
+                  return StreamChannel(
+                    channel: StreamChannel.of(context).channel,
+                    child: const DebugChannelPage(),
+                  );
+                },
+              ),
+            );
+          },
+          child: StreamChannelAvatar(
+            size: .lg,
+            channel: StreamChannel.of(context).channel,
+          ),
+        ),
       ),
       body: Column(
         children: <Widget>[
           Expanded(
             child: StreamMessageListView(
+              config: const StreamMessageListViewConfiguration(swipeToReply: true),
               threadBuilder: (_, parent) => ThreadPage(parent: parent!),
-              messageBuilder: (
-                context,
-                messageDetails,
-                messages,
-                defaultWidget,
-              ) {
-                // The threshold after which the message is considered
-                // swiped.
-                const threshold = 0.2;
-
-                final isMyMessage = messageDetails.isMyMessage;
-
-                // The direction in which the message can be swiped.
-                final swipeDirection = isMyMessage
-                    ? SwipeDirection.endToStart //
-                    : SwipeDirection.startToEnd;
-
-                return Swipeable(
-                  key: ValueKey(messageDetails.message.id),
-                  direction: swipeDirection,
-                  swipeThreshold: threshold,
-                  onSwiped: (details) => reply(messageDetails.message),
-                  backgroundBuilder: (context, details) {
-                    // The alignment of the swipe action.
-                    final alignment = isMyMessage
-                        ? Alignment.centerRight //
-                        : Alignment.centerLeft;
-
-                    // The progress of the swipe action.
-                    final progress =
-                        math.min(details.progress, threshold) / threshold;
-
-                    // The offset for the reply icon.
-                    var offset = Offset.lerp(
-                      const Offset(-24, 0),
-                      const Offset(12, 0),
-                      progress,
-                    )!;
-
-                    // If the message is mine, we need to flip the offset.
-                    if (isMyMessage) {
-                      offset = Offset(-offset.dx, -offset.dy);
-                    }
-
-                    final _streamTheme = StreamChatTheme.of(context);
-
-                    return Align(
-                      alignment: alignment,
-                      child: Transform.translate(
-                        offset: offset,
-                        child: Opacity(
-                          opacity: progress,
-                          child: SizedBox.square(
-                            dimension: 30,
-                            child: CustomPaint(
-                              painter: AnimatedCircleBorderPainter(
-                                progress: progress,
-                                color: _streamTheme.colorTheme.borders,
-                              ),
-                              child: Center(
-                                child: StreamSvgIcon(
-                                  icon: StreamSvgIcons.reply,
-                                  size: lerpDouble(0, 18, progress),
-                                  color: _streamTheme.colorTheme.accentPrimary,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                  child: defaultWidget.copyWith(onReplyTap: reply),
-                );
-              },
+              onReplyTap: reply,
             ),
           ),
-          StreamMessageInput(
+          StreamMessageComposer(
             enableVoiceRecording: true,
-            onQuotedMessageCleared: messageInputController.clearQuotedMessage,
+            onQuotedMessageCleared: messageComposerController.clearQuotedMessage,
             focusNode: focusNode,
-            messageInputController: messageInputController,
+            messageComposerController: messageComposerController,
           ),
         ],
       ),
@@ -343,7 +280,7 @@ class _ChannelPageState extends State<ChannelPage> {
   }
 
   void reply(Message message) {
-    messageInputController.quotedMessage = message;
+    messageComposerController.quotedMessage = message;
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       focusNode.requestFocus();
     });
@@ -352,7 +289,7 @@ class _ChannelPageState extends State<ChannelPage> {
   @override
   void dispose() {
     focusNode.dispose();
-    messageInputController.dispose();
+    messageComposerController.dispose();
     super.dispose();
   }
 }
@@ -378,9 +315,9 @@ class ThreadPage extends StatelessWidget {
               parentMessage: parent,
             ),
           ),
-          StreamMessageInput(
+          StreamMessageComposer(
             enableVoiceRecording: true,
-            messageInputController: StreamMessageInputController(
+            messageComposerController: StreamMessageComposerController(
               message: Message(parentId: parent.id),
             ),
           ),

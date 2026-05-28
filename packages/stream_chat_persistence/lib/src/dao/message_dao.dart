@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:math';
 
 import 'package:drift/drift.dart';
@@ -11,8 +12,7 @@ part 'message_dao.g.dart';
 
 /// The Data Access Object for operations in [Messages] table.
 @DriftAccessor(tables: [Messages, Users])
-class MessageDao extends DatabaseAccessor<DriftChatDatabase>
-    with _$MessageDaoMixin {
+class MessageDao extends DatabaseAccessor<DriftChatDatabase> with _$MessageDaoMixin {
   /// Creates a new message dao instance
   MessageDao(this._db) : super(_db);
 
@@ -39,6 +39,7 @@ class MessageDao extends DatabaseAccessor<DriftChatDatabase>
   Future<Message> _messageFromJoinRow(
     TypedResult rows, {
     bool fetchDraft = false,
+    bool fetchSharedLocation = false,
   }) async {
     final userEntity = rows.readTableOrNull(_users);
     final pinnedByEntity = rows.readTableOrNull(_pinnedByUsers);
@@ -61,9 +62,14 @@ class MessageDao extends DatabaseAccessor<DriftChatDatabase>
 
     final draft = await switch (fetchDraft) {
       true => _db.draftMessageDao.getDraftMessageByCid(
-          msgEntity.channelCid,
-          parentId: msgEntity.id,
-        ),
+        msgEntity.channelCid,
+        parentId: msgEntity.id,
+      ),
+      _ => null,
+    };
+
+    final sharedLocation = await switch (fetchSharedLocation) {
+      true => _db.locationDao.getLocationByMessageId(msgEntity.id),
       _ => null,
     };
 
@@ -75,6 +81,7 @@ class MessageDao extends DatabaseAccessor<DriftChatDatabase>
       quotedMessage: quotedMessage,
       poll: poll,
       draft: draft,
+      sharedLocation: sharedLocation,
     );
   }
 
@@ -85,6 +92,7 @@ class MessageDao extends DatabaseAccessor<DriftChatDatabase>
   Future<Message?> getMessageById(
     String id, {
     bool fetchDraft = true,
+    bool fetchSharedLocation = true,
   }) async {
     final query = select(messages).join([
       leftOuterJoin(_users, messages.userId.equalsExp(_users.id)),
@@ -92,8 +100,7 @@ class MessageDao extends DatabaseAccessor<DriftChatDatabase>
         _pinnedByUsers,
         messages.pinnedByUserId.equalsExp(_pinnedByUsers.id),
       ),
-    ])
-      ..where(messages.id.equals(id));
+    ])..where(messages.id.equals(id));
 
     final result = await query.getSingleOrNull();
     if (result == null) return null;
@@ -101,24 +108,26 @@ class MessageDao extends DatabaseAccessor<DriftChatDatabase>
     return _messageFromJoinRow(
       result,
       fetchDraft: fetchDraft,
+      fetchSharedLocation: fetchSharedLocation,
     );
   }
 
   /// Returns all the messages of a particular thread by matching
   /// [Messages.channelCid] with [cid]
-  Future<List<Message>> getThreadMessages(String cid) async =>
-      Future.wait(await (select(messages).join([
-        leftOuterJoin(_users, messages.userId.equalsExp(_users.id)),
-        leftOuterJoin(
-          _pinnedByUsers,
-          messages.pinnedByUserId.equalsExp(_pinnedByUsers.id),
-        ),
-      ])
-            ..where(messages.channelCid.equals(cid))
-            ..where(messages.parentId.isNotNull())
-            ..orderBy([OrderingTerm.asc(messages.createdAt)]))
-          .map(_messageFromJoinRow)
-          .get());
+  Future<List<Message>> getThreadMessages(String cid) async => Future.wait(
+    await (select(messages).join([
+            leftOuterJoin(_users, messages.userId.equalsExp(_users.id)),
+            leftOuterJoin(
+              _pinnedByUsers,
+              messages.pinnedByUserId.equalsExp(_pinnedByUsers.id),
+            ),
+          ])
+          ..where(messages.channelCid.equals(cid))
+          ..where(messages.parentId.isNotNull())
+          ..orderBy([OrderingTerm.asc(messages.createdAt)]))
+        .map(_messageFromJoinRow)
+        .get(),
+  );
 
   /// Returns all the messages of a particular thread by matching
   /// [Messages.parentId] with [parentId]
@@ -126,18 +135,20 @@ class MessageDao extends DatabaseAccessor<DriftChatDatabase>
     String parentId, {
     PaginationParams? options,
   }) async {
-    final msgList = await Future.wait(await (select(messages).join([
-      leftOuterJoin(_users, messages.userId.equalsExp(_users.id)),
-      leftOuterJoin(
-        _pinnedByUsers,
-        messages.pinnedByUserId.equalsExp(_pinnedByUsers.id),
-      ),
-    ])
-          ..where(messages.parentId.isNotNull())
-          ..where(messages.parentId.equals(parentId))
-          ..orderBy([OrderingTerm.asc(messages.createdAt)]))
-        .map(_messageFromJoinRow)
-        .get());
+    final msgList = await Future.wait(
+      await (select(messages).join([
+              leftOuterJoin(_users, messages.userId.equalsExp(_users.id)),
+              leftOuterJoin(
+                _pinnedByUsers,
+                messages.pinnedByUserId.equalsExp(_pinnedByUsers.id),
+              ),
+            ])
+            ..where(messages.parentId.isNotNull())
+            ..where(messages.parentId.equals(parentId))
+            ..orderBy([OrderingTerm.asc(messages.createdAt)]))
+          .map(_messageFromJoinRow)
+          .get(),
+    );
 
     if (msgList.isNotEmpty) {
       if (options?.lessThan != null) {
@@ -169,18 +180,20 @@ class MessageDao extends DatabaseAccessor<DriftChatDatabase>
   Future<List<Message>> getMessagesByCid(
     String cid, {
     bool fetchDraft = true,
+    bool fetchSharedLocation = true,
     PaginationParams? messagePagination,
   }) async {
-    final query = select(messages).join([
-      leftOuterJoin(_users, messages.userId.equalsExp(_users.id)),
-      leftOuterJoin(
-        _pinnedByUsers,
-        messages.pinnedByUserId.equalsExp(_pinnedByUsers.id),
-      ),
-    ])
-      ..where(messages.channelCid.equals(cid))
-      ..where(messages.parentId.isNull() | messages.showInChannel.equals(true))
-      ..orderBy([OrderingTerm.asc(messages.createdAt)]);
+    final query =
+        select(messages).join([
+            leftOuterJoin(_users, messages.userId.equalsExp(_users.id)),
+            leftOuterJoin(
+              _pinnedByUsers,
+              messages.pinnedByUserId.equalsExp(_pinnedByUsers.id),
+            ),
+          ])
+          ..where(messages.channelCid.equals(cid))
+          ..where(messages.parentId.isNull() | messages.showInChannel.equals(true))
+          ..orderBy([OrderingTerm.asc(messages.createdAt)]);
 
     final result = await query.get();
     if (result.isEmpty) return [];
@@ -190,6 +203,7 @@ class MessageDao extends DatabaseAccessor<DriftChatDatabase>
         (row) => _messageFromJoinRow(
           row,
           fetchDraft: fetchDraft,
+          fetchSharedLocation: fetchSharedLocation,
         ),
       ),
     );
@@ -212,29 +226,74 @@ class MessageDao extends DatabaseAccessor<DriftChatDatabase>
         }
       }
       if (messagePagination?.limit != null) {
-        return msgList
-            .skip(max(0, msgList.length - messagePagination!.limit))
-            .toList();
+        return msgList.skip(max(0, msgList.length - messagePagination!.limit)).toList();
       }
     }
     return msgList;
   }
 
+  /// Deletes all messages sent by a user with the given [userId].
+  ///
+  /// If [hardDelete] is `true`, permanently removes messages from the database.
+  /// Otherwise, soft-deletes them by updating their type, deletion timestamp,
+  /// and state.
+  ///
+  /// If [cid] is provided, only deletes messages in that channel. Otherwise,
+  /// deletes messages across all channels.
+  ///
+  /// The [deletedAt] timestamp is used for soft deletes. Defaults to the
+  /// current time if not provided.
+  ///
+  /// Returns the number of rows affected.
+  Future<int> deleteMessagesByUser({
+    String? cid,
+    required String userId,
+    bool hardDelete = false,
+    DateTime? deletedAt,
+  }) async {
+    if (hardDelete) {
+      // Hard delete: remove from database
+      final deleteQuery = delete(messages)..where((tbl) => tbl.userId.equals(userId));
+
+      if (cid != null) {
+        deleteQuery.where((tbl) => tbl.channelCid.equals(cid));
+      }
+
+      return deleteQuery.go();
+    }
+
+    // Soft delete: update messages to mark as deleted
+    final updateQuery = update(messages)..where((tbl) => tbl.userId.equals(userId));
+
+    if (cid != null) {
+      updateQuery.where((tbl) => tbl.channelCid.equals(cid));
+    }
+
+    return updateQuery.write(
+      MessagesCompanion(
+        type: const Value('deleted'),
+        remoteDeletedAt: Value(deletedAt ?? DateTime.now()),
+        state: Value(jsonEncode(MessageState.softDeleted)),
+      ),
+    );
+  }
+
   /// Updates the message data of a particular channel with
   /// the new [messageList] data
-  Future<void> updateMessages(String cid, List<Message> messageList) =>
-      bulkUpdateMessages({cid: messageList});
+  Future<void> updateMessages(String cid, List<Message> messageList) => bulkUpdateMessages({cid: messageList});
 
   /// Bulk updates the message data of multiple channels
   Future<void> bulkUpdateMessages(
     Map<String, List<Message>?> channelWithMessages,
   ) {
     final entities = channelWithMessages.entries
-        .map((entry) =>
-            entry.value?.map(
-              (message) => message.toEntity(cid: entry.key),
-            ) ??
-            [])
+        .map(
+          (entry) =>
+              entry.value?.map(
+                (message) => message.toEntity(cid: entry.key),
+              ) ??
+              [],
+        )
         .expand((it) => it)
         .toList(growable: false);
     return batch(

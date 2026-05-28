@@ -7,11 +7,12 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// Customizing how messages are rendered is another very common use-case that
 /// the SDK supports easily.
 ///
-/// Replacing the built-in message component with your own is done by passing
-/// it as a builder function to the [StreamMessageListView] widget.
+/// Replacing the built-in message component with your own is done by
+/// passing a `messageBuilder` to [StreamMessageListView].
 ///
-/// The message builder function will get the usual [BuildContext] argument
-/// as well as the [Message] object and its position inside the list.
+/// The builder receives the [BuildContext], the [Message], and the
+/// pre-configured [StreamMessageItemProps] with all list-level callbacks
+/// already wired in.
 ///
 /// If you look at the code you can see that we use [StreamChat.of] to
 /// retrieve the current user so that we can style messages in a different way.
@@ -117,24 +118,21 @@ class ChannelPage extends StatelessWidget {
         children: <Widget>[
           Expanded(
             child: StreamMessageListView(
-              messageBuilder: _messageBuilder,
+              messageBuilder: _messageItemBuilder,
             ),
           ),
-          const StreamMessageInput(),
+          StreamMessageComposer(),
         ],
       ),
     );
   }
 
-  Widget _messageBuilder(
+  Widget _messageItemBuilder(
     BuildContext context,
-    MessageDetails details,
-    List<Message> messages,
-    StreamMessageWidget _,
+    Message message,
+    StreamMessageItemProps props,
   ) {
-    final message = details.message;
-    final isCurrentUser =
-        StreamChat.of(context).currentUser!.id == message.user!.id;
+    final isCurrentUser = StreamChat.of(context).currentUser!.id == message.user!.id;
     final textAlign = isCurrentUser ? TextAlign.right : TextAlign.left;
     final color = isCurrentUser ? Colors.blueGrey : Colors.blue;
 
@@ -142,22 +140,12 @@ class ChannelPage extends StatelessWidget {
       padding: const EdgeInsets.all(5),
       child: DecoratedBox(
         decoration: BoxDecoration(
-          border: Border.all(
-            color: color,
-          ),
-          borderRadius: const BorderRadius.all(
-            Radius.circular(5),
-          ),
+          border: Border.all(color: color),
+          borderRadius: const BorderRadius.all(Radius.circular(5)),
         ),
         child: ListTile(
-          title: Text(
-            message.text!,
-            textAlign: textAlign,
-          ),
-          subtitle: Text(
-            message.user!.name,
-            textAlign: textAlign,
-          ),
+          title: Text(message.text!, textAlign: textAlign),
+          subtitle: Text(message.user!.name, textAlign: textAlign),
         ),
       ),
     );

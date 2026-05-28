@@ -2,13 +2,10 @@ import 'package:alchemist/alchemist.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:stream_chat_flutter/src/attachment/voice_recording_attachment.dart';
 import 'package:stream_chat_flutter/src/audio/audio_playlist_state.dart';
-import 'package:stream_chat_flutter/src/misc/audio_waveform.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import '../mocks.dart';
-import '../utils/finders.dart';
 
 void main() {
   group(
@@ -28,7 +25,7 @@ void main() {
             _wrapWithStreamChatApp(
               StreamVoiceRecordingAttachment(
                 track: fakePlaylistTrack,
-                speed: PlaybackSpeed.regular,
+                speed: StreamPlaybackSpeed.x1,
               ),
             ),
           );
@@ -36,8 +33,6 @@ void main() {
           // Verify key components are present
           expect(find.byType(AudioControlButton), findsOneWidget);
           expect(find.byType(StreamAudioWaveformSlider), findsOneWidget);
-          expect(
-              find.bySvgIcon(StreamSvgIcons.filetypeAudioM4a), findsOneWidget);
         },
       );
 
@@ -49,7 +44,7 @@ void main() {
               StreamVoiceRecordingAttachment(
                 showTitle: true,
                 track: fakePlaylistTrack,
-                speed: PlaybackSpeed.regular,
+                speed: StreamPlaybackSpeed.x1,
               ),
             ),
           );
@@ -68,7 +63,7 @@ void main() {
               StreamVoiceRecordingAttachment(
                 showTitle: true,
                 track: fakePlaylistTrack,
-                speed: PlaybackSpeed.regular,
+                speed: StreamPlaybackSpeed.x1,
               ),
             ),
           );
@@ -86,13 +81,13 @@ void main() {
             _wrapWithStreamChatApp(
               StreamVoiceRecordingAttachment(
                 track: fakePlaylistTrack.copyWith(state: TrackState.playing),
-                speed: PlaybackSpeed.regular,
+                speed: StreamPlaybackSpeed.x1,
               ),
             ),
           );
 
-          expect(find.text('x1.0'), findsOneWidget);
-          expect(find.byType(SpeedControlButton), findsOneWidget);
+          expect(find.text('x1'), findsOneWidget);
+          expect(find.byType(StreamPlaybackSpeedToggle), findsOneWidget);
         },
       );
 
@@ -106,7 +101,7 @@ void main() {
               _wrapWithStreamChatApp(
                 StreamVoiceRecordingAttachment(
                   track: fakePlaylistTrack.copyWith(state: state),
-                  speed: PlaybackSpeed.regular,
+                  speed: StreamPlaybackSpeed.x1,
                   onTrackPlay: onTrackPlay,
                 ),
               ),
@@ -130,7 +125,7 @@ void main() {
             _wrapWithStreamChatApp(
               StreamVoiceRecordingAttachment(
                 track: fakePlaylistTrack.copyWith(state: TrackState.playing),
-                speed: PlaybackSpeed.regular,
+                speed: StreamPlaybackSpeed.x1,
                 onTrackPause: onTrackPause,
               ),
             ),
@@ -155,7 +150,7 @@ void main() {
             _wrapWithStreamChatApp(
               StreamVoiceRecordingAttachment(
                 track: fakePlaylistTrack.copyWith(state: TrackState.playing),
-                speed: PlaybackSpeed.regular,
+                speed: StreamPlaybackSpeed.x1,
                 onTrackSeekStart: onTrackSeekStart,
                 onTrackSeekChanged: onTrackSeekChanged,
                 onTrackSeekEnd: onTrackSeekEnd,
@@ -188,8 +183,8 @@ void main() {
       testWidgets(
         'handles speed change callback',
         (WidgetTester tester) async {
-          for (final speed in PlaybackSpeed.values) {
-            final onChangeSpeed = MockValueChanged<PlaybackSpeed>();
+          for (final speed in StreamPlaybackSpeed.values) {
+            final onChangeSpeed = MockValueChanged<StreamPlaybackSpeed>();
 
             await tester.pumpWidget(
               _wrapWithStreamChatApp(
@@ -201,37 +196,9 @@ void main() {
               ),
             );
 
-            await tester.tap(find.byType(SpeedControlButton));
+            await tester.tap(find.byType(StreamPlaybackSpeedToggle));
             verify(() => onChangeSpeed(speed.next)).called(1);
           }
-        },
-      );
-
-      testWidgets(
-        'custom trailing builder works',
-        (WidgetTester tester) async {
-          Widget customTrailingBuilder(
-            BuildContext context,
-            PlaylistTrack track,
-            PlaybackSpeed speed,
-            ValueChanged<PlaybackSpeed>? onChangeSpeed,
-          ) {
-            return const StreamSvgIcon(icon: StreamSvgIcons.closeSmall);
-          }
-
-          await tester.pumpWidget(
-            _wrapWithStreamChatApp(
-              StreamVoiceRecordingAttachment(
-                track: fakePlaylistTrack,
-                speed: PlaybackSpeed.regular,
-                trailingBuilder: customTrailingBuilder,
-              ),
-            ),
-          );
-
-          // Verify custom trailing widget is rendered
-          expect(find.bySvgIcon(StreamSvgIcons.closeSmall), findsOneWidget);
-          expect(find.bySvgIcon(StreamSvgIcons.filetypeAudioM4a), findsNothing);
         },
       );
 
@@ -242,15 +209,15 @@ void main() {
           fileName: 'stream_voice_recording_attachment_idle_$theme',
           constraints: const BoxConstraints.tightFor(width: 412, height: 200),
           builder: () => _wrapWithStreamChatApp(
-            brightness: brightness,
             Padding(
               padding: const EdgeInsets.all(8),
               child: StreamVoiceRecordingAttachment(
                 showTitle: true,
                 track: fakePlaylistTrack,
-                speed: PlaybackSpeed.regular,
+                speed: StreamPlaybackSpeed.x1,
               ),
             ),
+            brightness: brightness,
           ),
         );
 
@@ -259,7 +226,6 @@ void main() {
           fileName: 'stream_voice_recording_attachment_playing_$theme',
           constraints: const BoxConstraints.tightFor(width: 412, height: 200),
           builder: () => _wrapWithStreamChatApp(
-            brightness: brightness,
             Padding(
               padding: const EdgeInsets.all(8),
               child: StreamVoiceRecordingAttachment(
@@ -268,9 +234,10 @@ void main() {
                   state: TrackState.playing,
                   position: const Duration(seconds: 10),
                 ),
-                speed: PlaybackSpeed.regular,
+                speed: StreamPlaybackSpeed.x1,
               ),
             ),
+            brightness: brightness,
           ),
         );
       }
@@ -280,18 +247,20 @@ void main() {
 
 Widget _wrapWithStreamChatApp(
   Widget widget, {
-  Brightness? brightness,
+  Brightness brightness = Brightness.light,
 }) {
   return MaterialApp(
+    theme: ThemeData(brightness: brightness),
     home: StreamChatTheme(
-      data: StreamChatThemeData(brightness: brightness),
-      child: Builder(builder: (context) {
-        final theme = StreamChatTheme.of(context);
-        return Scaffold(
-          backgroundColor: theme.colorTheme.appBg,
-          body: Center(child: widget),
-        );
-      }),
+      data: StreamChatThemeData(),
+      child: Builder(
+        builder: (context) {
+          return Scaffold(
+            backgroundColor: context.streamColorScheme.backgroundApp,
+            body: Center(child: widget),
+          );
+        },
+      ),
     ),
   );
 }

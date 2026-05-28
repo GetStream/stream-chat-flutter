@@ -34,6 +34,7 @@ coverage_helper_test.dart
 **/doc/api/
 pubspec.lock
 pubspec_overrides.yaml
+devtools_options.yaml
 flutter_export_environment.sh
 generated_plugin_registrant.*
 GeneratedPluginRegistrant.*
@@ -66,6 +67,7 @@ GeneratedPluginRegistrant.*
 **/ios/**/xcuserdata
 **/ios/.generated/
 **/ios/Flutter/App.framework
+**/ios/Flutter/ephemeral
 **/ios/Flutter/Flutter.framework
 **/ios/Flutter/Flutter.podspec
 **/ios/Flutter/Generated.xcconfig

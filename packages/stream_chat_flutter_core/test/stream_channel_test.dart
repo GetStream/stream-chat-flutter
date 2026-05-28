@@ -794,13 +794,13 @@ void main() {
     }
 
     List<Message> _generateMessages(int count) => List.generate(
-          count,
-          (i) => Message(
-            id: 'msg-$i',
-            createdAt: DateTime(2024).add(Duration(seconds: i)),
-            user: User(id: 'otherUserId'),
-          ),
-        );
+      count,
+      (i) => Message(
+        id: 'msg-$i',
+        createdAt: DateTime(2024).add(Duration(seconds: i)),
+        user: User(id: 'otherUserId'),
+      ),
+    );
 
     setUp(() {
       when(() => mockChannel.cid).thenReturn('test:channel');
@@ -920,15 +920,14 @@ void main() {
     // the previously loaded window leaks past the reload (the original bug).
     var stateMessages = <Message>[];
 
-    List<Message> _generateMessages(int count, {required String prefix}) =>
-        List.generate(
-          count,
-          (i) => Message(
-            id: '$prefix-$i',
-            createdAt: DateTime(2024).add(Duration(seconds: i)),
-            user: User(id: 'otherUserId'),
-          ),
-        );
+    List<Message> _generateMessages(int count, {required String prefix}) => List.generate(
+      count,
+      (i) => Message(
+        id: '$prefix-$i',
+        createdAt: DateTime(2024).add(Duration(seconds: i)),
+        user: User(id: 'otherUserId'),
+      ),
+    );
 
     setUp(() {
       when(() => mockChannel.cid).thenReturn('test:channel');
@@ -989,9 +988,9 @@ void main() {
         verifyInOrder([
           () => mockChannel.state.truncate(),
           () => mockChannel.query(
-                preferOffline: any(named: 'preferOffline'),
-                messagesPagination: any(named: 'messagesPagination'),
-              ),
+            preferOffline: any(named: 'preferOffline'),
+            messagesPagination: any(named: 'messagesPagination'),
+          ),
         ]);
       },
     );
@@ -1003,12 +1002,14 @@ void main() {
 
         await streamChannel.reloadChannel();
 
-        final captured = verify(
-          () => mockChannel.query(
-            preferOffline: any(named: 'preferOffline'),
-            messagesPagination: captureAny(named: 'messagesPagination'),
-          ),
-        ).captured.single as PaginationParams;
+        final captured =
+            verify(
+                  () => mockChannel.query(
+                    preferOffline: any(named: 'preferOffline'),
+                    messagesPagination: captureAny(named: 'messagesPagination'),
+                  ),
+                ).captured.single
+                as PaginationParams;
 
         expect(captured.idAround, isNull);
         expect(captured.createdAtAround, isNull);

@@ -1,13 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/theme/poll_interactor_theme.dart';
-import 'package:stream_chat_flutter/src/utils/utils.dart';
-import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 /// {@template pollFooter}
 /// A widget used as the footer of a poll.
 ///
 /// Used in [StreamPollInteractor] to display various actions the user can take
 /// on the poll.
+///
+/// See also:
+///
+///  * [StreamPollInteractorThemeData.primaryActionStyle], for customizing
+///    primary action buttons (view results, end vote).
+///  * [StreamPollInteractorThemeData.secondaryActionStyle], for customizing
+///    secondary action buttons (suggest option, add comment, view comments).
+///  * [StreamPollInteractor], the parent widget that uses this footer.
 /// {@endtemplate}
 class PollFooter extends StatelessWidget {
   /// {@macro pollFooter}
@@ -21,7 +28,6 @@ class PollFooter extends StatelessWidget {
     this.onViewComments,
     this.onViewResults,
     this.onSuggestOption,
-    this.onSeeMoreOptions,
   });
 
   /// The poll the footer is for.
@@ -59,17 +65,16 @@ class PollFooter extends StatelessWidget {
   /// suggested options.
   final VoidCallback? onSuggestOption;
 
-  /// Callback invoked when the user wants to see more options.
-  ///
-  /// This is only available if the poll has more options than the
-  /// [visibleOptionCount].
-  final VoidCallback? onSeeMoreOptions;
-
   bool get _shouldShowEndPollButton {
     if (poll.isClosed) return false;
 
     // Only the creator of the poll can end it.
     return poll.createdBy?.id == currentUser.id;
+  }
+
+  bool get _shouldShowViewResultsButton {
+    // If the poll has no votes, don't show the button.
+    return poll.voteCount > 0;
   }
 
   bool get _shouldShowAddCommentButton {
@@ -93,86 +98,145 @@ class PollFooter extends StatelessWidget {
     return poll.allowUserSuggestedOptions;
   }
 
-  bool get _shouldEnableViewResultsButton {
-    // Disable the button if the poll haven't got any votes yet.
-    if (poll.voteCount < 1) return false;
-
-    return true;
-  }
-
   @override
   Widget build(BuildContext context) {
     final translations = context.translations;
 
-    return Column(
-      spacing: 2,
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: <Widget>[
-        if (visibleOptionCount case final count?
-            when count < poll.options.length)
-          PollFooterButton(
-            title: translations.seeAllOptionsLabel(count: poll.options.length),
-            onPressed: onSeeMoreOptions,
+    final spacing = context.streamSpacing;
+
+    final showEndPoll = _shouldShowEndPollButton;
+    final showViewResults = _shouldShowViewResultsButton;
+    final showSuggestions = _shouldShowSuggestionsButton;
+    final showAddComment = _shouldShowAddCommentButton;
+    final showViewComments = _shouldShowViewCommentsButton;
+
+    if (!showEndPoll && !showViewResults && !showSuggestions && !showAddComment && !showViewComments) {
+      return SizedBox(height: spacing.lg);
+    }
+
+    return Padding(
+      padding: .all(spacing.md),
+      child: Column(
+        mainAxisSize: .min,
+        spacing: spacing.xxxs,
+        crossAxisAlignment: .stretch,
+        children: <Widget>[
+          Column(
+            mainAxisSize: .min,
+            spacing: spacing.xs,
+            crossAxisAlignment: .stretch,
+            children: [
+              if (showViewResults)
+                _PollFooterButton.primary(
+                  label: translations.viewResultsLabel,
+                  onPressed: onViewResults,
+                ),
+              if (showEndPoll)
+                _PollFooterButton.primary(
+                  label: translations.endVoteLabel,
+                  onPressed: onEndVote,
+                ),
+            ],
           ),
-        if (_shouldShowSuggestionsButton)
-          PollFooterButton(
-            title: translations.suggestAnOptionLabel,
-            onPressed: onSuggestOption,
+          Column(
+            mainAxisSize: .min,
+            spacing: spacing.xs,
+            crossAxisAlignment: .stretch,
+            children: [
+              if (showSuggestions)
+                _PollFooterButton.secondary(
+                  label: translations.suggestAnOptionLabel,
+                  onPressed: onSuggestOption,
+                ),
+              if (showAddComment)
+                _PollFooterButton.secondary(
+                  label: translations.addACommentLabel,
+                  onPressed: onAddComment,
+                ),
+              if (showViewComments)
+                _PollFooterButton.secondary(
+                  label: translations.viewCommentsLabel,
+                  onPressed: onViewComments,
+                ),
+            ],
           ),
-        if (_shouldShowAddCommentButton)
-          PollFooterButton(
-            title: translations.addACommentLabel,
-            onPressed: onAddComment,
-          ),
-        if (_shouldShowViewCommentsButton)
-          PollFooterButton(
-            title: translations.viewCommentsLabel,
-            onPressed: onViewComments,
-          ),
-        PollFooterButton(
-          title: translations.viewResultsLabel,
-          onPressed: _shouldEnableViewResultsButton ? onViewResults : null,
-        ),
-        if (_shouldShowEndPollButton)
-          PollFooterButton(
-            title: translations.endVoteLabel,
-            onPressed: onEndVote,
-          ),
-      ],
+        ],
+      ),
     );
   }
 }
 
-/// {@template pollFooterButton}
-/// A button used in [PollFooter].
-///
-/// Displays the title and invokes the [onPressed] callback when pressed.
-/// {@endtemplate}
-class PollFooterButton extends StatelessWidget {
-  /// {@macro pollFooterButton}
-  const PollFooterButton({
-    super.key,
-    required this.title,
+// A button used in [PollFooter].
+//
+// Renders a [StreamButton] with the appropriate poll interactor theme style
+// applied via [StreamButtonTheme].
+class _PollFooterButton extends StatelessWidget {
+  const _PollFooterButton({
+    required this.label,
+    required this.type,
     this.onPressed,
   });
 
-  /// The title of the button.
-  final String title;
+  // Creates a primary poll footer button (outline style).
+  const _PollFooterButton.primary({
+    required String label,
+    VoidCallback? onPressed,
+  }) : this(label: label, type: .outline, onPressed: onPressed);
 
-  /// Callback invoked when the button is pressed.
+  // Creates a secondary poll footer button (ghost style).
+  const _PollFooterButton.secondary({
+    required String label,
+    VoidCallback? onPressed,
+  }) : this(label: label, type: .ghost, onPressed: onPressed);
+
+  final String label;
+  final StreamButtonType type;
   final VoidCallback? onPressed;
 
   @override
   Widget build(BuildContext context) {
     final theme = StreamPollInteractorTheme.of(context);
+    final defaults = _StreamPollFooterDefaults(context);
 
-    return TextButton(
-      onPressed: onPressed,
-      // Consume long press to avoid the parent long press.
-      onLongPress: onPressed != null ? () {} : null,
-      style: theme.pollActionButtonStyle,
-      child: Text(title),
+    final effectivePrimaryActionStyle = theme.primaryActionStyle ?? defaults.primaryActionStyle;
+    final effectiveSecondaryActionStyle = theme.secondaryActionStyle ?? defaults.secondaryActionStyle;
+
+    return StreamButtonTheme(
+      data: StreamButtonThemeData(
+        secondary: StreamButtonTypeStyle(
+          outline: effectivePrimaryActionStyle,
+          ghost: effectiveSecondaryActionStyle,
+        ),
+      ),
+      child: StreamButton(
+        size: .small,
+        style: .secondary,
+        type: type,
+        onPressed: onPressed,
+        child: Text(label),
+      ),
     );
   }
+}
+
+// Default values for [StreamPollInteractorThemeData] backed by stream design tokens.
+class _StreamPollFooterDefaults extends StreamPollInteractorThemeData {
+  _StreamPollFooterDefaults(this._context);
+
+  final BuildContext _context;
+
+  late final _alignment = StreamMessageLayout.messageAlignmentOf(_context);
+  late final StreamColorScheme _colorScheme = _context.streamColorScheme;
+
+  @override
+  StreamButtonThemeStyle get primaryActionStyle => .from(
+    tapTargetSize: .shrinkWrap,
+    borderColor: switch (_alignment) {
+      .start => _colorScheme.borderStrong,
+      .end => _colorScheme.brand.shade300,
+    },
+  );
+
+  @override
+  StreamButtonThemeStyle get secondaryActionStyle => .from(tapTargetSize: .shrinkWrap);
 }

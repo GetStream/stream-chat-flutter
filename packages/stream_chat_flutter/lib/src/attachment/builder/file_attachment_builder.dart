@@ -6,24 +6,19 @@ part of 'attachment_widget_builder.dart';
 class FileAttachmentBuilder extends StreamAttachmentWidgetBuilder {
   /// {@macro fileAttachmentBuilder}
   const FileAttachmentBuilder({
-    this.shape,
-    this.backgroundColor,
-    this.constraints = const BoxConstraints(),
-    this.padding = const EdgeInsets.all(4),
+    this.style,
+    this.constraints,
     this.onAttachmentTap,
   });
 
-  /// The shape of the file attachment.
-  final ShapeBorder? shape;
-
-  /// The background color of the file attachment.
-  final Color? backgroundColor;
+  /// The style of the file attachment container.
+  ///
+  /// When null, a default style with placement-aware background color and
+  /// a superellipse shape is used.
+  final StreamMessageAttachmentStyle? style;
 
   /// The constraints to apply to the file attachment widget.
-  final BoxConstraints constraints;
-
-  /// The padding to apply to the file attachment widget.
-  final EdgeInsetsGeometry padding;
+  final BoxConstraints? constraints;
 
   /// The callback to call when the attachment is tapped.
   final StreamAttachmentWidgetTapCallback? onAttachmentTap;
@@ -38,49 +33,45 @@ class FileAttachmentBuilder extends StreamAttachmentWidgetBuilder {
   }
 
   @override
-  Widget build(
+  Widget? build(
     BuildContext context,
     Message message,
     Map<String, List<Attachment>> attachments,
   ) {
     assert(debugAssertCanHandle(message, attachments), '');
 
+    final spacing = context.streamSpacing;
+
     final files = attachments[AttachmentType.file]!;
 
     Widget _buildFileAttachment(Attachment file) {
-      VoidCallback? onTap;
-      if (onAttachmentTap != null) {
-        onTap = () => onAttachmentTap!(message, file);
-      }
+      final onTap = switch (onAttachmentTap) {
+        final onTap? => () => onTap(message, file),
+        _ => null,
+      };
 
-      return InkWell(
-        onTap: onTap,
-        child: StreamFileAttachment(
-          file: file,
-          message: message,
-          shape: shape,
-          constraints: constraints,
-          backgroundColor: backgroundColor,
+      return StreamMessageAttachment(
+        style: style,
+        child: InkWell(
+          onTap: onTap,
+          child: StreamFileAttachment(
+            file: file,
+            message: message,
+            constraints: constraints,
+          ),
         ),
       );
     }
 
-    Widget child;
     if (files.length == 1) {
-      child = _buildFileAttachment(files.first);
-    } else {
-      child = Column(
-        // Add a small vertical padding between each attachment.
-        spacing: padding.vertical / 2,
-        children: <Widget>[
-          for (final file in files) _buildFileAttachment(file),
-        ],
-      );
+      return _buildFileAttachment(files.first);
     }
 
-    return Padding(
-      padding: padding,
-      child: child,
+    return Column(
+      spacing: spacing.xs,
+      children: <Widget>[
+        for (final file in files) _buildFileAttachment(file),
+      ],
     );
   }
 }

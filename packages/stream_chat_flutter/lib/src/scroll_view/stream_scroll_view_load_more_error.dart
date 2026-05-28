@@ -64,26 +64,27 @@ class StreamScrollViewLoadMoreError extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = StreamChatTheme.of(context);
-
     final errorText = AnimatedDefaultTextStyle(
-      style: errorStyle ?? theme.textTheme.body.copyWith(color: Colors.white),
+      style: errorStyle ?? context.streamTextTheme.bodyDefault.copyWith(color: Colors.white),
       duration: kThemeChangeDuration,
       child: error ?? const Empty(),
     );
 
     final errorIcon = AnimatedSwitcher(
       duration: kThemeChangeDuration,
-      child: this.errorIcon ??
-          const StreamSvgIcon(
+      child:
+          this.errorIcon ??
+          Icon(
+            context.streamIcons.retry,
             color: Colors.white,
-            icon: StreamSvgIcons.retry,
           ),
     );
 
-    final backgroundColor = this.backgroundColor ??
+    final colorScheme = context.streamColorScheme;
+    final backgroundColor =
+        this.backgroundColor ??
         // ignore: deprecated_member_use
-        theme.colorTheme.textLowEmphasis.withOpacity(0.9);
+        colorScheme.textSecondary.withOpacity(0.9);
 
     final children = [errorText, errorIcon];
 

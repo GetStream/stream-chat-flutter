@@ -6,14 +6,15 @@ import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 ///
 /// The function receives the [BuildContext] and the [Offset] where
 /// the menu should appear.
-typedef ContextMenuBuilder = Widget Function(
-  BuildContext context,
-  Offset offset,
-);
+typedef ContextMenuBuilder =
+    Widget Function(
+      BuildContext context,
+      Offset offset,
+    );
 
 /// Displays a custom context menu as a general dialog.
 ///
-/// The [contextMenuBuilder] is used to construct the contents of the
+/// The [menuBuilder] is used to construct the contents of the
 /// context menu, typically positioned based on the triggering gesture.
 ///
 /// The dialog can be customized using parameters such as [barrierColor],
@@ -22,7 +23,7 @@ typedef ContextMenuBuilder = Widget Function(
 /// Returns a [Future] that resolves when the menu is dismissed.
 Future<T?> showContextMenu<T>({
   required BuildContext context,
-  required WidgetBuilder contextMenuBuilder,
+  required WidgetBuilder menuBuilder,
   String? barrierLabel,
   Color? barrierColor,
   Duration transitionDuration = const Duration(milliseconds: 150),
@@ -59,7 +60,7 @@ Future<T?> showContextMenu<T>({
       );
     },
     pageBuilder: (context, animation, secondaryAnimation) {
-      final pageChild = Builder(builder: contextMenuBuilder);
+      final pageChild = Builder(builder: menuBuilder);
       return capturedThemes.wrap(pageChild);
     },
   );
@@ -73,11 +74,12 @@ class ContextMenuRegion extends StatefulWidget {
   /// Creates a [ContextMenuRegion].
   ///
   /// The [child] is the widget wrapped by this region. When a gesture is
-  /// detected on it, the [contextMenuBuilder] is used to construct the menu.
+  /// detected on it, the [menuBuilder] is used to construct the menu.
   const ContextMenuRegion({
     super.key,
     required this.child,
-    required this.contextMenuBuilder,
+    required this.menuBuilder,
+    this.onSelected,
   });
 
   /// The widget below this widget in the tree.
@@ -86,7 +88,14 @@ class ContextMenuRegion extends StatefulWidget {
   /// Called to build the context menu when the gesture is triggered.
   ///
   /// The builder is given the [BuildContext] and the [Offset] of the gesture.
-  final ContextMenuBuilder contextMenuBuilder;
+  final ContextMenuBuilder menuBuilder;
+
+  /// Called with the value returned when the context menu is dismissed.
+  ///
+  /// When a menu item pops the route with a value (e.g. via
+  /// [Navigator.pop]), that value is forwarded here. If the menu is dismissed
+  /// without a selection the value will be `null`.
+  final ValueChanged<Object?>? onSelected;
 
   @override
   State<ContextMenuRegion> createState() => _ContextMenuRegionState();
@@ -107,14 +116,16 @@ class _ContextMenuRegionState extends State<ContextMenuRegion> {
     super.dispose();
   }
 
-  Future<void> _showContextMenu(BuildContext context, Offset position) async {
-    print('ContextMenuRegion: Showing context menu at $position');
-    await showContextMenu(
+  Future<void> _showContextMenu(
+    BuildContext context,
+    Offset position,
+  ) async {
+    final result = await showContextMenu(
       context: context,
-      contextMenuBuilder: (context) {
-        return widget.contextMenuBuilder(context, position);
-      },
+      menuBuilder: (context) => widget.menuBuilder(context, position),
     );
+
+    return widget.onSelected?.call(result);
   }
 
   @override

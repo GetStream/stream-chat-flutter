@@ -53,8 +53,8 @@ class ScrollablePositionedList extends StatefulWidget {
     this.addRepaintBoundaries = true,
     this.minCacheExtent,
     this.keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
-  })  : itemPositionsNotifier = itemPositionsListener as ItemPositionsNotifier?,
-        separatorBuilder = null;
+  }) : itemPositionsNotifier = itemPositionsListener as ItemPositionsNotifier?,
+       separatorBuilder = null;
 
   /// Create a [ScrollablePositionedList] whose items are provided by
   /// [itemBuilder] and separators provided by [separatorBuilder].
@@ -143,7 +143,7 @@ class ScrollablePositionedList extends StatefulWidget {
   final int? semanticChildCount;
 
   /// The amount of space by which to inset the children.
-  final EdgeInsets? padding;
+  final EdgeInsetsGeometry? padding;
 
   /// Whether to wrap each child in an [IndexedSemantics].
   ///
@@ -228,8 +228,7 @@ class ItemScrollController {
   /// Returns a no-op listenable while the controller is unattached,
   /// so callers can register a listener at any time without a null
   /// check.
-  Listenable get isScrollingListenable =>
-      _scrollableListState?._isScrollingListenable ?? const _NoopListenable();
+  Listenable get isScrollingListenable => _scrollableListState?._isScrollingListenable ?? const _NoopListenable();
 
   _ScrollablePositionedListState? _scrollableListState;
 
@@ -312,8 +311,7 @@ class ItemScrollController {
   }
 }
 
-class _ScrollablePositionedListState extends State<ScrollablePositionedList>
-    with TickerProviderStateMixin {
+class _ScrollablePositionedListState extends State<ScrollablePositionedList> with TickerProviderStateMixin {
   /// Details for the primary (active) [ListView].
   _ListDisplayDetails primary = _ListDisplayDetails(const ValueKey('Ping'));
 
@@ -440,10 +438,8 @@ class _ScrollablePositionedListState extends State<ScrollablePositionedList>
 
   @override
   void dispose() {
-    primary.itemPositionsNotifier.itemPositions
-        .removeListener(_updatePositions);
-    secondary.itemPositionsNotifier.itemPositions
-        .removeListener(_updatePositions);
+    primary.itemPositionsNotifier.itemPositions.removeListener(_updatePositions);
+    secondary.itemPositionsNotifier.itemPositions.removeListener(_updatePositions);
     _subscribedScrollingNotifier?.removeListener(_onIsScrollingChanged);
     _isScrollingListenable.dispose();
     _animationController?.dispose();
@@ -548,9 +544,7 @@ class _ScrollablePositionedListState extends State<ScrollablePositionedList>
         ? _firstVisibleItemAlignment - pixelDelta / viewport
         : _firstVisibleItemAlignment;
 
-    if (newIndex == primary.target &&
-        primary.alignment == currentAlignment &&
-        pixels == 0) {
+    if (newIndex == primary.target && primary.alignment == currentAlignment && pixels == 0) {
       return;
     }
     primary
@@ -649,12 +643,35 @@ class _ScrollablePositionedListState extends State<ScrollablePositionedList>
   }
 
   double _cacheExtent(BoxConstraints constraints) => max(
-        (widget.scrollDirection == Axis.vertical
-                ? constraints.maxHeight
-                : constraints.maxWidth) *
-            _screenScrollCount,
-        widget.minCacheExtent ?? 0,
-      );
+    (widget.scrollDirection == Axis.vertical ? constraints.maxHeight : constraints.maxWidth) * _screenScrollCount,
+    widget.minCacheExtent ?? 0,
+  );
+
+  /// Pixels of [widget.padding] on the leading side of the scroll
+  /// axis. Direction-aware: resolves [EdgeInsetsDirectional] against
+  /// [Directionality] for horizontal axes.
+  double _resolveLeadingPadding() {
+    final geometry = widget.padding;
+    if (geometry == null) return 0;
+    final textDirection = Directionality.maybeOf(context) ?? TextDirection.ltr;
+    final resolved = geometry.resolve(textDirection);
+    if (widget.scrollDirection == Axis.vertical) {
+      return widget.reverse ? resolved.bottom : resolved.top;
+    }
+    final axisDirectionIsRight = (textDirection == TextDirection.ltr) ^ widget.reverse;
+    return axisDirectionIsRight ? resolved.left : resolved.right;
+  }
+
+  /// Adjustment for `_startScroll`'s target so the leading-end item
+  /// lands at the content-area edge (Compose semantic). Only applies
+  /// when the center sliver carries the leading padding — for other
+  /// indices SPL's pre-existing math is preserved.
+  double _resolveLeadingEndPaddingAdjust({required int index, required double alignment}) {
+    if (alignment != 0) return 0;
+    final isAtLeadingEnd = widget.reverse ? index == 0 : index == widget.itemCount - 1;
+    if (!isAtLeadingEnd) return 0;
+    return _resolveLeadingPadding();
+  }
 
   void _jumpTo({required int index, required double alignment}) {
     _stopScroll(canceled: true);
@@ -731,47 +748,46 @@ class _ScrollablePositionedListState extends State<ScrollablePositionedList>
     required List<double> opacityAnimationWeights,
   }) async {
     final direction = index > primary.target ? 1 : -1;
-    final itemPosition =
-        primary.itemPositionsNotifier.itemPositions.value.firstWhereOrNull(
+    final itemPosition = primary.itemPositionsNotifier.itemPositions.value.firstWhereOrNull(
       (ItemPosition itemPosition) => itemPosition.index == index,
     );
     if (itemPosition != null) {
       // Scroll directly.
-      final localScrollAmount = itemPosition.itemLeadingEdge *
-          primary.scrollController.position.viewportDimension;
+      final viewport = primary.scrollController.position.viewportDimension;
+      final localScrollAmount = itemPosition.itemLeadingEdge * viewport;
+      // `itemLeadingEdge` comes from `getOffsetToReveal`, which is
+      // geometric and padding-blind. Subtract `leadingPadding` so the
+      // target lands at the content-area edge (Compose semantic).
+      final paddingAdjust = _resolveLeadingEndPaddingAdjust(index: index, alignment: alignment);
       await primary.scrollController.animateTo(
-        primary.scrollController.offset +
-            localScrollAmount -
-            alignment * primary.scrollController.position.viewportDimension,
+        primary.scrollController.offset + localScrollAmount - alignment * viewport - paddingAdjust,
         duration: duration,
         curve: curve,
       );
     } else {
-      final scrollAmount = _screenScrollCount *
-          primary.scrollController.position.viewportDimension;
+      final scrollAmount = _screenScrollCount * primary.scrollController.position.viewportDimension;
       final startCompleter = Completer<void>();
       final endCompleter = Completer<void>();
       startAnimationCallback = () {
         SchedulerBinding.instance.addPostFrameCallback((_) {
           startAnimationCallback = () {};
           _animationController?.dispose();
-          _animationController =
-              AnimationController(vsync: this, duration: duration)..forward();
-          opacity.parent = _opacityAnimation(opacityAnimationWeights)
-              .animate(_animationController!);
-          secondary.scrollController.jumpTo(-direction *
-              (_screenScrollCount *
-                      primary.scrollController.position.viewportDimension -
-                  alignment *
-                      secondary.scrollController.position.viewportDimension));
+          _animationController = AnimationController(vsync: this, duration: duration)..forward();
+          opacity.parent = _opacityAnimation(opacityAnimationWeights).animate(_animationController!);
+          secondary.scrollController.jumpTo(
+            -direction *
+                (_screenScrollCount * primary.scrollController.position.viewportDimension -
+                    alignment * secondary.scrollController.position.viewportDimension),
+          );
 
-          startCompleter.complete(primary.scrollController.animateTo(
-            primary.scrollController.offset + direction * scrollAmount,
-            duration: duration,
-            curve: curve,
-          ));
-          endCompleter.complete(secondary.scrollController
-              .animateTo(0, duration: duration, curve: curve));
+          startCompleter.complete(
+            primary.scrollController.animateTo(
+              primary.scrollController.offset + direction * scrollAmount,
+              duration: duration,
+              curve: curve,
+            ),
+          );
+          endCompleter.complete(secondary.scrollController.animateTo(0, duration: duration, curve: curve));
         });
       };
       setState(() {
@@ -841,14 +857,13 @@ class _ScrollablePositionedListState extends State<ScrollablePositionedList>
   }
 
   void _updatePositions() {
-    final itemPositions = primary.itemPositionsNotifier.itemPositions.value
-        .where((ItemPosition position) =>
-            position.itemLeadingEdge < 1 && position.itemTrailingEdge > 0);
+    final itemPositions = primary.itemPositionsNotifier.itemPositions.value.where(
+      (ItemPosition position) => position.itemLeadingEdge < 1 && position.itemTrailingEdge > 0,
+    );
     if (itemPositions.isNotEmpty) {
       // The visually topmost item — smallest `itemLeadingEdge` along the
       // scroll axis.
-      final topmost = itemPositions
-          .reduce((a, b) => a.itemLeadingEdge < b.itemLeadingEdge ? a : b);
+      final topmost = itemPositions.reduce((a, b) => a.itemLeadingEdge < b.itemLeadingEdge ? a : b);
       PageStorage.of(context).writeState(context, topmost);
 
       // Capture the topmost item's identity + position so the next
@@ -861,10 +876,9 @@ class _ScrollablePositionedListState extends State<ScrollablePositionedList>
           _lastKnownFirstItemKey = key;
           _lastKnownFirstItemIndex = topmost.index;
           _firstVisibleItemAlignment = topmost.itemLeadingEdge;
-          _firstVisibleItemAlignmentAtPixels =
-              primary.scrollController.hasClients
-                  ? primary.scrollController.position.pixels
-                  : 0.0;
+          _firstVisibleItemAlignmentAtPixels = primary.scrollController.hasClients
+              ? primary.scrollController.position.pixels
+              : 0.0;
         }
       }
     }

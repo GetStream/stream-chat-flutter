@@ -47,23 +47,23 @@ extension DraftMessageEntityX on DraftMessageEntity {
 extension DraftMessageX on Draft {
   /// Maps a [DraftMessage] into [DraftMessageEntity]
   DraftMessageEntity toEntity() => DraftMessageEntity(
-        id: message.id,
-        channelCid: channelCid,
-        messageText: message.text,
-        type: message.type,
-        createdAt: createdAt,
-        attachments: message.attachments.map((it) {
-          return jsonEncode(it.toData());
-        }).toList(),
-        parentId: parentId,
-        showInChannel: message.showInChannel,
-        mentionedUsers: message.mentionedUsers.map((e) {
-          return jsonEncode(e.toJson());
-        }).toList(),
-        quotedMessageId: message.quotedMessageId,
-        silent: message.silent,
-        command: message.command,
-        pollId: message.pollId,
-        extraData: message.extraData,
-      );
+    id: message.id,
+    channelCid: channelCid,
+    messageText: message.text,
+    type: message.type,
+    createdAt: createdAt,
+    attachments: message.attachments.map((it) {
+      return jsonEncode(it.toData());
+    }).toList(),
+    parentId: parentId,
+    showInChannel: message.showInChannel,
+    mentionedUsers: message.mentionedUsers.map((e) {
+      return jsonEncode(e.toJson());
+    }).toList(),
+    quotedMessageId: message.quotedMessageId,
+    silent: message.silent,
+    command: message.command,
+    pollId: message.pollId,
+    extraData: message.extraData,
+  );
 }

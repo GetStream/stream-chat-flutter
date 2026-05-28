@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_redundant_argument_values
+
 import 'dart:math' as math;
 
 import 'package:flutter_test/flutter_test.dart';
@@ -83,8 +85,7 @@ void main() {
         type: 'testType',
         user: users[index],
         channelRole: 'channel_member',
-        parentId:
-            mapAllThreadToFirstMessage ? messages[0].id : messages[index].id,
+        parentId: mapAllThreadToFirstMessage ? messages[0].id : messages[index].id,
         createdAt: DateTime.now(),
         shadowed: math.Random().nextBool(),
         replyCount: index,
@@ -101,11 +102,7 @@ void main() {
         },
       ),
     );
-    final allMessages = [
-      ...messages,
-      if (quoted) ...quotedMessages,
-      if (threads) ...threadMessages
-    ];
+    final allMessages = [...messages, if (quoted) ...quotedMessages, if (threads) ...threadMessages];
     final reaction = Reaction(
       type: 'type',
       messageId: allMessages.first.id,
@@ -145,8 +142,7 @@ void main() {
     expect(newMessages.length, messages.length - 2);
 
     // Reaction for the first message should be deleted too
-    final newReactions =
-        await database.reactionDao.getReactions(firstMessageId);
+    final newReactions = await database.reactionDao.getReactions(firstMessageId);
     expect(newReactions, isEmpty);
   });
 
@@ -169,8 +165,7 @@ void main() {
 
         // Fetched reactions list should have one reaction for given message id
         final cid1firstMessageId = cid1Messages.first.id;
-        final cid1Reactions =
-            await database.reactionDao.getReactions(cid1firstMessageId);
+        final cid1Reactions = await database.reactionDao.getReactions(cid1firstMessageId);
         expect(cid1Reactions.length, 1);
 
         // Deleting all the messages of cid1
@@ -183,8 +178,7 @@ void main() {
         expect(cid2FetchedMessages, isNotEmpty);
 
         // Reaction for the first message should be deleted too
-        final cid1FetchedReactions =
-            await database.reactionDao.getReactions(cid1firstMessageId);
+        final cid1FetchedReactions = await database.reactionDao.getReactions(cid1firstMessageId);
         expect(cid1FetchedReactions, isEmpty);
       },
     );
@@ -204,12 +198,10 @@ void main() {
 
         // Fetched reactions list should have one reaction for given message id
         final cid1FirstMessageId = cid1Messages.first.id;
-        final cid1Reactions =
-            await database.reactionDao.getReactions(cid1FirstMessageId);
+        final cid1Reactions = await database.reactionDao.getReactions(cid1FirstMessageId);
         expect(cid1Reactions.length, 1);
         final cid2FirstMessageId = cid2Messages.first.id;
-        final cid2Reactions =
-            await database.reactionDao.getReactions(cid2FirstMessageId);
+        final cid2Reactions = await database.reactionDao.getReactions(cid2FirstMessageId);
         expect(cid2Reactions.length, 1);
 
         // Deleting all the messages of cid1
@@ -222,11 +214,9 @@ void main() {
         expect(cid2FetchedMessages, isEmpty);
 
         // Reaction for the first message should be deleted too
-        final cid1FetchedReactions =
-            await database.reactionDao.getReactions(cid1FirstMessageId);
+        final cid1FetchedReactions = await database.reactionDao.getReactions(cid1FirstMessageId);
         expect(cid1FetchedReactions, isEmpty);
-        final cid2FetchedReactions =
-            await database.reactionDao.getReactions(cid2FirstMessageId);
+        final cid2FetchedReactions = await database.reactionDao.getReactions(cid2FirstMessageId);
         expect(cid2FetchedReactions, isEmpty);
       },
     );
@@ -282,8 +272,7 @@ void main() {
     expect(insertedMessages, isNotEmpty);
 
     // Should fetch all the thread messages of parentId
-    final threadMessages =
-        await messageDao.getThreadMessagesByParentId(parentId);
+    final threadMessages = await messageDao.getThreadMessagesByParentId(parentId);
     expect(threadMessages.length, 1);
     expect(threadMessages.first.parentId, parentId);
   });
@@ -433,6 +422,185 @@ void main() {
       fetchedMessages.map((it) => it.id).contains(newMessage.id),
       true,
     );
+  });
+
+  group('deleteMessagesByUser', () {
+    const cid1 = 'test:Cid1';
+    const cid2 = 'test:Cid2';
+    const userId = 'testUserId0';
+
+    test('hard deletes user messages in specific channel', () async {
+      // Preparing test data for two channels
+      await _prepareTestData(cid1);
+      await _prepareTestData(cid2);
+
+      // Verify messages exist in both channels
+      final cid1Messages = await messageDao.getMessagesByCid(cid1);
+      final cid2Messages = await messageDao.getMessagesByCid(cid2);
+      expect(cid1Messages, isNotEmpty);
+      expect(cid2Messages, isNotEmpty);
+
+      // Count messages from the specific user in cid1
+      final cid1UserMessages = cid1Messages.where((m) => m.user?.id == userId).length;
+      expect(cid1UserMessages, greaterThan(0));
+
+      // Hard delete messages from user in cid1 only
+      await messageDao.deleteMessagesByUser(
+        cid: cid1,
+        userId: userId,
+        hardDelete: true,
+      );
+
+      // Verify user's messages are deleted from cid1
+      final cid1MessagesAfter = await messageDao.getMessagesByCid(cid1);
+      final cid1UserMessagesAfter = cid1MessagesAfter.where((m) => m.user?.id == userId).length;
+      expect(cid1UserMessagesAfter, 0);
+
+      // Verify other users' messages in cid1 are not affected
+      expect(cid1MessagesAfter.length, cid1Messages.length - cid1UserMessages);
+
+      // Verify messages in cid2 are not affected
+      final cid2MessagesAfter = await messageDao.getMessagesByCid(cid2);
+      expect(cid2MessagesAfter.length, cid2Messages.length);
+    });
+
+    test('soft deletes user messages in specific channel', () async {
+      // Preparing test data
+      await _prepareTestData(cid1);
+
+      final cid1Messages = await messageDao.getMessagesByCid(cid1);
+      final cid1UserMessages = cid1Messages.where((m) => m.user?.id == userId).toList();
+      expect(cid1UserMessages, isNotEmpty);
+
+      // Verify messages are not deleted initially
+      for (final message in cid1UserMessages) {
+        expect(message.type, isNot('deleted'));
+        expect(message.deletedAt, isNull);
+      }
+
+      // Soft delete messages from user
+      final deletedAt = DateTime.now();
+      await messageDao.deleteMessagesByUser(
+        cid: cid1,
+        userId: userId,
+        hardDelete: false,
+        deletedAt: deletedAt,
+      );
+
+      // Verify messages are marked as deleted
+      final cid1MessagesAfter = await messageDao.getMessagesByCid(cid1);
+      final cid1UserMessagesAfter = cid1MessagesAfter.where((m) => m.user?.id == userId).toList();
+
+      // Messages should still exist in DB
+      expect(cid1UserMessagesAfter.length, cid1UserMessages.length);
+
+      // But they should be marked as deleted
+      for (final message in cid1UserMessagesAfter) {
+        expect(message.type, 'deleted');
+        expect(message.deletedAt, isNotNull);
+      }
+
+      // Other users' messages should not be affected
+      final otherUserMessages = cid1MessagesAfter.where((m) => m.user?.id != userId).toList();
+      for (final message in otherUserMessages) {
+        expect(message.type, isNot('deleted'));
+      }
+    });
+
+    test('hard deletes user messages across all channels when cid is null', () async {
+      // Preparing test data for multiple channels
+      await _prepareTestData(cid1);
+      await _prepareTestData(cid2);
+
+      final cid1Messages = await messageDao.getMessagesByCid(cid1);
+      final cid2Messages = await messageDao.getMessagesByCid(cid2);
+
+      final cid1UserMessages = cid1Messages.where((m) => m.user?.id == userId).length;
+      final cid2UserMessages = cid2Messages.where((m) => m.user?.id == userId).length;
+
+      expect(cid1UserMessages, greaterThan(0));
+      expect(cid2UserMessages, greaterThan(0));
+
+      // Hard delete all messages from user across all channels
+      await messageDao.deleteMessagesByUser(
+        userId: userId,
+        hardDelete: true,
+      );
+
+      // Verify user's messages are deleted from both channels
+      final cid1MessagesAfter = await messageDao.getMessagesByCid(cid1);
+      final cid2MessagesAfter = await messageDao.getMessagesByCid(cid2);
+
+      expect(cid1MessagesAfter.where((m) => m.user?.id == userId).length, 0);
+      expect(cid2MessagesAfter.where((m) => m.user?.id == userId).length, 0);
+
+      // Verify other messages are preserved
+      expect(
+        cid1MessagesAfter.length,
+        cid1Messages.length - cid1UserMessages,
+      );
+      expect(
+        cid2MessagesAfter.length,
+        cid2Messages.length - cid2UserMessages,
+      );
+    });
+
+    test('soft deletes user messages across all channels when cid is null', () async {
+      // Preparing test data for multiple channels
+      await _prepareTestData(cid1);
+      await _prepareTestData(cid2);
+
+      final cid1Messages = await messageDao.getMessagesByCid(cid1);
+      final cid2Messages = await messageDao.getMessagesByCid(cid2);
+
+      final cid1UserMessages = cid1Messages.where((m) => m.user?.id == userId).length;
+      final cid2UserMessages = cid2Messages.where((m) => m.user?.id == userId).length;
+
+      // Soft delete all messages from user across all channels
+      await messageDao.deleteMessagesByUser(
+        userId: userId,
+        hardDelete: false,
+      );
+
+      // Verify user's messages are marked as deleted in both channels
+      final cid1MessagesAfter = await messageDao.getMessagesByCid(cid1);
+      final cid2MessagesAfter = await messageDao.getMessagesByCid(cid2);
+
+      final cid1UserMessagesAfter = cid1MessagesAfter.where((m) => m.user?.id == userId).toList();
+      final cid2UserMessagesAfter = cid2MessagesAfter.where((m) => m.user?.id == userId).toList();
+
+      // Messages should still exist
+      expect(cid1UserMessagesAfter.length, cid1UserMessages);
+      expect(cid2UserMessagesAfter.length, cid2UserMessages);
+
+      // All user messages should be marked as deleted
+      for (final message in [...cid1UserMessagesAfter, ...cid2UserMessagesAfter]) {
+        expect(message.type, 'deleted');
+        expect(message.deletedAt, isNotNull);
+      }
+    });
+
+    test('handles thread messages correctly', () async {
+      // Preparing test data with threads
+      await _prepareTestData(cid1, threads: true);
+
+      final cid1ThreadMessages = await messageDao.getThreadMessages(cid1);
+
+      final userThreadMessages = cid1ThreadMessages.where((m) => m.user?.id == userId).length;
+      expect(userThreadMessages, greaterThan(0));
+
+      // Hard delete all messages from user
+      await messageDao.deleteMessagesByUser(
+        cid: cid1,
+        userId: userId,
+        hardDelete: true,
+      );
+
+      // Verify thread messages from user are also deleted
+      final cid1ThreadMessagesAfter = await messageDao.getThreadMessages(cid1);
+      final userThreadMessagesAfter = cid1ThreadMessagesAfter.where((m) => m.user?.id == userId).length;
+      expect(userThreadMessagesAfter, 0);
+    });
   });
 
   tearDown(() async {

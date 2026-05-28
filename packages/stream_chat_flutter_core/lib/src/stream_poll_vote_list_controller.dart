@@ -21,8 +21,7 @@ const _kDefaultBackendPaginationLimit = 30;
 /// * Load initial data.
 /// * Load more data using [loadMore].
 /// * Replace the previously loaded poll votes.
-class StreamPollVoteListController
-    extends PagedValueNotifier<String, PollVote> {
+class StreamPollVoteListController extends PagedValueNotifier<String, PollVote> {
   /// Creates a Stream poll vote list controller.
   /// * `channel` is the Stream chat channel to use for the poll votes list.
   /// * `pollId` is the poll id to use for the poll votes list.
@@ -36,10 +35,10 @@ class StreamPollVoteListController
     this.filter,
     this.sort = defaultPollVoteListSort,
     this.limit = defaultPollVotePagedLimit,
-  })  : _eventHandler = eventHandler ?? StreamPollVoteEventHandler(),
-        _activeFilter = filter,
-        _activeSort = sort,
-        super(const PagedValue.loading());
+  }) : _eventHandler = eventHandler ?? StreamPollVoteEventHandler(),
+       _activeFilter = filter,
+       _activeSort = sort,
+       super(const PagedValue.loading());
 
   /// Creates a [StreamPollVoteListController] from the passed [value].
   StreamPollVoteListController.fromValue(
@@ -50,9 +49,9 @@ class StreamPollVoteListController
     this.filter,
     this.sort = defaultPollVoteListSort,
     this.limit = defaultPollVotePagedLimit,
-  })  : _eventHandler = eventHandler ?? StreamPollVoteEventHandler(),
-        _activeFilter = filter,
-        _activeSort = sort;
+  }) : _eventHandler = eventHandler ?? StreamPollVoteEventHandler(),
+       _activeFilter = filter,
+       _activeSort = sort;
 
   /// The channel to use for the poll votes list.
   final Channel channel;
@@ -106,11 +105,11 @@ class StreamPollVoteListController
     super.value = switch (_activeSort) {
       null => newValue,
       final pollVoteSort => newValue.maybeMap(
-          orElse: () => newValue,
-          (success) => success.copyWith(
-            items: success.items.sorted(pollVoteSort.compare),
-          ),
+        orElse: () => newValue,
+        (success) => success.copyWith(
+          items: success.items.sorted(pollVoteSort.compare),
         ),
+      ),
     };
   }
 
@@ -216,13 +215,11 @@ class StreamPollVoteListController
       if (eventListener?.call(event) ?? false) return;
 
       final eventType = event.type;
-      if (eventType == EventType.pollVoteCasted ||
-          eventType == EventType.pollAnswerCasted) {
+      if (eventType == EventType.pollVoteCasted || eventType == EventType.pollAnswerCasted) {
         _eventHandler.onPollVoteCasted(event, this);
       } else if (eventType == EventType.pollVoteChanged) {
         _eventHandler.onPollVoteChanged(event, this);
-      } else if (eventType == EventType.pollVoteRemoved ||
-          eventType == EventType.pollAnswerRemoved) {
+      } else if (eventType == EventType.pollVoteRemoved || eventType == EventType.pollAnswerRemoved) {
         _eventHandler.onPollVoteRemoved(event, this);
       }
     });

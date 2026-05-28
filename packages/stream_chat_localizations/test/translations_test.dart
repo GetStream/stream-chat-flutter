@@ -7,10 +7,8 @@ void main() {
   for (final language in kStreamChatSupportedLanguages) {
     test('translations exist for $language', () async {
       final locale = Locale(language);
-      expect(
-          GlobalStreamChatLocalizations.delegate.isSupported(locale), isTrue);
-      final localizations =
-          await GlobalStreamChatLocalizations.delegate.load(locale);
+      expect(GlobalStreamChatLocalizations.delegate.isSupported(locale), isTrue);
+      final localizations = await GlobalStreamChatLocalizations.delegate.load(locale);
       expect(localizations.launchUrlError, isNotNull);
       expect(localizations.loadingUsersError, isNotNull);
       expect(localizations.noUsersLabel, isNotNull);
@@ -37,7 +35,7 @@ void main() {
       expect(localizations.editedMessageLabel, isNotNull);
       expect(localizations.threadReplyCountText(3), isNotNull);
       expect(
-        localizations.attachmentsUploadProgressText(remaining: 3, total: 10),
+        localizations.attachmentsUploadProgressText(completed: 3, total: 10),
         isNotNull,
       );
       expect(
@@ -118,6 +116,7 @@ void main() {
         isNotNull,
       );
       expect(localizations.photosLabel, isNotNull);
+      expect(localizations.photosAndVideosLabel, isNotNull);
       // today
       expect(
         localizations.sentAtText(
@@ -164,6 +163,16 @@ void main() {
       expect(localizations.watchersCountText(1), isNotNull);
       // 3 members
       expect(localizations.watchersCountText(3), isNotNull);
+      // no online members
+      expect(
+        localizations.membersCountWithOnlineText(memberCount: 5, onlineCount: 0),
+        isNotNull,
+      );
+      // with online members
+      expect(
+        localizations.membersCountWithOnlineText(memberCount: 5, onlineCount: 2),
+        isNotNull,
+      );
       expect(localizations.viewInfoLabel, isNotNull);
       expect(localizations.leaveGroupLabel, isNotNull);
       expect(localizations.leaveLabel, isNotNull);
@@ -187,25 +196,23 @@ void main() {
         localizations.galleryPaginationText(currentPage: 1, totalPages: 2),
         isNotNull,
       );
-      expect(localizations.slowModeOnLabel, isNotNull);
+      expect(localizations.slowModeOnLabel(10), isNotNull);
       expect(localizations.linkDisabledDetails, isNotNull);
       expect(localizations.linkDisabledError, isNotNull);
       expect(localizations.sendMessagePermissionError, isNotNull);
       expect(localizations.couldNotReadBytesFromFileError, isNotNull);
       expect(localizations.toggleMuteUnmuteAction(isMuted: false), isNotNull);
       expect(localizations.downloadLabel, isNotNull);
-      expect(localizations.toggleMuteUnmuteGroupQuestion(isMuted: true),
-          isNotNull);
+      expect(localizations.commandUsernameLabel, isNotNull);
+      expect(localizations.toggleMuteUnmuteGroupQuestion(isMuted: true), isNotNull);
       expect(localizations.toggleMuteUnmuteGroupText(isMuted: true), isNotNull);
-      expect(
-          localizations.toggleMuteUnmuteUserQuestion(isMuted: true), isNotNull);
+      expect(localizations.toggleMuteUnmuteUserQuestion(isMuted: true), isNotNull);
       expect(localizations.toggleMuteUnmuteUserText(isMuted: true), isNotNull);
       expect(localizations.viewLibrary, isNotNull);
       expect(localizations.unreadMessagesSeparatorText(), isNotNull);
       expect(localizations.enableFileAccessMessage, isNotNull);
       expect(localizations.allowFileAccessMessage, isNotNull);
-      expect(
-          localizations.unreadCountIndicatorLabel(unreadCount: 2), isNotNull);
+      expect(localizations.unreadCountIndicatorLabel(unreadCount: 2), isNotNull);
       expect(localizations.unreadMessagesSeparatorText(), isNotNull);
       expect(localizations.markUnreadError, isNotNull);
       expect(localizations.markAsUnreadLabel, isNotNull);
@@ -213,7 +220,8 @@ void main() {
       expect(localizations.createPollLabel(), isNotNull);
       // Create a new poll
       expect(localizations.createPollLabel(isNew: true), isNotNull);
-      expect(localizations.questionsLabel, isNotNull);
+      expect(localizations.questionLabel(), isNotNull);
+      expect(localizations.questionLabel(isPlural: true), isNotNull);
       expect(localizations.askAQuestionLabel, isNotNull);
       // Question must be at least 5 characters long
       expect(
@@ -253,7 +261,8 @@ void main() {
       expect(localizations.anonymousPollLabel, isNotNull);
       expect(localizations.suggestAnOptionLabel, isNotNull);
       expect(localizations.addACommentLabel, isNotNull);
-      expect(localizations.endVoteConfirmationText, isNotNull);
+      expect(localizations.endVoteConfirmationTitle, isNotNull);
+      expect(localizations.endVoteConfirmationMessage, isNotNull);
       expect(localizations.createLabel, isNotNull);
       expect(localizations.endLabel, isNotNull);
       expect(localizations.endVoteLabel, isNotNull);
@@ -264,6 +273,7 @@ void main() {
       expect(localizations.pollCommentsLabel, isNotNull);
       expect(localizations.pollOptionsLabel, isNotNull);
       expect(localizations.pollResultsLabel, isNotNull);
+      expect(localizations.pollVotesLabel, isNotNull);
       // Voting mode
       expect(
         localizations.pollVotingModeLabel(const PollVotingMode.disabled()),
@@ -287,14 +297,19 @@ void main() {
       expect(localizations.seeAllOptionsLabel(count: 3), isNotNull);
       expect(localizations.showAllVotesLabel(), isNotNull);
       expect(localizations.showAllVotesLabel(count: 3), isNotNull);
+      expect(localizations.viewAllLabel, isNotNull);
       expect(localizations.updateYourCommentLabel, isNotNull);
       expect(localizations.viewCommentsLabel, isNotNull);
       expect(localizations.viewResultsLabel, isNotNull);
       // Vote count
       expect(localizations.voteCountLabel(), isNotNull);
       expect(localizations.voteCountLabel(count: 3), isNotNull);
+      // Total vote count
+      expect(localizations.totalVoteCountLabel(), isNotNull);
+      expect(localizations.totalVoteCountLabel(count: 3), isNotNull);
       expect(localizations.repliedToLabel, isNotNull);
       expect(localizations.newThreadsLabel(count: 3), isNotNull);
+      expect(localizations.loadingLabel, isNotNull);
       expect(localizations.slideToCancelLabel, isNotNull);
       expect(localizations.holdToRecordLabel, isNotNull);
       expect(localizations.sendAnywayLabel, isNotNull);
@@ -306,11 +321,54 @@ void main() {
       expect(localizations.audioAttachmentText, isNotNull);
       expect(localizations.imageAttachmentText, isNotNull);
       expect(localizations.videoAttachmentText, isNotNull);
+      expect(localizations.fileAttachmentText, isNotNull);
+      expect(localizations.linkAttachmentText, isNotNull);
+      expect(localizations.filesAttachmentCountText(3), isNotNull);
+      expect(localizations.photosAttachmentCountText(3), isNotNull);
+      expect(localizations.videosAttachmentCountText(3), isNotNull);
       expect(localizations.pollYouVotedText, isNotNull);
       expect(localizations.pollSomeoneVotedText('TestUser'), isNotNull);
       expect(localizations.pollYouCreatedText, isNotNull);
       expect(localizations.pollSomeoneCreatedText('TestUser'), isNotNull);
       expect(localizations.systemMessageLabel, isNotNull);
+      expect(localizations.draftLabel, isNotNull);
+      expect(localizations.locationLabel(), isNotNull);
+      expect(localizations.noConversationsYetText, isNotNull);
+      expect(localizations.replyToStartThreadText, isNotNull);
+      expect(localizations.sendMessageToStartConversationText, isNotNull);
+      expect(localizations.savedForLaterLabel, isNotNull);
+      expect(localizations.repliedToThreadAnnotationLabel, isNotNull);
+      expect(localizations.alsoSentInChannelAnnotationLabel, isNotNull);
+      expect(localizations.viewLabel, isNotNull);
+      expect(localizations.reminderSetLabel, isNotNull);
+      expect(localizations.reminderAtText('3:00 PM'), isNotNull);
+      expect(localizations.createPollPromptLabel, isNotNull);
+      expect(localizations.takePhotoAndShareLabel, isNotNull);
+      expect(localizations.takeVideoAndShareLabel, isNotNull);
+      expect(localizations.openCameraLabel, isNotNull);
+      expect(localizations.selectFilesToShareLabel, isNotNull);
+      expect(localizations.openFilesLabel, isNotNull);
+      expect(localizations.unsupportedAttachmentLabel, isNotNull);
+      expect(localizations.confirmLabel, isNotNull);
+      expect(localizations.emptyReactionsText, isNotNull);
+      expect(localizations.loadingReactionsError, isNotNull);
+      expect(localizations.tapToRemoveReactionLabel, isNotNull);
+      // singular vs. plural — both branches exercised
+      expect(localizations.reactionsCountText(1), isNotNull);
+      expect(localizations.reactionsCountText(5), isNotNull);
+      expect(localizations.justNowLabel, isNotNull);
+      expect(localizations.replyToUserLabel('TestUser'), isNotNull);
+      expect(localizations.multipleAnswersDescription, isNotNull);
+      // default range
+      expect(localizations.maximumVotesPerPersonDescription(), isNotNull);
+      // explicit range
+      expect(
+        localizations.maximumVotesPerPersonDescription(const (min: 1, max: 5)),
+        isNotNull,
+      );
+      expect(localizations.anonymousPollDescription, isNotNull);
+      expect(localizations.suggestAnOptionDescription, isNotNull);
+      expect(localizations.addACommentDescription, isNotNull);
     });
   }
 

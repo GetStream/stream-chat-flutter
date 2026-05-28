@@ -87,13 +87,15 @@ class KeyStrokeHandler {
     _cancelKeyStrokeTimer();
 
     _keyStrokeTimer = Timer(Duration(seconds: startTypingEventTimeout), () {
-      _stopTyping(parentId).then((_) {
-        if (completer.isCompleted) return;
-        completer.complete();
-      }).onError((error, stackTrace) {
-        if (completer.isCompleted) return;
-        completer.completeError(error!, stackTrace);
-      });
+      _stopTyping(parentId)
+          .then((_) {
+            if (completer.isCompleted) return;
+            completer.complete();
+          })
+          .onError((error, stackTrace) {
+            if (completer.isCompleted) return;
+            completer.completeError(error!, stackTrace);
+          });
     });
 
     // If the user is typing too long, it should call [onStartTyping] again.

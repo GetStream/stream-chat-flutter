@@ -2,123 +2,176 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/misc/flex_grid.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// {@template streamGalleryAttachment}
-/// Constructs a gallery of images, videos, and gifs from a list of attachments.
+/// A responsive grid layout for multiple media attachments.
 ///
-/// This widget uses a [FlexGrid] to display the attachments in a grid format.
-/// The grid will automatically resize based on the size of the attachment.
-/// {@endtemplate}
+/// [StreamGalleryAttachment] arranges two or more image, video, or GIF
+/// attachments in a responsive grid layout.
+///
+/// {@tool snippet}
+///
+/// Basic usage:
+///
+/// ```dart
+/// StreamGalleryAttachment(
+///   message: message,
+///   attachments: mediaAttachments,
+///   itemBuilder: (context, index) => MyMediaThumbnail(
+///     attachment: mediaAttachments[index],
+///   ),
+/// )
+/// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
-///  * [StreamImageAttachmentThumbnail], which is used to display the image
-///  thumbnails.
-///  * [StreamVideoAttachmentThumbnail], which is used to display the video
-///  thumbnails.
-///  * [StreamGiphyAttachmentThumbnail], which is used to display the gif
-///  thumbnails.
+///  * [StreamGalleryAttachmentProps], which configures this widget.
+///  * [DefaultStreamGalleryAttachment], the default implementation.
 class StreamGalleryAttachment extends StatelessWidget {
-  /// {@macro streamGalleryAttachment}
-  const StreamGalleryAttachment({
+  /// Creates a [StreamGalleryAttachment].
+  StreamGalleryAttachment({
     super.key,
-    required this.attachments,
+    required Message message,
+    required List<Attachment> attachments,
+    BoxConstraints? constraints,
+    double? spacing,
+    double? runSpacing,
+    required IndexedWidgetBuilder itemBuilder,
+  }) : props = .new(
+         message: message,
+         attachments: attachments,
+         constraints: constraints,
+         spacing: spacing,
+         runSpacing: runSpacing,
+         itemBuilder: itemBuilder,
+       );
+
+  /// The properties that configure this attachment.
+  final StreamGalleryAttachmentProps props;
+
+  @override
+  Widget build(BuildContext context) {
+    final builder = context.chatComponentBuilder<StreamGalleryAttachmentProps>();
+    if (builder != null) return builder(context, props);
+    return DefaultStreamGalleryAttachment(props: props);
+  }
+}
+
+/// Properties for configuring a [StreamGalleryAttachment].
+///
+/// This class holds all the configuration options for a gallery attachment,
+/// allowing them to be passed through the [StreamComponentFactory].
+///
+/// See also:
+///
+///  * [StreamGalleryAttachment], which uses these properties.
+///  * [DefaultStreamGalleryAttachment], the default implementation.
+class StreamGalleryAttachmentProps {
+  /// Creates properties for a gallery attachment.
+  const StreamGalleryAttachmentProps({
     required this.message,
-    this.shape,
-    this.constraints = const BoxConstraints(),
-    this.spacing = 2.0,
-    this.runSpacing = 2.0,
+    required this.attachments,
+    this.constraints,
+    this.spacing,
+    this.runSpacing,
     required this.itemBuilder,
   });
 
-  /// List of attachments to show
-  final List<Attachment> attachments;
-
-  /// The [Message] that the images are attached to
+  /// The [Message] that the images are attached to.
   final Message message;
 
-  /// The shape of the attachment.
-  ///
-  /// Defaults to [RoundedRectangleBorder] with a radius of 14.
-  final ShapeBorder? shape;
+  /// The list of media attachments to display in the grid.
+  final List<Attachment> attachments;
 
-  /// The constraints of the [attachments]
-  final BoxConstraints constraints;
+  /// The constraints to use when displaying the gallery.
+  final BoxConstraints? constraints;
 
   /// How much space to place between children in a run in the main axis.
   ///
   /// For example, if [spacing] is 10.0, the children will be spaced at least
   /// 10.0 logical pixels apart in the main axis.
   ///
-  /// Defaults to 2.0.
-  final double spacing;
+  /// When null, defaults to [StreamSpacing.xxs].
+  final double? spacing;
 
   /// How much space to place between the runs themselves in the cross axis.
   ///
   /// For example, if [runSpacing] is 10.0, the runs will be spaced at least
   /// 10.0 logical pixels apart in the cross axis.
   ///
-  /// Defaults to 2.0.
-  final double runSpacing;
+  /// When null, defaults to [StreamSpacing.xxs].
+  final double? runSpacing;
 
   /// Item builder for the gallery.
   final IndexedWidgetBuilder itemBuilder;
+}
+
+const _kDefaultConstraints = BoxConstraints.tightFor(width: 256, height: 195);
+
+/// The default implementation of [StreamGalleryAttachment].
+///
+/// Renders a responsive grid of media attachment thumbnails.
+///
+/// See also:
+///
+///  * [StreamGalleryAttachment], the public API widget.
+///  * [StreamGalleryAttachmentProps], which configures this widget.
+class DefaultStreamGalleryAttachment extends StatelessWidget {
+  /// Creates a default Stream gallery attachment.
+  const DefaultStreamGalleryAttachment({
+    super.key,
+    required this.props,
+  });
+
+  /// The properties that configure this attachment.
+  final StreamGalleryAttachmentProps props;
 
   @override
   Widget build(BuildContext context) {
+    final attachments = props.attachments;
     assert(
       attachments.length >= 2,
       'Gallery should have at least 2 attachments, found ${attachments.length}',
     );
 
-    final chatTheme = StreamChatTheme.of(context);
-    final colorTheme = chatTheme.colorTheme;
-    final shape = this.shape ??
-        RoundedRectangleBorder(
-          side: BorderSide(
-            color: colorTheme.borders,
-            strokeAlign: BorderSide.strokeAlignOutside,
-          ),
-          borderRadius: BorderRadius.circular(14),
-        );
+    final streamSpacing = context.streamSpacing;
+    final constraints = props.constraints ?? _kDefaultConstraints;
 
-    return Container(
+    final spacing = props.spacing ?? streamSpacing.xxs;
+    final runSpacing = props.runSpacing ?? streamSpacing.xxs;
+
+    return ConstrainedBox(
       constraints: constraints,
-      clipBehavior: Clip.hardEdge,
-      decoration: ShapeDecoration(shape: shape),
-      // Added a builder just for the sake of calculating the image count
-      // and building the appropriate layout based on the image count.
       child: Builder(
-        builder: (context) {
-          final attachmentCount = attachments.length;
-          if (attachmentCount == 2) {
-            return _buildForTwo(context, attachments);
-          }
-
-          if (attachmentCount == 3) {
-            return _buildForThree(context, attachments);
-          }
-
-          return _buildForFourOrMore(context, attachments);
+        builder: (context) => switch (attachments.length) {
+          2 => _buildForTwo(context, attachments, props.itemBuilder, spacing: spacing, runSpacing: runSpacing),
+          3 => _buildForThree(context, attachments, props.itemBuilder, spacing: spacing, runSpacing: runSpacing),
+          _ => _buildForFourOrMore(context, attachments, props.itemBuilder, spacing: spacing, runSpacing: runSpacing),
         },
       ),
     );
   }
 
-  Widget _buildForTwo(BuildContext context, List<Attachment> attachments) {
+  Widget _buildForTwo(
+    BuildContext context,
+    List<Attachment> attachments,
+    IndexedWidgetBuilder itemBuilder, {
+    required double spacing,
+    required double runSpacing,
+  }) {
     final aspectRatio1 = attachments[0].originalSize?.aspectRatio;
     final aspectRatio2 = attachments[1].originalSize?.aspectRatio;
 
-    // check if one image is landscape and other is portrait or vice versa
+    // Check if one image is landscape and other is portrait or vice versa.
     final isLandscape1 = aspectRatio1 != null && aspectRatio1 > 1;
     final isLandscape2 = aspectRatio2 != null && aspectRatio2 > 1;
 
     // Both the images are landscape.
+    // ----------
+    // |        |
+    // ----------
+    // |        |
+    // ----------
     if (isLandscape1 && isLandscape2) {
-      // ----------
-      // |        |
-      // ----------
-      // |        |
-      // ----------
       return FlexGrid(
         pattern: const [
           [1],
@@ -133,43 +186,15 @@ class StreamGalleryAttachment extends StatelessWidget {
       );
     }
 
-    // Both the images are portrait.
-    if (!isLandscape1 && !isLandscape2) {
-      // -----------
-      // |    |    |
-      // |    |    |
-      // |    |    |
-      // -----------
-      return FlexGrid(
-        pattern: const [
-          [1, 1],
-        ],
-        spacing: spacing,
-        runSpacing: runSpacing,
-        children: [
-          itemBuilder(context, 0),
-          itemBuilder(context, 1),
-        ],
-      );
-    }
-
-    // Layout on the basis of isLandscape1.
-    // 1. True
+    // Portrait, mixed, or unknown — strict 50/50 width split with cover crop.
     // -----------
-    // |      |  |
-    // |      |  |
-    // |      |  |
-    // -----------
-    //
-    // 2. False
-    // -----------
-    // |  |      |
-    // |  |      |
-    // |  |      |
+    // |    |    |
+    // |    |    |
+    // |    |    |
     // -----------
     return FlexGrid(
-      pattern: [
-        if (isLandscape1) [2, 1] else [1, 2],
+      pattern: const [
+        [1, 1],
       ],
       spacing: spacing,
       runSpacing: runSpacing,
@@ -180,7 +205,13 @@ class StreamGalleryAttachment extends StatelessWidget {
     );
   }
 
-  Widget _buildForThree(BuildContext context, List<Attachment> attachments) {
+  Widget _buildForThree(
+    BuildContext context,
+    List<Attachment> attachments,
+    IndexedWidgetBuilder itemBuilder, {
+    required double spacing,
+    required double runSpacing,
+  }) {
     final aspectRatio1 = attachments[0].originalSize?.aspectRatio;
     final isLandscape1 = aspectRatio1 != null && aspectRatio1 > 1;
 
@@ -219,7 +250,12 @@ class StreamGalleryAttachment extends StatelessWidget {
   }
 
   Widget _buildForFourOrMore(
-      BuildContext context, List<Attachment> attachments) {
+    BuildContext context,
+    List<Attachment> attachments,
+    IndexedWidgetBuilder itemBuilder, {
+    required double spacing,
+    required double runSpacing,
+  }) {
     final pattern = <List<int>>[];
     final children = <Widget>[];
 
@@ -232,6 +268,10 @@ class StreamGalleryAttachment extends StatelessWidget {
 
       children.add(itemBuilder(context, i));
     }
+
+    final radius = context.streamRadius;
+    final textTheme = context.streamTextTheme;
+    final colorScheme = context.streamColorScheme;
 
     // -----------
     // |    |    |
@@ -248,15 +288,15 @@ class StreamGalleryAttachment extends StatelessWidget {
       children: children,
       overlayBuilder: (context, remaining) {
         return IgnorePointer(
-          child: ColoredBox(
-            color: Colors.black38,
+          child: Material(
+            clipBehavior: .hardEdge,
+            color: colorScheme.backgroundOverlayDark,
+            shape: RoundedSuperellipseBorder(borderRadius: .all(radius.md)),
             child: Center(
               child: Text(
                 '+$remaining',
-                style: const TextStyle(
-                  fontSize: 26,
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
+                style: textTheme.headingLg.copyWith(
+                  color: colorScheme.textOnAccent,
                 ),
               ),
             ),

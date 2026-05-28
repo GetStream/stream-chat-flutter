@@ -1,3 +1,5 @@
+// ignore_for_file: lines_longer_than_80_chars
+
 part of 'stream_chat_localizations.dart';
 
 /// The translations for Norwegian (`no`).
@@ -47,10 +49,9 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
 
   @override
   String attachmentsUploadProgressText({
-    required int remaining,
+    required int completed,
     required int total,
-  }) =>
-      'Laster opp $remaining/$total ...';
+  }) => 'Lastet opp $completed av $total ...';
 
   @override
   String pinnedByUserText({
@@ -63,11 +64,10 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
   }
 
   @override
-  String get sendMessagePermissionError =>
-      'Du har ikke tillatelse til å sende meldinger';
+  String get sendMessagePermissionError => 'Du har ikke tillatelse til å sende meldinger';
 
   @override
-  String get emptyMessagesText => 'Det er ingen meldinger akkurat nå';
+  String get emptyMessagesText => 'Ingen meldinger ennå';
 
   @override
   String get genericErrorText => 'Noe gikk galt';
@@ -121,7 +121,7 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
   String get searchGifLabel => 'Søk GIFs';
 
   @override
-  String get writeAMessageLabel => 'Skriv en melding';
+  String get writeAMessageLabel => 'Send en melding';
 
   @override
   String get instantCommandsLabel => 'Direkte kommandoer';
@@ -133,8 +133,7 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
       'Vi prøvde å komprimere den, men det hjalp ikke.';
 
   @override
-  String fileTooLargeError(double limitInMB) =>
-      'Filen er for stor til å laste opp. Filgrense er $limitInMB MB.';
+  String fileTooLargeError(double limitInMB) => 'Filen er for stor til å laste opp. Filgrense er $limitInMB MB.';
 
   @override
   String get addAFileLabel => 'Legg til en fil';
@@ -161,12 +160,11 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
   String get somethingWentWrongError => 'Noe gikk galt';
 
   @override
-  String get addMoreFilesLabel => 'Legg til flere filer';
+  String get addMoreFilesLabel => 'Legg til flere';
 
   @override
   String get enablePhotoAndVideoAccessMessage =>
-      'Vennligst gi tillatelse til dine bilder'
-      '\nog videoer så du kan dele de med dine venner.';
+      'Vennligst gi tillatelse til dine bilder og videoer så du kan dele de med dine venner.';
 
   @override
   String get allowGalleryAccessMessage => 'Tillat tilgang til galleri';
@@ -176,35 +174,31 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
 
   @override
   String get flagMessageQuestion =>
-      'Ønsker du å sende en kopi av denne meldingen til en'
-      '\nmoderator for videre undersøkelser';
+      'Ønsker du å sende en kopi av denne meldingen til en moderator for videre undersøkelser';
 
   @override
-  String get flagLabel => 'RAPPORTER';
+  String get flagLabel => 'Rapporter';
 
   @override
-  String get cancelLabel => 'AVBRYT';
+  String get cancelLabel => 'Avbryt';
 
   @override
   String get flagMessageSuccessfulLabel => 'Melding rapportert';
 
   @override
-  String get flagMessageSuccessfulText =>
-      'Meldingen har blitt rapportert til en moderator.';
+  String get flagMessageSuccessfulText => 'Meldingen har blitt rapportert til en moderator.';
 
   @override
-  String get deleteLabel => 'SLETT';
+  String get deleteLabel => 'Slett';
 
   @override
   String get deleteMessageLabel => 'Slett melding';
 
   @override
-  String get deleteMessageQuestion =>
-      'Er du sikker på at du ønsker å slette denne meldingen permanent?';
+  String get deleteMessageQuestion => 'Er du sikker på at du ønsker å slette denne meldingen permanent?';
 
   @override
-  String get operationCouldNotBeCompletedText =>
-      'Denne handlingen kunne ikke bli gjennomført.';
+  String get operationCouldNotBeCompletedText => 'Denne handlingen kunne ikke bli gjennomført.';
 
   @override
   String get replyLabel => 'Svar';
@@ -235,6 +229,9 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
 
   @override
   String get photosLabel => 'Foto';
+
+  @override
+  String get photosAndVideosLabel => 'Foto og video';
 
   String _getDay(DateTime dateTime) {
     final now = DateTime.now();
@@ -274,8 +271,7 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
   String get letsStartChattingLabel => 'La oss starte å chatte!';
 
   @override
-  String get sendingFirstMessageLabel =>
-      'Hva med å sende din første melding til en venn?';
+  String get sendingFirstMessageLabel => 'Hva med å sende din første melding til en venn?';
 
   @override
   String get startAChatLabel => 'Start en chat';
@@ -287,11 +283,10 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
   String get deleteConversationLabel => 'Slett samtale';
 
   @override
-  String get deleteConversationQuestion =>
-      'Er du sikker på at du ønsker å slette denne samtalen?';
+  String get deleteConversationQuestion => 'Er du sikker på at du ønsker å slette denne samtalen?';
 
   @override
-  String get streamChatLabel => 'Stream Chat';
+  String get streamChatLabel => 'Samtaler';
 
   @override
   String get searchingForNetworkText => 'Søker etter nettverk';
@@ -315,6 +310,16 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
   }
 
   @override
+  String membersCountWithOnlineText({
+    required int memberCount,
+    required int onlineCount,
+  }) {
+    final members = membersCountText(memberCount);
+    if (onlineCount <= 0) return members;
+    return '$members, ${watchersCountText(onlineCount)}';
+  }
+
+  @override
   String get viewInfoLabel => 'Se info';
 
   @override
@@ -327,8 +332,7 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
   String get leaveConversationLabel => 'Forlat samtale';
 
   @override
-  String get leaveConversationQuestion =>
-      'Er du sikker på at du ønsker å forlate denne samtalen?';
+  String get leaveConversationQuestion => 'Er du sikker på at du ønsker å forlate denne samtalen?';
 
   @override
   String get showInChatLabel => 'Se i chat';
@@ -364,8 +368,7 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
   String galleryPaginationText({
     required int currentPage,
     required int totalPages,
-  }) =>
-      '${currentPage + 1} of $totalPages';
+  }) => '${currentPage + 1} of $totalPages';
 
   @override
   String get fileText => 'Fil';
@@ -374,15 +377,16 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
   String get replyToMessageLabel => 'Svar på melding';
 
   @override
-  String attachmentLimitExceedError(int limit) =>
-      'Antall vedlegg oversteget, maks antall: $limit';
+  String attachmentLimitExceedError(int limit) => 'Antall vedlegg oversteget, maks antall: $limit';
 
   @override
-  String get slowModeOnLabel => 'Sakte modus PÅ';
+  String slowModeOnLabel(int cooldownTimeOut) => 'Sakte modus, vent ${cooldownTimeOut}s\u2026';
 
   @override
-  String get linkDisabledDetails =>
-      'Sende lenker er ikke lov i denne samtalen.';
+  String get commandUsernameLabel => '@username';
+
+  @override
+  String get linkDisabledDetails => 'Sende lenker er ikke lov i denne samtalen.';
 
   @override
   String get linkDisabledError => 'Lenker er deaktivert';
@@ -394,8 +398,7 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
   String unreadMessagesSeparatorText() => 'Nye meldinger.';
 
   @override
-  String get couldNotReadBytesFromFileError =>
-      'Kunne ikke lese bytes fra filen.';
+  String get couldNotReadBytesFromFileError => 'Kunne ikke lese bytes fra filen.';
 
   @override
   String get downloadLabel => 'Nedlasting';
@@ -423,7 +426,6 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
   @override
   String toggleMuteUnmuteUserQuestion({required bool isMuted}) {
     if (isMuted) {
-      // ignore: lines_longer_than_80_chars
       return 'Er du sikker på at du vil oppheve ignoreringen av denne brukeren?';
     }
     return 'Er du sikker på at du vil ignorere denne brukeren?';
@@ -436,8 +438,7 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
   }
 
   @override
-  String get enableFileAccessMessage =>
-      'Aktiver tilgang til filer slik' '\nat du kan dele dem med venner.';
+  String get enableFileAccessMessage => 'Aktiver tilgang til filer slik at du kan dele dem med venner.';
 
   @override
   String get allowFileAccessMessage => 'Gi tilgang til filer';
@@ -462,7 +463,7 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
   }
 
   @override
-  String get questionsLabel => 'Spørsmål';
+  String questionLabel({bool isPlural = false}) => 'Spørsmål';
 
   @override
   String get askAQuestionLabel => 'Still et spørsmål';
@@ -503,8 +504,7 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
   String get multipleAnswersLabel => 'Flere svar';
 
   @override
-  String get maximumVotesPerPersonLabel =>
-      'Maksimalt antall stemmer per person';
+  String get maximumVotesPerPersonLabel => 'Maksimalt antall stemmer per person';
 
   @override
   String? maxVotesPerPersonValidationError(int votes, Range<int> range) {
@@ -546,15 +546,17 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
   String get enterYourCommentLabel => 'Skriv inn kommentaren din';
 
   @override
-  String get endVoteConfirmationText =>
-      'Er du sikker på at du vil avslutte avstemningen?';
+  String get endVoteConfirmationTitle => 'Er du sikker på at du vil avslutte avstemningen?';
+
+  @override
+  String get endVoteConfirmationMessage =>
+      'Vil du avslutte denne avstemningen nå? Ingen vil kunne stemme i denne avstemningen lenger.';
 
   @override
   String get deletePollOptionLabel => 'Slett alternativ';
 
   @override
-  String get deletePollOptionQuestion =>
-      'Er du sikker på at du vil slette dette alternativet?';
+  String get deletePollOptionQuestion => 'Er du sikker på at du vil slette dette alternativet?';
 
   @override
   String get createLabel => 'Opprett';
@@ -591,17 +593,30 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
   String get pollResultsLabel => 'Resultater for avstemningen';
 
   @override
+  String get pollVotesLabel => 'Stemmer';
+
+  @override
   String showAllVotesLabel({int? count}) {
     if (count == null) return 'Vis alle stemmer';
     return 'Vis alle $count stemmer';
   }
 
   @override
+  String get viewAllLabel => 'Vis alle';
+
+  @override
   String voteCountLabel({int? count}) => switch (count) {
-        null || < 1 => '0 stemmer',
-        1 => '1 stemme',
-        _ => '$count stemmer',
-      };
+    null || < 1 => '0 stemmer',
+    1 => '1 stemme',
+    _ => '$count stemmer',
+  };
+
+  @override
+  String totalVoteCountLabel({int? count}) => switch (count) {
+    null || < 1 => '0 stemmer totalt',
+    1 => '1 stemme totalt',
+    _ => '$count stemmer totalt',
+  };
 
   @override
   String get noPollVotesLabel => 'Det er ingen stemmer for øyeblikket';
@@ -619,6 +634,9 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
   }
 
   @override
+  String get loadingLabel => 'Laster...';
+
+  @override
   String get slideToCancelLabel => 'Gli for å avbryte';
 
   @override
@@ -628,8 +646,7 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
   String get sendAnywayLabel => 'Send likevel';
 
   @override
-  String get moderatedMessageBlockedText =>
-      'Meldingen ble blokkert av modereringsregler';
+  String get moderatedMessageBlockedText => 'Meldingen ble blokkert av modereringsregler';
 
   @override
   String get moderationReviewModalTitle => 'Er du sikker?';
@@ -654,6 +671,21 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
   String get videoAttachmentText => 'Video';
 
   @override
+  String get fileAttachmentText => 'Fil';
+
+  @override
+  String get linkAttachmentText => 'Lenke';
+
+  @override
+  String filesAttachmentCountText(int count) => count == 1 ? 'Fil' : '$count filer';
+
+  @override
+  String photosAttachmentCountText(int count) => count == 1 ? 'Bilde' : '$count bilder';
+
+  @override
+  String videosAttachmentCountText(int count) => count == 1 ? 'Video' : '$count videoer';
+
+  @override
   String get pollYouVotedText => 'Du stemte';
 
   @override
@@ -667,4 +699,97 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
 
   @override
   String get draftLabel => 'Utkast';
+
+  @override
+  String locationLabel({bool isLive = false}) {
+    if (isLive) return 'Direkte posisjon';
+    return 'Posisjon';
+  }
+
+  @override
+  String get noConversationsYetText => 'Ingen samtaler ennå';
+
+  @override
+  String get replyToStartThreadText => 'Svar på en melding for å starte en tråd';
+
+  @override
+  String get sendMessageToStartConversationText => 'Send en melding for å starte samtalen';
+
+  @override
+  String get savedForLaterLabel => 'Lagret til senere';
+
+  @override
+  String get repliedToThreadAnnotationLabel => 'Svarte i en tråd';
+
+  @override
+  String get alsoSentInChannelAnnotationLabel => 'Også sendt i kanalen';
+
+  @override
+  String get viewLabel => 'Vis';
+
+  @override
+  String get reminderSetLabel => 'Påminnelse satt';
+
+  @override
+  String reminderAtText(String time) => 'I dag kl. $time';
+
+  @override
+  String get createPollPromptLabel => 'Lag en avstemning og la alle stemme!';
+
+  @override
+  String get takePhotoAndShareLabel => 'Ta et bilde og del';
+
+  @override
+  String get takeVideoAndShareLabel => 'Ta en video og del';
+
+  @override
+  String get openCameraLabel => 'Åpne kamera';
+
+  @override
+  String get selectFilesToShareLabel => 'Velg filer å dele';
+
+  @override
+  String get openFilesLabel => 'Åpne filer';
+
+  @override
+  String get unsupportedAttachmentLabel => 'Vedlegg støttes ikke';
+
+  @override
+  String get confirmLabel => 'BEKREFT';
+
+  @override
+  String get emptyReactionsText => 'Ingen reaksjoner ennå';
+
+  @override
+  String get loadingReactionsError => 'Kunne ikke laste reaksjoner';
+
+  @override
+  String get tapToRemoveReactionLabel => 'Trykk for å fjerne';
+
+  @override
+  String reactionsCountText(int count) => '$count reaksjoner';
+
+  @override
+  String get justNowLabel => 'Akkurat nå';
+
+  @override
+  String replyToUserLabel(String userName) => 'Svar til $userName';
+
+  @override
+  String get multipleAnswersDescription => 'Velg mer enn ett alternativ';
+
+  @override
+  String maximumVotesPerPersonDescription([Range<int>? range]) {
+    final (:min, :max) = range ?? (min: 2, max: 10);
+    return 'Velg mellom $min\u2013$max alternativer';
+  }
+
+  @override
+  String get anonymousPollDescription => 'Skjul hvem som stemte';
+
+  @override
+  String get suggestAnOptionDescription => 'La andre legge til alternativer';
+
+  @override
+  String get addACommentDescription => 'La andre legge til kommentarer';
 }

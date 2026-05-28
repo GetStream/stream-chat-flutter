@@ -99,13 +99,11 @@ void main() {
     expect(updatedReads.first.user, dummyUser);
 
     // Saving a dummy reaction
-    final dummyReaction =
-        Reaction(type: 'type', messageId: messageId, userId: userId);
+    final dummyReaction = Reaction(type: 'type', messageId: messageId, userId: userId);
     await database.reactionDao.updateReactions([dummyReaction]);
 
     // Should match the dummy reaction
-    final updatedReactions =
-        await database.reactionDao.getReactionsByUserId(messageId, userId);
+    final updatedReactions = await database.reactionDao.getReactionsByUserId(messageId, userId);
     expect(updatedReactions.length, 1);
     expect(updatedReactions.first.messageId, messageId);
 
@@ -129,8 +127,7 @@ void main() {
     expect(reads, isEmpty);
 
     // Fetched readtions for passed message id and user id should be empty
-    final reactions =
-        await database.reactionDao.getReactionsByUserId(messageId, userId);
+    final reactions = await database.reactionDao.getReactionsByUserId(messageId, userId);
     expect(reactions, isEmpty);
   });
 

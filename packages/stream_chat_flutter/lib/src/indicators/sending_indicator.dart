@@ -12,7 +12,7 @@ class StreamSendingIndicator extends StatelessWidget {
     required this.message,
     this.isMessageRead = false,
     this.isMessageDelivered = false,
-    this.size = 12,
+    this.size,
   });
 
   /// The message whose sending status is to be shown.
@@ -29,38 +29,37 @@ class StreamSendingIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final streamChatTheme = StreamChatTheme.of(context);
-    final colorTheme = streamChatTheme.colorTheme;
+    final colorScheme = context.streamColorScheme;
 
     if (isMessageRead) {
-      return StreamSvgIcon(
+      return Icon(
+        context.streamIcons.checks,
         size: size,
-        icon: StreamSvgIcons.checkAll,
-        color: colorTheme.accentPrimary,
+        color: colorScheme.accentPrimary,
       );
     }
 
     if (isMessageDelivered) {
-      return StreamSvgIcon(
+      return Icon(
+        context.streamIcons.checks,
         size: size,
-        icon: StreamSvgIcons.checkAll,
-        color: colorTheme.textLowEmphasis,
+        color: colorScheme.textSecondary,
       );
     }
 
     if (message.state.isCompleted) {
-      return StreamSvgIcon(
+      return Icon(
+        context.streamIcons.checkmark,
         size: size,
-        icon: StreamSvgIcons.check,
-        color: colorTheme.textLowEmphasis,
+        color: colorScheme.textSecondary,
       );
     }
 
     if (message.state.isOutgoing) {
-      return StreamSvgIcon(
+      return Icon(
+        context.streamIcons.clock,
         size: size,
-        icon: StreamSvgIcons.time,
-        color: colorTheme.textLowEmphasis,
+        color: colorScheme.textSecondary,
       );
     }
 

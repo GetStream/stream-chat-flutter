@@ -5,9 +5,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import '../mocks.dart';
 
 void main() {
-  testWidgets(
-      'AttachmentUploadStateBuilder returns Offstage when message is sent',
-      (tester) async {
+  testWidgets('AttachmentUploadStateBuilder returns Offstage when message is sent', (tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(

@@ -207,16 +207,7 @@ void main() {
       expect(result.single.tag, 'old+merged');
     });
 
-    test('sorts the result when compare is provided', () {
-      final result = [const _Item('b', 3)].merge(
-        const [_Item('a', 1), _Item('c', 5)],
-        key: _itemKey,
-        compare: _itemCompare,
-      );
-      expect(result.map((it) => it.value).toList(), [1, 3, 5]);
-    });
-
-    test('preserves insertion order when compare is not provided', () {
+    test('preserves insertion order — `this` first, new items from `other`', () {
       // Map iteration preserves insertion order in Dart — items from `this`
       // come first, then new items from `other`.
       final result = [const _Item('a', 1)].merge(
@@ -225,11 +216,66 @@ void main() {
       );
       expect(result.map((it) => it.id).toList(), ['a', 'b']);
     });
+  });
 
-    test('two-pointer path: appends non-overlapping `other` (livestream)', () {
+  group('SortedListX.mergeSorted', () {
+    test('returns this when other is null', () {
+      final original = [1, 2, 3];
+      expect(
+        identical(
+          original.mergeSorted(null, key: (it) => it, compare: _intCompare),
+          original,
+        ),
+        true,
+      );
+    });
+
+    test('returns this when other is empty', () {
+      final original = [1, 2, 3];
+      expect(
+        identical(
+          original.mergeSorted(
+            const <int>[],
+            key: (it) => it,
+            compare: _intCompare,
+          ),
+          original,
+        ),
+        true,
+      );
+    });
+
+    test('returns this when other is identical to this', () {
+      final original = [1, 2, 3];
+      expect(
+        identical(
+          original.mergeSorted(
+            original,
+            key: (it) => it,
+            compare: _intCompare,
+          ),
+          original,
+        ),
+        true,
+      );
+    });
+
+    test('sorts `other` internally when it is unsorted', () {
+      const existing = [_Item('a', 1), _Item('c', 5)];
+      // `other` is unsorted on purpose — value 7 comes before value 3.
+      const incoming = [_Item('d', 7), _Item('b', 3)];
+      final result = existing.mergeSorted(
+        incoming,
+        key: _itemKey,
+        compare: _itemCompare,
+      );
+      expect(result.map((it) => it.value).toList(), [1, 3, 5, 7]);
+    });
+
+    test('appends non-overlapping `other` (livestream)', () {
       const existing = [_Item('a', 1), _Item('b', 3)];
       const incoming = [_Item('c', 5), _Item('d', 7)];
-      final result = existing.merge(
+      final result = existing.mergeSorted(
         incoming,
         key: _itemKey,
         compare: _itemCompare,
@@ -237,24 +283,21 @@ void main() {
       expect(result.map((it) => it.id).toList(), ['a', 'b', 'c', 'd']);
     });
 
-    test(
-      'two-pointer path: prepends non-overlapping `other` (pagination)',
-      () {
-        const existing = [_Item('c', 5), _Item('d', 7)];
-        const incoming = [_Item('a', 1), _Item('b', 3)];
-        final result = existing.merge(
-          incoming,
-          key: _itemKey,
-          compare: _itemCompare,
-        );
-        expect(result.map((it) => it.id).toList(), ['a', 'b', 'c', 'd']);
-      },
-    );
+    test('prepends non-overlapping `other` (pagination)', () {
+      const existing = [_Item('c', 5), _Item('d', 7)];
+      const incoming = [_Item('a', 1), _Item('b', 3)];
+      final result = existing.mergeSorted(
+        incoming,
+        key: _itemKey,
+        compare: _itemCompare,
+      );
+      expect(result.map((it) => it.id).toList(), ['a', 'b', 'c', 'd']);
+    });
 
-    test('two-pointer path: merges pre-sorted lists in sorted order', () {
+    test('merges pre-sorted lists in sorted order', () {
       const existing = [_Item('a', 1), _Item('c', 5), _Item('e', 9)];
       const incoming = [_Item('b', 3), _Item('d', 7)];
-      final result = existing.merge(
+      final result = existing.mergeSorted(
         incoming,
         key: _itemKey,
         compare: _itemCompare,
@@ -262,10 +305,10 @@ void main() {
       expect(result.map((it) => it.id).toList(), ['a', 'b', 'c', 'd', 'e']);
     });
 
-    test('two-pointer path: applies update on key collisions', () {
+    test('applies update on key collisions', () {
       const existing = [_Item('a', 1), _Item('b', 3, 'orig')];
       const incoming = [_Item('b', 3, 'new'), _Item('c', 5)];
-      final result = existing.merge(
+      final result = existing.mergeSorted(
         incoming,
         key: _itemKey,
         update: (orig, upd) => _Item(orig.id, upd.value, '${orig.tag}+merged'),
@@ -274,50 +317,43 @@ void main() {
       expect(result.map((it) => it.tag).toList(), ['', 'orig+merged', '']);
     });
 
-    test(
-      'two-pointer path: tolerates duplicate keys in the receiver',
-      () {
-        // The merge does not enforce input uniqueness. Duplicates in the
-        // receiver whose keys don't appear in `other` are propagated through
-        // and the sorted invariant is preserved.
-        const withDupes = [_Item('a', 1), _Item('a', 2)];
-        final result = withDupes.merge(
-          const [_Item('b', 3)],
-          key: _itemKey,
-          compare: _itemCompare,
-        );
-        expect(
-          result.map((it) => '${it.id}:${it.value}'),
-          ['a:1', 'a:2', 'b:3'],
-        );
-      },
-    );
+    test('tolerates duplicate keys in the receiver', () {
+      // The merge does not enforce input uniqueness. Duplicates in the
+      // receiver whose keys don't appear in `other` are propagated through
+      // and the sorted invariant is preserved.
+      const withDupes = [_Item('a', 1), _Item('a', 2)];
+      final result = withDupes.mergeSorted(
+        const [_Item('b', 3)],
+        key: _itemKey,
+        compare: _itemCompare,
+      );
+      expect(
+        result.map((it) => '${it.id}:${it.value}'),
+        ['a:1', 'a:2', 'b:3'],
+      );
+    });
+
+    test('tolerates duplicate keys in `other`', () {
+      const sorted = [_Item('a', 1)];
+      final result = sorted.mergeSorted(
+        const [_Item('b', 2), _Item('b', 3)],
+        key: _itemKey,
+        compare: _itemCompare,
+      );
+      expect(
+        result.map((it) => '${it.id}:${it.value}'),
+        ['a:1', 'b:2', 'b:3'],
+      );
+    });
 
     test(
-      'two-pointer path: tolerates duplicate keys in `other`',
-      () {
-        const sorted = [_Item('a', 1)];
-        final result = sorted.merge(
-          const [_Item('b', 2), _Item('b', 3)],
-          key: _itemKey,
-          compare: _itemCompare,
-        );
-        expect(
-          result.map((it) => '${it.id}:${it.value}'),
-          ['a:1', 'b:2', 'b:3'],
-        );
-      },
-    );
-
-    test(
-      'two-pointer path: receiver duplicates are dropped when '
-      '`other` contains the same key',
+      'receiver duplicates are dropped when `other` contains the same key',
       () {
         // When the duplicate-keyed entries in the receiver collide with a
         // key from `other`, all receiver copies are dropped — the keyset of
         // `other` takes precedence.
         const withDupes = [_Item('a', 1), _Item('a', 2)];
-        final result = withDupes.merge(
+        final result = withDupes.mergeSorted(
           const [_Item('a', 5, 'from-other'), _Item('b', 7)],
           key: _itemKey,
           compare: _itemCompare,

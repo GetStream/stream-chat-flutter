@@ -17,8 +17,7 @@ class ChannelApi {
 
   final StreamHttpClient _client;
 
-  String _getChannelUrl(String channelId, String channelType) =>
-      '/channels/$channelType/$channelId';
+  String _getChannelUrl(String channelId, String channelType) => '/channels/$channelType/$channelId';
 
   /// Query the API, get messages, members or other channel fields
   Future<ChannelState> queryChannel(
@@ -100,8 +99,7 @@ class ChannelApi {
       _getChannelUrl(channelId, channelType),
       data: {
         'data': data,
-        if (message != null)
-          'message': message.copyWith(updatedAt: DateTime.now()),
+        if (message != null) 'message': message.copyWith(updatedAt: DateTime.now()),
       },
     );
     return UpdateChannelResponse.fromJson(response.data);

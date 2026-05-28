@@ -1,12 +1,5 @@
 part of 'attachment_widget_builder.dart';
 
-const _kDefaultGiphyConstraints = BoxConstraints(
-  minWidth: 170,
-  maxWidth: 256,
-  minHeight: 100,
-  maxHeight: 300,
-);
-
 /// {@template giphyAttachmentBuilder}
 /// A widget builder for [AttachmentType.giphy] attachment type.
 ///
@@ -15,20 +8,19 @@ const _kDefaultGiphyConstraints = BoxConstraints(
 class GiphyAttachmentBuilder extends StreamAttachmentWidgetBuilder {
   /// {@macro giphyAttachmentBuilder}
   const GiphyAttachmentBuilder({
-    this.shape,
-    this.padding = const EdgeInsets.all(2),
-    this.constraints = _kDefaultGiphyConstraints,
+    this.style,
+    this.constraints,
     this.onAttachmentTap,
   });
 
-  /// The shape of the giphy attachment.
-  final ShapeBorder? shape;
+  /// The style of the giphy attachment container.
+  ///
+  /// When null, a default style with a rounded rectangle shape and border
+  /// is used.
+  final StreamMessageAttachmentStyle? style;
 
   /// The constraints to apply to the giphy attachment widget.
-  final BoxConstraints constraints;
-
-  /// The padding to apply to the giphy attachment widget.
-  final EdgeInsetsGeometry padding;
+  final BoxConstraints? constraints;
 
   /// The callback to call when the attachment is tapped.
   final StreamAttachmentWidgetTapCallback? onAttachmentTap;
@@ -43,7 +35,7 @@ class GiphyAttachmentBuilder extends StreamAttachmentWidgetBuilder {
   }
 
   @override
-  Widget build(
+  Widget? build(
     BuildContext context,
     Message message,
     Map<String, List<Attachment>> attachments,
@@ -57,15 +49,14 @@ class GiphyAttachmentBuilder extends StreamAttachmentWidgetBuilder {
       onTap = () => onAttachmentTap!(message, giphy);
     }
 
-    return Padding(
-      padding: padding,
+    return StreamMessageAttachment(
+      style: style,
       child: InkWell(
         onTap: onTap,
         child: StreamGiphyAttachment(
           message: message,
           constraints: constraints,
           giphy: giphy,
-          shape: shape,
         ),
       ),
     );

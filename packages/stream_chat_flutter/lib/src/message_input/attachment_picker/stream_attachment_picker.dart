@@ -1,548 +1,49 @@
 import 'dart:async';
 
-import 'package:collection/collection.dart';
+import 'package:file_picker/file_picker.dart' show FileType;
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/message_input/attachment_picker/options/options.dart';
 import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// The default maximum size for media attachments.
-const kDefaultMaxAttachmentSize = 100 * 1024 * 1024; // 100MB in Bytes
-
-/// The default maximum number of media attachments.
-const kDefaultMaxAttachmentCount = 10;
-
-/// Value class for [AttachmentPickerController].
+/// Inline widget for the system attachment picker interface.
 ///
-/// This class holds the list of [Poll] and [Attachment] objects.
-class AttachmentPickerValue {
-  /// Creates a new instance of [AttachmentPickerValue].
-  const AttachmentPickerValue({
-    this.poll,
-    this.attachments = const [],
-  });
-
-  /// The poll object.
-  final Poll? poll;
-
-  /// The list of [Attachment] objects.
-  final List<Attachment> attachments;
-
-  /// Returns a copy of this object with the provided values.
-  AttachmentPickerValue copyWith({
-    Poll? poll,
-    List<Attachment>? attachments,
-  }) {
-    return AttachmentPickerValue(
-      poll: poll ?? this.poll,
-      attachments: attachments ?? this.attachments,
-    );
-  }
-}
-
-/// Controller class for [StreamAttachmentPicker].
-class StreamAttachmentPickerController
-    extends ValueNotifier<AttachmentPickerValue> {
-  /// Creates a new instance of [StreamAttachmentPickerController].
-  StreamAttachmentPickerController({
-    this.initialPoll,
-    this.initialAttachments,
-    this.maxAttachmentSize = kDefaultMaxAttachmentSize,
-    this.maxAttachmentCount = kDefaultMaxAttachmentCount,
-  })  : assert(
-          (initialAttachments?.length ?? 0) <= maxAttachmentCount,
-          '''The initial attachments count must be less than or equal to maxAttachmentCount''',
-        ),
-        super(
-          AttachmentPickerValue(
-            poll: initialPoll,
-            attachments: initialAttachments ?? const [],
-          ),
-        );
-
-  /// The max attachment size allowed in bytes.
-  final int maxAttachmentSize;
-
-  /// The max attachment count allowed.
-  final int maxAttachmentCount;
-
-  /// The initial poll.
-  final Poll? initialPoll;
-
-  /// The initial attachments.
-  final List<Attachment>? initialAttachments;
-
-  @override
-  set value(AttachmentPickerValue newValue) {
-    if (newValue.attachments.length > maxAttachmentCount) {
-      throw ArgumentError(
-        'The maximum number of attachments is $maxAttachmentCount.',
-      );
-    }
-    super.value = newValue;
-  }
-
-  /// Adds a new [poll] to the message.
-  set poll(Poll poll) {
-    value = value.copyWith(poll: poll);
-  }
-
-  Future<String> _saveToCache(AttachmentFile file) async {
-    // Cache the attachment in a temporary file.
-    return StreamAttachmentHandler.instance.saveAttachmentFile(
-      attachmentFile: file,
-    );
-  }
-
-  Future<void> _removeFromCache(AttachmentFile file) {
-    // Remove the cached attachment file.
-    return StreamAttachmentHandler.instance.deleteAttachmentFile(
-      attachmentFile: file,
-    );
-  }
-
-  /// Adds a new attachment to the message.
-  Future<void> addAttachment(Attachment attachment) async {
-    assert(attachment.fileSize != null, '');
-    if (attachment.fileSize! > maxAttachmentSize) {
-      throw ArgumentError(
-        'The size of the attachment is ${attachment.fileSize} bytes, '
-        'but the maximum size allowed is $maxAttachmentSize bytes.',
-      );
-    }
-
-    final file = attachment.file;
-    final uploadState = attachment.uploadState;
-
-    // No need to cache the attachment if it's already uploaded
-    // or we are on web.
-    if (file == null || uploadState.isSuccess || isWeb) {
-      value = value.copyWith(attachments: [...value.attachments, attachment]);
-      return;
-    }
-
-    // Cache the attachment in a temporary file.
-    final tempFilePath = await _saveToCache(file);
-
-    value = value.copyWith(attachments: [
-      ...value.attachments,
-      attachment.copyWith(
-        file: file.copyWith(
-          path: tempFilePath,
-        ),
-      ),
-    ]);
-  }
-
-  /// Removes the specified [attachment] from the message.
-  Future<void> removeAttachment(Attachment attachment) async {
-    final file = attachment.file;
-    final uploadState = attachment.uploadState;
-
-    if (file == null || uploadState.isSuccess || isWeb) {
-      final updatedAttachments = [...value.attachments]..remove(attachment);
-      value = value.copyWith(attachments: updatedAttachments);
-      return;
-    }
-
-    // Remove the cached attachment file.
-    await _removeFromCache(file);
-
-    final updatedAttachments = [...value.attachments]..remove(attachment);
-    value = value.copyWith(attachments: updatedAttachments);
-  }
-
-  /// Remove the attachment with the given [attachmentId].
-  void removeAttachmentById(String attachmentId) {
-    final attachment = value.attachments.firstWhereOrNull(
-      (attachment) => attachment.id == attachmentId,
-    );
-
-    if (attachment == null) return;
-
-    removeAttachment(attachment);
-  }
-
-  /// Clears all the attachments.
-  Future<void> clear() async {
-    final attachments = [...value.attachments];
-    for (final attachment in attachments) {
-      final file = attachment.file;
-      final uploadState = attachment.uploadState;
-
-      if (file == null || uploadState.isSuccess || isWeb) continue;
-
-      await _removeFromCache(file);
-    }
-    value = const AttachmentPickerValue();
-  }
-
-  /// Resets the controller to its initial state.
-  Future<void> reset() async {
-    final attachments = [...value.attachments];
-    for (final attachment in attachments) {
-      final file = attachment.file;
-      final uploadState = attachment.uploadState;
-
-      if (file == null || uploadState.isSuccess || isWeb) continue;
-
-      await _removeFromCache(file);
-    }
-
-    value = AttachmentPickerValue(
-      poll: initialPoll,
-      attachments: initialAttachments ?? const [],
-    );
-  }
-}
-
-/// The possible picker types of the attachment picker.
-enum AttachmentPickerType {
-  /// The attachment picker will only allow to pick images.
-  images,
-
-  /// The attachment picker will only allow to pick videos.
-  videos,
-
-  /// The attachment picker will only allow to pick audios.
-  audios,
-
-  /// The attachment picker will only allow to pick files or documents.
-  files,
-
-  /// The attachment picker will only allow to create poll.
-  poll,
-}
-
-/// Function signature for building the attachment picker option view.
-typedef AttachmentPickerOptionViewBuilder = Widget Function(
-  BuildContext context,
-  StreamAttachmentPickerController controller,
-);
-
-/// Model class for the attachment picker options.
-class AttachmentPickerOption {
-  /// Creates a new instance of [AttachmentPickerOption].
-  const AttachmentPickerOption({
-    this.key,
-    required this.supportedTypes,
-    required this.icon,
-    this.title,
-    this.optionViewBuilder,
-  });
-
-  /// A key to identify the option.
-  final String? key;
-
-  /// The icon of the option.
-  final Widget icon;
-
-  /// The title of the option.
-  final String? title;
-
-  /// The supported types of the option.
-  final Iterable<AttachmentPickerType> supportedTypes;
-
-  /// The option view builder.
-  final AttachmentPickerOptionViewBuilder? optionViewBuilder;
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is AttachmentPickerOption &&
-          runtimeType == other.runtimeType &&
-          key == other.key &&
-          const IterableEquality().equals(supportedTypes, other.supportedTypes);
-
-  @override
-  int get hashCode =>
-      key.hashCode ^ const IterableEquality().hash(supportedTypes);
-}
-
-/// The attachment picker option for the web or desktop platforms.
-class WebOrDesktopAttachmentPickerOption extends AttachmentPickerOption {
-  /// Creates a new instance of [WebOrDesktopAttachmentPickerOption].
-  WebOrDesktopAttachmentPickerOption({
-    super.key,
-    required AttachmentPickerType type,
-    required super.icon,
-    required super.title,
-  }) : super(supportedTypes: [type]);
-
-  /// Creates a new instance of [WebOrDesktopAttachmentPickerOption] from
-  /// [option].
-  factory WebOrDesktopAttachmentPickerOption.fromAttachmentPickerOption(
-    AttachmentPickerOption option,
-  ) {
-    return WebOrDesktopAttachmentPickerOption(
-      key: option.key,
-      type: option.supportedTypes.first,
-      icon: option.icon,
-      title: option.title,
-    );
-  }
-
-  @override
-  String get title => super.title!;
-
-  /// Type of the option.
-  AttachmentPickerType get type => supportedTypes.first;
-}
-
-/// Helpful extensions for [StreamAttachmentPickerController].
-extension AttachmentPickerOptionTypeX on StreamAttachmentPickerController {
-  /// Returns the list of available attachment picker options.
-  Set<AttachmentPickerType> get currentAttachmentPickerTypes {
-    final attach = value.attachments;
-    final containsImage = attach.any((it) => it.type == AttachmentType.image);
-    final containsVideo = attach.any((it) => it.type == AttachmentType.video);
-    final containsAudio = attach.any((it) => it.type == AttachmentType.audio);
-    final containsFile = attach.any((it) => it.type == AttachmentType.file);
-    final containsPoll = value.poll != null;
-
-    return {
-      if (containsImage) AttachmentPickerType.images,
-      if (containsVideo) AttachmentPickerType.videos,
-      if (containsAudio) AttachmentPickerType.audios,
-      if (containsFile) AttachmentPickerType.files,
-      if (containsPoll) AttachmentPickerType.poll,
-    };
-  }
-
-  /// Returns the list of enabled picker types.
-  Set<AttachmentPickerType> filterEnabledTypes({
-    required Iterable<AttachmentPickerOption> options,
-  }) {
-    final availableTypes = currentAttachmentPickerTypes;
-    final enabledTypes = <AttachmentPickerType>{};
-    for (final option in options) {
-      final supportedTypes = option.supportedTypes;
-      if (availableTypes.any(supportedTypes.contains)) {
-        enabledTypes.addAll(supportedTypes);
-      }
-    }
-    return enabledTypes;
-  }
-
-  /// Returns true if the [initialAttachments] are changed.
-  bool get isValueChanged {
-    final isPollEqual = value.poll == initialPoll;
-    final areAttachmentsEqual = UnorderedIterableEquality<Attachment>(
-      EqualityBy((attachment) => attachment.id),
-    ).equals(value.attachments, initialAttachments);
-
-    return !isPollEqual || !areAttachmentsEqual;
-  }
-}
-
-/// Function signature for the callback when the web or desktop attachment
-/// picker option gets tapped.
-typedef OnWebOrDesktopAttachmentPickerOptionTap = void Function(
-  BuildContext context,
-  StreamAttachmentPickerController controller,
-  WebOrDesktopAttachmentPickerOption option,
-);
-
-/// Bottom sheet widget for the web or desktop version of the attachment picker.
-class StreamWebOrDesktopAttachmentPickerBottomSheet extends StatelessWidget {
-  /// Creates a new instance of [StreamWebOrDesktopAttachmentPickerBottomSheet].
-  const StreamWebOrDesktopAttachmentPickerBottomSheet({
+/// Shows a list of options that launch native platform dialogs.
+/// Selections are applied in real-time via the [controller].
+class StreamSystemAttachmentPicker extends StatelessWidget {
+  /// Creates a new instance of [StreamSystemAttachmentPicker].
+  const StreamSystemAttachmentPicker({
     super.key,
     required this.options,
     required this.controller,
-    this.onOptionTap,
   });
 
   /// The list of options.
-  final Set<WebOrDesktopAttachmentPickerOption> options;
+  final Set<SystemAttachmentPickerOption> options;
 
   /// The controller of the attachment picker.
   final StreamAttachmentPickerController controller;
 
-  /// The callback when the option gets tapped.
-  final OnWebOrDesktopAttachmentPickerOptionTap? onOptionTap;
-
   @override
   Widget build(BuildContext context) {
-    final enabledTypes = controller.filterEnabledTypes(options: options);
-    return ListView(
-      shrinkWrap: true,
-      children: [
-        ...options.map((option) {
-          VoidCallback? onOptionTap;
-          if (this.onOptionTap != null) {
-            onOptionTap = () {
-              this.onOptionTap?.call(context, controller, option);
-            };
-          }
-
-          final enabled = enabledTypes.isEmpty ||
-              enabledTypes.any((it) => it == option.type);
-
-          return ListTile(
-            enabled: enabled,
-            leading: option.icon,
-            title: Text(option.title),
-            onTap: onOptionTap,
-          );
-        }),
-      ],
-    );
-  }
-}
-
-/// Bottom sheet widget for the mobile version of the  attachment picker.
-class StreamMobileAttachmentPickerBottomSheet extends StatefulWidget {
-  /// Creates a new instance of [StreamMobileAttachmentPickerBottomSheet].
-  const StreamMobileAttachmentPickerBottomSheet({
-    super.key,
-    required this.options,
-    required this.controller,
-    this.initialOption,
-    this.onSendValue,
-  });
-
-  /// The list of options.
-  final Set<AttachmentPickerOption> options;
-
-  /// The initial option to be selected.
-  final AttachmentPickerOption? initialOption;
-
-  /// The controller of the attachment picker.
-  final StreamAttachmentPickerController controller;
-
-  /// The callback when the send button gets tapped.
-  final ValueSetter<AttachmentPickerValue>? onSendValue;
-
-  @override
-  State<StreamMobileAttachmentPickerBottomSheet> createState() =>
-      _StreamMobileAttachmentPickerBottomSheetState();
-}
-
-class _StreamMobileAttachmentPickerBottomSheetState
-    extends State<StreamMobileAttachmentPickerBottomSheet> {
-  late AttachmentPickerOption _currentOption;
-
-  @override
-  void initState() {
-    super.initState();
-    if (widget.initialOption == null) {
-      final enabledTypes = widget.controller.filterEnabledTypes(
-        options: widget.options,
-      );
-      if (enabledTypes.isNotEmpty) {
-        _currentOption = widget.options.firstWhere((it) {
-          return it.supportedTypes.contains(enabledTypes.first);
-        });
-      } else {
-        _currentOption = widget.options.first;
-      }
-    } else {
-      _currentOption = widget.initialOption!;
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return ValueListenableBuilder<AttachmentPickerValue>(
-      valueListenable: widget.controller,
-      builder: (context, attachments, _) {
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            _AttachmentPickerOptions(
-              controller: widget.controller,
-              options: widget.options,
-              currentOption: _currentOption,
-              onSendValue: widget.onSendValue,
-              onOptionSelected: (option) async {
-                setState(() => _currentOption = option);
-              },
-            ),
-            Expanded(
-              child: _currentOption.optionViewBuilder
-                      ?.call(context, widget.controller) ??
-                  const Empty(),
-            ),
-          ],
-        );
-      },
-    );
-  }
-}
-
-class _AttachmentPickerOptions extends StatelessWidget {
-  const _AttachmentPickerOptions({
-    required this.options,
-    required this.currentOption,
-    required this.controller,
-    this.onOptionSelected,
-    this.onSendValue,
-  });
-
-  final Iterable<AttachmentPickerOption> options;
-  final AttachmentPickerOption currentOption;
-  final StreamAttachmentPickerController controller;
-  final ValueSetter<AttachmentPickerOption>? onOptionSelected;
-  final ValueSetter<AttachmentPickerValue>? onSendValue;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorTheme = StreamChatTheme.of(context).colorTheme;
-    return ValueListenableBuilder<AttachmentPickerValue>(
+    return ValueListenableBuilder(
       valueListenable: controller,
-      builder: (context, attachments, __) {
-        final enabledTypes = controller.filterEnabledTypes(options: options);
-        return Row(
+      builder: (context, value, child) {
+        final enabledTypes = value.filterEnabledTypes(options: options);
+
+        return ListView(
+          shrinkWrap: true,
           children: [
-            Expanded(
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: [
-                    ...options.map(
-                      (option) {
-                        final supportedTypes = option.supportedTypes;
+            ...options.map(
+              (option) {
+                final supported = option.supportedTypes;
+                final isEnabled = enabledTypes.any(supported.contains);
 
-                        final isSelected = option == currentOption;
-                        final isEnabled = enabledTypes.isEmpty ||
-                            enabledTypes.any(supportedTypes.contains);
-
-                        final color = isSelected
-                            ? colorTheme.accentPrimary
-                            : colorTheme.textLowEmphasis;
-
-                        final onPressed =
-                            isEnabled ? () => onOptionSelected!(option) : null;
-
-                        return IconButton(
-                          color: color,
-                          disabledColor: colorTheme.disabled,
-                          icon: option.icon,
-                          onPressed: onPressed,
-                        );
-                      },
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            Builder(
-              builder: (context) {
-                final VoidCallback? onPressed;
-                if (onSendValue != null && controller.isValueChanged) {
-                  onPressed = () => onSendValue!(attachments);
-                } else {
-                  onPressed = null;
-                }
-
-                return IconButton(
-                  color: colorTheme.accentPrimary,
-                  disabledColor: colorTheme.disabled,
-                  icon: const StreamSvgIcon(
-                    icon: StreamSvgIcons.emptyCircleRight,
-                  ),
-                  onPressed: onPressed,
+                return ListTile(
+                  enabled: isEnabled,
+                  leading: Icon(option.icon),
+                  title: Text(option.title),
+                  onTap: () => option.onTap(context, controller),
                 );
               },
             ),
@@ -553,20 +54,155 @@ class _AttachmentPickerOptions extends StatelessWidget {
   }
 }
 
-/// Signature used by [EndOfFrameCallbackWidget.errorBuilder] to create a
-/// replacement widget to render.
-typedef EndOfFrameCallbackErrorWidgetBuilder = Widget Function(
-  BuildContext context,
-  Object error,
-  StackTrace? stackTrace,
-);
+/// Inline widget for the tabbed attachment picker interface.
+///
+/// Displays a tabbed interface with horizontal tabs for different attachment
+/// types (gallery, camera, files, etc.). Each tab shows a specialized
+/// interface for selecting that type of attachment.
+///
+/// Selections are applied in real-time via the [controller] rather than
+/// through a modal result pattern.
+class StreamTabbedAttachmentPicker extends StatefulWidget {
+  /// Creates a new instance of [StreamTabbedAttachmentPicker].
+  const StreamTabbedAttachmentPicker({
+    super.key,
+    required this.options,
+    required this.controller,
+    this.initialOption,
+  });
 
-/// Function signature for a callback that is called when the end of the frame
-/// is reached.
+  /// The list of options.
+  final Set<TabbedAttachmentPickerOption> options;
+
+  /// The initial option to be selected.
+  final TabbedAttachmentPickerOption? initialOption;
+
+  /// The controller of the attachment picker.
+  final StreamAttachmentPickerController controller;
+
+  @override
+  State<StreamTabbedAttachmentPicker> createState() => _StreamTabbedAttachmentPickerState();
+}
+
+class _StreamTabbedAttachmentPickerState extends State<StreamTabbedAttachmentPicker> {
+  late var _currentOption = _calculateInitialOption();
+  TabbedAttachmentPickerOption _calculateInitialOption() {
+    if (widget.initialOption case final option?) return option;
+
+    final options = widget.options;
+    final currentValue = widget.controller.value;
+    final enabledTypes = currentValue.filterEnabledTypes(options: options);
+
+    if (enabledTypes.isEmpty) return options.first;
+
+    return options.firstWhere(
+      (it) => enabledTypes.any(it.supportedTypes.contains),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<AttachmentPickerValue>(
+      valueListenable: widget.controller,
+      builder: (context, value, _) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            _TabbedAttachmentPickerOptions(
+              controller: widget.controller,
+              options: widget.options,
+              currentOption: _currentOption,
+              onOptionSelected: (option) async {
+                setState(() => _currentOption = option);
+              },
+            ),
+            Expanded(
+              child: _currentOption.optionViewBuilder(
+                context,
+                widget.controller,
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _TabbedAttachmentPickerOptions extends StatelessWidget {
+  const _TabbedAttachmentPickerOptions({
+    required this.options,
+    required this.currentOption,
+    required this.controller,
+    this.onOptionSelected,
+  });
+
+  final Iterable<TabbedAttachmentPickerOption> options;
+  final TabbedAttachmentPickerOption currentOption;
+  final StreamAttachmentPickerController controller;
+  final ValueSetter<TabbedAttachmentPickerOption>? onOptionSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    final spacing = context.streamSpacing;
+
+    return ValueListenableBuilder<AttachmentPickerValue>(
+      valueListenable: controller,
+      builder: (context, value, __) {
+        final enabledTypes = value.filterEnabledTypes(options: options);
+
+        return SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          padding: EdgeInsets.symmetric(horizontal: spacing.md, vertical: spacing.sm),
+          child: Row(
+            spacing: spacing.xxxs,
+            children: [
+              ...options.map(
+                (option) {
+                  final supported = option.supportedTypes;
+                  // An option with no supportedTypes is always enabled.
+                  final isEnabled = supported.isEmpty || enabledTypes.any(supported.contains);
+                  final isSelected = option == currentOption;
+
+                  final onPressed = switch (isEnabled) {
+                    true => () => onOptionSelected?.call(option),
+                    _ => null,
+                  };
+
+                  return StreamButton.icon(
+                    style: StreamButtonStyle.secondary,
+                    type: StreamButtonType.ghost,
+                    size: StreamButtonSize.large,
+                    icon: Icon(option.icon),
+                    onPressed: onPressed,
+                    isSelected: isSelected,
+                  );
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+/// Signature used by [EndOfFrameCallbackWidget.errorBuilder] to build a
+/// replacement widget when [EndOfFrameCallbackWidget.onEndOfFrame] throws.
+typedef EndOfFrameCallbackErrorWidgetBuilder =
+    Widget Function(
+      BuildContext context,
+      Object error,
+      StackTrace? stackTrace,
+    );
+
+/// Signature for callbacks invoked by [EndOfFrameCallbackWidget] once the
+/// first frame has been rendered.
 typedef EndOfFrameCallback = FutureOr<void> Function(BuildContext context);
 
-/// A widget that calls the given [callback] when the end of the frame is
-/// reached.
+/// A widget that invokes [onEndOfFrame] once after the first frame has been
+/// rendered.
 class EndOfFrameCallbackWidget extends StatefulWidget {
   /// Creates a new instance of [EndOfFrameCallbackWidget].
   const EndOfFrameCallbackWidget({
@@ -579,16 +215,19 @@ class EndOfFrameCallbackWidget extends StatefulWidget {
   /// The widget below this widget in the tree.
   final Widget? child;
 
-  /// The callback that is called when the end of the frame is reached.x
+  /// Called once after the first frame has been rendered.
   final EndOfFrameCallback onEndOfFrame;
 
-  /// The callback that will be called if the [onEndOfFrame] callback throws an
-  /// error.
+  /// Called to build a replacement widget when [onEndOfFrame] throws.
+  ///
+  /// If null, [child] is shown when [onEndOfFrame] throws and the error is
+  /// forwarded to [FlutterError.reportError] so it remains visible in the
+  /// console and to any error handlers registered by the host app (e.g.
+  /// Crashlytics, Sentry).
   final EndOfFrameCallbackErrorWidgetBuilder? errorBuilder;
 
   @override
-  State<EndOfFrameCallbackWidget> createState() =>
-      _EndOfFrameCallbackWidgetState();
+  State<EndOfFrameCallbackWidget> createState() => _EndOfFrameCallbackWidgetState();
 }
 
 class _EndOfFrameCallbackWidgetState extends State<EndOfFrameCallbackWidget> {
@@ -599,47 +238,43 @@ class _EndOfFrameCallbackWidgetState extends State<EndOfFrameCallbackWidget> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.endOfFrame.then((_) async {
-      if (mounted) {
-        try {
-          await widget.onEndOfFrame(context);
-        } catch (error, stackTrace) {
-          setState(() {
-            _error = error;
-            _stackTrace = stackTrace;
-          });
+      if (!mounted) return;
+      try {
+        await widget.onEndOfFrame(context);
+      } catch (error, stackTrace) {
+        if (!mounted) return;
+        // When no errorBuilder is provided we fall back to [child], so the
+        // error is otherwise invisible. Forward it through Flutter's error
+        // plumbing once so host apps (Crashlytics / Sentry / console) still
+        // see it. When an errorBuilder is provided, caller owns presentation.
+        if (widget.errorBuilder == null) {
+          FlutterError.reportError(
+            FlutterErrorDetails(
+              exception: error,
+              stack: stackTrace,
+              library: 'stream_chat_flutter',
+              context: ErrorDescription('EndOfFrameCallbackWidget.onEndOfFrame threw; falling back to child'),
+            ),
+          );
         }
+        setState(() {
+          _error = error;
+          _stackTrace = stackTrace;
+        });
       }
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final error = _error;
-    final stackTrace = _stackTrace;
-
-    if (error != null) {
-      final errorBuilder = widget.errorBuilder;
-      if (errorBuilder != null) {
-        return errorBuilder(context, error, stackTrace);
+    if (_error case final error?) {
+      if (widget.errorBuilder case final errorBuilder?) {
+        return errorBuilder(context, error, _stackTrace);
       }
-      return const Text('An error occurred');
     }
-
-    // Reset the error and stack trace so that we don't keep showing the same
-    // error over and over.
-    _error = null;
-    _stackTrace = null;
-
     return widget.child ?? const Empty();
   }
 }
-
-const _kDefaultOptionDrawerShape = RoundedRectangleBorder(
-  borderRadius: BorderRadius.only(
-    topLeft: Radius.circular(16),
-    topRight: Radius.circular(16),
-  ),
-);
 
 /// A widget that will be shown in the attachment picker.
 /// It can be used to show a custom view for each attachment picker option.
@@ -648,317 +283,283 @@ class OptionDrawer extends StatelessWidget {
   const OptionDrawer({
     super.key,
     required this.child,
-    this.color,
-    this.elevation = 2,
-    this.margin = EdgeInsets.zero,
-    this.clipBehavior = Clip.hardEdge,
-    this.shape = _kDefaultOptionDrawerShape,
-    this.title,
-    this.actions = const [],
+    this.margin,
   });
 
   /// The widget below this widget in the tree.
   final Widget child;
 
-  /// The background color of the options card.
-  ///
-  /// Defaults to [StreamColorTheme.barsBg].
-  final Color? color;
-
-  /// The elevation of the options card.
-  ///
-  /// The default value is 2.
-  final double elevation;
-
   /// The margin of the options card.
-  ///
-  /// The default value is [EdgeInsets.zero].
-  final EdgeInsetsGeometry margin;
-
-  /// The clip behavior of the options card.
-  ///
-  /// The default value is [Clip.hardEdge].
-  final Clip clipBehavior;
-
-  /// The shape of the options card.
-  final ShapeBorder shape;
-
-  /// The title of the options card.
-  final Widget? title;
-
-  /// The actions available for the options card.
-  final List<Widget> actions;
+  final EdgeInsetsGeometry? margin;
 
   @override
   Widget build(BuildContext context) {
-    final colorTheme = StreamChatTheme.of(context).colorTheme;
+    final spacing = context.streamSpacing;
+    final effectiveMargin = margin ?? .symmetric(horizontal: spacing.md, vertical: spacing.xxxl);
 
-    var height = 20.0;
-    if (title != null || actions.isNotEmpty) {
-      height = 40.0;
-    }
-
-    final leading = title ?? const Empty();
-
-    Widget trailing;
-    if (actions.isNotEmpty) {
-      trailing = Row(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.end,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: actions,
-      );
-    } else {
-      trailing = const Empty();
-    }
-
-    return Card(
-      elevation: elevation,
-      color: color ?? colorTheme.barsBg,
-      margin: margin,
-      shape: shape,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          SizedBox(
-            height: height,
-            child: Row(
-              children: [
-                Expanded(child: leading),
-                Container(
-                  height: 4,
-                  width: 40,
-                  decoration: BoxDecoration(
-                    color: colorTheme.disabled,
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                ),
-                Expanded(child: trailing),
-              ],
-            ),
-          ),
-          Expanded(child: child),
-        ],
-      ),
+    return Container(
+      margin: effectiveMargin,
+      child: child,
     );
   }
 }
 
-/// Returns the mobile version of the attachment picker.
-Widget mobileAttachmentPickerBuilder({
+/// Builds a tabbed attachment picker with custom interfaces for different
+/// attachment types.
+///
+/// Shows horizontal tabs for gallery, files, camera, video, and polls. Each
+/// tab displays a specialized interface for selecting that type of
+/// attachment. Tabs get enabled or disabled based on what you've already
+/// selected.
+///
+/// Selections are applied in real-time via the [controller].
+///
+/// The [onError] callback is invoked when an error occurs during attachment
+/// selection (e.g., file too large or attachment limit reached).
+///
+/// The [onPollCreated] callback is invoked when a poll is created, allowing
+/// the caller to handle poll-specific logic.
+Widget tabbedAttachmentPickerBuilder({
   required BuildContext context,
   required StreamAttachmentPickerController controller,
-  Poll? initialPoll,
   PollConfig? pollConfig,
-  Iterable<AttachmentPickerOption>? customOptions,
+  GalleryPickerConfig? galleryPickerConfig,
   List<AttachmentPickerType> allowedTypes = AttachmentPickerType.values,
-  ThumbnailSize attachmentThumbnailSize = const ThumbnailSize(400, 400),
-  ThumbnailFormat attachmentThumbnailFormat = ThumbnailFormat.jpeg,
-  int attachmentThumbnailQuality = 100,
-  double attachmentThumbnailScale = 1,
-  ErrorListener? onError,
+  AttachmentPickerOptionsBuilder? optionsBuilder,
+  ValueSetter<AttachmentPickerError>? onError,
+  ValueSetter<Poll>? onPollCreated,
+  ValueSetter<Command>? onCommandSelected,
 }) {
-  return StreamMobileAttachmentPickerBottomSheet(
+  final defaultOptions = <TabbedAttachmentPickerOption>[
+    TabbedAttachmentPickerOption(
+      key: 'gallery-picker',
+      icon: context.streamIcons.image,
+      supportedTypes: [
+        AttachmentPickerType.images,
+        AttachmentPickerType.videos,
+      ],
+      optionViewBuilder: (context, controller) {
+        final attachment = controller.value.attachments;
+        final selectedIds = attachment.map((it) => it.id);
+        return StreamGalleryPicker(
+          config: galleryPickerConfig,
+          selectedMediaItems: selectedIds,
+          onMediaItemSelected: (media) async {
+            try {
+              if (selectedIds.contains(media.id)) {
+                return await controller.removeAssetAttachment(media);
+              }
+              return await controller.addAssetAttachment(media);
+            } catch (e, stk) {
+              onError?.call(
+                AttachmentPickerError(error: e, stackTrace: stk),
+              );
+            }
+          },
+        );
+      },
+    ),
+    TabbedAttachmentPickerOption(
+      key: 'image-picker',
+      icon: context.streamIcons.camera,
+      supportedTypes: [AttachmentPickerType.images],
+      optionViewBuilder: (context, controller) => StreamImagePicker(
+        onImagePicked: (image) async {
+          try {
+            if (image != null) await controller.addAttachment(image);
+          } catch (e, stk) {
+            onError?.call(
+              AttachmentPickerError(error: e, stackTrace: stk),
+            );
+          }
+        },
+      ),
+    ),
+    TabbedAttachmentPickerOption(
+      key: 'video-picker',
+      icon: context.streamIcons.video,
+      supportedTypes: [AttachmentPickerType.videos],
+      optionViewBuilder: (context, controller) => StreamVideoPicker(
+        onVideoPicked: (video) async {
+          try {
+            if (video != null) await controller.addAttachment(video);
+          } catch (e, stk) {
+            onError?.call(
+              AttachmentPickerError(error: e, stackTrace: stk),
+            );
+          }
+        },
+      ),
+    ),
+    TabbedAttachmentPickerOption(
+      key: 'file-picker',
+      icon: context.streamIcons.file,
+      supportedTypes: [AttachmentPickerType.files],
+      optionViewBuilder: (context, controller) => StreamFilePicker(
+        onFilePicked: (file) async {
+          try {
+            if (file != null) await controller.addAttachment(file);
+          } catch (e, stk) {
+            onError?.call(
+              AttachmentPickerError(error: e, stackTrace: stk),
+            );
+          }
+        },
+      ),
+    ),
+    TabbedAttachmentPickerOption(
+      key: 'poll-creator',
+      icon: context.streamIcons.poll,
+      supportedTypes: [AttachmentPickerType.poll],
+      optionViewBuilder: (context, controller) {
+        final initialPoll = controller.value.poll;
+        return StreamPollCreator(
+          poll: initialPoll,
+          config: pollConfig,
+          onPollCreated: (poll) {
+            if (poll == null) return;
+            controller.poll = poll;
+            onPollCreated?.call(poll);
+          },
+        );
+      },
+    ),
+    TabbedAttachmentPickerOption(
+      key: 'command-picker',
+      icon: context.streamIcons.command,
+      supportedTypes: [AttachmentPickerType.command],
+      optionViewBuilder: (context, controller) => StreamCommandPicker(
+        onCommandSelected: onCommandSelected,
+      ),
+    ),
+  ];
+
+  final allOptions = switch (optionsBuilder) {
+    final builder? => builder(context, defaultOptions),
+    _ => defaultOptions,
+  };
+
+  final validOptions = allOptions.whereType<TabbedAttachmentPickerOption>();
+
+  if (validOptions.length < allOptions.length) {
+    throw ArgumentError(
+      'custom options must be of type TabbedAttachmentPickerOption when using '
+      'the tabbed attachment picker (default on mobile).',
+    );
+  }
+
+  return StreamTabbedAttachmentPicker(
     controller: controller,
-    onSendValue: Navigator.of(context).pop,
     options: {
-      ...{
-        if (customOptions != null) ...customOptions,
-        AttachmentPickerOption(
-          key: 'gallery-picker',
-          icon: const StreamSvgIcon(icon: StreamSvgIcons.pictures),
-          supportedTypes: [
-            AttachmentPickerType.images,
-            AttachmentPickerType.videos,
-          ],
-          optionViewBuilder: (context, controller) {
-            final attachment = controller.value.attachments;
-            final selectedIds = attachment.map((it) => it.id);
-            return StreamGalleryPicker(
-              selectedMediaItems: selectedIds,
-              mediaThumbnailSize: attachmentThumbnailSize,
-              mediaThumbnailFormat: attachmentThumbnailFormat,
-              mediaThumbnailQuality: attachmentThumbnailQuality,
-              mediaThumbnailScale: attachmentThumbnailScale,
-              onMediaItemSelected: (media) async {
-                try {
-                  if (selectedIds.contains(media.id)) {
-                    return await controller.removeAssetAttachment(media);
-                  }
-                  return await controller.addAssetAttachment(media);
-                } catch (e, stk) {
-                  if (onError != null) return onError.call(e, stk);
-                  rethrow;
-                }
-              },
-            );
-          },
-        ),
-        AttachmentPickerOption(
-          key: 'file-picker',
-          icon: const StreamSvgIcon(icon: StreamSvgIcons.files),
-          supportedTypes: [AttachmentPickerType.files],
-          optionViewBuilder: (context, controller) {
-            return StreamFilePicker(
-              onFilePicked: (file) async {
-                try {
-                  if (file != null) await controller.addAttachment(file);
-                  return Navigator.pop(context, controller.value);
-                } catch (e, stk) {
-                  Navigator.pop(context, controller.value);
-                  if (onError != null) return onError.call(e, stk);
-
-                  rethrow;
-                }
-              },
-            );
-          },
-        ),
-        AttachmentPickerOption(
-          key: 'image-picker',
-          icon: const StreamSvgIcon(icon: StreamSvgIcons.camera),
-          supportedTypes: [AttachmentPickerType.images],
-          optionViewBuilder: (context, controller) {
-            return StreamImagePicker(
-              onImagePicked: (image) async {
-                try {
-                  if (image != null) {
-                    await controller.addAttachment(image);
-                  }
-                  return Navigator.pop(context, controller.value);
-                } catch (e, stk) {
-                  Navigator.pop(context, controller.value);
-                  if (onError != null) return onError.call(e, stk);
-
-                  rethrow;
-                }
-              },
-            );
-          },
-        ),
-        AttachmentPickerOption(
-          key: 'video-picker',
-          icon: const StreamSvgIcon(icon: StreamSvgIcons.record),
-          supportedTypes: [AttachmentPickerType.videos],
-          optionViewBuilder: (context, controller) {
-            return StreamVideoPicker(
-              onVideoPicked: (video) async {
-                try {
-                  if (video != null) {
-                    await controller.addAttachment(video);
-                  }
-                  return Navigator.pop(context, controller.value);
-                } catch (e, stk) {
-                  Navigator.pop(context, controller.value);
-                  if (onError != null) return onError.call(e, stk);
-
-                  rethrow;
-                }
-              },
-            );
-          },
-        ),
-        AttachmentPickerOption(
-          key: 'poll-creator',
-          icon: const StreamSvgIcon(icon: StreamSvgIcons.polls),
-          supportedTypes: [AttachmentPickerType.poll],
-          optionViewBuilder: (context, controller) {
-            final initialPoll = controller.value.poll;
-            return StreamPollCreator(
-              poll: initialPoll,
-              config: pollConfig,
-              onPollCreated: (poll) {
-                try {
-                  if (poll != null) controller.poll = poll;
-                  return Navigator.pop(context, controller.value);
-                } catch (e, stk) {
-                  Navigator.pop(context, controller.value);
-                  if (onError != null) return onError.call(e, stk);
-
-                  rethrow;
-                }
-              },
-            );
-          },
-        ),
-      }.where((option) => option.supportedTypes.every(allowedTypes.contains)),
+      ...validOptions.where(
+        (option) => option.supportedTypes.every(allowedTypes.contains),
+      ),
     },
   );
 }
 
-/// Returns the web or desktop version of the attachment picker.
-Widget webOrDesktopAttachmentPickerBuilder({
+/// Builds a system attachment picker that opens native platform dialogs.
+///
+/// Shows a simple list of options that immediately launch your device's
+/// built-in file browser, camera app, or other native tools instead of
+/// custom interfaces.
+///
+/// Selections are applied in real-time via the [controller].
+///
+/// The [onError] callback is invoked when an error occurs during attachment
+/// selection.
+///
+/// The [onPollCreated] callback is invoked when a poll is created.
+Widget systemAttachmentPickerBuilder({
   required BuildContext context,
   required StreamAttachmentPickerController controller,
-  Poll? initialPoll,
-  PollConfig? pollConfig,
-  Iterable<WebOrDesktopAttachmentPickerOption>? customOptions,
+  PollConfig? pollConfig = const PollConfig(),
+  GalleryPickerConfig? galleryPickerConfig = const GalleryPickerConfig(),
   List<AttachmentPickerType> allowedTypes = AttachmentPickerType.values,
-  ThumbnailSize attachmentThumbnailSize = const ThumbnailSize(400, 400),
-  ThumbnailFormat attachmentThumbnailFormat = ThumbnailFormat.jpeg,
-  int attachmentThumbnailQuality = 100,
-  double attachmentThumbnailScale = 1,
-  ErrorListener? onError,
+  AttachmentPickerOptionsBuilder? optionsBuilder,
+  ValueSetter<AttachmentPickerError>? onError,
+  ValueSetter<Poll>? onPollCreated,
 }) {
-  return StreamWebOrDesktopAttachmentPickerBottomSheet(
-    controller: controller,
-    options: {
-      ...{
-        if (customOptions != null) ...customOptions,
-        WebOrDesktopAttachmentPickerOption(
-          key: 'image-picker',
-          type: AttachmentPickerType.images,
-          icon: const StreamSvgIcon(icon: StreamSvgIcons.pictures),
-          title: context.translations.uploadAPhotoLabel,
-        ),
-        WebOrDesktopAttachmentPickerOption(
-          key: 'video-picker',
-          type: AttachmentPickerType.videos,
-          icon: const StreamSvgIcon(icon: StreamSvgIcons.record),
-          title: context.translations.uploadAVideoLabel,
-        ),
-        WebOrDesktopAttachmentPickerOption(
-          key: 'file-picker',
-          type: AttachmentPickerType.files,
-          icon: const StreamSvgIcon(icon: StreamSvgIcons.files),
-          title: context.translations.uploadAFileLabel,
-        ),
-        WebOrDesktopAttachmentPickerOption(
-          key: 'poll-creator',
-          type: AttachmentPickerType.poll,
-          icon: const StreamSvgIcon(icon: StreamSvgIcons.polls),
-          title: context.translations.createPollLabel(isNew: true),
-        ),
-      }.where((option) => option.supportedTypes.every(allowedTypes.contains)),
-    },
-    onOptionTap: (context, controller, option) async {
-      // Handle the polls type option separately
-      if (option.type case AttachmentPickerType.poll) {
-        final poll = await showStreamPollCreatorDialog(
+  Future<void> pickSystemFile(
+    StreamAttachmentPickerController controller,
+    FileType type,
+  ) async {
+    try {
+      final file = await StreamAttachmentHandler.instance.pickFile(type: type);
+      if (file != null) await controller.addAttachment(file);
+    } catch (e, stk) {
+      onError?.call(AttachmentPickerError(error: e, stackTrace: stk));
+    }
+  }
+
+  final defaultOptions = <SystemAttachmentPickerOption>[
+    SystemAttachmentPickerOption(
+      key: 'image-picker',
+      supportedTypes: [AttachmentPickerType.images],
+      icon: context.streamIcons.image,
+      title: context.translations.uploadAPhotoLabel,
+      onTap: (context, controller) async {
+        await pickSystemFile(controller, FileType.image);
+      },
+    ),
+    SystemAttachmentPickerOption(
+      key: 'video-picker',
+      supportedTypes: [AttachmentPickerType.videos],
+      icon: context.streamIcons.video,
+      title: context.translations.uploadAVideoLabel,
+      onTap: (context, controller) async {
+        await pickSystemFile(controller, FileType.video);
+      },
+    ),
+    SystemAttachmentPickerOption(
+      key: 'file-picker',
+      supportedTypes: [AttachmentPickerType.files],
+      icon: context.streamIcons.file,
+      title: context.translations.uploadAFileLabel,
+      onTap: (context, controller) async {
+        await pickSystemFile(controller, FileType.any);
+      },
+    ),
+    SystemAttachmentPickerOption(
+      key: 'poll-creator',
+      supportedTypes: [AttachmentPickerType.poll],
+      icon: context.streamIcons.poll,
+      title: context.translations.createPollLabel(isNew: true),
+      onTap: (context, controller) async {
+        final initialPoll = controller.value.poll;
+        final poll = await showStreamPollCreatorSheet(
           context: context,
           poll: initialPoll,
           config: pollConfig,
         );
 
-        if (poll != null) controller.poll = poll;
-        return Navigator.pop(context, controller.value);
-      }
+        if (poll == null) return;
+        controller.poll = poll;
+        onPollCreated?.call(poll);
+      },
+    ),
+  ];
 
-      // Handle the remaining option types.
-      try {
-        final attachment = await StreamAttachmentHandler.instance.pickFile(
-          type: option.type.fileType,
-        );
-        if (attachment != null) {
-          await controller.addAttachment(attachment);
-        }
-        return Navigator.pop(context, controller.value);
-      } catch (e, stk) {
-        Navigator.pop(context, controller.value);
-        if (onError != null) return onError.call(e, stk);
+  final allOptions = switch (optionsBuilder) {
+    final builder? => builder(context, defaultOptions),
+    _ => defaultOptions,
+  };
 
-        rethrow;
-      }
+  final validOptions = allOptions.whereType<SystemAttachmentPickerOption>();
+
+  if (validOptions.length < allOptions.length) {
+    throw ArgumentError(
+      'custom options must be of type SystemAttachmentPickerOption when using '
+      'the system attachment picker (enabled explicitly or on web/desktop).',
+    );
+  }
+
+  return StreamSystemAttachmentPicker(
+    controller: controller,
+    options: {
+      ...validOptions.where(
+        (option) => option.supportedTypes.every(allowedTypes.contains),
+      ),
     },
   );
 }

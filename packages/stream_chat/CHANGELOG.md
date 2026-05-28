@@ -1,3 +1,36 @@
+## Upcoming
+
+✅ Added
+
+- Added `StreamChatClient.recoverStateOnReconnect` (defaults to `true`); when `false`, the client no longer auto-re-queries active channels on connection recovery — useful for consumers driving their own refresh from the `connectionRecovered` event.
+- Added `Message.updateWith(Message? other)` — merges a server-side update onto the local message while preserving locally-known `poll`, `sharedLocation`, `ownReactions`, and nested `quotedMessage` enrichment when the server omits them.
+- Added `Channel.isOneToOne` — true when the channel is `isDistinct` and has exactly two members. For the looser count-only check, inline `channel.memberCount == 2`.
+- Added `IterableMergeX.merge` (keyed-map merge on `Iterable<T>`, unsorted output) and `SortedListX.mergeSorted` (two-pointer merge on a sorted `List<T>`). Splits what `SortedListX.merge` did in 9.24.0 — see Changed below.
+
+⚠️ Deprecated
+
+- Deprecated `Message.syncWith` in favor of `Message.updateWith`. Note the arguments are flipped: `local.updateWith(remote)` replaces `remote.syncWith(local)`.
+
+🔄 Changed
+
+- Raised minimum versions of bundled Dart dependencies (`async`, `collection`, `dio`, `equatable`, `http_parser`, `json_annotation`, `logging`, `synchronized`, `uuid`, `web_socket_channel`) to current resolved versions.
+- Tightened `Channel.isGroup` from `memberCount != 2` to `memberCount > 2 || !isDistinct`. Two-member non-distinct channels now correctly report as groups, and 1-member distinct channels no longer do. Migrate via `!channel.isOneToOne` or `channel.memberCount != 2`.
+- Tightened `Channel.isDistinct` to require the `!members-` prefix (with trailing dash), matching the backend's `DistinctChannelPrefix` constant. Real server-generated ids always include the dash; only malformed/test ids that previously matched the looser `!members` check are affected.
+- Renamed `SortedListX.merge` (added in 9.24.0) → `SortedListX.mergeSorted` and moved the unsorted/iterable variant to `IterableMergeX.merge`. Callers on `List<T>` that want sorted output should switch to `mergeSorted`; callers on `Iterable<T>` keep using `merge`.
+- Made the collection getters on `ClientState` (`channels`, `users`, `activeLiveLocations`) unmodifiable. Direct mutation used to silently bypass their streams; update them via `addChannels` / `removeChannel`, `updateUser` / `updateUsers`.
+- Marked the cache-mutation surface on `ClientState` (`channels=`, `currentUser=`, `activeLiveLocations=`, `totalUnreadCount=`, `blockedUserIds=`, `updateUsers`, `updateUser`, `addChannels`, `removeChannel`) as `@internal`. App flows (`connectUser`, etc.) are unaffected.
+
+🔒 Security
+
+- Bumped `jose` floor to `0.3.5+1` to address [CVE-2026-34240](https://github.com/advisories/GHSA-vm9r-h74p-hg97) (untrusted JWK header accepted during signature verification). The SDK only uses `JsonWebToken.unverified` and is not directly exploitable, but the floor bump ensures consumers resolve to a patched version.
+
+🐞 Fixed
+
+- Fixed reactions, polls, and quoted-message enrichment briefly flickering after the app returned from the background. The reconnect path now refreshes channels and advances `lastSyncAt` to the current time instead of replaying every event since `lastSyncAt` through `handleEvent`. `client.sync()` remains available for consumers that need event-level replay.
+- Fixed `Channel.sendMessage` / `Channel.updateMessage` hanging forever when any attachment upload failed; they now throw `StreamChatError`.
+- Fixed quoted poll messages losing their poll, shared-location, or nested-quote content when the server omits it from the `quoted_message` payload during channel re-sync.
+- Fixed a poll attached to a parent message disappearing when a thread reply was added; partial `message.updated` events no longer clobber locally-known `poll` / `sharedLocation` on the parent.
+
 ## 9.24.0
 
 🔒 Security
@@ -46,9 +79,23 @@
 - Removed proactive re-fetching of messages with expired CDN attachment URLs on every channel
   state update. URL refreshes now flow through normal server events.
 
+## 10.0.0-beta.13
+
+🛑️ Breaking
+- SDK Redesign Changes. For more details, please refer to the [migration guide](https://github.com/GetStream/stream-chat-flutter/blob/210ff93f955be3f85c62e860309bd9aa240a5446/migrations).
+  The SDK redesign introduces a fresher default UI, but also better APIs for customization of the components.
+
+## 10.0.0-beta.12
+
+- Included the changes from version [`9.23.0`](https://pub.dev/packages/stream_chat/changelog).
+
 ## 9.23.0
 
 - Minor bug fixes and improvements
+
+## 10.0.0-beta.11
+
+- Included the changes from version [`9.22.0`](https://pub.dev/packages/stream_chat/changelog).
 
 ## 9.22.0
 
@@ -61,12 +108,25 @@
   specify a timestamp before which channel history should be hidden for newly added members. When
   provided, it takes precedence over the `hideHistory` boolean flag.
 
+## 10.0.0-beta.10
+
+- Included the changes from version [`9.21.0`](https://pub.dev/packages/stream_chat/changelog).
+
 ## 9.21.0
 
 🐞 Fixed
 
 - Fixed user's ID from being inadvertently used as their display name during the WebSocket
   connection process. [[#2447]](https://github.com/GetStream/stream-chat-flutter/issues/2447)
+
+## 10.0.0-beta.9
+
+🐞 Fixed
+
+- Fixed `Location.endAt` field not being properly converted to UTC, causing "expected date" API
+  errors when sending location messages.
+
+- Included the changes from version [`9.20.0`](https://pub.dev/packages/stream_chat/changelog).
 
 ## 9.20.0
 
@@ -92,9 +152,46 @@
 - `markRead`, `markUnread`, `markThreadRead`, and `markThreadUnread` methods now throw
   `StreamChatError` when channel lacks required capabilities.
 
+## 10.0.0-beta.8
+
+✅ Added
+
+- Added support for `user.messages.deleted` event.
+
+- Included the changes from version [`9.19.0`](https://pub.dev/packages/stream_chat/changelog).
+
 ## 9.19.0
 
 - Minor bug fixes and improvements
+
+## 10.0.0-beta.7
+
+🛑️ Breaking
+
+- **Changed `MessageState` factory constructors**: The `deleting`, `deleted`, and `deletingFailed` 
+  factory constructors now accept a `MessageDeleteScope` parameter instead of `bool hard`. 
+  Pattern matching callbacks also receive `MessageDeleteScope scope` instead of `bool hard`.
+- **Added new abstract methods to `AttachmentFileUploader`**: The `AttachmentFileUploader` interface
+  now includes four new abstract methods (`uploadImage`, `uploadFile`, `removeImage`, `removeFile`).
+  Custom implementations must implement these methods.
+
+For more details, please refer to the [migration guide](../../migrations/v10-migration.md).
+
+✅ Added
+
+- Added support for deleting messages only for the current user:
+  - `Channel.deleteMessageForMe()` - Delete a message only for the current user
+  - `StreamChatClient.deleteMessageForMe()` - Delete a message only for the current user via client
+  - `MessageDeleteScope` - New sealed class to represent deletion scope
+  - `MessageState.deletingForMe`, `MessageState.deletedForMe`, `MessageState.deletingForMeFailed` states
+  - `Message.deletedOnlyForMe`, `Event.deletedForMe`, `Member.deletedMessages` model fields
+- Added standalone file and image upload/removal methods for CDN operations:
+  - `StreamChatClient.uploadImage()` - Upload an image to the Stream CDN
+  - `StreamChatClient.uploadFile()` - Upload a file to the Stream CDN
+  - `StreamChatClient.removeImage()` - Remove an image from the Stream CDN
+  - `StreamChatClient.removeFile()` - Remove a file from the Stream CDN
+
+- Included the changes from version [`9.18.0`](https://pub.dev/packages/stream_chat/changelog).
 
 ## 9.18.0
 
@@ -116,6 +213,10 @@
 - Fixed `ChannelState.memberCount`, `ChannelState.config` and `ChannelState.extraData` getting reset
   on first load.
 
+## 10.0.0-beta.6
+
+- Included the changes from version [`9.17.0`](https://pub.dev/packages/stream_chat/changelog).
+
 ## 9.17.0
 
 🐞 Fixed
@@ -125,10 +226,15 @@
   during upload.
 - Fixed `toDraftMessage` to only include successfully uploaded attachments in draft messages.
 
+## 10.0.0-beta.5
+
+- Included the changes from version [`9.16.0`](https://pub.dev/packages/stream_chat/changelog).
+
 ## 9.16.0
 
 🐞 Fixed
 
+- Fixed `skipPush` and `skipEnrichUrl` not preserving during message send or update retry
 - Fixed `Channel` methods to throw proper `StateError` exceptions instead of relying on assertions
   for state validation.
 - Fixed `OwnUser` specific fields getting lost when creating a new `OwnUser` instance from
@@ -139,6 +245,25 @@
 
 - Added support for `Client.setPushPreferences` which allows setting PushPreferences for the
   current user or for a specific channel.
+
+## 10.0.0-beta.4
+
+🛑️ Breaking
+
+- **Changed `sendReaction` method signature**: The `sendReaction` method on both `Client` and
+  `Channel` now accepts a full `Reaction` object instead of individual parameters (`type`, `score`,
+  `extraData`). This change provides more flexibility and better type safety.
+
+✅ Added
+
+- Added comprehensive location sharing support with static and live location features:
+  - `Channel.sendStaticLocation()` - Send a static location message to the channel
+  - `Channel.startLiveLocationSharing()` - Start sharing live location with automatic updates
+  - `Channel.activeLiveLocations` - Track members active live location shares in the channel
+  - `Client.activeLiveLocations` - Access current user active live location shares across channels
+  - Location event listeners for `locationShared`, `locationUpdated`, and `locationExpired` events
+
+- Included the changes from version [`9.15.0`](https://pub.dev/packages/stream_chat/changelog).
 
 ## 9.15.0
 
@@ -153,6 +278,18 @@
 - Fixed `WebSocket` race condition where reconnection could access null user during disconnect.
 - Fixed draft message persistence issues where removed drafts were not properly deleted from the
   database.
+
+## 10.0.0-beta.3
+
+🛑️ Breaking
+
+- **Deprecated API Cleanup**: Removed all deprecated classes, methods, and properties for the v10 major release:
+  - **Removed Classes**: `PermissionType` (use string constants like `'delete-channel'`, `'update-channel'`), `CallApi`, `CallPayload`, `CallTokenPayload`, `CreateCallPayload`
+  - **Removed Methods**: `cooldownStartedAt` getter from `Channel`, `getCallToken` and `createCall` from `StreamChatClient`
+  - **Removed Properties**: `reactionCounts` and `reactionScores` getters from `Message` (use `reactionGroups` instead), `call` property from `StreamChatApi`
+  - **Removed Files**: `permission_type.dart`, `call_api.dart`, `call_payload.dart` and their associated tests
+
+- Included the changes from version [`9.14.0`](https://pub.dev/packages/stream_chat/changelog).
 
 ## 9.14.0
 
@@ -172,7 +309,15 @@
 
 - Deprecated `SortOption.new` constructor in favor of `SortOption.desc` and `SortOption.asc`.
 
+## 10.0.0-beta.2
+
+- Included the changes from version [`9.13.0`](https://pub.dev/packages/stream_chat/changelog).
+
 ## 9.13.0
+
+- Bug fixes and improvements
+
+## 10.0.0-beta.1
 
 - Bug fixes and improvements
 

@@ -19,23 +19,22 @@ class AttachmentFile {
     this.path,
     String? name,
     this.bytes,
-  })  : assert(
-          path != null || bytes != null,
-          'Either path or bytes should be != null',
-        ),
-        assert(
-          !CurrentPlatform.isWeb || bytes != null,
-          'File by path is not supported in web, Please provide bytes',
-        ),
-        assert(
-          name == null || name.isEmpty || name.contains('.'),
-          'Invalid file name, should also contain file extension',
-        ),
-        _name = name;
+  }) : assert(
+         path != null || bytes != null,
+         'Either path or bytes should be != null',
+       ),
+       assert(
+         !CurrentPlatform.isWeb || bytes != null,
+         'File by path is not supported in web, Please provide bytes',
+       ),
+       assert(
+         name == null || name.isEmpty || name.contains('.'),
+         'Invalid file name, should also contain file extension',
+       ),
+       _name = name;
 
   /// Create a new instance from a json
-  factory AttachmentFile.fromJson(Map<String, dynamic> json) =>
-      _$AttachmentFileFromJson(json);
+  factory AttachmentFile.fromJson(Map<String, dynamic> json) => _$AttachmentFileFromJson(json);
 
   /// The absolute path for a cached copy of this file. It can be used to
   /// create a file instance with a descriptor for the given path.
@@ -69,20 +68,34 @@ class AttachmentFile {
   /// Serialize to json
   Map<String, dynamic> toJson() => _$AttachmentFileToJson(this);
 
-  /// Converts this into a [MultipartFile]
+  /// Converts this [AttachmentFile] to a [MultipartFile].
+  ///
+  /// Tries path-based creation first, which is more efficient for large files.
+  /// Falls back to byte-based creation when the path is inaccessible
+  /// (e.g. web platforms, or short-lived iOS photo library exports).
   Future<MultipartFile> toMultipartFile() async {
-    return switch (CurrentPlatform.type) {
-      PlatformType.web => MultipartFile.fromBytes(
-          bytes!,
+    if (path case final path?) {
+      try {
+        return await MultipartFile.fromFile(
+          path,
           filename: name,
           contentType: mediaType,
-        ),
-      _ => await MultipartFile.fromFile(
-          path!,
-          filename: name,
-          contentType: mediaType,
-        ),
-    };
+        );
+      } catch (_) {} // Path may no longer exist
+    }
+
+    if (bytes case final bytes?) {
+      return MultipartFile.fromBytes(
+        bytes,
+        filename: name,
+        contentType: mediaType,
+      );
+    }
+
+    throw StateError(
+      'Cannot create MultipartFile: both path and bytes are unavailable. '
+      'path: $path, bytes: $bytes',
+    );
   }
 
   /// Creates a copy of this [AttachmentFile] but with the given fields
@@ -124,8 +137,7 @@ sealed class UploadState with _$UploadState {
   const factory UploadState.failed({required String error}) = Failed;
 
   /// Creates a new instance from a json
-  factory UploadState.fromJson(Map<String, dynamic> json) =>
-      _$UploadStateFromJson(json);
+  factory UploadState.fromJson(Map<String, dynamic> json) => _$UploadStateFromJson(json);
 
   /// Returns true if state is [Preparing]
   bool get isPreparing => this is Preparing;

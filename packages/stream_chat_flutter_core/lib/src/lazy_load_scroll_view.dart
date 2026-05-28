@@ -53,11 +53,10 @@ class _LazyLoadScrollViewState extends State<LazyLoadScrollView> {
   double _scrollPosition = 0;
 
   @override
-  Widget build(BuildContext context) =>
-      NotificationListener<ScrollNotification>(
-        onNotification: _onNotification,
-        child: widget.child,
-      );
+  Widget build(BuildContext context) => NotificationListener<ScrollNotification>(
+    onNotification: _onNotification,
+    child: widget.child,
+  );
 
   bool _onNotification(ScrollNotification notification) {
     if (notification is ScrollStartNotification) {
@@ -78,8 +77,7 @@ class _LazyLoadScrollViewState extends State<LazyLoadScrollView> {
       final minScrollExtent = notification.metrics.minScrollExtent;
       final scrollOffset = widget.scrollOffset;
 
-      if (pixels > (minScrollExtent + scrollOffset) &&
-          pixels < (maxScrollExtent - scrollOffset)) {
+      if (pixels > (minScrollExtent + scrollOffset) && pixels < (maxScrollExtent - scrollOffset)) {
         if (widget.onInBetweenOfPage != null) {
           widget.onInBetweenOfPage!();
           return !widget.allowNotificationBubbling;

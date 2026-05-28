@@ -1,0 +1,330 @@
+import 'package:device_preview/device_preview.dart' show Devices;
+import 'package:flutter/material.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+
+import '../src/golden_client_stubs.dart';
+import '../src/golden_theme.dart';
+import '../src/mocks.dart';
+import '../src/sample_users.dart';
+
+void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
+  docsGoldenTest(
+    'channel preview tile',
+    fileName: 'channel_preview',
+    constraints: const BoxConstraints.tightFor(width: 375, height: 80),
+    builder: () {
+      final client = MockClient();
+      final channel = fakeChannel(
+        client: client,
+        id: 'general',
+        name: 'General',
+        messages: [
+          Message(
+            id: 'msg-1',
+            text: 'Hey everyone!',
+            user: noahSmith,
+            createdAt: DateTime(2024, 6, 1, 10, 30),
+          ),
+        ],
+      );
+
+      return StreamChat(
+        client: client,
+        connectivityStream: Stream.value([ConnectivityResult.mobile]),
+        child: Scaffold(
+          body: StreamChannelListItem(channel: channel),
+        ),
+      );
+    },
+  );
+
+  docsGoldenTest(
+    'channel list view',
+    fileName: 'channel_list_view',
+    constraints: const BoxConstraints.tightFor(width: 430, height: 932),
+    deviceFrame: Devices.ios.iPhone13,
+    builder: () {
+      final client = MockClient();
+
+      final channels = [
+        fakeChannel(
+          client: client,
+          id: 'general',
+          name: 'General',
+          messages: [
+            Message(
+              id: 'msg-1',
+              text: 'Hey, how is everyone doing?',
+              user: noahSmith,
+              createdAt: DateTime(2024, 6, 1, 10, 30),
+            ),
+          ],
+          unreadCount: 2,
+        ),
+        fakeChannel(
+          client: client,
+          id: 'design',
+          name: 'Design',
+          messages: [
+            Message(
+              id: 'msg-2',
+              text: 'New mockups are ready!',
+              user: charlotteAnderson,
+              createdAt: DateTime(2024, 6, 1, 9, 15),
+            ),
+          ],
+        ),
+        fakeChannel(
+          client: client,
+          id: 'random',
+          name: 'Random',
+          messages: [
+            Message(
+              id: 'msg-3',
+              text: 'Anyone up for lunch?',
+              user: liamJohnson,
+              createdAt: DateTime(2024, 5, 31, 12, 0),
+            ),
+          ],
+        ),
+        fakeChannel(
+          client: client,
+          id: 'engineering',
+          name: 'Engineering',
+          messages: [
+            Message(
+              id: 'msg-4',
+              text: 'PR #42 is ready for review',
+              user: elenaBarros,
+              createdAt: DateTime(2024, 5, 30, 15, 45),
+            ),
+          ],
+        ),
+      ];
+
+      final controller = StreamChannelListController.fromValue(
+        PagedValue(items: channels),
+        client: client,
+      );
+
+      stubQueryChannelsForGoldens(client, channels);
+      stubMockClientCurrentUser(client, ownUser);
+
+      return StreamChat(
+        client: client,
+        connectivityStream: Stream.value([ConnectivityResult.mobile]),
+        child: Builder(
+          builder: (context) {
+            final icons = context.streamIcons;
+            return Scaffold(
+              appBar: StreamChannelListHeader(
+                title: const Text('Chats'),
+                trailing: StreamButton.icon(
+                  icon: Icon(icons.plus),
+                  onPressed: () {},
+                ),
+              ),
+              body: StreamChannelListView(
+                controller: controller,
+                shrinkWrap: true,
+              ),
+            );
+          },
+        ),
+      );
+    },
+  );
+
+  docsGoldenTest(
+    'swipe channel to reveal actions',
+    fileName: 'swipe_channel',
+    constraints: const BoxConstraints.tightFor(width: 375, height: 80),
+    whilePerforming: (tester) async {
+      await tester.drag(find.byType(StreamChannelListItem), const Offset(-150, 0));
+      await tester.pumpAndSettle();
+      return null;
+    },
+    builder: () {
+      final client = MockClient();
+      final channel = fakeChannel(
+        client: client,
+        id: 'general',
+        name: 'General',
+        messages: [
+          Message(
+            id: 'msg-1',
+            text: 'Hey, how is everyone doing?',
+            user: noahSmith,
+            createdAt: DateTime(2024, 6, 1, 10, 30),
+          ),
+        ],
+      );
+
+      return StreamChat(
+        client: client,
+        connectivityStream: Stream.value([ConnectivityResult.mobile]),
+        child: Builder(
+          builder: (context) {
+            final icons = context.streamIcons;
+            final colorScheme = context.streamColorScheme;
+            return Scaffold(
+              body: Slidable(
+                groupTag: 'channels-actions',
+                endActionPane: ActionPane(
+                  extentRatio: 0.4,
+                  motion: const BehindMotion(),
+                  children: [
+                    CustomSlidableAction(
+                      foregroundColor: colorScheme.textPrimary,
+                      backgroundColor: colorScheme.backgroundSurface,
+                      onPressed: (_) {},
+                      child: Icon(icons.more, size: 20),
+                    ),
+                    CustomSlidableAction(
+                      foregroundColor: colorScheme.textOnAccent,
+                      backgroundColor: colorScheme.accentPrimary,
+                      onPressed: (_) {},
+                      child: Icon(icons.mute, size: 20),
+                    ),
+                  ],
+                ),
+                child: StreamChannelListItem(channel: channel),
+              ),
+            );
+          },
+        ),
+      );
+    },
+  );
+
+  docsGoldenTest(
+    'slidable channel list with header',
+    fileName: 'slidable_channel_list',
+    constraints: const BoxConstraints.tightFor(width: 430, height: 932),
+    deviceFrame: Devices.ios.iPhone13,
+    whilePerforming: (tester) async {
+      await tester.drag(find.byType(StreamChannelListItem).first, const Offset(-200, 0));
+      await tester.pumpAndSettle();
+      return null;
+    },
+    builder: () {
+      final client = MockClient();
+
+      final channels = [
+        fakeChannel(
+          client: client,
+          id: 'general',
+          name: 'General',
+          messages: [
+            Message(
+              id: 'msg-1',
+              text: 'Hey, how is everyone doing?',
+              user: noahSmith,
+              createdAt: DateTime(2024, 6, 1, 10, 30),
+            ),
+          ],
+          unreadCount: 2,
+        ),
+        fakeChannel(
+          client: client,
+          id: 'design',
+          name: 'Design',
+          messages: [
+            Message(
+              id: 'msg-2',
+              text: 'New mockups are ready!',
+              user: charlotteAnderson,
+              createdAt: DateTime(2024, 6, 1, 9, 15),
+            ),
+          ],
+        ),
+        fakeChannel(
+          client: client,
+          id: 'random',
+          name: 'Random',
+          messages: [
+            Message(
+              id: 'msg-3',
+              text: 'Anyone up for lunch?',
+              user: liamJohnson,
+              createdAt: DateTime(2024, 5, 31, 12, 0),
+            ),
+          ],
+        ),
+        fakeChannel(
+          client: client,
+          id: 'engineering',
+          name: 'Engineering',
+          messages: [
+            Message(
+              id: 'msg-4',
+              text: 'PR #42 is ready for review',
+              user: elenaBarros,
+              createdAt: DateTime(2024, 5, 30, 15, 45),
+            ),
+          ],
+        ),
+      ];
+
+      final controller = StreamChannelListController.fromValue(
+        PagedValue(items: channels),
+        client: client,
+      );
+
+      stubQueryChannelsForGoldens(client, channels);
+      stubMockClientCurrentUser(client, ownUser);
+
+      return StreamChat(
+        client: client,
+        connectivityStream: Stream.value([ConnectivityResult.mobile]),
+        child: Builder(
+          builder: (context) {
+            final icons = context.streamIcons;
+            final colorScheme = context.streamColorScheme;
+            return Scaffold(
+              appBar: StreamChannelListHeader(
+                title: const Text('Chats'),
+                trailing: StreamButton.icon(
+                  icon: Icon(icons.plus),
+                  onPressed: () {},
+                ),
+              ),
+              body: StreamChannelListView(
+                controller: controller,
+                shrinkWrap: true,
+                itemBuilder: (context, channels, index, defaultWidget) {
+                  return Slidable(
+                    groupTag: 'channels-actions',
+                    endActionPane: ActionPane(
+                      extentRatio: 0.4,
+                      motion: const BehindMotion(),
+                      children: [
+                        CustomSlidableAction(
+                          foregroundColor: colorScheme.textPrimary,
+                          backgroundColor: colorScheme.backgroundSurface,
+                          onPressed: (_) {},
+                          child: Icon(icons.more, size: 20),
+                        ),
+                        CustomSlidableAction(
+                          foregroundColor: colorScheme.textOnAccent,
+                          backgroundColor: colorScheme.accentPrimary,
+                          onPressed: (_) {},
+                          child: Icon(icons.mute, size: 20),
+                        ),
+                      ],
+                    ),
+                    child: defaultWidget,
+                  );
+                },
+              ),
+            );
+          },
+        ),
+      );
+    },
+  );
+}

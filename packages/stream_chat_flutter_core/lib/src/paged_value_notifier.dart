@@ -8,8 +8,7 @@ part 'paged_value_notifier.freezed.dart';
 const defaultInitialPagedLimitMultiplier = 3;
 
 /// Value listenable for paged data.
-typedef PagedValueListenableBuilder<Key, Value>
-    = ValueListenableBuilder<PagedValue<Key, Value>>;
+typedef PagedValueListenableBuilder<Key, Value> = ValueListenableBuilder<PagedValue<Key, Value>>;
 
 /// A [PagedValueNotifier] that uses a [PagedListenable] to load data.
 ///
@@ -19,8 +18,7 @@ typedef PagedValueListenableBuilder<Key, Value>
 ///
 /// [PagedValueNotifier] is a [ValueNotifier] that emits a [PagedValue]
 /// whenever the data is loaded or an error occurs.
-abstract class PagedValueNotifier<Key, Value>
-    extends ValueNotifier<PagedValue<Key, Value>> {
+abstract class PagedValueNotifier<Key, Value> extends ValueNotifier<PagedValue<Key, Value>> {
   /// Creates a [PagedValueNotifier]
   PagedValueNotifier(this._initialValue) : super(_initialValue);
 
@@ -148,17 +146,18 @@ extension PagedValuePatternMatching<Key, Value> on PagedValue<Key, Value> {
       List<Value> items,
       Key? nextPageKey,
       StreamChatError? error,
-    ) success, {
+    )
+    success, {
     required TResult Function() loading,
     required TResult Function(StreamChatError error) error,
   }) {
     final pagedValue = this;
     return switch (pagedValue) {
       Success<Key, Value>() => success(
-          pagedValue.items,
-          pagedValue.nextPageKey,
-          pagedValue.error,
-        ),
+        pagedValue.items,
+        pagedValue.nextPageKey,
+        pagedValue.error,
+      ),
       Loading<Key, Value>() => loading(),
       Error<Key, Value>() => error(pagedValue.error),
     };
@@ -171,17 +170,18 @@ extension PagedValuePatternMatching<Key, Value> on PagedValue<Key, Value> {
       List<Value> items,
       Key? nextPageKey,
       StreamChatError? error,
-    )? success, {
+    )?
+    success, {
     TResult? Function()? loading,
     TResult? Function(StreamChatError error)? error,
   }) {
     final pagedValue = this;
     return switch (pagedValue) {
       Success<Key, Value>() => success?.call(
-          pagedValue.items,
-          pagedValue.nextPageKey,
-          pagedValue.error,
-        ),
+        pagedValue.items,
+        pagedValue.nextPageKey,
+        pagedValue.error,
+      ),
       Loading<Key, Value>() => loading?.call(),
       Error<Key, Value>() => error?.call(pagedValue.error),
     };
@@ -194,7 +194,8 @@ extension PagedValuePatternMatching<Key, Value> on PagedValue<Key, Value> {
       List<Value> items,
       Key? nextPageKey,
       StreamChatError? error,
-    )? success, {
+    )?
+    success, {
     TResult Function()? loading,
     TResult Function(StreamChatError error)? error,
     required TResult orElse(),
@@ -202,10 +203,10 @@ extension PagedValuePatternMatching<Key, Value> on PagedValue<Key, Value> {
     final pagedValue = this;
     final result = switch (pagedValue) {
       Success<Key, Value>() => success?.call(
-          pagedValue.items,
-          pagedValue.nextPageKey,
-          pagedValue.error,
-        ),
+        pagedValue.items,
+        pagedValue.nextPageKey,
+        pagedValue.error,
+      ),
       Loading<Key, Value>() => loading?.call(),
       Error<Key, Value>() => error?.call(pagedValue.error),
     };

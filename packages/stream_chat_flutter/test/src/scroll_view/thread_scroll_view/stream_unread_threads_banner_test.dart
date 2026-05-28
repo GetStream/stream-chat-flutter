@@ -9,8 +9,11 @@ void main() {
       fileName: 'stream_unread_threads_banner_${brightness.name}',
       constraints: const BoxConstraints.tightFor(width: 400, height: 100),
       builder: () => _wrapWithMaterialApp(
+        const StreamUnreadThreadsBanner(
+          enabled: true,
+          unreadThreads: {'id1', 'id2', 'id3'},
+        ),
         brightness: brightness,
-        const StreamUnreadThreadsBanner(unreadThreads: {'id1', 'id2', 'id3'}),
       ),
     );
   }
@@ -18,18 +21,20 @@ void main() {
 
 Widget _wrapWithMaterialApp(
   Widget widget, {
-  Brightness? brightness,
+  Brightness brightness = Brightness.light,
 }) {
   return MaterialApp(
+    theme: ThemeData(brightness: brightness),
     home: StreamChatTheme(
-      data: StreamChatThemeData(brightness: brightness),
-      child: Builder(builder: (context) {
-        final theme = StreamChatTheme.of(context);
-        return Scaffold(
-          backgroundColor: theme.colorTheme.appBg,
-          body: Center(child: widget),
-        );
-      }),
+      data: StreamChatThemeData(),
+      child: Builder(
+        builder: (context) {
+          return Scaffold(
+            backgroundColor: context.streamColorScheme.backgroundApp,
+            body: Center(child: widget),
+          );
+        },
+      ),
     ),
   );
 }

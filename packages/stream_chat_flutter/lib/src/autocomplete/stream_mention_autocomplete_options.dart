@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+// Caps the card height so a long mention list scrolls internally
+// instead of pushing the composer / header off the screen.
+const _kMaxHeight = 176.0;
+
 /// {@template user_mentions_overlay}
 /// Overlay for displaying users that can be mentioned.
 /// {@endtemplate}
@@ -16,14 +20,15 @@ class StreamMentionAutocompleteOptions extends StatefulWidget {
     this.mentionAllAppUsers = false,
     this.mentionsTileBuilder,
     this.onMentionUserTap,
-  })  : assert(
-          channel.state != null,
-          'Channel ${channel.cid} is not yet initialized',
-        ),
-        assert(
-          !mentionAllAppUsers || (mentionAllAppUsers && client != null),
-          'StreamChatClient is required in order to use mentionAllAppUsers',
-        );
+    this.style = AutocompleteOptionsStyle.fixed,
+  }) : assert(
+         channel.state != null,
+         'Channel ${channel.cid} is not yet initialized',
+       ),
+       assert(
+         !mentionAllAppUsers || (mentionAllAppUsers && client != null),
+         'StreamChatClient is required in order to use mentionAllAppUsers',
+       );
 
   /// Query for searching users.
   final String query;
@@ -48,13 +53,16 @@ class StreamMentionAutocompleteOptions extends StatefulWidget {
   /// Callback called when a user is selected.
   final ValueSetter<User>? onMentionUserTap;
 
+  /// The visual style of the autocomplete options overlay.
+  ///
+  /// Defaults to [AutocompleteOptionsStyle.fixed].
+  final AutocompleteOptionsStyle style;
+
   @override
-  _StreamMentionAutocompleteOptionsState createState() =>
-      _StreamMentionAutocompleteOptionsState();
+  _StreamMentionAutocompleteOptionsState createState() => _StreamMentionAutocompleteOptionsState();
 }
 
-class _StreamMentionAutocompleteOptionsState
-    extends State<StreamMentionAutocompleteOptions> {
+class _StreamMentionAutocompleteOptionsState extends State<StreamMentionAutocompleteOptions> {
   late Future<List<User>> userMentionsFuture;
 
   @override
@@ -83,18 +91,48 @@ class _StreamMentionAutocompleteOptionsState
         if (!snapshot.hasData) return const Empty();
         final users = snapshot.data!;
 
+        final colorScheme = context.streamColorScheme;
+        final spacing = context.streamSpacing;
+        final (:elevation, :margin, :shape) = widget.style.resolve(colorScheme.borderDefault);
+
         return StreamAutocompleteOptions<User>(
           options: users,
+          maxHeight: _kMaxHeight,
+          elevation: elevation,
+          margin: margin,
+          shape: shape,
           optionBuilder: (context, user) {
-            final colorTheme = StreamChatTheme.of(context).colorTheme;
-            return Material(
-              color: colorTheme.barsBg,
+            final mentionsTileBuilder = widget.mentionsTileBuilder;
+            if (mentionsTileBuilder != null) {
+              return Material(
+                color: context.streamColorScheme.backgroundElevation1,
+                child: InkWell(
+                  onTap: widget.onMentionUserTap == null ? null : () => widget.onMentionUserTap!(user),
+                  child: mentionsTileBuilder(context, user),
+                ),
+              );
+            }
+
+            return Padding(
+              padding: EdgeInsets.symmetric(horizontal: spacing.xxs),
               child: InkWell(
-                onTap: widget.onMentionUserTap == null
-                    ? null
-                    : () => widget.onMentionUserTap!(user),
-                child: widget.mentionsTileBuilder?.call(context, user) ??
-                    StreamUserMentionTile(user),
+                borderRadius: BorderRadius.circular(12),
+                onTap: widget.onMentionUserTap == null ? null : () => widget.onMentionUserTap!(user),
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: spacing.sm, vertical: spacing.xs),
+                  child: Row(
+                    spacing: spacing.sm,
+                    children: [
+                      StreamUserAvatar(size: .md, user: user),
+                      Text(
+                        user.name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: context.streamTextTheme.bodyDefault,
+                      ),
+                    ],
+                  ),
+                ),
               ),
             );
           },
@@ -131,18 +169,13 @@ class _StreamMentionAutocompleteOptionsState
     }
 
     final result = await _queryMembers(query);
-    return result
-        .map((it) => it.user)
-        .whereType<User>()
-        .toList(growable: false);
+    return result.map((it) => it.user).whereType<User>().toList(growable: false);
   }
 
   Future<List<Member>> _queryMembers(String query) async {
     final response = await widget.channel.queryMembers(
       pagination: PaginationParams(limit: widget.limit),
-      filter: query.isEmpty
-          ? const Filter.empty()
-          : Filter.autoComplete('name', query),
+      filter: query.isEmpty ? const Filter.empty() : Filter.autoComplete('name', query),
     );
     return response.members;
   }

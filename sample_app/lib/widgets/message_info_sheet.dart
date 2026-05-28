@@ -20,12 +20,12 @@ class MessageInfoSheet extends StatelessWidget {
     required BuildContext context,
     required Message message,
   }) {
-    final theme = StreamChatTheme.of(context);
+    final colorScheme = context.streamColorScheme;
     return showModalBottomSheet<void>(
       context: context,
       useSafeArea: true,
       isScrollControlled: true,
-      backgroundColor: theme.colorTheme.appBg,
+      backgroundColor: colorScheme.backgroundApp,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(
           top: Radius.circular(16),
@@ -48,9 +48,8 @@ class MessageInfoSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = StreamChatTheme.of(context);
-    final colorTheme = theme.colorTheme;
-    final textTheme = theme.textTheme;
+    final colorScheme = context.streamColorScheme;
+    final textTheme = context.streamTextTheme;
 
     final channel = StreamChannel.of(context).channel;
 
@@ -66,7 +65,7 @@ class MessageInfoSheet extends StatelessWidget {
             initialData: channel.state?.read,
             noDataBuilder: (context) => Center(
               child: CircularProgressIndicator.adaptive(
-                valueColor: AlwaysStoppedAnimation(colorTheme.accentPrimary),
+                valueColor: AlwaysStoppedAnimation(colorScheme.accentPrimary),
               ),
             ),
             builder: (context, reads) {
@@ -83,12 +82,12 @@ class MessageInfoSheet extends StatelessWidget {
                       Icon(
                         Icons.info_outline,
                         size: 56,
-                        color: colorTheme.textLowEmphasis,
+                        color: colorScheme.textSecondary,
                       ),
                       Text(
                         'No delivery information available',
-                        style: textTheme.body.copyWith(
-                          color: colorTheme.textLowEmphasis,
+                        style: textTheme.bodyDefault.copyWith(
+                          color: colorScheme.textSecondary,
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -136,16 +135,15 @@ class MessageInfoSheet extends StatelessWidget {
   }
 
   Widget _buildHeader(BuildContext context) {
-    final theme = StreamChatTheme.of(context);
-    final textTheme = theme.textTheme;
-    final colorTheme = theme.colorTheme;
+    final textTheme = context.streamTextTheme;
+    final colorScheme = context.streamColorScheme;
 
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         border: Border(
           bottom: BorderSide(
-            color: colorTheme.borders,
+            color: colorScheme.borderDefault,
           ),
         ),
       ),
@@ -154,13 +152,13 @@ class MessageInfoSheet extends StatelessWidget {
         children: [
           Text(
             'Message Info',
-            style: textTheme.headlineBold,
+            style: textTheme.headingMd,
           ),
           IconButton(
             iconSize: 32,
-            icon: const StreamSvgIcon(icon: StreamSvgIcons.close),
+            icon: Icon(context.streamIcons.xmark),
             onPressed: Navigator.of(context).maybePop,
-            color: colorTheme.textHighEmphasis,
+            color: colorScheme.textPrimary,
             padding: const EdgeInsets.all(4),
             style: ButtonStyle(
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -178,9 +176,8 @@ class MessageInfoSheet extends StatelessWidget {
     required List<Read> reads,
     required Widget Function(BuildContext context, Read item) itemBuilder,
   }) {
-    final theme = StreamChatTheme.of(context);
-    final colorTheme = theme.colorTheme;
-    final textTheme = theme.textTheme;
+    final colorScheme = context.streamColorScheme;
+    final textTheme = context.streamTextTheme;
 
     return Column(
       spacing: 12,
@@ -189,8 +186,8 @@ class MessageInfoSheet extends StatelessWidget {
         // Section title
         Text(
           title,
-          style: textTheme.footnote.copyWith(
-            color: colorTheme.textLowEmphasis,
+          style: textTheme.captionDefault.copyWith(
+            color: colorScheme.textSecondary,
           ),
         ),
 
@@ -199,7 +196,7 @@ class MessageInfoSheet extends StatelessWidget {
           borderRadius: BorderRadius.circular(12),
           child: DecoratedBox(
             decoration: BoxDecoration(
-              color: theme.colorTheme.barsBg,
+              color: colorScheme.backgroundElevation1,
             ),
             child: MediaQuery.removePadding(
               context: context,
@@ -213,7 +210,7 @@ class MessageInfoSheet extends StatelessWidget {
                 physics: const NeverScrollableScrollPhysics(),
                 separatorBuilder: (_, __) => Divider(
                   height: 1,
-                  color: theme.colorTheme.borders,
+                  color: colorScheme.borderDefault,
                 ),
                 itemBuilder: (_, index) => itemBuilder(
                   context,
@@ -240,8 +237,6 @@ class _UserReadTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = StreamChatTheme.of(context);
-
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: 12,
@@ -251,11 +246,8 @@ class _UserReadTile extends StatelessWidget {
         children: [
           // User avatar
           StreamUserAvatar(
+            size: .lg,
             user: read.user,
-            constraints: const BoxConstraints.tightFor(
-              height: 40,
-              width: 40,
-            ),
           ),
 
           const SizedBox(width: 12),
@@ -264,19 +256,19 @@ class _UserReadTile extends StatelessWidget {
           Expanded(
             child: Text(
               read.user.name,
-              style: theme.textTheme.bodyBold,
+              style: context.streamTextTheme.bodyEmphasis,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
           ),
 
           // Status icon
-          StreamSvgIcon(
+          Icon(
+            context.streamIcons.checks,
             size: 18,
-            icon: StreamSvgIcons.checkAll,
             color: switch (isDelivered) {
-              true => theme.colorTheme.textLowEmphasis,
-              false => theme.colorTheme.accentPrimary,
+              true => context.streamColorScheme.textSecondary,
+              false => context.streamColorScheme.accentPrimary,
             },
           ),
         ],

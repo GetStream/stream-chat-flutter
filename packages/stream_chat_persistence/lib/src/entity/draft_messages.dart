@@ -24,9 +24,7 @@ class DraftMessages extends Table {
   TextColumn get mentionedUsers => text().map(ListConverter<String>())();
 
   /// The ID of the parent message, if the message is a thread reply.
-  TextColumn get parentId => text()
-      .nullable()
-      .references(Messages, #id, onDelete: KeyAction.cascade)();
+  TextColumn get parentId => text().nullable().references(Messages, #id, onDelete: KeyAction.cascade)();
 
   /// The ID of the quoted message, if the message is a quoted reply.
   TextColumn get quotedMessageId => text().nullable()();
@@ -47,8 +45,7 @@ class DraftMessages extends Table {
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 
   /// The channel cid of which this message is part of
-  TextColumn get channelCid =>
-      text().references(Channels, #cid, onDelete: KeyAction.cascade)();
+  TextColumn get channelCid => text().references(Channels, #cid, onDelete: KeyAction.cascade)();
 
   /// Message custom extraData
   TextColumn get extraData => text().nullable().map(MapConverter())();

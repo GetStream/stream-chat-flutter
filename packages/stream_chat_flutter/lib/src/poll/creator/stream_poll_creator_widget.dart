@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:stream_chat_flutter/src/poll/creator/poll_config_option.dart';
 import 'package:stream_chat_flutter/src/poll/creator/poll_option_reorderable_list_view.dart';
 import 'package:stream_chat_flutter/src/poll/creator/poll_question_text_field.dart';
-import 'package:stream_chat_flutter/src/poll/creator/poll_switch_list_tile.dart';
+import 'package:stream_chat_flutter/src/theme/poll_creator_theme.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 /// {@template streamPollCreator}
 /// A widget that allows users to create a poll.
@@ -20,6 +22,7 @@ class StreamPollCreatorWidget extends StatelessWidget {
     this.shrinkWrap = false,
     this.physics,
     this.padding = const EdgeInsets.all(16),
+    this.scrollController,
   });
 
   /// The padding around the poll creator.
@@ -34,11 +37,22 @@ class StreamPollCreatorWidget extends StatelessWidget {
   /// The controller used to manage the state of the poll.
   final StreamPollController controller;
 
+  /// Optional scroll controller for the underlying scroll view.
+  ///
+  /// When the creator is hosted inside a [DraggableScrollableSheet] (e.g. by
+  /// [showStreamPollCreatorSheet]), pass the controller provided by the sheet
+  /// so drag gestures expand and collapse the sheet correctly.
+  final ScrollController? scrollController;
+
   @override
   Widget build(BuildContext context) {
+    final theme = StreamPollCreatorTheme.of(context);
+
     return ValueListenableBuilder(
       valueListenable: controller,
       builder: (context, poll, child) {
+        final spacing = context.streamSpacing;
+
         final config = controller.config;
         final translations = context.translations;
 
@@ -49,88 +63,79 @@ class StreamPollCreatorWidget extends StatelessWidget {
         return SingleChildScrollView(
           padding: padding,
           physics: physics,
+          controller: scrollController,
+          keyboardDismissBehavior: .onDrag,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               PollQuestionTextField(
                 questionRange: config.nameRange,
-                title: translations.questionsLabel,
+                title: translations.questionLabel(),
                 hintText: translations.askAQuestionLabel,
                 initialQuestion: PollQuestion(id: poll.id, text: poll.name),
                 onChanged: (question) => controller.question = question.text,
               ),
-              const SizedBox(height: 32),
+              SizedBox(height: spacing.xl),
               PollOptionReorderableListView(
                 title: translations.optionLabel(isPlural: true),
-                itemHintText: translations.optionLabel(),
+                itemHintText: context.translations.addAnOptionLabel,
                 allowDuplicate: config.allowDuplicateOptions,
                 optionsRange: config.optionsRange,
                 initialOptions: [
-                  for (final option in poll.options)
-                    PollOptionItem(id: option.id, text: option.text),
+                  for (final option in poll.options) PollOptionItem(id: option.id, text: option.text),
                 ],
                 onOptionsChanged: (options) => controller.options = [
-                  for (final option in options)
-                    PollOption(id: option.id, text: option.text),
+                  for (final option in options) PollOption(id: option.id, text: option.text),
                 ],
               ),
-              const SizedBox(height: 32),
-              PollSwitchListTile(
+              SizedBox(height: spacing.xxl),
+              PollConfigOption(
                 title: translations.multipleAnswersLabel,
+                description: translations.multipleAnswersDescription,
                 value: poll.enforceUniqueVote == false,
                 onChanged: (value) {
                   controller.enforceUniqueVote = !value;
                   // We also need to reset maxVotesAllowed if disabled.
                   if (value case false) controller.maxVotesAllowed = null;
                 },
-                children: [
-                  PollSwitchTextField(
-                    hintText: translations.maximumVotesPerPersonLabel,
-                    item: PollSwitchItem(
-                      value: poll.maxVotesAllowed != null,
-                      inputValue: poll.maxVotesAllowed,
-                    ),
-                    keyboardType: TextInputType.number,
-                    validator: (item) {
-                      if (config.allowedVotesRange case final allowedRange?) {
-                        final votes = item.inputValue;
-                        if (votes == null) return null;
-
-                        return translations.maxVotesPerPersonValidationError(
-                          votes,
-                          allowedRange,
-                        );
-                      }
-
-                      return null;
-                    },
-                    onChanged: (option) {
-                      final enabled = option.value;
-                      final maxVotes = option.inputValue;
-
-                      controller.maxVotesAllowed = enabled ? maxVotes : null;
-                    },
+                child: PollConfigOption(
+                  contentPadding: EdgeInsets.zero,
+                  title: translations.maximumVotesPerPersonLabel,
+                  description: translations.maximumVotesPerPersonDescription(
+                    config.allowedVotesRange,
                   ),
-                ],
+                  value: poll.maxVotesAllowed != null,
+                  onChanged: (enabled) {
+                    controller.maxVotesAllowed = enabled ? config.allowedVotesRange?.min ?? 2 : null;
+                  },
+                  child: StreamStepper(
+                    min: config.allowedVotesRange?.min ?? 2,
+                    max: config.allowedVotesRange?.max ?? 10,
+                    value: poll.maxVotesAllowed ?? config.allowedVotesRange?.min ?? 2,
+                    onChanged: (value) => controller.maxVotesAllowed = value,
+                    style: theme.configOptionStyle?.stepperStyle,
+                  ),
+                ),
               ),
-              const SizedBox(height: 8),
-              PollSwitchListTile(
+              SizedBox(height: spacing.md),
+              PollConfigOption(
                 title: translations.anonymousPollLabel,
-                value: poll.votingVisibility == VotingVisibility.anonymous,
-                onChanged: (anon) => controller.votingVisibility = anon //
-                    ? VotingVisibility.anonymous
-                    : VotingVisibility.public,
+                description: translations.anonymousPollDescription,
+                value: poll.votingVisibility == .anonymous,
+                onChanged: (anon) => controller.votingVisibility = anon ? .anonymous : .public,
               ),
-              const SizedBox(height: 8),
-              PollSwitchListTile(
+              SizedBox(height: spacing.md),
+              PollConfigOption(
                 title: translations.suggestAnOptionLabel,
+                description: translations.suggestAnOptionDescription,
                 value: poll.allowUserSuggestedOptions,
                 onChanged: (allow) => controller.allowSuggestions = allow,
               ),
-              const SizedBox(height: 8),
-              PollSwitchListTile(
+              SizedBox(height: spacing.md),
+              PollConfigOption(
                 title: translations.addACommentLabel,
+                description: translations.addACommentDescription,
                 value: poll.allowAnswers,
                 onChanged: (allow) => controller.allowComments = allow,
               ),

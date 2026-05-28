@@ -1,0 +1,39 @@
+name: docs_screenshots
+description: Golden test screenshots for Stream Chat Flutter documentation.
+publish_to: none
+
+# Note: The environment configuration and dependency versions are managed by Melos.
+#
+# Do not edit them manually.
+#
+# Steps to update dependencies:
+#   1. Modify the version in the melos.yaml file.
+#   2. Run `melos bootstrap` to apply changes.
+
+environment:
+  sdk: ^3.10.0
+  flutter: ">=3.38.1"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  record: ^6.2.0
+  stream_chat_flutter: ^10.0.0-beta.13
+  stream_core_flutter:
+    git:
+      url: https://github.com/GetStream/stream-core-flutter.git
+      ref: 333f7b72485f308b282cc85973223a2919fd8153
+      path: packages/stream_core_flutter
+
+dev_dependencies:
+  alchemist: ^0.14.0
+  device_preview: ^1.2.0
+  flutter_slidable: ^4.0.0
+  flutter_test:
+    sdk: flutter
+  mocktail: ^1.0.5
+  plugin_platform_interface: ^2.1.8
+  stream_chat_localizations: ^10.0.0-beta.13
+
+flutter:
+  uses-material-design: true

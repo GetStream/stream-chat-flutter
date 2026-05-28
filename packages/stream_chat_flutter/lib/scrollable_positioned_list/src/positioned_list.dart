@@ -49,9 +49,9 @@ class PositionedList extends StatefulWidget {
     this.addAutomaticKeepAlives = true,
     this.keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
   }) : assert(
-          (positionedIndex == 0) || (positionedIndex < itemCount),
-          'positionedIndex must be 0 or a value less than itemCount',
-        );
+         (positionedIndex == 0) || (positionedIndex < itemCount),
+         'positionedIndex must be 0 or a value less than itemCount',
+       );
 
   /// Number of items the [itemBuilder] can produce.
   final int itemCount;
@@ -125,7 +125,7 @@ class PositionedList extends StatefulWidget {
   final bool addSemanticIndexes;
 
   /// The amount of space by which to inset the children.
-  final EdgeInsets? padding;
+  final EdgeInsetsGeometry? padding;
 
   /// Whether to wrap each child in a [RepaintBoundary].
   ///
@@ -261,12 +261,9 @@ class _PositionedListState extends State<PositionedList> {
     final firstVisible = _firstVisibleIndex();
     final bucket = (firstVisible ~/ _slidingWindowSize) * _slidingWindowSize;
     final start = (bucket - _extraItemCount).clamp(0, widget.itemCount);
-    final end = (bucket + _slidingWindowSize + _extraItemCount)
-        .clamp(0, widget.itemCount);
+    final end = (bucket + _slidingWindowSize + _extraItemCount).clamp(0, widget.itemCount);
 
-    if (start == _cachedRangeStart &&
-        end == _cachedRangeEnd &&
-        widget.itemCount == _cachedItemCount) {
+    if (start == _cachedRangeStart && end == _cachedRangeEnd && widget.itemCount == _cachedItemCount) {
       return;
     }
 
@@ -331,8 +328,7 @@ class _PositionedListState extends State<PositionedList> {
   int? _findTrailingIndex(Key key) {
     final userIndex = _userIndexFromKey(key);
     if (userIndex == null) return null;
-    if (userIndex <= widget.positionedIndex || userIndex >= widget.itemCount)
-      return null;
+    if (userIndex <= widget.positionedIndex || userIndex >= widget.itemCount) return null;
     return widget.separatorBuilder == null
         ? userIndex - widget.positionedIndex - 1
         : (userIndex - widget.positionedIndex) * 2 - 1;
@@ -365,9 +361,7 @@ class _PositionedListState extends State<PositionedList> {
                       : _buildSeparatedListElement(
                           widget.positionedIndex * 2 - (index + 1),
                         ),
-                  childCount: widget.separatorBuilder == null
-                      ? widget.positionedIndex
-                      : widget.positionedIndex * 2,
+                  childCount: widget.separatorBuilder == null ? widget.positionedIndex : widget.positionedIndex * 2,
                   addSemanticIndexes: false,
                   addRepaintBoundaries: widget.addRepaintBoundaries,
                   addAutomaticKeepAlives: widget.addAutomaticKeepAlives,
@@ -393,8 +387,7 @@ class _PositionedListState extends State<PositionedList> {
               ),
             ),
           ),
-          if (widget.positionedIndex >= 0 &&
-              widget.positionedIndex < widget.itemCount - 1)
+          if (widget.positionedIndex >= 0 && widget.positionedIndex < widget.itemCount - 1)
             SliverPadding(
               padding: _trailingSliverPadding,
               sliver: SliverList(
@@ -440,69 +433,87 @@ class _PositionedListState extends State<PositionedList> {
     // null (e.g. headers, loaders, separators that don't need
     // cross-rebuild identity).
     final stableKey = widget.itemKeyBuilder?.call(index);
-    final child = stableKey != null
-        ? KeyedSubtree(key: ValueKey<Object>(stableKey), child: builtChild)
-        : builtChild;
+    final child = stableKey != null ? KeyedSubtree(key: ValueKey<Object>(stableKey), child: builtChild) : builtChild;
 
     return RegisteredElementWidget(
       key: IndexedKey(child.key, index),
-      child: widget.addSemanticIndexes
-          ? IndexedSemantics(index: index, child: child)
-          : child,
+      child: widget.addSemanticIndexes ? IndexedSemantics(index: index, child: child) : child,
     );
   }
 
-  EdgeInsets get _leadingSliverPadding =>
-      (widget.scrollDirection == Axis.vertical
-          ? widget.reverse
-              ? widget.padding?.copyWith(top: 0)
-              : widget.padding?.copyWith(bottom: 0)
-          : widget.reverse
-              ? widget.padding?.copyWith(left: 0)
-              : widget.padding?.copyWith(right: 0)) ??
-      EdgeInsets.zero;
+  EdgeInsets get _resolvedPadding =>
+      widget.padding?.resolve(Directionality.maybeOf(context) ?? TextDirection.ltr) ?? EdgeInsets.zero;
 
-  EdgeInsets get _centerSliverPadding => widget.scrollDirection == Axis.vertical
-      ? widget.reverse
-          ? widget.padding?.copyWith(
-                top: widget.positionedIndex == widget.itemCount - 1
-                    ? widget.padding!.top
-                    : 0,
-                bottom:
-                    widget.positionedIndex == 0 ? widget.padding!.bottom : 0,
-              ) ??
-              EdgeInsets.zero
-          : widget.padding?.copyWith(
-                top: widget.positionedIndex == 0 ? widget.padding!.top : 0,
-                bottom: widget.positionedIndex == widget.itemCount - 1
-                    ? widget.padding!.bottom
-                    : 0,
-              ) ??
-              EdgeInsets.zero
-      : widget.reverse
-          ? widget.padding?.copyWith(
-                left: widget.positionedIndex == widget.itemCount - 1
-                    ? widget.padding!.left
-                    : 0,
-                right: widget.positionedIndex == 0 ? widget.padding!.right : 0,
-              ) ??
-              EdgeInsets.zero
-          : widget.padding?.copyWith(
-                left: widget.positionedIndex == 0 ? widget.padding!.left : 0,
-                right: widget.positionedIndex == widget.itemCount - 1
-                    ? widget.padding!.right
-                    : 0,
-              ) ??
-              EdgeInsets.zero;
+  AxisDirection get _axisDirection {
+    if (widget.scrollDirection == Axis.vertical) {
+      return widget.reverse ? AxisDirection.up : AxisDirection.down;
+    }
+    final ltr = (Directionality.maybeOf(context) ?? TextDirection.ltr) == TextDirection.ltr;
+    if (widget.reverse) {
+      return ltr ? AxisDirection.left : AxisDirection.right;
+    }
+    return ltr ? AxisDirection.right : AxisDirection.left;
+  }
 
-  EdgeInsets get _trailingSliverPadding =>
-      widget.scrollDirection == Axis.vertical
-          ? widget.reverse
-              ? widget.padding?.copyWith(bottom: 0) ?? EdgeInsets.zero
-              : widget.padding?.copyWith(top: 0) ?? EdgeInsets.zero
-          : widget.reverse
-              ? widget.padding?.copyWith(right: 0) ?? EdgeInsets.zero
-              : widget.padding?.copyWith(left: 0) ?? EdgeInsets.zero;
+  EdgeInsets _stripAxisTrailing(EdgeInsets base) {
+    switch (_axisDirection) {
+      case AxisDirection.up:
+        return base.copyWith(top: 0);
+      case AxisDirection.down:
+        return base.copyWith(bottom: 0);
+      case AxisDirection.left:
+        return base.copyWith(left: 0);
+      case AxisDirection.right:
+        return base.copyWith(right: 0);
+    }
+  }
+
+  EdgeInsets _stripAxisLeading(EdgeInsets base) {
+    switch (_axisDirection) {
+      case AxisDirection.up:
+        return base.copyWith(bottom: 0);
+      case AxisDirection.down:
+        return base.copyWith(top: 0);
+      case AxisDirection.left:
+        return base.copyWith(right: 0);
+      case AxisDirection.right:
+        return base.copyWith(left: 0);
+    }
+  }
+
+  EdgeInsets get _leadingSliverPadding => _stripAxisTrailing(_resolvedPadding);
+
+  EdgeInsets get _trailingSliverPadding => _stripAxisLeading(_resolvedPadding);
+
+  // Center keeps cross-axis padding always; carries the leading/trailing
+  // edge padding only when it owns the first/last item.
+  EdgeInsets get _centerSliverPadding {
+    final resolved = _resolvedPadding;
+    final isFirst = widget.positionedIndex == 0;
+    final isLast = widget.positionedIndex == widget.itemCount - 1;
+    switch (_axisDirection) {
+      case AxisDirection.up:
+        return resolved.copyWith(
+          top: isLast ? resolved.top : 0,
+          bottom: isFirst ? resolved.bottom : 0,
+        );
+      case AxisDirection.down:
+        return resolved.copyWith(
+          top: isFirst ? resolved.top : 0,
+          bottom: isLast ? resolved.bottom : 0,
+        );
+      case AxisDirection.left:
+        return resolved.copyWith(
+          left: isLast ? resolved.left : 0,
+          right: isFirst ? resolved.right : 0,
+        );
+      case AxisDirection.right:
+        return resolved.copyWith(
+          left: isFirst ? resolved.left : 0,
+          right: isLast ? resolved.right : 0,
+        );
+    }
+  }
 
   void _schedulePositionNotificationUpdate() {
     if (!updateScheduled) {
@@ -548,35 +559,35 @@ class _PositionedListState extends State<PositionedList> {
             if (widget.scrollDirection == Axis.vertical) {
               final reveal = viewport!.getOffsetToReveal(box, 0).offset;
               if (!reveal.isFinite) continue;
-              final itemOffset = reveal -
-                  viewport.offset.pixels +
-                  anchor * viewport.size.height;
-              positions.add(ItemPosition(
-                index: key.index,
-                itemLeadingEdge: itemOffset.round() /
-                    scrollController.position.viewportDimension,
-                itemTrailingEdge: (itemOffset + box.size.height).round() /
-                    scrollController.position.viewportDimension,
-              ));
+              final itemOffset = reveal - viewport.offset.pixels + anchor * viewport.size.height;
+              positions.add(
+                ItemPosition(
+                  index: key.index,
+                  itemLeadingEdge: itemOffset.round() / scrollController.position.viewportDimension,
+                  itemTrailingEdge:
+                      (itemOffset + box.size.height).round() / scrollController.position.viewportDimension,
+                ),
+              );
             } else {
-              final itemOffset =
-                  box.localToGlobal(Offset.zero, ancestor: viewport).dx;
+              final itemOffset = box.localToGlobal(Offset.zero, ancestor: viewport).dx;
               if (!itemOffset.isFinite) continue;
-              positions.add(ItemPosition(
-                index: key.index,
-                itemLeadingEdge: (widget.reverse
-                            ? scrollController.position.viewportDimension -
-                                (itemOffset + box.size.width)
-                            : itemOffset)
-                        .round() /
-                    scrollController.position.viewportDimension,
-                itemTrailingEdge: (widget.reverse
-                            ? scrollController.position.viewportDimension -
-                                itemOffset
-                            : (itemOffset + box.size.width))
-                        .round() /
-                    scrollController.position.viewportDimension,
-              ));
+              positions.add(
+                ItemPosition(
+                  index: key.index,
+                  itemLeadingEdge:
+                      (widget.reverse
+                              ? scrollController.position.viewportDimension - (itemOffset + box.size.width)
+                              : itemOffset)
+                          .round() /
+                      scrollController.position.viewportDimension,
+                  itemTrailingEdge:
+                      (widget.reverse
+                              ? scrollController.position.viewportDimension - itemOffset
+                              : (itemOffset + box.size.width))
+                          .round() /
+                      scrollController.position.viewportDimension,
+                ),
+              );
             }
           } on TypeError catch (_) {
             // Specifically the null-check failure inside
