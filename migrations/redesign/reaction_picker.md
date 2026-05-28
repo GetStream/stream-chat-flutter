@@ -28,7 +28,7 @@ This guide covers the migration for the redesigned reaction picker and reaction 
 | `ReactionPickerIconList` / `ReactionIndicatorIconList`        | **Removed** — list rendering now lives inside picker/indicator widgets                                               |
 | `ReactionPickerIcon` / `ReactionIndicatorIcon`                | **Removed** — use resolver-based reaction mapping instead                                                            |
 | `StreamReactionPicker`                                        | **Renamed** to `StreamMessageReactionPicker` — reaction set from `config.reactionIconResolver.defaultReactions` only |
-| `StreamReactionPickerTheme` / `StreamReactionPickerThemeData` | **New** (from `stream_core_flutter`) — theme-based visual customisation for the picker                               |
+| `StreamReactionPickerTheme` / `StreamReactionPickerThemeData` | **New** (from `stream_core_flutter`) — theme-based visual customization for the picker                               |
 | `StreamMessageReactions`                                      | **New** — renders emoji chips for a message's reaction groups; replaces ad-hoc indicator usage                        |
 | `ReactionDetailSheet`                                         | **New** — `ReactionDetailSheet.show()` for reaction details bottom sheet                                             |
 
