@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 /// An icon widget for a chat command.
 ///
@@ -19,8 +20,8 @@ class StreamCommandIcon extends StatelessWidget {
     return IconTheme.merge(
       data: IconThemeData(size: 20, color: colorScheme.textSecondary),
       child: switch (command.name) {
-        'giphy' => StreamSvgIcon(icon: icons.giphy),
-        'imgur' => StreamSvgIcon(icon: icons.imgur),
+        'giphy' => SvgIcon(icons.giphy),
+        'imgur' => SvgIcon(icons.imgur),
         'ban' => Icon(icons.userRemove),
         'flag' => Icon(icons.flag),
         'mute' => Icon(icons.mute),
