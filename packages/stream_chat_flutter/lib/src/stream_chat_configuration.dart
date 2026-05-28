@@ -169,7 +169,7 @@ class StreamChatConfigurationData {
   }) {
     return StreamChatConfigurationData._(
       reactionIconResolver: reactionIconResolver ?? const DefaultReactionIconResolver(),
-      enforceUniqueReactions: enforceUniqueReactions ?? true,
+      enforceUniqueReactions: enforceUniqueReactions ?? false,
       draftMessagesEnabled: draftMessagesEnabled,
       messagePreviewFormatter: messagePreviewFormatter ?? MessagePreviewFormatter(),
       imageCDN: imageCDN,
