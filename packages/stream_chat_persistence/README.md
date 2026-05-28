@@ -16,7 +16,7 @@
 - [Flutter Offline Docs](https://getstream.io/chat/docs/flutter-dart/flutter_offline/)
 
 This package provides a persistence client for fetching and saving chat data locally.
-Stream Chat Persistence uses [Moor](https://github.com/simolus3/moor) as a disk cache.
+Stream Chat Persistence uses [Drift](https://github.com/simolus3/drift) as a disk cache.
 
 ### Changelog
 
@@ -52,7 +52,7 @@ And you are ready to go...
 
 ## Flutter Web
 
-Due to Moor web (for offline storage) you need to include the sql.js library:
+Due to Drift web (for offline storage) you need to include the sql.js library:
 
 ```html
 <!doctype html>

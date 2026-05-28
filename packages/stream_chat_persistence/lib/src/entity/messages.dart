@@ -5,7 +5,7 @@ import 'package:stream_chat_persistence/src/converter/map_converter.dart';
 import 'package:stream_chat_persistence/src/converter/reaction_groups_converter.dart';
 import 'package:stream_chat_persistence/src/entity/channels.dart';
 
-/// Represents a [Messages] table in [MoorChatDatabase].
+/// Represents a [Messages] table in [DriftChatDatabase].
 @DataClassName('MessageEntity')
 class Messages extends Table {
   /// The message id

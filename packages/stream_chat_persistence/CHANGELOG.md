@@ -1,4 +1,4 @@
-## Upcoming
+## Upcoming Beta
 
 🔄 Changed
 
@@ -7,6 +7,12 @@
 🐞 Fixed
 
 - Fixed channel list re-sorting on refresh or when returning from background.
+
+# Upcoming
+
+🚀 Performance
+
+- Reduce the number of DB reads in the `ChatPersistenceClient.getChannelStates` method.
 
 ## 9.24.0
 

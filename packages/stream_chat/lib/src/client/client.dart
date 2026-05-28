@@ -42,6 +42,8 @@ import 'package:stream_chat/src/core/models/reaction.dart';
 import 'package:stream_chat/src/core/models/thread.dart';
 import 'package:stream_chat/src/core/models/user.dart';
 import 'package:stream_chat/src/core/util/event_controller.dart';
+import 'package:stream_chat/src/core/util/extension.dart';
+import 'package:stream_chat/src/core/util/immutable_collection_subjects.dart';
 import 'package:stream_chat/src/core/util/in_flight_cache.dart';
 import 'package:stream_chat/src/core/util/list_extensions.dart';
 import 'package:stream_chat/src/core/util/utils.dart';
@@ -2320,7 +2322,7 @@ class ClientState {
       _client.on(EventType.channelHidden).listen((event) async {
         final eventChannel = event.channel!;
         await _client.chatPersistenceClient?.deleteChannels([eventChannel.cid]);
-        channels.remove(eventChannel.cid)?.dispose();
+        channels[eventChannel.cid]?.dispose();
       }),
     );
   }
@@ -2376,7 +2378,7 @@ class ClientState {
             if (isCurrentUser && event.channel != null) {
               final eventChannel = event.channel!;
               await _client.chatPersistenceClient?.deleteChannels([eventChannel.cid]);
-              channels.remove(eventChannel.cid)?.dispose();
+              channels[eventChannel.cid]?.dispose();
             }
           }),
     );
@@ -2392,7 +2394,7 @@ class ClientState {
           .listen((Event event) async {
             final eventChannel = event.channel!;
             await _client.chatPersistenceClient?.deleteChannels([eventChannel.cid]);
-            channels.remove(eventChannel.cid)?.dispose();
+            channels[eventChannel.cid]?.dispose();
           }),
     );
   }
@@ -2516,22 +2518,25 @@ class ClientState {
 
   /// Sets the user currently interacting with the client
   /// note: this fully overrides the [currentUser]
+  @internal
   set currentUser(OwnUser? user) {
     _computeUnreadCounts(user);
-    _currentUserController.add(user);
+    _currentUserController.safeAdd(user);
   }
 
   /// Update all the [users] with the provided [userList]
+  @internal
   void updateUsers(List<User?> userList) {
     final newUsers = {
       ...users,
       for (final user in userList)
         if (user != null) user.id: user,
     };
-    _usersController.add(newUsers);
+    _usersController.safeAdd(newUsers);
   }
 
   /// Update the passed [user] in state
+  @internal
   void updateUser(User? user) => updateUsers([user]);
 
   /// The current user
@@ -2547,20 +2552,17 @@ class ClientState {
   Stream<Map<String, User>> get usersStream => _usersController.stream;
 
   /// The current active live locations shared by the user.
-  List<Location> get activeLiveLocations {
-    return _activeLiveLocationsController.value;
-  }
+  List<Location> get activeLiveLocations => _activeLiveLocationsController.value;
 
   /// The current active live locations shared by the user as a stream.
-  Stream<List<Location>> get activeLiveLocationsStream {
-    return _activeLiveLocationsController.stream;
-  }
+  Stream<List<Location>> get activeLiveLocationsStream => _activeLiveLocationsController.stream;
 
   /// Sets the active live locations.
+  @internal
   set activeLiveLocations(List<Location> locations) {
     // For safe-keeping, we filter out any inactive locations before update.
-    final activeLocations = [...locations.where((it) => it.isActive)];
-    _activeLiveLocationsController.add(activeLocations);
+    final activeLocations = locations.where((it) => it.isActive);
+    _activeLiveLocationsController.safeAdd(activeLocations.toList());
   }
 
   /// The current unread channels count
@@ -2587,52 +2589,57 @@ class ClientState {
   /// The current list of channels in memory
   Map<String, Channel> get channels => _channelsController.value;
 
+  @internal
   set channels(Map<String, Channel> newChannels) {
-    _channelsController.add(newChannels);
+    _channelsController.safeAdd(newChannels);
   }
 
   /// Adds a list of channels to the current list of cached channels
+  @internal
   void addChannels(Map<String, Channel> channelMap) {
     final newChannels = {...channels, ...channelMap};
     channels = newChannels;
   }
 
   /// Removes the channel from the cached list of [channels]
+  @internal
   void removeChannel(String channelCid) {
-    channels = channels..remove(channelCid);
+    if (!channels.containsKey(channelCid)) return;
+    channels = {...channels}..remove(channelCid);
   }
 
-  @visibleForTesting
+  @internal
   set blockedUserIds(List<String> blockedUserIds) {
     currentUser = currentUser?.copyWith(blockedUserIds: blockedUserIds);
   }
 
   /// Used internally for optimistic update of unread count
+  @internal
   set totalUnreadCount(int unreadCount) {
-    _totalUnreadCountController.add(unreadCount);
+    _totalUnreadCountController.safeAdd(unreadCount);
   }
 
   void _computeUnreadCounts(OwnUser? user) {
     if (user?.totalUnreadCount case final count?) {
-      _totalUnreadCountController.add(count);
+      _totalUnreadCountController.safeAdd(count);
     }
 
     if (user?.unreadChannels case final count?) {
-      _unreadChannelsController.add(count);
+      _unreadChannelsController.safeAdd(count);
     }
 
     if (user?.unreadThreads case final count?) {
-      _unreadThreadsController.add(count);
+      _unreadThreadsController.safeAdd(count);
     }
   }
 
-  final _channelsController = BehaviorSubject<Map<String, Channel>>.seeded({});
+  final _channelsController = ImmutableMapBehaviorSubject<String, Channel>.seeded(const {});
   final _currentUserController = BehaviorSubject<OwnUser?>();
-  final _usersController = BehaviorSubject<Map<String, User>>.seeded({});
+  final _usersController = ImmutableMapBehaviorSubject<String, User>.seeded(const {});
   final _unreadChannelsController = BehaviorSubject<int>.seeded(0);
   final _unreadThreadsController = BehaviorSubject<int>.seeded(0);
   final _totalUnreadCountController = BehaviorSubject<int>.seeded(0);
-  final _activeLiveLocationsController = BehaviorSubject.seeded(<Location>[]);
+  final _activeLiveLocationsController = ImmutableListBehaviorSubject<Location>.seeded(const []);
 
   /// Call this method to dispose this object
   void dispose() {
@@ -2645,10 +2652,9 @@ class ClientState {
     _activeLiveLocationsController.close();
     _staleLiveLocationsCleanerTimer?.cancel();
 
-    final channels = [...this.channels.keys];
-    for (final channel in channels) {
-      this.channels.remove(channel)?.dispose();
-    }
     _channelsController.close();
+    for (final channel in channels.values) {
+      channel.dispose(); // Dispose any remaining channels in memory.
+    }
   }
 }

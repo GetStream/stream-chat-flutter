@@ -77,6 +77,59 @@ void main() {
     }
   });
 
+  test('getMembershipsForChannels', () async {
+    const cid1 = 'test:Cid1';
+    const cid2 = 'test:Cid2';
+    const cid3 = 'test:Cid3';
+    const targetUserId = 'targetUserId';
+
+    // Should be empty when cids list is empty
+    final emptyResult = await memberDao.getMembershipsForChannels(
+      [],
+      targetUserId,
+    );
+    expect(emptyResult, isEmpty);
+
+    // Should be empty when there is no data
+    final noDataResult = await memberDao.getMembershipsForChannels(
+      [cid1, cid2, cid3],
+      targetUserId,
+    );
+    expect(noDataResult, isEmpty);
+
+    // Preparing test data: target user is a member of cid1 and cid2,
+    // but not cid3.
+    final targetUser = User(id: targetUserId);
+    final otherUser = User(id: 'otherUserId');
+    Member memberFor(User user) => Member(
+      user: user,
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+    );
+    await database.userDao.updateUsers([targetUser, otherUser]);
+    await database.channelDao.updateChannels([
+      ChannelModel(cid: cid1),
+      ChannelModel(cid: cid2),
+      ChannelModel(cid: cid3),
+    ]);
+    await memberDao.updateMembers(cid1, [memberFor(targetUser)]);
+    await memberDao.updateMembers(cid2, [memberFor(targetUser)]);
+    await memberDao.updateMembers(cid3, [memberFor(otherUser)]);
+
+    // Should return memberships only for channels where target user
+    // is a member, keyed by channelCid.
+    final memberships = await memberDao.getMembershipsForChannels(
+      [cid1, cid2, cid3],
+      targetUserId,
+    );
+    expect(memberships.length, 2);
+    expect(memberships.keys, containsAll([cid1, cid2]));
+    expect(memberships.containsKey(cid3), isFalse);
+
+    expect(memberships[cid1]!.user!.id, targetUserId);
+    expect(memberships[cid2]!.user!.id, targetUserId);
+  });
+
   test('updateMembers', () async {
     const cid = 'test:Cid';
 

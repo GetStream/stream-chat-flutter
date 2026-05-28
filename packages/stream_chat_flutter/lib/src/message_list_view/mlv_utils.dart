@@ -1,4 +1,5 @@
 import 'package:collection/collection.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat_flutter/scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -161,4 +162,99 @@ StreamMessageContentKind resolveContentKind(Message message) {
   }
 
   return .standard;
+}
+
+/// Stream helpers for observing newly arrived messages on a channel,
+/// either in the main message list or scoped to a thread.
+extension NewMessageStreamX on ChannelClientState {
+  // True when [candidate] represents a newer tail message than
+  // [previous].
+  //
+  // A new arrival requires both a different id *and* a strictly later
+  // [Message.createdAt], so edits, reactions, and reorderings are
+  // ignored.
+  bool _isNewTailArrival(Message candidate, Message? previous) {
+    if (previous == null) return true;
+    return candidate.id != previous.id && candidate.createdAt.isAfter(previous.createdAt);
+  }
+
+  /// A stream that emits each newly arrived bottom message in
+  /// [messages].
+  ///
+  /// Fires for every upstream that grows the list, including
+  /// server-confirmed `message.new` events, optimistic local sends,
+  /// and any other update that appends to the tail.
+  ///
+  /// A new arrival is detected when the bottom message's id changes
+  /// **and** its [Message.createdAt] is strictly after the previously
+  /// observed tail. Edits, reactions, tail deletions, and pruning are
+  /// therefore ignored.
+  ///
+  /// Gated on [isUpToDate]: while the channel is loaded around a
+  /// historic message the stream stays silent, and the first emission
+  /// after the gate re-opens re-seeds the baseline without yielding.
+  Stream<Message> get newMessageStream async* {
+    var wasUpToDate = isUpToDate;
+    var lastSeen = wasUpToDate ? messages.lastOrNull : null;
+
+    await for (final updated in messagesStream) {
+      if (!isUpToDate) {
+        wasUpToDate = false;
+        lastSeen = null;
+        continue;
+      }
+
+      // Re-seed without yielding: the gate just re-opened, the next
+      // emission is a wholesale window replacement, not an arrival.
+      if (!wasUpToDate) {
+        wasUpToDate = true;
+        lastSeen = updated.lastOrNull;
+        continue;
+      }
+
+      final newLast = updated.lastOrNull;
+      if (newLast == null) {
+        lastSeen = null;
+        continue;
+      }
+
+      final isNewArrival = _isNewTailArrival(newLast, lastSeen);
+      lastSeen = newLast;
+      if (!isNewArrival) continue;
+      yield newLast;
+    }
+  }
+
+  /// A stream that emits each newly arrived reply at the bottom of
+  /// the thread identified by [parentMessageId].
+  ///
+  /// Fires for every upstream that grows the thread, including
+  /// server-confirmed replies, optimistic local sends, and any other
+  /// update that appends to the tail of [threads].
+  ///
+  /// A new arrival is detected when the bottom reply's id changes
+  /// **and** its [Message.createdAt] is strictly after the previously
+  /// observed tail. Edits, reactions, tail deletions, and pruning are
+  /// therefore ignored.
+  ///
+  /// Threads load lazily, so the stream stays silent until [threads]
+  /// carries replies for [parentMessageId]; that first snapshot seeds
+  /// the baseline without yielding.
+  Stream<Message> newThreadMessageStream(String parentMessageId) async* {
+    final threadMessages = threadsStream.mapNotNull((it) => it[parentMessageId]);
+
+    var lastSeen = threads[parentMessageId]?.lastOrNull;
+    await for (final updated in threadMessages) {
+      final newLast = updated.lastOrNull;
+      if (newLast == null) {
+        lastSeen = null;
+        continue;
+      }
+
+      final isNewArrival = _isNewTailArrival(newLast, lastSeen);
+      lastSeen = newLast;
+      if (!isNewArrival) continue;
+      yield newLast;
+    }
+  }
 }

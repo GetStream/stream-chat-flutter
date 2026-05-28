@@ -27,6 +27,36 @@ class MemberDao extends DatabaseAccessor<DriftChatDatabase> with _$MemberDaoMixi
           })
           .get();
 
+  /// Returns the membership row for [userId] in each channel listed in [cids],
+  /// keyed by `channelCid`.
+  ///
+  /// Channels in [cids] without a membership row for [userId] are absent from
+  /// the result. Executes a single `WHERE channel_cid IN (...) AND user_id = ?`
+  /// query.
+  Future<Map<String, Member>> getMembershipsForChannels(
+    List<String> cids,
+    String userId,
+  ) async {
+    if (cids.isEmpty) return const {};
+
+    final rows =
+        await (select(members).join([
+              leftOuterJoin(users, members.userId.equalsExp(users.id)),
+            ])..where(
+              members.channelCid.isIn(cids) & members.userId.equals(userId),
+            ))
+            .get();
+
+    return {
+      for (final row in rows)
+        row.readTable(members).channelCid: row
+            .readTable(members)
+            .toMember(
+              user: row.readTableOrNull(users)?.toUser(),
+            ),
+    };
+  }
+
   /// Updates all the members using the new [memberList] data
   Future<void> updateMembers(String cid, List<Member> memberList) => bulkUpdateMembers({cid: memberList});
 
