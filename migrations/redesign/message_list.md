@@ -15,7 +15,7 @@ For changes to the individual message item / message widget, see [message_widget
 - [Builder Signature Changes](#builder-signature-changes)
 - [New List-Level Callbacks](#new-list-level-callbacks)
 - [Changed: `showUnreadCountOnScrollToBottom` Default](#changed-showunreadcountonscrolltobottom-default)
-- [`MessageDetails` No Longer Passed to Builders](#messagedetails-no-longer-passed-to-builders)
+- [Removed: `MessageDetails`](#removed-messagedetails)
 - [StreamDraftListView Removed](#streamdraftlistview-removed)
 - [Migration Checklist](#migration-checklist)
 
@@ -31,7 +31,7 @@ For changes to the individual message item / message widget, see [message_widget
 | `MessageBuilder` typedef                                                   | `StreamMessageItemBuilder` typedef                                                              |
 | `ParentMessageBuilder` typedef                                             | `StreamMessageItemBuilder` typedef                                                              |
 | `OnQuotedMessageTap = void Function(String?)`                              | `void Function(Message quotedMessage)`                                                          |
-| `MessageDetails` argument                                                  | No longer passed to builders — alignment via `StreamMessageLayout.of(context)`, user via `StreamChat.of(context)` |
+| `MessageDetails` argument                                                  | Removed — alignment via `StreamMessageLayout.of(context)`, user via `StreamChat.of(context)`    |
 | `showUnreadCountOnScrollToBottom: false` (old default)                     | `showUnreadCountOnScrollToBottom: true` (new default)                                           |
 | `StreamDraftListView` / `StreamDraftListTile` / `StreamDraftListTileTheme` | Removed — use `StreamDraftListController` + `PagedValueListView`                                |
 
@@ -246,9 +246,9 @@ StreamMessageListView(
 
 ---
 
-## `MessageDetails` No Longer Passed to Builders
+## Removed: `MessageDetails`
 
-The old `messageBuilder` received `MessageDetails` which contained `userId`, `message`, `messages`, and `index`. The new builder receives just `Message` and `StreamMessageItemProps`. The user ID is accessible via `StreamChat.of(context).currentUser?.id`. Message alignment is provided by `StreamMessageLayout.of(context)`.
+The `MessageDetails` class has been removed. The old `messageBuilder` received it as an argument with `userId`, `message`, `messages`, and `index`. The new builder receives just `Message` and `StreamMessageItemProps`. The user ID is accessible via `StreamChat.of(context).currentUser?.id`. Message alignment is provided by `StreamMessageLayout.of(context)`.
 
 ```dart
 // Inside a messageBuilder:

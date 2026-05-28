@@ -22,6 +22,7 @@
 - Removed `StreamFileAttachmentThumbnail`; use `StreamImageAttachmentThumbnail` / `StreamVideoAttachmentThumbnail` or `StreamFileTypeIcon.fromMimeType(...)`.
 - Removed `StreamMessageThemeData` (ownMessageTheme / otherMessageTheme) and `StreamMessageInputThemeData` (messageInputTheme).
 - Removed `StreamChannelPreviewThemeData` (channelPreviewTheme).
+- Removed the public `MessageDetails` class. The new `messageBuilder` signature no longer receives it — use `StreamChat.of(context).currentUser` and `StreamMessageLayout.of(context)` instead. See [`migrations/redesign/message_list.md`](../../migrations/redesign/message_list.md#removed-messagedetails).
 - Renamed `StreamPollOptionsDialog` / `StreamPollResultsDialog` / `StreamPollOptionVotesDialog` / `StreamPollCommentsDialog` (and their `show*` helpers and `...DialogThemeData` types) → `...Sheet`. They now render as modal bottom sheets.
 - Replaced `StreamPollCreatorDialog` / `StreamPollCreatorFullScreenDialog` (and `showStreamPollCreatorDialog`) with a single `StreamPollCreatorSheet` (`showStreamPollCreatorSheet`) that renders as a modal bottom sheet, matching the other poll sheets. `StreamPollCreatorWidget` gained an optional `scrollController` parameter.
 - Removed `primaryActionStyle` and `secondaryActionStyle` from `StreamPollCreatorThemeData`. Use the new `sheetHeaderStyle.trailingStyle` / `sheetHeaderStyle.leadingStyle` instead — see [`migrations/redesign/attachments_and_polls.md`](../../migrations/redesign/attachments_and_polls.md).

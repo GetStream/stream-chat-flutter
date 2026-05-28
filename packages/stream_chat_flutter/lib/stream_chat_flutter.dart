@@ -194,7 +194,6 @@ export 'src/message_input/message_input_placeholder.dart';
 export 'src/message_input/stream_message_composer.dart';
 export 'src/message_input/stream_message_composer_attachment_list.dart';
 export 'src/message_input/stream_message_text_field.dart';
-export 'src/message_list_view/message_details.dart';
 export 'src/message_list_view/message_list_view.dart';
 export 'src/message_list_view/stream_message_list_view_builders.dart';
 export 'src/message_list_view/stream_message_list_view_configuration.dart';
