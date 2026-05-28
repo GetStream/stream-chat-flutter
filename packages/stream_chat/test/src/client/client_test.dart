@@ -4870,4 +4870,122 @@ void main() {
       );
     });
   });
+
+  group('ClientState mutation guards', () {
+    const apiKey = 'test-api-key';
+    late final api = FakeChatApi();
+    late StreamChatClient client;
+
+    setUp(() {
+      final ws = FakeWebSocket();
+      client = StreamChatClient(apiKey, ws: ws, chatApi: api);
+    });
+
+    tearDown(() {
+      client.dispose();
+    });
+
+    test('`state.channels` returns an unmodifiable view', () {
+      final channel = Channel.fromState(
+        client,
+        ChannelState(channel: ChannelModel(cid: 'messaging:c1')),
+      );
+      client.state.addChannels({'messaging:c1': channel});
+
+      expect(client.state.channels, hasLength(1));
+      expect(() => client.state.channels.remove('messaging:c1'), throwsUnsupportedError);
+      expect(() => client.state.channels.clear(), throwsUnsupportedError);
+      expect(() => client.state.channels['messaging:c2'] = channel, throwsUnsupportedError);
+    });
+
+    test('`state.users` returns an unmodifiable view', () {
+      client.state.updateUser(User(id: 'u1'));
+
+      expect(client.state.users.containsKey('u1'), isTrue);
+      expect(() => client.state.users.remove('u1'), throwsUnsupportedError);
+      expect(() => client.state.users.clear(), throwsUnsupportedError);
+    });
+
+    test('`state.activeLiveLocations` returns an unmodifiable view', () {
+      expect(() => client.state.activeLiveLocations.clear(), throwsUnsupportedError);
+    });
+
+    test('`removeChannel` emits a fresh map so distinct subscribers see the change', () async {
+      final channel = Channel.fromState(
+        client,
+        ChannelState(channel: ChannelModel(cid: 'messaging:c1')),
+      );
+      client.state.addChannels({'messaging:c1': channel});
+
+      final received = <Map<String, Channel>>[];
+      // Skip the BehaviorSubject's replay of the current value to new subscribers.
+      final sub = client.state.channelsStream.distinct().skip(1).listen(received.add);
+
+      client.state.removeChannel('messaging:c1');
+      await Future<void>.delayed(Duration.zero);
+
+      expect(received, hasLength(1));
+      expect(received.single, isEmpty);
+
+      await sub.cancel();
+    });
+
+    test('initial seeded values are unmodifiable (before any write)', () {
+      // Fresh client, no mutations yet — subscribers connecting at this point
+      // still see unmodifiable seeds.
+      expect(() => client.state.channels.clear(), throwsUnsupportedError);
+      expect(() => client.state.users.clear(), throwsUnsupportedError);
+      expect(() => client.state.activeLiveLocations.clear(), throwsUnsupportedError);
+    });
+
+    test('`channelsStream` emits unmodifiable maps', () async {
+      final received = <Map<String, Channel>>[];
+      final sub = client.state.channelsStream.listen(received.add);
+
+      final channel = Channel.fromState(
+        client,
+        ChannelState(channel: ChannelModel(cid: 'messaging:c1')),
+      );
+      client.state.addChannels({'messaging:c1': channel});
+      await Future<void>.delayed(Duration.zero);
+
+      // Both the initial seed and the post-write emission must be unmodifiable.
+      expect(received, hasLength(greaterThanOrEqualTo(2)));
+      for (final emitted in received) {
+        expect(emitted.clear, throwsUnsupportedError);
+      }
+
+      await sub.cancel();
+    });
+
+    test('`usersStream` emits unmodifiable maps', () async {
+      final received = <Map<String, User>>[];
+      final sub = client.state.usersStream.listen(received.add);
+
+      client.state.updateUser(User(id: 'u1'));
+      await Future<void>.delayed(Duration.zero);
+
+      expect(received, hasLength(greaterThanOrEqualTo(2)));
+      for (final emitted in received) {
+        expect(emitted.clear, throwsUnsupportedError);
+      }
+
+      await sub.cancel();
+    });
+
+    test('`activeLiveLocationsStream` emits unmodifiable lists', () async {
+      final received = <List<Location>>[];
+      final sub = client.state.activeLiveLocationsStream.listen(received.add);
+
+      client.state.activeLiveLocations = const [];
+      await Future<void>.delayed(Duration.zero);
+
+      expect(received, isNotEmpty);
+      for (final emitted in received) {
+        expect(emitted.clear, throwsUnsupportedError);
+      }
+
+      await sub.cancel();
+    });
+  });
 }
