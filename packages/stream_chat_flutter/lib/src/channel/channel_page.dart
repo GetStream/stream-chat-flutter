@@ -13,7 +13,6 @@ class StreamChannelPage extends StatefulWidget {
     this.highlightInitialMessage = false,
     this.onBackPressed,
     this.onChannelAvatarPressed,
-    this.isFloating = false,
   });
 
   /// Initial scroll index for the message list.
@@ -30,13 +29,6 @@ class StreamChannelPage extends StatefulWidget {
 
   /// Called when the default channel-avatar trailing is pressed.
   final void Function(BuildContext context, Channel channel)? onChannelAvatarPressed;
-
-  /// Whether the composer floats over the message list.
-  ///
-  /// When true the composer is overlaid at the bottom and the message list
-  /// scrolls underneath it. Layout is done in a single pass so the list
-  /// inset and the composer height are always in sync.
-  final bool isFloating;
 
   @override
   State<StreamChannelPage> createState() => _StreamChannelPageState();
@@ -89,15 +81,15 @@ class _StreamChannelPageState extends State<StreamChannelPage> {
       messageComposerController: _messageComposerController,
       onQuotedMessageCleared: _messageComposerController.clearQuotedMessage,
       enableVoiceRecording: true,
-      isFloating: widget.isFloating,
     );
+
+    final isFloating = StreamTheme.of(context).appStyle.appBarBehavior == .floating;
 
     final appBar = StreamChannelHeader(
       onChannelAvatarPressed: (channel) => widget.onChannelAvatarPressed?.call(context, channel),
-      floating: widget.isFloating,
     );
 
-    final topPadding = widget.isFloating ? appBar.preferredSize.height + MediaQuery.of(context).padding.top : 0.0;
+    final topPadding = isFloating ? appBar.preferredSize.height + MediaQuery.of(context).padding.top : 0.0;
 
     StreamMessageListView messageListBuilder(double bottomPadding) => StreamMessageListView(
       initialScrollIndex: widget.initialScrollIndex,
@@ -115,7 +107,7 @@ class _StreamChannelPageState extends State<StreamChannelPage> {
       bottomPadding: bottomPadding,
     );
 
-    final body = switch (widget.isFloating) {
+    final body = switch (isFloating) {
       true => _FloatingChannelBody(
         composer: composer,
         typingIndicator: typingIndicator,
@@ -144,7 +136,7 @@ class _StreamChannelPageState extends State<StreamChannelPage> {
     return Scaffold(
       backgroundColor: context.streamColorScheme.backgroundApp,
       appBar: appBar,
-      extendBodyBehindAppBar: widget.isFloating,
+      extendBodyBehindAppBar: isFloating,
       body: body,
     );
   }
