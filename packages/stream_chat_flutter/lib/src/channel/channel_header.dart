@@ -144,8 +144,7 @@ class StreamChannelHeader extends StatelessWidget implements PreferredSizeWidget
 
     var leading = this.leading;
     if (leading == null && automaticallyImplyLeading) {
-      final effectiveAppBarBehavior = appBarBehavior ?? StreamTheme.of(context).appStyle.appBarBehavior;
-      leading = StreamBackButton(showUnreadCount: true, floating: effectiveAppBarBehavior == .floating);
+      leading = StreamBackButton(showUnreadCount: true, appBarBehavior: appBarBehavior);
     }
 
     var title = this.title;
