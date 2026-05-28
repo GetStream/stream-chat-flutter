@@ -331,10 +331,10 @@ if (attachment.type == AttachmentType.image) {
 StreamAttachmentUploadStateBuilder(
   message: message,
   attachment: attachment,
-  failedBuilder: (context, attachment) => MyFailedWidget(),
-  preparingBuilder: (context, attachment) => MyPreparingWidget(),
-  inProgressBuilder: (context, attachment, sent, total) => MyProgressWidget(),
-  successBuilder: (context, attachment) => MySuccessWidget(), // removed
+  failedBuilder: (context, errorMessage) => MyFailedWidget(),
+  preparingBuilder: (context) => MyPreparingWidget(),
+  inProgressBuilder: (context, sent, total) => MyProgressWidget(),
+  successBuilder: (context) => MySuccessWidget(), // removed
 )
 ```
 
@@ -344,9 +344,9 @@ StreamAttachmentUploadStateBuilder(
 StreamAttachmentUploadStateBuilder(
   message: message,
   attachment: attachment,
-  failedBuilder: (context, attachment) => MyFailedWidget(),
-  preparingBuilder: (context, attachment) => MyPreparingWidget(),
-  inProgressBuilder: (context, attachment, sent, total) => MyProgressWidget(),
+  failedBuilder: (context, errorMessage) => MyFailedWidget(),
+  preparingBuilder: (context) => MyPreparingWidget(),
+  inProgressBuilder: (context, sent, total) => MyProgressWidget(),
   // successBuilder removed — the attachment renders directly once uploaded
 )
 ```
@@ -444,7 +444,7 @@ All four theme data classes dropped their app-bar styling slots (`appBarElevatio
 | Removed                                                                                                                                                                                                                    | Replacement                                                                                                                                                                        |
 | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `pollTitleTextStyle`, `pollTitleDecoration`                                                                                                                                                                                | `questionStyle` (`StreamPollQuestionStyle`)                                                                                                                                        |
-| `pollOptionsDecoration`, `pollOptionsWinnerDecoration`, `pollOptionsTextStyle`, `pollOptionsWinnerTextStyle`, `pollOptionsVoteCountTextStyle`, `pollOptionsWinnerVoteCountTextStyle`, `pollOptionsShowAllVotesButtonStyle` | `optionStyle` (`StreamPollOptionVotesStyle`) — bundles card chrome, text styles, winner trophy color/size, `footerDividerColor`, and `footerButtonStyle` for the "View all" action |
+| `pollOptionsDecoration`, `pollOptionsWinnerDecoration`, `pollOptionsTextStyle`, `pollOptionsWinnerTextStyle`, `pollOptionsVoteCountTextStyle`, `pollOptionsWinnerVoteCountTextStyle`, `pollOptionsShowAllVotesButtonStyle` | `optionStyle` (`StreamPollOptionVotesStyle`) — bundles card chrome, text styles, `winnerIconColor`/`winnerIconSize`, `footerDividerColor`, and `footerButtonStyle` for the "View all" action |
 | —                                                                                                                                                                                                                          | New: `contentPadding`, `sectionSpacing`, `optionsItemSpacing`, `totalVoteCountTextStyle` (for the new total-vote-count footer), `sheetHeaderStyle`                                 |
 
 **`StreamPollOptionVotesSheetThemeData`**

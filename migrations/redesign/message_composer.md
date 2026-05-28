@@ -10,7 +10,7 @@ This guide covers the migration for the message composer components in the Strea
 - [StreamMessageComposer](#streammessagecomposer)
 - [StreamChatMessageInput (new)](#streamchatmessageinput-new)
 - [StreamMessageComposerController Rename](#streammessagecomposercontroller-rename)
-- [StreamMessageComposerInput Rename](#streammessagecomposerinput-rename)
+- [StreamMessageComposerInput Split](#streammessagecomposerinput-split)
 - [Message Input Placeholder API](#message-input-placeholder-api)
 - [Attachment Customization](#attachment-customization)
 - [Removed Widgets](#removed-widgets)
@@ -174,6 +174,7 @@ Use this when you want the new design system visuals with custom business logic.
 | `textCapitalization`              | `TextCapitalization`               | `sentences`                     | Text capitalization behaviour for the text field                                                                                                                                                                                                                                                                                                                                                                                     |
 | `autofocus`                       | `bool`                             | `false`                         | Whether the text field should autofocus when built                                                                                                                                                                                                                                                                                                                                                                                   |
 | `autocorrect`                     | `bool`                             | `true`                          | Whether autocorrect is enabled                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `isFloating`                      | `bool`                             | `false`                         | Whether the composer renders in a floating style (affects layout, shadow, and decoration)                                                                                                                                                                                                                                                                                                                                            |
 
 ### Sub-components
 
@@ -244,16 +245,16 @@ controller.cancelEditMessage(); // explicit exit; restores prior content
 
 ---
 
-## StreamMessageComposerInput Rename
+## StreamMessageComposerInput Split
 
-The widget that renders the central input area of the composer has been renamed so that the meaning of the **input** vs the **whole composer** is unambiguous. The old `StreamMessageComposerInput` name now refers to the outer container (header + leading + center + trailing), while the inner text field area is `StreamMessageComposerInputCenter`.
+The composer input has been split into two distinct layers to make the **outer container** vs the **text-field center** unambiguous. The old `StreamMessageComposerInput` (text-field widget) has been replaced by `StreamMessageComposerInputCenter`, and a new `StreamMessageComposerInput` outer container now wraps the header, leading, center, and trailing slots. Both `MessageComposerInputProps` (outer container) and `MessageComposerInputCenterProps` (text-field center) exist as distinct classes with different field sets — this is a split, not a straight rename.
 
-| Old                                                     | New                                       |
-| ------------------------------------------------------- | ----------------------------------------- |
-| `StreamMessageComposerInput` (text-field widget)        | `StreamMessageComposerInputCenter`        |
-| `DefaultStreamMessageComposerInput`                     | `DefaultStreamMessageComposerInputCenter` |
-| `MessageComposerInputProps`                             | `MessageComposerInputCenterProps`         |
-| Factory builder key `messageComposerInput` (text field) | `messageComposerInputCenter`              |
+| Old                                                     | New                                                                                          |
+| ------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| `StreamMessageComposerInput` (text-field widget)        | `StreamMessageComposerInputCenter`                                                           |
+| `DefaultStreamMessageComposerInput`                     | `DefaultStreamMessageComposerInputCenter`                                                    |
+| `MessageComposerInputProps`                             | `MessageComposerInputCenterProps` (text-field center); `MessageComposerInputProps` now refers to the outer container |
+| Factory builder key `messageComposerInput` (text field) | `messageComposerInputCenter`                                                                 |
 
 > **Important:** The factory builder key `messageComposerInput` still exists, but **now overrides the outer input container** (header + leading + center + trailing) instead of just the text field. If you previously used `messageComposerInput` to swap the text field, switch to `messageComposerInputCenter` to preserve the old behaviour.
 
@@ -496,14 +497,11 @@ streamChatComponentBuilders(
 
 ### Built-in attachment builder helpers
 
-The following public widgets are provided as building blocks for custom attachment renderers:
+The following public widget is provided as a building block for custom attachment renderers:
 
 | Widget                         | Description                                                                       |
 | ------------------------------ | --------------------------------------------------------------------------------- |
-| `StreamAudioAttachmentBuilder` | Renders an audio or voice-recording attachment with playback controls             |
-| `StreamFileAttachmentBuilder`  | Renders a generic file attachment with file type icon, name, and size             |
 | `StreamMediaAttachmentBuilder` | Renders an image, video, or GIF attachment thumbnail with an optional media badge |
-| `RemoveAttachmentButton`       | The standard filled icon button used to dismiss an attachment                     |
 
 ---
 
@@ -517,7 +515,7 @@ The following composer-adjacent widgets have been removed. Replace any direct re
 | `StreamQuotedMessageWidget` | Use `StreamQuotedMessage`                                                                                                                                                                                       |
 | `EditMessageSheet`          | Editing is handled inline by the composer via `controller.editMessage(message)` — see [StreamMessageComposerController Rename](#streammessagecomposercontroller-rename)                                         |
 | `StreamMessageSendButton`   | Part of the composer internals; override `messageComposerInputTrailing` via `StreamComponentFactory` to customize the send button                                                                               |
-| `ErrorAlertSheet`           | Removed — surface attachment/composer errors via your own UI (e.g. a `SnackBar` or `AlertDialog`) using the typed errors documented in [v10-migration.md](../v10-migration.md#streamattachmentpickercontroller) |
+| `ErrorAlertSheet`           | No longer publicly exported (still used internally by `StreamMessageComposer`) — surface attachment/composer errors via your own UI (e.g. a `SnackBar` or `AlertDialog`) using the typed errors documented in [v10-migration.md](../v10-migration.md#streamattachmentpickercontroller) |
 
 `AttachmentButton` example:
 
@@ -559,7 +557,7 @@ StreamQuotedMessage(message: quotedMessage)
 
 ## Theme Removal: StreamMessageInputThemeData
 
-`StreamMessageInputThemeData` and the `StreamChatThemeData.messageInputTheme` accessor have been **removed**. The composer is now styled via the design-system primitives on `StreamTheme` (colors, typography, spacing, radius) and via per-component theme overrides on `StreamMessageComposer` itself (`backgroundColor`, `border`, etc.) or via `StreamComponentFactory` builder overrides for individual sub-components.
+`StreamMessageInputThemeData` and the `StreamChatThemeData.messageInputTheme` accessor have been **removed**. The composer is now styled via the design-system primitives — `context.streamColorScheme` for colors and `context.streamRadius` for corner radii — read directly by the sub-components. `StreamMessageComposer` has no `backgroundColor` or `border` constructor parameters; use `StreamComponentFactory` builder overrides to customize the appearance of individual sub-components.
 
 | Removed                                 | Replacement                                                                                          |
 | --------------------------------------- | ---------------------------------------------------------------------------------------------------- |
@@ -578,7 +576,7 @@ There is no one-to-one replacement — most fields on the old `StreamMessageInpu
 - [ ] Replace `StreamMessageComposerController(message: existingMessage)` with `controller.editMessage(existingMessage)` to enter edit mode
 - [ ] Replace `controller.clear()` (used to exit edit mode) with `controller.cancelEditMessage()` — `clear()` no longer exits edit mode
 - [ ] Rename `editingOriginalMessage` reads to `messageBeingEdited`
-- [ ] Rename the `StreamMessageComposerInput` widget to `StreamMessageComposerInputCenter` (and `DefaultStreamMessageComposerInput` → `DefaultStreamMessageComposerInputCenter`, `MessageComposerInputProps` → `MessageComposerInputCenterProps`)
+- [ ] Replace the old `StreamMessageComposerInput` text-field widget with `StreamMessageComposerInputCenter` (and `DefaultStreamMessageComposerInput` → `DefaultStreamMessageComposerInputCenter`); note that `MessageComposerInputProps` and `MessageComposerInputCenterProps` are now distinct classes — update props usage to the center variant for text-field customization
 - [ ] Switch any factory override that previously used the `messageComposerInput` key to render a custom text field over to `messageComposerInputCenter` — the old key now overrides the outer input container
 - [ ] Rename `hideSendAsDm` to `canAlsoSendToChannelFromThread` in all `StreamMessageComposer` usages and invert the value
 - [ ] Review usages of `attachmentLimit` — it is now `int?` and defaults to no limit; set an explicit value if you relied on the old default of `10`

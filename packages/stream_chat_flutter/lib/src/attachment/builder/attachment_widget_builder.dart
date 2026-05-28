@@ -47,7 +47,7 @@ abstract class StreamAttachmentWidgetBuilder {
   ///   * [VideoAttachmentBuilder]
   ///   * [VoiceRecordingAttachmentPlaylistBuilder]
   ///   * [PollAttachmentBuilder]
-  ///   * [UrlAttachmentBuilder]
+  ///   * [LinkPreviewAttachmentBuilder]
   ///   * [FallbackAttachmentBuilder]
   ///
   /// You can use this list as a starting point for your own list of builders.

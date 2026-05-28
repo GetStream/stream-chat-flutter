@@ -43,7 +43,7 @@ class StreamMessageActionsModal extends StatelessWidget {
   /// Alignment of the modal content.
   ///
   /// When null (the default), falls back to
-  /// [StreamMessagePlacement.alignmentDirectionalOf].
+  /// [StreamMessageLayout.alignmentDirectionalOf].
   final AlignmentGeometry? alignment;
 
   /// Controls whether to show the reaction picker at the top of the modal.

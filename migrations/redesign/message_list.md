@@ -15,7 +15,7 @@ For changes to the individual message item / message widget, see [message_widget
 - [Builder Signature Changes](#builder-signature-changes)
 - [New List-Level Callbacks](#new-list-level-callbacks)
 - [Changed: `showUnreadCountOnScrollToBottom` Default](#changed-showunreadcountonscrolltobottom-default)
-- [Removed: MessageDetails](#removed-messagedetails)
+- [`MessageDetails` No Longer Passed to Builders](#messagedetails-no-longer-passed-to-builders)
 - [StreamDraftListView Removed](#streamdraftlistview-removed)
 - [Migration Checklist](#migration-checklist)
 
@@ -31,7 +31,7 @@ For changes to the individual message item / message widget, see [message_widget
 | `MessageBuilder` typedef                                                   | `StreamMessageItemBuilder` typedef                                                              |
 | `ParentMessageBuilder` typedef                                             | `StreamMessageItemBuilder` typedef                                                              |
 | `OnQuotedMessageTap = void Function(String?)`                              | `void Function(Message quotedMessage)`                                                          |
-| `MessageDetails` argument                                                  | Removed — alignment via `StreamMessagePlacement.of(context)`, user via `StreamChat.of(context)` |
+| `MessageDetails` argument                                                  | No longer passed to builders — alignment via `StreamMessageLayout.of(context)`, user via `StreamChat.of(context)` |
 | `showUnreadCountOnScrollToBottom: false` (old default)                     | `showUnreadCountOnScrollToBottom: true` (new default)                                           |
 | `StreamDraftListView` / `StreamDraftListTile` / `StreamDraftListTileTheme` | Removed — use `StreamDraftListController` + `PagedValueListView`                                |
 
@@ -182,17 +182,22 @@ StreamMessageListView(
 
 ```dart
 StreamMessageListView(
+  // Option 1: use the default widget as-is
   messageBuilder: (context, message, defaultProps) {
     return StreamMessageItem.fromProps(props: defaultProps);
+  },
 
-    // Or customize props before building
+  // Option 2: customize props before building
+  messageBuilder: (context, message, defaultProps) {
     return StreamMessageItem.fromProps(
       props: defaultProps.copyWith(
         actionsBuilder: (context, actions) => [...actions, myAction],
       ),
     );
+  },
 
-    // Or replace entirely
+  // Option 3: replace entirely with a custom widget
+  messageBuilder: (context, message, defaultProps) {
     return MyCustomMessageWidget(message: message);
   },
   builders: StreamMessageListViewBuilders(
@@ -203,7 +208,7 @@ StreamMessageListView(
 )
 ```
 
-> **Important:** The `messageBuilder` callback now receives a `BuildContext` that has `StreamMessagePlacement` in its ancestor chain. You can call `StreamMessagePlacement.alignmentDirectionalOf(context)` to determine message alignment.
+> **Important:** The `messageBuilder` callback now receives a `BuildContext` that has `StreamMessageLayout` in its ancestor chain. You can call `StreamMessageLayout.alignmentDirectionalOf(context)` to determine message alignment.
 
 ---
 
@@ -241,14 +246,14 @@ StreamMessageListView(
 
 ---
 
-## Removed: MessageDetails
+## `MessageDetails` No Longer Passed to Builders
 
-The old `messageBuilder` received `MessageDetails` which contained `userId`, `message`, `messages`, and `index`. The new builder receives just `Message` and `StreamMessageItemProps`. The user ID is accessible via `StreamChat.of(context).currentUser?.id`. Message alignment is provided by `StreamMessagePlacement.of(context)`.
+The old `messageBuilder` received `MessageDetails` which contained `userId`, `message`, `messages`, and `index`. The new builder receives just `Message` and `StreamMessageItemProps`. The user ID is accessible via `StreamChat.of(context).currentUser?.id`. Message alignment is provided by `StreamMessageLayout.of(context)`.
 
 ```dart
 // Inside a messageBuilder:
 final currentUser = StreamChat.of(context).currentUser;
-final alignment = StreamMessagePlacement.alignmentDirectionalOf(context);
+final alignment = StreamMessageLayout.alignmentDirectionalOf(context);
 final isMyMessage = message.user?.id == currentUser?.id;
 ```
 
@@ -293,7 +298,7 @@ PagedValueListView<String, Draft>(
 - [ ] Keep `messageBuilder` as a top-level parameter; move `parentMessageBuilder` into `builders.parentMessage`
 - [ ] Update `messageBuilder` / `parentMessage` callbacks to the new `StreamMessageItemBuilder` signature `(BuildContext, Message, StreamMessageItemProps)`
 - [ ] Replace `defaultWidget.copyWith(...)` calls with `StreamMessageItem.fromProps(props: defaultProps.copyWith(...))`
-- [ ] Replace `MessageDetails` usage — use `StreamMessagePlacement.of(context)` for alignment, `StreamChat.of(context).currentUser` for user ID
+- [ ] Replace `MessageDetails` usage — use `StreamMessageLayout.of(context)` for alignment, `StreamChat.of(context).currentUser` for user ID
 - [ ] Update `onQuotedMessageTap` from `void Function(String?)` to `void Function(Message)`
 - [ ] Review the new `showUnreadCountOnScrollToBottom` default (`true`) and explicitly set `false` in `config` if you want the old behaviour
 - [ ] Replace `StreamDraftListView` / `StreamDraftListTile` with a `PagedValueListView` driven by `StreamDraftListController`

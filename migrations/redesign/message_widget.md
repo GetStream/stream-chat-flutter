@@ -187,7 +187,7 @@ These parameters have been removed entirely. See the **Migration Path** column f
 | `padding`                      | Outer padding around the message item (overrides theme)            |
 | `spacing`                      | Horizontal spacing between avatar and content (overrides theme)    |
 | `backgroundColor`              | Background color for the message row (overrides theme)             |
-| `maxWidth`                     | Max content width in logical pixels (default: `264`)               |
+| `maxWidth`                     | Max content width in logical pixels (default: `264` on `StreamMessageItem`, `272` on `StreamMessageItemProps`) |
 | `onMessageLinkTap`             | `void Function(Message, String)` — receives message and URL        |
 | `onUserMentionTap`             | `void Function(User)` — receives the mentioned user                |
 | `onQuotedMessageTap`           | `void Function(Message)` — receives the quoted message object      |
@@ -205,7 +205,7 @@ These parameters have been removed entirely. See the **Migration Path** column f
 | Link tap           | `void Function(String url)`              | `void Function(Message message, String url)`                                   |
 | Mention tap        | `void Function(User user)`               | `void Function(User user)` (renamed: `onMentionTap` → `onUserMentionTap`)      |
 | Quoted message tap | `void Function(String? quotedMessageId)` | `void Function(Message quotedMessage)`                                         |
-| Thread tap         | `void Function(Message message)`         | `void Function(Message message)` (unchanged signature, renamed: `onThreadTap`) |
+| Thread tap         | `void Function(Message message)`         | `void Function(Message parentMessage, Message? threadMessage)` (renamed: `onThreadTap`) |
 | Reply tap          | `void Function(Message message)`         | `void Function(Message message)` (new: `onReplyTap`)                           |
 
 ---
@@ -286,8 +286,8 @@ actionsBuilder: (context, defaultActions) {
 | Removed                                    | Replacement                                                                |
 | ------------------------------------------ | -------------------------------------------------------------------------- |
 | `StreamMessageThemeData`                   | `StreamMessageItemThemeData`                                               |
-| `StreamChatThemeData.ownMessageTheme`      | Configured per placement on `StreamMessageItemThemeData` (use `outgoing:`) |
-| `StreamChatThemeData.otherMessageTheme`    | Configured per placement on `StreamMessageItemThemeData` (use `incoming:`) |
+| `StreamChatThemeData.ownMessageTheme`      | Placement-aware styling via `StreamMessageLayoutProperty.resolveWith` on individual style fields (e.g. `bubble`, `metadata`) |
+| `StreamChatThemeData.otherMessageTheme`    | Placement-aware styling via `StreamMessageLayoutProperty.resolveWith` on individual style fields (e.g. `bubble`, `metadata`) |
 | `StreamMessageItem.messageTheme` parameter | Resolved from context via `StreamMessageItemTheme.of(context)`             |
 
 **Before (explicit `messageTheme` parameter):**
@@ -305,7 +305,7 @@ StreamMessageItem(
 StreamMessageItem(message: message)
 ```
 
-`StreamMessageItemTheme` is provided by `StreamChatTheme` and resolved based on `StreamMessagePlacement` (alignment, stack position, etc.).
+`StreamMessageItemTheme` is provided by `StreamChatTheme` and resolved based on `StreamMessageLayout` (alignment, stack position, etc.).
 
 ### StreamMessageItemThemeData
 
@@ -313,21 +313,28 @@ The old per-property visibility booleans are replaced by a structured visibility
 
 ```dart
 StreamMessageItemThemeData(
-  avatarVisibility: StreamMessageStyleVisibility(
-    incoming: StreamVisibility.visible,
-    outgoing: StreamVisibility.gone,
-  ),
-  annotationVisibility: StreamMessageStyleVisibility(...),
-  metadataVisibility: StreamMessageStyleVisibility(...),
-  repliesVisibility: StreamMessageStyleVisibility(...),
+  // Visibility fields take a StreamMessageLayoutVisibility resolved per layout.
+  avatarVisibility: StreamMessageLayoutVisibility.resolveWith((layout) {
+    // Hide avatar for end-aligned (outgoing) messages.
+    return layout.alignment == StreamMessageAlignment.end
+        ? StreamVisibility.gone
+        : StreamVisibility.visible;
+  }),
+  metadataVisibility: StreamMessageLayoutVisibility.resolveWith((layout) {
+    return switch (layout.stackPosition) {
+      StreamMessageStackPosition.bottom ||
+      StreamMessageStackPosition.single => StreamVisibility.visible,
+      _ => StreamVisibility.gone,
+    };
+  }),
 
-  incoming: StreamMessageItemStyle(
-    padding: EdgeInsets.all(4),
-    backgroundColor: Colors.white,
-  ),
-  outgoing: StreamMessageItemStyle(
-    padding: EdgeInsets.all(4),
-    backgroundColor: Colors.blue.shade50,
+  // Placement-aware bubble color lives on the bubble style field.
+  bubble: StreamMessageBubbleStyle(
+    backgroundColor: StreamMessageLayoutProperty.resolveWith((layout) {
+      return layout.alignment == StreamMessageAlignment.end
+          ? Colors.blue.shade50
+          : Colors.white;
+    }),
   ),
 )
 ```
@@ -360,7 +367,7 @@ StreamMessageListView(
 
     if (message.isDeleted || message.state.isFailed) return defaultWidget;
 
-    final alignment = StreamMessagePlacement.alignmentDirectionalOf(context);
+    final alignment = StreamMessageLayout.alignmentDirectionalOf(context);
     final isEnd = alignment == AlignmentDirectional.centerEnd;
 
     return Swipeable(
@@ -401,7 +408,7 @@ StreamMessageListView(
 
 | Old Typedef | New Typedef                                                                                              |
 | ----------- | -------------------------------------------------------------------------------------------------------- |
-| —           | `MessageActionsBuilder<T> = List<Widget> Function(BuildContext, List<StreamContextMenuAction<T>>)` (new) |
+| —           | `MessageActionsBuilder<T extends MessageAction> = List<Widget> Function(BuildContext, List<StreamContextMenuAction<T>>)` (new) |
 
 For the `MessageBuilder` / `ParentMessageBuilder` typedef changes and the new `StreamMessageItemBuilder`, see [message_list.md](message_list.md#builder-signature-changes).
 
@@ -414,7 +421,7 @@ For the `MessageBuilder` / `ParentMessageBuilder` typedef changes and the new `S
 - [ ] Remove `customActions` and `onCustomActionTap` — use `actionsBuilder` via component factory or `StreamMessageItemProps.copyWith()`
 - [ ] Remove all per-widget builder callbacks (`userAvatarBuilder`, `textBuilder`, `quotedMessageBuilder`, `deletedMessageBuilder`, `bottomRowBuilderWithDefaultWidget`, `reactionPickerBuilder`, `reactionIndicatorBuilder`) — use component factory instead
 - [ ] Remove `shape`, `borderSide`, `borderRadiusGeometry`, `attachmentShape`, `textPadding`, `attachmentPadding` — controlled via `StreamMessageBubble` theming
-- [ ] Remove `reverse` — determined by `StreamMessagePlacement` context
+- [ ] Remove `reverse` — determined by `StreamMessageLayout` context
 - [ ] Remove `translateUserAvatar` — avatar positioning is theme-driven
 - [ ] Replace `StreamMessageThemeData` / `ownMessageTheme` / `otherMessageTheme` with `StreamMessageItemThemeData`
 - [ ] Update `onLinkTap` to `onMessageLinkTap` with new signature `void Function(Message, String)`

@@ -31,6 +31,7 @@ This guide covers all breaking changes in **Stream Chat Flutter SDK v10.0.0**. W
     - [AttachmentFileUploader](#attachmentfileuploader)
 - [Unread Threads Banner](#unread-threads-banner)
 - [Stable Release Changes](#stable-release-changes)
+    - [ClientState Collection Immutability](#stream_chat-clientstate-collection-immutability)
     - [SortOption Constructor Rename](#stream_chat-sortoption-constructor-rename)
 - [Appendix: Beta Release Timeline](#appendix-beta-release-timeline)
 - [Migration Checklist](#migration-checklist)
@@ -61,7 +62,7 @@ Each breaking change section includes an **"Introduced in"** tag so you can quic
 | --------------------------------------------------- | ------------------------------------------------------------------------------------ |
 | [**Attachment Picker**](#attachment-picker)         | Sealed class hierarchy, builder pattern for options, typed result handling           |
 | [**Reactions**](#reactions)                         | `Reaction` object API, explicit `onReactionPicked` callbacks required                |
-| [**Message UI**](#message-ui)                       | New `onAttachmentTap` signature with fallback support, generic `StreamMessageAction` |
+| [**Message UI**](#message-ui)                       | `StreamAttachmentWidgetTapCallback` signature `void Function(Message, Attachment)`; sealed `MessageAction` hierarchy with `actionsBuilder` |
 | [**Message State**](#message-state--deletion)       | `MessageDeleteScope` replaces `bool hard`, delete-for-me support                     |
 | [**File Upload**](#file-upload)                     | Four new abstract methods on `AttachmentFileUploader`                                |
 | [**Unread Threads Banner**](#unread-threads-banner) | Wrapper pattern with `child`, `enabled`, `onRefresh`; removed `onTap`, `minHeight`   |
@@ -124,7 +125,7 @@ class LocationAttachmentPickerType extends CustomAttachmentPickerType {
 ```dart
 final option = AttachmentPickerOption(
   title: 'Gallery',
-  icon: Icon(Icons.photo_library),
+  icon: Icons.photo_library,
   supportedTypes: [AttachmentPickerType.images, AttachmentPickerType.videos],
   optionViewBuilder: (context, controller) {
     return GalleryPickerView(controller: controller);
@@ -133,7 +134,7 @@ final option = AttachmentPickerOption(
 
 final webOrDesktopOption = WebOrDesktopAttachmentPickerOption(
   title: 'File Upload',
-  icon: Icon(Icons.upload_file),
+  icon: Icons.upload_file,
   type: AttachmentPickerType.files,
 );
 ```
@@ -143,7 +144,7 @@ final webOrDesktopOption = WebOrDesktopAttachmentPickerOption(
 // For custom UI pickers (gallery, polls)
 final tabbedOption = TabbedAttachmentPickerOption(
   title: 'Gallery',
-  icon: Icon(Icons.photo_library),
+  icon: Icons.photo_library,
   supportedTypes: [AttachmentPickerType.images, AttachmentPickerType.videos],
   optionViewBuilder: (context, controller) {
     return GalleryPickerView(controller: controller);
@@ -153,7 +154,7 @@ final tabbedOption = TabbedAttachmentPickerOption(
 // For system pickers (camera, file dialogs)
 final systemOption = SystemAttachmentPickerOption(
   title: 'Camera',
-  icon: Icon(Icons.camera_alt),
+  icon: Icons.camera_alt,
   supportedTypes: [AttachmentPickerType.images],
   onTap: (context, controller) => pickFromCamera(),
 );
@@ -171,8 +172,8 @@ final systemOption = SystemAttachmentPickerOption(
 
 #### Key Changes:
 
-- Now returns `StreamAttachmentPickerResult` instead of `AttachmentPickerValue`
-- Improved type safety and clearer intent handling
+- `showStreamAttachmentPickerModalBottomSheet` has been **removed**. The attachment picker is now an inline widget embedded directly inside `StreamMessageComposer`. There is no longer a separate modal bottom sheet function to call.
+- To customise available picker options, use `attachmentPickerOptionsBuilder` on `StreamMessageComposer` (see [customAttachmentPickerOptions](#customattachmentpickeroptions)).
 
 #### Migration Steps:
 
@@ -182,32 +183,22 @@ final result = await showStreamAttachmentPickerModalBottomSheet(
   context: context,
   controller: controller,
 );
-
-// result is AttachmentPickerValue
 ```
 
 **After:**
-```dart
-final result = await showStreamAttachmentPickerModalBottomSheet(
-  context: context,
-  controller: controller,
-);
 
-// result is StreamAttachmentPickerResult
-switch (result) {
-  case AttachmentsPicked():
-    // Handle picked attachments
-  case PollCreated():
-    // Handle created poll
-  case AttachmentPickerError():
-    // Handle error
-  case CustomAttachmentPickerResult():
-    // Handle custom result
-}
+Remove the direct call. The picker now opens automatically from within `StreamMessageComposer`. To control which options are available, pass `attachmentPickerOptionsBuilder`:
+
+```dart
+StreamMessageComposer(
+  attachmentPickerOptionsBuilder: (context, defaultOptions) {
+    return [...defaultOptions]; // modify as needed
+  },
+)
 ```
 
 > **Important:**  
-> Always handle the new `StreamAttachmentPickerResult` return type with proper switch cases.
+> The picker is now inline. If you previously opened the picker programmatically, integrate it into the composer instead of calling a separate function.
 
 ---
 
@@ -217,8 +208,8 @@ switch (result) {
 
 #### Key Changes:
 
-- `StreamMobileAttachmentPickerBottomSheet` → `StreamTabbedAttachmentPickerBottomSheet`
-- `StreamWebOrDesktopAttachmentPickerBottomSheet` → `StreamSystemAttachmentPickerBottomSheet`
+- `StreamMobileAttachmentPickerBottomSheet` and `StreamWebOrDesktopAttachmentPickerBottomSheet` have been replaced by **inline widgets** — there are no longer separate bottom-sheet classes.
+- The new widgets are `StreamTabbedAttachmentPicker` (for mobile, tabbed interface) and `StreamSystemAttachmentPicker` (for web/desktop, system dialogs). Neither has a `BottomSheet` suffix — they are plain inline `Widget`s embedded inside the composer.
 
 #### Migration Steps:
 
@@ -238,22 +229,25 @@ StreamWebOrDesktopAttachmentPickerBottomSheet(
 ```
 
 **After:**
+
+The pickers are now managed internally by `StreamMessageComposer`. Direct instantiation is only needed for advanced custom layouts:
+
 ```dart
-StreamTabbedAttachmentPickerBottomSheet(
-  context: context,
+// Tabbed picker (mobile default)
+StreamTabbedAttachmentPicker(
   controller: controller,
-  customOptions: [tabbedOption],
+  options: {tabbedOption},
 );
 
-StreamSystemAttachmentPickerBottomSheet(
-  context: context,
+// System picker (web/desktop default)
+StreamSystemAttachmentPicker(
   controller: controller,
-  customOptions: [systemOption],
+  options: {systemOption},
 );
 ```
 
 > **Important:**  
-> The new names better reflect their respective layouts and functionality.
+> The bottom-sheet classes have been removed entirely. The new `StreamTabbedAttachmentPicker` and `StreamSystemAttachmentPicker` are inline widgets, not sheets. In most cases you do not need to instantiate them directly — use `attachmentPickerOptionsBuilder` on `StreamMessageComposer` to customise picker options.
 
 ---
 
@@ -274,7 +268,7 @@ StreamMessageComposer(
   customAttachmentPickerOptions: [
     TabbedAttachmentPickerOption(
       key: 'custom-location',
-      icon: const Icon(Icons.location_on),
+      icon: Icons.location_on,
       supportedTypes: [AttachmentPickerType.images],
       optionViewBuilder: (context, controller) {
         return CustomLocationPicker();
@@ -293,7 +287,7 @@ StreamMessageComposer(
       ...defaultOptions,
       TabbedAttachmentPickerOption(
         key: 'custom-location',
-        icon: const Icon(Icons.location_on),
+        icon: Icons.location_on,
         supportedTypes: [AttachmentPickerType.images],
         optionViewBuilder: (context, controller) {
           return CustomLocationPicker();
@@ -324,29 +318,10 @@ StreamMessageComposer(
 )
 ```
 
-**Using with `showStreamAttachmentPickerModalBottomSheet`:**
-```dart
-final result = await showStreamAttachmentPickerModalBottomSheet(
-  context: context,
-  optionsBuilder: (context, defaultOptions) {
-    return [
-      ...defaultOptions,
-      TabbedAttachmentPickerOption(
-        key: 'custom-option',
-        icon: const Icon(Icons.star),
-        supportedTypes: [AttachmentPickerType.images],
-        optionViewBuilder: (context, controller) {
-          return CustomPickerView();
-        },
-      ),
-    ];
-  },
-);
-```
-
 > **Important:**
-> - The builder pattern gives you access to default options, allowing more flexible customization
-> - The builder works with both mobile (tabbed) and desktop (system) pickers
+> - The builder pattern gives you access to default options, allowing more flexible customization.
+> - The builder works with both mobile (tabbed) and desktop (system) pickers.
+> - `showStreamAttachmentPickerModalBottomSheet` has been removed. Use `attachmentPickerOptionsBuilder` on `StreamMessageComposer` as shown above.
 
 ---
 
@@ -506,9 +481,10 @@ client.sendReaction(
 
 #### Key Changes:
 
-- New `StreamReactionPicker.builder` constructor
-- Added properties: `padding`, `scrollable`, `borderRadius`
-- Automatic reaction handling removed — must now use `onReactionPicked`
+- The chat-domain reaction picker widget is now `StreamMessageReactionPicker` (in `stream_chat_flutter`).
+- It wraps the domain-agnostic `StreamReactionPicker` from `stream_core_flutter`, resolving reaction icons automatically via `ReactionIconResolver`.
+- The widget only accepts `message` and `onReactionPicked` — there are no `padding`, `scrollable`, `borderRadius`, or `reactionIcons` parameters on the chat-level class.
+- Automatic reaction handling (sending to the channel) has been removed from the widget — you must supply `onReactionPicked`.
 
 #### Migration Steps:
 
@@ -519,33 +495,21 @@ StreamReactionPicker(
 );
 ```
 
-**After (Recommended – Builder):**
+**After:**
 ```dart
-StreamReactionPicker.builder(
-  context,
-  message,
-  (Reaction reaction) {
-    // Explicitly handle reaction
-  },
-);
-```
-
-**After (Alternative – Direct Configuration):**
-```dart
-StreamReactionPicker(
+StreamMessageReactionPicker(
   message: message,
-  reactionIcons: StreamChatConfiguration.of(context).reactionIcons,
   onReactionPicked: (Reaction reaction) {
-    // Handle reaction here
+    // Handle reaction — e.g. send or remove via channel
+    channel.sendReaction(message, reaction);
   },
-  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-  scrollable: true,
-  borderRadius: BorderRadius.circular(24),
 );
 ```
 
-> **Important:**  
-> Automatic reaction handling has been removed. You must explicitly handle reactions using `onReactionPicked`.
+> **Important:**
+> - Use `StreamMessageReactionPicker` (not `StreamReactionPicker`) for chat use cases.
+> - `StreamReactionPicker` from `stream_core_flutter` is the domain-agnostic primitive; it accepts `List<StreamReactionPickerItem>` and `onReactionPicked` (a `ValueSetter<StreamReactionPickerItem>`), not chat `Message` objects.
+> - `onReactionPicked` is now required for any reaction to be handled.
 
 ---
 
@@ -555,55 +519,46 @@ StreamReactionPicker(
 
 #### Key Changes:
 
-- `message` parameter has been removed
-- `reactionIcons` type changed from `List<StreamReactionIcon>` to `List<ReactionPickerIcon>`
-- `onReactionPicked` callback renamed to `onIconPicked` with new signature: `ValueSetter<ReactionPickerIcon>`
-- `iconBuilder` parameter changed from default value to nullable with internal fallback
-- Message-specific logic (checking for own reactions) moved to parent widget
+- `ReactionPickerIconList` and `ReactionPickerIcon` have been **removed**. They no longer exist in the public API.
+- Their functionality has been absorbed into the domain-agnostic `StreamReactionPicker` (from `stream_core_flutter`) and its `StreamReactionPickerItem` model.
 
 #### Migration Steps:
 
-**Before:**
+If you were using `ReactionPickerIconList` directly, replace it with `StreamMessageReactionPicker` for chat use cases:
+
 ```dart
-ReactionPickerIconList(
+// Use the high-level chat wrapper instead
+StreamMessageReactionPicker(
   message: message,
-  reactionIcons: icons,
   onReactionPicked: (reaction) {
-    // Handle reaction
     channel.sendReaction(message, reaction);
   },
 )
 ```
 
-**After:**
+For advanced cases that required direct control over each icon, use `StreamReactionPicker` with `StreamReactionPickerItem` objects:
+
 ```dart
-// Map StreamReactionIcon to ReactionPickerIcon with selection state
-final ownReactions = [...?message.ownReactions];
-final ownReactionsMap = {for (final it in ownReactions) it.type: it};
+// Build items with selection state from the message's own reactions
+final ownReactionsMap = {for (final r in [...?message.ownReactions]) r.type: r};
 
-final pickerIcons = icons.map((icon) {
-  return ReactionPickerIcon(
-    type: icon.type,
-    builder: icon.builder,
-    isSelected: ownReactionsMap[icon.type] != null,
-  );
-}).toList();
-
-ReactionPickerIconList(
-  reactionIcons: pickerIcons,
-  onIconPicked: (pickerIcon) {
-    final reaction = ownReactionsMap[pickerIcon.type] ?? 
-                     Reaction(type: pickerIcon.type);
-    // Handle reaction
+StreamReactionPicker(
+  items: reactionTypes.map((type) => StreamReactionPickerItem(
+    key: type,
+    emoji: resolver.resolve(type),
+    isSelected: ownReactionsMap[type] != null,
+  )).toList(),
+  onReactionPicked: (item) {
+    final reaction = ownReactionsMap[item.key] ?? Reaction(type: item.key);
     channel.sendReaction(message, reaction);
   },
 )
 ```
 
 > **Important:**
-> - This is typically an internal widget used by `StreamReactionPicker`
-> - If you were using it directly, you now need to handle reaction selection state externally
-> - Use `StreamReactionPicker` for most use cases instead of `ReactionPickerIconList`
+> - `ReactionPickerIconList` and `ReactionPickerIcon` no longer exist.
+> - Use `StreamMessageReactionPicker` for most chat scenarios.
+> - If you need the core picker directly, use `StreamReactionPicker` with `StreamReactionPickerItem` (from `stream_core_flutter`).
 
 ---
 
@@ -613,9 +568,8 @@ ReactionPickerIconList(
 
 #### Key Changes:
 
-- Based on `StreamMessageModal` for consistency
-- `messageTheme` removed — inferred automatically
-- Reaction handling must now be handled via `onReactionPicked`
+- `StreamMessageReactionsModal` has been **removed**.
+- The reaction detail view is now `ReactionDetailSheet`, shown as a modal bottom sheet via `ReactionDetailSheet.show(...)`.
 
 #### Migration Steps:
 
@@ -631,18 +585,16 @@ StreamMessageReactionsModal(
 
 **After:**
 ```dart
-StreamMessageReactionsModal(
+ReactionDetailSheet.show(
+  context: context,
   message: message,
-  messageWidget: myMessageWidget,
-  reverse: true,
-  onReactionPicked: (SelectReaction reactionAction) {
-    // Handle reaction explicitly
-  },
 );
 ```
 
-> **Important:**  
-> `messageTheme` has been removed. Reaction handling must now be explicit using `onReactionPicked`.
+> **Important:**
+> - `StreamMessageReactionsModal` no longer exists. Remove all references to it.
+> - `ReactionDetailSheet` fetches and paginates reactions from the server; it does not need a pre-built message widget.
+> - To intercept reaction detail display, provide a custom `onReactionsTap` callback to `StreamMessageItem` — the default implementation calls `ReactionDetailSheet.show`.
 
 ---
 
@@ -658,70 +610,42 @@ Updates to message widgets, attachment handling, and custom action patterns.
 
 #### Key Changes:
 
-- `onAttachmentTap` callback signature has changed to support custom attachment handling with automatic fallback to default behavior.
-- Callback now receives `BuildContext` as the first parameter.
-- Returns `FutureOr<bool>` to indicate whether the attachment was handled.
-- Returning `true` skips default behavior, `false` uses default handling (URLs, images, videos, giphys).
+- `onAttachmentTap` is a `StreamAttachmentWidgetTapCallback` — a `void Function(Message message, Attachment attachment)` typedef defined on `StreamAttachmentWidgetBuilder`.
+- It does **not** receive `BuildContext` and does **not** return `FutureOr<bool>`. The signature is simply `void Function(Message, Attachment)`.
+- It is not a parameter on `StreamMessageItem` directly. Pass custom attachment builders via the `attachmentBuilders` parameter, each of which may set its own `onTap` using this signature.
 
 #### Migration Steps:
 
 **Before:**
 ```dart
-StreamMessageItem(
-  message: message,
-  onAttachmentTap: (message, attachment) {
-    // Could only override - no way to fallback to default behavior
-    if (attachment.type == 'location') {
-      showLocationDialog(context, attachment);
-    }
-    // Other attachment types (images, videos, URLs) lost default behavior
-  },
-)
+// Old attachment builder with custom tap
+myBuilder.onTap = (message, attachment) { ... };
 ```
 
 **After:**
 ```dart
-StreamMessageItem(
-  message: message,
-  onAttachmentTap: (context, message, attachment) async {
-    if (attachment.type == 'location') {
-      await showLocationDialog(context, attachment);
-      return true; // Handled by custom logic
-    }
-    return false; // Use default behavior for images, videos, URLs, etc.
-  },
-)
-```
+// The typedef is:
+// typedef StreamAttachmentWidgetTapCallback = void Function(Message, Attachment);
 
-**Example: Handling multiple custom types**
-```dart
+// Supply custom attachment builders to StreamMessageItem to intercept taps:
 StreamMessageItem(
   message: message,
-  onAttachmentTap: (context, message, attachment) async {
-    switch (attachment.type) {
-      case 'location':
-        await Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => MapView(attachment)),
-        );
-        return true;
-      
-      case 'product':
-        await showProductDialog(context, attachment);
-        return true;
-      
-      default:
-        return false; // Images, videos, URLs use default viewer
-    }
-  },
+  attachmentBuilders: [
+    MyCustomAttachmentBuilder(
+      onAttachmentTap: (Message message, Attachment attachment) {
+        if (attachment.type == 'location') {
+          showLocationDialog(context, attachment);
+        }
+      },
+    ),
+  ],
 )
 ```
 
 > **Important:**
-> - The callback now requires `BuildContext` as the first parameter
-> - Must return `FutureOr<bool>` - `true` if handled, `false` for default behavior
-> - Default behavior automatically handles URL previews, images, videos, and giphys
-> - Supports both synchronous and asynchronous operations
+> - The signature is `void Function(Message, Attachment)` — no `BuildContext`, no return value.
+> - `onAttachmentTap` is a property on individual `StreamAttachmentWidgetBuilder` subclasses, not on `StreamMessageItem` itself.
+> - Each built-in attachment builder (image, video, file, giphy, link preview) accepts an `onAttachmentTap` in its constructor if you need to override its tap behavior.
 
 ---
 
@@ -762,14 +686,16 @@ StreamMessageItem(
 
 #### Key Changes:
 
-- Now generic: `StreamMessageAction<T extends MessageAction>`
-- Individual `onTap` handlers removed — use `onCustomActionTap` instead
-- Added new styling props for better customization
+- `StreamMessageAction` as a standalone widget class does **not** exist. The message action system uses the sealed `MessageAction` class hierarchy combined with `StreamContextMenuAction<T extends MessageAction>`.
+- Built-in actions are concrete `final` subclasses of the `MessageAction` sealed class: `SelectReaction`, `CopyMessage`, `DeleteMessage`, `EditMessage`, `FlagMessage`, `PinMessage`, `ThreadReply`, `QuotedReply`, and others.
+- To inject custom actions into the long-press menu, provide an `actionsBuilder` callback on `StreamMessageItem`. The builder receives the default list of `StreamContextMenuAction`s and must return a `List<Widget>`.
+- There is no `customActions` parameter or `onCustomActionTap` callback on `StreamMessageItem`.
 
 #### Migration Steps:
 
-**Before:**
+**Before (v9 pattern):**
 ```dart
+// v9-style action with individual onTap
 final customAction = StreamMessageAction(
   title: Text('Custom Action'),
   leading: Icon(Icons.settings),
@@ -779,30 +705,30 @@ final customAction = StreamMessageAction(
 );
 ```
 
-**After (Type-safe):**
+**After:**
 ```dart
-final customAction = StreamMessageAction<CustomMessageAction>(
-  action: CustomMessageAction(
-    message: message,
-    extraData: {'type': 'custom_action'},
-  ),
-  title: Text('Custom Action'),
-  leading: Icon(Icons.settings),
-  isDestructive: false,
-  iconColor: Colors.blue,
-);
-
 StreamMessageItem(
   message: message,
-  customActions: [customAction],
-  onCustomActionTap: (CustomMessageAction action) {
-    // Handle action here
+  actionsBuilder: (context, defaultActions) {
+    return [
+      ...defaultActions,
+      StreamContextMenuAction<MessageAction>(
+        value: CopyMessage(message: message), // use nearest built-in or subclass
+        leading: const Icon(Icons.settings),
+        label: const Text('Custom Action'),
+        onTap: () {
+          // Handle custom action directly in onTap
+        },
+      ),
+    ];
   },
-);
+)
 ```
 
-> **Important:**  
-> Individual `onTap` callbacks have been removed. Always handle actions using the centralized `onCustomActionTap`.
+> **Important:**
+> - There is no `StreamMessageAction` widget class; use `StreamContextMenuAction<T>` from `stream_core_flutter`.
+> - `StreamContextMenuAction` accepts `onTap` directly — no separate callback dispatch is needed.
+> - `actionsBuilder` on `StreamMessageItem` provides the default actions list, which you can extend, filter, or reorder before returning.
 
 ---
 
@@ -1106,14 +1032,23 @@ controller.cancelEditMessage(); // explicit exit
 
 ---
 
-### StreamMessageComposerInput Rename
+### StreamMessageComposerInput Split
 
-| Old                                 | New                                                                          |
-| ----------------------------------- | ---------------------------------------------------------------------------- |
-| `StreamMessageComposerInput`        | `StreamMessageComposerInputCenter`                                           |
-| `DefaultStreamMessageComposerInput` | `DefaultStreamMessageComposerInputCenter`                                    |
-| `MessageComposerInputProps`         | `MessageComposerInputCenterProps`                                            |
-| Builder key `messageComposerInput`  | `messageComposerInputCenter` (the old key now overrides the outer container) |
+`StreamMessageComposerInput` has been **split** — both names now exist and serve different roles:
+
+| Class                                     | Role                                                              |
+| ----------------------------------------- | ----------------------------------------------------------------- |
+| `StreamMessageComposerInput`              | Outer container (the full input row including leading/trailing)   |
+| `StreamMessageComposerInputCenter`        | Center content only (text field, attachments preview, etc.)       |
+| `DefaultStreamMessageComposerInput`       | Default outer container implementation                            |
+| `DefaultStreamMessageComposerInputCenter` | Default center implementation                                     |
+| `MessageComposerInputProps`               | Props for the outer container                                     |
+| `MessageComposerInputCenterProps`         | Props for the center widget                                       |
+
+If you were previously using `StreamMessageComposerInput` to customise the **text field area**, you need to target `StreamMessageComposerInputCenter` (and the `messageComposerInputCenter` builder key) instead. The `messageComposerInput` builder key now controls the outer container.
+
+> **Important:**
+> This is a split, not a rename. `StreamMessageComposerInput` still exists; targeting it replaces the entire input row. To replace only the text field area, use `StreamMessageComposerInputCenter`.
 
 ---
 
@@ -1135,7 +1070,7 @@ controller.cancelEditMessage(); // explicit exit
 | `StreamChannelGridView` / `StreamChannelGridTile`   | Removed                                                                                                           |
 | `StreamMessageSearchGridView`                       | Removed                                                                                                           |
 | `AttachmentModalSheet`                              | Removed                                                                                                           |
-| `ErrorAlertSheet`                                   | Removed                                                                                                           |
+| `ErrorAlertSheet`                                   | No longer publicly exported; still used internally by `StreamMessageComposer`                                     |
 | `StreamChannelInfoBottomSheet`                      | Removed                                                                                                           |
 | `StreamMarkdownMessage`                             | Use `StreamMessageText`                                                                                           |
 | `StreamAttachmentUploadStateBuilder.successBuilder` | Removed (unreachable)                                                                                             |
@@ -1184,6 +1119,39 @@ translations.attachmentsUploadProgressText(completed: 3, total: 5)
 `StreamChatCore` now sets `client.recoverStateOnReconnect = false` on mount. If you watch a `Channel` outside any list controller, subscribe to `client.on(EventType.connectionRecovered)` and call `channel.watch()` to refresh on reconnect.
 
 The default `StreamChat.backgroundKeepAlive` has been reduced from 1 minute to 15 seconds.
+
+---
+
+### stream_chat: ClientState Collection Immutability
+
+`ClientState.channels`, `ClientState.users`, and `ClientState.activeLiveLocations` are now backed by immutable subject types (`ImmutableMapBehaviorSubject` / `ImmutableListBehaviorSubject`). The map and list values they expose are unmodifiable — mutating them at runtime throws an `UnsupportedError`.
+
+In addition, the following setters and methods are now `@internal` and must not be called from application code:
+
+- `ClientState.channels=` (setter)
+- `ClientState.addChannels(...)`
+- `ClientState.removeChannel(...)`
+- `ClientState.activeLiveLocations=` (setter)
+
+#### Migration Steps:
+
+If your code mutated these collections directly, remove those mutations. All state changes must go through the public SDK APIs (`StreamChatClient`, `Channel`, etc.):
+
+```dart
+// Before — direct mutation (no longer allowed)
+client.state.channels[channel.cid] = channel;
+client.state.addChannels({channel.cid: channel});
+client.state.removeChannel(channel.cid);
+
+// After — use the SDK APIs; state is managed internally
+await client.queryChannels(...);  // populates channels automatically
+await channel.watch();            // adds/refreshes a single channel in state
+```
+
+> **Important:**
+> - Reading `channels`, `users`, and `activeLiveLocations` is unchanged — the getters still work.
+> - Do not cast the returned collections to `Map`/`List` and call mutating methods; those calls will throw at runtime.
+> - Code that previously relied on `addChannels` or `removeChannel` for optimistic state management must be reworked to use the SDK's own query and watch methods.
 
 ---
 
@@ -1273,7 +1241,7 @@ This appendix provides a chronological reference of breaking changes by beta ver
 - [ ] Replace `StreamMessageComposerController(message: ...)` with `.editMessage()` to enter edit mode
 - [ ] Replace `controller.clear()` (used to exit edit mode) with `controller.cancelEditMessage()`
 - [ ] Rename `editingOriginalMessage` → `messageBeingEdited`
-- [ ] Rename `StreamMessageComposerInput` → `StreamMessageComposerInputCenter` (and related props/key)
+- [ ] If you customised the text field area via `StreamMessageComposerInput`, switch to `StreamMessageComposerInputCenter` (and builder key `messageComposerInputCenter`); `StreamMessageComposerInput` now controls the entire outer input row
 - [ ] Remove `StreamDraftListView`, `StreamDraftListTile`, and theme classes — use `StreamDraftListController` + `PagedValueListView`
 - [ ] Replace removed widgets: `AttachmentButton`, `StreamQuotedMessageWidget`, `EditMessageSheet`, `StreamMessageSendButton`, etc. (see table)
 - [ ] Remove `StreamMessageThemeData` / `StreamMessageInputThemeData` / `StreamChannelPreviewThemeData` usage
@@ -1283,6 +1251,7 @@ This appendix provides a chronological reference of breaking changes by beta ver
 - [ ] Replace `SortOption('field', direction: SortOption.DESC)` with `SortOption.desc('field')` and `SortOption('field', direction: SortOption.ASC)` with `SortOption.asc('field')`
 - [ ] Migrate `Message.syncWith(local)` → `local.updateWith(remote)` (arguments are flipped)
 - [ ] Review `Channel.isGroup` usage — use `channel.isOneToOne` for two-member DM checks
+- [ ] Remove any code that mutates `ClientState.channels`, `ClientState.users`, or `ClientState.activeLiveLocations` directly (setters and `addChannels`/`removeChannel` are now `@internal`)
 
 ### Unread Threads Banner
 - [ ] Replace `Column` + `Expanded` layout with `StreamUnreadThreadsBanner(child: StreamThreadListView(...))`
@@ -1295,10 +1264,8 @@ This appendix provides a chronological reference of breaking changes by beta ver
 - [ ] Replace `ArgumentError('The maximum number of attachments is...')` with `AttachmentLimitReachedError` (provides `maxCount` property)
 
 ### For v10.0.0-beta.9:
-- [ ] Update `onAttachmentTap` callback signature to include `BuildContext` as first parameter
-- [ ] Return `FutureOr<bool>` from `onAttachmentTap` - `true` if handled, `false` for default behavior
-- [ ] Leverage automatic fallback to default handling for standard attachment types (images, videos, URLs)
-- [ ] Update any direct usage of `ReactionPickerIconList` to handle reaction selection state externally
+- [ ] Update any custom `StreamAttachmentWidgetBuilder` subclasses whose `onAttachmentTap` callback now has the signature `void Function(Message, Attachment)` (no `BuildContext`, no return value)
+- [ ] Replace any direct usage of `ReactionPickerIconList` / `ReactionPickerIcon` with `StreamMessageReactionPicker` or `StreamReactionPicker` + `StreamReactionPickerItem`
 
 ### For v10.0.0-beta.8:
 - [ ] Replace `customAttachmentPickerOptions` with `attachmentPickerOptionsBuilder` to access and modify default options
@@ -1316,14 +1283,15 @@ This appendix provides a chronological reference of breaking changes by beta ver
 
 ### For v10.0.0-beta.3:
 - [ ] Update attachment picker options to use `SystemAttachmentPickerOption` or `TabbedAttachmentPickerOption`
-- [ ] Handle new `StreamAttachmentPickerResult` return type from attachment picker
-- [ ] Use renamed bottom sheet classes (`StreamTabbedAttachmentPickerBottomSheet`, `StreamSystemAttachmentPickerBottomSheet`)
+- [ ] Remove calls to `showStreamAttachmentPickerModalBottomSheet` — the picker is now inline inside `StreamMessageComposer`
+- [ ] Replace `StreamMobileAttachmentPickerBottomSheet` / `StreamWebOrDesktopAttachmentPickerBottomSheet` with inline `StreamTabbedAttachmentPicker` / `StreamSystemAttachmentPicker` (no `BottomSheet` suffix)
+- [ ] Fix `icon:` values from `Icon(Icons.xxx)` (Widget) to `Icons.xxx` (IconData) on all picker option constructors
 
 ### For v10.0.0-beta.1:
-- [ ] Use `StreamReactionPicker.builder` or supply `onReactionPicked`
-- [ ] Convert all `StreamMessageAction` instances to type-safe generic usage
-- [ ] Centralize handling with `onCustomActionTap`
-- [ ] Remove deprecated props like `showReactionTail` and `messageTheme`
+- [ ] Replace `StreamReactionPicker(message: ...)` with `StreamMessageReactionPicker(message: ..., onReactionPicked: ...)` and supply the `onReactionPicked` callback
+- [ ] Remove `StreamMessageReactionsModal` usage — replaced by `ReactionDetailSheet.show(context: context, message: message)`
+- [ ] Replace `StreamMessageAction` + `customActions` + `onCustomActionTap` patterns with `actionsBuilder` on `StreamMessageItem`, returning `StreamContextMenuAction` widgets
+- [ ] Remove deprecated `showReactionTail` parameter from `StreamMessageItem`
 
 ---
 

@@ -118,7 +118,7 @@ StreamReactionListView(
 
 ## ReactionDetailSheet
 
-`ReactionDetailSheet` replaces the old `MessageReactionsModal`. It shows a bottom sheet with the total reaction count, emoji filter chips per reaction type, and a scrollable list of reactors using `StreamReactionListController` internally.
+`ReactionDetailSheet` replaces the old `StreamMessageReactionsModal`. It shows a bottom sheet with the total reaction count, emoji filter chips per reaction type, and a scrollable list of reactors using `StreamReactionListController` internally.
 
 ### Showing the Sheet
 
@@ -144,13 +144,13 @@ final action = await ReactionDetailSheet.show(
 | `message`             | `Message`      | yes      | The message whose reactions to display                   |
 | `initialReactionType` | `String?`      | no       | Pre-selects this reaction type chip when the sheet opens |
 
-### Migration from `MessageReactionsModal`
+### Migration from `StreamMessageReactionsModal`
 
 **Before:**
 ```dart
 showDialog(
   context: context,
-  builder: (_) => MessageReactionsModal(message: message),
+  builder: (_) => StreamMessageReactionsModal(message: message),
 );
 ```
 
@@ -172,7 +172,7 @@ The following reactions-related widgets have been removed. Replace any direct re
 
 | Removed Widget                | Replacement                                                                                                                                                                                       |
 | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `DesktopReactionsBuilder`     | Use `ReactionDetailSheet.show(context: context, message: message)` for the full reactors list, or override `messageReactions` via `StreamComponentFactory` to customize the inline reaction chips |
+| `DesktopReactionsBuilder`     | Use `ReactionDetailSheet.show(context: context, message: message)` for the full reactors list, or override `reactions` (`StreamComponentBuilder<StreamReactionsProps>?`) via `StreamComponentFactory` to customize the inline reaction chips |
 | `StreamMessageReactionsModal` | Use `ReactionDetailSheet` (see [ReactionDetailSheet](#reactiondetailsheet))                                                                                                                       |
 
 For action-related reaction widget changes (e.g. `StreamMessageReactionsModal` migration), see [message_actions.md](message_actions.md#streammessagereactionsmodal).
@@ -181,8 +181,8 @@ For action-related reaction widget changes (e.g. `StreamMessageReactionsModal` m
 
 ## Migration Checklist
 
-- [ ] Replace `MessageReactionsModal` with `ReactionDetailSheet.show()`
+- [ ] Replace `StreamMessageReactionsModal` with `ReactionDetailSheet.show()`
 - [ ] Use `StreamReactionListController` to load/paginate reactions programmatically
 - [ ] Use `StreamReactionListView` with a `StreamReactionListController` for custom reaction list UIs
 - [ ] For runtime reaction-type filtering, set `controller.filter` and call `controller.doInitialLoad()`
-- [ ] Remove any `DesktopReactionsBuilder` usage — replace with `ReactionDetailSheet.show(...)` or a custom `messageReactions` factory override
+- [ ] Remove any `DesktopReactionsBuilder` usage — replace with `ReactionDetailSheet.show(...)` or a custom `reactions` factory override

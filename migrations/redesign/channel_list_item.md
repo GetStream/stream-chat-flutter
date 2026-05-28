@@ -43,7 +43,7 @@ The old `StreamChannelListTile` accepted all slot widgets directly in its constr
 - `contentPadding` removed
 - `selectedTileColor` removed
 - `unreadIndicatorBuilder` removed
-- `sendingIndicatorBuilder` removed from constructor — pass via `StreamChannelListItemProps`
+- `sendingIndicatorBuilder` removed from constructor — override via `StreamComponentFactory` (see [Customizing Slots](#customizing-slots))
 
 ### Migration
 
@@ -129,7 +129,7 @@ StreamChannelListTile(
 
 ## Theme Migration
 
-`StreamChannelPreviewThemeData` has been replaced by `StreamChannelListItemThemeData`. Additionally, the `StreamChannelPreviewTheme` inherited widget itself is deprecated — replace it with `StreamChannelListItemTheme`.
+`StreamChannelPreviewThemeData` has been replaced by `StreamChannelListItemThemeData`. Additionally, the `StreamChannelPreviewTheme` inherited widget itself has been removed — replace it with `StreamChannelListItemTheme`.
 
 ### Property Mapping
 
@@ -298,7 +298,7 @@ PagedValueGridView<int, Channel>(
 - [ ] Replace `StreamChannelListTile` with `StreamChannelListItem`
 - [ ] Remove `tileColor`, `visualDensity`, `contentPadding`, `selectedTileColor`, `unreadIndicatorBuilder` parameters
 - [ ] Move slot customization (`leading`, `title`, `subtitle`, `trailing`) to `StreamComponentFactory`
-- [ ] Replace `StreamChannelPreviewTheme` inherited widget with `StreamChannelListItemTheme` — `StreamChannelPreviewTheme` is `@Deprecated` and will be removed in a future release
+- [ ] Replace `StreamChannelPreviewTheme` inherited widget with `StreamChannelListItemTheme` — `StreamChannelPreviewTheme` has been removed
 - [ ] Replace `StreamChatThemeData.channelPreviewTheme` with `StreamChatThemeData.channelListItemTheme`
 - [ ] Rename `lastMessageAtStyle` to `timestampStyle`
 - [ ] Move `lastMessageAtFormatter` from theme to `ChannelLastMessageDate(formatter: ...)`

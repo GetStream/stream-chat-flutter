@@ -261,7 +261,7 @@ If your app overrides these in a `Translations` subclass, your custom values are
 ## Migration Checklist
 
 - [ ] Search your codebase for any class that `extends Translations` or `extends DefaultTranslations`
-- [ ] Add implementations for all 35 new abstract members listed above — the compiler will flag missing ones
+- [ ] Add implementations for all 38 new abstract members listed above — the compiler will flag missing ones
 - [ ] Update the signature of any `questionsLabel` override to `questionLabel({bool isPlural = false})`, and replace any call to `translations.questionsLabel` with `translations.questionLabel(isPlural: true)`
 - [ ] Rename any `endVoteConfirmationText` override (and consumer) to `endVoteConfirmationTitle`
 - [ ] Update the signature of any `slowModeOnLabel` override from `String get slowModeOnLabel` to `String slowModeOnLabel(int cooldownTimeOut)`, and update consumers to pass the cooldown seconds (e.g. `translations.slowModeOnLabel(cooldownTimeOut)`)

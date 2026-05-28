@@ -14,8 +14,6 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// StreamLinkPreviewAttachment(
 ///   message: message,
 ///   urlAttachment: urlAttachment,
-///   hostDisplayName: 'GitHub',
-///   messageTheme: messageTheme,
 /// )
 /// ```
 /// {@end-tool}

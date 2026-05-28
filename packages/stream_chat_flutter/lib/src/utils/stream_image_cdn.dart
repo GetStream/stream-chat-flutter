@@ -102,7 +102,7 @@ class ImageResize {
 /// ```dart
 /// StreamChat(
 ///   client: client,
-///   config: StreamChatConfigurationData(
+///   streamChatConfigData: StreamChatConfigurationData(
 ///     imageCDN: MyImageCDN(),
 ///   ),
 ///   child: ...,

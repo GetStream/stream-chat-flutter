@@ -28,10 +28,9 @@ Use `StreamComponentFactory` instead for app-wide customisation.
 
 ### 4. `UnreadIndicatorButton` callback renames
 
-| Before         | After          |
-| -------------- | -------------- |
-| `onTap`        | `onJumpTap`    |
-| `onDismissTap` | `onDismissTap` |
+| Before  | After       |
+| ------- | ----------- |
+| `onTap` | `onJumpTap` |
 
 ### 5. `streamChatComponentBuilders` — `unreadIndicator` parameter removed
 

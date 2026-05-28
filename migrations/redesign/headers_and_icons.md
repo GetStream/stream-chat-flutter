@@ -53,7 +53,7 @@ Icon(context.streamIcons.copy, color: Colors.red, size: 24)
 | `checkSend`              | `checkmark`                   |
 | `circleUp`               | `arrowUp`                     |
 | `close`                  | `xmark`                       |
-| `closeSmall`             | `xmarkSmall`                  |
+| `closeSmall`             | `xmark`                       |
 | `contacts`               | `users`                       |
 | `copy`                   | `copy`                        |
 | `delete`                 | `delete`                      |
@@ -115,17 +115,16 @@ The following icons have been **removed with no equivalent** in the new set:
 
 ## Header Widgets
 
-All four chat headers — `StreamChannelHeader`, `StreamChannelListHeader`,
-`StreamThreadHeader`, and `StreamGalleryHeader` — have been rebuilt on top
-of the new design system's `StreamAppBar`. They now share a single slot
-model (`leading` / `title` / `subtitle` / `trailing`) and a single theme
-type (`StreamAppBarThemeData`), replacing the legacy
-`AppBar`-style API.
+Three chat headers — `StreamChannelHeader`, `StreamChannelListHeader`, and
+`StreamThreadHeader` — have been rebuilt on top of the new design system's
+`StreamAppBar`. They now share a single slot model (`leading` / `title` /
+`subtitle` / `trailing`) and a single theme type (`StreamAppBarThemeData`),
+replacing the legacy `AppBar`-style API.
 
 ### What changed across all headers
 
 * **New layout primitive.** The headers render a [`StreamAppBar`] with a
-  fixed 72-px height (`kStreamHeaderHeight`) instead of Material's
+  fixed 72-px height (`kStreamToolbarHeight`) instead of Material's
   `kToolbarHeight` (56 px). Pass the header directly to `Scaffold.appBar`
   as before — it implements `PreferredSizeWidget`.
 * **Slot model.** All four headers now expose `leading`, `title`,
@@ -137,9 +136,9 @@ type (`StreamAppBarThemeData`), replacing the legacy
   to insert a default back button. To override, pass `leading:` directly;
   to suppress, pass `automaticallyImplyLeading: false`.
 * **Theme.** `StreamChannelHeaderThemeData`, `StreamChannelListHeaderThemeData`,
-  and `StreamGalleryHeaderThemeData` are deleted. The corresponding
+  and `StreamThreadHeaderThemeData` are deleted. The corresponding
   accessors on `StreamChatThemeData` (`channelHeaderTheme`,
-  `channelListHeaderTheme`, `threadHeaderTheme`, `galleryHeaderTheme`)
+  `channelListHeaderTheme`, `threadHeaderTheme`)
   now return [`StreamAppBarThemeData`].
 * **Per-instance overrides.** A new `style: StreamAppBarStyle?` parameter
   lets callers override colours / padding / typography for one instance —
@@ -242,19 +241,29 @@ StreamChannelListHeader(
 The default subtitle is a [`StreamTypingIndicator`] that falls back to
 the thread's reply count when nobody is typing.
 
-### `StreamGalleryHeader`
+### `StreamMediaGalleryPreviewHeader`
 
-| Old parameter                  | New equivalent                                     |
-| ------------------------------ | -------------------------------------------------- |
-| `showBackButton: false`        | `automaticallyImplyLeading: false`                 |
-| `onBackPressed: cb`            | `leading: StreamBackButton(onPressed: cb)`         |
-| `onTitleTap: cb`               | `title: GestureDetector(onTap: cb, child: ...)`    |
-| `onImageTap: cb`               | `trailing: GestureDetector(onTap: cb, child: ...)` |
-| `elevation`, `backgroundColor` | Use `style:`; the rest are gone                    |
+The gallery header was redesigned as `StreamMediaGalleryPreviewHeader`.
+It wraps `StreamAppBar` and exposes only `title` and `subtitle` as `Widget?`
+slots. All other per-instance overrides (back button, trailing actions,
+colours) are handled by the underlying `StreamAppBar` defaults — no
+extra parameters are exposed.
 
-`onShowMessage`, `onReplyMessage`, and `attachmentActionsModalBuilder`
-are unchanged. The default trailing is still an icon button that opens
-the attachment actions modal.
+```dart
+StreamMediaGalleryPreviewHeader(
+  title: Text(message.user?.name ?? ''),
+  subtitle: Text(
+    context.translations.sentAtText(
+      date: message.createdAt,
+      time: message.createdAt,
+    ),
+  ),
+)
+```
+
+The back affordance is auto-implied by `StreamAppBar`; there is no
+`showBackButton`, `onBackPressed`, `onTitleTap`, `onImageTap`, or
+`attachmentActionsModalBuilder` parameter on this widget.
 
 ### Theming
 
@@ -282,10 +291,10 @@ a subtree, or pass `style:` directly on a single header instance.
 
 ### Header height
 
-`kStreamHeaderHeight` (72 px) is now the canonical header height —
+`kStreamToolbarHeight` (72 px) is now the canonical header height —
 exposed from `package:stream_chat_flutter/stream_chat_flutter.dart`. If
 you read `kToolbarHeight` (56 px) to size custom chrome that sits next
-to a Stream header, switch to `kStreamHeaderHeight` to stay aligned.
+to a Stream header, switch to `kStreamToolbarHeight` to stay aligned.
 
 ---
 
@@ -300,7 +309,7 @@ to a Stream header, switch to `kStreamHeaderHeight` to stay aligned.
 StreamComponentFactory(
   builders: StreamComponentBuilders(
     extensions: streamChatComponentBuilders(
-      messageWidget: (context, props) => MyMessage(props: props),
+      messageItem: (context, props) => MyMessage(props: props),
     ),
   ),
   child: StreamChat(
@@ -316,7 +325,7 @@ StreamChat(
   client: client,
   componentBuilders: StreamComponentBuilders(
     extensions: streamChatComponentBuilders(
-      messageWidget: (context, props) => MyMessage(props: props),
+      messageItem: (context, props) => MyMessage(props: props),
     ),
   ),
   child: MyApp(),
@@ -442,8 +451,8 @@ For message / reactions-related removals, see [message_widget.md](message_widget
 - [ ] Replace `titleBuilder: (context, user) => ...` with `title: ...` (a `Widget`)
 - [ ] Replace `actions: [a, b]` with `trailing: Row(children: [a, b])` — only one trailing slot is exposed
 - [ ] Drop `centerTitle`, `elevation`, `bottomOpacity`, `bottom`, and `backgroundColor` from header callsites; use `style: StreamAppBarStyle(backgroundColor: ...)` if you need to override the background
-- [ ] Update theme overrides: `StreamChannelHeaderThemeData` / `StreamChannelListHeaderThemeData` / `StreamGalleryHeaderThemeData` are deleted — switch to `StreamAppBarThemeData`
-- [ ] If you sized custom chrome to `kToolbarHeight` next to a Stream header, switch to `kStreamHeaderHeight` (72 px)
+- [ ] Update theme overrides: `StreamChannelHeaderThemeData` / `StreamChannelListHeaderThemeData` / `StreamThreadHeaderThemeData` are deleted — switch to `StreamAppBarThemeData`
+- [ ] If you sized custom chrome to `kToolbarHeight` next to a Stream header, switch to `kStreamToolbarHeight` (72 px)
 - [ ] Optionally move `StreamComponentFactory` wrapping into the `componentBuilders` parameter on `StreamChat`
 - [ ] Use the new `attachmentBuilders`, `reactionType`, and `reactionPosition` fields on `StreamChatConfigurationData` if you need custom attachment rendering or global reaction style control
 - [ ] If you watch a `Channel` outside any list controller, subscribe to `EventType.connectionRecovered` and call `channel.watch()` (the SDK no longer auto-recovers on reconnect when `StreamChatCore` is mounted)

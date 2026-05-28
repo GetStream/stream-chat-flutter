@@ -17,9 +17,11 @@ parameters have been removed.
 ### Breaking Changes
 
 - `backgroundColor`, `textColor`, and `textStyle` constructor parameters
-  removed — styling is now controlled via `StreamTheme`.
-- The widget is now wrapped in `IgnorePointer`; it does not respond to taps
-  itself.
+  removed — styling is now controlled via `StreamBadgeNotificationThemeData`
+  (applied through `StreamBadgeNotificationTheme`). `StreamUnreadIndicator`
+  itself has no direct theme hook.
+- The widget has no `GestureDetector` or `InkWell`; it is non-interactive by
+  default and does not respond to taps.
 - Now supports named constructors for different unread count types.
 
 ### Named Constructors
@@ -28,7 +30,7 @@ parameters have been removed.
 | ----------------------------------------------- | ------------------------------------------------------------------------------ |
 | `StreamUnreadIndicator()`                       | Shows total unread message count                                               |
 | `StreamUnreadIndicator.channels({String? cid})` | Shows unread channel count; optionally filtered to a specific channel by `cid` |
-| `StreamUnreadIndicator.threads({String? id})`   | Shows unread thread count                                                      |
+| `StreamUnreadIndicator.threads({String? id})`   | Shows unread thread count. **Note:** the `id` parameter is not yet supported (currently a no-op); the total unread thread count is always shown regardless of the value passed. |
 
 ### Overlay Mode
 
