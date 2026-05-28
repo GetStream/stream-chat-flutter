@@ -59,7 +59,8 @@ void main() {
     final insertedUsers = await _prepareUserData();
 
     // Modifying one of the users and also adding one new
-    final copyUser = insertedUsers.first.copyWith(online: false);
+    final copyUser =
+        insertedUsers.first.copyWith(online: !insertedUsers.first.online);
     final newUser = User(
       id: 'testUserId3',
       role: 'testRole',
@@ -72,11 +73,14 @@ void main() {
     await userDao.updateUsers([copyUser, newUser]);
 
     // Fetched users length should be one more than inserted users.
-    // copyUser `online` modified field should be `false`.
+    // copyUser `online` should match the toggled value.
     // Fetched users should contain the newUser.
     final fetchedUsers = await _readPersistedUsers();
     expect(fetchedUsers.length, insertedUsers.length + 1);
-    expect(fetchedUsers.firstWhere((it) => it.id == copyUser.id).online, false);
+    expect(
+      fetchedUsers.firstWhere((it) => it.id == copyUser.id).online,
+      copyUser.online,
+    );
     expect(fetchedUsers.any((it) => it.id == newUser.id), isTrue);
   });
 
