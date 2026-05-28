@@ -306,7 +306,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
 
   MessageListController get _messageListController => widget.messageListController ?? _defaultController;
 
-  StreamSubscription? _messageNewListener;
+  StreamSubscription<Message>? _messageNewListener;
   StreamSubscription? _userReadListener;
 
   @override
@@ -331,9 +331,6 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       debouncedMarkRead.cancel();
       debouncedMarkThreadRead.cancel();
 
-      _messageNewListener?.cancel();
-      _userReadListener?.cancel();
-
       _unreadState.value = _readUnreadSnapshot();
 
       final highlightInitialMessage = widget.config.highlightInitialMessage;
@@ -350,11 +347,14 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
         });
       }
 
-      _messageNewListener = streamChannel!.channel.on(EventType.messageNew).listen((event) {
-        final message = event.message;
-        if (message == null) return;
-        if (message.parentId != widget.parentMessage?.id) return;
+      final state = streamChannel?.channel.state;
+      final newMessageStream = switch (widget.parentMessage?.id) {
+        final parentId? => state?.newThreadMessageStream(parentId),
+        _ => state?.newMessageStream,
+      };
 
+      _messageNewListener?.cancel();
+      _messageNewListener = newMessageStream?.listen((message) {
         // Don't fight a scroll already in motion (drag, fling, or
         // still-running animated scrollTo).
         if (_scrollController?.isScrolling == true) return;
@@ -378,7 +378,8 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
         }
       });
 
-      _userReadListener = streamChannel!.channel.state?.currentUserReadStream.listen((_) {
+      _userReadListener?.cancel();
+      _userReadListener = state?.currentUserReadStream.listen((_) {
         _unreadState.value = _readUnreadSnapshot();
       });
     }

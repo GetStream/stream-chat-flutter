@@ -39,17 +39,19 @@ class MemberDao extends DatabaseAccessor<DriftChatDatabase> with _$MemberDaoMixi
   ) async {
     if (cids.isEmpty) return const {};
 
-    final rows = await (select(members).join([
-      leftOuterJoin(users, members.userId.equalsExp(users.id)),
-    ])
-          ..where(
-            members.channelCid.isIn(cids) & members.userId.equals(userId),
-          ))
-        .get();
+    final rows =
+        await (select(members).join([
+              leftOuterJoin(users, members.userId.equalsExp(users.id)),
+            ])..where(
+              members.channelCid.isIn(cids) & members.userId.equals(userId),
+            ))
+            .get();
 
     return {
       for (final row in rows)
-        row.readTable(members).channelCid: row.readTable(members).toMember(
+        row.readTable(members).channelCid: row
+            .readTable(members)
+            .toMember(
               user: row.readTableOrNull(users)?.toUser(),
             ),
     };

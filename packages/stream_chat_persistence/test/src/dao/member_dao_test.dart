@@ -102,10 +102,10 @@ void main() {
     final targetUser = User(id: targetUserId);
     final otherUser = User(id: 'otherUserId');
     Member memberFor(User user) => Member(
-          user: user,
-          createdAt: DateTime.now(),
-          updatedAt: DateTime.now(),
-        );
+      user: user,
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+    );
     await database.userDao.updateUsers([targetUser, otherUser]);
     await database.channelDao.updateChannels([
       ChannelModel(cid: cid1),

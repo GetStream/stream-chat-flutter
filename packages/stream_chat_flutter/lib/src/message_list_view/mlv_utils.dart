@@ -175,8 +175,7 @@ extension NewMessageStreamX on ChannelClientState {
   // ignored.
   bool _isNewTailArrival(Message candidate, Message? previous) {
     if (previous == null) return true;
-    return candidate.id != previous.id &&
-        candidate.createdAt.isAfter(previous.createdAt);
+    return candidate.id != previous.id && candidate.createdAt.isAfter(previous.createdAt);
   }
 
   /// A stream that emits each newly arrived bottom message in
@@ -242,8 +241,7 @@ extension NewMessageStreamX on ChannelClientState {
   /// carries replies for [parentMessageId]; that first snapshot seeds
   /// the baseline without yielding.
   Stream<Message> newThreadMessageStream(String parentMessageId) async* {
-    final threadMessages =
-        threadsStream.mapNotNull((it) => it[parentMessageId]);
+    final threadMessages = threadsStream.mapNotNull((it) => it[parentMessageId]);
 
     var lastSeen = threads[parentMessageId]?.lastOrNull;
     await for (final updated in threadMessages) {

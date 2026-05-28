@@ -276,8 +276,7 @@ void main() {
     });
 
     group('getChannelStates', () {
-      test('forwards filter, attaches memberships, sorts and paginates',
-          () async {
+      test('forwards filter, attaches memberships, sorts and paginates', () async {
         // Three channel models with distinct cids so sort + pagination are
         // observable in which cid gets hydrated.
         final c0 = ChannelModel(cid: 'messaging:c0');
@@ -307,13 +306,10 @@ void main() {
           ),
         };
 
-        when(() => mockDatabase.channelQueryDao.getChannels(filter: filter))
-            .thenAnswer((_) async => channels);
+        when(() => mockDatabase.channelQueryDao.getChannels(filter: filter)).thenAnswer((_) async => channels);
         // Lists compare by identity in Dart, so use any() matchers and verify
         // the captured args afterwards.
-        when(() =>
-                mockDatabase.memberDao.getMembershipsForChannels(any(), any()))
-            .thenAnswer((_) async => memberships);
+        when(() => mockDatabase.memberDao.getMembershipsForChannels(any(), any())).thenAnswer((_) async => memberships);
 
         // Only c2 should be hydrated — stub every per-cid DAO call.
         const pagedCid = 'messaging:c2';
@@ -327,18 +323,12 @@ void main() {
             lastReadMessageId: 'lastMessageId$i',
           ),
         );
-        when(() => mockDatabase.channelDao.getChannelByCid(pagedCid))
-            .thenAnswer((_) async => c2);
-        when(() => mockDatabase.memberDao.getMembersByCid(pagedCid))
-            .thenAnswer((_) async => members);
-        when(() => mockDatabase.readDao.getReadsByCid(pagedCid))
-            .thenAnswer((_) async => reads);
-        when(() => mockDatabase.messageDao.getMessagesByCid(pagedCid))
-            .thenAnswer((_) async => messages);
-        when(() => mockDatabase.pinnedMessageDao.getMessagesByCid(pagedCid))
-            .thenAnswer((_) async => messages);
-        when(() => mockDatabase.draftMessageDao.getDraftMessageByCid(pagedCid))
-            .thenAnswer((_) async => null);
+        when(() => mockDatabase.channelDao.getChannelByCid(pagedCid)).thenAnswer((_) async => c2);
+        when(() => mockDatabase.memberDao.getMembersByCid(pagedCid)).thenAnswer((_) async => members);
+        when(() => mockDatabase.readDao.getReadsByCid(pagedCid)).thenAnswer((_) async => reads);
+        when(() => mockDatabase.messageDao.getMessagesByCid(pagedCid)).thenAnswer((_) async => messages);
+        when(() => mockDatabase.pinnedMessageDao.getMessagesByCid(pagedCid)).thenAnswer((_) async => messages);
+        when(() => mockDatabase.draftMessageDao.getDraftMessageByCid(pagedCid)).thenAnswer((_) async => null);
 
         final result = await client.getChannelStates(
           filter: filter,
@@ -353,37 +343,31 @@ void main() {
         expect(result.single.channel!.cid, pagedCid);
 
         // Filter forwarded to the channels query.
-        verify(() => mockDatabase.channelQueryDao.getChannels(filter: filter))
-            .called(1);
+        verify(() => mockDatabase.channelQueryDao.getChannels(filter: filter)).called(1);
 
         // Memberships batched in a single query for all cids + connected user.
-        final capturedMembershipArgs = verify(() => mockDatabase.memberDao
-            .getMembershipsForChannels(captureAny(), captureAny())).captured;
+        final capturedMembershipArgs = verify(
+          () => mockDatabase.memberDao.getMembershipsForChannels(captureAny(), captureAny()),
+        ).captured;
         expect(capturedMembershipArgs, hasLength(2));
         expect(capturedMembershipArgs.first, equals(cids));
-          expect(capturedMembershipArgs.last, equals(currentUserId));
+        expect(capturedMembershipArgs.last, equals(currentUserId));
 
         // Only the paged cid was hydrated — c0 and c1 were skipped.
-        verify(() => mockDatabase.channelDao.getChannelByCid(pagedCid))
-            .called(1);
-        verifyNever(
-            () => mockDatabase.channelDao.getChannelByCid('messaging:c0'));
-        verifyNever(
-            () => mockDatabase.channelDao.getChannelByCid('messaging:c1'));
+        verify(() => mockDatabase.channelDao.getChannelByCid(pagedCid)).called(1);
+        verifyNever(() => mockDatabase.channelDao.getChannelByCid('messaging:c0'));
+        verifyNever(() => mockDatabase.channelDao.getChannelByCid('messaging:c1'));
       });
 
-      test('returns empty list and skips hydration when no channels match',
-          () async {
+      test('returns empty list and skips hydration when no channels match', () async {
         final filter = Filter.in_('members', const ['unknown_user']);
 
-        when(() => mockDatabase.channelQueryDao.getChannels(filter: filter))
-            .thenAnswer((_) async => <ChannelModel>[]);
+        when(() => mockDatabase.channelQueryDao.getChannels(filter: filter)).thenAnswer((_) async => <ChannelModel>[]);
 
         final result = await client.getChannelStates(filter: filter);
 
         expect(result, isEmpty);
-        verify(() => mockDatabase.channelQueryDao.getChannels(filter: filter))
-            .called(1);
+        verify(() => mockDatabase.channelQueryDao.getChannels(filter: filter)).called(1);
         // No channels → no per-cid hydration calls at all.
         verifyNever(() => mockDatabase.channelDao.getChannelByCid(any()));
       });
@@ -396,8 +380,7 @@ void main() {
           (i) => ChannelModel(cid: 'messaging:clamp_$i'),
         );
 
-        when(() => mockDatabase.channelQueryDao.getChannels())
-            .thenAnswer((_) async => channels);
+        when(() => mockDatabase.channelQueryDao.getChannels()).thenAnswer((_) async => channels);
 
         final result = await client.getChannelStates(
           paginationParams: const PaginationParams(offset: 100),

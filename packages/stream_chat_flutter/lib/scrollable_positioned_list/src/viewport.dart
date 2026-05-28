@@ -227,8 +227,7 @@ class UnboundedRenderViewport extends RenderViewport {
         }
 
         final top = _minScrollExtent + mainAxisExtent * effectiveAnchor;
-        final bottom =
-            _maxScrollExtent - mainAxisExtent * (1.0 - effectiveAnchor);
+        final bottom = _maxScrollExtent - mainAxisExtent * (1.0 - effectiveAnchor);
         final maxScrollOffset = math.max<double>(math.min(0, top), bottom);
         final minScrollOffset = math.min<double>(top, maxScrollOffset);
         if (offset.applyContentDimensions(minScrollOffset, maxScrollOffset)) {

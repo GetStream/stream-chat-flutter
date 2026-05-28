@@ -313,9 +313,7 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
     final channelModels = await db!.channelQueryDao.getChannels(filter: filter);
 
     // 2) Wrap each model in a sort envelope. No state loaded yet.
-    var envelopes = channelModels
-        .map((m) => ChannelState(channel: m))
-        .toList(growable: false);
+    var envelopes = channelModels.map((m) => ChannelState(channel: m)).toList(growable: false);
 
     // 3) If sort uses `pinnedAt`, preload the current user's memberships in
     //    one batched query and attach them to the envelopes.
@@ -334,8 +332,7 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
     final total = envelopes.length;
     final offset = (paginationParams?.offset ?? 0).clamp(0, total);
     final limit = paginationParams?.limit ?? (total - offset);
-    final pagedCids =
-        envelopes.skip(offset).take(limit).map((s) => s.channel!.cid).toList();
+    final pagedCids = envelopes.skip(offset).take(limit).map((s) => s.channel!.cid).toList();
 
     // 6) Hydrate ONLY the page.
     return Future.wait(pagedCids.map(getChannelStateByCid));
@@ -556,17 +553,13 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
     List<ChannelState> envelopes,
     String currentUserId,
   ) async {
-    final cids = envelopes
-        .map((s) => s.channel?.cid)
-        .whereType<String>()
-        .toList(growable: false);
+    final cids = envelopes.map((s) => s.channel?.cid).whereType<String>().toList(growable: false);
     final memberships = await db!.memberDao.getMembershipsForChannels(
       cids,
       currentUserId,
     );
     return [
-      for (final s in envelopes)
-        s.copyWith(membership: memberships[s.channel?.cid]),
+      for (final s in envelopes) s.copyWith(membership: memberships[s.channel?.cid]),
     ];
   }
 }
