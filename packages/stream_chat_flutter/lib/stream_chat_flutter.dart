@@ -183,7 +183,6 @@ export 'src/media_gallery_preview/video_player/stream_video_player.dart';
 export 'src/message_action/message_action.dart';
 export 'src/message_action/message_actions_builder.dart';
 export 'src/message_input/attachment_picker/stream_attachment_picker.dart';
-export 'src/message_input/attachment_picker/stream_attachment_picker_bottom_sheet.dart';
 export 'src/message_input/attachment_picker/stream_attachment_picker_controller.dart';
 export 'src/message_input/attachment_picker/stream_attachment_picker_option.dart';
 export 'src/message_input/attachment_picker/stream_attachment_picker_result.dart';
