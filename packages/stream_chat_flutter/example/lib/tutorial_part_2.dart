@@ -53,6 +53,8 @@ class MyApp extends StatelessWidget {
     required this.client,
   });
 
+  /// Instance of [StreamChatClient] we created earlier. This contains
+  /// information about our application and connection state.
   final StreamChatClient client;
 
   @override
@@ -62,20 +64,14 @@ class MyApp extends StatelessWidget {
         client: client,
         child: child,
       ),
-      home: ChannelListPage(
-        client: client,
-      ),
+      home: const ChannelListPage(),
     );
   }
 }
 
+/// Displays the list of channels for the current user.
 class ChannelListPage extends StatefulWidget {
-  const ChannelListPage({
-    super.key,
-    required this.client,
-  });
-
-  final StreamChatClient client;
+  const ChannelListPage({super.key});
 
   @override
   State<ChannelListPage> createState() => _ChannelListPageState();
@@ -83,7 +79,7 @@ class ChannelListPage extends StatefulWidget {
 
 class _ChannelListPageState extends State<ChannelListPage> {
   late final _controller = StreamChannelListController(
-    client: widget.client,
+    client: StreamChat.of(context).client,
     filter: Filter.in_(
       'members',
       [StreamChat.of(context).currentUser!.id],
@@ -100,17 +96,14 @@ class _ChannelListPageState extends State<ChannelListPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: RefreshIndicator(
-        onRefresh: _controller.refresh,
-        child: StreamChannelListView(
-          controller: _controller,
-          onChannelTap: (channel) => Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => StreamChannel(
-                channel: channel,
-                child: const ChannelPage(),
-              ),
+      body: StreamChannelListView(
+        controller: _controller,
+        onChannelTap: (channel) => Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => StreamChannel(
+              channel: channel,
+              child: const ChannelPage(),
             ),
           ),
         ),
@@ -119,6 +112,7 @@ class _ChannelListPageState extends State<ChannelListPage> {
   }
 }
 
+/// Displays the list of messages inside the channel.
 class ChannelPage extends StatelessWidget {
   const ChannelPage({
     super.key,
