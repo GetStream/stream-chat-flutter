@@ -31,6 +31,7 @@ This guide covers all breaking changes in **Stream Chat Flutter SDK v10.0.0**. W
     - [AttachmentFileUploader](#attachmentfileuploader)
 - [Unread Threads Banner](#unread-threads-banner)
 - [Stable Release Changes](#stable-release-changes)
+    - [SortOption Constructor Rename](#stream_chat-sortoption-constructor-rename)
 - [Appendix: Beta Release Timeline](#appendix-beta-release-timeline)
 - [Migration Checklist](#migration-checklist)
 
@@ -1186,6 +1187,26 @@ The default `StreamChat.backgroundKeepAlive` has been reduced from 1 minute to 1
 
 ---
 
+### stream_chat: SortOption Constructor Rename
+
+The unnamed positional constructor `SortOption(field, direction)` has been removed. Use the named constructors instead.
+
+```dart
+// Before
+const [SortOption('last_message_at', direction: SortOption.DESC)]
+const [SortOption('name', direction: SortOption.ASC)]
+
+// After
+const [SortOption.desc('last_message_at')]
+const [SortOption.asc('name')]
+```
+
+> **Important:**
+> - `SortOption.desc()` defaults `nullOrdering` to `NullOrdering.nullsFirst`
+> - `SortOption.asc()` defaults `nullOrdering` to `NullOrdering.nullsLast`
+
+---
+
 ### stream_chat: Channel.isOneToOne and Message.updateWith
 
 - `Channel.isOneToOne` added — returns `true` for distinct two-member channels.
@@ -1259,6 +1280,7 @@ This appendix provides a chronological reference of breaking changes by beta ver
 - [ ] Replace `StreamPollCreatorDialog` and other poll dialog helpers with the `...Sheet` equivalents
 - [ ] Rename `attachmentsUploadProgressText(remaining: ...)` → `attachmentsUploadProgressText(completed: ...)`
 - [ ] If watching a channel outside a list controller, subscribe to `connectionRecovered` and call `channel.watch()`
+- [ ] Replace `SortOption('field', direction: SortOption.DESC)` with `SortOption.desc('field')` and `SortOption('field', direction: SortOption.ASC)` with `SortOption.asc('field')`
 - [ ] Migrate `Message.syncWith(local)` → `local.updateWith(remote)` (arguments are flipped)
 - [ ] Review `Channel.isGroup` usage — use `channel.isOneToOne` for two-member DM checks
 
