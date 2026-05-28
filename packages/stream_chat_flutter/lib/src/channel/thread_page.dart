@@ -56,9 +56,13 @@ class _StreamThreadPageState extends State<StreamThreadPage> {
 
   @override
   Widget build(BuildContext context) {
+    final appBar = StreamThreadHeader(parent: widget.parent);
+    final isFloating = StreamTheme.of(context).appStyle.appBarBehavior == .floating;
+
     return Scaffold(
       backgroundColor: context.streamColorScheme.backgroundApp,
-      appBar: StreamThreadHeader(parent: widget.parent),
+      appBar: appBar,
+      extendBodyBehindAppBar: isFloating,
       body: Column(
         children: <Widget>[
           Expanded(
@@ -73,6 +77,7 @@ class _StreamThreadPageState extends State<StreamThreadPage> {
                 highlightInitialMessage: true,
               ),
               onViewInChannelTap: widget.onViewInChannelTap,
+              topPadding: isFloating ? appBar.preferredSize.height + MediaQuery.of(context).padding.top : 0.0,
             ),
           ),
           if (widget.parent.type != 'deleted')

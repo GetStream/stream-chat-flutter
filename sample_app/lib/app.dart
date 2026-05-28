@@ -173,11 +173,19 @@ class _StreamChatSampleAppState extends State<StreamChatSampleApp>
                 return MaterialApp.router(
                   theme: ThemeData(
                     brightness: .light,
-                    extensions: [StreamTheme.light()],
+                    extensions: [
+                      StreamTheme.light().copyWith(
+                        appStyle: const StreamAppStyle.floating(),
+                      ),
+                    ],
                   ),
                   darkTheme: ThemeData(
                     brightness: .dark,
-                    extensions: [StreamTheme.dark()],
+                    extensions: [
+                      StreamTheme.dark().copyWith(
+                        appStyle: const StreamAppStyle.floating(),
+                      ),
+                    ],
                   ),
                   themeMode: config.themeMode,
                   locale: config.locale,

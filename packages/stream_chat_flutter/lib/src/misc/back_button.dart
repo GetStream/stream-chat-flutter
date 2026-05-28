@@ -11,7 +11,7 @@ class StreamBackButton extends StatelessWidget {
     this.onPressed,
     this.showUnreadCount = false,
     this.channelId,
-    this.floating = false,
+    this.appBarBehavior,
   });
 
   /// Callback for when button is pressed
@@ -24,7 +24,7 @@ class StreamBackButton extends StatelessWidget {
   final String? channelId;
 
   /// Whether the back button is floating.
-  final bool floating;
+  final AppBarBehavior? appBarBehavior;
 
   @override
   Widget build(BuildContext context) {
@@ -32,10 +32,14 @@ class StreamBackButton extends StatelessWidget {
       .iOS || .macOS => context.streamIcons.chevronLeft,
       _ => context.streamIcons.arrowLeft,
     };
+    final isFloating = switch (appBarBehavior ?? StreamTheme.of(context).appStyle.appBarBehavior) {
+      .floating => true,
+      .regular => false,
+    };
 
     Widget button = StreamButton.icon(
-      type: floating ? .outline : .ghost,
-      isFloating: floating,
+      type: isFloating ? .outline : .ghost,
+      isFloating: isFloating,
       size: .medium,
       style: .secondary,
       icon: Icon(iconData),
