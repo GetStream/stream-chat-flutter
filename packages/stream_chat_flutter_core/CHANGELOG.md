@@ -1,4 +1,4 @@
-## Upcoming
+## Upcoming Beta Changes
 
 🛑️ Breaking
 
@@ -30,6 +30,13 @@
 
 - Fixed `StreamChatCore` disconnecting the WebSocket immediately on background when no `onBackgroundEventReceived` handler was provided; the keep-alive timer now fires before the connection closes regardless of whether a handler is set.
 - Fixed `StreamMessageComposerController.cancelEditMessage` losing the pre-edit draft when a remote update arrived for the message being edited.
+
+## Upcoming Changes
+
+🐞 Fixed
+
+- Fixed `StreamChannel.reloadChannel` merging the latest page on top of the previously loaded
+  window instead of replacing it. The reload now matches a fresh open of the channel.
 
 ## 9.24.0
 

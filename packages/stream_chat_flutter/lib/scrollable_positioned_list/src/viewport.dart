@@ -218,14 +218,17 @@ class UnboundedRenderViewport extends RenderViewport {
             final fitAnchor = _minScrollExtent.abs() / mainAxisExtent;
             if (fitAnchor != effectiveAnchor) {
               effectiveAnchor = fitAnchor;
-              count += 1;
+              // Do not increment `count` here. This is a deliberate one-time
+              // anchor correction (not an oscillation), so it must not consume
+              // a slot from the sliver-correction budget.
               continue;
             }
           }
         }
 
         final top = _minScrollExtent + mainAxisExtent * effectiveAnchor;
-        final bottom = _maxScrollExtent - mainAxisExtent * (1.0 - effectiveAnchor);
+        final bottom =
+            _maxScrollExtent - mainAxisExtent * (1.0 - effectiveAnchor);
         final maxScrollOffset = math.max<double>(math.min(0, top), bottom);
         final minScrollOffset = math.min<double>(top, maxScrollOffset);
         if (offset.applyContentDimensions(minScrollOffset, maxScrollOffset)) {

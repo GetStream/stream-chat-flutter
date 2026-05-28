@@ -794,13 +794,13 @@ void main() {
     }
 
     List<Message> _generateMessages(int count) => List.generate(
-      count,
-      (i) => Message(
-        id: 'msg-$i',
-        createdAt: DateTime(2024).add(Duration(seconds: i)),
-        user: User(id: 'otherUserId'),
-      ),
-    );
+          count,
+          (i) => Message(
+            id: 'msg-$i',
+            createdAt: DateTime(2024).add(Duration(seconds: i)),
+            user: User(id: 'otherUserId'),
+          ),
+        );
 
     setUp(() {
       when(() => mockChannel.cid).thenReturn('test:channel');
@@ -905,6 +905,134 @@ void main() {
             messagesPagination: any(named: 'messagesPagination'),
           ),
         ).called(1);
+      },
+    );
+  });
+
+  group('reloadChannel', () {
+    final mockChannel = MockChannel();
+    tearDownAll(mockChannel.dispose);
+
+    // Mutable backing so the mocked `truncate` and `query` can model the
+    // real `ChannelClientState.messages` lifecycle: truncate clears it,
+    // a `query` response is merged on top of whatever's there. With the
+    // truncate-before-query fix the merge target is empty; without it,
+    // the previously loaded window leaks past the reload (the original bug).
+    var stateMessages = <Message>[];
+
+    List<Message> _generateMessages(int count, {required String prefix}) =>
+        List.generate(
+          count,
+          (i) => Message(
+            id: '$prefix-$i',
+            createdAt: DateTime(2024).add(Duration(seconds: i)),
+            user: User(id: 'otherUserId'),
+          ),
+        );
+
+    setUp(() {
+      when(() => mockChannel.cid).thenReturn('test:channel');
+      when(() => mockChannel.state.messages).thenAnswer((_) => stateMessages);
+      when(() => mockChannel.state.isUpToDate).thenReturn(true);
+      when(() => mockChannel.state.unreadCount).thenReturn(0);
+      when(() => mockChannel.state.truncate()).thenAnswer((_) {
+        stateMessages = [];
+      });
+      when(
+        () => mockChannel.query(
+          preferOffline: any(named: 'preferOffline'),
+          messagesPagination: any(named: 'messagesPagination'),
+        ),
+      ).thenAnswer((_) async {
+        // Model `Channel.query` merging the new page onto the existing
+        // window — dedupe by id is unnecessary here because the test
+        // primes disjoint old/new sets.
+        final newMessages = _generateMessages(30, prefix: 'new');
+        stateMessages = [...stateMessages, ...newMessages];
+        return ChannelState(messages: newMessages);
+      });
+    });
+
+    tearDown(() {
+      stateMessages = <Message>[];
+      reset(mockChannel);
+    });
+
+    Future<StreamChannelState> _pumpStreamChannel(WidgetTester tester) async {
+      StreamChannelState? channelState;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: StreamChannel(
+              channel: mockChannel,
+              child: Builder(
+                builder: (context) {
+                  channelState = StreamChannel.of(context);
+                  return const Text('Channel Content');
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      return channelState!;
+    }
+
+    testWidgets(
+      'truncates the existing window before querying the latest messages',
+      (tester) async {
+        final streamChannel = await _pumpStreamChannel(tester);
+
+        await streamChannel.reloadChannel();
+
+        verifyInOrder([
+          () => mockChannel.state.truncate(),
+          () => mockChannel.query(
+                preferOffline: any(named: 'preferOffline'),
+                messagesPagination: any(named: 'messagesPagination'),
+              ),
+        ]);
+      },
+    );
+
+    testWidgets(
+      'queries with no around-anchor (loads the latest page)',
+      (tester) async {
+        final streamChannel = await _pumpStreamChannel(tester);
+
+        await streamChannel.reloadChannel();
+
+        final captured = verify(
+          () => mockChannel.query(
+            preferOffline: any(named: 'preferOffline'),
+            messagesPagination: captureAny(named: 'messagesPagination'),
+          ),
+        ).captured.single as PaginationParams;
+
+        expect(captured.idAround, isNull);
+        expect(captured.createdAtAround, isNull);
+      },
+    );
+
+    testWidgets(
+      'state contains only the latest page after reloading (drops the '
+      'previously loaded window)',
+      (tester) async {
+        // Seed the around-Y window that a prior `loadChannelAtMessage`
+        // would have produced.
+        stateMessages = _generateMessages(30, prefix: 'old');
+
+        final streamChannel = await _pumpStreamChannel(tester);
+        await streamChannel.reloadChannel();
+
+        // Without the truncate the merge would land us on 60 messages
+        // (old 30 + new 30). The fix yields just the latest page.
+        expect(stateMessages, hasLength(30));
+        expect(
+          stateMessages.map((m) => m.id),
+          everyElement(startsWith('new-')),
+        );
       },
     );
   });

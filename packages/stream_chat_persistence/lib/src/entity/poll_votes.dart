@@ -2,7 +2,7 @@
 import 'package:drift/drift.dart';
 import 'package:stream_chat_persistence/src/entity/entity.dart';
 
-/// Represents a [PollVotes] table in [MoorChatDatabase].
+/// Represents a [PollVotes] table in [DriftChatDatabase].
 @DataClassName('PollVoteEntity')
 class PollVotes extends Table {
   /// The unique identifier of the poll vote.

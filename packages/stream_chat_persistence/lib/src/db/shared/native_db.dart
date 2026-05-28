@@ -27,7 +27,7 @@ class SharedDB {
         userId,
         DatabaseConnection.delayed(
           Future(() async {
-            final isolate = await _createMoorIsolate(
+            final isolate = await _createDriftIsolate(
               dbName,
               logStatements: logStatements,
             );
@@ -72,13 +72,13 @@ class SharedDB {
         logStatements: request.logStatements,
       ),
     );
-    final moorIsolate = DriftIsolate.inCurrent(
+    final driftIsolate = DriftIsolate.inCurrent(
       () => DatabaseConnection(executor),
     );
-    request.sendMoorIsolate.send(moorIsolate);
+    request.sendDriftIsolate.send(driftIsolate);
   }
 
-  static Future<DriftIsolate> _createMoorIsolate(
+  static Future<DriftIsolate> _createDriftIsolate(
     String dbName, {
     bool logStatements = false,
   }) async {
@@ -101,12 +101,12 @@ class SharedDB {
 
 class _IsolateStartRequest {
   const _IsolateStartRequest(
-    this.sendMoorIsolate,
+    this.sendDriftIsolate,
     this.targetPath, {
     this.logStatements = false,
   });
 
-  final SendPort sendMoorIsolate;
+  final SendPort sendDriftIsolate;
   final String targetPath;
   final bool logStatements;
 }

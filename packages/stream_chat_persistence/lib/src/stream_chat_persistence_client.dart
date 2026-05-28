@@ -309,39 +309,36 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
     assert(_debugIsConnected, '');
     _logger.info('getChannelStates');
 
-    final channels = await db!.channelQueryDao.getChannels(filter: filter);
+    // 1) Lightweight load — channel rows + createdBy user only.
+    final channelModels = await db!.channelQueryDao.getChannels(filter: filter);
 
-    final messagePagination = PaginationParams(
-      // Default limit is set to 25 in backend.
-      limit: messageLimit ?? 25,
-    );
+    // 2) Wrap each model in a sort envelope. No state loaded yet.
+    var envelopes = channelModels
+        .map((m) => ChannelState(channel: m))
+        .toList(growable: false);
 
-    final channelStates = await Future.wait(
-      channels.map(
-        (e) => getChannelStateByCid(
-          e.cid,
-          messagePagination: messagePagination,
-        ),
-      ),
-    );
+    // 3) If sort uses `pinnedAt`, preload the current user's memberships in
+    //    one batched query and attach them to the envelopes.
+    final clientUserId = userId;
+    if (clientUserId != null && _sortRequiresMembership(channelStateSort)) {
+      envelopes = await _attachMemberships(envelopes, clientUserId);
+    }
 
-    // Sort the channel states
+    // 4) Sort using the existing comparator — same logic as today, just on
+    //    envelopes instead of fully-hydrated states.
     if (channelStateSort != null && channelStateSort.isNotEmpty) {
-      channelStates.sort(channelStateSort.compare);
+      envelopes.sort(channelStateSort.compare);
     }
 
-    // Apply offset
-    if (paginationParams?.offset case final paginationOffset?) {
-      final clampedOffset = paginationOffset.clamp(0, channelStates.length);
-      channelStates.removeRange(0, clampedOffset);
-    }
+    // 5) Slice the page.
+    final total = envelopes.length;
+    final offset = (paginationParams?.offset ?? 0).clamp(0, total);
+    final limit = paginationParams?.limit ?? (total - offset);
+    final pagedCids =
+        envelopes.skip(offset).take(limit).map((s) => s.channel!.cid).toList();
 
-    // Apply limit
-    if (paginationParams?.limit case final paginationLimit?) {
-      return channelStates.take(paginationLimit).toList();
-    }
-
-    return channelStates;
+    // 6) Hydrate ONLY the page.
+    return Future.wait(pagedCids.map(getChannelStateByCid));
   }
 
   @override
@@ -550,5 +547,26 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
       await db!.disconnect();
       db = null;
     }
+  }
+
+  bool _sortRequiresMembership(SortOrder<ChannelState>? sort) =>
+      sort?.any((opt) => opt.field == ChannelSortKey.pinnedAt) ?? false;
+
+  Future<List<ChannelState>> _attachMemberships(
+    List<ChannelState> envelopes,
+    String currentUserId,
+  ) async {
+    final cids = envelopes
+        .map((s) => s.channel?.cid)
+        .whereType<String>()
+        .toList(growable: false);
+    final memberships = await db!.memberDao.getMembershipsForChannels(
+      cids,
+      currentUserId,
+    );
+    return [
+      for (final s in envelopes)
+        s.copyWith(membership: memberships[s.channel?.cid]),
+    ];
   }
 }

@@ -8,7 +8,7 @@ DatabaseConnection _backgroundConnection() => DatabaseConnection(NativeDatabase.
 
 void main() {
   test(
-    'default constructor should create a new instance of MoorChatDatabase',
+    'default constructor should create a new instance of DriftChatDatabase',
     () async {
       const userId = 'testUserId';
       final executor = NativeDatabase.memory();
@@ -23,7 +23,7 @@ void main() {
   );
 
   test(
-    'connect constructor should create a new instance of MoorChatDatabase',
+    'connect constructor should create a new instance of DriftChatDatabase',
     () async {
       const userId = 'testUserId';
       final isolate = await DriftIsolate.spawn(_backgroundConnection);

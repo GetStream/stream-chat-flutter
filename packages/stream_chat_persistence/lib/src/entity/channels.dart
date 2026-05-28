@@ -2,7 +2,7 @@
 import 'package:drift/drift.dart';
 import 'package:stream_chat_persistence/src/converter/converter.dart';
 
-/// Represents a [Channels] table in [MoorChatDatabase].
+/// Represents a [Channels] table in [DriftChatDatabase].
 @DataClassName('ChannelEntity')
 class Channels extends Table {
   /// The id of this channel

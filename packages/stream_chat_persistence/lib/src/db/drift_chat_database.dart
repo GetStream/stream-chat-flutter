@@ -8,7 +8,7 @@ export 'shared/shared_db.dart';
 
 part 'drift_chat_database.g.dart';
 
-/// A chat database implemented using moor
+/// A chat database implemented using drift
 @DriftDatabase(
   tables: [
     Channels,

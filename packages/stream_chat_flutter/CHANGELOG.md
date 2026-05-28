@@ -1,4 +1,4 @@
-## Upcoming
+## Upcoming Beta Changes
 
 🔄 Internal / Non-breaking
 
@@ -121,6 +121,15 @@
 - Fixed poll, attachment-action, and message-action dialog buttons rendering their labels in uppercase (e.g. `CANCEL`, `SEND`, `FLAG`, `DELETE`); they now use the localized labels as-is so they match the rest of the system.
 - Fixed tapping a quoted parent message inside a thread doing nothing (or kicking back to the channel). The thread message list now resolves the parent slot directly and scrolls/highlights it instead of falling through to `loadChannelAtMessage`.
 - Fixed the jump-to-message highlight starting before the scroll settled, which made the fade barely visible (or invisible if the target hadn't been mounted yet). The message list now awaits the scroll, then plays a 1s hold + 1s ease-out fade — closer to the highlight feel in Slack's permalink jump.
+
+## Upcoming Changes
+
+🐞 Fixed
+
+- Fixed `StreamMessageListView` not auto-scrolling to the bottom on the user's own outgoing message
+  until the server confirmed it.
+- Fixed a `FlutterError` ("A RenderViewport exceeded its maximum number of layout cycles") that
+  could occur when fast-scrolling through the message list.
 
 ## 9.24.0
 
