@@ -419,7 +419,8 @@ StreamMessageComposer(
   placeholderBuilder: (context, placeholder) {
     final translations = context.translations;
     return switch (placeholder) {
-      SlowModePlaceholder() => translations.slowModeOnLabel,
+      SlowModePlaceholder(:final cooldownTimeOut) =>
+        translations.slowModeOnLabel(cooldownTimeOut),
       CommandPlaceholder(command: 'weather') => 'Type a city name',
       CommandPlaceholder(command: 'tip') => 'Type @user amount',
       CommandPlaceholder(command: 'poll') => 'Type your question',

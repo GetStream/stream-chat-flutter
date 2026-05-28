@@ -978,7 +978,7 @@ ValueListenableBuilder<Set<String>>(
 
 > **Introduced in:** v10.0.0 (stable)
 
-The following breaking changes landed between beta.13 and the stable release.
+The following breaking changes landed between beta.12 and the stable release.
 
 ### StreamMessageListView Config / Builders Split
 

@@ -297,7 +297,7 @@ The following attachment-related widgets have been removed. Replace any direct r
 | --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `StreamFileAttachmentThumbnail`                     | Use `StreamImageAttachmentThumbnail` for images, `StreamVideoAttachmentThumbnail` for videos, or `StreamFileTypeIcon.fromMimeType(...)` for generic file icons                                         |
 | `StreamAttachmentUploadStateBuilder.successBuilder` | Removed — was unreachable in practice (the success state immediately transitions to the rendered attachment)                                                                                           |
-| `AttachmentModalSheet`                              | Use the redesigned attachment picker — see [v10-migration.md](../v10-migration.md#streamattachmentpickeroption) for the new sealed-class option types and `showStreamAttachmentPickerModalBottomSheet` |
+| `AttachmentModalSheet`                              | Use the redesigned inline attachment picker — see [v10-migration.md](../v10-migration.md#attachment-picker) for the new sealed-class option types and the inline `StreamTabbedAttachmentPicker` / `StreamSystemAttachmentPicker` widgets |
 
 **`StreamFileAttachmentThumbnail` migration:**
 

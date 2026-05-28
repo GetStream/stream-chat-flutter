@@ -455,7 +455,7 @@ A top-level function from `package:stream_chat_flutter/stream_chat_flutter.dart`
 
 - **Re-wraps `StreamChatTheme`** across the route boundary so the theme is available inside the dialog even when `useRootNavigator: true`
 - **Applies a blur + scale transition** for a consistent Stream look
-- **Returns `Future<T?>`** — the value passed to `Navigator.pop` inside the dialog, which is how `StreamMessageActionsModal`, `StreamMessageReactionsModal`, and `ModeratedMessageActionsModal` deliver the selected action back to the caller
+- **Returns `Future<T?>`** — the value passed to `Navigator.pop` inside the dialog, which is how `StreamMessageActionsModal` and `ModeratedMessageActionsModal` deliver the selected action back to the caller
 
 ```dart
 // Replace showDialog with showStreamDialog when presenting Stream modals:
