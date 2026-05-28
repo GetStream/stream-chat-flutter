@@ -5,19 +5,18 @@ import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/src/core/util/extension.dart';
 
-/// A map view that throws `UnsupportedError` on any mutating operation.
-@internal
+/// A map that throws `UnsupportedError` on any mutating operation.
 typedef ImmutableMap<K, V> = UnmodifiableMapView<K, V>;
 
-/// A list view that throws `UnsupportedError` on any mutating operation.
-@internal
+/// A list that throws `UnsupportedError` on any mutating operation.
 typedef ImmutableList<E> = UnmodifiableListView<E>;
 
 /// A [Stream] of maps that guarantees every emitted value is immutable.
 ///
-/// Subscribers receive snapshots that throw `UnsupportedError` on mutation.
-/// Callers pass plain maps to [add] / [safeAdd] — the wrap is handled here
-/// so it cannot be forgotten or bypassed.
+/// The stream is a broadcast stream — multiple subscribers can listen at
+/// once. Subscribers receive snapshots that throw `UnsupportedError` on
+/// mutation. Callers pass plain maps to [add] / [safeAdd] — wrapping is
+/// automatic and unbypassable.
 ///
 /// ```dart
 /// final controller = ImmutableMapBehaviorSubject<String, Channel>.seeded(const {});
@@ -37,9 +36,10 @@ typedef ImmutableList<E> = UnmodifiableListView<E>;
 ///  * [ImmutableListBehaviorSubject], the list counterpart.
 @internal
 class ImmutableMapBehaviorSubject<K, V> extends StreamView<ImmutableMap<K, V>> implements Sink<Map<K, V>> {
-  /// Creates an [ImmutableMapBehaviorSubject] with no initial value.
+  /// Creates a subject with no initial value.
   ///
-  /// See [StreamController.broadcast] for [onListen], [onCancel] and [sync].
+  /// [onListen], [onCancel] and [sync] follow [StreamController.broadcast]
+  /// semantics.
   factory ImmutableMapBehaviorSubject({
     void Function()? onListen,
     void Function()? onCancel,
@@ -52,11 +52,12 @@ class ImmutableMapBehaviorSubject<K, V> extends StreamView<ImmutableMap<K, V>> i
     ),
   );
 
-  /// Creates the subject with [seed] as the initial value.
+  /// Creates a subject with [seed] as the initial value.
   ///
   /// Subscribers connecting before the first [add] also receive [seed].
   ///
-  /// See [StreamController.broadcast] for [onListen], [onCancel] and [sync].
+  /// [onListen], [onCancel] and [sync] follow [StreamController.broadcast]
+  /// semantics.
   factory ImmutableMapBehaviorSubject.seeded(
     Map<K, V> seed, {
     void Function()? onListen,
@@ -96,9 +97,10 @@ class ImmutableMapBehaviorSubject<K, V> extends StreamView<ImmutableMap<K, V>> i
 
 /// A [Stream] of lists that guarantees every emitted value is immutable.
 ///
-/// Subscribers receive snapshots that throw `UnsupportedError` on mutation.
-/// Callers pass plain lists to [add] / [safeAdd] — the wrap is handled here
-/// so it cannot be forgotten or bypassed.
+/// The stream is a broadcast stream — multiple subscribers can listen at
+/// once. Subscribers receive snapshots that throw `UnsupportedError` on
+/// mutation. Callers pass plain lists to [add] / [safeAdd] — wrapping is
+/// automatic and unbypassable.
 ///
 /// ```dart
 /// final controller = ImmutableListBehaviorSubject<Location>.seeded(const []);
@@ -118,9 +120,10 @@ class ImmutableMapBehaviorSubject<K, V> extends StreamView<ImmutableMap<K, V>> i
 ///  * [ImmutableMapBehaviorSubject], the map counterpart.
 @internal
 class ImmutableListBehaviorSubject<E> extends StreamView<ImmutableList<E>> implements Sink<List<E>> {
-  /// Creates an [ImmutableListBehaviorSubject] with no initial value.
+  /// Creates a subject with no initial value.
   ///
-  /// See [StreamController.broadcast] for [onListen], [onCancel] and [sync].
+  /// [onListen], [onCancel] and [sync] follow [StreamController.broadcast]
+  /// semantics.
   factory ImmutableListBehaviorSubject({
     void Function()? onListen,
     void Function()? onCancel,
@@ -133,11 +136,12 @@ class ImmutableListBehaviorSubject<E> extends StreamView<ImmutableList<E>> imple
     ),
   );
 
-  /// Creates the subject with [seed] as the initial value.
+  /// Creates a subject with [seed] as the initial value.
   ///
   /// Subscribers connecting before the first [add] also receive [seed].
   ///
-  /// See [StreamController.broadcast] for [onListen], [onCancel] and [sync].
+  /// [onListen], [onCancel] and [sync] follow [StreamController.broadcast]
+  /// semantics.
   factory ImmutableListBehaviorSubject.seeded(
     List<E> seed, {
     void Function()? onListen,
