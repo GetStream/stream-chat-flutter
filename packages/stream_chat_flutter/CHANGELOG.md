@@ -1,3 +1,12 @@
+## Upcoming Changes
+
+🐞 Fixed
+
+- Fixed `StreamMessageListView` not auto-scrolling to the bottom on the user's own outgoing message
+  until the server confirmed it.
+- Fixed a `FlutterError` ("A RenderViewport exceeded its maximum number of layout cycles") that
+  could occur when fast-scrolling through the message list.
+
 ## 9.24.0
 
 ✅ Added
