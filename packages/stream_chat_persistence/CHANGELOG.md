@@ -1,8 +1,22 @@
-# Upcoming
+## Upcoming Changes
 
 🚀 Performance
 
 - Reduce the number of DB reads in the `ChatPersistenceClient.getChannelStates` method.
+- Read only the messages matching the `PaginationParams` from DB when calling `MessageDao.getMessagesByCid` instead of reading all messages for the channel and applying pagination in memory.
+- Read only the thread replies matching the `PaginationParams` from DB when calling `MessageDao.getThreadMessagesByParentId` instead of reading all replies for the thread and applying pagination in memory.
+- Read only the reactions matching the `userId` from DB when calling `ReactionDao.getReactionsByUserId` instead of reading all reactions for the message and filtering in memory.
+- Read only the reactions matching the `userId` from DB when calling `PinnedMessageReactionDao.getReactionsByUserId` instead of reading all reactions for the message and filtering in memory.
+
+🐞 Fixed
+
+- `MessageDao.getMessagesByCid` now honours `PaginationParams.lessThanOrEqual` and `PaginationParams.greaterThanOrEqual` (inclusive of the cursor message), in addition to the existing strict `lessThan`/`greaterThan`.
+- `MessageDao.getMessagesByCid` now treats `PaginationParams.greaterThan` as strict (exclusive of the cursor), matching the `PaginationParams` contract and the existing `lessThan` behaviour.
+- `MessageDao.getMessagesByCid` with a forward cursor (`greaterThan`/`greaterThanOrEqual`) and a `limit` now returns the messages immediately AFTER the pivot, instead of the channel tail — mirroring how `lessThan` already returned the messages immediately before the pivot.
+- `MessageDao.getThreadMessagesByParentId` now honours `PaginationParams.lessThanOrEqual` and `PaginationParams.greaterThanOrEqual` (inclusive of the cursor reply), in addition to the existing `lessThan`/`greaterThan`.
+- `MessageDao.getThreadMessagesByParentId` now treats `PaginationParams.greaterThan` as strict (exclusive of the cursor), matching the `PaginationParams` contract and the existing `lessThan` behaviour.
+- `MessageDao.getThreadMessagesByParentId` with a `limit` now returns the page of replies closest to the pivot (immediately before a `lessThan`/`lessThanOrEqual` cursor, immediately after a `greaterThan`/`greaterThanOrEqual` cursor, or the thread tail when no cursor is set), instead of always returning the oldest replies of the thread.
+
 
 🔄 Changed
 

@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:drift/drift.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_persistence/src/db/drift_chat_database.dart';
@@ -126,42 +124,89 @@ class MessageDao extends DatabaseAccessor<DriftChatDatabase>
     String parentId, {
     PaginationParams? options,
   }) async {
-    final msgList = await Future.wait(await (select(messages).join([
+    final (
+      lessThanCursor,
+      lessThanOrEqualCursor,
+      greaterThanCursor,
+      greaterThanOrEqualCursor,
+    ) = await (
+      _lookupThreadCursor(parentId, options?.lessThan),
+      _lookupThreadCursor(parentId, options?.lessThanOrEqual),
+      _lookupThreadCursor(parentId, options?.greaterThan),
+      _lookupThreadCursor(parentId, options?.greaterThanOrEqual),
+    ).wait;
+
+    // When the caller is paginating forward (greaterThan / greaterThanOrEqual
+    // only), order ASC so the SQL `LIMIT` retains the N replies immediately
+    // AFTER the cursor. Otherwise order DESC so `LIMIT` retains the N replies
+    // closest to a `lessThan` cursor (or the thread's tail when no cursor is
+    // set). The final result is always reshaped to ASC for display.
+    final isForwardPagination =
+        (greaterThanCursor != null || greaterThanOrEqualCursor != null) &&
+            lessThanCursor == null &&
+            lessThanOrEqualCursor == null;
+
+    final orderBy = isForwardPagination
+        ? [
+            OrderingTerm.asc(messages.createdAt),
+            OrderingTerm.asc(messages.id),
+          ]
+        : [
+            OrderingTerm.desc(messages.createdAt),
+            OrderingTerm.desc(messages.id),
+          ];
+
+    final query = select(messages).join([
       leftOuterJoin(_users, messages.userId.equalsExp(_users.id)),
       leftOuterJoin(
         _pinnedByUsers,
         messages.pinnedByUserId.equalsExp(_pinnedByUsers.id),
       ),
     ])
-          ..where(messages.parentId.isNotNull())
-          ..where(messages.parentId.equals(parentId))
-          ..orderBy([OrderingTerm.asc(messages.createdAt)]))
-        .map(_messageFromJoinRow)
-        .get());
+      ..where(messages.parentId.equals(parentId))
+      ..orderBy(orderBy);
 
-    if (msgList.isNotEmpty) {
-      if (options?.lessThan != null) {
-        final lessThanIndex = msgList.indexWhere(
-          (m) => m.id == options!.lessThan,
-        );
-        if (lessThanIndex != -1) {
-          msgList.removeRange(lessThanIndex, msgList.length);
-        }
-      }
-      if (options?.greaterThan != null) {
-        final greaterThanIndex = msgList.indexWhere(
-          (m) => m.id == options!.greaterThan,
-        );
-        if (greaterThanIndex != -1) {
-          msgList.removeRange(0, greaterThanIndex);
-        }
-      }
-      final limit = options?.limit;
-      if (limit != null && limit > 0) {
-        return msgList.take(limit).toList();
-      }
+    // Cursor predicates compare the full `(createdAt, id)` tuple — the same
+    // key used in ORDER BY — so replies sharing a `createdAt` with the cursor
+    // fall on the correct side of the boundary. Filtering on `createdAt`
+    // alone would skip or repeat those siblings across pages.
+    if (lessThanCursor case final c?) {
+      query.where(
+        messages.createdAt.isSmallerThanValue(c.createdAt) |
+            (messages.createdAt.equals(c.createdAt) &
+                messages.id.isSmallerThanValue(c.id)),
+      );
     }
-    return msgList;
+    if (lessThanOrEqualCursor case final c?) {
+      query.where(
+        messages.createdAt.isSmallerThanValue(c.createdAt) |
+            (messages.createdAt.equals(c.createdAt) &
+                messages.id.isSmallerOrEqualValue(c.id)),
+      );
+    }
+    if (greaterThanCursor case final c?) {
+      query.where(
+        messages.createdAt.isBiggerThanValue(c.createdAt) |
+            (messages.createdAt.equals(c.createdAt) &
+                messages.id.isBiggerThanValue(c.id)),
+      );
+    }
+    if (greaterThanOrEqualCursor case final c?) {
+      query.where(
+        messages.createdAt.isBiggerThanValue(c.createdAt) |
+            (messages.createdAt.equals(c.createdAt) &
+                messages.id.isBiggerOrEqualValue(c.id)),
+      );
+    }
+
+    if (options != null) {
+      query.limit(options.limit);
+    }
+
+    final rows = await query.get();
+    final orderedRows = isForwardPagination ? rows : rows.reversed.toList();
+
+    return Future.wait(orderedRows.map(_messageFromJoinRow));
   }
 
   /// Returns all the messages of a channel by matching
@@ -171,6 +216,38 @@ class MessageDao extends DatabaseAccessor<DriftChatDatabase>
     bool fetchDraft = true,
     PaginationParams? messagePagination,
   }) async {
+    final (
+      lessThanCursor,
+      lessThanOrEqualCursor,
+      greaterThanCursor,
+      greaterThanOrEqualCursor,
+    ) = await (
+      _lookupCursor(messagePagination?.lessThan),
+      _lookupCursor(messagePagination?.lessThanOrEqual),
+      _lookupCursor(messagePagination?.greaterThan),
+      _lookupCursor(messagePagination?.greaterThanOrEqual),
+    ).wait;
+
+    // When the caller is paginating forward (greaterThan / greaterThanOrEqual
+    // only), order ASC so the SQL `LIMIT` retains the N messages immediately
+    // AFTER the cursor. Otherwise order DESC so `LIMIT` retains the N most
+    // recent (closest to a `lessThan` cursor, or the channel tail when no
+    // cursor is set). The final result is always reshaped to ASC for display.
+    final isForwardPagination =
+        (greaterThanCursor != null || greaterThanOrEqualCursor != null) &&
+            lessThanCursor == null &&
+            lessThanOrEqualCursor == null;
+
+    final orderBy = isForwardPagination
+        ? [
+            OrderingTerm.asc(messages.createdAt),
+            OrderingTerm.asc(messages.id),
+          ]
+        : [
+            OrderingTerm.desc(messages.createdAt),
+            OrderingTerm.desc(messages.id),
+          ];
+
     final query = select(messages).join([
       leftOuterJoin(_users, messages.userId.equalsExp(_users.id)),
       leftOuterJoin(
@@ -180,44 +257,52 @@ class MessageDao extends DatabaseAccessor<DriftChatDatabase>
     ])
       ..where(messages.channelCid.equals(cid))
       ..where(messages.parentId.isNull() | messages.showInChannel.equals(true))
-      ..orderBy([OrderingTerm.asc(messages.createdAt)]);
+      ..orderBy(orderBy);
 
-    final result = await query.get();
-    if (result.isEmpty) return [];
-
-    final msgList = await Future.wait(
-      result.map(
-        (row) => _messageFromJoinRow(
-          row,
-          fetchDraft: fetchDraft,
-        ),
-      ),
-    );
-
-    if (msgList.isNotEmpty) {
-      if (messagePagination?.lessThan != null) {
-        final lessThanIndex = msgList.indexWhere(
-          (m) => m.id == messagePagination!.lessThan,
-        );
-        if (lessThanIndex != -1) {
-          msgList.removeRange(lessThanIndex, msgList.length);
-        }
-      }
-      if (messagePagination?.greaterThan != null) {
-        final greaterThanIndex = msgList.indexWhere(
-          (m) => m.id == messagePagination!.greaterThan,
-        );
-        if (greaterThanIndex != -1) {
-          msgList.removeRange(0, greaterThanIndex);
-        }
-      }
-      if (messagePagination?.limit != null) {
-        return msgList
-            .skip(max(0, msgList.length - messagePagination!.limit))
-            .toList();
-      }
+    // Cursor predicates compare the full `(createdAt, id)` tuple — the same
+    // key used in ORDER BY — so messages sharing a `createdAt` with the cursor
+    // fall on the correct side of the boundary. Filtering on `createdAt` alone
+    // would skip or repeat those siblings across pages.
+    if (lessThanCursor case final c?) {
+      query.where(
+        messages.createdAt.isSmallerThanValue(c.createdAt) |
+            (messages.createdAt.equals(c.createdAt) &
+                messages.id.isSmallerThanValue(c.id)),
+      );
     }
-    return msgList;
+    if (lessThanOrEqualCursor case final c?) {
+      query.where(
+        messages.createdAt.isSmallerThanValue(c.createdAt) |
+            (messages.createdAt.equals(c.createdAt) &
+                messages.id.isSmallerOrEqualValue(c.id)),
+      );
+    }
+    if (greaterThanCursor case final c?) {
+      query.where(
+        messages.createdAt.isBiggerThanValue(c.createdAt) |
+            (messages.createdAt.equals(c.createdAt) &
+                messages.id.isBiggerThanValue(c.id)),
+      );
+    }
+    if (greaterThanOrEqualCursor case final c?) {
+      query.where(
+        messages.createdAt.isBiggerThanValue(c.createdAt) |
+            (messages.createdAt.equals(c.createdAt) &
+                messages.id.isBiggerOrEqualValue(c.id)),
+      );
+    }
+
+    if (messagePagination != null) {
+      query.limit(messagePagination.limit);
+    }
+
+    final rows = await query.get();
+    final orderedRows = isForwardPagination ? rows : rows.reversed.toList();
+
+    return Future.wait(
+      orderedRows
+          .map((row) => _messageFromJoinRow(row, fetchDraft: fetchDraft)),
+    );
   }
 
   /// Updates the message data of a particular channel with
@@ -240,5 +325,41 @@ class MessageDao extends DatabaseAccessor<DriftChatDatabase>
     return batch(
       (batch) => batch.insertAllOnConflictUpdate(messages, entities),
     );
+  }
+
+  /// Returns the `(createdAt, id)` cursor for the message with [id] in the
+  /// local cache, or `null` if [id] is null, the message isn't cached, or
+  /// isn't visible in the channel (i.e. a thread reply with
+  /// `showInChannel = false`).
+  Future<({DateTime createdAt, String id})?> _lookupCursor(String? id) async {
+    if (id == null) return null;
+    final createdAt = await (selectOnly(messages)
+          ..addColumns([messages.createdAt])
+          ..where(messages.id.equals(id))
+          ..where(
+            messages.parentId.isNull() | messages.showInChannel.equals(true),
+          ))
+        .map((row) => row.read(messages.createdAt))
+        .getSingleOrNull();
+    if (createdAt == null) return null;
+    return (createdAt: createdAt, id: id);
+  }
+
+  /// Returns the `(createdAt, id)` cursor for the thread reply with [id]
+  /// under [parentId] in the local cache, or `null` if [id] is null or no
+  /// such reply is cached.
+  Future<({DateTime createdAt, String id})?> _lookupThreadCursor(
+    String parentId,
+    String? id,
+  ) async {
+    if (id == null) return null;
+    final createdAt = await (selectOnly(messages)
+          ..addColumns([messages.createdAt])
+          ..where(messages.id.equals(id))
+          ..where(messages.parentId.equals(parentId)))
+        .map((row) => row.read(messages.createdAt))
+        .getSingleOrNull();
+    if (createdAt == null) return null;
+    return (createdAt: createdAt, id: id);
   }
 }
