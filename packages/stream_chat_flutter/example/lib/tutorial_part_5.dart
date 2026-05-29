@@ -45,6 +45,8 @@ class MyApp extends StatelessWidget {
     required this.client,
   });
 
+  /// Instance of [StreamChatClient] we created earlier. This contains
+  /// information about our application and connection state.
   final StreamChatClient client;
 
   @override
@@ -59,6 +61,7 @@ class MyApp extends StatelessWidget {
   }
 }
 
+/// Displays the list of channels for the current user.
 class ChannelListPage extends StatefulWidget {
   const ChannelListPage({
     super.key,
@@ -105,6 +108,7 @@ class _ChannelListPageState extends State<ChannelListPage> {
   }
 }
 
+/// Displays the list of messages inside the channel with a custom message widget.
 class ChannelPage extends StatelessWidget {
   const ChannelPage({
     super.key,
@@ -130,7 +134,7 @@ class ChannelPage extends StatelessWidget {
   Widget _messageItemBuilder(
     BuildContext context,
     Message message,
-    StreamMessageItemProps props,
+    StreamMessageItemProps defaultProps,
   ) {
     final isCurrentUser = StreamChat.of(context).currentUser!.id == message.user!.id;
     final textAlign = isCurrentUser ? TextAlign.right : TextAlign.left;
@@ -140,12 +144,22 @@ class ChannelPage extends StatelessWidget {
       padding: const EdgeInsets.all(5),
       child: DecoratedBox(
         decoration: BoxDecoration(
-          border: Border.all(color: color),
-          borderRadius: const BorderRadius.all(Radius.circular(5)),
+          border: Border.all(
+            color: color,
+          ),
+          borderRadius: const BorderRadius.all(
+            Radius.circular(5),
+          ),
         ),
         child: ListTile(
-          title: Text(message.text!, textAlign: textAlign),
-          subtitle: Text(message.user!.name, textAlign: textAlign),
+          title: Text(
+            message.text!,
+            textAlign: textAlign,
+          ),
+          subtitle: Text(
+            message.user!.name,
+            textAlign: textAlign,
+          ),
         ),
       ),
     );

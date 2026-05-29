@@ -50,27 +50,45 @@ class MyApp extends StatelessWidget {
     required this.client,
   });
 
+  /// Instance of [StreamChatClient] we created earlier. This contains
+  /// information about our application and connection state.
   final StreamChatClient client;
 
   @override
   Widget build(BuildContext context) {
-    final themeData = ThemeData(
-      colorScheme: ColorScheme.fromSwatch(
-        accentColor: Colors.green,
-      ),
-    );
+    final greenBrand = StreamColorSwatch.fromColor(Colors.green);
+    final greenBrandDark = StreamColorSwatch.fromColor(Colors.green, brightness: Brightness.dark);
     final customTheme = StreamChatThemeData(
-      messageListViewTheme: const StreamMessageListViewThemeData(
-        backgroundColor: Colors.grey,
-        backgroundImage: DecorationImage(
-          image: AssetImage('assets/background_doodle.png'),
-          fit: BoxFit.cover,
-        ),
+      channelListItemTheme: StreamChannelListItemThemeData(
+        titleStyle: const TextStyle(fontWeight: FontWeight.bold),
+        backgroundColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return Colors.green.shade100;
+          }
+          return null;
+        }),
       ),
     );
 
     return MaterialApp(
-      theme: themeData,
+      theme: ThemeData(
+        brightness: Brightness.light,
+        extensions: [
+          StreamTheme(
+            brightness: Brightness.light,
+            colorScheme: StreamColorScheme.light(brand: greenBrand),
+          ),
+        ],
+      ),
+      darkTheme: ThemeData(
+        brightness: Brightness.dark,
+        extensions: [
+          StreamTheme(
+            brightness: Brightness.dark,
+            colorScheme: StreamColorScheme.dark(brand: greenBrandDark),
+          ),
+        ],
+      ),
       builder: (context, child) => StreamChat(
         client: client,
         streamChatThemeData: customTheme,
@@ -81,6 +99,7 @@ class MyApp extends StatelessWidget {
   }
 }
 
+/// Displays the list of channels for the current user.
 class ChannelListPage extends StatefulWidget {
   const ChannelListPage({
     super.key,
@@ -127,6 +146,7 @@ class _ChannelListPageState extends State<ChannelListPage> {
   }
 }
 
+/// Displays the list of messages inside the channel.
 class ChannelPage extends StatelessWidget {
   const ChannelPage({
     super.key,
@@ -141,7 +161,7 @@ class ChannelPage extends StatelessWidget {
           Expanded(
             child: StreamMessageListView(
               threadBuilder: (_, parentMessage) => ThreadPage(
-                parent: parentMessage,
+                parent: parentMessage!,
               ),
             ),
           ),
@@ -152,31 +172,46 @@ class ChannelPage extends StatelessWidget {
   }
 }
 
-class ThreadPage extends StatelessWidget {
+/// Displays the thread replies for a parent message.
+class ThreadPage extends StatefulWidget {
   const ThreadPage({
     super.key,
-    this.parent,
+    required this.parent,
   });
 
-  final Message? parent;
+  /// The root message this thread is replying to.
+  final Message parent;
+
+  @override
+  State<ThreadPage> createState() => _ThreadPageState();
+}
+
+class _ThreadPageState extends State<ThreadPage> {
+  late final _controller = StreamMessageComposerController(
+    message: Message(parentId: widget.parent.id),
+  );
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: StreamThreadHeader(
-        parent: parent!,
+        parent: widget.parent,
       ),
       body: Column(
         children: <Widget>[
           Expanded(
             child: StreamMessageListView(
-              parentMessage: parent,
+              parentMessage: widget.parent,
             ),
           ),
           StreamMessageComposer(
-            messageComposerController: StreamMessageComposerController(
-              message: Message(parentId: parent!.id),
-            ),
+            messageComposerController: _controller,
           ),
         ],
       ),

@@ -54,6 +54,8 @@ class MyApp extends StatelessWidget {
     required this.client,
   });
 
+  /// Instance of [StreamChatClient] we created earlier. This contains
+  /// information about our application and connection state.
   final StreamChatClient client;
 
   @override
@@ -68,6 +70,7 @@ class MyApp extends StatelessWidget {
   }
 }
 
+/// Displays the list of channels for the current user.
 class ChannelListPage extends StatefulWidget {
   const ChannelListPage({
     super.key,
@@ -95,28 +98,32 @@ class _ChannelListPageState extends State<ChannelListPage> {
   }
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-    body: StreamChannelListView(
-      controller: _listController,
-      itemBuilder: _channelPreviewBuilder,
-      onChannelTap: (channel) {
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => StreamChannel(
-              channel: channel,
-              child: const ChannelPage(),
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: StreamChannelListView(
+        controller: _listController,
+        itemBuilder: _channelTileBuilder,
+        onChannelTap: (channel) {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) {
+                return StreamChannel(
+                  channel: channel,
+                  child: const ChannelPage(),
+                );
+              },
             ),
-          ),
-        );
-      },
-    ),
-  );
+          );
+        },
+      ),
+    );
+  }
 
-  Widget _channelPreviewBuilder(
+  Widget _channelTileBuilder(
     BuildContext context,
     List<Channel> channels,
     int index,
-    StreamChannelListItem defaultTile,
+    StreamChannelListItem defaultChannelListItem,
   ) {
     final channel = channels[index];
     final lastMessage = channel.state?.messages.reversed.firstWhereOrNull(
@@ -124,7 +131,8 @@ class _ChannelListPageState extends State<ChannelListPage> {
     );
 
     final subtitle = lastMessage == null ? 'nothing yet' : lastMessage.text!;
-    final opacity = (channel.state?.unreadCount ?? 0) > 0 ? 1.0 : 0.5;
+    final unreadCount = channel.state?.unreadCount ?? 0;
+    final opacity = unreadCount > 0 ? 1.0 : 0.5;
 
     return ListTile(
       onTap: () {
@@ -142,24 +150,23 @@ class _ChannelListPageState extends State<ChannelListPage> {
         channel: channel,
       ),
       title: StreamChannelName(
-        textStyle: StreamChannelListItemTheme.of(context).titleStyle!.copyWith(
-          color: context.streamColorScheme.textPrimary
-              // ignore: deprecated_member_use
-              .withOpacity(opacity),
-        ),
         channel: channel,
+        textStyle: StreamChannelListItemTheme.of(context).titleStyle?.copyWith(
+          color: context.streamColorScheme.textPrimary.withValues(alpha: opacity),
+        ),
       ),
       subtitle: Text(subtitle),
-      trailing: channel.state!.unreadCount > 0
+      trailing: unreadCount > 0
           ? CircleAvatar(
               radius: 10,
-              child: Text(channel.state!.unreadCount.toString()),
+              child: Text(unreadCount.toString()),
             )
           : const SizedBox(),
     );
   }
 }
 
+/// Displays the list of messages inside the channel.
 class ChannelPage extends StatelessWidget {
   const ChannelPage({
     super.key,
