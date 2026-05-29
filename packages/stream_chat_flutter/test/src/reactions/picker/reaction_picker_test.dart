@@ -234,6 +234,50 @@ void main() {
   );
 
   testWidgets(
+    'emoji sheet is limited to supportedReactions when + is tapped',
+    (WidgetTester tester) async {
+      final message = Message(
+        id: 'test-message',
+        text: 'Hello world',
+        user: User(id: 'test-user'),
+      );
+
+      // _SubsetDefaultReactionIconResolver:
+      //   defaultReactions   = {'love'}          → 1 quick-pick button
+      //   supportedReactions = {'love', 'like', 'wow'} → 3 emoji sheet entries
+      const subsetResolver = _SubsetDefaultReactionIconResolver();
+
+      await tester.pumpWidget(
+        _wrapWithMaterialApp(
+          StreamMessageReactionPicker(
+            message: message,
+            onReactionPicked: (_) {},
+          ),
+          reactionIconResolver: subsetResolver,
+        ),
+      );
+
+      await tester.pumpAndSettle(const Duration(seconds: 1));
+
+      // Open the full emoji sheet.
+      await tester.tap(find.byKey(const Key('add_reaction')));
+      await tester.pumpAndSettle();
+
+      // The sheet should be visible.
+      expect(find.byType(StreamEmojiPickerSheet), findsOneWidget);
+
+      // Total StreamEmojiButton count = 1 (quick-pick) + 3 (sheet) = 4.
+      // Without the fix it would be 1 + ~120 (full streamSupportedEmojis catalog).
+      expect(
+        find.byType(StreamEmojiButton),
+        findsNWidgets(
+          subsetResolver.defaultReactions.length + subsetResolver.supportedReactions.length,
+        ),
+      );
+    },
+  );
+
+  testWidgets(
     'uses custom reaction resolver rendering',
     (WidgetTester tester) async {
       final message = Message(

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart' as core;
 
 import '../../mocks.dart';
 
@@ -245,6 +246,54 @@ void main() {
     expect(find.byType(ReactionDetailSheet), findsOneWidget);
   });
 
+  testWidgets('emoji sheet is limited to supportedReactions from resolver when add-emoji chip is tapped', (
+    tester,
+  ) async {
+    when(
+      () => mockClient.queryReactions(
+        'test-message',
+        filter: any(named: 'filter'),
+        sort: any(named: 'sort'),
+        pagination: any(named: 'pagination'),
+      ),
+    ).thenAnswer(
+      (_) async => QueryReactionsResponse()
+        ..reactions = []
+        ..next = null,
+    );
+
+    final message = _buildMessage(
+      reactionGroups: {
+        'love': ReactionGroup(count: 1, sumScores: 1),
+      },
+    );
+
+    // _SubsetDetailResolver: supportedReactions = {'love', 'like'} (2 items)
+    await tester.pumpWidget(
+      _wrapWithMaterialApp(
+        client: mockClient,
+        reactionIconResolver: const _SubsetDetailResolver(),
+        _ReactionDetailSheetLauncher(message: message),
+      ),
+    );
+
+    await tester.tap(find.text('Open Sheet'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(ReactionDetailSheet), findsOneWidget);
+
+    // Tap the add-emoji chip (identified by the emojiAdd icon) to open the
+    // full emoji sheet.
+    await tester.tap(find.byIcon(core.StreamIconData.emojiAdd));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(StreamEmojiPickerSheet), findsOneWidget);
+
+    // The sheet should show exactly 2 emoji buttons (supportedReactions count).
+    // Without the fix it would show ~120 (full streamSupportedEmojis catalog).
+    expect(find.byType(StreamEmojiButton), findsNWidgets(2));
+  });
+
   group('ReactionDetailSheet Golden Tests', () {
     final reactions = [
       Reaction(
@@ -418,6 +467,7 @@ Widget _wrapWithMaterialApp(
   Widget child, {
   required StreamChatClient client,
   Brightness brightness = Brightness.light,
+  ReactionIconResolver? reactionIconResolver,
 }) {
   return MaterialApp(
     debugShowCheckedModeBanner: false,
@@ -427,6 +477,10 @@ Widget _wrapWithMaterialApp(
       // Mock the connectivity stream to always return wifi.
       connectivityStream: Stream.value([ConnectivityResult.wifi]),
       streamChatThemeData: StreamChatThemeData(),
+      streamChatConfigData: switch (reactionIconResolver) {
+        final resolver? => StreamChatConfigurationData(reactionIconResolver: resolver),
+        _ => null,
+      },
       child: child ?? const SizedBox.shrink(),
     ),
     home: Builder(
@@ -445,4 +499,25 @@ Widget _wrapWithMaterialApp(
       },
     ),
   );
+}
+
+/// Resolver with a small [supportedReactions] set for verifying that the
+/// emoji sheet receives only that subset when the add-emoji chip is tapped.
+class _SubsetDetailResolver extends ReactionIconResolver {
+  const _SubsetDetailResolver();
+
+  @override
+  Set<String> get defaultReactions => const {'love'};
+
+  @override
+  Set<String> get supportedReactions => const {'love', 'like'};
+
+  @override
+  String? emojiCode(String type) => streamSupportedEmojis[type]?.emoji;
+
+  @override
+  StreamEmojiContent resolve(String type) {
+    if (emojiCode(type) case final emoji?) return StreamUnicodeEmoji(emoji);
+    return const StreamUnicodeEmoji('❓');
+  }
 }

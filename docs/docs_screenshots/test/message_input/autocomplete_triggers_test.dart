@@ -1,4 +1,3 @@
-import 'package:alchemist/alchemist.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -21,10 +20,6 @@ void main() {
     'mention autocomplete trigger',
     fileName: 'autocomplete_trigger_mention',
     constraints: const BoxConstraints.tightFor(width: 375, height: 290),
-    pumpBeforeTest: (tester) async {
-      await tester.pump(); // let FutureBuilder resolve and show user list
-      await precacheImages(tester); // now precache the avatar images in the tree
-    },
     builder: () {
       final client = MockClient();
       final clientState = MockClientState();

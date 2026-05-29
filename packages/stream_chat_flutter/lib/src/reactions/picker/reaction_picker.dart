@@ -74,8 +74,10 @@ class StreamMessageReactionPicker extends StatelessWidget {
       onReactionPicked: onItemPicked,
       onAddReactionTap: () async {
         final selectedReactions = ownReactionsMap.keys.toSet();
+        final supportedEmojis = resolver.supportedReactions.map((type) => streamSupportedEmojis[type]).nonNulls;
         final emoji = await StreamEmojiPickerSheet.show(
           context: context,
+          emojis: supportedEmojis,
           selectedReactions: selectedReactions,
         );
 

@@ -2,6 +2,7 @@ import 'package:alchemist/alchemist.dart';
 import 'package:device_preview/device_preview.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:meta/meta.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_core_flutter/stream_core_flutter.dart' as core;
@@ -37,6 +38,12 @@ const docsScreenshotsTargetPlatform = TargetPlatform.iOS;
 /// which is the latest point inside the test body, before
 /// `_verifyInvariants` enforces that foundation debug vars are null.
 ///
+/// The default [pumpBeforeTest] does [WidgetTester.pumpAndSettle] first so
+/// deferred UI (modal sheets, paginated lists) renders, then [precacheImages]
+/// so avatar fixtures decode before the snapshot is taken. Order matters:
+/// precaching before settling would scan an empty tree and miss images that
+/// only mount after async work completes.
+///
 /// All [goldenTest] parameters are forwarded; pass a custom [pumpWidget] or
 /// [whilePerforming] and they will be composed with the platform pin.
 @isTest
@@ -47,7 +54,7 @@ void docsGoldenTest(
   List<String> tags = const ['golden'],
   double textScaleFactor = 1.0,
   BoxConstraints constraints = const BoxConstraints(),
-  PumpAction pumpBeforeTest = precacheImages,
+  PumpAction pumpBeforeTest = _settleThenPrecacheImages,
   PumpWidget pumpWidget = onlyPumpWidget,
   Interaction? whilePerforming,
   DeviceInfo? deviceFrame,
@@ -89,6 +96,13 @@ void docsGoldenTest(
     },
     builder: wrapped,
   );
+}
+
+// Settle async work (post-frame sheets, paginated lists) before precaching so
+// avatar Images that only mount after the load finishes get decoded.
+Future<void> _settleThenPrecacheImages(WidgetTester tester) async {
+  await tester.pumpAndSettle();
+  await precacheImages(tester);
 }
 
 /// Default [MaterialApp] wrapper used by [docsGoldenTest].
