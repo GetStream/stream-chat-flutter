@@ -79,7 +79,7 @@ class PinnedMessageDao extends DatabaseAccessor<DriftChatDatabase>
     );
   }
 
-  /// Returns a single message by matching the [PinnedMessages.id] with [id]
+  /// Returns a single message by matching the [PinnedMessages.id] with [id].
   Future<Message?> getMessageById(
     String id, {
     bool fetchDraft = true,
@@ -100,65 +100,6 @@ class PinnedMessageDao extends DatabaseAccessor<DriftChatDatabase>
       result,
       fetchDraft: fetchDraft,
     );
-  }
-
-  /// Returns all the messages of a particular thread by matching
-  /// [PinnedMessages.channelCid] with [cid]
-  Future<List<Message>> getThreadMessages(String cid) async =>
-      Future.wait(await (select(pinnedMessages).join([
-        leftOuterJoin(_users, pinnedMessages.userId.equalsExp(_users.id)),
-        leftOuterJoin(
-          _pinnedByUsers,
-          pinnedMessages.pinnedByUserId.equalsExp(_pinnedByUsers.id),
-        ),
-      ])
-            ..where(pinnedMessages.channelCid.equals(cid))
-            ..where(pinnedMessages.parentId.isNotNull())
-            ..orderBy([OrderingTerm.asc(pinnedMessages.createdAt)]))
-          .map(_messageFromJoinRow)
-          .get());
-
-  /// Returns all the messages of a particular thread by matching
-  /// [PinnedMessages.parentId] with [parentId]
-  Future<List<Message>> getThreadMessagesByParentId(
-    String parentId, {
-    PaginationParams? options,
-  }) async {
-    final msgList = await Future.wait(await (select(pinnedMessages).join([
-      leftOuterJoin(_users, pinnedMessages.userId.equalsExp(_users.id)),
-      leftOuterJoin(
-        _pinnedByUsers,
-        pinnedMessages.pinnedByUserId.equalsExp(_pinnedByUsers.id),
-      ),
-    ])
-          ..where(pinnedMessages.parentId.isNotNull())
-          ..where(pinnedMessages.parentId.equals(parentId))
-          ..orderBy([OrderingTerm.asc(pinnedMessages.createdAt)]))
-        .map(_messageFromJoinRow)
-        .get());
-
-    if (msgList.isNotEmpty) {
-      if (options?.lessThan != null) {
-        final lessThanIndex = msgList.indexWhere(
-          (m) => m.id == options!.lessThan,
-        );
-        if (lessThanIndex != -1) {
-          msgList.removeRange(lessThanIndex, msgList.length);
-        }
-      }
-      if (options?.greaterThan != null) {
-        final greaterThanIndex = msgList.indexWhere(
-          (m) => m.id == options!.greaterThan,
-        );
-        if (greaterThanIndex != -1) {
-          msgList.removeRange(0, greaterThanIndex);
-        }
-      }
-      if (options?.limit != null) {
-        return msgList.take(options!.limit).toList();
-      }
-    }
-    return msgList;
   }
 
   /// Returns all the messages of a channel by matching
@@ -215,11 +156,6 @@ class PinnedMessageDao extends DatabaseAccessor<DriftChatDatabase>
     }
     return msgList;
   }
-
-  /// Updates the message data of a particular channel with
-  /// the new [messageList] data
-  Future<void> updateMessages(String cid, List<Message> messageList) =>
-      bulkUpdateMessages({cid: messageList});
 
   /// Bulk updates the message data of multiple channels
   Future<void> bulkUpdateMessages(

@@ -39,7 +39,7 @@ void main() {
     );
     await database.userDao.updateUsers(users);
     await database.channelDao.updateChannels(channels);
-    await memberDao.updateMembers(cid, memberList);
+    await memberDao.bulkUpdateMembers({cid: memberList});
     return memberList;
   }
 
@@ -112,9 +112,11 @@ void main() {
       ChannelModel(cid: cid2),
       ChannelModel(cid: cid3),
     ]);
-    await memberDao.updateMembers(cid1, [memberFor(targetUser)]);
-    await memberDao.updateMembers(cid2, [memberFor(targetUser)]);
-    await memberDao.updateMembers(cid3, [memberFor(otherUser)]);
+    await memberDao.bulkUpdateMembers({
+      cid1: [memberFor(targetUser)],
+      cid2: [memberFor(targetUser)],
+      cid3: [memberFor(otherUser)],
+    });
 
     // Should return memberships only for channels where target user
     // is a member, keyed by channelCid.
@@ -130,7 +132,7 @@ void main() {
     expect(memberships[cid2]!.user!.id, targetUserId);
   });
 
-  test('updateMembers', () async {
+  test('bulkUpdateMembers', () async {
     const cid = 'test:Cid';
 
     // Preparing test data
@@ -174,7 +176,9 @@ void main() {
       updatedAt: DateTime.now(),
     );
     await database.userDao.updateUsers([newUser]);
-    await memberDao.updateMembers(cid, [copyMember, newMember]);
+    await memberDao.bulkUpdateMembers({
+      cid: [copyMember, newMember],
+    });
 
     // Fetched member length should be one more than inserted members.
     // copyMember `banned` modified field should be true.

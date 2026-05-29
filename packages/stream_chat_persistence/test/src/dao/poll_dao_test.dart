@@ -86,20 +86,6 @@ void main() {
     return polls;
   }
 
-  test('getPolls', () async {
-    // Should be empty initially
-    final polls = await pollDao.getPolls();
-    expect(polls, isEmpty);
-
-    // Adding sample polls
-    final insertedPolls = await _preparePollData();
-    expect(insertedPolls, isNotEmpty);
-
-    // Fetched polls length should match inserted polls length.
-    final fetchedPollVotes = await pollDao.getPolls();
-    expect(fetchedPollVotes.length, insertedPolls.length);
-  });
-
   test('updatePolls', () async {
     // Preparing test data
     final insertedPolls = await _preparePollData();
@@ -109,11 +95,10 @@ void main() {
 
     await pollDao.updatePolls([newPoll]);
 
-    // Fetched users length should be one more than inserted users.
-    // Fetched users should contain the newUser.
-    final fetchedPolls = await pollDao.getPolls();
-    expect(fetchedPolls.length, insertedPolls.length + 1);
-    expect(fetchedPolls.any((it) => it.id == newPoll.id), isTrue);
+    // Fetched poll should match the newly inserted poll.
+    final fetchedPoll = await pollDao.getPollById(newPoll.id);
+    expect(fetchedPoll, isNotNull);
+    expect(fetchedPoll!.id, newPoll.id);
   });
 
   test('getPollById', () async {
@@ -134,10 +119,9 @@ void main() {
     final pollToDelete = insertedPolls.first;
     await pollDao.deletePollsByIds([pollToDelete.id]);
 
-    // Fetched poll list should be one less than inserted polls.
-    final fetchedPolls = await pollDao.getPolls();
-    expect(fetchedPolls.length, insertedPolls.length - 1);
-    expect(fetchedPolls.any((it) => it.id == pollToDelete.id), isFalse);
+    // Fetched poll should be null.
+    final fetchedPoll = await pollDao.getPollById(pollToDelete.id);
+    expect(fetchedPoll, isNull);
   });
 
   test('deleting a poll should also delete its votes', () async {
@@ -152,10 +136,9 @@ void main() {
     // Delete the poll
     await pollDao.deletePollsByIds([pollToDelete.id]);
 
-    // Fetched poll list should be one less than inserted polls.
-    final fetchedPolls = await pollDao.getPolls();
-    expect(fetchedPolls.length, insertedPolls.length - 1);
-    expect(fetchedPolls.any((it) => it.id == pollToDelete.id), isFalse);
+    // Fetched poll should be null.
+    final fetchedPoll = await pollDao.getPollById(pollToDelete.id);
+    expect(fetchedPoll, isNull);
 
     // Fetched poll votes should be empty
     final fetchedPollVotes = await database.pollVoteDao.getPollVotes(
