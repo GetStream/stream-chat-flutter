@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart' as core;
 
 import '../../mocks.dart';
 
@@ -243,6 +244,52 @@ void main() {
 
     expect(action, isNull);
     expect(find.byType(ReactionDetailSheet), findsOneWidget);
+  });
+
+  testWidgets('emoji sheet is limited to supportedReactions from resolver when add-emoji chip is tapped',
+      (tester) async {
+    when(
+      () => mockClient.queryReactions(
+        'test-message',
+        filter: any(named: 'filter'),
+        sort: any(named: 'sort'),
+        pagination: any(named: 'pagination'),
+      ),
+    ).thenAnswer(
+      (_) async => QueryReactionsResponse()
+        ..reactions = []
+        ..next = null,
+    );
+
+    final message = _buildMessage(
+      reactionGroups: {
+        'love': ReactionGroup(count: 1, sumScores: 1),
+      },
+    );
+
+    await tester.pumpWidget(
+      _wrapWithMaterialApp(
+        client: mockClient,
+        // _SubsetDetailResolver: supportedReactions = {'love', 'like'} (2 items)
+        reactionIconResolver: const _SubsetDetailResolver(),
+        _ReactionDetailSheetLauncher(message: message),
+      ),
+    );
+
+    await tester.tap(find.text('Open Sheet'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(ReactionDetailSheet), findsOneWidget);
+
+    // Tap the add-emoji chip to open the full emoji sheet.
+    await tester.tap(find.byType(StreamEmojiChip).first);
+    await tester.pumpAndSettle();
+
+    expect(find.byType(StreamEmojiPickerSheet), findsOneWidget);
+
+    // The sheet should show exactly 2 emoji buttons (supportedReactions count).
+    // Without the fix it would show ~120 (full streamSupportedEmojis catalog).
+    expect(find.byType(StreamEmojiButton), findsNWidgets(2));
   });
 
   group('ReactionDetailSheet Golden Tests', () {
