@@ -81,20 +81,27 @@ void main() {
   test('getReactionsByUserId', () async {
     const messageId = 'testMessageId';
     const userId = 'testUserId';
+    const otherUserId = 'otherUserid';
 
     // Should be empty initially
     final reactions =
         await pinnedMessageReactionDao.getReactionsByUserId(messageId, userId);
     expect(reactions, isEmpty);
 
-    // Adding sample reactions
+    // Adding sample reactions from the target user.
     final insertedReactions =
         await _prepareReactionData(messageId, userId: userId);
     expect(insertedReactions, isNotEmpty);
 
-    // Fetched reaction length should match inserted reactions length.
+    // Adding sample reactions from other users on the same message.
+    final otherInsertedReactions =
+        await _prepareReactionData(messageId, userId: otherUserId);
+    expect(otherInsertedReactions, isNotEmpty);
+
+    // Fetched reaction length should match the target user's reactions only.
     // Every reaction messageId should match the provided messageId.
-    // Every reaction userId should match the provided userId.
+    // Every reaction userId should match the provided userId — i.e. reactions
+    // from other users on the same message must be filtered out.
     final fetchedReactions =
         await pinnedMessageReactionDao.getReactionsByUserId(messageId, userId);
     expect(fetchedReactions.length, insertedReactions.length);
@@ -141,6 +148,19 @@ void main() {
           .isNotEmpty,
       true,
     );
+  });
+
+  test(
+      'getReactions returns empty for a message id with no reactions, '
+      'even when reactions exist for other messages', () async {
+    const messageWithReactions = 'pmsg-A';
+    const messageWithoutReactions = 'pmsg-B';
+
+    await _prepareReactionData(messageWithReactions);
+
+    final fetched =
+        await pinnedMessageReactionDao.getReactions(messageWithoutReactions);
+    expect(fetched, isEmpty);
   });
 
   group('deleteReactionsByMessageIds', () {
