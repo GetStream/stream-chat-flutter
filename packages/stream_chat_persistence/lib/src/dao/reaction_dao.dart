@@ -16,17 +16,10 @@ class ReactionDao extends DatabaseAccessor<DriftChatDatabase>
 
   /// Returns all the reactions of a particular message by matching
   /// [Reactions.messageId] with [messageId]
-  Future<List<Reaction>> getReactions(String messageId) =>
-      (select(reactions).join([
-        leftOuterJoin(users, reactions.userId.equalsExp(users.id)),
-      ])
-            ..where(reactions.messageId.equals(messageId))
-            ..orderBy([OrderingTerm.asc(reactions.createdAt)]))
-          .map((rows) {
-        final userEntity = rows.readTableOrNull(users);
-        final reactionEntity = rows.readTable(reactions);
-        return reactionEntity.toReaction(user: userEntity?.toUser());
-      }).get();
+  Future<List<Reaction>> getReactions(String messageId) {
+    final where = reactions.messageId.equals(messageId);
+    return _selectReactions(where);
+  }
 
   /// Returns all the reactions of a particular message
   /// added by a particular user by matching
@@ -35,9 +28,10 @@ class ReactionDao extends DatabaseAccessor<DriftChatDatabase>
   Future<List<Reaction>> getReactionsByUserId(
     String messageId,
     String userId,
-  ) async {
-    final reactions = await getReactions(messageId);
-    return reactions.where((it) => it.userId == userId).toList();
+  ) {
+    final where =
+        reactions.messageId.equals(messageId) & reactions.userId.equals(userId);
+    return _selectReactions(where);
   }
 
   /// Updates the reactions data with the new [reactionList] data
@@ -57,4 +51,16 @@ class ReactionDao extends DatabaseAccessor<DriftChatDatabase>
           (r) => r.messageId.isIn(messageIds),
         );
       });
+
+  Future<List<Reaction>> _selectReactions(Expression<bool> where) {
+    final rows = select(reactions)
+        .join([leftOuterJoin(users, reactions.userId.equalsExp(users.id))])
+      ..where(where)
+      ..orderBy([OrderingTerm.asc(reactions.createdAt)]);
+    return rows.map((row) {
+      final reactionEntity = row.readTable(reactions);
+      final userEntity = row.readTableOrNull(users);
+      return reactionEntity.toReaction(user: userEntity?.toUser());
+    }).get();
+  }
 }

@@ -80,19 +80,26 @@ void main() {
   test('getReactionsByUserId', () async {
     const messageId = 'testMessageId';
     const userId = 'testUserId';
+    const otherUserId = 'otherUserid';
 
     // Should be empty initially
     final reactions = await reactionDao.getReactionsByUserId(messageId, userId);
     expect(reactions, isEmpty);
 
-    // Adding sample reactions
+    // Adding sample reactions from the target user.
     final insertedReactions =
         await _prepareReactionData(messageId, userId: userId);
     expect(insertedReactions, isNotEmpty);
 
-    // Fetched reaction length should match inserted reactions length.
+    // Adding sample reactions from other users on the same message.
+    final otherInsertedReactions =
+        await _prepareReactionData(messageId, userId: otherUserId);
+    expect(otherInsertedReactions, isNotEmpty);
+
+    // Fetched reaction length should match the target user's reactions only.
     // Every reaction messageId should match the provided messageId.
-    // Every reaction userId should match the provided userId.
+    // Every reaction userId should match the provided userId — i.e. reactions
+    // from other users on the same message must be filtered out.
     final fetchedReactions =
         await reactionDao.getReactionsByUserId(messageId, userId);
     expect(fetchedReactions.length, insertedReactions.length);
