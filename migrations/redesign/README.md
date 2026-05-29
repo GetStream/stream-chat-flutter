@@ -12,6 +12,29 @@ The redesigned components aim to provide:
 
 Each component migration guide contains specific details about the changes and how to migrate.
 
+## Package Architecture: Stream Core + Stream Chat
+
+The redesigned components are split across two packages:
+
+- **`stream_core_flutter`** — product-agnostic primitives: avatars, badges, buttons, sheets, app bars, message layout, reaction picker, and theming tokens. None of these classes depend on chat-domain models (`Channel`, `Message`, `User`).
+- **`stream_chat_flutter`** — chat-domain wrappers that take chat models and delegate visuals to the primitives.
+
+Most core types are re-exported from `stream_chat_flutter`, so a single `package:stream_chat_flutter/stream_chat_flutter.dart` import is usually enough. When a migration doc says a type "moved to `stream_core_flutter`," it has **not** been removed — it has been re-homed to the primitives layer and (in most cases) re-exported here so existing imports keep working.
+
+### Core primitive ↔ chat wrapper
+
+| Core (in `stream_core_flutter`)                          | Chat wrapper (in `stream_chat_flutter`)                                                     |
+| -------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `StreamAvatar`, `StreamAvatarGroup`, `StreamAvatarStack` | `StreamUserAvatar`, `StreamUserAvatarGroup`, `StreamUserAvatarStack`, `StreamChannelAvatar` |
+| `StreamReactionPicker` (takes `StreamReactionPickerItem`s) | `StreamMessageReactionPicker` (takes `Message`)                                            |
+| `StreamReactions` (takes `ReactionGroup`s)                 | `StreamMessageReactions` (takes `Message`)                                                  |
+
+### Frequently confused names
+
+- `StreamMessageLayout` — **not** `StreamMessagePlacement`.
+- `kStreamToolbarHeight` — **not** `kStreamHeaderHeight`.
+- `StreamAvatarTheme` / `StreamAvatarThemeData` — live in `stream_core_flutter`, re-exported from `stream_chat_flutter`; existing imports continue to work.
+
 ## Theming
 
 The redesigned components use `StreamTheme` for theming. If no `StreamTheme` is provided, a default theme is automatically created based on `Theme.of(context).brightness` (light or dark mode).
@@ -118,23 +141,24 @@ class MyCustomButton extends StatelessWidget {
 
 ## Components
 
-| Component | Migration Guide |
-|-----------|-----------------|
-| Stream Avatar | [stream_avatar.md](stream_avatar.md) |
-| Channel List Item | [channel_list_item.md](channel_list_item.md) |
-| Message Actions | [message_actions.md](message_actions.md) |
-| Reaction Picker / Reactions | [reaction_picker.md](reaction_picker.md) |
-| Image CDN & Thumbnails | [image_cdn.md](image_cdn.md) |
-| Message Widget & Message List | [message_widget.md](message_widget.md) |
-| Message Composer | [message_composer.md](message_composer.md) |
-| Unread Indicator | [unread_indicator.md](unread_indicator.md) |
-| Unread Indicator Button | [unread_indicator_button.md](unread_indicator_button.md) |
-| Reaction List & Detail Sheet | [reaction_list.md](reaction_list.md) |
-| Audio Waveform Theme | [audio_theme.md](audio_theme.md) |
-| Attachments & Polls | [attachments_and_polls.md](attachments_and_polls.md) |
-| Media Viewer (Full-screen Media) | [media_viewer.md](media_viewer.md) |
-| Headers, Icons & Configuration | [headers_and_icons.md](headers_and_icons.md) |
-| Localizations | [localizations.md](localizations.md) |
+| Component                        | Migration Guide                                          |
+| -------------------------------- | -------------------------------------------------------- |
+| Stream Avatar                    | [stream_avatar.md](stream_avatar.md)                     |
+| Channel List Item                | [channel_list_item.md](channel_list_item.md)             |
+| Message Actions                  | [message_actions.md](message_actions.md)                 |
+| Reaction Picker / Reactions      | [reaction_picker.md](reaction_picker.md)                 |
+| Image CDN & Thumbnails           | [image_cdn.md](image_cdn.md)                             |
+| Message Widget                   | [message_widget.md](message_widget.md)                   |
+| Message List                     | [message_list.md](message_list.md)                       |
+| Message Composer                 | [message_composer.md](message_composer.md)               |
+| Unread Indicator                 | [unread_indicator.md](unread_indicator.md)               |
+| Unread Indicator Button          | [unread_indicator_button.md](unread_indicator_button.md) |
+| Reaction List & Detail Sheet     | [reaction_list.md](reaction_list.md)                     |
+| Audio Waveform Theme             | [audio_theme.md](audio_theme.md)                         |
+| Attachments & Polls              | [attachments_and_polls.md](attachments_and_polls.md)     |
+| Media Viewer (Full-screen Media) | [media_viewer.md](media_viewer.md)                       |
+| Headers, Icons & Configuration   | [headers_and_icons.md](headers_and_icons.md)             |
+| Localizations                    | [localizations.md](localizations.md)                     |
 
 ## Need Help?
 

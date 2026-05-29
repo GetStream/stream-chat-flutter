@@ -17,18 +17,20 @@ parameters have been removed.
 ### Breaking Changes
 
 - `backgroundColor`, `textColor`, and `textStyle` constructor parameters
-  removed — styling is now controlled via `StreamTheme`.
-- The widget is now wrapped in `IgnorePointer`; it does not respond to taps
-  itself.
+  removed — styling is now controlled via `StreamBadgeNotificationThemeData`
+  (applied through `StreamBadgeNotificationTheme`). `StreamUnreadIndicator`
+  itself has no direct theme hook.
+- The widget has no `GestureDetector` or `InkWell`; it is non-interactive by
+  default and does not respond to taps.
 - Now supports named constructors for different unread count types.
 
 ### Named Constructors
 
-| Constructor | Description |
-|-------------|-------------|
-| `StreamUnreadIndicator()` | Shows total unread message count |
+| Constructor                                     | Description                                                                    |
+| ----------------------------------------------- | ------------------------------------------------------------------------------ |
+| `StreamUnreadIndicator()`                       | Shows total unread message count                                               |
 | `StreamUnreadIndicator.channels({String? cid})` | Shows unread channel count; optionally filtered to a specific channel by `cid` |
-| `StreamUnreadIndicator.threads({String? id})` | Shows unread thread count |
+| `StreamUnreadIndicator.threads({String? id})`   | Shows unread thread count. **Note:** the `id` parameter is not yet supported (currently a no-op); the total unread thread count is always shown regardless of the value passed. |
 
 ### Overlay Mode
 
@@ -36,11 +38,11 @@ parameters have been removed.
 passing a `child`. When `child` is non-null, the badge is positioned over the
 child using `alignment` and `offset`.
 
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `child` | `Widget?` | `null` | Widget to overlay the badge on. When `null`, only the badge is rendered. |
-| `alignment` | `AlignmentGeometry?` | `AlignmentDirectional.topEnd` | Alignment of the badge relative to `child`. |
-| `offset` | `Offset?` | `Offset(8, -6)` (mirrored in RTL) | Pixel offset applied after `alignment`. |
+| Parameter   | Type                 | Default                           | Description                                                              |
+| ----------- | -------------------- | --------------------------------- | ------------------------------------------------------------------------ |
+| `child`     | `Widget?`            | `null`                            | Widget to overlay the badge on. When `null`, only the badge is rendered. |
+| `alignment` | `AlignmentGeometry?` | `AlignmentDirectional.topEnd`     | Alignment of the badge relative to `child`.                              |
+| `offset`    | `Offset?`            | `Offset(8, -6)` (mirrored in RTL) | Pixel offset applied after `alignment`.                                  |
 
 ```dart
 // Standalone badge (no child).

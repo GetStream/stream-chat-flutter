@@ -21,13 +21,13 @@ The audio waveform theme types and the `StreamAudioWaveform` / `StreamAudioWavef
 
 ## What Changed
 
-| Item | Before | After |
-|------|--------|-------|
-| `StreamAudioWaveformTheme` | Defined in `stream_chat_flutter` | Moved to `stream_core_flutter`; no longer in `StreamChatThemeData` |
-| `StreamAudioWaveformSliderTheme` | Defined in `stream_chat_flutter` | Moved to `stream_core_flutter`; no longer in `StreamChatThemeData` |
-| `StreamAudioWaveform` widget | In `stream_chat_flutter` | Re-exported from `stream_core_flutter` via `stream_chat_flutter` |
-| `StreamAudioWaveformSlider` widget | In `stream_chat_flutter` | Re-exported from `stream_core_flutter` via `stream_chat_flutter` |
-| Theming entry point | `StreamChatThemeData.audioWaveformTheme` / `.audioWaveformSliderTheme` | `StreamTheme` (via `MaterialApp.theme.extensions`) |
+| Item                               | Before                                                                 | After                                                              |
+| ---------------------------------- | ---------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| `StreamAudioWaveformTheme`         | Defined in `stream_chat_flutter`                                       | Moved to `stream_core_flutter`; no longer in `StreamChatThemeData` |
+| `StreamAudioWaveformSliderTheme`   | Defined in `stream_chat_flutter`                                       | Deleted; thumb/track styling is now configured via `StreamAudioWaveformThemeData` |
+| `StreamAudioWaveform` widget       | In `stream_chat_flutter`                                               | Re-exported from `stream_core_flutter` via `stream_chat_flutter`   |
+| `StreamAudioWaveformSlider` widget | In `stream_chat_flutter`                                               | Re-exported from `stream_core_flutter` via `stream_chat_flutter`   |
+| Theming entry point                | `StreamChatThemeData.audioWaveformTheme` / `.audioWaveformSliderTheme` | `StreamAudioWaveformThemeData` via `StreamTheme` (added to `MaterialApp.theme.extensions`) |
 
 ---
 
@@ -43,9 +43,6 @@ StreamChat(
     audioWaveformTheme: StreamAudioWaveformThemeData(
       waveColor: Colors.blue,
       playedWaveColor: Colors.blueAccent,
-    ),
-    audioWaveformSliderTheme: StreamAudioWaveformSliderThemeData(
-      thumbColor: Colors.blue,
     ),
   ),
   child: ...,
@@ -75,7 +72,7 @@ MaterialApp(
 ## Migration Checklist
 
 - [ ] Remove any `StreamChatThemeData.audioWaveformTheme` usages
-- [ ] Remove any `StreamChatThemeData.audioWaveformSliderTheme` usages
+- [ ] Remove any `StreamChatThemeData.audioWaveformSliderTheme` usages — `StreamAudioWaveformSliderTheme` was deleted; thumb/track styling is now configured via `StreamAudioWaveformThemeData`
 - [ ] Remove `audioWaveformTheme` and `audioWaveformSliderTheme` from any `StreamChatThemeData.copyWith()` calls — these parameters no longer exist and will cause a compile error
 - [ ] Move audio waveform color / style customizations into a `StreamTheme` extension on `MaterialApp`
 - [ ] Import paths for `StreamAudioWaveform` and `StreamAudioWaveformSlider` remain the same (`package:stream_chat_flutter/stream_chat_flutter.dart`)

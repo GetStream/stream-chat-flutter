@@ -16,6 +16,7 @@ This guide covers the migration for the redesigned attachment components, voice 
 - [StreamUrlAttachment → StreamLinkPreviewAttachment](#streamurlattachment--streamlinkpreviewattachment)
 - [StreamVoiceRecordingAttachmentPlaylist](#streamvoicerecordingattachmentplaylist)
 - [Attachment Builders](#attachment-builders)
+- [Removed Attachment Widgets](#removed-attachment-widgets)
 - [StreamPollInteractorThemeData](#streampollinteractorthemedata)
 - [Poll Dialogs → Poll Sheets](#poll-dialogs--poll-sheets)
 - [Poll Creator Dialog → Sheet](#poll-creator-dialog--sheet)
@@ -26,20 +27,20 @@ This guide covers the migration for the redesigned attachment components, voice 
 
 ## Quick Reference
 
-| Symbol | Change |
-|--------|--------|
-| All attachment widgets | Adopt **Props + Component Factory** pattern (see below) |
-| `StreamUrlAttachment` | **Renamed** to `StreamLinkPreviewAttachment` |
-| `UrlAttachmentBuilder` | **Renamed** to `LinkPreviewAttachmentBuilder` |
-| `shape` parameter | **Removed** from all attachment widgets |
-| `constraints` parameter | Changed from required to optional on most attachments |
-| `StreamImageAttachment` thumbnail params | `imageThumbnailSize`, `imageThumbnailResizeType`, `imageThumbnailCropType` replaced by `ImageResize? resize` |
-| `StreamFileAttachment.backgroundColor` | **Removed** |
-| `StreamPollInteractorThemeData` | Fully redesigned — old properties removed, new structured theme |
-| `StreamPollOptionsDialog` / `StreamPollResultsDialog` / `StreamPollOptionVotesDialog` / `StreamPollCommentsDialog` | **Renamed** to `...Sheet` and now presented as modal bottom sheets |
-| `StreamPollOptionsDialogThemeData` / `StreamPollResultsDialogThemeData` / `StreamPollOptionVotesDialogThemeData` / `StreamPollCommentsDialogThemeData` | **Renamed** to `...SheetThemeData` and fully redesigned |
-| `StreamPollCreatorDialog` / `StreamPollCreatorFullScreenDialog` | **Replaced** by `StreamPollCreatorSheet` — see [Poll Creator Dialog → Sheet](#poll-creator-dialog--sheet) |
-| `StreamVoiceRecordingAttachmentThemeData` | Fully redesigned — old properties removed, new design-token-based theme |
+| Symbol                                                                                                                                                 | Change                                                                                                       |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------ |
+| All attachment widgets                                                                                                                                 | Adopt **Props + Component Factory** pattern (see below)                                                      |
+| `StreamUrlAttachment`                                                                                                                                  | **Renamed** to `StreamLinkPreviewAttachment`                                                                 |
+| `UrlAttachmentBuilder`                                                                                                                                 | **Renamed** to `LinkPreviewAttachmentBuilder`                                                                |
+| `shape` parameter                                                                                                                                      | **Removed** from all attachment widgets                                                                      |
+| `constraints` parameter                                                                                                                                | Changed from required to optional on most attachments                                                        |
+| `StreamImageAttachment` thumbnail params                                                                                                               | `imageThumbnailSize`, `imageThumbnailResizeType`, `imageThumbnailCropType` replaced by `ImageResize? resize` |
+| `StreamFileAttachment.backgroundColor`                                                                                                                 | **Removed**                                                                                                  |
+| `StreamPollInteractorThemeData`                                                                                                                        | Fully redesigned — old properties removed, new structured theme                                              |
+| `StreamPollOptionsDialog` / `StreamPollResultsDialog` / `StreamPollOptionVotesDialog` / `StreamPollCommentsDialog`                                     | **Renamed** to `...Sheet` and now presented as modal bottom sheets                                           |
+| `StreamPollOptionsDialogThemeData` / `StreamPollResultsDialogThemeData` / `StreamPollOptionVotesDialogThemeData` / `StreamPollCommentsDialogThemeData` | **Renamed** to `...SheetThemeData` and fully redesigned                                                      |
+| `StreamPollCreatorDialog` / `StreamPollCreatorFullScreenDialog`                                                                                        | **Replaced** by `StreamPollCreatorSheet` — see [Poll Creator Dialog → Sheet](#poll-creator-dialog--sheet)    |
+| `StreamVoiceRecordingAttachmentThemeData`                                                                                                              | Fully redesigned — old properties removed, new design-token-based theme                                      |
 
 ---
 
@@ -279,12 +280,76 @@ StreamVoiceRecordingAttachmentPlaylist(
 
 ## Attachment Builders
 
-| Old Builder | New Builder |
-|------------|------------|
-| `UrlAttachmentBuilder` | `LinkPreviewAttachmentBuilder` |
-| All others | Same name, updated constructor signatures |
+| Old Builder            | New Builder                               |
+| ---------------------- | ----------------------------------------- |
+| `UrlAttachmentBuilder` | `LinkPreviewAttachmentBuilder`            |
+| All others             | Same name, updated constructor signatures |
 
 All builders have had their `shape` and `padding` parameters removed. If you subclass any attachment builder, update to use the new Props-based attachment constructors.
+
+---
+
+## Removed Attachment Widgets
+
+The following attachment-related widgets have been removed. Replace any direct references with the listed alternatives.
+
+| Removed Widget                                      | Replacement                                                                                                                                                                                            |
+| --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `StreamFileAttachmentThumbnail`                     | Use `StreamImageAttachmentThumbnail` for images, `StreamVideoAttachmentThumbnail` for videos, or `StreamFileTypeIcon.fromMimeType(...)` for generic file icons                                         |
+| `StreamAttachmentUploadStateBuilder.successBuilder` | Removed — was unreachable in practice (the success state immediately transitions to the rendered attachment)                                                                                           |
+| `AttachmentModalSheet`                              | Use the redesigned inline attachment picker — see [v10-migration.md](../v10-migration.md#attachment-picker) for the new sealed-class option types and the inline `StreamTabbedAttachmentPicker` / `StreamSystemAttachmentPicker` widgets |
+
+**`StreamFileAttachmentThumbnail` migration:**
+
+**Before:**
+
+```dart
+StreamFileAttachmentThumbnail(
+  file: attachment.file,
+  fit: BoxFit.cover,
+)
+```
+
+**After:**
+
+```dart
+// Pick the right thumbnail based on the attachment type
+if (attachment.type == AttachmentType.image) {
+  StreamImageAttachmentThumbnail(image: attachment, fit: BoxFit.cover);
+} else if (attachment.type == AttachmentType.video) {
+  StreamVideoAttachmentThumbnail(video: attachment, fit: BoxFit.cover);
+} else {
+  StreamFileTypeIcon.fromMimeType(attachment.mimeType);
+}
+```
+
+**`StreamAttachmentUploadStateBuilder.successBuilder` migration:**
+
+**Before:**
+
+```dart
+StreamAttachmentUploadStateBuilder(
+  message: message,
+  attachment: attachment,
+  failedBuilder: (context, errorMessage) => MyFailedWidget(),
+  preparingBuilder: (context) => MyPreparingWidget(),
+  inProgressBuilder: (context, sent, total) => MyProgressWidget(),
+  successBuilder: (context) => MySuccessWidget(), // removed
+)
+```
+
+**After:**
+
+```dart
+StreamAttachmentUploadStateBuilder(
+  message: message,
+  attachment: attachment,
+  failedBuilder: (context, errorMessage) => MyFailedWidget(),
+  preparingBuilder: (context) => MyPreparingWidget(),
+  inProgressBuilder: (context, sent, total) => MyProgressWidget(),
+  // successBuilder removed — the attachment renders directly once uploaded
+)
+```
 
 ---
 
@@ -341,24 +406,24 @@ Each sheet is now full-size with a small fixed peek from the screen top, and the
 
 **Renamed symbols:**
 
-| Old | New |
-|-----|-----|
-| `StreamPollOptionsDialog` | `StreamPollOptionsSheet` |
-| `StreamPollResultsDialog` | `StreamPollResultsSheet` |
-| `StreamPollOptionVotesDialog` | `StreamPollOptionVotesSheet` |
-| `StreamPollCommentsDialog` | `StreamPollCommentsSheet` |
-| `showStreamPollOptionsDialog` | `showStreamPollOptionsSheet` |
-| `showStreamPollResultsDialog` | `showStreamPollResultsSheet` |
-| `showStreamPollOptionVotesDialog` | `showStreamPollOptionVotesSheet` |
-| `showStreamPollCommentsDialog` | `showStreamPollCommentsSheet` |
-| `StreamPollOptionsDialogTheme` / `StreamPollOptionsDialogThemeData` | `StreamPollOptionsSheetTheme` / `StreamPollOptionsSheetThemeData` |
-| `StreamPollResultsDialogTheme` / `StreamPollResultsDialogThemeData` | `StreamPollResultsSheetTheme` / `StreamPollResultsSheetThemeData` |
+| Old                                                                         | New                                                                       |
+| --------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| `StreamPollOptionsDialog`                                                   | `StreamPollOptionsSheet`                                                  |
+| `StreamPollResultsDialog`                                                   | `StreamPollResultsSheet`                                                  |
+| `StreamPollOptionVotesDialog`                                               | `StreamPollOptionVotesSheet`                                              |
+| `StreamPollCommentsDialog`                                                  | `StreamPollCommentsSheet`                                                 |
+| `showStreamPollOptionsDialog`                                               | `showStreamPollOptionsSheet`                                              |
+| `showStreamPollResultsDialog`                                               | `showStreamPollResultsSheet`                                              |
+| `showStreamPollOptionVotesDialog`                                           | `showStreamPollOptionVotesSheet`                                          |
+| `showStreamPollCommentsDialog`                                              | `showStreamPollCommentsSheet`                                             |
+| `StreamPollOptionsDialogTheme` / `StreamPollOptionsDialogThemeData`         | `StreamPollOptionsSheetTheme` / `StreamPollOptionsSheetThemeData`         |
+| `StreamPollResultsDialogTheme` / `StreamPollResultsDialogThemeData`         | `StreamPollResultsSheetTheme` / `StreamPollResultsSheetThemeData`         |
 | `StreamPollOptionVotesDialogTheme` / `StreamPollOptionVotesDialogThemeData` | `StreamPollOptionVotesSheetTheme` / `StreamPollOptionVotesSheetThemeData` |
-| `StreamPollCommentsDialogTheme` / `StreamPollCommentsDialogThemeData` | `StreamPollCommentsSheetTheme` / `StreamPollCommentsSheetThemeData` |
-| `StreamChatThemeData.pollOptionsDialogTheme` | `StreamChatThemeData.pollOptionsSheetTheme` |
-| `StreamChatThemeData.pollResultsDialogTheme` | `StreamChatThemeData.pollResultsSheetTheme` |
-| `StreamChatThemeData.pollOptionVotesDialogTheme` | `StreamChatThemeData.pollOptionVotesSheetTheme` |
-| `StreamChatThemeData.pollCommentsDialogTheme` | `StreamChatThemeData.pollCommentsSheetTheme` |
+| `StreamPollCommentsDialogTheme` / `StreamPollCommentsDialogThemeData`       | `StreamPollCommentsSheetTheme` / `StreamPollCommentsSheetThemeData`       |
+| `StreamChatThemeData.pollOptionsDialogTheme`                                | `StreamChatThemeData.pollOptionsSheetTheme`                               |
+| `StreamChatThemeData.pollResultsDialogTheme`                                | `StreamChatThemeData.pollResultsSheetTheme`                               |
+| `StreamChatThemeData.pollOptionVotesDialogTheme`                            | `StreamChatThemeData.pollOptionVotesSheetTheme`                           |
+| `StreamChatThemeData.pollCommentsDialogTheme`                               | `StreamChatThemeData.pollCommentsSheetTheme`                              |
 
 Each `...Sheet` widget also exposes a new optional `scrollController` parameter which `show*Sheet` wires to the enclosing `DraggableScrollableSheet`.
 
@@ -368,35 +433,35 @@ All four theme data classes dropped their app-bar styling slots (`appBarElevatio
 
 **`StreamPollOptionsSheetThemeData`**
 
-| Removed | Replacement |
-|---------|-------------|
-| `pollTitleTextStyle`, `pollTitleDecoration` | `questionStyle` (`StreamPollQuestionStyle`) |
-| `pollOptionsListViewDecoration` | `optionsCardStyle` (`StreamPollCardStyle`) |
-| — | New: `contentPadding`, `sectionSpacing`, `optionsItemSpacing`, `optionStyle` (`StreamPollOptionStyle`), `sheetHeaderStyle` |
+| Removed                                     | Replacement                                                                                                                |
+| ------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `pollTitleTextStyle`, `pollTitleDecoration` | `questionStyle` (`StreamPollQuestionStyle`)                                                                                |
+| `pollOptionsListViewDecoration`             | `optionsCardStyle` (`StreamPollCardStyle`)                                                                                 |
+| —                                           | New: `contentPadding`, `sectionSpacing`, `optionsItemSpacing`, `optionStyle` (`StreamPollOptionStyle`), `sheetHeaderStyle` |
 
 **`StreamPollResultsSheetThemeData`**
 
-| Removed | Replacement |
-|---------|-------------|
-| `pollTitleTextStyle`, `pollTitleDecoration` | `questionStyle` (`StreamPollQuestionStyle`) |
-| `pollOptionsDecoration`, `pollOptionsWinnerDecoration`, `pollOptionsTextStyle`, `pollOptionsWinnerTextStyle`, `pollOptionsVoteCountTextStyle`, `pollOptionsWinnerVoteCountTextStyle`, `pollOptionsShowAllVotesButtonStyle` | `optionStyle` (`StreamPollOptionVotesStyle`) — bundles card chrome, text styles, winner trophy color/size, `footerDividerColor`, and `footerButtonStyle` for the "View all" action |
-| — | New: `contentPadding`, `sectionSpacing`, `optionsItemSpacing`, `totalVoteCountTextStyle` (for the new total-vote-count footer), `sheetHeaderStyle` |
+| Removed                                                                                                                                                                                                                    | Replacement                                                                                                                                                                        |
+| -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pollTitleTextStyle`, `pollTitleDecoration`                                                                                                                                                                                | `questionStyle` (`StreamPollQuestionStyle`)                                                                                                                                        |
+| `pollOptionsDecoration`, `pollOptionsWinnerDecoration`, `pollOptionsTextStyle`, `pollOptionsWinnerTextStyle`, `pollOptionsVoteCountTextStyle`, `pollOptionsWinnerVoteCountTextStyle`, `pollOptionsShowAllVotesButtonStyle` | `optionStyle` (`StreamPollOptionVotesStyle`) — bundles card chrome, text styles, `winnerIconColor`/`winnerIconSize`, `footerDividerColor`, and `footerButtonStyle` for the "View all" action |
+| —                                                                                                                                                                                                                          | New: `contentPadding`, `sectionSpacing`, `optionsItemSpacing`, `totalVoteCountTextStyle` (for the new total-vote-count footer), `sheetHeaderStyle`                                 |
 
 **`StreamPollOptionVotesSheetThemeData`**
 
-| Removed | Replacement |
-|---------|-------------|
+| Removed                                                                                                                                     | Replacement                                                                |
+| ------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
 | `pollOptionVoteCountTextStyle`, `pollOptionWinnerVoteCountTextStyle`, `pollOptionVoteItemBackgroundColor`, `pollOptionVoteItemBorderRadius` | `optionStyle` (reuses `StreamPollOptionVotesStyle` from the results sheet) |
-| — | New: `contentPadding`, `sheetHeaderStyle` |
+| —                                                                                                                                           | New: `contentPadding`, `sheetHeaderStyle`                                  |
 
 Per-vote tile styling will ship later under a dedicated `StreamPollVoteListTile` theme.
 
 **`StreamPollCommentsSheetThemeData`**
 
-| Removed | Replacement |
-|---------|-------------|
+| Removed                                                                                                         | Replacement                                                                                                                            |
+| --------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
 | `pollCommentItemBackgroundColor`, `pollCommentItemBorderRadius`, `updateYourCommentButtonStyle` (`ButtonStyle`) | `commentStyle` (reuses `StreamPollOptionVotesStyle`) — only its `cardStyle`, `footerDividerColor` and `footerButtonStyle` are consumed |
-| — | New: `contentPadding`, `itemSpacing`, `sheetHeaderStyle` |
+| —                                                                                                               | New: `contentPadding`, `itemSpacing`, `sheetHeaderStyle`                                                                               |
 
 ### Migration:
 
@@ -450,11 +515,11 @@ The poll creator UI has been unified into a single bottom-sheet surface. The pre
 
 **Renamed / removed symbols:**
 
-| Old | New |
-|-----|-----|
-| `showStreamPollCreatorDialog` | `showStreamPollCreatorSheet` |
-| `StreamPollCreatorDialog` | `StreamPollCreatorSheet` |
-| `StreamPollCreatorFullScreenDialog` | `StreamPollCreatorSheet` |
+| Old                                 | New                          |
+| ----------------------------------- | ---------------------------- |
+| `showStreamPollCreatorDialog`       | `showStreamPollCreatorSheet` |
+| `StreamPollCreatorDialog`           | `StreamPollCreatorSheet`     |
+| `StreamPollCreatorFullScreenDialog` | `StreamPollCreatorSheet`     |
 
 `showStreamPollCreatorSheet` keeps the `poll`, `config`, and `padding` parameters from the old dialog helper; the dialog-specific parameters (`barrierDismissible`, `barrierColor`, `barrierLabel`, `useSafeArea`, `useRootNavigator`, `routeSettings`, `anchorPoint`, `traversalEdgeBehavior`) are no longer accepted — the sheet always presents as a modal bottom sheet over a safe area.
 
@@ -577,3 +642,6 @@ StreamVoiceRecordingAttachmentThemeData(
 - [ ] Update `StreamVoiceRecordingAttachmentThemeData` — see property mapping above
 - [ ] If using custom attachment builders, update to new Props-based constructors
 - [ ] If using component factory, register custom builders via `streamChatComponentBuilders`
+- [ ] Replace `StreamFileAttachmentThumbnail` with `StreamImageAttachmentThumbnail` / `StreamVideoAttachmentThumbnail` or `StreamFileTypeIcon.fromMimeType(...)`
+- [ ] Remove the `successBuilder` argument from `StreamAttachmentUploadStateBuilder` usages
+- [ ] Replace any `AttachmentModalSheet` usage with the redesigned attachment picker (see [v10-migration.md](../v10-migration.md#attachment-picker))

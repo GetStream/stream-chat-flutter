@@ -13,6 +13,8 @@ export 'package:stream_core_flutter/stream_core_flutter.dart'
         StreamAvatarGroupSize,
         StreamAvatarSize,
         StreamAvatarStackSize,
+        StreamAvatarTheme,
+        StreamAvatarThemeData,
         StreamBottomAppBar,
         StreamBottomAppBarStyle,
         StreamBottomAppBarTheme,
@@ -181,7 +183,6 @@ export 'src/media_gallery_preview/video_player/stream_video_player.dart';
 export 'src/message_action/message_action.dart';
 export 'src/message_action/message_actions_builder.dart';
 export 'src/message_input/attachment_picker/stream_attachment_picker.dart';
-export 'src/message_input/attachment_picker/stream_attachment_picker_bottom_sheet.dart';
 export 'src/message_input/attachment_picker/stream_attachment_picker_controller.dart';
 export 'src/message_input/attachment_picker/stream_attachment_picker_option.dart';
 export 'src/message_input/attachment_picker/stream_attachment_picker_result.dart';
@@ -194,7 +195,6 @@ export 'src/message_input/message_input_placeholder.dart';
 export 'src/message_input/stream_message_composer.dart';
 export 'src/message_input/stream_message_composer_attachment_list.dart';
 export 'src/message_input/stream_message_text_field.dart';
-export 'src/message_list_view/message_details.dart';
 export 'src/message_list_view/message_list_view.dart';
 export 'src/message_list_view/stream_message_list_view_builders.dart';
 export 'src/message_list_view/stream_message_list_view_configuration.dart';

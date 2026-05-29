@@ -11,22 +11,23 @@ This guide covers the migration for the redesigned channel list item components 
 - [Customizing Slots](#customizing-slots)
 - [Low-level Presentational Component](#low-level-presentational-component)
 - [Theme Migration](#theme-migration)
+- [Removed Widgets](#removed-widgets)
 - [Migration Checklist](#migration-checklist)
 
 ---
 
 ## Quick Reference
 
-| Old | New |
-|-----|-----|
-| `StreamChannelListTile` | `StreamChannelListItem` |
-| Constructor props: `leading`, `title`, `subtitle`, `trailing` | `StreamChannelListItemProps` (via `StreamComponentFactory`) |
-| `tileColor`, `visualDensity`, `contentPadding` | Removed — use `StreamChannelListItemThemeData` |
-| `selectedTileColor` | Removed — use `StreamChannelListItemThemeData.backgroundColor` |
-| `unreadIndicatorBuilder` | Removed |
-| `StreamChannelPreviewThemeData` | `StreamChannelListItemThemeData` |
-| `StreamChannelPreviewTheme.of(context)` | `StreamChannelListItemTheme.of(context)` |
-| `StreamChatThemeData.channelPreviewTheme` | `StreamChatThemeData.channelListItemTheme` |
+| Old                                                           | New                                                            |
+| ------------------------------------------------------------- | -------------------------------------------------------------- |
+| `StreamChannelListTile`                                       | `StreamChannelListItem`                                        |
+| Constructor props: `leading`, `title`, `subtitle`, `trailing` | `StreamChannelListItemProps` (via `StreamComponentFactory`)    |
+| `tileColor`, `visualDensity`, `contentPadding`                | Removed — use `StreamChannelListItemThemeData`                 |
+| `selectedTileColor`                                           | Removed — use `StreamChannelListItemThemeData.backgroundColor` |
+| `unreadIndicatorBuilder`                                      | Removed                                                        |
+| `StreamChannelPreviewThemeData`                               | `StreamChannelListItemThemeData`                               |
+| `StreamChannelPreviewTheme.of(context)`                       | `StreamChannelListItemTheme.of(context)`                       |
+| `StreamChatThemeData.channelPreviewTheme`                     | `StreamChatThemeData.channelListItemTheme`                     |
 
 ---
 
@@ -42,7 +43,7 @@ The old `StreamChannelListTile` accepted all slot widgets directly in its constr
 - `contentPadding` removed
 - `selectedTileColor` removed
 - `unreadIndicatorBuilder` removed
-- `sendingIndicatorBuilder` removed from constructor — pass via `StreamChannelListItemProps`
+- `sendingIndicatorBuilder` removed from constructor — override via `StreamComponentFactory` (see [Customizing Slots](#customizing-slots))
 
 ### Migration
 
@@ -128,27 +129,27 @@ StreamChannelListTile(
 
 ## Theme Migration
 
-`StreamChannelPreviewThemeData` has been replaced by `StreamChannelListItemThemeData`. Additionally, the `StreamChannelPreviewTheme` inherited widget itself is deprecated — replace it with `StreamChannelListItemTheme`.
+`StreamChannelPreviewThemeData` has been replaced by `StreamChannelListItemThemeData`. Additionally, the `StreamChannelPreviewTheme` inherited widget itself has been removed — replace it with `StreamChannelListItemTheme`.
 
 ### Property Mapping
 
-| Old (`StreamChannelPreviewThemeData`) | New (`StreamChannelListItemThemeData`) |
-|---------------------------------------|----------------------------------------|
-| `titleStyle` | `titleStyle` |
-| `subtitleStyle` | `subtitleStyle` |
-| `lastMessageAtStyle` | `timestampStyle` |
-| `avatarTheme` | Removed — use `StreamAvatarThemeData` directly |
-| `unreadCounterColor` | Removed — use `StreamBadgeNotificationThemeData` |
-| `indicatorIconSize` | Removed |
-| `lastMessageAtFormatter` | Removed from theme — pass to `ChannelLastMessageDate(formatter: ...)` |
+| Old (`StreamChannelPreviewThemeData`) | New (`StreamChannelListItemThemeData`)                                |
+| ------------------------------------- | --------------------------------------------------------------------- |
+| `titleStyle`                          | `titleStyle`                                                          |
+| `subtitleStyle`                       | `subtitleStyle`                                                       |
+| `lastMessageAtStyle`                  | `timestampStyle`                                                      |
+| `avatarTheme`                         | Removed — use `StreamAvatarThemeData` directly                        |
+| `unreadCounterColor`                  | Removed — use `StreamBadgeNotificationThemeData`                      |
+| `indicatorIconSize`                   | Removed                                                               |
+| `lastMessageAtFormatter`              | Removed from theme — pass to `ChannelLastMessageDate(formatter: ...)` |
 
 ### New Properties
 
-| Property | Type | Description |
-|----------|------|-------------|
-| `backgroundColor` | `WidgetStateProperty<Color?>?` | Background color resolved per state (default, hover, pressed, selected) |
-| `borderColor` | `Color?` | Bottom border color |
-| `muteIconPosition` | `MuteIconPosition?` | Whether the mute icon appears in `title` or `subtitle` row |
+| Property            | Type                           | Description                                                                                                     |
+| ------------------- | ------------------------------ | --------------------------------------------------------------------------------------------------------------- |
+| `backgroundColor`   | `WidgetStateProperty<Color?>?` | Background color resolved per state (default, hover, pressed, selected)                                         |
+| `borderColor`       | `Color?`                       | Bottom border color                                                                                             |
+| `attributePosition` | `AttributePosition?`           | Where the mute and pin icons appear: `inlineTitle` (in the title row) or `trailingBottom` (in the subtitle row) |
 
 ### Global Theme Migration
 
@@ -256,15 +257,53 @@ ChannelLastMessageDate(
 
 ---
 
+## Removed Widgets
+
+The following channel-list-related widgets have been removed. Replace any direct references with the listed alternatives.
+
+| Removed Widget                 | Replacement                                                                                                              |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------ |
+| `StreamChannelGridView`        | Removed — build your own grid using `StreamChannelListController` and `GridView` (the list controller already paginates) |
+| `StreamChannelGridTile`        | Removed — render a custom tile widget inside your `GridView`                                                             |
+| `StreamChannelInfoBottomSheet` | Removed — the sample app ships a reference implementation; copy or build your own channel info / details sheet           |
+
+**`StreamChannelGridView` migration sketch:**
+
+**Before:**
+
+```dart
+StreamChannelGridView(
+  controller: channelListController,
+  itemBuilder: (context, channels, index, defaultTile) => defaultTile,
+)
+```
+
+**After:**
+
+```dart
+PagedValueGridView<int, Channel>(
+  controller: channelListController,
+  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
+  itemBuilder: (context, channels, index) {
+    final channel = channels[index];
+    return MyChannelGridTile(channel: channel);
+  },
+)
+```
+
+---
+
 ## Migration Checklist
 
 - [ ] Replace `StreamChannelListTile` with `StreamChannelListItem`
 - [ ] Remove `tileColor`, `visualDensity`, `contentPadding`, `selectedTileColor`, `unreadIndicatorBuilder` parameters
 - [ ] Move slot customization (`leading`, `title`, `subtitle`, `trailing`) to `StreamComponentFactory`
-- [ ] Replace `StreamChannelPreviewTheme` inherited widget with `StreamChannelListItemTheme` — `StreamChannelPreviewTheme` is `@Deprecated` and will be removed in a future release
+- [ ] Replace `StreamChannelPreviewTheme` inherited widget with `StreamChannelListItemTheme` — `StreamChannelPreviewTheme` has been removed
 - [ ] Replace `StreamChatThemeData.channelPreviewTheme` with `StreamChatThemeData.channelListItemTheme`
 - [ ] Rename `lastMessageAtStyle` to `timestampStyle`
 - [ ] Move `lastMessageAtFormatter` from theme to `ChannelLastMessageDate(formatter: ...)`
 - [ ] Replace `tileColor`/`selectedTileColor` with `StreamChannelListItemThemeData.backgroundColor` using `WidgetStateProperty`
 - [ ] Replace `unreadCounterColor` with `StreamBadgeNotificationThemeData`
 - [ ] Replace `avatarTheme` in `StreamChannelPreviewThemeData` with `StreamAvatarThemeData` on the avatar widget directly
+- [ ] Remove any `StreamChannelGridView` / `StreamChannelGridTile` usage — build your own grid using `StreamChannelListController` with a `PagedValueGridView`
+- [ ] Remove any `StreamChannelInfoBottomSheet` usage — copy the sample app's channel info sheet or build your own

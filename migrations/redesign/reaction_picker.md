@@ -11,7 +11,7 @@ This guide covers the migration for the redesigned reaction picker and reaction 
 - [Removed Icon-List APIs](#removed-icon-list-apis)
 - [ReactionIconResolver and DefaultReactionIconResolver](#reactioniconresolver-and-defaultreactioniconresolver)
 - [StreamMessageReactionPicker](#streammessagereactionpicker-formerly-streamreactionpicker)
-- [StreamReactionIndicator](#streamreactionindicator)
+- [StreamMessageReactions](#streammessagereactions)
 - [New Components](#new-components)
 - [Migration Checklist](#migration-checklist)
 
@@ -19,18 +19,18 @@ This guide covers the migration for the redesigned reaction picker and reaction 
 
 ## Quick Reference
 
-| Symbol | Change |
-|--------|--------|
-| `StreamChatConfigurationData.reactionIcons` | **Removed** — replaced by `reactionIconResolver` |
-| `StreamChatConfigurationData.reactionIconResolver` | **New** — optional (default: `DefaultReactionIconResolver()`). Replaces `reactionIcons` |
-| `ReactionIconResolver` | **New** — abstract contract for mapping reaction type → `StreamEmojiContent` |
-| `DefaultReactionIconResolver` | **New** — ready-to-use default; extend to customize `defaultReactions`, `emojiCode`, or `resolve` |
-| `ReactionPickerIconList` / `ReactionIndicatorIconList` | **Removed** — list rendering now lives inside picker/indicator widgets |
-| `ReactionPickerIcon` / `ReactionIndicatorIcon` | **Removed** — use resolver-based reaction mapping instead |
-| `StreamReactionPicker` | **Renamed** to `StreamMessageReactionPicker` — reaction set from `config.reactionIconResolver.defaultReactions` only |
-| `StreamReactionPickerTheme` / `StreamReactionPickerThemeData` | **New** (from `stream_core_flutter`) — theme-based visual customisation for the picker |
-| `StreamReactionIndicator` | **Changed** — uses `config.reactionIconResolver.resolve(type)` only |
-| `ReactionDetailSheet` | **New** — `ReactionDetailSheet.show()` for reaction details bottom sheet |
+| Symbol                                                        | Change                                                                                                               |
+| ------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `StreamChatConfigurationData.reactionIcons`                   | **Removed** — replaced by `reactionIconResolver`                                                                     |
+| `StreamChatConfigurationData.reactionIconResolver`            | **New** — optional (default: `DefaultReactionIconResolver()`). Replaces `reactionIcons`                              |
+| `ReactionIconResolver`                                        | **New** — abstract contract for mapping reaction type → `StreamEmojiContent`                                         |
+| `DefaultReactionIconResolver`                                 | **New** — ready-to-use default; extend to customize `defaultReactions`, `emojiCode`, or `resolve`                    |
+| `ReactionPickerIconList` / `ReactionIndicatorIconList`        | **Removed** — list rendering now lives inside picker/indicator widgets                                               |
+| `ReactionPickerIcon` / `ReactionIndicatorIcon`                | **Removed** — use resolver-based reaction mapping instead                                                            |
+| `StreamReactionPicker`                                        | **Renamed** to `StreamMessageReactionPicker` — reaction set from `config.reactionIconResolver.defaultReactions` only |
+| `StreamReactionPickerTheme` / `StreamReactionPickerThemeData` | **New** (from `stream_core_flutter`) — theme-based visual customization for the picker                               |
+| `StreamMessageReactions`                                      | **New** — renders emoji chips for a message's reaction groups; replaces ad-hoc indicator usage                        |
+| `ReactionDetailSheet`                                         | **New** — `ReactionDetailSheet.show()` for reaction details bottom sheet                                             |
 
 > **Note:** If you were using default reactions only, behavior stays the same (`like`, `haha`, `love`, `wow`, `sad`). Migration is required only for custom reaction icon/type setups.
 
@@ -264,47 +264,56 @@ StreamReactionPickerTheme(
 
 ---
 
-## StreamReactionIndicator
+## StreamMessageReactions
 
-### Breaking Changes:
+`StreamMessageReactions` is the widget that renders a message's reaction groups as emoji chips overlaid on, or placed beneath, a message bubble. It replaces any prior ad-hoc indicator usage. Reaction icons are resolved through `StreamChatConfigurationData.reactionIconResolver`.
 
-- Indicator icons are resolved only through `config.reactionIconResolver.resolve(type)`
-- Old icon-list based customization paths were removed
+### Constructor
 
-### Migration
-
-**Before:**
 ```dart
-StreamChat(
-  client: client,
-  streamChatConfigData: StreamChatConfigurationData(
-    reactionIcons: [ /* old icon list */ ],
-  ),
-  child: MyApp(),
+StreamMessageReactions({
+  Key? key,
+  required Message message,
+  StreamReactionsType? type,        // defaults to StreamReactionsType.segmented
+  StreamReactionsPosition? position, // defaults to StreamReactionsPosition.header on mobile,
+                                     //             StreamReactionsPosition.footer on desktop/web
+  bool? overlap,                     // defaults to true on mobile, false on desktop/web
+  Comparator<ReactionGroup>? sorting, // defaults to ReactionSorting.byFirstReactionAt
+  VoidCallback? onPressed,
+  Widget? child,                     // typically the message bubble
+})
+```
+
+### Usage
+
+`StreamMessageReactions` is used internally by `StreamMessageContent` and `StreamMessageScaffold`. If you need to render reactions outside the standard message widget, use it directly:
+
+```dart
+StreamMessageReactions(
+  message: message,
+  onPressed: () { /* show reaction detail sheet */ },
+  child: myMessageBubble,
 )
 ```
 
-**After:**
+### Customization
+
+Reaction icons are resolved globally — configure them on `StreamChatConfigurationData.reactionIconResolver` (see [ReactionIconResolver and DefaultReactionIconResolver](#reactioniconresolver-and-defaultreactioniconresolver)).
+
+Visual layout properties (`type`, `position`, `overlap`) can be set per widget or as defaults via `StreamChatConfigurationData`:
+
 ```dart
 StreamChat(
   client: client,
   streamChatConfigData: StreamChatConfigurationData(
     reactionIconResolver: const MyReactionIconResolver(),
+    reactionType: StreamReactionsType.segmented,
+    reactionPosition: StreamReactionsPosition.header,
+    reactionOverlap: true,
   ),
   child: MyApp(),
 )
 ```
-
-Then keep indicator usage unchanged:
-
-```dart
-StreamReactionIndicator(
-  message: message,
-  onTap: onTap,
-)
-```
-
-Customize via `reactionIconResolver` in config.
 
 ---
 

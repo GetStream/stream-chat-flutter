@@ -21,29 +21,29 @@ This guide covers the migration for the redesigned message action components in 
 
 ## Quick Reference
 
-| Symbol | Change |
-|--------|--------|
-| `StreamMessageAction` | **Removed** — replaced by `StreamContextMenuAction<T>` |
-| `StreamMessageActionItem` | **Removed** — rendering built into `StreamContextMenuAction` |
-| `StreamMessageActionsModal.onActionTap` | **Removed** — use `onTap` per-action or await the dialog return value |
-| `StreamMessageActionsModal.messageActions` | **Type changed**: `List<StreamMessageAction>` → `List<Widget>` |
-| `StreamMessageActionsModal.reverse` | **Removed** — use `alignment: AlignmentGeometry?` |
-| `StreamMessageActionsModal.reactionPickerBuilder` | **Removed** — use `showReactionPicker: bool` |
-| `StreamMessageReactionsModal` | **Deleted** — use `ReactionDetailSheet` (see [reaction_list.md](reaction_list.md)) |
-| `StreamMessageReactionsModal.onReactionPicked` | **Removed** — await the dialog return value (`SelectReaction`) |
-| `ModeratedMessageActionsModal.onActionTap` | **Removed** — use `onTap` per-action or await the dialog return value |
-| `ModeratedMessageActionsModal.messageActions` | **Type changed**: `List<StreamMessageAction>` → `List<StreamContextMenuAction>` |
-| `StreamMessageItem.customActions` | **Removed** — replaced by `actionsBuilder` (`MessageActionsBuilder?`) |
-| `StreamMessageItem.onCustomActionTap` | **Removed** — use `onTap` directly on each `StreamContextMenuAction` in `actionsBuilder` |
-| `CustomMessageAction` | **Removed** — no longer needed; custom actions use `onTap` directly |
-| `OnMessageActionTap` | **Removed** — no longer needed |
-| `StreamMessageItem.actionsBuilder` | **New** — `MessageActionsBuilder?` for the normal long-press menu |
-| `StreamMessageActionsBuilder.buildActions` | **Changed**: return type `List<StreamContextMenuAction>`, `customActions` param **removed** |
-| `StreamMessageActionsBuilder.buildBouncedErrorActions` | **Return type changed**: `List<StreamMessageAction>` → `List<StreamContextMenuAction>` |
-| `MessageActionsBuilder<T>` | **New typedef** — `List<Widget> Function(BuildContext, List<StreamContextMenuAction<T>>)` |
-| `StreamContextMenu` | **New** — exported from `stream_core_flutter` |
-| `StreamContextMenuAction` | **New** — exported from `stream_core_flutter` |
-| `StreamContextMenuSeparator` | **New** — exported from `stream_core_flutter` |
+| Symbol                                                 | Change                                                                                      |
+| ------------------------------------------------------ | ------------------------------------------------------------------------------------------- |
+| `StreamMessageAction`                                  | **Removed** — replaced by `StreamContextMenuAction<T>`                                      |
+| `StreamMessageActionItem`                              | **Removed** — rendering built into `StreamContextMenuAction`                                |
+| `StreamMessageActionsModal.onActionTap`                | **Removed** — use `onTap` per-action or await the dialog return value                       |
+| `StreamMessageActionsModal.messageActions`             | **Type changed**: `List<StreamMessageAction>` → `List<Widget>`                              |
+| `StreamMessageActionsModal.reverse`                    | **Removed** — use `alignment: AlignmentGeometry?`                                           |
+| `StreamMessageActionsModal.reactionPickerBuilder`      | **Removed** — use `showReactionPicker: bool`                                                |
+| `StreamMessageReactionsModal`                          | **Deleted** — use `ReactionDetailSheet` (see [reaction_list.md](reaction_list.md))          |
+| `StreamMessageReactionsModal.onReactionPicked`         | **Removed** — await the dialog return value (`SelectReaction`)                              |
+| `ModeratedMessageActionsModal.onActionTap`             | **Removed** — await the dialog return value (`MessageAction?`)                              |
+| `ModeratedMessageActionsModal.messageActions`          | **Type changed**: `List<StreamMessageAction>` → `List<StreamContextMenuAction>`             |
+| `StreamMessageItem.customActions`                      | **Removed** — replaced by `actionsBuilder` (`MessageActionsBuilder?`)                       |
+| `StreamMessageItem.onCustomActionTap`                  | **Removed** — use `onTap` directly on each `StreamContextMenuAction` in `actionsBuilder`    |
+| `CustomMessageAction`                                  | **Removed** — no longer needed; custom actions use `onTap` directly                         |
+| `OnMessageActionTap`                                   | **Removed** — no longer needed                                                              |
+| `StreamMessageItem.actionsBuilder`                     | **New** — `MessageActionsBuilder?` for the normal long-press menu                           |
+| `StreamMessageActionsBuilder.buildActions`             | **Changed**: return type `List<StreamContextMenuAction>`, `customActions` param **removed** |
+| `StreamMessageActionsBuilder.buildBouncedErrorActions` | **Return type changed**: `List<StreamMessageAction>` → `List<StreamContextMenuAction>`      |
+| `MessageActionsBuilder<T>`                             | **New typedef** — `List<Widget> Function(BuildContext, List<StreamContextMenuAction<T>>)`   |
+| `StreamContextMenu`                                    | **New** — exported from `stream_core_flutter`                                               |
+| `StreamContextMenuAction`                              | **New** — exported from `stream_core_flutter`                                               |
+| `StreamContextMenuSeparator`                           | **New** — exported from `stream_core_flutter`                                               |
 
 > **Note:** `MessageAction` and all its built-in subclasses (`SelectReaction`, `CopyMessage`, `DeleteMessage`, etc.) are **unchanged**. `CustomMessageAction` (the escape-hatch subclass) has been **removed** — it was only needed for the old `onCustomActionTap` dispatch pattern.
 
@@ -81,7 +81,7 @@ StreamMessageAction(
 ```dart
 StreamContextMenuAction<MessageAction>(
   value: QuotedReply(message: message),
-  leading: Icon(context.streamIcons.arrowShareLeft),
+  leading: Icon(context.streamIcons.reply),
   label: Text(context.translations.replyLabel),
 )
 // The caller receives QuotedReply via the Future returned by showStreamDialog.
@@ -91,7 +91,7 @@ StreamContextMenuAction<MessageAction>(
 ```dart
 StreamContextMenuAction<MessageAction>(
   value: QuotedReply(message: message),
-  leading: Icon(context.streamIcons.arrowShareLeft),
+  leading: Icon(context.streamIcons.reply),
   label: Text(context.translations.replyLabel),
   onTap: () => onReply(message), // called after the route is dismissed
 )
@@ -99,19 +99,19 @@ StreamContextMenuAction<MessageAction>(
 
 ### Property mapping
 
-| `StreamMessageAction` | `StreamContextMenuAction` |
-|-----------------------|--------------------------|
-| `action: T` | `value: T?` |
-| `title: Widget?` | `label: Widget` (required) |
-| `leading: Widget?` | `leading: Widget?` |
-| `isDestructive: bool` | `isDestructive: bool` (or use `.destructive` constructor) |
-| `iconColor: Color?` | Controlled via `StreamContextMenuActionTheme` |
-| `titleTextColor: Color?` | Controlled via `StreamContextMenuActionTheme` |
-| `titleTextStyle: TextStyle?` | Controlled via `StreamContextMenuActionTheme` |
-| `backgroundColor: Color?` | Controlled via `StreamContextMenuActionTheme` |
-| — | `onTap: VoidCallback?` (new) |
-| — | `trailing: Widget?` (new) |
-| — | `enabled: bool` (new) |
+| `StreamMessageAction`        | `StreamContextMenuAction`                                 |
+| ---------------------------- | --------------------------------------------------------- |
+| `action: T`                  | `value: T?`                                               |
+| `title: Widget?`             | `label: Widget` (required)                                |
+| `leading: Widget?`           | `leading: Widget?`                                        |
+| `isDestructive: bool`        | `isDestructive: bool` (or use `.destructive` constructor) |
+| `iconColor: Color?`          | Controlled via `StreamContextMenuActionTheme`             |
+| `titleTextColor: Color?`     | Controlled via `StreamContextMenuActionTheme`             |
+| `titleTextStyle: TextStyle?` | Controlled via `StreamContextMenuActionTheme`             |
+| `backgroundColor: Color?`    | Controlled via `StreamContextMenuActionTheme`             |
+| —                            | `onTap: VoidCallback?` (new)                              |
+| —                            | `trailing: Widget?` (new)                                 |
+| —                            | `enabled: bool` (new)                                     |
 
 > **Important:**
 > - **`label` is now required** — `title: Widget?` was optional in `StreamMessageAction`; `label: Widget` is a required, non-nullable parameter in `StreamContextMenuAction`. Any call site that omitted `title` will fail to compile; you must supply a non-null `label` widget (typically a `Text`).
@@ -251,12 +251,9 @@ StreamMessageReactionsModal(
 
 **After:**
 ```dart
-final action = await showStreamDialog<MessageAction>(
+final action = await ReactionDetailSheet.show(
   context: context,
-  builder: (_) => StreamMessageReactionsModal(
-    message: message,
-    messageWidget: messageWidget,
-  ),
+  message: message,
 );
 
 if (action is SelectReaction) {
@@ -273,7 +270,7 @@ if (action is SelectReaction) {
 
 ### Breaking Changes
 
-- `onActionTap: OnMessageActionTap?` parameter **removed** — move handling to `onTap` on each action or await the dialog return value
+- `onActionTap: OnMessageActionTap?` parameter **removed** — move handling to awaiting the dialog return value
 - `messageActions` parameter type changed from `List<StreamMessageAction>` to `List<StreamContextMenuAction>`
 
 ### Migration
@@ -303,29 +300,10 @@ ModeratedMessageActionsModal(
 )
 ```
 
-**After (onTap per-action):**
-```dart
-ModeratedMessageActionsModal(
-  message: message,
-  messageActions: [
-    StreamContextMenuAction<MessageAction>(
-      value: ResendMessage(message: message),
-      label: Text(context.translations.sendAnywayLabel),
-      onTap: () => _resend(message),
-    ),
-    StreamContextMenuAction<MessageAction>(
-      value: EditMessage(message: message),
-      label: Text(context.translations.editMessageLabel),
-    ),
-    StreamContextMenuAction<MessageAction>.destructive(
-      value: HardDeleteMessage(message: message),
-      label: Text(context.translations.deleteMessageLabel),
-    ),
-  ],
-)
-```
-
 **After (await return value):**
+
+> **Important:** `ModeratedMessageActionsModal` renders actions as `AdaptiveDialogAction` buttons — it calls `Navigator.pop(context, action.props.value)` when an item is tapped and does **not** invoke `action.props.onTap`. Dispatch must be handled by awaiting the `Future` returned by `showStreamDialog`.
+
 ```dart
 final action = await showStreamDialog<MessageAction>(
   context: context,
@@ -435,11 +413,11 @@ StreamMessageItem(
 
 Both static methods now return `List<StreamContextMenuAction>` instead of `List<StreamMessageAction>`. Additionally, the `customActions` parameter of `buildActions` has been **removed** — appending custom actions is now handled by `StreamMessageItem.actionsBuilder`.
 
-| Method / Parameter | Old type | New type |
-|--------------------|----------|----------|
-| `buildActions` return | `List<StreamMessageAction>` | `List<StreamContextMenuAction>` |
-| `buildBouncedErrorActions` return | `List<StreamMessageAction>` | `List<StreamContextMenuAction>` |
-| `buildActions(customActions:)` | `Iterable<StreamMessageAction>?` | **Removed** |
+| Method / Parameter                | Old type                         | New type                        |
+| --------------------------------- | -------------------------------- | ------------------------------- |
+| `buildActions` return             | `List<StreamMessageAction>`      | `List<StreamContextMenuAction>` |
+| `buildBouncedErrorActions` return | `List<StreamMessageAction>`      | `List<StreamContextMenuAction>` |
+| `buildActions(customActions:)`    | `Iterable<StreamMessageAction>?` | **Removed**                     |
 
 ### Migration
 
@@ -477,7 +455,7 @@ A top-level function from `package:stream_chat_flutter/stream_chat_flutter.dart`
 
 - **Re-wraps `StreamChatTheme`** across the route boundary so the theme is available inside the dialog even when `useRootNavigator: true`
 - **Applies a blur + scale transition** for a consistent Stream look
-- **Returns `Future<T?>`** — the value passed to `Navigator.pop` inside the dialog, which is how `StreamMessageActionsModal`, `StreamMessageReactionsModal`, and `ModeratedMessageActionsModal` deliver the selected action back to the caller
+- **Returns `Future<T?>`** — the value passed to `Navigator.pop` inside the dialog, which is how `StreamMessageActionsModal` and `ModeratedMessageActionsModal` deliver the selected action back to the caller
 
 ```dart
 // Replace showDialog with showStreamDialog when presenting Stream modals:
@@ -515,7 +493,7 @@ StreamContextMenuAction<MessageAction>(
 // Destructive action
 StreamContextMenuAction<MessageAction>.destructive(
   value: DeleteMessage(message: message),
-  leading: Icon(context.streamIcons.trashBin),
+  leading: Icon(context.streamIcons.delete),
   label: Text('Delete'),
 )
 ```
@@ -569,7 +547,7 @@ StreamContextMenu(
 - [ ] Remove all `StreamMessageActionItem` usages
 - [ ] Remove `onActionTap` from `StreamMessageActionsModal`; handle via per-action `onTap` or await the dialog return value
 - [ ] Remove `onReactionPicked` from `StreamMessageReactionsModal`; await a `SelectReaction` return value
-- [ ] Remove `onActionTap` from `ModeratedMessageActionsModal`; handle via per-action `onTap` or await the dialog return value
+- [ ] Remove `onActionTap` from `ModeratedMessageActionsModal`; await the `MessageAction?` return value of `showStreamDialog` instead
 - [ ] Replace `StreamMessageItem.customActions` with `actionsBuilder`
 - [ ] Update `StreamMessageActionsBuilder.buildActions` call sites — return type is now `List<StreamContextMenuAction>` and `customActions` parameter no longer exists
 - [ ] Update `StreamMessageActionsBuilder.buildBouncedErrorActions` call sites — return type is now `List<StreamContextMenuAction>`
