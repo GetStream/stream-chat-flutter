@@ -165,7 +165,7 @@ These parameters have been removed entirely. See the **Migration Path** column f
 
 | Old Parameter                        | Migration Path                                                                                                                            |
 | ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| `reverse`                            | Determined by `StreamMessagePlacement` context (set by list view)                                                                         |
+| `reverse`                            | Determined by `StreamMessageLayout` context (set by list view)                                                                            |
 | `translateUserAvatar`                | Removed; avatar positioning is theme-driven                                                                                               |
 | `onConfirmDeleteTap`                 | Handled internally by `StreamMessageActionsBuilder`                                                                                       |
 | `onShowMessage`                      | Removed                                                                                                                                   |
