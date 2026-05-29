@@ -147,7 +147,7 @@ void main() {
         ),
         home: home,
       ),
-      pumpBeforeTest: (tester) async {
+      builder: () {
         when(
           () => mockClient.queryReactions(
             any(),
@@ -160,12 +160,7 @@ void main() {
             ..reactions = reactions
             ..next = null,
         );
-        // Trigger the post-frame callback that opens the sheet.
-        await tester.pump();
-        // Wait for the sheet animation and reactions to load.
-        await tester.pumpAndSettle(const Duration(seconds: 1));
-      },
-      builder: () {
+
         return Scaffold(
           backgroundColor: const Color(0xFFF0F2F5),
           body: _ReactionDetailSheetGoldenHost(message: detailMessage),
@@ -211,29 +206,25 @@ void main() {
       ),
     ];
 
-    // Stub before pump so doInitialLoad() finds the mock ready.
-    when(
-      () => listClient.queryReactions(
-        any(),
-        filter: any(named: 'filter'),
-        sort: any(named: 'sort'),
-        pagination: any(named: 'pagination'),
-      ),
-    ).thenAnswer(
-      (_) async => QueryReactionsResponse()
-        ..reactions = listReactions
-        ..next = null,
-    );
-
     docsGoldenTest(
       'reaction list view',
       fileName: 'reaction_list_view',
       constraints: const BoxConstraints.tightFor(width: 375, height: 240),
-      pumpBeforeTest: (tester) async {
-        // Wait for the async queryReactions response and list rebuild.
-        await tester.pumpAndSettle();
-      },
       builder: () {
+        // Stub before pump so doInitialLoad() finds the mock ready.
+        when(
+          () => listClient.queryReactions(
+            any(),
+            filter: any(named: 'filter'),
+            sort: any(named: 'sort'),
+            pagination: any(named: 'pagination'),
+          ),
+        ).thenAnswer(
+          (_) async => QueryReactionsResponse()
+            ..reactions = listReactions
+            ..next = null,
+        );
+
         final controller = StreamReactionListController(
           client: listClient,
           messageId: listMessageId,
