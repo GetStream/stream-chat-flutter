@@ -646,9 +646,16 @@ class StreamChatClient {
   final _queryChannelsCache = InFlightCache<String, List<Channel>>();
 
   /// Requests channels with a given query.
+  ///
+  /// Either an inline [filter]/[channelStateSort] pair or a [predefinedFilter]
+  /// identifier (optionally interpolated with [filterValues] and [sortValues])
+  /// can be supplied.
   Stream<List<Channel>> queryChannels({
     Filter? filter,
     SortOrder<ChannelState>? channelStateSort,
+    String? predefinedFilter,
+    Map<String, Object?>? filterValues,
+    Map<String, Object?>? sortValues,
     bool state = true,
     bool watch = true,
     bool presence = false,
@@ -665,6 +672,9 @@ class StreamChatClient {
     final hash = generateHash([
       filter,
       channelStateSort,
+      predefinedFilter,
+      filterValues,
+      sortValues,
       state,
       watch,
       presence,
@@ -678,6 +688,9 @@ class StreamChatClient {
     try {
       offlineChannels = await queryChannelsOffline(
         filter: filter,
+        predefinedFilter: predefinedFilter,
+        filterValues: filterValues,
+        sortValues: sortValues,
         channelStateSort: channelStateSort,
         messageLimit: messageLimit,
         paginationParams: paginationParams,
@@ -699,6 +712,9 @@ class StreamChatClient {
             queryChannelsOnline(
               filter: filter,
               sort: channelStateSort,
+              predefinedFilter: predefinedFilter,
+              filterValues: filterValues,
+              sortValues: sortValues,
               state: state,
               watch: watch,
               presence: presence,
@@ -726,6 +742,9 @@ class StreamChatClient {
   Future<List<Channel>> queryChannelsOnline({
     Filter? filter,
     SortOrder<ChannelState>? sort,
+    String? predefinedFilter,
+    Map<String, Object?>? filterValues,
+    Map<String, Object?>? sortValues,
     bool state = true,
     bool watch = true,
     bool presence = false,
@@ -756,6 +775,9 @@ class StreamChatClient {
     final res = await _chatApi.channel.queryChannels(
       filter: filter,
       sort: sort,
+      predefinedFilter: predefinedFilter,
+      filterValues: filterValues,
+      sortValues: sortValues,
       state: state,
       watch: watch,
       presence: presence,
@@ -786,12 +808,19 @@ class StreamChatClient {
     // Submit delivery report for the channels fetched in this query.
     await channelDeliveryReporter.submitForDelivery(updateData.value);
 
-    await chatPersistenceClient?.updateChannelQueries(
-      filter,
-      channels.map((c) => c.channel!.cid).toList(),
-      // Clear the query cache if we are refreshing.
-      clearQueryCache: (paginationParams.offset ?? 0) == 0,
-    );
+    // TODO: Wire predefined-filter queries to the persistence layer.
+    // Persistence cache is currently keyed by the inline filter; the
+    // persistence slice will add a query-id keyed variant. Until then,
+    // skip the write for predefined queries to avoid polluting the inline
+    // cache with predefined cids.
+    if (predefinedFilter == null) {
+      await chatPersistenceClient?.updateChannelQueries(
+        filter,
+        channels.map((c) => c.channel!.cid).toList(),
+        // Clear the query cache if we are refreshing.
+        clearQueryCache: (paginationParams.offset ?? 0) == 0,
+      );
+    }
 
     this.state.addChannels(updateData.key);
     return updateData.value;
@@ -800,10 +829,18 @@ class StreamChatClient {
   /// Requests channels with a given query from the Persistence client.
   Future<List<Channel>> queryChannelsOffline({
     Filter? filter,
+    String? predefinedFilter,
+    Map<String, Object?>? filterValues,
+    Map<String, Object?>? sortValues,
     SortOrder<ChannelState>? channelStateSort,
     int? messageLimit,
     PaginationParams paginationParams = const PaginationParams(),
   }) async {
+    // TODO: Add offline cache lookup for predefined-filter queries in the
+    // persistence slice. Returning empty here means the online path runs
+    // without an offline emit for predefined queries.
+    if (predefinedFilter != null) return const <Channel>[];
+
     final offlineChannels = await chatPersistenceClient?.getChannelStates(
       filter: filter,
       channelStateSort: channelStateSort,
