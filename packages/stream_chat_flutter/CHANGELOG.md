@@ -2,6 +2,8 @@
 
 🔄 Internal / Non-breaking
 
+- `ReactionIconResolver.supportedReactions` is now wired to the full emoji picker sheet opened by the "+" button in `StreamMessageReactionPicker` and the add-emoji chip in `ReactionDetailSheet`. Override `supportedReactions` on a custom resolver to control which reactions appear in the full picker grid.
+
 - Composer UI primitives (`StreamMessageComposerInputField`, `VoiceRecordingCallback`, and the outer/inner layout containers) are now owned by `stream_chat_flutter` and exported from this package. They were previously supplied by `stream_core_flutter`. The public API of `StreamMessageComposer` / `StreamChatMessageInput` and its sub-components is unchanged.
 - Re-export `StreamAvatarTheme` and `StreamAvatarThemeData` from `stream_core_flutter` so consumers can theme avatars without adding a separate `stream_core_flutter` import.
 
@@ -101,6 +103,7 @@
 
 🐞 Fixed
 
+- Set supported emojis for the reaction picker and detail sheet to the full set of supported emojis from `stream_core_flutter`.
 - Fixed `StreamCommandAutocompleteOptions` and `StreamMentionAutocompleteOptions` expanding to half the screen height — both now cap at a fixed max height (208px / 176px) and scroll internally so the list can't dominate the screen or overlap the header.
 - Fixed the "Add an option" button in the poll creator looking like a tappable empty option row while disabled. The button is now hidden when adding a new option isn't allowed (an existing option is empty, or the maximum has been reached) instead of rendering as a disabled lookalike.
 - Fixed voice recording duration label jumping by ~1 second when playback starts. The recording timer tracks duration in whole seconds, so the stored value can be up to 1 second longer than the actual audio file. The player now resolves this by keeping the larger of the stored and player-reported durations, matching the strategy used by the iOS SDK.

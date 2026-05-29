@@ -246,8 +246,9 @@ void main() {
     expect(find.byType(ReactionDetailSheet), findsOneWidget);
   });
 
-  testWidgets('emoji sheet is limited to supportedReactions from resolver when add-emoji chip is tapped',
-      (tester) async {
+  testWidgets('emoji sheet is limited to supportedReactions from resolver when add-emoji chip is tapped', (
+    tester,
+  ) async {
     when(
       () => mockClient.queryReactions(
         'test-message',
@@ -267,10 +268,10 @@ void main() {
       },
     );
 
+    // _SubsetDetailResolver: supportedReactions = {'love', 'like'} (2 items)
     await tester.pumpWidget(
       _wrapWithMaterialApp(
         client: mockClient,
-        // _SubsetDetailResolver: supportedReactions = {'love', 'like'} (2 items)
         reactionIconResolver: const _SubsetDetailResolver(),
         _ReactionDetailSheetLauncher(message: message),
       ),
@@ -281,8 +282,9 @@ void main() {
 
     expect(find.byType(ReactionDetailSheet), findsOneWidget);
 
-    // Tap the add-emoji chip to open the full emoji sheet.
-    await tester.tap(find.byType(StreamEmojiChip).first);
+    // Tap the add-emoji chip (identified by the emojiAdd icon) to open the
+    // full emoji sheet.
+    await tester.tap(find.byIcon(core.StreamIconData.emojiAdd));
     await tester.pumpAndSettle();
 
     expect(find.byType(StreamEmojiPickerSheet), findsOneWidget);
@@ -465,6 +467,7 @@ Widget _wrapWithMaterialApp(
   Widget child, {
   required StreamChatClient client,
   Brightness brightness = Brightness.light,
+  ReactionIconResolver? reactionIconResolver,
 }) {
   return MaterialApp(
     debugShowCheckedModeBanner: false,
@@ -474,6 +477,10 @@ Widget _wrapWithMaterialApp(
       // Mock the connectivity stream to always return wifi.
       connectivityStream: Stream.value([ConnectivityResult.wifi]),
       streamChatThemeData: StreamChatThemeData(),
+      streamChatConfigData: switch (reactionIconResolver) {
+        final resolver? => StreamChatConfigurationData(reactionIconResolver: resolver),
+        _ => null,
+      },
       child: child ?? const SizedBox.shrink(),
     ),
     home: Builder(
@@ -492,4 +499,25 @@ Widget _wrapWithMaterialApp(
       },
     ),
   );
+}
+
+/// Resolver with a small [supportedReactions] set for verifying that the
+/// emoji sheet receives only that subset when the add-emoji chip is tapped.
+class _SubsetDetailResolver extends ReactionIconResolver {
+  const _SubsetDetailResolver();
+
+  @override
+  Set<String> get defaultReactions => const {'love'};
+
+  @override
+  Set<String> get supportedReactions => const {'love', 'like'};
+
+  @override
+  String? emojiCode(String type) => streamSupportedEmojis[type]?.emoji;
+
+  @override
+  StreamEmojiContent resolve(String type) {
+    if (emojiCode(type) case final emoji?) return StreamUnicodeEmoji(emoji);
+    return const StreamUnicodeEmoji('❓');
+  }
 }

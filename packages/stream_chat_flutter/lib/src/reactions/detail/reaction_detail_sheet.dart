@@ -178,9 +178,7 @@ class _ReactionDetailSheetState extends State<ReactionDetailSheet> {
           leading: StreamEmojiChip.addEmoji(
             onPressed: () async {
               final selectedReactions = ownReactionsMap.keys.toSet();
-              final supportedEmojis = resolver.supportedReactions
-                  .map((type) => streamSupportedEmojis[type])
-                  .whereType<StreamEmojiData>();
+              final supportedEmojis = resolver.supportedReactions.map((type) => streamSupportedEmojis[type]).nonNulls;
               final emoji = await StreamEmojiPickerSheet.show(
                 context: context,
                 emojis: supportedEmojis,
