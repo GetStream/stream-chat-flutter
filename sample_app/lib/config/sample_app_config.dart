@@ -63,7 +63,7 @@ class SampleAppConfigData {
     bool enableDeleteForMe = false,
     bool enableMessageInfo = false,
     bool enableLocationSharing = false,
-    bool draftMessagesEnabled = false,
+    bool draftMessagesEnabled = true,
     bool enforceUniqueReactions = false,
     StreamReactionsType? reactionType,
     StreamReactionsPosition? reactionPosition,

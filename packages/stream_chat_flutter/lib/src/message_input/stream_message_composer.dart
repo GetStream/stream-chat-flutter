@@ -68,7 +68,7 @@ class StreamMessageComposer extends StatelessWidget {
     bool disableAttachments = false,
     int maxAttachmentSize = kDefaultMaxAttachmentSize,
     bool canAlsoSendToChannelFromThread = true,
-    bool enableVoiceRecording = false,
+    bool enableVoiceRecording = true,
     bool sendVoiceRecordingAutomatically = false,
     AudioRecorderFeedback voiceRecordingFeedback = const AudioRecorderFeedback(),
     UserMentionTileBuilder? userMentionsTileBuilder,
