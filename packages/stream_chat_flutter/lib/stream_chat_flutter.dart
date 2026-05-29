@@ -23,6 +23,8 @@ export 'package:stream_core_flutter/stream_core_flutter.dart'
         StreamBottomAppBarStyle,
         StreamBottomAppBarTheme,
         StreamBottomAppBarThemeData,
+        StreamBottomNavBar,
+        StreamBottomNavBarItem,
         StreamButton,
         StreamButtonSize,
         StreamButtonStyle,
