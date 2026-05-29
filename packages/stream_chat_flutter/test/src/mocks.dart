@@ -22,7 +22,12 @@ class MockChannel extends Mock implements Channel {
       ChannelCapability.uploadFile,
     ],
     Stream<Event>? eventStream,
-  }) : _eventStream = eventStream ?? const Stream.empty();
+  }) : _eventStream = eventStream ?? const Stream.empty() {
+    registerFallbackValue(DraftMessage());
+    when(() => createDraft(any())).thenAnswer((_) async => CreateDraftResponse());
+    when(deleteDraft).thenAnswer((_) async => EmptyResponse());
+    when(() => deleteDraft(parentId: any(named: 'parentId'))).thenAnswer((_) async => EmptyResponse());
+  }
 
   @override
   final String type;
@@ -84,6 +89,8 @@ class MockChannelState extends Mock implements ChannelClientState {
     when(() => unreadCount).thenReturn(0);
     when(() => isUpToDate).thenReturn(true);
     when(() => read).thenReturn([]);
+    when(() => draftStream).thenAnswer((_) => Stream.value(null));
+    when(() => threadDraftStream(any())).thenAnswer((_) => Stream.value(null));
   }
 }
 
