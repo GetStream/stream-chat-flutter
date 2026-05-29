@@ -80,19 +80,26 @@ void main() {
   test('getReactionsByUserId', () async {
     const messageId = 'testMessageId';
     const userId = 'testUserId';
+    const otherUserId = 'otherUserid';
 
     // Should be empty initially
     final reactions = await reactionDao.getReactionsByUserId(messageId, userId);
     expect(reactions, isEmpty);
 
-    // Adding sample reactions
+    // Adding sample reactions from the target user.
     final insertedReactions =
         await _prepareReactionData(messageId, userId: userId);
     expect(insertedReactions, isNotEmpty);
 
-    // Fetched reaction length should match inserted reactions length.
+    // Adding sample reactions from other users on the same message.
+    final otherInsertedReactions =
+        await _prepareReactionData(messageId, userId: otherUserId);
+    expect(otherInsertedReactions, isNotEmpty);
+
+    // Fetched reaction length should match the target user's reactions only.
     // Every reaction messageId should match the provided messageId.
-    // Every reaction userId should match the provided userId.
+    // Every reaction userId should match the provided userId — i.e. reactions
+    // from other users on the same message must be filtered out.
     final fetchedReactions =
         await reactionDao.getReactionsByUserId(messageId, userId);
     expect(fetchedReactions.length, insertedReactions.length);
@@ -138,6 +145,153 @@ void main() {
           .isNotEmpty,
       true,
     );
+  });
+
+  test('getReactionsForMessages chunks transparently when given >900 ids',
+      () async {
+    // 1,200 ids exceeds the historical SQLITE_MAX_VARIABLE_NUMBER cap (999)
+    // for a single `WHERE messageId IN (?, ?, ...)` statement — the helper
+    // must run the SELECT in chunks and merge.
+    const cid = 'test:ChunkedReactions';
+    const total = 1200;
+
+    final dbUser = User(id: 'testUserId');
+    await database.userDao.updateUsers([dbUser]);
+    await database.channelDao.updateChannels([ChannelModel(cid: cid)]);
+
+    final baseTime = DateTime.now();
+    final messages = List.generate(
+      total,
+      (i) => Message(
+        id: 'cmsg-$i',
+        user: dbUser,
+        text: 'Hello $i',
+        createdAt: baseTime.add(Duration(seconds: i)),
+      ),
+    );
+    await database.messageDao.updateMessages(cid, messages);
+
+    // Seed 1 reaction on every odd-indexed message (600 total) so we can
+    // verify both that the chunked query returns rows AND that ids without
+    // reactions still appear in the dense map with an empty list.
+    final reactions = [
+      for (var i = 0; i < total; i++)
+        if (i.isOdd)
+          Reaction(
+            type: 'like',
+            messageId: messages[i].id,
+            user: dbUser,
+            createdAt: baseTime.add(Duration(seconds: i)),
+          ),
+    ];
+    await reactionDao.updateReactions(reactions);
+
+    final ids = messages.map((m) => m.id).toList();
+    final grouped = await reactionDao.getReactionsForMessages(ids);
+
+    expect(grouped, hasLength(total),
+        reason: 'every input id must be a key (dense-map contract)');
+    var withReactions = 0;
+    var empty = 0;
+    for (var i = 0; i < total; i++) {
+      final list = grouped['cmsg-$i'];
+      expect(list, isNotNull);
+      if (i.isOdd) {
+        expect(list, hasLength(1));
+        expect(list!.first.messageId, 'cmsg-$i');
+        withReactions++;
+      } else {
+        expect(list, isEmpty);
+        empty++;
+      }
+    }
+    expect(withReactions, total ~/ 2);
+    expect(empty, total ~/ 2);
+  });
+
+  test(
+      'getReactions returns empty for a message id with no reactions, '
+      'even when reactions exist for other messages', () async {
+    // Locks per-id isolation: the upcoming batched `WHERE messageId IN (...)`
+    // path must not leak rows across ids when only one is queried.
+    const messageWithReactions = 'msg-A';
+    const messageWithoutReactions = 'msg-B';
+
+    await _prepareReactionData(messageWithReactions);
+
+    final fetched = await reactionDao.getReactions(messageWithoutReactions);
+    expect(fetched, isEmpty);
+  });
+
+  group('getReactionsForMessagesByUserId', () {
+    test('returns empty map for empty input ids', () async {
+      final result = await reactionDao
+          .getReactionsForMessagesByUserId(const [], 'someUser');
+      expect(result, isEmpty);
+    });
+
+    test(
+        "returns the given user's reactions per message id; message ids "
+        'with no reactions from that user map to an empty list', () async {
+      const cid = 'test:Cid';
+      const targetUser = 'targetUser';
+      const otherUser = 'otherUser';
+      const msgWithOwn = 'msg-with-own';
+      const msgWithoutOwn = 'msg-without-own';
+      const msgUnknown = 'msg-unknown';
+
+      final users = [User(id: targetUser), User(id: otherUser)];
+      await database.userDao.updateUsers(users);
+      await database.channelDao.updateChannels([ChannelModel(cid: cid)]);
+      await database.messageDao.updateMessages(cid, [
+        Message(
+          id: msgWithOwn,
+          user: users.first,
+          createdAt: DateTime.now(),
+          text: 'a',
+        ),
+        Message(
+          id: msgWithoutOwn,
+          user: users.first,
+          createdAt: DateTime.now(),
+          text: 'b',
+        ),
+      ]);
+      // msgWithOwn: 1 own + 1 other; msgWithoutOwn: only other-user reaction.
+      await reactionDao.updateReactions([
+        Reaction(
+          type: 'like',
+          messageId: msgWithOwn,
+          userId: targetUser,
+          createdAt: DateTime.now(),
+        ),
+        Reaction(
+          type: 'wow',
+          messageId: msgWithOwn,
+          userId: otherUser,
+          createdAt: DateTime.now(),
+        ),
+        Reaction(
+          type: 'love',
+          messageId: msgWithoutOwn,
+          userId: otherUser,
+          createdAt: DateTime.now(),
+        ),
+      ]);
+
+      final result = await reactionDao.getReactionsForMessagesByUserId(
+        const [msgWithOwn, msgWithoutOwn, msgUnknown],
+        targetUser,
+      );
+
+      expect(result.keys,
+          unorderedEquals([msgWithOwn, msgWithoutOwn, msgUnknown]));
+      expect(result[msgWithOwn], hasLength(1));
+      expect(result[msgWithOwn]!.single.userId, targetUser);
+      expect(result[msgWithOwn]!.single.type, 'like');
+      expect(result[msgWithoutOwn], isEmpty);
+      expect(result[msgUnknown], isEmpty);
+    });
   });
 
   group('deleteReactionsByMessageIds', () {
