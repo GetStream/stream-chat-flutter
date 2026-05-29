@@ -1,4 +1,4 @@
-// ignore_for_file: deprecated_member_use
+// ignore_for_file: deprecated_member_use, avoid_redundant_argument_values
 
 import 'dart:async';
 
@@ -74,40 +74,27 @@ class _ChannelListPageState extends State<ChannelListPage> {
 
     final enabledTabs = allTabs.where((t) => t.enabled).toList();
 
-    return Scaffold(
+    final isFloating = StreamTheme.of(context).appStyle.bottomBarBehavior == BottomBarBehavior.floating;
+
+    final bottomNav = isFloating
+        ? _FloatingTabBar(
+            currentIndex: _currentIndex,
+            tabs: enabledTabs,
+            onTap: (i) => setState(() => _currentIndex = i),
+          )
+        : _RegularBottomNavBar(
+            currentIndex: _currentIndex,
+            tabs: enabledTabs,
+            onTap: (i) => setState(() => _currentIndex = i),
+          );
+
+    return StreamScaffold(
       backgroundColor: colorScheme.backgroundApp,
       appBar: StreamChannelListHeader(
         title: Text(enabledTabs[_currentIndex].label, style: textTheme.headingSm),
       ),
       drawer: LeftDrawer(user: user),
-      bottomNavigationBar: DecoratedBox(
-        decoration: BoxDecoration(
-          color: colorScheme.backgroundElevation1,
-          border: Border(top: BorderSide(color: colorScheme.borderSubtle)),
-        ),
-        child: StreamBadgeNotificationTheme(
-          data: const .new(size: .xs),
-          child: BottomNavigationBar(
-            elevation: 0,
-            iconSize: 20,
-            currentIndex: _currentIndex,
-            type: BottomNavigationBarType.fixed,
-            selectedItemColor: colorScheme.textPrimary,
-            unselectedItemColor: colorScheme.textTertiary,
-            backgroundColor: Colors.transparent,
-            selectedLabelStyle: textTheme.metadataEmphasis,
-            unselectedLabelStyle: textTheme.metadataEmphasis,
-            onTap: (index) => setState(() => _currentIndex = index),
-            items: enabledTabs.map((tab) {
-              return BottomNavigationBarItem(
-                icon: tab.icon,
-                activeIcon: tab.selectedIcon,
-                label: tab.label,
-              );
-            }).toList(),
-          ),
-        ),
-      ),
+      bottom: bottomNav,
       body: IndexedStack(
         index: _currentIndex,
         children: [for (final tab in enabledTabs) tab.page],
@@ -140,6 +127,164 @@ class _ChannelListPageState extends State<ChannelListPage> {
     super.dispose();
   }
 }
+
+// ---------------------------------------------------------------------------
+// Floating pill tab bar (floating bottom bar behavior)
+// ---------------------------------------------------------------------------
+
+class _FloatingTabBar extends StatelessWidget {
+  const _FloatingTabBar({
+    required this.currentIndex,
+    required this.tabs,
+    required this.onTap,
+  });
+
+  final int currentIndex;
+  final List<_TabDef> tabs;
+  final ValueChanged<int> onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = context.streamColorScheme;
+    final spacing = context.streamSpacing;
+    final radius = context.streamRadius;
+
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: EdgeInsets.only(
+          left: spacing.xl,
+          right: spacing.xl,
+        ),
+        child: Container(
+          decoration: BoxDecoration(
+            color: colorScheme.backgroundElevation1,
+            borderRadius: BorderRadius.all(radius.max),
+            boxShadow: context.streamBoxShadow.elevation1,
+          ),
+          foregroundDecoration: BoxDecoration(
+            borderRadius: BorderRadius.all(radius.max),
+            border: Border.all(color: colorScheme.borderSubtle),
+          ),
+          child: Padding(
+            padding: EdgeInsets.symmetric(vertical: spacing.xs),
+            child: StreamBadgeNotificationTheme(
+              data: const .new(size: .xs),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  for (var i = 0; i < tabs.length; i++)
+                    _FloatingTabItem(
+                      tab: tabs[i],
+                      selected: i == currentIndex,
+                      onTap: () => onTap(i),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _FloatingTabItem extends StatelessWidget {
+  const _FloatingTabItem({
+    required this.tab,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final _TabDef tab;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = context.streamTextTheme;
+    final colorScheme = context.streamColorScheme;
+    final spacing = context.streamSpacing;
+    final color = selected ? colorScheme.textPrimary : colorScheme.textTertiary;
+
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onTap,
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: spacing.md, vertical: spacing.xxs),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          spacing: spacing.xxxs,
+          children: [
+            IconTheme(
+              data: IconThemeData(color: color, size: 20),
+              child: selected ? tab.selectedIcon : tab.icon,
+            ),
+            Text(
+              tab.label,
+              style: textTheme.metadataEmphasis.copyWith(color: color),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Regular (docked) bottom navigation bar
+// ---------------------------------------------------------------------------
+
+class _RegularBottomNavBar extends StatelessWidget {
+  const _RegularBottomNavBar({
+    required this.currentIndex,
+    required this.tabs,
+    required this.onTap,
+  });
+
+  final int currentIndex;
+  final List<_TabDef> tabs;
+  final ValueChanged<int> onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = context.streamColorScheme;
+    final textTheme = context.streamTextTheme;
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: colorScheme.backgroundElevation1,
+        border: Border(top: BorderSide(color: colorScheme.borderSubtle)),
+      ),
+      child: StreamBadgeNotificationTheme(
+        data: const .new(size: .xs),
+        child: BottomNavigationBar(
+          elevation: 0,
+          iconSize: 20,
+          currentIndex: currentIndex,
+          type: BottomNavigationBarType.fixed,
+          selectedItemColor: colorScheme.textPrimary,
+          unselectedItemColor: colorScheme.textTertiary,
+          backgroundColor: Colors.transparent,
+          selectedLabelStyle: textTheme.metadataEmphasis,
+          unselectedLabelStyle: textTheme.metadataEmphasis,
+          onTap: onTap,
+          items: tabs.map((tab) {
+            return BottomNavigationBarItem(
+              icon: tab.icon,
+              activeIcon: tab.selectedIcon,
+              label: tab.label,
+            );
+          }).toList(),
+        ),
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Tab definition
+// ---------------------------------------------------------------------------
 
 class _TabDef {
   const _TabDef({

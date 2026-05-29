@@ -1,5 +1,3 @@
-// ignore_for_file: deprecated_member_use, avoid_redundant_argument_values
-
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -66,6 +64,17 @@ class _StreamChannelPageState extends State<StreamChannelPage> {
 
   @override
   Widget build(BuildContext context) {
+    final appBar = StreamChannelHeader(
+      onChannelAvatarPressed: (channel) => widget.onChannelAvatarPressed?.call(context, channel),
+    );
+
+    final composer = StreamMessageComposer(
+      focusNode: _focusNode,
+      messageComposerController: _messageComposerController,
+      onQuotedMessageCleared: _messageComposerController.clearQuotedMessage,
+      enableVoiceRecording: true,
+    );
+
     final typingIndicator = StreamTypingIndicator(
       padding: const EdgeInsets.symmetric(
         horizontal: 8,
@@ -76,168 +85,72 @@ class _StreamChannelPageState extends State<StreamChannelPage> {
       ),
     );
 
-    final composer = StreamMessageComposer(
-      focusNode: _focusNode,
-      messageComposerController: _messageComposerController,
-      onQuotedMessageCleared: _messageComposerController.clearQuotedMessage,
-      enableVoiceRecording: true,
-    );
-
-    final isFloating = StreamTheme.of(context).appStyle.appBarBehavior == .floating;
-
-    final appBar = StreamChannelHeader(
-      onChannelAvatarPressed: (channel) => widget.onChannelAvatarPressed?.call(context, channel),
-    );
-
-    final topPadding = isFloating ? appBar.preferredSize.height + MediaQuery.of(context).padding.top : 0.0;
-
-    StreamMessageListView messageListBuilder(double bottomPadding) => StreamMessageListView(
-      initialScrollIndex: widget.initialScrollIndex,
-      initialAlignment: widget.initialAlignment,
-      config: StreamMessageListViewConfiguration(
-        highlightInitialMessage: widget.highlightInitialMessage,
-        swipeToReply: true,
-      ),
-      onEditMessageTap: _editMessage,
-      onReplyTap: _reply,
-      threadBuilder: (_, parentMessage) {
-        return StreamThreadPage(parent: parentMessage!);
-      },
-      topPadding: topPadding,
-      bottomPadding: bottomPadding,
-    );
-
-    final body = switch (isFloating) {
-      true => _FloatingChannelBody(
-        composer: composer,
-        typingIndicator: typingIndicator,
-        messageListBuilder: messageListBuilder,
-      ),
-      false => Column(
-        children: <Widget>[
-          Expanded(
-            child: Stack(
-              children: <Widget>[
-                messageListBuilder(0),
-                Positioned(
-                  bottom: 0,
-                  left: 0,
-                  right: 0,
-                  child: typingIndicator,
-                ),
-              ],
-            ),
-          ),
-          composer,
-        ],
-      ),
-    };
-
-    return Scaffold(
+    return StreamScaffold(
       backgroundColor: context.streamColorScheme.backgroundApp,
       appBar: appBar,
-      extendBodyBehindAppBar: isFloating,
-      body: body,
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Floating layout helpers
-// ---------------------------------------------------------------------------
-
-/// Layout slot identifiers for [_FloatingChannelBodyDelegate].
-enum _Slot { body, typing, composer }
-
-/// A custom [BoxConstraints] subclass that carries the composer height so that
-/// a [LayoutBuilder] inside the body slot can read it without a separate
-/// callback or [setState].
-///
-/// The [==] / [hashCode] overrides are intentional: they make the framework
-/// re-run [RenderObject.performLayout] on the body child even when the outer
-/// size constraints have not changed but only [composerHeight] has.
-class _BodyBoxConstraints extends BoxConstraints {
-  const _BodyBoxConstraints({
-    super.maxWidth,
-    super.maxHeight,
-    required this.composerHeight,
-  }) : assert(composerHeight >= 0, 'composerHeight must be non-negative');
-
-  /// Height of the floating composer, used as the list's bottom inset.
-  final double composerHeight;
-
-  @override
-  bool operator ==(Object other) {
-    if (super != other) return false;
-    return other is _BodyBoxConstraints && other.composerHeight == composerHeight;
-  }
-
-  @override
-  int get hashCode => Object.hash(super.hashCode, composerHeight);
-}
-
-/// [MultiChildLayoutDelegate] that measures the composer first, then lays out
-/// the typing indicator and body in the same layout pass — no post-frame
-/// callback required.
-class _FloatingChannelBodyDelegate extends MultiChildLayoutDelegate {
-  @override
-  void performLayout(Size size) {
-    // 1. Measure + position the composer at the bottom.
-    final composerSize = layoutChild(_Slot.composer, BoxConstraints.loose(size));
-    positionChild(_Slot.composer, Offset(0, size.height - composerSize.height));
-
-    // 2. Measure + position the typing indicator just above the composer.
-    final typingSize = layoutChild(_Slot.typing, BoxConstraints(maxWidth: size.width));
-    positionChild(_Slot.typing, Offset(0, size.height - composerSize.height - typingSize.height));
-
-    // 3. Lay out the body with the composer height embedded in the constraints
-    //    so the LayoutBuilder inside can read it synchronously.
-    layoutChild(
-      _Slot.body,
-      _BodyBoxConstraints(
-        maxWidth: size.width,
-        maxHeight: size.height,
-        composerHeight: composerSize.height,
+      bottom: composer,
+      body: _ChannelPageBody(
+        initialScrollIndex: widget.initialScrollIndex,
+        initialAlignment: widget.initialAlignment,
+        highlightInitialMessage: widget.highlightInitialMessage,
+        onReply: _reply,
+        onEditMessage: _editMessage,
+        typingIndicator: typingIndicator,
       ),
     );
-    positionChild(_Slot.body, Offset.zero);
   }
-
-  @override
-  bool shouldRelayout(_FloatingChannelBodyDelegate oldDelegate) => false;
 }
 
-/// Stateless widget that wires the floating layout together.
-class _FloatingChannelBody extends StatelessWidget {
-  const _FloatingChannelBody({
-    required this.composer,
+/// The body of [StreamChannelPage].
+///
+/// Reads [StreamScaffoldInsets] to provide correct [topPadding] and
+/// [bottomPadding] to [StreamMessageListView], and positions the typing
+/// indicator just above the composer (floating or docked) using the same
+/// inset values.
+class _ChannelPageBody extends StatelessWidget {
+  const _ChannelPageBody({
     required this.typingIndicator,
-    required this.messageListBuilder,
+    required this.onReply,
+    required this.onEditMessage,
+    this.initialScrollIndex,
+    this.initialAlignment,
+    this.highlightInitialMessage = false,
   });
 
-  final Widget composer;
   final Widget typingIndicator;
-
-  /// Called with the current composer height so the list can set its inset.
-  final Widget Function(double bottomWidgetsHeight) messageListBuilder;
+  final void Function(Message) onReply;
+  final void Function(Message) onEditMessage;
+  final int? initialScrollIndex;
+  final double? initialAlignment;
+  final bool highlightInitialMessage;
 
   @override
   Widget build(BuildContext context) {
-    return CustomMultiChildLayout(
-      delegate: _FloatingChannelBodyDelegate(),
+    final insets = StreamScaffoldInsets.of(context);
+
+    return Stack(
       children: [
-        // Body slot: a LayoutBuilder that reads the custom constraints.
-        LayoutId(
-          id: _Slot.body,
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              final height = constraints is _BodyBoxConstraints ? constraints.composerHeight : 0.0;
-              return messageListBuilder(height);
-            },
+        StreamMessageListView(
+          initialScrollIndex: initialScrollIndex,
+          initialAlignment: initialAlignment,
+          config: StreamMessageListViewConfiguration(
+            highlightInitialMessage: highlightInitialMessage,
+            swipeToReply: true,
           ),
+          onEditMessageTap: onEditMessage,
+          onReplyTap: onReply,
+          threadBuilder: (_, parentMessage) {
+            return StreamThreadPage(parent: parentMessage!);
+          },
+          topPadding: insets.topPadding,
+          bottomPadding: insets.bottomPadding,
         ),
-        LayoutId(id: _Slot.typing, child: typingIndicator),
-        LayoutId(id: _Slot.composer, child: composer),
+        Positioned(
+          bottom: insets.bottomPadding,
+          left: 0,
+          right: 0,
+          child: typingIndicator,
+        ),
       ],
     );
   }

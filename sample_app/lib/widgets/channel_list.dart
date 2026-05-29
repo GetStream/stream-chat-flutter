@@ -89,14 +89,21 @@ class _ChannelList extends State<ChannelList> {
         },
         child: NestedScrollView(
           controller: _scrollController,
-          headerSliverBuilder: (_, __) => [
-            SliverToBoxAdapter(
-              child: SearchTextField(
-                controller: _controller,
-                hintText: 'Search',
+          headerSliverBuilder: (context, __) {
+            // When the app bar is floating it overlaps this scroll view from
+            // the top. Insert a spacer sliver so the search bar starts below
+            // the visible bottom edge of the floating bar.
+            final topInset = StreamScaffoldInsets.maybeOf(context)?.topPadding ?? 0.0;
+            return [
+              if (topInset > 0) SliverToBoxAdapter(child: SizedBox(height: topInset)),
+              SliverToBoxAdapter(
+                child: SearchTextField(
+                  controller: _controller,
+                  hintText: 'Search',
+                ),
               ),
-            ),
-          ],
+            ];
+          },
           body: _isSearchActive
               ? _ChannelListSearch(_messageSearchListController)
               : _ChannelListDefault(_channelListController),
@@ -113,11 +120,14 @@ class _ChannelListDefault extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bottomPadding = StreamScaffoldInsets.maybeOf(context)?.bottomPadding ?? 0.0;
+
     return SlidableAutoCloseBehavior(
       child: RefreshIndicator(
         onRefresh: channelListController.refresh,
         child: StreamChannelListView(
           controller: channelListController,
+          padding: bottomPadding > 0 ? EdgeInsets.only(bottom: bottomPadding) : null,
           itemBuilder: (context, channels, index, defaultWidget) {
             final channel = channels[index];
 

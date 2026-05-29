@@ -57,37 +57,62 @@ class _StreamThreadPageState extends State<StreamThreadPage> {
   @override
   Widget build(BuildContext context) {
     final appBar = StreamThreadHeader(parent: widget.parent);
-    final isFloating = StreamTheme.of(context).appStyle.appBarBehavior == .floating;
 
-    return Scaffold(
+    final composer = widget.parent.type != 'deleted'
+        ? StreamMessageComposer(
+            focusNode: _focusNode,
+            messageComposerController: _messageComposerController,
+            enableVoiceRecording: true,
+          )
+        : null;
+
+    return StreamScaffold(
       backgroundColor: context.streamColorScheme.backgroundApp,
       appBar: appBar,
-      extendBodyBehindAppBar: isFloating,
-      body: Column(
-        children: <Widget>[
-          Expanded(
-            child: StreamMessageListView(
-              parentMessage: widget.parent,
-              initialScrollIndex: widget.initialScrollIndex,
-              initialAlignment: widget.initialAlignment,
-              onReplyTap: _reply,
-              config: const StreamMessageListViewConfiguration(
-                swipeToReply: true,
-                showScrollToBottom: false,
-                highlightInitialMessage: true,
-              ),
-              onViewInChannelTap: widget.onViewInChannelTap,
-              topPadding: isFloating ? appBar.preferredSize.height + MediaQuery.of(context).padding.top : 0.0,
-            ),
-          ),
-          if (widget.parent.type != 'deleted')
-            StreamMessageComposer(
-              focusNode: _focusNode,
-              messageComposerController: _messageComposerController,
-              enableVoiceRecording: true,
-            ),
-        ],
+      bottom: composer,
+      body: _ThreadBody(
+        parent: widget.parent,
+        initialScrollIndex: widget.initialScrollIndex,
+        initialAlignment: widget.initialAlignment,
+        onReply: _reply,
+        onViewInChannelTap: widget.onViewInChannelTap,
       ),
+    );
+  }
+}
+
+class _ThreadBody extends StatelessWidget {
+  const _ThreadBody({
+    required this.parent,
+    required this.onReply,
+    this.initialScrollIndex,
+    this.initialAlignment,
+    this.onViewInChannelTap,
+  });
+
+  final Message parent;
+  final void Function(Message) onReply;
+  final int? initialScrollIndex;
+  final double? initialAlignment;
+  final void Function(Message message)? onViewInChannelTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final insets = StreamScaffoldInsets.of(context);
+
+    return StreamMessageListView(
+      parentMessage: parent,
+      initialScrollIndex: initialScrollIndex,
+      initialAlignment: initialAlignment,
+      onReplyTap: onReply,
+      config: const StreamMessageListViewConfiguration(
+        swipeToReply: true,
+        showScrollToBottom: false,
+        highlightInitialMessage: true,
+      ),
+      onViewInChannelTap: onViewInChannelTap,
+      topPadding: insets.topPadding,
+      bottomPadding: insets.bottomPadding,
     );
   }
 }
