@@ -819,7 +819,7 @@ void main() {
               ..channels = channelStates
               ..predefinedFilter = const PredefinedFilter(
                 name: filterName,
-                filter: {},
+                filter: Filter.empty(),
                 sort: [SortOption<ChannelState>.desc('last_message_at')],
               ),
           );

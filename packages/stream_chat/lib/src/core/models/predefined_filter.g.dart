@@ -8,7 +8,9 @@ part of 'predefined_filter.dart';
 
 PredefinedFilter _$PredefinedFilterFromJson(Map<String, dynamic> json) => PredefinedFilter(
   name: json['name'] as String,
-  filter: json['filter'] as Map<String, dynamic>,
+  filter: PredefinedFilter._filterFromJson(
+    json['filter'] as Map<String, dynamic>,
+  ),
   sort: (json['sort'] as List<dynamic>?)
       ?.map(
         (e) => SortOption<ChannelState>.fromJson(e as Map<String, dynamic>),
