@@ -1,6 +1,7 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:stream_chat/src/core/api/sort_order.dart';
 import 'package:stream_chat/src/core/models/channel_state.dart';
+import 'package:stream_chat/src/core/models/filter.dart';
 
 part 'predefined_filter.g.dart';
 
@@ -20,18 +21,20 @@ class PredefinedFilter {
   });
 
   /// Create a new instance from a json.
-  factory PredefinedFilter.fromJson(Map<String, dynamic> json) =>
-      _$PredefinedFilterFromJson(json);
+  factory PredefinedFilter.fromJson(Map<String, dynamic> json) => _$PredefinedFilterFromJson(json);
 
   /// Identifier of the predefined filter on the server.
   final String name;
 
   /// Filter conditions as resolved by the server.
   ///
-  /// Kept as a raw map; the SDK does not evaluate filters locally.
-  // TODO: Type as `Filter` once `Filter.fromJson` lands — pending discussion.
-  final Map<String, dynamic> filter;
+  /// Wrapped in [Filter.raw] — the SDK does not evaluate filters locally.
+  /// Access the underlying map via [Filter.value] or [Filter.toJson].
+  @JsonKey(fromJson: _filterFromJson)
+  final Filter filter;
 
   /// Sort specification as resolved by the server.
   final SortOrder<ChannelState>? sort;
+
+  static Filter _filterFromJson(Map<String, dynamic> json) => Filter.raw(value: json);
 }
