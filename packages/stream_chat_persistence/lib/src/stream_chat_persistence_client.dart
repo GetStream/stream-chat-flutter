@@ -309,32 +309,66 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
     assert(_debugIsConnected, '');
     _logger.info('getChannelStates');
 
-    // 1) Lightweight load — channel rows + createdBy user only.
     final channelModels = await db!.channelQueryDao.getChannels(filter: filter);
 
-    // 2) Wrap each model in a sort envelope. No state loaded yet.
+    return _getChannelStatesPage(
+      channelModels,
+      channelStateSort,
+      paginationParams,
+    );
+  }
+
+  @override
+  Future<List<ChannelState>> getChannelStatesByPredefinedFilter({
+    required String filterName,
+    Map<String, Object?>? filterValues,
+    Map<String, Object?>? sortValues,
+    int? messageLimit,
+    PaginationParams? paginationParams,
+  }) async {
+    assert(_debugIsConnected, '');
+    _logger.info('getChannelStatesByPredefinedFilter');
+
+    final (channelModels, persistedSort) = await db!.channelQueryDao.getChannelsAndSortByPredefinedFilter(
+      filterName,
+      filterValues: filterValues,
+      sortValues: sortValues,
+    );
+
+    return _getChannelStatesPage(channelModels, persistedSort, paginationParams);
+  }
+
+  // Wraps channel models in sort envelopes, attaches memberships when the
+  // sort needs them, sorts, slices the requested page, and hydrates only the
+  // page with full channel state.
+  Future<List<ChannelState>> _getChannelStatesPage(
+    List<ChannelModel> channelModels,
+    SortOrder<ChannelState>? channelStateSort,
+    PaginationParams? paginationParams,
+  ) async {
+    // 1) Wrap each model in a sort envelope. No state loaded yet.
     var envelopes = channelModels.map((m) => ChannelState(channel: m)).toList(growable: false);
 
-    // 3) If sort uses `pinnedAt`, preload the current user's memberships in
+    // 2) If sort uses `pinnedAt`, preload the current user's memberships in
     //    one batched query and attach them to the envelopes.
     final clientUserId = userId;
     if (clientUserId != null && _sortRequiresMembership(channelStateSort)) {
       envelopes = await _attachMemberships(envelopes, clientUserId);
     }
 
-    // 4) Sort using the existing comparator — same logic as today, just on
-    //    envelopes instead of fully-hydrated states.
+    // 3) Sort using the comparator — on envelopes instead of fully-hydrated
+    //    states.
     if (channelStateSort != null && channelStateSort.isNotEmpty) {
       envelopes.sort(channelStateSort.compare);
     }
 
-    // 5) Slice the page.
+    // 4) Slice the page.
     final total = envelopes.length;
     final offset = (paginationParams?.offset ?? 0).clamp(0, total);
     final limit = paginationParams?.limit ?? (total - offset);
     final pagedCids = envelopes.skip(offset).take(limit).map((s) => s.channel!.cid).toList();
 
-    // 6) Hydrate ONLY the page.
+    // 5) Hydrate ONLY the page.
     return Future.wait(pagedCids.map(getChannelStateByCid));
   }
 
@@ -349,6 +383,27 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
     return db!.channelQueryDao.updateChannelQueries(
       filter,
       cids,
+      clearQueryCache: clearQueryCache,
+    );
+  }
+
+  @override
+  Future<void> updateChannelQueriesByPredefinedFilter(
+    String filterName,
+    List<String> cids, {
+    Map<String, Object?>? filterValues,
+    Map<String, Object?>? sortValues,
+    SortOrder<ChannelState>? channelStateSort,
+    bool clearQueryCache = false,
+  }) {
+    assert(_debugIsConnected, '');
+    _logger.info('updateChannelQueriesByPredefinedFilter');
+    return db!.channelQueryDao.updateChannelQueriesByPredefinedFilter(
+      filterName,
+      cids,
+      filterValues: filterValues,
+      sortValues: sortValues,
+      channelStateSort: channelStateSort,
       clearQueryCache: clearQueryCache,
     );
   }

@@ -65,6 +65,14 @@ final _levelEmojiMapper = {
   Level.SEVERE: '🚨',
 };
 
+// Fallback applied at write time when the server doesn't echo back a sort
+// spec for a predefined-filter query, so the persisted spec is never null.
+// TODO: Verify against the backend that this matches the server's default
+// sort for channel queries.
+const _defaultChannelStateSort = <SortOption<ChannelState>>[
+  SortOption<ChannelState>.desc(ChannelSortKey.lastUpdated),
+];
+
 /// The official Dart client for Stream Chat,
 /// a service for building chat applications.
 /// This library can be used on any Dart project and on both mobile and web apps
@@ -808,17 +816,27 @@ class StreamChatClient {
     // Submit delivery report for the channels fetched in this query.
     await channelDeliveryReporter.submitForDelivery(updateData.value);
 
-    // TODO: Wire predefined-filter queries to the persistence layer.
-    // Persistence cache is currently keyed by the inline filter; the
-    // persistence slice will add a query-id keyed variant. Until then,
-    // skip the write for predefined queries to avoid polluting the inline
-    // cache with predefined cids.
+    final cachedCids = channels.map((c) => c.channel!.cid).toList();
+    // Clear the query cache if we are refreshing.
+    final clearQueryCache = (paginationParams.offset ?? 0) == 0;
+
     if (predefinedFilter == null) {
       await chatPersistenceClient?.updateChannelQueries(
         filter,
-        channels.map((c) => c.channel!.cid).toList(),
-        // Clear the query cache if we are refreshing.
-        clearQueryCache: (paginationParams.offset ?? 0) == 0,
+        cachedCids,
+        clearQueryCache: clearQueryCache,
+      );
+    } else {
+      // Fall back to the default so the persisted spec is always meaningful.
+      final resolvedSort = res.predefinedFilter?.sort ?? _defaultChannelStateSort;
+
+      await chatPersistenceClient?.updateChannelQueriesByPredefinedFilter(
+        predefinedFilter,
+        cachedCids,
+        filterValues: filterValues,
+        sortValues: sortValues,
+        channelStateSort: resolvedSort,
+        clearQueryCache: clearQueryCache,
       );
     }
 
@@ -836,18 +854,22 @@ class StreamChatClient {
     int? messageLimit,
     PaginationParams paginationParams = const PaginationParams(),
   }) async {
-    // TODO: Add offline cache lookup for predefined-filter queries in the
-    // persistence slice. Returning empty here means the online path runs
-    // without an offline emit for predefined queries.
-    if (predefinedFilter != null) return const <Channel>[];
-
-    final offlineChannels = await chatPersistenceClient?.getChannelStates(
-      filter: filter,
-      channelStateSort: channelStateSort,
-      // Default limit is set to 25 in backend.
-      messageLimit: messageLimit ?? 25,
-      paginationParams: paginationParams,
-    );
+    final offlineChannels = await switch (predefinedFilter) {
+      null => chatPersistenceClient?.getChannelStates(
+        filter: filter,
+        channelStateSort: channelStateSort,
+        // Default limit is set to 25 in backend.
+        messageLimit: messageLimit ?? 25,
+        paginationParams: paginationParams,
+      ),
+      final name => chatPersistenceClient?.getChannelStatesByPredefinedFilter(
+        filterName: name,
+        filterValues: filterValues,
+        sortValues: sortValues,
+        messageLimit: messageLimit ?? 25,
+        paginationParams: paginationParams,
+      ),
+    };
 
     if (offlineChannels == null || offlineChannels.isEmpty) {
       logger.info('No channels found in offline storage for the given query');
