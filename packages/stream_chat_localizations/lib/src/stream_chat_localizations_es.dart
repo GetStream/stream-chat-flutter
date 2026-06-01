@@ -409,6 +409,15 @@ No es posible añadir más de $limit archivos adjuntos
   }
 
   @override
+  String toggleBlockUnblockUserText({required bool isBlocked}) {
+    if (isBlocked) {
+      return 'Desbloquear usuario';
+    } else {
+      return 'Bloquear usuario';
+    }
+  }
+
+  @override
   String toggleMuteUnmuteGroupQuestion({required bool isMuted}) {
     if (isMuted) {
       return '¿Estás seguro de que quieres activar el sonido de este grupo?';

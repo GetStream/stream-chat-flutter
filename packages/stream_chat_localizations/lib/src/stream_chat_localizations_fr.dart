@@ -409,6 +409,15 @@ Limite de pièces jointes dépassée : il n'est pas possible d'ajouter plus de $
   }
 
   @override
+  String toggleBlockUnblockUserText({required bool isBlocked}) {
+    if (isBlocked) {
+      return "Débloquer l'utilisateur";
+    } else {
+      return "Bloquer l'utilisateur";
+    }
+  }
+
+  @override
   String toggleMuteUnmuteGroupQuestion({required bool isMuted}) {
     if (isMuted) {
       return 'Voulez-vous vraiment réactiver le son de ce groupe ?';

@@ -407,6 +407,15 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
   }
 
   @override
+  String toggleBlockUnblockUserText({required bool isBlocked}) {
+    if (isBlocked) {
+      return 'उपयोगकर्ता को अनब्लॉक करें';
+    } else {
+      return 'उपयोगकर्ता को ब्लॉक करें';
+    }
+  }
+
+  @override
   String toggleMuteUnmuteGroupQuestion({required bool isMuted}) {
     if (isMuted) {
       return 'क्या आप वाकई इस समूह को अनम्यूट करना चाहते हैं?';

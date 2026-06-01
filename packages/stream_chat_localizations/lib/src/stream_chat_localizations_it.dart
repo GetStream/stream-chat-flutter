@@ -412,6 +412,15 @@ Attenzione: il limite massimo di $limit file è stato superato.
   }
 
   @override
+  String toggleBlockUnblockUserText({required bool isBlocked}) {
+    if (isBlocked) {
+      return 'Sblocca utente';
+    } else {
+      return 'Blocca utente';
+    }
+  }
+
+  @override
   String toggleMuteUnmuteGroupQuestion({required bool isMuted}) {
     if (isMuted) {
       return 'Sei sicuro di voler riattivare questo gruppo?';

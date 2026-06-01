@@ -406,6 +406,15 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
   }
 
   @override
+  String toggleBlockUnblockUserText({required bool isBlocked}) {
+    if (isBlocked) {
+      return "Desbloquejar l'usuari";
+    } else {
+      return "Bloquejar l'usuari";
+    }
+  }
+
+  @override
   String toggleMuteUnmuteGroupQuestion({required bool isMuted}) {
     if (isMuted) {
       return "Estàs segur que vols activar el so d'aquest grup?";

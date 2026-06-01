@@ -396,6 +396,15 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
   }
 
   @override
+  String toggleBlockUnblockUserText({required bool isBlocked}) {
+    if (isBlocked) {
+      return '사용자 차단 해제';
+    } else {
+      return '사용자 차단';
+    }
+  }
+
+  @override
   String toggleMuteUnmuteGroupQuestion({required bool isMuted}) {
     if (isMuted) {
       return '이 그룹의 음소거를 해제하시겠습니까?';

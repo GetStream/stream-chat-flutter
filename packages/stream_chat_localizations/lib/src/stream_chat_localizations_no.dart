@@ -438,6 +438,12 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
   }
 
   @override
+  String toggleBlockUnblockUserText({required bool isBlocked}) {
+    if (isBlocked) return 'Opphev blokkering';
+    return 'Blokker bruker';
+  }
+
+  @override
   String get enableFileAccessMessage => 'Aktiver tilgang til filer slik at du kan dele dem med venner.';
 
   @override

@@ -395,6 +395,15 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   }
 
   @override
+  String toggleBlockUnblockUserText({required bool isBlocked}) {
+    if (isBlocked) {
+      return 'ユーザーのブロックを解除';
+    } else {
+      return 'ユーザーをブロック';
+    }
+  }
+
+  @override
   String toggleMuteUnmuteGroupQuestion({required bool isMuted}) {
     if (isMuted) {
       return 'このグループのミュートを解除してもよろしいですか？';

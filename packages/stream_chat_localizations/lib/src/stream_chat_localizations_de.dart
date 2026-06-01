@@ -442,6 +442,15 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
   }
 
   @override
+  String toggleBlockUnblockUserText({required bool isBlocked}) {
+    if (isBlocked) {
+      return 'Blockierung aufheben';
+    } else {
+      return 'Benutzer blockieren';
+    }
+  }
+
+  @override
   String get viewLibrary => 'Bibliothek öffnen';
 
   @override
