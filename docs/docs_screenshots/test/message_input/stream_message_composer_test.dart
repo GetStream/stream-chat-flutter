@@ -174,6 +174,7 @@ void main() {
       // Seed the controller with text so the trailing slot shows the send
       // button (with the custom icon) instead of the default voice-record mic.
       final controller = StreamMessageComposerController()..text = 'Hello!';
+      addTearDown(controller.dispose);
 
       return Builder(
         builder: (context) {
