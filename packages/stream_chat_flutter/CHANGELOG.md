@@ -6,6 +6,9 @@
   until the server confirmed it.
 - Fixed a `FlutterError` ("A RenderViewport exceeded its maximum number of layout cycles") that
   could occur when fast-scrolling through the message list.
+- Fixed `RenderBox was not laid out` thrown by `MessageCard._updateWidthLimit` when the attachments
+  subtree was detached between scheduling the post-frame callback and it firing (e.g. the list was
+  rebuilt or the message removed). Added a `hasSize` guard before reading `RenderBox.size`.
 
 ## 9.24.0
 
