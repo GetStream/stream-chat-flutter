@@ -36,9 +36,19 @@ void main() {
     when(() => channel.lastMessageAt).thenReturn(DateTime.parse('2020-06-22 12:00:00'));
     when(() => channel.extraData).thenReturn({'name': 'test'});
     when(() => channel.extraDataStream).thenAnswer((_) => Stream.value({'name': 'test'}));
-    when(() => channelState.members).thenReturn([Member(userId: 'user-id', user: User(id: 'user-id'))]);
+    when(() => channelState.members).thenReturn([
+      Member(
+        userId: 'user-id',
+        user: User(id: 'user-id'),
+      ),
+    ]);
     when(() => channelState.membersStream).thenAnswer(
-      (_) => Stream.value([Member(userId: 'user-id', user: User(id: 'user-id'))]),
+      (_) => Stream.value([
+        Member(
+          userId: 'user-id',
+          user: User(id: 'user-id'),
+        ),
+      ]),
     );
     when(() => channelState.messages).thenReturn([]);
     when(() => channelState.messagesStream).thenAnswer((_) => Stream.value([]));
@@ -86,7 +96,11 @@ void main() {
 
     testWidgets('initial null does not clobber pre-populated quoted message', (tester) async {
       final composerController = StreamMessageComposerController()
-        ..quotedMessage = Message(id: 'q1', text: 'quoted', user: User(id: 'other-user'));
+        ..quotedMessage = Message(
+          id: 'q1',
+          text: 'quoted',
+          user: User(id: 'other-user'),
+        );
       addTearDown(composerController.dispose);
 
       final draftStream = StreamController<Draft?>.broadcast();
