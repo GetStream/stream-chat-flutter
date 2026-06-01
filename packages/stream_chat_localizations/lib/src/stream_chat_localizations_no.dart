@@ -42,6 +42,9 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
   String get threadReplyLabel => 'Svar på tråd';
 
   @override
+  String get threadLabel => 'Tråd';
+
+  @override
   String get onlyVisibleToYouText => 'Kun synlig for deg';
 
   @override

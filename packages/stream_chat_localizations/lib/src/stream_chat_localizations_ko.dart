@@ -40,6 +40,9 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
   String get threadReplyLabel => '스레드 답변';
 
   @override
+  String get threadLabel => '스레드';
+
+  @override
   String get onlyVisibleToYouText => '당신만 볼 수 있습니다';
 
   @override

@@ -12,6 +12,7 @@
 
 - Reordered the default message actions to match the design system.
 - Renamed default English `threadReplyLabel` (`'Thread'` → `'Thread Reply'`) and `markAsUnreadLabel` (`'Mark as Unread'` → `'Mark Unread'`).
+- `StreamThreadHeader` default title now sources from the new `threadLabel` translation key instead of `threadReplyLabel`, restoring the short `'Thread'` header.
 
 - `ReactionIconResolver.supportedReactions` is now wired to the full emoji picker sheet opened by the "+" button in `StreamMessageReactionPicker` and the add-emoji chip in `ReactionDetailSheet`. Override `supportedReactions` on a custom resolver to control which reactions appear in the full picker grid.
 

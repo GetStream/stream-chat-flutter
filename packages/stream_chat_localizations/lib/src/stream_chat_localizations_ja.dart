@@ -40,6 +40,9 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   String get threadReplyLabel => 'スレッド返信';
 
   @override
+  String get threadLabel => 'スレッド';
+
+  @override
   String get onlyVisibleToYouText => '自分にのみ見えます';
 
   @override

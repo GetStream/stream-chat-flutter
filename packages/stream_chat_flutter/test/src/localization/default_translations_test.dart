@@ -24,6 +24,7 @@ void main() {
       isNotNull,
     );
     expect(translations.threadReplyLabel, isNotNull);
+    expect(translations.threadLabel, isNotNull);
     expect(translations.onlyVisibleToYouText, isNotNull);
     expect(translations.threadReplyCountText(3), isNotNull);
     expect(

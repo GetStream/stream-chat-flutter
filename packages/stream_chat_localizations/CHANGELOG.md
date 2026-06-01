@@ -21,6 +21,8 @@
 ✅ Added
 
 - Added `toggleBlockUnblockUserText` translation for all supported locales.
+- Added `threadLabel` translation for all supported locales, used by the
+  `StreamThreadHeader` default title.
 - Added `commandUsernameLabel` translation (default `@username`) for all supported
   locales. Used by the message composer placeholder when user-target commands
   (`/mute`, `/unmute`, `/ban`, `/unban`) are active.

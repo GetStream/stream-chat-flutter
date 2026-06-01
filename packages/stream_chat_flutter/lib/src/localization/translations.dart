@@ -34,6 +34,9 @@ abstract class Translations {
   /// The label for "thread reply"
   String get threadReplyLabel;
 
+  /// The label for the thread view header ("Thread").
+  String get threadLabel;
+
   /// The text for showing if the message is only visible to you
   String get onlyVisibleToYouText;
 
@@ -758,6 +761,9 @@ class DefaultTranslations implements Translations {
 
   @override
   String get threadReplyLabel => 'Thread Reply';
+
+  @override
+  String get threadLabel => 'Thread';
 
   @override
   String get onlyVisibleToYouText => 'Only visible to you';

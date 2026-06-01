@@ -42,6 +42,9 @@ class StreamChatLocalizationsIt extends GlobalStreamChatLocalizations {
   String get threadReplyLabel => 'Rispondi nel thread';
 
   @override
+  String get threadLabel => 'Thread';
+
+  @override
   String get onlyVisibleToYouText => 'Visible solo a te';
 
   @override

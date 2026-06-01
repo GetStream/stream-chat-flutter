@@ -42,6 +42,9 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
   String get threadReplyLabel => 'Respon al fil';
 
   @override
+  String get threadLabel => 'Fil';
+
+  @override
   String get onlyVisibleToYouText => 'Només visible per a tu';
 
   @override
