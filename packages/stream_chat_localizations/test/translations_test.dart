@@ -31,6 +31,7 @@ void main() {
         isNotNull,
       );
       expect(localizations.threadReplyLabel, isNotNull);
+      expect(localizations.threadLabel, isNotNull);
       expect(localizations.onlyVisibleToYouText, isNotNull);
       expect(localizations.editedMessageLabel, isNotNull);
       expect(localizations.threadReplyCountText(3), isNotNull);
@@ -208,6 +209,9 @@ void main() {
       expect(localizations.toggleMuteUnmuteGroupText(isMuted: true), isNotNull);
       expect(localizations.toggleMuteUnmuteUserQuestion(isMuted: true), isNotNull);
       expect(localizations.toggleMuteUnmuteUserText(isMuted: true), isNotNull);
+      expect(localizations.toggleMuteUnmuteUserText(isMuted: false), isNotNull);
+      expect(localizations.toggleBlockUnblockUserText(isBlocked: true), isNotNull);
+      expect(localizations.toggleBlockUnblockUserText(isBlocked: false), isNotNull);
       expect(localizations.viewLibrary, isNotNull);
       expect(localizations.unreadMessagesSeparatorText(), isNotNull);
       expect(localizations.enableFileAccessMessage, isNotNull);

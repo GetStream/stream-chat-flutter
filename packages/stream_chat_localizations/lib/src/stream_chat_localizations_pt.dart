@@ -42,6 +42,9 @@ class StreamChatLocalizationsPt extends GlobalStreamChatLocalizations {
   String get threadReplyLabel => 'Responder na conversa';
 
   @override
+  String get threadLabel => 'Conversa';
+
+  @override
   String get onlyVisibleToYouText => 'Visível apenas para você';
 
   @override
@@ -399,6 +402,12 @@ Não é possível adicionar mais de $limit arquivos de uma vez
     } else {
       return 'Silenciar usuário';
     }
+  }
+
+  @override
+  String toggleBlockUnblockUserText({required bool isBlocked}) {
+    if (isBlocked) return 'Desbloquear usuário';
+    return 'Bloquear usuário';
   }
 
   @override

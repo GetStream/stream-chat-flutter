@@ -34,6 +34,9 @@ abstract class Translations {
   /// The label for "thread reply"
   String get threadReplyLabel;
 
+  /// The label for the thread view header ("Thread").
+  String get threadLabel;
+
   /// The text for showing if the message is only visible to you
   String get onlyVisibleToYouText;
 
@@ -398,6 +401,9 @@ abstract class Translations {
   /// The text for "Mute User"/"Unmute User" based on the value of [isMuted].
   String toggleMuteUnmuteUserText({required bool isMuted});
 
+  /// The text for "Block User"/"Unblock User" based on the value of [isBlocked].
+  String toggleBlockUnblockUserText({required bool isBlocked});
+
   /// The text for "Are you sure you want to mute this group?"/"Are you sure you want to unmute this group?"
   /// based on the value of [isMuted].
   String toggleMuteUnmuteGroupQuestion({required bool isMuted});
@@ -754,7 +760,10 @@ class DefaultTranslations implements Translations {
   }
 
   @override
-  String get threadReplyLabel => 'Thread';
+  String get threadReplyLabel => 'Thread Reply';
+
+  @override
+  String get threadLabel => 'Thread';
 
   @override
   String get onlyVisibleToYouText => 'Only visible to you';
@@ -930,7 +939,7 @@ class DefaultTranslations implements Translations {
   }
 
   @override
-  String get markAsUnreadLabel => 'Mark as Unread';
+  String get markAsUnreadLabel => 'Mark Unread';
 
   @override
   String unreadCountIndicatorLabel({required int unreadCount}) {
@@ -1133,6 +1142,12 @@ Attachment limit exceeded: it's not possible to add more than $limit attachments
     } else {
       return 'Mute User';
     }
+  }
+
+  @override
+  String toggleBlockUnblockUserText({required bool isBlocked}) {
+    if (isBlocked) return 'Unblock User';
+    return 'Block User';
   }
 
   @override

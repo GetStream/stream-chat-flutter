@@ -42,6 +42,9 @@ class StreamChatLocalizationsEs extends GlobalStreamChatLocalizations {
   String get threadReplyLabel => 'Responder al hilo de discusión';
 
   @override
+  String get threadLabel => 'Hilo';
+
+  @override
   String get onlyVisibleToYouText => 'Sólo visible para usted';
 
   @override
@@ -406,6 +409,12 @@ No es posible añadir más de $limit archivos adjuntos
     } else {
       return 'Silenciar usuario';
     }
+  }
+
+  @override
+  String toggleBlockUnblockUserText({required bool isBlocked}) {
+    if (isBlocked) return 'Desbloquear usuario';
+    return 'Bloquear usuario';
   }
 
   @override

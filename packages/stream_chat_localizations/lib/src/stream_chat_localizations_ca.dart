@@ -42,6 +42,9 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
   String get threadReplyLabel => 'Respon al fil';
 
   @override
+  String get threadLabel => 'Fil';
+
+  @override
   String get onlyVisibleToYouText => 'Només visible per a tu';
 
   @override
@@ -403,6 +406,12 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
     } else {
       return "Silencia l'usuari";
     }
+  }
+
+  @override
+  String toggleBlockUnblockUserText({required bool isBlocked}) {
+    if (isBlocked) return "Desbloquejar l'usuari";
+    return "Bloquejar l'usuari";
   }
 
   @override

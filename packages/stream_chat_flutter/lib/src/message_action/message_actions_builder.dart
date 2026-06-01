@@ -153,6 +153,37 @@ class StreamMessageActionsBuilder {
       );
     }
 
+    // Pinning a private message is not allowed, simply because pinning a
+    // message is meant to bring attention to that message, that is not possible
+    // with a message that is only visible to a subset of users.
+    if (canPinMessage && !isPrivateMessage) {
+      final isPinned = message.pinned;
+      final label = context.translations.togglePinUnpinText;
+
+      final action = switch (isPinned) {
+        true => UnpinMessage(message: message),
+        false => PinMessage(message: message),
+      };
+
+      messageActions.add(
+        StreamContextMenuAction(
+          value: action,
+          label: Text(label.call(pinned: isPinned)),
+          leading: Icon(icons.pin),
+        ),
+      );
+    }
+
+    if (message.text case final text? when text.isNotEmpty) {
+      messageActions.add(
+        StreamContextMenuAction(
+          value: CopyMessage(message: message),
+          label: Text(context.translations.copyMessageLabel),
+          leading: Icon(icons.copy),
+        ),
+      );
+    }
+
     // Mark unread action is only available for other users' messages.
     if (canReceiveReadEvents && !isSentByCurrentUser) {
       StreamContextMenuAction<MessageAction> markUnreadAction() {
@@ -175,16 +206,6 @@ class StreamMessageActionsBuilder {
       }
     }
 
-    if (message.text case final text? when text.isNotEmpty) {
-      messageActions.add(
-        StreamContextMenuAction(
-          value: CopyMessage(message: message),
-          label: Text(context.translations.copyMessageLabel),
-          leading: Icon(icons.copy),
-        ),
-      );
-    }
-
     if (!containsPoll && !containsGiphy) {
       if (canUpdateAnyMessage || (canUpdateOwnMessage && isSentByCurrentUser)) {
         messageActions.add(
@@ -195,39 +216,6 @@ class StreamMessageActionsBuilder {
           ),
         );
       }
-    }
-
-    // Pinning a private message is not allowed, simply because pinning a
-    // message is meant to bring attention to that message, that is not possible
-    // with a message that is only visible to a subset of users.
-    if (canPinMessage && !isPrivateMessage) {
-      final isPinned = message.pinned;
-      final label = context.translations.togglePinUnpinText;
-
-      final action = switch (isPinned) {
-        true => UnpinMessage(message: message),
-        false => PinMessage(message: message),
-      };
-
-      messageActions.add(
-        StreamContextMenuAction(
-          value: action,
-          label: Text(label.call(pinned: isPinned)),
-          leading: Icon(icons.pin),
-        ),
-      );
-    }
-
-    if (canDeleteAnyMessage || (canDeleteOwnMessage && isSentByCurrentUser)) {
-      final label = context.translations.toggleDeleteRetryDeleteMessageText;
-
-      messageActions.add(
-        StreamContextMenuAction.destructive(
-          value: DeleteMessage(message: message),
-          leading: Icon(icons.delete),
-          label: Text(label.call(isDeleteFailed: false)),
-        ),
-      );
     }
 
     if (!isSentByCurrentUser) {
@@ -255,6 +243,36 @@ class StreamMessageActionsBuilder {
           value: action,
           label: Text(label.call(isMuted: isMuted)),
           leading: Icon(icons.mute),
+        ),
+      );
+    }
+
+    if (message.user case final messageUser? when !isSentByCurrentUser) {
+      final isBlocked = currentUser?.blockedUserIds.contains(messageUser.id) ?? false;
+      final label = context.translations.toggleBlockUnblockUserText;
+
+      final action = switch (isBlocked) {
+        true => UnblockUser(message: message, user: messageUser),
+        false => BlockUser(message: message, user: messageUser),
+      };
+
+      messageActions.add(
+        StreamContextMenuAction.destructive(
+          value: action,
+          label: Text(label.call(isBlocked: isBlocked)),
+          leading: Icon(isBlocked ? icons.userCheck : icons.noSign),
+        ),
+      );
+    }
+
+    if (canDeleteAnyMessage || (canDeleteOwnMessage && isSentByCurrentUser)) {
+      final label = context.translations.toggleDeleteRetryDeleteMessageText;
+
+      messageActions.add(
+        StreamContextMenuAction.destructive(
+          value: DeleteMessage(message: message),
+          leading: Icon(icons.delete),
+          label: Text(label.call(isDeleteFailed: false)),
         ),
       );
     }

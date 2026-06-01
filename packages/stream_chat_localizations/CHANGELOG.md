@@ -5,6 +5,10 @@
 - Renamed `attachmentsUploadProgressText` parameter `remaining` → `completed`
   and reworded the translation across all locales to report completed count
   instead of remaining.
+- Renamed English `threadReplyLabel` (`'Thread'` → `'Thread Reply'`) and
+  `markAsUnreadLabel` (`'Mark as Unread'` → `'Mark Unread'`).
+- Reworded Korean `threadReplyLabel` (`'스레드 응답입니다'` → `'스레드 답변'`)
+  to drop the declarative copula so it reads as a menu label.
 - Renamed `questionsLabel` getter → `questionLabel({bool isPlural = false})`
   method across all supported locales.
 - Renamed `endVoteConfirmationText` → `endVoteConfirmationTitle` across all
@@ -16,6 +20,9 @@
 
 ✅ Added
 
+- Added `toggleBlockUnblockUserText` translation for all supported locales.
+- Added `threadLabel` translation for all supported locales, used by the
+  `StreamThreadHeader` default title.
 - Added `commandUsernameLabel` translation (default `@username`) for all supported
   locales. Used by the message composer placeholder when user-target commands
   (`/mute`, `/unmute`, `/ban`, `/unban`) are active.

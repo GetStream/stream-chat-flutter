@@ -4,7 +4,15 @@
 
 - `StreamMessageComposer` no longer clobbers pre-populated composer state (text, quoted message, attachments) when the channel's draft stream emits its initial `null` (no draft on server). The reset now fires only on an actual non-null → null transition, distinguishing "no draft yet" from "draft was removed".
 
+✅ Added
+
+- Added `BlockUser` / `UnblockUser` default message actions, dispatching to `StreamChatClient.blockUser` / `unblockUser`.
+
 🔄 Internal / Non-breaking
+
+- Reordered the default message actions to match the design system.
+- Renamed default English `threadReplyLabel` (`'Thread'` → `'Thread Reply'`) and `markAsUnreadLabel` (`'Mark as Unread'` → `'Mark Unread'`).
+- `StreamThreadHeader` default title now sources from the new `threadLabel` translation key instead of `threadReplyLabel`, restoring the short `'Thread'` header.
 
 - `ReactionIconResolver.supportedReactions` is now wired to the full emoji picker sheet opened by the "+" button in `StreamMessageReactionPicker` and the add-emoji chip in `ReactionDetailSheet`. Override `supportedReactions` on a custom resolver to control which reactions appear in the full picker grid.
 

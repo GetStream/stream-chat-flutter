@@ -40,6 +40,9 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   String get threadReplyLabel => 'スレッド返信';
 
   @override
+  String get threadLabel => 'スレッド';
+
+  @override
   String get onlyVisibleToYouText => '自分にのみ見えます';
 
   @override
@@ -392,6 +395,12 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
     } else {
       return 'ユーザーをミュート';
     }
+  }
+
+  @override
+  String toggleBlockUnblockUserText({required bool isBlocked}) {
+    if (isBlocked) return 'ユーザーのブロックを解除';
+    return 'ユーザーをブロック';
   }
 
   @override

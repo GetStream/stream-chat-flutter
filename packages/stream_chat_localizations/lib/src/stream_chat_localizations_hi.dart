@@ -42,6 +42,9 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
   String get threadReplyLabel => 'थ्रेड जवाब';
 
   @override
+  String get threadLabel => 'थ्रेड';
+
+  @override
   String get onlyVisibleToYouText => 'केवल आपको दिखाई दे रहा है';
 
   @override
@@ -404,6 +407,12 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
     } else {
       return 'उपयोगकर्ता को म्यूट करें';
     }
+  }
+
+  @override
+  String toggleBlockUnblockUserText({required bool isBlocked}) {
+    if (isBlocked) return 'उपयोगकर्ता को अनब्लॉक करें';
+    return 'उपयोगकर्ता को ब्लॉक करें';
   }
 
   @override
