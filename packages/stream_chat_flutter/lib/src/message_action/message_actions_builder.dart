@@ -247,18 +247,6 @@ class StreamMessageActionsBuilder {
       );
     }
 
-    if (canDeleteAnyMessage || (canDeleteOwnMessage && isSentByCurrentUser)) {
-      final label = context.translations.toggleDeleteRetryDeleteMessageText;
-
-      messageActions.add(
-        StreamContextMenuAction.destructive(
-          value: DeleteMessage(message: message),
-          leading: Icon(icons.delete),
-          label: Text(label.call(isDeleteFailed: false)),
-        ),
-      );
-    }
-
     if (message.user case final messageUser? when !isSentByCurrentUser) {
       final isBlocked = currentUser?.blockedUserIds.contains(messageUser.id) ?? false;
       final label = context.translations.toggleBlockUnblockUserText;
@@ -273,6 +261,18 @@ class StreamMessageActionsBuilder {
           value: action,
           label: Text(label.call(isBlocked: isBlocked)),
           leading: Icon(isBlocked ? icons.userCheck : icons.noSign),
+        ),
+      );
+    }
+
+    if (canDeleteAnyMessage || (canDeleteOwnMessage && isSentByCurrentUser)) {
+      final label = context.translations.toggleDeleteRetryDeleteMessageText;
+
+      messageActions.add(
+        StreamContextMenuAction.destructive(
+          value: DeleteMessage(message: message),
+          leading: Icon(icons.delete),
+          label: Text(label.call(isDeleteFailed: false)),
         ),
       );
     }
