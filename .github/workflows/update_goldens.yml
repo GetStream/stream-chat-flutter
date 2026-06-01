@@ -11,10 +11,11 @@ on:
         options:
           - sdk
           - docs
+          - both
 
 jobs:
   update_sdk_goldens:
-    if: inputs.target == 'sdk'
+    if: inputs.target == 'sdk' || inputs.target == 'both'
     runs-on: ubuntu-latest
     steps:
       - name: 📚 Checkout branch
@@ -48,7 +49,7 @@ jobs:
           commit_user_email: "60655709+Stream-SDK-Bot@users.noreply.github.com"
 
   update_docs_goldens:
-    if: inputs.target == 'docs'
+    if: inputs.target == 'docs' || inputs.target == 'both'
     runs-on: macos-latest
     steps:
       - name: 📚 Checkout branch
