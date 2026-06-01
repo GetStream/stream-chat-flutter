@@ -7,11 +7,11 @@ on:
         description: "Which goldens to update"
         required: true
         type: choice
-        default: sdk
+        default: both
         options:
+          - both
           - sdk
           - docs
-          - both
 
 jobs:
   update_sdk_goldens:
@@ -20,8 +20,6 @@ jobs:
     steps:
       - name: 📚 Checkout branch
         uses: actions/checkout@v6
-        with:
-          ssh-key: ${{ secrets.BOT_SSH_PRIVATE_KEY }}
 
       - name: 🐦 Install Flutter
         uses: subosito/flutter-action@v2
@@ -40,13 +38,13 @@ jobs:
         continue-on-error: true
         run: melos run update:goldens:sdk
 
-      - name: 📤 Commit Changes
-        uses: stefanzweifel/git-auto-commit-action@v7
+      - name: 📤 Upload SDK goldens artifact
+        uses: actions/upload-artifact@v4
         with:
-          commit_message: "chore: Update SDK Goldens"
-          file_pattern: "packages/**/test/**/goldens/**/*.png"
-          commit_user_name: "Stream SDK Bot"
-          commit_user_email: "60655709+Stream-SDK-Bot@users.noreply.github.com"
+          name: sdk-goldens
+          path: packages/**/test/**/goldens/**/*.png
+          if-no-files-found: ignore
+          retention-days: 1
 
   update_docs_goldens:
     if: inputs.target == 'docs' || inputs.target == 'both'
@@ -54,8 +52,6 @@ jobs:
     steps:
       - name: 📚 Checkout branch
         uses: actions/checkout@v6
-        with:
-          ssh-key: ${{ secrets.BOT_SSH_PRIVATE_KEY }}
 
       - name: 🐦 Install Flutter
         uses: subosito/flutter-action@v2
@@ -74,10 +70,50 @@ jobs:
         continue-on-error: true
         run: melos run update:goldens:docs
 
+      - name: 📤 Upload docs goldens artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: docs-goldens
+          path: docs/**/test/**/goldens/macos/*.png
+          if-no-files-found: ignore
+          retention-days: 1
+
+  commit_goldens:
+    needs: [update_sdk_goldens, update_docs_goldens]
+    # `always()` lets this run even when one regen job was skipped (e.g. target=sdk).
+    # We commit only if at least one regen job succeeded — a hard failure on either
+    # side falls through to a no-op rather than committing partial state.
+    if: |
+      always() &&
+      (needs.update_sdk_goldens.result == 'success' ||
+       needs.update_docs_goldens.result == 'success')
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📚 Checkout branch
+        uses: actions/checkout@v6
+        with:
+          ssh-key: ${{ secrets.BOT_SSH_PRIVATE_KEY }}
+
+      - name: 📥 Download SDK goldens
+        if: needs.update_sdk_goldens.result == 'success'
+        uses: actions/download-artifact@v4
+        with:
+          name: sdk-goldens
+          path: .
+
+      - name: 📥 Download docs goldens
+        if: needs.update_docs_goldens.result == 'success'
+        uses: actions/download-artifact@v4
+        with:
+          name: docs-goldens
+          path: .
+
       - name: 📤 Commit Changes
         uses: stefanzweifel/git-auto-commit-action@v7
         with:
-          commit_message: "chore: Update Docs Snapshots"
-          file_pattern: "docs/**/test/**/goldens/macos/*.png"
+          commit_message: "chore: Update Goldens"
+          file_pattern: |
+            packages/**/test/**/goldens/**/*.png
+            docs/**/test/**/goldens/**/*.png
           commit_user_name: "Stream SDK Bot"
           commit_user_email: "60655709+Stream-SDK-Bot@users.noreply.github.com"
