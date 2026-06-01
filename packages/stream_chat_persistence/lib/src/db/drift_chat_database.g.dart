@@ -98,6 +98,11 @@ class $ChannelsTable extends Channels
       filterTags = GeneratedColumn<String>('filter_tags', aliasedName, true,
               type: DriftSqlType.string, requiredDuringInsert: false)
           .withConverter<List<String>?>($ChannelsTable.$converterfilterTagsn);
+  static const VerificationMeta _teamMeta = const VerificationMeta('team');
+  @override
+  late final GeneratedColumn<String> team = GeneratedColumn<String>(
+      'team', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
   @override
   late final GeneratedColumnWithTypeConverter<Map<String, dynamic>?, String>
       extraData = GeneratedColumn<String>('extra_data', aliasedName, true,
@@ -120,6 +125,7 @@ class $ChannelsTable extends Channels
         messageCount,
         createdById,
         filterTags,
+        team,
         extraData
       ];
   @override
@@ -189,6 +195,10 @@ class $ChannelsTable extends Channels
           createdById.isAcceptableOrUnknown(
               data['created_by_id']!, _createdByIdMeta));
     }
+    if (data.containsKey('team')) {
+      context.handle(
+          _teamMeta, team.isAcceptableOrUnknown(data['team']!, _teamMeta));
+    }
     return context;
   }
 
@@ -229,6 +239,8 @@ class $ChannelsTable extends Channels
       filterTags: $ChannelsTable.$converterfilterTagsn.fromSql(attachedDatabase
           .typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}filter_tags'])),
+      team: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}team']),
       extraData: $ChannelsTable.$converterextraDatan.fromSql(attachedDatabase
           .typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}extra_data'])),
@@ -299,6 +311,9 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
   /// List of filter tags for this channel
   final List<String>? filterTags;
 
+  /// The team the channel belongs to
+  final String? team;
+
   /// Map of custom channel extraData
   final Map<String, dynamic>? extraData;
   const ChannelEntity(
@@ -316,6 +331,7 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
       this.messageCount,
       this.createdById,
       this.filterTags,
+      this.team,
       this.extraData});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -351,6 +367,9 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
       map['filter_tags'] = Variable<String>(
           $ChannelsTable.$converterfilterTagsn.toSql(filterTags));
     }
+    if (!nullToAbsent || team != null) {
+      map['team'] = Variable<String>(team);
+    }
     if (!nullToAbsent || extraData != null) {
       map['extra_data'] = Variable<String>(
           $ChannelsTable.$converterextraDatan.toSql(extraData));
@@ -377,6 +396,7 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
       messageCount: serializer.fromJson<int?>(json['messageCount']),
       createdById: serializer.fromJson<String?>(json['createdById']),
       filterTags: serializer.fromJson<List<String>?>(json['filterTags']),
+      team: serializer.fromJson<String?>(json['team']),
       extraData: serializer.fromJson<Map<String, dynamic>?>(json['extraData']),
     );
   }
@@ -398,6 +418,7 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
       'messageCount': serializer.toJson<int?>(messageCount),
       'createdById': serializer.toJson<String?>(createdById),
       'filterTags': serializer.toJson<List<String>?>(filterTags),
+      'team': serializer.toJson<String?>(team),
       'extraData': serializer.toJson<Map<String, dynamic>?>(extraData),
     };
   }
@@ -417,6 +438,7 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
           Value<int?> messageCount = const Value.absent(),
           Value<String?> createdById = const Value.absent(),
           Value<List<String>?> filterTags = const Value.absent(),
+          Value<String?> team = const Value.absent(),
           Value<Map<String, dynamic>?> extraData = const Value.absent()}) =>
       ChannelEntity(
         id: id ?? this.id,
@@ -437,6 +459,7 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
             messageCount.present ? messageCount.value : this.messageCount,
         createdById: createdById.present ? createdById.value : this.createdById,
         filterTags: filterTags.present ? filterTags.value : this.filterTags,
+        team: team.present ? team.value : this.team,
         extraData: extraData.present ? extraData.value : this.extraData,
       );
   ChannelEntity copyWithCompanion(ChannelsCompanion data) {
@@ -464,6 +487,7 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
           data.createdById.present ? data.createdById.value : this.createdById,
       filterTags:
           data.filterTags.present ? data.filterTags.value : this.filterTags,
+      team: data.team.present ? data.team.value : this.team,
       extraData: data.extraData.present ? data.extraData.value : this.extraData,
     );
   }
@@ -485,6 +509,7 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
           ..write('messageCount: $messageCount, ')
           ..write('createdById: $createdById, ')
           ..write('filterTags: $filterTags, ')
+          ..write('team: $team, ')
           ..write('extraData: $extraData')
           ..write(')'))
         .toString();
@@ -506,6 +531,7 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
       messageCount,
       createdById,
       filterTags,
+      team,
       extraData);
   @override
   bool operator ==(Object other) =>
@@ -525,6 +551,7 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
           other.messageCount == this.messageCount &&
           other.createdById == this.createdById &&
           other.filterTags == this.filterTags &&
+          other.team == this.team &&
           other.extraData == this.extraData);
 }
 
@@ -543,6 +570,7 @@ class ChannelsCompanion extends UpdateCompanion<ChannelEntity> {
   final Value<int?> messageCount;
   final Value<String?> createdById;
   final Value<List<String>?> filterTags;
+  final Value<String?> team;
   final Value<Map<String, dynamic>?> extraData;
   final Value<int> rowid;
   const ChannelsCompanion({
@@ -560,6 +588,7 @@ class ChannelsCompanion extends UpdateCompanion<ChannelEntity> {
     this.messageCount = const Value.absent(),
     this.createdById = const Value.absent(),
     this.filterTags = const Value.absent(),
+    this.team = const Value.absent(),
     this.extraData = const Value.absent(),
     this.rowid = const Value.absent(),
   });
@@ -578,6 +607,7 @@ class ChannelsCompanion extends UpdateCompanion<ChannelEntity> {
     this.messageCount = const Value.absent(),
     this.createdById = const Value.absent(),
     this.filterTags = const Value.absent(),
+    this.team = const Value.absent(),
     this.extraData = const Value.absent(),
     this.rowid = const Value.absent(),
   })  : id = Value(id),
@@ -599,6 +629,7 @@ class ChannelsCompanion extends UpdateCompanion<ChannelEntity> {
     Expression<int>? messageCount,
     Expression<String>? createdById,
     Expression<String>? filterTags,
+    Expression<String>? team,
     Expression<String>? extraData,
     Expression<int>? rowid,
   }) {
@@ -617,6 +648,7 @@ class ChannelsCompanion extends UpdateCompanion<ChannelEntity> {
       if (messageCount != null) 'message_count': messageCount,
       if (createdById != null) 'created_by_id': createdById,
       if (filterTags != null) 'filter_tags': filterTags,
+      if (team != null) 'team': team,
       if (extraData != null) 'extra_data': extraData,
       if (rowid != null) 'rowid': rowid,
     });
@@ -637,6 +669,7 @@ class ChannelsCompanion extends UpdateCompanion<ChannelEntity> {
       Value<int?>? messageCount,
       Value<String?>? createdById,
       Value<List<String>?>? filterTags,
+      Value<String?>? team,
       Value<Map<String, dynamic>?>? extraData,
       Value<int>? rowid}) {
     return ChannelsCompanion(
@@ -654,6 +687,7 @@ class ChannelsCompanion extends UpdateCompanion<ChannelEntity> {
       messageCount: messageCount ?? this.messageCount,
       createdById: createdById ?? this.createdById,
       filterTags: filterTags ?? this.filterTags,
+      team: team ?? this.team,
       extraData: extraData ?? this.extraData,
       rowid: rowid ?? this.rowid,
     );
@@ -708,6 +742,9 @@ class ChannelsCompanion extends UpdateCompanion<ChannelEntity> {
       map['filter_tags'] = Variable<String>(
           $ChannelsTable.$converterfilterTagsn.toSql(filterTags.value));
     }
+    if (team.present) {
+      map['team'] = Variable<String>(team.value);
+    }
     if (extraData.present) {
       map['extra_data'] = Variable<String>(
           $ChannelsTable.$converterextraDatan.toSql(extraData.value));
@@ -735,6 +772,7 @@ class ChannelsCompanion extends UpdateCompanion<ChannelEntity> {
           ..write('messageCount: $messageCount, ')
           ..write('createdById: $createdById, ')
           ..write('filterTags: $filterTags, ')
+          ..write('team: $team, ')
           ..write('extraData: $extraData, ')
           ..write('rowid: $rowid')
           ..write(')'))
@@ -8708,6 +8746,7 @@ typedef $$ChannelsTableCreateCompanionBuilder = ChannelsCompanion Function({
   Value<int?> messageCount,
   Value<String?> createdById,
   Value<List<String>?> filterTags,
+  Value<String?> team,
   Value<Map<String, dynamic>?> extraData,
   Value<int> rowid,
 });
@@ -8726,6 +8765,7 @@ typedef $$ChannelsTableUpdateCompanionBuilder = ChannelsCompanion Function({
   Value<int?> messageCount,
   Value<String?> createdById,
   Value<List<String>?> filterTags,
+  Value<String?> team,
   Value<Map<String, dynamic>?> extraData,
   Value<int> rowid,
 });
@@ -8853,6 +8893,9 @@ class $$ChannelsTableFilterComposer
       get filterTags => $composableBuilder(
           column: $table.filterTags,
           builder: (column) => ColumnWithTypeConverterFilters(column));
+
+  ColumnFilters<String> get team => $composableBuilder(
+      column: $table.team, builder: (column) => ColumnFilters(column));
 
   ColumnWithTypeConverterFilters<Map<String, dynamic>?, Map<String, dynamic>,
           String>
@@ -8999,6 +9042,9 @@ class $$ChannelsTableOrderingComposer
   ColumnOrderings<String> get filterTags => $composableBuilder(
       column: $table.filterTags, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<String> get team => $composableBuilder(
+      column: $table.team, builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<String> get extraData => $composableBuilder(
       column: $table.extraData, builder: (column) => ColumnOrderings(column));
 }
@@ -9055,6 +9101,9 @@ class $$ChannelsTableAnnotationComposer
   GeneratedColumnWithTypeConverter<List<String>?, String> get filterTags =>
       $composableBuilder(
           column: $table.filterTags, builder: (column) => column);
+
+  GeneratedColumn<String> get team =>
+      $composableBuilder(column: $table.team, builder: (column) => column);
 
   GeneratedColumnWithTypeConverter<Map<String, dynamic>?, String>
       get extraData => $composableBuilder(
@@ -9186,6 +9235,7 @@ class $$ChannelsTableTableManager extends RootTableManager<
             Value<int?> messageCount = const Value.absent(),
             Value<String?> createdById = const Value.absent(),
             Value<List<String>?> filterTags = const Value.absent(),
+            Value<String?> team = const Value.absent(),
             Value<Map<String, dynamic>?> extraData = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
@@ -9204,6 +9254,7 @@ class $$ChannelsTableTableManager extends RootTableManager<
             messageCount: messageCount,
             createdById: createdById,
             filterTags: filterTags,
+            team: team,
             extraData: extraData,
             rowid: rowid,
           ),
@@ -9222,6 +9273,7 @@ class $$ChannelsTableTableManager extends RootTableManager<
             Value<int?> messageCount = const Value.absent(),
             Value<String?> createdById = const Value.absent(),
             Value<List<String>?> filterTags = const Value.absent(),
+            Value<String?> team = const Value.absent(),
             Value<Map<String, dynamic>?> extraData = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
@@ -9240,6 +9292,7 @@ class $$ChannelsTableTableManager extends RootTableManager<
             messageCount: messageCount,
             createdById: createdById,
             filterTags: filterTags,
+            team: team,
             extraData: extraData,
             rowid: rowid,
           ),
