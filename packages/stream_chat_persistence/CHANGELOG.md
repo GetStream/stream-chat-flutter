@@ -14,6 +14,10 @@
 
 - Reduce the number of DB reads in the `ChatPersistenceClient.getChannelStates` method.
 
+🔄 Changed
+
+- Changed how dates are stored in the local cache, from integer seconds to ISO-8601 strings, in order to preserve millisecond precision.
+
 ## 9.24.0
 
 - Updated `stream_chat` dependency to [`9.24.0`](https://pub.dev/packages/stream_chat/changelog).

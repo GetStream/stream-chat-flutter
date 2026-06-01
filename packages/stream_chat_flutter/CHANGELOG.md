@@ -148,8 +148,18 @@
 
 - Fixed `StreamMessageListView` not auto-scrolling to the bottom on the user's own outgoing message
   until the server confirmed it.
-- Fixed a `FlutterError` ("A RenderViewport exceeded its maximum number of layout cycles") that
-  could occur when fast-scrolling through the message list.
+- Fixed `StreamMessageListView` tripping `A RenderViewport exceeded its maximum number of layout
+  cycles` under mid-list anchored layout. `ScrollablePositionedList` now preserves the scroll offset
+  across reanchors instead of resetting it to 0.
+- Fixed `RenderBox was not laid out` thrown by `MessageCard._updateWidthLimit` when the attachments
+  subtree was detached between scheduling the post-frame callback and it firing (e.g. the list was
+  rebuilt or the message removed). Added a `hasSize` guard before reading `RenderBox.size`.
+
+🚀 Improved
+
+- `ScrollablePositionedList.padding` now accepts `EdgeInsetsGeometry` (resolved against
+  `Directionality`), and `scrollTo` lands the target at the content-area edge by adjusting for
+  leading padding.
 
 ## 9.24.0
 

@@ -113,12 +113,18 @@ class _StreamMessageContentState extends State<StreamMessageContent> {
 
   // Measures the attachment width after layout and constrains the bubble.
   void _updateWidthLimit() {
+    if (!mounted) return;
+
     final attachmentContext = attachmentsKey.currentContext;
     final renderBox = attachmentContext?.findRenderObject() as RenderBox?;
-    final attachmentsWidth = renderBox?.size.width;
+    // The attachments subtree may have been detached between scheduling this
+    // post-frame callback and it firing. Reading [RenderBox.size] without
+    // checking [RenderBox.hasSize] throws `RenderBox was not laid out`.
+    if (renderBox == null || !renderBox.hasSize) return;
+    final attachmentsWidth = renderBox.size.width;
 
-    if (attachmentsWidth == null || attachmentsWidth == 0) return;
-    if (mounted) setState(() => widthLimit = attachmentsWidth);
+    if (attachmentsWidth == 0) return;
+    setState(() => widthLimit = attachmentsWidth);
   }
 
   @override

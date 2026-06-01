@@ -4,6 +4,7 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -67,7 +68,10 @@ class UnboundedRenderViewport extends RenderViewport {
   }) : _requestedAnchor = anchor,
        _effectiveAnchor = anchor;
 
-  static const int _maxLayoutCycles = 10;
+  // Raised from 10 to absorb walk-back cycles from the underlying
+  // slivers after an anchor-preserving re-layout. Still bounded so
+  // pathological infinite loops assert.
+  static const int _maxLayoutCycles = 100;
 
   /// The anchor the widget asked for. Used as the starting point each
   /// layout pass; may be overridden by the "fit anchor" fallback when
@@ -195,7 +199,9 @@ class UnboundedRenderViewport extends RenderViewport {
         offset.pixels + centerOffsetAdjustment,
         effectiveAnchor,
       );
-      if (correction != 0.0) {
+      // Sub-`precisionErrorTolerance` corrections can't move `pixels`
+      // and would loop forever; treat as converged.
+      if (correction.abs() > precisionErrorTolerance) {
         offset.correctBy(correction);
       } else {
         // *** Difference from [RenderViewport].
