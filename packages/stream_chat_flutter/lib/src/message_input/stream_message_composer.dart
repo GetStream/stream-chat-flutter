@@ -512,10 +512,6 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
   StreamSubscription<Event>? _messageUpdatedSubscription;
   StreamSubscription<Event>? _messageDeletedSubscription;
 
-  // Tracks the last draft seen on the stream so we can tell the
-  // "no draft on server" initial state apart from a real removal.
-  Draft? _lastDraft;
-
   @override
   void initState() {
     super.initState();
@@ -597,6 +593,10 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
       _effectiveController.cancelEditMessage();
     }
   }
+
+  // Tracks the last draft seen on the stream so we can tell the
+  // "no draft on server" initial state apart from a real removal.
+  Draft? _lastDraft;
 
   void _onDraftUpdate(Draft? draft) {
     // Don't let draft changes clobber an in-progress edit.
