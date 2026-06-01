@@ -594,11 +594,24 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     }
   }
 
+  // Tracks the last draft seen on the stream so we can tell the
+  // "no draft on server" initial state apart from a real removal.
+  Draft? _lastDraft;
+
   void _onDraftUpdate(Draft? draft) {
     // Don't let draft changes clobber an in-progress edit.
     if (_isEditing) return;
 
-    // If the draft is removed, reset the controller.
+    final hadDraft = _lastDraft != null;
+    _lastDraft = draft;
+
+    // Initial subscription with no draft on server — leave the controller
+    // alone so any pre-populated composer state (quoted message, attachments,
+    // drafted text) is preserved.
+    if (draft == null && !hadDraft) return;
+
+    // Draft transitioned from non-null to null — removed locally or on
+    // another device; reset the composer to match.
     if (draft == null) return _effectiveController.reset();
 
     // Otherwise, update the controller with the draft message.

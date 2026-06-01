@@ -228,6 +228,7 @@ void main() {
           client: listClient,
           messageId: listMessageId,
         );
+        addTearDown(controller.dispose);
 
         return StreamChat(
           client: listClient,
