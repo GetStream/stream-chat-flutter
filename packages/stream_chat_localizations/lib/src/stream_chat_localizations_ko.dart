@@ -397,11 +397,8 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
 
   @override
   String toggleBlockUnblockUserText({required bool isBlocked}) {
-    if (isBlocked) {
-      return '사용자 차단 해제';
-    } else {
-      return '사용자 차단';
-    }
+    if (isBlocked) return '사용자 차단 해제';
+    return '사용자 차단';
   }
 
   @override

@@ -407,11 +407,8 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
 
   @override
   String toggleBlockUnblockUserText({required bool isBlocked}) {
-    if (isBlocked) {
-      return "Desbloquejar l'usuari";
-    } else {
-      return "Bloquejar l'usuari";
-    }
+    if (isBlocked) return "Desbloquejar l'usuari";
+    return "Bloquejar l'usuari";
   }
 
   @override

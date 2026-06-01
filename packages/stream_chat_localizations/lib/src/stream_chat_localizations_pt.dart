@@ -403,11 +403,8 @@ Não é possível adicionar mais de $limit arquivos de uma vez
 
   @override
   String toggleBlockUnblockUserText({required bool isBlocked}) {
-    if (isBlocked) {
-      return 'Desbloquear usuário';
-    } else {
-      return 'Bloquear usuário';
-    }
+    if (isBlocked) return 'Desbloquear usuário';
+    return 'Bloquear usuário';
   }
 
   @override

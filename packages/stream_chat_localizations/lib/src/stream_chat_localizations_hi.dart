@@ -408,11 +408,8 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
 
   @override
   String toggleBlockUnblockUserText({required bool isBlocked}) {
-    if (isBlocked) {
-      return 'उपयोगकर्ता को अनब्लॉक करें';
-    } else {
-      return 'उपयोगकर्ता को ब्लॉक करें';
-    }
+    if (isBlocked) return 'उपयोगकर्ता को अनब्लॉक करें';
+    return 'उपयोगकर्ता को ब्लॉक करें';
   }
 
   @override

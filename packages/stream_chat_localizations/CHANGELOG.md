@@ -5,9 +5,9 @@
 - Renamed `attachmentsUploadProgressText` parameter `remaining` → `completed`
   and reworded the translation across all locales to report completed count
   instead of remaining.
-- English `threadReplyLabel` changed from `'Thread'` → `'Thread Reply'` and
-  `markAsUnreadLabel` from `'Mark as Unread'` → `'Mark Unread'` to match the
-  design system. Non-English locales are unchanged.
+- Renamed English `threadReplyLabel` (`'Thread'` → `'Thread Reply'`) and
+  `markAsUnreadLabel` (`'Mark as Unread'` → `'Mark Unread'`). Non-English
+  locales are unchanged.
 - Renamed `questionsLabel` getter → `questionLabel({bool isPlural = false})`
   method across all supported locales.
 - Renamed `endVoteConfirmationText` → `endVoteConfirmationTitle` across all
@@ -19,9 +19,7 @@
 
 ✅ Added
 
-- Added `toggleBlockUnblockUserText({required bool isBlocked})` translation
-  for all supported locales (English default: `'Block User'` / `'Unblock User'`).
-  Used by the new Block / Unblock message action.
+- Added `toggleBlockUnblockUserText` translation for all supported locales.
 - Added `commandUsernameLabel` translation (default `@username`) for all supported
   locales. Used by the message composer placeholder when user-target commands
   (`/mute`, `/unmute`, `/ban`, `/unban`) are active.

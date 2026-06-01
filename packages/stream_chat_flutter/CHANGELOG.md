@@ -6,12 +6,12 @@
 
 ✅ Added
 
-- Added `BlockUser` / `UnblockUser` message actions to the long-press message menu, matching Android Compose / SwiftUI / React Native parity. Toggles based on `currentUser.blockedUserIds` and dispatches to `client.blockUser` / `client.unblockUser`. Rendered as a destructive (red) entry below the separator, matching the design system.
+- Added `BlockUser` / `UnblockUser` default message actions, dispatching to `StreamChatClient.blockUser` / `unblockUser`.
 
 🔄 Internal / Non-breaking
 
-- Reordered the default message actions to match the design system: `Reply`, `Thread Reply`, `Pin/Unpin`, `Copy Message`, `Mark Unread`, `Edit Message`, `Flag Message`, `Mute/Unmute User`, `Delete Message`, `Block/Unblock User`. Custom `actionsBuilder` overrides are unaffected.
-- Renamed default English labels: `'Thread'` → `'Thread Reply'`, `'Mark as Unread'` → `'Mark Unread'`. Localizations for non-English locales are unchanged.
+- Reordered the default message actions to match the design system.
+- Renamed default English `threadReplyLabel` (`'Thread'` → `'Thread Reply'`) and `markAsUnreadLabel` (`'Mark as Unread'` → `'Mark Unread'`).
 
 - `ReactionIconResolver.supportedReactions` is now wired to the full emoji picker sheet opened by the "+" button in `StreamMessageReactionPicker` and the add-emoji chip in `ReactionDetailSheet`. Override `supportedReactions` on a custom resolver to control which reactions appear in the full picker grid.
 

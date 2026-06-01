@@ -413,11 +413,8 @@ Attenzione: il limite massimo di $limit file è stato superato.
 
   @override
   String toggleBlockUnblockUserText({required bool isBlocked}) {
-    if (isBlocked) {
-      return 'Sblocca utente';
-    } else {
-      return 'Blocca utente';
-    }
+    if (isBlocked) return 'Sblocca utente';
+    return 'Blocca utente';
   }
 
   @override

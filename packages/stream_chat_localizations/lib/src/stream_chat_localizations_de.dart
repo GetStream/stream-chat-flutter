@@ -443,11 +443,8 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
 
   @override
   String toggleBlockUnblockUserText({required bool isBlocked}) {
-    if (isBlocked) {
-      return 'Blockierung aufheben';
-    } else {
-      return 'Benutzer blockieren';
-    }
+    if (isBlocked) return 'Blockierung aufheben';
+    return 'Benutzer blockieren';
   }
 
   @override

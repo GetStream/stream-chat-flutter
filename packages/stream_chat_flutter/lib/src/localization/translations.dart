@@ -1140,11 +1140,8 @@ Attachment limit exceeded: it's not possible to add more than $limit attachments
 
   @override
   String toggleBlockUnblockUserText({required bool isBlocked}) {
-    if (isBlocked) {
-      return 'Unblock User';
-    } else {
-      return 'Block User';
-    }
+    if (isBlocked) return 'Unblock User';
+    return 'Block User';
   }
 
   @override

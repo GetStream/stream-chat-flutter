@@ -396,11 +396,8 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
 
   @override
   String toggleBlockUnblockUserText({required bool isBlocked}) {
-    if (isBlocked) {
-      return 'ユーザーのブロックを解除';
-    } else {
-      return 'ユーザーをブロック';
-    }
+    if (isBlocked) return 'ユーザーのブロックを解除';
+    return 'ユーザーをブロック';
   }
 
   @override
