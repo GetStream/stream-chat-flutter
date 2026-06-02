@@ -1,7 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/stream_chat_configuration.dart';
-import 'package:stream_chat_flutter/src/utils/device_segmentation.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:stream_core_flutter/stream_core_flutter.dart' as core;
 
@@ -24,7 +23,6 @@ class StreamMessageReactions extends StatelessWidget {
     required this.message,
     this.type,
     this.position,
-    this.overlap,
     this.sorting,
     this.onPressed,
     this.child,
@@ -40,14 +38,12 @@ class StreamMessageReactions extends StatelessWidget {
 
   /// Where the reactions appear relative to the message bubble.
   ///
-  /// Defaults to [core.StreamReactionsPosition.footer] on desktop and web,
-  /// and [core.StreamReactionsPosition.header] on mobile.
-  final core.StreamReactionsPosition? position;
-
-  /// Whether reactions overlap the message bubble edge.
+  /// Defaults to [core.StreamReactionsPosition.header] when null.
   ///
-  /// When null, defaults to `true` on mobile and `false` on desktop and web.
-  final bool? overlap;
+  /// Overlap is derived from this: [core.StreamReactionsPosition.header]
+  /// always overlaps the bubble edge; [core.StreamReactionsPosition.footer]
+  /// never overlaps.
+  final core.StreamReactionsPosition? position;
 
   /// Controls how reaction groups are sorted when displayed.
   ///
@@ -70,7 +66,7 @@ class StreamMessageReactions extends StatelessWidget {
 
     final effectiveType = type ?? config.reactionType ?? core.StreamReactionsType.segmented;
     final effectivePosition = position ?? config.reactionPosition ?? core.StreamReactionsPosition.header;
-    final effectiveOverlap = overlap ?? config.reactionOverlap ?? !isDesktopDeviceOrWeb;
+    final effectiveOverlap = effectivePosition == core.StreamReactionsPosition.header;
 
     final reactionGroups = message.reactionGroups?.entries;
     final effectiveReactionSorting = sorting ?? ReactionSorting.byFirstReactionAt;

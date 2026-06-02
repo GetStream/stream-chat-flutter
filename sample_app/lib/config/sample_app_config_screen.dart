@@ -143,16 +143,6 @@ class SampleAppConfigScreen extends StatelessWidget {
                   },
                   onChanged: (v) => SampleAppConfig.update(context, config.copyWith(reactionPosition: v)),
                 ),
-                _SegmentedRow<SampleReactionOverlap?>(
-                  title: 'Reaction Overlap',
-                  value: config.reactionOverlap,
-                  segments: const {
-                    null: 'Default',
-                    SampleReactionOverlap.overlap: 'Overlap',
-                    SampleReactionOverlap.noOverlap: 'No Overlap',
-                  },
-                  onChanged: (v) => SampleAppConfig.update(context, config.copyWith(reactionOverlap: v)),
-                ),
               ],
             ),
 
