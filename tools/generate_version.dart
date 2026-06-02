@@ -58,5 +58,6 @@ Future<void> main() async {
 
   await File(sampleAppPubspecPath).writeAsString(updatedSampleAppPubspec);
 
-  print('✓ Successfully updated version to $cleanedVersion in $sampleAppPubspecPath');
+  print(
+      '✓ Successfully updated version to $cleanedVersion in $sampleAppPubspecPath');
 }
