@@ -2,6 +2,8 @@
 
 🐞 Fixed
 
+- Fixed the thread page flashing through a large scroll-up animation when opened from an in-channel reply with cached thread replies.
+- Fixed the thread page throwing `Bad state: No element` on every channel state update when the parent message wasn't in the channel's loaded window.
 - Fixed opening a thread page or long-press message-actions modal overwriting the channel's loaded window — most visibly, jumping back to latest when the user had navigated to an older message via a quoted reply.
 - `StreamMessageComposer` no longer clobbers pre-populated composer state (text, quoted message, attachments) when the channel's draft stream emits its initial `null` (no draft on server). The reset now fires only on an actual non-null → null transition, distinguishing "no draft yet" from "draft was removed".
 

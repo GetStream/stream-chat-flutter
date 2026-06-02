@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_portal/flutter_portal.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat_flutter/scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:stream_chat_flutter/src/message_list_view/floating_date_divider.dart';
 import 'package:stream_chat_flutter/src/message_list_view/loading_indicator.dart';
@@ -284,11 +285,14 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
 
   bool get _isThreadConversation => widget.parentMessage != null;
 
-  late final int initialIndex = getInitialIndex(
-    widget.initialScrollIndex,
-    streamChannel!,
-    widget.messageFilter,
-  );
+  // `getInitialIndex` is computed against the channel's message list (unread
+  // anchor, last-read, etc.); those indices don't apply to a thread's reply
+  // list. In thread mode, start at the bottom (latest reply) unless the
+  // caller passed an explicit `initialScrollIndex`.
+  late final int initialIndex = () {
+    if (_isThreadConversation) return widget.initialScrollIndex ?? 0;
+    return getInitialIndex(widget.initialScrollIndex, streamChannel!, widget.messageFilter);
+  }();
 
   late final double initialAlignment = () {
     final initialAlignment = widget.initialAlignment;
@@ -1228,8 +1232,8 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
             channel: streamChannel!.channel,
             child: BetterStreamBuilder<Message>(
               initialData: parentMessage,
-              stream: streamChannel!.channel.state?.messagesStream.map(
-                (it) => it.firstWhere((m) => m.id == parentMessage.id),
+              stream: streamChannel!.channel.state?.messagesStream.mapNotNull(
+                (it) => it.firstWhereOrNull((m) => m.id == parentMessage.id),
               ),
               builder: (_, data) => threadBuilder(context, data),
             ),
