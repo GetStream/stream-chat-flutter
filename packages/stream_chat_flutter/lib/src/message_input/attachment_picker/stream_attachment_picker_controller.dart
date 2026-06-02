@@ -12,12 +12,18 @@ const kDefaultMaxAttachmentSize = 100 * 1024 * 1024; // 100MB in Bytes
 /// Controller class for [StreamAttachmentPicker].
 class StreamAttachmentPickerController extends ValueNotifier<AttachmentPickerValue> {
   /// Creates a new instance of [StreamAttachmentPickerController].
+  ///
+  /// When [appSettings] is provided, the per-type upload size limits and
+  /// allowed/blocked extension & mime-type rules from the backend are enforced
+  /// automatically. [maxAttachmentSize] acts as a fallback when [appSettings]
+  /// does not specify a limit for a given attachment type.
   factory StreamAttachmentPickerController({
     Poll? initialPoll,
     List<Attachment>? initialAttachments,
     Map<String, Object?>? initialExtraData,
-    int maxAttachmentSize = kDefaultMaxAttachmentSize,
+    int? maxAttachmentSize,
     int? maxAttachmentCount,
+    AppSettings? appSettings,
   }) {
     return StreamAttachmentPickerController._fromValue(
       AttachmentPickerValue(
@@ -27,13 +33,15 @@ class StreamAttachmentPickerController extends ValueNotifier<AttachmentPickerVal
       ),
       maxAttachmentSize: maxAttachmentSize,
       maxAttachmentCount: maxAttachmentCount,
+      appSettings: appSettings,
     );
   }
 
   StreamAttachmentPickerController._fromValue(
     this.initialValue, {
-    this.maxAttachmentSize = kDefaultMaxAttachmentSize,
+    this.maxAttachmentSize,
     this.maxAttachmentCount,
+    this.appSettings,
   }) : assert(
          maxAttachmentCount == null || initialValue.attachments.length <= maxAttachmentCount,
          'The initial attachments count must be less than or equal to maxAttachmentCount',
@@ -45,11 +53,24 @@ class StreamAttachmentPickerController extends ValueNotifier<AttachmentPickerVal
   /// Initial value for the controller.
   final AttachmentPickerValue initialValue;
 
-  /// The max attachment size allowed in bytes.
-  final int maxAttachmentSize;
+  /// Fallback max attachment size in bytes.
+  ///
+  /// When [appSettings] is provided, the backend upload size limit takes
+  /// precedence (per attachment type). This value is used when the backend
+  /// does not specify a limit, or when [appSettings] is `null`.
+  ///
+  /// When both [maxAttachmentSize] and [appSettings] are `null`,
+  /// [kDefaultMaxAttachmentSize] (100 MB) is applied.
+  final int? maxAttachmentSize;
 
   /// The max attachment count allowed, or `null` for no limit.
   final int? maxAttachmentCount;
+
+  /// App settings fetched from the Stream backend.
+  ///
+  /// When provided, per-type upload size limits and allowed/blocked extension
+  /// & mime-type rules are enforced in [addAttachment].
+  final AppSettings? appSettings;
 
   @override
   set value(AttachmentPickerValue newValue) {
@@ -104,17 +125,49 @@ class StreamAttachmentPickerController extends ValueNotifier<AttachmentPickerVal
     );
   }
 
+  /// Resolves the effective upload size limit for the given [attachment].
+  ///
+  /// Images use `imageUploadConfig`, all other types use `fileUploadConfig`.
+  /// Falls back to [maxAttachmentSize] and then to [kDefaultMaxAttachmentSize].
+  int _resolveMaxSize(Attachment attachment) {
+    final isImage = attachment.type == 'image';
+    final config = isImage ? appSettings?.imageUploadConfig : appSettings?.fileUploadConfig;
+    final serverLimit = config?.sizeLimit;
+    if (serverLimit != null && serverLimit > 0) return serverLimit;
+    return maxAttachmentSize ?? kDefaultMaxAttachmentSize;
+  }
+
+  /// Returns the [UploadConfig] that applies to the given [attachment].
+  UploadConfig? _uploadConfigFor(Attachment attachment) {
+    final isImage = attachment.type == 'image';
+    return isImage ? appSettings?.imageUploadConfig : appSettings?.fileUploadConfig;
+  }
+
   /// Adds a new attachment to the message.
   Future<void> addAttachment(Attachment attachment) async {
     final file = attachment.file;
 
     if (file != null) {
       assert(attachment.fileSize != null, '`attachment.fileSize` is required when the attachment has a file');
-      if (attachment.fileSize! > maxAttachmentSize) {
+
+      final effectiveMaxSize = _resolveMaxSize(attachment);
+      if (attachment.fileSize! > effectiveMaxSize) {
         throw AttachmentTooLargeError(
           fileSize: attachment.fileSize!,
-          maxSize: maxAttachmentSize,
+          maxSize: effectiveMaxSize,
         );
+      }
+
+      final uploadConfig = _uploadConfigFor(attachment);
+      if (uploadConfig != null) {
+        final mimeType = attachment.mimeType;
+        final extension = file.path?.split('.').last;
+        if (!uploadConfig.isAllowed(fileExtension: extension, mimeType: mimeType)) {
+          throw AttachmentBlockedError(
+            fileExtension: extension,
+            mimeType: mimeType,
+          );
+        }
       }
     }
 
@@ -339,4 +392,39 @@ class AttachmentLimitReachedError extends StreamChatError {
   String toString() =>
       'AttachmentLimitReachedError: '
       'The maximum number of attachments is $maxCount.';
+}
+
+/// Error thrown when an attachment is blocked by the app's upload configuration.
+///
+/// This occurs when calling [StreamAttachmentPickerController.addAttachment]
+/// with a file whose extension or MIME type is not permitted by the backend
+/// upload config (see [UploadConfig.isAllowed]).
+///
+/// Mirrors Swift SDK's `AttachmentUploadBlocked`.
+class AttachmentBlockedError extends StreamChatError {
+  /// Creates a new [AttachmentBlockedError].
+  const AttachmentBlockedError({
+    this.fileExtension,
+    this.mimeType,
+  }) : super(
+         'The attachment is blocked by the upload configuration'
+         '${fileExtension != null ? ' (extension: $fileExtension)' : ''}'
+         '${mimeType != null ? ' (mime: $mimeType)' : ''}.',
+       );
+
+  /// The file extension of the blocked attachment, if known.
+  final String? fileExtension;
+
+  /// The MIME type of the blocked attachment, if known.
+  final String? mimeType;
+
+  @override
+  List<Object?> get props => [...super.props, fileExtension, mimeType];
+
+  @override
+  String toString() =>
+      'AttachmentBlockedError: '
+      'The attachment is blocked by the upload configuration'
+      '${fileExtension != null ? ' (extension: $fileExtension)' : ''}'
+      '${mimeType != null ? ' (mime: $mimeType)' : ''}.';
 }

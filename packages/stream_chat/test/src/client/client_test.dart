@@ -829,8 +829,23 @@ void main() {
     });
 
     setUp(() async {
+      // Clear any accumulated interactions from a previous test so that
+      // verifyNoMoreInteractions on api.general stays accurate.
+      clearInteractions(api.general);
+
       final ws = FakeWebSocket();
       client = StreamChatClient(apiKey, chatApi: api, ws: ws);
+      // Stub getAppSettings so the background fetch after connectUser succeeds.
+      when(() => api.general.getAppSettings()).thenAnswer(
+        (_) async => GetAppSettingsResponse()
+          ..app = AppSettings(
+            name: 'test',
+            fileUploadConfig: UploadConfig(),
+            imageUploadConfig: UploadConfig(),
+            autoTranslationEnabled: false,
+            asyncUrlEnrichEnabled: false,
+          ),
+      );
       await client.connectUser(user, token);
       await delay(300);
       expect(client.persistenceEnabled, isFalse);
@@ -1278,6 +1293,7 @@ void main() {
           messageFilters: any(named: 'messageFilters'),
         ),
       ).called(1);
+      verify(() => api.general.getAppSettings()).called(1);
       verifyNoMoreInteractions(api.general);
     });
 
@@ -1880,6 +1896,7 @@ void main() {
       expect(res.members.length, members.length);
 
       verify(() => api.general.queryMembers(channelType)).called(1);
+      verify(() => api.general.getAppSettings()).called(1);
       verifyNoMoreInteractions(api.general);
     });
 
@@ -4314,6 +4331,7 @@ void main() {
       );
 
       verify(() => api.general.enrichUrl(url)).called(1);
+      verify(() => api.general.getAppSettings()).called(1);
       verifyNoMoreInteractions(api.general);
     });
 

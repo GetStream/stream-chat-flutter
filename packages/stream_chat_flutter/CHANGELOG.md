@@ -6,6 +6,10 @@
 
 ✅ Added
 
+- `StreamMessageComposer` and `MessageComposerProps` now automatically apply the backend-configured upload size limits from `ClientState.appSettings`. Image attachments use `imageUploadConfig.size_limit`; all other file attachments use `fileUploadConfig.size_limit`. The limit falls back to `kDefaultMaxAttachmentSize` (100 MB) when the backend value is absent or zero.
+- `StreamAttachmentPickerController` now accepts an optional `appSettings` parameter. When provided, `addAttachment` enforces per-type size limits and allowed/blocked extension & MIME-type rules, throwing `AttachmentBlockedError` when a file is disallowed.
+- Added `AttachmentBlockedError` — thrown by `StreamAttachmentPickerController.addAttachment` when the attachment's extension or MIME type is rejected by the app's upload configuration.
+- The `maxAttachmentSize` parameter on `StreamMessageComposer` and `MessageComposerProps` is now `int?` (was `int`). Passing `null` (the new default) lets the backend limit take effect; passing an explicit value overrides it entirely.
 - Added `BlockUser` / `UnblockUser` default message actions, dispatching to `StreamChatClient.blockUser` / `unblockUser`.
 
 🔄 Internal / Non-breaking

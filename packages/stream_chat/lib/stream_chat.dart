@@ -30,6 +30,7 @@ export 'src/core/error/error.dart';
 export 'src/core/http/interceptor/logging_interceptor.dart';
 export 'src/core/http/stream_http_client.dart';
 export 'src/core/models/action.dart';
+export 'src/core/models/app_settings.dart';
 export 'src/core/models/attachment.dart';
 export 'src/core/models/attachment_file.dart';
 export 'src/core/models/attachment_giphy_info.dart';

@@ -66,7 +66,7 @@ class StreamMessageComposer extends StatelessWidget {
     StreamMessageComposerController? messageComposerController,
     FocusNode? focusNode,
     bool disableAttachments = false,
-    int maxAttachmentSize = kDefaultMaxAttachmentSize,
+    int? maxAttachmentSize,
     bool canAlsoSendToChannelFromThread = true,
     bool enableVoiceRecording = true,
     bool sendVoiceRecordingAutomatically = false,
@@ -164,7 +164,7 @@ class MessageComposerProps {
     this.messageComposerController,
     this.focusNode,
     this.disableAttachments = false,
-    this.maxAttachmentSize = kDefaultMaxAttachmentSize,
+    this.maxAttachmentSize,
     this.canAlsoSendToChannelFromThread = true,
     this.enableVoiceRecording = false,
     this.sendVoiceRecordingAutomatically = false,
@@ -216,10 +216,16 @@ class MessageComposerProps {
   /// Defaults to false.
   final bool disableAttachments;
 
-  /// Max attachment size in bytes.
+  /// Max attachment size in bytes used as a fallback when the backend does not
+  /// provide an upload size limit via the app settings.
   ///
-  /// Defaults to 100 MB.
-  final int maxAttachmentSize;
+  /// When `null` (the default) the value is resolved at picker-open time:
+  /// the backend `file_upload_config.size_limit` / `image_upload_config.size_limit`
+  /// is used if available and greater than zero, otherwise [kDefaultMaxAttachmentSize]
+  /// (100 MB) is applied.
+  ///
+  /// Set an explicit value to override the backend limit entirely.
+  final int? maxAttachmentSize;
 
   /// Show the checkbox to send the message as a direct message to the channel.
   ///
@@ -973,11 +979,15 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     }
 
     setState(() {
+      final appSettings = StreamChat.of(context).client.state.appSettings;
       _pickerController = StreamAttachmentPickerController(
         initialAttachments: _effectiveController.attachments,
         initialPoll: _effectiveController.poll,
         maxAttachmentCount: widget.props.attachmentLimit,
+        // Explicit prop overrides the backend limit. When null, the controller
+        // resolves per attachment type using appSettings at validation time.
         maxAttachmentSize: widget.props.maxAttachmentSize,
+        appSettings: appSettings,
       );
 
       _startPickerSync();

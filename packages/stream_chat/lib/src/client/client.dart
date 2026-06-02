@@ -20,6 +20,7 @@ import 'package:stream_chat/src/core/http/stream_http_client.dart';
 import 'package:stream_chat/src/core/http/system_environment_manager.dart';
 import 'package:stream_chat/src/core/http/token.dart';
 import 'package:stream_chat/src/core/http/token_manager.dart';
+import 'package:stream_chat/src/core/models/app_settings.dart';
 import 'package:stream_chat/src/core/models/attachment_file.dart';
 import 'package:stream_chat/src/core/models/banned_user.dart';
 import 'package:stream_chat/src/core/models/channel_state.dart';
@@ -371,6 +372,14 @@ class StreamChatClient {
     );
   }
 
+  Future<void> _fetchAppSettingsSafely() async {
+    try {
+      await getAppSettings();
+    } catch (e, stk) {
+      logger.warning('Failed to fetch app settings', e, stk);
+    }
+  }
+
   Future<OwnUser> _connectUser(
     User user, {
     Token? token,
@@ -411,6 +420,10 @@ class StreamChatClient {
         );
         state.currentUser = connectedUser;
       }
+
+      // Fetch app settings in the background after connecting so the composer
+      // can use the backend-configured upload limits. Failures are non-fatal.
+      unawaited(_fetchAppSettingsSafely());
 
       return state.currentUser!;
     } catch (e, stk) {
@@ -2039,6 +2052,17 @@ class StreamChatClient {
   /// Get OpenGraph data of the given [url].
   Future<OGAttachmentResponse> enrichUrl(String url) => _chatApi.general.enrichUrl(url);
 
+  /// Fetches the app settings from Stream's backend and caches the result in
+  /// [ClientState.appSettings].
+  ///
+  /// This is called automatically after [connectUser] succeeds. You can also
+  /// call it manually to refresh the cached settings.
+  Future<GetAppSettingsResponse> getAppSettings() async {
+    final response = await _chatApi.general.getAppSettings();
+    state.appSettings = response.app;
+    return response;
+  }
+
   /// Queries threads with the given [options] and [pagination] params.
   ///
   /// Optionally, pass [filter] and [sort] to filter and sort the threads.
@@ -2545,6 +2569,17 @@ class ClientState {
   /// The current user as a stream
   Stream<OwnUser?> get currentUserStream => _currentUserController.stream;
 
+  /// The cached app settings, populated automatically after [StreamChatClient.connectUser]
+  /// and refreshed on demand via [StreamChatClient.getAppSettings].
+  AppSettings? get appSettings => _appSettingsController.valueOrNull;
+
+  /// A stream that emits the latest [AppSettings] whenever they are updated.
+  Stream<AppSettings?> get appSettingsStream => _appSettingsController.stream;
+
+  /// Sets the cached app settings.
+  @internal
+  set appSettings(AppSettings? settings) => _appSettingsController.safeAdd(settings);
+
   /// The current user
   Map<String, User> get users => _usersController.value;
 
@@ -2635,6 +2670,7 @@ class ClientState {
 
   final _channelsController = ImmutableMapBehaviorSubject<String, Channel>.seeded(const {});
   final _currentUserController = BehaviorSubject<OwnUser?>();
+  final _appSettingsController = BehaviorSubject<AppSettings?>();
   final _usersController = ImmutableMapBehaviorSubject<String, User>.seeded(const {});
   final _unreadChannelsController = BehaviorSubject<int>.seeded(0);
   final _unreadThreadsController = BehaviorSubject<int>.seeded(0);
@@ -2645,6 +2681,7 @@ class ClientState {
   void dispose() {
     cancelEventSubscription();
     _currentUserController.close();
+    _appSettingsController.close();
     _usersController.close();
     _unreadChannelsController.close();
     _unreadThreadsController.close();
