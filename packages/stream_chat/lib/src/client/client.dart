@@ -7,7 +7,6 @@ import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/src/client/channel.dart';
 import 'package:stream_chat/src/client/channel_delivery_reporter.dart';
-import 'package:stream_chat/src/client/predefined_filter_default_sort.dart';
 import 'package:stream_chat/src/client/query_channels_result.dart';
 import 'package:stream_chat/src/client/retry_policy.dart';
 import 'package:stream_chat/src/core/api/attachment_file_uploader.dart';
@@ -40,6 +39,7 @@ import 'package:stream_chat/src/core/models/push_preference.dart';
 import 'package:stream_chat/src/core/models/thread.dart';
 import 'package:stream_chat/src/core/models/user.dart';
 import 'package:stream_chat/src/core/util/in_flight_cache.dart';
+import 'package:stream_chat/src/core/util/predefined_filter_defaults.dart';
 import 'package:stream_chat/src/core/util/utils.dart';
 import 'package:stream_chat/src/db/chat_persistence_client.dart';
 import 'package:stream_chat/src/event_type.dart';
@@ -939,7 +939,7 @@ class StreamChatClient {
     } else {
       // Note: predefinedFilter will never be null here
       final resolvedFilter = res.predefinedFilter?.filter ?? const Filter.empty();
-      final resolvedSort = res.predefinedFilter?.sort ?? defaultChannelStateSortFor(resolvedFilter);
+      final resolvedSort = res.predefinedFilter?.sort ?? resolvedFilter.predefinedFilterFallbackSort;
 
       await chatPersistenceClient?.updateChannelQueriesByPredefinedFilter(
         predefinedFilter,
