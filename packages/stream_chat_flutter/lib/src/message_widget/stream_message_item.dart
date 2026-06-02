@@ -539,7 +539,7 @@ class DefaultStreamMessageItem extends StatelessWidget {
           alignment: StreamMessageLayout.alignmentDirectionalOf(context),
           child: Padding(
             padding: effectivePadding,
-            child: Row(
+            child: core.StreamRow(
               mainAxisSize: .min,
               spacing: effectiveSpacing,
               crossAxisAlignment: .end,
