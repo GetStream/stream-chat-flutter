@@ -16,7 +16,7 @@ Future<bool?> showAddMembersSheet(BuildContext context, Channel channel) {
   return showStreamSheet<bool>(
     context: context,
     isDismissible: true,
-    builder: (_, scrollController) => StreamChannel(
+    builder: (_, scrollController) => StreamChannel.value(
       channel: channel,
       child: AddMembersSheet(scrollController: scrollController),
     ),

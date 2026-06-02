@@ -805,7 +805,7 @@ class DefaultStreamMessageItem extends StatelessWidget {
             messageActions: actions,
             showReactionPicker: showPicker,
             leadingInset: leadingInset,
-            messageWidget: StreamChannel(
+            messageWidget: StreamChannel.value(
               channel: channel,
               child: StreamMessageItem(
                 key: const Key('MessageItem'),

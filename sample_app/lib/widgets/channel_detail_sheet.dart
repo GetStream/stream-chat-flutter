@@ -106,7 +106,7 @@ Future<ChannelDetailAction?> showChannelDetailSheet({
   return showStreamSheet<ChannelDetailAction>(
     context: context,
     isDismissible: true,
-    builder: (_, _) => StreamChannel(
+    builder: (_, _) => StreamChannel.value(
       channel: channel,
       child: ChannelDetailSheet(channel: channel),
     ),

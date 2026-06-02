@@ -2,6 +2,7 @@
 
 🐞 Fixed
 
+- Fixed opening a thread page or long-press message-actions modal overwriting the channel's loaded window — most visibly, jumping back to latest when the user had navigated to an older message via a quoted reply.
 - `StreamMessageComposer` no longer clobbers pre-populated composer state (text, quoted message, attachments) when the channel's draft stream emits its initial `null` (no draft on server). The reset now fires only on an actual non-null → null transition, distinguishing "no draft yet" from "draft was removed".
 
 ✅ Added

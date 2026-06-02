@@ -88,7 +88,7 @@ class _ChannelMediaDisplayScreenState extends State<ChannelMediaDisplayScreen> {
     final channel = StreamChannel.of(context).channel;
     Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (_) => StreamChannel(
+        builder: (_) => StreamChannel.value(
           channel: channel,
           child: StreamMediaGalleryPreview(
             attachments: attachments,

@@ -1224,7 +1224,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
           // This is needed to provide the nearest reaction icons to the
           // ReactionDetailSheet.
           data: StreamChatConfiguration.of(context),
-          child: StreamChannel(
+          child: StreamChannel.value(
             channel: streamChannel!.channel,
             child: BetterStreamBuilder<Message>(
               initialData: parentMessage,

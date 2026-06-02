@@ -13,7 +13,7 @@ Future<bool?> showEditGroupSheet(BuildContext context, Channel channel) {
   return showStreamSheet<bool>(
     context: context,
     isDismissible: true,
-    builder: (_, _) => StreamChannel(
+    builder: (_, _) => StreamChannel.value(
       channel: channel,
       child: const EditGroupSheet(),
     ),

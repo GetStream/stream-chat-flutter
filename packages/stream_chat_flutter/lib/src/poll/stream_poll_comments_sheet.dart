@@ -26,7 +26,7 @@ Future<T?> showStreamPollCommentsSheet<T extends Object?>({
 }) {
   return showStreamSheet<T>(
     context: context,
-    builder: (_, scrollController) => StreamChannel(
+    builder: (_, scrollController) => StreamChannel.value(
       channel: StreamChannel.of(context).channel,
       child: ValueListenableBuilder(
         valueListenable: messageNotifier,
