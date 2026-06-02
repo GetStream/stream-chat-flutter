@@ -1,0 +1,76 @@
+<!--
+  ~ Copyright (C) 2026 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="768"
+    android:viewportHeight="445"
+    android:tint="#FFFFFF">
+  <group android:scaleX="0.777027"
+      android:scaleY="0.4502305"
+      android:translateX="85.62162"
+      android:translateY="122.323715">
+    <path
+        android:pathData="M3.13,187.62L95.1,314.62C96.54,316.61 98.4,318.22 100.54,319.33C102.68,320.44 105.04,321.02 107.44,321.02C109.83,321.02 112.19,320.44 114.33,319.33C116.48,318.22 118.34,316.61 119.77,314.62L200.6,203.01C207.88,192.95 201.66,178.53 189.59,177.45L16.79,162.07C3.5,160.89 -4.88,176.57 3.13,187.62Z"
+        android:fillType="evenOdd">
+      <aapt:attr name="android:fillColor">
+        <gradient
+            android:centerX="438.57"
+            android:centerY="-42.05"
+            android:gradientRadius="515.39"
+            android:type="radial">
+          <item android:offset="0" android:color="#FF06C1FF"/>
+          <item android:offset="0.43" android:color="#FF008EF7"/>
+          <item android:offset="0.71" android:color="#FF005FFF"/>
+          <item android:offset="1" android:color="#FF004CCC"/>
+        </gradient>
+      </aapt:attr>
+    </path>
+    <path
+        android:pathData="M578.91,187.14L411.67,418.07C404.03,428.62 411.28,443.67 424,443.67H569.9C572.97,443.67 576.01,442.93 578.76,441.5C581.52,440.07 583.91,438 585.76,435.44L764.87,188.14C772.94,177 764.37,161.23 751.01,162.61L592.81,179.02C590.07,179.3 587.43,180.17 585.04,181.57C582.64,182.96 580.56,184.86 578.91,187.14Z"
+        android:fillType="evenOdd">
+      <aapt:attr name="android:fillColor">
+        <gradient
+            android:centerX="438.57"
+            android:centerY="-42.05"
+            android:gradientRadius="515.39"
+            android:type="radial">
+          <item android:offset="0" android:color="#FF06C1FF"/>
+          <item android:offset="0.43" android:color="#FF008EF7"/>
+          <item android:offset="0.71" android:color="#FF005FFF"/>
+          <item android:offset="1" android:color="#FF004CCC"/>
+        </gradient>
+      </aapt:attr>
+    </path>
+    <path
+        android:pathData="M532.77,189.04L353.64,436.42C351.78,438.99 349.37,441.07 346.59,442.5C343.82,443.93 340.76,444.67 337.67,444.65L198.37,443.73C195.32,443.71 192.31,442.97 189.59,441.55C186.86,440.13 184.49,438.07 182.65,435.55L138.68,375.08C136.09,371.52 134.69,367.17 134.68,362.71C134.68,358.24 136.07,353.9 138.66,350.33L386.41,8.21C388.25,5.67 390.64,3.61 393.38,2.18C396.11,0.76 399.13,0.01 402.2,0C405.26,-0.01 408.28,0.72 411.03,2.12C413.78,3.53 416.17,5.58 418.03,8.1L532.68,164.21C535.3,167.77 536.73,172.13 536.75,176.61C536.76,181.09 535.36,185.46 532.77,189.04Z"
+        android:fillType="evenOdd">
+      <aapt:attr name="android:fillColor">
+        <gradient
+            android:centerX="438.57"
+            android:centerY="-42.05"
+            android:gradientRadius="515.39"
+            android:type="radial">
+          <item android:offset="0" android:color="#FF06C1FF"/>
+          <item android:offset="0.43" android:color="#FF008EF7"/>
+          <item android:offset="0.71" android:color="#FF005FFF"/>
+          <item android:offset="1" android:color="#FF004CCC"/>
+        </gradient>
+      </aapt:attr>
+    </path>
+  </group>
+</vector>
