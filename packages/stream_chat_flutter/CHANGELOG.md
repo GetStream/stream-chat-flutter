@@ -2,6 +2,7 @@
 
 🐞 Fixed
 
+- `StreamUserAvatar` with `StreamAvatarSize.xxl` now uses `StreamOnlineIndicatorSize.xxl` (20px) instead of `xl` (16px), matching the Chat SDK design system spec.
 - `StreamMessageComposer` no longer clobbers pre-populated composer state (text, quoted message, attachments) when the channel's draft stream emits its initial `null` (no draft on server). The reset now fires only on an actual non-null → null transition, distinguishing "no draft yet" from "draft was removed".
 
 ✅ Added
