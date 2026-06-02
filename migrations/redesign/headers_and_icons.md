@@ -454,7 +454,7 @@ For message / reactions-related removals, see [message_widget.md](message_widget
 - [ ] Update theme overrides: `StreamChannelHeaderThemeData` / `StreamChannelListHeaderThemeData` / `StreamThreadHeaderThemeData` are deleted — switch to `StreamAppBarThemeData`
 - [ ] If you sized custom chrome to `kToolbarHeight` next to a Stream header, switch to `kStreamToolbarHeight` (72 px)
 - [ ] Optionally move `StreamComponentFactory` wrapping into the `componentBuilders` parameter on `StreamChat`
-- [ ] Use the new `attachmentBuilders`, `reactionType`, and `reactionPosition` fields on `StreamChatConfigurationData` if you need custom attachment rendering or global reaction style control; `reactionPosition` also controls overlap (`header` = overlaps, `footer` = no overlap)
+- [ ] Use the new `attachmentBuilders`, `reactionType`, and `reactionPosition` fields on `StreamChatConfigurationData` if you need custom attachment rendering or global reaction style control
 - [ ] If you watch a `Channel` outside any list controller, subscribe to `EventType.connectionRecovered` and call `channel.watch()` (the SDK no longer auto-recovers on reconnect when `StreamChatCore` is mounted)
 - [ ] If you relied on the old `StreamChat.backgroundKeepAlive` default of 1 minute, pass `backgroundKeepAlive: const Duration(minutes: 1)` explicitly — the new default is 15 seconds
 - [ ] Remove any `StreamMessageSearchGridView` usage — switch to `StreamMessageSearchListView` or build your own grid

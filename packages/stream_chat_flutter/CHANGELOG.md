@@ -21,8 +21,6 @@
 
 🛑️ Breaking
 
-- Removed `StreamChatConfigurationData.reactionOverlap`. Overlap is now determined by position: `StreamReactionsPosition.header` always overlaps the message bubble; `StreamReactionsPosition.footer` never overlaps. Remove any `reactionOverlap` usages and use `reactionPosition` to control overlap behaviour.
-- Removed the `overlap` parameter from `StreamMessageReactions`. Use the `position` parameter instead.
 - `StreamChatConfigurationData.draftMessagesEnabled` now defaults to `true`. Draft messages are enabled out of the box; pass `draftMessagesEnabled: false` to opt out.
 - `StreamChatConfigurationData.enforceUniqueReactions` now defaults to `false`. Users can add multiple distinct reaction types to a message by default; pass `enforceUniqueReactions: true` to restore the previous behaviour.
 - `StreamMessageComposer.enableVoiceRecording` now defaults to `true`. The voice recording button is shown out of the box; pass `enableVoiceRecording: false` to opt out.
@@ -102,7 +100,6 @@
 - Added `Translations.totalVoteCountLabel({int? count})`, `viewAllLabel`, `pollVotesLabel`, `endVoteConfirmationMessage` and `questionLabel({bool isPlural = false})`.
 - Added `Translations.reactionsCountText(int count)` for the reaction-detail sheet header.
 - Added `StreamChannelListTile.isPinned` — renders a pin icon alongside the existing mute icon for pinned channels.
-- Added `StreamChatConfigurationData.reactionOverlap` and `StreamMessageReactions.overlap` to control whether reactions overlap the message bubble edge. When unset, falls back to the platform-based default (overlap on mobile, no overlap on desktop and web).
 - Exported `StreamScrollViewLoadMoreError` and `StreamScrollViewLoadMoreIndicator` from the public API.
 - Exported `StreamTimestamp`, `DateFormatter`, `formatDate` and `formatRecentDateTime` from the public API.
 - Added `DateTimeComparisonUtils` extension on `DateTime` (`isToday`, `isYesterday`, `isWithinLastMinute`, `isWithinLastWeek`, `isInSameYear`, `isSame(other, unit:)`) and the `DateTimeUnit` enum (`year` / `month` / `day` / `hour` / `minute` / `second` / `millisecond` / `microsecond`). All getters compare in local time and read the current instant via `package:clock`, so they're testable under `withClock(...)`.

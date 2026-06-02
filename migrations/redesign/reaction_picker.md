@@ -23,7 +23,6 @@ This guide covers the migration for the redesigned reaction picker and reaction 
 | ------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
 | `StreamChatConfigurationData.reactionIcons`                   | **Removed** — replaced by `reactionIconResolver`                                                                     |
 | `StreamChatConfigurationData.reactionIconResolver`            | **New** — optional (default: `DefaultReactionIconResolver()`). Replaces `reactionIcons`                              |
-| `StreamChatConfigurationData.reactionOverlap`                 | **Removed** — overlap is now derived from `reactionPosition`: `header` always overlaps; `footer` never overlaps      |
 | `ReactionIconResolver`                                        | **New** — abstract contract for mapping reaction type → `StreamEmojiContent`                                         |
 | `DefaultReactionIconResolver`                                 | **New** — ready-to-use default; extend to customize `defaultReactions`, `emojiCode`, or `resolve`                    |
 | `ReactionPickerIconList` / `ReactionIndicatorIconList`        | **Removed** — list rendering now lives inside picker/indicator widgets                                               |
@@ -31,7 +30,6 @@ This guide covers the migration for the redesigned reaction picker and reaction 
 | `StreamReactionPicker`                                        | **Renamed** to `StreamMessageReactionPicker` — reaction set from `config.reactionIconResolver.defaultReactions` only |
 | `StreamReactionPickerTheme` / `StreamReactionPickerThemeData` | **New** (from `stream_core_flutter`) — theme-based visual customization for the picker                               |
 | `StreamMessageReactions`                                      | **New** — renders emoji chips for a message's reaction groups; replaces ad-hoc indicator usage                        |
-| `StreamMessageReactions.overlap`                              | **Removed** — use `position` instead; overlap is derived from position automatically                                 |
 | `ReactionDetailSheet`                                         | **New** — `ReactionDetailSheet.show()` for reaction details bottom sheet                                             |
 
 > **Note:** If you were using default reactions only, behavior stays the same (`like`, `haha`, `love`, `wow`, `sad`). Migration is required only for custom reaction icon/type setups.
@@ -44,7 +42,6 @@ This guide covers the migration for the redesigned reaction picker and reaction 
 
 - `reactionIcons` **removed** — was a list of reaction type + builder pairs for picker/indicator
 - `reactionIconResolver` **new** — optional; defaults to `DefaultReactionIconResolver()`. All reaction UI uses it
-- `reactionOverlap` **removed** — overlap is now derived from `reactionPosition`. Use `reactionPosition: StreamReactionsPosition.header` for overlap (top placement), or `reactionPosition: StreamReactionsPosition.footer` for no overlap (bottom placement)
 
 ### Migration
 
@@ -279,7 +276,6 @@ StreamMessageReactions({
   required Message message,
   StreamReactionsType? type,         // defaults to StreamReactionsType.segmented
   StreamReactionsPosition? position, // defaults to StreamReactionsPosition.header
-                                     // header → overlaps the bubble; footer → sits below it
   Comparator<ReactionGroup>? sorting, // defaults to ReactionSorting.byFirstReactionAt
   VoidCallback? onPressed,
   Widget? child,                     // typically the message bubble
@@ -302,7 +298,7 @@ StreamMessageReactions(
 
 Reaction icons are resolved globally — configure them on `StreamChatConfigurationData.reactionIconResolver` (see [ReactionIconResolver and DefaultReactionIconResolver](#reactioniconresolver-and-defaultreactioniconresolver)).
 
-Visual layout properties (`type`, `position`) can be set per widget or as defaults via `StreamChatConfigurationData`. Overlap is derived from position automatically — `header` always overlaps the bubble edge; `footer` never overlaps:
+Visual layout properties (`type`, `position`) can be set per widget or as defaults via `StreamChatConfigurationData`:
 
 ```dart
 StreamChat(
@@ -310,7 +306,7 @@ StreamChat(
   streamChatConfigData: StreamChatConfigurationData(
     reactionIconResolver: const MyReactionIconResolver(),
     reactionType: StreamReactionsType.segmented,
-    reactionPosition: StreamReactionsPosition.header, // overlaps the bubble
+    reactionPosition: StreamReactionsPosition.header,
   ),
   child: MyApp(),
 )
@@ -343,8 +339,6 @@ Exported for `StreamChatConfigurationData`. See [ReactionIconResolver and Defaul
 
 - [ ] Rename `StreamReactionPicker` → `StreamMessageReactionPicker` in your code
 - [ ] Remove `reactionIcons` from `StreamChatConfigurationData`
-- [ ] Remove `reactionOverlap` from `StreamChatConfigurationData` — use `reactionPosition` instead (`header` = overlap, `footer` = no overlap)
-- [ ] Remove `overlap` parameter from any direct `StreamMessageReactions` usage — set `position` instead
 - [ ] Remove `backgroundColor`, `padding`, `shape` props from picker usage — use `StreamReactionPickerTheme` instead
 - [ ] Custom quick-pick: extend `DefaultReactionIconResolver`, override `defaultReactions` with types from `streamSupportedEmojis` (so `emojiCode` returns emoji); set `reactionIconResolver`
 - [ ] Custom types not in `streamSupportedEmojis`: also override `emojiCode` to return Unicode emoji for each; optionally `supportedReactions`
