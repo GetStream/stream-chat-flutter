@@ -205,33 +205,37 @@ void main() {
       'sort_values': sortValues,
 
       // pagination
-      ...const PaginationParams().toJson()
+      ...const PaginationParams().toJson(),
     });
 
     final resolvedSort = [
       {'field': 'last_message_at', 'direction': -1},
     ];
 
-    when(() => client.get(
-          path,
-          queryParameters: {
-            'payload': payload,
-          },
-        )).thenAnswer((_) async => successResponse(
-          path,
-          data: {
-            'channels': [channelState.toJson()],
-            'predefined_filter': {
-              'name': predefinedFilter,
-              'filter': {
-                'members': {
-                  r'$in': ['test-user-id'],
-                },
+    when(
+      () => client.get(
+        path,
+        queryParameters: {
+          'payload': payload,
+        },
+      ),
+    ).thenAnswer(
+      (_) async => successResponse(
+        path,
+        data: {
+          'channels': [channelState.toJson()],
+          'predefined_filter': {
+            'name': predefinedFilter,
+            'filter': {
+              'members': {
+                r'$in': ['test-user-id'],
               },
-              'sort': resolvedSort,
             },
+            'sort': resolvedSort,
           },
-        ));
+        },
+      ),
+    );
 
     final res = await channelApi.queryChannels(
       predefinedFilter: predefinedFilter,
@@ -245,11 +249,13 @@ void main() {
     expect(res.predefinedFilter!.name, predefinedFilter);
     expect(
       res.predefinedFilter!.filter,
-      const Filter.raw(value: {
-        'members': {
-          r'$in': ['test-user-id'],
+      const Filter.raw(
+        value: {
+          'members': {
+            r'$in': ['test-user-id'],
+          },
         },
-      }),
+      ),
     );
     expect(res.predefinedFilter!.sort, hasLength(1));
     expect(res.predefinedFilter!.sort!.first.field, 'last_message_at');

@@ -1,5 +1,9 @@
 ## Upcoming Beta
 
+✅ Added
+
+- Added support for predefined filters for `QueryChannels` on `StreamChatPersistenceClient`.
+
 🔄 Changed
 
 - Raised minimum versions of bundled dependencies (`drift`, `path`, `path_provider`) to current resolved versions.

@@ -20,6 +20,7 @@ export 'src/client/channel.dart';
 export 'src/client/channel_delivery_reporter.dart';
 export 'src/client/client.dart';
 export 'src/client/key_stroke_handler.dart';
+export 'src/client/query_channels_result.dart';
 export 'src/client/retry_policy.dart';
 export 'src/core/api/attachment_file_uploader.dart';
 export 'src/core/api/requests.dart';

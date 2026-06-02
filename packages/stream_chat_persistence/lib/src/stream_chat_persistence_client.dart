@@ -319,7 +319,7 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   }
 
   @override
-  Future<List<ChannelState>> getChannelStatesByPredefinedFilter({
+  Future<QueryChannelsResponse> getChannelStatesByPredefinedFilter({
     required String filterName,
     Map<String, Object?>? filterValues,
     Map<String, Object?>? sortValues,
@@ -329,13 +329,28 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
     assert(_debugIsConnected, '');
     _logger.info('getChannelStatesByPredefinedFilter');
 
-    final (channelModels, persistedSort) = await db!.channelQueryDao.getChannelsAndSortByPredefinedFilter(
+    final (channelModels, filter, sort) = await db!.channelQueryDao.getChannelsAndSpecByPredefinedFilter(
       filterName,
       filterValues: filterValues,
       sortValues: sortValues,
     );
 
-    return _getChannelStatesPage(channelModels, persistedSort, paginationParams);
+    final channels = await _getChannelStatesPage(
+      channelModels,
+      sort,
+      paginationParams,
+    );
+    final predefinedFilter = filter == null
+        ? null
+        : PredefinedFilter(
+            name: filterName,
+            filter: filter,
+            sort: sort,
+          );
+
+    return QueryChannelsResponse()
+      ..channels = channels
+      ..predefinedFilter = predefinedFilter;
   }
 
   // Wraps channel models in sort envelopes, attaches memberships when the
@@ -391,9 +406,10 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   Future<void> updateChannelQueriesByPredefinedFilter(
     String filterName,
     List<String> cids, {
+    required Filter filter,
+    required SortOrder<ChannelState> sort,
     Map<String, Object?>? filterValues,
     Map<String, Object?>? sortValues,
-    SortOrder<ChannelState>? channelStateSort,
     bool clearQueryCache = false,
   }) {
     assert(_debugIsConnected, '');
@@ -401,9 +417,10 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
     return db!.channelQueryDao.updateChannelQueriesByPredefinedFilter(
       filterName,
       cids,
+      filter: filter,
+      sort: sort,
       filterValues: filterValues,
       sortValues: sortValues,
-      channelStateSort: channelStateSort,
       clearQueryCache: clearQueryCache,
     );
   }

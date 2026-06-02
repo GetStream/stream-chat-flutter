@@ -1,5 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:stream_chat/src/core/api/requests.dart';
+import 'package:stream_chat/src/core/api/responses.dart';
 import 'package:stream_chat/src/core/api/sort_order.dart';
 import 'package:stream_chat/src/core/models/attachment_file.dart';
 import 'package:stream_chat/src/core/models/channel_model.dart';
@@ -146,38 +147,44 @@ abstract class ChatPersistenceClient {
     bool clearQueryCache = false,
   });
 
-  /// Returns the stored channel states for a predefined-filter query.
+  /// Returns the stored response for a predefined-filter query.
   ///
   /// The query is identified by [filterName] and the optional [filterValues]
   /// and [sortValues] interpolation maps. Use [messageLimit] to limit messages
   /// per channel and [paginationParams] to paginate results.
   ///
-  /// Default implementation returns an empty list; persistence implementations
-  /// that support predefined-filter caching should override this.
-  Future<List<ChannelState>> getChannelStatesByPredefinedFilter({
+  /// The returned [QueryChannelsResponse] carries the persisted resolved
+  /// `predefinedFilter` spec (filter + sort) so offline callers can apply the
+  /// same filter/order the server applied on the last online query.
+  ///
+  /// Default implementation returns an empty response; persistence
+  /// implementations that support predefined-filter caching should override
+  /// this.
+  Future<QueryChannelsResponse> getChannelStatesByPredefinedFilter({
     required String filterName,
     Map<String, Object?>? filterValues,
     Map<String, Object?>? sortValues,
     int? messageLimit,
     PaginationParams? paginationParams,
-  }) async => const [];
+  }) async => QueryChannelsResponse()..channels = const [];
 
   /// Update list of channel queries for a predefined-filter query.
   ///
   /// The query is identified by [filterName] and the optional [filterValues]
-  /// and [sortValues] interpolation maps. [channelStateSort] is the resolved
-  /// sort spec returned by the server, persisted so subsequent offline reads
-  /// can apply the same ordering. If [clearQueryCache] is true, prior cids and
-  /// metadata for this query are deleted before the insert.
+  /// and [sortValues] interpolation maps. [filter] and [sort] are the
+  /// server-resolved spec values, persisted so subsequent offline reads can
+  /// reconstruct the same filter/order. If [clearQueryCache] is true, prior
+  /// cids and metadata for this query are deleted before the insert.
   ///
   /// Default implementation is a no-op; persistence implementations that
   /// support predefined-filter caching should override this.
   Future<void> updateChannelQueriesByPredefinedFilter(
     String filterName,
     List<String> cids, {
+    required Filter filter,
+    required SortOrder<ChannelState> sort,
     Map<String, Object?>? filterValues,
     Map<String, Object?>? sortValues,
-    SortOrder<ChannelState>? channelStateSort,
     bool clearQueryCache = false,
   }) async {}
 

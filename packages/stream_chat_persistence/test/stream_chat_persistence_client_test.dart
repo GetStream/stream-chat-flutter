@@ -409,7 +409,8 @@ void main() {
       const filterValues = {'user_id': 'testUserId'};
       const sortValues = {'pinned_at': true};
       const cids = <String>['messaging:c0'];
-      const sortSpec = <SortOption<ChannelState>>[
+      final filter = Filter.equal('type', 'messaging');
+      const sort = <SortOption<ChannelState>>[
         SortOption<ChannelState>.desc(ChannelSortKey.lastMessageAt),
       ];
 
@@ -417,9 +418,10 @@ void main() {
         () => mockDatabase.channelQueryDao.updateChannelQueriesByPredefinedFilter(
           filterName,
           cids,
+          filter: filter,
+          sort: sort,
           filterValues: filterValues,
           sortValues: sortValues,
-          channelStateSort: sortSpec,
           clearQueryCache: true,
         ),
       ).thenAnswer((_) => Future.value());
@@ -427,9 +429,10 @@ void main() {
       await client.updateChannelQueriesByPredefinedFilter(
         filterName,
         cids,
+        filter: filter,
+        sort: sort,
         filterValues: filterValues,
         sortValues: sortValues,
-        channelStateSort: sortSpec,
         clearQueryCache: true,
       );
 
@@ -437,9 +440,10 @@ void main() {
         () => mockDatabase.channelQueryDao.updateChannelQueriesByPredefinedFilter(
           filterName,
           cids,
+          filter: filter,
+          sort: sort,
           filterValues: filterValues,
           sortValues: sortValues,
-          channelStateSort: sortSpec,
           clearQueryCache: true,
         ),
       ).called(1);
@@ -482,13 +486,15 @@ void main() {
         ),
       };
 
+      final persistedFilter = Filter.equal('type', 'messaging');
+
       when(
-        () => mockDatabase.channelQueryDao.getChannelsAndSortByPredefinedFilter(
+        () => mockDatabase.channelQueryDao.getChannelsAndSpecByPredefinedFilter(
           filterName,
           filterValues: filterValues,
           sortValues: sortValues,
         ),
-      ).thenAnswer((_) async => (channels, persistedSort));
+      ).thenAnswer((_) async => (channels, persistedFilter, persistedSort));
       when(() => mockDatabase.memberDao.getMembershipsForChannels(any(), any())).thenAnswer((_) async => memberships);
 
       // Only p2 should be hydrated — stub every per-cid DAO call.
@@ -518,12 +524,18 @@ void main() {
       );
 
       // Persisted sort + offset + limit applied: only p2 is returned.
-      expect(result, hasLength(1));
-      expect(result.single.channel!.cid, pagedCid);
+      expect(result.channels, hasLength(1));
+      expect(result.channels.single.channel!.cid, pagedCid);
+
+      // Persisted predefined-filter spec surfaced on the response.
+      expect(result.predefinedFilter, isNotNull);
+      expect(result.predefinedFilter!.name, filterName);
+      expect(result.predefinedFilter!.filter.toJson(), persistedFilter.toJson());
+      expect(result.predefinedFilter!.sort, persistedSort);
 
       // DAO called with the predefined keys.
       verify(
-        () => mockDatabase.channelQueryDao.getChannelsAndSortByPredefinedFilter(
+        () => mockDatabase.channelQueryDao.getChannelsAndSpecByPredefinedFilter(
           filterName,
           filterValues: filterValues,
           sortValues: sortValues,

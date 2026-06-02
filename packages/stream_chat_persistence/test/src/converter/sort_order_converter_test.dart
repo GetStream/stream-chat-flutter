@@ -3,12 +3,7 @@ import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_persistence/src/converter/sort_order_converter.dart';
 
 void main() {
-  const converter = NullableChannelStateSortOrderConverter();
-
-  test('null round-trips as null', () {
-    expect(converter.toSql(null), isNull);
-    expect(converter.fromSql(null), isNull);
-  });
+  const converter = ChannelStateSortOrderConverter();
 
   test('non-empty SortOrder round-trips unchanged', () {
     const original = <SortOption<ChannelState>>[
@@ -18,8 +13,7 @@ void main() {
 
     final decoded = converter.fromSql(converter.toSql(original));
 
-    expect(decoded, isNotNull);
-    expect(decoded!.length, original.length);
+    expect(decoded.length, original.length);
     for (var i = 0; i < original.length; i++) {
       expect(decoded[i].field, original[i].field);
       expect(decoded[i].direction, original[i].direction);
