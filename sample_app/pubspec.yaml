@@ -1,7 +1,7 @@
 name: sample_app
 description: A new Flutter project.
 publish_to: "none"
-version: 10.0.0
+version: 9.24.0
 
 # Note: The environment configuration and dependency versions are managed by Melos.
 #
