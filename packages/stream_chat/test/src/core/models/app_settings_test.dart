@@ -22,11 +22,11 @@ void main() {
     });
 
     test('parses fileUploadConfig size_limit', () {
-      expect(appSettings.fileUploadConfig.sizeLimit, 10485760);
+      expect(appSettings.fileUploadConfig.sizeLimitInBytes, 10485760);
     });
 
     test('parses imageUploadConfig size_limit', () {
-      expect(appSettings.imageUploadConfig.sizeLimit, 5242880);
+      expect(appSettings.imageUploadConfig.sizeLimitInBytes, 5242880);
     });
 
     test('parses fileUploadConfig extension lists', () {
@@ -52,9 +52,9 @@ void main() {
       expect(config.blockedMimeTypes, isEmpty);
     });
 
-    test('defaults sizeLimit to null when absent', () {
+    test('defaults sizeLimitInBytes to null when absent', () {
       final config = UploadConfig.fromJson({});
-      expect(config.sizeLimit, isNull);
+      expect(config.sizeLimitInBytes, isNull);
     });
   });
 

@@ -132,7 +132,7 @@ class StreamAttachmentPickerController extends ValueNotifier<AttachmentPickerVal
   int _resolveMaxSize(Attachment attachment) {
     final isImage = attachment.type == 'image';
     final config = isImage ? appSettings?.imageUploadConfig : appSettings?.fileUploadConfig;
-    final serverLimit = config?.sizeLimit;
+    final serverLimit = config?.sizeLimitInBytes;
     if (serverLimit != null && serverLimit > 0) return serverLimit;
     return maxAttachmentSize ?? kDefaultMaxAttachmentSize;
   }

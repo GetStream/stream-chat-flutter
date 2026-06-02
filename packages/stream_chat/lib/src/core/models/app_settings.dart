@@ -42,7 +42,7 @@ class AppSettings {
 class UploadConfig {
   /// Creates a new [UploadConfig] instance.
   UploadConfig({
-    this.sizeLimit,
+    this.sizeLimitInBytes,
     this.allowedFileExtensions = const [],
     this.blockedFileExtensions = const [],
     this.allowedMimeTypes = const [],
@@ -56,7 +56,7 @@ class UploadConfig {
   ///
   /// A value of `0` or `null` means "use the SDK default".
   @JsonKey(name: 'size_limit')
-  final int? sizeLimit;
+  final int? sizeLimitInBytes;
 
   /// File extensions that are explicitly allowed (e.g. `['.pdf', '.csv']`).
   /// When non-empty, only listed extensions are permitted.
