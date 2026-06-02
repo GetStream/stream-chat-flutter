@@ -216,15 +216,14 @@ class MessageComposerProps {
   /// Defaults to false.
   final bool disableAttachments;
 
-  /// Max attachment size in bytes used as a fallback when the backend does not
-  /// provide an upload size limit via the app settings.
+  /// Fallback upload size limit in bytes, used only when the backend does not
+  /// provide a positive limit via `ClientState.appSettings`.
   ///
-  /// When `null` (the default) the value is resolved at picker-open time:
-  /// the backend `file_upload_config.size_limit` / `image_upload_config.size_limit`
-  /// is used if available and greater than zero, otherwise [kDefaultMaxAttachmentSize]
+  /// The backend value (`file_upload_config.size_limit` or
+  /// `image_upload_config.size_limit`) is always authoritative: this field is
+  /// consulted only when the backend limit is absent or zero. When both this
+  /// field and the backend limit are absent, [kDefaultMaxAttachmentSize]
   /// (100 MB) is applied.
-  ///
-  /// Set an explicit value to override the backend limit entirely.
   final int? maxAttachmentSize;
 
   /// Show the checkbox to send the message as a direct message to the channel.
