@@ -56,17 +56,3 @@ flutter:
   assets:
     - assets/
     - pubspec.lock
-
-flutter_icons:
-  image_path: "assets/ic_launcher.png"
-
-  android: true
-  adaptive_icon_background: "assets/ic_launcher_background.png"
-  adaptive_icon_foreground: "assets/ic_launcher_foreground.png"
-  ios: true
-  web:
-    generate: true
-  windows:
-    generate: true
-  macos:
-    generate: true

@@ -77,7 +77,7 @@ class NotificationService {
         requestBadgePermission: false,
         requestSoundPermission: false,
       ),
-      android: AndroidInitializationSettings('ic_notification_in_app'),
+      android: AndroidInitializationSettings('ic_notification'),
     );
 
     try {
