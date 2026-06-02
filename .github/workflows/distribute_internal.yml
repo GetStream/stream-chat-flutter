@@ -150,7 +150,6 @@ jobs:
           APPSTORE_API_KEY: ${{ secrets.APPSTORE_API_KEY }}
         run: bundle exec fastlane distribute_to_firebase
 
-  # TODO: Remove once feat/design-refresh is merged to master
   ios_testflight:
     needs: determine_platforms
     if: ${{ needs.determine_platforms.outputs.run_ios == 'true' }}

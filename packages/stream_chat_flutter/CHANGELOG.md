@@ -146,6 +146,9 @@
 
 🐞 Fixed
 
+- Fixed `ScrollablePositionedList.scrollTo` taking the long-distance teleport path when called
+  immediately after mount (before `itemPositions` had been published). It now waits one frame
+  for layout, then animates the real pixel distance.
 - Fixed `StreamMessageListView` not auto-scrolling to the bottom on the user's own outgoing message
   until the server confirmed it.
 - Fixed `StreamMessageListView` tripping `A RenderViewport exceeded its maximum number of layout
