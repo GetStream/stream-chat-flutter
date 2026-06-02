@@ -42,11 +42,17 @@ class StreamAttachmentPickerController extends ValueNotifier<AttachmentPickerVal
     this.maxAttachmentSize,
     this.maxAttachmentCount,
     this.appSettings,
-  }) : assert(
+  }) : _validator = AttachmentUploadValidator(
+         appSettings: appSettings,
+         maxAttachmentSize: maxAttachmentSize,
+       ),
+       assert(
          maxAttachmentCount == null || initialValue.attachments.length <= maxAttachmentCount,
          'The initial attachments count must be less than or equal to maxAttachmentCount',
        ),
        super(initialValue);
+
+  final AttachmentUploadValidator _validator;
 
   final _customResultController = StreamController<CustomAttachmentPickerResult>.broadcast();
 
@@ -125,51 +131,10 @@ class StreamAttachmentPickerController extends ValueNotifier<AttachmentPickerVal
     );
   }
 
-  /// Resolves the effective upload size limit for the given [attachment].
-  ///
-  /// Images use `imageUploadConfig`, all other types use `fileUploadConfig`.
-  /// Falls back to [maxAttachmentSize] and then to [kDefaultMaxAttachmentSize].
-  int _resolveMaxSize(Attachment attachment) {
-    final isImage = attachment.type == 'image';
-    final config = isImage ? appSettings?.imageUploadConfig : appSettings?.fileUploadConfig;
-    final serverLimit = config?.sizeLimitInBytes;
-    if (serverLimit != null && serverLimit > 0) return serverLimit;
-    return maxAttachmentSize ?? kDefaultMaxAttachmentSize;
-  }
-
-  /// Returns the [UploadConfig] that applies to the given [attachment].
-  UploadConfig? _uploadConfigFor(Attachment attachment) {
-    final isImage = attachment.type == 'image';
-    return isImage ? appSettings?.imageUploadConfig : appSettings?.fileUploadConfig;
-  }
-
   /// Adds a new attachment to the message.
   Future<void> addAttachment(Attachment attachment) async {
     final file = attachment.file;
-
-    if (file != null) {
-      assert(attachment.fileSize != null, '`attachment.fileSize` is required when the attachment has a file');
-
-      final effectiveMaxSize = _resolveMaxSize(attachment);
-      if (attachment.fileSize! > effectiveMaxSize) {
-        throw AttachmentTooLargeError(
-          fileSize: attachment.fileSize!,
-          maxSize: effectiveMaxSize,
-        );
-      }
-
-      final uploadConfig = _uploadConfigFor(attachment);
-      if (uploadConfig != null) {
-        final mimeType = attachment.mimeType;
-        final extension = file.path?.split('.').last;
-        if (!uploadConfig.isAllowed(fileExtension: extension, mimeType: mimeType)) {
-          throw AttachmentBlockedError(
-            fileExtension: extension,
-            mimeType: mimeType,
-          );
-        }
-      }
-    }
+    if (file != null) _validator.validate(attachment);
 
     final uploadState = attachment.uploadState;
 
@@ -392,6 +357,86 @@ class AttachmentLimitReachedError extends StreamChatError {
   String toString() =>
       'AttachmentLimitReachedError: '
       'The maximum number of attachments is $maxCount.';
+}
+
+/// Validates an [Attachment] against the backend upload configuration and an
+/// optional [maxAttachmentSize] fallback.
+///
+/// [StreamAttachmentPickerController] and [StreamMessageComposer]'s desktop
+/// drop path both use this class so that size-limit and extension/MIME-type
+/// rules are enforced consistently from a single place.
+class AttachmentUploadValidator {
+  /// Creates a new [AttachmentUploadValidator].
+  const AttachmentUploadValidator({
+    this.appSettings,
+    this.maxAttachmentSize,
+  });
+
+  /// App settings fetched from the Stream backend.
+  final AppSettings? appSettings;
+
+  /// Fallback size limit in bytes when the backend does not specify one.
+  ///
+  /// Defaults to [kDefaultMaxAttachmentSize] when `null`.
+  final int? maxAttachmentSize;
+
+  /// Validates [attachment] against the upload configuration.
+  ///
+  /// Throws [AttachmentTooLargeError] when the file exceeds the effective size
+  /// limit, or [AttachmentBlockedError] when its extension or MIME type is
+  /// rejected by [appSettings].
+  ///
+  /// Does nothing when [attachment] has no file.
+  void validate(Attachment attachment) {
+    final file = attachment.file;
+    if (file == null) return;
+
+    assert(
+      attachment.fileSize != null,
+      '`attachment.fileSize` is required when the attachment has a file',
+    );
+
+    final effectiveMaxSize = resolveMaxSize(attachment);
+    if (attachment.fileSize! > effectiveMaxSize) {
+      throw AttachmentTooLargeError(
+        fileSize: attachment.fileSize!,
+        maxSize: effectiveMaxSize,
+      );
+    }
+
+    final uploadConfig = uploadConfigFor(attachment);
+    if (uploadConfig != null) {
+      final rawPath = file.path;
+      final extension = (rawPath != null && rawPath.contains('.')) ? rawPath.split('.').last : null;
+      if (!uploadConfig.isAllowed(fileExtension: extension, mimeType: attachment.mimeType)) {
+        throw AttachmentBlockedError(
+          fileExtension: extension,
+          mimeType: attachment.mimeType,
+        );
+      }
+    }
+  }
+
+  /// Returns the effective upload size limit for [attachment] in bytes.
+  ///
+  /// Images use [AppSettings.imageUploadConfig]; all other types use
+  /// [AppSettings.fileUploadConfig]. Falls back to [maxAttachmentSize] and
+  /// then to [kDefaultMaxAttachmentSize] when the backend does not specify a
+  /// positive limit.
+  int resolveMaxSize(Attachment attachment) {
+    final isImage = attachment.type == 'image';
+    final config = isImage ? appSettings?.imageUploadConfig : appSettings?.fileUploadConfig;
+    final serverLimit = config?.sizeLimitInBytes;
+    if (serverLimit != null && serverLimit > 0) return serverLimit;
+    return maxAttachmentSize ?? kDefaultMaxAttachmentSize;
+  }
+
+  /// Returns the [UploadConfig] that applies to [attachment], or `null` when
+  /// [appSettings] is not available.
+  UploadConfig? uploadConfigFor(Attachment attachment) {
+    final isImage = attachment.type == 'image';
+    return isImage ? appSettings?.imageUploadConfig : appSettings?.fileUploadConfig;
+  }
 }
 
 /// Error thrown when an attachment is blocked by the app's upload configuration.

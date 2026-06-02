@@ -134,6 +134,11 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
   String fileTooLargeError(double limitInMB) => '파일이 너무 커서 업로드할 수 없습니다. 파일 크기 제한은 ${limitInMB}MB입니다.';
 
   @override
+  String fileTypeNotSupportedError(String? extension) => extension != null
+      ? "'.$extension' files are not supported for upload."
+      : 'This file type is not supported for upload.';
+
+  @override
   String get couldNotReadBytesFromFileError => '파일에서 바이트를 읽을 수 없습니다.';
 
   @override

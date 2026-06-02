@@ -840,7 +840,7 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
                 for (final file in details.files) {
                   attachments.add(await file.toAttachment(type: AttachmentType.file));
                 }
-                if (attachments.isNotEmpty) _addAttachments(attachments);
+                if (attachments.isNotEmpty) await _addValidatedAttachments(attachments);
               },
               onDragEntered: (_) {},
               onDragExited: (_) {},
@@ -1190,24 +1190,73 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     return response;
   }
 
-  /// Adds an attachment to the [messageComposerController.attachments] list
-  void _addAttachments(Iterable<Attachment> attachments) {
-    if (widget.props.attachmentLimit case final limit?) {
-      final length = _effectiveController.attachments.length + attachments.length;
-      if (length > limit) {
-        final onAttachmentLimitExceed = widget.props.onAttachmentLimitExceed;
-        if (onAttachmentLimitExceed != null) {
-          return onAttachmentLimitExceed(
-            limit,
-            context.translations.attachmentLimitExceedError(limit),
+  /// Validates [attachments] against appSettings and the attachment limit, then
+  /// adds them to the composer. Routes through [_pickerController] when the
+  /// picker is open (keeping it in sync); otherwise uses a throwaway
+  /// [StreamAttachmentPickerController] to enforce the same size and
+  /// extension/MIME rules before writing to [_effectiveController] directly.
+  Future<void> _addValidatedAttachments(Iterable<Attachment> attachments) async {
+    if (_pickerController case final picker?) {
+      for (final attachment in attachments) {
+        try {
+          await picker.addAttachment(attachment);
+        } on AttachmentTooLargeError catch (e) {
+          if (!mounted) return;
+          _showErrorAlert(
+            context.translations.fileTooLargeError(e.maxSize / (1024 * 1024)),
           );
+        } on AttachmentBlockedError catch (e) {
+          if (!mounted) return;
+          _showErrorAlert(context.translations.fileTypeNotSupportedError(e.fileExtension));
+        } on AttachmentLimitReachedError {
+          if (!mounted) return;
+          final limit = widget.props.attachmentLimit!;
+          final onLimit = widget.props.onAttachmentLimitExceed;
+          if (onLimit != null) {
+            onLimit(limit, context.translations.attachmentLimitExceedError(limit));
+          } else {
+            _showErrorAlert(context.translations.attachmentLimitExceedError(limit));
+          }
+          return;
         }
-        return _showErrorAlert(
-          context.translations.attachmentLimitExceedError(limit),
-        );
+      }
+      return;
+    }
+
+    // Picker is closed — validate via the shared AttachmentUploadValidator,
+    // then add passing attachments directly to the message controller.
+    // Dropped files already have an accessible path or bytes, so no temp-file
+    // caching step is required here.
+    final appSettings = StreamChat.of(context).client.state.appSettings;
+    final validator = AttachmentUploadValidator(
+      appSettings: appSettings,
+      maxAttachmentSize: widget.props.maxAttachmentSize,
+    );
+
+    if (widget.props.attachmentLimit case final limit?) {
+      if (_effectiveController.attachments.length + attachments.length > limit) {
+        final onLimit = widget.props.onAttachmentLimitExceed;
+        if (onLimit != null) {
+          return onLimit(limit, context.translations.attachmentLimitExceedError(limit));
+        }
+        return _showErrorAlert(context.translations.attachmentLimitExceedError(limit));
       }
     }
+
     for (final attachment in attachments) {
+      try {
+        validator.validate(attachment);
+      } on AttachmentTooLargeError catch (e) {
+        if (!mounted) return;
+        _showErrorAlert(
+          context.translations.fileTooLargeError(e.maxSize / (1024 * 1024)),
+        );
+        continue;
+      } on AttachmentBlockedError catch (e) {
+        if (!mounted) return;
+        _showErrorAlert(context.translations.fileTypeNotSupportedError(e.fileExtension));
+        continue;
+      }
       _effectiveController.addAttachment(attachment);
     }
   }
