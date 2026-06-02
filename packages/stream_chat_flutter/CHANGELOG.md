@@ -18,7 +18,7 @@
 
 - Composer UI primitives (`StreamMessageComposerInputField`, `VoiceRecordingCallback`, and the outer/inner layout containers) are now owned by `stream_chat_flutter` and exported from this package. They were previously supplied by `stream_core_flutter`. The public API of `StreamMessageComposer` / `StreamChatMessageInput` and its sub-components is unchanged.
 - Re-export `StreamAvatarTheme` and `StreamAvatarThemeData` from `stream_core_flutter` so consumers can theme avatars without adding a separate `stream_core_flutter` import.
-- Extracted the message item's leading avatar rendering into a new internal `StreamMessageLeading` widget, matching the structure used by `StreamMessageHeader` and `StreamMessageFooter`. Behavior is unchanged; `DefaultStreamMessageItem` now composes leading, header, and footer symmetrically.
+- Added `messageLeading`, `messageHeader`, and `messageFooter` factory slots to `streamChatComponentBuilders` for overriding the message item's avatar, annotations, or metadata row without replacing the whole `messageItem`.
 
 🛑️ Breaking
 
