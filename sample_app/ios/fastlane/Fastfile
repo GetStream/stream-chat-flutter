@@ -133,6 +133,8 @@ platform :ios do
     build_number = (current_build_number || 0).to_i + 1
     build_ipa(export_method: "app-store", build_number: build_number)
 
+    upload_dsyms_to_crashlytics
+
     upload_to_testflight(
       api_key: appstore_api_key,
       distribute_external: false,
