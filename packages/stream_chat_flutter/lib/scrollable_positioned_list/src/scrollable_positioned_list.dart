@@ -750,6 +750,16 @@ class _ScrollablePositionedListState extends State<ScrollablePositionedList>
     Curve curve = Curves.linear,
     required List<double> opacityAnimationWeights,
   }) async {
+    // If `itemPositions` hasn't been published yet (e.g. a scroll requested
+    // from a post-frame callback right after mount), the in-viewport branch
+    // below would miss the target and fall through to the dual-controller
+    // teleport path — even when the target is actually a few items away.
+    // Wait one frame so layout can report positions, then proceed.
+    if (primary.itemPositionsNotifier.itemPositions.value.isEmpty) {
+      await SchedulerBinding.instance.endOfFrame;
+      if (!mounted) return;
+    }
+
     final direction = index > primary.target ? 1 : -1;
     final itemPosition =
         primary.itemPositionsNotifier.itemPositions.value.firstWhereOrNull(

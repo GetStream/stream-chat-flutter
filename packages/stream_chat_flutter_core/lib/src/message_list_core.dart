@@ -305,7 +305,7 @@ class MessageListCoreState extends State<MessageListCore> {
   @override
   void dispose() {
     _teardownController(widget.messageListController);
-    _reloadChannelIfNeeded();
+    if (!_isThreadConversation) _reloadChannelIfNeeded();
     super.dispose();
   }
 }
