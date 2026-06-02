@@ -39,7 +39,10 @@ class StreamChatLocalizationsEn extends GlobalStreamChatLocalizations {
   }
 
   @override
-  String get threadReplyLabel => 'Thread';
+  String get threadReplyLabel => 'Thread Reply';
+
+  @override
+  String get threadLabel => 'Thread';
 
   @override
   String get onlyVisibleToYouText => 'Only visible to you';
@@ -402,6 +405,12 @@ class StreamChatLocalizationsEn extends GlobalStreamChatLocalizations {
   }
 
   @override
+  String toggleBlockUnblockUserText({required bool isBlocked}) {
+    if (isBlocked) return 'Unblock User';
+    return 'Block User';
+  }
+
+  @override
   String toggleMuteUnmuteGroupQuestion({required bool isMuted}) {
     if (isMuted) {
       return 'Are you sure you want to unmute this group?';
@@ -456,7 +465,7 @@ class StreamChatLocalizationsEn extends GlobalStreamChatLocalizations {
   String get allowFileAccessMessage => 'Allow access to files';
 
   @override
-  String get markAsUnreadLabel => 'Mark as Unread';
+  String get markAsUnreadLabel => 'Mark Unread';
 
   @override
   String unreadCountIndicatorLabel({required int unreadCount}) {

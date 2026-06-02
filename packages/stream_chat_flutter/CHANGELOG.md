@@ -1,6 +1,21 @@
 ## Upcoming Beta Changes
 
+🐞 Fixed
+
+- `StreamUserAvatar` with `StreamAvatarSize.xxl` now uses `StreamOnlineIndicatorSize.xxl` (20px) instead of `xl` (16px), matching the Chat SDK design system spec.
+- `StreamMessageComposer` no longer clobbers pre-populated composer state (text, quoted message, attachments) when the channel's draft stream emits its initial `null` (no draft on server). The reset now fires only on an actual non-null → null transition, distinguishing "no draft yet" from "draft was removed".
+
+✅ Added
+
+- Added `BlockUser` / `UnblockUser` default message actions, dispatching to `StreamChatClient.blockUser` / `unblockUser`.
+
 🔄 Internal / Non-breaking
+
+- Reordered the default message actions to match the design system.
+- Renamed default English `threadReplyLabel` (`'Thread'` → `'Thread Reply'`) and `markAsUnreadLabel` (`'Mark as Unread'` → `'Mark Unread'`).
+- `StreamThreadHeader` default title now sources from the new `threadLabel` translation key instead of `threadReplyLabel`, restoring the short `'Thread'` header.
+
+- `ReactionIconResolver.supportedReactions` is now wired to the full emoji picker sheet opened by the "+" button in `StreamMessageReactionPicker` and the add-emoji chip in `ReactionDetailSheet`. Override `supportedReactions` on a custom resolver to control which reactions appear in the full picker grid.
 
 - Composer UI primitives (`StreamMessageComposerInputField`, `VoiceRecordingCallback`, and the outer/inner layout containers) are now owned by `stream_chat_flutter` and exported from this package. They were previously supplied by `stream_core_flutter`. The public API of `StreamMessageComposer` / `StreamChatMessageInput` and its sub-components is unchanged.
 - Re-export `StreamAvatarTheme` and `StreamAvatarThemeData` from `stream_core_flutter` so consumers can theme avatars without adding a separate `stream_core_flutter` import.
@@ -86,7 +101,6 @@
 - Added `Translations.totalVoteCountLabel({int? count})`, `viewAllLabel`, `pollVotesLabel`, `endVoteConfirmationMessage` and `questionLabel({bool isPlural = false})`.
 - Added `Translations.reactionsCountText(int count)` for the reaction-detail sheet header.
 - Added `StreamChannelListTile.isPinned` — renders a pin icon alongside the existing mute icon for pinned channels.
-- Added `StreamChatConfigurationData.reactionOverlap` and `StreamMessageReactions.overlap` to control whether reactions overlap the message bubble edge. When unset, falls back to the platform-based default (overlap on mobile, no overlap on desktop and web).
 - Exported `StreamScrollViewLoadMoreError` and `StreamScrollViewLoadMoreIndicator` from the public API.
 - Exported `StreamTimestamp`, `DateFormatter`, `formatDate` and `formatRecentDateTime` from the public API.
 - Added `DateTimeComparisonUtils` extension on `DateTime` (`isToday`, `isYesterday`, `isWithinLastMinute`, `isWithinLastWeek`, `isInSameYear`, `isSame(other, unit:)`) and the `DateTimeUnit` enum (`year` / `month` / `day` / `hour` / `minute` / `second` / `millisecond` / `microsecond`). All getters compare in local time and read the current instant via `package:clock`, so they're testable under `withClock(...)`.
@@ -101,6 +115,7 @@
 
 🐞 Fixed
 
+- Set supported emojis for the reaction picker and detail sheet to the full set of supported emojis from `stream_core_flutter`.
 - Fixed `StreamCommandAutocompleteOptions` and `StreamMentionAutocompleteOptions` expanding to half the screen height — both now cap at a fixed max height (208px / 176px) and scroll internally so the list can't dominate the screen or overlap the header.
 - Fixed the "Add an option" button in the poll creator looking like a tappable empty option row while disabled. The button is now hidden when adding a new option isn't allowed (an existing option is empty, or the maximum has been reached) instead of rendering as a disabled lookalike.
 - Fixed voice recording duration label jumping by ~1 second when playback starts. The recording timer tracks duration in whole seconds, so the stored value can be up to 1 second longer than the actual audio file. The player now resolves this by keeping the larger of the stored and player-reported durations, matching the strategy used by the iOS SDK.
@@ -133,8 +148,18 @@
 
 - Fixed `StreamMessageListView` not auto-scrolling to the bottom on the user's own outgoing message
   until the server confirmed it.
-- Fixed a `FlutterError` ("A RenderViewport exceeded its maximum number of layout cycles") that
-  could occur when fast-scrolling through the message list.
+- Fixed `StreamMessageListView` tripping `A RenderViewport exceeded its maximum number of layout
+  cycles` under mid-list anchored layout. `ScrollablePositionedList` now preserves the scroll offset
+  across reanchors instead of resetting it to 0.
+- Fixed `RenderBox was not laid out` thrown by `MessageCard._updateWidthLimit` when the attachments
+  subtree was detached between scheduling the post-frame callback and it firing (e.g. the list was
+  rebuilt or the message removed). Added a `hasSize` guard before reading `RenderBox.size`.
+
+🚀 Improved
+
+- `ScrollablePositionedList.padding` now accepts `EdgeInsetsGeometry` (resolved against
+  `Directionality`), and `scrollTo` lands the target at the content-area edge by adjusting for
+  leading padding.
 
 ## 9.24.0
 

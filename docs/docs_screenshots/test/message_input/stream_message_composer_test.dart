@@ -56,7 +56,16 @@ void main() {
         channelState: channelState,
       );
 
-      return _buildMessageInputScaffold(client: client, channel: channel);
+      // Seed the controller with text so the trailing slot shows the send
+      // button instead of the voice-record mic (the default when empty).
+      final controller = StreamMessageComposerController()..text = 'Hello!';
+      addTearDown(controller.dispose);
+
+      return _buildMessageInputScaffold(
+        client: client,
+        channel: channel,
+        messageInput: StreamMessageComposer(messageComposerController: controller),
+      );
     },
   );
 
@@ -77,7 +86,16 @@ void main() {
         channelState: channelState,
       );
 
-      return _buildMessageInputScaffold(client: client, channel: channel);
+      // Seed the controller with text so the trailing slot shows the send
+      // button instead of the voice-record mic (the default when empty).
+      final controller = StreamMessageComposerController()..text = 'Hello!';
+      addTearDown(controller.dispose);
+
+      return _buildMessageInputScaffold(
+        client: client,
+        channel: channel,
+        messageInput: StreamMessageComposer(messageComposerController: controller),
+      );
     },
   );
 
@@ -99,6 +117,7 @@ void main() {
       );
 
       final controller = StreamMessageComposerController();
+      addTearDown(controller.dispose);
 
       return StreamChat(
         client: client,
@@ -152,6 +171,11 @@ void main() {
         channelState: channelState,
       );
 
+      // Seed the controller with text so the trailing slot shows the send
+      // button (with the custom icon) instead of the default voice-record mic.
+      final controller = StreamMessageComposerController()..text = 'Hello!';
+      addTearDown(controller.dispose);
+
       return Builder(
         builder: (context) {
           final theme = Theme.of(context);
@@ -175,7 +199,7 @@ void main() {
                   body: Column(
                     children: [
                       Expanded(child: Container()),
-                      StreamMessageComposer(),
+                      StreamMessageComposer(messageComposerController: controller),
                     ],
                   ),
                 ),
@@ -233,6 +257,7 @@ void main() {
           text: 'This is the original message',
           user: ameliaMoore,
         );
+      addTearDown(controller.dispose);
 
       return _buildMessageInputScaffold(
         client: client,
@@ -260,6 +285,7 @@ void main() {
       );
 
       final controller = StreamMessageComposerController();
+      addTearDown(controller.dispose);
 
       return StreamChat(
         client: client,

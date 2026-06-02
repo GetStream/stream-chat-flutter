@@ -109,6 +109,8 @@ class MockChannelState extends Mock implements ChannelClientState {
   }
 }
 
+class _FakeDraftMessage extends Fake implements DraftMessage {}
+
 /// Sets up a [MockChannel] with all stubs required by [StreamMessageComposer].
 void setupMockChannel({
   required MockClient client,
@@ -119,6 +121,10 @@ void setupMockChannel({
   List<Message> messages = const [],
   List<Member> members = const [],
 }) {
+  // mocktail needs a fallback to use any() on DraftMessage in the draft stubs
+  // below. Registration is idempotent so re-calling per setup is safe.
+  registerFallbackValue(_FakeDraftMessage());
+
   final allMembers = members.isNotEmpty ? members : _defaultMembers(channel.id);
 
   when(() => client.state).thenReturn(clientState);
@@ -126,6 +132,7 @@ void setupMockChannel({
   when(() => channel.lastMessageAtStream).thenAnswer((_) => Stream.value(DateTime.parse('2020-06-22 12:00:00')));
   when(() => channel.state).thenReturn(channelState);
   when(() => channel.client).thenReturn(client);
+  when(() => channel.config).thenReturn(ChannelConfig(mutes: true));
   when(channel.getRemainingCooldown).thenReturn(0);
   when(() => channel.isDistinct).thenReturn(false);
   when(() => channel.isMuted).thenReturn(false);
@@ -144,6 +151,11 @@ void setupMockChannel({
   when(() => channelState.members).thenReturn(allMembers);
   when(() => channelState.messages).thenReturn(messages);
   when(() => channelState.messagesStream).thenAnswer((_) => Stream.value(messages));
+  // Composer auto-saves the draft on deactivate via createDraft/deleteDraft;
+  // stub both so widget teardown doesn't leak an unresolved Future as a
+  // pending timer.
+  when(() => channel.createDraft(any())).thenAnswer((_) async => CreateDraftResponse());
+  when(() => channel.deleteDraft(parentId: any(named: 'parentId'))).thenAnswer((_) async => EmptyResponse());
 }
 
 /// Creates a [MockChannel] pre-configured with fake data for list views.

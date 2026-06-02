@@ -489,6 +489,9 @@ class _PositionedListState extends State<PositionedList> {
   // edge padding only when it owns the first/last item.
   EdgeInsets get _centerSliverPadding {
     final resolved = _resolvedPadding;
+    // Empty list: center is the only sliver in the tree. Drop neither
+    // edge or the gap would be asymmetric.
+    if (widget.itemCount == 0) return resolved;
     final isFirst = widget.positionedIndex == 0;
     final isLast = widget.positionedIndex == widget.itemCount - 1;
     switch (_axisDirection) {
@@ -571,21 +574,16 @@ class _PositionedListState extends State<PositionedList> {
             } else {
               final itemOffset = box.localToGlobal(Offset.zero, ancestor: viewport).dx;
               if (!itemOffset.isFinite) continue;
+              final viewportDimension = scrollController.position.viewportDimension;
+              // Branch on the resolved axis direction so RTL is handled.
+              final isRight = _axisDirection == AxisDirection.right;
+              final leadingPx = isRight ? itemOffset : viewportDimension - (itemOffset + box.size.width);
+              final trailingPx = isRight ? itemOffset + box.size.width : viewportDimension - itemOffset;
               positions.add(
                 ItemPosition(
                   index: key.index,
-                  itemLeadingEdge:
-                      (widget.reverse
-                              ? scrollController.position.viewportDimension - (itemOffset + box.size.width)
-                              : itemOffset)
-                          .round() /
-                      scrollController.position.viewportDimension,
-                  itemTrailingEdge:
-                      (widget.reverse
-                              ? scrollController.position.viewportDimension - itemOffset
-                              : (itemOffset + box.size.width))
-                          .round() /
-                      scrollController.position.viewportDimension,
+                  itemLeadingEdge: leadingPx.round() / viewportDimension,
+                  itemTrailingEdge: trailingPx.round() / viewportDimension,
                 ),
               );
             }

@@ -80,7 +80,7 @@ class StreamThreadHeader extends StatelessWidget implements PreferredSizeWidget 
     }
 
     var title = this.title;
-    title ??= Text(context.translations.threadReplyLabel);
+    title ??= Text(context.translations.threadLabel);
 
     var subtitle = this.subtitle;
     subtitle ??= StreamTypingIndicator(

@@ -107,6 +107,30 @@ final class UnmuteUser extends MessageAction {
   final User user;
 }
 
+/// Action to block a user, preventing direct messages from them
+final class BlockUser extends MessageAction {
+  /// Create a new block user action
+  const BlockUser({
+    required super.message,
+    required this.user,
+  });
+
+  /// The user to be blocked.
+  final User user;
+}
+
+/// Action to unblock a previously blocked user
+final class UnblockUser extends MessageAction {
+  /// Create a new unblock user action
+  const UnblockUser({
+    required super.message,
+    required this.user,
+  });
+
+  /// The user to be unblocked.
+  final User user;
+}
+
 /// Action to pin a message to make it prominently visible in the channel
 final class PinMessage extends MessageAction {
   /// Create a new pin message action

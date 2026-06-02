@@ -42,6 +42,9 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
   String get threadReplyLabel => 'Svar på tråd';
 
   @override
+  String get threadLabel => 'Tråd';
+
+  @override
   String get onlyVisibleToYouText => 'Kun synlig for deg';
 
   @override
@@ -435,6 +438,12 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
   String toggleMuteUnmuteUserText({required bool isMuted}) {
     if (isMuted) return 'Opphev lyden av brukeren';
     return 'Dempe brukeren';
+  }
+
+  @override
+  String toggleBlockUnblockUserText({required bool isBlocked}) {
+    if (isBlocked) return 'Opphev blokkering';
+    return 'Blokker bruker';
   }
 
   @override

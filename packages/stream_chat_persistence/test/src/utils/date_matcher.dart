@@ -14,7 +14,8 @@ class _IsSameDateAs extends Matcher {
         date.day == targetDate?.day &&
         date.hour == targetDate?.hour &&
         date.minute == targetDate?.minute &&
-        date.second == targetDate?.second;
+        date.second == targetDate?.second &&
+        date.millisecond == targetDate?.millisecond;
   }
 
   @override

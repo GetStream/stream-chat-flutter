@@ -42,6 +42,9 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
   String get threadReplyLabel => 'Thread-Antwort';
 
   @override
+  String get threadLabel => 'Thread';
+
+  @override
   String get onlyVisibleToYouText => 'Nur für dich sichtbar';
 
   @override
@@ -439,6 +442,12 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
   @override
   String toggleMuteUnmuteUserText({required bool isMuted}) {
     return 'Gebruiker dempen';
+  }
+
+  @override
+  String toggleBlockUnblockUserText({required bool isBlocked}) {
+    if (isBlocked) return 'Blockierung aufheben';
+    return 'Benutzer blockieren';
   }
 
   @override

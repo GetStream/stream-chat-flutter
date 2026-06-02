@@ -37,7 +37,10 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
   }
 
   @override
-  String get threadReplyLabel => '스레드 응답입니다';
+  String get threadReplyLabel => '스레드 답변';
+
+  @override
+  String get threadLabel => '스레드';
 
   @override
   String get onlyVisibleToYouText => '당신만 볼 수 있습니다';
@@ -393,6 +396,12 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
     } else {
       return '사용자 음소거';
     }
+  }
+
+  @override
+  String toggleBlockUnblockUserText({required bool isBlocked}) {
+    if (isBlocked) return '사용자 차단 해제';
+    return '사용자 차단';
   }
 
   @override

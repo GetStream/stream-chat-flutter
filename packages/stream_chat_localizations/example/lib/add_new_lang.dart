@@ -62,6 +62,9 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
   String get threadReplyLabel => 'Thread Reply';
 
   @override
+  String get threadLabel => 'Thread';
+
+  @override
   String get onlyVisibleToYouText => 'Only visible to you';
 
   @override
@@ -421,6 +424,12 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
     } else {
       return 'Mute User';
     }
+  }
+
+  @override
+  String toggleBlockUnblockUserText({required bool isBlocked}) {
+    if (isBlocked) return 'Unblock User';
+    return 'Block User';
   }
 
   @override

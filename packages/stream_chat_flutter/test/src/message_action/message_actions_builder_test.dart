@@ -115,6 +115,7 @@ void main() {
     actions.expects<DeleteMessage>();
     actions.expects<FlagMessage>();
     actions.expects<MuteUser>();
+    actions.expects<BlockUser>();
   });
 
   testWidgets('returns empty set for deleted messages', (tester) async {
@@ -327,6 +328,61 @@ void main() {
 
         actionsOwnMessage.notExpects<FlagMessage>(
           reason: 'Flag action should not be available for own messages',
+        );
+      },
+    );
+
+    testWidgets(
+      'handles block action correctly based on user and block list',
+      (tester) async {
+        final context = await _getContext(tester);
+
+        final channel = _getChannelWithCapabilities(allChannelCapabilities);
+
+        // Other user, not blocked → Block action
+        final userWithNoBlocks = OwnUser(id: 'current-user', blockedUserIds: const []);
+        final actionsForNoBlocks = StreamMessageActionsBuilder.buildActions(
+          context: context,
+          message: message,
+          channel: channel,
+          currentUser: userWithNoBlocks,
+        );
+
+        actionsForNoBlocks.expects<BlockUser>(
+          reason: 'Block action should be available for non-blocked users',
+        );
+
+        // Other user, already blocked → Unblock action
+        final userWithBlocks = OwnUser(
+          id: 'current-user',
+          blockedUserIds: const ['test-user'],
+        );
+
+        final actionsForBlockedUser = StreamMessageActionsBuilder.buildActions(
+          context: context,
+          message: message,
+          channel: channel,
+          currentUser: userWithBlocks,
+        );
+
+        actionsForBlockedUser.expects<UnblockUser>(
+          reason: 'Unblock action should be available for already blocked users',
+        );
+
+        // Own message → neither Block nor Unblock
+        final ownMessage = createTestMessage(userId: currentUser.id);
+        final actionsForOwnMessage = StreamMessageActionsBuilder.buildActions(
+          context: context,
+          message: ownMessage,
+          channel: channel,
+          currentUser: currentUser,
+        );
+
+        actionsForOwnMessage.notExpects<BlockUser>(
+          reason: 'Block action should not be available for own messages',
+        );
+        actionsForOwnMessage.notExpects<UnblockUser>(
+          reason: 'Unblock action should not be available for own messages',
         );
       },
     );

@@ -135,7 +135,8 @@ class StreamUserAvatar extends StatelessWidget {
     .xs || .sm => StreamOnlineIndicatorSize.sm,
     .md => StreamOnlineIndicatorSize.md,
     .lg => StreamOnlineIndicatorSize.lg,
-    .xl || .xxl => StreamOnlineIndicatorSize.xl,
+    .xl => StreamOnlineIndicatorSize.xl,
+    .xxl => StreamOnlineIndicatorSize.xxl,
   };
 }
 

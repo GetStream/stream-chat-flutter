@@ -42,6 +42,9 @@ class StreamChatLocalizationsFr extends GlobalStreamChatLocalizations {
   String get threadReplyLabel => 'Réponse au fil de discussion';
 
   @override
+  String get threadLabel => 'Fil de discussion';
+
+  @override
   String get onlyVisibleToYouText => 'Seulement visible par vous';
 
   @override
@@ -406,6 +409,12 @@ Limite de pièces jointes dépassée : il n'est pas possible d'ajouter plus de $
     } else {
       return 'Utilisateur muet';
     }
+  }
+
+  @override
+  String toggleBlockUnblockUserText({required bool isBlocked}) {
+    if (isBlocked) return "Débloquer l'utilisateur";
+    return "Bloquer l'utilisateur";
   }
 
   @override

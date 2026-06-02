@@ -838,6 +838,8 @@ class DefaultStreamMessageItem extends StatelessWidget {
     MarkUnread() => channel.markUnread(action.message.id),
     MuteUser() => channel.client.muteUser(action.user.id),
     UnmuteUser() => channel.client.unmuteUser(action.user.id),
+    BlockUser() => channel.client.blockUser(action.user.id),
+    UnblockUser() => channel.client.unblockUser(action.user.id),
     PinMessage() => channel.pinMessage(action.message),
     UnpinMessage() => channel.unpinMessage(action.message),
     ResendMessage() => channel.retryMessage(action.message),
