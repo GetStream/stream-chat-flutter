@@ -17,7 +17,6 @@ const _kDraftMessagesEnabled = 'config.draftMessagesEnabled';
 const _kEnforceUniqueReactions = 'config.enforceUniqueReactions';
 const _kReactionType = 'config.reactionType';
 const _kReactionPosition = 'config.reactionPosition';
-const _kReactionOverlap = 'config.reactionOverlap';
 const _kLocale = 'config.locale';
 
 const _sentinel = Object();
@@ -25,25 +24,6 @@ const _sentinel = Object();
 /// Locales supported by the sample app, derived from
 /// [kStreamChatSupportedLanguages].
 final supportedLocales = kStreamChatSupportedLanguages.map(Locale.new).toList();
-
-/// Reaction overlap preference for the sample app.
-///
-/// Mapped to `bool` via [value] when passed to
-/// [StreamChatConfigurationData.reactionOverlap]. Use `null` for the SDK's
-/// platform-based default (overlap on mobile, no overlap on desktop/web).
-enum SampleReactionOverlap {
-  /// Always overlap the message bubble edge.
-  overlap(true),
-
-  /// Never overlap the message bubble edge.
-  noOverlap(false);
-
-  // ignore: avoid_positional_boolean_parameters
-  const SampleReactionOverlap(this.value);
-
-  /// The boolean value passed to the SDK.
-  final bool value;
-}
 
 // ---------------------------------------------------------------------------
 // SampleAppConfigData
@@ -67,7 +47,6 @@ class SampleAppConfigData {
     bool enforceUniqueReactions = false,
     StreamReactionsType? reactionType,
     StreamReactionsPosition? reactionPosition,
-    SampleReactionOverlap? reactionOverlap,
   }) {
     return SampleAppConfigData.raw(
       themeMode: themeMode,
@@ -81,7 +60,6 @@ class SampleAppConfigData {
       enforceUniqueReactions: enforceUniqueReactions,
       reactionType: reactionType,
       reactionPosition: reactionPosition,
-      reactionOverlap: reactionOverlap,
     );
   }
 
@@ -98,7 +76,6 @@ class SampleAppConfigData {
     required this.enforceUniqueReactions,
     required this.reactionType,
     required this.reactionPosition,
-    required this.reactionOverlap,
   });
 
   /// Loads config from [StreamingSharedPreferences], falling back to defaults.
@@ -116,7 +93,6 @@ class SampleAppConfigData {
       enforceUniqueReactions: prefs.getBool(_kEnforceUniqueReactions, defaultValue: false).getValue(),
       reactionType: _intToReactionType(prefs.getInt(_kReactionType, defaultValue: -1).getValue()),
       reactionPosition: _intToReactionPosition(prefs.getInt(_kReactionPosition, defaultValue: -1).getValue()),
-      reactionOverlap: _intToReactionOverlap(prefs.getInt(_kReactionOverlap, defaultValue: -1).getValue()),
     );
   }
 
@@ -157,18 +133,12 @@ class SampleAppConfigData {
   /// Where reactions appear relative to the message bubble.
   final StreamReactionsPosition? reactionPosition;
 
-  /// Whether reactions overlap the message bubble edge.
-  ///
-  /// When null, the SDK's platform-based default is used (overlap on
-  /// mobile, no overlap on desktop and web).
-  final SampleReactionOverlap? reactionOverlap;
-
   // -- copyWith -------------------------------------------------------------
 
   /// Creates a copy with the given fields replaced.
   ///
-  /// For nullable fields ([locale], [reactionType], [reactionPosition],
-  /// [reactionOverlap]), pass explicitly as `null` to reset to default/system.
+  /// For nullable fields ([locale], [reactionType], [reactionPosition]),
+  /// pass explicitly as `null` to reset to default/system.
   SampleAppConfigData copyWith({
     ThemeMode? themeMode,
     Object? locale = _sentinel,
@@ -181,7 +151,6 @@ class SampleAppConfigData {
     bool? enforceUniqueReactions,
     Object? reactionType = _sentinel,
     Object? reactionPosition = _sentinel,
-    Object? reactionOverlap = _sentinel,
   }) {
     return SampleAppConfigData.raw(
       themeMode: themeMode ?? this.themeMode,
@@ -197,7 +166,6 @@ class SampleAppConfigData {
       reactionPosition: reactionPosition == _sentinel
           ? this.reactionPosition
           : reactionPosition as StreamReactionsPosition?,
-      reactionOverlap: reactionOverlap == _sentinel ? this.reactionOverlap : reactionOverlap as SampleReactionOverlap?,
     );
   }
 
@@ -216,7 +184,6 @@ class SampleAppConfigData {
     prefs.setBool(_kEnforceUniqueReactions, enforceUniqueReactions);
     prefs.setInt(_kReactionType, _reactionTypeToInt(reactionType));
     prefs.setInt(_kReactionPosition, _reactionPositionToInt(reactionPosition));
-    prefs.setInt(_kReactionOverlap, _reactionOverlapToInt(reactionOverlap));
   }
 
   static StreamReactionsType? _intToReactionType(int value) {
@@ -232,13 +199,6 @@ class SampleAppConfigData {
   static int _reactionTypeToInt(StreamReactionsType? type) => type?.index ?? -1;
 
   static int _reactionPositionToInt(StreamReactionsPosition? position) => position?.index ?? -1;
-
-  static SampleReactionOverlap? _intToReactionOverlap(int value) {
-    if (value < 0 || value >= SampleReactionOverlap.values.length) return null;
-    return SampleReactionOverlap.values[value];
-  }
-
-  static int _reactionOverlapToInt(SampleReactionOverlap? overlap) => overlap?.index ?? -1;
 }
 
 // ---------------------------------------------------------------------------
