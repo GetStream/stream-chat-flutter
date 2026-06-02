@@ -9,6 +9,7 @@ import 'package:stream_chat_flutter/src/context_menu/context_menu_region.dart';
 import 'package:stream_chat_flutter/src/message_widget/components/stream_message_content.dart';
 import 'package:stream_chat_flutter/src/message_widget/components/stream_message_footer.dart';
 import 'package:stream_chat_flutter/src/message_widget/components/stream_message_header.dart';
+import 'package:stream_chat_flutter/src/message_widget/components/stream_message_leading.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_core_flutter/stream_core_flutter.dart' as core;
 
@@ -430,17 +431,9 @@ class DefaultStreamMessageItem extends StatelessWidget {
     final effectiveMetadataVisibility = resolve((theme) => theme?.metadataVisibility);
     final effectiveRepliesVisibility = resolve((theme) => theme?.repliesVisibility);
 
-    Widget? leadingWidget;
-    if (props.message.user case final user?) {
-      final effectiveAvatarSize = theme.avatarSize ?? defaults.avatarSize;
-
-      leadingWidget = effectiveAvatarVisibility.apply(
-        core.StreamAvatarTheme(
-          data: .new(size: effectiveAvatarSize),
-          child: StreamUserAvatar(user: user, showOnlineIndicator: false),
-        ),
-      );
-    }
+    final leadingWidget = effectiveAvatarVisibility.apply(
+      StreamMessageLeading(message: message),
+    );
 
     final headerWidget = effectiveAnnotationVisibility.apply(
       StreamMessageHeader(
