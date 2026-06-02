@@ -8,6 +8,7 @@
 
 🐞 Fixed
 
+- Fixed `Channel.getMessagesById` mutating the loaded channel window as a side effect of fetching.
 - Fixed `StreamChatClient.queryDrafts` not forwarding the `filter` argument to the API.
 
 - Coalesced concurrent `queryChannels` calls with identical parameters via an in-flight cache.
