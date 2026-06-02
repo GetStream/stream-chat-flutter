@@ -21,6 +21,8 @@
 
 🛑️ Breaking
 
+- Removed `StreamChatConfigurationData.reactionOverlap`. Overlap is now determined by position: `StreamReactionsPosition.header` always overlaps the message bubble; `StreamReactionsPosition.footer` never overlaps. Remove any `reactionOverlap` usages and use `reactionPosition` to control overlap behaviour.
+- Removed the `overlap` parameter from `StreamMessageReactions`. Use the `position` parameter instead.
 - `StreamChatConfigurationData.draftMessagesEnabled` now defaults to `true`. Draft messages are enabled out of the box; pass `draftMessagesEnabled: false` to opt out.
 - `StreamChatConfigurationData.enforceUniqueReactions` now defaults to `false`. Users can add multiple distinct reaction types to a message by default; pass `enforceUniqueReactions: true` to restore the previous behaviour.
 - `StreamMessageComposer.enableVoiceRecording` now defaults to `true`. The voice recording button is shown out of the box; pass `enableVoiceRecording: false` to opt out.
