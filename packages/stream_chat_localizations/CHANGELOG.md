@@ -20,9 +20,7 @@
 
 ✅ Added
 
-- Added `fileTypeNotSupportedError(String? extension)` translation for all
-  supported locales. Used by the message composer when an attachment's
-  extension or MIME type is rejected.
+- Added `fileTypeNotSupportedError(String? extension)` translation for all supported locales.
 - Added `toggleBlockUnblockUserText` translation for all supported locales.
 - Added `threadLabel` translation for all supported locales, used by the
   `StreamThreadHeader` default title.
