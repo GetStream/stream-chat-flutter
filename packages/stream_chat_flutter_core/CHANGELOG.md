@@ -2,6 +2,7 @@
 
 ✅ Added
 
+- Added support for predefined filters on `StreamChannelListController`.
 - Added `StreamChannel.value` — exposes an already-initialized channel without running channel-page
   positioning. Use it for sub-route and overlay wraps.
 

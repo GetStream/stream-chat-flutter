@@ -1,5 +1,9 @@
 # Upcoming
 
+✅ Added
+
+- Added support for predefined filters for `QueryChannels` on `StreamChatPersistenceClient`.
+
 🚀 Performance
 
 - Reduce the number of DB reads in the `ChatPersistenceClient.getChannelStates` method.

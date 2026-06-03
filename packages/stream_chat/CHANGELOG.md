@@ -1,3 +1,10 @@
+# Upcoming
+
+✅ Added
+
+- Added support for predefined filters for `QueryChannels` on `StreamChatClient` (`StreamChatClient.queryChannels` and `StreamChatClient.queryChannelsWithResult`).
+- Added support for predefined filters for `QueryChannels` on `ChatPersistenceClient` (`ChatPersistenceClient.getChannelStatesByPredefinedFilter` and `ChatPersistenceClient.updateChannelQueriesByPredefinedFilter`).
+
 ## 9.24.0
 
 🔒 Security
