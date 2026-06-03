@@ -413,7 +413,6 @@ try {
 > - `AttachmentTooLargeError` provides `fileSize` and `maxSize` properties.
 > - `AttachmentLimitReachedError` provides `maxCount` property.
 > - `AttachmentBlockedError` provides `fileExtension` and `mimeType` (both nullable — populated regardless of which list triggered the rejection).
-> - To bypass the app's Dashboard-configured rules, construct your own `StreamAttachmentValidator` and pass it to the picker controller.
 
 ---
 
