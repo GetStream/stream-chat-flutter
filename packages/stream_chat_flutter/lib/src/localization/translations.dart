@@ -867,9 +867,10 @@ class DefaultTranslations implements Translations {
       'The file is too large to upload. The file size limit is $limitInMB MB.';
 
   @override
-  String fileTypeNotSupportedError(String? extension) => extension != null
-      ? "'.$extension' files are not supported for upload."
-      : 'This file type is not supported for upload.';
+  String fileTypeNotSupportedError(String? extension) {
+    if (extension != null) return "'.$extension' files are not supported for upload.";
+    return 'This file type is not supported for upload.';
+  }
 
   @override
   String get couldNotReadBytesFromFileError => 'Could not read bytes from file.';

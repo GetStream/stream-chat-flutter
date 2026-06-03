@@ -174,9 +174,10 @@ String get endVoteConfirmationMessage =>
 // `extension` is the raw extension without a leading dot (e.g. `'exe'`),
 // or `null` when the extension is unknown.
 @override
-String fileTypeNotSupportedError(String? extension) => extension != null
-    ? "'.$extension' files are not supported for upload."
-    : 'This file type is not supported for upload.';
+String fileTypeNotSupportedError(String? extension) {
+  if (extension != null) return "'.$extension' files are not supported for upload.";
+  return 'This file type is not supported for upload.';
+}
 ```
 
 > **Note:** The values shown above are the English defaults from `DefaultTranslations`. Provide your own translated strings in place of these.

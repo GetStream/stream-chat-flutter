@@ -138,9 +138,10 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
       'Die Dateigröße ist begrenzt auf $limitInMB MB.';
 
   @override
-  String fileTypeNotSupportedError(String? extension) => extension != null
-      ? "'.$extension' files are not supported for upload."
-      : 'This file type is not supported for upload.';
+  String fileTypeNotSupportedError(String? extension) {
+    if (extension != null) return "'.$extension' files are not supported for upload.";
+    return 'This file type is not supported for upload.';
+  }
 
   @override
   String get addAFileLabel => 'Datei hinzufügen';
