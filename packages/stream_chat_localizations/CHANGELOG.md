@@ -21,9 +21,8 @@
 ✅ Added
 
 - Added `fileTypeNotSupportedError(String? extension)` translation for all
-  supported locales. Used by the message composer to surface attachment
-  rejections from the app's `AppSettings.fileUploadConfig` /
-  `imageUploadConfig` (configured in the Stream Dashboard).
+  supported locales. Used by the message composer when an attachment's
+  extension or MIME type is rejected.
 - Added `toggleBlockUnblockUserText` translation for all supported locales.
 - Added `threadLabel` translation for all supported locales, used by the
   `StreamThreadHeader` default title.

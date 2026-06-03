@@ -6,8 +6,8 @@
 
 ✅ Added
 
-- `StreamMessageComposer` now validates every picked, pasted, and dropped attachment against the app's `AppSettings` (configured in the Stream Dashboard) — enforcing per-type size limits, allowed/blocked extensions and MIME types, and the total attachment count. Failures surface through the localized error sheet; pass `onError` to receive the typed `AttachmentLimitReachedError`, `AttachmentTooLargeError`, or `AttachmentBlockedError` and render your own UI.
-- Added `Translations.fileTypeNotSupportedError(String? extension)` — surfaced by the composer when an attachment is rejected by the app's allowed/blocked extension or MIME-type lists. Required override on any custom `Translations` subclass.
+- `StreamMessageComposer` now validates attachments against the app's `AppSettings` (configured in the Stream Dashboard) — enforcing size, extension/MIME, and count rules. Pass `onError` to handle the typed `AttachmentLimitReachedError`, `AttachmentTooLargeError`, or `AttachmentBlockedError` instead of the default error sheet.
+- Added `Translations.fileTypeNotSupportedError(String? extension)` — surfaced by the composer when an attachment's extension or MIME type is rejected.
 - Added `BlockUser` / `UnblockUser` default message actions, dispatching to `StreamChatClient.blockUser` / `unblockUser`.
 
 🔄 Internal / Non-breaking
@@ -82,7 +82,7 @@
 - Removed `StreamMessageComposer.maxAttachmentSize` (and the `kDefaultMaxAttachmentSize` constant). Per-type size limits come from `StreamChatClient.appSettings` (configured in the Stream Dashboard).
 - Removed `StreamMessageComposer.onAttachmentLimitExceed` and the `AttachmentLimitExceedListener` typedef. Use `onError` for custom error handling.
 - `StreamMessageComposer.attachmentLimit` is now a non-nullable `int` defaulting to `30` (the per-message attachment cap). Previously `int?` defaulting to `null` ("no limit").
-- `StreamAttachmentPickerController` constructor takes a `validator: StreamAttachmentValidator` parameter.
+- `StreamAttachmentPickerController` constructor now takes a single `validator: StreamAttachmentValidator` parameter (replaces the previous size / limit / config parameters).
 
 ✅ Added
 
