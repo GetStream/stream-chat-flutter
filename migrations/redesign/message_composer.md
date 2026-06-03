@@ -94,7 +94,7 @@ The previous `maxAttachmentSize` (UI-side fallback) and `onAttachmentLimitExceed
 
 | Removed                                          | Replacement                                                                                                                                                                                                            |
 | ------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `StreamMessageComposer.maxAttachmentSize` (`int?`) and the `kDefaultMaxAttachmentSize` constant | Size limits are read from `StreamChatClient.appSettings.fileUploadConfig.sizeLimit` / `imageUploadConfig.sizeLimit`. When the backend value is `0`, the SDK falls back to `UploadConfig.defaultSizeLimit` (100 MB).    |
+| `StreamMessageComposer.maxAttachmentSize` (`int?`) and the `kDefaultMaxAttachmentSize` constant | Size limits are read from `StreamChatClient.appSettings.fileUploadConfig.sizeLimit` / `imageUploadConfig.sizeLimit` (configured in the Stream Dashboard). When the app-configured value is `0`, the SDK falls back to `UploadConfig.defaultSizeLimit` (100 MB).    |
 | `StreamMessageComposer.onAttachmentLimitExceed` and the `AttachmentLimitExceedListener` typedef | The default error sheet handles all validator failures. To surface a custom UI, pass `onError` to `StreamMessageComposer` — when set, it short-circuits the default sheet and receives the typed `AttachmentLimitReachedError` / `AttachmentTooLargeError` / `AttachmentBlockedError`. |
 
 **Before:**
@@ -109,8 +109,9 @@ StreamMessageInput(
 
 **After:**
 ```dart
-// No UI-side knobs. Size + extension + MIME rules come from the backend
-// (AppSettings); the count limit comes from `attachmentLimit` (defaulting to 30).
+// No UI-side knobs. Size + extension + MIME rules come from the app's
+// AppSettings (configured in the Stream Dashboard); the count limit comes
+// from `attachmentLimit` (defaulting to 30).
 StreamMessageComposer()
 ```
 
@@ -628,7 +629,7 @@ There is no one-to-one replacement — most fields on the old `StreamMessageInpu
 - [ ] Switch any factory override that previously used the `messageComposerInput` key to render a custom text field over to `messageComposerInputCenter` — the old key now overrides the outer input container
 - [ ] Rename `hideSendAsDm` to `canAlsoSendToChannelFromThread` in all `StreamMessageComposer` usages and invert the value
 - [ ] Review usages of `attachmentLimit` — it is now a non-nullable `int` defaulting to `StreamAttachmentValidator.defaultMaxAttachmentCount` (`30`, the backend cap); set an explicit smaller value to tighten the limit
-- [ ] Remove `maxAttachmentSize` from any `StreamMessageComposer` call — size limits now come from `StreamChatClient.appSettings`; the SDK falls back to `UploadConfig.defaultSizeLimit` (100 MB) when the backend value is `0`
+- [ ] Remove `maxAttachmentSize` from any `StreamMessageComposer` call — size limits now come from `StreamChatClient.appSettings` (configured in the Stream Dashboard); the SDK falls back to `UploadConfig.defaultSizeLimit` (100 MB) when the app-configured value is `0`
 - [ ] Remove `onAttachmentLimitExceed` from any `StreamMessageComposer` call — the default error sheet now handles all validator failures, or pass `onError: (error, stackTrace) { … }` to render a custom UI (the callback short-circuits the default sheet and receives the typed `AttachmentLimitReachedError` / `AttachmentTooLargeError` / `AttachmentBlockedError`)
 - [ ] Remove any usage of `maxHeight`, `maxLines`, `minLines`, `padding`, `textInputMargin`, `elevation`, `shadow`, `enableActionAnimation`, `contentInsertionConfiguration`, `sendButtonLocation`
 - [ ] Replace `actionsBuilder` / `actionsLocation` / button builder params (`attachmentButtonBuilder`, `commandButtonBuilder`, `sendButtonBuilder`, `idleSendIcon`, `activeSendIcon`, `showCommandsButton`) with sub-component overrides via `StreamComponentFactory`

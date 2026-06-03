@@ -377,7 +377,7 @@ StreamMessageComposer(
 
 - Replaced `ArgumentError('The size of the attachment is...')` with `AttachmentTooLargeError`.
 - Replaced `ArgumentError('The maximum number of attachments is...')` with `AttachmentLimitReachedError`.
-- Added `AttachmentBlockedError`, thrown when the attachment's extension or MIME type is rejected by the backend `AppSettings.fileUploadConfig` / `imageUploadConfig`.
+- Added `AttachmentBlockedError`, thrown when the attachment's extension or MIME type is rejected by the app's `AppSettings.fileUploadConfig` / `imageUploadConfig` (configured in the Stream Dashboard).
 - Constructor now takes a single `validator: StreamAttachmentValidator` parameter — derived from `StreamChatClient.appSettings` by default when used through `StreamMessageComposer`.
 
 #### Migration Steps:
@@ -403,7 +403,7 @@ try {
   // Too many attachments
   showError('Cannot add more attachments. Maximum is ${e.maxCount}.');
 } on AttachmentBlockedError catch (e) {
-  // Extension or MIME type rejected by backend AppSettings
+  // Extension or MIME type rejected by AppSettings (configured in the Dashboard)
   showError('Attachment type not allowed (${e.fileExtension ?? e.mimeType}).');
 }
 ```
@@ -413,7 +413,7 @@ try {
 > - `AttachmentTooLargeError` provides `fileSize` and `maxSize` properties.
 > - `AttachmentLimitReachedError` provides `maxCount` property.
 > - `AttachmentBlockedError` provides `fileExtension` and `mimeType` (both nullable — populated regardless of which list triggered the rejection).
-> - To bypass the backend rules, construct your own `StreamAttachmentValidator` and pass it to the picker controller.
+> - To bypass the app's Dashboard-configured rules, construct your own `StreamAttachmentValidator` and pass it to the picker controller.
 
 ---
 

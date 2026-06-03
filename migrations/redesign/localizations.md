@@ -170,9 +170,9 @@ String get endVoteConfirmationMessage =>
     'Do you want to end this poll now? Nobody will be able to vote in this poll anymore.';
 
 // Attachment validation — shown when the file's extension is rejected by
-// the backend `AppSettings.fileUploadConfig` / `imageUploadConfig`.
-// `extension` is the raw extension without a leading dot (e.g. `'exe'`),
-// or `null` when the extension is unknown.
+// the app's `AppSettings.fileUploadConfig` / `imageUploadConfig` (configured
+// in the Stream Dashboard). `extension` is the raw extension without a
+// leading dot (e.g. `'exe'`), or `null` when the extension is unknown.
 @override
 String fileTypeNotSupportedError(String? extension) {
   if (extension != null) return "'.$extension' files are not supported for upload.";
