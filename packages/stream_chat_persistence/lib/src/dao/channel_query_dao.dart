@@ -4,6 +4,7 @@ import 'package:drift/drift.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_persistence/src/db/drift_chat_database.dart';
 import 'package:stream_chat_persistence/src/entity/channel_queries.dart';
+import 'package:stream_chat_persistence/src/entity/channel_queries_metadata.dart';
 import 'package:stream_chat_persistence/src/entity/channels.dart';
 import 'package:stream_chat_persistence/src/entity/users.dart';
 import 'package:stream_chat_persistence/src/mapper/mapper.dart';
@@ -11,7 +12,7 @@ import 'package:stream_chat_persistence/src/mapper/mapper.dart';
 part 'channel_query_dao.g.dart';
 
 /// The Data Access Object for operations in [ChannelQueries] table.
-@DriftAccessor(tables: [ChannelQueries, Channels, Users])
+@DriftAccessor(tables: [ChannelQueries, ChannelQueriesMetadata, Channels, Users])
 class ChannelQueryDao extends DatabaseAccessor<DriftChatDatabase>
     with _$ChannelQueryDaoMixin {
   /// Creates a new channel query dao instance
@@ -23,6 +24,19 @@ class ChannelQueryDao extends DatabaseAccessor<DriftChatDatabase>
     }
     final hash = base64Encode(utf8.encode('filter: ${jsonEncode(filter)}'));
     return hash;
+  }
+
+  String _computeHashForPredefined(
+    String filterName,
+    Map<String, Object?>? filterValues,
+    Map<String, Object?>? sortValues,
+  ) {
+    final payload = <String, Object?>{
+      'name': filterName,
+      if (filterValues != null) 'filter_values': filterValues,
+      if (sortValues != null) 'sort_values': sortValues,
+    };
+    return 'p:${base64Encode(utf8.encode(jsonEncode(payload)))}';
   }
 
   /// Update list of channel queries
@@ -55,6 +69,48 @@ class ChannelQueryDao extends DatabaseAccessor<DriftChatDatabase>
         });
       });
 
+  /// Update list of channel queries for a predefined-filter query.
+  ///
+  /// Writes the cached cids to [ChannelQueries] and the [channelStateSort]
+  /// (the server-resolved sort spec) to [ChannelQueriesMetadata] in a single
+  /// transaction. If [clearQueryCache] is true, prior cids and metadata for
+  /// this query are deleted before the insert.
+  Future<void> updateChannelQueriesByPredefinedFilter(
+    String filterName,
+    List<String> cids, {
+    Map<String, Object?>? filterValues,
+    Map<String, Object?>? sortValues,
+    SortOrder<ChannelState>? channelStateSort,
+    bool clearQueryCache = false,
+  }) async => transaction(() async {
+    final hash = _computeHashForPredefined(filterName, filterValues, sortValues);
+
+    if (clearQueryCache) {
+      await batch((it) {
+        it..deleteWhere<ChannelQueries, ChannelQueryEntity>(
+          channelQueries,
+          (c) => c.queryHash.equals(hash),
+        )
+        ..deleteWhere<ChannelQueriesMetadata, ChannelQueryMetadataEntity>(
+          channelQueriesMetadata,
+          (m) => m.queryHash.equals(hash),
+        );
+      });
+    }
+
+    await batch((it) {
+      it..insertAllOnConflictUpdate(
+        channelQueries,
+        cids.map((cid) => ChannelQueryEntity(queryHash: hash, channelCid: cid)).toList(),
+      )
+      ..insert(
+        channelQueriesMetadata,
+        ChannelQueryMetadataEntity(queryHash: hash, sortSpec: channelStateSort),
+        mode: InsertMode.insertOrReplace,
+      );
+    });
+  });
+
   ///
   Future<List<String>> getCachedChannelCids(Filter? filter) {
     final hash = _computeHash(filter);
@@ -77,5 +133,47 @@ class ChannelQueryDao extends DatabaseAccessor<DriftChatDatabase>
     }).get();
 
     return cachedChannels;
+  }
+
+  /// Get the cached channels and persisted sort spec for a predefined-filter
+  /// query.
+  ///
+  /// Returns a record `(channels, persistedSort)`. `persistedSort` is null
+  /// when no metadata row exists for this query.
+  Future<(List<ChannelModel>, SortOrder<ChannelState>?)> getChannelsAndSortByPredefinedFilter(
+    String filterName, {
+    Map<String, Object?>? filterValues,
+    Map<String, Object?>? sortValues,
+  }) async {
+    final hash = _computeHashForPredefined(filterName, filterValues, sortValues);
+
+    final cidsQuery = (select(channelQueries)
+          ..where((c) => c.queryHash.equals(hash)))
+        .map((c) => c.channelCid)
+        .get();
+
+    final metadataQuery = (select(channelQueriesMetadata)
+          ..where((m) => m.queryHash.equals(hash)))
+        .getSingleOrNull();
+
+    final (cachedCids, metadata) = await (cidsQuery, metadataQuery).wait;
+
+    if (cachedCids.isEmpty) return (const <ChannelModel>[], metadata?.sortSpec);
+
+    final cachedChannels = await (select(channels)
+          ..where((c) => c.cid.isIn(cachedCids)))
+        .join([
+          leftOuterJoin(users, channels.createdById.equalsExp(users.id)),
+        ])
+        .map((row) {
+          final createdByEntity = row.readTableOrNull(users);
+          final channelEntity = row.readTable(channels);
+          return channelEntity.toChannelModel(
+            createdBy: createdByEntity?.toUser(),
+          );
+        })
+        .get();
+
+    return (cachedChannels, metadata?.sortSpec);
   }
 }

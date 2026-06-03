@@ -81,6 +81,17 @@ class SortOption<T extends ComparableFieldProvider> {
   factory SortOption.fromJson(Map<String, dynamic> json) =>
       _$SortOptionFromJson(json);
 
+  /// Creates a [SortOption] from its JSON-serialized representation.
+  ///
+  /// Reconstructs via [SortOption.desc] / [SortOption.asc] based on the
+  /// `direction` field; `nullOrdering` defaults follow each constructor and
+  /// any custom comparator is discarded (comparators are not serialized).
+  factory SortOption.fromJson(Map<String, dynamic> json) {
+    final field = json['field'] as String;
+    final direction = json['direction'] as int;
+    return direction == SortOption.DESC ? SortOption<T>.desc(field) : SortOption<T>.asc(field);
+  }
+
   /// Ascending order (1)
   static const ASC = 1;
 

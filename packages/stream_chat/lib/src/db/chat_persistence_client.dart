@@ -137,6 +137,40 @@ abstract class ChatPersistenceClient {
     bool clearQueryCache = false,
   });
 
+  /// Returns the stored channel states for a predefined-filter query.
+  ///
+  /// The query is identified by [filterName] and the optional [filterValues]
+  /// and [sortValues] interpolation maps. Use [paginationParams] to paginate
+  /// results.
+  ///
+  /// Default implementation returns an empty list; persistence implementations
+  /// that support predefined-filter caching should override this.
+  Future<List<ChannelState>> getChannelStatesByPredefinedFilter({
+    required String filterName,
+    Map<String, Object?>? filterValues,
+    Map<String, Object?>? sortValues,
+    PaginationParams? paginationParams,
+  }) async => const [];
+
+  /// Update list of channel queries for a predefined-filter query.
+  ///
+  /// The query is identified by [filterName] and the optional [filterValues]
+  /// and [sortValues] interpolation maps. [channelStateSort] is the resolved
+  /// sort spec returned by the server, persisted so subsequent offline reads
+  /// can apply the same ordering. If [clearQueryCache] is true, prior cids and
+  /// metadata for this query are deleted before the insert.
+  ///
+  /// Default implementation is a no-op; persistence implementations that
+  /// support predefined-filter caching should override this.
+  Future<void> updateChannelQueriesByPredefinedFilter(
+    String filterName,
+    List<String> cids, {
+    Map<String, Object?>? filterValues,
+    Map<String, Object?>? sortValues,
+    SortOrder<ChannelState>? channelStateSort,
+    bool clearQueryCache = false,
+  }) async {}
+
   /// Remove a message by [messageId]
   Future<void> deleteMessageById(String messageId) =>
       deleteMessageByIds([messageId]);

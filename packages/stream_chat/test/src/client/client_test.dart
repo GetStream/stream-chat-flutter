@@ -789,6 +789,136 @@ void main() {
               .called(persistentChannelStates.length);
         },
       );
+
+      test(
+        'queryChannelsOnline with predefined filter persists via *ByPredefinedFilter with resolved sort',
+        () async {
+          const filterName = 'sample-app-list';
+          const filterValues = {'user_id': 'test-user-id'};
+          const sortValues = {'pinned_at': true};
+
+          final channelStates = List.generate(
+            3,
+            (i) => ChannelState(channel: ChannelModel(cid: 'test-type-$i:test-id-$i')),
+          );
+
+          when(
+            () => api.channel.queryChannels(
+              predefinedFilter: filterName,
+              filterValues: filterValues,
+              sortValues: sortValues,
+              state: any(named: 'state'),
+              watch: any(named: 'watch'),
+              presence: any(named: 'presence'),
+              memberLimit: any(named: 'memberLimit'),
+              messageLimit: any(named: 'messageLimit'),
+              paginationParams: any(named: 'paginationParams'),
+            ),
+          ).thenAnswer(
+            (_) async => QueryChannelsResponse()
+              ..channels = channelStates
+              ..predefinedFilter = const PredefinedFilter(
+                name: filterName,
+                filter: {},
+                sort: [SortOption<ChannelState>.desc('last_message_at')],
+              ),
+          );
+
+          when(() => persistence.getChannelThreads(any())).thenAnswer((_) async => <String, List<Message>>{});
+          when(() => persistence.updateChannelState(any())).thenAnswer((_) async {});
+          when(() => persistence.updateChannelThreads(any(), any())).thenAnswer((_) async {});
+          when(
+            () => persistence.updateChannelQueriesByPredefinedFilter(
+              any(),
+              any(),
+              filterValues: any(named: 'filterValues'),
+              sortValues: any(named: 'sortValues'),
+              channelStateSort: any(named: 'channelStateSort'),
+              clearQueryCache: any(named: 'clearQueryCache'),
+            ),
+          ).thenAnswer((_) => Future.value());
+
+          await delay(1100);
+          clearInteractions(persistence);
+
+          await client.queryChannelsOnline(
+            predefinedFilter: filterName,
+            filterValues: filterValues,
+            sortValues: sortValues,
+          );
+
+          // Inline persistence write is NOT called.
+          verifyNever(
+            () => persistence.updateChannelQueries(any(), any(), clearQueryCache: any(named: 'clearQueryCache')),
+          );
+
+          verify(
+            () => persistence.updateChannelQueriesByPredefinedFilter(
+              filterName,
+              channelStates.map((s) => s.channel!.cid).toList(),
+              filterValues: filterValues,
+              sortValues: sortValues,
+              channelStateSort: const [SortOption<ChannelState>.desc('last_message_at')],
+              clearQueryCache: true,
+            ),
+          ).called(1);
+        },
+      );
+
+      test(
+        'queryChannelsOffline with predefined filter reads via *ByPredefinedFilter',
+        () async {
+          const filterName = 'sample-app-list';
+          const filterValues = {'user_id': 'test-user-id'};
+          const sortValues = {'pinned_at': true};
+
+          final channelStates = List.generate(
+            3,
+            (i) => ChannelState(channel: ChannelModel(cid: 'test-type-$i:test-id-$i')),
+          );
+
+          when(
+            () => persistence.getChannelStatesByPredefinedFilter(
+              filterName: filterName,
+              filterValues: filterValues,
+              sortValues: sortValues,
+              paginationParams: any(named: 'paginationParams'),
+            ),
+          ).thenAnswer((_) async => channelStates);
+
+          when(() => persistence.getChannelThreads(any())).thenAnswer((_) async => <String, List<Message>>{});
+          when(() => persistence.updateChannelState(any())).thenAnswer((_) async {});
+          when(() => persistence.updateChannelThreads(any(), any())).thenAnswer((_) async {});
+
+          await delay(1100);
+          clearInteractions(persistence);
+
+          final channels = await client.queryChannelsOffline(
+            predefinedFilter: filterName,
+            filterValues: filterValues,
+            sortValues: sortValues,
+          );
+
+          expect(channels, hasLength(channelStates.length));
+
+          verifyNever(
+            () => persistence.getChannelStates(
+              filter: any(named: 'filter'),
+              channelStateSort: any(named: 'channelStateSort'),
+              paginationParams: any(named: 'paginationParams'),
+            ),
+          );
+
+          verify(
+            () => persistence.getChannelStatesByPredefinedFilter(
+              filterName: filterName,
+              filterValues: filterValues,
+              sortValues: sortValues,
+              paginationParams: const PaginationParams(),
+            ),
+          ).called(1);
+        },
+      );
     });
 
     test('`.disconnectUser` should reset state and user', () async {

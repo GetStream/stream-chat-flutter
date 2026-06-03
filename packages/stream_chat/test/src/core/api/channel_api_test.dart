@@ -237,7 +237,9 @@ void main() {
     expect(res.predefinedFilter, isNotNull);
     expect(res.predefinedFilter!.name, predefinedFilter);
     expect(res.predefinedFilter!.filter, isNotEmpty);
-    expect(res.predefinedFilter!.sort, resolvedSort);
+    expect(res.predefinedFilter!.sort, hasLength(1));
+    expect(res.predefinedFilter!.sort!.first.field, 'last_message_at');
+    expect(res.predefinedFilter!.sort!.first.direction, SortOption.DESC);
 
     verify(
       () => client.get(path, queryParameters: {'payload': payload}),
