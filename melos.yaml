@@ -115,6 +115,8 @@ command:
     dev_dependencies:
       alchemist: ^0.14.0
       build_runner: ^2.15.0
+      emojis: ^0.9.9
+      substring_highlight: ^1.0.33
       connectivity_plus_platform_interface: ^2.1.0
       drift_dev: ^2.33.0
       fake_async: ^1.3.3
