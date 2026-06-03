@@ -142,8 +142,8 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
 
   @override
   String fileTypeNotSupportedError(String? extension) {
-    if (extension != null) return "'.$extension' files are not supported for upload.";
-    return 'This file type is not supported for upload.';
+    if (extension != null) return "Els fitxers '.$extension' no s'admeten per pujar.";
+    return "Aquest tipus de fitxer no s'admet per pujar.";
   }
 
   @override

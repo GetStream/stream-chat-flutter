@@ -141,8 +141,8 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
 
   @override
   String fileTypeNotSupportedError(String? extension) {
-    if (extension != null) return "'.$extension' files are not supported for upload.";
-    return 'This file type is not supported for upload.';
+    if (extension != null) return "'.$extension' फ़ाइलें अपलोड के लिए समर्थित नहीं हैं।";
+    return 'यह फ़ाइल प्रकार अपलोड के लिए समर्थित नहीं है।';
   }
 
   @override
