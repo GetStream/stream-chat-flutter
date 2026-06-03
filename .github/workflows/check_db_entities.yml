@@ -4,15 +4,14 @@ on:
   pull_request_target:
 
 concurrency:
-  # Under pull_request_target, github.ref is the base branch, so we use
-  # the PR number to keep each PR's runs isolated.
+  # Use PR number — github.ref is the base branch under pull_request_target.
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
-# pull_request_target gives a write token even for fork PRs, but only
-# if we explicitly request the scopes here.
+# pull_request_target needs explicit perms; fork PRs default to read-only.
 permissions:
   contents: read
+  issues: write
   pull-requests: write
 
 jobs:
@@ -59,13 +58,12 @@ jobs:
 
           echo "Using base branch: origin/$BASE_BRANCH for comparison"
 
-          # Fetch the PR head SHA as a ref only — no working-tree update,
-          # so no smudge filters / hooks run on PR-controlled files
-          # while we hold the write token.
-          git fetch --no-tags --depth=1 origin "$PR_HEAD_SHA"
+          # Fetch PR head (refs only; full history needed for merge-base).
+          git fetch --no-tags origin "$PR_HEAD_SHA"
 
           # Check if any entity files have changed compared to the base branch
-          git diff --name-only "origin/$BASE_BRANCH...$PR_HEAD_SHA" -- $ENTITY_DIR | grep -E '\.dart$' > $TEMP_FILE || true
+          git diff --name-only "origin/$BASE_BRANCH...$PR_HEAD_SHA" -- $ENTITY_DIR > $TEMP_FILE.raw
+          grep -E '\.dart$' $TEMP_FILE.raw > $TEMP_FILE || [ $? -eq 1 ]
 
           if [ ! -s "$TEMP_FILE" ]; then
             echo "✅ No entity files changed."
