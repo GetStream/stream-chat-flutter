@@ -120,7 +120,7 @@ platform :ios do
     )
   end
 
-  desc "Build and distribute app to TestFlight internal with auto-incrementing build number"
+  desc "Build and distribute app to TestFlight Internal Testers with auto-incrementing build number"
   # Usage: bundle exec fastlane ios distribute_to_testflight_internal
   lane :distribute_to_testflight_internal do
     match_me

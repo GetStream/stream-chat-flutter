@@ -258,13 +258,13 @@ void main() {
   }
 
   // --------------------------------------------------------------------------
-  // reactionOverlap configuration — side-by-side comparison showing a message
-  // with overlap enabled vs. disabled.
+  // reaction position — side-by-side comparison showing header (overlapping)
+  // vs. footer (non-overlapping) placement.
   // --------------------------------------------------------------------------
 
   docsGoldenTest(
-    'reaction overlap true',
-    fileName: 'reaction_overlap_true',
+    'reaction position header',
+    fileName: 'reaction_position_header',
     constraints: const BoxConstraints.tightFor(width: 375, height: 140),
     builder: () {
       final client = MockClient();
@@ -300,7 +300,7 @@ void main() {
       return StreamChat(
         client: client,
         connectivityStream: Stream.value([ConnectivityResult.mobile]),
-        streamChatConfigData: StreamChatConfigurationData(reactionOverlap: true),
+        streamChatConfigData: StreamChatConfigurationData(reactionPosition: StreamReactionsPosition.header),
         child: StreamChannel(
           showLoading: false,
           channel: channel,
@@ -313,8 +313,8 @@ void main() {
   );
 
   docsGoldenTest(
-    'reaction overlap false',
-    fileName: 'reaction_overlap_false',
+    'reaction position footer',
+    fileName: 'reaction_position_footer',
     constraints: const BoxConstraints.tightFor(width: 375, height: 140),
     builder: () {
       final client = MockClient();
@@ -350,7 +350,7 @@ void main() {
       return StreamChat(
         client: client,
         connectivityStream: Stream.value([ConnectivityResult.mobile]),
-        streamChatConfigData: StreamChatConfigurationData(reactionOverlap: false),
+        streamChatConfigData: StreamChatConfigurationData(reactionPosition: StreamReactionsPosition.footer),
         child: StreamChannel(
           showLoading: false,
           channel: channel,

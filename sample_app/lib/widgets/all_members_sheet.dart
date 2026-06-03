@@ -19,7 +19,7 @@ Future<void> showAllMembersSheet(BuildContext context, Channel channel) {
   return showStreamSheet<void>(
     context: context,
     isDismissible: true,
-    builder: (_, scrollController) => StreamChannel(
+    builder: (_, scrollController) => StreamChannel.value(
       channel: channel,
       child: AllMembersSheet(scrollController: scrollController),
     ),

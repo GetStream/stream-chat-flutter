@@ -274,10 +274,8 @@ StreamReactionPickerTheme(
 StreamMessageReactions({
   Key? key,
   required Message message,
-  StreamReactionsType? type,        // defaults to StreamReactionsType.segmented
-  StreamReactionsPosition? position, // defaults to StreamReactionsPosition.header on mobile,
-                                     //             StreamReactionsPosition.footer on desktop/web
-  bool? overlap,                     // defaults to true on mobile, false on desktop/web
+  StreamReactionsType? type,         // defaults to StreamReactionsType.segmented
+  StreamReactionsPosition? position, // defaults to StreamReactionsPosition.header
   Comparator<ReactionGroup>? sorting, // defaults to ReactionSorting.byFirstReactionAt
   VoidCallback? onPressed,
   Widget? child,                     // typically the message bubble
@@ -300,7 +298,7 @@ StreamMessageReactions(
 
 Reaction icons are resolved globally — configure them on `StreamChatConfigurationData.reactionIconResolver` (see [ReactionIconResolver and DefaultReactionIconResolver](#reactioniconresolver-and-defaultreactioniconresolver)).
 
-Visual layout properties (`type`, `position`, `overlap`) can be set per widget or as defaults via `StreamChatConfigurationData`:
+Visual layout properties (`type`, `position`) can be set per widget or as defaults via `StreamChatConfigurationData`:
 
 ```dart
 StreamChat(
@@ -309,7 +307,6 @@ StreamChat(
     reactionIconResolver: const MyReactionIconResolver(),
     reactionType: StreamReactionsType.segmented,
     reactionPosition: StreamReactionsPosition.header,
-    reactionOverlap: true,
   ),
   child: MyApp(),
 )

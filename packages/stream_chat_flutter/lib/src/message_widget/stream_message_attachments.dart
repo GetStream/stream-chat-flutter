@@ -130,7 +130,7 @@ class StreamMessageAttachments extends core.NullableStatelessWidget {
 
       return navigator.push<void>(
         MaterialPageRoute(
-          builder: (_) => StreamChannel(
+          builder: (_) => StreamChannel.value(
             channel: channel,
             child: StreamMediaGalleryPreview(
               attachments: attachments,

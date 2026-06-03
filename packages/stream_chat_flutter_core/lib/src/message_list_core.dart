@@ -285,6 +285,10 @@ class MessageListCoreState extends State<MessageListCore> {
     // If the channel is up to date, we don't need to reload it.
     if (_upToDate) return;
 
+    // Thread conversations share the parent channel; reloading from a
+    // disposing thread would clobber the channel page state.
+    if (_isThreadConversation) return;
+
     try {
       return await _streamChannel?.reloadChannel();
     } catch (_) {

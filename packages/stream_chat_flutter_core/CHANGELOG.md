@@ -33,8 +33,17 @@
 
 ## Upcoming Changes
 
+✅ Added
+
+- Added `StreamChannel.value` — exposes an already-initialized channel without running channel-page
+  positioning. Use it for sub-route and overlay wraps.
+
 🐞 Fixed
 
+- Fixed `StreamChannel.getMessage` hitting the network for thread replies and pinned messages
+  already in local state.
+- Fixed `MessageListCore` reloading the parent channel from its dispose path when running in
+  thread mode.
 - Fixed `StreamChannel.reloadChannel` merging the latest page on top of the previously loaded
   window instead of replacing it. The reload now matches a fresh open of the channel.
 

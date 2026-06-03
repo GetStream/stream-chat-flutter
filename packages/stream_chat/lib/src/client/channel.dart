@@ -1984,10 +1984,7 @@ class Channel {
     List<String> messageIDs,
   ) async {
     _checkInitialized();
-    final res = await _client.getMessagesById(id!, type, messageIDs);
-    final messages = res.messages;
-    state!.updateChannelState(state!.channelState.copyWith(messages: messages));
-    return res;
+    return _client.getMessagesById(id!, type, messageIDs);
   }
 
   /// Translate a message by given [messageId] and [language].
