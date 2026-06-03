@@ -165,7 +165,6 @@ class StreamChatConfigurationData {
     List<StreamAttachmentWidgetBuilder>? attachmentBuilders,
     StreamReactionsType? reactionType,
     StreamReactionsPosition? reactionPosition,
-    bool? reactionOverlap,
   }) {
     return StreamChatConfigurationData._(
       reactionIconResolver: reactionIconResolver ?? const DefaultReactionIconResolver(),
@@ -176,7 +175,6 @@ class StreamChatConfigurationData {
       attachmentBuilders: attachmentBuilders,
       reactionType: reactionType,
       reactionPosition: reactionPosition,
-      reactionOverlap: reactionOverlap,
     );
   }
 
@@ -189,7 +187,6 @@ class StreamChatConfigurationData {
     required this.attachmentBuilders,
     this.reactionType,
     this.reactionPosition,
-    this.reactionOverlap,
   });
 
   /// Copies the configuration options from one [StreamChatConfigurationData] to
@@ -203,7 +200,6 @@ class StreamChatConfigurationData {
     List<StreamAttachmentWidgetBuilder>? attachmentBuilders,
     StreamReactionsType? reactionType,
     StreamReactionsPosition? reactionPosition,
-    bool? reactionOverlap,
   }) {
     return StreamChatConfigurationData(
       reactionIconResolver: reactionIconResolver ?? this.reactionIconResolver,
@@ -214,7 +210,6 @@ class StreamChatConfigurationData {
       attachmentBuilders: attachmentBuilders ?? this.attachmentBuilders,
       reactionType: reactionType ?? this.reactionType,
       reactionPosition: reactionPosition ?? this.reactionPosition,
-      reactionOverlap: reactionOverlap ?? this.reactionOverlap,
     );
   }
 
@@ -263,11 +258,4 @@ class StreamChatConfigurationData {
   /// When null, the widget resolves its own default
   /// ([StreamReactionsPosition.header]).
   final StreamReactionsPosition? reactionPosition;
-
-  /// Whether reactions overlap the message bubble edge across all message
-  /// widgets.
-  ///
-  /// When null, the widget resolves its own default (overlap on mobile,
-  /// no overlap on desktop and web).
-  final bool? reactionOverlap;
 }

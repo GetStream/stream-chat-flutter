@@ -2,6 +2,7 @@
 
 🐞 Fixed
 
+- `StreamUserAvatar` with `StreamAvatarSize.xxl` now uses `StreamOnlineIndicatorSize.xxl` (20px) instead of `xl` (16px), matching the Chat SDK design system spec.
 - Fixed the thread page flashing through a large scroll-up animation when opened from an in-channel reply with cached thread replies.
 - Fixed the thread page throwing `Bad state: No element` on every channel state update when the parent message wasn't in the channel's loaded window.
 - Fixed opening a thread page or long-press message-actions modal overwriting the channel's loaded window — most visibly, jumping back to latest when the user had navigated to an older message via a quoted reply.
@@ -21,6 +22,7 @@
 
 - Composer UI primitives (`StreamMessageComposerInputField`, `VoiceRecordingCallback`, and the outer/inner layout containers) are now owned by `stream_chat_flutter` and exported from this package. They were previously supplied by `stream_core_flutter`. The public API of `StreamMessageComposer` / `StreamChatMessageInput` and its sub-components is unchanged.
 - Re-export `StreamAvatarTheme` and `StreamAvatarThemeData` from `stream_core_flutter` so consumers can theme avatars without adding a separate `stream_core_flutter` import.
+- Added `messageLeading`, `messageHeader`, and `messageFooter` factory slots to `streamChatComponentBuilders` for overriding the message item's avatar, annotations, or metadata row without replacing the whole `messageItem`.
 
 🛑️ Breaking
 
@@ -103,7 +105,6 @@
 - Added `Translations.totalVoteCountLabel({int? count})`, `viewAllLabel`, `pollVotesLabel`, `endVoteConfirmationMessage` and `questionLabel({bool isPlural = false})`.
 - Added `Translations.reactionsCountText(int count)` for the reaction-detail sheet header.
 - Added `StreamChannelListTile.isPinned` — renders a pin icon alongside the existing mute icon for pinned channels.
-- Added `StreamChatConfigurationData.reactionOverlap` and `StreamMessageReactions.overlap` to control whether reactions overlap the message bubble edge. When unset, falls back to the platform-based default (overlap on mobile, no overlap on desktop and web).
 - Exported `StreamScrollViewLoadMoreError` and `StreamScrollViewLoadMoreIndicator` from the public API.
 - Exported `StreamTimestamp`, `DateFormatter`, `formatDate` and `formatRecentDateTime` from the public API.
 - Added `DateTimeComparisonUtils` extension on `DateTime` (`isToday`, `isYesterday`, `isWithinLastMinute`, `isWithinLastWeek`, `isInSameYear`, `isSame(other, unit:)`) and the `DateTimeUnit` enum (`year` / `month` / `day` / `hour` / `minute` / `second` / `millisecond` / `microsecond`). All getters compare in local time and read the current instant via `package:clock`, so they're testable under `withClock(...)`.

@@ -240,7 +240,6 @@ extension on SampleAppConfigData {
       enforceUniqueReactions: enforceUniqueReactions,
       reactionType: reactionType,
       reactionPosition: reactionPosition,
-      reactionOverlap: reactionOverlap?.value,
       attachmentBuilders: [
         if (enableLocationSharing)
           LocationAttachmentBuilder(
