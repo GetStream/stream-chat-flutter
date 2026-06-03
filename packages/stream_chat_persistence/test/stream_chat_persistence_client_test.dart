@@ -323,10 +323,14 @@ void main() {
             lastReadMessageId: 'lastMessageId$i',
           ),
         );
+        const messageLimit = 25;
+        const messagePagination = PaginationParams(limit: messageLimit);
         when(() => mockDatabase.channelDao.getChannelByCid(pagedCid)).thenAnswer((_) async => c2);
         when(() => mockDatabase.memberDao.getMembersByCid(pagedCid)).thenAnswer((_) async => members);
         when(() => mockDatabase.readDao.getReadsByCid(pagedCid)).thenAnswer((_) async => reads);
-        when(() => mockDatabase.messageDao.getMessagesByCid(pagedCid)).thenAnswer((_) async => messages);
+        when(
+          () => mockDatabase.messageDao.getMessagesByCid(pagedCid, messagePagination: messagePagination),
+        ).thenAnswer((_) async => messages);
         when(() => mockDatabase.pinnedMessageDao.getMessagesByCid(pagedCid)).thenAnswer((_) async => messages);
         when(() => mockDatabase.draftMessageDao.getDraftMessageByCid(pagedCid)).thenAnswer((_) async => null);
 
@@ -335,6 +339,7 @@ void main() {
           channelStateSort: const [
             SortOption<ChannelState>.desc(ChannelSortKey.pinnedAt),
           ],
+          messageLimit: messageLimit,
           paginationParams: const PaginationParams(offset: 1, limit: 1),
         );
 
@@ -357,6 +362,11 @@ void main() {
         verify(() => mockDatabase.channelDao.getChannelByCid(pagedCid)).called(1);
         verifyNever(() => mockDatabase.channelDao.getChannelByCid('messaging:c0'));
         verifyNever(() => mockDatabase.channelDao.getChannelByCid('messaging:c1'));
+
+        // messageLimit forwarded as PaginationParams to the message DAO.
+        verify(
+          () => mockDatabase.messageDao.getMessagesByCid(pagedCid, messagePagination: messagePagination),
+        ).called(1);
       });
 
       test('returns empty list and skips hydration when no channels match', () async {
