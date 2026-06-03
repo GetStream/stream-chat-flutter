@@ -7,6 +7,8 @@ import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/src/client/channel.dart';
 import 'package:stream_chat/src/client/channel_delivery_reporter.dart';
+import 'package:stream_chat/src/client/predefined_filter_default_sort.dart';
+import 'package:stream_chat/src/client/query_channels_result.dart';
 import 'package:stream_chat/src/client/retry_policy.dart';
 import 'package:stream_chat/src/core/api/attachment_file_uploader.dart';
 import 'package:stream_chat/src/core/api/requests.dart';
@@ -56,14 +58,6 @@ final _levelEmojiMapper = {
   Level.WARNING: '⚠️',
   Level.SEVERE: '🚨',
 };
-
-// Fallback applied at write time when the server doesn't echo back a sort
-// spec for a predefined-filter query, so the persisted spec is never null.
-// TODO: Verify against the backend that this matches the server's default
-// sort for channel queries.
-const _defaultChannelStateSort = <SortOption<ChannelState>>[
-  SortOption<ChannelState>.desc(ChannelSortKey.lastUpdated),
-];
 
 /// The official Dart client for Stream Chat,
 /// a service for building chat applications.
@@ -642,14 +636,84 @@ class StreamChatClient {
     });
   }
 
-  final _queryChannelsCache = InFlightCache<String, List<Channel>>();
+  final _queryChannelsCache = InFlightCache<String, QueryChannelsResult>();
 
   /// Requests channels with a given query.
   ///
   /// Either an inline [filter]/[channelStateSort] pair or a [predefinedFilter]
   /// identifier (optionally interpolated with [filterValues] and [sortValues])
   /// can be supplied.
+  ///
+  /// Use [queryChannelsWithResult] if you also need the server-resolved
+  /// [PredefinedFilter] spec.
   Stream<List<Channel>> queryChannels({
+    Filter? filter,
+    SortOrder<ChannelState>? channelStateSort,
+    String? predefinedFilter,
+    Map<String, Object?>? filterValues,
+    Map<String, Object?>? sortValues,
+    bool state = true,
+    bool watch = true,
+    bool presence = false,
+    int? memberLimit,
+    int? messageLimit,
+    PaginationParams paginationParams = const PaginationParams(),
+    bool waitForConnect = true,
+  }) async* {
+    await for (final result in _queryChannelsImpl(
+      filter: filter,
+      channelStateSort: channelStateSort,
+      predefinedFilter: predefinedFilter,
+      filterValues: filterValues,
+      sortValues: sortValues,
+      state: state,
+      watch: watch,
+      presence: presence,
+      memberLimit: memberLimit,
+      messageLimit: messageLimit,
+      paginationParams: paginationParams,
+      waitForConnect: waitForConnect,
+    )) {
+      yield result.channels;
+    }
+  }
+
+  /// Requests channels with a given query, yielding a [QueryChannelsResult]
+  /// that carries both the live channel list and the server-resolved
+  /// [PredefinedFilter] spec (when one is associated with the query).
+  ///
+  /// Yields the offline-cached result first (when available), followed by
+  /// the online result. Concurrent identical online queries are coalesced
+  /// via [_queryChannelsCache].
+  Stream<QueryChannelsResult> queryChannelsWithResult({
+    Filter? filter,
+    SortOrder<ChannelState>? channelStateSort,
+    String? predefinedFilter,
+    Map<String, Object?>? filterValues,
+    Map<String, Object?>? sortValues,
+    bool state = true,
+    bool watch = true,
+    bool presence = false,
+    int? memberLimit,
+    int? messageLimit,
+    PaginationParams paginationParams = const PaginationParams(),
+    bool waitForConnect = true,
+  }) => _queryChannelsImpl(
+    filter: filter,
+    channelStateSort: channelStateSort,
+    predefinedFilter: predefinedFilter,
+    filterValues: filterValues,
+    sortValues: sortValues,
+    state: state,
+    watch: watch,
+    presence: presence,
+    memberLimit: memberLimit,
+    messageLimit: messageLimit,
+    paginationParams: paginationParams,
+    waitForConnect: waitForConnect,
+  );
+
+  Stream<QueryChannelsResult> _queryChannelsImpl({
     Filter? filter,
     SortOrder<ChannelState>? channelStateSort,
     String? predefinedFilter,
@@ -683,9 +747,9 @@ class StreamChatClient {
     ]);
 
     // Per-caller offline emit — local persistence, not coalesced.
-    var offlineChannels = <Channel>[];
+    QueryChannelsResult? offlineResult;
     try {
-      offlineChannels = await queryChannelsOffline(
+      offlineResult = await _queryChannelsOfflineImpl(
         filter: filter,
         predefinedFilter: predefinedFilter,
         filterValues: filterValues,
@@ -694,7 +758,7 @@ class StreamChatClient {
         paginationParams: paginationParams,
       );
 
-      if (offlineChannels.isNotEmpty) yield offlineChannels;
+      if (offlineResult.channels.isNotEmpty) yield offlineResult;
     } catch (e, stk) {
       logger.warning('Error querying channels offline', e, stk);
       // Continue to online query even if offline fails
@@ -706,7 +770,7 @@ class StreamChatClient {
       // the lifecycle details.
       final result = await _queryChannelsCache.run(
         hash,
-        () => queryChannelsOnline(
+        () => _queryChannelsOnlineImpl(
           filter: filter,
           sort: channelStateSort,
           predefinedFilter: predefinedFilter,
@@ -731,7 +795,7 @@ class StreamChatClient {
     } catch (e, stk) {
       logger.severe('Error querying channels online', e, stk);
       // Only rethrow if we have no channels to show the user
-      if (offlineChannels.isEmpty) rethrow;
+      if (offlineResult == null || offlineResult.channels.isEmpty) rethrow;
     }
   }
 
@@ -758,6 +822,37 @@ class StreamChatClient {
 
   /// Requests channels with a given query from the API.
   Future<List<Channel>> queryChannelsOnline({
+    Filter? filter,
+    SortOrder<ChannelState>? sort,
+    String? predefinedFilter,
+    Map<String, Object?>? filterValues,
+    Map<String, Object?>? sortValues,
+    bool state = true,
+    bool watch = true,
+    bool presence = false,
+    int? memberLimit,
+    int? messageLimit,
+    bool waitForConnect = true,
+    PaginationParams paginationParams = const PaginationParams(),
+  }) async {
+    final result = await _queryChannelsOnlineImpl(
+      filter: filter,
+      sort: sort,
+      predefinedFilter: predefinedFilter,
+      filterValues: filterValues,
+      sortValues: sortValues,
+      state: state,
+      watch: watch,
+      presence: presence,
+      memberLimit: memberLimit,
+      messageLimit: messageLimit,
+      waitForConnect: waitForConnect,
+      paginationParams: paginationParams,
+    );
+    return result.channels;
+  }
+
+  Future<QueryChannelsResult> _queryChannelsOnlineImpl({
     Filter? filter,
     SortOrder<ChannelState>? sort,
     String? predefinedFilter,
@@ -810,7 +905,10 @@ class StreamChatClient {
         Please make sure to take a look at the Flutter tutorial: https://getstream.io/chat/flutter/tutorial
         If your application already has users and channels, you might need to adjust your query channel as explained in the docs https://getstream.io/chat/docs/query_channels/?language=dart
         ''');
-      return <Channel>[];
+      return QueryChannelsResult(
+        channels: const [],
+        predefinedFilter: res.predefinedFilter,
+      );
     }
 
     final channels = res.channels;
@@ -839,21 +937,26 @@ class StreamChatClient {
         clearQueryCache: clearQueryCache,
       );
     } else {
-      // Fall back to the default so the persisted spec is always meaningful.
-      final resolvedSort = res.predefinedFilter?.sort ?? _defaultChannelStateSort;
+      // Note: predefinedFilter will never be null here
+      final resolvedFilter = res.predefinedFilter?.filter ?? const Filter.empty();
+      final resolvedSort = res.predefinedFilter?.sort ?? defaultChannelStateSortFor(resolvedFilter);
 
       await chatPersistenceClient?.updateChannelQueriesByPredefinedFilter(
         predefinedFilter,
         cachedCids,
+        filter: resolvedFilter,
+        sort: resolvedSort,
         filterValues: filterValues,
         sortValues: sortValues,
-        channelStateSort: resolvedSort,
         clearQueryCache: clearQueryCache,
       );
     }
 
     this.state.addChannels(updateData.key);
-    return updateData.value;
+    return QueryChannelsResult(
+      channels: updateData.value,
+      predefinedFilter: res.predefinedFilter,
+    );
   }
 
   /// Requests channels with a given query from the Persistence client.
@@ -865,30 +968,57 @@ class StreamChatClient {
     SortOrder<ChannelState>? channelStateSort,
     PaginationParams paginationParams = const PaginationParams(),
   }) async {
-    final offlineChannels = await switch (predefinedFilter) {
-          null => chatPersistenceClient?.getChannelStates(
-              filter: filter,
-              channelStateSort: channelStateSort,
-              paginationParams: paginationParams,
-            ),
-          final name =>
-            chatPersistenceClient?.getChannelStatesByPredefinedFilter(
-              filterName: name,
-              filterValues: filterValues,
-              sortValues: sortValues,
-              paginationParams: paginationParams,
-            ),
-        } ??
-        [];
+    final result = await _queryChannelsOfflineImpl(
+      filter: filter,
+      predefinedFilter: predefinedFilter,
+      filterValues: filterValues,
+      sortValues: sortValues,
+      channelStateSort: channelStateSort,
+      paginationParams: paginationParams,
+    );
+    return result.channels;
+  }
 
-    if (offlineChannels.isEmpty) {
-      logger.info('No channels found in offline storage for the given query');
-      return [];
+  Future<QueryChannelsResult> _queryChannelsOfflineImpl({
+    Filter? filter,
+    String? predefinedFilter,
+    Map<String, Object?>? filterValues,
+    Map<String, Object?>? sortValues,
+    SortOrder<ChannelState>? channelStateSort,
+    PaginationParams paginationParams = const PaginationParams(),
+  }) async {
+    final QueryChannelsResponse res;
+    if (predefinedFilter == null) {
+      final channels = await chatPersistenceClient?.getChannelStates(
+        filter: filter,
+        channelStateSort: channelStateSort,
+        paginationParams: paginationParams,
+      );
+      res = QueryChannelsResponse()..channels = channels ?? const [];
+    } else {
+      res = await chatPersistenceClient?.getChannelStatesByPredefinedFilter(
+            filterName: predefinedFilter,
+            filterValues: filterValues,
+            sortValues: sortValues,
+            paginationParams: paginationParams,
+          ) ??
+          (QueryChannelsResponse()..channels = const []);
     }
 
-    final updatedData = _mapChannelStateToChannel(offlineChannels);
-    state.addChannels(updatedData.key);
-    return updatedData.value;
+    if (res.channels.isEmpty) {
+      logger.info('No channels found in offline storage for the given query');
+      return QueryChannelsResult(
+        channels: const [],
+        predefinedFilter: res.predefinedFilter,
+      );
+    }
+
+    final updateData = _mapChannelStateToChannel(res.channels);
+    state.addChannels(updateData.key);
+    return QueryChannelsResult(
+      channels: updateData.value,
+      predefinedFilter: res.predefinedFilter,
+    );
   }
 
   MapEntry<Map<String, Channel>, List<Channel>> _mapChannelStateToChannel(

@@ -161,7 +161,8 @@ void main() {
     const filterValues = {'user_id': 'testUserId'};
     const sortValues = {'pinned_at': true};
     const cids = ['testCid1', 'testCid2', 'testCid3'];
-    const sortSpec = <SortOption<ChannelState>>[
+    final filter = Filter.equal('type', 'messaging');
+    const sort = <SortOption<ChannelState>>[
       SortOption<ChannelState>.desc(ChannelSortKey.pinnedAt),
       SortOption<ChannelState>.desc(ChannelSortKey.lastMessageAt),
     ];
@@ -170,18 +171,21 @@ void main() {
     await channelQueryDao.updateChannelQueriesByPredefinedFilter(
       filterName,
       cids,
+      filter: filter,
+      sort: sort,
       filterValues: filterValues,
       sortValues: sortValues,
-      channelStateSort: sortSpec,
     );
 
-    final (cachedChannels, storedSort) = await channelQueryDao.getChannelsAndSortByPredefinedFilter(
+    final (cachedChannels, storedFilter, storedSort) = await channelQueryDao.getChannelsAndSpecByPredefinedFilter(
       filterName,
       filterValues: filterValues,
       sortValues: sortValues,
     );
 
     expect(cachedChannels.map((c) => c.cid).toSet(), cids.toSet());
+    expect(storedFilter, isNotNull);
+    expect(storedFilter!.toJson(), filter.toJson());
     expect(storedSort, isNotNull);
     expect(storedSort!.length, 2);
     expect(storedSort.first.field, ChannelSortKey.pinnedAt);
@@ -196,7 +200,8 @@ void main() {
     const sortValues = {'pinned_at': true};
     const oldCids = ['oldCid1', 'oldCid2'];
     const newCids = ['newCid1'];
-    const sortSpec = <SortOption<ChannelState>>[
+    final filter = Filter.equal('type', 'messaging');
+    const sort = <SortOption<ChannelState>>[
       SortOption<ChannelState>.desc(ChannelSortKey.pinnedAt),
       SortOption<ChannelState>.desc(ChannelSortKey.lastMessageAt),
     ];
@@ -205,26 +210,36 @@ void main() {
     await channelQueryDao.updateChannelQueriesByPredefinedFilter(
       filterName,
       oldCids,
+      filter: filter,
+      sort: sort,
       filterValues: filterValues,
       sortValues: sortValues,
-      channelStateSort: sortSpec,
     );
     await channelQueryDao.updateChannelQueriesByPredefinedFilter(
       filterName,
       newCids,
+      filter: filter,
+      sort: sort,
       filterValues: filterValues,
       sortValues: sortValues,
       clearQueryCache: true,
     );
 
-    final (cachedChannels, storedSort) = await channelQueryDao.getChannelsAndSortByPredefinedFilter(
+    final (cachedChannels, storedFilter, storedSort) = await channelQueryDao.getChannelsAndSpecByPredefinedFilter(
       filterName,
       filterValues: filterValues,
       sortValues: sortValues,
     );
 
     expect(cachedChannels.map((c) => c.cid).toSet(), newCids.toSet());
-    expect(storedSort, isNull);
+    expect(storedFilter, isNotNull);
+    expect(storedFilter!.toJson(), filter.toJson());
+    expect(storedSort, isNotNull);
+    expect(storedSort!.length, 2);
+    expect(storedSort.first.field, ChannelSortKey.pinnedAt);
+    expect(storedSort.first.direction, SortOption.DESC);
+    expect(storedSort.last.field, ChannelSortKey.lastMessageAt);
+    expect(storedSort.last.direction, SortOption.DESC);
   });
 
   tearDown(() async {
