@@ -22,11 +22,11 @@ void main() {
     });
 
     test('parses fileUploadConfig size_limit', () {
-      expect(appSettings.fileUploadConfig.sizeLimitInBytes, 10485760);
+      expect(appSettings.fileUploadConfig.sizeLimit, 10485760);
     });
 
     test('parses imageUploadConfig size_limit', () {
-      expect(appSettings.imageUploadConfig.sizeLimitInBytes, 5242880);
+      expect(appSettings.imageUploadConfig.sizeLimit, 5242880);
     });
 
     test('parses fileUploadConfig extension lists', () {
@@ -52,83 +52,9 @@ void main() {
       expect(config.blockedMimeTypes, isEmpty);
     });
 
-    test('defaults sizeLimitInBytes to null when absent', () {
+    test('defaults sizeLimit to defaultSizeLimit when absent', () {
       final config = UploadConfig.fromJson({});
-      expect(config.sizeLimitInBytes, isNull);
-    });
-  });
-
-  group('UploadConfig.isAllowed', () {
-    test('allows everything when lists are empty', () {
-      final config = UploadConfig();
-      expect(config.isAllowed(fileExtension: '.pdf', mimeType: 'application/pdf'), isTrue);
-      expect(config.isAllowed(), isTrue);
-    });
-
-    test('blocks by extension', () {
-      final config = UploadConfig(blockedFileExtensions: ['.exe']);
-      expect(config.isAllowed(fileExtension: '.exe'), isFalse);
-      expect(config.isAllowed(fileExtension: '.pdf'), isTrue);
-    });
-
-    test('blocked extension check is case-insensitive', () {
-      final config = UploadConfig(blockedFileExtensions: ['.EXE']);
-      expect(config.isAllowed(fileExtension: '.exe'), isFalse);
-      expect(config.isAllowed(fileExtension: 'exe'), isFalse);
-    });
-
-    test('leading dot on blocked extension is stripped before comparison', () {
-      final config = UploadConfig(blockedFileExtensions: ['exe']);
-      expect(config.isAllowed(fileExtension: '.exe'), isFalse);
-    });
-
-    test('enforces allow-list for extensions', () {
-      final config = UploadConfig(allowedFileExtensions: ['.csv', '.pdf']);
-      expect(config.isAllowed(fileExtension: '.csv'), isTrue);
-      expect(config.isAllowed(fileExtension: '.pdf'), isTrue);
-      expect(config.isAllowed(fileExtension: '.txt'), isFalse);
-    });
-
-    test('blocks by mime type', () {
-      final config = UploadConfig(blockedMimeTypes: ['application/x-msdownload']);
-      expect(config.isAllowed(mimeType: 'application/x-msdownload'), isFalse);
-      expect(config.isAllowed(mimeType: 'text/csv'), isTrue);
-    });
-
-    test('enforces allow-list for mime types', () {
-      final config = UploadConfig(allowedMimeTypes: ['text/csv', 'image/png']);
-      expect(config.isAllowed(mimeType: 'text/csv'), isTrue);
-      expect(config.isAllowed(mimeType: 'application/pdf'), isFalse);
-    });
-
-    test('blocked takes precedence over allowed', () {
-      final config = UploadConfig(
-        allowedFileExtensions: ['.pdf', '.exe'],
-        blockedFileExtensions: ['.exe'],
-      );
-      expect(config.isAllowed(fileExtension: '.exe'), isFalse);
-      expect(config.isAllowed(fileExtension: '.pdf'), isTrue);
-    });
-
-    test('null extension and mime type are always allowed', () {
-      final config = UploadConfig(
-        allowedFileExtensions: ['.pdf'],
-        allowedMimeTypes: ['image/png'],
-      );
-      expect(config.isAllowed(), isTrue);
-    });
-
-    test('extension and mime type are both checked', () {
-      final config = UploadConfig(
-        allowedFileExtensions: ['.pdf'],
-        allowedMimeTypes: ['application/pdf'],
-      );
-      // Both pass
-      expect(config.isAllowed(fileExtension: '.pdf', mimeType: 'application/pdf'), isTrue);
-      // Extension fails
-      expect(config.isAllowed(fileExtension: '.txt', mimeType: 'application/pdf'), isFalse);
-      // Mime fails
-      expect(config.isAllowed(fileExtension: '.pdf', mimeType: 'text/plain'), isFalse);
+      expect(config.sizeLimit, UploadConfig.defaultSizeLimit);
     });
   });
 }

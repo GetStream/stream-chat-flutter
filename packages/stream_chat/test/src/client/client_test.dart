@@ -837,14 +837,7 @@ void main() {
       client = StreamChatClient(apiKey, chatApi: api, ws: ws);
       // Stub getAppSettings so the background fetch after connectUser succeeds.
       when(() => api.general.getAppSettings()).thenAnswer(
-        (_) async => GetAppSettingsResponse()
-          ..app = AppSettings(
-            name: 'test',
-            fileUploadConfig: UploadConfig(),
-            imageUploadConfig: UploadConfig(),
-            autoTranslationEnabled: false,
-            asyncUrlEnrichEnabled: false,
-          ),
+        (_) async => GetAppSettingsResponse()..app = const AppSettings(name: 'test'),
       );
       await client.connectUser(user, token);
       await delay(300);

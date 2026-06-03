@@ -1,48 +1,82 @@
+import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'app_settings.g.dart';
 
-/// The top-level app configuration returned by the `GET /app` endpoint.
+/// {@template appSettings}
+/// The configuration of a Stream Chat application.
+///
+/// Carries the upload constraints applied to file and image attachments
+/// along with application-level feature flags configured for the app.
+///
+/// See also:
+///
+///  * [UploadConfig], for the per-category upload rules.
+///  * [StreamChatClient.appSettings], for the cached value held by the
+///    client.
+/// {@endtemplate}
 @JsonSerializable(createToJson: false)
-class AppSettings {
-  /// Creates a new [AppSettings] instance.
-  AppSettings({
-    required this.name,
-    required this.fileUploadConfig,
-    required this.imageUploadConfig,
-    required this.autoTranslationEnabled,
-    required this.asyncUrlEnrichEnabled,
+class AppSettings with EquatableMixin {
+  /// {@macro appSettings}
+  const AppSettings({
+    this.name = '',
+    this.fileUploadConfig = const UploadConfig(),
+    this.imageUploadConfig = const UploadConfig(),
+    this.autoTranslationEnabled = false,
+    this.asyncUrlEnrichEnabled = false,
   });
 
   /// Creates a new instance from a json.
   factory AppSettings.fromJson(Map<String, dynamic> json) => _$AppSettingsFromJson(json);
 
-  /// The name of the app.
+  /// The display name of the application.
   final String name;
 
-  /// Upload configuration for file attachments.
-  @JsonKey(name: 'file_upload_config')
+  /// The upload rules applied to non-image attachments.
   final UploadConfig fileUploadConfig;
 
-  /// Upload configuration for image attachments.
-  @JsonKey(name: 'image_upload_config')
+  /// The upload rules applied to image attachments.
   final UploadConfig imageUploadConfig;
 
-  /// Whether auto-translation is enabled.
-  @JsonKey(name: 'auto_translation_enabled')
+  /// Whether automatic message translation is enabled for the app.
   final bool autoTranslationEnabled;
 
-  /// Whether async URL enrichment is enabled.
-  @JsonKey(name: 'async_url_enrich_enabled')
+  /// Whether asynchronous URL enrichment is enabled for the app.
   final bool asyncUrlEnrichEnabled;
+
+  @override
+  List<Object?> get props => [
+    name,
+    fileUploadConfig,
+    imageUploadConfig,
+    autoTranslationEnabled,
+    asyncUrlEnrichEnabled,
+  ];
 }
 
-/// Upload configuration for a specific attachment category (file or image).
+/// {@template uploadConfig}
+/// The upload rules for a single category of attachment.
+///
+/// Each instance is paired with one category — see
+/// [AppSettings.fileUploadConfig] and [AppSettings.imageUploadConfig].
+///
+/// An upload is accepted only when it satisfies every populated list and
+/// stays within [sizeLimit]:
+///
+///  * [allowedFileExtensions] — when non-empty, the file's extension must
+///    appear in the list.
+///  * [blockedFileExtensions] — the file's extension must not appear in
+///    the list.
+///  * [allowedMimeTypes] — when non-empty, the file's MIME type must
+///    appear in the list.
+///  * [blockedMimeTypes] — the file's MIME type must not appear in the
+///    list.
+/// {@endtemplate}
 @JsonSerializable(createToJson: false)
-class UploadConfig {
-  /// Creates a new [UploadConfig] instance.
-  UploadConfig({
-    this.sizeLimitInBytes,
+class UploadConfig with EquatableMixin {
+  /// {@macro uploadConfig}
+  const UploadConfig({
+    this.sizeLimit = defaultSizeLimit,
     this.allowedFileExtensions = const [],
     this.blockedFileExtensions = const [],
     this.allowedMimeTypes = const [],
@@ -52,64 +86,41 @@ class UploadConfig {
   /// Creates a new instance from a json.
   factory UploadConfig.fromJson(Map<String, dynamic> json) => _$UploadConfigFromJson(json);
 
-  /// Maximum allowed upload size in bytes.
-  ///
-  /// A value of `0` or `null` means "use the SDK default".
-  @JsonKey(name: 'size_limit')
-  final int? sizeLimitInBytes;
+  /// The fallback used for [sizeLimit] when no explicit value is provided.
+  static const defaultSizeLimit = 100 * 1024 * 1024;
 
-  /// File extensions that are explicitly allowed (e.g. `['.pdf', '.csv']`).
-  /// When non-empty, only listed extensions are permitted.
-  @JsonKey(name: 'allowed_file_extensions', defaultValue: [])
+  /// The maximum upload size, in bytes.
+  ///
+  /// Defaults to [defaultSizeLimit].
+  @JsonKey(defaultValue: defaultSizeLimit)
+  final int sizeLimit;
+
+  /// The file extensions explicitly permitted, e.g. `['.pdf', '.csv']`.
+  ///
+  /// When non-empty, only listed extensions pass.
+  @JsonKey(defaultValue: [])
   final List<String> allowedFileExtensions;
 
-  /// File extensions that are explicitly blocked.
-  @JsonKey(name: 'blocked_file_extensions', defaultValue: [])
+  /// The file extensions explicitly blocked.
+  @JsonKey(defaultValue: [])
   final List<String> blockedFileExtensions;
 
-  /// MIME types that are explicitly allowed (e.g. `['text/csv', 'image/png']`).
-  /// When non-empty, only listed MIME types are permitted.
-  @JsonKey(name: 'allowed_mime_types', defaultValue: [])
+  /// The MIME types explicitly permitted, e.g. `['text/csv', 'image/png']`.
+  ///
+  /// When non-empty, only listed MIME types pass.
+  @JsonKey(defaultValue: [])
   final List<String> allowedMimeTypes;
 
-  /// MIME types that are explicitly blocked.
-  @JsonKey(name: 'blocked_mime_types', defaultValue: [])
+  /// The MIME types explicitly blocked.
+  @JsonKey(defaultValue: [])
   final List<String> blockedMimeTypes;
 
-  /// Returns whether an attachment with the given [fileExtension] and/or
-  /// [mimeType] is permitted by this configuration.
-  ///
-  /// Logic (mirrors Swift `UploadConfig.isAllowed`):
-  /// 1. If blocked by extension → rejected.
-  /// 2. If an allow-list exists and the extension is not in it → rejected.
-  /// 3. Same check for mime type.
-  /// 4. Otherwise → allowed.
-  bool isAllowed({String? fileExtension, String? mimeType}) {
-    return _isValueAllowed(
-          value: fileExtension,
-          allowed: allowedFileExtensions,
-          blocked: blockedFileExtensions,
-        ) &&
-        _isValueAllowed(
-          value: mimeType,
-          allowed: allowedMimeTypes,
-          blocked: blockedMimeTypes,
-        );
-  }
-
-  static bool _isValueAllowed({
-    required String? value,
-    required List<String> allowed,
-    required List<String> blocked,
-  }) {
-    if (value == null) return true;
-    // Normalise: lower-case and strip leading dots for extension comparison.
-    final v = value.toLowerCase().replaceFirst(RegExp(r'^\.'), '');
-
-    String normalise(String s) => s.toLowerCase().replaceFirst(RegExp(r'^\.'), '');
-
-    if (blocked.any((b) => normalise(b) == v)) return false;
-    if (allowed.isEmpty) return true;
-    return allowed.any((a) => normalise(a) == v);
-  }
+  @override
+  List<Object?> get props => [
+    sizeLimit,
+    allowedFileExtensions,
+    blockedFileExtensions,
+    allowedMimeTypes,
+    blockedMimeTypes,
+  ];
 }

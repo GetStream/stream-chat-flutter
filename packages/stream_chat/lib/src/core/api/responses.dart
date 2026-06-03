@@ -792,9 +792,8 @@ class GetActiveLiveLocationsResponse extends _BaseResponse {
 @JsonSerializable(createToJson: false)
 class GetAppSettingsResponse extends _BaseResponse {
   /// The app settings.
-  @JsonKey(name: 'app')
   late AppSettings app;
 
-  /// Create a new instance from a json
+  /// Creates a new instance from a json.
   static GetAppSettingsResponse fromJson(Map<String, dynamic> json) => _$GetAppSettingsResponseFromJson(json);
 }

@@ -27,16 +27,16 @@ DropItemFile _dropFile({
 AppSettings _makeAppSettings({
   List<String> blockedExtensions = const [],
   List<String> allowedExtensions = const [],
-  int? sizeLimitInBytes,
+  int sizeLimit = UploadConfig.defaultSizeLimit,
 }) {
   return AppSettings(
     name: 'test',
     fileUploadConfig: UploadConfig(
       blockedFileExtensions: blockedExtensions,
       allowedFileExtensions: allowedExtensions,
-      sizeLimitInBytes: sizeLimitInBytes,
+      sizeLimit: sizeLimit,
     ),
-    imageUploadConfig: UploadConfig(),
+    imageUploadConfig: const UploadConfig(),
     autoTranslationEnabled: false,
     asyncUrlEnrichEnabled: false,
   );
@@ -44,7 +44,7 @@ AppSettings _makeAppSettings({
 
 Future<void> pumpComposerWithSettings(
   WidgetTester tester, {
-  required AppSettings? appSettings,
+  required AppSettings appSettings,
   StreamMessageComposerController? controller,
 }) async {
   final client = MockClient();
@@ -55,7 +55,7 @@ Future<void> pumpComposerWithSettings(
   when(() => client.state).thenReturn(clientState);
   when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
   when(() => clientState.currentUserStream).thenAnswer((_) => Stream.value(OwnUser(id: 'user-id')));
-  when(() => clientState.appSettings).thenReturn(appSettings);
+  when(() => client.appSettings).thenReturn(appSettings);
   when(() => channel.state).thenReturn(channelState);
   when(() => channel.client).thenReturn(client);
   when(channel.getRemainingCooldown).thenReturn(0);
@@ -141,7 +141,7 @@ void main() {
       // Limit = 50 bytes; dropped file = 100 bytes.
       await pumpComposerWithSettings(
         tester,
-        appSettings: _makeAppSettings(sizeLimitInBytes: 50),
+        appSettings: _makeAppSettings(sizeLimit: 50),
         controller: composerController,
       );
 

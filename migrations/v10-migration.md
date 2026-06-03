@@ -377,6 +377,8 @@ StreamMessageComposer(
 
 - Replaced `ArgumentError('The size of the attachment is...')` with `AttachmentTooLargeError`.
 - Replaced `ArgumentError('The maximum number of attachments is...')` with `AttachmentLimitReachedError`.
+- Added `AttachmentBlockedError`, thrown when the attachment's extension or MIME type is rejected by the backend `AppSettings.fileUploadConfig` / `imageUploadConfig`.
+- Constructor now takes a single `validator: StreamAttachmentValidator` parameter — derived from `StreamChatClient.appSettings` by default when used through `StreamMessageComposer`.
 
 #### Migration Steps:
 
@@ -400,13 +402,18 @@ try {
 } on AttachmentLimitReachedError catch (e) {
   // Too many attachments
   showError('Cannot add more attachments. Maximum is ${e.maxCount}.');
+} on AttachmentBlockedError catch (e) {
+  // Extension or MIME type rejected by backend AppSettings
+  showError('Attachment type not allowed (${e.fileExtension ?? e.mimeType}).');
 }
 ```
 
 > **Important:**
-> - Replace `ArgumentError` catches with the specific typed errors
-> - `AttachmentTooLargeError` provides `fileSize` and `maxSize` properties
-> - `AttachmentLimitReachedError` provides `maxCount` property
+> - Replace `ArgumentError` catches with the specific typed errors.
+> - `AttachmentTooLargeError` provides `fileSize` and `maxSize` properties.
+> - `AttachmentLimitReachedError` provides `maxCount` property.
+> - `AttachmentBlockedError` provides `fileExtension` and `mimeType` (both nullable — populated regardless of which list triggered the rejection).
+> - To bypass the backend rules, construct your own `StreamAttachmentValidator` and pass it to the picker controller.
 
 ---
 

@@ -6,10 +6,10 @@
 
 ✅ Added
 
-- `StreamMessageComposer` and `MessageComposerProps` now automatically apply the backend-configured upload size limits from `ClientState.appSettings`. Image attachments use `imageUploadConfig.size_limit`; all other file attachments use `fileUploadConfig.size_limit`. The limit falls back to `kDefaultMaxAttachmentSize` (100 MB) when the backend value is absent or zero.
-- `StreamAttachmentPickerController` now accepts an optional `appSettings` parameter. When provided, `addAttachment` enforces per-type size limits and allowed/blocked extension & MIME-type rules, throwing `AttachmentBlockedError` when a file is disallowed.
-- Added `AttachmentBlockedError` — thrown by `StreamAttachmentPickerController.addAttachment` when the attachment's extension or MIME type is rejected by the app's upload configuration.
-- The `maxAttachmentSize` parameter on `StreamMessageComposer` and `MessageComposerProps` is now `int?` (was `int`). Passing `null` (the new default) lets the backend limit take effect; passing an explicit value acts as the fallback when the backend does not specify a limit for that attachment type.
+- `StreamMessageComposer` now validates picked, pasted, and dropped attachments against `StreamChatClient.appSettings` — enforcing per-type size limits, allowed/blocked file extensions and MIME types, and the total attachment count (`attachmentLimit`, default `StreamAttachmentValidator.defaultMaxAttachmentCount` of 30). Validation failures surface as a localized error sheet.
+- Added `StreamAttachmentValidator`, a stateless rule set built from `AppSettings`. Exposes `validateCount(int)` and `validate(Attachment)` checks that return `null` on success and a typed error otherwise — they never throw.
+- Added typed validator errors `AttachmentLimitReachedError`, `AttachmentTooLargeError`, and `AttachmentBlockedError` (subclasses of `StreamChatError`).
+- `StreamAttachmentPickerController` now takes a `validator: StreamAttachmentValidator` parameter instead of separate size/limit/config knobs. `addAttachment` throws the typed validator error when the attachment is rejected.
 - Added `BlockUser` / `UnblockUser` default message actions, dispatching to `StreamChatClient.blockUser` / `unblockUser`.
 
 🔄 Internal / Non-breaking
@@ -81,6 +81,10 @@
   - Removed `StreamChatThemeData.galleryHeaderTheme`, `StreamChatThemeData.galleryFooterTheme` (and the `imageFooterTheme:` constructor parameter) and the `StreamGalleryFooterThemeData` class. Header / footer chrome now flows through `StreamAppBarThemeData` / `StreamBottomAppBarThemeData`.
   - Removed the unused `StreamAvatarThemeData`.
   See [`migrations/redesign/media_viewer.md`](../../migrations/redesign/media_viewer.md).
+- Removed `StreamMessageComposer.maxAttachmentSize` (and the `kDefaultMaxAttachmentSize` constant). The per-type size limit now comes from `StreamChatClient.appSettings.fileUploadConfig.sizeLimit` / `imageUploadConfig.sizeLimit`, with `UploadConfig.defaultSizeLimit` (100 MB) as the fallback.
+- Removed `StreamMessageComposer.onAttachmentLimitExceed` and the `AttachmentLimitExceedListener` typedef. Surface limit failures via the standard error sheet, or handle the typed `AttachmentLimitReachedError` thrown by `StreamAttachmentPickerController.addAttachment`.
+- `StreamMessageComposer.attachmentLimit` is now a non-nullable `int` defaulting to `StreamAttachmentValidator.defaultMaxAttachmentCount` (30) — matching the backend's `MaxNumberOfMessageAttachments` cap. Previously `int?` with `null` meaning "no limit", which silently allowed the backend to reject the message. Pass a smaller value to tighten the limit; the backend value is the hard cap.
+- `StreamAttachmentPickerController` constructor now takes a `validator: StreamAttachmentValidator` parameter instead of separate size / limit / config knobs. See the [message composer migration guide](../../migrations/redesign/message_composer.md#appsettings-driven-attachment-validation).
 
 ✅ Added
 
