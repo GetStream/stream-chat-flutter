@@ -168,6 +168,15 @@ String get pollVotesLabel => 'Votes';
 @override
 String get endVoteConfirmationMessage =>
     'Do you want to end this poll now? Nobody will be able to vote in this poll anymore.';
+
+// Attachment validation — shown when the file's extension is rejected by
+// the backend `AppSettings.fileUploadConfig` / `imageUploadConfig`.
+// `extension` is the raw extension without a leading dot (e.g. `'exe'`),
+// or `null` when the extension is unknown.
+@override
+String fileTypeNotSupportedError(String? extension) => extension != null
+    ? "'.$extension' files are not supported for upload."
+    : 'This file type is not supported for upload.';
 ```
 
 > **Note:** The values shown above are the English defaults from `DefaultTranslations`. Provide your own translated strings in place of these.
@@ -261,7 +270,7 @@ If your app overrides these in a `Translations` subclass, your custom values are
 ## Migration Checklist
 
 - [ ] Search your codebase for any class that `extends Translations` or `extends DefaultTranslations`
-- [ ] Add implementations for all 38 new abstract members listed above — the compiler will flag missing ones
+- [ ] Add implementations for all 39 new abstract members listed above — the compiler will flag missing ones
 - [ ] Update the signature of any `questionsLabel` override to `questionLabel({bool isPlural = false})`, and replace any call to `translations.questionsLabel` with `translations.questionLabel(isPlural: true)`
 - [ ] Rename any `endVoteConfirmationText` override (and consumer) to `endVoteConfirmationTitle`
 - [ ] Update the signature of any `slowModeOnLabel` override from `String get slowModeOnLabel` to `String slowModeOnLabel(int cooldownTimeOut)`, and update consumers to pass the cooldown seconds (e.g. `translations.slowModeOnLabel(cooldownTimeOut)`)

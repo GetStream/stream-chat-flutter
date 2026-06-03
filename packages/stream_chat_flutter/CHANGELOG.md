@@ -9,6 +9,7 @@
 - `StreamMessageComposer` now validates picked, pasted, and dropped attachments against `StreamChatClient.appSettings` — enforcing per-type size limits, allowed/blocked file extensions and MIME types, and the total attachment count (`attachmentLimit`, default `StreamAttachmentValidator.defaultMaxAttachmentCount` of 30). Validation failures surface as a localized error sheet.
 - Added `StreamAttachmentValidator`, a stateless rule set built from `AppSettings`. Exposes `validateCount(int)` and `validate(Attachment)` checks that return `null` on success and a typed error otherwise — they never throw.
 - Added typed validator errors `AttachmentLimitReachedError`, `AttachmentTooLargeError`, and `AttachmentBlockedError` (subclasses of `StreamChatError`).
+- Added `Translations.fileTypeNotSupportedError(String? extension)` — surfaced by the composer when an attachment is rejected by the backend's allowed/blocked extension or MIME-type lists. Required override on any custom `Translations` subclass; see [`migrations/redesign/localizations.md`](../../migrations/redesign/localizations.md).
 - `StreamAttachmentPickerController` now takes a `validator: StreamAttachmentValidator` parameter instead of separate size/limit/config knobs. `addAttachment` throws the typed validator error when the attachment is rejected.
 - Added `BlockUser` / `UnblockUser` default message actions, dispatching to `StreamChatClient.blockUser` / `unblockUser`.
 
