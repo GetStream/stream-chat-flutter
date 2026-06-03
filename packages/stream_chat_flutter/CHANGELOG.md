@@ -82,7 +82,7 @@
   - Removed the unused `StreamAvatarThemeData`.
   See [`migrations/redesign/media_viewer.md`](../../migrations/redesign/media_viewer.md).
 - Removed `StreamMessageComposer.maxAttachmentSize` (and the `kDefaultMaxAttachmentSize` constant). The per-type size limit now comes from `StreamChatClient.appSettings.fileUploadConfig.sizeLimit` / `imageUploadConfig.sizeLimit`, with `UploadConfig.defaultSizeLimit` (100 MB) as the fallback.
-- Removed `StreamMessageComposer.onAttachmentLimitExceed` and the `AttachmentLimitExceedListener` typedef. Surface limit failures via the standard error sheet, or handle the typed `AttachmentLimitReachedError` thrown by `StreamAttachmentPickerController.addAttachment`.
+- Removed `StreamMessageComposer.onAttachmentLimitExceed` and the `AttachmentLimitExceedListener` typedef. Surface limit failures via the default error sheet, or pass `onError` to `StreamMessageComposer` — when set, the callback short-circuits the default sheet and receives the typed `AttachmentLimitReachedError` / `AttachmentTooLargeError` / `AttachmentBlockedError`.
 - `StreamMessageComposer.attachmentLimit` is now a non-nullable `int` defaulting to `StreamAttachmentValidator.defaultMaxAttachmentCount` (30) — matching the backend's `MaxNumberOfMessageAttachments` cap. Previously `int?` with `null` meaning "no limit", which silently allowed the backend to reject the message. Pass a smaller value to tighten the limit; the backend value is the hard cap.
 - `StreamAttachmentPickerController` constructor now takes a `validator: StreamAttachmentValidator` parameter instead of separate size / limit / config knobs. See the [message composer migration guide](../../migrations/redesign/message_composer.md#appsettings-driven-attachment-validation).
 
