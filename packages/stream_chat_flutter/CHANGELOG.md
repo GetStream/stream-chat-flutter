@@ -19,6 +19,8 @@
 - `ScrollablePositionedList.padding` now accepts `EdgeInsetsGeometry` (resolved against
   `Directionality`), and `scrollTo` lands the target at the content-area edge by adjusting for
   leading padding.
+- Bumped `jiffy` to `^6.4.5` to pick up cached locale and `DateFormat` lookups for cheaper
+  relative-time formatting.
 
 ## 9.24.0
 
