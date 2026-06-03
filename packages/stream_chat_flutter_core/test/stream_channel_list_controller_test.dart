@@ -37,7 +37,8 @@ void main() {
     expect(controller.value, same(value));
   });
 
-  test('doInitialLoad forwards inline filter and sort to queryChannels', () async {
+  test('doInitialLoad forwards inline filter and sort to queryChannels',
+      () async {
     final filter = Filter.in_('members', const ['u1']);
     const sort = [SortOption<ChannelState>.desc(ChannelSortKey.lastMessageAt)];
 
@@ -79,7 +80,9 @@ void main() {
     ).called(1);
   });
 
-  test('doInitialLoad forwards predefinedFilter, filterValues, sortValues to queryChannels', () async {
+  test(
+      'doInitialLoad forwards predefinedFilter, filterValues, sortValues to queryChannels',
+      () async {
     const presetName = 'sample_app_filter';
     const filterValues = {'user_id': 'u1'};
     const sortValues = {'preset': 'recent'};
@@ -212,7 +215,8 @@ void main() {
     expect((captured.single as PaginationParams).offset, equals(nextPageKey));
   });
 
-  test('loadMore appends new channels and forwards predefined params', () async {
+  test('loadMore appends new channels and forwards predefined params',
+      () async {
     const presetName = 'sample_app_filter';
     const filterValues = {'user_id': 'u1'};
     const sortValues = {'preset': 'recent'};

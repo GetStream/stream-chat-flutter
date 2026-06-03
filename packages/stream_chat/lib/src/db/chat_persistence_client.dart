@@ -156,7 +156,8 @@ abstract class ChatPersistenceClient {
     Map<String, Object?>? filterValues,
     Map<String, Object?>? sortValues,
     PaginationParams? paginationParams,
-  }) async => QueryChannelsResponse()..channels = const [];
+  }) async =>
+      QueryChannelsResponse()..channels = const [];
 
   /// Update list of channel queries for a predefined-filter query.
   ///

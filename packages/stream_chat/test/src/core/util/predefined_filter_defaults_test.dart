@@ -14,7 +14,8 @@ void main() {
       expect(sort.single.direction, equals(SortOption.DESC));
     });
 
-    test('returns lastMessageAt desc when raw filter touches last_message_at', () {
+    test('returns lastMessageAt desc when raw filter touches last_message_at',
+        () {
       const filter = Filter.raw(
         value: {
           'last_message_at': {r'$gt': '2024-01-01T00:00:00Z'},
@@ -27,7 +28,8 @@ void main() {
       expect(sort.single.direction, equals(SortOption.DESC));
     });
 
-    test(r'returns lastMessageAt desc when last_message_at is nested under $or', () {
+    test(r'returns lastMessageAt desc when last_message_at is nested under $or',
+        () {
       const filter = Filter.raw(
         value: {
           r'$or': [
@@ -65,7 +67,9 @@ void main() {
       expect(sort.single.field, equals(ChannelSortKey.lastUpdated));
     });
 
-    test('returns lastMessageAt desc when typed Filter.and touches last_message_at', () {
+    test(
+        'returns lastMessageAt desc when typed Filter.and touches last_message_at',
+        () {
       final filter = Filter.and([
         Filter.equal('type', 'messaging'),
         Filter.greater('last_message_at', '2024-01-01T00:00:00Z'),

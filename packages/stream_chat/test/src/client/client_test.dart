@@ -800,7 +800,8 @@ void main() {
 
           final channelStates = List.generate(
             3,
-            (i) => ChannelState(channel: ChannelModel(cid: 'test-type-$i:test-id-$i')),
+            (i) => ChannelState(
+                channel: ChannelModel(cid: 'test-type-$i:test-id-$i')),
           );
 
           when(
@@ -825,9 +826,12 @@ void main() {
               ),
           );
 
-          when(() => persistence.getChannelThreads(any())).thenAnswer((_) async => <String, List<Message>>{});
-          when(() => persistence.updateChannelState(any())).thenAnswer((_) async {});
-          when(() => persistence.updateChannelThreads(any(), any())).thenAnswer((_) async {});
+          when(() => persistence.getChannelThreads(any()))
+              .thenAnswer((_) async => <String, List<Message>>{});
+          when(() => persistence.updateChannelState(any()))
+              .thenAnswer((_) async {});
+          when(() => persistence.updateChannelThreads(any(), any()))
+              .thenAnswer((_) async {});
           when(
             () => persistence.updateChannelQueriesByPredefinedFilter(
               any(),
@@ -851,7 +855,8 @@ void main() {
 
           // Inline persistence write is NOT called.
           verifyNever(
-            () => persistence.updateChannelQueries(any(), any(), clearQueryCache: any(named: 'clearQueryCache')),
+            () => persistence.updateChannelQueries(any(), any(),
+                clearQueryCache: any(named: 'clearQueryCache')),
           );
 
           verify(
@@ -877,7 +882,8 @@ void main() {
 
           final channelStates = List.generate(
             3,
-            (i) => ChannelState(channel: ChannelModel(cid: 'test-type-$i:test-id-$i')),
+            (i) => ChannelState(
+                channel: ChannelModel(cid: 'test-type-$i:test-id-$i')),
           );
 
           when(
@@ -887,11 +893,15 @@ void main() {
               sortValues: sortValues,
               paginationParams: any(named: 'paginationParams'),
             ),
-          ).thenAnswer((_) async => QueryChannelsResponse()..channels = channelStates);
+          ).thenAnswer(
+              (_) async => QueryChannelsResponse()..channels = channelStates);
 
-          when(() => persistence.getChannelThreads(any())).thenAnswer((_) async => <String, List<Message>>{});
-          when(() => persistence.updateChannelState(any())).thenAnswer((_) async {});
-          when(() => persistence.updateChannelThreads(any(), any())).thenAnswer((_) async {});
+          when(() => persistence.getChannelThreads(any()))
+              .thenAnswer((_) async => <String, List<Message>>{});
+          when(() => persistence.updateChannelState(any()))
+              .thenAnswer((_) async {});
+          when(() => persistence.updateChannelThreads(any(), any()))
+              .thenAnswer((_) async {});
 
           await delay(1100);
           clearInteractions(persistence);
@@ -928,7 +938,8 @@ void main() {
         () async {
           final channelStates = List.generate(
             2,
-            (i) => ChannelState(channel: ChannelModel(cid: 'test-type-$i:test-id-$i')),
+            (i) => ChannelState(
+                channel: ChannelModel(cid: 'test-type-$i:test-id-$i')),
           );
 
           when(
@@ -954,11 +965,15 @@ void main() {
             (_) async => QueryChannelsResponse()..channels = channelStates,
           );
 
-          when(() => persistence.getChannelThreads(any())).thenAnswer((_) async => <String, List<Message>>{});
-          when(() => persistence.updateChannelState(any())).thenAnswer((_) async {});
-          when(() => persistence.updateChannelThreads(any(), any())).thenAnswer((_) async {});
+          when(() => persistence.getChannelThreads(any()))
+              .thenAnswer((_) async => <String, List<Message>>{});
+          when(() => persistence.updateChannelState(any()))
+              .thenAnswer((_) async {});
+          when(() => persistence.updateChannelThreads(any(), any()))
+              .thenAnswer((_) async {});
           when(
-            () => persistence.updateChannelQueries(any(), any(), clearQueryCache: any(named: 'clearQueryCache')),
+            () => persistence.updateChannelQueries(any(), any(),
+                clearQueryCache: any(named: 'clearQueryCache')),
           ).thenAnswer((_) => Future.value());
 
           await delay(1100);
@@ -982,10 +997,13 @@ void main() {
 
           final channelStates = List.generate(
             2,
-            (i) => ChannelState(channel: ChannelModel(cid: 'test-type-$i:test-id-$i')),
+            (i) => ChannelState(
+                channel: ChannelModel(cid: 'test-type-$i:test-id-$i')),
           );
 
-          const resolvedSort = [SortOption<ChannelState>.desc('last_message_at')];
+          const resolvedSort = [
+            SortOption<ChannelState>.desc('last_message_at')
+          ];
           const resolvedFilter = Filter.empty();
           const expectedPredefinedFilter = PredefinedFilter(
             name: filterName,
@@ -1000,7 +1018,8 @@ void main() {
               sortValues: any(named: 'sortValues'),
               paginationParams: any(named: 'paginationParams'),
             ),
-          ).thenAnswer((_) async => QueryChannelsResponse()..channels = const []);
+          ).thenAnswer(
+              (_) async => QueryChannelsResponse()..channels = const []);
 
           when(
             () => api.channel.queryChannels(
@@ -1020,9 +1039,12 @@ void main() {
               ..predefinedFilter = expectedPredefinedFilter,
           );
 
-          when(() => persistence.getChannelThreads(any())).thenAnswer((_) async => <String, List<Message>>{});
-          when(() => persistence.updateChannelState(any())).thenAnswer((_) async {});
-          when(() => persistence.updateChannelThreads(any(), any())).thenAnswer((_) async {});
+          when(() => persistence.getChannelThreads(any()))
+              .thenAnswer((_) async => <String, List<Message>>{});
+          when(() => persistence.updateChannelState(any()))
+              .thenAnswer((_) async {});
+          when(() => persistence.updateChannelThreads(any(), any()))
+              .thenAnswer((_) async {});
           when(
             () => persistence.updateChannelQueriesByPredefinedFilter(
               any(),

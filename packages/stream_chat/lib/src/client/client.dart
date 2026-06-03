@@ -698,20 +698,21 @@ class StreamChatClient {
     int? messageLimit,
     PaginationParams paginationParams = const PaginationParams(),
     bool waitForConnect = true,
-  }) => _queryChannelsImpl(
-    filter: filter,
-    channelStateSort: channelStateSort,
-    predefinedFilter: predefinedFilter,
-    filterValues: filterValues,
-    sortValues: sortValues,
-    state: state,
-    watch: watch,
-    presence: presence,
-    memberLimit: memberLimit,
-    messageLimit: messageLimit,
-    paginationParams: paginationParams,
-    waitForConnect: waitForConnect,
-  );
+  }) =>
+      _queryChannelsImpl(
+        filter: filter,
+        channelStateSort: channelStateSort,
+        predefinedFilter: predefinedFilter,
+        filterValues: filterValues,
+        sortValues: sortValues,
+        state: state,
+        watch: watch,
+        presence: presence,
+        memberLimit: memberLimit,
+        messageLimit: messageLimit,
+        paginationParams: paginationParams,
+        waitForConnect: waitForConnect,
+      );
 
   Stream<QueryChannelsResult> _queryChannelsImpl({
     Filter? filter,
@@ -938,8 +939,10 @@ class StreamChatClient {
       );
     } else {
       // Note: predefinedFilter will never be null here
-      final resolvedFilter = res.predefinedFilter?.filter ?? const Filter.empty();
-      final resolvedSort = res.predefinedFilter?.sort ?? resolvedFilter.predefinedFilterFallbackSort;
+      final resolvedFilter =
+          res.predefinedFilter?.filter ?? const Filter.empty();
+      final resolvedSort = res.predefinedFilter?.sort ??
+          resolvedFilter.predefinedFilterFallbackSort;
 
       await chatPersistenceClient?.updateChannelQueriesByPredefinedFilter(
         predefinedFilter,

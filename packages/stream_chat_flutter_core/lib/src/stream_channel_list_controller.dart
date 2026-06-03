@@ -85,8 +85,8 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
     this.limit = defaultChannelPagedLimit,
     this.messageLimit,
     this.memberLimit,
-  }) : _eventHandler = eventHandler ?? StreamChannelListEventHandler(),
-       _resolvedChannelStateSort = channelStateSort;
+  })  : _eventHandler = eventHandler ?? StreamChannelListEventHandler(),
+        _resolvedChannelStateSort = channelStateSort;
 
   /// The client to use for the channels list.
   final StreamChatClient client;

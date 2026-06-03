@@ -9,14 +9,18 @@ import 'package:stream_chat/stream_chat.dart';
 /// Used by the `channel_query_metadata` table to persist the server-resolved
 /// sort spec associated with a predefined-filter query, so that offline reads
 /// can apply the same ordering.
-class ChannelStateSortOrderConverter extends TypeConverter<SortOrder<ChannelState>, String> {
+class ChannelStateSortOrderConverter
+    extends TypeConverter<SortOrder<ChannelState>, String> {
   /// Creates a new instance.
   const ChannelStateSortOrderConverter();
 
   @override
   SortOrder<ChannelState> fromSql(String fromDb) {
     final list = jsonDecode(fromDb) as List<dynamic>;
-    return list.cast<Map<String, dynamic>>().map(SortOption<ChannelState>.fromJson).toList(growable: false);
+    return list
+        .cast<Map<String, dynamic>>()
+        .map(SortOption<ChannelState>.fromJson)
+        .toList(growable: false);
   }
 
   @override

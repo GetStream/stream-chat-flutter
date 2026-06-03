@@ -12,7 +12,9 @@ extension PredefinedFilterDefaults on Filter {
   /// default sort for channel queries.
   SortOrder<ChannelState> get predefinedFilterFallbackSort {
     if (_touchesField('last_message_at')) {
-      return const [SortOption<ChannelState>.desc(ChannelSortKey.lastMessageAt)];
+      return const [
+        SortOption<ChannelState>.desc(ChannelSortKey.lastMessageAt)
+      ];
     }
     return const [SortOption<ChannelState>.desc(ChannelSortKey.lastUpdated)];
   }

@@ -5,7 +5,8 @@ part of 'channel_query_dao.dart';
 // ignore_for_file: type=lint
 mixin _$ChannelQueryDaoMixin on DatabaseAccessor<DriftChatDatabase> {
   $ChannelQueriesTable get channelQueries => attachedDatabase.channelQueries;
-  $ChannelQueriesMetadataTable get channelQueriesMetadata => attachedDatabase.channelQueriesMetadata;
+  $ChannelQueriesMetadataTable get channelQueriesMetadata =>
+      attachedDatabase.channelQueriesMetadata;
   $ChannelsTable get channels => attachedDatabase.channels;
   $UsersTable get users => attachedDatabase.users;
 }

@@ -141,7 +141,8 @@ void main() {
   });
 
   Future<void> _insertChannelsForCids(List<String> cids) async {
-    final users = List.generate(cids.length, (i) => User(id: 'user_${cids[i]}'));
+    final users =
+        List.generate(cids.length, (i) => User(id: 'user_${cids[i]}'));
     final channelModels = List.generate(
       cids.length,
       (i) => ChannelModel(
@@ -177,7 +178,8 @@ void main() {
       sortValues: sortValues,
     );
 
-    final (cachedChannels, storedFilter, storedSort) = await channelQueryDao.getChannelsAndSpecByPredefinedFilter(
+    final (cachedChannels, storedFilter, storedSort) =
+        await channelQueryDao.getChannelsAndSpecByPredefinedFilter(
       filterName,
       filterValues: filterValues,
       sortValues: sortValues,
@@ -194,7 +196,8 @@ void main() {
     expect(storedSort.last.direction, SortOption.DESC);
   });
 
-  test('clear queryCache before updateChannelQueriesByPredefinedFilter', () async {
+  test('clear queryCache before updateChannelQueriesByPredefinedFilter',
+      () async {
     const filterName = 'sample-app-list';
     const filterValues = {'user_id': 'testUserId'};
     const sortValues = {'pinned_at': true};
@@ -225,7 +228,8 @@ void main() {
       clearQueryCache: true,
     );
 
-    final (cachedChannels, storedFilter, storedSort) = await channelQueryDao.getChannelsAndSpecByPredefinedFilter(
+    final (cachedChannels, storedFilter, storedSort) =
+        await channelQueryDao.getChannelsAndSpecByPredefinedFilter(
       filterName,
       filterValues: filterValues,
       sortValues: sortValues,

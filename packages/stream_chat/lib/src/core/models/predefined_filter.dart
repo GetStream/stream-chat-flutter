@@ -21,7 +21,8 @@ class PredefinedFilter {
   });
 
   /// Create a new instance from a json.
-  factory PredefinedFilter.fromJson(Map<String, dynamic> json) => _$PredefinedFilterFromJson(json);
+  factory PredefinedFilter.fromJson(Map<String, dynamic> json) =>
+      _$PredefinedFilterFromJson(json);
 
   /// Identifier of the predefined filter on the server.
   final String name;
@@ -36,5 +37,6 @@ class PredefinedFilter {
   /// Sort specification as resolved by the server.
   final SortOrder<ChannelState>? sort;
 
-  static Filter _filterFromJson(Map<String, dynamic> json) => Filter.raw(value: json);
+  static Filter _filterFromJson(Map<String, dynamic> json) =>
+      Filter.raw(value: json);
 }
