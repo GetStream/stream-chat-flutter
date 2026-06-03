@@ -65,11 +65,11 @@ class StreamChannel extends StatefulWidget {
     super.key,
     required this.child,
     required this.channel,
-  })  : showLoading = false,
-        initialMessageId = null,
-        errorBuilder = _defaultErrorBuilder,
-        loadingBuilder = _defaultLoadingBuilder,
-        _shouldPosition = false;
+  }) : showLoading = false,
+       initialMessageId = null,
+       errorBuilder = _defaultErrorBuilder,
+       loadingBuilder = _defaultLoadingBuilder,
+       _shouldPosition = false;
 
   /// The child of the widget
   final Widget child;
