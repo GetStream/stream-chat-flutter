@@ -1,4 +1,5 @@
 // coverage:ignore-file
+// demo: triggering check_db_entities workflow (revert before merge).
 import 'package:drift/drift.dart';
 import 'package:stream_chat_persistence/src/converter/converter.dart';
 
