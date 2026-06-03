@@ -2,8 +2,8 @@
 
 ✅ Added
 
-- Added `StreamChatClient.appSettings` (cached value, returns a default `AppSettings` until the first fetch completes) and `StreamChatClient.getAppSettings()` (re-fetches `GET /app` and updates the cache). App settings are loaded in the background after `connectUser` and cleared on `disconnectUser`.
-- Added `AppSettings` model with `fileUploadConfig` and `imageUploadConfig` (both `UploadConfig`). `UploadConfig` exposes `sizeLimit` (defaults to `UploadConfig.defaultSizeLimit`, 100 MB), `allowedFileExtensions`, `blockedFileExtensions`, `allowedMimeTypes`, and `blockedMimeTypes`. Each populated list is enforced independently — an attachment must pass every list to be accepted.
+- Added `StreamChatClient.appSettings` and `StreamChatClient.getAppSettings()` to read and refresh the per-app upload configuration set in the Stream Dashboard.
+- Added `AppSettings` model with `fileUploadConfig` / `imageUploadConfig` (both `UploadConfig`) — exposes `sizeLimit`, `allowedFileExtensions`, `blockedFileExtensions`, `allowedMimeTypes`, and `blockedMimeTypes`.
 - Added `StreamChatClient.recoverStateOnReconnect` (defaults to `true`); when `false`, the client no longer auto-re-queries active channels on connection recovery — useful for consumers driving their own refresh from the `connectionRecovered` event.
 - Added `Message.updateWith(Message? other)` — merges a server-side update onto the local message while preserving locally-known `poll`, `sharedLocation`, `ownReactions`, and nested `quotedMessage` enrichment when the server omits them.
 - Added `Channel.isOneToOne` — true when the channel is `isDistinct` and has exactly two members. For the looser count-only check, inline `channel.memberCount == 2`.
