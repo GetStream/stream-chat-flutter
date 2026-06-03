@@ -38,7 +38,7 @@ jobs:
         uses: actions/checkout@v6
 
       - name: "Detect Path Changes"
-        uses: dorny/paths-filter@v3
+        uses: dorny/paths-filter@v4
         id: filter
         with:
           filters: |
@@ -134,7 +134,7 @@ jobs:
       - name: "Collect Coverage"
         run: melos run coverage:ignore-file --no-select
       - name: "Upload Coverage"
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@v6
         with:
           token: ${{secrets.CODECOV_TOKEN}}
           files: packages/*/coverage/lcov.info
