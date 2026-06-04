@@ -25,8 +25,8 @@ void main() {
         home: Scaffold(
           body: StreamChat(
             client: client,
-            streamChatConfigData: configData,
-            streamChatThemeData: StreamChatThemeData(),
+            configData: configData,
+            themeData: StreamChatThemeData(),
             child: Center(
               child: StreamDraftMessagePreviewText(
                 textStyle: textStyle,

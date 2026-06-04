@@ -476,8 +476,8 @@ Widget _wrapWithMaterialApp(
       client: client,
       // Mock the connectivity stream to always return wifi.
       connectivityStream: Stream.value([ConnectivityResult.wifi]),
-      streamChatThemeData: StreamChatThemeData(),
-      streamChatConfigData: switch (reactionIconResolver) {
+      themeData: StreamChatThemeData(),
+      configData: switch (reactionIconResolver) {
         final resolver? => StreamChatConfigurationData(reactionIconResolver: resolver),
         _ => null,
       },

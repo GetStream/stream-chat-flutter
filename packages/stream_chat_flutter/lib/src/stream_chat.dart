@@ -26,8 +26,8 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 ///
 /// See also:
 ///
-///  * [StreamChatTheme], which provides [StreamChatThemeData] to descendants.
-///  * [StreamChatConfiguration], which provides [StreamChatConfigurationData].
+///  * [themeData], which controls chat widget styling via [StreamChatThemeData].
+///  * [configData], which controls non-theme UI behaviour via [StreamChatConfigurationData].
 ///  * [StreamChatCore], the non-UI logic wrapper mounted below this widget.
 class StreamChat extends StatefulWidget {
   /// Creates a [StreamChat] that exposes [client] and chat configuration to
@@ -36,8 +36,8 @@ class StreamChat extends StatefulWidget {
     super.key,
     required this.client,
     required this.child,
-    this.streamChatThemeData,
-    this.streamChatConfigData,
+    this.themeData,
+    this.configData,
     this.componentBuilders,
     this.onBackgroundEventReceived,
     this.backgroundKeepAlive = const Duration(seconds: 15),
@@ -57,12 +57,12 @@ class StreamChat extends StatefulWidget {
   /// Theme overrides applied to descendant chat widgets.
   ///
   /// If `null`, a default [StreamChatThemeData] is used.
-  final StreamChatThemeData? streamChatThemeData;
+  final StreamChatThemeData? themeData;
 
   /// Non-theme UI configuration options for descendant chat widgets.
   ///
   /// If `null`, a default [StreamChatConfigurationData] is used.
-  final StreamChatConfigurationData? streamChatConfigData;
+  final StreamChatConfigurationData? configData;
 
   /// Custom component builders for overriding default UI components.
   ///
@@ -181,7 +181,7 @@ class StreamChatState extends State<StreamChat> {
   StreamChatClient get client => widget.client;
 
   /// Gets configuration options from widget
-  StreamChatConfigurationData get streamChatConfigData => widget.streamChatConfigData ?? StreamChatConfigurationData();
+  StreamChatConfigurationData get configData => widget.configData ?? StreamChatConfigurationData();
 
   @override
   void initState() {
@@ -202,7 +202,7 @@ class StreamChatState extends State<StreamChat> {
       child: widget.child ?? const Empty(),
     );
 
-    final theme = widget.streamChatThemeData ?? StreamChatThemeData();
+    final theme = widget.themeData ?? StreamChatThemeData();
     child = StreamChatTheme(data: theme, child: child);
 
     final streamTheme = StreamTheme.of(context);
@@ -213,7 +213,7 @@ class StreamChatState extends State<StreamChat> {
     }
 
     return Portal(
-      child: StreamChatConfiguration(data: streamChatConfigData, child: child),
+      child: StreamChatConfiguration(data: configData, child: child),
     );
   }
 

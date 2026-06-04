@@ -77,7 +77,7 @@ class MyImageCDN extends StreamImageCDN {
 
 StreamChat(
   client: client,
-  streamChatConfigData: StreamChatConfigurationData(
+  configData: StreamChatConfigurationData(
     imageCDN: MyImageCDN(),
   ),
   child: ...,

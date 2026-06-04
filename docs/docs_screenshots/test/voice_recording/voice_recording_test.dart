@@ -55,11 +55,11 @@ Widget _buildVoiceRecordingContextScaffold({
   required MockClient client,
   required MockChannel channel,
   required Widget voiceWidget,
-  StreamChatThemeData? streamChatThemeData,
+  StreamChatThemeData? themeData,
 }) {
   return StreamChat(
     client: client,
-    streamChatThemeData: streamChatThemeData,
+    themeData: themeData,
     connectivityStream: Stream.value([ConnectivityResult.mobile]),
     child: StreamChannel(
       showLoading: false,
@@ -565,7 +565,7 @@ void main() {
         client: client,
         channel: channel,
         voiceWidget: StreamMessageItem(message: voiceMessage),
-        streamChatThemeData: customTheme,
+        themeData: customTheme,
       );
     },
   );
