@@ -300,7 +300,7 @@ void main() {
       return StreamChat(
         client: client,
         connectivityStream: Stream.value([ConnectivityResult.mobile]),
-        streamChatConfigData: StreamChatConfigurationData(reactionPosition: StreamReactionsPosition.header),
+        configData: StreamChatConfigurationData(reactionPosition: StreamReactionsPosition.header),
         child: StreamChannel(
           showLoading: false,
           channel: channel,
@@ -350,7 +350,7 @@ void main() {
       return StreamChat(
         client: client,
         connectivityStream: Stream.value([ConnectivityResult.mobile]),
-        streamChatConfigData: StreamChatConfigurationData(reactionPosition: StreamReactionsPosition.footer),
+        configData: StreamChatConfigurationData(reactionPosition: StreamReactionsPosition.footer),
         child: StreamChannel(
           showLoading: false,
           channel: channel,

@@ -107,7 +107,7 @@ Widget _wrapWithMaterialApp({
     home: StreamChat(
       client: client,
       componentBuilders: componentBuilders,
-      streamChatConfigData: StreamChatConfigurationData(),
+      configData: StreamChatConfigurationData(),
       connectivityStream: Stream.value([ConnectivityResult.wifi]),
       child: Scaffold(body: child),
     ),

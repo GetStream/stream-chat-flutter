@@ -81,7 +81,7 @@ void main() {
         builder: (context, child) => StreamChat(
           client: MockStreamChatClient(),
           // Global theme sets backgroundColor only.
-          streamChatThemeData: StreamChatThemeData(
+          themeData: StreamChatThemeData(
             messageListViewTheme: const StreamMessageListViewThemeData(
               backgroundColor: _bgColorLight,
             ),
@@ -116,7 +116,7 @@ void main() {
       MaterialApp(
         builder: (context, child) => StreamChat(
           client: MockStreamChatClient(),
-          streamChatThemeData: StreamChatThemeData(
+          themeData: StreamChatThemeData(
             messageListViewTheme: _messageListViewThemeDataImage,
           ),
           child: child,

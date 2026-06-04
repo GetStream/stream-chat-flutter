@@ -91,7 +91,7 @@ class MyApp extends StatelessWidget {
       ),
       builder: (context, child) => StreamChat(
         client: client,
-        streamChatThemeData: customTheme,
+        themeData: customTheme,
         child: child,
       ),
       home: const ChannelListPage(),

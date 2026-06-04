@@ -49,7 +49,7 @@ This guide covers the migration for the redesigned reaction picker and reaction 
 ```dart
 StreamChat(
   client: client,
-  streamChatConfigData: StreamChatConfigurationData(
+  configData: StreamChatConfigurationData(
     reactionIcons: [ /* type + builder per reaction */ ],
   ),
   child: MyApp(),
@@ -60,7 +60,7 @@ StreamChat(
 ```dart
 StreamChat(
   client: client,
-  streamChatConfigData: StreamChatConfigurationData(
+  configData: StreamChatConfigurationData(
     reactionIconResolver: const MyReactionIconResolver(),
   ),
   child: MyApp(),
@@ -88,7 +88,7 @@ Extend `DefaultReactionIconResolver` (see below), pass as `reactionIconResolver`
 ```dart
 StreamChat(
   client: client,
-  streamChatConfigData: StreamChatConfigurationData(
+  configData: StreamChatConfigurationData(
     reactionIcons: [
       // old reaction icon entries
     ],
@@ -114,7 +114,7 @@ class MyReactionIconResolver extends DefaultReactionIconResolver {
 
 StreamChat(
   client: client,
-  streamChatConfigData: StreamChatConfigurationData(
+  configData: StreamChatConfigurationData(
     reactionIconResolver: const MyReactionIconResolver(),
   ),
   child: MyApp(),
@@ -238,7 +238,7 @@ Configure reactions globally via `reactionIconResolver`:
 ```dart
 StreamChat(
   client: client,
-  streamChatConfigData: StreamChatConfigurationData(
+  configData: StreamChatConfigurationData(
     reactionIconResolver: const MyReactionIconResolver(),
   ),
   child: MyApp(),
@@ -303,7 +303,7 @@ Visual layout properties (`type`, `position`) can be set per widget or as defaul
 ```dart
 StreamChat(
   client: client,
-  streamChatConfigData: StreamChatConfigurationData(
+  configData: StreamChatConfigurationData(
     reactionIconResolver: const MyReactionIconResolver(),
     reactionType: StreamReactionsType.segmented,
     reactionPosition: StreamReactionsPosition.header,

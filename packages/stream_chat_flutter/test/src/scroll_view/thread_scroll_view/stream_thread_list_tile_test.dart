@@ -146,9 +146,9 @@ Widget _wrapWithMaterialApp(
     theme: ThemeData(brightness: brightness),
     home: StreamChat(
       client: client,
-      streamChatConfigData: StreamChatConfigurationData(),
+      configData: StreamChatConfigurationData(),
       connectivityStream: Stream.value([ConnectivityResult.wifi]),
-      streamChatThemeData: StreamChatThemeData(),
+      themeData: StreamChatThemeData(),
       child: Builder(
         builder: (context) {
           return Scaffold(

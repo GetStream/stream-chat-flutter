@@ -356,7 +356,7 @@ Three new optional fields have been added to `StreamChatConfigurationData`. Exis
 // Before: no attachment builder or reaction customization on the config
 StreamChat(
   client: client,
-  streamChatConfigData: StreamChatConfigurationData(
+  configData: StreamChatConfigurationData(
     enforceUniqueReactions: false,
   ),
   child: MyApp(),
@@ -365,7 +365,7 @@ StreamChat(
 // After: optionally add the new fields
 StreamChat(
   client: client,
-  streamChatConfigData: StreamChatConfigurationData(
+  configData: StreamChatConfigurationData(
     enforceUniqueReactions: false,
     attachmentBuilders: [MyCustomAttachmentBuilder()],
     reactionType: StreamReactionsType.segmented,
