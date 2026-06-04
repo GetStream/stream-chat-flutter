@@ -103,6 +103,11 @@ class $ChannelsTable extends Channels
       filterTags = GeneratedColumn<String>('filter_tags', aliasedName, true,
               type: DriftSqlType.string, requiredDuringInsert: false)
           .withConverter<List<String>?>($ChannelsTable.$converterfilterTagsn);
+  static const VerificationMeta _teamMeta = const VerificationMeta('team');
+  @override
+  late final GeneratedColumn<String> team = GeneratedColumn<String>(
+      'team', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
   static const VerificationMeta _extraDataMeta =
       const VerificationMeta('extraData');
   @override
@@ -127,6 +132,7 @@ class $ChannelsTable extends Channels
         messageCount,
         createdById,
         filterTags,
+        team,
         extraData
       ];
   @override
@@ -199,6 +205,10 @@ class $ChannelsTable extends Channels
               data['created_by_id']!, _createdByIdMeta));
     }
     context.handle(_filterTagsMeta, const VerificationResult.success());
+    if (data.containsKey('team')) {
+      context.handle(
+          _teamMeta, team.isAcceptableOrUnknown(data['team']!, _teamMeta));
+    }
     context.handle(_extraDataMeta, const VerificationResult.success());
     return context;
   }
@@ -240,6 +250,8 @@ class $ChannelsTable extends Channels
       filterTags: $ChannelsTable.$converterfilterTagsn.fromSql(attachedDatabase
           .typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}filter_tags'])),
+      team: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}team']),
       extraData: $ChannelsTable.$converterextraDatan.fromSql(attachedDatabase
           .typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}extra_data'])),
@@ -310,6 +322,9 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
   /// List of filter tags for this channel
   final List<String>? filterTags;
 
+  /// The team the channel belongs to
+  final String? team;
+
   /// Map of custom channel extraData
   final Map<String, dynamic>? extraData;
   const ChannelEntity(
@@ -327,6 +342,7 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
       this.messageCount,
       this.createdById,
       this.filterTags,
+      this.team,
       this.extraData});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -362,6 +378,9 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
       map['filter_tags'] = Variable<String>(
           $ChannelsTable.$converterfilterTagsn.toSql(filterTags));
     }
+    if (!nullToAbsent || team != null) {
+      map['team'] = Variable<String>(team);
+    }
     if (!nullToAbsent || extraData != null) {
       map['extra_data'] = Variable<String>(
           $ChannelsTable.$converterextraDatan.toSql(extraData));
@@ -388,6 +407,7 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
       messageCount: serializer.fromJson<int?>(json['messageCount']),
       createdById: serializer.fromJson<String?>(json['createdById']),
       filterTags: serializer.fromJson<List<String>?>(json['filterTags']),
+      team: serializer.fromJson<String?>(json['team']),
       extraData: serializer.fromJson<Map<String, dynamic>?>(json['extraData']),
     );
   }
@@ -409,6 +429,7 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
       'messageCount': serializer.toJson<int?>(messageCount),
       'createdById': serializer.toJson<String?>(createdById),
       'filterTags': serializer.toJson<List<String>?>(filterTags),
+      'team': serializer.toJson<String?>(team),
       'extraData': serializer.toJson<Map<String, dynamic>?>(extraData),
     };
   }
@@ -428,6 +449,7 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
           Value<int?> messageCount = const Value.absent(),
           Value<String?> createdById = const Value.absent(),
           Value<List<String>?> filterTags = const Value.absent(),
+          Value<String?> team = const Value.absent(),
           Value<Map<String, dynamic>?> extraData = const Value.absent()}) =>
       ChannelEntity(
         id: id ?? this.id,
@@ -448,6 +470,7 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
             messageCount.present ? messageCount.value : this.messageCount,
         createdById: createdById.present ? createdById.value : this.createdById,
         filterTags: filterTags.present ? filterTags.value : this.filterTags,
+        team: team.present ? team.value : this.team,
         extraData: extraData.present ? extraData.value : this.extraData,
       );
   ChannelEntity copyWithCompanion(ChannelsCompanion data) {
@@ -475,6 +498,7 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
           data.createdById.present ? data.createdById.value : this.createdById,
       filterTags:
           data.filterTags.present ? data.filterTags.value : this.filterTags,
+      team: data.team.present ? data.team.value : this.team,
       extraData: data.extraData.present ? data.extraData.value : this.extraData,
     );
   }
@@ -496,6 +520,7 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
           ..write('messageCount: $messageCount, ')
           ..write('createdById: $createdById, ')
           ..write('filterTags: $filterTags, ')
+          ..write('team: $team, ')
           ..write('extraData: $extraData')
           ..write(')'))
         .toString();
@@ -517,6 +542,7 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
       messageCount,
       createdById,
       filterTags,
+      team,
       extraData);
   @override
   bool operator ==(Object other) =>
@@ -536,6 +562,7 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
           other.messageCount == this.messageCount &&
           other.createdById == this.createdById &&
           other.filterTags == this.filterTags &&
+          other.team == this.team &&
           other.extraData == this.extraData);
 }
 
@@ -554,6 +581,7 @@ class ChannelsCompanion extends UpdateCompanion<ChannelEntity> {
   final Value<int?> messageCount;
   final Value<String?> createdById;
   final Value<List<String>?> filterTags;
+  final Value<String?> team;
   final Value<Map<String, dynamic>?> extraData;
   final Value<int> rowid;
   const ChannelsCompanion({
@@ -571,6 +599,7 @@ class ChannelsCompanion extends UpdateCompanion<ChannelEntity> {
     this.messageCount = const Value.absent(),
     this.createdById = const Value.absent(),
     this.filterTags = const Value.absent(),
+    this.team = const Value.absent(),
     this.extraData = const Value.absent(),
     this.rowid = const Value.absent(),
   });
@@ -589,6 +618,7 @@ class ChannelsCompanion extends UpdateCompanion<ChannelEntity> {
     this.messageCount = const Value.absent(),
     this.createdById = const Value.absent(),
     this.filterTags = const Value.absent(),
+    this.team = const Value.absent(),
     this.extraData = const Value.absent(),
     this.rowid = const Value.absent(),
   })  : id = Value(id),
@@ -610,6 +640,7 @@ class ChannelsCompanion extends UpdateCompanion<ChannelEntity> {
     Expression<int>? messageCount,
     Expression<String>? createdById,
     Expression<String>? filterTags,
+    Expression<String>? team,
     Expression<String>? extraData,
     Expression<int>? rowid,
   }) {
@@ -628,6 +659,7 @@ class ChannelsCompanion extends UpdateCompanion<ChannelEntity> {
       if (messageCount != null) 'message_count': messageCount,
       if (createdById != null) 'created_by_id': createdById,
       if (filterTags != null) 'filter_tags': filterTags,
+      if (team != null) 'team': team,
       if (extraData != null) 'extra_data': extraData,
       if (rowid != null) 'rowid': rowid,
     });
@@ -648,6 +680,7 @@ class ChannelsCompanion extends UpdateCompanion<ChannelEntity> {
       Value<int?>? messageCount,
       Value<String?>? createdById,
       Value<List<String>?>? filterTags,
+      Value<String?>? team,
       Value<Map<String, dynamic>?>? extraData,
       Value<int>? rowid}) {
     return ChannelsCompanion(
@@ -665,6 +698,7 @@ class ChannelsCompanion extends UpdateCompanion<ChannelEntity> {
       messageCount: messageCount ?? this.messageCount,
       createdById: createdById ?? this.createdById,
       filterTags: filterTags ?? this.filterTags,
+      team: team ?? this.team,
       extraData: extraData ?? this.extraData,
       rowid: rowid ?? this.rowid,
     );
@@ -719,6 +753,9 @@ class ChannelsCompanion extends UpdateCompanion<ChannelEntity> {
       map['filter_tags'] = Variable<String>(
           $ChannelsTable.$converterfilterTagsn.toSql(filterTags.value));
     }
+    if (team.present) {
+      map['team'] = Variable<String>(team.value);
+    }
     if (extraData.present) {
       map['extra_data'] = Variable<String>(
           $ChannelsTable.$converterextraDatan.toSql(extraData.value));
@@ -746,6 +783,7 @@ class ChannelsCompanion extends UpdateCompanion<ChannelEntity> {
           ..write('messageCount: $messageCount, ')
           ..write('createdById: $createdById, ')
           ..write('filterTags: $filterTags, ')
+          ..write('team: $team, ')
           ..write('extraData: $extraData, ')
           ..write('rowid: $rowid')
           ..write(')'))
@@ -770,8 +808,6 @@ class $MessagesTable extends Messages
   late final GeneratedColumn<String> messageText = GeneratedColumn<String>(
       'message_text', aliasedName, true,
       type: DriftSqlType.string, requiredDuringInsert: false);
-  static const VerificationMeta _attachmentsMeta =
-      const VerificationMeta('attachments');
   @override
   late final GeneratedColumnWithTypeConverter<List<String>, String>
       attachments = GeneratedColumn<String>('attachments', aliasedName, false,
@@ -789,16 +825,12 @@ class $MessagesTable extends Messages
       type: DriftSqlType.string,
       requiredDuringInsert: false,
       defaultValue: const Constant('regular'));
-  static const VerificationMeta _mentionedUsersMeta =
-      const VerificationMeta('mentionedUsers');
   @override
   late final GeneratedColumnWithTypeConverter<List<String>, String>
       mentionedUsers = GeneratedColumn<String>(
               'mentioned_users', aliasedName, false,
               type: DriftSqlType.string, requiredDuringInsert: true)
           .withConverter<List<String>>($MessagesTable.$convertermentionedUsers);
-  static const VerificationMeta _reactionGroupsMeta =
-      const VerificationMeta('reactionGroups');
   @override
   late final GeneratedColumnWithTypeConverter<Map<String, ReactionGroup>?,
       String> reactionGroups = GeneratedColumn<String>(
@@ -943,14 +975,11 @@ class $MessagesTable extends Messages
       requiredDuringInsert: true,
       defaultConstraints: GeneratedColumn.constraintIsAlways(
           'REFERENCES channels (cid) ON DELETE CASCADE'));
-  static const VerificationMeta _i18nMeta = const VerificationMeta('i18n');
   @override
   late final GeneratedColumnWithTypeConverter<Map<String, String>?, String>
       i18n = GeneratedColumn<String>('i18n', aliasedName, true,
               type: DriftSqlType.string, requiredDuringInsert: false)
           .withConverter<Map<String, String>?>($MessagesTable.$converteri18n);
-  static const VerificationMeta _restrictedVisibilityMeta =
-      const VerificationMeta('restrictedVisibility');
   @override
   late final GeneratedColumnWithTypeConverter<List<String>?, String>
       restrictedVisibility = GeneratedColumn<String>(
@@ -958,8 +987,6 @@ class $MessagesTable extends Messages
               type: DriftSqlType.string, requiredDuringInsert: false)
           .withConverter<List<String>?>(
               $MessagesTable.$converterrestrictedVisibilityn);
-  static const VerificationMeta _extraDataMeta =
-      const VerificationMeta('extraData');
   @override
   late final GeneratedColumnWithTypeConverter<Map<String, dynamic>?, String>
       extraData = GeneratedColumn<String>('extra_data', aliasedName, true,
@@ -1021,7 +1048,6 @@ class $MessagesTable extends Messages
           messageText.isAcceptableOrUnknown(
               data['message_text']!, _messageTextMeta));
     }
-    context.handle(_attachmentsMeta, const VerificationResult.success());
     if (data.containsKey('state')) {
       context.handle(
           _stateMeta, state.isAcceptableOrUnknown(data['state']!, _stateMeta));
@@ -1032,8 +1058,6 @@ class $MessagesTable extends Messages
       context.handle(
           _typeMeta, type.isAcceptableOrUnknown(data['type']!, _typeMeta));
     }
-    context.handle(_mentionedUsersMeta, const VerificationResult.success());
-    context.handle(_reactionGroupsMeta, const VerificationResult.success());
     if (data.containsKey('parent_id')) {
       context.handle(_parentIdMeta,
           parentId.isAcceptableOrUnknown(data['parent_id']!, _parentIdMeta));
@@ -1148,10 +1172,6 @@ class $MessagesTable extends Messages
     } else if (isInserting) {
       context.missing(_channelCidMeta);
     }
-    context.handle(_i18nMeta, const VerificationResult.success());
-    context.handle(
-        _restrictedVisibilityMeta, const VerificationResult.success());
-    context.handle(_extraDataMeta, const VerificationResult.success());
     return context;
   }
 
@@ -2232,8 +2252,6 @@ class $DraftMessagesTable extends DraftMessages
   late final GeneratedColumn<String> messageText = GeneratedColumn<String>(
       'message_text', aliasedName, true,
       type: DriftSqlType.string, requiredDuringInsert: false);
-  static const VerificationMeta _attachmentsMeta =
-      const VerificationMeta('attachments');
   @override
   late final GeneratedColumnWithTypeConverter<List<String>, String>
       attachments = GeneratedColumn<String>('attachments', aliasedName, false,
@@ -2247,8 +2265,6 @@ class $DraftMessagesTable extends DraftMessages
       type: DriftSqlType.string,
       requiredDuringInsert: false,
       defaultValue: const Constant('regular'));
-  static const VerificationMeta _mentionedUsersMeta =
-      const VerificationMeta('mentionedUsers');
   @override
   late final GeneratedColumnWithTypeConverter<List<String>, String>
       mentionedUsers = GeneratedColumn<String>(
@@ -2317,8 +2333,6 @@ class $DraftMessagesTable extends DraftMessages
       requiredDuringInsert: true,
       defaultConstraints: GeneratedColumn.constraintIsAlways(
           'REFERENCES channels (cid) ON DELETE CASCADE'));
-  static const VerificationMeta _extraDataMeta =
-      const VerificationMeta('extraData');
   @override
   late final GeneratedColumnWithTypeConverter<Map<String, dynamic>?, String>
       extraData = GeneratedColumn<String>('extra_data', aliasedName, true,
@@ -2363,12 +2377,10 @@ class $DraftMessagesTable extends DraftMessages
           messageText.isAcceptableOrUnknown(
               data['message_text']!, _messageTextMeta));
     }
-    context.handle(_attachmentsMeta, const VerificationResult.success());
     if (data.containsKey('type')) {
       context.handle(
           _typeMeta, type.isAcceptableOrUnknown(data['type']!, _typeMeta));
     }
-    context.handle(_mentionedUsersMeta, const VerificationResult.success());
     if (data.containsKey('parent_id')) {
       context.handle(_parentIdMeta,
           parentId.isAcceptableOrUnknown(data['parent_id']!, _parentIdMeta));
@@ -2409,7 +2421,6 @@ class $DraftMessagesTable extends DraftMessages
     } else if (isInserting) {
       context.missing(_channelCidMeta);
     }
-    context.handle(_extraDataMeta, const VerificationResult.success());
     return context;
   }
 
@@ -2947,8 +2958,6 @@ class $PinnedMessagesTable extends PinnedMessages
   late final GeneratedColumn<String> messageText = GeneratedColumn<String>(
       'message_text', aliasedName, true,
       type: DriftSqlType.string, requiredDuringInsert: false);
-  static const VerificationMeta _attachmentsMeta =
-      const VerificationMeta('attachments');
   @override
   late final GeneratedColumnWithTypeConverter<List<String>, String>
       attachments = GeneratedColumn<String>('attachments', aliasedName, false,
@@ -2967,8 +2976,6 @@ class $PinnedMessagesTable extends PinnedMessages
       type: DriftSqlType.string,
       requiredDuringInsert: false,
       defaultValue: const Constant('regular'));
-  static const VerificationMeta _mentionedUsersMeta =
-      const VerificationMeta('mentionedUsers');
   @override
   late final GeneratedColumnWithTypeConverter<List<String>, String>
       mentionedUsers = GeneratedColumn<String>(
@@ -2976,8 +2983,6 @@ class $PinnedMessagesTable extends PinnedMessages
               type: DriftSqlType.string, requiredDuringInsert: true)
           .withConverter<List<String>>(
               $PinnedMessagesTable.$convertermentionedUsers);
-  static const VerificationMeta _reactionGroupsMeta =
-      const VerificationMeta('reactionGroups');
   @override
   late final GeneratedColumnWithTypeConverter<Map<String, ReactionGroup>?,
       String> reactionGroups = GeneratedColumn<String>(
@@ -3119,15 +3124,12 @@ class $PinnedMessagesTable extends PinnedMessages
   late final GeneratedColumn<String> channelCid = GeneratedColumn<String>(
       'channel_cid', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _i18nMeta = const VerificationMeta('i18n');
   @override
   late final GeneratedColumnWithTypeConverter<Map<String, String>?, String>
       i18n = GeneratedColumn<String>('i18n', aliasedName, true,
               type: DriftSqlType.string, requiredDuringInsert: false)
           .withConverter<Map<String, String>?>(
               $PinnedMessagesTable.$converteri18n);
-  static const VerificationMeta _restrictedVisibilityMeta =
-      const VerificationMeta('restrictedVisibility');
   @override
   late final GeneratedColumnWithTypeConverter<List<String>?, String>
       restrictedVisibility = GeneratedColumn<String>(
@@ -3135,8 +3137,6 @@ class $PinnedMessagesTable extends PinnedMessages
               type: DriftSqlType.string, requiredDuringInsert: false)
           .withConverter<List<String>?>(
               $PinnedMessagesTable.$converterrestrictedVisibilityn);
-  static const VerificationMeta _extraDataMeta =
-      const VerificationMeta('extraData');
   @override
   late final GeneratedColumnWithTypeConverter<Map<String, dynamic>?, String>
       extraData = GeneratedColumn<String>('extra_data', aliasedName, true,
@@ -3199,7 +3199,6 @@ class $PinnedMessagesTable extends PinnedMessages
           messageText.isAcceptableOrUnknown(
               data['message_text']!, _messageTextMeta));
     }
-    context.handle(_attachmentsMeta, const VerificationResult.success());
     if (data.containsKey('state')) {
       context.handle(
           _stateMeta, state.isAcceptableOrUnknown(data['state']!, _stateMeta));
@@ -3210,8 +3209,6 @@ class $PinnedMessagesTable extends PinnedMessages
       context.handle(
           _typeMeta, type.isAcceptableOrUnknown(data['type']!, _typeMeta));
     }
-    context.handle(_mentionedUsersMeta, const VerificationResult.success());
-    context.handle(_reactionGroupsMeta, const VerificationResult.success());
     if (data.containsKey('parent_id')) {
       context.handle(_parentIdMeta,
           parentId.isAcceptableOrUnknown(data['parent_id']!, _parentIdMeta));
@@ -3326,10 +3323,6 @@ class $PinnedMessagesTable extends PinnedMessages
     } else if (isInserting) {
       context.missing(_channelCidMeta);
     }
-    context.handle(_i18nMeta, const VerificationResult.success());
-    context.handle(
-        _restrictedVisibilityMeta, const VerificationResult.success());
-    context.handle(_extraDataMeta, const VerificationResult.success());
     return context;
   }
 
@@ -4419,15 +4412,11 @@ class $PollsTable extends Polls with TableInfo<$PollsTable, PollEntity> {
   late final GeneratedColumn<String> description = GeneratedColumn<String>(
       'description', aliasedName, true,
       type: DriftSqlType.string, requiredDuringInsert: false);
-  static const VerificationMeta _optionsMeta =
-      const VerificationMeta('options');
   @override
   late final GeneratedColumnWithTypeConverter<List<String>, String> options =
       GeneratedColumn<String>('options', aliasedName, false,
               type: DriftSqlType.string, requiredDuringInsert: true)
           .withConverter<List<String>>($PollsTable.$converteroptions);
-  static const VerificationMeta _votingVisibilityMeta =
-      const VerificationMeta('votingVisibility');
   @override
   late final GeneratedColumnWithTypeConverter<VotingVisibility, String>
       votingVisibility = GeneratedColumn<String>(
@@ -4491,8 +4480,6 @@ class $PollsTable extends Polls with TableInfo<$PollsTable, PollEntity> {
       type: DriftSqlType.int,
       requiredDuringInsert: false,
       defaultValue: const Constant(0));
-  static const VerificationMeta _voteCountsByOptionMeta =
-      const VerificationMeta('voteCountsByOption');
   @override
   late final GeneratedColumnWithTypeConverter<Map<String, int>, String>
       voteCountsByOption = GeneratedColumn<String>(
@@ -4530,8 +4517,6 @@ class $PollsTable extends Polls with TableInfo<$PollsTable, PollEntity> {
       type: DriftSqlType.dateTime,
       requiredDuringInsert: false,
       defaultValue: currentDateAndTime);
-  static const VerificationMeta _extraDataMeta =
-      const VerificationMeta('extraData');
   @override
   late final GeneratedColumnWithTypeConverter<Map<String, dynamic>?, String>
       extraData = GeneratedColumn<String>('extra_data', aliasedName, true,
@@ -4585,8 +4570,6 @@ class $PollsTable extends Polls with TableInfo<$PollsTable, PollEntity> {
           description.isAcceptableOrUnknown(
               data['description']!, _descriptionMeta));
     }
-    context.handle(_optionsMeta, const VerificationResult.success());
-    context.handle(_votingVisibilityMeta, const VerificationResult.success());
     if (data.containsKey('enforce_unique_vote')) {
       context.handle(
           _enforceUniqueVoteMeta,
@@ -4622,7 +4605,6 @@ class $PollsTable extends Polls with TableInfo<$PollsTable, PollEntity> {
           answersCount.isAcceptableOrUnknown(
               data['answers_count']!, _answersCountMeta));
     }
-    context.handle(_voteCountsByOptionMeta, const VerificationResult.success());
     if (data.containsKey('vote_count')) {
       context.handle(_voteCountMeta,
           voteCount.isAcceptableOrUnknown(data['vote_count']!, _voteCountMeta));
@@ -4641,7 +4623,6 @@ class $PollsTable extends Polls with TableInfo<$PollsTable, PollEntity> {
       context.handle(_updatedAtMeta,
           updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));
     }
-    context.handle(_extraDataMeta, const VerificationResult.success());
     return context;
   }
 
@@ -5694,8 +5675,6 @@ class $PinnedMessageReactionsTable extends PinnedMessageReactions
       type: DriftSqlType.int,
       requiredDuringInsert: false,
       defaultValue: const Constant(0));
-  static const VerificationMeta _extraDataMeta =
-      const VerificationMeta('extraData');
   @override
   late final GeneratedColumnWithTypeConverter<Map<String, dynamic>?, String>
       extraData = GeneratedColumn<String>('extra_data', aliasedName, true,
@@ -5742,7 +5721,6 @@ class $PinnedMessageReactionsTable extends PinnedMessageReactions
       context.handle(
           _scoreMeta, score.isAcceptableOrUnknown(data['score']!, _scoreMeta));
     }
-    context.handle(_extraDataMeta, const VerificationResult.success());
     return context;
   }
 
@@ -6053,8 +6031,6 @@ class $ReactionsTable extends Reactions
       type: DriftSqlType.int,
       requiredDuringInsert: false,
       defaultValue: const Constant(0));
-  static const VerificationMeta _extraDataMeta =
-      const VerificationMeta('extraData');
   @override
   late final GeneratedColumnWithTypeConverter<Map<String, dynamic>?, String>
       extraData = GeneratedColumn<String>('extra_data', aliasedName, true,
@@ -6100,7 +6076,6 @@ class $ReactionsTable extends Reactions
       context.handle(
           _scoreMeta, score.isAcceptableOrUnknown(data['score']!, _scoreMeta));
     }
-    context.handle(_extraDataMeta, const VerificationResult.success());
     return context;
   }
 
@@ -6423,8 +6398,6 @@ class $UsersTable extends Users with TableInfo<$UsersTable, UserEntity> {
       defaultConstraints:
           GeneratedColumn.constraintIsAlways('CHECK ("banned" IN (0, 1))'),
       defaultValue: const Constant(false));
-  static const VerificationMeta _teamsRoleMeta =
-      const VerificationMeta('teamsRole');
   @override
   late final GeneratedColumnWithTypeConverter<Map<String, String>?, String>
       teamsRole = GeneratedColumn<String>('teams_role', aliasedName, true,
@@ -6437,8 +6410,6 @@ class $UsersTable extends Users with TableInfo<$UsersTable, UserEntity> {
   late final GeneratedColumn<int> avgResponseTime = GeneratedColumn<int>(
       'avg_response_time', aliasedName, true,
       type: DriftSqlType.int, requiredDuringInsert: false);
-  static const VerificationMeta _extraDataMeta =
-      const VerificationMeta('extraData');
   @override
   late final GeneratedColumnWithTypeConverter<Map<String, dynamic>, String>
       extraData = GeneratedColumn<String>('extra_data', aliasedName, false,
@@ -6503,14 +6474,12 @@ class $UsersTable extends Users with TableInfo<$UsersTable, UserEntity> {
       context.handle(_bannedMeta,
           banned.isAcceptableOrUnknown(data['banned']!, _bannedMeta));
     }
-    context.handle(_teamsRoleMeta, const VerificationResult.success());
     if (data.containsKey('avg_response_time')) {
       context.handle(
           _avgResponseTimeMeta,
           avgResponseTime.isAcceptableOrUnknown(
               data['avg_response_time']!, _avgResponseTimeMeta));
     }
-    context.handle(_extraDataMeta, const VerificationResult.success());
     return context;
   }
 
@@ -7019,8 +6988,6 @@ class $MembersTable extends Members
       defaultConstraints: GeneratedColumn.constraintIsAlways(
           'CHECK ("is_moderator" IN (0, 1))'),
       defaultValue: const Constant(false));
-  static const VerificationMeta _extraDataMeta =
-      const VerificationMeta('extraData');
   @override
   late final GeneratedColumnWithTypeConverter<Map<String, dynamic>?, String>
       extraData = GeneratedColumn<String>('extra_data', aliasedName, true,
@@ -7132,7 +7099,6 @@ class $MembersTable extends Members
           isModerator.isAcceptableOrUnknown(
               data['is_moderator']!, _isModeratorMeta));
     }
-    context.handle(_extraDataMeta, const VerificationResult.success());
     if (data.containsKey('created_at')) {
       context.handle(_createdAtMeta,
           createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
@@ -8279,8 +8245,6 @@ class $ConnectionEventsTable extends ConnectionEvents
   late final GeneratedColumn<String> type = GeneratedColumn<String>(
       'type', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _ownUserMeta =
-      const VerificationMeta('ownUser');
   @override
   late final GeneratedColumnWithTypeConverter<Map<String, dynamic>?, String>
       ownUser = GeneratedColumn<String>('own_user', aliasedName, true,
@@ -8341,7 +8305,6 @@ class $ConnectionEventsTable extends ConnectionEvents
     } else if (isInserting) {
       context.missing(_typeMeta);
     }
-    context.handle(_ownUserMeta, const VerificationResult.success());
     if (data.containsKey('total_unread_count')) {
       context.handle(
           _totalUnreadCountMeta,
@@ -8794,6 +8757,7 @@ typedef $$ChannelsTableCreateCompanionBuilder = ChannelsCompanion Function({
   Value<int?> messageCount,
   Value<String?> createdById,
   Value<List<String>?> filterTags,
+  Value<String?> team,
   Value<Map<String, dynamic>?> extraData,
   Value<int> rowid,
 });
@@ -8812,6 +8776,7 @@ typedef $$ChannelsTableUpdateCompanionBuilder = ChannelsCompanion Function({
   Value<int?> messageCount,
   Value<String?> createdById,
   Value<List<String>?> filterTags,
+  Value<String?> team,
   Value<Map<String, dynamic>?> extraData,
   Value<int> rowid,
 });
@@ -8827,8 +8792,8 @@ final class $$ChannelsTableReferences
                   db.channels.cid, db.messages.channelCid));
 
   $$MessagesTableProcessedTableManager get messagesRefs {
-    final manager = $$MessagesTableTableManager($_db, $_db.messages)
-        .filter((f) => f.channelCid.cid($_item.cid));
+    final manager = $$MessagesTableTableManager($_db, $_db.messages).filter(
+        (f) => f.channelCid.cid.sqlEquals($_itemColumn<String>('cid')!));
 
     final cache = $_typedResult.readTableOrNull(_messagesRefsTable($_db));
     return ProcessedTableManager(
@@ -8843,7 +8808,8 @@ final class $$ChannelsTableReferences
 
   $$DraftMessagesTableProcessedTableManager get draftMessagesRefs {
     final manager = $$DraftMessagesTableTableManager($_db, $_db.draftMessages)
-        .filter((f) => f.channelCid.cid($_item.cid));
+        .filter(
+            (f) => f.channelCid.cid.sqlEquals($_itemColumn<String>('cid')!));
 
     final cache = $_typedResult.readTableOrNull(_draftMessagesRefsTable($_db));
     return ProcessedTableManager(
@@ -8857,8 +8823,8 @@ final class $$ChannelsTableReferences
                   $_aliasNameGenerator(db.channels.cid, db.members.channelCid));
 
   $$MembersTableProcessedTableManager get membersRefs {
-    final manager = $$MembersTableTableManager($_db, $_db.members)
-        .filter((f) => f.channelCid.cid($_item.cid));
+    final manager = $$MembersTableTableManager($_db, $_db.members).filter(
+        (f) => f.channelCid.cid.sqlEquals($_itemColumn<String>('cid')!));
 
     final cache = $_typedResult.readTableOrNull(_membersRefsTable($_db));
     return ProcessedTableManager(
@@ -8872,8 +8838,8 @@ final class $$ChannelsTableReferences
               $_aliasNameGenerator(db.channels.cid, db.reads.channelCid));
 
   $$ReadsTableProcessedTableManager get readsRefs {
-    final manager = $$ReadsTableTableManager($_db, $_db.reads)
-        .filter((f) => f.channelCid.cid($_item.cid));
+    final manager = $$ReadsTableTableManager($_db, $_db.reads).filter(
+        (f) => f.channelCid.cid.sqlEquals($_itemColumn<String>('cid')!));
 
     final cache = $_typedResult.readTableOrNull(_readsRefsTable($_db));
     return ProcessedTableManager(
@@ -8938,6 +8904,9 @@ class $$ChannelsTableFilterComposer
       get filterTags => $composableBuilder(
           column: $table.filterTags,
           builder: (column) => ColumnWithTypeConverterFilters(column));
+
+  ColumnFilters<String> get team => $composableBuilder(
+      column: $table.team, builder: (column) => ColumnFilters(column));
 
   ColumnWithTypeConverterFilters<Map<String, dynamic>?, Map<String, dynamic>,
           String>
@@ -9084,6 +9053,9 @@ class $$ChannelsTableOrderingComposer
   ColumnOrderings<String> get filterTags => $composableBuilder(
       column: $table.filterTags, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<String> get team => $composableBuilder(
+      column: $table.team, builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<String> get extraData => $composableBuilder(
       column: $table.extraData, builder: (column) => ColumnOrderings(column));
 }
@@ -9140,6 +9112,9 @@ class $$ChannelsTableAnnotationComposer
   GeneratedColumnWithTypeConverter<List<String>?, String> get filterTags =>
       $composableBuilder(
           column: $table.filterTags, builder: (column) => column);
+
+  GeneratedColumn<String> get team =>
+      $composableBuilder(column: $table.team, builder: (column) => column);
 
   GeneratedColumnWithTypeConverter<Map<String, dynamic>?, String>
       get extraData => $composableBuilder(
@@ -9271,6 +9246,7 @@ class $$ChannelsTableTableManager extends RootTableManager<
             Value<int?> messageCount = const Value.absent(),
             Value<String?> createdById = const Value.absent(),
             Value<List<String>?> filterTags = const Value.absent(),
+            Value<String?> team = const Value.absent(),
             Value<Map<String, dynamic>?> extraData = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
@@ -9289,6 +9265,7 @@ class $$ChannelsTableTableManager extends RootTableManager<
             messageCount: messageCount,
             createdById: createdById,
             filterTags: filterTags,
+            team: team,
             extraData: extraData,
             rowid: rowid,
           ),
@@ -9307,6 +9284,7 @@ class $$ChannelsTableTableManager extends RootTableManager<
             Value<int?> messageCount = const Value.absent(),
             Value<String?> createdById = const Value.absent(),
             Value<List<String>?> filterTags = const Value.absent(),
+            Value<String?> team = const Value.absent(),
             Value<Map<String, dynamic>?> extraData = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
@@ -9325,6 +9303,7 @@ class $$ChannelsTableTableManager extends RootTableManager<
             messageCount: messageCount,
             createdById: createdById,
             filterTags: filterTags,
+            team: team,
             extraData: extraData,
             rowid: rowid,
           ),
@@ -9349,7 +9328,8 @@ class $$ChannelsTableTableManager extends RootTableManager<
               getPrefetchedDataCallback: (items) async {
                 return [
                   if (messagesRefs)
-                    await $_getPrefetchedData(
+                    await $_getPrefetchedData<ChannelEntity, $ChannelsTable,
+                            MessageEntity>(
                         currentTable: table,
                         referencedTable:
                             $$ChannelsTableReferences._messagesRefsTable(db),
@@ -9361,7 +9341,8 @@ class $$ChannelsTableTableManager extends RootTableManager<
                                 .where((e) => e.channelCid == item.cid),
                         typedResults: items),
                   if (draftMessagesRefs)
-                    await $_getPrefetchedData(
+                    await $_getPrefetchedData<ChannelEntity, $ChannelsTable,
+                            DraftMessageEntity>(
                         currentTable: table,
                         referencedTable: $$ChannelsTableReferences
                             ._draftMessagesRefsTable(db),
@@ -9373,7 +9354,8 @@ class $$ChannelsTableTableManager extends RootTableManager<
                                 .where((e) => e.channelCid == item.cid),
                         typedResults: items),
                   if (membersRefs)
-                    await $_getPrefetchedData(
+                    await $_getPrefetchedData<ChannelEntity, $ChannelsTable,
+                            MemberEntity>(
                         currentTable: table,
                         referencedTable:
                             $$ChannelsTableReferences._membersRefsTable(db),
@@ -9385,7 +9367,8 @@ class $$ChannelsTableTableManager extends RootTableManager<
                                 .where((e) => e.channelCid == item.cid),
                         typedResults: items),
                   if (readsRefs)
-                    await $_getPrefetchedData(
+                    await $_getPrefetchedData<ChannelEntity, $ChannelsTable,
+                            ReadEntity>(
                         currentTable: table,
                         referencedTable:
                             $$ChannelsTableReferences._readsRefsTable(db),
@@ -9496,8 +9479,10 @@ final class $$MessagesTableReferences
           $_aliasNameGenerator(db.messages.channelCid, db.channels.cid));
 
   $$ChannelsTableProcessedTableManager get channelCid {
+    final $_column = $_itemColumn<String>('channel_cid')!;
+
     final manager = $$ChannelsTableTableManager($_db, $_db.channels)
-        .filter((f) => f.cid($_item.channelCid!));
+        .filter((f) => f.cid.sqlEquals($_column));
     final item = $_typedResult.readTableOrNull(_channelCidTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
@@ -9512,7 +9497,7 @@ final class $$MessagesTableReferences
 
   $$DraftMessagesTableProcessedTableManager get draftMessagesRefs {
     final manager = $$DraftMessagesTableTableManager($_db, $_db.draftMessages)
-        .filter((f) => f.parentId.id($_item.id));
+        .filter((f) => f.parentId.id.sqlEquals($_itemColumn<String>('id')!));
 
     final cache = $_typedResult.readTableOrNull(_draftMessagesRefsTable($_db));
     return ProcessedTableManager(
@@ -9527,7 +9512,7 @@ final class $$MessagesTableReferences
 
   $$ReactionsTableProcessedTableManager get reactionsRefs {
     final manager = $$ReactionsTableTableManager($_db, $_db.reactions)
-        .filter((f) => f.messageId.id($_item.id));
+        .filter((f) => f.messageId.id.sqlEquals($_itemColumn<String>('id')!));
 
     final cache = $_typedResult.readTableOrNull(_reactionsRefsTable($_db));
     return ProcessedTableManager(
@@ -10225,7 +10210,8 @@ class $$MessagesTableTableManager extends RootTableManager<
               getPrefetchedDataCallback: (items) async {
                 return [
                   if (draftMessagesRefs)
-                    await $_getPrefetchedData(
+                    await $_getPrefetchedData<MessageEntity, $MessagesTable,
+                            DraftMessageEntity>(
                         currentTable: table,
                         referencedTable: $$MessagesTableReferences
                             ._draftMessagesRefsTable(db),
@@ -10237,7 +10223,8 @@ class $$MessagesTableTableManager extends RootTableManager<
                             referencedItems.where((e) => e.parentId == item.id),
                         typedResults: items),
                   if (reactionsRefs)
-                    await $_getPrefetchedData(
+                    await $_getPrefetchedData<MessageEntity, $MessagesTable,
+                            ReactionEntity>(
                         currentTable: table,
                         referencedTable:
                             $$MessagesTableReferences._reactionsRefsTable(db),
@@ -10315,9 +10302,10 @@ final class $$DraftMessagesTableReferences extends BaseReferences<
           $_aliasNameGenerator(db.draftMessages.parentId, db.messages.id));
 
   $$MessagesTableProcessedTableManager? get parentId {
-    if ($_item.parentId == null) return null;
+    final $_column = $_itemColumn<String>('parent_id');
+    if ($_column == null) return null;
     final manager = $$MessagesTableTableManager($_db, $_db.messages)
-        .filter((f) => f.id($_item.parentId!));
+        .filter((f) => f.id.sqlEquals($_column));
     final item = $_typedResult.readTableOrNull(_parentIdTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
@@ -10329,8 +10317,10 @@ final class $$DraftMessagesTableReferences extends BaseReferences<
           $_aliasNameGenerator(db.draftMessages.channelCid, db.channels.cid));
 
   $$ChannelsTableProcessedTableManager get channelCid {
+    final $_column = $_itemColumn<String>('channel_cid')!;
+
     final manager = $$ChannelsTableTableManager($_db, $_db.channels)
-        .filter((f) => f.cid($_item.channelCid!));
+        .filter((f) => f.cid.sqlEquals($_column));
     final item = $_typedResult.readTableOrNull(_channelCidTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
@@ -10854,7 +10844,7 @@ final class $$PinnedMessagesTableReferences extends BaseReferences<
       get pinnedMessageReactionsRefs {
     final manager = $$PinnedMessageReactionsTableTableManager(
             $_db, $_db.pinnedMessageReactions)
-        .filter((f) => f.messageId.id($_item.id));
+        .filter((f) => f.messageId.id.sqlEquals($_itemColumn<String>('id')!));
 
     final cache =
         $_typedResult.readTableOrNull(_pinnedMessageReactionsRefsTable($_db));
@@ -11437,7 +11427,8 @@ class $$PinnedMessagesTableTableManager extends RootTableManager<
               getPrefetchedDataCallback: (items) async {
                 return [
                   if (pinnedMessageReactionsRefs)
-                    await $_getPrefetchedData(
+                    await $_getPrefetchedData<PinnedMessageEntity,
+                            $PinnedMessagesTable, PinnedMessageReactionEntity>(
                         currentTable: table,
                         referencedTable: $$PinnedMessagesTableReferences
                             ._pinnedMessageReactionsRefsTable(db),
@@ -11520,7 +11511,7 @@ final class $$PollsTableReferences
 
   $$PollVotesTableProcessedTableManager get pollVotesRefs {
     final manager = $$PollVotesTableTableManager($_db, $_db.pollVotes)
-        .filter((f) => f.pollId.id($_item.id));
+        .filter((f) => f.pollId.id.sqlEquals($_itemColumn<String>('id')!));
 
     final cache = $_typedResult.readTableOrNull(_pollVotesRefsTable($_db));
     return ProcessedTableManager(
@@ -11889,7 +11880,8 @@ class $$PollsTableTableManager extends RootTableManager<
               getPrefetchedDataCallback: (items) async {
                 return [
                   if (pollVotesRefs)
-                    await $_getPrefetchedData(
+                    await $_getPrefetchedData<PollEntity, $PollsTable,
+                            PollVoteEntity>(
                         currentTable: table,
                         referencedTable:
                             $$PollsTableReferences._pollVotesRefsTable(db),
@@ -11947,9 +11939,10 @@ final class $$PollVotesTableReferences extends BaseReferences<
       .createAlias($_aliasNameGenerator(db.pollVotes.pollId, db.polls.id));
 
   $$PollsTableProcessedTableManager? get pollId {
-    if ($_item.pollId == null) return null;
+    final $_column = $_itemColumn<String>('poll_id');
+    if ($_column == null) return null;
     final manager = $$PollsTableTableManager($_db, $_db.polls)
-        .filter((f) => f.id($_item.pollId!));
+        .filter((f) => f.id.sqlEquals($_column));
     final item = $_typedResult.readTableOrNull(_pollIdTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
@@ -12252,8 +12245,10 @@ final class $$PinnedMessageReactionsTableReferences extends BaseReferences<
           db.pinnedMessageReactions.messageId, db.pinnedMessages.id));
 
   $$PinnedMessagesTableProcessedTableManager get messageId {
+    final $_column = $_itemColumn<String>('message_id')!;
+
     final manager = $$PinnedMessagesTableTableManager($_db, $_db.pinnedMessages)
-        .filter((f) => f.id($_item.messageId!));
+        .filter((f) => f.id.sqlEquals($_column));
     final item = $_typedResult.readTableOrNull(_messageIdTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
@@ -12548,8 +12543,10 @@ final class $$ReactionsTableReferences extends BaseReferences<
           $_aliasNameGenerator(db.reactions.messageId, db.messages.id));
 
   $$MessagesTableProcessedTableManager get messageId {
+    final $_column = $_itemColumn<String>('message_id')!;
+
     final manager = $$MessagesTableTableManager($_db, $_db.messages)
-        .filter((f) => f.id($_item.messageId!));
+        .filter((f) => f.id.sqlEquals($_column));
     final item = $_typedResult.readTableOrNull(_messageIdTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
@@ -13119,8 +13116,10 @@ final class $$MembersTableReferences
           $_aliasNameGenerator(db.members.channelCid, db.channels.cid));
 
   $$ChannelsTableProcessedTableManager get channelCid {
+    final $_column = $_itemColumn<String>('channel_cid')!;
+
     final manager = $$ChannelsTableTableManager($_db, $_db.channels)
-        .filter((f) => f.cid($_item.channelCid!));
+        .filter((f) => f.cid.sqlEquals($_column));
     final item = $_typedResult.readTableOrNull(_channelCidTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
@@ -13517,8 +13516,10 @@ final class $$ReadsTableReferences
       .createAlias($_aliasNameGenerator(db.reads.channelCid, db.channels.cid));
 
   $$ChannelsTableProcessedTableManager get channelCid {
+    final $_column = $_itemColumn<String>('channel_cid')!;
+
     final manager = $$ChannelsTableTableManager($_db, $_db.channels)
-        .filter((f) => f.cid($_item.channelCid!));
+        .filter((f) => f.cid.sqlEquals($_column));
     final item = $_typedResult.readTableOrNull(_channelCidTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
