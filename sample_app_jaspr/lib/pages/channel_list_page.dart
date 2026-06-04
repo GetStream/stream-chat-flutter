@@ -3,15 +3,13 @@ import 'package:jaspr/jaspr.dart';
 import 'package:jaspr_router/jaspr_router.dart';
 import 'package:sample_app_jaspr/pages/message_view.dart';
 import 'package:stream_chat_jaspr/stream_chat_jaspr.dart';
+import 'package:universal_web/web.dart' as web;
 
 const _pageStyles = Styles(
   display: Display.flex,
   flexDirection: FlexDirection.row,
   height: Unit.percent(100),
-  fontFamily: FontFamily.list([
-    FontFamily('Inter'),
-    FontFamilies.sansSerif,
-  ]),
+  fontFamily: StreamTypography.fontFamily,
 );
 
 // ---- Left panel ----
@@ -20,9 +18,9 @@ const _leftPanelStyles = Styles(
   display: Display.flex,
   flexDirection: FlexDirection.column,
   width: Unit.pixels(320),
-  backgroundColor: Colors.white,
+  backgroundColor: StreamColors.white,
   raw: {
-    'border-right': '1px solid #e5e7eb',
+    'border-right': '1px solid #EBEEF1',
     'flex-shrink': '0',
   },
 );
@@ -31,13 +29,13 @@ const _leftHeaderStyles = Styles(
   display: Display.flex,
   alignItems: AlignItems.center,
   padding: Padding.symmetric(
-    horizontal: Unit.pixels(16),
+    horizontal: Unit.pixels(StreamSpacing.md),
     vertical: Unit.pixels(14),
   ),
   raw: {
-    'border-bottom': '1px solid #e5e7eb',
+    'border-bottom': '1px solid #EBEEF1',
     'flex-shrink': '0',
-    'gap': '8px',
+    'gap': '${StreamSpacing.xs}px',
   },
 );
 
@@ -45,7 +43,7 @@ const _leftHeaderTitleStyles = Styles(
   flex: Flex(grow: 1),
   fontWeight: FontWeight.w700,
   fontSize: Unit.pixels(18),
-  color: Color('#1a1a1a'),
+  color: StreamColors.textPrimary,
 );
 
 const _signOutStyles = Styles(
@@ -53,12 +51,12 @@ const _signOutStyles = Styles(
     horizontal: Unit.pixels(10),
     vertical: Unit.pixels(5),
   ),
-  radius: BorderRadius.circular(Unit.pixels(6)),
-  border: Border.all(color: Color('#d1d5db'), width: Unit.pixels(1)),
-  backgroundColor: Colors.white,
-  color: Color('#374151'),
+  radius: BorderRadius.circular(Unit.pixels(StreamRadii.md)),
+  border: Border.all(color: StreamColors.borderDefault, width: Unit.pixels(1)),
+  backgroundColor: StreamColors.white,
+  color: StreamColors.textSecondary,
   cursor: Cursor.pointer,
-  fontSize: Unit.pixels(12),
+  fontSize: Unit.pixels(StreamTypography.sizeXxs + 2),
   fontWeight: FontWeight.w500,
 );
 
@@ -72,7 +70,7 @@ const _listContainerStyles = Styles(
 const _rightPanelStyles = Styles(
   flex: Flex(grow: 1),
   overflow: Overflow.hidden,
-  backgroundColor: Color('#f9fafb'),
+  raw: {'background': '#F9FAFB'},
 );
 
 const _emptyStateStyles = Styles(
@@ -81,8 +79,8 @@ const _emptyStateStyles = Styles(
   justifyContent: JustifyContent.center,
   alignItems: AlignItems.center,
   height: Unit.percent(100),
-  color: Color('#72767e'),
-  fontSize: Unit.pixels(15),
+  color: StreamColors.textTertiary,
+  fontSize: Unit.pixels(StreamTypography.sizeBase),
 );
 
 /// Master/detail page: channel list on the left, message view on the right.
@@ -118,6 +116,7 @@ class _ChannelListPageState extends State<ChannelListPage> {
   }
 
   Future<void> _signOut() async {
+    web.window.localStorage.removeItem('stream_chat_token');
     _controller?.dispose();
     _controller = null;
     _selectedChannel = null;
@@ -147,7 +146,7 @@ class _ChannelListPageState extends State<ChannelListPage> {
       // ---- Left panel: channel list ----
       div(styles: _leftPanelStyles, [
         div(styles: _leftHeaderStyles, [
-          div(styles: _leftHeaderTitleStyles, [Component.text('Chats')]),
+          const div(styles: _leftHeaderTitleStyles, [Component.text('Chats')]),
           button(
             onClick: _signOut,
             styles: _signOutStyles,
@@ -158,7 +157,8 @@ class _ChannelListPageState extends State<ChannelListPage> {
           StreamChannelListView(
             controller: _controller!,
             onChannelTap: _onChannelTap,
-            itemBuilder: (context, channel) => _ChannelTileWithSelection(
+            itemBuilder: (context, channel) => StreamChannelListTile(
+              key: ValueKey(channel.cid),
               channel: channel,
               selected: channel.cid == _selectedChannel?.cid,
               onTap: () => _onChannelTap(channel),
@@ -170,7 +170,7 @@ class _ChannelListPageState extends State<ChannelListPage> {
       // ---- Right panel: message view ----
       div(styles: _rightPanelStyles, [
         if (_selectedChannel == null)
-          div(styles: _emptyStateStyles, [
+          const div(styles: _emptyStateStyles, [
             Component.text('Select a conversation to start messaging'),
           ])
         else
@@ -180,34 +180,5 @@ class _ChannelListPageState extends State<ChannelListPage> {
           ),
       ]),
     ]);
-  }
-}
-
-/// Wraps [StreamChannelListTile] with a selection highlight.
-class _ChannelTileWithSelection extends StatelessComponent {
-  const _ChannelTileWithSelection({
-    required this.channel,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final Channel channel;
-  final bool selected;
-  final void Function() onTap;
-
-  @override
-  Component build(BuildContext context) {
-    return div(
-      styles: Styles(
-        backgroundColor: selected ? const Color('#EEF2FF') : Colors.transparent,
-      ),
-      [
-        StreamChannelListTile(
-          key: ValueKey(channel.cid),
-          channel: channel,
-          onTap: onTap,
-        ),
-      ],
-    );
   }
 }

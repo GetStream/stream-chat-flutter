@@ -3,6 +3,7 @@ import 'package:jaspr/jaspr.dart';
 import 'package:jaspr_router/jaspr_router.dart';
 import 'package:sample_app_jaspr/utils/app_config.dart';
 import 'package:stream_chat_jaspr/stream_chat_jaspr.dart';
+import 'package:universal_web/web.dart' as web;
 
 const _avatarColors = [
   Color('#005FFF'),
@@ -153,6 +154,7 @@ class _ChooseUserPageState extends State<ChooseUserPage> {
 
     try {
       await component.client.connectUser(user, token);
+      web.window.localStorage.setItem('stream_chat_token', token);
       Router.of(context).push('/channels');
     } catch (_) {
       setState(() => _connecting = false);

@@ -7,24 +7,21 @@ const _viewStyles = Styles(
   flexDirection: FlexDirection.column,
   height: Unit.percent(100),
   overflow: Overflow.hidden,
-  fontFamily: FontFamily.list([
-    FontFamily('Inter'),
-    FontFamilies.sansSerif,
-  ]),
+  fontFamily: StreamTypography.fontFamily,
 );
 
 const _headerStyles = Styles(
   display: Display.flex,
   alignItems: AlignItems.center,
   padding: Padding.symmetric(
-    horizontal: Unit.pixels(16),
-    vertical: Unit.pixels(12),
+    horizontal: Unit.pixels(StreamSpacing.md),
+    vertical: Unit.pixels(StreamSpacing.sm),
   ),
-  backgroundColor: Colors.white,
+  backgroundColor: StreamColors.white,
   raw: {
-    'border-bottom': '1px solid #e5e7eb',
+    'border-bottom': '1px solid #EBEEF1',
     'flex-shrink': '0',
-    'gap': '12px',
+    'gap': '${StreamSpacing.sm}px',
   },
 );
 
@@ -35,8 +32,8 @@ const _headerInfoStyles = Styles(
 
 const _headerNameStyles = Styles(
   fontWeight: FontWeight.w600,
-  fontSize: Unit.pixels(16),
-  color: Color('#1a1a1a'),
+  fontSize: Unit.pixels(StreamTypography.sizeHeader),
+  color: StreamColors.textPrimary,
   raw: {
     'white-space': 'nowrap',
     'overflow': 'hidden',
@@ -44,23 +41,9 @@ const _headerNameStyles = Styles(
   },
 );
 
-const _onlineRowStyles = Styles(
-  display: Display.flex,
-  alignItems: AlignItems.center,
-  raw: {'gap': '5px', 'margin-top': '1px'},
-);
-
-const _onlineDotStyles = Styles(
-  width: Unit.pixels(8),
-  height: Unit.pixels(8),
-  radius: BorderRadius.circular(Unit.pixels(4)),
-  backgroundColor: Color('#00DDB5'),
-  raw: {'flex-shrink': '0'},
-);
-
-const _onlineLabelStyles = Styles(
-  fontSize: Unit.pixels(12),
-  color: Color('#72767e'),
+const _headerStatusStyles = Styles(
+  fontSize: Unit.pixels(StreamTypography.sizeBase),
+  color: StreamColors.textSecondary,
 );
 
 const _messagesAreaStyles = Styles(
@@ -70,7 +53,7 @@ const _messagesAreaStyles = Styles(
 
 /// The right-hand panel of the master/detail layout.
 ///
-/// Shows the message history for [channel] and a text input to send messages.
+/// Shows the message history for [channel] and a composer to send messages.
 class MessageView extends StatefulComponent {
   /// Creates a [MessageView] for the given [channel].
   const MessageView({
@@ -92,7 +75,6 @@ class _MessageViewState extends State<MessageView> {
   void initState() {
     super.initState();
     _controller = StreamMessageListController(channel: component.channel);
-    _controller.doInitialLoad();
   }
 
   @override
@@ -107,29 +89,21 @@ class _MessageViewState extends State<MessageView> {
     final currentUser = StreamChatProvider.clientOf(context).state.currentUser!;
     final channelName = channel.resolveChannelName(currentUser);
     final initials = channel.resolveInitials(currentUser);
-
-    // Determine if this is a 1:1 DM so we can show online status.
-    final members = channel.state?.members ?? [];
-    final otherMembers =
-        members.where((m) => m.userId != currentUser.id).toList();
-    final isOnline = otherMembers.length == 1 &&
-        (otherMembers.first.user?.online ?? false);
+    final imageUrl = channel.resolveImageUrl(currentUser);
+    final isOnline = channel.resolveIsOnline(currentUser);
 
     return div(styles: _viewStyles, [
       // Header.
       div(styles: _headerStyles, [
         StreamJasprAvatar(
           initials: initials,
+          imageUrl: imageUrl,
+          isOnline: isOnline,
           size: 40,
-          colorSeed: channel.cid ?? initials,
         ),
         div(styles: _headerInfoStyles, [
           div(styles: _headerNameStyles, [Component.text(channelName)]),
-          if (isOnline)
-            div(styles: _onlineRowStyles, [
-              div(styles: _onlineDotStyles, []),
-              div(styles: _onlineLabelStyles, [Component.text('Online')]),
-            ]),
+          if (isOnline) const div(styles: _headerStatusStyles, [Component.text('Online')]),
         ]),
       ]),
 
@@ -141,8 +115,8 @@ class _MessageViewState extends State<MessageView> {
         ),
       ]),
 
-      // Input.
-      StreamMessageInput(channel: channel),
+      // Composer.
+      StreamMessageComposer(channel: channel),
     ]);
   }
 }

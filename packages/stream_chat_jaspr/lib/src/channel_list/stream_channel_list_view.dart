@@ -6,10 +6,11 @@ import 'package:stream_chat_jaspr/src/channel_list/stream_channel_list_tile.dart
 import 'package:universal_web/web.dart' as web;
 
 /// Signature for a function that builds a component for a given [Channel].
-typedef ChannelItemBuilder = Component Function(
-  BuildContext context,
-  Channel channel,
-);
+typedef ChannelItemBuilder =
+    Component Function(
+      BuildContext context,
+      Channel channel,
+    );
 
 const _listStyles = Styles(
   display: Display.flex,
@@ -126,8 +127,7 @@ class _StreamChannelListViewState extends State<StreamChannelListView> {
     final scrollHeight = target.scrollHeight;
     final clientHeight = target.clientHeight;
 
-    if (scrollTop + clientHeight >=
-        scrollHeight - component.loadMoreThreshold) {
+    if (scrollTop + clientHeight >= scrollHeight - component.loadMoreThreshold) {
       component.controller.loadMore();
     }
   }
@@ -136,36 +136,33 @@ class _StreamChannelListViewState extends State<StreamChannelListView> {
   Component build(BuildContext context) {
     final controller = component.controller;
 
-    if (controller.state == ChannelListState.loading &&
-        controller.channels.isEmpty) {
+    if (controller.state == ChannelListState.loading && controller.channels.isEmpty) {
       return div(styles: _listStyles, [
         component.loadingBuilder?.call(context) ??
-            div(styles: _centerStyles, [
+            const div(styles: _centerStyles, [
               Component.text('Loading channels...'),
             ]),
       ]);
     }
 
-    if (controller.state == ChannelListState.error &&
-        controller.channels.isEmpty) {
+    if (controller.state == ChannelListState.error && controller.channels.isEmpty) {
       return div(styles: _listStyles, [
         component.errorBuilder?.call(context, controller.error!) ??
             div(styles: _centerStyles, [
-              Component.text('Failed to load channels'),
+              const Component.text('Failed to load channels'),
               button(
                 onClick: controller.refresh,
                 styles: _retryButtonStyles,
-                [Component.text('Retry')],
+                const [Component.text('Retry')],
               ),
             ]),
       ]);
     }
 
-    if (controller.state == ChannelListState.loaded &&
-        controller.channels.isEmpty) {
+    if (controller.state == ChannelListState.loaded && controller.channels.isEmpty) {
       return div(styles: _listStyles, [
         component.emptyBuilder?.call(context) ??
-            div(styles: _centerStyles, [
+            const div(styles: _centerStyles, [
               Component.text('No channels found'),
             ]),
       ]);
@@ -176,15 +173,13 @@ class _StreamChannelListViewState extends State<StreamChannelListView> {
           StreamChannelListTile(
             key: ValueKey(channel.cid),
             channel: channel,
-            onTap: component.onChannelTap != null
-                ? () => component.onChannelTap!(channel)
-                : null,
+            onTap: component.onChannelTap != null ? () => component.onChannelTap!(channel) : null,
           );
     }).toList();
 
     if (controller.isLoadingMore) {
       tiles.add(
-        div(styles: _loadMoreStyles, [
+        const div(styles: _loadMoreStyles, [
           Component.text('Loading more...'),
         ]),
       );

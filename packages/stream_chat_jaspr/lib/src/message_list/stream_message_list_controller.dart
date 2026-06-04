@@ -134,8 +134,10 @@ class StreamMessageListController {
 
   void _subscribeToMessages() {
     _messagesSubscription?.cancel();
-    _messagesSubscription =
-        channel.state!.messagesStream.listen((_) => _updateMessages());
+    _messagesSubscription = channel.state!.messagesStream.listen((_) {
+      _updateMessages();
+      _notifyChanged();
+    });
   }
 
   void _updateMessages() {

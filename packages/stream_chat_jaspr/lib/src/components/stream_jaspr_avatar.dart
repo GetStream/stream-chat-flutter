@@ -1,70 +1,102 @@
 import 'package:jaspr/dom.dart';
 import 'package:jaspr/jaspr.dart';
+import 'package:stream_chat_jaspr/src/theme/stream_chat_jaspr_tokens.dart';
 
-const _avatarColors = [
-  Color('#005FFF'),
-  Color('#00B2FF'),
-  Color('#00DDB5'),
-  Color('#A95EDB'),
-  Color('#FF5733'),
-  Color('#FF8C00'),
-  Color('#FF3B7A'),
-];
-
-/// Returns a deterministic avatar background color for the given [seed] string.
-Color avatarColorForSeed(String seed) {
-  final index = seed.hashCode.abs() % _avatarColors.length;
-  return _avatarColors[index];
-}
-
-/// A circular avatar that shows [initials] on a colored background.
+/// A circular avatar showing a photo or initials fallback.
 ///
-/// The background color is chosen deterministically from a palette based on
-/// [colorSeed]. If [backgroundColor] is provided it overrides the palette.
+/// When [imageUrl] is provided and non-empty, displays the photo. Otherwise
+/// shows the first letter(s) of [initials] on a light-blue background.
+///
+/// Set [isOnline] to show a green online-indicator dot in the top-right corner.
 class StreamJasprAvatar extends StatelessComponent {
   /// Creates a [StreamJasprAvatar].
   const StreamJasprAvatar({
     required this.initials,
+    this.imageUrl,
     this.size = 40,
+    this.isOnline = false,
     this.backgroundColor,
-    this.colorSeed,
     super.key,
   });
 
-  /// The initials to display.
+  /// The initials shown when no [imageUrl] is available.
   final String initials;
 
-  /// The diameter of the avatar in pixels. Defaults to 40.
+  /// Optional URL for the user or channel photo.
+  ///
+  /// When null or empty the [initials] fallback is rendered instead.
+  final String? imageUrl;
+
+  /// Diameter of the avatar in pixels. Defaults to 40.
   final int size;
 
-  /// Explicit background color. If null, derived from [colorSeed].
-  final Color? backgroundColor;
+  /// Whether to show a green online-indicator dot. Defaults to false.
+  final bool isOnline;
 
-  /// Seed string for deriving a deterministic color. Falls back to [initials].
-  final String? colorSeed;
+  /// Explicit background color for the initials fallback.
+  ///
+  /// Overrides the default [StreamColors.avatarFallbackBg] when provided.
+  final Color? backgroundColor;
 
   @override
   Component build(BuildContext context) {
-    final seed = colorSeed ?? initials;
-    final bg = backgroundColor ?? avatarColorForSeed(seed);
     final sizeD = size.toDouble();
-    final fontSize = (size * 0.4).toDouble();
+    final fontSize = (sizeD * 0.4).clamp(10.0, 18.0);
+    final hasImage = imageUrl != null && imageUrl!.isNotEmpty;
 
     return div(
       styles: Styles(
         width: Unit.pixels(sizeD),
         height: Unit.pixels(sizeD),
-        radius: BorderRadius.circular(Unit.pixels(sizeD / 2)),
-        backgroundColor: bg,
-        display: Display.flex,
-        alignItems: AlignItems.center,
-        justifyContent: JustifyContent.center,
-        color: Colors.white,
-        fontWeight: FontWeight.w600,
-        fontSize: Unit.pixels(fontSize),
-        raw: {'flex-shrink': '0', 'user-select': 'none'},
+        position: const Position.relative(),
+        raw: {'flex-shrink': '0', 'display': 'inline-flex'},
       ),
-      [Component.text(initials)],
+      [
+        // Photo or initials circle.
+        if (hasImage)
+          img(
+            src: imageUrl!,
+            alt: initials,
+            styles: Styles(
+              width: Unit.pixels(sizeD),
+              height: Unit.pixels(sizeD),
+              radius: BorderRadius.circular(Unit.pixels(sizeD / 2)),
+              raw: {'object-fit': 'cover', 'display': 'block'},
+            ),
+          )
+        else
+          div(
+            styles: Styles(
+              width: Unit.pixels(sizeD),
+              height: Unit.pixels(sizeD),
+              radius: BorderRadius.circular(Unit.pixels(sizeD / 2)),
+              backgroundColor: backgroundColor ?? StreamColors.avatarFallbackBg,
+              display: Display.flex,
+              alignItems: AlignItems.center,
+              justifyContent: JustifyContent.center,
+              color: StreamColors.avatarFallbackText,
+              fontWeight: FontWeight.w600,
+              fontSize: Unit.pixels(fontSize),
+              raw: {'user-select': 'none'},
+            ),
+            [Component.text(initials)],
+          ),
+
+        // Online indicator dot.
+        if (isOnline)
+          const div(
+            styles: Styles(
+              width: Unit.pixels(14),
+              height: Unit.pixels(14),
+              radius: BorderRadius.circular(Unit.pixels(7)),
+              backgroundColor: StreamColors.online,
+              border: Border.all(color: StreamColors.white, width: Unit.pixels(2)),
+              position: Position.absolute(top: Unit.pixels(-2), right: Unit.pixels(-2)),
+              raw: {'flex-shrink': '0'},
+            ),
+            [],
+          ),
+      ],
     );
   }
 }

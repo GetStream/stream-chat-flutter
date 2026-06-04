@@ -11,8 +11,7 @@ extension ChannelX on Channel {
     if (name != null && name!.isNotEmpty) return name!;
 
     final members = state?.members ?? [];
-    final otherMembers =
-        members.where((m) => m.userId != currentUser.id).toList();
+    final otherMembers = members.where((m) => m.userId != currentUser.id).toList();
 
     if (otherMembers.isEmpty) return 'No title';
 
@@ -20,11 +19,7 @@ extension ChannelX on Channel {
       return otherMembers.first.user?.name ?? 'No title';
     }
 
-    final names = otherMembers
-        .map((m) => m.user?.name)
-        .where((n) => n != null && n.isNotEmpty)
-        .take(3)
-        .toList();
+    final names = otherMembers.map((m) => m.user?.name).where((n) => n != null && n.isNotEmpty).take(3).toList();
 
     final remaining = otherMembers.length - names.length;
     final joined = names.join(', ');
@@ -48,8 +43,7 @@ extension ChannelX on Channel {
   /// returns the first letter of the channel name.
   String resolveInitials(User currentUser) {
     final members = state?.members ?? [];
-    final otherMembers =
-        members.where((m) => m.userId != currentUser.id).toList();
+    final otherMembers = members.where((m) => m.userId != currentUser.id).toList();
 
     if (otherMembers.length == 1) {
       final user = otherMembers.first.user;
@@ -63,6 +57,63 @@ extension ChannelX on Channel {
 
     return '#';
   }
+
+  /// Resolves the display image URL for the channel avatar.
+  ///
+  /// For 1:1 DMs returns the other user's photo URL. For group channels
+  /// returns the channel's own image if set.
+  String? resolveImageUrl(User currentUser) {
+    final members = state?.members ?? [];
+    final otherMembers = members.where((m) => m.userId != currentUser.id).toList();
+
+    if (otherMembers.length == 1) {
+      return otherMembers.first.user?.image;
+    }
+
+    return image;
+  }
+
+  /// Returns true if this is a 1:1 DM and the other user is currently online.
+  bool resolveIsOnline(User currentUser) {
+    final members = state?.members ?? [];
+    final otherMembers = members.where((m) => m.userId != currentUser.id).toList();
+
+    return otherMembers.length == 1 && (otherMembers.first.user?.online ?? false);
+  }
+
+  /// Returns the last-message preview as a `(prefix, preview)` record.
+  ///
+  /// [prefix] is `'You:'`, `'Name:'` (first name only in group channels), or
+  /// empty for 1:1 channels where the sender is the other user.
+  /// [preview] is the attachment-aware preview text.
+  ({String prefix, String preview}) resolveLastMessagePreview(User currentUser) {
+    final messages = state?.messages ?? [];
+    final lastMessage = messages.lastWhereOrNull(_isVisibleMessage);
+    if (lastMessage == null) return (prefix: '', preview: 'No messages yet');
+
+    final isOwn = lastMessage.user?.id == currentUser.id;
+    final members = state?.members ?? [];
+    final otherCount = members.where((m) => m.userId != currentUser.id).length;
+    final isGroup = otherCount > 1;
+
+    String prefix;
+    if (isOwn) {
+      prefix = 'You:';
+    } else if (isGroup) {
+      final firstName = lastMessage.user?.name.split(' ').firstOrNull ?? '';
+      prefix = firstName.isNotEmpty ? '$firstName:' : '';
+    } else {
+      prefix = '';
+    }
+
+    return (prefix: prefix, preview: _messagePreviewText(lastMessage));
+  }
+}
+
+/// Extensions on [User] for common UI operations.
+extension UserX on User {
+  /// Returns the 1–2 character initials for this user's display name.
+  String get initials => _userInitials(this);
 }
 
 /// Extensions on [DateTime] for display formatting.
@@ -86,7 +137,23 @@ extension DateTimeX on DateTime {
     if (year == now.year) return DateFormat.MMMd().format(toLocal());
     return DateFormat.yMd().format(toLocal());
   }
+
+  /// Formats this date as a short time string, e.g. "08:32".
+  String toTimeString() => DateFormat.Hm().format(toLocal());
 }
+
+/// Formats a byte count to a human-readable string (B / KB / MB).
+String formatBytes(num bytes) {
+  if (bytes < 1024) return '${bytes.toStringAsFixed(0)} B';
+  if (bytes < 1024 * 1024) {
+    return '${(bytes / 1024).toStringAsFixed(1)} KB';
+  }
+  return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
+}
+
+// ---------------------------------------------------------------------------
+// Private helpers
+// ---------------------------------------------------------------------------
 
 bool _isVisibleMessage(Message message) {
   if (message.isShadowed) return false;
@@ -102,6 +169,18 @@ String _messagePreviewText(Message message) {
   }
 
   if (message.attachments.isNotEmpty) {
+    final first = message.attachments.first;
+    final type = first.type;
+    if (type == 'image' || type == 'giphy') return '📷 Photo';
+    if (type == 'video') return '📹 Video';
+    if (type == 'file') {
+      final title = first.title;
+      return title != null && title.isNotEmpty ? '📄 $title' : '📄 File';
+    }
+    if (first.titleLink != null || first.ogScrapeUrl != null) {
+      final label = first.title ?? first.titleLink ?? first.ogScrapeUrl ?? 'Link';
+      return '🔗 $label';
+    }
     final count = message.attachments.length;
     return count == 1 ? '📎 Attachment' : '📎 $count attachments';
   }

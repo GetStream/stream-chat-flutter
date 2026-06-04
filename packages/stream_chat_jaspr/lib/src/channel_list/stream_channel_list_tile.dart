@@ -3,108 +3,124 @@ import 'dart:async';
 import 'package:jaspr/dom.dart';
 import 'package:jaspr/jaspr.dart';
 import 'package:stream_chat/stream_chat.dart';
+import 'package:stream_chat_jaspr/src/components/stream_jaspr_avatar.dart';
 import 'package:stream_chat_jaspr/src/stream_chat_provider.dart';
+import 'package:stream_chat_jaspr/src/theme/stream_chat_jaspr_tokens.dart';
 import 'package:stream_chat_jaspr/src/utils/extensions.dart';
-
-const _avatarColors = [
-  Color('#005FFF'),
-  Color('#00B2FF'),
-  Color('#00DDB5'),
-  Color('#A95EDB'),
-  Color('#FF5733'),
-  Color('#FF8C00'),
-  Color('#FF3B7A'),
-];
 
 const _tileStyles = Styles(
   display: Display.flex,
   alignItems: AlignItems.center,
   padding: Padding.symmetric(
-    horizontal: Unit.pixels(16),
-    vertical: Unit.pixels(12),
+    horizontal: Unit.pixels(StreamSpacing.md),
+    vertical: Unit.pixels(StreamSpacing.sm),
   ),
   cursor: Cursor.pointer,
-  raw: {'transition': 'background-color 0.15s ease'},
-);
-
-const _avatarStyles = Styles(
-  width: Unit.pixels(40),
-  height: Unit.pixels(40),
-  radius: BorderRadius.circular(Unit.pixels(20)),
-  display: Display.flex,
-  alignItems: AlignItems.center,
-  justifyContent: JustifyContent.center,
-  color: Colors.white,
-  fontWeight: FontWeight.w600,
-  fontSize: Unit.pixels(16),
-  raw: {'flex-shrink': '0'},
+  position: Position.relative(),
+  raw: {
+    'transition': 'background-color 0.15s ease',
+    'border-bottom': '1px solid #EBEEF1',
+    'gap': '${StreamSpacing.sm}px',
+  },
 );
 
 const _infoStyles = Styles(
   flex: Flex(grow: 1),
   minWidth: Unit.zero,
-  padding: Padding.symmetric(horizontal: Unit.pixels(12)),
+  raw: {'gap': '${StreamSpacing.xxxs}px', 'display': 'flex', 'flex-direction': 'column'},
+);
+
+const _titleRowStyles = Styles(
+  display: Display.flex,
+  alignItems: AlignItems.center,
+  raw: {'gap': '${StreamSpacing.xs}px'},
 );
 
 const _nameStyles = Styles(
+  flex: Flex(grow: 1),
   fontWeight: FontWeight.w600,
-  fontSize: Unit.pixels(15),
-  color: Color('#1a1a1a'),
+  fontSize: Unit.pixels(StreamTypography.sizeBase),
+  color: StreamColors.textPrimary,
+  minWidth: Unit.zero,
   raw: {
     'white-space': 'nowrap',
     'overflow': 'hidden',
     'text-overflow': 'ellipsis',
   },
-);
-
-const _previewStyles = Styles(
-  fontSize: Unit.pixels(13),
-  raw: {
-    'margin-top': '2px',
-    'white-space': 'nowrap',
-    'overflow': 'hidden',
-    'text-overflow': 'ellipsis',
-  },
-);
-
-const _metaStyles = Styles(
-  display: Display.flex,
-  flexDirection: FlexDirection.column,
-  alignItems: AlignItems.end,
-  raw: {'flex-shrink': '0', 'gap': '4px'},
 );
 
 const _timeStyles = Styles(
-  fontSize: Unit.pixels(12),
-  color: Color('#72767e'),
-  raw: {'white-space': 'nowrap'},
+  fontSize: Unit.pixels(StreamTypography.sizeXxs),
+  color: StreamColors.textTertiary,
+  raw: {'white-space': 'nowrap', 'flex-shrink': '0'},
 );
 
-const _unreadBadgeStyles = Styles(
+const _previewRowStyles = Styles(
+  display: Display.flex,
+  alignItems: AlignItems.center,
+  raw: {'gap': '${StreamSpacing.xxs}px'},
+);
+
+const _prefixStyles = Styles(
+  fontSize: Unit.pixels(StreamTypography.sizeBase),
+  fontWeight: FontWeight.w600,
+  color: StreamColors.textTertiary,
+  raw: {'flex-shrink': '0', 'white-space': 'nowrap'},
+);
+
+const _previewTextStyles = Styles(
+  flex: Flex(grow: 1),
+  fontSize: Unit.pixels(StreamTypography.sizeBase),
+  color: StreamColors.textSecondary,
+  minWidth: Unit.zero,
+  raw: {
+    'white-space': 'nowrap',
+    'overflow': 'hidden',
+    'text-overflow': 'ellipsis',
+  },
+);
+
+const _badgeStyles = Styles(
   minWidth: Unit.pixels(20),
   height: Unit.pixels(20),
-  radius: BorderRadius.circular(Unit.pixels(10)),
-  backgroundColor: Color('#005FFF'),
-  color: Colors.white,
-  fontSize: Unit.pixels(11),
-  fontWeight: FontWeight.w600,
+  radius: BorderRadius.circular(Unit.pixels(StreamRadii.pill)),
+  backgroundColor: StreamColors.primary,
+  color: StreamColors.white,
+  fontSize: Unit.pixels(StreamTypography.sizeBase),
+  fontWeight: FontWeight.w700,
   display: Display.flex,
   alignItems: AlignItems.center,
   justifyContent: JustifyContent.center,
-  padding: Padding.symmetric(horizontal: Unit.pixels(6)),
+  border: Border.all(color: StreamColors.white, width: Unit.pixels(2)),
+  padding: Padding.symmetric(horizontal: Unit.pixels(StreamSpacing.xxs)),
+);
+
+const _selectionOverlayStyles = Styles(
+  radius: BorderRadius.circular(Unit.pixels(StreamRadii.lg)),
+  backgroundColor: StreamColors.selectionOverlay,
+  position: Position.absolute(
+    top: Unit.pixels(StreamSpacing.xxs),
+    right: Unit.pixels(StreamSpacing.xxs),
+    bottom: Unit.pixels(StreamSpacing.xxs),
+    left: Unit.pixels(StreamSpacing.xxs),
+  ),
+  raw: {'pointer-events': 'none'},
 );
 
 /// A component that renders a single channel tile in a channel list.
 ///
-/// Displays the channel avatar, name, last message preview, relative
-/// timestamp, and unread message count badge.
+/// Displays the channel avatar, name, last message preview (with sender
+/// prefix and attachment-type indicators), relative timestamp, and an
+/// unread-count badge.
 ///
 /// Subscribes to [Channel.state] streams so the tile updates in real-time.
+/// Pass [selected] to show the design-system selection overlay.
 class StreamChannelListTile extends StatefulComponent {
   /// Creates a [StreamChannelListTile].
   const StreamChannelListTile({
     required this.channel,
     this.onTap,
+    this.selected = false,
     super.key,
   });
 
@@ -113,6 +129,11 @@ class StreamChannelListTile extends StatefulComponent {
 
   /// Called when the tile is clicked.
   final void Function()? onTap;
+
+  /// Whether this tile is currently selected.
+  ///
+  /// Shows a rounded semi-transparent overlay when true.
+  final bool selected;
 
   @override
   State<StreamChannelListTile> createState() => _StreamChannelListTileState();
@@ -154,17 +175,12 @@ class _StreamChannelListTileState extends State<StreamChannelListTile> {
     final channelState = channel.state;
 
     final channelName = channel.resolveChannelName(currentUser);
-    final lastMessageText = channel.resolveLastMessageText();
     final initials = channel.resolveInitials(currentUser);
+    final imageUrl = channel.resolveImageUrl(currentUser);
+    final isOnline = channel.resolveIsOnline(currentUser);
+    final (:prefix, :preview) = channel.resolveLastMessagePreview(currentUser);
     final unreadCount = channelState?.unreadCount ?? 0;
     final lastMessageAt = channel.lastMessageAt;
-
-    final colorIndex = channelName.hashCode.abs() % _avatarColors.length;
-    final avatarColor = _avatarColors[colorIndex];
-
-    final previewColor = unreadCount > 0
-        ? const Color('#1a1a1a')
-        : const Color('#72767e');
 
     return div(
       styles: _tileStyles,
@@ -172,30 +188,39 @@ class _StreamChannelListTileState extends State<StreamChannelListTile> {
         if (component.onTap != null) 'click': (_) => component.onTap!(),
       },
       [
-        div(
-          styles: _avatarStyles.combine(
-            Styles(backgroundColor: avatarColor),
-          ),
-          [Component.text(initials)],
+        // Selection overlay (behind content via pointer-events:none).
+        if (component.selected) const div(styles: _selectionOverlayStyles, []),
+
+        // Avatar.
+        StreamJasprAvatar(
+          initials: initials,
+          imageUrl: imageUrl,
+          isOnline: isOnline,
+          size: 40,
         ),
+
+        // Info column: title row + preview row.
         div(styles: _infoStyles, [
-          div(styles: _nameStyles, [Component.text(channelName)]),
-          div(
-            styles: _previewStyles.combine(Styles(color: previewColor)),
-            [Component.text(lastMessageText)],
-          ),
-        ]),
-        div(styles: _metaStyles, [
-          if (lastMessageAt != null)
-            div(
-              styles: _timeStyles,
-              [Component.text(lastMessageAt.toRelativeString())],
-            ),
-          if (unreadCount > 0)
-            div(
-              styles: _unreadBadgeStyles,
-              [Component.text('$unreadCount')],
-            ),
+          // Title row: channel name + timestamp (top-right).
+          div(styles: _titleRowStyles, [
+            div(styles: _nameStyles, [Component.text(channelName)]),
+            if (lastMessageAt != null)
+              div(
+                styles: _timeStyles,
+                [Component.text(lastMessageAt.toRelativeString())],
+              ),
+          ]),
+
+          // Preview row: optional sender prefix + message text + unread badge.
+          div(styles: _previewRowStyles, [
+            if (prefix.isNotEmpty) div(styles: _prefixStyles, [Component.text(prefix)]),
+            div(styles: _previewTextStyles, [Component.text(preview)]),
+            if (unreadCount > 0)
+              div(
+                styles: _badgeStyles,
+                [Component.text('$unreadCount')],
+              ),
+          ]),
         ]),
       ],
     );

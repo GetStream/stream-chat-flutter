@@ -29,16 +29,14 @@ class StreamChatProvider extends InheritedComponent {
   ///
   /// Throws if no provider is found.
   static StreamChatProvider of(BuildContext context) {
-    final result =
-        context.dependOnInheritedComponentOfExactType<StreamChatProvider>();
+    final result = context.dependOnInheritedComponentOfExactType<StreamChatProvider>();
     assert(result != null, 'No StreamChatProvider found in context');
     return result!;
   }
 
   /// Returns the [StreamChatClient] from the nearest [StreamChatProvider]
   /// above [context].
-  static StreamChatClient clientOf(BuildContext context) =>
-      of(context).client;
+  static StreamChatClient clientOf(BuildContext context) => of(context).client;
 
   @override
   bool updateShouldNotify(covariant StreamChatProvider oldComponent) {

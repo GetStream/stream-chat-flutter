@@ -230,14 +230,11 @@ class StreamChannelListController {
       if (eventListener?.call(event) ?? false) return;
 
       final eventType = event.type;
-      if (eventType == EventType.channelDeleted ||
-          eventType == EventType.channelHidden) {
+      if (eventType == EventType.channelDeleted || eventType == EventType.channelHidden) {
         _onChannelRemoved(event);
-      } else if (eventType == EventType.channelTruncated ||
-          eventType == EventType.connectionRecovered) {
+      } else if (eventType == EventType.channelTruncated || eventType == EventType.connectionRecovered) {
         refresh();
-      } else if (eventType == EventType.channelUpdated ||
-          eventType == EventType.memberUpdated) {
+      } else if (eventType == EventType.channelUpdated || eventType == EventType.memberUpdated) {
         _onChannelUpdated();
       } else if (eventType == EventType.channelVisible ||
           eventType == EventType.notificationAddedToChannel ||
@@ -247,8 +244,7 @@ class StreamChannelListController {
         _onMessageNew(event);
       } else if (eventType == EventType.notificationRemovedFromChannel) {
         _onNotificationRemovedFromChannel(event);
-      } else if (eventType == 'user.presence.changed' ||
-          eventType == EventType.userUpdated) {
+      } else if (eventType == 'user.presence.changed' || eventType == EventType.userUpdated) {
         _onUserPresenceChanged(event);
       }
     });
@@ -276,12 +272,17 @@ class StreamChannelListController {
     final channelType = event.channelType;
     if (channelId == null || channelType == null) return;
 
-    final channel = await getChannel(id: channelId, type: channelType);
-    channels
-      ..removeWhere((it) => it.cid == channel.cid)
-      ..insert(0, channel);
-    channels = _sorted(channels);
-    _notifyChanged();
+    try {
+      final channel = await getChannel(id: channelId, type: channelType);
+      channels
+        ..removeWhere((it) => it.cid == channel.cid)
+        ..insert(0, channel);
+      channels = _sorted(channels);
+      _notifyChanged();
+    } catch (e) {
+      error = e;
+      _notifyChanged();
+    }
   }
 
   void _onMessageNew(Event event) {
@@ -320,9 +321,7 @@ class StreamChannelListController {
       }).toList();
 
       final membership = channel.membership;
-      final updatedMembership = membership?.userId == user.id
-          ? membership?.copyWith(user: user)
-          : membership;
+      final updatedMembership = membership?.userId == user.id ? membership?.copyWith(user: user) : membership;
 
       channel.state!.updateChannelState(
         channel.state!.channelState.copyWith(
