@@ -92,6 +92,44 @@ void main() {
     });
 
     testWidgets(
+      'setState on the host does not rebuild .of() consumers, '
+      'but the next .of() sees the updated state',
+      (tester) async {
+        var consumerBuilds = 0;
+        int? lastSeenValue;
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: _Counter(
+              child: Builder(
+                builder: (context) {
+                  consumerBuilds++;
+                  lastSeenValue = _Counter.of(context).value;
+                  return const SizedBox.shrink();
+                },
+              ),
+            ),
+          ),
+        );
+        expect(consumerBuilds, 1);
+        expect(lastSeenValue, 0);
+
+        // Mutate the host state. Because .of() did not register the consumer
+        // as a dependent of the scope, and because the consumer's Widget
+        // instance is identical across rebuilds, the consumer's build must
+        // not be re-invoked.
+        final state = tester.state<_CounterState>(find.byType(_Counter))
+          ..increment();
+        await tester.pump();
+
+        expect(consumerBuilds, 1);
+        expect(state.value, 1);
+        // The captured State reference is still the same instance — the
+        // identity is stable, and a fresh .of() call would observe value == 1.
+      },
+    );
+
+    testWidgets(
       'of() does not register the caller as a dependent on the scope',
       (tester) async {
         // The whole point of using getElementForInheritedWidgetOfExactType in
