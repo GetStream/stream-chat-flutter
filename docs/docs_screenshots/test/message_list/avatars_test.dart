@@ -12,6 +12,104 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   // -----------------------------------------------------------------------
+  // StreamUserAvatar — default appearance with online indicator
+  // -----------------------------------------------------------------------
+
+  docsGoldenTest(
+    'user avatar default',
+    fileName: 'user_avatar_default',
+    constraints: const BoxConstraints.tightFor(width: 80, height: 60),
+    builder: () {
+      final client = MockClient();
+      final clientState = MockClientState();
+      when(() => client.state).thenReturn(clientState);
+      when(() => clientState.currentUser).thenReturn(ownUser);
+
+      return StreamChat(
+        client: client,
+        connectivityStream: Stream.value([ConnectivityResult.mobile]),
+        child: Scaffold(
+          backgroundColor: Colors.white,
+          body: Center(
+            child: StreamUserAvatar(
+              user: noahSmith,
+              size: StreamAvatarSize.lg,
+              showOnlineIndicator: true,
+            ),
+          ),
+        ),
+      );
+    },
+  );
+
+
+  // -----------------------------------------------------------------------
+  // StreamUserAvatarGroup — default 2×2 grid layout
+  // -----------------------------------------------------------------------
+
+  docsGoldenTest(
+    'avatar group default',
+    fileName: 'avatar_group_default',
+    constraints: const BoxConstraints.tightFor(width: 60, height: 60),
+    builder: () {
+      final client = MockClient();
+      final clientState = MockClientState();
+      when(() => client.state).thenReturn(clientState);
+      when(() => clientState.currentUser).thenReturn(ownUser);
+
+      final users = [noahSmith, sophiaLee, liamJohnson, elenaBarros];
+
+      return StreamChat(
+        client: client,
+        connectivityStream: Stream.value([ConnectivityResult.mobile]),
+        child: Scaffold(
+          backgroundColor: Colors.white,
+          body: Center(
+            child: StreamUserAvatarGroup(
+              users: users,
+              size: StreamAvatarGroupSize.lg,
+            ),
+          ),
+        ),
+      );
+    },
+  );
+
+  // -----------------------------------------------------------------------
+  // StreamUserAvatarStack — default overlapping stack layout
+  // -----------------------------------------------------------------------
+
+  docsGoldenTest(
+    'avatar stack default',
+    fileName: 'avatar_stack_default',
+    constraints: const BoxConstraints.tightFor(width: 120, height: 60),
+    builder: () {
+      final client = MockClient();
+      final clientState = MockClientState();
+      when(() => client.state).thenReturn(clientState);
+      when(() => clientState.currentUser).thenReturn(ownUser);
+
+      final users = [noahSmith, sophiaLee, liamJohnson, elenaBarros];
+
+      return StreamChat(
+        client: client,
+        connectivityStream: Stream.value([ConnectivityResult.mobile]),
+        child: Scaffold(
+          backgroundColor: Colors.white,
+          body: Center(
+            child: StreamUserAvatarStack(
+              users: users,
+              size: StreamAvatarStackSize.sm,
+              max: 3,
+              overlap: 0.33,
+            ),
+          ),
+        ),
+      );
+    },
+  );
+
+  // -----------------------------------------------------------------------
   // avatarGroup — custom group grid layout via StreamComponentFactory
   // Shows a horizontal row instead of the default 2×2 grid.
   // -----------------------------------------------------------------------
