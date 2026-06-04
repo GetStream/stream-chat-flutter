@@ -12,7 +12,7 @@
 - [Documentation](https://getstream.io/chat/docs/sdk/flutter/)
 - [V10 Migration Guide](https://getstream.io/chat/docs/sdk/flutter/guides/migration-guide-10-0/)
 
-### Changelog
+## Changelog
 
 Check out the [changelog on pub.dev](https://pub.dev/packages/stream_chat/changelog) to see the latest changes in the package.
 
@@ -30,7 +30,7 @@ Add this to your `pubspec.yaml`, using the latest version [![Pub](https://img.sh
 
 ```yaml
 dependencies:
-  stream_chat: ^latest-version
+  stream_chat: ^10.0.0
 ```
 
 Then run:

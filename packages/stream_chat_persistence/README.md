@@ -12,7 +12,7 @@
 - [Documentation](https://getstream.io/chat/docs/sdk/flutter/)
 - [V10 Migration Guide](https://getstream.io/chat/docs/sdk/flutter/guides/migration-guide-10-0/)
 
-### Changelog
+## Changelog
 
 Check out the [changelog on pub.dev](https://pub.dev/packages/stream_chat_persistence/changelog) to see the latest changes in the package.
 
@@ -26,7 +26,7 @@ Add this to your `pubspec.yaml`, using the latest version [![Pub](https://img.sh
 
 ```yaml
 dependencies:
-  stream_chat_persistence: ^latest_version
+  stream_chat_persistence: ^10.0.0
 ```
 
 Then run:
@@ -73,7 +73,7 @@ Due to Drift's web backend you need to include the sql.js library. Add the follo
 </html>
 ```
 
-You can grab the latest version of `sql-wasm.js` and `sql-wasm.wasm` [here](https://github.com/sql-js/sql.js/releases) and copy them into your `/web` folder.
+You can grab the latest version of `sql-wasm.js` and `sql-wasm.wasm` from the [sql.js releases](https://github.com/sql-js/sql.js/releases) and copy them into your `/web` folder.
 
 ## Contributing
 

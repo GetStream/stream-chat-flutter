@@ -1,6 +1,6 @@
 # Official Flutter UI SDK for [Stream Chat](https://getstream.io/chat/sdk/flutter/)
 
-![](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/images/sdk_hero_v10.png)
+![Stream Chat Flutter SDK hero illustration showing chat bubbles and mobile device](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/images/sdk_hero_v10.png)
 
 > The official Flutter UI components for Stream Chat, a service for building chat applications.
 
@@ -14,7 +14,7 @@
 - [UI Docs](https://getstream.io/chat/docs/sdk/flutter/stream-chat-flutter/introduction/)
 - [V10 Migration Guide](https://getstream.io/chat/docs/sdk/flutter/guides/migration-guide-10-0/)
 
-### Changelog
+## Changelog
 
 Check out the [changelog on pub.dev](https://pub.dev/packages/stream_chat_flutter/changelog) to see the latest changes in the package.
 
@@ -63,7 +63,7 @@ Add this to your `pubspec.yaml`, using the latest version [![Pub](https://img.sh
 
 ```yaml
 dependencies:
-  stream_chat_flutter: ^latest_version
+  stream_chat_flutter: ^10.0.0
 ```
 
 Then run:

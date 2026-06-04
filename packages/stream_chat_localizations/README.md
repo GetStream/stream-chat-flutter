@@ -2,7 +2,7 @@
 
 > The official localizations for Stream Chat Flutter, a service for building chat applications.
 
-[![Pub](https://img.shields.io/pub/v/stream_chat_localizations.svg)](https://pub.dartlang.org/packages/stream_chat_localizations)
+[![Pub](https://img.shields.io/pub/v/stream_chat_localizations.svg)](https://pub.dev/packages/stream_chat_localizations)
 [![CI](https://github.com/GetStream/stream-chat-flutter/actions/workflows/stream_flutter_workflow.yml/badge.svg?branch=master)](https://github.com/GetStream/stream-chat-flutter/actions/workflows/stream_flutter_workflow.yml)
 
 **Quick Links**
@@ -12,7 +12,7 @@
 - [Localization Docs](https://getstream.io/chat/docs/sdk/flutter/stream-chat-flutter/localization/)
 - [V10 Migration Guide](https://getstream.io/chat/docs/sdk/flutter/guides/migration-guide-10-0/)
 
-### Changelog
+## Changelog
 
 Check out the [changelog on pub.dev](https://pub.dev/packages/stream_chat_localizations/changelog) to see the latest changes in the package.
 
@@ -38,11 +38,11 @@ More languages will be added in the future. Feel free to [contribute](https://gi
 
 ## Add Dependency
 
-Add this to your `pubspec.yaml`, using the latest version [![Pub](https://img.shields.io/pub/v/stream_chat_localizations.svg)](https://pub.dartlang.org/packages/stream_chat_localizations):
+Add this to your `pubspec.yaml`, using the latest version [![Pub](https://img.shields.io/pub/v/stream_chat_localizations.svg)](https://pub.dev/packages/stream_chat_localizations):
 
 ```yaml
 dependencies:
-  stream_chat_localizations: ^latest_version
+  stream_chat_localizations: ^10.0.0
 ```
 
 Then run:
@@ -109,7 +109,7 @@ Check out [this example](https://github.com/GetStream/stream-chat-flutter/blob/m
 
 ## Note on iOS
 
-For translations to work on **iOS** you need to add supported locales to `ios/Runner/Info.plist` as described [here](https://flutter.dev/docs/development/accessibility-and-localization/internationalization#localizing-for-ios-updating-the-ios-app-bundle).
+For translations to work on **iOS** you need to add supported locales to `ios/Runner/Info.plist` as described in the [Flutter docs: Localizing for iOS — updating the iOS app bundle](https://flutter.dev/docs/development/accessibility-and-localization/internationalization#localizing-for-ios-updating-the-ios-app-bundle).
 
 Example:
 

@@ -1,6 +1,6 @@
 # Official Flutter packages for [Stream Chat](https://getstream.io/chat/sdk/flutter/)
 
-![](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/images/sdk_hero_v10.png)
+![Stream Chat Flutter SDK hero image](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/images/sdk_hero_v10.png)
 
 [![CI](https://github.com/GetStream/stream-chat-flutter/actions/workflows/stream_flutter_workflow.yml/badge.svg?branch=master)](https://github.com/GetStream/stream-chat-flutter/actions/workflows/stream_flutter_workflow.yml)
 [![Melos](https://img.shields.io/badge/maintained%20with-melos-f700ff.svg?style=flat-square)](https://github.com/invertase/melos)
@@ -121,7 +121,7 @@ All of the Stream Chat packages follow [semantic versioning](https://semver.org/
 
 Occasionally, the SDK can include visual changes (whitespace, color, sizing) in minor versions as we continuously improve the default look of our UI widgets.
 
-See the [versioning policy documentation](https://getstream.io/chat/docs/sdk/flutter/basics/installation/) and the [releases page](https://github.com/GetStream/stream-chat-flutter/releases) for the full version history.
+See the [installation docs](https://getstream.io/chat/docs/sdk/flutter/basics/installation/) and the [releases page](https://github.com/GetStream/stream-chat-flutter/releases) for the full version history.
 
 ## We Are Hiring
 
