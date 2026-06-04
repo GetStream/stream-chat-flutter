@@ -167,7 +167,7 @@ jobs:
     name: build (${{ matrix.platform }})
     needs: gate
     runs-on: ${{ matrix.os }}
-    if: needs.gate.outputs.should_run == 'true'
+    if: needs.gate.outputs.should_run == 'true' && github.event_name == 'pull_request'
     timeout-minutes: 30
     strategy:
       fail-fast: false
