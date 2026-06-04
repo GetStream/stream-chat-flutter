@@ -16,6 +16,7 @@
 🔄 Changed
 
 - Raised minimum versions of bundled Dart dependencies (`async`, `collection`, `dio`, `equatable`, `http_parser`, `json_annotation`, `logging`, `synchronized`, `uuid`, `web_socket_channel`) to current resolved versions.
+- Raised minimum Dart SDK to `^3.11.0`.
 - Tightened `Channel.isGroup` from `memberCount != 2` to `memberCount > 2 || !isDistinct`. Two-member non-distinct channels now correctly report as groups, and 1-member distinct channels no longer do. Migrate via `!channel.isOneToOne` or `channel.memberCount != 2`.
 - Tightened `Channel.isDistinct` to require the `!members-` prefix (with trailing dash), matching the backend's `DistinctChannelPrefix` constant. Real server-generated ids always include the dash; only malformed/test ids that previously matched the looser `!members` check are affected.
 - Renamed `SortedListX.merge` (added in 9.24.0) → `SortedListX.mergeSorted` and moved the unsorted/iterable variant to `IterableMergeX.merge`. Callers on `List<T>` that want sorted output should switch to `mergeSorted`; callers on `Iterable<T>` keep using `merge`.

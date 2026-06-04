@@ -20,8 +20,8 @@ publish_to: none
 #   2. Add it to the melos.yaml file for future updates.
 
 environment:
-  sdk: ^3.10.0
-  flutter: ">=3.38.1"
+  sdk: ^3.11.0
+  flutter: ">=3.41.0"
 
 dependencies:
   cached_network_image: ^3.4.1
