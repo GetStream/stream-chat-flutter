@@ -1,90 +1,99 @@
-# Official Dart Client for [Stream Chat](https://getstream.io/chat/)
+# Official Low-Level Dart Client for [Stream Chat](https://getstream.io/chat/)
 
->The official Dart client for Stream Chat, a service for building chat applications. This library can be used on any Dart project and on both mobile and web apps with Flutter.
+> The official low-level Dart client for Stream Chat, a service for building chat applications. This library can be used on any Dart project and on both mobile and web apps with Flutter.
 
 [![Pub](https://img.shields.io/pub/v/stream_chat.svg)](https://pub.dartlang.org/packages/stream_chat)
-![](https://img.shields.io/badge/platform-flutter%20%7C%20flutter%20web-ff69b4.svg?style=flat-square)
-![CI](https://github.com/GetStream/stream-chat-flutter/workflows/stream_flutter_workflow/badge.svg?branch=master)
+[![CI](https://github.com/GetStream/stream-chat-flutter/actions/workflows/stream_flutter_workflow.yml/badge.svg?branch=master)](https://github.com/GetStream/stream-chat-flutter/actions/workflows/stream_flutter_workflow.yml)
 
 **Quick Links**
 
 - [Register](https://getstream.io/chat/trial/) to get an API key for Stream Chat
-- [Flutter Chat Tutorial](https://getstream.io/chat/flutter/tutorial/) 
-- [Chat UI Kit](https://getstream.io/chat/ui-kit/)
-- [Chat Client Docs](https://getstream.io/chat/docs/flutter-dart/?language=dart)
-
-**V4 Migration Guide**
-
-For upgrading from V3 to V4, please refer to the [V4 Migration Guide](https://getstream.io/chat/docs/sdk/flutter/guides/migration_guide_4_0/)
+- [Flutter Chat Tutorial](https://getstream.io/chat/flutter/tutorial/)
+- [Documentation](https://getstream.io/chat/docs/sdk/flutter/)
+- [V10 Migration Guide](https://getstream.io/chat/docs/sdk/flutter/guides/migration-guide-10-0/)
 
 ### Changelog
 
 Check out the [changelog on pub.dev](https://pub.dev/packages/stream_chat/changelog) to see the latest changes in the package.
 
-## Getting started
+## Overview
+
+`stream_chat` is the low-level client (LLC) of the Stream Chat Flutter SDK. It wraps the Stream Chat API and gives you the most control over UI, data, and architecture — at the cost of more plumbing. If you want built-in Flutter widgets, see [`stream_chat_flutter`](https://pub.dev/packages/stream_chat_flutter). If you want controllers and business logic without UI, see [`stream_chat_flutter_core`](https://pub.dev/packages/stream_chat_flutter_core).
+
+> **Note:** This is a front-end client SDK intended for use in Dart/Flutter applications. There are no plans to provide a backend (server-side) Dart SDK — backend integrations should use the [Stream server-side SDKs](https://getstream.io/chat/docs/) available for Node.js, Python, Go, and other platforms.
+
+## Getting Started
 
 ### Add dependency
-Add this to your package's pubspec.yaml file, use the latest version [![Pub](https://img.shields.io/pub/v/stream_chat.svg)](https://pub.dartlang.org/packages/stream_chat)
+
+Add this to your `pubspec.yaml`, using the latest version [![Pub](https://img.shields.io/pub/v/stream_chat.svg)](https://pub.dartlang.org/packages/stream_chat):
 
 ```yaml
 dependencies:
- stream_chat: ^latest-version
+  stream_chat: ^latest-version
 ```
 
-You should then run `flutter packages get`
+Then run:
+
+```shell
+dart pub get
+```
 
 ## Example Project
 
-There is a detailed Flutter example project in the `example` folder. You can directly run and play on it. 
+There is a detailed example project in the [`example`](https://github.com/GetStream/stream-chat-flutter/tree/master/packages/stream_chat/example) folder. You can run it directly to explore the API.
 
 ## Setup API Client
 
-First you need to instantiate a chat client. The Chat client will manage API call, event handling and manage the web socket connection to Stream Chat servers. You should only create the client once and re-use it across your application.
+First, instantiate a chat client. The client manages API calls, event handling, and the WebSocket connection to Stream Chat servers. You should create it once and re-use it across your application.
 
 ```dart
-final client = StreamChatClient("stream-chat-api-key");
+final client = StreamChatClient('stream-chat-api-key');
 ```
 
 ### Logging
 
-By default the Chat Client will write all messages with level Warn or Error to `stdout`.
+By default, the chat client writes all messages with level Warn or Error to stdout.
 
 #### Change Logging Level
 
-During development you might want to enable more logging information, you can change the default log level when constructing the client.
+During development you might want to enable more logging information:
 
-```dart 
-final client = StreamChatClient("stream-chat-api-key", logLevel: Level.INFO);
+```dart
+final client = StreamChatClient('stream-chat-api-key', logLevel: Level.INFO);
 ```
 
 #### Custom Logger
 
-You can handle the log messages directly instead of have them written to `stdout`, this is very convenient if you use an error tracking tool or if you want to centralize your logs into one facility.
+You can handle log messages directly instead of writing them to stdout — useful for error tracking tools:
 
 ```dart
 myLogHandlerFunction = (LogRecord record) {
-  // do something with the record (ie. send it to Sentry or Fabric)
-}
+  // do something with the record (e.g. send it to Sentry or Firebase Crashlytics)
+};
 
-final client = StreamChatClient("stream-chat-api-key", logHandlerFunction: myLogHandlerFunction);
+final client = StreamChatClient(
+  'stream-chat-api-key',
+  logHandlerFunction: myLogHandlerFunction,
+);
 ```
 
-### Offline storage 
+### Offline Storage
 
-To add data persistence, you can extend the class `ChatPersistenceClient` and pass an instance to the `StreamChatClient`.
+To add data persistence, extend `ChatPersistenceClient` and pass an instance to `StreamChatClient`:
 
 ```dart
 class CustomChatPersistentClient extends ChatPersistenceClient {
-...
+  // ...
 }
 
 final client = StreamChatClient(
-  apiKey ?? kDefaultStreamApiKey,
+  apiKey,
   logLevel: Level.INFO,
 )..chatPersistenceClient = CustomChatPersistentClient();
 ```
 
-We provide an official persistent client in the [`stream_chat_persistence`](https://pub.dev/packages/stream_chat_persistence) package.
+We provide an official persistence client in the [`stream_chat_persistence`](https://pub.dev/packages/stream_chat_persistence) package:
 
 ```dart
 import 'package:stream_chat_persistence/stream_chat_persistence.dart';
@@ -95,34 +104,29 @@ final chatPersistentClient = StreamChatPersistenceClient(
 );
 
 final client = StreamChatClient(
-  apiKey ?? kDefaultStreamApiKey,
+  apiKey,
   logLevel: Level.INFO,
 )..chatPersistenceClient = chatPersistentClient;
 ```
 
 ## Contributing
 
-### Code conventions
+We welcome code changes that improve this library or fix a problem. Please make sure to follow all best practices and add tests where applicable before submitting a Pull Request on GitHub.
 
-- Make sure that you run `dartfmt` before you commit your code
-- Make sure all public methods and functions are well documented
+### Code Conventions
 
-### Running tests 
+- Make sure all public methods and functions are well documented.
 
-- run `flutter test`
+### Running Tests
 
-### Releasing a new version
+```shell
+dart test
+```
 
-- update the package version on `pubspec.yaml` and `version.dart`
+### Code Generation
 
-- add a changelog entry on `CHANGELOG.md`
+JSON serialization relies on code generation. Keep it running while you make changes:
 
-- run `flutter pub publish` to publish the package
-
-### Watch models and generate JSON code
-
-JSON serialization relies on code generation; make sure to keep that running while you make changes to the library
-
-```bash
-flutter pub run build_runner watch
+```shell
+dart run build_runner watch
 ```
