@@ -413,3 +413,9 @@ GetActiveLiveLocationsResponse _$GetActiveLiveLocationsResponseFromJson(
   ..activeLiveLocations = (json['active_live_locations'] as List<dynamic>)
       .map((e) => Location.fromJson(e as Map<String, dynamic>))
       .toList();
+
+GetAppSettingsResponse _$GetAppSettingsResponseFromJson(
+  Map<String, dynamic> json,
+) => GetAppSettingsResponse()
+  ..duration = json['duration'] as String?
+  ..app = AppSettings.fromJson(json['app'] as Map<String, dynamic>);

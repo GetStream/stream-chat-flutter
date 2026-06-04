@@ -121,27 +121,34 @@ class _StreamGalleryPickerState extends State<StreamGalleryPicker> {
                 );
               }
 
-              return StreamPhotoGallery(
-                shrinkWrap: true,
-                controller: _controller,
-                onMediaTap: widget.onMediaItemSelected,
-                loadMoreTriggerIndex: 10,
-                thumbnailSize: widget.config.mediaThumbnailSize,
-                thumbnailFormat: widget.config.mediaThumbnailFormat,
-                thumbnailQuality: widget.config.mediaThumbnailQuality,
-                thumbnailScale: widget.config.mediaThumbnailScale,
-                addMoreBuilder: switch (isLimited) {
-                  true => (context) => _AddMoreTile(
-                    onTap: () => PhotoManager.presentLimited().then((_) => _controller.doInitialLoad()).ignore(),
-                  ),
-                  _ => null,
-                },
-                itemBuilder: (context, mediaItems, index, defaultWidget) {
-                  final media = mediaItems[index];
-                  return defaultWidget.copyWith(
-                    selected: widget.selectedMediaItems.contains(media.id),
-                  );
-                },
+              return MediaQuery.removePadding(
+                context: context,
+                // Workaround for the bottom padding issue.
+                // Link: https://github.com/flutter/flutter/issues/156149
+                removeTop: true,
+                removeBottom: true,
+                child: StreamPhotoGallery(
+                  shrinkWrap: true,
+                  controller: _controller,
+                  onMediaTap: widget.onMediaItemSelected,
+                  loadMoreTriggerIndex: 10,
+                  thumbnailSize: widget.config.mediaThumbnailSize,
+                  thumbnailFormat: widget.config.mediaThumbnailFormat,
+                  thumbnailQuality: widget.config.mediaThumbnailQuality,
+                  thumbnailScale: widget.config.mediaThumbnailScale,
+                  addMoreBuilder: switch (isLimited) {
+                    true => (context) => _AddMoreTile(
+                      onTap: () => PhotoManager.presentLimited().then((_) => _controller.doInitialLoad()).ignore(),
+                    ),
+                    _ => null,
+                  },
+                  itemBuilder: (context, mediaItems, index, defaultWidget) {
+                    final media = mediaItems[index];
+                    return defaultWidget.copyWith(
+                      selected: widget.selectedMediaItems.contains(media.id),
+                    );
+                  },
+                ),
               );
             },
           ),

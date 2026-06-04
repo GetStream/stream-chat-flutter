@@ -15,11 +15,13 @@ import 'package:stream_chat/src/core/api/responses.dart';
 import 'package:stream_chat/src/core/api/sort_order.dart';
 import 'package:stream_chat/src/core/api/stream_chat_api.dart';
 import 'package:stream_chat/src/core/error/error.dart';
+import 'package:stream_chat/src/core/http/app_settings_manager.dart';
 import 'package:stream_chat/src/core/http/connection_id_manager.dart';
 import 'package:stream_chat/src/core/http/stream_http_client.dart';
 import 'package:stream_chat/src/core/http/system_environment_manager.dart';
 import 'package:stream_chat/src/core/http/token.dart';
 import 'package:stream_chat/src/core/http/token_manager.dart';
+import 'package:stream_chat/src/core/models/app_settings.dart';
 import 'package:stream_chat/src/core/models/attachment_file.dart';
 import 'package:stream_chat/src/core/models/banned_user.dart';
 import 'package:stream_chat/src/core/models/channel_state.dart';
@@ -157,6 +159,7 @@ class StreamChatClient {
 
   final _tokenManager = TokenManager();
   final _connectionIdManager = ConnectionIdManager();
+  late final _appSettingsManager = AppSettingsManager(_chatApi.general);
   static final _systemEnvironmentManager = SystemEnvironmentManager();
 
   /// Updates the system environment information used by the client.
@@ -185,6 +188,12 @@ class StreamChatClient {
 
   /// Additional headers for all requests
   static Map<String, Object?> additionalHeaders = {};
+
+  /// The cached [AppSettings] for this client.
+  ///
+  /// Returns a default instance until the background load initiated by
+  /// [connectUser] completes. Call [getAppSettings] to force a re-fetch.
+  AppSettings get appSettings => _appSettingsManager.appSettings;
 
   /// The current package version
   static const packageVersion = PACKAGE_VERSION;
@@ -411,6 +420,10 @@ class StreamChatClient {
         );
         state.currentUser = connectedUser;
       }
+
+      // Start loading app settings in the background, we don't need to await
+      // for this to complete to consider the user connected.
+      unawaited(_appSettingsManager.loadAppSettings());
 
       return state.currentUser!;
     } catch (e, stk) {
@@ -2039,6 +2052,14 @@ class StreamChatClient {
   /// Get OpenGraph data of the given [url].
   Future<OGAttachmentResponse> enrichUrl(String url) => _chatApi.general.enrichUrl(url);
 
+  /// Re-fetches the [AppSettings] and updates [appSettings].
+  ///
+  /// [connectUser] populates the cache automatically, so calling this is
+  /// only needed to pick up changes made during an active session.
+  ///
+  /// Returns the newly fetched value, or throws when the request fails.
+  Future<AppSettings> getAppSettings() => _appSettingsManager.refresh();
+
   /// Queries threads with the given [options] and [pagination] params.
   ///
   /// Optionally, pass [filter] and [sort] to filter and sort the threads.
@@ -2210,6 +2231,9 @@ class StreamChatClient {
     // resetting state.
     state.dispose();
     state = ClientState(this);
+
+    // clearing app settings cache.
+    _appSettingsManager.clear();
 
     // resetting credentials.
     _tokenManager.reset();

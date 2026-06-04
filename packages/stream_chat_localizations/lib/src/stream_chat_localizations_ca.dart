@@ -141,6 +141,12 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
       'La mida màxima del fitxer és de $limitInMB MB.';
 
   @override
+  String fileTypeNotSupportedError(String? extension) {
+    if (extension != null) return "Els fitxers '.$extension' no s'admeten per pujar.";
+    return "Aquest tipus de fitxer no s'admet per pujar.";
+  }
+
+  @override
   String get couldNotReadBytesFromFileError => "No s'han pogut llegir els bytes del fitxer.";
 
   @override

@@ -66,6 +66,8 @@ void main() {
       expect(localizations.instantCommandsLabel, isNotNull);
       expect(localizations.fileTooLargeAfterCompressionError(33), isNotNull);
       expect(localizations.fileTooLargeError(33), isNotNull);
+      expect(localizations.fileTypeNotSupportedError('exe'), isNotNull);
+      expect(localizations.fileTypeNotSupportedError(null), isNotNull);
       expect(localizations.addAFileLabel, isNotNull);
       expect(localizations.photoFromCameraLabel, isNotNull);
       expect(localizations.uploadAFileLabel, isNotNull);
