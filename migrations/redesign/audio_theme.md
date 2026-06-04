@@ -39,7 +39,7 @@ Audio waveform theming is now part of `StreamTheme` from `stream_core_flutter`. 
 ```dart
 StreamChat(
   client: client,
-  streamChatThemeData: StreamChatThemeData(
+  themeData: StreamChatThemeData(
     audioWaveformTheme: StreamAudioWaveformThemeData(
       waveColor: Colors.blue,
       playedWaveColor: Colors.blueAccent,

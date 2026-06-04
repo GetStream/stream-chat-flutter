@@ -6,6 +6,7 @@ part 'stream_svg_icon.g.dart';
 /// {@template StreamSvgIconData}
 /// A class that holds the data for a [StreamSvgIcon].
 /// {@endtemplate}
+@Deprecated('Will be removed in the next major version')
 typedef StreamSvgIconData = SvgIconData;
 
 /// {@template StreamSvgIcon}
