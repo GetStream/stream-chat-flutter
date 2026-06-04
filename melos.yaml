@@ -24,9 +24,9 @@ command:
 
     # Dart and Flutter environment used in the project.
     environment:
-      sdk: ^3.11.5
+      sdk: ^3.11.0
       # We are not using carat '^' syntax here because flutter don't follow semantic versioning.
-      flutter: ">=3.41.9"
+      flutter: ">=3.41.0"
 
     # List of all the dependencies used in the project.
     dependencies:
