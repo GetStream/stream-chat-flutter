@@ -26,6 +26,7 @@
 - Re-export `StreamAvatarTheme` and `StreamAvatarThemeData` from `stream_core_flutter` so consumers can theme avatars without adding a separate `stream_core_flutter` import.
 - Added `messageLeading`, `messageHeader`, and `messageFooter` factory slots to `streamChatComponentBuilders` for overriding the message item's avatar, annotations, or metadata row without replacing the whole `messageItem`.
 - Bumped `jiffy` to `^6.4.5` to pick up cached locale and `DateFormat` lookups for cheaper relative-time formatting.
+- Raised minimum Flutter to `>=3.41.0` and Dart SDK to `^3.11.0`.
 
 🛑️ Breaking
 

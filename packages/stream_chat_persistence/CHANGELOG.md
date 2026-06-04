@@ -3,6 +3,7 @@
 🔄 Changed
 
 - Raised minimum versions of bundled dependencies (`drift`, `path`, `path_provider`) to current resolved versions.
+- Raised minimum Flutter to `>=3.41.0` and Dart SDK to `^3.11.0`.
 
 🐞 Fixed
 
