@@ -44,7 +44,7 @@ dependencies:
   http_parser: ^4.1.2
   image_picker: ^1.2.2
   image_size_getter: ^2.4.1
-  jiffy: ^6.4.4
+  jiffy: ^6.4.5
   just_audio: ^0.10.5
   lottie: ^3.3.3
   media_kit: ^1.2.6
