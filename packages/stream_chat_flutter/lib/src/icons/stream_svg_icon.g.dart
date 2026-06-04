@@ -51,6 +51,7 @@ part of 'stream_svg_icon.dart';
 ///
 ///  * [StreamSvgIcon]
 ///  * [IconButton]
+@Deprecated('context.streamIcons.* instead')
 abstract final class StreamSvgIcons {
   /// The package that contains the Stream SVG icons.
   static const String package = 'stream_chat_flutter';
