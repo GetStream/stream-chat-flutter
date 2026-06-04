@@ -24,6 +24,8 @@ class $ChannelsTable extends Channels
   late final GeneratedColumn<String> cid = GeneratedColumn<String>(
       'cid', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _ownCapabilitiesMeta =
+      const VerificationMeta('ownCapabilities');
   @override
   late final GeneratedColumnWithTypeConverter<List<String>?, String>
       ownCapabilities = GeneratedColumn<String>(
@@ -31,6 +33,7 @@ class $ChannelsTable extends Channels
               type: DriftSqlType.string, requiredDuringInsert: false)
           .withConverter<List<String>?>(
               $ChannelsTable.$converterownCapabilitiesn);
+  static const VerificationMeta _configMeta = const VerificationMeta('config');
   @override
   late final GeneratedColumnWithTypeConverter<Map<String, dynamic>, String>
       config = GeneratedColumn<String>('config', aliasedName, false,
@@ -93,6 +96,8 @@ class $ChannelsTable extends Channels
   late final GeneratedColumn<String> createdById = GeneratedColumn<String>(
       'created_by_id', aliasedName, true,
       type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _filterTagsMeta =
+      const VerificationMeta('filterTags');
   @override
   late final GeneratedColumnWithTypeConverter<List<String>?, String>
       filterTags = GeneratedColumn<String>('filter_tags', aliasedName, true,
@@ -103,6 +108,8 @@ class $ChannelsTable extends Channels
   late final GeneratedColumn<String> team = GeneratedColumn<String>(
       'team', aliasedName, true,
       type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _extraDataMeta =
+      const VerificationMeta('extraData');
   @override
   late final GeneratedColumnWithTypeConverter<Map<String, dynamic>?, String>
       extraData = GeneratedColumn<String>('extra_data', aliasedName, true,
@@ -155,6 +162,8 @@ class $ChannelsTable extends Channels
     } else if (isInserting) {
       context.missing(_cidMeta);
     }
+    context.handle(_ownCapabilitiesMeta, const VerificationResult.success());
+    context.handle(_configMeta, const VerificationResult.success());
     if (data.containsKey('frozen')) {
       context.handle(_frozenMeta,
           frozen.isAcceptableOrUnknown(data['frozen']!, _frozenMeta));
@@ -195,10 +204,12 @@ class $ChannelsTable extends Channels
           createdById.isAcceptableOrUnknown(
               data['created_by_id']!, _createdByIdMeta));
     }
+    context.handle(_filterTagsMeta, const VerificationResult.success());
     if (data.containsKey('team')) {
       context.handle(
           _teamMeta, team.isAcceptableOrUnknown(data['team']!, _teamMeta));
     }
+    context.handle(_extraDataMeta, const VerificationResult.success());
     return context;
   }
 
