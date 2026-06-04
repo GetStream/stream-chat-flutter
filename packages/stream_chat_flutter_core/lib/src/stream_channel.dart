@@ -4,7 +4,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/stream_chat.dart';
-import 'package:stream_chat_flutter_core/src/stream_scope.dart';
+import 'package:stream_chat_flutter_core/src/stream_state_scope.dart';
 
 /// Specifies query direction for pagination
 enum QueryDirection {
@@ -192,7 +192,7 @@ class StreamChannel extends StatefulWidget {
   /// See also:
   ///  * [of], which throws if no [StreamChannel] is found.
   static StreamChannelState? maybeOf(BuildContext context) {
-    return StreamScope.maybeOf<StreamChannelState>(context);
+    return StreamStateScope.maybeOf<StreamChannelState>(context);
   }
 
   @override
@@ -913,7 +913,7 @@ class StreamChannelState extends State<StreamChannel> {
 
   @override
   Widget build(BuildContext context) {
-    return StreamScope(
+    return StreamStateScope(
       state: this,
       child: FutureBuilder<void>(
         future: _channelInitFuture,

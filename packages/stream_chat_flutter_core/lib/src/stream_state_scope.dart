@@ -10,24 +10,24 @@ import 'package:flutter/widgets.dart';
 ///
 /// {@tool snippet}
 ///
-/// Inside the widget's state, wrap the subtree in a [StreamScope] and define
-/// `of` / `maybeOf` that read it back:
+/// Inside the widget's state, wrap the subtree in a [StreamStateScope] and
+/// define `of` / `maybeOf` that read it back:
 ///
 /// ```dart
 /// class MyWidget extends StatefulWidget {
 ///   // ...
 ///   static MyWidgetState of(BuildContext context) =>
-///       StreamScope.of<MyWidgetState>(context);
+///       StreamStateScope.of<MyWidgetState>(context);
 ///
 ///   static MyWidgetState? maybeOf(BuildContext context) =>
-///       StreamScope.maybeOf<MyWidgetState>(context);
+///       StreamStateScope.maybeOf<MyWidgetState>(context);
 /// }
 ///
 /// class MyWidgetState extends State<MyWidget> {
 ///   @override
 ///   Widget build(BuildContext context) {
 ///     // [T] is inferred from `state: this`, no need to spell it out.
-///     return StreamScope(state: this, child: widget.child);
+///     return StreamStateScope(state: this, child: widget.child);
 ///   }
 /// }
 /// ```
@@ -37,9 +37,9 @@ import 'package:flutter/widgets.dart';
 /// -free pointer to the enclosing [State], and the [State] identity is stable
 /// for the life of the element. Consumers that need to react to data exposed
 /// by the [State] should subscribe to its streams or notifiers explicitly.
-class StreamScope<T extends State> extends InheritedWidget {
-  /// Creates a [StreamScope] exposing [state] to descendants.
-  const StreamScope({
+class StreamStateScope<T extends State> extends InheritedWidget {
+  /// Creates a [StreamStateScope] exposing [state] to descendants.
+  const StreamStateScope({
     super.key,
     required this.state,
     required super.child,
@@ -48,28 +48,29 @@ class StreamScope<T extends State> extends InheritedWidget {
   /// The [State] exposed to descendants.
   final T state;
 
-  /// Returns the [State] of type [T] from the closest enclosing [StreamScope].
+  /// Returns the [State] of type [T] from the closest enclosing
+  /// [StreamStateScope].
   ///
-  /// Throws a [FlutterError] if no matching [StreamScope] is found.
+  /// Throws a [FlutterError] if no matching [StreamStateScope] is found.
   static T of<T extends State>(BuildContext context) {
     final result = maybeOf<T>(context);
     if (result != null) return result;
 
     throw FlutterError.fromParts(<DiagnosticsNode>[
       ErrorSummary(
-        'StreamScope.of<$T>() called with a context that does not contain a '
-        'StreamScope<$T>.',
+        'StreamStateScope.of<$T>() called with a context that does not '
+        'contain a StreamStateScope<$T>.',
       ),
       ErrorDescription(
-        'No StreamScope<$T> ancestor could be found starting from the context '
-        'that was passed to StreamScope.of<$T>().',
+        'No StreamStateScope<$T> ancestor could be found starting from the '
+        'context that was passed to StreamStateScope.of<$T>().',
       ),
       context.describeElement('The context used was'),
     ]);
   }
 
-  /// Returns the [State] of type [T] from the closest enclosing [StreamScope],
-  /// or `null` if there isn't one.
+  /// Returns the [State] of type [T] from the closest enclosing
+  /// [StreamStateScope], or `null` if there isn't one.
   ///
   /// This is a pure lookup — the calling element is **not** registered as a
   /// dependent, so the [State] identity must not change for the life of the
@@ -78,11 +79,11 @@ class StreamScope<T extends State> extends InheritedWidget {
   /// should subscribe to its streams or notifiers explicitly.
   static T? maybeOf<T extends State>(BuildContext context) {
     final element =
-        context.getElementForInheritedWidgetOfExactType<StreamScope<T>>();
-    final scope = element?.widget as StreamScope<T>?;
+        context.getElementForInheritedWidgetOfExactType<StreamStateScope<T>>();
+    final scope = element?.widget as StreamStateScope<T>?;
     return scope?.state;
   }
 
   @override
-  bool updateShouldNotify(StreamScope<T> oldWidget) => false;
+  bool updateShouldNotify(StreamStateScope<T> oldWidget) => false;
 }

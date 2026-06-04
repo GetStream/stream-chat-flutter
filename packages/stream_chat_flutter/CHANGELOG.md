@@ -19,7 +19,7 @@
 - `ScrollablePositionedList.padding` now accepts `EdgeInsetsGeometry` (resolved against
   `Directionality`), and `scrollTo` lands the target at the content-area edge by adjusting for
   leading padding.
-- `StreamChat.of` now resolves via `StreamScope` instead of `findAncestorStateOfType`, replacing
+- `StreamChat.of` now resolves via `StreamStateScope` instead of `findAncestorStateOfType`, replacing
   an O(tree-depth) element walk with an O(1) inherited-widget lookup. Callers and behavior are
   unchanged.
 

@@ -131,7 +131,7 @@ class StreamChat extends StatefulWidget {
   /// See also:
   ///  * [of], which throws if no [StreamChat] is found.
   static StreamChatState? maybeOf(BuildContext context) {
-    return StreamScope.maybeOf<StreamChatState>(context);
+    return StreamStateScope.maybeOf<StreamChatState>(context);
   }
 }
 
@@ -156,7 +156,7 @@ class StreamChatState extends State<StreamChat> {
   @override
   Widget build(BuildContext context) {
     final theme = _getTheme(context, widget.streamChatThemeData);
-    return StreamScope(
+    return StreamStateScope(
       state: this,
       child: Portal(
         child: StreamChatConfiguration(

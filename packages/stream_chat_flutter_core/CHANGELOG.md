@@ -4,7 +4,7 @@
 
 - Added `StreamChannel.value` — exposes an already-initialized channel without running channel-page
   positioning. Use it for sub-route and overlay wraps.
-- Added `StreamScope<T>` — a generic `InheritedWidget` that exposes a `State` to descendants for
+- Added `StreamStateScope<T>` — a generic `InheritedWidget` that exposes a `State` to descendants for
   O(1) `.of(context)` lookup. Use it to back `static of(BuildContext)` accessors instead of
   `BuildContext.findAncestorStateOfType`.
 
@@ -19,7 +19,7 @@
 
 🚀 Performance
 
-- `StreamChannel.of` and `StreamChatCore.of` now resolve via `StreamScope<T>` instead of
+- `StreamChannel.of` and `StreamChatCore.of` now resolve via `StreamStateScope<T>` instead of
   `findAncestorStateOfType`, replacing an O(tree-depth) element walk with an O(1) inherited-widget
   lookup. Callers and behavior are unchanged.
 

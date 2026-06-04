@@ -5,7 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 void main() {
-  group('StreamScope', () {
+  group('StreamStateScope', () {
     testWidgets('exposes the State to descendants via of()', (tester) async {
       _CounterState? captured;
 
@@ -93,10 +93,11 @@ void main() {
 
     testWidgets(
       'setState on the host does not rebuild .of() consumers, '
-      'but the next .of() sees the updated state',
+      'but a fresh .of() sees the updated state',
       (tester) async {
         var consumerBuilds = 0;
-        int? lastSeenValue;
+        BuildContext? leafContext;
+        _CounterState? initialLookup;
 
         await tester.pumpWidget(
           MaterialApp(
@@ -104,7 +105,8 @@ void main() {
               child: Builder(
                 builder: (context) {
                   consumerBuilds++;
-                  lastSeenValue = _Counter.of(context).value;
+                  leafContext = context;
+                  initialLookup = _Counter.of(context);
                   return const SizedBox.shrink();
                 },
               ),
@@ -112,20 +114,23 @@ void main() {
           ),
         );
         expect(consumerBuilds, 1);
-        expect(lastSeenValue, 0);
+        expect(initialLookup!.value, 0);
 
         // Mutate the host state. Because .of() did not register the consumer
         // as a dependent of the scope, and because the consumer's Widget
         // instance is identical across rebuilds, the consumer's build must
         // not be re-invoked.
-        final state = tester.state<_CounterState>(find.byType(_Counter))
-          ..increment();
+        tester.state<_CounterState>(find.byType(_Counter)).increment();
         await tester.pump();
 
+        // No rebuild on the consumer.
         expect(consumerBuilds, 1);
-        expect(state.value, 1);
-        // The captured State reference is still the same instance — the
-        // identity is stable, and a fresh .of() call would observe value == 1.
+
+        // A fresh .of() call from the same context returns the same State
+        // instance (identity is stable), and observes the post-setState value.
+        final freshLookup = _Counter.of(leafContext!);
+        expect(freshLookup, same(initialLookup));
+        expect(freshLookup.value, 1);
       },
     );
 
@@ -133,7 +138,7 @@ void main() {
       'of() does not register the caller as a dependent on the scope',
       (tester) async {
         // The whole point of using getElementForInheritedWidgetOfExactType in
-        // StreamScope.maybeOf is to preserve the dependency-free semantics of
+        // StreamStateScope.maybeOf is to preserve the dependency-free semantics of
         // the old findAncestorStateOfType-based implementation. If a future
         // change accidentally switches to dependOnInheritedWidgetOfExactType,
         // every consumer of StreamChannel.of / StreamChat.of would start
@@ -156,14 +161,15 @@ void main() {
 
         final scopeElement = leafContext!
             .getElementForInheritedWidgetOfExactType<
-                StreamScope<_CounterState>>()!;
+                StreamStateScope<_CounterState>>()!;
         final isDependent = (leafContext! as Element)
             .doesDependOnInheritedElement(scopeElement);
 
         expect(
           isDependent,
           isFalse,
-          reason: 'StreamScope.of must not register the caller as a dependent.',
+          reason:
+              'StreamStateScope.of must not register the caller as a dependent.',
         );
       },
     );
@@ -178,10 +184,10 @@ class _Counter extends StatefulWidget {
   final Widget child;
 
   static _CounterState of(BuildContext context) =>
-      StreamScope.of<_CounterState>(context);
+      StreamStateScope.of<_CounterState>(context);
 
   static _CounterState? maybeOf(BuildContext context) =>
-      StreamScope.maybeOf<_CounterState>(context);
+      StreamStateScope.maybeOf<_CounterState>(context);
 
   @override
   State<_Counter> createState() => _CounterState();
@@ -194,6 +200,6 @@ class _CounterState extends State<_Counter> {
 
   @override
   Widget build(BuildContext context) {
-    return StreamScope(state: this, child: widget.child);
+    return StreamStateScope(state: this, child: widget.child);
   }
 }
