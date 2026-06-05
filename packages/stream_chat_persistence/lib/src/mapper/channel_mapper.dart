@@ -60,6 +60,7 @@ extension ChannelModelX on ChannelModel {
     messageCount: messageCount,
     createdById: createdBy?.id,
     filterTags: filterTags,
-    team: team,extraData: extraData,
+    team: team,
+    extraData: extraData,
   );
 }
