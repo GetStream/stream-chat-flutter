@@ -4,6 +4,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/stream_chat.dart';
+import 'package:stream_chat_flutter_core/src/stream_state_scope.dart';
 
 /// Specifies query direction for pagination
 enum QueryDirection {
@@ -191,7 +192,7 @@ class StreamChannel extends StatefulWidget {
   /// See also:
   ///  * [of], which throws if no [StreamChannel] is found.
   static StreamChannelState? maybeOf(BuildContext context) {
-    return context.findAncestorStateOfType<StreamChannelState>();
+    return StreamStateScope.maybeOf<StreamChannelState>(context);
   }
 
   @override
@@ -912,21 +913,24 @@ class StreamChannelState extends State<StreamChannel> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<void>(
-      future: _channelInitFuture,
-      builder: (context, snapshot) {
-        if (snapshot.hasError) {
-          final error = snapshot.error!;
-          final stackTrace = snapshot.stackTrace;
-          return widget.errorBuilder(context, error, stackTrace);
-        }
+    return StreamStateScope(
+      state: this,
+      child: FutureBuilder<void>(
+        future: _channelInitFuture,
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            final error = snapshot.error!;
+            final stackTrace = snapshot.stackTrace;
+            return widget.errorBuilder(context, error, stackTrace);
+          }
 
-        if (snapshot.connectionState != ConnectionState.done) {
-          if (widget.showLoading) return widget.loadingBuilder(context);
-        }
+          if (snapshot.connectionState != ConnectionState.done) {
+            if (widget.showLoading) return widget.loadingBuilder(context);
+          }
 
-        return widget.child;
-      },
+          return widget.child;
+        },
+      ),
     );
   }
 }

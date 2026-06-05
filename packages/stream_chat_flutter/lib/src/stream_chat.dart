@@ -131,7 +131,7 @@ class StreamChat extends StatefulWidget {
   /// See also:
   ///  * [of], which throws if no [StreamChat] is found.
   static StreamChatState? maybeOf(BuildContext context) {
-    return context.findAncestorStateOfType<StreamChatState>();
+    return StreamStateScope.maybeOf<StreamChatState>(context);
   }
 }
 
@@ -156,35 +156,38 @@ class StreamChatState extends State<StreamChat> {
   @override
   Widget build(BuildContext context) {
     final theme = _getTheme(context, widget.streamChatThemeData);
-    return Portal(
-      child: StreamChatConfiguration(
-        data: streamChatConfigData,
-        child: StreamChatTheme(
-          data: theme,
-          child: Builder(
-            builder: (context) {
-              final materialTheme = Theme.of(context);
-              final streamTheme = StreamChatTheme.of(context);
-              return Theme(
-                data: materialTheme.copyWith(
-                  primaryIconTheme: streamTheme.primaryIconTheme,
-                  colorScheme: materialTheme.colorScheme.copyWith(
-                    secondary: streamTheme.colorTheme.accentPrimary,
+    return StreamStateScope(
+      state: this,
+      child: Portal(
+        child: StreamChatConfiguration(
+          data: streamChatConfigData,
+          child: StreamChatTheme(
+            data: theme,
+            child: Builder(
+              builder: (context) {
+                final materialTheme = Theme.of(context);
+                final streamTheme = StreamChatTheme.of(context);
+                return Theme(
+                  data: materialTheme.copyWith(
+                    primaryIconTheme: streamTheme.primaryIconTheme,
+                    colorScheme: materialTheme.colorScheme.copyWith(
+                      secondary: streamTheme.colorTheme.accentPrimary,
+                    ),
                   ),
-                ),
-                child: StreamChatCore(
-                  client: client,
-                  onBackgroundEventReceived: widget.onBackgroundEventReceived,
-                  backgroundKeepAlive: widget.backgroundKeepAlive,
-                  connectivityStream: widget.connectivityStream,
-                  child: Builder(
-                    builder: (context) {
-                      return widget.child ?? const Empty();
-                    },
+                  child: StreamChatCore(
+                    client: client,
+                    onBackgroundEventReceived: widget.onBackgroundEventReceived,
+                    backgroundKeepAlive: widget.backgroundKeepAlive,
+                    connectivityStream: widget.connectivityStream,
+                    child: Builder(
+                      builder: (context) {
+                        return widget.child ?? const Empty();
+                      },
+                    ),
                   ),
-                ),
-              );
-            },
+                );
+              },
+            ),
           ),
         ),
       ),

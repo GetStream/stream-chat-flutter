@@ -14,6 +14,10 @@
 - `MessageDao.getMessagesByCid` with a forward cursor (`greaterThan`/`greaterThanOrEqual`) and a `limit` now returns the messages immediately AFTER the pivot, instead of the channel tail — mirroring how `lessThan` already returned the messages immediately before the pivot.
 
 
+🐛 Fixed
+
+- Fixed missing persistence of the `team` field on channel entities.
+
 🔄 Changed
 
 - Changed how dates are stored in the local cache, from integer seconds to ISO-8601 strings, in order to preserve millisecond precision.
