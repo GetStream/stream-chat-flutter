@@ -135,29 +135,29 @@ class StreamChat extends StatefulWidget {
     throw FlutterError.fromParts(<DiagnosticsNode>[
       ErrorSummary(
         'StreamChat.of() called with a context that does not contain a '
-        'StreamChat.',
+            'StreamChat.',
       ),
       ErrorDescription(
         'No StreamChat ancestor could be found starting from the context '
-        'that was passed to StreamChat.of(). This usually happens when the '
-        'context used comes from the widget that creates the StreamChat '
-        'itself.',
+            'that was passed to StreamChat.of(). This usually happens when the '
+            'context used comes from the widget that creates the StreamChat '
+            'itself.',
       ),
       ErrorHint(
         'To fix this, ensure that you are using a context that is a descendant '
-        'of the StreamChat. You can use a Builder to get a new context that '
-        'is under the StreamChat:\n\n'
-        '  Builder(\n'
-        '    builder: (context) {\n'
-        '      final chatState = StreamChat.of(context);\n'
-        '      ...\n'
-        '    },\n'
-        '  )',
+            'of the StreamChat. You can use a Builder to get a new context that '
+            'is under the StreamChat:\n\n'
+            '  Builder(\n'
+            '    builder: (context) {\n'
+            '      final chatState = StreamChat.of(context);\n'
+            '      ...\n'
+            '    },\n'
+            '  )',
       ),
       ErrorHint(
         'Alternatively, split your build method into smaller widgets so that '
-        'you get a new BuildContext that is below the StreamChat in the '
-        'widget tree.',
+            'you get a new BuildContext that is below the StreamChat in the '
+            'widget tree.',
       ),
       context.describeElement('The context used was'),
     ]);
@@ -212,8 +212,11 @@ class StreamChatState extends State<StreamChat> {
       child = StreamComponentFactory(builders: builders, child: child);
     }
 
-    return Portal(
-      child: StreamChatConfiguration(data: configData, child: child),
+    return StreamStateScope(
+      state: this,
+      child: Portal(
+        child: StreamChatConfiguration(data: configData, child: child),
+      ),
     );
   }
 

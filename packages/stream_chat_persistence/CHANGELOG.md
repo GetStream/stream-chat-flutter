@@ -15,6 +15,10 @@
 
 - Reduce the number of DB reads in the `ChatPersistenceClient.getChannelStates` method.
 
+🐛 Fixed
+
+- Fixed missing persistence of the `team` field on channel entities.
+
 🔄 Changed
 
 - Changed how dates are stored in the local cache, from integer seconds to ISO-8601 strings, in order to preserve millisecond precision.

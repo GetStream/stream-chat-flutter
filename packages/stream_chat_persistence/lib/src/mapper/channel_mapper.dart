@@ -21,6 +21,7 @@ extension ChannelEntityX on ChannelEntity {
       deletedAt: deletedAt,
       createdBy: createdBy,
       filterTags: filterTags,
+      team: team,
       extraData: extraData ?? {},
     );
   }
@@ -59,6 +60,6 @@ extension ChannelModelX on ChannelModel {
     messageCount: messageCount,
     createdById: createdBy?.id,
     filterTags: filterTags,
-    extraData: extraData,
+    team: team,extraData: extraData,
   );
 }
