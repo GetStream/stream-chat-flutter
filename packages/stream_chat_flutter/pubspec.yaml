@@ -59,11 +59,7 @@ dependencies:
   share_plus: ">=12.0.2 <14.0.0"
   shimmer: ^3.0.0
   stream_chat_flutter_core: ^10.0.0-beta.13
-  stream_core_flutter:
-    git:
-      url: https://github.com/GetStream/stream-core-flutter.git
-      ref: 73ce5122a2f57e6106f35e95a2482bde0136a8e0
-      path: packages/stream_core_flutter
+  stream_core_flutter: ^0.3.0
   svg_icon_widget: ^0.0.1
   synchronized: ^3.4.0
   theme_extensions_builder_annotation: ^7.1.0
