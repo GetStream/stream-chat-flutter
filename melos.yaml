@@ -98,7 +98,6 @@ command:
       stream_chat_persistence: ^10.0.0-beta.13
       streaming_shared_preferences: ^2.0.0
       svg_icon_widget: ^0.0.1
-      # TODO: Replace with hosted version before merging PR
       stream_core_flutter: ^0.3.0
       synchronized: ^3.4.0
       thumblr: ^0.0.4
