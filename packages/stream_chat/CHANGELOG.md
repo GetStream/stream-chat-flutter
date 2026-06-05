@@ -1,3 +1,7 @@
+## 9.25.0
+
+- Minor bug fixes and improvements
+
 ## 9.24.0
 
 🔒 Security
