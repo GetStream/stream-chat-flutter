@@ -150,6 +150,19 @@ void main() {
     );
   });
 
+  test(
+      'getReactions returns empty for a message id with no reactions, '
+      'even when reactions exist for other messages', () async {
+    const messageWithReactions = 'pmsg-A';
+    const messageWithoutReactions = 'pmsg-B';
+
+    await _prepareReactionData(messageWithReactions);
+
+    final fetched =
+        await pinnedMessageReactionDao.getReactions(messageWithoutReactions);
+    expect(fetched, isEmpty);
+  });
+
   group('deleteReactionsByMessageIds', () {
     const messageId1 = 'testMessageId1';
     const messageId2 = 'testMessageId2';
