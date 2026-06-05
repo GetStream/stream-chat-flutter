@@ -1,4 +1,4 @@
-## Upcoming Changes
+## 9.25.0
 
 🚀 Performance
 
@@ -13,10 +13,6 @@
 - `MessageDao.getMessagesByCid` now honours `PaginationParams.lessThanOrEqual` and `PaginationParams.greaterThanOrEqual` (inclusive of the cursor message), in addition to the existing strict `lessThan`/`greaterThan`.
 - `MessageDao.getMessagesByCid` now treats `PaginationParams.greaterThan` as strict (exclusive of the cursor), matching the `PaginationParams` contract and the existing `lessThan` behaviour.
 - `MessageDao.getMessagesByCid` with a forward cursor (`greaterThan`/`greaterThanOrEqual`) and a `limit` now returns the messages immediately AFTER the pivot, instead of the channel tail — mirroring how `lessThan` already returned the messages immediately before the pivot.
-
-
-🐛 Fixed
-
 - Fixed missing persistence of the `team` field on channel entities.
 
 🔄 Changed
