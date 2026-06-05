@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/stream_chat.dart';
+import 'package:stream_chat_flutter_core/src/stream_state_scope.dart';
 import 'package:stream_chat_flutter_core/src/typedef.dart';
 
 /// Widget used to provide information about the chat to the widget tree.
@@ -133,7 +134,7 @@ class StreamChatCore extends StatefulWidget {
   /// See also:
   ///  * [of], which throws if no [StreamChatCore] is found.
   static StreamChatCoreState? maybeOf(BuildContext context) {
-    return context.findAncestorStateOfType<StreamChatCoreState>();
+    return StreamStateScope.maybeOf<StreamChatCoreState>(context);
   }
 }
 
@@ -294,7 +295,9 @@ class StreamChatCoreState extends State<StreamChatCore>
   }
 
   @override
-  Widget build(BuildContext context) => widget.child;
+  Widget build(BuildContext context) {
+    return StreamStateScope(state: this, child: widget.child);
+  }
 }
 
 final class _ChatLifecycleManager {
