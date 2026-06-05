@@ -87,6 +87,7 @@ void main() {
         createdAt: now,
         memberCount: index + 3,
         lastMessageAt: now.add(Duration(hours: index)),
+        team: 'testTeam$index',
       ),
     ).toList(growable: false);
 
@@ -124,6 +125,7 @@ void main() {
         expect(updatedChannel.cid, insertedChannel.cid);
         expect(updatedChannel.memberCount, insertedChannel.memberCount);
         expect(updatedChannel.filterTags, insertedChannel.filterTags);
+        expect(updatedChannel.team, insertedChannel.team);
 
         // Should match createdAt date
         expect(

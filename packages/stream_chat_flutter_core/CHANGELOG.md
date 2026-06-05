@@ -1,3 +1,28 @@
+## Upcoming
+
+✅ Added
+
+- Added `StreamChannel.value` — exposes an already-initialized channel without running channel-page
+  positioning. Use it for sub-route and overlay wraps.
+- Added `StreamStateScope<T>` — a generic `InheritedWidget` that exposes a `State` to descendants for
+  O(1) `.of(context)` lookup. Use it to back `static of(BuildContext)` accessors instead of
+  `BuildContext.findAncestorStateOfType`.
+
+🐞 Fixed
+
+- Fixed `StreamChannel.getMessage` hitting the network for thread replies and pinned messages
+  already in local state.
+- Fixed `MessageListCore` reloading the parent channel from its dispose path when running in
+  thread mode.
+- Fixed `StreamChannel.reloadChannel` merging the latest page on top of the previously loaded
+  window instead of replacing it. The reload now matches a fresh open of the channel.
+
+🚀 Performance
+
+- `StreamChannel.of` and `StreamChatCore.of` now resolve via `StreamStateScope<T>` instead of
+  `findAncestorStateOfType`, replacing an O(tree-depth) element walk with an O(1) inherited-widget
+  lookup. Callers and behavior are unchanged.
+
 ## 9.24.0
 
 ✅ Added

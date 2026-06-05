@@ -143,7 +143,7 @@ class ScrollablePositionedList extends StatefulWidget {
   final int? semanticChildCount;
 
   /// The amount of space by which to inset the children.
-  final EdgeInsets? padding;
+  final EdgeInsetsGeometry? padding;
 
   /// Whether to wrap each child in an [IndexedSemantics].
   ///
@@ -526,13 +526,10 @@ class _ScrollablePositionedListState extends State<ScrollablePositionedList>
   ///    reanchor would silently revert the user's in-progress scroll
   ///    and the list would feel locked in place.
   ///
-  /// 2. The scroll offset is brought to zero via
-  ///    [ScrollPosition.correctBy], not [ScrollController.jumpTo].
-  ///    `correctBy` mutates `pixels` directly without firing `goIdle()`
-  ///    or dispatching scroll notifications, so an in-flight
-  ///    `DragScrollActivity` or `BallisticScrollActivity` keeps
-  ///    integrating its delta against the new baseline instead of
-  ///    being cancelled.
+  /// 2. The new anchor folds the current pixel offset in so we can
+  ///    leave [primary.scrollController.position.pixels] untouched.
+  ///    Resetting pixels could exhaust [UnboundedRenderViewport]'s
+  ///    layout-cycle budget on deep mid-list anchors.
   void _updateFirstVisibleItemIfNeeded() {
     final keyBuilder = widget.itemKeyBuilder;
     if (keyBuilder == null || _lastKnownFirstItemKey == null) return;
@@ -547,23 +544,17 @@ class _ScrollablePositionedListState extends State<ScrollablePositionedList>
     final currentAlignment = viewport > 0
         ? _firstVisibleItemAlignment - pixelDelta / viewport
         : _firstVisibleItemAlignment;
+    // `newAnchor * viewport - pixels == currentAlignment * viewport`
+    // so the anchored item lands at the same visual position without
+    // touching pixels.
+    final newAnchor =
+        viewport > 0 ? currentAlignment + pixels / viewport : currentAlignment;
 
-    if (newIndex == primary.target &&
-        primary.alignment == currentAlignment &&
-        pixels == 0) {
-      return;
-    }
+    if (newIndex == primary.target && primary.alignment == newAnchor) return;
     primary
       ..target = newIndex
-      ..alignment = currentAlignment;
-    if (hasClients && pixels != 0) {
-      position!.correctBy(-pixels);
-    }
-    // The reanchor itself moves the pixel baseline to 0; record that
-    // alongside the (now-applied) anchor so subsequent reanchors that
-    // fire before the next layout compute deltas against the right
-    // starting point.
-    _firstVisibleItemAlignmentAtPixels = 0;
+      ..alignment = newAnchor;
+    _firstVisibleItemAlignmentAtPixels = pixels;
     _lastKnownFirstItemIndex = newIndex;
     _firstVisibleItemAlignment = currentAlignment;
   }
@@ -656,6 +647,35 @@ class _ScrollablePositionedListState extends State<ScrollablePositionedList>
         widget.minCacheExtent ?? 0,
       );
 
+  /// Pixels of [widget.padding] on the leading side of the scroll
+  /// axis. Direction-aware: resolves [EdgeInsetsDirectional] against
+  /// [Directionality] for horizontal axes.
+  double _resolveLeadingPadding() {
+    final geometry = widget.padding;
+    if (geometry == null) return 0;
+    final textDirection = Directionality.maybeOf(context) ?? TextDirection.ltr;
+    final resolved = geometry.resolve(textDirection);
+    if (widget.scrollDirection == Axis.vertical) {
+      return widget.reverse ? resolved.bottom : resolved.top;
+    }
+    final axisDirectionIsRight =
+        (textDirection == TextDirection.ltr) ^ widget.reverse;
+    return axisDirectionIsRight ? resolved.left : resolved.right;
+  }
+
+  /// Adjustment for `_startScroll`'s target so the leading-end item
+  /// lands at the content-area edge. Only applies when the center
+  /// sliver carries the leading padding — for other indices SPL's
+  /// pre-existing math is preserved.
+  double _resolveLeadingEndPaddingAdjust(
+      {required int index, required double alignment}) {
+    if (alignment != 0) return 0;
+    // Center carries the leading-edge padding only when
+    // `positionedIndex == 0`, in both axis directions.
+    if (index != 0) return 0;
+    return _resolveLeadingPadding();
+  }
+
   void _jumpTo({required int index, required double alignment}) {
     _stopScroll(canceled: true);
     if (index > widget.itemCount - 1) {
@@ -730,6 +750,16 @@ class _ScrollablePositionedListState extends State<ScrollablePositionedList>
     Curve curve = Curves.linear,
     required List<double> opacityAnimationWeights,
   }) async {
+    // If `itemPositions` hasn't been published yet (e.g. a scroll requested
+    // from a post-frame callback right after mount), the in-viewport branch
+    // below would miss the target and fall through to the dual-controller
+    // teleport path — even when the target is actually a few items away.
+    // Wait one frame so layout can report positions, then proceed.
+    if (primary.itemPositionsNotifier.itemPositions.value.isEmpty) {
+      await SchedulerBinding.instance.endOfFrame;
+      if (!mounted) return;
+    }
+
     final direction = index > primary.target ? 1 : -1;
     final itemPosition =
         primary.itemPositionsNotifier.itemPositions.value.firstWhereOrNull(
@@ -737,12 +767,18 @@ class _ScrollablePositionedListState extends State<ScrollablePositionedList>
     );
     if (itemPosition != null) {
       // Scroll directly.
-      final localScrollAmount = itemPosition.itemLeadingEdge *
-          primary.scrollController.position.viewportDimension;
+      final viewport = primary.scrollController.position.viewportDimension;
+      final localScrollAmount = itemPosition.itemLeadingEdge * viewport;
+      // `itemLeadingEdge` comes from `getOffsetToReveal`, which is
+      // geometric and padding-blind. Subtract `leadingPadding` so the
+      // target lands at the content-area edge.
+      final paddingAdjust =
+          _resolveLeadingEndPaddingAdjust(index: index, alignment: alignment);
       await primary.scrollController.animateTo(
         primary.scrollController.offset +
             localScrollAmount -
-            alignment * primary.scrollController.position.viewportDimension,
+            alignment * viewport -
+            paddingAdjust,
         duration: duration,
         curve: curve,
       );
@@ -759,17 +795,21 @@ class _ScrollablePositionedListState extends State<ScrollablePositionedList>
               AnimationController(vsync: this, duration: duration)..forward();
           opacity.parent = _opacityAnimation(opacityAnimationWeights)
               .animate(_animationController!);
-          secondary.scrollController.jumpTo(-direction *
-              (_screenScrollCount *
-                      primary.scrollController.position.viewportDimension -
-                  alignment *
-                      secondary.scrollController.position.viewportDimension));
+          secondary.scrollController.jumpTo(
+            -direction *
+                (_screenScrollCount *
+                        primary.scrollController.position.viewportDimension -
+                    alignment *
+                        secondary.scrollController.position.viewportDimension),
+          );
 
-          startCompleter.complete(primary.scrollController.animateTo(
-            primary.scrollController.offset + direction * scrollAmount,
-            duration: duration,
-            curve: curve,
-          ));
+          startCompleter.complete(
+            primary.scrollController.animateTo(
+              primary.scrollController.offset + direction * scrollAmount,
+              duration: duration,
+              curve: curve,
+            ),
+          );
           endCompleter.complete(secondary.scrollController
               .animateTo(0, duration: duration, curve: curve));
         });
@@ -841,9 +881,11 @@ class _ScrollablePositionedListState extends State<ScrollablePositionedList>
   }
 
   void _updatePositions() {
-    final itemPositions = primary.itemPositionsNotifier.itemPositions.value
-        .where((ItemPosition position) =>
-            position.itemLeadingEdge < 1 && position.itemTrailingEdge > 0);
+    final itemPositions =
+        primary.itemPositionsNotifier.itemPositions.value.where(
+      (ItemPosition position) =>
+          position.itemLeadingEdge < 1 && position.itemTrailingEdge > 0,
+    );
     if (itemPositions.isNotEmpty) {
       // The visually topmost item — smallest `itemLeadingEdge` along the
       // scroll axis.

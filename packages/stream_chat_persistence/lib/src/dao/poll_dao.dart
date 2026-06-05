@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_persistence/src/db/drift_chat_database.dart';
+import 'package:stream_chat_persistence/src/db/query_utils.dart';
 import 'package:stream_chat_persistence/src/entity/poll_votes.dart';
 import 'package:stream_chat_persistence/src/entity/polls.dart';
 import 'package:stream_chat_persistence/src/entity/users.dart';
@@ -51,6 +52,32 @@ class PollDao extends DatabaseAccessor<DriftChatDatabase> with _$PollDaoMixin {
           .map(_pollFromJoinRow)
           .getSingleOrNull();
 
+  /// Returns polls for every id in [pollIds], keyed by poll id.
+  Future<Map<String, Poll?>> getPollsByIds(List<String> pollIds) async {
+    if (pollIds.isEmpty) return const {};
+
+    // Group votes once for every requested poll. The dense-map contract on
+    // `getPollVotesForPolls` means every input id resolves to a (possibly
+    // empty) list with a single lookup.
+    final votesByPoll = await _db.pollVoteDao.getPollVotesForPolls(pollIds);
+
+    final result = <String, Poll?>{for (final id in pollIds) id: null};
+    for (final chunk in chunked(pollIds)) {
+      final where = polls.id.isIn(chunk);
+      final rows = await (select(polls)..where((_) => where)).join(
+          [leftOuterJoin(users, polls.createdById.equalsExp(users.id))]).get();
+      for (final row in rows) {
+        final pollEntity = row.readTable(polls);
+        // Same as `_pollFromJoinRow` => reads users via `readTable` (not
+        // `readTableOrNull`) on a LEFT JOIN
+        final userEntity = row.readTable(users);
+        final allVotes = votesByPoll[pollEntity.id] ?? const <PollVote>[];
+        result[pollEntity.id] = _buildPoll(pollEntity, userEntity, allVotes);
+      }
+    }
+    return result;
+  }
+
   /// Updates all the polls using the new [pollList] data
   Future<void> updatePolls(List<Poll> pollList) => batch(
         (it) => it.insertAllOnConflictUpdate(
@@ -69,4 +96,32 @@ class PollDao extends DatabaseAccessor<DriftChatDatabase> with _$PollDaoMixin {
   /// Deletes all the polls whose [Polls.id] is present in [pollIds]
   Future<void> deletePollsByIds(List<String> pollIds) =>
       (delete(polls)..where((tbl) => tbl.id.isIn(pollIds))).go();
+
+  Poll _buildPoll(
+    PollEntity pollEntity,
+    UserEntity userEntity,
+    List<PollVote> allVotes,
+  ) {
+    final latestAnswers = allVotes.where((it) => it.isAnswer);
+    final ownVotesAndAnswers = allVotes.where((it) => it.userId == _db.userId);
+
+    final latestVotesByOption = <String, List<PollVote>>{};
+    for (final vote in allVotes) {
+      if (vote.isAnswer) continue;
+      if (vote.optionId case final optionId?) {
+        latestVotesByOption.update(
+          optionId,
+          (value) => [...value, vote],
+          ifAbsent: () => [vote],
+        );
+      }
+    }
+
+    return pollEntity.toPoll(
+      createdBy: userEntity.toUser(),
+      latestAnswers: latestAnswers.toList(),
+      ownVotesAndAnswers: ownVotesAndAnswers.toList(),
+      latestVotesByOption: latestVotesByOption,
+    );
+  }
 }

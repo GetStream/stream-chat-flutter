@@ -34,42 +34,120 @@ class MessageDao extends DatabaseAccessor<DriftChatDatabase>
   Future<void> deleteMessageByCids(List<String> cids) async =>
       (delete(messages)..where((tbl) => tbl.channelCid.isIn(cids))).go();
 
-  Future<Message> _messageFromJoinRow(
-    TypedResult rows, {
+  /// Hydrates `rows` into `Message`s using batched lookups for related
+  /// entities. Reactions, polls, and (optionally) quoted messages and drafts
+  /// are each fetched once via a single `WHERE ... IN (?).
+  Future<List<Message>> _messagesFromJoinRows(
+    List<TypedResult> rows, {
     bool fetchDraft = false,
+    bool fetchQuotedMessage = true,
   }) async {
-    final userEntity = rows.readTableOrNull(_users);
-    final pinnedByEntity = rows.readTableOrNull(_pinnedByUsers);
-    final msgEntity = rows.readTable(messages);
-    final latestReactions = await _db.reactionDao.getReactions(msgEntity.id);
-    final ownReactions = await _db.reactionDao.getReactionsByUserId(
-      msgEntity.id,
-      _db.userId,
-    );
+    if (rows.isEmpty) return const [];
 
-    final quotedMessage = await switch (msgEntity.quotedMessageId) {
-      final id? => getMessageById(id),
-      _ => null,
-    };
+    final messageIds = <String>[];
+    final quotedIds = <String>[];
+    final pollIds = <String>[];
+    // note: While possible, in real case scenarios this will NOT hold more than
+    // a single value.
+    final cids = <String>{};
+    for (final row in rows) {
+      final msg = row.readTable(messages);
+      messageIds.add(msg.id);
+      if (msg.quotedMessageId case final id?) quotedIds.add(id);
+      if (msg.pollId case final id?) pollIds.add(id);
+      cids.add(msg.channelCid);
+    }
 
-    final poll = await switch (msgEntity.pollId) {
-      final id? => _db.pollDao.getPollById(id),
-      _ => null,
-    };
+    final results = await Future.wait([
+      // Reactions
+      _db.reactionDao.getReactionsForMessages(messageIds),
+      // Own reactions
+      _db.reactionDao.getReactionsForMessagesByUserId(messageIds, _db.userId),
+      // Polls
+      if (pollIds.isNotEmpty)
+        _db.pollDao.getPollsByIds(pollIds)
+      else
+        Future.value(const <String, Poll?>{}),
+      // Drafts
+      if (fetchDraft)
+        Future.wait([
+          for (final cid in cids)
+            _db.draftMessageDao
+                .getDraftMessagesByParentIds(cid, messageIds)
+                .then((map) => MapEntry(cid, map)),
+        ]).then(Map.fromEntries)
+      else
+        Future.value(const <String, Map<String, Draft?>>{}),
+    ]);
 
-    final draft = await switch (fetchDraft) {
-      true => _db.draftMessageDao.getDraftMessageByCid(
-          msgEntity.channelCid,
-          parentId: msgEntity.id,
+    final latestReactionsByMsg = results[0] as Map<String, List<Reaction>>;
+    final ownReactionsByMsg = results[1] as Map<String, List<Reaction>>;
+    final pollsById = results[2] as Map<String, Poll?>;
+    final draftsByCidByParentId =
+        results[3] as Map<String, Map<String, Draft?>>;
+
+    final quotedById = <String, Message>{};
+    if (fetchQuotedMessage && quotedIds.isNotEmpty) {
+      final quoteRows = await (select(messages).join([
+        leftOuterJoin(_users, messages.userId.equalsExp(_users.id)),
+        leftOuterJoin(
+          _pinnedByUsers,
+          messages.pinnedByUserId.equalsExp(_pinnedByUsers.id),
         ),
+      ])
+            ..where(messages.id.isIn(quotedIds)))
+          .get();
+      final quotedMessages = await _messagesFromJoinRows(
+        quoteRows,
+        fetchQuotedMessage: false,
+      );
+      for (final m in quotedMessages) {
+        quotedById[m.id] = m;
+      }
+    }
+
+    return [
+      for (final row in rows)
+        _buildMessage(
+          row,
+          latestReactionsByMsg: latestReactionsByMsg,
+          ownReactionsByMsg: ownReactionsByMsg,
+          pollsById: pollsById,
+          quotedById: quotedById,
+          draftsByCidByParentId: draftsByCidByParentId,
+        ),
+    ];
+  }
+
+  /// Builds a single [Message] from a join row + the pre-fetched maps
+  /// assembled by [_messagesFromJoinRows].
+  Message _buildMessage(
+    TypedResult row, {
+    required Map<String, List<Reaction>> latestReactionsByMsg,
+    required Map<String, List<Reaction>> ownReactionsByMsg,
+    required Map<String, Poll?> pollsById,
+    required Map<String, Message> quotedById,
+    required Map<String, Map<String, Draft?>> draftsByCidByParentId,
+  }) {
+    final userEntity = row.readTableOrNull(_users);
+    final pinnedByEntity = row.readTableOrNull(_pinnedByUsers);
+    final msgEntity = row.readTable(messages);
+
+    final quotedMessage = switch (msgEntity.quotedMessageId) {
+      final id? => quotedById[id],
       _ => null,
     };
+    final poll = switch (msgEntity.pollId) {
+      final id? => pollsById[id],
+      _ => null,
+    };
+    final draft = draftsByCidByParentId[msgEntity.channelCid]?[msgEntity.id];
 
     return msgEntity.toMessage(
       user: userEntity?.toUser(),
       pinnedBy: pinnedByEntity?.toUser(),
-      latestReactions: latestReactions,
-      ownReactions: ownReactions,
+      latestReactions: latestReactionsByMsg[msgEntity.id] ?? const [],
+      ownReactions: ownReactionsByMsg[msgEntity.id] ?? const [],
       quotedMessage: quotedMessage,
       poll: poll,
       draft: draft,
@@ -96,27 +174,27 @@ class MessageDao extends DatabaseAccessor<DriftChatDatabase>
     final result = await query.getSingleOrNull();
     if (result == null) return null;
 
-    return _messageFromJoinRow(
-      result,
-      fetchDraft: fetchDraft,
-    );
+    final hydrated =
+        await _messagesFromJoinRows([result], fetchDraft: fetchDraft);
+    return hydrated.firstOrNull;
   }
 
   /// Returns all the messages of a particular thread by matching
   /// [Messages.channelCid] with [cid]
-  Future<List<Message>> getThreadMessages(String cid) async =>
-      Future.wait(await (select(messages).join([
-        leftOuterJoin(_users, messages.userId.equalsExp(_users.id)),
-        leftOuterJoin(
-          _pinnedByUsers,
-          messages.pinnedByUserId.equalsExp(_pinnedByUsers.id),
-        ),
-      ])
-            ..where(messages.channelCid.equals(cid))
-            ..where(messages.parentId.isNotNull())
-            ..orderBy([OrderingTerm.asc(messages.createdAt)]))
-          .map(_messageFromJoinRow)
-          .get());
+  Future<List<Message>> getThreadMessages(String cid) async {
+    final rows = await (select(messages).join([
+      leftOuterJoin(_users, messages.userId.equalsExp(_users.id)),
+      leftOuterJoin(
+        _pinnedByUsers,
+        messages.pinnedByUserId.equalsExp(_pinnedByUsers.id),
+      ),
+    ])
+          ..where(messages.channelCid.equals(cid))
+          ..where(messages.parentId.isNotNull())
+          ..orderBy([OrderingTerm.asc(messages.createdAt)]))
+        .get();
+    return _messagesFromJoinRows(rows);
+  }
 
   /// Returns all the messages of a particular thread by matching
   /// [Messages.parentId] with [parentId]
@@ -206,7 +284,7 @@ class MessageDao extends DatabaseAccessor<DriftChatDatabase>
     final rows = await query.get();
     final orderedRows = isForwardPagination ? rows : rows.reversed.toList();
 
-    return Future.wait(orderedRows.map(_messageFromJoinRow));
+    return _messagesFromJoinRows(orderedRows);
   }
 
   /// Returns all the messages of a channel by matching
@@ -298,11 +376,7 @@ class MessageDao extends DatabaseAccessor<DriftChatDatabase>
 
     final rows = await query.get();
     final orderedRows = isForwardPagination ? rows : rows.reversed.toList();
-
-    return Future.wait(
-      orderedRows
-          .map((row) => _messageFromJoinRow(row, fetchDraft: fetchDraft)),
-    );
+    return _messagesFromJoinRows(orderedRows, fetchDraft: fetchDraft);
   }
 
   /// Updates the message data of a particular channel with

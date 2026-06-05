@@ -40,4 +40,24 @@ Future<void> main() async {
   await versionFile.writeAsString(updatedContent);
 
   print('✓ Successfully updated version to $version in $versionFilePath');
+
+  var cleanedVersion = version;
+  if (cleanedVersion.contains('-')) {
+    cleanedVersion = cleanedVersion.split('-').first;
+
+    print('Cleaned version for app: $cleanedVersion');
+  }
+
+  // Update the version in the sample_app pubspec.yaml
+  final sampleAppPubspecPath = p.join(rootDir, 'sample_app', 'pubspec.yaml');
+  final sampleAppPubspec = File(sampleAppPubspecPath).readAsStringSync();
+  final updatedSampleAppPubspec = sampleAppPubspec.replaceFirst(
+    RegExp('version: .+'),
+    'version: $cleanedVersion',
+  );
+
+  await File(sampleAppPubspecPath).writeAsString(updatedSampleAppPubspec);
+
+  print(
+      '✓ Successfully updated version to $cleanedVersion in $sampleAppPubspecPath');
 }
