@@ -706,7 +706,7 @@ void main() {
       expect(quoting.quotedMessage!.poll!.id, pollId);
     });
 
-    test('getMessagesByCid resolves a depth-2 quote chain', () async {
+    test('getMessagesByCid hydrates quotes to a single level only', () async {
       await _seedChannel(cid);
       final dbUser = User(id: 'testUserId');
       await database.userDao.updateUsers([dbUser]);
@@ -738,7 +738,58 @@ void main() {
       final fetched = await pinnedMessageDao.getMessagesByCid(cid);
       final top = fetched.firstWhere((m) => m.id == 'pA');
       expect(top.quotedMessage?.id, 'pB');
-      expect(top.quotedMessage?.quotedMessage?.id, 'pC');
+      expect(top.quotedMessage?.quotedMessage, isNull);
+    });
+
+    test(
+        'getMessagesByCid does not hydrate drafts for quoted pinned messages, '
+        'even when fetchDraft=true', () async {
+      await _seedChannel(cid);
+      final dbUser = User(id: 'testUserId');
+      await database.userDao.updateUsers([dbUser]);
+
+      const quotedId = 'pmsg-quoted-with-draft';
+      const quotingId = 'pmsg-quoting-no-draft';
+
+      final baseTime = DateTime.now();
+      final quotedMessage = Message(
+        id: quotedId,
+        user: dbUser,
+        text: 'quoted',
+        createdAt: baseTime,
+      );
+      final quotingMessage = Message(
+        id: quotingId,
+        user: dbUser,
+        text: 'quoting',
+        createdAt: baseTime.add(const Duration(seconds: 1)),
+        quotedMessageId: quotedId,
+      );
+
+      await pinnedMessageDao
+          .updateMessages(cid, [quotedMessage, quotingMessage]);
+      // `DraftMessages.parentId` is FK-referenced against `Messages.id`, not
+      // `PinnedMessages.id`, so the parent of the draft needs a row in both.
+      await database.messageDao.updateMessages(cid, [quotedMessage]);
+
+      await database.draftMessageDao.updateDraftMessages([
+        Draft(
+          channelCid: cid,
+          parentId: quotedId,
+          createdAt: baseTime,
+          message: DraftMessage(
+            id: 'pdraft-on-quoted',
+            text: 'unsent reply to quoted',
+            parentId: quotedId,
+          ),
+        ),
+      ]);
+
+      final fetched = await pinnedMessageDao.getMessagesByCid(cid);
+      final quoting = fetched.firstWhere((m) => m.id == quotingId);
+      expect(quoting.quotedMessage, isNotNull);
+      expect(quoting.quotedMessage!.id, quotedId);
+      expect(quoting.quotedMessage!.draft, isNull);
     });
   });
 

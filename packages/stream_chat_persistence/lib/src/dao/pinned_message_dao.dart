@@ -39,6 +39,7 @@ class PinnedMessageDao extends DatabaseAccessor<DriftChatDatabase>
   Future<List<Message>> _messagesFromJoinRows(
     List<TypedResult> rows, {
     bool fetchDraft = false,
+    bool fetchQuotedMessage = true,
   }) async {
     if (rows.isEmpty) return const [];
 
@@ -86,7 +87,7 @@ class PinnedMessageDao extends DatabaseAccessor<DriftChatDatabase>
         results[3] as Map<String, Map<String, Draft?>>;
 
     final quotedById = <String, Message>{};
-    if (quotedIds.isNotEmpty) {
+    if (fetchQuotedMessage && quotedIds.isNotEmpty) {
       final quoteRows = await (select(pinnedMessages).join([
         leftOuterJoin(_users, pinnedMessages.userId.equalsExp(_users.id)),
         leftOuterJoin(
@@ -98,7 +99,7 @@ class PinnedMessageDao extends DatabaseAccessor<DriftChatDatabase>
           .get();
       final quotedMessages = await _messagesFromJoinRows(
         quoteRows,
-        fetchDraft: true,
+        fetchQuotedMessage: false,
       );
       for (final m in quotedMessages) {
         quotedById[m.id] = m;
