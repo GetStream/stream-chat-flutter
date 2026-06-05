@@ -212,8 +212,11 @@ class StreamChatState extends State<StreamChat> {
       child = StreamComponentFactory(builders: builders, child: child);
     }
 
-    return Portal(
-      child: StreamChatConfiguration(data: configData, child: child),
+    return StreamStateScope(
+      state: this,
+      child: Portal(
+        child: StreamChatConfiguration(data: configData, child: child),
+      ),
     );
   }
 

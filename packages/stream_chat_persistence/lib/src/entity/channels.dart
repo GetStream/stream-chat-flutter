@@ -47,6 +47,9 @@ class Channels extends Table {
   /// List of filter tags for this channel
   TextColumn get filterTags => text().nullable().map(ListConverter<String>())();
 
+  /// The team the channel belongs to
+  TextColumn get team => text().nullable()();
+
   /// Map of custom channel extraData
   TextColumn get extraData => text().nullable().map(MapConverter())();
 
