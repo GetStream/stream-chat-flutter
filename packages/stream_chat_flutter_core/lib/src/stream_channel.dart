@@ -4,6 +4,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/stream_chat.dart';
+import 'package:stream_chat_flutter_core/src/stream_state_scope.dart';
 
 /// Specifies query direction for pagination
 enum QueryDirection {
@@ -45,7 +46,30 @@ class StreamChannel extends StatefulWidget {
     this.initialMessageId,
     this.errorBuilder = _defaultErrorBuilder,
     this.loadingBuilder = _defaultLoadingBuilder,
-  });
+  }) : _shouldPosition = true;
+
+  /// Exposes a [channel] to descendants without repositioning the loaded
+  /// window on mount.
+  ///
+  /// Use this when wrapping a channel in a sub-route or overlay for context
+  /// access only — e.g. a thread page, channel info screen, long-press
+  /// modal, or attachment viewer. The default constructor would otherwise
+  /// re-run channel-page positioning and overwrite the parent route's
+  /// loaded window.
+  ///
+  /// See also:
+  ///
+  ///  * [StreamChannel.new], which initializes the channel and positions it
+  ///    on mount.
+  const StreamChannel.value({
+    super.key,
+    required this.child,
+    required this.channel,
+  })  : showLoading = false,
+        initialMessageId = null,
+        errorBuilder = _defaultErrorBuilder,
+        loadingBuilder = _defaultLoadingBuilder,
+        _shouldPosition = false;
 
   /// The child of the widget
   final Widget child;
@@ -64,6 +88,10 @@ class StreamChannel extends StatefulWidget {
 
   /// Widget builder used in case an error occurs while building the channel.
   final ErrorWidgetBuilder errorBuilder;
+
+  // Whether to position the loaded window on mount (initialMessageId,
+  // last-read, or latest). Only false for StreamChannel.value.
+  final bool _shouldPosition;
 
   static Widget _defaultLoadingBuilder(BuildContext context) {
     final backgroundColor = _getDefaultBackgroundColor(context);
@@ -164,7 +192,7 @@ class StreamChannel extends StatefulWidget {
   /// See also:
   ///  * [of], which throws if no [StreamChannel] is found.
   static StreamChannelState? maybeOf(BuildContext context) {
-    return context.findAncestorStateOfType<StreamChannelState>();
+    return StreamStateScope.maybeOf<StreamChannelState>(context);
   }
 
   @override
@@ -675,16 +703,43 @@ class StreamChannelState extends State<StreamChannel> {
     );
   }
 
-  ///
+  /// Returns the message with the given [messageId].
   Future<Message> getMessage(String messageId) async {
-    var message = channel.state?.messages.firstWhereOrNull(
-      (it) => it.id == messageId,
+    if (_findCachedMessage(messageId) case final cached?) return cached;
+
+    final response = await channel.getMessagesById([messageId]);
+    return response.messages.firstWhere(
+      (m) => m.id == messageId,
+      orElse: () => throw StateError('Message "$messageId" not found'),
     );
-    if (message == null) {
-      final response = await channel.getMessagesById([messageId]);
-      message = response.messages.first;
+  }
+
+  // Scans cached locations in decreasing hit-likelihood, returning on the
+  // first match. Plain for-loops over `firstWhereOrNull`/`expand` to avoid
+  // per-call closure and iterable allocations.
+  Message? _findCachedMessage(String messageId) {
+    final state = channel.state;
+    if (state == null) return null;
+
+    // Hot path: regular channel messages in the loaded window.
+    for (final message in state.messages) {
+      if (message.id == messageId) return message;
     }
-    return message;
+
+    // Thread replies — only helps when `messageId` is itself a reply; thread
+    // parents live in `state.messages`, not under `state.threads`.
+    for (final replies in state.threads.values) {
+      for (final message in replies) {
+        if (message.id == messageId) return message;
+      }
+    }
+
+    // Pinned messages can sit outside the loaded window, so check them last.
+    for (final message in state.pinnedMessages) {
+      if (message.id == messageId) return message;
+    }
+
+    return null;
   }
 
   /// Query channel members.
@@ -776,8 +831,11 @@ class StreamChannelState extends State<StreamChannel> {
     });
   }
 
-  /// Reloads the channel with latest message
-  Future<void> reloadChannel() => _queryAtMessage();
+  /// Reloads the channel with latest messages, replacing the loaded window.
+  Future<void> reloadChannel() {
+    channel.state?.truncate();
+    return _queryAtMessage();
+  }
 
   Future<void> _maybeInitChannel() async {
     // If the channel doesn't have an CID yet, it hasn't been created on the
@@ -786,6 +844,10 @@ class StreamChannelState extends State<StreamChannel> {
 
     // Otherwise, we first initialize the channel if it's not yet initialized.
     if (channel.state == null) await channel.watch();
+
+    // If the widget was created using the StreamChannel.value constructor,
+    // we skip positioning so the already-loaded channel state is kept intact.
+    if (!widget._shouldPosition) return;
 
     // First we try to load the channel at the initial message if
     // 'initialMessageId' is provided in the widget.
@@ -851,21 +913,24 @@ class StreamChannelState extends State<StreamChannel> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<void>(
-      future: _channelInitFuture,
-      builder: (context, snapshot) {
-        if (snapshot.hasError) {
-          final error = snapshot.error!;
-          final stackTrace = snapshot.stackTrace;
-          return widget.errorBuilder(context, error, stackTrace);
-        }
+    return StreamStateScope(
+      state: this,
+      child: FutureBuilder<void>(
+        future: _channelInitFuture,
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            final error = snapshot.error!;
+            final stackTrace = snapshot.stackTrace;
+            return widget.errorBuilder(context, error, stackTrace);
+          }
 
-        if (snapshot.connectionState != ConnectionState.done) {
-          if (widget.showLoading) return widget.loadingBuilder(context);
-        }
+          if (snapshot.connectionState != ConnectionState.done) {
+            if (widget.showLoading) return widget.loadingBuilder(context);
+          }
 
-        return widget.child;
-      },
+          return widget.child;
+        },
+      ),
     );
   }
 }

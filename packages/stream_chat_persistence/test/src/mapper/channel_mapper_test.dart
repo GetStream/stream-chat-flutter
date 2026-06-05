@@ -26,6 +26,7 @@ void main() {
       createdById: user.id,
       filterTags: ['tag1', 'tag2'],
       extraData: {'test_extra_data': 'testData'},
+      team: 'testTeam',
     );
 
     test('toChannelModel should map entity into ChannelModel', () {
@@ -45,6 +46,7 @@ void main() {
       expect(channelModel.createdBy!.id, entity.createdById);
       expect(channelModel.filterTags, entity.filterTags);
       expect(channelModel.extraData, entity.extraData);
+      expect(channelModel.team, entity.team);
     });
 
     test('toChannelState should map entity into ChannelState ', () {
@@ -109,6 +111,7 @@ void main() {
       createdBy: createdBy,
       filterTags: ['tag1', 'tag2'],
       extraData: {'test_extra_data': 'testData'},
+      team: 'testTeam',
     );
 
     final channelEntity = model.toEntity();
@@ -130,5 +133,6 @@ void main() {
     expect(channelEntity.filterTags, model.filterTags);
     expect(channelEntity.extraData, model.extraData);
     expect(channelEntity.createdById, model.createdBy!.id);
+    expect(channelEntity.team, model.team);
   });
 }
