@@ -333,7 +333,6 @@ void main() {
       expect(threadMessages.last.id, 'testThreadMessageId${cid}24');
     });
 
-
     test('limit only returns the latest N replies', () async {
       await _prepareTestData(
         cid,
@@ -431,6 +430,168 @@ void main() {
       expect(replies.length, 5);
       expect(replies.first.id, threadId(5));
       expect(replies.last.id, threadId(9));
+    });
+
+    test('lessThan id not in result set is a no-op', () async {
+      await _prepareTestData(
+        cid,
+        threads: true,
+        mapAllThreadToFirstMessage: true,
+        count: 30,
+      );
+
+      final replies = await messageDao.getThreadMessagesByParentId(
+        parentId,
+        options: const PaginationParams(
+          limit: 100,
+          lessThan: 'missing-id',
+        ),
+      );
+
+      expect(replies.length, 30);
+      expect(replies.first.id, threadId(0));
+      expect(replies.last.id, threadId(29));
+    });
+
+    test('greaterThan id not in result set is a no-op', () async {
+      await _prepareTestData(
+        cid,
+        threads: true,
+        mapAllThreadToFirstMessage: true,
+        count: 30,
+      );
+
+      final replies = await messageDao.getThreadMessagesByParentId(
+        parentId,
+        options: const PaginationParams(
+          limit: 100,
+          greaterThan: 'missing-id',
+        ),
+      );
+
+      expect(replies.length, 30);
+      expect(replies.first.id, threadId(0));
+      expect(replies.last.id, threadId(29));
+    });
+
+    test('channel-message id as cursor is a no-op (not a thread reply)',
+        () async {
+      // `_prepareTestData` inserts channel messages with `parentId = null` and
+      // thread replies with `parentId` set. The thread lookup requires
+      // `parentId.equals(parentId)`, so passing a channel-message id must
+      // resolve to a no-op so the main query falls back to returning the full
+      // thread.
+      await _prepareTestData(
+        cid,
+        threads: true,
+        mapAllThreadToFirstMessage: true,
+        count: 30,
+      );
+
+      final replies = await messageDao.getThreadMessagesByParentId(
+        parentId,
+        options: const PaginationParams(
+          limit: 100,
+          lessThan: 'testMessageId${cid}5',
+        ),
+      );
+
+      expect(replies.length, 30);
+      expect(replies.first.id, threadId(0));
+      expect(replies.last.id, threadId(29));
+    });
+
+    test('default PaginationParams() applies implicit limit of 10', () async {
+      await _prepareTestData(
+        cid,
+        threads: true,
+        mapAllThreadToFirstMessage: true,
+        count: 30,
+      );
+
+      final replies = await messageDao.getThreadMessagesByParentId(
+        parentId,
+        options: const PaginationParams(),
+      );
+
+      expect(replies.length, 10);
+      expect(replies.first.id, threadId(20));
+      expect(replies.last.id, threadId(29));
+    });
+
+    test('default limit + lessThan returns last 10 of filtered set', () async {
+      await _prepareTestData(
+        cid,
+        threads: true,
+        mapAllThreadToFirstMessage: true,
+        count: 30,
+      );
+
+      final replies = await messageDao.getThreadMessagesByParentId(
+        parentId,
+        options: PaginationParams(lessThan: threadId(25)),
+      );
+
+      expect(replies.length, 10);
+      expect(replies.first.id, threadId(15));
+      expect(replies.last.id, threadId(24));
+    });
+
+    test('default limit + greaterThan returns first 10 after the pivot',
+        () async {
+      await _prepareTestData(
+        cid,
+        threads: true,
+        mapAllThreadToFirstMessage: true,
+        count: 30,
+      );
+
+      final replies = await messageDao.getThreadMessagesByParentId(
+        parentId,
+        options: PaginationParams(greaterThan: threadId(5)),
+      );
+
+      expect(replies.length, 10);
+      expect(replies.first.id, threadId(6));
+      expect(replies.last.id, threadId(15));
+    });
+
+    test('default limit + lessThanOrEqual returns the pivot and 9 before',
+        () async {
+      await _prepareTestData(
+        cid,
+        threads: true,
+        mapAllThreadToFirstMessage: true,
+        count: 30,
+      );
+
+      final replies = await messageDao.getThreadMessagesByParentId(
+        parentId,
+        options: PaginationParams(lessThanOrEqual: threadId(25)),
+      );
+
+      expect(replies.length, 10);
+      expect(replies.first.id, threadId(16));
+      expect(replies.last.id, threadId(25));
+    });
+
+    test('default limit + greaterThanOrEqual returns the pivot and 9 after',
+        () async {
+      await _prepareTestData(
+        cid,
+        threads: true,
+        mapAllThreadToFirstMessage: true,
+        count: 30,
+      );
+
+      final replies = await messageDao.getThreadMessagesByParentId(
+        parentId,
+        options: PaginationParams(greaterThanOrEqual: threadId(5)),
+      );
+
+      expect(replies.length, 10);
+      expect(replies.first.id, threadId(5));
+      expect(replies.last.id, threadId(14));
     });
 
     test('cursor with tied createdAt does not skip or duplicate siblings',
