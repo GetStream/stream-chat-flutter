@@ -1037,7 +1037,7 @@ void main() {
       expect(quoting.quotedMessage!.poll!.id, pollId);
     });
 
-    test('getMessagesByCid resolves a depth-2 quote chain', () async {
+    test('getMessagesByCid hydrates quotes to a single level only', () async {
       await _seedChannel(cid);
       final dbUser = User(id: 'testUserId');
       await database.userDao.updateUsers([dbUser]);
@@ -1069,7 +1069,54 @@ void main() {
       final fetched = await messageDao.getMessagesByCid(cid);
       final top = fetched.firstWhere((m) => m.id == 'A');
       expect(top.quotedMessage?.id, 'B');
-      expect(top.quotedMessage?.quotedMessage?.id, 'C');
+      expect(top.quotedMessage?.quotedMessage, isNull);
+    });
+
+    test(
+        'getMessagesByCid does not hydrate drafts for quoted messages, '
+        'even when fetchDraft=true', () async {
+      await _seedChannel(cid);
+      final dbUser = User(id: 'testUserId');
+      await database.userDao.updateUsers([dbUser]);
+
+      const quotedId = 'msg-quoted-with-draft';
+      const quotingId = 'msg-quoting-no-draft';
+
+      final baseTime = DateTime.now();
+      await messageDao.updateMessages(cid, [
+        Message(
+          id: quotedId,
+          user: dbUser,
+          text: 'quoted',
+          createdAt: baseTime,
+        ),
+        Message(
+          id: quotingId,
+          user: dbUser,
+          text: 'quoting',
+          createdAt: baseTime.add(const Duration(seconds: 1)),
+          quotedMessageId: quotedId,
+        ),
+      ]);
+
+      await database.draftMessageDao.updateDraftMessages([
+        Draft(
+          channelCid: cid,
+          parentId: quotedId,
+          createdAt: baseTime,
+          message: DraftMessage(
+            id: 'draft-on-quoted',
+            text: 'unsent reply to quoted',
+            parentId: quotedId,
+          ),
+        ),
+      ]);
+
+      final fetched = await messageDao.getMessagesByCid(cid);
+      final quoting = fetched.firstWhere((m) => m.id == quotingId);
+      expect(quoting.quotedMessage, isNotNull);
+      expect(quoting.quotedMessage!.id, quotedId);
+      expect(quoting.quotedMessage!.draft, isNull);
     });
 
     test('getMessagesByCid hydrates reactions under pagination', () async {

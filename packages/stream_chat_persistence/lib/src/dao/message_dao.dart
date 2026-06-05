@@ -35,11 +35,12 @@ class MessageDao extends DatabaseAccessor<DriftChatDatabase>
       (delete(messages)..where((tbl) => tbl.channelCid.isIn(cids))).go();
 
   /// Hydrates `rows` into `Message`s using batched lookups for related
-  /// entities. Reactions, polls, quoted messages and (optionally) drafts are
-  /// each fetched once via a single `WHERE ... IN (?).
+  /// entities. Reactions, polls, and (optionally) quoted messages and drafts
+  /// are each fetched once via a single `WHERE ... IN (?).
   Future<List<Message>> _messagesFromJoinRows(
     List<TypedResult> rows, {
     bool fetchDraft = false,
+    bool fetchQuotedMessage = true,
   }) async {
     if (rows.isEmpty) return const [];
 
@@ -86,7 +87,7 @@ class MessageDao extends DatabaseAccessor<DriftChatDatabase>
         results[3] as Map<String, Map<String, Draft?>>;
 
     final quotedById = <String, Message>{};
-    if (quotedIds.isNotEmpty) {
+    if (fetchQuotedMessage && quotedIds.isNotEmpty) {
       final quoteRows = await (select(messages).join([
         leftOuterJoin(_users, messages.userId.equalsExp(_users.id)),
         leftOuterJoin(
@@ -98,7 +99,7 @@ class MessageDao extends DatabaseAccessor<DriftChatDatabase>
           .get();
       final quotedMessages = await _messagesFromJoinRows(
         quoteRows,
-        fetchDraft: true,
+        fetchQuotedMessage: false,
       );
       for (final m in quotedMessages) {
         quotedById[m.id] = m;
