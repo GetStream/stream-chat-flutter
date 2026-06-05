@@ -28,12 +28,14 @@ dependencies:
 dev_dependencies:
   alchemist: ^0.14.0
   device_preview: ^1.2.0
+  emojis: ^0.9.9
   flutter_slidable: ^4.0.0
   flutter_test:
     sdk: flutter
   mocktail: ^1.0.5
   plugin_platform_interface: ^2.1.8
   stream_chat_localizations: ^10.0.0-beta.13
+  substring_highlight: ^1.0.33
 
 flutter:
   uses-material-design: true
