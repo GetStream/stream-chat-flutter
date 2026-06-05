@@ -223,8 +223,7 @@ void main() {
         channelState: channelState,
       );
 
-      final messageComposerController = StreamMessageComposerController()
-        ..message = Message(text: 'Hello :smile');
+      final messageComposerController = StreamMessageComposerController()..message = Message(text: 'Hello :smile');
 
       return StreamChat(
         client: client,
