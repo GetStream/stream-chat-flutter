@@ -171,7 +171,7 @@ class StreamChat extends StatefulWidget {
   /// See also:
   ///  * [of], which throws if no [StreamChat] is found.
   static StreamChatState? maybeOf(BuildContext context) {
-    return context.findAncestorStateOfType<StreamChatState>();
+    return StreamStateScope.maybeOf<StreamChatState>(context);
   }
 }
 
