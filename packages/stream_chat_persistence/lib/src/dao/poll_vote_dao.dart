@@ -60,6 +60,33 @@ class PollVoteDao extends DatabaseAccessor<DriftChatDatabase> with _$PollVoteDao
     return grouped;
   }
 
+  /// Returns poll votes for every id in [pollIds], grouped by poll id.
+  Future<Map<String, List<PollVote>>> getPollVotesForPolls(
+    List<String> pollIds,
+  ) async {
+    if (pollIds.isEmpty) return const {};
+    final grouped = <String, List<PollVote>>{
+      for (final id in pollIds) id: <PollVote>[],
+    };
+    for (final chunk in chunked(pollIds)) {
+      final where = pollVotes.pollId.isIn(chunk);
+      final rows = await (select(pollVotes).join([
+        leftOuterJoin(users, pollVotes.userId.equalsExp(users.id)),
+      ])
+            ..where(where)
+            ..orderBy([OrderingTerm.asc(pollVotes.createdAt)]))
+          .map((row) {
+        final userEntity = row.readTableOrNull(users);
+        final pollVoteEntity = row.readTable(pollVotes);
+        return pollVoteEntity.toPollVote(user: userEntity?.toUser());
+      }).get();
+      for (final v in rows) {
+        grouped[v.pollId]!.add(v);
+      }
+    }
+    return grouped;
+  }
+
   /// Updates the poll votes data with the new [pollVoteList] data
   Future<void> updatePollVotes(List<PollVote> pollVoteList) => batch(
     (it) => it.insertAllOnConflictUpdate(

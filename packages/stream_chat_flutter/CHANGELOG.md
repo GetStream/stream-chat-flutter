@@ -1,4 +1,4 @@
-## Upcoming Beta Changes
+## Upcoming Beta
 
 🐞 Fixed
 
