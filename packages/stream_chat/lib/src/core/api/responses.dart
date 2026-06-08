@@ -18,10 +18,12 @@ import 'package:stream_chat/src/core/models/poll_vote.dart';
 import 'package:stream_chat/src/core/models/push_preference.dart';
 import 'package:stream_chat/src/core/models/reaction.dart';
 import 'package:stream_chat/src/core/models/read.dart';
+import 'package:stream_chat/src/core/models/role.dart';
 import 'package:stream_chat/src/core/models/thread.dart';
 import 'package:stream_chat/src/core/models/unread_counts.dart';
 import 'package:stream_chat/src/core/models/user.dart';
 import 'package:stream_chat/src/core/models/user_block.dart';
+import 'package:stream_chat/src/core/models/user_group.dart';
 
 part 'responses.g.dart';
 
@@ -786,6 +788,87 @@ class GetActiveLiveLocationsResponse extends _BaseResponse {
   /// Create a new instance from a json
   static GetActiveLiveLocationsResponse fromJson(Map<String, dynamic> json) =>
       _$GetActiveLiveLocationsResponseFromJson(json);
+}
+
+/// Model response for [StreamChatClient.listUserGroups] api call
+@JsonSerializable(createToJson: false)
+class ListUserGroupsResponse extends _BaseResponse {
+  /// List of user groups returned by the api call
+  late List<UserGroup> userGroups;
+
+  /// Create a new instance from a json
+  static ListUserGroupsResponse fromJson(Map<String, dynamic> json) => _$ListUserGroupsResponseFromJson(json);
+}
+
+/// Model response for [StreamChatClient.searchUserGroups] api call
+@JsonSerializable(createToJson: false)
+class SearchUserGroupsResponse extends _BaseResponse {
+  /// List of user groups returned by the api call
+  late List<UserGroup> userGroups;
+
+  /// Create a new instance from a json
+  static SearchUserGroupsResponse fromJson(Map<String, dynamic> json) => _$SearchUserGroupsResponseFromJson(json);
+}
+
+/// Model response for [StreamChatClient.createUserGroup] api call
+@JsonSerializable(createToJson: false)
+class CreateUserGroupResponse extends _BaseResponse {
+  /// Created user group
+  late UserGroup userGroup;
+
+  /// Create a new instance from a json
+  static CreateUserGroupResponse fromJson(Map<String, dynamic> json) => _$CreateUserGroupResponseFromJson(json);
+}
+
+/// Model response for [StreamChatClient.getUserGroup] api call
+@JsonSerializable(createToJson: false)
+class GetUserGroupResponse extends _BaseResponse {
+  /// Fetched user group
+  late UserGroup userGroup;
+
+  /// Create a new instance from a json
+  static GetUserGroupResponse fromJson(Map<String, dynamic> json) => _$GetUserGroupResponseFromJson(json);
+}
+
+/// Model response for [StreamChatClient.updateUserGroup] api call
+@JsonSerializable(createToJson: false)
+class UpdateUserGroupResponse extends _BaseResponse {
+  /// Fetched user group
+  late UserGroup userGroup;
+
+  /// Create a new instance from a json
+  static UpdateUserGroupResponse fromJson(Map<String, dynamic> json) => _$UpdateUserGroupResponseFromJson(json);
+}
+
+/// Model response for [StreamChatClient.addUserGroupMembers] api call
+@JsonSerializable(createToJson: false)
+class AddUserGroupMembersResponse extends _BaseResponse {
+  /// Fetched user group
+  late UserGroup userGroup;
+
+  /// Create a new instance from a json
+  static AddUserGroupMembersResponse fromJson(Map<String, dynamic> json) => _$AddUserGroupMembersResponseFromJson(json);
+}
+
+/// Model response for [StreamChatClient.removeUserGroupMembers] api call
+@JsonSerializable(createToJson: false)
+class RemoveUserGroupMembersResponse extends _BaseResponse {
+  /// Fetched user group
+  late UserGroup userGroup;
+
+  /// Create a new instance from a json
+  static RemoveUserGroupMembersResponse fromJson(Map<String, dynamic> json) =>
+      _$RemoveUserGroupMembersResponseFromJson(json);
+}
+
+/// Model response for [StreamChatClient.searchRoles] api call
+@JsonSerializable(createToJson: false)
+class SearchRolesResponse extends _BaseResponse {
+  /// List of roles returned by the api call
+  late List<Role> roles;
+
+  /// Create a new instance from a json
+  static SearchRolesResponse fromJson(Map<String, dynamic> json) => _$SearchRolesResponseFromJson(json);
 }
 
 /// Model response for [StreamChatClient.getAppSettings] api call.

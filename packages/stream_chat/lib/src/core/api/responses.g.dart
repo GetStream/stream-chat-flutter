@@ -414,6 +414,56 @@ GetActiveLiveLocationsResponse _$GetActiveLiveLocationsResponseFromJson(
       .map((e) => Location.fromJson(e as Map<String, dynamic>))
       .toList();
 
+ListUserGroupsResponse _$ListUserGroupsResponseFromJson(
+  Map<String, dynamic> json,
+) => ListUserGroupsResponse()
+  ..duration = json['duration'] as String?
+  ..userGroups = (json['user_groups'] as List<dynamic>)
+      .map((e) => UserGroup.fromJson(e as Map<String, dynamic>))
+      .toList();
+
+SearchUserGroupsResponse _$SearchUserGroupsResponseFromJson(
+  Map<String, dynamic> json,
+) => SearchUserGroupsResponse()
+  ..duration = json['duration'] as String?
+  ..userGroups = (json['user_groups'] as List<dynamic>)
+      .map((e) => UserGroup.fromJson(e as Map<String, dynamic>))
+      .toList();
+
+CreateUserGroupResponse _$CreateUserGroupResponseFromJson(
+  Map<String, dynamic> json,
+) => CreateUserGroupResponse()
+  ..duration = json['duration'] as String?
+  ..userGroup = UserGroup.fromJson(json['user_group'] as Map<String, dynamic>);
+
+GetUserGroupResponse _$GetUserGroupResponseFromJson(
+  Map<String, dynamic> json,
+) => GetUserGroupResponse()
+  ..duration = json['duration'] as String?
+  ..userGroup = UserGroup.fromJson(json['user_group'] as Map<String, dynamic>);
+
+UpdateUserGroupResponse _$UpdateUserGroupResponseFromJson(
+  Map<String, dynamic> json,
+) => UpdateUserGroupResponse()
+  ..duration = json['duration'] as String?
+  ..userGroup = UserGroup.fromJson(json['user_group'] as Map<String, dynamic>);
+
+AddUserGroupMembersResponse _$AddUserGroupMembersResponseFromJson(
+  Map<String, dynamic> json,
+) => AddUserGroupMembersResponse()
+  ..duration = json['duration'] as String?
+  ..userGroup = UserGroup.fromJson(json['user_group'] as Map<String, dynamic>);
+
+RemoveUserGroupMembersResponse _$RemoveUserGroupMembersResponseFromJson(
+  Map<String, dynamic> json,
+) => RemoveUserGroupMembersResponse()
+  ..duration = json['duration'] as String?
+  ..userGroup = UserGroup.fromJson(json['user_group'] as Map<String, dynamic>);
+
+SearchRolesResponse _$SearchRolesResponseFromJson(Map<String, dynamic> json) => SearchRolesResponse()
+  ..duration = json['duration'] as String?
+  ..roles = (json['roles'] as List<dynamic>).map((e) => Role.fromJson(e as Map<String, dynamic>)).toList();
+
 GetAppSettingsResponse _$GetAppSettingsResponseFromJson(
   Map<String, dynamic> json,
 ) => GetAppSettingsResponse()
