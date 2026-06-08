@@ -63,20 +63,14 @@ class PinnedMessageDao extends DatabaseAccessor<DriftChatDatabase> with _$Pinned
       // Reactions
       _db.pinnedMessageReactionDao.getReactionsForMessages(messageIds),
       // Own reactions
-      _db.pinnedMessageReactionDao
-          .getReactionsForMessagesByUserId(messageIds, _db.userId),
+      _db.pinnedMessageReactionDao.getReactionsForMessagesByUserId(messageIds, _db.userId),
       // Polls
-      if (pollIds.isNotEmpty)
-        _db.pollDao.getPollsByIds(pollIds)
-      else
-        Future.value(const <String, Poll?>{}),
+      if (pollIds.isNotEmpty) _db.pollDao.getPollsByIds(pollIds) else Future.value(const <String, Poll?>{}),
       // Drafts
       if (fetchDraft)
         Future.wait([
           for (final cid in cids)
-            _db.draftMessageDao
-                .getDraftMessagesByParentIds(cid, messageIds)
-                .then((map) => MapEntry(cid, map)),
+            _db.draftMessageDao.getDraftMessagesByParentIds(cid, messageIds).then((map) => MapEntry(cid, map)),
         ]).then(Map.fromEntries)
       else
         Future.value(const <String, Map<String, Draft?>>{}),
@@ -90,8 +84,7 @@ class PinnedMessageDao extends DatabaseAccessor<DriftChatDatabase> with _$Pinned
     final latestReactionsByMsg = results[0] as Map<String, List<Reaction>>;
     final ownReactionsByMsg = results[1] as Map<String, List<Reaction>>;
     final pollsById = results[2] as Map<String, Poll?>;
-    final draftsByCidByParentId =
-        results[3] as Map<String, Map<String, Draft?>>;
+    final draftsByCidByParentId = results[3] as Map<String, Map<String, Draft?>>;
     final locationsByMsg = results[4] as Map<String, Location>;
 
     final quotedById = <String, Message>{};
@@ -102,9 +95,7 @@ class PinnedMessageDao extends DatabaseAccessor<DriftChatDatabase> with _$Pinned
           _pinnedByUsers,
           pinnedMessages.pinnedByUserId.equalsExp(_pinnedByUsers.id),
         ),
-      ])
-            ..where(pinnedMessages.id.isIn(quotedIds)))
-          .get();
+      ])..where(pinnedMessages.id.isIn(quotedIds))).get();
       final quotedMessages = await _messagesFromJoinRows(
         quoteRows,
         fetchQuotedMessage: false,
@@ -193,17 +184,18 @@ class PinnedMessageDao extends DatabaseAccessor<DriftChatDatabase> with _$Pinned
   /// Returns all the messages of a particular thread by matching
   /// [PinnedMessages.channelCid] with [cid]
   Future<List<Message>> getThreadMessages(String cid) async {
-    final rows = await (select(pinnedMessages).join([
-      leftOuterJoin(_users, pinnedMessages.userId.equalsExp(_users.id)),
-      leftOuterJoin(
-        _pinnedByUsers,
-        pinnedMessages.pinnedByUserId.equalsExp(_pinnedByUsers.id),
-      ),
-    ])
-          ..where(pinnedMessages.channelCid.equals(cid))
-          ..where(pinnedMessages.parentId.isNotNull())
-          ..orderBy([OrderingTerm.asc(pinnedMessages.createdAt)]))
-        .get();
+    final rows =
+        await (select(pinnedMessages).join([
+                leftOuterJoin(_users, pinnedMessages.userId.equalsExp(_users.id)),
+                leftOuterJoin(
+                  _pinnedByUsers,
+                  pinnedMessages.pinnedByUserId.equalsExp(_pinnedByUsers.id),
+                ),
+              ])
+              ..where(pinnedMessages.channelCid.equals(cid))
+              ..where(pinnedMessages.parentId.isNotNull())
+              ..orderBy([OrderingTerm.asc(pinnedMessages.createdAt)]))
+            .get();
     return _messagesFromJoinRows(rows);
   }
 
@@ -213,17 +205,18 @@ class PinnedMessageDao extends DatabaseAccessor<DriftChatDatabase> with _$Pinned
     String parentId, {
     PaginationParams? options,
   }) async {
-    final rows = await (select(pinnedMessages).join([
-      leftOuterJoin(_users, pinnedMessages.userId.equalsExp(_users.id)),
-      leftOuterJoin(
-        _pinnedByUsers,
-        pinnedMessages.pinnedByUserId.equalsExp(_pinnedByUsers.id),
-      ),
-    ])
-          ..where(pinnedMessages.parentId.isNotNull())
-          ..where(pinnedMessages.parentId.equals(parentId))
-          ..orderBy([OrderingTerm.asc(pinnedMessages.createdAt)]))
-        .get();
+    final rows =
+        await (select(pinnedMessages).join([
+                leftOuterJoin(_users, pinnedMessages.userId.equalsExp(_users.id)),
+                leftOuterJoin(
+                  _pinnedByUsers,
+                  pinnedMessages.pinnedByUserId.equalsExp(_pinnedByUsers.id),
+                ),
+              ])
+              ..where(pinnedMessages.parentId.isNotNull())
+              ..where(pinnedMessages.parentId.equals(parentId))
+              ..orderBy([OrderingTerm.asc(pinnedMessages.createdAt)]))
+            .get();
     final msgList = await _messagesFromJoinRows(rows);
 
     if (msgList.isNotEmpty) {

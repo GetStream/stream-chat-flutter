@@ -36,8 +36,7 @@ class PinnedMessageReactionDao extends DatabaseAccessor<DriftChatDatabase> with 
     String messageId,
     String userId,
   ) {
-    final where = pinnedMessageReactions.messageId.equals(messageId) &
-        pinnedMessageReactions.userId.equals(userId);
+    final where = pinnedMessageReactions.messageId.equals(messageId) & pinnedMessageReactions.userId.equals(userId);
     return _selectReactions(where);
   }
 
@@ -71,8 +70,7 @@ class PinnedMessageReactionDao extends DatabaseAccessor<DriftChatDatabase> with 
       for (final id in messageIds) id: <Reaction>[],
     };
     for (final chunk in chunked(messageIds)) {
-      final where = pinnedMessageReactions.messageId.isIn(chunk) &
-          pinnedMessageReactions.userId.equals(userId);
+      final where = pinnedMessageReactions.messageId.isIn(chunk) & pinnedMessageReactions.userId.equals(userId);
       final rows = await _selectReactions(where);
       for (final r in rows) {
         grouped[r.messageId]!.add(r);
@@ -99,11 +97,12 @@ class PinnedMessageReactionDao extends DatabaseAccessor<DriftChatDatabase> with 
   });
 
   Future<List<Reaction>> _selectReactions(Expression<bool> where) {
-    final rows = select(pinnedMessageReactions).join([
-      leftOuterJoin(users, pinnedMessageReactions.userId.equalsExp(users.id)),
-    ])
-      ..where(where)
-      ..orderBy([OrderingTerm.asc(pinnedMessageReactions.createdAt)]);
+    final rows =
+        select(pinnedMessageReactions).join([
+            leftOuterJoin(users, pinnedMessageReactions.userId.equalsExp(users.id)),
+          ])
+          ..where(where)
+          ..orderBy([OrderingTerm.asc(pinnedMessageReactions.createdAt)]);
     return rows.map((row) {
       final reactionEntity = row.readTable(pinnedMessageReactions);
       final userEntity = row.readTableOrNull(users);

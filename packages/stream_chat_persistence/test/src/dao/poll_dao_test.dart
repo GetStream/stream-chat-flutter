@@ -131,8 +131,7 @@ void main() {
     expect(poll, isNull);
   });
 
-  test(
-      'getPollById hydrates ownVotesAndAnswers + latestVotesByOption + '
+  test('getPollById hydrates ownVotesAndAnswers + latestVotesByOption + '
       'latestAnswers from mixed-user/mixed-option votes', () async {
     const pollId = 'poll-mixed';
     const optionA = PollOption(id: 'opt-a', text: 'A');
@@ -246,8 +245,7 @@ void main() {
       expect(result, isEmpty);
     });
 
-    test(
-        'returns a poll per id with votes/answers/ownVotes grouped; ids not '
+    test('returns a poll per id with votes/answers/ownVotes grouped; ids not '
         'in the cache map to null', () async {
       const optionA = PollOption(id: 'opt-a', text: 'A');
       const optionB = PollOption(id: 'opt-b', text: 'B');
@@ -298,11 +296,9 @@ void main() {
         ),
       ]);
 
-      final result = await pollDao
-          .getPollsByIds(const ['poll-1', 'poll-2', 'poll-missing']);
+      final result = await pollDao.getPollsByIds(const ['poll-1', 'poll-2', 'poll-missing']);
 
-      expect(
-          result.keys, unorderedEquals(['poll-1', 'poll-2', 'poll-missing']));
+      expect(result.keys, unorderedEquals(['poll-1', 'poll-2', 'poll-missing']));
       expect(result['poll-missing'], isNull);
 
       final poll1 = result['poll-1']!;

@@ -63,8 +63,9 @@ class PollDao extends DatabaseAccessor<DriftChatDatabase> with _$PollDaoMixin {
     final result = <String, Poll?>{for (final id in pollIds) id: null};
     for (final chunk in chunked(pollIds)) {
       final where = polls.id.isIn(chunk);
-      final rows = await (select(polls)..where((_) => where)).join(
-          [leftOuterJoin(users, polls.createdById.equalsExp(users.id))]).get();
+      final rows = await (select(
+        polls,
+      )..where((_) => where)).join([leftOuterJoin(users, polls.createdById.equalsExp(users.id))]).get();
       for (final row in rows) {
         final pollEntity = row.readTable(polls);
         // Same as `_pollFromJoinRow` => reads users via `readTable` (not

@@ -409,8 +409,7 @@ void main() {
       expect(fetchedMessages.last.id, 'testMessageId${cid}24');
     });
 
-    test('greaterThan only trims messages from the start (exclusive)',
-        () async {
+    test('greaterThan only trims messages from the start (exclusive)', () async {
       await _prepareTestData(cid, count: 30);
 
       final fetchedMessages = await messageDao.getMessagesByCid(
@@ -471,8 +470,7 @@ void main() {
       expect(fetchedMessages.last.id, 'testMessageId${cid}29');
     });
 
-    test('thread-reply id as cursor is a no-op (not visible in channel)',
-        () async {
+    test('thread-reply id as cursor is a no-op (not visible in channel)', () async {
       // `_prepareTestData` inserts thread replies with `parentId` set and
       // `showInChannel` left null — i.e. not visible in the channel query.
       // Passing such an id as a cursor must resolve to a no-op so the main
@@ -520,8 +518,7 @@ void main() {
       expect(fetchedMessages.last.id, 'testMessageId${cid}24');
     });
 
-    test('default limit + greaterThan returns first 10 after the pivot',
-        () async {
+    test('default limit + greaterThan returns first 10 after the pivot', () async {
       await _prepareTestData(cid, count: 30);
 
       final fetchedMessages = await messageDao.getMessagesByCid(
@@ -568,8 +565,7 @@ void main() {
       expect(fetchedMessages.last.id, 'testMessageId${cid}29');
     });
 
-    test('default limit + lessThanOrEqual returns the pivot and 9 before',
-        () async {
+    test('default limit + lessThanOrEqual returns the pivot and 9 before', () async {
       await _prepareTestData(cid, count: 30);
 
       final fetchedMessages = await messageDao.getMessagesByCid(
@@ -584,8 +580,7 @@ void main() {
       expect(fetchedMessages.last.id, 'testMessageId${cid}25');
     });
 
-    test('default limit + greaterThanOrEqual returns the pivot and 9 after',
-        () async {
+    test('default limit + greaterThanOrEqual returns the pivot and 9 after', () async {
       await _prepareTestData(cid, count: 30);
 
       final fetchedMessages = await messageDao.getMessagesByCid(
@@ -600,8 +595,7 @@ void main() {
       expect(fetchedMessages.last.id, 'testMessageId${cid}14');
     });
 
-    test('cursor with tied createdAt does not skip or duplicate siblings',
-        () async {
+    test('cursor with tied createdAt does not skip or duplicate siblings', () async {
       // Three messages share an identical `createdAt`. The SQL ORDER BY uses
       // the `(createdAt, id)` tuple, so within the trio the relative order is
       // by id (lexicographic). A cursor at `msg_tieB` must split the trio
@@ -617,12 +611,12 @@ void main() {
       final later = tie.add(const Duration(seconds: 1));
 
       Message m(String id, DateTime t) => Message(
-            id: id,
-            user: users.first,
-            createdAt: t,
-            updatedAt: t,
-            text: id,
-          );
+        id: id,
+        user: users.first,
+        createdAt: t,
+        updatedAt: t,
+        text: id,
+      );
 
       await messageDao.updateMessages(cid, [
         m('msg_pre', earlier),
@@ -824,14 +818,12 @@ void main() {
         // between rows when batched-hydration replaces the per-row queries.
         expect(
           m.latestReactions!.map((r) => r.type).toSet(),
-          equals(
-              {'like-${m.id.split('-').last}', 'love-${m.id.split('-').last}'}),
+          equals({'like-${m.id.split('-').last}', 'love-${m.id.split('-').last}'}),
         );
       }
     });
 
-    test('getMessagesByCid hydrates poll with own + other-user votes',
-        () async {
+    test('getMessagesByCid hydrates poll with own + other-user votes', () async {
       const messageId = 'msg-with-poll';
       const pollId = 'poll-mixed';
       await _seedChannel(cid);
@@ -922,8 +914,7 @@ void main() {
       );
     });
 
-    test(
-        'getMessagesByCid hydrates thread draft when fetchDraft=true; '
+    test('getMessagesByCid hydrates thread draft when fetchDraft=true; '
         'null when false', () async {
       // `fetchDraft` attaches a thread draft (parentId == message.id) to its
       // parent message, not the channel-level draft. See changelog entry for
@@ -960,13 +951,11 @@ void main() {
       expect(withDraft.first.draft!.message.text, 'unsent');
       expect(withDraft.first.draft!.parentId, parentId);
 
-      final withoutDraft =
-          await messageDao.getMessagesByCid(cid, fetchDraft: false);
+      final withoutDraft = await messageDao.getMessagesByCid(cid, fetchDraft: false);
       expect(withoutDraft.first.draft, isNull);
     });
 
-    test(
-        'getMessagesByCid hydrates quoted message with its own reactions '
+    test('getMessagesByCid hydrates quoted message with its own reactions '
         'and poll', () async {
       await _seedChannel(cid);
 
@@ -1061,8 +1050,7 @@ void main() {
       expect(top.quotedMessage?.quotedMessage, isNull);
     });
 
-    test(
-        'getMessagesByCid does not hydrate drafts for quoted messages, '
+    test('getMessagesByCid does not hydrate drafts for quoted messages, '
         'even when fetchDraft=true', () async {
       await _seedChannel(cid);
       final dbUser = User(id: 'testUserId');
@@ -1159,8 +1147,7 @@ void main() {
       }
     });
 
-    test(
-        'getMessageById hydrates sharedLocation when fetchSharedLocation=true; '
+    test('getMessageById hydrates sharedLocation when fetchSharedLocation=true; '
         'null when false', () async {
       await _seedChannel(cid);
       final dbUser = User(id: 'testUserId');
@@ -1205,8 +1192,7 @@ void main() {
       expect(withoutLocation!.sharedLocation, isNull);
     });
 
-    test(
-        'getMessagesByCid hydrates sharedLocation per row independently; '
+    test('getMessagesByCid hydrates sharedLocation per row independently; '
         'absent locations remain null', () async {
       await _seedChannel(cid);
       final dbUser = User(id: 'testUserId');
@@ -1271,8 +1257,7 @@ void main() {
       );
     });
 
-    test(
-        'getMessagesByCid hydrates sharedLocation for quoted message even '
+    test('getMessagesByCid hydrates sharedLocation for quoted message even '
         'when fetchSharedLocation=false on the parent', () async {
       await _seedChannel(cid);
       final dbUser = User(id: 'testUserId');

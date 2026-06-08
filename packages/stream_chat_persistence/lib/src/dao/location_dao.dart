@@ -79,13 +79,12 @@ class LocationDao extends DatabaseAccessor<DriftChatDatabase> with _$LocationDao
   /// that need the linked `message` / `channel` should use
   /// [getLocationByMessageId] or [getLocationsByCid].
   Future<Map<String, Location>> getLocationsByMessageIds(
-      List<String> messageIds,
+    List<String> messageIds,
   ) async {
     if (messageIds.isEmpty) return const {};
     final result = <String, Location>{};
     for (final chunk in chunked(messageIds)) {
-      final query = select(locations)
-        ..where((tbl) => tbl.messageId.isIn(chunk));
+      final query = select(locations)..where((tbl) => tbl.messageId.isIn(chunk));
       final entities = await query.get();
       for (final entity in entities) {
         if (entity.messageId case final id?) {

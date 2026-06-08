@@ -41,16 +41,18 @@ class PollVoteDao extends DatabaseAccessor<DriftChatDatabase> with _$PollVoteDao
     };
     for (final chunk in chunked(pollIds)) {
       final where = pollVotes.pollId.isIn(chunk);
-      final rows = await (select(pollVotes).join([
-        leftOuterJoin(users, pollVotes.userId.equalsExp(users.id)),
-      ])
-            ..where(where)
-            ..orderBy([OrderingTerm.asc(pollVotes.createdAt)]))
-          .map((row) {
-        final userEntity = row.readTableOrNull(users);
-        final pollVoteEntity = row.readTable(pollVotes);
-        return pollVoteEntity.toPollVote(user: userEntity?.toUser());
-      }).get();
+      final rows =
+          await (select(pollVotes).join([
+                  leftOuterJoin(users, pollVotes.userId.equalsExp(users.id)),
+                ])
+                ..where(where)
+                ..orderBy([OrderingTerm.asc(pollVotes.createdAt)]))
+              .map((row) {
+                final userEntity = row.readTableOrNull(users);
+                final pollVoteEntity = row.readTable(pollVotes);
+                return pollVoteEntity.toPollVote(user: userEntity?.toUser());
+              })
+              .get();
       for (final v in rows) {
         grouped[v.pollId]!.add(v);
       }

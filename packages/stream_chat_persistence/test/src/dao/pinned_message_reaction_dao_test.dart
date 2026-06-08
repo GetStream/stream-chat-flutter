@@ -107,8 +107,7 @@ void main() {
     expect(insertedReactions, isNotEmpty);
 
     // Adding sample reactions from other users on the same message.
-    final otherInsertedReactions =
-        await _prepareReactionData(messageId, userId: otherUserId);
+    final otherInsertedReactions = await _prepareReactionData(messageId, userId: otherUserId);
     expect(otherInsertedReactions, isNotEmpty);
 
     // Fetched reaction length should match the target user's reactions only.
@@ -178,16 +177,14 @@ void main() {
     );
   });
 
-  test(
-      'getReactions returns empty for a message id with no reactions, '
+  test('getReactions returns empty for a message id with no reactions, '
       'even when reactions exist for other messages', () async {
     const messageWithReactions = 'pmsg-A';
     const messageWithoutReactions = 'pmsg-B';
 
     await _prepareReactionData(messageWithReactions);
 
-    final fetched =
-        await pinnedMessageReactionDao.getReactions(messageWithoutReactions);
+    final fetched = await pinnedMessageReactionDao.getReactions(messageWithoutReactions);
     expect(fetched, isEmpty);
   });
 

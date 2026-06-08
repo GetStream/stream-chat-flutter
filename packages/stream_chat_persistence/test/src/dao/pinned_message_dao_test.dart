@@ -516,8 +516,7 @@ void main() {
       }
     });
 
-    test('getMessagesByCid hydrates poll with own + other-user votes',
-        () async {
+    test('getMessagesByCid hydrates poll with own + other-user votes', () async {
       const messageId = 'pmsg-with-poll';
       const pollId = 'ppoll-mixed';
       await _seedChannel(cid);
@@ -586,8 +585,7 @@ void main() {
       expect(hydratedPoll.ownVotesAndAnswers, hasLength(2));
     });
 
-    test(
-        'getMessagesByCid hydrates thread draft when fetchDraft=true; '
+    test('getMessagesByCid hydrates thread draft when fetchDraft=true; '
         'null when false', () async {
       await _seedChannel(cid);
       final dbUser = User(id: 'testUserId');
@@ -623,13 +621,11 @@ void main() {
       expect(withDraft.first.draft, isNotNull);
       expect(withDraft.first.draft!.parentId, parentId);
 
-      final withoutDraft =
-          await pinnedMessageDao.getMessagesByCid(cid, fetchDraft: false);
+      final withoutDraft = await pinnedMessageDao.getMessagesByCid(cid, fetchDraft: false);
       expect(withoutDraft.first.draft, isNull);
     });
 
-    test(
-        'getMessagesByCid hydrates quoted pinned message with its own '
+    test('getMessagesByCid hydrates quoted pinned message with its own '
         'reactions and poll', () async {
       await _seedChannel(cid);
       final dbUser = User(id: 'testUserId');
@@ -724,8 +720,7 @@ void main() {
       expect(top.quotedMessage?.quotedMessage, isNull);
     });
 
-    test(
-        'getMessagesByCid does not hydrate drafts for quoted pinned messages, '
+    test('getMessagesByCid does not hydrate drafts for quoted pinned messages, '
         'even when fetchDraft=true', () async {
       await _seedChannel(cid);
       final dbUser = User(id: 'testUserId');
@@ -749,8 +744,7 @@ void main() {
         quotedMessageId: quotedId,
       );
 
-      await pinnedMessageDao
-          .updateMessages(cid, [quotedMessage, quotingMessage]);
+      await pinnedMessageDao.updateMessages(cid, [quotedMessage, quotingMessage]);
       // `DraftMessages.parentId` is FK-referenced against `Messages.id`, not
       // `PinnedMessages.id`, so the parent of the draft needs a row in both.
       await database.messageDao.updateMessages(cid, [quotedMessage]);
@@ -775,8 +769,7 @@ void main() {
       expect(quoting.quotedMessage!.draft, isNull);
     });
 
-    test(
-        'getMessageById hydrates sharedLocation when fetchSharedLocation=true; '
+    test('getMessageById hydrates sharedLocation when fetchSharedLocation=true; '
         'null when false', () async {
       await _seedChannel(cid);
       final dbUser = User(id: 'testUserId');
@@ -824,8 +817,7 @@ void main() {
       expect(withoutLocation!.sharedLocation, isNull);
     });
 
-    test(
-        'getMessagesByCid hydrates sharedLocation per row independently; '
+    test('getMessagesByCid hydrates sharedLocation per row independently; '
         'absent locations remain null', () async {
       await _seedChannel(cid);
       final dbUser = User(id: 'testUserId');
@@ -892,8 +884,7 @@ void main() {
       );
     });
 
-    test(
-        'getMessagesByCid hydrates sharedLocation for quoted pinned message '
+    test('getMessagesByCid hydrates sharedLocation for quoted pinned message '
         'even when fetchSharedLocation=false on the parent', () async {
       await _seedChannel(cid);
       final dbUser = User(id: 'testUserId');
@@ -915,8 +906,7 @@ void main() {
         createdAt: baseTime.add(const Duration(seconds: 1)),
         quotedMessageId: quotedId,
       );
-      await pinnedMessageDao
-          .updateMessages(cid, [quotedMessage, quotingMessage]);
+      await pinnedMessageDao.updateMessages(cid, [quotedMessage, quotingMessage]);
       // Locations FK against `Messages.id`.
       await database.messageDao.updateMessages(cid, [quotedMessage]);
 

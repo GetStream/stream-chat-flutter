@@ -177,8 +177,7 @@ void main() {
       expect(result, isEmpty);
     });
 
-    test(
-        'returns votes grouped by poll id; polls with no votes (or unknown '
+    test('returns votes grouped by poll id; polls with no votes (or unknown '
         'ids) map to an empty list', () async {
       const pollWithVotes = 'poll-with-votes';
       const pollWithoutVotes = 'poll-without-votes';
@@ -202,8 +201,7 @@ void main() {
         const [pollWithVotes, pollWithoutVotes, pollUnknown],
       );
 
-      expect(result.keys,
-          unorderedEquals([pollWithVotes, pollWithoutVotes, pollUnknown]));
+      expect(result.keys, unorderedEquals([pollWithVotes, pollWithoutVotes, pollUnknown]));
       expect(result[pollWithVotes], hasLength(seededVotes.length));
       expect(
         result[pollWithVotes]!.every((v) => v.pollId == pollWithVotes),

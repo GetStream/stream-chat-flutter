@@ -66,17 +66,12 @@ class MessageDao extends DatabaseAccessor<DriftChatDatabase> with _$MessageDaoMi
       // Own reactions
       _db.reactionDao.getReactionsForMessagesByUserId(messageIds, _db.userId),
       // Polls
-      if (pollIds.isNotEmpty)
-        _db.pollDao.getPollsByIds(pollIds)
-      else
-        Future.value(const <String, Poll?>{}),
+      if (pollIds.isNotEmpty) _db.pollDao.getPollsByIds(pollIds) else Future.value(const <String, Poll?>{}),
       // Drafts
       if (fetchDraft)
         Future.wait([
           for (final cid in cids)
-            _db.draftMessageDao
-                .getDraftMessagesByParentIds(cid, messageIds)
-                .then((map) => MapEntry(cid, map)),
+            _db.draftMessageDao.getDraftMessagesByParentIds(cid, messageIds).then((map) => MapEntry(cid, map)),
         ]).then(Map.fromEntries)
       else
         Future.value(const <String, Map<String, Draft?>>{}),
@@ -90,8 +85,7 @@ class MessageDao extends DatabaseAccessor<DriftChatDatabase> with _$MessageDaoMi
     final latestReactionsByMsg = results[0] as Map<String, List<Reaction>>;
     final ownReactionsByMsg = results[1] as Map<String, List<Reaction>>;
     final pollsById = results[2] as Map<String, Poll?>;
-    final draftsByCidByParentId =
-        results[3] as Map<String, Map<String, Draft?>>;
+    final draftsByCidByParentId = results[3] as Map<String, Map<String, Draft?>>;
     final locationsByMsg = results[4] as Map<String, Location>;
 
     final quotedById = <String, Message>{};
@@ -102,9 +96,7 @@ class MessageDao extends DatabaseAccessor<DriftChatDatabase> with _$MessageDaoMi
           _pinnedByUsers,
           messages.pinnedByUserId.equalsExp(_pinnedByUsers.id),
         ),
-      ])
-            ..where(messages.id.isIn(quotedIds)))
-          .get();
+      ])..where(messages.id.isIn(quotedIds))).get();
       final quotedMessages = await _messagesFromJoinRows(
         quoteRows,
         fetchQuotedMessage: false,
@@ -198,17 +190,18 @@ class MessageDao extends DatabaseAccessor<DriftChatDatabase> with _$MessageDaoMi
   /// Returns all the messages of a particular thread by matching
   /// [Messages.channelCid] with [cid]
   Future<List<Message>> getThreadMessages(String cid) async {
-    final rows = await (select(messages).join([
-      leftOuterJoin(_users, messages.userId.equalsExp(_users.id)),
-      leftOuterJoin(
-        _pinnedByUsers,
-        messages.pinnedByUserId.equalsExp(_pinnedByUsers.id),
-      ),
-    ])
-          ..where(messages.channelCid.equals(cid))
-          ..where(messages.parentId.isNotNull())
-          ..orderBy([OrderingTerm.asc(messages.createdAt)]))
-        .get();
+    final rows =
+        await (select(messages).join([
+                leftOuterJoin(_users, messages.userId.equalsExp(_users.id)),
+                leftOuterJoin(
+                  _pinnedByUsers,
+                  messages.pinnedByUserId.equalsExp(_pinnedByUsers.id),
+                ),
+              ])
+              ..where(messages.channelCid.equals(cid))
+              ..where(messages.parentId.isNotNull())
+              ..orderBy([OrderingTerm.asc(messages.createdAt)]))
+            .get();
     return _messagesFromJoinRows(rows);
   }
 
@@ -218,17 +211,18 @@ class MessageDao extends DatabaseAccessor<DriftChatDatabase> with _$MessageDaoMi
     String parentId, {
     PaginationParams? options,
   }) async {
-    final rows = await (select(messages).join([
-      leftOuterJoin(_users, messages.userId.equalsExp(_users.id)),
-      leftOuterJoin(
-        _pinnedByUsers,
-        messages.pinnedByUserId.equalsExp(_pinnedByUsers.id),
-      ),
-    ])
-          ..where(messages.parentId.isNotNull())
-          ..where(messages.parentId.equals(parentId))
-          ..orderBy([OrderingTerm.asc(messages.createdAt)]))
-        .get();
+    final rows =
+        await (select(messages).join([
+                leftOuterJoin(_users, messages.userId.equalsExp(_users.id)),
+                leftOuterJoin(
+                  _pinnedByUsers,
+                  messages.pinnedByUserId.equalsExp(_pinnedByUsers.id),
+                ),
+              ])
+              ..where(messages.parentId.isNotNull())
+              ..where(messages.parentId.equals(parentId))
+              ..orderBy([OrderingTerm.asc(messages.createdAt)]))
+            .get();
     final msgList = await _messagesFromJoinRows(rows);
 
     if (msgList.isNotEmpty) {
@@ -285,8 +279,8 @@ class MessageDao extends DatabaseAccessor<DriftChatDatabase> with _$MessageDaoMi
     // cursor is set). The final result is always reshaped to ASC for display.
     final isForwardPagination =
         (greaterThanCursor != null || greaterThanOrEqualCursor != null) &&
-            lessThanCursor == null &&
-            lessThanOrEqualCursor == null;
+        lessThanCursor == null &&
+        lessThanOrEqualCursor == null;
 
     final orderBy = isForwardPagination
         ? [
@@ -298,16 +292,17 @@ class MessageDao extends DatabaseAccessor<DriftChatDatabase> with _$MessageDaoMi
             OrderingTerm.desc(messages.id),
           ];
 
-    final query = select(messages).join([
-      leftOuterJoin(_users, messages.userId.equalsExp(_users.id)),
-      leftOuterJoin(
-        _pinnedByUsers,
-        messages.pinnedByUserId.equalsExp(_pinnedByUsers.id),
-      ),
-    ])
-      ..where(messages.channelCid.equals(cid))
-      ..where(messages.parentId.isNull() | messages.showInChannel.equals(true))
-      ..orderBy(orderBy);
+    final query =
+        select(messages).join([
+            leftOuterJoin(_users, messages.userId.equalsExp(_users.id)),
+            leftOuterJoin(
+              _pinnedByUsers,
+              messages.pinnedByUserId.equalsExp(_pinnedByUsers.id),
+            ),
+          ])
+          ..where(messages.channelCid.equals(cid))
+          ..where(messages.parentId.isNull() | messages.showInChannel.equals(true))
+          ..orderBy(orderBy);
 
     // Cursor predicates compare the full `(createdAt, id)` tuple — the same
     // key used in ORDER BY — so messages sharing a `createdAt` with the cursor
@@ -316,29 +311,25 @@ class MessageDao extends DatabaseAccessor<DriftChatDatabase> with _$MessageDaoMi
     if (lessThanCursor case final c?) {
       query.where(
         messages.createdAt.isSmallerThanValue(c.createdAt) |
-            (messages.createdAt.equals(c.createdAt) &
-                messages.id.isSmallerThanValue(c.id)),
+            (messages.createdAt.equals(c.createdAt) & messages.id.isSmallerThanValue(c.id)),
       );
     }
     if (lessThanOrEqualCursor case final c?) {
       query.where(
         messages.createdAt.isSmallerThanValue(c.createdAt) |
-            (messages.createdAt.equals(c.createdAt) &
-                messages.id.isSmallerOrEqualValue(c.id)),
+            (messages.createdAt.equals(c.createdAt) & messages.id.isSmallerOrEqualValue(c.id)),
       );
     }
     if (greaterThanCursor case final c?) {
       query.where(
         messages.createdAt.isBiggerThanValue(c.createdAt) |
-            (messages.createdAt.equals(c.createdAt) &
-                messages.id.isBiggerThanValue(c.id)),
+            (messages.createdAt.equals(c.createdAt) & messages.id.isBiggerThanValue(c.id)),
       );
     }
     if (greaterThanOrEqualCursor case final c?) {
       query.where(
         messages.createdAt.isBiggerThanValue(c.createdAt) |
-            (messages.createdAt.equals(c.createdAt) &
-                messages.id.isBiggerOrEqualValue(c.id)),
+            (messages.createdAt.equals(c.createdAt) & messages.id.isBiggerOrEqualValue(c.id)),
       );
     }
 
@@ -430,14 +421,15 @@ class MessageDao extends DatabaseAccessor<DriftChatDatabase> with _$MessageDaoMi
   /// `showInChannel = false`).
   Future<({DateTime createdAt, String id})?> _lookupCursor(String? id) async {
     if (id == null) return null;
-    final createdAt = await (selectOnly(messages)
-          ..addColumns([messages.createdAt])
-          ..where(messages.id.equals(id))
-          ..where(
-            messages.parentId.isNull() | messages.showInChannel.equals(true),
-          ))
-        .map((row) => row.read(messages.createdAt))
-        .getSingleOrNull();
+    final createdAt =
+        await (selectOnly(messages)
+              ..addColumns([messages.createdAt])
+              ..where(messages.id.equals(id))
+              ..where(
+                messages.parentId.isNull() | messages.showInChannel.equals(true),
+              ))
+            .map((row) => row.read(messages.createdAt))
+            .getSingleOrNull();
     if (createdAt == null) return null;
     return (createdAt: createdAt, id: id);
   }

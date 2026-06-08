@@ -36,8 +36,7 @@ class ReactionDao extends DatabaseAccessor<DriftChatDatabase> with _$ReactionDao
     String messageId,
     String userId,
   ) {
-    final where =
-        reactions.messageId.equals(messageId) & reactions.userId.equals(userId);
+    final where = reactions.messageId.equals(messageId) & reactions.userId.equals(userId);
     return _selectReactions(where);
   }
 
@@ -70,8 +69,7 @@ class ReactionDao extends DatabaseAccessor<DriftChatDatabase> with _$ReactionDao
       for (final id in messageIds) id: <Reaction>[],
     };
     for (final chunk in chunked(messageIds)) {
-      final where =
-          reactions.messageId.isIn(chunk) & reactions.userId.equals(userId);
+      final where = reactions.messageId.isIn(chunk) & reactions.userId.equals(userId);
       final rows = await _selectReactions(where);
       for (final r in rows) {
         grouped[r.messageId]!.add(r);
@@ -98,8 +96,7 @@ class ReactionDao extends DatabaseAccessor<DriftChatDatabase> with _$ReactionDao
   });
 
   Future<List<Reaction>> _selectReactions(Expression<bool> where) {
-    final rows = select(reactions)
-        .join([leftOuterJoin(users, reactions.userId.equalsExp(users.id))])
+    final rows = select(reactions).join([leftOuterJoin(users, reactions.userId.equalsExp(users.id))])
       ..where(where)
       ..orderBy([OrderingTerm.asc(reactions.createdAt)]);
     return rows.map((row) {

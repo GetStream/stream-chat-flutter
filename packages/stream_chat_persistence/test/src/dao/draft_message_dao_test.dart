@@ -368,8 +368,7 @@ void main() {
     });
   });
 
-  test(
-      'getDraftMessageByCid hydrates parent message with draft=null '
+  test('getDraftMessageByCid hydrates parent message with draft=null '
       '(propagates fetchDraft=false to prevent recursion)', () async {
     const cid = 'test:fetchDraftPropagation';
     const parentId = 'parent-msg';
@@ -399,8 +398,7 @@ void main() {
       ),
     ]);
 
-    final fetched =
-        await draftMessageDao.getDraftMessageByCid(cid, parentId: parentId);
+    final fetched = await draftMessageDao.getDraftMessageByCid(cid, parentId: parentId);
 
     expect(fetched, isNotNull);
     expect(fetched!.parentMessage, isNotNull);
@@ -533,13 +531,11 @@ void main() {
 
   group('getDraftMessagesByParentIds', () {
     test('returns empty map for empty input ids', () async {
-      final result = await draftMessageDao
-          .getDraftMessagesByParentIds('any-cid', const []);
+      final result = await draftMessageDao.getDraftMessagesByParentIds('any-cid', const []);
       expect(result, isEmpty);
     });
 
-    test(
-        'returns the thread draft per parent id within the given channel; '
+    test('returns the thread draft per parent id within the given channel; '
         'parents without a thread draft (or drafts in other channels) map '
         'to null', () async {
       const cidA = 'test:cidA';

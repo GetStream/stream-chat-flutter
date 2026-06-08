@@ -107,8 +107,7 @@ void main() {
     expect(insertedReactions, isNotEmpty);
 
     // Adding sample reactions from other users on the same message.
-    final otherInsertedReactions =
-        await _prepareReactionData(messageId, userId: otherUserId);
+    final otherInsertedReactions = await _prepareReactionData(messageId, userId: otherUserId);
     expect(otherInsertedReactions, isNotEmpty);
 
     // Fetched reaction length should match the target user's reactions only.
@@ -178,8 +177,7 @@ void main() {
     );
   });
 
-  test('getReactionsForMessages chunks transparently when given >900 ids',
-      () async {
+  test('getReactionsForMessages chunks transparently when given >900 ids', () async {
     // 1,200 ids exceeds the historical SQLITE_MAX_VARIABLE_NUMBER cap (999)
     // for a single `WHERE messageId IN (?, ?, ...)` statement — the helper
     // must run the SELECT in chunks and merge.
@@ -220,8 +218,7 @@ void main() {
     final ids = messages.map((m) => m.id).toList();
     final grouped = await reactionDao.getReactionsForMessages(ids);
 
-    expect(grouped, hasLength(total),
-        reason: 'every input id must be a key (dense-map contract)');
+    expect(grouped, hasLength(total), reason: 'every input id must be a key (dense-map contract)');
     var withReactions = 0;
     var empty = 0;
     for (var i = 0; i < total; i++) {
@@ -240,8 +237,7 @@ void main() {
     expect(empty, total ~/ 2);
   });
 
-  test(
-      'getReactions returns empty for a message id with no reactions, '
+  test('getReactions returns empty for a message id with no reactions, '
       'even when reactions exist for other messages', () async {
     // Locks per-id isolation: the upcoming batched `WHERE messageId IN (...)`
     // path must not leak rows across ids when only one is queried.
@@ -256,13 +252,11 @@ void main() {
 
   group('getReactionsForMessagesByUserId', () {
     test('returns empty map for empty input ids', () async {
-      final result = await reactionDao
-          .getReactionsForMessagesByUserId(const [], 'someUser');
+      final result = await reactionDao.getReactionsForMessagesByUserId(const [], 'someUser');
       expect(result, isEmpty);
     });
 
-    test(
-        "returns the given user's reactions per message id; message ids "
+    test("returns the given user's reactions per message id; message ids "
         'with no reactions from that user map to an empty list', () async {
       const cid = 'test:Cid';
       const targetUser = 'targetUser';
@@ -315,8 +309,7 @@ void main() {
         targetUser,
       );
 
-      expect(result.keys,
-          unorderedEquals([msgWithOwn, msgWithoutOwn, msgUnknown]));
+      expect(result.keys, unorderedEquals([msgWithOwn, msgWithoutOwn, msgUnknown]));
       expect(result[msgWithOwn], hasLength(1));
       expect(result[msgWithOwn]!.single.userId, targetUser);
       expect(result[msgWithOwn]!.single.type, 'like');

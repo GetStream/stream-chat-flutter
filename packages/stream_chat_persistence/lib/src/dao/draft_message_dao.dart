@@ -84,8 +84,7 @@ class DraftMessageDao extends DatabaseAccessor<DriftChatDatabase> with _$DraftMe
     if (parentIds.isEmpty) return const {};
     final result = <String, Draft?>{for (final id in parentIds) id: null};
     for (final chunk in chunked(parentIds)) {
-      final query = select(draftMessages)
-        ..where((tbl) => tbl.channelCid.equals(cid) & tbl.parentId.isIn(chunk));
+      final query = select(draftMessages)..where((tbl) => tbl.channelCid.equals(cid) & tbl.parentId.isIn(chunk));
       final entities = await query.get();
       for (final entity in entities) {
         if (entity.parentId case final pid?) {
