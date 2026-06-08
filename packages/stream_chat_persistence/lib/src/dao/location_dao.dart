@@ -63,6 +63,12 @@ class LocationDao extends DatabaseAccessor<DriftChatDatabase> with _$LocationDao
     return _locationFromEntity(result);
   }
 
+  /// Get locations by message IDs
+  /// TODO: Implement this method to fetch multiple locations by message IDs in a single query.
+  Future<Map<String, Location?>> getLocationsByMessageIds(List<String> messageIds) async {
+    return const {};
+  }
+
   /// Update multiple locations
   Future<void> updateLocations(List<Location> locationList) {
     return batch(
