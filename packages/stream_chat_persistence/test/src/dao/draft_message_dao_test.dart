@@ -368,6 +368,50 @@ void main() {
     });
   });
 
+  test(
+      'getDraftMessageByCid hydrates parent message with draft=null '
+      '(propagates fetchDraft=false to prevent recursion)', () async {
+    const cid = 'test:fetchDraftPropagation';
+    const parentId = 'parent-msg';
+
+    final user = User(id: 'testUserId');
+    final parentMessage = Message(
+      id: parentId,
+      user: user,
+      createdAt: DateTime.now(),
+      text: 'Parent',
+    );
+
+    await database.userDao.updateUsers([user]);
+    await database.channelDao.updateChannels([ChannelModel(cid: cid)]);
+    await database.messageDao.updateMessages(cid, [parentMessage]);
+
+    await draftMessageDao.updateDraftMessages([
+      Draft(
+        channelCid: cid,
+        parentId: parentId,
+        createdAt: DateTime.now(),
+        message: DraftMessage(
+          id: 'thread-draft',
+          text: 'reply draft',
+          parentId: parentId,
+        ),
+      ),
+    ]);
+
+    final fetched =
+        await draftMessageDao.getDraftMessageByCid(cid, parentId: parentId);
+
+    expect(fetched, isNotNull);
+    expect(fetched!.parentMessage, isNotNull);
+    expect(fetched.parentMessage!.id, parentId);
+    expect(
+      fetched.parentMessage!.draft,
+      isNull,
+      reason: 'parent message hydration must pass fetchDraft=false',
+    );
+  });
+
   group('DraftMessages entity references', () {
     test(
       'should delete draft messages when referenced channel is deleted',
@@ -485,5 +529,102 @@ void main() {
         expect(draftAfterMessageDelete, isNull);
       },
     );
+  });
+
+  group('getDraftMessagesByParentIds', () {
+    test('returns empty map for empty input ids', () async {
+      final result = await draftMessageDao
+          .getDraftMessagesByParentIds('any-cid', const []);
+      expect(result, isEmpty);
+    });
+
+    test(
+        'returns the thread draft per parent id within the given channel; '
+        'parents without a thread draft (or drafts in other channels) map '
+        'to null', () async {
+      const cidA = 'test:cidA';
+      const cidB = 'test:cidB';
+      const parentWithDraft = 'parent-with-draft';
+      const parentWithoutDraft = 'parent-without-draft';
+      const parentInOtherChannel = 'parent-in-other-channel';
+      const parentUnknown = 'parent-unknown';
+
+      final user = User(id: 'testUserId');
+      await database.userDao.updateUsers([user]);
+      await database.channelDao.updateChannels([
+        ChannelModel(cid: cidA),
+        ChannelModel(cid: cidB),
+      ]);
+      await database.messageDao.updateMessages(cidA, [
+        Message(
+          id: parentWithDraft,
+          user: user,
+          createdAt: DateTime.now(),
+          text: 'A',
+        ),
+        Message(
+          id: parentWithoutDraft,
+          user: user,
+          createdAt: DateTime.now(),
+          text: 'B',
+        ),
+      ]);
+      await database.messageDao.updateMessages(cidB, [
+        Message(
+          id: parentInOtherChannel,
+          user: user,
+          createdAt: DateTime.now(),
+          text: 'C',
+        ),
+      ]);
+      // One draft in cidA on parentWithDraft, and one draft in cidB to
+      // confirm the cid filter excludes it from the cidA lookup.
+      await draftMessageDao.updateDraftMessages([
+        Draft(
+          channelCid: cidA,
+          parentId: parentWithDraft,
+          createdAt: DateTime.now(),
+          message: DraftMessage(
+            text: 'draft in cidA',
+            parentId: parentWithDraft,
+          ),
+        ),
+        Draft(
+          channelCid: cidB,
+          parentId: parentInOtherChannel,
+          createdAt: DateTime.now(),
+          message: DraftMessage(
+            text: 'draft in cidB',
+            parentId: parentInOtherChannel,
+          ),
+        ),
+      ]);
+
+      final result = await draftMessageDao.getDraftMessagesByParentIds(
+        cidA,
+        const [
+          parentWithDraft,
+          parentWithoutDraft,
+          parentInOtherChannel,
+          parentUnknown,
+        ],
+      );
+
+      expect(
+        result.keys,
+        unorderedEquals([
+          parentWithDraft,
+          parentWithoutDraft,
+          parentInOtherChannel,
+          parentUnknown,
+        ]),
+      );
+      expect(result[parentWithDraft], isNotNull);
+      expect(result[parentWithDraft]!.parentId, parentWithDraft);
+      expect(result[parentWithDraft]!.message.text, 'draft in cidA');
+      expect(result[parentWithoutDraft], isNull);
+      expect(result[parentInOtherChannel], isNull);
+      expect(result[parentUnknown], isNull);
+    });
   });
 }

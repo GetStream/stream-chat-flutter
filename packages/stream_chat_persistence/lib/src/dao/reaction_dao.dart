@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_persistence/src/db/drift_chat_database.dart';
+import 'package:stream_chat_persistence/src/db/query_utils.dart';
 import 'package:stream_chat_persistence/src/entity/reactions.dart';
 import 'package:stream_chat_persistence/src/entity/users.dart';
 import 'package:stream_chat_persistence/src/mapper/mapper.dart';
@@ -14,30 +15,69 @@ class ReactionDao extends DatabaseAccessor<DriftChatDatabase> with _$ReactionDao
   ReactionDao(super.db);
 
   /// Returns all the reactions of a particular message by matching
-  /// [Reactions.messageId] with [messageId]
-  Future<List<Reaction>> getReactions(String messageId) =>
-      (select(reactions).join([
-              leftOuterJoin(users, reactions.userId.equalsExp(users.id)),
-            ])
-            ..where(reactions.messageId.equals(messageId))
-            ..orderBy([OrderingTerm.asc(reactions.createdAt)]))
-          .map((rows) {
-            final userEntity = rows.readTableOrNull(users);
-            final reactionEntity = rows.readTable(reactions);
-            return reactionEntity.toReaction(user: userEntity?.toUser());
-          })
-          .get();
+  /// [Reactions.messageId] with [messageId].
+  ///
+  /// Not used in production — `MessageDao` hydrates via the batched
+  /// [getReactionsForMessages]. Kept for convenience (tests + ad-hoc
+  /// single-id lookups).
+  Future<List<Reaction>> getReactions(String messageId) {
+    final where = reactions.messageId.equals(messageId);
+    return _selectReactions(where);
+  }
 
   /// Returns all the reactions of a particular message
   /// added by a particular user by matching
   /// [Reactions.messageId] with [messageId] and
-  /// [Reactions.userId] with [userId]
+  /// [Reactions.userId] with [userId].
+  ///
+  /// Not used in production — `MessageDao` hydrates via the batched
+  /// [getReactionsForMessagesByUserId]. Kept for convenience.
   Future<List<Reaction>> getReactionsByUserId(
     String messageId,
     String userId,
+  ) {
+    final where =
+        reactions.messageId.equals(messageId) & reactions.userId.equals(userId);
+    return _selectReactions(where);
+  }
+
+  /// Returns reactions for every id in [messageIds], grouped by message id.
+  Future<Map<String, List<Reaction>>> getReactionsForMessages(
+    List<String> messageIds,
   ) async {
-    final reactions = await getReactions(messageId);
-    return reactions.where((it) => it.userId == userId).toList();
+    if (messageIds.isEmpty) return const {};
+    final grouped = <String, List<Reaction>>{
+      for (final id in messageIds) id: <Reaction>[],
+    };
+    for (final chunk in chunked(messageIds)) {
+      final where = reactions.messageId.isIn(chunk);
+      final rows = await _selectReactions(where);
+      for (final r in rows) {
+        grouped[r.messageId]!.add(r);
+      }
+    }
+    return grouped;
+  }
+
+  /// Returns reactions for every id in [messageIds] that were added by
+  /// [userId], grouped by message id.
+  Future<Map<String, List<Reaction>>> getReactionsForMessagesByUserId(
+    List<String> messageIds,
+    String userId,
+  ) async {
+    if (messageIds.isEmpty) return const {};
+    final grouped = <String, List<Reaction>>{
+      for (final id in messageIds) id: <Reaction>[],
+    };
+    for (final chunk in chunked(messageIds)) {
+      final where =
+          reactions.messageId.isIn(chunk) & reactions.userId.equals(userId);
+      final rows = await _selectReactions(where);
+      for (final r in rows) {
+        grouped[r.messageId]!.add(r);
+      }
+    }
+    return grouped;
   }
 
   /// Updates the reactions data with the new [reactionList] data
@@ -56,4 +96,16 @@ class ReactionDao extends DatabaseAccessor<DriftChatDatabase> with _$ReactionDao
       (r) => r.messageId.isIn(messageIds),
     );
   });
+
+  Future<List<Reaction>> _selectReactions(Expression<bool> where) {
+    final rows = select(reactions)
+        .join([leftOuterJoin(users, reactions.userId.equalsExp(users.id))])
+      ..where(where)
+      ..orderBy([OrderingTerm.asc(reactions.createdAt)]);
+    return rows.map((row) {
+      final reactionEntity = row.readTable(reactions);
+      final userEntity = row.readTableOrNull(users);
+      return reactionEntity.toReaction(user: userEntity?.toUser());
+    }).get();
+  }
 }
