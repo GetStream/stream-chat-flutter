@@ -3,6 +3,7 @@
 import 'package:drift/drift.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_persistence/src/db/drift_chat_database.dart';
+import 'package:stream_chat_persistence/src/db/query_utils.dart';
 import 'package:stream_chat_persistence/src/entity/entity.dart';
 import 'package:stream_chat_persistence/src/mapper/mapper.dart';
 
@@ -72,6 +73,26 @@ class DraftMessageDao extends DatabaseAccessor<DriftChatDatabase> with _$DraftMe
     if (result == null) return null;
 
     return _draftFromEntity(result);
+  }
+
+  /// Returns thread drafts in [cid] for every parent message id in
+  /// [parentIds], keyed by parent message id.
+  Future<Map<String, Draft?>> getDraftMessagesByParentIds(
+    String cid,
+    List<String> parentIds,
+  ) async {
+    if (parentIds.isEmpty) return const {};
+    final result = <String, Draft?>{for (final id in parentIds) id: null};
+    for (final chunk in chunked(parentIds)) {
+      final query = select(draftMessages)..where((tbl) => tbl.channelCid.equals(cid) & tbl.parentId.isIn(chunk));
+      final entities = await query.get();
+      for (final entity in entities) {
+        if (entity.parentId case final pid?) {
+          result[pid] = await _draftFromEntity(entity);
+        }
+      }
+    }
+    return result;
   }
 
   /// Updates the draft message data of a particular channel with

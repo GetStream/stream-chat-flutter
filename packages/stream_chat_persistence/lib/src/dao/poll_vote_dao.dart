@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_persistence/src/db/drift_chat_database.dart';
+import 'package:stream_chat_persistence/src/db/query_utils.dart';
 import 'package:stream_chat_persistence/src/entity/poll_votes.dart';
 import 'package:stream_chat_persistence/src/entity/polls.dart';
 import 'package:stream_chat_persistence/src/entity/users.dart';
@@ -29,6 +30,35 @@ class PollVoteDao extends DatabaseAccessor<DriftChatDatabase> with _$PollVoteDao
             return pollVoteEntity.toPollVote(user: userEntity?.toUser());
           })
           .get();
+
+  /// Returns poll votes for every id in [pollIds], grouped by poll id.
+  Future<Map<String, List<PollVote>>> getPollVotesForPolls(
+    List<String> pollIds,
+  ) async {
+    if (pollIds.isEmpty) return const {};
+    final grouped = <String, List<PollVote>>{
+      for (final id in pollIds) id: <PollVote>[],
+    };
+    for (final chunk in chunked(pollIds)) {
+      final where = pollVotes.pollId.isIn(chunk);
+      final rows =
+          await (select(pollVotes).join([
+                  leftOuterJoin(users, pollVotes.userId.equalsExp(users.id)),
+                ])
+                ..where(where)
+                ..orderBy([OrderingTerm.asc(pollVotes.createdAt)]))
+              .map((row) {
+                final userEntity = row.readTableOrNull(users);
+                final pollVoteEntity = row.readTable(pollVotes);
+                return pollVoteEntity.toPollVote(user: userEntity?.toUser());
+              })
+              .get();
+      for (final v in rows) {
+        grouped[v.pollId]!.add(v);
+      }
+    }
+    return grouped;
+  }
 
   /// Updates the poll votes data with the new [pollVoteList] data
   Future<void> updatePollVotes(List<PollVote> pollVoteList) => batch(
