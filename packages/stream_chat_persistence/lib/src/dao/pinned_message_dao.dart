@@ -82,9 +82,9 @@ class PinnedMessageDao extends DatabaseAccessor<DriftChatDatabase> with _$Pinned
         Future.value(const <String, Map<String, Draft?>>{}),
       // Locations
       if (fetchSharedLocation)
-        _db.locationDao.getLocationsByMessageIds(messageIds);
+        _db.locationDao.getLocationsByMessageIds(messageIds)
       else
-        Future.value(const <String, Location?>{}),
+        Future.value(const <String, Location>{}),
     ]);
 
     final latestReactionsByMsg = results[0] as Map<String, List<Reaction>>;
@@ -92,7 +92,7 @@ class PinnedMessageDao extends DatabaseAccessor<DriftChatDatabase> with _$Pinned
     final pollsById = results[2] as Map<String, Poll?>;
     final draftsByCidByParentId =
         results[3] as Map<String, Map<String, Draft?>>;
-    final locationsByMsg = results[4] as Map<String, Location?>;
+    final locationsByMsg = results[4] as Map<String, Location>;
 
     final quotedById = <String, Message>{};
     if (fetchQuotedMessage && quotedIds.isNotEmpty) {
@@ -108,6 +108,7 @@ class PinnedMessageDao extends DatabaseAccessor<DriftChatDatabase> with _$Pinned
       final quotedMessages = await _messagesFromJoinRows(
         quoteRows,
         fetchQuotedMessage: false,
+        fetchSharedLocation: true,
       );
       for (final m in quotedMessages) {
         quotedById[m.id] = m;
@@ -135,7 +136,7 @@ class PinnedMessageDao extends DatabaseAccessor<DriftChatDatabase> with _$Pinned
     required Map<String, Poll?> pollsById,
     required Map<String, Message> quotedById,
     required Map<String, Map<String, Draft?>> draftsByCidByParentId,
-    required Map<String, Location?> locationsByMsg,
+    required Map<String, Location> locationsByMsg,
   }) {
     final userEntity = row.readTableOrNull(_users);
     final pinnedByEntity = row.readTableOrNull(_pinnedByUsers);
@@ -145,9 +146,8 @@ class PinnedMessageDao extends DatabaseAccessor<DriftChatDatabase> with _$Pinned
       final id? => quotedById[id],
       _ => null,
     };
-    final poll = switch (
-        msgEntity.pollId) {
-        final id? => pollsById[id],
+    final poll = switch (msgEntity.pollId) {
+      final id? => pollsById[id],
       _ => null,
     };
     final draft = draftsByCidByParentId[msgEntity.channelCid]?[msgEntity.id];
@@ -182,8 +182,11 @@ class PinnedMessageDao extends DatabaseAccessor<DriftChatDatabase> with _$Pinned
     final result = await query.getSingleOrNull();
     if (result == null) return null;
 
-    final hydrated =
-        await _messagesFromJoinRows([result], fetchDraft: fetchDraft); // todo sharedLocation
+    final hydrated = await _messagesFromJoinRows(
+      [result],
+      fetchDraft: fetchDraft,
+      fetchSharedLocation: fetchSharedLocation,
+    );
     return hydrated.firstOrNull;
   }
 
@@ -270,7 +273,11 @@ class PinnedMessageDao extends DatabaseAccessor<DriftChatDatabase> with _$Pinned
           ..orderBy([OrderingTerm.asc(pinnedMessages.createdAt)]);
 
     final rows = await query.get();
-    final msgList = await _messagesFromJoinRows(rows, fetchDraft: fetchDraft); // todo sharedLocation
+    final msgList = await _messagesFromJoinRows(
+      rows,
+      fetchDraft: fetchDraft,
+      fetchSharedLocation: fetchSharedLocation,
+    );
 
     if (msgList.isNotEmpty) {
       final mutable = msgList.toList();

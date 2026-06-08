@@ -1158,6 +1158,170 @@ void main() {
         expect(m.latestReactions!.every((r) => r.messageId == m.id), isTrue);
       }
     });
+
+    test(
+        'getMessageById hydrates sharedLocation when fetchSharedLocation=true; '
+        'null when false', () async {
+      await _seedChannel(cid);
+      final dbUser = User(id: 'testUserId');
+      await database.userDao.updateUsers([dbUser]);
+
+      const messageId = 'msg-with-location';
+      await messageDao.updateMessages(cid, [
+        Message(
+          id: messageId,
+          user: dbUser,
+          text: 'pin drop',
+          createdAt: DateTime.now(),
+        ),
+      ]);
+
+      await database.locationDao.updateLocations([
+        Location(
+          channelCid: cid,
+          messageId: messageId,
+          userId: dbUser.id,
+          latitude: 37.7749,
+          longitude: -122.4194,
+          createdByDeviceId: 'device-A',
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        ),
+      ]);
+
+      final withLocation = await messageDao.getMessageById(messageId);
+      expect(withLocation, isNotNull);
+      expect(withLocation!.sharedLocation, isNotNull);
+      expect(withLocation.sharedLocation!.messageId, messageId);
+      expect(withLocation.sharedLocation!.latitude, 37.7749);
+      expect(withLocation.sharedLocation!.longitude, -122.4194);
+      expect(withLocation.sharedLocation!.createdByDeviceId, 'device-A');
+
+      final withoutLocation = await messageDao.getMessageById(
+        messageId,
+        fetchSharedLocation: false,
+      );
+      expect(withoutLocation, isNotNull);
+      expect(withoutLocation!.sharedLocation, isNull);
+    });
+
+    test(
+        'getMessagesByCid hydrates sharedLocation per row independently; '
+        'absent locations remain null', () async {
+      await _seedChannel(cid);
+      final dbUser = User(id: 'testUserId');
+      await database.userDao.updateUsers([dbUser]);
+
+      final baseTime = DateTime.now();
+      final messages = List.generate(
+        4,
+        (i) => Message(
+          id: 'loc-msg-$i',
+          user: dbUser,
+          text: 'msg $i',
+          createdAt: baseTime.add(Duration(seconds: i)),
+        ),
+      );
+      await messageDao.updateMessages(cid, messages);
+
+      // Locations only on messages 1 and 3; messages 0 and 2 have none.
+      await database.locationDao.updateLocations([
+        Location(
+          channelCid: cid,
+          messageId: messages[1].id,
+          userId: dbUser.id,
+          latitude: 10,
+          longitude: 20,
+          createdAt: baseTime,
+          updatedAt: baseTime,
+        ),
+        Location(
+          channelCid: cid,
+          messageId: messages[3].id,
+          userId: dbUser.id,
+          latitude: 30,
+          longitude: 40,
+          endAt: baseTime.add(const Duration(hours: 1)),
+          createdAt: baseTime,
+          updatedAt: baseTime,
+        ),
+      ]);
+
+      final fetched = await messageDao.getMessagesByCid(cid);
+      expect(fetched, hasLength(4));
+      final byId = {for (final m in fetched) m.id: m};
+
+      expect(byId['loc-msg-0']!.sharedLocation, isNull);
+      expect(byId['loc-msg-1']!.sharedLocation, isNotNull);
+      expect(byId['loc-msg-1']!.sharedLocation!.latitude, 10);
+      expect(byId['loc-msg-1']!.sharedLocation!.longitude, 20);
+      expect(byId['loc-msg-1']!.sharedLocation!.isLive, isFalse);
+      expect(byId['loc-msg-2']!.sharedLocation, isNull);
+      expect(byId['loc-msg-3']!.sharedLocation, isNotNull);
+      expect(byId['loc-msg-3']!.sharedLocation!.latitude, 30);
+      expect(byId['loc-msg-3']!.sharedLocation!.isLive, isTrue);
+
+      final withoutLocations = await messageDao.getMessagesByCid(
+        cid,
+        fetchSharedLocation: false,
+      );
+      expect(
+        withoutLocations.every((m) => m.sharedLocation == null),
+        isTrue,
+      );
+    });
+
+    test(
+        'getMessagesByCid hydrates sharedLocation for quoted message even '
+        'when fetchSharedLocation=false on the parent', () async {
+      await _seedChannel(cid);
+      final dbUser = User(id: 'testUserId');
+      await database.userDao.updateUsers([dbUser]);
+
+      const quotedId = 'msg-quoted-loc';
+      const quotingId = 'msg-quoting-no-loc';
+      final baseTime = DateTime.now();
+      await messageDao.updateMessages(cid, [
+        Message(
+          id: quotedId,
+          user: dbUser,
+          text: 'here I am',
+          createdAt: baseTime,
+        ),
+        Message(
+          id: quotingId,
+          user: dbUser,
+          text: 'see above',
+          createdAt: baseTime.add(const Duration(seconds: 1)),
+          quotedMessageId: quotedId,
+        ),
+      ]);
+
+      await database.locationDao.updateLocations([
+        Location(
+          channelCid: cid,
+          messageId: quotedId,
+          userId: dbUser.id,
+          latitude: 1,
+          longitude: 2,
+          createdAt: baseTime,
+          updatedAt: baseTime,
+        ),
+      ]);
+
+      // Parent caller opts out of locations, but the quoted message should
+      // still carry its own shared location.
+      final fetched = await messageDao.getMessagesByCid(
+        cid,
+        fetchSharedLocation: false,
+      );
+      final quoting = fetched.firstWhere((m) => m.id == quotingId);
+      expect(quoting.sharedLocation, isNull);
+      expect(quoting.quotedMessage, isNotNull);
+      expect(quoting.quotedMessage!.sharedLocation, isNotNull);
+      expect(quoting.quotedMessage!.sharedLocation!.latitude, 1);
+      expect(quoting.quotedMessage!.sharedLocation!.longitude, 2);
+    });
   });
 
   group('deleteMessagesByUser', () {
