@@ -59,7 +59,9 @@ class DmCheckboxListTile extends StatelessWidget {
           contentPadding: contentPadding,
           title: Text(
             context.translations.alsoSendAsDirectMessageLabel,
-            style: textTheme.metadataDefault.copyWith(color: colorScheme.textPrimary),
+            style: textTheme.metadataDefault.copyWith(
+            color: onChanged != null ? colorScheme.textPrimary : colorScheme.textDisabled,
+          ),
           ),
         ),
       ),
