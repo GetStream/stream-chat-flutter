@@ -90,7 +90,7 @@ void main() {
             bundle: rootBundle,
             child: StreamChat(
               client: client,
-              streamChatThemeData: StreamChatThemeData(),
+              themeData: StreamChatThemeData(),
               child: StreamChannel(
                 channel: channel,
                 child: StreamMessageListView(

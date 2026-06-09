@@ -208,7 +208,7 @@ class _StreamChatSampleAppState extends State<StreamChatSampleApp>
                                 messageItem: customMessageItemBuilder,
                               ),
                             ),
-                            streamChatConfigData: config.toStreamChatConfigData(),
+                            configData: config.toStreamChatConfigurationData(),
                             child: wrapped,
                           );
                         }
@@ -234,7 +234,7 @@ class _StreamChatSampleAppState extends State<StreamChatSampleApp>
 
 extension on SampleAppConfigData {
   /// Maps chat-relevant flags to a [StreamChatConfigurationData].
-  StreamChatConfigurationData toStreamChatConfigData() {
+  StreamChatConfigurationData toStreamChatConfigurationData() {
     return StreamChatConfigurationData(
       draftMessagesEnabled: draftMessagesEnabled,
       enforceUniqueReactions: enforceUniqueReactions,

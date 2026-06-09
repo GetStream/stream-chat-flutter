@@ -154,7 +154,7 @@ class _MediaSection extends StatelessWidget {
     final channel = StreamChannel.of(context).channel;
     Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (_) => StreamChannel(channel: channel, child: destination),
+        builder: (_) => StreamChannel.value(channel: channel, child: destination),
       ),
     );
   }

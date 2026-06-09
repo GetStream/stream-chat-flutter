@@ -144,6 +144,37 @@ void main() {
     },
   );
 
+  group('getLocationsByMessageIds', () {
+    test('returns empty map for empty input', () async {
+      final result = await locationDao.getLocationsByMessageIds([]);
+      expect(result, isEmpty);
+    });
+
+    test('returns a location entry only for ids that exist', () async {
+      const cid = 'test:Cid';
+      final inserted = await _prepareLocationData(cid: cid);
+
+      final ids = [
+        inserted[0].messageId!,
+        inserted[1].messageId!,
+        'nonExistentId',
+      ];
+      final result = await locationDao.getLocationsByMessageIds(ids);
+
+      // Stub previously returned `const {}`; the real implementation must
+      // populate one entry per match (no entry for missing ids).
+      expect(result, hasLength(2));
+      expect(result.containsKey(inserted[0].messageId), isTrue);
+      expect(result.containsKey(inserted[1].messageId), isTrue);
+      expect(result.containsKey('nonExistentId'), isFalse);
+
+      final first = result[inserted[0].messageId!];
+      expect(first, isNotNull);
+      expect(first!.latitude, inserted[0].latitude);
+      expect(first.longitude, inserted[0].longitude);
+    });
+  });
+
   test('deleteLocationsByCid', () async {
     const cid = 'test:Cid';
 

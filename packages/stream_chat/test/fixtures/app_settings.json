@@ -1,0 +1,22 @@
+{
+  "app": {
+    "name": "test-app",
+    "auto_translation_enabled": false,
+    "async_url_enrich_enabled": true,
+    "file_upload_config": {
+      "size_limit": 10485760,
+      "allowed_file_extensions": [".csv", ".pdf"],
+      "blocked_file_extensions": [".exe"],
+      "allowed_mime_types": ["text/csv", "application/pdf"],
+      "blocked_mime_types": ["application/x-msdownload"]
+    },
+    "image_upload_config": {
+      "size_limit": 5242880,
+      "allowed_file_extensions": [],
+      "blocked_file_extensions": [],
+      "allowed_mime_types": ["image/png", "image/jpeg"],
+      "blocked_mime_types": []
+    }
+  },
+  "duration": "10ms"
+}

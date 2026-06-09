@@ -99,20 +99,6 @@ typedef ErrorListener =
       StackTrace? stackTrace,
     );
 
-/// {@template attachmentLimitExceededListener}
-/// A callback that can be passed to
-/// [StreamMessageComposer.onAttachmentLimitExceed].
-///
-/// This callback should not throw.
-///
-/// It exists merely for showing custom error, and should not be used otherwise.
-/// {@endtemplate}
-typedef AttachmentLimitExceedListener =
-    void Function(
-      int limit,
-      String error,
-    );
-
 /// {@template attachmentThumbnailBuilder}
 /// A widget builder for representing attachment thumbnails.
 /// {@endtemplate}

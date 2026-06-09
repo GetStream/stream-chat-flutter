@@ -58,7 +58,7 @@ final appRoutes = [
             name: Routes.CHAT_INFO_SCREEN.name,
             path: Routes.CHAT_INFO_SCREEN.path,
             builder: (BuildContext context, GoRouterState state) {
-              return StreamChannel(
+              return StreamChannel.value(
                 channel: _resolveChannel(context, state),
                 child: ChatInfoScreen(
                   user: state.extra as User?,
@@ -70,7 +70,7 @@ final appRoutes = [
             name: Routes.GROUP_INFO_SCREEN.name,
             path: Routes.GROUP_INFO_SCREEN.path,
             builder: (BuildContext context, GoRouterState state) {
-              return StreamChannel(
+              return StreamChannel.value(
                 channel: _resolveChannel(context, state),
                 child: const GroupInfoScreen(),
               );

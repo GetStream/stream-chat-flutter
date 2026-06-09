@@ -145,6 +145,12 @@ class StreamChatLocalizationsIt extends GlobalStreamChatLocalizations {
 Il file è troppo grande per essere caricato. Il limite è di $limitInMB MB.''';
 
   @override
+  String fileTypeNotSupportedError(String? extension) {
+    if (extension != null) return "I file '.$extension' non sono supportati per il caricamento.";
+    return 'Questo tipo di file non è supportato per il caricamento.';
+  }
+
+  @override
   String get couldNotReadBytesFromFileError => 'Impossibile leggere i byte dal file.';
 
   @override

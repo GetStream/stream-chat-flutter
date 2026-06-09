@@ -844,6 +844,12 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
 
   @override
   String get addACommentDescription => 'Allow others to add comments';
+
+  @override
+  String fileTypeNotSupportedError(String? extension) {
+    if (extension != null) return "'.$extension' files are not supported for upload.";
+    return 'This file type is not supported for upload.';
+  }
 }
 
 void main() async {

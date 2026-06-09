@@ -2,6 +2,7 @@ import 'package:device_preview/device_preview.dart' show Devices;
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import '../src/golden_client_stubs.dart';
@@ -31,6 +32,40 @@ void main() {
           ),
         ],
       );
+
+      return StreamChat(
+        client: client,
+        connectivityStream: Stream.value([ConnectivityResult.mobile]),
+        child: Scaffold(
+          body: StreamChannelListItem(channel: channel),
+        ),
+      );
+    },
+  );
+
+  docsGoldenTest(
+    'channel preview tile with draft message',
+    fileName: 'channel_draft_message',
+    constraints: const BoxConstraints.tightFor(width: 375, height: 80),
+    builder: () {
+      final client = MockClient();
+      final channel = fakeChannel(
+        client: client,
+        id: 'general',
+        name: 'General',
+      );
+
+      final draft = Draft(
+        channelCid: 'messaging:general',
+        createdAt: DateTime(2024, 6, 1, 10, 30),
+        message: DraftMessage(text: 'This is a draft message...'),
+      );
+
+      // Stub draft on the channelState directly — chaining through channel.state
+      // inside when() confuses mocktail's call recorder.
+      final channelState = channel.state! as MockChannelState;
+      when(() => channelState.draft).thenReturn(draft);
+      when(() => channelState.draftStream).thenAnswer((_) => Stream.value(draft));
 
       return StreamChat(
         client: client,

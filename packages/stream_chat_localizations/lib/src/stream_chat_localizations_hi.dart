@@ -140,6 +140,12 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
       'फ़ाइल अपलोड करने के लिए बहुत बड़ी है। फ़ाइल आकार सीमा $limitInMB MB है।';
 
   @override
+  String fileTypeNotSupportedError(String? extension) {
+    if (extension != null) return "'.$extension' फ़ाइलें अपलोड के लिए समर्थित नहीं हैं।";
+    return 'यह फ़ाइल प्रकार अपलोड के लिए समर्थित नहीं है।';
+  }
+
+  @override
   String get couldNotReadBytesFromFileError => 'फ़ाइल से बाइट नहीं पढ़ सका.';
 
   @override

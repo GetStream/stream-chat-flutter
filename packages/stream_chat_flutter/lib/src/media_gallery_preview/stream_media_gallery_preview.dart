@@ -31,7 +31,7 @@ import 'package:stream_core_flutter/stream_core_flutter.dart' as core;
 /// ```dart
 /// Navigator.of(context).push(
 ///   MaterialPageRoute(
-///     builder: (_) => StreamChannel(
+///     builder: (_) => StreamChannel.value(
 ///       channel: channel,
 ///       child: StreamMediaGalleryPreview(
 ///         attachments: attachments,

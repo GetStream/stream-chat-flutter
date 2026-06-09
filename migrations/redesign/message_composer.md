@@ -61,9 +61,9 @@ StreamMessageComposer(
 
 > **Note:** `canAlsoSendToChannelFromThread` defaults to `true`, matching the old default of showing the checkbox when inside a thread.
 
-### Breaking Change: `attachmentLimit` is now optional
+### Breaking Change: `attachmentLimit` default is the backend cap
 
-`attachmentLimit` changed from a required `int` (default `10`) to an optional `int?`. When `null` (the new default), no attachment count limit is enforced.
+`attachmentLimit` is a non-nullable `int` defaulting to `StreamAttachmentValidator.defaultMaxAttachmentCount` (`30`) — the backend's `MaxNumberOfMessageAttachments` cap. Previously it defaulted to `10` (`StreamMessageInput`), and during the v10 beta it was briefly `int?` defaulting to `null` ("no limit"). The new default is now both lower-friction (matches the server cap) and safer (prevents silent backend rejections when a higher value is set client-side).
 
 **Before:**
 ```dart
@@ -72,17 +72,65 @@ StreamMessageInput(
 )
 ```
 
-**After (with limit):**
+**After (custom limit):**
 ```dart
 StreamMessageComposer(
   attachmentLimit: 5,
 )
 ```
 
-**After (no limit — new default behaviour):**
+**After (default — matches the backend cap of 30):**
 ```dart
 StreamMessageComposer(
-  // attachmentLimit not set — no limit applied
+  // attachmentLimit defaults to StreamAttachmentValidator.defaultMaxAttachmentCount
+)
+```
+
+### AppSettings-driven attachment validation
+
+`StreamMessageComposer` now validates every picked, pasted, and dropped attachment against `StreamChatClient.appSettings` — enforcing per-type size limits, allowed/blocked extensions, allowed/blocked MIME types, and the total attachment count. The validator runs synchronously off the cached `AppSettings` (auto-loaded on connect, refreshed via `client.getAppSettings()`); validation failures surface as a localized error sheet.
+
+The previous `maxAttachmentSize` (UI-side fallback) and `onAttachmentLimitExceed` (custom error callback) parameters have been **removed**.
+
+| Removed                                          | Replacement                                                                                                                                                                                                            |
+| ------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `StreamMessageComposer.maxAttachmentSize` (`int?`) and the `kDefaultMaxAttachmentSize` constant | Size limits are read from `StreamChatClient.appSettings.fileUploadConfig.sizeLimit` / `imageUploadConfig.sizeLimit` (configured in the Stream Dashboard). When the app-configured value is `0`, the SDK falls back to `UploadConfig.defaultSizeLimit` (100 MB).    |
+| `StreamMessageComposer.onAttachmentLimitExceed` and the `AttachmentLimitExceedListener` typedef | The default error sheet handles all validator failures. To surface a custom UI, pass `onError` to `StreamMessageComposer` — when set, it short-circuits the default sheet and receives the typed `AttachmentLimitReachedError` / `AttachmentTooLargeError` / `AttachmentBlockedError`. |
+
+**Before:**
+```dart
+StreamMessageInput(
+  maxAttachmentSize: 5 * 1024 * 1024, // 5 MB UI-side cap
+  onAttachmentLimitExceed: (limit, error) {
+    showSnackBar('Too many attachments ($limit max)');
+  },
+)
+```
+
+**After:**
+```dart
+// No UI-side knobs. Size + extension + MIME rules come from the app's
+// AppSettings (configured in the Stream Dashboard); the count limit comes
+// from `attachmentLimit` (defaulting to 30).
+StreamMessageComposer()
+```
+
+For a custom error UI, supply an `onError` callback to `StreamMessageComposer`. When provided, it short-circuits the default error sheet and receives the typed validator errors:
+
+```dart
+StreamMessageComposer(
+  onError: (error, stackTrace) {
+    final message = switch (error) {
+      AttachmentLimitReachedError(:final maxCount) =>
+        'Too many attachments ($maxCount max)',
+      AttachmentTooLargeError(:final maxSize) =>
+        'Attachment exceeds $maxSize bytes',
+      AttachmentBlockedError(:final fileExtension, :final mimeType) =>
+        'Attachment type not allowed (${fileExtension ?? mimeType})',
+      _ => null,
+    };
+    if (message != null) showSnackBar(message);
+  },
 )
 ```
 
@@ -580,7 +628,9 @@ There is no one-to-one replacement — most fields on the old `StreamMessageInpu
 - [ ] Replace the old `StreamMessageComposerInput` text-field widget with `StreamMessageComposerInputCenter` (and `DefaultStreamMessageComposerInput` → `DefaultStreamMessageComposerInputCenter`); note that `MessageComposerInputProps` and `MessageComposerInputCenterProps` are now distinct classes — update props usage to the center variant for text-field customization
 - [ ] Switch any factory override that previously used the `messageComposerInput` key to render a custom text field over to `messageComposerInputCenter` — the old key now overrides the outer input container
 - [ ] Rename `hideSendAsDm` to `canAlsoSendToChannelFromThread` in all `StreamMessageComposer` usages and invert the value
-- [ ] Review usages of `attachmentLimit` — it is now `int?` and defaults to no limit; set an explicit value if you relied on the old default of `10`
+- [ ] Review usages of `attachmentLimit` — it is now a non-nullable `int` defaulting to `StreamAttachmentValidator.defaultMaxAttachmentCount` (`30`, the backend cap); set an explicit smaller value to tighten the limit
+- [ ] Remove `maxAttachmentSize` from any `StreamMessageComposer` call — size limits now come from `StreamChatClient.appSettings` (configured in the Stream Dashboard); the SDK falls back to `UploadConfig.defaultSizeLimit` (100 MB) when the app-configured value is `0`
+- [ ] Remove `onAttachmentLimitExceed` from any `StreamMessageComposer` call — the default error sheet now handles all validator failures, or pass `onError: (error, stackTrace) { … }` to render a custom UI (the callback short-circuits the default sheet and receives the typed `AttachmentLimitReachedError` / `AttachmentTooLargeError` / `AttachmentBlockedError`)
 - [ ] Remove any usage of `maxHeight`, `maxLines`, `minLines`, `padding`, `textInputMargin`, `elevation`, `shadow`, `enableActionAnimation`, `contentInsertionConfiguration`, `sendButtonLocation`
 - [ ] Replace `actionsBuilder` / `actionsLocation` / button builder params (`attachmentButtonBuilder`, `commandButtonBuilder`, `sendButtonBuilder`, `idleSendIcon`, `activeSendIcon`, `showCommandsButton`) with sub-component overrides via `StreamComponentFactory`
 - [ ] Replace attachment list builder params (`attachmentListBuilder`, `fileAttachmentListBuilder`, `mediaAttachmentListBuilder`, `voiceRecordingAttachmentListBuilder`) with the `messageComposerAttachmentList` builder in `StreamComponentFactory`

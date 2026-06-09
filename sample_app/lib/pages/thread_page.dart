@@ -44,6 +44,13 @@ class _ThreadPageState extends State<ThreadPage> {
     });
   }
 
+  void _editMessage(Message message) {
+    _messageComposerController.editMessage(message);
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      _focusNode.requestFocus();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -57,6 +64,7 @@ class _ThreadPageState extends State<ThreadPage> {
               initialScrollIndex: widget.initialScrollIndex,
               initialAlignment: widget.initialAlignment,
               onReplyTap: _reply,
+              onEditMessageTap: _editMessage,
               config: const StreamMessageListViewConfiguration(
                 swipeToReply: true,
                 showScrollToBottom: false,

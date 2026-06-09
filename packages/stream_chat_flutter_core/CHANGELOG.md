@@ -1,4 +1,4 @@
-## Upcoming Beta Changes
+## 10.0.1
 
 🛑️ Breaking
 
@@ -23,6 +23,7 @@
 🔄 Changed
 
 - Widened `device_info_plus` to `>=12.4.0 <14.0.0`, `package_info_plus` to `>=9.0.1 <11.0.0`, and `connectivity_plus` to `>=7.1.1 <8.0.0` so apps can adopt the latest majors. Floors raised to current resolved versions.
+- Raised minimum Flutter to `>=3.41.0` and Dart SDK to `^3.11.0`.
 - `StreamChatCore` now sets `client.recoverStateOnReconnect = false` on mount; refreshes on `connectionRecovered` are driven by the list controllers in this package, avoiding a duplicate `queryChannels` round-trip and the historical event-replay flicker on reactions, polls, and quoted messages.
 - Apps watching a `Channel` outside any list controller (e.g. a deep link into a single channel screen) should subscribe to `client.on(EventType.connectionRecovered)` and call `channel.watch()` themselves to refresh state on reconnect.
 - Changed the default `backgroundKeepAlive` from 1 minute to 15 seconds — covers quick app-switches and notification-shade checks while closing cleanly before the server's 35-second read timeout. Still configurable.
@@ -32,12 +33,30 @@
 - Fixed `StreamChatCore` disconnecting the WebSocket immediately on background when no `onBackgroundEventReceived` handler was provided; the keep-alive timer now fires before the connection closes regardless of whether a handler is set.
 - Fixed `StreamMessageComposerController.cancelEditMessage` losing the pre-edit draft when a remote update arrived for the message being edited.
 
-## Upcoming Changes
+## 9.25.0
+
+✅ Added
+
+- Added `StreamChannel.value` — exposes an already-initialized channel without running channel-page
+  positioning. Use it for sub-route and overlay wraps.
+- Added `StreamStateScope<T>` — a generic `InheritedWidget` that exposes a `State` to descendants for
+  O(1) `.of(context)` lookup. Use it to back `static of(BuildContext)` accessors instead of
+  `BuildContext.findAncestorStateOfType`.
 
 🐞 Fixed
 
+- Fixed `StreamChannel.getMessage` hitting the network for thread replies and pinned messages
+  already in local state.
+- Fixed `MessageListCore` reloading the parent channel from its dispose path when running in
+  thread mode.
 - Fixed `StreamChannel.reloadChannel` merging the latest page on top of the previously loaded
   window instead of replacing it. The reload now matches a fresh open of the channel.
+
+🚀 Performance
+
+- `StreamChannel.of` and `StreamChatCore.of` now resolve via `StreamStateScope<T>` instead of
+  `findAncestorStateOfType`, replacing an O(tree-depth) element walk with an O(1) inherited-widget
+  lookup. Callers and behavior are unchanged.
 
 ## 9.24.0
 

@@ -134,6 +134,12 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   String fileTooLargeError(double limitInMB) => 'ファイルが大きすぎてアップロードできません。ファイルサイズの制限は${limitInMB}MBです。';
 
   @override
+  String fileTypeNotSupportedError(String? extension) {
+    if (extension != null) return "'.$extension'ファイルはアップロードに対応していません。";
+    return 'このファイル形式はアップロードに対応していません。';
+  }
+
+  @override
   String get couldNotReadBytesFromFileError => 'ファイルからバイトを読み取れませんでした';
 
   @override

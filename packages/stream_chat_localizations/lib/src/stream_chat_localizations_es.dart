@@ -141,6 +141,12 @@ class StreamChatLocalizationsEs extends GlobalStreamChatLocalizations {
       'El límite de tamaño de los archivos es de $limitInMB MB.';
 
   @override
+  String fileTypeNotSupportedError(String? extension) {
+    if (extension != null) return "Los archivos '.$extension' no son compatibles para subir.";
+    return 'Este tipo de archivo no es compatible para subir.';
+  }
+
+  @override
   String get couldNotReadBytesFromFileError => 'No se pudieron leer los bytes del archivo.';
 
   @override

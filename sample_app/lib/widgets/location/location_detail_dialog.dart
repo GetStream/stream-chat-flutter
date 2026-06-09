@@ -12,7 +12,7 @@ Future<T?> showLocationDetailDialog<T extends Object?>({
   return navigator.push(
     MaterialPageRoute(
       fullscreenDialog: true,
-      builder: (_) => StreamChannel(
+      builder: (_) => StreamChannel.value(
         channel: StreamChannel.of(context).channel,
         child: LocationDetailDialog(sharedLocation: location),
       ),

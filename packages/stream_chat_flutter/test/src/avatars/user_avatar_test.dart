@@ -27,7 +27,7 @@ void main() {
         MaterialApp(
           home: StreamChat(
             client: client,
-            streamChatThemeData: StreamChatThemeData(),
+            themeData: StreamChatThemeData(),
             child: Builder(
               builder: (context) {
                 return Scaffold(

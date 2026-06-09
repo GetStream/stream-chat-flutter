@@ -1,12 +1,17 @@
-## Upcoming Beta Changes
+## 10.0.1
 
 🐞 Fixed
 
 - `StreamUserAvatar` with `StreamAvatarSize.xxl` now uses `StreamOnlineIndicatorSize.xxl` (20px) instead of `xl` (16px), matching the Chat SDK design system spec.
+- Fixed the thread page flashing through a large scroll-up animation when opened from an in-channel reply with cached thread replies.
+- Fixed the thread page throwing `Bad state: No element` on every channel state update when the parent message wasn't in the channel's loaded window.
+- Fixed opening a thread page or long-press message-actions modal overwriting the channel's loaded window — most visibly, jumping back to latest when the user had navigated to an older message via a quoted reply.
 - `StreamMessageComposer` no longer clobbers pre-populated composer state (text, quoted message, attachments) when the channel's draft stream emits its initial `null` (no draft on server). The reset now fires only on an actual non-null → null transition, distinguishing "no draft yet" from "draft was removed".
 
 ✅ Added
 
+- `StreamMessageComposer` now validates attachments against the app's `AppSettings` (configured in the Stream Dashboard) — enforcing size, extension/MIME, and count rules. Pass `onError` to handle the typed `AttachmentLimitReachedError`, `AttachmentTooLargeError`, or `AttachmentBlockedError` instead of the default error sheet.
+- Added `Translations.fileTypeNotSupportedError(String? extension)` — surfaced by the composer when an attachment's extension or MIME type is rejected.
 - Added `BlockUser` / `UnblockUser` default message actions, dispatching to `StreamChatClient.blockUser` / `unblockUser`.
 
 🔄 Internal / Non-breaking
@@ -20,6 +25,8 @@
 - Composer UI primitives (`StreamMessageComposerInputField`, `VoiceRecordingCallback`, and the outer/inner layout containers) are now owned by `stream_chat_flutter` and exported from this package. They were previously supplied by `stream_core_flutter`. The public API of `StreamMessageComposer` / `StreamChatMessageInput` and its sub-components is unchanged.
 - Re-export `StreamAvatarTheme` and `StreamAvatarThemeData` from `stream_core_flutter` so consumers can theme avatars without adding a separate `stream_core_flutter` import.
 - Added `messageLeading`, `messageHeader`, and `messageFooter` factory slots to `streamChatComponentBuilders` for overriding the message item's avatar, annotations, or metadata row without replacing the whole `messageItem`.
+- Bumped `jiffy` to `^6.4.5` to pick up cached locale and `DateFormat` lookups for cheaper relative-time formatting.
+- Raised minimum Flutter to `>=3.41.0` and Dart SDK to `^3.11.0`.
 
 🛑️ Breaking
 
@@ -28,6 +35,7 @@
 - `StreamMessageComposer.enableVoiceRecording` now defaults to `true`. The voice recording button is shown out of the box; pass `enableVoiceRecording: false` to opt out.
 - `StreamMessageListView` had its large set of configuration and builder parameters reorganized. Behavior flags (e.g. `swipeToReply`, `markReadWhenAtTheBottom`, `showScrollToBottom`, `reverse`, `paginationLimit`, `scrollPhysics`, etc.) moved to `StreamMessageListViewConfiguration`, passed directly as `StreamMessageListView.config`. Custom builder callbacks (`headerBuilder`, `footerBuilder`, `loadingBuilder`, `emptyBuilder`, `errorBuilder`, `messageListBuilder`, `parentMessageBuilder`, `dateDividerBuilder`, `floatingDateDividerBuilder`, `threadSeparatorBuilder`, `unreadMessagesSeparatorBuilder`, `scrollToBottomBuilder`, `paginationLoadingIndicatorBuilder`, `spacingWidgetBuilder`, `systemMessageBuilder`, `ephemeralMessageBuilder`, `moderatedMessageBuilder`) moved to `StreamMessageListViewBuilders`, passed directly as `StreamMessageListView.builders`. The `messageBuilder` parameter is back at the root of the constructor as before.
 - Bumped `file_picker` to `^11.0.0` to resolve [#2599](https://github.com/GetStream/stream-chat-flutter/issues/2599). Apps depending on `file_picker` directly must also upgrade past `11.0.0`, which replaces the instance-based `FilePicker.platform.*` API with static `FilePicker.*` methods.
+- Renamed `StreamChat.streamChatThemeData` → `StreamChat.themeData` and `StreamChat.streamChatConfigData` → `StreamChat.configData`. The `StreamChatState.streamChatConfigData` getter is now `StreamChatState.configData`.
 - Renamed `StreamMessageComposer.messageInputController` parameter to `messageComposerController`.
 - Removed `StreamDraftListView`, `StreamDraftListTile`, `StreamDraftListTileTheme`, and `StreamDraftListTileThemeData` from the SDK. Also removed `StreamChatThemeData.draftListTileTheme`. Refer to the sample app for a reference implementation using `StreamDraftListController` and `PagedValueListView`.
 - Renamed `StreamMessageComposerInput` → `StreamMessageComposerInputCenter` (and `DefaultStreamMessageComposerInput` → `DefaultStreamMessageComposerInputCenter`). The name `StreamMessageComposerInput` is now the input container widget (assembles header, leading, center, trailing).
@@ -79,6 +87,10 @@
   - Removed `StreamChatThemeData.galleryHeaderTheme`, `StreamChatThemeData.galleryFooterTheme` (and the `imageFooterTheme:` constructor parameter) and the `StreamGalleryFooterThemeData` class. Header / footer chrome now flows through `StreamAppBarThemeData` / `StreamBottomAppBarThemeData`.
   - Removed the unused `StreamAvatarThemeData`.
   See [`migrations/redesign/media_viewer.md`](../../migrations/redesign/media_viewer.md).
+- Removed `StreamMessageComposer.maxAttachmentSize` (and the `kDefaultMaxAttachmentSize` constant). Per-type size limits come from `StreamChatClient.appSettings` (configured in the Stream Dashboard).
+- Removed `StreamMessageComposer.onAttachmentLimitExceed` and the `AttachmentLimitExceedListener` typedef. Use `onError` for custom error handling.
+- `StreamMessageComposer.attachmentLimit` is now a non-nullable `int` defaulting to `30` (the per-message attachment cap). Previously `int?` defaulting to `null` ("no limit").
+- `StreamAttachmentPickerController` constructor now takes a single `validator: StreamAttachmentValidator` parameter (replaces the previous size / limit / config parameters).
 
 ✅ Added
 
@@ -143,10 +155,13 @@
 - Fixed tapping a quoted parent message inside a thread doing nothing (or kicking back to the channel). The thread message list now resolves the parent slot directly and scrolls/highlights it instead of falling through to `loadChannelAtMessage`.
 - Fixed the jump-to-message highlight starting before the scroll settled, which made the fade barely visible (or invisible if the target hadn't been mounted yet). The message list now awaits the scroll, then plays a 1s hold + 1s ease-out fade — closer to the highlight feel in Slack's permalink jump.
 
-## Upcoming Changes
+## 9.25.0
 
 🐞 Fixed
 
+- Fixed `ScrollablePositionedList.scrollTo` taking the long-distance teleport path when called
+  immediately after mount (before `itemPositions` had been published). It now waits one frame
+  for layout, then animates the real pixel distance.
 - Fixed `StreamMessageListView` not auto-scrolling to the bottom on the user's own outgoing message
   until the server confirmed it.
 - Fixed `StreamMessageListView` tripping `A RenderViewport exceeded its maximum number of layout
@@ -161,6 +176,9 @@
 - `ScrollablePositionedList.padding` now accepts `EdgeInsetsGeometry` (resolved against
   `Directionality`), and `scrollTo` lands the target at the content-area edge by adjusting for
   leading padding.
+- `StreamChat.of` now resolves via `StreamStateScope` instead of `findAncestorStateOfType`, replacing
+  an O(tree-depth) element walk with an O(1) inherited-widget lookup. Callers and behavior are
+  unchanged.
 
 ## 9.24.0
 

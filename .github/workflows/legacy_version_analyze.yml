@@ -3,7 +3,7 @@ name: legacy_version_analyze
 env:
   # Note: The versions below should be manually updated after a new stable
   # version comes out.
-  flutter_version: "3.38.1"
+  flutter_version: "3.41.0"
 
 on:
   push:
@@ -36,7 +36,7 @@ jobs:
         uses: actions/checkout@v6
 
       - name: "Detect Path Changes"
-        uses: dorny/paths-filter@v3
+        uses: dorny/paths-filter@v4
         id: filter
         with:
           filters: |

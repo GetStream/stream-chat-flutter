@@ -16,14 +16,20 @@ version: 1.0.0+1
 #   2. Add it to the melos.yaml file for future updates.
 
 environment:
-  sdk: ^3.10.0
-  flutter: ">=3.38.1"
+  sdk: ^3.11.0
+  flutter: ">=3.41.0"
 
 dependencies:
   cupertino_icons: ^1.0.3
   flutter:
     sdk: flutter
-  stream_chat_flutter_core: ^10.0.0-beta.13
+  stream_chat_flutter_core: ^10.0.1
+
+dependency_overrides:
+  stream_chat:
+    path: ../../stream_chat
+  stream_chat_flutter_core:
+    path: ..
 
 flutter:
   uses-material-design: true

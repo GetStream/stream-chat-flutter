@@ -66,16 +66,14 @@ class StreamMessageComposer extends StatelessWidget {
     StreamMessageComposerController? messageComposerController,
     FocusNode? focusNode,
     bool disableAttachments = false,
-    int maxAttachmentSize = kDefaultMaxAttachmentSize,
     bool canAlsoSendToChannelFromThread = true,
     bool enableVoiceRecording = true,
     bool sendVoiceRecordingAutomatically = false,
     AudioRecorderFeedback voiceRecordingFeedback = const AudioRecorderFeedback(),
     UserMentionTileBuilder? userMentionsTileBuilder,
     ErrorListener? onError,
-    int? attachmentLimit,
+    int attachmentLimit = StreamAttachmentValidator.defaultMaxAttachmentCount,
     List<AttachmentPickerType> allowedAttachmentPickerTypes = AttachmentPickerType.values,
-    AttachmentLimitExceedListener? onAttachmentLimitExceed,
     Iterable<StreamAutocompleteTrigger> customAutocompleteTriggers = const [],
     bool mentionAllAppUsers = false,
     bool? shouldKeepFocusAfterMessage,
@@ -103,7 +101,6 @@ class StreamMessageComposer extends StatelessWidget {
          messageComposerController: messageComposerController,
          focusNode: focusNode,
          disableAttachments: disableAttachments,
-         maxAttachmentSize: maxAttachmentSize,
          canAlsoSendToChannelFromThread: canAlsoSendToChannelFromThread,
          enableVoiceRecording: enableVoiceRecording,
          sendVoiceRecordingAutomatically: sendVoiceRecordingAutomatically,
@@ -112,7 +109,6 @@ class StreamMessageComposer extends StatelessWidget {
          onError: onError,
          attachmentLimit: attachmentLimit,
          allowedAttachmentPickerTypes: allowedAttachmentPickerTypes,
-         onAttachmentLimitExceed: onAttachmentLimitExceed,
          customAutocompleteTriggers: customAutocompleteTriggers,
          mentionAllAppUsers: mentionAllAppUsers,
          shouldKeepFocusAfterMessage: shouldKeepFocusAfterMessage,
@@ -150,8 +146,9 @@ class StreamMessageComposer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return context.chatComponentBuilder<MessageComposerProps>()?.call(context, props) ??
-        DefaultStreamMessageComposer(props: props);
+    final builder = context.chatComponentBuilder<MessageComposerProps>();
+    if (builder != null) return builder(context, props);
+    return DefaultStreamMessageComposer(props: props);
   }
 }
 
@@ -164,16 +161,14 @@ class MessageComposerProps {
     this.messageComposerController,
     this.focusNode,
     this.disableAttachments = false,
-    this.maxAttachmentSize = kDefaultMaxAttachmentSize,
     this.canAlsoSendToChannelFromThread = true,
     this.enableVoiceRecording = false,
     this.sendVoiceRecordingAutomatically = false,
     this.voiceRecordingFeedback = const AudioRecorderFeedback(),
     this.userMentionsTileBuilder,
     this.onError,
-    this.attachmentLimit,
+    this.attachmentLimit = StreamAttachmentValidator.defaultMaxAttachmentCount,
     this.allowedAttachmentPickerTypes = AttachmentPickerType.values,
-    this.onAttachmentLimitExceed,
     this.customAutocompleteTriggers = const [],
     this.mentionAllAppUsers = false,
     this.shouldKeepFocusAfterMessage,
@@ -215,11 +210,6 @@ class MessageComposerProps {
   ///
   /// Defaults to false.
   final bool disableAttachments;
-
-  /// Max attachment size in bytes.
-  ///
-  /// Defaults to 100 MB.
-  final int maxAttachmentSize;
 
   /// Show the checkbox to send the message as a direct message to the channel.
   ///
@@ -273,19 +263,16 @@ class MessageComposerProps {
   /// A callback for error reporting
   final ErrorListener? onError;
 
-  /// A limit for the no. of attachments that can be sent with a single message.
-  final int? attachmentLimit;
+  /// The maximum number of attachments that can be sent with a single message.
+  ///
+  /// Defaults to [StreamAttachmentValidator.defaultMaxAttachmentCount].
+  final int attachmentLimit;
 
   /// The list of allowed attachment types which can be picked using the
   /// attachment button.
   ///
   /// By default, all the attachment types are allowed.
   final List<AttachmentPickerType> allowedAttachmentPickerTypes;
-
-  /// A callback for when the [attachmentLimit] is exceeded.
-  ///
-  /// This will override the default error alert behaviour.
-  final AttachmentLimitExceedListener? onAttachmentLimitExceed;
 
   /// List of triggers for showing autocomplete.
   final Iterable<StreamAutocompleteTrigger> customAutocompleteTriggers;
@@ -331,8 +318,7 @@ class MessageComposerProps {
   /// placeholderBuilder: (context, placeholder) {
   ///   final translations = context.translations;
   ///   return switch (placeholder) {
-  ///     SlowModePlaceholder(:final cooldownTimeOut) =>
-  ///       translations.slowModeOnLabel(cooldownTimeOut),
+  ///     SlowModePlaceholder(:final cooldownTimeOut) => translations.slowModeOnLabel(cooldownTimeOut),
   ///     CommandPlaceholder(command: 'weather') => 'Type a city name',
   ///     CommandPlaceholder() => translations.writeAMessageLabel,
   ///     AttachmentsPlaceholder() => translations.addACommentOrSendLabel,
@@ -976,8 +962,7 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
       _pickerController = StreamAttachmentPickerController(
         initialAttachments: _effectiveController.attachments,
         initialPoll: _effectiveController.poll,
-        maxAttachmentCount: widget.props.attachmentLimit,
-        maxAttachmentSize: widget.props.maxAttachmentSize,
+        validator: _buildAttachmentValidator(),
       );
 
       _startPickerSync();
@@ -1068,7 +1053,7 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
   }
 
   void _onPickerError(AttachmentPickerError error) {
-    widget.props.onError?.call(error.error, error.stackTrace);
+    return _handleAttachmentError(error.error, error.stackTrace);
   }
 
   late final _onChangedThrottled = throttle(
@@ -1180,26 +1165,62 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     return response;
   }
 
-  /// Adds an attachment to the [messageComposerController.attachments] list
-  void _addAttachments(Iterable<Attachment> attachments) {
-    if (widget.props.attachmentLimit case final limit?) {
-      final length = _effectiveController.attachments.length + attachments.length;
-      if (length > limit) {
-        final onAttachmentLimitExceed = widget.props.onAttachmentLimitExceed;
-        if (onAttachmentLimitExceed != null) {
-          return onAttachmentLimitExceed(
-            limit,
-            context.translations.attachmentLimitExceedError(limit),
-          );
-        }
-        return _showErrorAlert(
-          context.translations.attachmentLimitExceedError(limit),
-        );
-      }
+  // Validates [attachments] and adds the passing ones to the message
+  // controller. When the picker is open, _syncMessageToPicker propagates
+  // the additions (with caching) to the picker controller.
+  //
+  // On batch validation failures, only the first error is surfaced — the
+  // remaining failures are dropped silently to avoid stacking error alerts.
+  // Valid attachments are still added (partial success).
+  void _addAttachments(List<Attachment> attachments) {
+    if (attachments.isEmpty) return;
+
+    final validator = _buildAttachmentValidator();
+
+    // Pre-flight count check — reject the whole batch if it would exceed
+    // the limit. Atomic semantics: either all fit or none are added.
+    final newTotal = _effectiveController.attachments.length + attachments.length;
+    if (validator.validateCount(newTotal) case final error?) {
+      return _handleAttachmentError(error);
     }
+
+    final validationErrors = <StreamChatError>[];
     for (final attachment in attachments) {
+      if (validator.validate(attachment) case final error?) {
+        validationErrors.add(error);
+        continue;
+      }
+
       _effectiveController.addAttachment(attachment);
     }
+
+    if (validationErrors.firstOrNull case final error?) _handleAttachmentError(error);
+  }
+
+  StreamAttachmentValidator _buildAttachmentValidator() {
+    final appSettings = StreamChat.of(context).client.appSettings;
+
+    return StreamAttachmentValidator(
+      fileUploadConfig: appSettings.fileUploadConfig,
+      imageUploadConfig: appSettings.imageUploadConfig,
+      maxAttachmentCount: widget.props.attachmentLimit,
+    );
+  }
+
+  void _handleAttachmentError(Object error, [StackTrace? stackTrace]) {
+    if (widget.props.onError case final onError?) {
+      return onError(error, stackTrace ?? StackTrace.current);
+    }
+
+    final translations = context.translations;
+    final message = switch (error) {
+      AttachmentBlockedError(:final fileExtension) => translations.fileTypeNotSupportedError(fileExtension),
+      AttachmentTooLargeError(:final maxSize) => translations.fileTooLargeError(maxSize / (1024 * 1024)),
+      AttachmentLimitReachedError(:final maxCount) => translations.attachmentLimitExceedError(maxCount),
+      _ => error.toString(),
+    };
+
+    return _showErrorAlert(message);
   }
 
   /// Sends the current message
@@ -1286,6 +1307,7 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
   }
 
   void _showErrorAlert(String description) {
+    if (!mounted) return;
     showModalBottomSheet(
       backgroundColor: context.streamColorScheme.backgroundElevation1,
       context: context,

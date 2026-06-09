@@ -7,6 +7,7 @@ import 'package:stream_chat/stream_chat.dart';
 import 'package:test/test.dart';
 
 import '../../mocks.dart';
+import '../../utils.dart';
 
 void main() {
   Response successResponse(String path, {Object? data}) => Response(
@@ -336,6 +337,26 @@ void main() {
         queryParameters: {'url': url},
       ),
     ).called(1);
+    verifyNoMoreInteractions(client);
+  });
+
+  test('getAppSettings calls GET /app and parses response', () async {
+    const path = '/app';
+    final fixture = jsonFixture('app_settings.json');
+
+    when(() => client.get(path)).thenAnswer(
+      (_) async => successResponse(path, data: fixture),
+    );
+
+    final res = await generalApi.getAppSettings();
+
+    expect(res, isNotNull);
+    expect(res.app.name, 'test-app');
+    expect(res.app.fileUploadConfig.sizeLimit, 10485760);
+    expect(res.app.imageUploadConfig.sizeLimit, 5242880);
+    expect(res.app.fileUploadConfig.allowedFileExtensions, ['.csv', '.pdf']);
+
+    verify(() => client.get(path)).called(1);
     verifyNoMoreInteractions(client);
   });
 }

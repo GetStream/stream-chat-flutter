@@ -268,6 +268,67 @@ void main() {
   );
 
   docsGoldenTest(
+    'custom input header banner',
+    fileName: 'message_composer_input_header',
+    constraints: const BoxConstraints.tightFor(width: 375, height: 140),
+    builder: () {
+      final client = MockClient();
+      final clientState = MockClientState();
+      final channel = MockChannel();
+      final channelState = MockChannelState();
+
+      setupMockChannel(
+        client: client,
+        clientState: clientState,
+        channel: channel,
+        channelState: channelState,
+      );
+
+      final controller = StreamMessageComposerController();
+      addTearDown(controller.dispose);
+
+      return StreamChat(
+        client: client,
+        connectivityStream: Stream.value([ConnectivityResult.mobile]),
+        componentBuilders: StreamComponentBuilders(
+          extensions: streamChatComponentBuilders(
+            messageComposerInputHeader: (context, props) {
+              // Custom header: replace the default with a moderation banner.
+              // Add the quoted-message/attachment preview logic here if needed.
+              return Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                color: const Color(0xFFFFF9C4),
+                child: const Row(
+                  children: [
+                    Icon(Icons.warning_amber_rounded, size: 14, color: Color(0xFFB45309)),
+                    SizedBox(width: 6),
+                    Text(
+                      'This channel is moderated',
+                      style: TextStyle(fontSize: 12, color: Color(0xFF92400E)),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
+        child: StreamChannel(
+          showLoading: false,
+          channel: channel,
+          child: Scaffold(
+            body: Column(
+              children: [
+                const Expanded(child: SizedBox()),
+                StreamMessageComposer(messageComposerController: controller),
+              ],
+            ),
+          ),
+        ),
+      );
+    },
+  );
+
+  docsGoldenTest(
     'custom composer buttons',
     fileName: 'message_input_custom_buttons',
     constraints: const BoxConstraints.tightFor(width: 375, height: 100),

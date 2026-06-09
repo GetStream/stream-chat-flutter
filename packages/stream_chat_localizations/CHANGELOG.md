@@ -1,4 +1,4 @@
-## Upcoming
+## 10.0.1
 
 🛑️ Breaking
 
@@ -20,6 +20,7 @@
 
 ✅ Added
 
+- Added `fileTypeNotSupportedError(String? extension)` translation for all supported locales.
 - Added `toggleBlockUnblockUserText` translation for all supported locales.
 - Added `threadLabel` translation for all supported locales, used by the
   `StreamThreadHeader` default title.
@@ -55,6 +56,11 @@
   the redesigned message composer placeholder.
 - Reworded `endVoteLabel` English override from `'End Vote'` to `'End Poll'`.
 - Reworded `flagLabel`, `cancelLabel` and `deleteLabel` defaults from uppercase to sentence case across all supported locales (e.g. English: `'FLAG'` → `'Flag'`, `'CANCEL'` → `'Cancel'`, `'DELETE'` → `'Delete'`) so dialog buttons render in the same case as the rest of the system.
+- Raised minimum Flutter to `>=3.41.0` and Dart SDK to `^3.11.0`.
+
+## 9.25.0
+
+- Updated `stream_chat_flutter` dependency to [`9.25.0`](https://pub.dev/packages/stream_chat_flutter/changelog).
 
 ## 9.24.0
 

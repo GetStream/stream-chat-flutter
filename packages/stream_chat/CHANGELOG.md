@@ -1,7 +1,9 @@
-## Upcoming
+## 10.0.1
 
 ✅ Added
 
+- Added `StreamChatClient.appSettings` and `StreamChatClient.getAppSettings()` to read and refresh the per-app upload configuration set in the Stream Dashboard.
+- Added `AppSettings` model with `fileUploadConfig` / `imageUploadConfig` (both `UploadConfig`) — exposes `sizeLimit`, `allowedFileExtensions`, `blockedFileExtensions`, `allowedMimeTypes`, and `blockedMimeTypes`.
 - Added `StreamChatClient.recoverStateOnReconnect` (defaults to `true`); when `false`, the client no longer auto-re-queries active channels on connection recovery — useful for consumers driving their own refresh from the `connectionRecovered` event.
 - Added `Message.updateWith(Message? other)` — merges a server-side update onto the local message while preserving locally-known `poll`, `sharedLocation`, `ownReactions`, and nested `quotedMessage` enrichment when the server omits them.
 - Added `Channel.isOneToOne` — true when the channel is `isDistinct` and has exactly two members. For the looser count-only check, inline `channel.memberCount == 2`.
@@ -16,6 +18,7 @@
 🔄 Changed
 
 - Raised minimum versions of bundled Dart dependencies (`async`, `collection`, `dio`, `equatable`, `http_parser`, `json_annotation`, `logging`, `synchronized`, `uuid`, `web_socket_channel`) to current resolved versions.
+- Raised minimum Dart SDK to `^3.11.0`.
 - Tightened `Channel.isGroup` from `memberCount != 2` to `memberCount > 2 || !isDistinct`. Two-member non-distinct channels now correctly report as groups, and 1-member distinct channels no longer do. Migrate via `!channel.isOneToOne` or `channel.memberCount != 2`.
 - Tightened `Channel.isDistinct` to require the `!members-` prefix (with trailing dash), matching the backend's `DistinctChannelPrefix` constant. Real server-generated ids always include the dash; only malformed/test ids that previously matched the looser `!members` check are affected.
 - Renamed `SortedListX.merge` (added in 9.24.0) → `SortedListX.mergeSorted` and moved the unsorted/iterable variant to `IterableMergeX.merge`. Callers on `List<T>` that want sorted output should switch to `mergeSorted`; callers on `Iterable<T>` keep using `merge`.
@@ -33,6 +36,10 @@
 - Fixed quoted poll messages losing their poll, shared-location, or nested-quote content when the server omits it from the `quoted_message` payload during channel re-sync.
 - Fixed a poll attached to a parent message disappearing when a thread reply was added; partial `message.updated` events no longer clobber locally-known `poll` / `sharedLocation` on the parent.
 
+## 9.25.0
+
+- Minor bug fixes and improvements
+
 ## 9.24.0
 
 🔒 Security
@@ -43,6 +50,7 @@
 
 🐞 Fixed
 
+- Fixed `Channel.getMessagesById` mutating the loaded channel window as a side effect of fetching.
 - Fixed `StreamChatClient.queryDrafts` not forwarding the `filter` argument to the API.
 
 - Coalesced concurrent `queryChannels` calls with identical parameters via an in-flight cache.

@@ -1,6 +1,7 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:stream_chat/src/client/client.dart';
 import 'package:stream_chat/src/core/error/error.dart';
+import 'package:stream_chat/src/core/models/app_settings.dart';
 import 'package:stream_chat/src/core/models/banned_user.dart';
 import 'package:stream_chat/src/core/models/channel_model.dart';
 import 'package:stream_chat/src/core/models/channel_state.dart';
@@ -793,4 +794,14 @@ class GetActiveLiveLocationsResponse extends _BaseResponse {
   /// Create a new instance from a json
   static GetActiveLiveLocationsResponse fromJson(Map<String, dynamic> json) =>
       _$GetActiveLiveLocationsResponseFromJson(json);
+}
+
+/// Model response for [StreamChatClient.getAppSettings] api call.
+@JsonSerializable(createToJson: false)
+class GetAppSettingsResponse extends _BaseResponse {
+  /// The app settings.
+  late AppSettings app;
+
+  /// Creates a new instance from a json.
+  static GetAppSettingsResponse fromJson(Map<String, dynamic> json) => _$GetAppSettingsResponseFromJson(json);
 }

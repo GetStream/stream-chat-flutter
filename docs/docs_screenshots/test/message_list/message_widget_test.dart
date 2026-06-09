@@ -30,7 +30,7 @@ Widget _buildMessageScaffold({
 }) {
   return StreamChat(
     client: client,
-    streamChatConfigData: configData,
+    configData: configData,
     connectivityStream: Stream.value([ConnectivityResult.mobile]),
     child: StreamChannel(
       showLoading: false,

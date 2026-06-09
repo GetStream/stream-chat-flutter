@@ -139,6 +139,12 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
   String fileTooLargeError(double limitInMB) => 'Filen er for stor til å laste opp. Filgrense er $limitInMB MB.';
 
   @override
+  String fileTypeNotSupportedError(String? extension) {
+    if (extension != null) return "'.$extension'-filer støttes ikke for opplasting.";
+    return 'Denne filtypen støttes ikke for opplasting.';
+  }
+
+  @override
   String get addAFileLabel => 'Legg til en fil';
 
   @override
