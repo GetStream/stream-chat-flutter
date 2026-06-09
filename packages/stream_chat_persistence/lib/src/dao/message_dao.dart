@@ -230,8 +230,8 @@ class MessageDao extends DatabaseAccessor<DriftChatDatabase> with _$MessageDaoMi
     // set). The final result is always reshaped to ASC for display.
     final isForwardPagination =
         (greaterThanCursor != null || greaterThanOrEqualCursor != null) &&
-            lessThanCursor == null &&
-            lessThanOrEqualCursor == null;
+        lessThanCursor == null &&
+        lessThanOrEqualCursor == null;
 
     final orderBy = isForwardPagination
         ? [
@@ -243,15 +243,16 @@ class MessageDao extends DatabaseAccessor<DriftChatDatabase> with _$MessageDaoMi
             OrderingTerm.desc(messages.id),
           ];
 
-    final query = select(messages).join([
-      leftOuterJoin(_users, messages.userId.equalsExp(_users.id)),
-      leftOuterJoin(
-        _pinnedByUsers,
-        messages.pinnedByUserId.equalsExp(_pinnedByUsers.id),
-      ),
-    ])
-      ..where(messages.parentId.equals(parentId))
-      ..orderBy(orderBy);
+    final query =
+        select(messages).join([
+            leftOuterJoin(_users, messages.userId.equalsExp(_users.id)),
+            leftOuterJoin(
+              _pinnedByUsers,
+              messages.pinnedByUserId.equalsExp(_pinnedByUsers.id),
+            ),
+          ])
+          ..where(messages.parentId.equals(parentId))
+          ..orderBy(orderBy);
 
     // Cursor predicates compare the full `(createdAt, id)` tuple — the same
     // key used in ORDER BY — so replies sharing a `createdAt` with the cursor
@@ -260,29 +261,25 @@ class MessageDao extends DatabaseAccessor<DriftChatDatabase> with _$MessageDaoMi
     if (lessThanCursor case final c?) {
       query.where(
         messages.createdAt.isSmallerThanValue(c.createdAt) |
-            (messages.createdAt.equals(c.createdAt) &
-                messages.id.isSmallerThanValue(c.id)),
+            (messages.createdAt.equals(c.createdAt) & messages.id.isSmallerThanValue(c.id)),
       );
     }
     if (lessThanOrEqualCursor case final c?) {
       query.where(
         messages.createdAt.isSmallerThanValue(c.createdAt) |
-            (messages.createdAt.equals(c.createdAt) &
-                messages.id.isSmallerOrEqualValue(c.id)),
+            (messages.createdAt.equals(c.createdAt) & messages.id.isSmallerOrEqualValue(c.id)),
       );
     }
     if (greaterThanCursor case final c?) {
       query.where(
         messages.createdAt.isBiggerThanValue(c.createdAt) |
-            (messages.createdAt.equals(c.createdAt) &
-                messages.id.isBiggerThanValue(c.id)),
+            (messages.createdAt.equals(c.createdAt) & messages.id.isBiggerThanValue(c.id)),
       );
     }
     if (greaterThanOrEqualCursor case final c?) {
       query.where(
         messages.createdAt.isBiggerThanValue(c.createdAt) |
-            (messages.createdAt.equals(c.createdAt) &
-                messages.id.isBiggerOrEqualValue(c.id)),
+            (messages.createdAt.equals(c.createdAt) & messages.id.isBiggerOrEqualValue(c.id)),
       );
     }
 
@@ -486,12 +483,13 @@ class MessageDao extends DatabaseAccessor<DriftChatDatabase> with _$MessageDaoMi
     String? id,
   ) async {
     if (id == null) return null;
-    final createdAt = await (selectOnly(messages)
-          ..addColumns([messages.createdAt])
-          ..where(messages.id.equals(id))
-          ..where(messages.parentId.equals(parentId)))
-        .map((row) => row.read(messages.createdAt))
-        .getSingleOrNull();
+    final createdAt =
+        await (selectOnly(messages)
+              ..addColumns([messages.createdAt])
+              ..where(messages.id.equals(id))
+              ..where(messages.parentId.equals(parentId)))
+            .map((row) => row.read(messages.createdAt))
+            .getSingleOrNull();
     if (createdAt == null) return null;
     return (createdAt: createdAt, id: id);
   }

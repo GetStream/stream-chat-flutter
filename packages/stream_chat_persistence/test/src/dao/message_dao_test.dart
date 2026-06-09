@@ -280,8 +280,7 @@ void main() {
       expect(insertedMessages, isNotEmpty);
 
       // Should fetch all the thread messages of parentId
-      final threadMessages =
-          await messageDao.getThreadMessagesByParentId(parentId);
+      final threadMessages = await messageDao.getThreadMessagesByParentId(parentId);
       expect(threadMessages.length, 1);
       expect(threadMessages.first.parentId, parentId);
     });
@@ -464,8 +463,7 @@ void main() {
       expect(replies.last.id, threadId(29));
     });
 
-    test('channel-message id as cursor is a no-op (not a thread reply)',
-        () async {
+    test('channel-message id as cursor is a no-op (not a thread reply)', () async {
       // `_prepareTestData` inserts channel messages with `parentId = null` and
       // thread replies with `parentId` set. The thread lookup requires
       // `parentId.equals(parentId)`, so passing a channel-message id must
@@ -527,8 +525,7 @@ void main() {
       expect(replies.last.id, threadId(24));
     });
 
-    test('default limit + greaterThan returns first 10 after the pivot',
-        () async {
+    test('default limit + greaterThan returns first 10 after the pivot', () async {
       await _prepareTestData(
         cid,
         threads: true,
@@ -546,8 +543,7 @@ void main() {
       expect(replies.last.id, threadId(15));
     });
 
-    test('default limit + lessThanOrEqual returns the pivot and 9 before',
-        () async {
+    test('default limit + lessThanOrEqual returns the pivot and 9 before', () async {
       await _prepareTestData(
         cid,
         threads: true,
@@ -565,8 +561,7 @@ void main() {
       expect(replies.last.id, threadId(25));
     });
 
-    test('default limit + greaterThanOrEqual returns the pivot and 9 after',
-        () async {
+    test('default limit + greaterThanOrEqual returns the pivot and 9 after', () async {
       await _prepareTestData(
         cid,
         threads: true,
@@ -584,8 +579,7 @@ void main() {
       expect(replies.last.id, threadId(14));
     });
 
-    test('cursor with tied createdAt does not skip or duplicate siblings',
-        () async {
+    test('cursor with tied createdAt does not skip or duplicate siblings', () async {
       // Three replies share an identical `createdAt`. The SQL ORDER BY uses
       // the `(createdAt, id)` tuple, so within the trio the relative order is
       // by id (lexicographic). A cursor at `reply_tieB` must split the trio
@@ -601,21 +595,21 @@ void main() {
       final later = tie.add(const Duration(seconds: 1));
 
       Message parent() => Message(
-            id: parentId,
-            user: users.first,
-            createdAt: earlier,
-            updatedAt: earlier,
-            text: parentId,
-          );
+        id: parentId,
+        user: users.first,
+        createdAt: earlier,
+        updatedAt: earlier,
+        text: parentId,
+      );
 
       Message reply(String id, DateTime t) => Message(
-            id: id,
-            user: users.first,
-            parentId: parentId,
-            createdAt: t,
-            updatedAt: t,
-            text: id,
-          );
+        id: id,
+        user: users.first,
+        parentId: parentId,
+        createdAt: t,
+        updatedAt: t,
+        text: id,
+      );
 
       await messageDao.updateMessages(cid, [
         parent(),
