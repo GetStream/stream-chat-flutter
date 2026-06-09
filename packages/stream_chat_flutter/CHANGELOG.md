@@ -2,6 +2,7 @@
 
 🐞 Fixed
 
+- Fixed the "Also send in Channel" checkbox not being disabled during slow mode. The checkbox and its label now render with disabled colors (`colorScheme.textDisabled`) when a cooldown is active, matching the rest of the composer.
 - `StreamUserAvatar` with `StreamAvatarSize.xxl` now uses `StreamOnlineIndicatorSize.xxl` (20px) instead of `xl` (16px), matching the Chat SDK design system spec.
 - Fixed the thread page flashing through a large scroll-up animation when opened from an in-channel reply with cached thread replies.
 - Fixed the thread page throwing `Bad state: No element` on every channel state update when the parent message wasn't in the channel's loaded window.
