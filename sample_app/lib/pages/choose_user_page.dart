@@ -1,19 +1,11 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
+import 'package:sample_app/auth/auth_controller.dart';
 import 'package:sample_app/routes/routes.dart';
-import 'package:sample_app/state/init_data.dart';
 import 'package:sample_app/utils/app_config.dart';
-import 'package:sample_app/utils/localizations.dart';
 import 'package:sample_app/widgets/stream_version.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-
-const kStreamApiKey = 'STREAM_API_KEY';
-const kStreamUserId = 'STREAM_USER_ID';
-const kStreamToken = 'STREAM_TOKEN';
 
 class ChooseUserPage extends StatelessWidget {
   const ChooseUserPage({super.key});
@@ -23,7 +15,7 @@ class ChooseUserPage extends StatelessWidget {
     final users = defaultUsers;
 
     return Scaffold(
-      backgroundColor: StreamChatTheme.of(context).colorTheme.appBg,
+      backgroundColor: context.streamColorScheme.backgroundApp,
       body: SafeArea(
         child: Column(
           children: [
@@ -37,7 +29,7 @@ class ChooseUserPage extends StatelessWidget {
                   'assets/logo.svg',
                   height: 40,
                   colorFilter: ColorFilter.mode(
-                    StreamChatTheme.of(context).colorTheme.accentPrimary,
+                    context.streamColorScheme.accentPrimary,
                     BlendMode.srcIn,
                   ),
                 ),
@@ -46,13 +38,13 @@ class ChooseUserPage extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.only(bottom: 13),
               child: Text(
-                AppLocalizations.of(context).welcomeToStreamChat,
-                style: StreamChatTheme.of(context).textTheme.title,
+                'Welcome to Stream Chat',
+                style: context.streamTextTheme.headingLg,
               ),
             ),
             Text(
-              '${AppLocalizations.of(context).selectUserToTryFlutterSDK}:',
-              style: StreamChatTheme.of(context).textTheme.body,
+              'Select a user to try the Flutter SDK:',
+              style: context.streamTextTheme.bodyDefault,
             ),
             Expanded(
               child: Padding(
@@ -61,7 +53,7 @@ class ChooseUserPage extends StatelessWidget {
                   separatorBuilder: (context, i) {
                     return Container(
                       height: 1,
-                      color: StreamChatTheme.of(context).colorTheme.borders,
+                      color: context.streamColorScheme.borderDefault,
                     );
                   },
                   itemCount: users.length + 1,
@@ -76,16 +68,12 @@ class ChooseUserPage extends StatelessWidget {
                             showDialog(
                               barrierDismissible: false,
                               context: context,
-                              barrierColor: StreamChatTheme.of(context)
-                                  .colorTheme
-                                  .overlay,
+                              barrierColor: context.streamColorScheme.backgroundOverlayLight,
                               builder: (context) => Center(
                                 child: Container(
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(16),
-                                    color: StreamChatTheme.of(context)
-                                        .colorTheme
-                                        .barsBg,
+                                    color: context.streamColorScheme.backgroundElevation1,
                                   ),
                                   height: 100,
                                   width: 100,
@@ -96,93 +84,62 @@ class ChooseUserPage extends StatelessWidget {
                               ),
                             );
 
-                            final client =
-                                context.read<InitNotifier>().initData!.client;
-
                             final router = GoRouter.of(context);
 
-                            await client.connectUser(
-                              user,
-                              token,
-                            );
-
-                            if (!kIsWeb) {
-                              const secureStorage = FlutterSecureStorage();
-                              secureStorage.write(
-                                key: kStreamApiKey,
-                                value: kDefaultStreamApiKey,
+                            try {
+                              await authController.connect(
+                                apiKey: kDefaultStreamApiKey,
+                                user: user,
+                                token: token,
                               );
-                              secureStorage.write(
-                                key: kStreamUserId,
-                                value: user.id,
-                              );
-                              secureStorage.write(
-                                key: kStreamToken,
-                                value: token,
-                              );
+                            } finally {
+                              // Pop the progress dialog regardless of outcome.
+                              router.pop();
                             }
 
-                            // Pop the progress dialog.
-                            router.pop();
+                            // The router's redirect will forward an
+                            // Authenticated user to the channel list, but
+                            // nudge it along explicitly for snappiness.
                             router.replaceNamed(Routes.CHANNEL_LIST_PAGE.name);
                           },
                           leading: StreamUserAvatar(
+                            size: .lg,
                             user: user,
-                            constraints: BoxConstraints.tight(
-                              const Size.fromRadius(20),
-                            ),
                           ),
                           title: Text(
                             user.name,
-                            style:
-                                StreamChatTheme.of(context).textTheme.bodyBold,
+                            style: context.streamTextTheme.bodyEmphasis,
                           ),
                           subtitle: Text(
-                            AppLocalizations.of(context).streamTestAccount,
-                            style: StreamChatTheme.of(context)
-                                .textTheme
-                                .footnote
-                                .copyWith(
-                                  color: StreamChatTheme.of(context)
-                                      .colorTheme
-                                      .textLowEmphasis,
-                                ),
+                            'Stream test account',
+                            style: context.streamTextTheme.captionDefault.copyWith(
+                              color: context.streamColorScheme.textSecondary,
+                            ),
                           ),
-                          trailing: StreamSvgIcon(
-                            icon: StreamSvgIcons.arrowRight,
-                            color: StreamChatTheme.of(context)
-                                .colorTheme
-                                .accentPrimary,
+                          trailing: Icon(
+                            context.streamIcons.arrowRight,
+                            color: context.streamColorScheme.accentPrimary,
                           ),
                         );
                       }),
                       ListTile(
-                        onTap: () => GoRouter.of(context)
-                            .pushNamed(Routes.ADVANCED_OPTIONS.name),
+                        onTap: () => GoRouter.of(context).pushNamed(Routes.ADVANCED_OPTIONS.name),
                         leading: CircleAvatar(
-                          backgroundColor:
-                              StreamChatTheme.of(context).colorTheme.borders,
-                          child: StreamSvgIcon(
-                            icon: StreamSvgIcons.settings,
-                            color: StreamChatTheme.of(context)
-                                .colorTheme
-                                .textHighEmphasis,
+                          backgroundColor: context.streamColorScheme.borderDefault,
+                          child: Icon(
+                            Icons.settings,
+                            color: context.streamColorScheme.textPrimary,
                           ),
                         ),
                         title: Text(
-                          AppLocalizations.of(context).advancedOptions,
-                          style: StreamChatTheme.of(context).textTheme.bodyBold,
+                          'Advanced Options',
+                          style: context.streamTextTheme.bodyEmphasis,
                         ),
                         subtitle: Text(
-                          AppLocalizations.of(context).customSettings,
-                          style: StreamChatTheme.of(context)
-                              .textTheme
-                              .footnote
-                              .copyWith(
-                                color: StreamChatTheme.of(context)
-                                    .colorTheme
-                                    .textLowEmphasis,
-                              ),
+                          'Custom settings',
+                          style: context.streamTextTheme.captionDefault.copyWith(
+                            color: context.streamColorScheme.textSecondary,
+                          ),
                         ),
                         trailing: SvgPicture.asset(
                           'assets/icon_arrow_right.svg',

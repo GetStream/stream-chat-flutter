@@ -1,7 +1,10 @@
+// ignore_for_file: deprecated_member_use_from_same_package
+
 import 'package:alchemist/alchemist.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/icons/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart' show StreamThemeExtension;
 
 void main() {
   for (final brightness in Brightness.values) {
@@ -10,7 +13,6 @@ void main() {
       fileName: 'stream_svg_icon_${brightness.name}',
       constraints: const BoxConstraints.tightFor(width: 800, height: 1200),
       builder: () => _wrapWithMaterialApp(
-        brightness: brightness,
         Column(
           children: [
             // Monochrome svg icons
@@ -167,6 +169,7 @@ void main() {
             ),
           ],
         ),
+        brightness: brightness,
       ),
     );
   }
@@ -174,20 +177,19 @@ void main() {
 
 Widget _wrapWithMaterialApp(
   Widget widget, {
-  Brightness? brightness,
+  Brightness brightness = Brightness.light,
 }) {
   return MaterialApp(
-    home: Theme(
-      data: ThemeData(brightness: brightness),
-      child: StreamChatTheme(
-        data: StreamChatThemeData(brightness: brightness),
-        child: Builder(builder: (context) {
-          final theme = StreamChatTheme.of(context);
+    theme: ThemeData(brightness: brightness),
+    home: StreamChatTheme(
+      data: StreamChatThemeData(),
+      child: Builder(
+        builder: (context) {
           return Scaffold(
-            backgroundColor: theme.colorTheme.appBg,
+            backgroundColor: context.streamColorScheme.backgroundApp,
             body: Center(child: widget),
           );
-        }),
+        },
       ),
     ),
   );

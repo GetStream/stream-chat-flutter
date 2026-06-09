@@ -1,7 +1,6 @@
 // ignore_for_file: deprecated_member_use
 
 import 'package:flutter/material.dart';
-import 'package:sample_app/utils/localizations.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 typedef ChipBuilder<T> = Widget Function(BuildContext context, T chip);
@@ -68,7 +67,7 @@ class ChipInputTextFieldState<T> extends State<ChipsInputTextField<T>> {
       onTap: _pauseItemAddition ? resumeItemAddition : null,
       child: Material(
         elevation: 1,
-        color: StreamChatTheme.of(context).colorTheme.barsBg,
+        color: context.streamColorScheme.backgroundElevation1,
         child: Padding(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
           child: Row(
@@ -76,15 +75,10 @@ class ChipInputTextFieldState<T> extends State<ChipsInputTextField<T>> {
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 4),
                 child: Text(
-                  '${AppLocalizations.of(context).to.toUpperCase()}:',
-                  style: StreamChatTheme.of(context)
-                      .textTheme
-                      .footnote
-                      .copyWith(
-                          color: StreamChatTheme.of(context)
-                              .colorTheme
-                              .textHighEmphasis
-                              .withOpacity(.5)),
+                  'TO:',
+                  style: context.streamTextTheme.captionDefault.copyWith(
+                    color: context.streamColorScheme.textPrimary.withOpacity(.5),
+                  ),
                 ),
               ),
               const SizedBox(width: 12),
@@ -114,14 +108,9 @@ class ChipInputTextFieldState<T> extends State<ChipsInputTextField<T>> {
                           disabledBorder: InputBorder.none,
                           contentPadding: const EdgeInsets.only(top: 4),
                           hintText: widget.hint,
-                          hintStyle: StreamChatTheme.of(context)
-                              .textTheme
-                              .body
-                              .copyWith(
-                                  color: StreamChatTheme.of(context)
-                                      .colorTheme
-                                      .textHighEmphasis
-                                      .withOpacity(.5)),
+                          hintStyle: context.streamTextTheme.bodyDefault.copyWith(
+                            color: context.streamColorScheme.textPrimary.withOpacity(.5),
+                          ),
                         ),
                       ),
                   ],
@@ -132,20 +121,14 @@ class ChipInputTextFieldState<T> extends State<ChipsInputTextField<T>> {
                 alignment: Alignment.bottomCenter,
                 child: IconButton(
                   icon: _chips.isEmpty
-                      ? StreamSvgIcon(
-                          icon: StreamSvgIcons.user,
-                          color: StreamChatTheme.of(context)
-                              .colorTheme
-                              .textHighEmphasis
-                              .withOpacity(0.5),
+                      ? Icon(
+                          context.streamIcons.user,
+                          color: context.streamColorScheme.textPrimary.withOpacity(0.5),
                           size: 24,
                         )
-                      : StreamSvgIcon(
-                          icon: StreamSvgIcons.userAdd,
-                          color: StreamChatTheme.of(context)
-                              .colorTheme
-                              .textHighEmphasis
-                              .withOpacity(0.5),
+                      : Icon(
+                          context.streamIcons.userAdd,
+                          color: context.streamColorScheme.textPrimary.withOpacity(0.5),
                           size: 24,
                         ),
                   onPressed: resumeItemAddition,

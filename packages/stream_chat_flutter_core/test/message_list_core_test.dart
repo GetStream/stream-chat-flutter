@@ -94,8 +94,7 @@ void main() {
       final mockChannel = MockChannel();
       when(() => mockChannel.state.unreadCount).thenReturn(0);
       when(() => mockChannel.state.isUpToDate).thenReturn(true);
-      when(() => mockChannel.state.messagesStream)
-          .thenAnswer((_) => Stream.value([]));
+      when(() => mockChannel.state.messagesStream).thenAnswer((_) => Stream.value([]));
       when(() => mockChannel.state.messages).thenReturn([]);
 
       await tester.pumpWidget(
@@ -131,8 +130,7 @@ void main() {
 
       when(() => mockChannel.state.isUpToDate).thenReturn(true);
       when(() => mockChannel.state.unreadCount).thenReturn(0);
-      when(() => mockChannel.state.messagesStream)
-          .thenAnswer((_) => Stream.value([]));
+      when(() => mockChannel.state.messagesStream).thenAnswer((_) => Stream.value([]));
       when(() => mockChannel.state.messages).thenReturn([]);
 
       await tester.pumpWidget(
@@ -173,8 +171,7 @@ void main() {
       when(() => mockChannel.state.unreadCount).thenReturn(0);
       final messages = _generateMessages();
       when(() => mockChannel.state.messages).thenReturn(messages);
-      when(() => mockChannel.state.messagesStream)
-          .thenAnswer((_) => Stream.value(messages));
+      when(() => mockChannel.state.messagesStream).thenAnswer((_) => Stream.value(messages));
       when(() => mockChannel.state.messages).thenReturn(messages);
 
       await tester.pumpWidget(
@@ -193,13 +190,15 @@ void main() {
 
       await coreState.paginateData();
 
-      verify(() => mockChannel.query(
-            messagesPagination: any(
-              named: 'messagesPagination',
-              that: wrapMatcher((it) => it.limit == paginationLimit),
-            ),
-            preferOffline: any(named: 'preferOffline'),
-          )).called(1);
+      verify(
+        () => mockChannel.query(
+          messagesPagination: any(
+            named: 'messagesPagination',
+            that: wrapMatcher((it) => it.limit == paginationLimit),
+          ),
+          preferOffline: any(named: 'preferOffline'),
+        ),
+      ).called(1);
     },
   );
 
@@ -223,8 +222,7 @@ void main() {
       when(() => mockChannel.state.isUpToDate).thenReturn(true);
 
       const error = 'Error! Error! Error!';
-      when(() => mockChannel.state.messagesStream)
-          .thenAnswer((_) => Stream.error(error));
+      when(() => mockChannel.state.messagesStream).thenAnswer((_) => Stream.error(error));
       when(() => mockChannel.state.messages).thenReturn([]);
       when(() => mockChannel.state.unreadCount).thenReturn(0);
 
@@ -254,8 +252,7 @@ void main() {
         key: messageListCoreKey,
         messageListBuilder: (_, __) => const Offstage(),
         loadingBuilder: (BuildContext context) => const Offstage(),
-        emptyBuilder: (BuildContext context) =>
-            const Offstage(key: emptyWidgetKey),
+        emptyBuilder: (BuildContext context) => const Offstage(key: emptyWidgetKey),
         errorBuilder: (BuildContext context, Object error) => const Offstage(),
       );
 
@@ -264,8 +261,7 @@ void main() {
       when(() => mockChannel.state.isUpToDate).thenReturn(true);
 
       const messages = <Message>[];
-      when(() => mockChannel.state.messagesStream)
-          .thenAnswer((_) => Stream.value(messages));
+      when(() => mockChannel.state.messagesStream).thenAnswer((_) => Stream.value(messages));
       when(() => mockChannel.state.messages).thenReturn(messages);
       when(() => mockChannel.state.unreadCount).thenReturn(0);
 
@@ -302,19 +298,20 @@ void main() {
       final mockChannel = MockChannel();
 
       when(() => mockChannel.state.isUpToDate).thenReturn(false);
-      when(() => mockChannel.query(
-            state: any(named: 'state'),
-            watch: any(named: 'watch'),
-            presence: any(named: 'presence'),
-            membersPagination: any(named: 'membersPagination'),
-            messagesPagination: any(named: 'messagesPagination'),
-            preferOffline: any(named: 'preferOffline'),
-            watchersPagination: any(named: 'watchersPagination'),
-          )).thenAnswer((_) async => const ChannelState());
+      when(
+        () => mockChannel.query(
+          state: any(named: 'state'),
+          watch: any(named: 'watch'),
+          presence: any(named: 'presence'),
+          membersPagination: any(named: 'membersPagination'),
+          messagesPagination: any(named: 'messagesPagination'),
+          preferOffline: any(named: 'preferOffline'),
+          watchersPagination: any(named: 'watchersPagination'),
+        ),
+      ).thenAnswer((_) async => const ChannelState());
 
       const messages = <Message>[];
-      when(() => mockChannel.state.messagesStream)
-          .thenAnswer((_) => Stream.value(messages));
+      when(() => mockChannel.state.messagesStream).thenAnswer((_) => Stream.value(messages));
       when(() => mockChannel.state.messages).thenReturn(messages);
       when(() => mockChannel.state.unreadCount).thenReturn(0);
 
@@ -358,8 +355,7 @@ void main() {
       when(() => mockChannel.state.isUpToDate).thenReturn(true);
 
       final messages = _generateMessages();
-      when(() => mockChannel.state.messagesStream)
-          .thenAnswer((_) => Stream.value(messages));
+      when(() => mockChannel.state.messagesStream).thenAnswer((_) => Stream.value(messages));
       when(() => mockChannel.state.messages).thenReturn(messages);
       when(() => mockChannel.state.unreadCount).thenReturn(0);
 
@@ -411,8 +407,7 @@ void main() {
       when(() => mockChannel.state.isUpToDate).thenReturn(true);
       when(() => mockChannel.state.unreadCount).thenReturn(0);
       when(() => mockChannel.state.messages).thenReturn(initialMessages);
-      when(() => mockChannel.state.messagesStream)
-          .thenAnswer((_) => controller.stream);
+      when(() => mockChannel.state.messagesStream).thenAnswer((_) => controller.stream);
       when(() => mockChannel.state.pruneOldest(any())).thenReturn(null);
 
       await tester.pumpWidget(
@@ -435,8 +430,7 @@ void main() {
       // Subsequent emission with a new tail does trigger a prune.
       controller.add(withNewArrival);
       await tester.pumpAndSettle();
-      verify(() => mockChannel.state.pruneOldest(maximumMessageLimit))
-          .called(greaterThanOrEqualTo(1));
+      verify(() => mockChannel.state.pruneOldest(maximumMessageLimit)).called(greaterThanOrEqualTo(1));
     },
   );
 
@@ -461,17 +455,18 @@ void main() {
       when(() => mockChannel.state.isUpToDate).thenReturn(false);
       when(() => mockChannel.state.unreadCount).thenReturn(0);
       when(() => mockChannel.state.messages).thenReturn(messages);
-      when(() => mockChannel.state.messagesStream)
-          .thenAnswer((_) => Stream.value(messages));
-      when(() => mockChannel.query(
-            state: any(named: 'state'),
-            watch: any(named: 'watch'),
-            presence: any(named: 'presence'),
-            membersPagination: any(named: 'membersPagination'),
-            messagesPagination: any(named: 'messagesPagination'),
-            preferOffline: any(named: 'preferOffline'),
-            watchersPagination: any(named: 'watchersPagination'),
-          )).thenAnswer((_) async => const ChannelState());
+      when(() => mockChannel.state.messagesStream).thenAnswer((_) => Stream.value(messages));
+      when(
+        () => mockChannel.query(
+          state: any(named: 'state'),
+          watch: any(named: 'watch'),
+          presence: any(named: 'presence'),
+          membersPagination: any(named: 'membersPagination'),
+          messagesPagination: any(named: 'messagesPagination'),
+          preferOffline: any(named: 'preferOffline'),
+          watchersPagination: any(named: 'watchersPagination'),
+        ),
+      ).thenAnswer((_) async => const ChannelState());
 
       await tester.pumpWidget(
         Directionality(
@@ -509,8 +504,7 @@ void main() {
       when(() => mockChannel.state.isUpToDate).thenReturn(true);
       when(() => mockChannel.state.unreadCount).thenReturn(0);
       when(() => mockChannel.state.messages).thenReturn(messages);
-      when(() => mockChannel.state.messagesStream)
-          .thenAnswer((_) => Stream.value(messages));
+      when(() => mockChannel.state.messagesStream).thenAnswer((_) => Stream.value(messages));
 
       await tester.pumpWidget(
         Directionality(
@@ -529,13 +523,13 @@ void main() {
   );
 
   Message _testMessage(String id) => Message(
-        id: id,
-        type: 'testType',
-        user: User(id: 'testUserId'),
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-        text: 'message $id',
-      );
+    id: id,
+    type: 'testType',
+    user: User(id: 'testUserId'),
+    createdAt: DateTime.now(),
+    updatedAt: DateTime.now(),
+    text: 'message $id',
+  );
 
   testWidgets(
     'should not call channel.state.pruneOldest when growth came from '
@@ -570,8 +564,7 @@ void main() {
       when(() => mockChannel.state.isUpToDate).thenReturn(true);
       when(() => mockChannel.state.unreadCount).thenReturn(0);
       when(() => mockChannel.state.messages).thenReturn(initial);
-      when(() => mockChannel.state.messagesStream)
-          .thenAnswer((_) => controller.stream);
+      when(() => mockChannel.state.messagesStream).thenAnswer((_) => controller.stream);
 
       await tester.pumpWidget(
         Directionality(
@@ -628,8 +621,7 @@ void main() {
       when(() => mockChannel.state.isUpToDate).thenReturn(true);
       when(() => mockChannel.state.unreadCount).thenReturn(0);
       when(() => mockChannel.state.messages).thenReturn(initial);
-      when(() => mockChannel.state.messagesStream)
-          .thenAnswer((_) => controller.stream);
+      when(() => mockChannel.state.messagesStream).thenAnswer((_) => controller.stream);
       when(() => mockChannel.state.pruneOldest(any())).thenReturn(null);
 
       await tester.pumpWidget(
@@ -649,8 +641,7 @@ void main() {
       controller.add(appended);
       await tester.pumpAndSettle();
 
-      verify(() => mockChannel.state.pruneOldest(maximumMessageLimit))
-          .called(greaterThanOrEqualTo(1));
+      verify(() => mockChannel.state.pruneOldest(maximumMessageLimit)).called(greaterThanOrEqualTo(1));
     },
   );
 
@@ -688,8 +679,7 @@ void main() {
       when(() => mockChannel.state.isUpToDate).thenReturn(true);
       when(() => mockChannel.state.unreadCount).thenReturn(0);
       when(() => mockChannel.state.messages).thenReturn(initial);
-      when(() => mockChannel.state.messagesStream)
-          .thenAnswer((_) => controller.stream);
+      when(() => mockChannel.state.messagesStream).thenAnswer((_) => controller.stream);
 
       await tester.pumpWidget(
         Directionality(
@@ -738,8 +728,7 @@ void main() {
       final initial = [for (var i = 0; i < 10; i++) _testMessage('msg-$i')];
       // Edit a message mid-list (reactions, soft-delete and content edits
       // all flow through this shape).
-      final edited = [...initial]..[3] =
-          initial[3].copyWith(text: 'edited mid-list');
+      final edited = [...initial]..[3] = initial[3].copyWith(text: 'edited mid-list');
 
       final controller = StreamController<List<Message>>();
       addTearDown(controller.close);
@@ -747,8 +736,7 @@ void main() {
       when(() => mockChannel.state.isUpToDate).thenReturn(true);
       when(() => mockChannel.state.unreadCount).thenReturn(0);
       when(() => mockChannel.state.messages).thenReturn(initial);
-      when(() => mockChannel.state.messagesStream)
-          .thenAnswer((_) => controller.stream);
+      when(() => mockChannel.state.messagesStream).thenAnswer((_) => controller.stream);
 
       await tester.pumpWidget(
         Directionality(
@@ -794,8 +782,7 @@ void main() {
       when(() => mockChannel.state.isUpToDate).thenReturn(true);
       when(() => mockChannel.state.unreadCount).thenReturn(0);
       when(() => mockChannel.state.threads).thenReturn(threads);
-      when(() => mockChannel.state.threadsStream)
-          .thenAnswer((_) => Stream.value(threads));
+      when(() => mockChannel.state.threadsStream).thenAnswer((_) => Stream.value(threads));
       when(
         () => mockChannel.getReplies(
           parentMessage.id,
@@ -847,8 +834,7 @@ void main() {
       final threads = {parentMessage.id: messages};
 
       when(() => mockChannel.state.threads).thenReturn(threads);
-      when(() => mockChannel.state.threadsStream)
-          .thenAnswer((_) => Stream.value(threads));
+      when(() => mockChannel.state.threadsStream).thenAnswer((_) => Stream.value(threads));
       when(() => mockChannel.state.unreadCount).thenReturn(0);
 
       when(
@@ -880,13 +866,13 @@ void main() {
 
   group('MessageRetentionGate', () {
     Message msg(String id) => Message(
-          id: id,
-          type: 'testType',
-          user: User(id: 'testUserId'),
-          createdAt: DateTime.now(),
-          updatedAt: DateTime.now(),
-          text: id,
-        );
+      id: id,
+      type: 'testType',
+      user: User(id: 'testUserId'),
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+      text: id,
+    );
 
     test('does not prune when limit is null', () {
       final gate = MessageRetentionGate(limit: null);
@@ -1003,13 +989,13 @@ void main() {
 
   group('MessageListCore retention lifecycle', () {
     Message msg(String id) => Message(
-          id: id,
-          type: 'testType',
-          user: User(id: 'testUserId'),
-          createdAt: DateTime.now(),
-          updatedAt: DateTime.now(),
-          text: id,
-        );
+      id: id,
+      type: 'testType',
+      user: User(id: 'testUserId'),
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+      text: id,
+    );
 
     Widget _hostListCore({
       required Channel channel,
@@ -1060,22 +1046,26 @@ void main() {
           when(() => c.state.pruneOldest(any())).thenReturn(null);
         }
 
-        await tester.pumpWidget(_hostListCore(
-          channel: channelA,
-          coreKey: coreKey,
-          maximumMessageLimit: 5,
-        ));
+        await tester.pumpWidget(
+          _hostListCore(
+            channel: channelA,
+            coreKey: coreKey,
+            maximumMessageLimit: 5,
+          ),
+        );
         await tester.pumpAndSettle();
 
         // Channel A's first emission is compared against the seeded tail —
         // no prune on cached history.
         verifyNever(() => channelA.state.pruneOldest(any()));
 
-        await tester.pumpWidget(_hostListCore(
-          channel: channelB,
-          coreKey: coreKey,
-          maximumMessageLimit: 5,
-        ));
+        await tester.pumpWidget(
+          _hostListCore(
+            channel: channelB,
+            coreKey: coreKey,
+            maximumMessageLimit: 5,
+          ),
+        );
         await tester.pumpAndSettle();
 
         // After the channel switch the gate is re-seeded with channel B's
@@ -1094,44 +1084,46 @@ void main() {
         final mainMessages = [for (var i = 0; i < 10; i++) msg('main-$i')];
         final parent = msg('parent');
         final threadMessages = [
-          for (var i = 0; i < 3; i++)
-            msg('reply-$i').copyWith(parentId: parent.id),
+          for (var i = 0; i < 3; i++) msg('reply-$i').copyWith(parentId: parent.id),
         ];
 
         when(() => mockChannel.state.isUpToDate).thenReturn(true);
         when(() => mockChannel.state.unreadCount).thenReturn(0);
         when(() => mockChannel.state.messages).thenReturn(mainMessages);
-        when(() => mockChannel.state.messagesStream)
-            .thenAnswer((_) => Stream.value(mainMessages));
+        when(() => mockChannel.state.messagesStream).thenAnswer((_) => Stream.value(mainMessages));
         when(() => mockChannel.state.pruneOldest(any())).thenReturn(null);
-        when(() => mockChannel.state.threads)
-            .thenReturn({parent.id: threadMessages});
-        when(() => mockChannel.state.threadsStream)
-            .thenAnswer((_) => Stream.value({parent.id: threadMessages}));
-        when(() => mockChannel.getReplies(
-              parent.id,
-              options: any(named: 'options'),
-            )).thenAnswer((_) async => QueryRepliesResponse()..messages = []);
+        when(() => mockChannel.state.threads).thenReturn({parent.id: threadMessages});
+        when(() => mockChannel.state.threadsStream).thenAnswer((_) => Stream.value({parent.id: threadMessages}));
+        when(
+          () => mockChannel.getReplies(
+            parent.id,
+            options: any(named: 'options'),
+          ),
+        ).thenAnswer((_) async => QueryRepliesResponse()..messages = []);
 
         // Start on main channel — first emission is compared against the
         // seeded tail and does not prune.
-        await tester.pumpWidget(_hostListCore(
-          channel: mockChannel,
-          coreKey: coreKey,
-          maximumMessageLimit: 5,
-        ));
+        await tester.pumpWidget(
+          _hostListCore(
+            channel: mockChannel,
+            coreKey: coreKey,
+            maximumMessageLimit: 5,
+          ),
+        );
         await tester.pumpAndSettle();
 
         verifyNever(() => mockChannel.state.pruneOldest(any()));
         clearInteractions(mockChannel.state);
 
         // Switch to thread mode — gate is re-seeded with the thread tail.
-        await tester.pumpWidget(_hostListCore(
-          channel: mockChannel,
-          coreKey: coreKey,
-          maximumMessageLimit: 5,
-          parentMessage: parent,
-        ));
+        await tester.pumpWidget(
+          _hostListCore(
+            channel: mockChannel,
+            coreKey: coreKey,
+            maximumMessageLimit: 5,
+            parentMessage: parent,
+          ),
+        );
         await tester.pumpAndSettle();
 
         // While in thread mode, the gate must never prune (threads are
@@ -1143,11 +1135,13 @@ void main() {
         // history (consistent with the seed semantics on every channel /
         // mode transition).
         clearInteractions(mockChannel.state);
-        await tester.pumpWidget(_hostListCore(
-          channel: mockChannel,
-          coreKey: coreKey,
-          maximumMessageLimit: 5,
-        ));
+        await tester.pumpWidget(
+          _hostListCore(
+            channel: mockChannel,
+            coreKey: coreKey,
+            maximumMessageLimit: 5,
+          ),
+        );
         await tester.pumpAndSettle();
 
         verifyNever(() => mockChannel.state.pruneOldest(any()));
@@ -1167,15 +1161,16 @@ void main() {
         when(() => mockChannel.state.isUpToDate).thenReturn(true);
         when(() => mockChannel.state.unreadCount).thenReturn(0);
         when(() => mockChannel.state.messages).thenReturn(under);
-        when(() => mockChannel.state.messagesStream)
-            .thenAnswer((_) => Stream.value(under));
+        when(() => mockChannel.state.messagesStream).thenAnswer((_) => Stream.value(under));
 
-        await tester.pumpWidget(_hostListCore(
-          channel: mockChannel,
-          coreKey: coreKey,
-          maximumMessageLimit: 5,
-          retentionTrimBuffer: 30,
-        ));
+        await tester.pumpWidget(
+          _hostListCore(
+            channel: mockChannel,
+            coreKey: coreKey,
+            maximumMessageLimit: 5,
+            retentionTrimBuffer: 30,
+          ),
+        );
         await tester.pumpAndSettle();
 
         verifyNever(() => mockChannel.state.pruneOldest(any()));

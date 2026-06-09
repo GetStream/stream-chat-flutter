@@ -1,4 +1,4 @@
-/// Location for actions on the [StreamMessageInput].
+/// Location for actions on the [StreamMessageComposer].
 enum ActionsLocation {
   /// Align to left
   left,

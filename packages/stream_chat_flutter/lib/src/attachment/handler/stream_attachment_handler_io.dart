@@ -8,6 +8,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:stream_chat_flutter/src/attachment/handler/common.dart';
 import 'package:stream_chat_flutter/src/attachment/handler/stream_attachment_handler_base.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:video_player/video_player.dart';
 
 /// StreamAttachmentHandler implementation for desktop.
 class StreamAttachmentHandlerDesktop extends StreamAttachmentHandler {
@@ -64,11 +65,9 @@ class StreamAttachmentHandler extends StreamAttachmentHandlerBase {
 
   /// Returns the singleton instance of [StreamAttachmentHandler].
   // ignore: prefer_constructors_over_static_methods
-  static StreamAttachmentHandler get instance =>
-      _instance ??= StreamAttachmentHandler._();
+  static StreamAttachmentHandler get instance => _instance ??= StreamAttachmentHandler._();
 
   late final _imagePicker = ImagePicker();
-  late final _filePicker = FilePicker.platform;
 
   @override
   Future<Attachment?> pickImage({
@@ -101,7 +100,26 @@ class StreamAttachmentHandler extends StreamAttachmentHandlerBase {
       maxDuration: maxDuration,
     );
 
-    return video?.toAttachment(type: 'video');
+    if (video == null) return null;
+
+    final attachment = await video.toAttachment(type: 'video');
+
+    final videoController = VideoPlayerController.file(File(video.path));
+    try {
+      await videoController.initialize();
+      final duration = videoController.value.duration;
+      if (duration.inSeconds > 0) {
+        return attachment.copyWith(
+          extraData: {...attachment.extraData, 'duration': duration.inSeconds},
+        );
+      }
+    } catch (_) {
+      // If duration extraction fails, return the attachment without it.
+    } finally {
+      await videoController.dispose();
+    }
+
+    return attachment;
   }
 
   @override
@@ -111,14 +129,12 @@ class StreamAttachmentHandler extends StreamAttachmentHandlerBase {
     FileType type = FileType.any,
     List<String>? allowedExtensions,
     Function(FilePickerStatus)? onFileLoading,
-    @Deprecated('Has no effect, Use compressionQuality instead.')
-    bool allowCompression = true,
     int compressionQuality = 0,
     bool withData = true,
     bool withReadStream = false,
     bool lockParentWindow = true,
   }) async {
-    final result = await _filePicker.pickFiles(
+    final result = await FilePicker.pickFiles(
       dialogTitle: dialogTitle,
       initialDirectory: initialDirectory,
       type: type,
@@ -142,9 +158,7 @@ class StreamAttachmentHandler extends StreamAttachmentHandlerBase {
 
     final tempDir = await getTemporaryDirectory();
     final tempPath = Uri.file(tempDir.path, windows: CurrentPlatform.isWindows);
-    final tempFilePath = tempPath
-        .resolve(fileName!)
-        .toFilePath(windows: CurrentPlatform.isWindows);
+    final tempFilePath = tempPath.resolve(fileName!).toFilePath(windows: CurrentPlatform.isWindows);
 
     final attachmentFileBytes = attachmentFile.bytes;
     if (attachmentFileBytes == null) {

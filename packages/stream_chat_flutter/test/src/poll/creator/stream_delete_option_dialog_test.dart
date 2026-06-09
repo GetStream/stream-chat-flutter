@@ -29,7 +29,7 @@ void main() {
         await tester.tap(find.text('Delete Option'));
         await tester.pumpAndSettle();
 
-        await tester.tap(find.text('DELETE'));
+        await tester.tap(find.text('Delete'));
         await tester.pumpAndSettle();
 
         expect(value, isTrue);
@@ -59,7 +59,7 @@ void main() {
         await tester.tap(find.text('Delete Option'));
         await tester.pumpAndSettle();
 
-        await tester.tap(find.text('CANCEL'));
+        await tester.tap(find.text('Cancel'));
         await tester.pumpAndSettle();
 
         expect(value, isFalse);
@@ -103,8 +103,8 @@ void main() {
       fileName: 'poll_delete_option_dialog_${brightness.name}',
       constraints: const BoxConstraints.tightFor(width: 400, height: 250),
       builder: () => _wrapWithMaterialApp(
-        brightness: brightness,
         const PollDeleteOptionDialog(),
+        brightness: brightness,
       ),
     );
   }
@@ -112,11 +112,12 @@ void main() {
 
 Widget _wrapWithMaterialApp(
   Widget widget, {
-  Brightness? brightness,
+  Brightness brightness = Brightness.light,
 }) {
   return StreamChatTheme(
-    data: StreamChatThemeData(brightness: brightness),
+    data: StreamChatThemeData(),
     child: MaterialApp(
+      theme: ThemeData(brightness: brightness),
       home: widget,
     ),
   );

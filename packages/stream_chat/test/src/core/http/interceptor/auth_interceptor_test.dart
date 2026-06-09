@@ -35,8 +35,7 @@ void main() {
       expect(queryParams.containsKey('user_id'), isFalse);
 
       final token = Token.development('test-user-id');
-      when(() => tokenManager.loadToken(refresh: any(named: 'refresh')))
-          .thenAnswer((_) async => token);
+      when(() => tokenManager.loadToken(refresh: any(named: 'refresh'))).thenAnswer((_) async => token);
 
       authInterceptor.onRequest(options, handler);
 
@@ -51,8 +50,7 @@ void main() {
       expect(updatedQueryParams.containsKey('user_id'), isTrue);
       expect(updatedQueryParams['user_id'], token.userId);
 
-      verify(() => tokenManager.loadToken(refresh: any(named: 'refresh')))
-          .called(1);
+      verify(() => tokenManager.loadToken(refresh: any(named: 'refresh'))).called(1);
       verifyNoMoreInteractions(tokenManager);
     },
   );
@@ -95,13 +93,14 @@ void main() {
     when(() => tokenManager.isStatic).thenReturn(false);
 
     final token = Token.development('test-user-id');
-    when(() => tokenManager.loadToken(refresh: true))
-        .thenAnswer((_) async => token);
+    when(() => tokenManager.loadToken(refresh: true)).thenAnswer((_) async => token);
 
-    when(() => client.fetch(options)).thenAnswer((_) async => Response(
-          requestOptions: options,
-          statusCode: 200,
-        ));
+    when(() => client.fetch(options)).thenAnswer(
+      (_) async => Response(
+        requestOptions: options,
+        statusCode: 200,
+      ),
+    );
 
     authInterceptor.onError(err, handler);
 
@@ -142,8 +141,7 @@ void main() {
       when(() => tokenManager.isStatic).thenReturn(false);
 
       final token = Token.development('test-user-id');
-      when(() => tokenManager.loadToken(refresh: true))
-          .thenAnswer((_) async => token);
+      when(() => tokenManager.loadToken(refresh: true)).thenAnswer((_) async => token);
 
       when(() => client.fetch(options)).thenThrow(err);
 

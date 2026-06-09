@@ -19,6 +19,13 @@ import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 ///
 /// The widget also provides a [visibleOptionCount] parameter to control the
 /// number of visible options in the poll. If null, all options will be visible.
+///
+/// See also:
+///
+///  * [StreamPollInteractorTheme], for customizing poll interactor appearance.
+///  * [PollHeader], the header sub-component showing the poll question.
+///  * [PollOptionsListView], the list of votable options.
+///  * [PollFooter], the footer sub-component with action buttons.
 /// {@endtemplate}
 class StreamPollInteractor extends StatelessWidget {
   /// {@macro streamPollInteractor}
@@ -26,10 +33,6 @@ class StreamPollInteractor extends StatelessWidget {
     super.key,
     required this.poll,
     required this.currentUser,
-    this.padding = const EdgeInsets.symmetric(
-      vertical: 12,
-      horizontal: 10,
-    ),
     this.visibleOptionCount,
     this.onCastVote,
     this.onRemoveVote,
@@ -46,9 +49,6 @@ class StreamPollInteractor extends StatelessWidget {
 
   /// The current user interacting with the poll.
   final User currentUser;
-
-  /// The padding to apply to the interactor.
-  final EdgeInsetsGeometry padding;
 
   /// The number of visible options in the poll.
   ///
@@ -96,41 +96,36 @@ class StreamPollInteractor extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: padding,
-      child: Column(
-        spacing: 8,
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          PollHeader(poll: poll),
-          MediaQuery.removePadding(
-            context: context,
-            // Workaround for the bottom padding issue.
-            // Link: https://github.com/flutter/flutter/issues/156149
-            removeTop: true,
-            removeBottom: true,
-            child: PollOptionsListView(
-              poll: poll,
-              showProgressBar: true,
-              visibleOptionCount: visibleOptionCount,
-              onCastVote: onCastVote,
-              onRemoveVote: onRemoveVote,
-            ),
-          ),
-          PollFooter(
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        PollHeader(poll: poll),
+        MediaQuery.removePadding(
+          context: context,
+          // Workaround for the bottom padding issue.
+          // Link: https://github.com/flutter/flutter/issues/156149
+          removeTop: true,
+          removeBottom: true,
+          child: PollOptionsListView(
             poll: poll,
-            currentUser: currentUser,
             visibleOptionCount: visibleOptionCount,
-            onEndVote: onEndVote,
-            onAddComment: onAddComment,
-            onViewComments: onViewComments,
-            onViewResults: onViewResults,
-            onSuggestOption: onSuggestOption,
             onSeeMoreOptions: onSeeMoreOptions,
+            onCastVote: onCastVote,
+            onRemoveVote: onRemoveVote,
           ),
-        ],
-      ),
+        ),
+        PollFooter(
+          poll: poll,
+          currentUser: currentUser,
+          visibleOptionCount: visibleOptionCount,
+          onEndVote: onEndVote,
+          onAddComment: onAddComment,
+          onViewComments: onViewComments,
+          onViewResults: onViewResults,
+          onSuggestOption: onSuggestOption,
+        ),
+      ],
     );
   }
 }

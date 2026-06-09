@@ -1,198 +1,150 @@
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/theme/audio_waveform_slider_theme.dart';
+import 'package:flutter/widgets.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart';
+import 'package:theme_extensions_builder_annotation/theme_extensions_builder_annotation.dart';
 
-/// {@template streamVoiceRecordingAttachmentTheme}
-/// Overrides the default style of [StreamVoiceRecordingAttachment] descendants.
+part 'voice_recording_attachment_theme.g.theme.dart';
+
+/// Applies a voice recording attachment theme to descendant
+/// [StreamVoiceRecordingAttachment] widgets.
+///
+/// Wrap a subtree with [StreamVoiceRecordingAttachmentTheme] to override
+/// voice recording styling. Access the merged theme using
+/// [StreamVoiceRecordingAttachmentTheme.of].
+///
+/// {@tool snippet}
+///
+/// Override voice recording styling for a specific section:
+///
+/// ```dart
+/// StreamVoiceRecordingAttachmentTheme(
+///   data: StreamVoiceRecordingAttachmentThemeData(
+///     durationTextStyle: TextStyle(fontWeight: FontWeight.w700),
+///     activeDurationTextStyle: TextStyle(color: Colors.blue),
+///   ),
+///   child: StreamVoiceRecordingAttachment(
+///     track: track,
+///     speed: speed,
+///   ),
+/// )
+/// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
-///  * [StreamVoiceRecordingAttachmentThemeData], which is used to configure
-///  this theme.
-/// {@endtemplate}
+///  * [StreamVoiceRecordingAttachmentThemeData], which describes the voice
+///    recording attachment theme.
+///  * [StreamVoiceRecordingAttachment], the widget affected by this theme.
 class StreamVoiceRecordingAttachmentTheme extends InheritedTheme {
-  /// Creates a [StreamVoiceRecordingAttachmentTheme].
-  ///
-  /// The [data] parameter must not be null.
+  /// Creates a voice recording attachment theme that controls descendant
+  /// widgets.
   const StreamVoiceRecordingAttachmentTheme({
     super.key,
     required this.data,
     required super.child,
   });
 
-  /// The configuration of this theme.
+  /// The voice recording attachment theme data for descendant widgets.
   final StreamVoiceRecordingAttachmentThemeData data;
 
-  /// The closest instance of this class that encloses the given context.
+  /// Returns the [StreamVoiceRecordingAttachmentThemeData] merged from local
+  /// and global themes.
   ///
-  /// If there is no enclosing [StreamVoiceRecordingAttachmentTheme] widget,
-  /// then [StreamVoiceRecordingAttachmentTheme.voiceRecordingTheme] is used.
+  /// Local values from the nearest [StreamVoiceRecordingAttachmentTheme]
+  /// ancestor take precedence over global values from [StreamChatTheme.of].
   ///
-  /// Typical usage is as follows:
-  ///
-  /// ```dart
-  /// StreamVoiceRecordingAttachmentTheme theme =
-  /// StreamVoiceRecordingAttachmentTheme.of(context);
-  /// ```
+  /// This allows partial overrides - for example, overriding only
+  /// [StreamVoiceRecordingAttachmentThemeData.durationTextStyle] while
+  /// inheriting other properties from the global theme.
   static StreamVoiceRecordingAttachmentThemeData of(BuildContext context) {
-    final voiceRecordingTheme = context.dependOnInheritedWidgetOfExactType<
-        StreamVoiceRecordingAttachmentTheme>();
-    return voiceRecordingTheme?.data ??
-        StreamChatTheme.of(context).voiceRecordingAttachmentTheme;
+    final localTheme = context.dependOnInheritedWidgetOfExactType<StreamVoiceRecordingAttachmentTheme>();
+    return StreamChatTheme.of(context).voiceRecordingAttachmentTheme.merge(localTheme?.data);
   }
 
   @override
-  Widget wrap(BuildContext context, Widget child) =>
-      StreamVoiceRecordingAttachmentTheme(data: data, child: child);
+  Widget wrap(BuildContext context, Widget child) => StreamVoiceRecordingAttachmentTheme(data: data, child: child);
 
   @override
-  bool updateShouldNotify(StreamVoiceRecordingAttachmentTheme oldWidget) =>
-      data != oldWidget.data;
+  bool updateShouldNotify(StreamVoiceRecordingAttachmentTheme oldWidget) => data != oldWidget.data;
 }
 
-/// {@template streamVoiceRecordingAttachmentThemeData}
-/// A style that overrides the default appearance of
-/// [StreamVoiceRecordingAttachment] widgets when used with
-/// [StreamVoiceRecordingAttachmentTheme] or with the overall
-/// [StreamChatTheme]'s [StreamChatThemeData.voiceRecordingAttachmentTheme].
-/// {@endtemplate}
-class StreamVoiceRecordingAttachmentThemeData with Diagnosticable {
-  /// {@macro streamVoiceRecordingAttachmentThemeData}
+/// Theme data for customizing [StreamVoiceRecordingAttachment] widgets.
+///
+/// {@tool snippet}
+///
+/// Customize voice recording attachment appearance globally:
+///
+/// ```dart
+/// StreamChatThemeData(
+///   voiceRecordingAttachmentTheme: StreamVoiceRecordingAttachmentThemeData(
+///     durationTextStyle: TextStyle(fontWeight: FontWeight.w700),
+///     speedToggleStyle: StreamPlaybackSpeedToggleStyle.from(
+///       borderColor: Colors.grey,
+///     ),
+///   ),
+/// )
+/// ```
+/// {@end-tool}
+///
+/// See also:
+///
+///  * [StreamVoiceRecordingAttachment], the widget that uses this theme data.
+///  * [StreamVoiceRecordingAttachmentTheme], for overriding theme in a widget
+///    subtree.
+@themeGen
+@immutable
+class StreamVoiceRecordingAttachmentThemeData with _$StreamVoiceRecordingAttachmentThemeData {
+  /// Creates voice recording attachment theme data with optional style
+  /// overrides.
   const StreamVoiceRecordingAttachmentThemeData({
-    this.backgroundColor,
-    this.playIcon,
-    this.pauseIcon,
-    this.loadingIndicator,
-    this.audioControlButtonStyle,
     this.titleTextStyle,
     this.durationTextStyle,
-    this.speedControlButtonStyle,
-    this.audioWaveformSliderTheme,
+    this.activeDurationTextStyle,
+    this.controlButtonStyle,
+    this.speedToggleStyle,
+    this.waveformStyle,
   });
 
-  /// The background color of the attachment.
-  final Color? backgroundColor;
-
-  /// The icon widget to show when the recording is playing.
-  final Widget? playIcon;
-
-  /// The icon widget to show when the recording is paused.
-  final Widget? pauseIcon;
-
-  /// The widget to show when the recording is loading.
-  final Widget? loadingIndicator;
-
-  /// The style for the audio control button.
-  final ButtonStyle? audioControlButtonStyle;
-
-  /// The text style for the title.
+  /// The text style for the audio file title.
+  ///
+  /// If null, defaults to [StreamTextTheme.metadataEmphasis].
   final TextStyle? titleTextStyle;
 
-  /// The text style for the duration.
+  /// The text style for the duration label in default/idle state.
+  ///
+  /// If null, defaults to [StreamTextTheme.metadataEmphasis] with
+  /// [StreamColorScheme.textPrimary] color.
   final TextStyle? durationTextStyle;
 
-  /// The style for the speed control button.
-  final ButtonStyle? speedControlButtonStyle;
+  /// The text style for the duration label when actively playing.
+  ///
+  /// If null, defaults to [StreamTextTheme.metadataEmphasis] with
+  /// [StreamColorScheme.accentPrimary] color.
+  final TextStyle? activeDurationTextStyle;
 
-  /// The theme for the audio waveform slider.
-  final StreamAudioWaveformSliderThemeData? audioWaveformSliderTheme;
+  /// The visual styling for the play/pause/replay control button.
+  ///
+  /// If null, defaults to secondary outline [StreamButton] defaults with
+  /// chat-specific border color.
+  final StreamButtonThemeStyle? controlButtonStyle;
 
-  /// A copy of [StreamVoiceRecordingAttachmentThemeData] with specified
-  /// attributes overridden.
-  StreamVoiceRecordingAttachmentThemeData copyWith({
-    Color? backgroundColor,
-    Widget? playIcon,
-    Widget? pauseIcon,
-    Widget? loadingIndicator,
-    ButtonStyle? audioControlButtonStyle,
-    TextStyle? titleTextStyle,
-    TextStyle? durationTextStyle,
-    ButtonStyle? speedControlButtonStyle,
-    StreamAudioWaveformSliderThemeData? audioWaveformSliderTheme,
-  }) =>
-      StreamVoiceRecordingAttachmentThemeData(
-        backgroundColor: backgroundColor ?? this.backgroundColor,
-        playIcon: playIcon ?? this.playIcon,
-        pauseIcon: pauseIcon ?? this.pauseIcon,
-        loadingIndicator: loadingIndicator ?? this.loadingIndicator,
-        audioControlButtonStyle:
-            audioControlButtonStyle ?? this.audioControlButtonStyle,
-        titleTextStyle: titleTextStyle ?? this.titleTextStyle,
-        durationTextStyle: durationTextStyle ?? this.durationTextStyle,
-        speedControlButtonStyle:
-            speedControlButtonStyle ?? this.speedControlButtonStyle,
-        audioWaveformSliderTheme:
-            audioWaveformSliderTheme ?? this.audioWaveformSliderTheme,
-      );
+  /// The visual styling for the [StreamPlaybackSpeedToggle] (x1, x2, x0.5).
+  ///
+  /// If null, defaults to [StreamPlaybackSpeedToggle] defaults with
+  /// chat-specific border color and disabled state styling.
+  final StreamPlaybackSpeedToggleStyle? speedToggleStyle;
 
-  /// Merges this [StreamVoiceRecordingAttachmentThemeData] with the [other].
-  StreamVoiceRecordingAttachmentThemeData merge(
-    StreamVoiceRecordingAttachmentThemeData? other,
-  ) {
-    if (other == null) return this;
-    return copyWith(
-      backgroundColor: other.backgroundColor,
-      playIcon: other.playIcon,
-      pauseIcon: other.pauseIcon,
-      loadingIndicator: other.loadingIndicator,
-      audioControlButtonStyle: other.audioControlButtonStyle,
-      titleTextStyle: other.titleTextStyle,
-      durationTextStyle: other.durationTextStyle,
-      speedControlButtonStyle: other.speedControlButtonStyle,
-      audioWaveformSliderTheme: audioWaveformSliderTheme?.merge(
-        other.audioWaveformSliderTheme,
-      ),
-    );
-  }
+  /// The theme overrides for the waveform visualization.
+  ///
+  /// Chat-specific waveform colors for idle bars, playing bars, and thumb.
+  /// If null, defaults to [StreamAudioWaveformTheme] defaults.
+  final StreamAudioWaveformThemeData? waveformStyle;
 
-  /// Linearly interpolate between two [StreamVoiceRecordingAttachmentThemeData]
-  /// objects.
-  static StreamVoiceRecordingAttachmentThemeData lerp(
-    StreamVoiceRecordingAttachmentThemeData a,
-    StreamVoiceRecordingAttachmentThemeData b,
+  /// Linearly interpolate between two
+  /// [StreamVoiceRecordingAttachmentThemeData] objects.
+  static StreamVoiceRecordingAttachmentThemeData? lerp(
+    StreamVoiceRecordingAttachmentThemeData? a,
+    StreamVoiceRecordingAttachmentThemeData? b,
     double t,
-  ) {
-    return StreamVoiceRecordingAttachmentThemeData(
-      backgroundColor: Color.lerp(a.backgroundColor, b.backgroundColor, t),
-      playIcon: t < 0.5 ? a.playIcon : b.playIcon,
-      pauseIcon: t < 0.5 ? a.pauseIcon : b.pauseIcon,
-      loadingIndicator: t < 0.5 ? a.loadingIndicator : b.loadingIndicator,
-      audioControlButtonStyle: ButtonStyle.lerp(
-          a.audioControlButtonStyle, b.audioControlButtonStyle, t),
-      titleTextStyle: TextStyle.lerp(a.titleTextStyle, b.titleTextStyle, t),
-      durationTextStyle:
-          TextStyle.lerp(a.durationTextStyle, b.durationTextStyle, t),
-      speedControlButtonStyle: ButtonStyle.lerp(
-          a.speedControlButtonStyle, b.speedControlButtonStyle, t),
-      audioWaveformSliderTheme: StreamAudioWaveformSliderThemeData.lerp(
-          a.audioWaveformSliderTheme!, b.audioWaveformSliderTheme!, t),
-    );
-  }
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is StreamVoiceRecordingAttachmentThemeData &&
-          other.backgroundColor == backgroundColor &&
-          other.playIcon == playIcon &&
-          other.pauseIcon == pauseIcon &&
-          other.loadingIndicator == loadingIndicator &&
-          other.audioControlButtonStyle == audioControlButtonStyle &&
-          other.titleTextStyle == titleTextStyle &&
-          other.durationTextStyle == durationTextStyle &&
-          other.speedControlButtonStyle == speedControlButtonStyle &&
-          other.audioWaveformSliderTheme == audioWaveformSliderTheme;
-
-  @override
-  int get hashCode =>
-      backgroundColor.hashCode ^
-      playIcon.hashCode ^
-      pauseIcon.hashCode ^
-      loadingIndicator.hashCode ^
-      audioControlButtonStyle.hashCode ^
-      titleTextStyle.hashCode ^
-      durationTextStyle.hashCode ^
-      speedControlButtonStyle.hashCode ^
-      audioWaveformSliderTheme.hashCode;
+  ) => _$StreamVoiceRecordingAttachmentThemeData.lerp(a, b, t);
 }

@@ -2,10 +2,11 @@ import 'package:flutter/widgets.dart';
 import 'package:stream_chat_flutter/platform_widget_builder/src/platform_widget.dart';
 
 /// A widget-building function that includes the child widget.
-typedef PlatformTargetBuilder = Widget? Function(
-  BuildContext context,
-  Widget? child,
-)?;
+typedef PlatformTargetBuilder =
+    Widget? Function(
+      BuildContext context,
+      Widget? child,
+    )?;
 
 /// A widget that utilizes [PlatformTargetBuilder]s to build different widgets
 /// for each specified platform.
@@ -25,6 +26,7 @@ class PlatformWidgetBuilder extends StatelessWidget {
     this.mobile,
     this.desktop,
     this.web,
+    this.desktopOrWeb,
   });
 
   /// The child widget.
@@ -39,12 +41,21 @@ class PlatformWidgetBuilder extends StatelessWidget {
   /// The widget to build for web platforms.
   final PlatformTargetBuilder? web;
 
+  /// The widget to build for desktop or web platforms.
+  ///
+  /// Note: The widget will prefer the [desktop] or [web] widget if a
+  /// combination of desktop/web and desktopOrWeb is provided.
+  final PlatformTargetBuilder? desktopOrWeb;
+
   @override
   Widget build(BuildContext context) {
+    final webWidget = web ?? desktopOrWeb;
+    final desktopWidget = desktop ?? desktopOrWeb;
+
     return PlatformWidget(
-      desktop: (context) => desktop?.call(context, child),
+      desktop: (context) => desktopWidget?.call(context, child),
       mobile: (context) => mobile?.call(context, child),
-      web: (context) => web?.call(context, child),
+      web: (context) => webWidget?.call(context, child),
     );
   }
 }

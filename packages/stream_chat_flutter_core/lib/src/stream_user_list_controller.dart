@@ -40,9 +40,9 @@ class StreamUserListController extends PagedValueNotifier<int, User> {
     this.sort = defaultUserListSort,
     this.presence = true,
     this.limit = defaultUserPagedLimit,
-  })  : _activeFilter = filter,
-        _activeSort = sort,
-        super(const PagedValue.loading());
+  }) : _activeFilter = filter,
+       _activeSort = sort,
+       super(const PagedValue.loading());
 
   /// Creates a [StreamUserListController] from the passed [value].
   StreamUserListController.fromValue(
@@ -52,8 +52,8 @@ class StreamUserListController extends PagedValueNotifier<int, User> {
     this.sort = defaultUserListSort,
     this.presence = true,
     this.limit = defaultUserPagedLimit,
-  })  : _activeFilter = filter,
-        _activeSort = sort;
+  }) : _activeFilter = filter,
+       _activeSort = sort;
 
   /// The client to use for the channels list.
   final StreamChatClient client;
@@ -105,11 +105,11 @@ class StreamUserListController extends PagedValueNotifier<int, User> {
     super.value = switch (_activeSort) {
       null => newValue,
       final userSort => newValue.maybeMap(
-          orElse: () => newValue,
-          (success) => success.copyWith(
-            items: success.items.sorted(userSort.compare),
-          ),
+        orElse: () => newValue,
+        (success) => success.copyWith(
+          items: success.items.sorted(userSort.compare),
         ),
+      ),
     };
   }
 

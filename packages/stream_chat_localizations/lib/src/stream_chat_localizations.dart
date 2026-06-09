@@ -112,8 +112,7 @@ GlobalStreamChatLocalizations? getStreamChatTranslation(Locale locale) {
 /// )
 /// ```
 ///
-abstract class GlobalStreamChatLocalizations
-    implements StreamChatLocalizations {
+abstract class GlobalStreamChatLocalizations implements StreamChatLocalizations {
   /// Initializes an object that defines the StreamChat widget's localized
   /// strings for the given `localeName`.
   const GlobalStreamChatLocalizations({
@@ -129,8 +128,7 @@ abstract class GlobalStreamChatLocalizations
   /// [GlobalStreamChatLocalizations.delegates] as the value of
   /// [MaterialApp.localizationsDelegates] to include the localizations for both
   /// the flutter and stream chat widget libraries.
-  static const LocalizationsDelegate<StreamChatLocalizations> delegate =
-      _StreamChatLocalizationsDelegate();
+  static const LocalizationsDelegate<StreamChatLocalizations> delegate = _StreamChatLocalizationsDelegate();
 
   /// A value for [MaterialApp.localizationsDelegates] that's typically used by
   /// internationalized apps.
@@ -160,16 +158,13 @@ abstract class GlobalStreamChatLocalizations
   ];
 }
 
-class _StreamChatLocalizationsDelegate
-    extends LocalizationsDelegate<StreamChatLocalizations> {
+class _StreamChatLocalizationsDelegate extends LocalizationsDelegate<StreamChatLocalizations> {
   const _StreamChatLocalizationsDelegate();
 
   @override
-  bool isSupported(Locale locale) =>
-      kStreamChatSupportedLanguages.contains(locale.languageCode);
+  bool isSupported(Locale locale) => kStreamChatSupportedLanguages.contains(locale.languageCode);
 
-  static final _loadedTranslations =
-      <Locale, Future<StreamChatLocalizations>>{};
+  static final _loadedTranslations = <Locale, Future<StreamChatLocalizations>>{};
 
   @override
   Future<StreamChatLocalizations> load(Locale locale) {
@@ -186,6 +181,7 @@ class _StreamChatLocalizationsDelegate
   bool shouldReload(_StreamChatLocalizationsDelegate old) => false;
 
   @override
-  String toString() => 'GlobalStreamChatLocalizations.delegate('
+  String toString() =>
+      'GlobalStreamChatLocalizations.delegate('
       '${kStreamChatSupportedLanguages.length} locales)';
 }

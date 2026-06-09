@@ -102,10 +102,10 @@ void main() {
     final targetUser = User(id: targetUserId);
     final otherUser = User(id: 'otherUserId');
     Member memberFor(User user) => Member(
-          user: user,
-          createdAt: DateTime.now(),
-          updatedAt: DateTime.now(),
-        );
+      user: user,
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+    );
     await database.userDao.updateUsers([targetUser, otherUser]);
     await database.channelDao.updateChannels([
       ChannelModel(cid: cid1),
@@ -182,15 +182,11 @@ void main() {
     final newFetchedMembers = await memberDao.getMembersByCid(cid);
     expect(newFetchedMembers.length, fetchedMembers.length + 1);
     expect(
-      newFetchedMembers
-          .firstWhere((it) => it.user!.id == copyMember.user!.id)
-          .banned,
+      newFetchedMembers.firstWhere((it) => it.user!.id == copyMember.user!.id).banned,
       true,
     );
     expect(
-      newFetchedMembers
-          .where((it) => it.user!.id == newMember.user!.id)
-          .isNotEmpty,
+      newFetchedMembers.where((it) => it.user!.id == newMember.user!.id).isNotEmpty,
       true,
     );
   });

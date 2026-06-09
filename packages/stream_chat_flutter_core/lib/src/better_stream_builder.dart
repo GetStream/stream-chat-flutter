@@ -41,8 +41,7 @@ class BetterStreamBuilder<T extends Object> extends StatefulWidget {
   _BetterStreamBuilderState createState() => _BetterStreamBuilderState<T>();
 }
 
-class _BetterStreamBuilderState<T extends Object>
-    extends State<BetterStreamBuilder<T>> {
+class _BetterStreamBuilderState<T extends Object> extends State<BetterStreamBuilder<T>> {
   T? _lastEvent;
   Object? _lastError;
   StreamSubscription<T?>? _subscription;
@@ -93,8 +92,7 @@ class _BetterStreamBuilderState<T extends Object>
   void _onEvent(T? event) {
     if (!mounted) return;
     final wasErrored = _lastError != null;
-    final isEqual =
-        widget.comparator?.call(_lastEvent, event) ?? event == _lastEvent;
+    final isEqual = widget.comparator?.call(_lastEvent, event) ?? event == _lastEvent;
     if (isEqual && !wasErrored) return;
 
     _lastError = null;
@@ -110,14 +108,16 @@ class _BetterStreamBuilderState<T extends Object>
 
     if (widget.errorBuilder == null) {
       // No errorBuilder → log so the failure isn't completely silent.
-      FlutterError.reportError(FlutterErrorDetails(
-        exception: error,
-        stack: stackTrace,
-        library: 'stream_chat_flutter_core',
-        context: ErrorDescription(
-          'while listening to a BetterStreamBuilder stream',
+      FlutterError.reportError(
+        FlutterErrorDetails(
+          exception: error,
+          stack: stackTrace,
+          library: 'stream_chat_flutter_core',
+          context: ErrorDescription(
+            'while listening to a BetterStreamBuilder stream',
+          ),
         ),
-      ));
+      );
       return;
     }
 

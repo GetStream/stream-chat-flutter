@@ -76,8 +76,7 @@ void main() {
         countMap[value] = (countMap[value] ?? 0) + 1;
       }
       // Each value should appear either 2 or 3 times
-      expect(
-          countMap.values.every((count) => count == 2 || count == 3), isTrue);
+      expect(countMap.values.every((count) => count == 2 || count == 3), isTrue);
     });
 
     test('returns original data when target size is smaller', () {

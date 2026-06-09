@@ -1,3 +1,37 @@
+## Upcoming Beta
+
+🛑️ Breaking
+
+- Renamed `StreamMessageInputController` → `StreamMessageComposerController`.
+- Renamed `StreamRestorableMessageInputController` → `StreamRestorableMessageComposerController`.
+- Renamed `StreamMessageComposerController.editingOriginalMessage` → `messageBeingEdited`.
+- `StreamMessageComposerController` constructor no longer accepts non-initial messages;
+  use `editMessage()` to enter edit mode.
+- `StreamMessageComposerController.cancelEditMessage()` is now a no-op when no edit is active.
+- `StreamMessageComposerController.clear()` no longer exits edit mode;
+  use `cancelEditMessage()` instead.
+
+✅ Added
+
+- Added `StreamMessageComposerController.isEditing` getter.
+- Added `StreamMessageComposerController.clearCommand()`; setting `command = null` is
+  now an alias for it.
+- `StreamMessageComposerController.editMessage()` and the `command` setter are now
+  re-entrant — repeated calls preserve the original restore snapshot.
+
+🔄 Changed
+
+- Widened `device_info_plus` to `>=12.4.0 <14.0.0`, `package_info_plus` to `>=9.0.1 <11.0.0`, and `connectivity_plus` to `>=7.1.1 <8.0.0` so apps can adopt the latest majors. Floors raised to current resolved versions.
+- Raised minimum Flutter to `>=3.41.0` and Dart SDK to `^3.11.0`.
+- `StreamChatCore` now sets `client.recoverStateOnReconnect = false` on mount; refreshes on `connectionRecovered` are driven by the list controllers in this package, avoiding a duplicate `queryChannels` round-trip and the historical event-replay flicker on reactions, polls, and quoted messages.
+- Apps watching a `Channel` outside any list controller (e.g. a deep link into a single channel screen) should subscribe to `client.on(EventType.connectionRecovered)` and call `channel.watch()` themselves to refresh state on reconnect.
+- Changed the default `backgroundKeepAlive` from 1 minute to 15 seconds — covers quick app-switches and notification-shade checks while closing cleanly before the server's 35-second read timeout. Still configurable.
+
+🐞 Fixed
+
+- Fixed `StreamChatCore` disconnecting the WebSocket immediately on background when no `onBackgroundEventReceived` handler was provided; the keep-alive timer now fires before the connection closes regardless of whether a handler is set.
+- Fixed `StreamMessageComposerController.cancelEditMessage` losing the pre-edit draft when a remote update arrived for the message being edited.
+
 ## 9.25.0
 
 ✅ Added
@@ -61,17 +95,39 @@
   handovers, brief drops) now collapse into a single reconnect instead of firing a fresh
   `connectionRecovered` per emission.
 
+## 10.0.0-beta.13
+
+🛑️ Breaking
+- SDK Redesign Changes. For more details, please refer to the [migration guide](https://github.com/GetStream/stream-chat-flutter/blob/210ff93f955be3f85c62e860309bd9aa240a5446/migrations).
+  The SDK redesign introduces a fresher default UI, but also better APIs for customization of the components.
+
+## 10.0.0-beta.12
+
+- Included the changes from version [`9.23.0`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
+
 ## 9.23.0
 
 - Updated `stream_chat` dependency to [`9.23.0`](https://pub.dev/packages/stream_chat/changelog).
+
+## 10.0.0-beta.11
+
+- Included the changes from version [`9.22.0`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
 
 ## 9.22.0
 
 - Updated `stream_chat` dependency to [`9.22.0`](https://pub.dev/packages/stream_chat/changelog).
 
+## 10.0.0-beta.10
+
+- Included the changes from version [`9.21.0`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
+
 ## 9.21.0
 
 - Updated `stream_chat` dependency to [`9.21.0`](https://pub.dev/packages/stream_chat/changelog).
+
+## 10.0.0-beta.9
+
+- Included the changes from version [`9.20.0`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
 
 ## 9.20.0
 
@@ -80,17 +136,33 @@
 - Fixed race condition where `connectUser` could be blocked when connectivity monitoring triggers
   during initial connection. [[#2409]](https://github.com/GetStream/stream-chat-flutter/issues/2409)
 
+## 10.0.0-beta.8
+
+- Included the changes from version [`9.19.0`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
+
 ## 9.19.0
 
 - Updated `stream_chat` dependency to [`9.19.0`](https://pub.dev/packages/stream_chat/changelog).
+
+## 10.0.0-beta.7
+
+- Included the changes from version [`9.18.0`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
 
 ## 9.18.0
 
 - Updated `stream_chat` dependency to [`9.18.0`](https://pub.dev/packages/stream_chat/changelog).
 
+## 10.0.0-beta.6
+
+- Included the changes from version [`9.17.0`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
+
 ## 9.17.0
 
 - Updated `stream_chat` dependency to [`9.17.0`](https://pub.dev/packages/stream_chat/changelog).
+
+## 10.0.0-beta.5
+
+- Included the changes from version [`9.16.0`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
 
 ## 9.16.0
 
@@ -101,6 +173,10 @@
 ✅ Added
 
 - Added methods for paginating thread replies in `StreamChannel`.
+
+## 10.0.0-beta.4
+
+- Included the changes from version [`9.15.0`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
 
 ## 9.15.0
 
@@ -116,6 +192,10 @@
 - Ensure `StreamChannel` future builder completes after channel
   initialization. [[#2323]](https://github.com/GetStream/stream-chat-flutter/issues/2323)
 
+## 10.0.0-beta.3
+
+- Included the changes from version [`9.14.0`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
+
 ## 9.14.0
 
 🐞 Fixed
@@ -123,12 +203,20 @@
 - Fixed cached messages are cleared from channels with unread messages when accessed
   offline. [[#2083]](https://github.com/GetStream/stream-chat-flutter/issues/2083)
 
+## 10.0.0-beta.2
+
+- Included the changes from version [`9.13.0`](https://pub.dev/packages/stream_chat_flutter_core/changelog).
+
 ## 9.13.0
 
 🐞 Fixed
 
 - Fixed pagination end detection logic to properly determine when the top or bottom of the message
   list has been reached.
+
+## 10.0.0-beta.1
+
+- Updated `stream_chat` dependency to [`10.0.0-beta.1`](https://pub.dev/packages/stream_chat/changelog).
 
 ## 9.12.0
 

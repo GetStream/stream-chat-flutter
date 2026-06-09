@@ -43,6 +43,7 @@ jobs:
         with:
           filters: |
             relevant:
+              - 'docs/**'
               - 'packages/**'
               - 'sample_app/**'
               - '.github/workflows/stream_flutter_workflow.yml'

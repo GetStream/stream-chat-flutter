@@ -8,10 +8,10 @@ import '../../mocks.dart';
 
 void main() {
   Response successResponse(String path, {Object? data}) => Response(
-        data: data,
-        requestOptions: RequestOptions(path: path),
-        statusCode: 200,
-      );
+    data: data,
+    requestOptions: RequestOptions(path: path),
+    statusCode: 200,
+  );
 
   late final client = MockHttpClient();
   late GuestApi guestApi;
@@ -26,13 +26,20 @@ void main() {
 
     const path = '/guest';
 
-    when(() => client.post(
-          path,
-          data: {'user': user},
-        )).thenAnswer((_) async => successResponse(path, data: {
+    when(
+      () => client.post(
+        path,
+        data: {'user': user},
+      ),
+    ).thenAnswer(
+      (_) async => successResponse(
+        path,
+        data: {
           'access_token': accessToken,
           'user': user.toJson(),
-        }));
+        },
+      ),
+    );
 
     final res = await guestApi.getGuestUser(user);
 

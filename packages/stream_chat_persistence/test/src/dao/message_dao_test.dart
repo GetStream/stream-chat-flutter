@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_redundant_argument_values
+
 import 'dart:math' as math;
 
 import 'package:flutter_test/flutter_test.dart';
@@ -89,8 +91,7 @@ void main() {
         type: 'testType',
         user: users[index],
         channelRole: 'channel_member',
-        parentId:
-            mapAllThreadToFirstMessage ? messages[0].id : messages[index].id,
+        parentId: mapAllThreadToFirstMessage ? messages[0].id : messages[index].id,
         createdAt: baseTime.add(Duration(seconds: index)),
         shadowed: math.Random().nextBool(),
         replyCount: index,
@@ -107,11 +108,7 @@ void main() {
         },
       ),
     );
-    final allMessages = [
-      ...messages,
-      if (quoted) ...quotedMessages,
-      if (threads) ...threadMessages
-    ];
+    final allMessages = [...messages, if (quoted) ...quotedMessages, if (threads) ...threadMessages];
     final reaction = Reaction(
       type: 'type',
       messageId: allMessages.first.id,
@@ -151,8 +148,7 @@ void main() {
     expect(newMessages.length, messages.length - 2);
 
     // Reaction for the first message should be deleted too
-    final newReactions =
-        await database.reactionDao.getReactions(firstMessageId);
+    final newReactions = await database.reactionDao.getReactions(firstMessageId);
     expect(newReactions, isEmpty);
   });
 
@@ -175,8 +171,7 @@ void main() {
 
         // Fetched reactions list should have one reaction for given message id
         final cid1firstMessageId = cid1Messages.first.id;
-        final cid1Reactions =
-            await database.reactionDao.getReactions(cid1firstMessageId);
+        final cid1Reactions = await database.reactionDao.getReactions(cid1firstMessageId);
         expect(cid1Reactions.length, 1);
 
         // Deleting all the messages of cid1
@@ -189,8 +184,7 @@ void main() {
         expect(cid2FetchedMessages, isNotEmpty);
 
         // Reaction for the first message should be deleted too
-        final cid1FetchedReactions =
-            await database.reactionDao.getReactions(cid1firstMessageId);
+        final cid1FetchedReactions = await database.reactionDao.getReactions(cid1firstMessageId);
         expect(cid1FetchedReactions, isEmpty);
       },
     );
@@ -210,12 +204,10 @@ void main() {
 
         // Fetched reactions list should have one reaction for given message id
         final cid1FirstMessageId = cid1Messages.first.id;
-        final cid1Reactions =
-            await database.reactionDao.getReactions(cid1FirstMessageId);
+        final cid1Reactions = await database.reactionDao.getReactions(cid1FirstMessageId);
         expect(cid1Reactions.length, 1);
         final cid2FirstMessageId = cid2Messages.first.id;
-        final cid2Reactions =
-            await database.reactionDao.getReactions(cid2FirstMessageId);
+        final cid2Reactions = await database.reactionDao.getReactions(cid2FirstMessageId);
         expect(cid2Reactions.length, 1);
 
         // Deleting all the messages of cid1
@@ -228,11 +220,9 @@ void main() {
         expect(cid2FetchedMessages, isEmpty);
 
         // Reaction for the first message should be deleted too
-        final cid1FetchedReactions =
-            await database.reactionDao.getReactions(cid1FirstMessageId);
+        final cid1FetchedReactions = await database.reactionDao.getReactions(cid1FirstMessageId);
         expect(cid1FetchedReactions, isEmpty);
-        final cid2FetchedReactions =
-            await database.reactionDao.getReactions(cid2FirstMessageId);
+        final cid2FetchedReactions = await database.reactionDao.getReactions(cid2FirstMessageId);
         expect(cid2FetchedReactions, isEmpty);
       },
     );
@@ -288,8 +278,7 @@ void main() {
     expect(insertedMessages, isNotEmpty);
 
     // Should fetch all the thread messages of parentId
-    final threadMessages =
-        await messageDao.getThreadMessagesByParentId(parentId);
+    final threadMessages = await messageDao.getThreadMessagesByParentId(parentId);
     expect(threadMessages.length, 1);
     expect(threadMessages.first.parentId, parentId);
   });
@@ -420,8 +409,7 @@ void main() {
       expect(fetchedMessages.last.id, 'testMessageId${cid}24');
     });
 
-    test('greaterThan only trims messages from the start (exclusive)',
-        () async {
+    test('greaterThan only trims messages from the start (exclusive)', () async {
       await _prepareTestData(cid, count: 30);
 
       final fetchedMessages = await messageDao.getMessagesByCid(
@@ -482,8 +470,7 @@ void main() {
       expect(fetchedMessages.last.id, 'testMessageId${cid}29');
     });
 
-    test('thread-reply id as cursor is a no-op (not visible in channel)',
-        () async {
+    test('thread-reply id as cursor is a no-op (not visible in channel)', () async {
       // `_prepareTestData` inserts thread replies with `parentId` set and
       // `showInChannel` left null — i.e. not visible in the channel query.
       // Passing such an id as a cursor must resolve to a no-op so the main
@@ -531,8 +518,7 @@ void main() {
       expect(fetchedMessages.last.id, 'testMessageId${cid}24');
     });
 
-    test('default limit + greaterThan returns first 10 after the pivot',
-        () async {
+    test('default limit + greaterThan returns first 10 after the pivot', () async {
       await _prepareTestData(cid, count: 30);
 
       final fetchedMessages = await messageDao.getMessagesByCid(
@@ -579,8 +565,7 @@ void main() {
       expect(fetchedMessages.last.id, 'testMessageId${cid}29');
     });
 
-    test('default limit + lessThanOrEqual returns the pivot and 9 before',
-        () async {
+    test('default limit + lessThanOrEqual returns the pivot and 9 before', () async {
       await _prepareTestData(cid, count: 30);
 
       final fetchedMessages = await messageDao.getMessagesByCid(
@@ -595,8 +580,7 @@ void main() {
       expect(fetchedMessages.last.id, 'testMessageId${cid}25');
     });
 
-    test('default limit + greaterThanOrEqual returns the pivot and 9 after',
-        () async {
+    test('default limit + greaterThanOrEqual returns the pivot and 9 after', () async {
       await _prepareTestData(cid, count: 30);
 
       final fetchedMessages = await messageDao.getMessagesByCid(
@@ -611,8 +595,7 @@ void main() {
       expect(fetchedMessages.last.id, 'testMessageId${cid}14');
     });
 
-    test('cursor with tied createdAt does not skip or duplicate siblings',
-        () async {
+    test('cursor with tied createdAt does not skip or duplicate siblings', () async {
       // Three messages share an identical `createdAt`. The SQL ORDER BY uses
       // the `(createdAt, id)` tuple, so within the trio the relative order is
       // by id (lexicographic). A cursor at `msg_tieB` must split the trio
@@ -628,12 +611,12 @@ void main() {
       final later = tie.add(const Duration(seconds: 1));
 
       Message m(String id, DateTime t) => Message(
-            id: id,
-            user: users.first,
-            createdAt: t,
-            updatedAt: t,
-            text: id,
-          );
+        id: id,
+        user: users.first,
+        createdAt: t,
+        updatedAt: t,
+        text: id,
+      );
 
       await messageDao.updateMessages(cid, [
         m('msg_pre', earlier),
@@ -835,14 +818,12 @@ void main() {
         // between rows when batched-hydration replaces the per-row queries.
         expect(
           m.latestReactions!.map((r) => r.type).toSet(),
-          equals(
-              {'like-${m.id.split('-').last}', 'love-${m.id.split('-').last}'}),
+          equals({'like-${m.id.split('-').last}', 'love-${m.id.split('-').last}'}),
         );
       }
     });
 
-    test('getMessagesByCid hydrates poll with own + other-user votes',
-        () async {
+    test('getMessagesByCid hydrates poll with own + other-user votes', () async {
       const messageId = 'msg-with-poll';
       const pollId = 'poll-mixed';
       await _seedChannel(cid);
@@ -933,8 +914,7 @@ void main() {
       );
     });
 
-    test(
-        'getMessagesByCid hydrates thread draft when fetchDraft=true; '
+    test('getMessagesByCid hydrates thread draft when fetchDraft=true; '
         'null when false', () async {
       // `fetchDraft` attaches a thread draft (parentId == message.id) to its
       // parent message, not the channel-level draft. See changelog entry for
@@ -971,13 +951,11 @@ void main() {
       expect(withDraft.first.draft!.message.text, 'unsent');
       expect(withDraft.first.draft!.parentId, parentId);
 
-      final withoutDraft =
-          await messageDao.getMessagesByCid(cid, fetchDraft: false);
+      final withoutDraft = await messageDao.getMessagesByCid(cid, fetchDraft: false);
       expect(withoutDraft.first.draft, isNull);
     });
 
-    test(
-        'getMessagesByCid hydrates quoted message with its own reactions '
+    test('getMessagesByCid hydrates quoted message with its own reactions '
         'and poll', () async {
       await _seedChannel(cid);
 
@@ -1072,8 +1050,7 @@ void main() {
       expect(top.quotedMessage?.quotedMessage, isNull);
     });
 
-    test(
-        'getMessagesByCid does not hydrate drafts for quoted messages, '
+    test('getMessagesByCid does not hydrate drafts for quoted messages, '
         'even when fetchDraft=true', () async {
       await _seedChannel(cid);
       final dbUser = User(id: 'testUserId');
@@ -1168,6 +1145,346 @@ void main() {
         expect(m.ownReactions, hasLength(2));
         expect(m.latestReactions!.every((r) => r.messageId == m.id), isTrue);
       }
+    });
+
+    test('getMessageById hydrates sharedLocation when fetchSharedLocation=true; '
+        'null when false', () async {
+      await _seedChannel(cid);
+      final dbUser = User(id: 'testUserId');
+      await database.userDao.updateUsers([dbUser]);
+
+      const messageId = 'msg-with-location';
+      await messageDao.updateMessages(cid, [
+        Message(
+          id: messageId,
+          user: dbUser,
+          text: 'pin drop',
+          createdAt: DateTime.now(),
+        ),
+      ]);
+
+      await database.locationDao.updateLocations([
+        Location(
+          channelCid: cid,
+          messageId: messageId,
+          userId: dbUser.id,
+          latitude: 37.7749,
+          longitude: -122.4194,
+          createdByDeviceId: 'device-A',
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        ),
+      ]);
+
+      final withLocation = await messageDao.getMessageById(messageId);
+      expect(withLocation, isNotNull);
+      expect(withLocation!.sharedLocation, isNotNull);
+      expect(withLocation.sharedLocation!.messageId, messageId);
+      expect(withLocation.sharedLocation!.latitude, 37.7749);
+      expect(withLocation.sharedLocation!.longitude, -122.4194);
+      expect(withLocation.sharedLocation!.createdByDeviceId, 'device-A');
+
+      final withoutLocation = await messageDao.getMessageById(
+        messageId,
+        fetchSharedLocation: false,
+      );
+      expect(withoutLocation, isNotNull);
+      expect(withoutLocation!.sharedLocation, isNull);
+    });
+
+    test('getMessagesByCid hydrates sharedLocation per row independently; '
+        'absent locations remain null', () async {
+      await _seedChannel(cid);
+      final dbUser = User(id: 'testUserId');
+      await database.userDao.updateUsers([dbUser]);
+
+      final baseTime = DateTime.now();
+      final messages = List.generate(
+        4,
+        (i) => Message(
+          id: 'loc-msg-$i',
+          user: dbUser,
+          text: 'msg $i',
+          createdAt: baseTime.add(Duration(seconds: i)),
+        ),
+      );
+      await messageDao.updateMessages(cid, messages);
+
+      // Locations only on messages 1 and 3; messages 0 and 2 have none.
+      await database.locationDao.updateLocations([
+        Location(
+          channelCid: cid,
+          messageId: messages[1].id,
+          userId: dbUser.id,
+          latitude: 10,
+          longitude: 20,
+          createdAt: baseTime,
+          updatedAt: baseTime,
+        ),
+        Location(
+          channelCid: cid,
+          messageId: messages[3].id,
+          userId: dbUser.id,
+          latitude: 30,
+          longitude: 40,
+          endAt: baseTime.add(const Duration(hours: 1)),
+          createdAt: baseTime,
+          updatedAt: baseTime,
+        ),
+      ]);
+
+      final fetched = await messageDao.getMessagesByCid(cid);
+      expect(fetched, hasLength(4));
+      final byId = {for (final m in fetched) m.id: m};
+
+      expect(byId['loc-msg-0']!.sharedLocation, isNull);
+      expect(byId['loc-msg-1']!.sharedLocation, isNotNull);
+      expect(byId['loc-msg-1']!.sharedLocation!.latitude, 10);
+      expect(byId['loc-msg-1']!.sharedLocation!.longitude, 20);
+      expect(byId['loc-msg-1']!.sharedLocation!.isLive, isFalse);
+      expect(byId['loc-msg-2']!.sharedLocation, isNull);
+      expect(byId['loc-msg-3']!.sharedLocation, isNotNull);
+      expect(byId['loc-msg-3']!.sharedLocation!.latitude, 30);
+      expect(byId['loc-msg-3']!.sharedLocation!.isLive, isTrue);
+
+      final withoutLocations = await messageDao.getMessagesByCid(
+        cid,
+        fetchSharedLocation: false,
+      );
+      expect(
+        withoutLocations.every((m) => m.sharedLocation == null),
+        isTrue,
+      );
+    });
+
+    test('getMessagesByCid hydrates sharedLocation for quoted message even '
+        'when fetchSharedLocation=false on the parent', () async {
+      await _seedChannel(cid);
+      final dbUser = User(id: 'testUserId');
+      await database.userDao.updateUsers([dbUser]);
+
+      const quotedId = 'msg-quoted-loc';
+      const quotingId = 'msg-quoting-no-loc';
+      final baseTime = DateTime.now();
+      await messageDao.updateMessages(cid, [
+        Message(
+          id: quotedId,
+          user: dbUser,
+          text: 'here I am',
+          createdAt: baseTime,
+        ),
+        Message(
+          id: quotingId,
+          user: dbUser,
+          text: 'see above',
+          createdAt: baseTime.add(const Duration(seconds: 1)),
+          quotedMessageId: quotedId,
+        ),
+      ]);
+
+      await database.locationDao.updateLocations([
+        Location(
+          channelCid: cid,
+          messageId: quotedId,
+          userId: dbUser.id,
+          latitude: 1,
+          longitude: 2,
+          createdAt: baseTime,
+          updatedAt: baseTime,
+        ),
+      ]);
+
+      // Parent caller opts out of locations, but the quoted message should
+      // still carry its own shared location.
+      final fetched = await messageDao.getMessagesByCid(
+        cid,
+        fetchSharedLocation: false,
+      );
+      final quoting = fetched.firstWhere((m) => m.id == quotingId);
+      expect(quoting.sharedLocation, isNull);
+      expect(quoting.quotedMessage, isNotNull);
+      expect(quoting.quotedMessage!.sharedLocation, isNotNull);
+      expect(quoting.quotedMessage!.sharedLocation!.latitude, 1);
+      expect(quoting.quotedMessage!.sharedLocation!.longitude, 2);
+    });
+  });
+
+  group('deleteMessagesByUser', () {
+    const cid1 = 'test:Cid1';
+    const cid2 = 'test:Cid2';
+    const userId = 'testUserId0';
+
+    test('hard deletes user messages in specific channel', () async {
+      // Preparing test data for two channels
+      await _prepareTestData(cid1);
+      await _prepareTestData(cid2);
+
+      // Verify messages exist in both channels
+      final cid1Messages = await messageDao.getMessagesByCid(cid1);
+      final cid2Messages = await messageDao.getMessagesByCid(cid2);
+      expect(cid1Messages, isNotEmpty);
+      expect(cid2Messages, isNotEmpty);
+
+      // Count messages from the specific user in cid1
+      final cid1UserMessages = cid1Messages.where((m) => m.user?.id == userId).length;
+      expect(cid1UserMessages, greaterThan(0));
+
+      // Hard delete messages from user in cid1 only
+      await messageDao.deleteMessagesByUser(
+        cid: cid1,
+        userId: userId,
+        hardDelete: true,
+      );
+
+      // Verify user's messages are deleted from cid1
+      final cid1MessagesAfter = await messageDao.getMessagesByCid(cid1);
+      final cid1UserMessagesAfter = cid1MessagesAfter.where((m) => m.user?.id == userId).length;
+      expect(cid1UserMessagesAfter, 0);
+
+      // Verify other users' messages in cid1 are not affected
+      expect(cid1MessagesAfter.length, cid1Messages.length - cid1UserMessages);
+
+      // Verify messages in cid2 are not affected
+      final cid2MessagesAfter = await messageDao.getMessagesByCid(cid2);
+      expect(cid2MessagesAfter.length, cid2Messages.length);
+    });
+
+    test('soft deletes user messages in specific channel', () async {
+      // Preparing test data
+      await _prepareTestData(cid1);
+
+      final cid1Messages = await messageDao.getMessagesByCid(cid1);
+      final cid1UserMessages = cid1Messages.where((m) => m.user?.id == userId).toList();
+      expect(cid1UserMessages, isNotEmpty);
+
+      // Verify messages are not deleted initially
+      for (final message in cid1UserMessages) {
+        expect(message.type, isNot('deleted'));
+        expect(message.deletedAt, isNull);
+      }
+
+      // Soft delete messages from user
+      final deletedAt = DateTime.now();
+      await messageDao.deleteMessagesByUser(
+        cid: cid1,
+        userId: userId,
+        hardDelete: false,
+        deletedAt: deletedAt,
+      );
+
+      // Verify messages are marked as deleted
+      final cid1MessagesAfter = await messageDao.getMessagesByCid(cid1);
+      final cid1UserMessagesAfter = cid1MessagesAfter.where((m) => m.user?.id == userId).toList();
+
+      // Messages should still exist in DB
+      expect(cid1UserMessagesAfter.length, cid1UserMessages.length);
+
+      // But they should be marked as deleted
+      for (final message in cid1UserMessagesAfter) {
+        expect(message.type, 'deleted');
+        expect(message.deletedAt, isNotNull);
+      }
+
+      // Other users' messages should not be affected
+      final otherUserMessages = cid1MessagesAfter.where((m) => m.user?.id != userId).toList();
+      for (final message in otherUserMessages) {
+        expect(message.type, isNot('deleted'));
+      }
+    });
+
+    test('hard deletes user messages across all channels when cid is null', () async {
+      // Preparing test data for multiple channels
+      await _prepareTestData(cid1);
+      await _prepareTestData(cid2);
+
+      final cid1Messages = await messageDao.getMessagesByCid(cid1);
+      final cid2Messages = await messageDao.getMessagesByCid(cid2);
+
+      final cid1UserMessages = cid1Messages.where((m) => m.user?.id == userId).length;
+      final cid2UserMessages = cid2Messages.where((m) => m.user?.id == userId).length;
+
+      expect(cid1UserMessages, greaterThan(0));
+      expect(cid2UserMessages, greaterThan(0));
+
+      // Hard delete all messages from user across all channels
+      await messageDao.deleteMessagesByUser(
+        userId: userId,
+        hardDelete: true,
+      );
+
+      // Verify user's messages are deleted from both channels
+      final cid1MessagesAfter = await messageDao.getMessagesByCid(cid1);
+      final cid2MessagesAfter = await messageDao.getMessagesByCid(cid2);
+
+      expect(cid1MessagesAfter.where((m) => m.user?.id == userId).length, 0);
+      expect(cid2MessagesAfter.where((m) => m.user?.id == userId).length, 0);
+
+      // Verify other messages are preserved
+      expect(
+        cid1MessagesAfter.length,
+        cid1Messages.length - cid1UserMessages,
+      );
+      expect(
+        cid2MessagesAfter.length,
+        cid2Messages.length - cid2UserMessages,
+      );
+    });
+
+    test('soft deletes user messages across all channels when cid is null', () async {
+      // Preparing test data for multiple channels
+      await _prepareTestData(cid1);
+      await _prepareTestData(cid2);
+
+      final cid1Messages = await messageDao.getMessagesByCid(cid1);
+      final cid2Messages = await messageDao.getMessagesByCid(cid2);
+
+      final cid1UserMessages = cid1Messages.where((m) => m.user?.id == userId).length;
+      final cid2UserMessages = cid2Messages.where((m) => m.user?.id == userId).length;
+
+      // Soft delete all messages from user across all channels
+      await messageDao.deleteMessagesByUser(
+        userId: userId,
+        hardDelete: false,
+      );
+
+      // Verify user's messages are marked as deleted in both channels
+      final cid1MessagesAfter = await messageDao.getMessagesByCid(cid1);
+      final cid2MessagesAfter = await messageDao.getMessagesByCid(cid2);
+
+      final cid1UserMessagesAfter = cid1MessagesAfter.where((m) => m.user?.id == userId).toList();
+      final cid2UserMessagesAfter = cid2MessagesAfter.where((m) => m.user?.id == userId).toList();
+
+      // Messages should still exist
+      expect(cid1UserMessagesAfter.length, cid1UserMessages);
+      expect(cid2UserMessagesAfter.length, cid2UserMessages);
+
+      // All user messages should be marked as deleted
+      for (final message in [...cid1UserMessagesAfter, ...cid2UserMessagesAfter]) {
+        expect(message.type, 'deleted');
+        expect(message.deletedAt, isNotNull);
+      }
+    });
+
+    test('handles thread messages correctly', () async {
+      // Preparing test data with threads
+      await _prepareTestData(cid1, threads: true);
+
+      final cid1ThreadMessages = await messageDao.getThreadMessages(cid1);
+
+      final userThreadMessages = cid1ThreadMessages.where((m) => m.user?.id == userId).length;
+      expect(userThreadMessages, greaterThan(0));
+
+      // Hard delete all messages from user
+      await messageDao.deleteMessagesByUser(
+        cid: cid1,
+        userId: userId,
+        hardDelete: true,
+      );
+
+      // Verify thread messages from user are also deleted
+      final cid1ThreadMessagesAfter = await messageDao.getThreadMessages(cid1);
+      final userThreadMessagesAfter = cid1ThreadMessagesAfter.where((m) => m.user?.id == userId).length;
+      expect(userThreadMessagesAfter, 0);
     });
   });
 

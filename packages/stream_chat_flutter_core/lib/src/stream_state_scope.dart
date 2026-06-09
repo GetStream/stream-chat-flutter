@@ -78,8 +78,7 @@ class StreamStateScope<T extends State> extends InheritedWidget {
   /// frame). If consumers need to react to data exposed by the [State], they
   /// should subscribe to its streams or notifiers explicitly.
   static T? maybeOf<T extends State>(BuildContext context) {
-    final element =
-        context.getElementForInheritedWidgetOfExactType<StreamStateScope<T>>();
+    final element = context.getElementForInheritedWidgetOfExactType<StreamStateScope<T>>();
     final scope = element?.widget as StreamStateScope<T>?;
     return scope?.state;
   }

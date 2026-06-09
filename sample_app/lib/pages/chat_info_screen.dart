@@ -1,582 +1,368 @@
-// ignore_for_file: deprecated_member_use
-
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:sample_app/pages/channel_file_display_screen.dart';
 import 'package:sample_app/pages/channel_media_display_screen.dart';
 import 'package:sample_app/pages/pinned_messages_screen.dart';
-import 'package:sample_app/utils/localizations.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// Detail screen for a 1:1 chat correspondence
-class ChatInfoScreen extends StatefulWidget {
-  const ChatInfoScreen({
-    super.key,
-    required this.messageTheme,
-    this.user,
-  });
+/// Detail screen for a 1:1 chat correspondence.
+///
+/// Surfaces the other party's avatar, name, online status, plus channel
+/// shortcuts (pinned messages, media, files) and conversation actions
+/// (mute, block, delete) — see Figma frame `8833:431680`.
+class ChatInfoScreen extends StatelessWidget {
+  /// Creates a [ChatInfoScreen].
+  const ChatInfoScreen({super.key, this.user});
 
-  /// User in consideration
+  /// The other user in the conversation.
+  ///
+  /// Required at runtime — the screen renders an [Offstage] when null so
+  /// callers don't need to thread an additional null check.
   final User? user;
-
-  final StreamMessageThemeData messageTheme;
-
-  @override
-  State<ChatInfoScreen> createState() => _ChatInfoScreenState();
-}
-
-class _ChatInfoScreenState extends State<ChatInfoScreen> {
-  ValueNotifier<bool?> mutedBool = ValueNotifier(false);
-
-  @override
-  void initState() {
-    super.initState();
-    mutedBool = ValueNotifier(StreamChannel.of(context).channel.isMuted);
-  }
 
   @override
   Widget build(BuildContext context) {
-    final channel = StreamChannel.of(context).channel;
-    return Scaffold(
-      backgroundColor: StreamChatTheme.of(context).colorTheme.appBg,
-      body: ListView(
-        children: [
-          _buildUserHeader(),
-          Container(
-            height: 8,
-            color: StreamChatTheme.of(context).colorTheme.disabled,
-          ),
-          _buildOptionListTiles(),
-          Container(
-            height: 8,
-            color: StreamChatTheme.of(context).colorTheme.disabled,
-          ),
-          if (channel.ownCapabilities.contains(PermissionType.deleteChannel))
-            _buildDeleteListTile(),
-        ],
-      ),
-    );
-  }
+    final user = this.user;
+    if (user == null) return const Offstage();
 
-  Widget _buildUserHeader() {
-    return Material(
-      color: StreamChatTheme.of(context).colorTheme.appBg,
-      child: SafeArea(
-        child: Stack(
-          children: [
-            Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: StreamUserAvatar(
-                    user: widget.user!,
-                    constraints: const BoxConstraints.tightFor(
-                      width: 72,
-                      height: 72,
-                    ),
-                    borderRadius: BorderRadius.circular(36),
-                    showOnlineStatus: false,
-                  ),
-                ),
-                Text(
-                  widget.user!.name,
-                  style: const TextStyle(
-                      fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 7),
-                _buildConnectedTitleState(),
-                const SizedBox(height: 15),
-                StreamOptionListTile(
-                  title: '@${widget.user!.id}',
-                  tileColor: StreamChatTheme.of(context).colorTheme.appBg,
-                  trailing: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    child: Text(
-                      widget.user!.name,
-                      style: TextStyle(
-                          color: StreamChatTheme.of(context)
-                              .colorTheme
-                              .textHighEmphasis
-                              .withOpacity(0.5),
-                          fontSize: 16),
-                    ),
-                  ),
-                  onTap: () {},
-                ),
-              ],
-            ),
-            const Positioned(
-              top: 0,
-              left: 0,
-              width: 58,
-              child: StreamBackButton(),
-            ),
-          ],
+    final spacing = context.streamSpacing;
+    final colorScheme = context.streamColorScheme;
+
+    return Scaffold(
+      backgroundColor: colorScheme.backgroundApp,
+      appBar: StreamAppBar(title: const Text('Contact Info')),
+      // Action / chevron icons share a uniform 20px size — set once at the
+      // top of the body so individual rows stay style-free.
+      body: IconTheme.merge(
+        data: const IconThemeData(size: 20),
+        child: SingleChildScrollView(
+          padding: .directional(
+            top: spacing.xxl,
+            bottom: spacing.xxxl,
+            start: spacing.md,
+            end: spacing.md,
+          ),
+          child: Column(
+            mainAxisSize: .min,
+            children: [
+              _ContactInfoHeader(user: user),
+              SizedBox(height: spacing.xxl),
+              const _MediaSection(),
+              SizedBox(height: spacing.md),
+              const _ActionsSection(),
+            ],
+          ),
         ),
       ),
     );
   }
+}
 
-  Widget _buildOptionListTiles() {
-    final channel = StreamChannel.of(context);
+/// Hero header — large avatar with optional online indicator, name with an
+/// inline mute-state icon, and an online / last-seen subtitle.
+class _ContactInfoHeader extends StatelessWidget {
+  const _ContactInfoHeader({required this.user});
+
+  final User user;
+
+  @override
+  Widget build(BuildContext context) {
+    final spacing = context.streamSpacing;
+    final colorScheme = context.streamColorScheme;
+    final textTheme = context.streamTextTheme;
+    final channel = StreamChannel.of(context).channel;
 
     return Column(
       children: [
-        StreamBuilder<bool>(
-            stream: StreamChannel.of(context).channel.isMutedStream,
-            builder: (context, snapshot) {
-              mutedBool.value = snapshot.data;
-
-              return StreamOptionListTile(
-                tileColor: StreamChatTheme.of(context).colorTheme.appBg,
-                title: AppLocalizations.of(context).muteUser,
-                titleTextStyle: StreamChatTheme.of(context).textTheme.body,
-                leading: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 22),
-                  child: StreamSvgIcon(
-                    icon: StreamSvgIcons.mute,
-                    size: 24,
-                    color: StreamChatTheme.of(context)
-                        .colorTheme
-                        .textHighEmphasis
-                        .withOpacity(0.5),
-                  ),
-                ),
-                trailing: snapshot.data == null
-                    ? const CircularProgressIndicator()
-                    : ValueListenableBuilder<bool?>(
-                        valueListenable: mutedBool,
-                        builder: (context, value, _) {
-                          return CupertinoSwitch(
-                            value: value!,
-                            onChanged: (val) {
-                              mutedBool.value = val;
-
-                              if (snapshot.data!) {
-                                channel.channel.unmute();
-                              } else {
-                                channel.channel.mute();
-                              }
-                            },
-                          );
-                        }),
-                onTap: () {},
-              );
-            }),
-        StreamOptionListTile(
-          title: AppLocalizations.of(context).pinnedMessages,
-          tileColor: StreamChatTheme.of(context).colorTheme.appBg,
-          titleTextStyle: StreamChatTheme.of(context).textTheme.body,
-          leading: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 22),
-            child: StreamSvgIcon(
-              icon: StreamSvgIcons.pin,
-              size: 24,
-              color: StreamChatTheme.of(context)
-                  .colorTheme
-                  .textHighEmphasis
-                  .withOpacity(0.5),
-            ),
-          ),
-          trailing: StreamSvgIcon(
-            icon: StreamSvgIcons.right,
-            color: StreamChatTheme.of(context).colorTheme.textLowEmphasis,
-          ),
-          onTap: () {
-            final channel = StreamChannel.of(context).channel;
-
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => StreamChannel(
-                  channel: channel,
-                  child: const PinnedMessagesScreen(),
-                ),
-              ),
-            );
-          },
+        StreamUserAvatar(
+          user: user,
+          size: .xxl,
+          showOnlineIndicator: user.online,
         ),
-        StreamOptionListTile(
-          title: AppLocalizations.of(context).photosAndVideos,
-          tileColor: StreamChatTheme.of(context).colorTheme.appBg,
-          titleTextStyle: StreamChatTheme.of(context).textTheme.body,
-          leading: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: StreamSvgIcon(
-              icon: StreamSvgIcons.pictures,
-              size: 36,
-              color: StreamChatTheme.of(context)
-                  .colorTheme
-                  .textHighEmphasis
-                  .withOpacity(0.5),
-            ),
-          ),
-          trailing: StreamSvgIcon(
-            icon: StreamSvgIcons.right,
-            color: StreamChatTheme.of(context).colorTheme.textLowEmphasis,
-          ),
-          onTap: () {
-            final channel = StreamChannel.of(context).channel;
-
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => StreamChannel(
-                  channel: channel,
-                  child: ChannelMediaDisplayScreen(
-                    messageTheme: widget.messageTheme,
-                  ),
-                ),
+        SizedBox(height: spacing.md),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          spacing: spacing.xxs,
+          children: [
+            Flexible(
+              child: Text(
+                user.name,
+                style: textTheme.headingLg.copyWith(color: colorScheme.textPrimary),
+                overflow: TextOverflow.ellipsis,
               ),
-            );
-          },
-        ),
-        StreamOptionListTile(
-          title: AppLocalizations.of(context).files,
-          tileColor: StreamChatTheme.of(context).colorTheme.appBg,
-          titleTextStyle: StreamChatTheme.of(context).textTheme.body,
-          leading: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 18),
-            child: StreamSvgIcon(
-              icon: StreamSvgIcons.files,
-              size: 32,
-              color: StreamChatTheme.of(context)
-                  .colorTheme
-                  .textHighEmphasis
-                  .withOpacity(0.5),
             ),
-          ),
-          trailing: StreamSvgIcon(
-            icon: StreamSvgIcons.right,
-            color: StreamChatTheme.of(context).colorTheme.textLowEmphasis,
-          ),
-          onTap: () {
-            final channel = StreamChannel.of(context).channel;
-
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => StreamChannel(
-                  channel: channel,
-                  child: ChannelFileDisplayScreen(
-                    messageTheme: widget.messageTheme,
-                  ),
-                ),
-              ),
-            );
-          },
-        ),
-        StreamOptionListTile(
-          title: AppLocalizations.of(context).sharedGroups,
-          tileColor: StreamChatTheme.of(context).colorTheme.appBg,
-          titleTextStyle: StreamChatTheme.of(context).textTheme.body,
-          leading: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 22),
-            child: StreamSvgIcon(
-              icon: StreamSvgIcons.group,
-              size: 24,
-              color: StreamChatTheme.of(context)
-                  .colorTheme
-                  .textHighEmphasis
-                  .withOpacity(0.5),
+            BetterStreamBuilder<bool>(
+              stream: channel.isMutedStream,
+              initialData: channel.isMuted,
+              builder: (context, isMuted) {
+                if (!isMuted) return const SizedBox.shrink();
+                return Icon(
+                  context.streamIcons.mute,
+                  color: colorScheme.textTertiary,
+                );
+              },
             ),
-          ),
-          trailing: StreamSvgIcon(
-            icon: StreamSvgIcons.right,
-            color: StreamChatTheme.of(context).colorTheme.textLowEmphasis,
-          ),
-          onTap: () {
-            Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => _SharedGroupsScreen(
-                        StreamChat.of(context).currentUser, widget.user)));
-          },
+          ],
+        ),
+        SizedBox(height: spacing.xs),
+        Text(
+          _onlineLabel(user),
+          style: textTheme.captionDefault.copyWith(color: colorScheme.textSecondary),
         ),
       ],
     );
   }
 
-  Widget _buildDeleteListTile() {
-    return StreamOptionListTile(
-      title: 'Delete Conversation',
-      tileColor: StreamChatTheme.of(context).colorTheme.appBg,
-      titleTextStyle: StreamChatTheme.of(context).textTheme.body.copyWith(
-            color: StreamChatTheme.of(context).colorTheme.accentError,
-          ),
-      leading: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 22),
-        child: StreamSvgIcon(
-          icon: StreamSvgIcons.delete,
-          size: 24,
-          color: StreamChatTheme.of(context).colorTheme.accentError,
-        ),
-      ),
-      onTap: _showDeleteDialog,
-      titleColor: StreamChatTheme.of(context).colorTheme.accentError,
-    );
-  }
-
-  void _showDeleteDialog() async {
-    final streamChannel = StreamChannel.of(context);
-    final res = await showConfirmationBottomSheet(
-      context,
-      title: AppLocalizations.of(context).deleteConversationTitle,
-      okText: AppLocalizations.of(context).delete.toUpperCase(),
-      question: AppLocalizations.of(context).deleteConversationAreYouSure,
-      cancelText: AppLocalizations.of(context).cancel.toUpperCase(),
-      icon: StreamSvgIcon(
-        icon: StreamSvgIcons.delete,
-        color: StreamChatTheme.of(context).colorTheme.accentError,
-      ),
-    );
-    final channel = streamChannel.channel;
-    if (res == true) {
-      await channel.delete().then((value) {
-        Navigator.pop(context);
-        Navigator.pop(context);
-      });
-    }
-  }
-
-  Widget _buildConnectedTitleState() {
-    late Text alternativeWidget;
-
-    final otherMember = widget.user;
-
-    if (otherMember != null) {
-      if (otherMember.online) {
-        alternativeWidget = Text(
-          AppLocalizations.of(context).online,
-          style: TextStyle(
-              color: StreamChatTheme.of(context)
-                  .colorTheme
-                  .textHighEmphasis
-                  .withOpacity(0.5)),
-        );
-      } else {
-        alternativeWidget = Text(
-          '${AppLocalizations.of(context).lastSeen} ${Jiffy.parseFromDateTime(otherMember.lastActive!).fromNow()}',
-          style: TextStyle(
-              color: StreamChatTheme.of(context)
-                  .colorTheme
-                  .textHighEmphasis
-                  .withOpacity(0.5)),
-        );
-      }
-    }
-
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        if (widget.user!.online)
-          Material(
-            type: MaterialType.circle,
-            color: StreamChatTheme.of(context).colorTheme.barsBg,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              constraints: const BoxConstraints.tightFor(
-                width: 24,
-                height: 12,
-              ),
-              child: Material(
-                shape: const CircleBorder(),
-                color: StreamChatTheme.of(context).colorTheme.accentInfo,
-              ),
-            ),
-          ),
-        alternativeWidget,
-        if (widget.user!.online)
-          const SizedBox(
-            width: 24,
-          ),
-      ],
-    );
+  String _onlineLabel(User user) {
+    if (user.online) return 'Online';
+    final lastActive = user.lastActive;
+    if (lastActive == null) return 'Offline';
+    return 'Last seen ${Jiffy.parseFromDateTime(lastActive).fromNow()}';
   }
 }
 
-class _SharedGroupsScreen extends StatefulWidget {
-  const _SharedGroupsScreen(this.mainUser, this.otherUser);
-  final User? mainUser;
-  final User? otherUser;
+/// Card grouping the read-only channel-content shortcuts (pinned, media,
+/// files).
+class _MediaSection extends StatelessWidget {
+  const _MediaSection();
 
-  @override
-  __SharedGroupsScreenState createState() => __SharedGroupsScreenState();
-}
-
-class __SharedGroupsScreenState extends State<_SharedGroupsScreen> {
   @override
   Widget build(BuildContext context) {
-    final chat = StreamChat.of(context);
-
-    return Scaffold(
-      backgroundColor: StreamChatTheme.of(context).colorTheme.appBg,
-      appBar: AppBar(
-        elevation: 1,
-        centerTitle: true,
-        title: Text(
-          AppLocalizations.of(context).sharedGroups,
-          style: TextStyle(
-              color: StreamChatTheme.of(context).colorTheme.textHighEmphasis,
-              fontSize: 16),
+    final icons = context.streamIcons;
+    return _Section(
+      children: [
+        _Tile(
+          icon: Icon(icons.pin),
+          label: const Text('Pinned Messages'),
+          trailing: Icon(icons.chevronRight),
+          onTap: () => _push(context, const PinnedMessagesScreen()),
         ),
-        leading: const StreamBackButton(),
-        backgroundColor: StreamChatTheme.of(context).colorTheme.barsBg,
-      ),
-      body: StreamBuilder<List<Channel>>(
-        stream: chat.client.queryChannels(
-          filter: Filter.and([
-            Filter.in_('members', [widget.otherUser!.id]),
-            Filter.in_('members', [widget.mainUser!.id]),
-          ]),
+        _Tile(
+          icon: Icon(icons.image),
+          label: const Text('Photos & Videos'),
+          trailing: Icon(icons.chevronRight),
+          onTap: () => _push(context, const ChannelMediaDisplayScreen()),
         ),
-        builder: (context, snapshot) {
-          if (!snapshot.hasData) {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
-          }
-
-          if (snapshot.data!.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  StreamSvgIcon(
-                    icon: StreamSvgIcons.message,
-                    size: 136,
-                    color: StreamChatTheme.of(context).colorTheme.disabled,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    AppLocalizations.of(context).noSharedGroups,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: StreamChatTheme.of(context)
-                          .colorTheme
-                          .textHighEmphasis,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    AppLocalizations.of(context).groupSharedWithUserAppearHere,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: StreamChatTheme.of(context)
-                          .colorTheme
-                          .textHighEmphasis
-                          .withOpacity(0.5),
-                    ),
-                  ),
-                ],
-              ),
-            );
-          }
-
-          final channels = snapshot.data!
-              .where((c) =>
-                  c.state!.members.any((m) =>
-                      m.userId != widget.mainUser!.id &&
-                      m.userId != widget.otherUser!.id) ||
-                  !c.isDistinct)
-              .toList();
-
-          return ListView.builder(
-            itemCount: channels.length,
-            itemBuilder: (context, position) {
-              return StreamChannel(
-                channel: channels[position],
-                child: _buildListTile(channels[position]),
-              );
-            },
-          );
-        },
-      ),
+        _Tile(
+          icon: Icon(icons.folder),
+          label: const Text('Files'),
+          trailing: Icon(icons.chevronRight),
+          onTap: () => _push(context, const ChannelFileDisplayScreen()),
+        ),
+      ],
     );
   }
 
-  Widget _buildListTile(Channel channel) {
-    final extraData = channel.extraData;
-    final members = channel.state!.members;
-
-    const textStyle = TextStyle(fontSize: 14, fontWeight: FontWeight.bold);
-
-    return SizedBox(
-      height: 64,
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          String? title;
-          if (extraData['name'] == null) {
-            final otherMembers = members.where((member) =>
-                member.userId != StreamChat.of(context).currentUser!.id);
-            if (otherMembers.isNotEmpty) {
-              final maxWidth = constraints.maxWidth;
-              final maxChars = maxWidth / textStyle.fontSize!;
-              var currentChars = 0;
-              final currentMembers = <Member>[];
-              for (final element in otherMembers) {
-                final newLength = currentChars + element.user!.name.length;
-                if (newLength < maxChars) {
-                  currentChars = newLength;
-                  currentMembers.add(element);
-                }
-              }
-
-              final exceedingMembers =
-                  otherMembers.length - currentMembers.length;
-              title =
-                  '${currentMembers.map((e) => e.user!.name).join(', ')} ${exceedingMembers > 0 ? '+ $exceedingMembers' : ''}';
-            } else {
-              title = 'No title';
-            }
-          } else {
-            title = extraData['name']! as String;
-          }
-
-          return Column(
-            children: [
-              Expanded(
-                child: Row(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(8),
-                      child: StreamChannelAvatar(
-                        channel: channel,
-                        constraints:
-                            const BoxConstraints(maxWidth: 40, maxHeight: 40),
-                      ),
-                    ),
-                    Expanded(
-                        child: Text(
-                      title,
-                      style: textStyle,
-                    )),
-                    Padding(
-                      padding: const EdgeInsets.all(8),
-                      child: Text(
-                        '${channel.memberCount} ${AppLocalizations.of(context).members.toLowerCase()}',
-                        style: TextStyle(
-                            color: StreamChatTheme.of(context)
-                                .colorTheme
-                                .textHighEmphasis
-                                .withOpacity(0.5)),
-                      ),
-                    )
-                  ],
-                ),
-              ),
-              Container(
-                height: 1,
-                color: StreamChatTheme.of(context)
-                    .colorTheme
-                    .textHighEmphasis
-                    .withOpacity(.08),
-              ),
-            ],
-          );
-        },
+  void _push(BuildContext context, Widget destination) {
+    final channel = StreamChannel.of(context).channel;
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => StreamChannel.value(channel: channel, child: destination),
       ),
+    );
+  }
+}
+
+/// Card grouping the conversation-level actions — mute, block, delete.
+class _ActionsSection extends StatelessWidget {
+  const _ActionsSection();
+
+  @override
+  Widget build(BuildContext context) {
+    final icons = context.streamIcons;
+    final channel = StreamChannel.of(context).channel;
+
+    return _Section(
+      children: [
+        BetterStreamBuilder<bool>(
+          stream: channel.isMutedStream,
+          initialData: channel.isMuted,
+          builder: (context, isMuted) => _Tile(
+            icon: Icon(isMuted ? icons.audio : icons.mute),
+            label: Text(isMuted ? 'Unmute User' : 'Mute User'),
+            trailing: StreamSwitch(
+              value: isMuted,
+              onChanged: (_) {
+                if (isMuted) {
+                  channel.unmute();
+                } else {
+                  channel.mute();
+                }
+              },
+            ),
+          ),
+        ),
+        _Tile(
+          icon: Icon(icons.noSign),
+          label: const Text('Block User'),
+          onTap: () => _showNotImplementedSnack(context),
+        ),
+        if (channel.canDeleteChannel)
+          _Tile(
+            icon: Icon(icons.delete),
+            label: const Text('Delete Conversation'),
+            destructive: true,
+            onTap: () => _confirmDelete(context),
+          ),
+      ],
+    );
+  }
+
+  void _showNotImplementedSnack(BuildContext context) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Blocking users is not implemented in the sample app.')),
+    );
+  }
+
+  Future<void> _confirmDelete(BuildContext context) async {
+    final navigator = Navigator.of(context);
+    final channel = StreamChannel.of(context).channel;
+
+    final confirmed = await _showConfirmationDialog(
+      context: context,
+      title: 'Delete conversation',
+      content: 'Are you sure you want to delete this conversation?',
+      confirmLabel: 'Delete',
+    );
+    if (confirmed != true) return;
+
+    await channel.delete();
+    // Pop every screen until we land on the channel list — going back to
+    // the channel page would crash trying to read state from the now
+    // deleted channel.
+    navigator.popUntil((route) => route.isFirst);
+  }
+}
+
+/// A rounded section card that visually groups its [children] with a single
+/// background colour and clipped ink ripples — matches the Figma's "soft
+/// grey card" pattern shared across detail screens.
+class _Section extends StatelessWidget {
+  const _Section({required this.children});
+
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    final radius = context.streamRadius;
+    final spacing = context.streamSpacing;
+
+    final colorScheme = context.streamColorScheme;
+
+    return Material(
+      color: colorScheme.backgroundSurfaceCard,
+      shape: RoundedSuperellipseBorder(borderRadius: .all(radius.lg)),
+      clipBehavior: Clip.antiAlias,
+      child: Padding(
+        padding: .symmetric(vertical: spacing.xs, horizontal: spacing.xxs),
+        child: Column(mainAxisSize: .min, children: children),
+      ),
+    );
+  }
+}
+
+/// A single row inside a [_Section] — leading icon, label, and an optional
+/// [trailing] widget. Navigation rows should pass an explicit chevron;
+/// action rows that confirm or toggle in place pass [trailing] only when
+/// they need a control (e.g. a switch). Setting [destructive] paints both
+/// the icon and the label with [StreamColorScheme.accentError] via a local
+/// [StreamListTileTheme] override.
+class _Tile extends StatelessWidget {
+  const _Tile({
+    required this.icon,
+    required this.label,
+    this.onTap,
+    this.trailing,
+    this.destructive = false,
+  });
+
+  final Widget icon;
+  final Widget label;
+  final VoidCallback? onTap;
+  final Widget? trailing;
+  final bool destructive;
+
+  @override
+  Widget build(BuildContext context) {
+    final spacing = context.streamSpacing;
+    final colorScheme = context.streamColorScheme;
+
+    return StreamListTileTheme(
+      data: StreamListTileThemeData(
+        iconColor: destructive ? .all(colorScheme.accentError) : null,
+        titleColor: destructive ? .all(colorScheme.accentError) : null,
+        minTileHeight: 44, // Matches the design's tap target size for action rows
+        contentPadding: .symmetric(horizontal: spacing.sm),
+      ),
+      child: StreamListTile(
+        leading: icon,
+        trailing: trailing,
+        title: label,
+        onTap: onTap,
+      ),
+    );
+  }
+}
+
+// Stream-styled confirmation dialog with a destructive primary action.
+//
+// Mirrors the dialog pattern used by the poll interactor (e.g.
+// `showPollEndVoteDialog` / `showPollDeleteOptionDialog`) and the
+// SDK-internal `StreamMessageActionConfirmationModal`: a Material
+// [AlertDialog] with a ghost secondary cancel and a solid destructive
+// confirm.
+//
+// Resolves to `true` on confirm, `false` on cancel, `null` on dismiss.
+Future<bool?> _showConfirmationDialog({
+  required BuildContext context,
+  required String title,
+  required String content,
+  required String confirmLabel,
+}) {
+  return showDialog<bool>(
+    context: context,
+    builder: (_) => _ConfirmationDialog(
+      title: title,
+      content: content,
+      confirmLabel: confirmLabel,
+    ),
+  );
+}
+
+class _ConfirmationDialog extends StatelessWidget {
+  const _ConfirmationDialog({
+    required this.title,
+    required this.content,
+    required this.confirmLabel,
+  });
+
+  final String title;
+  final String content;
+  final String confirmLabel;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = context.streamColorScheme;
+
+    return AlertDialog(
+      backgroundColor: colorScheme.backgroundElevation1,
+      title: Text(title),
+      content: Text(content),
+      actions: [
+        StreamButton(
+          type: .ghost,
+          style: .secondary,
+          size: .small,
+          onPressed: () => Navigator.of(context).maybePop(false),
+          child: Text(context.translations.cancelLabel),
+        ),
+        StreamButton(
+          type: .solid,
+          style: .destructive,
+          size: .small,
+          onPressed: () => Navigator.of(context).maybePop(true),
+          child: Text(confirmLabel),
+        ),
+      ],
     );
   }
 }

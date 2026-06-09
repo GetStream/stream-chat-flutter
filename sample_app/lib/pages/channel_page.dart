@@ -1,12 +1,12 @@
-// ignore_for_file: deprecated_member_use
+// ignore_for_file: deprecated_member_use, avoid_redundant_argument_values
 
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sample_app/config/sample_app_config.dart';
 import 'package:sample_app/pages/thread_page.dart';
 import 'package:sample_app/routes/routes.dart';
-import 'package:sample_app/widgets/message_info_sheet.dart';
-import 'package:sample_app/widgets/reminder_dialog.dart';
+import 'package:sample_app/widgets/location/location_picker_dialog.dart';
+import 'package:sample_app/widgets/location/location_picker_option.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 class ChannelPage extends StatefulWidget {
@@ -26,8 +26,7 @@ class ChannelPage extends StatefulWidget {
 
 class _ChannelPageState extends State<ChannelPage> {
   FocusNode? _focusNode;
-  final StreamMessageInputController _messageInputController =
-      StreamMessageInputController();
+  final _messageComposerController = StreamMessageComposerController();
 
   @override
   void initState() {
@@ -38,11 +37,19 @@ class _ChannelPageState extends State<ChannelPage> {
   @override
   void dispose() {
     _focusNode!.dispose();
+    _messageComposerController.dispose();
     super.dispose();
   }
 
   void _reply(Message message) {
-    _messageInputController.quotedMessage = message;
+    _messageComposerController.quotedMessage = message;
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      _focusNode!.requestFocus();
+    });
+  }
+
+  void _editMessage(Message message) {
+    _messageComposerController.editMessage(message);
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       _focusNode!.requestFocus();
     });
@@ -50,37 +57,20 @@ class _ChannelPageState extends State<ChannelPage> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = StreamChatTheme.of(context);
-    final textTheme = theme.textTheme;
-    final colorTheme = theme.colorTheme;
+    final channel = StreamChannel.of(context).channel;
+    final config = channel.config;
 
     return Scaffold(
-      backgroundColor: colorTheme.appBg,
+      backgroundColor: context.streamColorScheme.backgroundApp,
       appBar: StreamChannelHeader(
-        showTypingIndicator: false,
-        onBackPressed: () => GoRouter.of(context).pop(),
-        onImageTap: () async {
-          final channel = StreamChannel.of(context).channel;
-          final router = GoRouter.of(context);
+        onChannelAvatarPressed: (channel) {
+          final isOneToOne = channel.isOneToOne;
+          final currentUserId = StreamChat.of(context).currentUser?.id;
 
-          if (channel.memberCount == 2 && channel.isDistinct) {
-            final currentUser = StreamChat.of(context).currentUser;
-            final otherUser = channel.state!.members.firstWhereOrNull(
-              (element) => element.user!.id != currentUser!.id,
-            );
-            if (otherUser != null) {
-              router.pushNamed(
-                Routes.CHAT_INFO_SCREEN.name,
-                pathParameters: Routes.CHAT_INFO_SCREEN.params(channel),
-                extra: otherUser.user,
-              );
-            }
-          } else {
-            GoRouter.of(context).pushNamed(
-              Routes.GROUP_INFO_SCREEN.name,
-              pathParameters: Routes.GROUP_INFO_SCREEN.params(channel),
-            );
-          }
+          final channelMembers = channel.state?.members ?? [];
+          final otherUser = isOneToOne ? channelMembers.firstWhere((m) => m.userId != currentUserId).user : null;
+
+          _pushChannelInfo(context, channel, otherUser);
         },
       ),
       body: Column(
@@ -91,10 +81,12 @@ class _ChannelPageState extends State<ChannelPage> {
                 StreamMessageListView(
                   initialScrollIndex: widget.initialScrollIndex,
                   initialAlignment: widget.initialAlignment,
-                  highlightInitialMessage: widget.highlightInitialMessage,
-                  //onMessageSwiped: _reply,
-                  messageFilter: defaultFilter,
-                  messageBuilder: customMessageBuilder,
+                  config: StreamMessageListViewConfiguration(
+                    swipeToReply: true,
+                    highlightInitialMessage: widget.highlightInitialMessage,
+                  ),
+                  onEditMessageTap: _editMessage,
+                  onReplyTap: _reply,
                   threadBuilder: (_, parentMessage) {
                     return ThreadPage(parent: parentMessage!);
                   },
@@ -105,14 +97,14 @@ class _ChannelPageState extends State<ChannelPage> {
                   right: 0,
                   child: Container(
                     alignment: Alignment.centerLeft,
-                    color: colorTheme.appBg.withOpacity(.9),
+                    color: context.streamColorScheme.backgroundApp.withOpacity(.9),
                     child: StreamTypingIndicator(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 8,
                         vertical: 4,
                       ),
-                      style: textTheme.footnote.copyWith(
-                        color: colorTheme.textLowEmphasis,
+                      style: context.streamTextTheme.captionDefault.copyWith(
+                        color: context.streamColorScheme.textSecondary,
                       ),
                     ),
                   ),
@@ -120,188 +112,98 @@ class _ChannelPageState extends State<ChannelPage> {
               ],
             ),
           ),
-          StreamMessageInput(
-            focusNode: _focusNode,
-            messageInputController: _messageInputController,
-            onQuotedMessageCleared: _messageInputController.clearQuotedMessage,
-            enableVoiceRecording: true,
-          ),
-        ],
-      ),
-    );
-  }
+          Builder(
+            builder: (context) {
+              final appConfig = context.sampleAppConfig;
+              final locationEnabled =
+                  appConfig.enableLocationSharing && config?.sharedLocations == true && channel.canShareLocation;
 
-  Widget customMessageBuilder(
-    BuildContext context,
-    MessageDetails details,
-    List<Message> messages,
-    StreamMessageWidget defaultMessageWidget,
-  ) {
-    final theme = StreamChatTheme.of(context);
-    final textTheme = theme.textTheme;
-    final colorTheme = theme.colorTheme;
+              return StreamMessageComposer(
+                focusNode: _focusNode,
+                messageComposerController: _messageComposerController,
+                onQuotedMessageCleared: _messageComposerController.clearQuotedMessage,
+                enableVoiceRecording: true,
+                allowedAttachmentPickerTypes: [
+                  ...AttachmentPickerType.values,
+                  if (locationEnabled) const LocationPickerType(),
+                ],
+                onAttachmentPickerResult: (result) {
+                  return _onCustomAttachmentPickerResult(channel, result);
+                },
+                attachmentPickerOptionsBuilder: (context, defaultOptions) => [
+                  ...defaultOptions,
+                  if (locationEnabled)
+                    TabbedAttachmentPickerOption(
+                      key: 'location-picker',
+                      icon: context.streamIcons.location,
+                      supportedTypes: [const LocationPickerType()],
+                      isEnabled: (value) {
+                        if (value.isEmpty) return true;
+                        return value.extraData['location'] != null;
+                      },
+                      optionViewBuilder: (context, controller) => LocationPicker(
+                        onLocationPicked: (locationResult) {
+                          if (locationResult == null) return;
 
-    final message = details.message;
-    final reminder = message.reminder;
-    final channelConfig = StreamChannel.of(context).channel.config;
-
-    final customOptions = <StreamMessageAction>[
-      if (channelConfig?.userMessageReminders == true) ...[
-        if (reminder != null) ...[
-          StreamMessageAction(
-            leading: StreamSvgIcon(
-              icon: StreamSvgIcons.time,
-              color: colorTheme.textLowEmphasis,
-            ),
-            title: const Text('Edit Reminder'),
-            onTap: (message) async {
-              Navigator.of(context).pop();
-
-              final option = await showDialog<ReminderOption>(
-                context: context,
-                builder: (_) => EditReminderDialog(
-                  isBookmarkReminder: reminder.remindAt == null,
-                ),
-              );
-
-              if (option == null) return;
-              final client = StreamChat.of(context).client;
-              final messageId = message.id;
-              final remindAt = option.remindAt;
-
-              client.updateReminder(messageId, remindAt: remindAt).ignore();
-            },
-          ),
-          StreamMessageAction(
-            leading: StreamSvgIcon(
-              icon: StreamSvgIcons.checkAll,
-              color: colorTheme.textLowEmphasis,
-            ),
-            title: const Text('Remove from later'),
-            onTap: (message) {
-              Navigator.of(context).pop();
-
-              final client = StreamChat.of(context).client;
-              final messageId = message.id;
-
-              client.deleteReminder(messageId).ignore();
-            },
-          ),
-        ] else ...[
-          StreamMessageAction(
-            leading: StreamSvgIcon(
-              icon: StreamSvgIcons.time,
-              color: colorTheme.textLowEmphasis,
-            ),
-            title: const Text('Remind me'),
-            onTap: (message) async {
-              Navigator.of(context).pop();
-
-              final reminder = await showDialog<ScheduledReminder>(
-                context: context,
-                builder: (_) => const CreateReminderDialog(),
-              );
-
-              if (reminder == null) return;
-              final client = StreamChat.of(context).client;
-              final messageId = message.id;
-              final remindAt = reminder.remindAt;
-
-              client.createReminder(messageId, remindAt: remindAt).ignore();
-            },
-          ),
-          StreamMessageAction(
-            leading: Icon(
-              Icons.bookmark_border,
-              color: colorTheme.textLowEmphasis,
-            ),
-            title: const Text('Save for later'),
-            onTap: (message) {
-              Navigator.of(context).pop();
-
-              final client = StreamChat.of(context).client;
-              final messageId = message.id;
-
-              client.createReminder(messageId).ignore();
-            },
-          ),
-        ],
-      ],
-      if (channelConfig?.deliveryEvents == true)
-        StreamMessageAction(
-          leading: Icon(
-            Icons.info_outline_rounded,
-            color: colorTheme.textLowEmphasis,
-          ),
-          title: const Text('Message Info'),
-          onTap: (message) {
-            Navigator.of(context).pop();
-            MessageInfoSheet.show(context: context, message: message);
-          },
-        ),
-    ];
-
-    return Container(
-      color: reminder != null ? colorTheme.accentPrimary.withOpacity(.1) : null,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          if (reminder != null)
-            Align(
-              alignment: switch (defaultMessageWidget.reverse) {
-                true => AlignmentDirectional.centerEnd,
-                false => AlignmentDirectional.centerStart,
-              },
-              child: Padding(
-                padding: const EdgeInsetsDirectional.fromSTEB(16, 4, 16, 8),
-                child: Row(
-                  spacing: 4,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      size: 16,
-                      Icons.bookmark_rounded,
-                      color: colorTheme.accentPrimary,
-                    ),
-                    Text(
-                      'Saved for later',
-                      style: textTheme.footnote.copyWith(
-                        color: colorTheme.accentPrimary,
+                          controller.notifyCustomResult(
+                            LocationPicked(location: locationResult),
+                          );
+                        },
                       ),
                     ),
-                  ],
-                ),
-              ),
-            ),
-          defaultMessageWidget.copyWith(
-            onReplyTap: _reply,
-            customActions: customOptions,
-            onShowMessage: (message, channel) => GoRouter.of(context).goNamed(
-              Routes.CHANNEL_PAGE.name,
-              pathParameters: Routes.CHANNEL_PAGE.params(channel),
-              queryParameters: Routes.CHANNEL_PAGE.queryParams(message),
-            ),
-            bottomRowBuilderWithDefaultWidget: (_, __, defaultWidget) {
-              return defaultWidget.copyWith(
-                deletedBottomRowBuilder: (context, message) {
-                  return const StreamVisibleFootnote();
-                },
+                ],
               );
             },
           ),
-          // If the message has a reminder, add some space below it.
-          if (reminder != null) const SizedBox(height: 4),
         ],
       ),
     );
   }
 
-  bool defaultFilter(Message m) {
-    final currentUser = StreamChat.of(context).currentUser;
-    final isMyMessage = m.user?.id == currentUser?.id;
-    final isDeletedOrShadowed = m.isDeleted == true || m.shadowed == true;
-    if (isDeletedOrShadowed && !isMyMessage) return false;
-    return true;
+  bool _onCustomAttachmentPickerResult(
+    Channel channel,
+    StreamAttachmentPickerResult result,
+  ) {
+    if (result is LocationPicked) {
+      _onShareLocationPicked(channel, result.location).ignore();
+      return true; // Notify that the result was handled.
+    }
+
+    return false; // Notify that the result was not handled.
   }
+
+  Future<SendMessageResponse> _onShareLocationPicked(
+    Channel channel,
+    LocationPickerResult result,
+  ) async {
+    if (result.endSharingAt case final endSharingAt?) {
+      return channel.startLiveLocationSharing(
+        endSharingAt: endSharingAt,
+        location: result.coordinates,
+      );
+    }
+
+    return channel.sendStaticLocation(location: result.coordinates);
+  }
+}
+
+// Pushes the chat / group info screen depending on whether [user] was
+// resolved. 1-1 channels pass the other member here (forwarded as `extra`
+// to the chat-info route); group channels pass `null` and route to the
+// group info screen.
+Future<void> _pushChannelInfo(BuildContext context, Channel channel, User? user) {
+  final router = GoRouter.of(context);
+
+  if (user != null) {
+    return router.pushNamed(
+      Routes.CHAT_INFO_SCREEN.name,
+      pathParameters: Routes.CHAT_INFO_SCREEN.params(channel),
+      extra: user,
+    );
+  }
+
+  return router.pushNamed(
+    Routes.GROUP_INFO_SCREEN.name,
+    pathParameters: Routes.GROUP_INFO_SCREEN.params(channel),
+  );
 }

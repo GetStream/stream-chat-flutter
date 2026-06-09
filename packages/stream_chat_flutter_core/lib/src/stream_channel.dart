@@ -18,11 +18,12 @@ enum QueryDirection {
 /// Signature used by [StreamChannel.errorBuilder] to create a replacement
 /// widget for an error that occurs while asynchronously building the channel.
 // TODO: Remove once ErrorBuilder supports passing stacktrace.
-typedef ErrorWidgetBuilder = Widget Function(
-  BuildContext context,
-  Object error,
-  StackTrace? stackTrace,
-);
+typedef ErrorWidgetBuilder =
+    Widget Function(
+      BuildContext context,
+      Object error,
+      StackTrace? stackTrace,
+    );
 
 Color _getDefaultBackgroundColor(BuildContext context) {
   final brightness = Theme.of(context).brightness;
@@ -65,11 +66,11 @@ class StreamChannel extends StatefulWidget {
     super.key,
     required this.child,
     required this.channel,
-  })  : showLoading = false,
-        initialMessageId = null,
-        errorBuilder = _defaultErrorBuilder,
-        loadingBuilder = _defaultLoadingBuilder,
-        _shouldPosition = false;
+  }) : showLoading = false,
+       initialMessageId = null,
+       errorBuilder = _defaultErrorBuilder,
+       loadingBuilder = _defaultLoadingBuilder,
+       _shouldPosition = false;
 
   /// The child of the widget
   final Widget child;
@@ -123,8 +124,7 @@ class StreamChannel extends StatefulWidget {
       color: backgroundColor,
       child: Center(
         child: switch (exception) {
-          DioException(type: DioExceptionType.badResponse) =>
-            Text(exception.message ?? 'Bad response'),
+          DioException(type: DioExceptionType.badResponse) => Text(exception.message ?? 'Bad response'),
           DioException() => const Text('Check your connection and retry'),
           _ => Text(exception.toString()),
         },
@@ -208,8 +208,7 @@ class StreamChannelState extends State<StreamChannel> {
   String? get initialMessageId => widget.initialMessageId;
 
   /// Current channel state stream
-  Stream<ChannelState>? get channelStateStream =>
-      widget.channel.state?.channelStateStream;
+  Stream<ChannelState>? get channelStateStream => widget.channel.state?.channelStateStream;
 
   final _queryTopMessagesController = BehaviorSubject.seeded(false);
   final _queryBottomMessagesController = BehaviorSubject.seeded(false);
@@ -470,31 +469,30 @@ class StreamChannelState extends State<StreamChannel> {
     String? messageId, {
     int limit = 30,
     bool preferOffline = false,
-  }) =>
-      _queryAtMessage(
-        messageId: messageId,
-        limit: limit,
-        preferOffline: preferOffline,
-      );
+  }) => _queryAtMessage(
+    messageId: messageId,
+    limit: limit,
+    preferOffline: preferOffline,
+  );
 
   /// Loads channel at specific message
   Future<void> loadChannelAtTimestamp(
     DateTime timestamp, {
     int limit = 30,
     bool preferOffline = false,
-  }) =>
-      _queryAtTimestamp(
-        timestamp: timestamp,
-        limit: limit,
-        preferOffline: preferOffline,
-      );
+  }) => _queryAtTimestamp(
+    timestamp: timestamp,
+    limit: limit,
+    preferOffline: preferOffline,
+  );
 
   // If we are jumping to a message we can determine if we loaded the oldest
   // page or the newest page, depending on where the aroundMessageId is located.
   ({
     bool endOfPrependReached,
     bool endOfAppendReached,
-  }) _inferBoundariesFromAnchorId(
+  })
+  _inferBoundariesFromAnchorId(
     String anchorId,
     List<Message> loadedMessages,
   ) {
@@ -582,7 +580,8 @@ class StreamChannelState extends State<StreamChannel> {
   ({
     bool endOfPrependReached,
     bool endOfAppendReached,
-  }) _inferBoundariesFromAnchorTimestamp(
+  })
+  _inferBoundariesFromAnchorTimestamp(
     DateTime anchorTimestamp,
     List<Message> loadedMessages,
   ) {
@@ -607,9 +606,11 @@ class StreamChannelState extends State<StreamChannel> {
       DateTime anchorTimestamp,
       List<Message> loadedMessages,
     ) {
-      final messageTimestamps = loadedMessages.map((it) {
-        return it.createdAt.millisecondsSinceEpoch;
-      }).toList(growable: false);
+      final messageTimestamps = loadedMessages
+          .map((it) {
+            return it.createdAt.millisecondsSinceEpoch;
+          })
+          .toList(growable: false);
 
       return messageTimestamps.lowerBoundBy<num>(
         anchorTimestamp.millisecondsSinceEpoch,
@@ -897,8 +898,7 @@ class StreamChannelState extends State<StreamChannel> {
   @override
   void didUpdateWidget(StreamChannel oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.channel.cid != widget.channel.cid ||
-        oldWidget.initialMessageId != widget.initialMessageId) {
+    if (oldWidget.channel.cid != widget.channel.cid || oldWidget.initialMessageId != widget.initialMessageId) {
       // Re-initialize channel if the channel CID or initial message ID changes.
       _channelInitFuture = [_maybeInitChannel(), channel.initialized].wait;
     }

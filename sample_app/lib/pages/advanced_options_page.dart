@@ -1,12 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
-import 'package:sample_app/app.dart';
-import 'package:sample_app/pages/choose_user_page.dart';
+import 'package:sample_app/auth/auth_controller.dart';
 import 'package:sample_app/routes/routes.dart';
-import 'package:sample_app/state/init_data.dart';
-import 'package:sample_app/utils/localizations.dart';
 import 'package:sample_app/widgets/stream_version.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -56,12 +51,12 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
       showDialog(
         barrierDismissible: false,
         context: context,
-        barrierColor: StreamChatTheme.of(context).colorTheme.overlay,
+        barrierColor: context.streamColorScheme.backgroundOverlayLight,
         builder: (context) => Center(
           child: Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(16),
-              color: StreamChatTheme.of(context).colorTheme.barsBg,
+              color: context.streamColorScheme.backgroundElevation1,
             ),
             height: 100,
             width: 100,
@@ -72,39 +67,22 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
         ),
       );
 
-      final client = buildStreamChatClient(apiKey);
       final router = GoRouter.of(context);
-      final initNotifier = context.read<InitNotifier>();
 
       try {
-        await client.connectUser(
-          User(
+        await authController.connect(
+          apiKey: apiKey,
+          user: User(
             id: userId,
             extraData: {
               'name': username,
             },
           ),
-          userToken,
+          token: userToken,
         );
-
-        const secureStorage = FlutterSecureStorage();
-        await Future.wait([
-          secureStorage.write(
-            key: kStreamApiKey,
-            value: apiKey,
-          ),
-          secureStorage.write(
-            key: kStreamUserId,
-            value: userId,
-          ),
-          secureStorage.write(
-            key: kStreamToken,
-            value: userToken,
-          ),
-        ]);
       } catch (e) {
         debugPrint(e.toString());
-        var errorText = AppLocalizations.of(context).errorConnecting;
+        var errorText = 'Error connecting, retry';
         if (e is Map) {
           errorText = e['message'] ?? errorText;
         }
@@ -116,8 +94,6 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
         return;
       }
       loading = false;
-      initNotifier.initData = initNotifier.initData!.copyWith(client: client);
-
       router.goNamed(Routes.CHOOSE_USER.name);
     }
   }
@@ -125,24 +101,8 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: StreamChatTheme.of(context).colorTheme.appBg,
-      appBar: AppBar(
-        backgroundColor: StreamChatTheme.of(context).colorTheme.barsBg,
-        elevation: 1,
-        centerTitle: true,
-        title: Text(
-          AppLocalizations.of(context).advancedOptions,
-          style: StreamChatTheme.of(context).textTheme.headlineBold.copyWith(
-              color: StreamChatTheme.of(context).colorTheme.textHighEmphasis),
-        ),
-        leading: IconButton(
-          icon: const StreamSvgIcon(icon: StreamSvgIcons.left),
-          color: StreamChatTheme.of(context).colorTheme.textHighEmphasis,
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-      ),
+      backgroundColor: context.streamColorScheme.backgroundApp,
+      appBar: StreamAppBar(title: const Text('Custom settings')),
       body: Builder(
         builder: (context) {
           return Padding(
@@ -164,9 +124,7 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                     validator: (value) {
                       if (value!.isEmpty) {
                         setState(() {
-                          _apiKeyError = AppLocalizations.of(context)
-                              .apiKeyError
-                              .toUpperCase();
+                          _apiKeyError = 'Please enter the Chat API Key'.toUpperCase();
                         });
                         return _apiKeyError;
                       }
@@ -174,9 +132,7 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                     },
                     style: TextStyle(
                       fontSize: 14,
-                      color: StreamChatTheme.of(context)
-                          .colorTheme
-                          .textHighEmphasis,
+                      color: context.streamColorScheme.textPrimary,
                     ),
                     decoration: InputDecoration(
                       errorStyle: const TextStyle(height: 0, fontSize: 0),
@@ -184,20 +140,18 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
                         color: _apiKeyError != null
-                            ? StreamChatTheme.of(context).colorTheme.accentError
-                            : StreamChatTheme.of(context)
-                                .colorTheme
-                                .textLowEmphasis,
+                            ? context.streamColorScheme.accentError
+                            : context.streamColorScheme.textSecondary,
                       ),
                       border: UnderlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
                         borderSide: BorderSide.none,
                       ),
-                      fillColor: StreamChatTheme.of(context).colorTheme.inputBg,
+                      fillColor: context.streamColorScheme.backgroundSurface,
                       filled: true,
                       labelText: _apiKeyError != null
-                          ? '${AppLocalizations.of(context).chatApiKey.toUpperCase()}: $_apiKeyError'
-                          : AppLocalizations.of(context).chatApiKey,
+                          ? '${'Chat API Key'.toUpperCase()}: $_apiKeyError'
+                          : 'Chat API Key',
                     ),
                     textInputAction: TextInputAction.next,
                   ),
@@ -214,9 +168,7 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                     validator: (value) {
                       if (value!.isEmpty) {
                         setState(() {
-                          _userIdError = AppLocalizations.of(context)
-                              .userIdError
-                              .toUpperCase();
+                          _userIdError = 'Please enter the User ID'.toUpperCase();
                         });
                         return _userIdError;
                       }
@@ -224,9 +176,7 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                     },
                     style: TextStyle(
                       fontSize: 14,
-                      color: StreamChatTheme.of(context)
-                          .colorTheme
-                          .textHighEmphasis,
+                      color: context.streamColorScheme.textPrimary,
                     ),
                     textInputAction: TextInputAction.next,
                     decoration: InputDecoration(
@@ -235,20 +185,16 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                         fontWeight: FontWeight.bold,
                         fontSize: 14,
                         color: _userIdError != null
-                            ? StreamChatTheme.of(context).colorTheme.accentError
-                            : StreamChatTheme.of(context)
-                                .colorTheme
-                                .textLowEmphasis,
+                            ? context.streamColorScheme.accentError
+                            : context.streamColorScheme.textSecondary,
                       ),
                       border: UnderlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
                         borderSide: BorderSide.none,
                       ),
-                      fillColor: StreamChatTheme.of(context).colorTheme.inputBg,
+                      fillColor: context.streamColorScheme.backgroundSurface,
                       filled: true,
-                      labelText: _userIdError != null
-                          ? '${AppLocalizations.of(context).userId.toUpperCase()}: $_userIdError'
-                          : AppLocalizations.of(context).userId,
+                      labelText: _userIdError != null ? '${'User ID'.toUpperCase()}: $_userIdError' : 'User ID',
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -264,9 +210,7 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                     validator: (value) {
                       if (value!.isEmpty) {
                         setState(() {
-                          _userTokenError = AppLocalizations.of(context)
-                              .userTokenError
-                              .toUpperCase();
+                          _userTokenError = 'Please enter the user token'.toUpperCase();
                         });
                         return _userTokenError;
                       }
@@ -274,9 +218,7 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                     },
                     style: TextStyle(
                       fontSize: 14,
-                      color: StreamChatTheme.of(context)
-                          .colorTheme
-                          .textHighEmphasis,
+                      color: context.streamColorScheme.textPrimary,
                     ),
                     textInputAction: TextInputAction.next,
                     decoration: InputDecoration(
@@ -285,20 +227,18 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                         fontWeight: FontWeight.bold,
                         fontSize: 14,
                         color: _userTokenError != null
-                            ? StreamChatTheme.of(context).colorTheme.accentError
-                            : StreamChatTheme.of(context)
-                                .colorTheme
-                                .textLowEmphasis,
+                            ? context.streamColorScheme.accentError
+                            : context.streamColorScheme.textSecondary,
                       ),
                       border: UnderlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
                         borderSide: BorderSide.none,
                       ),
-                      fillColor: StreamChatTheme.of(context).colorTheme.inputBg,
+                      fillColor: context.streamColorScheme.backgroundSurface,
                       filled: true,
                       labelText: _userTokenError != null
-                          ? '${AppLocalizations.of(context).userToken.toUpperCase()}: $_userTokenError'
-                          : AppLocalizations.of(context).userToken,
+                          ? '${'User Token'.toUpperCase()}: $_userTokenError'
+                          : 'User Token',
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -309,31 +249,27 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                       labelStyle: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
-                        color: StreamChatTheme.of(context)
-                            .colorTheme
-                            .textLowEmphasis,
+                        color: context.streamColorScheme.textSecondary,
                       ),
                       border: UnderlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
                         borderSide: BorderSide.none,
                       ),
-                      fillColor: StreamChatTheme.of(context).colorTheme.inputBg,
+                      fillColor: context.streamColorScheme.backgroundSurface,
                       filled: true,
-                      labelText: AppLocalizations.of(context).usernameOptional,
+                      labelText: 'Username (optional)',
                     ),
                   ),
                   const Spacer(),
                   ElevatedButton(
                     style: ButtonStyle(
                       backgroundColor: WidgetStateProperty.all<Color>(
-                          Theme.of(context).brightness == Brightness.light
-                              ? StreamChatTheme.of(context)
-                                  .colorTheme
-                                  .accentPrimary
-                              : Colors.white),
+                        Theme.of(context).brightness == Brightness.light
+                            ? context.streamColorScheme.accentPrimary
+                            : Colors.white,
+                      ),
                       elevation: WidgetStateProperty.all<double>(0),
-                      padding: WidgetStateProperty.all<EdgeInsets>(
-                          const EdgeInsets.symmetric(vertical: 16)),
+                      padding: WidgetStateProperty.all<EdgeInsets>(const EdgeInsets.symmetric(vertical: 16)),
                       shape: WidgetStateProperty.all(
                         RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(26),
@@ -342,13 +278,11 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                     ),
                     onPressed: _login,
                     child: Text(
-                      AppLocalizations.of(context).login,
+                      'Login',
                       style: TextStyle(
                         fontSize: 16,
                         color: Theme.of(context).brightness != Brightness.light
-                            ? StreamChatTheme.of(context)
-                                .colorTheme
-                                .accentPrimary
+                            ? context.streamColorScheme.accentPrimary
                             : Colors.white,
                       ),
                     ),

@@ -1,7 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:logging/logging.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/src/client/channel.dart';
 import 'package:stream_chat/src/client/channel_delivery_reporter.dart';
 import 'package:stream_chat/src/client/client.dart';
@@ -19,6 +18,7 @@ import 'package:stream_chat/src/core/http/stream_http_client.dart';
 import 'package:stream_chat/src/core/http/token_manager.dart';
 import 'package:stream_chat/src/core/models/channel_config.dart';
 import 'package:stream_chat/src/core/models/event.dart';
+import 'package:stream_chat/src/core/util/event_controller.dart';
 import 'package:stream_chat/src/db/chat_persistence_client.dart';
 import 'package:stream_chat/src/event_type.dart';
 import 'package:stream_chat/src/ws/websocket.dart';
@@ -67,8 +67,7 @@ class MockModerationApi extends Mock implements ModerationApi {}
 
 class MockGeneralApi extends Mock implements GeneralApi {}
 
-class MockAttachmentFileUploader extends Mock
-    implements AttachmentFileUploader {}
+class MockAttachmentFileUploader extends Mock implements AttachmentFileUploader {}
 
 class MockPersistenceClient extends Mock implements ChatPersistenceClient {
   String? _userId;
@@ -106,7 +105,7 @@ class MockStreamChatClient extends Mock implements StreamChatClient {
 
   @override
   Stream<Event> get eventStream => _eventController.stream;
-  final _eventController = PublishSubject<Event>();
+  final _eventController = EventController<Event>();
   void addEvent(Event event) => _eventController.add(event);
 
   @override
@@ -117,11 +116,10 @@ class MockStreamChatClient extends Mock implements StreamChatClient {
     String? eventType4,
   ]) {
     if (eventType == null || eventType == EventType.any) return eventStream;
-    return eventStream.where((event) =>
-        event.type == eventType ||
-        event.type == eventType2 ||
-        event.type == eventType3 ||
-        event.type == eventType4);
+    return eventStream.where(
+      (event) =>
+          event.type == eventType || event.type == eventType2 || event.type == eventType3 || event.type == eventType4,
+    );
   }
 
   @override
@@ -132,8 +130,7 @@ class MockStreamChatClientWithPersistence extends MockStreamChatClient {
   ChatPersistenceClient? _persistenceClient;
 
   @override
-  ChatPersistenceClient get chatPersistenceClient =>
-      _persistenceClient ??= MockPersistenceClient();
+  ChatPersistenceClient get chatPersistenceClient => _persistenceClient ??= MockPersistenceClient();
 
   @override
   bool get persistenceEnabled => true;
@@ -166,13 +163,10 @@ class MockRetryQueueChannel extends Mock implements Channel {
     String? eventType3,
     String? eventType4,
   ]) {
-    return client
-        .on(eventType, eventType2, eventType3, eventType4)
-        .where((e) => e.cid == cid);
+    return client.on(eventType, eventType2, eventType3, eventType4).where((e) => e.cid == cid);
   }
 }
 
 class MockWebSocket extends Mock implements WebSocket {}
 
-class MockChannelDeliveryReporter extends Mock
-    implements ChannelDeliveryReporter {}
+class MockChannelDeliveryReporter extends Mock implements ChannelDeliveryReporter {}

@@ -44,9 +44,7 @@ void main() {
       (key, value) => MapEntry(key, value.length),
     );
 
-    final users = latestVotesByOption.values
-        .expand((it) => it.map((it) => it.user!))
-        .toList();
+    final users = latestVotesByOption.values.expand((it) => it.map((it) => it.user!)).toList();
 
     final poll = Poll(
       id: pollId,
@@ -114,11 +112,13 @@ void main() {
     final fetchedPollVotes = await pollVoteDao.getPollVotes(pollId);
     expect(fetchedPollVotes.length, pollVotes.length + 1);
     expect(
-      fetchedPollVotes.any((it) =>
-          it.id == newPollVote.id &&
-          it.pollId == newPollVote.pollId &&
-          it.optionId == newPollVote.optionId &&
-          it.answerText == newPollVote.answerText),
+      fetchedPollVotes.any(
+        (it) =>
+            it.id == newPollVote.id &&
+            it.pollId == newPollVote.pollId &&
+            it.optionId == newPollVote.optionId &&
+            it.answerText == newPollVote.answerText,
+      ),
       true,
     );
   });
@@ -177,8 +177,7 @@ void main() {
       expect(result, isEmpty);
     });
 
-    test(
-        'returns votes grouped by poll id; polls with no votes (or unknown '
+    test('returns votes grouped by poll id; polls with no votes (or unknown '
         'ids) map to an empty list', () async {
       const pollWithVotes = 'poll-with-votes';
       const pollWithoutVotes = 'poll-without-votes';
@@ -202,8 +201,7 @@ void main() {
         const [pollWithVotes, pollWithoutVotes, pollUnknown],
       );
 
-      expect(result.keys,
-          unorderedEquals([pollWithVotes, pollWithoutVotes, pollUnknown]));
+      expect(result.keys, unorderedEquals([pollWithVotes, pollWithoutVotes, pollUnknown]));
       expect(result[pollWithVotes], hasLength(seededVotes.length));
       expect(
         result[pollWithVotes]!.every((v) => v.pollId == pollWithVotes),

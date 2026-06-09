@@ -7,10 +7,12 @@ class ThreadPage extends StatefulWidget {
     required this.parent,
     this.initialScrollIndex,
     this.initialAlignment,
+    this.onViewInChannelTap,
   });
   final Message parent;
   final int? initialScrollIndex;
   final double? initialAlignment;
+  final void Function(Message message)? onViewInChannelTap;
 
   @override
   State<ThreadPage> createState() => _ThreadPageState();
@@ -18,12 +20,12 @@ class ThreadPage extends StatefulWidget {
 
 class _ThreadPageState extends State<ThreadPage> {
   final FocusNode _focusNode = FocusNode();
-  late StreamMessageInputController _messageInputController;
+  late StreamMessageComposerController _messageComposerController;
 
   @override
   void initState() {
     super.initState();
-    _messageInputController = StreamMessageInputController(
+    _messageComposerController = StreamMessageComposerController(
       message: Message(parentId: widget.parent.id),
     );
   }
@@ -31,11 +33,19 @@ class _ThreadPageState extends State<ThreadPage> {
   @override
   void dispose() {
     _focusNode.dispose();
+    _messageComposerController.dispose();
     super.dispose();
   }
 
   void _reply(Message message) {
-    _messageInputController.quotedMessage = message;
+    _messageComposerController.quotedMessage = message;
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      _focusNode.requestFocus();
+    });
+  }
+
+  void _editMessage(Message message) {
+    _messageComposerController.editMessage(message);
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       _focusNode.requestFocus();
     });
@@ -44,10 +54,8 @@ class _ThreadPageState extends State<ThreadPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: StreamChatTheme.of(context).colorTheme.appBg,
-      appBar: StreamThreadHeader(
-        parent: widget.parent,
-      ),
+      backgroundColor: context.streamColorScheme.backgroundApp,
+      appBar: StreamThreadHeader(parent: widget.parent),
       body: Column(
         children: <Widget>[
           Expanded(
@@ -55,44 +63,24 @@ class _ThreadPageState extends State<ThreadPage> {
               parentMessage: widget.parent,
               initialScrollIndex: widget.initialScrollIndex,
               initialAlignment: widget.initialAlignment,
-              //onMessageSwiped: _reply,
-              messageFilter: defaultFilter,
-              showScrollToBottom: false,
-              highlightInitialMessage: true,
-              messageBuilder: (context, details, messages, defaultMessage) {
-                return defaultMessage.copyWith(
-                  onReplyTap: _reply,
-                  bottomRowBuilderWithDefaultWidget: (
-                    context,
-                    message,
-                    defaultWidget,
-                  ) {
-                    return defaultWidget.copyWith(
-                      deletedBottomRowBuilder: (context, message) {
-                        return const StreamVisibleFootnote();
-                      },
-                    );
-                  },
-                );
-              },
+              onReplyTap: _reply,
+              onEditMessageTap: _editMessage,
+              config: const StreamMessageListViewConfiguration(
+                swipeToReply: true,
+                showScrollToBottom: false,
+                highlightInitialMessage: true,
+              ),
+              onViewInChannelTap: widget.onViewInChannelTap,
             ),
           ),
           if (widget.parent.type != 'deleted')
-            StreamMessageInput(
+            StreamMessageComposer(
               focusNode: _focusNode,
-              messageInputController: _messageInputController,
+              messageComposerController: _messageComposerController,
               enableVoiceRecording: true,
             ),
         ],
       ),
     );
-  }
-
-  bool defaultFilter(Message m) {
-    final currentUser = StreamChat.of(context).currentUser;
-    final isMyMessage = m.user?.id == currentUser?.id;
-    final isDeletedOrShadowed = m.isDeleted == true || m.shadowed == true;
-    if (isDeletedOrShadowed && !isMyMessage) return false;
-    return true;
   }
 }

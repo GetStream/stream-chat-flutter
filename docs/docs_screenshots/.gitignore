@@ -1,0 +1,5 @@
+# docs_screenshots commits only the platform (macOS) goldens.
+# Ignore everything under `goldens/`, then un-ignore the macos subtree.
+**/test/**/goldens/**
+!**/test/**/goldens/macos/
+!**/test/**/goldens/macos/**

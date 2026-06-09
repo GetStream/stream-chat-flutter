@@ -16,8 +16,8 @@ void main() {
   late MockChannel channel;
   late MockChannelState channelState;
 
-  late final member = Member(user: User(id: 'alice', name: 'Alice'));
-  late final member2 = Member(user: User(id: 'bob', name: 'Bob'));
+  late final user1 = User(id: 'alice', name: 'Alice');
+  late final user2 = User(id: 'bob', name: 'Bob');
 
   setUpAll(() {
     client = MockClient();
@@ -26,7 +26,10 @@ void main() {
 
     when(() => channel.state!).thenReturn(channelState);
     when(() => channelState.membersStream).thenAnswer(
-      (_) => Stream<List<Member>>.value([member, member2]),
+      (_) => Stream<List<Member>>.value([
+        Member(user: user1),
+        Member(user: user2),
+      ]),
     );
   });
 
@@ -41,16 +44,13 @@ void main() {
         MaterialApp(
           home: StreamChat(
             client: client,
-            streamChatThemeData: StreamChatThemeData.light(),
+            themeData: StreamChatThemeData(),
             child: StreamChannel(
               channel: channel,
               child: Scaffold(
                 body: Center(
-                  child: StreamGroupAvatar(
-                    members: [
-                      member,
-                      member2,
-                    ],
+                  child: StreamUserAvatarGroup(
+                    users: [user1, user2],
                   ),
                 ),
               ),
@@ -74,7 +74,7 @@ void main() {
       return MaterialAppWrapper(
         home: StreamChat(
           client: client,
-          streamChatThemeData: StreamChatThemeData.light(),
+          themeData: StreamChatThemeData(),
           child: StreamChannel(
             channel: channel,
             child: Scaffold(
@@ -82,11 +82,8 @@ void main() {
                 child: SizedBox(
                   width: 100,
                   height: 100,
-                  child: StreamGroupAvatar(
-                    members: [
-                      member,
-                      member2,
-                    ],
+                  child: StreamUserAvatarGroup(
+                    users: [user1, user2],
                   ),
                 ),
               ),

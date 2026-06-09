@@ -17,8 +17,7 @@ void main() {
 
       final attachmentHandler = MockAttachmentHandler();
 
-      when(() => attachmentHandler.downloadAttachment(attachment))
-          .thenAnswer((invocation) async => 'filePath');
+      when(() => attachmentHandler.downloadAttachment(attachment)).thenAnswer((invocation) async => 'filePath');
 
       expect(
         await attachmentHandler.downloadAttachment(attachment),
@@ -31,15 +30,13 @@ void main() {
         title: 'test giphy attachment',
         type: 'giphy',
         extraData: const {
-          'original':
-              'https://giphy.com/gifs/nrkp3-dance-happy-3o7TKnCdBx5cMg0qti',
+          'original': 'https://giphy.com/gifs/nrkp3-dance-happy-3o7TKnCdBx5cMg0qti',
         },
       );
 
       final attachmentHandler = MockAttachmentHandler();
 
-      when(() => attachmentHandler.downloadAttachment(attachment))
-          .thenAnswer((invocation) async => 'filePath');
+      when(() => attachmentHandler.downloadAttachment(attachment)).thenAnswer((invocation) async => 'filePath');
 
       expect(
         await attachmentHandler.downloadAttachment(attachment),
@@ -56,8 +53,7 @@ void main() {
 
       final attachmentHandler = MockAttachmentHandler();
 
-      when(() => attachmentHandler.downloadAttachment(attachment))
-          .thenAnswer((invocation) async => 'filePath');
+      when(() => attachmentHandler.downloadAttachment(attachment)).thenAnswer((invocation) async => 'filePath');
 
       expect(
         await attachmentHandler.downloadAttachment(attachment),

@@ -1,19 +1,69 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/misc/giphy_chip.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// {@template streamGiphyAttachment}
-/// Shows a GIF attachment in a [StreamMessageWidget].
-/// {@endtemplate}
+/// A Giphy GIF attachment component with automatic sizing.
+///
+/// [StreamGiphyAttachment] displays a Giphy GIF attachment, automatically
+/// sized based on the GIF's metadata dimensions.
+///
+/// {@tool snippet}
+///
+/// Basic usage:
+///
+/// ```dart
+/// StreamGiphyAttachment(
+///   message: message,
+///   giphy: giphyAttachment,
+/// )
+/// ```
+/// {@end-tool}
+///
+/// See also:
+///
+///  * [StreamGiphyAttachmentProps], which configures this widget.
+///  * [DefaultStreamGiphyAttachment], the default implementation.
 class StreamGiphyAttachment extends StatelessWidget {
-  /// {@macro streamGiphyAttachment}
-  const StreamGiphyAttachment({
+  /// Creates a [StreamGiphyAttachment].
+  StreamGiphyAttachment({
     super.key,
+    required Message message,
+    required Attachment giphy,
+    GiphyInfoType type = GiphyInfoType.original,
+    BoxConstraints? constraints,
+  }) : props = .new(
+         message: message,
+         giphy: giphy,
+         type: type,
+         constraints: constraints,
+       );
+
+  /// The properties that configure this attachment.
+  final StreamGiphyAttachmentProps props;
+
+  @override
+  Widget build(BuildContext context) {
+    final builder = context.chatComponentBuilder<StreamGiphyAttachmentProps>();
+    if (builder != null) return builder(context, props);
+    return DefaultStreamGiphyAttachment(props: props);
+  }
+}
+
+/// Properties for configuring a [StreamGiphyAttachment].
+///
+/// This class holds all the configuration options for a giphy attachment,
+/// allowing them to be passed through the [StreamComponentFactory].
+///
+/// See also:
+///
+///  * [StreamGiphyAttachment], which uses these properties.
+///  * [DefaultStreamGiphyAttachment], the default implementation.
+class StreamGiphyAttachmentProps {
+  /// Creates properties for a giphy attachment.
+  const StreamGiphyAttachmentProps({
     required this.message,
     required this.giphy,
     this.type = GiphyInfoType.original,
-    this.shape,
-    this.constraints = const BoxConstraints(),
+    this.constraints,
   });
 
   /// The [Message] that the giphy is attached to.
@@ -24,21 +74,42 @@ class StreamGiphyAttachment extends StatelessWidget {
 
   /// The type of giphy to display.
   ///
-  /// Defaults to [GiphyInfoType.fixedHeight].
+  /// Defaults to [GiphyInfoType.original].
   final GiphyInfoType type;
 
-  /// The shape of the attachment.
-  ///
-  /// Defaults to [RoundedRectangleBorder] with a radius of 14.
-  final ShapeBorder? shape;
-
   /// The constraints to use when displaying the giphy.
-  final BoxConstraints constraints;
+  final BoxConstraints? constraints;
+}
+
+const _kDefaultConstraints = BoxConstraints(
+  minWidth: 170,
+  maxWidth: 256,
+  minHeight: 100,
+  maxHeight: 300,
+);
+
+/// The default implementation of [StreamGiphyAttachment].
+///
+/// Renders the GIF thumbnail with upload progress indication.
+///
+/// See also:
+///
+///  * [StreamGiphyAttachment], the public API widget.
+///  * [StreamGiphyAttachmentProps], which configures this widget.
+class DefaultStreamGiphyAttachment extends StatelessWidget {
+  /// Creates a default Stream giphy attachment.
+  const DefaultStreamGiphyAttachment({
+    super.key,
+    required this.props,
+  });
+
+  /// The properties that configure this attachment.
+  final StreamGiphyAttachmentProps props;
 
   @override
   Widget build(BuildContext context) {
     BoxFit? fit;
-    final giphyInfo = giphy.giphyInfo(type);
+    final giphyInfo = props.giphy.giphyInfo(props.type);
 
     Size? giphySize;
     if (giphyInfo != null) {
@@ -47,7 +118,7 @@ class StreamGiphyAttachment extends StatelessWidget {
 
     // If attachment size is available, we will tighten the constraints max
     // size to the attachment size.
-    var constraints = this.constraints;
+    var constraints = props.constraints ?? _kDefaultConstraints;
     if (giphySize != null) {
       constraints = constraints.tightenMaxSize(giphySize);
     } else {
@@ -56,47 +127,24 @@ class StreamGiphyAttachment extends StatelessWidget {
       fit = BoxFit.cover;
     }
 
-    final chatTheme = StreamChatTheme.of(context);
-    final colorTheme = chatTheme.colorTheme;
-    final shape = this.shape ??
-        RoundedRectangleBorder(
-          side: BorderSide(
-            color: colorTheme.borders,
-            strokeAlign: BorderSide.strokeAlignOutside,
-          ),
-          borderRadius: BorderRadius.circular(14),
-        );
-
-    return Container(
+    return ConstrainedBox(
       constraints: constraints,
-      clipBehavior: Clip.hardEdge,
-      decoration: ShapeDecoration(shape: shape),
       child: AspectRatio(
         aspectRatio: giphySize?.aspectRatio ?? 1,
         child: Stack(
-          alignment: Alignment.center,
+          fit: .expand,
+          alignment: .center,
           children: [
             StreamGiphyAttachmentThumbnail(
-              type: type,
-              giphy: giphy,
+              type: props.type,
+              giphy: props.giphy,
               fit: fit,
-              width: double.infinity,
-              height: double.infinity,
             ),
-            if (giphy.uploadState.isSuccess)
-              const Positioned(
-                bottom: 8,
-                left: 8,
-                child: GiphyChip(),
-              )
-            else
-              Padding(
-                padding: const EdgeInsets.all(8),
-                child: StreamAttachmentUploadStateBuilder(
-                  message: message,
-                  attachment: giphy,
-                ),
-              ),
+            PositionedDirectional(
+              bottom: 8,
+              start: 8,
+              child: StreamImageSourceBadge.giphy,
+            ),
           ],
         ),
       ),

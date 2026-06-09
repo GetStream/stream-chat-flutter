@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:stream_chat_flutter/src/message_input/attachment_picker/options/stream_command_icon.dart';
 import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+
+// Caps the card height so a long command list scrolls internally
+// instead of pushing the composer / header off the screen.
+const _kMaxHeight = 208.0;
 
 /// {@template commands_overlay}
 /// Overlay for displaying commands that can be used
@@ -12,6 +17,7 @@ class StreamCommandAutocompleteOptions extends StatelessWidget {
     required this.query,
     required this.channel,
     this.onCommandSelected,
+    this.style = AutocompleteOptionsStyle.fixed,
     super.key,
   });
 
@@ -24,6 +30,11 @@ class StreamCommandAutocompleteOptions extends StatelessWidget {
   /// Callback called when a command is selected.
   final ValueSetter<Command>? onCommandSelected;
 
+  /// The visual style of the autocomplete options overlay.
+  ///
+  /// Defaults to [AutocompleteOptionsStyle.fixed].
+  final AutocompleteOptionsStyle style;
+
   @override
   Widget build(BuildContext context) {
     final commands = channel.config?.commands.where((it) {
@@ -34,25 +45,30 @@ class StreamCommandAutocompleteOptions extends StatelessWidget {
 
     if (commands == null || commands.isEmpty) return const Empty();
 
-    final streamChatTheme = StreamChatTheme.of(context);
-    final colorTheme = streamChatTheme.colorTheme;
-    final textTheme = streamChatTheme.textTheme;
+    final colorScheme = context.streamColorScheme;
+    final textTheme = context.streamTextTheme;
+
+    final (:elevation, :margin, :shape) = style.resolve(colorScheme.borderDefault);
 
     return StreamAutocompleteOptions<Command>(
       options: commands,
+      maxHeight: _kMaxHeight,
+      elevation: elevation,
+      margin: margin,
+      shape: shape,
       headerBuilder: (context) {
-        return ListTile(
-          dense: true,
-          horizontalTitleGap: 0,
-          leading: StreamSvgIcon(
-            icon: StreamSvgIcons.lightning,
-            color: colorTheme.accentPrimary,
-            size: 28,
+        return Padding(
+          padding: EdgeInsets.only(
+            left: context.streamSpacing.sm,
+            right: context.streamSpacing.sm,
+            top: context.streamSpacing.md,
+            bottom: context.streamSpacing.xs,
           ),
-          title: Text(
-            context.translations.instantCommandsLabel,
-            style: textTheme.body.copyWith(
-              color: colorTheme.textLowEmphasis,
+          child: Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: Text(
+              context.translations.instantCommandsLabel,
+              style: textTheme.headingXs.copyWith(color: colorScheme.textTertiary),
             ),
           ),
         );
@@ -60,122 +76,28 @@ class StreamCommandAutocompleteOptions extends StatelessWidget {
       optionBuilder: (context, command) {
         return ListTile(
           dense: true,
-          horizontalTitleGap: 8,
-          leading: _CommandIcon(command: command),
-          title: Row(
+          horizontalTitleGap: context.streamSpacing.sm,
+          leading: StreamCommandIcon(command: command),
+          title: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                command.name.capitalize(),
-                style: textTheme.bodyBold.copyWith(
-                  color: colorTheme.textHighEmphasis,
-                ),
+                command.name.sentenceCase,
+                style: textTheme.bodyDefault,
               ),
-              const SizedBox(width: 8),
+              SizedBox(height: context.streamSpacing.xxs),
               Text(
-                '/${command.name} ${command.args}',
-                style: textTheme.body.copyWith(
-                  color: colorTheme.textLowEmphasis,
+                command.description,
+                style: textTheme.captionDefault.copyWith(
+                  color: colorScheme.textTertiary,
                 ),
               ),
             ],
           ),
-          onTap: onCommandSelected == null
-              ? null
-              : () => onCommandSelected!(command),
+          onTap: onCommandSelected == null ? null : () => onCommandSelected!(command),
         );
       },
     );
-  }
-}
-
-class _CommandIcon extends StatelessWidget {
-  const _CommandIcon({required this.command});
-
-  final Command command;
-
-  @override
-  Widget build(BuildContext context) {
-    final _streamChatTheme = StreamChatTheme.of(context);
-    switch (command.name) {
-      case 'giphy':
-        return const CircleAvatar(
-          radius: 12,
-          child: StreamSvgIcon(
-            size: 24,
-            icon: StreamSvgIcons.giphy,
-          ),
-        );
-      case 'ban':
-        return CircleAvatar(
-          backgroundColor: _streamChatTheme.colorTheme.accentPrimary,
-          radius: 12,
-          child: const StreamSvgIcon(
-            size: 16,
-            color: Colors.white,
-            icon: StreamSvgIcons.userRemove,
-          ),
-        );
-      case 'flag':
-        return CircleAvatar(
-          backgroundColor: _streamChatTheme.colorTheme.accentPrimary,
-          radius: 12,
-          child: const StreamSvgIcon(
-            size: 14,
-            color: Colors.white,
-            icon: StreamSvgIcons.flag,
-          ),
-        );
-      case 'imgur':
-        return CircleAvatar(
-          backgroundColor: _streamChatTheme.colorTheme.accentPrimary,
-          radius: 12,
-          child: const ClipOval(
-            child: StreamSvgIcon(
-              size: 24,
-              icon: StreamSvgIcons.imgur,
-            ),
-          ),
-        );
-      case 'mute':
-        return CircleAvatar(
-          backgroundColor: _streamChatTheme.colorTheme.accentPrimary,
-          radius: 12,
-          child: const StreamSvgIcon(
-            size: 16,
-            color: Colors.white,
-            icon: StreamSvgIcons.mute,
-          ),
-        );
-      case 'unban':
-        return CircleAvatar(
-          backgroundColor: _streamChatTheme.colorTheme.accentPrimary,
-          radius: 12,
-          child: const StreamSvgIcon(
-            size: 16,
-            color: Colors.white,
-            icon: StreamSvgIcons.userAdd,
-          ),
-        );
-      case 'unmute':
-        return CircleAvatar(
-          backgroundColor: _streamChatTheme.colorTheme.accentPrimary,
-          radius: 12,
-          child: const StreamSvgIcon(
-            size: 16,
-            color: Colors.white,
-            icon: StreamSvgIcons.volumeUp,
-          ),
-        );
-      default:
-        return CircleAvatar(
-          backgroundColor: _streamChatTheme.colorTheme.accentPrimary,
-          radius: 12,
-          child: const StreamSvgIcon(
-            size: 16,
-            color: Colors.white,
-            icon: StreamSvgIcons.lightning,
-          ),
-        );
-    }
   }
 }

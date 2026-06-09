@@ -2,20 +2,19 @@
 
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app_badger/flutter_app_badger.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sample_app/auth/auth_controller.dart';
+import 'package:sample_app/config/sample_app_config.dart';
+import 'package:sample_app/config/sample_app_config_screen.dart';
 import 'package:sample_app/pages/draft_list_page.dart';
 import 'package:sample_app/pages/reminders_page.dart';
 import 'package:sample_app/pages/thread_list_page.dart';
-import 'package:sample_app/pages/user_mentions_page.dart';
 import 'package:sample_app/routes/routes.dart';
-import 'package:sample_app/utils/localizations.dart';
+import 'package:sample_app/utils/shared_location_service.dart';
 import 'package:sample_app/widgets/channel_list.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-import 'package:streaming_shared_preferences/streaming_shared_preferences.dart';
 
 class ChannelListPage extends StatefulWidget {
   const ChannelListPage({
@@ -29,121 +28,89 @@ class ChannelListPage extends StatefulWidget {
 class _ChannelListPageState extends State<ChannelListPage> {
   int _currentIndex = 0;
 
-  bool _isSelected(int index) => _currentIndex == index;
-
-  List<BottomNavigationBarItem> get _navBarItems {
-    return <BottomNavigationBarItem>[
-      BottomNavigationBarItem(
-        icon: Stack(
-          clipBehavior: Clip.none,
-          children: [
-            StreamSvgIcon(
-              icon: StreamSvgIcons.message,
-              color: _isSelected(0)
-                  ? StreamChatTheme.of(context).colorTheme.textHighEmphasis
-                  : Colors.grey,
-            ),
-            PositionedDirectional(
-              top: -4,
-              start: 12,
-              child: StreamUnreadIndicator(),
-            ),
-          ],
-        ),
-        label: AppLocalizations.of(context).chats,
-      ),
-      BottomNavigationBarItem(
-        icon: StreamSvgIcon(
-          icon: StreamSvgIcons.mentions,
-          color: _isSelected(1)
-              ? StreamChatTheme.of(context).colorTheme.textHighEmphasis
-              : Colors.grey,
-        ),
-        label: AppLocalizations.of(context).mentions,
-      ),
-      BottomNavigationBarItem(
-        icon: Stack(
-          clipBehavior: Clip.none,
-          children: [
-            Icon(
-              Icons.message_outlined,
-              color: _isSelected(2)
-                  ? StreamChatTheme.of(context).colorTheme.textHighEmphasis
-                  : Colors.grey,
-            ),
-            PositionedDirectional(
-              top: -4,
-              start: 12,
-              child: StreamUnreadIndicator.threads(),
-            ),
-          ],
-        ),
-        label: 'Threads',
-      ),
-      BottomNavigationBarItem(
-        icon: Icon(
-          Icons.edit_note_rounded,
-          color: _isSelected(3)
-              ? StreamChatTheme.of(context).colorTheme.textHighEmphasis
-              : Colors.grey,
-        ),
-        label: 'Drafts',
-      ),
-      BottomNavigationBarItem(
-        icon: Icon(
-          Icons.bookmark_border_rounded,
-          color: _isSelected(4)
-              ? StreamChatTheme.of(context).colorTheme.textHighEmphasis
-              : Colors.grey,
-        ),
-        label: 'Reminders',
-      ),
-    ];
-  }
+  late final _locationService = SharedLocationService(
+    client: StreamChat.of(context).client,
+  );
 
   @override
   Widget build(BuildContext context) {
     final user = StreamChat.of(context).currentUser;
-    if (user == null) {
-      return const Offstage();
-    }
+    if (user == null) return const Offstage();
+
+    final icons = context.streamIcons;
+    final textTheme = context.streamTextTheme;
+    final colorScheme = context.streamColorScheme;
+
+    final config = context.sampleAppConfig;
+
+    final allTabs = <_TabDef>[
+      _TabDef(
+        icon: StreamUnreadIndicator(child: Icon(icons.messageBubble)),
+        selectedIcon: StreamUnreadIndicator(child: Icon(icons.messageBubbleFill)),
+        label: 'Chats',
+        page: const ChannelList(),
+      ),
+      _TabDef(
+        icon: StreamUnreadIndicator.threads(child: Icon(icons.thread)),
+        selectedIcon: StreamUnreadIndicator.threads(child: Icon(icons.threadFill)),
+        label: 'Threads',
+        page: const ThreadListPage(),
+      ),
+      _TabDef(
+        icon: const Icon(Icons.drafts_outlined),
+        selectedIcon: const Icon(Icons.drafts_rounded),
+        label: 'Drafts',
+        page: const DraftListPage(),
+        enabled: config.draftMessagesEnabled,
+      ),
+      _TabDef(
+        icon: const Icon(Icons.bookmark_outline_rounded),
+        selectedIcon: const Icon(Icons.bookmark_rounded),
+        label: 'Reminders',
+        page: const RemindersPage(),
+        enabled: config.enableReminderActions,
+      ),
+    ];
+
+    final enabledTabs = allTabs.where((t) => t.enabled).toList();
+
     return Scaffold(
-      backgroundColor: StreamChatTheme.of(context).colorTheme.appBg,
+      backgroundColor: colorScheme.backgroundApp,
       appBar: StreamChannelListHeader(
-        onNewChatButtonTap: () {
-          GoRouter.of(context).pushNamed(Routes.NEW_CHAT.name);
-        },
-        preNavigationCallback: () =>
-            FocusScope.of(context).requestFocus(FocusNode()),
+        title: Text(enabledTabs[_currentIndex].label, style: textTheme.headingSm),
       ),
-      drawer: LeftDrawer(
-        user: user,
-      ),
-      drawerEdgeDragWidth: 50,
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: StreamChatTheme.of(context).colorTheme.barsBg,
-        currentIndex: _currentIndex,
-        items: _navBarItems,
-        selectedLabelStyle: StreamChatTheme.of(context).textTheme.footnoteBold,
-        unselectedLabelStyle:
-            StreamChatTheme.of(context).textTheme.footnoteBold,
-        type: BottomNavigationBarType.fixed,
-        selectedItemColor:
-            StreamChatTheme.of(context).colorTheme.textHighEmphasis,
-        unselectedItemColor: Colors.grey,
-        onTap: (index) {
-          setState(() => _currentIndex = index);
-        },
+      drawer: LeftDrawer(user: user),
+      bottomNavigationBar: DecoratedBox(
+        decoration: BoxDecoration(
+          color: colorScheme.backgroundElevation1,
+          border: Border(top: BorderSide(color: colorScheme.borderSubtle)),
+        ),
+        child: StreamBadgeNotificationTheme(
+          data: const .new(size: .xs),
+          child: BottomNavigationBar(
+            elevation: 0,
+            iconSize: 20,
+            currentIndex: _currentIndex,
+            type: BottomNavigationBarType.fixed,
+            selectedItemColor: colorScheme.textPrimary,
+            unselectedItemColor: colorScheme.textTertiary,
+            backgroundColor: Colors.transparent,
+            selectedLabelStyle: textTheme.metadataEmphasis,
+            unselectedLabelStyle: textTheme.metadataEmphasis,
+            onTap: (index) => setState(() => _currentIndex = index),
+            items: enabledTabs.map((tab) {
+              return BottomNavigationBarItem(
+                icon: tab.icon,
+                activeIcon: tab.selectedIcon,
+                label: tab.label,
+              );
+            }).toList(),
+          ),
+        ),
       ),
       body: IndexedStack(
         index: _currentIndex,
-        children: const [
-          ChannelList(),
-          UserMentionsPage(),
-          ThreadListPage(),
-          DraftListPage(),
-          RemindersPage(),
-        ],
+        children: [for (final tab in enabledTabs) tab.page],
       ),
     );
   }
@@ -152,12 +119,9 @@ class _ChannelListPageState extends State<ChannelListPage> {
 
   @override
   void initState() {
-    if (!kIsWeb) {
-      badgeListener = StreamChat.of(context)
-          .client
-          .state
-          .totalUnreadCountStream
-          .listen((count) {
+    super.initState();
+    if (!CurrentPlatform.isWeb) {
+      badgeListener = StreamChat.of(context).client.state.totalUnreadCountStream.listen((count) {
         if (count > 0) {
           FlutterAppBadger.updateBadgeCount(count);
         } else {
@@ -165,14 +129,32 @@ class _ChannelListPageState extends State<ChannelListPage> {
         }
       });
     }
-    super.initState();
+
+    _locationService.initialize();
   }
 
   @override
   void dispose() {
     badgeListener?.cancel();
+    _locationService.dispose();
     super.dispose();
   }
+}
+
+class _TabDef {
+  const _TabDef({
+    required this.icon,
+    required this.selectedIcon,
+    required this.label,
+    required this.page,
+    this.enabled = true,
+  });
+
+  final Widget icon;
+  final Widget selectedIcon;
+  final String label;
+  final Widget page;
+  final bool enabled;
 }
 
 class LeftDrawer extends StatelessWidget {
@@ -185,131 +167,138 @@ class LeftDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = context.streamColorScheme;
+    final textTheme = context.streamTextTheme;
+    final icons = context.streamIcons;
+    final spacing = context.streamSpacing;
+    final config = context.sampleAppConfig;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Drawer(
-      child: ColoredBox(
-        color: StreamChatTheme.of(context).colorTheme.barsBg,
-        child: SafeArea(
-          child: Padding(
-            padding: EdgeInsets.only(
-              top: MediaQuery.of(context).viewPadding.top + 8,
+      shape: const RoundedRectangleBorder(),
+      backgroundColor: colorScheme.backgroundElevation1,
+      child: SafeArea(
+        child: Column(
+          children: [
+            SizedBox(height: spacing.lg),
+
+            // ── Profile header ──
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: spacing.lg),
+              child: Column(
+                children: [
+                  StreamUserAvatar(size: .xxl, user: user, showOnlineIndicator: false),
+                  SizedBox(height: spacing.sm),
+                  Text(
+                    user.name,
+                    style: textTheme.headingMd.copyWith(color: colorScheme.textPrimary),
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
+                  ),
+                  SizedBox(height: spacing.xxxs),
+                  Text(
+                    '@${user.id}',
+                    style: textTheme.captionDefault.copyWith(color: colorScheme.textTertiary),
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
             ),
-            child: Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(
-                    bottom: 20,
-                    left: 8,
+
+            SizedBox(height: spacing.lg),
+            Divider(height: 1, indent: spacing.md, endIndent: spacing.md, color: colorScheme.borderSubtle),
+            SizedBox(height: spacing.sm),
+
+            // ── Navigation actions ──
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: spacing.xs),
+              child: Column(
+                children: [
+                  StreamListTile(
+                    contentPadding: EdgeInsets.symmetric(horizontal: spacing.sm, vertical: spacing.xxxs),
+                    leading: Icon(icons.edit, size: 24),
+                    title: const Text('New direct message'),
+                    onTap: () {
+                      Navigator.of(context).pop();
+                      GoRouter.of(context).pushNamed(Routes.NEW_CHAT.name);
+                    },
                   ),
-                  child: Row(
-                    children: [
-                      StreamUserAvatar(
-                        user: user,
-                        showOnlineStatus: false,
-                        constraints:
-                            BoxConstraints.tight(const Size.fromRadius(20)),
+                  StreamListTile(
+                    contentPadding: EdgeInsets.symmetric(horizontal: spacing.sm, vertical: spacing.xxxs),
+                    leading: Icon(icons.users, size: 24),
+                    title: const Text('New group'),
+                    onTap: () {
+                      Navigator.of(context).pop();
+                      GoRouter.of(context).pushNamed(Routes.NEW_GROUP_CHAT.name);
+                    },
+                  ),
+                ],
+              ),
+            ),
+
+            SizedBox(height: spacing.xs),
+            Divider(height: 1, indent: spacing.md, endIndent: spacing.md, color: colorScheme.borderSubtle),
+            SizedBox(height: spacing.xs),
+
+            // ── Configuration ──
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: spacing.xs),
+              child: StreamListTile(
+                contentPadding: EdgeInsets.symmetric(horizontal: spacing.sm, vertical: spacing.xxxs),
+                leading: const Icon(Icons.tune_outlined, size: 24),
+                title: const Text('Configuration'),
+                trailing: Icon(Icons.chevron_right_outlined, size: 20, color: colorScheme.textTertiary),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  Navigator.of(context).push(
+                    MaterialPageRoute<void>(builder: (_) => const SampleAppConfigScreen()),
+                  );
+                },
+              ),
+            ),
+
+            const Spacer(),
+
+            // ── Bottom actions ──
+            Divider(height: 1, indent: spacing.md, endIndent: spacing.md, color: colorScheme.borderSubtle),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: spacing.xs),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: StreamListTile(
+                      contentPadding: EdgeInsets.symmetric(horizontal: spacing.sm, vertical: spacing.xxxs),
+                      leading: Icon(icons.leave, size: 24, color: colorScheme.accentError),
+                      title: Text(
+                        'Sign out',
+                        style: textTheme.bodyDefault.copyWith(color: colorScheme.accentError),
                       ),
-                      Padding(
-                        padding: const EdgeInsets.only(left: 16),
-                        child: Text(
-                          user.name,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                ListTile(
-                  leading: StreamSvgIcon(
-                    icon: StreamSvgIcons.penWrite,
-                    color: StreamChatTheme.of(context)
-                        .colorTheme
-                        .textHighEmphasis
-                        .withOpacity(.5),
-                  ),
-                  onTap: () {
-                    Navigator.of(context).pop();
-                    GoRouter.of(context).pushNamed(Routes.NEW_CHAT.name);
-                  },
-                  title: Text(
-                    AppLocalizations.of(context).newDirectMessage,
-                    style: const TextStyle(
-                      fontSize: 14.5,
-                    ),
-                  ),
-                ),
-                ListTile(
-                  leading: StreamSvgIcon(
-                    color: StreamChatTheme.of(context)
-                        .colorTheme
-                        .textHighEmphasis
-                        .withOpacity(.5),
-                    icon: StreamSvgIcons.contacts,
-                  ),
-                  onTap: () {
-                    Navigator.of(context).pop();
-                    GoRouter.of(context).pushNamed(Routes.NEW_GROUP_CHAT.name);
-                  },
-                  title: Text(
-                    AppLocalizations.of(context).newGroup,
-                    style: const TextStyle(
-                      fontSize: 14.5,
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: Container(
-                    alignment: Alignment.bottomCenter,
-                    child: ListTile(
+                      titleTextStyle: textTheme.bodyDefault.copyWith(color: colorScheme.accentError),
                       onTap: () async {
-                        final client = StreamChat.of(context).client;
                         final router = GoRouter.of(context);
-
-                        if (!kIsWeb) {
-                          const secureStorage = FlutterSecureStorage();
-                          await secureStorage.deleteAll();
-                        }
-
-                        await client.disconnectUser(flushChatPersistence: true);
-
+                        await authController.disconnect();
                         router.goNamed(Routes.CHOOSE_USER.name);
                       },
-                      leading: StreamSvgIcon(
-                        icon: StreamSvgIcons.user,
-                        color: StreamChatTheme.of(context)
-                            .colorTheme
-                            .textHighEmphasis
-                            .withOpacity(.5),
-                      ),
-                      title: Text(
-                        AppLocalizations.of(context).signOut,
-                        style: const TextStyle(
-                          fontSize: 14.5,
-                        ),
-                      ),
-                      trailing: IconButton(
-                        iconSize: 24,
-                        icon: const StreamSvgIcon(icon: StreamSvgIcons.moon),
-                        color: StreamChatTheme.of(context)
-                            .colorTheme
-                            .textLowEmphasis,
-                        onPressed: () async {
-                          final theme = Theme.of(context);
-                          final sp = await StreamingSharedPreferences.instance;
-                          sp.setInt(
-                            'theme',
-                            theme.brightness == Brightness.dark ? 1 : -1,
-                          );
-                        },
-                      ),
                     ),
                   ),
-                ),
-              ],
+                  IconButton(
+                    icon: Icon(
+                      isDark ? Icons.light_mode_outlined : Icons.dark_mode_outlined,
+                      color: colorScheme.textSecondary,
+                    ),
+                    onPressed: () {
+                      final newMode = isDark ? ThemeMode.light : ThemeMode.dark;
+                      SampleAppConfig.update(context, config.copyWith(themeMode: newMode));
+                    },
+                  ),
+                  SizedBox(width: spacing.xxs),
+                ],
+              ),
             ),
-          ),
+
+            SizedBox(height: spacing.md),
+          ],
         ),
       ),
     );

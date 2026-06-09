@@ -3,7 +3,7 @@ name: legacy_version_analyze
 env:
   # Note: The versions below should be manually updated after a new stable
   # version comes out.
-  flutter_version: "3.27.4"
+  flutter_version: "3.41.0"
 
 on:
   push:
@@ -65,7 +65,6 @@ jobs:
         with:
           flutter-version: ${{ env.flutter_version }}
           channel: stable
-          cache: true
           cache-key: flutter-:os:-:channel:-:version:-:arch:-:hash:-${{ hashFiles('**/pubspec.lock') }}
 
       - name: 📊 Analyze and test packages

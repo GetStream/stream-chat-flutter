@@ -1,8 +1,7 @@
 // Pins `StreamMessageListView`'s auto-scroll-on-new-message behaviour:
-// the listener subscribes to `channel.state.messagesStream` so it
-// triggers on optimistic local sends too (not just server-confirmed
-// `messageNew` events), and the SPL scroll math + listener timing must
-// not race with anchor preservation.
+// the listener must scroll to bottom only when the user is already
+// there or the message is their own, and the SPL math + listener
+// timing must not race with anchor preservation.
 
 import 'dart:async';
 
@@ -25,6 +24,11 @@ void main() {
   late StreamController<bool> isUpToDateController;
   late StreamController<int> unreadCountController;
   late StreamController<List<Message>> messagesController;
+  late StreamController<Event> messageNewController;
+
+  setUpAll(() {
+    registerFallbackValue(EventType.messageNew);
+  });
 
   setUp(() {
     client = MockClient();
@@ -32,41 +36,36 @@ void main() {
     when(() => client.state).thenAnswer((_) => clientState);
     ownUser = OwnUser(id: 'ownid');
     when(() => clientState.currentUser).thenReturn(ownUser);
-    when(() => clientState.currentUserStream)
-        .thenAnswer((_) => Stream.value(ownUser));
+    when(() => clientState.currentUserStream).thenAnswer((_) => Stream.value(ownUser));
 
     isUpToDateController = StreamController<bool>.broadcast();
     unreadCountController = StreamController<int>.broadcast();
     messagesController = StreamController<List<Message>>.broadcast();
+    // MockChannel.on filters this by event.type, so events pushed here
+    // surface to channel.on(EventType.messageNew) subscribers.
+    messageNewController = StreamController<Event>.broadcast();
     addTearDown(isUpToDateController.close);
     addTearDown(unreadCountController.close);
     addTearDown(messagesController.close);
+    addTearDown(messageNewController.close);
 
-    channel = MockChannel();
+    channel = MockChannel(eventStream: messageNewController.stream);
     channelClientState = MockChannelState();
     when(() => channel.client).thenReturn(client);
     when(() => channel.state).thenReturn(channelClientState);
 
-    when(() => channelClientState.threadsStream)
-        .thenAnswer((_) => const Stream.empty());
-    when(() => channelClientState.isUpToDateStream)
-        .thenAnswer((_) => isUpToDateController.stream);
-    when(() => channelClientState.unreadCountStream)
-        .thenAnswer((_) => unreadCountController.stream);
-    when(() => channelClientState.readStream)
-        .thenAnswer((_) => const Stream.empty());
+    when(() => channelClientState.threadsStream).thenAnswer((_) => const Stream.empty());
+    when(() => channelClientState.isUpToDateStream).thenAnswer((_) => isUpToDateController.stream);
+    when(() => channelClientState.unreadCountStream).thenAnswer((_) => unreadCountController.stream);
+    when(() => channelClientState.readStream).thenAnswer((_) => const Stream.empty());
     when(() => channelClientState.read).thenReturn([]);
-    when(() => channelClientState.membersStream)
-        .thenAnswer((_) => const Stream.empty());
+    when(() => channelClientState.membersStream).thenAnswer((_) => const Stream.empty());
     when(() => channelClientState.members).thenReturn([]);
     when(() => channelClientState.currentUserRead).thenReturn(null);
-    when(() => channelClientState.currentUserReadStream)
-        .thenAnswer((_) => const Stream.empty());
-    when(() => channelClientState.messagesStream)
-        .thenAnswer((_) => messagesController.stream);
+    when(() => channelClientState.currentUserReadStream).thenAnswer((_) => const Stream.empty());
+    when(() => channelClientState.messagesStream).thenAnswer((_) => messagesController.stream);
 
-    when(() => channel.markRead(messageId: any(named: 'messageId')))
-        .thenAnswer((_) async => EmptyResponse());
+    when(() => channel.markRead(messageId: any(named: 'messageId'))).thenAnswer((_) async => EmptyResponse());
   });
 
   Future<void> pumpMessageList(
@@ -86,7 +85,6 @@ void main() {
             bundle: rootBundle,
             child: StreamChat(
               client: client,
-              streamChatThemeData: StreamChatThemeData.light(),
               child: StreamChannel(
                 channel: channel,
                 child: const StreamMessageListView(),
@@ -103,10 +101,7 @@ void main() {
   }
 
   // Appends to the end because production state.messages is oldest-first.
-  // Mirrors what `state.updateMessage(...)` does for both optimistic local
-  // sends and server-confirmed `messageNew` events: it updates
-  // `channel.state.messages` and the stream emits the new list.
-  Future<void> deliverNewMessage(
+  Future<void> deliverMessageNew(
     WidgetTester tester, {
     required Message newMessage,
     required List<Message> existing,
@@ -115,20 +110,21 @@ void main() {
     when(() => channelClientState.messages).thenReturn(updated);
     await tester.runAsync(() async {
       messagesController.add(updated);
+      messageNewController.add(Event(type: EventType.messageNew, message: newMessage, cid: channel.cid));
       await tester.pumpAndSettle();
     });
   }
 
-  group('auto-scroll on new message', () {
+  group('auto-scroll on messageNew', () {
     testWidgets(
       'new message from another user while at bottom → renders at the bottom',
       (tester) async {
         final other = User(id: 'otherid');
-        final messages =
-            generateConversation(20, users: [other]).reversed.toList();
+        final messages = generateConversation(20, users: [other]).reversed.toList();
 
         await pumpMessageList(tester, messages: messages);
-        expect(find.byType(FloatingActionButton), findsNothing);
+
+        expect(find.byType(StreamButton), findsNothing);
 
         final newMessage = Message(
           id: 'new-msg-other',
@@ -136,11 +132,11 @@ void main() {
           user: other,
           createdAt: DateTime.now(),
         );
-        await deliverNewMessage(tester,
-            newMessage: newMessage, existing: messages);
+
+        await deliverMessageNew(tester, newMessage: newMessage, existing: messages);
 
         expect(find.text(newMessage.text!), findsOneWidget);
-        expect(find.byType(FloatingActionButton), findsNothing);
+        expect(find.byType(StreamButton), findsNothing);
       },
     );
 
@@ -148,15 +144,13 @@ void main() {
       'new message from another user while scrolled up → does NOT auto-scroll',
       (tester) async {
         final other = User(id: 'otherid');
-        final messages =
-            generateConversation(40, users: [other]).reversed.toList();
+        final messages = generateConversation(40, users: [other]).reversed.toList();
 
         await pumpMessageList(tester, messages: messages);
 
-        await tester.drag(
-            find.byType(StreamMessageListView), const Offset(0, 400));
+        await tester.drag(find.byType(StreamMessageListView), const Offset(0, 400));
         await tester.pumpAndSettle();
-        expect(find.byType(FloatingActionButton), findsOneWidget);
+        expect(find.byType(StreamButton), findsOneWidget);
 
         final newMessage = Message(
           id: 'new-msg-other-while-scrolled-up',
@@ -164,10 +158,10 @@ void main() {
           user: other,
           createdAt: DateTime.now(),
         );
-        await deliverNewMessage(tester,
-            newMessage: newMessage, existing: messages);
 
-        expect(find.byType(FloatingActionButton), findsOneWidget);
+        await deliverMessageNew(tester, newMessage: newMessage, existing: messages);
+
+        expect(find.byType(StreamButton), findsOneWidget);
         expect(find.text(newMessage.text!), findsNothing);
       },
     );
@@ -176,15 +170,13 @@ void main() {
       'own message while scrolled up → DOES auto-scroll to bottom',
       (tester) async {
         final other = User(id: 'otherid');
-        final messages =
-            generateConversation(40, users: [other]).reversed.toList();
+        final messages = generateConversation(40, users: [other]).reversed.toList();
 
         await pumpMessageList(tester, messages: messages);
 
-        await tester.drag(
-            find.byType(StreamMessageListView), const Offset(0, 400));
+        await tester.drag(find.byType(StreamMessageListView), const Offset(0, 400));
         await tester.pumpAndSettle();
-        expect(find.byType(FloatingActionButton), findsOneWidget);
+        expect(find.byType(StreamButton), findsOneWidget);
 
         final ownMessage = Message(
           id: 'new-msg-own',
@@ -192,159 +184,111 @@ void main() {
           user: ownUser,
           createdAt: DateTime.now(),
         );
-        await deliverNewMessage(tester,
-            newMessage: ownMessage, existing: messages);
+
+        await deliverMessageNew(tester, newMessage: ownMessage, existing: messages);
 
         expect(find.text(ownMessage.text!), findsOneWidget);
-        expect(find.byType(FloatingActionButton), findsNothing);
+        expect(find.byType(StreamButton), findsNothing);
       },
     );
 
-    // The whole point of this listener change: the user's outgoing
-    // message hits state via `state.updateMessage(...)` before the
-    // server confirms (no `messageNew` event yet). Subscribing to the
-    // messages stream covers that path.
+    // Single `pump()` captures the frame after the new-messages rebuild
+    // but before any post-frame follow-up runs. Fails loudly if the
+    // listener ever stops clearing SPL's anchor key synchronously and
+    // anchor preservation re-pins the layout.
     testWidgets(
-      'optimistic local message → auto-scrolls before server confirmation',
+      'messageNew while at bottom → previously-bottom message does not shift in frame N',
       (tester) async {
         final other = User(id: 'otherid');
-        final messages =
-            generateConversation(20, users: [other]).reversed.toList();
-
-        await pumpMessageList(tester, messages: messages);
-        expect(find.byType(FloatingActionButton), findsNothing);
-
-        final ownLocalMessage = Message(
-          id: 'optimistic-local',
-          text: 'Sending…',
-          user: ownUser,
-          localCreatedAt: DateTime.now(),
-          state: MessageState.sending,
-        );
-        await deliverNewMessage(tester,
-            newMessage: ownLocalMessage, existing: messages);
-
-        expect(find.text(ownLocalMessage.text!), findsOneWidget);
-        expect(find.byType(FloatingActionButton), findsNothing);
-      },
-    );
-
-    // Same message id with different createdAt (local→server confirm,
-    // failed→retry, edit, reaction…) must NOT re-trigger auto-scroll.
-    // After the first fire we scroll up, then the server confirms the
-    // same id with a different createdAt — the user must stay scrolled
-    // up.
-    testWidgets(
-      'server confirmation of optimistic message → does NOT scroll twice',
-      (tester) async {
-        final other = User(id: 'otherid');
-        final messages =
-            generateConversation(40, users: [other]).reversed.toList();
+        final messages = generateConversation(20, users: [other]).reversed.toList();
+        final originallyAtBottom = messages.last;
 
         await pumpMessageList(tester, messages: messages);
 
-        final localCreatedAt = DateTime.now();
-        final ownLocalMessage = Message(
-          id: 'optimistic-confirm-probe',
-          text: 'Hello',
-          user: ownUser,
-          localCreatedAt: localCreatedAt,
-          state: MessageState.sending,
-        );
-        await deliverNewMessage(tester,
-            newMessage: ownLocalMessage, existing: messages);
-        expect(find.text(ownLocalMessage.text!), findsOneWidget);
+        final rectBefore = tester.getRect(find.text(originallyAtBottom.text!));
 
-        // User scrolls away from the bottom while the server is round-tripping.
-        await tester.drag(
-            find.byType(StreamMessageListView), const Offset(0, 400));
-        await tester.pumpAndSettle();
-        expect(find.byType(FloatingActionButton), findsOneWidget);
-
-        // Server confirms: same id, different createdAt (server clock).
-        final confirmedMessage = ownLocalMessage.copyWith(
-          createdAt: localCreatedAt.add(const Duration(milliseconds: 250)),
-          state: MessageState.sent,
-        );
-        final updated = [...messages, confirmedMessage];
-        when(() => channelClientState.messages).thenReturn(updated);
-        await tester.runAsync(() async {
-          messagesController.add(updated);
-          await tester.pumpAndSettle();
-        });
-
-        // Listener must NOT fire on the confirmation: user stays scrolled up.
-        expect(find.byType(FloatingActionButton), findsOneWidget);
-      },
-    );
-
-    // Pins listener teardown on dispose: cancelling subscriptions in
-    // dispose() must not throw, and a delivery after dispose must be a
-    // no-op (no exceptions on a stale subscription).
-    testWidgets(
-      'listener is torn down on widget dispose',
-      (tester) async {
-        final other = User(id: 'otherid');
-        final messages =
-            generateConversation(20, users: [other]).reversed.toList();
-
-        await pumpMessageList(tester, messages: messages);
-
-        // Replace with an empty widget tree — disposes the message list.
-        await tester.pumpWidget(const SizedBox.shrink());
-
-        // Pushing after dispose must not throw.
-        final stale = Message(
-          id: 'after-dispose',
-          text: 'late arrival',
+        final newMessage = Message(
+          id: 'new-msg-shift-probe',
+          text: 'Shift probe',
           user: other,
           createdAt: DateTime.now(),
         );
-        final updated = [...messages, stale];
+        final updated = [...messages, newMessage];
         when(() => channelClientState.messages).thenReturn(updated);
+
         await tester.runAsync(() async {
           messagesController.add(updated);
-          await tester.pumpAndSettle();
+          messageNewController.add(Event(type: EventType.messageNew, message: newMessage, cid: channel.cid));
+          await tester.pump();
         });
 
-        // No widget to render the new message; just ensure no exception.
-        expect(tester.takeException(), isNull);
+        expect(tester.getRect(find.text(originallyAtBottom.text!)), rectBefore);
+
+        await tester.pumpAndSettle();
+        expect(find.text(newMessage.text!), findsOneWidget);
       },
     );
 
-    // Real burst: emit 5 messages back-to-back in the same microtask
-    // cycle, settle once at the end. The previous version awaited
-    // `pumpAndSettle` between each emit, which means no two messages
-    // were ever in flight together — that's not a burst.
     testWidgets(
-      'rapid burst of messages while at bottom → final layout shows newest',
+      'messageNew while at bottom → scroll position does not flap',
       (tester) async {
         final other = User(id: 'otherid');
-        final messages =
-            generateConversation(20, users: [other]).reversed.toList();
+        final messages = generateConversation(20, users: [other]).reversed.toList();
 
         await pumpMessageList(tester, messages: messages);
-        expect(find.byType(FloatingActionButton), findsNothing);
 
-        var existing = messages;
-        late Message latest;
+        final scrollable = tester.state<ScrollableState>(find.byType(Scrollable).first);
+        final pixelsBefore = scrollable.position.pixels;
+
+        final newMessage = Message(
+          id: 'new-msg-pixels',
+          text: 'Position-flap probe',
+          user: other,
+          createdAt: DateTime.now(),
+        );
+        final updated = [...messages, newMessage];
+        when(() => channelClientState.messages).thenReturn(updated);
+
+        var maxExcursion = 0.0;
         await tester.runAsync(() async {
-          for (var i = 0; i < 5; i++) {
-            latest = Message(
-              id: 'burst-$i',
-              text: 'Burst message $i',
-              user: other,
-              createdAt: DateTime.now().add(Duration(milliseconds: i)),
-            );
-            existing = [...existing, latest];
-            when(() => channelClientState.messages).thenReturn(existing);
-            messagesController.add(existing);
+          messagesController.add(updated);
+          messageNewController.add(Event(type: EventType.messageNew, message: newMessage, cid: channel.cid));
+          for (var i = 0; i < 20; i++) {
+            await tester.pump(const Duration(milliseconds: 25));
+            final delta = (scrollable.position.pixels - pixelsBefore).abs();
+            if (delta > maxExcursion) maxExcursion = delta;
           }
           await tester.pumpAndSettle();
         });
 
+        expect(maxExcursion, 0.0);
+      },
+    );
+
+    testWidgets(
+      'rapid burst of messages while at bottom → final layout shows newest',
+      (tester) async {
+        final other = User(id: 'otherid');
+        final messages = generateConversation(20, users: [other]).reversed.toList();
+
+        await pumpMessageList(tester, messages: messages);
+        expect(find.byType(StreamButton), findsNothing);
+
+        var existing = messages;
+        late Message latest;
+        for (var i = 0; i < 5; i++) {
+          latest = Message(
+            id: 'burst-$i',
+            text: 'Burst message $i',
+            user: other,
+            createdAt: DateTime.now().add(Duration(milliseconds: i)),
+          );
+          await deliverMessageNew(tester, newMessage: latest, existing: existing);
+          existing = [...existing, latest];
+        }
+
         expect(find.text(latest.text!), findsOneWidget);
-        expect(find.byType(FloatingActionButton), findsNothing);
+        expect(find.byType(StreamButton), findsNothing);
       },
     );
   });
