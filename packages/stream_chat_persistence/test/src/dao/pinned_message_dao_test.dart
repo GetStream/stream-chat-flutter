@@ -392,8 +392,7 @@ void main() {
       expect(fetchedMessages.last.id, 'testMessageId${cid}24');
     });
 
-    test('greaterThan only trims messages from the start (exclusive)',
-        () async {
+    test('greaterThan only trims messages from the start (exclusive)', () async {
       await _prepareTestData(cid, count: 30);
 
       final fetchedMessages = await pinnedMessageDao.getMessagesByCid(
@@ -454,8 +453,7 @@ void main() {
       expect(fetchedMessages.last.id, 'testMessageId${cid}29');
     });
 
-    test('thread-reply id as cursor is a no-op (not visible in channel)',
-        () async {
+    test('thread-reply id as cursor is a no-op (not visible in channel)', () async {
       // `_prepareTestData` inserts thread replies with `parentId` set and
       // `showInChannel` left null — i.e. not visible in the channel query.
       // Passing such an id as a cursor must resolve to a no-op so the main
@@ -503,8 +501,7 @@ void main() {
       expect(fetchedMessages.last.id, 'testMessageId${cid}24');
     });
 
-    test('default limit + greaterThan returns first 10 after the pivot',
-        () async {
+    test('default limit + greaterThan returns first 10 after the pivot', () async {
       await _prepareTestData(cid, count: 30);
 
       final fetchedMessages = await pinnedMessageDao.getMessagesByCid(
@@ -551,8 +548,7 @@ void main() {
       expect(fetchedMessages.last.id, 'testMessageId${cid}29');
     });
 
-    test('default limit + lessThanOrEqual returns the pivot and 9 before',
-        () async {
+    test('default limit + lessThanOrEqual returns the pivot and 9 before', () async {
       await _prepareTestData(cid, count: 30);
 
       final fetchedMessages = await pinnedMessageDao.getMessagesByCid(
@@ -567,8 +563,7 @@ void main() {
       expect(fetchedMessages.last.id, 'testMessageId${cid}25');
     });
 
-    test('default limit + greaterThanOrEqual returns the pivot and 9 after',
-        () async {
+    test('default limit + greaterThanOrEqual returns the pivot and 9 after', () async {
       await _prepareTestData(cid, count: 30);
 
       final fetchedMessages = await pinnedMessageDao.getMessagesByCid(
@@ -583,8 +578,7 @@ void main() {
       expect(fetchedMessages.last.id, 'testMessageId${cid}14');
     });
 
-    test('cursor with tied createdAt does not skip or duplicate siblings',
-        () async {
+    test('cursor with tied createdAt does not skip or duplicate siblings', () async {
       // Three messages share an identical `createdAt`. The SQL ORDER BY uses
       // the `(createdAt, id)` tuple, so within the trio the relative order is
       // by id (lexicographic). A cursor at `msg_tieB` must split the trio
@@ -600,12 +594,12 @@ void main() {
       final later = tie.add(const Duration(seconds: 1));
 
       Message m(String id, DateTime t) => Message(
-            id: id,
-            user: users.first,
-            createdAt: t,
-            updatedAt: t,
-            text: id,
-          );
+        id: id,
+        user: users.first,
+        createdAt: t,
+        updatedAt: t,
+        text: id,
+      );
 
       await pinnedMessageDao.updateMessages(cid, [
         m('msg_pre', earlier),
@@ -1227,6 +1221,57 @@ void main() {
       expect(quoting.quotedMessage!.sharedLocation!.latitude, 1);
       expect(quoting.quotedMessage!.sharedLocation!.longitude, 2);
     });
+
+    test('getMessagesByCid hydrates reactions under pagination', () async {
+      await _seedChannel(cid);
+      final dbUser = User(id: 'testUserId');
+      await database.userDao.updateUsers([dbUser]);
+
+      final baseTime = DateTime.now();
+      final messages = List.generate(
+        30,
+        (i) => Message(
+          id: 'p-msg-$i',
+          user: dbUser,
+          text: 'msg $i',
+          createdAt: baseTime.add(Duration(seconds: i)),
+        ),
+      );
+      await pinnedMessageDao.updateMessages(cid, messages);
+
+      // 2 reactions per message; surviving rows after pagination must still
+      // carry their full reaction set.
+      final reactions = [
+        for (final m in messages) ...[
+          Reaction(
+            type: 'r1',
+            messageId: m.id,
+            user: dbUser,
+            createdAt: m.createdAt,
+          ),
+          Reaction(
+            type: 'r2',
+            messageId: m.id,
+            user: dbUser,
+            createdAt: m.createdAt.add(const Duration(milliseconds: 1)),
+          ),
+        ],
+      ];
+      await database.pinnedMessageReactionDao.updateReactions(reactions);
+
+      final page = await pinnedMessageDao.getMessagesByCid(
+        cid,
+        messagePagination: const PaginationParams(
+          lessThan: 'p-msg-25',
+        ),
+      );
+      expect(page, hasLength(10));
+      for (final m in page) {
+        expect(m.latestReactions, hasLength(2));
+        expect(m.ownReactions, hasLength(2));
+        expect(m.latestReactions!.every((r) => r.messageId == m.id), isTrue);
+      }
+    });
   });
 
   group('deleteMessagesByUser', () {
@@ -1388,57 +1433,6 @@ void main() {
       for (final message in [...cid1UserMessagesAfter, ...cid2UserMessagesAfter]) {
         expect(message.type, 'deleted');
         expect(message.deletedAt, isNotNull);
-      }
-    });
-
-    test('getMessagesByCid hydrates reactions under pagination', () async {
-      await _seedChannel(cid);
-      final dbUser = User(id: 'testUserId');
-      await database.userDao.updateUsers([dbUser]);
-
-      final baseTime = DateTime.now();
-      final messages = List.generate(
-        30,
-        (i) => Message(
-          id: 'p-msg-$i',
-          user: dbUser,
-          text: 'msg $i',
-          createdAt: baseTime.add(Duration(seconds: i)),
-        ),
-      );
-      await pinnedMessageDao.updateMessages(cid, messages);
-
-      // 2 reactions per message; surviving rows after pagination must still
-      // carry their full reaction set.
-      final reactions = [
-        for (final m in messages) ...[
-          Reaction(
-            type: 'r1',
-            messageId: m.id,
-            user: dbUser,
-            createdAt: m.createdAt,
-          ),
-          Reaction(
-            type: 'r2',
-            messageId: m.id,
-            user: dbUser,
-            createdAt: m.createdAt.add(const Duration(milliseconds: 1)),
-          ),
-        ],
-      ];
-      await database.pinnedMessageReactionDao.updateReactions(reactions);
-
-      final page = await pinnedMessageDao.getMessagesByCid(
-        cid,
-        messagePagination: const PaginationParams(
-          lessThan: 'p-msg-25',
-        ),
-      );
-      expect(page, hasLength(10));
-      for (final m in page) {
-        expect(m.latestReactions, hasLength(2));
-        expect(m.ownReactions, hasLength(2));
-        expect(m.latestReactions!.every((r) => r.messageId == m.id), isTrue);
       }
     });
   });

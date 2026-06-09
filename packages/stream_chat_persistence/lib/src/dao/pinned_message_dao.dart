@@ -272,8 +272,8 @@ class PinnedMessageDao extends DatabaseAccessor<DriftChatDatabase> with _$Pinned
     // cursor is set). The final result is always reshaped to ASC for display.
     final isForwardPagination =
         (greaterThanCursor != null || greaterThanOrEqualCursor != null) &&
-            lessThanCursor == null &&
-            lessThanOrEqualCursor == null;
+        lessThanCursor == null &&
+        lessThanOrEqualCursor == null;
 
     final orderBy = isForwardPagination
         ? [
@@ -304,29 +304,25 @@ class PinnedMessageDao extends DatabaseAccessor<DriftChatDatabase> with _$Pinned
     if (lessThanCursor case final c?) {
       query.where(
         pinnedMessages.createdAt.isSmallerThanValue(c.createdAt) |
-            (pinnedMessages.createdAt.equals(c.createdAt) &
-                pinnedMessages.id.isSmallerThanValue(c.id)),
+            (pinnedMessages.createdAt.equals(c.createdAt) & pinnedMessages.id.isSmallerThanValue(c.id)),
       );
     }
     if (lessThanOrEqualCursor case final c?) {
       query.where(
         pinnedMessages.createdAt.isSmallerThanValue(c.createdAt) |
-            (pinnedMessages.createdAt.equals(c.createdAt) &
-                pinnedMessages.id.isSmallerOrEqualValue(c.id)),
+            (pinnedMessages.createdAt.equals(c.createdAt) & pinnedMessages.id.isSmallerOrEqualValue(c.id)),
       );
     }
     if (greaterThanCursor case final c?) {
       query.where(
         pinnedMessages.createdAt.isBiggerThanValue(c.createdAt) |
-            (pinnedMessages.createdAt.equals(c.createdAt) &
-                pinnedMessages.id.isBiggerThanValue(c.id)),
+            (pinnedMessages.createdAt.equals(c.createdAt) & pinnedMessages.id.isBiggerThanValue(c.id)),
       );
     }
     if (greaterThanOrEqualCursor case final c?) {
       query.where(
         pinnedMessages.createdAt.isBiggerThanValue(c.createdAt) |
-            (pinnedMessages.createdAt.equals(c.createdAt) &
-                pinnedMessages.id.isBiggerOrEqualValue(c.id)),
+            (pinnedMessages.createdAt.equals(c.createdAt) & pinnedMessages.id.isBiggerOrEqualValue(c.id)),
       );
     }
 
@@ -414,15 +410,15 @@ class PinnedMessageDao extends DatabaseAccessor<DriftChatDatabase> with _$Pinned
   /// `showInChannel = false`).
   Future<({DateTime createdAt, String id})?> _lookupCursor(String? id) async {
     if (id == null) return null;
-    final createdAt = await (selectOnly(pinnedMessages)
-          ..addColumns([pinnedMessages.createdAt])
-          ..where(pinnedMessages.id.equals(id))
-          ..where(
-            pinnedMessages.parentId.isNull() |
-                pinnedMessages.showInChannel.equals(true),
-          ))
-        .map((row) => row.read(pinnedMessages.createdAt))
-        .getSingleOrNull();
+    final createdAt =
+        await (selectOnly(pinnedMessages)
+              ..addColumns([pinnedMessages.createdAt])
+              ..where(pinnedMessages.id.equals(id))
+              ..where(
+                pinnedMessages.parentId.isNull() | pinnedMessages.showInChannel.equals(true),
+              ))
+            .map((row) => row.read(pinnedMessages.createdAt))
+            .getSingleOrNull();
     if (createdAt == null) return null;
     return (createdAt: createdAt, id: id);
   }
