@@ -35,7 +35,7 @@ class StreamUserMentionTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final chatThemeData = StreamChatTheme.of(context);
+    final colorScheme = context.streamColorScheme;
     return SizedBox(
       height: 56,
       child: Row(
@@ -43,11 +43,7 @@ class StreamUserMentionTile extends StatelessWidget {
           const SizedBox(
             width: 16,
           ),
-          leading ??
-              StreamUserAvatar(
-                user: user,
-                constraints: BoxConstraints.tight(const Size(40, 40)),
-              ),
+          leading ?? StreamUserAvatar(size: .lg, user: user),
           const SizedBox(width: 8),
           Expanded(
             child: Align(
@@ -61,7 +57,7 @@ class StreamUserMentionTile extends StatelessWidget {
                         user.name,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: chatThemeData.textTheme.bodyBold,
+                        style: context.streamTextTheme.bodyEmphasis,
                       ),
                   const SizedBox(height: 2),
                   subtitle ??
@@ -69,8 +65,8 @@ class StreamUserMentionTile extends StatelessWidget {
                         '@${user.id}',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: chatThemeData.textTheme.footnoteBold.copyWith(
-                          color: chatThemeData.colorTheme.textLowEmphasis,
+                        style: context.streamTextTheme.captionEmphasis.copyWith(
+                          color: colorScheme.textSecondary,
                         ),
                       ),
                 ],
@@ -83,9 +79,9 @@ class StreamUserMentionTile extends StatelessWidget {
                   right: 18,
                   left: 8,
                 ),
-                child: StreamSvgIcon(
-                  icon: StreamSvgIcons.mentions,
-                  color: chatThemeData.colorTheme.accentPrimary,
+                child: Icon(
+                  context.streamIcons.mention,
+                  color: colorScheme.accentPrimary,
                 ),
               ),
         ],

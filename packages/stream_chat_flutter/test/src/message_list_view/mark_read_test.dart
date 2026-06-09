@@ -43,12 +43,9 @@ void main() {
     when(() => client.state).thenAnswer((_) => clientState);
     final own = OwnUser(id: 'ownid');
     when(() => clientState.currentUser).thenReturn(own);
-    when(() => clientState.currentUserStream)
-        .thenAnswer((_) => Stream.value(own));
+    when(() => clientState.currentUserStream).thenAnswer((_) => Stream.value(own));
 
     channel = MockChannel();
-    when(() => channel.on(any(), any(), any(), any()))
-        .thenAnswer((_) => const Stream.empty());
     channelClientState = MockChannelState();
     when(() => channel.client).thenReturn(client);
     when(() => channel.state).thenReturn(channelClientState);
@@ -60,27 +57,19 @@ void main() {
     addTearDown(unreadCountController.close);
     addTearDown(messagesController.close);
 
-    when(() => channelClientState.threadsStream)
-        .thenAnswer((_) => const Stream.empty());
-    when(() => channelClientState.isUpToDateStream)
-        .thenAnswer((_) => isUpToDateController.stream);
-    when(() => channelClientState.unreadCountStream)
-        .thenAnswer((_) => unreadCountController.stream);
-    when(() => channelClientState.readStream)
-        .thenAnswer((_) => const Stream.empty());
+    when(() => channelClientState.threadsStream).thenAnswer((_) => const Stream.empty());
+    when(() => channelClientState.isUpToDateStream).thenAnswer((_) => isUpToDateController.stream);
+    when(() => channelClientState.unreadCountStream).thenAnswer((_) => unreadCountController.stream);
+    when(() => channelClientState.readStream).thenAnswer((_) => const Stream.empty());
     when(() => channelClientState.read).thenReturn([]);
-    when(() => channelClientState.membersStream)
-        .thenAnswer((_) => const Stream.empty());
+    when(() => channelClientState.membersStream).thenAnswer((_) => const Stream.empty());
     when(() => channelClientState.members).thenReturn([]);
     when(() => channelClientState.currentUserRead).thenReturn(null);
-    when(() => channelClientState.currentUserReadStream)
-        .thenAnswer((_) => const Stream.empty());
-    when(() => channelClientState.messagesStream)
-        .thenAnswer((_) => messagesController.stream);
+    when(() => channelClientState.currentUserReadStream).thenAnswer((_) => const Stream.empty());
+    when(() => channelClientState.messagesStream).thenAnswer((_) => messagesController.stream);
 
     // Mark-read mock returns immediately.
-    when(() => channel.markRead(messageId: any(named: 'messageId')))
-        .thenAnswer((_) async => EmptyResponse());
+    when(() => channel.markRead(messageId: any(named: 'messageId'))).thenAnswer((_) async => EmptyResponse());
   });
 
   Future<void> pumpMessageList(
@@ -101,11 +90,13 @@ void main() {
             bundle: rootBundle,
             child: StreamChat(
               client: client,
-              streamChatThemeData: StreamChatThemeData.light(),
+              themeData: StreamChatThemeData(),
               child: StreamChannel(
                 channel: channel,
                 child: StreamMessageListView(
-                  markReadWhenAtTheBottom: markReadWhenAtTheBottom,
+                  config: StreamMessageListViewConfiguration(
+                    markReadWhenAtTheBottom: markReadWhenAtTheBottom,
+                  ),
                 ),
               ),
             ),
@@ -135,8 +126,7 @@ void main() {
           unreadCount: 5,
         );
 
-        verify(() => channel.markRead(messageId: any(named: 'messageId')))
-            .called(1);
+        verify(() => channel.markRead(messageId: any(named: 'messageId'))).called(1);
       },
     );
 

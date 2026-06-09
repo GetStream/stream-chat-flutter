@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/indicators/loading_indicator.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template streamChatConfiguration}
@@ -18,21 +17,70 @@ class StreamChatConfiguration extends InheritedWidget {
   final StreamChatConfigurationData data;
 
   @override
-  bool updateShouldNotify(StreamChatConfiguration oldWidget) =>
-      data != oldWidget.data;
+  bool updateShouldNotify(StreamChatConfiguration oldWidget) => data != oldWidget.data;
 
-  /// Use this method to get the current [StreamChatThemeData] instance
+  /// Finds the [StreamChatConfigurationData] from the closest
+  /// [StreamChatConfiguration] ancestor that encloses the given context.
+  ///
+  /// This will throw a [FlutterError] if no [StreamChatConfiguration] is found
+  /// in the widget tree above the given context.
+  ///
+  /// Typical usage:
+  ///
+  /// ```dart
+  /// final config = StreamChatConfiguration.of(context);
+  /// ```
+  ///
+  /// If you're calling this in the same `build()` method that creates the
+  /// `StreamChatConfiguration`, consider using a `Builder` or refactoring into
+  /// a separate widget to obtain a context below the [StreamChatConfiguration].
+  ///
+  /// If you want to return null instead of throwing, use [maybeOf].
   static StreamChatConfigurationData of(BuildContext context) {
-    final streamChatConfiguration =
-        context.dependOnInheritedWidgetOfExactType<StreamChatConfiguration>();
+    final result = maybeOf(context);
+    if (result != null) return result;
 
-    assert(
-      streamChatConfiguration != null,
-      '''
-You must have a StreamChatConfigurationProvider widget at the top of your widget tree''',
-    );
+    throw FlutterError.fromParts(<DiagnosticsNode>[
+      ErrorSummary(
+        'StreamChatConfiguration.of() called with a context that does not '
+        'contain a StreamChatConfiguration.',
+      ),
+      ErrorDescription(
+        'No StreamChatConfiguration ancestor could be found starting from the '
+        'context that was passed to StreamChatConfiguration.of(). This usually '
+        'happens when the context used comes from the widget that creates the '
+        'StreamChatConfiguration itself.',
+      ),
+      ErrorHint(
+        'To fix this, ensure that you are using a context that is a descendant '
+        'of the StreamChatConfiguration. You can use a Builder to get a new '
+        'context that is under the StreamChatConfiguration:\n\n'
+        '  Builder(\n'
+        '    builder: (context) {\n'
+        '      final config = StreamChatConfiguration.of(context);\n'
+        '      ...\n'
+        '    },\n'
+        '  )',
+      ),
+      ErrorHint(
+        'Alternatively, split your build method into smaller widgets so that '
+        'you get a new BuildContext that is below the StreamChatConfiguration '
+        'in the widget tree.',
+      ),
+      context.describeElement('The context used was'),
+    ]);
+  }
 
-    return streamChatConfiguration!.data;
+  /// Finds the [StreamChatConfigurationData] from the closest
+  /// [StreamChatConfiguration] ancestor that encloses the given context.
+  ///
+  /// Returns null if no such ancestor exists.
+  ///
+  /// See also:
+  ///  * [of], which throws if no [StreamChatConfiguration] is found.
+  static StreamChatConfigurationData? maybeOf(BuildContext context) {
+    final streamChatConfiguration = context.dependOnInheritedWidgetOfExactType<StreamChatConfiguration>();
+    return streamChatConfiguration?.data;
   }
 }
 
@@ -109,57 +157,59 @@ You must have a StreamChatConfigurationProvider widget at the top of your widget
 class StreamChatConfigurationData {
   /// {@macro streamChatConfigurationData}
   factory StreamChatConfigurationData({
-    Widget loadingIndicator = const StreamLoadingIndicator(),
-    Widget Function(BuildContext, User)? defaultUserImage,
-    Widget Function(BuildContext, User)? placeholderUserImage,
-    List<StreamReactionIcon>? reactionIcons,
+    ReactionIconResolver? reactionIconResolver,
     bool? enforceUniqueReactions,
-    bool draftMessagesEnabled = false,
+    bool draftMessagesEnabled = true,
     MessagePreviewFormatter? messagePreviewFormatter,
+    StreamImageCDN imageCDN = const StreamImageCDN(),
+    List<StreamAttachmentWidgetBuilder>? attachmentBuilders,
+    StreamReactionsType? reactionType,
+    StreamReactionsPosition? reactionPosition,
   }) {
     return StreamChatConfigurationData._(
-      loadingIndicator: loadingIndicator,
-      defaultUserImage: defaultUserImage ?? _defaultUserImage,
-      placeholderUserImage: placeholderUserImage,
-      reactionIcons: reactionIcons ?? _defaultReactionIcons,
-      enforceUniqueReactions: enforceUniqueReactions ?? true,
+      reactionIconResolver: reactionIconResolver ?? const DefaultReactionIconResolver(),
+      enforceUniqueReactions: enforceUniqueReactions ?? false,
       draftMessagesEnabled: draftMessagesEnabled,
-      messagePreviewFormatter:
-          messagePreviewFormatter ?? MessagePreviewFormatter(),
+      messagePreviewFormatter: messagePreviewFormatter ?? MessagePreviewFormatter(),
+      imageCDN: imageCDN,
+      attachmentBuilders: attachmentBuilders,
+      reactionType: reactionType,
+      reactionPosition: reactionPosition,
     );
   }
 
-  StreamChatConfigurationData._({
-    required this.loadingIndicator,
-    required this.defaultUserImage,
-    required this.placeholderUserImage,
-    required this.reactionIcons,
+  const StreamChatConfigurationData._({
+    required this.reactionIconResolver,
     required this.enforceUniqueReactions,
     required this.draftMessagesEnabled,
     required this.messagePreviewFormatter,
+    required this.imageCDN,
+    required this.attachmentBuilders,
+    this.reactionType,
+    this.reactionPosition,
   });
 
   /// Copies the configuration options from one [StreamChatConfigurationData] to
   /// another.
   StreamChatConfigurationData copyWith({
-    Widget? loadingIndicator,
-    Widget Function(BuildContext, User)? defaultUserImage,
-    Widget Function(BuildContext, User)? placeholderUserImage,
-    List<StreamReactionIcon>? reactionIcons,
+    ReactionIconResolver? reactionIconResolver,
     bool? enforceUniqueReactions,
     bool? draftMessagesEnabled,
     MessagePreviewFormatter? messagePreviewFormatter,
+    StreamImageCDN? imageCDN,
+    List<StreamAttachmentWidgetBuilder>? attachmentBuilders,
+    StreamReactionsType? reactionType,
+    StreamReactionsPosition? reactionPosition,
   }) {
     return StreamChatConfigurationData(
-      reactionIcons: reactionIcons ?? this.reactionIcons,
-      defaultUserImage: defaultUserImage ?? this.defaultUserImage,
-      placeholderUserImage: placeholderUserImage ?? this.placeholderUserImage,
-      loadingIndicator: loadingIndicator ?? this.loadingIndicator,
-      enforceUniqueReactions:
-          enforceUniqueReactions ?? this.enforceUniqueReactions,
+      reactionIconResolver: reactionIconResolver ?? this.reactionIconResolver,
+      enforceUniqueReactions: enforceUniqueReactions ?? this.enforceUniqueReactions,
       draftMessagesEnabled: draftMessagesEnabled ?? this.draftMessagesEnabled,
-      messagePreviewFormatter:
-          messagePreviewFormatter ?? this.messagePreviewFormatter,
+      messagePreviewFormatter: messagePreviewFormatter ?? this.messagePreviewFormatter,
+      imageCDN: imageCDN ?? this.imageCDN,
+      attachmentBuilders: attachmentBuilders ?? this.attachmentBuilders,
+      reactionType: reactionType ?? this.reactionType,
+      reactionPosition: reactionPosition ?? this.reactionPosition,
     );
   }
 
@@ -168,17 +218,11 @@ class StreamChatConfigurationData {
   /// Defaults to False.
   final bool draftMessagesEnabled;
 
-  /// The widget that will be shown to indicate loading.
-  final Widget loadingIndicator;
-
-  /// The widget that will be built when the user image is unavailable.
-  final Widget Function(BuildContext, User) defaultUserImage;
-
-  /// The widget that will be built when the user image is loading.
-  final Widget Function(BuildContext, User)? placeholderUserImage;
-
-  /// Assets used for rendering reactions.
-  final List<StreamReactionIcon> reactionIcons;
+  /// The resolver used to convert reaction types into [StreamEmojiContent]
+  /// models and to provide the list of supported/default reaction types.
+  ///
+  /// Defaults to [DefaultReactionIconResolver].
+  final ReactionIconResolver reactionIconResolver;
 
   /// Whether a new reaction should replace the existing one.
   final bool enforceUniqueReactions;
@@ -188,78 +232,30 @@ class StreamChatConfigurationData {
   /// Defaults to [MessagePreviewFormatter].
   final MessagePreviewFormatter messagePreviewFormatter;
 
-  static final _defaultReactionIcons = [
-    StreamReactionIcon(
-      type: 'love',
-      builder: (context, highlighted, size) {
-        final theme = StreamChatTheme.of(context);
-        return StreamSvgIcon(
-          icon: StreamSvgIcons.loveReaction,
-          color: highlighted
-              ? theme.colorTheme.accentPrimary
-              : theme.primaryIconTheme.color,
-          size: size,
-        );
-      },
-    ),
-    StreamReactionIcon(
-      type: 'like',
-      builder: (context, highlighted, size) {
-        final theme = StreamChatTheme.of(context);
-        return StreamSvgIcon(
-          icon: StreamSvgIcons.thumbsUpReaction,
-          color: highlighted
-              ? theme.colorTheme.accentPrimary
-              : theme.primaryIconTheme.color,
-          size: size,
-        );
-      },
-    ),
-    StreamReactionIcon(
-      type: 'sad',
-      builder: (context, highlighted, size) {
-        final theme = StreamChatTheme.of(context);
-        return StreamSvgIcon(
-          icon: StreamSvgIcons.thumbsDownReaction,
-          color: highlighted
-              ? theme.colorTheme.accentPrimary
-              : theme.primaryIconTheme.color,
-          size: size,
-        );
-      },
-    ),
-    StreamReactionIcon(
-      type: 'haha',
-      builder: (context, highlighted, size) {
-        final theme = StreamChatTheme.of(context);
-        return StreamSvgIcon(
-          icon: StreamSvgIcons.lolReaction,
-          color: highlighted
-              ? theme.colorTheme.accentPrimary
-              : theme.primaryIconTheme.color,
-          size: size,
-        );
-      },
-    ),
-    StreamReactionIcon(
-      type: 'wow',
-      builder: (context, highlighted, size) {
-        final theme = StreamChatTheme.of(context);
-        return StreamSvgIcon(
-          icon: StreamSvgIcons.wutReaction,
-          color: highlighted
-              ? theme.colorTheme.accentPrimary
-              : theme.primaryIconTheme.color,
-          size: size,
-        );
-      },
-    ),
-  ];
+  /// The image CDN used for generating resized image URLs and stable
+  /// cache keys.
+  ///
+  /// Defaults to [StreamImageCDN], which supports Stream's own CDN.
+  /// Extend [StreamImageCDN] to customize behavior for a custom CDN.
+  final StreamImageCDN imageCDN;
 
-  static Widget _defaultUserImage(BuildContext context, User user) => Center(
-        child: StreamGradientAvatar(
-          name: user.name,
-          userId: user.id,
-        ),
-      );
+  /// Custom attachment builders for rendering attachment widgets in messages.
+  ///
+  /// When non-null, these builders are prepended to the default builders
+  /// based on the [Attachment.type], allowing custom attachment types to be
+  /// rendered globally across all message widgets.
+  final List<StreamAttachmentWidgetBuilder>? attachmentBuilders;
+
+  /// The visual type of the reactions display used across all message widgets.
+  ///
+  /// When null, the widget resolves its own default
+  /// ([StreamReactionsType.segmented]).
+  final StreamReactionsType? reactionType;
+
+  /// Where reactions appear relative to the message bubble across all
+  /// message widgets.
+  ///
+  /// When null, the widget resolves its own default
+  /// ([StreamReactionsPosition.header]).
+  final StreamReactionsPosition? reactionPosition;
 }

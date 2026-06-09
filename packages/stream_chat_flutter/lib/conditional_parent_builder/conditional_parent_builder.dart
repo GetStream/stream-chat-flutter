@@ -5,10 +5,11 @@ import 'package:flutter/material.dart';
 /// {@template parentBuilder}
 /// A function that provides the [BuildContext] and the [child] widget.
 /// {@endtemplate}
-typedef ParentBuilder = Widget Function(
-  BuildContext context,
-  Widget child,
-);
+typedef ParentBuilder =
+    Widget Function(
+      BuildContext context,
+      Widget child,
+    );
 
 /// {@template conditionalParentBuilder}
 /// A widget that allows developers to conditionally wrap the [child] widget
@@ -32,7 +33,7 @@ typedef ParentBuilder = Widget Function(
 /// ),
 /// ```
 /// This example can be found in the `stream_chat_flutter` source code under
-/// `src/message_widget/message_widget.dart`.
+/// `src/message_widget/stream_message_item.dart`.
 /// {@endtemplate}
 class ConditionalParentBuilder extends StatelessWidget {
   /// {@macro conditionalParentBuilder}

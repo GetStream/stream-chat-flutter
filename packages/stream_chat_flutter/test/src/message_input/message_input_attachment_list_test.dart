@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 import '../mocks.dart';
 
@@ -17,9 +18,9 @@ Widget wrapWithStreamChat(
 }
 
 void main() {
-  group('StreamMessageInputAttachmentList tests', () {
+  group('StreamMessageComposerAttachmentList tests', () {
     testWidgets(
-      'StreamMessageInputAttachmentList should render attachments',
+      'StreamMessageComposerAttachmentList should render attachments',
       (WidgetTester tester) async {
         final attachments = [
           Attachment(type: 'file', id: 'file1'),
@@ -29,22 +30,21 @@ void main() {
 
         await tester.pumpWidget(
           wrapWithStreamChat(
-            StreamMessageInputAttachmentList(
+            StreamMessageComposerAttachmentList(
               attachments: attachments,
             ),
           ),
         );
 
         // Expect 2 file attachments and 1 media attachment
-        expect(find.byType(MessageInputFileAttachments), findsOneWidget);
-        expect(find.byType(StreamFileAttachment), findsNWidgets(2));
+        expect(find.byType(StreamMessageComposerFileAttachment), findsNWidgets(2));
         expect(find.byType(MessageInputMediaAttachments), findsOneWidget);
         expect(find.byType(StreamMediaAttachmentThumbnail), findsOneWidget);
       },
     );
 
     testWidgets(
-      'StreamMessageInputAttachmentList should call onRemovePressed callback',
+      'StreamMessageComposerAttachmentList should call onRemovePressed callback',
       (WidgetTester tester) async {
         Attachment? removedAttachment;
 
@@ -55,7 +55,7 @@ void main() {
 
         await tester.pumpWidget(
           wrapWithStreamChat(
-            StreamMessageInputAttachmentList(
+            StreamMessageComposerAttachmentList(
               attachments: attachments,
               onRemovePressed: (attachment) {
                 removedAttachment = attachment;
@@ -64,7 +64,7 @@ void main() {
           ),
         );
 
-        final removeButtons = find.byType(RemoveAttachmentButton);
+        final removeButtons = find.byType(StreamRemoveControl);
 
         // Tap the first remove button
         await tester.tap(removeButtons.first);
@@ -72,18 +72,18 @@ void main() {
 
         // Expect the onRemovePressed callback to be called with the second
         // attachment as they are reversed in the UI.
-        expect(removedAttachment, attachments[1]);
+        expect(removedAttachment, attachments[0]);
       },
     );
 
     testWidgets(
-      '''StreamMessageInputAttachmentList should display empty box if no attachments''',
+      '''StreamMessageComposerAttachmentList should display empty box if no attachments''',
       (WidgetTester tester) async {
         final attachments = <Attachment>[];
 
         await tester.pumpWidget(
           wrapWithStreamChat(
-            StreamMessageInputAttachmentList(
+            StreamMessageComposerAttachmentList(
               attachments: attachments,
             ),
           ),
@@ -106,14 +106,14 @@ void main() {
 
         await tester.pumpWidget(
           wrapWithStreamChat(
-            MessageInputFileAttachments(
+            StreamMessageComposerAttachmentList(
               attachments: attachments,
             ),
           ),
         );
 
         // Expect 2 file attachments
-        expect(find.byType(StreamFileAttachment), findsNWidgets(2));
+        expect(find.byType(StreamMessageComposerFileAttachment), findsNWidgets(2));
       },
     );
 
@@ -128,7 +128,7 @@ void main() {
 
         await tester.pumpWidget(
           wrapWithStreamChat(
-            MessageInputFileAttachments(
+            StreamMessageComposerAttachmentList(
               attachments: attachments,
               onRemovePressed: (attachment) {
                 removedAttachment = attachment;
@@ -137,7 +137,7 @@ void main() {
           ),
         );
 
-        final removeButton = find.byType(RemoveAttachmentButton);
+        final removeButton = find.byType(StreamRemoveControl);
 
         // Tap the remove button
         await tester.tap(removeButton);
@@ -154,8 +154,8 @@ void main() {
       'MessageInputMediaAttachments should render media attachments',
       (WidgetTester tester) async {
         final attachments = [
-          Attachment(type: 'media', id: 'media1'),
-          Attachment(type: 'media', id: 'media2'),
+          Attachment(type: 'image', id: 'image1'),
+          Attachment(type: 'video', id: 'video1'),
         ];
 
         await tester.pumpWidget(
@@ -167,7 +167,7 @@ void main() {
         );
 
         // Expect 2 media attachments
-        expect(find.byType(Stack), findsNWidgets(2));
+        expect(find.byType(StreamMediaAttachmentBuilder), findsNWidgets(2));
       },
     );
 
@@ -186,6 +186,27 @@ void main() {
 
         // Expect an empty box
         expect(find.byType(SizedBox), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'MessageInputMediaAttachments should render unsupported attachment for unknown types',
+      (WidgetTester tester) async {
+        final attachments = [
+          Attachment(type: 'unknown', id: 'unknown1'),
+          Attachment(type: 'something_else', id: 'unknown2'),
+        ];
+
+        await tester.pumpWidget(
+          wrapWithStreamChat(
+            MessageInputMediaAttachments(
+              attachments: attachments,
+            ),
+          ),
+        );
+
+        // Expect a fallback unsupported attachment widget for each unknown type.
+        expect(find.byType(StreamMessageComposerUnsupportedAttachment), findsNWidgets(2));
       },
     );
   });
@@ -228,7 +249,7 @@ void main() {
           ),
         );
 
-        final removeButton = find.byType(RemoveAttachmentButton);
+        final removeButton = find.byType(StreamRemoveControl);
 
         // Tap the remove button
         await tester.tap(removeButton);

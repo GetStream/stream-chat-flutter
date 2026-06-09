@@ -10,8 +10,7 @@ part 'reaction_dao.g.dart';
 
 /// The Data Access Object for operations in [Reactions] table.
 @DriftAccessor(tables: [Reactions, Users])
-class ReactionDao extends DatabaseAccessor<DriftChatDatabase>
-    with _$ReactionDaoMixin {
+class ReactionDao extends DatabaseAccessor<DriftChatDatabase> with _$ReactionDaoMixin {
   /// Creates a new reaction dao instance
   ReactionDao(super.db);
 
@@ -37,8 +36,7 @@ class ReactionDao extends DatabaseAccessor<DriftChatDatabase>
     String messageId,
     String userId,
   ) {
-    final where =
-        reactions.messageId.equals(messageId) & reactions.userId.equals(userId);
+    final where = reactions.messageId.equals(messageId) & reactions.userId.equals(userId);
     return _selectReactions(where);
   }
 
@@ -71,8 +69,7 @@ class ReactionDao extends DatabaseAccessor<DriftChatDatabase>
       for (final id in messageIds) id: <Reaction>[],
     };
     for (final chunk in chunked(messageIds)) {
-      final where =
-          reactions.messageId.isIn(chunk) & reactions.userId.equals(userId);
+      final where = reactions.messageId.isIn(chunk) & reactions.userId.equals(userId);
       final rows = await _selectReactions(where);
       for (final r in rows) {
         grouped[r.messageId]!.add(r);
@@ -83,25 +80,23 @@ class ReactionDao extends DatabaseAccessor<DriftChatDatabase>
 
   /// Updates the reactions data with the new [reactionList] data
   Future<void> updateReactions(List<Reaction> reactionList) => batch((it) {
-        it.insertAllOnConflictUpdate(
-          reactions,
-          reactionList.map((r) => r.toEntity()).toList(),
-        );
-      });
+    it.insertAllOnConflictUpdate(
+      reactions,
+      reactionList.map((r) => r.toEntity()).toList(),
+    );
+  });
 
   /// Deletes all the reactions whose [Reactions.messageId] is
   /// present in [messageIds]
-  Future<void> deleteReactionsByMessageIds(List<String> messageIds) =>
-      batch((it) {
-        it.deleteWhere<Reactions, ReactionEntity>(
-          reactions,
-          (r) => r.messageId.isIn(messageIds),
-        );
-      });
+  Future<void> deleteReactionsByMessageIds(List<String> messageIds) => batch((it) {
+    it.deleteWhere<Reactions, ReactionEntity>(
+      reactions,
+      (r) => r.messageId.isIn(messageIds),
+    );
+  });
 
   Future<List<Reaction>> _selectReactions(Expression<bool> where) {
-    final rows = select(reactions)
-        .join([leftOuterJoin(users, reactions.userId.equalsExp(users.id))])
+    final rows = select(reactions).join([leftOuterJoin(users, reactions.userId.equalsExp(users.id))])
       ..where(where)
       ..orderBy([OrderingTerm.asc(reactions.createdAt)]);
     return rows.map((row) {

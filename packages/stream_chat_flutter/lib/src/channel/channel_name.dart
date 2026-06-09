@@ -87,8 +87,7 @@ class _NameGenerator extends StatelessWidget {
               }
             });
 
-            final exceedingMembers =
-                otherMembers.length - currentMembers.length;
+            final exceedingMembers = otherMembers.length - currentMembers.length;
             channelName =
                 '${currentMembers.map((e) => e.user?.name).join(', ')} '
                 '${exceedingMembers > 0 ? '+ $exceedingMembers' : ''}';

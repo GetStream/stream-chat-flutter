@@ -4,6 +4,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:stream_chat_flutter/src/audio/audio_playlist_state.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 /// {@template streamAudioPlaylistController}
 /// A controller for managing an audio playlist.
@@ -21,8 +22,8 @@ class StreamAudioPlaylistController extends ValueNotifier<AudioPlaylistState> {
   StreamAudioPlaylistController.raw({
     AudioPlayer? player,
     AudioPlaylistState state = const AudioPlaylistState(tracks: []),
-  })  : _player = player ?? AudioPlayer(),
-        super(state);
+  }) : _player = player ?? AudioPlayer(),
+       super(state);
 
   final AudioPlayer _player;
 
@@ -45,21 +46,22 @@ class StreamAudioPlaylistController extends ValueNotifier<AudioPlaylistState> {
       final tracks = [
         ...value.tracks.mapIndexed((index, track) {
           final trackState = switch (index == currentIndex) {
-            true => state.playing
-                ? TrackState.playing
-                : switch (state.processingState) {
-                    ProcessingState.idle => TrackState.idle,
-                    ProcessingState.loading => TrackState.loading,
-                    _ => TrackState.paused,
-                  },
+            true =>
+              state.playing
+                  ? TrackState.playing
+                  : switch (state.processingState) {
+                      ProcessingState.idle => TrackState.idle,
+                      ProcessingState.loading => TrackState.loading,
+                      _ => TrackState.paused,
+                    },
             false => switch (track.state) {
-                TrackState.idle => TrackState.idle,
-                _ => TrackState.paused,
-              },
+              TrackState.idle => TrackState.idle,
+              _ => TrackState.paused,
+            },
           };
 
           return track.copyWith(state: trackState);
-        })
+        }),
       ];
 
       value = value.copyWith(tracks: tracks);
@@ -74,7 +76,7 @@ class StreamAudioPlaylistController extends ValueNotifier<AudioPlaylistState> {
         ...value.tracks.mapIndexed((index, track) {
           if (index != currentIndex) return track;
           return track.copyWith(position: position);
-        })
+        }),
       ];
 
       value = value.copyWith(tracks: tracks);
@@ -82,7 +84,11 @@ class StreamAudioPlaylistController extends ValueNotifier<AudioPlaylistState> {
 
     // Listen to speed changes
     _speedSubscription = _player.speedStream.listen((speed) {
-      value = value.copyWith(speed: PlaybackSpeed.fromValue(speed));
+      final playbackSpeed = StreamPlaybackSpeed.values.firstWhere(
+        (e) => e.speed == speed,
+        orElse: () => StreamPlaybackSpeed.x1,
+      );
+      value = value.copyWith(speed: playbackSpeed);
     });
   }
 
@@ -116,7 +122,7 @@ class StreamAudioPlaylistController extends ValueNotifier<AudioPlaylistState> {
   Future<void> stop() => _player.stop();
 
   /// Sets the speed of the current track.
-  Future<void> setSpeed(PlaybackSpeed speed) => _player.setSpeed(speed.speed);
+  Future<void> setSpeed(StreamPlaybackSpeed speed) => _player.setSpeed(speed.speed);
 
   /// Seeks to the given position in the current track.
   Future<void> seek(Duration position) => _player.seek(position);
@@ -164,7 +170,9 @@ class StreamAudioPlaylistController extends ValueNotifier<AudioPlaylistState> {
       tracks: [
         ...tracks.mapIndexed((i, track) {
           if (i != index) return track;
-          return track.copyWith(duration: duration);
+          // Prefer the larger of the two to guard against tiny clock jitter
+          // between what was stored and what the decoder reports.
+          return track.copyWith(duration: [track.duration, ?duration].max);
         }),
       ],
     );

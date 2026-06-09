@@ -5,6 +5,8 @@
 // two-pointer `merge` here is a runtime optimization; `stream_core` does
 // keyed-map-merge-and-sort. Both produce the same result for sorted inputs.
 
+import 'package:collection/collection.dart';
+
 /// Useful extension functions for sorted [List]s.
 extension SortedListX<T extends Object> on List<T> {
   /// Inserts [element] into this sorted list at the correct position.
@@ -69,31 +71,26 @@ extension SortedListX<T extends Object> on List<T> {
     return removed.sortedInsert(resolved, compare: compare);
   }
 
-  /// Merges this list with [other], deduplicating by [key].
+  /// Merges this list with [other] via an O(N+M) two-pointer pass, with
+  /// duplicates deduplicated by [key].
   ///
-  /// Duplicates between the two lists are resolved via [update] (defaults to
-  /// preferring the element from [other]). Duplicates within a single input
-  /// list are tolerated and may be propagated to the output — the merge does
-  /// not assert input uniqueness.
+  /// The keyset of [other] takes precedence: any element of this list whose
+  /// key appears in [other] is dropped, and the [other] copy (optionally
+  /// passed through [update]) is emitted in its place. The output preserves
+  /// [compare] order.
   ///
-  /// - When [compare] is **not** provided, the merge uses an O(N+M) keyed-map
-  ///   merge and the result is returned in insertion order (this list's
-  ///   items first, new items from [other] last). Duplicate keys within a
-  ///   single input collapse to the last occurrence.
-  ///
-  /// - When [compare] **is** provided, the merge runs an O(N+M) two-pointer
-  ///   pass where the keyset of [other] takes precedence: any element of
-  ///   this list whose key appears in [other] is dropped before merging.
-  ///   Both inputs **must be pre-sorted by [compare]** — if either is not,
-  ///   the behavior is undefined.
+  /// The receiver must already be sorted by [compare] (state classes that
+  /// hold sorted lists maintain this as an invariant). [other] is sorted
+  /// internally before the walk, so callers can pass it in any order.
   ///
   /// Returns the receiver unchanged (same reference) when [other] is null,
-  /// empty, or identical to this list.
-  List<T> merge<K>(
+  /// empty, or identical to this list — the identity short-circuit fires
+  /// before any sorting work is done.
+  List<T> mergeSorted<K>(
     Iterable<T>? other, {
     required K Function(T item) key,
+    required Comparator<T> compare,
     T Function(T original, T updated)? update,
-    Comparator<T>? compare,
   }) {
     if (other == null) return this;
     if (identical(other, this)) return this;
@@ -104,27 +101,9 @@ extension SortedListX<T extends Object> on List<T> {
       return updated;
     }
 
-    if (compare != null) {
-      final otherList =
-          other is List<T> ? other : other.toList(growable: false);
-      return _mergeSortedTwoPointer(
-        this,
-        otherList,
-        key,
-        compare,
-        resolve,
-      );
-    }
-
-    final itemMap = {for (final item in this) key(item): item};
-    for (final item in other) {
-      itemMap.update(
-        key(item),
-        (original) => resolve(original, item),
-        ifAbsent: () => item,
-      );
-    }
-    return itemMap.values.toList(growable: false);
+    final otherList = other is List<T> ? other : other.toList(growable: false);
+    final sortedOther = otherList.sorted(compare);
+    return _mergeSortedTwoPointer(this, sortedOther, key, compare, resolve);
   }
 }
 
@@ -188,6 +167,83 @@ int _upperBound<T>(List<T> list, T element, Comparator<T> compare) {
     }
   }
   return start;
+}
+
+/// Useful extension functions for [Iterable].
+extension IterableMergeX<T extends Object> on Iterable<T> {
+  /// Merges this iterable with [other], deduplicating by [key].
+  ///
+  /// Uses an O(N+M) keyed-map merge. The result is returned in insertion
+  /// order — items from this iterable first, new items from [other] last.
+  /// Duplicate keys within a single input collapse to the last occurrence.
+  /// Cross-list duplicates are resolved via [update] (defaults to
+  /// preferring the element from [other]).
+  ///
+  /// Output is **not** sorted. If you need a sorted result and both inputs
+  /// are pre-sorted, use [SortedListX.mergeSorted] instead.
+  ///
+  /// Returns the receiver unchanged (same reference) when [other] is null,
+  /// empty, or identical to this iterable.
+  Iterable<T> merge<K>(
+    Iterable<T>? other, {
+    required K Function(T item) key,
+    T Function(T original, T updated)? update,
+  }) {
+    if (other == null) return this;
+    if (identical(other, this)) return this;
+    if (other.isEmpty) return this;
+
+    T resolve(T original, T updated) {
+      if (update != null) return update(original, updated);
+      return updated;
+    }
+
+    final itemMap = {for (final item in this) key(item): item};
+    for (final item in other) {
+      itemMap.update(
+        key(item),
+        (original) => resolve(original, item),
+        ifAbsent: () => item,
+      );
+    }
+    return itemMap.values;
+  }
+
+  /// Merges this iterable with [other], where [other] is an iterable of a
+  /// **different type** [V].
+  ///
+  /// Each item from [other] is converted to [T] via [value]; if [value]
+  /// returns `null`, that item is skipped. Useful for merging DTOs into a
+  /// model collection, or for projecting a nested field from a parent type
+  /// (e.g. merging `Message.sharedLocation` into a list of `Location`).
+  ///
+  /// Uses an O(N+M) keyed-map merge. The result is returned in insertion
+  /// order — items from this iterable first, new items from [other] last.
+  /// Cross-list duplicates are resolved via [update].
+  ///
+  /// Returns the receiver unchanged (same reference) when [other] is null
+  /// or empty.
+  Iterable<T> mergeFrom<K, V>(
+    Iterable<V>? other, {
+    required K Function(T item) key,
+    required T? Function(V item) value,
+    required T Function(T original, T updated) update,
+  }) {
+    if (other == null) return this;
+    if (other.isEmpty) return this;
+
+    final itemMap = {for (final item in this) key(item): item};
+    for (final otherItem in other) {
+      final item = value(otherItem);
+      if (item == null) continue;
+      itemMap.update(
+        key(item),
+        (original) => update(original, item),
+        ifAbsent: () => item,
+      );
+    }
+    return itemMap.values;
+  }
 }
 
 /// Useful extension functions for [List].

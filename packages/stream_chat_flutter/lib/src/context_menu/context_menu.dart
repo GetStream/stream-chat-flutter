@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 const double _kContextMenuScreenPadding = 8;
-const double _kContextMenuWidth = 222;
 
-/// Signature for a builder function that wraps the context menu widget.
+/// Signature for a builder function that wraps the context menu items.
 ///
 /// This builder can be used to customize the appearance of the menu
-/// container by wrapping [child] in additional UI elements.
-typedef ContextMenuBuilder = Widget Function(
-  BuildContext context,
-  Widget child,
-);
+/// container by wrapping [menuItems] in additional UI elements.
+typedef ContextMenuContainerBuilder =
+    Widget Function(
+      BuildContext context,
+      List<Widget> menuItems,
+    );
 
 /// A widget that displays a context menu anchored to a specific [Offset].
 ///
@@ -41,35 +42,20 @@ class ContextMenu extends StatelessWidget {
 
   /// Builds the outer container for the menu.
   ///
-  /// The [menuBuilder] receives the current context and a [child] widget
-  /// containing all the [menuItems].
+  /// The [menuBuilder] receives the current context and the [menuItems] list,
+  /// and should return a widget wrapping all items.
   ///
-  /// Defaults to a card-style scrollable container with fixed width.
-  final ContextMenuBuilder menuBuilder;
+  /// Defaults to a [StreamContextMenu] wrapping all items.
+  final ContextMenuContainerBuilder menuBuilder;
 
   /// Default menu container with standard styling.
   ///
   /// Wraps the menu content in a card-like [Material] with scroll support,
   /// applying max width and height constraints.
-  static Widget _defaultMenuBuilder(BuildContext context, Widget child) {
-    final availableHeight = MediaQuery.of(context).size.height;
-    final maxHeight = availableHeight - _kContextMenuScreenPadding * 2;
-
-    return ConstrainedBox(
-      constraints: BoxConstraints(
-        minWidth: _kContextMenuWidth,
-        maxWidth: _kContextMenuWidth,
-        maxHeight: maxHeight,
-      ),
-      child: Material(
-        elevation: 1,
-        type: MaterialType.card,
-        clipBehavior: Clip.antiAlias,
-        borderRadius: const BorderRadius.all(Radius.circular(7)),
-        child: SingleChildScrollView(child: child),
-      ),
-    );
-  }
+  static Widget _defaultMenuBuilder(
+    BuildContext context,
+    List<Widget> menuItems,
+  ) => StreamContextMenu(children: menuItems);
 
   @override
   Widget build(BuildContext context) {
@@ -90,14 +76,7 @@ class ContextMenu extends StatelessWidget {
         delegate: DesktopTextSelectionToolbarLayoutDelegate(
           anchor: anchor - localAdjustment,
         ),
-        child: menuBuilder.call(
-          context,
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: menuItems,
-          ),
-        ),
+        child: menuBuilder.call(context, menuItems),
       ),
     );
   }

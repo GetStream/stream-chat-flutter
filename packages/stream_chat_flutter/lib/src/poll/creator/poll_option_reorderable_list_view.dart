@@ -1,10 +1,9 @@
-import 'dart:ui';
-
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/misc/separated_reorderable_list_view.dart';
 import 'package:stream_chat_flutter/src/poll/creator/stream_delete_option_dialog.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 class _NullConst {
   const _NullConst();
@@ -48,6 +47,8 @@ class PollOptionItem {
   }
 }
 
+enum _PollOptionVariant { option, addOption }
+
 /// {@template pollOptionListItem}
 /// A widget that represents a poll option list item.
 /// {@endtemplate}
@@ -55,17 +56,34 @@ class PollOptionListItem extends StatelessWidget {
   /// {@macro pollOptionListItem}
   const PollOptionListItem({
     super.key,
-    required this.option,
+    required PollOptionItem this.option,
     this.hintText,
     this.focusNode,
     this.onRemove,
     this.onChanged,
-  });
+  }) : onAddOptionPressed = null,
+       _variant = .option;
+
+  /// Creates an "add an option" button styled to match the option list.
+  const PollOptionListItem.addOption({
+    super.key,
+    this.hintText,
+    VoidCallback? onPressed,
+  }) : option = null,
+       focusNode = null,
+       onRemove = null,
+       onChanged = null,
+       onAddOptionPressed = onPressed,
+       _variant = .addOption;
+
+  final _PollOptionVariant _variant;
 
   /// The poll option item.
-  final PollOptionItem option;
+  ///
+  /// Required for the default constructor, `null` for [addOption].
+  final PollOptionItem? option;
 
-  /// Hint to be displayed in the poll option list item.
+  /// Hint to be displayed in the poll option list item or as the button label.
   final String? hintText;
 
   /// The focus node for the text field.
@@ -77,66 +95,88 @@ class PollOptionListItem extends StatelessWidget {
   /// Callback called when the poll option item is changed.
   final ValueSetter<PollOptionItem>? onChanged;
 
+  /// Callback called when the "add an option" button is pressed.
+  ///
+  /// If `null`, the button is disabled.
+  /// Only used by the [addOption] constructor.
+  final VoidCallback? onAddOptionPressed;
+
   @override
   Widget build(BuildContext context) {
-    final theme = StreamPollCreatorTheme.of(context);
-    final fillColor = theme.optionsTextFieldFillColor;
-    final borderRadius = theme.optionsTextFieldBorderRadius;
+    return switch (_variant) {
+      _PollOptionVariant.option => _buildOption(context),
+      _PollOptionVariant.addOption => _buildAddOption(context),
+    };
+  }
 
-    final colorTheme = StreamChatTheme.of(context).colorTheme;
+  Widget _buildOption(BuildContext context) {
+    assert(option != null, 'option must not be null');
 
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: fillColor,
-        borderRadius: borderRadius,
+    final icons = context.streamIcons;
+
+    return StreamTextInput(
+      initialValue: option!.text,
+      hintText: hintText,
+      focusNode: focusNode,
+      textCapitalization: TextCapitalization.sentences,
+      helperText: option!.error,
+      helperState: option!.error != null ? StreamHelperState.error : null,
+      leading: MouseRegion(
+        cursor: SystemMouseCursors.grab,
+        child: Icon(icons.reorder),
       ),
-      child: Row(
-        children: [
-          Padding(
-            padding: const EdgeInsetsDirectional.all(16),
-            child: MouseRegion(
-              cursor: SystemMouseCursors.grab,
-              child: Icon(
-                size: 24,
-                Icons.drag_handle_rounded,
-                color: colorTheme.textLowEmphasis,
-              ),
-            ),
-          ),
-          Expanded(
-            child: StreamPollTextField(
-              initialValue: option.text,
-              hintText: hintText,
-              style: theme.optionsTextFieldStyle,
-              fillColor: fillColor,
-              borderRadius: borderRadius,
-              errorText: option.error,
-              errorStyle: theme.optionsTextFieldErrorStyle,
-              focusNode: focusNode,
-              contentPadding: const EdgeInsets.symmetric(vertical: 18),
-              onChanged: switch (onChanged) {
-                final onChanged? => (text) {
-                    final updated = option.copyWith(text: text);
-                    return onChanged.call(updated);
-                  },
-                _ => null,
-              },
-            ),
-          ),
-          IconButton(
-            iconSize: 24,
-            icon: const StreamSvgIcon(icon: StreamSvgIcons.delete),
-            style: IconButton.styleFrom(
-              foregroundColor: colorTheme.textLowEmphasis,
-            ),
-            // TODO: Enable once we have min SDK set to 3.29.0
-            // onLongPress: () {/* Consume long press */},
-            onPressed: switch (onRemove) {
-              final onRemove? => () => onRemove.call(option),
-              _ => null,
-            },
-          ),
-        ],
+      trailing: StreamButton.icon(
+        type: .ghost,
+        style: .secondary,
+        icon: Icon(icons.minusCircle),
+        themeStyle: .from(
+          fixedSize: const .square(20),
+          tapTargetSize: .shrinkWrap,
+        ),
+        onPressed: switch (onRemove) {
+          final onRemove? => () => onRemove.call(option!),
+          _ => null,
+        },
+      ),
+      onChanged: switch (onChanged) {
+        final onChanged? => (text) {
+          final updated = option!.copyWith(text: text);
+          return onChanged.call(updated);
+        },
+        _ => null,
+      },
+    );
+  }
+
+  Widget _buildAddOption(BuildContext context) {
+    final radius = context.streamRadius;
+    final spacing = context.streamSpacing;
+    final textTheme = context.streamTextTheme;
+    final colorScheme = context.streamColorScheme;
+
+    final inputStyle = StreamPollCreatorTheme.of(context).optionInputStyle;
+
+    final effectiveTextStyle = inputStyle?.textStyle ?? textTheme.bodyDefault;
+    final effectivePadding = inputStyle?.contentPadding ?? .symmetric(vertical: spacing.sm, horizontal: spacing.md);
+    final effectiveBorderColor = inputStyle?.border?.color ?? colorScheme.borderDefault;
+    final effectiveBorderRadius = inputStyle?.borderRadius ?? .all(radius.lg);
+
+    return SizedBox(
+      width: .infinity,
+      child: StreamButton(
+        type: .outline,
+        style: .secondary,
+        onPressed: onAddOptionPressed,
+        themeStyle: .from(
+          fixedSize: .infinite,
+          textStyle: effectiveTextStyle,
+          padding: effectivePadding,
+          tapTargetSize: .shrinkWrap,
+          borderColor: effectiveBorderColor,
+          alignment: AlignmentDirectional.centerStart,
+          shape: RoundedRectangleBorder(borderRadius: effectiveBorderRadius),
+        ),
+        child: Text(hintText ?? context.translations.addAnOptionLabel),
       ),
     );
   }
@@ -181,12 +221,10 @@ class PollOptionReorderableListView extends StatefulWidget {
   final ValueSetter<List<PollOptionItem>>? onOptionsChanged;
 
   @override
-  State<PollOptionReorderableListView> createState() =>
-      _PollOptionReorderableListViewState();
+  State<PollOptionReorderableListView> createState() => _PollOptionReorderableListViewState();
 }
 
-class _PollOptionReorderableListViewState
-    extends State<PollOptionReorderableListView> {
+class _PollOptionReorderableListViewState extends State<PollOptionReorderableListView> {
   late Map<String, FocusNode> _focusNodes;
   late Map<String, PollOptionItem> _options;
 
@@ -263,11 +301,12 @@ class _PollOptionReorderableListViewState
     return AnimatedBuilder(
       animation: animation,
       builder: (BuildContext context, Widget? child) {
-        final animValue = Curves.easeInOut.transform(animation.value);
-        final elevation = lerpDouble(0, 6, animValue)!;
+        final radius = context.streamRadius;
+        final colorScheme = context.streamColorScheme;
         return Material(
-          borderRadius: BorderRadius.circular(12),
-          elevation: elevation,
+          color: colorScheme.backgroundElevation3,
+          borderRadius: BorderRadius.all(radius.lg),
+          elevation: 3,
           child: child,
         );
       },
@@ -275,25 +314,52 @@ class _PollOptionReorderableListViewState
     );
   }
 
-  String? _validateOption(PollOptionItem option) {
+  // Revalidates all options for empty-text and duplicate errors.
+  //
+  // Empty options always receive an error. Duplicate checking is skipped
+  // when [PollOptionReorderableListView.allowDuplicate] is true.
+  //
+  // Uses a two-pass approach when [changedOptionId] is provided:
+  //
+  // 1. **Unchanged options first** — scanned in order to build the "seen"
+  //    set. Among these, the first occurrence of a text is clean and every
+  //    subsequent duplicate gets an error.
+  // 2. **Changed option last** — checked against the "seen" set built in
+  //    pass 1. This ensures the just-edited option always yields to
+  //    pre-existing ones, so the error appears on the option the user is
+  //    actively typing in rather than jumping to an older field.
+  //
+  // Without [changedOptionId] (e.g. after reorder or remove), all options
+  // are validated in a single pass where the first occurrence wins.
+  void _revalidateOptions({String? changedOptionId}) {
     final translations = context.translations;
+    final checkDuplicates = !widget.allowDuplicate;
+    final seen = <String>{};
 
-    // Check if the option is empty.
-    if (option.text.isEmpty) return translations.pollOptionEmptyError;
-
-    // Check for duplicate options if duplicates are not allowed.
-    if (widget.allowDuplicate case false) {
-      if (_options.values.any((it) {
-        // Skip if it's the same option
-        if (it.id == option.id) return false;
-
-        return it.text == option.text;
-      })) {
+    String? _errorFor(String normalized) {
+      if (normalized.isEmpty) return translations.pollOptionEmptyError;
+      if (checkDuplicates) {
+        if (seen.add(normalized)) return null;
         return translations.pollOptionDuplicateError;
       }
+
+      return null;
     }
 
-    return null;
+    // Pass 1 — validate every option except the one being edited.
+    _options.updateAll((key, option) {
+      if (key == changedOptionId) return option;
+
+      final normalized = option.text.trim().toLowerCase();
+      return option.copyWith(error: _errorFor(normalized));
+    });
+
+    // Pass 2 — validate the edited option against the pre-existing texts.
+    if (changedOptionId case final id? when _options.containsKey(id)) {
+      final option = _options[id]!;
+      final normalized = option.text.trim().toLowerCase();
+      _options[id] = option.copyWith(error: _errorFor(normalized));
+    }
   }
 
   Future<void> _onOptionRemoved(PollOptionItem option) async {
@@ -303,6 +369,7 @@ class _PollOptionReorderableListViewState
     setState(() {
       _options.remove(option.id);
       _focusNodes.remove(option.id)?.dispose();
+      _revalidateOptions();
     });
 
     // Ensure we have at least the minimum number of options
@@ -316,18 +383,9 @@ class _PollOptionReorderableListViewState
 
   void _onOptionChanged(PollOptionItem option) {
     setState(() {
-      // Update the changed option.
-      _options[option.id] = option.copyWith(
-        error: _validateOption(option),
-      );
-
-      // Validate every other option to check for duplicates.
-      _options.updateAll((key, value) {
-        // Skip the changed option as it's already validated.
-        if (key == option.id) return value;
-
-        return value.copyWith(error: _validateOption(value));
-      });
+      // Update the changed option and revalidate all for duplicates.
+      _options[option.id] = option;
+      _revalidateOptions(changedOptionId: option.id);
     });
 
     // Notify the parent widget about the change
@@ -348,6 +406,8 @@ class _PollOptionReorderableListViewState
       _options = <String, PollOptionItem>{
         for (final option in options) option.id: option,
       };
+
+      _revalidateOptions();
     });
 
     // Notify the parent widget about the change
@@ -395,60 +455,62 @@ class _PollOptionReorderableListViewState
   @override
   Widget build(BuildContext context) {
     final theme = StreamPollCreatorTheme.of(context);
-    final borderRadius = theme.optionsTextFieldBorderRadius;
+    final defaults = _PollOptionListViewDefaults(context);
+
+    final spacing = context.streamSpacing;
+
+    final effectiveTitleStyle = theme.headerTextStyle ?? defaults.headerTextStyle;
+    final effectiveInputStyle = theme.optionInputStyle ?? defaults.optionInputStyle;
 
     return Column(
+      spacing: spacing.xs,
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (widget.title case final title?) ...[
-          Text(title, style: theme.optionsHeaderStyle),
-          const SizedBox(height: 8),
-        ],
+        if (widget.title case final title?) Text(title, style: effectiveTitleStyle),
         Flexible(
-          child: SeparatedReorderableListView(
-            shrinkWrap: true,
-            itemCount: _options.length,
-            physics: const NeverScrollableScrollPhysics(),
-            proxyDecorator: _proxyDecorator,
-            separatorBuilder: (_, __) => const SizedBox(height: 8),
-            onReorderStart: (_) => FocusScope.of(context).unfocus(),
-            onReorder: _onOptionReorder,
-            itemBuilder: (context, index) {
-              final option = _options.values.elementAt(index);
-              return PollOptionListItem(
-                key: Key(option.id),
-                option: option,
-                hintText: widget.itemHintText,
-                focusNode: _focusNodes[option.id],
-                onRemove: _onOptionRemoved,
-                onChanged: _onOptionChanged,
-              );
-            },
-          ),
-        ),
-        const SizedBox(height: 8),
-        SizedBox(
-          width: double.infinity,
-          child: FilledButton.tonal(
-            onPressed: _canAddMoreOptions ? _onAddOptionPressed : null,
-            style: TextButton.styleFrom(
-              alignment: Alignment.centerLeft,
-              textStyle: theme.optionsTextFieldStyle,
-              shape: RoundedRectangleBorder(
-                borderRadius: borderRadius ?? BorderRadius.zero,
-              ),
-              padding: const EdgeInsets.symmetric(
-                vertical: 18,
-                horizontal: 16,
-              ),
-              backgroundColor: theme.optionsTextFieldFillColor,
-              foregroundColor: theme.optionsTextFieldStyle?.color,
+          child: StreamTextInputTheme(
+            data: .new(style: effectiveInputStyle),
+            child: SeparatedReorderableListView(
+              shrinkWrap: true,
+              itemCount: _options.length,
+              physics: const NeverScrollableScrollPhysics(),
+              proxyDecorator: _proxyDecorator,
+              separatorBuilder: (_, __) => SizedBox(height: spacing.xs),
+              onReorderStart: (_) => FocusScope.of(context).unfocus(),
+              onReorder: _onOptionReorder,
+              itemBuilder: (context, index) {
+                final option = _options.values.elementAt(index);
+                return PollOptionListItem(
+                  key: Key(option.id),
+                  option: option,
+                  hintText: widget.itemHintText,
+                  focusNode: _focusNodes[option.id],
+                  onRemove: _onOptionRemoved,
+                  onChanged: _onOptionChanged,
+                );
+              },
             ),
-            child: Text(context.translations.addAnOptionLabel),
           ),
         ),
+        if (_canAddMoreOptions)
+          PollOptionListItem.addOption(
+            hintText: widget.itemHintText,
+            onPressed: _onAddOptionPressed,
+          ),
       ],
     );
   }
+}
+
+class _PollOptionListViewDefaults extends StreamPollCreatorThemeData {
+  _PollOptionListViewDefaults(this._context);
+
+  final BuildContext _context;
+
+  late final _colorScheme = _context.streamColorScheme;
+  late final _textTheme = _context.streamTextTheme;
+
+  @override
+  TextStyle get headerTextStyle => _textTheme.headingSm.copyWith(color: _colorScheme.textPrimary);
 }

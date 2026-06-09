@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:shimmer/shimmer.dart';
 import 'package:stream_chat_flutter/src/attachment/thumbnail/image_attachment_thumbnail.dart';
 import 'package:stream_chat_flutter/src/attachment/thumbnail/thumbnail_error.dart';
-import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/video/video_thumbnail_image.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 /// {@template videoAttachmentThumbnail}
 /// Widget for building video attachment thumbnail.
@@ -19,7 +18,7 @@ class StreamVideoAttachmentThumbnail extends StatelessWidget {
     this.width,
     this.height,
     this.fit,
-    this.errorBuilder = _defaultErrorBuilder,
+    this.errorBuilder,
   });
 
   /// The video attachment to build the thumbnail for.
@@ -35,21 +34,18 @@ class StreamVideoAttachmentThumbnail extends StatelessWidget {
   final BoxFit? fit;
 
   /// Builder used when the thumbnail fails to load.
-  final ThumbnailErrorBuilder errorBuilder;
+  ///
+  /// If null, default error handling is used.
+  final ThumbnailErrorBuilder? errorBuilder;
 
-  // Default error builder for image attachment thumbnail.
-  static Widget _defaultErrorBuilder(
+  // Default error builder for video attachment thumbnail.
+  Widget _defaultErrorBuilder(
     BuildContext context,
     Object error,
     StackTrace? stackTrace,
   ) {
-    return ThumbnailError(
-      error: error,
-      stackTrace: stackTrace,
-      height: double.infinity,
-      width: double.infinity,
-      fit: BoxFit.cover,
-    );
+    if (errorBuilder case final builder?) return builder(context, error, null);
+    return StreamImageErrorPlaceholder(width: width, height: height);
   }
 
   @override
@@ -76,31 +72,14 @@ class StreamVideoAttachmentThumbnail extends StatelessWidget {
         height: height,
         fit: fit,
         frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
-          if (frame != null || wasSynchronouslyLoaded) {
-            return child;
-          }
-
-          final image = Image.asset(
-            'lib/assets/images/placeholder.png',
-            width: width,
-            height: height,
-            fit: BoxFit.cover,
-            package: 'stream_chat_flutter',
-          );
-
-          final colorTheme = StreamChatTheme.of(context).colorTheme;
-          return Shimmer.fromColors(
-            baseColor: colorTheme.disabled,
-            highlightColor: colorTheme.inputBg,
-            child: image,
-          );
+          if (frame != null || wasSynchronouslyLoaded) return child;
+          return StreamImageLoadingPlaceholder(height: height, width: width);
         },
-        errorBuilder: errorBuilder,
+        errorBuilder: _defaultErrorBuilder,
       );
     }
 
-    // Return error widget if no thumbnail is found.
-    return errorBuilder(
+    return _defaultErrorBuilder(
       context,
       'Video attachment is not valid',
       StackTrace.current,

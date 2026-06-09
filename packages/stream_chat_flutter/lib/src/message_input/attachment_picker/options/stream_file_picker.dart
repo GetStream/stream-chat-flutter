@@ -1,12 +1,10 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:photo_manager/photo_manager.dart';
 import 'package:stream_chat_flutter/src/attachment/handler/stream_attachment_handler.dart';
-import 'package:stream_chat_flutter/src/icons/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/message_input/attachment_picker/stream_attachment_picker.dart';
-import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/utils/utils.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 /// Widget used to pick files from the device
 class StreamFilePicker extends StatelessWidget {
@@ -19,7 +17,7 @@ class StreamFilePicker extends StatelessWidget {
     this.type = FileType.any,
     this.allowedExtensions,
     this.onFileLoading,
-    this.allowCompression = true,
+    this.compressionQuality = 0,
     this.withData = false,
     this.withReadStream = false,
     this.lockParentWindow = false,
@@ -43,8 +41,8 @@ class StreamFilePicker extends StatelessWidget {
   /// Callback called when the file picker is loading a file.
   final Function(FilePickerStatus)? onFileLoading;
 
-  /// Whether to allow compression of the file.
-  final bool allowCompression;
+  /// The compression quality for the file.
+  final int compressionQuality;
 
   /// Whether to include the file data in the [Attachment].
   final bool withData;
@@ -57,60 +55,59 @@ class StreamFilePicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = StreamChatTheme.of(context);
+    final spacing = context.streamSpacing;
+    final textTheme = context.streamTextTheme;
+    final colorScheme = context.streamColorScheme;
+
+    Future<void> onPickFile() async {
+      final pickedFile = await runInPermissionRequestLock(() {
+        return StreamAttachmentHandler.instance.pickFile(
+          dialogTitle: dialogTitle,
+          initialDirectory: initialDirectory,
+          type: type,
+          allowedExtensions: allowedExtensions,
+          onFileLoading: onFileLoading,
+          compressionQuality: compressionQuality,
+          withData: withData,
+          withReadStream: withReadStream,
+          lockParentWindow: lockParentWindow,
+        );
+      });
+
+      return onFilePicked.call(pickedFile);
+    }
+
     return OptionDrawer(
       child: EndOfFrameCallbackWidget(
-        child: StreamSvgIcon(
-          size: 240,
-          icon: StreamSvgIcons.files,
-          color: theme.colorTheme.disabled,
-        ),
-        onEndOfFrame: (_) async {
-          final pickedFile = await runInPermissionRequestLock(() {
-            return StreamAttachmentHandler.instance.pickFile(
-              dialogTitle: dialogTitle,
-              initialDirectory: initialDirectory,
-              type: type,
-              allowedExtensions: allowedExtensions,
-              onFileLoading: onFileLoading,
-              allowCompression: allowCompression,
-              withData: withData,
-              withReadStream: withReadStream,
-              lockParentWindow: lockParentWindow,
-            );
-          });
-
-          onFilePicked.call(pickedFile);
-        },
-        errorBuilder: (context, error, stacktrace) {
-          return Column(
+        child: Center(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              StreamSvgIcon(
-                size: 240,
-                icon: StreamSvgIcons.files,
-                color: theme.colorTheme.disabled,
+              Icon(
+                size: 32,
+                context.streamIcons.file,
+                color: colorScheme.textTertiary,
               ),
+              SizedBox(height: spacing.xs),
               Text(
-                context.translations.enablePhotoAndVideoAccessMessage,
-                style: theme.textTheme.body.copyWith(
-                  color: theme.colorTheme.textLowEmphasis,
+                context.translations.selectFilesToShareLabel,
+                style: textTheme.bodyDefault.copyWith(
+                  color: colorScheme.textSecondary,
                 ),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 8),
-              TextButton(
-                onPressed: PhotoManager.openSetting,
-                child: Text(
-                  context.translations.allowGalleryAccessMessage,
-                  style: theme.textTheme.bodyBold.copyWith(
-                    color: theme.colorTheme.accentPrimary,
-                  ),
-                ),
+              SizedBox(height: spacing.md),
+              StreamButton(
+                type: .outline,
+                style: .secondary,
+                onPressed: onPickFile,
+                child: Text(context.translations.openFilesLabel),
               ),
             ],
-          );
-        },
+          ),
+        ),
+        onEndOfFrame: (_) => onPickFile(),
       ),
     );
   }

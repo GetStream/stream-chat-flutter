@@ -3,16 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_localizations/stream_chat_localizations.dart';
 
-class _NnStreamChatLocalizationsDelegate
-    extends LocalizationsDelegate<StreamChatLocalizations> {
+class _NnStreamChatLocalizationsDelegate extends LocalizationsDelegate<StreamChatLocalizations> {
   const _NnStreamChatLocalizationsDelegate();
 
   @override
   bool isSupported(Locale locale) => locale.languageCode == 'nn';
 
   @override
-  Future<StreamChatLocalizations> load(Locale locale) =>
-      SynchronousFuture(const NnStreamChatLocalizations());
+  Future<StreamChatLocalizations> load(Locale locale) => SynchronousFuture(const NnStreamChatLocalizations());
 
   @override
   bool shouldReload(_NnStreamChatLocalizationsDelegate old) => false;
@@ -64,6 +62,9 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
   String get threadReplyLabel => 'Thread Reply';
 
   @override
+  String get threadLabel => 'Thread';
+
+  @override
   String get onlyVisibleToYouText => 'Only visible to you';
 
   @override
@@ -71,10 +72,9 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
 
   @override
   String attachmentsUploadProgressText({
-    required int remaining,
+    required int completed,
     required int total,
-  }) =>
-      'Uploading $remaining/$total ...';
+  }) => 'Uploaded $completed of $total ...';
 
   @override
   String pinnedByUserText({
@@ -87,11 +87,10 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
   }
 
   @override
-  String get sendMessagePermissionError =>
-      "You don't have permission to send messages";
+  String get sendMessagePermissionError => "You don't have permission to send messages";
 
   @override
-  String get emptyMessagesText => 'There are no messages currently';
+  String get emptyMessagesText => 'No messages yet';
 
   @override
   String get genericErrorText => 'Something went wrong';
@@ -122,8 +121,8 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
 
   @override
   String threadSeparatorText(int replyCount) {
-    if (replyCount == 1) return '1 Reply';
-    return '$replyCount Replies';
+    if (replyCount == 1) return '1 reply';
+    return '$replyCount replies';
   }
 
   @override
@@ -136,7 +135,7 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
   String get reconnectingLabel => 'Reconnecting...';
 
   @override
-  String get alsoSendAsDirectMessageLabel => 'Also send as direct message';
+  String get alsoSendAsDirectMessageLabel => 'Also send in Channel';
 
   @override
   String get addACommentOrSendLabel => 'Add a comment or send';
@@ -145,7 +144,7 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
   String get searchGifLabel => 'Search GIFs';
 
   @override
-  String get writeAMessageLabel => 'Write a message';
+  String get writeAMessageLabel => 'Send a message';
 
   @override
   String get instantCommandsLabel => 'Instant Commands';
@@ -161,8 +160,7 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
       'The file is too large to upload. The file size limit is $limitInMB MB.';
 
   @override
-  String get couldNotReadBytesFromFileError =>
-      'Could not read bytes from file.';
+  String get couldNotReadBytesFromFileError => 'Could not read bytes from file.';
 
   @override
   String get addAFileLabel => 'Add a file';
@@ -189,7 +187,7 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
   String get somethingWentWrongError => 'Something went wrong';
 
   @override
-  String get addMoreFilesLabel => 'Add more files';
+  String get addMoreFilesLabel => 'Add more';
 
   @override
   String get enablePhotoAndVideoAccessMessage =>
@@ -217,8 +215,7 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
   String get flagMessageSuccessfulLabel => 'Message flagged';
 
   @override
-  String get flagMessageSuccessfulText =>
-      'The message has been reported to a moderator.';
+  String get flagMessageSuccessfulText => 'The message has been reported to a moderator.';
 
   @override
   String get deleteLabel => 'DELETE';
@@ -227,12 +224,10 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
   String get deleteMessageLabel => 'Delete Message';
 
   @override
-  String get deleteMessageQuestion =>
-      'Are you sure you want to permanently delete this\nmessage?';
+  String get deleteMessageQuestion => 'Are you sure you want to permanently delete this\nmessage?';
 
   @override
-  String get operationCouldNotBeCompletedText =>
-      "The operation couldn't be completed.";
+  String get operationCouldNotBeCompletedText => "The operation couldn't be completed.";
 
   @override
   String get replyLabel => 'Reply';
@@ -263,6 +258,9 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
 
   @override
   String get photosLabel => 'Photos';
+
+  @override
+  String get photosAndVideosLabel => 'Photos & Videos';
 
   String _getDay(DateTime dateTime) {
     final now = DateTime.now();
@@ -302,8 +300,7 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
   String get letsStartChattingLabel => 'Let’s start chatting!';
 
   @override
-  String get sendingFirstMessageLabel =>
-      'How about sending your first message to a friend?';
+  String get sendingFirstMessageLabel => 'How about sending your first message to a friend?';
 
   @override
   String get startAChatLabel => 'Start a chat';
@@ -315,8 +312,7 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
   String get deleteConversationLabel => 'Delete Conversation';
 
   @override
-  String get deleteConversationQuestion =>
-      'Are you sure you want to delete this conversation?';
+  String get deleteConversationQuestion => 'Are you sure you want to delete this conversation?';
 
   @override
   String get streamChatLabel => 'Stream Chat';
@@ -343,6 +339,16 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
   }
 
   @override
+  String membersCountWithOnlineText({
+    required int memberCount,
+    required int onlineCount,
+  }) {
+    final members = membersCountText(memberCount);
+    if (onlineCount <= 0) return members;
+    return '$members, ${watchersCountText(onlineCount)}';
+  }
+
+  @override
   String get viewInfoLabel => 'View Info';
 
   @override
@@ -355,8 +361,7 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
   String get leaveConversationLabel => 'Leave conversation';
 
   @override
-  String get leaveConversationQuestion =>
-      'Are you sure you want to leave this conversation?';
+  String get leaveConversationQuestion => 'Are you sure you want to leave this conversation?';
 
   @override
   String get showInChatLabel => 'Show in Chat';
@@ -392,8 +397,7 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
   String galleryPaginationText({
     required int currentPage,
     required int totalPages,
-  }) =>
-      '$currentPage of $totalPages';
+  }) => '$currentPage of $totalPages';
 
   @override
   String get fileText => 'File';
@@ -402,11 +406,13 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
   String get replyToMessageLabel => 'Reply to Message';
 
   @override
-  String attachmentLimitExceedError(int limit) =>
-      'Attachment limit exceeded, limit: $limit';
+  String attachmentLimitExceedError(int limit) => 'Attachment limit exceeded, limit: $limit';
 
   @override
-  String get slowModeOnLabel => 'Slow mode ON';
+  String slowModeOnLabel(int cooldownTimeOut) => 'Slow mode, wait ${cooldownTimeOut}s\u2026';
+
+  @override
+  String get commandUsernameLabel => '@username';
 
   @override
   String get downloadLabel => 'Download';
@@ -418,6 +424,12 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
     } else {
       return 'Mute User';
     }
+  }
+
+  @override
+  String toggleBlockUnblockUserText({required bool isBlocked}) {
+    if (isBlocked) return 'Unblock User';
+    return 'Block User';
   }
 
   @override
@@ -457,8 +469,7 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
   }
 
   @override
-  String get linkDisabledDetails =>
-      'Sending links is not allowed in this conversation.';
+  String get linkDisabledDetails => 'Sending links is not allowed in this conversation.';
 
   @override
   String get linkDisabledError => 'Links are disabled';
@@ -495,7 +506,10 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
   }
 
   @override
-  String get questionsLabel => 'Questions';
+  String questionLabel({bool isPlural = false}) {
+    if (isPlural) return 'Questions';
+    return 'Question';
+  }
 
   @override
   String get askAQuestionLabel => 'Ask a question';
@@ -578,15 +592,17 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
   String get enterYourCommentLabel => 'Enter your comment';
 
   @override
-  String get endVoteConfirmationText =>
-      'Are you sure you want to end the poll?';
+  String get endVoteConfirmationTitle => 'End This Poll?';
+
+  @override
+  String get endVoteConfirmationMessage =>
+      'Do you want to end this poll now? Nobody will be able to vote in this poll anymore.';
 
   @override
   String get deletePollOptionLabel => 'Delete Option';
 
   @override
-  String get deletePollOptionQuestion =>
-      'Are you sure you want to delete this option?';
+  String get deletePollOptionQuestion => 'Are you sure you want to delete this option?';
 
   @override
   String get createLabel => 'Create';
@@ -617,10 +633,13 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
   String get viewResultsLabel => 'View Results';
 
   @override
-  String get endVoteLabel => 'End Vote';
+  String get endVoteLabel => 'End Poll';
 
   @override
   String get pollResultsLabel => 'Poll Results';
+
+  @override
+  String get pollVotesLabel => 'Votes';
 
   @override
   String showAllVotesLabel({int? count}) {
@@ -629,11 +648,21 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
   }
 
   @override
+  String get viewAllLabel => 'View all';
+
+  @override
   String voteCountLabel({int? count}) => switch (count) {
-        null || < 1 => '0 votes',
-        1 => '1 vote',
-        _ => '$count votes',
-      };
+    null || < 1 => '0 votes',
+    1 => '1 vote',
+    _ => '$count votes',
+  };
+
+  @override
+  String totalVoteCountLabel({int? count}) => switch (count) {
+    null || < 1 => '0 votes total',
+    1 => '1 vote total',
+    _ => '$count votes total',
+  };
 
   @override
   String get noPollVotesLabel => 'There are no poll votes currently';
@@ -651,6 +680,9 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
   }
 
   @override
+  String get loadingLabel => 'Loading...';
+
+  @override
   String get slideToCancelLabel => 'Slide to cancel';
 
   @override
@@ -660,8 +692,7 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
   String get sendAnywayLabel => 'Send Anyway';
 
   @override
-  String get moderatedMessageBlockedText =>
-      'Message was blocked by moderation policies';
+  String get moderatedMessageBlockedText => 'Message was blocked by moderation policies';
 
   @override
   String get moderationReviewModalTitle => 'Are you sure?';
@@ -699,6 +730,126 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
 
   @override
   String get draftLabel => 'Draft';
+
+  @override
+  String locationLabel({bool isLive = false}) {
+    if (isLive) return 'Live Location';
+    return 'Location';
+  }
+
+  @override
+  String get fileAttachmentText => 'File';
+
+  @override
+  String get linkAttachmentText => 'Link';
+
+  @override
+  String filesAttachmentCountText(int count) {
+    return count == 1 ? 'File' : '$count files';
+  }
+
+  @override
+  String photosAttachmentCountText(int count) {
+    return count == 1 ? 'Photo' : '$count photos';
+  }
+
+  @override
+  String videosAttachmentCountText(int count) {
+    return count == 1 ? 'Video' : '$count videos';
+  }
+
+  @override
+  String get noConversationsYetText => 'No conversations yet';
+
+  @override
+  String get replyToStartThreadText => 'Reply to a message to start a thread';
+
+  @override
+  String get sendMessageToStartConversationText => 'Send a message to start the conversation';
+
+  @override
+  String get savedForLaterLabel => 'Saved for later';
+
+  @override
+  String get repliedToThreadAnnotationLabel => 'Replied to a thread';
+
+  @override
+  String get alsoSentInChannelAnnotationLabel => 'Also sent in channel';
+
+  @override
+  String get viewLabel => 'View';
+
+  @override
+  String get reminderSetLabel => 'Reminder set';
+
+  @override
+  String reminderAtText(String time) => 'Today at $time';
+
+  @override
+  String get createPollPromptLabel => 'Create a poll and let everyone vote!';
+
+  @override
+  String get takePhotoAndShareLabel => 'Take a photo and share';
+
+  @override
+  String get takeVideoAndShareLabel => 'Take a video and share';
+
+  @override
+  String get openCameraLabel => 'Open camera';
+
+  @override
+  String get selectFilesToShareLabel => 'Select files to share';
+
+  @override
+  String get openFilesLabel => 'Open files';
+
+  @override
+  String get unsupportedAttachmentLabel => 'Unsupported Attachment';
+
+  @override
+  String get confirmLabel => 'CONFIRM';
+
+  @override
+  String get emptyReactionsText => 'No reactions yet';
+
+  @override
+  String get loadingReactionsError => 'Error loading reactions';
+
+  @override
+  String get tapToRemoveReactionLabel => 'Tap to remove';
+
+  @override
+  String reactionsCountText(int count) => count == 1 ? '1 Reaction' : '$count Reactions';
+
+  @override
+  String get justNowLabel => 'Just now';
+
+  @override
+  String replyToUserLabel(String userName) => 'Reply to $userName';
+
+  @override
+  String get multipleAnswersDescription => 'Select more than one option';
+
+  @override
+  String maximumVotesPerPersonDescription([Range<int>? range]) {
+    final (:min, :max) = range ?? (min: 2, max: 10);
+    return 'Choose between $min\u2013$max options';
+  }
+
+  @override
+  String get anonymousPollDescription => 'Hide who voted';
+
+  @override
+  String get suggestAnOptionDescription => 'Let others add options';
+
+  @override
+  String get addACommentDescription => 'Allow others to add comments';
+
+  @override
+  String fileTypeNotSupportedError(String? extension) {
+    if (extension != null) return "'.$extension' files are not supported for upload.";
+    return 'This file type is not supported for upload.';
+  }
 }
 
 void main() async {
@@ -810,14 +961,14 @@ class ChannelPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      appBar: StreamChannelHeader(),
+    return Scaffold(
+      appBar: const StreamChannelHeader(),
       body: Column(
         children: <Widget>[
-          Expanded(
+          const Expanded(
             child: StreamMessageListView(),
           ),
-          StreamMessageInput(),
+          StreamMessageComposer(),
         ],
       ),
     );

@@ -115,7 +115,10 @@ void main() {
   test('updateLastSyncAt preserves millisecond precision', () async {
     // A connection event must exist before lastSyncAt can be stored.
     await eventDao.updateConnectionEvent(
-      Event(createdAt: DateTime.now(), me: OwnUser(id: 'testUserId')),
+      Event(
+        createdAt: DateTime.now(),
+        me: OwnUser(id: 'testUserId'),
+      ),
     );
 
     final preciseDate = DateTime.utc(2026, 5, 28, 12, 34, 56, 123);

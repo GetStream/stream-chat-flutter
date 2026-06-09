@@ -1,6 +1,5 @@
-// dart format width=80
-// coverage:ignore-file
 // GENERATED CODE - DO NOT MODIFY BY HAND
+// coverage:ignore-file
 // ignore_for_file: type=lint
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
@@ -17,8 +16,7 @@ T _$identity<T>(T value) => value;
 mixin _$PagedValue<Key, Value> {
   @override
   bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType && other is PagedValue<Key, Value>);
+    return identical(this, other) || (other.runtimeType == runtimeType && other is PagedValue<Key, Value>);
   }
 
   @override
@@ -32,15 +30,13 @@ mixin _$PagedValue<Key, Value> {
 
 /// @nodoc
 class $PagedValueCopyWith<Key, Value, $Res> {
-  $PagedValueCopyWith(
-      PagedValue<Key, Value> _, $Res Function(PagedValue<Key, Value>) __);
+  $PagedValueCopyWith(PagedValue<Key, Value> _, $Res Function(PagedValue<Key, Value>) __);
 }
 
 /// @nodoc
 
 class Success<Key, Value> extends PagedValue<Key, Value> {
-  const Success(
-      {required final List<Value> items, this.nextPageKey, this.error})
+  const Success({required final List<Value> items, this.nextPageKey, this.error})
       : _items = items,
         super._();
 
@@ -73,17 +69,13 @@ class Success<Key, Value> extends PagedValue<Key, Value> {
         (other.runtimeType == runtimeType &&
             other is Success<Key, Value> &&
             const DeepCollectionEquality().equals(other._items, _items) &&
-            const DeepCollectionEquality()
-                .equals(other.nextPageKey, nextPageKey) &&
+            const DeepCollectionEquality().equals(other.nextPageKey, nextPageKey) &&
             (identical(other.error, error) || other.error == error));
   }
 
   @override
-  int get hashCode => Object.hash(
-      runtimeType,
-      const DeepCollectionEquality().hash(_items),
-      const DeepCollectionEquality().hash(nextPageKey),
-      error);
+  int get hashCode => Object.hash(runtimeType, const DeepCollectionEquality().hash(_items),
+      const DeepCollectionEquality().hash(nextPageKey), error);
 
   @override
   String toString() {
@@ -92,18 +84,14 @@ class Success<Key, Value> extends PagedValue<Key, Value> {
 }
 
 /// @nodoc
-abstract mixin class $SuccessCopyWith<Key, Value, $Res>
-    implements $PagedValueCopyWith<Key, Value, $Res> {
-  factory $SuccessCopyWith(
-          Success<Key, Value> value, $Res Function(Success<Key, Value>) _then) =
-      _$SuccessCopyWithImpl;
+abstract mixin class $SuccessCopyWith<Key, Value, $Res> implements $PagedValueCopyWith<Key, Value, $Res> {
+  factory $SuccessCopyWith(Success<Key, Value> value, $Res Function(Success<Key, Value>) _then) = _$SuccessCopyWithImpl;
   @useResult
   $Res call({List<Value> items, Key? nextPageKey, StreamChatError? error});
 }
 
 /// @nodoc
-class _$SuccessCopyWithImpl<Key, Value, $Res>
-    implements $SuccessCopyWith<Key, Value, $Res> {
+class _$SuccessCopyWithImpl<Key, Value, $Res> implements $SuccessCopyWith<Key, Value, $Res> {
   _$SuccessCopyWithImpl(this._self, this._then);
 
   final Success<Key, Value> _self;
@@ -141,8 +129,7 @@ class Loading<Key, Value> extends PagedValue<Key, Value> {
 
   @override
   bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType && other is Loading<Key, Value>);
+    return identical(this, other) || (other.runtimeType == runtimeType && other is Loading<Key, Value>);
   }
 
   @override
@@ -186,18 +173,14 @@ class Error<Key, Value> extends PagedValue<Key, Value> {
 }
 
 /// @nodoc
-abstract mixin class $ErrorCopyWith<Key, Value, $Res>
-    implements $PagedValueCopyWith<Key, Value, $Res> {
-  factory $ErrorCopyWith(
-          Error<Key, Value> value, $Res Function(Error<Key, Value>) _then) =
-      _$ErrorCopyWithImpl;
+abstract mixin class $ErrorCopyWith<Key, Value, $Res> implements $PagedValueCopyWith<Key, Value, $Res> {
+  factory $ErrorCopyWith(Error<Key, Value> value, $Res Function(Error<Key, Value>) _then) = _$ErrorCopyWithImpl;
   @useResult
   $Res call({StreamChatError error});
 }
 
 /// @nodoc
-class _$ErrorCopyWithImpl<Key, Value, $Res>
-    implements $ErrorCopyWith<Key, Value, $Res> {
+class _$ErrorCopyWithImpl<Key, Value, $Res> implements $ErrorCopyWith<Key, Value, $Res> {
   _$ErrorCopyWithImpl(this._self, this._then);
 
   final Error<Key, Value> _self;

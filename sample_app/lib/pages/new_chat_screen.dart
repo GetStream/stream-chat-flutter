@@ -5,7 +5,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sample_app/routes/routes.dart';
-import 'package:sample_app/utils/localizations.dart';
 import 'package:sample_app/widgets/chips_input_text_field.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -17,8 +16,7 @@ class NewChatScreen extends StatefulWidget {
 }
 
 class _NewChatScreenState extends State<NewChatScreen> {
-  final _chipInputTextFieldStateKey =
-      GlobalKey<ChipInputTextFieldState<User>>();
+  final _chipInputTextFieldStateKey = GlobalKey<ChipInputTextFieldState<User>>();
 
   late TextEditingController _controller;
 
@@ -29,15 +27,11 @@ class _NewChatScreenState extends State<NewChatScreen> {
       Filter.notEqual('id', StreamChat.of(context).currentUser!.id),
     ]),
     sort: [
-      const SortOption(
-        'name',
-        direction: 1,
-      ),
+      const SortOption.asc(UserSortKey.name),
     ],
   );
 
-  ChipInputTextFieldState? get _chipInputTextFieldState =>
-      _chipInputTextFieldStateKey.currentState;
+  ChipInputTextFieldState? get _chipInputTextFieldState => _chipInputTextFieldStateKey.currentState;
 
   String _userNameQuery = '';
 
@@ -64,8 +58,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
         });
 
         userListController.filter = Filter.and([
-          if (_userNameQuery.isNotEmpty)
-            Filter.autoComplete('name', _userNameQuery),
+          if (_userNameQuery.isNotEmpty) Filter.autoComplete('name', _userNameQuery),
           Filter.notEqual('id', StreamChat.of(context).currentUser!.id),
         ]);
         userListController.doInitialLoad();
@@ -94,13 +87,15 @@ class _NewChatScreenState extends State<NewChatScreen> {
         final res = await chatState.client.queryChannelsOnline(
           state: false,
           watch: false,
-          filter: Filter.raw(value: {
-            'members': [
-              ..._selectedUsers.map((e) => e.id),
-              chatState.currentUser!.id,
-            ],
-            'distinct': true,
-          }),
+          filter: Filter.raw(
+            value: {
+              'members': [
+                ..._selectedUsers.map((e) => e.id),
+                chatState.currentUser!.id,
+              ],
+              'distinct': true,
+            },
+          ),
           messageLimit: 0,
           paginationParams: const PaginationParams(
             limit: 1,
@@ -144,18 +139,8 @@ class _NewChatScreenState extends State<NewChatScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: StreamChatTheme.of(context).colorTheme.appBg,
-      appBar: AppBar(
-        elevation: 0,
-        backgroundColor: StreamChatTheme.of(context).colorTheme.barsBg,
-        leading: const StreamBackButton(),
-        title: Text(
-          AppLocalizations.of(context).newChat,
-          style: StreamChatTheme.of(context).textTheme.headlineBold.copyWith(
-              color: StreamChatTheme.of(context).colorTheme.textHighEmphasis),
-        ),
-        centerTitle: true,
-      ),
+      backgroundColor: context.streamColorScheme.backgroundApp,
+      appBar: StreamAppBar(title: const Text('New Chat')),
       body: StreamConnectionStatusBuilder(
         statusBuilder: (context, status) {
           var statusString = '';
@@ -163,14 +148,14 @@ class _NewChatScreenState extends State<NewChatScreen> {
 
           switch (status) {
             case ConnectionStatus.connected:
-              statusString = AppLocalizations.of(context).connected;
+              statusString = 'Connected';
               showStatus = false;
               break;
             case ConnectionStatus.connecting:
-              statusString = AppLocalizations.of(context).reconnecting;
+              statusString = 'Reconnecting...';
               break;
             case ConnectionStatus.disconnected:
-              statusString = AppLocalizations.of(context).disconnected;
+              statusString = 'Disconnected';
               break;
           }
           return StreamInfoTile(
@@ -188,7 +173,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
                     key: _chipInputTextFieldStateKey,
                     controller: _controller,
                     focusNode: _searchFocusNode,
-                    hint: AppLocalizations.of(context).typeANameHint,
+                    hint: 'Type a name',
                     chipBuilder: (context, user) {
                       return GestureDetector(
                         onTap: () {
@@ -200,9 +185,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
                           children: [
                             Container(
                               decoration: BoxDecoration(
-                                color: StreamChatTheme.of(context)
-                                    .colorTheme
-                                    .disabled,
+                                color: context.streamColorScheme.textDisabled,
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               padding: const EdgeInsets.only(left: 24),
@@ -212,30 +195,23 @@ class _NewChatScreenState extends State<NewChatScreen> {
                                   user.name,
                                   maxLines: 1,
                                   style: TextStyle(
-                                    color: StreamChatTheme.of(context)
-                                        .colorTheme
-                                        .textHighEmphasis,
+                                    color: context.streamColorScheme.textPrimary,
                                   ),
                                 ),
                               ),
                             ),
                             Container(
                               foregroundDecoration: BoxDecoration(
-                                color: StreamChatTheme.of(context)
-                                    .colorTheme
-                                    .overlay,
+                                color: context.streamColorScheme.backgroundOverlayLight,
                                 shape: BoxShape.circle,
                               ),
                               child: StreamUserAvatar(
-                                showOnlineStatus: false,
+                                size: .sm,
                                 user: user,
-                                constraints: const BoxConstraints.tightFor(
-                                  height: 24,
-                                  width: 24,
-                                ),
+                                showOnlineIndicator: false,
                               ),
                             ),
-                            const StreamSvgIcon(icon: StreamSvgIcons.close),
+                            Icon(context.streamIcons.xmark),
                           ],
                         ),
                       );
@@ -260,21 +236,17 @@ class _NewChatScreenState extends State<NewChatScreen> {
                           children: [
                             StreamNeumorphicButton(
                               child: Center(
-                                child: StreamSvgIcon(
-                                  color: StreamChatTheme.of(context)
-                                      .colorTheme
-                                      .accentPrimary,
+                                child: Icon(
+                                  context.streamIcons.users,
+                                  color: context.streamColorScheme.accentPrimary,
                                   size: 24,
-                                  icon: StreamSvgIcons.contacts,
                                 ),
                               ),
                             ),
                             const SizedBox(width: 8),
                             Text(
-                              AppLocalizations.of(context).createAGroup,
-                              style: StreamChatTheme.of(context)
-                                  .textTheme
-                                  .bodyBold,
+                              'Create a Group',
+                              style: context.streamTextTheme.bodyEmphasis,
                             ),
                           ],
                         ),
@@ -284,8 +256,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
                     Container(
                       width: double.maxFinite,
                       decoration: BoxDecoration(
-                        gradient:
-                            StreamChatTheme.of(context).colorTheme.bgGradient,
+                        color: context.streamColorScheme.backgroundElevation1,
                       ),
                       child: Padding(
                         padding: const EdgeInsets.symmetric(
@@ -293,17 +264,11 @@ class _NewChatScreenState extends State<NewChatScreen> {
                           horizontal: 8,
                         ),
                         child: Text(
-                            _isSearchActive
-                                ? '${AppLocalizations.of(context).matchesFor} "$_userNameQuery"'
-                                : AppLocalizations.of(context).onThePlatorm,
-                            style: StreamChatTheme.of(context)
-                                .textTheme
-                                .footnote
-                                .copyWith(
-                                    color: StreamChatTheme.of(context)
-                                        .colorTheme
-                                        .textHighEmphasis
-                                        .withOpacity(.5))),
+                          _isSearchActive ? 'Matches for "$_userNameQuery"' : 'On the platform',
+                          style: context.streamTextTheme.captionDefault.copyWith(
+                            color: context.streamColorScheme.textPrimary.withOpacity(.5),
+                          ),
+                        ),
                       ),
                     ),
                   Expanded(
@@ -323,52 +288,42 @@ class _NewChatScreenState extends State<NewChatScreen> {
                                   _chipInputTextFieldState!.removeItem(user);
                                 }
                               },
-                              itemBuilder: (
-                                context,
-                                users,
-                                index,
-                                defaultWidget,
-                              ) {
-                                return defaultWidget.copyWith(
-                                  selected:
-                                      _selectedUsers.contains(users[index]),
-                                );
-                              },
+                              itemBuilder:
+                                  (
+                                    context,
+                                    users,
+                                    index,
+                                    defaultWidget,
+                                  ) {
+                                    return defaultWidget.copyWith(
+                                      selected: _selectedUsers.contains(users[index]),
+                                    );
+                                  },
                               emptyBuilder: (_) {
                                 return LayoutBuilder(
                                   builder: (context, viewportConstraints) {
                                     return SingleChildScrollView(
-                                      physics:
-                                          const AlwaysScrollableScrollPhysics(),
+                                      physics: const AlwaysScrollableScrollPhysics(),
                                       child: ConstrainedBox(
                                         constraints: BoxConstraints(
-                                          minHeight:
-                                              viewportConstraints.maxHeight,
+                                          minHeight: viewportConstraints.maxHeight,
                                         ),
                                         child: Center(
                                           child: Column(
                                             children: [
-                                              const Padding(
-                                                padding: EdgeInsets.all(24),
-                                                child: StreamSvgIcon(
-                                                  icon: StreamSvgIcons.search,
+                                              Padding(
+                                                padding: const EdgeInsets.all(24),
+                                                child: Icon(
+                                                  context.streamIcons.search,
                                                   size: 96,
                                                   color: Colors.grey,
                                                 ),
                                               ),
                                               Text(
-                                                AppLocalizations.of(context)
-                                                    .noUserMatchesTheseKeywords,
-                                                style: StreamChatTheme.of(
-                                                        context)
-                                                    .textTheme
-                                                    .footnote
-                                                    .copyWith(
-                                                        color: StreamChatTheme
-                                                                .of(context)
-                                                            .colorTheme
-                                                            .textHighEmphasis
-                                                            .withOpacity(.5)),
+                                                'No user matches these keywords...',
+                                                style: context.streamTextTheme.captionDefault.copyWith(
+                                                  color: context.streamColorScheme.textPrimary.withOpacity(.5),
+                                                ),
                                               ),
                                             ],
                                           ),
@@ -389,20 +344,17 @@ class _NewChatScreenState extends State<NewChatScreen> {
 
                               return Center(
                                 child: Text(
-                                  AppLocalizations.of(context).noChatsHereYet,
+                                  'No chats here yet...',
                                   style: TextStyle(
                                     fontSize: 12,
-                                    color: StreamChatTheme.of(context)
-                                        .colorTheme
-                                        .textHighEmphasis
-                                        .withOpacity(.5),
+                                    color: context.streamColorScheme.textPrimary.withOpacity(.5),
                                   ),
                                 ),
                               );
                             },
                           ),
                   ),
-                  StreamMessageInput(
+                  StreamMessageComposer(
                     focusNode: _messageInputFocusNode,
                     preMessageSending: (message) async {
                       await channel!.watch();

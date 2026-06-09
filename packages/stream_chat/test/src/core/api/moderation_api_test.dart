@@ -7,10 +7,10 @@ import '../../mocks.dart';
 
 void main() {
   Response successResponse(String path, {Object? data}) => Response(
-        data: data,
-        requestOptions: RequestOptions(path: path),
-        statusCode: 200,
-      );
+    data: data,
+    requestOptions: RequestOptions(path: path),
+    statusCode: 200,
+  );
 
   late final client = MockHttpClient();
   late ModerationApi moderationApi;
@@ -65,15 +65,15 @@ void main() {
 
     const path = '/moderation/mute/channel';
 
-    when(() => client.post(
-              path,
-              data: {
-                'channel_cid': channelCid,
-                'expiration': expiration.inMilliseconds,
-              },
-            ))
-        .thenAnswer(
-            (_) async => successResponse(path, data: <String, dynamic>{}));
+    when(
+      () => client.post(
+        path,
+        data: {
+          'channel_cid': channelCid,
+          'expiration': expiration.inMilliseconds,
+        },
+      ),
+    ).thenAnswer((_) async => successResponse(path, data: <String, dynamic>{}));
 
     final res = await moderationApi.muteChannel(
       channelCid,
@@ -91,12 +91,12 @@ void main() {
 
     const path = '/moderation/unmute/channel';
 
-    when(() => client.post(
-              path,
-              data: {'channel_cid': channelCid},
-            ))
-        .thenAnswer(
-            (_) async => successResponse(path, data: <String, dynamic>{}));
+    when(
+      () => client.post(
+        path,
+        data: {'channel_cid': channelCid},
+      ),
+    ).thenAnswer((_) async => successResponse(path, data: <String, dynamic>{}));
 
     final res = await moderationApi.unmuteChannel(channelCid);
 
@@ -111,14 +111,14 @@ void main() {
 
     const path = '/moderation/flag';
 
-    when(() => client.post(
-              path,
-              data: {
-                'target_message_id': messageId,
-              },
-            ))
-        .thenAnswer(
-            (_) async => successResponse(path, data: <String, dynamic>{}));
+    when(
+      () => client.post(
+        path,
+        data: {
+          'target_message_id': messageId,
+        },
+      ),
+    ).thenAnswer((_) async => successResponse(path, data: <String, dynamic>{}));
 
     final res = await moderationApi.flagMessage(messageId);
 
@@ -133,14 +133,14 @@ void main() {
 
     const path = '/moderation/unflag';
 
-    when(() => client.post(
-              path,
-              data: {
-                'target_message_id': messageId,
-              },
-            ))
-        .thenAnswer(
-            (_) async => successResponse(path, data: <String, dynamic>{}));
+    when(
+      () => client.post(
+        path,
+        data: {
+          'target_message_id': messageId,
+        },
+      ),
+    ).thenAnswer((_) async => successResponse(path, data: <String, dynamic>{}));
 
     final res = await moderationApi.unflagMessage(messageId);
 
@@ -155,11 +155,14 @@ void main() {
 
     const path = '/moderation/flag';
 
-    when(() => client.post(path, data: {
-              'target_user_id': userId,
-            }))
-        .thenAnswer(
-            (_) async => successResponse(path, data: <String, dynamic>{}));
+    when(
+      () => client.post(
+        path,
+        data: {
+          'target_user_id': userId,
+        },
+      ),
+    ).thenAnswer((_) async => successResponse(path, data: <String, dynamic>{}));
 
     final res = await moderationApi.flagUser(userId);
 
@@ -174,14 +177,14 @@ void main() {
 
     const path = '/moderation/unflag';
 
-    when(() => client.post(
-              path,
-              data: {
-                'target_user_id': userId,
-              },
-            ))
-        .thenAnswer(
-            (_) async => successResponse(path, data: <String, dynamic>{}));
+    when(
+      () => client.post(
+        path,
+        data: {
+          'target_user_id': userId,
+        },
+      ),
+    ).thenAnswer((_) async => successResponse(path, data: <String, dynamic>{}));
 
     final res = await moderationApi.unflagUser(userId);
 
@@ -197,12 +200,15 @@ void main() {
 
     const path = '/moderation/ban';
 
-    when(() => client.post(path, data: {
-              'target_user_id': targetUserId,
-              ...options,
-            }))
-        .thenAnswer(
-            (_) async => successResponse(path, data: <String, dynamic>{}));
+    when(
+      () => client.post(
+        path,
+        data: {
+          'target_user_id': targetUserId,
+          ...options,
+        },
+      ),
+    ).thenAnswer((_) async => successResponse(path, data: <String, dynamic>{}));
 
     final res = await moderationApi.banUser(targetUserId, options: options);
 

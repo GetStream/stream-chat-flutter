@@ -10,9 +10,10 @@ import 'package:synchronized/synchronized.dart';
 ///
 /// Each [MessageDeliveryInfo] represents an acknowledgment that the current
 /// user has received a message.
-typedef MarkChannelsDelivered = Future<void> Function(
-  Iterable<MessageDelivery> deliveries,
-);
+typedef MarkChannelsDelivered =
+    Future<void> Function(
+      Iterable<MessageDelivery> deliveries,
+    );
 
 /// Manages the delivery reporting for channel messages.
 ///
@@ -31,8 +32,8 @@ class ChannelDeliveryReporter {
     Logger? logger,
     required this.onMarkChannelsDelivered,
     Duration throttleDuration = const Duration(seconds: 1),
-  })  : _logger = logger,
-        _markAsDeliveredThrottleDuration = throttleDuration;
+  }) : _logger = logger,
+       _markAsDeliveredThrottleDuration = throttleDuration;
 
   final Logger? _logger;
   final Duration _markAsDeliveredThrottleDuration;
@@ -43,7 +44,7 @@ class ChannelDeliveryReporter {
   final MarkChannelsDelivered onMarkChannelsDelivered;
 
   final _deliveryCandidatesLock = Lock();
-  final _deliveryCandidates = <String /* cid */, Message /* message */ >{};
+  final _deliveryCandidates = <String /* cid */, Message /* message */>{};
 
   /// Submits [channels] for delivery reporting.
   ///

@@ -8,6 +8,7 @@ import 'package:stream_chat/src/core/models/draft.dart';
 import 'package:stream_chat/src/core/models/draft_message.dart';
 import 'package:stream_chat/src/core/models/filter.dart';
 import 'package:stream_chat/src/core/models/message.dart';
+import 'package:stream_chat/src/core/models/reaction.dart';
 
 /// Defines the api dedicated to messages operations
 class MessageApi {
@@ -174,14 +175,20 @@ class MessageApi {
   Future<EmptyResponse> deleteMessage(
     String messageId, {
     bool? hard,
+    bool? deleteForMe,
   }) async {
+    if (hard == true && deleteForMe == true) {
+      throw ArgumentError(
+        'Both hard and deleteForMe cannot be set at the same time.',
+      );
+    }
+
     final response = await _client.delete(
       '/messages/$messageId',
-      queryParameters: hard != null
-          ? {
-              'hard': hard,
-            }
-          : null,
+      queryParameters: {
+        if (hard != null) 'hard': hard,
+        if (deleteForMe != null) 'delete_for_me': deleteForMe,
+      },
     );
     return EmptyResponse.fromJson(response.data);
   }
@@ -210,19 +217,17 @@ class MessageApi {
   /// Set [enforceUnique] to true to remove the existing user reaction
   Future<SendReactionResponse> sendReaction(
     String messageId,
-    String reactionType, {
-    Map<String, Object?> extraData = const {},
+    Reaction reaction, {
+    bool skipPush = false,
     bool enforceUnique = false,
   }) async {
-    final reaction = Map<String, Object?>.from(extraData)
-      ..addAll({'type': reactionType});
-
     final response = await _client.post(
       '/messages/$messageId/reaction',
-      data: {
-        'reaction': reaction,
+      data: json.encode({
+        'reaction': reaction.toJson(),
+        'skip_push': skipPush,
         'enforce_unique': enforceUnique,
-      },
+      }),
     );
     return SendReactionResponse.fromJson(response.data);
   }
@@ -248,6 +253,28 @@ class MessageApi {
       queryParameters: {
         if (pagination != null) ...pagination.toJson(),
       },
+    );
+    return QueryReactionsResponse.fromJson(response.data);
+  }
+
+  /// Queries reactions for a [messageId] with optional [filter], [sort],
+  /// and [pagination].
+  ///
+  /// Unlike [getReactions], this method supports filtering by reaction type,
+  /// user ID, or creation date, sorting, and cursor-based pagination.
+  Future<QueryReactionsResponse> queryReactions(
+    String messageId, {
+    Filter? filter,
+    SortOrder<Reaction>? sort,
+    PaginationParams? pagination,
+  }) async {
+    final response = await _client.post(
+      '/messages/$messageId/reactions',
+      data: jsonEncode({
+        if (filter != null) 'filter': filter.toJson(),
+        if (sort != null) 'sort': sort.map((e) => e.toJson()).toList(),
+        if (pagination != null) ...pagination.toJson(),
+      }),
     );
     return QueryReactionsResponse.fromJson(response.data);
   }

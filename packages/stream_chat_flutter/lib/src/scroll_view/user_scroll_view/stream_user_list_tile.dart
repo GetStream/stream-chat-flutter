@@ -105,50 +105,45 @@ class StreamUserListTile extends StatelessWidget {
     Color? tileColor,
     VisualDensity? visualDensity,
     EdgeInsetsGeometry? contentPadding,
-  }) =>
-      StreamUserListTile(
-        key: key ?? this.key,
-        user: user ?? this.user,
-        leading: leading ?? this.leading,
-        title: title ?? this.title,
-        subtitle: subtitle ?? this.subtitle,
-        selectedWidget: selectedWidget ?? this.selectedWidget,
-        selected: selected ?? this.selected,
-        onTap: onTap ?? this.onTap,
-        onLongPress: onLongPress ?? this.onLongPress,
-        tileColor: tileColor ?? this.tileColor,
-        visualDensity: visualDensity ?? this.visualDensity,
-        contentPadding: contentPadding ?? this.contentPadding,
-      );
+  }) => StreamUserListTile(
+    key: key ?? this.key,
+    user: user ?? this.user,
+    leading: leading ?? this.leading,
+    title: title ?? this.title,
+    subtitle: subtitle ?? this.subtitle,
+    selectedWidget: selectedWidget ?? this.selectedWidget,
+    selected: selected ?? this.selected,
+    onTap: onTap ?? this.onTap,
+    onLongPress: onLongPress ?? this.onLongPress,
+    tileColor: tileColor ?? this.tileColor,
+    visualDensity: visualDensity ?? this.visualDensity,
+    contentPadding: contentPadding ?? this.contentPadding,
+  );
 
   @override
   Widget build(BuildContext context) {
-    final chatThemeData = StreamChatTheme.of(context);
+    final colorScheme = context.streamColorScheme;
 
-    final leading = this.leading ??
-        StreamUserAvatar(
-          user: user,
-          constraints: const BoxConstraints.tightFor(
-            height: 40,
-            width: 40,
-          ),
-        );
+    final leading = this.leading ?? StreamUserAvatar(size: .lg, user: user);
 
-    final title = this.title ??
+    final title =
+        this.title ??
         Text(
           user.name,
-          style: chatThemeData.textTheme.bodyBold,
+          style: context.streamTextTheme.bodyEmphasis,
         );
 
-    final subtitle = this.subtitle ??
+    final subtitle =
+        this.subtitle ??
         UserLastActive(
           user: user,
         );
 
-    final selectedWidget = this.selectedWidget ??
-        StreamSvgIcon(
-          icon: StreamSvgIcons.checkSend,
-          color: chatThemeData.colorTheme.accentPrimary,
+    final selectedWidget =
+        this.selectedWidget ??
+        Icon(
+          context.streamIcons.checkmark,
+          color: colorScheme.accentPrimary,
         );
 
     return ListTile(
@@ -178,16 +173,15 @@ class UserLastActive extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final chatTheme = StreamChatTheme.of(context);
     final lastActive = user.lastActive ?? DateTime.now();
     return Text(
       user.online
           ? context.translations.userOnlineText
           : '${context.translations.userLastOnlineText} '
-              '${Jiffy.parseFromDateTime(lastActive).fromNow()}',
-      style: chatTheme.textTheme.footnote.copyWith(
+                '${Jiffy.parseFromDateTime(lastActive).fromNow()}',
+      style: context.streamTextTheme.captionDefault.copyWith(
         // ignore: deprecated_member_use
-        color: chatTheme.colorTheme.textHighEmphasis.withOpacity(0.5),
+        color: context.streamColorScheme.textPrimary.withOpacity(0.5),
       ),
     );
   }

@@ -31,7 +31,7 @@ abstract class StreamAttachmentHandlerBase {
     FileType type = FileType.any,
     List<String>? allowedExtensions,
     Function(FilePickerStatus)? onFileLoading,
-    bool allowCompression = true,
+    int compressionQuality = 0,
     bool withData = true,
     bool withReadStream = false,
     bool lockParentWindow = true,

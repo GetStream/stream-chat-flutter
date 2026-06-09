@@ -57,6 +57,14 @@ void main() {
         expect(MessageRules.canUpload(message), isTrue);
       });
 
+      test('should return true for message with shared location', () {
+        final message = Message(
+          sharedLocation: Location(latitude: 1, longitude: 2),
+        );
+
+        expect(MessageRules.canUpload(message), isTrue);
+      });
+
       test('should return false for empty message', () {
         final message = Message();
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 /// {@template streamAttachmentUploadStateBuilder}
 /// Widget to display attachment upload state
@@ -11,10 +12,9 @@ class StreamAttachmentUploadStateBuilder extends StatelessWidget {
     super.key,
     required this.message,
     required this.attachment,
-    this.preparingBuilder,
-    this.inProgressBuilder,
-    this.successBuilder,
-    this.failedBuilder,
+    this.preparingBuilder = _defaultPreparingBuilder,
+    this.inProgressBuilder = _defaultInProgressBuilder,
+    this.failedBuilder = _defaultFailedBuilder,
   });
 
   /// The message that [attachment] is associated with
@@ -24,229 +24,42 @@ class StreamAttachmentUploadStateBuilder extends StatelessWidget {
   final Attachment attachment;
 
   /// Widget to display when preparing to upload the [attachment]
-  final PreparingBuilder? preparingBuilder;
+  final PreparingBuilder preparingBuilder;
 
   /// {@macro inProgressBuilder}
-  final InProgressBuilder? inProgressBuilder;
-
-  /// {@macro successBuilder}
-  final SuccessBuilder? successBuilder;
+  final InProgressBuilder inProgressBuilder;
 
   /// {@macro failedBuilder}
-  final FailedBuilder? failedBuilder;
+  final FailedBuilder failedBuilder;
 
-  @override
-  Widget build(BuildContext context) {
-    if (message.state.isCompleted) {
-      return const Empty();
-    }
+  static Widget _defaultPreparingBuilder(BuildContext context) => StreamLoadingSpinner(size: .md);
 
-    final messageId = message.id;
-    final attachmentId = attachment.id;
-
-    final inProgress = inProgressBuilder ??
-        (context, int sent, int total) {
-          return _InProgressState(
-            sent: sent,
-            total: total,
-            attachmentId: attachmentId,
-          );
-        };
-
-    final failed = failedBuilder ??
-        (context, error) {
-          return _FailedState(
-            error: error,
-            messageId: messageId,
-            attachmentId: attachmentId,
-          );
-        };
-
-    final success = successBuilder ?? (context) => _SuccessState();
-
-    final preparing = preparingBuilder ??
-        (context) => _PreparingState(attachmentId: attachmentId);
-
-    return attachment.uploadState.when(
-      preparing: () => preparing(context),
-      inProgress: (sent, total) => inProgress(context, sent, total),
-      success: () => success(context),
-      failed: (error) => failed(context, error),
-    );
+  static Widget _defaultInProgressBuilder(BuildContext context, int sent, int total) {
+    // Fall back to an indeterminate spinner when the total size is unknown
+    // (e.g. `total` reported as `-1` or `0`) instead of rendering a fake 0%.
+    final progress = total > 0 ? sent / total : null;
+    return StreamLoadingSpinner(value: progress, size: .md);
   }
-}
 
-class _IconButton extends StatelessWidget {
-  const _IconButton({
-    this.icon,
-    this.onPressed,
-  });
-
-  final Widget? icon;
-  final VoidCallback? onPressed;
+  static Widget _defaultFailedBuilder(BuildContext context, String? error) => StreamErrorBadge(size: .sm);
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 24,
-      width: 24,
-      child: RawMaterialButton(
-        elevation: 0,
-        highlightElevation: 0,
-        focusElevation: 0,
-        hoverElevation: 0,
-        onPressed: onPressed,
-        fillColor: StreamChatTheme.of(context).colorTheme.overlayDark,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: icon,
-      ),
-    );
-  }
-}
+    // Hide the overlay once this individual attachment is done uploading
+    // or the whole message has been delivered.
+    if (attachment.uploadState.isSuccess || message.state.isCompleted) return const Empty();
 
-class _PreparingState extends StatelessWidget {
-  const _PreparingState({required this.attachmentId});
+    final colorScheme = context.streamColorScheme;
 
-  final String attachmentId;
-
-  @override
-  Widget build(BuildContext context) {
-    final channel = StreamChannel.of(context).channel;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Align(
-          alignment: Alignment.topRight,
-          child: _IconButton(
-            icon: StreamSvgIcon(
-              icon: StreamSvgIcons.close,
-              color: StreamChatTheme.of(context).colorTheme.barsBg,
-            ),
-            onPressed: () => channel.cancelAttachmentUpload(attachmentId),
-          ),
-        ),
-        Align(
-          alignment: Alignment.topRight,
-          child: StreamUploadProgressIndicator(
-            uploaded: 0,
-            total: double.maxFinite.toInt(),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _InProgressState extends StatelessWidget {
-  const _InProgressState({
-    required this.sent,
-    required this.total,
-    required this.attachmentId,
-  });
-
-  final int sent;
-  final int total;
-  final String attachmentId;
-
-  @override
-  Widget build(BuildContext context) {
-    final channel = StreamChannel.of(context).channel;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Align(
-          alignment: Alignment.topRight,
-          child: _IconButton(
-            icon: StreamSvgIcon(
-              icon: StreamSvgIcons.close,
-              color: StreamChatTheme.of(context).colorTheme.barsBg,
-            ),
-            onPressed: () => channel.cancelAttachmentUpload(attachmentId),
-          ),
-        ),
-        Align(
-          alignment: Alignment.topRight,
-          child: StreamUploadProgressIndicator(
-            uploaded: sent,
-            total: total,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _FailedState extends StatelessWidget {
-  const _FailedState({
-    this.error,
-    required this.messageId,
-    required this.attachmentId,
-  });
-
-  final String? error;
-  final String messageId;
-  final String attachmentId;
-
-  @override
-  Widget build(BuildContext context) {
-    final channel = StreamChannel.of(context).channel;
-    final theme = StreamChatTheme.of(context);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        _IconButton(
-          icon: StreamSvgIcon(
-            size: 14,
-            icon: StreamSvgIcons.retry,
-            color: theme.colorTheme.barsBg,
-          ),
-          onPressed: () {
-            channel.retryAttachmentUpload(messageId, attachmentId);
-          },
-        ),
-        Center(
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
-              // ignore: deprecated_member_use
-              color: theme.colorTheme.overlayDark.withOpacity(0.6),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                vertical: 6,
-                horizontal: 12,
-              ),
-              child: Text(
-                context.translations.uploadErrorLabel,
-                textAlign: TextAlign.center,
-                style: theme.textTheme.footnote.copyWith(
-                  color: theme.colorTheme.barsBg,
-                ),
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _SuccessState extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Align(
-      alignment: Alignment.topRight,
-      child: CircleAvatar(
-        backgroundColor: StreamChatTheme.of(context).colorTheme.overlayDark,
-        maxRadius: 12,
-        child: StreamSvgIcon(
-          icon: StreamSvgIcons.check,
-          color: StreamChatTheme.of(context).colorTheme.barsBg,
+    return ColoredBox(
+      color: colorScheme.backgroundOverlayLight,
+      child: Center(
+        child: attachment.uploadState.when(
+          preparing: () => preparingBuilder(context),
+          inProgress: (sent, total) => inProgressBuilder(context, sent, total),
+          // Unreachable — the early-return above already covers success.
+          success: () => const Empty(),
+          failed: (error) => failedBuilder(context, error),
         ),
       ),
     );

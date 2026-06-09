@@ -1,17 +1,66 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// {@template streamVideoAttachment}
-/// Shows a video attachment in a [StreamMessageWidget].
-/// {@endtemplate}
+/// A video attachment component with a play indicator.
+///
+/// [StreamVideoAttachment] displays a video attachment with a visual
+/// indicator that it can be played.
+///
+/// {@tool snippet}
+///
+/// Basic usage:
+///
+/// ```dart
+/// StreamVideoAttachment(
+///   message: message,
+///   video: videoAttachment,
+/// )
+/// ```
+/// {@end-tool}
+///
+/// See also:
+///
+///  * [StreamVideoAttachmentProps], which configures this widget.
+///  * [DefaultStreamVideoAttachment], the default implementation.
 class StreamVideoAttachment extends StatelessWidget {
-  /// {@macro streamVideoAttachment}
-  const StreamVideoAttachment({
+  /// Creates a [StreamVideoAttachment].
+  StreamVideoAttachment({
     super.key,
+    required Message message,
+    required Attachment video,
+    BoxConstraints? constraints,
+  }) : props = StreamVideoAttachmentProps(
+         message: message,
+         video: video,
+         constraints: constraints,
+       );
+
+  /// The properties that configure this attachment.
+  final StreamVideoAttachmentProps props;
+
+  @override
+  Widget build(BuildContext context) {
+    final builder = context.chatComponentBuilder<StreamVideoAttachmentProps>();
+    if (builder != null) return builder(context, props);
+    return DefaultStreamVideoAttachment(props: props);
+  }
+}
+
+/// Properties for configuring a [StreamVideoAttachment].
+///
+/// This class holds all the configuration options for a video attachment,
+/// allowing them to be passed through the [StreamComponentFactory].
+///
+/// See also:
+///
+///  * [StreamVideoAttachment], which uses these properties.
+///  * [DefaultStreamVideoAttachment], the default implementation.
+class StreamVideoAttachmentProps {
+  /// Creates properties for a video attachment.
+  const StreamVideoAttachmentProps({
     required this.message,
     required this.video,
-    this.shape,
-    this.constraints = const BoxConstraints(),
+    this.constraints,
   });
 
   /// The [Message] that the video is attached to.
@@ -20,54 +69,57 @@ class StreamVideoAttachment extends StatelessWidget {
   /// The [Attachment] object containing the video information.
   final Attachment video;
 
-  /// The shape of the attachment.
-  ///
-  /// Defaults to [RoundedRectangleBorder] with a radius of 14.
-  final ShapeBorder? shape;
-
   /// The constraints to use when displaying the video.
-  final BoxConstraints constraints;
+  final BoxConstraints? constraints;
+}
+
+const _kDefaultConstraints = BoxConstraints.tightFor(
+  width: 256,
+  height: 195,
+);
+
+/// The default implementation of [StreamVideoAttachment].
+///
+/// Renders the video thumbnail with upload progress indication.
+///
+/// See also:
+///
+///  * [StreamVideoAttachment], the public API widget.
+///  * [StreamVideoAttachmentProps], which configures this widget.
+class DefaultStreamVideoAttachment extends StatelessWidget {
+  /// Creates a default Stream video attachment.
+  const DefaultStreamVideoAttachment({
+    super.key,
+    required this.props,
+  });
+
+  /// The properties that configure this attachment.
+  final StreamVideoAttachmentProps props;
 
   @override
   Widget build(BuildContext context) {
-    final chatTheme = StreamChatTheme.of(context);
-    final colorTheme = chatTheme.colorTheme;
-    final shape = this.shape ??
-        RoundedRectangleBorder(
-          side: BorderSide(
-            color: colorTheme.borders,
-            strokeAlign: BorderSide.strokeAlignOutside,
-          ),
-          borderRadius: BorderRadius.circular(14),
-        );
+    final constraints = props.constraints ?? _kDefaultConstraints;
 
-    return Container(
+    return ConstrainedBox(
       constraints: constraints,
-      clipBehavior: Clip.hardEdge,
-      decoration: ShapeDecoration(shape: shape),
       child: Stack(
-        alignment: Alignment.center,
+        fit: .expand,
+        alignment: .center,
         children: [
           StreamVideoAttachmentThumbnail(
-            video: video,
-            width: double.infinity,
-            height: double.infinity,
+            video: props.video,
             fit: BoxFit.cover,
           ),
-          const Material(
-            shape: CircleBorder(),
-            child: Padding(
-              padding: EdgeInsets.all(16),
-              child: Icon(Icons.play_arrow),
+          if (props.video.uploadState.isSuccess) ...[
+            const Center(child: StreamVideoPlayIndicator(size: .lg)),
+          ] else ...[
+            Positioned.fill(
+              child: StreamAttachmentUploadStateBuilder(
+                message: props.message,
+                attachment: props.video,
+              ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8),
-            child: StreamAttachmentUploadStateBuilder(
-              message: message,
-              attachment: video,
-            ),
-          ),
+          ],
         ],
       ),
     );

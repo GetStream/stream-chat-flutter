@@ -10,10 +10,10 @@ import '../../mocks.dart';
 
 void main() {
   Response successResponse(String path, {Object? data}) => Response(
-        data: data,
-        requestOptions: RequestOptions(path: path),
-        statusCode: 200,
-      );
+    data: data,
+    requestOptions: RequestOptions(path: path),
+    statusCode: 200,
+  );
 
   late final client = MockHttpClient();
   late MessageApi messageApi;
@@ -29,16 +29,23 @@ void main() {
 
     const path = '/channels/$channelType/$channelId/message';
 
-    when(() => client.post(
-          path,
-          data: {
-            'message': message,
-            'skip_push': false,
-            'skip_enrich_url': false,
-          },
-        )).thenAnswer((_) async => successResponse(path, data: {
+    when(
+      () => client.post(
+        path,
+        data: {
+          'message': message,
+          'skip_push': false,
+          'skip_enrich_url': false,
+        },
+      ),
+    ).thenAnswer(
+      (_) async => successResponse(
+        path,
+        data: {
           'message': message.toJson(),
-        }));
+        },
+      ),
+    );
 
     final res = await messageApi.sendMessage(channelId, channelType, message);
 
@@ -56,16 +63,23 @@ void main() {
 
     const path = '/channels/$channelType/$channelId/message';
 
-    when(() => client.post(
-          path,
-          data: {
-            'message': message,
-            'skip_push': true,
-            'skip_enrich_url': false,
-          },
-        )).thenAnswer((_) async => successResponse(path, data: {
+    when(
+      () => client.post(
+        path,
+        data: {
+          'message': message,
+          'skip_push': true,
+          'skip_enrich_url': false,
+        },
+      ),
+    ).thenAnswer(
+      (_) async => successResponse(
+        path,
+        data: {
           'message': message.toJson(),
-        }));
+        },
+      ),
+    );
 
     final res = await messageApi.sendMessage(
       channelId,
@@ -93,12 +107,19 @@ void main() {
       (index) => Message(id: 'test-message-id-$index'),
     );
 
-    when(() => client.get(
-          path,
-          queryParameters: {'ids': messageIds.join(',')},
-        )).thenAnswer((_) async => successResponse(path, data: {
+    when(
+      () => client.get(
+        path,
+        queryParameters: {'ids': messageIds.join(',')},
+      ),
+    ).thenAnswer(
+      (_) async => successResponse(
+        path,
+        data: {
           'messages': [...messages.map((it) => it.toJson())],
-        }));
+        },
+      ),
+    );
 
     final res = await messageApi.getMessagesById(
       channelId,
@@ -122,8 +143,7 @@ void main() {
 
     final message = Message(id: messageId);
 
-    when(() => client.get(path)).thenAnswer((_) async =>
-        successResponse(path, data: {'message': message.toJson()}));
+    when(() => client.get(path)).thenAnswer((_) async => successResponse(path, data: {'message': message.toJson()}));
 
     final res = await messageApi.getMessage(messageId);
 
@@ -139,14 +159,16 @@ void main() {
 
     final path = '/messages/${message.id}';
 
-    when(() => client.post(
-          path,
-          data: {
-            'message': message,
-            'skip_push': false,
-            'skip_enrich_url': false,
-          },
-        )).thenAnswer(
+    when(
+      () => client.post(
+        path,
+        data: {
+          'message': message,
+          'skip_push': false,
+          'skip_enrich_url': false,
+        },
+      ),
+    ).thenAnswer(
       (_) async => successResponse(path, data: {'message': message.toJson()}),
     );
 
@@ -168,14 +190,16 @@ void main() {
     const path = '/messages/$messageId';
     final message = Message(id: 'test-message-id', text: set['text']);
 
-    when(() => client.put(
-          path,
-          data: {
-            'set': set,
-            'unset': unset,
-            'skip_enrich_url': false,
-          },
-        )).thenAnswer(
+    when(
+      () => client.put(
+        path,
+        data: {
+          'set': set,
+          'unset': unset,
+          'skip_enrich_url': false,
+        },
+      ),
+    ).thenAnswer(
       (_) async => successResponse(path, data: {'message': message.toJson()}),
     );
 
@@ -190,14 +214,16 @@ void main() {
     expect(res.message.text, set['text']);
     expect(res.message.pinExpires, isNull);
 
-    verify(() => client.put(
-          path,
-          data: {
-            'set': set,
-            'unset': unset,
-            'skip_enrich_url': false,
-          },
-        )).called(1);
+    verify(
+      () => client.put(
+        path,
+        data: {
+          'set': set,
+          'unset': unset,
+          'skip_enrich_url': false,
+        },
+      ),
+    ).called(1);
     verifyNoMoreInteractions(client);
   });
 
@@ -205,16 +231,17 @@ void main() {
     const messageId = 'test-message-id';
 
     const path = '/messages/$messageId';
+    const params = {'delete_for_me': true};
 
-    when(() => client.delete(path)).thenAnswer(
+    when(() => client.delete(path, queryParameters: params)).thenAnswer(
       (_) async => successResponse(path, data: <String, dynamic>{}),
     );
 
-    final res = await messageApi.deleteMessage(messageId);
+    final res = await messageApi.deleteMessage(messageId, deleteForMe: true);
 
     expect(res, isNotNull);
 
-    verify(() => client.delete(path)).called(1);
+    verify(() => client.delete(path, queryParameters: params)).called(1);
     verifyNoMoreInteractions(client);
   });
 
@@ -226,17 +253,17 @@ void main() {
 
     const path = '/messages/$messageId/action';
 
-    when(() => client.post(
-              path,
-              data: {
-                'id': channelId,
-                'type': channelType,
-                'form_data': formData,
-                'message_id': messageId,
-              },
-            ))
-        .thenAnswer(
-            (_) async => successResponse(path, data: <String, dynamic>{}));
+    when(
+      () => client.post(
+        path,
+        data: {
+          'id': channelId,
+          'type': channelType,
+          'form_data': formData,
+          'message_id': messageId,
+        },
+      ),
+    ).thenAnswer((_) async => successResponse(path, data: <String, dynamic>{}));
 
     final res = await messageApi.sendAction(
       channelId,
@@ -254,30 +281,32 @@ void main() {
   test('sendReaction', () async {
     const messageId = 'test-message-id';
     const reactionType = 'test-reaction-type';
-    const extraData = {'test-key': 'test-data'};
 
     const path = '/messages/$messageId/reaction';
 
     final message = Message(id: messageId);
     final reaction = Reaction(type: reactionType, messageId: messageId);
 
-    when(() => client.post(
-          path,
-          data: {
-            'reaction': Map<String, Object?>.from(extraData)
-              ..addAll({'type': reactionType}),
-            'enforce_unique': false,
-          },
-        )).thenAnswer((_) async => successResponse(path, data: {
-          'message': message.toJson(),
+    when(
+      () => client.post(
+        path,
+        data: jsonEncode({
           'reaction': reaction.toJson(),
-        }));
-
-    final res = await messageApi.sendReaction(
-      messageId,
-      reactionType,
-      extraData: extraData,
+          'skip_push': false,
+          'enforce_unique': false,
+        }),
+      ),
+    ).thenAnswer(
+      (_) async => successResponse(
+        path,
+        data: {
+          'message': message.toJson(),
+          'reaction': {...reaction.toJson(), 'message_id': messageId},
+        },
+      ),
     );
+
+    final res = await messageApi.sendReaction(messageId, reaction);
 
     expect(res, isNotNull);
     expect(res.message.id, messageId);
@@ -291,29 +320,34 @@ void main() {
   test('sendReaction with enforceUnique: true', () async {
     const messageId = 'test-message-id';
     const reactionType = 'test-reaction-type';
-    const extraData = {'test-key': 'test-data'};
 
     const path = '/messages/$messageId/reaction';
 
     final message = Message(id: messageId);
     final reaction = Reaction(type: reactionType, messageId: messageId);
 
-    when(() => client.post(
-          path,
-          data: {
-            'reaction': Map<String, Object?>.from(extraData)
-              ..addAll({'type': reactionType}),
-            'enforce_unique': true,
-          },
-        )).thenAnswer((_) async => successResponse(path, data: {
-          'message': message.toJson(),
+    when(
+      () => client.post(
+        path,
+        data: jsonEncode({
           'reaction': reaction.toJson(),
-        }));
+          'skip_push': false,
+          'enforce_unique': true,
+        }),
+      ),
+    ).thenAnswer(
+      (_) async => successResponse(
+        path,
+        data: {
+          'message': message.toJson(),
+          'reaction': {...reaction.toJson(), 'message_id': messageId},
+        },
+      ),
+    );
 
     final res = await messageApi.sendReaction(
       messageId,
-      reactionType,
-      extraData: extraData,
+      reaction,
       enforceUnique: true,
     );
 
@@ -332,8 +366,7 @@ void main() {
 
     const path = '/messages/$messageId/reaction/$reactionType';
 
-    when(() => client.delete(path)).thenAnswer(
-        (_) async => successResponse(path, data: <String, dynamic>{}));
+    when(() => client.delete(path)).thenAnswer((_) async => successResponse(path, data: <String, dynamic>{}));
 
     final res = await messageApi.deleteReaction(messageId, reactionType);
 
@@ -357,14 +390,25 @@ void main() {
       ),
     );
 
-    when(() => client.get(
-          path,
-          queryParameters: {
-            ...const PaginationParams().toJson(),
-          },
-        )).thenAnswer((_) async => successResponse(path, data: {
-          'reactions': [...reactions.map((it) => it.toJson())]
-        }));
+    when(
+      () => client.get(
+        path,
+        queryParameters: {
+          ...const PaginationParams().toJson(),
+        },
+      ),
+    ).thenAnswer(
+      (_) async => successResponse(
+        path,
+        data: {
+          'reactions': [
+            ...reactions.map(
+              (it) => {...it.toJson(), 'message_id': messageId},
+            ),
+          ],
+        },
+      ),
+    );
 
     final res = await messageApi.getReactions(messageId, pagination: options);
 
@@ -393,17 +437,24 @@ void main() {
       },
     );
 
-    when(() => client.post(
-          path,
-          data: {'language': language},
-        )).thenAnswer((_) async => successResponse(path, data: {
+    when(
+      () => client.post(
+        path,
+        data: {'language': language},
+      ),
+    ).thenAnswer(
+      (_) async => successResponse(
+        path,
+        data: {
           'message': {
             ...translatedMessage.toJson(),
             'i18n': {
               language: translatedMessageText,
             },
           },
-        }));
+        },
+      ),
+    );
 
     final res = await messageApi.translateMessage(messageId, language);
 
@@ -429,14 +480,21 @@ void main() {
       ),
     );
 
-    when(() => client.get(
-          path,
-          queryParameters: {
-            ...options.toJson(),
-          },
-        )).thenAnswer((_) async => successResponse(path, data: {
-          'messages': [...messages.map((it) => it.toJson())]
-        }));
+    when(
+      () => client.get(
+        path,
+        queryParameters: {
+          ...options.toJson(),
+        },
+      ),
+    ).thenAnswer(
+      (_) async => successResponse(
+        path,
+        data: {
+          'messages': [...messages.map((it) => it.toJson())],
+        },
+      ),
+    );
 
     final res = await messageApi.getReplies(parentId, options: options);
 
@@ -466,13 +524,17 @@ void main() {
       message: draftMessage,
     );
 
-    when(() => client.post(
-          path,
-          data: jsonEncode({'message': draftMessage}),
-        )).thenAnswer((_) async => successResponse(
-          path,
-          data: {'draft': draft.toJson()},
-        ));
+    when(
+      () => client.post(
+        path,
+        data: jsonEncode({'message': draftMessage}),
+      ),
+    ).thenAnswer(
+      (_) async => successResponse(
+        path,
+        data: {'draft': draft.toJson()},
+      ),
+    );
 
     final res = await messageApi.createDraft(
       channelId,
@@ -495,11 +557,12 @@ void main() {
 
     const path = '/channels/$channelType/$channelId/draft';
 
-    when(() => client.delete(path, queryParameters: <String, dynamic>{}))
-        .thenAnswer((_) async => successResponse(
-              path,
-              data: <String, dynamic>{},
-            ));
+    when(() => client.delete(path, queryParameters: <String, dynamic>{})).thenAnswer(
+      (_) async => successResponse(
+        path,
+        data: <String, dynamic>{},
+      ),
+    );
 
     final res = await messageApi.deleteDraft(
       channelId,
@@ -519,11 +582,12 @@ void main() {
 
     const path = '/channels/$channelType/$channelId/draft';
 
-    when(() => client.delete(path, queryParameters: {'parent_id': parentId}))
-        .thenAnswer((_) async => successResponse(
-              path,
-              data: <String, dynamic>{},
-            ));
+    when(() => client.delete(path, queryParameters: {'parent_id': parentId})).thenAnswer(
+      (_) async => successResponse(
+        path,
+        data: <String, dynamic>{},
+      ),
+    );
 
     final res = await messageApi.deleteDraft(
       channelId,
@@ -553,10 +617,14 @@ void main() {
       message: draftMessage,
     );
 
-    when(() => client.get(path, queryParameters: <String, dynamic>{}))
-        .thenAnswer((_) async => successResponse(path, data: {
-              'draft': draft.toJson(),
-            }));
+    when(() => client.get(path, queryParameters: <String, dynamic>{})).thenAnswer(
+      (_) async => successResponse(
+        path,
+        data: {
+          'draft': draft.toJson(),
+        },
+      ),
+    );
 
     final res = await messageApi.getDraft(
       channelId,
@@ -591,12 +659,19 @@ void main() {
       parentId: parentId,
     );
 
-    when(() => client.get(
-          path,
-          queryParameters: {'parent_id': parentId},
-        )).thenAnswer((_) async => successResponse(path, data: {
+    when(
+      () => client.get(
+        path,
+        queryParameters: {'parent_id': parentId},
+      ),
+    ).thenAnswer(
+      (_) async => successResponse(
+        path,
+        data: {
           'draft': draft.toJson(),
-        }));
+        },
+      ),
+    );
 
     final res = await messageApi.getDraft(
       channelId,
@@ -614,6 +689,84 @@ void main() {
     verifyNoMoreInteractions(client);
   });
 
+  test('queryReactions', () async {
+    const messageId = 'test-message-id';
+    const path = '/messages/$messageId/reactions';
+
+    final reactions = List.generate(
+      3,
+      (index) => Reaction(
+        type: 'test-reaction-type-$index',
+        messageId: messageId,
+      ),
+    );
+
+    when(
+      () => client.post(path, data: any(named: 'data')),
+    ).thenAnswer(
+      (_) async => successResponse(
+        path,
+        data: {
+          'reactions': [
+            ...reactions.map(
+              (it) => {...it.toJson(), 'message_id': messageId},
+            ),
+          ],
+          'next': null,
+        },
+      ),
+    );
+
+    final res = await messageApi.queryReactions(messageId);
+
+    expect(res, isNotNull);
+    expect(res.reactions.length, reactions.length);
+    expect(res.reactions.every((it) => it.messageId == messageId), isTrue);
+    expect(res.next, isNull);
+
+    verify(() => client.post(path, data: any(named: 'data'))).called(1);
+    verifyNoMoreInteractions(client);
+  });
+
+  test('queryReactions with next cursor', () async {
+    const messageId = 'test-message-id';
+    const path = '/messages/$messageId/reactions';
+    const nextCursor = 'next_page_cursor';
+
+    final reactions = List.generate(
+      3,
+      (index) => Reaction(
+        type: 'test-reaction-type-$index',
+        messageId: messageId,
+      ),
+    );
+
+    when(
+      () => client.post(path, data: any(named: 'data')),
+    ).thenAnswer(
+      (_) async => successResponse(
+        path,
+        data: {
+          'reactions': [
+            ...reactions.map(
+              (it) => {...it.toJson(), 'message_id': messageId},
+            ),
+          ],
+          'next': nextCursor,
+        },
+      ),
+    );
+
+    final res = await messageApi.queryReactions(messageId);
+
+    expect(res, isNotNull);
+    expect(res.reactions.length, reactions.length);
+    expect(res.next, nextCursor);
+
+    verify(() => client.post(path, data: any(named: 'data'))).called(1);
+    verifyNoMoreInteractions(client);
+  });
+
   test('queryDrafts', () async {
     const path = '/drafts/query';
 
@@ -626,22 +779,31 @@ void main() {
       ),
     );
 
-    when(() => client.post(
-          path,
-          data: any(named: 'data'),
-        )).thenAnswer((_) async => successResponse(path, data: {
+    when(
+      () => client.post(
+        path,
+        data: any(named: 'data'),
+      ),
+    ).thenAnswer(
+      (_) async => successResponse(
+        path,
+        data: {
           'drafts': [...draftMessages.map((it) => it.toJson())],
-        }));
+        },
+      ),
+    );
 
     final res = await messageApi.queryDrafts();
 
     expect(res, isNotNull);
     expect(res.drafts.length, draftMessages.length);
 
-    verify(() => client.post(
-          path,
-          data: any(named: 'data'),
-        )).called(1);
+    verify(
+      () => client.post(
+        path,
+        data: any(named: 'data'),
+      ),
+    ).called(1);
 
     verifyNoMoreInteractions(client);
   });

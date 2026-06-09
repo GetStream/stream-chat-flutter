@@ -26,11 +26,9 @@ class CreateReminderDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = StreamChatTheme.of(context);
-
     return CupertinoTheme(
       data: CupertinoTheme.of(context).copyWith(
-        primaryColor: theme.colorTheme.accentPrimary,
+        primaryColor: context.streamColorScheme.accentPrimary,
       ),
       child: CupertinoAlertDialog(
         title: const Text('Select Reminder Time'),
@@ -69,11 +67,9 @@ class EditReminderDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = StreamChatTheme.of(context);
-
     return CupertinoTheme(
       data: CupertinoTheme.of(context).copyWith(
-        primaryColor: theme.colorTheme.accentPrimary,
+        primaryColor: context.streamColorScheme.accentPrimary,
       ),
       child: CupertinoAlertDialog(
         title: const Text('Edit Reminder Time'),

@@ -1,51 +1,171 @@
+## 10.0.1
+
+🛑️ Breaking
+
+- Renamed `attachmentsUploadProgressText` parameter `remaining` → `completed`
+  and reworded the translation across all locales to report completed count
+  instead of remaining.
+- Renamed English `threadReplyLabel` (`'Thread'` → `'Thread Reply'`) and
+  `markAsUnreadLabel` (`'Mark as Unread'` → `'Mark Unread'`).
+- Reworded Korean `threadReplyLabel` (`'스레드 응답입니다'` → `'스레드 답변'`)
+  to drop the declarative copula so it reads as a menu label.
+- Renamed `questionsLabel` getter → `questionLabel({bool isPlural = false})`
+  method across all supported locales.
+- Renamed `endVoteConfirmationText` → `endVoteConfirmationTitle` across all
+  supported locales; English default changed to `'End This Poll?'`.
+- Renamed `slowModeOnLabel` getter → `slowModeOnLabel(int cooldownTimeOut)`
+  method across all supported locales. The default now renders a live
+  countdown (English default: `'Slow mode ON'` → `'Slow mode, wait
+  ${cooldownTimeOut}s\u2026'`).
+
+✅ Added
+
+- Added `fileTypeNotSupportedError(String? extension)` translation for all supported locales.
+- Added `toggleBlockUnblockUserText` translation for all supported locales.
+- Added `threadLabel` translation for all supported locales, used by the
+  `StreamThreadHeader` default title.
+- Added `commandUsernameLabel` translation (default `@username`) for all supported
+  locales. Used by the message composer placeholder when user-target commands
+  (`/mute`, `/unmute`, `/ban`, `/unban`) are active.
+- Added `unsupportedAttachmentLabel` translation for all supported locales.
+- Added `linkAttachmentText` translation for all supported locales (used by
+  `MessagePreviewFormatter` for link-preview attachments).
+- Added `confirmLabel`, `emptyReactionsText`, `loadingReactionsError`, and
+  `tapToRemoveReactionLabel` translations for all supported locales.
+- Added `justNowLabel`, `replyToUserLabel`, `multipleAnswersDescription`,
+  `maximumVotesPerPersonDescription`, `anonymousPollDescription`,
+  `suggestAnOptionDescription`, and `addACommentDescription` translations for
+  all supported locales.
+- Added `totalVoteCountLabel({int? count})` translation for all supported
+  locales.
+- Added `viewAllLabel` translation for all supported locales.
+- Added `pollVotesLabel` translation for all supported locales.
+- Added `endVoteConfirmationMessage` translation for all supported locales.
+- Added `reactionsCountText(int count)` translation for all supported locales.
+- Added `photosAndVideosLabel` translation (default `Photos & Videos`) for all
+  supported locales. Used by the new media gallery preview footer's thumbnail-
+  grid sheet header.
+
+🔄 Changed
+
+- Reworded `emptyMessagesText` across all locales to the shorter "No messages
+  yet" style (English default: `'There are no messages currently'` →
+  `'No messages yet'`) to match the redesigned empty state copy.
+- Reworded `writeAMessageLabel` across all locales to use a "Send a message"
+  style (English default: `'Write a message'` → `'Send a message'`) to match
+  the redesigned message composer placeholder.
+- Reworded `endVoteLabel` English override from `'End Vote'` to `'End Poll'`.
+- Reworded `flagLabel`, `cancelLabel` and `deleteLabel` defaults from uppercase to sentence case across all supported locales (e.g. English: `'FLAG'` → `'Flag'`, `'CANCEL'` → `'Cancel'`, `'DELETE'` → `'Delete'`) so dialog buttons render in the same case as the rest of the system.
+- Raised minimum Flutter to `>=3.41.0` and Dart SDK to `^3.11.0`.
+
+## 9.25.0
+
+- Updated `stream_chat_flutter` dependency to [`9.25.0`](https://pub.dev/packages/stream_chat_flutter/changelog).
+
 ## 9.24.0
 
 - Updated `stream_chat_flutter` dependency to [`9.24.0`](https://pub.dev/packages/stream_chat_flutter/changelog).
 
+## 10.0.0-beta.13
+
+🛑️ Breaking
+- SDK Redesign Changes. For more details, please refer to the [migration guide](https://github.com/GetStream/stream-chat-flutter/blob/210ff93f955be3f85c62e860309bd9aa240a5446/migrations).
+  The SDK redesign introduces a fresher default UI, but also better APIs for customization of the components.
+
+## 10.0.0-beta.12
+
+- Included the changes from version [`9.23.0`](https://pub.dev/packages/stream_chat_localizations/changelog).
+
 ## 9.23.0
 
 - Fixed Italian translation for `unreadMessagesSeparatorText` (was incorrectly showing French text "Nouveaux messages" instead of Italian "Nuovi messaggi").
+
+## 10.0.0-beta.11
+
+- Included the changes from version [`9.22.0`](https://pub.dev/packages/stream_chat_localizations/changelog).
 
 ## 9.22.0
 
 - Added translations for new `deletePollOptionLabel` label.
 - Added translations for new `deletePollOptionQuestion` text.
 
+## 10.0.0-beta.10
+
+- Included the changes from version [`9.21.0`](https://pub.dev/packages/stream_chat_localizations/changelog).
+
 ## 9.21.0
 
 - Updated `stream_chat_flutter` dependency to [`9.21.0`](https://pub.dev/packages/stream_chat_flutter/changelog).
+
+## 10.0.0-beta.9
+
+- Included the changes from version [`9.20.0`](https://pub.dev/packages/stream_chat_localizations/changelog).
 
 ## 9.20.0
 
 - Updated `stream_chat_flutter` dependency to [`9.20.0`](https://pub.dev/packages/stream_chat_flutter/changelog).
 
+## 10.0.0-beta.8
+
+- Included the changes from version [`9.19.0`](https://pub.dev/packages/stream_chat_localizations/changelog).
+
 ## 9.19.0
 
 - Updated `stream_chat_flutter` dependency to [`9.19.0`](https://pub.dev/packages/stream_chat_flutter/changelog).
+
+## 10.0.0-beta.7
+
+- Included the changes from version [`9.18.0`](https://pub.dev/packages/stream_chat_localizations/changelog).
 
 ## 9.18.0
 
 - Updated `stream_chat_flutter` dependency to [`9.18.0`](https://pub.dev/packages/stream_chat_flutter/changelog).
 
+## 10.0.0-beta.6
+
+- Included the changes from version [`9.17.0`](https://pub.dev/packages/stream_chat_localizations/changelog).
+
 ## 9.17.0
 
 - Updated `stream_chat_flutter` dependency to [`9.17.0`](https://pub.dev/packages/stream_chat_flutter/changelog).
+
+## 10.0.0-beta.5
+
+- Included the changes from version [`9.16.0`](https://pub.dev/packages/stream_chat_localizations/changelog).
 
 ## 9.16.0
 
 - Updated `stream_chat_flutter` dependency to [`9.16.0`](https://pub.dev/packages/stream_chat_flutter/changelog).
 
+## 10.0.0-beta.4
+
+- Added translations for new `locationLabel` label.
+
+- Included the changes from version [`9.15.0`](https://pub.dev/packages/stream_chat_localizations/changelog).
+
 ## 9.15.0
 
 - Updated `stream_chat_flutter` dependency to [`9.15.0`](https://pub.dev/packages/stream_chat_flutter/changelog).
+
+## 10.0.0-beta.3
+
+- Included the changes from version [`9.14.0`](https://pub.dev/packages/stream_chat_localizations/changelog).
 
 ## 9.14.0
 
 - Updated `stream_chat_flutter` dependency to [`9.14.0`](https://pub.dev/packages/stream_chat_flutter/changelog).
 
+## 10.0.0-beta.2
+
+- Included the changes from version [`9.13.0`](https://pub.dev/packages/stream_chat_localizations/changelog).
+
 ## 9.13.0
 
 - Updated `stream_chat_flutter` dependency to [`9.13.0`](https://pub.dev/packages/stream_chat_flutter/changelog).
+
+## 10.0.0-beta.1
+
+- Updated `stream_chat_flutter` dependency to [`10.0.0-beta.1`](https://pub.dev/packages/stream_chat_flutter/changelog).
 
 ## 9.12.0
 

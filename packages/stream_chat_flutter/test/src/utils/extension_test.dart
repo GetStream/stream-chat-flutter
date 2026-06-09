@@ -163,8 +163,8 @@ void main() {
 
       final modifiedMessage = message.replaceMentions();
 
-      expect(modifiedMessage.text, contains('[@Alice](user1)'));
-      expect(modifiedMessage.text, contains('[@Bob](user2)'));
+      expect(modifiedMessage.text, contains('[@Alice](mention:user1)'));
+      expect(modifiedMessage.text, contains('[@Bob](mention:user2)'));
     });
 
     test('replaceMentions without linkify should not add links', () {
@@ -190,7 +190,7 @@ void main() {
 
       final modifiedMessage = message.replaceMentions();
 
-      expect(modifiedMessage.text, contains('[@Alice](user1)'));
+      expect(modifiedMessage.text, contains('[@Alice](mention:user1)'));
     });
 
     test(
@@ -222,8 +222,8 @@ void main() {
 
         final modifiedMessage = message.replaceMentions();
 
-        expect(modifiedMessage.text, contains('[@Alice](user1)'));
-        expect(modifiedMessage.text, contains('[@Bob](user2)'));
+        expect(modifiedMessage.text, contains('[@Alice](mention:user1)'));
+        expect(modifiedMessage.text, contains('[@Bob](mention:user2)'));
       },
     );
 
@@ -238,7 +238,7 @@ void main() {
 
         final modifiedMessage = message.replaceMentions();
 
-        expect(modifiedMessage.text, equals('Hello, [@Tester (X)](user1)!'));
+        expect(modifiedMessage.text, equals('Hello, [@Tester (X)](mention:user1)!'));
       });
 
       test('should handle usernames with square brackets', () {
@@ -251,7 +251,7 @@ void main() {
 
         final modifiedMessage = message.replaceMentions();
 
-        expect(modifiedMessage.text, equals('Hello, [@User[123]](user1)!'));
+        expect(modifiedMessage.text, equals('Hello, [@User[123]](mention:user1)!'));
       });
 
       test('should handle usernames with dots and asterisks', () {
@@ -264,7 +264,7 @@ void main() {
 
         final modifiedMessage = message.replaceMentions();
 
-        expect(modifiedMessage.text, equals('Hello, [@user.name*](user1)!'));
+        expect(modifiedMessage.text, equals('Hello, [@user.name*](mention:user1)!'));
       });
 
       test('should handle usernames with plus and question marks', () {
@@ -277,7 +277,7 @@ void main() {
 
         final modifiedMessage = message.replaceMentions();
 
-        expect(modifiedMessage.text, equals('Hello, [@test+user?](user1)!'));
+        expect(modifiedMessage.text, equals('Hello, [@test+user?](mention:user1)!'));
       });
 
       test('should handle usernames without linkify', () {
@@ -305,7 +305,7 @@ void main() {
 
         expect(
           modifiedMessage.text,
-          equals('Hello, [@Test (X)](user1) and @Test (Y)!'),
+          equals('Hello, [@Test (X)](mention:user1) and @Test (Y)!'),
         );
       });
 
@@ -321,12 +321,11 @@ void main() {
 
         expect(
           modifiedMessage.text,
-          equals('Hello, [@TestUser](user.id+123)!'),
+          equals('Hello, [@TestUser](mention:user.id+123)!'),
         );
       });
 
-      test('should handle both userId and userName with special characters',
-          () {
+      test('should handle both userId and userName with special characters', () {
         final user = User(id: 'user[123]', name: 'Test (X)');
 
         final message = Message(
@@ -338,7 +337,7 @@ void main() {
 
         expect(
           modifiedMessage.text,
-          equals('Hello, [@Test (X)](user[123]) and [@Test (X)](user[123])!'),
+          equals('Hello, [@Test (X)](mention:user[123]) and [@Test (X)](mention:user[123])!'),
         );
       });
     });
@@ -386,126 +385,6 @@ void main() {
 
       expect(modifiedMessage.text, contains('@user1'));
       expect(modifiedMessage.text, isNot(contains('@Alice')));
-    });
-  });
-
-  group('Message List Extension Tests', () {
-    group('lastUnreadMessage', () {
-      test('should return null when list is empty', () {
-        final messages = <Message>[];
-        final userRead = Read(
-          lastRead: DateTime.now(),
-          user: User(id: 'user1'),
-        );
-        expect(messages.lastUnreadMessage(userRead), isNull);
-      });
-
-      test('should return null when userRead is null', () {
-        final messages = <Message>[
-          Message(id: '1'),
-          Message(id: '2'),
-        ];
-        expect(messages.lastUnreadMessage(null), isNull);
-      });
-
-      test('should return null when all messages are read', () {
-        final lastRead = DateTime.now();
-        final messages = <Message>[
-          Message(
-              id: '1',
-              createdAt: lastRead.subtract(const Duration(seconds: 1))),
-          Message(id: '2', createdAt: lastRead),
-        ];
-        final userRead = Read(
-          lastRead: lastRead,
-          user: User(id: 'user1'),
-        );
-        expect(messages.lastUnreadMessage(userRead), isNull);
-      });
-
-      test('should return null when all messages are mine', () {
-        final lastRead = DateTime.now();
-        final userRead = Read(
-          lastRead: lastRead,
-          user: User(id: 'user1'),
-        );
-        final messages = <Message>[
-          Message(
-              id: '1',
-              user: userRead.user,
-              createdAt: lastRead.add(const Duration(seconds: 1))),
-          Message(id: '2', user: userRead.user, createdAt: lastRead),
-        ];
-        expect(messages.lastUnreadMessage(userRead), isNull);
-      });
-
-      test('should return the message', () {
-        final lastRead = DateTime.now();
-        final otherUser = User(id: 'user2');
-        final userRead = Read(
-          lastRead: lastRead,
-          user: User(id: 'user1'),
-        );
-
-        final messages = <Message>[
-          Message(
-            id: '1',
-            user: otherUser,
-            createdAt: lastRead.add(const Duration(seconds: 2)),
-          ),
-          Message(
-            id: '2',
-            user: otherUser,
-            createdAt: lastRead.add(const Duration(seconds: 1)),
-          ),
-          Message(
-            id: '3',
-            user: otherUser,
-            createdAt: lastRead.subtract(const Duration(seconds: 1)),
-          ),
-        ];
-
-        final lastUnreadMessage = messages.lastUnreadMessage(userRead);
-        expect(lastUnreadMessage, isNotNull);
-        expect(lastUnreadMessage!.id, '2');
-      });
-
-      test('should not return the last message read', () {
-        final lastRead = DateTime.timestamp();
-        final otherUser = User(id: 'user2');
-        final userRead = Read(
-          lastRead: lastRead,
-          user: User(id: 'user1'),
-          lastReadMessageId: '3',
-        );
-
-        final messages = <Message>[
-          Message(
-            id: '1',
-            user: otherUser,
-            createdAt: lastRead.add(const Duration(seconds: 2)),
-          ),
-          Message(
-            id: '2',
-            user: otherUser,
-            createdAt: lastRead.add(const Duration(milliseconds: 1)),
-          ),
-          Message(
-            id: '3',
-            user: otherUser,
-            createdAt: lastRead.add(const Duration(microseconds: 1)),
-          ),
-          Message(
-            id: '4',
-            user: otherUser,
-            createdAt: lastRead.subtract(const Duration(seconds: 1)),
-          ),
-        ];
-
-        final lastUnreadMessage = messages.lastUnreadMessage(userRead);
-        expect(lastUnreadMessage, isNotNull);
-        expect(lastUnreadMessage!.id, '2');
-      });
     });
   });
 }

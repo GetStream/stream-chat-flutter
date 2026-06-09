@@ -1,3 +1,5 @@
+// ignore_for_file: lines_longer_than_80_chars
+
 part of 'stream_chat_localizations.dart';
 
 /// The translations for French (`fr`).
@@ -40,18 +42,19 @@ class StreamChatLocalizationsFr extends GlobalStreamChatLocalizations {
   String get threadReplyLabel => 'Réponse au fil de discussion';
 
   @override
+  String get threadLabel => 'Fil de discussion';
+
+  @override
   String get onlyVisibleToYouText => 'Seulement visible par vous';
 
   @override
-  String threadReplyCountText(int count) =>
-      '$count Réponses au fil de discussion';
+  String threadReplyCountText(int count) => '$count Réponses au fil de discussion';
 
   @override
   String attachmentsUploadProgressText({
-    required int remaining,
+    required int completed,
     required int total,
-  }) =>
-      'Transfert en cours $remaining/$total ...';
+  }) => 'Téléversés $completed sur $total ...';
 
   @override
   String pinnedByUserText({
@@ -64,11 +67,10 @@ class StreamChatLocalizationsFr extends GlobalStreamChatLocalizations {
   }
 
   @override
-  String get sendMessagePermissionError =>
-      "Vous n'êtes pas autorisé à envoyer des messages";
+  String get sendMessagePermissionError => "Vous n'êtes pas autorisé à envoyer des messages";
 
   @override
-  String get emptyMessagesText => "Il n'y a pas de messages actuellement";
+  String get emptyMessagesText => 'Aucun message pour le moment';
 
   @override
   String get genericErrorText => 'Il y a eu un problème';
@@ -113,8 +115,7 @@ class StreamChatLocalizationsFr extends GlobalStreamChatLocalizations {
   String get reconnectingLabel => 'Reconnexion...';
 
   @override
-  String get alsoSendAsDirectMessageLabel =>
-      'Envoyer aussi comme message direct';
+  String get alsoSendAsDirectMessageLabel => 'Envoyer aussi comme message direct';
 
   @override
   String get addACommentOrSendLabel => 'Ajouter un commentaire ou envoyer';
@@ -123,7 +124,7 @@ class StreamChatLocalizationsFr extends GlobalStreamChatLocalizations {
   String get searchGifLabel => 'Recherche de GIFs';
 
   @override
-  String get writeAMessageLabel => 'Écrire un message';
+  String get writeAMessageLabel => 'Envoyer un message';
 
   @override
   String get instantCommandsLabel => 'Commandes instantanées';
@@ -140,8 +141,13 @@ class StreamChatLocalizationsFr extends GlobalStreamChatLocalizations {
       'La taille limite du fichier est de $limitInMB Mo.';
 
   @override
-  String get couldNotReadBytesFromFileError =>
-      'Impossible de lire les octets du fichier.';
+  String fileTypeNotSupportedError(String? extension) {
+    if (extension != null) return "Les fichiers '.$extension' ne sont pas pris en charge pour le téléchargement.";
+    return "Ce type de fichier n'est pas pris en charge pour le téléchargement.";
+  }
+
+  @override
+  String get couldNotReadBytesFromFileError => 'Impossible de lire les octets du fichier.';
 
   @override
   String get addAFileLabel => 'Ajouter un fichier';
@@ -168,12 +174,11 @@ class StreamChatLocalizationsFr extends GlobalStreamChatLocalizations {
   String get somethingWentWrongError => 'Quelque chose a mal tourné';
 
   @override
-  String get addMoreFilesLabel => "Ajouter d'autres fichiers";
+  String get addMoreFilesLabel => 'Ajouter plus';
 
   @override
   String get enablePhotoAndVideoAccessMessage =>
-      "Veuillez autoriser l'accès à vos photos"
-      '\net vidéos afin de pouvoir les partager avec vos amis.';
+      "Veuillez autoriser l'accès à vos photos et vidéos afin de pouvoir les partager avec vos amis.";
 
   @override
   String get allowGalleryAccessMessage => "Autoriser l'accès à votre galerie";
@@ -183,35 +188,31 @@ class StreamChatLocalizationsFr extends GlobalStreamChatLocalizations {
 
   @override
   String get flagMessageQuestion =>
-      'Voulez-vous envoyer une copie de ce message à un'
-      '\nmodérateur pour une enquête plus approfondie ?';
+      'Voulez-vous envoyer une copie de ce message à un modérateur pour une enquête plus approfondie ?';
 
   @override
-  String get flagLabel => 'SIGNALER';
+  String get flagLabel => 'Signaler';
 
   @override
-  String get cancelLabel => 'ANNULER';
+  String get cancelLabel => 'Annuler';
 
   @override
   String get flagMessageSuccessfulLabel => 'Message signalé';
 
   @override
-  String get flagMessageSuccessfulText =>
-      'Ce message a été signalé à un modérateur.';
+  String get flagMessageSuccessfulText => 'Ce message a été signalé à un modérateur.';
 
   @override
-  String get deleteLabel => 'SUPPRIMER';
+  String get deleteLabel => 'Supprimer';
 
   @override
   String get deleteMessageLabel => 'Supprimer le message';
 
   @override
-  String get deleteMessageQuestion =>
-      'Êtes-vous sûr de vouloir supprimer définitivement ce\nmessage ?';
+  String get deleteMessageQuestion => 'Êtes-vous sûr de vouloir supprimer définitivement ce message ?';
 
   @override
-  String get operationCouldNotBeCompletedText =>
-      "L'opération n'a pas pu être terminée.";
+  String get operationCouldNotBeCompletedText => "L'opération n'a pas pu être terminée.";
 
   @override
   String get replyLabel => 'Répondre';
@@ -242,6 +243,9 @@ class StreamChatLocalizationsFr extends GlobalStreamChatLocalizations {
 
   @override
   String get photosLabel => 'Photos';
+
+  @override
+  String get photosAndVideosLabel => 'Photos et vidéos';
 
   String _getDay(DateTime dateTime) {
     final now = DateTime.now();
@@ -281,8 +285,7 @@ class StreamChatLocalizationsFr extends GlobalStreamChatLocalizations {
   String get letsStartChattingLabel => 'Commençons à discuter !';
 
   @override
-  String get sendingFirstMessageLabel =>
-      "Que diriez-vous d'envoyer votre premier message à un ami ?";
+  String get sendingFirstMessageLabel => "Que diriez-vous d'envoyer votre premier message à un ami ?";
 
   @override
   String get startAChatLabel => 'Commencer une discussion';
@@ -294,11 +297,10 @@ class StreamChatLocalizationsFr extends GlobalStreamChatLocalizations {
   String get deleteConversationLabel => 'Supprimer la conversation';
 
   @override
-  String get deleteConversationQuestion =>
-      'Vous êtes sûr de vouloir supprimer cette conversation ?';
+  String get deleteConversationQuestion => 'Vous êtes sûr de vouloir supprimer cette conversation ?';
 
   @override
-  String get streamChatLabel => 'Stream Chat';
+  String get streamChatLabel => 'Conversations';
 
   @override
   String get searchingForNetworkText => 'Recherche de réseau';
@@ -322,6 +324,16 @@ class StreamChatLocalizationsFr extends GlobalStreamChatLocalizations {
   }
 
   @override
+  String membersCountWithOnlineText({
+    required int memberCount,
+    required int onlineCount,
+  }) {
+    final members = membersCountText(memberCount);
+    if (onlineCount <= 0) return members;
+    return '$members, ${watchersCountText(onlineCount)}';
+  }
+
+  @override
   String get viewInfoLabel => 'Voir les informations';
 
   @override
@@ -334,8 +346,7 @@ class StreamChatLocalizationsFr extends GlobalStreamChatLocalizations {
   String get leaveConversationLabel => 'Quitter la conversation';
 
   @override
-  String get leaveConversationQuestion =>
-      'Etes-vous sûr de vouloir quitter cette conversation ?';
+  String get leaveConversationQuestion => 'Etes-vous sûr de vouloir quitter cette conversation ?';
 
   @override
   String get showInChatLabel => 'Montrer dans la Discussion';
@@ -371,8 +382,7 @@ class StreamChatLocalizationsFr extends GlobalStreamChatLocalizations {
   String galleryPaginationText({
     required int currentPage,
     required int totalPages,
-  }) =>
-      '${currentPage + 1} de $totalPages';
+  }) => '${currentPage + 1} de $totalPages';
 
   @override
   String get fileText => 'Fichier';
@@ -381,7 +391,8 @@ class StreamChatLocalizationsFr extends GlobalStreamChatLocalizations {
   String get replyToMessageLabel => 'Répondre au Message';
 
   @override
-  String attachmentLimitExceedError(int limit) => '''
+  String attachmentLimitExceedError(int limit) =>
+      '''
 Limite de pièces jointes dépassée : il n'est pas possible d'ajouter plus de $limit pièces jointes
   ''';
 
@@ -389,7 +400,10 @@ Limite de pièces jointes dépassée : il n'est pas possible d'ajouter plus de $
   String get viewLibrary => 'Voir la bibliothèque';
 
   @override
-  String get slowModeOnLabel => 'Mode lent activé';
+  String slowModeOnLabel(int cooldownTimeOut) => 'Mode lent, attendez ${cooldownTimeOut}s\u2026';
+
+  @override
+  String get commandUsernameLabel => '@username';
 
   @override
   String get downloadLabel => 'Télécharger';
@@ -401,6 +415,12 @@ Limite de pièces jointes dépassée : il n'est pas possible d'ajouter plus de $
     } else {
       return 'Utilisateur muet';
     }
+  }
+
+  @override
+  String toggleBlockUnblockUserText({required bool isBlocked}) {
+    if (isBlocked) return "Débloquer l'utilisateur";
+    return "Bloquer l'utilisateur";
   }
 
   @override
@@ -440,8 +460,7 @@ Limite de pièces jointes dépassée : il n'est pas possible d'ajouter plus de $
   }
 
   @override
-  String get linkDisabledDetails =>
-      "L'envoi de liens n'est pas autorisé dans cette conversation.";
+  String get linkDisabledDetails => "L'envoi de liens n'est pas autorisé dans cette conversation.";
 
   @override
   String get linkDisabledError => 'Les liens sont désactivés';
@@ -451,8 +470,7 @@ Limite de pièces jointes dépassée : il n'est pas possible d'ajouter plus de $
 
   @override
   String get enableFileAccessMessage =>
-      "Veuillez autoriser l'accès aux fichiers"
-      '\nafin de pouvoir les partager avec des amis.';
+      "Veuillez autoriser l'accès aux fichiers afin de pouvoir les partager avec des amis.";
 
   @override
   String get allowFileAccessMessage => "Autoriser l'accès aux fichiers";
@@ -478,7 +496,10 @@ Limite de pièces jointes dépassée : il n'est pas possible d'ajouter plus de $
   }
 
   @override
-  String get questionsLabel => 'Questions';
+  String questionLabel({bool isPlural = false}) {
+    if (isPlural) return 'Questions';
+    return 'Question';
+  }
 
   @override
   String get askAQuestionLabel => 'Poser une question';
@@ -519,8 +540,7 @@ Limite de pièces jointes dépassée : il n'est pas possible d'ajouter plus de $
   String get multipleAnswersLabel => 'Réponses multiples';
 
   @override
-  String get maximumVotesPerPersonLabel =>
-      'Nombre maximum de votes par personne';
+  String get maximumVotesPerPersonLabel => 'Nombre maximum de votes par personne';
 
   @override
   String? maxVotesPerPersonValidationError(int votes, Range<int> range) {
@@ -562,15 +582,17 @@ Limite de pièces jointes dépassée : il n'est pas possible d'ajouter plus de $
   String get enterYourCommentLabel => 'Entrez votre commentaire';
 
   @override
-  String get endVoteConfirmationText =>
-      'Êtes-vous sûr de vouloir terminer le vote?';
+  String get endVoteConfirmationTitle => 'Êtes-vous sûr de vouloir terminer le vote?';
+
+  @override
+  String get endVoteConfirmationMessage =>
+      'Voulez-vous terminer ce sondage maintenant ? Plus personne ne pourra voter dans ce sondage.';
 
   @override
   String get deletePollOptionLabel => "Supprimer l'option";
 
   @override
-  String get deletePollOptionQuestion =>
-      'Êtes-vous sûr de vouloir supprimer cette option ?';
+  String get deletePollOptionQuestion => 'Êtes-vous sûr de vouloir supprimer cette option ?';
 
   @override
   String get createLabel => 'Créer';
@@ -607,25 +629,36 @@ Limite de pièces jointes dépassée : il n'est pas possible d'ajouter plus de $
   String get pollResultsLabel => 'Résultats du sondage';
 
   @override
+  String get pollVotesLabel => 'Votes';
+
+  @override
   String showAllVotesLabel({int? count}) {
     if (count == null) return 'Afficher tous les votes';
     return 'Afficher tous les $count votes';
   }
 
   @override
+  String get viewAllLabel => 'Voir tout';
+
+  @override
   String voteCountLabel({int? count}) => switch (count) {
-        null || < 1 => '0 vote',
-        1 => '1 vote',
-        _ => '$count votes',
-      };
+    null || < 1 => '0 vote',
+    1 => '1 vote',
+    _ => '$count votes',
+  };
 
   @override
-  String get noPollVotesLabel =>
-      "Il n'y a pas de votes de sondage actuellement";
+  String totalVoteCountLabel({int? count}) => switch (count) {
+    null || < 1 => '0 vote au total',
+    1 => '1 vote au total',
+    _ => '$count votes au total',
+  };
 
   @override
-  String get loadingPollVotesError =>
-      'Erreur de chargement des votes du sondage';
+  String get noPollVotesLabel => "Il n'y a pas de votes de sondage actuellement";
+
+  @override
+  String get loadingPollVotesError => 'Erreur de chargement des votes du sondage';
 
   @override
   String get repliedToLabel => 'répondu à:';
@@ -637,18 +670,19 @@ Limite de pièces jointes dépassée : il n'est pas possible d'ajouter plus de $
   }
 
   @override
+  String get loadingLabel => 'Chargement...';
+
+  @override
   String get slideToCancelLabel => 'Glissez pour annuler';
 
   @override
-  String get holdToRecordLabel =>
-      'Maintenez pour enregistrer, relâchez pour envoyer';
+  String get holdToRecordLabel => 'Maintenez pour enregistrer, relâchez pour envoyer';
 
   @override
   String get sendAnywayLabel => 'Envoyer quand même';
 
   @override
-  String get moderatedMessageBlockedText =>
-      'Message bloqué par les politiques de modération';
+  String get moderatedMessageBlockedText => 'Message bloqué par les politiques de modération';
 
   @override
   String get moderationReviewModalTitle => 'Êtes-vous sûr ?';
@@ -673,6 +707,21 @@ Limite de pièces jointes dépassée : il n'est pas possible d'ajouter plus de $
   String get videoAttachmentText => 'Vidéo';
 
   @override
+  String get fileAttachmentText => 'Fichier';
+
+  @override
+  String get linkAttachmentText => 'Lien';
+
+  @override
+  String filesAttachmentCountText(int count) => count == 1 ? 'Fichier' : '$count fichiers';
+
+  @override
+  String photosAttachmentCountText(int count) => count == 1 ? 'Photo' : '$count photos';
+
+  @override
+  String videosAttachmentCountText(int count) => count == 1 ? 'Vidéo' : '$count vidéos';
+
+  @override
   String get pollYouVotedText => 'Vous avez voté';
 
   @override
@@ -686,4 +735,97 @@ Limite de pièces jointes dépassée : il n'est pas possible d'ajouter plus de $
 
   @override
   String get draftLabel => 'Brouillon';
+
+  @override
+  String locationLabel({bool isLive = false}) {
+    if (isLive) return 'Position en direct';
+    return 'Position';
+  }
+
+  @override
+  String get noConversationsYetText => 'Pas encore de conversations';
+
+  @override
+  String get replyToStartThreadText => 'Répondez à un message pour démarrer un fil';
+
+  @override
+  String get sendMessageToStartConversationText => 'Envoyez un message pour démarrer la conversation';
+
+  @override
+  String get savedForLaterLabel => 'Enregistré pour plus tard';
+
+  @override
+  String get repliedToThreadAnnotationLabel => 'A répondu à un fil';
+
+  @override
+  String get alsoSentInChannelAnnotationLabel => 'Également envoyé dans le canal';
+
+  @override
+  String get viewLabel => 'Voir';
+
+  @override
+  String get reminderSetLabel => 'Rappel défini';
+
+  @override
+  String reminderAtText(String time) => "Aujourd'hui à $time";
+
+  @override
+  String get createPollPromptLabel => 'Créez un sondage et laissez tout le monde voter !';
+
+  @override
+  String get takePhotoAndShareLabel => 'Prendre une photo et partager';
+
+  @override
+  String get takeVideoAndShareLabel => 'Prendre une vidéo et partager';
+
+  @override
+  String get openCameraLabel => 'Ouvrir la caméra';
+
+  @override
+  String get selectFilesToShareLabel => 'Sélectionnez des fichiers à partager';
+
+  @override
+  String get openFilesLabel => 'Ouvrir des fichiers';
+
+  @override
+  String get unsupportedAttachmentLabel => 'Pièce jointe non prise en charge';
+
+  @override
+  String get confirmLabel => 'CONFIRMER';
+
+  @override
+  String get emptyReactionsText => 'Pas encore de réactions';
+
+  @override
+  String get loadingReactionsError => 'Erreur lors du chargement des réactions';
+
+  @override
+  String get tapToRemoveReactionLabel => 'Appuyer pour supprimer';
+
+  @override
+  String reactionsCountText(int count) => '$count Réactions';
+
+  @override
+  String get justNowLabel => "À l'instant";
+
+  @override
+  String replyToUserLabel(String userName) => 'Répondre à $userName';
+
+  @override
+  String get multipleAnswersDescription => "Sélectionner plus d'une option";
+
+  @override
+  String maximumVotesPerPersonDescription([Range<int>? range]) {
+    final (:min, :max) = range ?? (min: 2, max: 10);
+    return 'Choisir entre $min et $max options';
+  }
+
+  @override
+  String get anonymousPollDescription => 'Masquer qui a voté';
+
+  @override
+  String get suggestAnOptionDescription => 'Laisser les autres ajouter des options';
+
+  @override
+  String get addACommentDescription => "Permettre aux autres d'ajouter des commentaires";
 }

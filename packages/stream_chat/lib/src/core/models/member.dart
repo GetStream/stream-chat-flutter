@@ -26,15 +26,16 @@ class Member extends Equatable implements ComparableFieldProvider {
     this.shadowBanned = false,
     this.pinnedAt,
     this.archivedAt,
+    this.deletedMessages = const [],
     this.extraData = const {},
-  })  : userId = userId ?? user?.id,
-        createdAt = createdAt ?? DateTime.now(),
-        updatedAt = updatedAt ?? DateTime.now();
+  }) : userId = userId ?? user?.id,
+       createdAt = createdAt ?? DateTime.now(),
+       updatedAt = updatedAt ?? DateTime.now();
 
   /// Create a new instance from a json
   factory Member.fromJson(Map<String, dynamic> json) => _$MemberFromJson(
-        Serializer.moveToExtraDataFromRoot(json, _topLevelFields),
-      );
+    Serializer.moveToExtraDataFromRoot(json, _topLevelFields),
+  );
 
   /// Known top level fields.
   ///
@@ -53,7 +54,8 @@ class Member extends Equatable implements ComparableFieldProvider {
     'created_at',
     'updated_at',
     'pinned_at',
-    'archived_at'
+    'archived_at',
+    'deleted_messages',
   ];
 
   /// The interested user
@@ -98,6 +100,12 @@ class Member extends Equatable implements ComparableFieldProvider {
   /// The last date of update
   final DateTime updatedAt;
 
+  /// List of message ids deleted by this member only for himself.
+  ///
+  /// These messages are not visible to this member anymore, but are still
+  /// visible to other channel members.
+  final List<String> deletedMessages;
+
   /// Map of custom member extraData.
   final Map<String, Object?> extraData;
 
@@ -118,49 +126,51 @@ class Member extends Equatable implements ComparableFieldProvider {
     bool? banned,
     DateTime? banExpires,
     bool? shadowBanned,
+    List<String>? deletedMessages,
     Map<String, Object?>? extraData,
-  }) =>
-      Member(
-        user: user ?? this.user,
-        inviteAcceptedAt: inviteAcceptedAt ?? this.inviteAcceptedAt,
-        inviteRejectedAt: inviteRejectedAt ?? this.inviteRejectedAt,
-        invited: invited ?? this.invited,
-        banned: banned ?? this.banned,
-        banExpires: banExpires ?? this.banExpires,
-        shadowBanned: shadowBanned ?? this.shadowBanned,
-        channelRole: channelRole ?? this.channelRole,
-        userId: userId ?? this.userId,
-        isModerator: isModerator ?? this.isModerator,
-        pinnedAt: pinnedAt ?? this.pinnedAt,
-        archivedAt: archivedAt ?? this.archivedAt,
-        createdAt: createdAt ?? this.createdAt,
-        updatedAt: updatedAt ?? this.updatedAt,
-        extraData: extraData ?? this.extraData,
-      );
+  }) => Member(
+    user: user ?? this.user,
+    inviteAcceptedAt: inviteAcceptedAt ?? this.inviteAcceptedAt,
+    inviteRejectedAt: inviteRejectedAt ?? this.inviteRejectedAt,
+    invited: invited ?? this.invited,
+    banned: banned ?? this.banned,
+    banExpires: banExpires ?? this.banExpires,
+    shadowBanned: shadowBanned ?? this.shadowBanned,
+    channelRole: channelRole ?? this.channelRole,
+    userId: userId ?? this.userId,
+    isModerator: isModerator ?? this.isModerator,
+    pinnedAt: pinnedAt ?? this.pinnedAt,
+    archivedAt: archivedAt ?? this.archivedAt,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    deletedMessages: deletedMessages ?? this.deletedMessages,
+    extraData: extraData ?? this.extraData,
+  );
 
   /// Serialize to json
   Map<String, dynamic> toJson() => Serializer.moveFromExtraDataToRoot(
-        _$MemberToJson(this),
-      );
+    _$MemberToJson(this),
+  );
 
   @override
   List<Object?> get props => [
-        user,
-        inviteAcceptedAt,
-        inviteRejectedAt,
-        invited,
-        channelRole,
-        userId,
-        isModerator,
-        banned,
-        banExpires,
-        shadowBanned,
-        pinnedAt,
-        archivedAt,
-        createdAt,
-        updatedAt,
-        extraData,
-      ];
+    user,
+    inviteAcceptedAt,
+    inviteRejectedAt,
+    invited,
+    channelRole,
+    userId,
+    isModerator,
+    banned,
+    banExpires,
+    shadowBanned,
+    pinnedAt,
+    archivedAt,
+    createdAt,
+    updatedAt,
+    deletedMessages,
+    extraData,
+  ];
 
   @override
   ComparableField? getComparableField(String sortKey) {

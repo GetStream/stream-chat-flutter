@@ -20,7 +20,10 @@ import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 ///   widget for the [Message.attachments].
 class AttachmentWidgetCatalog {
   /// {@macro attachmentWidgetCatalog}
-  const AttachmentWidgetCatalog({required this.builders});
+  const AttachmentWidgetCatalog({
+    required this.builders,
+    this.padding,
+  });
 
   /// The list of builders to use to build the widget.
   ///
@@ -28,25 +31,25 @@ class AttachmentWidgetCatalog {
   /// the message and attachments will be used to build the widget.
   final List<StreamAttachmentWidgetBuilder> builders;
 
+  /// The padding around the built attachment content.
+  final EdgeInsetsGeometry? padding;
+
   /// Builds a widget for the given [message] and [attachments].
   ///
   /// It iterates through the list of builders and uses the first builder
   /// that can handle the message and attachments.
   ///
   /// Throws an [Exception] if no builder is found for the message.
-  Widget build(BuildContext context, Message message) {
+  Widget? build(BuildContext context, Message message) {
     assert(!message.isDeleted, 'Cannot build attachment for deleted message');
 
-    assert(
-      message.attachments.isNotEmpty,
-      'Cannot build attachment for message without attachments',
-    );
-
-    // The list of attachments to build the widget for.
     final attachments = message.attachments.grouped;
     for (final builder in builders) {
       if (builder.canHandle(message, attachments)) {
-        return builder.build(context, message, attachments);
+        final child = builder.build(context, message, attachments);
+        if (child == null || padding == null) return child;
+
+        return Padding(padding: padding!, child: child);
       }
     }
 
@@ -57,8 +60,11 @@ class AttachmentWidgetCatalog {
 extension on List<Attachment> {
   /// Groups the attachments by their type.
   Map<String, List<Attachment>> get grouped {
-    return groupBy(where((it) {
-      return it.type != null;
-    }), (attachment) => attachment.type!);
+    return groupBy(
+      where((it) {
+        return it.type != null;
+      }),
+      (attachment) => attachment.type!,
+    );
   }
 }

@@ -25,13 +25,15 @@ class SharedDB {
     if (connectionMode == ConnectionMode.background) {
       return DriftChatDatabase(
         userId,
-        DatabaseConnection.delayed(Future(() async {
-          final isolate = await _createDriftIsolate(
-            dbName,
-            logStatements: logStatements,
-          );
-          return isolate.connect();
-        })),
+        DatabaseConnection.delayed(
+          Future(() async {
+            final isolate = await _createDriftIsolate(
+              dbName,
+              logStatements: logStatements,
+            );
+            return isolate.connect();
+          }),
+        ),
       );
     }
 
@@ -64,10 +66,12 @@ class SharedDB {
   }
 
   static void _startBackground(_IsolateStartRequest request) {
-    final executor = LazyDatabase(() async => NativeDatabase(
-          File(request.targetPath),
-          logStatements: request.logStatements,
-        ));
+    final executor = LazyDatabase(
+      () async => NativeDatabase(
+        File(request.targetPath),
+        logStatements: request.logStatements,
+      ),
+    );
     final driftIsolate = DriftIsolate.inCurrent(
       () => DatabaseConnection(executor),
     );

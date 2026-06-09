@@ -15,8 +15,7 @@ const _kDefaultBackendPaginationLimit = 30;
 /// * Load initial data.
 /// * Load more data using [loadMore].
 /// * Replace the previously loaded users.
-class StreamMessageSearchListController
-    extends PagedValueNotifier<String, GetMessageResponse> {
+class StreamMessageSearchListController extends PagedValueNotifier<String, GetMessageResponse> {
   /// Creates a Stream user list controller.
   ///
   /// * `client` is the Stream chat client to use for the channels list.
@@ -36,19 +35,19 @@ class StreamMessageSearchListController
     this.searchQuery,
     this.sort,
     this.limit = defaultMessageSearchPagedLimit,
-  })  : assert(
-          messageFilter != null || searchQuery != null,
-          'Either messageFilter or searchQuery must be provided',
-        ),
-        assert(
-          messageFilter == null || searchQuery == null,
-          'Only one of messageFilter or searchQuery can be provided',
-        ),
-        _activeFilter = filter,
-        _activeMessageFilter = messageFilter,
-        _activeSearchQuery = searchQuery,
-        _activeSort = sort,
-        super(const PagedValue.loading());
+  }) : assert(
+         messageFilter != null || searchQuery != null,
+         'Either messageFilter or searchQuery must be provided',
+       ),
+       assert(
+         messageFilter == null || searchQuery == null,
+         'Only one of messageFilter or searchQuery can be provided',
+       ),
+       _activeFilter = filter,
+       _activeMessageFilter = messageFilter,
+       _activeSearchQuery = searchQuery,
+       _activeSort = sort,
+       super(const PagedValue.loading());
 
   /// Creates a [StreamUserListController] from the passed [value].
   StreamMessageSearchListController.fromValue(
@@ -59,18 +58,18 @@ class StreamMessageSearchListController
     this.searchQuery,
     this.sort,
     this.limit = defaultMessageSearchPagedLimit,
-  })  : assert(
-          messageFilter != null || searchQuery != null,
-          'Either messageFilter or searchQuery must be provided',
-        ),
-        assert(
-          messageFilter == null || searchQuery == null,
-          'Only one of messageFilter or searchQuery can be provided',
-        ),
-        _activeFilter = filter,
-        _activeMessageFilter = messageFilter,
-        _activeSearchQuery = searchQuery,
-        _activeSort = sort;
+  }) : assert(
+         messageFilter != null || searchQuery != null,
+         'Either messageFilter or searchQuery must be provided',
+       ),
+       assert(
+         messageFilter == null || searchQuery == null,
+         'Only one of messageFilter or searchQuery can be provided',
+       ),
+       _activeFilter = filter,
+       _activeMessageFilter = messageFilter,
+       _activeSearchQuery = searchQuery,
+       _activeSort = sort;
 
   /// The client to use for the channels list.
   final StreamChatClient client;

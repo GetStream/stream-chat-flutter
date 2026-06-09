@@ -29,7 +29,7 @@ android {
 
     defaultConfig {
         applicationId "io.getstream.chat.android.flutter.sample"
-        minSdkVersion Math.max(flutter.minSdkVersion, 23)
+        minSdkVersion Math.max(flutter.minSdkVersion, 24)
         targetSdkVersion flutter.targetSdkVersion
         versionCode flutter.versionCode
         versionName flutter.versionName

@@ -19,8 +19,7 @@ class MockChatDatabase extends Mock implements DriftChatDatabase {
   MessageDao? _messageDao;
 
   @override
-  PinnedMessageDao get pinnedMessageDao =>
-      _pinnedMessageDao ??= MockPinnedMessageDao();
+  PinnedMessageDao get pinnedMessageDao => _pinnedMessageDao ??= MockPinnedMessageDao();
   PinnedMessageDao? _pinnedMessageDao;
 
   @override
@@ -32,8 +31,7 @@ class MockChatDatabase extends Mock implements DriftChatDatabase {
   ReactionDao? _reactionDao;
 
   @override
-  PinnedMessageReactionDao get pinnedMessageReactionDao =>
-      _pinnedMessageReactionDao ??= MockPinnedMessageReactionDao();
+  PinnedMessageReactionDao get pinnedMessageReactionDao => _pinnedMessageReactionDao ??= MockPinnedMessageReactionDao();
   PinnedMessageReactionDao? _pinnedMessageReactionDao;
 
   @override
@@ -41,13 +39,11 @@ class MockChatDatabase extends Mock implements DriftChatDatabase {
   ReadDao? _readDao;
 
   @override
-  ChannelQueryDao get channelQueryDao =>
-      _channelQueryDao ??= MockChannelQueryDao();
+  ChannelQueryDao get channelQueryDao => _channelQueryDao ??= MockChannelQueryDao();
   ChannelQueryDao? _channelQueryDao;
 
   @override
-  ConnectionEventDao get connectionEventDao =>
-      _connectionEventDao ??= MockConnectionEventDao();
+  ConnectionEventDao get connectionEventDao => _connectionEventDao ??= MockConnectionEventDao();
   ConnectionEventDao? _connectionEventDao;
 
   @override
@@ -59,9 +55,12 @@ class MockChatDatabase extends Mock implements DriftChatDatabase {
   PollVoteDao? _pollVoteDao;
 
   @override
-  DraftMessageDao get draftMessageDao =>
-      _draftMessageDao ??= MockDraftMessageDao();
+  DraftMessageDao get draftMessageDao => _draftMessageDao ??= MockDraftMessageDao();
   DraftMessageDao? _draftMessageDao;
+
+  @override
+  LocationDao get locationDao => _locationDao ??= MockLocationDao();
+  LocationDao? _locationDao;
 
   @override
   Future<void> flush() => Future.value();
@@ -82,8 +81,7 @@ class MockMemberDao extends Mock implements MemberDao {}
 
 class MockReactionDao extends Mock implements ReactionDao {}
 
-class MockPinnedMessageReactionDao extends Mock
-    implements PinnedMessageReactionDao {}
+class MockPinnedMessageReactionDao extends Mock implements PinnedMessageReactionDao {}
 
 class MockReadDao extends Mock implements ReadDao {}
 
@@ -96,3 +94,5 @@ class MockPollDao extends Mock implements PollDao {}
 class MockPollVoteDao extends Mock implements PollVoteDao {}
 
 class MockDraftMessageDao extends Mock implements DraftMessageDao {}
+
+class MockLocationDao extends Mock implements LocationDao {}

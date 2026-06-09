@@ -6,28 +6,32 @@ import 'package:stream_chat_localizations/stream_chat_localizations.dart';
 
 void main() {
   testWidgets('Nested Localizations', (WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(
-      theme: ThemeData(
-        useMaterial3: false,
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          useMaterial3: false,
+        ),
+        // Creates the outer Localizations widget.
+        home: ListView(
+          children: <Widget>[
+            const LocalizationTracker(key: ValueKey<String>('outer')),
+            Localizations(
+              locale: const Locale('hi'),
+              delegates: GlobalStreamChatLocalizations.delegates,
+              child: const LocalizationTracker(key: ValueKey<String>('inner')),
+            ),
+          ],
+        ),
       ),
-      // Creates the outer Localizations widget.
-      home: ListView(
-        children: <Widget>[
-          const LocalizationTracker(key: ValueKey<String>('outer')),
-          Localizations(
-            locale: const Locale('hi'),
-            delegates: GlobalStreamChatLocalizations.delegates,
-            child: const LocalizationTracker(key: ValueKey<String>('inner')),
-          ),
-        ],
-      ),
-    ));
+    );
 
     final LocalizationTrackerState outerTracker = tester.state(
-        find.byKey(const ValueKey<String>('outer'), skipOffstage: false));
+      find.byKey(const ValueKey<String>('outer'), skipOffstage: false),
+    );
     expect(outerTracker.captionFontSize, 12.0);
     final LocalizationTrackerState innerTracker = tester.state(
-        find.byKey(const ValueKey<String>('inner'), skipOffstage: false));
+      find.byKey(const ValueKey<String>('inner'), skipOffstage: false),
+    );
     expect(innerTracker.captionFontSize, 13.0);
   });
 
@@ -36,19 +40,21 @@ void main() {
     'during didChangeDependencies',
     (WidgetTester tester) async {
       // PageView calls ScrollPosition.dispose() during didChangeDependencies.
-      await tester.pumpWidget(MaterialApp(
-        supportedLocales: const <Locale>[
-          Locale('en', 'US'),
-          Locale('hi', 'IN'),
-        ],
-        localizationsDelegates: const [
-          DummyLocalizations.delegate,
-          GlobalStreamChatLocalizations.delegate,
-          GlobalMaterialLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-        ],
-        home: PageView(),
-      ));
+      await tester.pumpWidget(
+        MaterialApp(
+          supportedLocales: const <Locale>[
+            Locale('en', 'US'),
+            Locale('hi', 'IN'),
+          ],
+          localizationsDelegates: const [
+            DummyLocalizations.delegate,
+            GlobalStreamChatLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          home: PageView(),
+        ),
+      );
 
       await tester.binding.setLocale('hi', 'IN');
       await tester.pump();
@@ -58,14 +64,16 @@ void main() {
 
   testWidgets('Locale without countryCode', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/pull/16782
-    await tester.pumpWidget(MaterialApp(
-      localizationsDelegates: GlobalStreamChatLocalizations.delegates,
-      supportedLocales: const <Locale>[
-        Locale('en', 'US'),
-        Locale('hi'),
-      ],
-      home: Container(),
-    ));
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: GlobalStreamChatLocalizations.delegates,
+        supportedLocales: const <Locale>[
+          Locale('en', 'US'),
+          Locale('hi'),
+        ],
+        home: Container(),
+      ),
+    );
 
     await tester.binding.setLocale('hi', '');
     await tester.pump();
@@ -76,8 +84,7 @@ void main() {
 
 /// A localizations delegate that does not contain any useful data, and is only
 /// used to trigger didChangeDependencies upon locale change.
-class _DummyLocalizationsDelegate
-    extends LocalizationsDelegate<DummyLocalizations> {
+class _DummyLocalizationsDelegate extends LocalizationsDelegate<DummyLocalizations> {
   const _DummyLocalizationsDelegate();
 
   @override

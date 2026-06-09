@@ -38,16 +38,14 @@ class _CountingItemState extends State<_CountingItem> {
 
   @override
   Widget build(BuildContext context) => SizedBox(
-        height: _itemHeight,
-        child: Text(widget.label),
-      );
+    height: _itemHeight,
+    child: Text(widget.label),
+  );
 }
 
 ItemPosition _topmost(ItemPositionsListener listener) {
-  final visible = listener.itemPositions.value
-      .where((p) => p.itemLeadingEdge < 1 && p.itemTrailingEdge > 0);
-  return visible
-      .reduce((a, b) => a.itemLeadingEdge < b.itemLeadingEdge ? a : b);
+  final visible = listener.itemPositions.value.where((p) => p.itemLeadingEdge < 1 && p.itemTrailingEdge > 0);
+  return visible.reduce((a, b) => a.itemLeadingEdge < b.itemLeadingEdge ? a : b);
 }
 
 void main() {
@@ -243,7 +241,8 @@ void main() {
         expect(
           delta,
           lessThanOrEqualTo(3),
-          reason: 'Existing items should be reused via key-based '
+          reason:
+              'Existing items should be reused via key-based '
               'reconciliation; only the newly prepended items can mount.',
         );
       },
@@ -300,16 +299,16 @@ void main() {
         addTearDown(tester.view.resetDevicePixelRatio);
 
         Widget build(List<String> items) => MaterialApp(
-              home: ScrollablePositionedList.builder(
-                itemCount: items.length,
-                // No itemKeyBuilder provided.
-                itemPositionsListener: listener,
-                itemBuilder: (ctx, i) => SizedBox(
-                  height: _itemHeight,
-                  child: Text(items[i]),
-                ),
-              ),
-            );
+          home: ScrollablePositionedList.builder(
+            itemCount: items.length,
+            // No itemKeyBuilder provided.
+            itemPositionsListener: listener,
+            itemBuilder: (ctx, i) => SizedBox(
+              height: _itemHeight,
+              child: Text(items[i]),
+            ),
+          ),
+        );
 
         await tester.pumpWidget(build(items));
         await tester.pumpAndSettle();
@@ -460,7 +459,8 @@ void main() {
         expect(
           delta,
           lessThanOrEqualTo(2),
-          reason: 'Surviving items should keep their State across '
+          reason:
+              'Surviving items should keep their State across '
               'prepend in a separated list.',
         );
       },
@@ -498,7 +498,8 @@ void main() {
         expect(
           afterRebuild.itemLeadingEdge,
           closeTo(beforeRebuild.itemLeadingEdge, _tolerance),
-          reason: 'Same-itemCount rebuilds must not perturb the '
+          reason:
+              'Same-itemCount rebuilds must not perturb the '
               'scroll position.',
         );
       },
@@ -524,16 +525,16 @@ void main() {
         var items = <String>[for (var i = 0; i < 20; i++) 'msg-$i'];
 
         Widget build(List<String> items) => MaterialApp(
-              home: ScrollablePositionedList.builder(
-                itemCount: items.length,
-                itemKeyBuilder: (i) => items[i],
-                itemPositionsListener: listener,
-                itemBuilder: (ctx, i) => SizedBox(
-                  height: _itemHeight,
-                  child: Text(items[i]),
-                ),
-              ),
-            );
+          home: ScrollablePositionedList.builder(
+            itemCount: items.length,
+            itemKeyBuilder: (i) => items[i],
+            itemPositionsListener: listener,
+            itemBuilder: (ctx, i) => SizedBox(
+              height: _itemHeight,
+              child: Text(items[i]),
+            ),
+          ),
+        );
 
         await tester.pumpWidget(build(items));
         await tester.pumpAndSettle();

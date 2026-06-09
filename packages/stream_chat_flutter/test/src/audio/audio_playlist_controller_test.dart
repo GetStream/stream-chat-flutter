@@ -4,6 +4,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat_flutter/src/audio/audio_playlist_controller.dart';
 import 'package:stream_chat_flutter/src/audio/audio_playlist_state.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 class MockAudioPlayer extends Mock implements AudioPlayer {}
 
@@ -52,12 +53,9 @@ void main() {
       speedController = PublishSubject<double>();
 
       // Default mock behaviors
-      when(() => mockPlayer.playerStateStream)
-          .thenAnswer((_) => stateController.stream);
-      when(() => mockPlayer.positionStream)
-          .thenAnswer((_) => positionController.stream);
-      when(() => mockPlayer.speedStream)
-          .thenAnswer((_) => speedController.stream);
+      when(() => mockPlayer.playerStateStream).thenAnswer((_) => stateController.stream);
+      when(() => mockPlayer.positionStream).thenAnswer((_) => positionController.stream);
+      when(() => mockPlayer.speedStream).thenAnswer((_) => speedController.stream);
 
       controller = StreamAudioPlaylistController.raw(
         player: mockPlayer,
@@ -75,7 +73,7 @@ void main() {
     test('controller initializes with correct default state', () {
       expect(controller.value.tracks.length, equals(2));
       expect(controller.value.currentIndex, isNull);
-      expect(controller.value.speed, equals(PlaybackSpeed.regular));
+      expect(controller.value.speed, equals(StreamPlaybackSpeed.x1));
       expect(controller.value.loopMode, equals(PlaylistLoopMode.off));
     });
 
@@ -124,7 +122,7 @@ void main() {
           PlaylistTrack(
             title: 'new-track.mp3',
             uri: Uri.parse('https://example.com/new-track.mp3'),
-          )
+          ),
         ];
 
         await controller.updatePlaylist(newTracks);
@@ -166,7 +164,7 @@ void main() {
       test('setSpeed changes playback rate', () async {
         when(() => mockPlayer.setSpeed(any())).thenAnswer((_) async {});
 
-        const playbackSpeed = PlaybackSpeed.faster;
+        const playbackSpeed = StreamPlaybackSpeed.x2;
         await controller.setSpeed(playbackSpeed);
 
         verify(() => mockPlayer.setSpeed(playbackSpeed.speed)).called(1);
@@ -216,17 +214,17 @@ void main() {
       });
 
       test('speedStream updates playback speed', () async {
-        speedController.add(1.5);
-        await Future.delayed(Duration.zero);
-        expect(controller.value.speed, equals(PlaybackSpeed.faster));
-
         speedController.add(2);
         await Future.delayed(Duration.zero);
-        expect(controller.value.speed, equals(PlaybackSpeed.fastest));
+        expect(controller.value.speed, equals(StreamPlaybackSpeed.x2));
+
+        speedController.add(0.5);
+        await Future.delayed(Duration.zero);
+        expect(controller.value.speed, equals(StreamPlaybackSpeed.x0_5));
 
         speedController.add(1);
         await Future.delayed(Duration.zero);
-        expect(controller.value.speed, equals(PlaybackSpeed.regular));
+        expect(controller.value.speed, equals(StreamPlaybackSpeed.x1));
       });
 
       test('track completes and auto-advances', () async {
