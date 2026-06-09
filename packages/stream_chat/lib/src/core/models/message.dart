@@ -12,6 +12,7 @@ import 'package:stream_chat/src/core/models/poll.dart';
 import 'package:stream_chat/src/core/models/reaction.dart';
 import 'package:stream_chat/src/core/models/reaction_group.dart';
 import 'package:stream_chat/src/core/models/user.dart';
+import 'package:stream_chat/src/core/models/user_group.dart';
 import 'package:stream_chat/src/core/util/extension.dart';
 import 'package:stream_chat/src/core/util/serializer.dart';
 import 'package:uuid/uuid.dart';
@@ -33,6 +34,11 @@ class Message extends Equatable implements ComparableFieldProvider {
     this.text,
     String type = MessageType.regular,
     this.attachments = const [],
+    this.mentionedChannel,
+    this.mentionedGroupIds,
+    this.mentionedGroups,
+    this.mentionedHere,
+    this.mentionedRoles,
     this.mentionedUsers = const [],
     this.silent = false,
     this.shadowed = false,
@@ -121,6 +127,27 @@ class Message extends Equatable implements ComparableFieldProvider {
   /// command or as a result of URL scraping.
   @JsonKey(includeIfNull: false)
   final List<Attachment> attachments;
+
+  /// Boolean indicator if the message contains a "@channel" mention.
+  @JsonKey(includeIfNull: false)
+  final bool? mentionedChannel;
+
+  /// The list of group ids mentioned in the message.
+  @JsonKey(includeIfNull: false)
+  final List<String>? mentionedGroupIds;
+
+  /// The list of groups mentioned in the message, hydrated by the server from
+  /// [mentionedGroupIds].
+  @JsonKey(includeToJson: false)
+  final List<UserGroup>? mentionedGroups;
+
+  /// Boolean indicator if the message contains a "@here" mention.
+  @JsonKey(includeIfNull: false)
+  final bool? mentionedHere;
+
+  /// The list of roles mentioned in the message.
+  @JsonKey(includeIfNull: false)
+  final List<String>? mentionedRoles;
 
   /// The list of user mentioned in the message.
   @JsonKey(toJson: User.toIds)
@@ -353,6 +380,11 @@ class Message extends Equatable implements ComparableFieldProvider {
     'latest_reactions',
     'shadowed',
     'own_reactions',
+    'mentioned_channel',
+    'mentioned_group_ids',
+    'mentioned_groups',
+    'mentioned_here',
+    'mentioned_roles',
     'mentioned_users',
     'reaction_counts',
     'reaction_scores',
@@ -409,6 +441,11 @@ class Message extends Equatable implements ComparableFieldProvider {
     String? text,
     String? type,
     List<Attachment>? attachments,
+    bool? mentionedChannel,
+    List<String>? mentionedGroupIds,
+    List<UserGroup>? mentionedGroups,
+    bool? mentionedHere,
+    List<String>? mentionedRoles,
     List<User>? mentionedUsers,
     bool? silent,
     bool? shadowed,
@@ -477,6 +514,11 @@ class Message extends Equatable implements ComparableFieldProvider {
       text: text ?? this.text,
       type: type ?? this.type,
       attachments: attachments ?? this.attachments,
+      mentionedChannel: mentionedChannel ?? this.mentionedChannel,
+      mentionedGroupIds: mentionedGroupIds ?? this.mentionedGroupIds,
+      mentionedGroups: mentionedGroups ?? this.mentionedGroups,
+      mentionedHere: mentionedHere ?? this.mentionedHere,
+      mentionedRoles: mentionedRoles ?? this.mentionedRoles,
       mentionedUsers: mentionedUsers ?? this.mentionedUsers,
       silent: silent ?? this.silent,
       shadowed: shadowed ?? this.shadowed,
@@ -525,6 +567,11 @@ class Message extends Equatable implements ComparableFieldProvider {
       text: other.text,
       type: other.type,
       attachments: other.attachments,
+      mentionedChannel: other.mentionedChannel,
+      mentionedGroupIds: other.mentionedGroupIds,
+      mentionedGroups: other.mentionedGroups,
+      mentionedHere: other.mentionedHere,
+      mentionedRoles: other.mentionedRoles,
       mentionedUsers: other.mentionedUsers,
       silent: other.silent,
       shadowed: other.shadowed,
@@ -634,6 +681,11 @@ class Message extends Equatable implements ComparableFieldProvider {
     text,
     type,
     attachments,
+    mentionedChannel,
+    mentionedGroupIds,
+    mentionedGroups,
+    mentionedHere,
+    mentionedRoles,
     mentionedUsers,
     reactionGroups,
     latestReactions,

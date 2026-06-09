@@ -9,6 +9,7 @@ import 'package:stream_chat/src/core/models/poll_option.dart';
 import 'package:stream_chat/src/core/models/reaction.dart';
 import 'package:stream_chat/src/core/models/reaction_group.dart';
 import 'package:stream_chat/src/core/models/user.dart';
+import 'package:stream_chat/src/core/models/user_group.dart';
 import 'package:test/test.dart';
 
 import '../../utils.dart';
@@ -31,6 +32,21 @@ void main() {
       expect(message.createdAt, DateTime.parse('2020-01-28T22:17:31.107978Z'));
       expect(message.updatedAt, DateTime.parse('2020-01-28T22:17:31.130506Z'));
       expect(message.mentionedUsers, isA<List<User>>());
+      expect(message.mentionedUsers, hasLength(1));
+      expect(message.mentionedUsers.first.id, 'mentioned-user-1');
+      expect(message.mentionedUsers.first.name, 'John Doe');
+      expect(message.mentionedChannel, isTrue);
+      expect(message.mentionedHere, isFalse);
+      expect(message.mentionedRoles, equals(['admin', 'moderator']));
+      expect(message.mentionedGroupIds, equals(['group-1', 'group-2']));
+      expect(message.mentionedGroups, isA<List<UserGroup>>());
+      expect(message.mentionedGroups, hasLength(2));
+      expect(message.mentionedGroups![0].id, 'group-1');
+      expect(message.mentionedGroups![0].name, 'Engineering');
+      expect(message.mentionedGroups![0].description, 'Engineering team');
+      expect(message.mentionedGroups![1].id, 'group-2');
+      expect(message.mentionedGroups![1].name, 'Design');
+      expect(message.mentionedGroups![1].description, isNull);
       expect(message.pinned, false);
       expect(message.pinnedAt, null);
       expect(message.pinExpires, null);
@@ -57,6 +73,10 @@ void main() {
             'asset_url': 'https://media.giphy.com/media/5zvN79uTGfLMOVfQaA/giphy.mp4',
           }),
         ],
+        mentionedChannel: true,
+        mentionedHere: false,
+        mentionedRoles: const ['admin', 'moderator'],
+        mentionedGroupIds: const ['group-1', 'group-2'],
         showInChannel: true,
         parentId: 'parentId',
         restrictedVisibility: const ['user-id-3'],

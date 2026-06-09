@@ -13,6 +13,13 @@ Message _$MessageFromJson(Map<String, dynamic> json) => Message(
   attachments:
       (json['attachments'] as List<dynamic>?)?.map((e) => Attachment.fromJson(e as Map<String, dynamic>)).toList() ??
       const [],
+  mentionedChannel: json['mentioned_channel'] as bool?,
+  mentionedGroupIds: (json['mentioned_group_ids'] as List<dynamic>?)?.map((e) => e as String).toList(),
+  mentionedGroups: (json['mentioned_groups'] as List<dynamic>?)
+      ?.map((e) => UserGroup.fromJson(e as Map<String, dynamic>))
+      .toList(),
+  mentionedHere: json['mentioned_here'] as bool?,
+  mentionedRoles: (json['mentioned_roles'] as List<dynamic>?)?.map((e) => e as String).toList(),
   mentionedUsers:
       (json['mentioned_users'] as List<dynamic>?)?.map((e) => User.fromJson(e as Map<String, dynamic>)).toList() ??
       const [],
@@ -75,6 +82,10 @@ Map<String, dynamic> _$MessageToJson(Message instance) => <String, dynamic>{
   'text': instance.text,
   'type': ?MessageType.toJson(instance.type),
   'attachments': instance.attachments.map((e) => e.toJson()).toList(),
+  'mentioned_channel': ?instance.mentionedChannel,
+  'mentioned_group_ids': ?instance.mentionedGroupIds,
+  'mentioned_here': ?instance.mentionedHere,
+  'mentioned_roles': ?instance.mentionedRoles,
   'mentioned_users': User.toIds(instance.mentionedUsers),
   'parent_id': instance.parentId,
   'quoted_message_id': instance.quotedMessageId,

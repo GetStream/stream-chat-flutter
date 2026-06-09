@@ -16,6 +16,10 @@
       "actions": []
     }
   ],
+  "mentioned_channel": true,
+  "mentioned_group_ids": ["group-1", "group-2"],
+  "mentioned_here": false,
+  "mentioned_roles": ["admin", "moderator"],
   "mentioned_users": [],
   "parent_id": "parentId",
   "quoted_message_id": null,
