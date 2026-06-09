@@ -8620,6 +8620,85 @@ void main() {
       });
     });
 
+    group('Thread reply cooldown', () {
+      const currentUserId = 'test-user-id'; // matches FakeClientState default
+      const cooldownDuration = 30; // seconds
+
+      Channel _buildChannelWithCooldown() {
+        final channelModel = ChannelModel(
+          id: channelId,
+          type: channelType,
+          cooldown: cooldownDuration,
+          ownCapabilities: [ChannelCapability.slowMode],
+        );
+        final state = ChannelState(channel: channelModel);
+        final ch = Channel.fromState(client, state);
+        // isUpToDate is seeded true by default
+        return ch;
+      }
+
+      test(
+        'should return positive cooldown after current user sends a thread reply',
+        () {
+          final ch = _buildChannelWithCooldown();
+          addTearDown(ch.dispose);
+
+          // Simulate a thread reply by the current user sent just now.
+          final threadReply = Message(
+            id: 'thread-reply-1',
+            parentId: 'parent-msg-1',
+            showInChannel: false,
+            createdAt: DateTime.timestamp(),
+            user: User(id: currentUserId),
+          );
+          ch.state!.updateThreadInfo('parent-msg-1', [threadReply]);
+
+          expect(ch.getRemainingCooldown(), greaterThan(0));
+        },
+      );
+
+      test(
+        'should return 0 cooldown when thread reply was sent outside the cooldown window',
+        () {
+          final ch = _buildChannelWithCooldown();
+          addTearDown(ch.dispose);
+
+          // Reply sent cooldownDuration+5 seconds ago — outside the window.
+          final oldReply = Message(
+            id: 'thread-reply-old',
+            parentId: 'parent-msg-1',
+            showInChannel: false,
+            createdAt: DateTime.timestamp().subtract(
+              const Duration(seconds: cooldownDuration + 5),
+            ),
+            user: User(id: currentUserId),
+          );
+          ch.state!.updateThreadInfo('parent-msg-1', [oldReply]);
+
+          expect(ch.getRemainingCooldown(), equals(0));
+        },
+      );
+
+      test(
+        'should not trigger cooldown for a thread reply from another user',
+        () {
+          final ch = _buildChannelWithCooldown();
+          addTearDown(ch.dispose);
+
+          final otherUserReply = Message(
+            id: 'thread-reply-other',
+            parentId: 'parent-msg-1',
+            showInChannel: false,
+            createdAt: DateTime.timestamp(),
+            user: User(id: 'other-user-id'),
+          );
+          ch.state!.updateThreadInfo('parent-msg-1', [otherUserReply]);
+
+          expect(ch.getRemainingCooldown(), equals(0));
+        },
+      );
+    });
+
     group('Disposed channel state validation', () {
       late Channel channel;
 
