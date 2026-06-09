@@ -32,27 +32,28 @@ void main() {
       });
 
       when(() => clientState.totalUnreadCount).thenReturn(10);
-      when(() => clientState.totalUnreadCountStream)
-          .thenAnswer((i) => Stream.value(10));
+      when(() => clientState.totalUnreadCountStream).thenAnswer((i) => Stream.value(10));
 
       var tapped = false;
 
-      await tester.pumpWidget(MaterialApp(
-        home: StreamChat(
-          client: client,
-          child: StreamChannel(
-            channel: channel,
-            child: Scaffold(
-              body: StreamSystemMessage(
-                onMessageTap: (m) => tapped = true,
-                message: Message(
-                  text: 'demo message',
+      await tester.pumpWidget(
+        MaterialApp(
+          home: StreamChat(
+            client: client,
+            child: StreamChannel(
+              channel: channel,
+              child: Scaffold(
+                body: StreamSystemMessage(
+                  onMessageTap: (m) => tapped = true,
+                  message: Message(
+                    text: 'demo message',
+                  ),
                 ),
               ),
             ),
           ),
         ),
-      ));
+      );
 
       // wait for the initial state to be rendered.
       await tester.pumpAndSettle();
@@ -90,8 +91,7 @@ void main() {
       });
 
       when(() => clientState.totalUnreadCount).thenReturn(10);
-      when(() => clientState.totalUnreadCountStream)
-          .thenAnswer((i) => Stream.value(10));
+      when(() => clientState.totalUnreadCountStream).thenAnswer((i) => Stream.value(10));
 
       return MaterialAppWrapper(
         theme: ThemeData.light(),
@@ -102,11 +102,9 @@ void main() {
             showLoading: false,
             channel: channel,
             child: Scaffold(
-              body: Center(
-                child: StreamSystemMessage(
-                  message: Message(
-                    text: 'demo message',
-                  ),
+              body: StreamSystemMessage(
+                message: Message(
+                  text: 'demo message',
                 ),
               ),
             ),
@@ -142,8 +140,7 @@ void main() {
       });
 
       when(() => clientState.totalUnreadCount).thenReturn(10);
-      when(() => clientState.totalUnreadCountStream)
-          .thenAnswer((i) => Stream.value(10));
+      when(() => clientState.totalUnreadCountStream).thenAnswer((i) => Stream.value(10));
 
       return MaterialAppWrapper(
         theme: ThemeData.dark(),
@@ -154,11 +151,9 @@ void main() {
             showLoading: false,
             channel: channel,
             child: Scaffold(
-              body: Center(
-                child: StreamSystemMessage(
-                  message: Message(
-                    text: 'demo message',
-                  ),
+              body: StreamSystemMessage(
+                message: Message(
+                  text: 'demo message',
                 ),
               ),
             ),

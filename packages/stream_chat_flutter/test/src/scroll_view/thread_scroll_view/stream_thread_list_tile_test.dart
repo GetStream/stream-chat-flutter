@@ -68,8 +68,8 @@ void main() {
       fileName: 'stream_thread_list_tile_${brightness.name}',
       constraints: const BoxConstraints.tightFor(width: 600, height: 150),
       builder: () => _wrapWithMaterialApp(
-        brightness: brightness,
         StreamThreadListTile(thread: thread, currentUser: user2),
+        brightness: brightness,
       ),
     );
   }
@@ -133,7 +133,7 @@ void main() {
 
 Widget _wrapWithMaterialApp(
   Widget widget, {
-  Brightness? brightness,
+  Brightness brightness = Brightness.light,
 }) {
   final client = MockClient();
   final clientState = MockClientState();
@@ -143,16 +143,16 @@ Widget _wrapWithMaterialApp(
   when(() => clientState.currentUser).thenReturn(currentUser);
 
   return MaterialApp(
+    theme: ThemeData(brightness: brightness),
     home: StreamChat(
       client: client,
-      streamChatConfigData: StreamChatConfigurationData(),
+      configData: StreamChatConfigurationData(),
       connectivityStream: Stream.value([ConnectivityResult.wifi]),
-      streamChatThemeData: StreamChatThemeData(brightness: brightness),
+      themeData: StreamChatThemeData(),
       child: Builder(
         builder: (context) {
-          final theme = StreamChatTheme.of(context);
           return Scaffold(
-            backgroundColor: theme.colorTheme.appBg,
+            backgroundColor: context.streamColorScheme.backgroundApp,
             body: Center(child: widget),
           );
         },

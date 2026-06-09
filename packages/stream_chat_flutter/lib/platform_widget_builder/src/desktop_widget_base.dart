@@ -3,9 +3,10 @@ import 'package:flutter/material.dart' show Theme;
 import 'package:flutter/widgets.dart';
 
 /// A generic widget builder function.
-typedef PlatformBuilder<T> = T Function(
-  BuildContext context,
-);
+typedef PlatformBuilder<T> =
+    T Function(
+      BuildContext context,
+    );
 
 /// An abstract class used as a building block for creating
 /// [DesktopPlatformWidget]s.
@@ -21,8 +22,7 @@ typedef PlatformBuilder<T> = T Function(
 /// * M = macOS
 /// * W = Windows
 /// * L = Linux
-abstract class DesktopWidgetBase<M extends Widget, W extends Widget,
-    L extends Widget> extends StatelessWidget {
+abstract class DesktopWidgetBase<M extends Widget, W extends Widget, L extends Widget> extends StatelessWidget {
   /// Builds a [DesktopWidgetBase].
   const DesktopWidgetBase({super.key});
 

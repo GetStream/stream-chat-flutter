@@ -3,8 +3,8 @@ import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
-import 'package:stream_chat_flutter/src/icons/stream_svg_icon.dart';
-import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
+import 'package:stream_chat_flutter/src/attachment/thumbnail/thumbnail_size_calculator.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 /// Widget that displays a photo or video item from the gallery.
 class StreamPhotoGalleryTile extends StatelessWidget {
@@ -15,8 +15,9 @@ class StreamPhotoGalleryTile extends StatelessWidget {
     this.selected = false,
     this.onTap,
     this.onLongPress,
-    this.thumbnailSize = const ThumbnailSize(400, 400),
-    this.thumbnailFormat = ThumbnailFormat.jpeg,
+    this.fit = .cover,
+    this.thumbnailSize,
+    this.thumbnailFormat = .jpeg,
     this.thumbnailQuality = 100,
     this.thumbnailScale = 1,
   });
@@ -33,8 +34,15 @@ class StreamPhotoGalleryTile extends StatelessWidget {
   /// Called when the user long-presses on this grid tile.
   final GestureLongPressCallback? onLongPress;
 
-  /// The thumbnail size.
-  final ThumbnailSize thumbnailSize;
+  /// Fit of the underlying thumbnail image. Defaults to [BoxFit.cover].
+  final BoxFit fit;
+
+  /// The thumbnail size in pixels to request from the platform.
+  ///
+  /// When null (the default), the size is auto-calculated from the tile's
+  /// layout constraints and the device pixel ratio so we don't decode more
+  /// pixels than the tile actually displays.
+  final ThumbnailSize? thumbnailSize;
 
   /// {@macro photo_manager.ThumbnailFormat}
   final ThumbnailFormat thumbnailFormat;
@@ -56,38 +64,38 @@ class StreamPhotoGalleryTile extends StatelessWidget {
     bool? selected,
     GestureTapCallback? onTap,
     GestureLongPressCallback? onLongPress,
+    BoxFit? fit,
     ThumbnailSize? thumbnailSize,
     ThumbnailFormat? thumbnailFormat,
     int? thumbnailQuality,
     double? thumbnailScale,
-  }) =>
-      StreamPhotoGalleryTile(
-        key: key ?? this.key,
-        media: media ?? this.media,
-        selected: selected ?? this.selected,
-        onTap: onTap ?? this.onTap,
-        onLongPress: onLongPress ?? this.onLongPress,
-        thumbnailSize: thumbnailSize ?? this.thumbnailSize,
-        thumbnailFormat: thumbnailFormat ?? this.thumbnailFormat,
-        thumbnailQuality: thumbnailQuality ?? this.thumbnailQuality,
-        thumbnailScale: thumbnailScale ?? this.thumbnailScale,
-      );
+  }) => StreamPhotoGalleryTile(
+    key: key ?? this.key,
+    media: media ?? this.media,
+    selected: selected ?? this.selected,
+    onTap: onTap ?? this.onTap,
+    onLongPress: onLongPress ?? this.onLongPress,
+    fit: fit ?? this.fit,
+    thumbnailSize: thumbnailSize ?? this.thumbnailSize,
+    thumbnailFormat: thumbnailFormat ?? this.thumbnailFormat,
+    thumbnailQuality: thumbnailQuality ?? this.thumbnailQuality,
+    thumbnailScale: thumbnailScale ?? this.thumbnailScale,
+  );
 
   @override
   Widget build(BuildContext context) {
-    final chatThemeData = StreamChatTheme.of(context);
-    return Stack(
-      children: [
-        AspectRatio(
-          aspectRatio: 1,
-          child: FadeInImage(
-            fadeInDuration: const Duration(milliseconds: 300),
-            placeholder: const AssetImage(
-              'lib/assets/images/placeholder.png',
-              package: 'stream_chat_flutter',
-            ),
-            fit: BoxFit.cover,
-            image: MediaThumbnailProvider(
+    final radius = context.streamRadius;
+    final colorScheme = context.streamColorScheme;
+
+    return ClipRRect(
+      clipBehavior: .hardEdge,
+      borderRadius: .all(radius.xxs),
+      child: Stack(
+        children: [
+          AspectRatio(
+            aspectRatio: 1,
+            child: _GalleryThumbnail(
+              fit: fit,
               media: media,
               size: thumbnailSize,
               format: thumbnailFormat,
@@ -95,74 +103,134 @@ class StreamPhotoGalleryTile extends StatelessWidget {
               scale: thumbnailScale,
             ),
           ),
-        ),
-        Positioned.fill(
-          child: IgnorePointer(
+          Positioned.fill(
             child: AnimatedOpacity(
-              duration: const Duration(milliseconds: 300),
               opacity: selected ? 1.0 : 0.0,
-              child: Container(
-                color:
-                    // ignore: deprecated_member_use
-                    chatThemeData.colorTheme.textHighEmphasis.withOpacity(0.5),
-                alignment: Alignment.topRight,
-                padding: const EdgeInsets.only(
-                  top: 8,
-                  right: 8,
-                ),
-                child: CircleAvatar(
-                  radius: 12,
-                  backgroundColor: chatThemeData.colorTheme.barsBg,
-                  child: StreamSvgIcon(
-                    size: 24,
-                    icon: StreamSvgIcons.check,
-                    color: chatThemeData.colorTheme.textHighEmphasis,
-                  ),
-                ),
-              ),
+              duration: const Duration(milliseconds: 300),
+              child: ColoredBox(color: colorScheme.backgroundSelected),
             ),
           ),
-        ),
-        if (media.type == AssetType.video) ...[
-          const Positioned(
-            left: 8,
-            bottom: 10,
-            child: StreamSvgIcon(icon: StreamSvgIcons.videoCall),
+          PositionedDirectional(
+            top: 8,
+            end: 8,
+            child: _GallerySelectedIndicator(selected: selected),
           ),
-          Positioned(
-            right: 4,
-            bottom: 10,
-            child: Text(
-              media.videoDuration.format(),
-              style: TextStyle(
-                color: chatThemeData.colorTheme.barsBg,
+          if (media.type == AssetType.video)
+            PositionedDirectional(
+              start: 8,
+              bottom: 8,
+              child: StreamMediaBadge(
+                type: MediaBadgeType.video,
+                duration: media.videoDuration,
+                durationFormat: MediaBadgeDurationFormat.exact,
+              ),
+            ),
+          // https://stackoverflow.com/a/59317162/10036882
+          Positioned.fill(
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: onTap,
+                onLongPress: onLongPress,
               ),
             ),
           ),
         ],
-        // https://stackoverflow.com/a/59317162/10036882
-        Positioned.fill(
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: onTap,
-              onLongPress: onLongPress,
-            ),
-          ),
-        ),
-      ],
+      ),
     );
   }
 }
 
-extension on Duration {
-  String format() {
-    final s = '$this'.split('.')[0].padLeft(8, '0');
-    if (s.startsWith('00:')) {
-      return s.replaceFirst('00:', '');
-    }
+class _GalleryThumbnail extends StatelessWidget {
+  const _GalleryThumbnail({
+    required this.media,
+    required this.fit,
+    required this.size,
+    required this.format,
+    required this.quality,
+    required this.scale,
+  });
 
-    return s;
+  final AssetEntity media;
+  final BoxFit fit;
+  final ThumbnailSize? size;
+  final ThumbnailFormat format;
+  final int quality;
+  final double scale;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final effectiveSize = size ?? _autoSize(context, constraints);
+
+        return Image(
+          fit: fit,
+          image: MediaThumbnailProvider(
+            media: media,
+            size: effectiveSize,
+            format: format,
+            quality: quality,
+            scale: scale,
+          ),
+          frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
+            if (wasSynchronouslyLoaded || frame != null) return child;
+            return const StreamImageLoadingPlaceholder();
+          },
+          errorBuilder: (context, error, stackTrace) {
+            return const StreamImageErrorPlaceholder();
+          },
+        );
+      },
+    );
+  }
+
+  ThumbnailSize _autoSize(BuildContext context, BoxConstraints constraints) {
+    // orientatedSize accounts for EXIF rotation so portrait shots get the
+    // right aspect ratio. It's (0, 0) when EXIF parsing fails — the
+    // calculator returns null for that, and we fall back to the default
+    // tile size from Figma. fit drives cover vs contain sizing so the
+    // bitmap matches what the Image will actually paint, no upscale blur.
+    final size = ThumbnailSizeCalculator.calculate(
+      targetSize: constraints.biggest,
+      originalSize: media.orientatedSize,
+      pixelRatio: MediaQuery.devicePixelRatioOf(context),
+      fit: fit,
+    );
+
+    if (size == null) return const .square(132);
+    return .new(size.width.round(), size.height.round());
+  }
+}
+
+class _GallerySelectedIndicator extends StatelessWidget {
+  const _GallerySelectedIndicator({required this.selected});
+
+  final bool selected;
+
+  @override
+  Widget build(BuildContext context) {
+    final icons = context.streamIcons;
+    final colorScheme = context.streamColorScheme;
+
+    return AnimatedContainer(
+      width: 24,
+      height: 24,
+      duration: const Duration(milliseconds: 200),
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: selected ? colorScheme.accentPrimary : Colors.transparent,
+        border: .all(color: colorScheme.borderOnAccent, width: 2, strokeAlign: BorderSide.strokeAlignOutside),
+      ),
+      child: selected
+          ? Icon(
+              size: 12,
+              icons.checkmark,
+              fontWeight: .w900,
+              color: colorScheme.textOnAccent,
+            )
+          : null,
+    );
   }
 }
 
@@ -173,9 +241,8 @@ class MediaThumbnailProvider extends ImageProvider<MediaThumbnailProvider> {
   /// {@macro mediaThumbnailProvider}
   const MediaThumbnailProvider({
     required this.media,
-    // TODO: Are these sizes optimal? Consider web/desktop
-    this.size = const ThumbnailSize(400, 400),
-    this.format = ThumbnailFormat.jpeg,
+    this.size = const .square(132),
+    this.format = .jpeg,
     this.quality = 100,
     this.scale = 1,
   });
@@ -251,7 +318,8 @@ class MediaThumbnailProvider extends ImageProvider<MediaThumbnailProvider> {
   int get hashCode => Object.hash(media, size, format, quality, scale);
 
   @override
-  String toString() => '$runtimeType('
+  String toString() =>
+      '$runtimeType('
       'media: $media, '
       'size: $size, '
       'format: $format, '

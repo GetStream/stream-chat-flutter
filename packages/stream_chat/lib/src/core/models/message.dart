@@ -4,6 +4,7 @@ import 'package:json_annotation/json_annotation.dart';
 import 'package:stream_chat/src/core/models/attachment.dart';
 import 'package:stream_chat/src/core/models/comparable_field.dart';
 import 'package:stream_chat/src/core/models/draft.dart';
+import 'package:stream_chat/src/core/models/location.dart';
 import 'package:stream_chat/src/core/models/message_reminder.dart';
 import 'package:stream_chat/src/core/models/message_state.dart';
 import 'package:stream_chat/src/core/models/moderation.dart';
@@ -35,11 +36,7 @@ class Message extends Equatable implements ComparableFieldProvider {
     this.mentionedUsers = const [],
     this.silent = false,
     this.shadowed = false,
-    @Deprecated("Use 'reactionGroups' instead")
-    Map<String, int>? reactionCounts,
-    @Deprecated("Use 'reactionGroups' instead")
-    Map<String, int>? reactionScores,
-    Map<String, ReactionGroup>? reactionGroups,
+    this.reactionGroups,
     this.latestReactions,
     this.ownReactions,
     this.parentId,
@@ -55,6 +52,7 @@ class Message extends Equatable implements ComparableFieldProvider {
     this.localUpdatedAt,
     DateTime? deletedAt,
     this.localDeletedAt,
+    this.deletedForMe,
     this.messageTextUpdatedAt,
     this.user,
     this.pinned = false,
@@ -71,19 +69,15 @@ class Message extends Equatable implements ComparableFieldProvider {
     this.draft,
     this.reminder,
     this.channelRole,
-  })  : id = id ?? const Uuid().v4(),
-        type = MessageType(type),
-        pinExpires = pinExpires?.toUtc(),
-        remoteCreatedAt = createdAt,
-        remoteUpdatedAt = updatedAt,
-        remoteDeletedAt = deletedAt,
-        reactionGroups = _maybeGetReactionGroups(
-          reactionGroups: reactionGroups,
-          reactionCounts: reactionCounts,
-          reactionScores: reactionScores,
-        ),
-        _quotedMessageId = quotedMessageId,
-        _pollId = pollId;
+    this.sharedLocation,
+  }) : id = id ?? const Uuid().v4(),
+       type = MessageType(type),
+       pinExpires = pinExpires?.toUtc(),
+       remoteCreatedAt = createdAt,
+       remoteUpdatedAt = updatedAt,
+       remoteDeletedAt = deletedAt,
+       _quotedMessageId = quotedMessageId,
+       _pollId = pollId;
 
   /// Create a new instance from JSON.
   factory Message.fromJson(Map<String, dynamic> json) {
@@ -91,14 +85,17 @@ class Message extends Equatable implements ComparableFieldProvider {
       Serializer.moveToExtraDataFromRoot(json, topLevelFields),
     );
 
-    var state = MessageState.sent;
-    if (message.deletedAt != null) {
-      state = MessageState.softDeleted;
-    } else if (message.updatedAt.isAfter(message.createdAt)) {
-      state = MessageState.updated;
-    }
+    final isDeletedForMe = message.deletedForMe ?? false;
+    // TODO: Remove this override once type is properly enriched on the backend.
+    final type = isDeletedForMe ? MessageType.deleted : message.type;
+    final state = switch (message) {
+      _ when isDeletedForMe => MessageState.deletedForMe,
+      _ when message.deletedAt != null => MessageState.softDeleted,
+      _ when message.updatedAt.isAfter(message.createdAt) => MessageState.updated,
+      _ => MessageState.sent,
+    };
 
-    return message.copyWith(state: state);
+    return message.copyWith(type: type, state: state);
   }
 
   /// The message ID. This is either created by Stream or set client side when
@@ -129,45 +126,40 @@ class Message extends Equatable implements ComparableFieldProvider {
   @JsonKey(toJson: User.toIds)
   final List<User> mentionedUsers;
 
-  /// A map describing the count of number of every reaction.
-  @JsonKey(includeToJson: false)
-  @Deprecated("Use 'reactionGroups' instead")
-  Map<String, int>? get reactionCounts {
-    return reactionGroups?.map((type, it) => MapEntry(type, it.count));
-  }
-
-  /// A map describing the count of score of every reaction.
-  @JsonKey(includeToJson: false)
-  @Deprecated("Use 'reactionGroups' instead")
-  Map<String, int>? get reactionScores {
-    return reactionGroups?.map((type, it) => MapEntry(type, it.sumScores));
-  }
-
-  static Map<String, ReactionGroup>? _maybeGetReactionGroups({
-    Map<String, ReactionGroup>? reactionGroups,
-    Map<String, int>? reactionCounts,
-    Map<String, int>? reactionScores,
-  }) {
+  static Object? _reactionGroupsReadValue(
+    Map<Object?, Object?> json,
+    String key,
+  ) {
+    final reactionGroups = json[key] as Map<String, dynamic>?;
     if (reactionGroups != null) return reactionGroups;
+
+    final reactionCounts = json['reaction_counts'] as Map<String, dynamic>?;
+    final reactionScores = json['reaction_scores'] as Map<String, dynamic>?;
     if (reactionCounts == null && reactionScores == null) return null;
 
     final reactionTypes = {...?reactionCounts?.keys, ...?reactionScores?.keys};
     if (reactionTypes.isEmpty) return null;
 
-    final groups = <String, ReactionGroup>{};
+    final groups = <String, dynamic>{};
     for (final type in reactionTypes) {
       final count = reactionCounts?[type] ?? 0;
       final sumScores = reactionScores?[type] ?? 0;
 
       if (count == 0 || sumScores == 0) continue;
-      groups[type] = ReactionGroup(count: count, sumScores: sumScores);
+      final now = DateTime.timestamp();
+      groups[type] = {
+        'count': count,
+        'sum_scores': sumScores,
+        'first_reaction_at': now.toIso8601String(),
+        'last_reaction_at': now.toIso8601String(),
+      };
     }
 
     return groups;
   }
 
   /// A map of reaction types and their corresponding reaction groups.
-  @JsonKey(includeToJson: false)
+  @JsonKey(includeToJson: false, readValue: _reactionGroupsReadValue)
   final Map<String, ReactionGroup>? reactionGroups;
 
   /// The latest reactions to the message created by any user.
@@ -309,11 +301,13 @@ class Message extends Equatable implements ComparableFieldProvider {
   /// Optional draft message linked to this message.
   ///
   /// This is present when the message is a thread i.e. contains replies.
+  @JsonKey(includeToJson: false)
   final Draft? draft;
 
   /// Optional reminder for this message.
   ///
   /// This is present when a user has set a reminder for this message.
+  @JsonKey(includeToJson: false)
   final MessageReminder? reminder;
 
   static Object? _channelRoleReadValue(Map<Object?, Object?> json, String key) {
@@ -328,6 +322,17 @@ class Message extends Equatable implements ComparableFieldProvider {
   /// The role of the user in the channel the message belongs to.
   @JsonKey(includeToJson: false, readValue: _channelRoleReadValue)
   final String? channelRole;
+
+  /// Optional shared location associated with this message.
+  ///
+  /// This is used to share a location in a message, allowing users to view the
+  /// location on a map.
+  @JsonKey(includeIfNull: false)
+  final Location? sharedLocation;
+
+  /// Whether the message was deleted only for the current user.
+  @JsonKey(includeToJson: false)
+  final bool? deletedForMe;
 
   /// Message custom extraData.
   final Map<String, Object?> extraData;
@@ -378,6 +383,8 @@ class Message extends Equatable implements ComparableFieldProvider {
     'draft',
     'reminder',
     'member',
+    'shared_location',
+    'deleted_for_me',
   ];
 
   /// Serialize to json.
@@ -405,10 +412,6 @@ class Message extends Equatable implements ComparableFieldProvider {
     List<User>? mentionedUsers,
     bool? silent,
     bool? shadowed,
-    @Deprecated("Use 'reactionGroups' instead")
-    Map<String, int>? reactionCounts,
-    @Deprecated("Use 'reactionGroups' instead")
-    Map<String, int>? reactionScores,
     Map<String, ReactionGroup>? reactionGroups,
     List<Reaction>? latestReactions,
     List<Reaction>? ownReactions,
@@ -441,20 +444,18 @@ class Message extends Equatable implements ComparableFieldProvider {
     Object? draft = _nullConst,
     Object? reminder = _nullConst,
     String? channelRole,
+    Location? sharedLocation,
+    bool? deletedForMe,
   }) {
     assert(() {
-      if (pinExpires is! DateTime &&
-          pinExpires != null &&
-          pinExpires is! _NullConst) {
+      if (pinExpires is! DateTime && pinExpires != null && pinExpires is! _NullConst) {
         throw ArgumentError('`pinExpires` can only be set as DateTime or null');
       }
       return true;
     }(), 'Validate type for pinExpires');
 
     assert(() {
-      if (quotedMessage is! Message &&
-          quotedMessage != null &&
-          quotedMessage is! _NullConst) {
+      if (quotedMessage is! Message && quotedMessage != null && quotedMessage is! _NullConst) {
         throw ArgumentError(
           '`quotedMessage` can only be set as Message or null',
         );
@@ -463,9 +464,7 @@ class Message extends Equatable implements ComparableFieldProvider {
     }(), 'Validate type for quotedMessage');
 
     assert(() {
-      if (quotedMessageId is! String &&
-          quotedMessageId != null &&
-          quotedMessageId is! _NullConst) {
+      if (quotedMessageId is! String && quotedMessageId != null && quotedMessageId is! _NullConst) {
         throw ArgumentError(
           '`quotedMessage` can only be set as String or null',
         );
@@ -481,21 +480,12 @@ class Message extends Equatable implements ComparableFieldProvider {
       mentionedUsers: mentionedUsers ?? this.mentionedUsers,
       silent: silent ?? this.silent,
       shadowed: shadowed ?? this.shadowed,
-      reactionGroups: _maybeGetReactionGroups(
-            reactionGroups: reactionGroups,
-            reactionCounts: reactionCounts,
-            reactionScores: reactionScores,
-          ) ??
-          this.reactionGroups,
+      reactionGroups: reactionGroups ?? this.reactionGroups,
       latestReactions: latestReactions ?? this.latestReactions,
       ownReactions: ownReactions ?? this.ownReactions,
       parentId: parentId ?? this.parentId,
-      quotedMessage: quotedMessage == _nullConst
-          ? this.quotedMessage
-          : quotedMessage as Message?,
-      quotedMessageId: quotedMessageId == _nullConst
-          ? _quotedMessageId
-          : quotedMessageId as String?,
+      quotedMessage: quotedMessage == _nullConst ? this.quotedMessage : quotedMessage as Message?,
+      quotedMessageId: quotedMessageId == _nullConst ? _quotedMessageId : quotedMessageId as String?,
       replyCount: replyCount ?? this.replyCount,
       threadParticipants: threadParticipants ?? this.threadParticipants,
       showInChannel: showInChannel ?? this.showInChannel,
@@ -510,8 +500,7 @@ class Message extends Equatable implements ComparableFieldProvider {
       user: user ?? this.user,
       pinned: pinned ?? this.pinned,
       pinnedAt: pinnedAt ?? this.pinnedAt,
-      pinExpires:
-          pinExpires == _nullConst ? this.pinExpires : pinExpires as DateTime?,
+      pinExpires: pinExpires == _nullConst ? this.pinExpires : pinExpires as DateTime?,
       pinnedBy: pinnedBy ?? this.pinnedBy,
       poll: poll ?? this.poll,
       pollId: pollId ?? _pollId,
@@ -521,9 +510,10 @@ class Message extends Equatable implements ComparableFieldProvider {
       restrictedVisibility: restrictedVisibility ?? this.restrictedVisibility,
       moderation: moderation ?? this.moderation,
       draft: draft == _nullConst ? this.draft : draft as Draft?,
-      reminder:
-          reminder == _nullConst ? this.reminder : reminder as MessageReminder?,
+      reminder: reminder == _nullConst ? this.reminder : reminder as MessageReminder?,
       channelRole: channelRole ?? this.channelRole,
+      sharedLocation: sharedLocation ?? this.sharedLocation,
+      deletedForMe: deletedForMe ?? this.deletedForMe,
     );
   }
 
@@ -570,73 +560,118 @@ class Message extends Equatable implements ComparableFieldProvider {
       draft: other.draft,
       reminder: other.reminder,
       channelRole: other.channelRole,
+      sharedLocation: other.sharedLocation,
+      deletedForMe: other.deletedForMe,
     );
   }
 
-  /// Returns a new [Message] that is [other] with local changes applied to it.
+  /// Returns a new [Message] that is [other] reconciled with this message.
   ///
-  /// This ensures that the local sync changes are not lost when the message is
-  /// updated on the server.
+  /// `this` is the locally-known message and [other] is the incoming
+  /// payload. Local-only timestamps ([localCreatedAt], [localUpdatedAt],
+  /// [localDeletedAt]) are carried over from `this`. [poll],
+  /// [sharedLocation], and the nested [quotedMessage] fall back to the
+  /// local value when [other] omits them. The nested [quotedMessage] is
+  /// reconciled recursively.
   ///
-  /// For example, when a message is sent, it is immediately shown
-  /// optimistically in the UI. When the message is received from the server,
-  /// it will not contain the local changes. This method can be used to merge
-  /// the local changes back into the message.
-  ///
-  /// This also helps in maintaining the order of the messages in the channel
-  /// when the messages are sorted by the [createdAt] field.
-  Message syncWith(Message? other) {
+  /// If [other] is `null`, returns this message unchanged.
+  Message updateWith(Message? other) {
     if (other == null) return this;
 
-    return copyWith(
-      localCreatedAt: other.localCreatedAt,
-      localUpdatedAt: other.localUpdatedAt,
-      localDeletedAt: other.localDeletedAt,
+    // If we kept the local `deletedForMe` flag, the `type` and `state` on
+    // [other] were derived without it, so we re-promote them here to keep
+    // the message reading as deleted.
+    final preservedDeletedForMe = other.deletedForMe ?? deletedForMe;
+    final shouldPromoteDeletedForMe = preservedDeletedForMe == true && other.deletedForMe != true;
+
+    return other.copyWith(
+      // Local-only timestamps — the server cannot know about these,
+      // so they are always taken from this instance.
+      localCreatedAt: localCreatedAt,
+      localUpdatedAt: localUpdatedAt,
+      localDeletedAt: localDeletedAt,
+      deletedForMe: preservedDeletedForMe,
+      type: shouldPromoteDeletedForMe ? MessageType.deleted : null,
+      state: shouldPromoteDeletedForMe ? MessageState.deletedForMe : null,
+      // Preserve enrichment from this instance when [other] omits these
+      // fields, as the backend may strip them on partial payloads.
+      poll: other.poll ?? poll,
+      sharedLocation: other.sharedLocation ?? sharedLocation,
+      ownReactions: other.ownReactions ?? ownReactions,
+      // Recursively merge so nested enrichment survives a stripped payload.
+      quotedMessage: switch ((other.quotedMessage, quotedMessage)) {
+        // Same target — merge to preserve local enrichment.
+        (final incoming?, final local?) when incoming.id == local.id => local.updateWith(incoming),
+        // Different target — trust the new payload.
+        (final incoming?, _) => incoming,
+        // Server omitted the nested quote — keep the locally-known copy.
+        (_, final local) => local,
+      },
     );
+  }
+
+  /// Returns a new [Message] that is this message reconciled with the local
+  /// changes from [other].
+  ///
+  /// The argument convention is the inverse of [updateWith]: here `this` is
+  /// the server payload and [other] is the locally-known message.
+  /// `serverResponse.syncWith(localMessage)` is equivalent to
+  /// `localMessage.updateWith(serverResponse)`.
+  ///
+  /// See also:
+  ///
+  ///  * [updateWith], which performs the same reconciliation with the
+  ///    arguments flipped.
+  @Deprecated('Use updateWith instead — note the arguments are flipped')
+  Message syncWith(Message? other) {
+    if (other == null) return this;
+    return other.updateWith(this);
   }
 
   @override
   List<Object?> get props => [
-        id,
-        text,
-        type,
-        attachments,
-        mentionedUsers,
-        reactionGroups,
-        latestReactions,
-        ownReactions,
-        parentId,
-        quotedMessage,
-        quotedMessageId,
-        replyCount,
-        threadParticipants,
-        showInChannel,
-        shadowed,
-        silent,
-        command,
-        localCreatedAt,
-        remoteCreatedAt,
-        localUpdatedAt,
-        remoteUpdatedAt,
-        localDeletedAt,
-        remoteDeletedAt,
-        messageTextUpdatedAt,
-        user,
-        pinned,
-        pinnedAt,
-        pinExpires,
-        pinnedBy,
-        poll,
-        pollId,
-        extraData,
-        state,
-        i18n,
-        restrictedVisibility,
-        moderation,
-        draft,
-        reminder,
-        channelRole,
-      ];
+    id,
+    text,
+    type,
+    attachments,
+    mentionedUsers,
+    reactionGroups,
+    latestReactions,
+    ownReactions,
+    parentId,
+    quotedMessage,
+    quotedMessageId,
+    replyCount,
+    threadParticipants,
+    showInChannel,
+    shadowed,
+    silent,
+    command,
+    localCreatedAt,
+    remoteCreatedAt,
+    localUpdatedAt,
+    remoteUpdatedAt,
+    localDeletedAt,
+    remoteDeletedAt,
+    messageTextUpdatedAt,
+    user,
+    pinned,
+    pinnedAt,
+    pinExpires,
+    pinnedBy,
+    poll,
+    pollId,
+    extraData,
+    state,
+    i18n,
+    restrictedVisibility,
+    moderation,
+    draft,
+    reminder,
+    channelRole,
+    sharedLocation,
+    deletedForMe,
+  ];
 
   @override
   ComparableField? getComparableField(String sortKey) {

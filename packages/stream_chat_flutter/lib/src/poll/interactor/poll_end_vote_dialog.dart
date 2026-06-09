@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/theme/poll_interactor_theme.dart';
-import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
-import 'package:stream_chat_flutter/src/utils/extensions.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// {@template showPollSuggestOptionDialog}
+/// {@template showPollEndVoteDialog}
 /// Shows a dialog that allows the user to end vote for a poll.
+///
+/// See also:
+///
+///  * [PollEndVoteDialog], the dialog widget shown by this function.
+///  * [StreamPollInteractor], which invokes this via [StreamPollInteractor.onEndVote].
 /// {@endtemplate}
 Future<bool?> showPollEndVoteDialog({
   required BuildContext context,
@@ -17,6 +20,11 @@ Future<bool?> showPollEndVoteDialog({
 
 /// {@template pollEndVoteDialog}
 /// A dialog that allows the user to end vote for a poll.
+///
+/// See also:
+///
+///  * [showPollEndVoteDialog], the convenience function to show this dialog.
+///  * [StreamPollInteractor], the parent widget that triggers this dialog.
 /// {@endtemplate}
 class PollEndVoteDialog extends StatelessWidget {
   /// {@macro pollEndVoteDialog}
@@ -24,41 +32,30 @@ class PollEndVoteDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = StreamChatTheme.of(context);
-    final pollInteractorTheme = StreamPollInteractorTheme.of(context);
+    final colorScheme = context.streamColorScheme;
 
     final actions = [
-      TextButton(
+      StreamButton(
+        type: .ghost,
+        style: .secondary,
+        size: .small,
         onPressed: () => Navigator.of(context).maybePop(false),
-        style: TextButton.styleFrom(
-          textStyle: theme.textTheme.headlineBold,
-          foregroundColor: theme.colorTheme.accentPrimary,
-          disabledForegroundColor: theme.colorTheme.disabled,
-        ),
-        child: Text(context.translations.cancelLabel.toUpperCase()),
+        child: Text(context.translations.cancelLabel),
       ),
-      TextButton(
+      StreamButton(
+        type: .solid,
+        style: .destructive,
+        size: .small,
         onPressed: () => Navigator.of(context).maybePop(true),
-        style: TextButton.styleFrom(
-          textStyle: theme.textTheme.headlineBold,
-          foregroundColor: theme.colorTheme.accentPrimary,
-          disabledForegroundColor: theme.colorTheme.disabled,
-        ),
-        child: Text(context.translations.endLabel.toUpperCase()),
+        child: Text(context.translations.endLabel),
       ),
     ];
 
     return AlertDialog(
-      title: Text(
-        context.translations.endVoteConfirmationText,
-        style: pollInteractorTheme.pollActionDialogTitleStyle,
-      ),
       actions: actions,
-      titlePadding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      contentPadding: const EdgeInsets.all(16),
-      actionsPadding: const EdgeInsets.all(8),
-      backgroundColor: theme.colorTheme.appBg,
+      title: Text(context.translations.endVoteConfirmationTitle),
+      content: Text(context.translations.endVoteConfirmationMessage),
+      backgroundColor: colorScheme.backgroundElevation1,
     );
   }
 }

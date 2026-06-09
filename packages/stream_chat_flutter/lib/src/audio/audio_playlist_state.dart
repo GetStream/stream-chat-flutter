@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:collection/collection.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 /// {@template playlistLoopMode}
 /// Represents the loop mode of a playlist.
@@ -24,7 +25,7 @@ class AudioPlaylistState {
   const AudioPlaylistState({
     required this.tracks,
     this.currentIndex,
-    this.speed = PlaybackSpeed.regular,
+    this.speed = StreamPlaybackSpeed.x1,
     this.loopMode = PlaylistLoopMode.off,
   });
 
@@ -37,7 +38,7 @@ class AudioPlaylistState {
   final int? currentIndex;
 
   /// The current playback speed of the playlist.
-  final PlaybackSpeed speed;
+  final StreamPlaybackSpeed speed;
 
   /// The current loop mode of the playlist.
   final PlaylistLoopMode loopMode;
@@ -47,7 +48,7 @@ class AudioPlaylistState {
   AudioPlaylistState copyWith({
     List<PlaylistTrack>? tracks,
     int? currentIndex,
-    PlaybackSpeed? speed,
+    StreamPlaybackSpeed? speed,
     PlaylistLoopMode? loopMode,
   }) {
     return AudioPlaylistState(
@@ -101,45 +102,6 @@ enum TrackState {
   bool get isPaused => this == TrackState.paused;
 }
 
-/// {@template playbackSpeed}
-/// Represents the speed of a track.
-/// {@endtemplate}
-enum PlaybackSpeed {
-  /// The regular speed of the playback (1x).
-  regular._(1),
-
-  /// A faster speed of the playback (1.5x).
-  faster._(1.5),
-
-  /// The fastest speed of the playback (2x).
-  fastest._(2);
-
-  const PlaybackSpeed._(this.speed);
-
-  /// Creates a [PlaybackSpeed] from the given value.
-  factory PlaybackSpeed.fromValue(double speed) {
-    return PlaybackSpeed.values.firstWhere(
-      (it) => it.speed == speed,
-      orElse: () => PlaybackSpeed.regular,
-    );
-  }
-
-  /// The speed of the playback.
-  final double speed;
-}
-
-/// Helper extension for [PlaybackSpeed].
-extension StreamAudioPlayerExtension on PlaybackSpeed {
-  /// Returns the next [PlaybackSpeed] value.
-  PlaybackSpeed get next {
-    return switch (this) {
-      PlaybackSpeed.regular => PlaybackSpeed.faster,
-      PlaybackSpeed.faster => PlaybackSpeed.fastest,
-      PlaybackSpeed.fastest => PlaybackSpeed.regular,
-    };
-  }
-}
-
 /// {@template playlistTrack}
 /// Represents a track in a playlist.
 /// {@endtemplate}
@@ -147,12 +109,16 @@ class PlaylistTrack {
   /// {@macro playlistTrack}
   const PlaylistTrack({
     required this.uri,
+    this.key,
     this.title,
     this.waveform = const [],
     this.duration = Duration.zero,
     this.position = Duration.zero,
     this.state = TrackState.idle,
   });
+
+  /// The key to identify the track.
+  final Object? key;
 
   /// The uri of the track.
   final Uri uri;
@@ -200,6 +166,7 @@ class PlaylistTrack {
     TrackState? state,
   }) {
     return PlaylistTrack(
+      key: key,
       uri: uri ?? this.uri,
       title: title ?? this.title,
       duration: duration ?? this.duration,
@@ -211,7 +178,7 @@ class PlaylistTrack {
 
   @override
   int get hashCode {
-    return Object.hash(uri, title, duration, waveform, position, state);
+    return Object.hash(uri, title, duration, Object.hashAll(waveform), position, state);
   }
 
   @override
@@ -222,7 +189,7 @@ class PlaylistTrack {
           uri == other.uri &&
           title == other.title &&
           duration == other.duration &&
-          waveform == other.waveform &&
+          const ListEquality<double>().equals(waveform, other.waveform) &&
           position == other.position &&
           state == other.state;
 }

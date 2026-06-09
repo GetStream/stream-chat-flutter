@@ -40,6 +40,8 @@ class MyApp extends StatelessWidget {
     required this.client,
   });
 
+  /// Instance of [StreamChatClient] we created earlier. This contains
+  /// information about our application and connection state.
   final StreamChatClient client;
 
   @override
@@ -54,6 +56,7 @@ class MyApp extends StatelessWidget {
   }
 }
 
+/// Displays the list of channels for the current user.
 class ChannelListPage extends StatefulWidget {
   const ChannelListPage({
     super.key,
@@ -82,22 +85,23 @@ class _ChannelListPageState extends State<ChannelListPage> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        body: StreamChannelListView(
-          controller: _listController,
-          onChannelTap: (channel) {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => StreamChannel(
-                  channel: channel,
-                  child: const ChannelPage(),
-                ),
-              ),
-            );
-          },
-        ),
-      );
+    body: StreamChannelListView(
+      controller: _listController,
+      onChannelTap: (channel) {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => StreamChannel(
+              channel: channel,
+              child: const ChannelPage(),
+            ),
+          ),
+        );
+      },
+    ),
+  );
 }
 
+/// Displays the list of messages inside the channel.
 class ChannelPage extends StatelessWidget {
   const ChannelPage({
     super.key,
@@ -112,42 +116,57 @@ class ChannelPage extends StatelessWidget {
           Expanded(
             child: StreamMessageListView(
               threadBuilder: (_, parentMessage) => ThreadPage(
-                parent: parentMessage,
+                parent: parentMessage!,
               ),
             ),
           ),
-          const StreamMessageInput(),
+          StreamMessageComposer(),
         ],
       ),
     );
   }
 }
 
-class ThreadPage extends StatelessWidget {
+/// Displays the thread replies for a parent message.
+class ThreadPage extends StatefulWidget {
   const ThreadPage({
     super.key,
-    this.parent,
+    required this.parent,
   });
 
-  final Message? parent;
+  /// The root message this thread is replying to.
+  final Message parent;
+
+  @override
+  State<ThreadPage> createState() => _ThreadPageState();
+}
+
+class _ThreadPageState extends State<ThreadPage> {
+  late final _controller = StreamMessageComposerController(
+    message: Message(parentId: widget.parent.id),
+  );
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: StreamThreadHeader(
-        parent: parent!,
+        parent: widget.parent,
       ),
       body: Column(
         children: <Widget>[
           Expanded(
             child: StreamMessageListView(
-              parentMessage: parent,
+              parentMessage: widget.parent,
             ),
           ),
-          StreamMessageInput(
-            messageInputController: StreamMessageInputController(
-              message: Message(parentId: parent!.id),
-            ),
+          StreamMessageComposer(
+            messageComposerController: _controller,
           ),
         ],
       ),

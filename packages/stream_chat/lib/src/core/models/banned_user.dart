@@ -21,8 +21,7 @@ class BannedUser extends Equatable implements ComparableFieldProvider {
   });
 
   /// Create a new instance from a json
-  factory BannedUser.fromJson(Map<String, dynamic> json) =>
-      _$BannedUserFromJson(json);
+  factory BannedUser.fromJson(Map<String, dynamic> json) => _$BannedUserFromJson(json);
 
   /// Banned user.
   final User user;
@@ -57,27 +56,26 @@ class BannedUser extends Equatable implements ComparableFieldProvider {
     DateTime? expires,
     bool? shadow,
     String? reason,
-  }) =>
-      BannedUser(
-        user: user ?? this.user,
-        bannedBy: bannedBy ?? this.bannedBy,
-        channel: channel ?? this.channel,
-        createdAt: createdAt ?? this.createdAt,
-        expires: expires ?? this.expires,
-        shadow: shadow ?? this.shadow,
-        reason: reason ?? this.reason,
-      );
+  }) => BannedUser(
+    user: user ?? this.user,
+    bannedBy: bannedBy ?? this.bannedBy,
+    channel: channel ?? this.channel,
+    createdAt: createdAt ?? this.createdAt,
+    expires: expires ?? this.expires,
+    shadow: shadow ?? this.shadow,
+    reason: reason ?? this.reason,
+  );
 
   @override
   List<Object?> get props => [
-        user,
-        bannedBy,
-        channel,
-        createdAt,
-        expires,
-        shadow,
-        reason,
-      ];
+    user,
+    bannedBy,
+    channel,
+    createdAt,
+    expires,
+    shadow,
+    reason,
+  ];
 
   @override
   ComparableField? getComparableField(String sortKey) {

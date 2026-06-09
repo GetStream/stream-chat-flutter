@@ -1,7 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:logging/logging.dart';
 import 'package:stream_chat/src/core/api/attachment_file_uploader.dart';
-import 'package:stream_chat/src/core/api/call_api.dart';
 import 'package:stream_chat/src/core/api/channel_api.dart';
 import 'package:stream_chat/src/core/api/device_api.dart';
 import 'package:stream_chat/src/core/api/general_api.dart';
@@ -29,23 +28,23 @@ class StreamChatApi {
     TokenManager? tokenManager,
     ConnectionIdManager? connectionIdManager,
     SystemEnvironmentManager? systemEnvironmentManager,
-    AttachmentFileUploaderProvider attachmentFileUploaderProvider =
-        StreamAttachmentFileUploader.new,
+    AttachmentFileUploaderProvider attachmentFileUploaderProvider = StreamAttachmentFileUploader.new,
     Logger? logger,
     Iterable<Interceptor>? interceptors,
     HttpClientAdapter? httpClientAdapter,
-  })  : _fileUploaderProvider = attachmentFileUploaderProvider,
-        _client = client ??
-            StreamHttpClient(
-              apiKey,
-              options: options,
-              tokenManager: tokenManager,
-              connectionIdManager: connectionIdManager,
-              systemEnvironmentManager: systemEnvironmentManager,
-              logger: logger,
-              interceptors: interceptors,
-              httpClientAdapter: httpClientAdapter,
-            );
+  }) : _fileUploaderProvider = attachmentFileUploaderProvider,
+       _client =
+           client ??
+           StreamHttpClient(
+             apiKey,
+             options: options,
+             tokenManager: tokenManager,
+             connectionIdManager: connectionIdManager,
+             systemEnvironmentManager: systemEnvironmentManager,
+             logger: logger,
+             interceptors: interceptors,
+             httpClientAdapter: httpClientAdapter,
+           );
 
   final StreamHttpClient _client;
   final AttachmentFileUploaderProvider _fileUploaderProvider;
@@ -70,12 +69,6 @@ class StreamChatApi {
   ThreadsApi get threads => _threads ??= ThreadsApi(_client);
   ThreadsApi? _threads;
 
-  /// Api dedicated to call operations
-  @Deprecated('Will be removed in the next major version')
-  CallApi get call => _call ??= CallApi(_client);
-  @Deprecated('Will be removed in the next major version')
-  CallApi? _call;
-
   /// Api dedicated to channel operations
   ChannelApi get channel => _channel ??= ChannelApi(_client);
   ChannelApi? _channel;
@@ -97,7 +90,6 @@ class StreamChatApi {
   GeneralApi? _general;
 
   /// Class responsible for uploading images and files to a given channel
-  AttachmentFileUploader get fileUploader =>
-      _fileUploader ??= _fileUploaderProvider.call(_client);
+  AttachmentFileUploader get fileUploader => _fileUploader ??= _fileUploaderProvider.call(_client);
   AttachmentFileUploader? _fileUploader;
 }

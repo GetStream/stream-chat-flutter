@@ -3,8 +3,7 @@ import 'package:test/test.dart';
 
 void main() {
   group('InFlightCache', () {
-    test('coalesces concurrent identical calls into a single invocation',
-        () async {
+    test('coalesces concurrent identical calls into a single invocation', () async {
       final cache = InFlightCache<String, int>();
       var invocations = 0;
 
@@ -98,8 +97,7 @@ void main() {
       expect(second, 2);
     });
 
-    test('synchronous throws inside work are wrapped as rejected futures',
-        () async {
+    test('synchronous throws inside work are wrapped as rejected futures', () async {
       final cache = InFlightCache<String, int>();
 
       Future<int> work() {

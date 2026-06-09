@@ -26,8 +26,7 @@ void main() {
       expect(captured!.value, 0);
     });
 
-    testWidgets('maybeOf returns null when no scope is present',
-        (tester) async {
+    testWidgets('maybeOf returns null when no scope is present', (tester) async {
       _CounterState? captured;
 
       await tester.pumpWidget(
@@ -44,8 +43,7 @@ void main() {
       expect(captured, isNull);
     });
 
-    testWidgets('of() throws a FlutterError when no scope is present',
-        (tester) async {
+    testWidgets('of() throws a FlutterError when no scope is present', (tester) async {
       Object? caught;
 
       await tester.pumpWidget(
@@ -66,8 +64,7 @@ void main() {
       expect(caught, isA<FlutterError>());
     });
 
-    testWidgets('reads the nearest scope when multiple are nested',
-        (tester) async {
+    testWidgets('reads the nearest scope when multiple are nested', (tester) async {
       _CounterState? captured;
 
       await tester.pumpWidget(
@@ -85,8 +82,7 @@ void main() {
         ),
       );
 
-      final all =
-          tester.stateList<_CounterState>(find.byType(_Counter)).toList();
+      final all = tester.stateList<_CounterState>(find.byType(_Counter)).toList();
       expect(captured, isNotNull);
       expect(captured, same(all.last));
     });
@@ -159,17 +155,13 @@ void main() {
           ),
         );
 
-        final scopeElement = leafContext!
-            .getElementForInheritedWidgetOfExactType<
-                StreamStateScope<_CounterState>>()!;
-        final isDependent = (leafContext! as Element)
-            .doesDependOnInheritedElement(scopeElement);
+        final scopeElement = leafContext!.getElementForInheritedWidgetOfExactType<StreamStateScope<_CounterState>>()!;
+        final isDependent = (leafContext! as Element).doesDependOnInheritedElement(scopeElement);
 
         expect(
           isDependent,
           isFalse,
-          reason:
-              'StreamStateScope.of must not register the caller as a dependent.',
+          reason: 'StreamStateScope.of must not register the caller as a dependent.',
         );
       },
     );
@@ -183,11 +175,9 @@ class _Counter extends StatefulWidget {
 
   final Widget child;
 
-  static _CounterState of(BuildContext context) =>
-      StreamStateScope.of<_CounterState>(context);
+  static _CounterState of(BuildContext context) => StreamStateScope.of<_CounterState>(context);
 
-  static _CounterState? maybeOf(BuildContext context) =>
-      StreamStateScope.maybeOf<_CounterState>(context);
+  static _CounterState? maybeOf(BuildContext context) => StreamStateScope.maybeOf<_CounterState>(context);
 
   @override
   State<_Counter> createState() => _CounterState();

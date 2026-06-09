@@ -33,6 +33,12 @@ class StreamChannelInfo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final client = StreamChat.of(context).client;
+    final effectiveTextStyle =
+        textStyle ??
+        context.streamTextTheme.captionDefault.copyWith(
+          color: context.streamColorScheme.textSecondary,
+        );
+
     return BetterStreamBuilder<List<Member>>(
       stream: channel.state!.membersStream,
       initialData: channel.state!.members,
@@ -43,16 +49,16 @@ class StreamChannelInfo extends StatelessWidget {
               return _ConnectedTitleState(
                 channel: channel,
                 showTypingIndicator: showTypingIndicator,
-                textStyle: textStyle,
+                textStyle: effectiveTextStyle,
                 members: data,
                 parentId: parentId,
               );
             case ConnectionStatus.connecting:
-              return _ConnectingTitleState(textStyle: textStyle);
+              return _ConnectingTitleState(textStyle: effectiveTextStyle);
             case ConnectionStatus.disconnected:
               return _DisconnectedTitleState(
                 client: client,
-                textStyle: textStyle,
+                textStyle: effectiveTextStyle,
               );
           }
         },
@@ -80,18 +86,12 @@ class _ConnectedTitleState extends StatelessWidget {
   Widget build(BuildContext context) {
     Widget? alternativeWidget;
 
+    final translations = context.translations;
     final memberCount = channel.memberCount;
     if (memberCount != null && memberCount > 2) {
-      var text = context.translations.membersCountText(memberCount);
-      final onlineCount =
-          members?.where((m) => m.user?.online == true).length ?? 0;
-      if (onlineCount > 0) {
-        text += ', ${context.translations.watchersCountText(onlineCount)}';
-      }
-      alternativeWidget = Text(
-        text,
-        style: StreamChannelHeaderTheme.of(context).subtitleStyle,
-      );
+      final onlineCount = members?.where((m) => m.user?.online == true).length ?? 0;
+      final text = translations.membersCountWithOnlineText(memberCount: memberCount, onlineCount: onlineCount);
+      alternativeWidget = Text(text, style: textStyle);
     } else {
       final userId = StreamChat.of(context).currentUser?.id;
       final otherMember = members?.firstWhereOrNull(
@@ -100,14 +100,11 @@ class _ConnectedTitleState extends StatelessWidget {
 
       if (otherMember != null) {
         if (otherMember.user?.online == true) {
-          alternativeWidget = Text(
-            context.translations.userOnlineText,
-            style: textStyle,
-          );
+          alternativeWidget = Text(translations.userOnlineText, style: textStyle);
         } else {
           final lastActive = otherMember.user?.lastActive ?? DateTime.now();
           alternativeWidget = Text(
-            '${context.translations.userLastOnlineText} '
+            '${translations.userLastOnlineText} '
             '${Jiffy.parseFromDateTime(lastActive).fromNow()}',
             style: textStyle,
           );
@@ -187,7 +184,7 @@ class _DisconnectedTitleState extends StatelessWidget {
           child: Text(
             context.translations.tryAgainLabel,
             style: textStyle?.copyWith(
-              color: StreamChatTheme.of(context).colorTheme.accentPrimary,
+              color: context.streamColorScheme.accentPrimary,
             ),
           ),
         ),

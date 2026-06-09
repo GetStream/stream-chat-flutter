@@ -1,210 +1,219 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
+import 'package:flutter_portal/flutter_portal.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template streamChannelListHeader}
-/// Shows the current [StreamChatClient] status.
+/// A top-of-screen header for the channel list, surfacing the current
+/// [StreamChatClient] connection status.
+///
+/// [StreamChannelListHeader] renders a [StreamAppBar] whose default title
+/// reflects the connection state — _Stream Chat_ when connected, a
+/// loading spinner + _Searching for network…_ when connecting, and an
+/// _Offline_ label with a _try again_ affordance when disconnected.
+///
+/// The leading slot is always the signed-in user's avatar. Tap behaviour
+/// is wired through [onUserAvatarPressed]; when the callback is null the
+/// avatar mirrors Material [AppBar]'s auto-implied leading by opening the
+/// enclosing [Scaffold]'s drawer if one exists, and is otherwise rendered
+/// non-interactive.
+///
+/// The trailing slot is empty by default — pass [trailing] to wire up an
+/// action such as a _new chat_ button.
+///
+/// When [showConnectionStateTile] is true, a [StreamInfoTile] banner is
+/// rendered above the bar while the client is reconnecting or offline.
+///
+/// [StreamChannelListHeader] implements [PreferredSizeWidget] so it can
+/// be passed directly to [Scaffold.appBar].
+///
+/// {@tool snippet}
+///
+/// Basic usage as a [Scaffold.appBar] — the avatar opens the [Scaffold]'s
+/// drawer automatically when one is provided:
 ///
 /// ```dart
-/// class MyApp extends StatelessWidget {
-///   final StreamChatClient client;
-///
-///   MyApp(this.client);
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     return MaterialApp(
-///       home: StreamChat(
-///         client: client,
-///         child: Scaffold(
-///             appBar: ChannelListHeader(),
-///           ),
-///         ),
-///     );
-///   }
-/// }
+/// Scaffold(
+///   appBar: const StreamChannelListHeader(),
+///   drawer: MyDrawer(user: currentUser),
+///   body: const StreamChannelListView(),
+/// )
 /// ```
+/// {@end-tool}
 ///
-/// Usually you would use this widget as an [AppBar] inside a [Scaffold].
-/// However, you can also use it as a normal widget.
+/// {@tool snippet}
 ///
-/// Uses the inherited [StreamChatClient], by default, to fetch information
-/// about the status of the [client]. You can also pass your own
-/// [StreamChatClient] if you don't have it in the widget tree.
+/// With a custom avatar tap and a trailing _new chat_ button:
 ///
-/// Renders the UI based on the first ancestor of type [StreamChatTheme] and
-/// the [StreamChannelListHeaderThemeData] property. Modify it to change the
-/// widget's appearance.
+/// ```dart
+/// StreamChannelListHeader(
+///   onUserAvatarPressed: (user) => showProfile(context, user),
+///   trailing: StreamButton.icon(
+///     icon: Icon(context.streamIcons.plus),
+///     onPressed: () => GoRouter.of(context).pushNamed('new-chat'),
+///   ),
+/// )
+/// ```
+/// {@end-tool}
+///
+/// ## Theming
+///
+/// [StreamChannelListHeader] reads its chrome (background, padding,
+/// typography, divider) from [StreamChatThemeData.channelListHeaderTheme],
+/// which is a [StreamAppBarThemeData]. Per-instance overrides go on
+/// [style].
+///
+/// See also:
+///
+///  * [StreamAppBar], the underlying app bar component.
+///  * [StreamAppBarThemeData], for customizing appearance globally.
+///  * [StreamChannelHeader], the equivalent header for a single channel.
 /// {@endtemplate}
-class StreamChannelListHeader extends StatelessWidget
-    implements PreferredSizeWidget {
+class StreamChannelListHeader extends StatelessWidget implements PreferredSizeWidget {
   /// {@macro streamChannelListHeader}
   const StreamChannelListHeader({
     super.key,
     this.client,
-    this.titleBuilder,
-    this.onUserAvatarTap,
-    this.onNewChatButtonTap,
+    this.onUserAvatarPressed,
     this.showConnectionStateTile = false,
-    this.preNavigationCallback,
+    this.title,
     this.subtitle,
-    this.centerTitle,
-    this.leading,
-    this.actions,
-    this.backgroundColor,
-    this.elevation = 1,
+    this.trailing,
+    this.primary = true,
+    this.style,
   });
 
   /// Use this if you don't have a [StreamChatClient] in your widget tree.
   final StreamChatClient? client;
 
-  /// {@macro channelListHeaderTitleBuilder}
-  final ChannelListHeaderTitleBuilder? titleBuilder;
-
-  /// The action to perform when pressing the user avatar button.
+  /// Called when the user-avatar leading is pressed.
   ///
-  /// By default it calls `Scaffold.of(context).openDrawer()`.
-  final Function(User)? onUserAvatarTap;
+  /// When null, the avatar opens the enclosing [Scaffold]'s drawer if one
+  /// exists (matching Material [AppBar]); otherwise it's rendered
+  /// non-interactive.
+  final void Function(User user)? onUserAvatarPressed;
 
-  /// The action to perform when pressing the "new chat" button.
-  final VoidCallback? onNewChatButtonTap;
-
-  /// Whether to show the connection state tile
+  /// Whether to show the connection-state banner above the bar.
   final bool showConnectionStateTile;
 
-  /// The function to execute before navigation is performed
-  final VoidCallback? preNavigationCallback;
+  /// {@macro StreamAppBar.title}
+  ///
+  /// Defaults to a connection-state-aware title — see the class docs.
+  final Widget? title;
 
-  /// Subtitle widget
+  /// {@macro StreamAppBar.subtitle}
   final Widget? subtitle;
 
-  /// Whether the title should be centered
-  final bool? centerTitle;
-
-  /// Leading widget
+  /// {@macro StreamAppBar.trailing}
   ///
-  /// By default it shows the logged in user's avatar
-  final Widget? leading;
+  /// No default — pass a widget to wire up an action.
+  final Widget? trailing;
 
-  /// {@macro flutter.material.appbar.actions}
+  /// {@macro StreamAppBar.primary}
+  final bool primary;
+
+  /// {@macro StreamAppBar.style}
   ///
-  /// The "new chat" button is shown by default.
-  final List<Widget>? actions;
-
-  /// The background color for this [StreamChannelListHeader].
-  final Color? backgroundColor;
-
-  /// The elevation for this [StreamChannelListHeader].
-  final double elevation;
+  /// Per-instance override; merges over
+  /// [StreamChatThemeData.channelListHeaderTheme].
+  final StreamAppBarStyle? style;
 
   @override
-  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+  Size get preferredSize => const Size.fromHeight(kStreamToolbarHeight);
 
   @override
   Widget build(BuildContext context) {
     final _client = client ?? StreamChat.of(context).client;
-    final user = _client.state.currentUser;
-    return StreamConnectionStatusBuilder(
-      statusBuilder: (context, status) {
-        var statusString = '';
-        var showStatus = true;
+    final headerTheme = StreamChatTheme.of(context).channelListHeaderTheme;
 
-        switch (status) {
-          case ConnectionStatus.connected:
-            statusString = context.translations.connectedLabel;
-            showStatus = false;
-            break;
-          case ConnectionStatus.connecting:
-            statusString = context.translations.reconnectingLabel;
-            break;
-          case ConnectionStatus.disconnected:
-            statusString = context.translations.disconnectedLabel;
-            break;
-        }
+    final leading = _DefaultUserAvatar(client: _client, onPressed: onUserAvatarPressed);
 
-        final chatThemeData = StreamChatTheme.of(context);
-        final channelListHeaderThemeData =
-            StreamChannelListHeaderTheme.of(context);
-        final theme = Theme.of(context);
-        return StreamInfoTile(
-          showMessage: showConnectionStateTile && showStatus,
-          message: statusString,
-          child: AppBar(
-            toolbarTextStyle: theme.textTheme.bodyMedium,
-            titleTextStyle: theme.textTheme.titleLarge,
-            systemOverlayStyle: theme.brightness == Brightness.dark
-                ? SystemUiOverlayStyle.light
-                : SystemUiOverlayStyle.dark,
-            elevation: elevation,
-            backgroundColor:
-                backgroundColor ?? channelListHeaderThemeData.color,
-            centerTitle: centerTitle,
-            leading: leading ??
-                Center(
-                  child: user != null
-                      ? StreamUserAvatar(
-                          user: user,
-                          showOnlineStatus: false,
-                          onTap: onUserAvatarTap ??
-                              (_) {
-                                preNavigationCallback?.call();
-                                Scaffold.of(context).openDrawer();
-                              },
-                          borderRadius: channelListHeaderThemeData
-                              .avatarTheme?.borderRadius,
-                          constraints: channelListHeaderThemeData
-                              .avatarTheme?.constraints,
-                        )
-                      : const Empty(),
-                ),
-            actions: actions ??
-                [
-                  StreamNeumorphicButton(
-                    child: IconButton(
-                      icon: StreamConnectionStatusBuilder(
-                        statusBuilder: (context, status) {
-                          final color = switch (status) {
-                            ConnectionStatus.connected =>
-                              chatThemeData.colorTheme.accentPrimary,
-                            ConnectionStatus.connecting => Colors.grey,
-                            ConnectionStatus.disconnected => Colors.grey,
-                          };
+    return Portal(
+      child: StreamConnectionStatusBuilder(
+        statusBuilder: (context, status) {
+          var statusString = '';
+          var showStatus = true;
 
-                          return StreamSvgIcon(
-                            size: 24,
-                            color: color,
-                            icon: StreamSvgIcons.penWrite,
-                          );
-                        },
-                      ),
-                      onPressed: onNewChatButtonTap,
-                    ),
-                  ),
-                ],
-            title: Column(
-              children: [
-                Builder(
-                  builder: (context) {
-                    if (titleBuilder != null) {
-                      return titleBuilder!(context, status, _client);
-                    }
-                    switch (status) {
-                      case ConnectionStatus.connected:
-                        return _ConnectedTitleState();
-                      case ConnectionStatus.connecting:
-                        return _ConnectingTitleState();
-                      case ConnectionStatus.disconnected:
-                        return _DisconnectedTitleState(client: _client);
-                    }
-                  },
-                ),
-                subtitle ?? const Empty(),
-              ],
+          switch (status) {
+            case ConnectionStatus.connected:
+              statusString = context.translations.connectedLabel;
+              showStatus = false;
+              break;
+            case ConnectionStatus.connecting:
+              statusString = context.translations.reconnectingLabel;
+              break;
+            case ConnectionStatus.disconnected:
+              statusString = context.translations.disconnectedLabel;
+              break;
+          }
+
+          final title =
+              this.title ??
+              switch (status) {
+                ConnectionStatus.connected => _ConnectedTitleState(),
+                ConnectionStatus.connecting => _ConnectingTitleState(),
+                ConnectionStatus.disconnected => _DisconnectedTitleState(client: _client),
+              };
+
+          return StreamInfoTile(
+            showMessage: showConnectionStateTile && showStatus,
+            message: statusString,
+            // Wrap the bar in a [StreamAppBarTheme] so the per-header chat
+            // theme drives all default styling — the bar internally merges
+            // in any [style] override the caller passed.
+            child: StreamAppBarTheme(
+              data: headerTheme,
+              child: StreamAppBar(
+                leading: leading,
+                title: title,
+                subtitle: subtitle,
+                trailing: trailing,
+                primary: primary,
+                style: style,
+              ),
             ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _DefaultUserAvatar extends StatelessWidget {
+  const _DefaultUserAvatar({required this.client, this.onPressed});
+
+  final StreamChatClient client;
+  final void Function(User user)? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final user = client.state.currentUser;
+    if (user == null) return const SizedBox.shrink();
+
+    // Caller-provided handler wins; otherwise mirror Material AppBar and
+    // open the enclosing Scaffold's drawer if one exists. With no callback
+    // and no drawer, the avatar is non-interactive.
+    final scaffold = Scaffold.maybeOf(context);
+    final effectiveOnTap = switch (onPressed) {
+      final cb? => () => cb(user),
+      _ => scaffold?.openDrawer,
+    };
+
+    // Match the 48×48 tap target StreamAppBar's auto-implied leading uses
+    // (StreamButton.icon medium = 40 visible + Material padded tap target),
+    // so the avatar slot sizes and hit-tests consistently with other bars.
+    return SizedBox.square(
+      dimension: 48,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: effectiveOnTap,
+        child: Center(
+          child: StreamUserAvatar(
+            size: .lg,
+            user: user,
+            showOnlineIndicator: false,
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 }
@@ -212,12 +221,9 @@ class StreamChannelListHeader extends StatelessWidget
 class _ConnectedTitleState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final chatThemeData = StreamChatTheme.of(context);
     return Text(
       context.translations.streamChatLabel,
-      style: chatThemeData.textTheme.headlineBold.copyWith(
-        color: chatThemeData.colorTheme.textHighEmphasis,
-      ),
+      style: context.streamTextTheme.headingSm,
     );
   }
 }
@@ -225,23 +231,17 @@ class _ConnectedTitleState extends StatelessWidget {
 class _ConnectingTitleState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final textTheme = context.streamTextTheme;
+    final colorScheme = context.streamColorScheme;
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisSize: MainAxisSize.min,
       children: [
-        const SizedBox(
-          height: 16,
-          width: 16,
-          child: Center(
-            child: CircularProgressIndicator.adaptive(),
-          ),
-        ),
+        StreamLoadingSpinner(size: .sm),
         const SizedBox(width: 10),
         Text(
           context.translations.searchingForNetworkText,
-          style: StreamChannelListHeaderTheme.of(context).titleStyle?.copyWith(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
+          style: textTheme.headingSm.copyWith(color: colorScheme.textPrimary),
         ),
       ],
     );
@@ -249,36 +249,28 @@ class _ConnectingTitleState extends StatelessWidget {
 }
 
 class _DisconnectedTitleState extends StatelessWidget {
-  const _DisconnectedTitleState({
-    required this.client,
-  });
+  const _DisconnectedTitleState({required this.client});
 
   final StreamChatClient client;
 
   @override
   Widget build(BuildContext context) {
-    final chatThemeData = StreamChatTheme.of(context);
-    final channelListHeaderTheme = StreamChannelListHeaderTheme.of(context);
+    final textTheme = context.streamTextTheme;
+    final colorScheme = context.streamColorScheme;
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisSize: MainAxisSize.min,
       children: [
         Text(
           context.translations.offlineLabel,
-          style: channelListHeaderTheme.titleStyle?.copyWith(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-          ),
+          style: textTheme.headingSm.copyWith(color: colorScheme.textPrimary),
         ),
-        TextButton(
+        StreamButton(
+          type: .ghost,
+          style: .primary,
+          size: .small,
           onPressed: client.maybeReconnect,
-          child: Text(
-            context.translations.tryAgainLabel,
-            style: channelListHeaderTheme.titleStyle?.copyWith(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: chatThemeData.colorTheme.accentPrimary,
-            ),
-          ),
+          child: Text(context.translations.tryAgainLabel),
         ),
       ],
     );

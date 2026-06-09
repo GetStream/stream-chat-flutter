@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_redundant_argument_values
+
 import 'dart:math' as math;
 
 import 'package:flutter_test/flutter_test.dart';
@@ -73,8 +75,7 @@ void main() {
         type: 'testType',
         user: users[index],
         channelRole: 'channel_member',
-        parentId:
-            mapAllThreadToFirstMessage ? messages[0].id : messages[index].id,
+        parentId: mapAllThreadToFirstMessage ? messages[0].id : messages[index].id,
         createdAt: DateTime.now(),
         shadowed: math.Random().nextBool(),
         replyCount: index,
@@ -86,11 +87,7 @@ void main() {
         pinnedBy: User(id: 'testUserId$index'),
       ),
     );
-    final allMessages = [
-      ...messages,
-      if (quoted) ...quotedMessages,
-      if (threads) ...threadMessages
-    ];
+    final allMessages = [...messages, if (quoted) ...quotedMessages, if (threads) ...threadMessages];
     final reaction = Reaction(
       type: 'type',
       messageId: allMessages.first.id,
@@ -116,8 +113,7 @@ void main() {
     final firstMessageId = messages.first.id;
 
     // Fetched reactions list should have one reaction for given message id
-    final reactions =
-        await database.pinnedMessageReactionDao.getReactions(firstMessageId);
+    final reactions = await database.pinnedMessageReactionDao.getReactions(firstMessageId);
     expect(reactions.length, 1);
 
     // Deleting 2 messages from DB
@@ -131,8 +127,7 @@ void main() {
     expect(newMessages.length, messages.length - 2);
 
     // Reaction for the first message should be deleted too
-    final newReactions =
-        await database.pinnedMessageReactionDao.getReactions(firstMessageId);
+    final newReactions = await database.pinnedMessageReactionDao.getReactions(firstMessageId);
     expect(newReactions, isEmpty);
   });
 
@@ -155,24 +150,20 @@ void main() {
 
         // Fetched reactions list should have one reaction for given message id
         final cid1firstMessageId = cid1Messages.first.id;
-        final cid1Reactions = await database.pinnedMessageReactionDao
-            .getReactions(cid1firstMessageId);
+        final cid1Reactions = await database.pinnedMessageReactionDao.getReactions(cid1firstMessageId);
         expect(cid1Reactions.length, 1);
 
         // Deleting all the messages of cid1
         await pinnedMessageDao.deleteMessageByCids([cid1]);
 
         // Fetched messages length of only cid1 should be empty
-        final cid1FetchedMessages =
-            await pinnedMessageDao.getMessagesByCid(cid1);
-        final cid2FetchedMessages =
-            await pinnedMessageDao.getMessagesByCid(cid2);
+        final cid1FetchedMessages = await pinnedMessageDao.getMessagesByCid(cid1);
+        final cid2FetchedMessages = await pinnedMessageDao.getMessagesByCid(cid2);
         expect(cid1FetchedMessages, isEmpty);
         expect(cid2FetchedMessages, isNotEmpty);
 
         // Reaction for the first message should be deleted too
-        final cid1FetchedReactions = await database.pinnedMessageReactionDao
-            .getReactions(cid1firstMessageId);
+        final cid1FetchedReactions = await database.pinnedMessageReactionDao.getReactions(cid1firstMessageId);
         expect(cid1FetchedReactions, isEmpty);
       },
     );
@@ -192,31 +183,25 @@ void main() {
 
         // Fetched reactions list should have one reaction for given message id
         final cid1FirstMessageId = cid1Messages.first.id;
-        final cid1Reactions = await database.pinnedMessageReactionDao
-            .getReactions(cid1FirstMessageId);
+        final cid1Reactions = await database.pinnedMessageReactionDao.getReactions(cid1FirstMessageId);
         expect(cid1Reactions.length, 1);
         final cid2FirstMessageId = cid2Messages.first.id;
-        final cid2Reactions = await database.pinnedMessageReactionDao
-            .getReactions(cid2FirstMessageId);
+        final cid2Reactions = await database.pinnedMessageReactionDao.getReactions(cid2FirstMessageId);
         expect(cid2Reactions.length, 1);
 
         // Deleting all the messages of cid1
         await pinnedMessageDao.deleteMessageByCids([cid1, cid2]);
 
         // Fetched messages length of both cid1 and cid2 should be empty
-        final cid1FetchedMessages =
-            await pinnedMessageDao.getMessagesByCid(cid1);
-        final cid2FetchedMessages =
-            await pinnedMessageDao.getMessagesByCid(cid2);
+        final cid1FetchedMessages = await pinnedMessageDao.getMessagesByCid(cid1);
+        final cid2FetchedMessages = await pinnedMessageDao.getMessagesByCid(cid2);
         expect(cid1FetchedMessages, isEmpty);
         expect(cid2FetchedMessages, isEmpty);
 
         // Reaction for the first message should be deleted too
-        final cid1FetchedReactions = await database.pinnedMessageReactionDao
-            .getReactions(cid1FirstMessageId);
+        final cid1FetchedReactions = await database.pinnedMessageReactionDao.getReactions(cid1FirstMessageId);
         expect(cid1FetchedReactions, isEmpty);
-        final cid2FetchedReactions = await database.pinnedMessageReactionDao
-            .getReactions(cid2FirstMessageId);
+        final cid2FetchedReactions = await database.pinnedMessageReactionDao.getReactions(cid2FirstMessageId);
         expect(cid2FetchedReactions, isEmpty);
       },
     );
@@ -264,8 +249,7 @@ void main() {
     const parentId = 'testMessageId${cid}0';
 
     // Messages should be empty initially
-    final messages =
-        await pinnedMessageDao.getThreadMessagesByParentId(parentId);
+    final messages = await pinnedMessageDao.getThreadMessagesByParentId(parentId);
     expect(messages, isEmpty);
 
     // Preparing test data
@@ -273,8 +257,7 @@ void main() {
     expect(insertedMessages, isNotEmpty);
 
     // Should fetch all the thread messages of parentId
-    final threadMessages =
-        await pinnedMessageDao.getThreadMessagesByParentId(parentId);
+    final threadMessages = await pinnedMessageDao.getThreadMessagesByParentId(parentId);
     expect(threadMessages.length, 1);
     expect(threadMessages.first.parentId, parentId);
   });
@@ -533,8 +516,7 @@ void main() {
       }
     });
 
-    test('getMessagesByCid hydrates poll with own + other-user votes',
-        () async {
+    test('getMessagesByCid hydrates poll with own + other-user votes', () async {
       const messageId = 'pmsg-with-poll';
       const pollId = 'ppoll-mixed';
       await _seedChannel(cid);
@@ -603,8 +585,7 @@ void main() {
       expect(hydratedPoll.ownVotesAndAnswers, hasLength(2));
     });
 
-    test(
-        'getMessagesByCid hydrates thread draft when fetchDraft=true; '
+    test('getMessagesByCid hydrates thread draft when fetchDraft=true; '
         'null when false', () async {
       await _seedChannel(cid);
       final dbUser = User(id: 'testUserId');
@@ -640,13 +621,11 @@ void main() {
       expect(withDraft.first.draft, isNotNull);
       expect(withDraft.first.draft!.parentId, parentId);
 
-      final withoutDraft =
-          await pinnedMessageDao.getMessagesByCid(cid, fetchDraft: false);
+      final withoutDraft = await pinnedMessageDao.getMessagesByCid(cid, fetchDraft: false);
       expect(withoutDraft.first.draft, isNull);
     });
 
-    test(
-        'getMessagesByCid hydrates quoted pinned message with its own '
+    test('getMessagesByCid hydrates quoted pinned message with its own '
         'reactions and poll', () async {
       await _seedChannel(cid);
       final dbUser = User(id: 'testUserId');
@@ -741,8 +720,7 @@ void main() {
       expect(top.quotedMessage?.quotedMessage, isNull);
     });
 
-    test(
-        'getMessagesByCid does not hydrate drafts for quoted pinned messages, '
+    test('getMessagesByCid does not hydrate drafts for quoted pinned messages, '
         'even when fetchDraft=true', () async {
       await _seedChannel(cid);
       final dbUser = User(id: 'testUserId');
@@ -766,8 +744,7 @@ void main() {
         quotedMessageId: quotedId,
       );
 
-      await pinnedMessageDao
-          .updateMessages(cid, [quotedMessage, quotingMessage]);
+      await pinnedMessageDao.updateMessages(cid, [quotedMessage, quotingMessage]);
       // `DraftMessages.parentId` is FK-referenced against `Messages.id`, not
       // `PinnedMessages.id`, so the parent of the draft needs a row in both.
       await database.messageDao.updateMessages(cid, [quotedMessage]);
@@ -790,6 +767,336 @@ void main() {
       expect(quoting.quotedMessage, isNotNull);
       expect(quoting.quotedMessage!.id, quotedId);
       expect(quoting.quotedMessage!.draft, isNull);
+    });
+
+    test('getMessageById hydrates sharedLocation when fetchSharedLocation=true; '
+        'null when false', () async {
+      await _seedChannel(cid);
+      final dbUser = User(id: 'testUserId');
+      await database.userDao.updateUsers([dbUser]);
+
+      const messageId = 'pmsg-with-location';
+      final pinnedMessage = Message(
+        id: messageId,
+        user: dbUser,
+        text: 'pin drop',
+        createdAt: DateTime.now(),
+      );
+      // `Locations.messageId` is FK-referenced against `Messages.id`, so the
+      // pinned row alone isn't enough — insert into the main `messages` table
+      // too.
+      await pinnedMessageDao.updateMessages(cid, [pinnedMessage]);
+      await database.messageDao.updateMessages(cid, [pinnedMessage]);
+
+      await database.locationDao.updateLocations([
+        Location(
+          channelCid: cid,
+          messageId: messageId,
+          userId: dbUser.id,
+          latitude: 37.7749,
+          longitude: -122.4194,
+          createdByDeviceId: 'device-A',
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        ),
+      ]);
+
+      final withLocation = await pinnedMessageDao.getMessageById(messageId);
+      expect(withLocation, isNotNull);
+      expect(withLocation!.sharedLocation, isNotNull);
+      expect(withLocation.sharedLocation!.messageId, messageId);
+      expect(withLocation.sharedLocation!.latitude, 37.7749);
+      expect(withLocation.sharedLocation!.longitude, -122.4194);
+      expect(withLocation.sharedLocation!.createdByDeviceId, 'device-A');
+
+      final withoutLocation = await pinnedMessageDao.getMessageById(
+        messageId,
+        fetchSharedLocation: false,
+      );
+      expect(withoutLocation, isNotNull);
+      expect(withoutLocation!.sharedLocation, isNull);
+    });
+
+    test('getMessagesByCid hydrates sharedLocation per row independently; '
+        'absent locations remain null', () async {
+      await _seedChannel(cid);
+      final dbUser = User(id: 'testUserId');
+      await database.userDao.updateUsers([dbUser]);
+
+      final baseTime = DateTime.now();
+      final messages = List.generate(
+        4,
+        (i) => Message(
+          id: 'ploc-msg-$i',
+          user: dbUser,
+          text: 'msg $i',
+          createdAt: baseTime.add(Duration(seconds: i)),
+        ),
+      );
+      await pinnedMessageDao.updateMessages(cid, messages);
+      // Locations FK against `Messages.id`, so mirror the rows there.
+      await database.messageDao.updateMessages(cid, messages);
+
+      // Locations only on messages 1 and 3; messages 0 and 2 have none.
+      await database.locationDao.updateLocations([
+        Location(
+          channelCid: cid,
+          messageId: messages[1].id,
+          userId: dbUser.id,
+          latitude: 10,
+          longitude: 20,
+          createdAt: baseTime,
+          updatedAt: baseTime,
+        ),
+        Location(
+          channelCid: cid,
+          messageId: messages[3].id,
+          userId: dbUser.id,
+          latitude: 30,
+          longitude: 40,
+          endAt: baseTime.add(const Duration(hours: 1)),
+          createdAt: baseTime,
+          updatedAt: baseTime,
+        ),
+      ]);
+
+      final fetched = await pinnedMessageDao.getMessagesByCid(cid);
+      expect(fetched, hasLength(4));
+      final byId = {for (final m in fetched) m.id: m};
+
+      expect(byId['ploc-msg-0']!.sharedLocation, isNull);
+      expect(byId['ploc-msg-1']!.sharedLocation, isNotNull);
+      expect(byId['ploc-msg-1']!.sharedLocation!.latitude, 10);
+      expect(byId['ploc-msg-1']!.sharedLocation!.longitude, 20);
+      expect(byId['ploc-msg-1']!.sharedLocation!.isLive, isFalse);
+      expect(byId['ploc-msg-2']!.sharedLocation, isNull);
+      expect(byId['ploc-msg-3']!.sharedLocation, isNotNull);
+      expect(byId['ploc-msg-3']!.sharedLocation!.latitude, 30);
+      expect(byId['ploc-msg-3']!.sharedLocation!.isLive, isTrue);
+
+      final withoutLocations = await pinnedMessageDao.getMessagesByCid(
+        cid,
+        fetchSharedLocation: false,
+      );
+      expect(
+        withoutLocations.every((m) => m.sharedLocation == null),
+        isTrue,
+      );
+    });
+
+    test('getMessagesByCid hydrates sharedLocation for quoted pinned message '
+        'even when fetchSharedLocation=false on the parent', () async {
+      await _seedChannel(cid);
+      final dbUser = User(id: 'testUserId');
+      await database.userDao.updateUsers([dbUser]);
+
+      const quotedId = 'pmsg-quoted-loc';
+      const quotingId = 'pmsg-quoting-no-loc';
+      final baseTime = DateTime.now();
+      final quotedMessage = Message(
+        id: quotedId,
+        user: dbUser,
+        text: 'here I am',
+        createdAt: baseTime,
+      );
+      final quotingMessage = Message(
+        id: quotingId,
+        user: dbUser,
+        text: 'see above',
+        createdAt: baseTime.add(const Duration(seconds: 1)),
+        quotedMessageId: quotedId,
+      );
+      await pinnedMessageDao.updateMessages(cid, [quotedMessage, quotingMessage]);
+      // Locations FK against `Messages.id`.
+      await database.messageDao.updateMessages(cid, [quotedMessage]);
+
+      await database.locationDao.updateLocations([
+        Location(
+          channelCid: cid,
+          messageId: quotedId,
+          userId: dbUser.id,
+          latitude: 1,
+          longitude: 2,
+          createdAt: baseTime,
+          updatedAt: baseTime,
+        ),
+      ]);
+
+      // Parent caller opts out of locations, but the quoted message should
+      // still carry its own shared location.
+      final fetched = await pinnedMessageDao.getMessagesByCid(
+        cid,
+        fetchSharedLocation: false,
+      );
+      final quoting = fetched.firstWhere((m) => m.id == quotingId);
+      expect(quoting.sharedLocation, isNull);
+      expect(quoting.quotedMessage, isNotNull);
+      expect(quoting.quotedMessage!.sharedLocation, isNotNull);
+      expect(quoting.quotedMessage!.sharedLocation!.latitude, 1);
+      expect(quoting.quotedMessage!.sharedLocation!.longitude, 2);
+    });
+  });
+
+  group('deleteMessagesByUser', () {
+    const cid1 = 'test:Cid1';
+    const cid2 = 'test:Cid2';
+    const userId = 'testUserId0';
+
+    test('hard deletes user pinned messages in specific channel', () async {
+      // Preparing test data for two channels
+      await _prepareTestData(cid1);
+      await _prepareTestData(cid2);
+
+      // Verify messages exist in both channels
+      final cid1Messages = await pinnedMessageDao.getMessagesByCid(cid1);
+      final cid2Messages = await pinnedMessageDao.getMessagesByCid(cid2);
+      expect(cid1Messages, isNotEmpty);
+      expect(cid2Messages, isNotEmpty);
+
+      // Count messages from the specific user in cid1
+      final cid1UserMessages = cid1Messages.where((m) => m.user?.id == userId).length;
+      expect(cid1UserMessages, greaterThan(0));
+
+      // Hard delete messages from user in cid1 only
+      await pinnedMessageDao.deleteMessagesByUser(
+        cid: cid1,
+        userId: userId,
+        hardDelete: true,
+      );
+
+      // Verify user's messages are deleted from cid1
+      final cid1MessagesAfter = await pinnedMessageDao.getMessagesByCid(cid1);
+      final cid1UserMessagesAfter = cid1MessagesAfter.where((m) => m.user?.id == userId).length;
+      expect(cid1UserMessagesAfter, 0);
+
+      // Verify other users' messages in cid1 are not affected
+      expect(cid1MessagesAfter.length, cid1Messages.length - cid1UserMessages);
+
+      // Verify messages in cid2 are not affected
+      final cid2MessagesAfter = await pinnedMessageDao.getMessagesByCid(cid2);
+      expect(cid2MessagesAfter.length, cid2Messages.length);
+    });
+
+    test('soft deletes user pinned messages in specific channel', () async {
+      // Preparing test data
+      await _prepareTestData(cid1);
+
+      final cid1Messages = await pinnedMessageDao.getMessagesByCid(cid1);
+      final cid1UserMessages = cid1Messages.where((m) => m.user?.id == userId).toList();
+      expect(cid1UserMessages, isNotEmpty);
+
+      // Verify messages are not deleted initially
+      for (final message in cid1UserMessages) {
+        expect(message.type, isNot('deleted'));
+        expect(message.deletedAt, isNull);
+      }
+
+      // Soft delete messages from user
+      final deletedAt = DateTime.now();
+      await pinnedMessageDao.deleteMessagesByUser(
+        cid: cid1,
+        userId: userId,
+        hardDelete: false,
+        deletedAt: deletedAt,
+      );
+
+      // Verify messages are marked as deleted
+      final cid1MessagesAfter = await pinnedMessageDao.getMessagesByCid(cid1);
+      final cid1UserMessagesAfter = cid1MessagesAfter.where((m) => m.user?.id == userId).toList();
+
+      // Messages should still exist in DB
+      expect(cid1UserMessagesAfter.length, cid1UserMessages.length);
+
+      // But they should be marked as deleted
+      for (final message in cid1UserMessagesAfter) {
+        expect(message.type, 'deleted');
+        expect(message.deletedAt, isNotNull);
+      }
+
+      // Other users' messages should not be affected
+      final otherUserMessages = cid1MessagesAfter.where((m) => m.user?.id != userId).toList();
+      for (final message in otherUserMessages) {
+        expect(message.type, isNot('deleted'));
+      }
+    });
+
+    test('hard deletes user pinned messages across all channels when cid null', () async {
+      // Preparing test data for multiple channels
+      await _prepareTestData(cid1);
+      await _prepareTestData(cid2);
+
+      final cid1Messages = await pinnedMessageDao.getMessagesByCid(cid1);
+      final cid2Messages = await pinnedMessageDao.getMessagesByCid(cid2);
+
+      final cid1UserMessages = cid1Messages.where((m) => m.user?.id == userId).length;
+      final cid2UserMessages = cid2Messages.where((m) => m.user?.id == userId).length;
+
+      expect(cid1UserMessages, greaterThan(0));
+      expect(cid2UserMessages, greaterThan(0));
+
+      // Hard delete all messages from user across all channels
+      await pinnedMessageDao.deleteMessagesByUser(
+        userId: userId,
+        hardDelete: true,
+      );
+
+      // Verify user's messages are deleted from both channels
+      final cid1MessagesAfter = await pinnedMessageDao.getMessagesByCid(cid1);
+      final cid2MessagesAfter = await pinnedMessageDao.getMessagesByCid(cid2);
+
+      expect(
+        cid1MessagesAfter.where((m) => m.user?.id == userId).length,
+        0,
+      );
+      expect(
+        cid2MessagesAfter.where((m) => m.user?.id == userId).length,
+        0,
+      );
+
+      // Verify other messages are preserved
+      expect(
+        cid1MessagesAfter.length,
+        cid1Messages.length - cid1UserMessages,
+      );
+      expect(
+        cid2MessagesAfter.length,
+        cid2Messages.length - cid2UserMessages,
+      );
+    });
+
+    test('soft deletes user pinned messages across all channels when cid null', () async {
+      // Preparing test data for multiple channels
+      await _prepareTestData(cid1);
+      await _prepareTestData(cid2);
+
+      final cid1Messages = await pinnedMessageDao.getMessagesByCid(cid1);
+      final cid2Messages = await pinnedMessageDao.getMessagesByCid(cid2);
+
+      final cid1UserMessages = cid1Messages.where((m) => m.user?.id == userId).length;
+      final cid2UserMessages = cid2Messages.where((m) => m.user?.id == userId).length;
+
+      // Soft delete all messages from user across all channels
+      await pinnedMessageDao.deleteMessagesByUser(
+        userId: userId,
+        hardDelete: false,
+      );
+
+      // Verify user's messages are marked as deleted in both channels
+      final cid1MessagesAfter = await pinnedMessageDao.getMessagesByCid(cid1);
+      final cid2MessagesAfter = await pinnedMessageDao.getMessagesByCid(cid2);
+
+      final cid1UserMessagesAfter = cid1MessagesAfter.where((m) => m.user?.id == userId).toList();
+      final cid2UserMessagesAfter = cid2MessagesAfter.where((m) => m.user?.id == userId).toList();
+
+      // Messages should still exist
+      expect(cid1UserMessagesAfter.length, cid1UserMessages);
+      expect(cid2UserMessagesAfter.length, cid2UserMessages);
+
+      // All user messages should be marked as deleted
+      for (final message in [...cid1UserMessagesAfter, ...cid2UserMessagesAfter]) {
+        expect(message.type, 'deleted');
+        expect(message.deletedAt, isNotNull);
+      }
     });
   });
 

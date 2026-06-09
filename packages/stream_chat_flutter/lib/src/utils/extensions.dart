@@ -23,8 +23,7 @@ extension IntExtension on int {
     if (this <= 0) return '0 B';
     const suffixes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
     final i = (log(this) / log(_byteUnitConversionFactor)).floor();
-    final numberValue =
-        (this / pow(_byteUnitConversionFactor, i)).toStringAsFixed(2);
+    final numberValue = (this / pow(_byteUnitConversionFactor, i)).toStringAsFixed(2);
     final suffix = suffixes[i];
     return '$numberValue $suffix';
   }
@@ -44,14 +43,25 @@ extension DurationExtension on Duration {
 /// String extension
 extension StringExtension on String {
   /// Returns the capitalized string
-  String capitalize() =>
-      isNotEmpty ? '${this[0].toUpperCase()}${substring(1).toLowerCase()}' : '';
+  @Deprecated('Use sentenceCase instead')
+  String capitalize() => sentenceCase;
+
+  /// Returns the string in sentence case.
+  ///
+  /// Example: 'hello WORLD' -> 'Hello world'
+  String get sentenceCase {
+    if (isEmpty) return this;
+
+    final firstChar = this[0].toUpperCase();
+    final restOfString = substring(1).toLowerCase();
+
+    return '$firstChar$restOfString';
+  }
 
   /// Returns the biggest line of a text.
   String biggestLine() {
     if (contains('\n')) {
-      return split('\n')
-          .reduce((curr, next) => curr.length > next.length ? curr : next);
+      return split('\n').reduce((curr, next) => curr.length > next.length ? curr : next);
     } else {
       return this;
     }
@@ -91,55 +101,15 @@ extension StringExtension on String {
 
   /// Levenshtein distance between this and [t].
   int levenshteinDistance(String t) => levenshtein(this, t);
-
-  /// Returns a resized imageUrl with the given [width], [height], [resize]
-  /// and [crop] if it is from Stream CDN or Dashboard.
-  ///
-  /// Read more at https://getstream.io/chat/docs/flutter-dart/file_uploads/?language=dart#image-resizing
-  String getResizedImageUrl({
-    // TODO: Are these sizes optimal? Consider web/desktop
-    double width = 400,
-    double height = 400,
-    String /*clip|crop|scale|fill*/ resize = 'clip',
-    String /*center|top|bottom|left|right*/ crop = 'center',
-  }) {
-    final uri = Uri.parse(this);
-    final host = uri.host;
-
-    final fromStreamCDN = host.endsWith('stream-io-cdn.com');
-    final fromStreamDashboard = host.endsWith('stream-cloud-uploads.imgix.net');
-
-    if (!fromStreamCDN && !fromStreamDashboard) return this;
-
-    final queryParameters = {...uri.queryParameters};
-
-    if (fromStreamCDN) {
-      if (queryParameters['h'].isNullOrMatches('*') &&
-          queryParameters['w'].isNullOrMatches('*') &&
-          queryParameters['crop'].isNullOrMatches('*') &&
-          queryParameters['resize'].isNullOrMatches('*')) {
-        queryParameters['h'] = height.floor().toString();
-        queryParameters['w'] = width.floor().toString();
-        queryParameters['crop'] = crop;
-        queryParameters['resize'] = resize;
-      }
-    } else if (fromStreamDashboard) {
-      queryParameters['height'] = height.floor().toString();
-      queryParameters['width'] = width.floor().toString();
-      queryParameters['fit'] = crop;
-    }
-
-    return uri.replace(queryParameters: queryParameters).toString();
-  }
 }
 
 /// List extension
 extension IterableExtension<T> on Iterable<T> {
   /// Insert any item<T> inBetween the list items
   List<T> insertBetween(T item) => expand((e) sync* {
-        yield item;
-        yield e;
-      }).skip(1).toList(growable: false);
+    yield item;
+    yield e;
+  }).skip(1).toList(growable: false);
 }
 
 /// Useful extension for [PlatformFile]
@@ -251,8 +221,7 @@ extension InputDecorationX on InputDecoration {
       suffixIconConstraints: other.suffixIconConstraints,
       counter: other.counter,
       counterText: other.counterText,
-      counterStyle:
-          counterStyle?.merge(other.counterStyle) ?? other.counterStyle,
+      counterStyle: counterStyle?.merge(other.counterStyle) ?? other.counterStyle,
       filled: other.filled,
       fillColor: other.fillColor,
       focusColor: other.focusColor,
@@ -279,8 +248,7 @@ extension BuildContextX on BuildContext {
 
   /// Retrieves current translations according to locale
   /// Defaults to [DefaultTranslations]
-  Translations get translations =>
-      StreamChatLocalizations.of(this) ?? DefaultTranslations.instance;
+  Translations get translations => StreamChatLocalizations.of(this) ?? DefaultTranslations.instance;
 }
 
 /// Extension on [BorderRadius]
@@ -372,8 +340,7 @@ extension UserListX on List<User> {
     final entries = matchingUsers.entries.toList(growable: false)
       ..sort((prev, curr) {
         bool containsQuery(User user) =>
-            normalize(user.id).contains(normalizedQuery) ||
-            normalize(user.name).contains(normalizedQuery);
+            normalize(user.id).contains(normalizedQuery) || normalize(user.name).contains(normalizedQuery);
 
         final containsInPrev = containsQuery(prev.key);
         final containsInCurr = containsQuery(curr.key);
@@ -401,7 +368,7 @@ extension MessageX on Message {
 
       messageTextToRender = messageTextToRender?.replaceAll(
         RegExp('@(${RegExp.escape(userId)}|${RegExp.escape(userName)})'),
-        linkify ? '[@$userName]($userId)' : '@$userName',
+        linkify ? '[@$userName](mention:$userId)' : '@$userName',
       );
     }
 
@@ -413,8 +380,7 @@ extension MessageX on Message {
     var messageTextLength = min(text?.biggestLine().length ?? 0, 65);
 
     if (quotedMessage != null) {
-      var quotedMessageLength =
-          (min(quotedMessage!.text?.biggestLine().length ?? 0, 65)) + 8;
+      var quotedMessageLength = (min(quotedMessage!.text?.biggestLine().length ?? 0, 65)) + 8;
 
       if (quotedMessage!.attachments.isNotEmpty) {
         quotedMessageLength += 8;
@@ -436,8 +402,7 @@ extension MessageX on Message {
   }
 
   /// It returns the message with the translated text if available locally
-  Message translate(String language) =>
-      copyWith(text: i18n?['${language}_text'] ?? text);
+  Message translate(String language) => copyWith(text: i18n?['${language}_text'] ?? text);
 
   /// It returns the message replacing the mentioned user names with
   ///  the respective user ids
@@ -479,18 +444,12 @@ extension TypeX<T> on T? {
 extension FileTypeX on FileType {
   /// Converts the [FileType] to a [String].
   String toAttachmentType() {
-    switch (this) {
-      case FileType.image:
-        return AttachmentType.image;
-      case FileType.video:
-        return AttachmentType.video;
-      case FileType.audio:
-        return AttachmentType.audio;
-      case FileType.any:
-      case FileType.media:
-      case FileType.custom:
-        return AttachmentType.file;
-    }
+    return switch (this) {
+      FileType.image => AttachmentType.image,
+      FileType.video => AttachmentType.video,
+      FileType.audio => AttachmentType.audio,
+      FileType.any || FileType.media || FileType.custom => AttachmentType.file,
+    };
   }
 }
 
@@ -498,18 +457,16 @@ extension FileTypeX on FileType {
 extension AttachmentPickerTypeX on AttachmentPickerType {
   /// Converts the [AttachmentPickerType] to a [FileType].
   FileType get fileType {
-    switch (this) {
-      case AttachmentPickerType.images:
-        return FileType.image;
-      case AttachmentPickerType.videos:
-        return FileType.video;
-      case AttachmentPickerType.files:
-        return FileType.any;
-      case AttachmentPickerType.audios:
-        return FileType.audio;
-      case AttachmentPickerType.poll:
-        throw Exception('Polls do not have a file type');
-    }
+    return switch (this) {
+      ImagesPickerType() => FileType.image,
+      VideosPickerType() => FileType.video,
+      AudiosPickerType() => FileType.audio,
+      FilesPickerType() => FileType.any,
+      _ => throw Exception(
+        'Unsupported AttachmentPickerType: $this. '
+        'Only Images, Videos, Audios and Files are supported.',
+      ),
+    };
   }
 }
 
@@ -576,24 +533,6 @@ extension MessageListX on Iterable<Message> {
   ///
   /// The [userRead] is the last read message by the user.
   ///
-  /// The last unread message is the last message in the list that is not
-  /// sent by the current user and is sent after the last read message.
-  @Deprecated("Use 'StreamChannel.getFirstUnreadMessage' instead.")
-  Message? lastUnreadMessage(Read? userRead) {
-    if (isEmpty || userRead == null) return null;
-
-    if (first.createdAt.isAfter(userRead.lastRead) &&
-        last.createdAt.isBefore(userRead.lastRead)) {
-      return lastWhereOrNull(
-        (it) =>
-            it.user?.id != userRead.user.id &&
-            it.id != userRead.lastReadMessageId &&
-            it.createdAt.compareTo(userRead.lastRead) > 0,
-      );
-    }
-
-    return null;
-  }
 }
 
 /// Useful extensions on [ChannelModel].
@@ -619,16 +558,11 @@ extension ChannelModelX on ChannelModel {
     // Otherwise, we return the names of the first `maxMembers` members sorted
     // alphabetically, followed by the number of remaining members if there are
     // more than `maxMembers` members.
-    final memberNames = otherMembers
-        .map((it) => it.user?.name)
-        .whereType<String>()
-        .take(maxMembers)
-        .sorted();
+    final memberNames = otherMembers.map((it) => it.user?.name).whereType<String>().take(maxMembers).sorted();
 
     return switch (otherMembers.length <= maxMembers) {
       true => memberNames.join(', '),
-      false =>
-        '${memberNames.join(', ')} + ${otherMembers.length - maxMembers}',
+      false => '${memberNames.join(', ')} + ${otherMembers.length - maxMembers}',
     };
   }
 }
@@ -644,7 +578,7 @@ extension VoiceRecordingAttachmentExtension on Attachment {
     final duration = extraData['duration'] as num?;
     if (duration == null) return Duration.zero;
 
-    return Duration(milliseconds: duration.round() * 1000);
+    return Duration(milliseconds: (duration * 1000).round());
   }
 
   /// Returns the waveform data of the voice recording attachment if available
@@ -655,6 +589,15 @@ extension VoiceRecordingAttachmentExtension on Attachment {
 
     return [...waveform.map((e) => double.tryParse(e.toString())).nonNulls];
   }
+}
+
+/// {@template singleAttachmentPlaylistExtension}
+/// Extension on [Attachment] to provide the playlist specific
+/// properties.
+/// {@endtemplate}
+extension SingleAttachmentPlaylistExtension on Attachment {
+  /// Converts the attachment to a list of [PlaylistTrack].
+  List<PlaylistTrack> toPlaylist() => [this].toPlaylist();
 }
 
 /// {@template attachmentPlaylistExtension}
@@ -668,25 +611,25 @@ extension AttachmentPlaylistExtension on Iterable<Attachment> {
       ...map((it) {
         final uri = switch (it.uploadState) {
           Preparing() || InProgress() || Failed() => () {
-              if (CurrentPlatform.isWeb) {
-                final bytes = it.file?.bytes;
-                final mimeType = it.file?.mediaType?.mimeType;
-                if (bytes == null || mimeType == null) return null;
+            if (CurrentPlatform.isWeb) {
+              final bytes = it.file?.bytes;
+              final mimeType = it.file?.mediaType?.mimeType;
+              if (bytes == null || mimeType == null) return null;
 
-                return Uri.dataFromBytes(bytes, mimeType: mimeType);
-              }
+              return Uri.dataFromBytes(bytes, mimeType: mimeType);
+            }
 
-              final path = it.file?.path;
-              if (path == null) return null;
+            final path = it.file?.path;
+            if (path == null) return null;
 
-              return Uri.file(path, windows: CurrentPlatform.isWindows);
-            }(),
+            return Uri.file(path, windows: CurrentPlatform.isWindows);
+          }(),
           Success() => () {
-              final url = it.assetUrl;
-              if (url == null) return null;
+            final url = it.assetUrl;
+            if (url == null) return null;
 
-              return Uri.tryParse(url);
-            }(),
+            return Uri.tryParse(url);
+          }(),
         };
 
         if (uri == null) return null;
@@ -696,8 +639,42 @@ extension AttachmentPlaylistExtension on Iterable<Attachment> {
           title: it.title,
           waveform: it.waveform,
           duration: it.duration,
+          key: it,
         );
       }).nonNulls,
     ];
+  }
+}
+
+/// Adapts an [Offset] for the current [TextDirection].
+extension OffsetDirectionalX on Offset {
+  /// Flips [dx] for RTL so a positive offset always means "toward trailing."
+  Offset directional([TextDirection? textDirection]) {
+    if (textDirection == null || textDirection == TextDirection.ltr) return this;
+    return Offset(-dx, dy);
+  }
+}
+
+/// Extension to convert [AlignmentGeometry] to the corresponding
+/// [CrossAxisAlignment].
+extension ColumnAlignmentExtension on AlignmentGeometry {
+  /// Converts an [AlignmentGeometry] to the most appropriate
+  /// [CrossAxisAlignment] value.
+  CrossAxisAlignment toColumnCrossAxisAlignment() {
+    final x = switch (this) {
+      Alignment(x: final x) => x,
+      AlignmentDirectional(start: final start) => start,
+      _ => null,
+    };
+
+    // If the alignment is unknown, fallback to the center alignment.
+    if (x == null) return CrossAxisAlignment.center;
+
+    return switch (x) {
+      0.0 => CrossAxisAlignment.center,
+      < 0 => CrossAxisAlignment.start,
+      > 0 => CrossAxisAlignment.end,
+      _ => CrossAxisAlignment.center, // fallback (in case of NaN etc)
+    };
   }
 }

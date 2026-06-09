@@ -49,9 +49,9 @@ class PositionedList extends StatefulWidget {
     this.addAutomaticKeepAlives = true,
     this.keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
   }) : assert(
-          (positionedIndex == 0) || (positionedIndex < itemCount),
-          'positionedIndex must be 0 or a value less than itemCount',
-        );
+         (positionedIndex == 0) || (positionedIndex < itemCount),
+         'positionedIndex must be 0 or a value less than itemCount',
+       );
 
   /// Number of items the [itemBuilder] can produce.
   final int itemCount;
@@ -261,12 +261,9 @@ class _PositionedListState extends State<PositionedList> {
     final firstVisible = _firstVisibleIndex();
     final bucket = (firstVisible ~/ _slidingWindowSize) * _slidingWindowSize;
     final start = (bucket - _extraItemCount).clamp(0, widget.itemCount);
-    final end = (bucket + _slidingWindowSize + _extraItemCount)
-        .clamp(0, widget.itemCount);
+    final end = (bucket + _slidingWindowSize + _extraItemCount).clamp(0, widget.itemCount);
 
-    if (start == _cachedRangeStart &&
-        end == _cachedRangeEnd &&
-        widget.itemCount == _cachedItemCount) {
+    if (start == _cachedRangeStart && end == _cachedRangeEnd && widget.itemCount == _cachedItemCount) {
       return;
     }
 
@@ -331,8 +328,7 @@ class _PositionedListState extends State<PositionedList> {
   int? _findTrailingIndex(Key key) {
     final userIndex = _userIndexFromKey(key);
     if (userIndex == null) return null;
-    if (userIndex <= widget.positionedIndex || userIndex >= widget.itemCount)
-      return null;
+    if (userIndex <= widget.positionedIndex || userIndex >= widget.itemCount) return null;
     return widget.separatorBuilder == null
         ? userIndex - widget.positionedIndex - 1
         : (userIndex - widget.positionedIndex) * 2 - 1;
@@ -365,9 +361,7 @@ class _PositionedListState extends State<PositionedList> {
                       : _buildSeparatedListElement(
                           widget.positionedIndex * 2 - (index + 1),
                         ),
-                  childCount: widget.separatorBuilder == null
-                      ? widget.positionedIndex
-                      : widget.positionedIndex * 2,
+                  childCount: widget.separatorBuilder == null ? widget.positionedIndex : widget.positionedIndex * 2,
                   addSemanticIndexes: false,
                   addRepaintBoundaries: widget.addRepaintBoundaries,
                   addAutomaticKeepAlives: widget.addAutomaticKeepAlives,
@@ -393,8 +387,7 @@ class _PositionedListState extends State<PositionedList> {
               ),
             ),
           ),
-          if (widget.positionedIndex >= 0 &&
-              widget.positionedIndex < widget.itemCount - 1)
+          if (widget.positionedIndex >= 0 && widget.positionedIndex < widget.itemCount - 1)
             SliverPadding(
               padding: _trailingSliverPadding,
               sliver: SliverList(
@@ -440,29 +433,22 @@ class _PositionedListState extends State<PositionedList> {
     // null (e.g. headers, loaders, separators that don't need
     // cross-rebuild identity).
     final stableKey = widget.itemKeyBuilder?.call(index);
-    final child = stableKey != null
-        ? KeyedSubtree(key: ValueKey<Object>(stableKey), child: builtChild)
-        : builtChild;
+    final child = stableKey != null ? KeyedSubtree(key: ValueKey<Object>(stableKey), child: builtChild) : builtChild;
 
     return RegisteredElementWidget(
       key: IndexedKey(child.key, index),
-      child: widget.addSemanticIndexes
-          ? IndexedSemantics(index: index, child: child)
-          : child,
+      child: widget.addSemanticIndexes ? IndexedSemantics(index: index, child: child) : child,
     );
   }
 
   EdgeInsets get _resolvedPadding =>
-      widget.padding
-          ?.resolve(Directionality.maybeOf(context) ?? TextDirection.ltr) ??
-      EdgeInsets.zero;
+      widget.padding?.resolve(Directionality.maybeOf(context) ?? TextDirection.ltr) ?? EdgeInsets.zero;
 
   AxisDirection get _axisDirection {
     if (widget.scrollDirection == Axis.vertical) {
       return widget.reverse ? AxisDirection.up : AxisDirection.down;
     }
-    final ltr = (Directionality.maybeOf(context) ?? TextDirection.ltr) ==
-        TextDirection.ltr;
+    final ltr = (Directionality.maybeOf(context) ?? TextDirection.ltr) == TextDirection.ltr;
     if (widget.reverse) {
       return ltr ? AxisDirection.left : AxisDirection.right;
     }
@@ -576,32 +562,23 @@ class _PositionedListState extends State<PositionedList> {
             if (widget.scrollDirection == Axis.vertical) {
               final reveal = viewport!.getOffsetToReveal(box, 0).offset;
               if (!reveal.isFinite) continue;
-              final itemOffset = reveal -
-                  viewport.offset.pixels +
-                  anchor * viewport.size.height;
+              final itemOffset = reveal - viewport.offset.pixels + anchor * viewport.size.height;
               positions.add(
                 ItemPosition(
                   index: key.index,
-                  itemLeadingEdge: itemOffset.round() /
-                      scrollController.position.viewportDimension,
-                  itemTrailingEdge: (itemOffset + box.size.height).round() /
-                      scrollController.position.viewportDimension,
+                  itemLeadingEdge: itemOffset.round() / scrollController.position.viewportDimension,
+                  itemTrailingEdge:
+                      (itemOffset + box.size.height).round() / scrollController.position.viewportDimension,
                 ),
               );
             } else {
-              final itemOffset =
-                  box.localToGlobal(Offset.zero, ancestor: viewport).dx;
+              final itemOffset = box.localToGlobal(Offset.zero, ancestor: viewport).dx;
               if (!itemOffset.isFinite) continue;
-              final viewportDimension =
-                  scrollController.position.viewportDimension;
+              final viewportDimension = scrollController.position.viewportDimension;
               // Branch on the resolved axis direction so RTL is handled.
               final isRight = _axisDirection == AxisDirection.right;
-              final leadingPx = isRight
-                  ? itemOffset
-                  : viewportDimension - (itemOffset + box.size.width);
-              final trailingPx = isRight
-                  ? itemOffset + box.size.width
-                  : viewportDimension - itemOffset;
+              final leadingPx = isRight ? itemOffset : viewportDimension - (itemOffset + box.size.width);
+              final trailingPx = isRight ? itemOffset + box.size.width : viewportDimension - itemOffset;
               positions.add(
                 ItemPosition(
                   index: key.index,

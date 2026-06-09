@@ -8,8 +8,9 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 int getInitialIndex(
   int? initialScrollIndex,
   StreamChannelState channelState,
-  bool Function(Message)? messageFilter,
-) {
+  bool Function(Message)? messageFilter, {
+  String? messageId,
+}) {
   if (initialScrollIndex != null) return initialScrollIndex;
 
   final channel = channelState.channel;
@@ -17,17 +18,17 @@ int getInitialIndex(
   if (currentUser == null) return 0;
 
   final messages = [
-    ...channelState.channel.state!.messages
-        .where(messageFilter ?? defaultMessageFilter(currentUser.id))
+    ...channelState.channel.state!.messages.where(messageFilter ?? defaultMessageFilter(currentUser.id)),
   ].reversed.toList(growable: false);
 
-  // Return the initial message index if available.
-  if (channelState.initialMessageId case final initialMessageId?) {
-    final initialMessageIndex = messages.indexWhere(
-      (it) => it.id == initialMessageId,
+  // Return the target message index if available.
+  final targetMessageId = messageId ?? channelState.initialMessageId;
+  if (targetMessageId != null) {
+    final targetMessageIndex = messages.indexWhere(
+      (it) => it.id == targetMessageId,
     );
 
-    if (initialMessageIndex != -1) return initialMessageIndex + 2;
+    if (targetMessageIndex != -1) return targetMessageIndex + 2;
   }
 
   // Otherwise, return the first unread message index if available.
@@ -98,9 +99,69 @@ bool isElementAtIndexVisible(
   return element.itemTrailingEdge > 0 && element.itemLeadingEdge < 1;
 }
 
-/// Returns true if the message is the initial message.
-bool isInitialMessage(String id, StreamChannelState? channelState) {
-  return channelState!.initialMessageId == id;
+/// Computes the [StreamMessageStackPosition] for [message] based on its
+/// [previous] and [next] neighbors in the message list.
+///
+/// A new group starts when:
+/// - The neighbor is null (first/last message)
+/// - The sender changes
+/// - The timestamps fall in different calendar minutes
+/// - The neighbor is a system, ephemeral, or error message
+StreamMessageStackPosition computeStackPosition({
+  required Message message,
+  Message? previous,
+  Message? next,
+}) {
+  final isFirst = _isGroupBoundary(message, previous);
+  final isLast = _isGroupBoundary(message, next);
+
+  return switch ((isFirst, isLast)) {
+    (true, true) => StreamMessageStackPosition.single,
+    (true, false) => StreamMessageStackPosition.top,
+    (false, false) => StreamMessageStackPosition.middle,
+    (false, true) => StreamMessageStackPosition.bottom,
+  };
+}
+
+bool _isGroupBoundary(Message message, Message? neighbor) {
+  if (neighbor == null) return true;
+  if (message.user?.id != neighbor.user?.id) return true;
+  if (neighbor.isSystem || neighbor.isEphemeral || neighbor.isError) return true;
+
+  final createdAt = message.createdAt.toLocal();
+  final neighborCreatedAt = neighbor.createdAt.toLocal();
+  if (!createdAt.isSame(neighborCreatedAt, unit: .minute)) return true;
+
+  return false;
+}
+
+/// Returns the [StreamMessageContentKind] for [message] based on its text,
+/// attachments, poll, and quoted reply.
+///
+/// The result is [StreamMessageContentKind.singleAttachment] when:
+/// - There is no text and no quoted reply
+/// - There is exactly one attachment or a poll
+///
+/// The result is [StreamMessageContentKind.jumbomoji] when:
+/// - There is no quoted reply, no poll, and no attachments
+/// - The text contains only 1-3 emoji graphemes
+StreamMessageContentKind resolveContentKind(Message message) {
+  final hasText = message.text?.isNotEmpty == true;
+  final hasQuote = message.quotedMessage != null;
+  final hasPoll = message.poll != null;
+  final hasSharedLocation = message.sharedLocation != null;
+  final attachmentCount = message.attachments.length;
+
+  if (!hasText && !hasQuote && (hasPoll || hasSharedLocation || attachmentCount == 1)) {
+    return .singleAttachment;
+  }
+
+  if (!hasQuote && attachmentCount == 0) {
+    final emojiCount = StreamMessageText.emojiCount(message.text);
+    if (emojiCount != null && emojiCount <= 3) return .jumbomoji;
+  }
+
+  return .standard;
 }
 
 /// Stream helpers for observing newly arrived messages on a channel,
@@ -114,8 +175,7 @@ extension NewMessageStreamX on ChannelClientState {
   // ignored.
   bool _isNewTailArrival(Message candidate, Message? previous) {
     if (previous == null) return true;
-    return candidate.id != previous.id &&
-        candidate.createdAt.isAfter(previous.createdAt);
+    return candidate.id != previous.id && candidate.createdAt.isAfter(previous.createdAt);
   }
 
   /// A stream that emits each newly arrived bottom message in
@@ -181,8 +241,7 @@ extension NewMessageStreamX on ChannelClientState {
   /// carries replies for [parentMessageId]; that first snapshot seeds
   /// the baseline without yielding.
   Stream<Message> newThreadMessageStream(String parentMessageId) async* {
-    final threadMessages =
-        threadsStream.mapNotNull((it) => it[parentMessageId]);
+    final threadMessages = threadsStream.mapNotNull((it) => it[parentMessageId]);
 
     var lastSeen = threads[parentMessageId]?.lastOrNull;
     await for (final updated in threadMessages) {

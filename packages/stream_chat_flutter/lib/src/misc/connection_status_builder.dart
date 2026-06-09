@@ -29,13 +29,11 @@ class StreamConnectionStatusBuilder extends StatelessWidget {
   final WidgetBuilder? loadingBuilder;
 
   /// The builder that will be used in case of data
-  final Widget Function(BuildContext context, ConnectionStatus status)
-      statusBuilder;
+  final Widget Function(BuildContext context, ConnectionStatus status) statusBuilder;
 
   @override
   Widget build(BuildContext context) {
-    final stream = connectionStatusStream ??
-        StreamChat.of(context).client.wsConnectionStatusStream;
+    final stream = connectionStatusStream ?? StreamChat.of(context).client.wsConnectionStatusStream;
     final client = StreamChat.of(context).client;
     return BetterStreamBuilder<ConnectionStatus>(
       initialData: client.wsConnectionStatus,

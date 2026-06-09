@@ -28,7 +28,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 ///
 /// - We create a single [ChannelPage] widget under [StreamChat] with three
 /// widgets: [StreamChannelHeader], [StreamMessageListView]
-/// and [StreamMessageInput]
+/// and [StreamMessageComposer]
 ///
 /// If you now run the simulator you will see a single channel UI.
 Future<void> main() async {
@@ -42,10 +42,9 @@ Future<void> main() async {
     '''eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoic3VwZXItYmFuZC05In0.0L6lGoeLwkz0aZRUcpZKsvaXtNEDHBcezVTZ0oPq40A''',
   );
 
-  final channel = client.channel('messaging', id: 'godevs');
+  final channel = client.channel('messaging', id: 'flutterdevs');
 
-  // ignore: unawaited_futures, cascade_invocations
-  channel.watch();
+  await channel.watch();
 
   runApp(
     MyApp(
@@ -62,8 +61,11 @@ class MyApp extends StatelessWidget {
     required this.channel,
   });
 
+  /// Instance of [StreamChatClient] we created earlier. This contains
+  /// information about our application and connection state.
   final StreamChatClient client;
 
+  /// The channel we'd like to observe and participate in.
   final Channel channel;
 
   @override
@@ -83,22 +85,22 @@ class MyApp extends StatelessWidget {
   }
 }
 
+/// Displays the list of messages inside the channel.
 class ChannelPage extends StatelessWidget {
   const ChannelPage({
     super.key,
   });
 
   @override
-  // ignore: prefer_expression_function_bodies
   Widget build(BuildContext context) {
-    return const Scaffold(
-      appBar: StreamChannelHeader(),
+    return Scaffold(
+      appBar: const StreamChannelHeader(),
       body: Column(
         children: <Widget>[
-          Expanded(
+          const Expanded(
             child: StreamMessageListView(),
           ),
-          StreamMessageInput(),
+          StreamMessageComposer(),
         ],
       ),
     );

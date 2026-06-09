@@ -81,6 +81,7 @@ void main() {
       channelRole: 'channel_member',
       localDeletedAt: DateTime.now(),
       remoteDeletedAt: DateTime.now().add(const Duration(seconds: 1)),
+      deletedForMe: false,
       messageText: 'Hello',
       pinned: true,
       pinExpires: DateTime.now().toUtc(),
@@ -114,8 +115,7 @@ void main() {
     expect(message.shadowed, entity.shadowed);
     expect(message.showInChannel, entity.showInChannel);
     for (var i = 0; i < message.mentionedUsers.length; i++) {
-      final entityMentionedUser =
-          User.fromJson(jsonDecode(entity.mentionedUsers[i]));
+      final entityMentionedUser = User.fromJson(jsonDecode(entity.mentionedUsers[i]));
       expect(message.mentionedUsers[i].id, entityMentionedUser.id);
     }
     expect(message.replyCount, entity.replyCount);
@@ -131,6 +131,7 @@ void main() {
     expect(message.user!.id, entity.userId);
     expect(message.localDeletedAt, isSameDateAs(entity.localDeletedAt));
     expect(message.remoteDeletedAt, isSameDateAs(entity.remoteDeletedAt));
+    expect(message.deletedForMe, entity.deletedForMe);
     expect(message.text, entity.messageText);
     expect(message.channelRole, entity.channelRole);
     expect(message.pinned, entity.pinned);
@@ -221,6 +222,7 @@ void main() {
       channelRole: 'channel_member',
       localDeletedAt: DateTime.now(),
       deletedAt: DateTime.now().add(const Duration(seconds: 1)),
+      deletedForMe: true,
       text: 'Hello',
       pinned: true,
       pinExpires: DateTime.now(),
@@ -246,8 +248,7 @@ void main() {
     expect(entity.shadowed, message.shadowed);
     expect(entity.showInChannel, message.showInChannel);
     expect(entity.replyCount, message.replyCount);
-    expect(
-        entity.mentionedUsers, message.mentionedUsers.map(jsonEncode).toList());
+    expect(entity.mentionedUsers, message.mentionedUsers.map(jsonEncode).toList());
     expect(entity.state, jsonEncode(message.state));
     expect(entity.localUpdatedAt, isSameDateAs(message.localUpdatedAt));
     expect(entity.remoteUpdatedAt, isSameDateAs(message.remoteUpdatedAt));
@@ -259,6 +260,7 @@ void main() {
     expect(entity.userId, message.user!.id);
     expect(entity.localDeletedAt, isSameDateAs(message.localDeletedAt));
     expect(entity.remoteDeletedAt, isSameDateAs(message.remoteDeletedAt));
+    expect(entity.deletedForMe, message.deletedForMe);
     expect(entity.messageText, message.text);
     expect(entity.channelRole, message.channelRole);
     expect(entity.pinned, message.pinned);

@@ -28,12 +28,12 @@ class ChannelConfig {
     this.userMessageReminders = false,
     this.markMessagesPending = false,
     this.deliveryEvents = false,
-  })  : createdAt = createdAt ?? DateTime.now(),
-        updatedAt = updatedAt ?? DateTime.now();
+    this.sharedLocations = false,
+  }) : createdAt = createdAt ?? DateTime.now(),
+       updatedAt = updatedAt ?? DateTime.now();
 
   /// Create a new instance from a json
-  factory ChannelConfig.fromJson(Map<String, dynamic> json) =>
-      _$ChannelConfigFromJson(json);
+  factory ChannelConfig.fromJson(Map<String, dynamic> json) => _$ChannelConfigFromJson(json);
 
   /// Moderation configuration
   final String automod;
@@ -98,6 +98,9 @@ class ChannelConfig {
 
   /// Whether delivery events are enabled for this channel.
   final bool deliveryEvents;
+
+  /// True if shared locations are enabled for this channel.
+  final bool sharedLocations;
 
   /// Serialize to json
   Map<String, dynamic> toJson() => _$ChannelConfigToJson(this);

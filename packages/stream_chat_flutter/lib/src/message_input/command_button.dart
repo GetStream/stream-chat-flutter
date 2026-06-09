@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/icons/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/message_input/stream_message_input_icon_button.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 /// {@template commandButton}
 /// The button that allows a user to use commands in a chat.
@@ -53,7 +53,7 @@ class CommandButton extends StatelessWidget {
       color: color,
       iconSize: size,
       onPressed: onPressed,
-      icon: icon ?? const StreamSvgIcon(icon: StreamSvgIcons.lightning),
+      icon: icon ?? Icon(context.streamIcons.bolt),
     );
   }
 }

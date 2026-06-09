@@ -1,10 +1,30 @@
-## Upcoming Changes
+## Upcoming changes
+
+🚀 Performance
+
+- Read only the thread replies matching the `PaginationParams` from DB when calling `MessageDao.getThreadMessagesByParentId` instead of reading all replies for the thread and applying pagination in memory.
+
+🐞 Fixed
+
+- `MessageDao.getThreadMessagesByParentId` now honours all `PaginationParams` cursor variants (`lessThan`/`lessThanOrEqual`/`greaterThan`/`greaterThanOrEqual`) and returns the page of replies closest to the cursor.
+
+## 10.0.1
+
+🔄 Changed
+
+- Raised minimum versions of bundled dependencies (`drift`, `path`, `path_provider`) to current resolved versions.
+- Raised minimum Flutter to `>=3.41.0` and Dart SDK to `^3.11.0`.
+
+🐞 Fixed
+
+- Fixed channel list re-sorting on refresh or when returning from background.
+
+## 9.25.0
 
 🚀 Performance
 
 - Reduce the number of DB reads in the `ChatPersistenceClient.getChannelStates` method.
 - Read only the messages matching the `PaginationParams` from DB when calling `MessageDao.getMessagesByCid` instead of reading all messages for the channel and applying pagination in memory.
-- Read only the thread replies matching the `PaginationParams` from DB when calling `MessageDao.getThreadMessagesByParentId` instead of reading all replies for the thread and applying pagination in memory.
 - Read only the reactions matching the `userId` from DB when calling `ReactionDao.getReactionsByUserId` instead of reading all reactions for the message and filtering in memory.
 - Read only the reactions matching the `userId` from DB when calling `PinnedMessageReactionDao.getReactionsByUserId` instead of reading all reactions for the message and filtering in memory.
 - Improve the message read times from DB.
@@ -14,7 +34,6 @@
 - `MessageDao.getMessagesByCid` now honours `PaginationParams.lessThanOrEqual` and `PaginationParams.greaterThanOrEqual` (inclusive of the cursor message), in addition to the existing strict `lessThan`/`greaterThan`.
 - `MessageDao.getMessagesByCid` now treats `PaginationParams.greaterThan` as strict (exclusive of the cursor), matching the `PaginationParams` contract and the existing `lessThan` behaviour.
 - `MessageDao.getMessagesByCid` with a forward cursor (`greaterThan`/`greaterThanOrEqual`) and a `limit` now returns the messages immediately AFTER the pivot, instead of the channel tail — mirroring how `lessThan` already returned the messages immediately before the pivot.
-- `MessageDao.getThreadMessagesByParentId` now honours all `PaginationParams` cursor variants (`lessThan`/`lessThanOrEqual`/`greaterThan`/`greaterThanOrEqual`) and returns the page of replies closest to the cursor.
 - Fixed missing persistence of the `team` field on channel entities.
 
 🔄 Changed
@@ -25,9 +44,23 @@
 
 - Updated `stream_chat` dependency to [`9.24.0`](https://pub.dev/packages/stream_chat/changelog).
 
+## 10.0.0-beta.13
+
+🛑️ Breaking
+- SDK Redesign Changes. For more details, please refer to the [migration guide](https://github.com/GetStream/stream-chat-flutter/blob/210ff93f955be3f85c62e860309bd9aa240a5446/migrations).
+  The SDK redesign introduces a fresher default UI, but also better APIs for customization of the components.
+
+## 10.0.0-beta.12
+
+- Included the changes from version [`9.23.0`](https://pub.dev/packages/stream_chat_persistence/changelog).
+
 ## 9.23.0
 
 - Updated `stream_chat` dependency to [`9.23.0`](https://pub.dev/packages/stream_chat/changelog).
+
+## 10.0.0-beta.11
+
+- Included the changes from version [`9.22.0`](https://pub.dev/packages/stream_chat_persistence/changelog).
 
 ## 9.22.0
 
@@ -35,9 +68,17 @@
 
 - Added support for `ChannelModel.filterTags` field.
 
+## 10.0.0-beta.10
+
+- Included the changes from version [`9.21.0`](https://pub.dev/packages/stream_chat_persistence/changelog).
+
 ## 9.21.0
 
 - Updated `stream_chat` dependency to [`9.21.0`](https://pub.dev/packages/stream_chat/changelog).
+
+## 10.0.0-beta.9
+
+- Included the changes from version [`9.20.0`](https://pub.dev/packages/stream_chat_persistence/changelog).
 
 ## 9.20.0
 
@@ -46,9 +87,27 @@
 - Added support for `Read.lastDeliveredAt` and `Read.lastDeliveredMessageId` fields to track message
   delivery receipts.
 
+## 10.0.0-beta.8
+
+✅ Added
+
+- Added a new `StreamChatPersistenceClient.deleteMessagesFromUser()` method to delete
+  all messages from a specific user across all channels.
+- Added a new `messageLimit` parameter to the `getChannelStates` method
+  to limit the number of messages fetched per channel.
+
+- Included the changes from version [`9.19.0`](https://pub.dev/packages/stream_chat_persistence/changelog).
+
 ## 9.19.0
 
 - Updated `stream_chat` dependency to [`9.19.0`](https://pub.dev/packages/stream_chat/changelog).
+
+## 10.0.0-beta.7
+
+- Added support for `Messages.deletedForMe`, `PinnedMessages.deletedForMe`, and
+  `Members.deletedMessages` fields.
+
+- Included the changes from version [`9.18.0`](https://pub.dev/packages/stream_chat_persistence/changelog).
 
 ## 9.18.0
 
@@ -58,13 +117,28 @@
 - Added support for `client.flush()` method to clear database.
 - Added support for `Channel.messageCount` field.
 
+## 10.0.0-beta.6
+
+- Included the changes from version [`9.17.0`](https://pub.dev/packages/stream_chat_persistence/changelog).
+
 ## 9.17.0
 
 - Updated `stream_chat` dependency to [`9.17.0`](https://pub.dev/packages/stream_chat/changelog).
 
+## 10.0.0-beta.5
+
+- Included the changes from version [`9.16.0`](https://pub.dev/packages/stream_chat_persistence/changelog).
+
 ## 9.16.0
 
 - Updated `stream_chat` dependency to [`9.16.0`](https://pub.dev/packages/stream_chat/changelog).
+
+## 10.0.0-beta.4
+
+- Added support for `Location` entity in the database.
+- Added support for `emojiCode` and `updatedAt` fields in `Reaction` entity.
+
+- Included the changes from version [`9.15.0`](https://pub.dev/packages/stream_chat_persistence/changelog).
 
 ## 9.15.0
 
@@ -77,13 +151,25 @@
 
 - Added support for `User.avgResponseTime` field.
 
+## 10.0.0-beta.3
+
+- Included the changes from version [`9.14.0`](https://pub.dev/packages/stream_chat_persistence/changelog).
+
 ## 9.14.0
 
 - Updated `stream_chat` dependency to [`9.14.0`](https://pub.dev/packages/stream_chat/changelog).
 
+## 10.0.0-beta.2
+
+- Included the changes from version [`9.13.0`](https://pub.dev/packages/stream_chat_persistence/changelog).
+
 ## 9.13.0
 
 - Updated `stream_chat` dependency to [`9.13.0`](https://pub.dev/packages/stream_chat/changelog).
+
+## 10.0.0-beta.1
+
+- Updated `stream_chat` dependency to [`10.0.0-beta.1`](https://pub.dev/packages/stream_chat/changelog).
 
 ## 9.12.0
 

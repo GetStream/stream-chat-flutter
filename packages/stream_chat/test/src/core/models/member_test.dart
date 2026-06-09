@@ -12,6 +12,7 @@ void main() {
       expect(member.channelRole, 'channel_member');
       expect(member.createdAt, DateTime.parse('2020-01-28T22:17:30.95443Z'));
       expect(member.updatedAt, DateTime.parse('2020-01-28T22:17:30.95443Z'));
+      expect(member.deletedMessages, ['msg-1', 'msg-2', 'msg-3']);
       expect(member.extraData['some_custom_field'], 'with_custom_data');
     });
 
@@ -104,10 +105,8 @@ void main() {
         final field1 = recentMember.getComparableField(MemberSortKey.createdAt);
         final field2 = olderMember.getComparableField(MemberSortKey.createdAt);
 
-        expect(field1!.compareTo(field2!),
-            greaterThan(0)); // More recent > Less recent
-        expect(
-            field2.compareTo(field1), lessThan(0)); // Less recent < More recent
+        expect(field1!.compareTo(field2!), greaterThan(0)); // More recent > Less recent
+        expect(field2.compareTo(field1), lessThan(0)); // Less recent < More recent
       });
 
       test('should compare two members correctly using userId', () {
@@ -158,10 +157,8 @@ void main() {
         final field1 = owner.getComparableField(MemberSortKey.channelRole);
         final field2 = moderator.getComparableField(MemberSortKey.channelRole);
 
-        expect(field1!.compareTo(field2!),
-            greaterThan(0)); // 'owner' > 'moderator' alphabetically
-        expect(field2.compareTo(field1),
-            lessThan(0)); // 'moderator' < 'owner' alphabetically
+        expect(field1!.compareTo(field2!), greaterThan(0)); // 'owner' > 'moderator' alphabetically
+        expect(field2.compareTo(field1), lessThan(0)); // 'moderator' < 'owner' alphabetically
       });
 
       test('should compare two members correctly using extraData', () {

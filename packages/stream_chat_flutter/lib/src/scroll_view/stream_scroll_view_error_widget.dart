@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// A widget that is displayed when a [StreamScrollView] encounters an error
@@ -48,45 +47,49 @@ class StreamScrollViewErrorWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final chatThemeData = StreamChatTheme.of(context);
+    final icons = context.streamIcons;
+    final spacing = context.streamSpacing;
 
-    final errorIcon = AnimatedSwitcher(
-      duration: kThemeChangeDuration,
-      child: this.errorIcon ??
-          Icon(
-            Icons.error_outline_rounded,
-            size: 148,
-            color: chatThemeData.colorTheme.disabled,
-          ),
+    final textTheme = context.streamTextTheme;
+    final colorScheme = context.streamColorScheme;
+
+    final errorIcon = IconTheme.merge(
+      data: IconThemeData(size: 32, color: colorScheme.textTertiary),
+      child: this.errorIcon ?? Icon(icons.exclamationCircle),
     );
 
-    final titleText = AnimatedDefaultTextStyle(
-      style: errorTitleStyle ?? chatThemeData.textTheme.headline,
+    final effectiveStyle = errorTitleStyle ?? textTheme.captionDefault.copyWith(color: colorScheme.textSecondary);
+    final emptyTitleText = AnimatedDefaultTextStyle(
+      style: effectiveStyle,
       duration: kThemeChangeDuration,
-      child: errorTitle ?? const Empty(),
+      child: errorTitle ?? Text(context.translations.genericErrorText),
     );
 
-    final retryButtonText = AnimatedDefaultTextStyle(
-      style: errorTitleStyle ??
-          chatThemeData.textTheme.headline.copyWith(
-            color: Colors.white,
-          ),
-      duration: kThemeChangeDuration,
-      child: this.retryButtonText ?? Text(context.translations.retryLabel),
+    final retryButton = StreamButton(
+      size: .medium,
+      type: .outline,
+      style: .secondary,
+      onPressed: onRetryPressed,
+      child: Text(context.translations.retryLabel),
     );
 
-    return Column(
-      mainAxisSize: mainAxisSize,
-      mainAxisAlignment: mainAxisAlignment,
-      crossAxisAlignment: crossAxisAlignment,
-      children: [
-        errorIcon,
-        titleText,
-        ElevatedButton(
-          onPressed: onRetryPressed,
-          child: retryButtonText,
-        ),
-      ],
+    return Padding(
+      padding: .symmetric(
+        horizontal: spacing.md,
+        vertical: spacing.xxxl,
+      ),
+      child: Column(
+        mainAxisSize: mainAxisSize,
+        mainAxisAlignment: mainAxisAlignment,
+        crossAxisAlignment: crossAxisAlignment,
+        children: [
+          errorIcon,
+          SizedBox(height: spacing.xs),
+          emptyTitleText,
+          SizedBox(height: spacing.md),
+          retryButton,
+        ],
+      ),
     );
   }
 }

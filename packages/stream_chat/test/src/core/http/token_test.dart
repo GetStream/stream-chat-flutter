@@ -43,8 +43,7 @@ void main() {
     '`.guest` should create a guest-token with provided user and provider',
     () async {
       final user = User(id: 'test-user-id');
-      Future<String> provider(User user) async =>
-          Token.development(user.id).rawValue;
+      Future<String> provider(User user) async => Token.development(user.id).rawValue;
 
       final token = await Token.guest(user, provider);
       expect(token, isNotNull);

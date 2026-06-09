@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:stream_chat_flutter/src/ai_assistant/stream_typewriter_builder.dart';
-import 'package:stream_chat_flutter/src/misc/markdown_message.dart';
 import 'package:stream_chat_flutter/src/utils/device_segmentation.dart';
 import 'package:stream_chat_flutter/src/utils/helpers.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart' as core;
 
 /// {@template streamingMessageView}
 /// A widget that displays a message in a streaming fashion. The message is
@@ -76,14 +76,14 @@ class _StreamingMessageViewState extends State<StreamingMessageView> {
 
   @override
   Widget build(BuildContext context) {
-    return StreamMarkdownMessage(
-      data: _displayText,
+    return core.StreamMessageText(
+      _displayText,
       selectable: isDesktopDeviceOrWeb,
       onTapLink: switch (widget.onTapLink) {
         final onTapLink? => onTapLink,
         _ => (String link, String? href, String title) {
-            if (href != null) launchURL(context, href);
-          },
+          if (href != null) launchURL(context, href);
+        },
       },
     );
   }

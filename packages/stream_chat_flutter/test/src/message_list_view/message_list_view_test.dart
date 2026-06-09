@@ -18,34 +18,24 @@ void main() {
     clientState = MockClientState();
     when(() => client.state).thenAnswer((_) => clientState);
     when(() => clientState.currentUser).thenReturn(OwnUser(id: 'testid'));
-    when(() => clientState.currentUserStream)
-        .thenAnswer((_) => Stream.value(OwnUser(id: 'testid')));
+    when(() => clientState.currentUserStream).thenAnswer((_) => Stream.value(OwnUser(id: 'testid')));
     channel = MockChannel();
-    when(() => channel.on(any(), any(), any(), any()))
-        .thenAnswer((_) => const Stream.empty());
     channelClientState = MockChannelState();
     when(() => channel.client).thenReturn(client);
     when(() => channel.state).thenReturn(channelClientState);
-    when(() => channelClientState.threadsStream)
-        .thenAnswer((_) => const Stream.empty());
-    when(() => channelClientState.messagesStream)
-        .thenAnswer((_) => const Stream.empty());
+    when(() => channelClientState.threadsStream).thenAnswer((_) => const Stream.empty());
+    when(() => channelClientState.messagesStream).thenAnswer((_) => const Stream.empty());
     when(() => channelClientState.messages).thenReturn([]);
     when(() => channelClientState.isUpToDate).thenReturn(true);
-    when(() => channelClientState.isUpToDateStream)
-        .thenAnswer((_) => Stream.value(true));
-    when(() => channelClientState.unreadCountStream)
-        .thenAnswer((_) => Stream.value(0));
+    when(() => channelClientState.isUpToDateStream).thenAnswer((_) => Stream.value(true));
+    when(() => channelClientState.unreadCountStream).thenAnswer((_) => Stream.value(0));
     when(() => channelClientState.unreadCount).thenReturn(0);
-    when(() => channelClientState.readStream)
-        .thenAnswer((_) => const Stream.empty());
+    when(() => channelClientState.readStream).thenAnswer((_) => const Stream.empty());
     when(() => channelClientState.read).thenReturn([]);
-    when(() => channelClientState.membersStream)
-        .thenAnswer((_) => const Stream.empty());
+    when(() => channelClientState.membersStream).thenAnswer((_) => const Stream.empty());
     when(() => channelClientState.members).thenReturn([]);
     when(() => channelClientState.currentUserRead).thenReturn(null);
-    when(() => channelClientState.currentUserReadStream)
-        .thenAnswer((_) => const Stream.empty());
+    when(() => channelClientState.currentUserReadStream).thenAnswer((_) => const Stream.empty());
   });
 
   // https://github.com/GetStream/stream-chat-flutter/issues/674
@@ -59,7 +49,9 @@ void main() {
           child: StreamChannel(
             channel: channel,
             child: StreamMessageListView(
-              emptyBuilder: (_) => Container(key: emptyWidgetKey),
+              builders: StreamMessageListViewBuilders(
+                empty: (_) => Container(key: emptyWidgetKey),
+              ),
             ),
           ),
         ),
@@ -71,8 +63,7 @@ void main() {
     expect(find.byKey(emptyWidgetKey), findsOneWidget);
   });
 
-  testWidgets('renders a non empty message list view with custom background',
-      (tester) async {
+  testWidgets('renders a non empty message list view with custom background', (tester) async {
     final message = Message(
       id: 'message1',
       text: 'Hello world!',
@@ -95,7 +86,7 @@ void main() {
             bundle: rootBundle,
             child: StreamChat(
               client: client,
-              streamChatThemeData: StreamChatThemeData.light().copyWith(
+              themeData: StreamChatThemeData(
                 messageListViewTheme: const StreamMessageListViewThemeData(
                   backgroundColor: Colors.grey,
                   backgroundImage: DecorationImage(
@@ -136,8 +127,7 @@ void main() {
     );
   });
 
-  testWidgets('renders a non empty message list view with unread messages',
-      (tester) async {
+  testWidgets('renders a non empty message list view with unread messages', (tester) async {
     final user = OwnUser(id: 'testid');
     final message = Message(
       id: 'message1',
@@ -148,8 +138,7 @@ void main() {
       ),
     );
 
-    when(() => channelClientState.read)
-        .thenReturn([Read(lastRead: DateTime.now(), user: user)]);
+    when(() => channelClientState.read).thenReturn([Read(lastRead: DateTime.now(), user: user)]);
 
     when(() => channelClientState.messagesStream).thenAnswer(
       (_) => Stream.value([message]),
@@ -164,7 +153,7 @@ void main() {
             bundle: rootBundle,
             child: StreamChat(
               client: client,
-              streamChatThemeData: StreamChatThemeData.light().copyWith(
+              themeData: StreamChatThemeData(
                 messageListViewTheme: const StreamMessageListViewThemeData(
                   backgroundColor: Colors.grey,
                   backgroundImage: DecorationImage(
@@ -211,7 +200,7 @@ void main() {
             bundle: rootBundle,
             child: StreamChat(
               client: client,
-              streamChatThemeData: StreamChatThemeData.light().copyWith(
+              themeData: StreamChatThemeData(
                 messageListViewTheme: const StreamMessageListViewThemeData(
                   backgroundColor: Colors.grey,
                   backgroundImage: DecorationImage(
@@ -237,11 +226,11 @@ void main() {
       await tester.pumpAndSettle();
     });
 
-    expect(find.byType(FloatingActionButton), findsOneWidget);
+    expect(find.byType(StreamButton), findsOneWidget);
 
-    await tester.tap(find.byType(FloatingActionButton));
+    await tester.tap(find.byType(StreamButton));
     await tester.pumpAndSettle();
 
-    expect(find.byType(FloatingActionButton), findsNothing);
+    expect(find.byType(StreamButton), findsNothing);
   });
 }

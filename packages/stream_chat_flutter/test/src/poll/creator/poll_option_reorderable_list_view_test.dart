@@ -5,8 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_chat_flutter/src/poll/creator/poll_option_reorderable_list_view.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-
-import '../../utils/finders.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 void main() {
   for (final brightness in Brightness.values) {
@@ -53,15 +52,17 @@ void main() {
     testWidgets('should enforce minimum options requirement', (tester) async {
       var optionsChanged = <PollOptionItem>[];
 
-      await tester.pumpWidget(_wrapWithMaterialApp(
-        PollOptionReorderableListView(
-          optionsRange: (min: 3, max: null),
-          initialOptions: [
-            PollOptionItem(text: 'Option 1'),
-          ],
-          onOptionsChanged: (options) => optionsChanged = options,
+      await tester.pumpWidget(
+        _wrapWithMaterialApp(
+          PollOptionReorderableListView(
+            optionsRange: (min: 3, max: null),
+            initialOptions: [
+              PollOptionItem(text: 'Option 1'),
+            ],
+            onOptionsChanged: (options) => optionsChanged = options,
+          ),
         ),
-      ));
+      );
 
       // Should automatically add options to meet minimum requirement
       final textFields = find.byType(TextField);
@@ -73,44 +74,42 @@ void main() {
     });
 
     testWidgets('should respect maximum options limit', (tester) async {
-      await tester.pumpWidget(_wrapWithMaterialApp(
-        PollOptionReorderableListView(
-          optionsRange: (min: null, max: 3),
-          initialOptions: [
-            PollOptionItem(text: 'Option 1'),
-            PollOptionItem(text: 'Option 2'),
-            PollOptionItem(text: 'Option 3'),
-          ],
+      await tester.pumpWidget(
+        _wrapWithMaterialApp(
+          PollOptionReorderableListView(
+            optionsRange: (min: null, max: 3),
+            initialOptions: [
+              PollOptionItem(text: 'Option 1'),
+              PollOptionItem(text: 'Option 2'),
+              PollOptionItem(text: 'Option 3'),
+            ],
+          ),
         ),
-      ));
+      );
 
-      // Find the add button
-      final addButton = find.byType(FilledButton);
-      expect(addButton, findsOneWidget);
-
-      // The button should be disabled since we're at max options
-      final button = tester.widget<FilledButton>(addButton);
-      expect(button.onPressed, isNull);
+      // The add button should be hidden since we're at max options.
+      expect(find.addOptionButton(), findsNothing);
     });
 
     testWidgets('should respect both min and max options', (tester) async {
-      await tester.pumpWidget(_wrapWithMaterialApp(
-        PollOptionReorderableListView(
-          optionsRange: (min: 2, max: 4),
-          initialOptions: [
-            PollOptionItem(text: 'Option 1'),
-            PollOptionItem(text: 'Option 2'),
-          ],
+      await tester.pumpWidget(
+        _wrapWithMaterialApp(
+          PollOptionReorderableListView(
+            optionsRange: (min: 2, max: 4),
+            initialOptions: [
+              PollOptionItem(text: 'Option 1'),
+              PollOptionItem(text: 'Option 2'),
+            ],
+          ),
         ),
-      ));
+      );
 
       // Should have 2 options initially (meeting minimum)
       final textFields = find.byType(TextField);
       expect(textFields, findsNWidgets(2));
 
       // Add two more options to reach maximum
-      final addButton = find.byType(FilledButton);
-      await tester.tap(addButton);
+      await tester.tap(find.addOptionButton());
       await tester.pumpAndSettle();
 
       // Fill the newly added option so we can add another
@@ -119,52 +118,54 @@ void main() {
       await tester.pumpAndSettle();
 
       // Add one more option
-      await tester.tap(addButton);
+      await tester.tap(find.addOptionButton());
       await tester.pumpAndSettle();
 
       // Should now have 4 options (max reached)
       expect(find.byType(TextField), findsNWidgets(4));
 
-      // Add button should now be disabled since we reached max
-      final button = tester.widget<FilledButton>(addButton);
-      expect(button.onPressed, isNull);
+      // Add button should now be hidden since we reached max.
+      expect(find.addOptionButton(), findsNothing);
     });
 
     testWidgets(
       'should work with unlimited options when max is null',
       (tester) async {
-        await tester.pumpWidget(_wrapWithMaterialApp(
-          PollOptionReorderableListView(
-            optionsRange: (min: 2, max: null),
-            initialOptions: [
-              PollOptionItem(text: 'Option 1'),
-              PollOptionItem(text: 'Option 2'),
-            ],
+        await tester.pumpWidget(
+          _wrapWithMaterialApp(
+            PollOptionReorderableListView(
+              optionsRange: (min: 2, max: null),
+              initialOptions: [
+                PollOptionItem(text: 'Option 1'),
+                PollOptionItem(text: 'Option 2'),
+              ],
+            ),
           ),
-        ));
+        );
 
         // Add button should be enabled for unlimited options
-        final addButton = find.byType(FilledButton);
-        final button = tester.widget<FilledButton>(addButton);
-        expect(button.onPressed, isNotNull);
+        final addButton = find.addOptionButton();
+        final button = tester.widget<StreamButton>(addButton);
+        expect(button.props.onPressed, isNotNull);
       },
     );
   });
 
   group('Auto-Focus Functionality', () {
     testWidgets('should auto-focus on newly added option', (tester) async {
-      await tester.pumpWidget(_wrapWithMaterialApp(
-        PollOptionReorderableListView(
-          optionsRange: (min: 1, max: null),
-          initialOptions: [
-            PollOptionItem(text: 'Option 1'),
-          ],
+      await tester.pumpWidget(
+        _wrapWithMaterialApp(
+          PollOptionReorderableListView(
+            optionsRange: (min: 1, max: null),
+            initialOptions: [
+              PollOptionItem(text: 'Option 1'),
+            ],
+          ),
         ),
-      ));
+      );
 
       // Find the add button and tap it
-      final addButton = find.byType(FilledButton);
-      await tester.tap(addButton);
+      await tester.tap(find.addOptionButton());
       await tester.pumpAndSettle();
 
       // Verify that there are now 2 text fields
@@ -180,79 +181,77 @@ void main() {
 
   group('Empty Options Prevention', () {
     testWidgets(
-      'should disable add button when empty option exists',
+      'should hide add button when empty option exists',
       (tester) async {
-        await tester.pumpWidget(_wrapWithMaterialApp(
-          PollOptionReorderableListView(
-            optionsRange: (min: null, max: 5),
-            initialOptions: [
-              PollOptionItem(text: 'Option 1'),
-              PollOptionItem(text: 'Option 2'),
-              PollOptionItem(text: ''), // Empty option
-            ],
+        await tester.pumpWidget(
+          _wrapWithMaterialApp(
+            PollOptionReorderableListView(
+              optionsRange: (min: null, max: 5),
+              initialOptions: [
+                PollOptionItem(text: 'Option 1'),
+                PollOptionItem(text: 'Option 2'),
+                PollOptionItem(text: ''), // Empty option
+              ],
+            ),
           ),
-        ));
+        );
 
-        // Find the add button
-        final addButton = find.byType(FilledButton);
-        expect(addButton, findsOneWidget);
-
-        // The button should be disabled since there's already an empty option
-        final button = tester.widget<FilledButton>(addButton);
-        expect(button.onPressed, isNull);
+        // The button should be hidden since there's already an empty option.
+        expect(find.addOptionButton(), findsNothing);
       },
     );
 
     testWidgets(
-      'should enable add button when no empty options exist',
+      'should show add button when no empty options exist',
       (tester) async {
-        await tester.pumpWidget(_wrapWithMaterialApp(
-          PollOptionReorderableListView(
-            optionsRange: (min: null, max: 5),
-            initialOptions: [
-              PollOptionItem(text: 'Option 1'),
-              PollOptionItem(text: 'Option 2'),
-            ],
+        await tester.pumpWidget(
+          _wrapWithMaterialApp(
+            PollOptionReorderableListView(
+              optionsRange: (min: null, max: 5),
+              initialOptions: [
+                PollOptionItem(text: 'Option 1'),
+                PollOptionItem(text: 'Option 2'),
+              ],
+            ),
           ),
-        ));
+        );
 
-        // Find the add button
-        final addButton = find.byType(FilledButton);
+        // The button should be visible since no empty options exist.
+        final addButton = find.addOptionButton();
         expect(addButton, findsOneWidget);
-
-        // The button should be enabled since no empty options exist
-        final button = tester.widget<FilledButton>(addButton);
-        expect(button.onPressed, isNotNull);
+        final button = tester.widget<StreamButton>(addButton);
+        expect(button.props.onPressed, isNotNull);
       },
     );
 
     testWidgets(
-      'should re-enable add button after filling empty option',
+      'should reveal add button after filling empty option',
       (tester) async {
-        await tester.pumpWidget(_wrapWithMaterialApp(
-          PollOptionReorderableListView(
-            optionsRange: (min: null, max: 5),
-            initialOptions: [
-              PollOptionItem(text: 'Option 1'),
-              PollOptionItem(text: ''), // Empty option
-            ],
+        await tester.pumpWidget(
+          _wrapWithMaterialApp(
+            PollOptionReorderableListView(
+              optionsRange: (min: null, max: 5),
+              initialOptions: [
+                PollOptionItem(text: 'Option 1'),
+                PollOptionItem(text: ''), // Empty option
+              ],
+            ),
           ),
-        ));
+        );
 
-        // Initially, add button should be disabled
-        var addButton = find.byType(FilledButton);
-        var button = tester.widget<FilledButton>(addButton);
-        expect(button.onPressed, isNull);
+        // Initially, the add button should be hidden.
+        expect(find.addOptionButton(), findsNothing);
 
-        // Fill the empty option
+        // Fill the empty option.
         final textFields = find.byType(TextField);
         await tester.enterText(textFields.last, 'Option 2');
         await tester.pumpAndSettle();
 
-        // Now add button should be enabled
-        addButton = find.byType(FilledButton);
-        button = tester.widget<FilledButton>(addButton);
-        expect(button.onPressed, isNotNull);
+        // The add button should now be visible and enabled.
+        final addButton = find.addOptionButton();
+        expect(addButton, findsOneWidget);
+        final button = tester.widget<StreamButton>(addButton);
+        expect(button.props.onPressed, isNotNull);
       },
     );
   });
@@ -263,20 +262,21 @@ void main() {
       (tester) async {
         var optionsChanged = <PollOptionItem>[];
 
-        await tester.pumpWidget(_wrapWithMaterialApp(
-          PollOptionReorderableListView(
-            optionsRange: (min: 2, max: 5),
-            initialOptions: [
-              PollOptionItem(text: 'Option 1'),
-              PollOptionItem(text: 'Option 2'),
-            ],
-            onOptionsChanged: (options) => optionsChanged = options,
+        await tester.pumpWidget(
+          _wrapWithMaterialApp(
+            PollOptionReorderableListView(
+              optionsRange: (min: 2, max: 5),
+              initialOptions: [
+                PollOptionItem(text: 'Option 1'),
+                PollOptionItem(text: 'Option 2'),
+              ],
+              onOptionsChanged: (options) => optionsChanged = options,
+            ),
           ),
-        ));
+        );
 
         // Find the add button and tap it
-        final addButton = find.byType(FilledButton);
-        await tester.tap(addButton);
+        await tester.tap(find.addOptionButton());
         await tester.pumpAndSettle();
 
         // Verify a new option was added
@@ -291,13 +291,15 @@ void main() {
       (tester) async {
         var optionsChanged = <PollOptionItem>[];
 
-        await tester.pumpWidget(_wrapWithMaterialApp(
-          PollOptionReorderableListView(
-            optionsRange: (min: 2, max: null),
-            initialOptions: const [], // No initial options
-            onOptionsChanged: (options) => optionsChanged = options,
+        await tester.pumpWidget(
+          _wrapWithMaterialApp(
+            PollOptionReorderableListView(
+              optionsRange: (min: 2, max: null),
+              initialOptions: const [], // No initial options
+              onOptionsChanged: (options) => optionsChanged = options,
+            ),
           ),
-        ));
+        );
 
         // Should auto-add options to meet minimum requirement
         final textFields = find.byType(TextField);
@@ -307,27 +309,31 @@ void main() {
     );
 
     testWidgets('should handle updating initial options', (tester) async {
-      await tester.pumpWidget(_wrapWithMaterialApp(
-        PollOptionReorderableListView(
-          initialOptions: [
-            PollOptionItem(text: 'Option 1'),
-          ],
+      await tester.pumpWidget(
+        _wrapWithMaterialApp(
+          PollOptionReorderableListView(
+            initialOptions: [
+              PollOptionItem(text: 'Option 1'),
+            ],
+          ),
         ),
-      ));
+      );
 
       // Initially should have 1 option
       expect(find.byType(TextField), findsNWidgets(1));
 
       // Update with new options
-      await tester.pumpWidget(_wrapWithMaterialApp(
-        PollOptionReorderableListView(
-          initialOptions: [
-            PollOptionItem(text: 'Option 1'),
-            PollOptionItem(text: 'Option 2'),
-            PollOptionItem(text: 'Option 3'),
-          ],
+      await tester.pumpWidget(
+        _wrapWithMaterialApp(
+          PollOptionReorderableListView(
+            initialOptions: [
+              PollOptionItem(text: 'Option 1'),
+              PollOptionItem(text: 'Option 2'),
+              PollOptionItem(text: 'Option 3'),
+            ],
+          ),
         ),
-      ));
+      );
 
       // Should now have 3 options
       expect(find.byType(TextField), findsNWidgets(3));
@@ -336,19 +342,21 @@ void main() {
 
   group('Delete Option Functionality', () {
     testWidgets('should show delete confirmation dialog', (tester) async {
-      await tester.pumpWidget(_wrapWithMaterialApp(
-        PollOptionReorderableListView(
-          optionsRange: (min: 2, max: null),
-          initialOptions: [
-            PollOptionItem(text: 'Option 1'),
-            PollOptionItem(text: 'Option 2'),
-            PollOptionItem(text: 'Option 3'),
-          ],
+      await tester.pumpWidget(
+        _wrapWithMaterialApp(
+          PollOptionReorderableListView(
+            optionsRange: (min: 2, max: null),
+            initialOptions: [
+              PollOptionItem(text: 'Option 1'),
+              PollOptionItem(text: 'Option 2'),
+              PollOptionItem(text: 'Option 3'),
+            ],
+          ),
         ),
-      ));
+      );
 
       // Find the delete buttons
-      final deleteButtons = find.bySvgIcon(StreamSvgIcons.delete);
+      final deleteButtons = find.byIcon(StreamIconData.minusCircle);
       expect(deleteButtons, findsNWidgets(3));
 
       // Tap the first delete button
@@ -361,35 +369,37 @@ void main() {
         find.text('Are you sure you want to delete this option?'),
         findsOneWidget,
       );
-      expect(find.text('CANCEL'), findsOneWidget);
-      expect(find.text('DELETE'), findsOneWidget);
+      expect(find.text('Cancel'), findsOneWidget);
+      expect(find.text('Delete'), findsOneWidget);
     });
 
     testWidgets('should delete option when confirmed', (tester) async {
       var optionsChanged = <PollOptionItem>[];
 
-      await tester.pumpWidget(_wrapWithMaterialApp(
-        PollOptionReorderableListView(
-          optionsRange: (min: 2, max: null),
-          initialOptions: [
-            PollOptionItem(text: 'Option 1'),
-            PollOptionItem(text: 'Option 2'),
-            PollOptionItem(text: 'Option 3'),
-          ],
-          onOptionsChanged: (options) => optionsChanged = options,
+      await tester.pumpWidget(
+        _wrapWithMaterialApp(
+          PollOptionReorderableListView(
+            optionsRange: (min: 2, max: null),
+            initialOptions: [
+              PollOptionItem(text: 'Option 1'),
+              PollOptionItem(text: 'Option 2'),
+              PollOptionItem(text: 'Option 3'),
+            ],
+            onOptionsChanged: (options) => optionsChanged = options,
+          ),
         ),
-      ));
+      );
 
       // Initially should have 3 options
       expect(find.byType(TextField), findsNWidgets(3));
 
       // Find and tap the delete button for the first option
-      final deleteButtons = find.bySvgIcon(StreamSvgIcons.delete);
+      final deleteButtons = find.byIcon(StreamIconData.minusCircle);
       await tester.tap(deleteButtons.first);
       await tester.pumpAndSettle();
 
       // Confirm deletion
-      await tester.tap(find.text('DELETE'));
+      await tester.tap(find.text('Delete'));
       await tester.pumpAndSettle();
 
       // Should now have 2 options
@@ -400,28 +410,30 @@ void main() {
     testWidgets('should not delete option when cancelled', (tester) async {
       var optionsChanged = <PollOptionItem>[];
 
-      await tester.pumpWidget(_wrapWithMaterialApp(
-        PollOptionReorderableListView(
-          optionsRange: (min: 2, max: null),
-          initialOptions: [
-            PollOptionItem(text: 'Option 1'),
-            PollOptionItem(text: 'Option 2'),
-            PollOptionItem(text: 'Option 3'),
-          ],
-          onOptionsChanged: (options) => optionsChanged = options,
+      await tester.pumpWidget(
+        _wrapWithMaterialApp(
+          PollOptionReorderableListView(
+            optionsRange: (min: 2, max: null),
+            initialOptions: [
+              PollOptionItem(text: 'Option 1'),
+              PollOptionItem(text: 'Option 2'),
+              PollOptionItem(text: 'Option 3'),
+            ],
+            onOptionsChanged: (options) => optionsChanged = options,
+          ),
         ),
-      ));
+      );
 
       // Initially should have 3 options
       expect(find.byType(TextField), findsNWidgets(3));
 
       // Find and tap the delete button for the first option
-      final deleteButtons = find.bySvgIcon(StreamSvgIcons.delete);
+      final deleteButtons = find.byIcon(StreamIconData.minusCircle);
       await tester.tap(deleteButtons.first);
       await tester.pumpAndSettle();
 
       // Cancel deletion
-      await tester.tap(find.text('CANCEL'));
+      await tester.tap(find.text('Cancel'));
       await tester.pumpAndSettle();
 
       // Should still have 3 options
@@ -436,24 +448,26 @@ void main() {
         final option1 = PollOptionItem(text: 'Option 1');
         final option2 = PollOptionItem(text: 'Option 2');
 
-        await tester.pumpWidget(_wrapWithMaterialApp(
-          PollOptionReorderableListView(
-            optionsRange: (min: 2, max: null),
-            initialOptions: [option1, option2],
-            onOptionsChanged: (options) => optionsChanged = options,
+        await tester.pumpWidget(
+          _wrapWithMaterialApp(
+            PollOptionReorderableListView(
+              optionsRange: (min: 2, max: null),
+              initialOptions: [option1, option2],
+              onOptionsChanged: (options) => optionsChanged = options,
+            ),
           ),
-        ));
+        );
 
         // Should have 2 options (minimum)
         expect(find.byType(TextField), findsNWidgets(2));
 
         // Try to delete the first option
-        final deleteButtons = find.bySvgIcon(StreamSvgIcons.delete);
+        final deleteButtons = find.byIcon(StreamIconData.minusCircle);
         await tester.tap(deleteButtons.first);
         await tester.pumpAndSettle();
 
         // Confirm deletion
-        await tester.tap(find.text('DELETE'));
+        await tester.tap(find.text('Delete'));
         await tester.pumpAndSettle();
 
         // Should still have 2 options (minimum enforced)
@@ -476,22 +490,27 @@ void main() {
   });
 }
 
+extension on CommonFinders {
+  /// Finds the "Add an option" [StreamButton] at the bottom of the list.
+  Finder addOptionButton() => find.widgetWithText(StreamButton, 'Add an option');
+}
+
 Widget _wrapWithMaterialApp(
   Widget widget, {
-  Brightness? brightness,
+  Brightness brightness = Brightness.light,
 }) {
   return MaterialApp(
+    theme: ThemeData(brightness: brightness),
     builder: (context, child) {
       return StreamChatTheme(
-        data: StreamChatThemeData(brightness: brightness),
+        data: StreamChatThemeData(),
         child: child!,
       );
     },
     home: Builder(
       builder: (context) {
-        final theme = StreamChatTheme.of(context);
         return Scaffold(
-          backgroundColor: theme.colorTheme.appBg,
+          backgroundColor: context.streamColorScheme.backgroundApp,
           body: Center(
             child: Padding(
               padding: const EdgeInsets.all(8),

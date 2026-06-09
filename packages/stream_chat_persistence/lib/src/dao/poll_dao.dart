@@ -20,7 +20,7 @@ class PollDao extends DatabaseAccessor<DriftChatDatabase> with _$PollDaoMixin {
 
   Future<Poll> _pollFromJoinRow(TypedResult row) async {
     final pollEntity = row.readTable(polls);
-    final userEntity = row.readTable(users);
+    final userEntity = row.readTableOrNull(users);
     final allVotes = await _db.pollVoteDao.getPollVotes(pollEntity.id);
     final latestAnswers = allVotes.where((it) => it.isAnswer);
     final ownVotesAndAnswers = allVotes.where((it) => it.userId == _db.userId);
@@ -38,7 +38,7 @@ class PollDao extends DatabaseAccessor<DriftChatDatabase> with _$PollDaoMixin {
     }
 
     return pollEntity.toPoll(
-      createdBy: userEntity.toUser(),
+      createdBy: userEntity?.toUser(),
       latestAnswers: latestAnswers.toList(),
       ownVotesAndAnswers: ownVotesAndAnswers.toList(),
       latestVotesByOption: latestVotesByOption,
@@ -46,11 +46,10 @@ class PollDao extends DatabaseAccessor<DriftChatDatabase> with _$PollDaoMixin {
   }
 
   /// Returns the poll by matching [Polls.id] with [pollId]
-  Future<Poll?> getPollById(String pollId) async =>
-      await (select(polls)..where((it) => it.id.equals(pollId)))
-          .join([leftOuterJoin(users, polls.createdById.equalsExp(users.id))])
-          .map(_pollFromJoinRow)
-          .getSingleOrNull();
+  Future<Poll?> getPollById(String pollId) async => await (select(polls)..where((it) => it.id.equals(pollId)))
+      .join([leftOuterJoin(users, polls.createdById.equalsExp(users.id))])
+      .map(_pollFromJoinRow)
+      .getSingleOrNull();
 
   /// Returns polls for every id in [pollIds], keyed by poll id.
   Future<Map<String, Poll?>> getPollsByIds(List<String> pollIds) async {
@@ -64,13 +63,12 @@ class PollDao extends DatabaseAccessor<DriftChatDatabase> with _$PollDaoMixin {
     final result = <String, Poll?>{for (final id in pollIds) id: null};
     for (final chunk in chunked(pollIds)) {
       final where = polls.id.isIn(chunk);
-      final rows = await (select(polls)..where((_) => where)).join(
-          [leftOuterJoin(users, polls.createdById.equalsExp(users.id))]).get();
+      final rows = await (select(
+        polls,
+      )..where((_) => where)).join([leftOuterJoin(users, polls.createdById.equalsExp(users.id))]).get();
       for (final row in rows) {
         final pollEntity = row.readTable(polls);
-        // Same as `_pollFromJoinRow` => reads users via `readTable` (not
-        // `readTableOrNull`) on a LEFT JOIN
-        final userEntity = row.readTable(users);
+        final userEntity = row.readTableOrNull(users);
         final allVotes = votesByPoll[pollEntity.id] ?? const <PollVote>[];
         result[pollEntity.id] = _buildPoll(pollEntity, userEntity, allVotes);
       }
@@ -80,26 +78,26 @@ class PollDao extends DatabaseAccessor<DriftChatDatabase> with _$PollDaoMixin {
 
   /// Updates all the polls using the new [pollList] data
   Future<void> updatePolls(List<Poll> pollList) => batch(
-        (it) => it.insertAllOnConflictUpdate(
-          polls,
-          pollList.map((it) => it.toEntity()),
-        ),
-      );
+    (it) => it.insertAllOnConflictUpdate(
+      polls,
+      pollList.map((it) => it.toEntity()),
+    ),
+  );
 
   /// Returns the list of all the polls stored in db
-  Future<List<Poll>> getPolls() async => Future.wait(await (select(polls)
-        ..orderBy([(it) => OrderingTerm.desc(it.createdAt)]))
-      .join([leftOuterJoin(users, polls.createdById.equalsExp(users.id))])
-      .map(_pollFromJoinRow)
-      .get());
+  Future<List<Poll>> getPolls() async => Future.wait(
+    await (select(polls)..orderBy([(it) => OrderingTerm.desc(it.createdAt)]))
+        .join([leftOuterJoin(users, polls.createdById.equalsExp(users.id))])
+        .map(_pollFromJoinRow)
+        .get(),
+  );
 
   /// Deletes all the polls whose [Polls.id] is present in [pollIds]
-  Future<void> deletePollsByIds(List<String> pollIds) =>
-      (delete(polls)..where((tbl) => tbl.id.isIn(pollIds))).go();
+  Future<void> deletePollsByIds(List<String> pollIds) => (delete(polls)..where((tbl) => tbl.id.isIn(pollIds))).go();
 
   Poll _buildPoll(
     PollEntity pollEntity,
-    UserEntity userEntity,
+    UserEntity? userEntity,
     List<PollVote> allVotes,
   ) {
     final latestAnswers = allVotes.where((it) => it.isAnswer);
@@ -118,7 +116,7 @@ class PollDao extends DatabaseAccessor<DriftChatDatabase> with _$PollDaoMixin {
     }
 
     return pollEntity.toPoll(
-      createdBy: userEntity.toUser(),
+      createdBy: userEntity?.toUser(),
       latestAnswers: latestAnswers.toList(),
       ownVotesAndAnswers: ownVotesAndAnswers.toList(),
       latestVotesByOption: latestVotesByOption,

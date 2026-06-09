@@ -1,73 +1,59 @@
-# Stream Chat v1
+# Stream Chat Flutter Sample App
 
-![](https://raw.githubusercontent.com/GetStream/flutter-samples/master/images/sdk_hero_v4.png)
+A fully functional messenger built with [`stream_chat_flutter`](https://pub.dev/packages/stream_chat_flutter). The app lives inside this repository and consumes the SDK packages directly via Melos path overrides — making it the primary development playground for the SDK as well as the recommended reference when integrating Stream Chat into your own application.
 
-Stream Chat V1 is a sample app implemented using Stream Chat and Flutter. It is a fully fledged messaging app built using a combination of our pre-made widgets and custom Flutter widgets. 
+## Features
 
-It supports several advanced features like:
-
-- Channels list UI
-- Channel UI
+- Channel and message lists
+- Threads and quoted replies
 - Message reactions
-- Link preview
-- Image, video and file attachments
-- Editing and deleting messages
-- Typing indicators
-- Read indicators
-- Image gallery
-- GIF support
+- Image, video, and file attachments with media gallery
+- Message search
+- Pinned messages
+- Drafts
+- Message reminders
+- Static and live location sharing
+- Push notifications (Firebase Cloud Messaging)
+- Offline storage (powered by `stream_chat_persistence`)
 - Light and dark themes
-- Threads
-- Slash commands
-- Markdown message formatting
-- Count for unread messages
-
-![Features iOS](https://user-images.githubusercontent.com/20601437/110333493-eb023a80-8021-11eb-8fb1-b74f9ef37897.gif)
+- Localization
+- User authentication flow with selectable demo users
 
 ## Getting Started
 
-Before running this project please ensure Flutter is installed and configured on your machine. If you're new to Flutter, please checkout the [official guide](https://flutter.dev/docs/get-started/install) with installation instructions for your OS. 
+### Prerequisites
 
- 
-
-This project is only configured to support the following platforms:
-
-- Android
-- iOS
-
-Web and Desktop are not supported at this time. 
-
-After installing Flutter and the necessary toolchain for your device (Android or iOS), connect your device or open your emulator before running the following:
-
-**Clone the repo**
+Ensure [Flutter](https://flutter.dev/docs/get-started/install) is installed and configured on your machine. You also need [Melos](https://pub.dev/packages/melos) to bootstrap the monorepo:
 
 ```bash
-git clone https://github.com/GetStream/flutter-samples
+dart pub global activate melos
 ```
 
-**Open the app folder** 
+### Clone and Bootstrap
 
 ```bash
-cd flutter-samples/stream_chat_v1
+git clone https://github.com/GetStream/stream-chat-flutter.git
+cd stream-chat-flutter
+melos bootstrap
 ```
 
-**Install package dependencies:**
+### Run the App
 
 ```bash
-flutter packages get 
+cd sample_app
+flutter run
 ```
 
-**Open or create an emulator**
+The app connects to a demo Stream environment out of the box — no configuration required to get started. You can log in with any of the pre-configured demo users shown on the login screen.
 
-```bash
-# To run an emulator, run 'flutter emulators --launch <emulator id>'.
-# To create a new emulator, run 'flutter emulators --create [--name xyz]'.
-# You can find more information on managing emulators at the links below:
-# [https://developer.android.com/studio/run/managing-avds](https://developer.android.com/studio/run/managing-avds)[https://developer.android.com/studio/command-line/avdmanager](https://developer.android.com/studio/command-line/avdmanager)
-```
+### Configuration
 
-**Run the project on your device or emulator:**
+The default API key and demo user credentials live in `lib/utils/app_config.dart`. You can override the API key at runtime via the **Advanced Options** button on the login screen; the key is stored securely and used for subsequent sessions.
 
-```bash
-flutter run 
-```
+### Push Notifications
+
+Push notifications require a Firebase project. Add your `google-services.json` (Android) and/or `GoogleService-Info.plist` (iOS) to the respective platform directories. See the [push notifications guide](https://getstream.io/chat/docs/sdk/flutter/advanced-guides/push-notifications/) for full setup instructions.
+
+## Supported Platforms
+
+The app primarily targets **Android** and **iOS**. Web and macOS platform scaffolding is present in the repository but is not the focus of the sample app.

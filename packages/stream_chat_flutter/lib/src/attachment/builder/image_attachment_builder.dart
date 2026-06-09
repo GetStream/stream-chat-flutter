@@ -1,12 +1,5 @@
 part of 'attachment_widget_builder.dart';
 
-const _kDefaultImageConstraints = BoxConstraints(
-  minWidth: 170,
-  maxWidth: 256,
-  minHeight: 100,
-  maxHeight: 300,
-);
-
 /// {@template imageAttachmentBuilder}
 /// A widget builder for [AttachmentType.image] attachment type.
 ///
@@ -15,20 +8,19 @@ const _kDefaultImageConstraints = BoxConstraints(
 class ImageAttachmentBuilder extends StreamAttachmentWidgetBuilder {
   /// {@macro imageAttachmentBuilder}
   const ImageAttachmentBuilder({
-    this.shape,
-    this.padding = const EdgeInsets.all(2),
-    this.constraints = _kDefaultImageConstraints,
+    this.style,
+    this.constraints,
     this.onAttachmentTap,
   });
 
-  /// The shape of the image attachment.
-  final ShapeBorder? shape;
+  /// The style of the image attachment container.
+  ///
+  /// When null, a default style with a rounded rectangle shape and border
+  /// is used.
+  final StreamMessageAttachmentStyle? style;
 
   /// The constraints to apply to the image attachment widget.
-  final BoxConstraints constraints;
-
-  /// The padding to apply to the image attachment widget.
-  final EdgeInsetsGeometry padding;
+  final BoxConstraints? constraints;
 
   /// The callback to call when the attachment is tapped.
   final StreamAttachmentWidgetTapCallback? onAttachmentTap;
@@ -43,7 +35,7 @@ class ImageAttachmentBuilder extends StreamAttachmentWidgetBuilder {
   }
 
   @override
-  Widget build(
+  Widget? build(
     BuildContext context,
     Message message,
     Map<String, List<Attachment>> attachments,
@@ -57,12 +49,11 @@ class ImageAttachmentBuilder extends StreamAttachmentWidgetBuilder {
       onTap = () => onAttachmentTap!(message, image);
     }
 
-    return Padding(
-      padding: padding,
+    return StreamMessageAttachment(
+      style: style,
       child: InkWell(
         onTap: onTap,
         child: StreamImageAttachment(
-          shape: shape,
           message: message,
           constraints: constraints,
           image: image,
