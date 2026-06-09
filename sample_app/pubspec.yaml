@@ -1,7 +1,7 @@
 name: sample_app
 description: A new Flutter project.
 publish_to: "none"
-version: 10.0.0
+version: 10.0.1
 
 # Note: The environment configuration and dependency versions are managed by Melos.
 #
@@ -40,9 +40,9 @@ dependencies:
   latlong2: ^0.9.1
   lottie: ^3.3.3
   rxdart: ^0.28.0
-  stream_chat_flutter: ^10.0.0-beta.13
-  stream_chat_localizations: ^10.0.0-beta.13
-  stream_chat_persistence: ^10.0.0-beta.13
+  stream_chat_flutter: ^10.0.1
+  stream_chat_localizations: ^10.0.1
+  stream_chat_persistence: ^10.0.1
   streaming_shared_preferences: ^2.0.0
   uuid: ^4.5.3
   video_player: ^2.11.1
