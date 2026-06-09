@@ -66,7 +66,7 @@ jobs:
           cache-key: flutter-:os:-:channel:-:version:-:arch:-:hash:-${{ hashFiles('**/pubspec.lock') }}
       - name: "Install Tools"
         run: |
-          flutter pub global activate melos
+          flutter pub global activate melos 6.3.3
       - name: "Bootstrap Workspace"
         run: melos bootstrap --verbose
       - name: "Dart Analyze"
@@ -95,7 +95,7 @@ jobs:
           cache-key: flutter-:os:-:channel:-:version:-:arch:-:hash:-${{ hashFiles('**/pubspec.lock') }}
       - name: "Install Tools"
         run: |
-          flutter pub global activate melos
+          flutter pub global activate melos 6.3.3
       - name: "Bootstrap Workspace"
         run: melos bootstrap
       - name: "Melos Format"
@@ -125,7 +125,7 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y sqlite3 libsqlite3-dev
       - name: "Install Tools"
         run: |
-          flutter pub global activate melos
+          flutter pub global activate melos 6.3.3
           flutter pub global activate remove_from_coverage
       - name: "Bootstrap Workspace"
         run: melos bootstrap
@@ -199,7 +199,7 @@ jobs:
         with:
           xcode-version: '26.3'
       - name: "Install Tools"
-        run: flutter pub global activate melos
+        run: flutter pub global activate melos 6.3.3
       - name: "Bootstrap Workspace"
         run: melos bootstrap
       - name: Setup Ruby and Gems
