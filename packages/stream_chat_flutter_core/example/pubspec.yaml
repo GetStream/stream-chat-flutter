@@ -25,5 +25,11 @@ dependencies:
     sdk: flutter
   stream_chat_flutter_core: ^10.0.1
 
+dependency_overrides:
+  stream_chat:
+    path: ../../stream_chat
+  stream_chat_flutter_core:
+    path: ..
+
 flutter:
   uses-material-design: true

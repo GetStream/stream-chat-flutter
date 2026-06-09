@@ -5,7 +5,7 @@ runs:
   steps:
     - name: "Install Tools"
       shell: bash
-      run: flutter pub global activate melos 6.3.3
+      run: flutter pub global activate melos
 
     - name: "Bootstrap Workspace"
       shell: bash

@@ -78,7 +78,7 @@ jobs:
           cache-key: flutter-:os:-:channel:-:version:-:arch:-:hash:-${{ hashFiles('**/pubspec.lock') }}
 
       - name: "Install Tools"
-        run: flutter pub global activate melos 6.3.3
+        run: flutter pub global activate melos
 
       - name: "Bootstrap Workspace"
         run: melos bootstrap
@@ -128,7 +128,7 @@ jobs:
         run: flutter config --no-enable-swift-package-manager
 
       - name: "Install Tools"
-        run: flutter pub global activate melos 6.3.3
+        run: flutter pub global activate melos
 
       - name: "Bootstrap Workspace"
         run: melos bootstrap
@@ -181,7 +181,7 @@ jobs:
         run: flutter config --no-enable-swift-package-manager
 
       - name: "Install Tools"
-        run: flutter pub global activate melos 6.3.3
+        run: flutter pub global activate melos
 
       - name: "Bootstrap Workspace"
         run: melos bootstrap

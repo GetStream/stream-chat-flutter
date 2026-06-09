@@ -32,7 +32,7 @@ jobs:
         uses: subosito/flutter-action@v2
 
       - name: 📦 Install Tools
-        run: flutter pub global activate melos 6.3.3
+        run: flutter pub global activate melos
 
       - name: 🔧 Bootstrap Workspace
         run: melos bootstrap --verbose
