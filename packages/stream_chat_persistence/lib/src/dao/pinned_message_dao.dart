@@ -332,7 +332,11 @@ class PinnedMessageDao extends DatabaseAccessor<DriftChatDatabase> with _$Pinned
 
     final rows = await query.get();
     final orderedRows = isForwardPagination ? rows : rows.reversed.toList();
-    return _messagesFromJoinRows(orderedRows, fetchDraft: fetchDraft);
+    return _messagesFromJoinRows(
+      orderedRows,
+      fetchDraft: fetchDraft,
+      fetchSharedLocation: fetchSharedLocation,
+    );
   }
 
   /// Deletes all pinned messages sent by a user with the given [userId].
