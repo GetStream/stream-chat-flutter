@@ -60,8 +60,8 @@ class DmCheckboxListTile extends StatelessWidget {
           title: Text(
             context.translations.alsoSendAsDirectMessageLabel,
             style: textTheme.metadataDefault.copyWith(
-            color: onChanged != null ? colorScheme.textPrimary : colorScheme.textDisabled,
-          ),
+              color: onChanged != null ? colorScheme.textPrimary : colorScheme.textDisabled,
+            ),
           ),
         ),
       ),
