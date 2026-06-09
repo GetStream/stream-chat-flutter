@@ -4,7 +4,7 @@ import 'package:json_annotation/json_annotation.dart';
 part 'user_group_member.g.dart';
 
 /// Class that defines a member of a user group.
-@JsonSerializable(createToJson: false)
+@JsonSerializable(includeIfNull: false)
 class UserGroupMember extends Equatable {
   /// Create a new instance of [UserGroupMember].
   const UserGroupMember({
@@ -28,6 +28,9 @@ class UserGroupMember extends Equatable {
 
   /// The id of the member.
   final String userId;
+
+  /// Serialize model to json.
+  Map<String, dynamic> toJson() => _$UserGroupMemberToJson(this);
 
   @override
   List<Object?> get props => [

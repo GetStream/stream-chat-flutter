@@ -69,6 +69,20 @@ void main() {
             ),
           ),
       ),
+      mentionedChannel: true,
+      mentionedGroupIds: const ['testGroupId1', 'testGroupId2'],
+      mentionedGroups: [
+        jsonEncode(
+          UserGroup(
+            id: 'testGroupId1',
+            name: 'Engineering',
+            createdAt: DateTime.now(),
+            updatedAt: DateTime.now(),
+          ),
+        ),
+      ],
+      mentionedHere: false,
+      mentionedRoles: const ['admin', 'moderator'],
       mentionedUsers: [
         jsonEncode(User(id: 'testuser')),
       ],
@@ -114,6 +128,15 @@ void main() {
     expect(message.remoteCreatedAt, isSameDateAs(entity.remoteCreatedAt));
     expect(message.shadowed, entity.shadowed);
     expect(message.showInChannel, entity.showInChannel);
+    expect(message.mentionedChannel, entity.mentionedChannel);
+    expect(message.mentionedGroupIds, entity.mentionedGroupIds);
+    for (var i = 0; i < (message.mentionedGroups?.length ?? 0); i++) {
+      final entityMentionedGroup = UserGroup.fromJson(jsonDecode(entity.mentionedGroups![i]));
+      expect(message.mentionedGroups![i].id, entityMentionedGroup.id);
+      expect(message.mentionedGroups![i].name, entityMentionedGroup.name);
+    }
+    expect(message.mentionedHere, entity.mentionedHere);
+    expect(message.mentionedRoles, entity.mentionedRoles);
     for (var i = 0; i < message.mentionedUsers.length; i++) {
       final entityMentionedUser = User.fromJson(jsonDecode(entity.mentionedUsers[i]));
       expect(message.mentionedUsers[i].id, entityMentionedUser.id);
@@ -196,6 +219,18 @@ void main() {
       shadowed: math.Random().nextBool(),
       showInChannel: math.Random().nextBool(),
       replyCount: 33,
+      mentionedChannel: true,
+      mentionedGroupIds: const ['testGroupId1', 'testGroupId2'],
+      mentionedGroups: [
+        UserGroup(
+          id: 'testGroupId1',
+          name: 'Engineering',
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        ),
+      ],
+      mentionedHere: false,
+      mentionedRoles: const ['admin', 'moderator'],
       mentionedUsers: [
         User(id: 'testuser'),
       ],
@@ -248,6 +283,11 @@ void main() {
     expect(entity.shadowed, message.shadowed);
     expect(entity.showInChannel, message.showInChannel);
     expect(entity.replyCount, message.replyCount);
+    expect(entity.mentionedChannel, message.mentionedChannel);
+    expect(entity.mentionedGroupIds, message.mentionedGroupIds);
+    expect(entity.mentionedGroups, message.mentionedGroups?.map(jsonEncode).toList());
+    expect(entity.mentionedHere, message.mentionedHere);
+    expect(entity.mentionedRoles, message.mentionedRoles);
     expect(entity.mentionedUsers, message.mentionedUsers.map(jsonEncode).toList());
     expect(entity.state, jsonEncode(message.state));
     expect(entity.localUpdatedAt, isSameDateAs(message.localUpdatedAt));

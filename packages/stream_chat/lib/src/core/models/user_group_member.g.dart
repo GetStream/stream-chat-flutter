@@ -12,3 +12,10 @@ UserGroupMember _$UserGroupMemberFromJson(Map<String, dynamic> json) => UserGrou
   isAdmin: json['is_admin'] as bool,
   userId: json['user_id'] as String,
 );
+
+Map<String, dynamic> _$UserGroupMemberToJson(UserGroupMember instance) => <String, dynamic>{
+  'created_at': instance.createdAt.toIso8601String(),
+  'group_id': instance.groupId,
+  'is_admin': instance.isAdmin,
+  'user_id': instance.userId,
+};

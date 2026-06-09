@@ -18,3 +18,14 @@ UserGroup _$UserGroupFromJson(Map<String, dynamic> json) => UserGroup(
   teamId: json['team_id'] as String?,
   updatedAt: DateTime.parse(json['updated_at'] as String),
 );
+
+Map<String, dynamic> _$UserGroupToJson(UserGroup instance) => <String, dynamic>{
+  'created_at': instance.createdAt.toIso8601String(),
+  'created_by': ?instance.createdBy,
+  'description': ?instance.description,
+  'id': instance.id,
+  'members': ?instance.members?.map((e) => e.toJson()).toList(),
+  'name': instance.name,
+  'team_id': ?instance.teamId,
+  'updated_at': instance.updatedAt.toIso8601String(),
+};

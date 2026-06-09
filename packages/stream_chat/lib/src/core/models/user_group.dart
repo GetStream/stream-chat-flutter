@@ -5,7 +5,7 @@ import 'package:stream_chat/src/core/models/user_group_member.dart';
 part 'user_group.g.dart';
 
 /// Class that defines a user group.
-@JsonSerializable(createToJson: false)
+@JsonSerializable(includeIfNull: false)
 class UserGroup extends Equatable {
   /// Create a new instance of [UserGroup].
   const UserGroup({
@@ -46,6 +46,9 @@ class UserGroup extends Equatable {
 
   /// The date when the group was last updated.
   final DateTime updatedAt;
+
+  /// Serialize model to json.
+  Map<String, dynamic> toJson() => _$UserGroupToJson(this);
 
   @override
   List<Object?> get props => [
