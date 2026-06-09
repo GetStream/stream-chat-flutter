@@ -98,7 +98,12 @@ command:
       stream_chat_persistence: ^10.0.1
       streaming_shared_preferences: ^2.0.0
       svg_icon_widget: ^0.0.1
-      stream_core_flutter: ^0.3.0
+      # Pinned to PR #118 (feat: add StreamSnackbar) until released.
+      stream_core_flutter:
+        git:
+          url: https://github.com/GetStream/stream-core-flutter
+          ref: 5353033ea55b88e8f651c604389f0b7b0a839ebe
+          path: packages/stream_core_flutter
       synchronized: ^3.4.0
       thumblr: ^0.0.4
       url_launcher: ^6.3.2

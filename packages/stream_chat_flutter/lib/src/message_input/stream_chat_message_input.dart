@@ -149,30 +149,18 @@ class _StreamChatMessageInputState extends State<StreamChatMessageInput> {
         const targetAlignment = AlignmentDirectional.topEnd;
         const followerAlignment = AlignmentDirectional.bottomEnd;
 
-        final idleMessage = state is RecordStateIdle ? state.message : null;
-        final showIdleTooltip = idleMessage != null && idleMessage.isNotEmpty;
-
         return PortalTarget(
-          visible: showIdleTooltip,
           anchor: Aligned(
-            target: Alignment.topCenter,
-            follower: Alignment.bottomCenter,
-            offset: Offset(0, -streamSpacing.md),
+            target: targetAlignment.resolve(textDirection),
+            follower: followerAlignment.resolve(textDirection),
+            offset: Offset(-streamSpacing.md, -streamSpacing.md).directional(textDirection),
           ),
-          portalFollower: showIdleTooltip ? HoldToRecordInfoTooltip(message: idleMessage) : const SizedBox.shrink(),
-          child: PortalTarget(
-            anchor: Aligned(
-              target: targetAlignment.resolve(textDirection),
-              follower: followerAlignment.resolve(textDirection),
-              offset: Offset(-streamSpacing.md, -streamSpacing.md).directional(textDirection),
-            ),
-            visible: state is RecordStateRecording,
-            portalFollower: SwipeToLockButton(isLocked: state is RecordStateRecordingLocked),
-            child: _StreamChatMessageInputContent(
-              widget: widget,
-              inputController: _controller,
-              audioRecorderState: state,
-            ),
+          visible: state is RecordStateRecording,
+          portalFollower: SwipeToLockButton(isLocked: state is RecordStateRecordingLocked),
+          child: _StreamChatMessageInputContent(
+            widget: widget,
+            inputController: _controller,
+            audioRecorderState: state,
           ),
         );
       },
@@ -268,6 +256,10 @@ class _StreamChatMessageInputContent extends StatelessWidget {
           // Return if the recording is already started.
           if (audioRecorderController.isRecording) return;
 
+          // Clear any in-flight hold-to-record hint — the user is now
+          // holding correctly so the hint is stale.
+          StreamSnackbarMessenger.maybeOf(context)?.removeCurrent();
+
           await widget.feedback.onRecordStart(context);
           return audioRecorderController.startRecord();
         },
@@ -294,14 +286,16 @@ class _StreamChatMessageInputContent extends StatelessWidget {
           // Return if the recording is already started.
           if (audioRecorderController.isRecording) return;
 
-          // Capture the label before the async gap to avoid using a potentially
-          // unmounted BuildContext after awaiting.
+          // Capture the label and messenger before the async gap to avoid
+          // using a potentially unmounted BuildContext after awaiting.
           final holdLabel = context.translations.holdToRecordLabel;
+          final snackbarMessenger = StreamSnackbarMessenger.maybeOf(context);
 
           // Notify the parent that the recorder is canceled before it starts.
           await widget.feedback.onRecordStartCancel(context);
-          // Show a message to the user to hold to record.
-          audioRecorderController.showInfo(holdLabel);
+          // Snap-replace the current hint so rapid taps always show the
+          // freshest one without queueing duplicates or animating exits.
+          snackbarMessenger?.show(StreamSnackbar(message: Text(holdLabel)), replace: true);
         },
         onLongPressMoveUpdate: (details) async {
           // Return if the recording not yet started or already locked.

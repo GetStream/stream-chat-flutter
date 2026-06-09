@@ -174,6 +174,7 @@ class StreamAudioRecorderController extends ValueNotifier<AudioRecorderState> {
   /// Shows an info message to the user for the given [duration].
   ///
   /// This is useful for showing messages like "Hold to record" or "Recording".
+  @Deprecated('Use StreamSnackbar via StreamSnackbarMessenger instead.')
   void showInfo(
     String message, {
     Duration duration = const Duration(seconds: 3),

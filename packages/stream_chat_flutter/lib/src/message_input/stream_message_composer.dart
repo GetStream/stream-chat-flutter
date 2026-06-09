@@ -95,7 +95,7 @@ class StreamMessageComposer extends StatelessWidget {
     TextCapitalization textCapitalization = TextCapitalization.sentences,
     bool autofocus = false,
     bool autoCorrect = true,
-  }) : props = MessageComposerProps(
+  }) : props = .new(
          onMessageSent: onMessageSent,
          preMessageSending: preMessageSending,
          messageComposerController: messageComposerController,
@@ -147,8 +147,8 @@ class StreamMessageComposer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final builder = context.chatComponentBuilder<MessageComposerProps>();
-    if (builder != null) return builder(context, props);
-    return DefaultStreamMessageComposer(props: props);
+    final composer = builder?.call(context, props) ?? DefaultStreamMessageComposer(props: props);
+    return StreamSnackbarPopup(child: composer);
   }
 }
 
