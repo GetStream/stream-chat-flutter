@@ -3,6 +3,7 @@
 ✅ Added
 
 - Added Azerbaijani (`az`) translations.
+- Added Russian (`ru`) translations.
 
 ## 10.0.1
 
