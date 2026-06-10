@@ -789,29 +789,25 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     final viewPadding = MediaQuery.paddingOf(context);
 
     return Material(
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: context.streamColorScheme.backgroundElevation1,
-        ),
-        child: AnimatedBuilder(
-          animation: _pickerAnimation,
-          builder: (context, child) {
-            final safeAreaPadding = safeAreaEnabled
-                ? EdgeInsets.lerp(
-                    EdgeInsets.only(
-                      left: viewPadding.left,
-                      top: viewPadding.top,
-                      right: viewPadding.right,
-                      bottom: math.max(viewPadding.bottom, spacing.md),
-                    ),
-                    EdgeInsets.zero,
-                    _pickerAnimation.value,
-                  )!
-                : EdgeInsets.zero;
-            return Padding(padding: safeAreaPadding, child: child);
-          },
-          child: Center(heightFactor: 1, child: messageInput),
-        ),
+      color: context.streamColorScheme.backgroundElevation1,
+      child: AnimatedBuilder(
+        animation: _pickerAnimation,
+        builder: (context, child) {
+          final safeAreaPadding = safeAreaEnabled
+              ? EdgeInsets.lerp(
+                  EdgeInsets.only(
+                    left: viewPadding.left,
+                    top: viewPadding.top,
+                    right: viewPadding.right,
+                    bottom: math.max(viewPadding.bottom, spacing.md),
+                  ),
+                  EdgeInsets.zero,
+                  _pickerAnimation.value,
+                )!
+              : EdgeInsets.zero;
+          return Padding(padding: safeAreaPadding, child: child);
+        },
+        child: Center(heightFactor: 1, child: messageInput),
       ),
     );
   }
@@ -950,28 +946,28 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     };
     final useSystemPicker = widget.props.useSystemAttachmentPicker || isWebOrDesktop;
 
-    final child = useSystemPicker
-        ? systemAttachmentPickerBuilder(
-            context: context,
-            controller: _pickerController!,
-            allowedTypes: allowedTypes,
-            pollConfig: widget.props.pollConfig,
-            optionsBuilder: widget.props.attachmentPickerOptionsBuilder,
-            onError: _onPickerError,
-            onPollCreated: _onPollCreated,
-          )
-        : tabbedAttachmentPickerBuilder(
-            context: context,
-            controller: _pickerController!,
-            allowedTypes: allowedTypes,
-            pollConfig: widget.props.pollConfig,
-            optionsBuilder: widget.props.attachmentPickerOptionsBuilder,
-            onError: _onPickerError,
-            onPollCreated: _onPollCreated,
-            onCommandSelected: _onCommandSelectedFromPicker,
-          );
+    if (useSystemPicker) {
+      return systemAttachmentPickerBuilder(
+        context: context,
+        controller: _pickerController!,
+        allowedTypes: allowedTypes,
+        pollConfig: widget.props.pollConfig,
+        optionsBuilder: widget.props.attachmentPickerOptionsBuilder,
+        onError: _onPickerError,
+        onPollCreated: _onPollCreated,
+      );
+    }
 
-    return SizedBox(height: 333, child: child);
+    return tabbedAttachmentPickerBuilder(
+      context: context,
+      controller: _pickerController!,
+      allowedTypes: allowedTypes,
+      pollConfig: widget.props.pollConfig,
+      optionsBuilder: widget.props.attachmentPickerOptionsBuilder,
+      onError: _onPickerError,
+      onPollCreated: _onPollCreated,
+      onCommandSelected: _onCommandSelectedFromPicker,
+    );
   }
 
   void _onCommandSelectedFromPicker(Command command) {
