@@ -110,6 +110,9 @@ class _StreamChatMessageInputState extends State<StreamChatMessageInput> {
     super.initState();
     _initController();
     widget.audioRecorderController?.addListener(_onAudioRecorderChanged);
+    // Update the snackbar based on the initial state of the audio recorder controller
+    // after the first frame is rendered, to ensure that the BuildContext is fully available for showing the snackbar.
+    WidgetsBinding.instance.addPostFrameCallback((_) => _onAudioRecorderChanged());
   }
 
   @override
@@ -122,6 +125,7 @@ class _StreamChatMessageInputState extends State<StreamChatMessageInput> {
     if (widget.audioRecorderController != oldWidget.audioRecorderController) {
       oldWidget.audioRecorderController?.removeListener(_onAudioRecorderChanged);
       widget.audioRecorderController?.addListener(_onAudioRecorderChanged);
+      _onAudioRecorderChanged(); // Update the snackbar based on the new controller's state immediately.
     }
   }
 
