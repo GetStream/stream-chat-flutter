@@ -61,7 +61,10 @@ class StreamMessageLeadingProps {
 
   /// Returns a copy of this [StreamMessageLeadingProps] with the given fields
   /// replaced with new values.
-  StreamMessageLeadingProps copyWith({Message? message, VoidCallback? onTap}) {
+  StreamMessageLeadingProps copyWith({
+    Message? message,
+    VoidCallback? onTap,
+  }) {
     return StreamMessageLeadingProps(
       message: message ?? this.message,
       onTap: onTap ?? this.onTap,
