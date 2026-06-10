@@ -3,6 +3,7 @@
 🐞 Fixed
 
 - `StreamMessageItem.onUserAvatarTap` now fires when the author avatar is tapped. ([#2741](https://github.com/GetStream/stream-chat-flutter/issues/2741))
+- Added `MessageComposerProps.copyWith` so factory overrides can tweak individual props (e.g. `useSystemAttachmentPicker`) without re-specifying every field. ([#2742](https://github.com/GetStream/stream-chat-flutter/issues/2742))
 
 ## 10.0.1
 
