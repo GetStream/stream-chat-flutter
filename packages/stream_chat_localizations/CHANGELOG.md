@@ -1,3 +1,9 @@
+## Upcoming
+
+✅ Added
+
+- Added Azerbaijani (`az`) translations.
+
 ## 10.0.1
 
 🛑️ Breaking

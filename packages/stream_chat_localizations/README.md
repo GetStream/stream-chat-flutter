@@ -33,6 +33,7 @@ This package provides localized strings for all Stream Chat Flutter widgets. Dep
 - [Portuguese](https://github.com/GetStream/stream-chat-flutter/blob/master/packages/stream_chat_localizations/lib/src/stream_chat_localizations_pt.dart)
 - [German](https://github.com/GetStream/stream-chat-flutter/blob/master/packages/stream_chat_localizations/lib/src/stream_chat_localizations_de.dart)
 - [Norwegian](https://github.com/GetStream/stream-chat-flutter/blob/master/packages/stream_chat_localizations/lib/src/stream_chat_localizations_no.dart)
+- [Azerbaijani](https://github.com/GetStream/stream-chat-flutter/blob/master/packages/stream_chat_localizations/lib/src/stream_chat_localizations_az.dart)
 
 More languages will be added in the future. Feel free to [contribute](https://github.com/GetStream/stream-chat-flutter/blob/master/CONTRIBUTING.md) to add more.
 
@@ -79,6 +80,7 @@ class MyApp extends StatelessWidget {
         Locale('pt'),
         Locale('de'),
         Locale('no'),
+        Locale('az'),
       ],
       // Add GlobalStreamChatLocalizations.delegates
       localizationsDelegates: GlobalStreamChatLocalizations.delegates,
@@ -127,6 +129,7 @@ Example:
   <string>pt</string>
   <string>de</string>
   <string>no</string>
+  <string>az</string>
 </array>
 ```
 

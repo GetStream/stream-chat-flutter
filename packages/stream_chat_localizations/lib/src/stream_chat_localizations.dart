@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+part 'stream_chat_localizations_az.dart';
 part 'stream_chat_localizations_ca.dart';
 part 'stream_chat_localizations_de.dart';
 part 'stream_chat_localizations_en.dart';
@@ -24,6 +25,7 @@ part 'stream_chat_localizations_no.dart';
 ///
 ///  * [getStreamChatTranslation], whose documentation describes these values.
 const kStreamChatSupportedLanguages = {
+  'az',
   'en',
   'hi',
   'fr',
@@ -57,6 +59,8 @@ GlobalStreamChatLocalizations? getStreamChatTranslation(Locale locale) {
     'getStreamChatTranslation() called for unsupported locale "$locale"',
   );
   switch (locale.languageCode) {
+    case 'az':
+      return const StreamChatLocalizationsAz();
     case 'en':
       return const StreamChatLocalizationsEn();
     case 'hi':
