@@ -1064,8 +1064,6 @@ void main() {
       );
     });
 
-    tearDown(() => audioRecorderController.dispose());
-
     testWidgets(
       'long-press cancel on mic shows the hold-to-record snackbar',
       (WidgetTester tester) async {
@@ -1086,6 +1084,11 @@ void main() {
 
         expect(find.text(holdLabel), findsOneWidget);
         expect(find.byType(StreamSnackbar), findsOneWidget);
+
+        // Dispose in body: showInfo's 3s timer outlives the widget tree, and
+        // `tearDown` / `addTearDown` run after the binding's pending-timer
+        // check — only a body-side dispose cancels it in time.
+        audioRecorderController.dispose();
       },
     );
 
@@ -1109,6 +1112,8 @@ void main() {
 
         expect(feedback.cancelCount, 1);
         expect(find.text('Hold to record. Release to save.'), findsOneWidget);
+
+        audioRecorderController.dispose();
       },
     );
 
@@ -1130,6 +1135,8 @@ void main() {
         await _cancelMicLongPress(tester);
 
         expect(find.byType(StreamSnackbar), findsOneWidget);
+
+        audioRecorderController.dispose();
       },
     );
 
@@ -1160,6 +1167,8 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(find.byType(StreamSnackbar), findsNothing);
+
+        audioRecorderController.dispose();
       },
     );
 
@@ -1178,6 +1187,51 @@ void main() {
 
         final micContext = tester.element(find.byKey(const ValueKey('microphone_key')));
         expect(StreamSnackbarMessenger.maybeOf(micContext), isNotNull);
+      },
+    );
+
+    testWidgets(
+      'swiping the snackbar away clears the recorder state.message',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          buildWidget(
+            StreamChatMessageInput(
+              onSendPressed: () {},
+              audioRecorderController: audioRecorderController,
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        // ignore: deprecated_member_use
+        audioRecorderController.showInfo('Hint');
+        await tester.pumpAndSettle();
+        expect(find.text('Hint'), findsOneWidget);
+        expect(
+          // ignore: deprecated_member_use
+          (audioRecorderController.value as RecordStateIdle).message,
+          'Hint',
+        );
+
+        await tester.fling(find.text('Hint'), const Offset(0, 300), 1000);
+        await tester.pumpAndSettle();
+
+        expect(find.byType(StreamSnackbar), findsNothing);
+        // The listener should have called hideInfo() on dismissal, so the
+        // recorder no longer thinks it's showing 'Hint'. A subsequent
+        // showInfo('Hint') should fire a fresh snackbar.
+        expect(
+          // ignore: deprecated_member_use
+          (audioRecorderController.value as RecordStateIdle).message,
+          isNull,
+        );
+
+        // ignore: deprecated_member_use
+        audioRecorderController.showInfo('Hint');
+        await tester.pumpAndSettle();
+        expect(find.text('Hint'), findsOneWidget);
+
+        audioRecorderController.dispose();
       },
     );
   });

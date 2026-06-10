@@ -199,6 +199,18 @@ class StreamAudioRecorderController extends ValueNotifier<AudioRecorderState> {
     }
   }
 
+  /// Cancels any pending info-message timer and clears the message on
+  /// [RecordStateIdle]. Counterpart to [showInfo].
+  @Deprecated('Use StreamSnackbar via StreamSnackbarMessenger instead.')
+  void hideInfo() {
+    // Cancel the info timer.
+    _infoTimer?.cancel();
+    _infoTimer = null;
+
+    // Clear the info message if it is currently being shown.
+    if (value case RecordStateIdle()) value = const RecordStateIdle();
+  }
+
   Future<String> _getOutputFilePath(AudioEncoder encoder) async {
     // Ignored on web platform.
     if (CurrentPlatform.isWeb) return '';
@@ -233,6 +245,8 @@ class StreamAudioRecorderController extends ValueNotifier<AudioRecorderState> {
   void dispose() {
     _durationTimer?.cancel();
     _durationTimer = null;
+    _infoTimer?.cancel();
+    _infoTimer = null;
     _recorderAmplitudeSubscription?.cancel();
     _recorder.dispose();
     super.dispose();

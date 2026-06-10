@@ -109,6 +109,7 @@ class _StreamChatMessageInputState extends State<StreamChatMessageInput> {
   void initState() {
     super.initState();
     _initController();
+    widget.audioRecorderController?.addListener(_onAudioRecorderChanged);
   }
 
   @override
@@ -118,16 +119,42 @@ class _StreamChatMessageInputState extends State<StreamChatMessageInput> {
       if (oldWidget.controller == null) _controller.dispose();
       _initController();
     }
+    if (widget.audioRecorderController != oldWidget.audioRecorderController) {
+      oldWidget.audioRecorderController?.removeListener(_onAudioRecorderChanged);
+      widget.audioRecorderController?.addListener(_onAudioRecorderChanged);
+    }
   }
 
   @override
   void dispose() {
+    widget.audioRecorderController?.removeListener(_onAudioRecorderChanged);
     if (widget.controller == null) _controller.dispose();
     super.dispose();
   }
 
   void _initController() {
     _controller = widget.controller ?? StreamMessageComposerController();
+  }
+
+  // Listens to changes in the audio recorder controller and shows/hides a snackbar
+  // with the current message, if any.
+  void _onAudioRecorderChanged() {
+    if (!mounted) return;
+
+    final state = widget.audioRecorderController?.value;
+    final message = state is RecordStateIdle ? state.message : null;
+    final messenger = StreamSnackbarMessenger.maybeOf(context);
+
+    if (message == null || message.isEmpty) return messenger?.removeCurrent();
+    final controller = messenger?.show(StreamSnackbar(message: Text(message)), replace: true);
+    if (controller == null) return;
+
+    // Notify the recorder controller when the snackbar is closed, so it can clear
+    // the message and avoid showing stale messages if the user triggers the recorder again.
+    controller.closed.then((_) {
+      if (!mounted) return;
+      return widget.audioRecorderController?.hideInfo();
+    });
   }
 
   @override
@@ -286,16 +313,14 @@ class _StreamChatMessageInputContent extends StatelessWidget {
           // Return if the recording is already started.
           if (audioRecorderController.isRecording) return;
 
-          // Capture the label and messenger before the async gap to avoid
-          // using a potentially unmounted BuildContext after awaiting.
+          // Capture the label before the async gap to avoid using a potentially
+          // unmounted BuildContext after awaiting.
           final holdLabel = context.translations.holdToRecordLabel;
-          final snackbarMessenger = StreamSnackbarMessenger.maybeOf(context);
 
           // Notify the parent that the recorder is canceled before it starts.
           await widget.feedback.onRecordStartCancel(context);
-          // Snap-replace the current hint so rapid taps always show the
-          // freshest one without queueing duplicates or animating exits.
-          snackbarMessenger?.show(StreamSnackbar(message: Text(holdLabel)), replace: true);
+          // Show a message to the user to hold to record.
+          audioRecorderController.showInfo(holdLabel);
         },
         onLongPressMoveUpdate: (details) async {
           // Return if the recording not yet started or already locked.
