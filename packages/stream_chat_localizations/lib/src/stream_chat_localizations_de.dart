@@ -822,4 +822,14 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
 
   @override
   String get addACommentDescription => 'Anderen erlauben, Kommentare hinzuzufügen';
+
+  @override
+  String get notifyChannelText => 'Benachrichtige alle in diesem Kanal';
+
+  @override
+  String get notifyHereText =>
+      'Benachrichtige alle Online-Mitglieder in diesem Kanal';
+
+  @override
+  String notifyRoleText(String role) => 'Benachrichtige alle $role-Mitglieder';
 }

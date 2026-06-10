@@ -399,6 +399,76 @@ void main() {
 
       expect(controller.mentionedUsers, users);
     });
+
+    test('mentionedChannel setter mirrors onto the message', () {
+      expect(controller.mentionedChannel, isFalse);
+      expect(controller.message.mentionedChannel, isNull);
+
+      controller.mentionedChannel = true;
+
+      expect(controller.mentionedChannel, isTrue);
+      expect(controller.message.mentionedChannel, isTrue);
+    });
+
+    test('mentionedHere setter mirrors onto the message', () {
+      expect(controller.mentionedHere, isFalse);
+      expect(controller.message.mentionedHere, isNull);
+
+      controller.mentionedHere = true;
+
+      expect(controller.mentionedHere, isTrue);
+      expect(controller.message.mentionedHere, isTrue);
+    });
+
+    test('addMentionedRole appends role.name and is idempotent', () {
+      final admin = Role(
+        name: 'admin',
+        custom: false,
+        scopes: const [],
+        createdAt: DateTime(2024),
+        updatedAt: DateTime(2024),
+      );
+      final moderator = Role(
+        name: 'moderator',
+        custom: false,
+        scopes: const [],
+        createdAt: DateTime(2024),
+        updatedAt: DateTime(2024),
+      );
+
+      controller.addMentionedRole(admin);
+      controller.addMentionedRole(moderator);
+      controller.addMentionedRole(admin);
+
+      expect(controller.mentionedRoles, equals(['admin', 'moderator']));
+      expect(controller.message.mentionedRoles, equals(['admin', 'moderator']));
+    });
+
+    test(
+      'addMentionedUserGroup populates groups and ids and is idempotent',
+      () {
+        final engineering = UserGroup(
+          id: 'group-eng',
+          name: 'Engineering',
+          createdAt: DateTime(2024),
+          updatedAt: DateTime(2024),
+        );
+        final design = UserGroup(
+          id: 'group-design',
+          name: 'Design',
+          createdAt: DateTime(2024),
+          updatedAt: DateTime(2024),
+        );
+
+        controller.addMentionedUserGroup(engineering);
+        controller.addMentionedUserGroup(design);
+        controller.addMentionedUserGroup(engineering);
+
+        expect(controller.mentionedUserGroups.length, equals(2));
+        expect(controller.mentionedUserGroups.map((it) => it.id), equals(['group-eng', 'group-design']));
+        expect(controller.message.mentionedGroupIds, equals(['group-eng', 'group-design']));
+      },
+    );
   });
 
   group('Cooldown Timer', () {

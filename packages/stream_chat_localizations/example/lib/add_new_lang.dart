@@ -850,6 +850,15 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
     if (extension != null) return "'.$extension' files are not supported for upload.";
     return 'This file type is not supported for upload.';
   }
+
+  @override
+  String get notifyChannelText => 'Notify everyone in this channel';
+
+  @override
+  String get notifyHereText => 'Notify every online member in this channel';
+
+  @override
+  String notifyRoleText(String role) => 'Notify all $role members';
 }
 
 void main() async {

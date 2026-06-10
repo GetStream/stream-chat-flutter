@@ -19,6 +19,10 @@ class StreamMentionAutocompleteOptions extends StatefulWidget {
     this.limit = 10,
     this.mentionAllAppUsers = false,
     this.mentionsTileBuilder,
+    this.onMentionChannelTap,
+    this.onMentionHereTap,
+    this.onMentionRoleTap,
+    this.onMentionUserGroupTap,
     this.onMentionUserTap,
     this.style = AutocompleteOptionsStyle.fixed,
   }) : assert(
@@ -50,6 +54,18 @@ class StreamMentionAutocompleteOptions extends StatefulWidget {
   /// Customize the tile for the mentions overlay.
   final UserMentionTileBuilder? mentionsTileBuilder;
 
+  /// Callback called when the "@channel" broadcast mention is selected.
+  final VoidCallback? onMentionChannelTap;
+
+  /// Callback called when the "@here" broadcast mention is selected.
+  final VoidCallback? onMentionHereTap;
+
+  /// Callback called when a role mention is selected.
+  final ValueSetter<Role>? onMentionRoleTap;
+
+  /// Callback called when a user group mention is selected.
+  final ValueSetter<UserGroup>? onMentionUserGroupTap;
+
   /// Callback called when a user is selected.
   final ValueSetter<User>? onMentionUserTap;
 
@@ -63,12 +79,12 @@ class StreamMentionAutocompleteOptions extends StatefulWidget {
 }
 
 class _StreamMentionAutocompleteOptionsState extends State<StreamMentionAutocompleteOptions> {
-  late Future<List<User>> userMentionsFuture;
+  late Future<List<_MentionOption>> mentionsFuture;
 
   @override
   void initState() {
     super.initState();
-    userMentionsFuture = queryMentions(widget.query);
+    mentionsFuture = queryMentions(widget.query);
   }
 
   @override
@@ -78,67 +94,62 @@ class _StreamMentionAutocompleteOptionsState extends State<StreamMentionAutocomp
         widget.query != oldWidget.query ||
         widget.mentionAllAppUsers != oldWidget.mentionAllAppUsers ||
         widget.limit != oldWidget.limit) {
-      userMentionsFuture = queryMentions(widget.query);
+      mentionsFuture = queryMentions(widget.query);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<User>>(
-      future: userMentionsFuture,
+    return FutureBuilder<List<_MentionOption>>(
+      future: mentionsFuture,
       builder: (context, snapshot) {
-        if (snapshot.hasError) return const Empty();
         if (!snapshot.hasData) return const Empty();
-        final users = snapshot.data!;
+        final mentions = snapshot.data!;
+        if (mentions.isEmpty) return const Empty();
 
         final colorScheme = context.streamColorScheme;
-        final spacing = context.streamSpacing;
         final (:elevation, :margin, :shape) = widget.style.resolve(colorScheme.borderDefault);
 
-        return StreamAutocompleteOptions<User>(
-          options: users,
+        return StreamAutocompleteOptions<_MentionOption>(
+          options: mentions,
           maxHeight: _kMaxHeight,
           elevation: elevation,
           margin: margin,
           shape: shape,
-          optionBuilder: (context, user) {
-            final mentionsTileBuilder = widget.mentionsTileBuilder;
-            if (mentionsTileBuilder != null) {
-              return Material(
-                color: context.streamColorScheme.backgroundElevation1,
-                child: InkWell(
-                  onTap: widget.onMentionUserTap == null ? null : () => widget.onMentionUserTap!(user),
-                  child: mentionsTileBuilder(context, user),
-                ),
-              );
-            }
-
-            return Padding(
-              padding: EdgeInsets.symmetric(horizontal: spacing.xxs),
-              child: InkWell(
-                borderRadius: BorderRadius.circular(12),
-                onTap: widget.onMentionUserTap == null ? null : () => widget.onMentionUserTap!(user),
-                child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: spacing.sm, vertical: spacing.xs),
-                  child: Row(
-                    spacing: spacing.sm,
-                    children: [
-                      StreamUserAvatar(size: .md, user: user),
-                      Text(
-                        user.name,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: context.streamTextTheme.bodyDefault,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            );
+          optionBuilder: (context, option) => switch (option) {
+            _ChannelMention() => _MentionChannelTile(
+              onTap: widget.onMentionChannelTap,
+            ),
+            _HereMention() => _MentionHereTile(
+              onTap: widget.onMentionHereTap,
+            ),
+            _RoleMention(role: final role) => _MentionRoleTile(
+              role: role.name,
+              onTap: widget.onMentionRoleTap == null ? null : () => widget.onMentionRoleTap!(role),
+            ),
+            _UserGroupMention(userGroup: final userGroup) => _MentionUserGroupTile(
+              userGroup: userGroup,
+              onTap: widget.onMentionUserGroupTap,
+            ),
+            _UserMention(user: final user) => _buildUserTile(context, user),
           },
         );
       },
     );
+  }
+
+  Widget _buildUserTile(BuildContext context, User user) {
+    final mentionsTileBuilder = widget.mentionsTileBuilder;
+    if (mentionsTileBuilder != null) {
+      return Material(
+        color: context.streamColorScheme.backgroundElevation1,
+        child: InkWell(
+          onTap: widget.onMentionUserTap == null ? null : () => widget.onMentionUserTap!(user),
+          child: mentionsTileBuilder(context, user),
+        ),
+      );
+    }
+    return _MentionUserTile(user: user, onTap: widget.onMentionUserTap);
   }
 
   List<User> get membersAndWatchers {
@@ -149,27 +160,77 @@ class _StreamMentionAutocompleteOptionsState extends State<StreamMentionAutocomp
     }.whereType<User>().toList(growable: false);
   }
 
-  Future<List<User>> queryMentions(String query) async {
-    if (widget.mentionAllAppUsers) {
-      return _queryUsers(query);
+  Future<List<_MentionOption>> queryMentions(String query) async {
+    final broadcasts = _broadcastMentions(query);
+    final rolesFuture = _fetchRoles(query);
+    final groupsFuture = _fetchUserGroups(query);
+    final usersFuture = _fetchUsers(query);
+
+    final roles = await rolesFuture;
+    final groups = await groupsFuture;
+    final users = await usersFuture;
+
+    return [
+      ...broadcasts,
+      ...roles.map(_RoleMention.new),
+      ...groups.map(_UserGroupMention.new),
+      ...users.map(_UserMention.new),
+    ];
+  }
+
+  List<_MentionOption> _broadcastMentions(String query) {
+    final channel = widget.channel;
+    final normalized = query.toLowerCase();
+    final showChannel = channel.canNotifyChannel && (query.isEmpty || 'channel'.startsWith(normalized));
+    final showHere = channel.canNotifyHere && (query.isEmpty || 'here'.startsWith(normalized));
+    return [
+      if (showChannel) const _ChannelMention(),
+      if (showHere) const _HereMention(),
+    ];
+  }
+
+  Future<List<Role>> _fetchRoles(String query) async {
+    if (query.isEmpty || !widget.channel.canNotifyRole) return const [];
+    try {
+      final response = await widget.channel.client.searchRoles(query, limit: widget.limit);
+      return response.roles;
+    } catch (_) {
+      return const [];
     }
+  }
 
-    var channelState = widget.channel.state;
-
-    channelState = channelState!;
-    final members = channelState.members;
-
-    // By default, we return maximum 100 members via queryChannels api call.
-    // Thus it is safe to assume, that if number of members in channel.state
-    // is < 100, then all the members are already available on client side
-    // and we don't need to make any api call to queryMembers endpoint.
-    if (members.length < 100) {
-      final matchingUsers = membersAndWatchers.search(query);
-      return matchingUsers.toList(growable: false);
+  Future<List<UserGroup>> _fetchUserGroups(String query) async {
+    if (query.isEmpty || !widget.channel.canNotifyGroup) return const [];
+    try {
+      final response = await widget.channel.client.searchUserGroups(query, limit: widget.limit);
+      return response.userGroups;
+    } catch (_) {
+      return const [];
     }
+  }
 
-    final result = await _queryMembers(query);
-    return result.map((it) => it.user).whereType<User>().toList(growable: false);
+  Future<List<User>> _fetchUsers(String query) async {
+    try {
+      if (widget.mentionAllAppUsers) {
+        return await _queryUsers(query);
+      }
+
+      final channelState = widget.channel.state!;
+      final members = channelState.members;
+
+      // By default, we return maximum 100 members via queryChannels api call.
+      // Thus it is safe to assume, that if number of members in channel.state
+      // is < 100, then all the members are already available on client side
+      // and we don't need to make any api call to queryMembers endpoint.
+      if (members.length < 100) {
+        return membersAndWatchers.search(query).toList(growable: false);
+      }
+
+      final result = await _queryMembers(query);
+      return result.map((it) => it.user).whereType<User>().toList(growable: false);
+    } catch (_) {
+      return const [];
+    }
   }
 
   Future<List<Member>> _queryMembers(String query) async {
@@ -197,4 +258,221 @@ class _StreamMentionAutocompleteOptionsState extends State<StreamMentionAutocomp
     );
     return response.users;
   }
+}
+
+/// Shared row layout for every mention autocomplete tile.
+class _MentionTile extends StatelessWidget {
+  const _MentionTile({
+    required this.leading,
+    required this.title,
+    this.subtitle,
+    this.onTap,
+  });
+
+  final Widget leading;
+  final String title;
+  final String? subtitle;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final spacing = context.streamSpacing;
+    final colorScheme = context.streamColorScheme;
+    final textTheme = context.streamTextTheme;
+    final subtitle = this.subtitle;
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: spacing.xxs),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(8),
+        onTap: onTap,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 48),
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: spacing.sm,
+              vertical: spacing.xs,
+            ),
+            child: Row(
+              spacing: spacing.sm,
+              children: [
+                leading,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    spacing: spacing.xxxs,
+                    children: [
+                      Text(
+                        title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: textTheme.bodyDefault,
+                      ),
+                      if (subtitle != null)
+                        Text(
+                          subtitle,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: textTheme.metadataDefault.copyWith(
+                            color: colorScheme.textTertiary,
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Circular icon badge used as the leading widget for non-user mention tiles.
+class _MentionIconBadge extends StatelessWidget {
+  const _MentionIconBadge({required this.icon});
+
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    final spacing = context.streamSpacing;
+    final colorScheme = context.streamColorScheme;
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: colorScheme.backgroundSurfaceSubtle,
+        border: Border.all(color: colorScheme.borderSubtle),
+        shape: BoxShape.circle,
+      ),
+      child: Padding(
+        padding: EdgeInsets.all(spacing.xs),
+        child: Icon(icon, size: 16),
+      ),
+    );
+  }
+}
+
+/// Represents the tile for "@channel" mention.
+class _MentionChannelTile extends StatelessWidget {
+  const _MentionChannelTile({this.onTap});
+
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return _MentionTile(
+      leading: _MentionIconBadge(icon: context.streamIcons.megaphone),
+      title: '@channel',
+      subtitle: context.translations.notifyChannelText,
+      onTap: onTap,
+    );
+  }
+}
+
+/// Represents the tile for "@here" mention.
+class _MentionHereTile extends StatelessWidget {
+  const _MentionHereTile({this.onTap});
+
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return _MentionTile(
+      leading: _MentionIconBadge(icon: context.streamIcons.megaphone),
+      title: '@here',
+      subtitle: context.translations.notifyHereText,
+      onTap: onTap,
+    );
+  }
+}
+
+/// Represents the tile for role mentions.
+class _MentionRoleTile extends StatelessWidget {
+  const _MentionRoleTile({required this.role, this.onTap});
+
+  final String role;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return _MentionTile(
+      leading: _MentionIconBadge(icon: context.streamIcons.shield),
+      title: '@$role',
+      subtitle: context.translations.notifyRoleText(role),
+      onTap: onTap,
+    );
+  }
+}
+
+/// Represents the tile for user group mentions.
+class _MentionUserGroupTile extends StatelessWidget {
+  const _MentionUserGroupTile({required this.userGroup, this.onTap});
+
+  final UserGroup userGroup;
+  final ValueSetter<UserGroup>? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final description = userGroup.description;
+    return _MentionTile(
+      leading: _MentionIconBadge(icon: context.streamIcons.users),
+      title: '@${userGroup.name}',
+      subtitle: description?.isNotEmpty == true ? description : null,
+      onTap: onTap == null ? null : () => onTap!(userGroup),
+    );
+  }
+}
+
+/// Represents the tile for user mentions.
+class _MentionUserTile extends StatelessWidget {
+  const _MentionUserTile({required this.user, this.onTap});
+
+  final User user;
+  final ValueSetter<User>? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return _MentionTile(
+      leading: StreamUserAvatar(size: .md, user: user),
+      title: user.name,
+      onTap: onTap == null ? null : () => onTap!(user),
+    );
+  }
+}
+
+/// Represents a single entry in the mention autocomplete list.
+sealed class _MentionOption {
+  const _MentionOption();
+}
+
+/// Broadcast mention that notifies all members of the channel.
+class _ChannelMention extends _MentionOption {
+  const _ChannelMention();
+}
+
+/// Broadcast mention that notifies all online members of the channel.
+class _HereMention extends _MentionOption {
+  const _HereMention();
+}
+
+/// Role mention backed by a [Role] returned from the search endpoint.
+class _RoleMention extends _MentionOption {
+  const _RoleMention(this.role);
+
+  final Role role;
+}
+
+/// User group mention backed by a [UserGroup] returned from the search
+/// endpoint.
+class _UserGroupMention extends _MentionOption {
+  const _UserGroupMention(this.userGroup);
+
+  final UserGroup userGroup;
+}
+
+/// User mention backed by a [User] from channel membership or user search.
+class _UserMention extends _MentionOption {
+  const _UserMention(this.user);
+
+  final User user;
 }

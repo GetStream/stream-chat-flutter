@@ -897,11 +897,11 @@ extension MessageModerationHelper on Message {
 extension on Message {
   /// Removes mentions from the message if they are not included in the text.
   ///
-  /// This is useful for cleaning up the list of mentioned users before
-  /// sending the message.
+  /// This is useful for cleaning up the list of mentioned users, broadcast
+  /// flags, roles, and user groups before sending the message. Fields that
+  /// were never set stay untouched — only stale mention state set via the
+  /// composer is downgraded.
   Message removeMentionsIfNotIncluded() {
-    if (mentionedUsers.isEmpty) return this;
-
     final messageTextToSend = text;
     if (messageTextToSend == null) return this;
 
@@ -913,7 +913,35 @@ extension on Message {
       updatedMentionedUsers.remove(user);
     }
 
-    return copyWith(mentionedUsers: updatedMentionedUsers);
+    final updatedMentionedChannel =
+        mentionedChannel == true && !messageTextToSend.contains('@channel')
+            ? false
+            : mentionedChannel;
+
+    final updatedMentionedHere =
+        mentionedHere == true && !messageTextToSend.contains('@here')
+            ? false
+            : mentionedHere;
+
+    final updatedMentionedRoles = mentionedRoles
+        ?.where((r) => messageTextToSend.contains('@$r'))
+        .toList();
+
+    final updatedMentionedGroups = mentionedGroups
+        ?.where((g) => messageTextToSend.contains('@${g.name}'))
+        .toList();
+    final updatedMentionedGroupIds = updatedMentionedGroups == null
+        ? mentionedGroupIds
+        : updatedMentionedGroups.map((g) => g.id).toList();
+
+    return copyWith(
+      mentionedUsers: updatedMentionedUsers,
+      mentionedChannel: updatedMentionedChannel,
+      mentionedHere: updatedMentionedHere,
+      mentionedRoles: updatedMentionedRoles,
+      mentionedGroups: updatedMentionedGroups,
+      mentionedGroupIds: updatedMentionedGroupIds,
+    );
   }
 }
 

@@ -59,7 +59,8 @@ void main() {
     test('should serialize to json correctly', () {
       final message = Message(
         id: '4637f7e4-a06b-42db-ba5a-8d8270dd926f',
-        text: 'https://giphy.com/gifs/the-lion-king-live-action-5zvN79uTGfLMOVfQaA',
+        text: '@channel @admin @moderator '
+            'https://giphy.com/gifs/the-lion-king-live-action-5zvN79uTGfLMOVfQaA',
         attachments: [
           Attachment.fromJson(const {
             'type': 'giphy',
@@ -125,27 +126,53 @@ void main() {
       expect(json['text'], equals('Hello world'));
     });
 
-    test('should remove mentioned users not found in text', () {
+    test('should remove mentions not found in text', () {
       final user1 = User(id: 'user1', name: 'User One');
       final user2 = User(id: 'user2', name: 'User Two');
       final user3 = User(id: 'user3', name: 'User Three');
 
+      final stayingGroup = UserGroup(
+        id: 'group-1',
+        name: 'Engineering',
+        createdAt: DateTime(2024),
+        updatedAt: DateTime(2024),
+      );
+      final droppedGroup = UserGroup(
+        id: 'group-2',
+        name: 'Design',
+        createdAt: DateTime(2024),
+        updatedAt: DateTime(2024),
+      );
+
       final message = Message(
         id: 'message-id',
-        text: 'Hello @user1 and @User Two',
+        text: 'Hello @user1 and @User Two — heads up @channel @admin @Engineering',
         mentionedUsers: [user1, user2, user3],
+        mentionedChannel: true,
+        mentionedHere: true,
+        mentionedRoles: const ['admin', 'moderator'],
+        mentionedGroupIds: const ['group-1', 'group-2'],
+        mentionedGroups: [stayingGroup, droppedGroup],
       );
 
       final json = message.toJson();
 
-      // Decode the json to verify the mentions
-      //
-      // We should have only user1 and user2 in mentioned_users since user3 is
-      // not in the text
+      // Users: user3 has no token in the text, so it is dropped.
       final mentionedUserIds = (json['mentioned_users'] as List).cast<String>();
       expect(mentionedUserIds, containsAll(['user1', 'user2']));
       expect(mentionedUserIds, isNot(contains('user3')));
       expect(mentionedUserIds.length, equals(2));
+
+      // @channel stays, @here is dropped (text only mentions @channel).
+      expect(json['mentioned_channel'], isTrue);
+      expect(json['mentioned_here'], isFalse);
+
+      // Roles: "@admin" is in the text, "@moderator" is not.
+      expect(json['mentioned_roles'], equals(['admin']));
+
+      // Groups: only Engineering ("@Engineering") survives; group ids are
+      // re-derived from the remaining groups to stay in sync.
+      expect(json['mentioned_group_ids'], equals(['group-1']));
     });
 
     group('ComparableFieldProvider', () {

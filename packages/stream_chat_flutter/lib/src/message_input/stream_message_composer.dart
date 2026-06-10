@@ -783,6 +783,22 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
                     channel: StreamChannel.of(context).channel,
                     mentionAllAppUsers: widget.props.mentionAllAppUsers,
                     mentionsTileBuilder: widget.props.userMentionsTileBuilder,
+                    onMentionChannelTap: () {
+                      _effectiveController.mentionedChannel = true;
+                      StreamAutocomplete.of(context).acceptAutocompleteOption('channel');
+                    },
+                    onMentionHereTap: () {
+                      _effectiveController.mentionedHere = true;
+                      StreamAutocomplete.of(context).acceptAutocompleteOption('here');
+                    },
+                    onMentionRoleTap: (role) {
+                      _effectiveController.addMentionedRole(role);
+                      StreamAutocomplete.of(context).acceptAutocompleteOption(role.name);
+                    },
+                    onMentionUserGroupTap: (group) {
+                      _effectiveController.addMentionedUserGroup(group);
+                      StreamAutocomplete.of(context).acceptAutocompleteOption(group.name);
+                    },
                     onMentionUserTap: (user) {
                       // adding the mentioned user to the controller.
                       _effectiveController.addMentionedUser(user);

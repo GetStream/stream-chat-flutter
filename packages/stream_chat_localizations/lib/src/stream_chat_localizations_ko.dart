@@ -807,4 +807,13 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
 
   @override
   String get addACommentDescription => '다른 사람이 댓글을 추가하도록 허용';
+
+  @override
+  String get notifyChannelText => '이 채널의 모든 사람에게 알림';
+
+  @override
+  String get notifyHereText => '이 채널의 모든 온라인 사용자에게 알림';
+
+  @override
+  String notifyRoleText(String role) => '모든 $role 멤버에게 알림';
 }

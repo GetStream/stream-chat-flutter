@@ -836,4 +836,13 @@ Attenzione: il limite massimo di $limit file è stato superato.
 
   @override
   String get addACommentDescription => 'Permetti agli altri di aggiungere commenti';
+
+  @override
+  String get notifyChannelText => 'Notifica tutti in questo canale';
+
+  @override
+  String get notifyHereText => 'Notifica tutti i membri online in questo canale';
+
+  @override
+  String notifyRoleText(String role) => 'Notifica tutti i membri $role';
 }
