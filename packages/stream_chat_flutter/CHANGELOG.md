@@ -1,3 +1,9 @@
+## Unreleased
+
+🐞 Fixed
+
+- `StreamMessageItem.onUserAvatarTap` now fires when the author avatar is tapped. ([#2741](https://github.com/GetStream/stream-chat-flutter/issues/2741))
+
 ## 10.0.1
 
 🐞 Fixed
