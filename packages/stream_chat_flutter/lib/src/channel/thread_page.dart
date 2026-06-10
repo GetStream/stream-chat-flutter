@@ -54,6 +54,13 @@ class _StreamThreadPageState extends State<StreamThreadPage> {
     });
   }
 
+  void _editMessage(Message message) {
+    _messageComposerController.editMessage(message);
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      _focusNode.requestFocus();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final appBar = StreamThreadHeader(parent: widget.parent);
@@ -67,7 +74,6 @@ class _StreamThreadPageState extends State<StreamThreadPage> {
         : null;
 
     return StreamScaffold(
-      backgroundColor: context.streamColorScheme.backgroundApp,
       appBar: appBar,
       bottom: composer,
       body: _ThreadBody(
@@ -75,6 +81,7 @@ class _StreamThreadPageState extends State<StreamThreadPage> {
         initialScrollIndex: widget.initialScrollIndex,
         initialAlignment: widget.initialAlignment,
         onReply: _reply,
+        onEditMessageTap: _editMessage,
         onViewInChannelTap: widget.onViewInChannelTap,
       ),
     );
@@ -85,6 +92,7 @@ class _ThreadBody extends StatelessWidget {
   const _ThreadBody({
     required this.parent,
     required this.onReply,
+    required this.onEditMessageTap,
     this.initialScrollIndex,
     this.initialAlignment,
     this.onViewInChannelTap,
@@ -95,6 +103,7 @@ class _ThreadBody extends StatelessWidget {
   final int? initialScrollIndex;
   final double? initialAlignment;
   final void Function(Message message)? onViewInChannelTap;
+  final void Function(Message message)? onEditMessageTap;
 
   @override
   Widget build(BuildContext context) {
@@ -105,6 +114,7 @@ class _ThreadBody extends StatelessWidget {
       initialScrollIndex: initialScrollIndex,
       initialAlignment: initialAlignment,
       onReplyTap: onReply,
+      onEditMessageTap: onEditMessageTap,
       config: const StreamMessageListViewConfiguration(
         swipeToReply: true,
         showScrollToBottom: false,
