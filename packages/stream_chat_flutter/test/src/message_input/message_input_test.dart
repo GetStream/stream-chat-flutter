@@ -1143,10 +1143,10 @@ void main() {
     testWidgets(
       'starting a hold clears the in-flight hold-to-record snackbar',
       (WidgetTester tester) async {
-        // Deny permission so startRecord short-circuits before starting the
-        // duration timer.
-        when(() => mockRecorder.hasPermission(request: false)).thenAnswer((_) async => false);
-        when(() => mockRecorder.hasPermission(request: true)).thenAnswer((_) async => false);
+        // Mock the recorder so startRecord can transition to RecordStateRecordingHold.
+        const config = RecordConfig(numChannels: 1);
+        when(() => mockRecorder.hasPermission(request: false)).thenAnswer((_) async => true);
+        when(() => mockRecorder.start(config, path: any(named: 'path'))).thenAnswer((_) async {});
 
         await tester.pumpWidget(
           buildWidget(
@@ -1161,12 +1161,16 @@ void main() {
         await _cancelMicLongPress(tester);
         expect(find.byType(StreamSnackbar), findsOneWidget);
 
+        // Long-press the mic. startRecord transitions to RecordStateRecordingHold;
+        // the listener should react and remove the in-flight hint.
         final mic = find.byKey(const ValueKey('microphone_key'));
-        final gestureDetector = tester.widget<GestureDetector>(mic);
-        gestureDetector.onLongPress!();
-        await tester.pumpAndSettle();
+        tester.widget<GestureDetector>(mic).onLongPress!();
+        // pump < 1s so the recorder's periodic duration timer doesn't tick;
+        // microtasks drain and the state transition + listener fire complete.
+        await tester.pump(const Duration(milliseconds: 500));
 
         expect(find.byType(StreamSnackbar), findsNothing);
+        expect(audioRecorderController.value, isA<RecordStateRecordingHold>());
 
         audioRecorderController.dispose();
       },

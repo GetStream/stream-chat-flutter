@@ -283,10 +283,6 @@ class _StreamChatMessageInputContent extends StatelessWidget {
           // Return if the recording is already started.
           if (audioRecorderController.isRecording) return;
 
-          // Clear any in-flight hold-to-record hint — the user is now
-          // holding correctly so the hint is stale.
-          StreamSnackbarMessenger.maybeOf(context)?.removeCurrent();
-
           await widget.feedback.onRecordStart(context);
           return audioRecorderController.startRecord();
         },
