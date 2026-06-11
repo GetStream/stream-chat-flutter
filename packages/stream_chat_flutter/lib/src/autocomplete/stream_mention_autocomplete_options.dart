@@ -18,7 +18,12 @@ class StreamMentionAutocompleteOptions extends StatefulWidget {
     this.client,
     this.limit = 10,
     this.mentionAllAppUsers = false,
-    this.mentionsTileBuilder,
+    @Deprecated('Use mentionUserTileBuilder instead') this.mentionsTileBuilder,
+    this.mentionChannelTileBuilder,
+    this.mentionHereTileBuilder,
+    this.mentionRoleTileBuilder,
+    this.mentionUserGroupTileBuilder,
+    this.mentionUserTileBuilder,
     this.onMentionChannelTap,
     this.onMentionHereTap,
     this.onMentionRoleTap,
@@ -52,7 +57,23 @@ class StreamMentionAutocompleteOptions extends StatefulWidget {
   final bool mentionAllAppUsers;
 
   /// Customize the tile for the mentions overlay.
+  @Deprecated('Use mentionUserTileBuilder instead')
   final UserMentionTileBuilder? mentionsTileBuilder;
+
+  /// Builder for a custom `@channel` broadcast mention tile.
+  final Widget Function(BuildContext context)? mentionChannelTileBuilder;
+
+  /// Builder for a custom `@here` broadcast mention tile.
+  final Widget Function(BuildContext context)? mentionHereTileBuilder;
+
+  /// Builder for a custom role mention tile.
+  final MentionRoleTileBuilder? mentionRoleTileBuilder;
+
+  /// Builder for a custom user group mention tile.
+  final MentionUserGroupTileBuilder? mentionUserGroupTileBuilder;
+
+  /// Builder for a custom user mention tile.
+  final UserMentionTileBuilder? mentionUserTileBuilder;
 
   /// Callback called when the "@channel" broadcast mention is selected.
   final VoidCallback? onMentionChannelTap;
@@ -117,20 +138,10 @@ class _StreamMentionAutocompleteOptionsState extends State<StreamMentionAutocomp
           margin: margin,
           shape: shape,
           optionBuilder: (context, option) => switch (option) {
-            _ChannelMention() => _MentionChannelTile(
-              onTap: widget.onMentionChannelTap,
-            ),
-            _HereMention() => _MentionHereTile(
-              onTap: widget.onMentionHereTap,
-            ),
-            _RoleMention(role: final role) => _MentionRoleTile(
-              role: role.name,
-              onTap: widget.onMentionRoleTap == null ? null : () => widget.onMentionRoleTap!(role),
-            ),
-            _UserGroupMention(userGroup: final userGroup) => _MentionUserGroupTile(
-              userGroup: userGroup,
-              onTap: widget.onMentionUserGroupTap,
-            ),
+            _ChannelMention() => _buildChannelTile(context),
+            _HereMention() => _buildHereTile(context),
+            _RoleMention(role: final role) => _buildRoleTile(context, role),
+            _UserGroupMention(userGroup: final userGroup) => _buildUserGroupTile(context, userGroup),
             _UserMention(user: final user) => _buildUserTile(context, user),
           },
         );
@@ -138,14 +149,72 @@ class _StreamMentionAutocompleteOptionsState extends State<StreamMentionAutocomp
     );
   }
 
+  Widget _buildChannelTile(BuildContext context) {
+    final builder = widget.mentionChannelTileBuilder;
+    if (builder != null) {
+      return Material(
+        color: context.streamColorScheme.backgroundElevation1,
+        child: InkWell(
+          onTap: widget.onMentionChannelTap,
+          child: builder(context),
+        ),
+      );
+    }
+    return _MentionChannelTile(onTap: widget.onMentionChannelTap);
+  }
+
+  Widget _buildHereTile(BuildContext context) {
+    final builder = widget.mentionHereTileBuilder;
+    if (builder != null) {
+      return Material(
+        color: context.streamColorScheme.backgroundElevation1,
+        child: InkWell(
+          onTap: widget.onMentionHereTap,
+          child: builder(context),
+        ),
+      );
+    }
+    return _MentionHereTile(onTap: widget.onMentionHereTap);
+  }
+
+  Widget _buildRoleTile(BuildContext context, Role role) {
+    final tap = widget.onMentionRoleTap == null ? null : () => widget.onMentionRoleTap!(role);
+    final builder = widget.mentionRoleTileBuilder;
+    if (builder != null) {
+      return Material(
+        color: context.streamColorScheme.backgroundElevation1,
+        child: InkWell(
+          onTap: tap,
+          child: builder(context, role),
+        ),
+      );
+    }
+    return _MentionRoleTile(role: role.name, onTap: tap);
+  }
+
+  Widget _buildUserGroupTile(BuildContext context, UserGroup userGroup) {
+    final tap = widget.onMentionUserGroupTap == null ? null : () => widget.onMentionUserGroupTap!(userGroup);
+    final builder = widget.mentionUserGroupTileBuilder;
+    if (builder != null) {
+      return Material(
+        color: context.streamColorScheme.backgroundElevation1,
+        child: InkWell(
+          onTap: tap,
+          child: builder(context, userGroup),
+        ),
+      );
+    }
+    return _MentionUserGroupTile(userGroup: userGroup, onTap: widget.onMentionUserGroupTap);
+  }
+
   Widget _buildUserTile(BuildContext context, User user) {
-    final mentionsTileBuilder = widget.mentionsTileBuilder;
-    if (mentionsTileBuilder != null) {
+    final builder = widget.mentionUserTileBuilder ?? widget.mentionsTileBuilder;
+    if (builder != null) {
       return Material(
         color: context.streamColorScheme.backgroundElevation1,
         child: InkWell(
           onTap: widget.onMentionUserTap == null ? null : () => widget.onMentionUserTap!(user),
-          child: mentionsTileBuilder(context, user),
+          child: builder(context, user),
         ),
       );
     }

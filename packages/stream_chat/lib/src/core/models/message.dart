@@ -913,23 +913,15 @@ extension on Message {
       updatedMentionedUsers.remove(user);
     }
 
-    final updatedMentionedChannel =
-        mentionedChannel == true && !messageTextToSend.contains('@channel')
-            ? false
-            : mentionedChannel;
+    final updatedMentionedChannel = mentionedChannel == true && !messageTextToSend.contains('@channel')
+        ? false
+        : mentionedChannel;
 
-    final updatedMentionedHere =
-        mentionedHere == true && !messageTextToSend.contains('@here')
-            ? false
-            : mentionedHere;
+    final updatedMentionedHere = mentionedHere == true && !messageTextToSend.contains('@here') ? false : mentionedHere;
 
-    final updatedMentionedRoles = mentionedRoles
-        ?.where((r) => messageTextToSend.contains('@$r'))
-        .toList();
+    final updatedMentionedRoles = mentionedRoles?.where((r) => messageTextToSend.contains('@$r')).toList();
 
-    final updatedMentionedGroups = mentionedGroups
-        ?.where((g) => messageTextToSend.contains('@${g.name}'))
-        .toList();
+    final updatedMentionedGroups = mentionedGroups?.where((g) => messageTextToSend.contains('@${g.name}')).toList();
     final updatedMentionedGroupIds = updatedMentionedGroups == null
         ? mentionedGroupIds
         : updatedMentionedGroups.map((g) => g.id).toList();

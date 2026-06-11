@@ -72,6 +72,8 @@ export 'package:stream_core_flutter/stream_core_flutter.dart'
         StreamMessageListKind,
         StreamMessageContentKind,
         StreamMessageText,
+        StreamMessageTextStyle,
+        MentionType,
         StreamPlaybackSpeedToggle,
         StreamPlaybackSpeed,
         StreamReactionPicker,
@@ -180,6 +182,7 @@ export 'src/media_gallery_preview/stream_media_gallery_preview_footer.dart';
 export 'src/media_gallery_preview/stream_media_gallery_preview_header.dart';
 export 'src/media_gallery_preview/stream_media_gallery_preview_item.dart';
 export 'src/media_gallery_preview/video_player/stream_video_player.dart';
+export 'src/mention/mention.dart';
 export 'src/message_action/message_action.dart';
 export 'src/message_action/message_actions_builder.dart';
 export 'src/message_input/attachment_picker/stream_attachment_picker.dart';

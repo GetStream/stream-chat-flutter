@@ -829,8 +829,7 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
   String get notifyChannelText => 'इस चैनल के सभी सदस्यों को सूचित करें';
 
   @override
-  String get notifyHereText =>
-      'इस चैनल के सभी ऑनलाइन सदस्यों को सूचित करें';
+  String get notifyHereText => 'इस चैनल के सभी ऑनलाइन सदस्यों को सूचित करें';
 
   @override
   String notifyRoleText(String role) => 'सभी $role सदस्यों को सूचित करें';

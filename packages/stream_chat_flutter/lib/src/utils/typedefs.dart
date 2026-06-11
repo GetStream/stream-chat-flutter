@@ -127,6 +127,20 @@ typedef MentionTileOverlayBuilder =
       User user,
     );
 
+/// A builder function for representing a custom role mention tile.
+typedef MentionRoleTileBuilder =
+    Widget Function(
+      BuildContext context,
+      Role role,
+    );
+
+/// A builder function for representing a custom user group mention tile.
+typedef MentionUserGroupTileBuilder =
+    Widget Function(
+      BuildContext context,
+      UserGroup userGroup,
+    );
+
 /// {@template userMentionTileBuilder}
 /// A builder function for representing a custom user mention tile.
 ///

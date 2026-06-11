@@ -78,7 +78,8 @@ class StreamMessageItem extends StatelessWidget {
     void Function(Message)? onMessageLongPress,
     void Function(User)? onUserAvatarTap,
     void Function(Message message, String url)? onMessageLinkTap,
-    void Function(User user)? onUserMentionTap,
+    @Deprecated('Use onMentionTap and switch on UserMention instead') void Function(User user)? onUserMentionTap,
+    void Function(Mention mention)? onMentionTap,
     void Function(Message parentMessage, Message? threadMessage)? onThreadTap,
     void Function(Message)? onViewInChannelTap,
     void Function(Message)? onReplyTap,
@@ -102,6 +103,7 @@ class StreamMessageItem extends StatelessWidget {
          onUserAvatarTap: onUserAvatarTap,
          onMessageLinkTap: onMessageLinkTap,
          onUserMentionTap: onUserMentionTap,
+         onMentionTap: onMentionTap,
          onThreadTap: onThreadTap,
          onViewInChannelTap: onViewInChannelTap,
          onReplyTap: onReplyTap,
@@ -156,7 +158,8 @@ class StreamMessageItemProps {
     this.onMessageLongPress,
     this.onUserAvatarTap,
     this.onMessageLinkTap,
-    this.onUserMentionTap,
+    @Deprecated('Use onMentionTap and switch on UserMention instead') this.onUserMentionTap,
+    this.onMentionTap,
     this.onThreadTap,
     this.onViewInChannelTap,
     this.onReplyTap,
@@ -243,11 +246,28 @@ class StreamMessageItemProps {
   /// If null, the default link handling behaviour is used.
   final void Function(Message message, String url)? onMessageLinkTap;
 
-  /// Called when a `@mention` is tapped in the message text.
+  /// Called when a user `@mention` is tapped in the message text.
   ///
   /// Receives the mentioned [User] resolved from the message's
-  /// [Message.mentionedUsers] list. If null, tapping a mention has no effect.
+  /// [Message.mentionedUsers] list. Only fires for user mentions; to handle
+  /// every mention kind (channel, here, role, group, user) in a single
+  /// callback, use [onMentionTap] instead. When both are set, [onMentionTap]
+  /// takes precedence.
+  ///
+  /// If null, tapping a user mention has no effect.
+  @Deprecated('Use onMentionTap and switch on UserMention instead')
   final void Function(User user)? onUserMentionTap;
+
+  /// Called when a mention of any kind is tapped in the message text.
+  ///
+  /// Receives a typed [Mention] subclass carrying the looked-up payload
+  /// (`UserMention.user`, `GroupMention.userGroup`, `RoleMention.role`, or no
+  /// payload for `ChannelMention` / `HereMention`). Takes precedence over
+  /// [onUserMentionTap] when both are set.
+  ///
+  /// If null, the renderer falls back to [onUserMentionTap] for user
+  /// mentions only.
+  final void Function(Mention mention)? onMentionTap;
 
   /// Called when the thread reply indicator is tapped.
   ///
@@ -341,7 +361,8 @@ class StreamMessageItemProps {
     void Function(Message)? onMessageLongPress,
     void Function(User)? onUserAvatarTap,
     void Function(Message, String)? onMessageLinkTap,
-    void Function(User)? onUserMentionTap,
+    @Deprecated('Use onMentionTap and switch on UserMention instead') void Function(User)? onUserMentionTap,
+    void Function(Mention)? onMentionTap,
     void Function(Message, Message?)? onThreadTap,
     void Function(Message)? onViewInChannelTap,
     void Function(Message)? onReplyTap,
@@ -366,6 +387,7 @@ class StreamMessageItemProps {
       onUserAvatarTap: onUserAvatarTap ?? this.onUserAvatarTap,
       onMessageLinkTap: onMessageLinkTap ?? this.onMessageLinkTap,
       onUserMentionTap: onUserMentionTap ?? this.onUserMentionTap,
+      onMentionTap: onMentionTap ?? this.onMentionTap,
       onThreadTap: onThreadTap ?? this.onThreadTap,
       onViewInChannelTap: onViewInChannelTap ?? this.onViewInChannelTap,
       onReplyTap: onReplyTap ?? this.onReplyTap,
@@ -483,6 +505,13 @@ class DefaultStreamMessageItem extends StatelessWidget {
         final onTap? => (_, id) {
           final user = message.mentionedUsers.firstWhereOrNull((u) => u.id == id);
           if (user != null) onTap(user);
+        },
+        _ => null,
+      },
+      onAnyMentionTap: switch (props.onMentionTap) {
+        final onTap? => (_, type, id) {
+          final mention = _buildMention(message, type, id);
+          if (mention != null) onTap(mention);
         },
         _ => null,
       },
@@ -1085,4 +1114,22 @@ class _StreamMessageItemDefaults extends core.StreamMessageItemThemeData {
       .channel => .visible,
     },
   );
+}
+
+Mention? _buildMention(Message message, core.MentionType type, String id) {
+  return switch (type) {
+    core.MentionType.user =>
+      message.mentionedUsers.firstWhereOrNull((u) => u.id == id)?.let((user) => UserMention(user: user)),
+    core.MentionType.channel => const ChannelMention(),
+    core.MentionType.here => const HereMention(),
+    core.MentionType.role =>
+      message.mentionedRoles?.firstWhereOrNull((r) => r == id)?.let((role) => RoleMention(role: role)),
+    core.MentionType.group =>
+      message.mentionedGroups?.firstWhereOrNull((g) => g.id == id)?.let((g) => GroupMention(userGroup: g)),
+    _ => null,
+  };
+}
+
+extension<T extends Object> on T {
+  R let<R>(R Function(T it) f) => f(this);
 }

@@ -12,6 +12,7 @@ import 'package:image_size_getter/image_size_getter.dart' hide Size;
 import 'package:stream_chat_flutter/src/audio/audio_playlist_state.dart';
 import 'package:stream_chat_flutter/src/localization/translations.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart' show kStreamMentionScheme;
 
 int _byteUnitConversionFactor = 1024;
 
@@ -359,20 +360,74 @@ extension UserListX on List<User> {
 
 /// Extensions on Message
 extension MessageX on Message {
-  /// It replaces the user mentions with the actual user names.
+  /// Wraps mention substrings in the message text with markdown so the
+  /// renderer can style and dispatch taps by mention kind.
+  ///
+  /// Covers all mention sources:
+  /// `mentionedChannel` / `mentionedHere`, `mentionedGroups`, `mentionedRoles`,
+  /// `mentionedUsers`. The user-mention output keeps the bare `mention:`
+  /// scheme so callers consuming `replaceMentions().text` or wiring up
+  /// `onTapMention` keep working unchanged; channel / here / role / group
+  /// mentions use the qualified `mention-<type>:` schemes parsed by
+  /// `_StreamMentionSyntax`.
+  ///
+  /// When [linkify] is false, mention substrings are still replaced with the
+  /// resolved display names but the markdown wrapper is omitted — used by
+  /// the preview/quoted-reply formatter.
   Message replaceMentions({bool linkify = true}) {
-    var messageTextToRender = text;
-    for (final user in mentionedUsers.toSet()) {
-      final userId = user.id;
-      final userName = user.name;
+    final initial = text;
+    if (initial == null || initial.isEmpty) return this;
+    var current = initial;
 
-      messageTextToRender = messageTextToRender?.replaceAll(
-        RegExp('@(${RegExp.escape(userId)}|${RegExp.escape(userName)})'),
-        linkify ? '[@$userName](mention:$userId)' : '@$userName',
+    String wrap(String displayName, MentionType type, String id) {
+      if (!linkify) return '@$displayName';
+      final scheme = type == MentionType.user ? kStreamMentionScheme : '$kStreamMentionScheme-${type.value}';
+      return '[@$displayName]($scheme:$id)';
+    }
+
+    // Negative lookbehind on `[` ensures an already-wrapped `[@name](...)`
+    // isn't re-matched by a later iteration when another mention source
+    // happens to share the same `@name` literal.
+    String applyReplace(String input, String literal, String replacement) {
+      return input.replaceAll(
+        RegExp('(?<!\\[)@${RegExp.escape(literal)}'),
+        replacement,
       );
     }
 
-    return copyWith(text: messageTextToRender);
+    if (mentionedChannel ?? false) {
+      final channel = MentionType.channel.value;
+      current = applyReplace(current, channel, wrap(channel, MentionType.channel, channel));
+    }
+    if (mentionedHere ?? false) {
+      final here = MentionType.here.value;
+      current = applyReplace(current, here, wrap(here, MentionType.here, here));
+    }
+
+    for (final group in mentionedGroups ?? const <UserGroup>[]) {
+      final replacement = wrap(group.name, MentionType.group, group.id);
+      current = applyReplace(current, group.id, replacement);
+      if (group.name != group.id) {
+        current = applyReplace(current, group.name, replacement);
+      }
+    }
+
+    for (final role in mentionedRoles ?? const <String>[]) {
+      current = applyReplace(current, role, wrap(role, MentionType.role, role));
+    }
+
+    // User-mention emission uses the bare `mention:` scheme (unchanged from
+    // before enhanced mentions existed) so existing consumer code stays
+    // compatible.
+    for (final user in mentionedUsers.toSet()) {
+      final replacement = wrap(user.name, MentionType.user, user.id);
+      current = applyReplace(current, user.id, replacement);
+      if (user.name != user.id) {
+        current = applyReplace(current, user.name, replacement);
+      }
+    }
+
+    return copyWith(text: current);
   }
 
   /// Returns an approximation of message size

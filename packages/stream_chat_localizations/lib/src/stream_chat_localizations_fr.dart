@@ -833,8 +833,7 @@ Limite de pièces jointes dépassée : il n'est pas possible d'ajouter plus de $
   String get notifyChannelText => 'Notifier tout le monde dans ce canal';
 
   @override
-  String get notifyHereText =>
-      'Notifier tous les membres en ligne de ce canal';
+  String get notifyHereText => 'Notifier tous les membres en ligne de ce canal';
 
   @override
   String notifyRoleText(String role) => 'Notifier tous les membres $role';

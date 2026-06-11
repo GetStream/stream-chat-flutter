@@ -118,7 +118,8 @@ class StreamMessageListView extends StatefulWidget {
     this.onReactionsTap,
     this.onQuotedMessageTap,
     this.onMessageLinkTap,
-    this.onUserMentionTap,
+    @Deprecated('Use onMentionTap and switch on UserMention instead') this.onUserMentionTap,
+    this.onMentionTap,
     this.onSystemMessageTap,
     this.onEphemeralMessageTap,
     this.onModeratedMessageTap,
@@ -201,8 +202,23 @@ class StreamMessageListView extends StatefulWidget {
 
   /// Called when a user mention is tapped in message text.
   ///
+  /// Only fires for user mentions; to handle every mention kind in a single
+  /// callback, use [onMentionTap] instead. When both are set,
+  /// [onMentionTap] takes precedence.
+  ///
   /// Forwarded to each [StreamMessageItem] in the list.
+  @Deprecated('Use onMentionTap and switch on UserMention instead')
   final void Function(User user)? onUserMentionTap;
+
+  /// Called when a mention of any kind is tapped in the message text.
+  ///
+  /// Receives a typed [Mention] subclass carrying the looked-up payload
+  /// (`UserMention.user`, `GroupMention.userGroup`, `RoleMention.role`, or no
+  /// payload for `ChannelMention` / `HereMention`). Takes precedence over
+  /// [onUserMentionTap] when both are set.
+  ///
+  /// Forwarded to each [StreamMessageItem] in the list.
+  final void Function(Mention mention)? onMentionTap;
 
   /// Index of an item to initially align within the viewport.
   final int? initialScrollIndex;
@@ -983,6 +999,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       onQuotedMessageTap: widget.onQuotedMessageTap,
       onMessageLinkTap: widget.onMessageLinkTap,
       onUserMentionTap: widget.onUserMentionTap,
+      onMentionTap: widget.onMentionTap,
     );
 
     final userId = StreamChat.of(context).currentUser!.id;
@@ -1106,6 +1123,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       onReactionsTap: widget.onReactionsTap,
       onMessageLinkTap: widget.onMessageLinkTap,
       onUserMentionTap: widget.onUserMentionTap,
+      onMentionTap: widget.onMentionTap,
       onQuotedMessageTap: switch (widget.onQuotedMessageTap) {
         final onTap? => onTap,
         _ => (quotedMessage) => _scrollToMessage(messageId: quotedMessage.id),

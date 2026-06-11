@@ -375,14 +375,13 @@ void main() {
   });
 
   group('user groups', () {
-    UserGroup buildUserGroup(String name, {List<UserGroupMember>? members}) =>
-        UserGroup(
-          id: 'group-$name',
-          name: name,
-          members: members,
-          createdAt: DateTime.utc(2024),
-          updatedAt: DateTime.utc(2024),
-        );
+    UserGroup buildUserGroup(String name, {List<UserGroupMember>? members}) => UserGroup(
+      id: 'group-$name',
+      name: name,
+      members: members,
+      createdAt: DateTime.utc(2024),
+      updatedAt: DateTime.utc(2024),
+    );
 
     testWidgets(
       'empty query does not call searchUserGroups even when notifyGroup capability is set',
@@ -391,8 +390,7 @@ void main() {
           ownCapabilities: const [ChannelCapability.notifyGroup],
         );
         when(
-          () =>
-              mocks.client.searchUserGroups(any(), limit: any(named: 'limit')),
+          () => mocks.client.searchUserGroups(any(), limit: any(named: 'limit')),
         ).thenAnswer((_) async => SearchUserGroupsResponse()..userGroups = []);
 
         await _pumpMentionOptions(
@@ -403,8 +401,7 @@ void main() {
         );
 
         verifyNever(
-          () =>
-              mocks.client.searchUserGroups(any(), limit: any(named: 'limit')),
+          () => mocks.client.searchUserGroups(any(), limit: any(named: 'limit')),
         );
       },
     );
@@ -414,8 +411,7 @@ void main() {
       (tester) async {
         final mocks = _setupMocks(ownCapabilities: const []);
         when(
-          () =>
-              mocks.client.searchUserGroups(any(), limit: any(named: 'limit')),
+          () => mocks.client.searchUserGroups(any(), limit: any(named: 'limit')),
         ).thenAnswer((_) async => SearchUserGroupsResponse()..userGroups = []);
 
         await _pumpMentionOptions(
@@ -426,8 +422,7 @@ void main() {
         );
 
         verifyNever(
-          () =>
-              mocks.client.searchUserGroups(any(), limit: any(named: 'limit')),
+          () => mocks.client.searchUserGroups(any(), limit: any(named: 'limit')),
         );
       },
     );
@@ -444,8 +439,7 @@ void main() {
             limit: any(named: 'limit'),
           ),
         ).thenAnswer(
-          (_) async => SearchUserGroupsResponse()
-            ..userGroups = [buildUserGroup('engineering')],
+          (_) async => SearchUserGroupsResponse()..userGroups = [buildUserGroup('engineering')],
         );
 
         await _pumpMentionOptions(
@@ -472,8 +466,7 @@ void main() {
           ],
         );
         when(
-          () =>
-              mocks.client.searchUserGroups(any(), limit: any(named: 'limit')),
+          () => mocks.client.searchUserGroups(any(), limit: any(named: 'limit')),
         ).thenThrow(StateError('test error'));
 
         await _pumpMentionOptions(
@@ -490,8 +483,10 @@ void main() {
   });
 
   group('users', () {
-    Member buildMember(String id, String name) =>
-        Member(userId: id, user: User(id: id, name: name));
+    Member buildMember(String id, String name) => Member(
+      userId: id,
+      user: User(id: id, name: name),
+    );
 
     testWidgets(
       'members < 100 use in-memory search and skip queryMembers API call',
@@ -540,8 +535,7 @@ void main() {
             pagination: any(named: 'pagination'),
           ),
         ).thenAnswer(
-          (_) async => QueryMembersResponse()
-            ..members = [buildMember('alice-id', 'Alice')],
+          (_) async => QueryMembersResponse()..members = [buildMember('alice-id', 'Alice')],
         );
 
         await _pumpMentionOptions(
@@ -573,8 +567,7 @@ void main() {
             pagination: any(named: 'pagination'),
           ),
         ).thenAnswer(
-          (_) async =>
-              QueryUsersResponse()..users = [User(id: 'alice-id', name: 'Alice')],
+          (_) async => QueryUsersResponse()..users = [User(id: 'alice-id', name: 'Alice')],
         );
 
         await _pumpMentionOptions(
@@ -644,7 +637,10 @@ void main() {
           ChannelCapability.notifyGroup,
         ],
         members: [
-          Member(userId: 'hannah-id', user: User(id: 'hannah-id', name: 'Hannah')),
+          Member(
+            userId: 'hannah-id',
+            user: User(id: 'hannah-id', name: 'Hannah'),
+          ),
         ],
       );
       when(
