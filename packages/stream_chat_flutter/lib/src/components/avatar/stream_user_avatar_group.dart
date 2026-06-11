@@ -55,6 +55,7 @@ class StreamUserAvatarGroup extends StatelessWidget {
     super.key,
     required this.users,
     this.size,
+    this.showShadow = false,
   });
 
   /// The list of users whose avatars are displayed.
@@ -65,6 +66,13 @@ class StreamUserAvatarGroup extends StatelessWidget {
   /// If null, defaults to [StreamAvatarGroupSize.lg].
   final StreamAvatarGroupSize? size;
 
+  /// Whether to show a drop shadow around the avatar group.
+  ///
+  /// Defaults to false. The shadow style is determined by
+  /// [StreamAvatarThemeData.boxShadow], falling back to
+  /// [StreamBoxShadow.elevation3].
+  final bool showShadow;
+
   @override
   Widget build(BuildContext context) {
     return StreamAvatarGroup(
@@ -73,6 +81,7 @@ class StreamUserAvatarGroup extends StatelessWidget {
         (user) => StreamUserAvatar(
           user: user,
           showOnlineIndicator: false,
+          showShadow: showShadow,
         ),
       ),
     );
