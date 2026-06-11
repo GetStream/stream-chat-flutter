@@ -1,4 +1,13 @@
-## Unreleased
+## Upcoming
+
+✅ Added
+
+- `StreamMessageComposer` now surfaces the hold-to-record hint through `StreamSnackbar` anchored above the composer, and `StreamChat` provides an app-wide `StreamSnackbarScope` fallback.
+
+⚠️ Deprecated
+
+- `StreamAudioRecorderController.showInfo` is now deprecated. Show your own snackbar via `StreamSnackbarMessenger.of(context).show(StreamSnackbar(...))` instead.
+- `RecordStateIdle.message` is now deprecated; the composer no longer reads it.
 
 🐞 Fixed
 
