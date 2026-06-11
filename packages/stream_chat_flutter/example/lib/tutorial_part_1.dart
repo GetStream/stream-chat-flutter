@@ -33,16 +33,22 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// If you now run the simulator you will see a single channel UI.
 Future<void> main() async {
   final client = StreamChatClient(
-    's2dxdhpxd94g',
+    'b67pax5b2wdq',
     logLevel: Level.INFO,
   );
 
   await client.connectUser(
-    User(id: 'super-band-9'),
-    '''eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoic3VwZXItYmFuZC05In0.0L6lGoeLwkz0aZRUcpZKsvaXtNEDHBcezVTZ0oPq40A''',
+    User(id: 'tutorial-flutter'),
+    '''eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidHV0b3JpYWwtZmx1dHRlciJ9.S-MJpoSwDiqyXpUURgO5wVqJ4vKlIVFLSEyrFYCOE1c''',
   );
 
-  final channel = client.channel('messaging', id: 'flutterdevs');
+  final channel = client.channel(
+    'messaging',
+    id: 'flutterdevs',
+    extraData: const {
+      'members': ['tutorial-flutter'],
+    },
+  );
 
   await channel.watch();
 
@@ -93,7 +99,10 @@ class ChannelPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = context.streamColorScheme;
+
     return Scaffold(
+      backgroundColor: colorScheme.backgroundApp,
       appBar: const StreamChannelHeader(),
       body: Column(
         children: <Widget>[
