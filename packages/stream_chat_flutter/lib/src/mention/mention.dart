@@ -2,15 +2,13 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// A typed mention surfaced by the read-side render pipeline.
 ///
-/// Open hierarchy — customers may extend [Mention] for their own
-/// [MentionType] values. Consumers of `onMentionTap` should always include a
-/// default branch in their `switch` to cover unknown subtypes.
+/// One of the five built-in subclasses: [UserMention], [ChannelMention],
+/// [HereMention], [RoleMention], [GroupMention].
 abstract class Mention {
   /// Creates a new [Mention].
   const Mention();
 
-  /// The kind of mention. One of the well-known [MentionType] constants for
-  /// built-in subclasses, or a custom value for customer subclasses.
+  /// The kind of mention — one of the five constants on [MentionType].
   MentionType get type;
 
   /// The display name of the mention, derived from the payload.
