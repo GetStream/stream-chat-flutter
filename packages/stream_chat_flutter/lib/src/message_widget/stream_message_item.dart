@@ -429,7 +429,13 @@ class DefaultStreamMessageItem extends StatelessWidget {
     final effectiveRepliesVisibility = resolve((theme) => theme?.repliesVisibility);
 
     final leadingWidget = effectiveAvatarVisibility.apply(
-      StreamMessageLeading(message: message),
+      StreamMessageLeading(
+        message: message,
+        onTap: switch ((props.onUserAvatarTap, message.user)) {
+          (final onTap?, final user?) => () => onTap(user),
+          _ => null,
+        },
+      ),
     );
 
     final headerWidget = effectiveAnnotationVisibility.apply(
