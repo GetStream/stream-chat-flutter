@@ -416,17 +416,15 @@ ListUserGroupsResponse _$ListUserGroupsResponseFromJson(
   Map<String, dynamic> json,
 ) => ListUserGroupsResponse()
   ..duration = json['duration'] as String?
-  ..userGroups = (json['user_groups'] as List<dynamic>)
-      .map((e) => UserGroup.fromJson(e as Map<String, dynamic>))
-      .toList();
+  ..userGroups =
+      (json['user_groups'] as List<dynamic>?)?.map((e) => UserGroup.fromJson(e as Map<String, dynamic>)).toList() ?? [];
 
 SearchUserGroupsResponse _$SearchUserGroupsResponseFromJson(
   Map<String, dynamic> json,
 ) => SearchUserGroupsResponse()
   ..duration = json['duration'] as String?
-  ..userGroups = (json['user_groups'] as List<dynamic>)
-      .map((e) => UserGroup.fromJson(e as Map<String, dynamic>))
-      .toList();
+  ..userGroups =
+      (json['user_groups'] as List<dynamic>?)?.map((e) => UserGroup.fromJson(e as Map<String, dynamic>)).toList() ?? [];
 
 CreateUserGroupResponse _$CreateUserGroupResponseFromJson(
   Map<String, dynamic> json,
@@ -460,7 +458,7 @@ RemoveUserGroupMembersResponse _$RemoveUserGroupMembersResponseFromJson(
 
 SearchRolesResponse _$SearchRolesResponseFromJson(Map<String, dynamic> json) => SearchRolesResponse()
   ..duration = json['duration'] as String?
-  ..roles = (json['roles'] as List<dynamic>).map((e) => Role.fromJson(e as Map<String, dynamic>)).toList();
+  ..roles = (json['roles'] as List<dynamic>?)?.map((e) => Role.fromJson(e as Map<String, dynamic>)).toList() ?? [];
 
 GetAppSettingsResponse _$GetAppSettingsResponseFromJson(
   Map<String, dynamic> json,

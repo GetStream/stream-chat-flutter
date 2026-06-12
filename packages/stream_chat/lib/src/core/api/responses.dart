@@ -805,6 +805,7 @@ class GetActiveLiveLocationsResponse extends _BaseResponse {
 @JsonSerializable(createToJson: false)
 class ListUserGroupsResponse extends _BaseResponse {
   /// List of user groups returned by the api call
+  @JsonKey(defaultValue: [])
   late List<UserGroup> userGroups;
 
   /// Create a new instance from a json
@@ -815,6 +816,7 @@ class ListUserGroupsResponse extends _BaseResponse {
 @JsonSerializable(createToJson: false)
 class SearchUserGroupsResponse extends _BaseResponse {
   /// List of user groups returned by the api call
+  @JsonKey(defaultValue: [])
   late List<UserGroup> userGroups;
 
   /// Create a new instance from a json
@@ -876,6 +878,7 @@ class RemoveUserGroupMembersResponse extends _BaseResponse {
 @JsonSerializable(createToJson: false)
 class SearchRolesResponse extends _BaseResponse {
   /// List of roles returned by the api call
+  @JsonKey(defaultValue: [])
   late List<Role> roles;
 
   /// Create a new instance from a json

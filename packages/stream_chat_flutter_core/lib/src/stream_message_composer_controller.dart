@@ -389,11 +389,10 @@ class StreamMessageComposerController extends ValueNotifier<Message> {
   /// No-op if a group with the same id is already mentioned.
   void addMentionedUserGroup(UserGroup group) {
     final groups = mentionedUserGroups;
-    if (groups.any((it) => it.id == group.id)) return;
-    final updated = [...groups, group];
+    final existingIds = message.mentionedGroupIds ?? const <String>[];
     message = message.copyWith(
-      mentionedGroups: updated,
-      mentionedGroupIds: updated.map((it) => it.id).toList(),
+      mentionedGroups: groups.any((it) => it.id == group.id) ? groups : [...groups, group],
+      mentionedGroupIds: existingIds.contains(group.id) ? existingIds : [...existingIds, group.id],
     );
   }
 
