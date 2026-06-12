@@ -1,3 +1,9 @@
+## Upcoming
+
+✅ Added
+
+- Added `mentionedChannel`, `mentionedHere`, `mentionedRoles`, `addMentionedRole`, `mentionedUserGroups`, and `addMentionedUserGroup` to `StreamMessageComposerController` for composing enhanced mentions.
+
 ## 10.0.1
 
 🛑️ Breaking
