@@ -261,7 +261,7 @@ class _StreamMentionAutocompleteOptionsState extends State<StreamMentionAutocomp
   Future<List<Role>> _fetchRoles(String query) async {
     if (query.isEmpty || !widget.channel.canNotifyRole) return const [];
     try {
-      final response = await widget.channel.client.searchRoles(query, limit: widget.limit);
+      final response = await widget.channel.client.searchRoles(query);
       return response.roles;
     } catch (_) {
       return const [];
@@ -271,7 +271,10 @@ class _StreamMentionAutocompleteOptionsState extends State<StreamMentionAutocomp
   Future<List<UserGroup>> _fetchUserGroups(String query) async {
     if (query.isEmpty || !widget.channel.canNotifyGroup) return const [];
     try {
-      final response = await widget.channel.client.searchUserGroups(query, limit: widget.limit);
+      final response = await widget.channel.client.searchUserGroups(
+        query,
+        teamId: widget.channel.team,
+      );
       return response.userGroups;
     } catch (_) {
       return const [];

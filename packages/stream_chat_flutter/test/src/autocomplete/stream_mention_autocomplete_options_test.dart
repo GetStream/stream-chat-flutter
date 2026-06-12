@@ -13,6 +13,7 @@ _MentionTestMocks _setupMocks({
   List<ChannelCapability> ownCapabilities = const [],
   List<Member> members = const [],
   List<User> watchers = const [],
+  String? team,
 }) {
   final client = MockClient();
   final clientState = MockClientState();
@@ -23,6 +24,7 @@ _MentionTestMocks _setupMocks({
   when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
   when(() => channel.state).thenReturn(channelState);
   when(() => channel.client).thenReturn(client);
+  when(() => channel.team).thenReturn(team);
   when(() => channelState.members).thenReturn(members);
   when(() => channelState.watchers).thenReturn(watchers);
 
@@ -287,7 +289,7 @@ void main() {
           ownCapabilities: const [ChannelCapability.notifyRole],
         );
         when(
-          () => mocks.client.searchRoles(any(), limit: any(named: 'limit')),
+          () => mocks.client.searchRoles(any()),
         ).thenAnswer((_) async => SearchRolesResponse()..roles = []);
 
         await _pumpMentionOptions(
@@ -297,9 +299,7 @@ void main() {
           query: '',
         );
 
-        verifyNever(
-          () => mocks.client.searchRoles(any(), limit: any(named: 'limit')),
-        );
+        verifyNever(() => mocks.client.searchRoles(any()));
       },
     );
 
@@ -308,7 +308,7 @@ void main() {
       (tester) async {
         final mocks = _setupMocks(ownCapabilities: const []);
         when(
-          () => mocks.client.searchRoles(any(), limit: any(named: 'limit')),
+          () => mocks.client.searchRoles(any()),
         ).thenAnswer((_) async => SearchRolesResponse()..roles = []);
 
         await _pumpMentionOptions(
@@ -318,9 +318,7 @@ void main() {
           query: 'admin',
         );
 
-        verifyNever(
-          () => mocks.client.searchRoles(any(), limit: any(named: 'limit')),
-        );
+        verifyNever(() => mocks.client.searchRoles(any()));
       },
     );
 
@@ -330,9 +328,7 @@ void main() {
         final mocks = _setupMocks(
           ownCapabilities: const [ChannelCapability.notifyRole],
         );
-        when(
-          () => mocks.client.searchRoles('admin', limit: any(named: 'limit')),
-        ).thenAnswer(
+        when(() => mocks.client.searchRoles('admin')).thenAnswer(
           (_) async => SearchRolesResponse()..roles = [buildRole('admin')],
         );
 
@@ -344,7 +340,7 @@ void main() {
         );
 
         expect(find.text('@admin'), findsOneWidget);
-        verify(() => mocks.client.searchRoles('admin', limit: 10)).called(1);
+        verify(() => mocks.client.searchRoles('admin')).called(1);
       },
     );
 
@@ -358,7 +354,7 @@ void main() {
           ],
         );
         when(
-          () => mocks.client.searchRoles(any(), limit: any(named: 'limit')),
+          () => mocks.client.searchRoles(any()),
         ).thenThrow(StateError('test error'));
 
         await _pumpMentionOptions(
@@ -390,7 +386,7 @@ void main() {
           ownCapabilities: const [ChannelCapability.notifyGroup],
         );
         when(
-          () => mocks.client.searchUserGroups(any(), limit: any(named: 'limit')),
+          () => mocks.client.searchUserGroups(any(), teamId: any(named: 'teamId')),
         ).thenAnswer((_) async => SearchUserGroupsResponse()..userGroups = []);
 
         await _pumpMentionOptions(
@@ -401,7 +397,7 @@ void main() {
         );
 
         verifyNever(
-          () => mocks.client.searchUserGroups(any(), limit: any(named: 'limit')),
+          () => mocks.client.searchUserGroups(any(), teamId: any(named: 'teamId')),
         );
       },
     );
@@ -411,7 +407,7 @@ void main() {
       (tester) async {
         final mocks = _setupMocks(ownCapabilities: const []);
         when(
-          () => mocks.client.searchUserGroups(any(), limit: any(named: 'limit')),
+          () => mocks.client.searchUserGroups(any(), teamId: any(named: 'teamId')),
         ).thenAnswer((_) async => SearchUserGroupsResponse()..userGroups = []);
 
         await _pumpMentionOptions(
@@ -422,7 +418,7 @@ void main() {
         );
 
         verifyNever(
-          () => mocks.client.searchUserGroups(any(), limit: any(named: 'limit')),
+          () => mocks.client.searchUserGroups(any(), teamId: any(named: 'teamId')),
         );
       },
     );
@@ -434,10 +430,7 @@ void main() {
           ownCapabilities: const [ChannelCapability.notifyGroup],
         );
         when(
-          () => mocks.client.searchUserGroups(
-            'eng',
-            limit: any(named: 'limit'),
-          ),
+          () => mocks.client.searchUserGroups('eng', teamId: any(named: 'teamId')),
         ).thenAnswer(
           (_) async => SearchUserGroupsResponse()..userGroups = [buildUserGroup('engineering')],
         );
@@ -451,7 +444,33 @@ void main() {
 
         expect(find.text('@engineering'), findsOneWidget);
         verify(
-          () => mocks.client.searchUserGroups('eng', limit: 10),
+          () => mocks.client.searchUserGroups('eng', teamId: null),
+        ).called(1);
+      },
+    );
+
+    testWidgets(
+      'non-empty query forwards channel.team as teamId to searchUserGroups',
+      (tester) async {
+        final mocks = _setupMocks(
+          ownCapabilities: const [ChannelCapability.notifyGroup],
+          team: 'team-blue',
+        );
+        when(
+          () => mocks.client.searchUserGroups('eng', teamId: any(named: 'teamId')),
+        ).thenAnswer(
+          (_) async => SearchUserGroupsResponse()..userGroups = [buildUserGroup('engineering')],
+        );
+
+        await _pumpMentionOptions(
+          tester,
+          client: mocks.client,
+          channel: mocks.channel,
+          query: 'eng',
+        );
+
+        verify(
+          () => mocks.client.searchUserGroups('eng', teamId: 'team-blue'),
         ).called(1);
       },
     );
@@ -466,7 +485,7 @@ void main() {
           ],
         );
         when(
-          () => mocks.client.searchUserGroups(any(), limit: any(named: 'limit')),
+          () => mocks.client.searchUserGroups(any(), teamId: any(named: 'teamId')),
         ).thenThrow(StateError('test error'));
 
         await _pumpMentionOptions(
@@ -643,9 +662,7 @@ void main() {
           ),
         ],
       );
-      when(
-        () => mocks.client.searchRoles('h', limit: any(named: 'limit')),
-      ).thenAnswer(
+      when(() => mocks.client.searchRoles('h')).thenAnswer(
         (_) async => SearchRolesResponse()
           ..roles = [
             Role(
@@ -658,7 +675,7 @@ void main() {
           ],
       );
       when(
-        () => mocks.client.searchUserGroups('h', limit: any(named: 'limit')),
+        () => mocks.client.searchUserGroups('h', teamId: any(named: 'teamId')),
       ).thenAnswer(
         (_) async => SearchUserGroupsResponse()
           ..userGroups = [
@@ -728,9 +745,7 @@ void main() {
             ),
           ],
         );
-        when(
-          () => mocks.client.searchRoles('h', limit: any(named: 'limit')),
-        ).thenAnswer(
+        when(() => mocks.client.searchRoles('h')).thenAnswer(
           (_) async => SearchRolesResponse()
             ..roles = [
               Role(
@@ -743,7 +758,7 @@ void main() {
             ],
         );
         when(
-          () => mocks.client.searchUserGroups('h', limit: any(named: 'limit')),
+          () => mocks.client.searchUserGroups('h', teamId: any(named: 'teamId')),
         ).thenAnswer(
           (_) async => SearchUserGroupsResponse()
             ..userGroups = [
