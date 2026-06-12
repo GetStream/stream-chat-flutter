@@ -392,6 +392,7 @@ class MessageComposerProps {
 
   /// The location of the message composer.
   final ComposerLocation? composerLocation;
+
   /// Returns a copy of this [MessageComposerProps] with the given fields
   /// replaced with new values.
   MessageComposerProps copyWith({
@@ -1031,28 +1032,28 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     };
     final useSystemPicker = widget.props.useSystemAttachmentPicker || isWebOrDesktop;
 
-    if (useSystemPicker) {
-      return systemAttachmentPickerBuilder(
-        context: context,
-        controller: _pickerController!,
-        allowedTypes: allowedTypes,
-        pollConfig: widget.props.pollConfig,
-        optionsBuilder: widget.props.attachmentPickerOptionsBuilder,
-        onError: _onPickerError,
-        onPollCreated: _onPollCreated,
-      );
-    }
+    final child = useSystemPicker
+        ? systemAttachmentPickerBuilder(
+            context: context,
+            controller: _pickerController!,
+            allowedTypes: allowedTypes,
+            pollConfig: widget.props.pollConfig,
+            optionsBuilder: widget.props.attachmentPickerOptionsBuilder,
+            onError: _onPickerError,
+            onPollCreated: _onPollCreated,
+          )
+        : tabbedAttachmentPickerBuilder(
+            context: context,
+            controller: _pickerController!,
+            allowedTypes: allowedTypes,
+            pollConfig: widget.props.pollConfig,
+            optionsBuilder: widget.props.attachmentPickerOptionsBuilder,
+            onError: _onPickerError,
+            onPollCreated: _onPollCreated,
+            onCommandSelected: _onCommandSelectedFromPicker,
+          );
 
-    return tabbedAttachmentPickerBuilder(
-      context: context,
-      controller: _pickerController!,
-      allowedTypes: allowedTypes,
-      pollConfig: widget.props.pollConfig,
-      optionsBuilder: widget.props.attachmentPickerOptionsBuilder,
-      onError: _onPickerError,
-      onPollCreated: _onPollCreated,
-      onCommandSelected: _onCommandSelectedFromPicker,
-    );
+    return ColoredBox(color: context.streamColorScheme.backgroundElevation1, child: child);
   }
 
   void _onCommandSelectedFromPicker(Command command) {
