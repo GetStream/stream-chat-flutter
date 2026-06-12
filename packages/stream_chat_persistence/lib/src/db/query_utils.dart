@@ -12,6 +12,9 @@ import 'dart:math' as math;
 /// chunk size of 900 leaves headroom for any other bound parameters that
 /// share the same statement (for example a `AND userId = ?` filter).
 Iterable<List<T>> chunked<T>(List<T> input, [int size = 900]) sync* {
+  if (size <= 0) {
+    throw ArgumentError.value(size, 'size', 'must be greater than 0');
+  }
   for (var i = 0; i < input.length; i += size) {
     yield input.sublist(i, math.min(i + size, input.length));
   }
