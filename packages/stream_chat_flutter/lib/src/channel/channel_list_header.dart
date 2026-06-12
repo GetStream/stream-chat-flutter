@@ -80,6 +80,7 @@ class StreamChannelListHeader extends StatelessWidget implements PreferredSizeWi
     this.trailing,
     this.primary = true,
     this.style,
+    this.appBarBehavior,
   });
 
   /// Use this if you don't have a [StreamChatClient] in your widget tree.
@@ -117,6 +118,9 @@ class StreamChannelListHeader extends StatelessWidget implements PreferredSizeWi
   /// [StreamChatThemeData.channelListHeaderTheme].
   final StreamAppBarStyle? style;
 
+  /// Whether the header is floating.
+  final AppBarBehavior? appBarBehavior;
+
   @override
   Size get preferredSize => const Size.fromHeight(kStreamToolbarHeight);
 
@@ -125,7 +129,12 @@ class StreamChannelListHeader extends StatelessWidget implements PreferredSizeWi
     final _client = client ?? StreamChat.of(context).client;
     final headerTheme = StreamChatTheme.of(context).channelListHeaderTheme;
 
-    final leading = _DefaultUserAvatar(client: _client, onPressed: onUserAvatarPressed);
+    final hasAvatarShadow = switch (appBarBehavior ?? StreamTheme.of(context).appStyle.appBarBehavior) {
+      .floating => true,
+      .regular => false,
+    };
+
+    final leading = _DefaultUserAvatar(client: _client, onPressed: onUserAvatarPressed, showShadow: hasAvatarShadow);
 
     return Portal(
       child: StreamConnectionStatusBuilder(
@@ -179,10 +188,11 @@ class StreamChannelListHeader extends StatelessWidget implements PreferredSizeWi
 }
 
 class _DefaultUserAvatar extends StatelessWidget {
-  const _DefaultUserAvatar({required this.client, this.onPressed});
+  const _DefaultUserAvatar({required this.client, this.onPressed, this.showShadow = false});
 
   final StreamChatClient client;
   final void Function(User user)? onPressed;
+  final bool showShadow;
 
   @override
   Widget build(BuildContext context) {
@@ -211,6 +221,7 @@ class _DefaultUserAvatar extends StatelessWidget {
             size: .lg,
             user: user,
             showOnlineIndicator: false,
+            showShadow: showShadow,
           ),
         ),
       ),
