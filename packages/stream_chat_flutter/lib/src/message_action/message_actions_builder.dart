@@ -115,6 +115,7 @@ class StreamMessageActionsBuilder {
     final isParentMessage = (message.replyCount ?? 0) > 0;
     final canShowInChannel = message.showInChannel ?? true;
     final isPrivateMessage = message.hasRestrictedVisibility;
+    final repliesEnabled = channel.config?.replies ?? true;
     final canSendReply = channel.canSendReply;
     final canPinMessage = channel.canPinMessage;
     final canQuoteMessage = channel.canQuoteMessage;
@@ -143,7 +144,7 @@ class StreamMessageActionsBuilder {
     // Thread reply action is only available for parent messages that are not in a
     // thread view, as replying in a thread that is already being viewed doesn't make sense.
     // Additionally, the channel needs to support sending replies.
-    if (canSendReply && !isThreadMessage && !isInThreadView) {
+    if (canSendReply && repliesEnabled && !isThreadMessage && !isInThreadView) {
       messageActions.add(
         StreamContextMenuAction(
           value: ThreadReply(message: message),
