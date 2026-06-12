@@ -138,11 +138,12 @@ class _NewChatScreenState extends State<NewChatScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return StreamScaffold(
       backgroundColor: context.streamColorScheme.backgroundApp,
       appBar: StreamAppBar(title: const Text('New Chat')),
       body: StreamConnectionStatusBuilder(
         statusBuilder: (context, status) {
+          final topInset = StreamScaffoldInsets.maybeOf(context)?.topPadding ?? 0.0;
           var statusString = '';
           var showStatus = true;
 
@@ -169,6 +170,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  if (topInset > 0) SizedBox(height: topInset),
                   ChipsInputTextField<User>(
                     key: _chipInputTextFieldStateKey,
                     controller: _controller,

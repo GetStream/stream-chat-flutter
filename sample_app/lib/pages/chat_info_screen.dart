@@ -27,31 +27,36 @@ class ChatInfoScreen extends StatelessWidget {
     final spacing = context.streamSpacing;
     final colorScheme = context.streamColorScheme;
 
-    return Scaffold(
+    return StreamScaffold(
       backgroundColor: colorScheme.backgroundApp,
       appBar: StreamAppBar(title: const Text('Contact Info')),
       // Action / chevron icons share a uniform 20px size — set once at the
       // top of the body so individual rows stay style-free.
-      body: IconTheme.merge(
-        data: const IconThemeData(size: 20),
-        child: SingleChildScrollView(
-          padding: .directional(
-            top: spacing.xxl,
-            bottom: spacing.xxxl,
-            start: spacing.md,
-            end: spacing.md,
-          ),
-          child: Column(
-            mainAxisSize: .min,
-            children: [
-              _ContactInfoHeader(user: user),
-              SizedBox(height: spacing.xxl),
-              const _MediaSection(),
-              SizedBox(height: spacing.md),
-              const _ActionsSection(),
-            ],
-          ),
-        ),
+      body: Builder(
+        builder: (context) {
+          final topInset = StreamScaffoldInsets.maybeOf(context)?.topPadding ?? 0.0;
+          return IconTheme.merge(
+            data: const IconThemeData(size: 20),
+            child: SingleChildScrollView(
+              padding: .directional(
+                top: spacing.xxl + topInset,
+                bottom: spacing.xxxl,
+                start: spacing.md,
+                end: spacing.md,
+              ),
+              child: Column(
+                mainAxisSize: .min,
+                children: [
+                  _ContactInfoHeader(user: user),
+                  SizedBox(height: spacing.xxl),
+                  const _MediaSection(),
+                  SizedBox(height: spacing.md),
+                  const _ActionsSection(),
+                ],
+              ),
+            ),
+          );
+        },
       ),
     );
   }

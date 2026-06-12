@@ -39,50 +39,54 @@ class _ChannelFileDisplayScreenState extends State<ChannelFileDisplayScreen> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = context.streamColorScheme;
-    return Scaffold(
+    return StreamScaffold(
       backgroundColor: colorScheme.backgroundApp,
       appBar: StreamAppBar(title: const Text('Files')),
       body: ValueListenableBuilder<PagedValue<String, GetMessageResponse>>(
         valueListenable: _controller,
-        builder: (context, value, _) => value.when(
-          (items, nextPageKey, _) {
-            // Flatten messages → individual file attachments paired with
-            // the message timestamp we'll bucket on.
-            final entries = <_FileEntry>[
-              for (final response in items)
-                for (final attachment in response.message.attachments)
-                  if (attachment.type == 'file')
-                    _FileEntry(
-                      attachment: attachment,
-                      sentAt: response.message.createdAt,
-                    ),
-            ];
+        builder: (context, value, _) {
+          final topInset = StreamScaffoldInsets.maybeOf(context)?.topPadding ?? 0.0;
+          return value.when(
+            (items, nextPageKey, _) {
+              // Flatten messages → individual file attachments paired with
+              // the message timestamp we'll bucket on.
+              final entries = <_FileEntry>[
+                for (final response in items)
+                  for (final attachment in response.message.attachments)
+                    if (attachment.type == 'file')
+                      _FileEntry(
+                        attachment: attachment,
+                        sentAt: response.message.createdAt,
+                      ),
+              ];
 
-            if (entries.isEmpty) return const Center(child: _EmptyState());
+              if (entries.isEmpty) return const Center(child: _EmptyState());
 
-            // Pre-build a flat row list — interleave a header row above
-            // each month bucket so a single ListView.builder can render
-            // both kinds of rows without a CustomScrollView + slivers.
-            final rows = _buildRows(entries);
+              // Pre-build a flat row list — interleave a header row above
+              // each month bucket so a single ListView.builder can render
+              // both kinds of rows without a CustomScrollView + slivers.
+              final rows = _buildRows(entries);
 
-            return LazyLoadScrollView(
-              onEndOfPage: () async {
-                if (nextPageKey != null) await _controller.loadMore(nextPageKey);
-              },
-              child: ListView.builder(
-                itemCount: rows.length,
-                itemBuilder: (context, index) => rows[index].build(context),
+              return LazyLoadScrollView(
+                onEndOfPage: () async {
+                  if (nextPageKey != null) await _controller.loadMore(nextPageKey);
+                },
+                child: ListView.builder(
+                  padding: EdgeInsets.only(top: topInset),
+                  itemCount: rows.length,
+                  itemBuilder: (context, index) => rows[index].build(context),
+                ),
+              );
+            },
+            loading: () => const Center(child: StreamScrollViewLoadingWidget()),
+            error: (_) => Center(
+              child: StreamScrollViewErrorWidget(
+                errorTitle: const Text('Failed to load files'),
+                onRetryPressed: _controller.refresh,
               ),
-            );
-          },
-          loading: () => const Center(child: StreamScrollViewLoadingWidget()),
-          error: (_) => Center(
-            child: StreamScrollViewErrorWidget(
-              errorTitle: const Text('Failed to load files'),
-              onRetryPressed: _controller.refresh,
             ),
-          ),
-        ),
+          );
+        },
       ),
     );
   }
