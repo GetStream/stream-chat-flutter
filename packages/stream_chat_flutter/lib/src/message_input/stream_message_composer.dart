@@ -70,7 +70,12 @@ class StreamMessageComposer extends StatelessWidget {
     bool enableVoiceRecording = true,
     bool sendVoiceRecordingAutomatically = false,
     AudioRecorderFeedback voiceRecordingFeedback = const AudioRecorderFeedback(),
-    UserMentionTileBuilder? userMentionsTileBuilder,
+    @Deprecated('Use mentionUserTileBuilder instead') UserMentionTileBuilder? userMentionsTileBuilder,
+    WidgetBuilder? mentionChannelTileBuilder,
+    WidgetBuilder? mentionHereTileBuilder,
+    MentionRoleTileBuilder? mentionRoleTileBuilder,
+    MentionUserGroupTileBuilder? mentionUserGroupTileBuilder,
+    UserMentionTileBuilder? mentionUserTileBuilder,
     ErrorListener? onError,
     int attachmentLimit = StreamAttachmentValidator.defaultMaxAttachmentCount,
     List<AttachmentPickerType> allowedAttachmentPickerTypes = AttachmentPickerType.values,
@@ -105,7 +110,13 @@ class StreamMessageComposer extends StatelessWidget {
          enableVoiceRecording: enableVoiceRecording,
          sendVoiceRecordingAutomatically: sendVoiceRecordingAutomatically,
          voiceRecordingFeedback: voiceRecordingFeedback,
+         // ignore: deprecated_member_use_from_same_package
          userMentionsTileBuilder: userMentionsTileBuilder,
+         mentionChannelTileBuilder: mentionChannelTileBuilder,
+         mentionHereTileBuilder: mentionHereTileBuilder,
+         mentionRoleTileBuilder: mentionRoleTileBuilder,
+         mentionUserGroupTileBuilder: mentionUserGroupTileBuilder,
+         mentionUserTileBuilder: mentionUserTileBuilder,
          onError: onError,
          attachmentLimit: attachmentLimit,
          allowedAttachmentPickerTypes: allowedAttachmentPickerTypes,
@@ -165,7 +176,12 @@ class MessageComposerProps {
     this.enableVoiceRecording = false,
     this.sendVoiceRecordingAutomatically = false,
     this.voiceRecordingFeedback = const AudioRecorderFeedback(),
-    this.userMentionsTileBuilder,
+    @Deprecated('Use mentionUserTileBuilder instead') this.userMentionsTileBuilder,
+    this.mentionChannelTileBuilder,
+    this.mentionHereTileBuilder,
+    this.mentionRoleTileBuilder,
+    this.mentionUserGroupTileBuilder,
+    this.mentionUserTileBuilder,
     this.onError,
     this.attachmentLimit = StreamAttachmentValidator.defaultMaxAttachmentCount,
     this.allowedAttachmentPickerTypes = AttachmentPickerType.values,
@@ -258,7 +274,23 @@ class MessageComposerProps {
   final AudioRecorderFeedback voiceRecordingFeedback;
 
   /// Customize the tile for the mentions overlay.
+  @Deprecated('Use mentionUserTileBuilder instead')
   final UserMentionTileBuilder? userMentionsTileBuilder;
+
+  /// Customize the row shown for the `@channel` broadcast mention suggestion.
+  final WidgetBuilder? mentionChannelTileBuilder;
+
+  /// Customize the row shown for the `@here` broadcast mention suggestion.
+  final WidgetBuilder? mentionHereTileBuilder;
+
+  /// Customize the row shown for a role mention suggestion.
+  final MentionRoleTileBuilder? mentionRoleTileBuilder;
+
+  /// Customize the row shown for a user-group mention suggestion.
+  final MentionUserGroupTileBuilder? mentionUserGroupTileBuilder;
+
+  /// Customize the row shown for a user mention suggestion.
+  final UserMentionTileBuilder? mentionUserTileBuilder;
 
   /// A callback for error reporting
   final ErrorListener? onError;
@@ -854,7 +886,15 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
                     query: query,
                     channel: StreamChannel.of(context).channel,
                     mentionAllAppUsers: widget.props.mentionAllAppUsers,
-                    mentionsTileBuilder: widget.props.userMentionsTileBuilder,
+                    mentionChannelTileBuilder: widget.props.mentionChannelTileBuilder,
+                    mentionHereTileBuilder: widget.props.mentionHereTileBuilder,
+                    mentionRoleTileBuilder: widget.props.mentionRoleTileBuilder,
+                    mentionUserGroupTileBuilder: widget.props.mentionUserGroupTileBuilder,
+                    mentionUserTileBuilder:
+                        widget.props.mentionUserTileBuilder
+                        // ignore: deprecated_member_use_from_same_package
+                        ??
+                        widget.props.userMentionsTileBuilder,
                     onMentionChannelTap: () {
                       _effectiveController.mentionedChannel = true;
                       StreamAutocomplete.of(context).acceptAutocompleteOption('channel');
