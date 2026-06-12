@@ -53,7 +53,8 @@ class ErrorResponse extends _BaseResponse {
   Map<String, dynamic> toJson() => _$ErrorResponseToJson(this);
 
   @override
-  String toString() => 'ErrorResponse(code: $code, '
+  String toString() =>
+      'ErrorResponse(code: $code, '
       'message: $message, '
       'statusCode: $statusCode, '
       'moreInfo: $moreInfo)';
@@ -850,10 +851,13 @@ class UpsertPushPreferencesResponse extends _BaseResponse {
       _$UpsertPushPreferencesResponseFromJson(json);
 }
 
-Map<String, PushPreference> _userPreferencesFromJson(Map<String, dynamic>? json) {
+Map<String, PushPreference> _userPreferencesFromJson(
+  Map<String, dynamic>? json,
+) {
   if (json == null) return {};
   return {
     for (final MapEntry(:key, :value) in json.entries)
-      if (value != null) key: PushPreference.fromJson(value as Map<String, dynamic>),
+      if (value != null)
+        key: PushPreference.fromJson(value as Map<String, dynamic>),
   };
 }
