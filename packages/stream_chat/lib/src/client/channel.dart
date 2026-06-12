@@ -4290,13 +4290,19 @@ class ChannelClientState {
     final currentUserId = _client.state.currentUser?.id;
     if (currentUserId == null) return;
 
+    DateTime? maxCreatedAt;
     for (final message in messages) {
       if (message.user?.id != currentUserId) continue;
       if (message.isEphemeral) continue;
-      final current = _currentUserLastSentAtController.value;
-      if (current == null || message.createdAt.isAfter(current)) {
-        _currentUserLastSentAtController.safeAdd(message.createdAt);
+      if (maxCreatedAt == null || message.createdAt.isAfter(maxCreatedAt)) {
+        maxCreatedAt = message.createdAt;
       }
+    }
+
+    if (maxCreatedAt == null) return;
+    final current = _currentUserLastSentAtController.value;
+    if (current == null || maxCreatedAt.isAfter(current)) {
+      _currentUserLastSentAtController.safeAdd(maxCreatedAt);
     }
   }
 
