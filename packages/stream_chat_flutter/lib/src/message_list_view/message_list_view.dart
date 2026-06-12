@@ -789,18 +789,28 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
             ),
           ),
         if (_config.showScrollToBottom)
-          BetterStreamBuilder<bool>(
-            stream: streamChannel!.channel.state!.isUpToDateStream,
-            initialData: streamChannel!.channel.state!.isUpToDate,
-            builder: (context, snapshot) => ValueListenableBuilder<bool>(
+          if (_isThreadConversation)
+            ValueListenableBuilder<bool>(
               valueListenable: _showScrollToBottom,
               child: _buildScrollToBottom(),
               builder: (context, value, child) {
-                if (!snapshot || value) return child!;
+                if (value) return child!;
                 return const Empty();
               },
+            )
+          else
+            BetterStreamBuilder<bool>(
+              stream: streamChannel!.channel.state!.isUpToDateStream,
+              initialData: streamChannel!.channel.state!.isUpToDate,
+              builder: (context, snapshot) => ValueListenableBuilder<bool>(
+                valueListenable: _showScrollToBottom,
+                child: _buildScrollToBottom(),
+                builder: (context, value, child) {
+                  if (!snapshot || value) return child!;
+                  return const Empty();
+                },
+              ),
             ),
-          ),
         if (_config.showUnreadIndicator && !_isThreadConversation)
           Positioned(
             top: max(widget.topPadding, context.streamSpacing.sm),
