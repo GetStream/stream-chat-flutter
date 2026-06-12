@@ -75,7 +75,7 @@ class _StreamGalleryPickerState extends State<StreamGalleryPicker> {
     return FutureBuilder<PermissionState>(
       future: requestPermission,
       builder: (context, snapshot) {
-        if (!snapshot.hasData) return const Empty();
+        if (!snapshot.hasData) return const SizedBox.expand();
 
         final spacing = context.streamSpacing;
         final textTheme = context.streamTextTheme;
