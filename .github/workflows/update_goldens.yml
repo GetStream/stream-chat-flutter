@@ -57,7 +57,7 @@ jobs:
 
       - name: 📤 Upload SDK goldens artifact
         if: steps.detect.outputs.changed == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: sdk-goldens
           path: sdk-goldens.tgz
@@ -106,7 +106,7 @@ jobs:
 
       - name: 📤 Upload docs goldens artifact
         if: steps.detect.outputs.changed == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: docs-goldens
           path: docs-goldens.tgz
@@ -130,13 +130,13 @@ jobs:
 
       - name: 📥 Download SDK goldens
         if: needs.update_sdk_goldens.outputs.changed == 'true'
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: sdk-goldens
 
       - name: 📥 Download docs goldens
         if: needs.update_docs_goldens.outputs.changed == 'true'
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: docs-goldens
 

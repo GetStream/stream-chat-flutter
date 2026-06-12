@@ -171,6 +171,47 @@ void main() {
     });
   });
 
+  group('getPollVotesForPolls', () {
+    test('returns empty map for empty input ids', () async {
+      final result = await pollVoteDao.getPollVotesForPolls(const []);
+      expect(result, isEmpty);
+    });
+
+    test('returns votes grouped by poll id; polls with no votes (or unknown '
+        'ids) map to an empty list', () async {
+      const pollWithVotes = 'poll-with-votes';
+      const pollWithoutVotes = 'poll-without-votes';
+      const pollUnknown = 'poll-unknown';
+
+      // _preparePollVoteData seeds the poll plus 3 votes per option (9
+      // total) and inserts the necessary users.
+      final seededVotes = await _preparePollVoteData(pollWithVotes);
+      // Seed a second poll with no votes — just to confirm cross-poll
+      // isolation (votes from pollWithVotes must not leak into its bucket).
+      await database.pollDao.updatePolls([
+        Poll(
+          id: pollWithoutVotes,
+          name: 'No votes here',
+          options: const [PollOption(id: 'opt', text: 'X')],
+          createdById: 'user-0',
+        ),
+      ]);
+
+      final result = await pollVoteDao.getPollVotesForPolls(
+        const [pollWithVotes, pollWithoutVotes, pollUnknown],
+      );
+
+      expect(result.keys, unorderedEquals([pollWithVotes, pollWithoutVotes, pollUnknown]));
+      expect(result[pollWithVotes], hasLength(seededVotes.length));
+      expect(
+        result[pollWithVotes]!.every((v) => v.pollId == pollWithVotes),
+        isTrue,
+      );
+      expect(result[pollWithoutVotes], isEmpty);
+      expect(result[pollUnknown], isEmpty);
+    });
+  });
+
   tearDown(() async {
     await database.disconnect();
   });

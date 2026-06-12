@@ -215,6 +215,36 @@ void main() {
     });
   });
 
+  group('hideInfo', () {
+    test('clears the info message immediately', () {
+      controller.showInfo('Test Message');
+      expect((controller.value as RecordStateIdle).message, 'Test Message');
+
+      controller.hideInfo();
+
+      expect((controller.value as RecordStateIdle).message, isNull);
+    });
+
+    test('cancels the pending auto-clear timer', () async {
+      controller.showInfo('Test Message', duration: const Duration(milliseconds: 100));
+      expect((controller.value as RecordStateIdle).message, 'Test Message');
+
+      controller.hideInfo();
+      controller.showInfo('Other Message', duration: const Duration(seconds: 5));
+      expect((controller.value as RecordStateIdle).message, 'Other Message');
+
+      // Wait past the original (now-canceled) timer; the new message must
+      // still be present.
+      await Future.delayed(const Duration(milliseconds: 150));
+      expect((controller.value as RecordStateIdle).message, 'Other Message');
+    });
+
+    test('is a no-op when no info message is being shown', () {
+      controller.hideInfo();
+      expect((controller.value as RecordStateIdle).message, isNull);
+    });
+  });
+
   group('amplitude changes', () {
     setUp(() {
       when(() => mockRecorder.hasPermission(request: false)).thenAnswer((_) async => true);

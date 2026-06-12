@@ -1,4 +1,20 @@
-## Upcoming Beta Changes
+## Upcoming
+
+✅ Added
+
+- `StreamMessageComposer` now surfaces the hold-to-record hint through `StreamSnackbar` anchored above the composer, and `StreamChat` provides an app-wide `StreamSnackbarScope` fallback.
+
+⚠️ Deprecated
+
+- `StreamAudioRecorderController.showInfo` is now deprecated. Show your own snackbar via `StreamSnackbarMessenger.of(context).show(StreamSnackbar(...))` instead.
+- `RecordStateIdle.message` is now deprecated; the composer no longer reads it.
+
+🐞 Fixed
+
+- `StreamMessageItem.onUserAvatarTap` now fires when the author avatar is tapped. ([#2741](https://github.com/GetStream/stream-chat-flutter/issues/2741))
+- Added `MessageComposerProps.copyWith` so factory overrides can tweak individual props (e.g. `useSystemAttachmentPicker`) without re-specifying every field. ([#2742](https://github.com/GetStream/stream-chat-flutter/issues/2742))
+
+## 10.0.1
 
 🐞 Fixed
 
@@ -155,7 +171,7 @@
 - Fixed tapping a quoted parent message inside a thread doing nothing (or kicking back to the channel). The thread message list now resolves the parent slot directly and scrolls/highlights it instead of falling through to `loadChannelAtMessage`.
 - Fixed the jump-to-message highlight starting before the scroll settled, which made the fade barely visible (or invisible if the target hadn't been mounted yet). The message list now awaits the scroll, then plays a 1s hold + 1s ease-out fade — closer to the highlight feel in Slack's permalink jump.
 
-## Upcoming Changes
+## 9.25.0
 
 🐞 Fixed
 

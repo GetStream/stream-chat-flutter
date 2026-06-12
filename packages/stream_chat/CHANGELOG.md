@@ -1,4 +1,4 @@
-## Upcoming
+## 10.0.1
 
 ✅ Added
 
@@ -33,6 +33,10 @@
 - Fixed `Channel.sendMessage` / `Channel.updateMessage` hanging forever when any attachment upload failed; they now throw `StreamChatError`.
 - Fixed quoted poll messages losing their poll, shared-location, or nested-quote content when the server omits it from the `quoted_message` payload during channel re-sync.
 - Fixed a poll attached to a parent message disappearing when a thread reply was added; partial `message.updated` events no longer clobber locally-known `poll` / `sharedLocation` on the parent.
+
+## 9.25.0
+
+- Minor bug fixes and improvements
 
 ## 9.24.0
 
