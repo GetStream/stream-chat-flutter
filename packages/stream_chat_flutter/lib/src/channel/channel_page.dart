@@ -29,7 +29,7 @@ class StreamChannelPage extends StatefulWidget {
 }
 
 class _StreamChannelPageState extends State<StreamChannelPage> {
-  FocusNode? _focusNode;
+  late final FocusNode _focusNode;
   final _messageComposerController = StreamMessageComposerController();
 
   @override
@@ -40,21 +40,21 @@ class _StreamChannelPageState extends State<StreamChannelPage> {
 
   @override
   void dispose() {
-    _focusNode!.dispose();
+    _focusNode.dispose();
     super.dispose();
   }
 
   void _reply(Message message) {
     _messageComposerController.quotedMessage = message;
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      _focusNode!.requestFocus();
+      _focusNode.requestFocus();
     });
   }
 
   void _editMessage(Message message) {
     _messageComposerController.editMessage(message);
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      _focusNode!.requestFocus();
+      _focusNode.requestFocus();
     });
   }
 

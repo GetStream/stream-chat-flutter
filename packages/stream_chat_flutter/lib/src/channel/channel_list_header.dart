@@ -118,7 +118,8 @@ class StreamChannelListHeader extends StatelessWidget implements PreferredSizeWi
   /// [StreamChatThemeData.channelListHeaderTheme].
   final StreamAppBarStyle? style;
 
-  /// Whether the header is floating.
+  /// Controls the header's visual/layout behavior (e.g. floating vs pinned).
+  /// Falls back to the theme's default when null.
   final AppBarBehavior? appBarBehavior;
 
   @override

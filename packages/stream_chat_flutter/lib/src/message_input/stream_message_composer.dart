@@ -11,9 +11,6 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 const _kCommandTrigger = '/';
 const _kMentionTrigger = '@';
 
-/// Fixed height of the inline attachment picker body.
-const _kPickerBodyHeight = 333.0;
-
 /// Signature for the function that determines if a [matchedUri] should be
 /// previewed as an OG Attachment.
 typedef OgPreviewFilter = bool Function(Uri matchedUri, String messageText);
@@ -430,6 +427,7 @@ class MessageComposerProps {
     TextCapitalization? textCapitalization,
     bool? autofocus,
     bool? autoCorrect,
+    ComposerLocation? composerLocation,
   }) {
     return MessageComposerProps(
       onMessageSent: onMessageSent ?? this.onMessageSent,
@@ -466,6 +464,7 @@ class MessageComposerProps {
       textCapitalization: textCapitalization ?? this.textCapitalization,
       autofocus: autofocus ?? this.autofocus,
       autoCorrect: autoCorrect ?? this.autoCorrect,
+      composerLocation: composerLocation ?? this.composerLocation,
     );
   }
 
@@ -978,8 +977,7 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
             children: [
               SizeTransition(
                 sizeFactor: _pickerAnimation,
-                // ignore: deprecated_member_use
-                axisAlignment: -1,
+                alignment: Alignment.topCenter,
                 child: _buildInlineAttachmentPicker(context),
               ),
               // Gradient wraps only the pill — not the picker sibling — so

@@ -50,8 +50,8 @@ final appRoutes = [
                           final currentUserId = StreamChat.of(context).currentUser?.id;
 
                           final channelMembers = channel.state?.members ?? [];
-                          final otherUser = isOneToOne
-                              ? channelMembers.firstWhere((m) => m.userId != currentUserId).user
+                          final otherUser = (isOneToOne && currentUserId != null)
+                              ? channelMembers.firstWhereOrNull((m) => m.userId != currentUserId)?.user
                               : null;
 
                           final router = GoRouter.of(context);

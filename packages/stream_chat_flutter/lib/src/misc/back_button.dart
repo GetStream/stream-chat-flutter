@@ -23,7 +23,8 @@ class StreamBackButton extends StatelessWidget {
   /// Channel ID used to retrieve unread count
   final String? channelId;
 
-  /// Whether the back button is floating.
+  /// Controls the back button's visual/layout behavior (e.g. floating vs pinned).
+  /// Falls back to the theme's default when null.
   final AppBarBehavior? appBarBehavior;
 
   @override

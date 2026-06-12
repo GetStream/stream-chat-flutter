@@ -7,7 +7,9 @@ import 'package:sample_app/state/new_group_chat_state.dart';
 import 'package:sample_app/widgets/search_text_field.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// A screen for creating a new group chat by searching for and selecting users.
 class NewGroupChatScreen extends StatefulWidget {
+  /// Creates a [NewGroupChatScreen].
   const NewGroupChatScreen({super.key});
 
   @override
