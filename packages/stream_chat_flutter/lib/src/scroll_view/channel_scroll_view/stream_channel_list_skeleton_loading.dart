@@ -19,6 +19,7 @@ class StreamChannelListSkeletonLoading extends StatelessWidget {
   Widget build(BuildContext context) {
     return StreamSkeletonLoading(
       child: ListView.separated(
+        padding: EdgeInsets.zero,
         physics: const NeverScrollableScrollPhysics(),
         itemCount: itemCount,
         separatorBuilder: (context, index) => const SizedBox(height: 1),
