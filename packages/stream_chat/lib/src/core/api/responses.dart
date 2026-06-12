@@ -850,7 +850,9 @@ class UpsertPushPreferencesResponse extends _BaseResponse {
       _$UpsertPushPreferencesResponseFromJson(json);
 }
 
-Map<String, PushPreference> _userPreferencesFromJson(Map<String, dynamic>? json) {
+Map<String, PushPreference> _userPreferencesFromJson(
+  Map<String, dynamic>? json,
+) {
   if (json == null) return {};
   return {
     for (final MapEntry(:key, :value) in json.entries)
