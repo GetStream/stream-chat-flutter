@@ -3,11 +3,22 @@
 ✅ Added
 
 - `StreamMessageComposer` now surfaces the hold-to-record hint through `StreamSnackbar` anchored above the composer, and `StreamChat` provides an app-wide `StreamSnackbarScope` fallback.
+- Added support for `@channel`, `@here`, role, and user-group mentions — parsed on incoming messages, rendered as styled tappable spans in message text, and selectable from the composer's `@` autocomplete.
+- Added per-type tile builders on `StreamMessageComposer` and `StreamMentionAutocompleteOptions` (`mentionChannelTileBuilder`, `mentionHereTileBuilder`, `mentionRoleTileBuilder`, `mentionUserGroupTileBuilder`, `mentionUserTileBuilder`), plus matching `onMention*Tap` callbacks on `StreamMentionAutocompleteOptions`.
+- Added `StreamMessageListView.onMentionTap` and `StreamMessageItem.onMentionTap` — receives a typed `Mention` (`UserMention`, `ChannelMention`, `HereMention`, `RoleMention`, or `GroupMention`).
+- Added `mentionedChannel`, `mentionedHere`, `mentionedRoles`, `addMentionedRole`, `mentionedUserGroups`, and `addMentionedUserGroup` to `StreamMessageComposerController` for composing enhanced mentions.
 
 ⚠️ Deprecated
 
 - `StreamAudioRecorderController.showInfo` is now deprecated. Show your own snackbar via `StreamSnackbarMessenger.of(context).show(StreamSnackbar(...))` instead.
 - `RecordStateIdle.message` is now deprecated; the composer no longer reads it.
+- Deprecated `userMentionsTileBuilder` on `StreamMessageComposer` and `mentionsTileBuilder` on `StreamMentionAutocompleteOptions` in favor of `mentionUserTileBuilder`.
+- Deprecated `StreamMessageListView.onUserMentionTap` and `StreamMessageItem.onUserMentionTap` in favor of `onMentionTap`.
+- Deprecated `UserListX.search`.
+
+🔄 Changed
+
+- Improved the local filtering/sorting logic for the mention suggestions autocomplete.
 
 🐞 Fixed
 

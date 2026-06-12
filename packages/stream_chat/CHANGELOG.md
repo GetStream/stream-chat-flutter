@@ -1,3 +1,15 @@
+## Upcoming
+
+✅ Added
+
+- Added roles API on `StreamChatClient`: `searchRoles` for searching roles.
+- Added user-group APIs on `StreamChatClient`: `listUserGroups`, `searchUserGroups`, `getUserGroup`, `createUserGroup`, `updateUserGroup`, `deleteUserGroup`, `addUserGroupMembers`, `removeUserGroupMembers`.
+- Added enhanced-mention fields on `Message`: `mentionedChannel`, `mentionedHere`, `mentionedRoles`, `mentionedGroupIds`, and `mentionedGroups`.
+- Added `ChannelCapability.notifyChannel`, `notifyHere`, `notifyRole`, and `notifyGroup` capabilities, with matching `Channel.canNotifyChannel` / `canNotifyHere` / `canNotifyRole` / `canNotifyGroup` getters.
+- Added `ChannelConfig.pushLevel`, `pushNotifications`, and `chatPreferences` for per-channel-type push configuration.
+- Added `PushLevel` and `ChatPreferenceLevel` extension types and the `ChatPreferences` model — granular per-category push preferences (direct, channel, here, role, group mentions, thread replies, default).
+- Added `chatPreferences` field to `PushPreferenceInput`, `PushPreference`, and `ChannelPushPreference`.
+
 ## 10.0.1
 
 ✅ Added
