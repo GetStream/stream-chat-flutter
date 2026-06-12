@@ -4,37 +4,35 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// Sixth step of the [tutorial](https://getstream.io/chat/flutter/tutorial/)
 ///
-/// The Flutter SDK comes with a fully designed set of widgets which you can
-/// customize to fit with your application style and typography.
-/// Changing the theme of Chat widgets works in a very similar way that
-/// [MaterialApp] and [Theme] do.
+/// The Flutter SDK ships fully designed widgets that you can theme to match
+/// your app. Theming works in two layers:
 ///
-/// All chat widgets use their own default styling out of the box. There are
-/// two ways to change the styling:
+/// 1. Design tokens — a [StreamTheme] registered as a [ThemeData] extension.
+///    Set a brand color here and Stream derives the rest of its semantic
+///    palette from the swatch automatically.
+/// 2. Per-widget overrides — a [StreamChatThemeData] passed via
+///    [StreamChat.themeData]. Tweak individual components without touching
+///    the rest of the theme.
 ///
-/// 1. Initialize the [StreamChatTheme] from your existing [MaterialApp] style
-/// 2. Construct a custom theme and provide all the customizations needed
+/// First, we register a [StreamTheme] on both [MaterialApp.theme] and
+/// [MaterialApp.darkTheme] with a custom green brand swatch. Message
+/// bubbles, sending indicators, unread badges, the composer cursor, and
+/// other accents pick up the new tone in one go.
 ///
-/// First, we create a new Material [Theme] and pick [Colors.green] as the
-/// swatch color. The theme is then passed to [MaterialApp] as usual.
-///
-/// Then, we create a new [StreamChatTheme] from the green theme we just
-/// created. After saving the app you will see that several widgets have
-/// been updated with the new color.
-///
-/// We also change the message color posted by the current user.
-///
-/// You can perform these more granular style changes using
-/// [StreamChatTheme.copyWith].
+/// On top of that, we build a [StreamChatThemeData] override for
+/// [StreamChatThemeData.channelListItemTheme]: bold titles and a
+/// light-green tile background that reuses `greenBrand.shade100`, the
+/// same shade Stream uses for outgoing message bubbles, so the channel
+/// list and the message list share the same green tone.
 Future<void> main() async {
   final client = StreamChatClient(
-    's2dxdhpxd94g',
+    'b67pax5b2wdq',
     logLevel: Level.INFO,
   );
 
   await client.connectUser(
-    User(id: 'super-band-9'),
-    '''eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoic3VwZXItYmFuZC05In0.0L6lGoeLwkz0aZRUcpZKsvaXtNEDHBcezVTZ0oPq40A''',
+    User(id: 'tutorial-flutter'),
+    '''eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidHV0b3JpYWwtZmx1dHRlciJ9.S-MJpoSwDiqyXpUURgO5wVqJ4vKlIVFLSEyrFYCOE1c''',
   );
 
   runApp(
@@ -61,12 +59,7 @@ class MyApp extends StatelessWidget {
     final customTheme = StreamChatThemeData(
       channelListItemTheme: StreamChannelListItemThemeData(
         titleStyle: const TextStyle(fontWeight: FontWeight.bold),
-        backgroundColor: WidgetStateProperty.resolveWith((states) {
-          if (states.contains(WidgetState.selected)) {
-            return Colors.green.shade100;
-          }
-          return null;
-        }),
+        backgroundColor: WidgetStateProperty.all(greenBrand.shade100),
       ),
     );
 
@@ -128,7 +121,11 @@ class _ChannelListPageState extends State<ChannelListPage> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = context.streamColorScheme;
+
     return Scaffold(
+      backgroundColor: colorScheme.backgroundApp,
+      appBar: const StreamChannelListHeader(),
       body: StreamChannelListView(
         controller: _listController,
         onChannelTap: (channel) {
@@ -154,7 +151,10 @@ class ChannelPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = context.streamColorScheme;
+
     return Scaffold(
+      backgroundColor: colorScheme.backgroundApp,
       appBar: const StreamChannelHeader(),
       body: Column(
         children: <Widget>[
@@ -199,7 +199,10 @@ class _ThreadPageState extends State<ThreadPage> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = context.streamColorScheme;
+
     return Scaffold(
+      backgroundColor: colorScheme.backgroundApp,
       appBar: StreamThreadHeader(
         parent: widget.parent,
       ),

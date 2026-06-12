@@ -109,6 +109,10 @@ class _StreamChatMessageInputState extends State<StreamChatMessageInput> {
   void initState() {
     super.initState();
     _initController();
+    widget.audioRecorderController?.addListener(_onAudioRecorderChanged);
+    // Update the snackbar based on the initial state of the audio recorder controller
+    // after the first frame is rendered, to ensure that the BuildContext is fully available for showing the snackbar.
+    WidgetsBinding.instance.addPostFrameCallback((_) => _onAudioRecorderChanged());
   }
 
   @override
@@ -118,16 +122,43 @@ class _StreamChatMessageInputState extends State<StreamChatMessageInput> {
       if (oldWidget.controller == null) _controller.dispose();
       _initController();
     }
+    if (widget.audioRecorderController != oldWidget.audioRecorderController) {
+      oldWidget.audioRecorderController?.removeListener(_onAudioRecorderChanged);
+      widget.audioRecorderController?.addListener(_onAudioRecorderChanged);
+      _onAudioRecorderChanged(); // Update the snackbar based on the new controller's state immediately.
+    }
   }
 
   @override
   void dispose() {
+    widget.audioRecorderController?.removeListener(_onAudioRecorderChanged);
     if (widget.controller == null) _controller.dispose();
     super.dispose();
   }
 
   void _initController() {
     _controller = widget.controller ?? StreamMessageComposerController();
+  }
+
+  // Listens to changes in the audio recorder controller and shows/hides a snackbar
+  // with the current message, if any.
+  void _onAudioRecorderChanged() {
+    if (!mounted) return;
+
+    final state = widget.audioRecorderController?.value;
+    final message = state is RecordStateIdle ? state.message : null;
+    final messenger = StreamSnackbarMessenger.maybeOf(context);
+
+    if (message == null || message.isEmpty) return messenger?.removeCurrent();
+    final controller = messenger?.show(StreamSnackbar(message: Text(message)), replace: true);
+    if (controller == null) return;
+
+    // Notify the recorder controller when the snackbar is closed, so it can clear
+    // the message and avoid showing stale messages if the user triggers the recorder again.
+    controller.closed.then((_) {
+      if (!mounted) return;
+      return widget.audioRecorderController?.hideInfo();
+    });
   }
 
   @override
@@ -149,30 +180,18 @@ class _StreamChatMessageInputState extends State<StreamChatMessageInput> {
         const targetAlignment = AlignmentDirectional.topEnd;
         const followerAlignment = AlignmentDirectional.bottomEnd;
 
-        final idleMessage = state is RecordStateIdle ? state.message : null;
-        final showIdleTooltip = idleMessage != null && idleMessage.isNotEmpty;
-
         return PortalTarget(
-          visible: showIdleTooltip,
           anchor: Aligned(
-            target: Alignment.topCenter,
-            follower: Alignment.bottomCenter,
-            offset: Offset(0, -streamSpacing.md),
+            target: targetAlignment.resolve(textDirection),
+            follower: followerAlignment.resolve(textDirection),
+            offset: Offset(-streamSpacing.md, -streamSpacing.md).directional(textDirection),
           ),
-          portalFollower: showIdleTooltip ? HoldToRecordInfoTooltip(message: idleMessage) : const SizedBox.shrink(),
-          child: PortalTarget(
-            anchor: Aligned(
-              target: targetAlignment.resolve(textDirection),
-              follower: followerAlignment.resolve(textDirection),
-              offset: Offset(-streamSpacing.md, -streamSpacing.md).directional(textDirection),
-            ),
-            visible: state is RecordStateRecording,
-            portalFollower: SwipeToLockButton(isLocked: state is RecordStateRecordingLocked),
-            child: _StreamChatMessageInputContent(
-              widget: widget,
-              inputController: _controller,
-              audioRecorderState: state,
-            ),
+          visible: state is RecordStateRecording,
+          portalFollower: SwipeToLockButton(isLocked: state is RecordStateRecordingLocked),
+          child: _StreamChatMessageInputContent(
+            widget: widget,
+            inputController: _controller,
+            audioRecorderState: state,
           ),
         );
       },

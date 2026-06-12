@@ -25,51 +25,48 @@ class StreamCommandPicker extends StatelessWidget {
 
     return OptionDrawer(
       margin: EdgeInsets.zero,
-      child: Material(
-        type: .transparency,
-        child: Column(
-          spacing: spacing.md,
-          crossAxisAlignment: .start,
-          children: [
-            Padding(
-              padding: .symmetric(horizontal: spacing.md),
-              child: Text(context.translations.instantCommandsLabel, style: textTheme.headingSm),
-            ),
-            Expanded(
-              child: ListView.builder(
-                padding: .symmetric(horizontal: spacing.xxs, vertical: spacing.xxxs),
-                itemCount: commands.length,
-                itemBuilder: (context, index) {
-                  final command = commands[index];
-                  return InkWell(
-                    onTap: onCommandSelected == null ? null : () => onCommandSelected!(command),
-                    child: Padding(
-                      padding: .symmetric(horizontal: spacing.sm, vertical: spacing.xs),
-                      child: Row(
-                        spacing: spacing.sm,
-                        children: [
-                          StreamCommandIcon(command: command),
-                          Text(
-                            command.name.sentenceCase,
-                            style: textTheme.bodyEmphasis.copyWith(color: colorScheme.textPrimary),
+      child: Column(
+        spacing: spacing.md,
+        crossAxisAlignment: .start,
+        children: [
+          Padding(
+            padding: .symmetric(horizontal: spacing.md),
+            child: Text(context.translations.instantCommandsLabel, style: textTheme.headingSm),
+          ),
+          Expanded(
+            child: ListView.builder(
+              padding: .symmetric(horizontal: spacing.xxs, vertical: spacing.xxxs),
+              itemCount: commands.length,
+              itemBuilder: (context, index) {
+                final command = commands[index];
+                return InkWell(
+                  onTap: onCommandSelected == null ? null : () => onCommandSelected!(command),
+                  child: Padding(
+                    padding: .symmetric(horizontal: spacing.sm, vertical: spacing.xs),
+                    child: Row(
+                      spacing: spacing.sm,
+                      children: [
+                        StreamCommandIcon(command: command),
+                        Text(
+                          command.name.sentenceCase,
+                          style: textTheme.bodyEmphasis.copyWith(color: colorScheme.textPrimary),
+                        ),
+                        Expanded(
+                          child: Text(
+                            '/${command.name} ${command.args}',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: textTheme.bodyDefault.copyWith(color: colorScheme.textTertiary),
                           ),
-                          Expanded(
-                            child: Text(
-                              '/${command.name} ${command.args}',
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: textTheme.bodyDefault.copyWith(color: colorScheme.textTertiary),
-                            ),
-                          ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
-                  );
-                },
-              ),
+                  ),
+                );
+              },
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

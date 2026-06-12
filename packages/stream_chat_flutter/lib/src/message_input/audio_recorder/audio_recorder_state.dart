@@ -9,17 +9,13 @@ sealed class AudioRecorderState {
 
 /// {@template recordStateIdle}
 /// The audio recorder is currently idle and not recording any audio track.
-///
-/// Optionally, provide a [message] to display when the recorder is idle.
-///
-/// For example, when the user has not long pressed the record button long
-/// enough to start recording.
 /// {@endtemplate}
 final class RecordStateIdle extends AudioRecorderState {
   /// {@macro recordStateIdle}
   const RecordStateIdle({this.message}) : super._();
 
   /// The optional message to display when the recorder is idle.
+  @Deprecated('Use StreamSnackbar via StreamSnackbarMessenger instead.')
   final String? message;
 }
 
