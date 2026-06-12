@@ -14,6 +14,7 @@ _MentionTestMocks _setupMocks({
   List<Member> members = const [],
   List<User> watchers = const [],
   String? team,
+  int? memberCount,
 }) {
   final client = MockClient();
   final clientState = MockClientState();
@@ -25,6 +26,9 @@ _MentionTestMocks _setupMocks({
   when(() => channel.state).thenReturn(channelState);
   when(() => channel.client).thenReturn(client);
   when(() => channel.team).thenReturn(team);
+  // Default to "all members cached" so tests that don't care about the gating
+  // exercise the local-search branch.
+  when(() => channel.memberCount).thenReturn(memberCount ?? members.length);
   when(() => channelState.members).thenReturn(members);
   when(() => channelState.watchers).thenReturn(watchers);
 
@@ -508,7 +512,7 @@ void main() {
     );
 
     testWidgets(
-      'members < 100 use in-memory search and skip queryMembers API call',
+      'all members cached use in-memory search and skip queryMembers API call',
       (tester) async {
         final mocks = _setupMocks(
           ownCapabilities: const [],
@@ -517,6 +521,7 @@ void main() {
             buildMember('bob-id', 'Bob'),
             buildMember('charlie-id', 'Charlie'),
           ],
+          memberCount: 3,
         );
 
         await _pumpMentionOptions(
@@ -538,15 +543,15 @@ void main() {
     );
 
     testWidgets(
-      'members >= 100 trigger queryMembers API call and render returned users',
+      'partial cache (memberCount > cached members) triggers queryMembers API call',
       (tester) async {
-        final manyMembers = List.generate(
-          100,
-          (i) => buildMember('user-$i', 'User $i'),
-        );
         final mocks = _setupMocks(
           ownCapabilities: const [],
-          members: manyMembers,
+          members: [
+            buildMember('user-1', 'User 1'),
+            buildMember('user-2', 'User 2'),
+          ],
+          memberCount: 50,
         );
         when(
           () => mocks.channel.queryMembers(
@@ -571,6 +576,125 @@ void main() {
             pagination: any(named: 'pagination'),
           ),
         ).called(1);
+      },
+    );
+
+    testWidgets(
+      'null memberCount falls back to remote queryMembers',
+      (tester) async {
+        final mocks = _setupMocks(
+          ownCapabilities: const [],
+          members: [buildMember('cached-id', 'Cached')],
+          memberCount: null,
+        );
+        when(() => mocks.channel.memberCount).thenReturn(null);
+        when(
+          () => mocks.channel.queryMembers(
+            filter: any(named: 'filter'),
+            pagination: any(named: 'pagination'),
+          ),
+        ).thenAnswer(
+          (_) async => QueryMembersResponse()..members = [buildMember('alice-id', 'Alice')],
+        );
+
+        await _pumpMentionOptions(
+          tester,
+          client: mocks.client,
+          channel: mocks.channel,
+          query: 'alice',
+        );
+
+        expect(find.text('Alice'), findsOneWidget);
+        verify(
+          () => mocks.channel.queryMembers(
+            filter: any(named: 'filter'),
+            pagination: any(named: 'pagination'),
+          ),
+        ).called(1);
+      },
+    );
+
+    testWidgets(
+      'local search includes watchers',
+      (tester) async {
+        final mocks = _setupMocks(
+          ownCapabilities: const [],
+          members: [buildMember('alice-id', 'Alice')],
+          watchers: [User(id: 'wally-id', name: 'Wally')],
+        );
+
+        await _pumpMentionOptions(
+          tester,
+          client: mocks.client,
+          channel: mocks.channel,
+          query: 'wal',
+        );
+
+        expect(find.text('Wally'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'local results render alphabetically by name',
+      (tester) async {
+        final mocks = _setupMocks(
+          ownCapabilities: const [],
+          members: [
+            buildMember('c-id', 'Charlie'),
+            buildMember('a-id', 'Alice'),
+            buildMember('b-id', 'Bob'),
+          ],
+        );
+
+        await _pumpMentionOptions(
+          tester,
+          client: mocks.client,
+          channel: mocks.channel,
+          query: '',
+        );
+
+        final aliceY = tester.getTopLeft(find.text('Alice')).dy;
+        final bobY = tester.getTopLeft(find.text('Bob')).dy;
+        final charlieY = tester.getTopLeft(find.text('Charlie')).dy;
+        expect(aliceY, lessThan(bobY));
+        expect(bobY, lessThan(charlieY));
+      },
+    );
+
+    testWidgets(
+      'remote queryMembers results render in server order',
+      (tester) async {
+        final mocks = _setupMocks(
+          ownCapabilities: const [],
+          members: [buildMember('cached-id', 'Cached')],
+          memberCount: 50,
+        );
+        when(
+          () => mocks.channel.queryMembers(
+            filter: any(named: 'filter'),
+            pagination: any(named: 'pagination'),
+          ),
+        ).thenAnswer(
+          (_) async => QueryMembersResponse()
+            ..members = [
+              buildMember('c-id', 'Charlie'),
+              buildMember('a-id', 'Alice'),
+              buildMember('b-id', 'Bob'),
+            ],
+        );
+
+        await _pumpMentionOptions(
+          tester,
+          client: mocks.client,
+          channel: mocks.channel,
+          query: 'abc',
+        );
+
+        final charlieY = tester.getTopLeft(find.text('Charlie')).dy;
+        final aliceY = tester.getTopLeft(find.text('Alice')).dy;
+        final bobY = tester.getTopLeft(find.text('Bob')).dy;
+        expect(charlieY, lessThan(aliceY));
+        expect(aliceY, lessThan(bobY));
       },
     );
 
@@ -618,13 +742,10 @@ void main() {
     testWidgets(
       'queryMembers error is swallowed and does not blank the list',
       (tester) async {
-        final manyMembers = List.generate(
-          100,
-          (i) => buildMember('user-$i', 'User $i'),
-        );
         final mocks = _setupMocks(
           ownCapabilities: const [ChannelCapability.notifyHere],
-          members: manyMembers,
+          members: [buildMember('cached-id', 'Cached')],
+          memberCount: 50,
         );
         when(
           () => mocks.channel.queryMembers(

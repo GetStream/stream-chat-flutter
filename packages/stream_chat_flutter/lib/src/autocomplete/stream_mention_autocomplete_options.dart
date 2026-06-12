@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:stream_chat_flutter/src/autocomplete/user_mention_search.dart';
 import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -288,14 +289,14 @@ class _StreamMentionAutocompleteOptionsState extends State<StreamMentionAutocomp
       }
 
       final channelState = widget.channel.state!;
-      final members = channelState.members;
+      final memberCount = widget.channel.memberCount;
+      final allMembersCached = memberCount != null && memberCount == channelState.members.length;
 
-      // By default, we return maximum 100 members via queryChannels api call.
-      // Thus it is safe to assume, that if number of members in channel.state
-      // is < 100, then all the members are already available on client side
-      // and we don't need to make any api call to queryMembers endpoint.
-      if (members.length < 100) {
-        return membersAndWatchers.search(query).toList(growable: false);
+      // When every channel member is already cached locally we can match
+      // against the in-memory member + watcher set instead of hitting
+      // queryMembers.
+      if (allMembersCached) {
+        return searchUsersForMention(membersAndWatchers, query);
       }
 
       final result = await _queryMembers(query);

@@ -320,6 +320,10 @@ extension UserListX on List<User> {
   ///
   /// Results are returned sorted by their edit distance from the
   /// searched string, distance is calculated using the [levenshtein] algorithm.
+  @Deprecated(
+    'This extension is no longer used by the SDK and will be removed in a '
+    'future major release.',
+  )
   List<User> search(String query) {
     String normalize(String input) => input.toLowerCase().diacriticsInsensitive;
 
