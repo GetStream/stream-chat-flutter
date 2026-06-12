@@ -43,6 +43,19 @@ class SampleAppConfigScreen extends StatelessWidget {
                   },
                   onChanged: (v) => SampleAppConfig.update(context, config.copyWith(themeMode: v)),
                 ),
+                _SegmentedRow<SampleAppStyle>(
+                  title: 'App Style',
+                  value: config.appStyle,
+                  segments: const {
+                    SampleAppStyle.regular: 'Regular',
+                    SampleAppStyle.floating: 'Floating',
+                  },
+                  segmentIcons: const {
+                    SampleAppStyle.regular: Icons.web_asset_outlined,
+                    SampleAppStyle.floating: Icons.filter_none_outlined,
+                  },
+                  onChanged: (v) => SampleAppConfig.update(context, config.copyWith(appStyle: v)),
+                ),
                 _LocaleRow(config: config),
                 _SwitchRow(
                   icon: icons.reorder,

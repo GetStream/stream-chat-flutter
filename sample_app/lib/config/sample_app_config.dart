@@ -4,10 +4,24 @@ import 'package:stream_chat_localizations/stream_chat_localizations.dart';
 import 'package:streaming_shared_preferences/streaming_shared_preferences.dart';
 
 // ---------------------------------------------------------------------------
+// AppStyle enum
+// ---------------------------------------------------------------------------
+
+/// The visual style for the app's UI chrome (app bar, composer, bottom bar).
+enum SampleAppStyle {
+  /// Standard docked composer with solid app bar and bottom bar.
+  regular,
+
+  /// Floating composer with translucent overlapping chrome.
+  floating,
+}
+
+// ---------------------------------------------------------------------------
 // Preference keys
 // ---------------------------------------------------------------------------
 
 const _kThemeMode = 'config.themeMode';
+const _kAppStyle = 'config.appStyle';
 const _kForceRtl = 'config.forceRtl';
 const _kEnableReminderActions = 'config.enableReminderActions';
 const _kEnableDeleteForMe = 'config.enableDeleteForMe';
@@ -38,6 +52,7 @@ class SampleAppConfigData {
   factory SampleAppConfigData({
     Locale? locale,
     ThemeMode themeMode = .system,
+    SampleAppStyle appStyle = .floating,
     bool forceRtl = false,
     bool enableReminderActions = false,
     bool enableDeleteForMe = false,
@@ -50,6 +65,7 @@ class SampleAppConfigData {
   }) {
     return SampleAppConfigData.raw(
       themeMode: themeMode,
+      appStyle: appStyle,
       locale: locale,
       forceRtl: forceRtl,
       enableReminderActions: enableReminderActions,
@@ -66,6 +82,7 @@ class SampleAppConfigData {
   /// Raw constructor used internally and by persistence.
   const SampleAppConfigData.raw({
     required this.themeMode,
+    required this.appStyle,
     required this.locale,
     required this.forceRtl,
     required this.enableReminderActions,
@@ -81,8 +98,10 @@ class SampleAppConfigData {
   /// Loads config from [StreamingSharedPreferences], falling back to defaults.
   factory SampleAppConfigData.fromPreferences(StreamingSharedPreferences prefs) {
     final localeStr = prefs.getString(_kLocale, defaultValue: '').getValue();
+    final appStyleIndex = prefs.getInt(_kAppStyle, defaultValue: SampleAppStyle.floating.index).getValue();
     return SampleAppConfigData.raw(
       themeMode: ThemeMode.values[prefs.getInt(_kThemeMode, defaultValue: ThemeMode.system.index).getValue()],
+      appStyle: SampleAppStyle.values[appStyleIndex.clamp(0, SampleAppStyle.values.length - 1)],
       locale: localeStr.isEmpty ? null : Locale(localeStr),
       forceRtl: prefs.getBool(_kForceRtl, defaultValue: false).getValue(),
       enableReminderActions: prefs.getBool(_kEnableReminderActions, defaultValue: false).getValue(),
@@ -100,6 +119,9 @@ class SampleAppConfigData {
 
   /// The theme mode for the app (system, light, dark).
   final ThemeMode themeMode;
+
+  /// The visual style for the app chrome (app bar, composer, bottom bar).
+  final SampleAppStyle appStyle;
 
   /// The locale override for the app. When null, the system locale is used.
   final Locale? locale;
@@ -141,6 +163,7 @@ class SampleAppConfigData {
   /// pass explicitly as `null` to reset to default/system.
   SampleAppConfigData copyWith({
     ThemeMode? themeMode,
+    SampleAppStyle? appStyle,
     Object? locale = _sentinel,
     bool? forceRtl,
     bool? enableReminderActions,
@@ -154,6 +177,7 @@ class SampleAppConfigData {
   }) {
     return SampleAppConfigData.raw(
       themeMode: themeMode ?? this.themeMode,
+      appStyle: appStyle ?? this.appStyle,
       locale: locale == _sentinel ? this.locale : locale as Locale?,
       forceRtl: forceRtl ?? this.forceRtl,
       enableReminderActions: enableReminderActions ?? this.enableReminderActions,
@@ -174,6 +198,7 @@ class SampleAppConfigData {
   /// Persists all fields to [StreamingSharedPreferences].
   void saveToPreferences(StreamingSharedPreferences prefs) {
     prefs.setInt(_kThemeMode, themeMode.index);
+    prefs.setInt(_kAppStyle, appStyle.index);
     prefs.setString(_kLocale, locale?.languageCode ?? '');
     prefs.setBool(_kForceRtl, forceRtl);
     prefs.setBool(_kEnableReminderActions, enableReminderActions);
