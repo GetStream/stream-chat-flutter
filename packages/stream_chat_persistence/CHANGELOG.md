@@ -1,3 +1,14 @@
+## Upcoming Changes
+
+🚀 Performance
+
+- Read only the messages matching the `PaginationParams` from DB when calling `PinnedMessageDao.getMessagesByCid` instead of reading all pinned messages for the channel and applying pagination in memory.
+
+🐞 Fixed
+
+- `PinnedMessageDao.getMessagesByCid` now honours `PaginationParams.lessThanOrEqual` and `PaginationParams.greaterThanOrEqual` (inclusive of the cursor message), in addition to the existing strict `lessThan`/`greaterThan`.
+- `PinnedMessageDao.getMessagesByCid` with a forward cursor (`greaterThan`/`greaterThanOrEqual`) and a `limit` now returns the messages immediately AFTER the pivot, instead of the channel tail.
+
 ## 9.25.0
 
 🚀 Performance
