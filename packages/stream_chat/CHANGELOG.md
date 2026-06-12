@@ -1,3 +1,9 @@
+## Upcoming
+
+🐞 Fixed
+
+- Fixed failing to parse `null` values in `UpsertPushPreferencesResponse.userPreferences` JSON.
+
 ## 9.25.0
 
 - Minor bug fixes and improvements
