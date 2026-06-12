@@ -165,6 +165,8 @@ class StreamChatConfigurationData {
     List<StreamAttachmentWidgetBuilder>? attachmentBuilders,
     StreamReactionsType? reactionType,
     StreamReactionsPosition? reactionPosition,
+    StreamMessageListViewConfiguration messageListViewConfiguration =
+        const StreamMessageListViewConfiguration(),
   }) {
     return StreamChatConfigurationData._(
       reactionIconResolver: reactionIconResolver ?? const DefaultReactionIconResolver(),
@@ -175,6 +177,7 @@ class StreamChatConfigurationData {
       attachmentBuilders: attachmentBuilders,
       reactionType: reactionType,
       reactionPosition: reactionPosition,
+      messageListViewConfiguration: messageListViewConfiguration,
     );
   }
 
@@ -185,6 +188,7 @@ class StreamChatConfigurationData {
     required this.messagePreviewFormatter,
     required this.imageCDN,
     required this.attachmentBuilders,
+    required this.messageListViewConfiguration,
     this.reactionType,
     this.reactionPosition,
   });
@@ -200,6 +204,7 @@ class StreamChatConfigurationData {
     List<StreamAttachmentWidgetBuilder>? attachmentBuilders,
     StreamReactionsType? reactionType,
     StreamReactionsPosition? reactionPosition,
+    StreamMessageListViewConfiguration? messageListViewConfiguration,
   }) {
     return StreamChatConfigurationData(
       reactionIconResolver: reactionIconResolver ?? this.reactionIconResolver,
@@ -210,6 +215,7 @@ class StreamChatConfigurationData {
       attachmentBuilders: attachmentBuilders ?? this.attachmentBuilders,
       reactionType: reactionType ?? this.reactionType,
       reactionPosition: reactionPosition ?? this.reactionPosition,
+      messageListViewConfiguration: messageListViewConfiguration ?? this.messageListViewConfiguration,
     );
   }
 
@@ -258,4 +264,10 @@ class StreamChatConfigurationData {
   /// When null, the widget resolves its own default
   /// ([StreamReactionsPosition.header]).
   final StreamReactionsPosition? reactionPosition;
+
+  /// The default [StreamMessageListViewConfiguration] applied to every
+  /// [StreamMessageListView] that does not provide its own explicit [config].
+  ///
+  /// Defaults to [StreamMessageListViewConfiguration] with all defaults.
+  final StreamMessageListViewConfiguration messageListViewConfiguration;
 }

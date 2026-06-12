@@ -115,11 +115,6 @@ class _ThreadBody extends StatelessWidget {
       initialAlignment: initialAlignment,
       onReplyTap: onReply,
       onEditMessageTap: onEditMessageTap,
-      config: const StreamMessageListViewConfiguration(
-        swipeToReply: true,
-        showScrollToBottom: false,
-        highlightInitialMessage: true,
-      ),
       onViewInChannelTap: onViewInChannelTap,
       topPadding: insets.topPadding,
       bottomPadding: insets.bottomPadding,

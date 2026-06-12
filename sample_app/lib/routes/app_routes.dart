@@ -45,7 +45,6 @@ final appRoutes = [
                 return (parentMessage != null)
                     ? StreamThreadPage(parent: parentMessage)
                     : StreamChannelPage(
-                        highlightInitialMessage: messageId != null,
                         onChannelAvatarPressed: (context, channel) {
                           final isOneToOne = channel.isOneToOne;
                           final currentUserId = StreamChat.of(context).currentUser?.id;

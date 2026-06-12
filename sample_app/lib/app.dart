@@ -258,6 +258,10 @@ extension on SampleAppConfigData {
             },
           ),
       ],
+      messageListViewConfiguration: const StreamMessageListViewConfiguration(
+        highlightInitialMessage: true,
+        swipeToReply: true,
+      ),
     );
   }
 }

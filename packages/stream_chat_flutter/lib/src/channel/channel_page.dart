@@ -8,7 +8,6 @@ class StreamChannelPage extends StatefulWidget {
     super.key,
     this.initialScrollIndex,
     this.initialAlignment,
-    this.highlightInitialMessage = false,
     this.onBackPressed,
     this.onChannelAvatarPressed,
   });
@@ -18,9 +17,6 @@ class StreamChannelPage extends StatefulWidget {
 
   /// Initial scroll alignment for the message list.
   final double? initialAlignment;
-
-  /// Whether to highlight the initial message.
-  final bool highlightInitialMessage;
 
   /// Callback for when the back button is pressed.
   final VoidCallback? onBackPressed;
@@ -92,7 +88,6 @@ class _StreamChannelPageState extends State<StreamChannelPage> {
       body: _ChannelPageBody(
         initialScrollIndex: widget.initialScrollIndex,
         initialAlignment: widget.initialAlignment,
-        highlightInitialMessage: widget.highlightInitialMessage,
         onReply: _reply,
         onEditMessage: _editMessage,
         typingIndicator: typingIndicator,
@@ -114,7 +109,6 @@ class _ChannelPageBody extends StatelessWidget {
     required this.onEditMessage,
     this.initialScrollIndex,
     this.initialAlignment,
-    this.highlightInitialMessage = false,
   });
 
   final Widget typingIndicator;
@@ -122,7 +116,6 @@ class _ChannelPageBody extends StatelessWidget {
   final void Function(Message) onEditMessage;
   final int? initialScrollIndex;
   final double? initialAlignment;
-  final bool highlightInitialMessage;
 
   @override
   Widget build(BuildContext context) {
@@ -133,10 +126,6 @@ class _ChannelPageBody extends StatelessWidget {
         StreamMessageListView(
           initialScrollIndex: initialScrollIndex,
           initialAlignment: initialAlignment,
-          config: StreamMessageListViewConfiguration(
-            highlightInitialMessage: highlightInitialMessage,
-            swipeToReply: true,
-          ),
           onEditMessageTap: onEditMessage,
           onReplyTap: onReply,
           threadBuilder: (_, parentMessage) {

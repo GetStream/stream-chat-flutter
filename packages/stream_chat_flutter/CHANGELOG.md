@@ -2,6 +2,7 @@
 
 ✅ Added
 
+- Added `messageListViewConfiguration` field to `StreamChatConfigurationData`, allowing a global `StreamMessageListViewConfiguration` default for all `StreamMessageListView` widgets. Pass it via `StreamChat.configData` to configure behaviors like `swipeToReply` and `highlightInitialMessage` app-wide without wiring them per-page.
 - `StreamMessageComposer` now surfaces the hold-to-record hint through `StreamSnackbar` anchored above the composer, and `StreamChat` provides an app-wide `StreamSnackbarScope` fallback.
 
 ⚠️ Deprecated
