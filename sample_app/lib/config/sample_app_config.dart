@@ -52,7 +52,7 @@ class SampleAppConfigData {
   factory SampleAppConfigData({
     Locale? locale,
     ThemeMode themeMode = .system,
-    SampleAppStyle appStyle = .floating,
+    SampleAppStyle appStyle = .regular,
     bool forceRtl = false,
     bool enableReminderActions = false,
     bool enableDeleteForMe = false,
@@ -98,7 +98,7 @@ class SampleAppConfigData {
   /// Loads config from [StreamingSharedPreferences], falling back to defaults.
   factory SampleAppConfigData.fromPreferences(StreamingSharedPreferences prefs) {
     final localeStr = prefs.getString(_kLocale, defaultValue: '').getValue();
-    final appStyleIndex = prefs.getInt(_kAppStyle, defaultValue: SampleAppStyle.floating.index).getValue();
+    final appStyleIndex = prefs.getInt(_kAppStyle, defaultValue: SampleAppStyle.regular.index).getValue();
     return SampleAppConfigData.raw(
       themeMode: ThemeMode.values[prefs.getInt(_kThemeMode, defaultValue: ThemeMode.system.index).getValue()],
       appStyle: SampleAppStyle.values[appStyleIndex.clamp(0, SampleAppStyle.values.length - 1)],
