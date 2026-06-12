@@ -116,8 +116,8 @@ Widget _buildVoiceRecordingComposerScaffold({
           children: [
             Expanded(child: Container()),
             Builder(
-              builder: (context) {
-                return Material(
+              builder: (context) => StreamSnackbarPopup(
+                child: Material(
                   child: DecoratedBox(
                     decoration: BoxDecoration(
                       color: context.streamColorScheme.backgroundElevation1,
@@ -132,8 +132,8 @@ Widget _buildVoiceRecordingComposerScaffold({
                       ),
                     ),
                   ),
-                );
-              },
+                ),
+              ),
             ),
           ],
         ),

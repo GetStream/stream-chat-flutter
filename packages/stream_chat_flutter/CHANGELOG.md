@@ -1,3 +1,19 @@
+## Upcoming
+
+✅ Added
+
+- `StreamMessageComposer` now surfaces the hold-to-record hint through `StreamSnackbar` anchored above the composer, and `StreamChat` provides an app-wide `StreamSnackbarScope` fallback.
+
+⚠️ Deprecated
+
+- `StreamAudioRecorderController.showInfo` is now deprecated. Show your own snackbar via `StreamSnackbarMessenger.of(context).show(StreamSnackbar(...))` instead.
+- `RecordStateIdle.message` is now deprecated; the composer no longer reads it.
+
+🐞 Fixed
+
+- `StreamMessageItem.onUserAvatarTap` now fires when the author avatar is tapped. ([#2741](https://github.com/GetStream/stream-chat-flutter/issues/2741))
+- Added `MessageComposerProps.copyWith` so factory overrides can tweak individual props (e.g. `useSystemAttachmentPicker`) without re-specifying every field. ([#2742](https://github.com/GetStream/stream-chat-flutter/issues/2742))
+
 ## 10.0.1
 
 🐞 Fixed
