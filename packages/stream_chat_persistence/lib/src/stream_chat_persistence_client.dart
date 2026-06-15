@@ -299,6 +299,29 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
     );
   }
 
+  /// Drift-backed implementation of
+  /// [ChatPersistenceClient.getChannelStates].
+  @Deprecated('Use queryChannelStates instead')
+  @override
+  Future<List<ChannelState>> getChannelStates({
+    Filter? filter,
+    SortOrder<ChannelState>? channelStateSort,
+    int? messageLimit,
+    PaginationParams? paginationParams,
+  }) async {
+    assert(_debugIsConnected, '');
+    _logger.info('getChannelStates');
+    final res = await _queryChannelStatesImpl(
+      filter: filter,
+      sort: channelStateSort,
+      messageLimit: messageLimit,
+      paginationParams: paginationParams,
+    );
+    return res.channels;
+  }
+
+  /// Drift-backed implementation of
+  /// [ChatPersistenceClient.queryChannelStates].
   @override
   Future<QueryChannelsResponse> queryChannelStates({
     Filter? filter,
@@ -320,25 +343,6 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
       messageLimit: messageLimit,
       paginationParams: paginationParams,
     );
-  }
-
-  @Deprecated('Use queryChannelStates instead')
-  @override
-  Future<List<ChannelState>> getChannelStates({
-    Filter? filter,
-    SortOrder<ChannelState>? channelStateSort,
-    int? messageLimit,
-    PaginationParams? paginationParams,
-  }) async {
-    assert(_debugIsConnected, '');
-    _logger.info('getChannelStates');
-    final res = await _queryChannelStatesImpl(
-      filter: filter,
-      sort: channelStateSort,
-      messageLimit: messageLimit,
-      paginationParams: paginationParams,
-    );
-    return res.channels;
   }
 
   Future<QueryChannelsResponse> _queryChannelStatesImpl({
@@ -426,6 +430,26 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
     return Future.wait(pagedCids.map((cid) => getChannelStateByCid(cid, messagePagination: messagePagination)));
   }
 
+  /// Drift-backed implementation of
+  /// [ChatPersistenceClient.updateChannelQueries].
+  @Deprecated('Use saveChannelQueries instead')
+  @override
+  Future<void> updateChannelQueries(
+    Filter? filter,
+    List<String> cids, {
+    bool clearQueryCache = false,
+  }) {
+    assert(_debugIsConnected, '');
+    _logger.info('updateChannelQueries');
+    return _saveChannelQueriesImpl(
+      cids: cids,
+      filter: filter,
+      clearQueryCache: clearQueryCache,
+    );
+  }
+
+  /// Drift-backed implementation of
+  /// [ChatPersistenceClient.saveChannelQueries].
   @override
   Future<void> saveChannelQueries({
     required List<String> cids,
@@ -449,22 +473,6 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
       resolvedSort: resolvedSort,
       filterValues: filterValues,
       sortValues: sortValues,
-      clearQueryCache: clearQueryCache,
-    );
-  }
-
-  @Deprecated('Use saveChannelQueries instead')
-  @override
-  Future<void> updateChannelQueries(
-    Filter? filter,
-    List<String> cids, {
-    bool clearQueryCache = false,
-  }) {
-    assert(_debugIsConnected, '');
-    _logger.info('updateChannelQueries');
-    return _saveChannelQueriesImpl(
-      cids: cids,
-      filter: filter,
       clearQueryCache: clearQueryCache,
     );
   }
