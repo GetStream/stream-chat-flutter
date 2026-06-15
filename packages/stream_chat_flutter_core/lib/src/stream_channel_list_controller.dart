@@ -240,6 +240,12 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
     _resolvedChannelStateSort = predefinedFilter.effectiveSort;
   }
 
+  @override
+  Future<void> refresh({bool resetValue = true}) {
+    if (resetValue) _resolvedChannelStateSort = channelStateSort;
+    return super.refresh(resetValue: resetValue);
+  }
+
   /// Replaces the previously loaded channels with the passed [channels].
   set channels(List<Channel> channels) {
     if (value.isSuccess) {

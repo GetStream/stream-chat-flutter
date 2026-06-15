@@ -680,24 +680,20 @@ class StreamChatClient {
     int? messageLimit,
     PaginationParams paginationParams = const PaginationParams(),
     bool waitForConnect = true,
-  }) async* {
-    await for (final result in _queryChannelsImpl(
-      filter: filter,
-      channelStateSort: channelStateSort,
-      predefinedFilter: predefinedFilter,
-      filterValues: filterValues,
-      sortValues: sortValues,
-      state: state,
-      watch: watch,
-      presence: presence,
-      memberLimit: memberLimit,
-      messageLimit: messageLimit,
-      paginationParams: paginationParams,
-      waitForConnect: waitForConnect,
-    )) {
-      yield result.channels;
-    }
-  }
+  }) => queryChannelsWithResult(
+    filter: filter,
+    channelStateSort: channelStateSort,
+    predefinedFilter: predefinedFilter,
+    filterValues: filterValues,
+    sortValues: sortValues,
+    state: state,
+    watch: watch,
+    presence: presence,
+    memberLimit: memberLimit,
+    messageLimit: messageLimit,
+    paginationParams: paginationParams,
+    waitForConnect: waitForConnect,
+  ).map((result) => result.channels);
 
   /// Requests channels with a given query, yielding a [QueryChannelsResult]
   /// that carries both the live channel list and the server-resolved
@@ -932,10 +928,9 @@ class StreamChatClient {
 
     Filter? resolvedFilter;
     SortOrder<ChannelState>? resolvedSort;
-    if (predefinedFilter != null) {
-      resolvedFilter = res.predefinedFilter?.filter ?? const Filter.empty();
-      resolvedSort =
-          res.predefinedFilter?.effectiveSort ?? const [SortOption<ChannelState>.desc(ChannelSortKey.lastUpdated)];
+    if (res.predefinedFilter case final resolvedPredefinedFilter?) {
+      resolvedFilter = resolvedPredefinedFilter.filter;
+      resolvedSort = resolvedPredefinedFilter.effectiveSort;
     }
 
     await chatPersistenceClient?.saveChannelQueries(

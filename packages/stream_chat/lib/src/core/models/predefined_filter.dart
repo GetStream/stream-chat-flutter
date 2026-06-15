@@ -45,7 +45,7 @@ class PredefinedFilter {
 }
 
 SortOrder<ChannelState> _defaultSortFor(Filter filter) {
-  if (_touchesField(filter, 'last_message_at')) {
+  if (_touchesField(filter, ChannelSortKey.lastMessageAt)) {
     return const [SortOption<ChannelState>.desc(ChannelSortKey.lastMessageAt)];
   }
   return const [SortOption<ChannelState>.desc(ChannelSortKey.lastUpdated)];
