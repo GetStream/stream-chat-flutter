@@ -931,27 +931,24 @@ class StreamChatClient {
     // Clear the query cache if we are refreshing.
     final clearQueryCache = (paginationParams.offset ?? 0) == 0;
 
-    if (predefinedFilter == null) {
-      await chatPersistenceClient?.updateChannelQueries(
-        filter,
-        cachedCids,
-        clearQueryCache: clearQueryCache,
-      );
-    } else {
-      // Note: predefinedFilter will never be null here
-      final resolvedFilter = res.predefinedFilter?.filter ?? const Filter.empty();
-      final resolvedSort = res.predefinedFilter?.sort ?? resolvedFilter.predefinedFilterFallbackSort;
-
-      await chatPersistenceClient?.updateChannelQueriesByPredefinedFilter(
-        predefinedFilter,
-        cachedCids,
-        filter: resolvedFilter,
-        sort: resolvedSort,
-        filterValues: filterValues,
-        sortValues: sortValues,
-        clearQueryCache: clearQueryCache,
-      );
+    Filter? resolvedFilter;
+    SortOrder<ChannelState>? resolvedSort;
+    if (predefinedFilter != null) {
+      resolvedFilter = res.predefinedFilter?.filter ?? const Filter.empty();
+      resolvedSort = res.predefinedFilter?.sort ?? resolvedFilter.predefinedFilterFallbackSort;
     }
+
+    await chatPersistenceClient?.saveChannelQueries(
+      cids: cachedCids,
+      filter: filter,
+      sort: sort,
+      predefinedFilter: predefinedFilter,
+      resolvedFilter: resolvedFilter,
+      resolvedSort: resolvedSort,
+      filterValues: filterValues,
+      sortValues: sortValues,
+      clearQueryCache: clearQueryCache,
+    );
 
     this.state.addChannels(updateData.key);
     return QueryChannelsResult(
@@ -991,27 +988,18 @@ class StreamChatClient {
     int? messageLimit,
     PaginationParams paginationParams = const PaginationParams(),
   }) async {
-    final QueryChannelsResponse res;
-    if (predefinedFilter == null) {
-      final channels = await chatPersistenceClient?.getChannelStates(
-        filter: filter,
-        channelStateSort: channelStateSort,
-        // Default limit is set to 25 in backend.
-        messageLimit: messageLimit ?? 25,
-        paginationParams: paginationParams,
-      );
-      res = QueryChannelsResponse()..channels = channels ?? const [];
-    } else {
-      res =
-          await chatPersistenceClient?.getChannelStatesByPredefinedFilter(
-            filterName: predefinedFilter,
-            filterValues: filterValues,
-            sortValues: sortValues,
-            messageLimit: messageLimit ?? 25,
-            paginationParams: paginationParams,
-          ) ??
-          (QueryChannelsResponse()..channels = const []);
-    }
+    final res =
+        await chatPersistenceClient?.queryChannelStates(
+          filter: filter,
+          sort: channelStateSort,
+          predefinedFilter: predefinedFilter,
+          filterValues: filterValues,
+          sortValues: sortValues,
+          // Default limit is set to 25 in backend.
+          messageLimit: messageLimit ?? 25,
+          paginationParams: paginationParams,
+        ) ??
+        (QueryChannelsResponse()..channels = const []);
 
     if (res.channels.isEmpty) {
       logger.info('No channels found in offline storage for the given query');

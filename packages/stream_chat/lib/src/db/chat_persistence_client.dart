@@ -130,6 +130,7 @@ abstract class ChatPersistenceClient {
   /// Optionally provide [filter] to filter channels, [channelStateSort] to
   /// sort results, [messageLimit] to limit messages per channel, and
   /// [paginationParams] to paginate results.
+  @Deprecated('Use queryChannelStates instead')
   Future<List<ChannelState>> getChannelStates({
     Filter? filter,
     SortOrder<ChannelState>? channelStateSort,
@@ -141,52 +142,98 @@ abstract class ChatPersistenceClient {
   ///
   /// If [clearQueryCache] is true before the insert
   /// the list of matching rows will be deleted
+  @Deprecated('Use saveChannelQueries instead')
   Future<void> updateChannelQueries(
     Filter? filter,
     List<String> cids, {
     bool clearQueryCache = false,
   });
 
-  /// Returns the stored response for a predefined-filter query.
+  /// Returns the stored response for a channel query.
   ///
-  /// The query is identified by [filterName] and the optional [filterValues]
-  /// and [sortValues] interpolation maps. Use [messageLimit] to limit messages
-  /// per channel and [paginationParams] to paginate results.
+  /// The method supports two query modes, selected by whether
+  /// [predefinedFilter] is null:
   ///
-  /// The returned [QueryChannelsResponse] carries the persisted resolved
-  /// `predefinedFilter` spec (filter + sort) so offline callers can apply the
-  /// same filter/order the server applied on the last online query.
+  /// **Standard filter mode** (`predefinedFilter == null`):
+  /// - [filter] — the runtime filter used to identify the cached query.
+  /// - [sort] — the sort order applied to the cached channel states.
   ///
-  /// Default implementation returns an empty response; persistence
-  /// implementations that support predefined-filter caching should override
-  /// this.
-  Future<QueryChannelsResponse> getChannelStatesByPredefinedFilter({
-    required String filterName,
+  /// **Predefined filter mode** (`predefinedFilter != null`):
+  /// - [predefinedFilter] — the server-side filter template name.
+  /// - [filterValues] / [sortValues] — interpolation maps that, together
+  ///   with the template name, identify the cached query.
+  /// - The returned [QueryChannelsResponse.predefinedFilter] carries the
+  ///   server-resolved filter + sort spec persisted on the last online
+  ///   query, so the caller can apply the same order the server applied.
+  ///
+  /// Both modes:
+  /// - [messageLimit] limits messages per channel.
+  /// - [paginationParams] paginates results.
+  ///
+  /// For standard mode, [QueryChannelsResponse.predefinedFilter] is null.
+  Future<QueryChannelsResponse> queryChannelStates({
+    Filter? filter,
+    SortOrder<ChannelState>? sort,
+    String? predefinedFilter,
     Map<String, Object?>? filterValues,
     Map<String, Object?>? sortValues,
     int? messageLimit,
     PaginationParams? paginationParams,
-  }) async => QueryChannelsResponse()..channels = const [];
+  }) async {
+    if (predefinedFilter != null) {
+      return QueryChannelsResponse()..channels = const [];
+    }
+    // ignore: deprecated_member_use_from_same_package
+    final channels = await getChannelStates(
+      filter: filter,
+      channelStateSort: sort,
+      messageLimit: messageLimit,
+      paginationParams: paginationParams,
+    );
+    return QueryChannelsResponse()..channels = channels;
+  }
 
-  /// Update list of channel queries for a predefined-filter query.
+  /// Persists the result of a channel query.
   ///
-  /// The query is identified by [filterName] and the optional [filterValues]
-  /// and [sortValues] interpolation maps. [filter] and [sort] are the
-  /// server-resolved spec values, persisted so subsequent offline reads can
-  /// reconstruct the same filter/order. If [clearQueryCache] is true, prior
-  /// cids and metadata for this query are deleted before the insert.
+  /// The method supports two query modes, selected by whether
+  /// [predefinedFilter] is null. [cids] (the channel ids returned by the
+  /// query) and [clearQueryCache] (which deletes prior cached rows for the
+  /// same query before insert) apply to both modes.
   ///
-  /// Default implementation is a no-op; persistence implementations that
-  /// support predefined-filter caching should override this.
-  Future<void> updateChannelQueriesByPredefinedFilter(
-    String filterName,
-    List<String> cids, {
-    required Filter filter,
-    required SortOrder<ChannelState> sort,
+  /// **Standard filter mode** (`predefinedFilter == null`):
+  /// - [filter] — the runtime filter under which the [cids] are recorded.
+  /// - [sort] — the runtime sort order. [resolvedFilter] / [resolvedSort]
+  /// are ignored in this mode.
+  ///
+  /// **Predefined filter mode** (`predefinedFilter != null`):
+  /// - [predefinedFilter] — the server-side filter template name.
+  /// - [filterValues] / [sortValues] — interpolation maps used together
+  ///   with the template name to key the cache.
+  /// - [resolvedFilter] / [resolvedSort] — the server-resolved spec
+  ///   returned in the query response. Persisted alongside [cids] so
+  ///   subsequent offline reads can reconstruct the same filter and
+  ///   order. [filter] / [sort] are ignored in this mode.
+  Future<void> saveChannelQueries({
+    required List<String> cids,
+    Filter? filter,
+    SortOrder<ChannelState>? sort,
+    String? predefinedFilter,
+    Filter? resolvedFilter,
+    SortOrder<ChannelState>? resolvedSort,
     Map<String, Object?>? filterValues,
     Map<String, Object?>? sortValues,
     bool clearQueryCache = false,
-  }) async {}
+  }) async {
+    if (predefinedFilter != null) {
+      return;
+    }
+    // ignore: deprecated_member_use_from_same_package
+    return updateChannelQueries(
+      filter,
+      cids,
+      clearQueryCache: clearQueryCache,
+    );
+  }
 
   /// Remove a message by [messageId]
   Future<void> deleteMessageById(String messageId) => deleteMessageByIds([messageId]);
