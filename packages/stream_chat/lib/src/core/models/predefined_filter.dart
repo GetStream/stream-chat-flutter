@@ -36,5 +36,49 @@ class PredefinedFilter {
   /// Sort specification as resolved by the server.
   final SortOrder<ChannelState>? sort;
 
+  /// Sort to apply locally, matching what the server applies for this
+  /// predefined filter — the echoed [sort], or a default derived from
+  /// [filter] when [sort] is null.
+  SortOrder<ChannelState> get effectiveSort => sort ?? _defaultSortFor(filter);
+
   static Filter _filterFromJson(Map<String, dynamic> json) => Filter.raw(value: json);
+}
+
+SortOrder<ChannelState> _defaultSortFor(Filter filter) {
+  if (_touchesField(filter, 'last_message_at')) {
+    return const [SortOption<ChannelState>.desc(ChannelSortKey.lastMessageAt)];
+  }
+  return const [SortOption<ChannelState>.desc(ChannelSortKey.lastUpdated)];
+}
+
+bool _touchesField(Filter filter, String field) {
+  if (filter.key == field) return true;
+  final value = filter.value;
+  if (value is List<Filter>) {
+    return value.any((sub) => _touchesField(sub, field));
+  }
+  if (value is Map<String, Object?>) {
+    return _mapTouchesField(value, field);
+  }
+  return false;
+}
+
+bool _mapTouchesField(Map<String, Object?> map, String field) {
+  for (final entry in map.entries) {
+    final key = entry.key;
+    if (!key.startsWith(r'$')) {
+      if (key == field) return true;
+      continue;
+    }
+    // Group operator like $or / $and / $nor — recurse into list items.
+    final value = entry.value;
+    if (value is List) {
+      for (final item in value) {
+        if (item is Map<String, Object?> && _mapTouchesField(item, field)) {
+          return true;
+        }
+      }
+    }
+  }
+  return false;
 }

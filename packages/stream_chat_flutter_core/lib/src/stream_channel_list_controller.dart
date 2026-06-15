@@ -172,7 +172,7 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
     try {
       await for (final result in client.queryChannelsWithResult(
         filter: filter,
-        channelStateSort: channelStateSort,
+        channelStateSort: _resolvedChannelStateSort,
         predefinedFilter: predefinedFilter,
         filterValues: filterValues,
         sortValues: sortValues,
@@ -206,7 +206,7 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
     try {
       await for (final result in client.queryChannelsWithResult(
         filter: filter,
-        channelStateSort: channelStateSort,
+        channelStateSort: _resolvedChannelStateSort,
         predefinedFilter: predefinedFilter,
         filterValues: filterValues,
         sortValues: sortValues,
@@ -233,8 +233,11 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
   }
 
   void _resolveSort(QueryChannelsResult result) {
-    final resolved = result.predefinedFilter?.sort;
-    if (resolved != null) _resolvedChannelStateSort = resolved;
+    final predefinedFilter = result.predefinedFilter;
+    // Update the active sort only when predefinedFilter is present,
+    // otherwise use the initially set sort.
+    if (predefinedFilter == null) return;
+    _resolvedChannelStateSort = predefinedFilter.effectiveSort;
   }
 
   /// Replaces the previously loaded channels with the passed [channels].

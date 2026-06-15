@@ -49,7 +49,6 @@ import 'package:stream_chat/src/core/util/extension.dart';
 import 'package:stream_chat/src/core/util/immutable_collection_subjects.dart';
 import 'package:stream_chat/src/core/util/in_flight_cache.dart';
 import 'package:stream_chat/src/core/util/list_extensions.dart';
-import 'package:stream_chat/src/core/util/predefined_filter_defaults.dart';
 import 'package:stream_chat/src/core/util/utils.dart';
 import 'package:stream_chat/src/db/chat_persistence_client.dart';
 import 'package:stream_chat/src/event_type.dart';
@@ -935,7 +934,8 @@ class StreamChatClient {
     SortOrder<ChannelState>? resolvedSort;
     if (predefinedFilter != null) {
       resolvedFilter = res.predefinedFilter?.filter ?? const Filter.empty();
-      resolvedSort = res.predefinedFilter?.sort ?? resolvedFilter.predefinedFilterFallbackSort;
+      resolvedSort = res.predefinedFilter?.effectiveSort ??
+          const [SortOption<ChannelState>.desc(ChannelSortKey.lastUpdated)];
     }
 
     await chatPersistenceClient?.saveChannelQueries(
