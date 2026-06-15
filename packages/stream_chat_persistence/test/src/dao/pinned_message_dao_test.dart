@@ -98,7 +98,7 @@ void main() {
     );
     await database.userDao.updateUsers(users);
     await database.channelDao.updateChannels(channels);
-    await pinnedMessageDao.updateMessages(cid, allMessages);
+    await pinnedMessageDao.bulkUpdateMessages({cid: allMessages});
     await database.pinnedMessageReactionDao.updateReactions([reaction]);
     return allMessages;
   }
@@ -116,8 +116,8 @@ void main() {
     final firstMessageId = messages.first.id;
 
     // Fetched reactions list should have one reaction for given message id
-    final reactions =
-        await database.pinnedMessageReactionDao.getReactions(firstMessageId);
+    final reactions = (await database.pinnedMessageReactionDao
+        .getReactionsForMessages([firstMessageId]))[firstMessageId]!;
     expect(reactions.length, 1);
 
     // Deleting 2 messages from DB
@@ -131,8 +131,8 @@ void main() {
     expect(newMessages.length, messages.length - 2);
 
     // Reaction for the first message should be deleted too
-    final newReactions =
-        await database.pinnedMessageReactionDao.getReactions(firstMessageId);
+    final newReactions = (await database.pinnedMessageReactionDao
+        .getReactionsForMessages([firstMessageId]))[firstMessageId]!;
     expect(newReactions, isEmpty);
   });
 
@@ -155,8 +155,9 @@ void main() {
 
         // Fetched reactions list should have one reaction for given message id
         final cid1firstMessageId = cid1Messages.first.id;
-        final cid1Reactions = await database.pinnedMessageReactionDao
-            .getReactions(cid1firstMessageId);
+        final cid1Reactions = (await database.pinnedMessageReactionDao
+            .getReactionsForMessages(
+                [cid1firstMessageId]))[cid1firstMessageId]!;
         expect(cid1Reactions.length, 1);
 
         // Deleting all the messages of cid1
@@ -171,8 +172,9 @@ void main() {
         expect(cid2FetchedMessages, isNotEmpty);
 
         // Reaction for the first message should be deleted too
-        final cid1FetchedReactions = await database.pinnedMessageReactionDao
-            .getReactions(cid1firstMessageId);
+        final cid1FetchedReactions = (await database.pinnedMessageReactionDao
+            .getReactionsForMessages(
+                [cid1firstMessageId]))[cid1firstMessageId]!;
         expect(cid1FetchedReactions, isEmpty);
       },
     );
@@ -192,12 +194,14 @@ void main() {
 
         // Fetched reactions list should have one reaction for given message id
         final cid1FirstMessageId = cid1Messages.first.id;
-        final cid1Reactions = await database.pinnedMessageReactionDao
-            .getReactions(cid1FirstMessageId);
+        final cid1Reactions = (await database.pinnedMessageReactionDao
+            .getReactionsForMessages(
+                [cid1FirstMessageId]))[cid1FirstMessageId]!;
         expect(cid1Reactions.length, 1);
         final cid2FirstMessageId = cid2Messages.first.id;
-        final cid2Reactions = await database.pinnedMessageReactionDao
-            .getReactions(cid2FirstMessageId);
+        final cid2Reactions = (await database.pinnedMessageReactionDao
+            .getReactionsForMessages(
+                [cid2FirstMessageId]))[cid2FirstMessageId]!;
         expect(cid2Reactions.length, 1);
 
         // Deleting all the messages of cid1
@@ -212,11 +216,13 @@ void main() {
         expect(cid2FetchedMessages, isEmpty);
 
         // Reaction for the first message should be deleted too
-        final cid1FetchedReactions = await database.pinnedMessageReactionDao
-            .getReactions(cid1FirstMessageId);
+        final cid1FetchedReactions = (await database.pinnedMessageReactionDao
+            .getReactionsForMessages(
+                [cid1FirstMessageId]))[cid1FirstMessageId]!;
         expect(cid1FetchedReactions, isEmpty);
-        final cid2FetchedReactions = await database.pinnedMessageReactionDao
-            .getReactions(cid2FirstMessageId);
+        final cid2FetchedReactions = (await database.pinnedMessageReactionDao
+            .getReactionsForMessages(
+                [cid2FirstMessageId]))[cid2FirstMessageId]!;
         expect(cid2FetchedReactions, isEmpty);
       },
     );
@@ -238,79 +244,6 @@ void main() {
     final fetchedMessage = await pinnedMessageDao.getMessageById(id);
     expect(fetchedMessage, isNotNull);
     expect(fetchedMessage!.id, insertedMessages.first.id);
-  });
-
-  test('getThreadMessages', () async {
-    const cid = 'test:Cid';
-
-    // Messages should be empty initially
-    final messages = await pinnedMessageDao.getThreadMessages(cid);
-    expect(messages, isEmpty);
-
-    // Preparing test data
-    final insertedMessages = await _prepareTestData(cid, threads: true);
-    expect(insertedMessages, isNotEmpty);
-
-    // Should fetch all the thread messages of cid
-    final threadMessages = await pinnedMessageDao.getThreadMessages(cid);
-    expect(threadMessages, isNotEmpty);
-    for (final message in threadMessages) {
-      expect(message.parentId, isNotNull);
-    }
-  });
-
-  test('getThreadMessagesByParentId', () async {
-    const cid = 'test:Cid';
-    const parentId = 'testMessageId${cid}0';
-
-    // Messages should be empty initially
-    final messages =
-        await pinnedMessageDao.getThreadMessagesByParentId(parentId);
-    expect(messages, isEmpty);
-
-    // Preparing test data
-    final insertedMessages = await _prepareTestData(cid, threads: true);
-    expect(insertedMessages, isNotEmpty);
-
-    // Should fetch all the thread messages of parentId
-    final threadMessages =
-        await pinnedMessageDao.getThreadMessagesByParentId(parentId);
-    expect(threadMessages.length, 1);
-    expect(threadMessages.first.parentId, parentId);
-  });
-
-  test('getThreadMessagesByParentId along with pagination', () async {
-    const cid = 'test:Cid';
-    const parentId = 'testMessageId${cid}0';
-    const options = PaginationParams(
-      limit: 15,
-      lessThan: 'testThreadMessageId${cid}25',
-      greaterThanOrEqual: 'testThreadMessageId${cid}5',
-    );
-
-    // Messages should be empty initially
-    final messages = await pinnedMessageDao.getThreadMessagesByParentId(
-      parentId,
-      options: options,
-    );
-    expect(messages, isEmpty);
-
-    // Preparing test data
-    final insertedMessages = await _prepareTestData(
-      cid,
-      threads: true,
-      mapAllThreadToFirstMessage: true,
-      count: 30,
-    );
-    expect(insertedMessages, isNotEmpty);
-
-    // Should fetch all the thread messages of parentId and apply the pagination
-    final threadMessages = await pinnedMessageDao.getThreadMessagesByParentId(
-      parentId,
-      options: options,
-    );
-    expect(threadMessages.length, 15);
-    expect(threadMessages.first.parentId, parentId);
   });
 
   test('getMessagesByCid', () async {
@@ -409,7 +342,9 @@ void main() {
       pinnedBy: User(id: 'testUserId4'),
     );
 
-    await pinnedMessageDao.updateMessages(cid, [copyMessage, newMessage]);
+    await pinnedMessageDao.bulkUpdateMessages({
+      cid: [copyMessage, newMessage]
+    });
 
     // Fetched messages length should be one more than inserted message.
     // copyMessage `showInChannel` modified field should be false.
@@ -444,14 +379,16 @@ void main() {
       final otherUser = User(id: 'otherUser');
       await database.userDao.updateUsers([dbUser, otherUser]);
 
-      await pinnedMessageDao.updateMessages(cid, [
-        Message(
-          id: messageId,
-          user: dbUser,
-          text: 'Hello',
-          createdAt: DateTime.now(),
-        ),
-      ]);
+      await pinnedMessageDao.bulkUpdateMessages({
+        cid: [
+          Message(
+            id: messageId,
+            user: dbUser,
+            text: 'Hello',
+            createdAt: DateTime.now(),
+          ),
+        ]
+      });
 
       await database.pinnedMessageReactionDao.updateReactions([
         Reaction(
@@ -499,7 +436,7 @@ void main() {
           createdAt: baseTime.add(Duration(seconds: i)),
         ),
       );
-      await pinnedMessageDao.updateMessages(cid, messages);
+      await pinnedMessageDao.bulkUpdateMessages({cid: messages});
 
       final reactions = [
         for (var i = 0; i < messages.length; i++) ...[
@@ -556,15 +493,17 @@ void main() {
         ),
       ]);
 
-      await pinnedMessageDao.updateMessages(cid, [
-        Message(
-          id: messageId,
-          user: dbUser,
-          text: 'Vote please',
-          createdAt: DateTime.now(),
-          pollId: pollId,
-        ),
-      ]);
+      await pinnedMessageDao.bulkUpdateMessages({
+        cid: [
+          Message(
+            id: messageId,
+            user: dbUser,
+            text: 'Vote please',
+            createdAt: DateTime.now(),
+            pollId: pollId,
+          ),
+        ]
+      });
 
       await database.pollVoteDao.updatePollVotes([
         PollVote(
@@ -620,8 +559,12 @@ void main() {
       // Pin the message and ALSO insert it into the main `messages` table:
       // `DraftMessages.parentId` is FK-referenced against `Messages.id`, not
       // `PinnedMessages.id`, so a thread draft needs the row in both places.
-      await pinnedMessageDao.updateMessages(cid, [parentMessage]);
-      await database.messageDao.updateMessages(cid, [parentMessage]);
+      await pinnedMessageDao.bulkUpdateMessages({
+        cid: [parentMessage]
+      });
+      await database.messageDao.bulkUpdateMessages({
+        cid: [parentMessage]
+      });
 
       await database.draftMessageDao.updateDraftMessages([
         Draft(
@@ -670,22 +613,24 @@ void main() {
       ]);
 
       final baseTime = DateTime.now();
-      await pinnedMessageDao.updateMessages(cid, [
-        Message(
-          id: quotedMessageId,
-          user: dbUser,
-          text: 'first',
-          createdAt: baseTime,
-          pollId: pollId,
-        ),
-        Message(
-          id: quotingMessageId,
-          user: dbUser,
-          text: 'second',
-          createdAt: baseTime.add(const Duration(seconds: 1)),
-          quotedMessageId: quotedMessageId,
-        ),
-      ]);
+      await pinnedMessageDao.bulkUpdateMessages({
+        cid: [
+          Message(
+            id: quotedMessageId,
+            user: dbUser,
+            text: 'first',
+            createdAt: baseTime,
+            pollId: pollId,
+          ),
+          Message(
+            id: quotingMessageId,
+            user: dbUser,
+            text: 'second',
+            createdAt: baseTime.add(const Duration(seconds: 1)),
+            quotedMessageId: quotedMessageId,
+          ),
+        ]
+      });
 
       await database.pinnedMessageReactionDao.updateReactions([
         Reaction(
@@ -712,28 +657,30 @@ void main() {
       await database.userDao.updateUsers([dbUser]);
 
       final baseTime = DateTime.now();
-      await pinnedMessageDao.updateMessages(cid, [
-        Message(
-          id: 'pC',
-          user: dbUser,
-          text: 'root',
-          createdAt: baseTime,
-        ),
-        Message(
-          id: 'pB',
-          user: dbUser,
-          text: 'mid',
-          createdAt: baseTime.add(const Duration(seconds: 1)),
-          quotedMessageId: 'pC',
-        ),
-        Message(
-          id: 'pA',
-          user: dbUser,
-          text: 'top',
-          createdAt: baseTime.add(const Duration(seconds: 2)),
-          quotedMessageId: 'pB',
-        ),
-      ]);
+      await pinnedMessageDao.bulkUpdateMessages({
+        cid: [
+          Message(
+            id: 'pC',
+            user: dbUser,
+            text: 'root',
+            createdAt: baseTime,
+          ),
+          Message(
+            id: 'pB',
+            user: dbUser,
+            text: 'mid',
+            createdAt: baseTime.add(const Duration(seconds: 1)),
+            quotedMessageId: 'pC',
+          ),
+          Message(
+            id: 'pA',
+            user: dbUser,
+            text: 'top',
+            createdAt: baseTime.add(const Duration(seconds: 2)),
+            quotedMessageId: 'pB',
+          ),
+        ]
+      });
 
       final fetched = await pinnedMessageDao.getMessagesByCid(cid);
       final top = fetched.firstWhere((m) => m.id == 'pA');
@@ -766,11 +713,14 @@ void main() {
         quotedMessageId: quotedId,
       );
 
-      await pinnedMessageDao
-          .updateMessages(cid, [quotedMessage, quotingMessage]);
+      await pinnedMessageDao.bulkUpdateMessages({
+        cid: [quotedMessage, quotingMessage]
+      });
       // `DraftMessages.parentId` is FK-referenced against `Messages.id`, not
       // `PinnedMessages.id`, so the parent of the draft needs a row in both.
-      await database.messageDao.updateMessages(cid, [quotedMessage]);
+      await database.messageDao.bulkUpdateMessages({
+        cid: [quotedMessage]
+      });
 
       await database.draftMessageDao.updateDraftMessages([
         Draft(

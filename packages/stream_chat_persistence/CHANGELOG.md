@@ -1,3 +1,9 @@
+## Upcoming changes
+
+🔄 Internal / Non-breaking
+
+- Removed unused / test-only methods from internal DAO classes.
+
 ## 9.25.0
 
 🚀 Performance
