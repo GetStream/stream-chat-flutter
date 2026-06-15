@@ -95,7 +95,7 @@ class StreamMessageComposer extends StatelessWidget {
     TextCapitalization textCapitalization = TextCapitalization.sentences,
     bool autofocus = false,
     bool autoCorrect = true,
-  }) : props = MessageComposerProps(
+  }) : props = .new(
          onMessageSent: onMessageSent,
          preMessageSending: preMessageSending,
          messageComposerController: messageComposerController,
@@ -147,8 +147,8 @@ class StreamMessageComposer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final builder = context.chatComponentBuilder<MessageComposerProps>();
-    if (builder != null) return builder(context, props);
-    return DefaultStreamMessageComposer(props: props);
+    final composer = builder?.call(context, props) ?? DefaultStreamMessageComposer(props: props);
+    return StreamSnackbarPopup(child: composer);
   }
 }
 
@@ -383,6 +383,82 @@ class MessageComposerProps {
   ///
   /// Defaults to true.
   final bool autoCorrect;
+
+  /// Returns a copy of this [MessageComposerProps] with the given fields
+  /// replaced with new values.
+  MessageComposerProps copyWith({
+    void Function(Message)? onMessageSent,
+    FutureOr<Message> Function(Message)? preMessageSending,
+    StreamMessageComposerController? messageComposerController,
+    FocusNode? focusNode,
+    bool? disableAttachments,
+    bool? canAlsoSendToChannelFromThread,
+    bool? enableVoiceRecording,
+    bool? sendVoiceRecordingAutomatically,
+    AudioRecorderFeedback? voiceRecordingFeedback,
+    UserMentionTileBuilder? userMentionsTileBuilder,
+    ErrorListener? onError,
+    int? attachmentLimit,
+    List<AttachmentPickerType>? allowedAttachmentPickerTypes,
+    Iterable<StreamAutocompleteTrigger>? customAutocompleteTriggers,
+    bool? mentionAllAppUsers,
+    bool? shouldKeepFocusAfterMessage,
+    MessageValidator? validator,
+    String? restorationId,
+    bool? enableSafeArea,
+    bool? enableMentionsOverlay,
+    VoidCallback? onQuotedMessageCleared,
+    OgPreviewFilter? ogPreviewFilter,
+    MessageInputPlaceholderBuilder? placeholderBuilder,
+    bool? useSystemAttachmentPicker,
+    PollConfig? pollConfig,
+    AttachmentPickerOptionsBuilder? attachmentPickerOptionsBuilder,
+    OnAttachmentPickerResult? onAttachmentPickerResult,
+    KeyEventPredicate? sendMessageKeyPredicate,
+    KeyEventPredicate? clearQuotedMessageKeyPredicate,
+    TextInputAction? textInputAction,
+    TextInputType? keyboardType,
+    TextCapitalization? textCapitalization,
+    bool? autofocus,
+    bool? autoCorrect,
+  }) {
+    return MessageComposerProps(
+      onMessageSent: onMessageSent ?? this.onMessageSent,
+      preMessageSending: preMessageSending ?? this.preMessageSending,
+      messageComposerController: messageComposerController ?? this.messageComposerController,
+      focusNode: focusNode ?? this.focusNode,
+      disableAttachments: disableAttachments ?? this.disableAttachments,
+      canAlsoSendToChannelFromThread: canAlsoSendToChannelFromThread ?? this.canAlsoSendToChannelFromThread,
+      enableVoiceRecording: enableVoiceRecording ?? this.enableVoiceRecording,
+      sendVoiceRecordingAutomatically: sendVoiceRecordingAutomatically ?? this.sendVoiceRecordingAutomatically,
+      voiceRecordingFeedback: voiceRecordingFeedback ?? this.voiceRecordingFeedback,
+      userMentionsTileBuilder: userMentionsTileBuilder ?? this.userMentionsTileBuilder,
+      onError: onError ?? this.onError,
+      attachmentLimit: attachmentLimit ?? this.attachmentLimit,
+      allowedAttachmentPickerTypes: allowedAttachmentPickerTypes ?? this.allowedAttachmentPickerTypes,
+      customAutocompleteTriggers: customAutocompleteTriggers ?? this.customAutocompleteTriggers,
+      mentionAllAppUsers: mentionAllAppUsers ?? this.mentionAllAppUsers,
+      shouldKeepFocusAfterMessage: shouldKeepFocusAfterMessage ?? this.shouldKeepFocusAfterMessage,
+      validator: validator ?? this.validator,
+      restorationId: restorationId ?? this.restorationId,
+      enableSafeArea: enableSafeArea ?? this.enableSafeArea,
+      enableMentionsOverlay: enableMentionsOverlay ?? this.enableMentionsOverlay,
+      onQuotedMessageCleared: onQuotedMessageCleared ?? this.onQuotedMessageCleared,
+      ogPreviewFilter: ogPreviewFilter ?? this.ogPreviewFilter,
+      placeholderBuilder: placeholderBuilder ?? this.placeholderBuilder,
+      useSystemAttachmentPicker: useSystemAttachmentPicker ?? this.useSystemAttachmentPicker,
+      pollConfig: pollConfig ?? this.pollConfig,
+      attachmentPickerOptionsBuilder: attachmentPickerOptionsBuilder ?? this.attachmentPickerOptionsBuilder,
+      onAttachmentPickerResult: onAttachmentPickerResult ?? this.onAttachmentPickerResult,
+      sendMessageKeyPredicate: sendMessageKeyPredicate ?? this.sendMessageKeyPredicate,
+      clearQuotedMessageKeyPredicate: clearQuotedMessageKeyPredicate ?? this.clearQuotedMessageKeyPredicate,
+      textInputAction: textInputAction ?? this.textInputAction,
+      keyboardType: keyboardType ?? this.keyboardType,
+      textCapitalization: textCapitalization ?? this.textCapitalization,
+      autofocus: autofocus ?? this.autofocus,
+      autoCorrect: autoCorrect ?? this.autoCorrect,
+    );
+  }
 
   static bool _defaultSendMessageKeyPredicate(FocusNode node, KeyEvent event) {
     // Do not handle the event if the user is using a mobile device.
@@ -713,29 +789,25 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     final viewPadding = MediaQuery.paddingOf(context);
 
     return Material(
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: context.streamColorScheme.backgroundElevation1,
-        ),
-        child: AnimatedBuilder(
-          animation: _pickerAnimation,
-          builder: (context, child) {
-            final safeAreaPadding = safeAreaEnabled
-                ? EdgeInsets.lerp(
-                    EdgeInsets.only(
-                      left: viewPadding.left,
-                      top: viewPadding.top,
-                      right: viewPadding.right,
-                      bottom: math.max(viewPadding.bottom, spacing.md),
-                    ),
-                    EdgeInsets.zero,
-                    _pickerAnimation.value,
-                  )!
-                : EdgeInsets.zero;
-            return Padding(padding: safeAreaPadding, child: child);
-          },
-          child: Center(heightFactor: 1, child: messageInput),
-        ),
+      color: context.streamColorScheme.backgroundElevation1,
+      child: AnimatedBuilder(
+        animation: _pickerAnimation,
+        builder: (context, child) {
+          final safeAreaPadding = safeAreaEnabled
+              ? EdgeInsets.lerp(
+                  EdgeInsets.only(
+                    left: viewPadding.left,
+                    top: viewPadding.top,
+                    right: viewPadding.right,
+                    bottom: math.max(viewPadding.bottom, spacing.md),
+                  ),
+                  EdgeInsets.zero,
+                  _pickerAnimation.value,
+                )!
+              : EdgeInsets.zero;
+          return Padding(padding: safeAreaPadding, child: child);
+        },
+        child: Center(heightFactor: 1, child: messageInput),
       ),
     );
   }
@@ -874,28 +946,28 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     };
     final useSystemPicker = widget.props.useSystemAttachmentPicker || isWebOrDesktop;
 
-    final child = useSystemPicker
-        ? systemAttachmentPickerBuilder(
-            context: context,
-            controller: _pickerController!,
-            allowedTypes: allowedTypes,
-            pollConfig: widget.props.pollConfig,
-            optionsBuilder: widget.props.attachmentPickerOptionsBuilder,
-            onError: _onPickerError,
-            onPollCreated: _onPollCreated,
-          )
-        : tabbedAttachmentPickerBuilder(
-            context: context,
-            controller: _pickerController!,
-            allowedTypes: allowedTypes,
-            pollConfig: widget.props.pollConfig,
-            optionsBuilder: widget.props.attachmentPickerOptionsBuilder,
-            onError: _onPickerError,
-            onPollCreated: _onPollCreated,
-            onCommandSelected: _onCommandSelectedFromPicker,
-          );
+    if (useSystemPicker) {
+      return systemAttachmentPickerBuilder(
+        context: context,
+        controller: _pickerController!,
+        allowedTypes: allowedTypes,
+        pollConfig: widget.props.pollConfig,
+        optionsBuilder: widget.props.attachmentPickerOptionsBuilder,
+        onError: _onPickerError,
+        onPollCreated: _onPollCreated,
+      );
+    }
 
-    return SizedBox(height: 333, child: child);
+    return tabbedAttachmentPickerBuilder(
+      context: context,
+      controller: _pickerController!,
+      allowedTypes: allowedTypes,
+      pollConfig: widget.props.pollConfig,
+      optionsBuilder: widget.props.attachmentPickerOptionsBuilder,
+      onError: _onPickerError,
+      onPollCreated: _onPollCreated,
+      onCommandSelected: _onCommandSelectedFromPicker,
+    );
   }
 
   void _onCommandSelectedFromPicker(Command command) {
