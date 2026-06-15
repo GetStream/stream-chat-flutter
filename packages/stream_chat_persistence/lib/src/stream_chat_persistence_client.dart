@@ -351,11 +351,12 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
     PaginationParams? paginationParams,
   }) async {
     if (predefinedFilter != null) {
-      final (channelModels, resolvedFilter, resolvedSort) = await db!.channelQueryDao.getChannelsAndSpecByPredefinedFilter(
-        predefinedFilter,
-        filterValues: filterValues,
-        sortValues: sortValues,
-      );
+      final (channelModels, resolvedFilter, resolvedSort) = await db!.channelQueryDao
+          .getChannelsAndSpecByPredefinedFilter(
+            predefinedFilter,
+            filterValues: filterValues,
+            sortValues: sortValues,
+          );
 
       final channels = await _getChannelStatesPage(
         channelModels,

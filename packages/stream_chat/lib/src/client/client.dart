@@ -934,8 +934,8 @@ class StreamChatClient {
     SortOrder<ChannelState>? resolvedSort;
     if (predefinedFilter != null) {
       resolvedFilter = res.predefinedFilter?.filter ?? const Filter.empty();
-      resolvedSort = res.predefinedFilter?.effectiveSort ??
-          const [SortOption<ChannelState>.desc(ChannelSortKey.lastUpdated)];
+      resolvedSort =
+          res.predefinedFilter?.effectiveSort ?? const [SortOption<ChannelState>.desc(ChannelSortKey.lastUpdated)];
     }
 
     await chatPersistenceClient?.saveChannelQueries(
