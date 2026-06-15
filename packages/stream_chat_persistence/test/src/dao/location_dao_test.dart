@@ -50,7 +50,7 @@ void main() {
 
     await database.userDao.updateUsers(users);
     await database.channelDao.updateChannels(channels);
-    await database.messageDao.updateMessages(cid, messages);
+    await database.messageDao.bulkUpdateMessages({cid: messages});
     await locationDao.updateLocations(locations);
 
     return locations;
@@ -102,7 +102,9 @@ void main() {
     );
 
     await database.userDao.updateUsers([newUser]);
-    await database.messageDao.updateMessages(cid, [newMessage]);
+    await database.messageDao.bulkUpdateMessages({
+      cid: [newMessage],
+    });
     await locationDao.updateLocations([newLocation]);
 
     // Fetched locations length should be one more than inserted locations
