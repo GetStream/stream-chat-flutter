@@ -309,9 +309,7 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
     int? messageLimit,
     PaginationParams? paginationParams,
   }) async {
-    assert(_debugIsConnected, '');
-    _logger.info('getChannelStates');
-    final res = await _queryChannelStatesImpl(
+    final res = await queryChannelStates(
       filter: filter,
       sort: channelStateSort,
       messageLimit: messageLimit,
@@ -331,29 +329,9 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
     Map<String, Object?>? sortValues,
     int? messageLimit,
     PaginationParams? paginationParams,
-  }) {
+  }) async {
     assert(_debugIsConnected, '');
     _logger.info('queryChannelStates');
-    return _queryChannelStatesImpl(
-      filter: filter,
-      sort: sort,
-      predefinedFilter: predefinedFilter,
-      filterValues: filterValues,
-      sortValues: sortValues,
-      messageLimit: messageLimit,
-      paginationParams: paginationParams,
-    );
-  }
-
-  Future<QueryChannelsResponse> _queryChannelStatesImpl({
-    Filter? filter,
-    SortOrder<ChannelState>? sort,
-    String? predefinedFilter,
-    Map<String, Object?>? filterValues,
-    Map<String, Object?>? sortValues,
-    int? messageLimit,
-    PaginationParams? paginationParams,
-  }) async {
     if (predefinedFilter != null) {
       final (channelModels, resolvedFilter, resolvedSort) = await db!.channelQueryDao
           .getChannelsAndSpecByPredefinedFilter(
@@ -439,9 +417,7 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
     List<String> cids, {
     bool clearQueryCache = false,
   }) {
-    assert(_debugIsConnected, '');
-    _logger.info('updateChannelQueries');
-    return _saveChannelQueriesImpl(
+    return saveChannelQueries(
       cids: cids,
       filter: filter,
       clearQueryCache: clearQueryCache,
@@ -464,30 +440,6 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   }) {
     assert(_debugIsConnected, '');
     _logger.info('saveChannelQueries');
-    return _saveChannelQueriesImpl(
-      cids: cids,
-      filter: filter,
-      sort: sort,
-      predefinedFilter: predefinedFilter,
-      resolvedFilter: resolvedFilter,
-      resolvedSort: resolvedSort,
-      filterValues: filterValues,
-      sortValues: sortValues,
-      clearQueryCache: clearQueryCache,
-    );
-  }
-
-  Future<void> _saveChannelQueriesImpl({
-    required List<String> cids,
-    Filter? filter,
-    SortOrder<ChannelState>? sort,
-    String? predefinedFilter,
-    Filter? resolvedFilter,
-    SortOrder<ChannelState>? resolvedSort,
-    Map<String, Object?>? filterValues,
-    Map<String, Object?>? sortValues,
-    bool clearQueryCache = false,
-  }) {
     if (predefinedFilter != null) {
       return db!.channelQueryDao.updateChannelQueriesByPredefinedFilter(
         predefinedFilter,
