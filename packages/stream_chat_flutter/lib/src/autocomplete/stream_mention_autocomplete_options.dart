@@ -236,9 +236,7 @@ class _StreamMentionAutocompleteOptionsState extends State<StreamMentionAutocomp
     final groupsFuture = _fetchUserGroups(query);
     final usersFuture = _fetchUsers(query);
 
-    final roles = await rolesFuture;
-    final groups = await groupsFuture;
-    final users = await usersFuture;
+    final (roles, groups, users) = await (rolesFuture, groupsFuture, usersFuture).wait;
 
     return [
       ...broadcasts,
