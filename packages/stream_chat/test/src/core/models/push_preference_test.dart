@@ -49,9 +49,9 @@ void main() {
     test('should serialize chatPreferences for user-level preferences', () {
       const input = PushPreferenceInput(
         chatPreferences: ChatPreferences(
-          defaultPreference: ChatPreferenceLevel.all,
-          directMentions: ChatPreferenceLevel.none,
-          threadReplies: ChatPreferenceLevel.all,
+          defaultPreference: .all,
+          directMentions: .none,
+          threadReplies: .all,
         ),
       );
 
@@ -68,7 +68,7 @@ void main() {
       const input = PushPreferenceInput.channel(
         channelCid: 'messaging:general',
         chatPreferences: ChatPreferences(
-          channelMentions: ChatPreferenceLevel.none,
+          channelMentions: .none,
         ),
       );
 

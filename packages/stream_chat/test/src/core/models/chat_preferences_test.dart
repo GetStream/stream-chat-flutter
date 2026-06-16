@@ -12,13 +12,13 @@ void main() {
   group('src/models/chat_preferences', () {
     test('should serialize to json correctly', () {
       const prefs = ChatPreferences(
-        channelMentions: ChatPreferenceLevel.none,
-        defaultPreference: ChatPreferenceLevel.all,
-        directMentions: ChatPreferenceLevel.all,
-        groupMentions: ChatPreferenceLevel.none,
-        hereMentions: ChatPreferenceLevel.all,
-        roleMentions: ChatPreferenceLevel.none,
-        threadReplies: ChatPreferenceLevel.all,
+        channelMentions: .none,
+        defaultPreference: .all,
+        directMentions: .all,
+        groupMentions: .none,
+        hereMentions: .all,
+        roleMentions: .none,
+        threadReplies: .all,
       );
 
       expect(prefs.toJson(), <String, dynamic>{
@@ -34,7 +34,7 @@ void main() {
 
     test('should omit unset fields when serializing', () {
       const prefs = ChatPreferences(
-        directMentions: ChatPreferenceLevel.all,
+        directMentions: .all,
       );
 
       expect(prefs.toJson(), <String, dynamic>{

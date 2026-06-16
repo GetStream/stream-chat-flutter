@@ -385,7 +385,7 @@ extension MessageX on Message {
 
     String wrap(String displayName, MentionType type, String id) {
       if (!linkify) return '@$displayName';
-      final scheme = type == MentionType.user ? kStreamMentionScheme : '$kStreamMentionScheme-${type.value}';
+      final scheme = type == .user ? kStreamMentionScheme : '$kStreamMentionScheme-${type.value}';
       return '[@$displayName]($scheme:$id)';
     }
 
@@ -401,15 +401,15 @@ extension MessageX on Message {
 
     if (mentionedChannel ?? false) {
       final channel = MentionType.channel.value;
-      current = applyReplace(current, channel, wrap(channel, MentionType.channel, channel));
+      current = applyReplace(current, channel, wrap(channel, .channel, channel));
     }
     if (mentionedHere ?? false) {
       final here = MentionType.here.value;
-      current = applyReplace(current, here, wrap(here, MentionType.here, here));
+      current = applyReplace(current, here, wrap(here, .here, here));
     }
 
     for (final group in mentionedGroups ?? const <UserGroup>[]) {
-      final replacement = wrap(group.name, MentionType.group, group.id);
+      final replacement = wrap(group.name, .group, group.id);
       current = applyReplace(current, group.id, replacement);
       if (group.name != group.id) {
         current = applyReplace(current, group.name, replacement);
@@ -417,14 +417,14 @@ extension MessageX on Message {
     }
 
     for (final role in mentionedRoles ?? const <String>[]) {
-      current = applyReplace(current, role, wrap(role, MentionType.role, role));
+      current = applyReplace(current, role, wrap(role, .role, role));
     }
 
     // User-mention emission uses the bare `mention:` scheme (unchanged from
     // before enhanced mentions existed) so existing consumer code stays
     // compatible.
     for (final user in mentionedUsers.toSet()) {
-      final replacement = wrap(user.name, MentionType.user, user.id);
+      final replacement = wrap(user.name, .user, user.id);
       current = applyReplace(current, user.id, replacement);
       if (user.name != user.id) {
         current = applyReplace(current, user.name, replacement);

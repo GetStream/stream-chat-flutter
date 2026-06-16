@@ -27,7 +27,7 @@ class UserMention extends Mention {
   final User user;
 
   @override
-  MentionType get type => MentionType.user;
+  MentionType get type => .user;
 
   @override
   String get display => user.name;
@@ -39,7 +39,7 @@ class ChannelMention extends Mention {
   const ChannelMention();
 
   @override
-  MentionType get type => MentionType.channel;
+  MentionType get type => .channel;
 
   @override
   String get display => MentionType.channel.value;
@@ -51,7 +51,7 @@ class HereMention extends Mention {
   const HereMention();
 
   @override
-  MentionType get type => MentionType.here;
+  MentionType get type => .here;
 
   @override
   String get display => MentionType.here.value;
@@ -70,7 +70,7 @@ class RoleMention extends Mention {
   final String role;
 
   @override
-  MentionType get type => MentionType.role;
+  MentionType get type => .role;
 
   @override
   String get display => role;
@@ -85,7 +85,7 @@ class GroupMention extends Mention {
   final UserGroup userGroup;
 
   @override
-  MentionType get type => MentionType.group;
+  MentionType get type => .group;
 
   @override
   String get display => userGroup.name;

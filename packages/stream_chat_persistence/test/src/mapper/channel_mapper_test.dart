@@ -118,11 +118,11 @@ void main() {
       ownCapabilities: ['testCapability'],
       config: ChannelConfig(
         maxMessageLength: 33,
-        pushLevel: PushLevel.allMentions,
+        pushLevel: .allMentions,
         pushNotifications: false,
         chatPreferences: const ChatPreferences(
-          defaultPreference: ChatPreferenceLevel.all,
-          directMentions: ChatPreferenceLevel.none,
+          defaultPreference: .all,
+          directMentions: .none,
         ),
       ),
       frozen: math.Random().nextBool(),
