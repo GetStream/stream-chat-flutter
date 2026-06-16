@@ -79,7 +79,7 @@ class StreamMessageItem extends StatelessWidget {
     void Function(User)? onUserAvatarTap,
     void Function(Message message, String url)? onMessageLinkTap,
     @Deprecated('Use onMentionTap and switch on UserMention instead') void Function(User user)? onUserMentionTap,
-    void Function(Mention mention)? onMentionTap,
+    void Function(StreamMention mention)? onMentionTap,
     void Function(Message parentMessage, Message? threadMessage)? onThreadTap,
     void Function(Message)? onViewInChannelTap,
     void Function(Message)? onReplyTap,
@@ -260,14 +260,14 @@ class StreamMessageItemProps {
 
   /// Called when a mention of any kind is tapped in the message text.
   ///
-  /// Receives a typed [Mention] subclass carrying the looked-up payload
+  /// Receives a typed [StreamMention] subclass carrying the looked-up payload
   /// (`UserMention.user`, `GroupMention.userGroup`, `RoleMention.role`, or no
   /// payload for `ChannelMention` / `HereMention`). Takes precedence over
   /// [onUserMentionTap] when both are set.
   ///
   /// If null, the renderer falls back to [onUserMentionTap] for user
   /// mentions only.
-  final void Function(Mention mention)? onMentionTap;
+  final void Function(StreamMention mention)? onMentionTap;
 
   /// Called when the thread reply indicator is tapped.
   ///
@@ -362,7 +362,7 @@ class StreamMessageItemProps {
     void Function(User)? onUserAvatarTap,
     void Function(Message, String)? onMessageLinkTap,
     @Deprecated('Use onMentionTap and switch on UserMention instead') void Function(User)? onUserMentionTap,
-    void Function(Mention)? onMentionTap,
+    void Function(StreamMention)? onMentionTap,
     void Function(Message, Message?)? onThreadTap,
     void Function(Message)? onViewInChannelTap,
     void Function(Message)? onReplyTap,
@@ -1122,7 +1122,7 @@ class _StreamMessageItemDefaults extends core.StreamMessageItemThemeData {
   );
 }
 
-Mention? _buildMention(Message message, core.MentionType type, String id) {
+StreamMention? _buildMention(Message message, core.StreamMentionType type, String id) {
   return switch (type) {
     .user =>
       message.mentionedUsers.firstWhereOrNull((u) => u.id == id)?.let((user) => UserMention(user: user)),

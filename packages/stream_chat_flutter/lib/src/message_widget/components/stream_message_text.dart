@@ -52,7 +52,7 @@ class StreamMessageText extends StatelessWidget {
 
   /// Called when a mention of any kind is tapped.
   ///
-  /// Receives the [core.MentionType] decoded from the URL scheme along with
+  /// Receives the [core.StreamMentionType] decoded from the URL scheme along with
   /// the display text and the URL-decoded id payload. Takes precedence over
   /// [onMentionTap] when both are set.
   ///

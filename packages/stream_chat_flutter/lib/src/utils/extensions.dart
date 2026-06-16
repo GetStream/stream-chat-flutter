@@ -383,9 +383,9 @@ extension MessageX on Message {
     if (initial == null || initial.isEmpty) return this;
     var current = initial;
 
-    String wrap(String displayName, MentionType type, String id) {
+    String wrap(String displayName, StreamMentionType type, String id) {
       if (!linkify) return '@$displayName';
-      final scheme = type == .user ? kStreamMentionScheme : '$kStreamMentionScheme-${type.value}';
+      final scheme = type == .user ? kStreamMentionScheme : '$kStreamMentionScheme-$type';
       return '[@$displayName]($scheme:$id)';
     }
 
@@ -400,11 +400,11 @@ extension MessageX on Message {
     }
 
     if (mentionedChannel ?? false) {
-      final channel = MentionType.channel.value;
+      const channel = StreamMentionType.channel;
       current = applyReplace(current, channel, wrap(channel, .channel, channel));
     }
     if (mentionedHere ?? false) {
-      final here = MentionType.here.value;
+      const here = StreamMentionType.here;
       current = applyReplace(current, here, wrap(here, .here, here));
     }
 

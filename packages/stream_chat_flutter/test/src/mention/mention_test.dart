@@ -8,7 +8,7 @@ void main() {
       final mention = UserMention(user: user);
 
       expect(mention.user, same(user));
-      expect(mention.type, MentionType.user);
+      expect(mention.type, StreamMentionType.user);
       expect(mention.display, 'Alice');
     });
 
@@ -22,14 +22,14 @@ void main() {
     test('ChannelMention has fixed type and display', () {
       const mention = ChannelMention();
 
-      expect(mention.type, MentionType.channel);
+      expect(mention.type, StreamMentionType.channel);
       expect(mention.display, 'channel');
     });
 
     test('HereMention has fixed type and display', () {
       const mention = HereMention();
 
-      expect(mention.type, MentionType.here);
+      expect(mention.type, StreamMentionType.here);
       expect(mention.display, 'here');
     });
 
@@ -37,7 +37,7 @@ void main() {
       const mention = RoleMention(role: 'admin');
 
       expect(mention.role, 'admin');
-      expect(mention.type, MentionType.role);
+      expect(mention.type, StreamMentionType.role);
       expect(mention.display, 'admin');
     });
 
@@ -51,7 +51,7 @@ void main() {
       final mention = GroupMention(userGroup: group);
 
       expect(mention.userGroup, same(group));
-      expect(mention.type, MentionType.group);
+      expect(mention.type, StreamMentionType.group);
       expect(mention.display, 'Dream Team');
     });
   });

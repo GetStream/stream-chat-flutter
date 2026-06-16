@@ -212,13 +212,13 @@ class StreamMessageListView extends StatefulWidget {
 
   /// Called when a mention of any kind is tapped in the message text.
   ///
-  /// Receives a typed [Mention] subclass carrying the looked-up payload
+  /// Receives a typed [StreamMention] subclass carrying the looked-up payload
   /// (`UserMention.user`, `GroupMention.userGroup`, `RoleMention.role`, or no
   /// payload for `ChannelMention` / `HereMention`). Takes precedence over
   /// [onUserMentionTap] when both are set.
   ///
   /// Forwarded to each [StreamMessageItem] in the list.
-  final void Function(Mention mention)? onMentionTap;
+  final void Function(StreamMention mention)? onMentionTap;
 
   /// Index of an item to initially align within the viewport.
   final int? initialScrollIndex;

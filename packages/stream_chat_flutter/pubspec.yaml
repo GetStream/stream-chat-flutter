@@ -58,9 +58,17 @@ dependencies:
   shimmer: ^3.0.0
   stream_chat_flutter_core: ^10.0.1
   stream_core_flutter:
+    # The ignore below silences `invalid_dependency` because we occasionally
+    # pin stream_core_flutter to a git ref to iterate on it alongside this
+    # SDK between its releases.
+    #
+    # **Note:** Before publishing stream_chat_flutter, this MUST be swapped
+    # back to a pub version constraint — git deps are not allowed on pub.dev
+    # and will block the release.
+    # ignore: invalid_dependency
     git:
       url: https://github.com/GetStream/stream-core-flutter.git
-      ref: 90b8fccf0fcde5a83bc70523d7e46414be41287a
+      ref: 1c9500587984244d97d63ef01ac18df10430f3c4
       path: packages/stream_core_flutter
   svg_icon_widget: ^0.0.1
   synchronized: ^3.4.0

@@ -73,7 +73,7 @@ export 'package:stream_core_flutter/stream_core_flutter.dart'
         StreamMessageContentKind,
         StreamMessageText,
         StreamMessageTextStyle,
-        MentionType,
+        StreamMentionType,
         StreamPlaybackSpeedToggle,
         StreamPlaybackSpeed,
         StreamReactionPicker,
