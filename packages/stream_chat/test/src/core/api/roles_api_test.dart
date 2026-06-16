@@ -3,7 +3,7 @@
 import 'package:dio/dio.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/src/core/api/roles_api.dart';
-import 'package:stream_chat/src/core/models/role_type.dart';
+import 'package:stream_chat/src/core/models/role.dart';
 import 'package:test/test.dart';
 
 import '../../mocks.dart';

@@ -41,7 +41,7 @@ import 'package:stream_chat/src/core/models/poll_option.dart';
 import 'package:stream_chat/src/core/models/poll_vote.dart';
 import 'package:stream_chat/src/core/models/push_preference.dart';
 import 'package:stream_chat/src/core/models/reaction.dart';
-import 'package:stream_chat/src/core/models/role_type.dart';
+import 'package:stream_chat/src/core/models/role.dart';
 import 'package:stream_chat/src/core/models/thread.dart';
 import 'package:stream_chat/src/core/models/user.dart';
 import 'package:stream_chat/src/core/util/event_controller.dart';

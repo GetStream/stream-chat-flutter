@@ -19,4 +19,11 @@ void main() {
       expect(role.updatedAt, DateTime.parse('2024-01-02T00:00:00Z'));
     });
   });
+
+  group('src/models/role_type', () {
+    test('constants resolve to expected wire strings', () {
+      expect(RoleType.user, 'user');
+      expect(RoleType.channel, 'channel');
+    });
+  });
 }

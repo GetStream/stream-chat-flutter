@@ -1,6 +1,6 @@
 import 'package:stream_chat/src/core/api/responses.dart';
 import 'package:stream_chat/src/core/http/stream_http_client.dart';
-import 'package:stream_chat/src/core/models/role_type.dart';
+import 'package:stream_chat/src/core/models/role.dart';
 
 /// Defines the API dedicated to roles operations.
 class RolesApi {
