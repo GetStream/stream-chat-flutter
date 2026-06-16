@@ -293,8 +293,7 @@ void main() {
     test('setCommand keeps the quoted message regardless of CommandSet', () {
       // setCommand does not enforce availability rules itself — callers are
       // expected to gate on validateCommand first. Activation is purely a
-      // state mutation, mirroring Android Compose and stream-chat-js where
-      // the disabled check lives in the caller, not in setCommand.
+      // state mutation; the disabled check lives in the caller.
       controller.quotedMessage = quotedMessage;
       controller.setCommand(moderationCommand);
       expect(controller.message.command, 'ban');
