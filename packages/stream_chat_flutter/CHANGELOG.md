@@ -3,6 +3,8 @@
 ✅ Added
 
 - `StreamMessageComposer` now surfaces the hold-to-record hint through `StreamSnackbar` anchored above the composer, and `StreamChat` provides an app-wide `StreamSnackbarScope` fallback.
+- Added `commandValidator` prop on `StreamCommandAutocompleteOptions` and `StreamCommandPicker` for marking rows as unavailable; disabled rows remain tappable so the caller can surface feedback.
+- `StreamMessageComposer` now surfaces a `StreamSnackbar` when the user taps a disabled slash command in the picker or autocomplete, explaining why it's blocked.
 
 ⚠️ Deprecated
 

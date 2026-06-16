@@ -64,6 +64,9 @@ void main() {
       expect(localizations.searchGifLabel, isNotNull);
       expect(localizations.writeAMessageLabel, isNotNull);
       expect(localizations.instantCommandsLabel, isNotNull);
+      expect(localizations.commandUnavailableWhileEditingError, isNotNull);
+      expect(localizations.commandUnavailableWhileQuotingError, isNotNull);
+      expect(localizations.commandUnavailableError, isNotNull);
       expect(localizations.fileTooLargeAfterCompressionError(33), isNotNull);
       expect(localizations.fileTooLargeError(33), isNotNull);
       expect(localizations.fileTypeNotSupportedError('exe'), isNotNull);

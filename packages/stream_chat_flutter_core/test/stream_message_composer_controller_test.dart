@@ -116,11 +116,14 @@ void main() {
   });
 
   group('Command Handling', () {
-    test('set command updates message and clears text and attachments', () {
+    final giphyStub = Command(name: 'giphy');
+    final banStub = Command(name: 'ban');
+
+    test('setCommand updates message and clears text and attachments', () {
       controller.text = 'Some text';
       controller.addAttachment(Attachment(type: 'image'));
 
-      controller.command = 'giphy';
+      controller.setCommand(giphyStub);
 
       expect(controller.message.command, 'giphy');
       expect(controller.text, isEmpty);
@@ -131,7 +134,7 @@ void main() {
       controller.text = 'Draft text';
       controller.addAttachment(Attachment(type: 'image'));
 
-      controller.command = 'giphy';
+      controller.setCommand(giphyStub);
       controller.text = 'giphy search';
 
       controller.clearCommand();
@@ -150,24 +153,14 @@ void main() {
       expect(controller.message.command, isNull);
     });
 
-    test('setting command again during an active command keeps the original snapshot', () {
+    test('setCommand during an active command keeps the original snapshot', () {
       controller.text = 'Draft text';
 
-      controller.command = 'giphy';
+      controller.setCommand(giphyStub);
       controller.text = 'mid-command typing';
-      controller.command = 'ban';
+      controller.setCommand(banStub);
 
       controller.clearCommand();
-
-      expect(controller.text, 'Draft text');
-      expect(controller.message.command, isNull);
-    });
-
-    test('setting command to null is equivalent to clearCommand', () {
-      controller.text = 'Draft text';
-
-      controller.command = 'giphy';
-      controller.command = null;
 
       expect(controller.text, 'Draft text');
       expect(controller.message.command, isNull);
@@ -194,6 +187,206 @@ void main() {
 
       expect(controller.text, isEmpty);
       expect(controller.message.command, isNull);
+    });
+
+    test('setCommand clears mentions and clearCommand restores them', () {
+      final alice = User(id: 'alice');
+      controller.text = '@alice hi';
+      controller.addMentionedUser(alice);
+
+      controller.setCommand(
+        Command(
+          name: 'giphy',
+          description: '',
+          args: '',
+          set: CommandSet.fun,
+        ),
+      );
+
+      // Mentions are cleared in command mode (no orphan mentions get sent).
+      expect(controller.mentionedUsers, isEmpty);
+
+      controller.clearCommand();
+
+      // Cancel restores the pre-command draft, mentions included.
+      expect(controller.text, '@alice hi');
+      expect(controller.mentionedUsers, [alice]);
+    });
+
+    test('legacy command setter also clears mentions', () {
+      controller.text = '@alice hi';
+      controller.addMentionedUser(User(id: 'alice'));
+
+      controller.command = 'giphy';
+
+      expect(controller.mentionedUsers, isEmpty);
+    });
+
+    test('activeCommand returns null when no command is active', () {
+      expect(controller.activeCommand, isNull);
+    });
+
+    test('activeCommand returns the Command instance passed to setCommand', () {
+      controller.setCommand(giphyStub);
+
+      expect(controller.activeCommand, same(giphyStub));
+    });
+
+    test('activeCommand is cleared after clearCommand', () {
+      controller.setCommand(giphyStub);
+      controller.clearCommand();
+
+      expect(controller.activeCommand, isNull);
+    });
+
+    test('legacy command setter produces a stub activeCommand', () {
+      controller.command = 'giphy';
+
+      // The legacy setter has no Command metadata; the stub carries only the
+      // name so [activeCommand] mirrors [message.command].
+      expect(controller.activeCommand, isNotNull);
+      expect(controller.activeCommand!.name, 'giphy');
+      expect(controller.activeCommand!.description, isEmpty);
+      expect(controller.activeCommand!.args, isEmpty);
+      expect(controller.activeCommand!.set, const CommandSet(''));
+    });
+
+    test('activeCommand is cleared after legacy setter is set to null', () {
+      controller.command = 'giphy';
+      controller.command = null;
+
+      expect(controller.activeCommand, isNull);
+    });
+  });
+
+  group('Command availability and mutual exclusion', () {
+    final funCommand = Command(
+      name: 'giphy',
+      description: 'Search Giphy',
+      args: '[text]',
+      set: CommandSet.fun,
+    );
+    final moderationCommand = Command(
+      name: 'ban',
+      description: 'Ban a user',
+      args: '[@username]',
+      set: CommandSet.moderation,
+    );
+    final customCommand = Command(
+      name: 'escalate',
+      description: 'App-defined custom command',
+      args: '',
+      set: const CommandSet('support_set'),
+    );
+    final quotedMessage = Message(id: 'quoted-id', text: 'Quoted');
+
+    test('setCommand on a fun_set command keeps the quoted message', () {
+      controller.quotedMessage = quotedMessage;
+
+      controller.setCommand(funCommand);
+
+      expect(controller.message.command, 'giphy');
+      expect(controller.message.quotedMessageId, 'quoted-id');
+      expect(controller.message.quotedMessage, quotedMessage);
+    });
+
+    test('setCommand keeps the quoted message regardless of CommandSet', () {
+      // setCommand does not enforce availability rules itself — callers are
+      // expected to gate on validateCommand first. Activation is purely a
+      // state mutation, mirroring Android Compose and stream-chat-js where
+      // the disabled check lives in the caller, not in setCommand.
+      controller.quotedMessage = quotedMessage;
+      controller.setCommand(moderationCommand);
+      expect(controller.message.command, 'ban');
+      expect(controller.message.quotedMessageId, 'quoted-id');
+
+      controller.clearCommand();
+      controller.quotedMessage = quotedMessage;
+      controller.setCommand(funCommand);
+      expect(controller.message.command, 'giphy');
+      expect(controller.message.quotedMessageId, 'quoted-id');
+
+      controller.clearCommand();
+      controller.quotedMessage = quotedMessage;
+      controller.setCommand(customCommand);
+      expect(controller.message.command, 'escalate');
+      expect(controller.message.quotedMessageId, 'quoted-id');
+    });
+
+    test('setting a quoted message clears an active moderation command', () {
+      controller.text = 'Draft text';
+      controller.setCommand(moderationCommand);
+
+      controller.quotedMessage = quotedMessage;
+
+      expect(controller.message.command, isNull);
+      expect(controller.message.quotedMessageId, 'quoted-id');
+      // The pre-command draft is restored.
+      expect(controller.text, 'Draft text');
+    });
+
+    test('setting a quoted message keeps an active fun_set command', () {
+      controller.setCommand(funCommand);
+
+      controller.quotedMessage = quotedMessage;
+
+      expect(controller.message.command, 'giphy');
+      expect(controller.message.quotedMessageId, 'quoted-id');
+    });
+
+    test('setting a quoted message keeps an active custom-set command', () {
+      controller.setCommand(customCommand);
+
+      controller.quotedMessage = quotedMessage;
+
+      expect(controller.message.command, 'escalate');
+      expect(controller.message.quotedMessageId, 'quoted-id');
+    });
+
+    test('editMessage clears any active command and its snapshot', () {
+      controller.text = 'Draft text';
+      controller.setCommand(moderationCommand);
+
+      controller.editMessage(Message(id: 'm', text: 'editing this'));
+
+      expect(controller.message.command, isNull);
+      expect(controller.activeCommand, isNull);
+      expect(controller.isEditing, isTrue);
+
+      controller.cancelEditMessage();
+      // Cancel-edit unwinds to the pre-command draft, not back into command
+      // mode.
+      expect(controller.text, 'Draft text');
+      expect(controller.message.command, isNull);
+      expect(controller.activeCommand, isNull);
+
+      // The command snapshot was fully torn down on editMessage — a stray
+      // clearCommand call after cancel-edit must not resurrect stale state.
+      controller.clearCommand();
+      expect(controller.text, 'Draft text');
+      expect(controller.message.command, isNull);
+    });
+
+    test('validateCommand: moderation blocked while quoting', () {
+      controller.quotedMessage = quotedMessage;
+
+      expect(controller.validateCommand(moderationCommand), CommandUnavailableReason.quotedMessage);
+      expect(controller.validateCommand(funCommand), isNull);
+      expect(controller.validateCommand(customCommand), isNull);
+    });
+
+    test('validateCommand: every command blocked while editing', () {
+      controller.editMessage(Message(id: 'm', text: 'editing'));
+
+      expect(controller.validateCommand(moderationCommand), CommandUnavailableReason.editing);
+      expect(controller.validateCommand(funCommand), CommandUnavailableReason.editing);
+      expect(controller.validateCommand(customCommand), CommandUnavailableReason.editing);
+    });
+
+    test('validateCommand: every command available in a clean composer', () {
+      expect(controller.validateCommand(moderationCommand), isNull);
+      expect(controller.validateCommand(funCommand), isNull);
+      expect(controller.validateCommand(customCommand), isNull);
     });
   });
 
