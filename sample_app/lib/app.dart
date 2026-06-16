@@ -12,7 +12,6 @@ import 'package:sample_app/notification/notification_service.dart';
 import 'package:sample_app/pages/splash_screen.dart';
 import 'package:sample_app/routes/app_routes.dart';
 import 'package:sample_app/routes/routes.dart';
-import 'package:sample_app/widgets/custom_mention_item.dart';
 import 'package:sample_app/widgets/custom_message_actions.dart';
 import 'package:sample_app/widgets/location/location_attachment.dart';
 import 'package:sample_app/widgets/location/location_detail_dialog.dart';
@@ -207,12 +206,6 @@ class _StreamChatSampleAppState extends State<StreamChatSampleApp>
                             componentBuilders: StreamComponentBuilders(
                               extensions: streamChatComponentBuilders(
                                 messageItem: customMessageItemBuilder,
-                                // (2) Customize the `@channel` item globally.
-                                // Every StreamMessageComposer in the tree
-                                // picks this up automatically. A per-instance
-                                // `mentionItemBuilder:` on a specific composer
-                                // overrides this one — see ChannelPage.
-                                mentionItem: customChannelMentionItem,
                               ),
                             ),
                             configData: config.toStreamChatConfigurationData(),
