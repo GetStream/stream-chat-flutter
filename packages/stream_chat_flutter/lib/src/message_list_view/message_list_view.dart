@@ -118,7 +118,7 @@ class StreamMessageListView extends StatefulWidget {
     this.onReactionsTap,
     this.onQuotedMessageTap,
     this.onMessageLinkTap,
-    @Deprecated('Use onMentionTap and switch on UserMention instead') this.onUserMentionTap,
+    @Deprecated('Use onMentionTap and switch on StreamUserMention instead') this.onUserMentionTap,
     this.onMentionTap,
     this.onSystemMessageTap,
     this.onEphemeralMessageTap,
@@ -207,14 +207,15 @@ class StreamMessageListView extends StatefulWidget {
   /// [onMentionTap] takes precedence.
   ///
   /// Forwarded to each [StreamMessageItem] in the list.
-  @Deprecated('Use onMentionTap and switch on UserMention instead')
+  @Deprecated('Use onMentionTap and switch on StreamUserMention instead')
   final void Function(User user)? onUserMentionTap;
 
   /// Called when a mention of any kind is tapped in the message text.
   ///
   /// Receives a typed [StreamMention] subclass carrying the looked-up payload
-  /// (`UserMention.user`, `GroupMention.userGroup`, `RoleMention.role`, or no
-  /// payload for `ChannelMention` / `HereMention`). Takes precedence over
+  /// (`StreamUserMention.user`, `StreamGroupMention.userGroup`,
+  /// `StreamRoleMention.role`, or no payload for `StreamChannelMention` /
+  /// `StreamHereMention`). Takes precedence over
   /// [onUserMentionTap] when both are set.
   ///
   /// Forwarded to each [StreamMessageItem] in the list.

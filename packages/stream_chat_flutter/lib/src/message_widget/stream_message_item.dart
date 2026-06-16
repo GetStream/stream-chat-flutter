@@ -78,7 +78,7 @@ class StreamMessageItem extends StatelessWidget {
     void Function(Message)? onMessageLongPress,
     void Function(User)? onUserAvatarTap,
     void Function(Message message, String url)? onMessageLinkTap,
-    @Deprecated('Use onMentionTap and switch on UserMention instead') void Function(User user)? onUserMentionTap,
+    @Deprecated('Use onMentionTap and switch on StreamUserMention instead') void Function(User user)? onUserMentionTap,
     void Function(StreamMention mention)? onMentionTap,
     void Function(Message parentMessage, Message? threadMessage)? onThreadTap,
     void Function(Message)? onViewInChannelTap,
@@ -158,7 +158,7 @@ class StreamMessageItemProps {
     this.onMessageLongPress,
     this.onUserAvatarTap,
     this.onMessageLinkTap,
-    @Deprecated('Use onMentionTap and switch on UserMention instead') this.onUserMentionTap,
+    @Deprecated('Use onMentionTap and switch on StreamUserMention instead') this.onUserMentionTap,
     this.onMentionTap,
     this.onThreadTap,
     this.onViewInChannelTap,
@@ -255,14 +255,15 @@ class StreamMessageItemProps {
   /// takes precedence.
   ///
   /// If null, tapping a user mention has no effect.
-  @Deprecated('Use onMentionTap and switch on UserMention instead')
+  @Deprecated('Use onMentionTap and switch on StreamUserMention instead')
   final void Function(User user)? onUserMentionTap;
 
   /// Called when a mention of any kind is tapped in the message text.
   ///
   /// Receives a typed [StreamMention] subclass carrying the looked-up payload
-  /// (`UserMention.user`, `GroupMention.userGroup`, `RoleMention.role`, or no
-  /// payload for `ChannelMention` / `HereMention`). Takes precedence over
+  /// (`StreamUserMention.user`, `StreamGroupMention.userGroup`,
+  /// `StreamRoleMention.role`, or no payload for `StreamChannelMention` /
+  /// `StreamHereMention`). Takes precedence over
   /// [onUserMentionTap] when both are set.
   ///
   /// If null, the renderer falls back to [onUserMentionTap] for user
@@ -361,7 +362,7 @@ class StreamMessageItemProps {
     void Function(Message)? onMessageLongPress,
     void Function(User)? onUserAvatarTap,
     void Function(Message, String)? onMessageLinkTap,
-    @Deprecated('Use onMentionTap and switch on UserMention instead') void Function(User)? onUserMentionTap,
+    @Deprecated('Use onMentionTap and switch on StreamUserMention instead') void Function(User)? onUserMentionTap,
     void Function(StreamMention)? onMentionTap,
     void Function(Message, Message?)? onThreadTap,
     void Function(Message)? onViewInChannelTap,
@@ -1124,11 +1125,12 @@ class _StreamMessageItemDefaults extends core.StreamMessageItemThemeData {
 
 StreamMention? _buildMention(Message message, core.StreamMentionType type, String id) {
   return switch (type) {
-    .user => message.mentionedUsers.firstWhereOrNull((u) => u.id == id)?.let((user) => UserMention(user: user)),
-    .channel => const ChannelMention(),
-    .here => const HereMention(),
-    .role => message.mentionedRoles?.firstWhereOrNull((r) => r == id)?.let((role) => RoleMention(role: role)),
-    .group => message.mentionedGroups?.firstWhereOrNull((g) => g.id == id)?.let((g) => GroupMention(userGroup: g)),
+    .user => message.mentionedUsers.firstWhereOrNull((u) => u.id == id)?.let((user) => StreamUserMention(user: user)),
+    .channel => const StreamChannelMention(),
+    .here => const StreamHereMention(),
+    .role => message.mentionedRoles?.firstWhereOrNull((r) => r == id)?.let((role) => StreamRoleMention(role: role)),
+    .group =>
+      message.mentionedGroups?.firstWhereOrNull((g) => g.id == id)?.let((g) => StreamGroupMention(userGroup: g)),
     _ => null,
   };
 }

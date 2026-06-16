@@ -5,7 +5,7 @@
 - `StreamMessageComposer` now surfaces the hold-to-record hint through `StreamSnackbar` anchored above the composer, and `StreamChat` provides an app-wide `StreamSnackbarScope` fallback.
 - Added support for `@channel`, `@here`, role, and user-group mentions — parsed on incoming messages, rendered as styled tappable spans in message text, and selectable from the composer's `@` autocomplete.
 - Added per-type tile builders on `StreamMessageComposer` and `StreamMentionAutocompleteOptions` (`mentionChannelTileBuilder`, `mentionHereTileBuilder`, `mentionRoleTileBuilder`, `mentionUserGroupTileBuilder`, `mentionUserTileBuilder`), plus matching `onMention*Tap` callbacks on `StreamMentionAutocompleteOptions`.
-- Added `StreamMessageListView.onMentionTap` and `StreamMessageItem.onMentionTap` — receives a typed `Mention` (`UserMention`, `ChannelMention`, `HereMention`, `RoleMention`, or `GroupMention`).
+- Added `StreamMessageListView.onMentionTap` and `StreamMessageItem.onMentionTap` — receives a typed `StreamMention` (`StreamUserMention`, `StreamChannelMention`, `StreamHereMention`, `StreamRoleMention`, or `StreamGroupMention`).
 
 ⚠️ Deprecated
 

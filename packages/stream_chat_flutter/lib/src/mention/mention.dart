@@ -2,8 +2,9 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// A typed mention surfaced by the read-side render pipeline.
 ///
-/// One of the five built-in subclasses: [UserMention], [ChannelMention],
-/// [HereMention], [RoleMention], [GroupMention].
+/// One of the five built-in subclasses: [StreamUserMention],
+/// [StreamChannelMention], [StreamHereMention], [StreamRoleMention],
+/// [StreamGroupMention].
 abstract class StreamMention {
   /// Creates a new [StreamMention].
   const StreamMention();
@@ -19,9 +20,9 @@ abstract class StreamMention {
 }
 
 /// A mention referencing a single user.
-class UserMention extends StreamMention {
-  /// Creates a new [UserMention] wrapping [user].
-  const UserMention({required this.user});
+class StreamUserMention extends StreamMention {
+  /// Creates a new [StreamUserMention] wrapping [user].
+  const StreamUserMention({required this.user});
 
   /// The referenced user.
   final User user;
@@ -34,9 +35,9 @@ class UserMention extends StreamMention {
 }
 
 /// A `@channel` broadcast mention.
-class ChannelMention extends StreamMention {
-  /// Creates a new [ChannelMention].
-  const ChannelMention();
+class StreamChannelMention extends StreamMention {
+  /// Creates a new [StreamChannelMention].
+  const StreamChannelMention();
 
   @override
   StreamMentionType get type => .channel;
@@ -46,9 +47,9 @@ class ChannelMention extends StreamMention {
 }
 
 /// An `@here` broadcast mention targeting online channel members.
-class HereMention extends StreamMention {
-  /// Creates a new [HereMention].
-  const HereMention();
+class StreamHereMention extends StreamMention {
+  /// Creates a new [StreamHereMention].
+  const StreamHereMention();
 
   @override
   StreamMentionType get type => .here;
@@ -62,9 +63,9 @@ class HereMention extends StreamMention {
 /// Carries the role name only — the SDK does not persist the full [Role]
 /// model on the message. Customers needing the full [Role] can fetch it via
 /// `channel.client.searchRoles(role)`.
-class RoleMention extends StreamMention {
-  /// Creates a new [RoleMention] for the role with the given name.
-  const RoleMention({required this.role});
+class StreamRoleMention extends StreamMention {
+  /// Creates a new [StreamRoleMention] for the role with the given name.
+  const StreamRoleMention({required this.role});
 
   /// The role name.
   final String role;
@@ -77,9 +78,9 @@ class RoleMention extends StreamMention {
 }
 
 /// A mention referencing a named subset of channel members.
-class GroupMention extends StreamMention {
-  /// Creates a new [GroupMention] wrapping [userGroup].
-  const GroupMention({required this.userGroup});
+class StreamGroupMention extends StreamMention {
+  /// Creates a new [StreamGroupMention] wrapping [userGroup].
+  const StreamGroupMention({required this.userGroup});
 
   /// The referenced user group.
   final UserGroup userGroup;
