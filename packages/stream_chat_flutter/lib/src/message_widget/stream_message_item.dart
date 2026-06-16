@@ -1124,14 +1124,11 @@ class _StreamMessageItemDefaults extends core.StreamMessageItemThemeData {
 
 StreamMention? _buildMention(Message message, core.StreamMentionType type, String id) {
   return switch (type) {
-    .user =>
-      message.mentionedUsers.firstWhereOrNull((u) => u.id == id)?.let((user) => UserMention(user: user)),
+    .user => message.mentionedUsers.firstWhereOrNull((u) => u.id == id)?.let((user) => UserMention(user: user)),
     .channel => const ChannelMention(),
     .here => const HereMention(),
-    .role =>
-      message.mentionedRoles?.firstWhereOrNull((r) => r == id)?.let((role) => RoleMention(role: role)),
-    .group =>
-      message.mentionedGroups?.firstWhereOrNull((g) => g.id == id)?.let((g) => GroupMention(userGroup: g)),
+    .role => message.mentionedRoles?.firstWhereOrNull((r) => r == id)?.let((role) => RoleMention(role: role)),
+    .group => message.mentionedGroups?.firstWhereOrNull((g) => g.id == id)?.let((g) => GroupMention(userGroup: g)),
     _ => null,
   };
 }
