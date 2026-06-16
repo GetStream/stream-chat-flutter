@@ -19,8 +19,8 @@ class StreamMentionAutocompleteOptions extends StatefulWidget {
     this.client,
     this.limit = 10,
     this.mentionAllAppUsers = false,
-    @Deprecated('Use mentionTileBuilder instead') this.mentionsTileBuilder,
-    this.mentionTileBuilder,
+    @Deprecated('Use mentionItemBuilder instead') this.mentionsTileBuilder,
+    this.mentionItemBuilder,
     this.onMentionChannelTap,
     this.onMentionHereTap,
     this.onMentionRoleTap,
@@ -56,18 +56,18 @@ class StreamMentionAutocompleteOptions extends StatefulWidget {
   /// Customize the tile for user mentions in the overlay.
   ///
   /// Honoured only for user mentions, for backwards compatibility. Prefer
-  /// [mentionTileBuilder] (or a globally-registered factory builder), which
+  /// [mentionItemBuilder] (or a globally-registered factory builder), which
   /// covers every mention kind.
-  @Deprecated('Use mentionTileBuilder instead')
+  @Deprecated('Use mentionItemBuilder instead')
   final UserMentionTileBuilder? mentionsTileBuilder;
 
-  /// Per-instance builder for the suggestion tile rendered for each mention.
+  /// Per-instance builder for the suggestion item rendered for each mention.
   ///
   /// Takes precedence over any builder registered globally for
-  /// [StreamMentionTileProps] through [streamChatComponentBuilders]. When
-  /// null, the global builder is consulted next, then [DefaultStreamMentionTile]
+  /// [StreamMentionItemProps] through [streamChatComponentBuilders]. When
+  /// null, the global builder is consulted next, then [DefaultStreamMentionItem]
   /// is used as a fallback.
-  final StreamMentionTileBuilder? mentionTileBuilder;
+  final StreamMentionItemBuilder? mentionItemBuilder;
 
   /// Callback called when the "@channel" broadcast mention is selected.
   final VoidCallback? onMentionChannelTap;
@@ -160,10 +160,10 @@ class _StreamMentionAutocompleteOptionsState extends State<StreamMentionAutocomp
   }
 
   Widget _buildTile(BuildContext context, StreamMention mention, VoidCallback? onTap) {
-    final props = StreamMentionTileProps(mention: mention, onTap: onTap);
-    final localBuilder = widget.mentionTileBuilder;
+    final props = StreamMentionItemProps(mention: mention, onTap: onTap);
+    final localBuilder = widget.mentionItemBuilder;
     if (localBuilder != null) return localBuilder(context, props);
-    return StreamMentionTile.fromProps(props: props);
+    return StreamMentionItem.fromProps(props: props);
   }
 
   Widget _buildUserTile(BuildContext context, User user) {
@@ -171,7 +171,7 @@ class _StreamMentionAutocompleteOptionsState extends State<StreamMentionAutocomp
     // Deprecated legacy builder: honoured only for user mentions.
     // ignore: deprecated_member_use_from_same_package
     final legacy = widget.mentionsTileBuilder;
-    if (legacy != null && widget.mentionTileBuilder == null) {
+    if (legacy != null && widget.mentionItemBuilder == null) {
       return Material(
         color: context.streamColorScheme.backgroundElevation1,
         child: InkWell(

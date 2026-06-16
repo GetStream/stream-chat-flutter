@@ -4,90 +4,82 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// Renders a single mention suggestion row.
 ///
 /// Customise rendering globally by registering a [StreamComponentBuilder]
-/// for [StreamMentionTileProps] through [streamChatComponentBuilders]. When
-/// no builder is registered the [DefaultStreamMentionTile] fallback is used.
+/// for [StreamMentionItemProps] through [streamChatComponentBuilders]. When
+/// no builder is registered the [DefaultStreamMentionItem] fallback is used.
 ///
-/// For per-instance overrides, set `mentionTileBuilder` on
+/// For per-instance overrides, set `mentionItemBuilder` on
 /// [StreamMentionAutocompleteOptions] or [StreamMessageComposer].
-class StreamMentionTile extends StatelessWidget {
-  /// Creates a [StreamMentionTile] for the given [mention].
-  StreamMentionTile({
+class StreamMentionItem extends StatelessWidget {
+  /// Creates a [StreamMentionItem] for the given [mention].
+  StreamMentionItem({
     super.key,
     required StreamMention mention,
     VoidCallback? onTap,
-  }) : props = StreamMentionTileProps(mention: mention, onTap: onTap);
+  }) : props = StreamMentionItemProps(mention: mention, onTap: onTap);
 
-  /// Creates a [StreamMentionTile] from a pre-built [StreamMentionTileProps].
-  const StreamMentionTile.fromProps({super.key, required this.props});
+  /// Creates a [StreamMentionItem] from a pre-built [StreamMentionItemProps].
+  const StreamMentionItem.fromProps({super.key, required this.props});
 
-  /// The properties for the mention tile.
-  final StreamMentionTileProps props;
+  /// The properties for the mention item.
+  final StreamMentionItemProps props;
 
   @override
   Widget build(BuildContext context) {
-    final builder = context.chatComponentBuilder<StreamMentionTileProps>();
+    final builder = context.chatComponentBuilder<StreamMentionItemProps>();
     if (builder != null) return builder(context, props);
-    return DefaultStreamMentionTile(props: props);
+    return DefaultStreamMentionItem(props: props);
   }
 }
 
-/// A builder function that takes [StreamMentionTileProps] and returns a
-/// custom mention tile widget.
-typedef StreamMentionTileBuilder = StreamComponentBuilder<StreamMentionTileProps>;
+/// A builder function that takes [StreamMentionItemProps] and returns a
+/// custom mention item widget.
+typedef StreamMentionItemBuilder = StreamComponentBuilder<StreamMentionItemProps>;
 
-/// Properties for a [StreamMentionTile].
-class StreamMentionTileProps {
-  /// Creates a new [StreamMentionTileProps].
-  const StreamMentionTileProps({
+/// Properties for a [StreamMentionItem].
+class StreamMentionItemProps {
+  /// Creates a new [StreamMentionItemProps].
+  const StreamMentionItemProps({
     required this.mention,
     this.onTap,
   });
 
-  /// The mention that this tile represents.
+  /// The mention that this item represents.
   final StreamMention mention;
 
-  /// Called when the tile is tapped.
+  /// Called when the item is tapped.
   final VoidCallback? onTap;
 }
 
-/// Default rendering for a [StreamMentionTile].
+/// Default rendering for a [StreamMentionItem].
 ///
-/// Switches on the runtime type of [StreamMentionTileProps.mention] and
-/// renders the matching built-in tile. Unknown subclasses of [StreamMention]
-/// fall back to a generic tile using [StreamMention.display] as the title.
-class DefaultStreamMentionTile extends StatelessWidget {
-  /// Creates a new [DefaultStreamMentionTile].
-  const DefaultStreamMentionTile({super.key, required this.props});
+/// Switches on the runtime type of [StreamMentionItemProps.mention] and
+/// renders the matching built-in item. Unknown subclasses of [StreamMention]
+/// fall back to a generic item using [StreamMention.display] as the title.
+class DefaultStreamMentionItem extends StatelessWidget {
+  /// Creates a new [DefaultStreamMentionItem].
+  const DefaultStreamMentionItem({super.key, required this.props});
 
-  /// The properties for the mention tile.
-  final StreamMentionTileProps props;
+  /// The properties for the mention item.
+  final StreamMentionItemProps props;
 
   @override
   Widget build(BuildContext context) {
     final mention = props.mention;
     final onTap = props.onTap;
-    if (mention is StreamChannelMention) {
-      return _MentionChannelTile(onTap: onTap);
-    }
-    if (mention is StreamHereMention) {
-      return _MentionHereTile(onTap: onTap);
-    }
-    if (mention is StreamRoleMention) {
-      return _MentionRoleTile(role: mention.role, onTap: onTap);
-    }
-    if (mention is StreamGroupMention) {
-      return _MentionUserGroupTile(userGroup: mention.userGroup, onTap: onTap);
-    }
-    if (mention is StreamUserMention) {
-      return _MentionUserTile(user: mention.user, onTap: onTap);
-    }
-    return _MentionFallbackTile(display: mention.display, onTap: onTap);
+    return switch (mention) {
+      StreamChannelMention() => _MentionChannelItem(onTap: onTap),
+      StreamHereMention() => _MentionHereItem(onTap: onTap),
+      StreamRoleMention(:final role) => _MentionRoleItem(role: role, onTap: onTap),
+      StreamGroupMention(:final userGroup) => _MentionUserGroupItem(userGroup: userGroup, onTap: onTap),
+      StreamUserMention(:final user) => _MentionUserItem(user: user, onTap: onTap),
+      _ => _MentionFallbackItem(display: mention.display, onTap: onTap),
+    };
   }
 }
 
-/// Shared row layout for every mention autocomplete tile.
-class _MentionTile extends StatelessWidget {
-  const _MentionTile({
+/// Shared row layout for every mention autocomplete item.
+class _MentionItem extends StatelessWidget {
+  const _MentionItem({
     required this.leading,
     required this.title,
     this.subtitle,
@@ -153,7 +145,7 @@ class _MentionTile extends StatelessWidget {
   }
 }
 
-/// Circular icon badge used as the leading widget for non-user mention tiles.
+/// Circular icon badge used as the leading widget for non-user mention items.
 class _MentionIconBadge extends StatelessWidget {
   const _MentionIconBadge({required this.icon});
 
@@ -177,14 +169,14 @@ class _MentionIconBadge extends StatelessWidget {
   }
 }
 
-class _MentionChannelTile extends StatelessWidget {
-  const _MentionChannelTile({this.onTap});
+class _MentionChannelItem extends StatelessWidget {
+  const _MentionChannelItem({this.onTap});
 
   final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    return _MentionTile(
+    return _MentionItem(
       leading: _MentionIconBadge(icon: context.streamIcons.megaphone),
       title: '@channel',
       subtitle: context.translations.notifyChannelText,
@@ -193,14 +185,14 @@ class _MentionChannelTile extends StatelessWidget {
   }
 }
 
-class _MentionHereTile extends StatelessWidget {
-  const _MentionHereTile({this.onTap});
+class _MentionHereItem extends StatelessWidget {
+  const _MentionHereItem({this.onTap});
 
   final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    return _MentionTile(
+    return _MentionItem(
       leading: _MentionIconBadge(icon: context.streamIcons.megaphone),
       title: '@here',
       subtitle: context.translations.notifyHereText,
@@ -209,15 +201,15 @@ class _MentionHereTile extends StatelessWidget {
   }
 }
 
-class _MentionRoleTile extends StatelessWidget {
-  const _MentionRoleTile({required this.role, this.onTap});
+class _MentionRoleItem extends StatelessWidget {
+  const _MentionRoleItem({required this.role, this.onTap});
 
   final String role;
   final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    return _MentionTile(
+    return _MentionItem(
       leading: _MentionIconBadge(icon: context.streamIcons.shield),
       title: '@$role',
       subtitle: context.translations.notifyRoleText(role),
@@ -226,8 +218,8 @@ class _MentionRoleTile extends StatelessWidget {
   }
 }
 
-class _MentionUserGroupTile extends StatelessWidget {
-  const _MentionUserGroupTile({required this.userGroup, this.onTap});
+class _MentionUserGroupItem extends StatelessWidget {
+  const _MentionUserGroupItem({required this.userGroup, this.onTap});
 
   final UserGroup userGroup;
   final VoidCallback? onTap;
@@ -235,7 +227,7 @@ class _MentionUserGroupTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final description = userGroup.description;
-    return _MentionTile(
+    return _MentionItem(
       leading: _MentionIconBadge(icon: context.streamIcons.users),
       title: '@${userGroup.name}',
       subtitle: description?.isNotEmpty == true ? description : null,
@@ -244,15 +236,15 @@ class _MentionUserGroupTile extends StatelessWidget {
   }
 }
 
-class _MentionUserTile extends StatelessWidget {
-  const _MentionUserTile({required this.user, this.onTap});
+class _MentionUserItem extends StatelessWidget {
+  const _MentionUserItem({required this.user, this.onTap});
 
   final User user;
   final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    return _MentionTile(
+    return _MentionItem(
       leading: StreamUserAvatar(size: .md, user: user),
       title: user.name,
       onTap: onTap,
@@ -260,15 +252,15 @@ class _MentionUserTile extends StatelessWidget {
   }
 }
 
-class _MentionFallbackTile extends StatelessWidget {
-  const _MentionFallbackTile({required this.display, this.onTap});
+class _MentionFallbackItem extends StatelessWidget {
+  const _MentionFallbackItem({required this.display, this.onTap});
 
   final String display;
   final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    return _MentionTile(
+    return _MentionItem(
       leading: _MentionIconBadge(icon: context.streamIcons.megaphone),
       title: '@$display',
       onTap: onTap,

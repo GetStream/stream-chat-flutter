@@ -70,8 +70,8 @@ class StreamMessageComposer extends StatelessWidget {
     bool enableVoiceRecording = true,
     bool sendVoiceRecordingAutomatically = false,
     AudioRecorderFeedback voiceRecordingFeedback = const AudioRecorderFeedback(),
-    @Deprecated('Use mentionTileBuilder instead') UserMentionTileBuilder? userMentionsTileBuilder,
-    StreamMentionTileBuilder? mentionTileBuilder,
+    @Deprecated('Use mentionItemBuilder instead') UserMentionTileBuilder? userMentionsTileBuilder,
+    StreamMentionItemBuilder? mentionItemBuilder,
     ErrorListener? onError,
     int attachmentLimit = StreamAttachmentValidator.defaultMaxAttachmentCount,
     List<AttachmentPickerType> allowedAttachmentPickerTypes = AttachmentPickerType.values,
@@ -108,7 +108,7 @@ class StreamMessageComposer extends StatelessWidget {
          voiceRecordingFeedback: voiceRecordingFeedback,
          // ignore: deprecated_member_use_from_same_package
          userMentionsTileBuilder: userMentionsTileBuilder,
-         mentionTileBuilder: mentionTileBuilder,
+         mentionItemBuilder: mentionItemBuilder,
          onError: onError,
          attachmentLimit: attachmentLimit,
          allowedAttachmentPickerTypes: allowedAttachmentPickerTypes,
@@ -168,8 +168,8 @@ class MessageComposerProps {
     this.enableVoiceRecording = false,
     this.sendVoiceRecordingAutomatically = false,
     this.voiceRecordingFeedback = const AudioRecorderFeedback(),
-    @Deprecated('Use mentionTileBuilder instead') this.userMentionsTileBuilder,
-    this.mentionTileBuilder,
+    @Deprecated('Use mentionItemBuilder instead') this.userMentionsTileBuilder,
+    this.mentionItemBuilder,
     this.onError,
     this.attachmentLimit = StreamAttachmentValidator.defaultMaxAttachmentCount,
     this.allowedAttachmentPickerTypes = AttachmentPickerType.values,
@@ -265,19 +265,19 @@ class MessageComposerProps {
   /// overlay.
   ///
   /// Honoured only for user mentions, for backwards compatibility. Prefer
-  /// [mentionTileBuilder] (or a globally-registered factory builder), which
+  /// [mentionItemBuilder] (or a globally-registered factory builder), which
   /// covers every mention kind.
-  @Deprecated('Use mentionTileBuilder instead')
+  @Deprecated('Use mentionItemBuilder instead')
   final UserMentionTileBuilder? userMentionsTileBuilder;
 
-  /// Per-instance builder for the suggestion tile rendered for each mention
+  /// Per-instance builder for the suggestion item rendered for each mention
   /// in the `@` autocomplete overlay.
   ///
   /// Takes precedence over any builder registered globally for
-  /// [StreamMentionTileProps] through [streamChatComponentBuilders]. When
-  /// null, the global builder is consulted next, then [DefaultStreamMentionTile]
+  /// [StreamMentionItemProps] through [streamChatComponentBuilders]. When
+  /// null, the global builder is consulted next, then [DefaultStreamMentionItem]
   /// is used as a fallback.
-  final StreamMentionTileBuilder? mentionTileBuilder;
+  final StreamMentionItemBuilder? mentionItemBuilder;
 
   /// A callback for error reporting
   final ErrorListener? onError;
@@ -416,7 +416,7 @@ class MessageComposerProps {
     bool? sendVoiceRecordingAutomatically,
     AudioRecorderFeedback? voiceRecordingFeedback,
     UserMentionTileBuilder? userMentionsTileBuilder,
-    StreamMentionTileBuilder? mentionTileBuilder,
+    StreamMentionItemBuilder? mentionItemBuilder,
     ErrorListener? onError,
     int? attachmentLimit,
     List<AttachmentPickerType>? allowedAttachmentPickerTypes,
@@ -453,7 +453,7 @@ class MessageComposerProps {
       sendVoiceRecordingAutomatically: sendVoiceRecordingAutomatically ?? this.sendVoiceRecordingAutomatically,
       voiceRecordingFeedback: voiceRecordingFeedback ?? this.voiceRecordingFeedback,
       userMentionsTileBuilder: userMentionsTileBuilder ?? this.userMentionsTileBuilder,
-      mentionTileBuilder: mentionTileBuilder ?? this.mentionTileBuilder,
+      mentionItemBuilder: mentionItemBuilder ?? this.mentionItemBuilder,
       onError: onError ?? this.onError,
       attachmentLimit: attachmentLimit ?? this.attachmentLimit,
       allowedAttachmentPickerTypes: allowedAttachmentPickerTypes ?? this.allowedAttachmentPickerTypes,
@@ -875,7 +875,7 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
                     query: query,
                     channel: StreamChannel.of(context).channel,
                     mentionAllAppUsers: widget.props.mentionAllAppUsers,
-                    mentionTileBuilder: widget.props.mentionTileBuilder,
+                    mentionItemBuilder: widget.props.mentionItemBuilder,
                     // ignore: deprecated_member_use_from_same_package
                     mentionsTileBuilder: widget.props.userMentionsTileBuilder,
                     onMentionChannelTap: () {

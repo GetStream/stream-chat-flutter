@@ -22,7 +22,7 @@ Iterable<StreamComponentBuilderExtension<Object>> streamChatComponentBuilders({
   StreamComponentBuilder<StreamMessageFooterProps>? messageFooter,
   StreamComponentBuilder<StreamMessageComposerAttachmentListProps>? messageComposerAttachmentList,
   StreamComponentBuilder<StreamMessageComposerAttachmentProps>? messageComposerAttachment,
-  StreamComponentBuilder<StreamMentionTileProps>? mentionTile,
+  StreamComponentBuilder<StreamMentionItemProps>? mentionItem,
 
   // ── Attachments ──────────────────────────────────────────────────────────
   StreamComponentBuilder<StreamImageAttachmentProps>? imageAttachment,
@@ -55,7 +55,7 @@ Iterable<StreamComponentBuilderExtension<Object>> streamChatComponentBuilders({
     if (messageFooter != null) StreamComponentBuilderExtension(builder: messageFooter),
     if (messageComposerAttachmentList != null) StreamComponentBuilderExtension(builder: messageComposerAttachmentList),
     if (messageComposerAttachment != null) StreamComponentBuilderExtension(builder: messageComposerAttachment),
-    if (mentionTile != null) StreamComponentBuilderExtension(builder: mentionTile),
+    if (mentionItem != null) StreamComponentBuilderExtension(builder: mentionItem),
     if (imageAttachment != null) StreamComponentBuilderExtension(builder: imageAttachment),
     if (videoAttachment != null) StreamComponentBuilderExtension(builder: videoAttachment),
     if (giphyAttachment != null) StreamComponentBuilderExtension(builder: giphyAttachment),

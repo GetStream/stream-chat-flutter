@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:sample_app/config/sample_app_config.dart';
 import 'package:sample_app/pages/thread_page.dart';
 import 'package:sample_app/routes/routes.dart';
+import 'package:sample_app/widgets/custom_mention_item.dart';
 import 'package:sample_app/widgets/location/location_picker_dialog.dart';
 import 'package:sample_app/widgets/location/location_picker_option.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -123,6 +124,11 @@ class _ChannelPageState extends State<ChannelPage> {
                 messageComposerController: _messageComposerController,
                 onQuotedMessageCleared: _messageComposerController.clearQuotedMessage,
                 enableVoiceRecording: true,
+                // (1) Per-instance customization for the `@channel` item in
+                // the mention autocomplete overlay. Takes precedence over
+                // any global builder registered via the component factory in
+                // app.dart, but only for this composer.
+                // mentionItemBuilder: customChannelMentionItem,
                 allowedAttachmentPickerTypes: [
                   ...AttachmentPickerType.values,
                   if (locationEnabled) const LocationPickerType(),
