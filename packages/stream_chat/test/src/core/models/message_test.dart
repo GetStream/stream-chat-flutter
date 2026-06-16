@@ -127,53 +127,136 @@ void main() {
       expect(json['text'], equals('Hello world'));
     });
 
-    test('should remove mentions not found in text', () {
-      final user1 = User(id: 'user1', name: 'User One');
-      final user2 = User(id: 'user2', name: 'User Two');
-      final user3 = User(id: 'user3', name: 'User Three');
+    group('should remove mentions not found in text', () {
+      test('drops user mentions whose @id and @name are absent', () {
+        final user1 = User(id: 'user1', name: 'User One');
+        final user2 = User(id: 'user2', name: 'User Two');
+        final user3 = User(id: 'user3', name: 'User Three');
 
-      final stayingGroup = UserGroup(
-        id: 'group-1',
-        name: 'Engineering',
-        createdAt: DateTime(2024),
-        updatedAt: DateTime(2024),
-      );
-      final droppedGroup = UserGroup(
-        id: 'group-2',
-        name: 'Design',
-        createdAt: DateTime(2024),
-        updatedAt: DateTime(2024),
-      );
+        final message = Message(
+          id: 'message-id',
+          text: 'Hello @user1 and @User Two',
+          mentionedUsers: [user1, user2, user3],
+        );
 
-      final message = Message(
-        id: 'message-id',
-        text: 'Hello @user1 and @User Two — heads up @channel @admin @Engineering',
-        mentionedUsers: [user1, user2, user3],
-        mentionedChannel: true,
-        mentionedHere: true,
-        mentionedRoles: const ['admin', 'moderator'],
-        mentionedGroupIds: const ['group-1', 'group-2'],
-        mentionedGroups: [stayingGroup, droppedGroup],
-      );
+        final mentionedUserIds = (message.toJson()['mentioned_users'] as List).cast<String>();
 
-      final json = message.toJson();
+        // user1 survives via @id, user2 via @name, user3 is dropped.
+        expect(mentionedUserIds, containsAll(['user1', 'user2']));
+        expect(mentionedUserIds, isNot(contains('user3')));
+        expect(mentionedUserIds.length, equals(2));
+      });
 
-      // Users: user3 has no token in the text, so it is dropped.
-      final mentionedUserIds = (json['mentioned_users'] as List).cast<String>();
-      expect(mentionedUserIds, containsAll(['user1', 'user2']));
-      expect(mentionedUserIds, isNot(contains('user3')));
-      expect(mentionedUserIds.length, equals(2));
+      test('drops channel mention when @channel is absent', () {
+        final withToken = Message(
+          id: 'with-token',
+          text: 'Heads up @channel',
+          mentionedChannel: true,
+        );
+        final withoutToken = Message(
+          id: 'without-token',
+          text: 'Heads up everyone',
+          mentionedChannel: true,
+        );
 
-      // @channel stays, @here is dropped (text only mentions @channel).
-      expect(json['mentioned_channel'], isTrue);
-      expect(json['mentioned_here'], isFalse);
+        expect(withToken.toJson()['mentioned_channel'], isTrue);
+        expect(withoutToken.toJson()['mentioned_channel'], isFalse);
+      });
 
-      // Roles: "@admin" is in the text, "@moderator" is not.
-      expect(json['mentioned_roles'], equals(['admin']));
+      test('drops here mention when @here is absent', () {
+        final withToken = Message(
+          id: 'with-token',
+          text: 'Anyone around @here?',
+          mentionedHere: true,
+        );
+        final withoutToken = Message(
+          id: 'without-token',
+          text: 'Anyone around?',
+          mentionedHere: true,
+        );
 
-      // Groups: only Engineering ("@Engineering") survives; group ids are
-      // re-derived from the remaining groups to stay in sync.
-      expect(json['mentioned_group_ids'], equals(['group-1']));
+        expect(withToken.toJson()['mentioned_here'], isTrue);
+        expect(withoutToken.toJson()['mentioned_here'], isFalse);
+      });
+
+      test('drops role mentions whose @role token is absent', () {
+        final message = Message(
+          id: 'message-id',
+          text: 'Calling @admin for help',
+          mentionedRoles: const ['admin', 'moderator'],
+        );
+
+        expect(message.toJson()['mentioned_roles'], equals(['admin']));
+      });
+
+      test('drops group mentions whose @name is absent and re-derives ids', () {
+        final stayingGroup = UserGroup(
+          id: 'group-1',
+          name: 'Engineering',
+          createdAt: DateTime(2024),
+          updatedAt: DateTime(2024),
+        );
+        final droppedGroup = UserGroup(
+          id: 'group-2',
+          name: 'Design',
+          createdAt: DateTime(2024),
+          updatedAt: DateTime(2024),
+        );
+
+        final message = Message(
+          id: 'message-id',
+          text: 'Ping @Engineering',
+          mentionedGroupIds: const ['group-1', 'group-2'],
+          mentionedGroups: [stayingGroup, droppedGroup],
+        );
+
+        final json = message.toJson();
+
+        // Only Engineering survives; ids are re-derived from remaining groups.
+        expect(json['mentioned_group_ids'], equals(['group-1']));
+      });
+
+      test('handles every mention kind together', () {
+        final user1 = User(id: 'user1', name: 'User One');
+        final user2 = User(id: 'user2', name: 'User Two');
+        final user3 = User(id: 'user3', name: 'User Three');
+
+        final stayingGroup = UserGroup(
+          id: 'group-1',
+          name: 'Engineering',
+          createdAt: DateTime(2024),
+          updatedAt: DateTime(2024),
+        );
+        final droppedGroup = UserGroup(
+          id: 'group-2',
+          name: 'Design',
+          createdAt: DateTime(2024),
+          updatedAt: DateTime(2024),
+        );
+
+        final message = Message(
+          id: 'message-id',
+          text: 'Hello @user1 and @User Two — heads up @channel @admin @Engineering',
+          mentionedUsers: [user1, user2, user3],
+          mentionedChannel: true,
+          mentionedHere: true,
+          mentionedRoles: const ['admin', 'moderator'],
+          mentionedGroupIds: const ['group-1', 'group-2'],
+          mentionedGroups: [stayingGroup, droppedGroup],
+        );
+
+        final json = message.toJson();
+
+        final mentionedUserIds = (json['mentioned_users'] as List).cast<String>();
+        expect(mentionedUserIds, containsAll(['user1', 'user2']));
+        expect(mentionedUserIds, isNot(contains('user3')));
+        expect(mentionedUserIds.length, equals(2));
+
+        expect(json['mentioned_channel'], isTrue);
+        expect(json['mentioned_here'], isFalse);
+        expect(json['mentioned_roles'], equals(['admin']));
+        expect(json['mentioned_group_ids'], equals(['group-1']));
+      });
     });
 
     group('ComparableFieldProvider', () {
