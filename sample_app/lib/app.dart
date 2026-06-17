@@ -260,47 +260,45 @@ class _StreamChatSampleAppState extends State<StreamChatSampleApp>
 
     return base.copyWith(
       // Accent
-      accentPrimary: dynamicColor.primary,
       accentError: dynamicColor.error,
-      // accentNeutral: dynamicColor.onSurfaceVariant,
-      // Text
+      // // Text
       textPrimary: dynamicColor.onSurface,
       textSecondary: dynamicColor.onSurfaceVariant,
       textTertiary: dynamicColor.outline,
       textLink: dynamicColor.primary,
       textOnAccent: dynamicColor.onPrimary,
       textOnInverse: dynamicColor.onInverseSurface,
-      // Background
-      backgroundApp: dynamicColor.surfaceContainerLowest,
-      backgroundSurface: dynamicColor.surface,
-      backgroundSurfaceSubtle: dynamicColor.surfaceContainer,
-      backgroundSurfaceStrong: dynamicColor.surfaceContainerHighest,
-      backgroundSurfaceCard: dynamicColor.surfaceContainer,
-      backgroundOnAccent: dynamicColor.onPrimary,
-      backgroundHighlight: dynamicColor.primaryContainer,
-      backgroundScrim: dynamicColor.scrim,
-      backgroundInverse: dynamicColor.inverseSurface,
+      // // Background
+      // backgroundApp: dynamicColor.surfaceContainerLowest,
+      // backgroundSurface: dynamicColor.surface,
+      // backgroundSurfaceSubtle: dynamicColor.surfaceContainer,
+      // backgroundSurfaceStrong: dynamicColor.surfaceContainerHighest,
+      // backgroundSurfaceCard: dynamicColor.surfaceContainer,
+      // backgroundOnAccent: dynamicColor.onPrimary,
+      // backgroundHighlight: dynamicColor.primaryContainer,
+      // backgroundScrim: dynamicColor.scrim,
+      // backgroundInverse: dynamicColor.inverseSurface,
       // Background - Elevation
-      backgroundElevation0: dynamicColor.surfaceContainerLowest,
-      backgroundElevation1: dynamicColor.surfaceContainerLow,
-      backgroundElevation2: dynamicColor.surfaceContainer,
-      backgroundElevation3: dynamicColor.surfaceContainerHigh,
+      // backgroundElevation0: dynamicColor.surfaceContainerLowest,
+      // backgroundElevation1: dynamicColor.surfaceContainerLow,
+      // backgroundElevation2: dynamicColor.surfaceContainer,
+      // backgroundElevation3: dynamicColor.surfaceContainerHigh,
       // State
-      backgroundSelected: dynamicColor.primaryContainer,
+      // backgroundSelected: dynamicColor.primaryContainer,
       // Border - Core
-      borderDefault: dynamicColor.outline,
-      borderSubtle: dynamicColor.outlineVariant,
-      borderStrong: dynamicColor.outline,
-      borderOnAccent: dynamicColor.onPrimary,
-      borderOnInverse: dynamicColor.onInverseSurface,
-      borderOnSurface: dynamicColor.outline,
+      // borderDefault: dynamicColor.outline,
+      // borderSubtle: dynamicColor.outlineVariant,
+      // borderStrong: dynamicColor.outline,
+      // borderOnAccent: dynamicColor.onPrimary,
+      // borderOnInverse: dynamicColor.onInverseSurface,
+      // borderOnSurface: dynamicColor.outline,
       // Border - Utility
-      borderFocus: dynamicColor.primary,
-      borderActive: dynamicColor.primary,
-      borderError: dynamicColor.error,
-      borderSelected: dynamicColor.primary,
+      // borderFocus: dynamicColor.primary,
+      // borderActive: dynamicColor.primary,
+      // borderError: dynamicColor.error,
+      // borderSelected: dynamicColor.primary,
       // System
-      systemText: dynamicColor.onSurface,
+      // systemText: dynamicColor.onSurface,
     );
   }
 }
