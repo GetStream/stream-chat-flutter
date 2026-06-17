@@ -902,29 +902,33 @@ extension on Message {
   /// were never set stay untouched — only stale mention state set via the
   /// composer is downgraded.
   Message removeMentionsIfNotIncluded() {
-    final messageTextToSend = text;
-    if (messageTextToSend == null) return this;
+    final text = this.text;
+    if (text == null) return this;
+
+    // Whether [text] mentions [token] as a standalone @-prefixed word.
+    //
+    // Word-boundary lookarounds so that e.g. mentioning `@administrator`
+    // doesn't satisfy a stale `admin` token, and `@channels` doesn't satisfy
+    // `channel`.
+    bool mentionsToken(String token) {
+      final pattern = RegExp('(?<![A-Za-z0-9_])@${RegExp.escape(token)}(?![A-Za-z0-9_])');
+      return pattern.hasMatch(text);
+    }
 
     final updatedMentionedUsers = [...mentionedUsers];
     for (final user in mentionedUsers.toSet()) {
-      if (messageTextToSend.contains('@${user.id}')) continue;
-      if (messageTextToSend.contains('@${user.name}')) continue;
+      if (mentionsToken(user.id)) continue;
+      if (mentionsToken(user.name)) continue;
 
       updatedMentionedUsers.remove(user);
     }
 
-    final updatedMentionedChannel = mentionedChannel == true && !messageTextToSend.contains('@channel')
-        ? false
-        : mentionedChannel;
+    final updatedMentionedChannel = mentionedChannel == true ? mentionsToken('channel') : mentionedChannel;
+    final updatedMentionedHere = mentionedHere == true ? mentionsToken('here') : mentionedHere;
 
-    final updatedMentionedHere = mentionedHere == true && !messageTextToSend.contains('@here') ? false : mentionedHere;
-
-    final updatedMentionedRoles = mentionedRoles?.where((r) => messageTextToSend.contains('@$r')).toList();
-
-    final updatedMentionedGroups = mentionedGroups?.where((g) => messageTextToSend.contains('@${g.name}')).toList();
-    final updatedMentionedGroupIds = updatedMentionedGroups == null
-        ? mentionedGroupIds
-        : updatedMentionedGroups.map((g) => g.id).toList();
+    final updatedMentionedRoles = mentionedRoles?.where(mentionsToken).toList();
+    final updatedMentionedGroups = mentionedGroups?.where((g) => mentionsToken(g.name)).toList();
+    final updatedMentionedGroupIds = updatedMentionedGroups?.map((g) => g.id).toList() ?? mentionedGroupIds;
 
     return copyWith(
       mentionedUsers: updatedMentionedUsers,

@@ -257,6 +257,83 @@ void main() {
         expect(json['mentioned_roles'], equals(['admin']));
         expect(json['mentioned_group_ids'], equals(['group-1']));
       });
+
+      group('respects @token word boundaries', () {
+        test('drops role admin when text only has @administrator', () {
+          final message = Message(
+            id: 'message-id',
+            text: 'Calling @administrator urgently',
+            mentionedRoles: const ['admin'],
+          );
+
+          expect(message.toJson()['mentioned_roles'], isEmpty);
+        });
+
+        test('drops mentionedChannel when text only has @channels', () {
+          final message = Message(
+            id: 'message-id',
+            text: '@channels are useful',
+            mentionedChannel: true,
+          );
+
+          expect(message.toJson()['mentioned_channel'], isFalse);
+        });
+
+        test('drops mentionedHere when text only has @hereafter', () {
+          final message = Message(
+            id: 'message-id',
+            text: '@hereafter please ignore',
+            mentionedHere: true,
+          );
+
+          expect(message.toJson()['mentioned_here'], isFalse);
+        });
+
+        test('drops user mention when text only has a longer @id match', () {
+          final admin = User(id: 'admin', name: 'Admin');
+
+          final message = Message(
+            id: 'message-id',
+            text: 'Calling @administrator urgently',
+            mentionedUsers: [admin],
+          );
+
+          final mentionedUserIds = (message.toJson()['mentioned_users'] as List).cast<String>();
+          expect(mentionedUserIds, isEmpty);
+        });
+
+        test('drops user mention when text only has a longer @name match', () {
+          final adminUser = User(id: 'u-1', name: 'admin');
+
+          final message = Message(
+            id: 'message-id',
+            text: 'Calling @administrator urgently',
+            mentionedUsers: [adminUser],
+          );
+
+          final mentionedUserIds = (message.toJson()['mentioned_users'] as List).cast<String>();
+          expect(mentionedUserIds, isEmpty);
+        });
+
+        test('drops group eng when text only has @engineering', () {
+          final engGroup = UserGroup(
+            id: 'group-eng',
+            name: 'eng',
+            createdAt: DateTime(2024),
+            updatedAt: DateTime(2024),
+          );
+
+          final message = Message(
+            id: 'message-id',
+            text: 'Ping @engineering for review',
+            mentionedGroupIds: const ['group-eng'],
+            mentionedGroups: [engGroup],
+          );
+
+          final json = message.toJson();
+          expect(json['mentioned_group_ids'], isEmpty);
+        });
+      });
     });
 
     group('ComparableFieldProvider', () {
