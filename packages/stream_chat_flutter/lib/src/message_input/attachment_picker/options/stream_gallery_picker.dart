@@ -6,7 +6,6 @@ import 'package:path_provider/path_provider.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:stream_chat_flutter/src/message_input/attachment_picker/stream_attachment_picker.dart';
 import 'package:stream_chat_flutter/src/message_input/attachment_picker/stream_attachment_picker_controller.dart';
-import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/src/scroll_view/photo_gallery/stream_photo_gallery.dart';
 import 'package:stream_chat_flutter/src/scroll_view/photo_gallery/stream_photo_gallery_controller.dart';
 import 'package:stream_chat_flutter/src/utils/utils.dart';

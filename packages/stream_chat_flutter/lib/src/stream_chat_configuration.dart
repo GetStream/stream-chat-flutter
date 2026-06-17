@@ -165,8 +165,7 @@ class StreamChatConfigurationData {
     List<StreamAttachmentWidgetBuilder>? attachmentBuilders,
     StreamReactionsType? reactionType,
     StreamReactionsPosition? reactionPosition,
-    StreamMessageListViewConfiguration messageListViewConfiguration =
-        const StreamMessageListViewConfiguration(),
+    StreamMessageListViewConfiguration messageListViewConfiguration = const StreamMessageListViewConfiguration(),
   }) {
     return StreamChatConfigurationData._(
       reactionIconResolver: reactionIconResolver ?? const DefaultReactionIconResolver(),
