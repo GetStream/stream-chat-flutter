@@ -285,9 +285,8 @@ class WebSocket with TimerHelper {
   void _reconnect({bool refreshToken = false}) async {
     if (_reconnectRequestInProgress) return;
 
-    // Tear down the dead channel and its timers up front so the health-check
-    // timer can't fire on a closed sink while we wait — both when retrying and
-    // when reconnect is paused.
+    // Must run before the pause check so the health-check timer can't fire
+    // on a closed sink while we wait.
     _stopMonitoringEvents();
     _closeWebSocketChannel();
 

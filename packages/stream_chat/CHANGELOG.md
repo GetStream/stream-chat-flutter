@@ -3,10 +3,15 @@
 ✅ Added
 
 - Added `Command.set` field and `CommandSet` extension type (`fun`, `moderation`) for typed access to the backend's command set classifier.
+- Added `StreamChatClient.pauseReconnect` / `resumeReconnect` to suspend the WebSocket's auto-retry loop without tearing down the user session.
 
 🔄 Changed
 
 - `Command` constructor: `description` and `args` are now optional (default to `''`), matching the backend's "always present, may be empty" wire shape.
+
+🐞 Fixed
+
+- Fixed an unhandled `WebSocketChannelException` surfacing when a reconnect attempt failed (e.g. DNS lookup failed in background); the duplicate signal on `sink.done` is now ignored since the stream's `onError` already handles it.
 
 ## 10.0.1
 
@@ -18,7 +23,6 @@
 - Added `Message.updateWith(Message? other)` — merges a server-side update onto the local message while preserving locally-known `poll`, `sharedLocation`, `ownReactions`, and nested `quotedMessage` enrichment when the server omits them.
 - Added `Channel.isOneToOne` — true when the channel is `isDistinct` and has exactly two members. For the looser count-only check, inline `channel.memberCount == 2`.
 - Added `IterableMergeX.merge` (keyed-map merge on `Iterable<T>`, unsorted output) and `SortedListX.mergeSorted` (two-pointer merge on a sorted `List<T>`). Splits what `SortedListX.merge` did in 9.24.0 — see Changed below.
-- Added `StreamChatClient.pauseReconnect` / `resumeReconnect` to suspend the WebSocket's auto-retry loop without tearing down the user session.
 
 ⚠️ Deprecated
 
@@ -44,7 +48,6 @@
 - Fixed `Channel.sendMessage` / `Channel.updateMessage` hanging forever when any attachment upload failed; they now throw `StreamChatError`.
 - Fixed quoted poll messages losing their poll, shared-location, or nested-quote content when the server omits it from the `quoted_message` payload during channel re-sync.
 - Fixed a poll attached to a parent message disappearing when a thread reply was added; partial `message.updated` events no longer clobber locally-known `poll` / `sharedLocation` on the parent.
-- Fixed an unhandled `WebSocketChannelException` surfacing when a reconnect attempt failed (e.g. DNS lookup failed in background); the duplicate signal on `sink.done` is now ignored since the stream's `onError` already handles it.
 
 ## 9.25.0
 
