@@ -843,39 +843,32 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
         StreamAutocompleteTrigger(
           trigger: _kCommandTrigger,
           triggerOnlyAtStart: true,
-          optionsViewBuilder:
-              (
-                context,
-                autocompleteQuery,
-                messageComposerController,
-              ) {
-                final query = autocompleteQuery.query;
-                return StreamCommandAutocompleteOptions(
-                  query: query,
-                  channel: StreamChannel.of(context).channel,
-                  onCommandSelected: (command) {
-                    _effectiveController.command = command.name;
-                    // removing the overlay after the command is selected
-                    StreamAutocomplete.of(context).closeSuggestions();
-                  },
-                );
-              },
+          optionsViewBuilder: (context, autocompleteQuery, messageComposerController) {
+            final query = autocompleteQuery.query;
+            return ListenableBuilder(
+              listenable: messageComposerController,
+              builder: (context, _) => StreamCommandAutocompleteOptions(
+                query: query,
+                channel: StreamChannel.of(context).channel,
+                commandValidator: _effectiveController.validateCommand,
+                onCommandSelected: (command) {
+                  StreamAutocomplete.of(context).closeSuggestions();
+                  return _onCommandSelected(command);
+                },
+              ),
+            );
+          },
         ),
         if (widget.props.enableMentionsOverlay)
           StreamAutocompleteTrigger(
             trigger: _kMentionTrigger,
-            optionsViewBuilder:
-                (
-                  context,
-                  autocompleteQuery,
-                  messageComposerController,
-                ) {
-                  final query = autocompleteQuery.query;
-                  return StreamMentionAutocompleteOptions(
-                    query: query,
-                    channel: StreamChannel.of(context).channel,
-                    mentionAllAppUsers: widget.props.mentionAllAppUsers,
-                    mentionItemBuilder: widget.props.mentionItemBuilder,
+            optionsViewBuilder: (context, autocompleteQuery, messageComposerController) {
+              final query = autocompleteQuery.query;
+              return StreamMentionAutocompleteOptions(
+                query: query,
+                channel: StreamChannel.of(context).channel,
+                mentionAllAppUsers: widget.props.mentionAllAppUsers,
+                mentionItemBuilder: widget.props.mentionItemBuilder,
                     // ignore: deprecated_member_use_from_same_package
                     mentionsTileBuilder: widget.props.userMentionsTileBuilder,
                     onMentionChannelTap: () {
@@ -894,15 +887,15 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
                       _effectiveController.addMentionedUserGroup(group);
                       StreamAutocomplete.of(context).acceptAutocompleteOption(group.name);
                     },
-                    onMentionUserTap: (user) {
-                      // adding the mentioned user to the controller.
-                      _effectiveController.addMentionedUser(user);
+                onMentionUserTap: (user) {
+                  // adding the mentioned user to the controller.
+                  _effectiveController.addMentionedUser(user);
 
-                      // accepting the autocomplete option.
-                      StreamAutocomplete.of(context).acceptAutocompleteOption(user.name);
-                    },
-                  );
+                  // accepting the autocomplete option.
+                  StreamAutocomplete.of(context).acceptAutocompleteOption(user.name);
                 },
+              );
+            },
           ),
       ],
     );
@@ -1005,14 +998,49 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
       optionsBuilder: widget.props.attachmentPickerOptionsBuilder,
       onError: _onPickerError,
       onPollCreated: _onPollCreated,
-      onCommandSelected: _onCommandSelectedFromPicker,
+      onCommandSelected: _onCommandSelected,
+      commandValidator: _effectiveController.validateCommand,
     );
   }
 
-  void _onCommandSelectedFromPicker(Command command) {
-    _hidePicker();
-    _effectiveController.command = command.name;
+  // Validates [command]: on disabled, surfaces the "unavailable" snackbar and
+  // bails. On valid, activates the command and closes the picker.
+  void _onCommandSelected(Command command) {
+    final reason = _effectiveController.validateCommand(command);
+    if (reason != null) return _showCommandUnavailableSnackbar(reason);
+
+    _dismissCommandUnavailableSnackbar();
+    _effectiveController.setCommand(command);
+
+    _hidePicker(); // Close the picker
     _effectiveFocusNode.requestFocus();
+  }
+
+  StreamSnackbarController? _commandUnavailableSnackbarController;
+  void _showCommandUnavailableSnackbar(CommandUnavailableReason reason) {
+    final messenger = StreamSnackbarMessenger.maybeOf(context);
+    if (messenger == null) return;
+
+    final translations = context.translations;
+    final message = switch (reason) {
+      .editing => translations.commandUnavailableWhileEditingError,
+      .quotedMessage => translations.commandUnavailableWhileQuotingError,
+      .other => translations.commandUnavailableError,
+    };
+
+    _commandUnavailableSnackbarController = messenger.show(
+      StreamSnackbar(message: Text(message), variant: .error),
+      replace: true,
+    );
+  }
+
+  // Dismiss the "command unavailable" snackbar if it's currently shown.
+  //
+  // This is typically useful to prevent stale error messages from lingering after the user has
+  // taken an action that resolves the issue (e.g. selecting a different command, removing the quoted message, etc.).
+  void _dismissCommandUnavailableSnackbar() {
+    _commandUnavailableSnackbarController?.close();
+    _commandUnavailableSnackbarController = null;
   }
 
   bool _shouldShowSendToChannelCheckbox() {

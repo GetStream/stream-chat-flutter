@@ -171,7 +171,16 @@ class StreamMessageComposerController extends ValueNotifier<Message> {
     _textFieldController.value = value;
   }
 
+  /// Whether the controller is currently replying to another message.
+  ///
+  /// Equivalent to `message.quotedMessage != null`.
+  bool get isReplying => message.quotedMessage != null;
+
   set quotedMessage(Message quotedMessage) {
+    // Clear any active command if it's from the moderation set, since backend
+    // does not support activating moderation commands alongside a quoted message.
+    if (activeCommand?.set == .moderation) clearCommand();
+
     message = message.copyWith(
       quotedMessage: quotedMessage,
       quotedMessageId: quotedMessage.id,
@@ -190,23 +199,46 @@ class StreamMessageComposerController extends ValueNotifier<Message> {
   // [clearCommand] can restore the user's content.
   Message? _messageBeforeCommand;
 
-  /// Sets a command on the message.
+  /// The currently active [Command], or `null` if no command is active.
+  Command? get activeCommand => _activeCommand;
+  Command? _activeCommand;
+
+  /// Validates whether [command] can be activated given the controller's
+  /// current state.
   ///
-  /// Replaces the composer's content with an empty message tagged with
-  /// [command] so the UI can reflect command mode. Call [clearCommand] to
-  /// exit command mode and restore the composer to the content it had
-  /// before. Passing `null` is equivalent to calling [clearCommand].
+  /// Returns `null` when the command is available. A non-null
+  /// [CommandUnavailableReason] describes why activation is blocked:
+  ///
+  /// - [CommandUnavailableReason.editing] — an edit is in progress; commands
+  ///   are not allowed until the edit is committed or cancelled.
+  /// - [CommandUnavailableReason.quotedMessage] — a quoted message is set
+  ///   and [command] is in [CommandSet.moderation]; moderation commands
+  ///   don't inherit composer context.
+  CommandUnavailableReason? validateCommand(Command command) {
+    if (isEditing) return CommandUnavailableReason.editing;
+    if (isReplying && command.set == CommandSet.moderation) {
+      return CommandUnavailableReason.quotedMessage;
+    }
+    return null;
+  }
+
+  /// Activates [command] on the composer.
+  ///
+  /// Snapshots the current draft, then replaces it with an empty message
+  /// tagged with the command's name. Callers should check [validateCommand]
+  /// first — [setCommand] does not enforce availability rules itself.
   ///
   /// Safe to call repeatedly during an active command; [clearCommand] still
   /// restores the content that was in the composer before the first call.
-  set command(String? command) {
-    if (command == null) return clearCommand();
+  void setCommand(Command command) {
+    _activeCommand = command;
     _messageBeforeCommand ??= message;
 
     message = message.copyWith(
       text: '',
       attachments: [],
-      command: command,
+      mentionedUsers: [],
+      command: command.name,
     );
   }
 
@@ -215,10 +247,20 @@ class StreamMessageComposerController extends ValueNotifier<Message> {
   ///
   /// No-op if there is no active command.
   void clearCommand() {
+    _activeCommand = null;
     if (_messageBeforeCommand case final message?) {
       this.message = message;
       _messageBeforeCommand = null;
     }
+  }
+
+  /// Sets a command on the message by name.
+  ///
+  /// Passing `null` is equivalent to calling [clearCommand].
+  @Deprecated('Use setCommand/clearCommand instead.')
+  set command(String? command) {
+    if (command == null) return clearCommand();
+    return setCommand(Command(name: command));
   }
 
   /// Whether the controller is currently in edit mode.
@@ -249,6 +291,10 @@ class StreamMessageComposerController extends ValueNotifier<Message> {
   /// version of the same message arrives); [cancelEditMessage] still
   /// restores the content that was in the composer before the first call.
   void editMessage(Message message) {
+    // Clear any active command, since backend does not support activating a
+    // command alongside an edit.
+    clearCommand();
+
     _messageBeforeEdit ??= this.message;
     _messageBeingEdited = message;
 
@@ -539,6 +585,26 @@ class StreamRestorableMessageComposerController extends RestorableChangeNotifier
     }
     return json.encode(data);
   }
+}
+
+/// Why a [Command] cannot be activated on a
+/// [StreamMessageComposerController] right now.
+///
+/// Returned by [StreamMessageComposerController.validateCommand]; `null`
+/// means the command is available.
+enum CommandUnavailableReason {
+  /// An edit is in progress; commands are blocked until the edit is
+  /// committed or cancelled.
+  editing,
+
+  /// A quoted message is set and the command belongs to
+  /// [CommandSet.moderation], which doesn't inherit composer context.
+  quotedMessage,
+
+  /// The command isn't available for a reason not covered by the other
+  /// cases. Reserved for consumer-provided validators (or future SDK
+  /// additions) to flag unavailability without naming a specific cause.
+  other,
 }
 
 Timer _setPeriodicTimer(

@@ -130,6 +130,15 @@ class StreamChatLocalizationsEs extends GlobalStreamChatLocalizations {
   String get instantCommandsLabel => 'Comandos instantáneos';
 
   @override
+  String get commandUnavailableWhileEditingError => 'Not available while editing';
+
+  @override
+  String get commandUnavailableWhileQuotingError => 'Not available while replying';
+
+  @override
+  String get commandUnavailableError => 'Command not available';
+
+  @override
   String fileTooLargeAfterCompressionError(double limitInMB) =>
       'El archivo es demasiado grande para descargarlo. '
       'El tamaño máximo del archivo es de $limitInMB MB. '

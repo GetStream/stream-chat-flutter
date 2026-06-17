@@ -137,6 +137,19 @@ abstract class Translations {
   /// The label for instant commands in [StreamMessageComposer]
   String get instantCommandsLabel;
 
+  /// The error surfaced when the user taps a slash command while the
+  /// composer is editing a message.
+  String get commandUnavailableWhileEditingError;
+
+  /// The error surfaced when the user taps a moderation slash command
+  /// (e.g. `/mute`, `/ban`) while the composer is quoting another message.
+  String get commandUnavailableWhileQuotingError;
+
+  /// The generic error surfaced when a slash command is unavailable for a
+  /// reason not covered by [commandUnavailableWhileEditingError] or
+  /// [commandUnavailableWhileQuotingError].
+  String get commandUnavailableError;
+
   /// The error shown in case the file is too large even after compression
   /// while uploading via [StreamMessageComposer]
   String fileTooLargeAfterCompressionError(double limitInMB);
@@ -867,6 +880,15 @@ class DefaultTranslations implements Translations {
 
   @override
   String get instantCommandsLabel => 'Instant Commands';
+
+  @override
+  String get commandUnavailableWhileEditingError => 'Not available while editing';
+
+  @override
+  String get commandUnavailableWhileQuotingError => 'Not available while replying';
+
+  @override
+  String get commandUnavailableError => 'Command not available';
 
   @override
   String fileTooLargeAfterCompressionError(double limitInMB) =>
