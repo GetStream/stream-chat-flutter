@@ -3,7 +3,7 @@ import 'package:stream_chat_flutter/src/attachment/thumbnail/image_attachment_th
 import 'package:stream_chat_flutter/src/attachment/thumbnail/thumbnail_error.dart';
 import 'package:stream_chat_flutter/src/video/video_thumbnail_image.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
-import 'package:stream_core_flutter/stream_core_flutter.dart';
+import 'package:stream_core_flutter/chat.dart';
 
 /// {@template videoAttachmentThumbnail}
 /// Widget for building video attachment thumbnail.

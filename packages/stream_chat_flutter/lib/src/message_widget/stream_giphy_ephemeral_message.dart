@@ -3,7 +3,7 @@ import 'package:stream_chat_flutter/src/attachment/giphy_attachment.dart';
 import 'package:stream_chat_flutter/src/message_widget/components/stream_message_footer.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
-import 'package:stream_core_flutter/stream_core_flutter.dart' as core;
+import 'package:stream_core_flutter/chat.dart' as core;
 
 /// Signature for the action callback passed to [StreamGiphyEphemeralMessage].
 ///

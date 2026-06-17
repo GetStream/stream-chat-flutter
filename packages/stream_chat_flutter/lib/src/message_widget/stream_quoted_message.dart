@@ -4,7 +4,7 @@ import 'package:stream_chat_flutter/src/channel/stream_message_preview_text.dart
 import 'package:stream_chat_flutter/src/components/stream_chat_component_builders.dart';
 import 'package:stream_chat_flutter/src/theme/quoted_message_theme.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
-import 'package:stream_core_flutter/stream_core_flutter.dart';
+import 'package:stream_core_flutter/chat.dart';
 
 /// A preview of a quoted message rendered above a reply.
 ///

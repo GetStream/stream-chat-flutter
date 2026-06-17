@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/misc/separated_reorderable_list_view.dart';
 import 'package:stream_chat_flutter/src/poll/creator/stream_delete_option_dialog.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 class _NullConst {
   const _NullConst();

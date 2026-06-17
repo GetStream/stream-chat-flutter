@@ -9,7 +9,7 @@ import 'package:stream_chat_flutter/src/message_input/audio_recorder/audio_recor
 import 'package:stream_chat_flutter/src/message_input/stream_message_input_icon_button.dart';
 import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
-import 'package:stream_core_flutter/stream_core_flutter.dart';
+import 'package:stream_core_flutter/chat.dart';
 
 /// {@template audioRecorderBuilder}
 /// A builder function for constructing the audio recorder UI.

@@ -12,7 +12,6 @@ import 'package:image_size_getter/image_size_getter.dart' hide Size;
 import 'package:stream_chat_flutter/src/audio/audio_playlist_state.dart';
 import 'package:stream_chat_flutter/src/localization/translations.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-import 'package:stream_core_flutter/stream_core_flutter.dart' show kStreamMentionScheme;
 
 int _byteUnitConversionFactor = 1024;
 

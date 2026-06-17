@@ -1,7 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:stream_chat_flutter/src/theme/poll_option_votes_style.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
-import 'package:stream_core_flutter/stream_core_flutter.dart';
+import 'package:stream_core_flutter/chat.dart';
 import 'package:theme_extensions_builder_annotation/theme_extensions_builder_annotation.dart';
 
 part 'poll_option_votes_sheet_theme.g.theme.dart';
