@@ -22,7 +22,7 @@ dependencies:
   stream_core_flutter:
     git:
       url: https://github.com/GetStream/stream-core-flutter.git
-      ref: 1c9500587984244d97d63ef01ac18df10430f3c4
+      ref: fd9a715b390aa7e2b2e70d0af24ca64e10bba178
       path: packages/stream_core_flutter
 
 dev_dependencies:
