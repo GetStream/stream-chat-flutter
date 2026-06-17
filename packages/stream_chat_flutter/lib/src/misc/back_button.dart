@@ -23,8 +23,10 @@ class StreamBackButton extends StatelessWidget {
   /// Channel ID used to retrieve unread count
   final String? channelId;
 
-  /// Controls the back button's visual/layout behavior (e.g. floating vs pinned).
-  /// Falls back to the theme's default when null.
+  /// Controls the back button's visual/layout behavior (floating vs regular).
+  ///
+  /// When null, falls back to [StreamAppBarStyle.appBarBehavior] from the
+  /// ambient [StreamAppBarTheme], then to the ambient [StreamAppStyle].
   final AppBarBehavior? appBarBehavior;
 
   @override
@@ -33,7 +35,11 @@ class StreamBackButton extends StatelessWidget {
       .iOS || .macOS => context.streamIcons.chevronLeft,
       _ => context.streamIcons.arrowLeft,
     };
-    final isFloating = switch (appBarBehavior ?? StreamTheme.of(context).appStyle.appBarBehavior) {
+    final effectiveAppBarBehavior =
+        appBarBehavior ??
+        StreamAppBarTheme.of(context).style?.behavior ??
+        (StreamTheme.of(context).appStyle.isFloating ? AppBarBehavior.floating : AppBarBehavior.regular);
+    final isFloating = switch (effectiveAppBarBehavior) {
       .floating => true,
       .regular => false,
     };

@@ -172,8 +172,8 @@ class _StreamChatSampleAppState extends State<StreamChatSampleApp>
                 final config = context.sampleAppConfig;
 
                 StreamAppStyle appStyle() => switch (config.appStyle) {
-                  SampleAppStyle.regular => const StreamAppStyle.regular(),
-                  SampleAppStyle.floating => const StreamAppStyle.floating(),
+                  SampleAppStyle.regular => StreamAppStyle.regular,
+                  SampleAppStyle.floating => StreamAppStyle.floating,
                 };
 
                 ThemeData theme(Brightness brightness) => ThemeData(

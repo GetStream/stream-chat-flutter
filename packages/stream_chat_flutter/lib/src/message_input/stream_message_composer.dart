@@ -96,7 +96,7 @@ class StreamMessageComposer extends StatelessWidget {
     TextCapitalization textCapitalization = TextCapitalization.sentences,
     bool autofocus = false,
     bool autoCorrect = true,
-    ComposerLocation? composerLocation,
+    ComposerLocation? location,
   }) : props = .new(
          onMessageSent: onMessageSent,
          preMessageSending: preMessageSending,
@@ -132,7 +132,7 @@ class StreamMessageComposer extends StatelessWidget {
          textCapitalization: textCapitalization,
          autofocus: autofocus,
          autoCorrect: autoCorrect,
-         composerLocation: composerLocation,
+         location: location,
        );
 
   /// Creates a [StreamMessageComposer] from a pre-built [MessageComposerProps].
@@ -193,7 +193,7 @@ class MessageComposerProps {
     this.textCapitalization = TextCapitalization.sentences,
     this.autofocus = false,
     this.autoCorrect = true,
-    this.composerLocation,
+    this.location,
   });
 
   /// Function called after sending the message.
@@ -389,7 +389,7 @@ class MessageComposerProps {
   final bool autoCorrect;
 
   /// The location of the message composer.
-  final ComposerLocation? composerLocation;
+  final ComposerLocation? location;
 
   /// Returns a copy of this [MessageComposerProps] with the given fields
   /// replaced with new values.
@@ -428,7 +428,7 @@ class MessageComposerProps {
     TextCapitalization? textCapitalization,
     bool? autofocus,
     bool? autoCorrect,
-    ComposerLocation? composerLocation,
+    ComposerLocation? location,
   }) {
     return MessageComposerProps(
       onMessageSent: onMessageSent ?? this.onMessageSent,
@@ -465,7 +465,7 @@ class MessageComposerProps {
       textCapitalization: textCapitalization ?? this.textCapitalization,
       autofocus: autofocus ?? this.autofocus,
       autoCorrect: autoCorrect ?? this.autoCorrect,
-      composerLocation: composerLocation ?? this.composerLocation,
+      location: location ?? this.location,
     );
   }
 
@@ -798,7 +798,9 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     final viewPadding = MediaQuery.paddingOf(context);
 
     final effectiveComposerLocation =
-        widget.props.composerLocation ?? StreamTheme.of(context).appStyle.composerLocation;
+        widget.props.location ??
+        StreamMessageComposerTheme.of(context).location ??
+        (StreamTheme.of(context).appStyle.isFloating ? ComposerLocation.floating : ComposerLocation.docked);
 
     // The body behind the pill (and picker) — animated safe-area insets.
     final composerBody = AnimatedBuilder(
@@ -917,7 +919,9 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
   ) {
     final currentUserId = StreamChat.of(context).currentUser?.id;
     final effectiveComposerLocation =
-        widget.props.composerLocation ?? StreamTheme.of(context).appStyle.composerLocation;
+        widget.props.location ??
+        StreamMessageComposerTheme.of(context).location ??
+        (StreamTheme.of(context).appStyle.isFloating ? ComposerLocation.floating : ComposerLocation.docked);
     final isFloating = effectiveComposerLocation == .floating;
 
     return StreamMessageValueListenableBuilder(

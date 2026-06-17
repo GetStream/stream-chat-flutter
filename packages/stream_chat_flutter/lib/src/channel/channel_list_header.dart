@@ -80,7 +80,6 @@ class StreamChannelListHeader extends StatelessWidget implements PreferredSizeWi
     this.trailing,
     this.primary = true,
     this.style,
-    this.appBarBehavior,
   });
 
   /// Use this if you don't have a [StreamChatClient] in your widget tree.
@@ -118,10 +117,6 @@ class StreamChannelListHeader extends StatelessWidget implements PreferredSizeWi
   /// [StreamChatThemeData.channelListHeaderTheme].
   final StreamAppBarStyle? style;
 
-  /// Controls the header's visual/layout behavior (e.g. floating vs pinned).
-  /// Falls back to the theme's default when null.
-  final AppBarBehavior? appBarBehavior;
-
   @override
   Size get preferredSize => const Size.fromHeight(kStreamToolbarHeight);
 
@@ -130,12 +125,16 @@ class StreamChannelListHeader extends StatelessWidget implements PreferredSizeWi
     final _client = client ?? StreamChat.of(context).client;
     final headerTheme = StreamChatTheme.of(context).channelListHeaderTheme;
 
-    final hasAvatarShadow = switch (appBarBehavior ?? StreamTheme.of(context).appStyle.appBarBehavior) {
+    final effectiveAppBarBehavior =
+        style?.behavior ??
+        StreamAppBarTheme.of(context).style?.behavior ??
+        (StreamTheme.of(context).appStyle.isFloating ? AppBarBehavior.floating : AppBarBehavior.regular);
+    final hasAvatarShadow = switch (effectiveAppBarBehavior) {
       .floating => true,
       .regular => false,
     };
 
-    final leading = _DefaultUserAvatar(client: _client, onPressed: onUserAvatarPressed, showShadow: hasAvatarShadow);
+    final leading = _DefaultUserAvatar(client: _client, onPressed: onUserAvatarPressed, isFloating: hasAvatarShadow);
 
     return Portal(
       child: StreamConnectionStatusBuilder(
@@ -189,11 +188,11 @@ class StreamChannelListHeader extends StatelessWidget implements PreferredSizeWi
 }
 
 class _DefaultUserAvatar extends StatelessWidget {
-  const _DefaultUserAvatar({required this.client, this.onPressed, this.showShadow = false});
+  const _DefaultUserAvatar({required this.client, this.onPressed, this.isFloating = false});
 
   final StreamChatClient client;
   final void Function(User user)? onPressed;
-  final bool showShadow;
+  final bool isFloating;
 
   @override
   Widget build(BuildContext context) {
@@ -222,7 +221,7 @@ class _DefaultUserAvatar extends StatelessWidget {
             size: .lg,
             user: user,
             showOnlineIndicator: false,
-            showShadow: showShadow,
+            isFloating: isFloating,
           ),
         ),
       ),

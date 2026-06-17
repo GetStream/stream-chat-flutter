@@ -81,7 +81,6 @@ class StreamChannelHeader extends StatelessWidget implements PreferredSizeWidget
     this.trailing,
     this.primary = true,
     this.style,
-    this.appBarBehavior,
   });
 
   /// Called when the default channel-avatar trailing is pressed.
@@ -130,10 +129,6 @@ class StreamChannelHeader extends StatelessWidget implements PreferredSizeWidget
   /// [StreamChatThemeData.channelHeaderTheme].
   final StreamAppBarStyle? style;
 
-  /// Controls the header's visual/layout behavior (e.g. floating vs pinned).
-  /// Falls back to the theme's default when null.
-  final AppBarBehavior? appBarBehavior;
-
   @override
   Size get preferredSize => const Size.fromHeight(kStreamToolbarHeight);
 
@@ -144,7 +139,7 @@ class StreamChannelHeader extends StatelessWidget implements PreferredSizeWidget
 
     var leading = this.leading;
     if (leading == null && automaticallyImplyLeading) {
-      leading = StreamBackButton(showUnreadCount: true, appBarBehavior: appBarBehavior);
+      leading = const StreamBackButton(showUnreadCount: true);
     }
 
     var title = this.title;
@@ -153,7 +148,11 @@ class StreamChannelHeader extends StatelessWidget implements PreferredSizeWidget
     var subtitle = this.subtitle;
     subtitle ??= StreamChannelInfo(channel: channel);
 
-    final showAvatarShadow = switch (appBarBehavior ?? StreamTheme.of(context).appStyle.appBarBehavior) {
+    final effectiveAppBarBehavior =
+        style?.behavior ??
+        StreamAppBarTheme.of(context).style?.behavior ??
+        (StreamTheme.of(context).appStyle.isFloating ? AppBarBehavior.floating : AppBarBehavior.regular);
+    final showAvatarShadow = switch (effectiveAppBarBehavior) {
       .floating => true,
       .regular => false,
     };
@@ -162,7 +161,7 @@ class StreamChannelHeader extends StatelessWidget implements PreferredSizeWidget
     trailing ??= _DefaultChannelAvatar(
       channel: channel,
       onPressed: onChannelAvatarPressed,
-      showShadow: showAvatarShadow,
+      isFloating: showAvatarShadow,
     );
 
     return Portal(
@@ -201,7 +200,6 @@ class StreamChannelHeader extends StatelessWidget implements PreferredSizeWidget
                 trailing: trailing,
                 primary: primary,
                 style: style,
-                appBarBehavior: appBarBehavior,
               ),
             ),
           );
@@ -212,11 +210,11 @@ class StreamChannelHeader extends StatelessWidget implements PreferredSizeWidget
 }
 
 class _DefaultChannelAvatar extends StatelessWidget {
-  const _DefaultChannelAvatar({required this.channel, this.onPressed, this.showShadow = false});
+  const _DefaultChannelAvatar({required this.channel, this.onPressed, this.isFloating = false});
 
   final Channel channel;
   final void Function(Channel channel)? onPressed;
-  final bool showShadow;
+  final bool isFloating;
 
   @override
   Widget build(BuildContext context) {
@@ -237,7 +235,7 @@ class _DefaultChannelAvatar extends StatelessWidget {
           child: StreamChannelAvatar(
             size: .lg,
             channel: channel,
-            showShadow: showShadow,
+            isFloating: isFloating,
           ),
         ),
       ),

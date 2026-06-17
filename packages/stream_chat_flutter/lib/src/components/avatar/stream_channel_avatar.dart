@@ -54,7 +54,7 @@ class StreamChannelAvatar extends StatelessWidget {
     super.key,
     this.size,
     required this.channel,
-    this.showShadow = false,
+    this.isFloating,
   });
 
   /// The channel whose avatar is displayed.
@@ -70,7 +70,7 @@ class StreamChannelAvatar extends StatelessWidget {
   /// Defaults to false. The shadow style is determined by
   /// [StreamAvatarThemeData.boxShadow], falling back to
   /// [StreamBoxShadow.elevation3].
-  final bool showShadow;
+  final bool? isFloating;
 
   @override
   Widget build(BuildContext context) {
@@ -84,7 +84,7 @@ class StreamChannelAvatar extends StatelessWidget {
       builder: (context, channelImage) => StreamAvatar(
         imageUrl: channelImage,
         size: _avatarSizeForAvatarGroupSize(effectiveSize),
-        showShadow: showShadow,
+        isFloating: isFloating,
         placeholder: (_) => const _StreamChannelAvatarPlaceholder(),
       ),
       noDataBuilder: (context) => BetterStreamBuilder(
@@ -104,14 +104,14 @@ class StreamChannelAvatar extends StatelessWidget {
               size: _avatarSizeForAvatarGroupSize(effectiveSize),
               // TODO: make this configurable when the online state is shown.
               showOnlineIndicator: otherUser.online,
-              showShadow: showShadow,
+              isFloating: isFloating,
             );
           }
 
           return StreamUserAvatarGroup(
             size: effectiveSize,
             users: users.sortedBy((it) => it.id == currentUserId ? 1 : 0),
-            showShadow: showShadow,
+            isFloating: isFloating,
           );
         },
       ),
