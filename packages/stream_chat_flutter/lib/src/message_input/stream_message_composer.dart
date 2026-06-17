@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:stream_chat_flutter/src/message_input/error_alert_sheet.dart';
 import 'package:stream_chat_flutter/src/message_input/stream_chat_message_input.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_core_flutter/stream_core_flutter.dart' show streamFloatingFade;
 
 const _kCommandTrigger = '/';
 const _kMentionTrigger = '@';
@@ -1002,17 +1003,10 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
 
     return DecoratedBox(
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            bandColor.withAlpha(0x00), // transparent at top of composer band
-            bandColor.withAlpha(0x40), // ~25 %
-            bandColor.withAlpha(0xA8), // ~66 %
-            bandColor.withAlpha(0xE8), // ~91 %
-            bandColor, // solid at bottom (safe area)
-          ],
-          stops: const [0.0, 0.55, 0.75, 0.90, 1.0],
+        gradient: streamFloatingFade(
+          color: bandColor,
+          begin: Alignment.bottomCenter,
+          end: Alignment.topCenter,
         ),
       ),
       child: child,

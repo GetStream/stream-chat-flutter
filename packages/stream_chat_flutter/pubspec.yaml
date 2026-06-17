@@ -68,7 +68,7 @@ dependencies:
     # ignore: invalid_dependency
     git:
       url: https://github.com/GetStream/stream-core-flutter
-      ref: ef83513b075246cb662911926ad49ada2a07f595
+      ref: bed95c6a61dce641a1807cf642ebba66494ca6ec
       path: packages/stream_core_flutter
   svg_icon_widget: ^0.0.1
   synchronized: ^3.4.0

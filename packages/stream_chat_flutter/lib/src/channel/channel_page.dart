@@ -30,17 +30,19 @@ class StreamChannelPage extends StatefulWidget {
 
 class _StreamChannelPageState extends State<StreamChannelPage> {
   late final FocusNode _focusNode;
-  final _messageComposerController = StreamMessageComposerController();
+  late final StreamMessageComposerController _messageComposerController;
 
   @override
   void initState() {
-    _focusNode = FocusNode();
     super.initState();
+    _focusNode = FocusNode();
+    _messageComposerController = StreamMessageComposerController();
   }
 
   @override
   void dispose() {
     _focusNode.dispose();
+    _messageComposerController.dispose();
     super.dispose();
   }
 

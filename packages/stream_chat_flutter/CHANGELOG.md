@@ -10,7 +10,7 @@
 - Added `appBarBehavior` parameter to `StreamChannelHeader`, `StreamChannelListHeader`, and `StreamBackButton`, controlling floating vs pinned app bar appearance (avatar shadow, back-button style). Falls back to `appStyle.appBarBehavior` from the theme when null.
 - Added `messageListViewConfiguration` field to `StreamChatConfigurationData`, allowing a global `StreamMessageListViewConfiguration` default for all `StreamMessageListView` widgets. Pass it via `StreamChat.configData` to configure behaviors like `swipeToReply` and `highlightInitialMessage` app-wide without wiring them per-page.
 - `StreamMessageComposer` now surfaces the hold-to-record hint through `StreamSnackbar` anchored above the composer, and `StreamChat` provides an app-wide `StreamSnackbarScope` fallback.
-- Re-exported `StreamScaffold`, `StreamScaffoldInsets`, `StreamBottomNavBar`, `StreamBottomNavBarItem`, `StreamAppStyle`, `AppBarBehavior`, `BottomBarBehavior`, and `ComposerLocation` from `stream_core_flutter` via `package:stream_chat_flutter/stream_chat_flutter.dart`.
+- Re-exported `StreamScaffold`, `StreamScaffoldInsets`, `StreamBottomNavBar`, `StreamBottomNavBarItem`, `StreamAppStyle`, `AppBarBehavior`, `BottomBarBehavior`, `ComposerLocation`, and `streamFloatingFade` from `stream_core_flutter` via `package:stream_chat_flutter/stream_chat_flutter.dart`.
 
 ⚠️ Deprecated
 
@@ -19,6 +19,8 @@
 
 🐞 Fixed
 
+- Fixed `StreamChannelPage` leaking its `StreamMessageComposerController` — the state now disposes it in `dispose()`, matching the pattern already used by `StreamThreadPage`.
+- Fixed `StreamPhotoGallery` default padding having a redundant explicit `top: 0` (no visual change).
 - `StreamMessageItem.onUserAvatarTap` now fires when the author avatar is tapped. ([#2741](https://github.com/GetStream/stream-chat-flutter/issues/2741))
 - Added `MessageComposerProps.copyWith` so factory overrides can tweak individual props (e.g. `useSystemAttachmentPicker`) without re-specifying every field. ([#2742](https://github.com/GetStream/stream-chat-flutter/issues/2742))
 
