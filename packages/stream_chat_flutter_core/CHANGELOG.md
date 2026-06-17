@@ -47,6 +47,7 @@
 🐞 Fixed
 
 - Fixed `StreamChatCore` disconnecting the WebSocket immediately on background when no `onBackgroundEventReceived` handler was provided; the keep-alive timer now fires before the connection closes regardless of whether a handler is set.
+- Fixed a reconnect storm when the OS closed the WebSocket during the background keep-alive window; reconnects are now paused on background and resumed on foreground.
 - Fixed `StreamMessageComposerController.cancelEditMessage` losing the pre-edit draft when a remote update arrived for the message being edited.
 
 ## 9.25.0
