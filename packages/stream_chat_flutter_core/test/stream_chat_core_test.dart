@@ -240,7 +240,8 @@ void main() {
         ).thenReturn(ConnectionStatus.disconnected);
 
         // Act - foreground
-        tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+        tester.binding
+            .handleAppLifecycleStateChanged(AppLifecycleState.resumed);
         await tester.pumpAndSettle();
 
         // Assert - reconnect resumed before re-opening the connection.
