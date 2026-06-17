@@ -17,6 +17,10 @@
 - `StreamMessageComposerController.editMessage` now clears any active command (backend doesn't process commands on edit).
 - `StreamMessageComposerController.setCommand` now also clears `mentionedChannel`, `mentionedHere`, `mentionedRoles`, and `mentionedGroups`/`mentionedGroupIds` (was only clearing `mentionedUsers`); `clearCommand` restores them.
 
+🐞 Fixed
+
+- Fixed a reconnect storm when the OS closed the WebSocket during the background keep-alive window; reconnects are now paused on background and resumed on foreground.
+
 ## 10.0.1
 
 🛑️ Breaking

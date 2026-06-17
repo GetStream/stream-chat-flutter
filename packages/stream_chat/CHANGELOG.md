@@ -10,6 +10,7 @@
 - Added `PushLevel` and `ChatPreferenceLevel` extension types and the `ChatPreferences` model — granular per-category push preferences (direct, channel, here, role, group mentions, thread replies, default).
 - Added `chatPreferences` field to `PushPreferenceInput`, `PushPreference`, and `ChannelPushPreference`.
 - Added `Command.set` field and `CommandSet` extension type (`fun`, `moderation`) for typed access to the backend's command set classifier.
+- Added `StreamChatClient.pauseReconnect` / `resumeReconnect` to suspend the WebSocket's auto-retry loop without tearing down the user session.
 
 🔄 Changed
 
@@ -18,6 +19,7 @@
 🐞 Fixed
 
 - `Message.toJson` mention sanitization (`removeMentionsIfNotIncluded`) now requires `@token` to match at a word boundary, so e.g. typing `@administrator` no longer keeps a stale `admin` role mention alive, and `@channels` / `@hereafter` no longer keep `mentionedChannel` / `mentionedHere` set.
+- Fixed an unhandled `WebSocketChannelException` surfacing when a reconnect attempt failed (e.g. DNS lookup failed in background); the duplicate signal on `sink.done` is now ignored since the stream's `onError` already handles it.
 
 ## 10.0.1
 
