@@ -238,6 +238,11 @@ class StreamMessageComposerController extends ValueNotifier<Message> {
       text: '',
       attachments: [],
       mentionedUsers: [],
+      mentionedChannel: false,
+      mentionedHere: false,
+      mentionedRoles: const [],
+      mentionedGroups: const [],
+      mentionedGroupIds: const [],
       command: command.name,
     );
   }

@@ -191,8 +191,25 @@ void main() {
 
     test('setCommand clears mentions and clearCommand restores them', () {
       final alice = User(id: 'alice');
-      controller.text = '@alice hi';
+      final admin = Role(
+        name: 'admin',
+        custom: false,
+        scopes: const [],
+        createdAt: DateTime(2024),
+        updatedAt: DateTime(2024),
+      );
+      final engineering = UserGroup(
+        id: 'group-eng',
+        name: 'Engineering',
+        createdAt: DateTime(2024),
+        updatedAt: DateTime(2024),
+      );
+      controller.text = '@alice @admin @Engineering @channel @here hi';
       controller.addMentionedUser(alice);
+      controller.mentionedChannel = true;
+      controller.mentionedHere = true;
+      controller.addMentionedRole(admin);
+      controller.addMentionedUserGroup(engineering);
 
       controller.setCommand(
         Command(
@@ -205,12 +222,22 @@ void main() {
 
       // Mentions are cleared in command mode (no orphan mentions get sent).
       expect(controller.mentionedUsers, isEmpty);
+      expect(controller.mentionedChannel, isFalse);
+      expect(controller.mentionedHere, isFalse);
+      expect(controller.mentionedRoles, isEmpty);
+      expect(controller.mentionedUserGroups, isEmpty);
+      expect(controller.message.mentionedGroupIds, isEmpty);
 
       controller.clearCommand();
 
       // Cancel restores the pre-command draft, mentions included.
-      expect(controller.text, '@alice hi');
+      expect(controller.text, '@alice @admin @Engineering @channel @here hi');
       expect(controller.mentionedUsers, [alice]);
+      expect(controller.mentionedChannel, isTrue);
+      expect(controller.mentionedHere, isTrue);
+      expect(controller.mentionedRoles, equals(['admin']));
+      expect(controller.mentionedUserGroups, equals([engineering]));
+      expect(controller.message.mentionedGroupIds, equals(['group-eng']));
     });
 
     test('legacy command setter also clears mentions', () {

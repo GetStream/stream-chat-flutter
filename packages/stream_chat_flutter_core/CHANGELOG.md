@@ -15,6 +15,7 @@
 
 - `StreamMessageComposerController.quotedMessage` now auto-clears an active moderation-set command (backend doesn't support activating a moderation command alongside a quoted message).
 - `StreamMessageComposerController.editMessage` now clears any active command (backend doesn't process commands on edit).
+- `StreamMessageComposerController.setCommand` now also clears `mentionedChannel`, `mentionedHere`, `mentionedRoles`, and `mentionedGroups`/`mentionedGroupIds` (was only clearing `mentionedUsers`); `clearCommand` restores them.
 
 ## 10.0.1
 
