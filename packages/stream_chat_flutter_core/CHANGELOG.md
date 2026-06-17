@@ -1,3 +1,20 @@
+## Upcoming
+
+✅ Added
+
+- Added `StreamMessageComposerController.setCommand(Command)` and `activeCommand` getter for set-aware command activation and tracking.
+- Added `StreamMessageComposerController.validateCommand(Command)` returning a nullable `CommandUnavailableReason` so callers can gate activation against the composer state.
+- Added `CommandUnavailableReason` enum (`editing`, `quotedMessage`, `other`) and `CommandValidator` typedef.
+
+⚠️ Deprecated
+
+- Deprecated `set command(String?)` on `StreamMessageComposerController`; use `setCommand(Command)` or `clearCommand()` instead.
+
+🔄 Changed
+
+- `StreamMessageComposerController.quotedMessage` now auto-clears an active moderation-set command (backend doesn't support activating a moderation command alongside a quoted message).
+- `StreamMessageComposerController.editMessage` now clears any active command (backend doesn't process commands on edit).
+
 ## 10.0.1
 
 🛑️ Breaking

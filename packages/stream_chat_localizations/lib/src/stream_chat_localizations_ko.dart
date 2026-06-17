@@ -125,6 +125,15 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
   String get instantCommandsLabel => '인스턴트 커맨즈';
 
   @override
+  String get commandUnavailableWhileEditingError => 'Not available while editing';
+
+  @override
+  String get commandUnavailableWhileQuotingError => 'Not available while replying';
+
+  @override
+  String get commandUnavailableError => 'Command not available';
+
+  @override
   String fileTooLargeAfterCompressionError(double limitInMB) =>
       '파일이 너무 커서 업로드할 수 없습니다. '
       '파일 크기 제한은 ${limitInMB}MB입니다. '
