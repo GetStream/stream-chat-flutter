@@ -1,4 +1,8 @@
-## Upcoming changes
+## Upcoming
+
+✅ Added
+
+- Added persistence for enhanced-mention fields on messages: `mentionedChannel`, `mentionedHere`, `mentionedRoles`, `mentionedGroupIds`, and `mentionedGroups`.
 
 🚀 Performance
 

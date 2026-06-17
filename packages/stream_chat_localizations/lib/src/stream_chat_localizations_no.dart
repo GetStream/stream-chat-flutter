@@ -816,4 +816,13 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
 
   @override
   String get addACommentDescription => 'La andre legge til kommentarer';
+
+  @override
+  String get notifyChannelText => 'Varsle alle i denne kanalen';
+
+  @override
+  String get notifyHereText => 'Varsle alle pålogga medlemmer i denne kanalen';
+
+  @override
+  String notifyRoleText(String role) => 'Varsle alle $role-medlemmer';
 }

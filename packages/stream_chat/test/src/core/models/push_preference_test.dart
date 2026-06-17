@@ -1,3 +1,4 @@
+import 'package:stream_chat/src/core/models/chat_preferences.dart';
 import 'package:stream_chat/src/core/models/push_preference.dart';
 import 'package:test/test.dart';
 
@@ -6,14 +7,14 @@ void main() {
     test('should serialize to json correctly for user-level preferences', () {
       final input = PushPreferenceInput(
         callLevel: CallLevel.all,
-        chatLevel: ChatLevel.mentions,
+        chatLevel: ChatLevel.directMentions,
         disabledUntil: DateTime.parse('2024-12-31T23:59:59Z'),
         removeDisable: true,
       );
 
       final json = input.toJson();
       expect(json['call_level'], 'all');
-      expect(json['chat_level'], 'mentions');
+      expect(json['chat_level'], 'direct_mentions');
       expect(json['disabled_until'], '2024-12-31T23:59:59.000Z');
       expect(json['remove_disable'], true);
       expect(json['channel_cid'], isNull);
@@ -44,18 +45,52 @@ void main() {
       expect(json['chat_level'], 'default');
       expect(json['call_level'], 'default');
     });
+
+    test('should serialize chatPreferences for user-level preferences', () {
+      const input = PushPreferenceInput(
+        chatPreferences: ChatPreferences(
+          defaultPreference: .all,
+          directMentions: .none,
+          threadReplies: .all,
+        ),
+      );
+
+      final json = input.toJson();
+      expect(json['chat_preferences'], <String, dynamic>{
+        'default_preference': 'all',
+        'direct_mentions': 'none',
+        'thread_replies': 'all',
+      });
+      expect(json['chat_level'], isNull);
+    });
+
+    test('should serialize chatPreferences for channel preferences', () {
+      const input = PushPreferenceInput.channel(
+        channelCid: 'messaging:general',
+        chatPreferences: ChatPreferences(
+          channelMentions: .none,
+        ),
+      );
+
+      final json = input.toJson();
+      expect(json['channel_cid'], 'messaging:general');
+      expect(json['chat_preferences'], <String, dynamic>{
+        'channel_mentions': 'none',
+      });
+      expect(json['chat_level'], isNull);
+    });
   });
 
   group('src/models/push_preference', () {
     test('should parse json correctly', () {
       final pushPreference = PushPreference.fromJson(const {
         'call_level': 'all',
-        'chat_level': 'mentions',
+        'chat_level': 'direct_mentions',
         'disabled_until': '2024-12-31T23:59:59Z',
       });
 
       expect(pushPreference.callLevel, CallLevel.all);
-      expect(pushPreference.chatLevel, ChatLevel.mentions);
+      expect(pushPreference.chatLevel, ChatLevel.directMentions);
       expect(
         pushPreference.disabledUntil,
         DateTime.parse('2024-12-31T23:59:59Z'),
@@ -70,6 +105,31 @@ void main() {
 
       expect(pushPreference.callLevel, CallLevel.defaultValue);
       expect(pushPreference.chatLevel, ChatLevel.defaultValue);
+    });
+
+    test('should parse chatPreferences', () {
+      final pushPreference = PushPreference.fromJson(const {
+        'chat_preferences': {
+          'default_preference': 'all',
+          'direct_mentions': 'none',
+          'role_mentions': 'all',
+        },
+      });
+
+      expect(pushPreference.chatLevel, isNull);
+      expect(
+        pushPreference.chatPreferences?.defaultPreference,
+        ChatPreferenceLevel.all,
+      );
+      expect(
+        pushPreference.chatPreferences?.directMentions,
+        ChatPreferenceLevel.none,
+      );
+      expect(
+        pushPreference.chatPreferences?.roleMentions,
+        ChatPreferenceLevel.all,
+      );
+      expect(pushPreference.chatPreferences?.groupMentions, isNull);
     });
   });
 
@@ -97,6 +157,25 @@ void main() {
       expect(
         channelPushPreference.disabledUntil,
         DateTime.parse('2024-12-31T23:59:59Z'),
+      );
+    });
+
+    test('should parse chatPreferences', () {
+      final channelPushPreference = ChannelPushPreference.fromJson(const {
+        'chat_preferences': {
+          'here_mentions': 'all',
+          'channel_mentions': 'none',
+        },
+      });
+
+      expect(channelPushPreference.chatLevel, isNull);
+      expect(
+        channelPushPreference.chatPreferences?.hereMentions,
+        ChatPreferenceLevel.all,
+      );
+      expect(
+        channelPushPreference.chatPreferences?.channelMentions,
+        ChatPreferenceLevel.none,
       );
     });
   });

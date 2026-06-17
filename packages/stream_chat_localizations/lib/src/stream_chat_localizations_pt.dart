@@ -834,4 +834,13 @@ Não é possível adicionar mais de $limit arquivos de uma vez
 
   @override
   String get addACommentDescription => 'Permitir que outros adicionem comentários';
+
+  @override
+  String get notifyChannelText => 'Notificar todos neste canal';
+
+  @override
+  String get notifyHereText => 'Notificar todos os membros online neste canal';
+
+  @override
+  String notifyRoleText(String role) => 'Notificar todos os membros $role';
 }

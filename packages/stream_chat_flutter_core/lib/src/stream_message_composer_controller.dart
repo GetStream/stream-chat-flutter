@@ -238,6 +238,11 @@ class StreamMessageComposerController extends ValueNotifier<Message> {
       text: '',
       attachments: [],
       mentionedUsers: [],
+      mentionedChannel: false,
+      mentionedHere: false,
+      mentionedRoles: const [],
+      mentionedGroups: const [],
+      mentionedGroupIds: const [],
       command: command.name,
     );
   }
@@ -393,6 +398,53 @@ class StreamMessageComposerController extends ValueNotifier<Message> {
   /// Sets the poll in the message.
   set poll(Poll? poll) {
     message = message.copyWith(pollId: poll?.id, poll: poll);
+  }
+
+  /// Whether the message contains an "@channel" broadcast mention.
+  bool get mentionedChannel => message.mentionedChannel ?? false;
+
+  /// Sets whether the message contains an "@channel" broadcast mention.
+  set mentionedChannel(bool value) {
+    message = message.copyWith(mentionedChannel: value);
+  }
+
+  /// Whether the message contains an "@here" broadcast mention.
+  bool get mentionedHere => message.mentionedHere ?? false;
+
+  /// Sets whether the message contains an "@here" broadcast mention.
+  set mentionedHere(bool value) {
+    message = message.copyWith(mentionedHere: value);
+  }
+
+  /// Returns the list of mentioned role names in the message.
+  List<String> get mentionedRoles => message.mentionedRoles ?? const [];
+
+  /// Adds a role to the list of mentioned roles by appending [Role.name].
+  ///
+  /// No-op if the role is already mentioned.
+  void addMentionedRole(Role role) {
+    final roles = mentionedRoles;
+    if (roles.contains(role.name)) return;
+    message = message.copyWith(mentionedRoles: [...roles, role.name]);
+  }
+
+  /// Returns the list of mentioned user groups in the message.
+  ///
+  /// The full [UserGroup] objects are kept locally for display and send-time
+  /// sanitization. Only their IDs are sent over the wire via
+  /// [Message.mentionedGroupIds].
+  List<UserGroup> get mentionedUserGroups => message.mentionedGroups ?? const [];
+
+  /// Adds a user group to the list of mentioned groups.
+  ///
+  /// No-op if a group with the same id is already mentioned.
+  void addMentionedUserGroup(UserGroup group) {
+    final groups = mentionedUserGroups;
+    final existingIds = message.mentionedGroupIds ?? const <String>[];
+    message = message.copyWith(
+      mentionedGroups: groups.any((it) => it.id == group.id) ? groups : [...groups, group],
+      mentionedGroupIds: existingIds.contains(group.id) ? existingIds : [...existingIds, group.id],
+    );
   }
 
   /// Returns the list of mentioned users in the message.

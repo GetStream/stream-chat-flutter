@@ -2,6 +2,9 @@
 
 ✅ Added
 
+- Added support for `@channel`, `@here`, role, and user-group mentions — parsed on incoming messages, rendered as styled tappable spans in message text, and selectable from the composer's `@` autocomplete.
+- Added a single `mentionItemBuilder` on `StreamMessageComposer` and `StreamMentionAutocompleteOptions` that receives `StreamMentionItemProps` and covers every mention kind. Customise globally via `streamChatComponentBuilders(mentionItem: ...)` or per-instance via the new constructor parameter. Defaults are rendered by `DefaultStreamMentionItem`. Also added `onMention*Tap` callbacks on `StreamMentionAutocompleteOptions`.
+- Added `StreamMessageListView.onMentionTap` and `StreamMessageItem.onMentionTap` — receives a typed `StreamMention` (`StreamUserMention`, `StreamChannelMention`, `StreamHereMention`, `StreamRoleMention`, or `StreamGroupMention`).
 - `StreamMessageComposer` now surfaces the hold-to-record hint through `StreamSnackbar` anchored above the composer, and `StreamChat` provides an app-wide `StreamSnackbarScope` fallback.
 - Added `commandValidator` prop on `StreamCommandAutocompleteOptions` and `StreamCommandPicker` for marking rows as unavailable; disabled rows remain tappable so the caller can surface feedback.
 - `StreamMessageComposer` now surfaces a `StreamSnackbar` when the user taps a disabled slash command in the picker or autocomplete, explaining why it's blocked.
@@ -10,6 +13,13 @@
 
 - `StreamAudioRecorderController.showInfo` is now deprecated. Show your own snackbar via `StreamSnackbarMessenger.of(context).show(StreamSnackbar(...))` instead.
 - `RecordStateIdle.message` is now deprecated; the composer no longer reads it.
+- Deprecated `userMentionsTileBuilder` on `StreamMessageComposer` and `mentionsTileBuilder` on `StreamMentionAutocompleteOptions` in favor of `mentionItemBuilder`.
+- Deprecated `StreamMessageListView.onUserMentionTap` and `StreamMessageItem.onUserMentionTap` in favor of `onMentionTap`.
+- Deprecated `UserListX.search`.
+
+🔄 Changed
+
+- Improved the local filtering/sorting logic for the mention suggestions autocomplete.
 
 🐞 Fixed
 

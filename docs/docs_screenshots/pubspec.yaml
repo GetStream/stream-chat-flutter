@@ -21,8 +21,8 @@ dependencies:
   stream_chat_flutter: ^10.0.1
   stream_core_flutter:
     git:
-      url: https://github.com/GetStream/stream-core-flutter
-      ref: 43f90a46d8092ca2c1e24c36af06f05fc0c633a6
+      url: https://github.com/GetStream/stream-core-flutter.git
+      ref: fd9a715b390aa7e2b2e70d0af24ca64e10bba178
       path: packages/stream_core_flutter
 
 dev_dependencies:

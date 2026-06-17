@@ -378,6 +378,9 @@ void main() {
       expect(localizations.anonymousPollDescription, isNotNull);
       expect(localizations.suggestAnOptionDescription, isNotNull);
       expect(localizations.addACommentDescription, isNotNull);
+      expect(localizations.notifyChannelText, isNotNull);
+      expect(localizations.notifyHereText, isNotNull);
+      expect(localizations.notifyRoleText('admin'), isNotNull);
     });
   }
 

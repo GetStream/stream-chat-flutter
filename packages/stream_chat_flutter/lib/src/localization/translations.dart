@@ -738,6 +738,18 @@ abstract class Translations {
   /// The header text for the reaction detail sheet showing the count of
   /// visible reactions (e.g. "1 Reaction" / "5 Reactions").
   String reactionsCountText(int count);
+
+  /// The text shown under the "@channel" entry in the mention autocomplete,
+  /// describing that it notifies every channel member.
+  String get notifyChannelText;
+
+  /// The text shown under the "@here" entry in the mention autocomplete,
+  /// describing that it notifies every online channel member.
+  String get notifyHereText;
+
+  /// The text shown under a role mention entry in the mention autocomplete,
+  /// describing that it notifies every member holding the role named [role].
+  String notifyRoleText(String role);
 }
 
 /// Default implementation of Translation strings for the stream chat widgets
@@ -1575,4 +1587,13 @@ Attachment limit exceeded: it's not possible to add more than $limit attachments
 
   @override
   String reactionsCountText(int count) => count == 1 ? '1 Reaction' : '$count Reactions';
+
+  @override
+  String get notifyChannelText => 'Notify everyone in this channel';
+
+  @override
+  String get notifyHereText => 'Notify every online member in this channel';
+
+  @override
+  String notifyRoleText(String role) => 'Notify all $role members';
 }

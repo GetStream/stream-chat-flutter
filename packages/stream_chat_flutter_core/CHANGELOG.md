@@ -2,6 +2,7 @@
 
 ✅ Added
 
+- Added `mentionedChannel`, `mentionedHere`, `mentionedRoles`, `addMentionedRole`, `mentionedUserGroups`, and `addMentionedUserGroup` to `StreamMessageComposerController` for composing enhanced mentions.
 - Added `StreamMessageComposerController.setCommand(Command)` and `activeCommand` getter for set-aware command activation and tracking.
 - Added `StreamMessageComposerController.validateCommand(Command)` returning a nullable `CommandUnavailableReason` so callers can gate activation against the composer state.
 - Added `CommandUnavailableReason` enum (`editing`, `quotedMessage`, `other`) and `CommandValidator` typedef.
@@ -14,6 +15,7 @@
 
 - `StreamMessageComposerController.quotedMessage` now auto-clears an active moderation-set command (backend doesn't support activating a moderation command alongside a quoted message).
 - `StreamMessageComposerController.editMessage` now clears any active command (backend doesn't process commands on edit).
+- `StreamMessageComposerController.setCommand` now also clears `mentionedChannel`, `mentionedHere`, `mentionedRoles`, and `mentionedGroups`/`mentionedGroupIds` (was only clearing `mentionedUsers`); `clearCommand` restores them.
 
 🐞 Fixed
 
