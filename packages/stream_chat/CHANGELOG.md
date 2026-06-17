@@ -1,3 +1,13 @@
+## Upcoming
+
+✅ Added
+
+- Added `StreamChatClient.pauseReconnect` / `resumeReconnect` to suspend the WebSocket's auto-retry loop without tearing down the user session.
+
+🐞 Fixed
+
+- Fixed an unhandled `WebSocketChannelException` surfacing when a reconnect attempt failed (e.g. DNS lookup failed in background); the duplicate signal on `sink.done` is now ignored since the stream's `onError` already handles it.
+
 ## 9.25.0
 
 - Minor bug fixes and improvements
