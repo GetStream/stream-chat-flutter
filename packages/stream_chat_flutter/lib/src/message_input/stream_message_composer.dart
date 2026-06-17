@@ -869,24 +869,35 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
                 channel: StreamChannel.of(context).channel,
                 mentionAllAppUsers: widget.props.mentionAllAppUsers,
                 mentionItemBuilder: widget.props.mentionItemBuilder,
-                    // ignore: deprecated_member_use_from_same_package
-                    mentionsTileBuilder: widget.props.userMentionsTileBuilder,
-                    onMentionChannelTap: () {
-                      _effectiveController.mentionedChannel = true;
-                      StreamAutocomplete.of(context).acceptAutocompleteOption('channel');
-                    },
-                    onMentionHereTap: () {
-                      _effectiveController.mentionedHere = true;
-                      StreamAutocomplete.of(context).acceptAutocompleteOption('here');
-                    },
-                    onMentionRoleTap: (role) {
-                      _effectiveController.addMentionedRole(role);
-                      StreamAutocomplete.of(context).acceptAutocompleteOption(role.name);
-                    },
-                    onMentionUserGroupTap: (group) {
-                      _effectiveController.addMentionedUserGroup(group);
-                      StreamAutocomplete.of(context).acceptAutocompleteOption(group.name);
-                    },
+                mentionsTileBuilder: widget.props.userMentionsTileBuilder,
+                onMentionChannelTap: () {
+                  // setting the mentionedChannel flag to true in the controller.
+                  _effectiveController.mentionedChannel = true;
+
+                  // accepting the autocomplete option.
+                  StreamAutocomplete.of(context).acceptAutocompleteOption(StreamMentionType.channel);
+                },
+                onMentionHereTap: () {
+                  // setting the mentionedHere flag to true in the controller.
+                  _effectiveController.mentionedHere = true;
+
+                  // accepting the autocomplete option.
+                  StreamAutocomplete.of(context).acceptAutocompleteOption(StreamMentionType.here);
+                },
+                onMentionRoleTap: (role) {
+                  // adding the mentioned role to the controller.
+                  _effectiveController.addMentionedRole(role);
+
+                  // accepting the autocomplete option.
+                  StreamAutocomplete.of(context).acceptAutocompleteOption(role.name);
+                },
+                onMentionUserGroupTap: (group) {
+                  // adding the mentioned user group to the controller.
+                  _effectiveController.addMentionedUserGroup(group);
+
+                  // accepting the autocomplete option.
+                  StreamAutocomplete.of(context).acceptAutocompleteOption(group.name);
+                },
                 onMentionUserTap: (user) {
                   // adding the mentioned user to the controller.
                   _effectiveController.addMentionedUser(user);
