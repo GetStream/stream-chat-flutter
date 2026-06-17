@@ -138,7 +138,8 @@ void main() {
       expect(
         constrainedBoxes,
         isNotEmpty,
-        reason: 'Expected the bubble to be constrained to the attachment '
+        reason:
+            'Expected the bubble to be constrained to the attachment '
             'width (200) after the initial post-frame measurement.',
       );
 
@@ -164,7 +165,8 @@ void main() {
       expect(
         element.dirty,
         isFalse,
-        reason: 'StreamMessageContent re-ran setState on an unchanged '
+        reason:
+            'StreamMessageContent re-ran setState on an unchanged '
             'measured width, leaving the element dirty. This is the '
             'runaway-rebuild pattern from issue #2761.',
       );
