@@ -221,6 +221,34 @@ void main() {
     );
 
     testWidgets(
+      'should pause reconnect on background and resume on foreground',
+      (tester) async {
+        // Arrange
+        await pumpStreamChatCore(tester);
+
+        // Act - background
+        tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+        await tester.pumpAndSettle();
+
+        // Assert - reconnect paused, but no reconnect / disconnect yet.
+        verify(mockClient.pauseReconnect).called(1);
+        verifyNever(mockClient.resumeReconnect);
+
+        // Reset connection status so foreground triggers a reconnect.
+        when(
+          () => mockClient.wsConnectionStatus,
+        ).thenReturn(ConnectionStatus.disconnected);
+
+        // Act - foreground
+        tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+        await tester.pumpAndSettle();
+
+        // Assert - reconnect resumed before re-opening the connection.
+        verify(mockClient.resumeReconnect).called(1);
+      },
+    );
+
+    testWidgets(
       'should listen for events when app goes to background with handler',
       (tester) async {
         // Arrange
