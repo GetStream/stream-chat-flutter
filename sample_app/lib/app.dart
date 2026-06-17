@@ -2,6 +2,7 @@
 
 import 'dart:async';
 
+import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart' hide Message;
@@ -170,64 +171,136 @@ class _StreamChatSampleAppState extends State<StreamChatSampleApp>
             child: Builder(
               builder: (context) {
                 final config = context.sampleAppConfig;
-                return MaterialApp.router(
-                  theme: ThemeData(
-                    brightness: .light,
-                    extensions: [StreamTheme.light()],
-                  ),
-                  darkTheme: ThemeData(
-                    brightness: .dark,
-                    extensions: [StreamTheme.dark()],
-                  ),
-                  themeMode: config.themeMode,
-                  locale: config.locale,
-                  supportedLocales: supportedLocales,
-                  localizationsDelegates: const [
-                    GlobalStreamChatLocalizations.delegate,
-                    GlobalMaterialLocalizations.delegate,
-                    GlobalWidgetsLocalizations.delegate,
-                  ],
-                  builder: (context, child) {
-                    return ListenableBuilder(
-                      listenable: authController,
-                      builder: (context, cachedChild) {
-                        final wrapped = Directionality(
-                          textDirection: config.forceRtl ? .rtl : .ltr,
-                          child: cachedChild ?? const SizedBox.shrink(),
-                        );
+                return DynamicColorBuilder(
+                  builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
+                    return MaterialApp.router(
+                      theme: createTheme(
+                        dynamicColor: lightDynamic,
+                        brightness: Brightness.light,
+                      ),
+                      darkTheme: createTheme(
+                        dynamicColor: darkDynamic,
+                        brightness: Brightness.dark,
+                      ),
+                      themeMode: config.themeMode,
+                      locale: config.locale,
+                      supportedLocales: supportedLocales,
+                      localizationsDelegates: const [
+                        GlobalStreamChatLocalizations.delegate,
+                        GlobalMaterialLocalizations.delegate,
+                        GlobalWidgetsLocalizations.delegate,
+                      ],
+                      builder: (context, child) {
+                        return ListenableBuilder(
+                          listenable: authController,
+                          builder: (context, cachedChild) {
+                            final wrapped = Directionality(
+                              textDirection: config.forceRtl ? .rtl : .ltr,
+                              child: cachedChild ?? const SizedBox.shrink(),
+                            );
 
-                        // StreamChat stays mounted as long as a client
-                        // exists so `StreamChat.of(context)` remains
-                        // valid across logout transitions.
-                        final client = authController.client;
-                        if (client != null) {
-                          return StreamChat(
-                            client: client,
-                            componentBuilders: StreamComponentBuilders(
-                              extensions: streamChatComponentBuilders(
-                                messageItem: customMessageItemBuilder,
-                              ),
-                            ),
-                            configData: config.toStreamChatConfigurationData(),
-                            child: wrapped,
-                          );
-                        }
+                            // StreamChat stays mounted as long as a client
+                            // exists so `StreamChat.of(context)` remains
+                            // valid across logout transitions.
+                            final client = authController.client;
+                            if (client != null) {
+                              return StreamChat(
+                                client: client,
+                                componentBuilders: StreamComponentBuilders(
+                                  extensions: streamChatComponentBuilders(
+                                    messageItem: customMessageItemBuilder,
+                                  ),
+                                ),
+                                configData: config.toStreamChatConfigurationData(),
+                                child: wrapped,
+                              );
+                            }
 
-                        return StreamChatTheme(
-                          data: StreamChatThemeData(),
-                          child: wrapped,
+                            return StreamChatTheme(
+                              data: StreamChatThemeData(),
+                              child: wrapped,
+                            );
+                          },
+                          child: child,
                         );
                       },
-                      child: child,
+                      routerConfig: _setupRouter(),
                     );
                   },
-                  routerConfig: _setupRouter(),
                 );
               },
             ),
           ),
         if (!animationCompleted) buildAnimation(),
       ],
+    );
+  }
+
+  ThemeData createTheme({
+    required ColorScheme? dynamicColor,
+    required Brightness brightness,
+  }) {
+    final colorScheme = createColorScheme(dynamicColor, brightness);
+
+    return ThemeData(
+      brightness: brightness,
+      extensions: [StreamTheme(colorScheme: colorScheme, brightness: brightness)],
+    );
+  }
+
+  StreamColorScheme? createColorScheme(ColorScheme? dynamicColor, Brightness brightness) {
+    if (dynamicColor == null) return null;
+
+    final brand = StreamColorSwatch.fromColor(dynamicColor.primary, brightness: brightness);
+    final chrome = StreamColorSwatch.fromColor(dynamicColor.surface, brightness: brightness);
+
+    final base = brightness == Brightness.light
+        ? StreamColorScheme.light(brand: brand, chrome: chrome)
+        : StreamColorScheme.dark(brand: brand, chrome: chrome);
+
+    return base.copyWith(
+      // Accent
+      accentPrimary: dynamicColor.primary,
+      accentError: dynamicColor.error,
+      // accentNeutral: dynamicColor.onSurfaceVariant,
+      // Text
+      textPrimary: dynamicColor.onSurface,
+      textSecondary: dynamicColor.onSurfaceVariant,
+      textTertiary: dynamicColor.outline,
+      textLink: dynamicColor.primary,
+      textOnAccent: dynamicColor.onPrimary,
+      textOnInverse: dynamicColor.onInverseSurface,
+      // Background
+      backgroundApp: dynamicColor.surfaceContainerLowest,
+      backgroundSurface: dynamicColor.surface,
+      backgroundSurfaceSubtle: dynamicColor.surfaceContainer,
+      backgroundSurfaceStrong: dynamicColor.surfaceContainerHighest,
+      backgroundSurfaceCard: dynamicColor.surfaceContainer,
+      backgroundOnAccent: dynamicColor.onPrimary,
+      backgroundHighlight: dynamicColor.primaryContainer,
+      backgroundScrim: dynamicColor.scrim,
+      backgroundInverse: dynamicColor.inverseSurface,
+      // Background - Elevation
+      backgroundElevation0: dynamicColor.surfaceContainerLowest,
+      backgroundElevation1: dynamicColor.surfaceContainerLow,
+      backgroundElevation2: dynamicColor.surfaceContainer,
+      backgroundElevation3: dynamicColor.surfaceContainerHigh,
+      // State
+      backgroundSelected: dynamicColor.primaryContainer,
+      // Border - Core
+      borderDefault: dynamicColor.outline,
+      borderSubtle: dynamicColor.outlineVariant,
+      borderStrong: dynamicColor.outline,
+      borderOnAccent: dynamicColor.onPrimary,
+      borderOnInverse: dynamicColor.onInverseSurface,
+      borderOnSurface: dynamicColor.outline,
+      // Border - Utility
+      borderFocus: dynamicColor.primary,
+      borderActive: dynamicColor.primary,
+      borderError: dynamicColor.error,
+      borderSelected: dynamicColor.primary,
+      // System
+      systemText: dynamicColor.onSurface,
     );
   }
 }

@@ -22,6 +22,7 @@ environment:
 dependencies:
   avatar_glow: ^3.0.0
   collection: ^1.19.1
+  dynamic_color: ^1.8.1
   firebase_core: ^4.0.0
   firebase_crashlytics: ">=5.2.0 <5.2.5"
   firebase_messaging: ">=16.0.0 <16.4.2"
