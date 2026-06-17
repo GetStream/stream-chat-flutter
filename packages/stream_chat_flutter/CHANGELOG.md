@@ -1,3 +1,9 @@
+## Upcoming
+
+🐞 Fixed
+
+- `MessageCard` no longer re-runs `setState` on every post-frame measurement when the measured attachment width has not changed. ([#2761](https://github.com/GetStream/stream-chat-flutter/issues/2761))
+
 ## 9.25.0
 
 🐞 Fixed

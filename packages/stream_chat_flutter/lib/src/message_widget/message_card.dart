@@ -144,6 +144,7 @@ class _MessageCardState extends State<MessageCard> {
     final attachmentsWidth = renderBox.size.width;
 
     if (attachmentsWidth == 0) return;
+    if (widthLimit == attachmentsWidth) return;
 
     setState(() => widthLimit = attachmentsWidth);
   }
