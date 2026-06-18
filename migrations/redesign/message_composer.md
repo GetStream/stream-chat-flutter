@@ -603,7 +603,7 @@ StreamAudioRecorder(
 
 ### `PlaybackTimerText` for recording duration
 
-Use `PlaybackTimerText(duration: duration)` to display the recording elapsed time inside the `StreamAudioRecorder` builder. There is no `RecordingTimer` widget in v10 — `PlaybackTimerText` from `stream_core_flutter` is the correct replacement.
+Use `PlaybackTimerText(duration: duration)` to display the recording elapsed time inside the `StreamAudioRecorder` builder. There is no `RecordingTimer` widget in v10 — `PlaybackTimerText` is the correct replacement.
 
 | Old (does not exist in v10) | New                                              |
 | --------------------------- | ------------------------------------------------ |

@@ -325,7 +325,21 @@ MaterialApp(
 
 `StreamColorSwatch.fromColor(Color, [Brightness])` accepts any `Color` and derives the full swatch automatically. `StreamColorScheme.light(brand:)` / `StreamColorScheme.dark(brand:)` are convenience constructors that replace only the brand swatch.
 
-For fine-grained per-alignment control (e.g. different colors for sent vs. received), use `StreamMessageBubbleStyle` inside `StreamMessageItemThemeData` as shown in the [StreamMessageItemThemeData](#streammessageitemthemedata) section.
+For fine-grained per-alignment control (e.g. different colors for sent vs. received), use `StreamMessageBubbleStyle` inside `StreamMessageItemThemeData` with `StreamMessageLayoutProperty`. `StreamMessageLayoutProperty.resolveWith` receives the current `StreamMessageLayout` — which carries alignment, stack position, and other layout details — and returns the value for that specific message:
+
+```dart
+StreamMessageItemThemeData(
+  bubble: StreamMessageBubbleStyle(
+    backgroundColor: StreamMessageLayoutProperty.resolveWith((layout) {
+      return layout.alignment == StreamMessageAlignment.end
+          ? const Color(0xFFDCF8C6) // own message
+          : Colors.white;           // other message
+    }),
+  ),
+)
+```
+
+See the [StreamMessageItemThemeData](#streammessageitemthemedata) section for the full theme example.
 
 **Before (explicit `messageTheme` parameter):**
 ```dart
