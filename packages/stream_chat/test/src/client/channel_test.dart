@@ -8529,6 +8529,12 @@ void main() {
       (channel) => channel.canNotifyGroup,
     );
 
+    testCapability(
+      'CreateMentions',
+      ChannelCapability.createMention,
+      (channel) => channel.canCreateMention,
+    );
+
     test('returns correct values with multiple capabilities', () {
       final channelState = _generateChannelState(
         channelId,

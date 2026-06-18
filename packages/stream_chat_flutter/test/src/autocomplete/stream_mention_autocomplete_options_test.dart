@@ -511,11 +511,39 @@ void main() {
       user: User(id: id, name: name),
     );
 
+    testWidgets('query does not call queryUser or queryMembers when createMention capability is missing', (
+      tester,
+    ) async {
+      final mocks = _setupMocks(ownCapabilities: const []);
+
+      await _pumpMentionOptions(
+        tester,
+        client: mocks.client,
+        channel: mocks.channel,
+        query: 'ali',
+      );
+
+      verifyNever(
+        () => mocks.channel.queryMembers(
+          filter: any(named: 'filter'),
+          pagination: any(named: 'pagination'),
+        ),
+      );
+      verifyNever(
+        () => mocks.client.queryUsers(
+          presence: any(named: 'presence'),
+          filter: any(named: 'filter'),
+          sort: any(named: 'sort'),
+          pagination: any(named: 'pagination'),
+        ),
+      );
+    });
+
     testWidgets(
       'all members cached use in-memory search and skip queryMembers API call',
       (tester) async {
         final mocks = _setupMocks(
-          ownCapabilities: const [],
+          ownCapabilities: const [ChannelCapability.createMention],
           members: [
             buildMember('alice-id', 'Alice'),
             buildMember('bob-id', 'Bob'),
@@ -546,7 +574,7 @@ void main() {
       'partial cache (memberCount > cached members) triggers queryMembers API call',
       (tester) async {
         final mocks = _setupMocks(
-          ownCapabilities: const [],
+          ownCapabilities: const [ChannelCapability.createMention],
           members: [
             buildMember('user-1', 'User 1'),
             buildMember('user-2', 'User 2'),
@@ -583,7 +611,7 @@ void main() {
       'null memberCount falls back to remote queryMembers',
       (tester) async {
         final mocks = _setupMocks(
-          ownCapabilities: const [],
+          ownCapabilities: const [ChannelCapability.createMention],
           members: [buildMember('cached-id', 'Cached')],
           memberCount: null,
         );
@@ -618,7 +646,7 @@ void main() {
       'local search includes watchers',
       (tester) async {
         final mocks = _setupMocks(
-          ownCapabilities: const [],
+          ownCapabilities: const [ChannelCapability.createMention],
           members: [buildMember('alice-id', 'Alice')],
           watchers: [User(id: 'wally-id', name: 'Wally')],
         );
@@ -638,7 +666,7 @@ void main() {
       'local results render alphabetically by name',
       (tester) async {
         final mocks = _setupMocks(
-          ownCapabilities: const [],
+          ownCapabilities: const [ChannelCapability.createMention],
           members: [
             buildMember('c-id', 'Charlie'),
             buildMember('a-id', 'Alice'),
@@ -665,7 +693,7 @@ void main() {
       'remote queryMembers results render in server order',
       (tester) async {
         final mocks = _setupMocks(
-          ownCapabilities: const [],
+          ownCapabilities: const [ChannelCapability.createMention],
           members: [buildMember('cached-id', 'Cached')],
           memberCount: 50,
         );
@@ -701,7 +729,7 @@ void main() {
     testWidgets(
       'mentionAllAppUsers calls client.queryUsers instead of channel.queryMembers',
       (tester) async {
-        final mocks = _setupMocks(ownCapabilities: const []);
+        final mocks = _setupMocks(ownCapabilities: const [ChannelCapability.createMention]);
         when(
           () => mocks.client.queryUsers(
             presence: any(named: 'presence'),
@@ -743,7 +771,10 @@ void main() {
       'queryMembers error is swallowed and does not blank the list',
       (tester) async {
         final mocks = _setupMocks(
-          ownCapabilities: const [ChannelCapability.notifyHere],
+          ownCapabilities: const [
+            ChannelCapability.notifyHere,
+            ChannelCapability.createMention,
+          ],
           members: [buildMember('cached-id', 'Cached')],
           memberCount: 50,
         );
@@ -775,6 +806,7 @@ void main() {
           ChannelCapability.notifyHere,
           ChannelCapability.notifyRole,
           ChannelCapability.notifyGroup,
+          ChannelCapability.createMention,
         ],
         members: [
           Member(
@@ -858,6 +890,7 @@ void main() {
             ChannelCapability.notifyHere,
             ChannelCapability.notifyRole,
             ChannelCapability.notifyGroup,
+            ChannelCapability.createMention,
           ],
           members: [
             Member(

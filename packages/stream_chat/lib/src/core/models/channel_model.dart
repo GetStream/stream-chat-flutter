@@ -407,4 +407,7 @@ extension type const ChannelCapability(String capability) implements String {
 
   /// Ability to mention one or more user groups in a message.
   static const notifyGroup = ChannelCapability('notify-group');
+
+  /// Ability to mention a user in a message.
+  static const createMention = ChannelCapability('create-mention');
 }

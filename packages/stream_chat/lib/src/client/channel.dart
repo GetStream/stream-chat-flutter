@@ -4589,4 +4589,9 @@ extension ChannelCapabilityCheck on Channel {
   bool get canNotifyGroup {
     return ownCapabilities.contains(ChannelCapability.notifyGroup);
   }
+
+  /// True, if the current user can mention a user in a message.
+  bool get canCreateMention {
+    return ownCapabilities.contains(ChannelCapability.createMention);
+  }
 }

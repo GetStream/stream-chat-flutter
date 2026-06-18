@@ -7,6 +7,7 @@
 ✅ Added
 
 - Added support for `@channel`, `@here`, role, and user-group mentions — parsed on incoming messages, rendered as styled tappable spans in message text, and selectable from the composer's `@` autocomplete.
+- `StreamMentionAutocompleteOptions` now hides user suggestions when the channel lacks the `create-mention` capability, skipping the `queryMembers` / `queryUsers` calls.
 - Added a single `mentionItemBuilder` on `StreamMessageComposer` and `StreamMentionAutocompleteOptions` that receives `StreamMentionItemProps` and covers every mention kind. Customise globally via `streamChatComponentBuilders(mentionItem: ...)` or per-instance via the new constructor parameter. Defaults are rendered by `DefaultStreamMentionItem`. Also added `onMention*Tap` callbacks on `StreamMentionAutocompleteOptions`.
 - Added `StreamMessageListView.onMentionTap` and `StreamMessageItem.onMentionTap` — receives a typed `StreamMention` (`StreamUserMention`, `StreamChannelMention`, `StreamHereMention`, `StreamRoleMention`, or `StreamGroupMention`).
 - `StreamMessageComposer` now surfaces the hold-to-record hint through `StreamSnackbar` anchored above the composer, and `StreamChat` provides an app-wide `StreamSnackbarScope` fallback.

@@ -242,6 +242,7 @@ class _StreamMentionAutocompleteOptionsState extends State<StreamMentionAutocomp
   }
 
   Future<List<User>> _fetchUsers(String query) async {
+    if (!widget.channel.canCreateMention) return const [];
     try {
       if (widget.mentionAllAppUsers) {
         return await _queryUsers(query);
