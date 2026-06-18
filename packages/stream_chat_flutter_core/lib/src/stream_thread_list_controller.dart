@@ -158,6 +158,7 @@ class StreamThreadListController extends PagedValueNotifier<String, Thread> {
         nextPageKey: nextKey,
       );
       // Start listening to events
+      if (disposed) return;
       _subscribeToThreadListEvents();
     } on StreamChatError catch (error) {
       value = PagedValue.error(error);
