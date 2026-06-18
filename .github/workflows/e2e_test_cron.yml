@@ -1,0 +1,165 @@
+name: E2E Tests Nightly
+
+on:
+  schedule:
+    - cron: "0 1 * * 1-5"
+  workflow_dispatch:
+    inputs:
+      mock_server_branch:
+        description: "Mock server branch"
+        type: string
+        required: true
+        default: main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  mock_server_branch: ${{ github.event.inputs.mock_server_branch || 'main' }}
+  ALLURE_TOKEN: ${{ secrets.ALLURE_TOKEN }}
+
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        api-level: [34, 31, 28]
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: ./.github/actions/setup-java
+
+      - uses: ./.github/actions/cache-gradle
+
+      - uses: ./.github/actions/setup-ruby
+
+      - uses: ./.github/actions/setup-flutter
+
+      - name: Bootstrap
+        run: |
+          flutter pub global activate melos
+          melos bootstrap
+
+      - uses: ./.github/actions/enable-kvm
+
+      - name: Launch Allure TestOps
+        run: cd sample_app/android && bundle exec fastlane allure_launch cron:true
+
+      - name: Run e2e (Android emulator)
+        uses: reactivecircus/android-emulator-runner@v2
+        timeout-minutes: 90
+        with:
+          api-level: ${{ matrix.api-level }}
+          arch: x86_64
+          profile: pixel_6
+          emulator-options: -no-snapshot-save -no-window -no-audio -no-boot-anim -gpu swiftshader_indirect
+          script: cd sample_app/android && bundle exec fastlane run_e2e_test device:emulator-5554 mock_server_branch:${{ env.mock_server_branch }}
+
+      - name: Upload Allure results
+        if: env.ALLURE_LAUNCH_ID != '' && (success() || failure())
+        run: cd sample_app/android && bundle exec fastlane allure_upload
+
+      - name: Allure TestOps Launch Removal
+        if: env.ALLURE_LAUNCH_ID != '' && cancelled()
+        run: cd sample_app/android && bundle exec fastlane allure_launch_removal launch_id:$ALLURE_LAUNCH_ID
+
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: e2e-nightly-android-${{ matrix.api-level }}
+          path: |
+            sample_app/stream-chat-test-mock-server/logs
+            sample_app/build/e2e-test.log
+
+  ios:
+    runs-on: macos-15
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - ios: "26.2"
+            device: "iPhone 17 Pro"
+            setup_runtime: false
+          - ios: "18.5"
+            device: "iPhone 16 Pro"
+            setup_runtime: false
+          - ios: "17.5"
+            device: "iPhone 15 Pro"
+            setup_runtime: true
+    env:
+      XCODE_VERSION: "26.2"
+      COMPILER_INDEX_STORE_ENABLE: NO
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: ./.github/actions/setup-ruby
+
+      - uses: ./.github/actions/setup-flutter
+
+      - name: Use Firebase stubs for e2e
+        run: cp sample_app/pubspec_overrides.e2e.yaml sample_app/pubspec_overrides.yaml
+
+      - name: Bootstrap
+        run: |
+          flutter precache --ios
+          flutter config --no-enable-swift-package-manager
+          flutter pub global activate melos
+          melos bootstrap
+
+      - uses: ./.github/actions/setup-ios-runtime
+        if: ${{ matrix.setup_runtime }}
+        timeout-minutes: 60
+        with:
+          version: ${{ matrix.ios }}
+          device: ${{ matrix.device }}
+
+      - uses: ./.github/actions/cache-cocoapods
+        with:
+          key-suffix: ${{ matrix.ios }}
+
+      - uses: ./.github/actions/cache-xcode-cas
+        with:
+          key-suffix: ${{ matrix.ios }}
+          xcode-version: ${{ env.XCODE_VERSION }}
+
+      - name: Launch Allure TestOps
+        run: cd sample_app/ios && bundle exec fastlane allure_launch cron:true
+
+      - name: Run e2e (iOS simulator)
+        run: cd sample_app/ios && bundle exec fastlane run_e2e_test platform:ios ios:${{ matrix.ios }} device:"${{ matrix.device }} (${{ matrix.ios }})" mock_server_branch:${{ env.mock_server_branch }}
+
+      - name: Upload Allure results
+        if: env.ALLURE_LAUNCH_ID != '' && (success() || failure())
+        run: cd sample_app/ios && bundle exec fastlane allure_upload
+
+      - name: Allure TestOps Launch Removal
+        if: env.ALLURE_LAUNCH_ID != '' && cancelled()
+        run: cd sample_app/ios && bundle exec fastlane allure_launch_removal launch_id:$ALLURE_LAUNCH_ID
+
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: e2e-nightly-ios-${{ matrix.ios }}
+          path: |
+            sample_app/stream-chat-test-mock-server/logs
+            sample_app/build/e2e-test.log
+
+  slack:
+    name: Slack Report
+    runs-on: ubuntu-latest
+    needs: [android, ios]
+    if: failure() && github.event_name == 'schedule'
+    steps:
+      - uses: 8398a7/action-slack@v3
+        with:
+          status: cancelled
+          text: "You shall not pass!"
+          job_name: "${{ github.workflow }}: ${{ github.job }}"
+          fields: repo,commit,author,workflow
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_NIGHTLY_CHECKS }}

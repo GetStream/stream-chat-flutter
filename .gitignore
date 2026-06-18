@@ -2,6 +2,9 @@
 *.class
 *.log
 *.pyc
+/sample_app/stream-chat-test-mock-server/
+/sample_app/allure-results/
+/sample_app/allurectl
 *.swp
 .DS_Store
 .atom/
@@ -79,6 +82,7 @@ GeneratedPluginRegistrant.*
 **/ios/Runner/GeneratedPluginRegistrant.*
 **/ios/Flutter/ephemeral/**
 Podfile.lock
+**/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
 
 # Exceptions to iOS rules
 !**/ios/**/default.mode1v3

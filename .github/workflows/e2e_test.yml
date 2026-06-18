@@ -1,0 +1,125 @@
+name: e2e
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths-ignore:
+      - 'README.md'
+      - '**/*.png'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  android_api_level: "34"
+  ios_simulator_version: "26.2"
+  ios_simulator_device: "iPhone 17"
+  ALLURE_TOKEN: ${{ secrets.ALLURE_TOKEN }}
+
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: ./.github/actions/setup-java
+
+      - uses: ./.github/actions/cache-gradle
+
+      - uses: ./.github/actions/setup-ruby
+
+      - uses: ./.github/actions/setup-flutter
+
+      - name: Bootstrap
+        run: |
+          flutter pub global activate melos
+          melos bootstrap
+
+      - uses: ./.github/actions/enable-kvm
+
+      - name: Launch Allure TestOps
+        run: cd sample_app/android && bundle exec fastlane allure_launch
+        env:
+          GITHUB_EVENT: ${{ toJson(github.event) }}
+
+      - name: Run e2e (Android emulator)
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: ${{ env.android_api_level }}
+          arch: x86_64
+          profile: pixel_6
+          script: cd sample_app/android && bundle exec fastlane run_e2e_test device:emulator-5554
+
+      - name: Upload Allure results
+        if: env.ALLURE_LAUNCH_ID != '' && (success() || failure())
+        run: cd sample_app/android && bundle exec fastlane allure_upload
+
+      - name: Allure TestOps Launch Removal
+        if: env.ALLURE_LAUNCH_ID != '' && cancelled()
+        run: cd sample_app/android && bundle exec fastlane allure_launch_removal launch_id:$ALLURE_LAUNCH_ID
+
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: e2e-android-logs
+          path: |
+            sample_app/stream-chat-test-mock-server/logs
+            sample_app/build/e2e-test.log
+
+  ios:
+    runs-on: macos-15
+    env:
+      COMPILER_INDEX_STORE_ENABLE: NO
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: ./.github/actions/setup-flutter
+
+      - uses: ./.github/actions/setup-ruby
+
+      - name: Use Firebase stubs for e2e
+        run: cp sample_app/pubspec_overrides.e2e.yaml sample_app/pubspec_overrides.yaml
+
+      - name: Bootstrap
+        run: |
+          flutter precache --ios
+          flutter config --no-enable-swift-package-manager
+          flutter pub global activate melos
+          melos bootstrap
+
+      - uses: ./.github/actions/cache-cocoapods
+        with:
+          key-suffix: ${{ runner.os }}
+
+      - uses: ./.github/actions/cache-xcode-cas
+        with:
+          key-suffix: ${{ runner.os }}
+          xcode-version: ${{ env.ios_simulator_version }}
+
+      - name: Launch Allure TestOps
+        run: cd sample_app/ios && bundle exec fastlane allure_launch
+        env:
+          GITHUB_EVENT: ${{ toJson(github.event) }}
+
+      - name: Run e2e (iOS simulator)
+        run: cd sample_app/ios && bundle exec fastlane run_e2e_test platform:ios ios:"${{ env.ios_simulator_version }}" device:"${{ env.ios_simulator_device }}"
+
+      - name: Upload Allure results
+        if: env.ALLURE_LAUNCH_ID != '' && (success() || failure())
+        run: cd sample_app/ios && bundle exec fastlane allure_upload
+
+      - name: Allure TestOps Launch Removal
+        if: env.ALLURE_LAUNCH_ID != '' && cancelled()
+        run: cd sample_app/ios && bundle exec fastlane allure_launch_removal launch_id:$ALLURE_LAUNCH_ID
+
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: e2e-ios-logs
+          path: |
+            sample_app/stream-chat-test-mock-server/logs
+            sample_app/build/e2e-test.log

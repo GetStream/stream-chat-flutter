@@ -1,0 +1,73 @@
+require 'base64'
+
+allure_endpoint = 'https://streamio.testops.cloud'
+allure_project_id = '135'
+
+lane :collect_allure_results do |options|
+  results_dir = options[:output] || "#{root_path}/allure-results"
+  FileUtils.mkdir_p(results_dir)
+
+  log_file = options[:log_file] || "#{root_path}/build/e2e-test.log"
+  unless File.exist?(log_file)
+    UI.important("No e2e log at #{log_file}; skipping Allure collection")
+    next
+  end
+
+  log = File.read(log_file)
+
+  chunks = Hash.new { |hash, key| hash[key] = {} }
+  log.scan(/ALLURE-RESULT::([0-9a-f-]+):(\d+):([A-Za-z0-9+\/=]+)/) do |uuid, seq, chunk|
+    chunks[uuid][seq.to_i] = chunk
+  end
+
+  chunks.each do |uuid, parts|
+    base64 = parts.sort_by(&:first).map(&:last).join
+    File.write("#{results_dir}/#{uuid}-result.json", Base64.decode64(base64))
+  end
+  UI.message("Collected #{chunks.size} Allure result(s) into #{results_dir}")
+end
+
+lane :install_allurectl do
+  path = "#{root_path}/allurectl"
+  next path if File.exist?(path)
+
+  os = `uname -s`.strip.downcase
+  arch = `uname -m`.strip == 'x86_64' ? 'amd64' : 'arm64'
+  sh("curl -sSL -o #{path} " \
+     "https://github.com/allure-framework/allurectl/releases/latest/download/allurectl_#{os}_#{arch}")
+  sh("chmod +x #{path}")
+  path
+end
+
+lane :allure_upload do |options|
+  results = options[:results] || "#{root_path}/allure-results"
+  unless Dir.exist?(results) && Dir.children(results).any?
+    UI.important("No Allure results in #{results}; skipping upload")
+    next
+  end
+
+  allurectl = install_allurectl
+  branch = ENV['GITHUB_REF_NAME'] || `git rev-parse --abbrev-ref HEAD`.strip
+  launch_id = options[:launch_id] || ENV['ALLURE_LAUNCH_ID']
+  args = launch_id ? "--launch-id #{launch_id}" : "--launch-name 'Flutter e2e (#{branch})'"
+  sh("ALLURE_ENDPOINT=#{allure_endpoint} ALLURE_PROJECT_ID=#{allure_project_id} #{allurectl} upload #{args} #{results}")
+  UI.success("Uploaded Allure results → #{allure_endpoint} (project #{allure_project_id})")
+end
+
+lane :allure_launch do
+  allurectl = install_allurectl
+  branch = ENV['GITHUB_REF_NAME'] || `git rev-parse --abbrev-ref HEAD`.strip
+  id = sh("ALLURE_ENDPOINT=#{allure_endpoint} ALLURE_PROJECT_ID=#{allure_project_id} " \
+          "#{allurectl} launch create --launch-name 'Flutter e2e nightly (#{branch})' --format ID --no-header").strip
+  sh("echo 'ALLURE_LAUNCH_ID=#{id}' >> #{ENV['GITHUB_ENV']}") if ENV['GITHUB_ENV']
+  sh("echo 'launch_id=#{id}' >> #{ENV['GITHUB_OUTPUT']}") if ENV['GITHUB_OUTPUT']
+  id
+end
+
+lane :allure_launch_removal do |options|
+  id = options[:launch_id] || ENV['ALLURE_LAUNCH_ID']
+  next unless id
+
+  allurectl = install_allurectl
+  sh("ALLURE_ENDPOINT=#{allure_endpoint} ALLURE_PROJECT_ID=#{allure_project_id} #{allurectl} launch delete #{id}")
+end

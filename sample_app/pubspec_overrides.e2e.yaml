@@ -1,0 +1,12 @@
+# Copied over pubspec_overrides.yaml by the e2e CI jobs BEFORE `melos bootstrap`
+# (melos merges its own managed overrides into the existing file, preserving these
+# entries). Swaps the Firebase plugins for the pure-Dart no-op stubs in
+# e2e_stubs/ so no native Firebase SDK is downloaded, compiled, or
+# initialized during e2e runs.
+dependency_overrides:
+  firebase_core:
+    path: e2e_stubs/firebase_core
+  firebase_crashlytics:
+    path: e2e_stubs/firebase_crashlytics
+  firebase_messaging:
+    path: e2e_stubs/firebase_messaging
