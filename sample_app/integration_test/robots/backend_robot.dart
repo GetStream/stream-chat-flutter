@@ -1,9 +1,5 @@
 import '../mock_server/mock_server.dart';
 
-/// Drives the mock backend for test setup: seeding channels and forcing
-/// message/JWT failure scenarios. Port of the Android `BackendRobot`.
-///
-/// Methods return `this` for chaining (`await`ed, since each is one HTTP call).
 class BackendRobot {
   BackendRobot(this._mockServer);
 

@@ -1,15 +1,11 @@
 import '../mock_server/data_types.dart';
 import '../mock_server/mock_server.dart';
 
-/// Simulates a second user ("the participant") acting against the channel via
-/// the mock server, so the app under test receives their events in real time.
-/// Port of the Android `ParticipantRobot`.
 class ParticipantRobot {
   ParticipantRobot(this._mockServer);
 
   final MockServer _mockServer;
 
-  /// The participant's display name, as seeded by the mock server.
   static const name = 'Count Dooku';
 
   Future<ParticipantRobot> startTyping() async {

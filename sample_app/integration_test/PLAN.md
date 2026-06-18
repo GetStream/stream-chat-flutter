@@ -849,13 +849,30 @@ go more than a step or two without feedback. Decision is **Option A** (§3).
 - Remaining selectors resolved per-suite in Phase 4/5: existing type/key first; add a `Stream_*` key only where the SDK exposes nothing stable (e.g. one message cell among many).
 
 ### Phase 4 — DSL, robots & base
-- [ ] Implement `patrol_ext/` helpers: `waits.dart`, `actions.dart`, `finders.dart` (+ `defaultTimeout`).
-- [ ] Implement `support/`: `allure.dart` (`step()` + attachments), `retry.dart` (≈ `RetryRule`), `predefined_users.dart`.
-- [ ] Implement `UserRobot` (fluent UI actions) + assertion extensions (`message_list`, `channel_list`).
-- [ ] Implement `StreamTestEnv` (`setUp`/`tearDown` per §5.7) and `InitActivity` (userLogin / jwt).
-- [ ] **Gate:** one fully-ported test (`test_addsReaction`) passes on both platforms using the full DSL.
+> Lean scope: **no `patrol_ext` layer** — Patrol's `$` already provides
+> `waitUntilVisible`/`tap`/`enterText`/`scrollTo`/`at` (the Android `uiautomator`
+> layer only existed because UIAutomator was low-level). `retry` + Allure wiring
+> deferred to Phase 6; `InitActivity`/jwt deferred to the auth suite (Phase 5).
+- [x] `support/predefined_users.dart` (`UserCredentials` + `PredefinedUsers.qaTest1`) and `support/step.dart` (BDD `step()`; Allure hook point for Phase 5).
+- [x] `UserRobot` (`login` via the real choose-user UI, `openChannel`, `sendMessage`) + `user_robot_message_list_asserts.dart` (`assertMessage`). More actions/asserts added per-suite in Phase 5.
+- [x] `StreamTestEnv` (`support/stream_test_env.dart`) — `setUp` boots the app pointed at the mock server + owns the robots; `tearDown` = `debugReset` + `mockServer.stop`.
+- [x] Removed the throwaway `spike_seam_test.dart` (the DSL test covers the flow; `debugReset` isolation runs in every teardown).
+- [x] **Gate:** `message_list_test.dart` ported to the full DSL (`StreamTestEnv` + `UserRobot` + `step()`) passes on **both platforms** ✅ (Android + iOS). (Reactions test deferred to Phase 5 — needs reaction/context-menu selectors.)
 
-### Phase 5 — Port the test suites
+### Phase 5 — Tooling, Allure & CI
+> `Gemfile` + Fastlane skeleton and `start_mock_server`/`stop_mock_server` were
+> already added in Phase 0. This phase adds the build/run/Allure lanes that
+> depend on the test suite existing.
+- [ ] Flesh out the `Gemfile` (add rubocop + Pluginfile w/ allure-testops plugin) (§7.1).
+- [ ] Add the remaining Fastlane lanes: `build_e2e_test`, `run_e2e_test`, `build_and_run_e2e_test` (composing the existing `start_mock_server`/`stop_mock_server`) (§7.2).
+- [ ] Reuse Android `Allurefile` lanes: `allure_launch`, `allure_upload`, `allure_start_regression`.
+- [ ] Add `allure.properties` + emit `allure-results`; attach screenshots/logs on failure.
+- [ ] Add melos `e2e:build` / `e2e:run` scripts; verify `integration_test/` is excluded from `test:flutter` (§9).
+- [ ] Add GitHub Actions `e2e_test.yml` (matrix android/ios, mock server + Patrol + Allure upload); start label-gated/nightly, not on default PR path (§8).
+- [ ] Use a single Flutter driver port `4568` (distinct from native repos' 4566/4567; shared by iOS+Android, overridable via `--dart-define=MOCK_DRIVER_PORT`) in both `MockServer._driverPort` and the Fastlane lanes (§11).
+- [ ] **Gate:** CI run green on both platforms with results visible in Allure TestOps.
+
+### Phase 6 — Port the test suites
 Port in value order; each is a checkpoint:
 - [ ] `MessageListTests`
 - [ ] `ReactionsTests`
@@ -869,16 +886,3 @@ Port in value order; each is a checkpoint:
 - [ ] `AuthTests` (needs JWT-from-mock-server + connectivity toggling)
 - [ ] `BackendTests`
 - [ ] **Gate:** full suite green locally on Android emulator + iOS simulator.
-
-### Phase 6 — Tooling, Allure & CI
-> `Gemfile` + Fastlane skeleton and `start_mock_server`/`stop_mock_server` were
-> already added in Phase 0. This phase adds the build/run/Allure lanes that
-> depend on the test suite existing.
-- [ ] Flesh out the `Gemfile` (add rubocop + Pluginfile w/ allure-testops plugin) (§7.1).
-- [ ] Add the remaining Fastlane lanes: `build_e2e_test`, `run_e2e_test`, `build_and_run_e2e_test` (composing the existing `start_mock_server`/`stop_mock_server`) (§7.2).
-- [ ] Reuse Android `Allurefile` lanes: `allure_launch`, `allure_upload`, `allure_start_regression`.
-- [ ] Add `allure.properties` + emit `allure-results`; attach screenshots/logs on failure.
-- [ ] Add melos `e2e:build` / `e2e:run` scripts; verify `integration_test/` is excluded from `test:flutter` (§9).
-- [ ] Add GitHub Actions `e2e_test.yml` (matrix android/ios, mock server + Patrol + Allure upload); start label-gated/nightly, not on default PR path (§8).
-- [ ] Use a single Flutter driver port `4568` (distinct from native repos' 4566/4567; shared by iOS+Android, overridable via `--dart-define=MOCK_DRIVER_PORT`) in both `MockServer._driverPort` and the Fastlane lanes (§11).
-- [ ] **Gate:** CI run green on both platforms with results visible in Allure TestOps.
