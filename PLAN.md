@@ -568,9 +568,10 @@ class StreamTestEnv {
   }
 
   // App-side reset (Patrol shares one process across bundled tests).
+  // debugReset() clears secure storage, disposes the client, and clears the
+  // connection override.
   Future<void> tearDown() async {
-    await authController.debugReset();      // clear secure storage, dispose/null client
-    authController.debugConnectionOverride = null;
+    await authController.debugReset();
     await mockServer.stop();
   }
 }
@@ -814,12 +815,12 @@ go more than a step or two without feedback. Decision is **Option A** (§3).
 - ⚠️ **Toolchain note:** system Java is 26.0.1, which Gradle 8.13 rejects. Android builds need a supported JDK — set `JAVA_HOME=/opt/homebrew/opt/openjdk@21/...` (or `flutter config --jdk-dir`). Record this for CI.
 
 ### Phase 1 — Foundations & app-side plumbing
-- [ ] Create the directory layout from §4 (`integration_test/{tests,robots,pages}`, `e2e/{mock_server,robots,patrol_ext,support}`, `test_driver/`).
-- [ ] Implement `AuthController.debugReset()` (clear secure storage, dispose/null client) for per-test teardown (§6.2).
-- [ ] Guard boot-path side effects under the e2e flag: `NotificationService.initialize()`, `PushTokenManager`, `FirebaseCrashlytics.recordError` (§6.3).
-- [ ] Android: add debug `network_security_config` allowing cleartext to `10.0.2.2` (§6.6).
-- [ ] iOS: add ATS / `NSAllowsLocalNetworking` exception in the test build (§6.7).
-- [ ] **Gate:** Phase 0 spike still green after globals are reset between two dummy tests in one bundle.
+- Directory layout (§4): not pre-created — folders form as files land in Phase 2+ (empty dirs aren't tracked by git and add nothing).
+- [x] Implement `AuthController.debugReset()` (clear secure storage, dispose/null client, clear api key + push manager + connection override, back to `Unauthenticated`) for per-test teardown (§6.2). Wired into the spike's teardown.
+- [x] Guard boot-path side effects under the e2e flag (`isE2eTestRun`): `NotificationService.initialize()`, `PushTokenManager`, `FirebaseCrashlytics.recordError` (§6.3). *(Done in Phase 0.)*
+- [x] Android cleartext (§6.6) — already satisfied by the debug manifest's `usesCleartextTraffic="true"`.
+- [x] iOS ATS (§6.7) — already satisfied by `NSAllowsArbitraryLoads`.
+- [x] **Gate:** two tests in one bundle both pass on Android — each starts its own mock server on a fresh port and connects, with `debugReset()` wiping client/credentials/override in between. Proves per-test isolation (run 2 would fail on a leaked client/override otherwise).
 
 ### Phase 2 — Mock server client + control robots
 - [ ] Port `data_types.dart` (`AttachmentType`, `ReactionType`, `MessageDeliveryStatus`, `forbiddenWord`).

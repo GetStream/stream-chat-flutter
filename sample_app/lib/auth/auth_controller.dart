@@ -237,6 +237,30 @@ class AuthController extends ValueNotifier<AuthState> {
     client.disconnectUser(flushChatPersistence: flushPersistence).ignore();
   }
 
+  /// Resets all session state so the next e2e test starts clean.
+  ///
+  /// Patrol runs every test in one app process against this process-wide
+  /// singleton, so credentials, the client, and the connection override would
+  /// otherwise leak between tests. Unlike [dispose] this keeps the notifier
+  /// usable. Call from test teardown.
+  @visibleForTesting
+  Future<void> debugReset() async {
+    _pushTokenManager?.dispose().ignore();
+    _pushTokenManager = null;
+
+    await _client?.dispose();
+    _client = null;
+    _activeApiKey = null;
+    debugConnectionOverride = null;
+
+    if (!CurrentPlatform.isWeb) {
+      const secureStorage = FlutterSecureStorage();
+      await secureStorage.deleteAll();
+    }
+
+    value = const Unauthenticated();
+  }
+
   @override
   void dispose() {
     _pushTokenManager?.dispose().ignore();
