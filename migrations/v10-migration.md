@@ -707,8 +707,8 @@ StreamMessageItem(
 
 #### Key Changes:
 
-- `showReactionTail` parameter has been removed
-- Tail now automatically shows when the picker is visible
+- `showReactionTail` parameter has been removed. Tail now automatically shows when the picker is visible.
+- `StreamMessageItem` is now a thin shell that resolves its builder from `StreamComponentFactory`. Register a global builder on `StreamChat` to override the message widget app-wide — no per-list wiring needed.
 
 #### Migration Steps:
 
@@ -727,8 +727,50 @@ StreamMessageItem(
 );
 ```
 
+#### Global message widget customization via component factory
+
+In v9 the only customization hook was `messageBuilder` on `StreamMessageListView`, which only applied to that one list. The long-press actions modal and any other place that renders a message always showed the default widget.
+
+In v10, `StreamMessageItem` looks up a builder from `StreamComponentFactory`. Register one on `StreamChat` and every message rendered anywhere in the app — list, thread view, actions modal preview — uses your custom widget automatically:
+
+```dart
+StreamChat(
+  client: client,
+  componentBuilders: StreamComponentBuilders(
+    extensions: streamChatComponentBuilders(
+      messageItem: (context, props) {
+        // Modify props and use the default layout:
+        return DefaultStreamMessageItem(
+          props: props.copyWith(
+            actionsBuilder: (context, defaultActions) => [
+              ...defaultActions,
+              myCustomAction,
+            ],
+          ),
+        );
+        // Or replace entirely:
+        // return MyCustomBubble(message: props.message);
+      },
+    ),
+  ),
+  child: ...,
+)
+```
+
+`StreamMessageListView.messageBuilder` is still supported for per-list overrides. Inside it, call `StreamMessageItem.fromProps(props: defaultProps)` to ensure the factory is still invoked:
+
+```dart
+StreamMessageListView(
+  messageBuilder: (context, message, defaultProps) {
+    final widget = StreamMessageItem.fromProps(props: defaultProps);
+    return Swipeable(onSwiped: (_) => onReply(message), child: widget);
+  },
+)
+```
+
 > **Important:**  
-> The `showReactionTail` parameter is no longer supported. Tail is now always shown when the picker is visible.
+> The `showReactionTail` parameter is no longer supported. Tail is now always shown when the picker is visible.  
+> Prefer the component factory over `messageBuilder` for any customization that should apply globally (custom bubbles, extra actions, branding). Use `messageBuilder` only for per-list behavior such as swipe gestures.
 
 ---
 
@@ -1058,6 +1100,10 @@ StreamMessageListView(
 )
 ```
 
+**`messageBuilder` vs the component factory**
+
+`messageBuilder` is still the right tool for per-list behavior (e.g. a swipe-to-reply wrapper on one specific list). For anything that should look the same everywhere — custom bubble style, extra actions, branding — use the component factory on `StreamChat` instead. The factory applies to all message lists, thread views, and the long-press actions modal preview without any per-list wiring. See the [`StreamMessageItem`](#streammessageitem) section above for the full example.
+
 ---
 
 ### StreamMessageComposerController Rename
@@ -1286,6 +1332,7 @@ This appendix provides a chronological reference of breaking changes by beta ver
 
 ### For v10.0.0 (stable)
 - [ ] Rename `StreamChat` constructor parameter `streamChatThemeData:` → `themeData:`
+- [ ] If you passed `messageBuilder` to multiple `StreamMessageListView` instances for app-wide styling, consolidate into `StreamComponentBuilders(extensions: streamChatComponentBuilders(messageItem: ...))` on `StreamChat` — the factory also covers the actions modal preview automatically
 - [ ] Move `StreamMessageListView` behavior flags to `config: StreamMessageListViewConfiguration(...)`
 - [ ] Move `StreamMessageListView` builder callbacks to `builders: StreamMessageListViewBuilders(...)`
 - [ ] Rename `StreamMessageInputController` → `StreamMessageComposerController`
