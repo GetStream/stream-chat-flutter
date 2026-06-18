@@ -4,11 +4,15 @@ import 'dart:io';
 /// Client for the stream-chat-test-mock-server.
 ///
 /// Talks to the long-running driver (`driver.rb`), which forks a fresh mock
-/// server per test.
+/// server per test. [BackendRobot] and [ParticipantRobot] drive it through
+/// [post]/[get].
 class MockServer {
-  MockServer._(this.httpUrl, this.wsUrl);
+  MockServer._(this.url, this.wsUrl);
 
-  final String httpUrl;
+  /// REST base URL of the per-test mock server.
+  final String url;
+
+  /// WebSocket base URL of the per-test mock server.
   final String wsUrl;
 
   /// Android emulator reaches the host loopback via `10.0.2.2`; the iOS
@@ -18,37 +22,54 @@ class MockServer {
   static const _driverPort =
       String.fromEnvironment('MOCK_DRIVER_PORT', defaultValue: '4568');
 
+  /// Asks the driver to spawn a fresh mock server for [testName] and waits
+  /// until it is ready to serve requests.
   static Future<MockServer> start({required String testName}) async {
     final driverUrl = 'http://$_host:$_driverPort';
     final port = (await _get('$driverUrl/start/$testName')).trim();
     final server = MockServer._('http://$_host:$port', 'ws://$_host:$port');
-    await server._waitUntilReady();
+    await server.waitUntilReady();
     return server;
   }
 
+  /// Stops this per-test mock server.
+  Future<void> stop() => _get('$url/stop').catchError((_) => '');
+
+  /// POSTs to [endpoint] (path relative to [url]) with an optional text [body].
+  Future<void> post(String endpoint, {String? body}) async {
+    final client = HttpClient();
+    try {
+      final req = await client.postUrl(Uri.parse('$url/$endpoint'));
+      if (body != null) {
+        req.headers.contentType = ContentType.text;
+        req.write(body);
+      }
+      final res = await req.close();
+      await res.drain<void>();
+    } finally {
+      client.close(force: true);
+    }
+  }
+
+  /// GETs [endpoint] (path relative to [url]) and returns the response body.
+  Future<String> get(String endpoint) => _get('$url/$endpoint');
+
   /// The driver spawns `server.rb` asynchronously; it needs ~0.5–1s to boot
   /// puma before it answers. Poll `/ping` until ready.
-  Future<void> _waitUntilReady({
+  Future<void> waitUntilReady({
     Duration timeout = const Duration(seconds: 15),
   }) async {
     final deadline = DateTime.now().add(timeout);
     while (DateTime.now().isBefore(deadline)) {
       try {
-        if ((await _statusCode('$httpUrl/ping')) == 200) return;
+        if ((await _statusCode('$url/ping')) == 200) return;
       } catch (_) {
         // server not up yet
       }
       await Future<void>.delayed(const Duration(milliseconds: 250));
     }
-    throw StateError('Mock server at $httpUrl did not become ready in $timeout');
+    throw StateError('Mock server at $url did not become ready in $timeout');
   }
-
-  Future<void> generateChannels({int channels = 1, int messages = 0}) async {
-    await _post('$httpUrl/mock?channels=$channels&messages=$messages');
-  }
-
-  // The per-test server is reaped by the driver.
-  Future<void> stop() async {}
 
   static Future<String> _get(String url) async {
     final client = HttpClient();
@@ -68,17 +89,6 @@ class MockServer {
       final res = await req.close();
       await res.drain<void>();
       return res.statusCode;
-    } finally {
-      client.close(force: true);
-    }
-  }
-
-  static Future<void> _post(String url) async {
-    final client = HttpClient();
-    try {
-      final req = await client.postUrl(Uri.parse(url));
-      final res = await req.close();
-      await res.drain<void>();
     } finally {
       client.close(force: true);
     }

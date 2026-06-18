@@ -823,11 +823,15 @@ go more than a step or two without feedback. Decision is **Option A** (§3).
 - [x] **Gate:** two tests in one bundle both pass on Android — each starts its own mock server on a fresh port and connects, with `debugReset()` wiping client/credentials/override in between. Proves per-test isolation (run 2 would fail on a leaked client/override otherwise).
 
 ### Phase 2 — Mock server client + control robots
-- [ ] Port `data_types.dart` (`AttachmentType`, `ReactionType`, `MessageDeliveryStatus`, `forbiddenWord`).
-- [ ] Implement `MockServer` (driver `/start/:test`, dynamic port, per-platform host, `get`/`post`, `stop`).
-- [ ] Port `BackendRobot` (generateChannels, fail/freeze/delay, JWT revoke/invalidate/break, read_events, cooldown).
-- [ ] Port `ParticipantRobot` (message/thread/edit/delete/quote, reactions, typing, read, giphy, attachments).
-- [ ] **Gate:** a test calls `backendRobot.generateChannels(...)` + `participantRobot.sendMessage(...)` and the message appears in the app.
+> Layout note: shared helpers live under `integration_test/` (`mock_server/`,
+> `robots/`), not a sibling `e2e/` dir — Dart has no module boundary to justify
+> the split, and Patrol only bundles `*_test.dart`, so non-test helpers there are
+> safe.
+- [x] Port `data_types.dart` (`AttachmentType`, `ReactionType`, `MessageDeliveryStatus`, `forbiddenWord`).
+- [x] Implement `MockServer` (driver `/start/:test`, dynamic port, per-platform host, `get`/`post`, `stop` → per-test server's `/stop`, `waitUntilReady`).
+- [x] Port `BackendRobot` (generateChannels, fail/freeze messages, JWT revoke/invalidate/break).
+- [x] Port `ParticipantRobot` (message/thread/edit/delete/quote, reactions, typing, read, giphy, attachments).
+- [x] **Gate (scoped to robot layer):** `BackendRobot.generateChannels(...)` → the connected app queries the mock server and renders a `StreamChannelListTile` (validated on Android, two runs). `ParticipantRobot` is a faithful verbatim port; asserting a participant message *renders* needs the channel open + message-cell selectors, so that assertion moves to Phase 4's message-list tests (validating it earlier via the channel-list preview proved brittle).
 
 ### Phase 3 — Selectors (the big one)
 - [ ] Build the mapping table: Android `Stream_*` testTag → Flutter widget → `Key`.

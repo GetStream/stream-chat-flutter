@@ -5,7 +5,8 @@ import 'package:sample_app/auth/auth_controller.dart';
 import 'package:sample_app/utils/app_config.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-import '_spike/mock_server.dart';
+import 'mock_server/mock_server.dart';
+import 'robots/backend_robot.dart';
 
 // The mock server doesn't verify the signature, but the client parses the JWT
 // locally, so the token must be structurally valid.
@@ -28,11 +29,14 @@ void main() {
       addTearDown(authController.debugReset);
 
       authController.debugConnectionOverride = StreamConnectionOverride(
-        baseURL: mock.httpUrl,
+        baseURL: mock.url,
         baseWsUrl: mock.wsUrl,
       );
 
-      await mock.generateChannels(channels: 1, messages: 1);
+      await BackendRobot(mock).generateChannels(
+        channelsCount: 1,
+        messagesCount: 1,
+      );
 
       await $.pumpWidgetAndSettle(const StreamChatSampleApp());
 
@@ -44,7 +48,10 @@ void main() {
       );
       await $.pumpAndSettle();
 
+      // BackendRobot.generateChannels seeded a channel; the connected app's
+      // channel list should query it from the mock server and render a tile.
       expect($(StreamChannelListHeader), findsOneWidget);
+      await $(StreamChannelListTile).waitUntilVisible();
     });
   }
 }
