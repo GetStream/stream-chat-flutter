@@ -1,8 +1,22 @@
 opt_out_usage
 
+require 'net/http'
+
+import '../../Allurefile'
+
+mock_server_repo_name = 'stream-chat-test-mock-server'
+mock_server_driver_port = ENV['MOCK_DRIVER_PORT'] || '4568'
+github_org = (ENV['GITHUB_REPOSITORY'] || 'GetStream/stream-chat-flutter').split('/').first
+@force_check = false
+
 # Have an easy way to get the root of the project
 def root_path
   Dir.pwd.sub(/.*\Kfastlane/, '').sub(/.*\Kandroid/, '').sub(/.*\Kios/, '').sub(/.*\K\/\//, '')
+end
+
+# iOS simulator ids are UUIDs; Android device ids (emulator-5554, serials) aren't.
+def ios_device?(device)
+  device.to_s.match?(/\A[0-9A-F]{8}-[0-9A-F]{4}-/i)
 end
 
 # Have an easy way to run flutter tasks on the root of the project
@@ -13,4 +27,108 @@ end
 # Tasks to be reused on each platform flow
 lane :fetch_dependencies do
   sh_on_root(command: "flutter pub get --suppress-analytics")
+end
+
+# Clones (or reuses via local_server:) the mock-server repo and starts its
+# driver in the background. branch: selects the repo branch (default 'main').
+lane :start_mock_server do |options|
+  Dir.chdir(root_path) do
+    mock_server_repo = options[:local_server] || mock_server_repo_name
+    stop_mock_server unless is_ci
+
+    unless options[:local_server]
+      branch = options[:branch].to_s.empty? ? 'main' : options[:branch]
+      sh("rm -rf #{mock_server_repo}") if File.directory?(mock_server_repo)
+      sh("git clone -b #{branch} https://github.com/#{github_org}/#{mock_server_repo_name}.git")
+    end
+
+    Dir.chdir(mock_server_repo) do
+      FileUtils.mkdir_p('logs')
+      Bundler.with_unbundled_env do
+        sh('bundle install')
+        sh("bundle exec ruby driver.rb #{mock_server_driver_port} > logs/driver.log 2>&1 &")
+      end
+    end
+  end
+end
+
+# Stops the mock-server driver (and any servers it spawned).
+lane :stop_mock_server do
+  Net::HTTP.get_response(URI("http://localhost:#{mock_server_driver_port}/stop")) rescue nil
+end
+
+# Runs the Patrol e2e suite against a fresh mock server, then tears it down.
+# Requires `patrol` on PATH and, on Android, a Gradle-compatible JDK.
+# Options: device:, target: (single file), local_server:, mock_server_branch:.
+lane :run_e2e_test do |options|
+  next unless is_check_required(sources: sources_matrix[:e2e], force_check: @force_check)
+
+  start_mock_server(local_server: options[:local_server], branch: options[:mock_server_branch])
+  unless ios_device?(options[:device])
+    serial = options[:device] ? "-s #{options[:device]} " : ''
+    sh("adb #{serial}logcat -c")
+  end
+
+  begin
+    Dir.chdir(root_path) do
+      # Flutter 3.44+ requires assembleDebug + assembleDebugAndroidTest in one
+      # Gradle invocation; patch patrol_cli before the Android build step.
+      unless ios_device?(options[:device])
+        sh('bash tool/patch_patrol_cli_android_gradle.sh')
+      end
+
+      flags = []
+      flags << "--target #{options[:target]}" if options[:target]
+      flags << "--device #{options[:device]}" if options[:device]
+      flags << "--ios #{ENV.fetch('IOS_SIMULATOR_VERSION', '26.2')}" if ios_device?(options[:device])
+      sh("patrol test #{flags.join(' ')}".strip)
+    end
+  ensure
+    collect_allure_results(device: options[:device]) rescue nil
+    stop_mock_server
+  end
+end
+
+# Builds the e2e test binaries without running them (useful for CI caching).
+# `platform` is android or ios.
+lane :build_e2e_test do |options|
+  next unless is_check_required(sources: sources_matrix[:e2e], force_check: @force_check)
+
+  Dir.chdir(root_path) do
+    sh('bash tool/patch_patrol_cli_android_gradle.sh') if options[:platform] == 'android'
+    sh("patrol build #{options[:platform]}")
+  end
+end
+
+lane :build_and_run_e2e_test do |options|
+  build_e2e_test(platform: options[:platform])
+  run_e2e_test(options)
+end
+
+# Downloads and installs an iOS simulator runtime (used by cron e2e for iOS 17.x).
+lane :install_runtime do |options|
+  install_ios_runtime(
+    version: options[:ios],
+    custom_script: File.join(root_path, 'tool/install_ios_runtime.sh'),
+  )
+end
+
+# Maps each CI check to the source paths (repo-root-relative) that should
+# trigger it; `is_check_required` skips a lane when none of them changed.
+private_lane :sources_matrix do
+  {
+    e2e: [
+      'sample_app',
+      'packages',
+      'melos.yaml',
+      '.github/workflows/e2e_test.yml',
+      '.github/workflows/e2e_test_cron.yml',
+      'sample_app/tool/patch_patrol_cli_android_gradle.sh',
+      'sample_app/tool/boot_ios_simulator.sh',
+      'sample_app/tool/install_ios_runtime.sh',
+      '.github/actions/setup-ios-runtime',
+    ],
+    ruby: ['sample_app/Fastfile', 'sample_app/Allurefile', 'sample_app/android/fastlane',
+           'sample_app/ios/fastlane', 'sample_app/android/Gemfile', 'sample_app/ios/Gemfile'],
+  }
 end

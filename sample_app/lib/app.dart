@@ -101,7 +101,8 @@ class _StreamChatSampleAppState extends State<StreamChatSampleApp>
   void initState() {
     super.initState();
     _notificationService.onNotificationTap = _onNotificationTap;
-    _notificationService.initialize();
+    // Notifications rely on Firebase, which isn't initialized under e2e tests.
+    if (!isE2eTestRun) _notificationService.initialize();
 
     final timeOfStartMs = DateTime.now().millisecondsSinceEpoch;
 

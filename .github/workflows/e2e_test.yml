@@ -1,0 +1,138 @@
+name: e2e
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths-ignore:
+      - 'README.md'
+      - '**/*.png'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: e2e-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  flutter_version: "3.x"
+  # Must match setup-xcode and `patrol test --ios` (Patrol e2e on macos-26).
+  ios_simulator_version: "26.2"
+  ios_simulator_device: "iPhone 17"
+
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.flutter_version }}
+          channel: stable
+          cache-key: flutter-:os:-:channel:-:version:-:arch:-:hash:-${{ hashFiles('**/pubspec.lock') }}
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.3"
+          bundler-cache: true
+          working-directory: sample_app/android
+
+      - name: Bootstrap
+        run: |
+          flutter pub global activate melos
+          melos bootstrap
+          dart pub global activate patrol_cli
+
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Run e2e (Android emulator)
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          arch: x86_64
+          profile: pixel_6
+          script: cd sample_app/android && bundle exec fastlane run_e2e_test device:emulator-5554 mock_server_branch:main
+
+      - name: Upload Allure results
+        if: always()
+        env:
+          ALLURE_TOKEN: ${{ secrets.ALLURE_TOKEN }}
+        run: cd sample_app/android && bundle exec fastlane allure_upload
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: e2e-android-logs
+          path: |
+            sample_app/stream-chat-test-mock-server/logs
+            sample_app/build/app/reports
+
+  ios:
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v6
+
+      # Align Xcode with the iOS simulator runtime (device_info_plus 12.4+ and
+      # Patrol both need Xcode 26.x; terminate-app flakes without this match).
+      - uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: ${{ env.ios_simulator_version }}
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.flutter_version }}
+          channel: stable
+          cache-key: flutter-:os:-:channel:-:version:-:arch:-:hash:-${{ hashFiles('**/pubspec.lock') }}
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.3"
+          bundler-cache: true
+          working-directory: sample_app/ios
+
+      - name: Bootstrap
+        run: |
+          flutter precache --ios
+          flutter pub global activate melos
+          melos bootstrap
+          dart pub global activate patrol_cli
+
+      - name: Cache CocoaPods
+        uses: actions/cache@v4
+        with:
+          path: |
+            sample_app/ios/Pods
+            ~/Library/Caches/CocoaPods
+          key: pods-${{ runner.os }}-${{ hashFiles('pubspec.lock', 'sample_app/ios/Podfile') }}
+          restore-keys: pods-${{ runner.os }}-
+
+      - name: Boot simulator
+        run: bash sample_app/tool/boot_ios_simulator.sh "${{ env.ios_simulator_device }}" "${{ env.ios_simulator_version }}"
+
+      - name: Run e2e (iOS simulator)
+        env:
+          IOS_SIMULATOR_VERSION: ${{ env.ios_simulator_version }}
+        run: |
+          cd sample_app/ios && bundle exec fastlane run_e2e_test device:${{ env.device_id }} mock_server_branch:main
+
+      - name: Upload Allure results
+        if: always()
+        env:
+          ALLURE_TOKEN: ${{ secrets.ALLURE_TOKEN }}
+        run: cd sample_app/ios && bundle exec fastlane allure_upload
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: e2e-ios-logs
+          path: sample_app/stream-chat-test-mock-server/logs
