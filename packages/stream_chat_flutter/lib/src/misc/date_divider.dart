@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-import 'package:stream_core_flutter/stream_core_flutter.dart' as core;
+import 'package:stream_core_flutter/chat.dart' as core;
 
 /// {@template streamDateDivider}
 /// A widget that displays a date label as a centered pill-shaped container.

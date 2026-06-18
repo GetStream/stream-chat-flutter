@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_chat_flutter/src/message_widget/components/stream_message_content.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-import 'package:stream_core_flutter/stream_core_flutter.dart' hide StreamMessageContent;
 
 // A deterministic attachment renderer so the post-frame width measurement
 // returns a known, non-zero value regardless of asset loading. Without this

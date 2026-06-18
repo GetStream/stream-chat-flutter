@@ -11,7 +11,7 @@ import 'package:stream_chat_flutter/src/scroll_view/photo_gallery/stream_photo_g
 import 'package:stream_chat_flutter/src/scroll_view/photo_gallery/stream_photo_gallery_controller.dart';
 import 'package:stream_chat_flutter/src/utils/utils.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
-import 'package:stream_core_flutter/stream_core_flutter.dart';
+import 'package:stream_core_flutter/chat.dart';
 
 /// Max image resolution which can be resized by the CDN.
 /// Taken from https://getstream.io/chat/docs/flutter-dart/file_uploads/?language=dart#image-resizing

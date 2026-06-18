@@ -1,5 +1,5 @@
 import 'package:flutter/widgets.dart';
-import 'package:stream_core_flutter/stream_core_flutter.dart';
+import 'package:stream_core_flutter/chat.dart';
 import 'package:theme_extensions_builder_annotation/theme_extensions_builder_annotation.dart';
 
 part 'poll_option_style.g.theme.dart';
