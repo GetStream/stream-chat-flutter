@@ -124,6 +124,7 @@ command:
       freezed: ^3.0.0
       json_serializable: ^6.13.2
       mocktail: ^1.0.5
+      patrol: ^4.6.1
       path: ^1.9.1
       path_provider_platform_interface: ^2.1.2
       plugin_platform_interface: ^2.1.8

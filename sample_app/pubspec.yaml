@@ -50,9 +50,22 @@ dependencies:
 
 dev_dependencies:
   flutter_launcher_icons: ^0.14.4
+  integration_test:
+    sdk: flutter
+  patrol: ^4.6.1
 
 flutter:
   uses-material-design: true
   assets:
     - assets/
     - pubspec.lock
+
+# Patrol e2e configuration (config lives in pubspec.yaml, not a separate file).
+# Tests live in integration_test/ (Patrol defaults to patrol_test/ otherwise).
+patrol:
+  app_name: Stream Chat
+  test_directory: integration_test
+  android:
+    package_name: io.getstream.chat.android.flutter.sample
+  ios:
+    bundle_id: io.getstream.flutter

@@ -2,6 +2,8 @@
 *.class
 *.log
 *.pyc
+# E2E: mock-server checkout cloned by the `start_mock_server` Fastlane lane
+/sample_app/stream-chat-test-mock-server/
 *.swp
 .DS_Store
 .atom/

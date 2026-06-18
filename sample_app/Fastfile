@@ -1,5 +1,11 @@
 opt_out_usage
 
+require 'net/http'
+
+mock_server_repo_name = 'stream-chat-test-mock-server'
+mock_server_driver_port = ENV['MOCK_DRIVER_PORT'] || '4568'
+github_org = (ENV['GITHUB_REPOSITORY'] || 'GetStream/stream-chat-flutter').split('/').first
+
 # Have an easy way to get the root of the project
 def root_path
   Dir.pwd.sub(/.*\Kfastlane/, '').sub(/.*\Kandroid/, '').sub(/.*\Kios/, '').sub(/.*\K\/\//, '')
@@ -13,4 +19,40 @@ end
 # Tasks to be reused on each platform flow
 lane :fetch_dependencies do
   sh_on_root(command: "flutter pub get --suppress-analytics")
+end
+
+# Starts the mock-server driver in the background (ported from the Android/Swift
+# Fastfiles). The driver listens on `mock_server_driver_port` and forks a fresh
+# mock server per test when the suite calls `GET /start/:test`.
+#
+# Options:
+#   local_server: absolute/relative path to an existing mock-server checkout
+#                 (skips the clone — use the sibling repo when developing locally,
+#                 e.g. local_server:../stream-chat-test-mock-server)
+#   branch:       branch of the mock-server repo to clone (defaults to 'main')
+lane :start_mock_server do |options|
+  # Clone into the project root so the location is the same regardless of which
+  # platform's fastlane invoked the lane.
+  Dir.chdir(root_path) do
+    mock_server_repo = options[:local_server] || mock_server_repo_name
+    stop_mock_server unless is_ci
+
+    unless options[:local_server]
+      branch = options[:branch].to_s.empty? ? 'main' : options[:branch]
+      sh("rm -rf #{mock_server_repo}") if File.directory?(mock_server_repo)
+      sh("git clone -b #{branch} https://github.com/#{github_org}/#{mock_server_repo_name}.git")
+    end
+
+    Dir.chdir(mock_server_repo) do
+      FileUtils.mkdir_p('logs')
+      # Use the mock server's own Gemfile, not the app's bundler context.
+      sh('BUNDLE_GEMFILE=Gemfile bundle install')
+      sh("BUNDLE_GEMFILE=Gemfile bundle exec ruby driver.rb #{mock_server_driver_port} > logs/driver.log 2>&1 &")
+    end
+  end
+end
+
+# Stops the mock-server driver (and any servers it spawned).
+lane :stop_mock_server do
+  Net::HTTP.get_response(URI("http://localhost:#{mock_server_driver_port}/stop")) rescue nil
 end
