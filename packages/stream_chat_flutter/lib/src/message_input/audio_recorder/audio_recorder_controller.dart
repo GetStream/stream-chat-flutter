@@ -18,7 +18,8 @@ import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 /// to the recorder state changes and updates the [AudioRecorderState]
 /// accordingly.
 /// {@endtemplate}
-class StreamAudioRecorderController extends ValueNotifier<AudioRecorderState> {
+class StreamAudioRecorderController extends ValueNotifier<AudioRecorderState>
+    with DisposeAwareValueNotifier<AudioRecorderState> {
   /// {@macro streamAudioRecorderController}
   factory StreamAudioRecorderController({
     RecordConfig? config,

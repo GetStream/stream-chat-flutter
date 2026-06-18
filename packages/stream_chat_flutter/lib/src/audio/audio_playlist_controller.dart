@@ -4,12 +4,14 @@ import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:stream_chat_flutter/src/audio/audio_playlist_state.dart';
+import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart' show DisposeAwareValueNotifier;
 import 'package:stream_core_flutter/chat.dart';
 
 /// {@template streamAudioPlaylistController}
 /// A controller for managing an audio playlist.
 /// {@endtemplate}
-class StreamAudioPlaylistController extends ValueNotifier<AudioPlaylistState> {
+class StreamAudioPlaylistController extends ValueNotifier<AudioPlaylistState>
+    with DisposeAwareValueNotifier<AudioPlaylistState> {
   /// {@macro streamAudioPlaylistController}
   factory StreamAudioPlaylistController(List<PlaylistTrack> tracks) {
     return StreamAudioPlaylistController.raw(
