@@ -1,6 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
 
+// ignore: implementation_imports
+import 'package:test_api/src/backend/invoker.dart' show Invoker;
+
 /// Client for the stream-chat-test-mock-server.
 ///
 /// Talks to the long-running driver (`driver.rb`), which forks a fresh mock
@@ -22,14 +25,23 @@ class MockServer {
   static const _driverPort =
       String.fromEnvironment('MOCK_DRIVER_PORT', defaultValue: '4568');
 
-  /// Asks the driver to spawn a fresh mock server for [testName] and waits
-  /// until it is ready to serve requests.
-  static Future<MockServer> start({required String testName}) async {
+  /// Asks the driver to spawn a fresh mock server and waits until it is ready.
+  ///
+  /// [testName] only labels the server's log file; it defaults to the running
+  /// test's name.
+  static Future<MockServer> start({String? testName}) async {
+    final name = testName ?? _currentTestName();
     final driverUrl = 'http://$_host:$_driverPort';
-    final port = (await _get('$driverUrl/start/$testName')).trim();
+    final port = (await _get('$driverUrl/start/$name')).trim();
     final server = MockServer._('http://$_host:$port', 'ws://$_host:$port');
     await server.waitUntilReady();
     return server;
+  }
+
+  /// The running test's name, sanitized for use as a URL segment / filename.
+  static String _currentTestName() {
+    final name = Invoker.current?.liveTest.test.name ?? 'flutter_test';
+    return name.replaceAll(RegExp('[^A-Za-z0-9_]+'), '_');
   }
 
   /// Stops this per-test mock server.

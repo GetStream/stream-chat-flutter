@@ -833,13 +833,20 @@ go more than a step or two without feedback. Decision is **Option A** (§3).
 - [x] Port `ParticipantRobot` (message/thread/edit/delete/quote, reactions, typing, read, giphy, attachments).
 - [x] **Gate (scoped to robot layer):** `BackendRobot.generateChannels(...)` → the connected app queries the mock server and renders a `StreamChannelListTile` (validated on Android, two runs). `ParticipantRobot` is a faithful verbatim port; asserting a participant message *renders* needs the channel open + message-cell selectors, so that assertion moves to Phase 4's message-list tests (validating it earlier via the channel-list preview proved brittle).
 
-### Phase 3 — Selectors (the big one)
-- [ ] Build the mapping table: Android `Stream_*` testTag → Flutter widget → `Key`.
-- [ ] Add `Key('Stream_*')` (or `Semantics(identifier:)`) to targeted widgets in `stream_chat_flutter` (composer, message cell/text, reactions, context menu, headers, avatars, scroll buttons, thread items).
-- [ ] Add keys to `sample_app` screens (login/choose-user, JWT/connection screen, channel list tile).
-- [ ] Keep the selector strings in one shared constants file to avoid widget/page-object drift.
-- [ ] Implement the `pages/` PageObjects (`login`, `channel_list`, `message_list`, `thread`, `jwt`) referencing those keys.
-- [ ] **Gate:** a test finds and taps the composer input + send button via page objects.
+### Phase 3 — Selectors
+> Approach (revised): **reuse identifiers the SDK already exposes — exported
+> widget types and existing keys — before adding anything to the source.** Add a
+> `Stream_*` key only when no stable identifier exists, and only for a widget a
+> landing suite actually needs (no speculative keys). Goal: as few source changes
+> as possible.
+- [x] Composer selectors with **zero SDK changes**: input field matched by its
+      exported type `StreamMessageComposerInputField`; send button by the key the
+      SDK already sets for its `AnimatedSwitcher` (`ValueKey('send_key')`). (An
+      earlier pass added `Stream_*` keys; reverted once existing identifiers
+      proved sufficient.)
+- [x] PageObjects `pages/message_list_page.dart` (`composer.inputField` → type, `composer.sendButton` → `send_key`) and `pages/channel_list_page.dart` (channel tile → `StreamChannelListTile` type).
+- [x] **Gate:** test navigates channel list → opens channel → `enterText` into the composer field (by type) → taps the send button (by existing key) → the sent message renders. ✅ on Android (`integration_test/message_list_test.dart`).
+- Remaining selectors resolved per-suite in Phase 4/5: existing type/key first; add a `Stream_*` key only where the SDK exposes nothing stable (e.g. one message cell among many).
 
 ### Phase 4 — DSL, robots & base
 - [ ] Implement `patrol_ext/` helpers: `waits.dart`, `actions.dart`, `finders.dart` (+ `defaultTimeout`).

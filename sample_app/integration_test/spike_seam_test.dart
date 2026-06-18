@@ -24,7 +24,7 @@ const _qatest1Token =
 void main() {
   for (var run = 1; run <= 2; run++) {
     patrolTest('connects to the mock server (run $run)', ($) async {
-      final mock = await MockServer.start(testName: 'spike_seam_$run');
+      final mock = await MockServer.start();
       addTearDown(mock.stop);
       addTearDown(authController.debugReset);
 
