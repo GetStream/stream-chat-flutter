@@ -122,6 +122,7 @@ class StreamDraftListController extends PagedValueNotifier<String, Draft> {
         nextPageKey: nextKey,
       );
       // Start listening to events
+      if (disposed) return;
       _subscribeToDraftListEvents();
     } on StreamChatError catch (error) {
       value = PagedValue.error(error);

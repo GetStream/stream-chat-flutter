@@ -1,7 +1,12 @@
 ## Upcoming
 
+🐛 Fixed
+
+- Fixed a use-after-dispose race condition in all `PagedValueNotifier` subclasses (`StreamChannelListController`, `StreamUserListController`, `StreamMemberListController`, `StreamThreadListController`, `StreamDraftListController`, `StreamMessageReminderListController`, `StreamPollVoteListController`, `StreamReactionListController`, `StreamMessageSearchListController`): in-flight async loads could write `value` after `dispose()` had been called, triggering a `notifyListeners()` assertion throw in debug mode. A new `DisposeAwareValueNotifier` mixin guards the `value` setter and also prevents event subscriptions from being set up post-dispose.
+
 ✅ Added
 
+- Added `DisposeAwareValueNotifier<T>` mixin on `ValueNotifier<T>` that silently drops post-dispose `value` writes and exposes a `disposed` getter. Useful for any `ValueNotifier` subclass with async methods.
 - Added `mentionedChannel`, `mentionedHere`, `mentionedRoles`, `addMentionedRole`, `mentionedUserGroups`, and `addMentionedUserGroup` to `StreamMessageComposerController` for composing enhanced mentions.
 - Added `StreamMessageComposerController.setCommand(Command)` and `activeCommand` getter for set-aware command activation and tracking.
 - Added `StreamMessageComposerController.validateCommand(Command)` returning a nullable `CommandUnavailableReason` so callers can gate activation against the composer state.
