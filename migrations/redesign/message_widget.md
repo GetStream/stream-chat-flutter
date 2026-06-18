@@ -290,6 +290,32 @@ actionsBuilder: (context, defaultActions) {
 | `StreamChatThemeData.otherMessageTheme`    | Placement-aware styling via `StreamMessageLayoutProperty.resolveWith` on individual style fields (e.g. `bubble`, `metadata`) |
 | `StreamMessageItem.messageTheme` parameter | Resolved from context via `StreamMessageItemTheme.of(context)`             |
 
+### Changing the own-message bubble color
+
+The own-message bubble background is derived from `StreamColorScheme.brand.shade100`. The simplest way to change it app-wide is to provide a custom brand swatch via `StreamTheme` as a `ThemeExtension`:
+
+```dart
+// In your MaterialApp theme:
+MaterialApp(
+  theme: ThemeData(
+    extensions: [
+      StreamTheme(
+        colorScheme: StreamColorScheme.light(
+          // StreamColorSwatch.fromColor generates a full 11-shade swatch from
+          // a single color. shade100 ≈ a light tint — this becomes the own-message
+          // bubble background. For example, WhatsApp green produces ≈ #DCF8C6.
+          brand: StreamColorSwatch.fromColor(const Color(0xFF25D366)),
+        ),
+      ),
+    ],
+  ),
+)
+```
+
+`StreamColorSwatch.fromColor(Color, [Brightness])` accepts any `Color` and derives the full swatch automatically. `StreamColorScheme.light(brand:)` / `StreamColorScheme.dark(brand:)` are convenience constructors that replace only the brand swatch.
+
+For fine-grained per-alignment control (e.g. different colors for sent vs. received), use `StreamMessageBubbleStyle` inside `StreamMessageItemThemeData` as shown in the [StreamMessageItemThemeData](#streammessageitemthemedata) section.
+
 **Before (explicit `messageTheme` parameter):**
 ```dart
 StreamMessageItem(

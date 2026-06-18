@@ -8,6 +8,7 @@ This guide covers all breaking changes in **Stream Chat Flutter SDK v10.0.0**. W
 
 - [Who Should Read This](#who-should-read-this)
 - [Quick Reference](#quick-reference)
+- [StreamChat Widget](#streamchat-widget)
 - [Attachment Picker](#attachment-picker)
     - [AttachmentPickerType](#attachmentpickertype)
     - [StreamAttachmentPickerOption](#streamattachmentpickeroption)
@@ -60,12 +61,41 @@ Each breaking change section includes an **"Introduced in"** tag so you can quic
 
 | Feature Area                                        | Key Changes                                                                          |
 | --------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| [**StreamChat Widget**](#streamchat-widget)         | `streamChatThemeData:` renamed to `themeData:`                                       |
 | [**Attachment Picker**](#attachment-picker)         | Sealed class hierarchy, builder pattern for options, typed result handling           |
 | [**Reactions**](#reactions)                         | `Reaction` object API, explicit `onReactionPicked` callbacks required                |
 | [**Message UI**](#message-ui)                       | `StreamAttachmentWidgetTapCallback` signature `void Function(Message, Attachment)`; sealed `MessageAction` hierarchy with `actionsBuilder` |
 | [**Message State**](#message-state--deletion)       | `MessageDeleteScope` replaces `bool hard`, delete-for-me support                     |
 | [**File Upload**](#file-upload)                     | Four new abstract methods on `AttachmentFileUploader`                                |
 | [**Unread Threads Banner**](#unread-threads-banner) | Wrapper pattern with `child`, `enabled`, `onRefresh`; removed `onTap`, `minHeight`   |
+
+---
+
+## StreamChat Widget
+
+### `streamChatThemeData` renamed to `themeData`
+
+> **Introduced in:** v10.0.0
+
+The `streamChatThemeData` constructor parameter on `StreamChat` has been renamed to `themeData`.
+
+**Before:**
+```dart
+StreamChat(
+  client: client,
+  streamChatThemeData: myTheme,
+  child: child!,
+)
+```
+
+**After:**
+```dart
+StreamChat(
+  client: client,
+  themeData: myTheme,
+  child: child!,
+)
+```
 
 ---
 
@@ -199,6 +229,22 @@ StreamMessageComposer(
 
 > **Important:**  
 > The picker is now inline. If you previously opened the picker programmatically, integrate it into the composer instead of calling a separate function.
+
+#### Custom composer implementations
+
+If you have a fully custom composer (i.e. you do **not** use `StreamMessageComposer`) and need to add attachments programmatically, there is no public API to open the inline picker from outside the composer. Instead, build your own custom attachment picker or use a platform file picker directly and add the result to your `StreamMessageComposerController`:
+
+```dart
+// Using the image_picker package (add to pubspec.yaml: image_picker: ^1.0.0)
+Future<void> _openGallery() async {
+  final image = await ImagePicker().pickImage(source: ImageSource.gallery);
+  if (image == null || !mounted) return;
+  final attachment = await image.toAttachment(type: AttachmentType.image);
+  _controller.addAttachment(attachment);
+}
+```
+
+The `XFile.toAttachment(type:)` extension method is provided by `stream_chat_flutter`.
 
 ---
 
@@ -1239,6 +1285,7 @@ This appendix provides a chronological reference of breaking changes by beta ver
 ## Migration Checklist
 
 ### For v10.0.0 (stable)
+- [ ] Rename `StreamChat` constructor parameter `streamChatThemeData:` → `themeData:`
 - [ ] Move `StreamMessageListView` behavior flags to `config: StreamMessageListViewConfiguration(...)`
 - [ ] Move `StreamMessageListView` builder callbacks to `builders: StreamMessageListViewBuilders(...)`
 - [ ] Rename `StreamMessageInputController` → `StreamMessageComposerController`

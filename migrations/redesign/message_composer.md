@@ -13,6 +13,7 @@ This guide covers the migration for the message composer components in the Strea
 - [StreamMessageComposerInput Split](#streammessagecomposerinput-split)
 - [Message Input Placeholder API](#message-input-placeholder-api)
 - [Attachment Customization](#attachment-customization)
+- [Audio Recorder Migration](#audio-recorder-migration)
 - [Removed Widgets](#removed-widgets)
 - [Theme Removal: StreamMessageInputThemeData](#theme-removal-streammessageinputthemedata)
 - [Migration Checklist](#migration-checklist)
@@ -554,6 +555,64 @@ The following public widget is provided as a building block for custom attachmen
 
 ---
 
+## Audio Recorder Migration
+
+The audio recording widget has been redesigned. `StreamAudioRecorderButton` is **removed**; use `StreamAudioRecorder` instead.
+
+### `StreamAudioRecorderButton` → `StreamAudioRecorder`
+
+`StreamAudioRecorder` separates the recorder state from the UI: it exposes a `builder` callback that receives the current `AudioRecorderState` and a pre-built `button` widget, letting you render any custom chrome around the recording controls.
+
+**Before:**
+```dart
+StreamAudioRecorderButton(
+  controller: _recorder,
+)
+```
+
+**After:**
+```dart
+StreamAudioRecorder(
+  state: recorderState,     // AudioRecorderState from StreamAudioRecorderController
+  button: IconButton(       // your custom finish/send button
+    icon: const Icon(Icons.check),
+    onPressed: _finishRecording,
+  ),
+  builder: (context, state, button) {
+    return Row(
+      children: [
+        IconButton(
+          icon: const Icon(Icons.delete_outline),
+          onPressed: () => _recorder.cancelRecord(),
+        ),
+        Expanded(
+          child: Center(
+            child: switch (state) {
+              RecordStateRecording(:final duration) =>
+                PlaybackTimerText(duration: duration),  // shows elapsed time
+              _ => const SizedBox.shrink(),
+            },
+          ),
+        ),
+        button,
+      ],
+    );
+  },
+)
+```
+
+### `PlaybackTimerText` for recording duration
+
+Use `PlaybackTimerText(duration: duration)` to display the recording elapsed time inside the `StreamAudioRecorder` builder. There is no `RecordingTimer` widget in v10 — `PlaybackTimerText` from `stream_core_flutter` is the correct replacement.
+
+| Old (does not exist in v10) | New                                              |
+| --------------------------- | ------------------------------------------------ |
+| `RecordingTimer`            | `PlaybackTimerText(duration: duration)`          |
+
+`PlaybackTimerText` formats a `Duration` as `MM:SS` and is re-exported from `stream_chat_flutter`.
+
+---
+
 ## Removed Widgets
 
 The following composer-adjacent widgets have been removed. Replace any direct references with the listed alternatives.
@@ -644,3 +703,5 @@ There is no one-to-one replacement — most fields on the old `StreamMessageInpu
 - [ ] Rename `StreamMessageInput.hintGetter` to `placeholderBuilder` and rewrite the callback to switch over `MessageInputPlaceholder` cases (`SlowModePlaceholder`, `CommandPlaceholder`, `AttachmentsPlaceholder`, `WriteMessagePlaceholder`) instead of the removed `HintType` enum. If you build directly on `StreamChatMessageInput`, compute the placeholder string yourself via `MessageInputPlaceholder.resolve(controller)` and pass it via the `placeholder: String` parameter.
 - [ ] Review the new placeholder precedence (`slowMode > command > attachments > writeMessage`) and override `placeholderBuilder` if you need to preserve the old order
 - [ ] Add command-specific placeholders for any backend-defined commands you ship by pattern-matching on `CommandPlaceholder.command` in your `placeholderBuilder`
+- [ ] Replace `StreamAudioRecorderButton` with `StreamAudioRecorder(state:, button:, builder:)`
+- [ ] Replace any `RecordingTimer(duration:)` usage with `PlaybackTimerText(duration: duration)` — `RecordingTimer` does not exist in v10
