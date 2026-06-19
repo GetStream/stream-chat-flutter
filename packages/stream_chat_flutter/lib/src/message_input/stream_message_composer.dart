@@ -7,7 +7,6 @@ import 'package:flutter/services.dart';
 import 'package:stream_chat_flutter/src/message_input/error_alert_sheet.dart';
 import 'package:stream_chat_flutter/src/message_input/stream_chat_message_input.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-import 'package:stream_core_flutter/stream_core_flutter.dart' show streamFloatingFade;
 
 const _kCommandTrigger = '/';
 const _kMentionTrigger = '@';
