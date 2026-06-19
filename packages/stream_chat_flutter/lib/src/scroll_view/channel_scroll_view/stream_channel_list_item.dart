@@ -624,14 +624,18 @@ class _ChannelLastMessageWithStatusState extends State<_ChannelLastMessageWithSt
 
         // Find the last valid message.
         final message = messages.lastWhereOrNull(_defaultLastMessagePredicate);
-        // Cache only while the channel has the latest messages loaded
-        // (isUpToDate). When isUpToDate is false (e.g. Channel.query(idAround:)
-        // truncates state mid-load), the previous value keeps rendering instead
-        // of false rendering the empty state.
+        // `_currentLastMessage` holds the most recent message seen while the
+        // channel has the latest messages (isUpToDate).
+        // While isUpToDate is false (e.g. Channel.query(idAround:) truncates
+        // state mid-load), fall back to it so the preview shows the actual
+        // latest message.
+        final Message? latestLastMessage;
         if (channelState.isUpToDate) {
-          _currentLastMessage = message;
+          latestLastMessage = message;
+          _currentLastMessage = latestLastMessage;
+        } else {
+          latestLastMessage = [message, _currentLastMessage].latest;
         }
-        final latestLastMessage = [message, _currentLastMessage].latest;
 
         if (latestLastMessage == null) {
           return Text(
@@ -743,14 +747,18 @@ class _ChannelLastMessageTextState extends State<ChannelLastMessageText> {
 
         // Otherwise, show the channel last message if it exists.
         final message = messages.lastWhereOrNull(widget.lastMessagePredicate);
-        // Cache only while the channel has the latest messages loaded
-        // (isUpToDate). When isUpToDate is false (e.g. Channel.query(idAround:)
-        // truncates state mid-load), the previous value keeps rendering instead
-        // of false rendering the empty state.
+        // `_currentLastMessage` holds the most recent message seen while the
+        // channel has the latest messages (isUpToDate).
+        // While isUpToDate is false (e.g. Channel.query(idAround:) truncates
+        // state mid-load), fall back to it so the preview shows the actual
+        // latest message.
+        final Message? latestLastMessage;
         if (channelState.isUpToDate) {
-          _currentLastMessage = message;
+          latestLastMessage = message;
+          _currentLastMessage = latestLastMessage;
+        } else {
+          latestLastMessage = [message, _currentLastMessage].latest;
         }
-        final latestLastMessage = [message, _currentLastMessage].latest;
 
         if (latestLastMessage == null) {
           return Text(
