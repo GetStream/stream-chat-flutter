@@ -49,9 +49,17 @@ class ChannelApi {
   }
 
   /// Requests channels with a given query from the API.
+  ///
+  /// Either an inline [filter]/[sort] pair or a [predefinedFilter] identifier
+  /// (optionally interpolated with [filterValues] and [sortValues]) can be
+  /// provided. When a predefined filter is used, the server resolves it and
+  /// returns the materialized filter/sort on [QueryChannelsResponse].
   Future<QueryChannelsResponse> queryChannels({
     Filter? filter,
     SortOrder<ChannelState>? sort,
+    String? predefinedFilter,
+    Map<String, Object?>? filterValues,
+    Map<String, Object?>? sortValues,
     int? memberLimit,
     int? messageLimit,
     bool state = true,
@@ -71,6 +79,9 @@ class ChannelApi {
           // passed options
           if (sort != null) 'sort': sort,
           if (filter != null) 'filter_conditions': filter,
+          if (predefinedFilter != null) 'predefined_filter': predefinedFilter,
+          if (filterValues != null) 'filter_values': filterValues,
+          if (sortValues != null) 'sort_values': sortValues,
           if (memberLimit != null) 'member_limit': memberLimit,
           if (messageLimit != null) 'message_limit': messageLimit,
 

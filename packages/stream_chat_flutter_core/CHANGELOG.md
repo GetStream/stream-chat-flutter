@@ -41,6 +41,7 @@
 
 ✅ Added
 
+- Added support for predefined filters on `StreamChannelListController`.
 - Added `StreamMessageComposerController.isEditing` getter.
 - Added `StreamMessageComposerController.clearCommand()`; setting `command = null` is
   now an alias for it.

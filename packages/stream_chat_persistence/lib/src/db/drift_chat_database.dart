@@ -24,6 +24,7 @@ part 'drift_chat_database.g.dart';
     Members,
     Reads,
     ChannelQueries,
+    ChannelQueriesMetadata,
     ConnectionEvents,
   ],
   daos: [

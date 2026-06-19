@@ -30,7 +30,12 @@ QueryChannelsResponse _$QueryChannelsResponseFromJson(
 ) => QueryChannelsResponse()
   ..duration = json['duration'] as String?
   ..channels =
-      (json['channels'] as List<dynamic>?)?.map((e) => ChannelState.fromJson(e as Map<String, dynamic>)).toList() ?? [];
+      (json['channels'] as List<dynamic>?)?.map((e) => ChannelState.fromJson(e as Map<String, dynamic>)).toList() ?? []
+  ..predefinedFilter = json['predefined_filter'] == null
+      ? null
+      : PredefinedFilter.fromJson(
+          json['predefined_filter'] as Map<String, dynamic>,
+        );
 
 TranslateMessageResponse _$TranslateMessageResponseFromJson(
   Map<String, dynamic> json,
