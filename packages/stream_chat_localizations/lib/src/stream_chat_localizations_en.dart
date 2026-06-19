@@ -130,6 +130,15 @@ class StreamChatLocalizationsEn extends GlobalStreamChatLocalizations {
   String get instantCommandsLabel => 'Instant Commands';
 
   @override
+  String get commandUnavailableWhileEditingError => 'Not available while editing';
+
+  @override
+  String get commandUnavailableWhileQuotingError => 'Not available while replying';
+
+  @override
+  String get commandUnavailableError => 'Command not available';
+
+  @override
   String fileTooLargeAfterCompressionError(double limitInMB) =>
       'The file is too large to upload. '
       'The file size limit is $limitInMB MB. '
@@ -822,4 +831,13 @@ class StreamChatLocalizationsEn extends GlobalStreamChatLocalizations {
 
   @override
   String get addACommentDescription => 'Allow others to add comments';
+
+  @override
+  String get notifyChannelText => 'Notify everyone in this channel';
+
+  @override
+  String get notifyHereText => 'Notify every online member in this channel';
+
+  @override
+  String notifyRoleText(String role) => 'Notify all $role members';
 }

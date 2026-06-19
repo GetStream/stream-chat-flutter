@@ -190,6 +190,7 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
         );
       }
       // start listening to events
+      if (disposed) return;
       _subscribeToChannelListEvents();
     } on StreamChatError catch (error) {
       value = PagedValue.error(error);

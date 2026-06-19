@@ -2001,6 +2001,327 @@ void main() {
       expect(pushPreferences?.disabledUntil, pushPreference.disabledUntil);
     });
 
+    test('`.listUserGroups`', () async {
+      const limit = 10;
+      const idGt = 'cursor-group-id';
+      final createdAtGt = DateTime.utc(2024, 6, 15, 12);
+      const teamId = 'test-team-id';
+
+      when(
+        () => api.userGroups.listUserGroups(
+          limit: limit,
+          idGt: idGt,
+          createdAtGt: createdAtGt,
+          teamId: teamId,
+        ),
+      ).thenAnswer((_) async => ListUserGroupsResponse()..userGroups = const []);
+
+      final res = await client.listUserGroups(
+        limit: limit,
+        idGt: idGt,
+        createdAtGt: createdAtGt,
+        teamId: teamId,
+      );
+      expect(res, isNotNull);
+
+      verify(
+        () => api.userGroups.listUserGroups(
+          limit: limit,
+          idGt: idGt,
+          createdAtGt: createdAtGt,
+          teamId: teamId,
+        ),
+      ).called(1);
+      verifyNoMoreInteractions(api.userGroups);
+    });
+
+    test('`.searchUserGroups`', () async {
+      const query = 'eng';
+      const limit = 10;
+      const nameGt = 'engineering';
+      const idGt = 'cursor-group-id';
+      const teamId = 'test-team-id';
+
+      when(
+        () => api.userGroups.searchUserGroups(
+          query,
+          limit: limit,
+          nameGt: nameGt,
+          idGt: idGt,
+          teamId: teamId,
+        ),
+      ).thenAnswer((_) async => SearchUserGroupsResponse()..userGroups = const []);
+
+      final res = await client.searchUserGroups(
+        query,
+        limit: limit,
+        nameGt: nameGt,
+        idGt: idGt,
+        teamId: teamId,
+      );
+      expect(res, isNotNull);
+
+      verify(
+        () => api.userGroups.searchUserGroups(
+          query,
+          limit: limit,
+          nameGt: nameGt,
+          idGt: idGt,
+          teamId: teamId,
+        ),
+      ).called(1);
+      verifyNoMoreInteractions(api.userGroups);
+    });
+
+    test('`.getUserGroup`', () async {
+      const id = 'test-group-id';
+      const teamId = 'test-team-id';
+
+      when(() => api.userGroups.getUserGroup(id, teamId: teamId)).thenAnswer(
+        (_) async => GetUserGroupResponse()
+          ..userGroup = UserGroup(
+            id: id,
+            name: 'test-group-name',
+            createdAt: DateTime.utc(2024, 1, 1),
+            updatedAt: DateTime.utc(2024, 1, 2),
+          ),
+      );
+
+      final res = await client.getUserGroup(id, teamId: teamId);
+      expect(res, isNotNull);
+      expect(res.userGroup.id, id);
+
+      verify(() => api.userGroups.getUserGroup(id, teamId: teamId)).called(1);
+      verifyNoMoreInteractions(api.userGroups);
+    });
+
+    test('`.createUserGroup`', () async {
+      const name = 'Engineering';
+      const id = 'eng';
+      const description = 'Engineering team';
+      const teamId = 'test-team-id';
+      const memberIds = ['user-1', 'user-2'];
+
+      when(
+        () => api.userGroups.createUserGroup(
+          name,
+          id: id,
+          description: description,
+          teamId: teamId,
+          memberIds: memberIds,
+        ),
+      ).thenAnswer(
+        (_) async => CreateUserGroupResponse()
+          ..userGroup = UserGroup(
+            id: id,
+            name: name,
+            description: description,
+            teamId: teamId,
+            createdAt: DateTime.utc(2024, 1, 1),
+            updatedAt: DateTime.utc(2024, 1, 2),
+          ),
+      );
+
+      final res = await client.createUserGroup(
+        name,
+        id: id,
+        description: description,
+        teamId: teamId,
+        memberIds: memberIds,
+      );
+      expect(res, isNotNull);
+      expect(res.userGroup.id, id);
+
+      verify(
+        () => api.userGroups.createUserGroup(
+          name,
+          id: id,
+          description: description,
+          teamId: teamId,
+          memberIds: memberIds,
+        ),
+      ).called(1);
+      verifyNoMoreInteractions(api.userGroups);
+    });
+
+    test('`.updateUserGroup`', () async {
+      const id = 'test-group-id';
+      const name = 'New Name';
+      const description = 'New description';
+      const teamId = 'test-team-id';
+
+      when(
+        () => api.userGroups.updateUserGroup(
+          id,
+          name: name,
+          description: description,
+          teamId: teamId,
+        ),
+      ).thenAnswer(
+        (_) async => UpdateUserGroupResponse()
+          ..userGroup = UserGroup(
+            id: id,
+            name: name,
+            description: description,
+            teamId: teamId,
+            createdAt: DateTime.utc(2024, 1, 1),
+            updatedAt: DateTime.utc(2024, 1, 2),
+          ),
+      );
+
+      final res = await client.updateUserGroup(
+        id,
+        name: name,
+        description: description,
+        teamId: teamId,
+      );
+      expect(res, isNotNull);
+      expect(res.userGroup.name, name);
+
+      verify(
+        () => api.userGroups.updateUserGroup(
+          id,
+          name: name,
+          description: description,
+          teamId: teamId,
+        ),
+      ).called(1);
+      verifyNoMoreInteractions(api.userGroups);
+    });
+
+    test('`.deleteUserGroup`', () async {
+      const id = 'test-group-id';
+      const teamId = 'test-team-id';
+
+      when(() => api.userGroups.deleteUserGroup(id, teamId: teamId)).thenAnswer(
+        (_) async => EmptyResponse(),
+      );
+
+      final res = await client.deleteUserGroup(id, teamId: teamId);
+      expect(res, isNotNull);
+
+      verify(() => api.userGroups.deleteUserGroup(id, teamId: teamId)).called(1);
+      verifyNoMoreInteractions(api.userGroups);
+    });
+
+    test('`.addUserGroupMembers`', () async {
+      const id = 'test-group-id';
+      const memberIds = ['user-1', 'user-2'];
+      const asAdmin = true;
+      const teamId = 'test-team-id';
+
+      when(
+        () => api.userGroups.addUserGroupMembers(
+          id,
+          memberIds,
+          asAdmin: asAdmin,
+          teamId: teamId,
+        ),
+      ).thenAnswer(
+        (_) async => AddUserGroupMembersResponse()
+          ..userGroup = UserGroup(
+            id: id,
+            name: 'test-group-name',
+            createdAt: DateTime.utc(2024, 1, 1),
+            updatedAt: DateTime.utc(2024, 1, 2),
+          ),
+      );
+
+      final res = await client.addUserGroupMembers(
+        id,
+        memberIds,
+        asAdmin: asAdmin,
+        teamId: teamId,
+      );
+      expect(res, isNotNull);
+
+      verify(
+        () => api.userGroups.addUserGroupMembers(
+          id,
+          memberIds,
+          asAdmin: asAdmin,
+          teamId: teamId,
+        ),
+      ).called(1);
+      verifyNoMoreInteractions(api.userGroups);
+    });
+
+    test('`.removeUserGroupMembers`', () async {
+      const id = 'test-group-id';
+      const memberIds = ['user-1', 'user-2'];
+      const teamId = 'test-team-id';
+
+      when(
+        () => api.userGroups.removeUserGroupMembers(
+          id,
+          memberIds,
+          teamId: teamId,
+        ),
+      ).thenAnswer(
+        (_) async => RemoveUserGroupMembersResponse()
+          ..userGroup = UserGroup(
+            id: id,
+            name: 'test-group-name',
+            createdAt: DateTime.utc(2024, 1, 1),
+            updatedAt: DateTime.utc(2024, 1, 2),
+          ),
+      );
+
+      final res = await client.removeUserGroupMembers(
+        id,
+        memberIds,
+        teamId: teamId,
+      );
+      expect(res, isNotNull);
+
+      verify(
+        () => api.userGroups.removeUserGroupMembers(
+          id,
+          memberIds,
+          teamId: teamId,
+        ),
+      ).called(1);
+      verifyNoMoreInteractions(api.userGroups);
+    });
+
+    test('`.searchRoles`', () async {
+      const query = 'adm';
+      const limit = 10;
+      const nameGt = 'admin';
+      const roleType = RoleType.user;
+      const includeGlobalRoles = true;
+
+      when(
+        () => api.roles.searchRoles(
+          query,
+          limit: limit,
+          nameGt: nameGt,
+          roleType: roleType,
+          includeGlobalRoles: includeGlobalRoles,
+        ),
+      ).thenAnswer((_) async => SearchRolesResponse()..roles = const []);
+
+      final res = await client.searchRoles(
+        query,
+        limit: limit,
+        nameGt: nameGt,
+        roleType: roleType,
+        includeGlobalRoles: includeGlobalRoles,
+      );
+      expect(res, isNotNull);
+
+      verify(
+        () => api.roles.searchRoles(
+          query,
+          limit: limit,
+          nameGt: nameGt,
+          roleType: roleType,
+          includeGlobalRoles: includeGlobalRoles,
+        ),
+      ).called(1);
+      verifyNoMoreInteractions(api.roles);
+    });
+
     test('`.devToken`', () async {
       const userId = 'test-user-id';
 

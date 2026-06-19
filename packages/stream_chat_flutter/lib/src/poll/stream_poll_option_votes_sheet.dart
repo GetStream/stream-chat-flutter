@@ -8,7 +8,7 @@ import 'package:stream_chat_flutter/src/theme/poll_option_votes_sheet_theme.dart
 import 'package:stream_chat_flutter/src/theme/poll_option_votes_style.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
-import 'package:stream_core_flutter/stream_core_flutter.dart';
+import 'package:stream_core_flutter/chat.dart';
 
 /// {@template showStreamPollOptionVotesSheet}
 /// Displays an interactive bottom sheet to show all the votes for a poll

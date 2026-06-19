@@ -1,6 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
-import 'package:stream_core_flutter/stream_core_flutter.dart';
+import 'package:stream_core_flutter/chat.dart';
 
 /// {@template messageActionsBuilder}
 /// Signature for a builder that customizes the list of message actions shown

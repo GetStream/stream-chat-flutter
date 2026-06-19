@@ -125,6 +125,7 @@ class StreamMessageReminderListController extends PagedValueNotifier<String, Mes
         nextPageKey: nextKey,
       );
       // Start listening to events
+      if (disposed) return;
       _subscribeToReminderListEvents();
     } on StreamChatError catch (error) {
       value = PagedValue.error(error);

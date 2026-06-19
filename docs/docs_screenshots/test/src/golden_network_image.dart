@@ -2,7 +2,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:stream_core_flutter/stream_core_flutter.dart';
+import 'package:stream_core_flutter/chat.dart';
 
 /// Avatar fixtures sourced from Stream's Chat SDK Design System (Figma node
 /// `2867:55922`, "User Photo"). Each PNG is an 80×80 crop of a named sample

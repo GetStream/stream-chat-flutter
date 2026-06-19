@@ -1,7 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:collection/collection.dart';
-import 'package:stream_core_flutter/stream_core_flutter.dart';
+import 'package:stream_core_flutter/chat.dart';
 
 /// {@template playlistLoopMode}
 /// Represents the loop mode of a playlist.

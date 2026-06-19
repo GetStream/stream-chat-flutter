@@ -4,7 +4,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/attachment/attachment_widget_catalog.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-import 'package:stream_core_flutter/stream_core_flutter.dart' as core;
+import 'package:stream_core_flutter/chat.dart' as core;
 
 /// {@template onAttachmentWidgetTap}
 /// A callback that is called when an attachment widget is tapped.

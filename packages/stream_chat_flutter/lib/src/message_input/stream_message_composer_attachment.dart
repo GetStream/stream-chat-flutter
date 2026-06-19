@@ -12,7 +12,7 @@ class StreamMessageComposerAttachment extends StatelessWidget {
     required Attachment attachment,
     ValueSetter<Attachment>? onRemovePressed,
     StreamAudioPlaylistController? audioPlaylistController,
-  }) : props = StreamMessageComposerAttachmentProps(
+  }) : props = .new(
          attachment: attachment,
          onRemovePressed: onRemovePressed,
          audioPlaylistController: audioPlaylistController,
@@ -23,8 +23,9 @@ class StreamMessageComposerAttachment extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return context.chatComponentBuilder<StreamMessageComposerAttachmentProps>()?.call(context, props) ??
-        DefaultMessageComposerAttachment(props: props);
+    final builder = context.chatComponentBuilder<StreamMessageComposerAttachmentProps>();
+    if (builder != null) return builder(context, props);
+    return DefaultMessageComposerAttachment(props: props);
   }
 }
 

@@ -42,6 +42,7 @@ import 'package:stream_chat/src/core/models/poll_option.dart';
 import 'package:stream_chat/src/core/models/poll_vote.dart';
 import 'package:stream_chat/src/core/models/push_preference.dart';
 import 'package:stream_chat/src/core/models/reaction.dart';
+import 'package:stream_chat/src/core/models/role.dart';
 import 'package:stream_chat/src/core/models/thread.dart';
 import 'package:stream_chat/src/core/models/user.dart';
 import 'package:stream_chat/src/core/util/event_controller.dart';
@@ -524,6 +525,18 @@ class StreamChatClient {
 
     _ws.disconnect();
   }
+
+  /// Suspends the WebSocket's automatic reconnection without tearing down the
+  /// user session.
+  ///
+  /// While paused, unexpected socket closures (for example when the OS closes
+  /// the connection after the app is backgrounded) will not trigger retries.
+  /// Call [resumeReconnect] before re-establishing the connection.
+  void pauseReconnect() => _ws.pauseReconnect();
+
+  /// Re-enables the WebSocket's automatic reconnection after a previous
+  /// [pauseReconnect].
+  void resumeReconnect() => _ws.resumeReconnect();
 
   void _handleHealthCheckEvent(Event event) {
     final user = event.me;
@@ -2364,6 +2377,122 @@ class StreamChatClient {
   Future<EmptyResponse> deleteReminder(String messageId) {
     return _chatApi.reminders.deleteReminder(messageId);
   }
+
+  /// Lists user groups with cursor-based pagination.
+  Future<ListUserGroupsResponse> listUserGroups({
+    int? limit,
+    String? idGt,
+    DateTime? createdAtGt,
+    String? teamId,
+  }) => _chatApi.userGroups.listUserGroups(
+    limit: limit,
+    idGt: idGt,
+    createdAtGt: createdAtGt,
+    teamId: teamId,
+  );
+
+  /// Searches user groups by name prefix (autocomplete).
+  Future<SearchUserGroupsResponse> searchUserGroups(
+    String query, {
+    int? limit,
+    String? nameGt,
+    String? idGt,
+    String? teamId,
+  }) => _chatApi.userGroups.searchUserGroups(
+    query,
+    limit: limit,
+    nameGt: nameGt,
+    idGt: idGt,
+    teamId: teamId,
+  );
+
+  /// Gets a user group by ID, including its members.
+  Future<GetUserGroupResponse> getUserGroup(
+    String id, {
+    String? teamId,
+  }) => _chatApi.userGroups.getUserGroup(id, teamId: teamId);
+
+  /// Creates a new user group, optionally with initial members.
+  Future<CreateUserGroupResponse> createUserGroup(
+    String name, {
+    String? id,
+    String? description,
+    String? teamId,
+    List<String>? memberIds,
+  }) => _chatApi.userGroups.createUserGroup(
+    name,
+    id: id,
+    description: description,
+    teamId: teamId,
+    memberIds: memberIds,
+  );
+
+  /// Updates a user group's name and/or description.
+  ///
+  /// [teamId] scopes the lookup; a group's team cannot be changed.
+  Future<UpdateUserGroupResponse> updateUserGroup(
+    String id, {
+    String? name,
+    String? description,
+    String? teamId,
+  }) => _chatApi.userGroups.updateUserGroup(
+    id,
+    name: name,
+    description: description,
+    teamId: teamId,
+  );
+
+  /// Deletes a user group and all its memberships.
+  Future<EmptyResponse> deleteUserGroup(
+    String id, {
+    String? teamId,
+  }) => _chatApi.userGroups.deleteUserGroup(id, teamId: teamId);
+
+  /// Adds members to a user group.
+  Future<AddUserGroupMembersResponse> addUserGroupMembers(
+    String id,
+    List<String> memberIds, {
+    bool? asAdmin,
+    String? teamId,
+  }) => _chatApi.userGroups.addUserGroupMembers(
+    id,
+    memberIds,
+    asAdmin: asAdmin,
+    teamId: teamId,
+  );
+
+  /// Removes members from a user group.
+  Future<RemoveUserGroupMembersResponse> removeUserGroupMembers(
+    String id,
+    List<String> memberIds, {
+    String? teamId,
+  }) => _chatApi.userGroups.removeUserGroupMembers(
+    id,
+    memberIds,
+    teamId: teamId,
+  );
+
+  /// Searches roles by name prefix (autocomplete).
+  ///
+  /// [roleType] filters to user-assignable ([RoleType.user]) or
+  /// channel-assignable ([RoleType.channel]) roles when set; both kinds are
+  /// returned when omitted.
+  ///
+  /// [includeGlobalRoles] includes roles prefixed `global_` when set to
+  /// `true`. Defaults to `false`.
+  Future<SearchRolesResponse> searchRoles(
+    String query, {
+    int? limit,
+    String? nameGt,
+    RoleType? roleType,
+    bool? includeGlobalRoles,
+  }) => _chatApi.roles.searchRoles(
+    query,
+    limit: limit,
+    nameGt: nameGt,
+    roleType: roleType,
+    includeGlobalRoles: includeGlobalRoles,
+  );
 
   /// Closes the [_ws] connection and resets the [state]
   /// If [flushChatPersistence] is true the client deletes all offline

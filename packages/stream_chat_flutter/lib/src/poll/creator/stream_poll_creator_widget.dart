@@ -5,7 +5,7 @@ import 'package:stream_chat_flutter/src/poll/creator/poll_question_text_field.da
 import 'package:stream_chat_flutter/src/theme/poll_creator_theme.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
-import 'package:stream_core_flutter/stream_core_flutter.dart';
+import 'package:stream_core_flutter/chat.dart';
 
 /// {@template streamPollCreator}
 /// A widget that allows users to create a poll.

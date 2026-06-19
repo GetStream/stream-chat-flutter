@@ -135,6 +135,7 @@ class StreamPollVoteListController extends PagedValueNotifier<String, PollVote> 
       );
 
       // start listening to events
+      if (disposed) return;
       _subscribeToPollVoteEvents();
     } on StreamChatError catch (error) {
       value = PagedValue.error(error);

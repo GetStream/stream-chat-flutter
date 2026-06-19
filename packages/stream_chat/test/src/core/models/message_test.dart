@@ -9,6 +9,7 @@ import 'package:stream_chat/src/core/models/poll_option.dart';
 import 'package:stream_chat/src/core/models/reaction.dart';
 import 'package:stream_chat/src/core/models/reaction_group.dart';
 import 'package:stream_chat/src/core/models/user.dart';
+import 'package:stream_chat/src/core/models/user_group.dart';
 import 'package:test/test.dart';
 
 import '../../utils.dart';
@@ -31,6 +32,21 @@ void main() {
       expect(message.createdAt, DateTime.parse('2020-01-28T22:17:31.107978Z'));
       expect(message.updatedAt, DateTime.parse('2020-01-28T22:17:31.130506Z'));
       expect(message.mentionedUsers, isA<List<User>>());
+      expect(message.mentionedUsers, hasLength(1));
+      expect(message.mentionedUsers.first.id, 'mentioned-user-1');
+      expect(message.mentionedUsers.first.name, 'John Doe');
+      expect(message.mentionedChannel, isTrue);
+      expect(message.mentionedHere, isFalse);
+      expect(message.mentionedRoles, equals(['admin', 'moderator']));
+      expect(message.mentionedGroupIds, equals(['group-1', 'group-2']));
+      expect(message.mentionedGroups, isA<List<UserGroup>>());
+      expect(message.mentionedGroups, hasLength(2));
+      expect(message.mentionedGroups![0].id, 'group-1');
+      expect(message.mentionedGroups![0].name, 'Engineering');
+      expect(message.mentionedGroups![0].description, 'Engineering team');
+      expect(message.mentionedGroups![1].id, 'group-2');
+      expect(message.mentionedGroups![1].name, 'Design');
+      expect(message.mentionedGroups![1].description, isNull);
       expect(message.pinned, false);
       expect(message.pinnedAt, null);
       expect(message.pinExpires, null);
@@ -43,7 +59,9 @@ void main() {
     test('should serialize to json correctly', () {
       final message = Message(
         id: '4637f7e4-a06b-42db-ba5a-8d8270dd926f',
-        text: 'https://giphy.com/gifs/the-lion-king-live-action-5zvN79uTGfLMOVfQaA',
+        text:
+            '@channel @admin @moderator '
+            'https://giphy.com/gifs/the-lion-king-live-action-5zvN79uTGfLMOVfQaA',
         attachments: [
           Attachment.fromJson(const {
             'type': 'giphy',
@@ -57,6 +75,10 @@ void main() {
             'asset_url': 'https://media.giphy.com/media/5zvN79uTGfLMOVfQaA/giphy.mp4',
           }),
         ],
+        mentionedChannel: true,
+        mentionedHere: false,
+        mentionedRoles: const ['admin', 'moderator'],
+        mentionedGroupIds: const ['group-1', 'group-2'],
         showInChannel: true,
         parentId: 'parentId',
         restrictedVisibility: const ['user-id-3'],
@@ -105,27 +127,213 @@ void main() {
       expect(json['text'], equals('Hello world'));
     });
 
-    test('should remove mentioned users not found in text', () {
-      final user1 = User(id: 'user1', name: 'User One');
-      final user2 = User(id: 'user2', name: 'User Two');
-      final user3 = User(id: 'user3', name: 'User Three');
+    group('should remove mentions not found in text', () {
+      test('drops user mentions whose @id and @name are absent', () {
+        final user1 = User(id: 'user1', name: 'User One');
+        final user2 = User(id: 'user2', name: 'User Two');
+        final user3 = User(id: 'user3', name: 'User Three');
 
-      final message = Message(
-        id: 'message-id',
-        text: 'Hello @user1 and @User Two',
-        mentionedUsers: [user1, user2, user3],
-      );
+        final message = Message(
+          id: 'message-id',
+          text: 'Hello @user1 and @User Two',
+          mentionedUsers: [user1, user2, user3],
+        );
 
-      final json = message.toJson();
+        final mentionedUserIds = (message.toJson()['mentioned_users'] as List).cast<String>();
 
-      // Decode the json to verify the mentions
-      //
-      // We should have only user1 and user2 in mentioned_users since user3 is
-      // not in the text
-      final mentionedUserIds = (json['mentioned_users'] as List).cast<String>();
-      expect(mentionedUserIds, containsAll(['user1', 'user2']));
-      expect(mentionedUserIds, isNot(contains('user3')));
-      expect(mentionedUserIds.length, equals(2));
+        // user1 survives via @id, user2 via @name, user3 is dropped.
+        expect(mentionedUserIds, containsAll(['user1', 'user2']));
+        expect(mentionedUserIds, isNot(contains('user3')));
+        expect(mentionedUserIds.length, equals(2));
+      });
+
+      test('drops channel mention when @channel is absent', () {
+        final withToken = Message(
+          id: 'with-token',
+          text: 'Heads up @channel',
+          mentionedChannel: true,
+        );
+        final withoutToken = Message(
+          id: 'without-token',
+          text: 'Heads up everyone',
+          mentionedChannel: true,
+        );
+
+        expect(withToken.toJson()['mentioned_channel'], isTrue);
+        expect(withoutToken.toJson()['mentioned_channel'], isFalse);
+      });
+
+      test('drops here mention when @here is absent', () {
+        final withToken = Message(
+          id: 'with-token',
+          text: 'Anyone around @here?',
+          mentionedHere: true,
+        );
+        final withoutToken = Message(
+          id: 'without-token',
+          text: 'Anyone around?',
+          mentionedHere: true,
+        );
+
+        expect(withToken.toJson()['mentioned_here'], isTrue);
+        expect(withoutToken.toJson()['mentioned_here'], isFalse);
+      });
+
+      test('drops role mentions whose @role token is absent', () {
+        final message = Message(
+          id: 'message-id',
+          text: 'Calling @admin for help',
+          mentionedRoles: const ['admin', 'moderator'],
+        );
+
+        expect(message.toJson()['mentioned_roles'], equals(['admin']));
+      });
+
+      test('drops group mentions whose @name is absent and re-derives ids', () {
+        final stayingGroup = UserGroup(
+          id: 'group-1',
+          name: 'Engineering',
+          createdAt: DateTime(2024),
+          updatedAt: DateTime(2024),
+        );
+        final droppedGroup = UserGroup(
+          id: 'group-2',
+          name: 'Design',
+          createdAt: DateTime(2024),
+          updatedAt: DateTime(2024),
+        );
+
+        final message = Message(
+          id: 'message-id',
+          text: 'Ping @Engineering',
+          mentionedGroupIds: const ['group-1', 'group-2'],
+          mentionedGroups: [stayingGroup, droppedGroup],
+        );
+
+        final json = message.toJson();
+
+        // Only Engineering survives; ids are re-derived from remaining groups.
+        expect(json['mentioned_group_ids'], equals(['group-1']));
+      });
+
+      test('handles every mention kind together', () {
+        final user1 = User(id: 'user1', name: 'User One');
+        final user2 = User(id: 'user2', name: 'User Two');
+        final user3 = User(id: 'user3', name: 'User Three');
+
+        final stayingGroup = UserGroup(
+          id: 'group-1',
+          name: 'Engineering',
+          createdAt: DateTime(2024),
+          updatedAt: DateTime(2024),
+        );
+        final droppedGroup = UserGroup(
+          id: 'group-2',
+          name: 'Design',
+          createdAt: DateTime(2024),
+          updatedAt: DateTime(2024),
+        );
+
+        final message = Message(
+          id: 'message-id',
+          text: 'Hello @user1 and @User Two — heads up @channel @admin @Engineering',
+          mentionedUsers: [user1, user2, user3],
+          mentionedChannel: true,
+          mentionedHere: true,
+          mentionedRoles: const ['admin', 'moderator'],
+          mentionedGroupIds: const ['group-1', 'group-2'],
+          mentionedGroups: [stayingGroup, droppedGroup],
+        );
+
+        final json = message.toJson();
+
+        final mentionedUserIds = (json['mentioned_users'] as List).cast<String>();
+        expect(mentionedUserIds, containsAll(['user1', 'user2']));
+        expect(mentionedUserIds, isNot(contains('user3')));
+        expect(mentionedUserIds.length, equals(2));
+
+        expect(json['mentioned_channel'], isTrue);
+        expect(json['mentioned_here'], isFalse);
+        expect(json['mentioned_roles'], equals(['admin']));
+        expect(json['mentioned_group_ids'], equals(['group-1']));
+      });
+
+      group('respects @token word boundaries', () {
+        test('drops role admin when text only has @administrator', () {
+          final message = Message(
+            id: 'message-id',
+            text: 'Calling @administrator urgently',
+            mentionedRoles: const ['admin'],
+          );
+
+          expect(message.toJson()['mentioned_roles'], isEmpty);
+        });
+
+        test('drops mentionedChannel when text only has @channels', () {
+          final message = Message(
+            id: 'message-id',
+            text: '@channels are useful',
+            mentionedChannel: true,
+          );
+
+          expect(message.toJson()['mentioned_channel'], isFalse);
+        });
+
+        test('drops mentionedHere when text only has @hereafter', () {
+          final message = Message(
+            id: 'message-id',
+            text: '@hereafter please ignore',
+            mentionedHere: true,
+          );
+
+          expect(message.toJson()['mentioned_here'], isFalse);
+        });
+
+        test('drops user mention when text only has a longer @id match', () {
+          final admin = User(id: 'admin', name: 'Admin');
+
+          final message = Message(
+            id: 'message-id',
+            text: 'Calling @administrator urgently',
+            mentionedUsers: [admin],
+          );
+
+          final mentionedUserIds = (message.toJson()['mentioned_users'] as List).cast<String>();
+          expect(mentionedUserIds, isEmpty);
+        });
+
+        test('drops user mention when text only has a longer @name match', () {
+          final adminUser = User(id: 'u-1', name: 'admin');
+
+          final message = Message(
+            id: 'message-id',
+            text: 'Calling @administrator urgently',
+            mentionedUsers: [adminUser],
+          );
+
+          final mentionedUserIds = (message.toJson()['mentioned_users'] as List).cast<String>();
+          expect(mentionedUserIds, isEmpty);
+        });
+
+        test('drops group eng when text only has @engineering', () {
+          final engGroup = UserGroup(
+            id: 'group-eng',
+            name: 'eng',
+            createdAt: DateTime(2024),
+            updatedAt: DateTime(2024),
+          );
+
+          final message = Message(
+            id: 'message-id',
+            text: 'Ping @engineering for review',
+            mentionedGroupIds: const ['group-eng'],
+            mentionedGroups: [engGroup],
+          );
+
+          final json = message.toJson();
+          expect(json['mentioned_group_ids'], isEmpty);
+        });
+      });
     });
 
     group('ComparableFieldProvider', () {

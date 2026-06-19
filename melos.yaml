@@ -100,8 +100,8 @@ command:
       svg_icon_widget: ^0.0.1
       stream_core_flutter:
         git:
-          url: https://github.com/GetStream/stream-core-flutter
-          ref: 43f90a46d8092ca2c1e24c36af06f05fc0c633a6
+          url: https://github.com/GetStream/stream-core-flutter.git
+          ref: f022a26fea479b97d5a999cb8a7cdf5969b075f7
           path: packages/stream_core_flutter
       synchronized: ^3.4.0
       thumblr: ^0.0.4

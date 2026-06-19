@@ -7,7 +7,7 @@ import 'package:stream_chat_flutter/src/message_widget/components/stream_message
 import 'package:stream_chat_flutter/src/message_widget/stream_message_attachments.dart';
 import 'package:stream_chat_flutter/src/message_widget/stream_quoted_message.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
-import 'package:stream_core_flutter/stream_core_flutter.dart' as core;
+import 'package:stream_core_flutter/chat.dart' as core;
 
 /// Composes the main message content including the bubble, attachments, text,
 /// and reactions.
@@ -39,6 +39,7 @@ class StreamMessageContent extends StatefulWidget {
     this.attachmentBuilders,
     this.onLinkTap,
     this.onMentionTap,
+    this.onAnyMentionTap,
     this.onReactionsTap,
     this.onQuotedMessageTap,
     this.reactionSorting,
@@ -82,10 +83,26 @@ class StreamMessageContent extends StatefulWidget {
   /// If null, tapping a link has no effect.
   final MarkdownTapLinkCallback? onLinkTap;
 
-  /// Called when a `@mention` is tapped in the rendered message text.
+  /// Called when a user-type `@mention` is tapped in the rendered message
+  /// text.
   ///
-  /// If null, tapping a mention has no effect.
+  /// Only fires for user mentions; to handle every mention kind in one
+  /// callback, use [onAnyMentionTap] instead. When both are set,
+  /// [onAnyMentionTap] takes precedence.
+  ///
+  /// If null, tapping a user mention has no effect.
   final core.MarkdownTapMentionCallback? onMentionTap;
+
+  /// Called when a mention of any kind is tapped in the rendered message
+  /// text.
+  ///
+  /// Receives the [core.MentionType] decoded from the URL scheme along with
+  /// the display text and the URL-decoded id payload. Takes precedence over
+  /// [onMentionTap] when both are set.
+  ///
+  /// If null, the renderer falls back to [onMentionTap] for user mentions
+  /// only.
+  final core.MarkdownTapAnyMentionCallback? onAnyMentionTap;
 
   /// Called when the reactions area is tapped.
   ///
@@ -124,6 +141,7 @@ class _StreamMessageContentState extends State<StreamMessageContent> {
     final attachmentsWidth = renderBox.size.width;
 
     if (attachmentsWidth == 0) return;
+    if (widthLimit == attachmentsWidth) return;
     setState(() => widthLimit = attachmentsWidth);
   }
 
@@ -178,6 +196,7 @@ class _StreamMessageContentState extends State<StreamMessageContent> {
                           message: widget.message,
                           onLinkTap: widget.onLinkTap,
                           onMentionTap: widget.onMentionTap,
+                          onAnyMentionTap: widget.onAnyMentionTap,
                         ),
                     ],
                   ),
