@@ -624,6 +624,13 @@ class _ChannelLastMessageWithStatusState extends State<_ChannelLastMessageWithSt
 
         // Find the last valid message.
         final message = messages.lastWhereOrNull(_defaultLastMessagePredicate);
+        // Cache only while the channel has the latest messages loaded
+        // (isUpToDate). When isUpToDate is false (e.g. Channel.query(idAround:)
+        // truncates state mid-load), the previous value keeps rendering instead
+        // of false rendering the empty state.
+        if (channelState.isUpToDate) {
+          _currentLastMessage = message;
+        }
         final latestLastMessage = [message, _currentLastMessage].latest;
 
         if (latestLastMessage == null) {
@@ -736,6 +743,13 @@ class _ChannelLastMessageTextState extends State<ChannelLastMessageText> {
 
         // Otherwise, show the channel last message if it exists.
         final message = messages.lastWhereOrNull(widget.lastMessagePredicate);
+        // Cache only while the channel has the latest messages loaded
+        // (isUpToDate). When isUpToDate is false (e.g. Channel.query(idAround:)
+        // truncates state mid-load), the previous value keeps rendering instead
+        // of false rendering the empty state.
+        if (channelState.isUpToDate) {
+          _currentLastMessage = message;
+        }
         final latestLastMessage = [message, _currentLastMessage].latest;
 
         if (latestLastMessage == null) {

@@ -3,6 +3,7 @@
 🐛 Fixed
 
 - Fixed a use-after-dispose race condition in `StreamAttachmentPickerController`, `StreamAudioRecorderController`, and `StreamAudioPlaylistController`: async methods could write `value` after `dispose()`, causing a `notifyListeners()` assertion throw in debug mode. All three now use the `DisposeAwareValueNotifier` mixin from `stream_chat_flutter_core`.
+- Fixed last-message preview flicker during channel-state reloads.
 
 ✅ Added
 
