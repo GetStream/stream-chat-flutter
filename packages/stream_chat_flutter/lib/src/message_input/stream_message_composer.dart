@@ -1024,7 +1024,7 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
             children: [
               SizeTransition(
                 sizeFactor: _pickerAnimation,
-                alignment: Alignment.topCenter,
+                axisAlignment: -1,
                 child: _buildInlineAttachmentPicker(context),
               ),
               // Gradient wraps only the pill — not the picker sibling — so
