@@ -27,7 +27,7 @@ class StreamBackButton extends StatelessWidget {
   ///
   /// When null, falls back to [StreamAppBarStyle.appBarBehavior] from the
   /// ambient [StreamAppBarTheme], then to the ambient [StreamAppStyle].
-  final AppBarBehavior? appBarBehavior;
+  final StreamAppBarBehavior? appBarBehavior;
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +38,7 @@ class StreamBackButton extends StatelessWidget {
     final effectiveAppBarBehavior =
         appBarBehavior ??
         StreamAppBarTheme.of(context).style?.behavior ??
-        (StreamTheme.of(context).appStyle.isFloating ? AppBarBehavior.floating : AppBarBehavior.regular);
+        (StreamTheme.of(context).appStyle.isFloating ? .floating : .regular);
     final isFloating = switch (effectiveAppBarBehavior) {
       .floating => true,
       .regular => false,

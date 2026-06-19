@@ -1050,7 +1050,7 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
 
     return DecoratedBox(
       decoration: BoxDecoration(
-        gradient: streamFloatingFade(
+        gradient: streamFloatingFadeLinearGradient(
           color: bandColor,
           begin: Alignment.bottomCenter,
           end: Alignment.topCenter,
@@ -1088,9 +1088,9 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
             pollConfig: widget.props.pollConfig,
             optionsBuilder: widget.props.attachmentPickerOptionsBuilder,
             onError: _onPickerError,
-            onPollCreated: _onPollCreated,	
-      		onCommandSelected: _onCommandSelected,
-      		commandValidator: _effectiveController.validateCommand,
+            onPollCreated: _onPollCreated,
+            onCommandSelected: _onCommandSelected,
+            commandValidator: _effectiveController.validateCommand,
           );
 
     return ColoredBox(color: context.streamColorScheme.backgroundElevation1, child: child);

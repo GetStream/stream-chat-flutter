@@ -151,7 +151,7 @@ class StreamChannelHeader extends StatelessWidget implements PreferredSizeWidget
     final effectiveAppBarBehavior =
         style?.behavior ??
         StreamAppBarTheme.of(context).style?.behavior ??
-        (StreamTheme.of(context).appStyle.isFloating ? AppBarBehavior.floating : AppBarBehavior.regular);
+        (StreamTheme.of(context).appStyle.isFloating ? .floating : .regular);
     final showAvatarShadow = switch (effectiveAppBarBehavior) {
       .floating => true,
       .regular => false,
