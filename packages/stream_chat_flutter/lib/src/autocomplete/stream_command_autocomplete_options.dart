@@ -7,6 +7,14 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 // instead of pushing the composer / header off the screen.
 const _kMaxHeight = 208.0;
 
+/// Predicate returning the [CommandUnavailableReason] for [command] in the
+/// current composer context, or `null` if the command is available.
+///
+/// Modeled on [FormFieldValidator]: returning `null` means "ok", returning a
+/// non-null value carries the reason for the failure so callers can act on
+/// it (e.g. surface an explanation).
+typedef CommandValidator = CommandUnavailableReason? Function(Command command);
+
 /// {@template commands_overlay}
 /// Overlay for displaying commands that can be used
 /// to interact with the channel.
@@ -14,11 +22,12 @@ const _kMaxHeight = 208.0;
 class StreamCommandAutocompleteOptions extends StatelessWidget {
   /// Constructor for creating a [StreamCommandAutocompleteOptions]
   const StreamCommandAutocompleteOptions({
+    super.key,
     required this.query,
     required this.channel,
+    this.commandValidator,
     this.onCommandSelected,
-    this.style = AutocompleteOptionsStyle.fixed,
-    super.key,
+    this.style = .fixed,
   });
 
   /// Query for searching commands.
@@ -27,7 +36,21 @@ class StreamCommandAutocompleteOptions extends StatelessWidget {
   /// The channel to search for users.
   final Channel channel;
 
-  /// Callback called when a command is selected.
+  /// Resolves whether a command is available in the current composer state.
+  ///
+  /// Returns `null` when the command is enabled and selectable. A non-null
+  /// [CommandUnavailableReason] marks the row as dimmed; the row is still
+  /// tappable so [onCommandSelected] can decide what to do.
+  ///
+  /// When `null`, all commands are treated as enabled.
+  final CommandValidator? commandValidator;
+
+  /// Called when the user taps a command row.
+  ///
+  /// Fires for every row, including ones [commandValidator] flagged as disabled.
+  /// Re-run the commandValidator inside the callback to branch on availability
+  /// (e.g. activate the command vs. surface a snackbar explaining why it
+  /// can't be activated).
   final ValueSetter<Command>? onCommandSelected;
 
   /// The visual style of the autocomplete options overlay.
@@ -74,7 +97,8 @@ class StreamCommandAutocompleteOptions extends StatelessWidget {
         );
       },
       optionBuilder: (context, command) {
-        return ListTile(
+        final reason = commandValidator?.call(command);
+        final tile = ListTile(
           dense: true,
           horizontalTitleGap: context.streamSpacing.sm,
           leading: StreamCommandIcon(command: command),
@@ -97,6 +121,9 @@ class StreamCommandAutocompleteOptions extends StatelessWidget {
           ),
           onTap: onCommandSelected == null ? null : () => onCommandSelected!(command),
         );
+
+        if (reason == null) return tile;
+        return Opacity(opacity: 0.38, child: tile);
       },
     );
   }

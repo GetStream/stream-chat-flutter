@@ -130,6 +130,15 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
   String get instantCommandsLabel => 'Direkte kommandoer';
 
   @override
+  String get commandUnavailableWhileEditingError => 'Not available while editing';
+
+  @override
+  String get commandUnavailableWhileQuotingError => 'Not available while replying';
+
+  @override
+  String get commandUnavailableError => 'Command not available';
+
+  @override
   String fileTooLargeAfterCompressionError(double limitInMB) =>
       'Filen er for stor til å laste opp. '
       'Grensen for filopplasting er $limitInMB MB. '
@@ -807,4 +816,13 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
 
   @override
   String get addACommentDescription => 'La andre legge til kommentarer';
+
+  @override
+  String get notifyChannelText => 'Varsle alle i denne kanalen';
+
+  @override
+  String get notifyHereText => 'Varsle alle pålogga medlemmer i denne kanalen';
+
+  @override
+  String notifyRoleText(String role) => 'Varsle alle $role-medlemmer';
 }

@@ -10,7 +10,7 @@ import 'package:stream_chat_flutter/src/poll/stream_poll_options_sheet.dart';
 import 'package:stream_chat_flutter/src/poll/stream_poll_results_sheet.dart';
 import 'package:stream_chat_flutter/src/stream_chat.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
-import 'package:stream_core_flutter/stream_core_flutter.dart';
+import 'package:stream_core_flutter/chat.dart';
 
 /// An interactive poll attachment with voting and results.
 ///

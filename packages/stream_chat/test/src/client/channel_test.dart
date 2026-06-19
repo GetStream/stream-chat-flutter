@@ -8505,6 +8505,30 @@ void main() {
       (channel) => channel.canShareLocation,
     );
 
+    testCapability(
+      'NotifyChannel',
+      ChannelCapability.notifyChannel,
+      (channel) => channel.canNotifyChannel,
+    );
+
+    testCapability(
+      'NotifyHere',
+      ChannelCapability.notifyHere,
+      (channel) => channel.canNotifyHere,
+    );
+
+    testCapability(
+      'NotifyRole',
+      ChannelCapability.notifyRole,
+      (channel) => channel.canNotifyRole,
+    );
+
+    testCapability(
+      'NotifyGroup',
+      ChannelCapability.notifyGroup,
+      (channel) => channel.canNotifyGroup,
+    );
+
     test('returns correct values with multiple capabilities', () {
       final channelState = _generateChannelState(
         channelId,

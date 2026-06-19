@@ -127,6 +127,15 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
   String get instantCommandsLabel => 'Sofort-Befehle';
 
   @override
+  String get commandUnavailableWhileEditingError => 'Not available while editing';
+
+  @override
+  String get commandUnavailableWhileQuotingError => 'Not available while replying';
+
+  @override
+  String get commandUnavailableError => 'Command not available';
+
+  @override
   String fileTooLargeAfterCompressionError(double limitInMB) =>
       'Die Datei ist zu groß zum Hochladen. '
       'Die maximale Dateigröße beträgt $limitInMB MB. '
@@ -822,4 +831,13 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
 
   @override
   String get addACommentDescription => 'Anderen erlauben, Kommentare hinzuzufügen';
+
+  @override
+  String get notifyChannelText => 'Benachrichtige alle in diesem Kanal';
+
+  @override
+  String get notifyHereText => 'Benachrichtige alle Online-Mitglieder in diesem Kanal';
+
+  @override
+  String notifyRoleText(String role) => 'Benachrichtige alle $role-Mitglieder';
 }

@@ -130,6 +130,15 @@ class StreamChatLocalizationsFr extends GlobalStreamChatLocalizations {
   String get instantCommandsLabel => 'Commandes instantanées';
 
   @override
+  String get commandUnavailableWhileEditingError => 'Not available while editing';
+
+  @override
+  String get commandUnavailableWhileQuotingError => 'Not available while replying';
+
+  @override
+  String get commandUnavailableError => 'Command not available';
+
+  @override
   String fileTooLargeAfterCompressionError(double limitInMB) =>
       'Le fichier est trop volumineux pour être téléchargé. '
       'La taille maximale des fichiers est de $limitInMB Mo. '
@@ -828,4 +837,13 @@ Limite de pièces jointes dépassée : il n'est pas possible d'ajouter plus de $
 
   @override
   String get addACommentDescription => "Permettre aux autres d'ajouter des commentaires";
+
+  @override
+  String get notifyChannelText => 'Notifier tout le monde dans ce canal';
+
+  @override
+  String get notifyHereText => 'Notifier tous les membres en ligne de ce canal';
+
+  @override
+  String notifyRoleText(String role) => 'Notifier tous les membres $role';
 }

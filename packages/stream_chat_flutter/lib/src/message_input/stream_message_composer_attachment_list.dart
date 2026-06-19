@@ -2,11 +2,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/audio/audio_playlist_controller.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-import 'package:stream_core_flutter/stream_core_flutter.dart';
-// The local [StreamMessageComposerAttachment] (chat-domain wrapper) shadows
-// the same-named container from `stream_core_flutter`; this prefixed import
-// lets us reach the container by its core name without renaming either side.
-import 'package:stream_core_flutter/stream_core_flutter.dart' as core show StreamMessageComposerAttachment;
+import 'package:stream_core_flutter/chat.dart' as core;
 
 part 'stream_message_composer_attachment.dart';
 

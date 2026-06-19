@@ -344,6 +344,7 @@ Widget tabbedAttachmentPickerBuilder({
   AttachmentPickerOptionsBuilder? optionsBuilder,
   ValueSetter<AttachmentPickerError>? onError,
   ValueSetter<Poll>? onPollCreated,
+  CommandValidator? commandValidator,
   ValueSetter<Command>? onCommandSelected,
 }) {
   final defaultOptions = <TabbedAttachmentPickerOption>[
@@ -445,6 +446,7 @@ Widget tabbedAttachmentPickerBuilder({
       icon: context.streamIcons.command,
       supportedTypes: [AttachmentPickerType.command],
       optionViewBuilder: (context, controller) => StreamCommandPicker(
+        commandValidator: commandValidator,
         onCommandSelected: onCommandSelected,
       ),
     ),

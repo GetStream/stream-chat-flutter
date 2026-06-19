@@ -9,8 +9,10 @@ import 'package:stream_chat/src/core/api/message_api.dart';
 import 'package:stream_chat/src/core/api/moderation_api.dart';
 import 'package:stream_chat/src/core/api/polls_api.dart';
 import 'package:stream_chat/src/core/api/reminders_api.dart';
+import 'package:stream_chat/src/core/api/roles_api.dart';
 import 'package:stream_chat/src/core/api/threads_api.dart';
 import 'package:stream_chat/src/core/api/user_api.dart';
+import 'package:stream_chat/src/core/api/user_groups_api.dart';
 import 'package:stream_chat/src/core/http/connection_id_manager.dart';
 import 'package:stream_chat/src/core/http/stream_http_client.dart';
 import 'package:stream_chat/src/core/http/system_environment_manager.dart';
@@ -84,6 +86,14 @@ class StreamChatApi {
   /// Api dedicated to message reminders operations
   RemindersApi get reminders => _reminders ??= RemindersApi(_client);
   RemindersApi? _reminders;
+
+  /// Api dedicated to user groups operations
+  UserGroupsApi get userGroups => _userGroups ??= UserGroupsApi(_client);
+  UserGroupsApi? _userGroups;
+
+  /// Api dedicated to roles operations
+  RolesApi get roles => _roles ??= RolesApi(_client);
+  RolesApi? _roles;
 
   /// Api dedicated to general operations
   GeneralApi get general => _general ??= GeneralApi(_client);

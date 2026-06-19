@@ -1,3 +1,26 @@
+## Upcoming
+
+✅ Added
+
+- Added roles API on `StreamChatClient`: `searchRoles` for searching roles.
+- Added user-group APIs on `StreamChatClient`: `listUserGroups`, `searchUserGroups`, `getUserGroup`, `createUserGroup`, `updateUserGroup`, `deleteUserGroup`, `addUserGroupMembers`, `removeUserGroupMembers`.
+- Added enhanced-mention fields on `Message`: `mentionedChannel`, `mentionedHere`, `mentionedRoles`, `mentionedGroupIds`, and `mentionedGroups`.
+- Added `ChannelCapability.notifyChannel`, `notifyHere`, `notifyRole`, and `notifyGroup` capabilities, with matching `Channel.canNotifyChannel` / `canNotifyHere` / `canNotifyRole` / `canNotifyGroup` getters.
+- Added `ChannelConfig.pushLevel`, `pushNotifications`, and `chatPreferences` for per-channel-type push configuration.
+- Added `PushLevel` and `ChatPreferenceLevel` extension types and the `ChatPreferences` model — granular per-category push preferences (direct, channel, here, role, group mentions, thread replies, default).
+- Added `chatPreferences` field to `PushPreferenceInput`, `PushPreference`, and `ChannelPushPreference`.
+- Added `Command.set` field and `CommandSet` extension type (`fun`, `moderation`) for typed access to the backend's command set classifier.
+- Added `StreamChatClient.pauseReconnect` / `resumeReconnect` to suspend the WebSocket's auto-retry loop without tearing down the user session.
+
+🔄 Changed
+
+- `Command` constructor: `description` and `args` are now optional (default to `''`), matching the backend's "always present, may be empty" wire shape.
+
+🐞 Fixed
+
+- `Message.toJson` mention sanitization (`removeMentionsIfNotIncluded`) now requires `@token` to match at a word boundary, so e.g. typing `@administrator` no longer keeps a stale `admin` role mention alive, and `@channels` / `@hereafter` no longer keep `mentionedChannel` / `mentionedHere` set.
+- Fixed an unhandled `WebSocketChannelException` surfacing when a reconnect attempt failed (e.g. DNS lookup failed in background); the duplicate signal on `sink.done` is now ignored since the stream's `onError` already handles it.
+
 ## 10.0.1
 
 ✅ Added

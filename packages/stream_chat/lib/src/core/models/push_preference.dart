@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:stream_chat/src/core/models/chat_preferences.dart';
 
 part 'push_preference.g.dart';
 
@@ -8,13 +9,22 @@ extension type const ChatLevel(String rawType) implements String {
   /// All messages
   static const all = ChatLevel('all');
 
+  /// Only direct or indirect mentions
+  /// (`@username`, `@channel`, `@here`, group, or role).
+  static const allMentions = ChatLevel('all_mentions');
+
+  /// Only direct mentions (`@username`).
+  static const directMentions = ChatLevel('direct_mentions');
+
+  /// Only mentions
+  @Deprecated('Use directMentions instead')
+  static const mentions = ChatLevel('mentions');
+
   /// No messages
   static const none = ChatLevel('none');
 
-  /// Only mentions
-  static const mentions = ChatLevel('mentions');
-
-  /// Use default system setting
+  /// Fall through to the next preference tier
+  /// (member → user → channel config).
   static const defaultValue = ChatLevel('default');
 }
 
@@ -38,6 +48,7 @@ class PushPreferenceInput {
   const PushPreferenceInput({
     this.callLevel,
     this.chatLevel,
+    this.chatPreferences,
     this.disabledUntil,
     this.removeDisable,
   }) : channelCid = null;
@@ -48,6 +59,7 @@ class PushPreferenceInput {
     required String this.channelCid,
     this.callLevel,
     this.chatLevel,
+    this.chatPreferences,
     this.disabledUntil,
     this.removeDisable,
   });
@@ -60,6 +72,11 @@ class PushPreferenceInput {
 
   /// Push preference for chat messages
   final ChatLevel? chatLevel;
+
+  /// Granular per-category push preferences for chat messages.
+  ///
+  /// Mutually exclusive with [chatLevel].
+  final ChatPreferences? chatPreferences;
 
   /// Disabled until this date (snooze functionality)
   final DateTime? disabledUntil;
@@ -78,6 +95,7 @@ class PushPreference extends Equatable {
   const PushPreference({
     this.callLevel,
     this.chatLevel,
+    this.chatPreferences,
     this.disabledUntil,
   });
 
@@ -90,6 +108,11 @@ class PushPreference extends Equatable {
   /// Push preference for chat messages
   final ChatLevel? chatLevel;
 
+  /// Granular per-category push preferences for chat messages.
+  ///
+  /// Mutually exclusive with [chatLevel].
+  final ChatPreferences? chatPreferences;
+
   /// Disabled until this date (snooze functionality)
   final DateTime? disabledUntil;
 
@@ -97,7 +120,7 @@ class PushPreference extends Equatable {
   Map<String, dynamic> toJson() => _$PushPreferenceToJson(this);
 
   @override
-  List<Object?> get props => [callLevel, chatLevel, disabledUntil];
+  List<Object?> get props => [callLevel, chatLevel, chatPreferences, disabledUntil];
 }
 
 /// The class that contains push preferences for a specific channel
@@ -106,6 +129,7 @@ class ChannelPushPreference extends Equatable {
   /// Creates a new channel push preference instance
   const ChannelPushPreference({
     this.chatLevel,
+    this.chatPreferences,
     this.disabledUntil,
   });
 
@@ -115,6 +139,11 @@ class ChannelPushPreference extends Equatable {
   /// Push preference for chat messages
   final ChatLevel? chatLevel;
 
+  /// Granular per-category push preferences for chat messages.
+  ///
+  /// Mutually exclusive with [chatLevel].
+  final ChatPreferences? chatPreferences;
+
   /// Disabled until this date (snooze functionality)
   final DateTime? disabledUntil;
 
@@ -122,5 +151,5 @@ class ChannelPushPreference extends Equatable {
   Map<String, dynamic> toJson() => _$ChannelPushPreferenceToJson(this);
 
   @override
-  List<Object?> get props => [chatLevel, disabledUntil];
+  List<Object?> get props => [chatLevel, chatPreferences, disabledUntil];
 }

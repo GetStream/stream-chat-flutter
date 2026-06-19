@@ -10,7 +10,8 @@ import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 export 'package:stream_chat_flutter/src/message_input/stream_attachment_validator.dart';
 
 /// Controller class for [StreamAttachmentPicker].
-class StreamAttachmentPickerController extends ValueNotifier<AttachmentPickerValue> {
+class StreamAttachmentPickerController extends ValueNotifier<AttachmentPickerValue>
+    with DisposeAwareValueNotifier<AttachmentPickerValue> {
   /// Creates a new instance of [StreamAttachmentPickerController].
   ///
   /// The provided [validator] enforces per-attachment upload rules (size,

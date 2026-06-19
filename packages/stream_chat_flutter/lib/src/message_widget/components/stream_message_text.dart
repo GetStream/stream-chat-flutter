@@ -5,7 +5,7 @@ import 'package:stream_chat_flutter/src/stream_chat.dart';
 import 'package:stream_chat_flutter/src/utils/device_segmentation.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
-import 'package:stream_core_flutter/stream_core_flutter.dart' as core;
+import 'package:stream_core_flutter/chat.dart' as core;
 
 /// Displays the translated markdown message text, reacting to the current
 /// user's language preference.
@@ -29,6 +29,7 @@ class StreamMessageText extends StatelessWidget {
     required this.message,
     this.onLinkTap,
     this.onMentionTap,
+    this.onAnyMentionTap,
   });
 
   /// The message whose text to display.
@@ -39,11 +40,24 @@ class StreamMessageText extends StatelessWidget {
   /// If null, tapping a link has no effect.
   final MarkdownTapLinkCallback? onLinkTap;
 
-  /// Called when a `@mention` in the rendered markdown is tapped.
+  /// Called when a user `@mention` in the rendered markdown is tapped.
   ///
-  /// Mentions use the `[text](mention:id)` format in the raw markdown.
-  /// If null, tapping a mention has no effect.
+  /// Only fires for user-type mentions; broadcast / role / group mentions are
+  /// non-tappable when only this callback is set. To handle every mention
+  /// kind, use [onAnyMentionTap] instead. When both are provided,
+  /// [onAnyMentionTap] takes precedence.
+  ///
+  /// If null, tapping a user mention has no effect.
   final core.MarkdownTapMentionCallback? onMentionTap;
+
+  /// Called when a mention of any kind is tapped.
+  ///
+  /// Receives the [core.StreamMentionType] decoded from the URL scheme along with
+  /// the display text and the URL-decoded id payload. Takes precedence over
+  /// [onMentionTap] when both are set.
+  ///
+  /// If null, falls back to [onMentionTap] for user mentions only.
+  final core.MarkdownTapAnyMentionCallback? onAnyMentionTap;
 
   @override
   Widget build(BuildContext context) {
@@ -62,6 +76,7 @@ class StreamMessageText extends StatelessWidget {
           selectable: isDesktopDeviceOrWeb,
           onTapLink: onLinkTap,
           onTapMention: onMentionTap,
+          onTapAnyMention: onAnyMentionTap,
         );
       },
     );
