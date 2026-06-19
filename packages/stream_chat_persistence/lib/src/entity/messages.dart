@@ -153,3 +153,4 @@ class Messages extends Table {
   @override
   Set<Column> get primaryKey => {id};
 }
+// test: verify check_db_entities fails when schemaVersion isn't bumped (close without merge)
