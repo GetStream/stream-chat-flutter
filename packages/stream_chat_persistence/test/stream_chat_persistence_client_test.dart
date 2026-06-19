@@ -1,4 +1,4 @@
-// ignore_for_file: avoid_redundant_argument_values
+// ignore_for_file: avoid_redundant_argument_values, deprecated_member_use
 
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -104,6 +104,8 @@ void main() {
 
     setUpAll(() {
       registerFallbackValue(<String>[]);
+      registerFallbackValue(const Filter.empty());
+      registerFallbackValue(const <SortOption<ChannelState>>[]);
     });
 
     setUp(() async {
@@ -412,6 +414,437 @@ void main() {
 
       await client.updateChannelQueries(filter, cids);
       verify(() => mockDatabase.channelQueryDao.updateChannelQueries(filter, cids)).called(1);
+    });
+
+    group('queryChannelStates', () {
+      test('standard mode forwards filter and applies sort + pagination', () async {
+        // Three channel models with distinct cids so sort + pagination are
+        // observable in which cid gets hydrated.
+        final c0 = ChannelModel(cid: 'messaging:c0');
+        final c1 = ChannelModel(cid: 'messaging:c1');
+        final c2 = ChannelModel(cid: 'messaging:c2');
+        final channels = [c0, c1, c2];
+        const cids = ['messaging:c0', 'messaging:c1', 'messaging:c2'];
+
+        const currentUserId = 'test-user-id';
+        final filter = Filter.in_('members', const [currentUserId]);
+
+        // pinnedAt values chosen so descending order is [c1, c2, c0]. With
+        // offset 1 / limit 1 the only paged cid is c2.
+        final baseDate = DateTime.utc(2025);
+        final memberships = <String, Member>{
+          'messaging:c0': Member(
+            userId: currentUserId,
+            pinnedAt: baseDate.add(const Duration(days: 1)),
+          ),
+          'messaging:c1': Member(
+            userId: currentUserId,
+            pinnedAt: baseDate.add(const Duration(days: 3)),
+          ),
+          'messaging:c2': Member(
+            userId: currentUserId,
+            pinnedAt: baseDate.add(const Duration(days: 2)),
+          ),
+        };
+
+        when(() => mockDatabase.channelQueryDao.getChannels(filter: filter)).thenAnswer((_) async => channels);
+        // Lists compare by identity in Dart, so use any() matchers and verify
+        // the captured args afterwards.
+        when(() => mockDatabase.memberDao.getMembershipsForChannels(any(), any())).thenAnswer((_) async => memberships);
+
+        // Only c2 should be hydrated — stub every per-cid DAO call.
+        const pagedCid = 'messaging:c2';
+        final messages = List.generate(3, (i) => Message());
+        final members = List.generate(3, (i) => Member());
+        final reads = List.generate(
+          3,
+          (i) => Read(
+            user: User(id: 'testUserId$i'),
+            lastRead: DateTime.now(),
+            lastReadMessageId: 'lastMessageId$i',
+          ),
+        );
+        const messageLimit = 25;
+        const messagePagination = PaginationParams(limit: messageLimit);
+        when(() => mockDatabase.channelDao.getChannelByCid(pagedCid)).thenAnswer((_) async => c2);
+        when(() => mockDatabase.memberDao.getMembersByCid(pagedCid)).thenAnswer((_) async => members);
+        when(() => mockDatabase.readDao.getReadsByCid(pagedCid)).thenAnswer((_) async => reads);
+        when(
+          () => mockDatabase.messageDao.getMessagesByCid(pagedCid, messagePagination: messagePagination),
+        ).thenAnswer((_) async => messages);
+        when(() => mockDatabase.pinnedMessageDao.getMessagesByCid(pagedCid)).thenAnswer((_) async => messages);
+        when(() => mockDatabase.draftMessageDao.getDraftMessageByCid(pagedCid)).thenAnswer((_) async => null);
+
+        final result = await client.queryChannelStates(
+          filter: filter,
+          sort: const [
+            SortOption<ChannelState>.desc(ChannelSortKey.pinnedAt),
+          ],
+          messageLimit: messageLimit,
+          paginationParams: const PaginationParams(offset: 1, limit: 1),
+        );
+
+        // Sort + offset + limit applied: only c2 is returned.
+        expect(result.channels, hasLength(1));
+        expect(result.channels.single.channel!.cid, pagedCid);
+        expect(result.predefinedFilter, isNull);
+
+        // Filter forwarded to the channels query.
+        verify(() => mockDatabase.channelQueryDao.getChannels(filter: filter)).called(1);
+
+        // Memberships batched in a single query for all cids + connected user.
+        final capturedMembershipArgs = verify(
+          () => mockDatabase.memberDao.getMembershipsForChannels(captureAny(), captureAny()),
+        ).captured;
+        expect(capturedMembershipArgs, hasLength(2));
+        expect(capturedMembershipArgs.first, equals(cids));
+        expect(capturedMembershipArgs.last, equals(currentUserId));
+
+        // Only the paged cid was hydrated — c0 and c1 were skipped.
+        verify(() => mockDatabase.channelDao.getChannelByCid(pagedCid)).called(1);
+        verifyNever(() => mockDatabase.channelDao.getChannelByCid('messaging:c0'));
+        verifyNever(() => mockDatabase.channelDao.getChannelByCid('messaging:c1'));
+
+        // messageLimit forwarded as PaginationParams to the message DAO.
+        verify(
+          () => mockDatabase.messageDao.getMessagesByCid(pagedCid, messagePagination: messagePagination),
+        ).called(1);
+      });
+
+      test('standard mode returns empty response when no channels match', () async {
+        final filter = Filter.in_('members', const ['unknown_user']);
+
+        when(() => mockDatabase.channelQueryDao.getChannels(filter: filter)).thenAnswer((_) async => <ChannelModel>[]);
+
+        final result = await client.queryChannelStates(filter: filter);
+
+        expect(result.channels, isEmpty);
+        expect(result.predefinedFilter, isNull);
+        verify(() => mockDatabase.channelQueryDao.getChannels(filter: filter)).called(1);
+        verifyNever(() => mockDatabase.channelDao.getChannelByCid(any()));
+      });
+
+      test('standard mode clamps offset above total to an empty page', () async {
+        // Unique cid prefix so verifyNever doesn't collide with calls from
+        // earlier tests in the same group (mocktail records across tests).
+        final channels = List.generate(
+          3,
+          (i) => ChannelModel(cid: 'messaging:clamp_$i'),
+        );
+
+        when(() => mockDatabase.channelQueryDao.getChannels()).thenAnswer((_) async => channels);
+
+        final result = await client.queryChannelStates(
+          paginationParams: const PaginationParams(offset: 100),
+        );
+
+        expect(result.channels, isEmpty);
+        expect(result.predefinedFilter, isNull);
+        for (var i = 0; i < 3; i++) {
+          verifyNever(
+            () => mockDatabase.channelDao.getChannelByCid('messaging:clamp_$i'),
+          );
+        }
+      });
+
+      test('predefined mode applies persisted sort, paginates, and surfaces the resolved spec', () async {
+        const filterName = 'sample-app-list';
+        const filterValues = {'user_id': 'test-user-id'};
+        const sortValues = {'pinned_at': true};
+        const currentUserId = 'test-user-id';
+
+        // Three channel models with distinct cids so sort + pagination are
+        // observable in which cid gets hydrated.
+        final c0 = ChannelModel(cid: 'messaging:p0');
+        final c1 = ChannelModel(cid: 'messaging:p1');
+        final c2 = ChannelModel(cid: 'messaging:p2');
+        final channels = [c0, c1, c2];
+        const cids = ['messaging:p0', 'messaging:p1', 'messaging:p2'];
+
+        // Persisted sort uses `pinnedAt` so membership preload kicks in.
+        const persistedSort = <SortOption<ChannelState>>[
+          SortOption<ChannelState>.desc(ChannelSortKey.pinnedAt),
+        ];
+
+        // pinnedAt values chosen so descending order is [p1, p2, p0]. With
+        // offset 1 / limit 1 the only paged cid is p2.
+        final baseDate = DateTime.utc(2025);
+        final memberships = <String, Member>{
+          'messaging:p0': Member(
+            userId: currentUserId,
+            pinnedAt: baseDate.add(const Duration(days: 1)),
+          ),
+          'messaging:p1': Member(
+            userId: currentUserId,
+            pinnedAt: baseDate.add(const Duration(days: 3)),
+          ),
+          'messaging:p2': Member(
+            userId: currentUserId,
+            pinnedAt: baseDate.add(const Duration(days: 2)),
+          ),
+        };
+
+        final persistedFilter = Filter.equal('type', 'messaging');
+
+        when(
+          () => mockDatabase.channelQueryDao.getChannelsAndSpecByPredefinedFilter(
+            filterName,
+            filterValues: filterValues,
+            sortValues: sortValues,
+          ),
+        ).thenAnswer((_) async => (channels, persistedFilter, persistedSort));
+        // Lists compare by identity in Dart, so use any() matchers and verify
+        // the captured args afterwards.
+        when(() => mockDatabase.memberDao.getMembershipsForChannels(any(), any())).thenAnswer((_) async => memberships);
+
+        // Only p2 should be hydrated — stub every per-cid DAO call.
+        const pagedCid = 'messaging:p2';
+        final messages = List.generate(3, (i) => Message());
+        final members = List.generate(3, (i) => Member());
+        final reads = List.generate(
+          3,
+          (i) => Read(
+            user: User(id: 'testUserId$i'),
+            lastRead: DateTime.now(),
+            lastReadMessageId: 'lastMessageId$i',
+          ),
+        );
+        const messageLimit = 25;
+        const messagePagination = PaginationParams(limit: messageLimit);
+        when(() => mockDatabase.channelDao.getChannelByCid(pagedCid)).thenAnswer((_) async => c2);
+        when(() => mockDatabase.memberDao.getMembersByCid(pagedCid)).thenAnswer((_) async => members);
+        when(() => mockDatabase.readDao.getReadsByCid(pagedCid)).thenAnswer((_) async => reads);
+        when(
+          () => mockDatabase.messageDao.getMessagesByCid(pagedCid, messagePagination: messagePagination),
+        ).thenAnswer((_) async => messages);
+        when(() => mockDatabase.pinnedMessageDao.getMessagesByCid(pagedCid)).thenAnswer((_) async => messages);
+        when(() => mockDatabase.draftMessageDao.getDraftMessageByCid(pagedCid)).thenAnswer((_) async => null);
+
+        final result = await client.queryChannelStates(
+          predefinedFilter: filterName,
+          filterValues: filterValues,
+          sortValues: sortValues,
+          messageLimit: messageLimit,
+          paginationParams: const PaginationParams(offset: 1, limit: 1),
+        );
+
+        // Persisted sort + offset + limit applied: only p2 is returned.
+        expect(result.channels, hasLength(1));
+        expect(result.channels.single.channel!.cid, pagedCid);
+
+        // Persisted predefined-filter spec surfaced on the response.
+        expect(result.predefinedFilter, isNotNull);
+        expect(result.predefinedFilter!.name, filterName);
+        expect(result.predefinedFilter!.filter.toJson(), persistedFilter.toJson());
+        expect(result.predefinedFilter!.sort, persistedSort);
+
+        // DAO called with the predefined keys.
+        verify(
+          () => mockDatabase.channelQueryDao.getChannelsAndSpecByPredefinedFilter(
+            filterName,
+            filterValues: filterValues,
+            sortValues: sortValues,
+          ),
+        ).called(1);
+
+        // Memberships batched in a single query for all cids + connected user.
+        final capturedMembershipArgs = verify(
+          () => mockDatabase.memberDao.getMembershipsForChannels(captureAny(), captureAny()),
+        ).captured;
+        expect(capturedMembershipArgs, hasLength(2));
+        expect(capturedMembershipArgs.first, equals(cids));
+        expect(capturedMembershipArgs.last, equals(currentUserId));
+
+        // Only the paged cid was hydrated — p0 and p1 were skipped.
+        verify(() => mockDatabase.channelDao.getChannelByCid(pagedCid)).called(1);
+        verifyNever(() => mockDatabase.channelDao.getChannelByCid('messaging:p0'));
+        verifyNever(() => mockDatabase.channelDao.getChannelByCid('messaging:p1'));
+
+        // messageLimit forwarded as PaginationParams to the message DAO.
+        verify(
+          () => mockDatabase.messageDao.getMessagesByCid(pagedCid, messagePagination: messagePagination),
+        ).called(1);
+      });
+
+      test('predefined mode with no persisted spec returns null predefinedFilter', () async {
+        const filterName = 'sample-app-list';
+
+        when(
+          () => mockDatabase.channelQueryDao.getChannelsAndSpecByPredefinedFilter(
+            filterName,
+            filterValues: any(named: 'filterValues'),
+            sortValues: any(named: 'sortValues'),
+          ),
+        ).thenAnswer((_) async => (const <ChannelModel>[], null, null));
+
+        final result = await client.queryChannelStates(predefinedFilter: filterName);
+
+        expect(result.channels, isEmpty);
+        expect(result.predefinedFilter, isNull);
+      });
+
+      test('predefined mode clamps offset above total to an empty page', () async {
+        // Unique cid prefix so verifyNever doesn't collide with calls from
+        // earlier tests in the same group (mocktail records across tests).
+        const filterName = 'sample-app-list';
+        final channels = List.generate(
+          3,
+          (i) => ChannelModel(cid: 'messaging:clamp_p$i'),
+        );
+
+        when(
+          () => mockDatabase.channelQueryDao.getChannelsAndSpecByPredefinedFilter(
+            filterName,
+            filterValues: any(named: 'filterValues'),
+            sortValues: any(named: 'sortValues'),
+          ),
+        ).thenAnswer((_) async => (channels, null, null));
+
+        final result = await client.queryChannelStates(
+          predefinedFilter: filterName,
+          paginationParams: const PaginationParams(offset: 100),
+        );
+
+        expect(result.channels, isEmpty);
+        expect(result.predefinedFilter, isNull);
+        for (var i = 0; i < 3; i++) {
+          verifyNever(
+            () => mockDatabase.channelDao.getChannelByCid('messaging:clamp_p$i'),
+          );
+        }
+      });
+    });
+
+    group('saveChannelQueries', () {
+      test('standard mode forwards to channelQueryDao.updateChannelQueries', () async {
+        final filter = Filter.in_('members', const ['testUserId']);
+        const cids = <String>[];
+        when(() => mockDatabase.channelQueryDao.updateChannelQueries(filter, cids)).thenAnswer((_) => Future.value());
+
+        await client.saveChannelQueries(cids: cids, filter: filter);
+
+        verify(() => mockDatabase.channelQueryDao.updateChannelQueries(filter, cids)).called(1);
+      });
+
+      test('standard mode ignores resolvedFilter and resolvedSort', () async {
+        final filter = Filter.in_('members', const ['testUserId']);
+        const cids = <String>['messaging:c0'];
+        final resolvedFilter = Filter.equal('type', 'messaging');
+        const resolvedSort = <SortOption<ChannelState>>[
+          SortOption<ChannelState>.desc(ChannelSortKey.lastMessageAt),
+        ];
+
+        when(
+          () => mockDatabase.channelQueryDao.updateChannelQueries(
+            filter,
+            cids,
+            clearQueryCache: false,
+          ),
+        ).thenAnswer((_) => Future.value());
+
+        await client.saveChannelQueries(
+          cids: cids,
+          filter: filter,
+          sort: resolvedSort,
+          resolvedFilter: resolvedFilter,
+          resolvedSort: resolvedSort,
+        );
+
+        verify(
+          () => mockDatabase.channelQueryDao.updateChannelQueries(
+            filter,
+            cids,
+            clearQueryCache: false,
+          ),
+        ).called(1);
+        verifyNever(
+          () => mockDatabase.channelQueryDao.updateChannelQueriesByPredefinedFilter(
+            any(),
+            any(),
+            filter: any(named: 'filter'),
+            sort: any(named: 'sort'),
+            filterValues: any(named: 'filterValues'),
+            sortValues: any(named: 'sortValues'),
+            clearQueryCache: any(named: 'clearQueryCache'),
+          ),
+        );
+      });
+
+      test('predefined mode forwards all args to channelQueryDao.updateChannelQueriesByPredefinedFilter', () async {
+        const filterName = 'sample-app-list';
+        const filterValues = {'user_id': 'testUserId'};
+        const sortValues = {'pinned_at': true};
+        const cids = <String>['messaging:c0'];
+        final resolvedFilter = Filter.equal('type', 'messaging');
+        const resolvedSort = <SortOption<ChannelState>>[
+          SortOption<ChannelState>.desc(ChannelSortKey.lastMessageAt),
+        ];
+
+        when(
+          () => mockDatabase.channelQueryDao.updateChannelQueriesByPredefinedFilter(
+            filterName,
+            cids,
+            filter: resolvedFilter,
+            sort: resolvedSort,
+            filterValues: filterValues,
+            sortValues: sortValues,
+            clearQueryCache: true,
+          ),
+        ).thenAnswer((_) => Future.value());
+
+        await client.saveChannelQueries(
+          cids: cids,
+          predefinedFilter: filterName,
+          resolvedFilter: resolvedFilter,
+          resolvedSort: resolvedSort,
+          filterValues: filterValues,
+          sortValues: sortValues,
+          clearQueryCache: true,
+        );
+
+        verify(
+          () => mockDatabase.channelQueryDao.updateChannelQueriesByPredefinedFilter(
+            filterName,
+            cids,
+            filter: resolvedFilter,
+            sort: resolvedSort,
+            filterValues: filterValues,
+            sortValues: sortValues,
+            clearQueryCache: true,
+          ),
+        ).called(1);
+      });
+
+      test('predefined mode applies Filter.empty() and empty-sort fallback when resolved values are null', () async {
+        const filterName = 'sample-app-list';
+        const cids = <String>['messaging:c0'];
+
+        when(
+          () => mockDatabase.channelQueryDao.updateChannelQueriesByPredefinedFilter(
+            filterName,
+            cids,
+            filter: const Filter.empty(),
+            sort: const [],
+            filterValues: null,
+            sortValues: null,
+            clearQueryCache: false,
+          ),
+        ).thenAnswer((_) => Future.value());
+
+        await client.saveChannelQueries(cids: cids, predefinedFilter: filterName);
+
+        verify(
+          () => mockDatabase.channelQueryDao.updateChannelQueriesByPredefinedFilter(
+            filterName,
+            cids,
+            filter: const Filter.empty(),
+            sort: const [],
+            filterValues: null,
+            sortValues: null,
+            clearQueryCache: false,
+          ),
+        ).called(1);
+      });
     });
 
     test('deleteMessageById', () async {

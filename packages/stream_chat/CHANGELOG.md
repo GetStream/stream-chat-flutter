@@ -31,10 +31,13 @@
 - Added `Message.updateWith(Message? other)` — merges a server-side update onto the local message while preserving locally-known `poll`, `sharedLocation`, `ownReactions`, and nested `quotedMessage` enrichment when the server omits them.
 - Added `Channel.isOneToOne` — true when the channel is `isDistinct` and has exactly two members. For the looser count-only check, inline `channel.memberCount == 2`.
 - Added `IterableMergeX.merge` (keyed-map merge on `Iterable<T>`, unsorted output) and `SortedListX.mergeSorted` (two-pointer merge on a sorted `List<T>`). Splits what `SortedListX.merge` did in 9.24.0 — see Changed below.
+- Added support for predefined filters for `QueryChannels` on `StreamChatClient` (`StreamChatClient.queryChannels` and `StreamChatClient.queryChannelsWithResult`).
+- Added `ChatPersistenceClient.queryChannelStates` and `ChatPersistenceClient.saveChannelQueries` as the unified read/write methods for channel-query persistence. Both accept standard and predefined-filter parameters and internally dispatch.
 
 ⚠️ Deprecated
 
 - Deprecated `Message.syncWith` in favor of `Message.updateWith`. Note the arguments are flipped: `local.updateWith(remote)` replaces `remote.syncWith(local)`.
+- Deprecated `ChatPersistenceClient.getChannelStates` and `ChatPersistenceClient.updateChannelQueries` in favor of the unified `queryChannelStates` / `saveChannelQueries`. The deprecated methods stay overridable so downstream subclasses keep working unchanged.
 
 🔄 Changed
 

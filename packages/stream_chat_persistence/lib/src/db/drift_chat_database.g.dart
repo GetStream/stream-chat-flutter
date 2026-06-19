@@ -10985,6 +10985,278 @@ class ChannelQueriesCompanion extends UpdateCompanion<ChannelQueryEntity> {
   }
 }
 
+class $ChannelQueriesMetadataTable extends ChannelQueriesMetadata
+    with TableInfo<$ChannelQueriesMetadataTable, ChannelQueryMetadataEntity> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ChannelQueriesMetadataTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _queryHashMeta = const VerificationMeta(
+    'queryHash',
+  );
+  @override
+  late final GeneratedColumn<String> queryHash = GeneratedColumn<String>(
+    'query_hash',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<Filter, String> filter = GeneratedColumn<String>(
+    'filter',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  ).withConverter<Filter>($ChannelQueriesMetadataTable.$converterfilter);
+  @override
+  late final GeneratedColumnWithTypeConverter<SortOrder<ChannelState>, String> sort =
+      GeneratedColumn<String>(
+        'sort',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      ).withConverter<SortOrder<ChannelState>>(
+        $ChannelQueriesMetadataTable.$convertersort,
+      );
+  @override
+  List<GeneratedColumn> get $columns => [queryHash, filter, sort];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'channel_queries_metadata';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ChannelQueryMetadataEntity> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('query_hash')) {
+      context.handle(
+        _queryHashMeta,
+        queryHash.isAcceptableOrUnknown(data['query_hash']!, _queryHashMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_queryHashMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {queryHash};
+  @override
+  ChannelQueryMetadataEntity map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ChannelQueryMetadataEntity(
+      queryHash: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}query_hash'],
+      )!,
+      filter: $ChannelQueriesMetadataTable.$converterfilter.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}filter'],
+        )!,
+      ),
+      sort: $ChannelQueriesMetadataTable.$convertersort.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}sort'],
+        )!,
+      ),
+    );
+  }
+
+  @override
+  $ChannelQueriesMetadataTable createAlias(String alias) {
+    return $ChannelQueriesMetadataTable(attachedDatabase, alias);
+  }
+
+  static TypeConverter<Filter, String> $converterfilter = const FilterConverter();
+  static TypeConverter<SortOrder<ChannelState>, String> $convertersort = const ChannelStateSortOrderConverter();
+}
+
+class ChannelQueryMetadataEntity extends DataClass implements Insertable<ChannelQueryMetadataEntity> {
+  /// The query hash this metadata is associated with. Matches the hashes
+  /// produced by `ChannelQueryDao` for predefined-filter queries.
+  final String queryHash;
+
+  /// The server-resolved filter spec to surface on offline reads.
+  final Filter filter;
+
+  /// The server-resolved sort spec to apply on offline reads.
+  final SortOrder<ChannelState> sort;
+  const ChannelQueryMetadataEntity({
+    required this.queryHash,
+    required this.filter,
+    required this.sort,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['query_hash'] = Variable<String>(queryHash);
+    {
+      map['filter'] = Variable<String>(
+        $ChannelQueriesMetadataTable.$converterfilter.toSql(filter),
+      );
+    }
+    {
+      map['sort'] = Variable<String>(
+        $ChannelQueriesMetadataTable.$convertersort.toSql(sort),
+      );
+    }
+    return map;
+  }
+
+  factory ChannelQueryMetadataEntity.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ChannelQueryMetadataEntity(
+      queryHash: serializer.fromJson<String>(json['queryHash']),
+      filter: serializer.fromJson<Filter>(json['filter']),
+      sort: serializer.fromJson<SortOrder<ChannelState>>(json['sort']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'queryHash': serializer.toJson<String>(queryHash),
+      'filter': serializer.toJson<Filter>(filter),
+      'sort': serializer.toJson<SortOrder<ChannelState>>(sort),
+    };
+  }
+
+  ChannelQueryMetadataEntity copyWith({
+    String? queryHash,
+    Filter? filter,
+    SortOrder<ChannelState>? sort,
+  }) => ChannelQueryMetadataEntity(
+    queryHash: queryHash ?? this.queryHash,
+    filter: filter ?? this.filter,
+    sort: sort ?? this.sort,
+  );
+  ChannelQueryMetadataEntity copyWithCompanion(
+    ChannelQueriesMetadataCompanion data,
+  ) {
+    return ChannelQueryMetadataEntity(
+      queryHash: data.queryHash.present ? data.queryHash.value : this.queryHash,
+      filter: data.filter.present ? data.filter.value : this.filter,
+      sort: data.sort.present ? data.sort.value : this.sort,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ChannelQueryMetadataEntity(')
+          ..write('queryHash: $queryHash, ')
+          ..write('filter: $filter, ')
+          ..write('sort: $sort')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(queryHash, filter, sort);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ChannelQueryMetadataEntity &&
+          other.queryHash == this.queryHash &&
+          other.filter == this.filter &&
+          other.sort == this.sort);
+}
+
+class ChannelQueriesMetadataCompanion extends UpdateCompanion<ChannelQueryMetadataEntity> {
+  final Value<String> queryHash;
+  final Value<Filter> filter;
+  final Value<SortOrder<ChannelState>> sort;
+  final Value<int> rowid;
+  const ChannelQueriesMetadataCompanion({
+    this.queryHash = const Value.absent(),
+    this.filter = const Value.absent(),
+    this.sort = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ChannelQueriesMetadataCompanion.insert({
+    required String queryHash,
+    required Filter filter,
+    required SortOrder<ChannelState> sort,
+    this.rowid = const Value.absent(),
+  }) : queryHash = Value(queryHash),
+       filter = Value(filter),
+       sort = Value(sort);
+  static Insertable<ChannelQueryMetadataEntity> custom({
+    Expression<String>? queryHash,
+    Expression<String>? filter,
+    Expression<String>? sort,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (queryHash != null) 'query_hash': queryHash,
+      if (filter != null) 'filter': filter,
+      if (sort != null) 'sort': sort,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ChannelQueriesMetadataCompanion copyWith({
+    Value<String>? queryHash,
+    Value<Filter>? filter,
+    Value<SortOrder<ChannelState>>? sort,
+    Value<int>? rowid,
+  }) {
+    return ChannelQueriesMetadataCompanion(
+      queryHash: queryHash ?? this.queryHash,
+      filter: filter ?? this.filter,
+      sort: sort ?? this.sort,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (queryHash.present) {
+      map['query_hash'] = Variable<String>(queryHash.value);
+    }
+    if (filter.present) {
+      map['filter'] = Variable<String>(
+        $ChannelQueriesMetadataTable.$converterfilter.toSql(filter.value),
+      );
+    }
+    if (sort.present) {
+      map['sort'] = Variable<String>(
+        $ChannelQueriesMetadataTable.$convertersort.toSql(sort.value),
+      );
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ChannelQueriesMetadataCompanion(')
+          ..write('queryHash: $queryHash, ')
+          ..write('filter: $filter, ')
+          ..write('sort: $sort, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $ConnectionEventsTable extends ConnectionEvents with TableInfo<$ConnectionEventsTable, ConnectionEventEntity> {
   @override
   final GeneratedDatabase attachedDatabase;
@@ -11461,6 +11733,7 @@ abstract class _$DriftChatDatabase extends GeneratedDatabase {
   late final $MembersTable members = $MembersTable(this);
   late final $ReadsTable reads = $ReadsTable(this);
   late final $ChannelQueriesTable channelQueries = $ChannelQueriesTable(this);
+  late final $ChannelQueriesMetadataTable channelQueriesMetadata = $ChannelQueriesMetadataTable(this);
   late final $ConnectionEventsTable connectionEvents = $ConnectionEventsTable(
     this,
   );
@@ -11503,6 +11776,7 @@ abstract class _$DriftChatDatabase extends GeneratedDatabase {
     members,
     reads,
     channelQueries,
+    channelQueriesMetadata,
     connectionEvents,
   ];
   @override
@@ -18517,6 +18791,173 @@ typedef $$ChannelQueriesTableProcessedTableManager =
       ChannelQueryEntity,
       PrefetchHooks Function()
     >;
+typedef $$ChannelQueriesMetadataTableCreateCompanionBuilder =
+    ChannelQueriesMetadataCompanion Function({
+      required String queryHash,
+      required Filter filter,
+      required SortOrder<ChannelState> sort,
+      Value<int> rowid,
+    });
+typedef $$ChannelQueriesMetadataTableUpdateCompanionBuilder =
+    ChannelQueriesMetadataCompanion Function({
+      Value<String> queryHash,
+      Value<Filter> filter,
+      Value<SortOrder<ChannelState>> sort,
+      Value<int> rowid,
+    });
+
+class $$ChannelQueriesMetadataTableFilterComposer extends Composer<_$DriftChatDatabase, $ChannelQueriesMetadataTable> {
+  $$ChannelQueriesMetadataTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get queryHash => $composableBuilder(
+    column: $table.queryHash,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<Filter, Filter, String> get filter => $composableBuilder(
+    column: $table.filter,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<SortOrder<ChannelState>, SortOrder<ChannelState>, String> get sort =>
+      $composableBuilder(
+        column: $table.sort,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+}
+
+class $$ChannelQueriesMetadataTableOrderingComposer
+    extends Composer<_$DriftChatDatabase, $ChannelQueriesMetadataTable> {
+  $$ChannelQueriesMetadataTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get queryHash => $composableBuilder(
+    column: $table.queryHash,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get filter => $composableBuilder(
+    column: $table.filter,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get sort => $composableBuilder(
+    column: $table.sort,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$ChannelQueriesMetadataTableAnnotationComposer
+    extends Composer<_$DriftChatDatabase, $ChannelQueriesMetadataTable> {
+  $$ChannelQueriesMetadataTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get queryHash => $composableBuilder(column: $table.queryHash, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<Filter, String> get filter =>
+      $composableBuilder(column: $table.filter, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<SortOrder<ChannelState>, String> get sort =>
+      $composableBuilder(column: $table.sort, builder: (column) => column);
+}
+
+class $$ChannelQueriesMetadataTableTableManager
+    extends
+        RootTableManager<
+          _$DriftChatDatabase,
+          $ChannelQueriesMetadataTable,
+          ChannelQueryMetadataEntity,
+          $$ChannelQueriesMetadataTableFilterComposer,
+          $$ChannelQueriesMetadataTableOrderingComposer,
+          $$ChannelQueriesMetadataTableAnnotationComposer,
+          $$ChannelQueriesMetadataTableCreateCompanionBuilder,
+          $$ChannelQueriesMetadataTableUpdateCompanionBuilder,
+          (
+            ChannelQueryMetadataEntity,
+            BaseReferences<_$DriftChatDatabase, $ChannelQueriesMetadataTable, ChannelQueryMetadataEntity>,
+          ),
+          ChannelQueryMetadataEntity,
+          PrefetchHooks Function()
+        > {
+  $$ChannelQueriesMetadataTableTableManager(
+    _$DriftChatDatabase db,
+    $ChannelQueriesMetadataTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () => $$ChannelQueriesMetadataTableFilterComposer(
+            $db: db,
+            $table: table,
+          ),
+          createOrderingComposer: () => $$ChannelQueriesMetadataTableOrderingComposer(
+            $db: db,
+            $table: table,
+          ),
+          createComputedFieldComposer: () => $$ChannelQueriesMetadataTableAnnotationComposer(
+            $db: db,
+            $table: table,
+          ),
+          updateCompanionCallback:
+              ({
+                Value<String> queryHash = const Value.absent(),
+                Value<Filter> filter = const Value.absent(),
+                Value<SortOrder<ChannelState>> sort = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ChannelQueriesMetadataCompanion(
+                queryHash: queryHash,
+                filter: filter,
+                sort: sort,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String queryHash,
+                required Filter filter,
+                required SortOrder<ChannelState> sort,
+                Value<int> rowid = const Value.absent(),
+              }) => ChannelQueriesMetadataCompanion.insert(
+                queryHash: queryHash,
+                filter: filter,
+                sort: sort,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0.map((e) => (e.readTable(table), BaseReferences(db, table, e))).toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$ChannelQueriesMetadataTableProcessedTableManager =
+    ProcessedTableManager<
+      _$DriftChatDatabase,
+      $ChannelQueriesMetadataTable,
+      ChannelQueryMetadataEntity,
+      $$ChannelQueriesMetadataTableFilterComposer,
+      $$ChannelQueriesMetadataTableOrderingComposer,
+      $$ChannelQueriesMetadataTableAnnotationComposer,
+      $$ChannelQueriesMetadataTableCreateCompanionBuilder,
+      $$ChannelQueriesMetadataTableUpdateCompanionBuilder,
+      (
+        ChannelQueryMetadataEntity,
+        BaseReferences<_$DriftChatDatabase, $ChannelQueriesMetadataTable, ChannelQueryMetadataEntity>,
+      ),
+      ChannelQueryMetadataEntity,
+      PrefetchHooks Function()
+    >;
 typedef $$ConnectionEventsTableCreateCompanionBuilder =
     ConnectionEventsCompanion Function({
       Value<int> id,
@@ -18769,6 +19210,10 @@ class $DriftChatDatabaseManager {
   $$MembersTableTableManager get members => $$MembersTableTableManager(_db, _db.members);
   $$ReadsTableTableManager get reads => $$ReadsTableTableManager(_db, _db.reads);
   $$ChannelQueriesTableTableManager get channelQueries => $$ChannelQueriesTableTableManager(_db, _db.channelQueries);
+  $$ChannelQueriesMetadataTableTableManager get channelQueriesMetadata => $$ChannelQueriesMetadataTableTableManager(
+    _db,
+    _db.channelQueriesMetadata,
+  );
   $$ConnectionEventsTableTableManager get connectionEvents =>
       $$ConnectionEventsTableTableManager(_db, _db.connectionEvents);
 }
