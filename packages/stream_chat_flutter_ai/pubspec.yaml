@@ -1,0 +1,48 @@
+name: stream_chat_flutter_ai
+homepage: https://github.com/GetStream/stream-chat-flutter
+description: Stream Chat AI Flutter components. Build AI-powered chat experiences with Stream.
+version: 0.0.1
+repository: https://github.com/GetStream/stream-chat-flutter
+issue_tracker: https://github.com/GetStream/stream-chat-flutter/issues
+
+# Note: The environment configuration and dependency versions are managed by Melos.
+#
+# Do not edit them manually.
+#
+# Steps to update dependencies:
+#   1. Modify the version in the melos.yaml file.
+#   2. Run `melos bootstrap` to apply changes.
+#
+# Steps to add a new dependency:
+#   1. Add the dependency to this list.
+#   2. Add it to the melos.yaml file for future updates.
+
+environment:
+  sdk: ^3.11.0
+  flutter: ">=3.41.0"
+
+dependencies:
+  fl_chart: ^1.2.0
+  flutter:
+    sdk: flutter
+  flutter_markdown_plus: ^1.0.7
+  speech_to_text: ^7.0.0
+  stream_chat_flutter: ^10.0.1
+
+dev_dependencies:
+  alchemist: ^0.14.0
+  flutter_test:
+    sdk: flutter
+  mocktail: ^1.0.5
+
+# This package supports all platforms listed below.
+flutter:
+  uses-material-design: true
+
+platforms:
+  android:
+  ios:
+  linux:
+  macos:
+  web:
+  windows:

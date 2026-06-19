@@ -1,5 +1,13 @@
 ## Upcoming
 
+⚠️ Deprecated
+
+- `AITypingIndicatorView`, `AnimatedDots`, `TypewriterController`, `TypewriterValue`,
+  `TypewriterState`, `TypewriterWidgetBuilder`, `StreamTypewriterBuilder`, and
+  `StreamingMessageView` have moved to `package:stream_chat_flutter_ai`. The copies in
+  this package are deprecated and will be removed in a future release. Migrate by adding
+  `stream_chat_flutter_ai` to your `pubspec.yaml` and updating your imports.
+
 🐛 Fixed
 
 - Fixed a use-after-dispose race condition in `StreamAttachmentPickerController`, `StreamAudioRecorderController`, and `StreamAudioPlaylistController`: async methods could write `value` after `dispose()`, causing a `notifyListeners()` assertion throw in debug mode. All three now use the `DisposeAwareValueNotifier` mixin from `stream_chat_flutter_core`.

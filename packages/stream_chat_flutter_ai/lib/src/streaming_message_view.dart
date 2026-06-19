@@ -1,18 +1,22 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_markdown/flutter_markdown.dart';
-import 'package:stream_chat_flutter/src/ai_assistant/stream_typewriter_builder.dart';
-import 'package:stream_chat_flutter/src/utils/device_segmentation.dart';
-import 'package:stream_chat_flutter/src/utils/helpers.dart';
-import 'package:stream_core_flutter/chat.dart' as core;
+import 'package:stream_chat_flutter_ai/src/ai_markdown_body.dart';
+import 'package:stream_chat_flutter_ai/src/stream_typewriter_builder.dart';
+
+bool get _isDesktopDeviceOrWeb =>
+    kIsWeb ||
+    defaultTargetPlatform == TargetPlatform.macOS ||
+    defaultTargetPlatform == TargetPlatform.windows ||
+    defaultTargetPlatform == TargetPlatform.linux;
 
 /// {@template streamingMessageView}
 /// A widget that displays a message in a streaming fashion. The message is
 /// displayed as if it is being typed out by a typewriter.
+///
+/// Markdown in the message is fully rendered, including:
+/// - Fenced code blocks (with a copy-to-clipboard button and language label).
+/// - JSON / chart blocks rendered as interactive charts.
 /// {@endtemplate}
-@Deprecated(
-  'Moved to package:stream_chat_flutter_ai. '
-  'Will be removed in a future release.',
-)
 class StreamingMessageView extends StatefulWidget {
   /// {@macro streamingMessageView}
   const StreamingMessageView({
@@ -31,7 +35,9 @@ class StreamingMessageView extends StatefulWidget {
   /// Defaults to 10 milliseconds per character.
   final Duration typingSpeed;
 
-  /// Called when the user taps a link in the message.
+  /// Called when the user taps a hyperlink in the rendered markdown.
+  ///
+  /// If not provided, links are silently ignored.
   final MarkdownTapLinkCallback? onTapLink;
 
   /// A callback that is called whenever the typewriter state changes.
@@ -80,15 +86,10 @@ class _StreamingMessageViewState extends State<StreamingMessageView> {
 
   @override
   Widget build(BuildContext context) {
-    return core.StreamMessageText(
-      _displayText,
-      selectable: isDesktopDeviceOrWeb,
-      onTapLink: switch (widget.onTapLink) {
-        final onTapLink? => onTapLink,
-        _ => (String link, String? href, String title) {
-          if (href != null) launchURL(context, href);
-        },
-      },
+    return AiMarkdownBody(
+      data: _displayText,
+      selectable: _isDesktopDeviceOrWeb,
+      onTapLink: widget.onTapLink,
     );
   }
 }

@@ -17,10 +17,6 @@ import 'package:flutter/material.dart';
 /// see also:
 /// - [AnimatedDots] which is used to display the animated dots.
 /// {@endtemplate}
-@Deprecated(
-  'Moved to package:stream_chat_flutter_ai. '
-  'Will be removed in a future release.',
-)
 class AITypingIndicatorView extends StatelessWidget {
   /// {@macro aiTypingIndicatorView}
   const AITypingIndicatorView({
@@ -83,10 +79,6 @@ class AITypingIndicatorView extends StatelessWidget {
 ///
 /// The widget is typically used to indicate that someone is typing.
 /// {@endtemplate}
-@Deprecated(
-  'Moved to package:stream_chat_flutter_ai. '
-  'Will be removed in a future release.',
-)
 class AnimatedDots extends StatelessWidget {
   /// {@macro animatedDots}
   const AnimatedDots({

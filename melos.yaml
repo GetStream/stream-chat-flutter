@@ -55,7 +55,9 @@ command:
       flutter_local_notifications: ^21.0.0
       flutter_map: ^8.1.1
       flutter_map_animations: ^0.9.0
+      fl_chart: ^1.2.0
       flutter_markdown: ^0.7.7+1
+      flutter_markdown_plus: ^1.0.7
       flutter_portal: ^1.1.4
       flutter_secure_storage: ^9.2.2
       flutter_slidable: ^3.1.1
@@ -98,6 +100,7 @@ command:
       stream_chat_persistence: ^10.0.1
       streaming_shared_preferences: ^2.0.0
       svg_icon_widget: ^0.0.1
+      speech_to_text: ^7.0.0
       stream_core_flutter:
         git:
           url: https://github.com/GetStream/stream-core-flutter.git
