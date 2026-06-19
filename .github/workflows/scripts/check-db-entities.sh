@@ -57,6 +57,17 @@ extract_version_expr() {
     | head -n1
 }
 
+# Only evaluate the expression once we've confirmed it contains nothing
+# but integer-arithmetic tokens — guards against Dart forms like
+# `Foo.bar` or `1000 + kSchemaVersion` that would otherwise crash the
+# script under `set -e` or silently evaluate identifiers as 0.
+safe_eval() {
+  local expr="$1"
+  # Hyphen kept at the end of the class so it's treated as a literal.
+  [[ "$expr" =~ ^[[:digit:][:space:]+*/()%-]+$ ]] || return 1
+  printf '%s\n' "$((expr))"
+}
+
 BASE_EXPR=$(extract_version_expr "origin/$BASE_BRANCH")
 HEAD_EXPR=$(extract_version_expr "$PR_HEAD_SHA")
 
@@ -65,9 +76,9 @@ BASE_VERSION=""
 HEAD_VERSION=""
 SUGGESTED_EXPR=""
 
-if [ -n "$BASE_EXPR" ] && [ -n "$HEAD_EXPR" ]; then
-  BASE_VERSION=$((BASE_EXPR))
-  HEAD_VERSION=$((HEAD_EXPR))
+if [ -n "$BASE_EXPR" ] && [ -n "$HEAD_EXPR" ] \
+   && BASE_VERSION=$(safe_eval "$BASE_EXPR") \
+   && HEAD_VERSION=$(safe_eval "$HEAD_EXPR"); then
   echo "Base schemaVersion: $BASE_VERSION ($BASE_EXPR)"
   echo "Head schemaVersion: $HEAD_VERSION ($HEAD_EXPR)"
 
@@ -85,7 +96,7 @@ if [ -n "$BASE_EXPR" ] && [ -n "$HEAD_EXPR" ]; then
     VERSION_BUMPED="true"
   fi
 else
-  echo "::warning::Could not parse schemaVersion from $DB_FILE; skipping version check."
+  echo "::warning::Could not parse or evaluate schemaVersion from $DB_FILE; skipping version check."
 fi
 echo "version_bumped=$VERSION_BUMPED" >> "$GITHUB_OUTPUT"
 
