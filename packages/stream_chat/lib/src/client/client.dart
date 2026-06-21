@@ -505,6 +505,18 @@ class StreamChatClient {
     _ws.disconnect();
   }
 
+  /// Suspends the WebSocket's automatic reconnection without tearing down the
+  /// user session.
+  ///
+  /// While paused, unexpected socket closures (for example when the OS closes
+  /// the connection after the app is backgrounded) will not trigger retries.
+  /// Call [resumeReconnect] before re-establishing the connection.
+  void pauseReconnect() => _ws.pauseReconnect();
+
+  /// Re-enables the WebSocket's automatic reconnection after a previous
+  /// [pauseReconnect].
+  void resumeReconnect() => _ws.resumeReconnect();
+
   void _handleHealthCheckEvent(Event event) {
     final user = event.me;
     if (user != null) state.currentUser = user;
