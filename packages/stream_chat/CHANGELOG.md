@@ -7,6 +7,7 @@
 🐞 Fixed
 
 - Fixed an unhandled `WebSocketChannelException` surfacing when a reconnect attempt failed (e.g. DNS lookup failed in background); the duplicate signal on `sink.done` is now ignored since the stream's `onError` already handles it.
+- Fixed failing to parse `null` values in `UpsertPushPreferencesResponse.userPreferences` JSON.
 
 ## 9.25.0
 
