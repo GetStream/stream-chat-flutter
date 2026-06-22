@@ -4,6 +4,8 @@
 *.pyc
 # E2E: mock-server checkout cloned by the `start_mock_server` Fastlane lane
 /sample_app/stream-chat-test-mock-server/
+# E2E: Patrol-generated test bundle (regenerated on every `patrol test`)
+/sample_app/integration_test/test_bundle.dart
 *.swp
 .DS_Store
 .atom/
