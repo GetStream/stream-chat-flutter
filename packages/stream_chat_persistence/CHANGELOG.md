@@ -15,6 +15,7 @@
 - `MessageDao.getThreadMessagesByParentId` now honours all `PaginationParams` cursor variants (`lessThan`/`lessThanOrEqual`/`greaterThan`/`greaterThanOrEqual`) and returns the page of replies closest to the cursor.
 - `PinnedMessageDao.getMessagesByCid` now honours `PaginationParams.lessThanOrEqual` and `PaginationParams.greaterThanOrEqual` (inclusive of the cursor message), in addition to the existing strict `lessThan`/`greaterThan`.
 - `PinnedMessageDao.getMessagesByCid` with a forward cursor (`greaterThan`/`greaterThanOrEqual`) and a `limit` now returns the messages immediately AFTER the pivot, instead of the channel tail.
+- Bump database version.
 
 ## 10.0.1
 
