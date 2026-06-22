@@ -5,7 +5,7 @@ import 'package:stream_chat_flutter/src/attachment/thumbnail/thumbnail_error.dar
 import 'package:stream_chat_flutter/src/attachment/thumbnail/video_attachment_thumbnail.dart';
 import 'package:stream_chat_flutter/src/utils/stream_image_cdn.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
-import 'package:stream_core_flutter/stream_core_flutter.dart';
+import 'package:stream_core_flutter/chat.dart';
 
 /// {@template mediaAttachmentThumbnail}
 /// Widget for building media attachment thumbnail.

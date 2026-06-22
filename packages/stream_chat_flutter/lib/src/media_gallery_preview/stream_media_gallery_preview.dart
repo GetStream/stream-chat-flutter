@@ -3,7 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-import 'package:stream_core_flutter/stream_core_flutter.dart' as core;
+import 'package:stream_core_flutter/chat.dart' as core;
 
 /// A swipeable, full-screen viewer for a list of chat media attachments.
 ///

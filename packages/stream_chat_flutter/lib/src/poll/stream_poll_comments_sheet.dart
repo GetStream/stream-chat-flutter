@@ -11,7 +11,7 @@ import 'package:stream_chat_flutter/src/theme/poll_option_votes_style.dart';
 import 'package:stream_chat_flutter/src/utils/date_formatter.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
-import 'package:stream_core_flutter/stream_core_flutter.dart';
+import 'package:stream_core_flutter/chat.dart';
 
 /// {@template showStreamPollCommentsSheet}
 /// Displays an interactive bottom sheet to show all the comments for a poll.

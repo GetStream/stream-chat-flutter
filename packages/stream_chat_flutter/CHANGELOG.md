@@ -1,5 +1,9 @@
 ## Upcoming
 
+🐛 Fixed
+
+- Fixed a use-after-dispose race condition in `StreamAttachmentPickerController`, `StreamAudioRecorderController`, and `StreamAudioPlaylistController`: async methods could write `value` after `dispose()`, causing a `notifyListeners()` assertion throw in debug mode. All three now use the `DisposeAwareValueNotifier` mixin from `stream_chat_flutter_core`.
+
 ✅ Added
 
 - Added support for `@channel`, `@here`, role, and user-group mentions — parsed on incoming messages, rendered as styled tappable spans in message text, and selectable from the composer's `@` autocomplete.
@@ -25,6 +29,7 @@
 
 - `StreamMessageItem.onUserAvatarTap` now fires when the author avatar is tapped. ([#2741](https://github.com/GetStream/stream-chat-flutter/issues/2741))
 - Added `MessageComposerProps.copyWith` so factory overrides can tweak individual props (e.g. `useSystemAttachmentPicker`) without re-specifying every field. ([#2742](https://github.com/GetStream/stream-chat-flutter/issues/2742))
+- `StreamMessageContent` no longer re-runs `setState` on every inherited-widget change when the measured attachment width has not changed. ([#2761](https://github.com/GetStream/stream-chat-flutter/issues/2761))
 
 ## 10.0.1
 

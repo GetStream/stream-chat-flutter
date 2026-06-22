@@ -8,7 +8,7 @@ import 'package:stream_chat_flutter/src/scroll_view/stream_scroll_view_load_more
 import 'package:stream_chat_flutter/src/scroll_view/stream_scroll_view_loading_widget.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
-import 'package:stream_core_flutter/stream_core_flutter.dart';
+import 'package:stream_core_flutter/chat.dart';
 
 /// Default separator builder for [StreamPollVoteListView].
 Widget defaultPollVoteListViewSeparatorBuilder(

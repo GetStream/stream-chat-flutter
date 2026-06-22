@@ -7,7 +7,7 @@ import 'package:stream_chat_flutter/src/message_widget/components/stream_message
 import 'package:stream_chat_flutter/src/message_widget/stream_message_attachments.dart';
 import 'package:stream_chat_flutter/src/message_widget/stream_quoted_message.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
-import 'package:stream_core_flutter/stream_core_flutter.dart' as core;
+import 'package:stream_core_flutter/chat.dart' as core;
 
 /// Composes the main message content including the bubble, attachments, text,
 /// and reactions.
@@ -141,6 +141,7 @@ class _StreamMessageContentState extends State<StreamMessageContent> {
     final attachmentsWidth = renderBox.size.width;
 
     if (attachmentsWidth == 0) return;
+    if (widthLimit == attachmentsWidth) return;
     setState(() => widthLimit = attachmentsWidth);
   }
 
