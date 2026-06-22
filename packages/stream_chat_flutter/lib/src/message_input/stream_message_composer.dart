@@ -494,6 +494,7 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
       ..addListener(_onChangedDebounced);
   }
 
+  StreamSubscription<DateTime?>? _lastSentAtSubscription;
   StreamSubscription<Draft?>? _draftStreamSubscription;
   StreamSubscription<Event>? _messageUpdatedSubscription;
   StreamSubscription<Event>? _messageDeletedSubscription;
@@ -534,9 +535,14 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     final channel = StreamChannel.of(context).channel;
     final config = StreamChatConfiguration.of(context);
 
-    // Resumes the cooldown if the channel has currently an active cooldown.
+    // Keeps the composer cooldown in sync with channel sends.
     if (!_isEditing && channel.state != null) {
-      _effectiveController.startCooldown(channel.getRemainingCooldown());
+      _lastSentAtSubscription = channel.currentUserLastMessageAtStream.listen(
+        (lastMessageAt) {
+          final remainingCooldown = channel.getRemainingCooldown(lastMessageAt: lastMessageAt);
+          return _effectiveController.startCooldown(remainingCooldown);
+        },
+      );
     }
 
     // Starts listening to the draft stream for the current channel/thread.
@@ -1295,7 +1301,6 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
         false => channel.sendMessage(message),
       };
 
-      _effectiveController.startCooldown(channel.getRemainingCooldown());
       widget.props.onMessageSent?.call(resp.message);
     } catch (e, stk) {
       if (widget.props.onError != null) {
@@ -1393,6 +1398,7 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     _onChangedDebounced.cancel();
     _onChangedThrottled.cancel();
     _audioRecorderController.dispose();
+    _lastSentAtSubscription?.cancel();
     _draftStreamSubscription?.cancel();
     _messageUpdatedSubscription?.cancel();
     _messageDeletedSubscription?.cancel();

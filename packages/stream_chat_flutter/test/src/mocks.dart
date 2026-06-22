@@ -27,6 +27,7 @@ class MockChannel extends Mock implements Channel {
     when(() => createDraft(any())).thenAnswer((_) async => CreateDraftResponse());
     when(deleteDraft).thenAnswer((_) async => EmptyResponse());
     when(() => deleteDraft(parentId: any(named: 'parentId'))).thenAnswer((_) async => EmptyResponse());
+    when(() => currentUserLastMessageAtStream).thenAnswer((_) => Stream.value(null));
   }
 
   @override

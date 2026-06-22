@@ -8697,6 +8697,109 @@ void main() {
           expect(ch.getRemainingCooldown(), equals(0));
         },
       );
+
+      test(
+        'should clear cooldown when the most-recent own message is hard-deleted',
+        () {
+          final ch = _buildChannelWithCooldown();
+          addTearDown(ch.dispose);
+
+          final ownMessage = Message(
+            id: 'msg-1',
+            createdAt: DateTime.timestamp(),
+            user: User(id: currentUserId),
+          );
+          ch.state!.updateMessage(ownMessage);
+          expect(ch.getRemainingCooldown(), greaterThan(0));
+
+          ch.state!.deleteMessage(ownMessage, hardDelete: true);
+          expect(ch.getRemainingCooldown(), equals(0));
+        },
+      );
+
+      test(
+        'currentUserLastMessageAtStream emits a new timestamp when own message is added',
+        () async {
+          final ch = _buildChannelWithCooldown();
+          addTearDown(ch.dispose);
+
+          final emissions = <DateTime?>[];
+          final sub = ch.currentUserLastMessageAtStream.listen(emissions.add);
+          addTearDown(sub.cancel);
+
+          // Let the seed emission settle.
+          await Future<void>.delayed(Duration.zero);
+          final seededLast = emissions.last;
+
+          ch.state!.updateMessage(
+            Message(
+              id: 'msg-1',
+              createdAt: DateTime.timestamp(),
+              user: User(id: currentUserId),
+            ),
+          );
+          await Future<void>.delayed(Duration.zero);
+
+          expect(emissions.last, isNotNull);
+          expect(emissions.last, isNot(equals(seededLast)));
+        },
+      );
+
+      test(
+        'getRemainingCooldown uses the explicit [lastMessageAt] override',
+        () {
+          final ch = _buildChannelWithCooldown();
+          addTearDown(ch.dispose);
+
+          // No messages in state, so the default path returns 0.
+          expect(ch.getRemainingCooldown(), equals(0));
+
+          // Override pointing inside the cooldown window → positive remaining.
+          final recent = DateTime.timestamp().subtract(const Duration(seconds: 5));
+          expect(ch.getRemainingCooldown(lastMessageAt: recent), greaterThan(0));
+
+          // Override pointing outside the window → 0.
+          final old = DateTime.timestamp().subtract(
+            const Duration(seconds: cooldownDuration + 5),
+          );
+          expect(ch.getRemainingCooldown(lastMessageAt: old), equals(0));
+        },
+      );
+
+      test(
+        'currentUserLastMessageAt picks the latest across channel messages and threads',
+        () {
+          final ch = _buildChannelWithCooldown();
+          addTearDown(ch.dispose);
+
+          final older = DateTime.timestamp().subtract(const Duration(seconds: 20));
+          final newer = DateTime.timestamp().subtract(const Duration(seconds: 5));
+
+          // Older message in the main channel.
+          ch.state!.updateMessage(
+            Message(
+              id: 'msg-1',
+              createdAt: older,
+              user: User(id: currentUserId),
+            ),
+          );
+          // Newer reply in a thread.
+          ch.state!.updateThreadInfo('parent-msg-1', [
+            Message(
+              id: 'thread-reply-1',
+              parentId: 'parent-msg-1',
+              showInChannel: false,
+              createdAt: newer,
+              user: User(id: currentUserId),
+            ),
+          ]);
+
+          // Should pick the newer thread reply, not the older channel message.
+          final result = ch.currentUserLastMessageAt;
+          expect(result, isNotNull);
+          expect(result!.isAtSameMomentAs(newer), isTrue);
+        },
+      );
     });
 
     group('Disposed channel state validation', () {

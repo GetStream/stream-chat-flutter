@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:record/record.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat_flutter/src/message_input/dm_checkbox_list_tile.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -35,87 +36,149 @@ void main() {
     },
   );
 
-  testWidgets(
-    'checks message input slow mode',
-    (WidgetTester tester) async {
-      final client = MockClient();
-      final clientState = MockClientState();
-      final channel = MockChannel();
-      final channelState = MockChannelState();
-      final lastMessageAt = DateTime.parse('2020-06-22 12:00:00');
+  group('MessageComposer cooldown', () {
+    const cooldownSeconds = 10;
+
+    final client = MockClient();
+    final clientState = MockClientState();
+    final channel = MockChannel();
+    final channelState = MockChannelState();
+
+    late BehaviorSubject<DateTime?> lastMessageAtSubject;
+
+    setUp(() {
+      registerFallbackValue(Message());
+      lastMessageAtSubject = BehaviorSubject<DateTime?>.seeded(null);
 
       when(() => client.state).thenReturn(clientState);
       when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
-      when(() => channel.lastMessageAt).thenReturn(lastMessageAt);
-      when(() => channel.state).thenReturn(channelState);
-      when(channel.getRemainingCooldown).thenReturn(10);
-      when(() => channel.client).thenReturn(client);
-      when(() => channel.isMuted).thenReturn(false);
-      when(() => channel.isMutedStream).thenAnswer((i) => Stream.value(false));
-      when(() => channel.extraDataStream).thenAnswer(
-        (i) => Stream.value({
-          'name': 'test',
-        }),
-      );
-      when(() => channel.extraData).thenReturn({
-        'name': 'test',
-      });
-      when(() => channelState.membersStream).thenAnswer(
-        (i) => Stream.value([
-          Member(
-            userId: 'user-id',
-            user: User(id: 'user-id'),
-          ),
-        ]),
-      );
-      when(() => channelState.members).thenReturn([
-        Member(
-          userId: 'user-id',
-          user: User(id: 'user-id'),
-        ),
-      ]);
-      when(() => channelState.messages).thenReturn([
-        Message(
-          text: 'hello',
-          user: User(id: 'other-user'),
-        ),
-      ]);
-      when(() => channelState.messagesStream).thenAnswer(
-        (i) => Stream.value([
-          Message(
-            text: 'hello',
-            user: User(id: 'other-user'),
-          ),
-        ]),
-      );
+      when(() => clientState.currentUserStream).thenAnswer((_) => Stream.value(OwnUser(id: 'user-id')));
 
-      await tester.pumpWidget(
+      when(() => channel.state).thenReturn(channelState);
+      when(() => channel.client).thenReturn(client);
+      when(() => channel.currentUserLastMessageAtStream).thenAnswer((_) => lastMessageAtSubject.stream);
+
+      // Routes a message added to channel state through the same signal a
+      // real channel emits on: the current user's last-message-at stream
+      // gets the new timestamp.
+      when(() => channelState.addNewMessage(any())).thenAnswer((invocation) {
+        final message = invocation.positionalArguments[0] as Message;
+        if (message.user?.id == 'user-id' && !message.isEphemeral) {
+          lastMessageAtSubject.add(message.createdAt);
+        }
+      });
+
+      // Real-flow cooldown: derived from the timestamp the LLC stream emits.
+      // null (no send yet) → 0, recent timestamp (current user just sent) → cooldownSeconds.
+      when(() => channel.getRemainingCooldown(lastMessageAt: any(named: 'lastMessageAt'))).thenAnswer((i) {
+        return i.namedArguments[#lastMessageAt] != null ? cooldownSeconds : 0;
+      });
+    });
+
+    tearDown(() => lastMessageAtSubject.close());
+
+    Future<void> pumpComposer(WidgetTester tester) {
+      return tester.pumpWidget(
         MaterialApp(
           home: StreamChat(
             client: client,
             child: StreamChannel(
               channel: channel,
-              child: Scaffold(
-                body: StreamMessageComposer(),
-              ),
+              child: Scaffold(body: StreamMessageComposer()),
             ),
           ),
         ),
       );
+    }
 
-      // wait for the initial state to be rendered.
-      await tester.pumpAndSettle();
+    Message ownMessage() {
+      return Message(
+        id: 'msg-1',
+        createdAt: DateTime.timestamp(),
+        user: User(id: 'user-id'),
+      );
+    }
 
-      expect(find.text('Slow mode, wait 10s\u2026'), findsOneWidget);
+    testWidgets(
+      'shows slow mode UI when the current user has recently sent a message',
+      (tester) async {
+        // The user sent a message before the composer mounts — channel cooldown
+        // is already active.
+        channelState.addNewMessage(ownMessage());
 
-      // The text field is locked while slow mode is active.
-      final textField = tester.widget<TextField>(find.byType(TextField));
-      expect(textField.enabled, isFalse);
+        await pumpComposer(tester);
+        await tester.pumpAndSettle();
 
-      // The trailing button shows the remaining cooldown instead of send / mic.
-      expect(find.text('10'), findsOneWidget);
-    },
-  );
+        expect(find.text('Slow mode, wait ${cooldownSeconds}s…'), findsOneWidget);
+
+        final inputField = tester.widget<StreamMessageComposerInputField>(
+          find.byType(StreamMessageComposerInputField),
+        );
+
+        // Composer input field is locked while slow mode is active.
+        expect(inputField.enabled, isFalse);
+
+        final attachmentButton = tester.widget<StreamButton>(
+          find.descendant(
+            of: find.byType(DefaultStreamMessageComposerLeading),
+            matching: find.byType(StreamButton),
+          ),
+        );
+
+        // Attachment picker button is disabled while slow mode is active.
+        expect(attachmentButton.props.onPressed, isNull);
+
+        // Trailing button shows the remaining cooldown instead of send / mic.
+        expect(find.text('$cooldownSeconds'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'does not show slow mode UI when the current user has not sent recently',
+      (tester) async {
+        // No prior send — channel cooldown is not active on mount.
+        await pumpComposer(tester);
+        await tester.pumpAndSettle();
+
+        expect(find.text('Slow mode, wait ${cooldownSeconds}s…'), findsNothing);
+
+        final inputField = tester.widget<StreamMessageComposerInputField>(
+          find.byType(StreamMessageComposerInputField),
+        );
+
+        // Composer input field is enabled when slow mode is not active.
+        expect(inputField.enabled, isTrue);
+
+        final attachmentButton = tester.widget<StreamButton>(
+          find.descendant(
+            of: find.byType(DefaultStreamMessageComposerLeading),
+            matching: find.byType(StreamButton),
+          ),
+        );
+
+        // Attachment picker button is enabled when slow mode is not active.
+        expect(attachmentButton.props.onPressed, isNotNull);
+      },
+    );
+
+    testWidgets(
+      'starts cooldown when a sibling composer sends a message (e.g. thread composer)',
+      (tester) async {
+        await pumpComposer(tester);
+        await tester.pumpAndSettle();
+
+        // Before a message is added, no cooldown UI.
+        expect(find.text('Slow mode, wait ${cooldownSeconds}s…'), findsNothing);
+
+        // Simulate a sibling composer (e.g. thread composer) adding a message
+        // to channel state.
+        channelState.addNewMessage(ownMessage());
+        await tester.pumpAndSettle();
+
+        expect(find.text('Slow mode, wait ${cooldownSeconds}s…'), findsOneWidget);
+      },
+    );
+  });
 
   group('MessageInput keyboard interactions', () {
     final client = MockClient();

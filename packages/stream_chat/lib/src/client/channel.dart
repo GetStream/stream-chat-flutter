@@ -320,13 +320,16 @@ class Channel {
   /// Remaining cooldown duration in seconds for the channel.
   ///
   /// Returns 0 if there is no cooldown active.
-  int getRemainingCooldown() {
+  ///
+  /// Optionally, provide [lastMessageAt] to calculate the remaining cooldown based on a specific message timestamp
+  /// instead of the last message sent by the current user in this channel.
+  int getRemainingCooldown({DateTime? lastMessageAt}) {
     _checkInitialized();
 
     final cooldownDuration = cooldown;
     if (cooldownDuration <= 0) return 0;
 
-    final userLastMessageAt = currentUserLastMessageAt;
+    final userLastMessageAt = lastMessageAt ?? currentUserLastMessageAt;
     if (userLastMessageAt == null) return 0;
 
     if (canSkipSlowMode) return 0;
@@ -361,7 +364,38 @@ class Channel {
     return state!.channelStateStream.map((cs) => cs.channel?.lastMessageAt);
   }
 
+  DateTime? _currentUserLastMessageAt({
+    required List<Message>? messages,
+    required Map<String, List<Message>> threads,
+  }) {
+    final currentUserId = client.state.currentUser?.id;
+    if (currentUserId == null) return null;
+
+    bool ours(Message m) => !m.isEphemeral && m.user?.id == currentUserId;
+
+    DateTime? max;
+
+    if (messages != null) {
+      final idx = messages.lastIndexWhere(ours);
+      if (idx != -1) max = messages[idx].createdAt;
+    }
+
+    for (final replies in threads.values) {
+      final idx = replies.lastIndexWhere(ours);
+      if (idx == -1) continue;
+      final createdAt = replies[idx].createdAt;
+      if (max == null || createdAt.isAfter(max)) max = createdAt;
+    }
+
+    return max;
+  }
+
   /// The date of the last message sent by the current user.
+  ///
+  /// Returns null if the channel is not up to date or
+  /// if the current user has not sent any messages in this channel.
+  ///
+  /// Note: This includes both regular messages and thread messages.
   DateTime? get currentUserLastMessageAt {
     _checkInitialized();
 
@@ -369,17 +403,32 @@ class Channel {
     // from the current user.
     if (!state!.isUpToDate) return null;
 
-    return state!._currentUserLastSentAt;
+    final threads = state!.threads;
+    final messages = state!.channelState.messages;
+
+    return _currentUserLastMessageAt(messages: messages, threads: threads);
   }
 
   /// The date of the last message sent by the current user as a stream.
+  ///
+  /// Returns null if the channel is not up to date or
+  /// if the current user has not sent any messages in this channel.
+  ///
+  /// Note: This includes both regular messages and thread messages.
   Stream<DateTime?> get currentUserLastMessageAtStream {
     _checkInitialized();
 
-    return CombineLatestStream.combine2<bool, DateTime?, DateTime?>(
+    return CombineLatestStream.combine3(
       state!.isUpToDateStream,
-      state!._currentUserLastSentAtStream,
-      (isUpToDate, lastSentAt) => isUpToDate ? lastSentAt : null,
+      state!.channelStateStream.map((s) => s.messages).distinct(identical),
+      state!.threadsStream,
+      (isUpToDate, messages, threads) {
+        // If the channel is not up to date, we can't rely on the last message
+        // from the current user.
+        if (!isUpToDate) return null;
+
+        return _currentUserLastMessageAt(messages: messages, threads: threads);
+      },
     );
   }
 
@@ -2354,7 +2403,6 @@ class ChannelClientState {
     _channelStateController = BehaviorSubject.seeded(channelState);
     // Update the persistence storage with the seeded channel state.
     _debouncedUpdatePersistenceChannelState.call([channelState]);
-    _maybeUpdateCurrentUserLastSentAt(channelState.messages ?? const []);
 
     // region TYPING EVENTS
     _listenTypingEvents();
@@ -2437,10 +2485,7 @@ class ChannelClientState {
         ?.getChannelThreads(_channel.cid!)
         .then((threads) {
           // Load all the threads for the channel from the offline storage.
-          if (threads.isNotEmpty) {
-            _threads = threads;
-            _maybeUpdateCurrentUserLastSentAt(threads.values.flattened);
-          }
+          if (threads.isNotEmpty) _threads = threads;
         })
         .then((_) => retryFailedMessages());
   }
@@ -3595,8 +3640,6 @@ class ChannelClientState {
       pushPreferences: updatedState.pushPreferences,
       activeLiveLocations: updatedState.activeLiveLocations,
     );
-
-    _maybeUpdateCurrentUserLastSentAt(updatedState.messages ?? const []);
   }
 
   int _sortByCreatedAt(Message a, Message b) => a.createdAt.compareTo(b.createdAt);
@@ -3670,7 +3713,6 @@ class ChannelClientState {
     updatedThreads[parentId] = updatedThreadMessages.toList();
 
     _threads = updatedThreads;
-    _maybeUpdateCurrentUserLastSentAt(messages);
   }
 
   Draft? _getThreadDraft(String parentId, List<Message>? messages) {
@@ -3892,7 +3934,6 @@ class ChannelClientState {
     _updateChannelMessages(messages, update: update);
     _updatePinnedMessages(messages, update: update);
     _updateActiveLiveLocations(messages);
-    _maybeUpdateCurrentUserLastSentAt(messages);
   }
 
   void _updateThreadMessages(
@@ -4275,37 +4316,6 @@ class ChannelClientState {
     );
   }
 
-  /// The timestamp of the most recent non-ephemeral message sent by the
-  /// current user in this channel, including thread replies.
-  DateTime? get _currentUserLastSentAt => _currentUserLastSentAtController.value;
-
-  /// Stream of [_currentUserLastSentAt].
-  Stream<DateTime?> get _currentUserLastSentAtStream => _currentUserLastSentAtController.stream;
-
-  final _currentUserLastSentAtController = BehaviorSubject<DateTime?>.seeded(null);
-
-  /// Updates [_currentUserLastSentAt] if [messages] contains a newer
-  /// non-ephemeral message from the current user.
-  void _maybeUpdateCurrentUserLastSentAt(Iterable<Message> messages) {
-    final currentUserId = _client.state.currentUser?.id;
-    if (currentUserId == null) return;
-
-    DateTime? maxCreatedAt;
-    for (final message in messages) {
-      if (message.user?.id != currentUserId) continue;
-      if (message.isEphemeral) continue;
-      if (maxCreatedAt == null || message.createdAt.isAfter(maxCreatedAt)) {
-        maxCreatedAt = message.createdAt;
-      }
-    }
-
-    if (maxCreatedAt == null) return;
-    final current = _currentUserLastSentAtController.value;
-    if (current == null || maxCreatedAt.isAfter(current)) {
-      _currentUserLastSentAtController.safeAdd(maxCreatedAt);
-    }
-  }
-
   /// Call this method to dispose this object.
   void dispose() {
     _debouncedUpdatePersistenceChannelThreads.cancel();
@@ -4315,7 +4325,6 @@ class ChannelClientState {
     _channelStateController.close();
     _isUpToDateController.close();
     _threadsController.close();
-    _currentUserLastSentAtController.close();
     _staleTypingEventsCleanerTimer?.cancel();
     _stalePinnedMessagesCleanerTimer?.cancel();
     _staleLiveLocationsCleanerTimer?.cancel();
