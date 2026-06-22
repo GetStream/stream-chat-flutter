@@ -5,8 +5,6 @@ on:
   pull_request:
     types: [labeled, synchronize]
 
-# Heavy mobile e2e — keep off the default PR path; run on demand or when a PR
-# carries the `e2e` label. The nightly schedule lives in e2e_test_cron.yml.
 concurrency:
   group: e2e-${{ github.ref }}
   cancel-in-progress: true
