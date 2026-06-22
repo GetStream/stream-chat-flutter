@@ -142,6 +142,112 @@ void main() {
     });
   });
 
+  Future<void> insertChannelsForCids(List<String> cids) async {
+    final users =
+        List.generate(cids.length, (i) => User(id: 'user_${cids[i]}'));
+    final channelModels = List.generate(
+      cids.length,
+      (i) => ChannelModel(
+        id: 'id_${cids[i]}',
+        type: 'messaging',
+        cid: cids[i],
+        createdBy: users[i],
+        config: ChannelConfig(),
+      ),
+    );
+    await database.userDao.updateUsers(users);
+    await database.channelDao.updateChannels(channelModels);
+  }
+
+  test('updateChannelQueriesByPredefinedFilter', () async {
+    const filterName = 'sample-app-list';
+    const filterValues = {'user_id': 'testUserId'};
+    const sortValues = {'pinned_at': true};
+    const cids = ['testCid1', 'testCid2', 'testCid3'];
+    final filter = Filter.equal('type', 'messaging');
+    const sort = <SortOption<ChannelState>>[
+      SortOption<ChannelState>.desc(ChannelSortKey.pinnedAt),
+      SortOption<ChannelState>.desc(ChannelSortKey.lastMessageAt),
+    ];
+
+    await insertChannelsForCids(cids);
+    await channelQueryDao.updateChannelQueriesByPredefinedFilter(
+      filterName,
+      cids,
+      filter: filter,
+      sort: sort,
+      filterValues: filterValues,
+      sortValues: sortValues,
+    );
+
+    final (cachedChannels, storedFilter, storedSort) =
+        await channelQueryDao.getChannelsAndSpecByPredefinedFilter(
+      filterName,
+      filterValues: filterValues,
+      sortValues: sortValues,
+    );
+
+    expect(cachedChannels.map((c) => c.cid).toSet(), cids.toSet());
+    expect(storedFilter, isNotNull);
+    expect(storedFilter!.toJson(), filter.toJson());
+    expect(storedSort, isNotNull);
+    expect(storedSort!.length, 2);
+    expect(storedSort.first.field, ChannelSortKey.pinnedAt);
+    expect(storedSort.first.direction, SortOption.DESC);
+    expect(storedSort.last.field, ChannelSortKey.lastMessageAt);
+    expect(storedSort.last.direction, SortOption.DESC);
+  });
+
+  test('clear queryCache before updateChannelQueriesByPredefinedFilter',
+      () async {
+    const filterName = 'sample-app-list';
+    const filterValues = {'user_id': 'testUserId'};
+    const sortValues = {'pinned_at': true};
+    const oldCids = ['oldCid1', 'oldCid2'];
+    const newCids = ['newCid1'];
+    final filter = Filter.equal('type', 'messaging');
+    const sort = <SortOption<ChannelState>>[
+      SortOption<ChannelState>.desc(ChannelSortKey.pinnedAt),
+      SortOption<ChannelState>.desc(ChannelSortKey.lastMessageAt),
+    ];
+
+    await insertChannelsForCids([...oldCids, ...newCids]);
+    await channelQueryDao.updateChannelQueriesByPredefinedFilter(
+      filterName,
+      oldCids,
+      filter: filter,
+      sort: sort,
+      filterValues: filterValues,
+      sortValues: sortValues,
+    );
+    await channelQueryDao.updateChannelQueriesByPredefinedFilter(
+      filterName,
+      newCids,
+      filter: filter,
+      sort: sort,
+      filterValues: filterValues,
+      sortValues: sortValues,
+      clearQueryCache: true,
+    );
+
+    final (cachedChannels, storedFilter, storedSort) =
+        await channelQueryDao.getChannelsAndSpecByPredefinedFilter(
+      filterName,
+      filterValues: filterValues,
+      sortValues: sortValues,
+    );
+
+    expect(cachedChannels.map((c) => c.cid).toSet(), newCids.toSet());
+    expect(storedFilter, isNotNull);
+    expect(storedFilter!.toJson(), filter.toJson());
+    expect(storedSort, isNotNull);
+    expect(storedSort!.length, 2);
+    expect(storedSort.first.field, ChannelSortKey.pinnedAt);
+    expect(storedSort.first.direction, SortOption.DESC);
+    expect(storedSort.last.field, ChannelSortKey.lastMessageAt);
+    expect(storedSort.last.direction, SortOption.DESC);
+  });
+
   tearDown(() async {
     await database.disconnect();
   });

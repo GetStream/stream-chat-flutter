@@ -1,3 +1,9 @@
+## Upcoming
+
+✅ Added
+
+- Added support for predefined filters for `QueryChannels` on `StreamChatPersistenceClient`.
+
 ## 9.25.0
 
 🚀 Performance

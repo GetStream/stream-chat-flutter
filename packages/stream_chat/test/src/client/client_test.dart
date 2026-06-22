@@ -498,6 +498,7 @@ void main() {
       registerFallbackValue(FakeEvent());
       registerFallbackValue(const PaginationParams());
       registerFallbackValue(FakeChannelState());
+      registerFallbackValue(const Filter.empty());
     });
 
     setUp(() async {
@@ -612,11 +613,15 @@ void main() {
             ),
           );
 
-          when(() => persistence.getChannelStates(
+          when(() => persistence.queryChannelStates(
                 filter: any(named: 'filter'),
-                channelStateSort: any(named: 'channelStateSort'),
+                sort: any(named: 'sort'),
+                predefinedFilter: any(named: 'predefinedFilter'),
+                filterValues: any(named: 'filterValues'),
+                sortValues: any(named: 'sortValues'),
                 paginationParams: any(named: 'paginationParams'),
-              )).thenAnswer((_) async => persistentChannelStates);
+              )).thenAnswer((_) async =>
+              QueryChannelsResponse()..channels = persistentChannelStates);
 
           final channelStates = List.generate(
             3,
@@ -651,9 +656,17 @@ void main() {
               .thenAnswer((_) async {});
           when(() => persistence.updateChannelThreads(any(), any()))
               .thenAnswer((_) async {});
-          when(() => persistence.updateChannelQueries(any(), any(),
-                  clearQueryCache: any(named: 'clearQueryCache')))
-              .thenAnswer((_) => Future.value());
+          when(() => persistence.saveChannelQueries(
+                cids: any(named: 'cids'),
+                filter: any(named: 'filter'),
+                sort: any(named: 'sort'),
+                predefinedFilter: any(named: 'predefinedFilter'),
+                resolvedFilter: any(named: 'resolvedFilter'),
+                resolvedSort: any(named: 'resolvedSort'),
+                filterValues: any(named: 'filterValues'),
+                sortValues: any(named: 'sortValues'),
+                clearQueryCache: any(named: 'clearQueryCache'),
+              )).thenAnswer((_) => Future.value());
 
           // setUp's `connectUser` schedules debounced persistence writes
           // (1s window) that would otherwise fire during this test's wait
@@ -676,9 +689,12 @@ void main() {
           // invocations have fired before we verify counts.
           await delay(1500);
 
-          verify(() => persistence.getChannelStates(
+          verify(() => persistence.queryChannelStates(
                 filter: any(named: 'filter'),
-                channelStateSort: any(named: 'channelStateSort'),
+                sort: any(named: 'sort'),
+                predefinedFilter: any(named: 'predefinedFilter'),
+                filterValues: any(named: 'filterValues'),
+                sortValues: any(named: 'sortValues'),
                 paginationParams: any(named: 'paginationParams'),
               )).called(1);
 
@@ -699,8 +715,17 @@ void main() {
               .called(channelStates.length);
           verify(() => persistence.updateChannelThreads(any(), any()))
               .called(channelStates.length);
-          verify(() => persistence.updateChannelQueries(any(), any(),
-              clearQueryCache: any(named: 'clearQueryCache'))).called(1);
+          verify(() => persistence.saveChannelQueries(
+                cids: any(named: 'cids'),
+                filter: any(named: 'filter'),
+                sort: any(named: 'sort'),
+                predefinedFilter: any(named: 'predefinedFilter'),
+                resolvedFilter: any(named: 'resolvedFilter'),
+                resolvedSort: any(named: 'resolvedSort'),
+                filterValues: any(named: 'filterValues'),
+                sortValues: any(named: 'sortValues'),
+                clearQueryCache: any(named: 'clearQueryCache'),
+              )).called(1);
         },
       );
 
@@ -714,11 +739,15 @@ void main() {
             ),
           );
 
-          when(() => persistence.getChannelStates(
+          when(() => persistence.queryChannelStates(
                 filter: any(named: 'filter'),
-                channelStateSort: any(named: 'channelStateSort'),
+                sort: any(named: 'sort'),
+                predefinedFilter: any(named: 'predefinedFilter'),
+                filterValues: any(named: 'filterValues'),
+                sortValues: any(named: 'sortValues'),
                 paginationParams: any(named: 'paginationParams'),
-              )).thenAnswer((_) async => persistentChannelStates);
+              )).thenAnswer((_) async =>
+              QueryChannelsResponse()..channels = persistentChannelStates);
 
           when(() => api.channel.queryChannels(
                 filter: any(named: 'filter'),
@@ -764,9 +793,12 @@ void main() {
           // invocations have fired before we verify counts.
           await delay(1500);
 
-          verify(() => persistence.getChannelStates(
+          verify(() => persistence.queryChannelStates(
                 filter: any(named: 'filter'),
-                channelStateSort: any(named: 'channelStateSort'),
+                sort: any(named: 'sort'),
+                predefinedFilter: any(named: 'predefinedFilter'),
+                filterValues: any(named: 'filterValues'),
+                sortValues: any(named: 'sortValues'),
                 paginationParams: any(named: 'paginationParams'),
               )).called(1);
 
@@ -787,6 +819,358 @@ void main() {
               .called(persistentChannelStates.length);
           verify(() => persistence.updateChannelThreads(any(), any()))
               .called(persistentChannelStates.length);
+        },
+      );
+
+      test(
+        'queryChannelsOnline with inline filter persists via '
+        'saveChannelQueries',
+        () async {
+          final filter = Filter.in_('members', const ['test-user-id']);
+
+          final channelStates = List.generate(
+            3,
+            (i) => ChannelState(
+              channel: ChannelModel(cid: 'test-type-$i:test-id-$i'),
+            ),
+          );
+
+          when(() => api.channel.queryChannels(
+                filter: filter,
+                state: any(named: 'state'),
+                watch: any(named: 'watch'),
+                presence: any(named: 'presence'),
+                memberLimit: any(named: 'memberLimit'),
+                messageLimit: any(named: 'messageLimit'),
+                paginationParams: any(named: 'paginationParams'),
+              )).thenAnswer(
+            (_) async => QueryChannelsResponse()..channels = channelStates,
+          );
+
+          when(() => persistence.getChannelThreads(any()))
+              .thenAnswer((_) async => <String, List<Message>>{});
+          when(() => persistence.updateChannelState(any()))
+              .thenAnswer((_) async {});
+          when(() => persistence.updateChannelThreads(any(), any()))
+              .thenAnswer((_) async {});
+          when(() => persistence.saveChannelQueries(
+                cids: any(named: 'cids'),
+                filter: any(named: 'filter'),
+                sort: any(named: 'sort'),
+                predefinedFilter: any(named: 'predefinedFilter'),
+                resolvedFilter: any(named: 'resolvedFilter'),
+                resolvedSort: any(named: 'resolvedSort'),
+                filterValues: any(named: 'filterValues'),
+                sortValues: any(named: 'sortValues'),
+                clearQueryCache: any(named: 'clearQueryCache'),
+              )).thenAnswer((_) => Future.value());
+
+          await delay(1100);
+          clearInteractions(persistence);
+
+          await client.queryChannelsOnline(filter: filter);
+
+          // The standard path passes filter (the inline filter) and a null
+          // predefinedFilter. resolvedFilter / resolvedSort stay null —
+          // they're only meaningful for the predefined-filter path.
+          verify(() => persistence.saveChannelQueries(
+                cids: channelStates.map((s) => s.channel!.cid).toList(),
+                filter: filter,
+                sort: null,
+                predefinedFilter: null,
+                resolvedFilter: null,
+                resolvedSort: null,
+                filterValues: null,
+                sortValues: null,
+                clearQueryCache: true,
+              )).called(1);
+        },
+      );
+
+      test(
+        'queryChannelsOnline with predefined filter persists via '
+        'saveChannelQueries with resolved sort',
+        () async {
+          const filterName = 'sample-app-list';
+          const filterValues = {'user_id': 'test-user-id'};
+          const sortValues = {'pinned_at': true};
+
+          final channelStates = List.generate(
+            3,
+            (i) => ChannelState(
+              channel: ChannelModel(cid: 'test-type-$i:test-id-$i'),
+            ),
+          );
+
+          when(() => api.channel.queryChannels(
+                predefinedFilter: filterName,
+                filterValues: filterValues,
+                sortValues: sortValues,
+                state: any(named: 'state'),
+                watch: any(named: 'watch'),
+                presence: any(named: 'presence'),
+                memberLimit: any(named: 'memberLimit'),
+                messageLimit: any(named: 'messageLimit'),
+                paginationParams: any(named: 'paginationParams'),
+              )).thenAnswer(
+            (_) async => QueryChannelsResponse()
+              ..channels = channelStates
+              ..predefinedFilter = const PredefinedFilter(
+                name: filterName,
+                filter: Filter.empty(),
+                sort: [SortOption<ChannelState>.desc('last_message_at')],
+              ),
+          );
+
+          when(() => persistence.getChannelThreads(any()))
+              .thenAnswer((_) async => <String, List<Message>>{});
+          when(() => persistence.updateChannelState(any()))
+              .thenAnswer((_) async {});
+          when(() => persistence.updateChannelThreads(any(), any()))
+              .thenAnswer((_) async {});
+          when(() => persistence.saveChannelQueries(
+                cids: any(named: 'cids'),
+                filter: any(named: 'filter'),
+                sort: any(named: 'sort'),
+                predefinedFilter: any(named: 'predefinedFilter'),
+                resolvedFilter: any(named: 'resolvedFilter'),
+                resolvedSort: any(named: 'resolvedSort'),
+                filterValues: any(named: 'filterValues'),
+                sortValues: any(named: 'sortValues'),
+                clearQueryCache: any(named: 'clearQueryCache'),
+              )).thenAnswer((_) => Future.value());
+
+          await delay(1100);
+          clearInteractions(persistence);
+
+          await client.queryChannelsOnline(
+            predefinedFilter: filterName,
+            filterValues: filterValues,
+            sortValues: sortValues,
+          );
+
+          verify(() => persistence.saveChannelQueries(
+                cids: channelStates.map((s) => s.channel!.cid).toList(),
+                filter: null,
+                sort: null,
+                predefinedFilter: filterName,
+                resolvedFilter: const Filter.empty(),
+                resolvedSort: const [
+                  SortOption<ChannelState>.desc('last_message_at'),
+                ],
+                filterValues: filterValues,
+                sortValues: sortValues,
+                clearQueryCache: true,
+              )).called(1);
+        },
+      );
+
+      test(
+        'queryChannelsOffline with predefined filter reads via '
+        'queryChannelStates',
+        () async {
+          const filterName = 'sample-app-list';
+          const filterValues = {'user_id': 'test-user-id'};
+          const sortValues = {'pinned_at': true};
+
+          final channelStates = List.generate(
+            3,
+            (i) => ChannelState(
+              channel: ChannelModel(cid: 'test-type-$i:test-id-$i'),
+            ),
+          );
+
+          when(() => persistence.queryChannelStates(
+                filter: any(named: 'filter'),
+                sort: any(named: 'sort'),
+                predefinedFilter: filterName,
+                filterValues: filterValues,
+                sortValues: sortValues,
+                paginationParams: any(named: 'paginationParams'),
+              )).thenAnswer((_) async =>
+              QueryChannelsResponse()..channels = channelStates);
+
+          when(() => persistence.getChannelThreads(any()))
+              .thenAnswer((_) async => <String, List<Message>>{});
+          when(() => persistence.updateChannelState(any()))
+              .thenAnswer((_) async {});
+          when(() => persistence.updateChannelThreads(any(), any()))
+              .thenAnswer((_) async {});
+
+          await delay(1100);
+          clearInteractions(persistence);
+
+          final channels = await client.queryChannelsOffline(
+            predefinedFilter: filterName,
+            filterValues: filterValues,
+            sortValues: sortValues,
+          );
+
+          expect(channels, hasLength(channelStates.length));
+
+          verify(() => persistence.queryChannelStates(
+                filter: null,
+                sort: null,
+                predefinedFilter: filterName,
+                filterValues: filterValues,
+                sortValues: sortValues,
+                paginationParams: const PaginationParams(),
+              )).called(1);
+        },
+      );
+
+      test(
+        'queryChannelsWithResult yields QueryChannelsResult with '
+        'predefinedFilter=null for inline filter',
+        () async {
+          final channelStates = List.generate(
+            2,
+            (i) => ChannelState(
+              channel: ChannelModel(cid: 'test-type-$i:test-id-$i'),
+            ),
+          );
+
+          when(() => persistence.queryChannelStates(
+                filter: any(named: 'filter'),
+                sort: any(named: 'sort'),
+                predefinedFilter: any(named: 'predefinedFilter'),
+                filterValues: any(named: 'filterValues'),
+                sortValues: any(named: 'sortValues'),
+                paginationParams: any(named: 'paginationParams'),
+              )).thenAnswer(
+            (_) async => QueryChannelsResponse()..channels = const [],
+          );
+
+          when(() => api.channel.queryChannels(
+                filter: any(named: 'filter'),
+                sort: any(named: 'sort'),
+                state: any(named: 'state'),
+                watch: any(named: 'watch'),
+                presence: any(named: 'presence'),
+                memberLimit: any(named: 'memberLimit'),
+                messageLimit: any(named: 'messageLimit'),
+                paginationParams: any(named: 'paginationParams'),
+              )).thenAnswer(
+            (_) async => QueryChannelsResponse()..channels = channelStates,
+          );
+
+          when(() => persistence.getChannelThreads(any()))
+              .thenAnswer((_) async => <String, List<Message>>{});
+          when(() => persistence.updateChannelState(any()))
+              .thenAnswer((_) async {});
+          when(() => persistence.updateChannelThreads(any(), any()))
+              .thenAnswer((_) async {});
+          when(() => persistence.saveChannelQueries(
+                cids: any(named: 'cids'),
+                filter: any(named: 'filter'),
+                sort: any(named: 'sort'),
+                predefinedFilter: any(named: 'predefinedFilter'),
+                resolvedFilter: any(named: 'resolvedFilter'),
+                resolvedSort: any(named: 'resolvedSort'),
+                filterValues: any(named: 'filterValues'),
+                sortValues: any(named: 'sortValues'),
+                clearQueryCache: any(named: 'clearQueryCache'),
+              )).thenAnswer((_) => Future.value());
+
+          await delay(1100);
+          clearInteractions(persistence);
+
+          final results = await client.queryChannelsWithResult().toList();
+
+          // Persistence returned empty, so only the online emission is yielded.
+          expect(results, hasLength(1));
+          expect(results.single.channels, hasLength(channelStates.length));
+          expect(results.single.predefinedFilter, isNull);
+        },
+      );
+
+      test(
+        'queryChannelsWithResult yields QueryChannelsResult with '
+        'predefinedFilter populated for predefined query',
+        () async {
+          const filterName = 'sample-app-list';
+          const filterValues = {'user_id': 'test-user-id'};
+          const sortValues = {'pinned_at': true};
+
+          final channelStates = List.generate(
+            2,
+            (i) => ChannelState(
+              channel: ChannelModel(cid: 'test-type-$i:test-id-$i'),
+            ),
+          );
+
+          const resolvedSort = [
+            SortOption<ChannelState>.desc('last_message_at'),
+          ];
+          const resolvedFilter = Filter.empty();
+          const expectedPredefinedFilter = PredefinedFilter(
+            name: filterName,
+            filter: resolvedFilter,
+            sort: resolvedSort,
+          );
+
+          when(() => persistence.queryChannelStates(
+                filter: any(named: 'filter'),
+                sort: any(named: 'sort'),
+                predefinedFilter: any(named: 'predefinedFilter'),
+                filterValues: any(named: 'filterValues'),
+                sortValues: any(named: 'sortValues'),
+                paginationParams: any(named: 'paginationParams'),
+              )).thenAnswer(
+            (_) async => QueryChannelsResponse()..channels = const [],
+          );
+
+          when(() => api.channel.queryChannels(
+                predefinedFilter: filterName,
+                filterValues: filterValues,
+                sortValues: sortValues,
+                state: any(named: 'state'),
+                watch: any(named: 'watch'),
+                presence: any(named: 'presence'),
+                memberLimit: any(named: 'memberLimit'),
+                messageLimit: any(named: 'messageLimit'),
+                paginationParams: any(named: 'paginationParams'),
+              )).thenAnswer(
+            (_) async => QueryChannelsResponse()
+              ..channels = channelStates
+              ..predefinedFilter = expectedPredefinedFilter,
+          );
+
+          when(() => persistence.getChannelThreads(any()))
+              .thenAnswer((_) async => <String, List<Message>>{});
+          when(() => persistence.updateChannelState(any()))
+              .thenAnswer((_) async {});
+          when(() => persistence.updateChannelThreads(any(), any()))
+              .thenAnswer((_) async {});
+          when(() => persistence.saveChannelQueries(
+                cids: any(named: 'cids'),
+                filter: any(named: 'filter'),
+                sort: any(named: 'sort'),
+                predefinedFilter: any(named: 'predefinedFilter'),
+                resolvedFilter: any(named: 'resolvedFilter'),
+                resolvedSort: any(named: 'resolvedSort'),
+                filterValues: any(named: 'filterValues'),
+                sortValues: any(named: 'sortValues'),
+                clearQueryCache: any(named: 'clearQueryCache'),
+              )).thenAnswer((_) => Future.value());
+
+          await delay(1100);
+          clearInteractions(persistence);
+
+          final results = await client
+              .queryChannelsWithResult(
+                predefinedFilter: filterName,
+                filterValues: filterValues,
+                sortValues: sortValues,
+              )
+              .toList();
+
+          // Persistence returned empty, so only the online emission is yielded.
+          expect(results, hasLength(1));
+          expect(results.single.channels, hasLength(channelStates.length));
+          expect(results.single.predefinedFilter, isNotNull);
+          expect(results.single.predefinedFilter!.name, equals(filterName));
+          expect(results.single.predefinedFilter!.sort, equals(resolvedSort));
         },
       );
     });

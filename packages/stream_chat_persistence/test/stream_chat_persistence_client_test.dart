@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -102,6 +104,8 @@ void main() {
 
     setUpAll(() {
       registerFallbackValue(<String>[]);
+      registerFallbackValue(const Filter.empty());
+      registerFallbackValue(const <SortOption<ChannelState>>[]);
     });
 
     setUp(() async {
@@ -446,6 +450,241 @@ void main() {
       verify(() =>
               mockDatabase.channelQueryDao.updateChannelQueries(filter, cids))
           .called(1);
+    });
+
+    group('queryChannelStates', () {
+      test('standard mode returns empty response when no channels match',
+          () async {
+        final filter = Filter.in_('members', const ['unknown_user']);
+
+        when(() => mockDatabase.channelQueryDao.getChannels(filter: filter))
+            .thenAnswer((_) async => <ChannelModel>[]);
+
+        final result = await client.queryChannelStates(filter: filter);
+
+        expect(result.channels, isEmpty);
+        expect(result.predefinedFilter, isNull);
+        verify(() => mockDatabase.channelQueryDao.getChannels(filter: filter))
+            .called(1);
+        verifyNever(() => mockDatabase.channelDao.getChannelByCid(any()));
+      });
+
+      test('standard mode clamps offset above total to an empty page',
+          () async {
+        // Unique cid prefix so verifyNever doesn't collide with calls from
+        // earlier tests in the same group (mocktail records across tests).
+        final channels = List.generate(
+          3,
+          (i) => ChannelModel(cid: 'messaging:clamp_$i'),
+        );
+
+        when(() => mockDatabase.channelQueryDao.getChannels())
+            .thenAnswer((_) async => channels);
+
+        final result = await client.queryChannelStates(
+          paginationParams: const PaginationParams(offset: 100),
+        );
+
+        expect(result.channels, isEmpty);
+        expect(result.predefinedFilter, isNull);
+        for (var i = 0; i < 3; i++) {
+          verifyNever(
+            () => mockDatabase.channelDao.getChannelByCid('messaging:clamp_$i'),
+          );
+        }
+      });
+
+      test('predefined mode with no persisted spec returns null '
+          'predefinedFilter', () async {
+        const filterName = 'sample-app-list';
+
+        when(() => mockDatabase.channelQueryDao
+                .getChannelsAndSpecByPredefinedFilter(
+                  filterName,
+                  filterValues: any(named: 'filterValues'),
+                  sortValues: any(named: 'sortValues'),
+                ))
+            .thenAnswer((_) async => (const <ChannelModel>[], null, null));
+
+        final result =
+            await client.queryChannelStates(predefinedFilter: filterName);
+
+        expect(result.channels, isEmpty);
+        expect(result.predefinedFilter, isNull);
+      });
+
+      test('predefined mode clamps offset above total to an empty page',
+          () async {
+        // Unique cid prefix so verifyNever doesn't collide with calls from
+        // earlier tests in the same group (mocktail records across tests).
+        const filterName = 'sample-app-list';
+        final channels = List.generate(
+          3,
+          (i) => ChannelModel(cid: 'messaging:clamp_p$i'),
+        );
+
+        when(() => mockDatabase.channelQueryDao
+            .getChannelsAndSpecByPredefinedFilter(
+              filterName,
+              filterValues: any(named: 'filterValues'),
+              sortValues: any(named: 'sortValues'),
+            )).thenAnswer((_) async => (channels, null, null));
+
+        final result = await client.queryChannelStates(
+          predefinedFilter: filterName,
+          paginationParams: const PaginationParams(offset: 100),
+        );
+
+        expect(result.channels, isEmpty);
+        expect(result.predefinedFilter, isNull);
+        for (var i = 0; i < 3; i++) {
+          verifyNever(
+            () => mockDatabase.channelDao
+                .getChannelByCid('messaging:clamp_p$i'),
+          );
+        }
+      });
+    });
+
+    group('saveChannelQueries', () {
+      test('standard mode forwards to channelQueryDao.updateChannelQueries',
+          () async {
+        final filter = Filter.in_('members', const ['testUserId']);
+        const cids = <String>[];
+        when(() =>
+                mockDatabase.channelQueryDao.updateChannelQueries(filter, cids))
+            .thenAnswer((_) => Future.value());
+
+        await client.saveChannelQueries(cids: cids, filter: filter);
+
+        verify(() =>
+                mockDatabase.channelQueryDao.updateChannelQueries(filter, cids))
+            .called(1);
+      });
+
+      test('standard mode ignores resolvedFilter and resolvedSort', () async {
+        final filter = Filter.in_('members', const ['testUserId']);
+        const cids = <String>['messaging:c0'];
+        final resolvedFilter = Filter.equal('type', 'messaging');
+        const resolvedSort = <SortOption<ChannelState>>[
+          SortOption<ChannelState>.desc(ChannelSortKey.lastMessageAt),
+        ];
+
+        when(() => mockDatabase.channelQueryDao.updateChannelQueries(
+              filter,
+              cids,
+              // ignore: avoid_redundant_argument_values
+              clearQueryCache: false,
+            )).thenAnswer((_) => Future.value());
+
+        await client.saveChannelQueries(
+          cids: cids,
+          filter: filter,
+          sort: resolvedSort,
+          resolvedFilter: resolvedFilter,
+          resolvedSort: resolvedSort,
+        );
+
+        verify(() => mockDatabase.channelQueryDao.updateChannelQueries(
+              filter,
+              cids,
+              // ignore: avoid_redundant_argument_values
+              clearQueryCache: false,
+            )).called(1);
+        verifyNever(() => mockDatabase.channelQueryDao
+            .updateChannelQueriesByPredefinedFilter(
+              any(),
+              any(),
+              filter: any(named: 'filter'),
+              sort: any(named: 'sort'),
+              filterValues: any(named: 'filterValues'),
+              sortValues: any(named: 'sortValues'),
+              clearQueryCache: any(named: 'clearQueryCache'),
+            ));
+      });
+
+      test('predefined mode forwards all args to '
+          'channelQueryDao.updateChannelQueriesByPredefinedFilter', () async {
+        const filterName = 'sample-app-list';
+        const filterValues = {'user_id': 'testUserId'};
+        const sortValues = {'pinned_at': true};
+        const cids = <String>['messaging:c0'];
+        final resolvedFilter = Filter.equal('type', 'messaging');
+        const resolvedSort = <SortOption<ChannelState>>[
+          SortOption<ChannelState>.desc(ChannelSortKey.lastMessageAt),
+        ];
+
+        when(() => mockDatabase.channelQueryDao
+            .updateChannelQueriesByPredefinedFilter(
+              filterName,
+              cids,
+              filter: resolvedFilter,
+              sort: resolvedSort,
+              filterValues: filterValues,
+              sortValues: sortValues,
+              clearQueryCache: true,
+            )).thenAnswer((_) => Future.value());
+
+        await client.saveChannelQueries(
+          cids: cids,
+          predefinedFilter: filterName,
+          resolvedFilter: resolvedFilter,
+          resolvedSort: resolvedSort,
+          filterValues: filterValues,
+          sortValues: sortValues,
+          clearQueryCache: true,
+        );
+
+        verify(() => mockDatabase.channelQueryDao
+            .updateChannelQueriesByPredefinedFilter(
+              filterName,
+              cids,
+              filter: resolvedFilter,
+              sort: resolvedSort,
+              filterValues: filterValues,
+              sortValues: sortValues,
+              clearQueryCache: true,
+            )).called(1);
+      });
+
+      test('predefined mode applies Filter.empty() and empty-sort fallback '
+          'when resolved values are null', () async {
+        const filterName = 'sample-app-list';
+        const cids = <String>['messaging:c0'];
+
+        when(() => mockDatabase.channelQueryDao
+            .updateChannelQueriesByPredefinedFilter(
+              filterName,
+              cids,
+              filter: const Filter.empty(),
+              sort: const [],
+              // ignore: avoid_redundant_argument_values
+              filterValues: null,
+              // ignore: avoid_redundant_argument_values
+              sortValues: null,
+              // ignore: avoid_redundant_argument_values
+              clearQueryCache: false,
+            )).thenAnswer((_) => Future.value());
+
+        await client.saveChannelQueries(
+          cids: cids,
+          predefinedFilter: filterName,
+        );
+
+        verify(() => mockDatabase.channelQueryDao
+            .updateChannelQueriesByPredefinedFilter(
+              filterName,
+              cids,
+              filter: const Filter.empty(),
+              sort: const [],
+              // ignore: avoid_redundant_argument_values
+              filterValues: null,
+              // ignore: avoid_redundant_argument_values
+              sortValues: null,
+              // ignore: avoid_redundant_argument_values
+              clearQueryCache: false,
+            )).called(1);
+      });
     });
 
     test('deleteMessageById', () async {
