@@ -3,7 +3,9 @@ name: e2e
 on:
   workflow_dispatch:
   pull_request:
-    types: [labeled, synchronize]
+    paths-ignore:
+      - 'README.md'
+      - '**/*.png'
 
 permissions:
   contents: read
@@ -17,7 +19,6 @@ env:
 
 jobs:
   android:
-    if: github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'e2e')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -76,7 +77,6 @@ jobs:
             sample_app/build/app/reports
 
   ios:
-    if: github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'e2e')
     runs-on: macos-15
     steps:
       - uses: actions/checkout@v6
