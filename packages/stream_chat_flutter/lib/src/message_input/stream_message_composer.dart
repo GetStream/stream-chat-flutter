@@ -70,7 +70,8 @@ class StreamMessageComposer extends StatelessWidget {
     bool enableVoiceRecording = true,
     bool sendVoiceRecordingAutomatically = false,
     AudioRecorderFeedback voiceRecordingFeedback = const AudioRecorderFeedback(),
-    UserMentionTileBuilder? userMentionsTileBuilder,
+    @Deprecated('Use mentionItemBuilder instead') UserMentionTileBuilder? userMentionsTileBuilder,
+    StreamMentionItemBuilder? mentionItemBuilder,
     ErrorListener? onError,
     int attachmentLimit = StreamAttachmentValidator.defaultMaxAttachmentCount,
     List<AttachmentPickerType> allowedAttachmentPickerTypes = AttachmentPickerType.values,
@@ -95,7 +96,7 @@ class StreamMessageComposer extends StatelessWidget {
     TextCapitalization textCapitalization = TextCapitalization.sentences,
     bool autofocus = false,
     bool autoCorrect = true,
-  }) : props = MessageComposerProps(
+  }) : props = .new(
          onMessageSent: onMessageSent,
          preMessageSending: preMessageSending,
          messageComposerController: messageComposerController,
@@ -105,7 +106,9 @@ class StreamMessageComposer extends StatelessWidget {
          enableVoiceRecording: enableVoiceRecording,
          sendVoiceRecordingAutomatically: sendVoiceRecordingAutomatically,
          voiceRecordingFeedback: voiceRecordingFeedback,
+         // ignore: deprecated_member_use_from_same_package
          userMentionsTileBuilder: userMentionsTileBuilder,
+         mentionItemBuilder: mentionItemBuilder,
          onError: onError,
          attachmentLimit: attachmentLimit,
          allowedAttachmentPickerTypes: allowedAttachmentPickerTypes,
@@ -147,8 +150,8 @@ class StreamMessageComposer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final builder = context.chatComponentBuilder<MessageComposerProps>();
-    if (builder != null) return builder(context, props);
-    return DefaultStreamMessageComposer(props: props);
+    final composer = builder?.call(context, props) ?? DefaultStreamMessageComposer(props: props);
+    return StreamSnackbarPopup(child: composer);
   }
 }
 
@@ -165,7 +168,8 @@ class MessageComposerProps {
     this.enableVoiceRecording = false,
     this.sendVoiceRecordingAutomatically = false,
     this.voiceRecordingFeedback = const AudioRecorderFeedback(),
-    this.userMentionsTileBuilder,
+    @Deprecated('Use mentionItemBuilder instead') this.userMentionsTileBuilder,
+    this.mentionItemBuilder,
     this.onError,
     this.attachmentLimit = StreamAttachmentValidator.defaultMaxAttachmentCount,
     this.allowedAttachmentPickerTypes = AttachmentPickerType.values,
@@ -257,8 +261,23 @@ class MessageComposerProps {
   /// ```
   final AudioRecorderFeedback voiceRecordingFeedback;
 
-  /// Customize the tile for the mentions overlay.
+  /// Customize the tile for user mentions in the mention autocomplete
+  /// overlay.
+  ///
+  /// Honoured only for user mentions, for backwards compatibility. Prefer
+  /// [mentionItemBuilder] (or a globally-registered factory builder), which
+  /// covers every mention kind.
+  @Deprecated('Use mentionItemBuilder instead')
   final UserMentionTileBuilder? userMentionsTileBuilder;
+
+  /// Per-instance builder for the suggestion item rendered for each mention
+  /// in the `@` autocomplete overlay.
+  ///
+  /// Takes precedence over any builder registered globally for
+  /// [StreamMentionItemProps] through [streamChatComponentBuilders]. When
+  /// null, the global builder is consulted next, then [DefaultStreamMentionItem]
+  /// is used as a fallback.
+  final StreamMentionItemBuilder? mentionItemBuilder;
 
   /// A callback for error reporting
   final ErrorListener? onError;
@@ -383,6 +402,84 @@ class MessageComposerProps {
   ///
   /// Defaults to true.
   final bool autoCorrect;
+
+  /// Returns a copy of this [MessageComposerProps] with the given fields
+  /// replaced with new values.
+  MessageComposerProps copyWith({
+    void Function(Message)? onMessageSent,
+    FutureOr<Message> Function(Message)? preMessageSending,
+    StreamMessageComposerController? messageComposerController,
+    FocusNode? focusNode,
+    bool? disableAttachments,
+    bool? canAlsoSendToChannelFromThread,
+    bool? enableVoiceRecording,
+    bool? sendVoiceRecordingAutomatically,
+    AudioRecorderFeedback? voiceRecordingFeedback,
+    UserMentionTileBuilder? userMentionsTileBuilder,
+    StreamMentionItemBuilder? mentionItemBuilder,
+    ErrorListener? onError,
+    int? attachmentLimit,
+    List<AttachmentPickerType>? allowedAttachmentPickerTypes,
+    Iterable<StreamAutocompleteTrigger>? customAutocompleteTriggers,
+    bool? mentionAllAppUsers,
+    bool? shouldKeepFocusAfterMessage,
+    MessageValidator? validator,
+    String? restorationId,
+    bool? enableSafeArea,
+    bool? enableMentionsOverlay,
+    VoidCallback? onQuotedMessageCleared,
+    OgPreviewFilter? ogPreviewFilter,
+    MessageInputPlaceholderBuilder? placeholderBuilder,
+    bool? useSystemAttachmentPicker,
+    PollConfig? pollConfig,
+    AttachmentPickerOptionsBuilder? attachmentPickerOptionsBuilder,
+    OnAttachmentPickerResult? onAttachmentPickerResult,
+    KeyEventPredicate? sendMessageKeyPredicate,
+    KeyEventPredicate? clearQuotedMessageKeyPredicate,
+    TextInputAction? textInputAction,
+    TextInputType? keyboardType,
+    TextCapitalization? textCapitalization,
+    bool? autofocus,
+    bool? autoCorrect,
+  }) {
+    return MessageComposerProps(
+      onMessageSent: onMessageSent ?? this.onMessageSent,
+      preMessageSending: preMessageSending ?? this.preMessageSending,
+      messageComposerController: messageComposerController ?? this.messageComposerController,
+      focusNode: focusNode ?? this.focusNode,
+      disableAttachments: disableAttachments ?? this.disableAttachments,
+      canAlsoSendToChannelFromThread: canAlsoSendToChannelFromThread ?? this.canAlsoSendToChannelFromThread,
+      enableVoiceRecording: enableVoiceRecording ?? this.enableVoiceRecording,
+      sendVoiceRecordingAutomatically: sendVoiceRecordingAutomatically ?? this.sendVoiceRecordingAutomatically,
+      voiceRecordingFeedback: voiceRecordingFeedback ?? this.voiceRecordingFeedback,
+      userMentionsTileBuilder: userMentionsTileBuilder ?? this.userMentionsTileBuilder,
+      mentionItemBuilder: mentionItemBuilder ?? this.mentionItemBuilder,
+      onError: onError ?? this.onError,
+      attachmentLimit: attachmentLimit ?? this.attachmentLimit,
+      allowedAttachmentPickerTypes: allowedAttachmentPickerTypes ?? this.allowedAttachmentPickerTypes,
+      customAutocompleteTriggers: customAutocompleteTriggers ?? this.customAutocompleteTriggers,
+      mentionAllAppUsers: mentionAllAppUsers ?? this.mentionAllAppUsers,
+      shouldKeepFocusAfterMessage: shouldKeepFocusAfterMessage ?? this.shouldKeepFocusAfterMessage,
+      validator: validator ?? this.validator,
+      restorationId: restorationId ?? this.restorationId,
+      enableSafeArea: enableSafeArea ?? this.enableSafeArea,
+      enableMentionsOverlay: enableMentionsOverlay ?? this.enableMentionsOverlay,
+      onQuotedMessageCleared: onQuotedMessageCleared ?? this.onQuotedMessageCleared,
+      ogPreviewFilter: ogPreviewFilter ?? this.ogPreviewFilter,
+      placeholderBuilder: placeholderBuilder ?? this.placeholderBuilder,
+      useSystemAttachmentPicker: useSystemAttachmentPicker ?? this.useSystemAttachmentPicker,
+      pollConfig: pollConfig ?? this.pollConfig,
+      attachmentPickerOptionsBuilder: attachmentPickerOptionsBuilder ?? this.attachmentPickerOptionsBuilder,
+      onAttachmentPickerResult: onAttachmentPickerResult ?? this.onAttachmentPickerResult,
+      sendMessageKeyPredicate: sendMessageKeyPredicate ?? this.sendMessageKeyPredicate,
+      clearQuotedMessageKeyPredicate: clearQuotedMessageKeyPredicate ?? this.clearQuotedMessageKeyPredicate,
+      textInputAction: textInputAction ?? this.textInputAction,
+      keyboardType: keyboardType ?? this.keyboardType,
+      textCapitalization: textCapitalization ?? this.textCapitalization,
+      autofocus: autofocus ?? this.autofocus,
+      autoCorrect: autoCorrect ?? this.autoCorrect,
+    );
+  }
 
   static bool _defaultSendMessageKeyPredicate(FocusNode node, KeyEvent event) {
     // Do not handle the event if the user is using a mobile device.
@@ -719,29 +816,25 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     final viewPadding = MediaQuery.paddingOf(context);
 
     return Material(
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: context.streamColorScheme.backgroundElevation1,
-        ),
-        child: AnimatedBuilder(
-          animation: _pickerAnimation,
-          builder: (context, child) {
-            final safeAreaPadding = safeAreaEnabled
-                ? EdgeInsets.lerp(
-                    EdgeInsets.only(
-                      left: viewPadding.left,
-                      top: viewPadding.top,
-                      right: viewPadding.right,
-                      bottom: math.max(viewPadding.bottom, spacing.md),
-                    ),
-                    EdgeInsets.zero,
-                    _pickerAnimation.value,
-                  )!
-                : EdgeInsets.zero;
-            return Padding(padding: safeAreaPadding, child: child);
-          },
-          child: Center(heightFactor: 1, child: messageInput),
-        ),
+      color: context.streamColorScheme.backgroundElevation1,
+      child: AnimatedBuilder(
+        animation: _pickerAnimation,
+        builder: (context, child) {
+          final safeAreaPadding = safeAreaEnabled
+              ? EdgeInsets.lerp(
+                  EdgeInsets.only(
+                    left: viewPadding.left,
+                    top: viewPadding.top,
+                    right: viewPadding.right,
+                    bottom: math.max(viewPadding.bottom, spacing.md),
+                  ),
+                  EdgeInsets.zero,
+                  _pickerAnimation.value,
+                )!
+              : EdgeInsets.zero;
+          return Padding(padding: safeAreaPadding, child: child);
+        },
+        child: Center(heightFactor: 1, child: messageInput),
       ),
     );
   }
@@ -756,48 +849,70 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
         StreamAutocompleteTrigger(
           trigger: _kCommandTrigger,
           triggerOnlyAtStart: true,
-          optionsViewBuilder:
-              (
-                context,
-                autocompleteQuery,
-                messageComposerController,
-              ) {
-                final query = autocompleteQuery.query;
-                return StreamCommandAutocompleteOptions(
-                  query: query,
-                  channel: StreamChannel.of(context).channel,
-                  onCommandSelected: (command) {
-                    _effectiveController.command = command.name;
-                    // removing the overlay after the command is selected
-                    StreamAutocomplete.of(context).closeSuggestions();
-                  },
-                );
-              },
+          optionsViewBuilder: (context, autocompleteQuery, messageComposerController) {
+            final query = autocompleteQuery.query;
+            return ListenableBuilder(
+              listenable: messageComposerController,
+              builder: (context, _) => StreamCommandAutocompleteOptions(
+                query: query,
+                channel: StreamChannel.of(context).channel,
+                commandValidator: _effectiveController.validateCommand,
+                onCommandSelected: (command) {
+                  StreamAutocomplete.of(context).closeSuggestions();
+                  return _onCommandSelected(command);
+                },
+              ),
+            );
+          },
         ),
         if (widget.props.enableMentionsOverlay)
           StreamAutocompleteTrigger(
             trigger: _kMentionTrigger,
-            optionsViewBuilder:
-                (
-                  context,
-                  autocompleteQuery,
-                  messageComposerController,
-                ) {
-                  final query = autocompleteQuery.query;
-                  return StreamMentionAutocompleteOptions(
-                    query: query,
-                    channel: StreamChannel.of(context).channel,
-                    mentionAllAppUsers: widget.props.mentionAllAppUsers,
-                    mentionsTileBuilder: widget.props.userMentionsTileBuilder,
-                    onMentionUserTap: (user) {
-                      // adding the mentioned user to the controller.
-                      _effectiveController.addMentionedUser(user);
+            optionsViewBuilder: (context, autocompleteQuery, messageComposerController) {
+              final query = autocompleteQuery.query;
+              return StreamMentionAutocompleteOptions(
+                query: query,
+                channel: StreamChannel.of(context).channel,
+                mentionAllAppUsers: widget.props.mentionAllAppUsers,
+                mentionItemBuilder: widget.props.mentionItemBuilder,
+                mentionsTileBuilder: widget.props.userMentionsTileBuilder,
+                onMentionChannelTap: () {
+                  // setting the mentionedChannel flag to true in the controller.
+                  _effectiveController.mentionedChannel = true;
 
-                      // accepting the autocomplete option.
-                      StreamAutocomplete.of(context).acceptAutocompleteOption(user.name);
-                    },
-                  );
+                  // accepting the autocomplete option.
+                  StreamAutocomplete.of(context).acceptAutocompleteOption(StreamMentionType.channel);
                 },
+                onMentionHereTap: () {
+                  // setting the mentionedHere flag to true in the controller.
+                  _effectiveController.mentionedHere = true;
+
+                  // accepting the autocomplete option.
+                  StreamAutocomplete.of(context).acceptAutocompleteOption(StreamMentionType.here);
+                },
+                onMentionRoleTap: (role) {
+                  // adding the mentioned role to the controller.
+                  _effectiveController.addMentionedRole(role);
+
+                  // accepting the autocomplete option.
+                  StreamAutocomplete.of(context).acceptAutocompleteOption(role.name);
+                },
+                onMentionUserGroupTap: (group) {
+                  // adding the mentioned user group to the controller.
+                  _effectiveController.addMentionedUserGroup(group);
+
+                  // accepting the autocomplete option.
+                  StreamAutocomplete.of(context).acceptAutocompleteOption(group.name);
+                },
+                onMentionUserTap: (user) {
+                  // adding the mentioned user to the controller.
+                  _effectiveController.addMentionedUser(user);
+
+                  // accepting the autocomplete option.
+                  StreamAutocomplete.of(context).acceptAutocompleteOption(user.name);
+                },
+              );
+            },
           ),
       ],
     );
@@ -880,34 +995,69 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     };
     final useSystemPicker = widget.props.useSystemAttachmentPicker || isWebOrDesktop;
 
-    final child = useSystemPicker
-        ? systemAttachmentPickerBuilder(
-            context: context,
-            controller: _pickerController!,
-            allowedTypes: allowedTypes,
-            pollConfig: widget.props.pollConfig,
-            optionsBuilder: widget.props.attachmentPickerOptionsBuilder,
-            onError: _onPickerError,
-            onPollCreated: _onPollCreated,
-          )
-        : tabbedAttachmentPickerBuilder(
-            context: context,
-            controller: _pickerController!,
-            allowedTypes: allowedTypes,
-            pollConfig: widget.props.pollConfig,
-            optionsBuilder: widget.props.attachmentPickerOptionsBuilder,
-            onError: _onPickerError,
-            onPollCreated: _onPollCreated,
-            onCommandSelected: _onCommandSelectedFromPicker,
-          );
+    if (useSystemPicker) {
+      return systemAttachmentPickerBuilder(
+        context: context,
+        controller: _pickerController!,
+        allowedTypes: allowedTypes,
+        pollConfig: widget.props.pollConfig,
+        optionsBuilder: widget.props.attachmentPickerOptionsBuilder,
+        onError: _onPickerError,
+        onPollCreated: _onPollCreated,
+      );
+    }
 
-    return SizedBox(height: 333, child: child);
+    return tabbedAttachmentPickerBuilder(
+      context: context,
+      controller: _pickerController!,
+      allowedTypes: allowedTypes,
+      pollConfig: widget.props.pollConfig,
+      optionsBuilder: widget.props.attachmentPickerOptionsBuilder,
+      onError: _onPickerError,
+      onPollCreated: _onPollCreated,
+      onCommandSelected: _onCommandSelected,
+      commandValidator: _effectiveController.validateCommand,
+    );
   }
 
-  void _onCommandSelectedFromPicker(Command command) {
-    _hidePicker();
-    _effectiveController.command = command.name;
+  // Validates [command]: on disabled, surfaces the "unavailable" snackbar and
+  // bails. On valid, activates the command and closes the picker.
+  void _onCommandSelected(Command command) {
+    final reason = _effectiveController.validateCommand(command);
+    if (reason != null) return _showCommandUnavailableSnackbar(reason);
+
+    _dismissCommandUnavailableSnackbar();
+    _effectiveController.setCommand(command);
+
+    _hidePicker(); // Close the picker
     _effectiveFocusNode.requestFocus();
+  }
+
+  StreamSnackbarController? _commandUnavailableSnackbarController;
+  void _showCommandUnavailableSnackbar(CommandUnavailableReason reason) {
+    final messenger = StreamSnackbarMessenger.maybeOf(context);
+    if (messenger == null) return;
+
+    final translations = context.translations;
+    final message = switch (reason) {
+      .editing => translations.commandUnavailableWhileEditingError,
+      .quotedMessage => translations.commandUnavailableWhileQuotingError,
+      .other => translations.commandUnavailableError,
+    };
+
+    _commandUnavailableSnackbarController = messenger.show(
+      StreamSnackbar(message: Text(message), variant: .error),
+      replace: true,
+    );
+  }
+
+  // Dismiss the "command unavailable" snackbar if it's currently shown.
+  //
+  // This is typically useful to prevent stale error messages from lingering after the user has
+  // taken an action that resolves the issue (e.g. selecting a different command, removing the quoted message, etc.).
+  void _dismissCommandUnavailableSnackbar() {
+    _commandUnavailableSnackbarController?.close();
+    _commandUnavailableSnackbarController = null;
   }
 
   bool _shouldShowSendToChannelCheckbox() {

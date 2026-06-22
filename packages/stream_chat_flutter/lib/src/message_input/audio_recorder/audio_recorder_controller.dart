@@ -18,7 +18,8 @@ import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 /// to the recorder state changes and updates the [AudioRecorderState]
 /// accordingly.
 /// {@endtemplate}
-class StreamAudioRecorderController extends ValueNotifier<AudioRecorderState> {
+class StreamAudioRecorderController extends ValueNotifier<AudioRecorderState>
+    with DisposeAwareValueNotifier<AudioRecorderState> {
   /// {@macro streamAudioRecorderController}
   factory StreamAudioRecorderController({
     RecordConfig? config,
@@ -174,6 +175,7 @@ class StreamAudioRecorderController extends ValueNotifier<AudioRecorderState> {
   /// Shows an info message to the user for the given [duration].
   ///
   /// This is useful for showing messages like "Hold to record" or "Recording".
+  @Deprecated('Use StreamSnackbar via StreamSnackbarMessenger instead.')
   void showInfo(
     String message, {
     Duration duration = const Duration(seconds: 3),
@@ -196,6 +198,18 @@ class StreamAudioRecorderController extends ValueNotifier<AudioRecorderState> {
         if (value case RecordStateIdle()) value = const RecordStateIdle();
       });
     }
+  }
+
+  /// Cancels any pending info-message timer and clears the message on
+  /// [RecordStateIdle]. Counterpart to [showInfo].
+  @Deprecated('Use StreamSnackbar via StreamSnackbarMessenger instead.')
+  void hideInfo() {
+    // Cancel the info timer.
+    _infoTimer?.cancel();
+    _infoTimer = null;
+
+    // Clear the info message if it is currently being shown.
+    if (value case RecordStateIdle()) value = const RecordStateIdle();
   }
 
   Future<String> _getOutputFilePath(AudioEncoder encoder) async {
@@ -232,6 +246,8 @@ class StreamAudioRecorderController extends ValueNotifier<AudioRecorderState> {
   void dispose() {
     _durationTimer?.cancel();
     _durationTimer = null;
+    _infoTimer?.cancel();
+    _infoTimer = null;
     _recorderAmplitudeSubscription?.cancel();
     _recorder.dispose();
     super.dispose();

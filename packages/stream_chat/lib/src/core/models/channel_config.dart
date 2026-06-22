@@ -1,5 +1,7 @@
 import 'package:json_annotation/json_annotation.dart';
+import 'package:stream_chat/src/core/models/chat_preferences.dart';
 import 'package:stream_chat/src/core/models/command.dart';
+import 'package:stream_chat/src/core/models/push_level.dart';
 
 part 'channel_config.g.dart';
 
@@ -21,6 +23,9 @@ class ChannelConfig {
     this.replies = false,
     this.search = false,
     this.polls = false,
+    this.pushLevel,
+    this.pushNotifications = true,
+    this.chatPreferences,
     this.typingEvents = false,
     this.uploads = false,
     this.urlEnrichment = false,
@@ -73,6 +78,25 @@ class ChannelConfig {
 
   /// True if polls are active for this channel
   final bool polls;
+
+  /// The push level for this channel.
+  ///
+  /// Mutually exclusive with [chatPreferences] — when [chatPreferences] is set
+  /// on the backend, the coarse level is cleared and vice versa.
+  final PushLevel? pushLevel;
+
+  /// True if this channel type supports push notifications.
+  ///
+  /// Channel-type feature flag. When `false`, push notifications are disabled
+  /// for the entire channel type regardless of [pushLevel] or
+  /// [chatPreferences].
+  final bool pushNotifications;
+
+  /// Granular per-category push preferences for this channel.
+  ///
+  /// Mutually exclusive with [pushLevel] — when set, takes precedence over
+  /// the coarse level.
+  final ChatPreferences? chatPreferences;
 
   /// True if typing events should be sent for this channel
   final bool typingEvents;

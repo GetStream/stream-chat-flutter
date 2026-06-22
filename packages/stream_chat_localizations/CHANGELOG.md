@@ -1,3 +1,15 @@
+## Upcoming
+
+✅ Added
+
+- Added `notifyChannelText` translation for all supported locales — label for
+  the `@channel` broadcast mention in the autocomplete overlay.
+- Added `notifyHereText` translation for all supported locales — label for the
+  `@here` broadcast mention in the autocomplete overlay.
+- Added `notifyRoleText(String role)` translation for all supported locales —
+  label for role mentions in the autocomplete overlay.
+- Added `commandUnavailableWhileEditingError`, `commandUnavailableWhileQuotingError`, and `commandUnavailableError` strings for the "command not available" snackbars surfaced by `StreamMessageComposer`. Non-English locales currently use the English copy pending translation.
+
 ## 10.0.1
 
 🛑️ Breaking

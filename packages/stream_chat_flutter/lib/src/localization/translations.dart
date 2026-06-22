@@ -137,6 +137,19 @@ abstract class Translations {
   /// The label for instant commands in [StreamMessageComposer]
   String get instantCommandsLabel;
 
+  /// The error surfaced when the user taps a slash command while the
+  /// composer is editing a message.
+  String get commandUnavailableWhileEditingError;
+
+  /// The error surfaced when the user taps a moderation slash command
+  /// (e.g. `/mute`, `/ban`) while the composer is quoting another message.
+  String get commandUnavailableWhileQuotingError;
+
+  /// The generic error surfaced when a slash command is unavailable for a
+  /// reason not covered by [commandUnavailableWhileEditingError] or
+  /// [commandUnavailableWhileQuotingError].
+  String get commandUnavailableError;
+
   /// The error shown in case the file is too large even after compression
   /// while uploading via [StreamMessageComposer]
   String fileTooLargeAfterCompressionError(double limitInMB);
@@ -725,6 +738,18 @@ abstract class Translations {
   /// The header text for the reaction detail sheet showing the count of
   /// visible reactions (e.g. "1 Reaction" / "5 Reactions").
   String reactionsCountText(int count);
+
+  /// The text shown under the "@channel" entry in the mention autocomplete,
+  /// describing that it notifies every channel member.
+  String get notifyChannelText;
+
+  /// The text shown under the "@here" entry in the mention autocomplete,
+  /// describing that it notifies every online channel member.
+  String get notifyHereText;
+
+  /// The text shown under a role mention entry in the mention autocomplete,
+  /// describing that it notifies every member holding the role named [role].
+  String notifyRoleText(String role);
 }
 
 /// Default implementation of Translation strings for the stream chat widgets
@@ -855,6 +880,15 @@ class DefaultTranslations implements Translations {
 
   @override
   String get instantCommandsLabel => 'Instant Commands';
+
+  @override
+  String get commandUnavailableWhileEditingError => 'Not available while editing';
+
+  @override
+  String get commandUnavailableWhileQuotingError => 'Not available while replying';
+
+  @override
+  String get commandUnavailableError => 'Command not available';
 
   @override
   String fileTooLargeAfterCompressionError(double limitInMB) =>
@@ -1553,4 +1587,13 @@ Attachment limit exceeded: it's not possible to add more than $limit attachments
 
   @override
   String reactionsCountText(int count) => count == 1 ? '1 Reaction' : '$count Reactions';
+
+  @override
+  String get notifyChannelText => 'Notify everyone in this channel';
+
+  @override
+  String get notifyHereText => 'Notify every online member in this channel';
+
+  @override
+  String notifyRoleText(String role) => 'Notify all $role members';
 }

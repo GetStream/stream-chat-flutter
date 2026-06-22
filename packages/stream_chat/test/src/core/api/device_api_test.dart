@@ -137,7 +137,7 @@ void main() {
     const path = '/push_preferences';
 
     const preferences = [
-      PushPreferenceInput(chatLevel: ChatLevel.mentions),
+      PushPreferenceInput(chatLevel: ChatLevel.directMentions),
     ];
 
     when(() => client.post(path, data: any(named: 'data'))).thenAnswer(

@@ -8,9 +8,24 @@ class StreamCommandPicker extends StatelessWidget {
   const StreamCommandPicker({
     super.key,
     this.onCommandSelected,
+    this.commandValidator,
   });
 
-  /// Callback called when a command is selected.
+  /// Resolves whether a command is available in the current composer state.
+  ///
+  /// Returns `null` when the command is enabled and selectable. A non-null
+  /// [CommandUnavailableReason] marks the row as dimmed; the row is still
+  /// tappable so [onCommandSelected] can decide what to do.
+  ///
+  /// When `null`, all commands are treated as enabled.
+  final CommandValidator? commandValidator;
+
+  /// Called when the user taps a command row.
+  ///
+  /// Fires for every row, including ones [commandValidator] flagged as
+  /// disabled. Re-run the validator inside the callback to branch on
+  /// availability (e.g. activate the command vs. surface a snackbar
+  /// explaining why it can't be activated).
   final ValueSetter<Command>? onCommandSelected;
 
   @override
@@ -25,51 +40,52 @@ class StreamCommandPicker extends StatelessWidget {
 
     return OptionDrawer(
       margin: EdgeInsets.zero,
-      child: Material(
-        type: .transparency,
-        child: Column(
-          spacing: spacing.md,
-          crossAxisAlignment: .start,
-          children: [
-            Padding(
-              padding: .symmetric(horizontal: spacing.md),
-              child: Text(context.translations.instantCommandsLabel, style: textTheme.headingSm),
-            ),
-            Expanded(
-              child: ListView.builder(
-                padding: .symmetric(horizontal: spacing.xxs, vertical: spacing.xxxs),
-                itemCount: commands.length,
-                itemBuilder: (context, index) {
-                  final command = commands[index];
-                  return InkWell(
-                    onTap: onCommandSelected == null ? null : () => onCommandSelected!(command),
-                    child: Padding(
-                      padding: .symmetric(horizontal: spacing.sm, vertical: spacing.xs),
-                      child: Row(
-                        spacing: spacing.sm,
-                        children: [
-                          StreamCommandIcon(command: command),
-                          Text(
-                            command.name.sentenceCase,
-                            style: textTheme.bodyEmphasis.copyWith(color: colorScheme.textPrimary),
+      child: Column(
+        spacing: spacing.md,
+        crossAxisAlignment: .start,
+        children: [
+          Padding(
+            padding: .symmetric(horizontal: spacing.md),
+            child: Text(context.translations.instantCommandsLabel, style: textTheme.headingSm),
+          ),
+          Expanded(
+            child: ListView.builder(
+              padding: .symmetric(horizontal: spacing.xxs, vertical: spacing.xxxs),
+              itemCount: commands.length,
+              itemBuilder: (context, index) {
+                final command = commands[index];
+                final reason = commandValidator?.call(command);
+                final tile = InkWell(
+                  onTap: onCommandSelected == null ? null : () => onCommandSelected!(command),
+                  child: Padding(
+                    padding: .symmetric(horizontal: spacing.sm, vertical: spacing.xs),
+                    child: Row(
+                      spacing: spacing.sm,
+                      children: [
+                        StreamCommandIcon(command: command),
+                        Text(
+                          command.name.sentenceCase,
+                          style: textTheme.bodyEmphasis.copyWith(color: colorScheme.textPrimary),
+                        ),
+                        Expanded(
+                          child: Text(
+                            '/${command.name} ${command.args}',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: textTheme.bodyDefault.copyWith(color: colorScheme.textTertiary),
                           ),
-                          Expanded(
-                            child: Text(
-                              '/${command.name} ${command.args}',
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: textTheme.bodyDefault.copyWith(color: colorScheme.textTertiary),
-                            ),
-                          ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
-                  );
-                },
-              ),
+                  ),
+                );
+
+                if (reason == null) return tile;
+                return Opacity(opacity: 0.38, child: tile);
+              },
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

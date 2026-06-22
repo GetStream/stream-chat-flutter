@@ -2,17 +2,22 @@
 
 import 'dart:async';
 
+import 'package:alchemist/alchemist.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
 import 'package:record/record.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat_flutter/src/message_input/dm_checkbox_list_tile.dart';
+import 'package:stream_chat_flutter/src/message_input/stream_chat_message_input.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import '../fakes.dart';
 import '../mocks.dart';
+
+class _MockAudioRecorder extends Mock implements AudioRecorder {}
 
 /// TODO: remove skip once we have a proper message input test.
 void main() {
@@ -1100,9 +1105,272 @@ void main() {
       );
     });
   });
+
+  group('StreamChatMessageInput hold-to-record snackbar', () {
+    late _MockAudioRecorder mockRecorder;
+    late StreamAudioRecorderController audioRecorderController;
+
+    setUpAll(() => registerFallbackValue(Duration.zero));
+
+    setUp(() {
+      PathProviderPlatform.instance = FakePathProviderPlatform();
+      mockRecorder = _MockAudioRecorder();
+      // The production AudioRecorder spins up a 100ms periodic amplitude
+      // timer; mocking with an empty stream keeps the test binding free
+      // of pending timers.
+      when(() => mockRecorder.onAmplitudeChanged(any())).thenAnswer((_) => const Stream.empty());
+      when(() => mockRecorder.dispose()).thenAnswer((_) async {});
+
+      audioRecorderController = StreamAudioRecorderController.raw(
+        recorder: mockRecorder,
+        config: const RecordConfig(numChannels: 1),
+      );
+    });
+
+    testWidgets(
+      'long-press cancel on mic shows the hold-to-record snackbar',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          buildWidget(
+            StreamChatMessageInput(
+              onSendPressed: () {},
+              audioRecorderController: audioRecorderController,
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        const holdLabel = 'Hold to record. Release to save.';
+        expect(find.text(holdLabel), findsNothing);
+
+        await _cancelMicLongPress(tester);
+
+        expect(find.text(holdLabel), findsOneWidget);
+        expect(find.byType(StreamSnackbar), findsOneWidget);
+
+        // Dispose in body: showInfo's 3s timer outlives the widget tree, and
+        // `tearDown` / `addTearDown` run after the binding's pending-timer
+        // check — only a body-side dispose cancels it in time.
+        audioRecorderController.dispose();
+      },
+    );
+
+    testWidgets(
+      'invokes onRecordStartCancel feedback before showing the snackbar',
+      (WidgetTester tester) async {
+        final feedback = _RecordingFeedbackSpy();
+
+        await tester.pumpWidget(
+          buildWidget(
+            StreamChatMessageInput(
+              onSendPressed: () {},
+              audioRecorderController: audioRecorderController,
+              feedback: feedback,
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        await _cancelMicLongPress(tester);
+
+        expect(feedback.cancelCount, 1);
+        expect(find.text('Hold to record. Release to save.'), findsOneWidget);
+
+        audioRecorderController.dispose();
+      },
+    );
+
+    testWidgets(
+      'rapid cancels do not enqueue duplicate snackbars',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          buildWidget(
+            StreamChatMessageInput(
+              onSendPressed: () {},
+              audioRecorderController: audioRecorderController,
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        await _cancelMicLongPress(tester);
+        await _cancelMicLongPress(tester);
+        await _cancelMicLongPress(tester);
+
+        expect(find.byType(StreamSnackbar), findsOneWidget);
+
+        audioRecorderController.dispose();
+      },
+    );
+
+    testWidgets(
+      'starting a hold clears the in-flight hold-to-record snackbar',
+      (WidgetTester tester) async {
+        // Mock the recorder so startRecord can transition to RecordStateRecordingHold.
+        const config = RecordConfig(numChannels: 1);
+        when(() => mockRecorder.hasPermission(request: false)).thenAnswer((_) async => true);
+        when(() => mockRecorder.start(config, path: any(named: 'path'))).thenAnswer((_) async {});
+
+        await tester.pumpWidget(
+          buildWidget(
+            StreamChatMessageInput(
+              onSendPressed: () {},
+              audioRecorderController: audioRecorderController,
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        await _cancelMicLongPress(tester);
+        expect(find.byType(StreamSnackbar), findsOneWidget);
+
+        // Long-press the mic. startRecord transitions to RecordStateRecordingHold;
+        // the listener should react and remove the in-flight hint.
+        final mic = find.byKey(const ValueKey('microphone_key'));
+        tester.widget<GestureDetector>(mic).onLongPress!();
+        // pump < 1s so the recorder's periodic duration timer doesn't tick;
+        // microtasks drain and the state transition + listener fire complete.
+        await tester.pump(const Duration(milliseconds: 500));
+
+        expect(find.byType(StreamSnackbar), findsNothing);
+        expect(audioRecorderController.value, isA<RecordStateRecordingHold>());
+
+        audioRecorderController.dispose();
+      },
+    );
+
+    testWidgets(
+      'composer subtree resolves a StreamSnackbarMessenger via context',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          buildWidget(
+            StreamChatMessageInput(
+              onSendPressed: () {},
+              audioRecorderController: audioRecorderController,
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        final micContext = tester.element(find.byKey(const ValueKey('microphone_key')));
+        expect(StreamSnackbarMessenger.maybeOf(micContext), isNotNull);
+      },
+    );
+
+    testWidgets(
+      'swiping the snackbar away clears the recorder state.message',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          buildWidget(
+            StreamChatMessageInput(
+              onSendPressed: () {},
+              audioRecorderController: audioRecorderController,
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        // ignore: deprecated_member_use
+        audioRecorderController.showInfo('Hint');
+        await tester.pumpAndSettle();
+        expect(find.text('Hint'), findsOneWidget);
+        expect(
+          // ignore: deprecated_member_use
+          (audioRecorderController.value as RecordStateIdle).message,
+          'Hint',
+        );
+
+        await tester.fling(find.text('Hint'), const Offset(0, 300), 1000);
+        await tester.pumpAndSettle();
+
+        expect(find.byType(StreamSnackbar), findsNothing);
+        // The listener should have called hideInfo() on dismissal, so the
+        // recorder no longer thinks it's showing 'Hint'. A subsequent
+        // showInfo('Hint') should fire a fresh snackbar.
+        expect(
+          // ignore: deprecated_member_use
+          (audioRecorderController.value as RecordStateIdle).message,
+          isNull,
+        );
+
+        // ignore: deprecated_member_use
+        audioRecorderController.showInfo('Hint');
+        await tester.pumpAndSettle();
+        expect(find.text('Hint'), findsOneWidget);
+
+        audioRecorderController.dispose();
+      },
+    );
+  });
+
+  group('StreamChat global snackbar scope', () {
+    testWidgets(
+      'descendants without a nearer popup find a fallback messenger',
+      (WidgetTester tester) async {
+        StreamSnackbarMessenger? captured;
+
+        await tester.pumpWidget(
+          buildWidget(
+            Builder(
+              builder: (context) {
+                captured = StreamSnackbarMessenger.maybeOf(context);
+                return const SizedBox.shrink();
+              },
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(captured, isNotNull);
+      },
+    );
+  });
+
+  goldenTest(
+    'composer hold-to-record snackbar',
+    fileName: 'composer_hold_to_record_snackbar',
+    constraints: const BoxConstraints.tightFor(width: 400, height: 240),
+    pumpBeforeTest: (tester) async {
+      await tester.pumpAndSettle();
+      final mic = find.byKey(const ValueKey('microphone_key'));
+      final gd = tester.widget<GestureDetector>(mic);
+      gd.onLongPressCancel!();
+      await tester.pumpAndSettle();
+    },
+    builder: () => buildWidget(
+      Column(
+        children: [
+          const Expanded(child: SizedBox()),
+          StreamMessageComposer(),
+        ],
+      ),
+    ),
+  );
 }
 
-MaterialApp buildWidget(StreamMessageComposer input) {
+Future<void> _cancelMicLongPress(WidgetTester tester) async {
+  final mic = find.byKey(const ValueKey('microphone_key'));
+  expect(mic, findsOneWidget);
+  // Invoking the callback directly avoids depending on gesture-arena
+  // timing — onLongPressCancel needs a sibling tap to race the long press,
+  // which is brittle to reproduce in widget tests.
+  final gestureDetector = tester.widget<GestureDetector>(mic);
+  gestureDetector.onLongPressCancel!();
+  await tester.pumpAndSettle();
+}
+
+class _RecordingFeedbackSpy extends AudioRecorderFeedback {
+  _RecordingFeedbackSpy() : super();
+
+  int cancelCount = 0;
+
+  @override
+  Future<void> onRecordStartCancel(BuildContext context) async {
+    cancelCount++;
+  }
+}
+
+MaterialApp buildWidget(Widget input) {
   final client = MockClient();
   final clientState = MockClientState();
   final channel = MockChannel();
@@ -1157,6 +1425,7 @@ MaterialApp buildWidget(StreamMessageComposer input) {
   return MaterialApp(
     home: StreamChat(
       client: client,
+      connectivityStream: Stream.value([ConnectivityResult.mobile]),
       child: StreamChannel(
         channel: channel,
         child: Scaffold(body: input),

@@ -39,17 +39,19 @@ class StreamSystemAttachmentPicker extends StatelessWidget {
     return ValueListenableBuilder(
       valueListenable: controller,
       builder: (context, value, child) {
+        final spacing = context.streamSpacing;
         final enabledTypes = value.filterEnabledTypes(options: options);
 
         return ListView(
           shrinkWrap: true,
+          padding: .symmetric(vertical: spacing.sm, horizontal: spacing.xxs),
           children: [
             ...options.map(
               (option) {
                 final supported = option.supportedTypes;
                 final isEnabled = enabledTypes.any(supported.contains);
 
-                return ListTile(
+                return StreamListTile(
                   enabled: isEnabled,
                   leading: Icon(option.icon),
                   title: Text(option.title),
@@ -63,6 +65,9 @@ class StreamSystemAttachmentPicker extends StatelessWidget {
     );
   }
 }
+
+// The height of the attachment picker when using the tabbed interface.
+const _kTabbedAttachmentPickerHeight = 260.0;
 
 /// Inline widget for the tabbed attachment picker interface.
 ///
@@ -127,7 +132,8 @@ class _StreamTabbedAttachmentPickerState extends State<StreamTabbedAttachmentPic
                 setState(() => _currentOption = option);
               },
             ),
-            Expanded(
+            SizedBox(
+              height: _kTabbedAttachmentPickerHeight,
               child: _currentOption.optionViewBuilder(
                 context,
                 widget.controller,
@@ -338,6 +344,7 @@ Widget tabbedAttachmentPickerBuilder({
   AttachmentPickerOptionsBuilder? optionsBuilder,
   ValueSetter<AttachmentPickerError>? onError,
   ValueSetter<Poll>? onPollCreated,
+  CommandValidator? commandValidator,
   ValueSetter<Command>? onCommandSelected,
 }) {
   final defaultOptions = <TabbedAttachmentPickerOption>[
@@ -439,6 +446,7 @@ Widget tabbedAttachmentPickerBuilder({
       icon: context.streamIcons.command,
       supportedTypes: [AttachmentPickerType.command],
       optionViewBuilder: (context, controller) => StreamCommandPicker(
+        commandValidator: commandValidator,
         onCommandSelected: onCommandSelected,
       ),
     ),

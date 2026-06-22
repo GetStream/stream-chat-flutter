@@ -130,6 +130,15 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
   String get instantCommandsLabel => 'Commandes instantànies';
 
   @override
+  String get commandUnavailableWhileEditingError => 'Not available while editing';
+
+  @override
+  String get commandUnavailableWhileQuotingError => 'Not available while replying';
+
+  @override
+  String get commandUnavailableError => 'Command not available';
+
+  @override
   String fileTooLargeAfterCompressionError(double limitInMB) =>
       'El fitxer és massa gran per descarregar-lo. '
       'La mida màxima del fitxer és de $limitInMB MB. '
@@ -824,4 +833,13 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
 
   @override
   String get addACommentDescription => 'Permet que altres afegeixin comentaris';
+
+  @override
+  String get notifyChannelText => "Notifica a tothom d'aquest canal";
+
+  @override
+  String get notifyHereText => "Notifica a tots els membres connectats d'aquest canal";
+
+  @override
+  String notifyRoleText(String role) => 'Notifica tots els membres $role';
 }

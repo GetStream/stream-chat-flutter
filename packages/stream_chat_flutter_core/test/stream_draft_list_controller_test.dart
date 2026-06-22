@@ -713,5 +713,100 @@ void main() {
 
       expect(controller.dispose, returnsNormally);
     });
+
+    // Regression tests for FLU-529: disposing a controller while a network
+    // request is in-flight must not throw "used after being disposed".
+    test(
+      'disposing during doInitialLoad does not throw when response arrives late',
+      () async {
+        final completer = Completer<QueryDraftsResponse>();
+        when(
+          () => client.queryDrafts(
+            filter: any(named: 'filter'),
+            sort: any(named: 'sort'),
+            pagination: any(named: 'pagination'),
+          ),
+        ).thenAnswer((_) => completer.future);
+
+        final controller = StreamDraftListController(client: client);
+        // Start the load but do NOT await — we want to dispose first.
+        final loadFuture = controller.doInitialLoad();
+        controller.dispose();
+
+        // Resolve the in-flight request after the controller is disposed.
+        final response = QueryDraftsResponse()
+          ..drafts = generateDrafts()
+          ..next = '';
+        completer.complete(response);
+
+        // The future should resolve cleanly with no assertion/exception.
+        await expectLater(loadFuture, completes);
+      },
+    );
+
+    test(
+      'disposing during loadMore does not throw when response arrives late',
+      () async {
+        const nextPageKey = 'page_2';
+        final existingDrafts = generateDrafts();
+
+        // Set up the controller already in a paged success state.
+        final controller = StreamDraftListController.fromValue(
+          PagedValue<String, Draft>(items: existingDrafts, nextPageKey: nextPageKey),
+          client: client,
+        );
+
+        final completer = Completer<QueryDraftsResponse>();
+        when(
+          () => client.queryDrafts(
+            filter: any(named: 'filter'),
+            sort: any(named: 'sort'),
+            pagination: any(named: 'pagination'),
+          ),
+        ).thenAnswer((_) => completer.future);
+
+        final loadMoreFuture = controller.loadMore(nextPageKey);
+        controller.dispose();
+
+        final response = QueryDraftsResponse()
+          ..drafts = generateDrafts(count: 1, startId: 999)
+          ..next = '';
+        completer.complete(response);
+
+        await expectLater(loadMoreFuture, completes);
+      },
+    );
+
+    test(
+      'event subscription is not created when disposed before response arrives',
+      () async {
+        final completer = Completer<QueryDraftsResponse>();
+        // Use a fresh mock client to track `on()` calls per-test.
+        final localClient = MockClient();
+        // Stub `on()` only if needed after dispose — we will verify it is NOT called.
+        when(localClient.on).thenAnswer((_) => const Stream.empty());
+        when(
+          () => localClient.queryDrafts(
+            filter: any(named: 'filter'),
+            sort: any(named: 'sort'),
+            pagination: any(named: 'pagination'),
+          ),
+        ).thenAnswer((_) => completer.future);
+
+        final controller = StreamDraftListController(client: localClient);
+        final loadFuture = controller.doInitialLoad();
+        controller.dispose();
+
+        final response = QueryDraftsResponse()
+          ..drafts = generateDrafts()
+          ..next = '';
+        completer.complete(response);
+        await loadFuture;
+
+        // `on()` is only called to set up the event subscription; if the guard
+        // works, it must not have been reached after dispose.
+        verifyNever(localClient.on);
+      },
+    );
   });
 }

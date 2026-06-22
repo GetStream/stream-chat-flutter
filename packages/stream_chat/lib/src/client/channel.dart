@@ -4596,4 +4596,27 @@ extension ChannelCapabilityCheck on Channel {
   bool get canShareLocation {
     return ownCapabilities.contains(ChannelCapability.shareLocation);
   }
+
+  /// True, if the current user can send an "@channel" mention that notifies
+  /// all channel members.
+  bool get canNotifyChannel {
+    return ownCapabilities.contains(ChannelCapability.notifyChannel);
+  }
+
+  /// True, if the current user can send an "@here" mention that notifies all
+  /// online channel members.
+  bool get canNotifyHere {
+    return ownCapabilities.contains(ChannelCapability.notifyHere);
+  }
+
+  /// True, if the current user can mention one or more roles in a message.
+  bool get canNotifyRole {
+    return ownCapabilities.contains(ChannelCapability.notifyRole);
+  }
+
+  /// True, if the current user can mention one or more user groups in a
+  /// message.
+  bool get canNotifyGroup {
+    return ownCapabilities.contains(ChannelCapability.notifyGroup);
+  }
 }

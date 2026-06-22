@@ -1,5 +1,6 @@
 {
   "name": "giphy",
   "description": "Post a random gif to the channel",
-  "args": "[text]"
+  "args": "[text]",
+  "set": "fun_set"
 }

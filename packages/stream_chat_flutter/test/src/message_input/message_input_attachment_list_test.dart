@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 import '../mocks.dart';
 
@@ -89,8 +88,14 @@ void main() {
           ),
         );
 
-        // Expect an empty box
-        expect(find.byType(SizedBox), findsOneWidget);
+        // Expect an empty box rendered by the attachment list itself.
+        expect(
+          find.descendant(
+            of: find.byType(StreamMessageComposerAttachmentList),
+            matching: find.byType(SizedBox),
+          ),
+          findsOneWidget,
+        );
       },
     );
   });
@@ -184,8 +189,14 @@ void main() {
           ),
         );
 
-        // Expect an empty box
-        expect(find.byType(SizedBox), findsOneWidget);
+        // Expect an empty box rendered by the media attachments widget itself.
+        expect(
+          find.descendant(
+            of: find.byType(MessageInputMediaAttachments),
+            matching: find.byType(SizedBox),
+          ),
+          findsOneWidget,
+        );
       },
     );
 

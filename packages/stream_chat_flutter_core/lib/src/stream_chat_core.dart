@@ -328,6 +328,7 @@ final class _ChatLifecycleManager {
     _cancelBackgroundTimer();
     _cancelEventSubscription();
 
+    client.resumeReconnect();
     return client.maybeReconnect().ignore();
   }
 
@@ -337,6 +338,10 @@ final class _ChatLifecycleManager {
   void _onBackground() {
     _cancelBackgroundTimer();
     _cancelEventSubscription();
+
+    // Suspend automatic reconnection so that an OS-initiated socket close
+    // during the keep-alive window doesn't kick off a retry storm.
+    client.pauseReconnect();
 
     if (onBackgroundEvent case final handler?) {
       _eventSubscription = client.on().listen(handler);
