@@ -55,6 +55,7 @@
 
 🐞 Fixed
 
+- Fixed slow mode (cooldown) not activating after sending a reply in a thread. `Channel.getRemainingCooldown()` and `currentUserLastMessageAt` now scan thread replies in addition to main-channel messages, matching the backend behaviour where both message types share the same per-channel cooldown bucket.
 - Fixed reactions, polls, and quoted-message enrichment briefly flickering after the app returned from the background. The reconnect path now refreshes channels and advances `lastSyncAt` to the current time instead of replaying every event since `lastSyncAt` through `handleEvent`. `client.sync()` remains available for consumers that need event-level replay.
 - Fixed `Channel.sendMessage` / `Channel.updateMessage` hanging forever when any attachment upload failed; they now throw `StreamChatError`.
 - Fixed quoted poll messages losing their poll, shared-location, or nested-quote content when the server omits it from the `quoted_message` payload during channel re-sync.
