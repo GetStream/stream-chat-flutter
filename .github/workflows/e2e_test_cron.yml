@@ -11,6 +11,9 @@ on:
         required: true
         default: main
 
+permissions:
+  contents: read
+
 concurrency:
   group: e2e-nightly-${{ github.ref }}
   cancel-in-progress: true
