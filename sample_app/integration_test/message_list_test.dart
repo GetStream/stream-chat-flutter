@@ -1,14 +1,14 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:patrol/patrol.dart';
 
 import 'robots/user_robot_message_list_asserts.dart';
 import 'support/step.dart';
+import 'support/stream_test.dart';
 import 'support/stream_test_env.dart';
 
 void main() {
   const sampleText = 'Test';
 
-  patrolTest('message list updates when the user sends a message', ($) async {
+  streamTest('message list updates when the user sends a message', ($) async {
     final env = StreamTestEnv();
     await env.setUp($);
     addTearDown(env.tearDown);

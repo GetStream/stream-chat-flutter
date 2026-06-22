@@ -860,17 +860,17 @@ go more than a step or two without feedback. Decision is **Option A** (§3).
 - [x] **Gate:** `message_list_test.dart` ported to the full DSL (`StreamTestEnv` + `UserRobot` + `step()`) passes on **both platforms** ✅ (Android + iOS). (Reactions test deferred to Phase 5 — needs reaction/context-menu selectors.)
 
 ### Phase 5 — Tooling, Allure & CI
-> `Gemfile` + Fastlane skeleton and `start_mock_server`/`stop_mock_server` were
-> already added in Phase 0. This phase adds the build/run/Allure lanes that
-> depend on the test suite existing.
-- [ ] Flesh out the `Gemfile` (add rubocop + Pluginfile w/ allure-testops plugin) (§7.1).
-- [ ] Add the remaining Fastlane lanes: `build_e2e_test`, `run_e2e_test`, `build_and_run_e2e_test` (composing the existing `start_mock_server`/`stop_mock_server`) (§7.2).
-- [ ] Reuse Android `Allurefile` lanes: `allure_launch`, `allure_upload`, `allure_start_regression`.
-- [ ] Add `allure.properties` + emit `allure-results`; attach screenshots/logs on failure.
-- [ ] Add melos `e2e:build` / `e2e:run` scripts; verify `integration_test/` is excluded from `test:flutter` (§9).
-- [ ] Add GitHub Actions `e2e_test.yml` (matrix android/ios, mock server + Patrol + Allure upload); start label-gated/nightly, not on default PR path (§8).
-- [ ] Use a single Flutter driver port `4568` (distinct from native repos' 4566/4567; shared by iOS+Android, overridable via `--dart-define=MOCK_DRIVER_PORT`) in both `MockServer._driverPort` and the Fastlane lanes (§11).
-- [ ] **Gate:** CI run green on both platforms with results visible in Allure TestOps.
+- [x] Fastlane lanes `run_e2e_test` / `build_e2e_test` / `build_and_run_e2e_test` (compose `start_mock_server`/`stop_mock_server`). `run_e2e_test` **validated locally on Android** end-to-end (start mock server → `patrol test` → stop). Fixed a real bug: the mock-server `bundle install`/driver must run under `Bundler.with_unbundled_env`, else the parent `bundle exec fastlane` context breaks it.
+- [x] melos `e2e:run` script; confirmed `integration_test/` is excluded from `test:flutter` (`flutter test` only runs `test/`).
+- [x] Single Flutter driver port `4568` used by `MockServer._driverPort` and the lanes (§11).
+- [x] GitHub Actions — two workflows, mirroring the native repos' split:
+  - `e2e_test.yml` — PR (label `e2e`) + manual `workflow_dispatch`. android + ios jobs; JDK 21; clones mock server; runs `run_e2e_test` + `allure_upload`; uploads logs.
+  - `e2e_test_cron.yml` — **separate nightly** (weeknights 01:00 UTC) + manual. Broader matrix (Android API 34/31/28; iOS 16/15), per-job `allure_launch` → `run_e2e_test` → `allure_upload` (shared launch via `ALLURE_LAUNCH_ID`) → `allure_launch_removal` on cancel, plus a Slack-on-failure job. Guarded to the canonical repo.
+  - Both YAML-validated; not runnable here (no GH runner). Scheduled workflows only fire once on the default branch.
+- [x] **Allure results producer — built & validated on both platforms.** A Dart reporter (`integration_test/allure/allure.dart`) hooked into `step()` and a `streamTest()` wrapper produces standard Allure 2 result JSON (uuid, historyId, name, fullName, status, start/stop, nested steps). Captures `passed`/`failed`/`broken`. Since on-device files don't survive Android scoped-storage / `clearPackageData`, and Dart `print` doesn't reach patrol's stdout, the reporter emits **chunked `ALLURE-RESULT::` markers** (sub-1024 to dodge log truncation); `collect_allure_results` reassembles them from the device log — `adb logcat` (Android) / `xcrun simctl … log show` (iOS) — into `allure-results/`. Validated end-to-end via `run_e2e_test` on **Android and iOS**: green test → `allure-results/<uuid>-result.json` with the 3 GIVEN/WHEN/THEN steps; a failing run produced a `broken` result.
+- Dropped the Android test orchestrator + `clearPackageData` from `build.gradle` (added in Phase 3) — they wiped the app's storage and aren't needed (isolation is in-process via `debugReset`).
+- [x] **Allure upload — built & validated against live TestOps.** `allure_upload` / `allure_launch` / `install_allurectl` lanes drive `allurectl` (endpoint `streamio.testops.cloud`, project `135`, `ALLURE_TOKEN` from env). Verified real uploads (launches 276343 Android-results, 276345 iOS-results). Wired into CI (`allure_upload` step on both jobs, `if: always()`, `ALLURE_TOKEN` from `secrets`).
+- **Gate:** e2e suite runs green on both platforms via `run_e2e_test`, produces valid Allure results on both, and uploads to TestOps — all validated locally. Only the GitHub-Actions run itself is unverified here (needs `ALLURE_TOKEN` added as a repo secret + a workflow trigger).
 
 ### Phase 6 — Port the test suites
 Port in value order; each is a checkpoint:
