@@ -94,7 +94,7 @@ class DefaultStreamMessageComposerInputCenter extends StatelessWidget {
               left: context.streamSpacing.md,
               bottom: context.streamSpacing.md - 8,
             ),
-            onChanged: (value) => controller.showInChannel = value,
+            onChanged: props.isSlowModeActive ? null : (value) => controller.showInChannel = value,
           ),
       ],
     );
