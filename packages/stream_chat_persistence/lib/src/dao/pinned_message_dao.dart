@@ -174,68 +174,6 @@ class PinnedMessageDao extends DatabaseAccessor<DriftChatDatabase>
     return hydrated.firstOrNull;
   }
 
-  /// Returns all the messages of a particular thread by matching
-  /// [PinnedMessages.channelCid] with [cid]
-  Future<List<Message>> getThreadMessages(String cid) async {
-    final rows = await (select(pinnedMessages).join([
-      leftOuterJoin(_users, pinnedMessages.userId.equalsExp(_users.id)),
-      leftOuterJoin(
-        _pinnedByUsers,
-        pinnedMessages.pinnedByUserId.equalsExp(_pinnedByUsers.id),
-      ),
-    ])
-          ..where(pinnedMessages.channelCid.equals(cid))
-          ..where(pinnedMessages.parentId.isNotNull())
-          ..orderBy([OrderingTerm.asc(pinnedMessages.createdAt)]))
-        .get();
-    return _messagesFromJoinRows(rows);
-  }
-
-  /// Returns all the messages of a particular thread by matching
-  /// [PinnedMessages.parentId] with [parentId]
-  Future<List<Message>> getThreadMessagesByParentId(
-    String parentId, {
-    PaginationParams? options,
-  }) async {
-    final rows = await (select(pinnedMessages).join([
-      leftOuterJoin(_users, pinnedMessages.userId.equalsExp(_users.id)),
-      leftOuterJoin(
-        _pinnedByUsers,
-        pinnedMessages.pinnedByUserId.equalsExp(_pinnedByUsers.id),
-      ),
-    ])
-          ..where(pinnedMessages.parentId.isNotNull())
-          ..where(pinnedMessages.parentId.equals(parentId))
-          ..orderBy([OrderingTerm.asc(pinnedMessages.createdAt)]))
-        .get();
-    final msgList = await _messagesFromJoinRows(rows);
-
-    if (msgList.isNotEmpty) {
-      final mutable = msgList.toList();
-      if (options?.lessThan != null) {
-        final lessThanIndex = mutable.indexWhere(
-          (m) => m.id == options!.lessThan,
-        );
-        if (lessThanIndex != -1) {
-          mutable.removeRange(lessThanIndex, mutable.length);
-        }
-      }
-      if (options?.greaterThan != null) {
-        final greaterThanIndex = mutable.indexWhere(
-          (m) => m.id == options!.greaterThan,
-        );
-        if (greaterThanIndex != -1) {
-          mutable.removeRange(0, greaterThanIndex);
-        }
-      }
-      if (options?.limit != null) {
-        return mutable.take(options!.limit).toList();
-      }
-      return mutable;
-    }
-    return msgList;
-  }
-
   /// Returns all the messages of a channel by matching
   /// [PinnedMessages.channelCid] with [parentId]
   Future<List<Message>> getMessagesByCid(
@@ -283,11 +221,6 @@ class PinnedMessageDao extends DatabaseAccessor<DriftChatDatabase>
     }
     return msgList;
   }
-
-  /// Updates the message data of a particular channel with
-  /// the new [messageList] data
-  Future<void> updateMessages(String cid, List<Message> messageList) =>
-      bulkUpdateMessages({cid: messageList});
 
   /// Bulk updates the message data of multiple channels
   Future<void> bulkUpdateMessages(

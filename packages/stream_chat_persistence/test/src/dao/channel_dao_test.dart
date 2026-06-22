@@ -68,7 +68,9 @@ void main() {
 
     // Saving a dummy member
     final dummyMember = Member(userId: userId, user: dummyUser);
-    await database.memberDao.updateMembers(cid, [dummyMember]);
+    await database.memberDao.bulkUpdateMembers({
+      cid: [dummyMember]
+    });
 
     // Should match the dummy member
     final updatedMembers = await database.memberDao.getMembersByCid(cid);
@@ -78,7 +80,9 @@ void main() {
     // Saving a dummy message
     const messageId = 'messageId';
     final dummyMessage = Message(id: messageId, user: dummyUser);
-    await database.messageDao.updateMessages(cid, [dummyMessage]);
+    await database.messageDao.bulkUpdateMessages({
+      cid: [dummyMessage]
+    });
 
     // Should match the dummy message
     final updatedMessages = await database.messageDao.getMessagesByCid(cid);
@@ -91,7 +95,9 @@ void main() {
       user: dummyUser,
       lastReadMessageId: messageId,
     );
-    await database.readDao.updateReads(cid, [dummyRead]);
+    await database.readDao.bulkUpdateReads({
+      cid: [dummyRead]
+    });
 
     // Should match the dummy read
     final updatedReads = await database.readDao.getReadsByCid(cid);
@@ -104,8 +110,8 @@ void main() {
     await database.reactionDao.updateReactions([dummyReaction]);
 
     // Should match the dummy reaction
-    final updatedReactions =
-        await database.reactionDao.getReactionsByUserId(messageId, userId);
+    final updatedReactions = (await database.reactionDao
+        .getReactionsForMessagesByUserId([messageId], userId))[messageId]!;
     expect(updatedReactions.length, 1);
     expect(updatedReactions.first.messageId, messageId);
 
@@ -129,8 +135,8 @@ void main() {
     expect(reads, isEmpty);
 
     // Fetched readtions for passed message id and user id should be empty
-    final reactions =
-        await database.reactionDao.getReactionsByUserId(messageId, userId);
+    final reactions = (await database.reactionDao
+        .getReactionsForMessagesByUserId([messageId], userId))[messageId]!;
     expect(reactions, isEmpty);
   });
 

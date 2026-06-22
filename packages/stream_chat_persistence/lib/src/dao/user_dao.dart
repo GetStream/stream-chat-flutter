@@ -19,10 +19,4 @@ class UserDao extends DatabaseAccessor<DriftChatDatabase> with _$UserDaoMixin {
           userList.map((u) => u.toEntity()).toList(),
         ),
       );
-
-  /// Returns the list of all the users stored in db
-  Future<List<User>> getUsers() =>
-      (select(users)..orderBy([(u) => OrderingTerm.desc(u.createdAt)]))
-          .map((it) => it.toUser())
-          .get();
 }
