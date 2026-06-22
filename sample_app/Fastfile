@@ -7,6 +7,7 @@ import '../../Allurefile'
 mock_server_repo_name = 'stream-chat-test-mock-server'
 mock_server_driver_port = ENV['MOCK_DRIVER_PORT'] || '4568'
 github_org = (ENV['GITHUB_REPOSITORY'] || 'GetStream/stream-chat-flutter').split('/').first
+@force_check = false
 
 # Have an easy way to get the root of the project
 def root_path
@@ -55,6 +56,8 @@ end
 # Requires `patrol` on PATH and, on Android, a Gradle-compatible JDK.
 # Options: device:, target: (single file), local_server:, mock_server_branch:.
 lane :run_e2e_test do |options|
+  next unless is_check_required(sources: sources_matrix[:e2e], force_check: @force_check)
+
   start_mock_server(local_server: options[:local_server], branch: options[:mock_server_branch])
   sh('adb logcat -c') rescue nil
 
@@ -74,10 +77,28 @@ end
 # Builds the e2e test binaries without running them (useful for CI caching).
 # `platform` is android or ios.
 lane :build_e2e_test do |options|
+  next unless is_check_required(sources: sources_matrix[:e2e], force_check: @force_check)
+
   Dir.chdir(root_path) { sh("patrol build #{options[:platform]}") }
 end
 
 lane :build_and_run_e2e_test do |options|
   build_e2e_test(platform: options[:platform])
   run_e2e_test(options)
+end
+
+# Maps each CI check to the source paths (repo-root-relative) that should
+# trigger it; `is_check_required` skips a lane when none of them changed.
+private_lane :sources_matrix do
+  {
+    e2e: [
+      'sample_app',
+      'packages',
+      'melos.yaml',
+      '.github/workflows/e2e_test.yml',
+      '.github/workflows/e2e_test_cron.yml',
+    ],
+    ruby: ['sample_app/Fastfile', 'sample_app/Allurefile', 'sample_app/android/fastlane',
+           'sample_app/ios/fastlane', 'sample_app/android/Gemfile', 'sample_app/ios/Gemfile'],
+  }
 end

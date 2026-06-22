@@ -863,6 +863,7 @@ go more than a step or two without feedback. Decision is **Option A** (§3).
 - [x] Fastlane lanes `run_e2e_test` / `build_e2e_test` / `build_and_run_e2e_test` (compose `start_mock_server`/`stop_mock_server`). `run_e2e_test` **validated locally on Android** end-to-end (start mock server → `patrol test` → stop). Fixed a real bug: the mock-server `bundle install`/driver must run under `Bundler.with_unbundled_env`, else the parent `bundle exec fastlane` context breaks it.
 - [x] melos `e2e:run` script; confirmed `integration_test/` is excluded from `test:flutter` (`flutter test` only runs `test/`).
 - [x] Single Flutter driver port `4568` used by `MockServer._driverPort` and the lanes (§11).
+- [x] `sources_matrix` lane + `is_check_required` gating on `run_e2e_test`/`build_e2e_test` (iOS-style, via `fastlane-plugin-stream_actions`): the e2e lanes self-skip unless `sample_app`, `packages`, `melos.yaml`, or the e2e workflows changed (`@force_check` overrides).
 - [x] GitHub Actions — two workflows, mirroring the native repos' split:
   - `e2e_test.yml` — PR (label `e2e`) + manual `workflow_dispatch`. android + ios jobs; JDK 21; clones mock server; runs `run_e2e_test` + `allure_upload`; uploads logs.
   - `e2e_test_cron.yml` — **separate nightly** (weeknights 01:00 UTC) + manual. Broader matrix (Android API 34/31/28; iOS 16/15), per-job `allure_launch` → `run_e2e_test` → `allure_upload` (shared launch via `ALLURE_LAUNCH_ID`) → `allure_launch_removal` on cancel, plus a Slack-on-failure job. Guarded to the canonical repo.
