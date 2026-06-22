@@ -189,9 +189,9 @@ class _BenchmarkPageState extends State<BenchmarkPage> {
       const Duration(milliseconds: 500),
       (_) => _publishSnapshot(),
     );
-    final initial = widget.channel.state?.messages ?? const <Message>[];
-    _ingest(initial);
-    _messagesSub = widget.channel.state!.messagesStream.listen((messages) {
+    final state = widget.channel.state!;
+    _ingest(state.messages);
+    _messagesSub = state.messagesStream.listen((messages) {
       if (!mounted) return;
       // No `setState` here — see the class-level doc comment. The 2 Hz
       // tick will publish the new counts into the dashboard snapshot.
@@ -622,7 +622,6 @@ class _BenchHud extends StatelessWidget {
   Widget build(BuildContext context) {
     const radius = 22.0;
     return Align(
-      key: UniqueKey(),
       alignment: Alignment.topCenter,
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 520),
