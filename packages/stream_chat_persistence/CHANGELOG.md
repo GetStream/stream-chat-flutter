@@ -1,3 +1,9 @@
+## Upcoming Changes
+
+🐞 Fixed
+
+- `PollDao` no longer crashes when reading polls whose creator user is missing from the local cache.
+
 ## 9.25.0
 
 🚀 Performance
