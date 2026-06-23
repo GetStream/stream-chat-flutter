@@ -8,6 +8,7 @@
 
 - Fixed an unhandled `WebSocketChannelException` surfacing when a reconnect attempt failed (e.g. DNS lookup failed in background); the duplicate signal on `sink.done` is now ignored since the stream's `onError` already handles it.
 - Fixed failing to parse `null` values in `UpsertPushPreferencesResponse.userPreferences` JSON.
+- Fixed resetting channel unread count on `message.read` events delivered for threads. 
 
 ## 9.25.0
 
