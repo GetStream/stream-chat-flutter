@@ -100,13 +100,14 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return StreamScaffold(
       backgroundColor: context.streamColorScheme.backgroundApp,
       appBar: StreamAppBar(title: const Text('Custom settings')),
       body: Builder(
         builder: (context) {
+          final topInset = StreamScaffoldInsets.maybeOf(context)?.topPadding ?? 0.0;
           return Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+            padding: EdgeInsets.fromLTRB(16, 16 + topInset, 16, 0),
             child: Form(
               key: _formKey,
               child: Column(

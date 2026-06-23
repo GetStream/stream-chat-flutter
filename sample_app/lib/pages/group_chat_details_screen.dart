@@ -48,7 +48,7 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
         GoRouter.of(context).pop();
         return false;
       },
-      child: Scaffold(
+      child: StreamScaffold(
         backgroundColor: context.streamColorScheme.backgroundApp,
         appBar: StreamAppBar(
           title: const Text('Name of Group Chat'),
@@ -105,117 +105,123 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
               tileAnchor: Alignment.topCenter,
               childAnchor: Alignment.topCenter,
               message: statusString,
-              child: Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
-                    child: Row(
-                      children: [
-                        Text(
-                          'Name'.toUpperCase(),
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: context.streamColorScheme.textSecondary,
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: TextField(
-                            controller: _groupNameController,
-                            decoration: InputDecoration(
-                              isDense: true,
-                              border: InputBorder.none,
-                              focusedBorder: InputBorder.none,
-                              enabledBorder: InputBorder.none,
-                              errorBorder: InputBorder.none,
-                              disabledBorder: InputBorder.none,
-                              contentPadding: EdgeInsets.zero,
-                              hintText: 'Choose a group chat name',
-                              hintStyle: TextStyle(
-                                fontSize: 14,
+              child: Builder(
+                builder: (context) {
+                  final topInset = StreamScaffoldInsets.maybeOf(context)?.topPadding ?? 0.0;
+                  return Column(
+                    children: [
+                      if (topInset > 0) SizedBox(height: topInset),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
+                        child: Row(
+                          children: [
+                            Text(
+                              'Name'.toUpperCase(),
+                              style: TextStyle(
+                                fontSize: 12,
                                 color: context.streamColorScheme.textSecondary,
                               ),
                             ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: TextField(
+                                controller: _groupNameController,
+                                decoration: InputDecoration(
+                                  isDense: true,
+                                  border: InputBorder.none,
+                                  focusedBorder: InputBorder.none,
+                                  enabledBorder: InputBorder.none,
+                                  errorBorder: InputBorder.none,
+                                  disabledBorder: InputBorder.none,
+                                  contentPadding: EdgeInsets.zero,
+                                  hintText: 'Choose a group chat name',
+                                  hintStyle: TextStyle(
+                                    fontSize: 14,
+                                    color: context.streamColorScheme.textSecondary,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Container(
+                        width: double.maxFinite,
+                        decoration: BoxDecoration(
+                          color: context.streamColorScheme.backgroundElevation1,
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 8,
+                            horizontal: 8,
+                          ),
+                          child: Text(
+                            '$_totalUsers ${_totalUsers > 1 ? 'Members' : 'Member'}',
+                            style: TextStyle(
+                              color: context.streamColorScheme.textSecondary,
+                            ),
                           ),
                         ),
-                      ],
-                    ),
-                  ),
-                  Container(
-                    width: double.maxFinite,
-                    decoration: BoxDecoration(
-                      color: context.streamColorScheme.backgroundElevation1,
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 8,
-                        horizontal: 8,
                       ),
-                      child: Text(
-                        '$_totalUsers ${_totalUsers > 1 ? 'Members' : 'Member'}',
-                        style: TextStyle(
-                          color: context.streamColorScheme.textSecondary,
-                        ),
-                      ),
-                    ),
-                  ),
-                  AnimatedBuilder(
-                    animation: widget.groupChatState,
-                    builder: (context, child) {
-                      return Expanded(
-                        child: GestureDetector(
-                          behavior: HitTestBehavior.opaque,
-                          onPanDown: (_) => FocusScope.of(context).unfocus(),
-                          child: ListView.separated(
-                            itemCount: widget.groupChatState.users.length + 1,
-                            separatorBuilder: (_, __) => Container(
-                              height: 1,
-                              color: context.streamColorScheme.borderDefault,
-                            ),
-                            itemBuilder: (_, index) {
-                              if (index == widget.groupChatState.users.length) {
-                                return Container(
+                      AnimatedBuilder(
+                        animation: widget.groupChatState,
+                        builder: (context, child) {
+                          return Expanded(
+                            child: GestureDetector(
+                              behavior: HitTestBehavior.opaque,
+                              onPanDown: (_) => FocusScope.of(context).unfocus(),
+                              child: ListView.separated(
+                                itemCount: widget.groupChatState.users.length + 1,
+                                separatorBuilder: (_, __) => Container(
                                   height: 1,
                                   color: context.streamColorScheme.borderDefault,
-                                );
-                              }
-                              final user = widget.groupChatState.users.elementAt(index);
-                              return ListTile(
-                                key: ObjectKey(user),
-                                leading: StreamUserAvatar(
-                                  size: .lg,
-                                  user: user,
                                 ),
-                                title: Text(
-                                  user.name,
-                                  style: const TextStyle(fontWeight: FontWeight.bold),
-                                ),
-                                contentPadding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 8,
-                                ),
-                                trailing: IconButton(
-                                  icon: Icon(
-                                    Icons.clear_rounded,
-                                    color: context.streamColorScheme.textPrimary,
-                                  ),
-                                  padding: EdgeInsets.zero,
-                                  splashRadius: 24,
-                                  onPressed: () {
-                                    widget.groupChatState.removeUser(user);
-                                    if (widget.groupChatState.users.isEmpty) {
-                                      GoRouter.of(context).pop();
-                                    }
-                                  },
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ],
+                                itemBuilder: (_, index) {
+                                  if (index == widget.groupChatState.users.length) {
+                                    return Container(
+                                      height: 1,
+                                      color: context.streamColorScheme.borderDefault,
+                                    );
+                                  }
+                                  final user = widget.groupChatState.users.elementAt(index);
+                                  return ListTile(
+                                    key: ObjectKey(user),
+                                    leading: StreamUserAvatar(
+                                      size: .lg,
+                                      user: user,
+                                    ),
+                                    title: Text(
+                                      user.name,
+                                      style: const TextStyle(fontWeight: FontWeight.bold),
+                                    ),
+                                    contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 8,
+                                    ),
+                                    trailing: IconButton(
+                                      icon: Icon(
+                                        Icons.clear_rounded,
+                                        color: context.streamColorScheme.textPrimary,
+                                      ),
+                                      padding: EdgeInsets.zero,
+                                      splashRadius: 24,
+                                      onPressed: () {
+                                        widget.groupChatState.removeUser(user);
+                                        if (widget.groupChatState.users.isEmpty) {
+                                          GoRouter.of(context).pop();
+                                        }
+                                      },
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  );
+                },
               ),
             );
           },

@@ -123,8 +123,10 @@ class StreamMessageListView extends StatefulWidget {
     this.onEphemeralMessageTap,
     this.onModeratedMessageTap,
     this.onMessageLongPress,
-    this.config = const StreamMessageListViewConfiguration(),
+    this.config,
     this.builders = const StreamMessageListViewBuilders(),
+    this.topPadding = 0,
+    this.bottomPadding = 0,
   });
 
   /// Predicate used to filter messages.
@@ -263,8 +265,10 @@ class StreamMessageListView extends StatefulWidget {
   /// [StreamMessageListViewConfiguration.markReadWhenAtTheBottom], scroll
   /// physics, and other non-builder, non-theme settings.
   ///
-  /// Defaults to [StreamMessageListViewConfiguration] with all defaults.
-  final StreamMessageListViewConfiguration config;
+  /// When null, falls back to
+  /// [StreamChatConfigurationData.messageListViewConfiguration] from the
+  /// nearest [StreamChatConfiguration] ancestor.
+  final StreamMessageListViewConfiguration? config;
 
   /// Custom slot builders for this message list view.
   ///
@@ -273,6 +277,18 @@ class StreamMessageListView extends StatefulWidget {
   ///
   /// Defaults to [StreamMessageListViewBuilders] with no overrides.
   final StreamMessageListViewBuilders builders;
+
+  /// Top padding added to the message list scroll view.
+  ///
+  /// Used by the floating app bar layout to keep the first message visible
+  /// below the app bar without requiring a separate [setState] call.
+  final double topPadding;
+
+  /// Bottom padding added to the message list scroll view.
+  ///
+  /// Used by the floating composer layout to keep the last message visible
+  /// above the composer without requiring a separate [setState] call.
+  final double bottomPadding;
 
   @override
   _StreamMessageListViewState createState() => _StreamMessageListViewState();
@@ -326,6 +342,14 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
 
   MessageListController get _messageListController => widget.messageListController ?? _defaultController;
 
+  /// Returns the effective [StreamMessageListViewConfiguration] for this list.
+  ///
+  /// Uses [widget.config] when explicitly provided, otherwise falls back to
+  /// [StreamChatConfigurationData.messageListViewConfiguration] from the
+  /// nearest [StreamChatConfiguration] ancestor.
+  StreamMessageListViewConfiguration get _config =>
+      widget.config ?? StreamChatConfiguration.of(context).messageListViewConfiguration;
+
   StreamSubscription<Message>? _messageNewListener;
   StreamSubscription? _userReadListener;
 
@@ -353,7 +377,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
 
       _unreadState.value = _readUnreadSnapshot();
 
-      final highlightInitialMessage = widget.config.highlightInitialMessage;
+      final highlightInitialMessage = _config.highlightInitialMessage;
       final highlightMessageId = switch ((highlightInitialMessage, _isThreadConversation)) {
         (true, true) => _ThreadHighlightScope.of(context),
         (true, false) => streamChannel?.initialMessageId,
@@ -549,9 +573,9 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       child: Portal(
         child: ScaffoldMessenger(
           child: MessageListCore(
-            paginationLimit: widget.config.paginationLimit,
-            maximumMessageLimit: widget.config.maximumMessageLimit,
-            retentionTrimBuffer: widget.config.retentionTrimBuffer,
+            paginationLimit: _config.paginationLimit,
+            maximumMessageLimit: _config.maximumMessageLimit,
+            retentionTrimBuffer: _config.retentionTrimBuffer,
             messageFilter: widget.messageFilter,
             loadingBuilder: defaultLoadingBuilder,
             emptyBuilder: defaultEmptyBuilder,
@@ -595,7 +619,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
             }
 
             return StreamInfoTile(
-              showMessage: widget.config.showConnectionStateTile && showStatus,
+              showMessage: _config.showConnectionStateTile && showStatus,
               tileAnchor: Alignment.topCenter,
               childAnchor: Alignment.topCenter,
               message: statusString,
@@ -609,15 +633,18 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
                 },
                 child: ScrollablePositionedList.separated(
                   key: Key('mlv-${streamChannel?.channel.cid}-${widget.parentMessage?.id}'),
-                  padding: .symmetric(vertical: context.streamSpacing.sm),
-                  keyboardDismissBehavior: widget.config.keyboardDismissBehavior,
+                  padding: .only(
+                    top: max(widget.topPadding, context.streamSpacing.sm),
+                    bottom: max(widget.bottomPadding, context.streamSpacing.sm),
+                  ),
+                  keyboardDismissBehavior: _config.keyboardDismissBehavior,
                   itemPositionsListener: _itemPositionListener,
                   initialScrollIndex: initialIndex,
                   initialAlignment: initialAlignment,
-                  physics: widget.config.scrollPhysics,
+                  physics: _config.scrollPhysics,
                   itemScrollController: _scrollController,
-                  reverse: widget.config.reverse,
-                  shrinkWrap: widget.config.shrinkWrap,
+                  reverse: _config.reverse,
+                  shrinkWrap: _config.shrinkWrap,
                   itemCount: itemCount,
                   itemKeyBuilder: (index) {
                     // Layout (see comment block below): indices 0/1 and the
@@ -661,7 +688,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
                       return ThreadSeparator(parentMessage: widget.parentMessage!);
                     }
                     if (i == itemCount - 3) {
-                      if (widget.config.reverse ? widget.builders.header == null : widget.builders.footer == null) {
+                      if (_config.reverse ? widget.builders.header == null : widget.builders.footer == null) {
                         if (messages.isNotEmpty) {
                           final message = messages.last;
                           return _maybeBuildWithUnreadMessagesSeparator(
@@ -675,7 +702,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
                       return const SizedBox(height: 8);
                     }
                     if (i == 0) {
-                      if (widget.config.reverse ? widget.builders.footer == null : widget.builders.header == null) {
+                      if (_config.reverse ? widget.builders.footer == null : widget.builders.header == null) {
                         return const Empty();
                       }
                       return const SizedBox(height: 8);
@@ -684,7 +711,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
                     if (i == 1 || i == itemCount - 4) return const Empty();
 
                     late final Message message, nextMessage;
-                    if (widget.config.reverse) {
+                    if (_config.reverse) {
                       message = messages[i - 1];
                       nextMessage = messages[i - 2];
                     } else {
@@ -721,7 +748,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
                     }
 
                     if (i == itemCount - 2) {
-                      if (widget.config.reverse) {
+                      if (_config.reverse) {
                         return widget.builders.header?.call(context) ?? const Empty();
                       } else {
                         return widget.builders.footer?.call(context) ?? const Empty();
@@ -743,7 +770,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
                     }
 
                     if (i == 0) {
-                      if (widget.config.reverse) {
+                      if (_config.reverse) {
                         return widget.builders.footer?.call(context) ?? const Empty();
                       } else {
                         return widget.builders.header?.call(context) ?? const Empty();
@@ -762,13 +789,13 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
             );
           },
         ),
-        if (widget.config.showFloatingDateDivider)
+        if (_config.showFloatingDateDivider)
           Positioned(
-            top: context.streamSpacing.sm,
+            top: max(widget.topPadding, context.streamSpacing.sm),
             child: FloatingDateDivider(
               itemCount: itemCount,
-              reverse: widget.config.reverse,
-              fadeNearInlineDivider: widget.config.fadeFloatingDateDividerNearInline,
+              reverse: _config.reverse,
+              fadeNearInlineDivider: _config.fadeFloatingDateDividerNearInline,
               itemPositionListener: _itemPositionListener.itemPositions,
               messages: messages,
               dateDividerBuilder: switch (widget.builders.floatingDateDivider) {
@@ -777,22 +804,32 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
               },
             ),
           ),
-        if (widget.config.showScrollToBottom)
-          BetterStreamBuilder<bool>(
-            stream: streamChannel!.channel.state!.isUpToDateStream,
-            initialData: streamChannel!.channel.state!.isUpToDate,
-            builder: (context, snapshot) => ValueListenableBuilder<bool>(
+        if (_config.showScrollToBottom)
+          if (_isThreadConversation)
+            ValueListenableBuilder<bool>(
               valueListenable: _showScrollToBottom,
               child: _buildScrollToBottom(),
               builder: (context, value, child) {
-                if (!snapshot || value) return child!;
+                if (value) return child!;
                 return const Empty();
               },
+            )
+          else
+            BetterStreamBuilder<bool>(
+              stream: streamChannel!.channel.state!.isUpToDateStream,
+              initialData: streamChannel!.channel.state!.isUpToDate,
+              builder: (context, snapshot) => ValueListenableBuilder<bool>(
+                valueListenable: _showScrollToBottom,
+                child: _buildScrollToBottom(),
+                builder: (context, value, child) {
+                  if (!snapshot || value) return child!;
+                  return const Empty();
+                },
+              ),
             ),
-          ),
-        if (widget.config.showUnreadIndicator && !_isThreadConversation)
+        if (_config.showUnreadIndicator && !_isThreadConversation)
           Positioned(
-            top: context.streamSpacing.sm,
+            top: max(widget.topPadding, context.streamSpacing.sm),
             child: UnreadIndicatorButton(
               onJumpTap: scrollToUnreadDefaultTapAction,
               onDismissTap: _markMessagesAsRead,
@@ -988,7 +1025,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
   Widget buildParentMessage(Message message) {
     final parentMessageProps = StreamMessageItemProps(
       message: message,
-      swipeToReply: widget.config.swipeToReply,
+      swipeToReply: _config.swipeToReply,
       onThreadTap: _onThreadTap,
       onMessageTap: widget.onMessageTap,
       onMessageLongPress: widget.onMessageLongPress,
@@ -1042,14 +1079,14 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
           type: .outline,
           size: .medium,
           isFloating: true,
-          icon: switch (widget.config.reverse) {
+          icon: switch (_config.reverse) {
             true => Icon(context.streamIcons.arrowDown),
             false => Icon(context.streamIcons.arrowUp),
           },
           onPressed: () => scrollToBottomDefaultTapAction(unreadCount),
         );
 
-        if (showUnreadCount && widget.config.showUnreadCountOnScrollToBottom) {
+        if (showUnreadCount && _config.showUnreadCountOnScrollToBottom) {
           button = StreamBadgeNotification(
             label: '${unreadCount > 99 ? '99+' : unreadCount}',
             child: button,
@@ -1057,7 +1094,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
         }
 
         return PositionedDirectional(
-          bottom: 16,
+          bottom: max(16, widget.bottomPadding),
           end: 16,
           child: button,
         );
@@ -1110,7 +1147,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
 
     final messageItemProps = StreamMessageItemProps(
       message: message,
-      swipeToReply: widget.config.swipeToReply,
+      swipeToReply: _config.swipeToReply,
       onThreadTap: _onThreadTap,
       onViewInChannelTap: _isThreadConversation
           ? widget.onViewInChannelTap ?? (message) => Navigator.of(context).pop(message.id)
@@ -1196,7 +1233,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       _lastFullyVisibleMessage = newLastFullyVisibleMessage;
 
       // Mark messages as read if needed.
-      if (widget.config.markReadWhenAtTheBottom) {
+      if (_config.markReadWhenAtTheBottom) {
         _maybeMarkMessagesAsRead().ignore();
       }
     }

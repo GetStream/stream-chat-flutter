@@ -1,4 +1,4 @@
-// ignore_for_file: deprecated_member_use
+// ignore_for_file: deprecated_member_use, avoid_redundant_argument_values
 
 import 'dart:async';
 
@@ -45,28 +45,36 @@ class _ChannelListPageState extends State<ChannelListPage> {
 
     final allTabs = <_TabDef>[
       _TabDef(
-        icon: StreamUnreadIndicator(child: Icon(icons.messageBubble)),
-        selectedIcon: StreamUnreadIndicator(child: Icon(icons.messageBubbleFill)),
-        label: 'Chats',
+        navItem: StreamBottomNavBarItem(
+          icon: StreamUnreadIndicator(child: Icon(icons.messageBubble)),
+          selectedIcon: StreamUnreadIndicator(child: Icon(icons.messageBubbleFill)),
+          label: 'Chats',
+        ),
         page: const ChannelList(),
       ),
       _TabDef(
-        icon: StreamUnreadIndicator.threads(child: Icon(icons.thread)),
-        selectedIcon: StreamUnreadIndicator.threads(child: Icon(icons.threadFill)),
-        label: 'Threads',
+        navItem: StreamBottomNavBarItem(
+          icon: StreamUnreadIndicator.threads(child: Icon(icons.thread)),
+          selectedIcon: StreamUnreadIndicator.threads(child: Icon(icons.threadFill)),
+          label: 'Threads',
+        ),
         page: const ThreadListPage(),
       ),
       _TabDef(
-        icon: const Icon(Icons.drafts_outlined),
-        selectedIcon: const Icon(Icons.drafts_rounded),
-        label: 'Drafts',
+        navItem: const StreamBottomNavBarItem(
+          icon: Icon(Icons.drafts_outlined),
+          selectedIcon: Icon(Icons.drafts_rounded),
+          label: 'Drafts',
+        ),
         page: const DraftListPage(),
         enabled: config.draftMessagesEnabled,
       ),
       _TabDef(
-        icon: const Icon(Icons.bookmark_outline_rounded),
-        selectedIcon: const Icon(Icons.bookmark_rounded),
-        label: 'Reminders',
+        navItem: const StreamBottomNavBarItem(
+          icon: Icon(Icons.bookmark_outline_rounded),
+          selectedIcon: Icon(Icons.bookmark_rounded),
+          label: 'Reminders',
+        ),
         page: const RemindersPage(),
         enabled: config.enableReminderActions,
       ),
@@ -74,39 +82,16 @@ class _ChannelListPageState extends State<ChannelListPage> {
 
     final enabledTabs = allTabs.where((t) => t.enabled).toList();
 
-    return Scaffold(
+    return StreamScaffold(
       backgroundColor: colorScheme.backgroundApp,
       appBar: StreamChannelListHeader(
-        title: Text(enabledTabs[_currentIndex].label, style: textTheme.headingSm),
+        title: Text(enabledTabs[_currentIndex].navItem.label, style: textTheme.headingSm),
       ),
       drawer: LeftDrawer(user: user),
-      bottomNavigationBar: DecoratedBox(
-        decoration: BoxDecoration(
-          color: colorScheme.backgroundElevation1,
-          border: Border(top: BorderSide(color: colorScheme.borderSubtle)),
-        ),
-        child: StreamBadgeNotificationTheme(
-          data: const .new(size: .xs),
-          child: BottomNavigationBar(
-            elevation: 0,
-            iconSize: 20,
-            currentIndex: _currentIndex,
-            type: BottomNavigationBarType.fixed,
-            selectedItemColor: colorScheme.textPrimary,
-            unselectedItemColor: colorScheme.textTertiary,
-            backgroundColor: Colors.transparent,
-            selectedLabelStyle: textTheme.metadataEmphasis,
-            unselectedLabelStyle: textTheme.metadataEmphasis,
-            onTap: (index) => setState(() => _currentIndex = index),
-            items: enabledTabs.map((tab) {
-              return BottomNavigationBarItem(
-                icon: tab.icon,
-                activeIcon: tab.selectedIcon,
-                label: tab.label,
-              );
-            }).toList(),
-          ),
-        ),
+      bottom: StreamBottomNavBar(
+        currentIndex: _currentIndex,
+        onTap: (i) => setState(() => _currentIndex = i),
+        items: [for (final tab in enabledTabs) tab.navItem],
       ),
       body: IndexedStack(
         index: _currentIndex,
@@ -141,18 +126,18 @@ class _ChannelListPageState extends State<ChannelListPage> {
   }
 }
 
+// ---------------------------------------------------------------------------
+// Tab definition
+// ---------------------------------------------------------------------------
+
 class _TabDef {
   const _TabDef({
-    required this.icon,
-    required this.selectedIcon,
-    required this.label,
+    required this.navItem,
     required this.page,
     this.enabled = true,
   });
 
-  final Widget icon;
-  final Widget selectedIcon;
-  final String label;
+  final StreamBottomNavBarItem navItem;
   final Widget page;
   final bool enabled;
 }

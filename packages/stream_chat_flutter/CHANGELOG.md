@@ -6,6 +6,15 @@
 
 ✅ Added
 
+- Added `StreamChannelPage` — a ready-to-use channel page widget that wires up `StreamChannelHeader`, `StreamMessageListView`, and `StreamMessageComposer` with floating or docked layout driven by the active app style.
+- Added `StreamThreadPage` — a ready-to-use thread page widget with the same floating/docked layout support.
+- Added `MessageComposerProps.composerLocation` — explicitly controls whether `StreamMessageComposer` renders in `floating` or `docked` mode; falls back to the theme's `appStyle.composerLocation` when null. `copyWith` now distinguishes "not passed" from "explicitly set to null" via a sentinel so callers can clear an override back to the theme default.
+- Added `StreamMessageListView.config` — accepts an explicit `StreamMessageListViewConfiguration` per widget; falls back to `StreamChatConfigurationData.messageListViewConfiguration` from the nearest ancestor when omitted.
+- Added `StreamMessageListView.topPadding` and `bottomPadding` — padding applied to the scroll view's top and bottom edges, used by floating app bar / composer layouts to keep messages visible without an extra `setState`.
+- Added `appBarBehavior` parameter to `StreamChannelHeader`, `StreamChannelListHeader`, and `StreamBackButton`, controlling floating vs pinned app bar appearance (avatar shadow, back-button style). Falls back to `appStyle.appBarBehavior` from the theme when null.
+- Added `messageListViewConfiguration` field to `StreamChatConfigurationData`, allowing a global `StreamMessageListViewConfiguration` default for all `StreamMessageListView` widgets. Pass it via `StreamChat.configData` to configure behaviors like `swipeToReply` and `highlightInitialMessage` app-wide without wiring them per-page.
+- `StreamMessageComposer` now surfaces the hold-to-record hint through `StreamSnackbar` anchored above the composer, and `StreamChat` provides an app-wide `StreamSnackbarScope` fallback.
+- Re-exported `StreamScaffold`, `StreamScaffoldInsets`, `StreamBottomNavBar`, `StreamBottomNavBarItem`, `StreamAppStyle`, `AppBarBehavior`, `BottomBarBehavior`, `ComposerLocation`, and `streamFloatingFade` from `stream_core_flutter` via `package:stream_chat_flutter/stream_chat_flutter.dart`.
 - Added support for `@channel`, `@here`, role, and user-group mentions — parsed on incoming messages, rendered as styled tappable spans in message text, and selectable from the composer's `@` autocomplete.
 - Added a single `mentionItemBuilder` on `StreamMessageComposer` and `StreamMentionAutocompleteOptions` that receives `StreamMentionItemProps` and covers every mention kind. Customise globally via `streamChatComponentBuilders(mentionItem: ...)` or per-instance via the new constructor parameter. Defaults are rendered by `DefaultStreamMentionItem`. Also added `onMention*Tap` callbacks on `StreamMentionAutocompleteOptions`.
 - Added `StreamMessageListView.onMentionTap` and `StreamMessageItem.onMentionTap` — receives a typed `StreamMention` (`StreamUserMention`, `StreamChannelMention`, `StreamHereMention`, `StreamRoleMention`, or `StreamGroupMention`).
@@ -27,6 +36,8 @@
 
 🐞 Fixed
 
+- Fixed `StreamChannelPage` leaking its `StreamMessageComposerController` — the state now disposes it in `dispose()`, matching the pattern already used by `StreamThreadPage`.
+- Fixed `StreamPhotoGallery` default padding having a redundant explicit `top: 0` (no visual change).
 - `StreamMessageItem.onUserAvatarTap` now fires when the author avatar is tapped. ([#2741](https://github.com/GetStream/stream-chat-flutter/issues/2741))
 - Added `MessageComposerProps.copyWith` so factory overrides can tweak individual props (e.g. `useSystemAttachmentPicker`) without re-specifying every field. ([#2742](https://github.com/GetStream/stream-chat-flutter/issues/2742))
 - `StreamMessageContent` no longer re-runs `setState` on every inherited-widget change when the measured attachment width has not changed. ([#2761](https://github.com/GetStream/stream-chat-flutter/issues/2761))

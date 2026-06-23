@@ -170,15 +170,25 @@ class _StreamChatSampleAppState extends State<StreamChatSampleApp>
             child: Builder(
               builder: (context) {
                 final config = context.sampleAppConfig;
+
+                StreamAppStyle appStyle() => switch (config.appStyle) {
+                  SampleAppStyle.regular => .regular,
+                  SampleAppStyle.floating => .floating,
+                };
+
+                ThemeData theme(Brightness brightness) => ThemeData(
+                  brightness: brightness,
+                  extensions: [
+                    StreamTheme(
+                      brightness: brightness,
+                      appStyle: appStyle(),
+                    ),
+                  ],
+                );
+
                 return MaterialApp.router(
-                  theme: ThemeData(
-                    brightness: .light,
-                    extensions: [StreamTheme.light()],
-                  ),
-                  darkTheme: ThemeData(
-                    brightness: .dark,
-                    extensions: [StreamTheme.dark()],
-                  ),
+                  theme: theme(.light),
+                  darkTheme: theme(.dark),
                   themeMode: config.themeMode,
                   locale: config.locale,
                   supportedLocales: supportedLocales,
@@ -248,6 +258,10 @@ extension on SampleAppConfigData {
             },
           ),
       ],
+      messageListViewConfiguration: const StreamMessageListViewConfiguration(
+        highlightInitialMessage: true,
+        swipeToReply: true,
+      ),
     );
   }
 }

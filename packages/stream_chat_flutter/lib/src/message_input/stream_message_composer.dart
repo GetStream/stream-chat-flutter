@@ -96,6 +96,7 @@ class StreamMessageComposer extends StatelessWidget {
     TextCapitalization textCapitalization = TextCapitalization.sentences,
     bool autofocus = false,
     bool autoCorrect = true,
+    ComposerLocation? location,
   }) : props = .new(
          onMessageSent: onMessageSent,
          preMessageSending: preMessageSending,
@@ -133,6 +134,7 @@ class StreamMessageComposer extends StatelessWidget {
          textCapitalization: textCapitalization,
          autofocus: autofocus,
          autoCorrect: autoCorrect,
+         location: location,
        );
 
   /// Creates a [StreamMessageComposer] from a pre-built [MessageComposerProps].
@@ -194,6 +196,7 @@ class MessageComposerProps {
     this.textCapitalization = TextCapitalization.sentences,
     this.autofocus = false,
     this.autoCorrect = true,
+    this.location,
   });
 
   /// Function called after sending the message.
@@ -403,6 +406,9 @@ class MessageComposerProps {
   /// Defaults to true.
   final bool autoCorrect;
 
+  /// The location of the message composer.
+  final ComposerLocation? location;
+
   /// Returns a copy of this [MessageComposerProps] with the given fields
   /// replaced with new values.
   MessageComposerProps copyWith({
@@ -441,6 +447,7 @@ class MessageComposerProps {
     TextCapitalization? textCapitalization,
     bool? autofocus,
     bool? autoCorrect,
+    ComposerLocation? location,
   }) {
     return MessageComposerProps(
       onMessageSent: onMessageSent ?? this.onMessageSent,
@@ -478,6 +485,7 @@ class MessageComposerProps {
       textCapitalization: textCapitalization ?? this.textCapitalization,
       autofocus: autofocus ?? this.autofocus,
       autoCorrect: autoCorrect ?? this.autoCorrect,
+      location: location ?? this.location,
     );
   }
 
@@ -815,27 +823,61 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     final safeAreaEnabled = widget.props.enableSafeArea ?? true;
     final viewPadding = MediaQuery.paddingOf(context);
 
+    final effectiveComposerLocation =
+        widget.props.location ??
+        StreamMessageComposerTheme.of(context).location ??
+        (StreamTheme.of(context).appStyle.isFloating ? ComposerLocation.floating : ComposerLocation.docked);
+
+    // The body behind the pill (and picker) — animated safe-area insets.
+    final composerBody = AnimatedBuilder(
+      animation: _pickerAnimation,
+      builder: (context, child) {
+        final safeAreaPadding = safeAreaEnabled
+            ? EdgeInsets.lerp(
+                EdgeInsets.only(
+                  left: viewPadding.left,
+                  right: viewPadding.right,
+                  bottom: math.max(viewPadding.bottom, spacing.md),
+                ),
+                EdgeInsets.zero,
+                _pickerAnimation.value,
+              )!
+            : EdgeInsets.zero;
+
+        // For floating: overlay a solid swatch only over the safe-area zone
+        // (the space below the pill/picker) so that the pill's gradient fade
+        // remains visible above while the transparent safe-area gap is covered.
+        // The picker's own ColoredBox covers the picker zone when open.
+        if (effectiveComposerLocation == .floating && safeAreaPadding.bottom > 0) {
+          final bandColor = context.streamColorScheme.backgroundElevation1;
+          return Stack(
+            children: [
+              Positioned(
+                bottom: 0,
+                left: 0,
+                right: 0,
+                height: safeAreaPadding.bottom,
+                child: ColoredBox(color: bandColor),
+              ),
+              Padding(padding: safeAreaPadding, child: child),
+            ],
+          );
+        }
+
+        return Padding(padding: safeAreaPadding, child: child);
+      },
+      child: Center(heightFactor: 1, child: messageInput),
+    );
+
     return Material(
-      color: context.streamColorScheme.backgroundElevation1,
-      child: AnimatedBuilder(
-        animation: _pickerAnimation,
-        builder: (context, child) {
-          final safeAreaPadding = safeAreaEnabled
-              ? EdgeInsets.lerp(
-                  EdgeInsets.only(
-                    left: viewPadding.left,
-                    top: viewPadding.top,
-                    right: viewPadding.right,
-                    bottom: math.max(viewPadding.bottom, spacing.md),
-                  ),
-                  EdgeInsets.zero,
-                  _pickerAnimation.value,
-                )!
-              : EdgeInsets.zero;
-          return Padding(padding: safeAreaPadding, child: child);
-        },
-        child: Center(heightFactor: 1, child: messageInput),
-      ),
+      color: Colors.transparent,
+      child: switch (effectiveComposerLocation) {
+        .floating => composerBody,
+        .docked => DecoratedBox(
+          decoration: BoxDecoration(color: context.streamColorScheme.backgroundElevation1),
+          child: composerBody,
+        ),
+      },
     );
   }
 
@@ -924,63 +966,103 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     FocusNode focusNode,
   ) {
     final currentUserId = StreamChat.of(context).currentUser?.id;
+    final effectiveComposerLocation =
+        widget.props.location ??
+        StreamMessageComposerTheme.of(context).location ??
+        (StreamTheme.of(context).appStyle.isFloating ? ComposerLocation.floating : ComposerLocation.docked);
+    final isFloating = effectiveComposerLocation == .floating;
 
     return StreamMessageValueListenableBuilder(
       valueListenable: controller,
-      builder: (context, value, _) => PopScope(
-        canPop: !_isPickerVisible,
-        onPopInvokedWithResult: (didPop, _) {
-          if (!didPop) _hidePicker();
-        },
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            DropTarget(
-              onDragDone: (details) async {
-                final attachments = <Attachment>[];
-                for (final file in details.files) {
-                  attachments.add(await file.toAttachment(type: AttachmentType.file));
-                }
-                if (attachments.isNotEmpty) _addAttachments(attachments);
+      builder: (context, value, _) {
+        // Extracted so the floating gradient can wrap just the pill, keeping
+        // gradient height stable when the picker (a sibling) opens.
+        final pill = DropTarget(
+          onDragDone: (details) async {
+            final attachments = <Attachment>[];
+            for (final file in details.files) {
+              attachments.add(await file.toAttachment(type: AttachmentType.file));
+            }
+            if (attachments.isNotEmpty) _addAttachments(attachments);
+          },
+          onDragEntered: (_) {},
+          onDragExited: (_) {},
+          child: Focus(
+            skipTraversal: true,
+            onKeyEvent: _handleKeyPressed,
+            child: StreamChatMessageInput(
+              controller: controller,
+              currentUserId: currentUserId,
+              onAttachmentButtonPressed: widget.props.disableAttachments ? null : _onAttachmentButtonPressed,
+              isPickerOpen: _isPickerVisible,
+              placeholder: _buildPlaceholder(context),
+              focusNode: focusNode,
+              onSendPressed: sendMessage,
+              canAlsoSendToChannel: _shouldShowSendToChannelCheckbox(),
+              audioRecorderController: widget.props.enableVoiceRecording ? _audioRecorderController : null,
+              sendVoiceRecordingAutomatically: widget.props.sendVoiceRecordingAutomatically,
+              feedback: widget.props.voiceRecordingFeedback,
+              onQuotedMessageCleared: () {
+                _effectiveController.clearQuotedMessage();
+                widget.props.onQuotedMessageCleared?.call();
               },
-              onDragEntered: (_) {},
-              onDragExited: (_) {},
-              child: Focus(
-                skipTraversal: true,
-                onKeyEvent: _handleKeyPressed,
-                child: StreamChatMessageInput(
-                  controller: controller,
-                  currentUserId: currentUserId,
-                  onAttachmentButtonPressed: widget.props.disableAttachments ? null : _onAttachmentButtonPressed,
-                  isPickerOpen: _isPickerVisible,
-                  placeholder: _buildPlaceholder(context),
-                  focusNode: focusNode,
-                  onSendPressed: sendMessage,
-                  canAlsoSendToChannel: _shouldShowSendToChannelCheckbox(),
-                  audioRecorderController: widget.props.enableVoiceRecording ? _audioRecorderController : null,
-                  sendVoiceRecordingAutomatically: widget.props.sendVoiceRecordingAutomatically,
-                  feedback: widget.props.voiceRecordingFeedback,
-                  onQuotedMessageCleared: () {
-                    _effectiveController.clearQuotedMessage();
-                    widget.props.onQuotedMessageCleared?.call();
-                  },
-                  textInputAction: widget.props.textInputAction,
-                  keyboardType: widget.props.keyboardType,
-                  textCapitalization: widget.props.textCapitalization,
-                  autofocus: widget.props.autofocus,
-                  autocorrect: widget.props.autoCorrect,
-                ),
+              textInputAction: widget.props.textInputAction,
+              keyboardType: widget.props.keyboardType,
+              textCapitalization: widget.props.textCapitalization,
+              autofocus: widget.props.autofocus,
+              autocorrect: widget.props.autoCorrect,
+              isFloating: isFloating,
+            ),
+          ),
+        );
+
+        return PopScope(
+          canPop: !_isPickerVisible,
+          onPopInvokedWithResult: (didPop, _) {
+            if (!didPop) _hidePicker();
+          },
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            // Reversed paint order so the pill (and its shadow) paints on top
+            // of the picker panel. VerticalDirection.up keeps the pill visually
+            // above the picker while making it the last-painted child.
+            verticalDirection: VerticalDirection.up,
+            children: [
+              SizeTransition(
+                sizeFactor: _pickerAnimation,
+                // ignore: deprecated_member_use, alternative is only available since Flutter 3.44
+                axisAlignment: -1,
+                child: _buildInlineAttachmentPicker(context),
               ),
-            ),
-            SizeTransition(
-              sizeFactor: _pickerAnimation,
-              // ignore: deprecated_member_use
-              axisAlignment: -1,
-              child: _buildInlineAttachmentPicker(context),
-            ),
-          ],
+              // Gradient wraps only the pill — not the picker sibling — so
+              // the gradient height tracks the pill and doesn't stretch when
+              // the picker opens or closes.
+              if (isFloating) _buildFloatingComposerBand(context, pill) else pill,
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  /// Wraps [child] (the pill widget) with a floating gradient background that
+  /// fades from transparent at the top to solid
+  /// [StreamColorScheme.backgroundElevation1] at the bottom.
+  ///
+  /// Applied to just the pill [DropTarget] so the gradient height tracks the
+  /// pill (growing with attachments) and is unaffected by the picker opening.
+  Widget _buildFloatingComposerBand(BuildContext context, Widget child) {
+    final bandColor = context.streamColorScheme.backgroundElevation1;
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        gradient: streamFloatingFadeLinearGradient(
+          color: bandColor,
+          begin: Alignment.bottomCenter,
+          end: Alignment.topCenter,
         ),
       ),
+      child: child,
     );
   }
 
@@ -995,29 +1077,29 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     };
     final useSystemPicker = widget.props.useSystemAttachmentPicker || isWebOrDesktop;
 
-    if (useSystemPicker) {
-      return systemAttachmentPickerBuilder(
-        context: context,
-        controller: _pickerController!,
-        allowedTypes: allowedTypes,
-        pollConfig: widget.props.pollConfig,
-        optionsBuilder: widget.props.attachmentPickerOptionsBuilder,
-        onError: _onPickerError,
-        onPollCreated: _onPollCreated,
-      );
-    }
+    final child = useSystemPicker
+        ? systemAttachmentPickerBuilder(
+            context: context,
+            controller: _pickerController!,
+            allowedTypes: allowedTypes,
+            pollConfig: widget.props.pollConfig,
+            optionsBuilder: widget.props.attachmentPickerOptionsBuilder,
+            onError: _onPickerError,
+            onPollCreated: _onPollCreated,
+          )
+        : tabbedAttachmentPickerBuilder(
+            context: context,
+            controller: _pickerController!,
+            allowedTypes: allowedTypes,
+            pollConfig: widget.props.pollConfig,
+            optionsBuilder: widget.props.attachmentPickerOptionsBuilder,
+            onError: _onPickerError,
+            onPollCreated: _onPollCreated,
+            onCommandSelected: _onCommandSelected,
+            commandValidator: _effectiveController.validateCommand,
+          );
 
-    return tabbedAttachmentPickerBuilder(
-      context: context,
-      controller: _pickerController!,
-      allowedTypes: allowedTypes,
-      pollConfig: widget.props.pollConfig,
-      optionsBuilder: widget.props.attachmentPickerOptionsBuilder,
-      onError: _onPickerError,
-      onPollCreated: _onPollCreated,
-      onCommandSelected: _onCommandSelected,
-      commandValidator: _effectiveController.validateCommand,
-    );
+    return ColoredBox(color: context.streamColorScheme.backgroundElevation1, child: child);
   }
 
   // Validates [command]: on disabled, surfaces the "unavailable" snackbar and

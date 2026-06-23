@@ -125,7 +125,16 @@ class StreamChannelListHeader extends StatelessWidget implements PreferredSizeWi
     final _client = client ?? StreamChat.of(context).client;
     final headerTheme = StreamChatTheme.of(context).channelListHeaderTheme;
 
-    final leading = _DefaultUserAvatar(client: _client, onPressed: onUserAvatarPressed);
+    final effectiveAppBarBehavior =
+        style?.behavior ??
+        StreamAppBarTheme.of(context).style?.behavior ??
+        (StreamTheme.of(context).appStyle.isFloating ? .floating : .regular);
+    final hasAvatarShadow = switch (effectiveAppBarBehavior) {
+      .floating => true,
+      .regular => false,
+    };
+
+    final leading = _DefaultUserAvatar(client: _client, onPressed: onUserAvatarPressed, isFloating: hasAvatarShadow);
 
     return Portal(
       child: StreamConnectionStatusBuilder(
@@ -179,10 +188,11 @@ class StreamChannelListHeader extends StatelessWidget implements PreferredSizeWi
 }
 
 class _DefaultUserAvatar extends StatelessWidget {
-  const _DefaultUserAvatar({required this.client, this.onPressed});
+  const _DefaultUserAvatar({required this.client, this.onPressed, this.isFloating = false});
 
   final StreamChatClient client;
   final void Function(User user)? onPressed;
+  final bool isFloating;
 
   @override
   Widget build(BuildContext context) {
@@ -211,6 +221,7 @@ class _DefaultUserAvatar extends StatelessWidget {
             size: .lg,
             user: user,
             showOnlineIndicator: false,
+            isFloating: isFloating,
           ),
         ),
       ),
