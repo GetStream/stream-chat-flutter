@@ -20,6 +20,7 @@
 
 - `Message.toJson` mention sanitization (`removeMentionsIfNotIncluded`) now requires `@token` to match at a word boundary, so e.g. typing `@administrator` no longer keeps a stale `admin` role mention alive, and `@channels` / `@hereafter` no longer keep `mentionedChannel` / `mentionedHere` set.
 - Fixed an unhandled `WebSocketChannelException` surfacing when a reconnect attempt failed (e.g. DNS lookup failed in background); the duplicate signal on `sink.done` is now ignored since the stream's `onError` already handles it.
+- Fixed resetting channel unread count on `message.read` events delivered for threads. 
 
 ## 10.0.1
 

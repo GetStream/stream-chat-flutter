@@ -5854,6 +5854,61 @@ void main() {
         },
       );
 
+      test(
+        'should not update channel read state on thread message read event',
+        () async {
+          final currentUser = User(id: 'test-user');
+          final currentRead = Read(
+            user: currentUser,
+            lastRead: DateTime(2020),
+            unreadMessages: 10,
+            lastReadMessageId: 'channel-msg-1',
+          );
+
+          // Setup initial channel read state
+          channel.state?.updateChannelState(
+            channel.state!.channelState.copyWith(
+              read: [currentRead],
+            ),
+          );
+
+          // Verify initial state
+          final read = channel.state?.read.first;
+          expect(read?.unreadMessages, 10);
+          expect(read?.lastReadMessageId, 'channel-msg-1');
+          expect(read?.lastRead.isAtSameMomentAs(DateTime(2020)), isTrue);
+
+          // Create a thread-scoped message.read event (thread != null)
+          final threadMessageReadEvent = Event(
+            cid: channel.cid,
+            type: EventType.messageRead,
+            user: currentUser,
+            createdAt: DateTime(2022),
+            lastReadMessageId: 'thread-reply-99',
+            thread: Thread(
+              channelCid: channel.cid!,
+              parentMessageId: 'parent-msg-1',
+              createdByUserId: currentUser.id,
+              replyCount: 3,
+              participantCount: 2,
+            ),
+          );
+
+          // Dispatch event
+          client.addEvent(threadMessageReadEvent);
+
+          // Wait for event to be processed
+          await Future.delayed(Duration.zero);
+
+          // Channel read state must be untouched — thread reads
+          // must not clobber the channel-level Read.
+          final after = channel.state?.read.first;
+          expect(after?.unreadMessages, 10);
+          expect(after?.lastReadMessageId, 'channel-msg-1');
+          expect(after?.lastRead.isAtSameMomentAs(DateTime(2020)), isTrue);
+        },
+      );
+
       test('should update read state on notification mark unread event', () async {
         // Create the current read state
         final currentUser = User(id: 'test-user');
