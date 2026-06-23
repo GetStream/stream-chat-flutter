@@ -494,17 +494,17 @@ void main() {
         }
       });
 
-      test('predefined mode with no persisted spec returns null '
+      test(
+          'predefined mode with no persisted spec returns null '
           'predefinedFilter', () async {
         const filterName = 'sample-app-list';
 
-        when(() => mockDatabase.channelQueryDao
-                .getChannelsAndSpecByPredefinedFilter(
-                  filterName,
-                  filterValues: any(named: 'filterValues'),
-                  sortValues: any(named: 'sortValues'),
-                ))
-            .thenAnswer((_) async => (const <ChannelModel>[], null, null));
+        when(() =>
+            mockDatabase.channelQueryDao.getChannelsAndSpecByPredefinedFilter(
+              filterName,
+              filterValues: any(named: 'filterValues'),
+              sortValues: any(named: 'sortValues'),
+            )).thenAnswer((_) async => (const <ChannelModel>[], null, null));
 
         final result =
             await client.queryChannelStates(predefinedFilter: filterName);
@@ -523,8 +523,8 @@ void main() {
           (i) => ChannelModel(cid: 'messaging:clamp_p$i'),
         );
 
-        when(() => mockDatabase.channelQueryDao
-            .getChannelsAndSpecByPredefinedFilter(
+        when(() =>
+            mockDatabase.channelQueryDao.getChannelsAndSpecByPredefinedFilter(
               filterName,
               filterValues: any(named: 'filterValues'),
               sortValues: any(named: 'sortValues'),
@@ -539,8 +539,8 @@ void main() {
         expect(result.predefinedFilter, isNull);
         for (var i = 0; i < 3; i++) {
           verifyNever(
-            () => mockDatabase.channelDao
-                .getChannelByCid('messaging:clamp_p$i'),
+            () =>
+                mockDatabase.channelDao.getChannelByCid('messaging:clamp_p$i'),
           );
         }
       });
@@ -591,8 +591,8 @@ void main() {
               // ignore: avoid_redundant_argument_values
               clearQueryCache: false,
             )).called(1);
-        verifyNever(() => mockDatabase.channelQueryDao
-            .updateChannelQueriesByPredefinedFilter(
+        verifyNever(() =>
+            mockDatabase.channelQueryDao.updateChannelQueriesByPredefinedFilter(
               any(),
               any(),
               filter: any(named: 'filter'),
@@ -603,7 +603,8 @@ void main() {
             ));
       });
 
-      test('predefined mode forwards all args to '
+      test(
+          'predefined mode forwards all args to '
           'channelQueryDao.updateChannelQueriesByPredefinedFilter', () async {
         const filterName = 'sample-app-list';
         const filterValues = {'user_id': 'testUserId'};
@@ -614,8 +615,8 @@ void main() {
           SortOption<ChannelState>.desc(ChannelSortKey.lastMessageAt),
         ];
 
-        when(() => mockDatabase.channelQueryDao
-            .updateChannelQueriesByPredefinedFilter(
+        when(() =>
+            mockDatabase.channelQueryDao.updateChannelQueriesByPredefinedFilter(
               filterName,
               cids,
               filter: resolvedFilter,
@@ -635,8 +636,8 @@ void main() {
           clearQueryCache: true,
         );
 
-        verify(() => mockDatabase.channelQueryDao
-            .updateChannelQueriesByPredefinedFilter(
+        verify(() =>
+            mockDatabase.channelQueryDao.updateChannelQueriesByPredefinedFilter(
               filterName,
               cids,
               filter: resolvedFilter,
@@ -647,13 +648,14 @@ void main() {
             )).called(1);
       });
 
-      test('predefined mode applies Filter.empty() and empty-sort fallback '
+      test(
+          'predefined mode applies Filter.empty() and empty-sort fallback '
           'when resolved values are null', () async {
         const filterName = 'sample-app-list';
         const cids = <String>['messaging:c0'];
 
-        when(() => mockDatabase.channelQueryDao
-            .updateChannelQueriesByPredefinedFilter(
+        when(() =>
+            mockDatabase.channelQueryDao.updateChannelQueriesByPredefinedFilter(
               filterName,
               cids,
               filter: const Filter.empty(),
@@ -671,8 +673,8 @@ void main() {
           predefinedFilter: filterName,
         );
 
-        verify(() => mockDatabase.channelQueryDao
-            .updateChannelQueriesByPredefinedFilter(
+        verify(() =>
+            mockDatabase.channelQueryDao.updateChannelQueriesByPredefinedFilter(
               filterName,
               cids,
               filter: const Filter.empty(),

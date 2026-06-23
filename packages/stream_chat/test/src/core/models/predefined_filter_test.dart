@@ -69,7 +69,8 @@ void main() {
       },
     );
 
-    test('falls back to lastMessageAt desc when raw filter '
+    test(
+        'falls back to lastMessageAt desc when raw filter '
         'touches last_message_at', () {
       const predefined = PredefinedFilter(
         name: 'x',
@@ -86,7 +87,8 @@ void main() {
       expect(sort.single.direction, equals(SortOption.DESC));
     });
 
-    test('falls back to lastMessageAt desc when last_message_at '
+    test(
+        'falls back to lastMessageAt desc when last_message_at '
         r'is nested under $or', () {
       const predefined = PredefinedFilter(
         name: 'x',
@@ -134,7 +136,8 @@ void main() {
       },
     );
 
-    test('falls back to lastMessageAt desc when typed Filter.and '
+    test(
+        'falls back to lastMessageAt desc when typed Filter.and '
         'touches last_message_at', () {
       final predefined = PredefinedFilter(
         name: 'x',

@@ -54,8 +54,7 @@ class ErrorResponse extends _BaseResponse {
   Map<String, dynamic> toJson() => _$ErrorResponseToJson(this);
 
   @override
-  String toString() =>
-      'ErrorResponse(code: $code, '
+  String toString() => 'ErrorResponse(code: $code, '
       'message: $message, '
       'statusCode: $statusCode, '
       'moreInfo: $moreInfo)';

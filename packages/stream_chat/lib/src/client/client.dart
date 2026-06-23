@@ -670,20 +670,21 @@ class StreamChatClient {
     int? messageLimit,
     PaginationParams paginationParams = const PaginationParams(),
     bool waitForConnect = true,
-  }) => queryChannelsWithResult(
-    filter: filter,
-    channelStateSort: channelStateSort,
-    predefinedFilter: predefinedFilter,
-    filterValues: filterValues,
-    sortValues: sortValues,
-    state: state,
-    watch: watch,
-    presence: presence,
-    memberLimit: memberLimit,
-    messageLimit: messageLimit,
-    paginationParams: paginationParams,
-    waitForConnect: waitForConnect,
-  ).map((result) => result.channels);
+  }) =>
+      queryChannelsWithResult(
+        filter: filter,
+        channelStateSort: channelStateSort,
+        predefinedFilter: predefinedFilter,
+        filterValues: filterValues,
+        sortValues: sortValues,
+        state: state,
+        watch: watch,
+        presence: presence,
+        memberLimit: memberLimit,
+        messageLimit: messageLimit,
+        paginationParams: paginationParams,
+        waitForConnect: waitForConnect,
+      ).map((result) => result.channels);
 
   /// Requests channels with a given query, yielding a [QueryChannelsResult]
   /// that carries both the live channel list and the server-resolved
@@ -749,27 +750,26 @@ class StreamChatClient {
       // the lifecycle details.
       final result = await _queryChannelsCache.run(
         hash,
-        () =>
-            _queryChannelsOnlineImpl(
-              filter: filter,
-              sort: channelStateSort,
-              predefinedFilter: predefinedFilter,
-              filterValues: filterValues,
-              sortValues: sortValues,
-              state: state,
-              watch: watch,
-              presence: presence,
-              memberLimit: memberLimit,
-              messageLimit: messageLimit,
-              paginationParams: paginationParams,
-              waitForConnect: waitForConnect,
-            ).timeout(
-              const Duration(seconds: 30),
-              onTimeout: () {
-                logger.warning('Online channel query timed out');
-                throw TimeoutException('Channel query timed out');
-              },
-            ),
+        () => _queryChannelsOnlineImpl(
+          filter: filter,
+          sort: channelStateSort,
+          predefinedFilter: predefinedFilter,
+          filterValues: filterValues,
+          sortValues: sortValues,
+          state: state,
+          watch: watch,
+          presence: presence,
+          memberLimit: memberLimit,
+          messageLimit: messageLimit,
+          paginationParams: paginationParams,
+          waitForConnect: waitForConnect,
+        ).timeout(
+          const Duration(seconds: 30),
+          onTimeout: () {
+            logger.warning('Online channel query timed out');
+            throw TimeoutException('Channel query timed out');
+          },
+        ),
       );
       yield result;
     } catch (e, stk) {
@@ -964,8 +964,7 @@ class StreamChatClient {
     SortOrder<ChannelState>? channelStateSort,
     PaginationParams paginationParams = const PaginationParams(),
   }) async {
-    final res =
-        await chatPersistenceClient?.queryChannelStates(
+    final res = await chatPersistenceClient?.queryChannelStates(
           filter: filter,
           sort: channelStateSort,
           predefinedFilter: predefinedFilter,

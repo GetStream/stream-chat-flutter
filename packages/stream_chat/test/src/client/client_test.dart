@@ -620,8 +620,8 @@ void main() {
                 filterValues: any(named: 'filterValues'),
                 sortValues: any(named: 'sortValues'),
                 paginationParams: any(named: 'paginationParams'),
-              )).thenAnswer((_) async =>
-              QueryChannelsResponse()..channels = persistentChannelStates);
+              )).thenAnswer((_) async => QueryChannelsResponse()
+            ..channels = persistentChannelStates);
 
           final channelStates = List.generate(
             3,
@@ -746,8 +746,8 @@ void main() {
                 filterValues: any(named: 'filterValues'),
                 sortValues: any(named: 'sortValues'),
                 paginationParams: any(named: 'paginationParams'),
-              )).thenAnswer((_) async =>
-              QueryChannelsResponse()..channels = persistentChannelStates);
+              )).thenAnswer((_) async => QueryChannelsResponse()
+            ..channels = persistentChannelStates);
 
           when(() => api.channel.queryChannels(
                 filter: any(named: 'filter'),
@@ -987,8 +987,8 @@ void main() {
                 filterValues: filterValues,
                 sortValues: sortValues,
                 paginationParams: any(named: 'paginationParams'),
-              )).thenAnswer((_) async =>
-              QueryChannelsResponse()..channels = channelStates);
+              )).thenAnswer((_) async => QueryChannelsResponse()
+            ..channels = channelStates);
 
           when(() => persistence.getChannelThreads(any()))
               .thenAnswer((_) async => <String, List<Message>>{});
