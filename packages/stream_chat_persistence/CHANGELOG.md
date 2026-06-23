@@ -1,4 +1,4 @@
-## Upcoming Changes
+## 9.26.0
 
 🐞 Fixed
 
