@@ -41,6 +41,9 @@ void main() {
     when(() => webSocketChannel.stream).thenAnswer(
       (_) => webSocketController.stream,
     );
+    when(() => webSocketSink.done).thenAnswer(
+      (_) => Completer<void>().future,
+    );
     when(() => webSocketSink.add(any())).thenAnswer((invocation) {
       webSocketController.add(invocation.positionalArguments.first);
     });
@@ -376,6 +379,98 @@ void main() {
         me: user,
       );
       webSocketSink.add(json.encode(event));
+
+      addTearDown(timer.cancel);
+    },
+  );
+
+  test(
+    'should not `reconnect` after connection closes while reconnect is paused',
+    () async {
+      // Construct with a short health-check interval so we can pump past it
+      // within the test and assert no health-check writes happen on the
+      // closed sink.
+      final pausedWebSocket = WebSocket(
+        apiKey: 'api-key',
+        baseUrl: 'ws://<local-ip>:8800',
+        tokenManager: tokenManager,
+        webSocketChannelProvider: (_, {protocols}) => webSocketChannel,
+        healthCheckInterval: 1,
+        reconnectionMonitorInterval: 1,
+      );
+      addTearDown(pausedWebSocket.disconnect);
+
+      final user = OwnUser(id: 'test-user');
+      const connectionId = 'test-connection-id';
+      // Sends connect event to web-socket stream
+      final timer = Timer(const Duration(milliseconds: 300), () {
+        final event = Event(
+          type: EventType.healthCheck,
+          connectionId: connectionId,
+          me: user,
+        );
+        webSocketSink.add(json.encode(event));
+      });
+
+      final statuses = <ConnectionStatus>[];
+      final sub = pausedWebSocket.connectionStatusStream.listen(statuses.add);
+
+      await pausedWebSocket.connect(user);
+      expect(pausedWebSocket.reconnectEnabled, isTrue);
+
+      pausedWebSocket.pauseReconnect();
+      expect(pausedWebSocket.reconnectEnabled, isFalse);
+
+      // Mark all writes-so-far as verified so the next assertion only sees
+      // calls made after the close.
+      verify(() => webSocketSink.add(any()));
+
+      // Simulate an OS-initiated socket close.
+      webSocketSink.close();
+
+      // Pump well past the health-check interval to prove its timer was
+      // cancelled and no further writes are attempted on the dead channel.
+      await Future.delayed(const Duration(seconds: 3));
+
+      // Status should settle to disconnected after the paused close, with no
+      // `connecting` flicker from a retry attempt.
+      expect(statuses, [
+        ConnectionStatus.disconnected,
+        ConnectionStatus.connecting,
+        ConnectionStatus.connected,
+        ConnectionStatus.disconnected,
+      ]);
+      // No additional sink writes after the close.
+      verifyNever(() => webSocketSink.add(any()));
+
+      addTearDown(() {
+        timer.cancel();
+        sub.cancel();
+      });
+    },
+  );
+
+  test(
+    'should `reconnect` again after `resumeReconnect`',
+    () async {
+      final user = OwnUser(id: 'test-user');
+      const connectionId = 'test-connection-id';
+      final timer = Timer(const Duration(milliseconds: 300), () {
+        final event = Event(
+          type: EventType.healthCheck,
+          connectionId: connectionId,
+          me: user,
+        );
+        webSocketSink.add(json.encode(event));
+      });
+
+      await webSocket.connect(user);
+
+      webSocket.pauseReconnect();
+      expect(webSocket.reconnectEnabled, isFalse);
+
+      webSocket.resumeReconnect();
+      expect(webSocket.reconnectEnabled, isTrue);
 
       addTearDown(timer.cancel);
     },

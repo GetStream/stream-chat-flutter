@@ -834,8 +834,11 @@ class GetUnreadCountResponse extends _BaseResponse {
 /// Model response for [StreamChatClient.setPushPreferences] api call
 @JsonSerializable(createToJson: false)
 class UpsertPushPreferencesResponse extends _BaseResponse {
-  /// Mapping of user IDs to their push preferences
-  @JsonKey(defaultValue: {})
+  /// Mapping of user IDs to their push preferences.
+  ///
+  /// Users whose user-global preferences were not touched by the upsert call
+  /// (the server returns `null` for them) are omitted from this map.
+  @JsonKey(fromJson: _userPreferencesFromJson)
   late Map<String, PushPreference> userPreferences;
 
   /// Mapping of user IDs to their channel-specific push preferences
@@ -845,4 +848,15 @@ class UpsertPushPreferencesResponse extends _BaseResponse {
   /// Create a new instance from a json
   static UpsertPushPreferencesResponse fromJson(Map<String, dynamic> json) =>
       _$UpsertPushPreferencesResponseFromJson(json);
+}
+
+Map<String, PushPreference> _userPreferencesFromJson(
+  Map<String, dynamic>? json,
+) {
+  if (json == null) return {};
+  return {
+    for (final MapEntry(:key, :value) in json.entries)
+      if (value != null)
+        key: PushPreference.fromJson(value as Map<String, dynamic>),
+  };
 }
