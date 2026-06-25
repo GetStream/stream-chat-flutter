@@ -584,7 +584,10 @@ class _ChannelLastMessageWithStatus extends StatefulWidget {
 class _ChannelLastMessageWithStatusState extends State<_ChannelLastMessageWithStatus> {
   Message? _currentLastMessage;
 
-  static bool _defaultLastMessagePredicate(Message message) {
+  bool _defaultLastMessagePredicate(Message message) {
+    final currentUserId = widget.channel.client.state.currentUser?.id;
+    final isMyMessage = currentUserId != null && message.user?.id == currentUserId;
+    if (message.shadowed && !isMyMessage) return false;
     if (message.isShadowed) return false;
     if (message.isError) return false;
     if (message.isEphemeral) return false;
@@ -675,11 +678,13 @@ class ChannelLastMessageText extends StatefulWidget {
     super.key,
     required this.channel,
     this.textStyle,
-    this.lastMessagePredicate = _defaultLastMessagePredicate,
+    bool Function(Message)? lastMessagePredicate,
   }) : assert(
          channel.state != null,
          'Channel ${channel.id} is not initialized',
-       );
+       ),
+       lastMessagePredicate =
+           lastMessagePredicate ?? _defaultLastMessagePredicate(channel.client.state.currentUser?.id);
 
   /// The channel to display the last message of.
   final Channel channel;
@@ -696,12 +701,15 @@ class ChannelLastMessageText extends StatefulWidget {
 
   // The default predicate to determine if the message should be
   // considered for the last message.
-  static bool _defaultLastMessagePredicate(Message message) {
-    if (message.isShadowed) return false;
-    if (message.isError) return false;
-    if (message.isEphemeral) return false;
-
-    return true;
+  static bool Function(Message) _defaultLastMessagePredicate(String? currentUserId) {
+    return (Message message) {
+      final isMyMessage = currentUserId != null && message.user?.id == currentUserId;
+      if (message.shadowed && !isMyMessage) return false;
+      if (message.isShadowed) return false;
+      if (message.isError) return false;
+      if (message.isEphemeral) return false;
+      return true;
+    };
   }
 
   @override
