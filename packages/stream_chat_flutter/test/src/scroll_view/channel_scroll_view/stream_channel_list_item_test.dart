@@ -23,8 +23,7 @@ void main() {
 
     when(() => client.state).thenReturn(clientState);
     when(() => clientState.currentUser).thenReturn(currentUser);
-    when(() => clientState.currentUserStream)
-        .thenAnswer((_) => Stream.value(currentUser));
+    when(() => clientState.currentUserStream).thenAnswer((_) => Stream.value(currentUser));
     when(() => channel.state).thenReturn(channelState);
     when(() => channel.client).thenReturn(client);
     when(() => channelState.draft).thenReturn(null);
@@ -36,8 +35,7 @@ void main() {
     List<Message> messages,
   ) async {
     when(() => channelState.messages).thenReturn(messages);
-    when(() => channelState.messagesStream)
-        .thenAnswer((_) => Stream.value(messages));
+    when(() => channelState.messagesStream).thenAnswer((_) => Stream.value(messages));
 
     await tester.pumpWidget(
       MaterialApp(
@@ -161,8 +159,7 @@ void main() {
       );
 
       when(() => channelState.messages).thenReturn([shadowedByOther]);
-      when(() => channelState.messagesStream)
-          .thenAnswer((_) => Stream.value([shadowedByOther]));
+      when(() => channelState.messagesStream).thenAnswer((_) => Stream.value([shadowedByOther]));
 
       await tester.pumpWidget(
         MaterialApp(
