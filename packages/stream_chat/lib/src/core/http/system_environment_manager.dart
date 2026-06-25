@@ -11,15 +11,18 @@ class SystemEnvironmentManager {
   /// {@macro systemEnvironmentManager}
   SystemEnvironmentManager({
     SystemEnvironment? environment,
-  }) : _environment = switch (environment) {
-         final env? => env,
-         _ => SystemEnvironment(
-           sdkName: 'stream-chat',
-           sdkIdentifier: 'dart',
-           sdkVersion: PACKAGE_VERSION,
-           osName: CurrentPlatform.name,
-         ),
-       };
+  }) : _environment = SystemEnvironment(
+         sdkName: _sdkName,
+         sdkIdentifier: _sdkIdentifierDart,
+         sdkVersion: PACKAGE_VERSION,
+         osName: CurrentPlatform.name,
+       ) {
+    if (environment != null) updateEnvironment(environment);
+  }
+
+  static const _sdkName = 'stream-chat';
+  static const _sdkIdentifierDart = 'dart';
+  static const _sdkIdentifierFlutter = 'flutter';
 
   /// Returns the Stream client user agent string based on the current
   /// [environment] value.
@@ -31,7 +34,37 @@ class SystemEnvironmentManager {
 
   /// Updates the current [SystemEnvironment].
   void updateEnvironment(SystemEnvironment environment) {
-    _environment = environment;
+    _environment = _sanitize(environment);
+  }
+
+  /// Sanitizes the passed [SystemEnvironment]
+  /// Ignores custom values for:
+  /// - sdkName
+  /// - sdkVersion
+  /// - osName
+  /// Allows only the dart -> flutter promotion for:
+  /// - sdkIdentifier (any other value, including a flutter -> dart
+  ///   demotion, is ignored)
+  /// Allows overriding of:
+  /// - appName
+  /// - appVersion
+  /// - osVersion
+  /// - deviceModel
+  SystemEnvironment _sanitize(SystemEnvironment environment) {
+    final sdkIdentifier = environment.sdkIdentifier == _sdkIdentifierFlutter
+        ? _sdkIdentifierFlutter
+        : _environment.sdkIdentifier;
+    final osName = _environment.osName;
+    return SystemEnvironment(
+      sdkName: _sdkName,
+      sdkIdentifier: sdkIdentifier,
+      sdkVersion: PACKAGE_VERSION,
+      appName: environment.appName,
+      appVersion: environment.appVersion,
+      osName: osName,
+      osVersion: environment.osVersion,
+      deviceModel: environment.deviceModel,
+    );
   }
 }
 
