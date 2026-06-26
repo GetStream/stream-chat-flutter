@@ -1,3 +1,9 @@
+## Upcoming
+
+🐞 Fixed
+
+- Fix backwards pagination not working if channel was never opened.
+
 ## 10.1.0
 
 🐛 Fixed

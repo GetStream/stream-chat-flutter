@@ -878,8 +878,15 @@ class StreamChannelState extends State<StreamChannel> {
         }
       }
 
-      // Otherwise, load the channel at the last read date.
-      return loadChannelAtTimestamp(currentUserRead.lastRead);
+      // `lastRead` is `DateTime.utc(1, 1, 1)` (Go's zero `time.Time{}`) when
+      // the server has never recorded an explicit read for this user. The
+      // server ignores that as a `created_at_around` anchor and returns the
+      // channel tail, after which `_inferBoundariesFromAnchorTimestamp`
+      // would mis-conclude `_topPaginationEnded = true`. Skip in that case
+      // and fall through to the catch-all "load latest" below.
+      if (currentUserRead.lastRead.toUtc().isAfter(DateTime.utc(1970, 1, 1))) {
+        return loadChannelAtTimestamp(currentUserRead.lastRead);
+      }
     }
 
     // If nothing above applies, we just load the channel at the latest
