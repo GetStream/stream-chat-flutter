@@ -584,22 +584,13 @@ class _ChannelLastMessageWithStatus extends StatefulWidget {
 class _ChannelLastMessageWithStatusState extends State<_ChannelLastMessageWithStatus> {
   Message? _currentLastMessage;
 
-  bool _defaultLastMessagePredicate(Message message) {
-    final currentUserId = widget.channel.client.state.currentUser?.id;
-    final isMyMessage = currentUserId != null && message.user?.id == currentUserId;
-    if (message.shadowed && !isMyMessage) return false;
-    if (message.isError) return false;
-    if (message.isEphemeral) return false;
-
-    return true;
-  }
-
   @override
   Widget build(BuildContext context) {
     final channelState = widget.channel.state;
     if (channelState == null) return const Empty();
 
     final currentUser = widget.channel.client.state.currentUser;
+    final predicate = _defaultLastMessagePredicate(currentUser?.id);
 
     return BetterStreamBuilder<(Draft?, List<Message>)>(
       stream: CombineLatestStream.combine2(
@@ -625,7 +616,7 @@ class _ChannelLastMessageWithStatusState extends State<_ChannelLastMessageWithSt
         }
 
         // Find the last valid message.
-        final message = messages.lastWhereOrNull(_defaultLastMessagePredicate);
+        final message = messages.lastWhereOrNull(predicate);
         final latestLastMessage = [message, _currentLastMessage].latest;
 
         if (latestLastMessage == null) {
@@ -698,20 +689,20 @@ class ChannelLastMessageText extends StatefulWidget {
   /// considered for the last message.
   final bool Function(Message) lastMessagePredicate;
 
-  // The default predicate to determine if the message should be
-  // considered for the last message.
-  static bool Function(Message) _defaultLastMessagePredicate(String? currentUserId) {
-    return (Message message) {
-      final isMyMessage = currentUserId != null && message.user?.id == currentUserId;
-      if (message.shadowed && !isMyMessage) return false;
-      if (message.isError) return false;
-      if (message.isEphemeral) return false;
-      return true;
-    };
-  }
-
   @override
   State<ChannelLastMessageText> createState() => _ChannelLastMessageTextState();
+}
+
+// The default predicate to determine if the message should be
+// considered for the last message.
+bool Function(Message) _defaultLastMessagePredicate(String? currentUserId) {
+  return (Message message) {
+    final isMyMessage = currentUserId != null && message.user?.id == currentUserId;
+    if (message.shadowed && !isMyMessage) return false;
+    if (message.isError) return false;
+    if (message.isEphemeral) return false;
+    return true;
+  };
 }
 
 class _ChannelLastMessageTextState extends State<ChannelLastMessageText> {
