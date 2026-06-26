@@ -97,31 +97,6 @@ void main() {
     },
   );
 
-  testWidgets(
-    'hides moderation V2 shadowed message regardless of sender',
-    (tester) async {
-      final visible = Message(
-        text: 'visible',
-        user: User(id: currentUserId),
-        createdAt: DateTime(2024, 1, 1),
-      );
-      final v2Shadowed = Message(
-        text: 'v2 shadowed',
-        user: User(id: currentUserId),
-        createdAt: DateTime(2024, 1, 2),
-        moderation: const Moderation(
-          action: ModerationAction.shadow,
-          originalText: 'v2 shadowed',
-        ),
-      );
-
-      await pumpWithMessages(tester, [visible, v2Shadowed]);
-
-      expect(find.text('visible'), findsOneWidget);
-      expect(find.text('v2 shadowed'), findsNothing);
-    },
-  );
-
   testWidgets('hides error and ephemeral messages', (tester) async {
     final visible = Message(
       text: 'visible',

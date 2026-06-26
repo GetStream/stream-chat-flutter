@@ -588,7 +588,6 @@ class _ChannelLastMessageWithStatusState extends State<_ChannelLastMessageWithSt
     final currentUserId = widget.channel.client.state.currentUser?.id;
     final isMyMessage = currentUserId != null && message.user?.id == currentUserId;
     if (message.shadowed && !isMyMessage) return false;
-    if (message.isShadowed) return false;
     if (message.isError) return false;
     if (message.isEphemeral) return false;
 
@@ -705,7 +704,6 @@ class ChannelLastMessageText extends StatefulWidget {
     return (Message message) {
       final isMyMessage = currentUserId != null && message.user?.id == currentUserId;
       if (message.shadowed && !isMyMessage) return false;
-      if (message.isShadowed) return false;
       if (message.isError) return false;
       if (message.isEphemeral) return false;
       return true;
