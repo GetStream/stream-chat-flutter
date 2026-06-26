@@ -2,7 +2,7 @@
 
 🐞 Fixed
 
-- Fix backwards pagination not working if channel was never opened.
+- Fixed backwards pagination not working if channel was never opened.
 
 ## 10.1.0
 
