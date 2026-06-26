@@ -382,7 +382,6 @@ class ChannelLastMessageText extends StatefulWidget {
       final isMyMessage =
           currentUserId != null && message.user?.id == currentUserId;
       if (message.shadowed && !isMyMessage) return false;
-      if (message.isShadowed) return false;
       if (message.isDeleted) return false;
       if (message.isError) return false;
       if (message.isEphemeral) return false;

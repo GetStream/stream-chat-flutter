@@ -57,7 +57,7 @@ void main() {
     final message = Message(
       text: 'hello world',
       user: User(id: 'other'),
-      createdAt: DateTime(2024, 1, 1),
+      createdAt: DateTime(2024),
     );
 
     await pumpWithMessages(tester, [message]);
@@ -69,7 +69,7 @@ void main() {
     final visible = Message(
       text: 'visible',
       user: User(id: 'other'),
-      createdAt: DateTime(2024, 1, 1),
+      createdAt: DateTime(2024),
     );
     final shadowed = Message(
       text: 'shadowed',
@@ -91,7 +91,7 @@ void main() {
         text: 'my shadowed',
         shadowed: true,
         user: User(id: currentUserId),
-        createdAt: DateTime(2024, 1, 1),
+        createdAt: DateTime(2024),
       );
 
       await pumpWithMessages(tester, [mine]);
@@ -100,36 +100,11 @@ void main() {
     },
   );
 
-  testWidgets(
-    'hides moderation V2 shadowed message regardless of sender',
-    (tester) async {
-      final visible = Message(
-        text: 'visible',
-        user: User(id: currentUserId),
-        createdAt: DateTime(2024, 1, 1),
-      );
-      final v2Shadowed = Message(
-        text: 'v2 shadowed',
-        user: User(id: currentUserId),
-        createdAt: DateTime(2024, 1, 2),
-        moderation: const Moderation(
-          action: ModerationAction.shadow,
-          originalText: 'v2 shadowed',
-        ),
-      );
-
-      await pumpWithMessages(tester, [visible, v2Shadowed]);
-
-      expect(find.text('visible'), findsOneWidget);
-      expect(find.text('v2 shadowed'), findsNothing);
-    },
-  );
-
   testWidgets('hides deleted, error, and ephemeral messages', (tester) async {
     final visible = Message(
       text: 'visible',
       user: User(id: 'other'),
-      createdAt: DateTime(2024, 1, 1),
+      createdAt: DateTime(2024),
     );
     final deleted = Message(
       text: 'deleted',
@@ -165,7 +140,7 @@ void main() {
         text: 'shadowed by other',
         shadowed: true,
         user: User(id: 'other'),
-        createdAt: DateTime(2024, 1, 1),
+        createdAt: DateTime(2024),
       );
 
       when(() => channelState.messages).thenReturn([shadowedByOther]);
