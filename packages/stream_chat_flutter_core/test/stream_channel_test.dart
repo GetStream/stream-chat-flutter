@@ -861,6 +861,35 @@ void main() {
         );
       },
     );
+
+    testWidgets(
+      'queries latest page (no around-anchor) when lastRead is the Go '
+      'zero-time sentinel and channel is stale',
+      (tester) async {
+        when(() => mockChannel.state.isUpToDate).thenReturn(false);
+        final read = Read(
+          user: User(id: 'testUserId'),
+          lastRead: DateTime.utc(1, 1, 1),
+          unreadMessages: 100,
+        );
+        when(() => mockChannel.state.unreadCount).thenReturn(100);
+        when(() => mockChannel.state.currentUserRead).thenReturn(read);
+
+        await _pumpStreamChannel(tester, mockChannel);
+
+        final captured =
+            verify(
+                  () => mockChannel.query(
+                    preferOffline: any(named: 'preferOffline'),
+                    messagesPagination: captureAny(named: 'messagesPagination'),
+                  ),
+                ).captured.single
+                as PaginationParams;
+
+        expect(captured.idAround, isNull);
+        expect(captured.createdAtAround, isNull);
+      },
+    );
   });
 
   group('pruneOldest', () {

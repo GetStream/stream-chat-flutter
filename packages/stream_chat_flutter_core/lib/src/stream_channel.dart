@@ -201,6 +201,10 @@ class StreamChannel extends StatefulWidget {
 
 // ignore: public_member_api_docs
 class StreamChannelState extends State<StreamChannel> {
+  // Anything before this is treated as the server's "never read" sentinel
+  // (Go's zero `time.Time{}` → `DateTime.utc(1, 1, 1)`).
+  static final _minValidLastRead = DateTime.utc(1970, 1, 1);
+
   /// Current channel
   Channel get channel => widget.channel;
 
@@ -878,13 +882,10 @@ class StreamChannelState extends State<StreamChannel> {
         }
       }
 
-      // `lastRead` is `DateTime.utc(1, 1, 1)` (Go's zero `time.Time{}`) when
-      // the server has never recorded an explicit read for this user. The
-      // server ignores that as a `created_at_around` anchor and returns the
-      // channel tail, after which `_inferBoundariesFromAnchorTimestamp`
-      // would mis-conclude `_topPaginationEnded = true`. Skip in that case
-      // and fall through to the catch-all "load latest" below.
-      if (currentUserRead.lastRead.toUtc().isAfter(DateTime.utc(1970, 1, 1))) {
+      // Skip the "never read" sentinel: the server ignores it as
+      // `created_at_around` and returns the tail, which would mis-infer
+      // `_topPaginationEnded = true`. Fall through to load-latest below.
+      if (currentUserRead.lastRead.isAfter(_minValidLastRead)) {
         return loadChannelAtTimestamp(currentUserRead.lastRead);
       }
     }
