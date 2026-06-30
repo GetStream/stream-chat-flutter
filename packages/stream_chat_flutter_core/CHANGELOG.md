@@ -1,3 +1,9 @@
+## Upcoming
+
+🐛 Fixed
+
+- Fixed `StreamChannelListController` not handling `notification.channel_deleted` event.
+
 ## 10.1.0
 
 🐛 Fixed
