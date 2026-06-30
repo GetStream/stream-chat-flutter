@@ -4,6 +4,12 @@
 
 - Added support for predefined filters for `QueryChannels` on `StreamChatPersistenceClient`.
 
+## 9.26.0
+
+🐞 Fixed
+
+- `PollDao` no longer crashes when reading polls whose creator user is missing from the local cache.
+
 ## 9.25.0
 
 🚀 Performance
