@@ -50,6 +50,53 @@ List<Message> _buildMessages({bool withPinned = false, bool withThreads = false}
   ];
 }
 
+List<Message> _buildMentionMessages() {
+  return [
+    Message(
+      id: 'msg-mention-1',
+      text: '@channel quick reminder about the design review at 2pm today',
+      user: _otherUser,
+      createdAt: DateTime(2024, 6, 1, 10, 0),
+      mentionedChannel: true,
+    ),
+    Message(
+      id: 'msg-mention-2',
+      text: '@here who can join the call?',
+      user: ownUser,
+      createdAt: DateTime(2024, 6, 1, 10, 1),
+      mentionedHere: true,
+    ),
+    Message(
+      id: 'msg-mention-3',
+      text: "@engineering let's sync on the API changes",
+      user: liamJohnson,
+      createdAt: DateTime(2024, 6, 1, 10, 2),
+      mentionedRoles: const ['engineering'],
+    ),
+    Message(
+      id: 'msg-mention-4',
+      text: 'Pinging @core-team for visibility',
+      user: ownUser,
+      createdAt: DateTime(2024, 6, 1, 10, 3),
+      mentionedGroups: [
+        UserGroup(
+          id: 'core-team-id',
+          name: 'core-team',
+          createdAt: DateTime.utc(2024),
+          updatedAt: DateTime.utc(2024),
+        ),
+      ],
+    ),
+    Message(
+      id: 'msg-mention-5',
+      text: '@Charlotte Anderson can you weigh in?',
+      user: miaThompson,
+      createdAt: DateTime(2024, 6, 1, 10, 4),
+      mentionedUsers: [charlotteAnderson],
+    ),
+  ];
+}
+
 Widget _buildMessageListViewScaffold({
   required MockClient client,
   required MockChannel channel,
@@ -102,6 +149,31 @@ void main() {
     constraints: const BoxConstraints.tightFor(width: 375, height: 600),
     builder: () {
       final messages = _buildMessages(withPinned: true);
+      final client = MockClient();
+      final clientState = MockClientState();
+      final channel = MockChannel(type: 'messaging', id: 'general');
+      final channelState = MockChannelState();
+
+      setupMockChannel(
+        client: client,
+        clientState: clientState,
+        channel: channel,
+        channelState: channelState,
+        channelName: 'General',
+        messages: messages,
+      );
+      when(() => clientState.currentUser).thenReturn(ownUser);
+
+      return _buildMessageListViewScaffold(client: client, channel: channel);
+    },
+  );
+
+  docsGoldenTest(
+    'message list view with mentions',
+    fileName: 'message_list_view_mentions',
+    constraints: const BoxConstraints.tightFor(width: 375, height: 600),
+    builder: () {
+      final messages = _buildMentionMessages();
       final client = MockClient();
       final clientState = MockClientState();
       final channel = MockChannel(type: 'messaging', id: 'general');

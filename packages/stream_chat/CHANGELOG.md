@@ -1,4 +1,4 @@
-## Upcoming
+## 10.1.0
 
 ✅ Added
 
@@ -20,6 +20,7 @@
 
 - `Message.toJson` mention sanitization (`removeMentionsIfNotIncluded`) now requires `@token` to match at a word boundary, so e.g. typing `@administrator` no longer keeps a stale `admin` role mention alive, and `@channels` / `@hereafter` no longer keep `mentionedChannel` / `mentionedHere` set.
 - Fixed an unhandled `WebSocketChannelException` surfacing when a reconnect attempt failed (e.g. DNS lookup failed in background); the duplicate signal on `sink.done` is now ignored since the stream's `onError` already handles it.
+- Fixed resetting channel unread count on `message.read` events delivered for threads. 
 
 ## 10.0.1
 
@@ -55,6 +56,7 @@
 
 🐞 Fixed
 
+- Fixed slow mode (cooldown) not activating after sending a reply in a thread. `Channel.getRemainingCooldown()` and `currentUserLastMessageAt` now scan thread replies in addition to main-channel messages, matching the backend behaviour where both message types share the same per-channel cooldown bucket.
 - Fixed reactions, polls, and quoted-message enrichment briefly flickering after the app returned from the background. The reconnect path now refreshes channels and advances `lastSyncAt` to the current time instead of replaying every event since `lastSyncAt` through `handleEvent`. `client.sync()` remains available for consumers that need event-level replay.
 - Fixed `Channel.sendMessage` / `Channel.updateMessage` hanging forever when any attachment upload failed; they now throw `StreamChatError`.
 - Fixed quoted poll messages losing their poll, shared-location, or nested-quote content when the server omits it from the `quoted_message` payload during channel re-sync.
