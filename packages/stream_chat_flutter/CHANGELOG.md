@@ -1,3 +1,9 @@
+## Upcoming
+
+🐞 Fixed
+
+- Fixed last-message preview flicker during channel-state reloads.
+
 ## 10.1.0
 
 🐛 Fixed
