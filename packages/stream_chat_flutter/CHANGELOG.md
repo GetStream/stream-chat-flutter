@@ -1,3 +1,8 @@
+## Upcoming
+
+🐞 Fixed
+- Fixed shadowed messages not hidden in channel list items.
+
 ## 9.26.0
 
 🐞 Fixed
