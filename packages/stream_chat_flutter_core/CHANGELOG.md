@@ -1,8 +1,9 @@
 ## Upcoming
 
-🐛 Fixed
+🐞 Fixed
 
 - Fixed `StreamChannelListController` not handling `notification.channel_deleted` event.
+- Fixed backwards pagination not working if channel was never opened.
 
 ## 10.1.0
 
