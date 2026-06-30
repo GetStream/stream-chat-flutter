@@ -1,5 +1,9 @@
 ## 9.26.0
 
+✅ Added
+
+- Added support for predefined filters on `StreamChannelListController`.
+
 🐞 Fixed
 
 - Fixed a reconnect storm when the OS closed the WebSocket during the background keep-alive window; reconnects are now paused on background and resumed on foreground.
