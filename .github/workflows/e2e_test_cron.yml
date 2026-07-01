@@ -1,0 +1,171 @@
+name: E2E Tests Nightly
+
+on:
+  schedule:
+    - cron: "0 1 * * 1-5" # weeknights at 01:00 UTC
+  workflow_dispatch:
+    inputs:
+      mock_server_branch:
+        description: "Mock server branch"
+        type: string
+        required: true
+        default: main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: e2e-nightly-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  flutter_version: "3.x"
+  mock_server_branch: ${{ github.event.inputs.mock_server_branch || 'main' }}
+
+jobs:
+  android:
+    if: github.repository == 'GetStream/stream-chat-flutter'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        api-level: [34, 31, 28]
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.flutter_version }}
+          channel: stable
+          cache-key: flutter-:os:-:channel:-:version:-:arch:-:hash:-${{ hashFiles('**/pubspec.lock') }}
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.3"
+          bundler-cache: true
+          working-directory: sample_app/android
+
+      - name: Bootstrap
+        run: |
+          flutter pub global activate melos
+          melos bootstrap
+          dart pub global activate patrol_cli
+
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Create Allure launch
+        env:
+          ALLURE_TOKEN: ${{ secrets.ALLURE_TOKEN }}
+        run: cd sample_app/android && bundle exec fastlane allure_launch
+
+      - name: Run e2e (Android emulator)
+        uses: reactivecircus/android-emulator-runner@v2
+        timeout-minutes: 90
+        with:
+          api-level: ${{ matrix.api-level }}
+          arch: x86_64
+          profile: pixel_6
+          emulator-options: -no-snapshot-save -no-window -no-audio -no-boot-anim -gpu swiftshader_indirect
+          script: cd sample_app/android && bundle exec fastlane run_e2e_test device:emulator-5554 mock_server_branch:${{ env.mock_server_branch }}
+
+      - name: Upload Allure results
+        if: success() || failure()
+        env:
+          ALLURE_TOKEN: ${{ secrets.ALLURE_TOKEN }}
+        run: cd sample_app/android && bundle exec fastlane allure_upload
+
+      - name: Remove Allure launch (on cancel)
+        if: cancelled()
+        env:
+          ALLURE_TOKEN: ${{ secrets.ALLURE_TOKEN }}
+        run: cd sample_app/android && bundle exec fastlane allure_launch_removal
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: e2e-nightly-android-${{ matrix.api-level }}
+          path: sample_app/stream-chat-test-mock-server/logs
+
+  ios:
+    if: github.repository == 'GetStream/stream-chat-flutter'
+    runs-on: macos-15
+    strategy:
+      fail-fast: false
+      matrix:
+        device: ["iPhone 16", "iPhone 15"]
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.flutter_version }}
+          channel: stable
+          cache-key: flutter-:os:-:channel:-:version:-:arch:-:hash:-${{ hashFiles('**/pubspec.lock') }}
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.3"
+          bundler-cache: true
+          working-directory: sample_app/ios
+
+      - name: Bootstrap
+        run: |
+          flutter pub global activate melos
+          melos bootstrap
+          dart pub global activate patrol_cli
+
+      - name: Create Allure launch
+        env:
+          ALLURE_TOKEN: ${{ secrets.ALLURE_TOKEN }}
+        run: cd sample_app/ios && bundle exec fastlane allure_launch
+
+      - name: Boot simulator
+        run: |
+          device_id=$(xcrun simctl list devices available --json \
+            | python3 -c "import sys,json;d=json.load(sys.stdin);print(next(x['udid'] for r in d['devices'].values() for x in r if x['name']=='${{ matrix.device }}'))")
+          echo "device_id=$device_id" >> "$GITHUB_ENV"
+          xcrun simctl boot "$device_id"
+
+      - name: Run e2e (iOS simulator)
+        run: cd sample_app/ios && bundle exec fastlane run_e2e_test device:${{ env.device_id }} mock_server_branch:${{ env.mock_server_branch }}
+
+      - name: Upload Allure results
+        if: success() || failure()
+        env:
+          ALLURE_TOKEN: ${{ secrets.ALLURE_TOKEN }}
+        run: cd sample_app/ios && bundle exec fastlane allure_upload
+
+      - name: Remove Allure launch (on cancel)
+        if: cancelled()
+        env:
+          ALLURE_TOKEN: ${{ secrets.ALLURE_TOKEN }}
+        run: cd sample_app/ios && bundle exec fastlane allure_launch_removal
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: e2e-nightly-ios-${{ matrix.device }}
+          path: sample_app/stream-chat-test-mock-server/logs
+
+  slack:
+    name: Slack Report
+    runs-on: ubuntu-latest
+    needs: [android, ios]
+    if: failure() && github.event_name == 'schedule'
+    steps:
+      - uses: 8398a7/action-slack@v3
+        with:
+          status: failure
+          text: "Nightly e2e failed 🌙"
+          fields: repo,commit,author,workflow
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_NIGHTLY_CHECKS }}

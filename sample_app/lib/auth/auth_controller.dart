@@ -26,8 +26,16 @@ final _chatPersistenceClient = StreamChatPersistenceClient(
   logLevel: Level.SEVERE,
 );
 
+/// True when running under e2e tests, detected via the presence of a
+/// [StreamConnectionOverride]. Used to skip boot-path side effects that assume
+/// a full native launch (Firebase, push registration, notifications).
+bool get isE2eTestRun => authController.debugConnectionOverride != null;
+
 Future<void> _sampleAppLogHandler(LogRecord record) async {
   if (kDebugMode) StreamChatClient.defaultLogHandler(record);
+
+  // Crashlytics isn't initialized under e2e tests (the app is pumped in-process).
+  if (isE2eTestRun) return;
 
   // report errors to Firebase Crashlytics
   if (record.error != null || record.stackTrace != null) {
@@ -39,7 +47,27 @@ Future<void> _sampleAppLogHandler(LogRecord record) async {
   }
 }
 
-StreamChatClient _buildStreamChatClient(String apiKey) {
+/// Test-only override that points the [StreamChatClient] at a mock server.
+///
+/// `null` in production, so the SDK uses its default base URL. E2E tests set
+/// [AuthController.debugConnectionOverride] before the first [AuthController.connect]
+/// so the client talks to the local mock server instead of the real backend.
+@visibleForTesting
+class StreamConnectionOverride {
+  /// Creates an override; pass `null` for any field to keep the SDK default.
+  const StreamConnectionOverride({this.baseURL, this.baseWsUrl});
+
+  /// REST base URL, e.g. `http://10.0.2.2:<port>` (Android) / `http://localhost:<port>` (iOS).
+  final String? baseURL;
+
+  /// WebSocket base URL, e.g. `ws://10.0.2.2:<port>` / `ws://localhost:<port>`.
+  final String? baseWsUrl;
+}
+
+StreamChatClient _buildStreamChatClient(
+  String apiKey, {
+  StreamConnectionOverride? connectionOverride,
+}) {
   const logLevel = kDebugMode ? Level.INFO : Level.SEVERE;
   return StreamChatClient(
     apiKey,
@@ -51,8 +79,9 @@ StreamChatClient _buildStreamChatClient(String apiKey) {
         return error is StreamChatNetworkError && error.isRetriable;
       },
     ),
-    //baseURL: 'http://<local-ip>:3030',
-    //baseWsUrl: 'ws://<local-ip>:8800',
+    // Null in production → SDK defaults; set by e2e tests to hit the mock server.
+    baseURL: connectionOverride?.baseURL,
+    baseWsUrl: connectionOverride?.baseWsUrl,
   )..chatPersistenceClient = _chatPersistenceClient;
 }
 
@@ -92,6 +121,14 @@ class AuthController extends ValueNotifier<AuthState> {
 
   /// The active client, or `null` before the first [connect].
   StreamChatClient? get client => _client;
+
+  /// Test-only connection override (see [StreamConnectionOverride]).
+  ///
+  /// Set this before the first [connect] in e2e tests to point the client at
+  /// the local mock server; leave `null` in production. Read once when the
+  /// client is built, so set it before the app calls [connect].
+  @visibleForTesting
+  StreamConnectionOverride? debugConnectionOverride;
 
   String? _activeApiKey;
   PushTokenManager? _pushTokenManager;
@@ -142,7 +179,10 @@ class AuthController extends ValueNotifier<AuthState> {
       _client = null;
     }
 
-    final client = _client ??= _buildStreamChatClient(apiKey);
+    final client = _client ??= _buildStreamChatClient(
+      apiKey,
+      connectionOverride: debugConnectionOverride,
+    );
     _activeApiKey = apiKey;
 
     try {
@@ -157,11 +197,14 @@ class AuthController extends ValueNotifier<AuthState> {
         ]);
       }
 
-      _pushTokenManager = PushTokenManager(
-        client: client,
-        iosPushProvider: _kIosPushProvider,
-        androidPushProvider: _kAndroidPushProvider,
-      )..registerDevice();
+      // Push relies on Firebase, which isn't initialized under e2e tests.
+      if (!isE2eTestRun) {
+        _pushTokenManager = PushTokenManager(
+          client: client,
+          iosPushProvider: _kIosPushProvider,
+          androidPushProvider: _kAndroidPushProvider,
+        )..registerDevice();
+      }
 
       value = Authenticated(ownUser);
     } catch (_) {
@@ -192,6 +235,30 @@ class AuthController extends ValueNotifier<AuthState> {
     // list's final rebuild trips `channel.state != null`.
     await SchedulerBinding.instance.endOfFrame;
     client.disconnectUser(flushChatPersistence: flushPersistence).ignore();
+  }
+
+  /// Resets all session state so the next e2e test starts clean.
+  ///
+  /// Patrol runs every test in one app process against this process-wide
+  /// singleton, so credentials, the client, and the connection override would
+  /// otherwise leak between tests. Unlike [dispose] this keeps the notifier
+  /// usable. Call from test teardown.
+  @visibleForTesting
+  Future<void> debugReset() async {
+    _pushTokenManager?.dispose().ignore();
+    _pushTokenManager = null;
+
+    await _client?.dispose();
+    _client = null;
+    _activeApiKey = null;
+    debugConnectionOverride = null;
+
+    if (!CurrentPlatform.isWeb) {
+      const secureStorage = FlutterSecureStorage();
+      await secureStorage.deleteAll();
+    }
+
+    value = const Unauthenticated();
   }
 
   @override

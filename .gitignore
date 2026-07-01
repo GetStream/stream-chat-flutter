@@ -2,6 +2,14 @@
 *.class
 *.log
 *.pyc
+# E2E: mock-server checkout cloned by the `start_mock_server` Fastlane lane
+/sample_app/stream-chat-test-mock-server/
+# E2E: Patrol-generated test bundle (regenerated on every `patrol test`)
+/sample_app/integration_test/test_bundle.dart
+# E2E: Allure results assembled from test runs
+/sample_app/allure-results/
+# E2E: allurectl binary downloaded by the Fastlane allure lanes
+/sample_app/allurectl
 *.swp
 .DS_Store
 .atom/

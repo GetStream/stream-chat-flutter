@@ -33,6 +33,9 @@ android {
         targetSdkVersion flutter.targetSdkVersion
         versionCode flutter.versionCode
         versionName flutter.versionName
+
+        // Patrol e2e
+        testInstrumentationRunner "pl.leancode.patrol.PatrolJUnitRunner"
     }
 
     signingConfigs {
