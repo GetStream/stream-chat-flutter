@@ -188,7 +188,7 @@ the fact that it is expensive should be visible in the type signature (returns
 
 The SDK is layered — each package builds on top of the previous:
 
-```
+```text
 stream_chat                     # Pure Dart, no Flutter dependency
   └── stream_chat_persistence   # Local disk cache using Drift (optional)
       └── stream_chat_flutter_core   # Flutter business logic, no UI
@@ -337,7 +337,7 @@ We strongly recommend avoiding third-party code unless strictly necessary.
 
 ### Monorepo layout
 
-```
+```text
 stream-chat-flutter/
 ├── melos.yaml                # Workspace + centralized dependencies
 ├── analysis_options.yaml     # Shared lints
@@ -1094,7 +1094,7 @@ link the tracking issue:
 
 TODOs are bare `// TODO:` — no username tag (this diverges from Flutter's guide, which
 requires `TODO(handle):`). If the TODO groups a workstream, an optional short tag is
-fine (`// TODO(perf-migration): …`), but it's a category label, not a github handle.
+fine (`// TODO(perf-migration): …`), but it's a category label, not a GitHub handle.
 
 Include an issue link when the deferred work is tracked; if the constraint is
 self-explanatory ("wait for backend enrichment", "wait for next major"), a link isn't
