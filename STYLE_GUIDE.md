@@ -1240,11 +1240,15 @@ It composes per-component theme data (e.g. `StreamMessageListViewThemeData`,
 When adding a new component theme:
 
 1. Create a `<Component>ThemeData` class that:
-   - `extends ThemeExtension<<Component>ThemeData>` and uses
-     `with _$<Component>ThemeData` (the generated mixin).
-   - Is annotated with `@ThemeExtensions(constructor: 'raw', buildContextExtension: false)`.
+   - Uses `with _$<Component>ThemeData` (the generated mixin) and is annotated with
+     `@immutable` + `@themeGen`. Component themes do **not** extend `ThemeExtension`.
    - Declares `part '<snake_name>.g.theme.dart';` at the top of the file.
    - Has **all fields nullable** — defaults do not live here.
+
+   The root `StreamChatThemeData` is an exception: it `extends ThemeExtension` and uses
+   `@ThemeExtensions(constructor: 'raw', buildContextExtension: false)` so it can plug
+   into Material's `ThemeData.extensions`. New component themes should follow the
+   `@themeGen` pattern, not the root pattern.
 2. Create a `<Component>Theme` `InheritedTheme` widget that exposes the data via a
    `static <Component>ThemeData of(BuildContext context)` lookup.
 3. Add the new theme data as a field on `StreamChatThemeData`.
