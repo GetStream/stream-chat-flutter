@@ -1061,16 +1061,21 @@ once, it will likely need another. Name things after the idea, not the version.
 Find the answers to the questions, or describe the confusion, including references
 where you found answers.
 
-If commenting on a workaround for a bug, link to the issue and leave a TODO:
+If commenting on a workaround for a bug, describe the constraint and (when one exists)
+link the tracking issue:
 
 ```dart
-// TODO(username): Coercing to double because the backend returns int for zero.
-//                 See https://github.com/GetStream/stream-chat-flutter/issues/XXXX.
+// TODO: Remove this override once `type` is properly enriched on the backend.
+// TODO: Add stacktrace as a parameter in v11.0.0.
 ```
 
-TODOs are formatted `TODO(github-handle): description with issue link.`. A TODO is not
-a commitment that the referenced person will fix the issue — it's the person with
-enough context to explain the problem. Include an issue link.
+TODOs are bare `// TODO:` — no username tag (this diverges from Flutter's guide, which
+requires `TODO(handle):`). If the TODO groups a workstream, an optional short tag is
+fine (`// TODO(perf-migration): …`), but it's a category label, not a github handle.
+
+Include an issue link when the deferred work is tracked; if the constraint is
+self-explanatory ("wait for backend enrichment", "wait for next major"), a link isn't
+required.
 
 ### Bare ignore directives are fine
 
