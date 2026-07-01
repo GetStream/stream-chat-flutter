@@ -28,6 +28,8 @@ cd packages/stream_chat_flutter && flutter test
 cd packages/stream_chat_flutter && flutter test test/src/path/to/test_file.dart
 ```
 
+See [`TESTING.md`](TESTING.md) for guidance on writing effective tests.
+
 ### Golden Tests
 ```bash
 melos run update:goldens    # Regenerate all golden image files
