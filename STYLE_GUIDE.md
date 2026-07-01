@@ -1398,8 +1398,8 @@ tooling — do not write these entries by hand.
   an issue, and hand a PR over for review.
 - **Melos commands**: `melos.yaml` — every task the repo runs (test, analyze, generate,
   goldens).
-- **Design source**: the "Chat SDK Design System" Figma project — accessed via the
-  Figma MCP server when implementing UI.
+- **Design source**: the [Chat SDK Design System](https://www.figma.com/design/Us73erK1xFNcB5EH3hyq6Y/Chat-SDK-Design-System)
+  Figma project — accessed via the Figma MCP server when implementing UI.
 
 When something isn't covered here and isn't obvious from surrounding code, prefer to
 ask in the PR rather than guessing. If a convention isn't documented, propose adding

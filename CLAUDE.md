@@ -134,7 +134,7 @@ After modifying any package, update its `CHANGELOG.md`.
 
 ## Figma Designs
 
-UI designs for this SDK are in the **Chat SDK Design system** Figma project. Use the Figma MCP server to look up designs when implementing or updating UI components.
+UI designs for this SDK are in the [Chat SDK Design System](https://www.figma.com/design/Us73erK1xFNcB5EH3hyq6Y/Chat-SDK-Design-System) Figma project. Use the Figma MCP server to look up designs when implementing or updating UI components.
 
 ## `stream_core_flutter` (external sibling repo)
 
