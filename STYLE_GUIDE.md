@@ -63,7 +63,12 @@ document; the section link is provided.
 - Line width: **120 characters** (configured in `analysis_options.yaml`). Comments and
   docs follow the same limit.
 - Single quotes, package imports (never relative), trailing commas preserved, `const`
-  wherever possible. These are enforced by the linter — do not disable them.
+  wherever possible, `final` for locals that aren't reassigned. These are enforced by
+  the linter — do not disable them.
+- Prefer named parameters for booleans (`avoid_positional_boolean_parameters`). A
+  positional `bool` at a call site tells the reader nothing.
+- File names are `snake_case.dart` (`file_names`). Imports follow the standard order:
+  `dart:` → `package:` → relative — one blank line between groups (`directives_ordering`).
 - Public API members require dartdoc (`///`). Private members (`_`-prefixed) use `//`
   block comments, not `///`. → [Private members use `//`](#private-members-use--not-)
 - Default to zero inline `//` comments in implementation. Prefer well-named locals and
@@ -636,6 +641,11 @@ often viewed in isolation; the surrounding context may not be there.
 
 ## Coding patterns
 
+The linter enforces most of the rules in this section — see
+[`analysis_options.yaml`](analysis_options.yaml) for the authoritative list. Rules
+highlighted below either extend a lint (adding rationale or a repo-specific pattern)
+or capture conventions the linter can't check.
+
 ### Use asserts liberally to detect contract violations
 
 `assert()` lets us verify invariants without paying a cost in release mode, because
@@ -643,6 +653,10 @@ Dart only evaluates asserts in debug mode.
 
 Use asserts for conditions that should be impossible unless there is a bug. Do not use
 asserts to validate user input or network data (those must throw at runtime).
+
+Every assert must include a message explaining the invariant
+(`prefer_asserts_with_message`). A bare `assert(x != null)` is a lint error; write
+`assert(x != null, 'x must be set before calling foo()')`.
 
 ```dart
 void updateMessage(Message message) {
@@ -687,6 +701,11 @@ final label = switch (state) {
 ```
 
 ### Prefer explicit types and avoid `dynamic`
+
+All public API members must have explicit type annotations — parameters, fields, and
+return types (`type_annotate_public_apis`, `always_declare_return_types`). This
+includes top-level declarations and static members. The linter will reject a public
+member without a declared type.
 
 Avoid `dynamic` in public APIs. If the type is unknown, prefer `Object?` and casting;
 `dynamic` disables all static checking.
@@ -1209,18 +1228,52 @@ Padding(padding: EdgeInsets.all(8));   // avoid — reads as int
 
 ### Theming
 
-`StreamChatThemeData` (accessed via `StreamChatTheme.of(context)`) is the central theme
-object. It contains per-component theme data (e.g. `MessageThemeData`,
-`ChannelHeaderThemeData`). Each component reads its theme from context.
+Themes are Flutter `ThemeExtension`s, generated via the `theme_extensions_builder`
+package. **Do not hand-roll `copyWith`, `merge`, `lerp`, `==`, or `hashCode`** —
+annotate with `@ThemeExtensions` and let the generator produce them. Hand-rolled
+implementations drift out of sync when fields are added.
 
-When adding a new component:
+`StreamChatThemeData` (accessed via `StreamChatTheme.of(context)`) is the root theme.
+It composes per-component theme data (e.g. `StreamMessageListViewThemeData`,
+`StreamChannelHeaderThemeData`). Each component reads its own theme from context.
 
-1. Define a `<Component>ThemeData` class with `copyWith`, `merge`, `lerp`, and
-   equality.
-2. Add a field of that type to `StreamChatThemeData`.
-3. Provide light and dark defaults.
-4. Read it from context via `StreamChatTheme.of(context).<component>Theme` in the
-   component's `build`.
+When adding a new component theme:
+
+1. Create a `<Component>ThemeData` class that:
+   - `extends ThemeExtension<<Component>ThemeData>` and uses
+     `with _$<Component>ThemeData` (the generated mixin).
+   - Is annotated with `@ThemeExtensions(constructor: 'raw', buildContextExtension: false)`.
+   - Declares `part '<snake_name>.g.theme.dart';` at the top of the file.
+   - Has **all fields nullable** — defaults do not live here.
+2. Create a `<Component>Theme` `InheritedTheme` widget that exposes the data via a
+   `static <Component>ThemeData of(BuildContext context)` lookup.
+3. Add the new theme data as a field on `StreamChatThemeData`.
+4. **Place defaults in the widget's implementation, not in the theme data class.**
+   This mirrors Flutter's own convention (`AppBar`, `TabBar`, etc.): the theme data
+   holds overrides with nullable fields; the widget's `build` resolves the effective
+   value with a null-coalescing chain, falling back to hardcoded defaults or upstream
+   Material/Cupertino theme values at the leaf.
+
+   ```dart
+   Widget build(BuildContext context) {
+     final theme = StreamMessageListViewTheme.of(context);
+     final backgroundColor = widget.backgroundColor
+         ?? theme.backgroundColor
+         ?? Theme.of(context).colorScheme.surface;
+     // ...
+   }
+   ```
+
+   Keeps `StreamChatThemeData`'s constructor lean, makes overrides composable, and
+   avoids stale defaults getting baked into the root theme when a widget's design
+   changes.
+5. Run `melos run generate:flutter` to produce the `.g.theme.dart` part.
+6. Read the theme from context via `StreamChatTheme.of(context).<component>Theme` in
+   the component's `build` (or via `<Component>Theme.of(context)` when the widget
+   lives inside its own theme scope).
+
+Look at `stream_chat_theme.dart` and `message_list_view_theme.dart` for the reference
+shape.
 
 Do not thread theme values through constructor parameters when they belong in the
 theme. If a caller wants to override, they can wrap the widget in a
@@ -1259,6 +1312,9 @@ output is stale, run `melos run generate:all`.
 
 Every new public widget in `stream_chat_flutter` should:
 
+- Accept `Key? key` in its constructor and forward it to `super(key: key)`
+  (`use_key_in_widget_constructors`). Use `super.key` shorthand where possible
+  (`use_super_parameters`).
 - Support accessibility on both Android (TalkBack) and iOS (VoiceOver). A `Tooltip` is
   usually sufficient as the accessible label — do not duplicate it with
   `Icon.semanticLabel` unless VoiceOver or TalkBack fails to read the tooltip.
