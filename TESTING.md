@@ -23,8 +23,8 @@ communicates nothing to the reader — the object is already visible from the fi
 being edited.
 
 ```dart
-// BAD — the reader already knows we're testing StreamMessageListController.
-test('StreamMessageListController', () { ... });
+// BAD — the reader already knows we're testing StreamChannelListController.
+test('StreamChannelListController', () { ... });
 
 // BAD — same problem.
 test('Channel.watch', () { ... });
@@ -34,13 +34,13 @@ Instead, name the test after the behavior or the expected outcome:
 
 ```dart
 // GOOD
-test('StreamMessageListController appends new messages to the end of the list', () { ... });
+test('StreamChannelListController appends new channels when pagination advances', () { ... });
 
 // GOOD
-test('Channel.watch throws when called on a disposed channel', () { ... });
+test('Channel.watch throws StateError when called after the channel is disposed', () { ... });
 
 // GOOD
-testWidgets('StreamMessageComposer disables the send button while a file is uploading', (tester) async { ... });
+testWidgets('StreamMessageComposer clears its text after the message is sent', (tester) async { ... });
 ```
 
 A reader scanning `flutter test`'s output should be able to tell what broke from the
@@ -53,11 +53,11 @@ is one thing broken, or many? Is one method broken, or an interaction between th
 
 ```dart
 // BAD — this test exercises three behaviors.
-test('Message state transitions', () {
-  expect(Message().state, isA<MessageInitial>());
-  final sending = Message().copyWith(state: MessageState.sending);
-  expect(sending.state, isA<MessageOutgoing>());
-  expect(() => sending.copyWith(state: null), throwsA(isA<AssertionError>()));
+test('Message.copyWith', () {
+  final base = Message(text: 'hi');
+  expect(base.copyWith(text: 'bye').text, equals('bye'));
+  expect(base.copyWith().text, equals('hi'));
+  expect(base.copyWith(text: 'bye').id, equals(base.id));
 });
 ```
 
@@ -65,20 +65,19 @@ Split into one behavior per test:
 
 ```dart
 // GOOD
-test('Message defaults to MessageInitial state', () {
-  expect(Message().state, isA<MessageInitial>());
+test('Message.copyWith overrides the text field with the argument', () {
+  final base = Message(text: 'hi');
+  expect(base.copyWith(text: 'bye').text, equals('bye'));
 });
 
-test('Message.copyWith(state: sending) produces a MessageOutgoing state', () {
-  final message = Message().copyWith(state: MessageState.sending);
-  expect(message.state, isA<MessageOutgoing>());
+test('Message.copyWith preserves the original text when text is omitted', () {
+  final base = Message(text: 'hi');
+  expect(base.copyWith().text, equals('hi'));
 });
 
-test('Message.copyWith throws when state is null', () {
-  expect(
-    () => Message().copyWith(state: null),
-    throwsA(isA<AssertionError>()),
-  );
+test('Message.copyWith preserves the id across copies', () {
+  final base = Message(text: 'hi');
+  expect(base.copyWith(text: 'bye').id, equals(base.id));
 });
 ```
 
@@ -146,7 +145,7 @@ test" from "the actions we take on it".
 
 ```dart
 // OK — but the widget-being-tested and the action-being-taken are entangled.
-testWidgets('Tapping a message opens the reaction picker', (tester) async {
+testWidgets('Long-pressing a message opens the reaction picker', (tester) async {
   await _pumpMessageWidget(
     tester,
     message: Message(id: 'm1', text: 'hi'),
@@ -156,7 +155,7 @@ testWidgets('Tapping a message opens the reaction picker', (tester) async {
   await tester.longPress(find.text('hi'));
   await tester.pumpAndSettle();
 
-  expect(find.byType(StreamReactionPicker), findsOneWidget);
+  expect(find.byType(StreamMessageReactionPicker), findsOneWidget);
 });
 ```
 
@@ -164,14 +163,14 @@ Extract the message and let the test name the two moving parts explicitly:
 
 ```dart
 // GOOD — the message is named and the action is a separate line.
-testWidgets('Tapping a message opens the reaction picker', (tester) async {
+testWidgets('Long-pressing a message opens the reaction picker', (tester) async {
   final message = Message(id: 'm1', text: 'hi');
 
   await _pumpMessageWidget(tester, message: message);
   await tester.longPress(find.text('hi'));
   await tester.pumpAndSettle();
 
-  expect(find.byType(StreamReactionPicker), findsOneWidget);
+  expect(find.byType(StreamMessageReactionPicker), findsOneWidget);
 });
 ```
 
