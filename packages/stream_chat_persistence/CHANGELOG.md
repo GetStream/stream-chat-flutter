@@ -17,6 +17,10 @@
 - `PinnedMessageDao.getMessagesByCid` with a forward cursor (`greaterThan`/`greaterThanOrEqual`) and a `limit` now returns the messages immediately AFTER the pivot, instead of the channel tail.
 - Bump database version.
 
+🔄 Internal / Non-breaking
+
+- Removed unused / test-only methods from internal DAO classes.
+
 ## 10.0.1
 
 ✅ Added
