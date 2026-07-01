@@ -3194,7 +3194,7 @@ class ChannelClientState {
         final message = event.message;
         if (message == null) return;
 
-        return updateMessage(message);
+        return _updateMessages([message], upsert: false);
       }),
     );
   }
@@ -3209,7 +3209,9 @@ class ChannelClientState {
           deletedForMe: event.deletedForMe,
         );
 
-        return deleteMessage(message, hardDelete: hardDelete);
+        if (hardDelete) return deleteMessage(message, hardDelete: true);
+        // Soft delete, update the message only if loaded (upsert: false)
+        return _updateMessages([message], upsert: false);
       }),
     );
   }
@@ -3930,11 +3932,12 @@ class ChannelClientState {
   void _updateMessages(
     Iterable<Message> messages, {
     Message Function(Message original, Message updated) update = _mergeUpdate,
+    bool upsert = true,
   }) {
     if (messages.isEmpty) return;
 
-    _updateThreadMessages(messages, update: update);
-    _updateChannelMessages(messages, update: update);
+    _updateThreadMessages(messages, update: update, upsert: upsert);
+    _updateChannelMessages(messages, update: update, upsert: upsert);
     _updatePinnedMessages(messages, update: update);
     _updateActiveLiveLocations(messages);
   }
@@ -3942,6 +3945,7 @@ class ChannelClientState {
   void _updateThreadMessages(
     Iterable<Message> messages, {
     Message Function(Message original, Message updated) update = _mergeUpdate,
+    bool upsert = true,
   }) {
     if (messages.isEmpty) return;
 
@@ -3963,6 +3967,7 @@ class ChannelClientState {
         existing: threadMessages,
         toMerge: value,
         update: update,
+        upsert: upsert,
       );
 
       // Update the thread with the modified message list.
@@ -3976,6 +3981,7 @@ class ChannelClientState {
   void _updateChannelMessages(
     Iterable<Message> messages, {
     Message Function(Message original, Message updated) update = _mergeUpdate,
+    bool upsert = true,
   }) {
     if (messages.isEmpty) return;
 
@@ -3996,6 +4002,7 @@ class ChannelClientState {
       existing: channelMessages,
       toMerge: affectedMessages,
       update: update,
+      upsert: upsert,
     );
 
     // Calculate the new last message at time.
@@ -4092,14 +4099,20 @@ class ChannelClientState {
     required Iterable<Message> existing,
     required Iterable<Message> toMerge,
     Message Function(Message original, Message updated) update = _mergeUpdate,
+    bool upsert = true,
   }) {
     if (toMerge.isEmpty) return existing;
 
     // [update] decides whether each pair is reconciled (default — see
     // `_mergeUpdate`) or replaced (`_replaceUpdate`, used by local rollback
     // paths that don't want enrichment fallback to keep optimistic values).
+    //
+    // [upsert] controls whether ids not already in [existing] are inserted.
+    // Event-driven paths (`message.updated`, `message.deleted` soft) pass
+    // `upsert: false` so an out-of-window message isn't dropped into a gap
+    // between the loaded slice and history the client hasn't paged in yet.
     final existingList = existing is List<Message> ? existing : existing.toList();
-    final toMergeList = toMerge is List<Message> ? toMerge : toMerge.toList();
+    var toMergeList = toMerge is List<Message> ? toMerge : toMerge.toList();
 
     // Single-message fast path. The hot ingest path (server echoes, edits,
     // reactions, read receipts) always lands here, and `lastIndexWhere` +
@@ -4108,6 +4121,10 @@ class ChannelClientState {
     if (toMergeList.length == 1) {
       final message = toMergeList.first;
       final oldIndex = existingList.lastIndexWhere((it) => it.id == message.id);
+
+      // upsert: false — skip update if message is not loaded
+      if (oldIndex == -1 && !upsert) return existingList;
+
       final resolved = oldIndex == -1 ? message : update(existingList[oldIndex], message);
 
       final mergedMessages = existingList.sortedUpsertAt(
@@ -4125,6 +4142,13 @@ class ChannelClientState {
         (it) => it.quotedMessageId == resolved.id,
         (it) => it.copyWith(quotedMessage: resolved),
       );
+    }
+
+    // upsert: false - skip messages not loaded in the window
+    if (!upsert) {
+      final existingIds = {for (final m in existingList) m.id};
+      toMergeList = toMergeList.where((m) => existingIds.contains(m.id)).toList();
+      if (toMergeList.isEmpty) return existingList;
     }
 
     // Batch path: receiver (`existingList`) is maintained sorted as a
