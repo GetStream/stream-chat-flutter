@@ -950,6 +950,10 @@ Consuming streams in widgets:
 
 ## Testing
 
+This section covers repo-level testing conventions (tools, self-containment, golden
+tests). For guidance on **how to write good tests** — naming, factoring, one behavior
+per test — see [`TESTING.md`](TESTING.md).
+
 ### Make each test entirely self-contained
 
 Embrace code duplication in tests. It makes it easier to create new tests by copying
