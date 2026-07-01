@@ -1143,8 +1143,22 @@ changes.
 
 ### Comment all test skips
 
-If a test needs to be skipped, use `skip: 'reason and https://link.to/issue'`. Never
-skip without a linked issue.
+Every skipped test must carry a reason as its `skip` argument. Bare `skip: true` is a
+lint-review red flag — the next person to look will not know whether the skip is
+temporary, permanent, or forgotten.
+
+```dart
+// GOOD:
+skip: 'Flakes on CI runners with <2 vCPUs; investigating.'
+skip: 'Blocked on Flutter #12345 — remove once that ships.'
+
+// BAD:
+skip: true
+```
+
+Include an issue link when the skip is tied to a tracked bug or unlanded feature;
+otherwise a plain reason is fine. If the skip becomes long-lived (weeks), file an
+issue so it's tracked.
 
 ### Comment empty closures to `setState`
 
