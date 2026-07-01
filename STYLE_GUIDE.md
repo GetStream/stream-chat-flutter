@@ -1142,10 +1142,21 @@ setState(() {
 
 ## Formatting
 
-`dart format` handles most whitespace formatting. Line length is **120 characters** for
-both code and comments, configured in `analysis_options.yaml`. Trailing commas are
-preserved rather than automatically added, so include a trailing comma anywhere you
-want the formatter to break the argument list onto multiple lines.
+Run the formatter via Melos, not directly:
+
+```bash
+melos run format        # dart format --set-exit-if-changed . in every package
+melos run lint:all      # analyze + format, run this before opening a PR
+```
+
+`melos run format` wraps `dart format --set-exit-if-changed .` so every package is
+checked with the same settings. Do not invoke `dart format` on a single file with ad-hoc
+flags — the workspace-level config (line length, trailing commas) applies uniformly.
+
+Line length is **120 characters** for both code and comments, configured in
+`analysis_options.yaml`. Trailing commas are preserved rather than automatically added,
+so include a trailing comma anywhere you want the formatter to break the argument list
+onto multiple lines.
 
 ### Constructors come first
 
