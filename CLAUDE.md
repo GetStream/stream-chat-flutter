@@ -2,6 +2,11 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+> **Before writing or reviewing code, read [`STYLE_GUIDE.md`](STYLE_GUIDE.md).** It is
+> the source of truth for coding conventions, documentation style, testing, changelog
+> policy, and repo-specific rules that diverge from the Flutter / Dart defaults. This
+> file is a repo overview; the style guide is the rulebook.
+
 ## Overview
 
 This is a Dart/Flutter monorepo for Stream Chat's official Flutter SDK, managed with [Melos](https://pub.dev/packages/melos). All packages live under `packages/`.
