@@ -1246,59 +1246,67 @@ Padding(padding: EdgeInsets.all(8));   // avoid — reads as int
 
 ### Theming
 
-Theme data classes are generated via the `theme_extensions_builder` package. **Do not
-hand-roll `copyWith`, `merge`, `lerp`, `==`, or `hashCode`** — annotate with `@themeGen`
-(or `@ThemeExtensions` for the root theme) and let the generator produce them.
-Hand-rolled implementations drift out of sync when fields are added.
+Themes are generated via `theme_extensions_builder`. **Never hand-roll `copyWith`,
+`merge`, `lerp`, `==`, or `hashCode`.** Annotate with `@themeGen` (or
+`@ThemeExtensions` for the root) and let the generator produce them.
 
-`StreamChatThemeData` (accessed via `StreamChatTheme.of(context)`) is the root theme.
-It composes per-component theme data (e.g. `StreamMessageListViewThemeData`,
-`StreamChannelHeaderThemeData`). Each component reads its own theme from context.
+`StreamChatThemeData` (accessed via `StreamChatTheme.of(context)`) is the root
+theme. It composes per-component theme data (`StreamMessageListViewThemeData`,
+`StreamChannelHeaderThemeData`, etc.). Each component reads its own theme from
+context.
 
-When adding a new component theme:
+Adding a new component theme:
 
-1. Create a `<Component>ThemeData` class that:
-   - Uses `with _$<Component>ThemeData` (the generated mixin) and is annotated with
-     `@immutable` + `@themeGen`. Component themes do **not** extend `ThemeExtension`.
-   - Declares `part '<snake_name>.g.theme.dart';` at the top of the file.
-   - Has **all fields nullable** — defaults do not live here.
+```dart
+// lib/src/theme/stream_widget_theme.dart
 
-   The root `StreamChatThemeData` is an exception: it `extends ThemeExtension` and uses
-   `@ThemeExtensions(constructor: 'raw', buildContextExtension: false)` so it can plug
-   into Material's `ThemeData.extensions`. New component themes should follow the
-   `@themeGen` pattern, not the root pattern.
-2. Create a `<Component>Theme` `InheritedTheme` widget that exposes the data via a
-   `static <Component>ThemeData of(BuildContext context)` lookup.
-3. Add the new theme data as a field on `StreamChatThemeData`.
-4. **Place defaults in the widget's implementation, not in the theme data class.**
-   This mirrors Flutter's own convention (`AppBar`, `TabBar`, etc.): the theme data
-   holds overrides with nullable fields; the widget's `build` resolves the effective
-   value with a null-coalescing chain, falling back to hardcoded defaults or upstream
-   Material/Cupertino theme values at the leaf.
+@immutable
+@themeGen
+class StreamWidgetThemeData with _$StreamWidgetThemeData {
+  const StreamWidgetThemeData({this.backgroundColor, this.borderRadius});
 
-   ```dart
-   Widget build(BuildContext context) {
-     final theme = StreamMessageListViewTheme.of(context);
-     final backgroundColor = widget.backgroundColor
-         ?? theme.backgroundColor
-         ?? Theme.of(context).colorScheme.surface;
-     // ...
-   }
-   ```
+  // All fields are nullable — defaults do not live here.
+  final Color? backgroundColor;
+  final double? borderRadius;
+}
 
-   Keeps `StreamChatThemeData`'s constructor lean, makes overrides composable, and
-   avoids stale defaults getting baked into the root theme when a widget's design
-   changes.
-5. Run `melos run generate:flutter` to produce the `.g.theme.dart` part.
-6. Read the theme from context via `StreamChatTheme.of(context).<component>Theme` in
-   the component's `build` (or via `<Component>Theme.of(context)` when the widget
-   lives inside its own theme scope).
+class StreamWidgetTheme extends InheritedTheme {
+  const StreamWidgetTheme({super.key, required this.data, required super.child});
+  final StreamWidgetThemeData data;
 
-Look at `stream_chat_theme.dart` and `message_list_view_theme.dart` for the reference
-shape.
+  static StreamWidgetThemeData of(BuildContext context) {
+    final local = context.dependOnInheritedWidgetOfExactType<StreamWidgetTheme>();
+    return local?.data ?? StreamChatTheme.of(context).widgetTheme;
+  }
+  // ... wrap + updateShouldNotify.
+}
+```
 
-Do not thread theme values through constructor parameters when they belong in the
-theme. If a caller wants to override, they can wrap the widget in a
+Then add `widgetTheme` as a field on `StreamChatThemeData`, run
+`melos run generate:flutter`, and consume it in the widget:
+
+```dart
+Widget build(BuildContext context) {
+  final theme = StreamWidgetTheme.of(context);
+  final backgroundColor = widget.backgroundColor
+      ?? theme.backgroundColor
+      ?? Theme.of(context).colorScheme.surface;
+  // ...
+}
+```
+
+**Place defaults in the widget's `build`, not in the theme data class.** This
+mirrors Flutter's `AppBar`/`TabBar` pattern: theme data holds overrides with
+nullable fields; the widget resolves the effective value via null-coalescing.
+
+Note: the root `StreamChatThemeData` is an exception — it extends
+`ThemeExtension` and uses
+`@ThemeExtensions(constructor: 'raw', buildContextExtension: false)` so it plugs
+into Material's `ThemeData.extensions`. New component themes follow the
+`@themeGen` pattern above, not the root pattern.
+
+Do not thread theme values through constructor parameters when they belong in
+the theme. If a caller wants to override, they can wrap the widget in a
 `StreamChatTheme(data: ..., child: ...)`.
 
 ### Configuration vs. theme
