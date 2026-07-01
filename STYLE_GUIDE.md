@@ -1242,10 +1242,10 @@ Padding(padding: EdgeInsets.all(8));   // avoid — reads as int
 
 ### Theming
 
-Themes are Flutter `ThemeExtension`s, generated via the `theme_extensions_builder`
-package. **Do not hand-roll `copyWith`, `merge`, `lerp`, `==`, or `hashCode`** —
-annotate with `@ThemeExtensions` and let the generator produce them. Hand-rolled
-implementations drift out of sync when fields are added.
+Theme data classes are generated via the `theme_extensions_builder` package. **Do not
+hand-roll `copyWith`, `merge`, `lerp`, `==`, or `hashCode`** — annotate with `@themeGen`
+(or `@ThemeExtensions` for the root theme) and let the generator produce them.
+Hand-rolled implementations drift out of sync when fields are added.
 
 `StreamChatThemeData` (accessed via `StreamChatTheme.of(context)`) is the root theme.
 It composes per-component theme data (e.g. `StreamMessageListViewThemeData`,
