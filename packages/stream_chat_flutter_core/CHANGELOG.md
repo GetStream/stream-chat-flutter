@@ -2,6 +2,12 @@
 
 🐛 Fixed
 
+- Fixed `StreamChannelListController` not handling `notification.channel_deleted` event.
+
+## 10.1.0
+
+🐛 Fixed
+
 - Fixed a use-after-dispose race condition in all `PagedValueNotifier` subclasses (`StreamChannelListController`, `StreamUserListController`, `StreamMemberListController`, `StreamThreadListController`, `StreamDraftListController`, `StreamMessageReminderListController`, `StreamPollVoteListController`, `StreamReactionListController`, `StreamMessageSearchListController`): in-flight async loads could write `value` after `dispose()` had been called, triggering a `notifyListeners()` assertion throw in debug mode. A new `DisposeAwareValueNotifier` mixin guards the `value` setter and also prevents event subscriptions from being set up post-dispose.
 
 ✅ Added
