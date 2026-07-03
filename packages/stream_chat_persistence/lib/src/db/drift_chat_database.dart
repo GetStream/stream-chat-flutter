@@ -58,7 +58,7 @@ class DriftChatDatabase extends _$DriftChatDatabase {
 
   // you should bump this number whenever you change or add a table definition.
   @override
-  int get schemaVersion => 1000 + 34;
+  int get schemaVersion => 1000 + 35;
 
   // Store DateTime as ISO-8601 text to preserve sub-second precision.
   @override
