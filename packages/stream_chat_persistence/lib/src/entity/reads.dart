@@ -4,6 +4,7 @@ import 'package:stream_chat_persistence/src/entity/channels.dart';
 
 /// Represents a [Reads] table in [DriftChatDatabase].
 @DataClassName('ReadEntity')
+@TableIndex(name: 'idx_reads_channel_cid', columns: {#channelCid})
 class Reads extends Table {
   /// Date of the read event
   DateTimeColumn get lastRead => dateTime()();
