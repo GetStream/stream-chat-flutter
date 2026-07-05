@@ -129,7 +129,7 @@ class _PollConfigOptionHeader extends StatelessWidget {
     final effectiveDescriptionStyle = configOptionStyle?.descriptionTextStyle ?? defaults.descriptionTextStyle;
     final effectiveSwitchStyle = configOptionStyle?.switchStyle ?? defaults.switchStyle;
 
-    return Row(
+    final child = Row(
       spacing: spacing.md,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -151,6 +151,8 @@ class _PollConfigOptionHeader extends StatelessWidget {
         ),
       ],
     );
+
+    return MergeSemantics(child: child);
   }
 }
 
