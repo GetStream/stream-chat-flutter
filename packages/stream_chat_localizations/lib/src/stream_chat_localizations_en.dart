@@ -882,10 +882,12 @@ class _AccessibilityTranslationsEn implements AccessibilityTranslations {
   String recordingDurationLabel({required Duration duration}) => 'Recording duration, ${formatDuration(duration)}';
 
   @override
-  String voiceRecordingPreviewPlayLabel({required Duration duration}) => 'Play voice recording, ${formatDuration(duration)}';
+  String voiceRecordingPreviewPlayLabel({required Duration duration}) =>
+      'Play voice recording, ${formatDuration(duration)}';
 
   @override
-  String voiceRecordingPreviewPauseLabel({required Duration duration}) => 'Pause voice recording, ${formatDuration(duration)}';
+  String voiceRecordingPreviewPauseLabel({required Duration duration}) =>
+      'Pause voice recording, ${formatDuration(duration)}';
 
   @override
   String get attachmentPickerTooltip => 'Open attachment picker';

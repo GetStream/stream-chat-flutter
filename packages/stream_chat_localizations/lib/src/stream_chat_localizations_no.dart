@@ -867,10 +867,12 @@ class _AccessibilityTranslationsNo implements AccessibilityTranslations {
   String recordingDurationLabel({required Duration duration}) => 'Opptaksvarighet, ${formatDuration(duration)}';
 
   @override
-  String voiceRecordingPreviewPlayLabel({required Duration duration}) => 'Spill av taleopptak, ${formatDuration(duration)}';
+  String voiceRecordingPreviewPlayLabel({required Duration duration}) =>
+      'Spill av taleopptak, ${formatDuration(duration)}';
 
   @override
-  String voiceRecordingPreviewPauseLabel({required Duration duration}) => 'Sett taleopptak på pause, ${formatDuration(duration)}';
+  String voiceRecordingPreviewPauseLabel({required Duration duration}) =>
+      'Sett taleopptak på pause, ${formatDuration(duration)}';
 
   @override
   String get attachmentPickerTooltip => 'Åpne vedleggsvelger';

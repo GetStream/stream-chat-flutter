@@ -888,7 +888,8 @@ class _AccessibilityTranslationsFr implements AccessibilityTranslations {
   String recordingDurationLabel({required Duration duration}) => "Durée d'enregistrement, ${formatDuration(duration)}";
 
   @override
-  String voiceRecordingPreviewPlayLabel({required Duration duration}) => "Lire l'enregistrement vocal, ${formatDuration(duration)}";
+  String voiceRecordingPreviewPlayLabel({required Duration duration}) =>
+      "Lire l'enregistrement vocal, ${formatDuration(duration)}";
 
   @override
   String voiceRecordingPreviewPauseLabel({required Duration duration}) =>

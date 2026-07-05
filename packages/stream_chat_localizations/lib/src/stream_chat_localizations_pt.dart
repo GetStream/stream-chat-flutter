@@ -885,10 +885,12 @@ class _AccessibilityTranslationsPt implements AccessibilityTranslations {
   String recordingDurationLabel({required Duration duration}) => 'Duração da gravação, ${formatDuration(duration)}';
 
   @override
-  String voiceRecordingPreviewPlayLabel({required Duration duration}) => 'Reproduzir gravação de voz, ${formatDuration(duration)}';
+  String voiceRecordingPreviewPlayLabel({required Duration duration}) =>
+      'Reproduzir gravação de voz, ${formatDuration(duration)}';
 
   @override
-  String voiceRecordingPreviewPauseLabel({required Duration duration}) => 'Pausar gravação de voz, ${formatDuration(duration)}';
+  String voiceRecordingPreviewPauseLabel({required Duration duration}) =>
+      'Pausar gravação de voz, ${formatDuration(duration)}';
 
   @override
   String get attachmentPickerTooltip => 'Abrir seletor de anexos';

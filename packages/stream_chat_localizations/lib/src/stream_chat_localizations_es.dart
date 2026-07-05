@@ -886,10 +886,12 @@ class _AccessibilityTranslationsEs implements AccessibilityTranslations {
   String recordingDurationLabel({required Duration duration}) => 'Duración de grabación, ${formatDuration(duration)}';
 
   @override
-  String voiceRecordingPreviewPlayLabel({required Duration duration}) => 'Reproducir grabación de voz, ${formatDuration(duration)}';
+  String voiceRecordingPreviewPlayLabel({required Duration duration}) =>
+      'Reproducir grabación de voz, ${formatDuration(duration)}';
 
   @override
-  String voiceRecordingPreviewPauseLabel({required Duration duration}) => 'Pausar grabación de voz, ${formatDuration(duration)}';
+  String voiceRecordingPreviewPauseLabel({required Duration duration}) =>
+      'Pausar grabación de voz, ${formatDuration(duration)}';
 
   @override
   String get attachmentPickerTooltip => 'Abrir selector de archivos adjuntos';

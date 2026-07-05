@@ -882,10 +882,12 @@ class _AccessibilityTranslationsDe implements AccessibilityTranslations {
   String recordingDurationLabel({required Duration duration}) => 'Aufnahmedauer, ${formatDuration(duration)}';
 
   @override
-  String voiceRecordingPreviewPlayLabel({required Duration duration}) => 'Sprachaufnahme abspielen, ${formatDuration(duration)}';
+  String voiceRecordingPreviewPlayLabel({required Duration duration}) =>
+      'Sprachaufnahme abspielen, ${formatDuration(duration)}';
 
   @override
-  String voiceRecordingPreviewPauseLabel({required Duration duration}) => 'Sprachaufnahme pausieren, ${formatDuration(duration)}';
+  String voiceRecordingPreviewPauseLabel({required Duration duration}) =>
+      'Sprachaufnahme pausieren, ${formatDuration(duration)}';
 
   @override
   String get attachmentPickerTooltip => 'Anhang-Auswahl öffnen';

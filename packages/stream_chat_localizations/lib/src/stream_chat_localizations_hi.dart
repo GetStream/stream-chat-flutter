@@ -883,10 +883,12 @@ class _AccessibilityTranslationsHi implements AccessibilityTranslations {
   String recordingDurationLabel({required Duration duration}) => 'रिकॉर्डिंग अवधि, ${formatDuration(duration)}';
 
   @override
-  String voiceRecordingPreviewPlayLabel({required Duration duration}) => 'वॉइस रिकॉर्डिंग चलाएँ, ${formatDuration(duration)}';
+  String voiceRecordingPreviewPlayLabel({required Duration duration}) =>
+      'वॉइस रिकॉर्डिंग चलाएँ, ${formatDuration(duration)}';
 
   @override
-  String voiceRecordingPreviewPauseLabel({required Duration duration}) => 'वॉइस रिकॉर्डिंग रोकें, ${formatDuration(duration)}';
+  String voiceRecordingPreviewPauseLabel({required Duration duration}) =>
+      'वॉइस रिकॉर्डिंग रोकें, ${formatDuration(duration)}';
 
   @override
   String get attachmentPickerTooltip => 'अटैचमेंट चयनकर्ता खोलें';
