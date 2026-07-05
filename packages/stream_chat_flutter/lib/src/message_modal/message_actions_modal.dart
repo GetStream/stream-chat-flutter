@@ -72,9 +72,11 @@ class StreamMessageActionsModal extends StatelessWidget {
 
     final insetPadding = EdgeInsetsDirectional.only(start: leadingInset);
 
+    final a11y = context.translations.accessibility;
     return StreamMessageDialog(
       spacing: spacing.xs,
       alignment: effectiveAlignment,
+      semanticLabel: a11y.messageActionsLabel,
       headerBuilder: switch (showReactionPicker) {
         true => (context) => Padding(
           padding: insetPadding,
