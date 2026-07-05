@@ -8,6 +8,9 @@ class StreamChatLocalizationsEn extends GlobalStreamChatLocalizations {
   const StreamChatLocalizationsEn({super.localeName = 'en'});
 
   @override
+  AccessibilityTranslations get accessibility => const _AccessibilityTranslationsEn();
+
+  @override
   String get launchUrlError => 'Cannot launch the url';
 
   @override
@@ -840,4 +843,210 @@ class StreamChatLocalizationsEn extends GlobalStreamChatLocalizations {
 
   @override
   String notifyRoleText(String role) => 'Notify all $role members';
+}
+
+class _AccessibilityTranslationsEn implements AccessibilityTranslations {
+  const _AccessibilityTranslationsEn();
+
+  @override
+  String get localeName => 'en';
+
+  @override
+  String get sendMessageTooltip => 'Send message';
+
+  @override
+  String get saveEditTooltip => 'Save edit';
+
+  @override
+  String get sendCommandTooltip => 'Send command';
+
+  @override
+  String slowModeTooltip({required int seconds}) {
+    if (seconds == 1) return 'Slow mode: 1 second';
+    return 'Slow mode: $seconds seconds';
+  }
+
+  @override
+  String get recordVoiceRecordingLabel => 'Record voice message';
+
+  @override
+  String get cancelRecordingTooltip => 'Cancel recording';
+
+  @override
+  String get stopRecordingTooltip => 'Stop recording';
+
+  @override
+  String get sendRecordingTooltip => 'Send recording';
+
+  @override
+  String recordingDurationLabel({required Duration duration}) => 'Recording duration, ${formatDuration(duration)}';
+
+  @override
+  String voiceRecordingPreviewPlayLabel({required Duration duration}) => 'Play voice recording, ${formatDuration(duration)}';
+
+  @override
+  String voiceRecordingPreviewPauseLabel({required Duration duration}) => 'Pause voice recording, ${formatDuration(duration)}';
+
+  @override
+  String get attachmentPickerTooltip => 'Open attachment picker';
+
+  @override
+  String get attachmentPickerOpenedAnnouncement => 'Attachment picker opened';
+
+  @override
+  String get attachmentPickerClosedAnnouncement => 'Attachment picker closed';
+
+  @override
+  String voiceRecordingAttachmentLabel({Duration? duration}) {
+    if (duration == null) return 'Voice message';
+    return 'Voice message, ${formatDuration(duration)}';
+  }
+
+  @override
+  String videoAttachmentLabel({String? title}) {
+    if (title == null || title.isEmpty) return 'Video';
+    return 'Video, $title';
+  }
+
+  @override
+  String get gifAttachmentLabel => 'GIF';
+
+  @override
+  String imageAttachmentLabel({String? title}) {
+    if (title == null || title.isEmpty) return 'Photo';
+    return 'Photo, $title';
+  }
+
+  @override
+  String get voiceRecordingPlayTooltip => 'Play';
+
+  @override
+  String get voiceRecordingPauseTooltip => 'Pause';
+
+  @override
+  String get voiceRecordingLoadingTooltip => 'Loading';
+
+  @override
+  String get channelInfoLabel => 'Channel info';
+
+  @override
+  String get messageActionsLabel => 'Message actions';
+
+  @override
+  String galleryImageLabel({DateTime? createdAt}) {
+    if (createdAt == null) return 'Photo';
+    return 'Photo, ${formatDateTime(createdAt)}';
+  }
+
+  @override
+  String galleryVideoLabel({
+    DateTime? createdAt,
+    Duration? duration,
+  }) {
+    final parts = <String>[
+      'Video',
+      if (duration != null) formatDuration(duration),
+      if (createdAt != null) formatDateTime(createdAt),
+    ];
+    return parts.join(', ');
+  }
+
+  @override
+  String get selectMediaTapHint => 'select';
+
+  @override
+  String get deselectMediaTapHint => 'deselect';
+
+  @override
+  String get savePollTooltip => 'Save poll';
+
+  @override
+  String removePollOptionTooltip({String? optionText}) {
+    final trimmed = optionText?.trim();
+    if (trimmed == null || trimmed.isEmpty) return 'Remove option';
+    return 'Remove option $trimmed';
+  }
+
+  @override
+  String get recordingStartedAnnouncement => 'Recording started. Slide left to cancel. Slide up to lock.';
+
+  @override
+  String get recordingLockedAnnouncement => 'Recording locked';
+
+  @override
+  String get recordingStoppedAnnouncement => 'Recording stopped';
+
+  @override
+  String get recordingCancelledAnnouncement => 'Recording cancelled';
+
+  @override
+  String get recordingCompletedAnnouncement => 'Recording complete';
+
+  @override
+  String get imageAttachmentAddedAnnouncement => 'Photo added';
+
+  @override
+  String get imageAttachmentRemovedAnnouncement => 'Photo removed';
+
+  @override
+  String get videoAttachmentAddedAnnouncement => 'Video added';
+
+  @override
+  String get videoAttachmentRemovedAnnouncement => 'Video removed';
+
+  @override
+  String get gifAttachmentAddedAnnouncement => 'GIF added';
+
+  @override
+  String get gifAttachmentRemovedAnnouncement => 'GIF removed';
+
+  @override
+  String get fileAttachmentAddedAnnouncement => 'File added';
+
+  @override
+  String get fileAttachmentRemovedAnnouncement => 'File removed';
+
+  @override
+  String get voiceRecordingAttachmentAddedAnnouncement => 'Voice message added';
+
+  @override
+  String get voiceRecordingAttachmentRemovedAnnouncement => 'Voice message removed';
+
+  @override
+  String get attachmentAddedAnnouncement => 'Attachment added';
+
+  @override
+  String get attachmentRemovedAnnouncement => 'Attachment removed';
+
+  @override
+  String attachmentsAddedAnnouncement({required int count}) {
+    if (count == 1) return '1 attachment added';
+    return '$count attachments added';
+  }
+
+  @override
+  String attachmentsRemovedAnnouncement({required int count}) {
+    if (count == 1) return '1 attachment removed';
+    return '$count attachments removed';
+  }
+
+  @override
+  String formatDateTime(DateTime dateTime) {
+    final jiffy = Jiffy.parseFromDateTime(dateTime);
+    return '${jiffy.EEEE}, ${jiffy.yMMMMd}, ${jiffy.jm}';
+  }
+
+  @override
+  String formatDuration(Duration duration) {
+    final hours = duration.inHours;
+    final minutes = duration.inMinutes.remainder(60);
+    final seconds = duration.inSeconds.remainder(60);
+    final parts = <String>[
+      if (hours > 0) Intl.plural(hours, one: '$hours hour', other: '$hours hours', locale: 'en'),
+      if (minutes > 0) Intl.plural(minutes, one: '$minutes minute', other: '$minutes minutes', locale: 'en'),
+      if (seconds > 0 || (hours == 0 && minutes == 0))
+        Intl.plural(seconds, one: '$seconds second', other: '$seconds seconds', locale: 'en'),
+    ];
+    return parts.join(', ');
+  }
 }

@@ -8,6 +8,9 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
   const StreamChatLocalizationsNo({super.localeName = 'no'});
 
   @override
+  AccessibilityTranslations get accessibility => const _AccessibilityTranslationsNo();
+
+  @override
   String get launchUrlError => 'Kan ikke laste inn url';
 
   @override
@@ -825,4 +828,210 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
 
   @override
   String notifyRoleText(String role) => 'Varsle alle $role-medlemmer';
+}
+
+class _AccessibilityTranslationsNo implements AccessibilityTranslations {
+  const _AccessibilityTranslationsNo();
+
+  @override
+  String get localeName => 'no';
+
+  @override
+  String get sendMessageTooltip => 'Send melding';
+
+  @override
+  String get saveEditTooltip => 'Lagre redigering';
+
+  @override
+  String get sendCommandTooltip => 'Send kommando';
+
+  @override
+  String slowModeTooltip({required int seconds}) {
+    if (seconds == 1) return 'Sakte modus: 1 sekund';
+    return 'Sakte modus: $seconds sekunder';
+  }
+
+  @override
+  String get recordVoiceRecordingLabel => 'Ta opp talemelding';
+
+  @override
+  String get cancelRecordingTooltip => 'Avbryt opptak';
+
+  @override
+  String get stopRecordingTooltip => 'Stopp opptak';
+
+  @override
+  String get sendRecordingTooltip => 'Send opptak';
+
+  @override
+  String recordingDurationLabel({required Duration duration}) => 'Opptaksvarighet, ${formatDuration(duration)}';
+
+  @override
+  String voiceRecordingPreviewPlayLabel({required Duration duration}) => 'Spill av taleopptak, ${formatDuration(duration)}';
+
+  @override
+  String voiceRecordingPreviewPauseLabel({required Duration duration}) => 'Sett taleopptak på pause, ${formatDuration(duration)}';
+
+  @override
+  String get attachmentPickerTooltip => 'Åpne vedleggsvelger';
+
+  @override
+  String get attachmentPickerOpenedAnnouncement => 'Vedleggsvelger åpnet';
+
+  @override
+  String get attachmentPickerClosedAnnouncement => 'Vedleggsvelger lukket';
+
+  @override
+  String voiceRecordingAttachmentLabel({Duration? duration}) {
+    if (duration == null) return 'Talemelding';
+    return 'Talemelding, ${formatDuration(duration)}';
+  }
+
+  @override
+  String videoAttachmentLabel({String? title}) {
+    if (title == null || title.isEmpty) return 'Video';
+    return 'Video, $title';
+  }
+
+  @override
+  String get gifAttachmentLabel => 'GIF';
+
+  @override
+  String imageAttachmentLabel({String? title}) {
+    if (title == null || title.isEmpty) return 'Foto';
+    return 'Foto, $title';
+  }
+
+  @override
+  String get voiceRecordingPlayTooltip => 'Spill av';
+
+  @override
+  String get voiceRecordingPauseTooltip => 'Pause';
+
+  @override
+  String get voiceRecordingLoadingTooltip => 'Laster';
+
+  @override
+  String get channelInfoLabel => 'Kanalinformasjon';
+
+  @override
+  String get messageActionsLabel => 'Meldingshandlinger';
+
+  @override
+  String galleryImageLabel({DateTime? createdAt}) {
+    if (createdAt == null) return 'Foto';
+    return 'Foto, ${formatDateTime(createdAt)}';
+  }
+
+  @override
+  String galleryVideoLabel({
+    DateTime? createdAt,
+    Duration? duration,
+  }) {
+    final parts = <String>[
+      'Video',
+      if (duration != null) formatDuration(duration),
+      if (createdAt != null) formatDateTime(createdAt),
+    ];
+    return parts.join(', ');
+  }
+
+  @override
+  String get selectMediaTapHint => 'velg';
+
+  @override
+  String get deselectMediaTapHint => 'fjern valg';
+
+  @override
+  String get savePollTooltip => 'Lagre avstemning';
+
+  @override
+  String removePollOptionTooltip({String? optionText}) {
+    final trimmed = optionText?.trim();
+    if (trimmed == null || trimmed.isEmpty) return 'Fjern alternativ';
+    return 'Fjern alternativ $trimmed';
+  }
+
+  @override
+  String get recordingStartedAnnouncement => 'Opptak startet. Sveip venstre for å avbryte. Sveip opp for å låse.';
+
+  @override
+  String get recordingLockedAnnouncement => 'Opptak låst';
+
+  @override
+  String get recordingStoppedAnnouncement => 'Opptak stoppet';
+
+  @override
+  String get recordingCancelledAnnouncement => 'Opptak avbrutt';
+
+  @override
+  String get recordingCompletedAnnouncement => 'Opptak fullført';
+
+  @override
+  String get imageAttachmentAddedAnnouncement => 'Foto lagt til';
+
+  @override
+  String get imageAttachmentRemovedAnnouncement => 'Foto fjernet';
+
+  @override
+  String get videoAttachmentAddedAnnouncement => 'Video lagt til';
+
+  @override
+  String get videoAttachmentRemovedAnnouncement => 'Video fjernet';
+
+  @override
+  String get gifAttachmentAddedAnnouncement => 'GIF lagt til';
+
+  @override
+  String get gifAttachmentRemovedAnnouncement => 'GIF fjernet';
+
+  @override
+  String get fileAttachmentAddedAnnouncement => 'Fil lagt til';
+
+  @override
+  String get fileAttachmentRemovedAnnouncement => 'Fil fjernet';
+
+  @override
+  String get voiceRecordingAttachmentAddedAnnouncement => 'Talemelding lagt til';
+
+  @override
+  String get voiceRecordingAttachmentRemovedAnnouncement => 'Talemelding fjernet';
+
+  @override
+  String get attachmentAddedAnnouncement => 'Vedlegg lagt til';
+
+  @override
+  String get attachmentRemovedAnnouncement => 'Vedlegg fjernet';
+
+  @override
+  String attachmentsAddedAnnouncement({required int count}) {
+    if (count == 1) return '1 vedlegg lagt til';
+    return '$count vedlegg lagt til';
+  }
+
+  @override
+  String attachmentsRemovedAnnouncement({required int count}) {
+    if (count == 1) return '1 vedlegg fjernet';
+    return '$count vedlegg fjernet';
+  }
+
+  @override
+  String formatDateTime(DateTime dateTime) {
+    final jiffy = Jiffy.parseFromDateTime(dateTime);
+    return '${jiffy.EEEE}, ${jiffy.yMMMMd}, ${jiffy.jm}';
+  }
+
+  @override
+  String formatDuration(Duration duration) {
+    final hours = duration.inHours;
+    final minutes = duration.inMinutes.remainder(60);
+    final seconds = duration.inSeconds.remainder(60);
+    final parts = <String>[
+      if (hours > 0) Intl.plural(hours, one: '$hours time', other: '$hours timer', locale: 'no'),
+      if (minutes > 0) Intl.plural(minutes, one: '$minutes minutt', other: '$minutes minutter', locale: 'no'),
+      if (seconds > 0 || (hours == 0 && minutes == 0))
+        Intl.plural(seconds, one: '$seconds sekund', other: '$seconds sekunder', locale: 'no'),
+    ];
+    return parts.join(', ');
+  }
 }

@@ -28,6 +28,9 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
   static const delegate = _NnStreamChatLocalizationsDelegate();
 
   @override
+  AccessibilityTranslations get accessibility => const DefaultAccessibilityTranslations();
+
+  @override
   String get launchUrlError => 'Custom error';
 
   @override

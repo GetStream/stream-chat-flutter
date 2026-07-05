@@ -8,6 +8,9 @@ class StreamChatLocalizationsFr extends GlobalStreamChatLocalizations {
   const StreamChatLocalizationsFr({super.localeName = 'fr'});
 
   @override
+  AccessibilityTranslations get accessibility => const _AccessibilityTranslationsFr();
+
+  @override
   String get launchUrlError => "Impossible de lancer l'url";
 
   @override
@@ -846,4 +849,212 @@ Limite de pièces jointes dépassée : il n'est pas possible d'ajouter plus de $
 
   @override
   String notifyRoleText(String role) => 'Notifier tous les membres $role';
+}
+
+class _AccessibilityTranslationsFr implements AccessibilityTranslations {
+  const _AccessibilityTranslationsFr();
+
+  @override
+  String get localeName => 'fr';
+
+  @override
+  String get sendMessageTooltip => 'Envoyer le message';
+
+  @override
+  String get saveEditTooltip => 'Enregistrer la modification';
+
+  @override
+  String get sendCommandTooltip => 'Envoyer la commande';
+
+  @override
+  String slowModeTooltip({required int seconds}) {
+    if (seconds == 1) return 'Mode lent : 1 seconde';
+    return 'Mode lent : $seconds secondes';
+  }
+
+  @override
+  String get recordVoiceRecordingLabel => 'Enregistrer un message vocal';
+
+  @override
+  String get cancelRecordingTooltip => "Annuler l'enregistrement";
+
+  @override
+  String get stopRecordingTooltip => "Arrêter l'enregistrement";
+
+  @override
+  String get sendRecordingTooltip => "Envoyer l'enregistrement";
+
+  @override
+  String recordingDurationLabel({required Duration duration}) => "Durée d'enregistrement, ${formatDuration(duration)}";
+
+  @override
+  String voiceRecordingPreviewPlayLabel({required Duration duration}) => "Lire l'enregistrement vocal, ${formatDuration(duration)}";
+
+  @override
+  String voiceRecordingPreviewPauseLabel({required Duration duration}) =>
+      "Mettre en pause l'enregistrement vocal, ${formatDuration(duration)}";
+
+  @override
+  String get attachmentPickerTooltip => 'Ouvrir le sélecteur de pièces jointes';
+
+  @override
+  String get attachmentPickerOpenedAnnouncement => 'Sélecteur de pièces jointes ouvert';
+
+  @override
+  String get attachmentPickerClosedAnnouncement => 'Sélecteur de pièces jointes fermé';
+
+  @override
+  String voiceRecordingAttachmentLabel({Duration? duration}) {
+    if (duration == null) return 'Message vocal';
+    return 'Message vocal, ${formatDuration(duration)}';
+  }
+
+  @override
+  String videoAttachmentLabel({String? title}) {
+    if (title == null || title.isEmpty) return 'Vidéo';
+    return 'Vidéo, $title';
+  }
+
+  @override
+  String get gifAttachmentLabel => 'GIF';
+
+  @override
+  String imageAttachmentLabel({String? title}) {
+    if (title == null || title.isEmpty) return 'Photo';
+    return 'Photo, $title';
+  }
+
+  @override
+  String get voiceRecordingPlayTooltip => 'Lire';
+
+  @override
+  String get voiceRecordingPauseTooltip => 'Pause';
+
+  @override
+  String get voiceRecordingLoadingTooltip => 'Chargement';
+
+  @override
+  String get channelInfoLabel => 'Informations sur le canal';
+
+  @override
+  String get messageActionsLabel => 'Actions du message';
+
+  @override
+  String galleryImageLabel({DateTime? createdAt}) {
+    if (createdAt == null) return 'Photo';
+    return 'Photo, ${formatDateTime(createdAt)}';
+  }
+
+  @override
+  String galleryVideoLabel({
+    DateTime? createdAt,
+    Duration? duration,
+  }) {
+    final parts = <String>[
+      'Vidéo',
+      if (duration != null) formatDuration(duration),
+      if (createdAt != null) formatDateTime(createdAt),
+    ];
+    return parts.join(', ');
+  }
+
+  @override
+  String get selectMediaTapHint => 'sélectionner';
+
+  @override
+  String get deselectMediaTapHint => 'désélectionner';
+
+  @override
+  String get savePollTooltip => 'Enregistrer le sondage';
+
+  @override
+  String removePollOptionTooltip({String? optionText}) {
+    final trimmed = optionText?.trim();
+    if (trimmed == null || trimmed.isEmpty) return "Supprimer l'option";
+    return "Supprimer l'option $trimmed";
+  }
+
+  @override
+  String get recordingStartedAnnouncement =>
+      'Enregistrement commencé. Glissez vers la gauche pour annuler. Glissez vers le haut pour verrouiller.';
+
+  @override
+  String get recordingLockedAnnouncement => 'Enregistrement verrouillé';
+
+  @override
+  String get recordingStoppedAnnouncement => 'Enregistrement arrêté';
+
+  @override
+  String get recordingCancelledAnnouncement => 'Enregistrement annulé';
+
+  @override
+  String get recordingCompletedAnnouncement => 'Enregistrement terminé';
+
+  @override
+  String get imageAttachmentAddedAnnouncement => 'Photo ajoutée';
+
+  @override
+  String get imageAttachmentRemovedAnnouncement => 'Photo supprimée';
+
+  @override
+  String get videoAttachmentAddedAnnouncement => 'Vidéo ajoutée';
+
+  @override
+  String get videoAttachmentRemovedAnnouncement => 'Vidéo supprimée';
+
+  @override
+  String get gifAttachmentAddedAnnouncement => 'GIF ajouté';
+
+  @override
+  String get gifAttachmentRemovedAnnouncement => 'GIF supprimé';
+
+  @override
+  String get fileAttachmentAddedAnnouncement => 'Fichier ajouté';
+
+  @override
+  String get fileAttachmentRemovedAnnouncement => 'Fichier supprimé';
+
+  @override
+  String get voiceRecordingAttachmentAddedAnnouncement => 'Message vocal ajouté';
+
+  @override
+  String get voiceRecordingAttachmentRemovedAnnouncement => 'Message vocal supprimé';
+
+  @override
+  String get attachmentAddedAnnouncement => 'Pièce jointe ajoutée';
+
+  @override
+  String get attachmentRemovedAnnouncement => 'Pièce jointe supprimée';
+
+  @override
+  String attachmentsAddedAnnouncement({required int count}) {
+    if (count == 1) return '1 pièce jointe ajoutée';
+    return '$count pièces jointes ajoutées';
+  }
+
+  @override
+  String attachmentsRemovedAnnouncement({required int count}) {
+    if (count == 1) return '1 pièce jointe supprimée';
+    return '$count pièces jointes supprimées';
+  }
+
+  @override
+  String formatDateTime(DateTime dateTime) {
+    final jiffy = Jiffy.parseFromDateTime(dateTime);
+    return '${jiffy.EEEE}, ${jiffy.yMMMMd}, ${jiffy.jm}';
+  }
+
+  @override
+  String formatDuration(Duration duration) {
+    final hours = duration.inHours;
+    final minutes = duration.inMinutes.remainder(60);
+    final seconds = duration.inSeconds.remainder(60);
+    final parts = <String>[
+      if (hours > 0) Intl.plural(hours, one: '$hours heure', other: '$hours heures', locale: 'fr'),
+      if (minutes > 0) Intl.plural(minutes, one: '$minutes minute', other: '$minutes minutes', locale: 'fr'),
+      if (seconds > 0 || (hours == 0 && minutes == 0))
+        Intl.plural(seconds, one: '$seconds seconde', other: '$seconds secondes', locale: 'fr'),
+    ];
+    return parts.join(', ');
+  }
 }

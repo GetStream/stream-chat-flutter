@@ -1,3 +1,9 @@
+## Upcoming
+
+✅ Added
+
+- Added `AccessibilityTranslations`, a nested `translations.accessibility` namespace holding screen-reader-only strings — tooltips, semantic labels, hints, and live-region announcements for the composer, attachment picker, voice recording, message actions, channel header, media gallery, and poll creator. Every supported locale (11 in total) has its own full native-language implementation — no reliance on English fallback. Screen readers speak durations as natural language ("1 minute 23 seconds") and timestamps as locale-aware spelled-out dates ("March 15, 2026, 10:30 AM"), instead of ambiguous clock strings. Public `formatDuration(Duration)` and `formatDateTime(DateTime?)` formatters on the namespace mirror Flutter's `MaterialLocalizations.formatFullDate`/`formatDecimal` pattern. Translations for `de/es/it/pt/ca/no/hi/ja/ko` are best-effort; native-speaker corrections welcome.
+
 ## 10.1.0
 
 ✅ Added

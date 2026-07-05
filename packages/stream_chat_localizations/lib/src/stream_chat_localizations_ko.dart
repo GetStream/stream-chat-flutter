@@ -6,6 +6,9 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
   const StreamChatLocalizationsKo({super.localeName = 'ko'});
 
   @override
+  AccessibilityTranslations get accessibility => const _AccessibilityTranslationsKo();
+
+  @override
   String get launchUrlError => 'URL을 시작할 수 없습니다';
 
   @override
@@ -825,4 +828,208 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
 
   @override
   String notifyRoleText(String role) => '모든 $role 멤버에게 알림';
+}
+
+class _AccessibilityTranslationsKo implements AccessibilityTranslations {
+  const _AccessibilityTranslationsKo();
+
+  @override
+  String get localeName => 'ko';
+
+  @override
+  String get sendMessageTooltip => '메시지 보내기';
+
+  @override
+  String get saveEditTooltip => '편집 저장';
+
+  @override
+  String get sendCommandTooltip => '명령어 보내기';
+
+  @override
+  String slowModeTooltip({required int seconds}) {
+    return '슬로모드: $seconds초';
+  }
+
+  @override
+  String get recordVoiceRecordingLabel => '음성 메시지 녹음';
+
+  @override
+  String get cancelRecordingTooltip => '녹음 취소';
+
+  @override
+  String get stopRecordingTooltip => '녹음 중지';
+
+  @override
+  String get sendRecordingTooltip => '녹음 전송';
+
+  @override
+  String recordingDurationLabel({required Duration duration}) => '녹음 길이, ${formatDuration(duration)}';
+
+  @override
+  String voiceRecordingPreviewPlayLabel({required Duration duration}) => '음성 녹음 재생, ${formatDuration(duration)}';
+
+  @override
+  String voiceRecordingPreviewPauseLabel({required Duration duration}) => '음성 녹음 일시정지, ${formatDuration(duration)}';
+
+  @override
+  String get attachmentPickerTooltip => '첨부 파일 선택 열기';
+
+  @override
+  String get attachmentPickerOpenedAnnouncement => '첨부 파일 선택이 열렸습니다';
+
+  @override
+  String get attachmentPickerClosedAnnouncement => '첨부 파일 선택이 닫혔습니다';
+
+  @override
+  String voiceRecordingAttachmentLabel({Duration? duration}) {
+    if (duration == null) return '음성 메시지';
+    return '음성 메시지, ${formatDuration(duration)}';
+  }
+
+  @override
+  String videoAttachmentLabel({String? title}) {
+    if (title == null || title.isEmpty) return '동영상';
+    return '동영상, $title';
+  }
+
+  @override
+  String get gifAttachmentLabel => 'GIF';
+
+  @override
+  String imageAttachmentLabel({String? title}) {
+    if (title == null || title.isEmpty) return '사진';
+    return '사진, $title';
+  }
+
+  @override
+  String get voiceRecordingPlayTooltip => '재생';
+
+  @override
+  String get voiceRecordingPauseTooltip => '일시정지';
+
+  @override
+  String get voiceRecordingLoadingTooltip => '불러오는 중';
+
+  @override
+  String get channelInfoLabel => '채널 정보';
+
+  @override
+  String get messageActionsLabel => '메시지 작업';
+
+  @override
+  String galleryImageLabel({DateTime? createdAt}) {
+    if (createdAt == null) return '사진';
+    return '사진, ${formatDateTime(createdAt)}';
+  }
+
+  @override
+  String galleryVideoLabel({
+    DateTime? createdAt,
+    Duration? duration,
+  }) {
+    final parts = <String>[
+      '동영상',
+      if (duration != null) formatDuration(duration),
+      if (createdAt != null) formatDateTime(createdAt),
+    ];
+    return parts.join(', ');
+  }
+
+  @override
+  String get selectMediaTapHint => '선택';
+
+  @override
+  String get deselectMediaTapHint => '선택 해제';
+
+  @override
+  String get savePollTooltip => '투표 저장';
+
+  @override
+  String removePollOptionTooltip({String? optionText}) {
+    final trimmed = optionText?.trim();
+    if (trimmed == null || trimmed.isEmpty) return '항목 삭제';
+    return '항목 $trimmed 삭제';
+  }
+
+  @override
+  String get recordingStartedAnnouncement => '녹음을 시작했습니다. 왼쪽으로 밀어 취소, 위로 밀어 잠그기.';
+
+  @override
+  String get recordingLockedAnnouncement => '녹음이 잠겼습니다';
+
+  @override
+  String get recordingStoppedAnnouncement => '녹음이 중지되었습니다';
+
+  @override
+  String get recordingCancelledAnnouncement => '녹음이 취소되었습니다';
+
+  @override
+  String get recordingCompletedAnnouncement => '녹음 완료';
+
+  @override
+  String get imageAttachmentAddedAnnouncement => '사진이 추가되었습니다';
+
+  @override
+  String get imageAttachmentRemovedAnnouncement => '사진이 삭제되었습니다';
+
+  @override
+  String get videoAttachmentAddedAnnouncement => '동영상이 추가되었습니다';
+
+  @override
+  String get videoAttachmentRemovedAnnouncement => '동영상이 삭제되었습니다';
+
+  @override
+  String get gifAttachmentAddedAnnouncement => 'GIF가 추가되었습니다';
+
+  @override
+  String get gifAttachmentRemovedAnnouncement => 'GIF가 삭제되었습니다';
+
+  @override
+  String get fileAttachmentAddedAnnouncement => '파일이 추가되었습니다';
+
+  @override
+  String get fileAttachmentRemovedAnnouncement => '파일이 삭제되었습니다';
+
+  @override
+  String get voiceRecordingAttachmentAddedAnnouncement => '음성 메시지가 추가되었습니다';
+
+  @override
+  String get voiceRecordingAttachmentRemovedAnnouncement => '음성 메시지가 삭제되었습니다';
+
+  @override
+  String get attachmentAddedAnnouncement => '첨부 파일이 추가되었습니다';
+
+  @override
+  String get attachmentRemovedAnnouncement => '첨부 파일이 삭제되었습니다';
+
+  @override
+  String attachmentsAddedAnnouncement({required int count}) {
+    return '첨부 파일 $count개가 추가되었습니다';
+  }
+
+  @override
+  String attachmentsRemovedAnnouncement({required int count}) {
+    return '첨부 파일 $count개가 삭제되었습니다';
+  }
+
+  @override
+  String formatDateTime(DateTime dateTime) {
+    final jiffy = Jiffy.parseFromDateTime(dateTime);
+    return '${jiffy.EEEE} ${jiffy.yMMMMd} ${jiffy.jm}';
+  }
+
+  @override
+  String formatDuration(Duration duration) {
+    final hours = duration.inHours;
+    final minutes = duration.inMinutes.remainder(60);
+    final seconds = duration.inSeconds.remainder(60);
+    // Korean time-units have no grammatical number; comma-space between
+    // parts gives the screen reader a pause between units.
+    final parts = <String>[
+      if (hours > 0) '$hours시간',
+      if (minutes > 0) '$minutes분',
+      if (seconds > 0 || (hours == 0 && minutes == 0)) '$seconds초',
+    ];
+    return parts.join(', ');
+  }
 }
