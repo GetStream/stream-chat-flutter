@@ -71,18 +71,20 @@ class DefaultStreamMessageComposerInputTrailing extends StatelessWidget {
         final isEnabled = (!isEditing && !hasCommand) || hasContent;
 
         final voiceRecordingCallback = props.voiceRecordingCallback;
-        if (buttonState == _ButtonState.send ||
-            buttonState == _ButtonState.edit ||
-            buttonState == _ButtonState.command ||
-            voiceRecordingCallback == null) {
+        if (buttonState == .send || buttonState == .edit || buttonState == .command || voiceRecordingCallback == null) {
+          final a11y = context.translations.accessibility;
           return StreamButton.icon(
             key: _sendKey,
-            icon: Icon(
-              buttonState == _ButtonState.edit || buttonState == _ButtonState.command
-                  ? context.streamIcons.checkmark
-                  : context.streamIcons.send,
-            ),
+            icon: switch (buttonState) {
+              .edit || .command => Icon(context.streamIcons.checkmark),
+              _ => Icon(context.streamIcons.send),
+            },
             size: StreamButtonSize.small,
+            tooltip: switch (buttonState) {
+              .edit => a11y.saveEditTooltip,
+              .command => a11y.sendCommandTooltip,
+              _ => a11y.sendMessageTooltip,
+            },
             onPressed: isEnabled ? props.onSendPressed : null,
           );
         }
@@ -111,8 +113,10 @@ class _SlowModeCountdownButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final a11y = context.translations.accessibility;
     return StreamButton.icon(
       icon: Text('$cooldownTimeOut'),
+      tooltip: a11y.slowModeTooltip(seconds: cooldownTimeOut),
       style: StreamButtonStyle.secondary,
       size: StreamButtonSize.small,
     );
@@ -130,7 +134,7 @@ class _VoiceRecordingButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    final microphoneButton = GestureDetector(
       key: _microphoneKey,
       onLongPress: voiceRecordingCallback.onLongPressStart,
       onLongPressCancel: voiceRecordingCallback.onLongPressCancel,
@@ -154,9 +158,21 @@ class _VoiceRecordingButton extends StatelessWidget {
           type: StreamButtonType.ghost,
           style: StreamButtonStyle.secondary,
           size: StreamButtonSize.small,
-          onPressed: () {},
+          onPressed: voiceRecordingCallback.onLongPressCancel,
         ),
       ),
+    );
+
+    final a11y = context.translations.accessibility;
+    return Semantics(
+      button: true,
+      container: true,
+      excludeSemantics: true,
+      label: a11y.recordVoiceRecordingLabel,
+      onLongPressHint: a11y.recordVoiceRecordingLabel,
+      onTap: voiceRecordingCallback.onLongPressCancel,
+      onLongPress: voiceRecordingCallback.onLongPressStart,
+      child: microphoneButton,
     );
   }
 }

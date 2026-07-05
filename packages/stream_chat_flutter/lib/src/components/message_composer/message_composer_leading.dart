@@ -1,4 +1,4 @@
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// A widget that shows the leading of the message composer.
@@ -40,6 +40,8 @@ class DefaultStreamMessageComposerLeading extends StatelessWidget {
         !props.isAudioRecordingFlowActive &&
         props.controller.message.command == null;
 
+    final localizations = MaterialLocalizations.of(context);
+
     return AnimatedOpacity(
       opacity: showButton ? 1.0 : 0.0,
       duration: showButton ? const Duration(milliseconds: 200) : Duration.zero,
@@ -50,17 +52,33 @@ class DefaultStreamMessageComposerLeading extends StatelessWidget {
         child: Row(
           children: [
             if (showButton) ...[
-              AnimatedRotation(
-                turns: props.isPickerOpen ? closedRotation : 0,
-                duration: const Duration(milliseconds: 150),
-                curve: Curves.easeOut,
-                child: StreamButton.icon(
-                  icon: Icon(context.streamIcons.plus),
-                  style: StreamButtonStyle.secondary,
-                  type: StreamButtonType.outline,
-                  size: StreamButtonSize.large,
-                  isFloating: props.isFloating,
-                  onPressed: props.isSlowModeActive ? null : props.onAttachmentButtonPressed,
+              MergeSemantics(
+                // Hint overrides is only supported on Android, so we use the
+                // hint for iOS and macOS and the onTapHint for Android.
+                child: Semantics(
+                  hint: switch ((Theme.of(context).platform, props.isPickerOpen)) {
+                    (.iOS || .macOS, true) => localizations.expansionTileExpandedHint,
+                    (.iOS || .macOS, false) => localizations.expansionTileCollapsedHint,
+                    _ => null,
+                  },
+                  onTapHint: switch (props.isPickerOpen) {
+                    true => localizations.expandedIconTapHint,
+                    false => localizations.collapsedIconTapHint,
+                  },
+                  child: StreamButton.icon(
+                    icon: AnimatedRotation(
+                      turns: props.isPickerOpen ? closedRotation : 0,
+                      duration: const Duration(milliseconds: 150),
+                      curve: Curves.easeOut,
+                      child: Icon(context.streamIcons.plus),
+                    ),
+                    style: StreamButtonStyle.secondary,
+                    type: StreamButtonType.outline,
+                    size: StreamButtonSize.large,
+                    isFloating: props.isFloating,
+                    tooltip: context.translations.accessibility.attachmentPickerTooltip,
+                    onPressed: props.isSlowModeActive ? null : props.onAttachmentButtonPressed,
+                  ),
                 ),
               ),
               SizedBox(width: context.streamSpacing.xs),
