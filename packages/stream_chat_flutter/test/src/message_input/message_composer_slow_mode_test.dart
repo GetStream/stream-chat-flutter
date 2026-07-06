@@ -32,6 +32,11 @@ void main() {
       when(() => channel.state).thenReturn(channelState);
       when(() => channel.client).thenReturn(client);
       when(channel.getRemainingCooldown).thenReturn(10);
+      when(
+        () => channel.getRemainingCooldown(lastMessageAt: any(named: 'lastMessageAt')),
+      ).thenReturn(10);
+      when(() => channel.currentUserLastMessageAt).thenReturn(lastMessageAt);
+      when(() => channel.currentUserLastMessageAtStream).thenAnswer((_) => Stream.value(lastMessageAt));
       when(() => channel.isMuted).thenReturn(false);
       when(() => channel.isMutedStream).thenAnswer((_) => Stream.value(false));
       when(() => channel.isPinned).thenReturn(false);

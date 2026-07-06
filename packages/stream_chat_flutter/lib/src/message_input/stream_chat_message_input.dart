@@ -150,7 +150,14 @@ class _StreamChatMessageInputState extends State<StreamChatMessageInput> {
     final messenger = StreamSnackbarMessenger.maybeOf(context);
 
     if (message == null || message.isEmpty) return messenger?.removeCurrent();
-    final controller = messenger?.show(StreamSnackbar(message: Text(message)), replace: true);
+
+    final controller = messenger?.show(
+      replace: true,
+      StreamSnackbar(
+        message: Text(message),
+        onVisible: () => StreamSemanticsAnnouncer.announce(context, message),
+      ),
+    );
     if (controller == null) return;
 
     // Notify the recorder controller when the snackbar is closed, so it can clear
@@ -265,15 +272,19 @@ class _StreamChatMessageInputContent extends StatelessWidget {
                     top: BorderSide(color: context.streamColorScheme.borderDefault),
                   ),
                 ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              StreamMessageComposerLeading(props: componentProps),
-              Expanded(
-                child: StreamMessageComposerInput(props: inputProps),
-              ),
-              StreamMessageComposerTrailing(props: componentProps),
-            ],
+          child: Semantics(
+            container: true,
+            explicitChildNodes: true,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                StreamMessageComposerLeading(props: componentProps),
+                Expanded(
+                  child: StreamMessageComposerInput(props: inputProps),
+                ),
+                StreamMessageComposerTrailing(props: componentProps),
+              ],
+            ),
           ),
         );
       },

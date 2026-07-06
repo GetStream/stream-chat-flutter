@@ -117,6 +117,29 @@ void main() {
       expect(error.data?.message, message);
     });
 
+    test('.fromDioException with non-JSON String data falls back to '
+        'statusMessage', () {
+      const statusCode = 504;
+      const statusMessage = 'Gateway Timeout';
+      const body = 'upstream request timeout';
+      final options = RequestOptions(path: 'test-path');
+      final dioError = DioException(
+        requestOptions: options,
+        response: Response(
+          requestOptions: options,
+          statusCode: statusCode,
+          statusMessage: statusMessage,
+          data: body,
+        ),
+      );
+      final error = StreamChatNetworkError.fromDioException(dioError);
+      expect(error, isNotNull);
+      expect(error.code, -1);
+      expect(error.message, statusMessage);
+      expect(error.statusCode, statusCode);
+      expect(error.data, isNull);
+    });
+
     test('.fromDioException with null data and existing response message', () {
       const statusCode = 666;
       const message = 'test-error-message';

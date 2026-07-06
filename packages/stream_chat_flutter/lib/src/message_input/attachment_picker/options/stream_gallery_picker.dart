@@ -93,7 +93,7 @@ class _StreamGalleryPickerState extends State<StreamGalleryPicker> {
           child: Builder(
             builder: (context) {
               if (!isPermissionGranted) {
-                return Center(
+                final child = Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -119,6 +119,8 @@ class _StreamGalleryPickerState extends State<StreamGalleryPicker> {
                     ],
                   ),
                 );
+
+                return MergeSemantics(child: child);
               }
 
               return MediaQuery.removePadding(
@@ -169,7 +171,7 @@ class _AddMoreTile extends StatelessWidget {
     final textTheme = context.streamTextTheme;
     final spacing = context.streamSpacing;
 
-    return Material(
+    final addMoreTile = Material(
       color: colorScheme.backgroundSurfaceCard,
       child: InkWell(
         onTap: onTap,
@@ -198,6 +200,14 @@ class _AddMoreTile extends StatelessWidget {
           ),
         ),
       ),
+    );
+
+    return Semantics(
+      button: true,
+      label: context.translations.addMoreFilesLabel,
+      excludeSemantics: true,
+      onTap: onTap,
+      child: addMoreTile,
     );
   }
 }

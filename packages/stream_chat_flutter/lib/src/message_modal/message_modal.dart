@@ -1,3 +1,5 @@
+import 'dart:ui' show SemanticsRole;
+
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
 
@@ -29,6 +31,7 @@ class StreamMessageDialog extends StatelessWidget {
     this.insetAnimationCurve = Curves.decelerate,
     this.insetPadding = const EdgeInsets.all(16),
     this.alignment = Alignment.center,
+    this.semanticLabel,
   });
 
   /// Vertical spacing between sections.
@@ -71,6 +74,18 @@ class StreamMessageDialog extends StatelessWidget {
   ///
   /// Defaults to [Alignment.center].
   final AlignmentGeometry alignment;
+
+  /// The semantic label of the dialog used by accessibility frameworks to
+  /// announce screen transitions when the dialog is opened and closed.
+  ///
+  /// If no label is provided, no scope-level name is emitted and the dialog
+  /// is announced by the role only.
+  ///
+  /// See also:
+  ///
+  ///  * [SemanticsConfiguration.namesRoute], for a description of how this
+  ///    value is used.
+  final String? semanticLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -120,6 +135,16 @@ class StreamMessageDialog extends StatelessWidget {
       );
     }
 
-    return dialog;
+    if (semanticLabel case final label?) {
+      dialog = Semantics(
+        scopesRoute: true,
+        explicitChildNodes: true,
+        namesRoute: true,
+        label: label,
+        child: dialog,
+      );
+    }
+
+    return Semantics(role: SemanticsRole.dialog, child: dialog);
   }
 }
