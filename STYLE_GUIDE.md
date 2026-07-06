@@ -110,22 +110,7 @@ document; the section link is provided.
   `Translations` interface. → [Localization](#localization)
 
 
-## A word on designing APIs
-
-Designing an API is an art. Like all forms of art, one learns by practicing. The best
-way to get good at designing APIs is to spend a decade or more designing them, while
-working closely with people who are using your APIs.
-
-In the absence of one's own experience, one can attempt to rely on the experience of
-others. When receiving feedback about API design from an experienced API designer, they
-will sometimes seem unhappy without being able to articulate why. When this happens,
-seriously consider that your API should be scrapped and a new solution found.
-
-This requires a different and equally important skill: not getting attached to your
-creations. Try many wildly different APIs, then write code that uses those APIs, to see
-how they work. Throw away APIs that feel frustrating, that lead to buggy code, or that
-other people don't like. If it isn't elegant, it's usually better to try again than to
-forge ahead.
+## Public API stability
 
 An SDK API is for years, not just for the one PR you are working on. A signature
 committed today is one we have to keep supporting until we ship a major version bump.
@@ -186,14 +171,15 @@ the fact that it is expensive should be visible in the type signature (returns
 
 ### Layers
 
-The SDK is layered — each package builds on top of the previous:
+The SDK is layered — higher packages build on lower ones. `stream_chat_persistence`
+is an optional sibling of the Flutter layers, not a required layer between them:
 
 ```text
-stream_chat                     # Pure Dart, no Flutter dependency
-  └── stream_chat_persistence   # Local disk cache using Drift (optional)
-      └── stream_chat_flutter_core   # Flutter business logic, no UI
-          └── stream_chat_flutter    # Full UI component library
-              └── stream_chat_localizations   # i18n for UI
+stream_chat                        # Pure Dart, no Flutter dependency
+├── stream_chat_persistence        # Optional Drift-backed disk cache
+└── stream_chat_flutter_core       # Flutter business logic, no UI
+    └── stream_chat_flutter        # Full UI component library
+        └── stream_chat_localizations   # i18n for UI
 ```
 
 Convenience APIs belong at the layer above the one they are simplifying. Do not push a
@@ -261,15 +247,18 @@ Predictable APIs that give the developer control are generally preferred over AP
 mostly do the right thing but don't give the developer any way to adjust the results.
 Predictability is reassuring.
 
-### Solve real problems by literally solving a real problem
+### Design against a concrete use case
 
-Where possible, partner with a real customer who wants the feature and is willing to
-help you test it. Only by actually using a feature in the real world can we be
-confident it is ready.
+Before adding a public API, be able to point to a specific integration that needs it —
+a real customer request, a documented sample-app requirement, a use case in the issue
+tracker. APIs designed against hypothetical needs tend to have the wrong shape for
+every real caller; APIs designed against one real caller are easier to generalize
+later, once a second caller shows up.
 
-If your first customer says the feature doesn't actually solve their use case, don't
-dismiss the concerns as esoteric. What seems like the problem when you start a project
-often turns out to be trivial compared to the real issues faced by real developers.
+If a customer report says a shipped feature doesn't solve their use case, don't
+dismiss the concern as esoteric. What seemed like the problem at the start of a
+project often turns out to be trivial compared to the real issues real integrators
+hit in production.
 
 ### Start designing APIs from the closest point to the developer
 
@@ -282,9 +271,9 @@ Instead, always design the top-level API first. Consider what the most ergonomic
 would be at the level that most developers interact with. Then, once that API is
 cleanly designed, build the lower levels so the higher level can be layered atop.
 
-Concretely: design the `StreamChatFlutter` widget or `Channel` method first, then the
-`stream_chat_flutter_core` controller, then the `stream_chat` API, then the network
-protocol.
+Concretely: design the `StreamChat`-level widget or `Channel` method a developer
+would call first, then the `stream_chat_flutter_core` controller, then the
+`stream_chat` API, then the network protocol.
 
 ### Only log actionable messages to the console
 
@@ -321,16 +310,6 @@ code will bitrot too fast to be useful and will confuse people maintaining the c
 If a feature is being deprecated, follow the deprecation policy: annotate with
 `@Deprecated('use X instead')`, add a `CHANGELOG.md` entry, and keep the deprecated
 API for at least one minor release before removal.
-
-### Copyright and licensing
-
-New source files should carry the standard header used elsewhere in the repo. Third-
-party code must live in a `third_party/` subdirectory of the package with a `LICENSE`
-file that describes the license and a `README` describing its provenance. The
-third-party license must also be duplicated into the package's `LICENSE` file where
-applicable.
-
-We strongly recommend avoiding third-party code unless strictly necessary.
 
 
 ## Repository structure
@@ -974,6 +953,15 @@ entire test suite.
 Instead of a single `channel_test.dart` covering everything, split into
 `channel_watch_test.dart`, `channel_send_test.dart`, `channel_state_test.dart`, etc.
 
+### Use `group` sparingly, only for tight clusters
+
+`group(...)` is fine — and used widely across the repo — for a small cluster of
+tests that share a precondition, e.g. "when the message is outside the loaded window",
+"when the user is anonymous". Keep the group's description short and describe the
+precondition, not the method under test. Prefer splitting the file over piling up
+nested groups; if a group is doing the job a separate file should be doing, split
+the file instead.
+
 ### Mock only at the seam
 
 Prefer mocking at the boundary between your code and the outside world (HTTP client,
@@ -995,15 +983,22 @@ files live alongside the test in a `goldens/` subdirectory. Locally, tests run a
 platform goldens; CI runs against CI goldens (detected via `CI` / `GITHUB_ACTIONS`
 environment variables).
 
-To regenerate goldens:
+**Regenerate committed goldens via the `update_goldens` GitHub Action**, not locally.
+The action runs on the same host CI uses, so the committed `goldens/ci/` PNGs match
+what CI compares against. Locally-generated goldens carry host-specific font hinting
+and antialiasing that will fail CI on other machines.
+
+For local iteration only, you can run:
 
 ```bash
 melos run update:goldens
 ```
 
-Regenerate goldens deliberately, in a separate commit from behavior changes, so
-reviewers can see what visually changed. Do not check in a golden mismatch just because
-a test "works locally".
+…but do not commit those files. Once you're confident the visual change is what you
+want, dispatch the `update_goldens` workflow from the PR branch — it regenerates
+the goldens on Linux (and macOS for `docs_*`) and auto-commits the updated PNGs
+back to the branch as a `chore: Update Goldens` commit. Pull the branch after the
+workflow finishes.
 
 
 ## Naming
@@ -1362,9 +1357,13 @@ UI strings live in `stream_chat_localizations`. Adding a new string means:
    `packages/stream_chat_localizations/lib/src/translations.dart`.
 2. Implement the getter for every supported locale in the corresponding
    `translations_*.dart` file.
-3. Reference it via `StreamChatLocalizations.of(context)?.newString ?? 'fallback'` in
+3. Add an assertion for the new getter to
+   `packages/stream_chat_localizations/test/translations_test.dart` — that test
+   iterates over `kStreamChatSupportedLanguages` and asserts each field is
+   non-null, so it's what catches a locale that forgot to implement the getter.
+4. Reference it via `StreamChatLocalizations.of(context)?.newString ?? 'fallback'` in
    the widget.
-4. If the fallback isn't the same as the English translation, document why.
+5. If the fallback isn't the same as the English translation, document why.
 
 Do not hardcode English strings in widgets — even when the string is a `Tooltip` label,
 route it through `StreamChatLocalizations`.
@@ -1397,14 +1396,15 @@ under the `Upcoming` heading. Entries look like this:
 
 - Added `StreamChatClient.searchRoles` for searching channel roles.
 
-🐛 Fixed
+🐞 Fixed
 
 - Fixed a crash when opening a channel with a pinned message that had been deleted.
 ```
 
 The canonical section labels used across packages are `✅ Added`, `🔄 Changed`,
-`⚠️ Deprecated`, `🐛 Fixed`, `🔄 Internal / Non-breaking`, and `🔒 Security`. Use them
-verbatim — do not invent new headings.
+`⚠️ Deprecated`, `🐞 Fixed`, `🔄 Internal / Non-breaking`, and `🔒 Security`. Use them
+verbatim — do not invent new headings. (`stream_chat_flutter_core` currently uses
+`🐛 Fixed`; treat that as a legacy inconsistency and prefer `🐞 Fixed` in new entries.)
 
 Prefer **one short bullet** per entry, describing the functional change. Longer entries
 are acceptable for user-visible multi-facet features where the extra context matters to

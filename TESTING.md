@@ -182,6 +182,25 @@ When writing a test, imagine the developer who will read it six months from now.
 Anything you can do to help that reader understand what and why the test is checking
 is worth doing.
 
+## `group` is for shared preconditions, not for organizing a file
+
+Reach for `group(...)` when several tests share a precondition that's worth stating
+once: "when the message is outside the loaded window", "when the current user is
+anonymous", "when the connection is offline". The group description names the
+precondition; the test descriptions inside name the behaviors that follow from it.
+
+```dart
+group('when the message is outside the loaded window', () {
+  test('does not insert an unknown message into the state', () async { ... });
+  test('updates a known message in place', () async { ... });
+});
+```
+
+Do not use `group` to organize a file by method or class — that's what the file
+itself is for. If a `group` is doing the work a separate file should be doing,
+[split the file instead](STYLE_GUIDE.md#prefer-more-test-files-avoid-long-test-files).
+Nested groups more than one level deep are almost always a signal to split.
+
 ## See also
 
 - [STYLE_GUIDE.md — Testing](STYLE_GUIDE.md#testing) — repo-level testing conventions

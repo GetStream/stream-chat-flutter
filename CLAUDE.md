@@ -57,14 +57,15 @@ melos run version:update    # Regenerate version.dart from pubspec.yaml (runs au
 
 ## Package Architecture
 
-The SDK is layered — each package builds on top of the previous:
+The SDK is layered. `stream_chat_persistence` is an optional sibling of the Flutter
+layers, not a required layer between them:
 
 ```
-stream_chat                    # Pure Dart, no Flutter dependency
-  └── stream_chat_persistence  # Local disk cache using Drift (optional)
-      └── stream_chat_flutter_core  # Flutter business logic, no UI
-          └── stream_chat_flutter  # Full UI component library
-              └── stream_chat_localizations  # i18n for UI components
+stream_chat                        # Pure Dart, no Flutter dependency
+├── stream_chat_persistence        # Optional Drift-backed disk cache
+└── stream_chat_flutter_core       # Flutter business logic, no UI
+    └── stream_chat_flutter        # Full UI component library
+        └── stream_chat_localizations  # i18n for UI components
 ```
 
 ### `stream_chat`
