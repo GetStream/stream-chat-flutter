@@ -60,7 +60,7 @@ melos run version:update    # Regenerate version.dart from pubspec.yaml (runs au
 The SDK is layered. `stream_chat_persistence` is an optional sibling of the Flutter
 layers, not a required layer between them:
 
-```
+```text
 stream_chat                        # Pure Dart, no Flutter dependency
 ├── stream_chat_persistence        # Optional Drift-backed disk cache
 └── stream_chat_flutter_core       # Flutter business logic, no UI
