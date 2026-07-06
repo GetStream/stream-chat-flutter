@@ -402,6 +402,10 @@ void main() {
       expect(a11y.voiceRecordingPreviewPauseLabel(duration: const Duration(seconds: 83)), isNotNull);
       // Composer: attachment picker
       expect(a11y.attachmentPickerTooltip, isNotNull);
+      expect(a11y.attachmentPickerOpenHint, isNotNull);
+      expect(a11y.attachmentPickerCloseHint, isNotNull);
+      expect(a11y.attachmentPickerOpenTapHint, isNotNull);
+      expect(a11y.attachmentPickerCloseTapHint, isNotNull);
       expect(a11y.attachmentPickerOpenedAnnouncement, isNotNull);
       expect(a11y.attachmentPickerClosedAnnouncement, isNotNull);
       // Attachment display — both null-duration and known-duration branches
@@ -425,6 +429,13 @@ void main() {
       expect(a11y.galleryImageLabel(createdAt: DateTime(2026, 3, 15, 10, 30)), isNotNull);
       expect(a11y.galleryVideoLabel(), isNotNull);
       expect(a11y.galleryVideoLabel(createdAt: DateTime(2026, 3, 15, 10, 30)), isNotNull);
+      expect(
+        a11y.galleryVideoLabel(
+          createdAt: DateTime(2026, 3, 15, 10, 30),
+          duration: const Duration(minutes: 1, seconds: 23),
+        ),
+        isNotNull,
+      );
       expect(a11y.selectMediaTapHint, isNotNull);
       expect(a11y.deselectMediaTapHint, isNotNull);
       // Poll creator — both null-option and known-option branches
