@@ -16,7 +16,7 @@ part 'app_settings.g.dart';
 ///    client.
 /// {@endtemplate}
 @JsonSerializable(createToJson: false)
-class AppSettings with Equatable {
+class AppSettings extends Equatable {
   /// {@macro appSettings}
   const AppSettings({
     this.name = '',
@@ -73,7 +73,7 @@ class AppSettings with Equatable {
 ///    list.
 /// {@endtemplate}
 @JsonSerializable(createToJson: false)
-class UploadConfig with Equatable {
+class UploadConfig extends Equatable {
   /// {@macro uploadConfig}
   const UploadConfig({
     this.sizeLimit = defaultSizeLimit,
