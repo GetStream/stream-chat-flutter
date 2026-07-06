@@ -1,3 +1,10 @@
+## Upcoming
+
+🚀 Performance
+
+- Add indices on the `channel_cid` column on the `Messages`, `Members`, and `Reads` tables to improve read times on large databases.
+- Add indices on the `message_id` column on the `Reactions` table to improve read times on large databases.
+
 ## 10.1.0
 
 ✅ Added

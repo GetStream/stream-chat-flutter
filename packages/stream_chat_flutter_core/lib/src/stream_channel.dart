@@ -201,6 +201,10 @@ class StreamChannel extends StatefulWidget {
 
 // ignore: public_member_api_docs
 class StreamChannelState extends State<StreamChannel> {
+  // Anything before this is treated as the server's "never read" sentinel
+  // (Go's zero `time.Time{}` → `DateTime.utc(1, 1, 1)`).
+  static final _minValidLastRead = DateTime.utc(1970, 1, 1);
+
   /// Current channel
   Channel get channel => widget.channel;
 
@@ -878,8 +882,12 @@ class StreamChannelState extends State<StreamChannel> {
         }
       }
 
-      // Otherwise, load the channel at the last read date.
-      return loadChannelAtTimestamp(currentUserRead.lastRead);
+      // Skip the "never read" sentinel: the server ignores it as
+      // `created_at_around` and returns the tail, which would mis-infer
+      // `_topPaginationEnded = true`. Fall through to load-latest below.
+      if (currentUserRead.lastRead.isAfter(_minValidLastRead)) {
+        return loadChannelAtTimestamp(currentUserRead.lastRead);
+      }
     }
 
     // If nothing above applies, we just load the channel at the latest
