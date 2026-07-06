@@ -5,7 +5,7 @@ import 'package:stream_chat/stream_chat.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 ///
-class StreamChatError with EquatableMixin implements Exception {
+class StreamChatError with Equatable implements Exception {
   ///
   const StreamChatError(this.message);
 
