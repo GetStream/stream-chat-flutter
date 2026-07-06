@@ -116,15 +116,11 @@ GlobalStreamChatLocalizations? getStreamChatTranslation(Locale locale) {
 abstract class GlobalStreamChatLocalizations implements StreamChatLocalizations {
   /// Initializes an object that defines the StreamChat widget's localized
   /// strings for the given `localeName`.
-  const GlobalStreamChatLocalizations({
-    required String localeName,
-  }) : _localeName = localeName;
-
-  final String _localeName;
+  const GlobalStreamChatLocalizations({required this.localeName});
 
   /// The BCP-47 locale name this translation instance targets
   /// (e.g. `'en'`, `'de'`, `'fr'`).
-  String get localeName => _localeName;
+  final String localeName;
 
   /// A [LocalizationsDelegate] for [StreamChatLocalizations].
   ///
