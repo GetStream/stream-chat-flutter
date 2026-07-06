@@ -869,6 +869,18 @@ class _AccessibilityTranslationsJa extends AccessibilityTranslations {
   String get attachmentPickerTooltip => '添付ファイル選択を開く';
 
   @override
+  String get attachmentPickerOpenHint => 'ダブルタップして添付ファイル選択を開く';
+
+  @override
+  String get attachmentPickerCloseHint => 'ダブルタップして添付ファイル選択を閉じる';
+
+  @override
+  String get attachmentPickerOpenTapHint => '添付ファイル選択を開く';
+
+  @override
+  String get attachmentPickerCloseTapHint => '添付ファイル選択を閉じる';
+
+  @override
   String get attachmentPickerOpenedAnnouncement => '添付ファイル選択を開きました';
 
   @override

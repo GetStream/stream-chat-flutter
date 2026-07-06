@@ -875,6 +875,18 @@ class _AccessibilityTranslationsNo extends AccessibilityTranslations {
   String get attachmentPickerTooltip => 'Åpne vedleggsvelger';
 
   @override
+  String get attachmentPickerOpenHint => 'dobbeltrykk for å åpne vedleggsvelger';
+
+  @override
+  String get attachmentPickerCloseHint => 'dobbeltrykk for å lukke vedleggsvelger';
+
+  @override
+  String get attachmentPickerOpenTapHint => 'åpne vedleggsvelger';
+
+  @override
+  String get attachmentPickerCloseTapHint => 'lukk vedleggsvelger';
+
+  @override
   String get attachmentPickerOpenedAnnouncement => 'Vedleggsvelger åpnet';
 
   @override

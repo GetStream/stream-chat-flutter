@@ -891,6 +891,18 @@ class _AccessibilityTranslationsHi extends AccessibilityTranslations {
   String get attachmentPickerTooltip => 'अटैचमेंट चयनकर्ता खोलें';
 
   @override
+  String get attachmentPickerOpenHint => 'अटैचमेंट चयनकर्ता खोलने के लिए दो बार टैप करें';
+
+  @override
+  String get attachmentPickerCloseHint => 'अटैचमेंट चयनकर्ता बंद करने के लिए दो बार टैप करें';
+
+  @override
+  String get attachmentPickerOpenTapHint => 'अटैचमेंट चयनकर्ता खोलें';
+
+  @override
+  String get attachmentPickerCloseTapHint => 'अटैचमेंट चयनकर्ता बंद करें';
+
+  @override
   String get attachmentPickerOpenedAnnouncement => 'अटैचमेंट चयनकर्ता खुला';
 
   @override

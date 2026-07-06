@@ -81,6 +81,22 @@ abstract class AccessibilityTranslations {
   /// [StreamMessageComposer].
   String get attachmentPickerTooltip;
 
+  /// The verbose hint read by VoiceOver on the attachment-picker toggle
+  /// when the picker is closed (i.e. tapping will open it).
+  String get attachmentPickerOpenHint;
+
+  /// The verbose hint read by VoiceOver on the attachment-picker toggle
+  /// when the picker is open (i.e. tapping will close it).
+  String get attachmentPickerCloseHint;
+
+  /// The `onTapHint` read by TalkBack on the attachment-picker toggle
+  /// when the picker is closed. TalkBack prepends "double-tap to ".
+  String get attachmentPickerOpenTapHint;
+
+  /// The `onTapHint` read by TalkBack on the attachment-picker toggle
+  /// when the picker is open. TalkBack prepends "double-tap to ".
+  String get attachmentPickerCloseTapHint;
+
   /// The live-region announcement fired when the attachment picker opens.
   String get attachmentPickerOpenedAnnouncement;
 
@@ -295,6 +311,18 @@ class DefaultAccessibilityTranslations extends AccessibilityTranslations {
 
   @override
   String get attachmentPickerTooltip => 'Open attachment picker';
+
+  @override
+  String get attachmentPickerOpenHint => 'double tap to open attachment picker';
+
+  @override
+  String get attachmentPickerCloseHint => 'double tap to close attachment picker';
+
+  @override
+  String get attachmentPickerOpenTapHint => 'open attachment picker';
+
+  @override
+  String get attachmentPickerCloseTapHint => 'close attachment picker';
 
   @override
   String get attachmentPickerOpenedAnnouncement => 'Attachment picker opened';

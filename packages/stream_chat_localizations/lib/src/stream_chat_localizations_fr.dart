@@ -896,6 +896,18 @@ class _AccessibilityTranslationsFr extends AccessibilityTranslations {
   String get attachmentPickerTooltip => 'Ouvrir le sélecteur de pièces jointes';
 
   @override
+  String get attachmentPickerOpenHint => 'toucher deux fois pour ouvrir le sélecteur de pièces jointes';
+
+  @override
+  String get attachmentPickerCloseHint => 'toucher deux fois pour fermer le sélecteur de pièces jointes';
+
+  @override
+  String get attachmentPickerOpenTapHint => 'ouvrir le sélecteur de pièces jointes';
+
+  @override
+  String get attachmentPickerCloseTapHint => 'fermer le sélecteur de pièces jointes';
+
+  @override
   String get attachmentPickerOpenedAnnouncement => 'Sélecteur de pièces jointes ouvert';
 
   @override

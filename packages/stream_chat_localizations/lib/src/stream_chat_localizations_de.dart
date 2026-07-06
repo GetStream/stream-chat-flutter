@@ -890,6 +890,18 @@ class _AccessibilityTranslationsDe extends AccessibilityTranslations {
   String get attachmentPickerTooltip => 'Anhang-Auswahl öffnen';
 
   @override
+  String get attachmentPickerOpenHint => 'zum Öffnen der Anhang-Auswahl doppeltippen';
+
+  @override
+  String get attachmentPickerCloseHint => 'zum Schließen der Anhang-Auswahl doppeltippen';
+
+  @override
+  String get attachmentPickerOpenTapHint => 'Anhang-Auswahl öffnen';
+
+  @override
+  String get attachmentPickerCloseTapHint => 'Anhang-Auswahl schließen';
+
+  @override
   String get attachmentPickerOpenedAnnouncement => 'Anhang-Auswahl geöffnet';
 
   @override

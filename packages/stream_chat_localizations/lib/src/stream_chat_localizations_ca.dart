@@ -892,6 +892,18 @@ class _AccessibilityTranslationsCa extends AccessibilityTranslations {
   String get attachmentPickerTooltip => 'Obre el selector de fitxers adjunts';
 
   @override
+  String get attachmentPickerOpenHint => 'toca dos vegades per obrir el selector de fitxers adjunts';
+
+  @override
+  String get attachmentPickerCloseHint => 'toca dos vegades per tancar el selector de fitxers adjunts';
+
+  @override
+  String get attachmentPickerOpenTapHint => 'obrir el selector de fitxers adjunts';
+
+  @override
+  String get attachmentPickerCloseTapHint => 'tancar el selector de fitxers adjunts';
+
+  @override
   String get attachmentPickerOpenedAnnouncement => 'Selector de fitxers adjunts obert';
 
   @override

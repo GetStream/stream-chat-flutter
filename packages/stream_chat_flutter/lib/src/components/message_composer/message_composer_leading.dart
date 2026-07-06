@@ -40,7 +40,7 @@ class DefaultStreamMessageComposerLeading extends StatelessWidget {
         !props.isAudioRecordingFlowActive &&
         props.controller.message.command == null;
 
-    final localizations = MaterialLocalizations.of(context);
+    final a11y = context.translations.accessibility;
 
     return AnimatedOpacity(
       opacity: showButton ? 1.0 : 0.0,
@@ -57,13 +57,13 @@ class DefaultStreamMessageComposerLeading extends StatelessWidget {
                 // hint for iOS and macOS and the onTapHint for Android.
                 child: Semantics(
                   hint: switch ((Theme.of(context).platform, props.isPickerOpen)) {
-                    (.iOS || .macOS, true) => localizations.expansionTileExpandedHint,
-                    (.iOS || .macOS, false) => localizations.expansionTileCollapsedHint,
+                    (.iOS || .macOS, true) => a11y.attachmentPickerCloseHint,
+                    (.iOS || .macOS, false) => a11y.attachmentPickerOpenHint,
                     _ => null,
                   },
                   onTapHint: switch (props.isPickerOpen) {
-                    true => localizations.expandedIconTapHint,
-                    false => localizations.collapsedIconTapHint,
+                    true => a11y.attachmentPickerCloseTapHint,
+                    false => a11y.attachmentPickerOpenTapHint,
                   },
                   child: StreamButton.icon(
                     icon: AnimatedRotation(
@@ -76,7 +76,7 @@ class DefaultStreamMessageComposerLeading extends StatelessWidget {
                     type: StreamButtonType.outline,
                     size: StreamButtonSize.large,
                     isFloating: props.isFloating,
-                    tooltip: context.translations.accessibility.attachmentPickerTooltip,
+                    tooltip: a11y.attachmentPickerTooltip,
                     onPressed: props.isSlowModeActive ? null : props.onAttachmentButtonPressed,
                   ),
                 ),

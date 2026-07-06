@@ -872,6 +872,18 @@ class _AccessibilityTranslationsKo extends AccessibilityTranslations {
   String get attachmentPickerTooltip => '첨부 파일 선택 열기';
 
   @override
+  String get attachmentPickerOpenHint => '두 번 탭하여 첨부 파일 선택 열기';
+
+  @override
+  String get attachmentPickerCloseHint => '두 번 탭하여 첨부 파일 선택 닫기';
+
+  @override
+  String get attachmentPickerOpenTapHint => '첨부 파일 선택 열기';
+
+  @override
+  String get attachmentPickerCloseTapHint => '첨부 파일 선택 닫기';
+
+  @override
   String get attachmentPickerOpenedAnnouncement => '첨부 파일 선택이 열렸습니다';
 
   @override

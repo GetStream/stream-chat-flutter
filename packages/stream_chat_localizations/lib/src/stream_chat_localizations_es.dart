@@ -894,6 +894,18 @@ class _AccessibilityTranslationsEs extends AccessibilityTranslations {
   String get attachmentPickerTooltip => 'Abrir selector de archivos adjuntos';
 
   @override
+  String get attachmentPickerOpenHint => 'toca dos veces para abrir el selector de archivos adjuntos';
+
+  @override
+  String get attachmentPickerCloseHint => 'toca dos veces para cerrar el selector de archivos adjuntos';
+
+  @override
+  String get attachmentPickerOpenTapHint => 'abrir selector de archivos adjuntos';
+
+  @override
+  String get attachmentPickerCloseTapHint => 'cerrar selector de archivos adjuntos';
+
+  @override
   String get attachmentPickerOpenedAnnouncement => 'Selector de archivos adjuntos abierto';
 
   @override

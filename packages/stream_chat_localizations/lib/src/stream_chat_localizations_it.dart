@@ -904,6 +904,18 @@ class _AccessibilityTranslationsIt extends AccessibilityTranslations {
   String get attachmentPickerTooltip => 'Apri selettore allegati';
 
   @override
+  String get attachmentPickerOpenHint => 'tocca due volte per aprire il selettore allegati';
+
+  @override
+  String get attachmentPickerCloseHint => 'tocca due volte per chiudere il selettore allegati';
+
+  @override
+  String get attachmentPickerOpenTapHint => 'apri selettore allegati';
+
+  @override
+  String get attachmentPickerCloseTapHint => 'chiudi selettore allegati';
+
+  @override
   String get attachmentPickerOpenedAnnouncement => 'Selettore allegati aperto';
 
   @override
