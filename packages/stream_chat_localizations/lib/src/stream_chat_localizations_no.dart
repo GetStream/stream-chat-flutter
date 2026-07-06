@@ -1038,10 +1038,10 @@ class _AccessibilityTranslationsNo extends AccessibilityTranslations {
     final minutes = duration.inMinutes.remainder(60);
     final seconds = duration.inSeconds.remainder(60);
     final parts = <String>[
-      if (hours > 0) Intl.plural(hours, one: '$hours time', other: '$hours timer', locale: 'no'),
-      if (minutes > 0) Intl.plural(minutes, one: '$minutes minutt', other: '$minutes minutter', locale: 'no'),
+      if (hours > 0) Intl.plural(hours, one: '$hours time', other: '$hours timer', locale: localeName),
+      if (minutes > 0) Intl.plural(minutes, one: '$minutes minutt', other: '$minutes minutter', locale: localeName),
       if (seconds > 0 || (hours == 0 && minutes == 0))
-        Intl.plural(seconds, one: '$seconds sekund', other: '$seconds sekunder', locale: 'no'),
+        Intl.plural(seconds, one: '$seconds sekund', other: '$seconds sekunder', locale: localeName),
     ];
     return parts.join(', ');
   }

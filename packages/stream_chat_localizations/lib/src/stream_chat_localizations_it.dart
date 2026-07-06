@@ -1068,10 +1068,10 @@ class _AccessibilityTranslationsIt extends AccessibilityTranslations {
     final minutes = duration.inMinutes.remainder(60);
     final seconds = duration.inSeconds.remainder(60);
     final parts = <String>[
-      if (hours > 0) Intl.plural(hours, one: '$hours ora', other: '$hours ore', locale: 'it'),
-      if (minutes > 0) Intl.plural(minutes, one: '$minutes minuto', other: '$minutes minuti', locale: 'it'),
+      if (hours > 0) Intl.plural(hours, one: '$hours ora', other: '$hours ore', locale: localeName),
+      if (minutes > 0) Intl.plural(minutes, one: '$minutes minuto', other: '$minutes minuti', locale: localeName),
       if (seconds > 0 || (hours == 0 && minutes == 0))
-        Intl.plural(seconds, one: '$seconds secondo', other: '$seconds secondi', locale: 'it'),
+        Intl.plural(seconds, one: '$seconds secondo', other: '$seconds secondi', locale: localeName),
     ];
     return parts.join(', ');
   }

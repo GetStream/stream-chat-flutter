@@ -1060,10 +1060,10 @@ class _AccessibilityTranslationsFr extends AccessibilityTranslations {
     final minutes = duration.inMinutes.remainder(60);
     final seconds = duration.inSeconds.remainder(60);
     final parts = <String>[
-      if (hours > 0) Intl.plural(hours, one: '$hours heure', other: '$hours heures', locale: 'fr'),
-      if (minutes > 0) Intl.plural(minutes, one: '$minutes minute', other: '$minutes minutes', locale: 'fr'),
+      if (hours > 0) Intl.plural(hours, one: '$hours heure', other: '$hours heures', locale: localeName),
+      if (minutes > 0) Intl.plural(minutes, one: '$minutes minute', other: '$minutes minutes', locale: localeName),
       if (seconds > 0 || (hours == 0 && minutes == 0))
-        Intl.plural(seconds, one: '$seconds seconde', other: '$seconds secondes', locale: 'fr'),
+        Intl.plural(seconds, one: '$seconds seconde', other: '$seconds secondes', locale: localeName),
     ];
     return parts.join(', ');
   }
