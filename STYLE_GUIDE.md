@@ -1214,8 +1214,24 @@ If no order is obvious, use:
 8. Read-only properties (other than `hashCode`).
 9. Operators (other than `==`).
 10. Methods (other than `toString` and `build`).
-11. The `build` method.
+11. The `build` method (together with its `_build*` helpers — see below).
 12. `operator ==`, `hashCode`, `toString`, and diagnostics methods.
+
+### Group methods by feature, not by visibility
+
+The list above is a fallback ordering. Within slots 10–11 (`Methods` and `build`),
+group by concept, not by public/private:
+
+- A private helper called by one public method should live directly under that
+  method, not in a separate "private helpers" block at the bottom of the class.
+- Related methods (e.g. all the event handlers for one feature, or the "update"
+  and "remove" siblings for one collection) sit as a run.
+- `_build*` helpers used by `build` cluster around it. `build` heads the block,
+  its helpers follow. Don't separate them with unrelated methods.
+
+This matches the existing repo (`Channel`, `StreamMessageComposer`,
+`StreamMessageListView`) and keeps a private helper visually close to the code
+that uses it.
 
 ### Use braces for long function bodies
 
