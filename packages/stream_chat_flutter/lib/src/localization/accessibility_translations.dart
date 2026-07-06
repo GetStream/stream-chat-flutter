@@ -21,10 +21,15 @@ import 'package:stream_chat_flutter/src/localization/translations.dart';
 ///  * [Translations.accessibility], the getter that surfaces this on
 ///    [Translations].
 abstract class AccessibilityTranslations {
+  /// Creates the base [AccessibilityTranslations] with the given `localeName`.
+  ///
+  /// Subclasses forward the locale via `super.localeName` in their constructor.
+  const AccessibilityTranslations({required this.localeName});
+
   /// The BCP-47 locale name this translation instance targets (e.g. `'en'`,
   /// `'de'`, `'fr'`). Used to bind [Intl.withLocale] / [DateFormat] to the
   /// correct locale when formatting dates and durations for screen readers.
-  String get localeName;
+  final String localeName;
 
   /// The tooltip for the send button in a [StreamMessageComposer].
   String get sendMessageTooltip;
@@ -242,12 +247,9 @@ abstract class AccessibilityTranslations {
 ///  * [AccessibilityTranslations], the interface this implements.
 ///  * [Translations.accessibility], which returns an instance of this
 ///    class when no [StreamChatLocalizations] delegate is registered.
-class DefaultAccessibilityTranslations implements AccessibilityTranslations {
+class DefaultAccessibilityTranslations extends AccessibilityTranslations {
   /// Creates a default English [AccessibilityTranslations] impl.
-  const DefaultAccessibilityTranslations();
-
-  @override
-  String get localeName => 'en';
+  const DefaultAccessibilityTranslations({super.localeName = 'en'});
 
   @override
   String get sendMessageTooltip => 'Send message';

@@ -8,7 +8,7 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
   const StreamChatLocalizationsCa({super.localeName = 'ca'});
 
   @override
-  AccessibilityTranslations get accessibility => const _AccessibilityTranslationsCa();
+  AccessibilityTranslations get accessibility => _AccessibilityTranslationsCa(localeName: localeName);
 
   @override
   String get launchUrlError => "No s'ha pogut obrir l'enllaç";
@@ -847,11 +847,8 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
   String notifyRoleText(String role) => 'Notifica tots els membres $role';
 }
 
-class _AccessibilityTranslationsCa implements AccessibilityTranslations {
-  const _AccessibilityTranslationsCa();
-
-  @override
-  String get localeName => 'ca';
+class _AccessibilityTranslationsCa extends AccessibilityTranslations {
+  const _AccessibilityTranslationsCa({super.localeName = 'ca'});
 
   @override
   String get sendMessageTooltip => 'Envia el missatge';

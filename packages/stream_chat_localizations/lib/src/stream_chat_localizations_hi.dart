@@ -8,7 +8,7 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
   const StreamChatLocalizationsHi({super.localeName = 'hi'});
 
   @override
-  AccessibilityTranslations get accessibility => const _AccessibilityTranslationsHi();
+  AccessibilityTranslations get accessibility => _AccessibilityTranslationsHi(localeName: localeName);
 
   @override
   String get launchUrlError => 'यूआरएल लॉन्च नहीं कर सकते';
@@ -847,11 +847,8 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
   String notifyRoleText(String role) => 'सभी $role सदस्यों को सूचित करें';
 }
 
-class _AccessibilityTranslationsHi implements AccessibilityTranslations {
-  const _AccessibilityTranslationsHi();
-
-  @override
-  String get localeName => 'hi';
+class _AccessibilityTranslationsHi extends AccessibilityTranslations {
+  const _AccessibilityTranslationsHi({super.localeName = 'hi'});
 
   @override
   String get sendMessageTooltip => 'संदेश भेजें';

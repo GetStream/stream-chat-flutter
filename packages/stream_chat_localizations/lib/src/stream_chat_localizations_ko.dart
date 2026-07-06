@@ -6,7 +6,7 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
   const StreamChatLocalizationsKo({super.localeName = 'ko'});
 
   @override
-  AccessibilityTranslations get accessibility => const _AccessibilityTranslationsKo();
+  AccessibilityTranslations get accessibility => _AccessibilityTranslationsKo(localeName: localeName);
 
   @override
   String get launchUrlError => 'URL을 시작할 수 없습니다';
@@ -830,11 +830,8 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
   String notifyRoleText(String role) => '모든 $role 멤버에게 알림';
 }
 
-class _AccessibilityTranslationsKo implements AccessibilityTranslations {
-  const _AccessibilityTranslationsKo();
-
-  @override
-  String get localeName => 'ko';
+class _AccessibilityTranslationsKo extends AccessibilityTranslations {
+  const _AccessibilityTranslationsKo({super.localeName = 'ko'});
 
   @override
   String get sendMessageTooltip => '메시지 보내기';

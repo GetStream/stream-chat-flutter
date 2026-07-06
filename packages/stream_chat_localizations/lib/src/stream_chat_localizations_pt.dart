@@ -8,7 +8,7 @@ class StreamChatLocalizationsPt extends GlobalStreamChatLocalizations {
   const StreamChatLocalizationsPt({super.localeName = 'pt'});
 
   @override
-  AccessibilityTranslations get accessibility => const _AccessibilityTranslationsPt();
+  AccessibilityTranslations get accessibility => _AccessibilityTranslationsPt(localeName: localeName);
 
   @override
   String get launchUrlError => 'O URL não pôde ser aberto';
@@ -848,11 +848,8 @@ Não é possível adicionar mais de $limit arquivos de uma vez
   String notifyRoleText(String role) => 'Notificar todos os membros $role';
 }
 
-class _AccessibilityTranslationsPt implements AccessibilityTranslations {
-  const _AccessibilityTranslationsPt();
-
-  @override
-  String get localeName => 'pt';
+class _AccessibilityTranslationsPt extends AccessibilityTranslations {
+  const _AccessibilityTranslationsPt({super.localeName = 'pt'});
 
   @override
   String get sendMessageTooltip => 'Enviar mensagem';

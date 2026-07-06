@@ -6,7 +6,7 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   const StreamChatLocalizationsJa({super.localeName = 'ja'});
 
   @override
-  AccessibilityTranslations get accessibility => const _AccessibilityTranslationsJa();
+  AccessibilityTranslations get accessibility => _AccessibilityTranslationsJa(localeName: localeName);
 
   @override
   String get launchUrlError => 'URLの起動ができません';
@@ -827,11 +827,8 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   String notifyRoleText(String role) => '$role 全員に通知';
 }
 
-class _AccessibilityTranslationsJa implements AccessibilityTranslations {
-  const _AccessibilityTranslationsJa();
-
-  @override
-  String get localeName => 'ja';
+class _AccessibilityTranslationsJa extends AccessibilityTranslations {
+  const _AccessibilityTranslationsJa({super.localeName = 'ja'});
 
   @override
   String get sendMessageTooltip => 'メッセージを送信';

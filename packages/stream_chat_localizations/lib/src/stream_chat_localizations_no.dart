@@ -8,7 +8,7 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
   const StreamChatLocalizationsNo({super.localeName = 'no'});
 
   @override
-  AccessibilityTranslations get accessibility => const _AccessibilityTranslationsNo();
+  AccessibilityTranslations get accessibility => _AccessibilityTranslationsNo(localeName: localeName);
 
   @override
   String get launchUrlError => 'Kan ikke laste inn url';
@@ -830,11 +830,8 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
   String notifyRoleText(String role) => 'Varsle alle $role-medlemmer';
 }
 
-class _AccessibilityTranslationsNo implements AccessibilityTranslations {
-  const _AccessibilityTranslationsNo();
-
-  @override
-  String get localeName => 'no';
+class _AccessibilityTranslationsNo extends AccessibilityTranslations {
+  const _AccessibilityTranslationsNo({super.localeName = 'no'});
 
   @override
   String get sendMessageTooltip => 'Send melding';
