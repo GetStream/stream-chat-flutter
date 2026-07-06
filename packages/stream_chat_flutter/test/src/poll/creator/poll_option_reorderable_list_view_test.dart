@@ -2,6 +2,7 @@
 
 import 'package:alchemist/alchemist.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_chat_flutter/src/poll/creator/poll_option_reorderable_list_view.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -484,6 +485,91 @@ void main() {
         final newOption = optionsChanged.firstWhere((e) => e.id != option2.id);
         expect(newOption.id, isNot(option1.id));
         expect(newOption.text, isEmpty);
+      },
+    );
+  });
+
+  group('Semantics / reorder', () {
+    const moveToStart = CustomSemanticsAction(label: 'Move to the start');
+    const moveToEnd = CustomSemanticsAction(label: 'Move to the end');
+    const moveUp = CustomSemanticsAction(label: 'Move up');
+    const moveDown = CustomSemanticsAction(label: 'Move down');
+
+    // Returns the customSemanticsActions on the closest Semantics ancestor of
+    // the item keyed by [id] (matches the wrapper Flutter inserts via
+    // ReorderableListView._wrapWithSemantics).
+    Map<CustomSemanticsAction, VoidCallback> actionsForOptionId(WidgetTester tester, String id) {
+      final semantics = tester
+          .widgetList<Semantics>(
+            find.ancestor(of: find.byKey(Key(id)), matching: find.byType(Semantics)),
+          )
+          .firstWhere((s) => s.properties.customSemanticsActions != null);
+      return semantics.properties.customSemanticsActions!;
+    }
+
+    testWidgets(
+      'action set per position matches the move-by-1 contract',
+      (tester) async {
+        final handle = tester.ensureSemantics();
+
+        final options = [
+          PollOptionItem(text: 'Apple'),
+          PollOptionItem(text: 'Banana'),
+          PollOptionItem(text: 'Cherry'),
+        ];
+
+        await tester.pumpWidget(
+          _wrapWithMaterialApp(
+            PollOptionReorderableListView(initialOptions: options),
+          ),
+        );
+
+        // First option: can move down or to the end; cannot move up / to start.
+        final firstActions = actionsForOptionId(tester, options.first.id);
+        expect(firstActions.keys, unorderedEquals([moveDown, moveToEnd]));
+
+        // Middle option: full set of 4 actions.
+        final middleActions = actionsForOptionId(tester, options[1].id);
+        expect(middleActions.keys, unorderedEquals([moveToStart, moveUp, moveDown, moveToEnd]));
+
+        // Last option: can move up or to the start; cannot move down / to end.
+        final lastActions = actionsForOptionId(tester, options.last.id);
+        expect(lastActions.keys, unorderedEquals([moveToStart, moveUp]));
+
+        handle.dispose();
+      },
+    );
+
+    testWidgets(
+      'invoking moveToEnd on the first option moves it to the end',
+      (tester) async {
+        final handle = tester.ensureSemantics();
+
+        final options = [
+          PollOptionItem(text: 'Apple'),
+          PollOptionItem(text: 'Banana'),
+          PollOptionItem(text: 'Cherry'),
+        ];
+        var current = options;
+
+        await tester.pumpWidget(
+          _wrapWithMaterialApp(
+            PollOptionReorderableListView(
+              initialOptions: options,
+              onOptionsChanged: (next) => current = next,
+            ),
+          ),
+        );
+
+        actionsForOptionId(tester, options.first.id)[moveToEnd]!();
+        await tester.pumpAndSettle();
+
+        expect(
+          current.map((o) => o.text),
+          orderedEquals(['Banana', 'Cherry', 'Apple']),
+        );
+
+        handle.dispose();
       },
     );
   });

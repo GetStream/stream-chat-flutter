@@ -72,18 +72,20 @@ class DefaultStreamMessageComposerInputCenter extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        StreamMessageComposerInputField(
-          controller: controller.textFieldController,
-          placeholder: props.placeholder,
-          focusNode: props.focusNode,
-          command: controller.message.command?.toUpperCase(),
-          onDismissCommand: controller.clearCommand,
-          textInputAction: props.textInputAction,
-          keyboardType: props.keyboardType,
-          textCapitalization: props.textCapitalization,
-          autofocus: props.autofocus,
-          autocorrect: props.autocorrect,
-          enabled: !props.isSlowModeActive,
+        StreamAccessibilityAutofocus(
+          child: StreamMessageComposerInputField(
+            controller: controller.textFieldController,
+            placeholder: props.placeholder,
+            focusNode: props.focusNode,
+            command: controller.message.command?.toUpperCase(),
+            onDismissCommand: controller.clearCommand,
+            textInputAction: props.textInputAction,
+            keyboardType: props.keyboardType,
+            textCapitalization: props.textCapitalization,
+            autofocus: props.autofocus,
+            autocorrect: props.autocorrect,
+            enabled: !props.isSlowModeActive,
+          ),
         ),
         if (props.canAlsoSendToChannel)
           DmCheckboxListTile(

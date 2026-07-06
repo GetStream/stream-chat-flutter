@@ -1,5 +1,9 @@
 ## Upcoming
 
+✅ Added
+
+- Added an `AccessibilityTranslations` namespace on `Translations`, accessed via `context.translations.accessibility`, holding all screen-reader labels, tooltips, hints, and live-region announcements used by the composer, voice recording, attachment picker, message actions, channel header, media gallery, and poll creator. Getter suffixes follow Flutter's `MaterialLocalizations` convention (`Tooltip`, `Label`, `Hint`, `TapHint`, `Announcement`). Added a `DateTime.toA11yTimestamp()` extension for locale-aware long-form timestamps in accessibility labels.
+
 🐞 Fixed
 
 - Fixed last-message preview flicker during channel-state reloads.

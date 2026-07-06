@@ -75,6 +75,10 @@ class StreamAudioRecorderController extends ValueNotifier<AudioRecorderState>
       await _recorder.start(config, path: tempPath);
       _startDurationTimer();
 
+      // Reset the per-session flag so a new recording starts in a known state
+      // regardless of how the previous session ended.
+      _wasLastCancelled = false;
+
       // Update the state to recording hold.
       value = const RecordStateRecordingHold();
     }
@@ -133,6 +137,16 @@ class StreamAudioRecorderController extends ValueNotifier<AudioRecorderState>
     return null;
   }
 
+  /// Whether the most recent transition to [RecordStateIdle] was a user
+  /// cancellation (the recorded track was discarded) rather than a send /
+  /// finalize that kept the track.
+  ///
+  /// Set by [cancelRecord] from its `discardTrack` argument. Read this from a
+  /// state-transition observer when both cancel and send paths land at
+  /// [RecordStateIdle] and need to be distinguished.
+  bool get wasLastCancelled => _wasLastCancelled;
+  bool _wasLastCancelled = false;
+
   /// Cancels the current recording session and discards the recorded track.
   ///
   /// Pass [discardTrack] as `false` to keep the recorded track, This is useful
@@ -142,6 +156,7 @@ class StreamAudioRecorderController extends ValueNotifier<AudioRecorderState>
     // Only cancel the recorder if it is currently recording or stopped.
     if (value case RecordStateRecording() || RecordStateStopped()) {
       if (discardTrack) await _recorder.cancel();
+      _wasLastCancelled = discardTrack;
 
       // Update the state to idle.
       value = const RecordStateIdle();

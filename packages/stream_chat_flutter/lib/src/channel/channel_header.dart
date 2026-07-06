@@ -186,6 +186,7 @@ class StreamChannelHeader extends StatelessWidget implements PreferredSizeWidget
                 subtitle: subtitle,
                 trailing: trailing,
                 primary: primary,
+                excludeHeaderSemantics: true,
                 style: style,
               ),
             ),
@@ -212,7 +213,7 @@ class _DefaultChannelAvatar extends StatelessWidget {
     // Match the 48×48 tap target StreamAppBar's auto-implied leading uses
     // (StreamButton.icon medium = 40 visible + Material padded tap target),
     // so the avatar slot sizes and hit-tests consistently with other bars.
-    return SizedBox.square(
+    Widget avatar = SizedBox.square(
       dimension: 48,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
@@ -225,5 +226,19 @@ class _DefaultChannelAvatar extends StatelessWidget {
         ),
       ),
     );
+
+    if (effectiveOnTap != null) {
+      final a11y = context.translations.accessibility;
+      avatar = Semantics(
+        button: true,
+        container: true,
+        label: a11y.channelInfoLabel,
+        excludeSemantics: true,
+        onTap: effectiveOnTap,
+        child: avatar,
+      );
+    }
+
+    return avatar;
   }
 }

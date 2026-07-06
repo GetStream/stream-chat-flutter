@@ -24,6 +24,9 @@ class StreamBackButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = MaterialLocalizations.of(context);
+    final backTooltip = localizations.backButtonTooltip;
+
     final iconData = switch (Theme.of(context).platform) {
       .iOS || .macOS => context.streamIcons.chevronLeft,
       _ => context.streamIcons.arrowLeft,
@@ -33,6 +36,7 @@ class StreamBackButton extends StatelessWidget {
       type: .ghost,
       size: .medium,
       style: .secondary,
+      tooltip: backTooltip,
       icon: Icon(iconData),
       onPressed: () {
         if (onPressed case final onPressed?) {
