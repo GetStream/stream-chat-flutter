@@ -36,7 +36,7 @@ class StreamPollCreator extends StatelessWidget {
       return onPollCreated?.call(result);
     }
 
-    return OptionDrawer(
+    final drawer = OptionDrawer(
       child: EndOfFrameCallbackWidget(
         child: Center(
           child: Column(
@@ -67,5 +67,7 @@ class StreamPollCreator extends StatelessWidget {
         onEndOfFrame: (_) => _openCreatePollFlow(),
       ),
     );
+
+    return MergeSemantics(child: drawer);
   }
 }

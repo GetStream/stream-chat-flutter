@@ -25,8 +25,6 @@ Future<T?> showStreamDialog<T>({
 }) {
   assert(debugCheckHasMaterialLocalizations(context), '');
   final localizations = MaterialLocalizations.of(context);
-
-  final theme = StreamChatTheme.of(context);
   final colorScheme = context.streamColorScheme;
 
   final capturedThemes = InheritedTheme.capture(
@@ -55,8 +53,9 @@ Future<T?> showStreamDialog<T>({
       );
     },
     pageBuilder: (context, animation, secondaryAnimation) {
-      final pageChild = Portal(child: Builder(builder: builder));
-      return StreamChatTheme(data: theme, child: capturedThemes.wrap(pageChild));
+      final dialog = capturedThemes.wrap(Portal(child: Builder(builder: builder)));
+      // Prevent SR taps on the dialog body from falling through to the barrier.
+      return Semantics(hitTestBehavior: SemanticsHitTestBehavior.opaque, child: dialog);
     },
   );
 }

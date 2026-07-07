@@ -3,7 +3,10 @@ import 'dart:math' as math;
 
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
+import 'package:stream_chat_flutter/src/message_input/audio_recorder/audio_recorder_announcer.dart';
+import 'package:stream_chat_flutter/src/message_input/composer_attachment_announcer.dart';
 import 'package:stream_chat_flutter/src/message_input/error_alert_sheet.dart';
 import 'package:stream_chat_flutter/src/message_input/stream_chat_message_input.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -815,7 +818,7 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     final safeAreaEnabled = widget.props.enableSafeArea ?? true;
     final viewPadding = MediaQuery.paddingOf(context);
 
-    return Material(
+    final composer = Material(
       color: context.streamColorScheme.backgroundElevation1,
       child: AnimatedBuilder(
         animation: _pickerAnimation,
@@ -835,6 +838,15 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
           return Padding(padding: safeAreaPadding, child: child);
         },
         child: Center(heightFactor: 1, child: messageInput),
+      ),
+    );
+
+    return ComposerAttachmentAnnouncer(
+      controller: _effectiveController,
+      child: AudioRecorderAnnouncer(
+        controller: _audioRecorderController,
+        assertiveness: Assertiveness.assertive,
+        child: composer,
       ),
     );
   }
@@ -1129,6 +1141,7 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     });
 
     _pickerAnimationController.forward();
+    _announcePickerStateChange(isOpen: true);
   }
 
   void _hidePicker() {
@@ -1136,8 +1149,23 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
 
     _stopPickerSync();
     _pickerAnimationController.reverse().then((_) {
-      if (mounted) setState(_disposePickerController);
+      if (!mounted) return;
+      setState(_disposePickerController);
+      _announcePickerStateChange(isOpen: false);
     });
+  }
+
+  void _announcePickerStateChange({required bool isOpen}) {
+    final a11y = context.translations.accessibility;
+
+    return StreamSemanticsAnnouncer.announce(
+      context,
+      assertiveness: .assertive,
+      switch (isOpen) {
+        true => a11y.attachmentPickerOpenedAnnouncement,
+        false => a11y.attachmentPickerClosedAnnouncement,
+      },
+    );
   }
 
   void _startPickerSync() {
@@ -1542,12 +1570,12 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     _effectiveController
       ..removeListener(_onChangedThrottled)
       ..removeListener(_onChangedDebounced);
+    _audioRecorderController.dispose();
     _controller?.dispose();
     _effectiveFocusNode.removeListener(_focusNodeListener);
     _focusNode?.dispose();
     _onChangedDebounced.cancel();
     _onChangedThrottled.cancel();
-    _audioRecorderController.dispose();
     _lastSentAtSubscription?.cancel();
     _draftStreamSubscription?.cancel();
     _messageUpdatedSubscription?.cancel();

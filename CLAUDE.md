@@ -2,6 +2,11 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+> **Before writing or reviewing code, read [`STYLE_GUIDE.md`](STYLE_GUIDE.md).** It is
+> the source of truth for coding conventions, documentation style, testing, changelog
+> policy, and repo-specific rules that diverge from the Flutter / Dart defaults. This
+> file is a repo overview; the style guide is the rulebook.
+
 ## Overview
 
 This is a Dart/Flutter monorepo for Stream Chat's official Flutter SDK, managed with [Melos](https://pub.dev/packages/melos). All packages live under `packages/`.
@@ -22,6 +27,8 @@ melos run test:flutter   # Run Flutter tests
 cd packages/stream_chat_flutter && flutter test
 cd packages/stream_chat_flutter && flutter test test/src/path/to/test_file.dart
 ```
+
+See [`TESTING.md`](TESTING.md) for guidance on writing effective tests.
 
 ### Golden Tests
 ```bash
@@ -50,14 +57,15 @@ melos run version:update    # Regenerate version.dart from pubspec.yaml (runs au
 
 ## Package Architecture
 
-The SDK is layered — each package builds on top of the previous:
+The SDK is layered. `stream_chat_persistence` is an optional sibling of the Flutter
+layers, not a required layer between them:
 
-```
-stream_chat                    # Pure Dart, no Flutter dependency
-  └── stream_chat_persistence  # Local disk cache using Drift (optional)
-      └── stream_chat_flutter_core  # Flutter business logic, no UI
-          └── stream_chat_flutter  # Full UI component library
-              └── stream_chat_localizations  # i18n for UI components
+```text
+stream_chat                        # Pure Dart, no Flutter dependency
+├── stream_chat_persistence        # Optional Drift-backed disk cache
+└── stream_chat_flutter_core       # Flutter business logic, no UI
+    └── stream_chat_flutter        # Full UI component library
+        └── stream_chat_localizations  # i18n for UI components
 ```
 
 ### `stream_chat`
@@ -129,7 +137,7 @@ After modifying any package, update its `CHANGELOG.md`.
 
 ## Figma Designs
 
-UI designs for this SDK are in the **Chat SDK Design system** Figma project. Use the Figma MCP server to look up designs when implementing or updating UI components.
+UI designs for this SDK are in the [Chat SDK Design System](https://www.figma.com/design/Us73erK1xFNcB5EH3hyq6Y/Chat-SDK-Design-System) Figma project. Use the Figma MCP server to look up designs when implementing or updating UI components.
 
 ## `stream_core_flutter` (external sibling repo)
 

@@ -77,7 +77,7 @@ class StreamMessageComposerInputField extends StatelessWidget {
     final effectiveCursorHeight = inputStyle?.cursorHeight ?? inputDefaults.cursorHeight;
     final effectiveCursorRadius = inputStyle?.cursorRadius ?? inputDefaults.cursorRadius;
 
-    return ConstrainedBox(
+    final inputField = ConstrainedBox(
       constraints: const BoxConstraints(maxHeight: 124),
       child: Padding(
         padding: EdgeInsets.all(spacing.sm),
@@ -129,6 +129,8 @@ class StreamMessageComposerInputField extends StatelessWidget {
         ),
       ),
     );
+
+    return MergeSemantics(child: inputField);
   }
 }
 

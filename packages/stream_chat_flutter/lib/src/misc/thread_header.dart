@@ -98,6 +98,7 @@ class StreamThreadHeader extends StatelessWidget implements PreferredSizeWidget 
         subtitle: subtitle,
         trailing: trailing,
         primary: primary,
+        excludeHeaderSemantics: true,
         style: style,
       ),
     );

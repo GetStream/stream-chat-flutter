@@ -22,6 +22,7 @@ class StreamUnreadIndicator extends StatelessWidget {
     this.child,
     this.alignment,
     this.offset,
+    this.semanticLabel,
   }) : _unreadType = const _TotalUnreadCount();
 
   /// Displays the unreadChannel count.
@@ -33,6 +34,7 @@ class StreamUnreadIndicator extends StatelessWidget {
     this.child,
     this.alignment,
     this.offset,
+    this.semanticLabel,
   }) : _unreadType = _UnreadChannels(cid: cid);
 
   /// Displays the unreadThreads count.
@@ -44,6 +46,7 @@ class StreamUnreadIndicator extends StatelessWidget {
     this.child,
     this.alignment,
     this.offset,
+    this.semanticLabel,
   }) : _unreadType = _UnreadThreads(id: id);
 
   final _UnreadTypes _unreadType;
@@ -69,6 +72,13 @@ class StreamUnreadIndicator extends StatelessWidget {
   /// Defaults to `Offset(8, -6)` for [TextDirection.ltr] or
   /// `Offset(-8, -6)` for [TextDirection.rtl].
   final Offset? offset;
+
+  /// An alternative label spoken by screen readers in place of the count.
+  ///
+  /// When null (the default), the visible count ("5", "99+") is announced
+  /// as-is. Provide a descriptive string (e.g. `"5 unread messages"`) when
+  /// the bare count would be ambiguous without surrounding context.
+  final String? semanticLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -115,6 +125,7 @@ class StreamUnreadIndicator extends StatelessWidget {
             > 99 => '99+',
             _ => '$unreadCount',
           },
+          semanticLabel: semanticLabel,
           alignment: effectiveAlignment,
           offset: effectiveOffset,
           child: child,
