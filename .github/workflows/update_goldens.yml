@@ -13,6 +13,10 @@ on:
           - sdk
           - docs
 
+permissions:
+  actions: write
+  contents: read
+
 jobs:
   update_sdk_goldens:
     if: inputs.target == 'sdk' || inputs.target == 'both'
