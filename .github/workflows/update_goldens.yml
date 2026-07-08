@@ -14,8 +14,7 @@ on:
           - docs
 
 permissions:
-  actions: write
-  contents: read
+  contents: write
 
 jobs:
   update_sdk_goldens:
