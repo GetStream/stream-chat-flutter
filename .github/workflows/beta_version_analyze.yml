@@ -6,6 +6,9 @@ on:
     - cron: '0 2 * * 1'
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   # Does a sanity check on packages for the next beta version so we are not surprised by any breaking changes.
   analyze_beta_versions:
