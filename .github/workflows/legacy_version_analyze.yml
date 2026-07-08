@@ -17,6 +17,10 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+  pull-requests: read
+
 jobs:
   # Centralizes every gating decision for this workflow — path filter, draft
   # state, and push-vs-PR semantics. Downstream jobs only need a single
