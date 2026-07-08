@@ -171,9 +171,6 @@ class StreamChatClient {
   /// ```dart
   /// client.updateSystemEnvironment(
   ///   SystemEnvironment(
-  ///     sdkName: 'stream-chat',
-  ///     sdkIdentifier: 'dart',
-  ///     sdkVersion: StreamChatClient.packageVersion,
   ///     appName: 'my_app',
   ///     appVersion: '1.0.0',
   ///   ),
