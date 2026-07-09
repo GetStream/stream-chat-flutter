@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-import 'package:stream_core_flutter/stream_core_flutter.dart' as core;
+import 'package:stream_core_flutter/chat.dart' as core;
 
 /// A widget that shows the input header of the message composer.
 /// Uses the factory to show custom components or used the default implementation.
@@ -102,9 +102,14 @@ class _DefaultStreamMessageComposerInputHeader extends StatelessWidget {
                     final attachment = voiceRecordings.elementAtOrNull(index);
                     if (attachment == null) return child;
 
+                    final durationSecs = attachment.extraData['duration'] as num?;
+                    final duration = durationSecs != null ? Duration(seconds: durationSecs.round()) : null;
+
+                    final a11y = context.translations.accessibility;
                     return core.StreamMessageComposerAttachment(
                       onRemovePressed: () => _onAttachmentRemovePressed(attachment),
-                      child: child,
+                      semanticLabel: a11y.voiceRecordingAttachmentLabel(duration: duration),
+                      child: ExcludeSemantics(child: child),
                     );
                   },
                 ),

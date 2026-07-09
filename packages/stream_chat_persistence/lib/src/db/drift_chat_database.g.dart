@@ -955,6 +955,58 @@ class $MessagesTable extends Messages with TableInfo<$MessagesTable, MessageEnti
     requiredDuringInsert: false,
     defaultValue: const Constant('regular'),
   );
+  static const VerificationMeta _mentionedChannelMeta = const VerificationMeta(
+    'mentionedChannel',
+  );
+  @override
+  late final GeneratedColumn<bool> mentionedChannel = GeneratedColumn<bool>(
+    'mentioned_channel',
+    aliasedName,
+    true,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("mentioned_channel" IN (0, 1))',
+    ),
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<List<String>?, String> mentionedGroupIds = GeneratedColumn<String>(
+    'mentioned_group_ids',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  ).withConverter<List<String>?>($MessagesTable.$convertermentionedGroupIdsn);
+  @override
+  late final GeneratedColumnWithTypeConverter<List<String>?, String> mentionedGroups = GeneratedColumn<String>(
+    'mentioned_groups',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  ).withConverter<List<String>?>($MessagesTable.$convertermentionedGroupsn);
+  static const VerificationMeta _mentionedHereMeta = const VerificationMeta(
+    'mentionedHere',
+  );
+  @override
+  late final GeneratedColumn<bool> mentionedHere = GeneratedColumn<bool>(
+    'mentioned_here',
+    aliasedName,
+    true,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("mentioned_here" IN (0, 1))',
+    ),
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<List<String>?, String> mentionedRoles = GeneratedColumn<String>(
+    'mentioned_roles',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  ).withConverter<List<String>?>($MessagesTable.$convertermentionedRolesn);
   @override
   late final GeneratedColumnWithTypeConverter<List<String>, String> mentionedUsers = GeneratedColumn<String>(
     'mentioned_users',
@@ -1259,6 +1311,11 @@ class $MessagesTable extends Messages with TableInfo<$MessagesTable, MessageEnti
     attachments,
     state,
     type,
+    mentionedChannel,
+    mentionedGroupIds,
+    mentionedGroups,
+    mentionedHere,
+    mentionedRoles,
     mentionedUsers,
     reactionGroups,
     parentId,
@@ -1325,6 +1382,24 @@ class $MessagesTable extends Messages with TableInfo<$MessagesTable, MessageEnti
       context.handle(
         _typeMeta,
         type.isAcceptableOrUnknown(data['type']!, _typeMeta),
+      );
+    }
+    if (data.containsKey('mentioned_channel')) {
+      context.handle(
+        _mentionedChannelMeta,
+        mentionedChannel.isAcceptableOrUnknown(
+          data['mentioned_channel']!,
+          _mentionedChannelMeta,
+        ),
+      );
+    }
+    if (data.containsKey('mentioned_here')) {
+      context.handle(
+        _mentionedHereMeta,
+        mentionedHere.isAcceptableOrUnknown(
+          data['mentioned_here']!,
+          _mentionedHereMeta,
+        ),
       );
     }
     if (data.containsKey('parent_id')) {
@@ -1528,6 +1603,32 @@ class $MessagesTable extends Messages with TableInfo<$MessagesTable, MessageEnti
         DriftSqlType.string,
         data['${effectivePrefix}type'],
       )!,
+      mentionedChannel: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}mentioned_channel'],
+      ),
+      mentionedGroupIds: $MessagesTable.$convertermentionedGroupIdsn.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}mentioned_group_ids'],
+        ),
+      ),
+      mentionedGroups: $MessagesTable.$convertermentionedGroupsn.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}mentioned_groups'],
+        ),
+      ),
+      mentionedHere: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}mentioned_here'],
+      ),
+      mentionedRoles: $MessagesTable.$convertermentionedRolesn.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}mentioned_roles'],
+        ),
+      ),
       mentionedUsers: $MessagesTable.$convertermentionedUsers.fromSql(
         attachedDatabase.typeMapping.read(
           DriftSqlType.string,
@@ -1655,6 +1756,18 @@ class $MessagesTable extends Messages with TableInfo<$MessagesTable, MessageEnti
   }
 
   static TypeConverter<List<String>, String> $converterattachments = ListConverter<String>();
+  static TypeConverter<List<String>, String> $convertermentionedGroupIds = ListConverter<String>();
+  static TypeConverter<List<String>?, String?> $convertermentionedGroupIdsn = NullAwareTypeConverter.wrap(
+    $convertermentionedGroupIds,
+  );
+  static TypeConverter<List<String>, String> $convertermentionedGroups = ListConverter<String>();
+  static TypeConverter<List<String>?, String?> $convertermentionedGroupsn = NullAwareTypeConverter.wrap(
+    $convertermentionedGroups,
+  );
+  static TypeConverter<List<String>, String> $convertermentionedRoles = ListConverter<String>();
+  static TypeConverter<List<String>?, String?> $convertermentionedRolesn = NullAwareTypeConverter.wrap(
+    $convertermentionedRoles,
+  );
   static TypeConverter<List<String>, String> $convertermentionedUsers = ListConverter<String>();
   static TypeConverter<Map<String, ReactionGroup>, String> $converterreactionGroups = ReactionGroupsConverter();
   static TypeConverter<Map<String, ReactionGroup>?, String?> $converterreactionGroupsn = NullAwareTypeConverter.wrap(
@@ -1687,6 +1800,22 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
 
   /// The message type
   final String type;
+
+  /// True if the message contains a "@channel" mention.
+  final bool? mentionedChannel;
+
+  /// The list of group ids mentioned in the message.
+  final List<String>? mentionedGroupIds;
+
+  /// The list of groups mentioned in the message,
+  /// hydrated by the server from [mentionedGroupIds].
+  final List<String>? mentionedGroups;
+
+  /// True if the message contains a "@here" mention.
+  final bool? mentionedHere;
+
+  /// The list of roles mentioned in the message.
+  final List<String>? mentionedRoles;
 
   /// The list of user mentioned in the message
   final List<String> mentionedUsers;
@@ -1774,6 +1903,11 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
     required this.attachments,
     required this.state,
     required this.type,
+    this.mentionedChannel,
+    this.mentionedGroupIds,
+    this.mentionedGroups,
+    this.mentionedHere,
+    this.mentionedRoles,
     required this.mentionedUsers,
     this.reactionGroups,
     this.parentId,
@@ -1816,6 +1950,27 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
     }
     map['state'] = Variable<String>(state);
     map['type'] = Variable<String>(type);
+    if (!nullToAbsent || mentionedChannel != null) {
+      map['mentioned_channel'] = Variable<bool>(mentionedChannel);
+    }
+    if (!nullToAbsent || mentionedGroupIds != null) {
+      map['mentioned_group_ids'] = Variable<String>(
+        $MessagesTable.$convertermentionedGroupIdsn.toSql(mentionedGroupIds),
+      );
+    }
+    if (!nullToAbsent || mentionedGroups != null) {
+      map['mentioned_groups'] = Variable<String>(
+        $MessagesTable.$convertermentionedGroupsn.toSql(mentionedGroups),
+      );
+    }
+    if (!nullToAbsent || mentionedHere != null) {
+      map['mentioned_here'] = Variable<bool>(mentionedHere);
+    }
+    if (!nullToAbsent || mentionedRoles != null) {
+      map['mentioned_roles'] = Variable<String>(
+        $MessagesTable.$convertermentionedRolesn.toSql(mentionedRoles),
+      );
+    }
     {
       map['mentioned_users'] = Variable<String>(
         $MessagesTable.$convertermentionedUsers.toSql(mentionedUsers),
@@ -1915,6 +2070,17 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
       attachments: serializer.fromJson<List<String>>(json['attachments']),
       state: serializer.fromJson<String>(json['state']),
       type: serializer.fromJson<String>(json['type']),
+      mentionedChannel: serializer.fromJson<bool?>(json['mentionedChannel']),
+      mentionedGroupIds: serializer.fromJson<List<String>?>(
+        json['mentionedGroupIds'],
+      ),
+      mentionedGroups: serializer.fromJson<List<String>?>(
+        json['mentionedGroups'],
+      ),
+      mentionedHere: serializer.fromJson<bool?>(json['mentionedHere']),
+      mentionedRoles: serializer.fromJson<List<String>?>(
+        json['mentionedRoles'],
+      ),
       mentionedUsers: serializer.fromJson<List<String>>(json['mentionedUsers']),
       reactionGroups: serializer.fromJson<Map<String, ReactionGroup>?>(
         json['reactionGroups'],
@@ -1959,6 +2125,11 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
       'attachments': serializer.toJson<List<String>>(attachments),
       'state': serializer.toJson<String>(state),
       'type': serializer.toJson<String>(type),
+      'mentionedChannel': serializer.toJson<bool?>(mentionedChannel),
+      'mentionedGroupIds': serializer.toJson<List<String>?>(mentionedGroupIds),
+      'mentionedGroups': serializer.toJson<List<String>?>(mentionedGroups),
+      'mentionedHere': serializer.toJson<bool?>(mentionedHere),
+      'mentionedRoles': serializer.toJson<List<String>?>(mentionedRoles),
       'mentionedUsers': serializer.toJson<List<String>>(mentionedUsers),
       'reactionGroups': serializer.toJson<Map<String, ReactionGroup>?>(
         reactionGroups,
@@ -2001,6 +2172,11 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
     List<String>? attachments,
     String? state,
     String? type,
+    Value<bool?> mentionedChannel = const Value.absent(),
+    Value<List<String>?> mentionedGroupIds = const Value.absent(),
+    Value<List<String>?> mentionedGroups = const Value.absent(),
+    Value<bool?> mentionedHere = const Value.absent(),
+    Value<List<String>?> mentionedRoles = const Value.absent(),
     List<String>? mentionedUsers,
     Value<Map<String, ReactionGroup>?> reactionGroups = const Value.absent(),
     Value<String?> parentId = const Value.absent(),
@@ -2034,6 +2210,11 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
     attachments: attachments ?? this.attachments,
     state: state ?? this.state,
     type: type ?? this.type,
+    mentionedChannel: mentionedChannel.present ? mentionedChannel.value : this.mentionedChannel,
+    mentionedGroupIds: mentionedGroupIds.present ? mentionedGroupIds.value : this.mentionedGroupIds,
+    mentionedGroups: mentionedGroups.present ? mentionedGroups.value : this.mentionedGroups,
+    mentionedHere: mentionedHere.present ? mentionedHere.value : this.mentionedHere,
+    mentionedRoles: mentionedRoles.present ? mentionedRoles.value : this.mentionedRoles,
     mentionedUsers: mentionedUsers ?? this.mentionedUsers,
     reactionGroups: reactionGroups.present ? reactionGroups.value : this.reactionGroups,
     parentId: parentId.present ? parentId.value : this.parentId,
@@ -2069,6 +2250,11 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
       attachments: data.attachments.present ? data.attachments.value : this.attachments,
       state: data.state.present ? data.state.value : this.state,
       type: data.type.present ? data.type.value : this.type,
+      mentionedChannel: data.mentionedChannel.present ? data.mentionedChannel.value : this.mentionedChannel,
+      mentionedGroupIds: data.mentionedGroupIds.present ? data.mentionedGroupIds.value : this.mentionedGroupIds,
+      mentionedGroups: data.mentionedGroups.present ? data.mentionedGroups.value : this.mentionedGroups,
+      mentionedHere: data.mentionedHere.present ? data.mentionedHere.value : this.mentionedHere,
+      mentionedRoles: data.mentionedRoles.present ? data.mentionedRoles.value : this.mentionedRoles,
       mentionedUsers: data.mentionedUsers.present ? data.mentionedUsers.value : this.mentionedUsers,
       reactionGroups: data.reactionGroups.present ? data.reactionGroups.value : this.reactionGroups,
       parentId: data.parentId.present ? data.parentId.value : this.parentId,
@@ -2111,6 +2297,11 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
           ..write('attachments: $attachments, ')
           ..write('state: $state, ')
           ..write('type: $type, ')
+          ..write('mentionedChannel: $mentionedChannel, ')
+          ..write('mentionedGroupIds: $mentionedGroupIds, ')
+          ..write('mentionedGroups: $mentionedGroups, ')
+          ..write('mentionedHere: $mentionedHere, ')
+          ..write('mentionedRoles: $mentionedRoles, ')
           ..write('mentionedUsers: $mentionedUsers, ')
           ..write('reactionGroups: $reactionGroups, ')
           ..write('parentId: $parentId, ')
@@ -2149,6 +2340,11 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
     attachments,
     state,
     type,
+    mentionedChannel,
+    mentionedGroupIds,
+    mentionedGroups,
+    mentionedHere,
+    mentionedRoles,
     mentionedUsers,
     reactionGroups,
     parentId,
@@ -2186,6 +2382,11 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
           other.attachments == this.attachments &&
           other.state == this.state &&
           other.type == this.type &&
+          other.mentionedChannel == this.mentionedChannel &&
+          other.mentionedGroupIds == this.mentionedGroupIds &&
+          other.mentionedGroups == this.mentionedGroups &&
+          other.mentionedHere == this.mentionedHere &&
+          other.mentionedRoles == this.mentionedRoles &&
           other.mentionedUsers == this.mentionedUsers &&
           other.reactionGroups == this.reactionGroups &&
           other.parentId == this.parentId &&
@@ -2221,6 +2422,11 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
   final Value<List<String>> attachments;
   final Value<String> state;
   final Value<String> type;
+  final Value<bool?> mentionedChannel;
+  final Value<List<String>?> mentionedGroupIds;
+  final Value<List<String>?> mentionedGroups;
+  final Value<bool?> mentionedHere;
+  final Value<List<String>?> mentionedRoles;
   final Value<List<String>> mentionedUsers;
   final Value<Map<String, ReactionGroup>?> reactionGroups;
   final Value<String?> parentId;
@@ -2255,6 +2461,11 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
     this.attachments = const Value.absent(),
     this.state = const Value.absent(),
     this.type = const Value.absent(),
+    this.mentionedChannel = const Value.absent(),
+    this.mentionedGroupIds = const Value.absent(),
+    this.mentionedGroups = const Value.absent(),
+    this.mentionedHere = const Value.absent(),
+    this.mentionedRoles = const Value.absent(),
     this.mentionedUsers = const Value.absent(),
     this.reactionGroups = const Value.absent(),
     this.parentId = const Value.absent(),
@@ -2290,6 +2501,11 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
     required List<String> attachments,
     required String state,
     this.type = const Value.absent(),
+    this.mentionedChannel = const Value.absent(),
+    this.mentionedGroupIds = const Value.absent(),
+    this.mentionedGroups = const Value.absent(),
+    this.mentionedHere = const Value.absent(),
+    this.mentionedRoles = const Value.absent(),
     required List<String> mentionedUsers,
     this.reactionGroups = const Value.absent(),
     this.parentId = const Value.absent(),
@@ -2329,6 +2545,11 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
     Expression<String>? attachments,
     Expression<String>? state,
     Expression<String>? type,
+    Expression<bool>? mentionedChannel,
+    Expression<String>? mentionedGroupIds,
+    Expression<String>? mentionedGroups,
+    Expression<bool>? mentionedHere,
+    Expression<String>? mentionedRoles,
     Expression<String>? mentionedUsers,
     Expression<String>? reactionGroups,
     Expression<String>? parentId,
@@ -2364,6 +2585,11 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
       if (attachments != null) 'attachments': attachments,
       if (state != null) 'state': state,
       if (type != null) 'type': type,
+      if (mentionedChannel != null) 'mentioned_channel': mentionedChannel,
+      if (mentionedGroupIds != null) 'mentioned_group_ids': mentionedGroupIds,
+      if (mentionedGroups != null) 'mentioned_groups': mentionedGroups,
+      if (mentionedHere != null) 'mentioned_here': mentionedHere,
+      if (mentionedRoles != null) 'mentioned_roles': mentionedRoles,
       if (mentionedUsers != null) 'mentioned_users': mentionedUsers,
       if (reactionGroups != null) 'reaction_groups': reactionGroups,
       if (parentId != null) 'parent_id': parentId,
@@ -2401,6 +2627,11 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
     Value<List<String>>? attachments,
     Value<String>? state,
     Value<String>? type,
+    Value<bool?>? mentionedChannel,
+    Value<List<String>?>? mentionedGroupIds,
+    Value<List<String>?>? mentionedGroups,
+    Value<bool?>? mentionedHere,
+    Value<List<String>?>? mentionedRoles,
     Value<List<String>>? mentionedUsers,
     Value<Map<String, ReactionGroup>?>? reactionGroups,
     Value<String?>? parentId,
@@ -2436,6 +2667,11 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
       attachments: attachments ?? this.attachments,
       state: state ?? this.state,
       type: type ?? this.type,
+      mentionedChannel: mentionedChannel ?? this.mentionedChannel,
+      mentionedGroupIds: mentionedGroupIds ?? this.mentionedGroupIds,
+      mentionedGroups: mentionedGroups ?? this.mentionedGroups,
+      mentionedHere: mentionedHere ?? this.mentionedHere,
+      mentionedRoles: mentionedRoles ?? this.mentionedRoles,
       mentionedUsers: mentionedUsers ?? this.mentionedUsers,
       reactionGroups: reactionGroups ?? this.reactionGroups,
       parentId: parentId ?? this.parentId,
@@ -2486,6 +2722,29 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
     }
     if (type.present) {
       map['type'] = Variable<String>(type.value);
+    }
+    if (mentionedChannel.present) {
+      map['mentioned_channel'] = Variable<bool>(mentionedChannel.value);
+    }
+    if (mentionedGroupIds.present) {
+      map['mentioned_group_ids'] = Variable<String>(
+        $MessagesTable.$convertermentionedGroupIdsn.toSql(
+          mentionedGroupIds.value,
+        ),
+      );
+    }
+    if (mentionedGroups.present) {
+      map['mentioned_groups'] = Variable<String>(
+        $MessagesTable.$convertermentionedGroupsn.toSql(mentionedGroups.value),
+      );
+    }
+    if (mentionedHere.present) {
+      map['mentioned_here'] = Variable<bool>(mentionedHere.value);
+    }
+    if (mentionedRoles.present) {
+      map['mentioned_roles'] = Variable<String>(
+        $MessagesTable.$convertermentionedRolesn.toSql(mentionedRoles.value),
+      );
     }
     if (mentionedUsers.present) {
       map['mentioned_users'] = Variable<String>(
@@ -2596,6 +2855,11 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
           ..write('attachments: $attachments, ')
           ..write('state: $state, ')
           ..write('type: $type, ')
+          ..write('mentionedChannel: $mentionedChannel, ')
+          ..write('mentionedGroupIds: $mentionedGroupIds, ')
+          ..write('mentionedGroups: $mentionedGroups, ')
+          ..write('mentionedHere: $mentionedHere, ')
+          ..write('mentionedRoles: $mentionedRoles, ')
           ..write('mentionedUsers: $mentionedUsers, ')
           ..write('reactionGroups: $reactionGroups, ')
           ..write('parentId: $parentId, ')
@@ -4060,6 +4324,67 @@ class $PinnedMessagesTable extends PinnedMessages with TableInfo<$PinnedMessages
     requiredDuringInsert: false,
     defaultValue: const Constant('regular'),
   );
+  static const VerificationMeta _mentionedChannelMeta = const VerificationMeta(
+    'mentionedChannel',
+  );
+  @override
+  late final GeneratedColumn<bool> mentionedChannel = GeneratedColumn<bool>(
+    'mentioned_channel',
+    aliasedName,
+    true,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("mentioned_channel" IN (0, 1))',
+    ),
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<List<String>?, String> mentionedGroupIds =
+      GeneratedColumn<String>(
+        'mentioned_group_ids',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      ).withConverter<List<String>?>(
+        $PinnedMessagesTable.$convertermentionedGroupIdsn,
+      );
+  @override
+  late final GeneratedColumnWithTypeConverter<List<String>?, String> mentionedGroups =
+      GeneratedColumn<String>(
+        'mentioned_groups',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      ).withConverter<List<String>?>(
+        $PinnedMessagesTable.$convertermentionedGroupsn,
+      );
+  static const VerificationMeta _mentionedHereMeta = const VerificationMeta(
+    'mentionedHere',
+  );
+  @override
+  late final GeneratedColumn<bool> mentionedHere = GeneratedColumn<bool>(
+    'mentioned_here',
+    aliasedName,
+    true,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("mentioned_here" IN (0, 1))',
+    ),
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<List<String>?, String> mentionedRoles =
+      GeneratedColumn<String>(
+        'mentioned_roles',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      ).withConverter<List<String>?>(
+        $PinnedMessagesTable.$convertermentionedRolesn,
+      );
   @override
   late final GeneratedColumnWithTypeConverter<List<String>, String> mentionedUsers = GeneratedColumn<String>(
     'mentioned_users',
@@ -4364,6 +4689,11 @@ class $PinnedMessagesTable extends PinnedMessages with TableInfo<$PinnedMessages
     attachments,
     state,
     type,
+    mentionedChannel,
+    mentionedGroupIds,
+    mentionedGroups,
+    mentionedHere,
+    mentionedRoles,
     mentionedUsers,
     reactionGroups,
     parentId,
@@ -4430,6 +4760,24 @@ class $PinnedMessagesTable extends PinnedMessages with TableInfo<$PinnedMessages
       context.handle(
         _typeMeta,
         type.isAcceptableOrUnknown(data['type']!, _typeMeta),
+      );
+    }
+    if (data.containsKey('mentioned_channel')) {
+      context.handle(
+        _mentionedChannelMeta,
+        mentionedChannel.isAcceptableOrUnknown(
+          data['mentioned_channel']!,
+          _mentionedChannelMeta,
+        ),
+      );
+    }
+    if (data.containsKey('mentioned_here')) {
+      context.handle(
+        _mentionedHereMeta,
+        mentionedHere.isAcceptableOrUnknown(
+          data['mentioned_here']!,
+          _mentionedHereMeta,
+        ),
       );
     }
     if (data.containsKey('parent_id')) {
@@ -4633,6 +4981,32 @@ class $PinnedMessagesTable extends PinnedMessages with TableInfo<$PinnedMessages
         DriftSqlType.string,
         data['${effectivePrefix}type'],
       )!,
+      mentionedChannel: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}mentioned_channel'],
+      ),
+      mentionedGroupIds: $PinnedMessagesTable.$convertermentionedGroupIdsn.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}mentioned_group_ids'],
+        ),
+      ),
+      mentionedGroups: $PinnedMessagesTable.$convertermentionedGroupsn.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}mentioned_groups'],
+        ),
+      ),
+      mentionedHere: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}mentioned_here'],
+      ),
+      mentionedRoles: $PinnedMessagesTable.$convertermentionedRolesn.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}mentioned_roles'],
+        ),
+      ),
       mentionedUsers: $PinnedMessagesTable.$convertermentionedUsers.fromSql(
         attachedDatabase.typeMapping.read(
           DriftSqlType.string,
@@ -4760,6 +5134,18 @@ class $PinnedMessagesTable extends PinnedMessages with TableInfo<$PinnedMessages
   }
 
   static TypeConverter<List<String>, String> $converterattachments = ListConverter<String>();
+  static TypeConverter<List<String>, String> $convertermentionedGroupIds = ListConverter<String>();
+  static TypeConverter<List<String>?, String?> $convertermentionedGroupIdsn = NullAwareTypeConverter.wrap(
+    $convertermentionedGroupIds,
+  );
+  static TypeConverter<List<String>, String> $convertermentionedGroups = ListConverter<String>();
+  static TypeConverter<List<String>?, String?> $convertermentionedGroupsn = NullAwareTypeConverter.wrap(
+    $convertermentionedGroups,
+  );
+  static TypeConverter<List<String>, String> $convertermentionedRoles = ListConverter<String>();
+  static TypeConverter<List<String>?, String?> $convertermentionedRolesn = NullAwareTypeConverter.wrap(
+    $convertermentionedRoles,
+  );
   static TypeConverter<List<String>, String> $convertermentionedUsers = ListConverter<String>();
   static TypeConverter<Map<String, ReactionGroup>, String> $converterreactionGroups = ReactionGroupsConverter();
   static TypeConverter<Map<String, ReactionGroup>?, String?> $converterreactionGroupsn = NullAwareTypeConverter.wrap(
@@ -4792,6 +5178,22 @@ class PinnedMessageEntity extends DataClass implements Insertable<PinnedMessageE
 
   /// The message type
   final String type;
+
+  /// True if the message contains a "@channel" mention.
+  final bool? mentionedChannel;
+
+  /// The list of group ids mentioned in the message.
+  final List<String>? mentionedGroupIds;
+
+  /// The list of groups mentioned in the message,
+  /// hydrated by the server from [mentionedGroupIds].
+  final List<String>? mentionedGroups;
+
+  /// True if the message contains a "@here" mention.
+  final bool? mentionedHere;
+
+  /// The list of roles mentioned in the message.
+  final List<String>? mentionedRoles;
 
   /// The list of user mentioned in the message
   final List<String> mentionedUsers;
@@ -4879,6 +5281,11 @@ class PinnedMessageEntity extends DataClass implements Insertable<PinnedMessageE
     required this.attachments,
     required this.state,
     required this.type,
+    this.mentionedChannel,
+    this.mentionedGroupIds,
+    this.mentionedGroups,
+    this.mentionedHere,
+    this.mentionedRoles,
     required this.mentionedUsers,
     this.reactionGroups,
     this.parentId,
@@ -4921,6 +5328,29 @@ class PinnedMessageEntity extends DataClass implements Insertable<PinnedMessageE
     }
     map['state'] = Variable<String>(state);
     map['type'] = Variable<String>(type);
+    if (!nullToAbsent || mentionedChannel != null) {
+      map['mentioned_channel'] = Variable<bool>(mentionedChannel);
+    }
+    if (!nullToAbsent || mentionedGroupIds != null) {
+      map['mentioned_group_ids'] = Variable<String>(
+        $PinnedMessagesTable.$convertermentionedGroupIdsn.toSql(
+          mentionedGroupIds,
+        ),
+      );
+    }
+    if (!nullToAbsent || mentionedGroups != null) {
+      map['mentioned_groups'] = Variable<String>(
+        $PinnedMessagesTable.$convertermentionedGroupsn.toSql(mentionedGroups),
+      );
+    }
+    if (!nullToAbsent || mentionedHere != null) {
+      map['mentioned_here'] = Variable<bool>(mentionedHere);
+    }
+    if (!nullToAbsent || mentionedRoles != null) {
+      map['mentioned_roles'] = Variable<String>(
+        $PinnedMessagesTable.$convertermentionedRolesn.toSql(mentionedRoles),
+      );
+    }
     {
       map['mentioned_users'] = Variable<String>(
         $PinnedMessagesTable.$convertermentionedUsers.toSql(mentionedUsers),
@@ -5022,6 +5452,17 @@ class PinnedMessageEntity extends DataClass implements Insertable<PinnedMessageE
       attachments: serializer.fromJson<List<String>>(json['attachments']),
       state: serializer.fromJson<String>(json['state']),
       type: serializer.fromJson<String>(json['type']),
+      mentionedChannel: serializer.fromJson<bool?>(json['mentionedChannel']),
+      mentionedGroupIds: serializer.fromJson<List<String>?>(
+        json['mentionedGroupIds'],
+      ),
+      mentionedGroups: serializer.fromJson<List<String>?>(
+        json['mentionedGroups'],
+      ),
+      mentionedHere: serializer.fromJson<bool?>(json['mentionedHere']),
+      mentionedRoles: serializer.fromJson<List<String>?>(
+        json['mentionedRoles'],
+      ),
       mentionedUsers: serializer.fromJson<List<String>>(json['mentionedUsers']),
       reactionGroups: serializer.fromJson<Map<String, ReactionGroup>?>(
         json['reactionGroups'],
@@ -5066,6 +5507,11 @@ class PinnedMessageEntity extends DataClass implements Insertable<PinnedMessageE
       'attachments': serializer.toJson<List<String>>(attachments),
       'state': serializer.toJson<String>(state),
       'type': serializer.toJson<String>(type),
+      'mentionedChannel': serializer.toJson<bool?>(mentionedChannel),
+      'mentionedGroupIds': serializer.toJson<List<String>?>(mentionedGroupIds),
+      'mentionedGroups': serializer.toJson<List<String>?>(mentionedGroups),
+      'mentionedHere': serializer.toJson<bool?>(mentionedHere),
+      'mentionedRoles': serializer.toJson<List<String>?>(mentionedRoles),
       'mentionedUsers': serializer.toJson<List<String>>(mentionedUsers),
       'reactionGroups': serializer.toJson<Map<String, ReactionGroup>?>(
         reactionGroups,
@@ -5108,6 +5554,11 @@ class PinnedMessageEntity extends DataClass implements Insertable<PinnedMessageE
     List<String>? attachments,
     String? state,
     String? type,
+    Value<bool?> mentionedChannel = const Value.absent(),
+    Value<List<String>?> mentionedGroupIds = const Value.absent(),
+    Value<List<String>?> mentionedGroups = const Value.absent(),
+    Value<bool?> mentionedHere = const Value.absent(),
+    Value<List<String>?> mentionedRoles = const Value.absent(),
     List<String>? mentionedUsers,
     Value<Map<String, ReactionGroup>?> reactionGroups = const Value.absent(),
     Value<String?> parentId = const Value.absent(),
@@ -5141,6 +5592,11 @@ class PinnedMessageEntity extends DataClass implements Insertable<PinnedMessageE
     attachments: attachments ?? this.attachments,
     state: state ?? this.state,
     type: type ?? this.type,
+    mentionedChannel: mentionedChannel.present ? mentionedChannel.value : this.mentionedChannel,
+    mentionedGroupIds: mentionedGroupIds.present ? mentionedGroupIds.value : this.mentionedGroupIds,
+    mentionedGroups: mentionedGroups.present ? mentionedGroups.value : this.mentionedGroups,
+    mentionedHere: mentionedHere.present ? mentionedHere.value : this.mentionedHere,
+    mentionedRoles: mentionedRoles.present ? mentionedRoles.value : this.mentionedRoles,
     mentionedUsers: mentionedUsers ?? this.mentionedUsers,
     reactionGroups: reactionGroups.present ? reactionGroups.value : this.reactionGroups,
     parentId: parentId.present ? parentId.value : this.parentId,
@@ -5176,6 +5632,11 @@ class PinnedMessageEntity extends DataClass implements Insertable<PinnedMessageE
       attachments: data.attachments.present ? data.attachments.value : this.attachments,
       state: data.state.present ? data.state.value : this.state,
       type: data.type.present ? data.type.value : this.type,
+      mentionedChannel: data.mentionedChannel.present ? data.mentionedChannel.value : this.mentionedChannel,
+      mentionedGroupIds: data.mentionedGroupIds.present ? data.mentionedGroupIds.value : this.mentionedGroupIds,
+      mentionedGroups: data.mentionedGroups.present ? data.mentionedGroups.value : this.mentionedGroups,
+      mentionedHere: data.mentionedHere.present ? data.mentionedHere.value : this.mentionedHere,
+      mentionedRoles: data.mentionedRoles.present ? data.mentionedRoles.value : this.mentionedRoles,
       mentionedUsers: data.mentionedUsers.present ? data.mentionedUsers.value : this.mentionedUsers,
       reactionGroups: data.reactionGroups.present ? data.reactionGroups.value : this.reactionGroups,
       parentId: data.parentId.present ? data.parentId.value : this.parentId,
@@ -5218,6 +5679,11 @@ class PinnedMessageEntity extends DataClass implements Insertable<PinnedMessageE
           ..write('attachments: $attachments, ')
           ..write('state: $state, ')
           ..write('type: $type, ')
+          ..write('mentionedChannel: $mentionedChannel, ')
+          ..write('mentionedGroupIds: $mentionedGroupIds, ')
+          ..write('mentionedGroups: $mentionedGroups, ')
+          ..write('mentionedHere: $mentionedHere, ')
+          ..write('mentionedRoles: $mentionedRoles, ')
           ..write('mentionedUsers: $mentionedUsers, ')
           ..write('reactionGroups: $reactionGroups, ')
           ..write('parentId: $parentId, ')
@@ -5256,6 +5722,11 @@ class PinnedMessageEntity extends DataClass implements Insertable<PinnedMessageE
     attachments,
     state,
     type,
+    mentionedChannel,
+    mentionedGroupIds,
+    mentionedGroups,
+    mentionedHere,
+    mentionedRoles,
     mentionedUsers,
     reactionGroups,
     parentId,
@@ -5293,6 +5764,11 @@ class PinnedMessageEntity extends DataClass implements Insertable<PinnedMessageE
           other.attachments == this.attachments &&
           other.state == this.state &&
           other.type == this.type &&
+          other.mentionedChannel == this.mentionedChannel &&
+          other.mentionedGroupIds == this.mentionedGroupIds &&
+          other.mentionedGroups == this.mentionedGroups &&
+          other.mentionedHere == this.mentionedHere &&
+          other.mentionedRoles == this.mentionedRoles &&
           other.mentionedUsers == this.mentionedUsers &&
           other.reactionGroups == this.reactionGroups &&
           other.parentId == this.parentId &&
@@ -5328,6 +5804,11 @@ class PinnedMessagesCompanion extends UpdateCompanion<PinnedMessageEntity> {
   final Value<List<String>> attachments;
   final Value<String> state;
   final Value<String> type;
+  final Value<bool?> mentionedChannel;
+  final Value<List<String>?> mentionedGroupIds;
+  final Value<List<String>?> mentionedGroups;
+  final Value<bool?> mentionedHere;
+  final Value<List<String>?> mentionedRoles;
   final Value<List<String>> mentionedUsers;
   final Value<Map<String, ReactionGroup>?> reactionGroups;
   final Value<String?> parentId;
@@ -5362,6 +5843,11 @@ class PinnedMessagesCompanion extends UpdateCompanion<PinnedMessageEntity> {
     this.attachments = const Value.absent(),
     this.state = const Value.absent(),
     this.type = const Value.absent(),
+    this.mentionedChannel = const Value.absent(),
+    this.mentionedGroupIds = const Value.absent(),
+    this.mentionedGroups = const Value.absent(),
+    this.mentionedHere = const Value.absent(),
+    this.mentionedRoles = const Value.absent(),
     this.mentionedUsers = const Value.absent(),
     this.reactionGroups = const Value.absent(),
     this.parentId = const Value.absent(),
@@ -5397,6 +5883,11 @@ class PinnedMessagesCompanion extends UpdateCompanion<PinnedMessageEntity> {
     required List<String> attachments,
     required String state,
     this.type = const Value.absent(),
+    this.mentionedChannel = const Value.absent(),
+    this.mentionedGroupIds = const Value.absent(),
+    this.mentionedGroups = const Value.absent(),
+    this.mentionedHere = const Value.absent(),
+    this.mentionedRoles = const Value.absent(),
     required List<String> mentionedUsers,
     this.reactionGroups = const Value.absent(),
     this.parentId = const Value.absent(),
@@ -5436,6 +5927,11 @@ class PinnedMessagesCompanion extends UpdateCompanion<PinnedMessageEntity> {
     Expression<String>? attachments,
     Expression<String>? state,
     Expression<String>? type,
+    Expression<bool>? mentionedChannel,
+    Expression<String>? mentionedGroupIds,
+    Expression<String>? mentionedGroups,
+    Expression<bool>? mentionedHere,
+    Expression<String>? mentionedRoles,
     Expression<String>? mentionedUsers,
     Expression<String>? reactionGroups,
     Expression<String>? parentId,
@@ -5471,6 +5967,11 @@ class PinnedMessagesCompanion extends UpdateCompanion<PinnedMessageEntity> {
       if (attachments != null) 'attachments': attachments,
       if (state != null) 'state': state,
       if (type != null) 'type': type,
+      if (mentionedChannel != null) 'mentioned_channel': mentionedChannel,
+      if (mentionedGroupIds != null) 'mentioned_group_ids': mentionedGroupIds,
+      if (mentionedGroups != null) 'mentioned_groups': mentionedGroups,
+      if (mentionedHere != null) 'mentioned_here': mentionedHere,
+      if (mentionedRoles != null) 'mentioned_roles': mentionedRoles,
       if (mentionedUsers != null) 'mentioned_users': mentionedUsers,
       if (reactionGroups != null) 'reaction_groups': reactionGroups,
       if (parentId != null) 'parent_id': parentId,
@@ -5508,6 +6009,11 @@ class PinnedMessagesCompanion extends UpdateCompanion<PinnedMessageEntity> {
     Value<List<String>>? attachments,
     Value<String>? state,
     Value<String>? type,
+    Value<bool?>? mentionedChannel,
+    Value<List<String>?>? mentionedGroupIds,
+    Value<List<String>?>? mentionedGroups,
+    Value<bool?>? mentionedHere,
+    Value<List<String>?>? mentionedRoles,
     Value<List<String>>? mentionedUsers,
     Value<Map<String, ReactionGroup>?>? reactionGroups,
     Value<String?>? parentId,
@@ -5543,6 +6049,11 @@ class PinnedMessagesCompanion extends UpdateCompanion<PinnedMessageEntity> {
       attachments: attachments ?? this.attachments,
       state: state ?? this.state,
       type: type ?? this.type,
+      mentionedChannel: mentionedChannel ?? this.mentionedChannel,
+      mentionedGroupIds: mentionedGroupIds ?? this.mentionedGroupIds,
+      mentionedGroups: mentionedGroups ?? this.mentionedGroups,
+      mentionedHere: mentionedHere ?? this.mentionedHere,
+      mentionedRoles: mentionedRoles ?? this.mentionedRoles,
       mentionedUsers: mentionedUsers ?? this.mentionedUsers,
       reactionGroups: reactionGroups ?? this.reactionGroups,
       parentId: parentId ?? this.parentId,
@@ -5593,6 +6104,33 @@ class PinnedMessagesCompanion extends UpdateCompanion<PinnedMessageEntity> {
     }
     if (type.present) {
       map['type'] = Variable<String>(type.value);
+    }
+    if (mentionedChannel.present) {
+      map['mentioned_channel'] = Variable<bool>(mentionedChannel.value);
+    }
+    if (mentionedGroupIds.present) {
+      map['mentioned_group_ids'] = Variable<String>(
+        $PinnedMessagesTable.$convertermentionedGroupIdsn.toSql(
+          mentionedGroupIds.value,
+        ),
+      );
+    }
+    if (mentionedGroups.present) {
+      map['mentioned_groups'] = Variable<String>(
+        $PinnedMessagesTable.$convertermentionedGroupsn.toSql(
+          mentionedGroups.value,
+        ),
+      );
+    }
+    if (mentionedHere.present) {
+      map['mentioned_here'] = Variable<bool>(mentionedHere.value);
+    }
+    if (mentionedRoles.present) {
+      map['mentioned_roles'] = Variable<String>(
+        $PinnedMessagesTable.$convertermentionedRolesn.toSql(
+          mentionedRoles.value,
+        ),
+      );
     }
     if (mentionedUsers.present) {
       map['mentioned_users'] = Variable<String>(
@@ -5707,6 +6245,11 @@ class PinnedMessagesCompanion extends UpdateCompanion<PinnedMessageEntity> {
           ..write('attachments: $attachments, ')
           ..write('state: $state, ')
           ..write('type: $type, ')
+          ..write('mentionedChannel: $mentionedChannel, ')
+          ..write('mentionedGroupIds: $mentionedGroupIds, ')
+          ..write('mentionedGroups: $mentionedGroups, ')
+          ..write('mentionedHere: $mentionedHere, ')
+          ..write('mentionedRoles: $mentionedRoles, ')
           ..write('mentionedUsers: $mentionedUsers, ')
           ..write('reactionGroups: $reactionGroups, ')
           ..write('parentId: $parentId, ')
@@ -10442,6 +10985,278 @@ class ChannelQueriesCompanion extends UpdateCompanion<ChannelQueryEntity> {
   }
 }
 
+class $ChannelQueriesMetadataTable extends ChannelQueriesMetadata
+    with TableInfo<$ChannelQueriesMetadataTable, ChannelQueryMetadataEntity> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ChannelQueriesMetadataTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _queryHashMeta = const VerificationMeta(
+    'queryHash',
+  );
+  @override
+  late final GeneratedColumn<String> queryHash = GeneratedColumn<String>(
+    'query_hash',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<Filter, String> filter = GeneratedColumn<String>(
+    'filter',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  ).withConverter<Filter>($ChannelQueriesMetadataTable.$converterfilter);
+  @override
+  late final GeneratedColumnWithTypeConverter<SortOrder<ChannelState>, String> sort =
+      GeneratedColumn<String>(
+        'sort',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      ).withConverter<SortOrder<ChannelState>>(
+        $ChannelQueriesMetadataTable.$convertersort,
+      );
+  @override
+  List<GeneratedColumn> get $columns => [queryHash, filter, sort];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'channel_queries_metadata';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ChannelQueryMetadataEntity> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('query_hash')) {
+      context.handle(
+        _queryHashMeta,
+        queryHash.isAcceptableOrUnknown(data['query_hash']!, _queryHashMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_queryHashMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {queryHash};
+  @override
+  ChannelQueryMetadataEntity map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ChannelQueryMetadataEntity(
+      queryHash: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}query_hash'],
+      )!,
+      filter: $ChannelQueriesMetadataTable.$converterfilter.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}filter'],
+        )!,
+      ),
+      sort: $ChannelQueriesMetadataTable.$convertersort.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}sort'],
+        )!,
+      ),
+    );
+  }
+
+  @override
+  $ChannelQueriesMetadataTable createAlias(String alias) {
+    return $ChannelQueriesMetadataTable(attachedDatabase, alias);
+  }
+
+  static TypeConverter<Filter, String> $converterfilter = const FilterConverter();
+  static TypeConverter<SortOrder<ChannelState>, String> $convertersort = const ChannelStateSortOrderConverter();
+}
+
+class ChannelQueryMetadataEntity extends DataClass implements Insertable<ChannelQueryMetadataEntity> {
+  /// The query hash this metadata is associated with. Matches the hashes
+  /// produced by `ChannelQueryDao` for predefined-filter queries.
+  final String queryHash;
+
+  /// The server-resolved filter spec to surface on offline reads.
+  final Filter filter;
+
+  /// The server-resolved sort spec to apply on offline reads.
+  final SortOrder<ChannelState> sort;
+  const ChannelQueryMetadataEntity({
+    required this.queryHash,
+    required this.filter,
+    required this.sort,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['query_hash'] = Variable<String>(queryHash);
+    {
+      map['filter'] = Variable<String>(
+        $ChannelQueriesMetadataTable.$converterfilter.toSql(filter),
+      );
+    }
+    {
+      map['sort'] = Variable<String>(
+        $ChannelQueriesMetadataTable.$convertersort.toSql(sort),
+      );
+    }
+    return map;
+  }
+
+  factory ChannelQueryMetadataEntity.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ChannelQueryMetadataEntity(
+      queryHash: serializer.fromJson<String>(json['queryHash']),
+      filter: serializer.fromJson<Filter>(json['filter']),
+      sort: serializer.fromJson<SortOrder<ChannelState>>(json['sort']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'queryHash': serializer.toJson<String>(queryHash),
+      'filter': serializer.toJson<Filter>(filter),
+      'sort': serializer.toJson<SortOrder<ChannelState>>(sort),
+    };
+  }
+
+  ChannelQueryMetadataEntity copyWith({
+    String? queryHash,
+    Filter? filter,
+    SortOrder<ChannelState>? sort,
+  }) => ChannelQueryMetadataEntity(
+    queryHash: queryHash ?? this.queryHash,
+    filter: filter ?? this.filter,
+    sort: sort ?? this.sort,
+  );
+  ChannelQueryMetadataEntity copyWithCompanion(
+    ChannelQueriesMetadataCompanion data,
+  ) {
+    return ChannelQueryMetadataEntity(
+      queryHash: data.queryHash.present ? data.queryHash.value : this.queryHash,
+      filter: data.filter.present ? data.filter.value : this.filter,
+      sort: data.sort.present ? data.sort.value : this.sort,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ChannelQueryMetadataEntity(')
+          ..write('queryHash: $queryHash, ')
+          ..write('filter: $filter, ')
+          ..write('sort: $sort')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(queryHash, filter, sort);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ChannelQueryMetadataEntity &&
+          other.queryHash == this.queryHash &&
+          other.filter == this.filter &&
+          other.sort == this.sort);
+}
+
+class ChannelQueriesMetadataCompanion extends UpdateCompanion<ChannelQueryMetadataEntity> {
+  final Value<String> queryHash;
+  final Value<Filter> filter;
+  final Value<SortOrder<ChannelState>> sort;
+  final Value<int> rowid;
+  const ChannelQueriesMetadataCompanion({
+    this.queryHash = const Value.absent(),
+    this.filter = const Value.absent(),
+    this.sort = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ChannelQueriesMetadataCompanion.insert({
+    required String queryHash,
+    required Filter filter,
+    required SortOrder<ChannelState> sort,
+    this.rowid = const Value.absent(),
+  }) : queryHash = Value(queryHash),
+       filter = Value(filter),
+       sort = Value(sort);
+  static Insertable<ChannelQueryMetadataEntity> custom({
+    Expression<String>? queryHash,
+    Expression<String>? filter,
+    Expression<String>? sort,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (queryHash != null) 'query_hash': queryHash,
+      if (filter != null) 'filter': filter,
+      if (sort != null) 'sort': sort,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ChannelQueriesMetadataCompanion copyWith({
+    Value<String>? queryHash,
+    Value<Filter>? filter,
+    Value<SortOrder<ChannelState>>? sort,
+    Value<int>? rowid,
+  }) {
+    return ChannelQueriesMetadataCompanion(
+      queryHash: queryHash ?? this.queryHash,
+      filter: filter ?? this.filter,
+      sort: sort ?? this.sort,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (queryHash.present) {
+      map['query_hash'] = Variable<String>(queryHash.value);
+    }
+    if (filter.present) {
+      map['filter'] = Variable<String>(
+        $ChannelQueriesMetadataTable.$converterfilter.toSql(filter.value),
+      );
+    }
+    if (sort.present) {
+      map['sort'] = Variable<String>(
+        $ChannelQueriesMetadataTable.$convertersort.toSql(sort.value),
+      );
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ChannelQueriesMetadataCompanion(')
+          ..write('queryHash: $queryHash, ')
+          ..write('filter: $filter, ')
+          ..write('sort: $sort, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $ConnectionEventsTable extends ConnectionEvents with TableInfo<$ConnectionEventsTable, ConnectionEventEntity> {
   @override
   final GeneratedDatabase attachedDatabase;
@@ -10918,8 +11733,25 @@ abstract class _$DriftChatDatabase extends GeneratedDatabase {
   late final $MembersTable members = $MembersTable(this);
   late final $ReadsTable reads = $ReadsTable(this);
   late final $ChannelQueriesTable channelQueries = $ChannelQueriesTable(this);
+  late final $ChannelQueriesMetadataTable channelQueriesMetadata = $ChannelQueriesMetadataTable(this);
   late final $ConnectionEventsTable connectionEvents = $ConnectionEventsTable(
     this,
+  );
+  late final Index idxMessagesChannelCid = Index(
+    'idx_messages_channel_cid',
+    'CREATE INDEX idx_messages_channel_cid ON messages (channel_cid)',
+  );
+  late final Index idxReactionsMessageId = Index(
+    'idx_reactions_message_id',
+    'CREATE INDEX idx_reactions_message_id ON reactions (message_id)',
+  );
+  late final Index idxMembersChannelCid = Index(
+    'idx_members_channel_cid',
+    'CREATE INDEX idx_members_channel_cid ON members (channel_cid)',
+  );
+  late final Index idxReadsChannelCid = Index(
+    'idx_reads_channel_cid',
+    'CREATE INDEX idx_reads_channel_cid ON reads (channel_cid)',
   );
   late final UserDao userDao = UserDao(this as DriftChatDatabase);
   late final ChannelDao channelDao = ChannelDao(this as DriftChatDatabase);
@@ -10960,7 +11792,12 @@ abstract class _$DriftChatDatabase extends GeneratedDatabase {
     members,
     reads,
     channelQueries,
+    channelQueriesMetadata,
     connectionEvents,
+    idxMessagesChannelCid,
+    idxReactionsMessageId,
+    idxMembersChannelCid,
+    idxReadsChannelCid,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -11897,6 +12734,11 @@ typedef $$MessagesTableCreateCompanionBuilder =
       required List<String> attachments,
       required String state,
       Value<String> type,
+      Value<bool?> mentionedChannel,
+      Value<List<String>?> mentionedGroupIds,
+      Value<List<String>?> mentionedGroups,
+      Value<bool?> mentionedHere,
+      Value<List<String>?> mentionedRoles,
       required List<String> mentionedUsers,
       Value<Map<String, ReactionGroup>?> reactionGroups,
       Value<String?> parentId,
@@ -11933,6 +12775,11 @@ typedef $$MessagesTableUpdateCompanionBuilder =
       Value<List<String>> attachments,
       Value<String> state,
       Value<String> type,
+      Value<bool?> mentionedChannel,
+      Value<List<String>?> mentionedGroupIds,
+      Value<List<String>?> mentionedGroups,
+      Value<bool?> mentionedHere,
+      Value<List<String>?> mentionedRoles,
       Value<List<String>> mentionedUsers,
       Value<Map<String, ReactionGroup>?> reactionGroups,
       Value<String?> parentId,
@@ -12074,6 +12921,31 @@ class $$MessagesTableFilterComposer extends Composer<_$DriftChatDatabase, $Messa
   ColumnFilters<String> get type => $composableBuilder(
     column: $table.type,
     builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get mentionedChannel => $composableBuilder(
+    column: $table.mentionedChannel,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<List<String>?, List<String>, String> get mentionedGroupIds => $composableBuilder(
+    column: $table.mentionedGroupIds,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<List<String>?, List<String>, String> get mentionedGroups => $composableBuilder(
+    column: $table.mentionedGroups,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnFilters<bool> get mentionedHere => $composableBuilder(
+    column: $table.mentionedHere,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<List<String>?, List<String>, String> get mentionedRoles => $composableBuilder(
+    column: $table.mentionedRoles,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
   );
 
   ColumnWithTypeConverterFilters<List<String>, List<String>, String> get mentionedUsers => $composableBuilder(
@@ -12336,6 +13208,31 @@ class $$MessagesTableOrderingComposer extends Composer<_$DriftChatDatabase, $Mes
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<bool> get mentionedChannel => $composableBuilder(
+    column: $table.mentionedChannel,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get mentionedGroupIds => $composableBuilder(
+    column: $table.mentionedGroupIds,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get mentionedGroups => $composableBuilder(
+    column: $table.mentionedGroups,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get mentionedHere => $composableBuilder(
+    column: $table.mentionedHere,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get mentionedRoles => $composableBuilder(
+    column: $table.mentionedRoles,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get mentionedUsers => $composableBuilder(
     column: $table.mentionedUsers,
     builder: (column) => ColumnOrderings(column),
@@ -12512,6 +13409,31 @@ class $$MessagesTableAnnotationComposer extends Composer<_$DriftChatDatabase, $M
   GeneratedColumn<String> get state => $composableBuilder(column: $table.state, builder: (column) => column);
 
   GeneratedColumn<String> get type => $composableBuilder(column: $table.type, builder: (column) => column);
+
+  GeneratedColumn<bool> get mentionedChannel => $composableBuilder(
+    column: $table.mentionedChannel,
+    builder: (column) => column,
+  );
+
+  GeneratedColumnWithTypeConverter<List<String>?, String> get mentionedGroupIds => $composableBuilder(
+    column: $table.mentionedGroupIds,
+    builder: (column) => column,
+  );
+
+  GeneratedColumnWithTypeConverter<List<String>?, String> get mentionedGroups => $composableBuilder(
+    column: $table.mentionedGroups,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get mentionedHere => $composableBuilder(
+    column: $table.mentionedHere,
+    builder: (column) => column,
+  );
+
+  GeneratedColumnWithTypeConverter<List<String>?, String> get mentionedRoles => $composableBuilder(
+    column: $table.mentionedRoles,
+    builder: (column) => column,
+  );
 
   GeneratedColumnWithTypeConverter<List<String>, String> get mentionedUsers => $composableBuilder(
     column: $table.mentionedUsers,
@@ -12748,6 +13670,11 @@ class $$MessagesTableTableManager
                 Value<List<String>> attachments = const Value.absent(),
                 Value<String> state = const Value.absent(),
                 Value<String> type = const Value.absent(),
+                Value<bool?> mentionedChannel = const Value.absent(),
+                Value<List<String>?> mentionedGroupIds = const Value.absent(),
+                Value<List<String>?> mentionedGroups = const Value.absent(),
+                Value<bool?> mentionedHere = const Value.absent(),
+                Value<List<String>?> mentionedRoles = const Value.absent(),
                 Value<List<String>> mentionedUsers = const Value.absent(),
                 Value<Map<String, ReactionGroup>?> reactionGroups = const Value.absent(),
                 Value<String?> parentId = const Value.absent(),
@@ -12782,6 +13709,11 @@ class $$MessagesTableTableManager
                 attachments: attachments,
                 state: state,
                 type: type,
+                mentionedChannel: mentionedChannel,
+                mentionedGroupIds: mentionedGroupIds,
+                mentionedGroups: mentionedGroups,
+                mentionedHere: mentionedHere,
+                mentionedRoles: mentionedRoles,
                 mentionedUsers: mentionedUsers,
                 reactionGroups: reactionGroups,
                 parentId: parentId,
@@ -12818,6 +13750,11 @@ class $$MessagesTableTableManager
                 required List<String> attachments,
                 required String state,
                 Value<String> type = const Value.absent(),
+                Value<bool?> mentionedChannel = const Value.absent(),
+                Value<List<String>?> mentionedGroupIds = const Value.absent(),
+                Value<List<String>?> mentionedGroups = const Value.absent(),
+                Value<bool?> mentionedHere = const Value.absent(),
+                Value<List<String>?> mentionedRoles = const Value.absent(),
                 required List<String> mentionedUsers,
                 Value<Map<String, ReactionGroup>?> reactionGroups = const Value.absent(),
                 Value<String?> parentId = const Value.absent(),
@@ -12852,6 +13789,11 @@ class $$MessagesTableTableManager
                 attachments: attachments,
                 state: state,
                 type: type,
+                mentionedChannel: mentionedChannel,
+                mentionedGroupIds: mentionedGroupIds,
+                mentionedGroups: mentionedGroups,
+                mentionedHere: mentionedHere,
+                mentionedRoles: mentionedRoles,
                 mentionedUsers: mentionedUsers,
                 reactionGroups: reactionGroups,
                 parentId: parentId,
@@ -14037,6 +14979,11 @@ typedef $$PinnedMessagesTableCreateCompanionBuilder =
       required List<String> attachments,
       required String state,
       Value<String> type,
+      Value<bool?> mentionedChannel,
+      Value<List<String>?> mentionedGroupIds,
+      Value<List<String>?> mentionedGroups,
+      Value<bool?> mentionedHere,
+      Value<List<String>?> mentionedRoles,
       required List<String> mentionedUsers,
       Value<Map<String, ReactionGroup>?> reactionGroups,
       Value<String?> parentId,
@@ -14073,6 +15020,11 @@ typedef $$PinnedMessagesTableUpdateCompanionBuilder =
       Value<List<String>> attachments,
       Value<String> state,
       Value<String> type,
+      Value<bool?> mentionedChannel,
+      Value<List<String>?> mentionedGroupIds,
+      Value<List<String>?> mentionedGroups,
+      Value<bool?> mentionedHere,
+      Value<List<String>?> mentionedRoles,
       Value<List<String>> mentionedUsers,
       Value<Map<String, ReactionGroup>?> reactionGroups,
       Value<String?> parentId,
@@ -14166,6 +15118,31 @@ class $$PinnedMessagesTableFilterComposer extends Composer<_$DriftChatDatabase, 
   ColumnFilters<String> get type => $composableBuilder(
     column: $table.type,
     builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get mentionedChannel => $composableBuilder(
+    column: $table.mentionedChannel,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<List<String>?, List<String>, String> get mentionedGroupIds => $composableBuilder(
+    column: $table.mentionedGroupIds,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<List<String>?, List<String>, String> get mentionedGroups => $composableBuilder(
+    column: $table.mentionedGroups,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnFilters<bool> get mentionedHere => $composableBuilder(
+    column: $table.mentionedHere,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<List<String>?, List<String>, String> get mentionedRoles => $composableBuilder(
+    column: $table.mentionedRoles,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
   );
 
   ColumnWithTypeConverterFilters<List<String>, List<String>, String> get mentionedUsers => $composableBuilder(
@@ -14363,6 +15340,31 @@ class $$PinnedMessagesTableOrderingComposer extends Composer<_$DriftChatDatabase
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<bool> get mentionedChannel => $composableBuilder(
+    column: $table.mentionedChannel,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get mentionedGroupIds => $composableBuilder(
+    column: $table.mentionedGroupIds,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get mentionedGroups => $composableBuilder(
+    column: $table.mentionedGroups,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get mentionedHere => $composableBuilder(
+    column: $table.mentionedHere,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get mentionedRoles => $composableBuilder(
+    column: $table.mentionedRoles,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get mentionedUsers => $composableBuilder(
     column: $table.mentionedUsers,
     builder: (column) => ColumnOrderings(column),
@@ -14522,6 +15524,31 @@ class $$PinnedMessagesTableAnnotationComposer extends Composer<_$DriftChatDataba
   GeneratedColumn<String> get state => $composableBuilder(column: $table.state, builder: (column) => column);
 
   GeneratedColumn<String> get type => $composableBuilder(column: $table.type, builder: (column) => column);
+
+  GeneratedColumn<bool> get mentionedChannel => $composableBuilder(
+    column: $table.mentionedChannel,
+    builder: (column) => column,
+  );
+
+  GeneratedColumnWithTypeConverter<List<String>?, String> get mentionedGroupIds => $composableBuilder(
+    column: $table.mentionedGroupIds,
+    builder: (column) => column,
+  );
+
+  GeneratedColumnWithTypeConverter<List<String>?, String> get mentionedGroups => $composableBuilder(
+    column: $table.mentionedGroups,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get mentionedHere => $composableBuilder(
+    column: $table.mentionedHere,
+    builder: (column) => column,
+  );
+
+  GeneratedColumnWithTypeConverter<List<String>?, String> get mentionedRoles => $composableBuilder(
+    column: $table.mentionedRoles,
+    builder: (column) => column,
+  );
 
   GeneratedColumnWithTypeConverter<List<String>, String> get mentionedUsers => $composableBuilder(
     column: $table.mentionedUsers,
@@ -14690,6 +15717,11 @@ class $$PinnedMessagesTableTableManager
                 Value<List<String>> attachments = const Value.absent(),
                 Value<String> state = const Value.absent(),
                 Value<String> type = const Value.absent(),
+                Value<bool?> mentionedChannel = const Value.absent(),
+                Value<List<String>?> mentionedGroupIds = const Value.absent(),
+                Value<List<String>?> mentionedGroups = const Value.absent(),
+                Value<bool?> mentionedHere = const Value.absent(),
+                Value<List<String>?> mentionedRoles = const Value.absent(),
                 Value<List<String>> mentionedUsers = const Value.absent(),
                 Value<Map<String, ReactionGroup>?> reactionGroups = const Value.absent(),
                 Value<String?> parentId = const Value.absent(),
@@ -14724,6 +15756,11 @@ class $$PinnedMessagesTableTableManager
                 attachments: attachments,
                 state: state,
                 type: type,
+                mentionedChannel: mentionedChannel,
+                mentionedGroupIds: mentionedGroupIds,
+                mentionedGroups: mentionedGroups,
+                mentionedHere: mentionedHere,
+                mentionedRoles: mentionedRoles,
                 mentionedUsers: mentionedUsers,
                 reactionGroups: reactionGroups,
                 parentId: parentId,
@@ -14760,6 +15797,11 @@ class $$PinnedMessagesTableTableManager
                 required List<String> attachments,
                 required String state,
                 Value<String> type = const Value.absent(),
+                Value<bool?> mentionedChannel = const Value.absent(),
+                Value<List<String>?> mentionedGroupIds = const Value.absent(),
+                Value<List<String>?> mentionedGroups = const Value.absent(),
+                Value<bool?> mentionedHere = const Value.absent(),
+                Value<List<String>?> mentionedRoles = const Value.absent(),
                 required List<String> mentionedUsers,
                 Value<Map<String, ReactionGroup>?> reactionGroups = const Value.absent(),
                 Value<String?> parentId = const Value.absent(),
@@ -14794,6 +15836,11 @@ class $$PinnedMessagesTableTableManager
                 attachments: attachments,
                 state: state,
                 type: type,
+                mentionedChannel: mentionedChannel,
+                mentionedGroupIds: mentionedGroupIds,
+                mentionedGroups: mentionedGroups,
+                mentionedHere: mentionedHere,
+                mentionedRoles: mentionedRoles,
                 mentionedUsers: mentionedUsers,
                 reactionGroups: reactionGroups,
                 parentId: parentId,
@@ -17764,6 +18811,173 @@ typedef $$ChannelQueriesTableProcessedTableManager =
       ChannelQueryEntity,
       PrefetchHooks Function()
     >;
+typedef $$ChannelQueriesMetadataTableCreateCompanionBuilder =
+    ChannelQueriesMetadataCompanion Function({
+      required String queryHash,
+      required Filter filter,
+      required SortOrder<ChannelState> sort,
+      Value<int> rowid,
+    });
+typedef $$ChannelQueriesMetadataTableUpdateCompanionBuilder =
+    ChannelQueriesMetadataCompanion Function({
+      Value<String> queryHash,
+      Value<Filter> filter,
+      Value<SortOrder<ChannelState>> sort,
+      Value<int> rowid,
+    });
+
+class $$ChannelQueriesMetadataTableFilterComposer extends Composer<_$DriftChatDatabase, $ChannelQueriesMetadataTable> {
+  $$ChannelQueriesMetadataTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get queryHash => $composableBuilder(
+    column: $table.queryHash,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<Filter, Filter, String> get filter => $composableBuilder(
+    column: $table.filter,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<SortOrder<ChannelState>, SortOrder<ChannelState>, String> get sort =>
+      $composableBuilder(
+        column: $table.sort,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+}
+
+class $$ChannelQueriesMetadataTableOrderingComposer
+    extends Composer<_$DriftChatDatabase, $ChannelQueriesMetadataTable> {
+  $$ChannelQueriesMetadataTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get queryHash => $composableBuilder(
+    column: $table.queryHash,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get filter => $composableBuilder(
+    column: $table.filter,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get sort => $composableBuilder(
+    column: $table.sort,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$ChannelQueriesMetadataTableAnnotationComposer
+    extends Composer<_$DriftChatDatabase, $ChannelQueriesMetadataTable> {
+  $$ChannelQueriesMetadataTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get queryHash => $composableBuilder(column: $table.queryHash, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<Filter, String> get filter =>
+      $composableBuilder(column: $table.filter, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<SortOrder<ChannelState>, String> get sort =>
+      $composableBuilder(column: $table.sort, builder: (column) => column);
+}
+
+class $$ChannelQueriesMetadataTableTableManager
+    extends
+        RootTableManager<
+          _$DriftChatDatabase,
+          $ChannelQueriesMetadataTable,
+          ChannelQueryMetadataEntity,
+          $$ChannelQueriesMetadataTableFilterComposer,
+          $$ChannelQueriesMetadataTableOrderingComposer,
+          $$ChannelQueriesMetadataTableAnnotationComposer,
+          $$ChannelQueriesMetadataTableCreateCompanionBuilder,
+          $$ChannelQueriesMetadataTableUpdateCompanionBuilder,
+          (
+            ChannelQueryMetadataEntity,
+            BaseReferences<_$DriftChatDatabase, $ChannelQueriesMetadataTable, ChannelQueryMetadataEntity>,
+          ),
+          ChannelQueryMetadataEntity,
+          PrefetchHooks Function()
+        > {
+  $$ChannelQueriesMetadataTableTableManager(
+    _$DriftChatDatabase db,
+    $ChannelQueriesMetadataTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () => $$ChannelQueriesMetadataTableFilterComposer(
+            $db: db,
+            $table: table,
+          ),
+          createOrderingComposer: () => $$ChannelQueriesMetadataTableOrderingComposer(
+            $db: db,
+            $table: table,
+          ),
+          createComputedFieldComposer: () => $$ChannelQueriesMetadataTableAnnotationComposer(
+            $db: db,
+            $table: table,
+          ),
+          updateCompanionCallback:
+              ({
+                Value<String> queryHash = const Value.absent(),
+                Value<Filter> filter = const Value.absent(),
+                Value<SortOrder<ChannelState>> sort = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ChannelQueriesMetadataCompanion(
+                queryHash: queryHash,
+                filter: filter,
+                sort: sort,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String queryHash,
+                required Filter filter,
+                required SortOrder<ChannelState> sort,
+                Value<int> rowid = const Value.absent(),
+              }) => ChannelQueriesMetadataCompanion.insert(
+                queryHash: queryHash,
+                filter: filter,
+                sort: sort,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0.map((e) => (e.readTable(table), BaseReferences(db, table, e))).toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$ChannelQueriesMetadataTableProcessedTableManager =
+    ProcessedTableManager<
+      _$DriftChatDatabase,
+      $ChannelQueriesMetadataTable,
+      ChannelQueryMetadataEntity,
+      $$ChannelQueriesMetadataTableFilterComposer,
+      $$ChannelQueriesMetadataTableOrderingComposer,
+      $$ChannelQueriesMetadataTableAnnotationComposer,
+      $$ChannelQueriesMetadataTableCreateCompanionBuilder,
+      $$ChannelQueriesMetadataTableUpdateCompanionBuilder,
+      (
+        ChannelQueryMetadataEntity,
+        BaseReferences<_$DriftChatDatabase, $ChannelQueriesMetadataTable, ChannelQueryMetadataEntity>,
+      ),
+      ChannelQueryMetadataEntity,
+      PrefetchHooks Function()
+    >;
 typedef $$ConnectionEventsTableCreateCompanionBuilder =
     ConnectionEventsCompanion Function({
       Value<int> id,
@@ -18016,6 +19230,10 @@ class $DriftChatDatabaseManager {
   $$MembersTableTableManager get members => $$MembersTableTableManager(_db, _db.members);
   $$ReadsTableTableManager get reads => $$ReadsTableTableManager(_db, _db.reads);
   $$ChannelQueriesTableTableManager get channelQueries => $$ChannelQueriesTableTableManager(_db, _db.channelQueries);
+  $$ChannelQueriesMetadataTableTableManager get channelQueriesMetadata => $$ChannelQueriesMetadataTableTableManager(
+    _db,
+    _db.channelQueriesMetadata,
+  );
   $$ConnectionEventsTableTableManager get connectionEvents =>
       $$ConnectionEventsTableTableManager(_db, _db.connectionEvents);
 }

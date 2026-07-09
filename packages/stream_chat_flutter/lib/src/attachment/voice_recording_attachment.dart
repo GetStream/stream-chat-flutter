@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/audio/audio_playlist_state.dart';
 import 'package:stream_chat_flutter/src/audio/audio_sampling.dart' as sampling;
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 const _kDefaultWaveformLimit = 35;
 const _kDefaultWaveformHeight = 24.0;
@@ -325,6 +324,7 @@ class AudioControlButton extends StatelessWidget {
     this.type = .outline,
     this.size = .medium,
     this.themeStyle,
+    this.autofocus = false,
   });
 
   /// The current state of the audio track.
@@ -351,20 +351,31 @@ class AudioControlButton extends StatelessWidget {
   /// The optional style override for the button.
   final StreamButtonThemeStyle? themeStyle;
 
+  /// Whether this button should be focused when first rendered.
+  final bool autofocus;
+
   @override
   Widget build(BuildContext context) {
     final icons = context.streamIcons;
+    final a11y = context.translations.accessibility;
 
     return StreamButton.icon(
       style: style,
       type: type,
       size: size,
       themeStyle: themeStyle,
+      autofocus: autofocus,
       icon: switch (state) {
         TrackState.loading => Icon(icons.playFill),
         TrackState.idle => Icon(icons.playFill),
         TrackState.playing => Icon(icons.pauseFill),
         TrackState.paused => Icon(icons.playFill),
+      },
+      tooltip: switch (state) {
+        TrackState.loading => a11y.voiceRecordingLoadingTooltip,
+        TrackState.idle => a11y.voiceRecordingPlayTooltip,
+        TrackState.playing => a11y.voiceRecordingPauseTooltip,
+        TrackState.paused => a11y.voiceRecordingPlayTooltip,
       },
       onPressed: switch (state) {
         TrackState.loading => null,

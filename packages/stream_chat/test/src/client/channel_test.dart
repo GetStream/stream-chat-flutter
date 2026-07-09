@@ -5854,6 +5854,61 @@ void main() {
         },
       );
 
+      test(
+        'should not update channel read state on thread message read event',
+        () async {
+          final currentUser = User(id: 'test-user');
+          final currentRead = Read(
+            user: currentUser,
+            lastRead: DateTime(2020),
+            unreadMessages: 10,
+            lastReadMessageId: 'channel-msg-1',
+          );
+
+          // Setup initial channel read state
+          channel.state?.updateChannelState(
+            channel.state!.channelState.copyWith(
+              read: [currentRead],
+            ),
+          );
+
+          // Verify initial state
+          final read = channel.state?.read.first;
+          expect(read?.unreadMessages, 10);
+          expect(read?.lastReadMessageId, 'channel-msg-1');
+          expect(read?.lastRead.isAtSameMomentAs(DateTime(2020)), isTrue);
+
+          // Create a thread-scoped message.read event (thread != null)
+          final threadMessageReadEvent = Event(
+            cid: channel.cid,
+            type: EventType.messageRead,
+            user: currentUser,
+            createdAt: DateTime(2022),
+            lastReadMessageId: 'thread-reply-99',
+            thread: Thread(
+              channelCid: channel.cid!,
+              parentMessageId: 'parent-msg-1',
+              createdByUserId: currentUser.id,
+              replyCount: 3,
+              participantCount: 2,
+            ),
+          );
+
+          // Dispatch event
+          client.addEvent(threadMessageReadEvent);
+
+          // Wait for event to be processed
+          await Future.delayed(Duration.zero);
+
+          // Channel read state must be untouched — thread reads
+          // must not clobber the channel-level Read.
+          final after = channel.state?.read.first;
+          expect(after?.unreadMessages, 10);
+          expect(after?.lastReadMessageId, 'channel-msg-1');
+          expect(after?.lastRead.isAtSameMomentAs(DateTime(2020)), isTrue);
+        },
+      );
+
       test('should update read state on notification mark unread event', () async {
         // Create the current read state
         final currentUser = User(id: 'test-user');
@@ -8505,6 +8560,30 @@ void main() {
       (channel) => channel.canShareLocation,
     );
 
+    testCapability(
+      'NotifyChannel',
+      ChannelCapability.notifyChannel,
+      (channel) => channel.canNotifyChannel,
+    );
+
+    testCapability(
+      'NotifyHere',
+      ChannelCapability.notifyHere,
+      (channel) => channel.canNotifyHere,
+    );
+
+    testCapability(
+      'NotifyRole',
+      ChannelCapability.notifyRole,
+      (channel) => channel.canNotifyRole,
+    );
+
+    testCapability(
+      'NotifyGroup',
+      ChannelCapability.notifyGroup,
+      (channel) => channel.canNotifyGroup,
+    );
+
     test('returns correct values with multiple capabilities', () {
       final channelState = _generateChannelState(
         channelId,
@@ -8618,6 +8697,188 @@ void main() {
       test('should return cooldown stream with default value', () {
         expectLater(channel.cooldownStream.take(1), emits(0));
       });
+    });
+
+    group('Thread reply cooldown', () {
+      const currentUserId = 'test-user-id'; // matches FakeClientState default
+      const cooldownDuration = 30; // seconds
+
+      Channel _buildChannelWithCooldown() {
+        final channelModel = ChannelModel(
+          id: channelId,
+          type: channelType,
+          cooldown: cooldownDuration,
+          ownCapabilities: [ChannelCapability.slowMode],
+        );
+        final state = ChannelState(channel: channelModel);
+        final ch = Channel.fromState(client, state);
+        // isUpToDate is seeded true by default
+        return ch;
+      }
+
+      test(
+        'should return positive cooldown after current user sends a thread reply',
+        () {
+          final ch = _buildChannelWithCooldown();
+          addTearDown(ch.dispose);
+
+          // Simulate a thread reply by the current user sent just now.
+          final threadReply = Message(
+            id: 'thread-reply-1',
+            parentId: 'parent-msg-1',
+            showInChannel: false,
+            createdAt: DateTime.timestamp(),
+            user: User(id: currentUserId),
+          );
+          ch.state!.updateThreadInfo('parent-msg-1', [threadReply]);
+
+          expect(ch.getRemainingCooldown(), greaterThan(0));
+        },
+      );
+
+      test(
+        'should return 0 cooldown when thread reply was sent outside the cooldown window',
+        () {
+          final ch = _buildChannelWithCooldown();
+          addTearDown(ch.dispose);
+
+          // Reply sent cooldownDuration+5 seconds ago — outside the window.
+          final oldReply = Message(
+            id: 'thread-reply-old',
+            parentId: 'parent-msg-1',
+            showInChannel: false,
+            createdAt: DateTime.timestamp().subtract(
+              const Duration(seconds: cooldownDuration + 5),
+            ),
+            user: User(id: currentUserId),
+          );
+          ch.state!.updateThreadInfo('parent-msg-1', [oldReply]);
+
+          expect(ch.getRemainingCooldown(), equals(0));
+        },
+      );
+
+      test(
+        'should not trigger cooldown for a thread reply from another user',
+        () {
+          final ch = _buildChannelWithCooldown();
+          addTearDown(ch.dispose);
+
+          final otherUserReply = Message(
+            id: 'thread-reply-other',
+            parentId: 'parent-msg-1',
+            showInChannel: false,
+            createdAt: DateTime.timestamp(),
+            user: User(id: 'other-user-id'),
+          );
+          ch.state!.updateThreadInfo('parent-msg-1', [otherUserReply]);
+
+          expect(ch.getRemainingCooldown(), equals(0));
+        },
+      );
+
+      test(
+        'should clear cooldown when the most-recent own message is hard-deleted',
+        () {
+          final ch = _buildChannelWithCooldown();
+          addTearDown(ch.dispose);
+
+          final ownMessage = Message(
+            id: 'msg-1',
+            createdAt: DateTime.timestamp(),
+            user: User(id: currentUserId),
+          );
+          ch.state!.updateMessage(ownMessage);
+          expect(ch.getRemainingCooldown(), greaterThan(0));
+
+          ch.state!.deleteMessage(ownMessage, hardDelete: true);
+          expect(ch.getRemainingCooldown(), equals(0));
+        },
+      );
+
+      test(
+        'currentUserLastMessageAtStream emits a new timestamp when own message is added',
+        () async {
+          final ch = _buildChannelWithCooldown();
+          addTearDown(ch.dispose);
+
+          final emissions = <DateTime?>[];
+          final sub = ch.currentUserLastMessageAtStream.listen(emissions.add);
+          addTearDown(sub.cancel);
+
+          // Let the seed emission settle.
+          await Future<void>.delayed(Duration.zero);
+          final seededLast = emissions.last;
+
+          ch.state!.updateMessage(
+            Message(
+              id: 'msg-1',
+              createdAt: DateTime.timestamp(),
+              user: User(id: currentUserId),
+            ),
+          );
+          await Future<void>.delayed(Duration.zero);
+
+          expect(emissions.last, isNotNull);
+          expect(emissions.last, isNot(equals(seededLast)));
+        },
+      );
+
+      test(
+        'getRemainingCooldown uses the explicit [lastMessageAt] override',
+        () {
+          final ch = _buildChannelWithCooldown();
+          addTearDown(ch.dispose);
+
+          // No messages in state, so the default path returns 0.
+          expect(ch.getRemainingCooldown(), equals(0));
+
+          // Override pointing inside the cooldown window → positive remaining.
+          final recent = DateTime.timestamp().subtract(const Duration(seconds: 5));
+          expect(ch.getRemainingCooldown(lastMessageAt: recent), greaterThan(0));
+
+          // Override pointing outside the window → 0.
+          final old = DateTime.timestamp().subtract(
+            const Duration(seconds: cooldownDuration + 5),
+          );
+          expect(ch.getRemainingCooldown(lastMessageAt: old), equals(0));
+        },
+      );
+
+      test(
+        'currentUserLastMessageAt picks the latest across channel messages and threads',
+        () {
+          final ch = _buildChannelWithCooldown();
+          addTearDown(ch.dispose);
+
+          final older = DateTime.timestamp().subtract(const Duration(seconds: 20));
+          final newer = DateTime.timestamp().subtract(const Duration(seconds: 5));
+
+          // Older message in the main channel.
+          ch.state!.updateMessage(
+            Message(
+              id: 'msg-1',
+              createdAt: older,
+              user: User(id: currentUserId),
+            ),
+          );
+          // Newer reply in a thread.
+          ch.state!.updateThreadInfo('parent-msg-1', [
+            Message(
+              id: 'thread-reply-1',
+              parentId: 'parent-msg-1',
+              showInChannel: false,
+              createdAt: newer,
+              user: User(id: currentUserId),
+            ),
+          ]);
+
+          // Should pick the newer thread reply, not the older channel message.
+          final result = ch.currentUserLastMessageAt;
+          expect(result, isNotNull);
+          expect(result!.isAtSameMomentAs(newer), isTrue);
+        },
+      );
     });
 
     group('Disposed channel state validation', () {

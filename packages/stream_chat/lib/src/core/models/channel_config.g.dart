@@ -22,6 +22,13 @@ ChannelConfig _$ChannelConfigFromJson(Map<String, dynamic> json) => ChannelConfi
   replies: json['replies'] as bool? ?? false,
   search: json['search'] as bool? ?? false,
   polls: json['polls'] as bool? ?? false,
+  pushLevel: json['push_level'] as PushLevel?,
+  pushNotifications: json['push_notifications'] as bool? ?? true,
+  chatPreferences: json['chat_preferences'] == null
+      ? null
+      : ChatPreferences.fromJson(
+          json['chat_preferences'] as Map<String, dynamic>,
+        ),
   typingEvents: json['typing_events'] as bool? ?? false,
   uploads: json['uploads'] as bool? ?? false,
   urlEnrichment: json['url_enrichment'] as bool? ?? false,
@@ -46,6 +53,9 @@ Map<String, dynamic> _$ChannelConfigToJson(ChannelConfig instance) => <String, d
   'replies': instance.replies,
   'search': instance.search,
   'polls': instance.polls,
+  'push_level': instance.pushLevel,
+  'push_notifications': instance.pushNotifications,
+  'chat_preferences': instance.chatPreferences?.toJson(),
   'typing_events': instance.typingEvents,
   'uploads': instance.uploads,
   'url_enrichment': instance.urlEnrichment,

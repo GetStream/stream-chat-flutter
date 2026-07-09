@@ -1,3 +1,38 @@
+## Upcoming
+
+🔄 Changed
+
+- `StreamChatClient.updateSystemEnvironment` now sanitizes the passed `SystemEnvironment`: `sdkName`, `sdkVersion`, and `osName` are locked to internal defaults, and `sdkIdentifier` only accepts the `dart` → `flutter` promotion (other values, including a `flutter` → `dart` demotion, are ignored). `appName`, `appVersion`, `osVersion`, and `deviceModel` continue to pass through as-is.
+
+🐞 Fixed
+
+- `StreamChatNetworkError.fromDioException` no longer throws `FormatException` when an edge/proxy returns a non-JSON body (e.g. a plain `upstream request timeout` from a 504); the original network error now surfaces with `statusCode` / `statusMessage` intact.
+
+
+## 10.1.0
+
+✅ Added
+
+- Added roles API on `StreamChatClient`: `searchRoles` for searching roles.
+- Added user-group APIs on `StreamChatClient`: `listUserGroups`, `searchUserGroups`, `getUserGroup`, `createUserGroup`, `updateUserGroup`, `deleteUserGroup`, `addUserGroupMembers`, `removeUserGroupMembers`.
+- Added enhanced-mention fields on `Message`: `mentionedChannel`, `mentionedHere`, `mentionedRoles`, `mentionedGroupIds`, and `mentionedGroups`.
+- Added `ChannelCapability.notifyChannel`, `notifyHere`, `notifyRole`, and `notifyGroup` capabilities, with matching `Channel.canNotifyChannel` / `canNotifyHere` / `canNotifyRole` / `canNotifyGroup` getters.
+- Added `ChannelConfig.pushLevel`, `pushNotifications`, and `chatPreferences` for per-channel-type push configuration.
+- Added `PushLevel` and `ChatPreferenceLevel` extension types and the `ChatPreferences` model — granular per-category push preferences (direct, channel, here, role, group mentions, thread replies, default).
+- Added `chatPreferences` field to `PushPreferenceInput`, `PushPreference`, and `ChannelPushPreference`.
+- Added `Command.set` field and `CommandSet` extension type (`fun`, `moderation`) for typed access to the backend's command set classifier.
+- Added `StreamChatClient.pauseReconnect` / `resumeReconnect` to suspend the WebSocket's auto-retry loop without tearing down the user session.
+
+🔄 Changed
+
+- `Command` constructor: `description` and `args` are now optional (default to `''`), matching the backend's "always present, may be empty" wire shape.
+
+🐞 Fixed
+
+- `Message.toJson` mention sanitization (`removeMentionsIfNotIncluded`) now requires `@token` to match at a word boundary, so e.g. typing `@administrator` no longer keeps a stale `admin` role mention alive, and `@channels` / `@hereafter` no longer keep `mentionedChannel` / `mentionedHere` set.
+- Fixed an unhandled `WebSocketChannelException` surfacing when a reconnect attempt failed (e.g. DNS lookup failed in background); the duplicate signal on `sink.done` is now ignored since the stream's `onError` already handles it.
+- Fixed resetting channel unread count on `message.read` events delivered for threads.
+
 ## 10.0.1
 
 ✅ Added
@@ -8,10 +43,13 @@
 - Added `Message.updateWith(Message? other)` — merges a server-side update onto the local message while preserving locally-known `poll`, `sharedLocation`, `ownReactions`, and nested `quotedMessage` enrichment when the server omits them.
 - Added `Channel.isOneToOne` — true when the channel is `isDistinct` and has exactly two members. For the looser count-only check, inline `channel.memberCount == 2`.
 - Added `IterableMergeX.merge` (keyed-map merge on `Iterable<T>`, unsorted output) and `SortedListX.mergeSorted` (two-pointer merge on a sorted `List<T>`). Splits what `SortedListX.merge` did in 9.24.0 — see Changed below.
+- Added support for predefined filters for `QueryChannels` on `StreamChatClient` (`StreamChatClient.queryChannels` and `StreamChatClient.queryChannelsWithResult`).
+- Added `ChatPersistenceClient.queryChannelStates` and `ChatPersistenceClient.saveChannelQueries` as the unified read/write methods for channel-query persistence. Both accept standard and predefined-filter parameters and internally dispatch.
 
 ⚠️ Deprecated
 
 - Deprecated `Message.syncWith` in favor of `Message.updateWith`. Note the arguments are flipped: `local.updateWith(remote)` replaces `remote.syncWith(local)`.
+- Deprecated `ChatPersistenceClient.getChannelStates` and `ChatPersistenceClient.updateChannelQueries` in favor of the unified `queryChannelStates` / `saveChannelQueries`. The deprecated methods stay overridable so downstream subclasses keep working unchanged.
 
 🔄 Changed
 
@@ -29,6 +67,7 @@
 
 🐞 Fixed
 
+- Fixed slow mode (cooldown) not activating after sending a reply in a thread. `Channel.getRemainingCooldown()` and `currentUserLastMessageAt` now scan thread replies in addition to main-channel messages, matching the backend behaviour where both message types share the same per-channel cooldown bucket.
 - Fixed reactions, polls, and quoted-message enrichment briefly flickering after the app returned from the background. The reconnect path now refreshes channels and advances `lastSyncAt` to the current time instead of replaying every event since `lastSyncAt` through `handleEvent`. `client.sync()` remains available for consumers that need event-level replay.
 - Fixed `Channel.sendMessage` / `Channel.updateMessage` hanging forever when any attachment upload failed; they now throw `StreamChatError`.
 - Fixed quoted poll messages losing their poll, shared-location, or nested-quote content when the server omits it from the `quoted_message` payload during channel re-sync.

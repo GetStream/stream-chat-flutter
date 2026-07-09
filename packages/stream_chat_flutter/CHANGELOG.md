@@ -2,22 +2,50 @@
 
 ✅ Added
 
+- Added an `AccessibilityTranslations` namespace on `Translations`, accessed via `context.translations.accessibility`, holding all screen-reader labels, tooltips, hints, and live-region announcements used by the composer, voice recording, attachment picker, message actions, channel header, media gallery, and poll creator. Getter suffixes follow Flutter's `MaterialLocalizations` convention (`Tooltip`, `Label`, `Hint`, `TapHint`, `Announcement`). Added a `DateTime.toA11yTimestamp()` extension for locale-aware long-form timestamps in accessibility labels.
+
+🐞 Fixed
+
+- Fixed last-message preview flicker during channel-state reloads.
+
+## 10.1.0
+
+🐛 Fixed
+
+- Fixed a use-after-dispose race condition in `StreamAttachmentPickerController`, `StreamAudioRecorderController`, and `StreamAudioPlaylistController`: async methods could write `value` after `dispose()`, causing a `notifyListeners()` assertion throw in debug mode. All three now use the `DisposeAwareValueNotifier` mixin from `stream_chat_flutter_core`.
+
+✅ Added
+
+- Added support for `@channel`, `@here`, role, and user-group mentions — parsed on incoming messages, rendered as styled tappable spans in message text, and selectable from the composer's `@` autocomplete.
+- Added a single `mentionItemBuilder` on `StreamMessageComposer` and `StreamMentionAutocompleteOptions` that receives `StreamMentionItemProps` and covers every mention kind. Customise globally via `streamChatComponentBuilders(mentionItem: ...)` or per-instance via the new constructor parameter. Defaults are rendered by `DefaultStreamMentionItem`. Also added `onMention*Tap` callbacks on `StreamMentionAutocompleteOptions`.
+- Added `StreamMessageListView.onMentionTap` and `StreamMessageItem.onMentionTap` — receives a typed `StreamMention` (`StreamUserMention`, `StreamChannelMention`, `StreamHereMention`, `StreamRoleMention`, or `StreamGroupMention`).
 - `StreamMessageComposer` now surfaces the hold-to-record hint through `StreamSnackbar` anchored above the composer, and `StreamChat` provides an app-wide `StreamSnackbarScope` fallback.
+- Added `commandValidator` prop on `StreamCommandAutocompleteOptions` and `StreamCommandPicker` for marking rows as unavailable; disabled rows remain tappable so the caller can surface feedback.
+- `StreamMessageComposer` now surfaces a `StreamSnackbar` when the user taps a disabled slash command in the picker or autocomplete, explaining why it's blocked.
 
 ⚠️ Deprecated
 
 - `StreamAudioRecorderController.showInfo` is now deprecated. Show your own snackbar via `StreamSnackbarMessenger.of(context).show(StreamSnackbar(...))` instead.
 - `RecordStateIdle.message` is now deprecated; the composer no longer reads it.
+- Deprecated `userMentionsTileBuilder` on `StreamMessageComposer` and `mentionsTileBuilder` on `StreamMentionAutocompleteOptions` in favor of `mentionItemBuilder`.
+- Deprecated `StreamMessageListView.onUserMentionTap` and `StreamMessageItem.onUserMentionTap` in favor of `onMentionTap`.
+- Deprecated `UserListX.search`.
+
+🔄 Changed
+
+- Improved the local filtering/sorting logic for the mention suggestions autocomplete.
 
 🐞 Fixed
 
 - `StreamMessageItem.onUserAvatarTap` now fires when the author avatar is tapped. ([#2741](https://github.com/GetStream/stream-chat-flutter/issues/2741))
 - Added `MessageComposerProps.copyWith` so factory overrides can tweak individual props (e.g. `useSystemAttachmentPicker`) without re-specifying every field. ([#2742](https://github.com/GetStream/stream-chat-flutter/issues/2742))
+- `StreamMessageContent` no longer re-runs `setState` on every inherited-widget change when the measured attachment width has not changed. ([#2761](https://github.com/GetStream/stream-chat-flutter/issues/2761))
 
 ## 10.0.1
 
 🐞 Fixed
 
+- Fixed the "Also send in Channel" checkbox not being disabled during slow mode. The checkbox and its label now render with disabled colors (`colorScheme.textDisabled`) when a cooldown is active, matching the rest of the composer.
 - `StreamUserAvatar` with `StreamAvatarSize.xxl` now uses `StreamOnlineIndicatorSize.xxl` (20px) instead of `xl` (16px), matching the Chat SDK design system spec.
 - Fixed the thread page flashing through a large scroll-up animation when opened from an in-channel reply with cached thread replies.
 - Fixed the thread page throwing `Bad state: No element` on every channel state update when the parent message wasn't in the channel's loaded window.

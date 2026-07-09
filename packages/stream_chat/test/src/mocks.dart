@@ -12,7 +12,9 @@ import 'package:stream_chat/src/core/api/guest_api.dart';
 import 'package:stream_chat/src/core/api/message_api.dart';
 import 'package:stream_chat/src/core/api/moderation_api.dart';
 import 'package:stream_chat/src/core/api/polls_api.dart';
+import 'package:stream_chat/src/core/api/roles_api.dart';
 import 'package:stream_chat/src/core/api/user_api.dart';
+import 'package:stream_chat/src/core/api/user_groups_api.dart';
 import 'package:stream_chat/src/core/http/connection_id_manager.dart';
 import 'package:stream_chat/src/core/http/stream_http_client.dart';
 import 'package:stream_chat/src/core/http/token_manager.dart';
@@ -64,6 +66,10 @@ class MockChannelApi extends Mock implements ChannelApi {}
 class MockDeviceApi extends Mock implements DeviceApi {}
 
 class MockModerationApi extends Mock implements ModerationApi {}
+
+class MockUserGroupsApi extends Mock implements UserGroupsApi {}
+
+class MockRolesApi extends Mock implements RolesApi {}
 
 class MockGeneralApi extends Mock implements GeneralApi {}
 

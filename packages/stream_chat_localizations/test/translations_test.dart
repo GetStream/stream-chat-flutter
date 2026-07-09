@@ -64,6 +64,9 @@ void main() {
       expect(localizations.searchGifLabel, isNotNull);
       expect(localizations.writeAMessageLabel, isNotNull);
       expect(localizations.instantCommandsLabel, isNotNull);
+      expect(localizations.commandUnavailableWhileEditingError, isNotNull);
+      expect(localizations.commandUnavailableWhileQuotingError, isNotNull);
+      expect(localizations.commandUnavailableError, isNotNull);
       expect(localizations.fileTooLargeAfterCompressionError(33), isNotNull);
       expect(localizations.fileTooLargeError(33), isNotNull);
       expect(localizations.fileTypeNotSupportedError('exe'), isNotNull);
@@ -375,6 +378,98 @@ void main() {
       expect(localizations.anonymousPollDescription, isNotNull);
       expect(localizations.suggestAnOptionDescription, isNotNull);
       expect(localizations.addACommentDescription, isNotNull);
+      expect(localizations.notifyChannelText, isNotNull);
+      expect(localizations.notifyHereText, isNotNull);
+      expect(localizations.notifyRoleText('admin'), isNotNull);
+
+      // Accessibility translations
+      final a11y = localizations.accessibility;
+      expect(a11y, isNotNull);
+      // Composer: send button
+      expect(a11y.sendMessageTooltip, isNotNull);
+      expect(a11y.saveEditTooltip, isNotNull);
+      expect(a11y.sendCommandTooltip, isNotNull);
+      // singular vs. plural — both branches exercised
+      expect(a11y.slowModeTooltip(seconds: 1), isNotNull);
+      expect(a11y.slowModeTooltip(seconds: 30), isNotNull);
+      // Composer: voice recorder
+      expect(a11y.recordVoiceRecordingLabel, isNotNull);
+      expect(a11y.cancelRecordingTooltip, isNotNull);
+      expect(a11y.stopRecordingTooltip, isNotNull);
+      expect(a11y.sendRecordingTooltip, isNotNull);
+      expect(a11y.recordingDurationLabel(duration: const Duration(seconds: 83)), isNotNull);
+      expect(a11y.voiceRecordingPreviewPlayLabel(duration: const Duration(seconds: 83)), isNotNull);
+      expect(a11y.voiceRecordingPreviewPauseLabel(duration: const Duration(seconds: 83)), isNotNull);
+      // Composer: attachment picker
+      expect(a11y.attachmentPickerTooltip, isNotNull);
+      expect(a11y.attachmentPickerOpenHint, isNotNull);
+      expect(a11y.attachmentPickerCloseHint, isNotNull);
+      expect(a11y.attachmentPickerOpenTapHint, isNotNull);
+      expect(a11y.attachmentPickerCloseTapHint, isNotNull);
+      expect(a11y.attachmentPickerOpenedAnnouncement, isNotNull);
+      expect(a11y.attachmentPickerClosedAnnouncement, isNotNull);
+      // Attachment display — both null-duration and known-duration branches
+      expect(a11y.voiceRecordingAttachmentLabel(), isNotNull);
+      expect(a11y.voiceRecordingAttachmentLabel(duration: const Duration(minutes: 2)), isNotNull);
+      expect(a11y.videoAttachmentLabel(), isNotNull);
+      expect(a11y.videoAttachmentLabel(title: 'trip.mp4'), isNotNull);
+      expect(a11y.gifAttachmentLabel, isNotNull);
+      expect(a11y.imageAttachmentLabel(), isNotNull);
+      expect(a11y.imageAttachmentLabel(title: 'sunset'), isNotNull);
+      // Voice message playback
+      expect(a11y.voiceRecordingPlayTooltip, isNotNull);
+      expect(a11y.voiceRecordingPauseTooltip, isNotNull);
+      expect(a11y.voiceRecordingLoadingTooltip, isNotNull);
+      // Channel header
+      expect(a11y.channelInfoLabel, isNotNull);
+      // Message actions
+      expect(a11y.messageActionsLabel, isNotNull);
+      // Photo gallery tile — both null-date and known-date branches
+      expect(a11y.galleryImageLabel(), isNotNull);
+      expect(a11y.galleryImageLabel(createdAt: DateTime(2026, 3, 15, 10, 30)), isNotNull);
+      expect(a11y.galleryVideoLabel(), isNotNull);
+      expect(a11y.galleryVideoLabel(createdAt: DateTime(2026, 3, 15, 10, 30)), isNotNull);
+      expect(
+        a11y.galleryVideoLabel(
+          createdAt: DateTime(2026, 3, 15, 10, 30),
+          duration: const Duration(minutes: 1, seconds: 23),
+        ),
+        isNotNull,
+      );
+      expect(a11y.selectMediaTapHint, isNotNull);
+      expect(a11y.deselectMediaTapHint, isNotNull);
+      // Poll creator — both null-option and known-option branches
+      expect(a11y.savePollTooltip, isNotNull);
+      expect(a11y.removePollOptionTooltip(), isNotNull);
+      expect(a11y.removePollOptionTooltip(optionText: 'Apple'), isNotNull);
+      // Recording state announcements
+      expect(a11y.recordingStartedAnnouncement, isNotNull);
+      expect(a11y.recordingLockedAnnouncement, isNotNull);
+      expect(a11y.recordingStoppedAnnouncement, isNotNull);
+      expect(a11y.recordingCancelledAnnouncement, isNotNull);
+      expect(a11y.recordingCompletedAnnouncement, isNotNull);
+      // Attachment change announcements
+      expect(a11y.imageAttachmentAddedAnnouncement, isNotNull);
+      expect(a11y.imageAttachmentRemovedAnnouncement, isNotNull);
+      expect(a11y.videoAttachmentAddedAnnouncement, isNotNull);
+      expect(a11y.videoAttachmentRemovedAnnouncement, isNotNull);
+      expect(a11y.gifAttachmentAddedAnnouncement, isNotNull);
+      expect(a11y.gifAttachmentRemovedAnnouncement, isNotNull);
+      expect(a11y.fileAttachmentAddedAnnouncement, isNotNull);
+      expect(a11y.fileAttachmentRemovedAnnouncement, isNotNull);
+      expect(a11y.voiceRecordingAttachmentAddedAnnouncement, isNotNull);
+      expect(a11y.voiceRecordingAttachmentRemovedAnnouncement, isNotNull);
+      expect(a11y.attachmentAddedAnnouncement, isNotNull);
+      expect(a11y.attachmentRemovedAnnouncement, isNotNull);
+      // singular vs. plural — both branches exercised
+      expect(a11y.attachmentsAddedAnnouncement(count: 1), isNotNull);
+      expect(a11y.attachmentsAddedAnnouncement(count: 5), isNotNull);
+      expect(a11y.attachmentsRemovedAnnouncement(count: 1), isNotNull);
+      expect(a11y.attachmentsRemovedAnnouncement(count: 5), isNotNull);
+      // Formatters
+      expect(a11y.formatDuration(const Duration(seconds: 45)), isNotNull);
+      expect(a11y.formatDuration(const Duration(hours: 1, minutes: 2, seconds: 3)), isNotNull);
+      expect(a11y.formatDateTime(DateTime(2026, 3, 15, 10, 30)), isNotNull);
     });
   }
 

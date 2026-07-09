@@ -21,7 +21,7 @@ jobs:
       changed: ${{ steps.detect.outputs.changed }}
     steps:
       - name: 📚 Checkout branch
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: 🐦 Install Flutter
         uses: subosito/flutter-action@v2
@@ -70,7 +70,7 @@ jobs:
       changed: ${{ steps.detect.outputs.changed }}
     steps:
       - name: 📚 Checkout branch
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: 🐦 Install Flutter
         uses: subosito/flutter-action@v2
@@ -124,7 +124,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: 📚 Checkout branch
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           ssh-key: ${{ secrets.BOT_SSH_PRIVATE_KEY }}
 
@@ -143,7 +143,10 @@ jobs:
       - name: 📦 Extract goldens
         run: |
           for tgz in sdk-goldens.tgz docs-goldens.tgz; do
-            [[ -f "$tgz" ]] && tar -xzf "$tgz" && rm "$tgz"
+            if [[ -f "$tgz" ]]; then
+              tar -xzf "$tgz"
+              rm "$tgz"
+            fi
           done
 
       - name: 📤 Commit Changes

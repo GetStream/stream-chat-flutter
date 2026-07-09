@@ -386,5 +386,166 @@ void main() {
       expect(modifiedMessage.text, contains('@user1'));
       expect(modifiedMessage.text, isNot(contains('@Alice')));
     });
+
+    group('replaceMentions with enhanced mention types', () {
+      test('wraps @channel as broadcast when mentionedChannel is true', () {
+        final message = Message(
+          text: 'Heads up @channel - release tomorrow.',
+          mentionedChannel: true,
+        );
+
+        final result = message.replaceMentions();
+
+        expect(
+          result.text,
+          equals(
+            'Heads up [@channel](mention-channel:channel) - release tomorrow.',
+          ),
+        );
+      });
+
+      test('wraps @here as broadcast when mentionedHere is true', () {
+        final message = Message(
+          text: 'Anyone available @here ?',
+          mentionedHere: true,
+        );
+
+        final result = message.replaceMentions();
+
+        expect(
+          result.text,
+          equals('Anyone available [@here](mention-here:here) ?'),
+        );
+      });
+
+      test('leaves @channel untouched when mentionedChannel is false', () {
+        final message = Message(text: 'Discussing @channel feature.');
+
+        final result = message.replaceMentions();
+
+        expect(result.text, equals('Discussing @channel feature.'));
+      });
+
+      test('wraps role mentions from mentionedRoles', () {
+        final message = Message(
+          text: 'Paging @admin for review.',
+          mentionedRoles: const ['admin'],
+        );
+
+        final result = message.replaceMentions();
+
+        expect(
+          result.text,
+          equals('Paging [@admin](mention-role:admin) for review.'),
+        );
+      });
+
+      test('wraps group mentions from mentionedGroups by name and id', () {
+        final group = UserGroup(
+          id: 'grp-1',
+          name: 'Dream Team',
+          createdAt: DateTime(2026),
+          updatedAt: DateTime(2026),
+        );
+        final message = Message(
+          text: 'Pinging @Dream Team and @grp-1.',
+          mentionedGroups: [group],
+        );
+
+        final result = message.replaceMentions();
+
+        expect(
+          result.text,
+          equals(
+            'Pinging [@Dream Team](mention-group:grp-1) and [@Dream Team](mention-group:grp-1).',
+          ),
+        );
+      });
+
+      test('user mentions still emit the bare mention: scheme (unchanged)', () {
+        final user = User(id: 'user-1', name: 'Alice');
+        final message = Message(
+          text: 'Hey @Alice!',
+          mentionedUsers: [user],
+        );
+
+        final result = message.replaceMentions();
+
+        expect(result.text, equals('Hey [@Alice](mention:user-1)!'));
+      });
+
+      test('combines all four mention kinds in a single message', () {
+        final user = User(id: 'usr-1', name: 'Alice');
+        final group = UserGroup(
+          id: 'grp-1',
+          name: 'Dream Team',
+          createdAt: DateTime(2026),
+          updatedAt: DateTime(2026),
+        );
+        final message = Message(
+          text: '@channel @here @Dream Team @admin @Alice',
+          mentionedChannel: true,
+          mentionedHere: true,
+          mentionedRoles: const ['admin'],
+          mentionedGroups: [group],
+          mentionedUsers: [user],
+        );
+
+        final result = message.replaceMentions();
+
+        expect(
+          result.text,
+          equals(
+            '[@channel](mention-channel:channel) '
+            '[@here](mention-here:here) '
+            '[@Dream Team](mention-group:grp-1) '
+            '[@admin](mention-role:admin) '
+            '[@Alice](mention:usr-1)',
+          ),
+        );
+      });
+
+      test('linkify:false substitutes display names without markdown', () {
+        final user = User(id: 'usr-1', name: 'Alice');
+        final group = UserGroup(
+          id: 'grp-1',
+          name: 'Dream Team',
+          createdAt: DateTime(2026),
+          updatedAt: DateTime(2026),
+        );
+        final message = Message(
+          text: '@channel @grp-1 @admin @Alice',
+          mentionedChannel: true,
+          mentionedRoles: const ['admin'],
+          mentionedGroups: [group],
+          mentionedUsers: [user],
+        );
+
+        final result = message.replaceMentions(linkify: false);
+
+        expect(result.text, equals('@channel @Dream Team @admin @Alice'));
+      });
+
+      test(
+        'overlapping role and user names: first match wins, no double-wrap',
+        () {
+          final user = User(id: 'usr-1', name: 'admin');
+          final message = Message(
+            text: 'Hey @admin!',
+            mentionedRoles: const ['admin'],
+            mentionedUsers: [user],
+          );
+
+          final result = message.replaceMentions();
+
+          // Role is processed before user; the negative lookbehind prevents
+          // the user iteration from re-wrapping the already-wrapped mention.
+          expect(
+            result.text,
+            equals('Hey [@admin](mention-role:admin)!'),
+          );
+        },
+      );
+    });
   });
 }

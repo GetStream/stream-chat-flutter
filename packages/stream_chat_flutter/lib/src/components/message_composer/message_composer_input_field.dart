@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-import 'package:stream_core_flutter/stream_core_flutter.dart' as core;
+import 'package:stream_core_flutter/chat.dart' as core;
 
 /// A widget that represents the actual text input field for the message
 /// composer.
@@ -77,7 +77,7 @@ class StreamMessageComposerInputField extends StatelessWidget {
     final effectiveCursorHeight = inputStyle?.cursorHeight ?? inputDefaults.cursorHeight;
     final effectiveCursorRadius = inputStyle?.cursorRadius ?? inputDefaults.cursorRadius;
 
-    return ConstrainedBox(
+    final inputField = ConstrainedBox(
       constraints: const BoxConstraints(maxHeight: 124),
       child: Padding(
         padding: EdgeInsets.all(spacing.sm),
@@ -129,6 +129,8 @@ class StreamMessageComposerInputField extends StatelessWidget {
         ),
       ),
     );
+
+    return MergeSemantics(child: inputField);
   }
 }
 

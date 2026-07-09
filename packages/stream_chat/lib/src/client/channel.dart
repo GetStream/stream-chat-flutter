@@ -320,13 +320,16 @@ class Channel {
   /// Remaining cooldown duration in seconds for the channel.
   ///
   /// Returns 0 if there is no cooldown active.
-  int getRemainingCooldown() {
+  ///
+  /// Optionally, provide [lastMessageAt] to calculate the remaining cooldown based on a specific message timestamp
+  /// instead of the last message sent by the current user in this channel.
+  int getRemainingCooldown({DateTime? lastMessageAt}) {
     _checkInitialized();
 
     final cooldownDuration = cooldown;
     if (cooldownDuration <= 0) return 0;
 
-    final userLastMessageAt = currentUserLastMessageAt;
+    final userLastMessageAt = lastMessageAt ?? currentUserLastMessageAt;
     if (userLastMessageAt == null) return 0;
 
     if (canSkipSlowMode) return 0;
@@ -361,20 +364,38 @@ class Channel {
     return state!.channelStateStream.map((cs) => cs.channel?.lastMessageAt);
   }
 
-  DateTime? _currentUserLastMessageAt(List<Message>? messages) {
+  DateTime? _currentUserLastMessageAt({
+    required List<Message>? messages,
+    required Map<String, List<Message>> threads,
+  }) {
     final currentUserId = client.state.currentUser?.id;
     if (currentUserId == null) return null;
 
-    final validMessages = messages?.where((message) {
-      if (message.isEphemeral) return false;
-      if (message.user?.id != currentUserId) return false;
-      return true;
-    });
+    bool ours(Message m) => !m.isEphemeral && m.user?.id == currentUserId;
 
-    return validMessages?.map((m) => m.createdAt).max;
+    DateTime? max;
+
+    if (messages != null) {
+      final idx = messages.lastIndexWhere(ours);
+      if (idx != -1) max = messages[idx].createdAt;
+    }
+
+    for (final replies in threads.values) {
+      final idx = replies.lastIndexWhere(ours);
+      if (idx == -1) continue;
+      final createdAt = replies[idx].createdAt;
+      if (max == null || createdAt.isAfter(max)) max = createdAt;
+    }
+
+    return max;
   }
 
   /// The date of the last message sent by the current user.
+  ///
+  /// Returns null if the channel is not up to date or
+  /// if the current user has not sent any messages in this channel.
+  ///
+  /// Note: This includes both regular messages and thread messages.
   DateTime? get currentUserLastMessageAt {
     _checkInitialized();
 
@@ -382,22 +403,31 @@ class Channel {
     // from the current user.
     if (!state!.isUpToDate) return null;
 
+    final threads = state!.threads;
     final messages = state!.channelState.messages;
-    return _currentUserLastMessageAt(messages);
+
+    return _currentUserLastMessageAt(messages: messages, threads: threads);
   }
 
   /// The date of the last message sent by the current user as a stream.
+  ///
+  /// Returns null if the channel is not up to date or
+  /// if the current user has not sent any messages in this channel.
+  ///
+  /// Note: This includes both regular messages and thread messages.
   Stream<DateTime?> get currentUserLastMessageAtStream {
     _checkInitialized();
 
-    return CombineLatestStream.combine2<bool, List<Message>?, DateTime?>(
+    return CombineLatestStream.combine3(
       state!.isUpToDateStream,
-      state!.channelStateStream.map((state) => state.messages),
-      (isUpToDate, messages) {
+      state!.channelStateStream.map((s) => s.messages).distinct(identical),
+      state!.threadsStream,
+      (isUpToDate, messages, threads) {
         // If the channel is not up to date, we can't rely on the last message
         // from the current user.
         if (!isUpToDate) return null;
-        return _currentUserLastMessageAt(messages);
+
+        return _currentUserLastMessageAt(messages: messages, threads: threads);
       },
     );
   }
@@ -3323,6 +3353,9 @@ class ChannelClientState {
       ..add(
         _channel.on(EventType.messageRead).listen(
           (event) {
+            // Skip handling the event if delivered for a thread
+            if (event.thread != null) return;
+
             final user = event.user;
             if (user == null) return;
 
@@ -4565,5 +4598,28 @@ extension ChannelCapabilityCheck on Channel {
   /// True, if the current user can share location in the channel.
   bool get canShareLocation {
     return ownCapabilities.contains(ChannelCapability.shareLocation);
+  }
+
+  /// True, if the current user can send an "@channel" mention that notifies
+  /// all channel members.
+  bool get canNotifyChannel {
+    return ownCapabilities.contains(ChannelCapability.notifyChannel);
+  }
+
+  /// True, if the current user can send an "@here" mention that notifies all
+  /// online channel members.
+  bool get canNotifyHere {
+    return ownCapabilities.contains(ChannelCapability.notifyHere);
+  }
+
+  /// True, if the current user can mention one or more roles in a message.
+  bool get canNotifyRole {
+    return ownCapabilities.contains(ChannelCapability.notifyRole);
+  }
+
+  /// True, if the current user can mention one or more user groups in a
+  /// message.
+  bool get canNotifyGroup {
+    return ownCapabilities.contains(ChannelCapability.notifyGroup);
   }
 }

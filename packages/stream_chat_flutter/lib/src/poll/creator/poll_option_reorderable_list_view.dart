@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/misc/separated_reorderable_list_view.dart';
 import 'package:stream_chat_flutter/src/poll/creator/stream_delete_option_dialog.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-import 'package:stream_core_flutter/stream_core_flutter.dart';
 
 class _NullConst {
   const _NullConst();
@@ -113,6 +112,7 @@ class PollOptionListItem extends StatelessWidget {
     assert(option != null, 'option must not be null');
 
     final icons = context.streamIcons;
+    final a11y = context.translations.accessibility;
 
     return StreamTextInput(
       initialValue: option!.text,
@@ -129,6 +129,7 @@ class PollOptionListItem extends StatelessWidget {
         type: .ghost,
         style: .secondary,
         icon: Icon(icons.minusCircle),
+        tooltip: a11y.removePollOptionTooltip(optionText: option!.text),
         themeStyle: .from(
           fixedSize: const .square(20),
           tapTargetSize: .shrinkWrap,
@@ -467,7 +468,11 @@ class _PollOptionReorderableListViewState extends State<PollOptionReorderableLis
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (widget.title case final title?) Text(title, style: effectiveTitleStyle),
+        if (widget.title case final title?)
+          Semantics(
+            header: true,
+            child: Text(title, style: effectiveTitleStyle),
+          ),
         Flexible(
           child: StreamTextInputTheme(
             data: .new(style: effectiveInputStyle),

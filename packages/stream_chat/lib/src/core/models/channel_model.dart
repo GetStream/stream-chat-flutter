@@ -394,4 +394,17 @@ extension type const ChannelCapability(String capability) implements String {
 
   /// Ability to share location.
   static const shareLocation = ChannelCapability('share-location');
+
+  /// Ability to send an "@channel" mention that notifies all channel members.
+  static const notifyChannel = ChannelCapability('notify-channel');
+
+  /// Ability to send an "@here" mention that notifies all online channel
+  /// members.
+  static const notifyHere = ChannelCapability('notify-here');
+
+  /// Ability to mention one or more roles in a message.
+  static const notifyRole = ChannelCapability('notify-role');
+
+  /// Ability to mention one or more user groups in a message.
+  static const notifyGroup = ChannelCapability('notify-group');
 }

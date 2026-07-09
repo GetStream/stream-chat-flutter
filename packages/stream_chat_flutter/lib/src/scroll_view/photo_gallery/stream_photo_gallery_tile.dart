@@ -4,7 +4,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:stream_chat_flutter/src/attachment/thumbnail/thumbnail_size_calculator.dart';
-import 'package:stream_core_flutter/stream_core_flutter.dart';
+import 'package:stream_chat_flutter/src/utils/extensions.dart';
+import 'package:stream_core_flutter/chat.dart';
 
 /// Widget that displays a photo or video item from the gallery.
 class StreamPhotoGalleryTile extends StatelessWidget {
@@ -86,8 +87,9 @@ class StreamPhotoGalleryTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final radius = context.streamRadius;
     final colorScheme = context.streamColorScheme;
+    final isVideo = media.type == AssetType.video;
 
-    return ClipRRect(
+    final galleryTile = ClipRRect(
       clipBehavior: .hardEdge,
       borderRadius: .all(radius.xxs),
       child: Stack(
@@ -115,7 +117,7 @@ class StreamPhotoGalleryTile extends StatelessWidget {
             end: 8,
             child: _GallerySelectedIndicator(selected: selected),
           ),
-          if (media.type == AssetType.video)
+          if (isVideo)
             PositionedDirectional(
               start: 8,
               bottom: 8,
@@ -137,6 +139,24 @@ class StreamPhotoGalleryTile extends StatelessWidget {
           ),
         ],
       ),
+    );
+
+    final a11y = context.translations.accessibility;
+    final label = switch (isVideo) {
+      true => a11y.galleryVideoLabel(createdAt: media.createDateTime, duration: media.videoDuration),
+      false => a11y.galleryImageLabel(createdAt: media.createDateTime),
+    };
+
+    return Semantics(
+      button: true,
+      selected: selected,
+      image: !isVideo,
+      onTapHint: selected ? a11y.deselectMediaTapHint : a11y.selectMediaTapHint,
+      label: label,
+      excludeSemantics: true,
+      onTap: onTap,
+      onLongPress: onLongPress,
+      child: galleryTile,
     );
   }
 }

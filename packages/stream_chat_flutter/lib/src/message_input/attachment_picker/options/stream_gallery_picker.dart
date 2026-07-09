@@ -11,7 +11,7 @@ import 'package:stream_chat_flutter/src/scroll_view/photo_gallery/stream_photo_g
 import 'package:stream_chat_flutter/src/scroll_view/photo_gallery/stream_photo_gallery_controller.dart';
 import 'package:stream_chat_flutter/src/utils/utils.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
-import 'package:stream_core_flutter/stream_core_flutter.dart';
+import 'package:stream_core_flutter/chat.dart';
 
 /// Max image resolution which can be resized by the CDN.
 /// Taken from https://getstream.io/chat/docs/flutter-dart/file_uploads/?language=dart#image-resizing
@@ -93,7 +93,7 @@ class _StreamGalleryPickerState extends State<StreamGalleryPicker> {
           child: Builder(
             builder: (context) {
               if (!isPermissionGranted) {
-                return Center(
+                final child = Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -119,6 +119,8 @@ class _StreamGalleryPickerState extends State<StreamGalleryPicker> {
                     ],
                   ),
                 );
+
+                return MergeSemantics(child: child);
               }
 
               return MediaQuery.removePadding(
@@ -169,7 +171,7 @@ class _AddMoreTile extends StatelessWidget {
     final textTheme = context.streamTextTheme;
     final spacing = context.streamSpacing;
 
-    return Material(
+    final addMoreTile = Material(
       color: colorScheme.backgroundSurfaceCard,
       child: InkWell(
         onTap: onTap,
@@ -198,6 +200,14 @@ class _AddMoreTile extends StatelessWidget {
           ),
         ),
       ),
+    );
+
+    return Semantics(
+      button: true,
+      label: context.translations.addMoreFilesLabel,
+      excludeSemantics: true,
+      onTap: onTap,
+      child: addMoreTile,
     );
   }
 }

@@ -176,7 +176,93 @@ void main() {
     expect(res.channels, isNotEmpty);
 
     verify(
-      () => client.get(path, queryParameters: any(named: 'queryParameters')),
+      () => client.get(path, queryParameters: {'payload': payload}),
+    ).called(1);
+    verifyNoMoreInteractions(client);
+  });
+
+  test('queryChannels with predefined filter', () async {
+    const channelId = 'test-channel-id';
+    const channelType = 'test-channel-type';
+
+    const predefinedFilter = 'sample-app-list';
+    const filterValues = {'user_id': 'test-user-id'};
+    const sortValues = {'pinned_first': true};
+
+    const path = '/channels';
+
+    final channelState = _generateChannelState(channelId, channelType);
+
+    final payload = jsonEncode({
+      // default options
+      'state': true,
+      'watch': true,
+      'presence': false,
+
+      // passed options
+      'predefined_filter': predefinedFilter,
+      'filter_values': filterValues,
+      'sort_values': sortValues,
+
+      // pagination
+      ...const PaginationParams().toJson(),
+    });
+
+    final resolvedSort = [
+      {'field': 'last_message_at', 'direction': -1},
+    ];
+
+    when(
+      () => client.get(
+        path,
+        queryParameters: {
+          'payload': payload,
+        },
+      ),
+    ).thenAnswer(
+      (_) async => successResponse(
+        path,
+        data: {
+          'channels': [channelState.toJson()],
+          'predefined_filter': {
+            'name': predefinedFilter,
+            'filter': {
+              'members': {
+                r'$in': ['test-user-id'],
+              },
+            },
+            'sort': resolvedSort,
+          },
+        },
+      ),
+    );
+
+    final res = await channelApi.queryChannels(
+      predefinedFilter: predefinedFilter,
+      filterValues: filterValues,
+      sortValues: sortValues,
+    );
+
+    expect(res, isNotNull);
+    expect(res.channels, isNotEmpty);
+    expect(res.predefinedFilter, isNotNull);
+    expect(res.predefinedFilter!.name, predefinedFilter);
+    expect(
+      res.predefinedFilter!.filter,
+      const Filter.raw(
+        value: {
+          'members': {
+            r'$in': ['test-user-id'],
+          },
+        },
+      ),
+    );
+    expect(res.predefinedFilter!.sort, hasLength(1));
+    expect(res.predefinedFilter!.sort!.first.field, 'last_message_at');
+    expect(res.predefinedFilter!.sort!.first.direction, SortOption.DESC);
+
+    verify(
+      () => client.get(path, queryParameters: {'payload': payload}),
     ).called(1);
     verifyNoMoreInteractions(client);
   });

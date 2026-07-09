@@ -1,7 +1,7 @@
 {
   "id": "4637f7e4-a06b-42db-ba5a-8d8270dd926f",
   "type": "regular",
-  "text": "https://giphy.com/gifs/the-lion-king-live-action-5zvN79uTGfLMOVfQaA",
+  "text": "@channel @admin @moderator https://giphy.com/gifs/the-lion-king-live-action-5zvN79uTGfLMOVfQaA",
   "silent": false,
   "attachments": [
     {
@@ -16,6 +16,10 @@
       "actions": []
     }
   ],
+  "mentioned_channel": true,
+  "mentioned_group_ids": ["group-1", "group-2"],
+  "mentioned_here": false,
+  "mentioned_roles": ["admin", "moderator"],
   "mentioned_users": [],
   "parent_id": "parentId",
   "quoted_message_id": null,

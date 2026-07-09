@@ -12,7 +12,7 @@ class StreamMessageComposerAttachment extends StatelessWidget {
     required Attachment attachment,
     ValueSetter<Attachment>? onRemovePressed,
     StreamAudioPlaylistController? audioPlaylistController,
-  }) : props = StreamMessageComposerAttachmentProps(
+  }) : props = .new(
          attachment: attachment,
          onRemovePressed: onRemovePressed,
          audioPlaylistController: audioPlaylistController,
@@ -23,8 +23,9 @@ class StreamMessageComposerAttachment extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return context.chatComponentBuilder<StreamMessageComposerAttachmentProps>()?.call(context, props) ??
-        DefaultMessageComposerAttachment(props: props);
+    final builder = context.chatComponentBuilder<StreamMessageComposerAttachmentProps>();
+    if (builder != null) return builder(context, props);
+    return DefaultMessageComposerAttachment(props: props);
   }
 }
 
@@ -160,43 +161,48 @@ class MessageInputVoiceRecordingAttachment extends StatelessWidget {
         final track = state.tracks.firstWhereOrNull((it) => it.key == attachment);
         if (track == null) return const SizedBox.shrink();
 
+        final a11y = context.translations.accessibility;
+
         return core.StreamMessageComposerAttachment(
+          semanticLabel: a11y.voiceRecordingAttachmentLabel(duration: track.duration),
           onRemovePressed: switch (onRemovePressed) {
             final callback? => () => callback(attachment),
             _ => null,
           },
-          child: StreamVoiceRecordingAttachment(
-            title: context.translations.voiceRecordingText,
-            showTitle: true,
-            track: track,
-            speed: state.speed,
-            onTrackPause: controller.pause,
-            onChangeSpeed: controller.setSpeed,
-            onTrackPlay: () async {
-              // Play the track directly if it is already loaded.
-              if (state.currentIndex == index) return controller.play();
-              // Otherwise, load the track first and then play it.
-              return controller.skipToItem(index);
-            },
-            // Only allow seeking if the current track is the one being
-            // interacted with.
-            onTrackSeekStart: (_) async {
-              if (state.currentIndex != index) return;
-              return controller.pause();
-            },
-            onTrackSeekEnd: (_) async {
-              if (state.currentIndex != index) return;
-              return controller.play();
-            },
-            onTrackSeekChanged: (progress) async {
-              if (state.currentIndex != index) return;
+          child: ExcludeSemantics(
+            child: StreamVoiceRecordingAttachment(
+              title: context.translations.voiceRecordingText,
+              showTitle: true,
+              track: track,
+              speed: state.speed,
+              onTrackPause: controller.pause,
+              onChangeSpeed: controller.setSpeed,
+              onTrackPlay: () async {
+                // Play the track directly if it is already loaded.
+                if (state.currentIndex == index) return controller.play();
+                // Otherwise, load the track first and then play it.
+                return controller.skipToItem(index);
+              },
+              // Only allow seeking if the current track is the one being
+              // interacted with.
+              onTrackSeekStart: (_) async {
+                if (state.currentIndex != index) return;
+                return controller.pause();
+              },
+              onTrackSeekEnd: (_) async {
+                if (state.currentIndex != index) return;
+                return controller.play();
+              },
+              onTrackSeekChanged: (progress) async {
+                if (state.currentIndex != index) return;
 
-              final duration = track.duration.inMicroseconds;
-              final seekPosition = (duration * progress).toInt();
-              final seekDuration = Duration(microseconds: seekPosition);
+                final duration = track.duration.inMicroseconds;
+                final seekPosition = (duration * progress).toInt();
+                final seekDuration = Duration(microseconds: seekPosition);
 
-              return controller.seek(seekDuration);
-            },
+                return controller.seek(seekDuration);
+              },
+            ),
           ),
         );
       },
@@ -220,14 +226,31 @@ class StreamMediaAttachmentBuilder extends StatelessWidget {
     final durationSecs = attachment.extraData['duration'] as num?;
     final videoDuration = durationSecs != null ? Duration(seconds: durationSecs.round()) : null;
 
+    final a11y = context.translations.accessibility;
+
     Widget? effectiveMediaBadge;
     if (attachment.type == .video) {
-      effectiveMediaBadge = StreamMediaBadge(type: .video, duration: videoDuration);
+      effectiveMediaBadge = StreamMediaBadge(
+        type: .video,
+        duration: videoDuration,
+        semanticsLabel: switch (videoDuration) {
+          final duration? => a11y.formatDuration(duration),
+          _ => null,
+        },
+      );
     }
+
+    final semanticLabel = switch (attachment.type) {
+      .image => a11y.imageAttachmentLabel(title: attachment.title),
+      .video => a11y.videoAttachmentLabel(title: attachment.title),
+      .giphy => a11y.gifAttachmentLabel,
+      _ => null,
+    };
 
     return Container(
       key: Key(attachment.id),
       child: StreamMessageComposerMediaAttachment(
+        semanticLabel: semanticLabel,
         mediaBadge: effectiveMediaBadge,
         onRemovePressed: onRemovePressed != null ? () => onRemovePressed!(attachment) : null,
         child: StreamMediaAttachmentThumbnail(media: attachment, fit: BoxFit.cover),

@@ -8,6 +8,7 @@ import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/src/client/channel.dart';
 import 'package:stream_chat/src/client/channel_delivery_reporter.dart';
 import 'package:stream_chat/src/client/event_resolvers.dart' as event_resolvers;
+import 'package:stream_chat/src/client/query_channels_result.dart';
 import 'package:stream_chat/src/client/retry_policy.dart';
 import 'package:stream_chat/src/core/api/attachment_file_uploader.dart';
 import 'package:stream_chat/src/core/api/requests.dart';
@@ -41,6 +42,7 @@ import 'package:stream_chat/src/core/models/poll_option.dart';
 import 'package:stream_chat/src/core/models/poll_vote.dart';
 import 'package:stream_chat/src/core/models/push_preference.dart';
 import 'package:stream_chat/src/core/models/reaction.dart';
+import 'package:stream_chat/src/core/models/role.dart';
 import 'package:stream_chat/src/core/models/thread.dart';
 import 'package:stream_chat/src/core/models/user.dart';
 import 'package:stream_chat/src/core/util/event_controller.dart';
@@ -164,21 +166,30 @@ class StreamChatClient {
 
   /// Updates the system environment information used by the client.
   ///
-  /// It allows you to set environment-specific information that will be
-  /// included in API requests, such as the application name, platform details,
-  /// and version information.
+  /// The passed [environment] is sanitized before being applied:
+  ///
+  /// Overridable fields (passed through as-is):
+  /// - [SystemEnvironment.appName]
+  /// - [SystemEnvironment.appVersion]
+  /// - [SystemEnvironment.osVersion]
+  /// - [SystemEnvironment.deviceModel]
+  ///
+  /// Immutable fields (custom values are ignored, internal defaults are
+  /// preserved):
+  /// - [SystemEnvironment.sdkName]
+  /// - [SystemEnvironment.sdkIdentifier]
+  /// - [SystemEnvironment.sdkVersion]
+  /// - [SystemEnvironment.osName]
   ///
   /// Example:
   /// ```dart
   /// client.updateSystemEnvironment(
   ///   SystemEnvironment(
-  ///     name: 'my_app',
-  ///     version: '1.0.0',
+  ///     appName: 'my_app',
+  ///     appVersion: '1.0.0',
   ///   ),
   /// );
   /// ```
-  ///
-  /// See [SystemEnvironment] for more information on the available fields.
   void updateSystemEnvironment(SystemEnvironment environment) {
     _systemEnvironmentManager.updateEnvironment(environment);
   }
@@ -524,6 +535,18 @@ class StreamChatClient {
     _ws.disconnect();
   }
 
+  /// Suspends the WebSocket's automatic reconnection without tearing down the
+  /// user session.
+  ///
+  /// While paused, unexpected socket closures (for example when the OS closes
+  /// the connection after the app is backgrounded) will not trigger retries.
+  /// Call [resumeReconnect] before re-establishing the connection.
+  void pauseReconnect() => _ws.pauseReconnect();
+
+  /// Re-enables the WebSocket's automatic reconnection after a previous
+  /// [pauseReconnect].
+  void resumeReconnect() => _ws.resumeReconnect();
+
   void _handleHealthCheckEvent(Event event) {
     final user = event.me;
     if (user != null) state.currentUser = user;
@@ -656,12 +679,57 @@ class StreamChatClient {
     });
   }
 
-  final _queryChannelsCache = InFlightCache<String, List<Channel>>();
+  final _queryChannelsCache = InFlightCache<String, QueryChannelsResult>();
 
   /// Requests channels with a given query.
+  ///
+  /// Either an inline [filter]/[channelStateSort] pair or a [predefinedFilter]
+  /// identifier (optionally interpolated with [filterValues] and [sortValues])
+  /// can be supplied.
+  ///
+  /// Use [queryChannelsWithResult] if you also need the server-resolved
+  /// [PredefinedFilter] spec.
   Stream<List<Channel>> queryChannels({
     Filter? filter,
     SortOrder<ChannelState>? channelStateSort,
+    String? predefinedFilter,
+    Map<String, Object?>? filterValues,
+    Map<String, Object?>? sortValues,
+    bool state = true,
+    bool watch = true,
+    bool presence = false,
+    int? memberLimit,
+    int? messageLimit,
+    PaginationParams paginationParams = const PaginationParams(),
+    bool waitForConnect = true,
+  }) => queryChannelsWithResult(
+    filter: filter,
+    channelStateSort: channelStateSort,
+    predefinedFilter: predefinedFilter,
+    filterValues: filterValues,
+    sortValues: sortValues,
+    state: state,
+    watch: watch,
+    presence: presence,
+    memberLimit: memberLimit,
+    messageLimit: messageLimit,
+    paginationParams: paginationParams,
+    waitForConnect: waitForConnect,
+  ).map((result) => result.channels);
+
+  /// Requests channels with a given query, yielding a [QueryChannelsResult]
+  /// that carries both the live channel list and the server-resolved
+  /// [PredefinedFilter] spec (when one is associated with the query).
+  ///
+  /// Yields the offline-cached result first (when available), followed by
+  /// the online result. Concurrent identical online queries are coalesced
+  /// via [_queryChannelsCache].
+  Stream<QueryChannelsResult> queryChannelsWithResult({
+    Filter? filter,
+    SortOrder<ChannelState>? channelStateSort,
+    String? predefinedFilter,
+    Map<String, Object?>? filterValues,
+    Map<String, Object?>? sortValues,
     bool state = true,
     bool watch = true,
     bool presence = false,
@@ -678,6 +746,9 @@ class StreamChatClient {
     final hash = generateHash([
       filter,
       channelStateSort,
+      predefinedFilter,
+      filterValues,
+      sortValues,
       state,
       watch,
       presence,
@@ -687,16 +758,19 @@ class StreamChatClient {
     ]);
 
     // Per-caller offline emit — local persistence, not coalesced.
-    var offlineChannels = <Channel>[];
+    QueryChannelsResult? offlineResult;
     try {
-      offlineChannels = await queryChannelsOffline(
+      offlineResult = await _queryChannelsOfflineImpl(
         filter: filter,
+        predefinedFilter: predefinedFilter,
+        filterValues: filterValues,
+        sortValues: sortValues,
         channelStateSort: channelStateSort,
         messageLimit: messageLimit,
         paginationParams: paginationParams,
       );
 
-      if (offlineChannels.isNotEmpty) yield offlineChannels;
+      if (offlineResult.channels.isNotEmpty) yield offlineResult;
     } catch (e, stk) {
       logger.warning('Error querying channels offline', e, stk);
       // Continue to online query even if offline fails
@@ -709,9 +783,12 @@ class StreamChatClient {
       final result = await _queryChannelsCache.run(
         hash,
         () =>
-            queryChannelsOnline(
+            _queryChannelsOnlineImpl(
               filter: filter,
               sort: channelStateSort,
+              predefinedFilter: predefinedFilter,
+              filterValues: filterValues,
+              sortValues: sortValues,
               state: state,
               watch: watch,
               presence: presence,
@@ -731,7 +808,7 @@ class StreamChatClient {
     } catch (e, stk) {
       logger.severe('Error querying channels online', e, stk);
       // Only rethrow if we have no channels to show the user
-      if (offlineChannels.isEmpty) rethrow;
+      if (offlineResult == null || offlineResult.channels.isEmpty) rethrow;
     }
   }
 
@@ -739,6 +816,40 @@ class StreamChatClient {
   Future<List<Channel>> queryChannelsOnline({
     Filter? filter,
     SortOrder<ChannelState>? sort,
+    String? predefinedFilter,
+    Map<String, Object?>? filterValues,
+    Map<String, Object?>? sortValues,
+    bool state = true,
+    bool watch = true,
+    bool presence = false,
+    int? memberLimit,
+    int? messageLimit,
+    bool waitForConnect = true,
+    PaginationParams paginationParams = const PaginationParams(),
+  }) async {
+    final result = await _queryChannelsOnlineImpl(
+      filter: filter,
+      sort: sort,
+      predefinedFilter: predefinedFilter,
+      filterValues: filterValues,
+      sortValues: sortValues,
+      state: state,
+      watch: watch,
+      presence: presence,
+      memberLimit: memberLimit,
+      messageLimit: messageLimit,
+      waitForConnect: waitForConnect,
+      paginationParams: paginationParams,
+    );
+    return result.channels;
+  }
+
+  Future<QueryChannelsResult> _queryChannelsOnlineImpl({
+    Filter? filter,
+    SortOrder<ChannelState>? sort,
+    String? predefinedFilter,
+    Map<String, Object?>? filterValues,
+    Map<String, Object?>? sortValues,
     bool state = true,
     bool watch = true,
     bool presence = false,
@@ -769,6 +880,9 @@ class StreamChatClient {
     final res = await _chatApi.channel.queryChannels(
       filter: filter,
       sort: sort,
+      predefinedFilter: predefinedFilter,
+      filterValues: filterValues,
+      sortValues: sortValues,
       state: state,
       watch: watch,
       presence: presence,
@@ -784,7 +898,10 @@ class StreamChatClient {
         Please make sure to take a look at the Flutter tutorial: https://getstream.io/chat/flutter/tutorial
         If your application already has users and channels, you might need to adjust your query channel as explained in the docs https://getstream.io/chat/docs/query_channels/?language=dart
         ''');
-      return <Channel>[];
+      return QueryChannelsResult(
+        channels: const [],
+        predefinedFilter: res.predefinedFilter,
+      );
     }
 
     final channels = res.channels;
@@ -799,40 +916,94 @@ class StreamChatClient {
     // Submit delivery report for the channels fetched in this query.
     await channelDeliveryReporter.submitForDelivery(updateData.value);
 
-    await chatPersistenceClient?.updateChannelQueries(
-      filter,
-      channels.map((c) => c.channel!.cid).toList(),
-      // Clear the query cache if we are refreshing.
-      clearQueryCache: (paginationParams.offset ?? 0) == 0,
+    final cachedCids = channels.map((c) => c.channel!.cid).toList();
+    // Clear the query cache if we are refreshing.
+    final clearQueryCache = (paginationParams.offset ?? 0) == 0;
+
+    Filter? resolvedFilter;
+    SortOrder<ChannelState>? resolvedSort;
+    if (res.predefinedFilter case final resolvedPredefinedFilter?) {
+      resolvedFilter = resolvedPredefinedFilter.filter;
+      resolvedSort = resolvedPredefinedFilter.effectiveSort;
+    }
+
+    await chatPersistenceClient?.saveChannelQueries(
+      cids: cachedCids,
+      filter: filter,
+      sort: sort,
+      predefinedFilter: predefinedFilter,
+      resolvedFilter: resolvedFilter,
+      resolvedSort: resolvedSort,
+      filterValues: filterValues,
+      sortValues: sortValues,
+      clearQueryCache: clearQueryCache,
     );
 
     this.state.addChannels(updateData.key);
-    return updateData.value;
+    return QueryChannelsResult(
+      channels: updateData.value,
+      predefinedFilter: res.predefinedFilter,
+    );
   }
 
   /// Requests channels with a given query from the Persistence client.
   Future<List<Channel>> queryChannelsOffline({
     Filter? filter,
+    String? predefinedFilter,
+    Map<String, Object?>? filterValues,
+    Map<String, Object?>? sortValues,
     SortOrder<ChannelState>? channelStateSort,
     int? messageLimit,
     PaginationParams paginationParams = const PaginationParams(),
   }) async {
-    final offlineChannels = await chatPersistenceClient?.getChannelStates(
+    final result = await _queryChannelsOfflineImpl(
       filter: filter,
+      predefinedFilter: predefinedFilter,
+      filterValues: filterValues,
+      sortValues: sortValues,
       channelStateSort: channelStateSort,
-      // Default limit is set to 25 in backend.
-      messageLimit: messageLimit ?? 25,
+      messageLimit: messageLimit,
       paginationParams: paginationParams,
     );
+    return result.channels;
+  }
 
-    if (offlineChannels == null || offlineChannels.isEmpty) {
+  Future<QueryChannelsResult> _queryChannelsOfflineImpl({
+    Filter? filter,
+    String? predefinedFilter,
+    Map<String, Object?>? filterValues,
+    Map<String, Object?>? sortValues,
+    SortOrder<ChannelState>? channelStateSort,
+    int? messageLimit,
+    PaginationParams paginationParams = const PaginationParams(),
+  }) async {
+    final res =
+        await chatPersistenceClient?.queryChannelStates(
+          filter: filter,
+          sort: channelStateSort,
+          predefinedFilter: predefinedFilter,
+          filterValues: filterValues,
+          sortValues: sortValues,
+          // Default limit is set to 25 in backend.
+          messageLimit: messageLimit ?? 25,
+          paginationParams: paginationParams,
+        ) ??
+        (QueryChannelsResponse()..channels = const []);
+
+    if (res.channels.isEmpty) {
       logger.info('No channels found in offline storage for the given query');
-      return [];
+      return QueryChannelsResult(
+        channels: const [],
+        predefinedFilter: res.predefinedFilter,
+      );
     }
 
-    final updatedData = _mapChannelStateToChannel(offlineChannels);
-    state.addChannels(updatedData.key);
-    return updatedData.value;
+    final updateData = _mapChannelStateToChannel(res.channels);
+    state.addChannels(updateData.key);
+    return QueryChannelsResult(
+      channels: updateData.value,
+      predefinedFilter: res.predefinedFilter,
+    );
   }
 
   MapEntry<Map<String, Channel>, List<Channel>> _mapChannelStateToChannel(
@@ -2215,6 +2386,122 @@ class StreamChatClient {
   Future<EmptyResponse> deleteReminder(String messageId) {
     return _chatApi.reminders.deleteReminder(messageId);
   }
+
+  /// Lists user groups with cursor-based pagination.
+  Future<ListUserGroupsResponse> listUserGroups({
+    int? limit,
+    String? idGt,
+    DateTime? createdAtGt,
+    String? teamId,
+  }) => _chatApi.userGroups.listUserGroups(
+    limit: limit,
+    idGt: idGt,
+    createdAtGt: createdAtGt,
+    teamId: teamId,
+  );
+
+  /// Searches user groups by name prefix (autocomplete).
+  Future<SearchUserGroupsResponse> searchUserGroups(
+    String query, {
+    int? limit,
+    String? nameGt,
+    String? idGt,
+    String? teamId,
+  }) => _chatApi.userGroups.searchUserGroups(
+    query,
+    limit: limit,
+    nameGt: nameGt,
+    idGt: idGt,
+    teamId: teamId,
+  );
+
+  /// Gets a user group by ID, including its members.
+  Future<GetUserGroupResponse> getUserGroup(
+    String id, {
+    String? teamId,
+  }) => _chatApi.userGroups.getUserGroup(id, teamId: teamId);
+
+  /// Creates a new user group, optionally with initial members.
+  Future<CreateUserGroupResponse> createUserGroup(
+    String name, {
+    String? id,
+    String? description,
+    String? teamId,
+    List<String>? memberIds,
+  }) => _chatApi.userGroups.createUserGroup(
+    name,
+    id: id,
+    description: description,
+    teamId: teamId,
+    memberIds: memberIds,
+  );
+
+  /// Updates a user group's name and/or description.
+  ///
+  /// [teamId] scopes the lookup; a group's team cannot be changed.
+  Future<UpdateUserGroupResponse> updateUserGroup(
+    String id, {
+    String? name,
+    String? description,
+    String? teamId,
+  }) => _chatApi.userGroups.updateUserGroup(
+    id,
+    name: name,
+    description: description,
+    teamId: teamId,
+  );
+
+  /// Deletes a user group and all its memberships.
+  Future<EmptyResponse> deleteUserGroup(
+    String id, {
+    String? teamId,
+  }) => _chatApi.userGroups.deleteUserGroup(id, teamId: teamId);
+
+  /// Adds members to a user group.
+  Future<AddUserGroupMembersResponse> addUserGroupMembers(
+    String id,
+    List<String> memberIds, {
+    bool? asAdmin,
+    String? teamId,
+  }) => _chatApi.userGroups.addUserGroupMembers(
+    id,
+    memberIds,
+    asAdmin: asAdmin,
+    teamId: teamId,
+  );
+
+  /// Removes members from a user group.
+  Future<RemoveUserGroupMembersResponse> removeUserGroupMembers(
+    String id,
+    List<String> memberIds, {
+    String? teamId,
+  }) => _chatApi.userGroups.removeUserGroupMembers(
+    id,
+    memberIds,
+    teamId: teamId,
+  );
+
+  /// Searches roles by name prefix (autocomplete).
+  ///
+  /// [roleType] filters to user-assignable ([RoleType.user]) or
+  /// channel-assignable ([RoleType.channel]) roles when set; both kinds are
+  /// returned when omitted.
+  ///
+  /// [includeGlobalRoles] includes roles prefixed `global_` when set to
+  /// `true`. Defaults to `false`.
+  Future<SearchRolesResponse> searchRoles(
+    String query, {
+    int? limit,
+    String? nameGt,
+    RoleType? roleType,
+    bool? includeGlobalRoles,
+  }) => _chatApi.roles.searchRoles(
+    query,
+    limit: limit,
+    nameGt: nameGt,
+    roleType: roleType,
+    includeGlobalRoles: includeGlobalRoles,
+  );
 
   /// Closes the [_ws] connection and resets the [state]
   /// If [flushChatPersistence] is true the client deletes all offline

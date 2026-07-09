@@ -7,6 +7,7 @@ import 'package:stream_chat_persistence/src/entity/channels.dart';
 
 /// Represents a [Messages] table in [DriftChatDatabase].
 @DataClassName('MessageEntity')
+@TableIndex(name: 'idx_messages_channel_cid', columns: {#channelCid})
 class Messages extends Table {
   /// The message id
   TextColumn get id => text()();
@@ -23,6 +24,22 @@ class Messages extends Table {
 
   /// The message type
   TextColumn get type => text().withDefault(const Constant('regular'))();
+
+  /// True if the message contains a "@channel" mention.
+  BoolColumn get mentionedChannel => boolean().nullable()();
+
+  /// The list of group ids mentioned in the message.
+  TextColumn get mentionedGroupIds => text().nullable().map(ListConverter<String>())();
+
+  /// The list of groups mentioned in the message,
+  /// hydrated by the server from [mentionedGroupIds].
+  TextColumn get mentionedGroups => text().nullable().map(ListConverter<String>())();
+
+  /// True if the message contains a "@here" mention.
+  BoolColumn get mentionedHere => boolean().nullable()();
+
+  /// The list of roles mentioned in the message.
+  TextColumn get mentionedRoles => text().nullable().map(ListConverter<String>())();
 
   /// The list of user mentioned in the message
   TextColumn get mentionedUsers => text().map(ListConverter<String>())();

@@ -1,7 +1,9 @@
 import 'dart:async';
 
+import 'package:collection/collection.dart';
 import 'package:file_picker/file_picker.dart' show FileType;
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import 'package:stream_chat_flutter/src/message_input/attachment_picker/options/options.dart';
 import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -42,6 +44,10 @@ class StreamSystemAttachmentPicker extends StatelessWidget {
         final spacing = context.streamSpacing;
         final enabledTypes = value.filterEnabledTypes(options: options);
 
+        final firstEnabledOption = options.firstWhereOrNull(
+          (option) => enabledTypes.any(option.supportedTypes.contains),
+        );
+
         return ListView(
           shrinkWrap: true,
           padding: .symmetric(vertical: spacing.sm, horizontal: spacing.xxs),
@@ -53,6 +59,7 @@ class StreamSystemAttachmentPicker extends StatelessWidget {
 
                 return StreamListTile(
                   enabled: isEnabled,
+                  autofocus: option == firstEnabledOption,
                   leading: Icon(option.icon),
                   title: Text(option.title),
                   onTap: () => option.onTap(context, controller),
@@ -132,11 +139,14 @@ class _StreamTabbedAttachmentPickerState extends State<StreamTabbedAttachmentPic
                 setState(() => _currentOption = option);
               },
             ),
-            SizedBox(
-              height: _kTabbedAttachmentPickerHeight,
-              child: _currentOption.optionViewBuilder(
-                context,
-                widget.controller,
+            Semantics(
+              role: SemanticsRole.tabPanel,
+              child: SizedBox(
+                height: _kTabbedAttachmentPickerHeight,
+                child: _currentOption.optionViewBuilder(
+                  context,
+                  widget.controller,
+                ),
               ),
             ),
           ],
@@ -162,41 +172,70 @@ class _TabbedAttachmentPickerOptions extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final spacing = context.streamSpacing;
+    final localizations = MaterialLocalizations.of(context);
+    final optionsList = options.toList();
 
     return ValueListenableBuilder<AttachmentPickerValue>(
       valueListenable: controller,
       builder: (context, value, __) {
-        final enabledTypes = value.filterEnabledTypes(options: options);
+        final enabledTypes = value.filterEnabledTypes(options: optionsList);
 
         return SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           padding: EdgeInsets.symmetric(horizontal: spacing.md, vertical: spacing.sm),
-          child: Row(
-            spacing: spacing.xxxs,
-            children: [
-              ...options.map(
-                (option) {
-                  final supported = option.supportedTypes;
-                  // An option with no supportedTypes is always enabled.
-                  final isEnabled = supported.isEmpty || enabledTypes.any(supported.contains);
-                  final isSelected = option == currentOption;
+          child: Semantics(
+            container: true,
+            explicitChildNodes: true,
+            role: SemanticsRole.tabBar,
+            child: Row(
+              spacing: spacing.xxxs,
+              children: [
+                ...options.mapIndexed(
+                  (index, option) {
+                    final supported = option.supportedTypes;
+                    // An option with no supportedTypes is always enabled.
+                    final isEnabled = supported.isEmpty || enabledTypes.any(supported.contains);
+                    final isSelected = option == currentOption;
 
-                  final onPressed = switch (isEnabled) {
-                    true => () => onOptionSelected?.call(option),
-                    _ => null,
-                  };
+                    final onPressed = switch (isEnabled) {
+                      true => () => onOptionSelected?.call(option),
+                      _ => null,
+                    };
 
-                  return StreamButton.icon(
-                    style: StreamButtonStyle.secondary,
-                    type: StreamButtonType.ghost,
-                    size: StreamButtonSize.large,
-                    icon: Icon(option.icon),
-                    onPressed: onPressed,
-                    isSelected: isSelected,
-                  );
-                },
-              ),
-            ],
+                    return MergeSemantics(
+                      child: Semantics(
+                        label: option.title,
+                        selected: isSelected,
+                        role: SemanticsRole.tab,
+                        child: Stack(
+                          children: [
+                            Tooltip(
+                              message: option.title,
+                              excludeFromSemantics: true,
+                              child: StreamButton.icon(
+                                style: StreamButtonStyle.secondary,
+                                type: StreamButtonType.ghost,
+                                size: StreamButtonSize.large,
+                                onPressed: onPressed,
+                                isSelected: isSelected,
+                                autofocus: isSelected,
+                                icon: Icon(option.icon),
+                              ),
+                            ),
+                            Semantics(
+                              label: localizations.tabLabel(
+                                tabIndex: index + 1,
+                                tabCount: optionsList.length,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ),
           ),
         );
       },
@@ -344,12 +383,14 @@ Widget tabbedAttachmentPickerBuilder({
   AttachmentPickerOptionsBuilder? optionsBuilder,
   ValueSetter<AttachmentPickerError>? onError,
   ValueSetter<Poll>? onPollCreated,
+  CommandValidator? commandValidator,
   ValueSetter<Command>? onCommandSelected,
 }) {
   final defaultOptions = <TabbedAttachmentPickerOption>[
     TabbedAttachmentPickerOption(
       key: 'gallery-picker',
       icon: context.streamIcons.image,
+      title: context.translations.photosAndVideosLabel,
       supportedTypes: [
         AttachmentPickerType.images,
         AttachmentPickerType.videos,
@@ -378,6 +419,7 @@ Widget tabbedAttachmentPickerBuilder({
     TabbedAttachmentPickerOption(
       key: 'image-picker',
       icon: context.streamIcons.camera,
+      title: context.translations.photoFromCameraLabel,
       supportedTypes: [AttachmentPickerType.images],
       optionViewBuilder: (context, controller) => StreamImagePicker(
         onImagePicked: (image) async {
@@ -394,6 +436,7 @@ Widget tabbedAttachmentPickerBuilder({
     TabbedAttachmentPickerOption(
       key: 'video-picker',
       icon: context.streamIcons.video,
+      title: context.translations.videoFromCameraLabel,
       supportedTypes: [AttachmentPickerType.videos],
       optionViewBuilder: (context, controller) => StreamVideoPicker(
         onVideoPicked: (video) async {
@@ -410,6 +453,7 @@ Widget tabbedAttachmentPickerBuilder({
     TabbedAttachmentPickerOption(
       key: 'file-picker',
       icon: context.streamIcons.file,
+      title: context.translations.uploadAFileLabel,
       supportedTypes: [AttachmentPickerType.files],
       optionViewBuilder: (context, controller) => StreamFilePicker(
         onFilePicked: (file) async {
@@ -426,6 +470,7 @@ Widget tabbedAttachmentPickerBuilder({
     TabbedAttachmentPickerOption(
       key: 'poll-creator',
       icon: context.streamIcons.poll,
+      title: context.translations.createPollLabel(isNew: true),
       supportedTypes: [AttachmentPickerType.poll],
       optionViewBuilder: (context, controller) {
         final initialPoll = controller.value.poll;
@@ -443,8 +488,10 @@ Widget tabbedAttachmentPickerBuilder({
     TabbedAttachmentPickerOption(
       key: 'command-picker',
       icon: context.streamIcons.command,
+      title: context.translations.instantCommandsLabel,
       supportedTypes: [AttachmentPickerType.command],
       optionViewBuilder: (context, controller) => StreamCommandPicker(
+        commandValidator: commandValidator,
         onCommandSelected: onCommandSelected,
       ),
     ),
