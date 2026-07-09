@@ -277,7 +277,7 @@ class MessageDao extends DatabaseAccessor<DriftChatDatabase>
       );
     }
 
-    if (options != null) {
+    if (options != null && options.limit > 0) {
       query.limit(options.limit);
     }
 
