@@ -4457,7 +4457,8 @@ void main() {
           },
           "user2": {
             "chat_level": "none"
-          }
+          },
+          "user3": null
         },
         "user_channel_preferences": {
           "user1": {
@@ -4482,7 +4483,10 @@ void main() {
       );
 
       expect(response.userPreferences, isA<Map<String, PushPreference>>());
+      // user3 had a `null` value in the response (no user-global prefs were
+      // touched by the upsert) — should be filtered outs.
       expect(response.userPreferences, hasLength(2));
+      expect(response.userPreferences.containsKey('user3'), isFalse);
 
       // Test user1 preferences
       final user1Prefs = response.userPreferences['user1']!;

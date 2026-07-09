@@ -181,6 +181,38 @@ class PinnedMessageDao extends DatabaseAccessor<DriftChatDatabase>
     bool fetchDraft = true,
     PaginationParams? messagePagination,
   }) async {
+    final (
+      lessThanCursor,
+      lessThanOrEqualCursor,
+      greaterThanCursor,
+      greaterThanOrEqualCursor,
+    ) = await (
+      _lookupCursor(messagePagination?.lessThan),
+      _lookupCursor(messagePagination?.lessThanOrEqual),
+      _lookupCursor(messagePagination?.greaterThan),
+      _lookupCursor(messagePagination?.greaterThanOrEqual),
+    ).wait;
+
+    // When the caller is paginating forward (greaterThan / greaterThanOrEqual
+    // only), order ASC so the SQL `LIMIT` retains the N messages immediately
+    // AFTER the cursor. Otherwise order DESC so `LIMIT` retains the N most
+    // recent (closest to a `lessThan` cursor, or the channel tail when no
+    // cursor is set). The final result is always reshaped to ASC for display.
+    final isForwardPagination =
+        (greaterThanCursor != null || greaterThanOrEqualCursor != null) &&
+            lessThanCursor == null &&
+            lessThanOrEqualCursor == null;
+
+    final orderBy = isForwardPagination
+        ? [
+            OrderingTerm.asc(pinnedMessages.createdAt),
+            OrderingTerm.asc(pinnedMessages.id),
+          ]
+        : [
+            OrderingTerm.desc(pinnedMessages.createdAt),
+            OrderingTerm.desc(pinnedMessages.id),
+          ];
+
     final query = select(pinnedMessages).join([
       leftOuterJoin(_users, pinnedMessages.userId.equalsExp(_users.id)),
       leftOuterJoin(
@@ -191,35 +223,65 @@ class PinnedMessageDao extends DatabaseAccessor<DriftChatDatabase>
       ..where(pinnedMessages.channelCid.equals(cid))
       ..where(pinnedMessages.parentId.isNull() |
           pinnedMessages.showInChannel.equals(true))
-      ..orderBy([OrderingTerm.asc(pinnedMessages.createdAt)]);
+      ..orderBy(orderBy);
+
+    // Cursor predicates compare the full `(createdAt, id)` tuple — the same
+    // key used in ORDER BY — so messages sharing a `createdAt` with the cursor
+    // fall on the correct side of the boundary. Filtering on `createdAt` alone
+    // would skip or repeat those siblings across pages.
+    if (lessThanCursor case final c?) {
+      query.where(
+        pinnedMessages.createdAt.isSmallerThanValue(c.createdAt) |
+            (pinnedMessages.createdAt.equals(c.createdAt) &
+                pinnedMessages.id.isSmallerThanValue(c.id)),
+      );
+    }
+    if (lessThanOrEqualCursor case final c?) {
+      query.where(
+        pinnedMessages.createdAt.isSmallerThanValue(c.createdAt) |
+            (pinnedMessages.createdAt.equals(c.createdAt) &
+                pinnedMessages.id.isSmallerOrEqualValue(c.id)),
+      );
+    }
+    if (greaterThanCursor case final c?) {
+      query.where(
+        pinnedMessages.createdAt.isBiggerThanValue(c.createdAt) |
+            (pinnedMessages.createdAt.equals(c.createdAt) &
+                pinnedMessages.id.isBiggerThanValue(c.id)),
+      );
+    }
+    if (greaterThanOrEqualCursor case final c?) {
+      query.where(
+        pinnedMessages.createdAt.isBiggerThanValue(c.createdAt) |
+            (pinnedMessages.createdAt.equals(c.createdAt) &
+                pinnedMessages.id.isBiggerOrEqualValue(c.id)),
+      );
+    }
+
+    if (messagePagination != null) {
+      query.limit(messagePagination.limit);
+    }
 
     final rows = await query.get();
-    final msgList = await _messagesFromJoinRows(rows, fetchDraft: fetchDraft);
+    final orderedRows = isForwardPagination ? rows : rows.reversed.toList();
+    return _messagesFromJoinRows(orderedRows, fetchDraft: fetchDraft);
+  }
 
-    if (msgList.isNotEmpty) {
-      final mutable = msgList.toList();
-      if (messagePagination?.lessThan != null) {
-        final lessThanIndex = mutable.indexWhere(
-          (m) => m.id == messagePagination!.lessThan,
-        );
-        if (lessThanIndex != -1) {
-          mutable.removeRange(lessThanIndex, mutable.length);
-        }
-      }
-      if (messagePagination?.greaterThan != null) {
-        final greaterThanIndex = mutable.indexWhere(
-          (m) => m.id == messagePagination!.greaterThan,
-        );
-        if (greaterThanIndex != -1) {
-          mutable.removeRange(0, greaterThanIndex);
-        }
-      }
-      if (messagePagination?.limit != null) {
-        return mutable.take(messagePagination!.limit).toList();
-      }
-      return mutable;
-    }
-    return msgList;
+  /// Returns the `(createdAt, id)` cursor for the pinned message with [id] in
+  /// the local cache, or `null` if [id] is null, the message isn't cached, or
+  /// isn't visible in the channel (i.e. a thread reply with
+  /// `showInChannel = false`).
+  Future<({DateTime createdAt, String id})?> _lookupCursor(String? id) async {
+    if (id == null) return null;
+    final createdAt = await (selectOnly(pinnedMessages)
+          ..addColumns([pinnedMessages.createdAt])
+          ..where(pinnedMessages.id.equals(id))
+          ..where(pinnedMessages.parentId.isNull() |
+              pinnedMessages.showInChannel.equals(true)))
+        .map((row) => row.read(pinnedMessages.createdAt))
+        .getSingleOrNull();
+    if (createdAt == null) return null;
+    return (createdAt: createdAt, id: id);
   }
 
   /// Bulk updates the message data of multiple channels

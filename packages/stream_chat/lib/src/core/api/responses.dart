@@ -15,6 +15,7 @@ import 'package:stream_chat/src/core/models/message_reminder.dart';
 import 'package:stream_chat/src/core/models/poll.dart';
 import 'package:stream_chat/src/core/models/poll_option.dart';
 import 'package:stream_chat/src/core/models/poll_vote.dart';
+import 'package:stream_chat/src/core/models/predefined_filter.dart';
 import 'package:stream_chat/src/core/models/push_preference.dart';
 import 'package:stream_chat/src/core/models/reaction.dart';
 import 'package:stream_chat/src/core/models/read.dart';
@@ -77,6 +78,13 @@ class QueryChannelsResponse extends _BaseResponse {
   /// List of channels state returned by the query
   @JsonKey(defaultValue: [])
   late List<ChannelState> channels;
+
+  /// Predefined filter spec as resolved by the server.
+  ///
+  /// Populated when the request used `predefined_filter`. Contains the
+  /// preset name and the materialized `filter`/`sort` that were applied.
+  @JsonKey(name: 'predefined_filter')
+  PredefinedFilter? predefinedFilter;
 
   /// Create a new instance from a json
   static QueryChannelsResponse fromJson(Map<String, dynamic> json) =>
@@ -834,8 +842,11 @@ class GetUnreadCountResponse extends _BaseResponse {
 /// Model response for [StreamChatClient.setPushPreferences] api call
 @JsonSerializable(createToJson: false)
 class UpsertPushPreferencesResponse extends _BaseResponse {
-  /// Mapping of user IDs to their push preferences
-  @JsonKey(defaultValue: {})
+  /// Mapping of user IDs to their push preferences.
+  ///
+  /// Users whose user-global preferences were not touched by the upsert call
+  /// (the server returns `null` for them) are omitted from this map.
+  @JsonKey(fromJson: _userPreferencesFromJson)
   late Map<String, PushPreference> userPreferences;
 
   /// Mapping of user IDs to their channel-specific push preferences
@@ -845,4 +856,15 @@ class UpsertPushPreferencesResponse extends _BaseResponse {
   /// Create a new instance from a json
   static UpsertPushPreferencesResponse fromJson(Map<String, dynamic> json) =>
       _$UpsertPushPreferencesResponseFromJson(json);
+}
+
+Map<String, PushPreference> _userPreferencesFromJson(
+  Map<String, dynamic>? json,
+) {
+  if (json == null) return {};
+  return {
+    for (final MapEntry(:key, :value) in json.entries)
+      if (value != null)
+        key: PushPreference.fromJson(value as Map<String, dynamic>),
+  };
 }

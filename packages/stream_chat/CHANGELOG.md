@@ -1,3 +1,27 @@
+## Unreleased
+
+🐞 Fixed
+
+- Fixed a deprecation warning from `equatable` causing CI analysis to fail.
+
+## 9.26.0
+
+✅ Added
+
+- Added support for predefined filters for `QueryChannels` on `StreamChatClient` (`StreamChatClient.queryChannels` and `StreamChatClient.queryChannelsWithResult`).
+- Added `ChatPersistenceClient.queryChannelStates` and `ChatPersistenceClient.saveChannelQueries` as the unified read/write methods for channel-query persistence. Both accept standard and predefined-filter parameters and internally dispatch.
+- Added `StreamChatClient.pauseReconnect` / `resumeReconnect` to suspend the WebSocket's auto-retry loop without tearing down the user session.
+
+⚠️ Deprecated
+
+- Deprecated `ChatPersistenceClient.getChannelStates` and `ChatPersistenceClient.updateChannelQueries` in favor of the unified `queryChannelStates` / `saveChannelQueries`. The deprecated methods stay overridable so downstream subclasses keep working unchanged.
+
+🐞 Fixed
+
+- Fixed an unhandled `WebSocketChannelException` surfacing when a reconnect attempt failed (e.g. DNS lookup failed in background); the duplicate signal on `sink.done` is now ignored since the stream's `onError` already handles it.
+- Fixed failing to parse `null` values in `UpsertPushPreferencesResponse.userPreferences` JSON.
+- Fixed resetting channel unread count on `message.read` events delivered for threads. 
+
 ## 9.25.0
 
 - Minor bug fixes and improvements

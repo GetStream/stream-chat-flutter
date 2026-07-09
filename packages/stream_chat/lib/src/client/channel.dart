@@ -3098,6 +3098,9 @@ class ChannelClientState {
       ..add(
         _channel.on(EventType.messageRead).listen(
           (event) {
+            // Skip handling the event if delivered for a thread
+            if (event.thread != null) return;
+
             final user = event.user;
             if (user == null) return;
 

@@ -20,7 +20,7 @@ class PollDao extends DatabaseAccessor<DriftChatDatabase> with _$PollDaoMixin {
 
   Future<Poll> _pollFromJoinRow(TypedResult row) async {
     final pollEntity = row.readTable(polls);
-    final userEntity = row.readTable(users);
+    final userEntity = row.readTableOrNull(users);
     final allVotes = await _db.pollVoteDao.getPollVotes(pollEntity.id);
     final latestAnswers = allVotes.where((it) => it.isAnswer);
     final ownVotesAndAnswers = allVotes.where((it) => it.userId == _db.userId);
@@ -38,7 +38,7 @@ class PollDao extends DatabaseAccessor<DriftChatDatabase> with _$PollDaoMixin {
     }
 
     return pollEntity.toPoll(
-      createdBy: userEntity.toUser(),
+      createdBy: userEntity?.toUser(),
       latestAnswers: latestAnswers.toList(),
       ownVotesAndAnswers: ownVotesAndAnswers.toList(),
       latestVotesByOption: latestVotesByOption,
@@ -68,9 +68,7 @@ class PollDao extends DatabaseAccessor<DriftChatDatabase> with _$PollDaoMixin {
           [leftOuterJoin(users, polls.createdById.equalsExp(users.id))]).get();
       for (final row in rows) {
         final pollEntity = row.readTable(polls);
-        // Same as `_pollFromJoinRow` => reads users via `readTable` (not
-        // `readTableOrNull`) on a LEFT JOIN
-        final userEntity = row.readTable(users);
+        final userEntity = row.readTableOrNull(users);
         final allVotes = votesByPoll[pollEntity.id] ?? const <PollVote>[];
         result[pollEntity.id] = _buildPoll(pollEntity, userEntity, allVotes);
       }
@@ -92,7 +90,7 @@ class PollDao extends DatabaseAccessor<DriftChatDatabase> with _$PollDaoMixin {
 
   Poll _buildPoll(
     PollEntity pollEntity,
-    UserEntity userEntity,
+    UserEntity? userEntity,
     List<PollVote> allVotes,
   ) {
     final latestAnswers = allVotes.where((it) => it.isAnswer);
@@ -111,7 +109,7 @@ class PollDao extends DatabaseAccessor<DriftChatDatabase> with _$PollDaoMixin {
     }
 
     return pollEntity.toPoll(
-      createdBy: userEntity.toUser(),
+      createdBy: userEntity?.toUser(),
       latestAnswers: latestAnswers.toList(),
       ownVotesAndAnswers: ownVotesAndAnswers.toList(),
       latestVotesByOption: latestVotesByOption,
