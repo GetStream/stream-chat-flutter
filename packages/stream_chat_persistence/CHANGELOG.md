@@ -5,6 +5,10 @@
 - Add indices on the `channel_cid` column on the `Messages`, `Members`, and `Reads` tables to improve read times on large databases.
 - Add indices on the `message_id` column on the `Reactions` table to improve read times on large databases.
 
+🐞 Fixed
+
+- `MessageDao.getThreadMessagesByParentId` now treats a `PaginationParams.limit` of `0` as "unset" and returns all matching replies, instead of returning none.
+
 ## 10.1.0
 
 ✅ Added
