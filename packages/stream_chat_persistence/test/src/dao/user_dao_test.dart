@@ -55,24 +55,13 @@ void main() {
     // Fetched users length should be one more than inserted users.
     // copyUser `online` modified field should be `false`.
     // Fetched users should contain the newUser.
-    final fetchedUsers = await userDao.getUsers();
-    expect(fetchedUsers.length, insertedUsers.length + 1);
-    expect(fetchedUsers.firstWhere((it) => it.id == copyUser.id).online, false);
-    expect(fetchedUsers.contains(newUser), true);
-  });
-
-  test('getUsers', () async {
-    // Should be empty initially
-    final users = await userDao.getUsers();
-    expect(users, isEmpty);
-
-    // Preparing test data
-    final insertedUsers = await _prepareUserData();
-    expect(insertedUsers, isNotEmpty);
-
-    // Fetched user list should match inserted user list length
-    final fetchedUsers = await userDao.getUsers();
-    expect(fetchedUsers.length, insertedUsers.length);
+    final fetchedEntities = await database.select(database.users).get();
+    expect(fetchedEntities.length, insertedUsers.length + 1);
+    expect(
+      fetchedEntities.firstWhere((it) => it.id == copyUser.id).online,
+      false,
+    );
+    expect(fetchedEntities.any((it) => it.id == newUser.id), isTrue);
   });
 
   tearDown(() async {

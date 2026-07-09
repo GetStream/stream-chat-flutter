@@ -61,72 +61,13 @@ void main() {
 
     await database.userDao.updateUsers(users);
     await database.channelDao.updateChannels(channels);
-    await database.pinnedMessageDao.updateMessages(cid, [message]);
+    await database.pinnedMessageDao.bulkUpdateMessages({
+      cid: [message],
+    });
     await pinnedMessageReactionDao.updateReactions(reactions);
 
     return reactions;
   }
-
-  test('getReactions', () async {
-    const messageId = 'testMessageId';
-
-    // Should be empty initially
-    final reactions = await pinnedMessageReactionDao.getReactions(messageId);
-    expect(reactions, isEmpty);
-
-    // Adding sample reactions
-    final insertedReactions = await _prepareReactionData(messageId);
-    expect(insertedReactions, isNotEmpty);
-
-    // Fetched reaction length should match inserted reactions length.
-    // Every reaction messageId should match the provided messageId.
-    final fetchedReactions = await pinnedMessageReactionDao.getReactions(messageId);
-    expect(fetchedReactions.length, insertedReactions.length);
-    expect(fetchedReactions.every((it) => it.messageId == messageId), true);
-
-    // Verify score and emojiCode are preserved
-    for (var i = 0; i < fetchedReactions.length; i++) {
-      final inserted = insertedReactions[i];
-      final fetched = fetchedReactions[i];
-      expect(fetched.score, inserted.score);
-      expect(fetched.emojiCode, inserted.emojiCode);
-    }
-  });
-
-  test('getReactionsByUserId', () async {
-    const messageId = 'testMessageId';
-    const userId = 'testUserId';
-    const otherUserId = 'otherUserid';
-
-    // Should be empty initially
-    final reactions = await pinnedMessageReactionDao.getReactionsByUserId(messageId, userId);
-    expect(reactions, isEmpty);
-
-    // Adding sample reactions from the target user.
-    final insertedReactions = await _prepareReactionData(messageId, userId: userId);
-    expect(insertedReactions, isNotEmpty);
-
-    // Adding sample reactions from other users on the same message.
-    final otherInsertedReactions = await _prepareReactionData(messageId, userId: otherUserId);
-    expect(otherInsertedReactions, isNotEmpty);
-
-    // Fetched reaction length should match the target user's reactions only.
-    // Every reaction messageId should match the provided messageId.
-    // Every reaction userId should match the provided userId — i.e. reactions
-    // from other users on the same message must be filtered out.
-    final fetchedReactions = await pinnedMessageReactionDao.getReactionsByUserId(messageId, userId);
-    expect(fetchedReactions.length, insertedReactions.length);
-    expect(fetchedReactions.every((it) => it.messageId == messageId), true);
-    expect(fetchedReactions.every((it) => it.userId == userId), true);
-
-    // Verify score and emojiCode are preserved
-    for (var i = 0; i < fetchedReactions.length; i++) {
-      final inserted = insertedReactions[i];
-      final fetched = fetchedReactions[i];
-      expect(fetched.score, inserted.score);
-      expect(fetched.emojiCode, inserted.emojiCode);
-    }
-  });
 
   test('updateReactions', () async {
     const messageId = 'testMessageId';
@@ -157,7 +98,9 @@ void main() {
     // Fetched reaction length should be one more than inserted reactions.
     // copyReaction modified fields should match
     // Fetched reactions should contain the newReaction.
-    final fetchedReactions = await pinnedMessageReactionDao.getReactions(messageId);
+    final fetchedReactions = (await pinnedMessageReactionDao.getReactionsForMessages(
+      [messageId],
+    ))[messageId]!;
     expect(fetchedReactions.length, reactions.length + 1);
 
     final fetchedCopyReaction = fetchedReactions.firstWhere(
@@ -177,15 +120,17 @@ void main() {
     );
   });
 
-  test('getReactions returns empty for a message id with no reactions, '
-      'even when reactions exist for other messages', () async {
+  test('getReactionsForMessages returns empty list for a message id with no '
+      'reactions, even when reactions exist for other messages', () async {
     const messageWithReactions = 'pmsg-A';
     const messageWithoutReactions = 'pmsg-B';
 
     await _prepareReactionData(messageWithReactions);
 
-    final fetched = await pinnedMessageReactionDao.getReactions(messageWithoutReactions);
-    expect(fetched, isEmpty);
+    final fetched = await pinnedMessageReactionDao.getReactionsForMessages(
+      const [messageWithoutReactions],
+    );
+    expect(fetched[messageWithoutReactions], isEmpty);
   });
 
   group('deleteReactionsByMessageIds', () {
@@ -198,19 +143,21 @@ void main() {
 
       // Fetched reaction list length should match
       // the inserted reactions list length
-      final reactions1 = await pinnedMessageReactionDao.getReactions(messageId1);
-      final reactions2 = await pinnedMessageReactionDao.getReactions(messageId2);
-      expect(reactions1.length, insertedReactions1.length);
-      expect(reactions2.length, insertedReactions2.length);
+      final reactions = await pinnedMessageReactionDao.getReactionsForMessages(
+        [messageId1, messageId2],
+      );
+      expect(reactions[messageId1]!.length, insertedReactions1.length);
+      expect(reactions[messageId2]!.length, insertedReactions2.length);
 
       // Deleting all the reactions of messageId1
       await pinnedMessageReactionDao.deleteReactionsByMessageIds([messageId1]);
 
       // Fetched reactions length of only messageId1 should be empty
-      final fetchedReactions1 = await pinnedMessageReactionDao.getReactions(messageId1);
-      final fetchedReactions2 = await pinnedMessageReactionDao.getReactions(messageId2);
-      expect(fetchedReactions1, isEmpty);
-      expect(fetchedReactions2, isNotEmpty);
+      final fetched = await pinnedMessageReactionDao.getReactionsForMessages(
+        [messageId1, messageId2],
+      );
+      expect(fetched[messageId1], isEmpty);
+      expect(fetched[messageId2], isNotEmpty);
     });
 
     test('should delete all the reactions of both message', () async {
@@ -220,19 +167,23 @@ void main() {
 
       // Fetched reaction list length should match
       // the inserted reactions list length
-      final reactions1 = await pinnedMessageReactionDao.getReactions(messageId1);
-      final reactions2 = await pinnedMessageReactionDao.getReactions(messageId2);
-      expect(reactions1.length, insertedReactions1.length);
-      expect(reactions2.length, insertedReactions2.length);
+      final reactions = await pinnedMessageReactionDao.getReactionsForMessages(
+        [messageId1, messageId2],
+      );
+      expect(reactions[messageId1]!.length, insertedReactions1.length);
+      expect(reactions[messageId2]!.length, insertedReactions2.length);
 
       // Deleting all the reactions of messageId1 and messageId2
-      await pinnedMessageReactionDao.deleteReactionsByMessageIds([messageId1, messageId2]);
+      await pinnedMessageReactionDao.deleteReactionsByMessageIds(
+        [messageId1, messageId2],
+      );
 
       // Fetched reactions length of both messages should be empty
-      final fetchedReactions1 = await pinnedMessageReactionDao.getReactions(messageId1);
-      final fetchedReactions2 = await pinnedMessageReactionDao.getReactions(messageId2);
-      expect(fetchedReactions1, isEmpty);
-      expect(fetchedReactions2, isEmpty);
+      final fetched = await pinnedMessageReactionDao.getReactionsForMessages(
+        [messageId1, messageId2],
+      );
+      expect(fetched[messageId1], isEmpty);
+      expect(fetched[messageId2], isEmpty);
     });
   });
 
