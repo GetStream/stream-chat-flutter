@@ -5,6 +5,11 @@ import 'package:stream_chat/stream_chat.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 ///
+// ignore: deprecated_member_use
+// `EquatableMixin` is deprecated in equatable ≥2.0.8 in favour of
+// `with Equatable`, but switching would change the mixin type in the class
+// hierarchy (e.g. `error is EquatableMixin` → false), which is a breaking
+// change under semver. Migrate this when the next major version is cut.
 class StreamChatError with EquatableMixin implements Exception {
   ///
   const StreamChatError(this.message);
