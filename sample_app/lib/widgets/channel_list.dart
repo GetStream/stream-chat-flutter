@@ -55,14 +55,8 @@ class _ChannelList extends State<ChannelList> {
 
   late final _channelListController = StreamChannelListController(
     client: StreamChat.of(context).client,
-    filter: Filter.in_('members', [StreamChat.of(context).currentUser!.id]),
-    channelStateSort: [
-      const SortOption.desc(
-        ChannelSortKey.pinnedAt,
-        nullOrdering: NullOrdering.nullsLast,
-      ),
-      const SortOption.desc(ChannelSortKey.lastMessageAt),
-    ],
+    predefinedFilter: 'stream_chat_flutter_sample_app_v9',
+    filterValues: {'user_id': StreamChat.of(context).currentUser!.id},
     limit: 30,
   );
 

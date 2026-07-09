@@ -1,4 +1,8 @@
-## Upcoming changes
+## Upcoming
+
+✅ Added
+
+- Added support for predefined filters for `QueryChannels` on `StreamChatPersistenceClient`.
 
 🚀 Performance
 
@@ -7,6 +11,12 @@
 🐞 Fixed
 
 - `MessageDao.getThreadMessagesByParentId` now honours all `PaginationParams` cursor variants (`lessThan`/`lessThanOrEqual`/`greaterThan`/`greaterThanOrEqual`) and returns the page of replies closest to the cursor.
+
+## 9.26.0
+
+🐞 Fixed
+
+- `PollDao` no longer crashes when reading polls whose creator user is missing from the local cache.
 
 ## 9.25.0
 
