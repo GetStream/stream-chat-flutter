@@ -4,6 +4,14 @@
 
 - Added support for predefined filters for `QueryChannels` on `StreamChatPersistenceClient`.
 
+🚀 Performance
+
+- Read only the thread replies matching the `PaginationParams` from DB when calling `MessageDao.getThreadMessagesByParentId` instead of reading all replies for the thread and applying pagination in memory.
+
+🐞 Fixed
+
+- `MessageDao.getThreadMessagesByParentId` now honours all `PaginationParams` cursor variants (`lessThan`/`lessThanOrEqual`/`greaterThan`/`greaterThanOrEqual`) and returns the page of replies closest to the cursor.
+
 ## 9.26.0
 
 🐞 Fixed
