@@ -166,21 +166,30 @@ class StreamChatClient {
 
   /// Updates the system environment information used by the client.
   ///
-  /// It allows you to set environment-specific information that will be
-  /// included in API requests, such as the application name, platform details,
-  /// and version information.
+  /// The passed [environment] is sanitized before being applied:
+  ///
+  /// Overridable fields (passed through as-is):
+  /// - [SystemEnvironment.appName]
+  /// - [SystemEnvironment.appVersion]
+  /// - [SystemEnvironment.osVersion]
+  /// - [SystemEnvironment.deviceModel]
+  ///
+  /// Immutable fields (custom values are ignored, internal defaults are
+  /// preserved):
+  /// - [SystemEnvironment.sdkName]
+  /// - [SystemEnvironment.sdkIdentifier]
+  /// - [SystemEnvironment.sdkVersion]
+  /// - [SystemEnvironment.osName]
   ///
   /// Example:
   /// ```dart
   /// client.updateSystemEnvironment(
   ///   SystemEnvironment(
-  ///     name: 'my_app',
-  ///     version: '1.0.0',
+  ///     appName: 'my_app',
+  ///     appVersion: '1.0.0',
   ///   ),
   /// );
   /// ```
-  ///
-  /// See [SystemEnvironment] for more information on the available fields.
   void updateSystemEnvironment(SystemEnvironment environment) {
     _systemEnvironmentManager.updateEnvironment(environment);
   }
