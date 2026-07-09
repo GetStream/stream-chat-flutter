@@ -1,3 +1,9 @@
+## Unreleased
+
+🐞 Fixed
+
+- Fixed a deprecation warning from `equatable` causing CI analysis to fail.
+
 ## 9.26.0
 
 ✅ Added
