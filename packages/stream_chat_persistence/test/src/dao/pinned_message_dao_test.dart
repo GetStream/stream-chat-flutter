@@ -557,13 +557,15 @@ void main() {
             text: id,
           );
 
-      await pinnedMessageDao.updateMessages(cid, [
-        m('msg_pre', earlier),
-        m('msg_tieA', tie),
-        m('msg_tieB', tie),
-        m('msg_tieC', tie),
-        m('msg_post', later),
-      ]);
+      await pinnedMessageDao.bulkUpdateMessages({
+        cid: [
+          m('msg_pre', earlier),
+          m('msg_tieA', tie),
+          m('msg_tieB', tie),
+          m('msg_tieC', tie),
+          m('msg_post', later),
+        ]
+      });
 
       final before = await pinnedMessageDao.getMessagesByCid(
         cid,
@@ -1049,7 +1051,7 @@ void main() {
           createdAt: baseTime.add(Duration(seconds: i)),
         ),
       );
-      await pinnedMessageDao.updateMessages(cid, messages);
+      await pinnedMessageDao.bulkUpdateMessages({cid: messages});
 
       // 2 reactions per message; surviving rows after pagination must still
       // carry their full reaction set.

@@ -654,14 +654,16 @@ void main() {
             text: id,
           );
 
-      await messageDao.updateMessages(cid, [
-        parent(),
-        reply('reply_pre', earlier),
-        reply('reply_tieA', tie),
-        reply('reply_tieB', tie),
-        reply('reply_tieC', tie),
-        reply('reply_post', later),
-      ]);
+      await messageDao.bulkUpdateMessages({
+        cid: [
+          parent(),
+          reply('reply_pre', earlier),
+          reply('reply_tieA', tie),
+          reply('reply_tieB', tie),
+          reply('reply_tieC', tie),
+          reply('reply_post', later),
+        ]
+      });
 
       final before = await messageDao.getThreadMessagesByParentId(
         parentId,
