@@ -4,6 +4,10 @@
 
 - `StreamChatClient.updateSystemEnvironment` now sanitizes the passed `SystemEnvironment`: `sdkName`, `sdkVersion`, and `osName` are locked to internal defaults, and `sdkIdentifier` only accepts the `dart` → `flutter` promotion (other values, including a `flutter` → `dart` demotion, are ignored). `appName`, `appVersion`, `osVersion`, and `deviceModel` continue to pass through as-is.
 
+🐞 Fixed
+
+- Fixed a deprecation warning from `equatable` causing CI analysis to fail.
+
 ## 9.26.0
 
 ✅ Added
