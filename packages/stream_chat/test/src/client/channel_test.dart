@@ -1854,6 +1854,60 @@ void main() {
       });
     });
 
+    group('`ChannelClientState.updateMessage`', () {
+      test('upsert: true (default) adds an unknown message', () async {
+        final message = Message(
+          id: 'unknown-message',
+          user: client.state.currentUser,
+          text: 'hello',
+          createdAt: DateTime.utc(2026),
+        );
+
+        expect(channel.state!.messages, isEmpty);
+
+        channel.state!.updateMessage(message);
+
+        expect(channel.state!.messages.map((m) => m.id), ['unknown-message']);
+      });
+
+      test('upsert: false does NOT add an unknown message', () async {
+        final message = Message(
+          id: 'unknown-message',
+          user: client.state.currentUser,
+          text: 'hello',
+          createdAt: DateTime.utc(2026),
+        );
+
+        expect(channel.state!.messages, isEmpty);
+
+        channel.state!.updateMessage(message, upsert: false);
+
+        expect(channel.state!.messages, isEmpty);
+      });
+
+      test('upsert: false updates a message already in the window', () async {
+        const messageId = 'known-message';
+        final seeded = Message(
+          id: messageId,
+          user: client.state.currentUser,
+          text: 'old',
+          createdAt: DateTime.utc(2026),
+        );
+        channel.state!.updateChannelState(
+          channel.state!.channelState.copyWith(messages: [seeded]),
+        );
+
+        channel.state!.updateMessage(
+          seeded.copyWith(text: 'new'),
+          upsert: false,
+        );
+
+        final stored = channel.state!.messages.single;
+        expect(stored.id, equals(messageId));
+        expect(stored.text, equals('new'));
+      });
+    });
+
     test('`.partialUpdateMessage`', () async {
       final message = Message(
         id: 'test-message-id',
@@ -5582,6 +5636,30 @@ void main() {
               await Future.delayed(Duration.zero);
 
               expect(channel.state!.threads[parentId]!.map((m) => m.id), ['known-reply']);
+            },
+          );
+
+          test(
+            'should NOT create phantom threads[parentId] entry for unloaded thread',
+            () async {
+              const parentId = 'unloaded-parent';
+              // The thread was never paged in, so there's no entry for it.
+              expect(channel.state!.threads.containsKey(parentId), isFalse);
+
+              channel.state!.isUpToDate = false;
+
+              final phantomReply = Message(
+                id: 'phantom-reply',
+                parentId: parentId,
+                user: client.state.currentUser,
+                text: 'edited',
+                createdAt: DateTime.utc(2026, 1, 2),
+              );
+              client.addEvent(createUpdateMessageEvent(phantomReply));
+              await Future.delayed(Duration.zero);
+
+              // The dropped reply must not leave behind an empty thread entry.
+              expect(channel.state!.threads.containsKey(parentId), isFalse);
             },
           );
 

@@ -1,5 +1,9 @@
 ## Upcoming
 
+✅ Added
+
+- Added an `upsert` flag to `ChannelClientState.updateMessage` (defaults to `true`). Pass `false` to update a message only if it's already loaded in the state, skipping unknown messages instead of adding them.
+
 🐞 Fixed
 
 - Fixed `message.updated` and soft `message.deleted` events being incorrectly upserted into `ChannelState.messages` (and thread reply lists) when they targeted a message outside the currently loaded window.

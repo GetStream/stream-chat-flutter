@@ -3194,7 +3194,7 @@ class ChannelClientState {
         final message = event.message;
         if (message == null) return;
 
-        return _updateMessages([message], upsert: false);
+        return updateMessage(message, upsert: false);
       }),
     );
   }
@@ -3211,7 +3211,7 @@ class ChannelClientState {
 
         if (hardDelete) return deleteMessage(message, hardDelete: true);
         // Soft delete, update the message only if loaded (upsert: false)
-        return _updateMessages([message], upsert: false);
+        return updateMessage(message, upsert: false);
       }),
     );
   }
@@ -3307,13 +3307,18 @@ class ChannelClientState {
     );
   }
 
-  /// Updates the [message] in the state if it exists. Adds it otherwise.
+  /// Updates the [message] in the state.
   ///
   /// Reconciles via `Message.updateWith`, so locally-known enrichment
   /// (poll, sharedLocation, ownReactions, nested quotedMessage) is
   /// preserved when [message] omits those fields. Use [replaceMessage]
   /// for paths that need a strict overwrite.
-  void updateMessage(Message message) => _updateMessages([message]);
+  ///
+  /// When [upsert] is `true` (the default) and [message] isn't already in
+  /// the state, it's added. When `false`, an unknown [message] is skipped
+  /// and the state is left unchanged; only a message already loaded in the
+  /// state is updated.
+  void updateMessage(Message message, {bool upsert = true}) => _updateMessages([message], upsert: upsert);
 
   /// Replaces the [message] in the state if it exists, no-op otherwise.
   ///
@@ -3962,13 +3967,22 @@ class ChannelClientState {
 
     final updatedThreads = {...threads};
     for (final MapEntry(key: thread, :value) in messagesByThread.entries) {
-      final threadMessages = updatedThreads[thread] ?? <Message>[];
+      final existingThreadMessages = updatedThreads[thread];
+      final threadMessages = existingThreadMessages ?? <Message>[];
       final updatedThreadMessages = _mergeMessagesIntoExisting(
         existing: threadMessages,
         toMerge: value,
         update: update,
         upsert: upsert,
       );
+
+      // Don't create a phantom entry for a thread that wasn't loaded: with
+      // `upsert: false` an out-of-window reply is dropped, leaving the merged
+      // list empty. Writing it back would make `threads.containsKey(parentId)`
+      // report a thread that was never paged in.
+      if (existingThreadMessages == null && updatedThreadMessages.isEmpty) {
+        continue;
+      }
 
       // Update the thread with the modified message list.
       updatedThreads[thread] = updatedThreadMessages.toList();
