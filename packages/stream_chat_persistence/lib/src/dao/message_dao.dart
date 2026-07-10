@@ -379,11 +379,6 @@ class MessageDao extends DatabaseAccessor<DriftChatDatabase>
     return _messagesFromJoinRows(orderedRows, fetchDraft: fetchDraft);
   }
 
-  /// Updates the message data of a particular channel with
-  /// the new [messageList] data
-  Future<void> updateMessages(String cid, List<Message> messageList) =>
-      bulkUpdateMessages({cid: messageList});
-
   /// Bulk updates the message data of multiple channels
   Future<void> bulkUpdateMessages(
     Map<String, List<Message>?> channelWithMessages,

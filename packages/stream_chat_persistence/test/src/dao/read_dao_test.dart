@@ -32,7 +32,7 @@ void main() {
 
     await database.userDao.updateUsers(users);
     await database.channelDao.updateChannels(channels);
-    await readDao.updateReads(cid, reads);
+    await readDao.bulkUpdateReads({cid: reads});
     return reads;
   }
 
@@ -81,7 +81,9 @@ void main() {
       lastDeliveredMessageId: 'lastDeliveredMessageId3',
     );
     await database.userDao.updateUsers([newUser]);
-    await readDao.updateReads(cid, [copyRead, newRead]);
+    await readDao.bulkUpdateReads({
+      cid: [copyRead, newRead]
+    });
 
     // Fetched reads length should be one more than inserted reads.
     // copyRead `unreadMessages` modified field should be 33.

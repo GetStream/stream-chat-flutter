@@ -15,6 +15,10 @@
 - `PinnedMessageDao.getMessagesByCid` now honours `PaginationParams.lessThanOrEqual` and `PaginationParams.greaterThanOrEqual` (inclusive of the cursor message), in addition to the existing strict `lessThan`/`greaterThan`.
 - `PinnedMessageDao.getMessagesByCid` with a forward cursor (`greaterThan`/`greaterThanOrEqual`) and a `limit` now returns the messages immediately AFTER the pivot, instead of the channel tail.
 
+🔄 Internal / Non-breaking
+
+- Removed unused / test-only methods from internal DAO classes.
+
 ## 9.26.0
 
 🐞 Fixed
