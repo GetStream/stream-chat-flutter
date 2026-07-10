@@ -672,10 +672,6 @@ class _ChannelLastMessageWithStatusState extends State<_ChannelLastMessageWithSt
   }
 }
 
-/// Signature for a predicate deciding whether a [Message] should be
-/// considered as a channel's last message preview.
-typedef LastMessagePredicate = bool Function(Message message);
-
 /// A widget that displays the last message of a channel.
 class ChannelLastMessageText extends StatefulWidget {
   /// Creates a new instance of [ChannelLastMessageText] widget.
