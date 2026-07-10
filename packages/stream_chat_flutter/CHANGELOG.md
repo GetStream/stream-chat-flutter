@@ -1,5 +1,9 @@
 ## Upcoming
 
+✅ Added
+
+- Added a `LastMessagePredicate` typedef for the `ChannelLastMessageText.lastMessagePredicate` filter.
+
 🐞 Fixed
 - Fixed shadowed messages not hidden in channel list items.
 

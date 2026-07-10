@@ -349,7 +349,7 @@ class ChannelLastMessageText extends StatefulWidget {
     super.key,
     required this.channel,
     this.textStyle,
-    bool Function(Message)? lastMessagePredicate,
+    LastMessagePredicate? lastMessagePredicate,
   })  : assert(
           channel.state != null,
           'Channel ${channel.id} is not initialized',
@@ -370,12 +370,12 @@ class ChannelLastMessageText extends StatefulWidget {
   ///
   /// This predicate is used to filter out messages that should not be
   /// considered for the last message.
-  final bool Function(Message) lastMessagePredicate;
+  final LastMessagePredicate lastMessagePredicate;
 
   // The default predicate to determine if the message should be considered
   // for the last message. Hides shadowed messages from non-senders so the
   // sender's preview matches the messaging UI.
-  static bool Function(Message) _defaultLastMessagePredicate(
+  static LastMessagePredicate _defaultLastMessagePredicate(
     String? currentUserId,
   ) {
     return (Message message) {
