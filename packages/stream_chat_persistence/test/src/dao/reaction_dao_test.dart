@@ -53,59 +53,13 @@ void main() {
 
     await database.userDao.updateUsers(users);
     await database.channelDao.updateChannels(channels);
-    await database.messageDao.updateMessages(cid, [message]);
+    await database.messageDao.bulkUpdateMessages({
+      cid: [message]
+    });
     await reactionDao.updateReactions(reactions);
 
     return reactions;
   }
-
-  test('getReactions', () async {
-    const messageId = 'testMessageId';
-
-    // Should be empty initially
-    final reactions = await reactionDao.getReactions(messageId);
-    expect(reactions, isEmpty);
-
-    // Adding sample reactions
-    final insertedReactions = await _prepareReactionData(messageId);
-    expect(insertedReactions, isNotEmpty);
-
-    // Fetched reaction length should match inserted reactions length.
-    // Every reaction messageId should match the provided messageId.
-    final fetchedReactions = await reactionDao.getReactions(messageId);
-    expect(fetchedReactions.length, insertedReactions.length);
-    expect(fetchedReactions.every((it) => it.messageId == messageId), true);
-  });
-
-  test('getReactionsByUserId', () async {
-    const messageId = 'testMessageId';
-    const userId = 'testUserId';
-    const otherUserId = 'otherUserid';
-
-    // Should be empty initially
-    final reactions = await reactionDao.getReactionsByUserId(messageId, userId);
-    expect(reactions, isEmpty);
-
-    // Adding sample reactions from the target user.
-    final insertedReactions =
-        await _prepareReactionData(messageId, userId: userId);
-    expect(insertedReactions, isNotEmpty);
-
-    // Adding sample reactions from other users on the same message.
-    final otherInsertedReactions =
-        await _prepareReactionData(messageId, userId: otherUserId);
-    expect(otherInsertedReactions, isNotEmpty);
-
-    // Fetched reaction length should match the target user's reactions only.
-    // Every reaction messageId should match the provided messageId.
-    // Every reaction userId should match the provided userId — i.e. reactions
-    // from other users on the same message must be filtered out.
-    final fetchedReactions =
-        await reactionDao.getReactionsByUserId(messageId, userId);
-    expect(fetchedReactions.length, insertedReactions.length);
-    expect(fetchedReactions.every((it) => it.messageId == messageId), true);
-    expect(fetchedReactions.every((it) => it.userId == userId), true);
-  });
 
   test('updateReactions', () async {
     const messageId = 'testMessageId';
@@ -129,7 +83,8 @@ void main() {
     // Fetched reaction length should be one more than inserted reactions.
     // copyReaction `score` modified field should be 33.
     // Fetched reactions should contain the newReaction.
-    final fetchedReactions = await reactionDao.getReactions(messageId);
+    final fetchedReactions =
+        (await reactionDao.getReactionsForMessages([messageId]))[messageId]!;
     expect(fetchedReactions.length, reactions.length + 1);
     expect(
       fetchedReactions
@@ -169,7 +124,7 @@ void main() {
         createdAt: baseTime.add(Duration(seconds: i)),
       ),
     );
-    await database.messageDao.updateMessages(cid, messages);
+    await database.messageDao.bulkUpdateMessages({cid: messages});
 
     // Seed 1 reaction on every odd-indexed message (600 total) so we can
     // verify both that the chunked query returns rows AND that ids without
@@ -210,17 +165,18 @@ void main() {
   });
 
   test(
-      'getReactions returns empty for a message id with no reactions, '
-      'even when reactions exist for other messages', () async {
-    // Locks per-id isolation: the upcoming batched `WHERE messageId IN (...)`
-    // path must not leak rows across ids when only one is queried.
+      'getReactionsForMessages returns empty list for a message id with no '
+      'reactions, even when reactions exist for other messages', () async {
+    // Locks per-id isolation: the batched `WHERE messageId IN (...)`
+    // path must not leak rows across ids.
     const messageWithReactions = 'msg-A';
     const messageWithoutReactions = 'msg-B';
 
     await _prepareReactionData(messageWithReactions);
 
-    final fetched = await reactionDao.getReactions(messageWithoutReactions);
-    expect(fetched, isEmpty);
+    final fetched = await reactionDao
+        .getReactionsForMessages(const [messageWithoutReactions]);
+    expect(fetched[messageWithoutReactions], isEmpty);
   });
 
   group('getReactionsForMessagesByUserId', () {
@@ -243,20 +199,22 @@ void main() {
       final users = [User(id: targetUser), User(id: otherUser)];
       await database.userDao.updateUsers(users);
       await database.channelDao.updateChannels([ChannelModel(cid: cid)]);
-      await database.messageDao.updateMessages(cid, [
-        Message(
-          id: msgWithOwn,
-          user: users.first,
-          createdAt: DateTime.now(),
-          text: 'a',
-        ),
-        Message(
-          id: msgWithoutOwn,
-          user: users.first,
-          createdAt: DateTime.now(),
-          text: 'b',
-        ),
-      ]);
+      await database.messageDao.bulkUpdateMessages({
+        cid: [
+          Message(
+            id: msgWithOwn,
+            user: users.first,
+            createdAt: DateTime.now(),
+            text: 'a',
+          ),
+          Message(
+            id: msgWithoutOwn,
+            user: users.first,
+            createdAt: DateTime.now(),
+            text: 'b',
+          ),
+        ]
+      });
       // msgWithOwn: 1 own + 1 other; msgWithoutOwn: only other-user reaction.
       await reactionDao.updateReactions([
         Reaction(
@@ -304,19 +262,19 @@ void main() {
 
       // Fetched reaction list length should match
       // the inserted reactions list length
-      final reactions1 = await reactionDao.getReactions(messageId1);
-      final reactions2 = await reactionDao.getReactions(messageId2);
-      expect(reactions1.length, insertedReactions1.length);
-      expect(reactions2.length, insertedReactions2.length);
+      final reactions =
+          await reactionDao.getReactionsForMessages([messageId1, messageId2]);
+      expect(reactions[messageId1]!.length, insertedReactions1.length);
+      expect(reactions[messageId2]!.length, insertedReactions2.length);
 
       // Deleting all the reactions of messageId1
       await reactionDao.deleteReactionsByMessageIds([messageId1]);
 
       // Fetched reactions length of only messageId1 should be empty
-      final fetchedReactions1 = await reactionDao.getReactions(messageId1);
-      final fetchedReactions2 = await reactionDao.getReactions(messageId2);
-      expect(fetchedReactions1, isEmpty);
-      expect(fetchedReactions2, isNotEmpty);
+      final fetched =
+          await reactionDao.getReactionsForMessages([messageId1, messageId2]);
+      expect(fetched[messageId1], isEmpty);
+      expect(fetched[messageId2], isNotEmpty);
     });
     test('should delete all the reactions of both message', () async {
       // Preparing test data
@@ -325,19 +283,19 @@ void main() {
 
       // Fetched reaction list length should match
       // the inserted reactions list length
-      final reactions1 = await reactionDao.getReactions(messageId1);
-      final reactions2 = await reactionDao.getReactions(messageId2);
-      expect(reactions1.length, insertedReactions1.length);
-      expect(reactions2.length, insertedReactions2.length);
+      final reactions =
+          await reactionDao.getReactionsForMessages([messageId1, messageId2]);
+      expect(reactions[messageId1]!.length, insertedReactions1.length);
+      expect(reactions[messageId2]!.length, insertedReactions2.length);
 
       // Deleting all the reactions of messageId1 and messageId2
       await reactionDao.deleteReactionsByMessageIds([messageId1, messageId2]);
 
       // Fetched reactions length of both messages should be empty
-      final fetchedReactions1 = await reactionDao.getReactions(messageId1);
-      final fetchedReactions2 = await reactionDao.getReactions(messageId2);
-      expect(fetchedReactions1, isEmpty);
-      expect(fetchedReactions2, isEmpty);
+      final fetched =
+          await reactionDao.getReactionsForMessages([messageId1, messageId2]);
+      expect(fetched[messageId1], isEmpty);
+      expect(fetched[messageId2], isEmpty);
     });
   });
 

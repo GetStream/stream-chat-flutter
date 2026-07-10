@@ -6,8 +6,20 @@
 
 🚀 Performance
 
+- Read only the thread replies matching the `PaginationParams` from DB when calling `MessageDao.getThreadMessagesByParentId` instead of reading all replies for the thread and applying pagination in memory.
+- Read only the messages matching the `PaginationParams` from DB when calling `PinnedMessageDao.getMessagesByCid` instead of reading all pinned messages for the channel and applying pagination in memory.
 - Add indices on the `channel_cid` column on the `Messages`, `Members`, and `Reads` tables to improve read times on large databases.
 - Add indices on the `message_id` column on the `Reactions` table to improve read times on large databases.
+
+🐞 Fixed
+
+- `MessageDao.getThreadMessagesByParentId` now honours all `PaginationParams` cursor variants (`lessThan`/`lessThanOrEqual`/`greaterThan`/`greaterThanOrEqual`) and returns the page of replies closest to the cursor.
+- `PinnedMessageDao.getMessagesByCid` now honours `PaginationParams.lessThanOrEqual` and `PaginationParams.greaterThanOrEqual` (inclusive of the cursor message), in addition to the existing strict `lessThan`/`greaterThan`.
+- `PinnedMessageDao.getMessagesByCid` with a forward cursor (`greaterThan`/`greaterThanOrEqual`) and a `limit` now returns the messages immediately AFTER the pivot, instead of the channel tail.
+
+🔄 Internal / Non-breaking
+
+- Removed unused / test-only methods from internal DAO classes.
 
 ## 9.26.0
 

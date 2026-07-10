@@ -102,7 +102,7 @@ void main() {
     await database.channelDao.updateChannels(allChannels);
 
     if (withParentMessage || withQuotedMessage) {
-      await database.messageDao.updateMessages(cid, messages);
+      await database.messageDao.bulkUpdateMessages({cid: messages});
     }
 
     if (withPoll && polls != null) {
@@ -287,7 +287,9 @@ void main() {
 
         await database.userDao.updateUsers([user]);
         await database.channelDao.updateChannels([ChannelModel(cid: cid)]);
-        await database.messageDao.updateMessages(cid, [parentMessage]);
+        await database.messageDao.bulkUpdateMessages({
+          cid: [parentMessage]
+        });
 
         // Create first thread draft
         final firstDraft = Draft(
@@ -394,7 +396,9 @@ void main() {
 
     await database.userDao.updateUsers([user]);
     await database.channelDao.updateChannels([ChannelModel(cid: cid)]);
-    await database.messageDao.updateMessages(cid, [parentMessage]);
+    await database.messageDao.bulkUpdateMessages({
+      cid: [parentMessage]
+    });
 
     await draftMessageDao.updateDraftMessages([
       Draft(
@@ -465,7 +469,7 @@ void main() {
 
         await database.userDao.updateUsers([user]);
         await database.channelDao.updateChannels([ChannelModel(cid: cid)]);
-        await database.messageDao.updateMessages(cid, messages);
+        await database.messageDao.bulkUpdateMessages({cid: messages});
 
         // Create a channel draft (no parent message)
         final channelDraft = Draft(
@@ -574,28 +578,32 @@ void main() {
         ChannelModel(cid: cidA),
         ChannelModel(cid: cidB),
       ]);
-      await database.messageDao.updateMessages(cidA, [
-        Message(
-          id: parentWithDraft,
-          user: user,
-          createdAt: DateTime.now(),
-          text: 'A',
-        ),
-        Message(
-          id: parentWithoutDraft,
-          user: user,
-          createdAt: DateTime.now(),
-          text: 'B',
-        ),
-      ]);
-      await database.messageDao.updateMessages(cidB, [
-        Message(
-          id: parentInOtherChannel,
-          user: user,
-          createdAt: DateTime.now(),
-          text: 'C',
-        ),
-      ]);
+      await database.messageDao.bulkUpdateMessages({
+        cidA: [
+          Message(
+            id: parentWithDraft,
+            user: user,
+            createdAt: DateTime.now(),
+            text: 'A',
+          ),
+          Message(
+            id: parentWithoutDraft,
+            user: user,
+            createdAt: DateTime.now(),
+            text: 'B',
+          ),
+        ]
+      });
+      await database.messageDao.bulkUpdateMessages({
+        cidB: [
+          Message(
+            id: parentInOtherChannel,
+            user: user,
+            createdAt: DateTime.now(),
+            text: 'C',
+          ),
+        ]
+      });
       // One draft in cidA on parentWithDraft, and one draft in cidB to
       // confirm the cid filter excludes it from the cidA lookup.
       await draftMessageDao.updateDraftMessages([
