@@ -20,40 +20,89 @@ void main() {
       expect(manager.environment.sdkVersion, equals(PACKAGE_VERSION));
     });
 
-    test('initializes with custom environment', () {
+    test('sanitizes environment passed to constructor', () {
       const customEnv = SystemEnvironment(
         sdkName: 'custom-sdk',
-        sdkIdentifier: 'custom',
+        sdkIdentifier: 'flutter',
         sdkVersion: '1.0.0',
+        appName: 'test-app',
       );
 
       manager = SystemEnvironmentManager(environment: customEnv);
 
-      expect(manager.environment.sdkName, equals('custom-sdk'));
-      expect(manager.environment.sdkIdentifier, equals('custom'));
-      expect(manager.environment.sdkVersion, equals('1.0.0'));
+      // Immutable fields are forced to internal values.
+      expect(manager.environment.sdkName, equals('stream-chat'));
+      expect(manager.environment.sdkVersion, equals(PACKAGE_VERSION));
+      expect(manager.environment.osName, equals(CurrentPlatform.name));
+      // Whitelisted sdkIdentifier is accepted.
+      expect(manager.environment.sdkIdentifier, equals('flutter'));
+      // App fields are passed through.
+      expect(manager.environment.appName, equals('test-app'));
     });
 
-    test('updates environment', () {
+    test('sanitizes environment on update', () {
       const newEnv = SystemEnvironment(
-        sdkName: 'updated-sdk',
-        sdkIdentifier: 'updated',
-        sdkVersion: '2.0.0',
+        sdkName: 'stream-chat-android',
+        sdkIdentifier: 'android',
+        sdkVersion: '99.0.0',
+        appName: 'test-app',
+        appVersion: '2.0.0',
+        osName: 'spoofed-os',
+        osVersion: '14',
+        deviceModel: 'Pixel 7',
       );
 
       manager.updateEnvironment(newEnv);
 
-      expect(manager.environment.sdkName, equals('updated-sdk'));
-      expect(manager.environment.sdkIdentifier, equals('updated'));
-      expect(manager.environment.sdkVersion, equals('2.0.0'));
+      // Immutable fields are forced to internal values.
+      expect(manager.environment.sdkName, equals('stream-chat'));
+      expect(manager.environment.sdkVersion, equals(PACKAGE_VERSION));
+      expect(manager.environment.osName, equals(CurrentPlatform.name));
+      // Unknown sdkIdentifier falls back to the current value.
+      expect(manager.environment.sdkIdentifier, equals('dart'));
+      // App/device/os-version fields are passed through.
+      expect(manager.environment.appName, equals('test-app'));
+      expect(manager.environment.appVersion, equals('2.0.0'));
+      expect(manager.environment.osVersion, equals('14'));
+      expect(manager.environment.deviceModel, equals('Pixel 7'));
+    });
+
+    test('allows promoting sdkIdentifier from dart to flutter', () {
+      manager.updateEnvironment(
+        const SystemEnvironment(
+          sdkName: 'stream-chat',
+          sdkIdentifier: 'flutter',
+          sdkVersion: PACKAGE_VERSION,
+        ),
+      );
+
+      expect(manager.environment.sdkIdentifier, equals('flutter'));
+    });
+
+    test('ignores demotion of sdkIdentifier from flutter to dart', () {
+      manager
+        ..updateEnvironment(
+          const SystemEnvironment(
+            sdkName: 'stream-chat',
+            sdkIdentifier: 'flutter',
+            sdkVersion: PACKAGE_VERSION,
+          ),
+        )
+        ..updateEnvironment(
+          const SystemEnvironment(
+            sdkName: 'stream-chat',
+            sdkIdentifier: 'dart',
+            sdkVersion: PACKAGE_VERSION,
+          ),
+        );
+
+      expect(manager.environment.sdkIdentifier, equals('flutter'));
     });
 
     test('userAgent returns proper header string', () {
       expect(
         manager.userAgent,
-        equals(
-          'stream-chat-dart-v$PACKAGE_VERSION|os=${CurrentPlatform.name}',
-        ),
+        equals('stream-chat-dart-v$PACKAGE_VERSION|os=${CurrentPlatform.name}'),
       );
     });
   });
@@ -66,10 +115,7 @@ void main() {
         sdkVersion: '1.0.0',
       );
 
-      expect(
-        env.xStreamClientHeader,
-        equals('stream-chat-dart-v1.0.0'),
-      );
+      expect(env.xStreamClientHeader, equals('stream-chat-dart-v1.0.0'));
     });
 
     test('includes app name when available', () {
