@@ -25,7 +25,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: "17"
@@ -68,7 +68,7 @@ jobs:
           ALLURE_TOKEN: ${{ secrets.ALLURE_TOKEN }}
         run: cd sample_app/android && bundle exec fastlane allure_upload
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: e2e-android-logs
@@ -128,7 +128,7 @@ jobs:
           ALLURE_TOKEN: ${{ secrets.ALLURE_TOKEN }}
         run: cd sample_app/ios && bundle exec fastlane allure_upload
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: e2e-ios-logs
