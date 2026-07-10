@@ -10,12 +10,13 @@ class MockServer {
   final String url;
   final String wsUrl;
 
-  static String get _host => Platform.isAndroid ? '10.0.2.2' : 'localhost';
+  static String get _host => Platform.isAndroid ? '10.0.2.2' : '127.0.0.1';
 
   static const _driverPort =
       String.fromEnvironment('MOCK_DRIVER_PORT', defaultValue: '4568');
 
   static const _httpTimeout = Duration(seconds: 10);
+  static const _pingTimeout = Duration(seconds: 2);
 
   static Future<MockServer> start({String? testName}) async {
     final name = testName ?? _currentTestName();
@@ -51,11 +52,11 @@ class MockServer {
   Future<String> get(String endpoint) => _get('$url/$endpoint');
 
   Future<void> waitUntilReady({
-    Duration timeout = const Duration(seconds: 15),
+    Duration timeout = const Duration(seconds: 45),
   }) async {
     final deadline = DateTime.now().add(timeout);
     while (DateTime.now().isBefore(deadline)) {
-      final ready = await _statusCode('$url/ping')
+      final ready = await _statusCode('$url/ping', timeout: _pingTimeout)
           .then((code) => code == 200)
           .catchError((Object _) => false);
       if (ready) return;
@@ -75,8 +76,8 @@ class MockServer {
     }
   }
 
-  static Future<int> _statusCode(String url) async {
-    final client = HttpClient()..connectionTimeout = _httpTimeout;
+  static Future<int> _statusCode(String url, {Duration? timeout}) async {
+    final client = HttpClient()..connectionTimeout = timeout ?? _httpTimeout;
     try {
       final req = await client.getUrl(Uri.parse(url));
       final res = await req.close().timeout(_httpTimeout);
