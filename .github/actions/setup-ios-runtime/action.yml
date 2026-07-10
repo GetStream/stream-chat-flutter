@@ -1,5 +1,5 @@
 name: Setup iOS Runtime
-description: Download and install a requested iOS simulator runtime (stream-chat-swift parity)
+description: Download and install a requested iOS simulator runtime
 inputs:
   version:
     description: iOS runtime version (e.g. 17.5)

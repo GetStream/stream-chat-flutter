@@ -1,11 +1,4 @@
 #!/usr/bin/env bash
-# Patches patrol_cli so Android e2e builds run assembleDebug and
-# assembleDebugAndroidTest in a single Gradle invocation.
-#
-# Flutter 3.44's shouldConfigureFlutterTask skips registering
-# compileFlutterBuildDebug when only assembleDebugAndroidTest is requested,
-# which breaks Patrol's two-step Gradle build on CI.
-# See: https://github.com/flutter/flutter/issues/109560
 set -euo pipefail
 
 PATROL_VERSION="${PATROL_CLI_VERSION:-$(dart pub global list 2>/dev/null | awk '/^patrol_cli / {print $2; exit}')}"
@@ -88,9 +81,7 @@ old = """      // :app:assembleDebug
         throw Exception(cause);
       }"""
 
-new = """      // :app:assembleDebug + :app:assembleDebugAndroidTest in one invocation
-      // so Flutter registers compileFlutterBuildDebug (Flutter 3.44+).
-      // Patched by sample_app/tool/patch_patrol_cli_android_gradle.sh
+new = """      // Patched by sample_app/tool/patch_patrol_cli_android_gradle.sh
 
       final assembleInvocation = options.toGradleAssembleInvocation(
         isWindows: _platform.isWindows,
@@ -141,5 +132,4 @@ print(f"Patched {path}")
 PY
 fi
 
-# Drop the precompiled snapshot so `patrol` runs from the patched sources.
 rm -f "${PUB_CACHE}/global_packages/patrol_cli/bin/"*.snapshot 2>/dev/null || true

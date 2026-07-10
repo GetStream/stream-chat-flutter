@@ -3,9 +3,6 @@ require 'base64'
 allure_endpoint = 'https://streamio.testops.cloud'
 allure_project_id = '135'
 
-# Reassembles the chunked `ALLURE-RESULT::` markers the Dart reporter prints into
-# an `allure-results/` dir for allurectl upload. The markers are read from the
-# device log: logcat on Android, the simulator log on iOS (device: is a UUID).
 lane :collect_allure_results do |options|
   results_dir = options[:output] || "#{root_path}/allure-results"
   FileUtils.mkdir_p(results_dir)
@@ -41,9 +38,6 @@ lane :install_allurectl do
   path
 end
 
-# Uploads collected allure-results to Allure TestOps. Requires ALLURE_TOKEN in
-# the env. Uses ALLURE_LAUNCH_ID (or launch_id:) to upload into an existing
-# launch; otherwise allurectl creates one.
 lane :allure_upload do |options|
   results = options[:results] || "#{root_path}/allure-results"
   unless Dir.exist?(results) && Dir.children(results).any?
@@ -60,8 +54,6 @@ lane :allure_upload do |options|
   UI.success("Uploaded Allure results → #{allure_endpoint} (project #{allure_project_id})")
 end
 
-# Creates a launch up front and exports its id (ALLURE_LAUNCH_ID) so the nightly
-# matrix jobs upload into the same launch. Requires ALLURE_TOKEN.
 lane :allure_launch do
   allurectl = install_allurectl
   branch = ENV['GITHUB_REF_NAME'] || `git rev-parse --abbrev-ref HEAD`.strip
@@ -72,7 +64,6 @@ lane :allure_launch do
   id
 end
 
-# Deletes the launch (cleanup when a nightly run is cancelled). Requires ALLURE_TOKEN.
 lane :allure_launch_removal do |options|
   id = options[:launch_id] || ENV['ALLURE_LAUNCH_ID']
   next unless id

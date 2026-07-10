@@ -16,7 +16,6 @@ concurrency:
 
 env:
   flutter_version: "3.x"
-  # Must match setup-xcode and `patrol test --ios` (Patrol e2e on macos-26).
   ios_simulator_version: "26.2"
   ios_simulator_device: "iPhone 17"
 
@@ -82,8 +81,6 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      # Align Xcode with the iOS simulator runtime (device_info_plus 12.4+ and
-      # Patrol both need Xcode 26.x; terminate-app flakes without this match).
       - uses: maxim-lobanov/setup-xcode@v1
         with:
           xcode-version: ${{ env.ios_simulator_version }}

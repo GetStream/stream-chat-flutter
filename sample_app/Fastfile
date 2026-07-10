@@ -9,28 +9,22 @@ mock_server_driver_port = ENV['MOCK_DRIVER_PORT'] || '4568'
 github_org = (ENV['GITHUB_REPOSITORY'] || 'GetStream/stream-chat-flutter').split('/').first
 @force_check = false
 
-# Have an easy way to get the root of the project
 def root_path
   Dir.pwd.sub(/.*\Kfastlane/, '').sub(/.*\Kandroid/, '').sub(/.*\Kios/, '').sub(/.*\K\/\//, '')
 end
 
-# iOS simulator ids are UUIDs; Android device ids (emulator-5554, serials) aren't.
 def ios_device?(device)
   device.to_s.match?(/\A[0-9A-F]{8}-[0-9A-F]{4}-/i)
 end
 
-# Have an easy way to run flutter tasks on the root of the project
 lane :sh_on_root do |options|
   Dir.chdir(root_path) { sh(options[:command]) }
 end
 
-# Tasks to be reused on each platform flow
 lane :fetch_dependencies do
   sh_on_root(command: "flutter pub get --suppress-analytics")
 end
 
-# Clones (or reuses via local_server:) the mock-server repo and starts its
-# driver in the background. branch: selects the repo branch (default 'main').
 lane :start_mock_server do |options|
   Dir.chdir(root_path) do
     mock_server_repo = options[:local_server] || mock_server_repo_name
@@ -52,14 +46,10 @@ lane :start_mock_server do |options|
   end
 end
 
-# Stops the mock-server driver (and any servers it spawned).
 lane :stop_mock_server do
   Net::HTTP.get_response(URI("http://localhost:#{mock_server_driver_port}/stop")) rescue nil
 end
 
-# Runs the Patrol e2e suite against a fresh mock server, then tears it down.
-# Requires `patrol` on PATH and, on Android, a Gradle-compatible JDK.
-# Options: device:, target: (single file), local_server:, mock_server_branch:.
 lane :run_e2e_test do |options|
   next unless is_check_required(sources: sources_matrix[:e2e], force_check: @force_check)
 
@@ -71,8 +61,6 @@ lane :run_e2e_test do |options|
 
   begin
     Dir.chdir(root_path) do
-      # Flutter 3.44+ requires assembleDebug + assembleDebugAndroidTest in one
-      # Gradle invocation; patch patrol_cli before the Android build step.
       unless ios_device?(options[:device])
         sh('bash tool/patch_patrol_cli_android_gradle.sh')
       end
@@ -89,8 +77,6 @@ lane :run_e2e_test do |options|
   end
 end
 
-# Builds the e2e test binaries without running them (useful for CI caching).
-# `platform` is android or ios.
 lane :build_e2e_test do |options|
   next unless is_check_required(sources: sources_matrix[:e2e], force_check: @force_check)
 
@@ -105,7 +91,6 @@ lane :build_and_run_e2e_test do |options|
   run_e2e_test(options)
 end
 
-# Downloads and installs an iOS simulator runtime (used by cron e2e for iOS 17.x).
 lane :install_runtime do |options|
   install_ios_runtime(
     version: options[:ios],
@@ -113,8 +98,6 @@ lane :install_runtime do |options|
   )
 end
 
-# Maps each CI check to the source paths (repo-root-relative) that should
-# trigger it; `is_check_required` skips a lane when none of them changed.
 private_lane :sources_matrix do
   {
     e2e: [

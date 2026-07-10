@@ -7,8 +7,6 @@ import org.junit.runners.Parameterized;
 
 import pl.leancode.patrol.PatrolJUnitRunner;
 
-// Patrol e2e entry point: enumerates the Dart `patrolTest` cases and runs each
-// as a parameterized JUnit test against MainActivity. Do not edit by hand.
 @RunWith(Parameterized.class)
 public class MainActivityTest {
     @Parameterized.Parameters(name = "{0}")

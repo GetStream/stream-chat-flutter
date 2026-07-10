@@ -1,9 +1,4 @@
 #!/usr/bin/env bash
-# Boots an iOS simulator for Patrol e2e on CI.
-#
-# Builds use Xcode 26.2 on macos-15; only the simulator runtime varies (see
-# stream-chat-swift cron-checks). For downloaded runtimes, pass the simctl name
-# only: boot_ios_simulator.sh custom-test-device
 set -euo pipefail
 
 DEVICE_NAME="${1:?usage: boot_ios_simulator.sh <device-name> [ios-version]}"
@@ -65,7 +60,6 @@ echo "device_id=${device_id}" >>"$GITHUB_ENV"
 xcrun simctl boot "${device_id}" 2>/dev/null || true
 xcrun simctl bootstatus "${device_id}" -b
 
-# https://github.com/leancodepl/patrol/issues/1282
 sleep 10
 
 if [[ -n "$IOS_VERSION" ]]; then

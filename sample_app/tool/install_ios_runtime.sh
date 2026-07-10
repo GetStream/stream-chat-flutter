@@ -1,6 +1,4 @@
 #!/bin/bash -e
-# Installs a downloaded iOS simulator runtime image (DMG).
-# Ported from stream-chat-swift/Scripts/install_ios_runtime.sh
 
 log() { echo "👉 ${1}" >&2; }
 die() { log "${1}"; exit 1; }

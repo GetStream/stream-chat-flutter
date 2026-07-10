@@ -18,7 +18,6 @@ test_target = project.new_target(
   :ui_test_bundle, 'RunnerUITests', :ios, deployment_target, nil, :objc
 )
 
-# Path is relative to the project dir (ios/).
 group = project.main_group.find_subpath('RunnerUITests', true)
 group.set_source_tree('SOURCE_ROOT')
 file_ref = group.new_reference('RunnerUITests/RunnerUITests.m')
@@ -35,18 +34,12 @@ test_target.build_configurations.each do |config|
   s['CLANG_ENABLE_MODULES'] = 'YES'
   s['SWIFT_VERSION'] = '5.0'
   s['ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES'] = 'YES'
-  # Auto-synthesize Info.plist (UI test bundles need one; without this the
-  # xcodebuild step fails with code 65).
   s['GENERATE_INFOPLIST_FILE'] = 'YES'
-  # Without an explicit product name the .xctest bundle is built nameless,
-  # which collides as "Multiple commands produce .../PlugIns/.xctest".
   s['PRODUCT_NAME'] = '$(TARGET_NAME)'
 end
 
 project.save
 
-# Wire the test target into the shared Runner scheme's Test action so
-# `patrol`/xcodebuild discovers it.
 scheme_path = File.join(
   Xcodeproj::XCScheme.shared_data_dir(project_path), 'Runner.xcscheme'
 )

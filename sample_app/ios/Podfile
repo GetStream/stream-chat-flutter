@@ -31,7 +31,6 @@ target 'Runner' do
   use_frameworks!
   use_modular_headers!
 
-  # Patrol e2e UI test target.
   target 'RunnerUITests' do
     inherit! :complete
   end

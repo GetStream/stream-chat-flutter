@@ -2,7 +2,7 @@ name: E2E Tests Nightly
 
 on:
   schedule:
-    - cron: "0 1 * * 1-5" # weeknights at 01:00 UTC
+    - cron: "0 1 * * 1-5"
   workflow_dispatch:
     inputs:
       mock_server_branch:
@@ -124,7 +124,6 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      # Build with Xcode 26.2 on every matrix row; only the simulator OS varies.
       - uses: maxim-lobanov/setup-xcode@v1
         with:
           xcode-version: "26.2"

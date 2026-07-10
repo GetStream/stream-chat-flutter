@@ -60,8 +60,6 @@ flutter:
     - assets/
     - pubspec.lock
 
-# Patrol e2e configuration (config lives in pubspec.yaml, not a separate file).
-# Tests live in integration_test/ (Patrol defaults to patrol_test/ otherwise).
 patrol:
   app_name: Stream Chat
   test_directory: integration_test
