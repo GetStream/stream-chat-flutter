@@ -55,6 +55,8 @@ export 'src/indicators/sending_indicator.dart';
 export 'src/indicators/typing_indicator.dart';
 export 'src/indicators/unread_indicator.dart';
 export 'src/keyboard_shortcuts/keyboard_shortcut_runner.dart';
+export 'src/localization/accessibility_translations.dart'
+    show AccessibilityTranslations, DefaultAccessibilityTranslations;
 export 'src/localization/stream_chat_localizations.dart';
 export 'src/localization/translations.dart' show DefaultTranslations;
 export 'src/media_gallery/stream_media_gallery.dart';

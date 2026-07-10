@@ -229,6 +229,7 @@ void main() {
       );
 
       when(channel.getRemainingCooldown).thenReturn(10);
+      when(() => channel.getRemainingCooldown(lastMessageAt: any(named: 'lastMessageAt'))).thenReturn(10);
 
       return _buildMessageInputScaffold(client: client, channel: channel);
     },

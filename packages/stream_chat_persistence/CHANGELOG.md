@@ -1,3 +1,10 @@
+## Upcoming
+
+🚀 Performance
+
+- Add indices on the `channel_cid` column on the `Messages`, `Members`, and `Reads` tables to improve read times on large databases.
+- Add indices on the `message_id` column on the `Reactions` table to improve read times on large databases.
+
 ## 10.1.0
 
 ✅ Added
@@ -16,6 +23,10 @@
 - `PinnedMessageDao.getMessagesByCid` now honours `PaginationParams.lessThanOrEqual` and `PaginationParams.greaterThanOrEqual` (inclusive of the cursor message), in addition to the existing strict `lessThan`/`greaterThan`.
 - `PinnedMessageDao.getMessagesByCid` with a forward cursor (`greaterThan`/`greaterThanOrEqual`) and a `limit` now returns the messages immediately AFTER the pivot, instead of the channel tail.
 - Bump database version.
+
+🔄 Internal / Non-breaking
+
+- Removed unused / test-only methods from internal DAO classes.
 
 ## 10.0.1
 

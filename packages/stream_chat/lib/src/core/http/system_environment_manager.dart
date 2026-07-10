@@ -11,15 +11,16 @@ class SystemEnvironmentManager {
   /// {@macro systemEnvironmentManager}
   SystemEnvironmentManager({
     SystemEnvironment? environment,
-  }) : _environment = switch (environment) {
-         final env? => env,
-         _ => SystemEnvironment(
-           sdkName: 'stream-chat',
-           sdkIdentifier: 'dart',
-           sdkVersion: PACKAGE_VERSION,
-           osName: CurrentPlatform.name,
-         ),
-       };
+  }) : _environment = SystemEnvironment(
+         sdkName: _sdkName,
+         sdkIdentifier: _SdkIdentifier.dart,
+         sdkVersion: PACKAGE_VERSION,
+         osName: CurrentPlatform.name,
+       ) {
+    if (environment != null) updateEnvironment(environment);
+  }
+
+  static const _sdkName = 'stream-chat';
 
   /// Returns the Stream client user agent string based on the current
   /// [environment] value.
@@ -31,7 +32,37 @@ class SystemEnvironmentManager {
 
   /// Updates the current [SystemEnvironment].
   void updateEnvironment(SystemEnvironment environment) {
-    _environment = environment;
+    _environment = _sanitize(environment);
+  }
+
+  /// Sanitizes the passed [SystemEnvironment]
+  /// Ignores custom values for:
+  /// - sdkName
+  /// - sdkVersion
+  /// - osName
+  /// Allows only the dart -> flutter promotion for:
+  /// - sdkIdentifier (any other value, including a flutter -> dart
+  ///   demotion, is ignored)
+  /// Allows overriding of:
+  /// - appName
+  /// - appVersion
+  /// - osVersion
+  /// - deviceModel
+  SystemEnvironment _sanitize(SystemEnvironment environment) {
+    final incoming = _SdkIdentifier(environment.sdkIdentifier);
+    final current = _SdkIdentifier(_environment.sdkIdentifier);
+    final sdkIdentifier = incoming.precedence < current.precedence ? current : incoming;
+    final osName = _environment.osName;
+    return SystemEnvironment(
+      sdkName: _sdkName,
+      sdkIdentifier: sdkIdentifier,
+      sdkVersion: PACKAGE_VERSION,
+      appName: environment.appName,
+      appVersion: environment.appVersion,
+      osName: osName,
+      osVersion: environment.osVersion,
+      deviceModel: environment.deviceModel,
+    );
   }
 }
 
@@ -62,4 +93,19 @@ extension XStreamClientHeaderExtension on SystemEnvironment {
       if (deviceModel case final model?) 'device_model=$model',
     ].nonNulls.join('|');
   }
+}
+
+/// Known SDK identifiers ranked by precedence. A proposed update is only
+/// accepted when its precedence is greater than or equal to the current
+/// identifier's, which makes the dart -> flutter transition one-way and
+/// causes unknown identifiers to fall back to the current value.
+extension type const _SdkIdentifier(String value) implements String {
+  static const dart = _SdkIdentifier('dart');
+  static const flutter = _SdkIdentifier('flutter');
+
+  int get precedence => switch (this) {
+    dart => 0,
+    flutter => 1,
+    _ => -1,
+  };
 }

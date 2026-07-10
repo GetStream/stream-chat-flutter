@@ -5,7 +5,7 @@ import 'package:stream_chat/stream_chat.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 ///
-class StreamChatError with EquatableMixin implements Exception {
+class StreamChatError extends Equatable implements Exception {
   ///
   const StreamChatError(this.message);
 
@@ -102,7 +102,18 @@ class StreamChatNetworkError extends StreamChatError {
     if (data is Map<String, Object?>) {
       errorResponse = ErrorResponse.fromJson(data);
     } else if (data is String) {
-      errorResponse = ErrorResponse.fromJson(jsonDecode(data));
+      // Edge/proxy responses (e.g. Cloudflare 5xx, gateway 504) may return
+      // a plain-text body like 'upstream request timeout'. Guard the
+      // decode so a non-JSON body doesn't mask the original DioException;
+      // the surrounding factory falls back to statusMessage / message.
+      try {
+        final decoded = jsonDecode(data);
+        if (decoded is Map<String, Object?>) {
+          errorResponse = ErrorResponse.fromJson(decoded);
+        }
+      } on FormatException {
+        // Leave errorResponse null; handled by fallback below.
+      }
     }
     return StreamChatNetworkError.raw(
       code: errorResponse?.code ?? -1,

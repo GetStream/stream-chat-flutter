@@ -13,6 +13,9 @@ on:
           - sdk
           - docs
 
+permissions:
+  contents: write
+
 jobs:
   update_sdk_goldens:
     if: inputs.target == 'sdk' || inputs.target == 'both'
@@ -143,7 +146,10 @@ jobs:
       - name: 📦 Extract goldens
         run: |
           for tgz in sdk-goldens.tgz docs-goldens.tgz; do
-            [[ -f "$tgz" ]] && tar -xzf "$tgz" && rm "$tgz"
+            if [[ -f "$tgz" ]]; then
+              tar -xzf "$tgz"
+              rm "$tgz"
+            fi
           done
 
       - name: 📤 Commit Changes

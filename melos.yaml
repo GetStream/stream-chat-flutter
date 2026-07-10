@@ -68,6 +68,7 @@ command:
       http_parser: ^4.1.2
       image_picker: ^1.2.2
       image_size_getter: ^2.4.1
+      intl: ^0.20.2
       jiffy: ^6.4.5
       jose: ^0.3.5+1
       json_annotation: ^4.11.0
@@ -98,7 +99,11 @@ command:
       stream_chat_persistence: ^10.1.0
       streaming_shared_preferences: ^2.0.0
       svg_icon_widget: ^0.0.1
-      stream_core_flutter: ^0.4.0
+      stream_core_flutter:
+        git:
+          url: https://github.com/GetStream/stream-core-flutter.git
+          ref: 7d0421a2cc04480e0bd2fc404cf6dd5b051f7f42
+          path: packages/stream_core_flutter
       synchronized: ^3.4.0
       thumblr: ^0.0.4
       url_launcher: ^6.3.2

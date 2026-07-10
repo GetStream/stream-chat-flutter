@@ -332,3 +332,7 @@ typedef MessageRelatedBuilder =
 
 /// A function that returns true if the message is valid and can be sent.
 typedef MessageValidator = bool Function(Message message);
+
+/// Signature for a predicate deciding whether a [Message] should be
+/// considered as a channel's last message preview.
+typedef LastMessagePredicate = bool Function(Message message);
