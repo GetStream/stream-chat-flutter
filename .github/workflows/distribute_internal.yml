@@ -90,7 +90,7 @@ jobs:
         uses: ruby/setup-ruby@v1
         with:
           bundler-cache: true
-          working-directory: sample_app/android
+          working-directory: sample_app
 
       - name: Setup Firebase Service Account'
         working-directory: sample_app/android
@@ -140,7 +140,7 @@ jobs:
         uses: ruby/setup-ruby@v1
         with:
           bundler-cache: true
-          working-directory: sample_app/ios
+          working-directory: sample_app
 
       - name: Setup Firebase Service Account
         working-directory: sample_app/ios
@@ -193,7 +193,7 @@ jobs:
         uses: ruby/setup-ruby@v1
         with:
           bundler-cache: true
-          working-directory: sample_app/ios
+          working-directory: sample_app
 
       - name: Distribute to TestFlight Internal
         working-directory: sample_app/ios

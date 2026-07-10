@@ -25,11 +25,10 @@ runs:
 
     - name: Setup iOS simulator runtime
       shell: bash
-      working-directory: sample_app/ios
       run: |
         sudo rm -rfv ~/Library/Developer/CoreSimulator/* || true
-        bundle exec fastlane install_runtime ios:${{ inputs.version }}
-        sudo rm -rfv *.dmg || true
+        cd sample_app/ios && bundle exec fastlane install_runtime ios:${{ inputs.version }}
+        sudo rm -rfv sample_app/*.dmg || true
         xcrun simctl list runtimes
 
     - name: Create custom iOS simulator

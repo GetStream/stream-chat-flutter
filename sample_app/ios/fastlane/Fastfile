@@ -1,5 +1,5 @@
 skip_docs
-import '../../Fastfile'
+import '../../fastlane/Fastfile'
 default_platform(:ios)
 
 before_all do

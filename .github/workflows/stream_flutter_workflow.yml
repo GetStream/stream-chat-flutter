@@ -209,7 +209,7 @@ jobs:
       - name: Setup Ruby and Gems
         uses: ruby/setup-ruby@v1
         with:
-          working-directory: ${{ matrix.working-directory }}
+          working-directory: sample_app
           bundler-cache: true
       - name: "Build ${{ matrix.platform }} App"
         working-directory: ${{ matrix.working-directory }}

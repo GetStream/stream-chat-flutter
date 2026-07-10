@@ -40,7 +40,7 @@ jobs:
         with:
           ruby-version: "3.3"
           bundler-cache: true
-          working-directory: sample_app/android
+          working-directory: sample_app
 
       - name: Bootstrap
         run: |
@@ -95,7 +95,7 @@ jobs:
         with:
           ruby-version: "3.3"
           bundler-cache: true
-          working-directory: sample_app/ios
+          working-directory: sample_app
 
       - name: Bootstrap
         run: |
