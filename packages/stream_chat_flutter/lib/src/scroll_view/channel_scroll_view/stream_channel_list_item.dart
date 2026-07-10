@@ -590,7 +590,7 @@ class _ChannelLastMessageWithStatusState extends State<_ChannelLastMessageWithSt
     if (channelState == null) return const Empty();
 
     final currentUser = widget.channel.client.state.currentUser;
-    final predicate = _defaultLastMessagePredicate(currentUser?.id);
+    final predicate = _defaultLastMessagePredicateForUser(currentUser?.id);
 
     return BetterStreamBuilder<(Draft?, List<Message>)>(
       stream: CombineLatestStream.combine2(
@@ -672,6 +672,10 @@ class _ChannelLastMessageWithStatusState extends State<_ChannelLastMessageWithSt
   }
 }
 
+/// Signature for a predicate deciding whether a [Message] should be
+/// considered as a channel's last message preview.
+typedef LastMessagePredicate = bool Function(Message message);
+
 /// A widget that displays the last message of a channel.
 class ChannelLastMessageText extends StatefulWidget {
   /// Creates a new instance of [ChannelLastMessageText] widget.
@@ -679,13 +683,13 @@ class ChannelLastMessageText extends StatefulWidget {
     super.key,
     required this.channel,
     this.textStyle,
-    bool Function(Message)? lastMessagePredicate,
+    LastMessagePredicate? lastMessagePredicate,
   }) : assert(
          channel.state != null,
          'Channel ${channel.id} is not initialized',
        ),
        lastMessagePredicate =
-           lastMessagePredicate ?? _defaultLastMessagePredicate(channel.client.state.currentUser?.id);
+           lastMessagePredicate ?? _defaultLastMessagePredicateForUser(channel.client.state.currentUser?.id);
 
   /// The channel to display the last message of.
   final Channel channel;
@@ -698,7 +702,7 @@ class ChannelLastMessageText extends StatefulWidget {
   ///
   /// This predicate is used to filter out messages that should not be
   /// considered for the last message.
-  final bool Function(Message) lastMessagePredicate;
+  final LastMessagePredicate lastMessagePredicate;
 
   @override
   State<ChannelLastMessageText> createState() => _ChannelLastMessageTextState();
@@ -706,7 +710,7 @@ class ChannelLastMessageText extends StatefulWidget {
 
 // The default predicate to determine if the message should be
 // considered for the last message.
-bool Function(Message) _defaultLastMessagePredicate(String? currentUserId) {
+LastMessagePredicate _defaultLastMessagePredicateForUser(String? currentUserId) {
   return (Message message) {
     final isMyMessage = currentUserId != null && message.user?.id == currentUserId;
     if (message.shadowed && !isMyMessage) return false;
