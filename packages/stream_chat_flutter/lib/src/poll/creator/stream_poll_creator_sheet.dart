@@ -87,6 +87,7 @@ class _StreamPollCreatorSheetState extends State<StreamPollCreatorSheet> {
   @override
   Widget build(BuildContext context) {
     final theme = StreamPollCreatorTheme.of(context);
+    final a11y = context.translations.accessibility;
 
     return Column(
       mainAxisSize: .min,
@@ -102,6 +103,7 @@ class _StreamPollCreatorSheetState extends State<StreamPollCreatorSheet> {
               return StreamButton.icon(
                 style: .primary,
                 type: .solid,
+                tooltip: a11y.savePollTooltip,
                 icon: Icon(context.streamIcons.checkmark),
                 onPressed: switch (isValid) {
                   false => null,

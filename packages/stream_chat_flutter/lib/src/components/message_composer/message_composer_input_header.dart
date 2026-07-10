@@ -102,9 +102,14 @@ class _DefaultStreamMessageComposerInputHeader extends StatelessWidget {
                     final attachment = voiceRecordings.elementAtOrNull(index);
                     if (attachment == null) return child;
 
+                    final durationSecs = attachment.extraData['duration'] as num?;
+                    final duration = durationSecs != null ? Duration(seconds: durationSecs.round()) : null;
+
+                    final a11y = context.translations.accessibility;
                     return core.StreamMessageComposerAttachment(
                       onRemovePressed: () => _onAttachmentRemovePressed(attachment),
-                      child: child,
+                      semanticLabel: a11y.voiceRecordingAttachmentLabel(duration: duration),
+                      child: ExcludeSemantics(child: child),
                     );
                   },
                 ),

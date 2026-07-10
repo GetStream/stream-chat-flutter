@@ -8,6 +8,9 @@ class StreamChatLocalizationsEs extends GlobalStreamChatLocalizations {
   const StreamChatLocalizationsEs({super.localeName = 'es'});
 
   @override
+  AccessibilityTranslations get accessibility => _AccessibilityTranslationsEs(localeName: localeName);
+
+  @override
   String get launchUrlError => 'No se pudo abrir la url';
 
   @override
@@ -844,4 +847,222 @@ No es posible añadir más de $limit archivos adjuntos
 
   @override
   String notifyRoleText(String role) => 'Notificar a todos los miembros $role';
+}
+
+class _AccessibilityTranslationsEs extends AccessibilityTranslations {
+  const _AccessibilityTranslationsEs({super.localeName = 'es'});
+
+  @override
+  String get sendMessageTooltip => 'Enviar mensaje';
+
+  @override
+  String get saveEditTooltip => 'Guardar edición';
+
+  @override
+  String get sendCommandTooltip => 'Enviar comando';
+
+  @override
+  String slowModeTooltip({required int seconds}) {
+    if (seconds == 1) return 'Modo lento: 1 segundo';
+    return 'Modo lento: $seconds segundos';
+  }
+
+  @override
+  String get recordVoiceRecordingLabel => 'Grabar mensaje de voz';
+
+  @override
+  String get cancelRecordingTooltip => 'Cancelar grabación';
+
+  @override
+  String get stopRecordingTooltip => 'Detener grabación';
+
+  @override
+  String get sendRecordingTooltip => 'Enviar grabación';
+
+  @override
+  String recordingDurationLabel({required Duration duration}) => 'Duración de grabación, ${formatDuration(duration)}';
+
+  @override
+  String voiceRecordingPreviewPlayLabel({required Duration duration}) =>
+      'Reproducir grabación de voz, ${formatDuration(duration)}';
+
+  @override
+  String voiceRecordingPreviewPauseLabel({required Duration duration}) =>
+      'Pausar grabación de voz, ${formatDuration(duration)}';
+
+  @override
+  String get attachmentPickerTooltip => 'Abrir selector de archivos adjuntos';
+
+  @override
+  String get attachmentPickerOpenHint => 'toca dos veces para abrir el selector de archivos adjuntos';
+
+  @override
+  String get attachmentPickerCloseHint => 'toca dos veces para cerrar el selector de archivos adjuntos';
+
+  @override
+  String get attachmentPickerOpenTapHint => 'abrir selector de archivos adjuntos';
+
+  @override
+  String get attachmentPickerCloseTapHint => 'cerrar selector de archivos adjuntos';
+
+  @override
+  String get attachmentPickerOpenedAnnouncement => 'Selector de archivos adjuntos abierto';
+
+  @override
+  String get attachmentPickerClosedAnnouncement => 'Selector de archivos adjuntos cerrado';
+
+  @override
+  String voiceRecordingAttachmentLabel({Duration? duration}) {
+    if (duration == null) return 'Mensaje de voz';
+    return 'Mensaje de voz, ${formatDuration(duration)}';
+  }
+
+  @override
+  String videoAttachmentLabel({String? title}) {
+    if (title == null || title.isEmpty) return 'Vídeo';
+    return 'Vídeo, $title';
+  }
+
+  @override
+  String get gifAttachmentLabel => 'GIF';
+
+  @override
+  String imageAttachmentLabel({String? title}) {
+    if (title == null || title.isEmpty) return 'Foto';
+    return 'Foto, $title';
+  }
+
+  @override
+  String get voiceRecordingPlayTooltip => 'Reproducir';
+
+  @override
+  String get voiceRecordingPauseTooltip => 'Pausa';
+
+  @override
+  String get voiceRecordingLoadingTooltip => 'Cargando';
+
+  @override
+  String get channelInfoLabel => 'Información del canal';
+
+  @override
+  String get messageActionsLabel => 'Acciones del mensaje';
+
+  @override
+  String galleryImageLabel({DateTime? createdAt}) {
+    if (createdAt == null) return 'Foto';
+    return 'Foto, ${formatDateTime(createdAt)}';
+  }
+
+  @override
+  String galleryVideoLabel({
+    DateTime? createdAt,
+    Duration? duration,
+  }) {
+    final parts = <String>[
+      'Vídeo',
+      if (duration != null) formatDuration(duration),
+      if (createdAt != null) formatDateTime(createdAt),
+    ];
+    return parts.join(', ');
+  }
+
+  @override
+  String get selectMediaTapHint => 'seleccionar';
+
+  @override
+  String get deselectMediaTapHint => 'deseleccionar';
+
+  @override
+  String get savePollTooltip => 'Guardar encuesta';
+
+  @override
+  String removePollOptionTooltip({String? optionText}) {
+    final trimmed = optionText?.trim();
+    if (trimmed == null || trimmed.isEmpty) return 'Eliminar opción';
+    return 'Eliminar opción $trimmed';
+  }
+
+  @override
+  String get recordingStartedAnnouncement =>
+      'Grabación iniciada. Desliza a la izquierda para cancelar. Desliza hacia arriba para bloquear.';
+
+  @override
+  String get recordingLockedAnnouncement => 'Grabación bloqueada';
+
+  @override
+  String get recordingStoppedAnnouncement => 'Grabación detenida';
+
+  @override
+  String get recordingCancelledAnnouncement => 'Grabación cancelada';
+
+  @override
+  String get recordingCompletedAnnouncement => 'Grabación completada';
+
+  @override
+  String get imageAttachmentAddedAnnouncement => 'Foto añadida';
+
+  @override
+  String get imageAttachmentRemovedAnnouncement => 'Foto eliminada';
+
+  @override
+  String get videoAttachmentAddedAnnouncement => 'Vídeo añadido';
+
+  @override
+  String get videoAttachmentRemovedAnnouncement => 'Vídeo eliminado';
+
+  @override
+  String get gifAttachmentAddedAnnouncement => 'GIF añadido';
+
+  @override
+  String get gifAttachmentRemovedAnnouncement => 'GIF eliminado';
+
+  @override
+  String get fileAttachmentAddedAnnouncement => 'Archivo añadido';
+
+  @override
+  String get fileAttachmentRemovedAnnouncement => 'Archivo eliminado';
+
+  @override
+  String get voiceRecordingAttachmentAddedAnnouncement => 'Mensaje de voz añadido';
+
+  @override
+  String get voiceRecordingAttachmentRemovedAnnouncement => 'Mensaje de voz eliminado';
+
+  @override
+  String get attachmentAddedAnnouncement => 'Archivo adjunto añadido';
+
+  @override
+  String get attachmentRemovedAnnouncement => 'Archivo adjunto eliminado';
+
+  @override
+  String attachmentsAddedAnnouncement({required int count}) {
+    if (count == 1) return '1 archivo adjunto añadido';
+    return '$count archivos adjuntos añadidos';
+  }
+
+  @override
+  String attachmentsRemovedAnnouncement({required int count}) {
+    if (count == 1) return '1 archivo adjunto eliminado';
+    return '$count archivos adjuntos eliminados';
+  }
+
+  @override
+  String formatDateTime(DateTime dateTime) {
+    final jiffy = Jiffy.parseFromDateTime(dateTime);
+    return '${jiffy.EEEE}, ${jiffy.yMMMMd}, ${jiffy.jm}';
+  }
+
+  @override
+  String formatDuration(Duration duration) {
+    final hours = duration.inHours;
+    final minutes = duration.inMinutes.remainder(60);
+    final seconds = duration.inSeconds.remainder(60);
+    final parts = <String>[
+      if (hours > 0) Intl.plural(hours, one: '$hours hora', other: '$hours horas', locale: localeName),
+      if (minutes > 0) Intl.plural(minutes, one: '$minutes minuto', other: '$minutes minutos', locale: localeName),
+      if (seconds > 0 || (hours == 0 && minutes == 0))
+        Intl.plural(seconds, one: '$seconds segundo', other: '$seconds segundos', locale: localeName),
+    ];
+    return parts.join(', ');
+  }
 }

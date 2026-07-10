@@ -130,10 +130,15 @@ void setupMockChannel({
   when(() => client.state).thenReturn(clientState);
   when(() => channel.lastMessageAt).thenReturn(DateTime.parse('2020-06-22 12:00:00'));
   when(() => channel.lastMessageAtStream).thenAnswer((_) => Stream.value(DateTime.parse('2020-06-22 12:00:00')));
+  when(() => channel.currentUserLastMessageAt).thenReturn(DateTime.parse('2020-06-22 12:00:00'));
+  when(
+    () => channel.currentUserLastMessageAtStream,
+  ).thenAnswer((_) => Stream.value(DateTime.parse('2020-06-22 12:00:00')));
   when(() => channel.state).thenReturn(channelState);
   when(() => channel.client).thenReturn(client);
   when(() => channel.config).thenReturn(ChannelConfig(mutes: true));
   when(channel.getRemainingCooldown).thenReturn(0);
+  when(() => channel.getRemainingCooldown(lastMessageAt: any(named: 'lastMessageAt'))).thenReturn(0);
   when(() => channel.isDistinct).thenReturn(false);
   when(() => channel.isMuted).thenReturn(false);
   when(() => channel.isMutedStream).thenAnswer((_) => Stream.value(false));

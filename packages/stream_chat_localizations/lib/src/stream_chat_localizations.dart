@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:intl/intl.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 part 'stream_chat_localizations_ca.dart';
@@ -115,12 +116,11 @@ GlobalStreamChatLocalizations? getStreamChatTranslation(Locale locale) {
 abstract class GlobalStreamChatLocalizations implements StreamChatLocalizations {
   /// Initializes an object that defines the StreamChat widget's localized
   /// strings for the given `localeName`.
-  const GlobalStreamChatLocalizations({
-    required String localeName,
-  }) : _localeName = localeName;
+  const GlobalStreamChatLocalizations({required this.localeName});
 
-  // ignore: unused_field
-  final String _localeName;
+  /// The BCP-47 locale name this translation instance targets
+  /// (e.g. `'en'`, `'de'`, `'fr'`).
+  final String localeName;
 
   /// A [LocalizationsDelegate] for [StreamChatLocalizations].
   ///

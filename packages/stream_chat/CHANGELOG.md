@@ -1,3 +1,14 @@
+## Upcoming
+
+🔄 Changed
+
+- `StreamChatClient.updateSystemEnvironment` now sanitizes the passed `SystemEnvironment`: `sdkName`, `sdkVersion`, and `osName` are locked to internal defaults, and `sdkIdentifier` only accepts the `dart` → `flutter` promotion (other values, including a `flutter` → `dart` demotion, are ignored). `appName`, `appVersion`, `osVersion`, and `deviceModel` continue to pass through as-is.
+
+🐞 Fixed
+
+- `StreamChatNetworkError.fromDioException` no longer throws `FormatException` when an edge/proxy returns a non-JSON body (e.g. a plain `upstream request timeout` from a 504); the original network error now surfaces with `statusCode` / `statusMessage` intact.
+
+
 ## 10.1.0
 
 ✅ Added
@@ -20,7 +31,7 @@
 
 - `Message.toJson` mention sanitization (`removeMentionsIfNotIncluded`) now requires `@token` to match at a word boundary, so e.g. typing `@administrator` no longer keeps a stale `admin` role mention alive, and `@channels` / `@hereafter` no longer keep `mentionedChannel` / `mentionedHere` set.
 - Fixed an unhandled `WebSocketChannelException` surfacing when a reconnect attempt failed (e.g. DNS lookup failed in background); the duplicate signal on `sink.done` is now ignored since the stream's `onError` already handles it.
-- Fixed resetting channel unread count on `message.read` events delivered for threads. 
+- Fixed resetting channel unread count on `message.read` events delivered for threads.
 
 ## 10.0.1
 

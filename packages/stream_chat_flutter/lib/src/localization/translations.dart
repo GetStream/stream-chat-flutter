@@ -1,12 +1,21 @@
 // ignore_for_file: lines_longer_than_80_chars
 
 import 'package:jiffy/jiffy.dart';
+import 'package:stream_chat_flutter/src/localization/accessibility_translations.dart';
 import 'package:stream_chat_flutter/src/message_list_view/message_list_view.dart';
 import 'package:stream_chat_flutter/src/misc/connection_status_builder.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 /// Translation strings for the stream chat widgets
 abstract class Translations {
+  /// Accessibility (a11y) translation strings.
+  ///
+  /// Namespaced separately from visible strings because a11y translations
+  /// have different maintenance needs (screen-reader read-order testing,
+  /// pacing punctuation) and follow their own naming convention. See
+  /// [AccessibilityTranslations].
+  AccessibilityTranslations get accessibility;
+
   /// The error shown when [launchURL] fails
   String get launchUrlError;
 
@@ -758,6 +767,9 @@ class DefaultTranslations implements Translations {
 
   /// Singleton instance of [DefaultTranslations]
   static const instance = DefaultTranslations._();
+
+  @override
+  AccessibilityTranslations get accessibility => const DefaultAccessibilityTranslations();
 
   @override
   String get launchUrlError => 'Cannot launch the url';

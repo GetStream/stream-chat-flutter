@@ -7,6 +7,30 @@ import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 import 'mocks.dart';
 
+Future<StreamChannelState> _pumpStreamChannel(
+  WidgetTester tester,
+  Channel channel,
+) async {
+  StreamChannelState? channelState;
+  await tester.pumpWidget(
+    MaterialApp(
+      home: Scaffold(
+        body: StreamChannel(
+          channel: channel,
+          child: Builder(
+            builder: (context) {
+              channelState = StreamChannel.of(context);
+              return const Text('Channel Content');
+            },
+          ),
+        ),
+      ),
+    ),
+  );
+  await tester.pumpAndSettle();
+  return channelState!;
+}
+
 void main() {
   group('StreamChannel.of()', () {
     testWidgets(
@@ -515,34 +539,6 @@ void main() {
 
     tearDown(() => reset(mockChannel));
 
-    Future<StreamChannelState> _pumpStreamChannel(WidgetTester tester) async {
-      StreamChannelState? channelState;
-
-      // Build a widget that accesses the channel state
-      final testWidget = MaterialApp(
-        home: Scaffold(
-          body: StreamChannel(
-            channel: mockChannel,
-            child: Builder(
-              builder: (context) {
-                // Access the channel state
-                channelState = StreamChannel.of(context);
-                return const Text('Channel Content');
-              },
-            ),
-          ),
-        ),
-      );
-
-      await tester.pumpWidget(testWidget);
-      await tester.pumpAndSettle();
-
-      // Verify we can access the channel state
-      expect(channelState, isNotNull);
-
-      return channelState!;
-    }
-
     testWidgets(
       'Returns null when messages list is empty',
       (tester) async {
@@ -550,7 +546,7 @@ void main() {
         when(() => mockChannel.state.unreadCount).thenReturn(0);
         when(() => mockChannel.state.isUpToDate).thenReturn(true);
 
-        final streamChannel = await _pumpStreamChannel(tester);
+        final streamChannel = await _pumpStreamChannel(tester, mockChannel);
 
         expect(streamChannel.getFirstUnreadMessage(), isNull);
       },
@@ -579,7 +575,7 @@ void main() {
         when(() => mockChannel.state.currentUserRead).thenReturn(mockRead);
         when(() => mockChannel.state.isUpToDate).thenReturn(true);
 
-        final streamChannel = await _pumpStreamChannel(tester);
+        final streamChannel = await _pumpStreamChannel(tester, mockChannel);
 
         expect(streamChannel.getFirstUnreadMessage(mockRead), isNull);
       },
@@ -614,7 +610,7 @@ void main() {
         when(() => mockChannel.state.messages).thenReturn(messages);
         when(() => mockChannel.state.currentUserRead).thenReturn(mockRead);
 
-        final streamChannel = await _pumpStreamChannel(tester);
+        final streamChannel = await _pumpStreamChannel(tester, mockChannel);
 
         expect(streamChannel.getFirstUnreadMessage(), isNull);
       },
@@ -655,7 +651,7 @@ void main() {
         when(() => mockChannel.state.messages).thenReturn(messages);
         when(() => mockChannel.state.currentUserRead).thenReturn(mockRead);
 
-        final streamChannel = await _pumpStreamChannel(tester);
+        final streamChannel = await _pumpStreamChannel(tester, mockChannel);
 
         expect(streamChannel.getFirstUnreadMessage(), equals(unreadMessage));
       },
@@ -703,7 +699,7 @@ void main() {
         when(() => mockChannel.state.messages).thenReturn(messages);
         when(() => mockChannel.state.currentUserRead).thenReturn(mockRead);
 
-        final streamChannel = await _pumpStreamChannel(tester);
+        final streamChannel = await _pumpStreamChannel(tester, mockChannel);
 
         expect(
           streamChannel.getFirstUnreadMessage(),
@@ -750,7 +746,7 @@ void main() {
         when(() => mockChannel.state.messages).thenReturn(messages);
         when(() => mockChannel.state.currentUserRead).thenReturn(defaultRead);
 
-        final streamChannel = await _pumpStreamChannel(tester);
+        final streamChannel = await _pumpStreamChannel(tester, mockChannel);
 
         // With default read - should return null
         expect(streamChannel.getFirstUnreadMessage(), isNull);
@@ -764,6 +760,138 @@ void main() {
     );
   });
 
+  group('_maybeInitChannel', () {
+    final mockChannel = MockChannel();
+    tearDownAll(mockChannel.dispose);
+
+    setUp(() {
+      when(() => mockChannel.cid).thenReturn('test:channel1');
+      when(() => mockChannel.state.messages).thenReturn(const <Message>[]);
+      when(() => mockChannel.state.isUpToDate).thenReturn(true);
+      when(
+        () => mockChannel.query(
+          preferOffline: any(named: 'preferOffline'),
+          messagesPagination: any(named: 'messagesPagination'),
+        ),
+      ).thenAnswer((_) async => const ChannelState());
+    });
+
+    tearDown(() => reset(mockChannel));
+
+    testWidgets(
+      'queries idAround=lastReadMessageId when lastReadMessageId is set',
+      (tester) async {
+        final read = Read(
+          user: User(id: 'testUserId'),
+          lastRead: DateTime.now(),
+          unreadMessages: 100,
+          lastReadMessageId: 'last-read-msg',
+        );
+        when(() => mockChannel.state.unreadCount).thenReturn(100);
+        when(() => mockChannel.state.currentUserRead).thenReturn(read);
+
+        await _pumpStreamChannel(tester, mockChannel);
+
+        final captured =
+            verify(
+                  () => mockChannel.query(
+                    preferOffline: any(named: 'preferOffline'),
+                    messagesPagination: captureAny(named: 'messagesPagination'),
+                  ),
+                ).captured.single
+                as PaginationParams;
+
+        expect(captured.idAround, equals('last-read-msg'));
+        expect(captured.createdAtAround, isNull);
+      },
+    );
+
+    testWidgets(
+      'queries createdAtAround=lastRead when lastReadMessageId is null and '
+      'lastRead is a real timestamp',
+      (tester) async {
+        final lastRead = DateTime.utc(2026, 6, 26, 12);
+        final read = Read(
+          user: User(id: 'testUserId'),
+          lastRead: lastRead,
+          unreadMessages: 100,
+        );
+        when(() => mockChannel.state.unreadCount).thenReturn(100);
+        when(() => mockChannel.state.currentUserRead).thenReturn(read);
+
+        await _pumpStreamChannel(tester, mockChannel);
+
+        final captured =
+            verify(
+                  () => mockChannel.query(
+                    preferOffline: any(named: 'preferOffline'),
+                    messagesPagination: captureAny(named: 'messagesPagination'),
+                  ),
+                ).captured.single
+                as PaginationParams;
+
+        expect(captured.idAround, isNull);
+        expect(captured.createdAtAround, equals(lastRead.toUtc()));
+      },
+    );
+
+    testWidgets(
+      'does not query around when lastReadMessageId is null and lastRead is '
+      'the Go zero-time sentinel',
+      (tester) async {
+        final read = Read(
+          user: User(id: 'testUserId'),
+          // Go `time.Time{}` deserializes to `0001-01-01T00:00:00Z`.
+          lastRead: DateTime.utc(1, 1, 1),
+          unreadMessages: 100,
+        );
+        when(() => mockChannel.state.unreadCount).thenReturn(100);
+        when(() => mockChannel.state.currentUserRead).thenReturn(read);
+
+        await _pumpStreamChannel(tester, mockChannel);
+
+        // `isUpToDate` is true (setUp), so the catch-all "load latest" path
+        // at the end of `_maybeInitChannel` does not fire either — no query
+        // should happen at all.
+        verifyNever(
+          () => mockChannel.query(
+            preferOffline: any(named: 'preferOffline'),
+            messagesPagination: any(named: 'messagesPagination'),
+          ),
+        );
+      },
+    );
+
+    testWidgets(
+      'queries latest page (no around-anchor) when lastRead is the Go '
+      'zero-time sentinel and channel is stale',
+      (tester) async {
+        when(() => mockChannel.state.isUpToDate).thenReturn(false);
+        final read = Read(
+          user: User(id: 'testUserId'),
+          lastRead: DateTime.utc(1, 1, 1),
+          unreadMessages: 100,
+        );
+        when(() => mockChannel.state.unreadCount).thenReturn(100);
+        when(() => mockChannel.state.currentUserRead).thenReturn(read);
+
+        await _pumpStreamChannel(tester, mockChannel);
+
+        final captured =
+            verify(
+                  () => mockChannel.query(
+                    preferOffline: any(named: 'preferOffline'),
+                    messagesPagination: captureAny(named: 'messagesPagination'),
+                  ),
+                ).captured.single
+                as PaginationParams;
+
+        expect(captured.idAround, isNull);
+        expect(captured.createdAtAround, isNull);
+      },
+    );
+  });
+
   group('pruneOldest', () {
     final mockChannel = MockChannel();
     tearDownAll(mockChannel.dispose);
@@ -771,27 +899,6 @@ void main() {
     // Mutable backing for state.messages so the mocked pruneOldest can
     // modify the value subsequent stubs return.
     var stateMessages = <Message>[];
-
-    Future<StreamChannelState> _pumpStreamChannel(WidgetTester tester) async {
-      StreamChannelState? channelState;
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: StreamChannel(
-              channel: mockChannel,
-              child: Builder(
-                builder: (context) {
-                  channelState = StreamChannel.of(context);
-                  return const Text('Channel Content');
-                },
-              ),
-            ),
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-      return channelState!;
-    }
 
     List<Message> _generateMessages(int count) => List.generate(
       count,
@@ -823,7 +930,7 @@ void main() {
     testWidgets('delegates to channel.state.pruneOldest', (tester) async {
       stateMessages = _generateMessages(10);
 
-      final streamChannel = await _pumpStreamChannel(tester);
+      final streamChannel = await _pumpStreamChannel(tester, mockChannel);
       streamChannel.pruneOldest(4);
 
       verify(() => mockChannel.state.pruneOldest(4)).called(1);
@@ -846,7 +953,7 @@ void main() {
           (_) async => ChannelState(messages: _generateMessages(2)),
         );
 
-        final streamChannel = await _pumpStreamChannel(tester);
+        final streamChannel = await _pumpStreamChannel(tester, mockChannel);
 
         await streamChannel.queryMessages();
         await streamChannel.queryMessages();
@@ -888,7 +995,7 @@ void main() {
           (_) async => ChannelState(messages: _generateMessages(2)),
         );
 
-        final streamChannel = await _pumpStreamChannel(tester);
+        final streamChannel = await _pumpStreamChannel(tester, mockChannel);
 
         await streamChannel.queryMessages();
 
@@ -957,31 +1064,10 @@ void main() {
       reset(mockChannel);
     });
 
-    Future<StreamChannelState> _pumpStreamChannel(WidgetTester tester) async {
-      StreamChannelState? channelState;
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: StreamChannel(
-              channel: mockChannel,
-              child: Builder(
-                builder: (context) {
-                  channelState = StreamChannel.of(context);
-                  return const Text('Channel Content');
-                },
-              ),
-            ),
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-      return channelState!;
-    }
-
     testWidgets(
       'truncates the existing window before querying the latest messages',
       (tester) async {
-        final streamChannel = await _pumpStreamChannel(tester);
+        final streamChannel = await _pumpStreamChannel(tester, mockChannel);
 
         await streamChannel.reloadChannel();
 
@@ -998,7 +1084,7 @@ void main() {
     testWidgets(
       'queries with no around-anchor (loads the latest page)',
       (tester) async {
-        final streamChannel = await _pumpStreamChannel(tester);
+        final streamChannel = await _pumpStreamChannel(tester, mockChannel);
 
         await streamChannel.reloadChannel();
 
@@ -1024,7 +1110,7 @@ void main() {
         // would have produced.
         stateMessages = _generateMessages(30, prefix: 'old');
 
-        final streamChannel = await _pumpStreamChannel(tester);
+        final streamChannel = await _pumpStreamChannel(tester, mockChannel);
         await streamChannel.reloadChannel();
 
         // Without the truncate the merge would land us on 60 messages
