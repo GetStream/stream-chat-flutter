@@ -116,7 +116,7 @@ void main() {
     );
     await database.userDao.updateUsers(users);
     await database.channelDao.updateChannels(channels);
-    await messageDao.updateMessages(cid, allMessages);
+    await messageDao.bulkUpdateMessages({cid: allMessages});
     await database.reactionDao.updateReactions([reaction]);
     return allMessages;
   }
@@ -134,7 +134,7 @@ void main() {
     final firstMessageId = messages.first.id;
 
     // Fetched reactions list should have one reaction for given message id
-    final reactions = await database.reactionDao.getReactions(firstMessageId);
+    final reactions = (await database.reactionDao.getReactionsForMessages([firstMessageId]))[firstMessageId]!;
     expect(reactions.length, 1);
 
     // Deleting 2 messages from DB
@@ -148,7 +148,7 @@ void main() {
     expect(newMessages.length, messages.length - 2);
 
     // Reaction for the first message should be deleted too
-    final newReactions = await database.reactionDao.getReactions(firstMessageId);
+    final newReactions = (await database.reactionDao.getReactionsForMessages([firstMessageId]))[firstMessageId]!;
     expect(newReactions, isEmpty);
   });
 
@@ -171,7 +171,9 @@ void main() {
 
         // Fetched reactions list should have one reaction for given message id
         final cid1firstMessageId = cid1Messages.first.id;
-        final cid1Reactions = await database.reactionDao.getReactions(cid1firstMessageId);
+        final cid1Reactions = (await database.reactionDao.getReactionsForMessages([
+          cid1firstMessageId,
+        ]))[cid1firstMessageId]!;
         expect(cid1Reactions.length, 1);
 
         // Deleting all the messages of cid1
@@ -184,7 +186,9 @@ void main() {
         expect(cid2FetchedMessages, isNotEmpty);
 
         // Reaction for the first message should be deleted too
-        final cid1FetchedReactions = await database.reactionDao.getReactions(cid1firstMessageId);
+        final cid1FetchedReactions = (await database.reactionDao.getReactionsForMessages([
+          cid1firstMessageId,
+        ]))[cid1firstMessageId]!;
         expect(cid1FetchedReactions, isEmpty);
       },
     );
@@ -204,10 +208,14 @@ void main() {
 
         // Fetched reactions list should have one reaction for given message id
         final cid1FirstMessageId = cid1Messages.first.id;
-        final cid1Reactions = await database.reactionDao.getReactions(cid1FirstMessageId);
+        final cid1Reactions = (await database.reactionDao.getReactionsForMessages([
+          cid1FirstMessageId,
+        ]))[cid1FirstMessageId]!;
         expect(cid1Reactions.length, 1);
         final cid2FirstMessageId = cid2Messages.first.id;
-        final cid2Reactions = await database.reactionDao.getReactions(cid2FirstMessageId);
+        final cid2Reactions = (await database.reactionDao.getReactionsForMessages([
+          cid2FirstMessageId,
+        ]))[cid2FirstMessageId]!;
         expect(cid2Reactions.length, 1);
 
         // Deleting all the messages of cid1
@@ -220,9 +228,13 @@ void main() {
         expect(cid2FetchedMessages, isEmpty);
 
         // Reaction for the first message should be deleted too
-        final cid1FetchedReactions = await database.reactionDao.getReactions(cid1FirstMessageId);
+        final cid1FetchedReactions = (await database.reactionDao.getReactionsForMessages([
+          cid1FirstMessageId,
+        ]))[cid1FirstMessageId]!;
         expect(cid1FetchedReactions, isEmpty);
-        final cid2FetchedReactions = await database.reactionDao.getReactions(cid2FirstMessageId);
+        final cid2FetchedReactions = (await database.reactionDao.getReactionsForMessages([
+          cid2FirstMessageId,
+        ]))[cid2FirstMessageId]!;
         expect(cid2FetchedReactions, isEmpty);
       },
     );
@@ -631,14 +643,16 @@ void main() {
         text: id,
       );
 
-      await messageDao.updateMessages(cid, [
-        parent(),
-        reply('reply_pre', earlier),
-        reply('reply_tieA', tie),
-        reply('reply_tieB', tie),
-        reply('reply_tieC', tie),
-        reply('reply_post', later),
-      ]);
+      await messageDao.bulkUpdateMessages({
+        cid: [
+          parent(),
+          reply('reply_pre', earlier),
+          reply('reply_tieA', tie),
+          reply('reply_tieB', tie),
+          reply('reply_tieC', tie),
+          reply('reply_post', later),
+        ],
+      });
 
       final before = await messageDao.getThreadMessagesByParentId(
         parentId,
@@ -977,13 +991,15 @@ void main() {
         text: id,
       );
 
-      await messageDao.updateMessages(cid, [
-        m('msg_pre', earlier),
-        m('msg_tieA', tie),
-        m('msg_tieB', tie),
-        m('msg_tieC', tie),
-        m('msg_post', later),
-      ]);
+      await messageDao.bulkUpdateMessages({
+        cid: [
+          m('msg_pre', earlier),
+          m('msg_tieA', tie),
+          m('msg_tieB', tie),
+          m('msg_tieC', tie),
+          m('msg_post', later),
+        ],
+      });
 
       final before = await messageDao.getMessagesByCid(
         cid,
@@ -1054,7 +1070,9 @@ void main() {
       pinnedBy: User(id: 'testUserId4'),
     );
 
-    await messageDao.updateMessages(cid, [copyMessage, newMessage]);
+    await messageDao.bulkUpdateMessages({
+      cid: [copyMessage, newMessage],
+    });
 
     // Fetched messages length should be one more than inserted message.
     // copyMessage `showInChannel` modified field should be false.
@@ -1087,14 +1105,16 @@ void main() {
       final otherUser = User(id: 'otherUser');
       await database.userDao.updateUsers([dbUser, otherUser]);
 
-      await messageDao.updateMessages(cid, [
-        Message(
-          id: messageId,
-          user: dbUser,
-          text: 'Hello',
-          createdAt: DateTime.now(),
-        ),
-      ]);
+      await messageDao.bulkUpdateMessages({
+        cid: [
+          Message(
+            id: messageId,
+            user: dbUser,
+            text: 'Hello',
+            createdAt: DateTime.now(),
+          ),
+        ],
+      });
 
       // 2 reactions by the DB user, 1 by another user.
       await database.reactionDao.updateReactions([
@@ -1148,7 +1168,7 @@ void main() {
           createdAt: baseTime.add(Duration(seconds: i)),
         ),
       );
-      await messageDao.updateMessages(cid, messages);
+      await messageDao.bulkUpdateMessages({cid: messages});
 
       // 2 reactions per message, distinct types per-row.
       final reactions = [
@@ -1203,15 +1223,17 @@ void main() {
       );
       await database.pollDao.updatePolls([poll]);
 
-      await messageDao.updateMessages(cid, [
-        Message(
-          id: messageId,
-          user: dbUser,
-          text: 'Vote please',
-          createdAt: DateTime.now(),
-          pollId: pollId,
-        ),
-      ]);
+      await messageDao.bulkUpdateMessages({
+        cid: [
+          Message(
+            id: messageId,
+            user: dbUser,
+            text: 'Vote please',
+            createdAt: DateTime.now(),
+            pollId: pollId,
+          ),
+        ],
+      });
 
       // 2 own votes (one per option), 2 other-user votes, 1 own answer.
       await database.pollVoteDao.updatePollVotes([
@@ -1283,14 +1305,16 @@ void main() {
       await database.userDao.updateUsers([dbUser]);
 
       const parentId = 'msg-with-draft';
-      await messageDao.updateMessages(cid, [
-        Message(
-          id: parentId,
-          user: dbUser,
-          text: 'msg',
-          createdAt: DateTime.now(),
-        ),
-      ]);
+      await messageDao.bulkUpdateMessages({
+        cid: [
+          Message(
+            id: parentId,
+            user: dbUser,
+            text: 'msg',
+            createdAt: DateTime.now(),
+          ),
+        ],
+      });
 
       await database.draftMessageDao.updateDraftMessages([
         Draft(
@@ -1338,22 +1362,24 @@ void main() {
       await database.pollDao.updatePolls([poll]);
 
       final baseTime = DateTime.now();
-      await messageDao.updateMessages(cid, [
-        Message(
-          id: quotedMessageId,
-          user: dbUser,
-          text: 'first',
-          createdAt: baseTime,
-          pollId: pollId,
-        ),
-        Message(
-          id: quotingMessageId,
-          user: dbUser,
-          text: 'second',
-          createdAt: baseTime.add(const Duration(seconds: 1)),
-          quotedMessageId: quotedMessageId,
-        ),
-      ]);
+      await messageDao.bulkUpdateMessages({
+        cid: [
+          Message(
+            id: quotedMessageId,
+            user: dbUser,
+            text: 'first',
+            createdAt: baseTime,
+            pollId: pollId,
+          ),
+          Message(
+            id: quotingMessageId,
+            user: dbUser,
+            text: 'second',
+            createdAt: baseTime.add(const Duration(seconds: 1)),
+            quotedMessageId: quotedMessageId,
+          ),
+        ],
+      });
 
       await database.reactionDao.updateReactions([
         Reaction(
@@ -1380,28 +1406,30 @@ void main() {
       await database.userDao.updateUsers([dbUser]);
 
       final baseTime = DateTime.now();
-      await messageDao.updateMessages(cid, [
-        Message(
-          id: 'C',
-          user: dbUser,
-          text: 'root',
-          createdAt: baseTime,
-        ),
-        Message(
-          id: 'B',
-          user: dbUser,
-          text: 'mid',
-          createdAt: baseTime.add(const Duration(seconds: 1)),
-          quotedMessageId: 'C',
-        ),
-        Message(
-          id: 'A',
-          user: dbUser,
-          text: 'top',
-          createdAt: baseTime.add(const Duration(seconds: 2)),
-          quotedMessageId: 'B',
-        ),
-      ]);
+      await messageDao.bulkUpdateMessages({
+        cid: [
+          Message(
+            id: 'C',
+            user: dbUser,
+            text: 'root',
+            createdAt: baseTime,
+          ),
+          Message(
+            id: 'B',
+            user: dbUser,
+            text: 'mid',
+            createdAt: baseTime.add(const Duration(seconds: 1)),
+            quotedMessageId: 'C',
+          ),
+          Message(
+            id: 'A',
+            user: dbUser,
+            text: 'top',
+            createdAt: baseTime.add(const Duration(seconds: 2)),
+            quotedMessageId: 'B',
+          ),
+        ],
+      });
 
       final fetched = await messageDao.getMessagesByCid(cid);
       final top = fetched.firstWhere((m) => m.id == 'A');
@@ -1419,21 +1447,23 @@ void main() {
       const quotingId = 'msg-quoting-no-draft';
 
       final baseTime = DateTime.now();
-      await messageDao.updateMessages(cid, [
-        Message(
-          id: quotedId,
-          user: dbUser,
-          text: 'quoted',
-          createdAt: baseTime,
-        ),
-        Message(
-          id: quotingId,
-          user: dbUser,
-          text: 'quoting',
-          createdAt: baseTime.add(const Duration(seconds: 1)),
-          quotedMessageId: quotedId,
-        ),
-      ]);
+      await messageDao.bulkUpdateMessages({
+        cid: [
+          Message(
+            id: quotedId,
+            user: dbUser,
+            text: 'quoted',
+            createdAt: baseTime,
+          ),
+          Message(
+            id: quotingId,
+            user: dbUser,
+            text: 'quoting',
+            createdAt: baseTime.add(const Duration(seconds: 1)),
+            quotedMessageId: quotedId,
+          ),
+        ],
+      });
 
       await database.draftMessageDao.updateDraftMessages([
         Draft(
@@ -1470,7 +1500,7 @@ void main() {
           createdAt: baseTime.add(Duration(seconds: i)),
         ),
       );
-      await messageDao.updateMessages(cid, messages);
+      await messageDao.bulkUpdateMessages({cid: messages});
 
       // 2 reactions per message; surviving rows after pagination must still
       // carry their full reaction set.
@@ -1513,14 +1543,16 @@ void main() {
       await database.userDao.updateUsers([dbUser]);
 
       const messageId = 'msg-with-location';
-      await messageDao.updateMessages(cid, [
-        Message(
-          id: messageId,
-          user: dbUser,
-          text: 'pin drop',
-          createdAt: DateTime.now(),
-        ),
-      ]);
+      await messageDao.bulkUpdateMessages({
+        cid: [
+          Message(
+            id: messageId,
+            user: dbUser,
+            text: 'pin drop',
+            createdAt: DateTime.now(),
+          ),
+        ],
+      });
 
       await database.locationDao.updateLocations([
         Location(
@@ -1567,7 +1599,7 @@ void main() {
           createdAt: baseTime.add(Duration(seconds: i)),
         ),
       );
-      await messageDao.updateMessages(cid, messages);
+      await messageDao.bulkUpdateMessages({cid: messages});
 
       // Locations only on messages 1 and 3; messages 0 and 2 have none.
       await database.locationDao.updateLocations([
@@ -1625,21 +1657,23 @@ void main() {
       const quotedId = 'msg-quoted-loc';
       const quotingId = 'msg-quoting-no-loc';
       final baseTime = DateTime.now();
-      await messageDao.updateMessages(cid, [
-        Message(
-          id: quotedId,
-          user: dbUser,
-          text: 'here I am',
-          createdAt: baseTime,
-        ),
-        Message(
-          id: quotingId,
-          user: dbUser,
-          text: 'see above',
-          createdAt: baseTime.add(const Duration(seconds: 1)),
-          quotedMessageId: quotedId,
-        ),
-      ]);
+      await messageDao.bulkUpdateMessages({
+        cid: [
+          Message(
+            id: quotedId,
+            user: dbUser,
+            text: 'here I am',
+            createdAt: baseTime,
+          ),
+          Message(
+            id: quotingId,
+            user: dbUser,
+            text: 'see above',
+            createdAt: baseTime.add(const Duration(seconds: 1)),
+            quotedMessageId: quotedId,
+          ),
+        ],
+      });
 
       await database.locationDao.updateLocations([
         Location(
