@@ -1,8 +1,13 @@
-# Official Flutter AI components for [Stream Chat](https://getstream.io/chat/sdk/flutter/)
+# Flutter AI components by [Stream](https://getstream.io/chat/sdk/flutter/)
 
-> AI-powered Flutter components for Stream Chat. Build LLM-driven chat experiences with
+> A standalone set of Flutter components for building LLM-driven chat experiences:
 > streaming text, animated typing indicators, syntax-highlighted code blocks, charts,
-> a purpose-built AI composer, and speech-to-text input.
+> a purpose-built AI composer, and speech-to-text input. This package has **no
+> dependency on `stream_chat`, `stream_chat_flutter`, or any other Stream Chat
+> package** — every widget operates on plain strings, callbacks, and controllers, so
+> it can be dropped into any Flutter app or paired with any backend/LLM provider. See
+> [Using with Stream Chat](#using-with-stream-chat) below for wiring it up to a Stream
+> Chat channel.
 
 [![Pub](https://img.shields.io/pub/v/stream_chat_flutter_ai.svg)](https://pub.dartlang.org/packages/stream_chat_flutter_ai)
 [![CI](https://github.com/GetStream/stream-chat-flutter/actions/workflows/stream_flutter_workflow.yml/badge.svg?branch=master)](https://github.com/GetStream/stream-chat-flutter/actions/workflows/stream_flutter_workflow.yml)
@@ -104,21 +109,24 @@ if (spec != null) ChartView(spec: spec);
 
 ### `StreamAIComposer`
 
-A message composer designed for AI-powered channels. Features:
+A message composer designed for AI-powered conversations. Features:
 
 - **Suggestion chips** (`ChatOption`) shown above the input when no option is selected.
 - An **inline selected-option badge** (with dismiss button) inside the input box.
 - A **send / stop toggle** — the send button (↑) becomes a stop button (⏹) while the
   AI is generating a response.
+- An optional **voice / send toggle** (`enableSpeechToText: true`) — a single control that
+  shows a microphone while the field is empty and swaps to send as soon as you type.
 - Factory-based slot customisation via `StreamAIComposerFactory`.
 
 ```dart
 StreamAIComposer(
   controller: controller,
+  enableSpeechToText: true, // requires the platform permissions documented below
   onSendPressed: (text, selectedOption) async {
-    await channel.sendMessage(Message(text: text));
+    await myBackend.sendMessage(text);
   },
-  onStopPressed: () => channel.stopAIResponse(),
+  onStopPressed: () => myBackend.stopGenerating(),
 );
 ```
 
@@ -143,13 +151,14 @@ controller.isGenerating = false;
 
 ### `StreamAIComposerFactory`
 
-Subclass to override the leading and/or trailing regions of the composer.
+Subclass to override the leading and/or trailing regions of the composer — for slots other
+than the send button itself (e.g. an attachment picker):
 
 ```dart
 class MyComposerFactory extends StreamAIComposerFactory {
   @override
   Widget buildLeading(BuildContext context, AiComposerController controller) {
-    return SpeechToTextButton(controller: controller);
+    return IconButton(icon: const Icon(Icons.attach_file), onPressed: () { ... });
   }
 }
 
@@ -166,7 +175,10 @@ StreamAIComposer(
 
 A microphone button that feeds partial and final speech recognition results directly
 into an `AiComposerController`'s text field. The button hides itself automatically
-when the AI is generating or the text field is non-empty.
+when the AI is generating or the text field is non-empty. Prefer
+`StreamAIComposer(enableSpeechToText: true, ...)` over placing this widget manually — that
+swaps it into the send button's own slot for a single toggling control, rather than a
+separate button alongside send.
 
 ```dart
 SpeechToTextButton(
@@ -211,7 +223,22 @@ SpeechToTextButton(
 
 ---
 
-## Listening to AI events
+## Installation
+
+`stream_chat_flutter_ai` has no dependency on Stream Chat — install it on its own:
+
+```yaml
+dependencies:
+  stream_chat_flutter_ai: ^0.0.1
+```
+
+## Using with Stream Chat
+
+The components in this package are provider-agnostic: they take plain text, callbacks,
+and controllers, so you decide how to source and stream AI responses. If you're building
+on top of [Stream Chat](https://getstream.io/chat/sdk/flutter/), here's how the pieces
+typically connect to a `Channel` from `stream_chat_flutter`. This requires adding
+`stream_chat_flutter` as a dependency of your app (not of this package):
 
 ```dart
 channel.on(EventType.aiIndicatorUpdate).listen((event) {
@@ -233,15 +260,18 @@ Stop an in-progress AI response:
 await channel.stopAIResponse();
 ```
 
----
+Send the composer's text as a new message:
 
-## Installation
-
-```yaml
-dependencies:
-  stream_chat_flutter: ^10.0.1
-  stream_chat_flutter_ai: ^0.0.1
+```dart
+StreamAIComposer(
+  controller: controller,
+  onSendPressed: (text, selectedOption) => channel.sendMessage(Message(text: text)),
+  onStopPressed: () => channel.stopAIResponse(),
+);
 ```
+
+See the [Flutter AI sample app](https://github.com/GetStream/chat-ai-samples/tree/main/flutter)
+for a complete, working integration.
 
 ## Changelog
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter_ai/src/composer/ai_composer_controller.dart';
 import 'package:stream_chat_flutter_ai/src/composer/chat_option.dart';
+import 'package:stream_chat_flutter_ai/src/composer/speech_to_text_button.dart';
 import 'package:stream_chat_flutter_ai/src/composer/stream_ai_composer_factory.dart';
 
 /// Callback fired when the user taps the send button.
@@ -17,6 +18,8 @@ typedef AiComposerSendCallback = void Function(String text, ChatOption? selected
 /// - An inline selected-option chip (with dismiss button) inside the input box.
 /// - A **stop** button (instead of send) while [AiComposerController.isGenerating]
 ///   is `true`.
+/// - Optionally, a voice-input button that swaps places with the send button
+///   when the text field is empty (see [enableSpeechToText]).
 ///
 /// All layout regions are customisable via [StreamAIComposerFactory].
 ///
@@ -25,9 +28,9 @@ typedef AiComposerSendCallback = void Function(String text, ChatOption? selected
 /// StreamAIComposer(
 ///   controller: controller,
 ///   onSendPressed: (text, option) async {
-///     await channel.sendMessage(Message(text: text));
+///     await myBackend.sendMessage(text);
 ///   },
-///   onStopPressed: () => channel.stopAIResponse(),
+///   onStopPressed: () => myBackend.stopGenerating(),
 /// );
 /// ```
 class StreamAIComposer extends StatefulWidget {
@@ -43,6 +46,7 @@ class StreamAIComposer extends StatefulWidget {
     this.minLines = 1,
     this.maxLines = 8,
     this.textInputAction = TextInputAction.newline,
+    this.enableSpeechToText = false,
   });
 
   /// The controller that manages input text, chat options, and generating state.
@@ -74,6 +78,17 @@ class StreamAIComposer extends StatefulWidget {
 
   /// The action shown on the keyboard's action button.
   final TextInputAction textInputAction;
+
+  /// Whether to show a voice-input button in place of the send button when
+  /// the text field is empty.
+  ///
+  /// When `true`, the send button's slot shows [SpeechToTextButton] while the
+  /// field is empty and the AI isn't generating a response, and swaps back to
+  /// the ordinary send button as soon as the user types (or to the stop
+  /// button while generating) — a single toggling control, rather than two
+  /// separate buttons. Requires the platform permissions documented on
+  /// [SpeechToTextButton]. Defaults to `false`.
+  final bool enableSpeechToText;
 
   @override
   State<StreamAIComposer> createState() => _StreamAIComposerState();
@@ -177,6 +192,7 @@ class _StreamAIComposerState extends State<StreamAIComposer> {
                     minLines: widget.minLines,
                     maxLines: widget.maxLines,
                     textInputAction: widget.textInputAction,
+                    enableSpeechToText: widget.enableSpeechToText,
                     onSend: _onSend,
                     onStop: _onStop,
                   ),
@@ -205,6 +221,7 @@ class _InputContainer extends StatelessWidget {
     this.minLines = 1,
     this.maxLines = 8,
     this.textInputAction = TextInputAction.newline,
+    this.enableSpeechToText = false,
   });
 
   final AiComposerController controller;
@@ -215,6 +232,7 @@ class _InputContainer extends StatelessWidget {
   final int minLines;
   final int maxLines;
   final TextInputAction textInputAction;
+  final bool enableSpeechToText;
 
   @override
   Widget build(BuildContext context) {
@@ -258,11 +276,24 @@ class _InputContainer extends StatelessWidget {
               ),
               Padding(
                 padding: const EdgeInsets.only(right: 4, bottom: 4),
-                child: _SendStopButton(
-                  controller: controller,
-                  onSend: onSend,
-                  onStop: onStop,
-                ),
+                child: enableSpeechToText
+                    ? Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          SpeechToTextButton(controller: controller),
+                          _SendStopButton(
+                            controller: controller,
+                            onSend: onSend,
+                            onStop: onStop,
+                            hideWhenEmpty: true,
+                          ),
+                        ],
+                      )
+                    : _SendStopButton(
+                        controller: controller,
+                        onSend: onSend,
+                        onStop: onStop,
+                      ),
               ),
             ],
           ),
@@ -281,11 +312,18 @@ class _SendStopButton extends StatelessWidget {
     required this.controller,
     required this.onSend,
     required this.onStop,
+    this.hideWhenEmpty = false,
   });
 
   final AiComposerController controller;
   final VoidCallback onSend;
   final VoidCallback onStop;
+
+  /// When `true`, this button disappears entirely (instead of showing a
+  /// disabled send icon) while the field is empty and the AI isn't
+  /// generating — used together with [SpeechToTextButton] stacked in the
+  /// same slot, so the two form a single toggling control.
+  final bool hideWhenEmpty;
 
   @override
   Widget build(BuildContext context) {
@@ -296,6 +334,10 @@ class _SendStopButton extends StatelessWidget {
         tooltip: 'Stop generating',
         color: Theme.of(context).colorScheme.error,
       );
+    }
+
+    if (hideWhenEmpty && !controller.hasContent) {
+      return const SizedBox.shrink();
     }
 
     return _IconActionButton(

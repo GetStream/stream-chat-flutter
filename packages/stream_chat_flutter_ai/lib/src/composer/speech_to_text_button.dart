@@ -43,7 +43,15 @@ import 'package:stream_chat_flutter_ai/src/composer/ai_composer_controller.dart'
 /// <true/>
 /// ```
 ///
-/// Usage:
+/// For a single control that toggles between voice input and send — matching
+/// the reference iOS/Android AI sample apps — pass
+/// `StreamAIComposer(enableSpeechToText: true, ...)` instead of placing this
+/// widget manually; that swaps this button in for the send button's own slot
+/// while the field is empty, rather than showing two separate buttons side
+/// by side.
+///
+/// To place it elsewhere instead (e.g. always visible in a custom slot), use
+/// it directly via [StreamAIComposerFactory]:
 /// ```dart
 /// class MyFactory extends StreamAIComposerFactory {
 ///   @override

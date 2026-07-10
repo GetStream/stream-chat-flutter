@@ -27,7 +27,6 @@ dependencies:
     sdk: flutter
   flutter_markdown_plus: ^1.0.7
   speech_to_text: ^7.0.0
-  stream_chat_flutter: ^10.0.1
 
 dev_dependencies:
   alchemist: ^0.14.0

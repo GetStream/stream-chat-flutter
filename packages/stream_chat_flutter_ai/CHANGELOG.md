@@ -1,7 +1,12 @@
 ## Upcoming
 
+🔄 Changed
+
+- `stream_chat_flutter_ai` no longer depends on `stream_chat_flutter` (or any `stream_chat*` package). The package is fully standalone and can be used in any Flutter app, independent of Stream Chat. Wiring it up to a Stream Chat channel is now shown in the docs as an optional integration, not a dependency.
+
 ✅ Added
 
+- `StreamAIComposer.enableSpeechToText` — when `true`, swaps `SpeechToTextButton` in for the send button's own slot while the text field is empty, so voice input and send behave as a single toggling control instead of two separate buttons.
 - Initial implementation of `stream_chat_flutter_ai`:
   - `AITypingIndicatorView` — animated dots indicator for AI states (thinking, checking sources, etc.).
   - `AnimatedDots` — standalone animated dots widget.
