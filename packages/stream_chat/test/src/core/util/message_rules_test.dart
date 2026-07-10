@@ -238,6 +238,39 @@ void main() {
         expect(MessageRules.canCountAsUnread(message, channel), isFalse);
       });
 
+      test(
+        'should return true when channel lacks read capability but local '
+        'unread count tracking is enabled',
+        () {
+          final localClient = _createMockClient(
+            currentUser: client.state.currentUser,
+            isLocalUnreadCountEnabled: true,
+          );
+          final message = _createMessage();
+          final channel = _createChannel(localClient, hasReadEvents: false);
+
+          expect(MessageRules.canCountAsUnread(message, channel), isTrue);
+        },
+      );
+
+      test(
+        'should behave as before for channels that already support read '
+        'receipts, even when local unread count tracking is enabled',
+        () {
+          // Local unread tracking only changes behavior for channels that
+          // lack read receipts; channels that already have them are
+          // unaffected by the flag.
+          final localClient = _createMockClient(
+            currentUser: client.state.currentUser,
+            isLocalUnreadCountEnabled: true,
+          );
+          final message = _createMessage();
+          final channel = _createChannel(localClient, hasReadEvents: true);
+
+          expect(MessageRules.canCountAsUnread(message, channel), isTrue);
+        },
+      );
+
       test('should return false when channel is muted', () {
         final message = _createMessage();
         final originalUser = client.state.currentUser;
@@ -661,7 +694,10 @@ Logger _createLogger(String name) {
   return logger;
 }
 
-StreamChatClient _createMockClient({OwnUser? currentUser}) {
+StreamChatClient _createMockClient({
+  OwnUser? currentUser,
+  bool isLocalUnreadCountEnabled = false,
+}) {
   final client = MockStreamChatClient();
   final clientState = FakeClientState(currentUser: currentUser);
 
@@ -673,6 +709,7 @@ StreamChatClient _createMockClient({OwnUser? currentUser}) {
   when(() => client.retryPolicy).thenReturn(
     RetryPolicy(shouldRetry: (_, __, ___) => false),
   );
+  client.isLocalUnreadCountEnabled = isLocalUnreadCountEnabled;
 
   return client;
 }

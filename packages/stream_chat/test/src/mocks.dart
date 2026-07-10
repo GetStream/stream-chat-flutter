@@ -102,6 +102,15 @@ class MockStreamChatClient extends Mock implements StreamChatClient {
   @override
   bool get persistenceEnabled => false;
 
+  // A plain settable field (not a `when(...)` stub) so tests can flip it
+  // with a direct assignment, e.g. `client.isLocalUnreadCountEnabled = true`.
+  // Stubbing it via `when()` in this constructor would be re-entrant: this
+  // mock is often stored in a `late final` and lazily constructed as a side
+  // effect of evaluating another `when(() => client....)` call already in
+  // progress, which corrupts mocktail's global stubbing state.
+  @override
+  bool isLocalUnreadCountEnabled = false;
+
   ChannelDeliveryReporter? _deliveryReporter;
 
   @override
