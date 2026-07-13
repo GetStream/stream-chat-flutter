@@ -1207,6 +1207,8 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
   // The conditions are:
   // 1. The channel is up to date or we are in a thread conversation.
   // 2. There are unread messages or we are in a thread conversation.
+  // 3. In a thread, the parent has at least one reply — the server-side
+  //    thread object doesn't exist until the first reply lands.
   //
   // If any of the conditions are not met, the function returns early.
   // Otherwise, it calls the _markMessagesAsRead function to mark the messages
@@ -1216,6 +1218,10 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     if (channel == null) return;
 
     final isInThread = widget.parentMessage != null;
+
+    // A server-side thread object only exists once the parent has at least
+    // one reply; markThreadRead on a reply-less parent returns 404.
+    if (isInThread && (widget.parentMessage?.replyCount ?? 0) == 0) return;
 
     final isUpToDate = channel.state?.isUpToDate ?? false;
     if (!isInThread && !isUpToDate) return;
