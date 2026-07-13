@@ -1,8 +1,10 @@
-## 9.26.0
+## Upcoming
 
 ✅ Added
 
 - Added support for predefined filters on `StreamChannelListController`.
+
+## 9.26.0
 
 🐞 Fixed
 
