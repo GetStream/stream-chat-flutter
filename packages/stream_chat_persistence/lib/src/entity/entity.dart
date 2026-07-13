@@ -1,4 +1,5 @@
 export 'channel_queries.dart';
+export 'channel_queries_metadata.dart';
 export 'channels.dart';
 export 'connection_events.dart';
 export 'draft_messages.dart';

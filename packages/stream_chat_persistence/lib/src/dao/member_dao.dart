@@ -55,10 +55,6 @@ class MemberDao extends DatabaseAccessor<DriftChatDatabase>
     };
   }
 
-  /// Updates all the members using the new [memberList] data
-  Future<void> updateMembers(String cid, List<Member> memberList) =>
-      bulkUpdateMembers({cid: memberList});
-
   /// Bulk updates the members data of multiple channels
   Future<void> bulkUpdateMembers(
     Map<String, List<Member>?> channelWithMembers,

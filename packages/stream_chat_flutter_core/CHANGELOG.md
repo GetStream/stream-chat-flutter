@@ -1,4 +1,14 @@
+## Upcoming
+
+🐞 Fixed
+
+- Fixed `StreamChannelListController` not handling `notification.channel_deleted` event.
+
 ## 9.26.0
+
+✅ Added
+
+- Added support for predefined filters on `StreamChannelListController`.
 
 🐞 Fixed
 
