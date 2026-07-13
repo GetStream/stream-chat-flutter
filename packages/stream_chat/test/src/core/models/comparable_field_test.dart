@@ -49,7 +49,8 @@ void main() {
     // a raw codepoint compare.
     test('sorts issue #2601 names into a sensible order', () {
       final names = ['Zara', 'jhon', 'Łukasz', 'Øystein', 'Adam', 'Marek'];
-      final sorted = [...names]..sort((a, b) => ComparableField.fromValue(a)!.compareTo(ComparableField.fromValue(b)!));
+      final sorted = [...names]..sort((a, b) => ComparableField.fromValue(a)!
+          .compareTo(ComparableField.fromValue(b)!));
 
       expect(sorted, ['Adam', 'jhon', 'Łukasz', 'Marek', 'Øystein', 'Zara']);
     });
@@ -121,8 +122,7 @@ void main() {
           'Ali',
         ];
 
-        final sorted = [...values]
-          ..sort((a, b) {
+        final sorted = [...values]..sort((a, b) {
             final fa = ComparableField.fromValue(a)!;
             final fb = ComparableField.fromValue(b)!;
             return fa.compareTo(fb);
