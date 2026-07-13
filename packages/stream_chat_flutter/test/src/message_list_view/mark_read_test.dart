@@ -8,6 +8,10 @@
 //   2. `channel.state.isUpToDate` is true (or we're in a thread).
 //   3. `channel.state.unreadCount > 0`.
 //
+// In a thread, it fires `channel.markThreadRead(parentId)` instead, and is
+// additionally gated on the parent having at least one reply — the server-side
+// thread object only exists after the first reply, so an earlier call 404s.
+//
 // These tests pin the expected behavior so regressions in the underlying
 // position-listener flow (SPL `itemPositions`, scroll wiring, etc.) surface
 // here instead of as user-visible bugs.
@@ -32,6 +36,7 @@ void main() {
   late StreamController<bool> isUpToDateController;
   late StreamController<int> unreadCountController;
   late StreamController<List<Message>> messagesController;
+  late StreamController<Map<String, List<Message>>> threadsController;
 
   setUpAll(() {
     registerFallbackValue(EventType.messageNew);
@@ -53,11 +58,14 @@ void main() {
     isUpToDateController = StreamController<bool>.broadcast();
     unreadCountController = StreamController<int>.broadcast();
     messagesController = StreamController<List<Message>>.broadcast();
+    threadsController = StreamController<Map<String, List<Message>>>.broadcast();
     addTearDown(isUpToDateController.close);
     addTearDown(unreadCountController.close);
     addTearDown(messagesController.close);
+    addTearDown(threadsController.close);
 
-    when(() => channelClientState.threadsStream).thenAnswer((_) => const Stream.empty());
+    when(() => channelClientState.threadsStream).thenAnswer((_) => threadsController.stream);
+    when(() => channelClientState.threads).thenReturn(const {});
     when(() => channelClientState.isUpToDateStream).thenAnswer((_) => isUpToDateController.stream);
     when(() => channelClientState.unreadCountStream).thenAnswer((_) => unreadCountController.stream);
     when(() => channelClientState.readStream).thenAnswer((_) => const Stream.empty());
@@ -68,8 +76,17 @@ void main() {
     when(() => channelClientState.currentUserReadStream).thenAnswer((_) => const Stream.empty());
     when(() => channelClientState.messagesStream).thenAnswer((_) => messagesController.stream);
 
-    // Mark-read mock returns immediately.
+    // Mark-read mocks return immediately.
     when(() => channel.markRead(messageId: any(named: 'messageId'))).thenAnswer((_) async => EmptyResponse());
+    when(() => channel.markThreadRead(any())).thenAnswer((_) async => EmptyResponse());
+    // Thread reply loader called by MessageListCore when parentMessage is set.
+    when(
+      () => channel.getReplies(
+        any(),
+        options: any(named: 'options'),
+        preferOffline: any(named: 'preferOffline'),
+      ),
+    ).thenAnswer((_) async => QueryRepliesResponse()..messages = []);
   });
 
   Future<void> pumpMessageList(
@@ -78,10 +95,17 @@ void main() {
     required bool isUpToDate,
     required int unreadCount,
     bool markReadWhenAtTheBottom = true,
+    Message? parentMessage,
   }) async {
     when(() => channelClientState.isUpToDate).thenReturn(isUpToDate);
     when(() => channelClientState.unreadCount).thenReturn(unreadCount);
     when(() => channelClientState.messages).thenReturn(messages);
+
+    // In thread mode, MessageListCore reads from state.threads[parentId] and
+    // subscribes to state.threadsStream. Seed both so the reply list renders.
+    if (parentMessage != null) {
+      when(() => channelClientState.threads).thenReturn({parentMessage.id: messages});
+    }
 
     await tester.runAsync(() async {
       await tester.pumpWidget(
@@ -94,6 +118,7 @@ void main() {
               child: StreamChannel(
                 channel: channel,
                 child: StreamMessageListView(
+                  parentMessage: parentMessage,
                   config: StreamMessageListViewConfiguration(
                     markReadWhenAtTheBottom: markReadWhenAtTheBottom,
                   ),
@@ -106,7 +131,11 @@ void main() {
       // Prime the streams.
       isUpToDateController.add(isUpToDate);
       unreadCountController.add(unreadCount);
-      messagesController.add(messages);
+      if (parentMessage != null) {
+        threadsController.add({parentMessage.id: messages});
+      } else {
+        messagesController.add(messages);
+      }
       await tester.pumpAndSettle();
     });
   }
@@ -185,6 +214,93 @@ void main() {
         verifyNever(
           () => channel.markRead(messageId: any(named: 'messageId')),
         );
+      },
+    );
+  });
+
+  group('thread markThreadRead gates', () {
+    testWidgets(
+      'does NOT fire when parentMessage.replyCount is 0 (thread does not yet exist server-side)',
+      (tester) async {
+        final other = User(id: 'otherid');
+        final parent = Message(
+          id: 'parent-id',
+          user: other,
+          text: 'parent',
+          createdAt: DateTime.utc(2026),
+        );
+
+        await pumpMessageList(
+          tester,
+          parentMessage: parent,
+          messages: [],
+          isUpToDate: true,
+          unreadCount: 0,
+        );
+
+        verifyNever(() => channel.markThreadRead(any()));
+      },
+    );
+
+    testWidgets(
+      'fires when parentMessage.replyCount > 0',
+      (tester) async {
+        final other = User(id: 'otherid');
+        final parent = Message(
+          id: 'parent-id',
+          user: other,
+          text: 'parent',
+          replyCount: 1,
+          createdAt: DateTime.utc(2026),
+        );
+        final reply = Message(
+          id: 'reply-id',
+          user: other,
+          text: 'reply',
+          parentId: parent.id,
+          createdAt: DateTime.utc(2026, 1, 1, 0, 1),
+        );
+
+        await pumpMessageList(
+          tester,
+          parentMessage: parent,
+          messages: [parent, reply],
+          isUpToDate: true,
+          unreadCount: 0,
+        );
+
+        verify(() => channel.markThreadRead(parent.id)).called(1);
+      },
+    );
+
+    testWidgets(
+      'does NOT fire markRead (channel-level) when in a thread',
+      (tester) async {
+        final other = User(id: 'otherid');
+        final parent = Message(
+          id: 'parent-id',
+          user: other,
+          text: 'parent',
+          replyCount: 1,
+          createdAt: DateTime.utc(2026),
+        );
+        final reply = Message(
+          id: 'reply-id',
+          user: other,
+          text: 'reply',
+          parentId: parent.id,
+          createdAt: DateTime.utc(2026, 1, 1, 0, 1),
+        );
+
+        await pumpMessageList(
+          tester,
+          parentMessage: parent,
+          messages: [parent, reply],
+          isUpToDate: true,
+          unreadCount: 5,
+        );
+
+        verifyNever(() => channel.markRead(messageId: any(named: 'messageId')));
       },
     );
   });
