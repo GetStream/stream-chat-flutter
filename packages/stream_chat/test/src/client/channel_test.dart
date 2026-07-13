@@ -2315,8 +2315,12 @@ void main() {
 
         when(() => client.deleteMessage(messageId)).thenAnswer((_) async => EmptyResponse());
 
+        // A soft delete only updates a message already in the loaded window,
+        // so seed it first — a delete must never insert a phantom record.
+        channel.state?.addNewMessage(message);
+
         expectLater(
-          // skipping first seed message list -> [] messages
+          // skip the seeded message -> [message]
           channel.state?.messagesStream.skip(1),
           emitsInOrder([
             [
@@ -2430,8 +2434,12 @@ void main() {
 
         when(() => client.deleteMessageForMe(messageId)).thenAnswer((_) async => EmptyResponse());
 
+        // A soft delete only updates a message already in the loaded window,
+        // so seed it first — a delete must never insert a phantom record.
+        channel.state?.addNewMessage(message);
+
         expectLater(
-          // skipping first seed message list -> [] messages
+          // skip the seeded message -> [message]
           channel.state?.messagesStream.skip(1),
           emitsInOrder([
             [

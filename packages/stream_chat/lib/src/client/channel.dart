@@ -3209,9 +3209,7 @@ class ChannelClientState {
           deletedForMe: event.deletedForMe,
         );
 
-        if (hardDelete) return deleteMessage(message, hardDelete: true);
-        // Soft delete, update the message only if loaded (upsert: false)
-        return updateMessage(message, upsert: false);
+        return deleteMessage(message, hardDelete: hardDelete);
       }),
     );
   }
@@ -3931,7 +3929,7 @@ class ChannelClientState {
     if (messages.isEmpty) return;
 
     if (hardDelete) return _removeMessages(messages);
-    return _updateMessages(messages);
+    return _updateMessages(messages, upsert: false);
   }
 
   void _updateMessages(
@@ -3968,6 +3966,13 @@ class ChannelClientState {
     final updatedThreads = {...threads};
     for (final MapEntry(key: thread, :value) in messagesByThread.entries) {
       final existingThreadMessages = updatedThreads[thread];
+
+      // Don't create a phantom entry for a thread that wasn't loaded: with
+      // `upsert: false` an out-of-window reply is dropped, so there's nothing
+      // to merge. Writing it back would make `threads.containsKey(parentId)`
+      // report a thread that was never paged in.
+      if (existingThreadMessages == null && !upsert) continue;
+
       final threadMessages = existingThreadMessages ?? <Message>[];
       final updatedThreadMessages = _mergeMessagesIntoExisting(
         existing: threadMessages,
@@ -3975,14 +3980,6 @@ class ChannelClientState {
         update: update,
         upsert: upsert,
       );
-
-      // Don't create a phantom entry for a thread that wasn't loaded: with
-      // `upsert: false` an out-of-window reply is dropped, leaving the merged
-      // list empty. Writing it back would make `threads.containsKey(parentId)`
-      // report a thread that was never paged in.
-      if (existingThreadMessages == null && updatedThreadMessages.isEmpty) {
-        continue;
-      }
 
       // Update the thread with the modified message list.
       updatedThreads[thread] = updatedThreadMessages.toList();
