@@ -42,6 +42,7 @@ void main() {
       when(() => channelState.unreadCountStream).thenAnswer((i) => Stream.value(1));
       when(() => clientState.totalUnreadCount).thenAnswer((i) => 1);
       when(() => clientState.totalUnreadCountStream).thenAnswer((i) => Stream.value(1));
+      when(() => clientState.channels).thenReturn({channel.cid!: channel});
       when(() => channelState.membersStream).thenAnswer(
         (i) => Stream.value([
           Member(
@@ -122,6 +123,7 @@ void main() {
       when(() => client.wsConnectionStatus).thenReturn(ConnectionStatus.disconnected);
       when(() => clientState.totalUnreadCount).thenAnswer((i) => 1);
       when(() => clientState.totalUnreadCountStream).thenAnswer((i) => Stream.value(1));
+      when(() => clientState.channels).thenReturn({channel.cid!: channel});
 
       await tester.pumpWidget(
         MaterialApp(
@@ -188,6 +190,7 @@ void main() {
       when(() => client.wsConnectionStatusStream).thenAnswer((_) => Stream.value(ConnectionStatus.connecting));
       when(() => clientState.totalUnreadCount).thenAnswer((i) => 1);
       when(() => clientState.totalUnreadCountStream).thenAnswer((i) => Stream.value(1));
+      when(() => clientState.channels).thenReturn({channel.cid!: channel});
 
       await tester.pumpWidget(
         MaterialApp(
@@ -399,6 +402,7 @@ void main() {
       when(() => client.wsConnectionStatusStream).thenAnswer((_) => Stream.value(ConnectionStatus.connecting));
       when(() => clientState.totalUnreadCount).thenAnswer((i) => 1);
       when(() => clientState.totalUnreadCountStream).thenAnswer((i) => Stream.value(1));
+      when(() => clientState.channels).thenReturn({channel.cid!: channel});
 
       var backPressed = false;
       var imageTapped = false;

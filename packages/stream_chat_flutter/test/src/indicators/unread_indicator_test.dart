@@ -138,4 +138,135 @@ void main() {
       expect(find.text('99+'), findsOneWidget);
     },
   );
+
+  testWidgets(
+    'it should exclude the given channel from the total unread count',
+    (WidgetTester tester) async {
+      final client = MockClient();
+      final clientState = MockClientState();
+      final channel = MockChannel();
+      final channelState = MockChannelState();
+      final lastMessageAt = DateTime.parse('2020-06-22 12:00:00');
+
+      when(() => client.state).thenReturn(clientState);
+      when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
+      when(() => clientState.channels).thenReturn({
+        channel.cid!: channel,
+      });
+      when(() => channel.lastMessageAt).thenReturn(lastMessageAt);
+      when(() => channel.state).thenReturn(channelState);
+      when(() => channel.client).thenReturn(client);
+      when(() => channelState.unreadCount).thenReturn(3);
+      when(() => channelState.unreadCountStream).thenAnswer((i) => Stream.value(3));
+
+      when(() => clientState.totalUnreadCount).thenReturn(10);
+      when(() => clientState.totalUnreadCountStream).thenAnswer((i) => Stream.value(10));
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: StreamChat(
+            client: client,
+            child: StreamChannel(
+              channel: channel,
+              child: Scaffold(
+                body: StreamUnreadIndicator(excludeCid: channel.cid),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // wait for the initial state to be rendered.
+      await tester.pumpAndSettle();
+
+      // 10 total - 3 in the excluded channel = 7 unread elsewhere.
+      expect(find.text('7'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'it should clamp the excluded total unread count to zero',
+    (WidgetTester tester) async {
+      final client = MockClient();
+      final clientState = MockClientState();
+      final channel = MockChannel();
+      final channelState = MockChannelState();
+      final lastMessageAt = DateTime.parse('2020-06-22 12:00:00');
+
+      when(() => client.state).thenReturn(clientState);
+      when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
+      when(() => clientState.channels).thenReturn({
+        channel.cid!: channel,
+      });
+      when(() => channel.lastMessageAt).thenReturn(lastMessageAt);
+      when(() => channel.state).thenReturn(channelState);
+      when(() => channel.client).thenReturn(client);
+      when(() => channelState.unreadCount).thenReturn(5);
+      when(() => channelState.unreadCountStream).thenAnswer((i) => Stream.value(5));
+
+      when(() => clientState.totalUnreadCount).thenReturn(3);
+      when(() => clientState.totalUnreadCountStream).thenAnswer((i) => Stream.value(3));
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: StreamChat(
+            client: client,
+            child: StreamChannel(
+              channel: channel,
+              child: Scaffold(
+                body: StreamUnreadIndicator(excludeCid: channel.cid),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // wait for the initial state to be rendered.
+      await tester.pumpAndSettle();
+
+      // 3 total - 5 excluded clamps to 0, so no badge is shown.
+      expect(find.byType(StreamBadgeNotification), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'it should fall back to the raw total for an untracked excluded channel',
+    (WidgetTester tester) async {
+      final client = MockClient();
+      final clientState = MockClientState();
+      final channel = MockChannel();
+      final channelState = MockChannelState();
+      final lastMessageAt = DateTime.parse('2020-06-22 12:00:00');
+
+      when(() => client.state).thenReturn(clientState);
+      when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
+      when(() => clientState.channels).thenReturn(const {});
+      when(() => channel.lastMessageAt).thenReturn(lastMessageAt);
+      when(() => channel.state).thenReturn(channelState);
+      when(() => channel.client).thenReturn(client);
+
+      when(() => clientState.totalUnreadCount).thenReturn(10);
+      when(() => clientState.totalUnreadCountStream).thenAnswer((i) => Stream.value(10));
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: StreamChat(
+            client: client,
+            child: StreamChannel(
+              channel: channel,
+              child: Scaffold(
+                body: StreamUnreadIndicator(excludeCid: channel.cid),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // wait for the initial state to be rendered.
+      await tester.pumpAndSettle();
+
+      // The channel is absent from client state, so nothing is subtracted.
+      expect(find.text('10'), findsOneWidget);
+    },
+  );
 }
