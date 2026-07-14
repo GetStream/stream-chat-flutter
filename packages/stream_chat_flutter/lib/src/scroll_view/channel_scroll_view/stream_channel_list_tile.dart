@@ -349,11 +349,15 @@ class ChannelLastMessageText extends StatefulWidget {
     super.key,
     required this.channel,
     this.textStyle,
-    this.lastMessagePredicate = _defaultLastMessagePredicate,
-  }) : assert(
+    LastMessagePredicate? lastMessagePredicate,
+  })  : assert(
           channel.state != null,
           'Channel ${channel.id} is not initialized',
-        );
+        ),
+        lastMessagePredicate = lastMessagePredicate ??
+            _defaultLastMessagePredicate(
+              channel.client.state.currentUser?.id,
+            );
 
   /// The channel to display the last message of.
   final Channel channel;
@@ -366,17 +370,23 @@ class ChannelLastMessageText extends StatefulWidget {
   ///
   /// This predicate is used to filter out messages that should not be
   /// considered for the last message.
-  final bool Function(Message) lastMessagePredicate;
+  final LastMessagePredicate lastMessagePredicate;
 
-  // The default predicate to determine if the message should be
-  // considered for the last message.
-  static bool _defaultLastMessagePredicate(Message message) {
-    if (message.isShadowed) return false;
-    if (message.isDeleted) return false;
-    if (message.isError) return false;
-    if (message.isEphemeral) return false;
-
-    return true;
+  // The default predicate to determine if the message should be considered
+  // for the last message. Hides shadowed messages from non-senders so the
+  // sender's preview matches the messaging UI.
+  static LastMessagePredicate _defaultLastMessagePredicate(
+    String? currentUserId,
+  ) {
+    return (Message message) {
+      final isMyMessage =
+          currentUserId != null && message.user?.id == currentUserId;
+      if (message.shadowed && !isMyMessage) return false;
+      if (message.isDeleted) return false;
+      if (message.isError) return false;
+      if (message.isEphemeral) return false;
+      return true;
+    };
   }
 
   @override

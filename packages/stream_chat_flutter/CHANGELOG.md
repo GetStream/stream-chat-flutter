@@ -1,8 +1,13 @@
 ## Upcoming
 
+✅ Added
+
+- Added a `LastMessagePredicate` typedef for the `ChannelLastMessageText.lastMessagePredicate` filter.
+
 🐞 Fixed
 
 - Fixed `StreamMessageListView` firing `markThreadRead` on a reply-less parent, which produced a guaranteed 404 every time the thread view was opened before the first reply.
+- Fixed shadowed messages not hidden in channel list items.
 
 ## 9.26.0
 
