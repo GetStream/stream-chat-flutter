@@ -1,3 +1,5 @@
+import 'package:stream_chat/src/core/util/string_sort_normalizer.dart';
+
 /// A wrapper class for values that implements [Comparable].
 ///
 /// This class is used to compare values of different types in a way that
@@ -8,6 +10,10 @@
 /// For example, when sorting a list of objects with different types of fields,
 /// using this class will ensure that all values are compared correctly
 /// regardless of their type.
+///
+/// String comparisons fold diacritics and ligatures to base characters
+/// (`Ł→l`, `Ø→o`, `Æ→ae`, `é→e`) and ignore case, so ordering aligns with
+/// what the server returns for name-like sorts.
 class ComparableField<T> implements Comparable<ComparableField<T>> {
   const ComparableField._(this.value);
 
@@ -24,12 +30,20 @@ class ComparableField<T> implements Comparable<ComparableField<T>> {
   int compareTo(ComparableField<T> other) {
     return switch ((value, other.value)) {
       (final num a, final num b) => a.compareTo(b),
-      (final String a, final String b) => a.compareTo(b),
+      (final String a, final String b) => _compareStrings(a, b),
       (final DateTime a, final DateTime b) => a.compareTo(b),
       (final bool a, final bool b) when a == b => 0,
       (final bool a, final bool b) => a && !b ? 1 : -1, // true > false
       _ => 0, // All comparisons were equal or incomparable types
     };
+  }
+
+  // Compares using the shared server-parity normalizer.
+  static int _compareStrings(String a, String b) {
+    final normalizedA = normalizeStringForSort(a);
+    final normalizedB = normalizeStringForSort(b);
+
+    return normalizedA.compareTo(normalizedB);
   }
 }
 
