@@ -1,5 +1,9 @@
 ## Upcoming
 
+✅ Added
+
+- Added an `upsert` flag to `ChannelClientState.updateMessage` (defaults to `true`). Pass `false` to update a message only if it's already loaded in the state, skipping unknown messages instead of adding them.
+
 🔄 Changed
 
 - `StreamChatClient.updateSystemEnvironment` now sanitizes the passed `SystemEnvironment`: `sdkName`, `sdkVersion`, and `osName` are locked to internal defaults, and `sdkIdentifier` only accepts the `dart` → `flutter` promotion (other values, including a `flutter` → `dart` demotion, are ignored). `appName`, `appVersion`, `osVersion`, and `deviceModel` continue to pass through as-is.
@@ -8,7 +12,7 @@
 
 - `StreamChatNetworkError.fromDioException` no longer throws `FormatException` when an edge/proxy returns a non-JSON body (e.g. a plain `upstream request timeout` from a 504); the original network error now surfaces with `statusCode` / `statusMessage` intact.
 - `ComparableField` now folds diacritics/ligatures and ignores case when comparing strings, so `SortOption` on fields like `name` no longer pushes lowercase or non-ASCII names (`jhon`, `Łukasz`, `Øystein`) to the end of client-sorted lists ([#2601](https://github.com/GetStream/stream-chat-flutter/issues/2601)).
-
+- Fixed `message.updated` and soft `message.deleted` events being incorrectly upserted into `ChannelState.messages` (and thread reply lists) when they targeted a message outside the currently loaded window.
 
 ## 10.1.0
 

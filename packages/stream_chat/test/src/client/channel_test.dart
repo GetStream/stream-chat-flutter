@@ -1854,6 +1854,60 @@ void main() {
       });
     });
 
+    group('`ChannelClientState.updateMessage`', () {
+      test('upsert: true (default) adds an unknown message', () async {
+        final message = Message(
+          id: 'unknown-message',
+          user: client.state.currentUser,
+          text: 'hello',
+          createdAt: DateTime.utc(2026),
+        );
+
+        expect(channel.state!.messages, isEmpty);
+
+        channel.state!.updateMessage(message);
+
+        expect(channel.state!.messages.map((m) => m.id), ['unknown-message']);
+      });
+
+      test('upsert: false does NOT add an unknown message', () async {
+        final message = Message(
+          id: 'unknown-message',
+          user: client.state.currentUser,
+          text: 'hello',
+          createdAt: DateTime.utc(2026),
+        );
+
+        expect(channel.state!.messages, isEmpty);
+
+        channel.state!.updateMessage(message, upsert: false);
+
+        expect(channel.state!.messages, isEmpty);
+      });
+
+      test('upsert: false updates a message already in the window', () async {
+        const messageId = 'known-message';
+        final seeded = Message(
+          id: messageId,
+          user: client.state.currentUser,
+          text: 'old',
+          createdAt: DateTime.utc(2026),
+        );
+        channel.state!.updateChannelState(
+          channel.state!.channelState.copyWith(messages: [seeded]),
+        );
+
+        channel.state!.updateMessage(
+          seeded.copyWith(text: 'new'),
+          upsert: false,
+        );
+
+        final stored = channel.state!.messages.single;
+        expect(stored.id, equals(messageId));
+        expect(stored.text, equals('new'));
+      });
+    });
+
     test('`.partialUpdateMessage`', () async {
       final message = Message(
         id: 'test-message-id',
@@ -2261,8 +2315,12 @@ void main() {
 
         when(() => client.deleteMessage(messageId)).thenAnswer((_) async => EmptyResponse());
 
+        // A soft delete only updates a message already in the loaded window,
+        // so seed it first — a delete must never insert a phantom record.
+        channel.state?.addNewMessage(message);
+
         expectLater(
-          // skipping first seed message list -> [] messages
+          // skip the seeded message -> [message]
           channel.state?.messagesStream.skip(1),
           emitsInOrder([
             [
@@ -2376,8 +2434,12 @@ void main() {
 
         when(() => client.deleteMessageForMe(messageId)).thenAnswer((_) async => EmptyResponse());
 
+        // A soft delete only updates a message already in the loaded window,
+        // so seed it first — a delete must never insert a phantom record.
+        channel.state?.addNewMessage(message);
+
         expectLater(
-          // skipping first seed message list -> [] messages
+          // skip the seeded message -> [message]
           channel.state?.messagesStream.skip(1),
           emitsInOrder([
             [
@@ -5465,6 +5527,191 @@ void main() {
             expect(channel.state?.pinnedMessages, isEmpty);
           },
         );
+
+        // A `message.updated` event for a message outside the loaded window
+        // would otherwise upsert into the sorted list — creating a phantom
+        // entry with a gap. The guard is "id not in the loaded list", and
+        // is independent of `isUpToDate` — even at the latest page we may
+        // have paginated past older history and receive an event for a
+        // message no longer in memory.
+        group('when message is outside the loaded window', () {
+          test(
+            'should NOT insert unknown message into `messages` list',
+            () async {
+              // Simulate "we have the latest page but not older history":
+              // seed the tail messages.
+              final tail = List.generate(
+                3,
+                (i) => Message(
+                  id: 'tail-$i',
+                  user: client.state.currentUser,
+                  text: 'tail $i',
+                  createdAt: DateTime.utc(2026, 6, 1).add(Duration(seconds: i)),
+                ),
+              );
+              channel.state!.updateChannelState(
+                channel.state!.channelState.copyWith(messages: tail),
+              );
+              expect(channel.state!.messages, hasLength(3));
+
+              // Event for a message on an older page we don't have loaded.
+              final olderPageEdit = Message(
+                id: 'older-page-msg',
+                user: client.state.currentUser,
+                text: 'edited on older page',
+                createdAt: DateTime.utc(2025, 1, 1),
+              );
+              client.addEvent(createUpdateMessageEvent(olderPageEdit));
+              await Future.delayed(Duration.zero);
+
+              // Tail is unchanged, no phantom entry inserted at position 0.
+              expect(channel.state!.messages.map((m) => m.id), ['tail-0', 'tail-1', 'tail-2']);
+              expect(channel.state!.pinnedMessages, isEmpty);
+            },
+          );
+
+          test(
+            'should update message in place when it IS in the loaded window',
+            () async {
+              const messageId = 'known';
+              final seeded = Message(
+                id: messageId,
+                user: client.state.currentUser,
+                text: 'old',
+                createdAt: DateTime.utc(2026),
+              );
+              channel.state!.updateChannelState(
+                channel.state!.channelState.copyWith(messages: [seeded]),
+              );
+              channel.state!.isUpToDate = false;
+
+              final edited = seeded.copyWith(text: 'new');
+              client.addEvent(createUpdateMessageEvent(edited));
+              await Future.delayed(Duration.zero);
+
+              final stored = channel.state!.messages.singleWhere((m) => m.id == messageId);
+              expect(stored.text, equals('new'));
+            },
+          );
+
+          test(
+            'should still add to pinnedMessages when pinned:true even if not in loaded window',
+            () async {
+              channel.state!.isUpToDate = false;
+              expect(channel.state!.messages, isEmpty);
+              expect(channel.state!.pinnedMessages, isEmpty);
+
+              const messageId = 'pin-me';
+              final pinned = Message(
+                id: messageId,
+                user: client.state.currentUser,
+                pinned: true,
+              );
+              client.addEvent(createUpdateMessageEvent(pinned));
+              await Future.delayed(Duration.zero);
+
+              expect(channel.state!.messages, isEmpty);
+              expect(channel.state!.pinnedMessages.length, equals(1));
+              expect(channel.state!.pinnedMessages.first.id, equals(messageId));
+            },
+          );
+
+          test(
+            'should NOT insert unknown reply into threads[parentId]',
+            () async {
+              const parentId = 'parent-1';
+              final knownReply = Message(
+                id: 'known-reply',
+                parentId: parentId,
+                user: client.state.currentUser,
+                createdAt: DateTime.utc(2026),
+              );
+              // Populate threads[parentId] via addNewMessage's thread-only path.
+              channel.state!.addNewMessage(knownReply);
+              await Future.delayed(Duration.zero);
+              expect(channel.state!.threads[parentId], hasLength(1));
+
+              channel.state!.isUpToDate = false;
+
+              final phantomReply = Message(
+                id: 'other-reply',
+                parentId: parentId,
+                user: client.state.currentUser,
+                text: 'edited',
+                createdAt: DateTime.utc(2026, 1, 2),
+              );
+              client.addEvent(createUpdateMessageEvent(phantomReply));
+              await Future.delayed(Duration.zero);
+
+              expect(channel.state!.threads[parentId]!.map((m) => m.id), ['known-reply']);
+            },
+          );
+
+          test(
+            'should NOT create phantom threads[parentId] entry for unloaded thread',
+            () async {
+              const parentId = 'unloaded-parent';
+              // The thread was never paged in, so there's no entry for it.
+              expect(channel.state!.threads.containsKey(parentId), isFalse);
+
+              channel.state!.isUpToDate = false;
+
+              final phantomReply = Message(
+                id: 'phantom-reply',
+                parentId: parentId,
+                user: client.state.currentUser,
+                text: 'edited',
+                createdAt: DateTime.utc(2026, 1, 2),
+              );
+              client.addEvent(createUpdateMessageEvent(phantomReply));
+              await Future.delayed(Duration.zero);
+
+              // The dropped reply must not leave behind an empty thread entry.
+              expect(channel.state!.threads.containsKey(parentId), isFalse);
+            },
+          );
+
+          test(
+            'should still expire activeLiveLocations for out-of-window message',
+            () async {
+              final liveLocation = Location(
+                channelCid: channel.cid,
+                userId: 'user1',
+                messageId: 'loc-msg',
+                latitude: 40.7128,
+                longitude: -74.0060,
+                createdByDeviceId: 'device1',
+                endAt: DateTime.now().add(const Duration(hours: 1)),
+              );
+
+              // Seed only activeLiveLocations, keeping `messages` empty —
+              // the exact "message is outside the loaded window" scenario.
+              channel.state!.updateChannelState(
+                ChannelState(
+                  channel: channel.state!.channelState.channel,
+                  activeLiveLocations: [liveLocation],
+                ),
+              );
+              channel.state!.isUpToDate = false;
+              expect(channel.state!.messages, isEmpty);
+              expect(channel.state!.activeLiveLocations, hasLength(1));
+
+              // A message.updated that expires the live location.
+              final expiredMessage = Message(
+                id: 'loc-msg',
+                text: 'Live location shared',
+                sharedLocation: liveLocation.copyWith(
+                  endAt: DateTime.now().subtract(const Duration(minutes: 1)),
+                ),
+              );
+              client.addEvent(createUpdateMessageEvent(expiredMessage));
+              await Future.delayed(Duration.zero);
+
+              expect(channel.state!.messages, isEmpty);
+              expect(channel.state!.activeLiveLocations, isEmpty);
+            },
+          );
+        });
       },
     );
 
@@ -5642,6 +5889,188 @@ void main() {
             expect(stored.pollId, poll.id);
           },
         );
+      },
+    );
+
+    // A `message.deleted` event for a message outside the loaded window
+    // must not upsert a "deleted" record into the sorted list — that would
+    // create a phantom entry with a gap. Pinned + live-location
+    // side-effects must still fire.
+    group(
+      EventType.messageDeleted,
+      () {
+        const channelId = 'test-channel-id';
+        const channelType = 'test-channel-type';
+        late Channel channel;
+
+        setUp(() {
+          final channelState = _generateChannelState(
+            channelId,
+            channelType,
+            mockChannelConfig: true,
+            ownCapabilities: const [ChannelCapability.readEvents],
+          );
+          channel = Channel.fromState(client, channelState);
+        });
+
+        tearDown(() => channel.dispose());
+
+        Event createDeleteMessageEvent(Message message, {bool hardDelete = false}) {
+          return Event(
+            cid: channel.cid,
+            type: EventType.messageDeleted,
+            message: message.copyWith(
+              type: MessageType.deleted,
+              deletedAt: DateTime.timestamp(),
+            ),
+            hardDelete: hardDelete,
+          );
+        }
+
+        // Same design as the `messageUpdated` guards: the check is
+        // "message-in-loaded-window" and is independent of `isUpToDate` —
+        // an event for a message on an older, unloaded page must not be
+        // turned into a phantom "deleted" record inserted into the sorted
+        // list.
+        group('when message is outside the loaded window', () {
+          test(
+            'soft delete does NOT insert phantom "deleted" record into messages',
+            () async {
+              final tail = List.generate(
+                3,
+                (i) => Message(
+                  id: 'tail-$i',
+                  user: client.state.currentUser,
+                  text: 'tail $i',
+                  createdAt: DateTime.utc(2026, 6, 1).add(Duration(seconds: i)),
+                ),
+              );
+              channel.state!.updateChannelState(
+                channel.state!.channelState.copyWith(messages: tail),
+              );
+              expect(channel.state!.messages, hasLength(3));
+
+              final olderPage = Message(
+                id: 'older-page-msg',
+                user: client.state.currentUser,
+                text: 'gone',
+                createdAt: DateTime.utc(2025, 1, 1),
+              );
+              client.addEvent(createDeleteMessageEvent(olderPage));
+              await Future.delayed(Duration.zero);
+
+              expect(channel.state!.messages.map((m) => m.id), ['tail-0', 'tail-1', 'tail-2']);
+            },
+          );
+
+          test(
+            'soft delete marks message as deleted when it IS in the loaded window',
+            () async {
+              const messageId = 'known';
+              final seeded = Message(
+                id: messageId,
+                user: client.state.currentUser,
+                text: 'hi',
+                createdAt: DateTime.utc(2026),
+              );
+              channel.state!.updateChannelState(
+                channel.state!.channelState.copyWith(messages: [seeded]),
+              );
+              channel.state!.isUpToDate = false;
+
+              client.addEvent(createDeleteMessageEvent(seeded));
+              await Future.delayed(Duration.zero);
+
+              final stored = channel.state!.messages.singleWhere((m) => m.id == messageId);
+              expect(stored.type, equals(MessageType.deleted));
+              expect(stored.deletedAt, isNotNull);
+            },
+          );
+
+          test(
+            'soft delete unpins a pinned-but-not-in-window message via _pinIsValid',
+            () async {
+              const messageId = 'pinned-msg';
+              final pinned = Message(
+                id: messageId,
+                user: client.state.currentUser,
+                pinned: true,
+                createdAt: DateTime.utc(2026),
+              );
+              // Seed only the pinnedMessages list — message absent from
+              // the main `messages` window.
+              channel.state!.updateChannelState(
+                channel.state!.channelState.copyWith(pinnedMessages: [pinned]),
+              );
+              channel.state!.isUpToDate = false;
+              expect(channel.state!.messages, isEmpty);
+              expect(channel.state!.pinnedMessages, hasLength(1));
+
+              client.addEvent(createDeleteMessageEvent(pinned));
+              await Future.delayed(Duration.zero);
+
+              expect(channel.state!.messages, isEmpty);
+              expect(channel.state!.pinnedMessages, isEmpty);
+            },
+          );
+
+          test(
+            'soft delete still clears activeLiveLocations even when message not in window',
+            () async {
+              final liveLocation = Location(
+                channelCid: channel.cid,
+                userId: 'user1',
+                messageId: 'loc-msg',
+                latitude: 40.7128,
+                longitude: -74.0060,
+                createdByDeviceId: 'device1',
+                endAt: DateTime.now().add(const Duration(hours: 1)),
+              );
+
+              // Seed only activeLiveLocations, keeping `messages` empty.
+              channel.state!.updateChannelState(
+                ChannelState(
+                  channel: channel.state!.channelState.channel,
+                  activeLiveLocations: [liveLocation],
+                ),
+              );
+              channel.state!.isUpToDate = false;
+              expect(channel.state!.messages, isEmpty);
+              expect(channel.state!.activeLiveLocations, hasLength(1));
+
+              final locationMessage = Message(
+                id: 'loc-msg',
+                text: 'Live location shared',
+                sharedLocation: liveLocation,
+              );
+              client.addEvent(createDeleteMessageEvent(locationMessage));
+              await Future.delayed(Duration.zero);
+
+              expect(channel.state!.messages, isEmpty);
+              expect(channel.state!.activeLiveLocations, isEmpty);
+            },
+          );
+
+          test(
+            'hard delete is a no-op when message is not in the loaded window',
+            () async {
+              channel.state!.isUpToDate = false;
+              expect(channel.state!.messages, isEmpty);
+
+              final phantom = Message(
+                id: 'phantom',
+                user: client.state.currentUser,
+                text: 'gone',
+                createdAt: DateTime.utc(2026),
+              );
+              client.addEvent(createDeleteMessageEvent(phantom, hardDelete: true));
+              await Future.delayed(Duration.zero);
+
+              expect(channel.state!.messages, isEmpty);
+              expect(channel.state!.pinnedMessages, isEmpty);
+            },
+          );
+        });
       },
     );
 

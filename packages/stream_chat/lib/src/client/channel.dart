@@ -3194,7 +3194,7 @@ class ChannelClientState {
         final message = event.message;
         if (message == null) return;
 
-        return updateMessage(message);
+        return updateMessage(message, upsert: false);
       }),
     );
   }
@@ -3305,13 +3305,18 @@ class ChannelClientState {
     );
   }
 
-  /// Updates the [message] in the state if it exists. Adds it otherwise.
+  /// Updates the [message] in the state.
   ///
   /// Reconciles via `Message.updateWith`, so locally-known enrichment
   /// (poll, sharedLocation, ownReactions, nested quotedMessage) is
   /// preserved when [message] omits those fields. Use [replaceMessage]
   /// for paths that need a strict overwrite.
-  void updateMessage(Message message) => _updateMessages([message]);
+  ///
+  /// When [upsert] is `true` (the default) and [message] isn't already in
+  /// the state, it's added. When `false`, an unknown [message] is skipped
+  /// and the state is left unchanged; only a message already loaded in the
+  /// state is updated.
+  void updateMessage(Message message, {bool upsert = true}) => _updateMessages([message], upsert: upsert);
 
   /// Replaces the [message] in the state if it exists, no-op otherwise.
   ///
@@ -3924,17 +3929,18 @@ class ChannelClientState {
     if (messages.isEmpty) return;
 
     if (hardDelete) return _removeMessages(messages);
-    return _updateMessages(messages);
+    return _updateMessages(messages, upsert: false);
   }
 
   void _updateMessages(
     Iterable<Message> messages, {
     Message Function(Message original, Message updated) update = _mergeUpdate,
+    bool upsert = true,
   }) {
     if (messages.isEmpty) return;
 
-    _updateThreadMessages(messages, update: update);
-    _updateChannelMessages(messages, update: update);
+    _updateThreadMessages(messages, update: update, upsert: upsert);
+    _updateChannelMessages(messages, update: update, upsert: upsert);
     _updatePinnedMessages(messages, update: update);
     _updateActiveLiveLocations(messages);
   }
@@ -3942,6 +3948,7 @@ class ChannelClientState {
   void _updateThreadMessages(
     Iterable<Message> messages, {
     Message Function(Message original, Message updated) update = _mergeUpdate,
+    bool upsert = true,
   }) {
     if (messages.isEmpty) return;
 
@@ -3958,11 +3965,20 @@ class ChannelClientState {
 
     final updatedThreads = {...threads};
     for (final MapEntry(key: thread, :value) in messagesByThread.entries) {
-      final threadMessages = updatedThreads[thread] ?? <Message>[];
+      final existingThreadMessages = updatedThreads[thread];
+
+      // Don't create a phantom entry for a thread that wasn't loaded: with
+      // `upsert: false` an out-of-window reply is dropped, so there's nothing
+      // to merge. Writing it back would make `threads.containsKey(parentId)`
+      // report a thread that was never paged in.
+      if (existingThreadMessages == null && !upsert) continue;
+
+      final threadMessages = existingThreadMessages ?? <Message>[];
       final updatedThreadMessages = _mergeMessagesIntoExisting(
         existing: threadMessages,
         toMerge: value,
         update: update,
+        upsert: upsert,
       );
 
       // Update the thread with the modified message list.
@@ -3976,6 +3992,7 @@ class ChannelClientState {
   void _updateChannelMessages(
     Iterable<Message> messages, {
     Message Function(Message original, Message updated) update = _mergeUpdate,
+    bool upsert = true,
   }) {
     if (messages.isEmpty) return;
 
@@ -3996,6 +4013,7 @@ class ChannelClientState {
       existing: channelMessages,
       toMerge: affectedMessages,
       update: update,
+      upsert: upsert,
     );
 
     // Calculate the new last message at time.
@@ -4092,14 +4110,20 @@ class ChannelClientState {
     required Iterable<Message> existing,
     required Iterable<Message> toMerge,
     Message Function(Message original, Message updated) update = _mergeUpdate,
+    bool upsert = true,
   }) {
     if (toMerge.isEmpty) return existing;
 
     // [update] decides whether each pair is reconciled (default — see
     // `_mergeUpdate`) or replaced (`_replaceUpdate`, used by local rollback
     // paths that don't want enrichment fallback to keep optimistic values).
+    //
+    // [upsert] controls whether ids not already in [existing] are inserted.
+    // Event-driven paths (`message.updated`, `message.deleted` soft) pass
+    // `upsert: false` so an out-of-window message isn't dropped into a gap
+    // between the loaded slice and history the client hasn't paged in yet.
     final existingList = existing is List<Message> ? existing : existing.toList();
-    final toMergeList = toMerge is List<Message> ? toMerge : toMerge.toList();
+    var toMergeList = toMerge is List<Message> ? toMerge : toMerge.toList();
 
     // Single-message fast path. The hot ingest path (server echoes, edits,
     // reactions, read receipts) always lands here, and `lastIndexWhere` +
@@ -4108,6 +4132,10 @@ class ChannelClientState {
     if (toMergeList.length == 1) {
       final message = toMergeList.first;
       final oldIndex = existingList.lastIndexWhere((it) => it.id == message.id);
+
+      // upsert: false — skip update if message is not loaded
+      if (oldIndex == -1 && !upsert) return existingList;
+
       final resolved = oldIndex == -1 ? message : update(existingList[oldIndex], message);
 
       final mergedMessages = existingList.sortedUpsertAt(
@@ -4125,6 +4153,13 @@ class ChannelClientState {
         (it) => it.quotedMessageId == resolved.id,
         (it) => it.copyWith(quotedMessage: resolved),
       );
+    }
+
+    // upsert: false - skip messages not loaded in the window
+    if (!upsert) {
+      final existingIds = {for (final m in existingList) m.id};
+      toMergeList = toMergeList.where((m) => existingIds.contains(m.id)).toList();
+      if (toMergeList.isEmpty) return existingList;
     }
 
     // Batch path: receiver (`existingList`) is maintained sorted as a
