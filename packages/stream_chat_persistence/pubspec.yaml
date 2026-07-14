@@ -29,7 +29,7 @@ dependencies:
   meta: ^1.9.1
   path: ^1.9.1
   path_provider: ^2.1.5
-  sqlite3_flutter_libs: ^0.5.26
+  sqlite3_flutter_libs: ">=0.5.26 <0.7.0"
   stream_chat: ^10.1.0
 
 dev_dependencies:
