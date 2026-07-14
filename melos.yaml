@@ -47,8 +47,11 @@ command:
       equatable: ^2.0.8
       ezanimation: ^0.6.0
       firebase_core: ^4.0.0
-      firebase_crashlytics: ^5.2.0
-      firebase_messaging: ^16.0.0
+      # Capped below 5.2.5 / 16.4.2: those releases import `FirebasePlugin` from
+      # firebase_core_platform_interface, which no longer exposes it. Remove the
+      # upper bounds once FlutterFire ships a fixed release.
+      firebase_crashlytics: '>=5.2.0 <5.2.5'
+      firebase_messaging: '>=16.0.0 <16.4.2'
       file_picker: ^11.0.0
       file_selector: ^1.1.0
       flutter_app_badger: ^1.5.0
