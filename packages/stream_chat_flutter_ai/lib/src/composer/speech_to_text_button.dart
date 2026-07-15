@@ -6,7 +6,7 @@ import 'package:stream_chat_flutter_ai/src/composer/ai_composer_controller.dart'
 import 'package:stream_chat_flutter_ai/src/composer/composer_action_button.dart';
 
 /// A microphone button that feeds speech-to-text results directly into an
-/// [AiComposerController]'s text field.
+/// [AIComposerController]'s text field.
 ///
 /// Rendered as one of the states of [StreamAIComposer]'s single trailing
 /// control — the composer only builds this widget while the field is empty
@@ -58,7 +58,7 @@ import 'package:stream_chat_flutter_ai/src/composer/composer_action_button.dart'
 /// ```dart
 /// class MyFactory extends StreamAIComposerFactory {
 ///   @override
-///   Widget buildLeading(BuildContext context, AiComposerController controller) {
+///   Widget buildLeading(BuildContext context, AIComposerController controller) {
 ///     return SpeechToTextButton(controller: controller);
 ///   }
 /// }
@@ -76,7 +76,7 @@ class SpeechToTextButton extends StatefulWidget {
   });
 
   /// The controller whose text field receives recognised words.
-  final AiComposerController controller;
+  final AIComposerController controller;
 
   /// Called when speech recognition encounters an error.
   final void Function(SpeechRecognitionError error)? onError;

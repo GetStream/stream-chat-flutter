@@ -12,7 +12,7 @@ Status legend: ⬜ Not started · 🚧 In progress · ✅ Done · 🅾️ Option
 
 | # | Feature | Phase | Effort | Status |
 |---|---|---|---|---|
-| 1.1 | Standalone suggested-prompt chips (`SuggestionsView`) | 1 | S | ⬜ |
+| 1.1 | Standalone suggested-prompt chips (`SuggestionsView`) | 1 | S | ✅ |
 | 1.2 | Chart schema & kind breadth (`USpec`) | 1 | M | ⬜ |
 | 2.1 | Code syntax highlighting (`CodeBlockView`) | 2 | M | ⬜ |
 | 2.2 | Composer factory slot coverage | 2 | M | ⬜ |
@@ -24,31 +24,38 @@ Status legend: ⬜ Not started · 🚧 In progress · ✅ Done · 🅾️ Option
 
 ## Phase 1 — Quick parity wins (low effort, high value)
 
-### 1.1 Standalone suggested-prompt chips (`SuggestionsView`)
+### 1.1 Standalone suggested-prompt chips (`SuggestionsView`) ✅
 
 **Gap:** Swift ships `SuggestionsView` — a horizontally-scrolling row of free-text quick-reply
-chips, independent of `ChatOption`. Flutter has no equivalent; its only suggestion surface today is
-`ChatOption` rows inside `ComposerAttachmentSheet`.
+chips, independent of `ChatOption`. Flutter had no equivalent; its only suggestion surface was
+`ChatOption` rows inside `ComposerAttachmentSheet`. The reference Flutter sample
+(`chat-ai-samples/flutter`) had already hand-rolled an equivalent inline `_LandingView` widget —
+this work extracted that into the package and rewired the sample to consume it, matching how the
+iOS sample docks `SuggestionsView` above its composer (`ContentView.swift`'s
+`VStack { Spacer(); SuggestionsView(...) }`).
 
-**Proposed API:** new `lib/src/composer/suggestions_view.dart`:
+**Shipped API:** `lib/src/composer/suggestions_view.dart`:
 
 ```dart
-StreamAiSuggestionsView({
+StreamAISuggestionsView({
   required List<String> suggestions,
   required ValueChanged<String> onSuggestionSelected,
   double itemMaxWidth = 160,
-  EdgeInsets padding,
+  EdgeInsets padding = const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
 })
 ```
 
 Theme-driven (`Theme.of(context).colorScheme`), consistent with the composer pill tokens
 (`surfaceContainerHigh`/`outlineVariant`).
 
-- **Files:** new `suggestions_view.dart`; export from `lib/stream_chat_flutter_ai.dart`.
-- **Reuse:** match the chip styling already used by `_SelectedOptionChip` in
-  `lib/src/composer/stream_ai_composer.dart`.
+- **Files:** new `suggestions_view.dart`; exported from `lib/stream_chat_flutter_ai.dart`; consumed
+  by `chat-ai-samples/flutter`'s `_LandingView` (`chat_ai_assistant_home_page.dart`).
+- **Note:** naming — Swift's only AI-token type is `AITypingIndicatorView` (capital "AI",
+  consistently); the package's `AiComposerController`/`AiComposerSendCallback`/`AiMarkdownBody` were
+  renamed to `AIComposerController`/`AIComposerSendCallback`/`AIMarkdownBody` to match, and the new
+  widget is `StreamAISuggestionsView` (not the originally-drafted `StreamAiSuggestionsView`).
 - **Acceptance:** tapping a chip fires the callback with its text; row scrolls; long text
-  truncates to 2 lines; widget test covering render + tap.
+  truncates to 2 lines; widget test covering render + tap — see `suggestions_view_test.dart`.
 - **Effort:** S (½ day).
 
 ### 1.2 Chart schema & kind breadth (`USpec`)
@@ -121,10 +128,10 @@ text input and the attachment sheet are hardcoded inside `stream_ai_composer.dar
 
 **Proposed work:** add two nullable slot methods mirroring the existing pattern:
 
-- `Widget? buildInput(BuildContext, AiComposerController)` — defaults to the current
+- `Widget? buildInput(BuildContext, AIComposerController)` — defaults to the current
   `_InputContainer` (promote it out of private, or wrap it). Lets hosts fully replace the input
   field.
-- `Widget buildAttachmentSheet(BuildContext, AiComposerController)` — defaults to
+- `Widget buildAttachmentSheet(BuildContext, AIComposerController)` — defaults to
   `ComposerAttachmentSheet`; `_AttachmentButton` calls the factory instead of constructing the
   sheet directly.
 
@@ -211,7 +218,7 @@ the `stream_core_flutter` split from the chat-specific packages), not in
 Recorded here so future parity work doesn't regress these — they are intentional improvements over
 Swift, not gaps:
 
-- **Image-only sends:** `AiComposerController.hasContent` gates the send button on text **or**
+- **Image-only sends:** `AIComposerController.hasContent` gates the send button on text **or**
   attachments; Swift's send button only appears when text is non-empty.
 - **Unified morphing trailing control:** a single 40×40 control that morphs between mic/send/stop
   is a more deliberate design than Swift's separately-styled buttons.
@@ -221,6 +228,6 @@ Swift, not gaps:
 ## At parity (no work needed)
 
 Streaming/typewriter text rendering, the AI typing indicator, the composer state controller
-(`AiComposerController` ↔ Swift's `ComposerViewModel`), the `ChatOption` model (including its
+(`AIComposerController` ↔ Swift's `ComposerViewModel`), the `ChatOption` model (including its
 `description` field), speech-to-text, and the attachment picker (camera + recent photos + full
 library picker).

@@ -13,13 +13,13 @@ import 'package:stream_chat_flutter_ai/src/composer/stream_ai_composer_factory.d
 ///
 /// Shows, in a single scrollable sheet:
 /// - A camera tile and a horizontal strip of the user's recent photos, each
-///   tappable to toggle it in/out of [AiComposerController.attachments].
+///   tappable to toggle it in/out of [AIComposerController.attachments].
 ///   Selecting a photo takes effect immediately — there is no separate
 ///   confirm step, so the sheet can stay open while the user picks several.
 /// - An "All Photos" button that opens the platform's full image picker.
-/// - Below that (only if non-empty), [AiComposerController.chatOptions] as a
+/// - Below that (only if non-empty), [AIComposerController.chatOptions] as a
 ///   list of selectable rows (icon, title, subtitle) — tapping one calls
-///   [AiComposerController.selectChatOption] and closes the sheet.
+///   [AIComposerController.selectChatOption] and closes the sheet.
 ///
 /// Requires platform permissions for gallery access:
 ///
@@ -40,9 +40,9 @@ class ComposerAttachmentSheet extends StatefulWidget {
   /// Creates a [ComposerAttachmentSheet].
   const ComposerAttachmentSheet({super.key, required this.controller});
 
-  /// The controller whose [AiComposerController.attachments] and
-  /// [AiComposerController.chatOptions] this sheet reads and mutates.
-  final AiComposerController controller;
+  /// The controller whose [AIComposerController.attachments] and
+  /// [AIComposerController.chatOptions] this sheet reads and mutates.
+  final AIComposerController controller;
 
   @override
   State<ComposerAttachmentSheet> createState() => _ComposerAttachmentSheetState();
@@ -55,12 +55,12 @@ class _ComposerAttachmentSheetState extends State<ComposerAttachmentSheet> {
   List<AssetEntity> _recentPhotos = const [];
 
   /// Maps a selected asset's id to the exact [XFile] instance passed to
-  /// [AiComposerController.addAttachments], so deselecting can pass that same
-  /// instance back to [AiComposerController.removeAttachment].
+  /// [AIComposerController.addAttachments], so deselecting can pass that same
+  /// instance back to [AIComposerController.removeAttachment].
   ///
   /// [XFile] doesn't override `==`, so a freshly-constructed `XFile` with the
   /// same path is *not* `==` to the one already in
-  /// [AiComposerController.attachments] — reconstructing one to remove would
+  /// [AIComposerController.attachments] — reconstructing one to remove would
   /// silently fail to match.
   final Map<String, XFile> _selectedAssets = {};
 

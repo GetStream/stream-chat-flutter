@@ -70,13 +70,13 @@ StreamTypewriterBuilder(
 );
 ```
 
-### `AiMarkdownBody`
+### `AIMarkdownBody`
 
 Segment-based markdown renderer used internally by `StreamingMessageView`. Use it
 directly when you need markdown rendering without the typewriter animation.
 
 ```dart
-AiMarkdownBody(
+AIMarkdownBody(
   data: markdownText,
   selectable: true,          // enables text selection on desktop / web
   onTapLink: (text, href, title) { /* handle link tap */ },
@@ -130,12 +130,12 @@ StreamAIComposer(
 );
 ```
 
-### `AiComposerController`
+### `AIComposerController`
 
 `ChangeNotifier` that manages all mutable state for `StreamAIComposer`.
 
 ```dart
-final controller = AiComposerController(
+final controller = AIComposerController(
   chatOptions: [
     ChatOption(id: 'summarize', text: 'Summarize this', icon: Icons.summarize),
     ChatOption(id: 'email',     text: 'Write an email',  icon: Icons.email),
@@ -157,7 +157,7 @@ than the send button itself (e.g. an attachment picker):
 ```dart
 class MyComposerFactory extends StreamAIComposerFactory {
   @override
-  Widget buildLeading(BuildContext context, AiComposerController controller) {
+  Widget buildLeading(BuildContext context, AIComposerController controller) {
     return IconButton(icon: const Icon(Icons.attach_file), onPressed: () { ... });
   }
 }
@@ -171,10 +171,33 @@ StreamAIComposer(
 
 ---
 
+### `StreamAISuggestionsView`
+
+A horizontally-scrolling row of free-text quick-reply chips, independent of `ChatOption`. Typically
+docked above the composer on a "new chat" landing screen — tapping a chip fires the callback with
+its exact text, and you decide what happens next (e.g. send it immediately).
+
+```dart
+Column(
+  children: [
+    const Spacer(),
+    StreamAISuggestionsView(
+      suggestions: const [
+        'Create a painting in Renaissance-style',
+        'Help me study vocabulary for an exam',
+      ],
+      onSuggestionSelected: (text) => sendMessage(text),
+    ),
+  ],
+)
+```
+
+---
+
 ### `SpeechToTextButton`
 
 A microphone button that feeds partial and final speech recognition results directly
-into an `AiComposerController`'s text field. The button hides itself automatically
+into an `AIComposerController`'s text field. The button hides itself automatically
 when the AI is generating or the text field is non-empty. Prefer
 `StreamAIComposer(enableSpeechToText: true, ...)` over placing this widget manually — that
 swaps it into the send button's own slot for a single toggling control, rather than a

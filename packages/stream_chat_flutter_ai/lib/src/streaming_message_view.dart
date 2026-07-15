@@ -33,7 +33,7 @@ class StreamingMessageView extends StatefulWidget {
   final String text;
 
   /// Style overrides for the rendered markdown. See
-  /// [AiMarkdownBody.styleSheet].
+  /// [AIMarkdownBody.styleSheet].
   final MarkdownStyleSheet? styleSheet;
 
   /// The speed at which the text is typed out.
@@ -92,7 +92,7 @@ class _StreamingMessageViewState extends State<StreamingMessageView> {
 
   @override
   Widget build(BuildContext context) {
-    return AiMarkdownBody(
+    return AIMarkdownBody(
       data: _displayText,
       selectable: _isDesktopDeviceOrWeb,
       onTapLink: widget.onTapLink,

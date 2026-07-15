@@ -15,5 +15,6 @@ export 'src/composer/composer_attachment_sheet.dart';
 export 'src/composer/speech_to_text_button.dart';
 export 'src/composer/stream_ai_composer.dart';
 export 'src/composer/stream_ai_composer_factory.dart';
+export 'src/composer/suggestions_view.dart';
 export 'src/stream_typewriter_builder.dart';
 export 'src/streaming_message_view.dart';

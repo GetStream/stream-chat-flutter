@@ -27,9 +27,9 @@ final _kFenceRegex = RegExp(r'```(\w*)\n([\s\S]*?)```', multiLine: true);
 /// - Code fences via [CodeBlockView] (dark box, copy button, language label).
 /// - JSON / chart fences via [ChartView] when the content is a valid [USpec];
 ///   otherwise falls back to [CodeBlockView].
-class AiMarkdownBody extends StatelessWidget {
-  /// Creates an [AiMarkdownBody].
-  const AiMarkdownBody({
+class AIMarkdownBody extends StatelessWidget {
+  /// Creates an [AIMarkdownBody].
+  const AIMarkdownBody({
     super.key,
     required this.data,
     this.onTapLink,

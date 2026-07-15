@@ -12,19 +12,19 @@ import 'package:stream_chat_flutter_ai/src/composer/chat_option.dart';
 ///
 /// Example:
 /// ```dart
-/// final controller = AiComposerController(
+/// final controller = AIComposerController(
 ///   chatOptions: [
 ///     ChatOption(id: 'summarize', text: 'Summarize this', icon: Icons.summarize),
 ///     ChatOption(id: 'email', text: 'Write an email', icon: Icons.email),
 ///   ],
 /// );
 /// ```
-class AiComposerController extends ChangeNotifier {
-  /// Creates an [AiComposerController].
+class AIComposerController extends ChangeNotifier {
+  /// Creates an [AIComposerController].
   ///
   /// [initialText] pre-fills the text field.
   /// [chatOptions] sets the initial list of suggestion chips.
-  AiComposerController({
+  AIComposerController({
     String initialText = '',
     List<ChatOption> chatOptions = const [],
   }) : _chatOptions = chatOptions,

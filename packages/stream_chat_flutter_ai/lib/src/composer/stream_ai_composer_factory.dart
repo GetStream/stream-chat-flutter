@@ -10,7 +10,7 @@ import 'package:stream_chat_flutter_ai/src/composer/composer_attachment_sheet.da
 /// ```dart
 /// class MyFactory extends StreamAIComposerFactory {
 ///   @override
-///   Widget buildLeading(BuildContext context, AiComposerController controller) {
+///   Widget buildLeading(BuildContext context, AIComposerController controller) {
 ///     return IconButton(
 ///       icon: const Icon(Icons.attach_file),
 ///       onPressed: () { /* pick attachments */ },
@@ -31,13 +31,13 @@ class StreamAIComposerFactory {
   ///
   /// Defaults to an outlined circular "+" button that opens a
   /// [ComposerAttachmentSheet] — a combined photo picker and, if
-  /// [AiComposerController.chatOptions] is non-empty, chat-option list. The
-  /// button is disabled while [AiComposerController.isGenerating] is `true`.
+  /// [AIComposerController.chatOptions] is non-empty, chat-option list. The
+  /// button is disabled while [AIComposerController.isGenerating] is `true`.
   ///
   /// Override to replace it, or return `null` to hide it — [StreamAIComposer]
   /// only reserves layout space (and the gap to the input container) for a
   /// non-`null` result.
-  Widget? buildLeading(BuildContext context, AiComposerController controller) {
+  Widget? buildLeading(BuildContext context, AIComposerController controller) {
     return _AttachmentButton(controller: controller);
   }
 
@@ -46,7 +46,7 @@ class StreamAIComposerFactory {
   ///
   /// Returns `null` by default (no trailing widget). See [buildLeading] for
   /// how `null` affects layout.
-  Widget? buildTrailing(BuildContext context, AiComposerController controller) {
+  Widget? buildTrailing(BuildContext context, AIComposerController controller) {
     return null;
   }
 }
@@ -56,7 +56,7 @@ class StreamAIComposerFactory {
 class _AttachmentButton extends StatelessWidget {
   const _AttachmentButton({required this.controller});
 
-  final AiComposerController controller;
+  final AIComposerController controller;
 
   Future<void> _openAttachmentSheet(BuildContext context) {
     return showModalBottomSheet<void>(
