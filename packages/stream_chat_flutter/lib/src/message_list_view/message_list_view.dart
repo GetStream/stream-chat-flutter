@@ -920,6 +920,16 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
 
   Future<void> _markMessagesAsRead() async {
     if (widget.parentMessage case final parent?) {
+      // If we are in a thread, mark the thread as read immediately.
+      await streamChannel?.channel.markThreadRead(parent.id);
+    } else {
+      // Otherwise, mark the channel as read immediately.
+      await streamChannel?.channel.markRead();
+    }
+  }
+
+  Future<void> _markMessagesAsReadDebounced() async {
+    if (widget.parentMessage case final parent?) {
       // If we are in a thread, mark the thread as read.
       debouncedMarkThreadRead.call([parent.id]);
     } else {
@@ -1230,7 +1240,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     if (!isInThread && !hasUnread) return;
 
     // Mark messages as read if it's allowed.
-    return _markMessagesAsRead();
+    return _markMessagesAsReadDebounced();
   }
 
   void _getOnThreadTap() {
