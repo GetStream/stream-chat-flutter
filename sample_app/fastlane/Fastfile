@@ -6,7 +6,7 @@ import File.expand_path('Allurefile', __dir__)
 
 mock_server_repo_name = 'stream-chat-test-mock-server'
 mock_server_driver_port = ENV['MOCK_DRIVER_PORT'] || '4568'
-github_repo = ENV['GITHUB_REPOSITORY'] || 'GetStream/stream-chat-swift'
+github_repo = ENV['GITHUB_REPOSITORY'] || 'GetStream/stream-chat-flutter'
 @force_check = false
 
 def root_path

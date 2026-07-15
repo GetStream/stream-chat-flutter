@@ -43,7 +43,7 @@ end
 
 lane :allure_upload do |options|
   unless Dir.exist?(allure_results_path) && Dir.children(allure_results_path).any?
-    UI.important("No Allure results in #{results}; skipping upload")
+    UI.important("No Allure results in #{allure_results_path}; skipping upload")
     next
   end
 
