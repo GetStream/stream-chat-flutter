@@ -55,6 +55,7 @@ class StreamUserAvatarGroup extends StatelessWidget {
     super.key,
     required this.users,
     this.size,
+    this.semanticsLabel,
   });
 
   /// The list of users whose avatars are displayed.
@@ -65,10 +66,19 @@ class StreamUserAvatarGroup extends StatelessWidget {
   /// If null, defaults to [StreamAvatarGroupSize.lg].
   final StreamAvatarGroupSize? size;
 
+  /// Screen-reader label for the avatar group.
+  ///
+  /// When null (the default), the group composes through — each child's own
+  /// [StreamUserAvatar.semanticsLabel] applies. When non-null, the group is
+  /// exposed as a single labeled image node and its children (including the
+  /// "+N" overflow badge) are dropped from the semantics tree.
+  final String? semanticsLabel;
+
   @override
   Widget build(BuildContext context) {
     return StreamAvatarGroup(
       size: size,
+      semanticsLabel: semanticsLabel,
       children: users.map(
         (user) => StreamUserAvatar(
           user: user,

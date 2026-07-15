@@ -4,6 +4,7 @@
 
 - Added an `AccessibilityTranslations` namespace on `Translations`, accessed via `context.translations.accessibility`, holding all screen-reader labels, tooltips, hints, and live-region announcements used by the composer, voice recording, attachment picker, message actions, channel header, media gallery, and poll creator. Getter suffixes follow Flutter's `MaterialLocalizations` convention (`Tooltip`, `Label`, `Hint`, `TapHint`, `Announcement`). Added a `DateTime.toA11yTimestamp()` extension for locale-aware long-form timestamps in accessibility labels.
 - Added a `LastMessagePredicate` typedef for the `ChannelLastMessageText.lastMessagePredicate` filter.
+- Added optional `semanticsLabel` to `StreamUserAvatar`, `StreamUserAvatarGroup`, and `StreamUserAvatarStack`. On `StreamUserAvatar`, `null` (default) drops the placeholder's initials from the semantics tree; a non-null value exposes it as a labeled image node. On `StreamUserAvatarGroup` / `StreamUserAvatarStack`, `null` composes through — each child avatar's own `semanticsLabel` applies — while a non-null value collapses the group into a single labeled image node and hides children and the "+N" overflow badge.
 
 🐞 Fixed
 

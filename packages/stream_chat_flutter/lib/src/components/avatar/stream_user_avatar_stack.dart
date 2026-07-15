@@ -71,6 +71,7 @@ class StreamUserAvatarStack extends StatelessWidget {
     this.size,
     this.overlap = 0.33,
     this.max = 5,
+    this.semanticsLabel,
   }) : assert(max >= 2, 'max must be at least 2');
 
   /// The list of users whose avatars are displayed.
@@ -96,12 +97,21 @@ class StreamUserAvatarStack extends StatelessWidget {
   /// Must be at least 2. Defaults to 5.
   final int max;
 
+  /// Screen-reader label for the avatar stack.
+  ///
+  /// When null (the default), the stack composes through — each child's own
+  /// [StreamUserAvatar.semanticsLabel] applies. When non-null, the stack is
+  /// exposed as a single labeled image node and its children (including the
+  /// "+N" overflow badge) are dropped from the semantics tree.
+  final String? semanticsLabel;
+
   @override
   Widget build(BuildContext context) {
     return StreamAvatarStack(
       max: max,
       size: size,
       overlap: overlap,
+      semanticsLabel: semanticsLabel,
       children: users.map(
         (user) => StreamUserAvatar(
           user: user,

@@ -68,6 +68,7 @@ class StreamUserAvatar extends StatelessWidget {
     required this.user,
     this.showBorder = true,
     this.showOnlineIndicator = true,
+    this.semanticsLabel,
   });
 
   /// The user whose avatar is displayed.
@@ -90,6 +91,14 @@ class StreamUserAvatar extends StatelessWidget {
   /// [StreamAvatarSize.lg].
   final StreamAvatarSize? size;
 
+  /// Screen-reader label for the avatar.
+  ///
+  /// When null (the default), the placeholder speaks for itself — wrap in
+  /// [ExcludeSemantics] when the surrounding row already labels the user.
+  /// When non-null, the avatar is exposed as a labeled image node and the
+  /// placeholder is dropped from the semantics tree.
+  final String? semanticsLabel;
+
   @override
   Widget build(BuildContext context) {
     final avatarTheme = context.streamAvatarTheme;
@@ -109,6 +118,7 @@ class StreamUserAvatar extends StatelessWidget {
       showBorder: showBorder,
       backgroundColor: effectiveBackgroundColor,
       foregroundColor: effectiveForegroundColor,
+      semanticsLabel: semanticsLabel,
       placeholder: (_) => _StreamUserAvatarPlaceholder(user: user, size: effectiveSize),
     );
 
