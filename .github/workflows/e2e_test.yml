@@ -81,9 +81,6 @@ jobs:
 
       - uses: ./.github/actions/setup-ruby
 
-      - name: Use Firebase stubs for e2e
-        run: cp sample_app/pubspec_overrides.e2e.yaml sample_app/pubspec_overrides.yaml
-
       - name: Bootstrap
         run: |
           flutter precache --ios

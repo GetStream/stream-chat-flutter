@@ -1,7 +1,0 @@
-name: firebase_core
-description: No-op pure-Dart stand-in for firebase_core, swapped in by e2e builds to keep the native Firebase SDK out of the app.
-version: 0.0.1
-publish_to: none
-
-environment:
-  sdk: ^3.0.0
