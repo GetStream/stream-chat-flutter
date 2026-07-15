@@ -12,7 +12,7 @@ import 'package:stream_chat_flutter_ai/src/code_block_view.dart';
 typedef MarkdownTapLinkCallback = void Function(String text, String? href, String title);
 
 /// The set of languages whose fences are treated as chart blocks.
-const _kChartLanguages = {'json', 'chart', 'chartjs', 'echarts', 'plotly', 'vega'};
+const _kChartLanguages = {'json', 'chart', 'chartjs', 'echarts', 'highcharts', 'plotly', 'vega'};
 
 /// Regex that splits markdown into text and fenced-code segments.
 ///
@@ -74,9 +74,7 @@ class AIMarkdownBody extends StatelessWidget {
         data: segment.text,
         selectable: selectable,
         styleSheet: styleSheet,
-        onTapLink: onTapLink != null
-            ? (text, href, title) => onTapLink!(text, href, title)
-            : null,
+        onTapLink: onTapLink != null ? (text, href, title) => onTapLink!(text, href, title) : null,
       );
     }
 
@@ -107,10 +105,12 @@ class AIMarkdownBody extends StatelessWidget {
       if (match.start > cursor) {
         segments.add(_TextSegment(markdown.substring(cursor, match.start)));
       }
-      segments.add(_CodeSegment(
-        language: match.group(1) ?? '',
-        code: (match.group(2) ?? '').trimRight(),
-      ));
+      segments.add(
+        _CodeSegment(
+          language: match.group(1) ?? '',
+          code: (match.group(2) ?? '').trimRight(),
+        ),
+      );
       cursor = match.end;
     }
 

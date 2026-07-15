@@ -37,3 +37,7 @@
   - `ChatOption` — data class for the selectable options shown in `ComposerAttachmentSheet`.
   - `ChatComposerFactory` — subclass to override the leading and trailing regions of the composer.
   - `SpeechToTextButton` — microphone button that streams partial speech-to-text results into the composer's text field; hidden while AI is generating or text is non-empty.
+- `ChartView` now renders `USpecKind.scatter` as a real scatter plot (via `fl_chart`'s `ScatterChart`) instead of silently falling back to a line chart, plus new `USpecKind.bubble` (scatter with point size driven by `UPoint.size`) and `USpecKind.histogram` (auto-binned into 10 buckets, mirroring `stream-chat-swift-ai`'s `makeBins`) renders. `USpecKind.heatmap` parses but renders as a placeholder for now — a full grid render is deferred.
+- `USpecParser` recognises five additional chart schemas, matching `stream-chat-swift-ai`'s `parseUSpec` breadth: Plotly (single-spec and figure heatmaps), ECharts, Highcharts, a Vega-Lite subset (mark + encoding), and a flat pie schema (`{type: "pie", data: [{label, value}]}`). Its existing Chart.js adapter now also recognises pie/doughnut, scatter/bubble point objects (`{x, y, r}`), the `radar`/`polarArea` fallback mappings, and `options.scales.y.beginAtZero`.
+- `UPoint` gained optional `size` (bubble radius) and `z` (heatmap intensity) fields; `USpec` gained `beginAtZeroY`, applied to the y-axis in `ChartView`.
+- `AIMarkdownBody` now also routes ` ```highcharts ` fences to the chart parser.

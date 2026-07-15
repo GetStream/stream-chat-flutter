@@ -13,7 +13,7 @@ Status legend: ⬜ Not started · 🚧 In progress · ✅ Done · 🅾️ Option
 | # | Feature | Phase | Effort | Status |
 |---|---|---|---|---|
 | 1.1 | Standalone suggested-prompt chips (`SuggestionsView`) | 1 | S | ✅ |
-| 1.2 | Chart schema & kind breadth (`USpec`) | 1 | M | ⬜ |
+| 1.2 | Chart schema & kind breadth (`USpec`) | 1 | M | 🚧 |
 | 2.1 | Code syntax highlighting (`CodeBlockView`) | 2 | M | ⬜ |
 | 2.2 | Composer factory slot coverage | 2 | M | ⬜ |
 | 2.3 | Localization scaffolding | 2 | M | ⬜ |
@@ -60,7 +60,7 @@ Theme-driven (`Theme.of(context).colorScheme`), consistent with the composer pil
   truncates to 2 lines; widget test covering render + tap — see `suggestions_view_test.dart`.
 - **Effort:** S (½ day).
 
-### 1.2 Chart schema & kind breadth (`USpec`)
+### 1.2 Chart schema & kind breadth (`USpec`) 🚧
 
 **Gap:** Swift's `parseUSpec` auto-detects **7 schemas** (Chart.js, Plotly single + full figure,
 ECharts, Highcharts, Vega-Lite, a legacy custom schema, flat pie) and renders **8 kinds** (line,
@@ -71,17 +71,19 @@ chart** (the `switch` default case, `_ => _buildLineChart()`).
 
 **Proposed work** (incremental, land independently):
 
-- [ ] 1.2.1 Implement a real scatter render in `ChartView` (fl_chart `ScatterChart`) instead of the
+- [x] 1.2.1 Implement a real scatter render in `ChartView` (fl_chart `ScatterChart`) instead of the
       line fallback.
-- [ ] 1.2.2 Add a Vega-Lite adapter to `USpecParser` (mark + encoding subset) — the most common
+- [x] 1.2.2 Add a Vega-Lite adapter to `USpecParser` (mark + encoding subset) — the most common
       LLM output after Chart.js.
-- [ ] 1.2.3 Add ECharts + Highcharts adapters.
-- [ ] 1.2.4 Add Plotly adapter (single-spec + first-trace-of-figure).
-- [ ] 1.2.5 Add `USpecKind.histogram` (auto-bin into ~10 buckets, mirroring Swift's `makeBins`) and
+- [x] 1.2.3 Add ECharts + Highcharts adapters.
+- [x] 1.2.4 Add Plotly adapter (single-spec + first-trace-of-figure).
+- [x] 1.2.5 Add `USpecKind.histogram` (auto-bin into ~10 buckets, mirroring Swift's `makeBins`) and
       `USpecKind.bubble` (point size from a `size`/`z` field — requires an optional `size` field
       on `UPoint`).
 - [ ] 1.2.6 Add heatmap (fl_chart has no native heatmap — render as a `GridView`/`CustomPaint`
-      grid, or document as deferred if the cost isn't justified).
+      grid, or document as deferred if the cost isn't justified). Parsing already lands
+      (`USpecKind.heatmap` from Plotly/Vega-Lite `rect` marks); `ChartView` renders a placeholder
+      for it until the grid is built.
 
 Fence-language routing already exists in `lib/src/ai_markdown_body.dart`
 (`json, chart, chartjs, echarts, plotly, vega`) — extend the language set as needed, the hook is
