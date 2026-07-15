@@ -272,6 +272,7 @@ class _StreamChatSampleAppState extends State<StreamChatSampleApp>
     return base.copyWith(
       // Accent
       accentError: dynamicColor.error,
+      accentNeutral: dynamicColor.secondary,
       // // Text
       textPrimary: dynamicColor.onSurface,
       textSecondary: dynamicColor.onSurfaceVariant,
