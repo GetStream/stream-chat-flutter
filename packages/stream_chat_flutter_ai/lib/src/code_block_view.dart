@@ -39,6 +39,7 @@ class CodeBlockView extends StatelessWidget {
                 fontSize: 13,
                 color: _kFgColor,
                 height: 1.5,
+                fontFeatures: [FontFeature.tabularFigures()],
               ),
             ),
           ),

@@ -26,6 +26,8 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_markdown_plus: ^1.0.7
+  image_picker: ^1.2.2
+  photo_manager: ^3.9.0
   speech_to_text: ^7.0.0
 
 dev_dependencies:

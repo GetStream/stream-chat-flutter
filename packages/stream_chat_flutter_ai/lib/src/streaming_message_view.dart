@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_markdown_plus/flutter_markdown_plus.dart' show MarkdownStyleSheet;
 import 'package:stream_chat_flutter_ai/src/ai_markdown_body.dart';
 import 'package:stream_chat_flutter_ai/src/stream_typewriter_builder.dart';
 
@@ -25,10 +26,15 @@ class StreamingMessageView extends StatefulWidget {
     this.onTapLink,
     this.typingSpeed = const Duration(milliseconds: 10),
     this.onTypewriterStateChanged,
+    this.styleSheet,
   });
 
   /// The text to display in the widget.
   final String text;
+
+  /// Style overrides for the rendered markdown. See
+  /// [AiMarkdownBody.styleSheet].
+  final MarkdownStyleSheet? styleSheet;
 
   /// The speed at which the text is typed out.
   ///
@@ -90,6 +96,7 @@ class _StreamingMessageViewState extends State<StreamingMessageView> {
       data: _displayText,
       selectable: _isDesktopDeviceOrWeb,
       onTapLink: widget.onTapLink,
+      styleSheet: widget.styleSheet,
     );
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/widgets.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:stream_chat_flutter_ai/src/composer/chat_option.dart';
 
 /// Controller for [StreamAIComposer] that holds all mutable UI state.
@@ -26,8 +27,8 @@ class AiComposerController extends ChangeNotifier {
   AiComposerController({
     String initialText = '',
     List<ChatOption> chatOptions = const [],
-  })  : _chatOptions = chatOptions,
-        _textController = TextEditingController(text: initialText) {
+  }) : _chatOptions = chatOptions,
+       _textController = TextEditingController(text: initialText) {
     _textController.addListener(_onTextChanged);
   }
 
@@ -35,6 +36,7 @@ class AiComposerController extends ChangeNotifier {
   List<ChatOption> _chatOptions;
   ChatOption? _selectedChatOption;
   bool _isGenerating = false;
+  final List<XFile> _attachments = [];
 
   /// The underlying [TextEditingController] — pass this to a [TextField].
   TextEditingController get textEditingController => _textController;
@@ -42,8 +44,28 @@ class AiComposerController extends ChangeNotifier {
   /// The current text in the input field.
   String get text => _textController.text;
 
-  /// Whether the input field contains non-whitespace content.
-  bool get hasContent => text.trim().isNotEmpty;
+  /// Whether the input field contains non-whitespace text.
+  bool get hasText => text.trim().isNotEmpty;
+
+  /// Whether the input field contains text and/or pending attachments.
+  ///
+  /// Used to decide whether the send button is enabled — a message with only
+  /// images and no text is still sendable.
+  bool get hasContent => hasText || _attachments.isNotEmpty;
+
+  /// The images the user has picked to send alongside the message.
+  List<XFile> get attachments => List.unmodifiable(_attachments);
+
+  /// Adds [files] to the pending attachments.
+  void addAttachments(Iterable<XFile> files) {
+    _attachments.addAll(files);
+    notifyListeners();
+  }
+
+  /// Removes a single pending attachment.
+  void removeAttachment(XFile file) {
+    if (_attachments.remove(file)) notifyListeners();
+  }
 
   /// Whether the AI is currently generating a response.
   ///
@@ -80,12 +102,13 @@ class AiComposerController extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Clears the text field and the selected option.
+  /// Clears the text field, the selected option, and any pending attachments.
   ///
   /// Call this after a successful send.
   void clear() {
     _textController.clear();
     _selectedChatOption = null;
+    _attachments.clear();
     notifyListeners();
   }
 

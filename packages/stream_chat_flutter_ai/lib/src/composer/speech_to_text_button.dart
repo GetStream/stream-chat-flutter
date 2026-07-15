@@ -3,14 +3,17 @@ import 'package:speech_to_text/speech_recognition_error.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 import 'package:stream_chat_flutter_ai/src/composer/ai_composer_controller.dart';
+import 'package:stream_chat_flutter_ai/src/composer/composer_action_button.dart';
 
 /// A microphone button that feeds speech-to-text results directly into an
 /// [AiComposerController]'s text field.
 ///
-/// The button is **only visible** when the controller's text field is empty and
-/// the AI is not currently generating a response. While listening, it shows an
-/// animated recording indicator and the recognised speech appears in the text
-/// field in real time. Tapping again stops recognition.
+/// Rendered as one of the states of [StreamAIComposer]'s single trailing
+/// control — the composer only builds this widget while the field is empty
+/// and the AI is not generating, so it does not re-check either condition
+/// itself. While listening, it shows an animated recording indicator and the
+/// recognised speech appears in the text field in real time. Tapping again
+/// stops recognition.
 ///
 /// Platform permissions must be configured before the button can work:
 ///
@@ -98,8 +101,7 @@ class SpeechToTextButton extends StatefulWidget {
   State<SpeechToTextButton> createState() => _SpeechToTextButtonState();
 }
 
-class _SpeechToTextButtonState extends State<SpeechToTextButton>
-    with SingleTickerProviderStateMixin {
+class _SpeechToTextButtonState extends State<SpeechToTextButton> with SingleTickerProviderStateMixin {
   final _speech = SpeechToText();
   bool _isAvailable = false;
   bool _isListening = false;
@@ -173,28 +175,29 @@ class _SpeechToTextButtonState extends State<SpeechToTextButton>
     return ListenableBuilder(
       listenable: widget.controller,
       builder: (context, _) {
-        // Hidden when generating or when there is already text in the field.
-        if (!_isAvailable || widget.controller.isGenerating || widget.controller.hasContent) {
+        // The composer only builds this widget while the field is empty and
+        // the AI isn't generating (see `_trailingState` in
+        // stream_ai_composer.dart), so the only remaining reason to hide is
+        // the platform speech recognizer being unavailable.
+        if (!_isAvailable) {
           return const SizedBox.shrink();
         }
 
-        final color = _isListening ? Theme.of(context).colorScheme.error : Theme.of(context).colorScheme.onSurface;
+        final colorScheme = Theme.of(context).colorScheme;
+        final color = _isListening ? colorScheme.error : colorScheme.primary;
 
-        return Padding(
-          padding: const EdgeInsets.only(right: 4),
-          child: _isListening
-              ? AnimatedBuilder(
-                  animation: _pulseAnimation,
-                  builder: (context, child) {
-                    return Opacity(
-                      opacity: _pulseAnimation.value,
-                      child: child,
-                    );
-                  },
-                  child: _MicButton(color: color, onTap: _toggle, recording: true),
-                )
-              : _MicButton(color: color, onTap: _toggle, recording: false),
-        );
+        return _isListening
+            ? AnimatedBuilder(
+                animation: _pulseAnimation,
+                builder: (context, child) {
+                  return Opacity(
+                    opacity: _pulseAnimation.value,
+                    child: child,
+                  );
+                },
+                child: _MicButton(color: color, onTap: _toggle, recording: true),
+              )
+            : _MicButton(color: color, onTap: _toggle, recording: false);
       },
     );
   }
@@ -209,20 +212,11 @@ class _MicButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Tooltip(
-      message: recording ? 'Stop recording' : 'Voice input',
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(20),
-        child: Padding(
-          padding: const EdgeInsets.all(8),
-          child: Icon(
-            recording ? Icons.stop_circle_outlined : Icons.mic_outlined,
-            color: color,
-            size: 24,
-          ),
-        ),
-      ),
+    return ComposerActionButton(
+      icon: recording ? Icons.stop_rounded : Icons.mic_none_rounded,
+      onPressed: onTap,
+      tooltip: recording ? 'Stop recording' : 'Voice input',
+      color: color,
     );
   }
 }

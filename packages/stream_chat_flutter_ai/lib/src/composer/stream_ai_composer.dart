@@ -1,25 +1,37 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:stream_chat_flutter_ai/src/composer/ai_composer_controller.dart';
 import 'package:stream_chat_flutter_ai/src/composer/chat_option.dart';
+import 'package:stream_chat_flutter_ai/src/composer/composer_action_button.dart';
 import 'package:stream_chat_flutter_ai/src/composer/speech_to_text_button.dart';
 import 'package:stream_chat_flutter_ai/src/composer/stream_ai_composer_factory.dart';
 
 /// Callback fired when the user taps the send button.
 ///
 /// [text] is the current message text. [selectedOption] is the active
-/// [ChatOption], or `null` if the user did not select one.
-typedef AiComposerSendCallback = void Function(String text, ChatOption? selectedOption);
+/// [ChatOption], or `null` if the user did not select one. [attachments] is
+/// the list of images the user picked via the composer's attachment button.
+typedef AiComposerSendCallback =
+    void Function(
+      String text,
+      ChatOption? selectedOption,
+      List<XFile> attachments,
+    );
 
 /// An AI-aware message composer.
 ///
 /// Renders a text input with:
-/// - Suggestion chips ([ChatOption]s) shown above the input when no option is
-///   selected.
-/// - An inline selected-option chip (with dismiss button) inside the input box.
-/// - A **stop** button (instead of send) while [AiComposerController.isGenerating]
-///   is `true`.
-/// - Optionally, a voice-input button that swaps places with the send button
-///   when the text field is empty (see [enableSpeechToText]).
+/// - An inline selected-option chip (with dismiss button) inside the input
+///   box once a [ChatOption] is selected — see `ComposerAttachmentSheet`,
+///   which lists [AiComposerController.chatOptions] alongside the photo
+///   picker, opened from the composer's leading "+" button by default.
+/// - A row of image thumbnails above the input when the user has picked
+///   attachments (see [StreamAIComposerFactory.buildLeading]).
+/// - A single circular trailing control that morphs between voice input
+///   (empty field), send (field has content), and stop (while
+///   [AiComposerController.isGenerating] is `true`).
 ///
 /// All layout regions are customisable via [StreamAIComposerFactory].
 ///
@@ -27,8 +39,8 @@ typedef AiComposerSendCallback = void Function(String text, ChatOption? selected
 /// ```dart
 /// StreamAIComposer(
 ///   controller: controller,
-///   onSendPressed: (text, option) async {
-///     await myBackend.sendMessage(text);
+///   onSendPressed: (text, option, attachments) async {
+///     await myBackend.sendMessage(text, attachments);
 ///   },
 ///   onStopPressed: () => myBackend.stopGenerating(),
 /// );
@@ -49,7 +61,8 @@ class StreamAIComposer extends StatefulWidget {
     this.enableSpeechToText = false,
   });
 
-  /// The controller that manages input text, chat options, and generating state.
+  /// The controller that manages input text, chat options, attachments, and
+  /// generating state.
   ///
   /// If not provided, an internal controller is created and disposed
   /// automatically.
@@ -82,11 +95,10 @@ class StreamAIComposer extends StatefulWidget {
   /// Whether to show a voice-input button in place of the send button when
   /// the text field is empty.
   ///
-  /// When `true`, the send button's slot shows [SpeechToTextButton] while the
-  /// field is empty and the AI isn't generating a response, and swaps back to
-  /// the ordinary send button as soon as the user types (or to the stop
-  /// button while generating) — a single toggling control, rather than two
-  /// separate buttons. Requires the platform permissions documented on
+  /// When `true`, the composer's single trailing control shows a mic while
+  /// the field is empty and the AI isn't generating a response, and morphs
+  /// into the send button as soon as the user types (or the stop button
+  /// while generating). Requires the platform permissions documented on
   /// [SpeechToTextButton]. Defaults to `false`.
   final bool enableSpeechToText;
 
@@ -155,7 +167,11 @@ class _StreamAIComposerState extends State<StreamAIComposer> {
 
   void _onSend() {
     if (!_controller.hasContent) return;
-    widget.onSendPressed(_controller.text, _controller.selectedChatOption);
+    widget.onSendPressed(
+      _controller.text,
+      _controller.selectedChatOption,
+      _controller.attachments,
+    );
     _controller.clear();
     _focusNode.requestFocus();
   }
@@ -169,38 +185,44 @@ class _StreamAIComposerState extends State<StreamAIComposer> {
     return ListenableBuilder(
       listenable: _controller,
       builder: (context, _) {
-        final showChips = _controller.chatOptions.isNotEmpty && _controller.selectedChatOption == null;
+        final leading = widget.factory.buildLeading(context, _controller);
+        final trailing = widget.factory.buildTrailing(context, _controller);
 
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            if (showChips)
-              _ChatOptionChips(
-                options: _controller.chatOptions,
-                onSelected: _controller.selectChatOption,
-              ),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                widget.factory.buildLeading(context, _controller),
-                Expanded(
-                  child: _InputContainer(
-                    controller: _controller,
-                    focusNode: _focusNode,
-                    hintText: widget.hintText,
-                    minLines: widget.minLines,
-                    maxLines: widget.maxLines,
-                    textInputAction: widget.textInputAction,
-                    enableSpeechToText: widget.enableSpeechToText,
-                    onSend: _onSend,
-                    onStop: _onStop,
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                // Centered, not `.end` — the pill is taller than the fixed-size
+                // leading/trailing circles (its height grows with multi-line
+                // text), and bottom-aligning them dumps 100% of that extra
+                // height above the circles as a lopsided gap. Centering keeps
+                // the circles evenly inset, matching the reference Android
+                // layout, where both the "+" and mic sit centered within the
+                // pill's height rather than flush to its bottom edge.
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  if (leading != null) ...[leading, const SizedBox(width: 8)],
+                  Expanded(
+                    child: _InputContainer(
+                      controller: _controller,
+                      focusNode: _focusNode,
+                      hintText: widget.hintText,
+                      minLines: widget.minLines,
+                      maxLines: widget.maxLines,
+                      textInputAction: widget.textInputAction,
+                      enableSpeechToText: widget.enableSpeechToText,
+                      onSend: _onSend,
+                      onStop: _onStop,
+                    ),
                   ),
-                ),
-                widget.factory.buildTrailing(context, _controller),
-              ],
-            ),
-          ],
+                  if (trailing != null) ...[const SizedBox(width: 8), trailing],
+                ],
+              ),
+            ],
+          ),
         );
       },
     );
@@ -241,7 +263,7 @@ class _InputContainer extends StatelessWidget {
 
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerHighest,
+        color: colorScheme.surfaceContainerHigh,
         borderRadius: BorderRadius.circular(24),
         border: Border.all(color: borderColor),
       ),
@@ -254,8 +276,16 @@ class _InputContainer extends StatelessWidget {
               option: controller.selectedChatOption!,
               onDismiss: controller.clearSelectedChatOption,
             ),
+          if (controller.attachments.isNotEmpty)
+            _AttachmentThumbnails(
+              attachments: controller.attachments,
+              onRemove: controller.removeAttachment,
+            ),
           Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
+            // Centered so the trailing mic/send/stop circle sits evenly
+            // inset within the pill instead of flush to one edge — see the
+            // comment on the outer Row in `_StreamAIComposerState.build`.
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Expanded(
                 child: TextField(
@@ -266,6 +296,11 @@ class _InputContainer extends StatelessWidget {
                   textInputAction: textInputAction,
                   decoration: InputDecoration(
                     hintText: hintText ?? 'Ask anything…',
+                    hintStyle: TextStyle(
+                      color: colorScheme.onSurfaceVariant.withValues(
+                        alpha: 0.6,
+                      ),
+                    ),
                     border: InputBorder.none,
                     contentPadding: const EdgeInsets.fromLTRB(16, 12, 8, 12),
                   ),
@@ -275,25 +310,20 @@ class _InputContainer extends StatelessWidget {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.only(right: 4, bottom: 4),
-                child: enableSpeechToText
-                    ? Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          SpeechToTextButton(controller: controller),
-                          _SendStopButton(
-                            controller: controller,
-                            onSend: onSend,
-                            onStop: onStop,
-                            hideWhenEmpty: true,
-                          ),
-                        ],
-                      )
-                    : _SendStopButton(
-                        controller: controller,
-                        onSend: onSend,
-                        onStop: onStop,
-                      ),
+                padding: const EdgeInsets.only(right: 6),
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 150),
+                  transitionBuilder: (child, animation) => ScaleTransition(scale: animation, child: child),
+                  child: _TrailingControl(
+                    key: ValueKey(
+                      _trailingState(controller, enableSpeechToText),
+                    ),
+                    controller: controller,
+                    onSend: onSend,
+                    onStop: onStop,
+                    enableSpeechToText: enableSpeechToText,
+                  ),
+                ),
               ),
             ],
           ),
@@ -303,133 +333,173 @@ class _InputContainer extends StatelessWidget {
   }
 }
 
+/// Identifies which of the trailing control's states is currently active, so
+/// [AnimatedSwitcher] can key on it and animate transitions between them.
+String _trailingState(
+  AiComposerController controller,
+  bool enableSpeechToText,
+) {
+  if (controller.isGenerating) return 'stop';
+  if (controller.hasContent) return 'send';
+  if (enableSpeechToText) return 'mic';
+  return 'send-disabled';
+}
+
 // ---------------------------------------------------------------------------
-// Send / Stop button
+// Trailing control (mic / send / stop — one morphing button)
 // ---------------------------------------------------------------------------
 
-class _SendStopButton extends StatelessWidget {
-  const _SendStopButton({
+class _TrailingControl extends StatelessWidget {
+  const _TrailingControl({
+    super.key,
     required this.controller,
     required this.onSend,
     required this.onStop,
-    this.hideWhenEmpty = false,
+    required this.enableSpeechToText,
   });
 
   final AiComposerController controller;
   final VoidCallback onSend;
   final VoidCallback onStop;
-
-  /// When `true`, this button disappears entirely (instead of showing a
-  /// disabled send icon) while the field is empty and the AI isn't
-  /// generating — used together with [SpeechToTextButton] stacked in the
-  /// same slot, so the two form a single toggling control.
-  final bool hideWhenEmpty;
-
-  @override
-  Widget build(BuildContext context) {
-    if (controller.isGenerating) {
-      return _IconActionButton(
-        icon: Icons.stop_circle_outlined,
-        onPressed: onStop,
-        tooltip: 'Stop generating',
-        color: Theme.of(context).colorScheme.error,
-      );
-    }
-
-    if (hideWhenEmpty && !controller.hasContent) {
-      return const SizedBox.shrink();
-    }
-
-    return _IconActionButton(
-      icon: Icons.arrow_upward_rounded,
-      onPressed: controller.hasContent ? onSend : null,
-      tooltip: 'Send',
-      color: Theme.of(context).colorScheme.primary,
-    );
-  }
-}
-
-class _IconActionButton extends StatelessWidget {
-  const _IconActionButton({
-    required this.icon,
-    required this.onPressed,
-    required this.tooltip,
-    required this.color,
-  });
-
-  final IconData icon;
-  final VoidCallback? onPressed;
-  final String tooltip;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    final enabled = onPressed != null;
-    return Tooltip(
-      message: tooltip,
-      child: InkWell(
-        onTap: onPressed,
-        borderRadius: BorderRadius.circular(20),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 150),
-          width: 36,
-          height: 36,
-          decoration: BoxDecoration(
-            color: enabled ? color : color.withValues(alpha: 0.3),
-            shape: BoxShape.circle,
-          ),
-          alignment: Alignment.center,
-          child: Icon(icon, color: Colors.white, size: 20),
-        ),
-      ),
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Option chips row
-// ---------------------------------------------------------------------------
-
-class _ChatOptionChips extends StatelessWidget {
-  const _ChatOptionChips({required this.options, required this.onSelected});
-
-  final List<ChatOption> options;
-  final ValueChanged<ChatOption> onSelected;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          children: options.map((option) {
-            return Padding(
-              padding: const EdgeInsets.only(right: 8),
-              child: _OptionChip(option: option, onTap: () => onSelected(option)),
-            );
-          }).toList(),
-        ),
-      ),
-    );
-  }
-}
-
-class _OptionChip extends StatelessWidget {
-  const _OptionChip({required this.option, required this.onTap});
-
-  final ChatOption option;
-  final VoidCallback onTap;
+  final bool enableSpeechToText;
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    return ActionChip(
-      avatar: option.icon != null ? Icon(option.icon, size: 16) : null,
-      label: Text(option.text),
-      onPressed: onTap,
-      side: BorderSide(color: colorScheme.outlineVariant),
-      backgroundColor: colorScheme.surfaceContainerHighest,
+
+    if (controller.isGenerating) {
+      return ComposerActionButton(
+        icon: Icons.stop_rounded,
+        onPressed: onStop,
+        tooltip: 'Stop generating',
+        color: colorScheme.error,
+      );
+    }
+
+    if (controller.hasContent) {
+      return ComposerActionButton(
+        icon: Icons.arrow_upward_rounded,
+        onPressed: onSend,
+        tooltip: 'Send',
+        color: colorScheme.primary,
+      );
+    }
+
+    if (enableSpeechToText) {
+      return SpeechToTextButton(controller: controller);
+    }
+
+    return ComposerActionButton(
+      icon: Icons.arrow_upward_rounded,
+      onPressed: null,
+      tooltip: 'Send',
+      color: colorScheme.primary,
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Attachment thumbnails
+// ---------------------------------------------------------------------------
+
+class _AttachmentThumbnails extends StatelessWidget {
+  const _AttachmentThumbnails({
+    required this.attachments,
+    required this.onRemove,
+  });
+
+  final List<XFile> attachments;
+  final ValueChanged<XFile> onRemove;
+
+  static const double _size = 64;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
+      child: SizedBox(
+        height: _size,
+        child: ListView.separated(
+          scrollDirection: Axis.horizontal,
+          itemCount: attachments.length,
+          separatorBuilder: (context, index) => const SizedBox(width: 8),
+          itemBuilder: (context, index) {
+            final file = attachments[index];
+            return _AttachmentThumbnail(
+              key: ValueKey(file.path),
+              file: file,
+              onRemove: () => onRemove(file),
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
+
+class _AttachmentThumbnail extends StatelessWidget {
+  const _AttachmentThumbnail({
+    super.key,
+    required this.file,
+    required this.onRemove,
+  });
+
+  final XFile file;
+  final VoidCallback onRemove;
+
+  static const double _size = 64;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return SizedBox(
+      width: _size,
+      height: _size,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: SizedBox(
+              width: _size,
+              height: _size,
+              child: FutureBuilder<Uint8List>(
+                future: file.readAsBytes(),
+                builder: (context, snapshot) {
+                  final bytes = snapshot.data;
+                  if (bytes == null) {
+                    return ColoredBox(color: colorScheme.surface);
+                  }
+                  return Image.memory(bytes, fit: BoxFit.cover);
+                },
+              ),
+            ),
+          ),
+          Positioned(
+            top: -6,
+            right: -6,
+            child: InkWell(
+              onTap: onRemove,
+              borderRadius: BorderRadius.circular(10),
+              child: Container(
+                width: 20,
+                height: 20,
+                decoration: BoxDecoration(
+                  color: colorScheme.surface,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: colorScheme.outlineVariant),
+                ),
+                child: Icon(
+                  Icons.close,
+                  size: 14,
+                  color: colorScheme.onSurface,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -448,28 +518,40 @@ class _SelectedOptionChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     return Padding(
-      padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (option.icon != null) ...[
-            Icon(option.icon, size: 14, color: colorScheme.primary),
-            const SizedBox(width: 4),
-          ],
-          Text(
-            option.text,
-            style: Theme.of(context).textTheme.labelMedium?.copyWith(
-              color: colorScheme.primary,
-              fontWeight: FontWeight.w600,
+      padding: const EdgeInsets.fromLTRB(12, 10, 12, 2),
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: colorScheme.primaryContainer,
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(10, 6, 8, 6),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (option.icon != null) ...[
+                  Icon(option.icon, size: 18, color: colorScheme.onPrimaryContainer),
+                  const SizedBox(width: 6),
+                ],
+                Text(
+                  option.text,
+                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                    color: colorScheme.onPrimaryContainer,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(width: 6),
+                InkWell(
+                  onTap: onDismiss,
+                  borderRadius: BorderRadius.circular(10),
+                  child: Icon(Icons.close, size: 18, color: colorScheme.onPrimaryContainer),
+                ),
+              ],
             ),
           ),
-          const SizedBox(width: 4),
-          InkWell(
-            onTap: onDismiss,
-            borderRadius: BorderRadius.circular(8),
-            child: Icon(Icons.close, size: 14, color: colorScheme.primary),
-          ),
-        ],
+        ),
       ),
     );
   }

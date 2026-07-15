@@ -34,6 +34,7 @@ class AiMarkdownBody extends StatelessWidget {
     required this.data,
     this.onTapLink,
     this.selectable = false,
+    this.styleSheet,
   });
 
   /// The markdown string to render.
@@ -44,6 +45,17 @@ class AiMarkdownBody extends StatelessWidget {
 
   /// Whether text content is selectable (pass `true` on desktop / web).
   final bool selectable;
+
+  /// Style overrides for the rendered markdown (paragraph text, links,
+  /// headings, etc.). Defaults to `flutter_markdown_plus`'s own
+  /// `MarkdownStyleSheet.fromTheme(Theme.of(context))` when not provided.
+  ///
+  /// Host apps that also render non-AI messages via `stream_chat_flutter`
+  /// can pass a sheet built from that package's own message text style (e.g.
+  /// `context.streamTextTheme.bodyDefault`) so AI and regular messages share
+  /// the same font size/weight — this package has no dependency on
+  /// `stream_chat_flutter`/`stream_core_flutter`, so it can't do that itself.
+  final MarkdownStyleSheet? styleSheet;
 
   @override
   Widget build(BuildContext context) {
@@ -61,6 +73,7 @@ class AiMarkdownBody extends StatelessWidget {
       return MarkdownBody(
         data: segment.text,
         selectable: selectable,
+        styleSheet: styleSheet,
         onTapLink: onTapLink != null
             ? (text, href, title) => onTapLink!(text, href, title)
             : null,
