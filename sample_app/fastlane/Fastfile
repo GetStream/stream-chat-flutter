@@ -2,7 +2,6 @@ opt_out_usage
 
 require 'net/http'
 require 'shellwords'
-
 import File.expand_path('Allurefile', __dir__)
 
 mock_server_repo_name = 'stream-chat-test-mock-server'

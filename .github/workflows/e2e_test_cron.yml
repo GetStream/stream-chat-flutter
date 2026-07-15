@@ -21,6 +21,7 @@ concurrency:
 env:
   mock_server_branch: ${{ github.event.inputs.mock_server_branch || 'main' }}
   ALLURE_TOKEN: ${{ secrets.ALLURE_TOKEN }}
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
   android:
@@ -61,12 +62,12 @@ jobs:
           script: cd sample_app/android && bundle exec fastlane run_e2e_test device:emulator-5554 mock_server_branch:${{ env.mock_server_branch }}
 
       - name: Upload Allure results
-        if: env.ALLURE_LAUNCH_ID != '' && (success() || failure())
-        run: cd sample_app/android && bundle exec fastlane allure_upload
+        if: env.LAUNCH_ID != '' && (success() || failure())
+        run: cd sample_app/android && bundle exec fastlane allure_upload launch_id:$LAUNCH_ID
 
       - name: Allure TestOps Launch Removal
-        if: env.ALLURE_LAUNCH_ID != '' && cancelled()
-        run: cd sample_app/android && bundle exec fastlane allure_launch_removal launch_id:$ALLURE_LAUNCH_ID
+        if: env.LAUNCH_ID != '' && cancelled()
+        run: cd sample_app/android && bundle exec fastlane allure_launch_removal launch_id:$LAUNCH_ID
 
       - uses: actions/upload-artifact@v7
         if: failure()
@@ -93,7 +94,6 @@ jobs:
             setup_runtime: true
     env:
       XCODE_VERSION: "26.2"
-      COMPILER_INDEX_STORE_ENABLE: NO
     steps:
       - uses: actions/checkout@v6
 
@@ -131,12 +131,12 @@ jobs:
         run: cd sample_app/ios && bundle exec fastlane run_e2e_test platform:ios ios:${{ matrix.ios }} device:"${{ matrix.device }} (${{ matrix.ios }})" mock_server_branch:${{ env.mock_server_branch }}
 
       - name: Upload Allure results
-        if: env.ALLURE_LAUNCH_ID != '' && (success() || failure())
-        run: cd sample_app/ios && bundle exec fastlane allure_upload
+        if: env.LAUNCH_ID != '' && (success() || failure())
+        run: cd sample_app/ios && bundle exec fastlane allure_upload launch_id:$LAUNCH_ID
 
       - name: Allure TestOps Launch Removal
-        if: env.ALLURE_LAUNCH_ID != '' && cancelled()
-        run: cd sample_app/ios && bundle exec fastlane allure_launch_removal launch_id:$ALLURE_LAUNCH_ID
+        if: env.LAUNCH_ID != '' && cancelled()
+        run: cd sample_app/ios && bundle exec fastlane allure_launch_removal launch_id:$LAUNCH_ID
 
       - uses: actions/upload-artifact@v7
         if: failure()

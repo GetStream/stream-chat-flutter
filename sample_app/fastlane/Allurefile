@@ -1,10 +1,11 @@
 require 'base64'
 
-allure_endpoint = 'https://streamio.testops.cloud'
 allure_project_id = '135'
+allure_url = 'https://streamio.testops.cloud'
+allure_api_url = "#{allure_url}/api"
 
 lane :collect_allure_results do |options|
-  results_dir = options[:output] || "#{root_path}/allure-results"
+  results_dir = options[:output] || allure_results_path
   FileUtils.mkdir_p(results_dir)
 
   log_file = options[:log_file] || "#{root_path}/build/e2e-test.log"
@@ -31,6 +32,7 @@ lane :install_allurectl do
   path = "#{root_path}/allurectl"
   next path if File.exist?(path)
 
+  allure_version = '2.21.1'
   os = `uname -s`.strip.downcase
   arch = `uname -m`.strip == 'x86_64' ? 'amd64' : 'arm64'
   sh("curl -sSL -o #{path} " \
@@ -47,27 +49,37 @@ lane :allure_upload do |options|
   end
 
   allurectl = install_allurectl
-  branch = ENV['GITHUB_REF_NAME'] || `git rev-parse --abbrev-ref HEAD`.strip
-  launch_id = options[:launch_id] || ENV['ALLURE_LAUNCH_ID']
-  args = launch_id ? "--launch-id #{launch_id}" : "--launch-name 'Flutter e2e (#{branch})'"
-  sh("ALLURE_ENDPOINT=#{allure_endpoint} ALLURE_PROJECT_ID=#{allure_project_id} #{allurectl} upload #{args} #{results}")
-  UI.success("Uploaded Allure results → #{allure_endpoint} (project #{allure_project_id})")
+  allure_args = "-e #{allure_url} --project-id #{allure_project_id} --launch-id #{options[:launch_id]}"
+  sh("#{allurectl} launch reopen #{options[:launch_id]} || true") # to prevent allure from uploading results to a closed launch
+  sh("env BRANCH_NAME='#{current_branch}' #{allurectl} upload #{allure_args} #{allure_results_path} || true")
+  UI.success("Check out test results in Allure TestOps: #{allure_url}/launch/#{options[:launch_id]} 🎉")
 end
 
-lane :allure_launch do
-  allurectl = install_allurectl
-  branch = ENV['GITHUB_REF_NAME'] || `git rev-parse --abbrev-ref HEAD`.strip
-  id = sh("ALLURE_ENDPOINT=#{allure_endpoint} ALLURE_PROJECT_ID=#{allure_project_id} " \
-          "#{allurectl} launch create --launch-name 'Flutter e2e nightly (#{branch})' --format ID --no-header").strip
-  sh("echo 'ALLURE_LAUNCH_ID=#{id}' >> #{ENV['GITHUB_ENV']}") if ENV['GITHUB_ENV']
-  sh("echo 'launch_id=#{id}' >> #{ENV['GITHUB_OUTPUT']}") if ENV['GITHUB_OUTPUT']
-  id
+lane :allure_launch do |options|
+  next unless is_check_required(sources: sources_matrix[:e2e], force_check: @force_check)
+
+  launch_id = allure_create_launch(
+    url: allure_api_url,
+    project_id: allure_project_id,
+    github_run_details: github_run_details,
+    cron: options[:cron]
+  )
+
+  sh("echo 'LAUNCH_ID=#{launch_id}' >> $GITHUB_ENV") if is_ci
 end
 
 lane :allure_launch_removal do |options|
-  id = options[:launch_id] || ENV['ALLURE_LAUNCH_ID']
-  next unless id
+  allure_api(url: allure_api_url, path: "launch/#{options[:launch_id]}", http_method: 'DELETE')
+end
 
-  allurectl = install_allurectl
-  sh("ALLURE_ENDPOINT=#{allure_endpoint} ALLURE_PROJECT_ID=#{allure_project_id} #{allurectl} launch delete #{id}")
+def github_run_details
+  return nil unless is_ci
+
+  github_path = "#{ENV.fetch('GITHUB_API_URL', nil)}/repos/#{ENV.fetch('GITHUB_REPOSITORY', nil)}/actions/runs/#{ENV.fetch('GITHUB_RUN_ID', nil)}"
+  output = sh(command: "curl -s -H 'authorization: Bearer #{ENV.fetch('GITHUB_TOKEN', nil)}' -X GET -G #{github_path}")
+  JSON.parse(output)
+end
+
+def allure_results_path
+  "#{root_path}/allure-results"
 end
