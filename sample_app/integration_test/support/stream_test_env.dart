@@ -8,20 +8,21 @@ import '../robots/participant_robot.dart';
 import '../robots/user_robot.dart';
 
 class StreamTestEnv {
-  late final MockServer mockServer;
+  MockServer? _mockServer;
+  MockServer get mockServer => _mockServer!;
   late final BackendRobot backendRobot;
   late final ParticipantRobot participantRobot;
   late final UserRobot userRobot;
 
   Future<void> setUp(WidgetTester tester) async {
-    mockServer = await MockServer.start();
-    backendRobot = BackendRobot(mockServer);
-    participantRobot = ParticipantRobot(mockServer);
+    final server = _mockServer = await MockServer.start();
+    backendRobot = BackendRobot(server);
+    participantRobot = ParticipantRobot(server);
     userRobot = UserRobot(tester);
 
     authController.debugConnectionOverride = StreamConnectionOverride(
-      baseURL: mockServer.url,
-      baseWsUrl: mockServer.wsUrl,
+      baseURL: server.url,
+      baseWsUrl: server.wsUrl,
     );
 
     await tester.pumpWidget(const StreamChatSampleApp());
@@ -32,7 +33,8 @@ class StreamTestEnv {
     try {
       await authController.debugReset();
     } finally {
-      await mockServer.stop();
+      // Null when MockServer.start() itself failed during setUp.
+      await _mockServer?.stop();
     }
   }
 }

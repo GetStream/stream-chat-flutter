@@ -22,6 +22,8 @@ void streamTest({
     );
     try {
       await body(tester);
+      final pendingException = tester.binding.takeException();
+      if (pendingException != null) throw pendingException;
       Allure.instance.stopTest(status: AllureStatus.passed);
     } on TestFailure catch (e, st) {
       Allure.instance.stopTest(status: AllureStatus.failed, message: e, trace: st);
@@ -43,8 +45,10 @@ void streamTestWithEnv({
     description: description,
     body: (tester) async {
       final env = StreamTestEnv();
-      await env.setUp(tester);
+      // Registered before setUp so cleanup also runs when setup fails partway
+      // (e.g. the mock server started but the app failed to boot).
       addTearDown(env.tearDown);
+      await env.setUp(tester);
       await body(env);
     },
   );
