@@ -1,15 +1,15 @@
 ## Upcoming
 
+✅ Added
+
+- Added support for predefined filters on `StreamChannelListController`.
+
 🐞 Fixed
 
 - Fixed `StreamChannelListController` not handling `notification.channel_deleted` event.
 - Fixed backwards pagination not working if channel was never opened.
 
 ## 9.26.0
-
-✅ Added
-
-- Added support for predefined filters on `StreamChannelListController`.
 
 🐞 Fixed
 
