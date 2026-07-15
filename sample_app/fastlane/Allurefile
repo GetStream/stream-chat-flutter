@@ -36,14 +36,13 @@ lane :install_allurectl do
   os = `uname -s`.strip.downcase
   arch = `uname -m`.strip == 'x86_64' ? 'amd64' : 'arm64'
   sh("curl -sSL -o #{path} " \
-     "https://github.com/allure-framework/allurectl/releases/latest/download/allurectl_#{os}_#{arch}")
+     "https://github.com/allure-framework/allurectl/releases/#{allure_version}/download/allurectl_#{os}_#{arch}")
   sh("chmod +x #{path}")
   path
 end
 
 lane :allure_upload do |options|
-  results = options[:results] || "#{root_path}/allure-results"
-  unless Dir.exist?(results) && Dir.children(results).any?
+  unless Dir.exist?(allure_results_path) && Dir.children(allure_results_path).any?
     UI.important("No Allure results in #{results}; skipping upload")
     next
   end
