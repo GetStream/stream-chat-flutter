@@ -82,7 +82,7 @@ GeneratedPluginRegistrant.*
 **/ios/Runner/GeneratedPluginRegistrant.*
 **/ios/Flutter/ephemeral/**
 Podfile.lock
-**/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
+**/xcshareddata/swiftpm/Package.resolved
 
 # Exceptions to iOS rules
 !**/ios/**/default.mode1v3
