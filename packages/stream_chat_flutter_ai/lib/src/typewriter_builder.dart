@@ -62,12 +62,12 @@ class TypewriterValue {
 }
 
 /// {@template typewriterController}
-/// A controller for a [StreamTypewriterBuilder]. It allows you to control the
+/// A controller for a [TypewriterBuilder]. It allows you to control the
 /// typing state of the typewriter. You can start, pause, and stop typing the
 /// target text.
 ///
 /// To use a [TypewriterController], simply create one and pass it to a
-/// [StreamTypewriterBuilder]. The builder will listen to the controller and
+/// [TypewriterBuilder]. The builder will listen to the controller and
 /// rebuild whenever the value changes. You can then control the typing state
 /// by calling [startTyping], [pauseTyping], and [stopTyping] on the controller.
 ///
@@ -76,7 +76,7 @@ class TypewriterValue {
 ///
 /// @override
 /// Widget build(BuildContext context) {
-///  return StreamTypewriterBuilder(
+///  return TypewriterBuilder(
 ///    controller: controller,
 ///    builder: (context, value, child) {
 ///      return Text(value.text);
@@ -200,7 +200,7 @@ class TypewriterController extends ValueNotifier<TypewriterValue> {
 }
 
 /// {@template typewriterWidgetBuilder}
-/// A widget builder for a [StreamTypewriterBuilder]. It allows you to build a
+/// A widget builder for a [TypewriterBuilder]. It allows you to build a
 /// widget depending on the [TypewriterValue]'s value.
 /// {@endtemplate}
 typedef TypewriterWidgetBuilder =
@@ -210,14 +210,14 @@ typedef TypewriterWidgetBuilder =
       Widget? child,
     );
 
-/// {@template streamTypewriterBuilder}
+/// {@template typewriterBuilder}
 /// A widget that listens to a [TypewriterController] and rebuilds whenever the
 /// value changes. It allows you to build a widget depending on the controller's
 /// value.
 /// {@endtemplate}
-class StreamTypewriterBuilder extends StatelessWidget {
-  /// {@macro streamTypewriterBuilder}
-  const StreamTypewriterBuilder({
+class TypewriterBuilder extends StatelessWidget {
+  /// {@macro typewriterBuilder}
+  const TypewriterBuilder({
     super.key,
     required this.controller,
     required this.builder,

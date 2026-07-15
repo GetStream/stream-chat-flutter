@@ -32,7 +32,7 @@ const _kChipPadding = EdgeInsets.all(12);
 /// Column(
 ///   children: [
 ///     const Spacer(),
-///     StreamAISuggestionsView(
+///     AISuggestionsView(
 ///       suggestions: const [
 ///         'Create a painting in Renaissance-style',
 ///         'Help me study vocabulary for an exam',
@@ -42,9 +42,9 @@ const _kChipPadding = EdgeInsets.all(12);
 ///   ],
 /// )
 /// ```
-class StreamAISuggestionsView extends StatelessWidget {
-  /// Creates a [StreamAISuggestionsView].
-  const StreamAISuggestionsView({
+class AISuggestionsView extends StatelessWidget {
+  /// Creates a [AISuggestionsView].
+  const AISuggestionsView({
     super.key,
     required this.suggestions,
     required this.onSuggestionSelected,
@@ -180,7 +180,7 @@ class _SuggestionChip extends StatelessWidget {
 
     return DecoratedBox(
       // Same fill/border tokens as the composer's input pill (see
-      // `_InputContainer` in stream_ai_composer.dart) so the two read as one
+      // `_InputContainer` in chat_composer.dart) so the two read as one
       // connected surface rather than mismatched colors.
       decoration: BoxDecoration(
         color: color,

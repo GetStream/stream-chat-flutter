@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart' show MarkdownStyleSheet;
 import 'package:stream_chat_flutter_ai/src/ai_markdown_body.dart';
-import 'package:stream_chat_flutter_ai/src/stream_typewriter_builder.dart';
+import 'package:stream_chat_flutter_ai/src/typewriter_builder.dart';
 
 bool get _isDesktopDeviceOrWeb =>
     kIsWeb ||

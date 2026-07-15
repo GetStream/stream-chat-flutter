@@ -55,7 +55,7 @@ AITypingIndicatorView(
 ### `TypewriterController`
 
 Low-level controller for driving the typewriter effect independently of
-`StreamingMessageView`. Use with `StreamTypewriterBuilder` for custom layouts.
+`StreamingMessageView`. Use with `TypewriterBuilder` for custom layouts.
 
 ```dart
 final controller = TypewriterController(text: '');
@@ -64,7 +64,7 @@ final controller = TypewriterController(text: '');
 controller.updateText(accumulatedText);
 
 // In your widget tree:
-StreamTypewriterBuilder(
+TypewriterBuilder(
   controller: controller,
   builder: (context, value, child) => Text(value.text),
 );
@@ -107,7 +107,7 @@ if (spec != null) ChartView(spec: spec);
 
 ---
 
-### `StreamAIComposer`
+### `ChatComposer`
 
 A message composer designed for AI-powered conversations. Features:
 
@@ -117,10 +117,10 @@ A message composer designed for AI-powered conversations. Features:
   AI is generating a response.
 - An optional **voice / send toggle** (`enableSpeechToText: true`) — a single control that
   shows a microphone while the field is empty and swaps to send as soon as you type.
-- Factory-based slot customisation via `StreamAIComposerFactory`.
+- Factory-based slot customisation via `ChatComposerFactory`.
 
 ```dart
-StreamAIComposer(
+ChatComposer(
   controller: controller,
   enableSpeechToText: true, // requires the platform permissions documented below
   onSendPressed: (text, selectedOption) async {
@@ -130,12 +130,12 @@ StreamAIComposer(
 );
 ```
 
-### `AIComposerController`
+### `ChatComposerController`
 
-`ChangeNotifier` that manages all mutable state for `StreamAIComposer`.
+`ChangeNotifier` that manages all mutable state for `ChatComposer`.
 
 ```dart
-final controller = AIComposerController(
+final controller = ChatComposerController(
   chatOptions: [
     ChatOption(id: 'summarize', text: 'Summarize this', icon: Icons.summarize),
     ChatOption(id: 'email',     text: 'Write an email',  icon: Icons.email),
@@ -149,21 +149,21 @@ controller.isGenerating = true;
 controller.isGenerating = false;
 ```
 
-### `StreamAIComposerFactory`
+### `ChatComposerFactory`
 
 Subclass to override the leading and/or trailing regions of the composer — for slots other
 than the send button itself (e.g. an attachment picker):
 
 ```dart
-class MyComposerFactory extends StreamAIComposerFactory {
+class MyComposerFactory extends ChatComposerFactory {
   @override
-  Widget buildLeading(BuildContext context, AIComposerController controller) {
+  Widget buildLeading(BuildContext context, ChatComposerController controller) {
     return IconButton(icon: const Icon(Icons.attach_file), onPressed: () { ... });
   }
 }
 
 // Pass to the composer:
-StreamAIComposer(
+ChatComposer(
   factory: MyComposerFactory(),
   ...
 );
@@ -171,7 +171,7 @@ StreamAIComposer(
 
 ---
 
-### `StreamAISuggestionsView`
+### `AISuggestionsView`
 
 A horizontally-scrolling row of free-text quick-reply chips, independent of `ChatOption`. Typically
 docked above the composer on a "new chat" landing screen — tapping a chip fires the callback with
@@ -181,7 +181,7 @@ its exact text, and you decide what happens next (e.g. send it immediately).
 Column(
   children: [
     const Spacer(),
-    StreamAISuggestionsView(
+    AISuggestionsView(
       suggestions: const [
         'Create a painting in Renaissance-style',
         'Help me study vocabulary for an exam',
@@ -197,9 +197,9 @@ Column(
 ### `SpeechToTextButton`
 
 A microphone button that feeds partial and final speech recognition results directly
-into an `AIComposerController`'s text field. The button hides itself automatically
+into an `ChatComposerController`'s text field. The button hides itself automatically
 when the AI is generating or the text field is non-empty. Prefer
-`StreamAIComposer(enableSpeechToText: true, ...)` over placing this widget manually — that
+`ChatComposer(enableSpeechToText: true, ...)` over placing this widget manually — that
 swaps it into the send button's own slot for a single toggling control, rather than a
 separate button alongside send.
 
@@ -286,7 +286,7 @@ await channel.stopAIResponse();
 Send the composer's text as a new message:
 
 ```dart
-StreamAIComposer(
+ChatComposer(
   controller: controller,
   onSendPressed: (text, selectedOption) => channel.sendMessage(Message(text: text)),
   onStopPressed: () => channel.stopAIResponse(),

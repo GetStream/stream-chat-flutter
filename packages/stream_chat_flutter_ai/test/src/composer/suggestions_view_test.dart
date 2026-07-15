@@ -5,11 +5,11 @@ import 'package:stream_chat_flutter_ai/stream_chat_flutter_ai.dart';
 Widget _wrap(Widget child) => MaterialApp(home: Scaffold(body: child));
 
 void main() {
-  group('StreamAISuggestionsView', () {
+  group('AISuggestionsView', () {
     testWidgets('renders one chip per suggestion', (tester) async {
       await tester.pumpWidget(
         _wrap(
-          StreamAISuggestionsView(
+          AISuggestionsView(
             suggestions: const ['Summarize this', 'Write an email'],
             onSuggestionSelected: (_) {},
           ),
@@ -24,7 +24,7 @@ void main() {
       String? selected;
       await tester.pumpWidget(
         _wrap(
-          StreamAISuggestionsView(
+          AISuggestionsView(
             suggestions: const ['Summarize this', 'Write an email'],
             onSuggestionSelected: (text) => selected = text,
           ),
@@ -44,7 +44,7 @@ void main() {
 
       await tester.pumpWidget(
         _wrap(
-          StreamAISuggestionsView(
+          AISuggestionsView(
             suggestions: const [longSuggestion],
             onSuggestionSelected: (_) {},
           ),
@@ -66,7 +66,7 @@ void main() {
 
       await tester.pumpWidget(
         _wrap(
-          StreamAISuggestionsView(
+          AISuggestionsView(
             suggestions: const [short, long],
             onSuggestionSelected: (_) {},
           ),
@@ -94,7 +94,7 @@ void main() {
 
       await tester.pumpWidget(
         _wrap(
-          StreamAISuggestionsView(
+          AISuggestionsView(
             suggestions: const [moderate, extended],
             onSuggestionSelected: (_) {},
           ),
@@ -116,7 +116,7 @@ void main() {
     testWidgets('row scrolls horizontally', (tester) async {
       await tester.pumpWidget(
         _wrap(
-          StreamAISuggestionsView(
+          AISuggestionsView(
             suggestions: const ['One', 'Two', 'Three'],
             onSuggestionSelected: (_) {},
           ),

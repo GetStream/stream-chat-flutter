@@ -5,21 +5,21 @@ import 'package:stream_chat_flutter_ai/stream_chat_flutter_ai.dart';
 Widget _wrap(Widget child) => MaterialApp(home: Scaffold(body: child));
 
 void main() {
-  group('AIComposerController', () {
+  group('ChatComposerController', () {
     test('hasContent is false when text is empty', () {
-      final controller = AIComposerController();
+      final controller = ChatComposerController();
       expect(controller.hasContent, isFalse);
       controller.dispose();
     });
 
     test('hasContent is true when text is non-empty', () {
-      final controller = AIComposerController(initialText: 'hello');
+      final controller = ChatComposerController(initialText: 'hello');
       expect(controller.hasContent, isTrue);
       controller.dispose();
     });
 
     test('selectChatOption updates selectedChatOption', () {
-      final controller = AIComposerController();
+      final controller = ChatComposerController();
       const option = ChatOption(id: 'a', text: 'Option A');
       controller.selectChatOption(option);
       expect(controller.selectedChatOption, equals(option));
@@ -27,7 +27,7 @@ void main() {
     });
 
     test('clearSelectedChatOption removes the selection', () {
-      final controller = AIComposerController()
+      final controller = ChatComposerController()
         ..selectChatOption(const ChatOption(id: 'a', text: 'Option A'))
         ..clearSelectedChatOption();
       expect(controller.selectedChatOption, isNull);
@@ -35,7 +35,7 @@ void main() {
     });
 
     test('clear resets text, selectedChatOption, and attachments', () {
-      final controller = AIComposerController(initialText: 'some text')
+      final controller = ChatComposerController(initialText: 'some text')
         ..selectChatOption(const ChatOption(id: 'a', text: 'Option A'))
         ..addAttachments([XFile('a.png')])
         ..clear();
@@ -46,7 +46,7 @@ void main() {
     });
 
     test('isGenerating setter notifies listeners', () {
-      final controller = AIComposerController();
+      final controller = ChatComposerController();
       var notified = false;
       controller
         ..addListener(() => notified = true)
@@ -57,7 +57,7 @@ void main() {
     });
 
     test('addAttachments appends files and notifies listeners', () {
-      final controller = AIComposerController();
+      final controller = ChatComposerController();
       var notified = false;
       controller
         ..addListener(() => notified = true)
@@ -69,7 +69,7 @@ void main() {
     });
 
     test('addAttachments makes hasContent true even with no text', () {
-      final controller = AIComposerController();
+      final controller = ChatComposerController();
       expect(controller.hasContent, isFalse);
 
       controller.addAttachments([XFile('a.png')]);
@@ -82,7 +82,7 @@ void main() {
     test('removeAttachment removes a single file and notifies listeners', () {
       final fileA = XFile('a.png');
       final fileB = XFile('b.png');
-      final controller = AIComposerController()..addAttachments([fileA, fileB]);
+      final controller = ChatComposerController()..addAttachments([fileA, fileB]);
       var notified = false;
       controller
         ..addListener(() => notified = true)
@@ -94,11 +94,11 @@ void main() {
     });
   });
 
-  group('StreamAIComposer', () {
+  group('ChatComposer', () {
     testWidgets('renders hint text in empty text field', (tester) async {
       await tester.pumpWidget(
         _wrap(
-          StreamAIComposer(
+          ChatComposer(
             hintText: 'Ask anything…',
             onSendPressed: (_, __, ___) {},
           ),
@@ -108,10 +108,10 @@ void main() {
     });
 
     testWidgets('displays send button when text is not empty', (tester) async {
-      final controller = AIComposerController(initialText: 'Hello');
+      final controller = ChatComposerController(initialText: 'Hello');
       await tester.pumpWidget(
         _wrap(
-          StreamAIComposer(
+          ChatComposer(
             controller: controller,
             onSendPressed: (_, __, ___) {},
           ),
@@ -122,10 +122,10 @@ void main() {
     });
 
     testWidgets('displays stop button when isGenerating is true', (tester) async {
-      final controller = AIComposerController()..isGenerating = true;
+      final controller = ChatComposerController()..isGenerating = true;
       await tester.pumpWidget(
         _wrap(
-          StreamAIComposer(
+          ChatComposer(
             controller: controller,
             onSendPressed: (_, __, ___) {},
             onStopPressed: () {},
@@ -141,12 +141,12 @@ void main() {
       // chip row above the input. That row was removed in favor of listing
       // them inside `ComposerAttachmentSheet` (opened from the "+" button) —
       // see the "ComposerAttachmentSheet" group below.
-      final controller = AIComposerController(
+      final controller = ChatComposerController(
         chatOptions: [const ChatOption(id: '1', text: 'Summarize')],
       );
       await tester.pumpWidget(
         _wrap(
-          StreamAIComposer(
+          ChatComposer(
             controller: controller,
             onSendPressed: (_, __, ___) {},
           ),
@@ -162,13 +162,13 @@ void main() {
       ChatOption? capturedOption;
       List<XFile>? capturedAttachments;
       const option = ChatOption(id: 'summarize', text: 'Summarize');
-      final controller = AIComposerController(chatOptions: [option])
+      final controller = ChatComposerController(chatOptions: [option])
         ..selectChatOption(option)
         ..addAttachments([XFile('a.png')]);
 
       await tester.pumpWidget(
         _wrap(
-          StreamAIComposer(
+          ChatComposer(
             controller: controller,
             onSendPressed: (text, selectedOption, attachments) {
               capturedText = text;
@@ -195,11 +195,11 @@ void main() {
 
     testWidgets('onStopPressed is called when stop button is tapped', (tester) async {
       var stopped = false;
-      final controller = AIComposerController()..isGenerating = true;
+      final controller = ChatComposerController()..isGenerating = true;
 
       await tester.pumpWidget(
         _wrap(
-          StreamAIComposer(
+          ChatComposer(
             controller: controller,
             onSendPressed: (_, __, ___) {},
             onStopPressed: () => stopped = true,
@@ -213,10 +213,10 @@ void main() {
     });
 
     testWidgets('trailing control shows mic when empty and speech is enabled', (tester) async {
-      final controller = AIComposerController();
+      final controller = ChatComposerController();
       await tester.pumpWidget(
         _wrap(
-          StreamAIComposer(
+          ChatComposer(
             controller: controller,
             enableSpeechToText: true,
             onSendPressed: (_, __, ___) {},
@@ -230,10 +230,10 @@ void main() {
     });
 
     testWidgets('trailing control morphs from mic to send once text is entered', (tester) async {
-      final controller = AIComposerController();
+      final controller = ChatComposerController();
       await tester.pumpWidget(
         _wrap(
-          StreamAIComposer(
+          ChatComposer(
             controller: controller,
             enableSpeechToText: true,
             onSendPressed: (_, __, ___) {},
@@ -250,10 +250,10 @@ void main() {
     });
 
     testWidgets('renders attachment thumbnails and removes them on tap', (tester) async {
-      final controller = AIComposerController()..addAttachments([XFile('a.png')]);
+      final controller = ChatComposerController()..addAttachments([XFile('a.png')]);
       await tester.pumpWidget(
         _wrap(
-          StreamAIComposer(
+          ChatComposer(
             controller: controller,
             onSendPressed: (_, __, ___) {},
           ),
@@ -273,7 +273,7 @@ void main() {
     testWidgets('default leading slot renders an attachment button', (tester) async {
       await tester.pumpWidget(
         _wrap(
-          StreamAIComposer(
+          ChatComposer(
             onSendPressed: (_, __, ___) {},
           ),
         ),
@@ -291,7 +291,7 @@ void main() {
       // inserted, doubling the composer's right-hand margin.
       await tester.pumpWidget(
         _wrap(
-          StreamAIComposer(
+          ChatComposer(
             onSendPressed: (_, __, ___) {},
           ),
         ),
@@ -311,11 +311,11 @@ void main() {
         text: 'Deep research',
         description: 'Get a detailed report',
       );
-      final controller = AIComposerController(chatOptions: [option]);
+      final controller = ChatComposerController(chatOptions: [option]);
 
       await tester.pumpWidget(
         _wrap(
-          StreamAIComposer(controller: controller, onSendPressed: (_, __, ___) {}),
+          ChatComposer(controller: controller, onSendPressed: (_, __, ___) {}),
         ),
       );
 
@@ -335,11 +335,11 @@ void main() {
 
     testWidgets('selecting a chat option updates the controller and closes the sheet', (tester) async {
       const option = ChatOption(id: 'research', text: 'Deep research');
-      final controller = AIComposerController(chatOptions: [option]);
+      final controller = ChatComposerController(chatOptions: [option]);
 
       await tester.pumpWidget(
         _wrap(
-          StreamAIComposer(controller: controller, onSendPressed: (_, __, ___) {}),
+          ChatComposer(controller: controller, onSendPressed: (_, __, ___) {}),
         ),
       );
 
@@ -365,11 +365,11 @@ void main() {
     });
 
     testWidgets('does not render a chat-options section when chatOptions is empty', (tester) async {
-      final controller = AIComposerController();
+      final controller = ChatComposerController();
 
       await tester.pumpWidget(
         _wrap(
-          StreamAIComposer(controller: controller, onSendPressed: (_, __, ___) {}),
+          ChatComposer(controller: controller, onSendPressed: (_, __, ___) {}),
         ),
       );
 

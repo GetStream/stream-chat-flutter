@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter_ai/src/composer/ai_composer_controller.dart';
+import 'package:stream_chat_flutter_ai/src/composer/chat_composer_controller.dart';
 import 'package:stream_chat_flutter_ai/src/composer/composer_attachment_sheet.dart';
 
-/// Factory that produces the composable regions of [StreamAIComposer].
+/// Factory that produces the composable regions of [ChatComposer].
 ///
 /// Subclass and override any method to swap out individual slots without
 /// rebuilding the entire widget:
 ///
 /// ```dart
-/// class MyFactory extends StreamAIComposerFactory {
+/// class MyFactory extends ChatComposerFactory {
 ///   @override
-///   Widget buildLeading(BuildContext context, AIComposerController controller) {
+///   Widget buildLeading(BuildContext context, ChatComposerController controller) {
 ///     return IconButton(
 ///       icon: const Icon(Icons.attach_file),
 ///       onPressed: () { /* pick attachments */ },
@@ -18,9 +18,9 @@ import 'package:stream_chat_flutter_ai/src/composer/composer_attachment_sheet.da
 ///   }
 /// }
 /// ```
-class StreamAIComposerFactory {
-  /// Creates a [StreamAIComposerFactory].
-  const StreamAIComposerFactory();
+class ChatComposerFactory {
+  /// Creates a [ChatComposerFactory].
+  const ChatComposerFactory();
 
   /// The maximum number of images the default [buildLeading] button lets the
   /// user pick in one go.
@@ -31,13 +31,13 @@ class StreamAIComposerFactory {
   ///
   /// Defaults to an outlined circular "+" button that opens a
   /// [ComposerAttachmentSheet] — a combined photo picker and, if
-  /// [AIComposerController.chatOptions] is non-empty, chat-option list. The
-  /// button is disabled while [AIComposerController.isGenerating] is `true`.
+  /// [ChatComposerController.chatOptions] is non-empty, chat-option list. The
+  /// button is disabled while [ChatComposerController.isGenerating] is `true`.
   ///
-  /// Override to replace it, or return `null` to hide it — [StreamAIComposer]
+  /// Override to replace it, or return `null` to hide it — [ChatComposer]
   /// only reserves layout space (and the gap to the input container) for a
   /// non-`null` result.
-  Widget? buildLeading(BuildContext context, AIComposerController controller) {
+  Widget? buildLeading(BuildContext context, ChatComposerController controller) {
     return _AttachmentButton(controller: controller);
   }
 
@@ -46,7 +46,7 @@ class StreamAIComposerFactory {
   ///
   /// Returns `null` by default (no trailing widget). See [buildLeading] for
   /// how `null` affects layout.
-  Widget? buildTrailing(BuildContext context, AIComposerController controller) {
+  Widget? buildTrailing(BuildContext context, ChatComposerController controller) {
     return null;
   }
 }
@@ -56,7 +56,7 @@ class StreamAIComposerFactory {
 class _AttachmentButton extends StatelessWidget {
   const _AttachmentButton({required this.controller});
 
-  final AIComposerController controller;
+  final ChatComposerController controller;
 
   Future<void> _openAttachmentSheet(BuildContext context) {
     return showModalBottomSheet<void>(
@@ -83,7 +83,7 @@ class _AttachmentButton extends StatelessWidget {
           height: 40,
           decoration: BoxDecoration(
             // Same fill/border tokens as the input pill (see
-            // `_InputContainer` in stream_ai_composer.dart) so the two read
+            // `_InputContainer` in chat_composer.dart) so the two read
             // as one connected surface rather than mismatched colors.
             color: colorScheme.surfaceContainerHigh,
             shape: BoxShape.circle,

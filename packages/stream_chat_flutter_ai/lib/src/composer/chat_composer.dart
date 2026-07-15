@@ -2,18 +2,18 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:stream_chat_flutter_ai/src/composer/ai_composer_controller.dart';
+import 'package:stream_chat_flutter_ai/src/composer/chat_composer_controller.dart';
+import 'package:stream_chat_flutter_ai/src/composer/chat_composer_factory.dart';
 import 'package:stream_chat_flutter_ai/src/composer/chat_option.dart';
 import 'package:stream_chat_flutter_ai/src/composer/composer_action_button.dart';
 import 'package:stream_chat_flutter_ai/src/composer/speech_to_text_button.dart';
-import 'package:stream_chat_flutter_ai/src/composer/stream_ai_composer_factory.dart';
 
 /// Callback fired when the user taps the send button.
 ///
 /// [text] is the current message text. [selectedOption] is the active
 /// [ChatOption], or `null` if the user did not select one. [attachments] is
 /// the list of images the user picked via the composer's attachment button.
-typedef AIComposerSendCallback =
+typedef ChatComposerSendCallback =
     void Function(
       String text,
       ChatOption? selectedOption,
@@ -25,19 +25,19 @@ typedef AIComposerSendCallback =
 /// Renders a text input with:
 /// - An inline selected-option chip (with dismiss button) inside the input
 ///   box once a [ChatOption] is selected — see `ComposerAttachmentSheet`,
-///   which lists [AIComposerController.chatOptions] alongside the photo
+///   which lists [ChatComposerController.chatOptions] alongside the photo
 ///   picker, opened from the composer's leading "+" button by default.
 /// - A row of image thumbnails above the input when the user has picked
-///   attachments (see [StreamAIComposerFactory.buildLeading]).
+///   attachments (see [ChatComposerFactory.buildLeading]).
 /// - A single circular trailing control that morphs between voice input
 ///   (empty field), send (field has content), and stop (while
-///   [AIComposerController.isGenerating] is `true`).
+///   [ChatComposerController.isGenerating] is `true`).
 ///
-/// All layout regions are customisable via [StreamAIComposerFactory].
+/// All layout regions are customisable via [ChatComposerFactory].
 ///
 /// Example:
 /// ```dart
-/// StreamAIComposer(
+/// ChatComposer(
 ///   controller: controller,
 ///   onSendPressed: (text, option, attachments) async {
 ///     await myBackend.sendMessage(text, attachments);
@@ -45,14 +45,14 @@ typedef AIComposerSendCallback =
 ///   onStopPressed: () => myBackend.stopGenerating(),
 /// );
 /// ```
-class StreamAIComposer extends StatefulWidget {
-  /// Creates a [StreamAIComposer].
-  const StreamAIComposer({
+class ChatComposer extends StatefulWidget {
+  /// Creates a [ChatComposer].
+  const ChatComposer({
     super.key,
     this.controller,
     required this.onSendPressed,
     this.onStopPressed,
-    this.factory = const StreamAIComposerFactory(),
+    this.factory = const ChatComposerFactory(),
     this.focusNode,
     this.hintText,
     this.minLines = 1,
@@ -66,16 +66,16 @@ class StreamAIComposer extends StatefulWidget {
   ///
   /// If not provided, an internal controller is created and disposed
   /// automatically.
-  final AIComposerController? controller;
+  final ChatComposerController? controller;
 
   /// Called when the user taps the send button.
-  final AIComposerSendCallback onSendPressed;
+  final ChatComposerSendCallback onSendPressed;
 
   /// Called when the user taps the stop button while the AI is generating.
   final VoidCallback? onStopPressed;
 
   /// Factory used to build the leading and trailing slots.
-  final StreamAIComposerFactory factory;
+  final ChatComposerFactory factory;
 
   /// Focus node for the text field.
   final FocusNode? focusNode;
@@ -103,11 +103,11 @@ class StreamAIComposer extends StatefulWidget {
   final bool enableSpeechToText;
 
   @override
-  State<StreamAIComposer> createState() => _StreamAIComposerState();
+  State<ChatComposer> createState() => _ChatComposerState();
 }
 
-class _StreamAIComposerState extends State<StreamAIComposer> {
-  late AIComposerController _controller;
+class _ChatComposerState extends State<ChatComposer> {
+  late ChatComposerController _controller;
   late FocusNode _focusNode;
   bool _ownsController = false;
   bool _ownsFocusNode = false;
@@ -116,7 +116,7 @@ class _StreamAIComposerState extends State<StreamAIComposer> {
   void initState() {
     super.initState();
     if (widget.controller == null) {
-      _controller = AIComposerController();
+      _controller = ChatComposerController();
       _ownsController = true;
     } else {
       _controller = widget.controller!;
@@ -130,7 +130,7 @@ class _StreamAIComposerState extends State<StreamAIComposer> {
   }
 
   @override
-  void didUpdateWidget(covariant StreamAIComposer oldWidget) {
+  void didUpdateWidget(covariant ChatComposer oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.controller != oldWidget.controller) {
       if (_ownsController) {
@@ -138,7 +138,7 @@ class _StreamAIComposerState extends State<StreamAIComposer> {
         _ownsController = false;
       }
       if (widget.controller == null) {
-        _controller = AIComposerController();
+        _controller = ChatComposerController();
         _ownsController = true;
       } else {
         _controller = widget.controller!;
@@ -246,7 +246,7 @@ class _InputContainer extends StatelessWidget {
     this.enableSpeechToText = false,
   });
 
-  final AIComposerController controller;
+  final ChatComposerController controller;
   final FocusNode focusNode;
   final VoidCallback onSend;
   final VoidCallback onStop;
@@ -284,7 +284,7 @@ class _InputContainer extends StatelessWidget {
           Row(
             // Centered so the trailing mic/send/stop circle sits evenly
             // inset within the pill instead of flush to one edge — see the
-            // comment on the outer Row in `_StreamAIComposerState.build`.
+            // comment on the outer Row in `_ChatComposerState.build`.
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Expanded(
@@ -336,7 +336,7 @@ class _InputContainer extends StatelessWidget {
 /// Identifies which of the trailing control's states is currently active, so
 /// [AnimatedSwitcher] can key on it and animate transitions between them.
 String _trailingState(
-  AIComposerController controller,
+  ChatComposerController controller,
   bool enableSpeechToText,
 ) {
   if (controller.isGenerating) return 'stop';
@@ -358,7 +358,7 @@ class _TrailingControl extends StatelessWidget {
     required this.enableSpeechToText,
   });
 
-  final AIComposerController controller;
+  final ChatComposerController controller;
   final VoidCallback onSend;
   final VoidCallback onStop;
   final bool enableSpeechToText;

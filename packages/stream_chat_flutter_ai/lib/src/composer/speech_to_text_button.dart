@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:speech_to_text/speech_recognition_error.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text/speech_to_text.dart';
-import 'package:stream_chat_flutter_ai/src/composer/ai_composer_controller.dart';
+import 'package:stream_chat_flutter_ai/src/composer/chat_composer_controller.dart';
 import 'package:stream_chat_flutter_ai/src/composer/composer_action_button.dart';
 
 /// A microphone button that feeds speech-to-text results directly into an
-/// [AIComposerController]'s text field.
+/// [ChatComposerController]'s text field.
 ///
-/// Rendered as one of the states of [StreamAIComposer]'s single trailing
+/// Rendered as one of the states of [ChatComposer]'s single trailing
 /// control — the composer only builds this widget while the field is empty
 /// and the AI is not generating, so it does not re-check either condition
 /// itself. While listening, it shows an animated recording indicator and the
@@ -48,17 +48,17 @@ import 'package:stream_chat_flutter_ai/src/composer/composer_action_button.dart'
 ///
 /// For a single control that toggles between voice input and send — matching
 /// the reference iOS/Android AI sample apps — pass
-/// `StreamAIComposer(enableSpeechToText: true, ...)` instead of placing this
+/// `ChatComposer(enableSpeechToText: true, ...)` instead of placing this
 /// widget manually; that swaps this button in for the send button's own slot
 /// while the field is empty, rather than showing two separate buttons side
 /// by side.
 ///
 /// To place it elsewhere instead (e.g. always visible in a custom slot), use
-/// it directly via [StreamAIComposerFactory]:
+/// it directly via [ChatComposerFactory]:
 /// ```dart
-/// class MyFactory extends StreamAIComposerFactory {
+/// class MyFactory extends ChatComposerFactory {
 ///   @override
-///   Widget buildLeading(BuildContext context, AIComposerController controller) {
+///   Widget buildLeading(BuildContext context, ChatComposerController controller) {
 ///     return SpeechToTextButton(controller: controller);
 ///   }
 /// }
@@ -76,7 +76,7 @@ class SpeechToTextButton extends StatefulWidget {
   });
 
   /// The controller whose text field receives recognised words.
-  final AIComposerController controller;
+  final ChatComposerController controller;
 
   /// Called when speech recognition encounters an error.
   final void Function(SpeechRecognitionError error)? onError;
@@ -177,7 +177,7 @@ class _SpeechToTextButtonState extends State<SpeechToTextButton> with SingleTick
       builder: (context, _) {
         // The composer only builds this widget while the field is empty and
         // the AI isn't generating (see `_trailingState` in
-        // stream_ai_composer.dart), so the only remaining reason to hide is
+        // chat_composer.dart), so the only remaining reason to hide is
         // the platform speech recognizer being unavailable.
         if (!_isAvailable) {
           return const SizedBox.shrink();

@@ -4,22 +4,22 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:photo_manager/photo_manager.dart';
-import 'package:stream_chat_flutter_ai/src/composer/ai_composer_controller.dart';
+import 'package:stream_chat_flutter_ai/src/composer/chat_composer_controller.dart';
+import 'package:stream_chat_flutter_ai/src/composer/chat_composer_factory.dart';
 import 'package:stream_chat_flutter_ai/src/composer/chat_option.dart';
-import 'package:stream_chat_flutter_ai/src/composer/stream_ai_composer_factory.dart';
 
 /// The combined attachment / chat-option sheet opened from the composer's
-/// leading "+" button by default (see [StreamAIComposerFactory.buildLeading]).
+/// leading "+" button by default (see [ChatComposerFactory.buildLeading]).
 ///
 /// Shows, in a single scrollable sheet:
 /// - A camera tile and a horizontal strip of the user's recent photos, each
-///   tappable to toggle it in/out of [AIComposerController.attachments].
+///   tappable to toggle it in/out of [ChatComposerController.attachments].
 ///   Selecting a photo takes effect immediately — there is no separate
 ///   confirm step, so the sheet can stay open while the user picks several.
 /// - An "All Photos" button that opens the platform's full image picker.
-/// - Below that (only if non-empty), [AIComposerController.chatOptions] as a
+/// - Below that (only if non-empty), [ChatComposerController.chatOptions] as a
 ///   list of selectable rows (icon, title, subtitle) — tapping one calls
-///   [AIComposerController.selectChatOption] and closes the sheet.
+///   [ChatComposerController.selectChatOption] and closes the sheet.
 ///
 /// Requires platform permissions for gallery access:
 ///
@@ -40,9 +40,9 @@ class ComposerAttachmentSheet extends StatefulWidget {
   /// Creates a [ComposerAttachmentSheet].
   const ComposerAttachmentSheet({super.key, required this.controller});
 
-  /// The controller whose [AIComposerController.attachments] and
-  /// [AIComposerController.chatOptions] this sheet reads and mutates.
-  final AIComposerController controller;
+  /// The controller whose [ChatComposerController.attachments] and
+  /// [ChatComposerController.chatOptions] this sheet reads and mutates.
+  final ChatComposerController controller;
 
   @override
   State<ComposerAttachmentSheet> createState() => _ComposerAttachmentSheetState();
@@ -55,12 +55,12 @@ class _ComposerAttachmentSheetState extends State<ComposerAttachmentSheet> {
   List<AssetEntity> _recentPhotos = const [];
 
   /// Maps a selected asset's id to the exact [XFile] instance passed to
-  /// [AIComposerController.addAttachments], so deselecting can pass that same
-  /// instance back to [AIComposerController.removeAttachment].
+  /// [ChatComposerController.addAttachments], so deselecting can pass that same
+  /// instance back to [ChatComposerController.removeAttachment].
   ///
   /// [XFile] doesn't override `==`, so a freshly-constructed `XFile` with the
   /// same path is *not* `==` to the one already in
-  /// [AIComposerController.attachments] — reconstructing one to remove would
+  /// [ChatComposerController.attachments] — reconstructing one to remove would
   /// silently fail to match.
   final Map<String, XFile> _selectedAssets = {};
 
@@ -122,7 +122,7 @@ class _ComposerAttachmentSheetState extends State<ComposerAttachmentSheet> {
   }
 
   Future<void> _pickFromFullLibrary() async {
-    final photos = await ImagePicker().pickMultiImage(limit: StreamAIComposerFactory.maxAttachments);
+    final photos = await ImagePicker().pickMultiImage(limit: ChatComposerFactory.maxAttachments);
     if (photos.isEmpty) return;
     widget.controller.addAttachments(photos);
   }

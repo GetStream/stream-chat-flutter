@@ -2,7 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:stream_chat_flutter_ai/src/composer/chat_option.dart';
 
-/// Controller for [StreamAIComposer] that holds all mutable UI state.
+/// Controller for [ChatComposer] that holds all mutable UI state.
 ///
 /// Manages:
 /// - The text field content (via an internal [TextEditingController]).
@@ -12,19 +12,19 @@ import 'package:stream_chat_flutter_ai/src/composer/chat_option.dart';
 ///
 /// Example:
 /// ```dart
-/// final controller = AIComposerController(
+/// final controller = ChatComposerController(
 ///   chatOptions: [
 ///     ChatOption(id: 'summarize', text: 'Summarize this', icon: Icons.summarize),
 ///     ChatOption(id: 'email', text: 'Write an email', icon: Icons.email),
 ///   ],
 /// );
 /// ```
-class AIComposerController extends ChangeNotifier {
-  /// Creates an [AIComposerController].
+class ChatComposerController extends ChangeNotifier {
+  /// Creates an [ChatComposerController].
   ///
   /// [initialText] pre-fills the text field.
   /// [chatOptions] sets the initial list of suggestion chips.
-  AIComposerController({
+  ChatComposerController({
     String initialText = '',
     List<ChatOption> chatOptions = const [],
   }) : _chatOptions = chatOptions,
@@ -69,7 +69,7 @@ class AIComposerController extends ChangeNotifier {
 
   /// Whether the AI is currently generating a response.
   ///
-  /// When `true`, [StreamAIComposer] shows a stop button instead of a send
+  /// When `true`, [ChatComposer] shows a stop button instead of a send
   /// button.
   bool get isGenerating => _isGenerating;
   set isGenerating(bool value) {

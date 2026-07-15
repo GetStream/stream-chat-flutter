@@ -37,7 +37,7 @@ iOS sample docks `SuggestionsView` above its composer (`ContentView.swift`'s
 **Shipped API:** `lib/src/composer/suggestions_view.dart`:
 
 ```dart
-StreamAISuggestionsView({
+AISuggestionsView({
   required List<String> suggestions,
   required ValueChanged<String> onSuggestionSelected,
   double itemMaxWidth = 160,
@@ -50,10 +50,12 @@ Theme-driven (`Theme.of(context).colorScheme`), consistent with the composer pil
 
 - **Files:** new `suggestions_view.dart`; exported from `lib/stream_chat_flutter_ai.dart`; consumed
   by `chat-ai-samples/flutter`'s `_LandingView` (`chat_ai_assistant_home_page.dart`).
-- **Note:** naming — Swift's only AI-token type is `AITypingIndicatorView` (capital "AI",
-  consistently); the package's `AiComposerController`/`AiComposerSendCallback`/`AiMarkdownBody` were
-  renamed to `AIComposerController`/`AIComposerSendCallback`/`AIMarkdownBody` to match, and the new
-  widget is `StreamAISuggestionsView` (not the originally-drafted `StreamAiSuggestionsView`).
+- **Note:** naming — the package is fully standalone (no `stream_chat`/`stream_chat_flutter`
+  dependency), so its public types drop the `Stream`/`StreamAI` prefix entirely. The composer
+  family follows the Android reference SDK's generic naming (`ChatComposer`,
+  `ChatComposerFactory`, `ChatComposerController`, `ChatComposerSendCallback`); AI-specific widgets
+  keep a capital `AI` token, consistently, matching Swift's `AITypingIndicator` (`AIMarkdownBody`,
+  `AITypingIndicatorView`, `AISuggestionsView`).
 - **Acceptance:** tapping a chip fires the callback with its text; row scrolls; long text
   truncates to 2 lines; widget test covering render + tap — see `suggestions_view_test.dart`.
 - **Effort:** S (½ day).
@@ -118,30 +120,30 @@ existing dark theme (`_kBgColor 0xFF1E1E1E`), header, and copy button intact.
   span tree is produced.
 - **Effort:** M (1–2 days including dependency vetting).
 
-### 2.2 Composer factory slot coverage (`StreamAIComposerFactory`)
+### 2.2 Composer factory slot coverage (`ChatComposerFactory`)
 
 **Gap:** Swift's `ComposerViewFactory` exposes **4** overridable slots (leading, trailing, input
-view, picker sheet). Flutter's `StreamAIComposerFactory`
-(`lib/src/composer/stream_ai_composer_factory.dart`) exposes only **2** (leading, trailing) — the
-text input and the attachment sheet are hardcoded inside `stream_ai_composer.dart` and
+view, picker sheet). Flutter's `ChatComposerFactory`
+(`lib/src/composer/chat_composer_factory.dart`) exposes only **2** (leading, trailing) — the
+text input and the attachment sheet are hardcoded inside `chat_composer.dart` and
 `_AttachmentButton`.
 
 **Proposed work:** add two nullable slot methods mirroring the existing pattern:
 
-- `Widget? buildInput(BuildContext, AIComposerController)` — defaults to the current
+- `Widget? buildInput(BuildContext, ChatComposerController)` — defaults to the current
   `_InputContainer` (promote it out of private, or wrap it). Lets hosts fully replace the input
   field.
-- `Widget buildAttachmentSheet(BuildContext, AIComposerController)` — defaults to
+- `Widget buildAttachmentSheet(BuildContext, ChatComposerController)` — defaults to
   `ComposerAttachmentSheet`; `_AttachmentButton` calls the factory instead of constructing the
   sheet directly.
 
-- **Files:** `stream_ai_composer_factory.dart`, `stream_ai_composer.dart` (wire
+- **Files:** `chat_composer_factory.dart`, `chat_composer.dart` (wire
   `_InputContainer`/`_TrailingControl` through the factory).
 - **Constraint:** keep the established `Widget?`-null-to-opt-out convention — no
   `SizedBox.shrink()` sentinels (two separately-constructed instances aren't `identical`/`==`,
   which is exactly the bug the existing `buildLeading`/`buildTrailing` nullability fix addressed).
 - **Acceptance:** a custom factory can swap both the input and the sheet; existing default
-  behavior is unchanged; extend `stream_ai_composer_test.dart` with an override test.
+  behavior is unchanged; extend `chat_composer_test.dart` with an override test.
 - **Effort:** M (1 day).
 
 ### 2.3 Localization scaffolding
@@ -159,7 +161,7 @@ standalone design goal). Replace hardcoded literals with lookups against this ob
 
 - **Files:** new `lib/src/localization/stream_ai_translations.dart`; touch every widget currently
   holding a literal (`code_block_view.dart`, `composer_attachment_sheet.dart`,
-  `stream_ai_composer.dart`, `stream_ai_composer_factory.dart`).
+  `chat_composer.dart`, `chat_composer_factory.dart`).
 - **Acceptance:** all user-facing strings resolve through the translations object; a test injecting
   a custom translations instance observes the overridden strings.
 - **Effort:** M (1 day). Ships no non-English translations yet — just the seam for adding them
@@ -218,7 +220,7 @@ the `stream_core_flutter` split from the chat-specific packages), not in
 Recorded here so future parity work doesn't regress these — they are intentional improvements over
 Swift, not gaps:
 
-- **Image-only sends:** `AIComposerController.hasContent` gates the send button on text **or**
+- **Image-only sends:** `ChatComposerController.hasContent` gates the send button on text **or**
   attachments; Swift's send button only appears when text is non-empty.
 - **Unified morphing trailing control:** a single 40×40 control that morphs between mic/send/stop
   is a more deliberate design than Swift's separately-styled buttons.
@@ -228,6 +230,6 @@ Swift, not gaps:
 ## At parity (no work needed)
 
 Streaming/typewriter text rendering, the AI typing indicator, the composer state controller
-(`AIComposerController` ↔ Swift's `ComposerViewModel`), the `ChatOption` model (including its
+(`ChatComposerController` ↔ Swift's `ComposerViewModel`), the `ChatOption` model (including its
 `description` field), speech-to-text, and the attachment picker (camera + recent photos + full
 library picker).
