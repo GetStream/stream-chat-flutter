@@ -55,9 +55,7 @@ StreamChatClient _buildStreamChatClient(
   String apiKey, {
   StreamConnectionOverride? connectionOverride,
 }) {
-  final logLevel = connectionOverride != null
-      ? Level.OFF
-      : (kDebugMode ? Level.INFO : Level.SEVERE);
+  final logLevel = connectionOverride != null ? Level.OFF : (kDebugMode ? Level.INFO : Level.SEVERE);
   return StreamChatClient(
     apiKey,
     logLevel: logLevel,

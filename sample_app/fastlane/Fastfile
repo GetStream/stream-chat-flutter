@@ -121,18 +121,7 @@ end
 
 private_lane :sources_matrix do
   {
-    e2e: [
-      'sample_app',
-      'packages',
-      'melos.yaml',
-      '.github/workflows/e2e_test.yml',
-      '.github/workflows/e2e_test_cron.yml',
-      '.github/actions/cache-xcode-cas',
-      'sample_app/scripts/install_ios_runtime.sh',
-      '.github/actions/setup-ios-runtime',
-    ],
-    ruby: ['sample_app/fastlane/Fastfile', 'sample_app/fastlane/Allurefile', 'sample_app/Gemfile',
-           'sample_app/.ruby-version', 'sample_app/fastlane/Pluginfile', 'sample_app/android/fastlane',
-           'sample_app/ios/fastlane'],
+    e2e: ['sample_app', 'packages'],
+    ruby: ['sample_app/fastlane', 'sample_app/android/fastlane', 'sample_app/ios/fastlane'],
   }
 end

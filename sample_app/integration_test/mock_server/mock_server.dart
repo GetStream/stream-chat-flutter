@@ -12,8 +12,7 @@ class MockServer {
 
   static String get _host => Platform.isAndroid ? '10.0.2.2' : '127.0.0.1';
 
-  static const _driverPort =
-      String.fromEnvironment('MOCK_DRIVER_PORT', defaultValue: '4568');
+  static const _driverPort = String.fromEnvironment('MOCK_DRIVER_PORT', defaultValue: '4568');
 
   static const _httpTimeout = Duration(seconds: 10);
   static const _pingTimeout = Duration(seconds: 2);
@@ -25,9 +24,7 @@ class MockServer {
   static Future<MockServer> start({String? testName}) async {
     final name = testName ?? _currentTestName();
     final driverUrl = 'http://$_host:$_driverPort';
-    final port =
-        (await _get('$driverUrl/start/$name', timeout: _driverStartTimeout))
-            .trim();
+    final port = (await _get('$driverUrl/start/$name', timeout: _driverStartTimeout)).trim();
     final server = MockServer._('http://$_host:$port', 'ws://$_host:$port');
     await server.waitUntilReady();
     return server;
@@ -62,9 +59,10 @@ class MockServer {
   }) async {
     final deadline = DateTime.now().add(timeout);
     while (DateTime.now().isBefore(deadline)) {
-      final ready = await _statusCode('$url/ping', timeout: _pingTimeout)
-          .then((code) => code == 200)
-          .catchError((Object _) => false);
+      final ready = await _statusCode(
+        '$url/ping',
+        timeout: _pingTimeout,
+      ).then((code) => code == 200).catchError((Object _) => false);
       if (ready) return;
       await Future<void>.delayed(const Duration(milliseconds: 250));
     }

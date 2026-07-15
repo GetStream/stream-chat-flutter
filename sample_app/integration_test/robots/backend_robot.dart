@@ -12,12 +12,8 @@ class BackendRobot {
     String? messagesText,
     String? repliesText,
   }) async {
-    final messagesTextParam = messagesText != null
-        ? 'messages_text=${Uri.encodeQueryComponent(messagesText)}&'
-        : '';
-    final repliesTextParam = repliesText != null
-        ? 'replies_text=${Uri.encodeQueryComponent(repliesText)}&'
-        : '';
+    final messagesTextParam = messagesText != null ? 'messages_text=${Uri.encodeQueryComponent(messagesText)}&' : '';
+    final repliesTextParam = repliesText != null ? 'replies_text=${Uri.encodeQueryComponent(repliesText)}&' : '';
     await _mockServer.post(
       'mock?'
       '$messagesTextParam'
@@ -39,11 +35,9 @@ class BackendRobot {
     return this;
   }
 
-  Future<void> revokeToken({int duration = 5}) =>
-      _mockServer.post('jwt/revoke_token?duration=$duration');
+  Future<void> revokeToken({int duration = 5}) => _mockServer.post('jwt/revoke_token?duration=$duration');
 
-  Future<void> invalidateToken({int duration = 5}) =>
-      _mockServer.post('jwt/invalidate_token?duration=$duration');
+  Future<void> invalidateToken({int duration = 5}) => _mockServer.post('jwt/invalidate_token?duration=$duration');
 
   Future<void> invalidateTokenDate({int duration = 5}) =>
       _mockServer.post('jwt/invalidate_token_date?duration=$duration');

@@ -20,14 +20,14 @@ class _Step {
   final List<_Step> steps = [];
 
   Map<String, Object?> toJson() => {
-        'name': name,
-        'status': status.name,
-        if (statusDetails != null) 'statusDetails': statusDetails,
-        'stage': 'finished',
-        'start': start,
-        'stop': stop,
-        'steps': [for (final s in steps) s.toJson()],
-      };
+    'name': name,
+    'status': status.name,
+    if (statusDetails != null) 'statusDetails': statusDetails,
+    'stage': 'finished',
+    'start': start,
+    'stop': stop,
+    'steps': [for (final s in steps) s.toJson()],
+  };
 }
 
 class _Result {
@@ -50,18 +50,18 @@ class _Result {
   final List<_Step> steps = [];
 
   Map<String, Object?> toJson() => {
-        'uuid': uuid,
-        'historyId': base64.encode(utf8.encode(fullName)),
-        'name': name,
-        'fullName': fullName,
-        'status': status.name,
-        if (statusDetails != null) 'statusDetails': statusDetails,
-        'stage': 'finished',
-        'start': start,
-        'stop': stop,
-        'labels': labels,
-        'steps': [for (final s in steps) s.toJson()],
-      };
+    'uuid': uuid,
+    'historyId': base64.encode(utf8.encode(fullName)),
+    'name': name,
+    'fullName': fullName,
+    'status': status.name,
+    if (statusDetails != null) 'statusDetails': statusDetails,
+    'stage': 'finished',
+    'start': start,
+    'stop': stop,
+    'labels': labels,
+    'steps': [for (final s in steps) s.toJson()],
+  };
 }
 
 class Allure {
