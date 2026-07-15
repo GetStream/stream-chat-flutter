@@ -311,7 +311,8 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
       if (eventListener?.call(event) ?? false) return;
 
       final eventType = event.type;
-      if (eventType == EventType.channelDeleted) {
+      if (eventType == EventType.channelDeleted ||
+          eventType == EventType.notificationChannelDeleted) {
         _eventHandler.onChannelDeleted(event, this);
       } else if (eventType == EventType.channelHidden) {
         _eventHandler.onChannelHidden(event, this);

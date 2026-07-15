@@ -16,6 +16,7 @@
 🐞 Fixed
 
 - Fixed a deprecation warning from `equatable` causing CI analysis to fail.
+- `ComparableField` now folds diacritics/ligatures and ignores case when comparing strings, so `SortOption` on fields like `name` no longer pushes lowercase or non-ASCII names (`jhon`, `Łukasz`, `Øystein`) to the end of client-sorted lists ([#2601](https://github.com/GetStream/stream-chat-flutter/issues/2601)).
 
 ## 9.26.0
 

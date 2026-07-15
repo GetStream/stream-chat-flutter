@@ -34,6 +34,12 @@ enum NullOrdering {
 /// // Sort channels by last message date in descending order
 /// final sort = SortOption<ChannelState>("last_message_at");
 /// ```
+///
+/// String comparisons are diacritic- and case-insensitive by default so client
+/// ordering aligns with what the server returns for sorts like `name` (see
+/// [ComparableField]). Pass a custom [Comparator] via the `comparator`
+/// parameter to override this — e.g. to sort raw codepoints or apply a
+/// locale-aware collator.
 @JsonSerializable(includeIfNull: false)
 class SortOption<T extends ComparableFieldProvider> {
   /// Creates a new SortOption instance with the specified field and direction.
