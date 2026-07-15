@@ -869,7 +869,7 @@ class _AccessibilityTranslationsKo extends AccessibilityTranslations {
   String voiceRecordingPreviewPauseLabel({required Duration duration}) => '음성 녹음 일시정지, ${formatDuration(duration)}';
 
   @override
-  String get attachmentPickerTooltip => '첨부 파일 선택 열기';
+  String get attachmentPickerTooltip => '첨부 파일 선택 전환';
 
   @override
   String get attachmentPickerOpenHint => '두 번 탭하여 첨부 파일 선택 열기';

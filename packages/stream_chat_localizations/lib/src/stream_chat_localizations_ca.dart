@@ -889,7 +889,7 @@ class _AccessibilityTranslationsCa extends AccessibilityTranslations {
       "Pausa l'enregistrament de veu, ${formatDuration(duration)}";
 
   @override
-  String get attachmentPickerTooltip => 'Obre el selector de fitxers adjunts';
+  String get attachmentPickerTooltip => 'Alterna el selector de fitxers adjunts';
 
   @override
   String get attachmentPickerOpenHint => 'toca dos vegades per obrir el selector de fitxers adjunts';

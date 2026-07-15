@@ -890,7 +890,7 @@ class _AccessibilityTranslationsPt extends AccessibilityTranslations {
       'Pausar gravação de voz, ${formatDuration(duration)}';
 
   @override
-  String get attachmentPickerTooltip => 'Abrir seletor de anexos';
+  String get attachmentPickerTooltip => 'Alternar seletor de anexos';
 
   @override
   String get attachmentPickerOpenHint => 'toque duas vezes para abrir o seletor de anexos';

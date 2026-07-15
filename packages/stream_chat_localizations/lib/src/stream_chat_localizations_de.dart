@@ -887,7 +887,7 @@ class _AccessibilityTranslationsDe extends AccessibilityTranslations {
       'Sprachaufnahme pausieren, ${formatDuration(duration)}';
 
   @override
-  String get attachmentPickerTooltip => 'Anhang-Auswahl öffnen';
+  String get attachmentPickerTooltip => 'Anhang-Auswahl umschalten';
 
   @override
   String get attachmentPickerOpenHint => 'zum Öffnen der Anhang-Auswahl doppeltippen';

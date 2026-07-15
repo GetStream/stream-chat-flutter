@@ -887,7 +887,7 @@ class _AccessibilityTranslationsEn extends AccessibilityTranslations {
       'Pause voice recording, ${formatDuration(duration)}';
 
   @override
-  String get attachmentPickerTooltip => 'Open attachment picker';
+  String get attachmentPickerTooltip => 'Toggle attachment picker';
 
   @override
   String get attachmentPickerOpenHint => 'double tap to open attachment picker';

@@ -901,7 +901,7 @@ class _AccessibilityTranslationsIt extends AccessibilityTranslations {
       'Metti in pausa registrazione vocale, ${formatDuration(duration)}';
 
   @override
-  String get attachmentPickerTooltip => 'Apri selettore allegati';
+  String get attachmentPickerTooltip => 'Attiva/disattiva selettore allegati';
 
   @override
   String get attachmentPickerOpenHint => 'tocca due volte per aprire il selettore allegati';

@@ -893,7 +893,7 @@ class _AccessibilityTranslationsFr extends AccessibilityTranslations {
       "Mettre en pause l'enregistrement vocal, ${formatDuration(duration)}";
 
   @override
-  String get attachmentPickerTooltip => 'Ouvrir le sélecteur de pièces jointes';
+  String get attachmentPickerTooltip => 'Basculer le sélecteur de pièces jointes';
 
   @override
   String get attachmentPickerOpenHint => 'toucher deux fois pour ouvrir le sélecteur de pièces jointes';

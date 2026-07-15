@@ -310,7 +310,7 @@ class DefaultAccessibilityTranslations extends AccessibilityTranslations {
   }
 
   @override
-  String get attachmentPickerTooltip => 'Open attachment picker';
+  String get attachmentPickerTooltip => 'Toggle attachment picker';
 
   @override
   String get attachmentPickerOpenHint => 'double tap to open attachment picker';

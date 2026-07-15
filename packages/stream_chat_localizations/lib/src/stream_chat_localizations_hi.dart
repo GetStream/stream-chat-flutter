@@ -888,7 +888,7 @@ class _AccessibilityTranslationsHi extends AccessibilityTranslations {
       'वॉइस रिकॉर्डिंग रोकें, ${formatDuration(duration)}';
 
   @override
-  String get attachmentPickerTooltip => 'अटैचमेंट चयनकर्ता खोलें';
+  String get attachmentPickerTooltip => 'अटैचमेंट चयनकर्ता टॉगल करें';
 
   @override
   String get attachmentPickerOpenHint => 'अटैचमेंट चयनकर्ता खोलने के लिए दो बार टैप करें';

@@ -866,7 +866,7 @@ class _AccessibilityTranslationsJa extends AccessibilityTranslations {
   String voiceRecordingPreviewPauseLabel({required Duration duration}) => 'ボイス録音を一時停止、${formatDuration(duration)}';
 
   @override
-  String get attachmentPickerTooltip => '添付ファイル選択を開く';
+  String get attachmentPickerTooltip => '添付ファイル選択を切り替え';
 
   @override
   String get attachmentPickerOpenHint => 'ダブルタップして添付ファイル選択を開く';

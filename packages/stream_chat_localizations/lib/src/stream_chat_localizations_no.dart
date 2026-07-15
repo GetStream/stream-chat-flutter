@@ -872,7 +872,7 @@ class _AccessibilityTranslationsNo extends AccessibilityTranslations {
       'Sett taleopptak på pause, ${formatDuration(duration)}';
 
   @override
-  String get attachmentPickerTooltip => 'Åpne vedleggsvelger';
+  String get attachmentPickerTooltip => 'Veksle vedleggsvelger';
 
   @override
   String get attachmentPickerOpenHint => 'dobbeltrykk for å åpne vedleggsvelger';
