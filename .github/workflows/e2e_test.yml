@@ -33,12 +33,12 @@ jobs:
 
       - uses: ./.github/actions/setup-flutter
 
+      - uses: ./.github/actions/enable-kvm
+
       - name: Bootstrap
         run: |
           flutter pub global activate melos
           melos bootstrap
-
-      - uses: ./.github/actions/enable-kvm
 
       - name: Launch Allure TestOps
         working-directory: sample_app/android
@@ -85,13 +85,6 @@ jobs:
 
       - uses: ./.github/actions/setup-ruby
 
-      - name: Bootstrap
-        run: |
-          flutter precache --ios
-          flutter config --no-enable-swift-package-manager
-          flutter pub global activate melos
-          melos bootstrap
-
       - uses: ./.github/actions/cache-cocoapods
         with:
           key-suffix: ${{ runner.os }}
@@ -100,6 +93,13 @@ jobs:
         with:
           key-suffix: ${{ runner.os }}
           xcode-version: ${{ env.IOS_SIMULATOR_VERSION }}
+
+      - name: Bootstrap
+        run: |
+          flutter precache --ios
+          flutter config --no-enable-swift-package-manager
+          flutter pub global activate melos
+          melos bootstrap
 
       - name: Launch Allure TestOps
         working-directory: sample_app/ios

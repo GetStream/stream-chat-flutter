@@ -42,12 +42,12 @@ jobs:
 
       - uses: ./.github/actions/setup-flutter
 
+      - uses: ./.github/actions/enable-kvm
+
       - name: Bootstrap
         run: |
           flutter pub global activate melos
           melos bootstrap
-
-      - uses: ./.github/actions/enable-kvm
 
       - name: Launch Allure TestOps
         working-directory: sample_app/android
@@ -105,13 +105,6 @@ jobs:
 
       - uses: ./.github/actions/setup-flutter
 
-      - name: Bootstrap
-        run: |
-          flutter precache --ios
-          flutter config --no-enable-swift-package-manager
-          flutter pub global activate melos
-          melos bootstrap
-
       - uses: ./.github/actions/setup-ios-runtime
         if: ${{ matrix.setup_runtime }}
         with:
@@ -126,6 +119,13 @@ jobs:
         with:
           key-suffix: ${{ matrix.ios }}
           xcode-version: ${{ env.XCODE_VERSION }}
+
+      - name: Bootstrap
+        run: |
+          flutter precache --ios
+          flutter config --no-enable-swift-package-manager
+          flutter pub global activate melos
+          melos bootstrap
 
       - name: Launch Allure TestOps
         working-directory: sample_app/ios
