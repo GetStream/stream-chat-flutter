@@ -39,6 +39,7 @@ dependencies:
   image_picker: ^1.2.2
   latlong2: ^0.9.1
   lottie: ^3.3.3
+  path_provider_android: ">=2.2.5 <2.3.0"
   rxdart: ^0.28.0
   stream_chat_flutter: ^10.1.0
   stream_chat_localizations: ^10.1.0
@@ -50,6 +51,8 @@ dependencies:
 
 dev_dependencies:
   flutter_launcher_icons: ^0.14.4
+  integration_test:
+    sdk: flutter
 
 flutter:
   uses-material-design: true
