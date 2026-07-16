@@ -126,11 +126,6 @@ jobs:
         with:
           key-suffix: ${{ matrix.ios }}
 
-      - uses: ./.github/actions/cache-xcode-cas
-        with:
-          key-suffix: ${{ matrix.ios }}
-          xcode-version: ${{ env.XCODE_VERSION }}
-
       - name: Launch Allure TestOps
         working-directory: sample_app/ios
         run: bundle exec fastlane allure_launch cron:true
