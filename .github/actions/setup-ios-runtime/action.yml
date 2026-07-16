@@ -25,9 +25,16 @@ runs:
 
     - name: Setup iOS simulator runtime
       shell: bash
+      run: sudo rm -rfv ~/Library/Developer/CoreSimulator/* || true
+
+    - name: Install iOS runtime
+      shell: bash
+      working-directory: sample_app/ios
+      run: bundle exec fastlane install_runtime ios:${{ inputs.version }}
+
+    - name: Cleanup iOS runtime install artifacts
+      shell: bash
       run: |
-        sudo rm -rfv ~/Library/Developer/CoreSimulator/* || true
-        cd sample_app/ios && bundle exec fastlane install_runtime ios:${{ inputs.version }}
         sudo rm -rfv sample_app/*.dmg || true
         xcrun simctl list runtimes
 

@@ -41,7 +41,8 @@ jobs:
       - uses: ./.github/actions/enable-kvm
 
       - name: Launch Allure TestOps
-        run: cd sample_app/android && bundle exec fastlane allure_launch
+        working-directory: sample_app/android
+        run: bundle exec fastlane allure_launch
         env:
           GITHUB_EVENT: ${{ toJson(github.event) }}
 
@@ -55,11 +56,13 @@ jobs:
 
       - name: Upload Allure results
         if: env.LAUNCH_ID != '' && (success() || failure())
-        run: cd sample_app/android && bundle exec fastlane allure_upload launch_id:$LAUNCH_ID
+        working-directory: sample_app/android
+        run: bundle exec fastlane allure_upload launch_id:$LAUNCH_ID
 
       - name: Allure TestOps Launch Removal
         if: env.LAUNCH_ID != '' && cancelled()
-        run: cd sample_app/android && bundle exec fastlane allure_launch_removal launch_id:$LAUNCH_ID
+        working-directory: sample_app/android
+        run: bundle exec fastlane allure_launch_removal launch_id:$LAUNCH_ID
 
       - uses: actions/upload-artifact@v7
         if: failure()
@@ -99,20 +102,24 @@ jobs:
           xcode-version: ${{ env.IOS_SIMULATOR_VERSION }}
 
       - name: Launch Allure TestOps
-        run: cd sample_app/ios && bundle exec fastlane allure_launch
+        working-directory: sample_app/ios
+        run: bundle exec fastlane allure_launch
         env:
           GITHUB_EVENT: ${{ toJson(github.event) }}
 
       - name: Run e2e (iOS simulator)
-        run: cd sample_app/ios && bundle exec fastlane run_e2e_test platform:ios ios:"${{ env.IOS_SIMULATOR_VERSION }}" device:"${{ env.IOS_SIMULATOR_DEVICE }}"
+        working-directory: sample_app/ios
+        run: bundle exec fastlane run_e2e_test platform:ios ios:"${{ env.IOS_SIMULATOR_VERSION }}" device:"${{ env.IOS_SIMULATOR_DEVICE }}"
 
       - name: Upload Allure results
         if: env.LAUNCH_ID != '' && (success() || failure())
-        run: cd sample_app/ios && bundle exec fastlane allure_upload launch_id:$LAUNCH_ID
+        working-directory: sample_app/ios
+        run: bundle exec fastlane allure_upload launch_id:$LAUNCH_ID
 
       - name: Allure TestOps Launch Removal
         if: env.LAUNCH_ID != '' && cancelled()
-        run: cd sample_app/ios && bundle exec fastlane allure_launch_removal launch_id:$LAUNCH_ID
+        working-directory: sample_app/ios
+        run: bundle exec fastlane allure_launch_removal launch_id:$LAUNCH_ID
 
       - uses: actions/upload-artifact@v7
         if: failure()
