@@ -46,8 +46,7 @@ class FirebaseMessaging {
     bool provisional = false,
     bool providesAppNotificationSettings = false,
     bool sound = true,
-  }) async =>
-      const NotificationSettings(authorizationStatus: AuthorizationStatus.denied);
+  }) async => const NotificationSettings(authorizationStatus: AuthorizationStatus.denied);
 
   /// Does nothing.
   Future<void> setForegroundNotificationPresentationOptions({
