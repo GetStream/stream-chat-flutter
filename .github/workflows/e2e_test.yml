@@ -19,6 +19,7 @@ env:
 jobs:
   android:
     runs-on: ubuntu-latest
+    timeout-minutes: 40
     env:
       ANDROID_API_LEVEL: "34"
     steps:
@@ -70,6 +71,7 @@ jobs:
 
   ios:
     runs-on: macos-15
+    timeout-minutes: 40
     env:
       IOS_SIMULATOR_VERSION: "26.2"
       IOS_SIMULATOR_DEVICE: "iPhone 17"
