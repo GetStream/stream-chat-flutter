@@ -14,6 +14,8 @@ runs:
     - shell: bash
       run: |
         echo "FLUTTER_XCODE_COMPILATION_CACHE_ENABLE_CACHING=YES" >> "$GITHUB_ENV"
+        # Emits per-file cache hit/miss remarks; only visible in verbose runs.
+        echo "FLUTTER_XCODE_COMPILATION_CACHE_ENABLE_DIAGNOSTIC_REMARKS=YES" >> "$GITHUB_ENV"
         echo "FLUTTER_XCODE_SWIFT_ENABLE_COMPILE_CACHE=YES" >> "$GITHUB_ENV"
         echo "FLUTTER_XCODE_CLANG_ENABLE_COMPILE_CACHE=YES" >> "$GITHUB_ENV"
         echo "FLUTTER_XCODE_COMPILATION_CACHE_CAS_PATH=$HOME/xcode-cas" >> "$GITHUB_ENV"
