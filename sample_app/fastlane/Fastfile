@@ -1,0 +1,127 @@
+opt_out_usage
+
+require 'net/http'
+require 'shellwords'
+import File.expand_path('Allurefile', __dir__)
+
+mock_server_repo_name = 'stream-chat-test-mock-server'
+mock_server_driver_port = ENV['MOCK_DRIVER_PORT'] || '4568'
+github_repo = ENV['GITHUB_REPOSITORY'] || 'GetStream/stream-chat-flutter'
+@force_check = false
+
+def root_path
+  Dir.pwd.sub(/.*\Kfastlane/, '').sub(/.*\Kandroid/, '').sub(/.*\Kios/, '').sub(/.*\K\/\//, '')
+end
+
+def ios_device?(device)
+  device.to_s.match?(/\A[0-9A-F]{8}-[0-9A-F]{4}-/i)
+end
+
+lane :sh_on_root do |options|
+  Dir.chdir(root_path) { sh(options[:command]) }
+end
+
+lane :fetch_dependencies do
+  sh_on_root(command: "flutter pub get --suppress-analytics")
+end
+
+lane :start_mock_server do |options|
+  Dir.chdir(root_path) do
+    mock_server_repo = options[:local_server] || mock_server_repo_name
+    stop_mock_server unless is_ci
+
+    unless options[:local_server]
+      branch = options[:branch].to_s.empty? ? 'main' : options[:branch]
+      sh("rm -rf #{mock_server_repo}") if File.directory?(mock_server_repo)
+      sh("git clone -b #{branch} https://github.com/#{github_repo.split('/').first}/#{mock_server_repo}.git")
+    end
+
+    Dir.chdir(mock_server_repo) do
+      FileUtils.mkdir_p('logs')
+      sh("bundle exec ruby driver.rb #{mock_server_driver_port} > logs/driver.log 2>&1 &")
+    end
+  end
+end
+
+lane :stop_mock_server do
+  Net::HTTP.get_response(URI("http://localhost:#{mock_server_driver_port}/stop")) rescue nil
+end
+
+def sh_with_retries(command: nil, retries: 2, label: nil)
+  retries = retries.to_i
+  label ||= command
+  attempt = 0
+  begin
+    attempt += 1
+    if block_given?
+      yield
+    else
+      sh(command)
+    end
+    true
+  rescue StandardError
+    if attempt <= retries
+      UI.important("#{label} failed (attempt #{attempt}/#{retries + 1}); retrying…")
+      retry
+    end
+    UI.error("#{label} still failing after #{retries} retries")
+    false
+  end
+end
+
+lane :run_e2e_test do |options|
+  next unless is_check_required(sources: sources_matrix[:e2e], force_check: @force_check)
+
+  ios = options[:platform] == 'ios' || ios_device?(options[:device])
+  device = options[:device]
+
+  start_mock_server(local_server: options[:local_server], branch: options[:mock_server_branch])
+
+  if ios
+    device = prepare_simulator(device: options[:device], reset: is_ci, wait_for_boot: false)
+  else
+    serial = device ? "-s #{device} " : ''
+    sh("adb #{serial}logcat -c")
+  end
+
+  log_file = "#{root_path}/build/e2e-test.log"
+  FileUtils.mkdir_p(File.dirname(log_file))
+  File.write(log_file, '')
+
+  begin
+    Dir.chdir(root_path) do
+      targets = options[:target] ? [options[:target]] : Dir['integration_test/*_test.dart'].sort
+      UI.user_error!('No e2e test files found') if targets.empty?
+
+      failed = []
+      targets.each do |target|
+        flags = [target]
+        flags << "-d #{device}" if device
+        if options[:verbose]
+          flags << '--verbose'
+        else
+          flags << '--quiet'
+          flags << "--reporter #{ENV['GITHUB_ACTIONS'] ? 'github' : 'expanded'}"
+        end
+
+        ok = sh_with_retries(retries: options[:retries] || 2, label: target) do
+          cmd = "flutter test #{flags.join(' ')} 2>&1 | tee -a #{Shellwords.escape(log_file)}"
+          sh("bash -o pipefail -c #{Shellwords.escape(cmd)}")
+        end
+        failed << target unless ok
+      end
+
+      UI.user_error!("E2E failed after retries: #{failed.join(', ')}") unless failed.empty?
+    end
+  ensure
+    collect_allure_results(log_file: log_file) rescue nil
+    stop_mock_server
+  end
+end
+
+private_lane :sources_matrix do
+  {
+    e2e: ['sample_app', 'packages'],
+    ruby: ['sample_app/fastlane', 'sample_app/android/fastlane', 'sample_app/ios/fastlane'],
+  }
+end
