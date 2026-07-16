@@ -60,10 +60,10 @@ class PinnedMessageDao extends DatabaseAccessor<DriftChatDatabase> with _$Pinned
     }
 
     final results = await Future.wait([
-      // Reactions
+      // Reactions. We fetch every reaction for these messages once; own
+      // reactions are the current-user subset and are derived in-memory below
+      // instead of issuing a second, near-identical table scan.
       _db.pinnedMessageReactionDao.getReactionsForMessages(messageIds),
-      // Own reactions
-      _db.pinnedMessageReactionDao.getReactionsForMessagesByUserId(messageIds, _db.userId),
       // Polls
       if (pollIds.isNotEmpty) _db.pollDao.getPollsByIds(pollIds) else Future.value(const <String, Poll?>{}),
       // Drafts
@@ -82,29 +82,24 @@ class PinnedMessageDao extends DatabaseAccessor<DriftChatDatabase> with _$Pinned
     ]);
 
     final latestReactionsByMsg = results[0] as Map<String, List<Reaction>>;
-    final ownReactionsByMsg = results[1] as Map<String, List<Reaction>>;
-    final pollsById = results[2] as Map<String, Poll?>;
-    final draftsByCidByParentId = results[3] as Map<String, Map<String, Draft?>>;
-    final locationsByMsg = results[4] as Map<String, Location>;
+    final pollsById = results[1] as Map<String, Poll?>;
+    final draftsByCidByParentId = results[2] as Map<String, Map<String, Draft?>>;
+    final locationsByMsg = results[3] as Map<String, Location>;
 
-    final quotedById = <String, Message>{};
-    if (fetchQuotedMessage && quotedIds.isNotEmpty) {
-      final quoteRows = await (select(pinnedMessages).join([
-        leftOuterJoin(_users, pinnedMessages.userId.equalsExp(_users.id)),
-        leftOuterJoin(
-          _pinnedByUsers,
-          pinnedMessages.pinnedByUserId.equalsExp(_pinnedByUsers.id),
-        ),
-      ])..where(pinnedMessages.id.isIn(quotedIds))).get();
-      final quotedMessages = await _messagesFromJoinRows(
-        quoteRows,
-        fetchQuotedMessage: false,
-        fetchSharedLocation: true,
-      );
-      for (final m in quotedMessages) {
-        quotedById[m.id] = m;
-      }
-    }
+    final ownReactionsByMsg = _ownReactionsFrom(latestReactionsByMsg);
+
+    final quotedById = fetchQuotedMessage && quotedIds.isNotEmpty
+        ? await _resolveQuotedMessages(
+            rows,
+            messageIds,
+            quotedIds,
+            latestReactionsByMsg: latestReactionsByMsg,
+            ownReactionsByMsg: ownReactionsByMsg,
+            pollsById: pollsById,
+            locationsByMsg: locationsByMsg,
+            fetchSharedLocation: fetchSharedLocation,
+          )
+        : const <String, Message>{};
 
     return [
       for (final row in rows)
@@ -154,6 +149,93 @@ class PinnedMessageDao extends DatabaseAccessor<DriftChatDatabase> with _$Pinned
       draft: draft,
       sharedLocation: sharedLocation,
     );
+  }
+
+  /// Derives each message's own reactions — those authored by the current
+  /// user — from the already-fetched [latestReactionsByMsg], avoiding a second,
+  /// near-identical table scan.
+  Map<String, List<Reaction>> _ownReactionsFrom(
+    Map<String, List<Reaction>> latestReactionsByMsg,
+  ) {
+    return {
+      for (final MapEntry(:key, :value) in latestReactionsByMsg.entries)
+        key: [
+          for (final reaction in value)
+            if (reaction.userId == _db.userId) reaction,
+        ],
+    };
+  }
+
+  /// Resolves the quoted-message previews referenced by a page of pinned
+  /// messages, keyed by quoted-message id.
+  ///
+  /// Quotes already present in [rows] are rebuilt from the maps already loaded
+  /// for the page (no extra queries); only quotes outside the page are fetched
+  /// from the DB. Either way a quote is hydrated a single level deep and never
+  /// carries a draft, and always includes its shared location.
+  Future<Map<String, Message>> _resolveQuotedMessages(
+    List<TypedResult> rows,
+    List<String> messageIds,
+    List<String> quotedIds, {
+    required Map<String, List<Reaction>> latestReactionsByMsg,
+    required Map<String, List<Reaction>> ownReactionsByMsg,
+    required Map<String, Poll?> pollsById,
+    required Map<String, Location> locationsByMsg,
+    required bool fetchSharedLocation,
+  }) async {
+    final quotedById = <String, Message>{};
+    final pageIds = messageIds.toSet();
+
+    // A quote already in this page can be rebuilt from the maps we loaded for
+    // the page instead of re-querying it — but only when the page fetched
+    // everything the quote needs. Reactions and polls are always loaded for the
+    // page; the shared location is only loaded when [fetchSharedLocation] is
+    // set, and that location is the one field a rebuilt quote relies on. So
+    // reuse in-page quotes only in that case; otherwise let the DB branch below
+    // fetch them (it always loads locations — quotes keep their location even
+    // when the caller opted out of locations for the page).
+    final inPageQuotedIds = fetchSharedLocation ? quotedIds.where(pageIds.contains).toSet() : const <String>{};
+    if (inPageQuotedIds.isNotEmpty) {
+      final rowById = {
+        for (final row in rows) row.readTable(pinnedMessages).id: row,
+      };
+      for (final id in inPageQuotedIds) {
+        final row = rowById[id];
+        if (row == null) continue;
+        quotedById[id] = _buildMessage(
+          row,
+          latestReactionsByMsg: latestReactionsByMsg,
+          ownReactionsByMsg: ownReactionsByMsg,
+          pollsById: pollsById,
+          quotedById: const {}, // quotes are hydrated a single level only
+          draftsByCidByParentId: const {}, // quotes never carry a draft
+          locationsByMsg: locationsByMsg,
+        );
+      }
+    }
+
+    // Everything not rebuilt above — including all quotes when
+    // fetchSharedLocation is false — is fetched + hydrated from the DB.
+    final outOfPageQuotedIds = quotedIds.toSet().difference(inPageQuotedIds).toList();
+    if (outOfPageQuotedIds.isNotEmpty) {
+      final quoteRows = await (select(pinnedMessages).join([
+        leftOuterJoin(_users, pinnedMessages.userId.equalsExp(_users.id)),
+        leftOuterJoin(
+          _pinnedByUsers,
+          pinnedMessages.pinnedByUserId.equalsExp(_pinnedByUsers.id),
+        ),
+      ])..where(pinnedMessages.id.isIn(outOfPageQuotedIds))).get();
+      final quotedMessages = await _messagesFromJoinRows(
+        quoteRows,
+        fetchQuotedMessage: false,
+        fetchSharedLocation: true,
+      );
+      for (final m in quotedMessages) {
+        quotedById[m.id] = m;
+      }
+    }
+
+    return quotedById;
   }
 
   /// Returns a single message by matching the [PinnedMessages.id] with [id]

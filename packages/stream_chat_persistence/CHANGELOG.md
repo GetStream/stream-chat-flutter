@@ -4,6 +4,7 @@
 
 - Add indices on the `channel_cid` column on the `Messages`, `Members`, and `Reads` tables to improve read times on large databases.
 - Add indices on the `message_id` column on the `Reactions` table to improve read times on large databases.
+- Speed up hydrating a page of cached messages (`MessageDao`/`PinnedMessageDao`): derive each message's own reactions from the already-fetched reactions instead of issuing a second query, and stop re-fetching/re-hydrating quoted messages that are already part of the loaded page.
 
 🐞 Fixed
 
