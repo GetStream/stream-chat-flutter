@@ -218,9 +218,29 @@ lane :run_e2e_test do |options|
     end
   ensure
     collect_allure_results(log_file: log_file) rescue nil
-    attach_videos_to_failed_results(results_dir: allure_results_path, videos: videos) rescue nil
+    # Persist the recording metadata so the video clips can be sliced+attached
+    # in a separate, failure-only CI step (ffmpeg is only needed then, and is
+    # installed only on the runners/paths that lack it). See `attach_videos`.
+    File.write("#{videos_dir}/manifest.json", JSON.generate(videos)) unless videos.empty?
     stop_mock_server
   end
+end
+
+# Slices each failed test's window out of its file's recording and attaches it
+# to the Allure result. Split out of `run_e2e_test` so CI can run it as an
+# independent `if: failure()` step (installing ffmpeg only then). Reads the
+# manifest `run_e2e_test` wrote; no-op when there's no manifest.
+lane :attach_videos do
+  manifest = "#{root_path}/build/e2e-videos/manifest.json"
+  unless File.exist?(manifest)
+    UI.important("No video manifest at #{manifest}; nothing to attach")
+    next
+  end
+
+  videos = JSON.parse(File.read(manifest)).transform_values do |v|
+    { path: v['path'], started_at_ms: v['started_at_ms'] }
+  end
+  attach_videos_to_failed_results(results_dir: allure_results_path, videos: videos)
 end
 
 private_lane :sources_matrix do

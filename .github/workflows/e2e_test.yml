@@ -54,6 +54,13 @@ jobs:
           profile: pixel_6
           script: cd sample_app/android && bundle exec fastlane run_e2e_test device:emulator-5554
 
+      - name: Attach videos to failed tests
+        if: failure()
+        working-directory: sample_app/android
+        run: |
+          sudo apt-get update && sudo apt-get install -y ffmpeg
+          bundle exec fastlane attach_videos
+
       - name: Upload Allure results
         if: env.LAUNCH_ID != '' && (success() || failure())
         working-directory: sample_app/android
@@ -72,59 +79,64 @@ jobs:
             sample_app/stream-chat-test-mock-server/logs
             sample_app/build/e2e-test.log
 
-  # ios:
-  #   runs-on: macos-15
-  #   timeout-minutes: 40
-  #   env:
-  #     IOS_SIMULATOR_VERSION: "26.2"
-  #     IOS_SIMULATOR_DEVICE: "iPhone 17"
-  #   steps:
-  #     - uses: actions/checkout@v6
+  ios:
+    runs-on: macos-15
+    timeout-minutes: 40
+    env:
+      IOS_SIMULATOR_VERSION: "26.2"
+      IOS_SIMULATOR_DEVICE: "iPhone 17"
+    steps:
+      - uses: actions/checkout@v6
 
-  #     - uses: ./.github/actions/setup-flutter
+      - uses: ./.github/actions/setup-flutter
 
-  #     - uses: ./.github/actions/setup-ruby
+      - uses: ./.github/actions/setup-ruby
 
-  #     - uses: ./.github/actions/cache-cocoapods
-  #       with:
-  #         key-suffix: ${{ runner.os }}
+      - uses: ./.github/actions/cache-cocoapods
+        with:
+          key-suffix: ${{ runner.os }}
 
-  #     - uses: ./.github/actions/cache-xcode-cas
-  #       with:
-  #         key-suffix: ${{ runner.os }}
-  #         xcode-version: ${{ env.IOS_SIMULATOR_VERSION }}
+      - uses: ./.github/actions/cache-xcode-cas
+        with:
+          key-suffix: ${{ runner.os }}
+          xcode-version: ${{ env.IOS_SIMULATOR_VERSION }}
 
-  #     - name: Bootstrap
-  #       run: |
-  #         flutter precache --ios
-  #         flutter config --no-enable-swift-package-manager
-  #         flutter pub global activate melos
-  #         melos bootstrap
+      - name: Bootstrap
+        run: |
+          flutter precache --ios
+          flutter config --no-enable-swift-package-manager
+          flutter pub global activate melos
+          melos bootstrap
 
-  #     - name: Launch Allure TestOps
-  #       working-directory: sample_app/ios
-  #       run: bundle exec fastlane allure_launch
-  #       env:
-  #         GITHUB_EVENT: ${{ toJson(github.event) }}
+      - name: Launch Allure TestOps
+        working-directory: sample_app/ios
+        run: bundle exec fastlane allure_launch
+        env:
+          GITHUB_EVENT: ${{ toJson(github.event) }}
 
-  #     - name: Run e2e (iOS simulator)
-  #       working-directory: sample_app/ios
-  #       run: bundle exec fastlane run_e2e_test platform:ios ios:"${{ env.IOS_SIMULATOR_VERSION }}" device:"${{ env.IOS_SIMULATOR_DEVICE }}"
+      - name: Run e2e (iOS simulator)
+        working-directory: sample_app/ios
+        run: bundle exec fastlane run_e2e_test platform:ios ios:"${{ env.IOS_SIMULATOR_VERSION }}" device:"${{ env.IOS_SIMULATOR_DEVICE }}"
 
-  #     - name: Upload Allure results
-  #       if: env.LAUNCH_ID != '' && (success() || failure())
-  #       working-directory: sample_app/ios
-  #       run: bundle exec fastlane allure_upload launch_id:$LAUNCH_ID
+      - name: Attach videos to failed tests
+        if: failure()
+        working-directory: sample_app/ios
+        run: bundle exec fastlane attach_videos
 
-  #     - name: Allure TestOps Launch Removal
-  #       if: env.LAUNCH_ID != '' && cancelled()
-  #       working-directory: sample_app/ios
-  #       run: bundle exec fastlane allure_launch_removal launch_id:$LAUNCH_ID
+      - name: Upload Allure results
+        if: env.LAUNCH_ID != '' && (success() || failure())
+        working-directory: sample_app/ios
+        run: bundle exec fastlane allure_upload launch_id:$LAUNCH_ID
 
-  #     - uses: actions/upload-artifact@v7
-  #       if: failure()
-  #       with:
-  #         name: e2e-ios-logs
-  #         path: |
-  #           sample_app/stream-chat-test-mock-server/logs
-  #           sample_app/build/e2e-test.log
+      - name: Allure TestOps Launch Removal
+        if: env.LAUNCH_ID != '' && cancelled()
+        working-directory: sample_app/ios
+        run: bundle exec fastlane allure_launch_removal launch_id:$LAUNCH_ID
+
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: e2e-ios-logs
+          path: |
+            sample_app/stream-chat-test-mock-server/logs
+            sample_app/build/e2e-test.log
