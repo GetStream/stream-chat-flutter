@@ -401,6 +401,24 @@ void main() {
       verifyNever(() => controller.channels = any());
     });
 
+    test('updates the current user via membership when not a loaded member', () {
+      final currentUser = User(id: 'me', name: 'Renamed');
+      final channel = mockChannel(
+        'messaging:a',
+        members: [Member(userId: 'u1')],
+        membership: Member(userId: 'me'),
+      );
+      when(() => controller.currentItems).thenReturn([channel]);
+
+      handler.onUserPresenceChanged(
+        Event(type: EventType.userUpdated, user: currentUser),
+        controller,
+      );
+
+      verify(() => channel.state.updateChannelState(any())).called(1);
+      expect(capturedChannels(), equals([channel]));
+    });
+
     test('routes user.updated through the same handler', () {
       final user = User(id: 'u1', name: 'Renamed');
       final channel = mockChannel('messaging:a', members: [Member(userId: 'u1')]);

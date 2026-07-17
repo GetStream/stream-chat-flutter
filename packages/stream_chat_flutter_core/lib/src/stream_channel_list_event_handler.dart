@@ -192,9 +192,10 @@ mixin class StreamChannelListEventHandler {
   ///
   /// This event is fired when a user's presence changes or gets updated.
   ///
-  /// By default, this updates the event user in every listed channel they are a
-  /// member of, then re-sorts the list. Does nothing when the user is not a
-  /// member of any listed channel.
+  /// By default, this updates the event user in every listed channel where they
+  /// appear — either among the loaded members, or, when the event is about the
+  /// current user, as the channel membership — then re-sorts the list.
+  /// Does nothing when no listed channel references the user.
   void onUserPresenceChanged(
     Event event,
     StreamChannelListController controller,
@@ -210,7 +211,9 @@ mixin class StreamChannelListEventHandler {
       final existingMembers = [...channel.state!.members];
 
       // Leave channels untouched where the user is not an existing member.
-      if (!existingMembers.any((m) => m.userId == user.id)) continue;
+      final containsUser = existingMembership?.userId == user.id ||
+          existingMembers.any((m) => m.userId == user.id);
+      if (!containsUser) continue;
 
       Member? maybeUpdateMemberUser(Member? existingMember) {
         if (existingMember == null) return null;
