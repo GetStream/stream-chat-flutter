@@ -200,7 +200,13 @@ lane :run_e2e_test do |options|
 
         rec = start_screen_recording(ios: ios, device: device, path: "#{videos_dir}/#{test_name}.mp4")
         ok = sh_with_retries(retries: options[:retries] || 2, label: target) do
-          cmd = "flutter test #{flags.join(' ')} 2>&1 | tee -a #{Shellwords.escape(log_file)}"
+          # `tee` keeps the FULL output (incl. ALLURE-* markers) in the log file
+          # that collect_allure_results scans; the trailing grep hides just that
+          # base64 marker noise from the console. `|| true` keeps grep from
+          # affecting the pipeline's exit code, so pipefail still surfaces a
+          # `flutter test` failure.
+          cmd = "flutter test #{flags.join(' ')} 2>&1 | tee -a #{Shellwords.escape(log_file)} | " \
+                "{ grep --line-buffered -vE 'ALLURE-(RESULT|ATTACH)::' || true; }"
           sh("bash -o pipefail -c #{Shellwords.escape(cmd)}")
         end
         stop_screen_recording(rec)
