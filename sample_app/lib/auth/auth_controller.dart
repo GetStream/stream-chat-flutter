@@ -72,7 +72,13 @@ StreamChatClient _buildStreamChatClient(
     // every HTTP request (paired with the WebSocket close from
     // debugConnectivityStream). See `AuthController.debugForceOffline`.
     chatApiInterceptors: connectionOverride != null ? [_offlineSimulationInterceptor] : null,
-  )..chatPersistenceClient = _chatPersistenceClient;
+  )
+    // No offline persistence under e2e. The persistence client is a shared,
+    // never-cleared SQLite DB, so state leaks across the tests in a bundle and
+    // a reaction event referencing an unpersisted message throws an async
+    // FOREIGN KEY error — which, being async, poisons the shared test binding
+    // and makes every remaining test in the file fail before it can report.
+    ..chatPersistenceClient = connectionOverride != null ? null : _chatPersistenceClient;
 }
 
 /// Rejects every Stream API request with a connection error while
