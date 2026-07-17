@@ -121,7 +121,9 @@ jobs:
       - name: Attach videos to failed tests
         if: failure()
         working-directory: sample_app/ios
-        run: bundle exec fastlane attach_videos
+        run: |
+          command -v ffmpeg >/dev/null 2>&1 || brew install ffmpeg
+          bundle exec fastlane attach_videos
 
       - name: Upload Allure results
         if: env.LAUNCH_ID != '' && (success() || failure())

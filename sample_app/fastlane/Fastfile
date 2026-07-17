@@ -52,12 +52,21 @@ end
 def stop_screen_recording(rec)
   return unless rec
 
-  Process.kill('INT', rec[:pid])
-  Process.wait(rec[:pid])
-  unless rec[:ios]
-    sleep(1) # let screenrecord flush the file before pulling
+  if rec[:ios]
+    # simctl finalizes the .mp4 when its own process gets SIGINT.
+    Process.kill('INT', rec[:pid])
+    Process.wait(rec[:pid])
+  else
+    # `screenrecord` writes the moov atom only when the ON-DEVICE process gets
+    # SIGINT. Killing the local `adb shell` client instead lets adbd send the
+    # child SIGHUP, which leaves a truncated/empty (~4 byte) file — so signal
+    # the device-side process directly, let it flush, then pull.
+    sh("adb #{rec[:serial]}shell pkill -INT screenrecord", log: false) rescue nil
+    sleep(3) # let screenrecord finalize + flush the file on-device
+    Process.kill('INT', rec[:pid]) rescue nil # reap the local adb client
+    Process.wait(rec[:pid]) rescue nil
     sh("adb #{rec[:serial]}pull #{rec[:remote]} #{rec[:path]}", log: false)
-    sh("adb #{rec[:serial]}shell rm #{rec[:remote]}", log: false)
+    sh("adb #{rec[:serial]}shell rm #{rec[:remote]}", log: false) rescue nil
   end
 rescue StandardError => e
   UI.important("Screen recording failed to stop: #{e.message}")
@@ -97,7 +106,13 @@ def attach_videos_to_failed_results(results_dir:, videos:)
     ok = system('ffmpeg', '-y', '-ss', ss.to_s, '-i', meta[:path], '-t', duration.to_s,
                 '-an', '-c:v', 'libx264', '-preset', 'veryfast', '-movflags', '+faststart', clip,
                 out: File::NULL, err: File::NULL)
-    next unless ok && File.exist?(clip) && File.size(clip).positive?
+    # Guard against a degenerate clip (e.g. the slice window fell past the end
+    # of the recording, or ffmpeg failed): a real clip is many KB — anything
+    # tiny is an empty/broken mp4 we must not attach.
+    unless ok && File.exist?(clip) && File.size(clip) > 1024
+      File.delete(clip) if File.exist?(clip)
+      next
+    end
 
     (result['attachments'] ||= []) << { 'name' => 'Video', 'source' => File.basename(clip), 'type' => 'video/mp4' }
     File.write(json_path, JSON.generate(result))
@@ -207,10 +222,6 @@ lane :run_e2e_test do |options|
         # those test descriptions.
         only = nil
 
-        # One recording spans all attempts; the video is sliced per failed test
-        # using each result's start/stop (device-epoch ms) against this offset.
-        rec = start_screen_recording(ios: ios, device: device, path: "#{videos_dir}/#{test_name}.mp4")
-
         ok = false
         attempt = 0
         loop do
@@ -229,6 +240,16 @@ lane :run_e2e_test do |options|
           # a single --name with a regex alternation is the only way to OR them.
           flags << "--name #{Shellwords.escape(name_alternation(only))}" if only
 
+          # Record PER ATTEMPT (not once across all attempts): a still-failing
+          # test's final Allure result comes from the LAST attempt it ran in, so
+          # that attempt's recording is the one we slice. Because retries re-run
+          # only the failing subset, that last attempt is short — its clip fits
+          # within Android's ~180s screenrecord cap, whereas a recording
+          # spanning every attempt would put the failure minutes past the cap
+          # (→ an empty, past-the-end slice). Same path each attempt: the last
+          # one wins and is what the manifest points at.
+          rec = start_screen_recording(ios: ios, device: device, path: "#{videos_dir}/#{test_name}.mp4")
+
           File.write(attempt_log, '')
           # `tee` keeps the FULL output (incl. ALLURE-* markers) in the log file
           # that collect_allure_results scans, plus a fresh per-attempt copy for
@@ -245,6 +266,11 @@ lane :run_e2e_test do |options|
             false
           end
 
+          stop_screen_recording(rec)
+          # Keep the latest attempt's recording metadata (see the per-attempt
+          # rationale above).
+          videos[test_name] = { path: rec[:path], started_at_ms: rec[:started_at_ms] } if rec
+
           break if ok || attempt > retries
 
           only = failed_test_names(attempt_log)
@@ -259,8 +285,6 @@ lane :run_e2e_test do |options|
           end
         end
 
-        stop_screen_recording(rec)
-        videos[test_name] = { path: rec[:path], started_at_ms: rec[:started_at_ms] } if rec
         failed << target unless ok
       end
 
