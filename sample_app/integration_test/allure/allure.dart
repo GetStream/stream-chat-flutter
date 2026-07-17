@@ -5,6 +5,15 @@ import 'package:uuid/uuid.dart';
 
 const allureResultMarker = 'ALLURE-RESULT::';
 const allureAttachmentMarker = 'ALLURE-ATTACH::';
+
+/// Lightweight per-test outcome marker, emitted once per test as
+/// `E2E-TEST::<status>::<base64(name)>`. The Fastlane lane parses these to
+/// retry **only** the tests that failed in an attempt (rather than re-running
+/// the whole file); the name is base64-encoded to survive any characters in
+/// the test description. Separate from [allureResultMarker] (which carries the
+/// full report payload) so retry attribution stays cheap and delimiter-safe.
+const allureTestStatusMarker = 'E2E-TEST::';
+
 const _chunkSize = 900;
 
 enum AllureStatus { passed, failed, broken, skipped }
@@ -197,6 +206,8 @@ class Allure {
     }
 
     _emitChunked(allureResultMarker, result.uuid, base64.encode(utf8.encode(jsonEncode(result.toJson()))));
+    // Compact outcome line for the Fastlane retry logic (see the marker doc).
+    print('$allureTestStatusMarker${status.name}::${base64.encode(utf8.encode(result.name))}');
     _result = null;
   }
 }

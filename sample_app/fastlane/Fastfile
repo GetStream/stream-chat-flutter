@@ -5,6 +5,7 @@ require 'shellwords'
 require 'json'
 require 'securerandom'
 require 'fileutils'
+require 'base64'
 import File.expand_path('Allurefile', __dir__)
 
 mock_server_repo_name = 'stream-chat-test-mock-server'
@@ -133,26 +134,21 @@ lane :stop_mock_server do
   Net::HTTP.get_response(URI("http://localhost:#{mock_server_driver_port}/stop")) rescue nil
 end
 
-def sh_with_retries(command: nil, retries: 2, label: nil)
-  retries = retries.to_i
-  label ||= command
-  attempt = 0
-  begin
-    attempt += 1
-    if block_given?
-      yield
-    else
-      sh(command)
-    end
-    true
-  rescue StandardError
-    if attempt <= retries
-      UI.important("#{label} failed (attempt #{attempt}/#{retries + 1}); retrying…")
-      retry
-    end
-    UI.error("#{label} still failing after #{retries} retries")
-    false
+# Names of the tests that failed/broke in a single `flutter test` run, read
+# from the `E2E-TEST::<status>::<base64(name)>` markers the Dart reporter emits
+# (one per test). Used to retry only the failed cases. Returns [] when nothing
+# could be attributed (e.g. a compile error or crash before any test reported),
+# which the caller treats as "retry the whole file".
+def failed_test_names(log)
+  return [] unless File.exist?(log)
+
+  failed = []
+  File.read(log).scan(%r{E2E-TEST::(passed|failed|broken|skipped)::([A-Za-z0-9+/=]+)}) do |status, name_b64|
+    next unless %w[failed broken].include?(status)
+
+    failed << Base64.decode64(name_b64).force_encoding('UTF-8')
   end
+  failed.uniq
 end
 
 lane :run_e2e_test do |options|
@@ -184,31 +180,74 @@ lane :run_e2e_test do |options|
       targets = options[:target] ? [options[:target]] : Dir['integration_test/*_test.dart'].sort
       UI.user_error!('No e2e test files found') if targets.empty?
 
+      retries = (options[:retries] || 2).to_i
+
       failed = []
       targets.each do |target|
         # Basename ties each test's video clip back to its result via the
         # `testFile` label the Dart reporter sets from this dart-define.
         test_name = File.basename(target, '.dart')
-        flags = [target, "--dart-define=E2E_TARGET=#{test_name}"]
-        flags << "-d #{device}" if device
-        if options[:verbose]
-          flags << '--verbose'
-        else
-          flags << '--quiet'
-          flags << "--reporter #{ENV['GITHUB_ACTIONS'] ? 'github' : 'expanded'}"
+
+        # Per-attempt log, scanned for the failed-test markers so the *next*
+        # attempt re-runs only what failed (via --plain-name). Kept distinct
+        # from the cumulative `log_file` (which accumulates every attempt's
+        # ALLURE-* markers for Allure) so attribution reflects one attempt only.
+        attempt_log = "#{videos_dir}/#{test_name}.attempt.log"
+
+        # nil => run the whole file (first attempt); an array => re-run only
+        # those test descriptions.
+        only = nil
+
+        # One recording spans all attempts; the video is sliced per failed test
+        # using each result's start/stop (device-epoch ms) against this offset.
+        rec = start_screen_recording(ios: ios, device: device, path: "#{videos_dir}/#{test_name}.mp4")
+
+        ok = false
+        attempt = 0
+        loop do
+          attempt += 1
+
+          flags = [target, "--dart-define=E2E_TARGET=#{test_name}"]
+          flags << "-d #{device}" if device
+          if options[:verbose]
+            flags << '--verbose'
+          else
+            flags << '--quiet'
+            flags << "--reporter #{ENV['GITHUB_ACTIONS'] ? 'github' : 'expanded'}"
+          end
+          # Retry only the tests that failed last attempt.
+          only&.each { |name| flags << "--plain-name #{Shellwords.escape(name)}" }
+
+          File.write(attempt_log, '')
+          # `tee` keeps the FULL output (incl. ALLURE-* markers) in the log file
+          # that collect_allure_results scans, plus a fresh per-attempt copy for
+          # failure attribution; the trailing grep hides the base64 marker noise
+          # from the console. `|| true` keeps grep from affecting the pipeline's
+          # exit code, so pipefail still surfaces a `flutter test` failure.
+          cmd = "flutter test #{flags.join(' ')} 2>&1 | tee -a #{Shellwords.escape(log_file)} | " \
+                "tee #{Shellwords.escape(attempt_log)} | " \
+                "{ grep --line-buffered -vE 'ALLURE-(RESULT|ATTACH)::|E2E-TEST::' || true; }"
+          ok = begin
+            sh("bash -o pipefail -c #{Shellwords.escape(cmd)}")
+            true
+          rescue StandardError
+            false
+          end
+
+          break if ok || attempt > retries
+
+          only = failed_test_names(attempt_log)
+          if only.empty?
+            # No per-test failure attributed (compile error / early crash) —
+            # retry the whole file.
+            only = nil
+            UI.important("#{target} failed (attempt #{attempt}/#{retries + 1}); retrying whole file…")
+          else
+            UI.important("#{target} failed (attempt #{attempt}/#{retries + 1}); " \
+                         "retrying #{only.size} failed test(s): #{only.join(', ')}")
+          end
         end
 
-        rec = start_screen_recording(ios: ios, device: device, path: "#{videos_dir}/#{test_name}.mp4")
-        ok = sh_with_retries(retries: options[:retries] || 2, label: target) do
-          # `tee` keeps the FULL output (incl. ALLURE-* markers) in the log file
-          # that collect_allure_results scans; the trailing grep hides just that
-          # base64 marker noise from the console. `|| true` keeps grep from
-          # affecting the pipeline's exit code, so pipefail still surfaces a
-          # `flutter test` failure.
-          cmd = "flutter test #{flags.join(' ')} 2>&1 | tee -a #{Shellwords.escape(log_file)} | " \
-                "{ grep --line-buffered -vE 'ALLURE-(RESULT|ATTACH)::' || true; }"
-          sh("bash -o pipefail -c #{Shellwords.escape(cmd)}")
-        end
         stop_screen_recording(rec)
         videos[test_name] = { path: rec[:path], started_at_ms: rec[:started_at_ms] } if rec
         failed << target unless ok
