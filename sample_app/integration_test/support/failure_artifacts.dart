@@ -10,10 +10,9 @@ import '../allure/allure.dart';
 /// current Allure test. Called on failure, before the result is emitted.
 ///
 /// Screenshot and widget hierarchy are grabbed in-process from the live render
-/// tree; [log] is the output captured during the test body. Video is recorded
-/// host-side by the Fastlane lane (it can't be captured in-process). Every
-/// capture is best-effort — a failure to grab one artifact never masks the
-/// original test failure.
+/// tree; [log] is the output captured during the test body. Every capture is
+/// best-effort — a failure to grab one artifact never masks the original test
+/// failure.
 Future<void> captureFailureArtifacts(WidgetTester tester, String log) async {
   await _attachScreenshot(tester);
   _attachWidgetHierarchy();

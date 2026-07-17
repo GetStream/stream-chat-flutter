@@ -2,9 +2,6 @@ opt_out_usage
 
 require 'net/http'
 require 'shellwords'
-require 'json'
-require 'securerandom'
-require 'fileutils'
 import File.expand_path('Allurefile', __dir__)
 
 mock_server_repo_name = 'stream-chat-test-mock-server'
@@ -18,89 +15,6 @@ end
 
 def ios_device?(device)
   device.to_s.match?(/\A[0-9A-F]{8}-[0-9A-F]{4}-/i)
-end
-
-# Starts a best-effort screen recording of the device/simulator. Returns a
-# handle passed back to `stop_screen_recording`, or nil if recording couldn't
-# start (recording never fails the test run).
-def start_screen_recording(ios:, device:, path:)
-  FileUtils.mkdir_p(File.dirname(path))
-  # Wall-clock at recording start, to line the video timeline up with the
-  # per-test start/stop timestamps the Dart reporter records (same clock on the
-  # iOS simulator; host-synced on the Android emulator).
-  started_at_ms = (Time.now.to_f * 1000).round
-  if ios
-    # `simctl io recordVideo` records until interrupted; run it detached and
-    # keep the pid so we can SIGINT it (which finalizes the .mp4).
-    pid = spawn('xcrun', 'simctl', 'io', device, 'recordVideo', '--codec=h264', '--force', path,
-                out: File::NULL, err: File::NULL)
-    { pid: pid, ios: true, path: path, started_at_ms: started_at_ms }
-  else
-    # `screenrecord` writes on-device (max ~180s), pulled after stop.
-    serial = device ? "-s #{device} " : ''
-    remote = "/sdcard/#{File.basename(path)}"
-    pid = spawn("adb #{serial}shell screenrecord --bit-rate 4000000 #{remote}",
-                out: File::NULL, err: File::NULL)
-    { pid: pid, ios: false, path: path, remote: remote, serial: serial, started_at_ms: started_at_ms }
-  end
-rescue StandardError => e
-  UI.important("Screen recording failed to start: #{e.message}")
-  nil
-end
-
-def stop_screen_recording(rec)
-  return unless rec
-
-  Process.kill('INT', rec[:pid])
-  Process.wait(rec[:pid])
-  unless rec[:ios]
-    sleep(1) # let screenrecord flush the file before pulling
-    sh("adb #{rec[:serial]}pull #{rec[:remote]} #{rec[:path]}", log: false)
-    sh("adb #{rec[:serial]}shell rm #{rec[:remote]}", log: false)
-  end
-rescue StandardError => e
-  UI.important("Screen recording failed to stop: #{e.message}")
-end
-
-# Attaches a **per-test** video to each failed/broken result. Recording is
-# per file (all its tests run in one `flutter test` process, so the host can't
-# start/stop between them), so each test's clip is sliced out of its file's
-# video using the result's own start/stop timestamps.
-#
-# `videos` maps a test-file basename => { path:, started_at_ms: }.
-def attach_videos_to_failed_results(results_dir:, videos:)
-  return unless Dir.exist?(results_dir)
-  return if videos.empty?
-
-  unless system('command -v ffmpeg > /dev/null 2>&1')
-    UI.important('ffmpeg not found; skipping per-test video attachments')
-    return
-  end
-
-  Dir["#{results_dir}/*-result.json"].each do |json_path|
-    result = JSON.parse(File.read(json_path))
-    next unless %w[failed broken].include?(result['status'])
-    next unless result['start'] && result['stop']
-
-    label = (result['labels'] || []).find { |l| l['name'] == 'testFile' }
-    meta = label && videos[label['value']]
-    next unless meta && File.exist?(meta[:path]) && File.size(meta[:path]).positive?
-
-    # Slice [start, stop] out of the file's video, with 1s of lead/tail padding
-    # to absorb recording-start latency and minor clock skew.
-    ss = [((result['start'] - meta[:started_at_ms]) / 1000.0) - 1.0, 0].max
-    duration = ((result['stop'] - result['start']) / 1000.0) + 2.0
-    next unless duration.positive?
-
-    clip = "#{results_dir}/#{SecureRandom.uuid}-attachment.mp4"
-    ok = system('ffmpeg', '-y', '-ss', ss.to_s, '-i', meta[:path], '-t', duration.to_s,
-                '-an', '-c:v', 'libx264', '-preset', 'veryfast', '-movflags', '+faststart', clip,
-                out: File::NULL, err: File::NULL)
-    next unless ok && File.exist?(clip) && File.size(clip).positive?
-
-    (result['attachments'] ||= []) << { 'name' => 'Video', 'source' => File.basename(clip), 'type' => 'video/mp4' }
-    File.write(json_path, JSON.generate(result))
-  end
 end
 
 lane :sh_on_root do |options|
@@ -174,11 +88,6 @@ lane :run_e2e_test do |options|
   FileUtils.mkdir_p(File.dirname(log_file))
   File.write(log_file, '')
 
-  videos_dir = "#{root_path}/build/e2e-videos"
-  FileUtils.rm_rf(videos_dir)
-  FileUtils.mkdir_p(videos_dir)
-  videos = {} # test-file basename => { path:, started_at_ms: }
-
   begin
     Dir.chdir(root_path) do
       targets = options[:target] ? [options[:target]] : Dir['integration_test/*_test.dart'].sort
@@ -186,10 +95,7 @@ lane :run_e2e_test do |options|
 
       failed = []
       targets.each do |target|
-        # Basename ties each test's video clip back to its result via the
-        # `testFile` label the Dart reporter sets from this dart-define.
-        test_name = File.basename(target, '.dart')
-        flags = [target, "--dart-define=E2E_TARGET=#{test_name}"]
+        flags = [target]
         flags << "-d #{device}" if device
         if options[:verbose]
           flags << '--verbose'
@@ -198,13 +104,10 @@ lane :run_e2e_test do |options|
           flags << "--reporter #{ENV['GITHUB_ACTIONS'] ? 'github' : 'expanded'}"
         end
 
-        rec = start_screen_recording(ios: ios, device: device, path: "#{videos_dir}/#{test_name}.mp4")
         ok = sh_with_retries(retries: options[:retries] || 2, label: target) do
           cmd = "flutter test #{flags.join(' ')} 2>&1 | tee -a #{Shellwords.escape(log_file)}"
           sh("bash -o pipefail -c #{Shellwords.escape(cmd)}")
         end
-        stop_screen_recording(rec)
-        videos[test_name] = { path: rec[:path], started_at_ms: rec[:started_at_ms] } if rec
         failed << target unless ok
       end
 
@@ -212,7 +115,6 @@ lane :run_e2e_test do |options|
     end
   ensure
     collect_allure_results(log_file: log_file) rescue nil
-    attach_videos_to_failed_results(results_dir: allure_results_path, videos: videos) rescue nil
     stop_mock_server
   end
 end
