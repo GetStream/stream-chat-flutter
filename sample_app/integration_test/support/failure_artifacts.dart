@@ -6,6 +6,14 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../allure/allure.dart';
 
+// Attachments are streamed to the device log as base64 chunks, so they must
+// stay small — a full-resolution screenshot or a whole widget tree produces
+// thousands of log lines per failure, floods CI, and risks logcat dropping
+// chunks (which corrupts the reassembled file). These bounds keep each
+// attachment to a few dozen lines while staying useful for triage.
+const _maxScreenshotSide = 600.0; // longest edge, logical px * pixelRatio
+const _maxTextChars = 20000;
+
 /// Captures debug artifacts from the running app and attaches them to the
 /// current Allure test. Called on failure, before the result is emitted.
 ///
@@ -16,7 +24,7 @@ import '../allure/allure.dart';
 Future<void> captureFailureArtifacts(WidgetTester tester, String log) async {
   await _attachScreenshot(tester);
   _attachWidgetHierarchy();
-  Allure.instance.attachText('Log', log, ext: 'log');
+  Allure.instance.attachText('Log', _cap(log), ext: 'log');
 }
 
 Future<void> _attachScreenshot(WidgetTester tester) async {
@@ -25,11 +33,11 @@ Future<void> _attachScreenshot(WidgetTester tester) async {
     final layer = view.debugLayer;
     if (layer is! OffsetLayer) return;
 
-    // Capped at 2.0 rather than the full device pixel ratio: the PNG is
-    // streamed to the device log as base64 chunks, and a huge image risks
-    // logcat dropping lines (which would corrupt the reassembled file). 2.0
-    // stays readable while keeping the volume manageable.
-    final pixelRatio = view.flutterView.devicePixelRatio.clamp(1.0, 2.0);
+    // Downscale so the longest edge is ~_maxScreenshotSide px, regardless of
+    // device resolution — keeps the base64 payload small (see file header).
+    final longestSide = view.paintBounds.size.longestSide;
+    final pixelRatio = longestSide <= 0 ? 1.0 : (_maxScreenshotSide / longestSide).clamp(0.1, 1.5);
+
     final image = await layer.toImage(view.paintBounds, pixelRatio: pixelRatio);
     try {
       final data = await image.toByteData(format: ui.ImageByteFormat.png);
@@ -52,8 +60,14 @@ void _attachWidgetHierarchy() {
   try {
     final tree = WidgetsBinding.instance.rootElement?.toStringDeep();
     if (tree == null) return;
-    Allure.instance.attachText('Widget hierarchy', tree, ext: 'txt');
+    Allure.instance.attachText('Widget hierarchy', _cap(tree), ext: 'txt');
   } catch (_) {
     // Best-effort.
   }
+}
+
+String _cap(String s) {
+  if (s.length <= _maxTextChars) return s;
+  final dropped = s.length - _maxTextChars;
+  return '${s.substring(0, _maxTextChars)}\n…[truncated $dropped chars]';
 }
