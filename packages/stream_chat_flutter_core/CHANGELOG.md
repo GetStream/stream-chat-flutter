@@ -4,6 +4,7 @@
 
 - Fixed `StreamChannelListController` not handling `notification.channel_deleted` event.
 - Fixed backwards pagination not working if channel was never opened.
+- Guarded `StreamChannelListController`'s `channel.updated`, `member.updated`, and `user.presence.changed`/`user.updated` event handlers to skip the full list re-sort when the event doesn't affect any listed channel.
 
 ## 10.1.0
 

@@ -48,9 +48,13 @@ mixin class StreamChannelListEventHandler {
   ///
   /// This event is fired when a channel is updated.
   ///
-  /// By default, this updates the channel received in the event.
+  /// By default, this re-sorts the list when the updated channel is present in
+  /// it, and does nothing otherwise.
   void onChannelUpdated(Event event, StreamChannelListController controller) {
-    controller.channels = [...controller.currentItems];
+    final cid = event.cid ?? event.channel?.cid;
+    final channels = controller.currentItems;
+    if (!channels.any((it) => it.cid == cid)) return;
+    controller.channels = [...channels];
   }
 
   /// Function which gets called for the event
@@ -58,9 +62,13 @@ mixin class StreamChannelListEventHandler {
   ///
   /// This event is fired when a member is updated.
   ///
-  /// By default, this sorts the channels.
+  /// By default, this re-sorts the list when the member's channel is present in
+  /// it, and does nothing otherwise.
   void onMemberUpdated(Event event, StreamChannelListController controller) {
-    controller.channels = [...controller.currentItems];
+    final cid = event.cid ?? event.channel?.cid;
+    final channels = controller.currentItems;
+    if (!channels.any((it) => it.cid == cid)) return;
+    controller.channels = [...channels];
   }
 
   /// Function which gets called for the event
@@ -180,11 +188,13 @@ mixin class StreamChannelListEventHandler {
   }
 
   /// Function which gets called for the event
-  /// 'user.presence.changed' and [EventType.userUpdated].
+  /// [EventType.userPresenceChanged] and [EventType.userUpdated].
   ///
   /// This event is fired when a user's presence changes or gets updated.
   ///
-  /// By default, this updates the channel member with the event user.
+  /// By default, this updates the event user in every listed channel they are a
+  /// member of, then re-sorts the list. Does nothing when the user is not a
+  /// member of any listed channel.
   void onUserPresenceChanged(
     Event event,
     StreamChannelListController controller,
@@ -194,12 +204,13 @@ mixin class StreamChannelListEventHandler {
 
     final channels = [...controller.currentItems];
 
-    final updatedChannels = channels.map((channel) {
+    var updated = false;
+    for (final channel in channels) {
       final existingMembership = channel.membership;
       final existingMembers = [...channel.state!.members];
 
-      // Return if the user is not a existing member of the channel.
-      if (!existingMembers.any((m) => m.userId == user.id)) return channel;
+      // Leave channels untouched where the user is not an existing member.
+      if (!existingMembers.any((m) => m.userId == user.id)) continue;
 
       Member? maybeUpdateMemberUser(Member? existingMember) {
         if (existingMember == null) return null;
@@ -216,9 +227,12 @@ mixin class StreamChannelListEventHandler {
         ),
       );
 
-      return channel;
-    });
+      updated = true;
+    }
 
-    controller.channels = [...updatedChannels];
+    // Skip the re-sort when no listed channel contained the user.
+    if (!updated) return;
+
+    controller.channels = [...channels];
   }
 }
