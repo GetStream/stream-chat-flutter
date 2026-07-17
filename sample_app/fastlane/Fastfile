@@ -151,6 +151,15 @@ def failed_test_names(log)
   failed.uniq
 end
 
+# Builds a single Dart-regex alternation matching any of `names`, for one
+# `flutter test --name` (which OR's, unlike passing multiple flags). Each name
+# is regex-escaped (ECMAScript metacharacters; spaces left as-is) so the test
+# descriptions match literally.
+def name_alternation(names)
+  escaped = names.map { |n| n.gsub(%r{[.*+?^${}()|\[\]\\/]}) { |c| "\\#{c}" } }
+  "(#{escaped.join('|')})"
+end
+
 lane :run_e2e_test do |options|
   next unless is_check_required(sources: sources_matrix[:e2e], force_check: @force_check)
 
@@ -215,8 +224,10 @@ lane :run_e2e_test do |options|
             flags << '--quiet'
             flags << "--reporter #{ENV['GITHUB_ACTIONS'] ? 'github' : 'expanded'}"
           end
-          # Retry only the tests that failed last attempt.
-          only&.each { |name| flags << "--plain-name #{Shellwords.escape(name)}" }
+          # Retry only the tests that failed last attempt. `flutter test` AND's
+          # multiple --name/--plain-name flags (a test must match them all), so
+          # a single --name with a regex alternation is the only way to OR them.
+          flags << "--name #{Shellwords.escape(name_alternation(only))}" if only
 
           File.write(attempt_log, '')
           # `tee` keeps the FULL output (incl. ALLURE-* markers) in the log file
