@@ -11,6 +11,7 @@
 - Fixed shadowed messages not hidden in channel list items.
 - Fixed `StreamMessageListView` firing `markThreadRead` on a reply-less parent, which produced a guaranteed 404 every time the thread view was opened before the first reply.
 - Fixed dismissing the `StreamMessageListView` unread indicator being ignored while a channel is receiving a rapid burst of messages.
+- Fixed `onReactionPicked` using an incorrect `BuildContext`, which could cause the parent route to be popped unexpectedly when used with nested navigators.
 
 ## 10.1.0
 
