@@ -211,8 +211,7 @@ mixin class StreamChannelListEventHandler {
       final existingMembers = [...channel.state!.members];
 
       // Leave channels untouched where the user is not an existing member.
-      final containsUser = existingMembership?.userId == user.id ||
-          existingMembers.any((m) => m.userId == user.id);
+      final containsUser = existingMembership?.userId == user.id || existingMembers.any((m) => m.userId == user.id);
       if (!containsUser) continue;
 
       Member? maybeUpdateMemberUser(Member? existingMember) {
