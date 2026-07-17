@@ -10,6 +10,11 @@ import '../allure/allure.dart';
 import 'failure_artifacts.dart';
 import 'stream_test_env.dart';
 
+/// The test file currently running, injected by the Fastlane lane
+/// (`--dart-define=E2E_TARGET=...`). Lets the lane attach that file's host-side
+/// video recording to its failed tests. Empty when run ad-hoc.
+const _e2eTarget = String.fromEnvironment('E2E_TARGET');
+
 void streamTest({
   String? allureId,
   required String description,
@@ -21,7 +26,10 @@ void streamTest({
     Allure.instance.startTest(
       name: description,
       fullName: Invoker.current?.liveTest.test.name ?? description,
-      labels: {if (allureId != null) 'AS_ID': allureId},
+      labels: {
+        if (allureId != null) 'AS_ID': allureId,
+        if (_e2eTarget.isNotEmpty) 'testFile': _e2eTarget,
+      },
     );
 
     // Capture the test body's output so it can be attached on failure, while
