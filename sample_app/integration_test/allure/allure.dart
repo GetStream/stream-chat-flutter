@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:math';
 
-import 'package:flutter_test/flutter_test.dart' show TestFailure;
 import 'package:uuid/uuid.dart';
 
 const allureResultMarker = 'ALLURE-RESULT::';
@@ -70,7 +69,7 @@ class Allure {
   static final Allure instance = Allure._();
 
   _Result? _result;
-  final List<_Step> _stepStack = [];
+  _Step? _openStep;
 
   int get _now => DateTime.now().millisecondsSinceEpoch;
 
@@ -79,7 +78,7 @@ class Allure {
     required String fullName,
     Map<String, String> labels = const {},
   }) {
-    _stepStack.clear();
+    _openStep = null;
     _result = _Result(
       uuid: const Uuid().v4(),
       name: name,
@@ -91,26 +90,34 @@ class Allure {
     );
   }
 
-  Future<T> step<T>(String name, Future<T> Function() body) async {
+  /// Records a BDD step marker. The statements that run after this call, up to
+  /// the next [beginStep] (or the end of the test), are the step's body — so a
+  /// step needs no closure and reads like the native `step("...") { ... }`.
+  ///
+  /// A failure in the body is attributed to whichever step is open when the
+  /// test stops (see [stopTest]).
+  void beginStep(String name) {
+    final result = _result;
+    if (result == null) return;
+    _closeOpenStep();
     final step = _Step(name, _now);
-    (_stepStack.isNotEmpty ? _stepStack.last.steps : _result?.steps)?.add(step);
-    _stepStack.add(step);
-    try {
-      return await body();
-    } on TestFailure catch (e) {
+    result.steps.add(step);
+    _openStep = step;
+  }
+
+  void _closeOpenStep({AllureStatus? status, String? message, String? trace}) {
+    final step = _openStep;
+    if (step == null) return;
+    step.stop = _now;
+    if (status != null && status != AllureStatus.passed) {
       step
-        ..status = AllureStatus.failed
-        ..statusDetails = {'message': '$e'};
-      rethrow;
-    } catch (e) {
-      step
-        ..status = AllureStatus.broken
-        ..statusDetails = {'message': '$e'};
-      rethrow;
-    } finally {
-      step.stop = _now;
-      _stepStack.removeLast();
+        ..status = status
+        ..statusDetails = {
+          if (message != null) 'message': message,
+          if (trace != null) 'trace': trace,
+        };
     }
+    _openStep = null;
   }
 
   void stopTest({
@@ -120,6 +127,13 @@ class Allure {
   }) {
     final result = _result;
     if (result == null) return;
+    // Close the step that was open when the test ended, propagating a failure
+    // to it so the report points at the step whose body actually threw.
+    _closeOpenStep(
+      status: status,
+      message: message?.toString(),
+      trace: trace?.toString(),
+    );
     result
       ..status = status
       ..stop = _now;

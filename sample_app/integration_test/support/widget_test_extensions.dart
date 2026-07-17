@@ -52,4 +52,40 @@ extension E2EWidgetTester on WidgetTester {
     }
     throw TestFailure('Timed out waiting for $finder');
   }
+
+  Future<void> waitUntilNotVisible(
+    Finder finder, {
+    Duration timeout = const Duration(seconds: 30),
+  }) async {
+    final end = DateTime.now().add(timeout);
+    while (DateTime.now().isBefore(end)) {
+      await pump(const Duration(milliseconds: 100));
+      if (finder.evaluate().isEmpty) {
+        await pumpAndSettle();
+        return;
+      }
+    }
+    throw TestFailure('Timed out waiting for $finder to disappear');
+  }
+
+  /// Long-presses [target] until [appears] shows up.
+  ///
+  /// A message's long-press handler is disabled while it is still being sent,
+  /// so a single long-press can be a no-op; retrying until the reaction
+  /// picker (or any expected widget) appears makes the gesture reliable.
+  Future<void> longPressUntilVisible(
+    Finder target,
+    Finder appears, {
+    Duration timeout = const Duration(seconds: 30),
+  }) async {
+    await waitUntilVisible(target);
+    final end = DateTime.now().add(timeout);
+    while (DateTime.now().isBefore(end)) {
+      await longPress(target);
+      await pumpAndSettle();
+      if (appears.evaluate().isNotEmpty) return;
+      await pump(const Duration(milliseconds: 250));
+    }
+    throw TestFailure('Timed out long-pressing $target waiting for $appears');
+  }
 }
