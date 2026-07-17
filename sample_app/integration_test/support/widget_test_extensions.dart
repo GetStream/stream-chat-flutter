@@ -78,13 +78,23 @@ extension E2EWidgetTester on WidgetTester {
     Finder appears, {
     Duration timeout = const Duration(seconds: 30),
   }) async {
-    await waitUntilVisible(target);
     final end = DateTime.now().add(timeout);
     while (DateTime.now().isBefore(end)) {
+      await pump(const Duration(milliseconds: 100));
+      if (appears.evaluate().isNotEmpty) return;
+
+      bool resolves;
+      try {
+        resolves = target.evaluate().isNotEmpty;
+      } catch (_) {
+        resolves = false;
+      }
+      if (!resolves) continue;
+
       await longPress(target);
       await pumpAndSettle();
       if (appears.evaluate().isNotEmpty) return;
-      await pump(const Duration(milliseconds: 250));
+      await pump(const Duration(milliseconds: 150));
     }
     throw TestFailure('Timed out long-pressing $target waiting for $appears');
   }

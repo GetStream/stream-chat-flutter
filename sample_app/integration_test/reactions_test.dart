@@ -9,6 +9,7 @@ void main() {
   const sampleText = 'Test';
 
   streamTestWithEnv(
+    allureId: '11293',
     description: 'user adds a reaction to their own message',
     body: (env) async {
       step('GIVEN user opens the channel');
@@ -26,6 +27,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '11288',
     description: 'user deletes a reaction from their own message',
     body: (env) async {
       step('GIVEN user opens the channel');
@@ -46,6 +48,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '11292',
     description: 'user adds a reaction to the participant message',
     body: (env) async {
       step('GIVEN user opens the channel');
@@ -63,6 +66,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '11290',
     description: 'user removes a reaction from the participant message',
     body: (env) async {
       step('GIVEN user opens the channel');
@@ -83,6 +87,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '11294',
     description: 'participant adds a reaction to the user message',
     body: (env) async {
       step('GIVEN user opens the channel');
@@ -98,6 +103,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '11296',
     description: 'participant removes a reaction from the user message',
     body: (env) async {
       step('GIVEN user opens the channel');
@@ -117,6 +123,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '11291',
     description: 'participant adds a reaction to their own message',
     body: (env) async {
       step('GIVEN user opens the channel');
@@ -134,6 +141,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '11295',
     description: 'participant removes a reaction from their own message',
     body: (env) async {
       step('GIVEN user opens the channel');
@@ -154,13 +162,8 @@ void main() {
     },
   );
 
-  // EXPECTED TO FAIL on Flutter: unlike iOS/Android, the Dart SDK does not
-  // queue offline reactions — `channel.sendReaction` rolls back its optimistic
-  // update when the HTTP request fails (channel.dart), and the reaction is
-  // never replayed on reconnect (the RetryQueue is messages-only). Kept as a
-  // faithful port of the native case so the gap stays visible; it will pass
-  // once the SDK gives reactions the same offline-queue treatment as messages.
   streamTestWithEnv(
+    allureId: '11287',
     description: 'user adds a reaction while offline',
     body: (env) async {
       step('GIVEN user opens the channel');
@@ -187,6 +190,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '11289',
     description: 'participant adds a reaction while the user is offline',
     body: (env) async {
       step('GIVEN user opens the channel');
