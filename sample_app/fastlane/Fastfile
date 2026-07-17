@@ -2,6 +2,9 @@ opt_out_usage
 
 require 'net/http'
 require 'shellwords'
+require 'json'
+require 'securerandom'
+require 'fileutils'
 import File.expand_path('Allurefile', __dir__)
 
 mock_server_repo_name = 'stream-chat-test-mock-server'
@@ -15,6 +18,72 @@ end
 
 def ios_device?(device)
   device.to_s.match?(/\A[0-9A-F]{8}-[0-9A-F]{4}-/i)
+end
+
+# Starts a best-effort screen recording of the device/simulator. Returns a
+# handle passed back to `stop_screen_recording`, or nil if recording couldn't
+# start (recording never fails the test run).
+def start_screen_recording(ios:, device:, path:)
+  FileUtils.mkdir_p(File.dirname(path))
+  if ios
+    # `simctl io recordVideo` records until interrupted; run it detached and
+    # keep the pid so we can SIGINT it (which finalizes the .mp4).
+    pid = spawn('xcrun', 'simctl', 'io', device, 'recordVideo', '--codec=h264', '--force', path,
+                out: File::NULL, err: File::NULL)
+    { pid: pid, ios: true, path: path }
+  else
+    # `screenrecord` writes on-device (max ~180s), pulled after stop.
+    serial = device ? "-s #{device} " : ''
+    remote = "/sdcard/#{File.basename(path)}"
+    pid = spawn("adb #{serial}shell screenrecord --bit-rate 4000000 #{remote}",
+                out: File::NULL, err: File::NULL)
+    { pid: pid, ios: false, path: path, remote: remote, serial: serial }
+  end
+rescue StandardError => e
+  UI.important("Screen recording failed to start: #{e.message}")
+  nil
+end
+
+def stop_screen_recording(rec)
+  return unless rec
+
+  Process.kill('INT', rec[:pid])
+  Process.wait(rec[:pid])
+  unless rec[:ios]
+    sleep(1) # let screenrecord flush the file before pulling
+    sh("adb #{rec[:serial]}pull #{rec[:remote]} #{rec[:path]}", log: false)
+    sh("adb #{rec[:serial]}shell rm #{rec[:remote]}", log: false)
+  end
+rescue StandardError => e
+  UI.important("Screen recording failed to stop: #{e.message}")
+end
+
+# Attaches each recorded video to the failed/broken results of the file it came
+# from, matched via the `testFile` label the Dart reporter sets. One video is
+# copied once and shared by every failed test in that file.
+def attach_videos_to_failed_results(results_dir:, videos_dir:)
+  return unless Dir.exist?(results_dir)
+
+  sources = {}
+  Dir["#{results_dir}/*-result.json"].each do |json_path|
+    result = JSON.parse(File.read(json_path))
+    next unless %w[failed broken].include?(result['status'])
+
+    label = (result['labels'] || []).find { |l| l['name'] == 'testFile' }
+    next unless label
+
+    video = "#{videos_dir}/#{label['value']}.mp4"
+    next unless File.exist?(video) && File.size(video).positive?
+
+    source = sources[video] ||= begin
+      name = "#{SecureRandom.uuid}-attachment.mp4"
+      FileUtils.cp(video, "#{results_dir}/#{name}")
+      name
+    end
+
+    (result['attachments'] ||= []) << { 'name' => 'Video', 'source' => source, 'type' => 'video/mp4' }
+    File.write(json_path, JSON.generate(result))
+  end
 end
 
 lane :sh_on_root do |options|
@@ -88,6 +157,10 @@ lane :run_e2e_test do |options|
   FileUtils.mkdir_p(File.dirname(log_file))
   File.write(log_file, '')
 
+  videos_dir = "#{root_path}/build/e2e-videos"
+  FileUtils.rm_rf(videos_dir)
+  FileUtils.mkdir_p(videos_dir)
+
   begin
     Dir.chdir(root_path) do
       targets = options[:target] ? [options[:target]] : Dir['integration_test/*_test.dart'].sort
@@ -95,7 +168,10 @@ lane :run_e2e_test do |options|
 
       failed = []
       targets.each do |target|
-        flags = [target]
+        # Basename ties the recording to the file's failed results via the
+        # `testFile` label the Dart reporter sets from this dart-define.
+        test_name = File.basename(target, '.dart')
+        flags = [target, "--dart-define=E2E_TARGET=#{test_name}"]
         flags << "-d #{device}" if device
         if options[:verbose]
           flags << '--verbose'
@@ -104,10 +180,12 @@ lane :run_e2e_test do |options|
           flags << "--reporter #{ENV['GITHUB_ACTIONS'] ? 'github' : 'expanded'}"
         end
 
+        rec = start_screen_recording(ios: ios, device: device, path: "#{videos_dir}/#{test_name}.mp4")
         ok = sh_with_retries(retries: options[:retries] || 2, label: target) do
           cmd = "flutter test #{flags.join(' ')} 2>&1 | tee -a #{Shellwords.escape(log_file)}"
           sh("bash -o pipefail -c #{Shellwords.escape(cmd)}")
         end
+        stop_screen_recording(rec)
         failed << target unless ok
       end
 
@@ -115,6 +193,7 @@ lane :run_e2e_test do |options|
     end
   ensure
     collect_allure_results(log_file: log_file) rescue nil
+    attach_videos_to_failed_results(results_dir: allure_results_path, videos_dir: videos_dir) rescue nil
     stop_mock_server
   end
 end

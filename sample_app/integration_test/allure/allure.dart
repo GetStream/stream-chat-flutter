@@ -4,9 +4,20 @@ import 'dart:math';
 import 'package:uuid/uuid.dart';
 
 const allureResultMarker = 'ALLURE-RESULT::';
+const allureAttachmentMarker = 'ALLURE-ATTACH::';
 const _chunkSize = 900;
 
 enum AllureStatus { passed, failed, broken, skipped }
+
+class _Attachment {
+  _Attachment({required this.name, required this.source, required this.type});
+
+  final String name;
+  final String source;
+  final String type;
+
+  Map<String, Object?> toJson() => {'name': name, 'source': source, 'type': type};
+}
 
 class _Step {
   _Step(this.name, this.start);
@@ -47,6 +58,7 @@ class _Result {
   Map<String, String>? statusDetails;
   final List<Map<String, String>> labels;
   final List<_Step> steps = [];
+  final List<_Attachment> attachments = [];
 
   Map<String, Object?> toJson() => {
     'uuid': uuid,
@@ -60,6 +72,7 @@ class _Result {
     'stop': stop,
     'labels': labels,
     'steps': [for (final s in steps) s.toJson()],
+    'attachments': [for (final a in attachments) a.toJson()],
   };
 }
 
@@ -120,6 +133,45 @@ class Allure {
     _openStep = null;
   }
 
+  /// Attaches a binary artifact (e.g. a screenshot) to the current test.
+  ///
+  /// The bytes are streamed to the device log as chunked
+  /// `ALLURE-ATTACH::<source>:<seq>:<base64>` markers (the same transport as
+  /// results); `collect_allure_results` reassembles them into
+  /// `allure-results/<source>` and this entry references it. Register before
+  /// [stopTest] so the reference is included in the emitted result JSON.
+  void attachBytes(
+    String name,
+    List<int> bytes, {
+    required String type,
+    required String ext,
+  }) {
+    final result = _result;
+    if (result == null || bytes.isEmpty) return;
+    final source = '${const Uuid().v4()}-attachment.$ext';
+    result.attachments.add(_Attachment(name: name, source: source, type: type));
+    _emitChunked(allureAttachmentMarker, source, base64.encode(bytes));
+  }
+
+  /// Attaches a text artifact (e.g. the widget hierarchy or a log) to the
+  /// current test. See [attachBytes].
+  void attachText(
+    String name,
+    String content, {
+    String type = 'text/plain',
+    String ext = 'txt',
+  }) {
+    if (content.isEmpty) return;
+    attachBytes(name, utf8.encode(content), type: type, ext: ext);
+  }
+
+  void _emitChunked(String marker, String key, String encoded) {
+    for (var i = 0, seq = 0; i < encoded.length; i += _chunkSize, seq++) {
+      final chunk = encoded.substring(i, min(i + _chunkSize, encoded.length));
+      print('$marker$key:$seq:$chunk');
+    }
+  }
+
   void stopTest({
     required AllureStatus status,
     Object? message,
@@ -144,11 +196,7 @@ class Allure {
       };
     }
 
-    final encoded = base64.encode(utf8.encode(jsonEncode(result.toJson())));
-    for (var i = 0, seq = 0; i < encoded.length; i += _chunkSize, seq++) {
-      final chunk = encoded.substring(i, min(i + _chunkSize, encoded.length));
-      print('$allureResultMarker${result.uuid}:$seq:$chunk');
-    }
+    _emitChunked(allureResultMarker, result.uuid, base64.encode(utf8.encode(jsonEncode(result.toJson()))));
     _result = null;
   }
 }
