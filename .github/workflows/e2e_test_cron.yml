@@ -142,13 +142,6 @@ jobs:
         working-directory: sample_app/ios
         run: bundle exec fastlane run_e2e_test platform:ios ios:${{ matrix.ios }} device:"${{ matrix.device }} (${{ matrix.ios }})" mock_server_branch:${{ env.mock_server_branch }}
 
-      - name: Attach videos to failed tests
-        if: failure()
-        working-directory: sample_app/ios
-        run: |
-          command -v ffmpeg >/dev/null 2>&1 || brew install ffmpeg
-          bundle exec fastlane attach_videos
-
       - name: Upload Allure results
         if: env.LAUNCH_ID != '' && (success() || failure())
         working-directory: sample_app/ios
