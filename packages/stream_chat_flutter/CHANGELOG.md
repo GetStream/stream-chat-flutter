@@ -4,6 +4,8 @@
 
 - Added `AccessibilityTranslations` on `Translations` (accessed via `context.translations.accessibility`) — screen-reader labels, tooltips, hints, and live-region announcements. Includes `formatDateTime`, `formatDuration`, and `formatRecentDateTime` formatters.
 - Added `AccessibleMessagePreviewFormatter` — an optional interface extending `MessagePreviewFormatter` with `formatMessageSemanticsLabel` and `formatDraftMessageSemanticsLabel`. `StreamMessagePreviewText`, `StreamDraftMessagePreviewText`, and `StreamSendingIndicator` now emit natural-language screen-reader labels for the channel list.
+- Added optional `semanticsLabel` to `StreamChannelAvatar`. Group channels emit a default `"Group"` label; direct-message avatars stay silent.
+- Added optional `semanticsLabel` to `StreamTimestamp`. Defaults to a bucketed natural-language phrasing via `AccessibilityTranslations.formatRecentDateTime`.
 - Added a `LastMessagePredicate` typedef for the `ChannelLastMessageText.lastMessagePredicate` filter.
 - Added optional `semanticsLabel` to `StreamUserAvatar`, `StreamUserAvatarGroup`, and `StreamUserAvatarStack`. On `StreamUserAvatar`, `null` (default) drops the placeholder's initials from the semantics tree; a non-null value exposes it as a labeled image node. On `StreamUserAvatarGroup` / `StreamUserAvatarStack`, `null` composes through — each child avatar's own `semanticsLabel` applies — while a non-null value collapses the group into a single labeled image node and hides children and the "+N" overflow badge.
 
