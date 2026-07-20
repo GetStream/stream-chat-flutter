@@ -1340,7 +1340,9 @@ void main() {
       handle.dispose();
     });
 
-    testWidgets('system message — "System, <body>" prefix disambiguates the event from an authored message', (tester) async {
+    testWidgets('system message — "System, <body>" prefix disambiguates the event from an authored message', (
+      tester,
+    ) async {
       final handle = tester.ensureSemantics();
       final channel = ChannelModel(id: 'c', type: 'messaging', memberCount: 2);
       final message = Message(
@@ -1558,7 +1560,7 @@ void main() {
       await pumpMessagePreview(tester, message, channel: channel);
 
       // Localized label is title-cased in en — `Live Location` (matches
-       // the existing visible-side `locationLabel(isLive: true)` output).
+      // the existing visible-side `locationLabel(isLive: true)` output).
       expect(find.bySemanticsLabel('You\nLive Location'), findsOneWidget);
       handle.dispose();
     });
@@ -1580,7 +1582,10 @@ void main() {
     testWidgets('system message without text — falls back to localized label', (tester) async {
       final handle = tester.ensureSemantics();
       final channel = ChannelModel(id: 'c', type: 'messaging', memberCount: 2);
-      final message = Message(type: 'system', user: User(id: 'alice', name: 'Alice'));
+      final message = Message(
+        type: 'system',
+        user: User(id: 'alice', name: 'Alice'),
+      );
 
       await pumpMessagePreview(tester, message, channel: channel);
 

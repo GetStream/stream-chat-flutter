@@ -982,14 +982,16 @@ _AttachmentSemanticsPreview _resolveSingleAttachmentSemanticsPreview(
   final a11y = translations.accessibility;
   final typeLabel = _semanticsTypeLabelFor(translations, attachment.type, 1);
 
-  final extra = caption ?? switch (attachment.type) {
-    // Spell the voice-recording duration out ("1 minute 23 seconds") rather
-    // than a colon-separated clock string ("1:23") — screen readers announce
-    // ":" inconsistently.
-    AttachmentType.voiceRecording => a11y.formatDuration(attachment.duration),
-    AttachmentType.file || AttachmentType.urlPreview => attachment.title?.trim().nullIfEmpty,
-    _ => null,
-  };
+  final extra =
+      caption ??
+      switch (attachment.type) {
+        // Spell the voice-recording duration out ("1 minute 23 seconds") rather
+        // than a colon-separated clock string ("1:23") — screen readers announce
+        // ":" inconsistently.
+        AttachmentType.voiceRecording => a11y.formatDuration(attachment.duration),
+        AttachmentType.file || AttachmentType.urlPreview => attachment.title?.trim().nullIfEmpty,
+        _ => null,
+      };
 
   return (typeLabel: typeLabel, extra: extra);
 }
