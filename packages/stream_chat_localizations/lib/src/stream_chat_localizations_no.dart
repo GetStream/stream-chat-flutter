@@ -954,6 +954,54 @@ class _AccessibilityTranslationsNo extends AccessibilityTranslations {
   String get deselectMediaTapHint => 'fjern valg';
 
   @override
+  String get outgoingMessagePreviewLabel => 'Du';
+
+  @override
+  String incomingMessagePreviewLabel({String? senderName}) {
+    return senderName ?? 'Melding';
+  }
+
+  @override
+  String get pollPreviewLabel => 'Avstemning';
+
+  @override
+  String get draftPreviewLabel => 'Utkast';
+
+  @override
+  String get messageSendingStatusLabel => 'Sender';
+
+  @override
+  String get messageSentStatusLabel => 'Sendt';
+
+  @override
+  String get messageDeliveredStatusLabel => 'Levert';
+
+  @override
+  String get messageReadStatusLabel => 'Lest';
+
+  @override
+  String unreadMessagesLabel({required int count}) {
+    return Intl.plural(
+      count,
+      one: '$count ulest melding',
+      other: '$count uleste meldinger',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String get channelGroupLabel => 'Gruppe';
+
+  @override
+  String get systemMessagePreviewLabel => 'System';
+
+  @override
+  String get channelMutedLabel => 'dempet';
+
+  @override
+  String get channelPinnedLabel => 'festet';
+
+  @override
   String get savePollTooltip => 'Lagre avstemning';
 
   @override
@@ -1016,14 +1064,39 @@ class _AccessibilityTranslationsNo extends AccessibilityTranslations {
 
   @override
   String attachmentsAddedAnnouncement({required int count}) {
-    if (count == 1) return '1 vedlegg lagt til';
-    return '$count vedlegg lagt til';
+    return Intl.plural(
+      count,
+      one: '$count vedlegg lagt til',
+      other: '$count vedlegg lagt til',
+      locale: localeName,
+    );
   }
 
   @override
   String attachmentsRemovedAnnouncement({required int count}) {
-    if (count == 1) return '1 vedlegg fjernet';
-    return '$count vedlegg fjernet';
+    return Intl.plural(
+      count,
+      one: '$count vedlegg fjernet',
+      other: '$count vedlegg fjernet',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String formatRecentDateTime(DateTime date) {
+    if (date.isWithinLastMinute) return 'Akkurat nå';
+
+    final localDate = date.toLocal();
+    final jiffyDate = Jiffy.parseFromDateTime(localDate);
+    final time = jiffyDate.jm;
+
+    if (localDate.isToday) return 'I dag kl. $time';
+    if (localDate.isYesterday) return 'I går kl. $time';
+    if (localDate.isWithinLastWeek) return '${jiffyDate.EEEE} kl. $time';
+    if (localDate.isInSameYear) {
+      return '${jiffyDate.format(pattern: 'd. MMM')} kl. $time';
+    }
+    return '${jiffyDate.format(pattern: 'd. MMM yyyy')} kl. $time';
   }
 
   @override

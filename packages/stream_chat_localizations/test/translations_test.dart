@@ -1,3 +1,4 @@
+import 'package:clock/clock.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -470,6 +471,37 @@ void main() {
       expect(a11y.formatDuration(const Duration(seconds: 45)), isNotNull);
       expect(a11y.formatDuration(const Duration(hours: 1, minutes: 2, seconds: 3)), isNotNull);
       expect(a11y.formatDateTime(DateTime(2026, 3, 15, 10, 30)), isNotNull);
+      // formatRecentDateTime — every bucket exercised so each branch is covered.
+      // Pin the clock to mid-year so day-arithmetic doesn't leak between year
+      // buckets on year-boundary run dates.
+      await withClock(Clock.fixed(DateTime(2026, 6, 15, 12)), () async {
+        final now = clock.now();
+        expect(a11y.formatRecentDateTime(now), isNotNull);
+        expect(a11y.formatRecentDateTime(now.subtract(const Duration(hours: 3))), isNotNull);
+        expect(a11y.formatRecentDateTime(now.subtract(const Duration(days: 1))), isNotNull);
+        expect(a11y.formatRecentDateTime(now.subtract(const Duration(days: 3))), isNotNull);
+        expect(a11y.formatRecentDateTime(now.subtract(const Duration(days: 30))), isNotNull);
+        expect(a11y.formatRecentDateTime(now.subtract(const Duration(days: 400))), isNotNull);
+      });
+      // Message preview prefixes
+      expect(a11y.outgoingMessagePreviewLabel, isNotNull);
+      expect(a11y.incomingMessagePreviewLabel(), isNotNull);
+      expect(a11y.incomingMessagePreviewLabel(senderName: 'Alice'), isNotNull);
+      expect(a11y.pollPreviewLabel, isNotNull);
+      expect(a11y.draftPreviewLabel, isNotNull);
+      expect(a11y.systemMessagePreviewLabel, isNotNull);
+      // Delivery status
+      expect(a11y.messageSendingStatusLabel, isNotNull);
+      expect(a11y.messageSentStatusLabel, isNotNull);
+      expect(a11y.messageDeliveredStatusLabel, isNotNull);
+      expect(a11y.messageReadStatusLabel, isNotNull);
+      // Channel list row
+      expect(a11y.channelGroupLabel, isNotNull);
+      expect(a11y.channelMutedLabel, isNotNull);
+      expect(a11y.channelPinnedLabel, isNotNull);
+      // singular vs. plural — both branches exercised
+      expect(a11y.unreadMessagesLabel(count: 1), isNotNull);
+      expect(a11y.unreadMessagesLabel(count: 5), isNotNull);
     });
   }
 

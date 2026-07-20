@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:stream_chat_flutter/src/localization/translations.dart';
+import 'package:stream_chat_flutter/src/utils/date_formatter.dart';
 
 /// Defines the accessibility (a11y) resource values used by the Stream Chat
 /// widgets.
@@ -158,6 +159,71 @@ abstract class AccessibilityTranslations {
   /// deselected on tap.
   String get deselectMediaTapHint;
 
+  /// The screen-reader prefix for own last-message previews, e.g. `"You"`.
+  ///
+  /// Combined with the message body as `"You\n2 photos"`.
+  String get outgoingMessagePreviewLabel;
+
+  /// The screen-reader prefix for group-channel last-message previews from
+  /// another user.
+  ///
+  /// Combined with the body as `"Alice\n2 photos"`, or `"Message\n2 photos"`
+  /// when [senderName] is null.
+  String incomingMessagePreviewLabel({String? senderName});
+
+  /// The screen-reader type label for a poll last-message preview, e.g.
+  /// `"Poll"`.
+  ///
+  /// Prepended to the question so `"ee"` becomes `"Poll\nee"`.
+  String get pollPreviewLabel;
+
+  /// The screen-reader prefix for draft last-message previews, e.g.
+  /// `"Draft"`.
+  ///
+  /// Combined with the draft body as `"Draft\nReply in progress"`.
+  String get draftPreviewLabel;
+
+  /// The screen-reader label for a message-delivery indicator while the
+  /// message is sending, e.g. `"Sending"`.
+  String get messageSendingStatusLabel;
+
+  /// The screen-reader label for a message-delivery indicator once the
+  /// message has been server-acknowledged but not delivered, e.g. `"Sent"`.
+  String get messageSentStatusLabel;
+
+  /// The screen-reader label for a message-delivery indicator once the
+  /// message has been delivered but not read, e.g. `"Delivered"`.
+  String get messageDeliveredStatusLabel;
+
+  /// The screen-reader label for a message-delivery indicator once the
+  /// message has been read by the recipient, e.g. `"Read"`.
+  String get messageReadStatusLabel;
+
+  /// The screen-reader phrasing for a batch of unread messages, e.g.
+  /// `"9 unread messages"` / `"1 unread message"`.
+  ///
+  /// Only invoked when `count > 0`.
+  String unreadMessagesLabel({required int count});
+
+  /// The screen-reader label for the avatar on a group channel, e.g.
+  /// `"Group"`.
+  String get channelGroupLabel;
+
+  /// The screen-reader prefix for system / channel-event last-message
+  /// previews, e.g. `"System"`.
+  ///
+  /// Combined with the event text as `"System\nAlice was added to the
+  /// channel"`.
+  String get systemMessagePreviewLabel;
+
+  /// The screen-reader label for the muted-channel indicator on a channel
+  /// list row.
+  String get channelMutedLabel;
+
+  /// The screen-reader label for the pinned-channel indicator on a channel
+  /// list row.
+  String get channelPinnedLabel;
+
   /// The tooltip for the save-poll button in a poll creator.
   String get savePollTooltip;
 
@@ -246,13 +312,17 @@ abstract class AccessibilityTranslations {
   /// 10:30 AM' in United States English.
   String formatDateTime(DateTime dateTime);
 
-  /// Formats `duration` as a spelled-out natural-language string suitable
-  /// for screen-reader announcements, e.g. '1 minute 23 seconds' in
-  /// United States English.
+  /// Formats `date` as a locale-aware bucketed natural-language timestamp
+  /// for screen-reader announcements, e.g. `"Just now"`, `"Today at 14:30"`,
+  /// `"Yesterday at 14:30"`, `"Saturday at 14:30"`, `"Jan 15 at 14:30"`, or
+  /// `"Jan 15, 2024 at 14:30"` for older dates.
   ///
-  /// Colon-delimited clock strings ('01:23') are read inconsistently by
-  /// TalkBack and VoiceOver; spelled-out units are read unambiguously and
-  /// match how a sighted user would say the duration aloud.
+  /// Ordinals and compact abbreviations (`"15th"`, `"1m"`) are avoided —
+  /// some TTS engines mispronounce them.
+  String formatRecentDateTime(DateTime date);
+
+  /// Formats `duration` as a spelled-out natural-language string for
+  /// screen-reader announcements, e.g. `"1 minute 23 seconds"`.
   String formatDuration(Duration duration);
 }
 
@@ -264,7 +334,7 @@ abstract class AccessibilityTranslations {
 ///  * [Translations.accessibility], which returns an instance of this
 ///    class when no [StreamChatLocalizations] delegate is registered.
 class DefaultAccessibilityTranslations extends AccessibilityTranslations {
-  /// Creates a default English [AccessibilityTranslations] impl.
+  /// Creates a default English [AccessibilityTranslations] implementation.
   const DefaultAccessibilityTranslations({super.localeName = 'en'});
 
   @override
@@ -392,6 +462,54 @@ class DefaultAccessibilityTranslations extends AccessibilityTranslations {
   String get deselectMediaTapHint => 'deselect';
 
   @override
+  String get outgoingMessagePreviewLabel => 'You';
+
+  @override
+  String incomingMessagePreviewLabel({String? senderName}) {
+    return senderName ?? 'Message';
+  }
+
+  @override
+  String get pollPreviewLabel => 'Poll';
+
+  @override
+  String get draftPreviewLabel => 'Draft';
+
+  @override
+  String get messageSendingStatusLabel => 'Sending';
+
+  @override
+  String get messageSentStatusLabel => 'Sent';
+
+  @override
+  String get messageDeliveredStatusLabel => 'Delivered';
+
+  @override
+  String get messageReadStatusLabel => 'Read';
+
+  @override
+  String unreadMessagesLabel({required int count}) {
+    return Intl.plural(
+      count,
+      one: '$count unread message',
+      other: '$count unread messages',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String get channelGroupLabel => 'Group';
+
+  @override
+  String get systemMessagePreviewLabel => 'System';
+
+  @override
+  String get channelMutedLabel => 'muted';
+
+  @override
+  String get channelPinnedLabel => 'pinned';
+
+  @override
   String get savePollTooltip => 'Save poll';
 
   @override
@@ -454,20 +572,45 @@ class DefaultAccessibilityTranslations extends AccessibilityTranslations {
 
   @override
   String attachmentsAddedAnnouncement({required int count}) {
-    if (count == 1) return '1 attachment added';
-    return '$count attachments added';
+    return Intl.plural(
+      count,
+      one: '$count attachment added',
+      other: '$count attachments added',
+      locale: localeName,
+    );
   }
 
   @override
   String attachmentsRemovedAnnouncement({required int count}) {
-    if (count == 1) return '1 attachment removed';
-    return '$count attachments removed';
+    return Intl.plural(
+      count,
+      one: '$count attachment removed',
+      other: '$count attachments removed',
+      locale: localeName,
+    );
   }
 
   @override
   String formatDateTime(DateTime dateTime) {
     final jiffy = Jiffy.parseFromDateTime(dateTime);
     return '${jiffy.EEEE}, ${jiffy.yMMMMd}, ${jiffy.jm}';
+  }
+
+  @override
+  String formatRecentDateTime(DateTime date) {
+    if (date.isWithinLastMinute) return 'Just now';
+
+    final localDate = date.toLocal();
+    final jiffyDate = Jiffy.parseFromDateTime(localDate);
+    final time = jiffyDate.format(pattern: 'H:mm');
+
+    if (localDate.isToday) return 'Today at $time';
+    if (localDate.isYesterday) return 'Yesterday at $time';
+    if (localDate.isWithinLastWeek) return '${jiffyDate.EEEE} at $time';
+    if (localDate.isInSameYear) {
+      return '${jiffyDate.format(pattern: 'MMM d')} at $time';
+    }
+    return '${jiffyDate.format(pattern: 'MMM d, yyyy')} at $time';
   }
 
   @override

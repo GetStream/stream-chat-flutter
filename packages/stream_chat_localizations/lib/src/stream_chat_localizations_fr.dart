@@ -975,6 +975,54 @@ class _AccessibilityTranslationsFr extends AccessibilityTranslations {
   String get deselectMediaTapHint => 'désélectionner';
 
   @override
+  String get outgoingMessagePreviewLabel => 'Vous';
+
+  @override
+  String incomingMessagePreviewLabel({String? senderName}) {
+    return senderName ?? 'Message';
+  }
+
+  @override
+  String get pollPreviewLabel => 'Sondage';
+
+  @override
+  String get draftPreviewLabel => 'Brouillon';
+
+  @override
+  String get messageSendingStatusLabel => "En cours d'envoi";
+
+  @override
+  String get messageSentStatusLabel => 'Envoyé';
+
+  @override
+  String get messageDeliveredStatusLabel => 'Distribué';
+
+  @override
+  String get messageReadStatusLabel => 'Lu';
+
+  @override
+  String unreadMessagesLabel({required int count}) {
+    return Intl.plural(
+      count,
+      one: '$count message non lu',
+      other: '$count messages non lus',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String get channelGroupLabel => 'Groupe';
+
+  @override
+  String get systemMessagePreviewLabel => 'Système';
+
+  @override
+  String get channelMutedLabel => 'en sourdine';
+
+  @override
+  String get channelPinnedLabel => 'épinglé';
+
+  @override
   String get savePollTooltip => 'Enregistrer le sondage';
 
   @override
@@ -1038,14 +1086,39 @@ class _AccessibilityTranslationsFr extends AccessibilityTranslations {
 
   @override
   String attachmentsAddedAnnouncement({required int count}) {
-    if (count == 1) return '1 pièce jointe ajoutée';
-    return '$count pièces jointes ajoutées';
+    return Intl.plural(
+      count,
+      one: '$count pièce jointe ajoutée',
+      other: '$count pièces jointes ajoutées',
+      locale: localeName,
+    );
   }
 
   @override
   String attachmentsRemovedAnnouncement({required int count}) {
-    if (count == 1) return '1 pièce jointe supprimée';
-    return '$count pièces jointes supprimées';
+    return Intl.plural(
+      count,
+      one: '$count pièce jointe supprimée',
+      other: '$count pièces jointes supprimées',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String formatRecentDateTime(DateTime date) {
+    if (date.isWithinLastMinute) return "À l'instant";
+
+    final localDate = date.toLocal();
+    final jiffyDate = Jiffy.parseFromDateTime(localDate);
+    final time = jiffyDate.jm;
+
+    if (localDate.isToday) return "Aujourd'hui à $time";
+    if (localDate.isYesterday) return 'Hier à $time';
+    if (localDate.isWithinLastWeek) return '${jiffyDate.EEEE} à $time';
+    if (localDate.isInSameYear) {
+      return '${jiffyDate.format(pattern: 'd MMM')} à $time';
+    }
+    return '${jiffyDate.format(pattern: 'd MMM yyyy')} à $time';
   }
 
   @override

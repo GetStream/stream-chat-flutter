@@ -2,8 +2,10 @@
 
 ✅ Added
 
-- Added `AccessibilityTranslations`, a nested `translations.accessibility` namespace holding screen-reader-only strings — tooltips, semantic labels, hints, and live-region announcements for the composer, attachment picker, voice recording, message actions, channel header, media gallery, and poll creator. Every supported locale (11 in total) has its own full native-language implementation — no reliance on English fallback. Screen readers speak durations as natural language ("1 minute 23 seconds") and timestamps as locale-aware spelled-out dates ("March 15, 2026, 10:30 AM"), instead of ambiguous clock strings. Public `formatDuration(Duration)` and `formatDateTime(DateTime?)` formatters on the namespace mirror Flutter's `MaterialLocalizations.formatFullDate`/`formatDecimal` pattern. Translations for `de/es/it/pt/ca/no/hi/ja/ko` are best-effort; native-speaker corrections welcome.
-- Updated `attachmentPickerTooltip` in every locale to a state-agnostic "Toggle attachment picker" phrasing so the tooltip stays valid whether the picker is open or closed.
+- Added `AccessibilityTranslations`, a nested `translations.accessibility` namespace of screen-reader-only strings — tooltips, semantic labels, hints, live-region announcements, and `formatDuration` / `formatDateTime` / `formatRecentDateTime` formatters. Every supported locale ships a full native-language implementation.
+- Added channel-list a11y strings: `unreadMessagesLabel`, `channelGroupLabel`, `systemMessagePreviewLabel`, `channelMutedLabel`, `channelPinnedLabel`.
+- Added message-preview a11y strings: `outgoingMessagePreviewLabel`, `incomingMessagePreviewLabel`, `pollPreviewLabel`, `draftPreviewLabel`, and the `messageSending` / `messageSent` / `messageDelivered` / `messageRead` status labels.
+- Updated `attachmentPickerTooltip` in every locale to a state-agnostic `"Toggle attachment picker"` phrasing.
 
 ## 10.1.0
 

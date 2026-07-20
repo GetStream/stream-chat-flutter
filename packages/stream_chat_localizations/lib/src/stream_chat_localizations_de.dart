@@ -969,6 +969,54 @@ class _AccessibilityTranslationsDe extends AccessibilityTranslations {
   String get deselectMediaTapHint => 'abwählen';
 
   @override
+  String get outgoingMessagePreviewLabel => 'Sie';
+
+  @override
+  String incomingMessagePreviewLabel({String? senderName}) {
+    return senderName ?? 'Nachricht';
+  }
+
+  @override
+  String get pollPreviewLabel => 'Umfrage';
+
+  @override
+  String get draftPreviewLabel => 'Entwurf';
+
+  @override
+  String get messageSendingStatusLabel => 'Wird gesendet';
+
+  @override
+  String get messageSentStatusLabel => 'Gesendet';
+
+  @override
+  String get messageDeliveredStatusLabel => 'Zugestellt';
+
+  @override
+  String get messageReadStatusLabel => 'Gelesen';
+
+  @override
+  String unreadMessagesLabel({required int count}) {
+    return Intl.plural(
+      count,
+      one: '$count ungelesene Nachricht',
+      other: '$count ungelesene Nachrichten',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String get channelGroupLabel => 'Gruppe';
+
+  @override
+  String get systemMessagePreviewLabel => 'System';
+
+  @override
+  String get channelMutedLabel => 'stummgeschaltet';
+
+  @override
+  String get channelPinnedLabel => 'angeheftet';
+
+  @override
   String get savePollTooltip => 'Umfrage speichern';
 
   @override
@@ -1032,14 +1080,39 @@ class _AccessibilityTranslationsDe extends AccessibilityTranslations {
 
   @override
   String attachmentsAddedAnnouncement({required int count}) {
-    if (count == 1) return '1 Anhang hinzugefügt';
-    return '$count Anhänge hinzugefügt';
+    return Intl.plural(
+      count,
+      one: '$count Anhang hinzugefügt',
+      other: '$count Anhänge hinzugefügt',
+      locale: localeName,
+    );
   }
 
   @override
   String attachmentsRemovedAnnouncement({required int count}) {
-    if (count == 1) return '1 Anhang entfernt';
-    return '$count Anhänge entfernt';
+    return Intl.plural(
+      count,
+      one: '$count Anhang entfernt',
+      other: '$count Anhänge entfernt',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String formatRecentDateTime(DateTime date) {
+    if (date.isWithinLastMinute) return 'Gerade eben';
+
+    final localDate = date.toLocal();
+    final jiffyDate = Jiffy.parseFromDateTime(localDate);
+    final time = jiffyDate.jm;
+
+    if (localDate.isToday) return 'Heute um $time';
+    if (localDate.isYesterday) return 'Gestern um $time';
+    if (localDate.isWithinLastWeek) return '${jiffyDate.EEEE} um $time';
+    if (localDate.isInSameYear) {
+      return '${jiffyDate.format(pattern: 'd. MMM')} um $time';
+    }
+    return '${jiffyDate.format(pattern: 'd. MMM yyyy')} um $time';
   }
 
   @override
