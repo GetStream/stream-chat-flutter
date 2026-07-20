@@ -68,10 +68,9 @@ class StreamUserAvatarGroup extends StatelessWidget {
 
   /// Screen-reader label for the avatar group.
   ///
-  /// When null (the default), the group composes through — each child's own
-  /// [StreamUserAvatar.semanticsLabel] applies. When non-null, the group is
-  /// exposed as a single labeled image node and its children (including the
-  /// "+N" overflow badge) are dropped from the semantics tree.
+  /// When null (the default), each child avatar carries its own
+  /// [StreamUserAvatar.semanticsLabel]. When non-null, the group is exposed
+  /// as a single labeled image node.
   final String? semanticsLabel;
 
   @override

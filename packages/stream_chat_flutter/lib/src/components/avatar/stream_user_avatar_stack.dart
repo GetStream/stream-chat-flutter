@@ -99,10 +99,9 @@ class StreamUserAvatarStack extends StatelessWidget {
 
   /// Screen-reader label for the avatar stack.
   ///
-  /// When null (the default), the stack composes through — each child's own
-  /// [StreamUserAvatar.semanticsLabel] applies. When non-null, the stack is
-  /// exposed as a single labeled image node and its children (including the
-  /// "+N" overflow badge) are dropped from the semantics tree.
+  /// When null (the default), each child avatar carries its own
+  /// [StreamUserAvatar.semanticsLabel]. When non-null, the stack is exposed
+  /// as a single labeled image node.
   final String? semanticsLabel;
 
   @override
