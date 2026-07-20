@@ -3,6 +3,7 @@
 ✅ Added
 
 - Added an `upsert` flag to `ChannelClientState.updateMessage` (defaults to `true`). Pass `false` to update a message only if it's already loaded in the state, skipping unknown messages instead of adding them.
+- Added `EventType.userPresenceChanged` (`user.presence.changed`) constant.
 
 🔄 Changed
 
