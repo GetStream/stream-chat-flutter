@@ -8,19 +8,6 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import '../mocks.dart';
 
 void main() {
-  late MockClient client;
-  late MockClientState clientState;
-  late OwnUser currentUser;
-
-  setUp(() {
-    client = MockClient();
-    clientState = MockClientState();
-    currentUser = OwnUser(id: 'test-user-id', name: 'Test User');
-
-    when(() => client.state).thenReturn(clientState);
-    when(() => clientState.currentUser).thenReturn(currentUser);
-  });
-
   Future<void> pumpMessagePreview(
     WidgetTester tester,
     Message message, {
@@ -28,6 +15,7 @@ void main() {
     TextStyle? textStyle,
     ChannelModel? channel,
     StreamChatConfigurationData? configData,
+    bool showCaption = true,
   }) async {
     final client = MockClient();
     final clientState = MockClientState();
@@ -49,6 +37,7 @@ void main() {
                 language: language,
                 textStyle: textStyle,
                 channel: channel,
+                showCaption: showCaption,
               ),
             ),
           ),
@@ -326,7 +315,7 @@ void main() {
       await pumpMessagePreview(tester, message);
 
       expect(_findIcons(tester), hasLength(1));
-      expect(_extractText(tester), contains('Voice Recording'));
+      expect(_extractText(tester), contains('Voice recording'));
       expect(_extractText(tester), contains('00:00'));
     });
 
@@ -345,7 +334,7 @@ void main() {
       await pumpMessagePreview(tester, message);
 
       expect(_findIcons(tester), hasLength(1));
-      expect(_extractText(tester), contains('Voice Recording'));
+      expect(_extractText(tester), contains('Voice recording'));
       expect(_extractText(tester), contains('02:05'));
     });
 
@@ -1025,6 +1014,620 @@ void main() {
       );
 
       expect(find.text('💬 Hey there'), findsOneWidget);
+    });
+  });
+
+  group('Accessibility label (formatMessageSemanticsLabel)', () {
+    testWidgets('group channel — full sender name prefix for other users', (tester) async {
+      final handle = tester.ensureSemantics();
+      final channel = ChannelModel(id: 'c', type: 'messaging', memberCount: 3);
+      final message = Message(
+        text: 'Hello there',
+        user: User(id: 'other', name: 'Jane Doe'),
+      );
+
+      await pumpMessagePreview(tester, message, channel: channel);
+
+      expect(find.bySemanticsLabel('Jane Doe\nHello there'), findsOneWidget);
+      handle.dispose();
+    });
+
+    testWidgets('group channel — drops the prefix entirely when sender is unknown', (tester) async {
+      final handle = tester.ensureSemantics();
+      final channel = ChannelModel(id: 'c', type: 'messaging', memberCount: 3);
+      // No `user` on the message — the formatter can't derive a sender
+      // name. Rather than emit a bare "Message" prefix that carries no
+      // information, drop the prefix and read the body alone.
+      final message = Message(text: 'Hello there');
+
+      await pumpMessagePreview(tester, message, channel: channel);
+
+      expect(find.bySemanticsLabel('Hello there'), findsOneWidget);
+      handle.dispose();
+    });
+
+    testWidgets('group channel — "You, body" for own messages', (tester) async {
+      final handle = tester.ensureSemantics();
+      final channel = ChannelModel(id: 'c', type: 'messaging', memberCount: 3);
+      final message = Message(
+        text: 'Hello everyone',
+        user: User(id: 'test-user-id', name: 'Test User'),
+      );
+
+      await pumpMessagePreview(tester, message, channel: channel);
+
+      expect(find.bySemanticsLabel('You\nHello everyone'), findsOneWidget);
+      handle.dispose();
+    });
+
+    testWidgets('1-on-1 channel — no speaker prefix (sender is implicit) for other user', (tester) async {
+      final handle = tester.ensureSemantics();
+      final channel = ChannelModel(id: 'c', type: 'messaging', memberCount: 2);
+      final message = Message(
+        text: 'Hi',
+        user: User(id: 'other', name: 'Jane'),
+      );
+
+      await pumpMessagePreview(tester, message, channel: channel);
+
+      expect(find.bySemanticsLabel('Hi'), findsOneWidget);
+      handle.dispose();
+    });
+
+    testWidgets('1-on-1 channel — "You, body" for own messages', (tester) async {
+      final handle = tester.ensureSemantics();
+      final channel = ChannelModel(id: 'c', type: 'messaging', memberCount: 2);
+      final message = Message(
+        text: 'See you tomorrow',
+        user: User(id: 'test-user-id', name: 'Test User'),
+      );
+
+      await pumpMessagePreview(tester, message, channel: channel);
+
+      expect(find.bySemanticsLabel('You\nSee you tomorrow'), findsOneWidget);
+      handle.dispose();
+    });
+
+    testWidgets('attachment message — icon placeholder is stripped from the label', (tester) async {
+      final handle = tester.ensureSemantics();
+      final channel = ChannelModel(id: 'c', type: 'messaging', memberCount: 3);
+      final message = Message(
+        user: User(id: 'other', name: 'Jane Doe'),
+        attachments: [
+          Attachment(type: 'image'),
+          Attachment(type: 'image'),
+        ],
+      );
+
+      await pumpMessagePreview(tester, message, channel: channel);
+
+      // Without `includePlaceholders: false`, the inline camera icon
+      // (WidgetSpan) would leak an object-replacement character into the
+      // label — screen readers would announce it as "object" or silence.
+      expect(find.bySemanticsLabel('Jane Doe\n2 photos'), findsOneWidget);
+      handle.dispose();
+    });
+
+    testWidgets('poll message — "Poll" type prefix restores context lost by the icon', (tester) async {
+      final handle = tester.ensureSemantics();
+      final channel = ChannelModel(id: 'c', type: 'messaging', memberCount: 3);
+      final message = Message(
+        user: User(id: 'test-user-id', name: 'Test User'),
+        poll: Poll(
+          id: 'p1',
+          name: "What's for lunch?",
+          options: const [],
+        ),
+      );
+
+      await pumpMessagePreview(tester, message, channel: channel);
+
+      expect(find.bySemanticsLabel("You\nPoll\nWhat's for lunch?"), findsOneWidget);
+      handle.dispose();
+    });
+
+    testWidgets('poll message from other user — "Poll" prefix included', (tester) async {
+      final handle = tester.ensureSemantics();
+      final channel = ChannelModel(id: 'c', type: 'messaging', memberCount: 3);
+      final message = Message(
+        user: User(id: 'other', name: 'Jane Doe'),
+        poll: Poll(id: 'p2', name: 'ee', options: const []),
+      );
+
+      await pumpMessagePreview(tester, message, channel: channel);
+
+      // "Jane Doe, Poll, ee" — SR user now knows "ee" is a poll title from
+      // Jane, not a plain-text message that says "ee".
+      expect(find.bySemanticsLabel('Jane Doe\nPoll\nee'), findsOneWidget);
+      handle.dispose();
+    });
+
+    testWidgets('single image attachment — icon placeholder stripped', (tester) async {
+      final handle = tester.ensureSemantics();
+      final channel = ChannelModel(id: 'c', type: 'messaging', memberCount: 3);
+      final message = Message(
+        user: User(id: 'test-user-id', name: 'Test User'),
+        attachments: [Attachment(type: 'image')],
+      );
+
+      await pumpMessagePreview(tester, message, channel: channel);
+
+      expect(find.bySemanticsLabel('You\nPhoto'), findsOneWidget);
+      handle.dispose();
+    });
+
+    testWidgets('single video attachment — icon placeholder stripped', (tester) async {
+      final handle = tester.ensureSemantics();
+      final channel = ChannelModel(id: 'c', type: 'messaging', memberCount: 3);
+      final message = Message(
+        user: User(id: 'test-user-id', name: 'Test User'),
+        attachments: [Attachment(type: 'video')],
+      );
+
+      await pumpMessagePreview(tester, message, channel: channel);
+
+      expect(find.bySemanticsLabel('You\nVideo'), findsOneWidget);
+      handle.dispose();
+    });
+
+    testWidgets('file attachment with title — "File" type prefix restores context', (tester) async {
+      final handle = tester.ensureSemantics();
+      final channel = ChannelModel(id: 'c', type: 'messaging', memberCount: 3);
+      final message = Message(
+        user: User(id: 'test-user-id', name: 'Test User'),
+        attachments: [Attachment(type: 'file', title: 'report.pdf')],
+      );
+
+      await pumpMessagePreview(tester, message, channel: channel);
+
+      expect(find.bySemanticsLabel('You\nFile\nreport.pdf'), findsOneWidget);
+      handle.dispose();
+    });
+
+    testWidgets('image with caption text — "Photo" type prefix + caption', (tester) async {
+      final handle = tester.ensureSemantics();
+      final channel = ChannelModel(id: 'c', type: 'messaging', memberCount: 3);
+      final message = Message(
+        text: 'Check this out',
+        user: User(id: 'test-user-id', name: 'Test User'),
+        attachments: [Attachment(type: 'image')],
+      );
+
+      await pumpMessagePreview(tester, message, channel: channel);
+
+      expect(find.bySemanticsLabel('You\nPhoto\nCheck this out'), findsOneWidget);
+      handle.dispose();
+    });
+
+    testWidgets('multiple images with caption — pluralized type prefix + caption', (tester) async {
+      final handle = tester.ensureSemantics();
+      final channel = ChannelModel(id: 'c', type: 'messaging', memberCount: 3);
+      final message = Message(
+        text: 'Beach day',
+        user: User(id: 'test-user-id', name: 'Test User'),
+        attachments: [
+          Attachment(type: 'image'),
+          Attachment(type: 'image'),
+          Attachment(type: 'image'),
+        ],
+      );
+
+      await pumpMessagePreview(tester, message, channel: channel);
+
+      expect(find.bySemanticsLabel('You\n3 photos\nBeach day'), findsOneWidget);
+      handle.dispose();
+    });
+
+    testWidgets('video with caption — "Video" type prefix + caption', (tester) async {
+      final handle = tester.ensureSemantics();
+      final channel = ChannelModel(id: 'c', type: 'messaging', memberCount: 3);
+      final message = Message(
+        text: 'From the concert',
+        user: User(id: 'test-user-id', name: 'Test User'),
+        attachments: [Attachment(type: 'video')],
+      );
+
+      await pumpMessagePreview(tester, message, channel: channel);
+
+      expect(find.bySemanticsLabel('You\nVideo\nFrom the concert'), findsOneWidget);
+      handle.dispose();
+    });
+
+    testWidgets('mixed-type attachments with caption — "N files" prefix + caption', (tester) async {
+      final handle = tester.ensureSemantics();
+      final channel = ChannelModel(id: 'c', type: 'messaging', memberCount: 3);
+      final message = Message(
+        text: 'Mixed bag',
+        user: User(id: 'test-user-id', name: 'Test User'),
+        attachments: [
+          Attachment(type: 'image'),
+          Attachment(type: 'video'),
+        ],
+      );
+
+      await pumpMessagePreview(tester, message, channel: channel);
+
+      expect(find.bySemanticsLabel('You\n2 files\nMixed bag'), findsOneWidget);
+      handle.dispose();
+    });
+
+    testWidgets('mixed-type attachments without caption — no prefix (fallback has type)', (tester) async {
+      final handle = tester.ensureSemantics();
+      final channel = ChannelModel(id: 'c', type: 'messaging', memberCount: 3);
+      final message = Message(
+        user: User(id: 'test-user-id', name: 'Test User'),
+        attachments: [
+          Attachment(type: 'image'),
+          Attachment(type: 'video'),
+        ],
+      );
+
+      await pumpMessagePreview(tester, message, channel: channel);
+
+      // Fallback body is "2 files" — already includes the type word; no
+      // prefix needed. Avoids the "2 files, 2 files" redundancy.
+      expect(find.bySemanticsLabel('You\n2 files'), findsOneWidget);
+      handle.dispose();
+    });
+
+    testWidgets('voice recording — duration spelled out for screen readers', (tester) async {
+      final handle = tester.ensureSemantics();
+      final channel = ChannelModel(id: 'c', type: 'messaging', memberCount: 3);
+      final message = Message(
+        user: User(id: 'test-user-id', name: 'Test User'),
+        attachments: [
+          Attachment(
+            type: 'voiceRecording',
+            extraData: const {'duration': 83.0},
+          ),
+        ],
+      );
+
+      await pumpMessagePreview(tester, message, channel: channel);
+
+      // "1 minute 23 seconds" — spelled out, not "1:23" which reads
+      // inconsistently across screen readers.
+      expect(
+        find.bySemanticsLabel('You\nVoice recording\n1 minute, 23 seconds'),
+        findsOneWidget,
+      );
+      handle.dispose();
+    });
+
+    testWidgets('shared location without caption — "Location" fallback only', (tester) async {
+      final handle = tester.ensureSemantics();
+      final channel = ChannelModel(id: 'c', type: 'messaging', memberCount: 3);
+      final message = Message(
+        user: User(id: 'test-user-id', name: 'Test User'),
+        sharedLocation: Location(latitude: 0, longitude: 0),
+      );
+
+      await pumpMessagePreview(tester, message, channel: channel);
+
+      expect(find.bySemanticsLabel('You\nLocation'), findsOneWidget);
+      handle.dispose();
+    });
+
+    testWidgets('shared location with caption — "Location, {caption}"', (tester) async {
+      final handle = tester.ensureSemantics();
+      final channel = ChannelModel(id: 'c', type: 'messaging', memberCount: 3);
+      final message = Message(
+        text: 'Meeting spot',
+        user: User(id: 'test-user-id', name: 'Test User'),
+        sharedLocation: Location(latitude: 0, longitude: 0),
+      );
+
+      await pumpMessagePreview(tester, message, channel: channel);
+
+      expect(find.bySemanticsLabel('You\nLocation\nMeeting spot'), findsOneWidget);
+      handle.dispose();
+    });
+
+    testWidgets('deleted message — no speaker prefix; deletion IS the content', (tester) async {
+      final handle = tester.ensureSemantics();
+      final channel = ChannelModel(id: 'c', type: 'messaging', memberCount: 3);
+      final message = Message(
+        text: 'gone',
+        type: 'deleted',
+        user: User(id: 'other', name: 'Jane Doe'),
+      );
+
+      await pumpMessagePreview(tester, message, channel: channel);
+
+      // "Jane, Message deleted" would sound like Jane said the literal
+      // phrase "Message deleted". Return the deletion notice verbatim.
+      expect(find.bySemanticsLabel('Message deleted'), findsOneWidget);
+      handle.dispose();
+    });
+
+    testWidgets('system message — "System, <body>" prefix disambiguates the event from an authored message', (tester) async {
+      final handle = tester.ensureSemantics();
+      final channel = ChannelModel(id: 'c', type: 'messaging', memberCount: 2);
+      final message = Message(
+        text: 'Alice was added to the channel',
+        type: 'system',
+        user: User(id: 'alice', name: 'Alice'),
+      );
+
+      await pumpMessagePreview(tester, message, channel: channel);
+
+      // Without the "System" prefix a DM row titled "Alice" would read
+      // "Alice, ..., Alice was added to the channel" — sounding like
+      // Alice authored that sentence herself.
+      expect(
+        find.bySemanticsLabel('System\nAlice was added to the channel'),
+        findsOneWidget,
+      );
+      handle.dispose();
+    });
+
+    testWidgets('showCaption: false — attachment a11y drops the caption, mirroring the visual', (tester) async {
+      final handle = tester.ensureSemantics();
+      final channel = ChannelModel(id: 'c', type: 'messaging', memberCount: 2);
+      final message = Message(
+        text: 'Beach day',
+        user: User(id: 'test-user-id', name: 'Test User'),
+        attachments: [
+          Attachment(type: AttachmentType.image),
+          Attachment(type: AttachmentType.image),
+        ],
+      );
+
+      await pumpMessagePreview(tester, message, channel: channel, showCaption: false);
+
+      // Visual falls back to "2 photos" (no caption); a11y must match so
+      // dense contexts like quoted-reply previews stay consistent.
+      expect(find.bySemanticsLabel('You\n2 photos'), findsOneWidget);
+      handle.dispose();
+    });
+
+    testWidgets('showCaption: false — location a11y drops the caption', (tester) async {
+      final handle = tester.ensureSemantics();
+      final channel = ChannelModel(id: 'c', type: 'messaging', memberCount: 2);
+      final message = Message(
+        text: 'Meet me here',
+        user: User(id: 'other', name: 'Alice'),
+        sharedLocation: Location(latitude: 0, longitude: 0),
+      );
+
+      await pumpMessagePreview(tester, message, channel: channel, showCaption: false);
+
+      expect(find.bySemanticsLabel('Location'), findsOneWidget);
+      handle.dispose();
+    });
+
+    testWidgets('audio attachment — "Audio" type label, no caption', (tester) async {
+      final handle = tester.ensureSemantics();
+      final channel = ChannelModel(id: 'c', type: 'messaging', memberCount: 2);
+      final message = Message(
+        user: User(id: 'test-user-id', name: 'Test User'),
+        attachments: [Attachment(type: AttachmentType.audio)],
+      );
+
+      await pumpMessagePreview(tester, message, channel: channel);
+
+      expect(find.bySemanticsLabel('You\nAudio'), findsOneWidget);
+      handle.dispose();
+    });
+
+    testWidgets('audio attachment with caption — "Audio, {caption}"', (tester) async {
+      final handle = tester.ensureSemantics();
+      final channel = ChannelModel(id: 'c', type: 'messaging', memberCount: 2);
+      final message = Message(
+        text: 'Track name',
+        user: User(id: 'test-user-id', name: 'Test User'),
+        attachments: [Attachment(type: AttachmentType.audio)],
+      );
+
+      await pumpMessagePreview(tester, message, channel: channel);
+
+      expect(find.bySemanticsLabel('You\nAudio\nTrack name'), findsOneWidget);
+      handle.dispose();
+    });
+
+    testWidgets('url preview — "Link, {og title}" when caption absent', (tester) async {
+      final handle = tester.ensureSemantics();
+      final channel = ChannelModel(id: 'c', type: 'messaging', memberCount: 2);
+      final message = Message(
+        user: User(id: 'test-user-id', name: 'Test User'),
+        attachments: [Attachment(type: AttachmentType.urlPreview, title: 'Article title')],
+      );
+
+      await pumpMessagePreview(tester, message, channel: channel);
+
+      expect(find.bySemanticsLabel('You\nLink\nArticle title'), findsOneWidget);
+      handle.dispose();
+    });
+
+    testWidgets('url preview with caption — caption wins over og title', (tester) async {
+      final handle = tester.ensureSemantics();
+      final channel = ChannelModel(id: 'c', type: 'messaging', memberCount: 2);
+      final message = Message(
+        text: 'Check this out',
+        user: User(id: 'test-user-id', name: 'Test User'),
+        attachments: [Attachment(type: AttachmentType.urlPreview, title: 'Article title')],
+      );
+
+      await pumpMessagePreview(tester, message, channel: channel);
+
+      expect(find.bySemanticsLabel('You\nLink\nCheck this out'), findsOneWidget);
+      handle.dispose();
+    });
+
+    testWidgets('url preview without title or caption — bare "Link"', (tester) async {
+      final handle = tester.ensureSemantics();
+      final channel = ChannelModel(id: 'c', type: 'messaging', memberCount: 2);
+      final message = Message(
+        user: User(id: 'test-user-id', name: 'Test User'),
+        attachments: [Attachment(type: AttachmentType.urlPreview)],
+      );
+
+      await pumpMessagePreview(tester, message, channel: channel);
+
+      expect(find.bySemanticsLabel('You\nLink'), findsOneWidget);
+      handle.dispose();
+    });
+
+    testWidgets('giphy attachment — "Giphy" fallback when caption absent', (tester) async {
+      final handle = tester.ensureSemantics();
+      final channel = ChannelModel(id: 'c', type: 'messaging', memberCount: 2);
+      final message = Message(
+        user: User(id: 'test-user-id', name: 'Test User'),
+        attachments: [Attachment(type: AttachmentType.giphy)],
+      );
+
+      await pumpMessagePreview(tester, message, channel: channel);
+
+      expect(find.bySemanticsLabel('You\nGiphy'), findsOneWidget);
+      handle.dispose();
+    });
+
+    testWidgets('giphy attachment with caption — "Giphy, {caption}"', (tester) async {
+      final handle = tester.ensureSemantics();
+      final channel = ChannelModel(id: 'c', type: 'messaging', memberCount: 2);
+      final message = Message(
+        text: 'Reaction meme',
+        user: User(id: 'test-user-id', name: 'Test User'),
+        attachments: [Attachment(type: AttachmentType.giphy)],
+      );
+
+      await pumpMessagePreview(tester, message, channel: channel);
+
+      expect(find.bySemanticsLabel('You\nGiphy\nReaction meme'), findsOneWidget);
+      handle.dispose();
+    });
+
+    testWidgets('voice recording with caption — caption wins over duration', (tester) async {
+      final handle = tester.ensureSemantics();
+      final channel = ChannelModel(id: 'c', type: 'messaging', memberCount: 2);
+      final message = Message(
+        text: 'Listen to this',
+        user: User(id: 'test-user-id', name: 'Test User'),
+        attachments: [
+          Attachment(
+            type: AttachmentType.voiceRecording,
+            extraData: const {'duration': 83.0},
+          ),
+        ],
+      );
+
+      await pumpMessagePreview(tester, message, channel: channel);
+
+      // Caption preempts the spelled-out duration extra.
+      expect(find.bySemanticsLabel('You\nVoice recording\nListen to this'), findsOneWidget);
+      handle.dispose();
+    });
+
+    testWidgets('file without title or caption — bare "File"', (tester) async {
+      final handle = tester.ensureSemantics();
+      final channel = ChannelModel(id: 'c', type: 'messaging', memberCount: 2);
+      final message = Message(
+        user: User(id: 'test-user-id', name: 'Test User'),
+        attachments: [Attachment(type: AttachmentType.file)],
+      );
+
+      await pumpMessagePreview(tester, message, channel: channel);
+
+      expect(find.bySemanticsLabel('You\nFile'), findsOneWidget);
+      handle.dispose();
+    });
+
+    testWidgets('file with caption — caption wins over title', (tester) async {
+      final handle = tester.ensureSemantics();
+      final channel = ChannelModel(id: 'c', type: 'messaging', memberCount: 2);
+      final message = Message(
+        text: 'Docs for review',
+        user: User(id: 'test-user-id', name: 'Test User'),
+        attachments: [Attachment(type: AttachmentType.file, title: 'report.pdf')],
+      );
+
+      await pumpMessagePreview(tester, message, channel: channel);
+
+      expect(find.bySemanticsLabel('You\nFile\nDocs for review'), findsOneWidget);
+      handle.dispose();
+    });
+
+    testWidgets('live location — distinct "Live location" fallback', (tester) async {
+      final handle = tester.ensureSemantics();
+      final channel = ChannelModel(id: 'c', type: 'messaging', memberCount: 2);
+      final message = Message(
+        user: User(id: 'test-user-id', name: 'Test User'),
+        sharedLocation: Location(latitude: 0, longitude: 0, endAt: DateTime.now().add(const Duration(minutes: 5))),
+      );
+
+      await pumpMessagePreview(tester, message, channel: channel);
+
+      // Localized label is title-cased in en — `Live Location` (matches
+       // the existing visible-side `locationLabel(isLive: true)` output).
+      expect(find.bySemanticsLabel('You\nLive Location'), findsOneWidget);
+      handle.dispose();
+    });
+
+    testWidgets('poll with empty name — bare "Poll" prefix, no body', (tester) async {
+      final handle = tester.ensureSemantics();
+      final channel = ChannelModel(id: 'c', type: 'messaging', memberCount: 3);
+      final message = Message(
+        user: User(id: 'test-user-id', name: 'Test User'),
+        poll: Poll(id: 'p1', name: '', options: const []),
+      );
+
+      await pumpMessagePreview(tester, message, channel: channel);
+
+      expect(find.bySemanticsLabel('You\nPoll'), findsOneWidget);
+      handle.dispose();
+    });
+
+    testWidgets('system message without text — falls back to localized label', (tester) async {
+      final handle = tester.ensureSemantics();
+      final channel = ChannelModel(id: 'c', type: 'messaging', memberCount: 2);
+      final message = Message(type: 'system', user: User(id: 'alice', name: 'Alice'));
+
+      await pumpMessagePreview(tester, message, channel: channel);
+
+      // No event body → fall back to the localized "System Message" label
+      // without the "System, " prefix (there's nothing to disambiguate).
+      expect(find.bySemanticsLabel('System Message'), findsOneWidget);
+      handle.dispose();
+    });
+
+    testWidgets('showCaption: false on voice recording — falls back to duration', (tester) async {
+      final handle = tester.ensureSemantics();
+      final channel = ChannelModel(id: 'c', type: 'messaging', memberCount: 2);
+      final message = Message(
+        text: 'Listen to this',
+        user: User(id: 'test-user-id', name: 'Test User'),
+        attachments: [
+          Attachment(
+            type: AttachmentType.voiceRecording,
+            extraData: const {'duration': 83.0},
+          ),
+        ],
+      );
+
+      await pumpMessagePreview(tester, message, channel: channel, showCaption: false);
+
+      // With caption suppressed, the intrinsic duration fills the "extra" slot.
+      expect(
+        find.bySemanticsLabel('You\nVoice recording\n1 minute, 23 seconds'),
+        findsOneWidget,
+      );
+      handle.dispose();
+    });
+
+    testWidgets('showCaption: false on file — falls back to filename', (tester) async {
+      final handle = tester.ensureSemantics();
+      final channel = ChannelModel(id: 'c', type: 'messaging', memberCount: 2);
+      final message = Message(
+        text: 'Please review',
+        user: User(id: 'test-user-id', name: 'Test User'),
+        attachments: [Attachment(type: AttachmentType.file, title: 'report.pdf')],
+      );
+
+      await pumpMessagePreview(tester, message, channel: channel, showCaption: false);
+
+      // With caption suppressed, the intrinsic filename fills the "extra" slot.
+      expect(find.bySemanticsLabel('You\nFile\nreport.pdf'), findsOneWidget);
+      handle.dispose();
     });
   });
 }
