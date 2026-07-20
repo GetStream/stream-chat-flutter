@@ -14,6 +14,7 @@
 - Fixed last-message preview flicker during channel-state reloads.
 - Fixed shadowed messages not hidden in channel list items.
 - Fixed `StreamMessageListView` firing `markThreadRead` on a reply-less parent, which produced a guaranteed 404 every time the thread view was opened before the first reply.
+- Fixed `StreamChannelListTile` announcing avatar initials and unlabeled fragments — now merges into a single accessible row summary with labeled avatar, muted / pinned icons, and unread badge.
 - Renamed `attachmentPickerTooltip` to state-agnostic "Toggle attachment picker" so screen readers no longer announce "Open attachment picker" while the picker is already expanded.
 - Fixed `voiceRecordingText` casing to sentence case (`"Voice recording"`).
 
