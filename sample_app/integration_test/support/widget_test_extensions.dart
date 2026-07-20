@@ -1,4 +1,4 @@
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 extension E2EWidgetTester on WidgetTester {
@@ -94,8 +94,27 @@ extension E2EWidgetTester on WidgetTester {
       await longPress(target);
       await pumpAndSettle();
       if (appears.evaluate().isNotEmpty) return;
+
+      // Integration tests: after a message has reactions, [WidgetTester.longPress]
+      // can lose the gesture arena while [InkWell.onLongPress] is still wired.
+      if (_tryInvokeMessageLongPress(target)) {
+        await pumpAndSettle();
+        if (appears.evaluate().isNotEmpty) return;
+      }
+
       await pump(const Duration(milliseconds: 150));
     }
     throw TestFailure('Timed out long-pressing $target waiting for $appears');
+  }
+
+  bool _tryInvokeMessageLongPress(Finder target) {
+    final inkWells = find.descendant(of: target, matching: find.byType(InkWell));
+    if (inkWells.evaluate().isEmpty) return false;
+
+    final onLongPress = widget<InkWell>(inkWells.first).onLongPress;
+    if (onLongPress == null) return false;
+
+    onLongPress();
+    return true;
   }
 }
