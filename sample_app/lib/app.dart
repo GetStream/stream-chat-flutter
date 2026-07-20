@@ -101,7 +101,7 @@ class _StreamChatSampleAppState extends State<StreamChatSampleApp>
   void initState() {
     super.initState();
     _notificationService.onNotificationTap = _onNotificationTap;
-    _notificationService.initialize();
+    if (!isE2eTestRun) _notificationService.initialize();
 
     final timeOfStartMs = DateTime.now().millisecondsSinceEpoch;
 

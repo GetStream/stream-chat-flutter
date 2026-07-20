@@ -15,8 +15,6 @@ on:
           - ios
           - both
 
-env:
-  FLUTTER_VERSION: '3.x'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -37,7 +35,7 @@ jobs:
         run: |
           # Is this a release?
           is_release="${{ github.event_name == 'release' }}"
-          
+
           # If it's a release event, build both platforms
           if [[ "$is_release" == "true" ]]; then
             echo "Building all platforms due to release"
@@ -45,11 +43,11 @@ jobs:
             echo "run_android=true" >> $GITHUB_OUTPUT
             exit 0
           fi
-          
+
           # For manual workflow dispatch, store platform in a variable
           platform="${{ github.event.inputs.platform }}"
           echo "Selected platform: $platform"
-          
+
           # Set outputs only if they should be true
           [[ "$platform" == "ios" || "$platform" == "both" ]] && echo "run_ios=true" >> $GITHUB_OUTPUT || true
           [[ "$platform" == "android" || "$platform" == "both" ]] && echo "run_android=true" >> $GITHUB_OUTPUT || true
@@ -69,18 +67,9 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: "Install Flutter"
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: ${{ env.FLUTTER_VERSION }}
-          channel: stable
-          cache-key: flutter-:os:-:channel:-:version:-:arch:-:hash:-${{ hashFiles('**/pubspec.lock') }}
+      - uses: ./.github/actions/setup-flutter
 
-      - name: Setup Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          bundler-cache: true
-          working-directory: sample_app/android
+      - uses: ./.github/actions/setup-ruby
 
       - name: Distribute to S3
         working-directory: sample_app/android
@@ -110,21 +99,12 @@ jobs:
         with:
           xcode-version: '26.3'
 
-      - name: "Install Flutter"
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: ${{ env.FLUTTER_VERSION }}
-          channel: stable
-          cache-key: flutter-:os:-:channel:-:version:-:arch:-:hash:-${{ hashFiles('**/pubspec.lock') }}
+      - uses: ./.github/actions/setup-flutter
 
       - name: "Disable Swift Package Manager"
         run: flutter config --no-enable-swift-package-manager
 
-      - name: Setup Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          bundler-cache: true
-          working-directory: sample_app/ios
+      - uses: ./.github/actions/setup-ruby
 
       - name: Distribute to TestFlight
         working-directory: sample_app/ios

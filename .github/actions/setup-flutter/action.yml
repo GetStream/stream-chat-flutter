@@ -1,0 +1,12 @@
+name: 'Setup Flutter'
+description: 'Install Flutter with dependency caching'
+runs:
+  using: "composite"
+  steps:
+    - uses: subosito/flutter-action@v2
+      with:
+        flutter-version: "3.x"
+        channel: stable
+        cache: true
+        cache-key: "flutter-:os:-:channel:-:version:-:arch:"
+        pub-cache-key: "flutter-pub-:os:-${{ hashFiles('melos.yaml', '**/pubspec.yaml') }}"

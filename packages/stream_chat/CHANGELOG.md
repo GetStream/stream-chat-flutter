@@ -3,9 +3,11 @@
 ✅ Added
 
 - Added an `upsert` flag to `ChannelClientState.updateMessage` (defaults to `true`). Pass `false` to update a message only if it's already loaded in the state, skipping unknown messages instead of adding them.
+- Added `EventType.userPresenceChanged` (`user.presence.changed`) constant.
 
 🔄 Changed
 
+- Reduced the default `participantLimit` and `memberLimit` on `ThreadOptions` from `100` to `10`.
 - `StreamChatClient.updateSystemEnvironment` now sanitizes the passed `SystemEnvironment`: `sdkName`, `sdkVersion`, and `osName` are locked to internal defaults, and `sdkIdentifier` only accepts the `dart` → `flutter` promotion (other values, including a `flutter` → `dart` demotion, are ignored). `appName`, `appVersion`, `osVersion`, and `deviceModel` continue to pass through as-is.
 
 🐞 Fixed

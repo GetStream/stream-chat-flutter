@@ -1,4 +1,5 @@
 name: Package Analysis
+description: Package Analysis
 
 runs:
   using: "composite"

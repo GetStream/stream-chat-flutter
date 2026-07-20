@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
@@ -32,6 +33,17 @@ class StreamTypingIndicator extends StatelessWidget {
   /// Id of the parent message in case of a thread
   final String? parentId;
 
+  // Compares the typing users by id so the indicator only rebuilds when the
+  // set of typing users changes. The stream maps to a new lazy Iterable on
+  // every typing event (and on the stale-typing cleanup), so identity equality
+  // would rebuild even when the same users are still typing. Order-sensitive
+  // because only the first user is shown by name.
+  bool _typingUsersEquals(Iterable<User>? previous, Iterable<User>? current) {
+    final previousIds = previous?.map((it) => it.id).toList() ?? const <String>[];
+    final currentIds = current?.map((it) => it.id).toList() ?? const <String>[];
+    return const ListEquality<String>().equals(previousIds, currentIds);
+  }
+
   @override
   Widget build(BuildContext context) {
     final channelState = channel?.state ?? StreamChannel.of(context).channel.state!;
@@ -43,6 +55,7 @@ class StreamTypingIndicator extends StatelessWidget {
       stream: channelState.typingEventsStream.map(
         (typingEvents) => typingEvents.entries.where((element) => element.value.parentId == parentId).map((e) => e.key),
       ),
+      comparator: _typingUsersEquals,
       builder: (context, users) => AnimatedSwitcher(
         layoutBuilder: (currentChild, previousChildren) => Stack(
           children: <Widget>[

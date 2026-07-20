@@ -1,10 +1,15 @@
 skip_docs
-import '../../Fastfile'
+require 'json'
+import '../../fastlane/Fastfile'
 default_platform(:ios)
 
-before_all do
+xcode_version = ENV['XCODE_VERSION'] || '26.2'
+
+before_all do |lane|
   if is_ci
     setup_ci
+    setup_git_config
+    select_xcode(version: xcode_version) unless [:allure_launch, :allure_upload, :allure_launch_removal].include?(lane)
   end
 end
 
@@ -165,6 +170,13 @@ platform :ios do
       issuer_id: '69a6de96-0738-47e3-e053-5b8c7c11a4d1',
       key_content: ENV.fetch('APPSTORE_API_KEY', nil),
       in_house: false,
+    )
+  end
+
+  lane :install_runtime do |options|
+    install_ios_runtime(
+      version: options[:ios],
+      custom_script: File.join(root_path, 'scripts/install_ios_runtime.sh'),
     )
   end
 end
