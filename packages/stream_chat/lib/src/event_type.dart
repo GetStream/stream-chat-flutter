@@ -72,6 +72,9 @@ class EventType {
   /// Event sent when a user is updated
   static const String userUpdated = 'user.updated';
 
+  /// Event sent when a user's presence changes
+  static const String userPresenceChanged = 'user.presence.changed';
+
   /// Event sent when a member is added to a channel
   static const String memberAdded = 'member.added';
 
