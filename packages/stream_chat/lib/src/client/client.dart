@@ -82,8 +82,8 @@ class StreamChatClient {
     RetryPolicy? retryPolicy,
     String? baseURL,
     String? baseWsUrl,
-    Duration connectTimeout = const Duration(seconds: 6),
-    Duration receiveTimeout = const Duration(seconds: 6),
+    Duration connectTimeout = kDefaultConnectTimeout,
+    Duration receiveTimeout = kDefaultReceiveTimeout,
     StreamChatApi? chatApi,
     WebSocket? ws,
     AttachmentFileUploaderProvider attachmentFileUploaderProvider =
