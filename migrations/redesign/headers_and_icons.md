@@ -185,6 +185,36 @@ The default leading is now [`StreamBackButton`] with a channel-aware
 unread badge; the default trailing is the channel avatar wrapped in a
 48×48 tap target wired to `onChannelAvatarPressed`.
 
+### `StreamBackButton`
+
+The unread badge is now supplied as a widget through a single `unreadIndicator`
+parameter (typically a `StreamUnreadIndicator`) instead of the `showUnreadCount`
+/ `channelId` flags, which are **deprecated** but still functional. The badge is
+overlaid on the button's top-end corner and hides itself when its count is zero.
+
+| Old                                     | New equivalent                                              |
+| --------------------------------------- | ----------------------------------------------------------- |
+| `showUnreadCount: false` (or omitted)   | `unreadIndicator:` omitted — no badge                       |
+| `showUnreadCount: true`                 | `unreadIndicator: StreamUnreadIndicator()`                  |
+| `showUnreadCount: true, channelId: cid` | `unreadIndicator: StreamUnreadIndicator.channels(cid: cid)` |
+
+`StreamUnreadIndicator` also takes an optional `excludeCid` to omit one channel
+from the total. The default `StreamChannelHeader` leading uses
+`StreamUnreadIndicator(excludeCid: channel.cid)` so its badge counts the unread
+messages in *other* channels.
+
+**Before:**
+
+```dart
+StreamBackButton(showUnreadCount: true)
+```
+
+**After:**
+
+```dart
+StreamBackButton(unreadIndicator: StreamUnreadIndicator())
+```
+
 ### `StreamChannelListHeader`
 
 | Old parameter                                                                                | New equivalent                                                                     |

@@ -4,6 +4,11 @@
 
 - Added an `AccessibilityTranslations` namespace on `Translations`, accessed via `context.translations.accessibility`, holding all screen-reader labels, tooltips, hints, and live-region announcements used by the composer, voice recording, attachment picker, message actions, channel header, media gallery, and poll creator. Getter suffixes follow Flutter's `MaterialLocalizations` convention (`Tooltip`, `Label`, `Hint`, `TapHint`, `Announcement`). Added a `DateTime.toA11yTimestamp()` extension for locale-aware long-form timestamps in accessibility labels.
 - Added a `LastMessagePredicate` typedef for the `ChannelLastMessageText.lastMessagePredicate` filter.
+- Added an `unreadIndicator` parameter to `StreamBackButton` that overlays a widget (typically a `StreamUnreadIndicator`) on the button's top-end corner. Pass `StreamUnreadIndicator(excludeCid: cid)` to show the total unread count of other channels, or `StreamUnreadIndicator.channels(cid: cid)` for a single channel's count.
+
+⚠️ Deprecated
+
+- Deprecated `StreamBackButton.showUnreadCount` and `StreamBackButton.channelId` in favor of `unreadIndicator`.
 
 🐞 Fixed
 
@@ -12,6 +17,7 @@
 - Fixed `StreamMessageListView` firing `markThreadRead` on a reply-less parent, which produced a guaranteed 404 every time the thread view was opened before the first reply.
 - Fixed dismissing the `StreamMessageListView` unread indicator being ignored while a channel is receiving a rapid burst of messages.
 - Fixed `StreamTypingIndicator` rebuilding on every typing event by comparing the typing users by id, so it only rebuilds when the set of typing users changes.
+- Fixed the `StreamBackButton` unread badge including the currently open channel in its total count.
 
 ## 10.1.0
 
