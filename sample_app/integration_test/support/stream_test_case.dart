@@ -19,10 +19,11 @@ void streamTest({
   String? allureId,
   required String description,
   required Future<void> Function(WidgetTester tester) body,
+  String? skip,
 }) {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets(description, (tester) async {
+  testWidgets(description, skip: skip != null, (tester) async {
     Allure.instance.startTest(
       name: description,
       fullName: Invoker.current?.liveTest.test.name ?? description,
@@ -70,10 +71,12 @@ void streamTestWithEnv({
   String? allureId,
   required String description,
   required Future<void> Function(StreamTestEnv env) body,
+  String? skip,
 }) {
   streamTest(
     allureId: allureId,
     description: description,
+    skip: skip,
     body: (tester) async {
       final env = StreamTestEnv();
       // Registered before setUp so cleanup also runs when setup fails partway
