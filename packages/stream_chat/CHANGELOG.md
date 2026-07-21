@@ -7,6 +7,7 @@
 
 🔄 Changed
 
+- Increased the default `StreamChatClient` `connectTimeout` and `receiveTimeout` from 6s to 30s.
 - `StreamChatClient.updateSystemEnvironment` now sanitizes the passed `SystemEnvironment`: `sdkName`, `sdkVersion`, and `osName` are locked to internal defaults, and `sdkIdentifier` only accepts the `dart` → `flutter` promotion (other values, including a `flutter` → `dart` demotion, are ignored). `appName`, `appVersion`, `osVersion`, and `deviceModel` continue to pass through as-is.
 
 ⚠️ Deprecated
