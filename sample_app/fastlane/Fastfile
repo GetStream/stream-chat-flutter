@@ -40,6 +40,7 @@ end
 def stop_screen_recording(rec)
   return unless rec
 
+  rec[:ended_at_ms] = (Time.now.to_f * 1000).round
   sh("adb #{rec[:serial]}shell pkill -INT screenrecord", log: false) rescue nil
   sleep(3) # let screenrecord finalize + flush the file on-device
   Process.kill('INT', rec[:pid]) rescue nil # reap the local adb client
@@ -65,7 +66,13 @@ def attach_videos_to_failed_results(results_dir:, videos:)
     next unless result['start'] && result['stop']
 
     label = (result['labels'] || []).find { |l| l['name'] == 'testFile' }
-    meta = label && videos[label['value']]
+    recordings = label && videos[label['value']]
+    next unless recordings
+
+    meta = recordings.find do |r|
+      r[:started_at_ms] && r[:ended_at_ms] &&
+        result['start'] >= r[:started_at_ms] && result['start'] <= r[:ended_at_ms]
+    end
     next unless meta && File.exist?(meta[:path]) && File.size(meta[:path]).positive?
 
     ss = [((result['start'] - meta[:started_at_ms]) / 1000.0) - 1.0, 0].max
@@ -158,7 +165,7 @@ lane :run_e2e_test do |options|
   videos_dir = "#{root_path}/build/e2e-videos"
   FileUtils.rm_rf(videos_dir)
   FileUtils.mkdir_p(videos_dir)
-  videos = {} # test-file basename => { path:, started_at_ms: }
+  videos = {} # test-file basename => [ { path:, started_at_ms:, ended_at_ms: }, ... ] (one per attempt)
 
   begin
     Dir.chdir(root_path) do
@@ -193,7 +200,8 @@ lane :run_e2e_test do |options|
           end
 
           flags << "--name #{Shellwords.escape(name_alternation(only))}" if only
-          rec = start_screen_recording(ios: ios, device: device, path: "#{videos_dir}/#{test_name}.mp4")
+          # Per-attempt path so retries don't overwrite earlier recordings.
+          rec = start_screen_recording(ios: ios, device: device, path: "#{videos_dir}/#{test_name}.attempt#{attempt}.mp4")
 
           File.write(attempt_log, '')
           cmd = "flutter test #{flags.join(' ')} 2>&1 | tee -a #{Shellwords.escape(log_file)} | " \
@@ -208,8 +216,16 @@ lane :run_e2e_test do |options|
 
           stop_screen_recording(rec)
 
-          # Keep the latest attempt's recording metadata.
-          videos[test_name] = { path: rec[:path], started_at_ms: rec[:started_at_ms] } if rec
+          # Keep every attempt's recording + window, so failed results from an
+          # earlier attempt still match their own video even when a later retry
+          # narrows the test set or passes.
+          if rec
+            (videos[test_name] ||= []) << {
+              path: rec[:path],
+              started_at_ms: rec[:started_at_ms],
+              ended_at_ms: rec[:ended_at_ms],
+            }
+          end
 
           break if ok || attempt > retries
 
@@ -242,8 +258,10 @@ lane :attach_videos do
     next
   end
 
-  videos = JSON.parse(File.read(manifest)).transform_values do |v|
-    { path: v['path'], started_at_ms: v['started_at_ms'] }
+  videos = JSON.parse(File.read(manifest)).transform_values do |recordings|
+    recordings.map do |v|
+      { path: v['path'], started_at_ms: v['started_at_ms'], ended_at_ms: v['ended_at_ms'] }
+    end
   end
   attach_videos_to_failed_results(results_dir: allure_results_path, videos: videos)
 end
