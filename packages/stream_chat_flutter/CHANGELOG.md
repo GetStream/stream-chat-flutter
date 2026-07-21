@@ -4,11 +4,11 @@
 
 - Added an `AccessibilityTranslations` namespace on `Translations`, accessed via `context.translations.accessibility`, holding all screen-reader labels, tooltips, hints, and live-region announcements used by the composer, voice recording, attachment picker, message actions, channel header, media gallery, and poll creator. Getter suffixes follow Flutter's `MaterialLocalizations` convention (`Tooltip`, `Label`, `Hint`, `TapHint`, `Announcement`). Added a `DateTime.toA11yTimestamp()` extension for locale-aware long-form timestamps in accessibility labels.
 - Added a `LastMessagePredicate` typedef for the `ChannelLastMessageText.lastMessagePredicate` filter.
-- Added a `unreadCount` parameter to `StreamBackButton`, configured via `StreamBackButtonUnreadCount` (`.total({excludeCid})` or `.channel(cid)`).
+- Added an `unreadIndicator` parameter to `StreamBackButton` that overlays a widget (typically a `StreamUnreadIndicator`) on the button's top-end corner. Pass `StreamUnreadIndicator(excludeCid: cid)` to show the total unread count of other channels, or `StreamUnreadIndicator.channels(cid: cid)` for a single channel's count.
 
 ⚠️ Deprecated
 
-- Deprecated `StreamBackButton.showUnreadCount` and `StreamBackButton.channelId` in favor of `unreadCount`.
+- Deprecated `StreamBackButton.showUnreadCount` and `StreamBackButton.channelId` in favor of `unreadIndicator`.
 
 🐞 Fixed
 

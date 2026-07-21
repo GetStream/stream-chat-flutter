@@ -1,8 +1,10 @@
+import 'package:alchemist/alchemist.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+import '../material_app_wrapper.dart';
 import '../mocks.dart';
 
 void main() {
@@ -141,7 +143,7 @@ void main() {
   );
 
   testWidgets(
-    'unreadCount.total() shows the total unread count',
+    'a total unreadIndicator shows the total unread count',
     (WidgetTester tester) async {
       final client = MockClient();
       final clientState = MockClientState();
@@ -157,7 +159,7 @@ void main() {
               child: StreamChat(
                 client: client,
                 child: const StreamBackButton(
-                  unreadCount: StreamBackButtonUnreadCount.total(),
+                  unreadIndicator: StreamUnreadIndicator(),
                 ),
               ),
             ),
@@ -172,7 +174,7 @@ void main() {
   );
 
   testWidgets(
-    'unreadCount.total(excludeCid:) excludes the given channel',
+    'a total unreadIndicator with excludeCid excludes the given channel',
     (WidgetTester tester) async {
       final client = MockClient();
       final clientState = MockClientState();
@@ -194,7 +196,7 @@ void main() {
               child: StreamChat(
                 client: client,
                 child: StreamBackButton(
-                  unreadCount: StreamBackButtonUnreadCount.total(
+                  unreadIndicator: StreamUnreadIndicator(
                     excludeCid: channel.cid,
                   ),
                 ),
@@ -211,7 +213,7 @@ void main() {
   );
 
   testWidgets(
-    'unreadCount.channel(cid) shows that channel unread count',
+    'a channels unreadIndicator shows that channel unread count',
     (WidgetTester tester) async {
       final client = MockClient();
       final clientState = MockClientState();
@@ -231,7 +233,9 @@ void main() {
               child: StreamChat(
                 client: client,
                 child: StreamBackButton(
-                  unreadCount: StreamBackButtonUnreadCount.channel(channel.cid!),
+                  unreadIndicator: StreamUnreadIndicator.channels(
+                    cid: channel.cid,
+                  ),
                 ),
               ),
             ),
@@ -246,7 +250,7 @@ void main() {
   );
 
   testWidgets(
-    'no unreadCount shows no badge',
+    'no unreadIndicator shows no badge',
     (WidgetTester tester) async {
       final client = MockClient();
       final clientState = MockClientState();
@@ -275,7 +279,7 @@ void main() {
   );
 
   testWidgets(
-    'unreadCount takes precedence over the deprecated flags',
+    'unreadIndicator takes precedence over the deprecated flags',
     (WidgetTester tester) async {
       final client = MockClient();
       final clientState = MockClientState();
@@ -297,9 +301,9 @@ void main() {
               child: StreamChat(
                 client: client,
                 child: StreamBackButton(
-                  // The config wins over showUnreadCount: true, so the badge
+                  // The indicator wins over showUnreadCount: true, so the badge
                   // shows the excluded total (7), not the raw total (10).
-                  unreadCount: StreamBackButtonUnreadCount.total(
+                  unreadIndicator: StreamUnreadIndicator(
                     excludeCid: channel.cid,
                   ),
                   showUnreadCount: true,
@@ -408,5 +412,61 @@ void main() {
 
       expect(find.byType(StreamUnreadIndicator), findsNothing);
     },
+  );
+
+  // Golden safety net: locks in the current back-button appearance (icon +
+  // overlaid unread badge) so the unread-indicator API refactor stays
+  // pixel-identical.
+  for (final brightness in Brightness.values) {
+    goldenTest(
+      '[${brightness.name}] -> StreamBackButton with unread badge looks fine',
+      fileName: 'stream_back_button_unread_${brightness.name}',
+      constraints: const BoxConstraints.tightFor(width: 120, height: 120),
+      builder: () => _wrapWithMaterialApp(
+        const StreamBackButton(
+          unreadIndicator: StreamUnreadIndicator(),
+        ),
+        client: _clientWithTotalUnread(5),
+        brightness: brightness,
+      ),
+    );
+  }
+
+  goldenTest(
+    '[light] -> StreamBackButton without unread badge looks fine',
+    fileName: 'stream_back_button_no_unread_light',
+    constraints: const BoxConstraints.tightFor(width: 120, height: 120),
+    builder: () => _wrapWithMaterialApp(
+      const StreamBackButton(
+        unreadIndicator: StreamUnreadIndicator(),
+      ),
+      client: _clientWithTotalUnread(0),
+    ),
+  );
+}
+
+StreamChatClient _clientWithTotalUnread(int count) {
+  final client = MockClient();
+  final clientState = MockClientState();
+  when(() => client.state).thenReturn(clientState);
+  when(() => clientState.totalUnreadCount).thenReturn(count);
+  when(() => clientState.totalUnreadCountStream).thenAnswer((_) => Stream.value(count));
+  return client;
+}
+
+Widget _wrapWithMaterialApp(
+  Widget child, {
+  required StreamChatClient client,
+  Brightness brightness = Brightness.light,
+}) {
+  return MaterialAppWrapper(
+    theme: ThemeData(brightness: brightness),
+    home: StreamChat(
+      client: client,
+      connectivityStream: Stream.value(const [ConnectivityResult.mobile]),
+      child: Scaffold(
+        body: Center(child: child),
+      ),
+    ),
   );
 }

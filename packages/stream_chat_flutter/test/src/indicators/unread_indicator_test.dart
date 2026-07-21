@@ -1,8 +1,10 @@
+import 'package:alchemist/alchemist.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+import '../material_app_wrapper.dart';
 import '../mocks.dart';
 
 void main() {
@@ -268,5 +270,56 @@ void main() {
       // The channel is absent from client state, so nothing is subtracted.
       expect(find.text('10'), findsOneWidget);
     },
+  );
+
+  // Golden safety net: locks in the current badge appearance overlaid on a
+  // child, including the "99+" overflow pill.
+  for (final brightness in Brightness.values) {
+    goldenTest(
+      '[${brightness.name}] -> StreamUnreadIndicator on a child looks fine',
+      fileName: 'stream_unread_indicator_${brightness.name}',
+      constraints: const BoxConstraints.tightFor(width: 120, height: 120),
+      builder: () => _wrapWithMaterialApp(
+        const StreamUnreadIndicator(child: Icon(Icons.chat_bubble_outline)),
+        client: _clientWithTotalUnread(5),
+        brightness: brightness,
+      ),
+    );
+  }
+
+  goldenTest(
+    '[light] -> StreamUnreadIndicator shows 99+ overflow',
+    fileName: 'stream_unread_indicator_overflow_light',
+    constraints: const BoxConstraints.tightFor(width: 120, height: 120),
+    builder: () => _wrapWithMaterialApp(
+      const StreamUnreadIndicator(child: Icon(Icons.chat_bubble_outline)),
+      client: _clientWithTotalUnread(100),
+    ),
+  );
+}
+
+StreamChatClient _clientWithTotalUnread(int count) {
+  final client = MockClient();
+  final clientState = MockClientState();
+  when(() => client.state).thenReturn(clientState);
+  when(() => clientState.totalUnreadCount).thenReturn(count);
+  when(() => clientState.totalUnreadCountStream).thenAnswer((_) => Stream.value(count));
+  return client;
+}
+
+Widget _wrapWithMaterialApp(
+  Widget child, {
+  required StreamChatClient client,
+  Brightness brightness = Brightness.light,
+}) {
+  return MaterialAppWrapper(
+    theme: ThemeData(brightness: brightness),
+    home: StreamChat(
+      client: client,
+      connectivityStream: Stream.value(const [ConnectivityResult.mobile]),
+      child: Scaffold(
+        body: Center(child: child),
+      ),
+    ),
   );
 }

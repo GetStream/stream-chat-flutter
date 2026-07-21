@@ -187,20 +187,21 @@ unread badge; the default trailing is the channel avatar wrapped in a
 
 ### `StreamBackButton`
 
-The unread badge is now configured through a single `unreadCount` parameter
-(a `StreamBackButtonUnreadCount`) instead of the `showUnreadCount` /
-`channelId` flags, which are **deprecated** but still functional.
+The unread badge is now supplied as a widget through a single `unreadIndicator`
+parameter (typically a `StreamUnreadIndicator`) instead of the `showUnreadCount`
+/ `channelId` flags, which are **deprecated** but still functional. The badge is
+overlaid on the button's top-end corner and hides itself when its count is zero.
 
-| Old                                     | New equivalent                                            |
-| --------------------------------------- | --------------------------------------------------------- |
-| `showUnreadCount: false` (or omitted)   | `unreadCount:` omitted — no badge                         |
-| `showUnreadCount: true`                 | `unreadCount: StreamBackButtonUnreadCount.total()`        |
-| `showUnreadCount: true, channelId: cid` | `unreadCount: StreamBackButtonUnreadCount.channel(cid)`   |
+| Old                                     | New equivalent                                              |
+| --------------------------------------- | ----------------------------------------------------------- |
+| `showUnreadCount: false` (or omitted)   | `unreadIndicator:` omitted — no badge                       |
+| `showUnreadCount: true`                 | `unreadIndicator: StreamUnreadIndicator()`                  |
+| `showUnreadCount: true, channelId: cid` | `unreadIndicator: StreamUnreadIndicator.channels(cid: cid)` |
 
-`StreamBackButtonUnreadCount.total` also takes an optional `excludeCid` to omit
-one channel from the total. The default `StreamChannelHeader` leading uses
-`total(excludeCid: channel.cid)` so its badge counts the unread messages in
-*other* channels.
+`StreamUnreadIndicator` also takes an optional `excludeCid` to omit one channel
+from the total. The default `StreamChannelHeader` leading uses
+`StreamUnreadIndicator(excludeCid: channel.cid)` so its badge counts the unread
+messages in *other* channels.
 
 **Before:**
 
@@ -211,7 +212,7 @@ StreamBackButton(showUnreadCount: true)
 **After:**
 
 ```dart
-StreamBackButton(unreadCount: StreamBackButtonUnreadCount.total())
+StreamBackButton(unreadIndicator: StreamUnreadIndicator())
 ```
 
 ### `StreamChannelListHeader`

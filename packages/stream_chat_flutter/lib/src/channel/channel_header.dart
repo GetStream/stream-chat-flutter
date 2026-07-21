@@ -140,7 +140,7 @@ class StreamChannelHeader extends StatelessWidget implements PreferredSizeWidget
     var leading = this.leading;
     if (leading == null && automaticallyImplyLeading) {
       leading = StreamBackButton(
-        unreadCount: StreamBackButtonUnreadCount.total(excludeCid: channel.cid),
+        unreadIndicator: StreamUnreadIndicator(excludeCid: channel.cid),
       );
     }
 

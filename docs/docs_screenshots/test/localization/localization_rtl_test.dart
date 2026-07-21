@@ -191,7 +191,7 @@ void main() {
           child: Scaffold(
             appBar: const StreamChannelHeader(
               automaticallyImplyLeading: false,
-              leading: StreamBackButton(unreadCount: null),
+              leading: StreamBackButton(unreadIndicator: null),
             ),
             body: Column(
               children: [

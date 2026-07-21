@@ -225,20 +225,21 @@ class _ChannelPageState extends State<ChannelPage> {
 
   @override
   Widget build(BuildContext context) {
-    // Show the current channel's own unread count on the back button.
-    final unreadCount = switch (StreamChannel.of(context).channel.cid) {
-      final cid? => StreamBackButtonUnreadCount.channel(cid),
-      _ => const StreamBackButtonUnreadCount.total(),
+    // Show the unread count of the other channels on the back button,
+    // excluding the currently open one.
+    final unreadIndicator = switch (StreamChannel.of(context).channel.cid) {
+      final cid? => StreamUnreadIndicator(excludeCid: cid),
+      _ => const StreamUnreadIndicator(),
     };
 
     return Scaffold(
       appBar: StreamChannelHeader(
         leading: switch ((widget.showBackButton, widget.onBackPressed)) {
           (true, final cb?) => StreamBackButton(
-            unreadCount: unreadCount,
+            unreadIndicator: unreadIndicator,
             onPressed: () => cb(context),
           ),
-          (true, null) => StreamBackButton(unreadCount: unreadCount),
+          (true, null) => StreamBackButton(unreadIndicator: unreadIndicator),
           _ => const SizedBox(),
         },
         trailing: GestureDetector(
