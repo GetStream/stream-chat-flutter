@@ -279,6 +279,39 @@ void main() {
   );
 
   testWidgets(
+    'an unreadIndicator with a zero count shows no badge',
+    (WidgetTester tester) async {
+      final client = MockClient();
+      final clientState = MockClientState();
+
+      when(() => client.state).thenReturn(clientState);
+      when(() => clientState.totalUnreadCount).thenAnswer((_) => 0);
+      when(() => clientState.totalUnreadCountStream).thenAnswer((_) => Stream.value(0));
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Center(
+              child: StreamChat(
+                client: client,
+                child: const StreamBackButton(
+                  unreadIndicator: StreamUnreadIndicator(),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      // The indicator is configured, but with a zero count it renders no badge.
+      expect(find.byType(StreamUnreadIndicator), findsOneWidget);
+      expect(find.byType(StreamBadgeNotification), findsNothing);
+    },
+  );
+
+  testWidgets(
     'unreadIndicator takes precedence over the deprecated flags',
     (WidgetTester tester) async {
       final client = MockClient();
