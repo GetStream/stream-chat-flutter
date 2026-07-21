@@ -57,22 +57,22 @@ StreamChatClient _buildStreamChatClient(
 }) {
   final logLevel = connectionOverride != null ? Level.OFF : (kDebugMode ? Level.INFO : Level.SEVERE);
   return StreamChatClient(
-    apiKey,
-    logLevel: logLevel,
-    logHandlerFunction: _sampleAppLogHandler,
-    retryPolicy: RetryPolicy(
-      maxRetryAttempts: 3,
-      shouldRetry: (client, attempt, error) {
-        return error is StreamChatNetworkError && error.isRetriable;
-      },
-    ),
-    baseURL: connectionOverride?.baseURL,
-    baseWsUrl: connectionOverride?.baseWsUrl,
-    // e2e only: lets the harness simulate a full network outage by failing
-    // every HTTP request (paired with the WebSocket close from
-    // debugConnectivityStream). See `AuthController.debugForceOffline`.
-    chatApiInterceptors: connectionOverride != null ? [_offlineSimulationInterceptor] : null,
-  )
+      apiKey,
+      logLevel: logLevel,
+      logHandlerFunction: _sampleAppLogHandler,
+      retryPolicy: RetryPolicy(
+        maxRetryAttempts: 3,
+        shouldRetry: (client, attempt, error) {
+          return error is StreamChatNetworkError && error.isRetriable;
+        },
+      ),
+      baseURL: connectionOverride?.baseURL,
+      baseWsUrl: connectionOverride?.baseWsUrl,
+      // e2e only: lets the harness simulate a full network outage by failing
+      // every HTTP request (paired with the WebSocket close from
+      // debugConnectivityStream). See `AuthController.debugForceOffline`.
+      chatApiInterceptors: connectionOverride != null ? [_offlineSimulationInterceptor] : null,
+    )
     // No offline persistence under e2e. The persistence client is a shared,
     // never-cleared SQLite DB, so state leaks across the tests in a bundle and
     // a reaction event referencing an unpersisted message throws an async
