@@ -26,9 +26,6 @@ lane :collect_allure_results do |options|
     File.write("#{results_dir}/#{uuid}-result.json", Base64.decode64(base64))
   end
 
-  # Attachments (screenshot / widget hierarchy / log) ride the same log-marker
-  # transport, keyed by their `<uuid>-attachment.<ext>` source filename; the
-  # result JSON references them by that name.
   attachments = Hash.new { |hash, key| hash[key] = {} }
   log.scan(%r{ALLURE-ATTACH::([0-9a-f-]+-attachment\.[a-z0-9]+):(\d+):([A-Za-z0-9+/=]+)}) do |source, seq, chunk|
     attachments[source][seq.to_i] = chunk
