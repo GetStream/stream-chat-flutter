@@ -1,17 +1,41 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
-import 'package:stream_chat_flutter/src/media_gallery_preview/video_player/stream_video_player_activity_mixin.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+
+/// Returns true if the app is running on windows or linux platform.
+bool get isDesktopVideoPlayerSupported =>
+    // Dart VLC is not supported on MacOS.
+    !CurrentPlatform.isMacOS && (CurrentPlatform.isWindows || CurrentPlatform.isLinux);
+
+class SampleAppVideoPlayer extends StatelessWidget {
+  const SampleAppVideoPlayer({
+    super.key,
+    required this.props,
+  });
+
+  /// The properties that configure this video player.
+  final StreamVideoPlayerProps props;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!kIsWeb && isDesktopVideoPlayerSupported) {
+      return StreamVideoPlayerDesktop(
+        attachment: props.attachment,
+        pageIndex: props.pageIndex,
+        autoplay: props.autoplay,
+      );
+    }
+    return DefaultStreamVideoPlayer(props: props);
+  }
+}
 
 /// Video player used on Linux and Windows inside a
 /// [StreamMediaGalleryPreview].
 ///
 /// Pauses itself when the enclosing preview swipes away from this page
 /// and resumes on return if the user had it playing before.
-///
-/// Routed to internally by [StreamVideoPlayer]; you generally don't need
-/// to construct this directly.
 class StreamVideoPlayerDesktop extends StatefulWidget {
   /// Creates a [StreamVideoPlayerDesktop].
   const StreamVideoPlayerDesktop({

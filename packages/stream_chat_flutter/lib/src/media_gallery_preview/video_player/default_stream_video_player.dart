@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/media_gallery_preview/video_player/stream_video_player_activity_mixin.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:video_player/video_player.dart';
 
@@ -14,34 +13,35 @@ import 'package:video_player/video_player.dart';
 ///
 /// Routed to internally by [StreamVideoPlayer]; you generally don't need
 /// to construct this directly.
-class StreamVideoPlayerDefault extends StatefulWidget {
-  /// Creates a [StreamVideoPlayerDefault].
-  const StreamVideoPlayerDefault({
+class DefaultStreamVideoPlayer extends StatefulWidget {
+  /// Creates a [DefaultStreamVideoPlayer].
+  const DefaultStreamVideoPlayer({
     super.key,
-    required this.attachment,
-    required this.pageIndex,
-    this.autoplay = false,
+    required this.props,
   });
 
+  /// The properties that configure this video player.
+  final StreamVideoPlayerProps props;
+
   /// The video attachment to play.
-  final Attachment attachment;
+  Attachment get attachment => props.attachment;
 
   /// The 0-based index of this page in the enclosing
   /// [StreamMediaGalleryPreview].
-  final int pageIndex;
+  int get pageIndex => props.pageIndex;
 
   /// Whether playback should auto-start when this page first becomes
   /// active.
-  final bool autoplay;
+  bool get autoplay => props.autoplay;
 
   @override
-  State<StreamVideoPlayerDefault> createState() => _StreamVideoPlayerDefaultState();
+  State<DefaultStreamVideoPlayer> createState() => _StreamVideoPlayerDefaultState();
 }
 
-class _StreamVideoPlayerDefaultState extends State<StreamVideoPlayerDefault>
+class _StreamVideoPlayerDefaultState extends State<DefaultStreamVideoPlayer>
     with
-        StreamVideoPlayerActivityMixin<StreamVideoPlayerDefault>,
-        AutomaticKeepAliveClientMixin<StreamVideoPlayerDefault> {
+        StreamVideoPlayerActivityMixin<DefaultStreamVideoPlayer>,
+        AutomaticKeepAliveClientMixin<DefaultStreamVideoPlayer> {
   final _player = _ChewieVideoPlayer();
   Object? _error;
 

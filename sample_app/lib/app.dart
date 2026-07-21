@@ -15,9 +15,11 @@ import 'package:sample_app/routes/routes.dart';
 import 'package:sample_app/widgets/custom_message_actions.dart';
 import 'package:sample_app/widgets/location/location_attachment.dart';
 import 'package:sample_app/widgets/location/location_detail_dialog.dart';
+import 'package:sample_app/widgets/video_player.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_localizations/stream_chat_localizations.dart';
 import 'package:streaming_shared_preferences/streaming_shared_preferences.dart';
+import 'package:media_kit/media_kit.dart';
 
 /// Root widget of the sample app: boots prefs + notifications, runs
 /// the router, and owns the [StreamChat] ancestor.
@@ -120,6 +122,11 @@ class _StreamChatSampleAppState extends State<StreamChatSampleApp>
         });
       }
     });
+
+    // Ensures that media kit is initialized on Windows and Linux platforms.
+    if (!isTestEnvironment && isDesktopVideoPlayerSupported) {
+      MediaKit.ensureInitialized();
+    }
   }
 
   @override

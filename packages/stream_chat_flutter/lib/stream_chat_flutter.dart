@@ -67,6 +67,8 @@ export 'src/media_gallery_preview/stream_media_gallery_preview_footer.dart';
 export 'src/media_gallery_preview/stream_media_gallery_preview_header.dart';
 export 'src/media_gallery_preview/stream_media_gallery_preview_item.dart';
 export 'src/media_gallery_preview/video_player/stream_video_player.dart';
+export 'src/media_gallery_preview/video_player/stream_video_player_activity_mixin.dart';
+export 'src/media_gallery_preview/video_player/default_stream_video_player.dart';
 export 'src/mention/mention.dart';
 export 'src/mention/mention_item.dart';
 export 'src/message_action/message_action.dart';
