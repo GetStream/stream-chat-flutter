@@ -1,17 +1,15 @@
-import 'dart:async';
 import 'dart:io';
 
 import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_view/photo_view.dart';
-import 'package:stream_chat_flutter/src/fullscreen_media/full_screen_media_widget.dart';
 import 'package:stream_chat_flutter/src/fullscreen_media/gallery_navigation_item.dart';
 import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:video_player/video_player.dart';
 
 /// A full screen image widget
-class StreamFullScreenMedia extends FullScreenMediaWidget {
+class StreamFullScreenMedia extends StatefulWidget {
   /// Instantiate a new FullScreenImage
   const StreamFullScreenMedia({
     super.key,
@@ -61,40 +59,10 @@ class _FullScreenMediaState extends State<StreamFullScreenMedia> {
     _isDisplayingDetail.value = !_isDisplayingDetail.value;
   }
 
-  final videoPackages = <String, VideoPackage>{};
-
   @override
   void initState() {
     super.initState();
     _pageController = PageController(initialPage: widget.startIndex);
-    for (var i = 0; i < widget.mediaAttachmentPackages.length; i++) {
-      final attachment = widget.mediaAttachmentPackages[i].attachment;
-      if (attachment.type != AttachmentType.video) continue;
-      final package = VideoPackage(attachment, showControls: true);
-      videoPackages[attachment.id] = package;
-    }
-    initializePlayers();
-  }
-
-  Future<void> initializePlayers() async {
-    if (videoPackages.isEmpty) {
-      return;
-    }
-
-    final currentAttachment =
-        widget.mediaAttachmentPackages[widget.startIndex].attachment;
-
-    await Future.wait(videoPackages.values.map(
-      (it) => it.initialize(),
-    ));
-
-    if (widget.autoplayVideos &&
-        currentAttachment.type == AttachmentType.video) {
-      final package = videoPackages.values
-          .firstWhere((e) => e._attachment == currentAttachment);
-      package._chewieController?.play();
-    }
-    setState(() {}); // ignore: no-empty-block
   }
 
   @override
@@ -102,9 +70,6 @@ class _FullScreenMediaState extends State<StreamFullScreenMedia> {
     _currentPage.dispose();
     _pageController.dispose();
     _isDisplayingDetail.dispose();
-    for (final package in videoPackages.values) {
-      package.dispose();
-    }
     super.dispose();
   }
 
@@ -255,81 +220,64 @@ class _FullScreenMediaState extends State<StreamFullScreenMedia> {
                 );
               }
             },
-            child: PageView.builder(
-              controller: _pageController,
-              itemCount: widget.mediaAttachmentPackages.length,
-              onPageChanged: (val) {
-                _currentPage.value = val;
-                if (videoPackages.isEmpty) return;
-                final currentAttachment =
-                    widget.mediaAttachmentPackages[val].attachment;
-                for (final e in videoPackages.values) {
-                  if (e._attachment != currentAttachment) {
-                    e._chewieController?.pause();
-                  }
-                }
-                if (widget.autoplayVideos &&
-                    currentAttachment.type == AttachmentType.video) {
-                  final controller = videoPackages[currentAttachment.id]!;
-                  controller._chewieController?.play();
-                }
-              },
-              itemBuilder: (context, index) {
-                final currentAttachmentPackage =
-                    widget.mediaAttachmentPackages[index];
-                final attachment = currentAttachmentPackage.attachment;
-                return ValueListenableBuilder(
-                  valueListenable: _isDisplayingDetail,
-                  builder: (context, isDisplayingDetail, child) {
-                    final padding = MediaQuery.paddingOf(context);
+            child: FullScreenMediaScope(
+              activeIndex: _currentPage,
+              child: PageView.builder(
+                controller: _pageController,
+                itemCount: widget.mediaAttachmentPackages.length,
+                onPageChanged: (val) => _currentPage.value = val,
+                itemBuilder: (context, index) {
+                  final currentAttachmentPackage =
+                      widget.mediaAttachmentPackages[index];
+                  final attachment = currentAttachmentPackage.attachment;
+                  return ValueListenableBuilder(
+                    valueListenable: _isDisplayingDetail,
+                    builder: (context, isDisplayingDetail, child) {
+                      final padding = MediaQuery.paddingOf(context);
 
-                    return AnimatedContainer(
-                      duration: kThemeChangeDuration,
-                      color: switch (isDisplayingDetail) {
-                        true => StreamChannelHeaderTheme.of(context).color,
-                        false => Colors.black,
-                      },
-                      padding: EdgeInsetsDirectional.only(
-                        top: padding.top + kToolbarHeight,
-                        bottom: padding.bottom + kToolbarHeight,
-                      ),
-                      child: child,
-                    );
-                  },
-                  child: Builder(
-                    builder: (context) {
-                      if (attachment.type == AttachmentType.image ||
-                          attachment.type == AttachmentType.giphy) {
-                        return PhotoView.customChild(
-                          maxScale: PhotoViewComputedScale.covered,
-                          minScale: PhotoViewComputedScale.contained,
-                          backgroundDecoration: const BoxDecoration(
-                            color: Colors.transparent,
-                          ),
-                          child: StreamMediaAttachmentThumbnail(
-                            media: attachment,
-                            width: double.infinity,
-                            height: double.infinity,
-                          ),
-                        );
-                      } else if (attachment.type == AttachmentType.video) {
-                        final controller = videoPackages[attachment.id]!;
-                        if (!controller.initialized) {
-                          return const Center(
-                            child: CircularProgressIndicator.adaptive(),
+                      return AnimatedContainer(
+                        duration: kThemeChangeDuration,
+                        color: switch (isDisplayingDetail) {
+                          true => StreamChannelHeaderTheme.of(context).color,
+                          false => Colors.black,
+                        },
+                        padding: EdgeInsetsDirectional.only(
+                          top: padding.top + kToolbarHeight,
+                          bottom: padding.bottom + kToolbarHeight,
+                        ),
+                        child: child,
+                      );
+                    },
+                    child: Builder(
+                      builder: (context) {
+                        if (attachment.type == AttachmentType.image ||
+                            attachment.type == AttachmentType.giphy) {
+                          return PhotoView.customChild(
+                            maxScale: PhotoViewComputedScale.covered,
+                            minScale: PhotoViewComputedScale.contained,
+                            backgroundDecoration: const BoxDecoration(
+                              color: Colors.transparent,
+                            ),
+                            child: StreamMediaAttachmentThumbnail(
+                              media: attachment,
+                              width: double.infinity,
+                              height: double.infinity,
+                            ),
+                          );
+                        } else if (attachment.type == AttachmentType.video) {
+                          return StreamVideoPlayer(
+                            attachment: attachment,
+                            pageIndex: index,
+                            autoplay: widget.autoplayVideos,
                           );
                         }
 
-                        return Chewie(
-                          controller: controller.chewieController!,
-                        );
-                      }
-
-                      return const Empty();
-                    },
-                  ),
-                );
-              },
+                        return const Empty();
+                      },
+                    ),
+                  );
+                },
+              ),
             ),
           ),
         ),
@@ -342,20 +290,19 @@ class _FullScreenMediaState extends State<StreamFullScreenMedia> {
 class VideoPackage {
   /// Constructor for creating [VideoPackage]
   VideoPackage(
-    this._attachment, {
+    Attachment attachment, {
     bool showControls = false,
     bool autoInitialize = true,
   })  : _showControls = showControls,
         _autoInitialize = autoInitialize,
-        _videoPlayerController = _attachment.localUri != null
+        _videoPlayerController = attachment.localUri != null
             ? VideoPlayerController.file(
-                File.fromUri(_attachment.localUri!),
+                File.fromUri(attachment.localUri!),
               )
             : VideoPlayerController.networkUrl(
-                Uri.parse(_attachment.assetUrl!),
+                Uri.parse(attachment.assetUrl!),
               );
 
-  final Attachment _attachment;
   final bool _showControls;
   final bool _autoInitialize;
   final VideoPlayerController _videoPlayerController;
