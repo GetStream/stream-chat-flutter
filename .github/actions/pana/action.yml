@@ -1,4 +1,5 @@
 name: Pana Workflow
+description: 'Run pana package analysis and verify the score meets the minimum threshold'
 
 inputs:
   min_score:
@@ -28,7 +29,7 @@ runs:
           yq eval '.dependencies.stream_chat = {"path": "../stream_chat"}' -i packages/stream_chat_flutter_core/pubspec.yaml
           yq eval '.dependencies.stream_chat_flutter_core = {"path": "../stream_chat_flutter_core"}' -i packages/stream_chat_flutter/pubspec.yaml
           yq eval '.dependencies.stream_chat = {"path": "../stream_chat"}' -i packages/stream_chat_persistence/pubspec.yaml
-    
+
     - name: Install Flutter
       uses: subosito/flutter-action@v2
       with:

@@ -15,6 +15,8 @@
 - Fixed last-message preview flicker during channel-state reloads.
 - Fixed shadowed messages not hidden in channel list items.
 - Fixed `StreamMessageListView` firing `markThreadRead` on a reply-less parent, which produced a guaranteed 404 every time the thread view was opened before the first reply.
+- Fixed dismissing the `StreamMessageListView` unread indicator being ignored while a channel is receiving a rapid burst of messages.
+- Fixed `StreamTypingIndicator` rebuilding on every typing event by comparing the typing users by id, so it only rebuilds when the set of typing users changes.
 - Fixed the `StreamBackButton` unread badge including the currently open channel in its total count.
 
 ## 10.1.0

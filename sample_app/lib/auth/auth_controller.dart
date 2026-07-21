@@ -26,7 +26,11 @@ final _chatPersistenceClient = StreamChatPersistenceClient(
   logLevel: Level.SEVERE,
 );
 
+bool get isE2eTestRun => authController.debugConnectionOverride != null;
+
 Future<void> _sampleAppLogHandler(LogRecord record) async {
+  if (isE2eTestRun) return;
+
   if (kDebugMode) StreamChatClient.defaultLogHandler(record);
 
   // report errors to Firebase Crashlytics
@@ -39,8 +43,19 @@ Future<void> _sampleAppLogHandler(LogRecord record) async {
   }
 }
 
-StreamChatClient _buildStreamChatClient(String apiKey) {
-  const logLevel = kDebugMode ? Level.INFO : Level.SEVERE;
+@visibleForTesting
+class StreamConnectionOverride {
+  const StreamConnectionOverride({this.baseURL, this.baseWsUrl});
+
+  final String? baseURL;
+  final String? baseWsUrl;
+}
+
+StreamChatClient _buildStreamChatClient(
+  String apiKey, {
+  StreamConnectionOverride? connectionOverride,
+}) {
+  final logLevel = connectionOverride != null ? Level.OFF : (kDebugMode ? Level.INFO : Level.SEVERE);
   return StreamChatClient(
     apiKey,
     logLevel: logLevel,
@@ -51,8 +66,8 @@ StreamChatClient _buildStreamChatClient(String apiKey) {
         return error is StreamChatNetworkError && error.isRetriable;
       },
     ),
-    //baseURL: 'http://<local-ip>:3030',
-    //baseWsUrl: 'ws://<local-ip>:8800',
+    baseURL: connectionOverride?.baseURL,
+    baseWsUrl: connectionOverride?.baseWsUrl,
   )..chatPersistenceClient = _chatPersistenceClient;
 }
 
@@ -92,6 +107,9 @@ class AuthController extends ValueNotifier<AuthState> {
 
   /// The active client, or `null` before the first [connect].
   StreamChatClient? get client => _client;
+
+  @visibleForTesting
+  StreamConnectionOverride? debugConnectionOverride;
 
   String? _activeApiKey;
   PushTokenManager? _pushTokenManager;
@@ -142,7 +160,10 @@ class AuthController extends ValueNotifier<AuthState> {
       _client = null;
     }
 
-    final client = _client ??= _buildStreamChatClient(apiKey);
+    final client = _client ??= _buildStreamChatClient(
+      apiKey,
+      connectionOverride: debugConnectionOverride,
+    );
     _activeApiKey = apiKey;
 
     try {
@@ -157,11 +178,13 @@ class AuthController extends ValueNotifier<AuthState> {
         ]);
       }
 
-      _pushTokenManager = PushTokenManager(
-        client: client,
-        iosPushProvider: _kIosPushProvider,
-        androidPushProvider: _kAndroidPushProvider,
-      )..registerDevice();
+      if (!isE2eTestRun) {
+        _pushTokenManager = PushTokenManager(
+          client: client,
+          iosPushProvider: _kIosPushProvider,
+          androidPushProvider: _kAndroidPushProvider,
+        )..registerDevice();
+      }
 
       value = Authenticated(ownUser);
     } catch (_) {
@@ -192,6 +215,24 @@ class AuthController extends ValueNotifier<AuthState> {
     // list's final rebuild trips `channel.state != null`.
     await SchedulerBinding.instance.endOfFrame;
     client.disconnectUser(flushChatPersistence: flushPersistence).ignore();
+  }
+
+  @visibleForTesting
+  Future<void> debugReset() async {
+    _pushTokenManager?.dispose().ignore();
+    _pushTokenManager = null;
+
+    await _client?.dispose();
+    _client = null;
+    _activeApiKey = null;
+    debugConnectionOverride = null;
+
+    if (!CurrentPlatform.isWeb) {
+      const secureStorage = FlutterSecureStorage();
+      await secureStorage.deleteAll();
+    }
+
+    value = const Unauthenticated();
   }
 
   @override

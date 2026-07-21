@@ -7,12 +7,14 @@ import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/stream_chat.dart' hide Success;
 import 'package:stream_chat_flutter_core/src/paged_value_notifier.dart';
 import 'package:stream_chat_flutter_core/src/stream_channel_list_controller.dart';
+import 'package:stream_chat_flutter_core/src/stream_channel_list_event_handler.dart';
 
 import 'mocks.dart';
 
 void main() {
   setUpAll(() {
     registerFallbackValue(const PaginationParams());
+    registerFallbackValue(Event(type: 'fallback'));
   });
 
   final client = MockClient();
@@ -25,17 +27,6 @@ void main() {
     reset(client);
   });
 
-  MockChannel mockChannel(String cid, {bool watchable = false}) {
-    final channel = MockChannel();
-    when(() => channel.cid).thenReturn(cid);
-    if (watchable) {
-      when(channel.watch).thenAnswer((_) => Future.value(const ChannelState()));
-      final [type, id] = cid.split(':');
-      when(() => client.channel(type, id: id)).thenReturn(channel);
-    }
-    return channel;
-  }
-
   Future<StreamChannelListController> buildController({
     List<Channel> channels = const [],
     Filter? filter,
@@ -43,6 +34,7 @@ void main() {
     String? predefinedFilter,
     Map<String, Object?>? filterValues,
     Map<String, Object?>? sortValues,
+    StreamChannelListEventHandler? eventHandler,
   }) async {
     when(
       () => client.queryChannelsWithResult(
@@ -60,6 +52,7 @@ void main() {
 
     final controller = StreamChannelListController(
       client: client,
+      eventHandler: eventHandler,
       filter: filter,
       channelStateSort: channelStateSort,
       predefinedFilter: predefinedFilter,
@@ -282,259 +275,129 @@ void main() {
     expect((captured.single as PaginationParams).offset, equals(nextPageKey));
   });
 
-  group('Event handling', () {
+  // The controller's only responsibility for events is routing them to the
+  // matching handler method. The handler's behavior for each event is covered
+  // in stream_channel_list_event_handler_test.dart, so here we inject a mock
+  // handler and assert only that dispatch reaches the right method.
+  group('Event handling routes each event to its handler', () {
     late StreamController<Event> eventController;
+    late MockStreamChannelListEventHandler handler;
 
     setUp(() {
       eventController = StreamController<Event>.broadcast();
       when(client.on).thenAnswer((_) => eventController.stream);
+      handler = MockStreamChannelListEventHandler();
     });
 
     tearDown(() {
       eventController.close();
     });
 
-    test('channel.deleted event removes the channel from the list', () async {
-      final keptChannel = mockChannel('messaging:kept');
-      final deletedChannel = mockChannel('messaging:deleted');
+    Future<StreamChannelListController> subscribe() => buildController(eventHandler: handler);
 
-      final controller = await buildController(
-        channels: [keptChannel, deletedChannel],
-        channelStateSort: null,
-      );
-
-      eventController.add(
-        Event(type: EventType.channelDeleted, cid: 'messaging:deleted'),
-      );
+    test('channel.deleted -> onChannelDeleted', () async {
+      final controller = await subscribe();
+      eventController.add(Event(type: EventType.channelDeleted));
       await pumpEventQueue();
-
-      expect(controller.value.asSuccess.items, equals([keptChannel]));
+      verify(() => handler.onChannelDeleted(any(), controller)).called(1);
     });
 
-    test(
-      'notification.channel_deleted event removes the channel from the list',
-      () async {
-        final keptChannel = mockChannel('messaging:kept');
-        final deletedChannel = mockChannel('messaging:deleted');
-
-        final controller = await buildController(
-          channels: [keptChannel, deletedChannel],
-          channelStateSort: null,
-        );
-
-        eventController.add(
-          Event(
-            type: EventType.notificationChannelDeleted,
-            cid: 'messaging:deleted',
-          ),
-        );
-        await pumpEventQueue();
-
-        expect(controller.value.asSuccess.items, equals([keptChannel]));
-      },
-    );
-
-    test('channel.hidden event removes the channel from the list', () async {
-      final keptChannel = mockChannel('messaging:kept');
-      final hiddenChannel = mockChannel('messaging:hidden');
-
-      final controller = await buildController(
-        channels: [keptChannel, hiddenChannel],
-        channelStateSort: null,
-      );
-
-      eventController.add(
-        Event(type: EventType.channelHidden, cid: 'messaging:hidden'),
-      );
+    test('notification.channel_deleted -> onChannelDeleted', () async {
+      final controller = await subscribe();
+      eventController.add(Event(type: EventType.notificationChannelDeleted));
       await pumpEventQueue();
-
-      expect(controller.value.asSuccess.items, equals([keptChannel]));
+      verify(() => handler.onChannelDeleted(any(), controller)).called(1);
     });
 
-    test('channel.truncated event refreshes the list', () async {
-      final channel = mockChannel('messaging:foo');
+    test('channel.hidden -> onChannelHidden', () async {
+      final controller = await subscribe();
+      eventController.add(Event(type: EventType.channelHidden));
+      await pumpEventQueue();
+      verify(() => handler.onChannelHidden(any(), controller)).called(1);
+    });
 
-      await buildController(channels: [channel], channelStateSort: null);
-
+    test('channel.truncated -> onChannelTruncated', () async {
+      final controller = await subscribe();
       eventController.add(Event(type: EventType.channelTruncated));
       await pumpEventQueue();
-
-      verify(
-        () => client.queryChannelsWithResult(
-          filter: any(named: 'filter'),
-          channelStateSort: any(named: 'channelStateSort'),
-          predefinedFilter: any(named: 'predefinedFilter'),
-          filterValues: any(named: 'filterValues'),
-          sortValues: any(named: 'sortValues'),
-          memberLimit: any(named: 'memberLimit'),
-          messageLimit: any(named: 'messageLimit'),
-          presence: any(named: 'presence'),
-          paginationParams: any(named: 'paginationParams'),
-        ),
-      ).called(2);
+      verify(() => handler.onChannelTruncated(any(), controller)).called(1);
     });
 
-    test('connection.recovered event refreshes the list', () async {
-      await buildController(channelStateSort: null);
+    test('channel.updated -> onChannelUpdated', () async {
+      final controller = await subscribe();
+      eventController.add(Event(type: EventType.channelUpdated));
+      await pumpEventQueue();
+      verify(() => handler.onChannelUpdated(any(), controller)).called(1);
+    });
 
+    test('member.updated -> onMemberUpdated', () async {
+      final controller = await subscribe();
+      eventController.add(Event(type: EventType.memberUpdated));
+      await pumpEventQueue();
+      verify(() => handler.onMemberUpdated(any(), controller)).called(1);
+    });
+
+    test('channel.visible -> onChannelVisible', () async {
+      final controller = await subscribe();
+      eventController.add(Event(type: EventType.channelVisible));
+      await pumpEventQueue();
+      verify(() => handler.onChannelVisible(any(), controller)).called(1);
+    });
+
+    test('connection.recovered -> onConnectionRecovered', () async {
+      final controller = await subscribe();
       eventController.add(Event(type: EventType.connectionRecovered));
       await pumpEventQueue();
+      verify(() => handler.onConnectionRecovered(any(), controller)).called(1);
+    });
 
+    test('message.new -> onMessageNew', () async {
+      final controller = await subscribe();
+      eventController.add(Event(type: EventType.messageNew));
+      await pumpEventQueue();
+      verify(() => handler.onMessageNew(any(), controller)).called(1);
+    });
+
+    test('notification.added_to_channel -> onNotificationAddedToChannel', () async {
+      final controller = await subscribe();
+      eventController.add(Event(type: EventType.notificationAddedToChannel));
+      await pumpEventQueue();
       verify(
-        () => client.queryChannelsWithResult(
-          filter: any(named: 'filter'),
-          channelStateSort: any(named: 'channelStateSort'),
-          predefinedFilter: any(named: 'predefinedFilter'),
-          filterValues: any(named: 'filterValues'),
-          sortValues: any(named: 'sortValues'),
-          memberLimit: any(named: 'memberLimit'),
-          messageLimit: any(named: 'messageLimit'),
-          presence: any(named: 'presence'),
-          paginationParams: any(named: 'paginationParams'),
-        ),
-      ).called(2);
+        () => handler.onNotificationAddedToChannel(any(), controller),
+      ).called(1);
     });
 
-    test('message.new event moves the matching channel to the top', () async {
-      final channelA = mockChannel('messaging:a');
-      final channelB = mockChannel('messaging:b');
-      final channelC = mockChannel('messaging:c');
-
-      final controller = await buildController(
-        channels: [channelA, channelB, channelC],
-        channelStateSort: null,
-      );
-
-      eventController.add(
-        Event(type: EventType.messageNew, cid: 'messaging:b'),
-      );
+    test('notification.message_new -> onNotificationMessageNew', () async {
+      final controller = await subscribe();
+      eventController.add(Event(type: EventType.notificationMessageNew));
       await pumpEventQueue();
-
-      expect(
-        controller.value.asSuccess.items,
-        equals([channelB, channelA, channelC]),
-      );
+      verify(
+        () => handler.onNotificationMessageNew(any(), controller),
+      ).called(1);
     });
 
-    test(
-      'message.new event for a channel not in the list refreshes the list',
-      () async {
-        final channel = mockChannel('messaging:foo');
-
-        await buildController(channels: [channel], channelStateSort: null);
-
-        eventController.add(
-          Event(type: EventType.messageNew, cid: 'messaging:unknown'),
-        );
-        await pumpEventQueue();
-
-        verify(
-          () => client.queryChannelsWithResult(
-            filter: any(named: 'filter'),
-            channelStateSort: any(named: 'channelStateSort'),
-            predefinedFilter: any(named: 'predefinedFilter'),
-            filterValues: any(named: 'filterValues'),
-            sortValues: any(named: 'sortValues'),
-            memberLimit: any(named: 'memberLimit'),
-            messageLimit: any(named: 'messageLimit'),
-            presence: any(named: 'presence'),
-            paginationParams: any(named: 'paginationParams'),
-          ),
-        ).called(2);
-      },
-    );
-
-    test('channel.visible event adds the channel to the top of the list', () async {
-      final existingChannel = mockChannel('messaging:existing');
-      final newChannel = mockChannel('messaging:new', watchable: true);
-
-      final controller = await buildController(
-        channels: [existingChannel],
-        channelStateSort: null,
-      );
-
-      eventController.add(
-        Event(
-          type: EventType.channelVisible,
-          channelId: 'new',
-          channelType: 'messaging',
-        ),
-      );
+    test('notification.removed_from_channel -> onNotificationRemovedFromChannel', () async {
+      final controller = await subscribe();
+      eventController.add(Event(type: EventType.notificationRemovedFromChannel));
       await pumpEventQueue();
-
-      expect(controller.value.asSuccess.items, equals([newChannel, existingChannel]));
+      verify(
+        () => handler.onNotificationRemovedFromChannel(any(), controller),
+      ).called(1);
     });
 
-    test(
-      'notification.added_to_channel event adds the channel to the top of the list',
-      () async {
-        final existingChannel = mockChannel('messaging:existing');
-        final newChannel = mockChannel('messaging:new', watchable: true);
+    test('user.presence.changed -> onUserPresenceChanged', () async {
+      final controller = await subscribe();
+      eventController.add(Event(type: EventType.userPresenceChanged));
+      await pumpEventQueue();
+      verify(() => handler.onUserPresenceChanged(any(), controller)).called(1);
+    });
 
-        final controller = await buildController(
-          channels: [existingChannel],
-          channelStateSort: null,
-        );
-
-        eventController.add(
-          Event(
-            type: EventType.notificationAddedToChannel,
-            channelId: 'new',
-            channelType: 'messaging',
-          ),
-        );
-        await pumpEventQueue();
-
-        expect(controller.value.asSuccess.items, equals([newChannel, existingChannel]));
-      },
-    );
-
-    test(
-      'notification.message_new event adds the channel to the top of the list',
-      () async {
-        final existingChannel = mockChannel('messaging:existing');
-        final newChannel = mockChannel('messaging:new', watchable: true);
-
-        final controller = await buildController(
-          channels: [existingChannel],
-          channelStateSort: null,
-        );
-
-        eventController.add(
-          Event(
-            type: EventType.notificationMessageNew,
-            channelId: 'new',
-            channelType: 'messaging',
-          ),
-        );
-        await pumpEventQueue();
-
-        expect(controller.value.asSuccess.items, equals([newChannel, existingChannel]));
-      },
-    );
-
-    test(
-      'notification.removed_from_channel event removes the channel from the list',
-      () async {
-        final keptChannel = mockChannel('messaging:kept');
-        final removedChannel = mockChannel('messaging:removed');
-
-        final controller = await buildController(
-          channels: [keptChannel, removedChannel],
-          channelStateSort: null,
-        );
-
-        eventController.add(
-          Event(
-            type: EventType.notificationRemovedFromChannel,
-            channel: ChannelModel(cid: 'messaging:removed'),
-          ),
-        );
-        await pumpEventQueue();
-
-        expect(controller.value.asSuccess.items, equals([keptChannel]));
-      },
-    );
+    test('user.updated -> onUserPresenceChanged', () async {
+      final controller = await subscribe();
+      eventController.add(Event(type: EventType.userUpdated));
+      await pumpEventQueue();
+      verify(() => handler.onUserPresenceChanged(any(), controller)).called(1);
+    });
   });
 
   test('channels setter replaces items while keeping success state', () {
