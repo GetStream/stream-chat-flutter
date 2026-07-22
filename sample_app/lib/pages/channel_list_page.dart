@@ -1,6 +1,7 @@
 // ignore_for_file: deprecated_member_use
 
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:app_badge_plus/app_badge_plus.dart';
 import 'package:flutter/material.dart';
@@ -122,12 +123,9 @@ class _ChannelListPageState extends State<ChannelListPage> {
   void initState() {
     super.initState();
     if (isAppBadgeSupported) {
-      badgeListener = StreamChat.of(context).client.state.totalUnreadCountStream.listen((count) {
-        if (count > 0) {
-          AppBadgePlus.updateBadge(count);
-        } else {
-          AppBadgePlus.updateBadge(0);
-        }
+      final client = StreamChat.of(context).client;
+      badgeListener = client.state.totalUnreadCountStream.listen((count) {
+        AppBadgePlus.updateBadge(math.max(0, count));
       });
     }
 
