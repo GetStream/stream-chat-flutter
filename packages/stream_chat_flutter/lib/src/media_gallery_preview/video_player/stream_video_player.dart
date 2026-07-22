@@ -197,6 +197,7 @@ class _StreamVideoPlayerDefaultState extends State<DefaultStreamVideoPlayer>
 class _ChewieVideoPlayer {
   VideoPlayerController? _video;
   ChewieController? _chewie;
+  bool _disposed = false;
 
   /// The chewie controller used for playback once initialisation has
   /// completed. `null` until [open] resolves.
@@ -222,8 +223,15 @@ class _ChewieVideoPlayer {
     final video = localUri != null
         ? VideoPlayerController.file(File.fromUri(localUri))
         : VideoPlayerController.networkUrl(Uri.parse(assetUrl!));
-    _video = video;
     await video.initialize();
+
+    // The state may have been disposed while awaiting initialization; avoid
+    // wiring up a Chewie controller around an already torn-down controller.
+    if (_disposed) {
+      return video.dispose();
+    }
+
+    _video = video;
     _chewie = ChewieController(
       videoPlayerController: video,
       autoInitialize: true,
@@ -239,6 +247,7 @@ class _ChewieVideoPlayer {
 
   /// Releases both controllers.
   void dispose() {
+    _disposed = true;
     _chewie?.dispose();
     _video?.dispose();
   }
