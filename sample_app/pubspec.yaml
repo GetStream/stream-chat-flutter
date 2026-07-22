@@ -31,7 +31,7 @@ dependencies:
   flutter_local_notifications: ^21.0.0
   flutter_map: ^8.1.1
   flutter_map_animations: ^0.9.0
-  flutter_secure_storage: ^9.2.2
+  flutter_secure_storage: ^10.3.1
   flutter_slidable: ^3.1.1
   flutter_svg: ^2.3.0
   geolocator: ^13.0.0
@@ -40,10 +40,9 @@ dependencies:
   latlong2: ^0.9.1
   lottie: ^3.3.3
   marionette_flutter: ^0.6.0
-  # Bundles a known-good libmpv for the desktop (media_kit) video player. Without
-  # it, media_kit falls back to an incompatible system libmpv and crashes natively
-  # when opening a video on Linux/Windows.
-  media_kit_libs_video: ^1.0.6
+  # Add media_kit_libs_video if you want to run it on windows or linux platforms.
+  media_kit: ^1.2.6
+  media_kit_video: ^2.0.1
   path_provider_android: ">=2.2.5 <2.3.0"
   rxdart: ^0.28.0
   stream_chat_flutter: ^10.1.0

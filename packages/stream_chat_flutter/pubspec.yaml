@@ -38,7 +38,6 @@ dependencies:
   flutter_portal: ^1.1.4
   flutter_svg: ^2.3.0
   gal: ^2.3.2
-  get_thumbnail_video: ^0.7.3
   http_parser: ^4.1.2
   image_picker: ^1.2.2
   image_size_getter: ^2.4.1
@@ -46,8 +45,6 @@ dependencies:
   jiffy: ^6.4.5
   just_audio: ^0.10.5
   lottie: ^3.3.3
-  media_kit: ^1.2.6
-  media_kit_video: ^2.0.1
   meta: ^1.9.1
   path_provider: ^2.1.5
   photo_manager: ^3.9.0
@@ -71,6 +68,7 @@ dependencies:
       url: https://github.com/GetStream/stream-core-flutter.git
       ref: 7d0421a2cc04480e0bd2fc404cf6dd5b051f7f42
       path: packages/stream_core_flutter
+  stream_thumbnail: ^0.1.0
   svg_icon_widget: ^0.0.1
   synchronized: ^3.4.0
   theme_extensions_builder_annotation: ^7.1.0

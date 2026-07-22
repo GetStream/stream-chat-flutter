@@ -4,6 +4,7 @@
 
 - Added an `AccessibilityTranslations` namespace on `Translations`, accessed via `context.translations.accessibility`, holding all screen-reader labels, tooltips, hints, and live-region announcements used by the composer, voice recording, attachment picker, message actions, channel header, media gallery, and poll creator. Getter suffixes follow Flutter's `MaterialLocalizations` convention (`Tooltip`, `Label`, `Hint`, `TapHint`, `Announcement`). Added a `DateTime.toA11yTimestamp()` extension for locale-aware long-form timestamps in accessibility labels.
 - Added a `LastMessagePredicate` typedef for the `ChannelLastMessageText.lastMessagePredicate` filter.
+- Made `StreamVideoPlayer` overridable via the `StreamComponentFactory` (`streamChatComponentBuilders(videoPlayer: ...)`), with the previous implementation now available as `DefaultStreamVideoPlayer`.
 
 🐞 Fixed
 
@@ -12,6 +13,7 @@
 - Fixed `StreamMessageListView` firing `markThreadRead` on a reply-less parent, which produced a guaranteed 404 every time the thread view was opened before the first reply.
 - Fixed dismissing the `StreamMessageListView` unread indicator being ignored while a channel is receiving a rapid burst of messages.
 - Fixed `StreamTypingIndicator` rebuilding on every typing event by comparing the typing users by id, so it only rebuilds when the set of typing users changes.
+- Replaced the `get_thumbnail_video` dependency with Stream's own `stream_thumbnail` plugin, resolving the iOS duplicate-`VideoThumbnailPlugin`-symbol crash when an app also uses `video_thumbnail`/`video_editor` ([#2360](https://github.com/GetStream/stream-chat-flutter/issues/2360)).
 
 ## 10.1.0
 
