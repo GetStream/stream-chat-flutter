@@ -1,7 +1,7 @@
 name: sample_app
 description: A new Flutter project.
 publish_to: "none"
-version: 10.1.0
+version: 10.2.0
 
 # Note: The environment configuration and dependency versions are managed by Melos.
 #
@@ -31,7 +31,7 @@ dependencies:
   flutter_local_notifications: ^21.0.0
   flutter_map: ^8.1.1
   flutter_map_animations: ^0.9.0
-  flutter_secure_storage: ^9.2.2
+  flutter_secure_storage: ^10.3.1
   flutter_slidable: ^3.1.1
   flutter_svg: ^2.3.0
   geolocator: ^13.0.0
@@ -39,11 +39,15 @@ dependencies:
   image_picker: ^1.2.2
   latlong2: ^0.9.1
   lottie: ^3.3.3
+  marionette_flutter: ^0.6.0
+  # Add media_kit_libs_video if you want to run it on windows or linux platforms.
+  media_kit: ^1.2.6
+  media_kit_video: ^2.0.1
   path_provider_android: ">=2.2.5 <2.3.0"
   rxdart: ^0.28.0
-  stream_chat_flutter: ^10.1.0
-  stream_chat_localizations: ^10.1.0
-  stream_chat_persistence: ^10.1.0
+  stream_chat_flutter: ^10.2.0
+  stream_chat_localizations: ^10.2.0
+  stream_chat_persistence: ^10.2.0
   streaming_shared_preferences: ^2.0.0
   uuid: ^4.5.3
   video_player: ^2.11.1

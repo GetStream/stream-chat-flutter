@@ -2,45 +2,64 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:marionette_flutter/marionette_flutter.dart';
 import 'package:sample_app/app.dart';
 import 'package:sample_app/firebase_options.dart';
+import 'package:sample_app/utils/firebase_support.dart';
 
 Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-
-  // Initialize Firebase before wiring Crashlytics handlers so the error
-  // reporters have a live Firebase app to talk to.
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-
-  // Avoid sending Crashlytics reports for crashes that happen during local
-  // development; reports still flow in release/profile builds.
-  if (!kDebugMode) {
-    await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(true);
+  // In debug mode, initialize the Marionette binding so AI agents can drive
+  // the running app over MCP (inspect widgets, tap, type, scroll, screenshot).
+  // Falls back to the standard binding in release/profile builds.
+  if (kDebugMode) {
+    MarionetteBinding.ensureInitialized();
+  } else {
+    WidgetsFlutterBinding.ensureInitialized();
   }
 
-  /// Captures errors reported by the Flutter framework.
-  FlutterError.onError = (FlutterErrorDetails details) {
-    if (kDebugMode) {
-      // In development mode, simply print to console.
-      FlutterError.dumpErrorToConsole(details);
-    } else {
-      // In production mode, report the framework error to Crashlytics as fatal
-      // so it surfaces alongside native crashes.
-      FirebaseCrashlytics.instance.recordFlutterFatalError(details);
+  if (isFirebaseSupported) {
+    // Initialize Firebase before wiring Crashlytics handlers so the error
+    // reporters have a live Firebase app to talk to.
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+
+    // Crashlytics has no web support, so leave the default FlutterError and
+    // PlatformDispatcher error handlers (console/embedder reporting) in place
+    // there instead of wiring them to Crashlytics.
+    if (isCrashlyticsSupported) {
+      // Avoid sending Crashlytics reports for crashes that happen during
+      // local development; reports still flow in release/profile builds.
+      if (!kDebugMode) {
+        await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(true);
+      }
+
+      /// Captures errors reported by the Flutter framework.
+      FlutterError.onError = (FlutterErrorDetails details) {
+        if (kDebugMode) {
+          // In development mode, simply print to console.
+          FlutterError.dumpErrorToConsole(details);
+        } else {
+          // In production mode, report the framework error to Crashlytics as
+          // fatal so it surfaces alongside native crashes.
+          FirebaseCrashlytics.instance.recordFlutterFatalError(details);
+        }
+      };
+
+      /// Captures errors reported by the platform dispatcher, including async
+      /// errors thrown outside the Flutter framework (e.g. from native iOS and
+      /// Android code via platform channels).
+      PlatformDispatcher.instance.onError = (error, stack) {
+        // In debug, return false so the embedder logs the error and the IDE
+        // can break on it. In release, hand it to Crashlytics and mark it
+        // handled.
+        if (kDebugMode) return false;
+
+        FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+        return true;
+      };
     }
-  };
-
-  /// Captures errors reported by the platform dispatcher, including async
-  /// errors thrown outside the Flutter framework (e.g. from native iOS and
-  /// Android code via platform channels).
-  PlatformDispatcher.instance.onError = (error, stack) {
-    // In debug, return false so the embedder logs the error and the IDE can
-    // break on it. In release, hand it to Crashlytics and mark it handled.
-    if (kDebugMode) return false;
-
-    FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
-    return true;
-  };
+  }
 
   runApp(const StreamChatSampleApp());
 }

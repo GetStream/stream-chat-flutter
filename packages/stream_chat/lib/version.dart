@@ -9,4 +9,4 @@
 
 /// Current package version
 /// Used in [SystemEnvironmentManager] to build the `x-stream-client` header
-const PACKAGE_VERSION = '10.1.0';
+const PACKAGE_VERSION = '10.2.0';
