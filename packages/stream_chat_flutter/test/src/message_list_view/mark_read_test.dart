@@ -22,6 +22,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:stream_chat_flutter/src/message_list_view/unread_indicator_button.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import '../../test_utils/data_generator.dart';
@@ -337,6 +338,65 @@ void main() {
 
         // The default scroll-to-bottom button is a FloatingActionButton.
         expect(find.byType(FloatingActionButton), findsNothing);
+      },
+    );
+  });
+
+  group('unread indicator dismiss', () {
+    testWidgets(
+      'marks the channel read immediately when tapped',
+      (tester) async {
+        final other = User(id: 'otherid');
+        final messages = generateConversation(20, users: [other]);
+
+        await pumpMessageList(
+          tester,
+          messages: messages,
+          isUpToDate: true,
+          unreadCount: 5,
+          markReadWhenAtTheBottom: false,
+        );
+
+        // Nothing has marked the channel read yet.
+        verifyNever(() => channel.markRead(messageId: any(named: 'messageId')));
+
+        final indicator = tester.widget<UnreadIndicatorButton>(
+          find.byType(UnreadIndicatorButton),
+        );
+        await indicator.onDismissTap();
+
+        verify(() => channel.markRead(messageId: any(named: 'messageId')))
+            .called(1);
+      },
+    );
+
+    testWidgets(
+      'fires markRead on every tap (not debounced)',
+      (tester) async {
+        final other = User(id: 'otherid');
+        final messages = generateConversation(20, users: [other]);
+
+        await pumpMessageList(
+          tester,
+          messages: messages,
+          isUpToDate: true,
+          unreadCount: 5,
+          markReadWhenAtTheBottom: false,
+        );
+
+        final indicator = tester.widget<UnreadIndicatorButton>(
+          find.byType(UnreadIndicatorButton),
+        );
+
+        // Three taps in quick succession, well within the 1s debounce window.
+        // A debounced dismiss (leading: true) would collapse these into a
+        // single immediate call; the fix fires one markRead per tap.
+        await indicator.onDismissTap();
+        await indicator.onDismissTap();
+        await indicator.onDismissTap();
+
+        verify(() => channel.markRead(messageId: any(named: 'messageId')))
+            .called(3);
       },
     );
   });
