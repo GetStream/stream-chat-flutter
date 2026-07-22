@@ -2,13 +2,19 @@ part of 'stream_http_client.dart';
 
 const _defaultBaseURL = 'https://chat.stream-io-api.com';
 
+/// The default connect timeout for the api request
+const kDefaultConnectTimeout = Duration(seconds: 30);
+
+/// The default receive timeout for the api request
+const kDefaultReceiveTimeout = Duration(seconds: 30);
+
 /// Client options to modify [StreamHttpClient]
 class StreamHttpClientOptions {
   /// Instantiates a new [StreamHttpClientOptions]
   const StreamHttpClientOptions({
     String? baseUrl,
-    this.connectTimeout = const Duration(seconds: 30),
-    this.receiveTimeout = const Duration(seconds: 30),
+    this.connectTimeout = kDefaultConnectTimeout,
+    this.receiveTimeout = kDefaultReceiveTimeout,
     this.queryParameters = const {},
     this.headers = const {},
   }) : baseUrl = baseUrl ?? _defaultBaseURL;

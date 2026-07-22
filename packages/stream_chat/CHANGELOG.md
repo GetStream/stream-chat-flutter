@@ -2,11 +2,18 @@
 
 ✅ Added
 
+- Added support for predefined filters for `QueryChannels` on `StreamChatClient` (`StreamChatClient.queryChannels` and `StreamChatClient.queryChannelsWithResult`).
+- Added `ChatPersistenceClient.queryChannelStates` and `ChatPersistenceClient.saveChannelQueries` as the unified read/write methods for channel-query persistence. Both accept standard and predefined-filter parameters and internally dispatch.
 - Added an `upsert` flag to `ChannelClientState.updateMessage` and `ChannelClientState.updateThreadInfo` (defaults to `true`). Pass `false` to update a message only if it's already loaded in the state, skipping unknown messages instead of adding them.
 
 🔄 Changed
 
+- Increased the default `StreamChatClient` `connectTimeout` and `receiveTimeout` from 6s to 30s.
 - `StreamChatClient.updateSystemEnvironment` now sanitizes the passed `SystemEnvironment`: `sdkName`, `sdkVersion`, and `osName` are locked to internal defaults, and `sdkIdentifier` only accepts the `dart` → `flutter` promotion (other values, including a `flutter` → `dart` demotion, are ignored). `appName`, `appVersion`, `osVersion`, and `deviceModel` continue to pass through as-is.
+
+⚠️ Deprecated
+
+- Deprecated `ChatPersistenceClient.getChannelStates` and `ChatPersistenceClient.updateChannelQueries` in favor of the unified `queryChannelStates` / `saveChannelQueries`. The deprecated methods stay overridable so downstream subclasses keep working unchanged.
 
 🐞 Fixed
 
@@ -16,15 +23,7 @@
 
 ## 9.26.0
 
-✅ Added
-
-- Added support for predefined filters for `QueryChannels` on `StreamChatClient` (`StreamChatClient.queryChannels` and `StreamChatClient.queryChannelsWithResult`).
-- Added `ChatPersistenceClient.queryChannelStates` and `ChatPersistenceClient.saveChannelQueries` as the unified read/write methods for channel-query persistence. Both accept standard and predefined-filter parameters and internally dispatch.
 - Added `StreamChatClient.pauseReconnect` / `resumeReconnect` to suspend the WebSocket's auto-retry loop without tearing down the user session.
-
-⚠️ Deprecated
-
-- Deprecated `ChatPersistenceClient.getChannelStates` and `ChatPersistenceClient.updateChannelQueries` in favor of the unified `queryChannelStates` / `saveChannelQueries`. The deprecated methods stay overridable so downstream subclasses keep working unchanged.
 
 🐞 Fixed
 
