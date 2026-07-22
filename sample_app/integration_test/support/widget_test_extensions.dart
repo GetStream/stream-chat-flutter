@@ -1,4 +1,4 @@
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 extension E2EWidgetTester on WidgetTester {
@@ -51,5 +51,70 @@ extension E2EWidgetTester on WidgetTester {
       }
     }
     throw TestFailure('Timed out waiting for $finder');
+  }
+
+  Future<void> waitUntilNotVisible(
+    Finder finder, {
+    Duration timeout = const Duration(seconds: 30),
+  }) async {
+    final end = DateTime.now().add(timeout);
+    while (DateTime.now().isBefore(end)) {
+      await pump(const Duration(milliseconds: 100));
+      if (finder.evaluate().isEmpty) {
+        await pumpAndSettle();
+        return;
+      }
+    }
+    throw TestFailure('Timed out waiting for $finder to disappear');
+  }
+
+  /// Long-presses [target] until [appears] shows up.
+  ///
+  /// A message's long-press handler is disabled while it is still being sent,
+  /// so a single long-press can be a no-op; retrying until the reaction
+  /// picker (or any expected widget) appears makes the gesture reliable.
+  Future<void> longPressUntilVisible(
+    Finder target,
+    Finder appears, {
+    Duration timeout = const Duration(seconds: 30),
+  }) async {
+    final end = DateTime.now().add(timeout);
+    while (DateTime.now().isBefore(end)) {
+      await pump(const Duration(milliseconds: 100));
+      if (appears.evaluate().isNotEmpty) return;
+
+      bool resolves;
+      try {
+        resolves = target.evaluate().isNotEmpty;
+      } catch (_) {
+        resolves = false;
+      }
+      if (!resolves) continue;
+
+      await longPress(target);
+      await pumpAndSettle();
+      if (appears.evaluate().isNotEmpty) return;
+
+      // Integration tests: after a message has reactions, [WidgetTester.longPress]
+      // can lose the gesture arena while [InkWell.onLongPress] is still wired.
+      if (_tryInvokeMessageLongPress(target)) {
+        await pumpAndSettle();
+        if (appears.evaluate().isNotEmpty) return;
+      }
+
+      await pump(const Duration(milliseconds: 150));
+    }
+    throw TestFailure('Timed out long-pressing $target waiting for $appears');
+  }
+
+  bool _tryInvokeMessageLongPress(Finder target) {
+    final inkWells = find.descendant(of: target, matching: find.byType(InkWell));
+    if (inkWells.evaluate().isEmpty) return false;
+
+    final onLongPress = widget<InkWell>(inkWells.first).onLongPress;
+    if (onLongPress == null) return false;
+
+    onLongPress();
+    return true;
   }
 }
