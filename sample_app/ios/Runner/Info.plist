@@ -47,7 +47,9 @@
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>We need access to your location to share it in the chat.</string>
 	<key>NSLocationAlwaysUsageDescription</key>
-    <string>We need access to your location to share it in the chat.</string>
+	<string>We need access to your location to share it in the chat.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>We need access to your location to share it in the chat.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Used to send message attachments</string>
 	<key>NSPhotoLibraryUsageDescription</key>
