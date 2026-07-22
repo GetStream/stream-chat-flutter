@@ -7,7 +7,7 @@ import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:flutter_local_notifications/flutter_local_notifications.dart' hide Message;
 import 'package:sample_app/notification/notification.dart';
 import 'package:sample_app/notification/notification_background_handler.dart';
-import 'package:sample_app/utils/firebase_support.dart';
+import 'package:sample_app/utils/platform_support.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// The Android notification-channel id used for all chat notifications.
