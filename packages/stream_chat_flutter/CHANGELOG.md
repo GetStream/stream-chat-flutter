@@ -2,7 +2,7 @@
 
 ⚠️ Changed
 
-- Removed dependency on `media_kit` and `media_kit_video`. When running the VideoPlayer on Windows or Linux platforms, you need to add `media_kit` dependency to your `pubspec.yaml` file and create a custom `StreamVideoPlayer` implementation in the `streamChatComponentBuilders`.
+- Removed dependency on `media_kit` and `media_kit_video`. When running the VideoPlayer on Windows or Linux platforms, you need to add `media_kit` dependency to your `pubspec.yaml` file and create a custom `StreamVideoPlayer` implementation in the `streamChatComponentBuilders`. ([#2828](https://github.com/GetStream/stream-chat-flutter/pull/2828))
 
 ✅ Added
 
