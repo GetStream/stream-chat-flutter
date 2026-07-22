@@ -45,8 +45,6 @@ dependencies:
   jiffy: ^6.4.5
   just_audio: ^0.10.5
   lottie: ^3.3.3
-  media_kit: ^1.2.6
-  media_kit_video: ^2.0.1
   meta: ^1.9.1
   path_provider: ^2.1.5
   photo_manager: ^3.9.0
