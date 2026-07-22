@@ -1,5 +1,9 @@
 ## 10.2.0
 
+⚠️ Changed
+
+- Removed dependency on `media_kit` and `media_kit_video`. When running the VideoPlayer on Windows or Linux platforms, you need to add `media_kit` dependency to your `pubspec.yaml` file and create a custom `StreamVideoPlayer` implementation in the `streamChatComponentBuilders`.
+
 ✅ Added
 
 - Added an `AccessibilityTranslations` namespace on `Translations`, accessed via `context.translations.accessibility`, holding all screen-reader labels, tooltips, hints, and live-region announcements used by the composer, voice recording, attachment picker, message actions, channel header, media gallery, and poll creator. Getter suffixes follow Flutter's `MaterialLocalizations` convention (`Tooltip`, `Label`, `Hint`, `TapHint`, `Announcement`). Added a `DateTime.toA11yTimestamp()` extension for locale-aware long-form timestamps in accessibility labels.
