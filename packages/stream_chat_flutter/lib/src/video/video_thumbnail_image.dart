@@ -2,8 +2,8 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:get_thumbnail_video/index.dart';
 import 'package:stream_chat_flutter/src/video/video_service.dart';
+import 'package:stream_thumbnail/stream_thumbnail.dart';
 
 /// {@template video_thumbnail_image}
 /// A custom [ImageProvider] class for loading video thumbnails as images in
@@ -46,7 +46,7 @@ class StreamVideoThumbnailImage extends ImageProvider<StreamVideoThumbnailImage>
   const StreamVideoThumbnailImage({
     required this.video,
     this.headers,
-    this.imageFormat = ImageFormat.PNG,
+    this.imageFormat = .png,
     this.maxHeight = 0,
     this.maxWidth = 0,
     this.timeMs = 0,
@@ -61,7 +61,7 @@ class StreamVideoThumbnailImage extends ImageProvider<StreamVideoThumbnailImage>
   final Map<String, String>? headers;
 
   /// The format of the generated thumbnail image.
-  final ImageFormat imageFormat;
+  final StreamThumbnailFormat imageFormat;
 
   /// The maximum height of the generated thumbnail image.
   final int maxHeight;
