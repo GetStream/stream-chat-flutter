@@ -213,6 +213,7 @@ class _StreamChatSampleAppState extends State<StreamChatSampleApp>
                             componentBuilders: StreamComponentBuilders(
                               extensions: streamChatComponentBuilders(
                                 messageItem: customMessageItemBuilder,
+                                videoPlayer: (context, props) => SampleAppVideoPlayer(props: props),
                               ),
                             ),
                             configData: config.toStreamChatConfigurationData(),
