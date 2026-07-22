@@ -39,6 +39,7 @@ dependencies:
   image_picker: ^1.2.2
   latlong2: ^0.9.1
   lottie: ^3.3.3
+  media_kit_libs_video: ^1.0.6
   media_kit: ^1.2.6
   media_kit_video: ^2.0.1
   path_provider_android: ">=2.2.5 <2.3.0"
