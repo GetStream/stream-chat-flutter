@@ -66,7 +66,6 @@ command:
       freezed_annotation: ^3.0.0
       gal: ^2.3.2
       geolocator: ^13.0.0
-      get_thumbnail_video: ^0.7.3
       go_router: ^14.6.2
       http_parser: ^4.1.2
       image_picker: ^1.2.2
@@ -108,6 +107,7 @@ command:
           url: https://github.com/GetStream/stream-core-flutter.git
           ref: 7d0421a2cc04480e0bd2fc404cf6dd5b051f7f42
           path: packages/stream_core_flutter
+      stream_thumbnail: ^0.1.0
       synchronized: ^3.4.0
       thumblr: ^0.0.4
       url_launcher: ^6.3.2
