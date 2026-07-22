@@ -2819,7 +2819,7 @@ class ChannelClientState {
         pollId: oldMessage?.pollId,
         ownReactions: oldMessage?.ownReactions,
       );
-      updateMessage(message);
+      updateMessage(message, upsert: false);
     }));
   }
 
@@ -2935,74 +2935,82 @@ class ChannelClientState {
     );
   }
 
-  /// Updates the [message] in the state if it exists. Adds it otherwise.
-  void updateMessage(Message message) {
+  /// Updates the [message] in the state if it exists. Adds it otherwise,
+  /// unless [upsert] is `false`, in which case an unknown [message] is skipped.
+  void updateMessage(Message message, {bool upsert = true}) {
     // Determine if the message should be displayed in the channel view.
     if (message.parentId == null || message.showInChannel == true) {
       // Scan from the tail: server echoes, edits, and reactions almost
       // always target a recent message, so `lastIndexWhere` exits in a
       // handful of comparisons instead of walking the full list.
       final oldIndex = messages.lastIndexWhere((m) => m.id == message.id);
-      final oldMessage = oldIndex == -1 ? null : messages[oldIndex];
-
-      // Carry over local-only timestamps; no-op when there's no prior.
-      var updatedMessage = message.syncWith(oldMessage);
-
-      // Restore `quotedMessage` stripped by a partial-update payload —
-      // the server omits it when only updating other fields.
-      if (oldMessage != null &&
-          updatedMessage.quotedMessageId != null &&
-          updatedMessage.quotedMessage == null &&
-          oldMessage.quotedMessage != null) {
-        updatedMessage = updatedMessage.copyWith(
-          quotedMessage: oldMessage.quotedMessage,
-        );
-      }
-
-      var newMessages = messages.sortedUpsertAt(
-        oldIndex,
-        updatedMessage,
-        compare: _sortByCreatedAt,
-      );
-
-      // When the target of a quote is deleted, rewrite the embedded
-      // `quotedMessage` in every message quoting it. `updateIf` returns
-      // the same list reference when nothing matches.
-      if (oldMessage != null && message.isDeleted) {
-        newMessages = newMessages.updateIf(
-          (it) => it.quotedMessageId == message.id,
-          (it) => it.copyWith(
-            quotedMessage: updatedMessage.copyWith(
-              type: message.type,
-              deletedAt: message.deletedAt,
-            ),
-          ),
-        );
-      }
 
       // Handle updates to pinned messages.
       final newPinnedMessages = _updatePinnedMessages(message);
 
-      // Calculate the new last message at time.
-      var lastMessageAt = _channelState.channel?.lastMessageAt;
-      lastMessageAt ??= message.createdAt;
-      if (MessageRules.canUpdateChannelLastMessageAt(message, _channel)) {
-        lastMessageAt = [lastMessageAt, message.createdAt].max;
-      }
+      if (oldIndex == -1 && !upsert) {
+        _channelState = _channelState.copyWith(
+          pinnedMessages: newPinnedMessages,
+        );
+      } else {
+        final oldMessage = oldIndex == -1 ? null : messages[oldIndex];
 
-      // Apply the updated lists to the channel state.
-      _channelState = _channelState.copyWith(
-        messages: newMessages,
-        pinnedMessages: newPinnedMessages,
-        channel: _channelState.channel?.copyWith(
-          lastMessageAt: lastMessageAt,
-        ),
-      );
+        // Carry over local-only timestamps; no-op when there's no prior.
+        var updatedMessage = message.syncWith(oldMessage);
+
+        // Restore `quotedMessage` stripped by a partial-update payload —
+        // the server omits it when only updating other fields.
+        if (oldMessage != null &&
+            updatedMessage.quotedMessageId != null &&
+            updatedMessage.quotedMessage == null &&
+            oldMessage.quotedMessage != null) {
+          updatedMessage = updatedMessage.copyWith(
+            quotedMessage: oldMessage.quotedMessage,
+          );
+        }
+
+        var newMessages = messages.sortedUpsertAt(
+          oldIndex,
+          updatedMessage,
+          compare: _sortByCreatedAt,
+        );
+
+        // When the target of a quote is deleted, rewrite the embedded
+        // `quotedMessage` in every message quoting it. `updateIf` returns
+        // the same list reference when nothing matches.
+        if (oldMessage != null && message.isDeleted) {
+          newMessages = newMessages.updateIf(
+            (it) => it.quotedMessageId == message.id,
+            (it) => it.copyWith(
+              quotedMessage: updatedMessage.copyWith(
+                type: message.type,
+                deletedAt: message.deletedAt,
+              ),
+            ),
+          );
+        }
+
+        // Calculate the new last message at time.
+        var lastMessageAt = _channelState.channel?.lastMessageAt;
+        lastMessageAt ??= message.createdAt;
+        if (MessageRules.canUpdateChannelLastMessageAt(message, _channel)) {
+          lastMessageAt = [lastMessageAt, message.createdAt].max;
+        }
+
+        // Apply the updated lists to the channel state.
+        _channelState = _channelState.copyWith(
+          messages: newMessages,
+          pinnedMessages: newPinnedMessages,
+          channel: _channelState.channel?.copyWith(
+            lastMessageAt: lastMessageAt,
+          ),
+        );
+      }
     }
 
     // If the message is part of a thread, update thread information.
     if (message.parentId case final parentId?) {
-      updateThreadInfo(parentId, [message]);
+      updateThreadInfo(parentId, [message], upsert: upsert);
     }
   }
 
@@ -3090,7 +3098,7 @@ class ChannelClientState {
   /// Removes/Updates the [message] based on the [hardDelete] value.
   void deleteMessage(Message message, {bool hardDelete = false}) {
     if (hardDelete) return removeMessage(message);
-    return updateMessage(message);
+    return updateMessage(message, upsert: false);
   }
 
   void _listenReadEvents() {
@@ -3453,16 +3461,32 @@ class ChannelClientState {
   }
 
   /// Update threads with updated information about messages.
-  void updateThreadInfo(String parentId, List<Message> messages) {
+  void updateThreadInfo(
+    String parentId,
+    List<Message> messages, {
+    bool upsert = true,
+  }) {
+    var messagesToMerge = messages;
+    if (!upsert) {
+      final existingThread = threads[parentId];
+      // Don't create a phantom entry for a thread that was never paged in,
+      // and only update replies already loaded in it.
+      if (existingThread == null) return;
+      final existingIds = {for (final m in existingThread) m.id};
+      messagesToMerge =
+          messages.where((m) => existingIds.contains(m.id)).toList();
+      if (messagesToMerge.isEmpty) return;
+    }
+
     final newThreads = {...threads}..update(
         parentId,
         (original) => original.merge(
-          messages,
+          messagesToMerge,
           key: (message) => message.id,
           update: (original, updated) => updated.syncWith(original),
           compare: _sortByCreatedAt,
         ),
-        ifAbsent: () => messages.sorted(_sortByCreatedAt),
+        ifAbsent: () => messagesToMerge.sorted(_sortByCreatedAt),
       );
 
     _threads = newThreads;
