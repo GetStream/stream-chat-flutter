@@ -119,7 +119,7 @@ platform :ios do
       distribute_external: true,
       notify_external_testers: true,
       ipa: "#{root_path}/build/ios/ipa/ChatSample.ipa",
-      groups: ['Internal Testers', 'External Testers'],
+      groups: ['External Testers'],
       changelog: 'Lots of amazing new features to test out!',
       skip_waiting_for_build_processing: true,
     )
@@ -145,7 +145,6 @@ platform :ios do
       distribute_external: false,
       notify_external_testers: false,
       ipa: "#{root_path}/build/ios/ipa/ChatSample.ipa",
-      groups: ['Internal Testers'],
       changelog: 'Lots of amazing new features to test out!',
       skip_waiting_for_build_processing: true,
     )
