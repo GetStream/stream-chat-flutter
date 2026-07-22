@@ -12,6 +12,7 @@ import 'package:sample_app/pages/draft_list_page.dart';
 import 'package:sample_app/pages/reminders_page.dart';
 import 'package:sample_app/pages/thread_list_page.dart';
 import 'package:sample_app/routes/routes.dart';
+import 'package:sample_app/utils/platform_support.dart';
 import 'package:sample_app/utils/shared_location_service.dart';
 import 'package:sample_app/widgets/channel_list.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -120,9 +121,7 @@ class _ChannelListPageState extends State<ChannelListPage> {
   @override
   void initState() {
     super.initState();
-    // app_badge_plus only supports Android, iOS, and macOS.
-    final supportsAppBadge = CurrentPlatform.isAndroid || CurrentPlatform.isIos || CurrentPlatform.isMacOS;
-    if (supportsAppBadge) {
+    if (isAppBadgeSupported) {
       badgeListener = StreamChat.of(context).client.state.totalUnreadCountStream.listen((count) {
         if (count > 0) {
           AppBadgePlus.updateBadge(count);

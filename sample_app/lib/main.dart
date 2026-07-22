@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:marionette_flutter/marionette_flutter.dart';
 import 'package:sample_app/app.dart';
 import 'package:sample_app/firebase_options.dart';
-import 'package:sample_app/utils/firebase_support.dart';
+import 'package:sample_app/utils/platform_support.dart';
 
 Future<void> main() async {
   // In debug mode, initialize the Marionette binding so AI agents can drive

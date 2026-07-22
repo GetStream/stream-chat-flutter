@@ -16,3 +16,8 @@ bool get isFirebaseSupported =>
 /// so `main()` skips wiring Crashlytics collection and error reporting there
 /// while still initializing Firebase Core and FCM.
 bool get isCrashlyticsSupported => CurrentPlatform.isAndroid || CurrentPlatform.isIos || CurrentPlatform.isMacOS;
+
+/// Whether app icon badges are supported on the current platform.
+///
+/// `app_badge_plus` only implements Android, iOS, and macOS.
+bool get isAppBadgeSupported => CurrentPlatform.isAndroid || CurrentPlatform.isIos || CurrentPlatform.isMacOS;
