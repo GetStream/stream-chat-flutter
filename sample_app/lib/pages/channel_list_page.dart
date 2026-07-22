@@ -3,7 +3,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_app_badger/flutter_app_badger.dart';
+import 'package:app_badge_plus/app_badge_plus.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sample_app/auth/auth_controller.dart';
 import 'package:sample_app/config/sample_app_config.dart';
@@ -123,9 +123,9 @@ class _ChannelListPageState extends State<ChannelListPage> {
     if (!CurrentPlatform.isWeb) {
       badgeListener = StreamChat.of(context).client.state.totalUnreadCountStream.listen((count) {
         if (count > 0) {
-          FlutterAppBadger.updateBadgeCount(count);
+          AppBadgePlus.updateBadge(count);
         } else {
-          FlutterAppBadger.removeBadge();
+          AppBadgePlus.updateBadge(0);
         }
       });
     }
