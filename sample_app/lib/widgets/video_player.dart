@@ -4,11 +4,6 @@ import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// Returns true if the app is running on windows or linux platform.
-bool get isDesktopVideoPlayerSupported =>
-    // Dart VLC is not supported on MacOS.
-    !CurrentPlatform.isMacOS && (CurrentPlatform.isWindows || CurrentPlatform.isLinux);
-
 class SampleAppVideoPlayer extends StatelessWidget {
   const SampleAppVideoPlayer({
     super.key,
