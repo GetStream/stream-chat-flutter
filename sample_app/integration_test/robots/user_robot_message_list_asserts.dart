@@ -28,10 +28,10 @@ extension UserRobotMessageListAsserts on UserRobot {
 /// Chainable counterparts to [UserRobotMessageListAsserts], so an assertion can
 /// follow a fluent action chain (`userRobot.addReaction(x).assertReaction(...)`).
 extension UserRobotMessageListAssertsChain on Future<UserRobot> {
-  Future<UserRobot> assertMessage(String text) async => (await this).assertMessage(text);
+  Future<UserRobot> assertMessage(String text) => then((it) => it.assertMessage(text));
 
   Future<UserRobot> assertReaction({
     required ReactionType type,
     required bool isDisplayed,
-  }) async => (await this).assertReaction(type: type, isDisplayed: isDisplayed);
+  }) => then((it) => it.assertReaction(type: type, isDisplayed: isDisplayed));
 }

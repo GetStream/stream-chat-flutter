@@ -60,15 +60,15 @@ class UserRobot {
 extension UserRobotChain on Future<UserRobot> {
   Future<UserRobot> login([
     UserCredentials user = PredefinedUsers.currentUser,
-  ]) async => (await this).login(user);
+  ]) => then((it) => it.login(user));
 
-  Future<UserRobot> openChannel({int index = 0}) async => (await this).openChannel(index: index);
+  Future<UserRobot> openChannel({int index = 0}) => then((it) => it.openChannel(index: index));
 
-  Future<UserRobot> sendMessage(String text) async => (await this).sendMessage(text);
+  Future<UserRobot> sendMessage(String text) => then((it) => it.sendMessage(text));
 
-  Future<UserRobot> addReaction(ReactionType type, {int messageIndex = 0}) async =>
-      (await this).addReaction(type, messageIndex: messageIndex);
+  Future<UserRobot> addReaction(ReactionType type, {int messageIndex = 0}) =>
+      then((it) => it.addReaction(type, messageIndex: messageIndex));
 
-  Future<UserRobot> deleteReaction(ReactionType type, {int messageIndex = 0}) async =>
-      (await this).deleteReaction(type, messageIndex: messageIndex);
+  Future<UserRobot> deleteReaction(ReactionType type, {int messageIndex = 0}) =>
+      then((it) => it.deleteReaction(type, messageIndex: messageIndex));
 }

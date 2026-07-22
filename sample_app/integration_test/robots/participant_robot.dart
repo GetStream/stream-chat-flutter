@@ -181,13 +181,14 @@ class ParticipantRobot {
 /// Only the methods currently used by the ported suites are mirrored here; add
 /// more from [ParticipantRobot] as new suites need to chain them.
 extension ParticipantRobotChain on Future<ParticipantRobot> {
-  Future<ParticipantRobot> readMessage() async => (await this).readMessage();
+  Future<ParticipantRobot> readMessage() => then((it) => it.readMessage());
 
-  Future<ParticipantRobot> sendMessage(String text, {int delay = 0}) async =>
-      (await this).sendMessage(text, delay: delay);
+  Future<ParticipantRobot> sendMessage(String text, {int delay = 0}) =>
+      then((it) => it.sendMessage(text, delay: delay));
 
-  Future<ParticipantRobot> addReaction(ReactionType type, {int delay = 0}) async =>
-      (await this).addReaction(type, delay: delay);
+  Future<ParticipantRobot> addReaction(ReactionType type, {int delay = 0}) =>
+      then((it) => it.addReaction(type, delay: delay));
 
-  Future<ParticipantRobot> deleteReaction(ReactionType type) async => (await this).deleteReaction(type);
+  Future<ParticipantRobot> deleteReaction(ReactionType type) =>
+      then((it) => it.deleteReaction(type));
 }
