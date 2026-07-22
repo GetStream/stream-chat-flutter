@@ -2,8 +2,8 @@
 
 import 'dart:async';
 
-import 'package:flutter/material.dart';
 import 'package:app_badge_plus/app_badge_plus.dart';
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sample_app/auth/auth_controller.dart';
 import 'package:sample_app/config/sample_app_config.dart';
@@ -120,7 +120,9 @@ class _ChannelListPageState extends State<ChannelListPage> {
   @override
   void initState() {
     super.initState();
-    if (!CurrentPlatform.isWeb) {
+    // app_badge_plus only supports Android, iOS, and macOS.
+    final supportsAppBadge = CurrentPlatform.isAndroid || CurrentPlatform.isIos || CurrentPlatform.isMacOS;
+    if (supportsAppBadge) {
       badgeListener = StreamChat.of(context).client.state.totalUnreadCountStream.listen((count) {
         if (count > 0) {
           AppBadgePlus.updateBadge(count);
