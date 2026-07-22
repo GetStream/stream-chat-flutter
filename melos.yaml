@@ -54,19 +54,18 @@ command:
       firebase_messaging: '>=16.0.0 <16.4.2'
       file_picker: ^11.0.0
       file_selector: ^1.1.0
-      flutter_app_badger: ^1.5.0
+      app_badge_plus: ^1.3.2
       flutter_local_notifications: ^21.0.0
       flutter_map: ^8.1.1
       flutter_map_animations: ^0.9.0
       flutter_markdown: ^0.7.7+1
       flutter_portal: ^1.1.4
-      flutter_secure_storage: ^9.2.2
+      flutter_secure_storage: ^10.3.1
       flutter_slidable: ^3.1.1
       flutter_svg: ^2.3.0
       freezed_annotation: ^3.0.0
       gal: ^2.3.2
       geolocator: ^13.0.0
-      get_thumbnail_video: ^0.7.3
       go_router: ^14.6.2
       http_parser: ^4.1.2
       image_picker: ^1.2.2
@@ -79,7 +78,9 @@ command:
       latlong2: ^0.9.1
       logging: ^1.3.0
       lottie: ^3.3.3
+      marionette_flutter: ^0.6.0
       media_kit: ^1.2.6
+      media_kit_libs_video: ^1.0.6
       media_kit_video: ^2.0.1
       meta: ^1.9.1
       mime: ^2.0.0
@@ -96,18 +97,15 @@ command:
       share_plus: ">=12.0.2 <14.0.0"
       shimmer: ^3.0.0
       sqlite3_flutter_libs: ^0.5.26
-      stream_chat: ^10.1.0
-      stream_chat_flutter: ^10.1.0
-      stream_chat_flutter_core: ^10.1.0
-      stream_chat_localizations: ^10.1.0
-      stream_chat_persistence: ^10.1.0
+      stream_chat: ^10.2.0
+      stream_chat_flutter: ^10.2.0
+      stream_chat_flutter_core: ^10.2.0
+      stream_chat_localizations: ^10.2.0
+      stream_chat_persistence: ^10.2.0
       streaming_shared_preferences: ^2.0.0
       svg_icon_widget: ^0.0.1
-      stream_core_flutter:
-        git:
-          url: https://github.com/GetStream/stream-core-flutter.git
-          ref: 7d0421a2cc04480e0bd2fc404cf6dd5b051f7f42
-          path: packages/stream_core_flutter
+      stream_core_flutter: ^0.4.1
+      stream_thumbnail: ^0.1.0
       synchronized: ^3.4.0
       thumblr: ^0.0.4
       url_launcher: ^6.3.2
