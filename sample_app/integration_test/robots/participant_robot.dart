@@ -189,6 +189,5 @@ extension ParticipantRobotChain on Future<ParticipantRobot> {
   Future<ParticipantRobot> addReaction(ReactionType type, {int delay = 0}) =>
       then((it) => it.addReaction(type, delay: delay));
 
-  Future<ParticipantRobot> deleteReaction(ReactionType type) =>
-      then((it) => it.deleteReaction(type));
+  Future<ParticipantRobot> deleteReaction(ReactionType type) => then((it) => it.deleteReaction(type));
 }
