@@ -34,20 +34,20 @@ class StreamTypingIndicator extends StatelessWidget {
   final String? parentId;
 
   // Compares the typing users by id so the indicator only rebuilds when the
-  // set of typing users changes. The stream maps to a new lazy Iterable on
-  // every typing event (and on the stale-typing cleanup), so identity equality
-  // would rebuild even when the same users are still typing. Order-sensitive
-  // because only the first user is shown by name.
-  bool _typingUsersEquals(Iterable<User>? previous, Iterable<User>? current) {
-    final previousIds = previous?.map((it) => it.id).toList() ?? const <String>[];
-    final currentIds = current?.map((it) => it.id).toList() ?? const <String>[];
-    return const ListEquality<String>().equals(previousIds, currentIds);
+  // set of typing users changes. The stream maps to a new list on every typing
+  // event (and on the stale-typing cleanup), so identity equality would rebuild
+  // even when the same users are still typing. Order-sensitive because only the
+  // first user is shown by name.
+  bool _typingUsersEquals(List<User>? previous, List<User>? current) {
+    final previousIds = previous?.map((it) => it.id) ?? const <String>[];
+    final currentIds = current?.map((it) => it.id) ?? const <String>[];
+    return const IterableEquality<String>().equals(previousIds, currentIds);
   }
 
   // Keeps only the users typing in the same context as this indicator: the
   // thread identified by [parentId], or the main channel when it's null.
-  Iterable<User> _typingUsers(Map<User, Event> typingEvents) {
-    return typingEvents.entries.where((element) => element.value.parentId == parentId).map((e) => e.key);
+  List<User> _typingUsers(Map<User, Event> typingEvents) {
+    return typingEvents.entries.where((element) => element.value.parentId == parentId).map((e) => e.key).toList();
   }
 
   @override
@@ -56,7 +56,7 @@ class StreamTypingIndicator extends StatelessWidget {
 
     final altWidget = alternativeWidget ?? const Empty();
 
-    return BetterStreamBuilder<Iterable<User>>(
+    return BetterStreamBuilder<List<User>>(
       initialData: _typingUsers(channelState.typingEvents),
       stream: channelState.typingEventsStream.map(_typingUsers),
       comparator: _typingUsersEquals,
