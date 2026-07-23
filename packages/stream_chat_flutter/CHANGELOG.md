@@ -12,6 +12,7 @@
 
 🐞 Fixed
 
+- Fixed `saveAttachmentFile` resolving the destination against the filesystem root instead of the temporary directory (`Uri.file` dropped the trailing slash so `resolve` replaced the last path segment), causing a permission-denied error when saving attachments picked via the system attachment picker.
 - Fixed link preview enrichment failing for uppercase URL schemes (e.g. `HTTPS://`) by normalizing the scheme before enriching.
 - Fixed last-message preview flicker during channel-state reloads.
 - Fixed shadowed messages not hidden in channel list items.

@@ -157,7 +157,7 @@ class StreamAttachmentHandler extends StreamAttachmentHandlerBase {
     assert(fileName != null, 'Attachment file name is required');
 
     final tempDir = await getTemporaryDirectory();
-    final tempPath = Uri.file(tempDir.path, windows: CurrentPlatform.isWindows);
+    final tempPath = Uri.directory(tempDir.path, windows: CurrentPlatform.isWindows);
     final tempFilePath = tempPath.resolve(fileName!).toFilePath(windows: CurrentPlatform.isWindows);
 
     final attachmentFileBytes = attachmentFile.bytes;
