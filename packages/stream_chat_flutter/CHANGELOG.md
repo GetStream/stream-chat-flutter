@@ -1,3 +1,9 @@
+## Upcoming
+
+🐞 Fixed
+
+- Fixed `StreamTypingIndicator` briefly showing typing users from a different context (main channel vs. thread) on its first frame.
+
 ## 10.2.0
 
 ⚠️ Changed
