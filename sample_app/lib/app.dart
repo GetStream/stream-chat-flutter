@@ -12,6 +12,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart'
     hide Message;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:go_router/go_router.dart';
+import 'package:media_kit/media_kit.dart';
 import 'package:provider/provider.dart';
 import 'package:sample_app/firebase_options.dart';
 import 'package:sample_app/pages/choose_user_page.dart';
@@ -22,6 +23,7 @@ import 'package:sample_app/state/init_data.dart';
 import 'package:sample_app/utils/app_config.dart';
 import 'package:sample_app/utils/local_notification_observer.dart';
 import 'package:sample_app/utils/localizations.dart';
+import 'package:sample_app/widgets/media_kit_video_player.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_localizations/stream_chat_localizations.dart';
 import 'package:stream_chat_persistence/stream_chat_persistence.dart';
@@ -407,6 +409,12 @@ class _StreamChatSampleAppState extends State<StreamChatSampleApp>
   void initState() {
     final timeOfStartMs = DateTime.now().millisecondsSinceEpoch;
 
+    // Ensures that media kit is initialized on Windows and Linux platforms,
+    // where it backs the video player registered below.
+    if (!isTestEnvironment && isDesktopVideoPlayerSupported) {
+      MediaKit.ensureInitialized();
+    }
+
     _initConnection().then(
       (initData) {
         setState(() {
@@ -516,6 +524,16 @@ class _StreamChatSampleAppState extends State<StreamChatSampleApp>
                       client: _initNotifier.initData!.client,
                       streamChatConfigData: StreamChatConfigurationData(
                         draftMessagesEnabled: true,
+                        // `chewie`/`video_player`, the SDK's default video
+                        // player, doesn't support Windows or Linux, so we
+                        // provide a `media_kit`-based player for those
+                        // platforms instead.
+                        videoPlayer: (context, props) {
+                          if (kIsWeb || !isDesktopVideoPlayerSupported) {
+                            return null;
+                          }
+                          return MediaKitVideoPlayer(props: props);
+                        },
                       ),
                       child: child,
                     ),

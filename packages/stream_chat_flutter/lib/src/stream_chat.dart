@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
-import 'package:stream_chat_flutter/src/video/vlc/vlc_manager.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template streamChat}
@@ -143,15 +142,6 @@ class StreamChatState extends State<StreamChat> {
   /// Gets configuration options from widget
   StreamChatConfigurationData get streamChatConfigData =>
       widget.streamChatConfigData ?? StreamChatConfigurationData();
-
-  @override
-  void initState() {
-    super.initState();
-    // Ensures that VLC only initializes in real desktop environments
-    if (!isTestEnvironment && isDesktopVideoPlayerSupported) {
-      VlcManager.instance.initialize();
-    }
-  }
 
   @override
   Widget build(BuildContext context) {

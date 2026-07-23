@@ -116,6 +116,7 @@ class StreamChatConfigurationData {
     bool? enforceUniqueReactions,
     bool draftMessagesEnabled = false,
     MessagePreviewFormatter? messagePreviewFormatter,
+    StreamVideoPlayerBuilder? videoPlayer,
   }) {
     return StreamChatConfigurationData._(
       loadingIndicator: loadingIndicator,
@@ -126,6 +127,7 @@ class StreamChatConfigurationData {
       draftMessagesEnabled: draftMessagesEnabled,
       messagePreviewFormatter:
           messagePreviewFormatter ?? MessagePreviewFormatter(),
+      videoPlayer: videoPlayer,
     );
   }
 
@@ -137,6 +139,7 @@ class StreamChatConfigurationData {
     required this.enforceUniqueReactions,
     required this.draftMessagesEnabled,
     required this.messagePreviewFormatter,
+    required this.videoPlayer,
   });
 
   /// Copies the configuration options from one [StreamChatConfigurationData] to
@@ -149,6 +152,7 @@ class StreamChatConfigurationData {
     bool? enforceUniqueReactions,
     bool? draftMessagesEnabled,
     MessagePreviewFormatter? messagePreviewFormatter,
+    StreamVideoPlayerBuilder? videoPlayer,
   }) {
     return StreamChatConfigurationData(
       reactionIcons: reactionIcons ?? this.reactionIcons,
@@ -160,6 +164,7 @@ class StreamChatConfigurationData {
       draftMessagesEnabled: draftMessagesEnabled ?? this.draftMessagesEnabled,
       messagePreviewFormatter:
           messagePreviewFormatter ?? this.messagePreviewFormatter,
+      videoPlayer: videoPlayer ?? this.videoPlayer,
     );
   }
 
@@ -182,6 +187,16 @@ class StreamChatConfigurationData {
 
   /// Whether a new reaction should replace the existing one.
   final bool enforceUniqueReactions;
+
+  /// Builds a custom video player for video attachments shown inside
+  /// `StreamFullScreenMedia`.
+  ///
+  /// Return `null` (or leave this unset) to use the default `chewie`-based
+  /// player ([DefaultStreamVideoPlayer]). `video_player` (and therefore the
+  /// default player) has no Windows or Linux implementation, so apps that
+  /// need desktop video playback should provide a player here, e.g. one
+  /// backed by `media_kit`.
+  final StreamVideoPlayerBuilder? videoPlayer;
 
   /// The formatter used for message previews throughout the application.
   ///

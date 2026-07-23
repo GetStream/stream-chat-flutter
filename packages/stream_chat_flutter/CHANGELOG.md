@@ -3,6 +3,11 @@
 ✅ Added
 
 - Added a `LastMessagePredicate` typedef for the `ChannelLastMessageText.lastMessagePredicate` filter.
+- Added `StreamChatConfigurationData.videoPlayer`, letting apps override the video player used inside `StreamFullScreenMedia` (e.g. to plug in a `media_kit`-based player for desktop). The default implementation is now available as `DefaultStreamVideoPlayer`.
+
+🔄 Changed
+
+- Removed the `media_kit`/`media_kit_video` dependencies from the SDK. Windows and Linux full-screen video no longer works out of the box, since the new default player (`chewie`/`video_player`) doesn't support those platforms; apps that need desktop video playback should provide one via `StreamChatConfigurationData.videoPlayer` (see the sample app for a `media_kit`-based example).
 
 🐞 Fixed
 
