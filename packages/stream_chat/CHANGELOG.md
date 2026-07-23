@@ -5,6 +5,10 @@
 - Added an `upsert` flag to `ChannelClientState.updateMessage` (defaults to `true`). Pass `false` to update a message only if it's already loaded in the state, skipping unknown messages instead of adding them.
 - Added `EventType.userPresenceChanged` (`user.presence.changed`) constant.
 
+✅ Added
+
+- Added `StreamChatClient.isLocalUnreadCountEnabled` (default `false`). When enabled, channels that have read events disabled (e.g. livestream channel types) track their unread count locally, on-device: incoming messages increment it, hard-deleted messages decrement it, and `Channel.markRead` / `markUnread` / `markUnreadByTimestamp` update it locally without a network request. Channels that support read receipts are unaffected and keep relying on server-driven unread counts.
+
 🔄 Changed
 
 - Reduced the default `participantLimit` and `memberLimit` on `ThreadOptions` from `100` to `10`.

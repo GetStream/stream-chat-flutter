@@ -1852,8 +1852,16 @@ class Channel {
   ///
   /// Optionally provide a [messageId] if you want to mark channel as
   /// read from a particular message onwards.
+  ///
+  /// If [usesLocalUnreadCount] is `true` for this channel, this updates the
+  /// unread count locally, on-device, without making a network request.
   Future<EmptyResponse> markRead({String? messageId}) async {
     _checkInitialized();
+
+    if (usesLocalUnreadCount) {
+      state!.markReadLocally(messageId: messageId);
+      return EmptyResponse();
+    }
 
     if (!canUseReadReceipts) {
       throw const StreamChatError(
@@ -1868,8 +1876,30 @@ class Channel {
   /// Marks the channel as unread by a given [messageId].
   ///
   /// All messages from the provided message onwards will be marked as unread.
+  ///
+  /// If [usesLocalUnreadCount] is `true` for this channel, this updates the
+  /// unread count locally, on-device, without making a network request. The
+  /// message must be part of the locally-known messages ([Channel.messages])
+  /// for the count to be recomputed.
   Future<EmptyResponse> markUnread(String messageId) async {
     _checkInitialized();
+
+    if (usesLocalUnreadCount) {
+      final anchor = state!.messages.firstWhereOrNull((it) => it.id == messageId);
+      if (anchor == null) {
+        throw StreamChatError(
+          'Cannot mark as unread: Message "$messageId" was not found in the '
+          'locally-known messages for this channel.',
+        );
+      }
+
+      // Subtract a microsecond so the anchor message itself is treated as
+      // "after" the new read boundary, matching the "from the provided
+      // message onwards" semantics described above.
+      final lastRead = anchor.createdAt.subtract(const Duration(microseconds: 1));
+      state!.markUnreadLocally(lastRead: lastRead);
+      return EmptyResponse();
+    }
 
     if (!canUseReadReceipts) {
       throw const StreamChatError(
@@ -1884,8 +1914,16 @@ class Channel {
   /// Marks the channel as unread by a given [timestamp].
   ///
   /// All messages after the provided timestamp will be marked as unread.
+  ///
+  /// If [usesLocalUnreadCount] is `true` for this channel, this updates the
+  /// unread count locally, on-device, without making a network request.
   Future<EmptyResponse> markUnreadByTimestamp(DateTime timestamp) async {
     _checkInitialized();
+
+    if (usesLocalUnreadCount) {
+      state!.markUnreadLocally(lastRead: timestamp);
+      return EmptyResponse();
+    }
 
     if (!canUseReadReceipts) {
       throw const StreamChatError(
@@ -2096,7 +2134,7 @@ class Channel {
         };
 
         if (isQueryingAround) this.state?.truncate();
-        this.state?.updateChannelState(channelState);
+        this.state?.updateChannelStateFromServer(channelState);
       }
 
       // Submit for delivery reporting only when fetching the latest messages.
@@ -3209,6 +3247,15 @@ class ChannelClientState {
           deletedForMe: event.deletedForMe,
         );
 
+        // Decrement the locally-tracked unread count for hard-deleted
+        // messages that would have counted as unread. Soft-deleted messages
+        // keep their slot. Only applies to channels that track unread counts
+        // locally (see [Channel.usesLocalUnreadCount]) — server-driven
+        // channels get corrected counts from server read events instead.
+        if (hardDelete && _channel.usesLocalUnreadCount && MessageRules.canCountAsUnread(message, _channel)) {
+          unreadCount = math.max(0, unreadCount - 1);
+        }
+
         return deleteMessage(message, hardDelete: hardDelete);
       }),
     );
@@ -3568,6 +3615,68 @@ class ChannelClientState {
     return updateRead([existingUserRead.copyWith(unreadMessages: count)]);
   }
 
+  /// Marks the channel as read locally, without making a network request.
+  ///
+  /// Used for channels that track unread counts locally (see
+  /// [Channel.usesLocalUnreadCount]), since the server rejects the mark-read
+  /// endpoint for channels that have read events disabled.
+  void markReadLocally({String? messageId}) {
+    final currentUser = _client.state.currentUser;
+    if (currentUser == null) return;
+
+    final now = DateTime.now();
+    final lastReadMessageId = messageId ?? messages.lastOrNull?.id;
+
+    final existingUserRead = currentUserRead;
+    updateRead([
+      Read(
+        user: currentUser,
+        lastRead: now,
+        lastReadMessageId: lastReadMessageId,
+        lastDeliveredAt: existingUserRead?.lastDeliveredAt,
+        lastDeliveredMessageId: existingUserRead?.lastDeliveredMessageId,
+      ),
+    ]);
+  }
+
+  /// Marks the channel as unread locally, without making a network request.
+  ///
+  /// [lastRead] and [lastReadMessageId] define the new read boundary: any
+  /// locally-known message that is still eligible per
+  /// [MessageRules.canCountAsUnread] once this boundary is applied is counted
+  /// as unread.
+  ///
+  /// Used for channels that track unread counts locally (see
+  /// [Channel.usesLocalUnreadCount]), since the server rejects the
+  /// mark-unread endpoint for channels that have read events disabled.
+  void markUnreadLocally({
+    required DateTime lastRead,
+    String? lastReadMessageId,
+  }) {
+    final currentUser = _client.state.currentUser;
+    if (currentUser == null) return;
+
+    final existingUserRead = currentUserRead;
+
+    // Apply the new read boundary first so `MessageRules.canCountAsUnread`
+    // (which reads `channel.state?.currentUserRead`) evaluates against it.
+    updateRead([
+      Read(
+        user: currentUser,
+        lastRead: lastRead,
+        lastReadMessageId: lastReadMessageId,
+        lastDeliveredAt: existingUserRead?.lastDeliveredAt,
+        lastDeliveredMessageId: existingUserRead?.lastDeliveredMessageId,
+      ),
+    ]);
+
+    // Recompute the unread count from the locally-known messages now that
+    // the boundary above is in effect.
+    final unread = messages.where((it) => MessageRules.canCountAsUnread(it, _channel)).length;
+
+    unreadCount = unread;
+  }
+
   /// Counts the number of unread messages mentioning the current user.
   ///
   /// **NOTE**: The method relies on the [Channel.messages] list and doesn't do
@@ -3648,6 +3757,47 @@ class ChannelClientState {
       pushPreferences: updatedState.pushPreferences,
       activeLiveLocations: updatedState.activeLiveLocations,
     );
+  }
+
+  /// Applies a [remoteState] received from the server or offline storage
+  /// (e.g. a `query`/`watch` response), merging it into local state.
+  ///
+  /// Unlike [updateChannelState], this preserves the current user's
+  /// locally-tracked read state for channels that track unread counts
+  /// on-device (see [Channel.usesLocalUnreadCount]) — their `lastRead`,
+  /// `lastReadMessageId`, and `unreadMessages` are kept as-is instead of
+  /// being overwritten by the remote payload; only delivery fields are
+  /// still applied from it.
+  ///
+  /// Call this instead of [updateChannelState] whenever [remoteState]
+  /// genuinely comes from the network or offline storage.
+  void updateChannelStateFromServer(ChannelState remoteState) {
+    updateChannelState(_preserveLocalUnreadState(remoteState));
+  }
+
+  /// Rewrites the current user's [Read] in [remoteState], if present, to
+  /// keep the locally-tracked `lastRead` / `lastReadMessageId` /
+  /// `unreadMessages` while still adopting the remote delivery fields.
+  ///
+  /// No-op unless [Channel.usesLocalUnreadCount] is enabled and a local read
+  /// already exists for the current user.
+  ChannelState _preserveLocalUnreadState(ChannelState remoteState) {
+    if (!_channel.usesLocalUnreadCount) return remoteState;
+
+    final localRead = currentUserRead;
+    final remoteReads = remoteState.read;
+    if (localRead == null || remoteReads == null) return remoteState;
+
+    final currentUserId = localRead.user.id;
+    final preservedReads = remoteReads.map((read) {
+      if (read.user.id != currentUserId) return read;
+      return localRead.copyWith(
+        lastDeliveredAt: read.lastDeliveredAt,
+        lastDeliveredMessageId: read.lastDeliveredMessageId,
+      );
+    });
+
+    return remoteState.copyWith(read: preservedReads.toList());
   }
 
   int _sortByCreatedAt(Message a, Message b) => a.createdAt.compareTo(b.createdAt);
@@ -4587,6 +4737,17 @@ extension ChannelCapabilityCheck on Channel {
   /// True, if the current user has read events capability.
   bool get canUseReadReceipts {
     return ownCapabilities.contains(ChannelCapability.readEvents);
+  }
+
+  /// True, if unread counts for this channel should be tracked locally,
+  /// on-device, rather than relying on the server.
+  ///
+  /// This is the case when [StreamChatClient.isLocalUnreadCountEnabled] is
+  /// enabled and the channel doesn't support read receipts (for example,
+  /// livestream channel types that disable read events). Channels that
+  /// support read receipts always rely on server-driven unread counts.
+  bool get usesLocalUnreadCount {
+    return _client.isLocalUnreadCountEnabled && !canUseReadReceipts;
   }
 
   /// True, if the current user has connect events capability.
