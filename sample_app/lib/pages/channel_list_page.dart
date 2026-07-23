@@ -1,9 +1,10 @@
 // ignore_for_file: deprecated_member_use
 
 import 'dart:async';
+import 'dart:math' as math;
 
+import 'package:app_badge_plus/app_badge_plus.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_app_badger/flutter_app_badger.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sample_app/auth/auth_controller.dart';
 import 'package:sample_app/config/sample_app_config.dart';
@@ -12,6 +13,7 @@ import 'package:sample_app/pages/draft_list_page.dart';
 import 'package:sample_app/pages/reminders_page.dart';
 import 'package:sample_app/pages/thread_list_page.dart';
 import 'package:sample_app/routes/routes.dart';
+import 'package:sample_app/utils/platform_support.dart';
 import 'package:sample_app/utils/shared_location_service.dart';
 import 'package:sample_app/widgets/channel_list.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -120,13 +122,10 @@ class _ChannelListPageState extends State<ChannelListPage> {
   @override
   void initState() {
     super.initState();
-    if (!CurrentPlatform.isWeb) {
-      badgeListener = StreamChat.of(context).client.state.totalUnreadCountStream.listen((count) {
-        if (count > 0) {
-          FlutterAppBadger.updateBadgeCount(count);
-        } else {
-          FlutterAppBadger.removeBadge();
-        }
+    if (isAppBadgeSupported) {
+      final client = StreamChat.of(context).client;
+      badgeListener = client.state.totalUnreadCountStream.listen((count) {
+        AppBadgePlus.updateBadge(math.max(0, count));
       });
     }
 

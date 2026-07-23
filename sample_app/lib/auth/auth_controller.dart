@@ -57,19 +57,45 @@ StreamChatClient _buildStreamChatClient(
 }) {
   final logLevel = connectionOverride != null ? Level.OFF : (kDebugMode ? Level.INFO : Level.SEVERE);
   return StreamChatClient(
-    apiKey,
-    logLevel: logLevel,
-    logHandlerFunction: _sampleAppLogHandler,
-    retryPolicy: RetryPolicy(
-      maxRetryAttempts: 3,
-      shouldRetry: (client, attempt, error) {
-        return error is StreamChatNetworkError && error.isRetriable;
-      },
-    ),
-    baseURL: connectionOverride?.baseURL,
-    baseWsUrl: connectionOverride?.baseWsUrl,
-  )..chatPersistenceClient = _chatPersistenceClient;
+      apiKey,
+      logLevel: logLevel,
+      logHandlerFunction: _sampleAppLogHandler,
+      retryPolicy: RetryPolicy(
+        maxRetryAttempts: 3,
+        shouldRetry: (client, attempt, error) {
+          return error is StreamChatNetworkError && error.isRetriable;
+        },
+      ),
+      baseURL: connectionOverride?.baseURL,
+      baseWsUrl: connectionOverride?.baseWsUrl,
+      // e2e only: lets the harness simulate a full network outage by failing
+      // every HTTP request (paired with the WebSocket close from
+      // debugConnectivityStream). See `AuthController.debugForceOffline`.
+      chatApiInterceptors: connectionOverride != null ? [_offlineSimulationInterceptor] : null,
+    )
+    // No offline persistence under e2e. The persistence client is a shared,
+    // never-cleared SQLite DB, so state leaks across the tests in a bundle and
+    // a reaction event referencing an unpersisted message throws an async
+    // FOREIGN KEY error — which, being async, poisons the shared test binding
+    // and makes every remaining test in the file fail before it can report.
+    ..chatPersistenceClient = connectionOverride != null ? null : _chatPersistenceClient;
 }
+
+/// Rejects every Stream API request with a connection error while
+/// [AuthController.debugForceOffline] is set, mimicking a device that has lost
+/// its network — the HTTP half of the e2e offline switch.
+final _offlineSimulationInterceptor = InterceptorsWrapper(
+  onRequest: (options, handler) {
+    if (!authController.debugForceOffline) return handler.next(options);
+    return handler.reject(
+      DioException(
+        requestOptions: options,
+        type: DioExceptionType.connectionError,
+        error: 'e2e: simulated offline',
+      ),
+    );
+  },
+);
 
 /// Authentication state exposed by [AuthController].
 sealed class AuthState {
@@ -110,6 +136,21 @@ class AuthController extends ValueNotifier<AuthState> {
 
   @visibleForTesting
   StreamConnectionOverride? debugConnectionOverride;
+
+  /// Test-controlled connectivity source fed to the `StreamChat` widget.
+  ///
+  /// When set, it replaces the real `connectivity_plus` monitor so e2e tests
+  /// can deterministically drive the client offline/online (see the e2e
+  /// harness's `goOffline`/`goOnline`). Null in production (read by `app.dart`,
+  /// so it can't be `@visibleForTesting` like [debugConnectionOverride]).
+  Stream<List<ConnectivityResult>>? debugConnectivityStream;
+
+  /// e2e only: when true, every Stream API HTTP request fails with a simulated
+  /// connection error (see [_offlineSimulationInterceptor]). Paired with the
+  /// WebSocket close driven by [debugConnectivityStream] to simulate a full
+  /// network outage. Toggled by the harness's `goOffline`/`goOnline`.
+  @visibleForTesting
+  bool debugForceOffline = false;
 
   String? _activeApiKey;
   PushTokenManager? _pushTokenManager;
@@ -226,6 +267,8 @@ class AuthController extends ValueNotifier<AuthState> {
     _client = null;
     _activeApiKey = null;
     debugConnectionOverride = null;
+    debugConnectivityStream = null;
+    debugForceOffline = false;
 
     if (!CurrentPlatform.isWeb) {
       const secureStorage = FlutterSecureStorage();
