@@ -1,3 +1,14 @@
+## Upcoming
+
+✅ Added
+
+- Added `Event.watcherCount`, exposing the server-provided `watcher_count` field on events (e.g. `user.watching.start`, `user.watching.stop`, `message.new`).
+
+🐞 Fixed
+
+- Fixed `ChannelClientState.watcherCount` staying stale during a session.
+- Fixed watchers not being removed from `ChannelClientState.watchers` on `user.watching.stop`.
+
 ## 10.2.0
 
 ✅ Added
@@ -15,7 +26,6 @@
 - `StreamChatNetworkError.fromDioException` no longer throws `FormatException` when an edge/proxy returns a non-JSON body (e.g. a plain `upstream request timeout` from a 504); the original network error now surfaces with `statusCode` / `statusMessage` intact.
 - `ComparableField` now folds diacritics/ligatures and ignores case when comparing strings, so `SortOption` on fields like `name` no longer pushes lowercase or non-ASCII names (`jhon`, `Łukasz`, `Øystein`) to the end of client-sorted lists ([#2601](https://github.com/GetStream/stream-chat-flutter/issues/2601)).
 - Fixed `message.updated` and soft `message.deleted` events being incorrectly upserted into `ChannelState.messages` (and thread reply lists) when they targeted a message outside the currently loaded window.
-
 ## 10.1.0
 
 ✅ Added

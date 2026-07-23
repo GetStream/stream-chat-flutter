@@ -6185,6 +6185,198 @@ void main() {
       );
     });
 
+    group('Watching Events', () {
+      const channelId = 'test-channel-id';
+      const channelType = 'test-channel-type';
+      late Channel channel;
+
+      setUp(() {
+        final channelState = _generateChannelState(
+          channelId,
+          channelType,
+          mockChannelConfig: true,
+          ownCapabilities: const [ChannelCapability.readEvents],
+        );
+        channel = Channel.fromState(client, channelState);
+      });
+
+      tearDown(() => channel.dispose());
+
+      test(
+        '${EventType.userWatchingStart} adds the watcher and updates watcherCount',
+        () async {
+          final watcher = User(id: 'watcher-1');
+
+          client.addEvent(
+            Event(
+              cid: channel.cid,
+              type: EventType.userWatchingStart,
+              user: watcher,
+              watcherCount: 3,
+            ),
+          );
+
+          // Wait for the event to get processed
+          await Future.delayed(Duration.zero);
+
+          expect(channel.state!.watcherCount, 3);
+          expect(
+            channel.state!.channelState.watchers?.map((it) => it.id),
+            contains('watcher-1'),
+          );
+        },
+      );
+
+      test(
+        '${EventType.userWatchingStop} removes the watcher and updates watcherCount',
+        () async {
+          final watcher = User(id: 'watcher-1');
+
+          // The watcher starts watching first (count = 2).
+          client.addEvent(
+            Event(
+              cid: channel.cid,
+              type: EventType.userWatchingStart,
+              user: watcher,
+              watcherCount: 2,
+            ),
+          );
+          await Future.delayed(Duration.zero);
+          expect(channel.state!.watcherCount, 2);
+          expect(
+            channel.state!.channelState.watchers?.map((it) => it.id),
+            contains('watcher-1'),
+          );
+
+          // Then stops watching (count = 1).
+          client.addEvent(
+            Event(
+              cid: channel.cid,
+              type: EventType.userWatchingStop,
+              user: watcher,
+              watcherCount: 1,
+            ),
+          );
+          await Future.delayed(Duration.zero);
+
+          expect(channel.state!.watcherCount, 1);
+          expect(
+            channel.state!.channelState.watchers?.map((it) => it.id),
+            isNot(contains('watcher-1')),
+          );
+        },
+      );
+
+      test(
+        'watching event without watcherCount preserves the existing count',
+        () async {
+          // Seed an initial watcher count.
+          channel.state!.updateChannelState(
+            channel.state!.channelState.copyWith(watcherCount: 5),
+          );
+          expect(channel.state!.watcherCount, 5);
+
+          // A watching event that omits watcher_count must not wipe the count.
+          client.addEvent(
+            Event(
+              cid: channel.cid,
+              type: EventType.userWatchingStart,
+              user: User(id: 'watcher-2'),
+            ),
+          );
+          await Future.delayed(Duration.zero);
+
+          expect(channel.state!.watcherCount, 5);
+          expect(
+            channel.state!.channelState.watchers?.map((it) => it.id),
+            contains('watcher-2'),
+          );
+        },
+      );
+
+      test(
+        '${EventType.messageNew} updates watcherCount from the event',
+        () async {
+          expect(channel.state!.watcherCount, isNull);
+
+          final message = Message(
+            id: 'test-message-id',
+            user: client.state.currentUser,
+            createdAt: DateTime.now(),
+          );
+
+          client.addEvent(
+            Event(
+              cid: channel.cid,
+              type: EventType.messageNew,
+              message: message,
+              watcherCount: 7,
+            ),
+          );
+          await Future.delayed(Duration.zero);
+
+          expect(channel.state!.watcherCount, 7);
+        },
+      );
+
+      test(
+        '${EventType.messageNew} without watcherCount preserves the existing count',
+        () async {
+          // Seed an initial watcher count.
+          channel.state!.updateChannelState(
+            channel.state!.channelState.copyWith(watcherCount: 4),
+          );
+          expect(channel.state!.watcherCount, 4);
+
+          // A local/optimistic message.new without watcher_count must not
+          // reset the count.
+          client.addEvent(
+            Event(
+              cid: channel.cid,
+              type: EventType.messageNew,
+              message: Message(
+                id: 'test-message-id-2',
+                user: client.state.currentUser,
+                createdAt: DateTime.now(),
+              ),
+            ),
+          );
+          await Future.delayed(Duration.zero);
+
+          expect(channel.state!.watcherCount, 4);
+        },
+      );
+
+      test(
+        '${EventType.notificationMessageNew} does not overwrite watcherCount',
+        () async {
+          // Seed a known watcher count.
+          channel.state!.updateChannelState(
+            channel.state!.channelState.copyWith(watcherCount: 5),
+          );
+          expect(channel.state!.watcherCount, 5);
+
+          // notification.message_new is delivered to non-watchers and reports
+          // watcher_count: 0; it must not clobber the real count.
+          client.addEvent(
+            Event(
+              cid: channel.cid,
+              type: EventType.notificationMessageNew,
+              message: Message(
+                id: 'notif-message-id',
+                user: User(id: 'other-user'),
+                createdAt: DateTime.now(),
+              ),
+              watcherCount: 0,
+            ),
+          );
+          await Future.delayed(Duration.zero);
+
+          expect(channel.state!.watcherCount, 5);
+        },
+      );
+    });
+
     group('Read Events', () {
       const channelId = 'test-channel-id';
       const channelType = 'test-channel-type';
