@@ -186,6 +186,17 @@ extension ParticipantRobotChain on Future<ParticipantRobot> {
   Future<ParticipantRobot> sendMessage(String text, {int delay = 0}) =>
       then((it) => it.sendMessage(text, delay: delay));
 
+  Future<ParticipantRobot> editMessage(String text) => then((it) => it.editMessage(text));
+
+  Future<ParticipantRobot> deleteMessage({bool hard = false}) => then((it) => it.deleteMessage(hard: hard));
+
+  Future<ParticipantRobot> sendMessageInThread(String text, {bool alsoSendInChannel = false}) =>
+      then((it) => it.sendMessageInThread(text, alsoSendInChannel: alsoSendInChannel));
+
+  Future<ParticipantRobot> startTyping() => then((it) => it.startTyping());
+
+  Future<ParticipantRobot> stopTyping() => then((it) => it.stopTyping());
+
   Future<ParticipantRobot> addReaction(ReactionType type, {int delay = 0}) =>
       then((it) => it.addReaction(type, delay: delay));
 
