@@ -5,7 +5,6 @@ import 'package:flutter/services.dart';
 import 'package:stream_chat_flutter/src/utils/device_segmentation.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_thumbnail/stream_thumbnail.dart';
-import 'package:thumblr/thumblr.dart' as thumblr;
 
 ///
 // ignore: prefer-match-file-name
@@ -44,22 +43,6 @@ class _IVideoService {
     if (video == null) return generatePlaceholderThumbnail();
 
     try {
-      // If the device is a desktop, use thumblr to generate the thumbnail.
-      if (isDesktopDevice) {
-        final thumbnail = await thumblr.generateThumbnail(filePath: video);
-        final byteData = await thumbnail.image.toByteData(
-          format: ui.ImageByteFormat.png,
-        );
-
-        final bytesList = byteData?.buffer.asUint8List();
-        if (bytesList != null && bytesList.isNotEmpty) {
-          return bytesList;
-        }
-
-        return await generatePlaceholderThumbnail();
-      }
-
-      // Otherwise, use the stream_thumbnail plugin to generate the thumbnail.
       return await StreamThumbnail.thumbnailData(
         video: video,
         headers: headers,

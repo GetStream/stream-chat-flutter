@@ -105,9 +105,12 @@ command:
       streaming_shared_preferences: ^2.0.0
       svg_icon_widget: ^0.0.1
       stream_core_flutter: ^0.4.1
-      stream_thumbnail: ^0.1.0
+      stream_thumbnail:
+        git:
+          url: https://github.com/GetStream/stream-core-flutter.git
+          ref: feat/update-thumbnail-plugin
+          path: packages/stream_thumbnail
       synchronized: ^3.4.0
-      thumblr: ^0.0.4
       url_launcher: ^6.3.2
       uuid: ^4.5.3
       video_player: ^2.11.1
