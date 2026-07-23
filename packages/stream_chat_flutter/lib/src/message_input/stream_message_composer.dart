@@ -1293,19 +1293,22 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     if (_lastSearchedContainsUrlText == value) return;
     _lastSearchedContainsUrlText = value;
 
-    final matchedUrls = _urlRegex.allMatches(value).where((it) {
-      final _parsedMatch = Uri.tryParse(it.group(0) ?? '')?.withScheme;
-      if (_parsedMatch == null) return false;
+    // Find the first url to preview, normalizing the scheme so links like
+    // `HTTPS://` enrich the same as `https://`.
+    String? firstMatchedUrl;
+    for (final match in _urlRegex.allMatches(value)) {
+      final url = Uri.tryParse(match.group(0) ?? '')?.withScheme;
+      if (url == null) continue;
+      if (!widget.props.ogPreviewFilter.call(url, value)) continue;
 
-      return widget.props.ogPreviewFilter.call(_parsedMatch, value);
-    }).toList();
-
-    // Reset the og attachment if the text doesn't contain any url
-    if (matchedUrls.isEmpty || !channel.canSendLinks) {
-      return _effectiveController.clearOGAttachment();
+      firstMatchedUrl = url.toString();
+      break;
     }
 
-    final firstMatchedUrl = matchedUrls.first.group(0)!;
+    // Reset the og attachment if the text doesn't contain any url
+    if (firstMatchedUrl == null || !channel.canSendLinks) {
+      return _effectiveController.clearOGAttachment();
+    }
 
     // If the parsed url matches the ogAttachment url, don't do anything
     if (_effectiveController.ogAttachment?.titleLink == firstMatchedUrl) {
