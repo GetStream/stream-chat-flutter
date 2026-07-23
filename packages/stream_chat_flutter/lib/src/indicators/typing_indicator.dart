@@ -44,6 +44,12 @@ class StreamTypingIndicator extends StatelessWidget {
     return const ListEquality<String>().equals(previousIds, currentIds);
   }
 
+  // Keeps only the users typing in the same context as this indicator: the
+  // thread identified by [parentId], or the main channel when it's null.
+  Iterable<User> _typingUsers(Map<User, Event> typingEvents) {
+    return typingEvents.entries.where((element) => element.value.parentId == parentId).map((e) => e.key);
+  }
+
   @override
   Widget build(BuildContext context) {
     final channelState = channel?.state ?? StreamChannel.of(context).channel.state!;
@@ -51,10 +57,8 @@ class StreamTypingIndicator extends StatelessWidget {
     final altWidget = alternativeWidget ?? const Empty();
 
     return BetterStreamBuilder<Iterable<User>>(
-      initialData: channelState.typingEvents.keys,
-      stream: channelState.typingEventsStream.map(
-        (typingEvents) => typingEvents.entries.where((element) => element.value.parentId == parentId).map((e) => e.key),
-      ),
+      initialData: _typingUsers(channelState.typingEvents),
+      stream: channelState.typingEventsStream.map(_typingUsers),
       comparator: _typingUsersEquals,
       builder: (context, users) => AnimatedSwitcher(
         layoutBuilder: (currentChild, previousChildren) => Stack(
