@@ -210,6 +210,9 @@ class _StreamChatSampleAppState extends State<StreamChatSampleApp>
                         if (client != null) {
                           return StreamChat(
                             client: client,
+                            // Null in production → the SDK uses the real
+                            // connectivity monitor; set only by e2e tests.
+                            connectivityStream: authController.debugConnectivityStream,
                             componentBuilders: StreamComponentBuilders(
                               extensions: streamChatComponentBuilders(
                                 messageItem: customMessageItemBuilder,

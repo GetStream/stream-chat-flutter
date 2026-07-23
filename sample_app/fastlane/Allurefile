@@ -25,7 +25,18 @@ lane :collect_allure_results do |options|
     base64 = parts.sort_by(&:first).map(&:last).join
     File.write("#{results_dir}/#{uuid}-result.json", Base64.decode64(base64))
   end
-  UI.message("Collected #{chunks.size} Allure result(s) into #{results_dir}")
+
+  attachments = Hash.new { |hash, key| hash[key] = {} }
+  log.scan(%r{ALLURE-ATTACH::([0-9a-f-]+-attachment\.[a-z0-9]+):(\d+):([A-Za-z0-9+/=]+)}) do |source, seq, chunk|
+    attachments[source][seq.to_i] = chunk
+  end
+
+  attachments.each do |source, parts|
+    base64 = parts.sort_by(&:first).map(&:last).join
+    File.binwrite("#{results_dir}/#{source}", Base64.decode64(base64))
+  end
+
+  UI.message("Collected #{chunks.size} Allure result(s) and #{attachments.size} attachment(s) into #{results_dir}")
 end
 
 lane :install_allurectl do

@@ -62,6 +62,13 @@ jobs:
           emulator-options: -no-snapshot-save -no-window -no-audio -no-boot-anim -gpu swiftshader_indirect
           script: cd sample_app/android && bundle exec fastlane run_e2e_test device:emulator-5554 mock_server_branch:${{ env.mock_server_branch }}
 
+      - name: Attach videos to failed tests
+        if: failure()
+        working-directory: sample_app/android
+        run: |
+          sudo apt-get update && sudo apt-get install -y ffmpeg
+          bundle exec fastlane attach_videos
+
       - name: Upload Allure results
         if: env.LAUNCH_ID != '' && (success() || failure())
         working-directory: sample_app/android
