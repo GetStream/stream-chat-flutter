@@ -6,6 +6,7 @@
 
 🐞 Fixed
 
+- Fixed link preview enrichment failing for uppercase URL schemes (e.g. `HTTPS://`) by normalizing the scheme before enriching.
 - Fixed `StreamMessageListView` firing `markThreadRead` on a reply-less parent, which produced a guaranteed 404 every time the thread view was opened before the first reply.
 - Fixed shadowed messages not hidden in channel list items.
 - Fixed last-message preview flicker during channel-state reloads.
