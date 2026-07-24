@@ -248,6 +248,7 @@ class StreamChannelListTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final icons = context.streamIcons;
     final spacing = context.streamSpacing;
+    final a11y = context.translations.accessibility;
 
     final channelListItemTheme = StreamChannelListItemTheme.of(context);
     final defaults = _StreamChannelListItemThemeDefaults(context);
@@ -258,8 +259,8 @@ class StreamChannelListTile extends StatelessWidget {
     final effectiveAttributePosition = channelListItemTheme.attributePosition ?? defaults.attributePosition;
 
     final channelAttributes = [
-      if (isMuted) Icon(icons.mute),
-      if (isPinned) Icon(icons.pin),
+      if (isMuted) Icon(icons.mute, semanticLabel: a11y.channelMutedLabel),
+      if (isPinned) Icon(icons.pin, semanticLabel: a11y.channelPinnedLabel),
     ];
 
     Widget? attributesRow;
@@ -274,7 +275,7 @@ class StreamChannelListTile extends StatelessWidget {
     final titleTrailing = effectiveAttributePosition == .inlineTitle ? attributesRow : null;
     final subtitleTrailing = effectiveAttributePosition == .trailingBottom ? attributesRow : null;
 
-    return Padding(
+    final listItem = Padding(
       padding: EdgeInsets.all(spacing.xxs),
       child: StreamListTileTheme(
         data: StreamListTileThemeData(
@@ -318,6 +319,8 @@ class StreamChannelListTile extends StatelessWidget {
         ),
       ),
     );
+
+    return MergeSemantics(child: listItem);
   }
 }
 
@@ -342,6 +345,7 @@ class _TitleRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final spacing = context.streamSpacing;
     final colorScheme = context.streamColorScheme;
+    final a11y = context.translations.accessibility;
 
     return Row(
       mainAxisSize: .min,
@@ -374,7 +378,11 @@ class _TitleRow extends StatelessWidget {
             spacing: spacing.xs,
             children: [
               if (timestamp case final timestamp?) DefaultTextStyle.merge(style: timestampStyle, child: timestamp),
-              if (unreadCount > 0) StreamBadgeNotification(label: '$unreadCount'),
+              if (unreadCount > 0)
+                StreamBadgeNotification(
+                  label: '$unreadCount',
+                  semanticLabel: a11y.unreadMessagesLabel(count: unreadCount),
+                ),
             ],
           ),
       ],
@@ -652,6 +660,8 @@ class _ChannelLastMessageWithStatusState extends State<_ChannelLastMessageWithSt
               message: latestLastMessage,
             );
           }
+
+          deliveryPrefix = ExcludeSemantics(child: deliveryPrefix);
         }
 
         return Row(

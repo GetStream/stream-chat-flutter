@@ -105,7 +105,7 @@ class _DefaultStreamThreadListTile extends StatelessWidget {
         channel?.formatName(currentUser: currentUser) ?? avatarUser?.name ?? context.translations.noTitleText;
     final participantUsers = thread.threadParticipants.map((it) => it.user).nonNulls.toList(growable: false);
 
-    return Padding(
+    final listItem = Padding(
       padding: EdgeInsets.all(spacing.xxs),
       child: StreamListTileTheme(
         data: StreamListTileThemeData(
@@ -172,6 +172,8 @@ class _DefaultStreamThreadListTile extends StatelessWidget {
         ),
       ),
     );
+
+    return MergeSemantics(child: listItem);
   }
 }
 
@@ -283,12 +285,16 @@ class ThreadUnreadCount extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final a11y = context.translations.accessibility;
     return Badge(
       textStyle: style,
       textColor: style?.color,
       backgroundColor: backgroundColor,
       largeSize: 20,
-      label: Text('$unreadCount'),
+      label: Text(
+        '$unreadCount',
+        semanticsLabel: a11y.unreadMessagesLabel(count: unreadCount),
+      ),
     );
   }
 }

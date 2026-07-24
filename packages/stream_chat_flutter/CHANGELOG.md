@@ -16,8 +16,12 @@
 
 ✅ Added
 
-- Added an `AccessibilityTranslations` namespace on `Translations`, accessed via `context.translations.accessibility`, holding all screen-reader labels, tooltips, hints, and live-region announcements used by the composer, voice recording, attachment picker, message actions, channel header, media gallery, and poll creator. Getter suffixes follow Flutter's `MaterialLocalizations` convention (`Tooltip`, `Label`, `Hint`, `TapHint`, `Announcement`). Added a `DateTime.toA11yTimestamp()` extension for locale-aware long-form timestamps in accessibility labels.
+- Added `AccessibilityTranslations` on `Translations` (accessed via `context.translations.accessibility`) — screen-reader labels, tooltips, hints, and live-region announcements. Includes `formatDateTime`, `formatDuration`, and `formatRecentDateTime` formatters.
+- Added `AccessibleMessagePreviewFormatter` — an optional interface extending `MessagePreviewFormatter` with `formatMessageSemanticsLabel` and `formatDraftMessageSemanticsLabel`. `StreamMessagePreviewText`, `StreamDraftMessagePreviewText`, and `StreamSendingIndicator` now emit natural-language screen-reader labels for the channel list.
+- Added optional `semanticsLabel` to `StreamChannelAvatar`. Group channels emit a default `"Group"` label; direct-message avatars stay silent.
+- Added optional `semanticsLabel` to `StreamTimestamp`. Defaults to a bucketed natural-language phrasing via `AccessibilityTranslations.formatRecentDateTime`.
 - Added a `LastMessagePredicate` typedef for the `ChannelLastMessageText.lastMessagePredicate` filter.
+- Added optional `semanticsLabel` to `StreamUserAvatar`, `StreamUserAvatarGroup`, and `StreamUserAvatarStack`.
 - Made `StreamVideoPlayer` overridable via the `StreamComponentFactory` (`streamChatComponentBuilders(videoPlayer: ...)`), with the previous implementation now available as `DefaultStreamVideoPlayer`.
 
 🐞 Fixed
@@ -28,6 +32,11 @@
 - Fixed `StreamMessageListView` firing `markThreadRead` on a reply-less parent, which produced a guaranteed 404 every time the thread view was opened before the first reply.
 - Fixed dismissing the `StreamMessageListView` unread indicator being ignored while a channel is receiving a rapid burst of messages.
 - Fixed `StreamTypingIndicator` rebuilding on every typing event by comparing the typing users by id, so it only rebuilds when the set of typing users changes.
+- Fixed `StreamChannelListTile` announcing avatar initials and unlabeled fragments — now merges into a single accessible row summary with labeled avatar, muted / pinned icons, and unread badge.
+- Fixed `StreamThreadListTile` announcing content as flat comma-separated fragments — now merges into a single accessible row summary and labels the unread badge with the localized `"N unread messages"` phrasing.
+- Renamed `attachmentPickerTooltip` to state-agnostic "Toggle attachment picker" so screen readers no longer announce "Open attachment picker" while the picker is already expanded.
+- Fixed `voiceRecordingText` casing to sentence case (`"Voice recording"`).
+- Fixed `formatRecentDateTime` hardcoding 24-hour time — displayed and announced timestamps now follow the locale's convention (e.g. 24-hour in Germany, 12-hour in India).
 - Replaced the `get_thumbnail_video` dependency with Stream's own `stream_thumbnail` plugin, resolving the iOS duplicate-`VideoThumbnailPlugin`-symbol crash when an app also uses `video_thumbnail`/`video_editor` ([#2360](https://github.com/GetStream/stream-chat-flutter/issues/2360)).
 
 ## 10.1.0
