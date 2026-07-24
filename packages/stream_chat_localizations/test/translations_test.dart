@@ -521,4 +521,31 @@ void main() {
       'GlobalStreamChatLocalizations.delegate($supportedLocales locales)',
     );
   });
+
+  // formatRecentDateTime renders the time via Jiffy's locale-aware `jm`, so the
+  // spoken clock follows the locale convention: 24-hour in most of Europe,
+  // 12-hour in English and Hindi. The wider suite above never pins the Jiffy
+  // locale, so this is the only place the locale-awareness is exercised.
+  test('formatRecentDateTime uses a locale-aware clock', () async {
+    await withClock(Clock.fixed(DateTime(2026, 6, 15, 20)), () async {
+      final recent = DateTime(2026, 6, 15, 15); // today at 15:00 / 3:00 PM
+
+      Future<String> recentIn(String language) async {
+        await Jiffy.setLocale(language);
+        final a11y = (await GlobalStreamChatLocalizations.delegate.load(Locale(language))).accessibility;
+        return a11y.formatRecentDateTime(recent);
+      }
+
+      // 24-hour locales keep the wall-clock hour and never emit a meridiem.
+      for (final language in ['de', 'fr', 'it']) {
+        final formatted = await recentIn(language);
+        expect(formatted, contains('15:00'), reason: '$language should use a 24-hour clock');
+        expect(formatted.toUpperCase(), isNot(contains('PM')), reason: '$language should omit the meridiem');
+      }
+
+      // 12-hour locales fold to 3:00 with a meridiem.
+      expect(await recentIn('en'), contains('3:00 PM'));
+      expect(await recentIn('hi'), allOf(contains('3:00'), contains('pm')));
+    });
+  });
 }

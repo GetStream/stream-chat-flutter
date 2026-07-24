@@ -23,8 +23,9 @@ void main() {
       });
 
       // The a11y label is bucketed via formatRecentDateTime — for a within-
-      // last-week date, the weekday name appears with "at HH:mm".
-      expect(find.bySemanticsLabel(RegExp('at 14:30')), findsOneWidget);
+      // last-week date, the weekday name appears with a locale-aware time
+      // ("2:30 PM" in the default English locale).
+      expect(find.bySemanticsLabel(RegExp('at 2:30 PM')), findsOneWidget);
       handle.dispose();
     });
 

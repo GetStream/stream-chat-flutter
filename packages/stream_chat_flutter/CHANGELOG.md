@@ -20,6 +20,7 @@
 - Fixed `StreamThreadListTile` announcing content as flat comma-separated fragments — now merges into a single accessible row summary and labels the unread badge with the localized `"N unread messages"` phrasing.
 - Renamed `attachmentPickerTooltip` to state-agnostic "Toggle attachment picker" so screen readers no longer announce "Open attachment picker" while the picker is already expanded.
 - Fixed `voiceRecordingText` casing to sentence case (`"Voice recording"`).
+- Fixed `formatRecentDateTime` hardcoding 24-hour time — displayed and announced timestamps now follow the locale's convention (e.g. 24-hour in Germany, 12-hour in India).
 
 ## 10.1.0
 

@@ -313,9 +313,9 @@ abstract class AccessibilityTranslations {
   String formatDateTime(DateTime dateTime);
 
   /// Formats `date` as a locale-aware bucketed natural-language timestamp
-  /// for screen-reader announcements, e.g. `"Just now"`, `"Today at 14:30"`,
-  /// `"Yesterday at 14:30"`, `"Saturday at 14:30"`, `"Jan 15 at 14:30"`, or
-  /// `"Jan 15, 2024 at 14:30"` for older dates.
+  /// for screen-reader announcements, e.g. `"Just now"`, `"Today at 2:30 PM"`,
+  /// `"Yesterday at 2:30 PM"`, `"Saturday at 2:30 PM"`, `"Jan 15 at 2:30 PM"`,
+  /// or `"Jan 15, 2024 at 2:30 PM"` for older dates.
   ///
   /// Ordinals and compact abbreviations (`"15th"`, `"1m"`) are avoided —
   /// some TTS engines mispronounce them.
@@ -602,7 +602,7 @@ class DefaultAccessibilityTranslations extends AccessibilityTranslations {
 
     final localDate = date.toLocal();
     final jiffyDate = Jiffy.parseFromDateTime(localDate);
-    final time = jiffyDate.format(pattern: 'H:mm');
+    final time = jiffyDate.jm;
 
     if (localDate.isToday) return 'Today at $time';
     if (localDate.isYesterday) return 'Yesterday at $time';
