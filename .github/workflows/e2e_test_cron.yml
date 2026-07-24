@@ -118,14 +118,8 @@ jobs:
           version: ${{ matrix.ios }}
           device: ${{ matrix.device }}
 
-      - uses: ./.github/actions/cache-cocoapods
-        with:
-          key-suffix: ${{ matrix.ios }}
-
-      - uses: ./.github/actions/cache-xcode-cas
-        with:
-          key-suffix: ${{ matrix.ios }}
-          xcode-version: ${{ env.XCODE_VERSION }}
+      - name: Use Firebase stubs
+        run: cp sample_app/pubspec_overrides.e2e.yaml sample_app/pubspec_overrides.yaml
 
       - name: Bootstrap
         run: |
@@ -133,6 +127,11 @@ jobs:
           flutter config --no-enable-swift-package-manager
           flutter pub global activate melos
           melos bootstrap
+
+      # After Bootstrap so the cache keys hash the resolved pubspec.lock
+      - uses: ./.github/actions/cache-cocoapods
+        with:
+          key-suffix: ${{ matrix.ios }}
 
       - name: Launch Allure TestOps
         working-directory: sample_app/ios
