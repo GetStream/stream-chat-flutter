@@ -304,6 +304,7 @@ For more details, please refer to the [migration guide](../../migrations/v10-mig
 - Fixed `OwnUser` specific fields getting lost when creating a new `OwnUser` instance from
   an `User` instance.
 - Fixed `Client.currentUser` specific fields getting reset on `user.updated` events.
+- Fixed build in dart2wasm environment.
 
 ✅ Added
 
