@@ -23,7 +23,7 @@ jobs:
     env:
       ANDROID_API_LEVEL: "34"
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - uses: ./.github/actions/setup-java
 
@@ -54,6 +54,13 @@ jobs:
           profile: pixel_6
           script: cd sample_app/android && bundle exec fastlane run_e2e_test device:emulator-5554
 
+      - name: Attach videos to failed tests
+        if: failure()
+        working-directory: sample_app/android
+        run: |
+          sudo apt-get update && sudo apt-get install -y ffmpeg
+          bundle exec fastlane attach_videos
+
       - name: Upload Allure results
         if: env.LAUNCH_ID != '' && (success() || failure())
         working-directory: sample_app/android
@@ -79,7 +86,7 @@ jobs:
       IOS_SIMULATOR_VERSION: "26.2"
       IOS_SIMULATOR_DEVICE: "iPhone 17"
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - uses: ./.github/actions/setup-flutter
 

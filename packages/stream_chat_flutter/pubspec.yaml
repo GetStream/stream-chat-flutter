@@ -1,7 +1,7 @@
 name: stream_chat_flutter
 homepage: https://github.com/GetStream/stream-chat-flutter
 description: Stream Chat official Flutter SDK. Build your own chat experience using Dart and Flutter.
-version: 10.1.0
+version: 10.2.0
 repository: https://github.com/GetStream/stream-chat-flutter
 issue_tracker: https://github.com/GetStream/stream-chat-flutter/issues
 
@@ -38,7 +38,6 @@ dependencies:
   flutter_portal: ^1.1.4
   flutter_svg: ^2.3.0
   gal: ^2.3.2
-  get_thumbnail_video: ^0.7.3
   http_parser: ^4.1.2
   image_picker: ^1.2.2
   image_size_getter: ^2.4.1
@@ -46,8 +45,6 @@ dependencies:
   jiffy: ^6.4.5
   just_audio: ^0.10.5
   lottie: ^3.3.3
-  media_kit: ^1.2.6
-  media_kit_video: ^2.0.1
   meta: ^1.9.1
   path_provider: ^2.1.5
   photo_manager: ^3.9.0
@@ -57,7 +54,7 @@ dependencies:
   rxdart: ^0.28.0
   share_plus: ">=12.0.2 <14.0.0"
   shimmer: ^3.0.0
-  stream_chat_flutter_core: ^10.1.0
+  stream_chat_flutter_core: ^10.2.0
   stream_core_flutter:
     # The ignore below silences `invalid_dependency` because we occasionally
     # pin stream_core_flutter to a git ref to iterate on it alongside this
@@ -69,8 +66,9 @@ dependencies:
     # ignore: invalid_dependency
     git:
       url: https://github.com/GetStream/stream-core-flutter.git
-      ref: c711bba905ac38bd81fdf0365ef1731323d61146
+      ref: 5b5c51ad270ef9ff21efa9eb20e490f19e40ac87
       path: packages/stream_core_flutter
+  stream_thumbnail: ^0.1.0
   svg_icon_widget: ^0.0.1
   synchronized: ^3.4.0
   theme_extensions_builder_annotation: ^7.1.0
