@@ -1,4 +1,5 @@
 import 'package:flutter/widgets.dart';
+import 'package:stream_chat_flutter/src/localization/translations.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:stream_core_flutter/chat.dart';
@@ -53,6 +54,8 @@ import 'package:stream_core_flutter/chat.dart';
 /// See also:
 ///
 ///  * [StreamMessagePreviewFormatter], the default implementation.
+///  * [AccessibleMessagePreviewFormatter], the optional a11y-aware
+///    extension of this interface.
 ///  * [StreamChatConfigurationData.messagePreviewFormatter], which configures
 ///    the formatter used across the Stream Chat widget tree.
 abstract interface class MessagePreviewFormatter {
@@ -65,8 +68,7 @@ abstract interface class MessagePreviewFormatter {
   ///
   /// The output adapts to the message kind (regular, deleted, system, poll,
   /// location) and to the surrounding [channel] — for example, group channels
-  /// prepend a bold "You:" or "FirstName:" prefix. Mentions in the message
-  /// text are automatically bolded.
+  /// prepend a bold "You:" or "FirstName:" prefix.
   ///
   /// [showCaption] controls how attachment and location previews label
   /// themselves: when `true` (the default) they display the message text; when
@@ -74,10 +76,10 @@ abstract interface class MessagePreviewFormatter {
   /// type-based label such as "Photo", "2 Videos", or "Location". Pure text
   /// messages always show their text.
   ///
-  /// The returned span carries structural style only (bold mentions, bold
-  /// sender prefix, tinted deleted-message text). Base text color and font
-  /// should be applied by the caller via [Text.rich]'s `style` parameter or
-  /// an ambient [DefaultTextStyle]; inline icons pick up their color from the
+  /// The returned span carries structural style only (bold sender prefix,
+  /// tinted deleted-message text). Base text color and font should be
+  /// applied by the caller via [Text.rich]'s `style` parameter or an
+  /// ambient [DefaultTextStyle]; inline icons pick up their color from the
   /// ambient [IconTheme].
   TextSpan formatMessage(
     BuildContext context,
@@ -92,8 +94,7 @@ abstract interface class MessagePreviewFormatter {
   ///
   /// The prefix is rendered in bold using the theme's accent color. The
   /// draft body is formatted using the same rules as a regular message —
-  /// plain text, attachments, and polls all get a rich preview — with
-  /// mentions bolded automatically.
+  /// plain text, attachments, and polls all get a rich preview.
   ///
   /// [currentUser] is forwarded to body formatters that need viewer context
   /// (for example, [formatPollMessage] to resolve the current user's vote).
@@ -114,7 +115,45 @@ abstract interface class MessagePreviewFormatter {
   });
 }
 
-/// The default implementation of [MessagePreviewFormatter].
+/// A [MessagePreviewFormatter] that also emits plain-text a11y labels
+/// suitable for [Text.semanticsLabel] / [Semantics.label].
+///
+/// Implementing this interface is optional; consumers implementing only
+/// [MessagePreviewFormatter] continue to work with a visual-derived a11y
+/// fallback.
+///
+/// See also:
+///
+///  * [StreamMessagePreviewFormatter], which implements this interface.
+abstract interface class AccessibleMessagePreviewFormatter implements MessagePreviewFormatter {
+  /// Formats [message] as a plain-text natural-language string for screen
+  /// readers — the accessible counterpart to [formatMessage].
+  ///
+  /// [showCaption] mirrors [formatMessage]: when `true` (the default),
+  /// attachment and location labels include the message text as a caption;
+  /// when `false` they fall back to a type-only label.
+  String formatMessageSemanticsLabel(
+    BuildContext context,
+    Message message, {
+    ChannelModel? channel,
+    User? currentUser,
+    bool showCaption = true,
+  });
+
+  /// Formats [draftMessage] as a plain-text natural-language string for
+  /// screen readers — the accessible counterpart to [formatDraftMessage].
+  ///
+  /// [showCaption] mirrors [formatDraftMessage].
+  String formatDraftMessageSemanticsLabel(
+    BuildContext context,
+    DraftMessage draftMessage, {
+    User? currentUser,
+    bool showCaption = true,
+  });
+}
+
+/// The default implementation of [MessagePreviewFormatter] and
+/// [AccessibleMessagePreviewFormatter].
 ///
 /// The preview is assembled in two layers, each produced by a separate
 /// `format*` method so subclasses can override a specific piece without
@@ -127,8 +166,8 @@ abstract interface class MessagePreviewFormatter {
 ///    [formatGroupMessage] ("FirstName: "), or [formatDirectMessage] (no
 ///    prefix by default).
 ///
-/// Mentions are applied to the body automatically and do not need to be
-/// handled in overrides.
+/// Each visual `format*` method has a paired `format*SemanticsLabel`
+/// variant that returns the equivalent screen-reader label.
 ///
 /// {@tool snippet}
 ///
@@ -161,7 +200,7 @@ abstract interface class MessagePreviewFormatter {
 ///
 ///  * [MessagePreviewFormatter], the public interface.
 ///  * [formatMessage], which composes the final preview span.
-class StreamMessagePreviewFormatter implements MessagePreviewFormatter {
+class StreamMessagePreviewFormatter implements AccessibleMessagePreviewFormatter {
   /// Creates a [StreamMessagePreviewFormatter].
   const StreamMessagePreviewFormatter();
 
@@ -387,7 +426,7 @@ class StreamMessagePreviewFormatter implements MessagePreviewFormatter {
   ///  * Multiple same-type attachments → type-specific icon + pluralized
   ///    count ("2 Photos", "3 Videos", "4 files").
   ///  * Mixed-type attachments → file icon + "N files".
-  ///  * Voice recording → voice icon + "Voice Recording (mm:ss)" when no
+  ///  * Voice recording → voice icon + "Voice recording (mm:ss)" when no
   ///    caption is available.
   ///  * Giphy → file icon + caption, or "Giphy" when no caption is set.
   ///  * Unknown / custom types → unsupported-attachment icon + caption (if
@@ -491,6 +530,194 @@ class StreamMessagePreviewFormatter implements MessagePreviewFormatter {
   @protected
   String getDraftPrefix(BuildContext context) {
     return '${context.translations.draftLabel}:';
+  }
+
+  @override
+  String formatMessageSemanticsLabel(
+    BuildContext context,
+    Message message, {
+    ChannelModel? channel,
+    User? currentUser,
+    bool showCaption = true,
+  }) {
+    final body = _formatContentSemanticsLabel(
+      context,
+      message,
+      currentUser: currentUser,
+      showCaption: showCaption,
+    );
+
+    // Deleted and system messages describe state / channel events, not
+    // something the sender authored — the speaker prefix would read as
+    // "You, Message deleted", which sounds like the user said the literal
+    // phrase "Message deleted". Return the body verbatim in these cases.
+    if (message.isDeleted || message.isSystem) return body;
+
+    if (channel == null) return body;
+
+    final a11y = context.translations.accessibility;
+
+    if (message.user?.id == currentUser?.id) {
+      return '${a11y.outgoingMessagePreviewLabel}\n$body';
+    }
+
+    // 1-on-1 channel — sender identity is implicit from the channel.
+    if (channel.memberCount <= 2) return body;
+
+    // Announce the full sender name — screen readers aren't width-bound
+    // like the visual preview, and a surname disambiguates when multiple
+    // members share a first name. When the sender has no derivable name,
+    // skip the prefix entirely — a bare "Message, ..." token carries no
+    // information.
+    final authorName = message.user?.name.trim().nullIfEmpty;
+    if (authorName == null) return body;
+
+    return '${a11y.incomingMessagePreviewLabel(senderName: authorName)}\n$body';
+  }
+
+  // Dispatches to the `format*SemanticsLabel` method that matches the kind of
+  // [message]. Mirrors [_formatContent] but returns a plain-text a11y label
+  // instead of a visual TextSpan.
+  String _formatContentSemanticsLabel(
+    BuildContext context,
+    Message message, {
+    User? currentUser,
+    bool showCaption = true,
+  }) {
+    if (message.isDeleted) {
+      return formatDeletedMessageSemanticsLabel(context, message);
+    }
+
+    if (message.isSystem) {
+      return formatSystemMessageSemanticsLabel(context, message);
+    }
+
+    if (message.poll case final poll?) {
+      return formatPollMessageSemanticsLabel(context, poll, currentUser);
+    }
+
+    if (message.sharedLocation case final location?) {
+      return formatLocationMessageSemanticsLabel(context, message, location, showCaption: showCaption);
+    }
+
+    final regular = formatRegularMessageSemanticsLabel(context, message, showCaption: showCaption);
+    if (regular != null) return regular;
+
+    return formatEmptyMessageSemanticsLabel(context, message);
+  }
+
+  /// Formats a regular [message] — plain text, attachments, or both — as a
+  /// plain-text a11y label. Returns `null` when the message has neither
+  /// text nor attachments.
+  ///
+  /// [showCaption] gates whether the message text is used as an attachment
+  /// caption; set to `false` for tight contexts (e.g. quoted replies) so
+  /// the label falls back to a type-only fragment.
+  @protected
+  String? formatRegularMessageSemanticsLabel(
+    BuildContext context,
+    Message message, {
+    bool showCaption = true,
+  }) {
+    final messageText = message.text?.trim().nullIfEmpty;
+    final attachments = message.attachments;
+
+    if (attachments.isNotEmpty) {
+      final caption = showCaption ? messageText : null;
+      return formatMessageAttachmentsSemanticsLabel(context, caption, attachments);
+    }
+
+    return messageText;
+  }
+
+  /// Formats a deleted [message] as a plain-text a11y label — the localized
+  /// "Message deleted" text.
+  @protected
+  String formatDeletedMessageSemanticsLabel(BuildContext context, Message message) {
+    return context.translations.messageDeletedLabel;
+  }
+
+  /// Formats a system [message] as a plain-text a11y label —
+  /// `"System\n<body>"`.
+  ///
+  /// Falls back to the localized `"System message"` label when the event
+  /// text is missing.
+  @protected
+  String formatSystemMessageSemanticsLabel(BuildContext context, Message message) {
+    final body = message.text?.trim().nullIfEmpty;
+    if (body == null) return context.translations.systemMessageLabel;
+    final a11y = context.translations.accessibility;
+    return '${a11y.systemMessagePreviewLabel}\n$body';
+  }
+
+  /// Formats an empty [message] as a plain-text a11y label — the localized
+  /// "no content" fallback.
+  @protected
+  String formatEmptyMessageSemanticsLabel(BuildContext context, Message message) {
+    return context.translations.emptyMessagePreviewText;
+  }
+
+  /// Formats a [poll] message as a plain-text a11y label — `"Poll\n<name>"`.
+  @protected
+  String formatPollMessageSemanticsLabel(BuildContext context, Poll poll, User? currentUser) {
+    final a11y = context.translations.accessibility;
+    final name = poll.name.trim();
+    if (name.isEmpty) return a11y.pollPreviewLabel;
+    return '${a11y.pollPreviewLabel}\n$name';
+  }
+
+  /// Formats a shared-[location] message as a plain-text a11y label — the
+  /// localized `"Location"` / `"Live location"` label, optionally suffixed
+  /// with the message text when a caption is present and [showCaption] is
+  /// `true`.
+  @protected
+  String formatLocationMessageSemanticsLabel(
+    BuildContext context,
+    Message message,
+    Location location, {
+    bool showCaption = true,
+  }) {
+    final typeLabel = context.translations.locationLabel(isLive: location.isLive);
+    final caption = showCaption ? message.text?.trim().nullIfEmpty : null;
+    if (caption == null) return typeLabel;
+    return '$typeLabel\n$caption';
+  }
+
+  /// Formats non-empty [attachments] as a plain-text a11y label —
+  /// `"<typeLabel>[\n<extra>]"`.
+  ///
+  /// `typeLabel` is a translated, count-aware type label (`"Photo"`,
+  /// `"2 photos"`, `"Video"`, `"3 files"`, `"Voice recording"`, etc.);
+  /// mixed-type groups collapse to `"N files"`. `extra` is the caption or,
+  /// when absent, the attachment's intrinsic text — filename, URL-preview
+  /// title, or voice-recording duration.
+  @protected
+  String formatMessageAttachmentsSemanticsLabel(
+    BuildContext context,
+    String? caption,
+    Iterable<Attachment> attachments,
+  ) {
+    final preview = _resolveAttachmentSemanticsPreview(context, attachments, caption);
+    if (preview.extra == null) return preview.typeLabel;
+    return '${preview.typeLabel}\n${preview.extra}';
+  }
+
+  @override
+  String formatDraftMessageSemanticsLabel(
+    BuildContext context,
+    DraftMessage draftMessage, {
+    User? currentUser,
+    bool showCaption = true,
+  }) {
+    final body = _formatContentSemanticsLabel(
+      context,
+      draftMessage.toMessage(),
+      currentUser: currentUser,
+      showCaption: showCaption,
+    );
+
+    final a11y = context.translations.accessibility;
+    return '${a11y.draftPreviewLabel}\n$body';
   }
 }
 
@@ -698,6 +925,119 @@ _AttachmentPreview _resolveMultipleAttachmentsPreview(
     .video => (icon: icons.video, label: caption ?? translations.videosAttachmentCountText(count)),
     .file => (icon: icons.file, label: caption ?? translations.filesAttachmentCountText(count)),
     _ => _resolveSingleAttachmentPreview(context, first, caption),
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Attachment presentation (a11y)
+//
+// Mirror of the visual attachment resolvers above, producing a plain-text
+// `(typeLabel, extra)` pair used by [formatMessageAttachmentsSemanticsLabel]:
+//
+//  * [_resolveAttachmentSemanticsPreview]          — dispatcher.
+//  * [_resolveSingleAttachmentSemanticsPreview]    — one attachment; adds
+//                                                     the attachment-intrinsic
+//                                                     extra (filename, link
+//                                                     title, voice duration)
+//                                                     when no caption exists.
+//  * [_resolveMultipleAttachmentsSemanticsPreview] — 2+ attachments; a
+//                                                     type-only label plus
+//                                                     the caption when set.
+// ---------------------------------------------------------------------------
+
+// A resolved a11y attachment preview: the localized [typeLabel] ("Photo",
+// "2 photos", "Voice recording", ...) and an optional [extra] appended
+// after a newline (caption, filename, or spelled-out duration).
+typedef _AttachmentSemanticsPreview = ({String typeLabel, String? extra});
+
+// Resolves the type label + extra to announce for a message with
+// [attachments], optionally falling back to [caption] when provided.
+//
+// Thin dispatcher that picks between the single- and multi-attachment
+// resolvers. Assumes [attachments] is non-empty.
+_AttachmentSemanticsPreview _resolveAttachmentSemanticsPreview(
+  BuildContext context,
+  Iterable<Attachment> attachments,
+  String? caption,
+) {
+  if (attachments.length > 1) {
+    return _resolveMultipleAttachmentsSemanticsPreview(context, attachments, caption);
+  }
+  return _resolveSingleAttachmentSemanticsPreview(context, attachments.first, caption);
+}
+
+// Resolves the a11y preview for a message with a single [attachment].
+//
+// The type label is always emitted so screen-reader users hear the kind of
+// attachment ("Photo", "File", "Voice recording", ...) even when a caption
+// is present. The [extra] slot prefers [caption], then falls back to
+// attachment-intrinsic text (filename, OG title, spelled-out voice
+// duration) that would otherwise be lost.
+_AttachmentSemanticsPreview _resolveSingleAttachmentSemanticsPreview(
+  BuildContext context,
+  Attachment attachment,
+  String? caption,
+) {
+  final translations = context.translations;
+  final a11y = translations.accessibility;
+  final typeLabel = _semanticsTypeLabelFor(translations, attachment.type, 1);
+
+  final extra =
+      caption ??
+      switch (attachment.type) {
+        // Spell the voice-recording duration out ("1 minute 23 seconds") rather
+        // than a colon-separated clock string ("1:23") — screen readers announce
+        // ":" inconsistently.
+        AttachmentType.voiceRecording => a11y.formatDuration(attachment.duration),
+        AttachmentType.file || AttachmentType.urlPreview => attachment.title?.trim().nullIfEmpty,
+        _ => null,
+      };
+
+  return (typeLabel: typeLabel, extra: extra);
+}
+
+// Resolves the a11y preview for a message with two or more [attachments].
+//
+// Same-type groups get a pluralized count via
+// [Translations.photosAttachmentCountText] / etc.; mixed-type groups
+// collapse to a generic "N files" label. Attachment-intrinsic text
+// (filename, duration) is not appended for multi-attachment groups — with
+// no caption the group is announced as type-only.
+//
+// Assumes [attachments] has at least two entries.
+_AttachmentSemanticsPreview _resolveMultipleAttachmentsSemanticsPreview(
+  BuildContext context,
+  Iterable<Attachment> attachments,
+  String? caption,
+) {
+  final translations = context.translations;
+
+  final first = attachments.first;
+  final count = attachments.length;
+
+  final hasMixedTypes = attachments.any((it) => it.type != first.type);
+  if (hasMixedTypes) return (typeLabel: translations.filesAttachmentCountText(count), extra: caption);
+
+  return (typeLabel: _semanticsTypeLabelFor(translations, first.type, count), extra: caption);
+}
+
+// Returns the localized, count-aware type label for the given attachment
+// [type] — used by both single- and multi-attachment a11y resolvers.
+//
+// Types with a plural form (image / video / file) honor [count]; others
+// return their singular label regardless.
+String _semanticsTypeLabelFor(Translations t, AttachmentType? type, int count) {
+  return switch (type) {
+    AttachmentType.image => t.photosAttachmentCountText(count),
+    AttachmentType.video => t.videosAttachmentCountText(count),
+    AttachmentType.file => t.filesAttachmentCountText(count),
+    AttachmentType.audio => t.audioAttachmentText,
+    AttachmentType.voiceRecording => t.voiceRecordingText,
+    AttachmentType.urlPreview => t.linkAttachmentText,
+    // Giphy has no dedicated translation — the visual formatter uses the
+    // literal 'Giphy' brand name.
+    AttachmentType.giphy => 'Giphy',
+    _ => t.filesAttachmentCountText(count),
   };
 }
 

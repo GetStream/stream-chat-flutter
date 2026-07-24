@@ -701,7 +701,7 @@ class StreamChatLocalizationsEn extends GlobalStreamChatLocalizations {
   String get emptyMessagePreviewText => '';
 
   @override
-  String get voiceRecordingText => 'Voice Recording';
+  String get voiceRecordingText => 'Voice recording';
 
   @override
   String get audioAttachmentText => 'Audio';
@@ -887,7 +887,7 @@ class _AccessibilityTranslationsEn extends AccessibilityTranslations {
       'Pause voice recording, ${formatDuration(duration)}';
 
   @override
-  String get attachmentPickerTooltip => 'Open attachment picker';
+  String get attachmentPickerTooltip => 'Toggle attachment picker';
 
   @override
   String get attachmentPickerOpenHint => 'double tap to open attachment picker';
@@ -969,6 +969,54 @@ class _AccessibilityTranslationsEn extends AccessibilityTranslations {
   String get deselectMediaTapHint => 'deselect';
 
   @override
+  String get outgoingMessagePreviewLabel => 'You';
+
+  @override
+  String incomingMessagePreviewLabel({String? senderName}) {
+    return senderName ?? 'Message';
+  }
+
+  @override
+  String get pollPreviewLabel => 'Poll';
+
+  @override
+  String get draftPreviewLabel => 'Draft';
+
+  @override
+  String get messageSendingStatusLabel => 'Sending';
+
+  @override
+  String get messageSentStatusLabel => 'Sent';
+
+  @override
+  String get messageDeliveredStatusLabel => 'Delivered';
+
+  @override
+  String get messageReadStatusLabel => 'Read';
+
+  @override
+  String unreadMessagesLabel({required int count}) {
+    return Intl.plural(
+      count,
+      one: '$count unread message',
+      other: '$count unread messages',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String get channelGroupLabel => 'Group';
+
+  @override
+  String get systemMessagePreviewLabel => 'System';
+
+  @override
+  String get channelMutedLabel => 'muted';
+
+  @override
+  String get channelPinnedLabel => 'pinned';
+
+  @override
   String get savePollTooltip => 'Save poll';
 
   @override
@@ -1031,20 +1079,45 @@ class _AccessibilityTranslationsEn extends AccessibilityTranslations {
 
   @override
   String attachmentsAddedAnnouncement({required int count}) {
-    if (count == 1) return '1 attachment added';
-    return '$count attachments added';
+    return Intl.plural(
+      count,
+      one: '$count attachment added',
+      other: '$count attachments added',
+      locale: localeName,
+    );
   }
 
   @override
   String attachmentsRemovedAnnouncement({required int count}) {
-    if (count == 1) return '1 attachment removed';
-    return '$count attachments removed';
+    return Intl.plural(
+      count,
+      one: '$count attachment removed',
+      other: '$count attachments removed',
+      locale: localeName,
+    );
   }
 
   @override
   String formatDateTime(DateTime dateTime) {
     final jiffy = Jiffy.parseFromDateTime(dateTime);
     return '${jiffy.EEEE}, ${jiffy.yMMMMd}, ${jiffy.jm}';
+  }
+
+  @override
+  String formatRecentDateTime(DateTime date) {
+    if (date.isWithinLastMinute) return 'Just now';
+
+    final localDate = date.toLocal();
+    final jiffyDate = Jiffy.parseFromDateTime(localDate);
+    final time = jiffyDate.jm;
+
+    if (localDate.isToday) return 'Today at $time';
+    if (localDate.isYesterday) return 'Yesterday at $time';
+    if (localDate.isWithinLastWeek) return '${jiffyDate.EEEE} at $time';
+    if (localDate.isInSameYear) {
+      return '${jiffyDate.format(pattern: 'MMM d')} at $time';
+    }
+    return '${jiffyDate.format(pattern: 'MMM d, yyyy')} at $time';
   }
 
   @override

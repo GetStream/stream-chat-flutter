@@ -37,12 +37,26 @@ class StreamDraftMessagePreviewText extends StatelessWidget {
       showCaption: showCaption,
     );
 
+    // Prefer a hand-crafted a11y label when the formatter opts into
+    // [AccessibleMessagePreviewFormatter]; fall back to the visual
+    // TextSpan stripped of inline icon placeholders.
+    final a11yLabel = switch (formatter) {
+      final AccessibleMessagePreviewFormatter it => it.formatDraftMessageSemanticsLabel(
+        context,
+        draftMessage,
+        currentUser: currentUser,
+        showCaption: showCaption,
+      ),
+      _ => previewTextSpan.toPlainText(includePlaceholders: false),
+    };
+
     return Text.rich(
       maxLines: 1,
       previewTextSpan,
       style: textStyle,
       overflow: TextOverflow.ellipsis,
       textAlign: TextAlign.start,
+      semanticsLabel: a11yLabel,
     );
   }
 }

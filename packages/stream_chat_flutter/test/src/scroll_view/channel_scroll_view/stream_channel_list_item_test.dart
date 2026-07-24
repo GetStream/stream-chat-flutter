@@ -342,4 +342,167 @@ void main() {
       },
     );
   });
+
+  group('StreamChannelListTile a11y', () {
+    Widget wrap(Widget child) => MaterialApp(
+      theme: ThemeData(extensions: [StreamTheme()]),
+      home: Scaffold(body: child),
+    );
+
+    testWidgets('merges children into a single accessible node with the composed label', (tester) async {
+      final handle = tester.ensureSemantics();
+
+      await tester.pumpWidget(
+        wrap(
+          StreamChannelListTile(
+            avatar: const _SilentAvatar(),
+            title: const Text('General'),
+            subtitle: const Text('Alice: 2 photos'),
+            timestamp: const Text('2h'),
+            unreadCount: 2,
+            isMuted: true,
+            onTap: () {},
+          ),
+        ),
+      );
+
+      // A silent avatar (a DM avatar wraps itself in ExcludeSemantics) must
+      // contribute nothing to the merged label.
+      expect(find.bySemanticsLabel('AVATAR-SENTINEL'), findsNothing);
+
+      // The tile's composed label carries the name, muted state, unread
+      // count, preview, and timestamp — merged into one accessible node.
+      // MergeSemantics joins the child labels with newlines, so match with
+      // `dotAll: true` so `.` crosses the line breaks.
+      expect(
+        find.bySemanticsLabel(
+          RegExp(
+            'General.*muted.*2h.*2 unread.*Alice: 2 photos',
+            dotAll: true,
+          ),
+        ),
+        findsOneWidget,
+      );
+
+      handle.dispose();
+    });
+
+    testWidgets('a labeled avatar contributes its label to the composed row announcement', (tester) async {
+      final handle = tester.ensureSemantics();
+
+      await tester.pumpWidget(
+        wrap(
+          StreamChannelListTile(
+            avatar: const _LabeledAvatar('Group'),
+            title: const Text('Team'),
+            subtitle: const Text('Alice: sup'),
+            timestamp: const Text('2h'),
+            onTap: () {},
+          ),
+        ),
+      );
+
+      // A group avatar's semantics label (emitted by StreamChannelAvatar for
+      // groups) is picked up by the row's MergeSemantics wrap and prepended
+      // to the announcement, restoring the "this is a group" context that
+      // the multi-avatar visual conveys to sighted users.
+      expect(
+        find.bySemanticsLabel(
+          RegExp('Group.*Team.*Alice: sup', dotAll: true),
+        ),
+        findsOneWidget,
+      );
+
+      handle.dispose();
+    });
+
+    testWidgets('unreadCount == 0 omits the "unread" state from the label', (tester) async {
+      final handle = tester.ensureSemantics();
+
+      await tester.pumpWidget(
+        wrap(
+          StreamChannelListTile(
+            avatar: const SizedBox.shrink(),
+            title: const Text('General'),
+            subtitle: const Text('Hi'),
+            timestamp: const Text('2h'),
+            onTap: () {},
+          ),
+        ),
+      );
+
+      expect(find.bySemanticsLabel(RegExp('General')), findsOneWidget);
+      expect(find.bySemanticsLabel(RegExp('unread')), findsNothing);
+
+      handle.dispose();
+    });
+
+    testWidgets('isPinned adds the "pinned" fragment to the merged label', (tester) async {
+      final handle = tester.ensureSemantics();
+
+      await tester.pumpWidget(
+        wrap(
+          StreamChannelListTile(
+            avatar: const _SilentAvatar(),
+            title: const Text('General'),
+            subtitle: const Text('Hi'),
+            timestamp: const Text('2h'),
+            isPinned: true,
+            onTap: () {},
+          ),
+        ),
+      );
+
+      expect(
+        find.bySemanticsLabel(RegExp('General.*pinned.*2h.*Hi', dotAll: true)),
+        findsOneWidget,
+      );
+      handle.dispose();
+    });
+
+    testWidgets('muted + pinned combined announce in order', (tester) async {
+      final handle = tester.ensureSemantics();
+
+      await tester.pumpWidget(
+        wrap(
+          StreamChannelListTile(
+            avatar: const _SilentAvatar(),
+            title: const Text('General'),
+            subtitle: const Text('Hi'),
+            timestamp: const Text('2h'),
+            isMuted: true,
+            isPinned: true,
+            onTap: () {},
+          ),
+        ),
+      );
+
+      expect(
+        find.bySemanticsLabel(RegExp('General.*muted.*pinned.*2h.*Hi', dotAll: true)),
+        findsOneWidget,
+      );
+      handle.dispose();
+    });
+  });
+}
+
+// Simulates a DM avatar — silent (wraps its sentinel text in
+// ExcludeSemantics). Keeps the a11y assertions independent of any real
+// avatar widget's internals.
+class _SilentAvatar extends StatelessWidget {
+  const _SilentAvatar();
+
+  @override
+  Widget build(BuildContext context) => const ExcludeSemantics(child: Text('AVATAR-SENTINEL'));
+}
+
+// Simulates a group avatar — participates in semantics with a label,
+// matching what StreamChannelAvatar emits for group channels.
+class _LabeledAvatar extends StatelessWidget {
+  const _LabeledAvatar(this.label);
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) => Semantics(label: label, child: const SizedBox.shrink());
 }
