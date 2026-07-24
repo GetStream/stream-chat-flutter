@@ -1,4 +1,5 @@
 import 'package:flutter/widgets.dart';
+import 'package:stream_chat_flutter/src/message_list_view/auto_scroll_policy.dart';
 
 /// {@template streamMessageListConfiguration}
 /// Holds all behavior flags and non-theme, non-builder configuration for
@@ -32,8 +33,9 @@ class StreamMessageListViewConfiguration {
     this.paginationLimit = 25,
     this.maximumMessageLimit,
     this.retentionTrimBuffer = 30,
-    this.keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.onDrag,
+    this.keyboardDismissBehavior = .onDrag,
     this.scrollPhysics = const ClampingScrollPhysics(),
+    this.autoScrollPolicy = .whenOwnMessageOrAtBottom,
   });
 
   /// Whether to mark the channel as read when the user scrolls to the bottom.
@@ -134,6 +136,13 @@ class StreamMessageListViewConfiguration {
   /// Defaults to [ClampingScrollPhysics].
   final ScrollPhysics scrollPhysics;
 
+  /// Controls whether and how the list scrolls to the newest message when a
+  /// new message arrives.
+  ///
+  /// Defaults to [StreamAutoScrollPolicy.whenOwnMessageOrAtBottom]. Use
+  /// [StreamAutoScrollPolicy.disabled] to take full control of scrolling.
+  final StreamAutoScrollPolicy autoScrollPolicy;
+
   /// Returns a copy of this configuration with the given fields replaced.
   StreamMessageListViewConfiguration copyWith({
     bool? markReadWhenAtTheBottom,
@@ -152,6 +161,7 @@ class StreamMessageListViewConfiguration {
     int? retentionTrimBuffer,
     ScrollViewKeyboardDismissBehavior? keyboardDismissBehavior,
     ScrollPhysics? scrollPhysics,
+    StreamAutoScrollPolicy? autoScrollPolicy,
   }) {
     return StreamMessageListViewConfiguration(
       markReadWhenAtTheBottom: markReadWhenAtTheBottom ?? this.markReadWhenAtTheBottom,
@@ -170,6 +180,7 @@ class StreamMessageListViewConfiguration {
       retentionTrimBuffer: retentionTrimBuffer ?? this.retentionTrimBuffer,
       keyboardDismissBehavior: keyboardDismissBehavior ?? this.keyboardDismissBehavior,
       scrollPhysics: scrollPhysics ?? this.scrollPhysics,
+      autoScrollPolicy: autoScrollPolicy ?? this.autoScrollPolicy,
     );
   }
 
@@ -192,7 +203,8 @@ class StreamMessageListViewConfiguration {
         other.maximumMessageLimit == maximumMessageLimit &&
         other.retentionTrimBuffer == retentionTrimBuffer &&
         other.keyboardDismissBehavior == keyboardDismissBehavior &&
-        other.scrollPhysics == scrollPhysics;
+        other.scrollPhysics == scrollPhysics &&
+        other.autoScrollPolicy == autoScrollPolicy;
   }
 
   @override
@@ -213,5 +225,6 @@ class StreamMessageListViewConfiguration {
     retentionTrimBuffer,
     keyboardDismissBehavior,
     scrollPhysics,
+    autoScrollPolicy,
   );
 }
