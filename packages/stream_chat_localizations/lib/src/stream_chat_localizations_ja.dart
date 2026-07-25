@@ -866,7 +866,7 @@ class _AccessibilityTranslationsJa extends AccessibilityTranslations {
   String voiceRecordingPreviewPauseLabel({required Duration duration}) => 'ボイス録音を一時停止、${formatDuration(duration)}';
 
   @override
-  String get attachmentPickerTooltip => '添付ファイル選択を開く';
+  String get attachmentPickerTooltip => '添付ファイル選択を切り替え';
 
   @override
   String get attachmentPickerOpenHint => 'ダブルタップして添付ファイル選択を開く';
@@ -948,6 +948,54 @@ class _AccessibilityTranslationsJa extends AccessibilityTranslations {
   String get deselectMediaTapHint => '選択解除';
 
   @override
+  String get outgoingMessagePreviewLabel => '自分';
+
+  @override
+  String incomingMessagePreviewLabel({String? senderName}) {
+    return senderName ?? 'メッセージ';
+  }
+
+  @override
+  String get pollPreviewLabel => '投票';
+
+  @override
+  String get draftPreviewLabel => '下書き';
+
+  @override
+  String get messageSendingStatusLabel => '送信中';
+
+  @override
+  String get messageSentStatusLabel => '送信済み';
+
+  @override
+  String get messageDeliveredStatusLabel => '配信済み';
+
+  @override
+  String get messageReadStatusLabel => '既読';
+
+  @override
+  String unreadMessagesLabel({required int count}) {
+    return Intl.plural(
+      count,
+      one: '$count件の未読メッセージ',
+      other: '$count件の未読メッセージ',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String get channelGroupLabel => 'グループ';
+
+  @override
+  String get systemMessagePreviewLabel => 'システム';
+
+  @override
+  String get channelMutedLabel => 'ミュート済み';
+
+  @override
+  String get channelPinnedLabel => '固定済み';
+
+  @override
   String get savePollTooltip => '投票を保存';
 
   @override
@@ -1010,12 +1058,39 @@ class _AccessibilityTranslationsJa extends AccessibilityTranslations {
 
   @override
   String attachmentsAddedAnnouncement({required int count}) {
-    return '$count件の添付ファイルを追加しました';
+    return Intl.plural(
+      count,
+      one: '$count件の添付ファイルを追加しました',
+      other: '$count件の添付ファイルを追加しました',
+      locale: localeName,
+    );
   }
 
   @override
   String attachmentsRemovedAnnouncement({required int count}) {
-    return '$count件の添付ファイルを削除しました';
+    return Intl.plural(
+      count,
+      one: '$count件の添付ファイルを削除しました',
+      other: '$count件の添付ファイルを削除しました',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String formatRecentDateTime(DateTime date) {
+    if (date.isWithinLastMinute) return 'たった今';
+
+    final localDate = date.toLocal();
+    final jiffyDate = Jiffy.parseFromDateTime(localDate);
+    final time = jiffyDate.jm;
+
+    if (localDate.isToday) return '今日 $time';
+    if (localDate.isYesterday) return '昨日 $time';
+    if (localDate.isWithinLastWeek) return '${jiffyDate.EEEE} $time';
+    if (localDate.isInSameYear) {
+      return '${jiffyDate.format(pattern: 'M月d日')} $time';
+    }
+    return '${jiffyDate.format(pattern: 'yyyy年M月d日')} $time';
   }
 
   @override

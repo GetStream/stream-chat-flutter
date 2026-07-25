@@ -380,21 +380,28 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
         if (_scrollController?.isScrolling == true) return;
 
         final currentUser = streamChannel?.channel.client.state.currentUser;
-        final isOwnMessage = message.user?.id == currentUser?.id;
         final isAtBottom = !_showScrollToBottom.value;
 
-        // Auto-scroll on own messages always; on others only when the
-        // user is already at the bottom. For "far from bottom", SPL's
-        // itemKeyBuilder anchor preservation keeps the visible
-        // content pinned.
-        if (!isOwnMessage && !isAtBottom) return;
+        final details = StreamAutoScrollDetails(
+          message: message,
+          currentUser: currentUser,
+          isAtBottom: isAtBottom,
+        );
 
-        // Synchronous (not post-frame) so `_scrollTo` clears SPL's
-        // anchor key before the rebuild's `didUpdateWidget`; otherwise
-        // anchor preservation re-pins the topmost visible message and
-        // pushes the new one below the viewport.
+        final behavior = widget.config.autoScrollPolicy.resolve(details);
+
+        // Synchronous (not post-frame) so the scroll clears SPL's anchor key
+        // before the rebuild's `didUpdateWidget`; otherwise anchor
+        // preservation re-pins the topmost visible message and pushes the new
+        // one below the viewport.
         if (_scrollController case final controller? when controller.isAttached) {
-          controller.scrollTo(index: 0);
+          return switch (behavior) {
+            // SPL's itemKeyBuilder anchor preservation keeps the visible
+            // content pinned, so staying put doesn't shift the viewport.
+            StreamAutoScrollBehavior.none => null,
+            StreamAutoScrollBehavior.jump => controller.jumpTo(index: 0),
+            StreamAutoScrollBehavior.animate => controller.scrollTo(index: 0),
+          };
         }
       });
 

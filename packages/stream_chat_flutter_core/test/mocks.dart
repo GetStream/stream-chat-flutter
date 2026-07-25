@@ -1,7 +1,13 @@
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/stream_chat.dart';
+import 'package:stream_chat_flutter_core/src/stream_channel_list_controller.dart';
+import 'package:stream_chat_flutter_core/src/stream_channel_list_event_handler.dart';
 
 class MockLogger extends Mock implements Logger {}
+
+class MockStreamChannelListController extends Mock implements StreamChannelListController {}
+
+class MockStreamChannelListEventHandler extends Mock implements StreamChannelListEventHandler {}
 
 class MockClient extends Mock implements StreamChatClient {
   MockClient() {

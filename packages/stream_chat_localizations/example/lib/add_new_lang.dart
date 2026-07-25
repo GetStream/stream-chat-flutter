@@ -717,7 +717,7 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
   String get emptyMessagePreviewText => '';
 
   @override
-  String get voiceRecordingText => 'Voice Recording';
+  String get voiceRecordingText => 'Voice recording';
 
   @override
   String get audioAttachmentText => 'Audio';

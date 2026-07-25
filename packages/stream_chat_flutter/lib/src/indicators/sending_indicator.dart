@@ -30,12 +30,14 @@ class StreamSendingIndicator extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = context.streamColorScheme;
+    final a11y = context.translations.accessibility;
 
     if (isMessageRead) {
       return Icon(
         context.streamIcons.checks,
         size: size,
         color: colorScheme.accentPrimary,
+        semanticLabel: a11y.messageReadStatusLabel,
       );
     }
 
@@ -44,6 +46,7 @@ class StreamSendingIndicator extends StatelessWidget {
         context.streamIcons.checks,
         size: size,
         color: colorScheme.textSecondary,
+        semanticLabel: a11y.messageDeliveredStatusLabel,
       );
     }
 
@@ -52,6 +55,7 @@ class StreamSendingIndicator extends StatelessWidget {
         context.streamIcons.checkmark,
         size: size,
         color: colorScheme.textSecondary,
+        semanticLabel: a11y.messageSentStatusLabel,
       );
     }
 
@@ -60,6 +64,7 @@ class StreamSendingIndicator extends StatelessWidget {
         context.streamIcons.clock,
         size: size,
         color: colorScheme.textSecondary,
+        semanticLabel: a11y.messageSendingStatusLabel,
       );
     }
 

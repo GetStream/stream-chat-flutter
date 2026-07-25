@@ -1490,7 +1490,7 @@ Attachment limit exceeded: it's not possible to add more than $limit attachments
   String get emptyMessagePreviewText => '';
 
   @override
-  String get voiceRecordingText => 'Voice Recording';
+  String get voiceRecordingText => 'Voice recording';
 
   @override
   String get audioAttachmentText => 'Audio';

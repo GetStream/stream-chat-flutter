@@ -7,7 +7,6 @@ list(APPEND FLUTTER_PLUGIN_LIST
   desktop_drop
   file_selector_windows
   gal
-  media_kit_video
   record_windows
   share_plus
   sqlite3_flutter_libs

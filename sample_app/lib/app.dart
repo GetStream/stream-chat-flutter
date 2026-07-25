@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart' hide Message;
 import 'package:go_router/go_router.dart';
+import 'package:media_kit/media_kit.dart';
 import 'package:sample_app/auth/auth_controller.dart';
 import 'package:sample_app/config/sample_app_config.dart';
 import 'package:sample_app/notification/notification_service.dart';
@@ -15,6 +16,7 @@ import 'package:sample_app/routes/routes.dart';
 import 'package:sample_app/widgets/custom_message_actions.dart';
 import 'package:sample_app/widgets/location/location_attachment.dart';
 import 'package:sample_app/widgets/location/location_detail_dialog.dart';
+import 'package:sample_app/widgets/video_player.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_localizations/stream_chat_localizations.dart';
 import 'package:streaming_shared_preferences/streaming_shared_preferences.dart';
@@ -120,6 +122,11 @@ class _StreamChatSampleAppState extends State<StreamChatSampleApp>
         });
       }
     });
+
+    // Ensures that media kit is initialized on Windows and Linux platforms.
+    if (!isTestEnvironment && isDesktopVideoPlayerSupported) {
+      MediaKit.ensureInitialized();
+    }
   }
 
   @override
@@ -203,9 +210,13 @@ class _StreamChatSampleAppState extends State<StreamChatSampleApp>
                         if (client != null) {
                           return StreamChat(
                             client: client,
+                            // Null in production → the SDK uses the real
+                            // connectivity monitor; set only by e2e tests.
+                            connectivityStream: authController.debugConnectivityStream,
                             componentBuilders: StreamComponentBuilders(
                               extensions: streamChatComponentBuilders(
                                 messageItem: customMessageItemBuilder,
+                                videoPlayer: (context, props) => SampleAppVideoPlayer(props: props),
                               ),
                             ),
                             configData: config.toStreamChatConfigurationData(),

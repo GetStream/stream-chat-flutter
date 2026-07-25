@@ -1,3 +1,4 @@
+import 'package:clock/clock.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -470,6 +471,37 @@ void main() {
       expect(a11y.formatDuration(const Duration(seconds: 45)), isNotNull);
       expect(a11y.formatDuration(const Duration(hours: 1, minutes: 2, seconds: 3)), isNotNull);
       expect(a11y.formatDateTime(DateTime(2026, 3, 15, 10, 30)), isNotNull);
+      // formatRecentDateTime — every bucket exercised so each branch is covered.
+      // Pin the clock to mid-year so day-arithmetic doesn't leak between year
+      // buckets on year-boundary run dates.
+      await withClock(Clock.fixed(DateTime(2026, 6, 15, 12)), () async {
+        final now = clock.now();
+        expect(a11y.formatRecentDateTime(now), isNotNull);
+        expect(a11y.formatRecentDateTime(now.subtract(const Duration(hours: 3))), isNotNull);
+        expect(a11y.formatRecentDateTime(now.subtract(const Duration(days: 1))), isNotNull);
+        expect(a11y.formatRecentDateTime(now.subtract(const Duration(days: 3))), isNotNull);
+        expect(a11y.formatRecentDateTime(now.subtract(const Duration(days: 30))), isNotNull);
+        expect(a11y.formatRecentDateTime(now.subtract(const Duration(days: 400))), isNotNull);
+      });
+      // Message preview prefixes
+      expect(a11y.outgoingMessagePreviewLabel, isNotNull);
+      expect(a11y.incomingMessagePreviewLabel(), isNotNull);
+      expect(a11y.incomingMessagePreviewLabel(senderName: 'Alice'), isNotNull);
+      expect(a11y.pollPreviewLabel, isNotNull);
+      expect(a11y.draftPreviewLabel, isNotNull);
+      expect(a11y.systemMessagePreviewLabel, isNotNull);
+      // Delivery status
+      expect(a11y.messageSendingStatusLabel, isNotNull);
+      expect(a11y.messageSentStatusLabel, isNotNull);
+      expect(a11y.messageDeliveredStatusLabel, isNotNull);
+      expect(a11y.messageReadStatusLabel, isNotNull);
+      // Channel list row
+      expect(a11y.channelGroupLabel, isNotNull);
+      expect(a11y.channelMutedLabel, isNotNull);
+      expect(a11y.channelPinnedLabel, isNotNull);
+      // singular vs. plural — both branches exercised
+      expect(a11y.unreadMessagesLabel(count: 1), isNotNull);
+      expect(a11y.unreadMessagesLabel(count: 5), isNotNull);
     });
   }
 
@@ -488,5 +520,32 @@ void main() {
       GlobalStreamChatLocalizations.delegate.toString(),
       'GlobalStreamChatLocalizations.delegate($supportedLocales locales)',
     );
+  });
+
+  // formatRecentDateTime renders the time via Jiffy's locale-aware `jm`, so the
+  // spoken clock follows the locale convention: 24-hour in most of Europe,
+  // 12-hour in English and Hindi. The wider suite above never pins the Jiffy
+  // locale, so this is the only place the locale-awareness is exercised.
+  test('formatRecentDateTime uses a locale-aware clock', () async {
+    await withClock(Clock.fixed(DateTime(2026, 6, 15, 20)), () async {
+      final recent = DateTime(2026, 6, 15, 15); // today at 15:00 / 3:00 PM
+
+      Future<String> recentIn(String language) async {
+        await Jiffy.setLocale(language);
+        final a11y = (await GlobalStreamChatLocalizations.delegate.load(Locale(language))).accessibility;
+        return a11y.formatRecentDateTime(recent);
+      }
+
+      // 24-hour locales keep the wall-clock hour and never emit a meridiem.
+      for (final language in ['de', 'fr', 'it']) {
+        final formatted = await recentIn(language);
+        expect(formatted, contains('15:00'), reason: '$language should use a 24-hour clock');
+        expect(formatted.toUpperCase(), isNot(contains('PM')), reason: '$language should omit the meridiem');
+      }
+
+      // 12-hour locales fold to 3:00 with a meridiem.
+      expect(await recentIn('en'), contains('3:00 PM'));
+      expect(await recentIn('hi'), allOf(contains('3:00'), contains('pm')));
+    });
   });
 }

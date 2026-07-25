@@ -901,7 +901,7 @@ class _AccessibilityTranslationsIt extends AccessibilityTranslations {
       'Metti in pausa registrazione vocale, ${formatDuration(duration)}';
 
   @override
-  String get attachmentPickerTooltip => 'Apri selettore allegati';
+  String get attachmentPickerTooltip => 'Attiva/disattiva selettore allegati';
 
   @override
   String get attachmentPickerOpenHint => 'tocca due volte per aprire il selettore allegati';
@@ -983,6 +983,54 @@ class _AccessibilityTranslationsIt extends AccessibilityTranslations {
   String get deselectMediaTapHint => 'deseleziona';
 
   @override
+  String get outgoingMessagePreviewLabel => 'Tu';
+
+  @override
+  String incomingMessagePreviewLabel({String? senderName}) {
+    return senderName ?? 'Messaggio';
+  }
+
+  @override
+  String get pollPreviewLabel => 'Sondaggio';
+
+  @override
+  String get draftPreviewLabel => 'Bozza';
+
+  @override
+  String get messageSendingStatusLabel => 'In invio';
+
+  @override
+  String get messageSentStatusLabel => 'Inviato';
+
+  @override
+  String get messageDeliveredStatusLabel => 'Consegnato';
+
+  @override
+  String get messageReadStatusLabel => 'Letto';
+
+  @override
+  String unreadMessagesLabel({required int count}) {
+    return Intl.plural(
+      count,
+      one: '$count messaggio non letto',
+      other: '$count messaggi non letti',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String get channelGroupLabel => 'Gruppo';
+
+  @override
+  String get systemMessagePreviewLabel => 'Sistema';
+
+  @override
+  String get channelMutedLabel => 'silenziato';
+
+  @override
+  String get channelPinnedLabel => 'fissato';
+
+  @override
   String get savePollTooltip => 'Salva sondaggio';
 
   @override
@@ -1046,14 +1094,39 @@ class _AccessibilityTranslationsIt extends AccessibilityTranslations {
 
   @override
   String attachmentsAddedAnnouncement({required int count}) {
-    if (count == 1) return '1 allegato aggiunto';
-    return '$count allegati aggiunti';
+    return Intl.plural(
+      count,
+      one: '$count allegato aggiunto',
+      other: '$count allegati aggiunti',
+      locale: localeName,
+    );
   }
 
   @override
   String attachmentsRemovedAnnouncement({required int count}) {
-    if (count == 1) return '1 allegato rimosso';
-    return '$count allegati rimossi';
+    return Intl.plural(
+      count,
+      one: '$count allegato rimosso',
+      other: '$count allegati rimossi',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String formatRecentDateTime(DateTime date) {
+    if (date.isWithinLastMinute) return 'Proprio ora';
+
+    final localDate = date.toLocal();
+    final jiffyDate = Jiffy.parseFromDateTime(localDate);
+    final time = jiffyDate.jm;
+
+    if (localDate.isToday) return 'Oggi alle $time';
+    if (localDate.isYesterday) return 'Ieri alle $time';
+    if (localDate.isWithinLastWeek) return '${jiffyDate.EEEE} alle $time';
+    if (localDate.isInSameYear) {
+      return '${jiffyDate.format(pattern: 'd MMM')} alle $time';
+    }
+    return '${jiffyDate.format(pattern: 'd MMM yyyy')} alle $time';
   }
 
   @override

@@ -49,12 +49,29 @@ class StreamMessagePreviewText extends StatelessWidget {
       showCaption: showCaption,
     );
 
+    // Prefer a hand-crafted a11y label when the formatter opts into
+    // [AccessibleMessagePreviewFormatter]; fall back to the visual
+    // TextSpan stripped of inline icon placeholders so custom formatters
+    // that only implement [MessagePreviewFormatter] still get a
+    // reasonable — if less rich — screen-reader announcement.
+    final a11yLabel = switch (formatter) {
+      final AccessibleMessagePreviewFormatter it => it.formatMessageSemanticsLabel(
+        context,
+        previewMessage,
+        channel: channel,
+        currentUser: currentUser,
+        showCaption: showCaption,
+      ),
+      _ => previewTextSpan.toPlainText(includePlaceholders: false),
+    };
+
     return Text.rich(
       maxLines: 1,
       previewTextSpan,
       style: textStyle,
       overflow: TextOverflow.ellipsis,
       textAlign: TextAlign.start,
+      semanticsLabel: a11yLabel,
     );
   }
 }

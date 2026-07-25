@@ -2659,6 +2659,7 @@ class ChannelClientState {
                 watcher,
                 ...?existingWatchers?.where((user) => user.id != watcher.id),
               ],
+              watcherCount: event.watcherCount,
             ),
           );
         }
@@ -2671,11 +2672,10 @@ class ChannelClientState {
       _channel.on(EventType.userWatchingStop).listen((event) {
         final watcher = event.user;
         if (watcher != null) {
-          final existingWatchers = channelState.watchers;
-          updateChannelState(
-            channelState.copyWith(
-              watchers: [...?existingWatchers?.where((user) => user.id != watcher.id)],
-            ),
+          final existingWatchers = channelState.watchers ?? const <User>[];
+          _channelState = channelState.copyWith(
+            watchers: existingWatchers.where((user) => user.id != watcher.id).toList(),
+            watcherCount: event.watcherCount,
           );
         }
       }),
@@ -3225,7 +3225,15 @@ class ChannelClientState {
             final message = event.message;
             if (message == null) return;
 
-            return addNewMessage(message);
+            addNewMessage(message);
+
+            // Only message.new carries a reliable watcher count;
+            // notification.message_new targets non-watchers and reports 0.
+            if (event.watcherCount case final watcherCount? when event.type == EventType.messageNew) {
+              updateChannelState(
+                channelState.copyWith(watcherCount: watcherCount),
+              );
+            }
           }),
     );
   }
