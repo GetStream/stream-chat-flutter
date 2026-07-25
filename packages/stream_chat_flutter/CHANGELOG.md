@@ -23,6 +23,7 @@
 - Added a `LastMessagePredicate` typedef for the `ChannelLastMessageText.lastMessagePredicate` filter.
 - Added optional `semanticsLabel` to `StreamUserAvatar`, `StreamUserAvatarGroup`, and `StreamUserAvatarStack`.
 - Made `StreamVideoPlayer` overridable via the `StreamComponentFactory` (`streamChatComponentBuilders(videoPlayer: ...)`), with the previous implementation now available as `DefaultStreamVideoPlayer`.
+- Added `onReactionSelected` to `StreamMessageReactionPicker`, providing the appropriate `BuildContext` for navigation. Deprecated `onReactionPicked` in favor of the new callback.
 
 🐞 Fixed
 
