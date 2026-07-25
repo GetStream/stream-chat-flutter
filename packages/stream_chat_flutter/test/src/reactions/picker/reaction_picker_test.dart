@@ -21,6 +21,7 @@ void main() {
           StreamMessageReactionPicker(
             message: message,
             onReactionPicked: (_) {},
+            onReactionSelected: (_, _) {},
           ),
           reactionIconResolver: resolver,
         ),
@@ -77,7 +78,44 @@ void main() {
   );
 
   testWidgets(
-    'reuses own reaction when selected',
+    'calls onReactionSelected when a reaction is selected',
+    (WidgetTester tester) async {
+      final message = Message(
+        id: 'test-message',
+        text: 'Hello world',
+        user: User(id: 'test-user'),
+      );
+
+      Reaction? pickedReaction;
+
+      await tester.pumpWidget(
+        _wrapWithMaterialApp(
+          StreamMessageReactionPicker(
+            message: message,
+            onReactionSelected: (_, reaction) {
+              pickedReaction = reaction;
+            },
+          ),
+          reactionIconResolver: resolver,
+        ),
+      );
+
+      // Wait for animations to complete.
+      await tester.pumpAndSettle(const Duration(seconds: 1));
+
+      // Tap the first reaction button.
+      await tester.tap(find.byKey(const Key('love')));
+      await tester.pump();
+
+      // Verify the callback was called with the correct reaction.
+      expect(pickedReaction, isNotNull);
+      expect(pickedReaction!.type, 'love');
+      expect(pickedReaction!.emojiCode, resolver.emojiCode('love'));
+    },
+  );
+
+  testWidgets(
+    'reuses own reaction when selected via onReactionPicked',
     (WidgetTester tester) async {
       final existingReaction = Reaction(
         type: 'love',
@@ -117,6 +155,46 @@ void main() {
   );
 
   testWidgets(
+    'reuses own reaction when selected via onReactionSelected',
+    (WidgetTester tester) async {
+      final existingReaction = Reaction(
+        type: 'love',
+        messageId: 'test-message',
+        userId: 'test-user',
+      );
+
+      final message = Message(
+        id: 'test-message',
+        text: 'Hello world',
+        user: User(id: 'test-user'),
+        ownReactions: [existingReaction],
+      );
+
+      Reaction? pickedReaction;
+
+      await tester.pumpWidget(
+        _wrapWithMaterialApp(
+          StreamMessageReactionPicker(
+            message: message,
+            onReactionSelected: (_, reaction) {
+              pickedReaction = reaction;
+            },
+          ),
+          reactionIconResolver: resolver,
+        ),
+      );
+
+      // Wait for animations to complete.
+      await tester.pumpAndSettle(const Duration(seconds: 1));
+
+      await tester.tap(find.byKey(const Key('love')));
+      await tester.pump();
+
+      expect(pickedReaction, same(existingReaction));
+    },
+  );
+
+  testWidgets(
     'marks own reactions as selected',
     (WidgetTester tester) async {
       final message = Message(
@@ -137,6 +215,7 @@ void main() {
           StreamMessageReactionPicker(
             message: message,
             onReactionPicked: (_) {},
+            onReactionSelected: (_, _) {},
           ),
           reactionIconResolver: resolver,
         ),
@@ -173,6 +252,7 @@ void main() {
           StreamMessageReactionPicker(
             message: message,
             onReactionPicked: (_) {},
+            onReactionSelected: (_, _) {},
           ),
           reactionIconResolver: compactResolver,
         ),
@@ -187,6 +267,7 @@ void main() {
           StreamMessageReactionPicker(
             message: message,
             onReactionPicked: (_) {},
+            onReactionSelected: (_, _) {},
           ),
           reactionIconResolver: resolver,
         ),
@@ -217,6 +298,7 @@ void main() {
           StreamMessageReactionPicker(
             message: message,
             onReactionPicked: (_) {},
+            onReactionSelected: (_, _) {},
           ),
           reactionIconResolver: subsetResolver,
         ),
@@ -252,6 +334,7 @@ void main() {
           StreamMessageReactionPicker(
             message: message,
             onReactionPicked: (_) {},
+            onReactionSelected: (_, _) {},
           ),
           reactionIconResolver: subsetResolver,
         ),
@@ -291,6 +374,7 @@ void main() {
           StreamMessageReactionPicker(
             message: message,
             onReactionPicked: (_) {},
+            onReactionSelected: (_, _) {},
           ),
           reactionIconResolver: const _TypeBasedReactionIconResolver(),
         ),
@@ -321,6 +405,7 @@ void main() {
           StreamMessageReactionPicker(
             message: message,
             onReactionPicked: (_) {},
+            onReactionSelected: (_, _) {},
           ),
           reactionIconResolver: resolver,
         ),
@@ -351,6 +436,7 @@ void main() {
             StreamMessageReactionPicker(
               message: message,
               onReactionPicked: (_) {},
+              onReactionSelected: (_, _) {},
             ),
             reactionIconResolver: resolver,
             brightness: brightness,
@@ -380,6 +466,7 @@ void main() {
             StreamMessageReactionPicker(
               message: message,
               onReactionPicked: (_) {},
+              onReactionSelected: (_, _) {},
             ),
             reactionIconResolver: resolver,
             brightness: brightness,
@@ -402,6 +489,7 @@ void main() {
             StreamMessageReactionPicker(
               message: message,
               onReactionPicked: (_) {},
+              onReactionSelected: (_, _) {},
             ),
             reactionIconResolver: const _SubsetDefaultReactionIconResolver(),
             brightness: brightness,
