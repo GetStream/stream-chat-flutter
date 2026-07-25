@@ -20,7 +20,7 @@ void main() {
         _wrapWithMaterialApp(
           StreamMessageReactionPicker(
             message: message,
-            onReactionPicked: (_, _) {},
+            onReactionPicked: (_) {},
           ),
           reactionIconResolver: resolver,
         ),
@@ -54,7 +54,7 @@ void main() {
         _wrapWithMaterialApp(
           StreamMessageReactionPicker(
             message: message,
-            onReactionPicked: (reaction, _) {
+            onReactionPicked: (reaction) {
               pickedReaction = reaction;
             },
           ),
@@ -98,7 +98,7 @@ void main() {
         _wrapWithMaterialApp(
           StreamMessageReactionPicker(
             message: message,
-            onReactionPicked: (reaction, _) {
+            onReactionPicked: (reaction) {
               pickedReaction = reaction;
             },
           ),
@@ -136,7 +136,7 @@ void main() {
         _wrapWithMaterialApp(
           StreamMessageReactionPicker(
             message: message,
-            onReactionPicked: (_, _) {},
+            onReactionPicked: (_) {},
           ),
           reactionIconResolver: resolver,
         ),
@@ -172,7 +172,7 @@ void main() {
         _wrapWithMaterialApp(
           StreamMessageReactionPicker(
             message: message,
-            onReactionPicked: (_, _) {},
+            onReactionPicked: (_) {},
           ),
           reactionIconResolver: compactResolver,
         ),
@@ -186,7 +186,7 @@ void main() {
         _wrapWithMaterialApp(
           StreamMessageReactionPicker(
             message: message,
-            onReactionPicked: (_, _) {},
+            onReactionPicked: (_) {},
           ),
           reactionIconResolver: resolver,
         ),
@@ -216,7 +216,7 @@ void main() {
         _wrapWithMaterialApp(
           StreamMessageReactionPicker(
             message: message,
-            onReactionPicked: (_, _) {},
+            onReactionPicked: (_) {},
           ),
           reactionIconResolver: subsetResolver,
         ),
@@ -251,7 +251,7 @@ void main() {
         _wrapWithMaterialApp(
           StreamMessageReactionPicker(
             message: message,
-            onReactionPicked: (_, _) {},
+            onReactionPicked: (_) {},
           ),
           reactionIconResolver: subsetResolver,
         ),
@@ -290,7 +290,7 @@ void main() {
         _wrapWithMaterialApp(
           StreamMessageReactionPicker(
             message: message,
-            onReactionPicked: (_, _) {},
+            onReactionPicked: (_) {},
           ),
           reactionIconResolver: const _TypeBasedReactionIconResolver(),
         ),
@@ -320,7 +320,7 @@ void main() {
         _wrapWithMaterialApp(
           StreamMessageReactionPicker(
             message: message,
-            onReactionPicked: (_, _) {},
+            onReactionPicked: (_) {},
           ),
           reactionIconResolver: resolver,
         ),
@@ -350,7 +350,7 @@ void main() {
           return _wrapWithMaterialApp(
             StreamMessageReactionPicker(
               message: message,
-              onReactionPicked: (_, _) {},
+              onReactionPicked: (_) {},
             ),
             reactionIconResolver: resolver,
             brightness: brightness,
@@ -379,7 +379,7 @@ void main() {
           return _wrapWithMaterialApp(
             StreamMessageReactionPicker(
               message: message,
-              onReactionPicked: (_, _) {},
+              onReactionPicked: (_) {},
             ),
             reactionIconResolver: resolver,
             brightness: brightness,
@@ -401,7 +401,7 @@ void main() {
           return _wrapWithMaterialApp(
             StreamMessageReactionPicker(
               message: message,
-              onReactionPicked: (_, _) {},
+              onReactionPicked: (_) {},
             ),
             reactionIconResolver: const _SubsetDefaultReactionIconResolver(),
             brightness: brightness,

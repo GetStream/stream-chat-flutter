@@ -3,6 +3,11 @@ import 'package:stream_chat_flutter/src/stream_chat_configuration.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:stream_core_flutter/chat.dart';
 
+/// {@template onReactionPicked}
+/// Callback called when a reaction is picked.
+/// {@endtemplate}
+typedef OnReactionPicked = ValueSetter<Reaction>;
+
 /// {@template streamMessageReactionPicker}
 /// A chat-specific reaction picker that bridges [StreamReactionPicker] with
 /// chat domain models.
@@ -32,7 +37,7 @@ class StreamMessageReactionPicker extends StatelessWidget {
   final Message message;
 
   /// {@macro onReactionPicked}
-  final Function(Reaction, BuildContext)? onReactionPicked;
+  final OnReactionPicked? onReactionPicked;
 
   @override
   Widget build(BuildContext context) {
@@ -61,7 +66,7 @@ class StreamMessageReactionPicker extends StatelessWidget {
         _ => Reaction(type: item.key, emojiCode: reactionEmojiCode),
       };
 
-      return onReactionPicked?.call(pickedReaction, context);
+      return onReactionPicked?.call(pickedReaction);
     }
 
     return StreamReactionPicker(
@@ -79,7 +84,7 @@ class StreamMessageReactionPicker extends StatelessWidget {
         if (!context.mounted || emoji == null) return;
 
         final reaction = Reaction(type: emoji.shortName, emojiCode: emoji.emoji);
-        return onReactionPicked?.call(reaction, context);
+        return onReactionPicked?.call(reaction);
       },
     );
   }
