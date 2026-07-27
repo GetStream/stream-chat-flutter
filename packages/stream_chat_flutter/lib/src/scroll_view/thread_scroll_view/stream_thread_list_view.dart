@@ -336,14 +336,19 @@ class StreamThreadListView extends StatelessWidget {
           const Center(
             child: StreamThreadListSkeletonLoading(),
           ),
-      errorBuilder: (context, error) =>
-          errorBuilder?.call(context, error) ??
-          Center(
-            child: StreamScrollViewErrorWidget(
-              errorTitle: Text(context.translations.loadingMessagesError),
-              onRetryPressed: controller.refresh,
-            ),
+      errorBuilder: (context, error) {
+        if (errorBuilder?.call(context, error) case final builder?) return builder;
+
+        final translations = context.translations;
+        final text = resolveNetworkErrorText(context, error, fallbackTitle: translations.loadingMessagesError);
+
+        return Center(
+          child: StreamScrollViewErrorWidget(
+            errorTitle: Text(text.title),
+            onRetryPressed: controller.refresh,
           ),
+        );
+      },
     );
   }
 }

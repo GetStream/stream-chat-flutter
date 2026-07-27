@@ -535,9 +535,15 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
 
     Widget defaultErrorBuilder(BuildContext context, Object error) {
       if (widget.builders.error case final builder?) return builder(context, error);
+
+      final translations = context.translations;
+      final text = resolveNetworkErrorText(context, error, fallbackTitle: translations.loadingMessagesError);
+
       return Center(
         child: StreamScrollViewErrorWidget(
-          errorTitle: Text(context.translations.loadingMessagesError),
+          errorTitle: Text(text.title),
+          errorSubtitle: Text(text.description),
+          retryButtonText: Text(translations.tryAgainLabel),
           onRetryPressed: () => streamChannel?.reloadChannel(),
         ),
       );

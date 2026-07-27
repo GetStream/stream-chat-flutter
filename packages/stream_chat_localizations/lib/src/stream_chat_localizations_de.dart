@@ -180,6 +180,24 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
   String get somethingWentWrongError => 'Etwas ist schief gelaufen';
 
   @override
+  String get connectionErrorTitle => 'Keine Internetverbindung';
+
+  @override
+  String get connectionErrorDescription => 'Bitte überprüfe deine Internetverbindung';
+
+  @override
+  String get slowConnectionErrorTitle => 'Langsame Internetverbindung';
+
+  @override
+  String get slowConnectionErrorDescription => 'Es scheint ein Problem mit deiner Internetverbindung zu geben';
+
+  @override
+  String get genericErrorTitle => 'Fehler';
+
+  @override
+  String get genericErrorDescription => 'Hoppla, etwas ist schief gelaufen';
+
+  @override
   String get addMoreFilesLabel => 'Mehr hinzufügen';
 
   @override

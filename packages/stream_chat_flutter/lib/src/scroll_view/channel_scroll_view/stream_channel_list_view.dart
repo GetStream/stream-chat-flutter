@@ -333,14 +333,21 @@ class StreamChannelListView extends StatelessWidget {
         ),
       ),
       loadingBuilder: (context) => loadingBuilder?.call(context) ?? const StreamChannelListSkeletonLoading(),
-      errorBuilder: (context, error) =>
-          errorBuilder?.call(context, error) ??
-          Center(
-            child: StreamScrollViewErrorWidget(
-              errorTitle: Text(context.translations.loadingChannelsError),
-              onRetryPressed: controller.refresh,
-            ),
+      errorBuilder: (context, error) {
+        if (errorBuilder?.call(context, error) case final builder?) return builder;
+
+        final translations = context.translations;
+        final text = resolveNetworkErrorText(context, error, fallbackTitle: translations.loadingChannelsError);
+
+        return Center(
+          child: StreamScrollViewErrorWidget(
+            errorTitle: Text(text.title),
+            errorSubtitle: Text(text.description),
+            retryButtonText: Text(translations.tryAgainLabel),
+            onRetryPressed: controller.refresh,
           ),
+        );
+      },
     );
   }
 }

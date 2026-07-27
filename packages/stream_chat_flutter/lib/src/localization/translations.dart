@@ -197,6 +197,25 @@ abstract class Translations {
   /// The error shown when something went wrong
   String get somethingWentWrongError;
 
+  /// The title shown when there is no internet connection.
+  String get connectionErrorTitle;
+
+  /// The description shown when there is no internet connection.
+  String get connectionErrorDescription;
+
+  /// The title shown when the connection is too slow or the request timed out.
+  String get slowConnectionErrorTitle;
+
+  /// The description shown when the connection is too slow or the request
+  /// timed out.
+  String get slowConnectionErrorDescription;
+
+  /// The title shown for a generic, uncategorised error.
+  String get genericErrorTitle;
+
+  /// The description shown for a generic, uncategorised error.
+  String get genericErrorDescription;
+
   /// The label for "OK"
   String get okLabel;
 
@@ -944,6 +963,24 @@ class DefaultTranslations implements Translations {
 
   @override
   String get somethingWentWrongError => 'Something went wrong';
+
+  @override
+  String get connectionErrorTitle => 'No Internet Connection';
+
+  @override
+  String get connectionErrorDescription => 'Please check your internet connection';
+
+  @override
+  String get slowConnectionErrorTitle => 'Slow Internet Connection';
+
+  @override
+  String get slowConnectionErrorDescription => 'There seems to be a problem with your internet connection';
+
+  @override
+  String get genericErrorTitle => 'Error';
+
+  @override
+  String get genericErrorDescription => 'Oops, something went wrong';
 
   @override
   String get addMoreFilesLabel => 'Add more';

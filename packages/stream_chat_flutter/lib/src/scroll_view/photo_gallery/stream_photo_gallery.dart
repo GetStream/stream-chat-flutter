@@ -390,13 +390,17 @@ class StreamPhotoGallery extends StatelessWidget {
             );
       },
       errorBuilder: (context, error) {
-        return errorBuilder?.call(context, error) ??
-            Center(
-              child: StreamScrollViewErrorWidget(
-                errorTitle: Text(context.translations.genericErrorText),
-                onRetryPressed: controller.refresh,
-              ),
-            );
+        if (errorBuilder?.call(context, error) case final builder?) return builder;
+
+        final translations = context.translations;
+        final text = resolveNetworkErrorText(context, error, fallbackTitle: translations.genericErrorText);
+
+        return Center(
+          child: StreamScrollViewErrorWidget(
+            errorTitle: Text(text.title),
+            onRetryPressed: controller.refresh,
+          ),
+        );
       },
     );
   }

@@ -1,3 +1,9 @@
+## Upcoming
+
+✅ Added
+
+- Added connection-error translations (`connectionErrorTitle`/`Description`, `slowConnectionErrorTitle`/`Description`, `genericErrorTitle`/`Description`) for all supported locales.
+
 ## 10.2.0
 
 ✅ Added

@@ -186,6 +186,24 @@ class StreamChatLocalizationsEs extends GlobalStreamChatLocalizations {
   String get somethingWentWrongError => 'Algo ha salido mal';
 
   @override
+  String get connectionErrorTitle => 'Sin conexión a Internet';
+
+  @override
+  String get connectionErrorDescription => 'Comprueba tu conexión a Internet';
+
+  @override
+  String get slowConnectionErrorTitle => 'Conexión a Internet lenta';
+
+  @override
+  String get slowConnectionErrorDescription => 'Parece que hay un problema con tu conexión a Internet';
+
+  @override
+  String get genericErrorTitle => 'Error';
+
+  @override
+  String get genericErrorDescription => 'Vaya, algo ha salido mal';
+
+  @override
   String get addMoreFilesLabel => 'Añadir más';
 
   @override
