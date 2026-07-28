@@ -3,16 +3,25 @@
 ✅ Added
 
 - Added `Event.watcherCount`, exposing the server-provided `watcher_count` field on events (e.g. `user.watching.start`, `user.watching.stop`, `message.new`).
+- Added `StreamChatNetworkError.type` (a `StreamChatNetworkErrorType` capturing the transport failure kind — connection error, timeout, cancellation, etc.).
 - Added support for sending and deleting reactions while offline.
+
+⚠️ Deprecated
+
+- Deprecated `StreamChatNetworkError.isRequestCancelledError` in favor of `type == StreamChatNetworkErrorType.cancel`.
 
 🔄 Changed
 
+- Raised the minimum `dio` version to `^5.11.0`.
 - When offline storage is enabled, `Channel.sendReaction` and `Channel.deleteReaction` keep the optimistic change on a transient/offline error and replay it on reconnect, instead of reverting it.
 
 🐞 Fixed
 
+- Fixed `StreamWebSocketError.toString()` using a `WebSocketError(...)` prefix instead of the class name; it now also includes `code`, and `StreamChatNetworkError.toString()` now surfaces the transport `type` when known.
 - Fixed `ChannelClientState.watcherCount` staying stale during a session.
 - Fixed watchers not being removed from `ChannelClientState.watchers` on `user.watching.stop`.
+- Fixed `Channel.name`/`image`/`extraData` setters throwing after a *failed* initialization; they now only throw once the channel is successfully initialized.
+- Fixed `Channel.initialized` staying errored after a failed init; it now reflects a subsequent successful (re)initialization.
 
 ## 10.2.0
 

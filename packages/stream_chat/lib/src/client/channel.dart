@@ -112,7 +112,7 @@ class Channel {
   ///
   /// {@macro name}
   set name(String? name) {
-    if (_initializedCompleter.isCompleted) {
+    if (_isInitialized) {
       throw StateError(
         'Once the channel is initialized you should use `channel.updateName` '
         'to update the channel name',
@@ -125,7 +125,7 @@ class Channel {
   ///
   /// {@macro image}
   set image(String? image) {
-    if (_initializedCompleter.isCompleted) {
+    if (_isInitialized) {
       throw StateError(
         'Once the channel is initialized you should use `channel.updateImage` '
         'to update the channel image',
@@ -135,7 +135,7 @@ class Channel {
   }
 
   set extraData(Map<String, Object?> extraData) {
-    if (_initializedCompleter.isCompleted) {
+    if (_isInitialized) {
       throw StateError(
         'Once the channel is initialized you should use `channel.update` '
         'to update channel data',
@@ -570,13 +570,16 @@ class Channel {
   StreamChatClient get client => _client;
   final StreamChatClient _client;
 
-  final Completer<bool> _initializedCompleter = Completer();
+  Completer<bool> _initializedCompleter = Completer();
 
   /// True if this is initialized.
   ///
   /// Call [watch] to initialize the client or instantiate it using
   /// [Channel.fromState].
   Future<bool> get initialized => _initializedCompleter.future;
+
+  // Whether the channel is successfully initialized and not disposed.
+  bool get _isInitialized => _initializedCompleter.isCompleted && state != null;
 
   final _cancelableAttachmentUploadRequest = <String, CancelToken>{};
   final _messageAttachmentsUploadCompleter = <String, Completer<Message>>{};
@@ -714,7 +717,7 @@ class Channel {
               }
             })
             .catchError((e, stk) {
-              if (e is StreamChatNetworkError && e.isRequestCancelledError) {
+              if (e is StreamChatNetworkError && e.type == .cancel) {
                 client.logger.info('Attachment ${it.id} upload cancelled');
 
                 // remove attachment from message if cancelled.
@@ -2076,6 +2079,14 @@ class Channel {
     PaginationParams? watchersPagination,
     bool preferOffline = false,
   }) async {
+    // A prior failed init left the completer errored; reset it so this attempt
+    // owns the `initialized` result. Must stay before the first `await` so a
+    // caller reading `initialized` right after `query()`/`watch()` begins sees
+    // the fresh completer.
+    if (_initializedCompleter.isCompleted && this.state == null) {
+      _initializedCompleter = Completer<bool>();
+    }
+
     ChannelState? channelState;
 
     try {
@@ -2410,7 +2421,7 @@ class Channel {
   }
 
   void _checkInitialized() {
-    if (_initializedCompleter.isCompleted && state != null) return;
+    if (_isInitialized) return;
 
     throw StateError(
       "Channel $cid hasn't been initialized yet or has been disposed. "

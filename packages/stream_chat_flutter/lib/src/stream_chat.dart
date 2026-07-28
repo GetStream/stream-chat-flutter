@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
+import 'package:stream_chat_flutter/src/utils/network_error_text.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// Provides chat state and configuration to the descendant widget tree.
@@ -194,7 +195,11 @@ class StreamChatState extends State<StreamChat> {
       onBackgroundEventReceived: widget.onBackgroundEventReceived,
       backgroundKeepAlive: widget.backgroundKeepAlive,
       connectivityStream: widget.connectivityStream,
-      child: StreamSnackbarScope(child: widget.child ?? const Empty()),
+      child: DefaultStreamChannelBuilders(
+        errorBuilder: _defaultChannelErrorBuilder,
+        loadingBuilder: _defaultChannelLoadingBuilder,
+        child: StreamSnackbarScope(child: widget.child ?? const Empty()),
+      ),
     );
 
     final theme = widget.themeData ?? StreamChatThemeData();
@@ -239,4 +244,40 @@ extension on ThemeData {
     // must come after the spread to win its slot when one is already present.
     return copyWith(extensions: [...extensions.values, extension]);
   }
+}
+
+// Installed by [StreamChat] as the default [StreamChannel] loading state, so
+// app-provided channels show a themed indicator on the app background.
+Widget _defaultChannelLoadingBuilder(BuildContext context) {
+  return Material(
+    color: context.streamColorScheme.backgroundApp,
+    child: const Center(
+      child: StreamScrollViewLoadingWidget(),
+    ),
+  );
+}
+
+// Installed by [StreamChat] as the default [StreamChannel] error state, so
+// app-provided channels show a themed, localized widget instead of a raw error.
+// Both builders are stable top-level tear-offs so DefaultStreamChannelBuilders
+// can compare them by identity in updateShouldNotify.
+Widget _defaultChannelErrorBuilder(
+  BuildContext context,
+  Object error,
+  StackTrace? stackTrace,
+) {
+  final translations = context.translations;
+  final text = resolveNetworkErrorText(context, error);
+
+  return Material(
+    color: context.streamColorScheme.backgroundApp,
+    child: Center(
+      child: StreamScrollViewErrorWidget(
+        errorTitle: Text(text.title),
+        errorSubtitle: Text(text.description),
+        retryButtonText: Text(translations.tryAgainLabel),
+        onRetryPressed: () => StreamChannel.of(context).retry(),
+      ),
+    ),
+  );
 }
