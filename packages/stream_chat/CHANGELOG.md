@@ -3,6 +3,11 @@
 ✅ Added
 
 - Added `Event.watcherCount`, exposing the server-provided `watcher_count` field on events (e.g. `user.watching.start`, `user.watching.stop`, `message.new`).
+- Added support for sending and deleting reactions while offline.
+
+🔄 Changed
+
+- When offline storage is enabled, `Channel.sendReaction` and `Channel.deleteReaction` keep the optimistic change on a transient/offline error and replay it on reconnect, instead of reverting it.
 
 🐞 Fixed
 

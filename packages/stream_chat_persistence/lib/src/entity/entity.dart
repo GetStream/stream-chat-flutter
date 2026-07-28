@@ -6,6 +6,7 @@ export 'draft_messages.dart';
 export 'locations.dart';
 export 'members.dart';
 export 'messages.dart';
+export 'pending_operations.dart';
 export 'pinned_message_reactions.dart';
 export 'pinned_messages.dart';
 export 'poll_votes.dart';

@@ -8,6 +8,7 @@ import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/src/client/channel.dart';
 import 'package:stream_chat/src/client/channel_delivery_reporter.dart';
 import 'package:stream_chat/src/client/event_resolvers.dart' as event_resolvers;
+import 'package:stream_chat/src/client/pending_operation_replayer.dart';
 import 'package:stream_chat/src/client/query_channels_result.dart';
 import 'package:stream_chat/src/client/retry_policy.dart';
 import 'package:stream_chat/src/core/api/attachment_file_uploader.dart';
@@ -162,6 +163,7 @@ class StreamChatClient {
   final _tokenManager = TokenManager();
   final _connectionIdManager = ConnectionIdManager();
   late final _appSettingsManager = AppSettingsManager(_chatApi.general);
+  late final _pendingOperationReplayer = PendingOperationReplayer(this);
   static final _systemEnvironmentManager = SystemEnvironmentManager();
 
   /// Updates the system environment information used by the client.
@@ -588,6 +590,11 @@ class StreamChatClient {
     final connectionRecovered = !wasConnected && isConnected;
 
     if (connectionRecovered) {
+      // Replay pending offline operations (e.g. reactions) BEFORE any
+      // server-state refresh, so the server has each mutation before a re-query
+      // returns state that would otherwise clobber the optimistic change.
+      await _pendingOperationReplayer.replay();
+
       // connection recovered
       final cids = [...state.channels.keys.toSet()];
       if (cids.isNotEmpty) {

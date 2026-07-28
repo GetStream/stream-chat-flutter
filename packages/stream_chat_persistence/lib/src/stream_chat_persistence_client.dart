@@ -531,6 +531,27 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   }
 
   @override
+  Future<void> insertPendingOperation(PendingOperation operation) {
+    assert(_debugIsConnected, '');
+    _logger.info('insertPendingOperation');
+    return db!.pendingOperationDao.insertPendingOperation(operation);
+  }
+
+  @override
+  Future<List<PendingOperation>> getPendingOperations() {
+    assert(_debugIsConnected, '');
+    _logger.info('getPendingOperations');
+    return db!.pendingOperationDao.getPendingOperations();
+  }
+
+  @override
+  Future<void> deletePendingOperation(int id) {
+    assert(_debugIsConnected, '');
+    _logger.info('deletePendingOperation');
+    return db!.pendingOperationDao.deletePendingOperation(id);
+  }
+
+  @override
   Future<void> bulkUpdateReads(Map<String, List<Read>?> reads) {
     assert(_debugIsConnected, '');
     _logger.info('bulkUpdateReads');

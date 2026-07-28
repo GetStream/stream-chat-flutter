@@ -20,6 +20,7 @@ import 'package:stream_chat/src/core/http/stream_http_client.dart';
 import 'package:stream_chat/src/core/http/token_manager.dart';
 import 'package:stream_chat/src/core/models/channel_config.dart';
 import 'package:stream_chat/src/core/models/event.dart';
+import 'package:stream_chat/src/core/models/pending_operation.dart';
 import 'package:stream_chat/src/core/util/event_controller.dart';
 import 'package:stream_chat/src/db/chat_persistence_client.dart';
 import 'package:stream_chat/src/event_type.dart';
@@ -96,11 +97,49 @@ class MockPersistenceClient extends Mock implements ChatPersistenceClient {
     _userId = null;
     _isConnected = false;
   }
+
+  /// In-memory pending-operation queue. Real overrides (not mocktail stubs)
+  /// so they behave like a working queue and don't register as interactions
+  /// for `verifyNoMoreInteractions`. Populate it with [insertPendingOperation].
+  final List<PendingOperation> storedPendingOperations = [];
+  int _nextPendingOperationId = 1;
+
+  /// Ids for which [deletePendingOperation] throws, to exercise the replay
+  /// loop's per-operation error isolation.
+  final Set<int> failDeleteForIds = {};
+
+  @override
+  Future<void> insertPendingOperation(PendingOperation operation) async {
+    // Assign an autoincrement id like the real DAO so replay can delete by id.
+    storedPendingOperations.add(
+      PendingOperation(
+        id: _nextPendingOperationId++,
+        type: operation.type,
+        targetMessageId: operation.targetMessageId,
+        payload: operation.payload,
+      ),
+    );
+  }
+
+  @override
+  Future<List<PendingOperation>> getPendingOperations() async {
+    // Return a snapshot (like the DAO) so a delete during replay iteration
+    // cannot concurrently modify the list being iterated.
+    return [...storedPendingOperations];
+  }
+
+  @override
+  Future<void> deletePendingOperation(int id) async {
+    if (failDeleteForIds.contains(id)) {
+      throw Exception('simulated delete failure for operation $id');
+    }
+    storedPendingOperations.removeWhere((it) => it.id == id);
+  }
 }
 
 class MockStreamChatClient extends Mock implements StreamChatClient {
   @override
-  bool get persistenceEnabled => false;
+  bool get persistenceEnabled => chatPersistenceClient != null;
 
   ChannelDeliveryReporter? _deliveryReporter;
 

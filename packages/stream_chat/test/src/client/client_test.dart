@@ -1,6 +1,7 @@
 // ignore_for_file: avoid_redundant_argument_values, lines_longer_than_80_chars
 
 import 'package:mocktail/mocktail.dart';
+import 'package:stream_chat/src/client/reaction_pending_operation.dart';
 import 'package:stream_chat/src/core/http/token.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:test/test.dart';
@@ -5420,6 +5421,90 @@ void main() {
           paginationParams: any(named: 'paginationParams'),
         ),
       ).called(1);
+    });
+  });
+
+  group('replay pending operations on reconnect', () {
+    const apiKey = 'test-api-key';
+    final user = User(id: 'test-user-id');
+    final token = Token.development(user.id).rawValue;
+
+    late FakeChatApi api;
+    late FakeWebSocket ws;
+    late MockPersistenceClient persistence;
+    late StreamChatClient client;
+
+    setUpAll(() {
+      registerFallbackValue(Reaction(type: 'fallback'));
+    });
+
+    setUp(() async {
+      api = FakeChatApi();
+      ws = FakeWebSocket();
+      persistence = MockPersistenceClient();
+      when(() => persistence.updateLastSyncAt(any())).thenAnswer((_) => Future.value());
+      when(persistence.getLastSyncAt).thenAnswer((_) async => null);
+      // recoverStateOnReconnect off + no loaded channels → the reconnect does
+      // nothing but replay the queue, keeping these tests isolated to it.
+      client = StreamChatClient(apiKey, chatApi: api, ws: ws, recoverStateOnReconnect: false)
+        ..chatPersistenceClient = persistence;
+      // Initial connect replays an empty queue (a no-op); tests populate the
+      // queue afterwards and reconnect to exercise replay.
+      await client.connectUser(user, token);
+      await delay(300);
+    });
+
+    tearDown(() async {
+      await client.dispose();
+    });
+
+    // Drives the FakeWebSocket through a connected → disconnected → connected
+    // transition so the client's recovery path (and replay) fires.
+    Future<void> simulateReconnect() async {
+      ws.connectionStatus = ConnectionStatus.disconnected;
+      await delay(100);
+      ws.connectionStatus = ConnectionStatus.connected;
+      await delay(300);
+    }
+
+    PendingOperation addOp(String messageId) => ReactionPendingOperation.add(
+      Reaction(type: 'like', messageId: messageId),
+      skipPush: false,
+      enforceUnique: false,
+    );
+
+    void stubSendReactionOk() {
+      when(
+        () => api.message.sendReaction(
+          any(),
+          any(),
+          skipPush: any(named: 'skipPush'),
+          enforceUnique: any(named: 'enforceUnique'),
+        ),
+      ).thenAnswer(
+        (invocation) async => SendReactionResponse()
+          ..message = Message(id: invocation.positionalArguments[0] as String)
+          ..reaction = Reaction(type: 'like'),
+      );
+    }
+
+    test('connection recovery replays the pending-operation queue', () async {
+      // Focused replay semantics live in pending_operation_replayer_test.dart;
+      // this asserts only the wiring — that recovery triggers a replay.
+      await persistence.insertPendingOperation(addOp('m1'));
+      stubSendReactionOk();
+
+      await simulateReconnect();
+
+      verify(
+        () => api.message.sendReaction(
+          'm1',
+          any(),
+          skipPush: any(named: 'skipPush'),
+          enforceUnique: any(named: 'enforceUnique'),
+        ),
+      ).called(1);
+      expect(persistence.storedPendingOperations, isEmpty);
     });
   });
 

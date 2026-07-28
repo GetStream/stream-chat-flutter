@@ -11,6 +11,7 @@ import 'package:stream_chat/src/core/models/filter.dart';
 import 'package:stream_chat/src/core/models/location.dart';
 import 'package:stream_chat/src/core/models/member.dart';
 import 'package:stream_chat/src/core/models/message.dart';
+import 'package:stream_chat/src/core/models/pending_operation.dart';
 import 'package:stream_chat/src/core/models/poll.dart';
 import 'package:stream_chat/src/core/models/poll_vote.dart';
 import 'package:stream_chat/src/core/models/reaction.dart';
@@ -354,6 +355,15 @@ abstract class ChatPersistenceClient {
 
   /// Deletes all the pinned messages reactions by [messageIds]
   Future<void> deletePinnedMessageReactionsByMessageId(List<String> messageIds);
+
+  /// Inserts [operation] into the pending-operation queue.
+  Future<void> insertPendingOperation(PendingOperation operation) async {}
+
+  /// Returns all stored pending operations ordered by insertion.
+  Future<List<PendingOperation>> getPendingOperations() async => [];
+
+  /// Deletes the pending operation with the given [id].
+  Future<void> deletePendingOperation(int id) async {}
 
   /// Deletes all the poll votes by [pollIds]
   Future<void> deletePollVotesByPollIds(List<String> pollIds);
