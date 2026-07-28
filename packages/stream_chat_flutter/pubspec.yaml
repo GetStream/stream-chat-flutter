@@ -28,7 +28,7 @@ dependencies:
   collection: ^1.19.1
   desktop_drop: ^0.7.1
   diacritic: ^0.1.6
-  dio: ^5.9.2
+  dio: ^5.11.0
   ezanimation: ^0.6.0
   file_picker: ^11.0.0
   file_selector: ^1.1.0

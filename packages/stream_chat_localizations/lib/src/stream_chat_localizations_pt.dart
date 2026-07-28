@@ -183,6 +183,24 @@ class StreamChatLocalizationsPt extends GlobalStreamChatLocalizations {
   String get somethingWentWrongError => 'Algo deu errado';
 
   @override
+  String get connectionErrorTitle => 'Sem conexão com a Internet';
+
+  @override
+  String get connectionErrorDescription => 'Verifique sua conexão com a Internet';
+
+  @override
+  String get slowConnectionErrorTitle => 'Conexão com a Internet lenta';
+
+  @override
+  String get slowConnectionErrorDescription => 'Parece haver um problema com sua conexão com a Internet';
+
+  @override
+  String get genericErrorTitle => 'Erro';
+
+  @override
+  String get genericErrorDescription => 'Ops, algo deu errado';
+
+  @override
   String get addMoreFilesLabel => 'Adicionar mais';
 
   @override

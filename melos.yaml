@@ -42,7 +42,7 @@ command:
       device_info_plus: '>=12.4.0 <14.0.0'
       device_preview: ^1.2.0
       diacritic: ^0.1.6
-      dio: ^5.9.2
+      dio: ^5.11.0
       drift: ^2.33.0
       equatable: ^2.0.8
       ezanimation: ^0.6.0

@@ -1,6 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/scroll_view/channel_scroll_view/stream_channel_list_skeleton_loading.dart';
+import 'package:stream_chat_flutter/src/utils/network_error_text.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// Default separator builder for [StreamChannelListView].
@@ -333,14 +334,21 @@ class StreamChannelListView extends StatelessWidget {
         ),
       ),
       loadingBuilder: (context) => loadingBuilder?.call(context) ?? const StreamChannelListSkeletonLoading(),
-      errorBuilder: (context, error) =>
-          errorBuilder?.call(context, error) ??
-          Center(
-            child: StreamScrollViewErrorWidget(
-              errorTitle: Text(context.translations.loadingChannelsError),
-              onRetryPressed: controller.refresh,
-            ),
+      errorBuilder: (context, error) {
+        if (errorBuilder?.call(context, error) case final builder?) return builder;
+
+        final translations = context.translations;
+        final text = resolveNetworkErrorText(context, error, fallbackTitle: translations.loadingChannelsError);
+
+        return Center(
+          child: StreamScrollViewErrorWidget(
+            errorTitle: Text(text.title),
+            errorSubtitle: Text(text.description),
+            retryButtonText: Text(translations.tryAgainLabel),
+            onRetryPressed: controller.refresh,
           ),
+        );
+      },
     );
   }
 }

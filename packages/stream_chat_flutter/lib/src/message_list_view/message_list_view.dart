@@ -15,6 +15,7 @@ import 'package:stream_chat_flutter/src/message_list_view/thread_separator.dart'
 import 'package:stream_chat_flutter/src/message_list_view/unread_messages_separator.dart';
 import 'package:stream_chat_flutter/src/message_widget/stream_ephemeral_message.dart';
 import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
+import 'package:stream_chat_flutter/src/utils/network_error_text.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// Spacing Types (These are properties of a message to help inform the decision
@@ -535,9 +536,15 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
 
     Widget defaultErrorBuilder(BuildContext context, Object error) {
       if (widget.builders.error case final builder?) return builder(context, error);
+
+      final translations = context.translations;
+      final text = resolveNetworkErrorText(context, error, fallbackTitle: translations.loadingMessagesError);
+
       return Center(
         child: StreamScrollViewErrorWidget(
-          errorTitle: Text(context.translations.loadingMessagesError),
+          errorTitle: Text(text.title),
+          errorSubtitle: Text(text.description),
+          retryButtonText: Text(translations.tryAgainLabel),
           onRetryPressed: () => streamChannel?.reloadChannel(),
         ),
       );
