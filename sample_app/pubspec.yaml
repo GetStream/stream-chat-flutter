@@ -42,6 +42,7 @@ dependencies:
   marionette_flutter: ^0.6.0
   # Add media_kit_libs_video if you want to run it on windows or linux platforms.
   media_kit: ^1.2.6
+  # media_kit_libs_video: ^1.0.7
   media_kit_video: ^2.0.1
   path_provider_android: ">=2.2.5 <2.3.0"
   rxdart: ^0.28.0
