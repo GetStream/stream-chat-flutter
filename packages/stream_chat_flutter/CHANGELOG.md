@@ -3,11 +3,13 @@
 ✅ Added
 
 - Added `StreamMessageListViewConfiguration.autoScrollPolicy` to control whether and how `StreamMessageListView` scrolls to the newest message when a new message arrives. Use `StreamAutoScrollPolicy.disabled` to fully control scrolling yourself.
+- Added `onReactionSelected` to `StreamMessageReactionPicker`, a context-aware callback that provides the `BuildContext` for navigation.
 - Added an `errorSubtitle` to `StreamScrollViewErrorWidget`, which now falls back to the design's generic error copy (title, description, and a "Try Again" retry label) when values aren't provided.
 - Added a `size` (`StreamLoadingSpinnerSize`) parameter to `StreamScrollViewLoadingWidget`.
 
 ⚠️ Deprecated
 
+- Deprecated `StreamMessageReactionPicker.onReactionPicked` in favor of `onReactionSelected`.
 - Deprecated `height`/`width` of `StreamScrollViewLoadingWidget` in favor of `size`.
 
 🐞 Fixed
