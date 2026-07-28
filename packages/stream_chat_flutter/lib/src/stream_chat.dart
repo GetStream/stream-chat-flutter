@@ -3,6 +3,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
+import 'package:stream_chat_flutter/src/scroll_view/stream_scroll_view_error_widget.dart';
+import 'package:stream_chat_flutter/src/scroll_view/stream_scroll_view_loading_widget.dart';
+import 'package:stream_chat_flutter/src/utils/network_error_text.dart';
 import 'package:stream_chat_flutter/src/video/vlc/vlc_manager.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -179,10 +182,14 @@ class StreamChatState extends State<StreamChat> {
                     onBackgroundEventReceived: widget.onBackgroundEventReceived,
                     backgroundKeepAlive: widget.backgroundKeepAlive,
                     connectivityStream: widget.connectivityStream,
-                    child: Builder(
-                      builder: (context) {
-                        return widget.child ?? const Empty();
-                      },
+                    child: DefaultStreamChannelBuilders(
+                      errorBuilder: _defaultChannelErrorBuilder,
+                      loadingBuilder: _defaultChannelLoadingBuilder,
+                      child: Builder(
+                        builder: (context) {
+                          return widget.child ?? const Empty();
+                        },
+                      ),
                     ),
                   ),
                 );
@@ -219,4 +226,40 @@ class StreamChatState extends State<StreamChat> {
     }
     super.didChangeDependencies();
   }
+}
+
+// Installed by [StreamChat] as the default [StreamChannel] loading state, so
+// app-provided channels show a themed indicator on the app background.
+Widget _defaultChannelLoadingBuilder(BuildContext context) {
+  return Material(
+    color: StreamChatTheme.of(context).colorTheme.appBg,
+    child: const Center(
+      child: StreamScrollViewLoadingWidget(),
+    ),
+  );
+}
+
+// Installed by [StreamChat] as the default [StreamChannel] error state, so
+// app-provided channels show a themed, localized widget instead of a raw error.
+// Both builders are stable top-level tear-offs so DefaultStreamChannelBuilders
+// can compare them by identity in updateShouldNotify.
+Widget _defaultChannelErrorBuilder(
+  BuildContext context,
+  Object error,
+  StackTrace? stackTrace,
+) {
+  final translations = context.translations;
+  final text = resolveNetworkErrorText(context, error);
+
+  return Material(
+    color: StreamChatTheme.of(context).colorTheme.appBg,
+    child: Center(
+      child: StreamScrollViewErrorWidget(
+        errorTitle: Text(text.title),
+        errorSubtitle: Text(text.description),
+        retryButtonText: Text(translations.tryAgainLabel),
+        onRetryPressed: () => StreamChannel.of(context).retry(),
+      ),
+    ),
+  );
 }

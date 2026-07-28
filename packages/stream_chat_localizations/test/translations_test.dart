@@ -156,6 +156,12 @@ void main() {
       expect(localizations.searchingForNetworkText, isNotNull);
       expect(localizations.offlineLabel, isNotNull);
       expect(localizations.tryAgainLabel, isNotNull);
+      expect(localizations.connectionErrorTitle, isNotNull);
+      expect(localizations.connectionErrorDescription, isNotNull);
+      expect(localizations.slowConnectionErrorTitle, isNotNull);
+      expect(localizations.slowConnectionErrorDescription, isNotNull);
+      expect(localizations.genericErrorTitle, isNotNull);
+      expect(localizations.genericErrorDescription, isNotNull);
       // 1 member
       expect(localizations.membersCountText(1), isNotNull);
       // 3 members

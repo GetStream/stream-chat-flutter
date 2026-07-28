@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// A widget that is displayed when a [StreamScrollView] encounters an error
@@ -10,6 +9,8 @@ class StreamScrollViewErrorWidget extends StatelessWidget {
     super.key,
     this.errorTitle,
     this.errorTitleStyle,
+    this.errorSubtitle,
+    this.errorSubtitleStyle,
     this.errorIcon,
     this.retryButtonText,
     this.retryButtonTextStyle,
@@ -20,15 +21,28 @@ class StreamScrollViewErrorWidget extends StatelessWidget {
   });
 
   /// The title of the error.
+  ///
+  /// Defaults to a generic localized error title.
   final Widget? errorTitle;
 
   /// The style of the title.
   final TextStyle? errorTitleStyle;
 
+  /// An optional supporting description shown below the title.
+  ///
+  /// When no [errorTitle] is supplied, this defaults to a generic localized
+  /// description so the out-of-the-box error state matches the design.
+  final Widget? errorSubtitle;
+
+  /// The style of the subtitle.
+  final TextStyle? errorSubtitleStyle;
+
   /// The icon to display when the list shows error.
   final Widget? errorIcon;
 
   /// The text to display in the retry button.
+  ///
+  /// Defaults to a localized "Try Again" label.
   final Widget? retryButtonText;
 
   /// The style of the retryButtonText.
@@ -49,6 +63,7 @@ class StreamScrollViewErrorWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final chatThemeData = StreamChatTheme.of(context);
+    final translations = context.translations;
 
     final errorIcon = AnimatedSwitcher(
       duration: kThemeChangeDuration,
@@ -62,9 +77,16 @@ class StreamScrollViewErrorWidget extends StatelessWidget {
 
     final titleText = AnimatedDefaultTextStyle(
       style: errorTitleStyle ?? chatThemeData.textTheme.headline,
+      textAlign: TextAlign.center,
       duration: kThemeChangeDuration,
-      child: errorTitle ?? const Empty(),
+      child: errorTitle ?? Text(translations.genericErrorTitle),
     );
+
+    // The generic subtitle only pairs with the generic title, not a custom one.
+    final resolvedSubtitle = errorSubtitle ??
+        (errorTitle == null
+            ? Text(translations.genericErrorDescription)
+            : null);
 
     final retryButtonText = AnimatedDefaultTextStyle(
       style: errorTitleStyle ??
@@ -72,7 +94,7 @@ class StreamScrollViewErrorWidget extends StatelessWidget {
             color: Colors.white,
           ),
       duration: kThemeChangeDuration,
-      child: this.retryButtonText ?? Text(context.translations.retryLabel),
+      child: this.retryButtonText ?? Text(translations.retryLabel),
     );
 
     return Column(
@@ -82,6 +104,16 @@ class StreamScrollViewErrorWidget extends StatelessWidget {
       children: [
         errorIcon,
         titleText,
+        if (resolvedSubtitle != null)
+          AnimatedDefaultTextStyle(
+            style: errorSubtitleStyle ??
+                chatThemeData.textTheme.body.copyWith(
+                  color: chatThemeData.colorTheme.textLowEmphasis,
+                ),
+            textAlign: TextAlign.center,
+            duration: kThemeChangeDuration,
+            child: resolvedSubtitle,
+          ),
         ElevatedButton(
           onPressed: onRetryPressed,
           child: retryButtonText,

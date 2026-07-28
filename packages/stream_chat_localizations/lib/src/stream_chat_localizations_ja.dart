@@ -160,6 +160,24 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   String get somethingWentWrongError => 'エラーが発生しました';
 
   @override
+  String get connectionErrorTitle => 'インターネット接続がありません';
+
+  @override
+  String get connectionErrorDescription => 'インターネット接続を確認してください';
+
+  @override
+  String get slowConnectionErrorTitle => 'インターネット接続が遅いです';
+
+  @override
+  String get slowConnectionErrorDescription => 'インターネット接続に問題があるようです';
+
+  @override
+  String get genericErrorTitle => 'エラー';
+
+  @override
+  String get genericErrorDescription => 'おっと、問題が発生しました';
+
+  @override
   String get addMoreFilesLabel => 'ファイルの追加';
 
   @override

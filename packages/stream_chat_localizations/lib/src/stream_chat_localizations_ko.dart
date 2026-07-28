@@ -160,6 +160,24 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
   String get somethingWentWrongError => '뭔가 잘못됐습느다';
 
   @override
+  String get connectionErrorTitle => '인터넷 연결 없음';
+
+  @override
+  String get connectionErrorDescription => '인터넷 연결을 확인해 주세요';
+
+  @override
+  String get slowConnectionErrorTitle => '인터넷 연결이 느림';
+
+  @override
+  String get slowConnectionErrorDescription => '인터넷 연결에 문제가 있는 것 같습니다';
+
+  @override
+  String get genericErrorTitle => '오류';
+
+  @override
+  String get genericErrorDescription => '앗, 문제가 발생했습니다';
+
+  @override
   String get addMoreFilesLabel => '파일을 추가함';
 
   @override

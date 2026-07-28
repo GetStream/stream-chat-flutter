@@ -39,6 +39,12 @@ void main() {
     );
     expect(translations.emptyMessagesText, isNotNull);
     expect(translations.genericErrorText, isNotNull);
+    expect(translations.connectionErrorTitle, isNotNull);
+    expect(translations.connectionErrorDescription, isNotNull);
+    expect(translations.slowConnectionErrorTitle, isNotNull);
+    expect(translations.slowConnectionErrorDescription, isNotNull);
+    expect(translations.genericErrorTitle, isNotNull);
+    expect(translations.genericErrorDescription, isNotNull);
     expect(translations.loadingMessagesError, isNotNull);
     expect(translations.resultCountText(3), isNotNull);
     expect(translations.messageDeletedText, isNotNull);
