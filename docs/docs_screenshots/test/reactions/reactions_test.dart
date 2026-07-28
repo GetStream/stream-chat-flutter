@@ -52,7 +52,7 @@ void main() {
           body: Center(
             child: StreamMessageReactionPicker(
               message: message,
-              onReactionPicked: (_) {},
+              onReactionSelected: (_, _) {},
             ),
           ),
         ),

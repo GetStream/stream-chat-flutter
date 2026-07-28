@@ -678,13 +678,13 @@ class DefaultStreamMessageItem extends StatelessWidget {
       currentUser: currentUser,
     );
 
-    void onReactionPicked(Reaction reaction) {
+    void onReactionSelected(BuildContext context, Reaction reaction) {
       final action = SelectReaction(message: message, reaction: reaction);
       return Navigator.pop(context, action); // Pop the modal with the selected reaction action
     }
 
     return [
-      if (showPicker) StreamMessageReactionPicker(message: message, onReactionPicked: onReactionPicked),
+      if (showPicker) StreamMessageReactionPicker(message: message, onReactionSelected: onReactionSelected),
       ...actions,
     ];
   }

@@ -112,6 +112,43 @@ void main() {
       expect(newChannelInstance.name, newName);
       expect(newChannelInstance.extraData['name'], newName);
     });
+
+    test('setters remain usable after a failed watch()', () async {
+      // Make initialization fail.
+      when(
+        () => client.queryChannel(
+          channelType,
+          channelId: any(named: 'channelId'),
+          channelData: any(named: 'channelData'),
+          state: any(named: 'state'),
+          watch: any(named: 'watch'),
+          presence: any(named: 'presence'),
+          messagesPagination: any(named: 'messagesPagination'),
+          membersPagination: any(named: 'membersPagination'),
+          watchersPagination: any(named: 'watchersPagination'),
+        ),
+      ).thenThrow(StreamChatNetworkError(ChatErrorCode.inputError));
+
+      // A failed watch() also completes `initialized` with the error. Attach
+      // the expectation up-front so that error has a listener the moment it
+      // occurs and isn't reported as an unhandled async error.
+      final initializedFailure = expectLater(
+        channel.initialized,
+        throwsA(isA<StreamChatNetworkError>()),
+      );
+
+      await expectLater(
+        channel.watch(),
+        throwsA(isA<StreamChatNetworkError>()),
+      );
+      await initializedFailure;
+
+      // Init never *succeeded*, so the raw setters must still work. Previously
+      // they threw because the completer was merely `isCompleted` (it had
+      // completed with an error).
+      expect(() => channel.name = 'New name', returnsNormally);
+      expect(channel.name, 'New name');
+    });
   });
 
   group('Initialized Channel with Persistence', () {
@@ -789,7 +826,7 @@ void main() {
             (_) async => throw StreamChatNetworkError.raw(
               code: 0,
               message: 'Request cancelled',
-              isRequestCancelledError: true,
+              type: StreamChatNetworkErrorType.cancel,
             ),
           );
 
@@ -843,7 +880,7 @@ void main() {
             (_) async => throw StreamChatNetworkError.raw(
               code: 0,
               message: 'Request cancelled',
-              isRequestCancelledError: true,
+              type: StreamChatNetworkErrorType.cancel,
             ),
           );
 
@@ -920,7 +957,7 @@ void main() {
             (_) async => throw StreamChatNetworkError.raw(
               code: 0,
               message: 'Request cancelled',
-              isRequestCancelledError: true,
+              type: StreamChatNetworkErrorType.cancel,
             ),
           );
 
@@ -992,7 +1029,7 @@ void main() {
             (_) async => throw StreamChatNetworkError.raw(
               code: 0,
               message: 'Request cancelled',
-              isRequestCancelledError: true,
+              type: StreamChatNetworkErrorType.cancel,
             ),
           );
 
@@ -3951,6 +3988,49 @@ void main() {
         ).called(1);
       });
 
+      test('a successful retry after a failed init reconciles '
+          '`initialized` and `state`', () async {
+        final freshChannel = Channel(client, channelType, channelId);
+        addTearDown(freshChannel.dispose);
+
+        var attempts = 0;
+        when(
+          () => client.queryChannel(
+            channelType,
+            channelId: channelId,
+            watch: true,
+            channelData: any(named: 'channelData'),
+            messagesPagination: any(named: 'messagesPagination'),
+            membersPagination: any(named: 'membersPagination'),
+            watchersPagination: any(named: 'watchersPagination'),
+          ),
+        ).thenAnswer((_) async {
+          if (++attempts == 1) {
+            throw StreamChatNetworkError(ChatErrorCode.inputError);
+          }
+          return _generateChannelState(channelId, channelType);
+        });
+
+        // First init fails: `initialized` errors and `state` stays null.
+        // Attach the expectation before watch() so the error is handled.
+        final firstInit = expectLater(
+          freshChannel.initialized,
+          throwsA(isA<StreamChatNetworkError>()),
+        );
+        await expectLater(
+          freshChannel.watch(),
+          throwsA(isA<StreamChatNetworkError>()),
+        );
+        await firstInit;
+        expect(freshChannel.state, isNull);
+
+        // Retrying resets the completer; the successful watch initializes the
+        // channel and `initialized`/`state` agree again.
+        await freshChannel.watch();
+        expect(freshChannel.state, isNotNull);
+        await expectLater(freshChannel.initialized, completion(isTrue));
+      });
+
       test('should rethrow if `.query` throws', () async {
         when(
           () => client.queryChannel(
@@ -6181,6 +6261,198 @@ void main() {
           expect(channel.membership, isNotNull);
           expect(channel.membership?.user?.id, equals(updatedUser?.id));
           expect(channel.membership?.user?.role, equals(updatedUser?.role));
+        },
+      );
+    });
+
+    group('Watching Events', () {
+      const channelId = 'test-channel-id';
+      const channelType = 'test-channel-type';
+      late Channel channel;
+
+      setUp(() {
+        final channelState = _generateChannelState(
+          channelId,
+          channelType,
+          mockChannelConfig: true,
+          ownCapabilities: const [ChannelCapability.readEvents],
+        );
+        channel = Channel.fromState(client, channelState);
+      });
+
+      tearDown(() => channel.dispose());
+
+      test(
+        '${EventType.userWatchingStart} adds the watcher and updates watcherCount',
+        () async {
+          final watcher = User(id: 'watcher-1');
+
+          client.addEvent(
+            Event(
+              cid: channel.cid,
+              type: EventType.userWatchingStart,
+              user: watcher,
+              watcherCount: 3,
+            ),
+          );
+
+          // Wait for the event to get processed
+          await Future.delayed(Duration.zero);
+
+          expect(channel.state!.watcherCount, 3);
+          expect(
+            channel.state!.channelState.watchers?.map((it) => it.id),
+            contains('watcher-1'),
+          );
+        },
+      );
+
+      test(
+        '${EventType.userWatchingStop} removes the watcher and updates watcherCount',
+        () async {
+          final watcher = User(id: 'watcher-1');
+
+          // The watcher starts watching first (count = 2).
+          client.addEvent(
+            Event(
+              cid: channel.cid,
+              type: EventType.userWatchingStart,
+              user: watcher,
+              watcherCount: 2,
+            ),
+          );
+          await Future.delayed(Duration.zero);
+          expect(channel.state!.watcherCount, 2);
+          expect(
+            channel.state!.channelState.watchers?.map((it) => it.id),
+            contains('watcher-1'),
+          );
+
+          // Then stops watching (count = 1).
+          client.addEvent(
+            Event(
+              cid: channel.cid,
+              type: EventType.userWatchingStop,
+              user: watcher,
+              watcherCount: 1,
+            ),
+          );
+          await Future.delayed(Duration.zero);
+
+          expect(channel.state!.watcherCount, 1);
+          expect(
+            channel.state!.channelState.watchers?.map((it) => it.id),
+            isNot(contains('watcher-1')),
+          );
+        },
+      );
+
+      test(
+        'watching event without watcherCount preserves the existing count',
+        () async {
+          // Seed an initial watcher count.
+          channel.state!.updateChannelState(
+            channel.state!.channelState.copyWith(watcherCount: 5),
+          );
+          expect(channel.state!.watcherCount, 5);
+
+          // A watching event that omits watcher_count must not wipe the count.
+          client.addEvent(
+            Event(
+              cid: channel.cid,
+              type: EventType.userWatchingStart,
+              user: User(id: 'watcher-2'),
+            ),
+          );
+          await Future.delayed(Duration.zero);
+
+          expect(channel.state!.watcherCount, 5);
+          expect(
+            channel.state!.channelState.watchers?.map((it) => it.id),
+            contains('watcher-2'),
+          );
+        },
+      );
+
+      test(
+        '${EventType.messageNew} updates watcherCount from the event',
+        () async {
+          expect(channel.state!.watcherCount, isNull);
+
+          final message = Message(
+            id: 'test-message-id',
+            user: client.state.currentUser,
+            createdAt: DateTime.now(),
+          );
+
+          client.addEvent(
+            Event(
+              cid: channel.cid,
+              type: EventType.messageNew,
+              message: message,
+              watcherCount: 7,
+            ),
+          );
+          await Future.delayed(Duration.zero);
+
+          expect(channel.state!.watcherCount, 7);
+        },
+      );
+
+      test(
+        '${EventType.messageNew} without watcherCount preserves the existing count',
+        () async {
+          // Seed an initial watcher count.
+          channel.state!.updateChannelState(
+            channel.state!.channelState.copyWith(watcherCount: 4),
+          );
+          expect(channel.state!.watcherCount, 4);
+
+          // A local/optimistic message.new without watcher_count must not
+          // reset the count.
+          client.addEvent(
+            Event(
+              cid: channel.cid,
+              type: EventType.messageNew,
+              message: Message(
+                id: 'test-message-id-2',
+                user: client.state.currentUser,
+                createdAt: DateTime.now(),
+              ),
+            ),
+          );
+          await Future.delayed(Duration.zero);
+
+          expect(channel.state!.watcherCount, 4);
+        },
+      );
+
+      test(
+        '${EventType.notificationMessageNew} does not overwrite watcherCount',
+        () async {
+          // Seed a known watcher count.
+          channel.state!.updateChannelState(
+            channel.state!.channelState.copyWith(watcherCount: 5),
+          );
+          expect(channel.state!.watcherCount, 5);
+
+          // notification.message_new is delivered to non-watchers and reports
+          // watcher_count: 0; it must not clobber the real count.
+          client.addEvent(
+            Event(
+              cid: channel.cid,
+              type: EventType.notificationMessageNew,
+              message: Message(
+                id: 'notif-message-id',
+                user: User(id: 'other-user'),
+                createdAt: DateTime.now(),
+              ),
+              watcherCount: 0,
+            ),
+          );
+          await Future.delayed(Duration.zero);
+
+          expect(channel.state!.watcherCount, 5);
         },
       );
     });
