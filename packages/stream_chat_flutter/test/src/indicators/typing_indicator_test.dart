@@ -169,7 +169,11 @@ void main() {
       final typingController = StreamController<Map<User, Event>>.broadcast();
       addTearDown(typingController.close);
 
-      when(() => channelState.typingEvents).thenReturn(const {});
+      // A main-channel (no parentId) typing event is already present when the
+      // indicator mounts.
+      when(() => channelState.typingEvents).thenReturn({
+        User(id: 'user-a', name: 'Alice'): Event(type: EventType.typingStart),
+      });
       when(() => channelState.typingEventsStream).thenAnswer(
         (_) => typingController.stream,
       );
@@ -185,6 +189,10 @@ void main() {
         ),
       );
       await tester.pump();
+
+      // The pre-existing main-channel typer is filtered out of the initial
+      // data, so the first frame shows nothing.
+      expect(find.byType(Flexible), findsNothing);
 
       // Typing in the main channel (no parentId) is ignored by a thread
       // indicator.

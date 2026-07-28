@@ -140,6 +140,8 @@ void setupMockChannel({
   when(channel.getRemainingCooldown).thenReturn(0);
   when(() => channel.getRemainingCooldown(lastMessageAt: any(named: 'lastMessageAt'))).thenReturn(0);
   when(() => channel.isDistinct).thenReturn(false);
+  when(() => channel.isGroup).thenReturn(true);
+  when(() => channel.isOneToOne).thenReturn(false);
   when(() => channel.isMuted).thenReturn(false);
   when(() => channel.isMutedStream).thenAnswer((_) => Stream.value(false));
   when(() => channel.isPinned).thenReturn(false);
