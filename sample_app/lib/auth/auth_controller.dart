@@ -210,7 +210,7 @@ class AuthController extends ValueNotifier<AuthState> {
     try {
       final ownUser = await client.connectUser(user, token);
 
-      if (persistCredentials && !CurrentPlatform.isWeb) {
+      if (persistCredentials && !CurrentPlatform.isWeb && !CurrentPlatform.isMacOS) {
         const secureStorage = FlutterSecureStorage();
         await Future.wait([
           secureStorage.write(key: kStreamApiKey, value: apiKey),
