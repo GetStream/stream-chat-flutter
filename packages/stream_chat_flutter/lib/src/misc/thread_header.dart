@@ -71,10 +71,11 @@ class StreamThreadHeader extends StatelessWidget implements PreferredSizeWidget 
 
     var leading = this.leading;
     if (leading == null && automaticallyImplyLeading) {
-      final cid = channel?.cid;
-      leading = StreamBackButton(
-        unreadIndicator: cid != null ? StreamUnreadIndicator.channels(cid: cid) : const StreamUnreadIndicator(),
-      );
+      final unreadIndicator = switch (channel?.cid) {
+        final cid? => StreamUnreadIndicator.channels(cid: cid),
+        null => const StreamUnreadIndicator(),
+      };
+      leading = StreamBackButton(unreadIndicator: unreadIndicator);
     }
 
     Widget? fallbackSubtitle;
