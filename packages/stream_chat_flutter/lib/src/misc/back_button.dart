@@ -19,8 +19,8 @@ class StreamBackButton extends StatelessWidget {
       'This will be removed in a future version.',
     )
     this.channelId,
-    this.unreadIndicator,
-  });
+    Widget? unreadIndicator = _unset,
+  }) : _unreadIndicator = unreadIndicator;
 
   /// Callback for when button is pressed
   final VoidCallback? onPressed;
@@ -42,8 +42,11 @@ class StreamBackButton extends StatelessWidget {
   /// The unread badge overlaid on the top-end corner of the button.
   ///
   /// Typically a [StreamUnreadIndicator]. The badge hides itself when its
-  /// count is zero.
-  final Widget? unreadIndicator;
+  /// count is zero. Null when not explicitly set.
+  Widget? get unreadIndicator =>
+      identical(_unreadIndicator, _unset) ? null : _unreadIndicator;
+
+  final Widget? _unreadIndicator;
 
   @override
   Widget build(BuildContext context) {
@@ -93,7 +96,7 @@ class StreamBackButton extends StatelessWidget {
   }
 
   Widget? get _effectiveUnreadIndicator {
-    if (unreadIndicator case final effective?) return effective;
+    if (!identical(_unreadIndicator, _unset)) return _unreadIndicator;
     if (!showUnreadCount) return null;
     return switch (channelId) {
       final cid? => StreamUnreadIndicator.channels(cid: cid),
@@ -101,3 +104,13 @@ class StreamBackButton extends StatelessWidget {
     };
   }
 }
+
+class _WidgetSentinel extends Widget {
+  const _WidgetSentinel();
+
+  @override
+  Element createElement() =>
+      throw StateError('_WidgetSentinel must never be built.');
+}
+
+const _unset = _WidgetSentinel();

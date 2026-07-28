@@ -354,6 +354,41 @@ void main() {
   );
 
   testWidgets(
+    'unreadIndicator: null hides the badge even with showUnreadCount: true',
+    (WidgetTester tester) async {
+      final client = MockClient();
+      final clientState = MockClientState();
+
+      when(() => client.state).thenReturn(clientState);
+      when(() => clientState.totalUnreadCount).thenAnswer((_) => 10);
+      when(() => clientState.totalUnreadCountStream).thenAnswer((_) => Stream.value(10));
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Center(
+              child: StreamChat(
+                client: client,
+                // An explicit null wins over the deprecated flag, hiding the
+                // badge instead of falling back to showUnreadCount.
+                child: const StreamBackButton(
+                  unreadIndicator: null,
+                  showUnreadCount: true,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      expect(find.byType(StreamUnreadIndicator), findsNothing);
+      expect(find.text('10'), findsNothing);
+    },
+  );
+
+  testWidgets(
     'showUnreadCount: true shows the total unread count',
     (WidgetTester tester) async {
       final client = MockClient();
