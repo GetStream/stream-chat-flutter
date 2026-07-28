@@ -3,10 +3,15 @@
 ✅ Added
 
 - Added `StreamMessageListViewConfiguration.autoScrollPolicy` to control whether and how `StreamMessageListView` scrolls to the newest message when a new message arrives. Use `StreamAutoScrollPolicy.disabled` to fully control scrolling yourself.
+- Added `onReactionSelected` to `StreamMessageReactionPicker`, a context-aware callback that provides the `BuildContext` for navigation.
 
 🐞 Fixed
 
 - Fixed `StreamTypingIndicator` briefly showing typing users from a different context (main channel vs. thread) on its first frame.
+
+⚠️ Deprecated
+
+- Deprecated `StreamMessageReactionPicker.onReactionPicked` in favor of `onReactionSelected`.
 
 ## 10.2.0
 
