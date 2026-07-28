@@ -9827,6 +9827,9 @@ void main() {
       when(
         () => client.channelDeliveryReporter.submitForDelivery(any()),
       ).thenAnswer((_) async {});
+      when(
+        () => client.channelDeliveryReporter.reconcileDelivery(any()),
+      ).thenAnswer((_) async {});
       client.isLocalUnreadCountEnabled = true;
     });
 
@@ -10056,6 +10059,135 @@ void main() {
         );
       },
     );
+
+    test(
+      'markRead reconciles pending delivery receipts',
+      () async {
+        final channel = _createLivestreamChannel();
+        channel.state!.unreadCount = 2;
+
+        await expectLater(channel.markRead(), completes);
+
+        verify(
+          () => client.channelDeliveryReporter.reconcileDelivery([channel]),
+        ).called(1);
+      },
+    );
+
+    group('local read boundary anchors', () {
+      final start = DateTime(2024, 1, 1);
+      final messages = [
+        Message(
+          id: 'm1',
+          text: '1',
+          user: User(id: 'other-user'),
+          createdAt: start,
+        ),
+        Message(
+          id: 'm2',
+          text: '2',
+          user: User(id: 'other-user'),
+          createdAt: start.add(const Duration(minutes: 1)),
+        ),
+        Message(
+          id: 'm3',
+          text: '3',
+          user: User(id: 'other-user'),
+          createdAt: start.add(const Duration(minutes: 2)),
+        ),
+      ];
+
+      test(
+        'markUnread is inclusive of the anchor and points lastReadMessageId at '
+        'the previous message',
+        () async {
+          final channel = _createLivestreamChannel(
+            messages: messages,
+            reads: [
+              Read(user: currentUser, lastRead: start.add(const Duration(minutes: 5))),
+            ],
+          );
+
+          await expectLater(channel.markUnread('m2'), completes);
+
+          // m2 (the anchor) and m3 are unread; m1 stays read.
+          expect(channel.state?.unreadCount, equals(2));
+          expect(channel.state?.currentUserRead?.lastReadMessageId, equals('m1'));
+          verifyNever(() => client.markChannelUnread(any(), any(), any()));
+        },
+      );
+
+      test(
+        'markUnread leaves lastReadMessageId null when the anchor is the oldest '
+        'known message',
+        () async {
+          final channel = _createLivestreamChannel(
+            messages: messages,
+            reads: [
+              Read(user: currentUser, lastRead: start.add(const Duration(minutes: 5))),
+            ],
+          );
+
+          await expectLater(channel.markUnread('m1'), completes);
+
+          expect(channel.state?.unreadCount, equals(3));
+          expect(channel.state?.currentUserRead?.lastReadMessageId, isNull);
+        },
+      );
+
+      test(
+        'markUnreadByTimestamp is exclusive of the boundary and points '
+        'lastReadMessageId at the newest message at or before it',
+        () async {
+          final channel = _createLivestreamChannel(
+            messages: messages,
+            reads: [
+              Read(user: currentUser, lastRead: start.add(const Duration(minutes: 5))),
+            ],
+          );
+
+          // Exactly m2's createdAt: m2 stays read, only m3 becomes unread.
+          await expectLater(channel.markUnreadByTimestamp(messages[1].createdAt), completes);
+
+          expect(channel.state?.unreadCount, equals(1));
+          expect(channel.state?.currentUserRead?.lastReadMessageId, equals('m2'));
+          verifyNever(() => client.markChannelUnreadByTimestamp(any(), any(), any()));
+        },
+      );
+
+      test(
+        'markUnread(id) and markUnreadByTimestamp(createdAt) intentionally '
+        'differ by the anchor message',
+        () async {
+          final byId = _createLivestreamChannel(
+            messages: messages,
+            reads: [
+              Read(user: currentUser, lastRead: start.add(const Duration(minutes: 5))),
+            ],
+          );
+          final byTimestamp = _createLivestreamChannel(
+            messages: messages,
+            reads: [
+              Read(user: currentUser, lastRead: start.add(const Duration(minutes: 5))),
+            ],
+          );
+
+          await byId.markUnread('m2');
+          await byTimestamp.markUnreadByTimestamp(messages[1].createdAt);
+
+          // `markUnread` includes m2, `markUnreadByTimestamp` excludes it.
+          expect(byId.state?.unreadCount, equals(2));
+          expect(byTimestamp.state?.unreadCount, equals(1));
+
+          // ...and they agree once the timestamp is nudged below the anchor.
+          await byTimestamp.markUnreadByTimestamp(
+            messages[1].createdAt.subtract(const Duration(microseconds: 1)),
+          );
+          expect(byTimestamp.state?.unreadCount, equals(2));
+          expect(byTimestamp.state?.currentUserRead?.lastReadMessageId, equals('m1'));
+        },
+      );
+    });
 
     test(
       'server payloads do not clobber the locally-tracked read state',

@@ -1875,7 +1875,10 @@ class Channel {
 
   /// Marks the channel as unread by a given [messageId].
   ///
-  /// All messages from the provided message onwards will be marked as unread.
+  /// All messages from the provided message onwards will be marked as unread,
+  /// **including** the message itself. Contrast with
+  /// [markUnreadByTimestamp], which is exclusive: a message created at
+  /// exactly the given timestamp stays read.
   ///
   /// If [usesLocalUnreadCount] is `true` for this channel, this updates the
   /// unread count locally, on-device, without making a network request. The
@@ -1885,19 +1888,27 @@ class Channel {
     _checkInitialized();
 
     if (usesLocalUnreadCount) {
-      final anchor = state!.messages.firstWhereOrNull((it) => it.id == messageId);
-      if (anchor == null) {
+      // [ChannelClientState.messages] is sorted ascending by `createdAt`, so
+      // the entry before the anchor is the newest message that stays read.
+      final messages = state!.messages;
+      final anchorIndex = messages.indexWhere((it) => it.id == messageId);
+      if (anchorIndex < 0) {
         throw StreamChatError(
           'Cannot mark as unread: Message "$messageId" was not found in the '
           'locally-known messages for this channel.',
         );
       }
 
+      final anchor = messages[anchorIndex];
+      final previous = anchorIndex > 0 ? messages[anchorIndex - 1] : null;
+
       // Subtract a microsecond so the anchor message itself is treated as
       // "after" the new read boundary, matching the "from the provided
-      // message onwards" semantics described above.
+      // message onwards" semantics described above. Preferred over using
+      // `previous.createdAt` as the boundary, which would leak the anchor
+      // back into the read set if the two share an identical `createdAt`.
       final lastRead = anchor.createdAt.subtract(const Duration(microseconds: 1));
-      state!.markUnreadLocally(lastRead: lastRead);
+      state!.markUnreadLocally(lastRead: lastRead, lastReadMessageId: previous?.id);
       return EmptyResponse();
     }
 
@@ -1913,7 +1924,12 @@ class Channel {
 
   /// Marks the channel as unread by a given [timestamp].
   ///
-  /// All messages after the provided timestamp will be marked as unread.
+  /// All messages after the provided timestamp will be marked as unread. This
+  /// boundary is **exclusive**: a message created at exactly [timestamp] stays
+  /// read. Contrast with [markUnread], which is inclusive of the message it is
+  /// given — `markUnread(m.id)` is equivalent to
+  /// `markUnreadByTimestamp(m.createdAt - 1µs)`, not to
+  /// `markUnreadByTimestamp(m.createdAt)`.
   ///
   /// If [usesLocalUnreadCount] is `true` for this channel, this updates the
   /// unread count locally, on-device, without making a network request.
@@ -1921,7 +1937,16 @@ class Channel {
     _checkInitialized();
 
     if (usesLocalUnreadCount) {
-      state!.markUnreadLocally(lastRead: timestamp);
+      // The newest locally-known message at or before the boundary is the last
+      // one that stays read.
+      final lastReadMessage = state!.messages.lastWhereOrNull(
+        (it) => !it.createdAt.isAfter(timestamp),
+      );
+
+      state!.markUnreadLocally(
+        lastRead: timestamp,
+        lastReadMessageId: lastReadMessage?.id,
+      );
       return EmptyResponse();
     }
 
@@ -3632,6 +3657,13 @@ class ChannelClientState {
         lastDeliveredMessageId: existingUserRead?.lastDeliveredMessageId,
       ),
     ]);
+
+    // Read supersedes delivered, so drop any pending delivery candidate the
+    // new read boundary just made ineligible. `delivery_events` is configured
+    // independently of `read_events`, so a channel tracking unread counts
+    // locally can still have delivery receipts enabled. Mirrors what the
+    // `message.read` event listener does for server-driven channels.
+    _client.channelDeliveryReporter.reconcileDelivery([_channel]);
   }
 
   /// Marks the channel as unread locally, without making a network request.
