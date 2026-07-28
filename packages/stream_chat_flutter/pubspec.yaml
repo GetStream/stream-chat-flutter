@@ -59,7 +59,7 @@ dependencies:
   stream_thumbnail:
     git:
       url: https://github.com/GetStream/stream-core-flutter.git
-      ref: feat/update-thumbnail-plugin
+      ref: 70b8b5265d2d2ae973428d8135e31d8184d29370
       path: packages/stream_thumbnail
   svg_icon_widget: ^0.0.1
   synchronized: ^3.4.0
