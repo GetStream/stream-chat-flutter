@@ -2,6 +2,7 @@
 
 import 'dart:async';
 
+import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart' hide Message;
@@ -177,67 +178,91 @@ class _StreamChatSampleAppState extends State<StreamChatSampleApp>
             child: Builder(
               builder: (context) {
                 final config = context.sampleAppConfig;
-                return MaterialApp.router(
-                  theme: ThemeData(
-                    brightness: .light,
-                    extensions: [StreamTheme.light()],
-                  ),
-                  darkTheme: ThemeData(
-                    brightness: .dark,
-                    extensions: [StreamTheme.dark()],
-                  ),
-                  themeMode: config.themeMode,
-                  locale: config.locale,
-                  supportedLocales: supportedLocales,
-                  localizationsDelegates: const [
-                    GlobalStreamChatLocalizations.delegate,
-                    GlobalMaterialLocalizations.delegate,
-                    GlobalWidgetsLocalizations.delegate,
-                  ],
-                  builder: (context, child) {
-                    return ListenableBuilder(
-                      listenable: authController,
-                      builder: (context, cachedChild) {
-                        final wrapped = Directionality(
-                          textDirection: config.forceRtl ? .rtl : .ltr,
-                          child: cachedChild ?? const SizedBox.shrink(),
-                        );
+                return DynamicColorBuilder(
+                  builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
+                    return MaterialApp.router(
+                      theme: createTheme(
+                        dynamicColor: config.enableDynamicColor ? lightDynamic : null,
+                        brightness: Brightness.light,
+                      ),
+                      darkTheme: createTheme(
+                        dynamicColor: config.enableDynamicColor ? darkDynamic : null,
+                        brightness: Brightness.dark,
+                      ),
+                      themeMode: config.themeMode,
+                      locale: config.locale,
+                      supportedLocales: supportedLocales,
+                      localizationsDelegates: const [
+                        GlobalStreamChatLocalizations.delegate,
+                        GlobalMaterialLocalizations.delegate,
+                        GlobalWidgetsLocalizations.delegate,
+                      ],
+                      builder: (context, child) {
+                        return ListenableBuilder(
+                          listenable: authController,
+                          builder: (context, cachedChild) {
+                            final wrapped = Directionality(
+                              textDirection: config.forceRtl ? .rtl : .ltr,
+                              child: cachedChild ?? const SizedBox.shrink(),
+                            );
 
-                        // StreamChat stays mounted as long as a client
-                        // exists so `StreamChat.of(context)` remains
-                        // valid across logout transitions.
-                        final client = authController.client;
-                        if (client != null) {
-                          return StreamChat(
-                            client: client,
-                            // Null in production → the SDK uses the real
-                            // connectivity monitor; set only by e2e tests.
-                            connectivityStream: authController.debugConnectivityStream,
-                            componentBuilders: StreamComponentBuilders(
-                              extensions: streamChatComponentBuilders(
-                                messageItem: customMessageItemBuilder,
-                                videoPlayer: (context, props) => SampleAppVideoPlayer(props: props),
-                              ),
-                            ),
-                            configData: config.toStreamChatConfigurationData(),
-                            child: wrapped,
-                          );
-                        }
+                            // StreamChat stays mounted as long as a client
+                            // exists so `StreamChat.of(context)` remains
+                            // valid across logout transitions.
+                            final client = authController.client;
+                            if (client != null) {
+                              return StreamChat(
+                                client: client,
+                                // Null in production → the SDK uses the real
+                                // connectivity monitor; set only by e2e tests.
+                                connectivityStream: authController.debugConnectivityStream,
+                                componentBuilders: StreamComponentBuilders(
+                                  extensions: streamChatComponentBuilders(
+                                    messageItem: customMessageItemBuilder,
+                                    videoPlayer: (context, props) => SampleAppVideoPlayer(props: props),
+                                  ),
+                                ),
+                                configData: config.toStreamChatConfigurationData(),
+                                child: wrapped,
+                              );
+                            }
 
-                        return StreamChatTheme(
-                          data: StreamChatThemeData(),
-                          child: wrapped,
+                            return StreamChatTheme(
+                              data: StreamChatThemeData(),
+                              child: wrapped,
+                            );
+                          },
+                          child: child,
                         );
                       },
-                      child: child,
+                      routerConfig: _setupRouter(),
                     );
                   },
-                  routerConfig: _setupRouter(),
                 );
               },
             ),
           ),
         if (!animationCompleted) buildAnimation(),
+      ],
+    );
+  }
+
+  ThemeData createTheme({
+    required ColorScheme? dynamicColor,
+    required Brightness brightness,
+  }) {
+    return ThemeData(
+      brightness: brightness,
+      extensions: [
+        StreamTheme(
+          colorScheme: dynamicColor == null
+              ? null
+              : .fromSeed(
+                  brand: dynamicColor.primary,
+                  brightness: brightness,
+                ),
+          brightness: brightness,
+        ),
       ],
     );
   }
