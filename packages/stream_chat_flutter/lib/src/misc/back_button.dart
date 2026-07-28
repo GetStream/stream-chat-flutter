@@ -43,8 +43,7 @@ class StreamBackButton extends StatelessWidget {
   ///
   /// Typically a [StreamUnreadIndicator]. The badge hides itself when its
   /// count is zero. Null when not explicitly set.
-  Widget? get unreadIndicator =>
-      identical(_unreadIndicator, _unset) ? null : _unreadIndicator;
+  Widget? get unreadIndicator => identical(_unreadIndicator, _unset) ? null : _unreadIndicator;
 
   final Widget? _unreadIndicator;
 
@@ -109,8 +108,7 @@ class _WidgetSentinel extends Widget {
   const _WidgetSentinel();
 
   @override
-  Element createElement() =>
-      throw StateError('_WidgetSentinel must never be built.');
+  Element createElement() => throw StateError('_WidgetSentinel must never be built.');
 }
 
 const _unset = _WidgetSentinel();
