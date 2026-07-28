@@ -8,7 +8,7 @@
 
 ⚠️ Deprecated
 
-- Deprecated the now-unused `height`/`width` of `StreamScrollViewLoadingWidget` in favor of `size`.
+- Deprecated `height`/`width` of `StreamScrollViewLoadingWidget` in favor of `size`.
 
 🐞 Fixed
 

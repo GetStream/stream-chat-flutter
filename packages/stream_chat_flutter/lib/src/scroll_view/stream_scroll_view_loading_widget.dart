@@ -7,19 +7,19 @@ class StreamScrollViewLoadingWidget extends StatelessWidget {
   const StreamScrollViewLoadingWidget({
     super.key,
     this.size = StreamLoadingSpinnerSize.lg,
-    @Deprecated('No longer used; the spinner is sized via size') this.height = 42,
-    @Deprecated('No longer used; the spinner is sized via size') this.width = 42,
+    @Deprecated('Use size instead') this.height = 42,
+    @Deprecated('Use size instead') this.width = 42,
   });
 
   /// The size of the loading spinner.
   final StreamLoadingSpinnerSize size;
 
   /// The height of the indicator.
-  @Deprecated('No longer used; the spinner is sized via size')
+  @Deprecated('Use size instead')
   final double height;
 
   /// The width of the indicator.
-  @Deprecated('No longer used; the spinner is sized via size')
+  @Deprecated('Use size instead')
   final double width;
 
   @override
@@ -31,7 +31,11 @@ class StreamScrollViewLoadingWidget extends StatelessWidget {
         horizontal: spacing.md,
         vertical: spacing.xxxl,
       ),
-      child: StreamLoadingSpinner(size: size),
+      child: SizedBox(
+        width: width,
+        height: height,
+        child: StreamLoadingSpinner(size: size),
+      ),
     );
   }
 }

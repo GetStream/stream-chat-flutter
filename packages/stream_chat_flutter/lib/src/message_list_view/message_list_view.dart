@@ -15,6 +15,7 @@ import 'package:stream_chat_flutter/src/message_list_view/thread_separator.dart'
 import 'package:stream_chat_flutter/src/message_list_view/unread_messages_separator.dart';
 import 'package:stream_chat_flutter/src/message_widget/stream_ephemeral_message.dart';
 import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
+import 'package:stream_chat_flutter/src/utils/network_error_text.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// Spacing Types (These are properties of a message to help inform the decision

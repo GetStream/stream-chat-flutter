@@ -266,7 +266,7 @@ void main() {
       expect(error.type, StreamChatNetworkErrorType.unknown);
     });
 
-    test('.type is not part of equality', () {
+    test('.type is part of equality', () {
       final error = StreamChatNetworkError.raw(code: 1, message: 'msg');
       final error2 = StreamChatNetworkError.raw(
         code: 1,
@@ -274,7 +274,7 @@ void main() {
         type: StreamChatNetworkErrorType.connectionTimeout,
       );
 
-      expect(error, error2);
+      expect(error, isNot(error2));
     });
   });
 }

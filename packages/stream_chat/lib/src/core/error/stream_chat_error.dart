@@ -165,7 +165,7 @@ class StreamChatNetworkError extends StreamChatError {
   bool get isRetriable => data == null;
 
   @override
-  List<Object?> get props => [...super.props, code, statusCode];
+  List<Object?> get props => [...super.props, code, statusCode, type];
 
   @override
   String toString({bool printStackTrace = false}) {

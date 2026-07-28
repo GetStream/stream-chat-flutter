@@ -1,5 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:stream_chat_flutter/src/utils/network_error_text.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// Default separator builder for [StreamUserListView].
