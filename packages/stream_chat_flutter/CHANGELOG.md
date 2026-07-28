@@ -3,10 +3,15 @@
 ✅ Added
 
 - Added `StreamMessageListViewConfiguration.autoScrollPolicy` to control whether and how `StreamMessageListView` scrolls to the newest message when a new message arrives. Use `StreamAutoScrollPolicy.disabled` to fully control scrolling yourself.
+- Added `onReactionSelected` to `StreamMessageReactionPicker`, a context-aware callback that provides the `BuildContext` for navigation.
 
 🐞 Fixed
 
 - Fixed `StreamTypingIndicator` briefly showing typing users from a different context (main channel vs. thread) on its first frame.
+
+⚠️ Deprecated
+
+- Deprecated `StreamMessageReactionPicker.onReactionPicked` in favor of `onReactionSelected`.
 
 ## 10.2.0
 
@@ -23,7 +28,6 @@
 - Added a `LastMessagePredicate` typedef for the `ChannelLastMessageText.lastMessagePredicate` filter.
 - Added optional `semanticsLabel` to `StreamUserAvatar`, `StreamUserAvatarGroup`, and `StreamUserAvatarStack`.
 - Made `StreamVideoPlayer` overridable via the `StreamComponentFactory` (`streamChatComponentBuilders(videoPlayer: ...)`), with the previous implementation now available as `DefaultStreamVideoPlayer`.
-- Added `onReactionSelected` to `StreamMessageReactionPicker`, providing the appropriate `BuildContext` for navigation.
 
 🐞 Fixed
 
@@ -39,10 +43,6 @@
 - Fixed `voiceRecordingText` casing to sentence case (`"Voice recording"`).
 - Fixed `formatRecentDateTime` hardcoding 24-hour time — displayed and announced timestamps now follow the locale's convention (e.g. 24-hour in Germany, 12-hour in India).
 - Replaced the `get_thumbnail_video` dependency with Stream's own `stream_thumbnail` plugin, resolving the iOS duplicate-`VideoThumbnailPlugin`-symbol crash when an app also uses `video_thumbnail`/`video_editor` ([#2360](https://github.com/GetStream/stream-chat-flutter/issues/2360)).
-
-⚠️ Deprecated
-
-- Deprecated `onReactionPicked` in favor of `onReactionSelected`.
 
 ## 10.1.0
 

@@ -20,7 +20,6 @@ void main() {
         _wrapWithMaterialApp(
           StreamMessageReactionPicker(
             message: message,
-            onReactionPicked: (_) {},
             onReactionSelected: (_, _) {},
           ),
           reactionIconResolver: resolver,
@@ -111,6 +110,75 @@ void main() {
       expect(pickedReaction, isNotNull);
       expect(pickedReaction!.type, 'love');
       expect(pickedReaction!.emojiCode, resolver.emojiCode('love'));
+    },
+  );
+
+  // Regression test for the picker popping the wrong navigator in nested
+  // navigation.
+  //
+  // The picker is shown on the root navigator (like the message context menu),
+  // while its trigger lives under a nested navigator. onReactionSelected must
+  // pop the picker route, not the nested navigator's page beneath it.
+  testWidgets(
+    'onReactionSelected context dismisses the picker route in nested navigation',
+    (WidgetTester tester) async {
+      final message = Message(
+        id: 'test-message',
+        text: 'Hello world',
+        user: User(id: 'test-user'),
+      );
+
+      Reaction? selected;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          debugShowCheckedModeBanner: false,
+          theme: ThemeData(splashFactory: NoSplash.splashFactory),
+          builder: (context, child) => StreamChatConfiguration(
+            data: StreamChatConfigurationData(reactionIconResolver: resolver),
+            child: StreamChatTheme(
+              data: StreamChatThemeData(),
+              child: child ?? const SizedBox.shrink(),
+            ),
+          ),
+          home: Navigator(
+            onGenerateRoute: (_) => MaterialPageRoute<void>(
+              builder: (context) => Scaffold(
+                body: Center(
+                  child: ElevatedButton(
+                    key: const Key('open_picker'),
+                    onPressed: () => showDialog<void>(
+                      context: context,
+                      builder: (_) => Center(
+                        child: StreamMessageReactionPicker(
+                          message: message,
+                          onReactionSelected: (context, reaction) {
+                            selected = reaction;
+                            Navigator.pop(context);
+                          },
+                        ),
+                      ),
+                    ),
+                    child: const Text('open'),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.byKey(const Key('open_picker')));
+      await tester.pumpAndSettle();
+      expect(find.byType(StreamMessageReactionPicker), findsOneWidget);
+
+      await tester.tap(find.byKey(const Key('love')));
+      await tester.pumpAndSettle();
+
+      // Picker route popped, reaction reported, nested page left intact.
+      expect(selected?.type, 'love');
+      expect(find.byType(StreamMessageReactionPicker), findsNothing);
+      expect(find.byKey(const Key('open_picker')), findsOneWidget);
     },
   );
 
@@ -214,7 +282,6 @@ void main() {
         _wrapWithMaterialApp(
           StreamMessageReactionPicker(
             message: message,
-            onReactionPicked: (_) {},
             onReactionSelected: (_, _) {},
           ),
           reactionIconResolver: resolver,
@@ -251,7 +318,6 @@ void main() {
         _wrapWithMaterialApp(
           StreamMessageReactionPicker(
             message: message,
-            onReactionPicked: (_) {},
             onReactionSelected: (_, _) {},
           ),
           reactionIconResolver: compactResolver,
@@ -266,7 +332,6 @@ void main() {
         _wrapWithMaterialApp(
           StreamMessageReactionPicker(
             message: message,
-            onReactionPicked: (_) {},
             onReactionSelected: (_, _) {},
           ),
           reactionIconResolver: resolver,
@@ -297,7 +362,6 @@ void main() {
         _wrapWithMaterialApp(
           StreamMessageReactionPicker(
             message: message,
-            onReactionPicked: (_) {},
             onReactionSelected: (_, _) {},
           ),
           reactionIconResolver: subsetResolver,
@@ -333,7 +397,6 @@ void main() {
         _wrapWithMaterialApp(
           StreamMessageReactionPicker(
             message: message,
-            onReactionPicked: (_) {},
             onReactionSelected: (_, _) {},
           ),
           reactionIconResolver: subsetResolver,
@@ -373,7 +436,6 @@ void main() {
         _wrapWithMaterialApp(
           StreamMessageReactionPicker(
             message: message,
-            onReactionPicked: (_) {},
             onReactionSelected: (_, _) {},
           ),
           reactionIconResolver: const _TypeBasedReactionIconResolver(),
@@ -404,7 +466,6 @@ void main() {
         _wrapWithMaterialApp(
           StreamMessageReactionPicker(
             message: message,
-            onReactionPicked: (_) {},
             onReactionSelected: (_, _) {},
           ),
           reactionIconResolver: resolver,
@@ -435,7 +496,6 @@ void main() {
           return _wrapWithMaterialApp(
             StreamMessageReactionPicker(
               message: message,
-              onReactionPicked: (_) {},
               onReactionSelected: (_, _) {},
             ),
             reactionIconResolver: resolver,
@@ -465,7 +525,6 @@ void main() {
           return _wrapWithMaterialApp(
             StreamMessageReactionPicker(
               message: message,
-              onReactionPicked: (_) {},
               onReactionSelected: (_, _) {},
             ),
             reactionIconResolver: resolver,
@@ -488,7 +547,6 @@ void main() {
           return _wrapWithMaterialApp(
             StreamMessageReactionPicker(
               message: message,
-              onReactionPicked: (_) {},
               onReactionSelected: (_, _) {},
             ),
             reactionIconResolver: const _SubsetDefaultReactionIconResolver(),
