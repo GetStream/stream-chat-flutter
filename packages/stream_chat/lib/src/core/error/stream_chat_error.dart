@@ -199,6 +199,9 @@ enum StreamChatNetworkErrorType {
   /// Receiving the response timed out.
   receiveTimeout,
 
+  /// Transforming the response (e.g. background JSON decoding) timed out.
+  transformTimeout,
+
   /// The server responded with a non-success status.
   badResponse,
 
@@ -218,10 +221,11 @@ StreamChatNetworkErrorType _networkErrorTypeFromDio(DioExceptionType type) {
     DioExceptionType.connectionTimeout => StreamChatNetworkErrorType.connectionTimeout,
     DioExceptionType.sendTimeout => StreamChatNetworkErrorType.sendTimeout,
     DioExceptionType.receiveTimeout => StreamChatNetworkErrorType.receiveTimeout,
+    DioExceptionType.transformTimeout => StreamChatNetworkErrorType.transformTimeout,
     DioExceptionType.badResponse => StreamChatNetworkErrorType.badResponse,
     DioExceptionType.cancel => StreamChatNetworkErrorType.cancel,
     DioExceptionType.badCertificate => StreamChatNetworkErrorType.badCertificate,
-    // Unknown or future dio types map to unknown.
+    // DioExceptionType.unknown and any future dio types map to unknown.
     _ => StreamChatNetworkErrorType.unknown,
   };
 }

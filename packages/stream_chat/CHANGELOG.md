@@ -9,6 +9,10 @@
 
 - Deprecated `StreamChatNetworkError.isRequestCancelledError` in favor of `type == StreamChatNetworkErrorType.cancel`.
 
+🔄 Changed
+
+- Raised the minimum `dio` version to `^5.11.0`.
+
 🐞 Fixed
 
 - Fixed `StreamWebSocketError.toString()` using a `WebSocketError(...)` prefix instead of the class name; it now also includes `code`, and `StreamChatNetworkError.toString()` now surfaces the transport `type` when known.

@@ -243,12 +243,11 @@ void main() {
         DioExceptionType.connectionTimeout: StreamChatNetworkErrorType.connectionTimeout,
         DioExceptionType.sendTimeout: StreamChatNetworkErrorType.sendTimeout,
         DioExceptionType.receiveTimeout: StreamChatNetworkErrorType.receiveTimeout,
+        DioExceptionType.transformTimeout: StreamChatNetworkErrorType.transformTimeout,
         DioExceptionType.badResponse: StreamChatNetworkErrorType.badResponse,
         DioExceptionType.cancel: StreamChatNetworkErrorType.cancel,
         DioExceptionType.badCertificate: StreamChatNetworkErrorType.badCertificate,
         DioExceptionType.unknown: StreamChatNetworkErrorType.unknown,
-        // Unmodeled / future dio types degrade to unknown.
-        DioExceptionType.transformTimeout: StreamChatNetworkErrorType.unknown,
       };
 
       for (final MapEntry(key: dioType, value: expected) in cases.entries) {
