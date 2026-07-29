@@ -3,7 +3,9 @@ import 'dart:math' as math;
 
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/semantics.dart';
+// Needed for RenderProxyBox; it also re-exports the semantics library that
+// Assertiveness comes from, which is why flutter/semantics.dart isn't imported.
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:stream_chat_flutter/src/message_input/audio_recorder/audio_recorder_announcer.dart';
 import 'package:stream_chat_flutter/src/message_input/composer_attachment_announcer.dart';
@@ -13,17 +15,6 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 const _kCommandTrigger = '/';
 const _kMentionTrigger = '@';
-
-// How far the floating composer's lower background paints bleed *up*, under the
-// paint above them.
-//
-// The floating composer stacks several same-colored fills (the pill's gradient
-// band, the picker panel, the safe-area strip). Where two of them merely abut at
-// a fractional device-pixel boundary, both edges get antialiased; composited in
-// sequence their coverages don't sum to 1, so a hairline of whatever is behind
-// (the message list) survives. Overlapping instead of abutting removes the seam,
-// and is invisible because the paints share a color.
-const _kFloatingSeamBleed = 1.0;
 
 /// Signature for the function that determines if a [matchedUri] should be
 /// previewed as an OG Attachment.
@@ -858,22 +849,20 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
               )!
             : EdgeInsets.zero;
 
-        // For floating: overlay a solid swatch only over the safe-area zone
-        // (the space below the pill/picker) so that the pill's gradient fade
-        // remains visible above while the transparent safe-area gap is covered.
-        // The picker's own ColoredBox covers the picker zone when open.
-        if (effectiveComposerLocation == .floating && safeAreaPadding.bottom > 0) {
-          final bandColor = context.streamColorScheme.backgroundElevation1;
+        // For floating: one continuous backdrop behind the pill, the picker and
+        // the safe-area zone. Painting it as a single layer is what keeps it
+        // seamless — abutting fills would each be antialiased at a fractional
+        // device-pixel boundary and let a hairline of the message list through.
+        if (effectiveComposerLocation == .floating) {
           return Stack(
             children: [
-              Positioned(
-                bottom: 0,
-                left: 0,
-                right: 0,
-                // Bleeds up under the pill/picker above it to avoid a seam;
-                // this is a Positioned, so it only affects painting.
-                height: safeAreaPadding.bottom + _kFloatingSeamBleed,
-                child: ColoredBox(color: bandColor),
+              Positioned.fill(
+                child: CustomPaint(
+                  painter: _FloatingComposerBackdropPainter(
+                    color: context.streamColorScheme.backgroundElevation1,
+                    fadeExtent: _pillHeight,
+                  ),
+                ),
               ),
               Padding(padding: safeAreaPadding, child: child),
             ],
@@ -1053,21 +1042,20 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
             // above the picker while making it the last-painted child.
             verticalDirection: VerticalDirection.up,
             children: [
-              // The panel fill lives outside the SizeTransition: its ClipRect
-              // would otherwise clip away the upward bleed.
-              _TopBleedFill(
-                color: context.streamColorScheme.backgroundElevation1,
-                child: SizeTransition(
-                  sizeFactor: _pickerAnimation,
-                  // ignore: deprecated_member_use, alternative is only available since Flutter 3.44
-                  axisAlignment: -1,
-                  child: _buildInlineAttachmentPicker(context),
-                ),
+              SizeTransition(
+                sizeFactor: _pickerAnimation,
+                // ignore: deprecated_member_use, alternative is only available since Flutter 3.44
+                axisAlignment: -1,
+                child: _buildInlineAttachmentPicker(context),
               ),
-              // Gradient wraps only the pill — not the picker sibling — so
-              // the gradient height tracks the pill and doesn't stretch when
-              // the picker opens or closes.
-              if (isFloating) _buildFloatingComposerBand(context, pill) else pill,
+              // Both the pill and the picker sit on one backdrop painted behind
+              // the whole composer. Reporting the pill's height keeps that
+              // backdrop's fade confined to the pill, so the fade grows with the
+              // pill but never stretches when the picker opens or closes.
+              if (isFloating)
+                _ReportHeight(onHeightChanged: (height) => _pillHeight.value = height, child: pill)
+              else
+                pill,
             ],
           ),
         );
@@ -1075,26 +1063,10 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     );
   }
 
-  /// Wraps [child] (the pill widget) with a floating gradient background that
-  /// fades from transparent at the top to solid
-  /// [StreamColorScheme.backgroundElevation1] at the bottom.
-  ///
-  /// Applied to just the pill [DropTarget] so the gradient height tracks the
-  /// pill (growing with attachments) and is unaffected by the picker opening.
-  Widget _buildFloatingComposerBand(BuildContext context, Widget child) {
-    final bandColor = context.streamColorScheme.backgroundElevation1;
-
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        gradient: streamFloatingFadeLinearGradient(
-          color: bandColor,
-          begin: Alignment.bottomCenter,
-          end: Alignment.topCenter,
-        ),
-      ),
-      child: child,
-    );
-  }
+  // Height of the floating pill, reported from layout and read back at paint
+  // time by _FloatingComposerBackdropPainter. Layout always runs before paint,
+  // so the backdrop's fade is never a frame behind the pill.
+  final _pillHeight = ValueNotifier<double>(0);
 
   Widget _buildInlineAttachmentPicker(BuildContext context) {
     if (!_isPickerVisible) return const SizedBox.shrink();
@@ -1129,8 +1101,8 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
             commandValidator: _effectiveController.validateCommand,
           );
 
-    // The panel's background is painted by the _TopBleedFill wrapping the
-    // SizeTransition around this widget, not here.
+    // No background here: when floating, the panel sits on the composer-wide
+    // backdrop painted by _FloatingComposerBackdropPainter.
     return child;
   }
 
@@ -1685,48 +1657,90 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     _draftStreamSubscription?.cancel();
     _messageUpdatedSubscription?.cancel();
     _messageDeletedSubscription?.cancel();
+    _pillHeight.dispose();
     super.dispose();
   }
 }
 
-/// Fills [child]'s bounds with [color], bleeding [_kFloatingSeamBleed] logical
-/// pixels above its own top edge so it tucks under whatever paints on top of it.
+/// Paints the floating composer's whole background in a single pass: a fade from
+/// transparent to solid [color] across the top [fadeExtent] logical pixels (the
+/// height of the pill), then solid [color] for the remaining height (the
+/// attachment picker and the safe-area zone).
 ///
-/// See [_kFloatingSeamBleed] for why the overlap is needed.
-class _TopBleedFill extends StatelessWidget {
-  const _TopBleedFill({required this.color, required this.child});
+/// One paint rather than several abutting ones is what makes this seamless.
+/// Separate fills would each be antialiased where they meet, and because they
+/// composite in sequence their coverages don't sum to 1 — leaving a hairline of
+/// the message list visible between them.
+///
+/// [fadeExtent] is read at paint time rather than baked in at build time, so the
+/// fade tracks the pill as it grows (attachments, a quoted message, wrapped
+/// text) while staying independent of the total height. That is what keeps the
+/// fade from stretching when the picker opens or closes.
+class _FloatingComposerBackdropPainter extends CustomPainter {
+  _FloatingComposerBackdropPainter({
+    required this.color,
+    required this.fadeExtent,
+  }) : super(repaint: fadeExtent);
 
   final Color color;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    // CustomPaint runs the painter before the child and never clips, which is
-    // what lets the fill escape above its own bounds.
-    return CustomPaint(
-      painter: _TopBleedFillPainter(color: color, bleed: _kFloatingSeamBleed),
-      child: child,
-    );
-  }
-}
-
-class _TopBleedFillPainter extends CustomPainter {
-  const _TopBleedFillPainter({required this.color, required this.bleed});
-
-  final Color color;
-  final double bleed;
+  final ValueNotifier<double> fadeExtent;
 
   @override
   void paint(Canvas canvas, Size size) {
-    // Nothing to tuck under when collapsed; skip so we don't leave a stray line.
     if (size.isEmpty) return;
 
-    final rect = Rect.fromLTWH(0, -bleed, size.width, size.height + bleed);
-    canvas.drawRect(rect, Paint()..color = color);
+    // The gradient runs bottom-to-top, so the solid run is measured from the
+    // bottom and the fade occupies the top `extent` pixels.
+    final extent = math.min(fadeExtent.value, size.height);
+    final solidFraction = (1 - extent / size.height).clamp(0.0, 1.0);
+
+    final rect = Offset.zero & size;
+    final gradient = streamFloatingFadeLinearGradient(
+      color: color,
+      solidFraction: solidFraction,
+      begin: Alignment.bottomCenter,
+      end: Alignment.topCenter,
+    );
+
+    canvas.drawRect(rect, Paint()..shader = gradient.createShader(rect));
   }
 
   @override
-  bool shouldRepaint(_TopBleedFillPainter oldDelegate) {
-    return oldDelegate.color != color || oldDelegate.bleed != bleed;
+  bool shouldRepaint(_FloatingComposerBackdropPainter oldDelegate) {
+    return oldDelegate.color != color || oldDelegate.fadeExtent != fadeExtent;
+  }
+}
+
+/// Reports [child]'s laid-out height via [onHeightChanged] during layout.
+///
+/// Used to feed the pill's height to [_FloatingComposerBackdropPainter]. The
+/// callback fires inside `performLayout`, which is safe for the listener to turn
+/// into a repaint: the framework flushes all layout before any painting, so the
+/// backdrop sees the current height in the same frame.
+class _ReportHeight extends SingleChildRenderObjectWidget {
+  const _ReportHeight({required this.onHeightChanged, required super.child});
+
+  final ValueChanged<double> onHeightChanged;
+
+  @override
+  _RenderReportHeight createRenderObject(BuildContext context) {
+    return _RenderReportHeight(onHeightChanged: onHeightChanged);
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, _RenderReportHeight renderObject) {
+    renderObject.onHeightChanged = onHeightChanged;
+  }
+}
+
+class _RenderReportHeight extends RenderProxyBox {
+  _RenderReportHeight({required this.onHeightChanged});
+
+  ValueChanged<double> onHeightChanged;
+
+  @override
+  void performLayout() {
+    super.performLayout();
+    onHeightChanged(size.height);
   }
 }
