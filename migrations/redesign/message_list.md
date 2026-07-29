@@ -9,6 +9,7 @@ For changes to the individual message item / message widget, see [message_widget
 ## Table of Contents
 
 - [Quick Reference](#quick-reference)
+- [Customizing the Message Item](#customizing-the-message-item)
 - [Config & Builders Split](#config--builders-split)
   - [Behavior flags → `config`](#behavior-flags--config)
   - [Builder callbacks → `builders`](#builder-callbacks--builders)
@@ -27,13 +28,83 @@ For changes to the individual message item / message widget, see [message_widget
 | -------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
 | `StreamMessageListView(swipeToReply: true, paginationLimit: 20, ...)`      | `StreamMessageListView(config: StreamMessageListViewConfiguration(...))`                        |
 | `StreamMessageListView(loadingBuilder: ..., emptyBuilder: ..., ...)`       | `StreamMessageListView(builders: StreamMessageListViewBuilders(...))`                           |
-| `messageBuilder` / `parentMessageBuilder`                                  | `messageBuilder` (root) / `builders.parentMessage`                                              |
+| `messageBuilder` / `parentMessageBuilder`                                  | Component factory (preferred) or `messageBuilder` (root) / `builders.parentMessage`            |
 | `MessageBuilder` typedef                                                   | `StreamMessageItemBuilder` typedef                                                              |
 | `ParentMessageBuilder` typedef                                             | `StreamMessageItemBuilder` typedef                                                              |
 | `OnQuotedMessageTap = void Function(String?)`                              | `void Function(Message quotedMessage)`                                                          |
 | `MessageDetails` argument                                                  | Removed — alignment via `StreamMessageLayout.of(context)`, user via `StreamChat.of(context)`    |
 | `showUnreadCountOnScrollToBottom: false` (old default)                     | `showUnreadCountOnScrollToBottom: true` (new default)                                           |
 | `StreamDraftListView` / `StreamDraftListTile` / `StreamDraftListTileTheme` | Removed — use `StreamDraftListController` + `PagedValueListView`                                |
+
+---
+
+## Customizing the Message Item
+
+v10 introduces two ways to customize how individual messages render. Choose based on scope:
+
+### Component factory — preferred for app-wide customization
+
+Register a `messageItem` builder on `StreamChat` via `StreamComponentBuilders`. This applies globally: the message list, thread list, action modal previews, and any other place that renders a `StreamMessageItem` all use the same builder automatically — with no extra wiring required.
+
+```dart
+StreamChat(
+  client: client,
+  componentBuilders: StreamComponentBuilders(
+    extensions: streamChatComponentBuilders(
+      messageItem: (context, props) {
+        // Option A: modify props and use the default layout
+        return DefaultStreamMessageItem(
+          props: props.copyWith(
+            actionsBuilder: (context, defaultActions) => [
+              ...defaultActions,
+              myCustomAction,
+            ],
+          ),
+        );
+        // Option B: replace entirely with a custom widget
+        // return MyCustomBubble(message: props.message);
+      },
+    ),
+  ),
+  child: ...,
+)
+```
+
+This is the approach that was not possible before v10. In v9 you had to pass `messageBuilder` to every `StreamMessageListView` separately, and any modal that displayed a message preview (e.g. the long-press actions sheet) would always fall back to the default widget because there was no way to hook into it globally.
+
+### `messageBuilder` — for per-list overrides
+
+`StreamMessageListView.messageBuilder` is still supported. Use it when you need behavior specific to one list — for example, adding swipe-to-reply only on the main channel view while keeping the default layout in thread views:
+
+```dart
+StreamMessageListView(
+  messageBuilder: (context, message, defaultProps) {
+    // StreamMessageItem.fromProps respects the global factory if one is set.
+    final defaultWidget = StreamMessageItem.fromProps(props: defaultProps);
+
+    if (message.isDeleted || message.state.isFailed) return defaultWidget;
+
+    return Swipeable(
+      key: ValueKey(message.id),
+      onSwiped: (_) => onReply(message),
+      child: defaultWidget,
+    );
+  },
+)
+```
+
+`messageBuilder` takes precedence over the component factory for that list. If `messageBuilder` is set, `StreamMessageItem.fromProps` still goes through the factory — so the two compose cleanly: the factory supplies the global style, and `messageBuilder` wraps or modifies it per-list.
+
+### Precedence
+
+```
+messageBuilder (per-list, highest priority)
+  └─ calls StreamMessageItem.fromProps()
+       └─ component factory (app-wide, if registered)
+            └─ DefaultStreamMessageItem (SDK default)
+```
+
+> **Rule of thumb:** use the component factory for anything that should look the same everywhere (custom bubbles, extra actions, branding). Use `messageBuilder` only when behavior genuinely differs per list (swipe gestures, list-specific wrappers).
 
 ---
 
@@ -293,10 +364,12 @@ PagedValueListView<String, Draft>(
 
 ## Migration Checklist
 
+- [ ] If you previously passed `messageBuilder` to every `StreamMessageListView` for app-wide styling, migrate that logic to the component factory via `StreamComponentBuilders(extensions: streamChatComponentBuilders(messageItem: ...))` on `StreamChat` — this automatically covers the action modal preview and all other lists
 - [ ] Move all `StreamMessageListView` behavior flags into `config: StreamMessageListViewConfiguration(...)`
 - [ ] Move all `StreamMessageListView` builder callbacks into `builders: StreamMessageListViewBuilders(...)` and rename per the table above (e.g. `loadingBuilder` → `loading`, `emptyBuilder` → `empty`, `dateDividerBuilder` → `dateDivider`)
-- [ ] Keep `messageBuilder` as a top-level parameter; move `parentMessageBuilder` into `builders.parentMessage`
+- [ ] Keep `messageBuilder` as a top-level parameter only for per-list behavior (e.g. swipe wrappers); move `parentMessageBuilder` into `builders.parentMessage`
 - [ ] Update `messageBuilder` / `parentMessage` callbacks to the new `StreamMessageItemBuilder` signature `(BuildContext, Message, StreamMessageItemProps)`
+- [ ] Inside `messageBuilder`, call `StreamMessageItem.fromProps(props: defaultProps)` instead of using the old `defaultWidget` — this ensures the global component factory is still invoked
 - [ ] Replace `defaultWidget.copyWith(...)` calls with `StreamMessageItem.fromProps(props: defaultProps.copyWith(...))`
 - [ ] Replace `MessageDetails` usage — use `StreamMessageLayout.of(context)` for alignment, `StreamChat.of(context).currentUser` for user ID
 - [ ] Update `onQuotedMessageTap` from `void Function(String?)` to `void Function(Message)`

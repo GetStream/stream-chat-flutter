@@ -338,9 +338,41 @@ Both approaches are equivalent. If you already have a `StreamComponentFactory` e
 
 ## StreamChatConfigurationData New Fields
 
-Three new optional fields have been added to `StreamChatConfigurationData`. Existing code that does not pass them will use the defaults and requires no changes.
+### Removed: `reactionIcons`
+
+`StreamChatConfigurationData.reactionIcons` (`List<StreamReactionIcon>`) has been **removed**. Reaction icons are now resolved by a `ReactionIconResolver` stored on `reactionIconResolver`.
+
+| Removed                                       | Replacement                                         |
+| --------------------------------------------- | --------------------------------------------------- |
+| `StreamChatConfigurationData.reactionIcons`   | `StreamChatConfigurationData.reactionIconResolver`  |
+| `StreamReactionIcon` model class              | `StreamEmojiContent` (returned by `resolver.resolve(type)`) |
+
+To render a reaction emoji in a custom widget, call `resolver.resolve(type)` and pass the result to `StreamEmoji`:
+
+```dart
+final resolver = StreamChatConfiguration.of(context).reactionIconResolver;
+final content = resolver.resolve('like');           // returns StreamEmojiContent
+StreamEmoji(emoji: content, size: StreamEmojiSize.sm)
+```
+
+The `StreamEmojiSize` enum has values `.sm`, `.md`, and `.lg`.
+
+To supply a custom resolver, pass `reactionIconResolver:` to `StreamChatConfigurationData`:
+
+```dart
+StreamChat(
+  configData: StreamChatConfigurationData(
+    reactionIconResolver: MyCustomReactionIconResolver(),
+  ),
+  child: ...,
+)
+```
+
+---
 
 ### New Fields
+
+Three new optional fields have been added to `StreamChatConfigurationData`. Existing code that does not pass them will use the defaults and requires no changes.
 
 | Field                | Type                                   | Default | Description                                                                                                                               |
 | -------------------- | -------------------------------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
@@ -442,6 +474,7 @@ For message / reactions-related removals, see [message_widget.md](message_widget
 
 ## Migration Checklist
 
+- [ ] Replace `StreamChatConfigurationData.reactionIcons` with `reactionIconResolver`; render emoji via `resolver.resolve(type)` → `StreamEmoji(emoji: content, size: StreamEmojiSize.sm)`
 - [ ] Replace all `StreamSvgIcon(icon: StreamSvgIcons.*)` with `Icon(context.streamIcons.*)` using the mapping table above
 - [ ] Replace `showBackButton: false` with `automaticallyImplyLeading: false` on every header that used it
 - [ ] Move `onBackPressed: cb` to `leading: StreamBackButton(onPressed: cb)`

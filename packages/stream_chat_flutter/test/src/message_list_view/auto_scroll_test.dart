@@ -73,6 +73,7 @@ void main() {
     required List<Message> messages,
     bool isUpToDate = true,
     int unreadCount = 0,
+    StreamMessageListViewConfiguration config = const StreamMessageListViewConfiguration(),
   }) async {
     when(() => channelClientState.isUpToDate).thenReturn(isUpToDate);
     when(() => channelClientState.unreadCount).thenReturn(unreadCount);
@@ -87,7 +88,7 @@ void main() {
               client: client,
               child: StreamChannel(
                 channel: channel,
-                child: const StreamMessageListView(),
+                child: StreamMessageListView(config: config),
               ),
             ),
           ),
@@ -188,6 +189,132 @@ void main() {
         await deliverMessageNew(tester, newMessage: ownMessage, existing: messages);
 
         expect(find.text(ownMessage.text!), findsOneWidget);
+        expect(find.byType(StreamButton), findsNothing);
+      },
+    );
+
+    testWidgets(
+      'own message while scrolled up with disabled policy → does NOT auto-scroll',
+      (tester) async {
+        final other = User(id: 'otherid');
+        final messages = generateConversation(40, users: [other]).reversed.toList();
+
+        await pumpMessageList(
+          tester,
+          messages: messages,
+          config: const StreamMessageListViewConfiguration(
+            autoScrollPolicy: StreamAutoScrollPolicy.disabled,
+          ),
+        );
+
+        await tester.drag(find.byType(StreamMessageListView), const Offset(0, 400));
+        await tester.pumpAndSettle();
+        expect(find.byType(StreamButton), findsOneWidget);
+
+        final ownMessage = Message(
+          id: 'new-msg-own-disabled',
+          text: 'My own outgoing message, no auto-scroll',
+          user: ownUser,
+          createdAt: DateTime.now(),
+        );
+
+        await deliverMessageNew(tester, newMessage: ownMessage, existing: messages);
+
+        expect(find.byType(StreamButton), findsOneWidget);
+        expect(find.text(ownMessage.text!), findsNothing);
+      },
+    );
+
+    testWidgets(
+      'incoming message while scrolled up with a jump policy → jumps to bottom',
+      (tester) async {
+        final other = User(id: 'otherid');
+        final messages = generateConversation(40, users: [other]).reversed.toList();
+
+        await pumpMessageList(
+          tester,
+          messages: messages,
+          config: StreamMessageListViewConfiguration(
+            autoScrollPolicy: StreamAutoScrollPolicy.custom((_) => StreamAutoScrollBehavior.jump),
+          ),
+        );
+
+        await tester.drag(find.byType(StreamMessageListView), const Offset(0, 400));
+        await tester.pumpAndSettle();
+        expect(find.byType(StreamButton), findsOneWidget);
+
+        final newMessage = Message(
+          id: 'new-msg-jump',
+          text: 'Jump straight to me',
+          user: other,
+          createdAt: DateTime.now(),
+        );
+
+        await deliverMessageNew(tester, newMessage: newMessage, existing: messages);
+
+        expect(find.text(newMessage.text!), findsOneWidget);
+        expect(find.byType(StreamButton), findsNothing);
+      },
+    );
+
+    testWidgets(
+      'own message while scrolled up with whenAtBottom policy → does NOT auto-scroll',
+      (tester) async {
+        final other = User(id: 'otherid');
+        final messages = generateConversation(40, users: [other]).reversed.toList();
+
+        await pumpMessageList(
+          tester,
+          messages: messages,
+          config: const StreamMessageListViewConfiguration(
+            autoScrollPolicy: StreamAutoScrollPolicy.whenAtBottom,
+          ),
+        );
+
+        await tester.drag(find.byType(StreamMessageListView), const Offset(0, 400));
+        await tester.pumpAndSettle();
+        expect(find.byType(StreamButton), findsOneWidget);
+
+        final ownMessage = Message(
+          id: 'new-msg-own-when-at-bottom',
+          text: 'My own message, should not pull me back',
+          user: ownUser,
+          createdAt: DateTime.now(),
+        );
+
+        await deliverMessageNew(tester, newMessage: ownMessage, existing: messages);
+
+        expect(find.byType(StreamButton), findsOneWidget);
+        expect(find.text(ownMessage.text!), findsNothing);
+      },
+    );
+
+    testWidgets(
+      'new message while at bottom with whenAtBottom policy → follows to the bottom',
+      (tester) async {
+        final other = User(id: 'otherid');
+        final messages = generateConversation(20, users: [other]).reversed.toList();
+
+        await pumpMessageList(
+          tester,
+          messages: messages,
+          config: const StreamMessageListViewConfiguration(
+            autoScrollPolicy: StreamAutoScrollPolicy.whenAtBottom,
+          ),
+        );
+
+        expect(find.byType(StreamButton), findsNothing);
+
+        final newMessage = Message(
+          id: 'new-msg-when-at-bottom-follow',
+          text: 'Followed while at the bottom',
+          user: other,
+          createdAt: DateTime.now(),
+        );
+
+        await deliverMessageNew(tester, newMessage: newMessage, existing: messages);
+
+        expect(find.text(newMessage.text!), findsOneWidget);
         expect(find.byType(StreamButton), findsNothing);
       },
     );

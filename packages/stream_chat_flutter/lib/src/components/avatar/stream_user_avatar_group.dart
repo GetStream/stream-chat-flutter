@@ -56,6 +56,7 @@ class StreamUserAvatarGroup extends StatelessWidget {
     required this.users,
     this.size,
     this.isFloating,
+    this.semanticsLabel,
   });
 
   /// The list of users whose avatars are displayed.
@@ -73,10 +74,18 @@ class StreamUserAvatarGroup extends StatelessWidget {
   /// [StreamBoxShadow.elevation3].
   final bool? isFloating;
 
+  /// Screen-reader label for the avatar group.
+  ///
+  /// When null (the default), each child avatar carries its own
+  /// [StreamUserAvatar.semanticsLabel]. When non-null, the group is exposed
+  /// as a single labeled image node.
+  final String? semanticsLabel;
+
   @override
   Widget build(BuildContext context) {
     return StreamAvatarGroup(
       size: size,
+      semanticsLabel: semanticsLabel,
       children: users.map(
         (user) => StreamUserAvatar(
           user: user,

@@ -2,7 +2,6 @@ name: stream_flutter_workflow
 
 env:
   ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
-  flutter_version: "3.x"
 
 on:
   pull_request:
@@ -18,6 +17,10 @@ on:
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: read
 
 jobs:
   # Centralizes every gating decision for this workflow — path filter,
@@ -35,7 +38,7 @@ jobs:
       should_run: ${{ github.event_name == 'push' || (steps.filter.outputs.relevant == 'true' && github.event.pull_request.draft != true) }}
     steps:
       - name: "Git Checkout"
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: "Detect Path Changes"
         uses: dorny/paths-filter@v4
@@ -55,15 +58,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: "Git Checkout"
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
-      - name: "Install Flutter"
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: ${{ env.flutter_version }}
-          channel: stable
-          cache-key: flutter-:os:-:channel:-:version:-:arch:-:hash:-${{ hashFiles('**/pubspec.lock') }}
+      - uses: ./.github/actions/setup-flutter
       - name: "Install Tools"
         run: |
           flutter pub global activate melos
@@ -84,15 +82,10 @@ jobs:
     timeout-minutes: 15
     steps:
       - name: "Git Checkout"
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
-      - name: "Install Flutter"
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: ${{ env.flutter_version }}
-          channel: stable
-          cache-key: flutter-:os:-:channel:-:version:-:arch:-:hash:-${{ hashFiles('**/pubspec.lock') }}
+      - uses: ./.github/actions/setup-flutter
       - name: "Install Tools"
         run: |
           flutter pub global activate melos
@@ -111,15 +104,10 @@ jobs:
     timeout-minutes: 30
     steps:
       - name: "Git Checkout"
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
-      - name: "Install Flutter"
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: ${{ env.flutter_version }}
-          channel: stable
-          cache-key: flutter-:os:-:channel:-:version:-:arch:-:hash:-${{ hashFiles('**/pubspec.lock') }}
+      - uses: ./.github/actions/setup-flutter
       # This step is needed due to https://github.com/actions/runner-images/issues/11279
       - name: Install SQLite3
         run: sudo apt-get update && sudo apt-get install -y sqlite3 libsqlite3-dev
@@ -185,15 +173,10 @@ jobs:
 
     steps:
       - name: "Git Checkout"
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
-      - name: "Install Flutter"
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: ${{ env.flutter_version }}
-          channel: stable
-          cache-key: flutter-:os:-:channel:-:version:-:arch:-:hash:-${{ hashFiles('**/pubspec.lock') }}
+      - uses: ./.github/actions/setup-flutter
       - uses: maxim-lobanov/setup-xcode@v1
         if: matrix.platform == 'ios'
         with:
@@ -202,11 +185,7 @@ jobs:
         run: flutter pub global activate melos
       - name: "Bootstrap Workspace"
         run: melos bootstrap
-      - name: Setup Ruby and Gems
-        uses: ruby/setup-ruby@v1
-        with:
-          working-directory: ${{ matrix.working-directory }}
-          bundler-cache: true
+      - uses: ./.github/actions/setup-ruby
       - name: "Build ${{ matrix.platform }} App"
         working-directory: ${{ matrix.working-directory }}
         run: ${{ matrix.build-command }}

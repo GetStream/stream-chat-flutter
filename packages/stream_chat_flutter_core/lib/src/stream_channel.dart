@@ -25,14 +25,6 @@ typedef ErrorWidgetBuilder =
       StackTrace? stackTrace,
     );
 
-Color _getDefaultBackgroundColor(BuildContext context) {
-  final brightness = Theme.of(context).brightness;
-  return switch (brightness) {
-    Brightness.light => const Color(0xfff7f7f8),
-    Brightness.dark => const Color(0xff000000),
-  };
-}
-
 /// Widget used to provide information about the channel to the widget tree
 ///
 /// Use [StreamChannel.of] to get the current [StreamChannelState] instance.
@@ -45,8 +37,8 @@ class StreamChannel extends StatefulWidget {
     required this.channel,
     this.showLoading = true,
     this.initialMessageId,
-    this.errorBuilder = _defaultErrorBuilder,
-    this.loadingBuilder = _defaultLoadingBuilder,
+    this.errorBuilder = _resolveErrorBuilder,
+    this.loadingBuilder = _resolveLoadingBuilder,
   }) : _shouldPosition = true;
 
   /// Exposes a [channel] to descendants without repositioning the loaded
@@ -68,8 +60,8 @@ class StreamChannel extends StatefulWidget {
     required this.channel,
   }) : showLoading = false,
        initialMessageId = null,
-       errorBuilder = _defaultErrorBuilder,
-       loadingBuilder = _defaultLoadingBuilder,
+       errorBuilder = _resolveErrorBuilder,
+       loadingBuilder = _resolveLoadingBuilder,
        _shouldPosition = false;
 
   /// The child of the widget
@@ -84,52 +76,35 @@ class StreamChannel extends StatefulWidget {
   /// If passed the channel will load from this particular message.
   final String? initialMessageId;
 
-  /// Widget builder used in case the channel is initialising.
+  /// Widget builder used while the channel is initialising.
+  ///
+  /// Defaults to a builder that resolves the nearest
+  /// [DefaultStreamChannelBuilders], falling back to a built-in loading
+  /// indicator.
   final WidgetBuilder loadingBuilder;
 
-  /// Widget builder used in case an error occurs while building the channel.
+  /// Widget builder used when an error occurs while building the channel.
+  ///
+  /// Defaults to a builder that resolves the nearest
+  /// [DefaultStreamChannelBuilders], falling back to a built-in error widget.
   final ErrorWidgetBuilder errorBuilder;
 
   // Whether to position the loaded window on mount (initialMessageId,
   // last-read, or latest). Only false for StreamChannel.value.
   final bool _shouldPosition;
 
-  static Widget _defaultLoadingBuilder(BuildContext context) {
-    final backgroundColor = _getDefaultBackgroundColor(context);
-    return Material(
-      color: backgroundColor,
-      child: const Center(
-        child: CircularProgressIndicator.adaptive(),
-      ),
-    );
+  static Widget _resolveLoadingBuilder(BuildContext context) {
+    final builder = DefaultStreamChannelBuilders.loadingBuilderOf(context);
+    return builder(context);
   }
 
-  static Widget _defaultErrorBuilder(
+  static Widget _resolveErrorBuilder(
     BuildContext context,
     Object error,
     StackTrace? stackTrace,
   ) {
-    final backgroundColor = _getDefaultBackgroundColor(context);
-
-    Object? unwrapParallelError(Object error) {
-      if (error case ParallelWaitError(:final List<AsyncError?> errors)) {
-        return errors.firstWhereOrNull((it) => it != null)?.error;
-      }
-
-      return error;
-    }
-
-    final exception = unwrapParallelError(error);
-    return Material(
-      color: backgroundColor,
-      child: Center(
-        child: switch (exception) {
-          DioException(type: DioExceptionType.badResponse) => Text(exception.message ?? 'Bad response'),
-          DioException() => const Text('Check your connection and retry'),
-          _ => Text(exception.toString()),
-        },
-      ),
-    );
+    final builder = DefaultStreamChannelBuilders.errorBuilderOf(context);
+    return builder(context, error, stackTrace);
   }
 
   /// Finds the [StreamChannelState] from the closest [StreamChannel] ancestor
@@ -201,6 +176,10 @@ class StreamChannel extends StatefulWidget {
 
 // ignore: public_member_api_docs
 class StreamChannelState extends State<StreamChannel> {
+  // Anything before this is treated as the server's "never read" sentinel
+  // (Go's zero `time.Time{}` → `DateTime.utc(1, 1, 1)`).
+  static final _minValidLastRead = DateTime.utc(1970, 1, 1);
+
   /// Current channel
   Channel get channel => widget.channel;
 
@@ -838,6 +817,27 @@ class StreamChannelState extends State<StreamChannel> {
     return _queryAtMessage();
   }
 
+  /// Retries initializing the channel after a failure.
+  ///
+  /// Re-runs the channel initialization and rebuilds so a previously failed
+  /// load (e.g. due to a network error) can recover. This is the retry action
+  /// to wire into [StreamChannel.errorBuilder].
+  void retry() {
+    if (!mounted) return;
+    setState(_initializeChannel); // Rebuild to show the loading state again.
+  }
+
+  void _initializeChannel() {
+    // Order matters: `_maybeInitChannel()` triggers the (re)query that resets
+    // `channel.initialized` after a failed init, so it must run before
+    // `channel.initialized` is read here — otherwise a retry would await the
+    // stale, already-errored completer.
+    //
+    // `..ignore()` avoids an unhandled error if the future fails before the
+    // FutureBuilder resubscribes (e.g. on retry's deferred rebuild).
+    _channelInitFuture = Future.wait([_maybeInitChannel(), channel.initialized])..ignore();
+  }
+
   Future<void> _maybeInitChannel() async {
     // If the channel doesn't have an CID yet, it hasn't been created on the
     // server so we don't need to initialize it.
@@ -878,8 +878,12 @@ class StreamChannelState extends State<StreamChannel> {
         }
       }
 
-      // Otherwise, load the channel at the last read date.
-      return loadChannelAtTimestamp(currentUserRead.lastRead);
+      // Skip the "never read" sentinel: the server ignores it as
+      // `created_at_around` and returns the tail, which would mis-infer
+      // `_topPaginationEnded = true`. Fall through to load-latest below.
+      if (currentUserRead.lastRead.isAfter(_minValidLastRead)) {
+        return loadChannelAtTimestamp(currentUserRead.lastRead);
+      }
     }
 
     // If nothing above applies, we just load the channel at the latest
@@ -892,7 +896,7 @@ class StreamChannelState extends State<StreamChannel> {
   @override
   void initState() {
     super.initState();
-    _channelInitFuture = [_maybeInitChannel(), channel.initialized].wait;
+    _initializeChannel();
   }
 
   @override
@@ -900,7 +904,7 @@ class StreamChannelState extends State<StreamChannel> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.channel.cid != widget.channel.cid || oldWidget.initialMessageId != widget.initialMessageId) {
       // Re-initialize channel if the channel CID or initial message ID changes.
-      _channelInitFuture = [_maybeInitChannel(), channel.initialized].wait;
+      _initializeChannel();
     }
   }
 
@@ -918,18 +922,135 @@ class StreamChannelState extends State<StreamChannel> {
       child: FutureBuilder<void>(
         future: _channelInitFuture,
         builder: (context, snapshot) {
+          // Gate the error on `done`: the snapshot keeps the stale error across
+          // a retry, so checking it first would hide the loading state.
+          if (snapshot.connectionState != ConnectionState.done) {
+            if (widget.showLoading) return widget.loadingBuilder(context);
+            return widget.child; // return child directly if loading is disabled
+          }
+
           if (snapshot.hasError) {
             final error = snapshot.error!;
             final stackTrace = snapshot.stackTrace;
             return widget.errorBuilder(context, error, stackTrace);
           }
 
-          if (snapshot.connectionState != ConnectionState.done) {
-            if (widget.showLoading) return widget.loadingBuilder(context);
-          }
-
           return widget.child;
         },
+      ),
+    );
+  }
+}
+
+/// Provides default builders to descendant [StreamChannel]s that don't
+/// specify their own [StreamChannel.loadingBuilder] / [StreamChannel.errorBuilder].
+///
+/// Lets a higher layer (e.g. `stream_chat_flutter`'s `StreamChat`) supply
+/// themed, localized loading and error states for every [StreamChannel]
+/// beneath it, without each call site passing them.
+class DefaultStreamChannelBuilders extends InheritedWidget {
+  /// Creates a new instance of [DefaultStreamChannelBuilders].
+  const DefaultStreamChannelBuilders({
+    super.key,
+    this.loadingBuilder,
+    this.errorBuilder,
+    required super.child,
+  });
+
+  /// Default builder for the channel-initializing state.
+  final WidgetBuilder? loadingBuilder;
+
+  /// Default builder for the channel-initialization error state.
+  final ErrorWidgetBuilder? errorBuilder;
+
+  /// Resolves the loading builder from the closest [DefaultStreamChannelBuilders]
+  /// above [context], falling back to the built-in loading indicator.
+  static WidgetBuilder loadingBuilderOf(BuildContext context) {
+    final scope = context.dependOnInheritedWidgetOfExactType<DefaultStreamChannelBuilders>();
+    return scope?.loadingBuilder ?? _defaultLoadingBuilder;
+  }
+
+  /// Resolves the error builder from the closest [DefaultStreamChannelBuilders]
+  /// above [context], falling back to the built-in error widget.
+  static ErrorWidgetBuilder errorBuilderOf(BuildContext context) {
+    final scope = context.dependOnInheritedWidgetOfExactType<DefaultStreamChannelBuilders>();
+    return scope?.errorBuilder ?? _defaultErrorBuilder;
+  }
+
+  @override
+  bool updateShouldNotify(DefaultStreamChannelBuilders oldWidget) {
+    return loadingBuilder != oldWidget.loadingBuilder || errorBuilder != oldWidget.errorBuilder;
+  }
+
+  static Color _getDefaultBackgroundColor(BuildContext context) {
+    final brightness = Theme.of(context).brightness;
+    return switch (brightness) {
+      Brightness.light => const Color(0xfff7f7f8),
+      Brightness.dark => const Color(0xff000000),
+    };
+  }
+
+  static Widget _defaultLoadingBuilder(BuildContext context) {
+    final backgroundColor = _getDefaultBackgroundColor(context);
+    return Material(
+      color: backgroundColor,
+      child: const Center(
+        child: CircularProgressIndicator.adaptive(),
+      ),
+    );
+  }
+
+  static Widget _defaultErrorBuilder(
+    BuildContext context,
+    Object error,
+    StackTrace? stackTrace,
+  ) {
+    final backgroundColor = _getDefaultBackgroundColor(context);
+
+    // Raw, unlocalized fallback: this core widget has no design system or
+    // translations, so copy/styling are hardcoded. Apps can override with
+    // [StreamChannel.errorBuilder] for a themed, localized state.
+    final (title, message) = switch (error) {
+      StreamChatNetworkError(type: .connectionError) => (
+        'No Internet Connection',
+        'Please check your internet connection',
+      ),
+      StreamChatNetworkError(type: .connectionTimeout || .sendTimeout || .receiveTimeout) => (
+        'Slow Internet Connection',
+        'There seems to be a problem with your internet connection',
+      ),
+      _ => ('Error', 'Oops, something went wrong'),
+    };
+
+    return Material(
+      color: backgroundColor,
+      child: Center(
+        child: Padding(
+          padding: const .symmetric(horizontal: 16, vertical: 40),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.error_outline, size: 32),
+              const SizedBox(height: 8),
+              Text(
+                title,
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 16, fontWeight: .w600),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                message,
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 16),
+              ),
+              const SizedBox(height: 16),
+              OutlinedButton(
+                onPressed: () => StreamChannel.maybeOf(context)?.retry(),
+                child: const Text('Try Again'),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

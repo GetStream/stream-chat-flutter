@@ -2,10 +2,9 @@ import 'dart:async';
 import 'dart:ui' as ui;
 
 import 'package:flutter/services.dart';
-import 'package:get_thumbnail_video/index.dart';
-import 'package:get_thumbnail_video/video_thumbnail.dart';
 import 'package:stream_chat_flutter/src/utils/device_segmentation.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_thumbnail/stream_thumbnail.dart';
 import 'package:thumblr/thumblr.dart' as thumblr;
 
 ///
@@ -35,7 +34,7 @@ class _IVideoService {
   Future<Uint8List?> generateVideoThumbnail({
     String? video,
     Map<String, String>? headers,
-    ImageFormat imageFormat = ImageFormat.PNG,
+    StreamThumbnailFormat imageFormat = .png,
     int maxHeight = 0,
     int maxWidth = 0,
     int timeMs = 0,
@@ -60,8 +59,8 @@ class _IVideoService {
         return await generatePlaceholderThumbnail();
       }
 
-      // Otherwise, use the VideoThumbnail package to generate the thumbnail.
-      return await VideoThumbnail.thumbnailData(
+      // Otherwise, use the stream_thumbnail plugin to generate the thumbnail.
+      return await StreamThumbnail.thumbnailData(
         video: video,
         headers: headers,
         imageFormat: imageFormat,

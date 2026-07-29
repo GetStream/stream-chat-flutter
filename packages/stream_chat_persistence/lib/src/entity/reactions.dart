@@ -5,6 +5,7 @@ import 'package:stream_chat_persistence/src/entity/messages.dart';
 
 /// Represents a [Reactions] table in [DriftChatDatabase].
 @DataClassName('ReactionEntity')
+@TableIndex(name: 'idx_reactions_message_id', columns: {#messageId})
 class Reactions extends Table {
   /// The id of the user that sent the reaction
   TextColumn get userId => text().nullable()();

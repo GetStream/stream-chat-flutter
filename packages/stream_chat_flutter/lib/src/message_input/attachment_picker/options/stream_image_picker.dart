@@ -54,7 +54,7 @@ class StreamImagePicker extends StatelessWidget {
       return onImagePicked.call(pickedImage);
     }
 
-    return OptionDrawer(
+    final drawer = OptionDrawer(
       child: EndOfFrameCallbackWidget(
         child: Center(
           child: Column(
@@ -110,5 +110,7 @@ class StreamImagePicker extends StatelessWidget {
         },
       ),
     );
+
+    return MergeSemantics(child: drawer);
   }
 }

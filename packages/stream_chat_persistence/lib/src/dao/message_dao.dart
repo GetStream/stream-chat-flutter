@@ -283,7 +283,7 @@ class MessageDao extends DatabaseAccessor<DriftChatDatabase> with _$MessageDaoMi
       );
     }
 
-    if (options != null) {
+    if (options != null && options.limit > 0) {
       query.limit(options.limit);
     }
 
@@ -432,10 +432,6 @@ class MessageDao extends DatabaseAccessor<DriftChatDatabase> with _$MessageDaoMi
       ),
     );
   }
-
-  /// Updates the message data of a particular channel with
-  /// the new [messageList] data
-  Future<void> updateMessages(String cid, List<Message> messageList) => bulkUpdateMessages({cid: messageList});
 
   /// Bulk updates the message data of multiple channels
   Future<void> bulkUpdateMessages(

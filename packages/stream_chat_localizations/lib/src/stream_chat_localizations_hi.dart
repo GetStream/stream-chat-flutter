@@ -8,6 +8,9 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
   const StreamChatLocalizationsHi({super.localeName = 'hi'});
 
   @override
+  AccessibilityTranslations get accessibility => _AccessibilityTranslationsHi(localeName: localeName);
+
+  @override
   String get launchUrlError => 'यूआरएल लॉन्च नहीं कर सकते';
 
   @override
@@ -180,6 +183,24 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
 
   @override
   String get somethingWentWrongError => 'लोड करने में समस्या';
+
+  @override
+  String get connectionErrorTitle => 'इंटरनेट कनेक्शन नहीं है';
+
+  @override
+  String get connectionErrorDescription => 'कृपया अपना इंटरनेट कनेक्शन जांचें';
+
+  @override
+  String get slowConnectionErrorTitle => 'धीमा इंटरनेट कनेक्शन';
+
+  @override
+  String get slowConnectionErrorDescription => 'ऐसा लगता है कि आपके इंटरनेट कनेक्शन में कोई समस्या है';
+
+  @override
+  String get genericErrorTitle => 'त्रुटि';
+
+  @override
+  String get genericErrorDescription => 'ओह, कुछ गलत हो गया';
 
   @override
   String get addMoreFilesLabel => 'और जोड़ें';
@@ -842,4 +863,293 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
 
   @override
   String notifyRoleText(String role) => 'सभी $role सदस्यों को सूचित करें';
+}
+
+class _AccessibilityTranslationsHi extends AccessibilityTranslations {
+  const _AccessibilityTranslationsHi({super.localeName = 'hi'});
+
+  @override
+  String get sendMessageTooltip => 'संदेश भेजें';
+
+  @override
+  String get saveEditTooltip => 'संपादन सहेजें';
+
+  @override
+  String get sendCommandTooltip => 'कमांड भेजें';
+
+  @override
+  String slowModeTooltip({required int seconds}) {
+    return 'स्लो मोड: $seconds सेकंड';
+  }
+
+  @override
+  String get recordVoiceRecordingLabel => 'वॉइस संदेश रिकॉर्ड करें';
+
+  @override
+  String get cancelRecordingTooltip => 'रिकॉर्डिंग रद्द करें';
+
+  @override
+  String get stopRecordingTooltip => 'रिकॉर्डिंग रोकें';
+
+  @override
+  String get sendRecordingTooltip => 'रिकॉर्डिंग भेजें';
+
+  @override
+  String recordingDurationLabel({required Duration duration}) => 'रिकॉर्डिंग अवधि, ${formatDuration(duration)}';
+
+  @override
+  String voiceRecordingPreviewPlayLabel({required Duration duration}) =>
+      'वॉइस रिकॉर्डिंग चलाएँ, ${formatDuration(duration)}';
+
+  @override
+  String voiceRecordingPreviewPauseLabel({required Duration duration}) =>
+      'वॉइस रिकॉर्डिंग रोकें, ${formatDuration(duration)}';
+
+  @override
+  String get attachmentPickerTooltip => 'अटैचमेंट चयनकर्ता टॉगल करें';
+
+  @override
+  String get attachmentPickerOpenHint => 'अटैचमेंट चयनकर्ता खोलने के लिए दो बार टैप करें';
+
+  @override
+  String get attachmentPickerCloseHint => 'अटैचमेंट चयनकर्ता बंद करने के लिए दो बार टैप करें';
+
+  @override
+  String get attachmentPickerOpenTapHint => 'अटैचमेंट चयनकर्ता खोलें';
+
+  @override
+  String get attachmentPickerCloseTapHint => 'अटैचमेंट चयनकर्ता बंद करें';
+
+  @override
+  String get attachmentPickerOpenedAnnouncement => 'अटैचमेंट चयनकर्ता खुला';
+
+  @override
+  String get attachmentPickerClosedAnnouncement => 'अटैचमेंट चयनकर्ता बंद';
+
+  @override
+  String voiceRecordingAttachmentLabel({Duration? duration}) {
+    if (duration == null) return 'वॉइस संदेश';
+    return 'वॉइस संदेश, ${formatDuration(duration)}';
+  }
+
+  @override
+  String videoAttachmentLabel({String? title}) {
+    if (title == null || title.isEmpty) return 'वीडियो';
+    return 'वीडियो, $title';
+  }
+
+  @override
+  String get gifAttachmentLabel => 'GIF';
+
+  @override
+  String imageAttachmentLabel({String? title}) {
+    if (title == null || title.isEmpty) return 'फोटो';
+    return 'फोटो, $title';
+  }
+
+  @override
+  String get voiceRecordingPlayTooltip => 'चलाएँ';
+
+  @override
+  String get voiceRecordingPauseTooltip => 'रोकें';
+
+  @override
+  String get voiceRecordingLoadingTooltip => 'लोड हो रहा है';
+
+  @override
+  String get channelInfoLabel => 'चैनल की जानकारी';
+
+  @override
+  String get messageActionsLabel => 'संदेश क्रियाएँ';
+
+  @override
+  String galleryImageLabel({DateTime? createdAt}) {
+    if (createdAt == null) return 'फोटो';
+    return 'फोटो, ${formatDateTime(createdAt)}';
+  }
+
+  @override
+  String galleryVideoLabel({
+    DateTime? createdAt,
+    Duration? duration,
+  }) {
+    final parts = <String>[
+      'वीडियो',
+      if (duration != null) formatDuration(duration),
+      if (createdAt != null) formatDateTime(createdAt),
+    ];
+    return parts.join(', ');
+  }
+
+  @override
+  String get selectMediaTapHint => 'चुनें';
+
+  @override
+  String get deselectMediaTapHint => 'चयन हटाएँ';
+
+  @override
+  String get outgoingMessagePreviewLabel => 'आप';
+
+  @override
+  String incomingMessagePreviewLabel({String? senderName}) {
+    return senderName ?? 'संदेश';
+  }
+
+  @override
+  String get pollPreviewLabel => 'पोल';
+
+  @override
+  String get draftPreviewLabel => 'मसौदा';
+
+  @override
+  String get messageSendingStatusLabel => 'भेजा जा रहा है';
+
+  @override
+  String get messageSentStatusLabel => 'भेजा गया';
+
+  @override
+  String get messageDeliveredStatusLabel => 'पहुंचा दिया';
+
+  @override
+  String get messageReadStatusLabel => 'पढ़ा गया';
+
+  @override
+  String unreadMessagesLabel({required int count}) {
+    return Intl.plural(
+      count,
+      one: '$count अपठित संदेश',
+      other: '$count अपठित संदेश',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String get channelGroupLabel => 'ग्रुप';
+
+  @override
+  String get systemMessagePreviewLabel => 'सिस्टम';
+
+  @override
+  String get channelMutedLabel => 'म्यूट';
+
+  @override
+  String get channelPinnedLabel => 'पिन किया गया';
+
+  @override
+  String get savePollTooltip => 'पोल सहेजें';
+
+  @override
+  String removePollOptionTooltip({String? optionText}) {
+    final trimmed = optionText?.trim();
+    if (trimmed == null || trimmed.isEmpty) return 'विकल्प हटाएँ';
+    return 'विकल्प हटाएँ $trimmed';
+  }
+
+  @override
+  String get recordingStartedAnnouncement =>
+      'रिकॉर्डिंग शुरू हुई। रद्द करने के लिए बाईं ओर स्लाइड करें। लॉक करने के लिए ऊपर स्लाइड करें।';
+
+  @override
+  String get recordingLockedAnnouncement => 'रिकॉर्डिंग लॉक हो गई';
+
+  @override
+  String get recordingStoppedAnnouncement => 'रिकॉर्डिंग रुक गई';
+
+  @override
+  String get recordingCancelledAnnouncement => 'रिकॉर्डिंग रद्द हो गई';
+
+  @override
+  String get recordingCompletedAnnouncement => 'रिकॉर्डिंग पूर्ण';
+
+  @override
+  String get imageAttachmentAddedAnnouncement => 'फोटो जोड़ी गई';
+
+  @override
+  String get imageAttachmentRemovedAnnouncement => 'फोटो हटाई गई';
+
+  @override
+  String get videoAttachmentAddedAnnouncement => 'वीडियो जोड़ा गया';
+
+  @override
+  String get videoAttachmentRemovedAnnouncement => 'वीडियो हटाया गया';
+
+  @override
+  String get gifAttachmentAddedAnnouncement => 'GIF जोड़ा गया';
+
+  @override
+  String get gifAttachmentRemovedAnnouncement => 'GIF हटाया गया';
+
+  @override
+  String get fileAttachmentAddedAnnouncement => 'फ़ाइल जोड़ी गई';
+
+  @override
+  String get fileAttachmentRemovedAnnouncement => 'फ़ाइल हटाई गई';
+
+  @override
+  String get voiceRecordingAttachmentAddedAnnouncement => 'वॉइस संदेश जोड़ा गया';
+
+  @override
+  String get voiceRecordingAttachmentRemovedAnnouncement => 'वॉइस संदेश हटाया गया';
+
+  @override
+  String get attachmentAddedAnnouncement => 'अटैचमेंट जोड़ा गया';
+
+  @override
+  String get attachmentRemovedAnnouncement => 'अटैचमेंट हटाया गया';
+
+  @override
+  String attachmentsAddedAnnouncement({required int count}) {
+    return Intl.plural(
+      count,
+      one: '$count अटैचमेंट जोड़ा गया',
+      other: '$count अटैचमेंट जोड़े गए',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String attachmentsRemovedAnnouncement({required int count}) {
+    return Intl.plural(
+      count,
+      one: '$count अटैचमेंट हटाया गया',
+      other: '$count अटैचमेंट हटाए गए',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String formatRecentDateTime(DateTime date) {
+    if (date.isWithinLastMinute) return 'अभी';
+
+    final localDate = date.toLocal();
+    final jiffyDate = Jiffy.parseFromDateTime(localDate);
+    final time = jiffyDate.jm;
+
+    if (localDate.isToday) return 'आज $time पर';
+    if (localDate.isYesterday) return 'कल $time पर';
+    if (localDate.isWithinLastWeek) return '${jiffyDate.EEEE} $time पर';
+    if (localDate.isInSameYear) {
+      return '${jiffyDate.format(pattern: 'd MMM')} $time पर';
+    }
+    return '${jiffyDate.format(pattern: 'd MMM yyyy')} $time पर';
+  }
+
+  @override
+  String formatDateTime(DateTime dateTime) {
+    final jiffy = Jiffy.parseFromDateTime(dateTime);
+    return '${jiffy.EEEE}, ${jiffy.yMMMMd}, ${jiffy.jm}';
+  }
+
+  @override
+  String formatDuration(Duration duration) {
+    final hours = duration.inHours;
+    final minutes = duration.inMinutes.remainder(60);
+    final seconds = duration.inSeconds.remainder(60);
+    final parts = <String>[
+      if (hours > 0) Intl.plural(hours, one: '$hours घंटा', other: '$hours घंटे', locale: localeName),
+      if (minutes > 0) '$minutes मिनट',
+      if (seconds > 0 || (hours == 0 && minutes == 0)) '$seconds सेकंड',
+    ];
+    return parts.join(', ');
+  }
 }

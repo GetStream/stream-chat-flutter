@@ -44,7 +44,7 @@ class StreamVideoPicker extends StatelessWidget {
       return onVideoPicked.call(pickedVideo);
     }
 
-    return OptionDrawer(
+    final drawer = OptionDrawer(
       child: EndOfFrameCallbackWidget(
         child: Center(
           child: Column(
@@ -102,5 +102,7 @@ class StreamVideoPicker extends StatelessWidget {
         },
       ),
     );
+
+    return MergeSemantics(child: drawer);
   }
 }

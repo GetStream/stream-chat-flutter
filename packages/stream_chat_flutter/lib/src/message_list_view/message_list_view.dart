@@ -15,6 +15,7 @@ import 'package:stream_chat_flutter/src/message_list_view/thread_separator.dart'
 import 'package:stream_chat_flutter/src/message_list_view/unread_messages_separator.dart';
 import 'package:stream_chat_flutter/src/message_widget/stream_ephemeral_message.dart';
 import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
+import 'package:stream_chat_flutter/src/utils/network_error_text.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// Spacing Types (These are properties of a message to help inform the decision
@@ -404,21 +405,28 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
         if (_scrollController?.isScrolling == true) return;
 
         final currentUser = streamChannel?.channel.client.state.currentUser;
-        final isOwnMessage = message.user?.id == currentUser?.id;
         final isAtBottom = !_showScrollToBottom.value;
 
-        // Auto-scroll on own messages always; on others only when the
-        // user is already at the bottom. For "far from bottom", SPL's
-        // itemKeyBuilder anchor preservation keeps the visible
-        // content pinned.
-        if (!isOwnMessage && !isAtBottom) return;
+        final details = StreamAutoScrollDetails(
+          message: message,
+          currentUser: currentUser,
+          isAtBottom: isAtBottom,
+        );
 
-        // Synchronous (not post-frame) so `_scrollTo` clears SPL's
-        // anchor key before the rebuild's `didUpdateWidget`; otherwise
-        // anchor preservation re-pins the topmost visible message and
-        // pushes the new one below the viewport.
+        final behavior = _config.autoScrollPolicy.resolve(details);
+
+        // Synchronous (not post-frame) so the scroll clears SPL's anchor key
+        // before the rebuild's `didUpdateWidget`; otherwise anchor
+        // preservation re-pins the topmost visible message and pushes the new
+        // one below the viewport.
         if (_scrollController case final controller? when controller.isAttached) {
-          controller.scrollTo(index: 0);
+          return switch (behavior) {
+            // SPL's itemKeyBuilder anchor preservation keeps the visible
+            // content pinned, so staying put doesn't shift the viewport.
+            StreamAutoScrollBehavior.none => null,
+            StreamAutoScrollBehavior.jump => controller.jumpTo(index: 0),
+            StreamAutoScrollBehavior.animate => controller.scrollTo(index: 0),
+          };
         }
       });
 
@@ -552,9 +560,15 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
 
     Widget defaultErrorBuilder(BuildContext context, Object error) {
       if (widget.builders.error case final builder?) return builder(context, error);
+
+      final translations = context.translations;
+      final text = resolveNetworkErrorText(context, error, fallbackTitle: translations.loadingMessagesError);
+
       return Center(
         child: StreamScrollViewErrorWidget(
-          errorTitle: Text(context.translations.loadingMessagesError),
+          errorTitle: Text(text.title),
+          errorSubtitle: Text(text.description),
+          retryButtonText: Text(translations.tryAgainLabel),
           onRetryPressed: () => streamChannel?.reloadChannel(),
         ),
       );
@@ -957,6 +971,17 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
 
   Future<void> _markMessagesAsRead() async {
     if (widget.parentMessage case final parent?) {
+      // If we are in a thread, mark the thread as read immediately.
+      await streamChannel?.channel.markThreadRead(parent.id);
+      return;
+    }
+
+    // Otherwise, mark the channel as read immediately.
+    await streamChannel?.channel.markRead();
+  }
+
+  Future<void> _debouncedMarkMessagesAsRead() async {
+    if (widget.parentMessage case final parent?) {
       // If we are in a thread, mark the thread as read.
       debouncedMarkThreadRead.call([parent.id]);
     } else {
@@ -1244,6 +1269,8 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
   // The conditions are:
   // 1. The channel is up to date or we are in a thread conversation.
   // 2. There are unread messages or we are in a thread conversation.
+  // 3. In a thread, the parent has at least one reply — the server-side
+  //    thread object doesn't exist until the first reply lands.
   //
   // If any of the conditions are not met, the function returns early.
   // Otherwise, it calls the _markMessagesAsRead function to mark the messages
@@ -1254,6 +1281,10 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
 
     final isInThread = widget.parentMessage != null;
 
+    // A server-side thread object only exists once the parent has at least
+    // one reply; markThreadRead on a reply-less parent returns 404.
+    if (isInThread && (widget.parentMessage?.replyCount ?? 0) == 0) return;
+
     final isUpToDate = channel.state?.isUpToDate ?? false;
     if (!isInThread && !isUpToDate) return;
 
@@ -1261,7 +1292,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     if (!isInThread && !hasUnread) return;
 
     // Mark messages as read if it's allowed.
-    return _markMessagesAsRead();
+    return _debouncedMarkMessagesAsRead();
   }
 
   void _getOnThreadTap() {

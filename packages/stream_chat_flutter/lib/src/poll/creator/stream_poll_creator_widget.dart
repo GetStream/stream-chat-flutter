@@ -114,6 +114,7 @@ class StreamPollCreatorWidget extends StatelessWidget {
                     max: config.allowedVotesRange?.max ?? 10,
                     value: poll.maxVotesAllowed ?? config.allowedVotesRange?.min ?? 2,
                     onChanged: (value) => controller.maxVotesAllowed = value,
+                    semanticLabel: translations.maximumVotesPerPersonLabel,
                     style: theme.configOptionStyle?.stepperStyle,
                   ),
                 ),

@@ -70,9 +70,15 @@ The old design used a single monolithic `StreamMessageItem` with 50+ parameters 
 
 ### Component Factory Pattern
 
-The new design adds a **component factory** layer for app-wide customization. The `messageBuilder` / `parentMessageBuilder` callbacks on `StreamMessageListView` are still supported for per-list customization.
+The new design adds a **component factory** layer for app-wide customization. This is the **preferred way** to customize the message widget in v10.
 
-**App-wide customization via component factory:**
+**Why the factory is preferred over `messageBuilder`:**
+
+In v9, `messageBuilder` was the only customization hook — but it only applied to the list you passed it to. Any other place that renders a message (most notably the long-press actions modal, which shows a preview of the message being acted on) always used the default widget. You had no way to make those previews match your custom bubble without forking SDK internals.
+
+In v10, `StreamMessageItem` resolves its builder from `StreamComponentFactory` (via `context.chatComponentBuilder<StreamMessageItemProps>()`). Register a factory once on `StreamChat` and every `StreamMessageItem` across the app — message list, thread list, actions modal preview — uses your custom widget automatically.
+
+**App-wide customization via component factory (preferred):**
 ```dart
 StreamChat(
   client: client,
@@ -93,16 +99,21 @@ StreamChat(
 )
 ```
 
-**Per-list customization via `messageBuilder` (still supported):**
+**Per-list customization via `messageBuilder` (use only for list-specific behavior):**
 ```dart
 StreamMessageListView(
   messageBuilder: (context, message, defaultProps) {
-    return StreamMessageItem.fromProps(props: defaultProps);
+    // StreamMessageItem.fromProps goes through the factory, so global
+    // customization is still applied even inside a per-list messageBuilder.
+    final defaultWidget = StreamMessageItem.fromProps(props: defaultProps);
+    return Swipeable(onSwiped: (_) => onReply(message), child: defaultWidget);
   },
 )
 ```
 
-Both can be combined — the component factory applies first, then the per-list `messageBuilder` can further customize or wrap the result. See [message_list.md](message_list.md) for details on the `messageBuilder` signature and the new `config` / `builders` split on `StreamMessageListView`.
+The two compose cleanly: `messageBuilder` takes precedence for that list; calling `StreamMessageItem.fromProps` inside it still invokes the factory. Reserve `messageBuilder` for behavior that genuinely differs per list (gesture wrappers, list-specific layout changes). Everything else belongs in the factory.
+
+See [message_list.md](message_list.md) for details on the `messageBuilder` signature, the `config` / `builders` split, and when to choose each approach.
 
 ---
 
@@ -289,6 +300,46 @@ actionsBuilder: (context, defaultActions) {
 | `StreamChatThemeData.ownMessageTheme`      | Placement-aware styling via `StreamMessageLayoutProperty.resolveWith` on individual style fields (e.g. `bubble`, `metadata`) |
 | `StreamChatThemeData.otherMessageTheme`    | Placement-aware styling via `StreamMessageLayoutProperty.resolveWith` on individual style fields (e.g. `bubble`, `metadata`) |
 | `StreamMessageItem.messageTheme` parameter | Resolved from context via `StreamMessageItemTheme.of(context)`             |
+
+### Changing the own-message bubble color
+
+The own-message bubble background is derived from `StreamColorScheme.brand.shade100`. The simplest way to change it app-wide is to provide a custom brand swatch via `StreamTheme` as a `ThemeExtension`:
+
+```dart
+// In your MaterialApp theme:
+MaterialApp(
+  theme: ThemeData(
+    extensions: [
+      StreamTheme(
+        colorScheme: StreamColorScheme.light(
+          // StreamColorSwatch.fromColor generates a full 11-shade swatch from
+          // a single color. shade100 ≈ a light tint — this becomes the own-message
+          // bubble background. For example, WhatsApp green produces ≈ #DCF8C6.
+          brand: StreamColorSwatch.fromColor(const Color(0xFF25D366)),
+        ),
+      ),
+    ],
+  ),
+)
+```
+
+`StreamColorSwatch.fromColor(Color, [Brightness])` accepts any `Color` and derives the full swatch automatically. `StreamColorScheme.light(brand:)` / `StreamColorScheme.dark(brand:)` are convenience constructors that replace only the brand swatch.
+
+For fine-grained per-alignment control (e.g. different colors for sent vs. received), use `StreamMessageBubbleStyle` inside `StreamMessageItemThemeData` with `StreamMessageLayoutProperty`. `StreamMessageLayoutProperty.resolveWith` receives the current `StreamMessageLayout` — which carries alignment, stack position, and other layout details — and returns the value for that specific message:
+
+```dart
+StreamMessageItemThemeData(
+  bubble: StreamMessageBubbleStyle(
+    backgroundColor: StreamMessageLayoutProperty.resolveWith((layout) {
+      return layout.alignment == StreamMessageAlignment.end
+          ? const Color(0xFFDCF8C6) // own message
+          : Colors.white;           // other message
+    }),
+  ),
+)
+```
+
+See the [StreamMessageItemThemeData](#streammessageitemthemedata) section for the full theme example.
 
 **Before (explicit `messageTheme` parameter):**
 ```dart

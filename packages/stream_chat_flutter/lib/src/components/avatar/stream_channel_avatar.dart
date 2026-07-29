@@ -2,6 +2,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/components/avatar/stream_user_avatar.dart';
 import 'package:stream_chat_flutter/src/components/avatar/stream_user_avatar_group.dart';
+import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:stream_core_flutter/chat.dart';
 
@@ -55,6 +56,7 @@ class StreamChannelAvatar extends StatelessWidget {
     this.size,
     required this.channel,
     this.isFloating,
+    this.semanticsLabel,
   });
 
   /// The channel whose avatar is displayed.
@@ -72,17 +74,27 @@ class StreamChannelAvatar extends StatelessWidget {
   /// [StreamBoxShadow.elevation3].
   final bool? isFloating;
 
+  /// Screen-reader label for the avatar.
+  ///
+  /// When null (the default), a `"Group"` label is emitted for group
+  /// channels and direct-message avatars stay silent. When non-null, the
+  /// given string replaces the default; an empty string leaves the avatar
+  /// silent.
+  final String? semanticsLabel;
+
   @override
   Widget build(BuildContext context) {
     assert(channel.state != null, 'Channel ${channel.id} is not initialized');
 
     final effectiveSize = size ?? StreamAvatarGroupSize.lg;
+    final effectiveLabel = semanticsLabel ?? _defaultSemanticsLabel(context);
 
     return BetterStreamBuilder(
       stream: channel.imageStream,
       initialData: channel.image,
       builder: (context, channelImage) => StreamAvatar(
         imageUrl: channelImage,
+        semanticsLabel: effectiveLabel,
         size: _avatarSizeForAvatarGroupSize(effectiveSize),
         isFloating: isFloating,
         placeholder: (_) => const _StreamChannelAvatarPlaceholder(),
@@ -94,13 +106,14 @@ class StreamChannelAvatar extends StatelessWidget {
           final users = members.map((it) => it.user!).toList();
           final currentUserId = channel.client.state.currentUser?.id;
 
-          if (channel.isDistinct && users.length == 2) {
+          if (channel.isOneToOne) {
             final otherUser = users.firstWhere(
               (u) => u.id != currentUserId,
               orElse: () => users.first,
             );
             return StreamUserAvatar(
               user: otherUser,
+              semanticsLabel: effectiveLabel,
               size: _avatarSizeForAvatarGroupSize(effectiveSize),
               // TODO: make this configurable when the online state is shown.
               showOnlineIndicator: otherUser.online,
@@ -110,12 +123,22 @@ class StreamChannelAvatar extends StatelessWidget {
 
           return StreamUserAvatarGroup(
             size: effectiveSize,
+            semanticsLabel: effectiveLabel,
             users: users.sortedBy((it) => it.id == currentUserId ? 1 : 0),
             isFloating: isFloating,
           );
         },
       ),
     );
+  }
+
+  // Computes the default screen-reader label for the avatar based on the
+  // channel type. Returns "Group" for group channels; direct-message
+  // avatars stay silent so the counterpart's identity — announced by the
+  // row's title — isn't duplicated.
+  String? _defaultSemanticsLabel(BuildContext context) {
+    if (!channel.isGroup) return null;
+    return context.translations.accessibility.channelGroupLabel;
   }
 
   // Maps [StreamAvatarGroupSize] to corresponding [StreamAvatarSize].

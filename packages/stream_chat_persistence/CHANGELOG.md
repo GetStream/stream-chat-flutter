@@ -1,4 +1,15 @@
-## Upcoming
+## 10.2.0
+
+🚀 Performance
+
+- Add indices on the `channel_cid` column on the `Messages`, `Members`, and `Reads` tables to improve read times on large databases.
+- Add indices on the `message_id` column on the `Reactions` table to improve read times on large databases.
+
+🐞 Fixed
+
+- `MessageDao.getThreadMessagesByParentId` now treats a `PaginationParams.limit` of `0` as "unset" and returns all matching replies, instead of returning none.
+
+## 10.1.0
 
 ✅ Added
 
@@ -15,6 +26,11 @@
 - `MessageDao.getThreadMessagesByParentId` now honours all `PaginationParams` cursor variants (`lessThan`/`lessThanOrEqual`/`greaterThan`/`greaterThanOrEqual`) and returns the page of replies closest to the cursor.
 - `PinnedMessageDao.getMessagesByCid` now honours `PaginationParams.lessThanOrEqual` and `PaginationParams.greaterThanOrEqual` (inclusive of the cursor message), in addition to the existing strict `lessThan`/`greaterThan`.
 - `PinnedMessageDao.getMessagesByCid` with a forward cursor (`greaterThan`/`greaterThanOrEqual`) and a `limit` now returns the messages immediately AFTER the pivot, instead of the channel tail.
+- Bump database version.
+
+🔄 Internal / Non-breaking
+
+- Removed unused / test-only methods from internal DAO classes.
 
 ## 10.0.1
 

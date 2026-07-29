@@ -1,0 +1,274 @@
+opt_out_usage
+
+require 'net/http'
+require 'shellwords'
+require 'json'
+require 'securerandom'
+require 'fileutils'
+require 'base64'
+import File.expand_path('Allurefile', __dir__)
+
+mock_server_repo_name = 'stream-chat-test-mock-server'
+mock_server_driver_port = ENV['MOCK_DRIVER_PORT'] || '4568'
+github_repo = ENV['GITHUB_REPOSITORY'] || 'GetStream/stream-chat-flutter'
+@force_check = false
+
+def root_path
+  Dir.pwd.sub(/.*\Kfastlane/, '').sub(/.*\Kandroid/, '').sub(/.*\Kios/, '').sub(/.*\K\/\//, '')
+end
+
+def ios_device?(device)
+  device.to_s.match?(/\A[0-9A-F]{8}-[0-9A-F]{4}-/i)
+end
+
+# Video is recorded on ANDROID ONLY — iOS recording is intentionally disabled.
+def start_screen_recording(ios:, device:, path:)
+  return nil if ios
+
+  FileUtils.mkdir_p(File.dirname(path))
+  started_at_ms = (Time.now.to_f * 1000).round
+  serial = device ? "-s #{device} " : ''
+  remote = "/sdcard/#{File.basename(path)}"
+  pid = spawn("adb #{serial}shell screenrecord --bit-rate 4000000 #{remote}",
+              out: File::NULL, err: File::NULL)
+  { pid: pid, path: path, remote: remote, serial: serial, started_at_ms: started_at_ms }
+rescue StandardError => e
+  UI.important("Screen recording failed to start: #{e.message}")
+  nil
+end
+
+def stop_screen_recording(rec)
+  return unless rec
+
+  rec[:ended_at_ms] = (Time.now.to_f * 1000).round
+  sh("adb #{rec[:serial]}shell pkill -INT screenrecord", log: false) rescue nil
+  sleep(3) # let screenrecord finalize + flush the file on-device
+  Process.kill('INT', rec[:pid]) rescue nil # reap the local adb client
+  Process.wait(rec[:pid]) rescue nil
+  sh("adb #{rec[:serial]}pull #{rec[:remote]} #{rec[:path]}", log: false)
+  sh("adb #{rec[:serial]}shell rm #{rec[:remote]}", log: false) rescue nil
+rescue StandardError => e
+  UI.important("Screen recording failed to stop: #{e.message}")
+end
+
+def attach_videos_to_failed_results(results_dir:, videos:)
+  return unless Dir.exist?(results_dir)
+  return if videos.empty?
+
+  unless system('command -v ffmpeg > /dev/null 2>&1')
+    UI.important('ffmpeg not found; skipping per-test video attachments')
+    return
+  end
+
+  Dir["#{results_dir}/*-result.json"].each do |json_path|
+    result = JSON.parse(File.read(json_path))
+    next unless %w[failed broken].include?(result['status'])
+    next unless result['start'] && result['stop']
+
+    label = (result['labels'] || []).find { |l| l['name'] == 'testFile' }
+    recordings = label && videos[label['value']]
+    next unless recordings
+
+    meta = recordings.find do |r|
+      r[:started_at_ms] && r[:ended_at_ms] &&
+        result['start'] >= r[:started_at_ms] && result['start'] <= r[:ended_at_ms]
+    end
+    next unless meta && File.exist?(meta[:path]) && File.size(meta[:path]).positive?
+
+    ss = [((result['start'] - meta[:started_at_ms]) / 1000.0) - 1.0, 0].max
+    duration = ((result['stop'] - result['start']) / 1000.0) + 2.0
+    next unless duration.positive?
+
+    clip = "#{results_dir}/#{SecureRandom.uuid}-attachment.mp4"
+    ok = system('ffmpeg', '-y', '-ss', ss.to_s, '-i', meta[:path], '-t', duration.to_s,
+                '-an', '-c:v', 'libx264', '-preset', 'veryfast', '-movflags', '+faststart', clip,
+                out: File::NULL, err: File::NULL)
+
+    unless ok && File.exist?(clip) && File.size(clip) > 1024
+      File.delete(clip) if File.exist?(clip)
+      next
+    end
+
+    (result['attachments'] ||= []) << { 'name' => 'Video', 'source' => File.basename(clip), 'type' => 'video/mp4' }
+    File.write(json_path, JSON.generate(result))
+  end
+end
+
+lane :sh_on_root do |options|
+  Dir.chdir(root_path) { sh(options[:command]) }
+end
+
+lane :fetch_dependencies do
+  sh_on_root(command: "flutter pub get --suppress-analytics")
+end
+
+lane :start_mock_server do |options|
+  Dir.chdir(root_path) do
+    mock_server_repo = options[:local_server] || mock_server_repo_name
+    stop_mock_server unless is_ci
+
+    unless options[:local_server]
+      branch = options[:branch].to_s.empty? ? 'main' : options[:branch]
+      sh("rm -rf #{mock_server_repo}") if File.directory?(mock_server_repo)
+      sh("git clone -b #{branch} https://github.com/#{github_repo.split('/').first}/#{mock_server_repo}.git")
+    end
+
+    Dir.chdir(mock_server_repo) do
+      FileUtils.mkdir_p('logs')
+      sh("bundle exec ruby driver.rb #{mock_server_driver_port} > logs/driver.log 2>&1 &")
+    end
+  end
+end
+
+lane :stop_mock_server do
+  Net::HTTP.get_response(URI("http://localhost:#{mock_server_driver_port}/stop")) rescue nil
+end
+
+def failed_test_names(log)
+  return [] unless File.exist?(log)
+
+  failed = []
+  File.read(log).scan(%r{E2E-TEST::(passed|failed|broken|skipped)::([A-Za-z0-9+/=]+)}) do |status, name_b64|
+    next unless %w[failed broken].include?(status)
+
+    failed << Base64.decode64(name_b64).force_encoding('UTF-8')
+  end
+  failed.uniq
+end
+
+# Builds a single Dart-regex alternation matching any of `names`, for one`flutter test --name`.
+# Each name is regex-escaped so the test descriptions match literally.
+def name_alternation(names)
+  escaped = names.map { |n| n.gsub(%r{[.*+?^${}()|\[\]\\/]}) { |c| "\\#{c}" } }
+  "(#{escaped.join('|')})"
+end
+
+lane :run_e2e_test do |options|
+  next unless is_check_required(sources: sources_matrix[:e2e], force_check: @force_check)
+
+  ios = options[:platform] == 'ios' || ios_device?(options[:device])
+  device = options[:device]
+
+  start_mock_server(local_server: options[:local_server], branch: options[:mock_server_branch])
+
+  if ios
+    device = prepare_simulator(device: options[:device], reset: is_ci, wait_for_boot: false)
+  else
+    serial = device ? "-s #{device} " : ''
+    sh("adb #{serial}logcat -c")
+  end
+
+  log_file = "#{root_path}/build/e2e-test.log"
+  FileUtils.mkdir_p(File.dirname(log_file))
+  File.write(log_file, '')
+
+  videos_dir = "#{root_path}/build/e2e-videos"
+  FileUtils.rm_rf(videos_dir)
+  FileUtils.mkdir_p(videos_dir)
+  videos = {} # test-file basename => [ { path:, started_at_ms:, ended_at_ms: }, ... ] (one per attempt)
+
+  begin
+    Dir.chdir(root_path) do
+      targets = options[:target] ? [options[:target]] : Dir['integration_test/*_test.dart'].sort
+      UI.user_error!('No e2e test files found') if targets.empty?
+
+      retries = (options[:retries] || 2).to_i
+
+      failed = []
+      targets.each do |target|
+        test_name = File.basename(target, '.dart')
+
+        attempt_log = "#{videos_dir}/#{test_name}.attempt.log"
+
+        # nil => run the whole file (first attempt);
+        # an array => re-run only those test descriptions.
+        only = nil
+
+        ok = false
+        attempt = 0
+        loop do
+          attempt += 1
+
+          flags = [target, "--dart-define=E2E_TARGET=#{test_name}"]
+          flags << "-d #{device}" if device
+
+          if options[:verbose]
+            flags << '--verbose'
+          else
+            flags << '--quiet'
+            flags << "--reporter #{ENV['GITHUB_ACTIONS'] ? 'github' : 'expanded'}"
+          end
+
+          flags << "--name #{Shellwords.escape(name_alternation(only))}" if only
+          # Per-attempt path so retries don't overwrite earlier recordings.
+          rec = start_screen_recording(ios: ios, device: device, path: "#{videos_dir}/#{test_name}.attempt#{attempt}.mp4")
+
+          File.write(attempt_log, '')
+          cmd = "flutter test #{flags.join(' ')} 2>&1 | tee -a #{Shellwords.escape(log_file)} | " \
+                "tee #{Shellwords.escape(attempt_log)} | " \
+                "{ grep --line-buffered -vE 'ALLURE-(RESULT|ATTACH)::|E2E-TEST::' || true; }"
+          ok = begin
+            sh("bash -o pipefail -c #{Shellwords.escape(cmd)}")
+            true
+          rescue StandardError
+            false
+          end
+
+          stop_screen_recording(rec)
+
+          # Keep every attempt's recording + window, so failed results from an
+          # earlier attempt still match their own video even when a later retry
+          # narrows the test set or passes.
+          if rec
+            (videos[test_name] ||= []) << {
+              path: rec[:path],
+              started_at_ms: rec[:started_at_ms],
+              ended_at_ms: rec[:ended_at_ms],
+            }
+          end
+
+          break if ok || attempt > retries
+
+          only = failed_test_names(attempt_log)
+          if only.empty?
+            only = nil
+            UI.important("#{target} failed (attempt #{attempt}/#{retries + 1}); retrying whole file…")
+          else
+            UI.important("#{target} failed (attempt #{attempt}/#{retries + 1}); " \
+                         "retrying #{only.size} failed test(s): #{only.join(', ')}")
+          end
+        end
+
+        failed << target unless ok
+      end
+
+      UI.user_error!("E2E failed after retries: #{failed.join(', ')}") unless failed.empty?
+    end
+  ensure
+    collect_allure_results(log_file: log_file) rescue nil
+    File.write("#{videos_dir}/manifest.json", JSON.generate(videos)) unless videos.empty?
+    stop_mock_server
+  end
+end
+
+lane :attach_videos do
+  manifest = "#{root_path}/build/e2e-videos/manifest.json"
+  unless File.exist?(manifest)
+    UI.important("No video manifest at #{manifest}; nothing to attach")
+    next
+  end
+
+  videos = JSON.parse(File.read(manifest)).transform_values do |recordings|
+    recordings.map do |v|
+      { path: v['path'], started_at_ms: v['started_at_ms'], ended_at_ms: v['ended_at_ms'] }
+    end
+  end
+  attach_videos_to_failed_results(results_dir: allure_results_path, videos: videos)
+end
+
+private_lane :sources_matrix do
+  {
+    e2e: ['sample_app', 'packages'],
+    ruby: ['sample_app/fastlane', 'sample_app/android/fastlane', 'sample_app/ios/fastlane'],
+  }
+end

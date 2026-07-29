@@ -47,37 +47,45 @@ class MessageComposerRecordingLocked extends StatelessWidget {
     final colorScheme = context.streamColorScheme;
     final spacing = context.streamSpacing;
 
+    final a11y = context.translations.accessibility;
+    final durationLabel = a11y.recordingDurationLabel(duration: state.duration);
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            Container(
-              height: 48,
-              width: 48,
-              alignment: Alignment.center,
-              child: Icon(
-                icons.voice,
-                color: context.streamColorScheme.accentError,
-                size: 20,
+        Semantics(
+          container: true,
+          label: durationLabel,
+          excludeSemantics: true,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Container(
+                height: 48,
+                width: 48,
+                alignment: Alignment.center,
+                child: Icon(
+                  icons.voice,
+                  color: context.streamColorScheme.accentError,
+                  size: 20,
+                ),
               ),
-            ),
-            Text(
-              state.duration.toMinutesAndSeconds(),
-              style: textTheme.captionEmphasis.copyWith(
-                color: colorScheme.textPrimary,
-                fontFeatures: [const FontFeature.tabularFigures()],
+              Text(
+                state.duration.toMinutesAndSeconds(),
+                style: textTheme.captionEmphasis.copyWith(
+                  color: colorScheme.textPrimary,
+                  fontFeatures: [const FontFeature.tabularFigures()],
+                ),
               ),
-            ),
-            Expanded(
-              child: Container(
-                height: _kDefaultWaveformHeight,
-                padding: EdgeInsets.symmetric(horizontal: spacing.md),
-                child: StreamAudioWaveform(waveform: state.waveform, limit: 50),
+              Expanded(
+                child: Container(
+                  height: _kDefaultWaveformHeight,
+                  padding: EdgeInsets.symmetric(horizontal: spacing.md),
+                  child: StreamAudioWaveform(waveform: state.waveform, limit: 50),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -88,6 +96,7 @@ class MessageComposerRecordingLocked extends StatelessWidget {
               type: StreamButtonType.outline,
               size: StreamButtonSize.small,
               icon: Icon(icons.delete),
+              tooltip: a11y.cancelRecordingTooltip,
               onPressed: audioRecorderController.cancelRecord,
             ),
             if (audioRecorderController.value is RecordStateRecording)
@@ -97,14 +106,17 @@ class MessageComposerRecordingLocked extends StatelessWidget {
                 type: StreamButtonType.outline,
                 size: StreamButtonSize.small,
                 icon: Icon(icons.stopFill),
+                tooltip: a11y.stopRecordingTooltip,
                 onPressed: audioRecorderController.stopRecord,
               ),
             StreamButton.icon(
               key: const ValueKey('finish-record-button'),
+              autofocus: true,
               style: StreamButtonStyle.primary,
               type: StreamButtonType.solid,
               size: StreamButtonSize.small,
               icon: Icon(icons.checkmark),
+              tooltip: a11y.sendRecordingTooltip,
               onPressed: () async {
                 await feedback.onRecordFinish(context);
                 final audio = await audioRecorderController.finishRecord();
@@ -209,72 +221,93 @@ class _MessageComposerRecordingStoppedState extends State<MessageComposerRecordi
         final track = state.tracks.firstOrNull;
         if (track == null) return const SizedBox.shrink();
 
+        final a11y = context.translations.accessibility;
+        final playPauseLabel = switch (track.state) {
+          TrackState.playing => a11y.voiceRecordingPreviewPauseLabel(duration: track.duration),
+          _ => a11y.voiceRecordingPreviewPlayLabel(duration: track.duration),
+        };
+
+        void onPlay() {
+          if (state.currentIndex == index) {
+            // Play the track directly if it is already loaded.
+            _controller.play();
+          } else {
+            // Otherwise, load the track first and then play it.
+            _controller.skipToItem(index);
+          }
+        }
+
+        final onPause = _controller.pause;
+
         return Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                AudioControlButton(
-                  state: track.state,
-                  style: StreamButtonStyle.secondary,
-                  type: StreamButtonType.ghost,
-                  size: StreamButtonSize.small,
-                  onPlay: () {
-                    if (state.currentIndex == index) {
-                      // Play the track directly if it is already loaded.
-                      _controller.play();
-                    } else {
-                      // Otherwise, load the track first and then play it.
-                      _controller.skipToItem(index);
-                    }
-                  },
-                  onPause: _controller.pause,
-                ),
-                AudioDurationText(
-                  duration: track.duration,
-                  position: track.position,
-                  style: textTheme.captionEmphasis.copyWith(
-                    color: colorScheme.textPrimary,
-                    fontFeatures: [const FontFeature.tabularFigures()],
+            Semantics(
+              container: true,
+              button: true,
+              label: playPauseLabel,
+              excludeSemantics: true,
+              onTap: switch (track.state) {
+                TrackState.playing => onPause,
+                TrackState.paused || TrackState.idle => onPlay,
+                TrackState.loading => null,
+              },
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  AudioControlButton(
+                    state: track.state,
+                    style: StreamButtonStyle.secondary,
+                    type: StreamButtonType.ghost,
+                    size: StreamButtonSize.small,
+                    onPlay: onPlay,
+                    onPause: onPause,
                   ),
-                ),
-
-                Expanded(
-                  child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: spacing.md),
-                    height: _kDefaultWaveformHeight,
-                    child: StreamAudioWaveformSlider(
-                      limit: _kDefaultWaveformLimit,
-                      waveform: sampling.resampleWaveformData(
-                        track.waveform,
-                        _kDefaultWaveformLimit,
-                      ),
-                      progress: track.progress,
-                      // Only allow seeking if the current track is the one being
-                      // interacted with.
-                      onChangeStart: (_) async {
-                        if (state.currentIndex != index) return;
-                        return _controller.pause();
-                      },
-                      onChangeEnd: (_) async {
-                        if (state.currentIndex != index) return;
-                        return _controller.play();
-                      },
-                      onChanged: (progress) async {
-                        if (state.currentIndex != index) return;
-
-                        final duration = track.duration.inMicroseconds;
-                        final seekPosition = (duration * progress).toInt();
-                        final seekDuration = Duration(microseconds: seekPosition);
-
-                        return _controller.seek(seekDuration);
-                      },
-                      isActive: track.state != TrackState.idle,
+                  AudioDurationText(
+                    duration: track.duration,
+                    position: track.position,
+                    style: textTheme.captionEmphasis.copyWith(
+                      color: colorScheme.textPrimary,
+                      fontFeatures: [const FontFeature.tabularFigures()],
                     ),
                   ),
-                ),
-              ],
+
+                  Expanded(
+                    child: Container(
+                      padding: EdgeInsets.symmetric(horizontal: spacing.md),
+                      height: _kDefaultWaveformHeight,
+                      child: StreamAudioWaveformSlider(
+                        limit: _kDefaultWaveformLimit,
+                        waveform: sampling.resampleWaveformData(
+                          track.waveform,
+                          _kDefaultWaveformLimit,
+                        ),
+                        progress: track.progress,
+                        // Only allow seeking if the current track is the one being
+                        // interacted with.
+                        onChangeStart: (_) async {
+                          if (state.currentIndex != index) return;
+                          return _controller.pause();
+                        },
+                        onChangeEnd: (_) async {
+                          if (state.currentIndex != index) return;
+                          return _controller.play();
+                        },
+                        onChanged: (progress) async {
+                          if (state.currentIndex != index) return;
+
+                          final duration = track.duration.inMicroseconds;
+                          final seekPosition = (duration * progress).toInt();
+                          final seekDuration = Duration(microseconds: seekPosition);
+
+                          return _controller.seek(seekDuration);
+                        },
+                        isActive: track.state != TrackState.idle,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -285,6 +318,7 @@ class _MessageComposerRecordingStoppedState extends State<MessageComposerRecordi
                   type: StreamButtonType.outline,
                   size: StreamButtonSize.small,
                   icon: Icon(icons.delete),
+                  tooltip: a11y.cancelRecordingTooltip,
                   onPressed: widget.audioRecorderController.cancelRecord,
                 ),
                 if (widget.audioRecorderController.value is RecordStateRecording)
@@ -294,14 +328,17 @@ class _MessageComposerRecordingStoppedState extends State<MessageComposerRecordi
                     type: StreamButtonType.outline,
                     size: StreamButtonSize.small,
                     icon: Icon(icons.stopFill),
+                    tooltip: a11y.stopRecordingTooltip,
                     onPressed: widget.audioRecorderController.stopRecord,
                   ),
                 StreamButton.icon(
                   key: const ValueKey('finish-record-button'),
+                  autofocus: true,
                   style: StreamButtonStyle.primary,
                   type: StreamButtonType.solid,
                   size: StreamButtonSize.small,
                   icon: Icon(icons.checkmark),
+                  tooltip: a11y.sendRecordingTooltip,
                   onPressed: () async {
                     await widget.feedback.onRecordFinish(context);
                     final audio = await widget.audioRecorderController.finishRecord();

@@ -1,3 +1,4 @@
+import 'package:clock/clock.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -161,6 +162,12 @@ void main() {
       expect(localizations.searchingForNetworkText, isNotNull);
       expect(localizations.offlineLabel, isNotNull);
       expect(localizations.tryAgainLabel, isNotNull);
+      expect(localizations.connectionErrorTitle, isNotNull);
+      expect(localizations.connectionErrorDescription, isNotNull);
+      expect(localizations.slowConnectionErrorTitle, isNotNull);
+      expect(localizations.slowConnectionErrorDescription, isNotNull);
+      expect(localizations.genericErrorTitle, isNotNull);
+      expect(localizations.genericErrorDescription, isNotNull);
       // 1 member
       expect(localizations.membersCountText(1), isNotNull);
       // 3 members
@@ -381,6 +388,126 @@ void main() {
       expect(localizations.notifyChannelText, isNotNull);
       expect(localizations.notifyHereText, isNotNull);
       expect(localizations.notifyRoleText('admin'), isNotNull);
+
+      // Accessibility translations
+      final a11y = localizations.accessibility;
+      expect(a11y, isNotNull);
+      // Composer: send button
+      expect(a11y.sendMessageTooltip, isNotNull);
+      expect(a11y.saveEditTooltip, isNotNull);
+      expect(a11y.sendCommandTooltip, isNotNull);
+      // singular vs. plural — both branches exercised
+      expect(a11y.slowModeTooltip(seconds: 1), isNotNull);
+      expect(a11y.slowModeTooltip(seconds: 30), isNotNull);
+      // Composer: voice recorder
+      expect(a11y.recordVoiceRecordingLabel, isNotNull);
+      expect(a11y.cancelRecordingTooltip, isNotNull);
+      expect(a11y.stopRecordingTooltip, isNotNull);
+      expect(a11y.sendRecordingTooltip, isNotNull);
+      expect(a11y.recordingDurationLabel(duration: const Duration(seconds: 83)), isNotNull);
+      expect(a11y.voiceRecordingPreviewPlayLabel(duration: const Duration(seconds: 83)), isNotNull);
+      expect(a11y.voiceRecordingPreviewPauseLabel(duration: const Duration(seconds: 83)), isNotNull);
+      // Composer: attachment picker
+      expect(a11y.attachmentPickerTooltip, isNotNull);
+      expect(a11y.attachmentPickerOpenHint, isNotNull);
+      expect(a11y.attachmentPickerCloseHint, isNotNull);
+      expect(a11y.attachmentPickerOpenTapHint, isNotNull);
+      expect(a11y.attachmentPickerCloseTapHint, isNotNull);
+      expect(a11y.attachmentPickerOpenedAnnouncement, isNotNull);
+      expect(a11y.attachmentPickerClosedAnnouncement, isNotNull);
+      // Attachment display — both null-duration and known-duration branches
+      expect(a11y.voiceRecordingAttachmentLabel(), isNotNull);
+      expect(a11y.voiceRecordingAttachmentLabel(duration: const Duration(minutes: 2)), isNotNull);
+      expect(a11y.videoAttachmentLabel(), isNotNull);
+      expect(a11y.videoAttachmentLabel(title: 'trip.mp4'), isNotNull);
+      expect(a11y.gifAttachmentLabel, isNotNull);
+      expect(a11y.imageAttachmentLabel(), isNotNull);
+      expect(a11y.imageAttachmentLabel(title: 'sunset'), isNotNull);
+      // Voice message playback
+      expect(a11y.voiceRecordingPlayTooltip, isNotNull);
+      expect(a11y.voiceRecordingPauseTooltip, isNotNull);
+      expect(a11y.voiceRecordingLoadingTooltip, isNotNull);
+      // Channel header
+      expect(a11y.channelInfoLabel, isNotNull);
+      // Message actions
+      expect(a11y.messageActionsLabel, isNotNull);
+      // Photo gallery tile — both null-date and known-date branches
+      expect(a11y.galleryImageLabel(), isNotNull);
+      expect(a11y.galleryImageLabel(createdAt: DateTime(2026, 3, 15, 10, 30)), isNotNull);
+      expect(a11y.galleryVideoLabel(), isNotNull);
+      expect(a11y.galleryVideoLabel(createdAt: DateTime(2026, 3, 15, 10, 30)), isNotNull);
+      expect(
+        a11y.galleryVideoLabel(
+          createdAt: DateTime(2026, 3, 15, 10, 30),
+          duration: const Duration(minutes: 1, seconds: 23),
+        ),
+        isNotNull,
+      );
+      expect(a11y.selectMediaTapHint, isNotNull);
+      expect(a11y.deselectMediaTapHint, isNotNull);
+      // Poll creator — both null-option and known-option branches
+      expect(a11y.savePollTooltip, isNotNull);
+      expect(a11y.removePollOptionTooltip(), isNotNull);
+      expect(a11y.removePollOptionTooltip(optionText: 'Apple'), isNotNull);
+      // Recording state announcements
+      expect(a11y.recordingStartedAnnouncement, isNotNull);
+      expect(a11y.recordingLockedAnnouncement, isNotNull);
+      expect(a11y.recordingStoppedAnnouncement, isNotNull);
+      expect(a11y.recordingCancelledAnnouncement, isNotNull);
+      expect(a11y.recordingCompletedAnnouncement, isNotNull);
+      // Attachment change announcements
+      expect(a11y.imageAttachmentAddedAnnouncement, isNotNull);
+      expect(a11y.imageAttachmentRemovedAnnouncement, isNotNull);
+      expect(a11y.videoAttachmentAddedAnnouncement, isNotNull);
+      expect(a11y.videoAttachmentRemovedAnnouncement, isNotNull);
+      expect(a11y.gifAttachmentAddedAnnouncement, isNotNull);
+      expect(a11y.gifAttachmentRemovedAnnouncement, isNotNull);
+      expect(a11y.fileAttachmentAddedAnnouncement, isNotNull);
+      expect(a11y.fileAttachmentRemovedAnnouncement, isNotNull);
+      expect(a11y.voiceRecordingAttachmentAddedAnnouncement, isNotNull);
+      expect(a11y.voiceRecordingAttachmentRemovedAnnouncement, isNotNull);
+      expect(a11y.attachmentAddedAnnouncement, isNotNull);
+      expect(a11y.attachmentRemovedAnnouncement, isNotNull);
+      // singular vs. plural — both branches exercised
+      expect(a11y.attachmentsAddedAnnouncement(count: 1), isNotNull);
+      expect(a11y.attachmentsAddedAnnouncement(count: 5), isNotNull);
+      expect(a11y.attachmentsRemovedAnnouncement(count: 1), isNotNull);
+      expect(a11y.attachmentsRemovedAnnouncement(count: 5), isNotNull);
+      // Formatters
+      expect(a11y.formatDuration(const Duration(seconds: 45)), isNotNull);
+      expect(a11y.formatDuration(const Duration(hours: 1, minutes: 2, seconds: 3)), isNotNull);
+      expect(a11y.formatDateTime(DateTime(2026, 3, 15, 10, 30)), isNotNull);
+      // formatRecentDateTime — every bucket exercised so each branch is covered.
+      // Pin the clock to mid-year so day-arithmetic doesn't leak between year
+      // buckets on year-boundary run dates.
+      await withClock(Clock.fixed(DateTime(2026, 6, 15, 12)), () async {
+        final now = clock.now();
+        expect(a11y.formatRecentDateTime(now), isNotNull);
+        expect(a11y.formatRecentDateTime(now.subtract(const Duration(hours: 3))), isNotNull);
+        expect(a11y.formatRecentDateTime(now.subtract(const Duration(days: 1))), isNotNull);
+        expect(a11y.formatRecentDateTime(now.subtract(const Duration(days: 3))), isNotNull);
+        expect(a11y.formatRecentDateTime(now.subtract(const Duration(days: 30))), isNotNull);
+        expect(a11y.formatRecentDateTime(now.subtract(const Duration(days: 400))), isNotNull);
+      });
+      // Message preview prefixes
+      expect(a11y.outgoingMessagePreviewLabel, isNotNull);
+      expect(a11y.incomingMessagePreviewLabel(), isNotNull);
+      expect(a11y.incomingMessagePreviewLabel(senderName: 'Alice'), isNotNull);
+      expect(a11y.pollPreviewLabel, isNotNull);
+      expect(a11y.draftPreviewLabel, isNotNull);
+      expect(a11y.systemMessagePreviewLabel, isNotNull);
+      // Delivery status
+      expect(a11y.messageSendingStatusLabel, isNotNull);
+      expect(a11y.messageSentStatusLabel, isNotNull);
+      expect(a11y.messageDeliveredStatusLabel, isNotNull);
+      expect(a11y.messageReadStatusLabel, isNotNull);
+      // Channel list row
+      expect(a11y.channelGroupLabel, isNotNull);
+      expect(a11y.channelMutedLabel, isNotNull);
+      expect(a11y.channelPinnedLabel, isNotNull);
+      // singular vs. plural — both branches exercised
+      expect(a11y.unreadMessagesLabel(count: 1), isNotNull);
+      expect(a11y.unreadMessagesLabel(count: 5), isNotNull);
     });
   }
 
@@ -399,5 +526,32 @@ void main() {
       GlobalStreamChatLocalizations.delegate.toString(),
       'GlobalStreamChatLocalizations.delegate($supportedLocales locales)',
     );
+  });
+
+  // formatRecentDateTime renders the time via Jiffy's locale-aware `jm`, so the
+  // spoken clock follows the locale convention: 24-hour in most of Europe,
+  // 12-hour in English and Hindi. The wider suite above never pins the Jiffy
+  // locale, so this is the only place the locale-awareness is exercised.
+  test('formatRecentDateTime uses a locale-aware clock', () async {
+    await withClock(Clock.fixed(DateTime(2026, 6, 15, 20)), () async {
+      final recent = DateTime(2026, 6, 15, 15); // today at 15:00 / 3:00 PM
+
+      Future<String> recentIn(String language) async {
+        await Jiffy.setLocale(language);
+        final a11y = (await GlobalStreamChatLocalizations.delegate.load(Locale(language))).accessibility;
+        return a11y.formatRecentDateTime(recent);
+      }
+
+      // 24-hour locales keep the wall-clock hour and never emit a meridiem.
+      for (final language in ['de', 'fr', 'it']) {
+        final formatted = await recentIn(language);
+        expect(formatted, contains('15:00'), reason: '$language should use a 24-hour clock');
+        expect(formatted.toUpperCase(), isNot(contains('PM')), reason: '$language should omit the meridiem');
+      }
+
+      // 12-hour locales fold to 3:00 with a meridiem.
+      expect(await recentIn('en'), contains('3:00 PM'));
+      expect(await recentIn('hi'), allOf(contains('3:00'), contains('pm')));
+    });
   });
 }

@@ -28,9 +28,12 @@ void stubQueryChannelsForGoldens(MockClient client, List<Channel> channels) {
   _ensureGoldenMocktailFallbacks();
   stubStreamClientEventStream(client);
   when(
-    () => client.queryChannels(
+    () => client.queryChannelsWithResult(
       filter: any(named: 'filter'),
       channelStateSort: any(named: 'channelStateSort'),
+      predefinedFilter: any(named: 'predefinedFilter'),
+      filterValues: any(named: 'filterValues'),
+      sortValues: any(named: 'sortValues'),
       state: any(named: 'state'),
       watch: any(named: 'watch'),
       presence: any(named: 'presence'),
@@ -39,7 +42,7 @@ void stubQueryChannelsForGoldens(MockClient client, List<Channel> channels) {
       paginationParams: any(named: 'paginationParams'),
       waitForConnect: any(named: 'waitForConnect'),
     ),
-  ).thenAnswer((_) => Stream.value(channels));
+  ).thenAnswer((_) => Stream.value(QueryChannelsResult(channels: channels)));
 }
 
 /// Stubs thread queries for [StreamThreadListController] goldens using [StreamThreadListController.fromValue].

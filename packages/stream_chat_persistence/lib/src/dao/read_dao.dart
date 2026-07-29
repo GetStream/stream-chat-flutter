@@ -29,10 +29,6 @@ class ReadDao extends DatabaseAccessor<DriftChatDatabase> with _$ReadDaoMixin {
           })
           .get();
 
-  /// Updates the read data of a particular channel with
-  /// the new [readList] data
-  Future<void> updateReads(String cid, List<Read> readList) => bulkUpdateReads({cid: readList});
-
   /// Bulk updates the reads data of multiple channels
   Future<void> bulkUpdateReads(Map<String, List<Read>?> channelWithReads) {
     final entities = channelWithReads.entries

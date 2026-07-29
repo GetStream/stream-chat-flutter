@@ -18,7 +18,7 @@ class StreamMessageComposerRecordingOngoing extends StatelessWidget {
     final colorScheme = context.streamColorScheme;
     final icons = context.streamIcons;
 
-    return ConstrainedBox(
+    final content = ConstrainedBox(
       constraints: const BoxConstraints(
         minHeight: 48,
       ),
@@ -61,6 +61,8 @@ class StreamMessageComposerRecordingOngoing extends StatelessWidget {
         ],
       ),
     );
+
+    return ExcludeSemantics(child: content);
   }
 }
 

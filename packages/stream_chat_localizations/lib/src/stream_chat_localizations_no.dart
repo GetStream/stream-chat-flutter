@@ -8,6 +8,9 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
   const StreamChatLocalizationsNo({super.localeName = 'no'});
 
   @override
+  AccessibilityTranslations get accessibility => _AccessibilityTranslationsNo(localeName: localeName);
+
+  @override
   String get launchUrlError => 'Kan ikke laste inn url';
 
   @override
@@ -176,6 +179,24 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
 
   @override
   String get somethingWentWrongError => 'Noe gikk galt';
+
+  @override
+  String get connectionErrorTitle => 'Ingen internettforbindelse';
+
+  @override
+  String get connectionErrorDescription => 'Sjekk internettforbindelsen din';
+
+  @override
+  String get slowConnectionErrorTitle => 'Treg internettforbindelse';
+
+  @override
+  String get slowConnectionErrorDescription => 'Det ser ut til å være et problem med internettforbindelsen din';
+
+  @override
+  String get genericErrorTitle => 'Feil';
+
+  @override
+  String get genericErrorDescription => 'Oi, noe gikk galt';
 
   @override
   String get addMoreFilesLabel => 'Legg til flere';
@@ -825,4 +846,294 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
 
   @override
   String notifyRoleText(String role) => 'Varsle alle $role-medlemmer';
+}
+
+class _AccessibilityTranslationsNo extends AccessibilityTranslations {
+  const _AccessibilityTranslationsNo({super.localeName = 'no'});
+
+  @override
+  String get sendMessageTooltip => 'Send melding';
+
+  @override
+  String get saveEditTooltip => 'Lagre redigering';
+
+  @override
+  String get sendCommandTooltip => 'Send kommando';
+
+  @override
+  String slowModeTooltip({required int seconds}) {
+    if (seconds == 1) return 'Sakte modus: 1 sekund';
+    return 'Sakte modus: $seconds sekunder';
+  }
+
+  @override
+  String get recordVoiceRecordingLabel => 'Ta opp talemelding';
+
+  @override
+  String get cancelRecordingTooltip => 'Avbryt opptak';
+
+  @override
+  String get stopRecordingTooltip => 'Stopp opptak';
+
+  @override
+  String get sendRecordingTooltip => 'Send opptak';
+
+  @override
+  String recordingDurationLabel({required Duration duration}) => 'Opptaksvarighet, ${formatDuration(duration)}';
+
+  @override
+  String voiceRecordingPreviewPlayLabel({required Duration duration}) =>
+      'Spill av taleopptak, ${formatDuration(duration)}';
+
+  @override
+  String voiceRecordingPreviewPauseLabel({required Duration duration}) =>
+      'Sett taleopptak på pause, ${formatDuration(duration)}';
+
+  @override
+  String get attachmentPickerTooltip => 'Veksle vedleggsvelger';
+
+  @override
+  String get attachmentPickerOpenHint => 'dobbeltrykk for å åpne vedleggsvelger';
+
+  @override
+  String get attachmentPickerCloseHint => 'dobbeltrykk for å lukke vedleggsvelger';
+
+  @override
+  String get attachmentPickerOpenTapHint => 'åpne vedleggsvelger';
+
+  @override
+  String get attachmentPickerCloseTapHint => 'lukk vedleggsvelger';
+
+  @override
+  String get attachmentPickerOpenedAnnouncement => 'Vedleggsvelger åpnet';
+
+  @override
+  String get attachmentPickerClosedAnnouncement => 'Vedleggsvelger lukket';
+
+  @override
+  String voiceRecordingAttachmentLabel({Duration? duration}) {
+    if (duration == null) return 'Talemelding';
+    return 'Talemelding, ${formatDuration(duration)}';
+  }
+
+  @override
+  String videoAttachmentLabel({String? title}) {
+    if (title == null || title.isEmpty) return 'Video';
+    return 'Video, $title';
+  }
+
+  @override
+  String get gifAttachmentLabel => 'GIF';
+
+  @override
+  String imageAttachmentLabel({String? title}) {
+    if (title == null || title.isEmpty) return 'Foto';
+    return 'Foto, $title';
+  }
+
+  @override
+  String get voiceRecordingPlayTooltip => 'Spill av';
+
+  @override
+  String get voiceRecordingPauseTooltip => 'Pause';
+
+  @override
+  String get voiceRecordingLoadingTooltip => 'Laster';
+
+  @override
+  String get channelInfoLabel => 'Kanalinformasjon';
+
+  @override
+  String get messageActionsLabel => 'Meldingshandlinger';
+
+  @override
+  String galleryImageLabel({DateTime? createdAt}) {
+    if (createdAt == null) return 'Foto';
+    return 'Foto, ${formatDateTime(createdAt)}';
+  }
+
+  @override
+  String galleryVideoLabel({
+    DateTime? createdAt,
+    Duration? duration,
+  }) {
+    final parts = <String>[
+      'Video',
+      if (duration != null) formatDuration(duration),
+      if (createdAt != null) formatDateTime(createdAt),
+    ];
+    return parts.join(', ');
+  }
+
+  @override
+  String get selectMediaTapHint => 'velg';
+
+  @override
+  String get deselectMediaTapHint => 'fjern valg';
+
+  @override
+  String get outgoingMessagePreviewLabel => 'Du';
+
+  @override
+  String incomingMessagePreviewLabel({String? senderName}) {
+    return senderName ?? 'Melding';
+  }
+
+  @override
+  String get pollPreviewLabel => 'Avstemning';
+
+  @override
+  String get draftPreviewLabel => 'Utkast';
+
+  @override
+  String get messageSendingStatusLabel => 'Sender';
+
+  @override
+  String get messageSentStatusLabel => 'Sendt';
+
+  @override
+  String get messageDeliveredStatusLabel => 'Levert';
+
+  @override
+  String get messageReadStatusLabel => 'Lest';
+
+  @override
+  String unreadMessagesLabel({required int count}) {
+    return Intl.plural(
+      count,
+      one: '$count ulest melding',
+      other: '$count uleste meldinger',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String get channelGroupLabel => 'Gruppe';
+
+  @override
+  String get systemMessagePreviewLabel => 'System';
+
+  @override
+  String get channelMutedLabel => 'dempet';
+
+  @override
+  String get channelPinnedLabel => 'festet';
+
+  @override
+  String get savePollTooltip => 'Lagre avstemning';
+
+  @override
+  String removePollOptionTooltip({String? optionText}) {
+    final trimmed = optionText?.trim();
+    if (trimmed == null || trimmed.isEmpty) return 'Fjern alternativ';
+    return 'Fjern alternativ $trimmed';
+  }
+
+  @override
+  String get recordingStartedAnnouncement => 'Opptak startet. Sveip venstre for å avbryte. Sveip opp for å låse.';
+
+  @override
+  String get recordingLockedAnnouncement => 'Opptak låst';
+
+  @override
+  String get recordingStoppedAnnouncement => 'Opptak stoppet';
+
+  @override
+  String get recordingCancelledAnnouncement => 'Opptak avbrutt';
+
+  @override
+  String get recordingCompletedAnnouncement => 'Opptak fullført';
+
+  @override
+  String get imageAttachmentAddedAnnouncement => 'Foto lagt til';
+
+  @override
+  String get imageAttachmentRemovedAnnouncement => 'Foto fjernet';
+
+  @override
+  String get videoAttachmentAddedAnnouncement => 'Video lagt til';
+
+  @override
+  String get videoAttachmentRemovedAnnouncement => 'Video fjernet';
+
+  @override
+  String get gifAttachmentAddedAnnouncement => 'GIF lagt til';
+
+  @override
+  String get gifAttachmentRemovedAnnouncement => 'GIF fjernet';
+
+  @override
+  String get fileAttachmentAddedAnnouncement => 'Fil lagt til';
+
+  @override
+  String get fileAttachmentRemovedAnnouncement => 'Fil fjernet';
+
+  @override
+  String get voiceRecordingAttachmentAddedAnnouncement => 'Talemelding lagt til';
+
+  @override
+  String get voiceRecordingAttachmentRemovedAnnouncement => 'Talemelding fjernet';
+
+  @override
+  String get attachmentAddedAnnouncement => 'Vedlegg lagt til';
+
+  @override
+  String get attachmentRemovedAnnouncement => 'Vedlegg fjernet';
+
+  @override
+  String attachmentsAddedAnnouncement({required int count}) {
+    return Intl.plural(
+      count,
+      one: '$count vedlegg lagt til',
+      other: '$count vedlegg lagt til',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String attachmentsRemovedAnnouncement({required int count}) {
+    return Intl.plural(
+      count,
+      one: '$count vedlegg fjernet',
+      other: '$count vedlegg fjernet',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String formatRecentDateTime(DateTime date) {
+    if (date.isWithinLastMinute) return 'Akkurat nå';
+
+    final localDate = date.toLocal();
+    final jiffyDate = Jiffy.parseFromDateTime(localDate);
+    final time = jiffyDate.jm;
+
+    if (localDate.isToday) return 'I dag kl. $time';
+    if (localDate.isYesterday) return 'I går kl. $time';
+    if (localDate.isWithinLastWeek) return '${jiffyDate.EEEE} kl. $time';
+    if (localDate.isInSameYear) {
+      return '${jiffyDate.format(pattern: 'd. MMM')} kl. $time';
+    }
+    return '${jiffyDate.format(pattern: 'd. MMM yyyy')} kl. $time';
+  }
+
+  @override
+  String formatDateTime(DateTime dateTime) {
+    final jiffy = Jiffy.parseFromDateTime(dateTime);
+    return '${jiffy.EEEE}, ${jiffy.yMMMMd}, ${jiffy.jm}';
+  }
+
+  @override
+  String formatDuration(Duration duration) {
+    final hours = duration.inHours;
+    final minutes = duration.inMinutes.remainder(60);
+    final seconds = duration.inSeconds.remainder(60);
+    final parts = <String>[
+      if (hours > 0) Intl.plural(hours, one: '$hours time', other: '$hours timer', locale: localeName),
+      if (minutes > 0) Intl.plural(minutes, one: '$minutes minutt', other: '$minutes minutter', locale: localeName),
+      if (seconds > 0 || (hours == 0 && minutes == 0))
+        Intl.plural(seconds, one: '$seconds sekund', other: '$seconds sekunder', locale: localeName),
+    ];
+    return parts.join(', ');
+  }
 }

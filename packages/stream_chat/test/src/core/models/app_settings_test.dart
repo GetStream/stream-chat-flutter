@@ -45,7 +45,7 @@ void main() {
     });
 
     test('defaults to empty lists when fields are absent', () {
-      final config = UploadConfig.fromJson({'size_limit': 0});
+      final config = UploadConfig.fromJson(const {'size_limit': 0});
       expect(config.allowedFileExtensions, isEmpty);
       expect(config.blockedFileExtensions, isEmpty);
       expect(config.allowedMimeTypes, isEmpty);
@@ -53,7 +53,7 @@ void main() {
     });
 
     test('defaults sizeLimit to defaultSizeLimit when absent', () {
-      final config = UploadConfig.fromJson({});
+      final config = UploadConfig.fromJson(const {});
       expect(config.sizeLimit, UploadConfig.defaultSizeLimit);
     });
   });

@@ -312,7 +312,7 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
       if (eventListener?.call(event) ?? false) return;
 
       final eventType = event.type;
-      if (eventType == EventType.channelDeleted) {
+      if (eventType == EventType.channelDeleted || eventType == EventType.notificationChannelDeleted) {
         _eventHandler.onChannelDeleted(event, this);
       } else if (eventType == EventType.channelHidden) {
         _eventHandler.onChannelHidden(event, this);
@@ -332,7 +332,7 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
         _eventHandler.onNotificationMessageNew(event, this);
       } else if (eventType == EventType.notificationRemovedFromChannel) {
         _eventHandler.onNotificationRemovedFromChannel(event, this);
-      } else if (eventType == 'user.presence.changed' || eventType == EventType.userUpdated) {
+      } else if (eventType == EventType.userPresenceChanged || eventType == EventType.userUpdated) {
         _eventHandler.onUserPresenceChanged(event, this);
       } else if (eventType == EventType.memberUpdated) {
         _eventHandler.onMemberUpdated(event, this);

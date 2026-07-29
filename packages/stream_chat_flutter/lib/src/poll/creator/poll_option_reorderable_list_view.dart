@@ -112,6 +112,7 @@ class PollOptionListItem extends StatelessWidget {
     assert(option != null, 'option must not be null');
 
     final icons = context.streamIcons;
+    final a11y = context.translations.accessibility;
 
     return StreamTextInput(
       initialValue: option!.text,
@@ -128,6 +129,7 @@ class PollOptionListItem extends StatelessWidget {
         type: .ghost,
         style: .secondary,
         icon: Icon(icons.minusCircle),
+        tooltip: a11y.removePollOptionTooltip(optionText: option!.text),
         themeStyle: .from(
           fixedSize: const .square(20),
           tapTargetSize: .shrinkWrap,
@@ -466,7 +468,11 @@ class _PollOptionReorderableListViewState extends State<PollOptionReorderableLis
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (widget.title case final title?) Text(title, style: effectiveTitleStyle),
+        if (widget.title case final title?)
+          Semantics(
+            header: true,
+            child: Text(title, style: effectiveTitleStyle),
+          ),
         Flexible(
           child: StreamTextInputTheme(
             data: .new(style: effectiveInputStyle),

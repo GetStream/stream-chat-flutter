@@ -138,6 +138,76 @@ void main() {
   );
 
   docsGoldenTest(
+    'mention autocomplete trigger with mention types',
+    fileName: 'autocomplete_trigger_mention_types',
+    constraints: const BoxConstraints.tightFor(width: 375, height: 320),
+    builder: () {
+      final client = MockClient();
+      final clientState = MockClientState();
+      final channel = MockChannel(
+        ownCapabilities: const [
+          ChannelCapability.sendMessage,
+          ChannelCapability.uploadFile,
+          ChannelCapability.notifyChannel,
+          ChannelCapability.notifyHere,
+          ChannelCapability.notifyRole,
+        ],
+      );
+      final channelState = MockChannelState();
+
+      final members = [
+        Member(userId: charlotteAnderson.id, user: charlotteAnderson),
+      ];
+
+      setupMockChannel(
+        client: client,
+        clientState: clientState,
+        channel: channel,
+        channelState: channelState,
+        members: members,
+      );
+
+      when(() => channelState.watchers).thenReturn([]);
+
+      when(() => client.searchRoles('c')).thenAnswer(
+        (_) async => SearchRolesResponse()
+          ..roles = [
+            Role(
+              name: 'customer-success',
+              custom: false,
+              scopes: const [],
+              createdAt: DateTime.utc(2024),
+              updatedAt: DateTime.utc(2024),
+            ),
+          ],
+      );
+
+      final messageComposerController = StreamMessageComposerController()..message = Message(text: 'Hello @c');
+
+      return StreamChat(
+        client: client,
+        connectivityStream: Stream.value([ConnectivityResult.mobile]),
+        child: StreamChannel(
+          showLoading: false,
+          channel: channel,
+          child: Scaffold(
+            body: Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                StreamMentionAutocompleteOptions(
+                  query: 'c',
+                  channel: channel,
+                ),
+                StreamMessageComposer(messageComposerController: messageComposerController),
+              ],
+            ),
+          ),
+        ),
+      );
+    },
+  );
+
+  docsGoldenTest(
     'commands autocomplete trigger',
     fileName: 'autocomplete_trigger_commands',
     constraints: const BoxConstraints.tightFor(width: 375, height: 340),

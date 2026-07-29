@@ -6,6 +6,9 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   const StreamChatLocalizationsJa({super.localeName = 'ja'});
 
   @override
+  AccessibilityTranslations get accessibility => _AccessibilityTranslationsJa(localeName: localeName);
+
+  @override
   String get launchUrlError => 'URLの起動ができません';
 
   @override
@@ -174,6 +177,24 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
 
   @override
   String get somethingWentWrongError => 'エラーが発生しました';
+
+  @override
+  String get connectionErrorTitle => 'インターネット接続がありません';
+
+  @override
+  String get connectionErrorDescription => 'インターネット接続を確認してください';
+
+  @override
+  String get slowConnectionErrorTitle => 'インターネット接続が遅いです';
+
+  @override
+  String get slowConnectionErrorDescription => 'インターネット接続に問題があるようです';
+
+  @override
+  String get genericErrorTitle => 'エラー';
+
+  @override
+  String get genericErrorDescription => 'おっと、問題が発生しました';
 
   @override
   String get addMoreFilesLabel => 'さらに追加';
@@ -822,4 +843,292 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
 
   @override
   String notifyRoleText(String role) => '$role 全員に通知';
+}
+
+class _AccessibilityTranslationsJa extends AccessibilityTranslations {
+  const _AccessibilityTranslationsJa({super.localeName = 'ja'});
+
+  @override
+  String get sendMessageTooltip => 'メッセージを送信';
+
+  @override
+  String get saveEditTooltip => '編集を保存';
+
+  @override
+  String get sendCommandTooltip => 'コマンドを送信';
+
+  @override
+  String slowModeTooltip({required int seconds}) {
+    return 'スローモード: $seconds秒';
+  }
+
+  @override
+  String get recordVoiceRecordingLabel => 'ボイスメッセージを録音';
+
+  @override
+  String get cancelRecordingTooltip => '録音をキャンセル';
+
+  @override
+  String get stopRecordingTooltip => '録音を停止';
+
+  @override
+  String get sendRecordingTooltip => '録音を送信';
+
+  @override
+  String recordingDurationLabel({required Duration duration}) => '録音時間、${formatDuration(duration)}';
+
+  @override
+  String voiceRecordingPreviewPlayLabel({required Duration duration}) => 'ボイス録音を再生、${formatDuration(duration)}';
+
+  @override
+  String voiceRecordingPreviewPauseLabel({required Duration duration}) => 'ボイス録音を一時停止、${formatDuration(duration)}';
+
+  @override
+  String get attachmentPickerTooltip => '添付ファイル選択を切り替え';
+
+  @override
+  String get attachmentPickerOpenHint => 'ダブルタップして添付ファイル選択を開く';
+
+  @override
+  String get attachmentPickerCloseHint => 'ダブルタップして添付ファイル選択を閉じる';
+
+  @override
+  String get attachmentPickerOpenTapHint => '添付ファイル選択を開く';
+
+  @override
+  String get attachmentPickerCloseTapHint => '添付ファイル選択を閉じる';
+
+  @override
+  String get attachmentPickerOpenedAnnouncement => '添付ファイル選択を開きました';
+
+  @override
+  String get attachmentPickerClosedAnnouncement => '添付ファイル選択を閉じました';
+
+  @override
+  String voiceRecordingAttachmentLabel({Duration? duration}) {
+    if (duration == null) return 'ボイスメッセージ';
+    return 'ボイスメッセージ、${formatDuration(duration)}';
+  }
+
+  @override
+  String videoAttachmentLabel({String? title}) {
+    if (title == null || title.isEmpty) return '動画';
+    return '動画、$title';
+  }
+
+  @override
+  String get gifAttachmentLabel => 'GIF';
+
+  @override
+  String imageAttachmentLabel({String? title}) {
+    if (title == null || title.isEmpty) return '写真';
+    return '写真、$title';
+  }
+
+  @override
+  String get voiceRecordingPlayTooltip => '再生';
+
+  @override
+  String get voiceRecordingPauseTooltip => '一時停止';
+
+  @override
+  String get voiceRecordingLoadingTooltip => '読み込み中';
+
+  @override
+  String get channelInfoLabel => 'チャンネル情報';
+
+  @override
+  String get messageActionsLabel => 'メッセージ操作';
+
+  @override
+  String galleryImageLabel({DateTime? createdAt}) {
+    if (createdAt == null) return '写真';
+    return '写真、${formatDateTime(createdAt)}';
+  }
+
+  @override
+  String galleryVideoLabel({
+    DateTime? createdAt,
+    Duration? duration,
+  }) {
+    final parts = <String>[
+      '動画',
+      if (duration != null) formatDuration(duration),
+      if (createdAt != null) formatDateTime(createdAt),
+    ];
+    return parts.join('、');
+  }
+
+  @override
+  String get selectMediaTapHint => '選択';
+
+  @override
+  String get deselectMediaTapHint => '選択解除';
+
+  @override
+  String get outgoingMessagePreviewLabel => '自分';
+
+  @override
+  String incomingMessagePreviewLabel({String? senderName}) {
+    return senderName ?? 'メッセージ';
+  }
+
+  @override
+  String get pollPreviewLabel => '投票';
+
+  @override
+  String get draftPreviewLabel => '下書き';
+
+  @override
+  String get messageSendingStatusLabel => '送信中';
+
+  @override
+  String get messageSentStatusLabel => '送信済み';
+
+  @override
+  String get messageDeliveredStatusLabel => '配信済み';
+
+  @override
+  String get messageReadStatusLabel => '既読';
+
+  @override
+  String unreadMessagesLabel({required int count}) {
+    return Intl.plural(
+      count,
+      one: '$count件の未読メッセージ',
+      other: '$count件の未読メッセージ',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String get channelGroupLabel => 'グループ';
+
+  @override
+  String get systemMessagePreviewLabel => 'システム';
+
+  @override
+  String get channelMutedLabel => 'ミュート済み';
+
+  @override
+  String get channelPinnedLabel => '固定済み';
+
+  @override
+  String get savePollTooltip => '投票を保存';
+
+  @override
+  String removePollOptionTooltip({String? optionText}) {
+    final trimmed = optionText?.trim();
+    if (trimmed == null || trimmed.isEmpty) return '選択肢を削除';
+    return '選択肢 $trimmed を削除';
+  }
+
+  @override
+  String get recordingStartedAnnouncement => '録音開始。キャンセルするには左にスライド。ロックするには上にスライド。';
+
+  @override
+  String get recordingLockedAnnouncement => '録音をロックしました';
+
+  @override
+  String get recordingStoppedAnnouncement => '録音を停止しました';
+
+  @override
+  String get recordingCancelledAnnouncement => '録音をキャンセルしました';
+
+  @override
+  String get recordingCompletedAnnouncement => '録音完了';
+
+  @override
+  String get imageAttachmentAddedAnnouncement => '写真を追加しました';
+
+  @override
+  String get imageAttachmentRemovedAnnouncement => '写真を削除しました';
+
+  @override
+  String get videoAttachmentAddedAnnouncement => '動画を追加しました';
+
+  @override
+  String get videoAttachmentRemovedAnnouncement => '動画を削除しました';
+
+  @override
+  String get gifAttachmentAddedAnnouncement => 'GIFを追加しました';
+
+  @override
+  String get gifAttachmentRemovedAnnouncement => 'GIFを削除しました';
+
+  @override
+  String get fileAttachmentAddedAnnouncement => 'ファイルを追加しました';
+
+  @override
+  String get fileAttachmentRemovedAnnouncement => 'ファイルを削除しました';
+
+  @override
+  String get voiceRecordingAttachmentAddedAnnouncement => 'ボイスメッセージを追加しました';
+
+  @override
+  String get voiceRecordingAttachmentRemovedAnnouncement => 'ボイスメッセージを削除しました';
+
+  @override
+  String get attachmentAddedAnnouncement => '添付ファイルを追加しました';
+
+  @override
+  String get attachmentRemovedAnnouncement => '添付ファイルを削除しました';
+
+  @override
+  String attachmentsAddedAnnouncement({required int count}) {
+    return Intl.plural(
+      count,
+      one: '$count件の添付ファイルを追加しました',
+      other: '$count件の添付ファイルを追加しました',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String attachmentsRemovedAnnouncement({required int count}) {
+    return Intl.plural(
+      count,
+      one: '$count件の添付ファイルを削除しました',
+      other: '$count件の添付ファイルを削除しました',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String formatRecentDateTime(DateTime date) {
+    if (date.isWithinLastMinute) return 'たった今';
+
+    final localDate = date.toLocal();
+    final jiffyDate = Jiffy.parseFromDateTime(localDate);
+    final time = jiffyDate.jm;
+
+    if (localDate.isToday) return '今日 $time';
+    if (localDate.isYesterday) return '昨日 $time';
+    if (localDate.isWithinLastWeek) return '${jiffyDate.EEEE} $time';
+    if (localDate.isInSameYear) {
+      return '${jiffyDate.format(pattern: 'M月d日')} $time';
+    }
+    return '${jiffyDate.format(pattern: 'yyyy年M月d日')} $time';
+  }
+
+  @override
+  String formatDateTime(DateTime dateTime) {
+    final jiffy = Jiffy.parseFromDateTime(dateTime);
+    return '${jiffy.EEEE} ${jiffy.yMMMMd} ${jiffy.jm}';
+  }
+
+  @override
+  String formatDuration(Duration duration) {
+    final hours = duration.inHours;
+    final minutes = duration.inMinutes.remainder(60);
+    final seconds = duration.inSeconds.remainder(60);
+    // Japanese time-units have no grammatical number; use ideographic comma
+    // between parts so screen readers pause between units.
+    final parts = <String>[
+      if (hours > 0) '$hours時間',
+      if (minutes > 0) '$minutes分',
+      if (seconds > 0 || (hours == 0 && minutes == 0)) '$seconds秒',
+    ];
+    return parts.join('、');
+  }
 }

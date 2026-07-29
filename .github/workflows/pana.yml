@@ -12,12 +12,16 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+  pull-requests: read
+
 jobs:
   stream_chat:
     runs-on: ubuntu-latest
     steps:
       - name: 📚 Git Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: 📊 Verify Pana Score
         uses: ./.github/actions/pana
         with:
@@ -28,7 +32,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: 📚 Git Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: 📊 Verify Pana Score
         uses: ./.github/actions/pana
         with:
@@ -39,7 +43,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: 📚 Git Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: 📊 Verify Pana Score
         uses: ./.github/actions/pana
         with:
@@ -50,7 +54,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: 📚 Git Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: 📊 Verify Pana Score
         uses: ./.github/actions/pana
         with:
@@ -61,7 +65,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: 📚 Git Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: 📊 Verify Pana Score
         uses: ./.github/actions/pana
         with:

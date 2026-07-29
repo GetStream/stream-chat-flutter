@@ -2,6 +2,21 @@
 
 ✅ Added
 
+- Added connection-error translations (`connectionErrorTitle`/`Description`, `slowConnectionErrorTitle`/`Description`, `genericErrorTitle`/`Description`) for all supported locales.
+
+## 10.2.0
+
+✅ Added
+
+- Added `AccessibilityTranslations`, a nested `translations.accessibility` namespace of screen-reader-only strings — tooltips, semantic labels, hints, live-region announcements, and `formatDuration` / `formatDateTime` / `formatRecentDateTime` formatters. Every supported locale ships a full native-language implementation.
+- Added channel-list a11y strings: `unreadMessagesLabel`, `channelGroupLabel`, `systemMessagePreviewLabel`, `channelMutedLabel`, `channelPinnedLabel`.
+- Added message-preview a11y strings: `outgoingMessagePreviewLabel`, `incomingMessagePreviewLabel`, `pollPreviewLabel`, `draftPreviewLabel`, and the `messageSending` / `messageSent` / `messageDelivered` / `messageRead` status labels.
+- Updated `attachmentPickerTooltip` in every locale to a state-agnostic `"Toggle attachment picker"` phrasing.
+
+## 10.1.0
+
+✅ Added
+
 - Added `notifyChannelText` translation for all supported locales — label for
   the `@channel` broadcast mention in the autocomplete overlay.
 - Added `notifyHereText` translation for all supported locales — label for the

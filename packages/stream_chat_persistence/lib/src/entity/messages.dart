@@ -7,6 +7,7 @@ import 'package:stream_chat_persistence/src/entity/channels.dart';
 
 /// Represents a [Messages] table in [DriftChatDatabase].
 @DataClassName('MessageEntity')
+@TableIndex(name: 'idx_messages_channel_cid', columns: {#channelCid})
 class Messages extends Table {
   /// The message id
   TextColumn get id => text()();

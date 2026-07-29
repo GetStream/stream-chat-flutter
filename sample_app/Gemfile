@@ -1,0 +1,15 @@
+source "https://rubygems.org"
+
+gem "fastlane"
+gem "cocoapods"
+gem "multi_json"
+gem "sinatra", group: :sinatra_dependencies
+
+group :sinatra_dependencies do
+  gem "eventmachine"
+  gem "faye-websocket"
+  gem "puma"
+  gem "rackup"
+end
+
+eval_gemfile("fastlane/Pluginfile")

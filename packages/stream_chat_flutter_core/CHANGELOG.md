@@ -1,5 +1,24 @@
 ## Upcoming
 
+✅ Added
+
+- Added `StreamChannelState.retry()` to re-run a failed channel initialization, for use as the retry action in `StreamChannel.errorBuilder`.
+- Added `DefaultStreamChannelBuilders`, an inherited widget that supplies default loading and error builders to descendant `StreamChannel`s (resolved via `loadingBuilderOf`/`errorBuilderOf`).
+
+🐞 Fixed
+
+- Fixed `StreamChannel`'s default error state exposing raw error details; it now shows a safe error state (icon, message, and a Try Again button wired to `retry()`) that adapts to the failure type.
+
+## 10.2.0
+
+🐞 Fixed
+
+- Fixed `StreamChannelListController` not handling `notification.channel_deleted` event.
+- Fixed backwards pagination not working if channel was never opened.
+- Guarded `StreamChannelListController`'s `channel.updated`, `member.updated`, and `user.presence.changed`/`user.updated` event handlers to skip the full list re-sort when the event doesn't affect any listed channel.
+
+## 10.1.0
+
 🐛 Fixed
 
 - Fixed a use-after-dispose race condition in all `PagedValueNotifier` subclasses (`StreamChannelListController`, `StreamUserListController`, `StreamMemberListController`, `StreamThreadListController`, `StreamDraftListController`, `StreamMessageReminderListController`, `StreamPollVoteListController`, `StreamReactionListController`, `StreamMessageSearchListController`): in-flight async loads could write `value` after `dispose()` had been called, triggering a `notifyListeners()` assertion throw in debug mode. A new `DisposeAwareValueNotifier` mixin guards the `value` setter and also prevents event subscriptions from being set up post-dispose.

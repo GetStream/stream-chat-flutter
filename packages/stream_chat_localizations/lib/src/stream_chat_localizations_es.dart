@@ -8,6 +8,9 @@ class StreamChatLocalizationsEs extends GlobalStreamChatLocalizations {
   const StreamChatLocalizationsEs({super.localeName = 'es'});
 
   @override
+  AccessibilityTranslations get accessibility => _AccessibilityTranslationsEs(localeName: localeName);
+
+  @override
   String get launchUrlError => 'No se pudo abrir la url';
 
   @override
@@ -181,6 +184,24 @@ class StreamChatLocalizationsEs extends GlobalStreamChatLocalizations {
 
   @override
   String get somethingWentWrongError => 'Algo ha salido mal';
+
+  @override
+  String get connectionErrorTitle => 'Sin conexión a Internet';
+
+  @override
+  String get connectionErrorDescription => 'Comprueba tu conexión a Internet';
+
+  @override
+  String get slowConnectionErrorTitle => 'Conexión a Internet lenta';
+
+  @override
+  String get slowConnectionErrorDescription => 'Parece que hay un problema con tu conexión a Internet';
+
+  @override
+  String get genericErrorTitle => 'Error';
+
+  @override
+  String get genericErrorDescription => 'Vaya, algo ha salido mal';
 
   @override
   String get addMoreFilesLabel => 'Añadir más';
@@ -844,4 +865,295 @@ No es posible añadir más de $limit archivos adjuntos
 
   @override
   String notifyRoleText(String role) => 'Notificar a todos los miembros $role';
+}
+
+class _AccessibilityTranslationsEs extends AccessibilityTranslations {
+  const _AccessibilityTranslationsEs({super.localeName = 'es'});
+
+  @override
+  String get sendMessageTooltip => 'Enviar mensaje';
+
+  @override
+  String get saveEditTooltip => 'Guardar edición';
+
+  @override
+  String get sendCommandTooltip => 'Enviar comando';
+
+  @override
+  String slowModeTooltip({required int seconds}) {
+    if (seconds == 1) return 'Modo lento: 1 segundo';
+    return 'Modo lento: $seconds segundos';
+  }
+
+  @override
+  String get recordVoiceRecordingLabel => 'Grabar mensaje de voz';
+
+  @override
+  String get cancelRecordingTooltip => 'Cancelar grabación';
+
+  @override
+  String get stopRecordingTooltip => 'Detener grabación';
+
+  @override
+  String get sendRecordingTooltip => 'Enviar grabación';
+
+  @override
+  String recordingDurationLabel({required Duration duration}) => 'Duración de grabación, ${formatDuration(duration)}';
+
+  @override
+  String voiceRecordingPreviewPlayLabel({required Duration duration}) =>
+      'Reproducir grabación de voz, ${formatDuration(duration)}';
+
+  @override
+  String voiceRecordingPreviewPauseLabel({required Duration duration}) =>
+      'Pausar grabación de voz, ${formatDuration(duration)}';
+
+  @override
+  String get attachmentPickerTooltip => 'Alternar selector de archivos adjuntos';
+
+  @override
+  String get attachmentPickerOpenHint => 'toca dos veces para abrir el selector de archivos adjuntos';
+
+  @override
+  String get attachmentPickerCloseHint => 'toca dos veces para cerrar el selector de archivos adjuntos';
+
+  @override
+  String get attachmentPickerOpenTapHint => 'abrir selector de archivos adjuntos';
+
+  @override
+  String get attachmentPickerCloseTapHint => 'cerrar selector de archivos adjuntos';
+
+  @override
+  String get attachmentPickerOpenedAnnouncement => 'Selector de archivos adjuntos abierto';
+
+  @override
+  String get attachmentPickerClosedAnnouncement => 'Selector de archivos adjuntos cerrado';
+
+  @override
+  String voiceRecordingAttachmentLabel({Duration? duration}) {
+    if (duration == null) return 'Mensaje de voz';
+    return 'Mensaje de voz, ${formatDuration(duration)}';
+  }
+
+  @override
+  String videoAttachmentLabel({String? title}) {
+    if (title == null || title.isEmpty) return 'Vídeo';
+    return 'Vídeo, $title';
+  }
+
+  @override
+  String get gifAttachmentLabel => 'GIF';
+
+  @override
+  String imageAttachmentLabel({String? title}) {
+    if (title == null || title.isEmpty) return 'Foto';
+    return 'Foto, $title';
+  }
+
+  @override
+  String get voiceRecordingPlayTooltip => 'Reproducir';
+
+  @override
+  String get voiceRecordingPauseTooltip => 'Pausa';
+
+  @override
+  String get voiceRecordingLoadingTooltip => 'Cargando';
+
+  @override
+  String get channelInfoLabel => 'Información del canal';
+
+  @override
+  String get messageActionsLabel => 'Acciones del mensaje';
+
+  @override
+  String galleryImageLabel({DateTime? createdAt}) {
+    if (createdAt == null) return 'Foto';
+    return 'Foto, ${formatDateTime(createdAt)}';
+  }
+
+  @override
+  String galleryVideoLabel({
+    DateTime? createdAt,
+    Duration? duration,
+  }) {
+    final parts = <String>[
+      'Vídeo',
+      if (duration != null) formatDuration(duration),
+      if (createdAt != null) formatDateTime(createdAt),
+    ];
+    return parts.join(', ');
+  }
+
+  @override
+  String get selectMediaTapHint => 'seleccionar';
+
+  @override
+  String get deselectMediaTapHint => 'deseleccionar';
+
+  @override
+  String get outgoingMessagePreviewLabel => 'Tú';
+
+  @override
+  String incomingMessagePreviewLabel({String? senderName}) {
+    return senderName ?? 'Mensaje';
+  }
+
+  @override
+  String get pollPreviewLabel => 'Encuesta';
+
+  @override
+  String get draftPreviewLabel => 'Borrador';
+
+  @override
+  String get messageSendingStatusLabel => 'Enviando';
+
+  @override
+  String get messageSentStatusLabel => 'Enviado';
+
+  @override
+  String get messageDeliveredStatusLabel => 'Entregado';
+
+  @override
+  String get messageReadStatusLabel => 'Leído';
+
+  @override
+  String unreadMessagesLabel({required int count}) {
+    return Intl.plural(
+      count,
+      one: '$count mensaje sin leer',
+      other: '$count mensajes sin leer',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String get channelGroupLabel => 'Grupo';
+
+  @override
+  String get systemMessagePreviewLabel => 'Sistema';
+
+  @override
+  String get channelMutedLabel => 'silenciado';
+
+  @override
+  String get channelPinnedLabel => 'fijado';
+
+  @override
+  String get savePollTooltip => 'Guardar encuesta';
+
+  @override
+  String removePollOptionTooltip({String? optionText}) {
+    final trimmed = optionText?.trim();
+    if (trimmed == null || trimmed.isEmpty) return 'Eliminar opción';
+    return 'Eliminar opción $trimmed';
+  }
+
+  @override
+  String get recordingStartedAnnouncement =>
+      'Grabación iniciada. Desliza a la izquierda para cancelar. Desliza hacia arriba para bloquear.';
+
+  @override
+  String get recordingLockedAnnouncement => 'Grabación bloqueada';
+
+  @override
+  String get recordingStoppedAnnouncement => 'Grabación detenida';
+
+  @override
+  String get recordingCancelledAnnouncement => 'Grabación cancelada';
+
+  @override
+  String get recordingCompletedAnnouncement => 'Grabación completada';
+
+  @override
+  String get imageAttachmentAddedAnnouncement => 'Foto añadida';
+
+  @override
+  String get imageAttachmentRemovedAnnouncement => 'Foto eliminada';
+
+  @override
+  String get videoAttachmentAddedAnnouncement => 'Vídeo añadido';
+
+  @override
+  String get videoAttachmentRemovedAnnouncement => 'Vídeo eliminado';
+
+  @override
+  String get gifAttachmentAddedAnnouncement => 'GIF añadido';
+
+  @override
+  String get gifAttachmentRemovedAnnouncement => 'GIF eliminado';
+
+  @override
+  String get fileAttachmentAddedAnnouncement => 'Archivo añadido';
+
+  @override
+  String get fileAttachmentRemovedAnnouncement => 'Archivo eliminado';
+
+  @override
+  String get voiceRecordingAttachmentAddedAnnouncement => 'Mensaje de voz añadido';
+
+  @override
+  String get voiceRecordingAttachmentRemovedAnnouncement => 'Mensaje de voz eliminado';
+
+  @override
+  String get attachmentAddedAnnouncement => 'Archivo adjunto añadido';
+
+  @override
+  String get attachmentRemovedAnnouncement => 'Archivo adjunto eliminado';
+
+  @override
+  String attachmentsAddedAnnouncement({required int count}) {
+    return Intl.plural(
+      count,
+      one: '$count archivo adjunto añadido',
+      other: '$count archivos adjuntos añadidos',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String attachmentsRemovedAnnouncement({required int count}) {
+    return Intl.plural(
+      count,
+      one: '$count archivo adjunto eliminado',
+      other: '$count archivos adjuntos eliminados',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String formatRecentDateTime(DateTime date) {
+    if (date.isWithinLastMinute) return 'Ahora mismo';
+
+    final localDate = date.toLocal();
+    final jiffyDate = Jiffy.parseFromDateTime(localDate);
+    final time = jiffyDate.jm;
+
+    if (localDate.isToday) return 'Hoy a las $time';
+    if (localDate.isYesterday) return 'Ayer a las $time';
+    if (localDate.isWithinLastWeek) return '${jiffyDate.EEEE} a las $time';
+    if (localDate.isInSameYear) {
+      return '${jiffyDate.format(pattern: 'd MMM')} a las $time';
+    }
+    return '${jiffyDate.format(pattern: 'd MMM yyyy')} a las $time';
+  }
+
+  @override
+  String formatDateTime(DateTime dateTime) {
+    final jiffy = Jiffy.parseFromDateTime(dateTime);
+    return '${jiffy.EEEE}, ${jiffy.yMMMMd}, ${jiffy.jm}';
+  }
+
+  @override
+  String formatDuration(Duration duration) {
+    final hours = duration.inHours;
+    final minutes = duration.inMinutes.remainder(60);
+    final seconds = duration.inSeconds.remainder(60);
+    final parts = <String>[
+      if (hours > 0) Intl.plural(hours, one: '$hours hora', other: '$hours horas', locale: localeName),
+      if (minutes > 0) Intl.plural(minutes, one: '$minutes minuto', other: '$minutes minutos', locale: localeName),
+      if (seconds > 0 || (hours == 0 && minutes == 0))
+        Intl.plural(seconds, one: '$seconds segundo', other: '$seconds segundos', locale: localeName),
+    ];
+    return parts.join(', ');
+  }
 }

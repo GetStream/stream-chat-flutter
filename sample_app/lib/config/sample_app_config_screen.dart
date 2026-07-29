@@ -1,6 +1,15 @@
+import 'dart:io' show Platform;
+
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:sample_app/config/sample_app_config.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+
+/// Whether dynamic color extraction is supported on the current platform.
+///
+/// The `dynamic_color` package only supports Android, macOS, Windows, and
+/// Linux; iOS and web always resolve to `null`.
+final bool _dynamicColorSupported = !kIsWeb && !Platform.isIOS;
 
 /// A settings screen for configuring sample app feature flags.
 class SampleAppConfigScreen extends StatelessWidget {
@@ -58,6 +67,17 @@ class SampleAppConfigScreen extends StatelessWidget {
                         SampleAppStyle.floating: Icons.filter_none_outlined,
                       },
                       onChanged: (v) => SampleAppConfig.update(context, config.copyWith(appStyle: v)),
+                    ),
+                    _SwitchRow(
+                      icon: Icons.palette_outlined,
+                      title: 'Dynamic Color',
+                      subtitle: _dynamicColorSupported
+                          ? 'Theme colors derived from the device wallpaper/accent'
+                          : 'Only supported on Android, macOS, Windows, and Linux',
+                      value: _dynamicColorSupported && config.enableDynamicColor,
+                      onChanged: _dynamicColorSupported
+                          ? (v) => SampleAppConfig.update(context, config.copyWith(enableDynamicColor: v))
+                          : null,
                     ),
                     _LocaleRow(config: config),
                     _SwitchRow(
@@ -257,16 +277,21 @@ class _SwitchRow extends StatelessWidget {
   final String title;
   final String? subtitle;
   final bool value;
-  final ValueChanged<bool> onChanged;
+
+  /// Called when the switch is toggled. Pass `null` to disable the row.
+  final ValueChanged<bool>? onChanged;
 
   @override
   Widget build(BuildContext context) {
+    final enabled = onChanged != null;
+
     return StreamListTile(
+      enabled: enabled,
       leading: Icon(icon, size: 24),
       title: Text(title),
       subtitle: subtitle != null ? Text(subtitle!) : null,
       trailing: StreamSwitch(value: value, onChanged: onChanged),
-      onTap: () => onChanged(!value),
+      onTap: enabled ? () => onChanged!(!value) : null,
     );
   }
 }

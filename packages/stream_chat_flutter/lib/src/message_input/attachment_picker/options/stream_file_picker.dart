@@ -77,7 +77,7 @@ class StreamFilePicker extends StatelessWidget {
       return onFilePicked.call(pickedFile);
     }
 
-    return OptionDrawer(
+    final drawer = OptionDrawer(
       child: EndOfFrameCallbackWidget(
         child: Center(
           child: Column(
@@ -110,5 +110,7 @@ class StreamFilePicker extends StatelessWidget {
         onEndOfFrame: (_) => onPickFile(),
       ),
     );
+
+    return MergeSemantics(child: drawer);
   }
 }

@@ -74,6 +74,69 @@ void main() {
     );
   }
 
+  group('StreamThreadListTile a11y', () {
+    testWidgets(
+      'merges children into a single accessible node with the composed label',
+      (tester) async {
+        final handle = tester.ensureSemantics();
+
+        await tester.pumpWidget(
+          _wrapWithMaterialApp(
+            StreamThreadListTile(thread: thread, currentUser: user2),
+          ),
+        );
+
+        await tester.pumpAndSettle();
+
+        // The tile's composed label carries the channel name, unread
+        // badge, message preview, reply count, and timestamp — merged
+        // into one accessible node. MergeSemantics joins the child
+        // labels with newlines, so match with `dotAll: true` so `.`
+        // crosses breaks.
+        expect(
+          find.bySemanticsLabel(
+            RegExp(
+              'Group ride.*3 unread messages.*group ride this Saturday.*1 reply',
+              dotAll: true,
+            ),
+          ),
+          findsOneWidget,
+        );
+
+        handle.dispose();
+      },
+    );
+
+    testWidgets(
+      'unread count == 0 omits the unread label from the announcement',
+      (tester) async {
+        final handle = tester.ensureSemantics();
+
+        final threadWithoutUnread = thread.copyWith(
+          read: [
+            Read(user: user2, lastRead: createdAt, unreadMessages: 0),
+          ],
+        );
+
+        await tester.pumpWidget(
+          _wrapWithMaterialApp(
+            StreamThreadListTile(
+              thread: threadWithoutUnread,
+              currentUser: user2,
+            ),
+          ),
+        );
+
+        await tester.pumpAndSettle();
+
+        expect(find.bySemanticsLabel(RegExp('Group ride')), findsOneWidget);
+        expect(find.bySemanticsLabel(RegExp('unread')), findsNothing);
+
+        handle.dispose();
+      },
+    );
+  });
+
   group('Formatter Tests', () {
     testWidgets(
       'StreamThreadListTile displays custom formatted timestamp',

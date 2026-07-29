@@ -11737,6 +11737,22 @@ abstract class _$DriftChatDatabase extends GeneratedDatabase {
   late final $ConnectionEventsTable connectionEvents = $ConnectionEventsTable(
     this,
   );
+  late final Index idxMessagesChannelCid = Index(
+    'idx_messages_channel_cid',
+    'CREATE INDEX idx_messages_channel_cid ON messages (channel_cid)',
+  );
+  late final Index idxReactionsMessageId = Index(
+    'idx_reactions_message_id',
+    'CREATE INDEX idx_reactions_message_id ON reactions (message_id)',
+  );
+  late final Index idxMembersChannelCid = Index(
+    'idx_members_channel_cid',
+    'CREATE INDEX idx_members_channel_cid ON members (channel_cid)',
+  );
+  late final Index idxReadsChannelCid = Index(
+    'idx_reads_channel_cid',
+    'CREATE INDEX idx_reads_channel_cid ON reads (channel_cid)',
+  );
   late final UserDao userDao = UserDao(this as DriftChatDatabase);
   late final ChannelDao channelDao = ChannelDao(this as DriftChatDatabase);
   late final MessageDao messageDao = MessageDao(this as DriftChatDatabase);
@@ -11778,6 +11794,10 @@ abstract class _$DriftChatDatabase extends GeneratedDatabase {
     channelQueries,
     channelQueriesMetadata,
     connectionEvents,
+    idxMessagesChannelCid,
+    idxReactionsMessageId,
+    idxMembersChannelCid,
+    idxReadsChannelCid,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([

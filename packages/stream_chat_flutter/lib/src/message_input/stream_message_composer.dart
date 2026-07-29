@@ -3,7 +3,10 @@ import 'dart:math' as math;
 
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
+import 'package:stream_chat_flutter/src/message_input/audio_recorder/audio_recorder_announcer.dart';
+import 'package:stream_chat_flutter/src/message_input/composer_attachment_announcer.dart';
 import 'package:stream_chat_flutter/src/message_input/error_alert_sheet.dart';
 import 'package:stream_chat_flutter/src/message_input/stream_chat_message_input.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -599,6 +602,7 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
       ..addListener(_onChangedDebounced);
   }
 
+  StreamSubscription<DateTime?>? _lastSentAtSubscription;
   StreamSubscription<Draft?>? _draftStreamSubscription;
   StreamSubscription<Event>? _messageUpdatedSubscription;
   StreamSubscription<Event>? _messageDeletedSubscription;
@@ -639,9 +643,14 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     final channel = StreamChannel.of(context).channel;
     final config = StreamChatConfiguration.of(context);
 
-    // Resumes the cooldown if the channel has currently an active cooldown.
+    // Keeps the composer cooldown in sync with channel sends.
     if (!_isEditing && channel.state != null) {
-      _effectiveController.startCooldown(channel.getRemainingCooldown());
+      _lastSentAtSubscription = channel.currentUserLastMessageAtStream.listen(
+        (lastMessageAt) {
+          final remainingCooldown = channel.getRemainingCooldown(lastMessageAt: lastMessageAt);
+          return _effectiveController.startCooldown(remainingCooldown);
+        },
+      );
     }
 
     // Starts listening to the draft stream for the current channel/thread.
@@ -863,7 +872,7 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
       child: Center(heightFactor: 1, child: messageInput),
     );
 
-    return Material(
+    final composer = Material(
       color: Colors.transparent,
       child: switch (effectiveComposerLocation) {
         .floating => composerBody,
@@ -872,6 +881,15 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
           child: composerBody,
         ),
       },
+    );
+
+    return ComposerAttachmentAnnouncer(
+      controller: _effectiveController,
+      child: AudioRecorderAnnouncer(
+        controller: _audioRecorderController,
+        assertiveness: Assertiveness.assertive,
+        child: composer,
+      ),
     );
   }
 
@@ -1205,6 +1223,7 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     });
 
     _pickerAnimationController.forward();
+    _announcePickerStateChange(isOpen: true);
   }
 
   void _hidePicker() {
@@ -1212,8 +1231,23 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
 
     _stopPickerSync();
     _pickerAnimationController.reverse().then((_) {
-      if (mounted) setState(_disposePickerController);
+      if (!mounted) return;
+      setState(_disposePickerController);
+      _announcePickerStateChange(isOpen: false);
     });
+  }
+
+  void _announcePickerStateChange({required bool isOpen}) {
+    final a11y = context.translations.accessibility;
+
+    return StreamSemanticsAnnouncer.announce(
+      context,
+      assertiveness: .assertive,
+      switch (isOpen) {
+        true => a11y.attachmentPickerOpenedAnnouncement,
+        false => a11y.attachmentPickerClosedAnnouncement,
+      },
+    );
   }
 
   void _startPickerSync() {
@@ -1341,19 +1375,22 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     if (_lastSearchedContainsUrlText == value) return;
     _lastSearchedContainsUrlText = value;
 
-    final matchedUrls = _urlRegex.allMatches(value).where((it) {
-      final _parsedMatch = Uri.tryParse(it.group(0) ?? '')?.withScheme;
-      if (_parsedMatch == null) return false;
+    // Find the first url to preview, normalizing the scheme so links like
+    // `HTTPS://` enrich the same as `https://`.
+    String? firstMatchedUrl;
+    for (final match in _urlRegex.allMatches(value)) {
+      final url = Uri.tryParse(match.group(0) ?? '')?.withScheme;
+      if (url == null) continue;
+      if (!widget.props.ogPreviewFilter.call(url, value)) continue;
 
-      return widget.props.ogPreviewFilter.call(_parsedMatch, value);
-    }).toList();
-
-    // Reset the og attachment if the text doesn't contain any url
-    if (matchedUrls.isEmpty || !channel.canSendLinks) {
-      return _effectiveController.clearOGAttachment();
+      firstMatchedUrl = url.toString();
+      break;
     }
 
-    final firstMatchedUrl = matchedUrls.first.group(0)!;
+    // Reset the og attachment if the text doesn't contain any url
+    if (firstMatchedUrl == null || !channel.canSendLinks) {
+      return _effectiveController.clearOGAttachment();
+    }
 
     // If the parsed url matches the ogAttachment url, don't do anything
     if (_effectiveController.ogAttachment?.titleLink == firstMatchedUrl) {
@@ -1527,7 +1564,6 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
         false => channel.sendMessage(message),
       };
 
-      _effectiveController.startCooldown(channel.getRemainingCooldown());
       widget.props.onMessageSent?.call(resp.message);
     } catch (e, stk) {
       if (widget.props.onError != null) {
@@ -1619,12 +1655,13 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     _effectiveController
       ..removeListener(_onChangedThrottled)
       ..removeListener(_onChangedDebounced);
+    _audioRecorderController.dispose();
     _controller?.dispose();
     _effectiveFocusNode.removeListener(_focusNodeListener);
     _focusNode?.dispose();
     _onChangedDebounced.cancel();
     _onChangedThrottled.cancel();
-    _audioRecorderController.dispose();
+    _lastSentAtSubscription?.cancel();
     _draftStreamSubscription?.cancel();
     _messageUpdatedSubscription?.cancel();
     _messageDeletedSubscription?.cancel();

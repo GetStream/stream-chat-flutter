@@ -23,6 +23,7 @@ enum SampleAppStyle {
 const _kThemeMode = 'config.themeMode';
 const _kAppStyle = 'config.appStyle';
 const _kForceRtl = 'config.forceRtl';
+const _kEnableDynamicColor = 'config.enableDynamicColor';
 const _kEnableReminderActions = 'config.enableReminderActions';
 const _kEnableDeleteForMe = 'config.enableDeleteForMe';
 const _kEnableMessageInfo = 'config.enableMessageInfo';
@@ -54,6 +55,7 @@ class SampleAppConfigData {
     ThemeMode themeMode = .system,
     SampleAppStyle appStyle = .regular,
     bool forceRtl = false,
+    bool enableDynamicColor = false,
     bool enableReminderActions = false,
     bool enableDeleteForMe = false,
     bool enableMessageInfo = false,
@@ -68,6 +70,7 @@ class SampleAppConfigData {
       appStyle: appStyle,
       locale: locale,
       forceRtl: forceRtl,
+      enableDynamicColor: enableDynamicColor,
       enableReminderActions: enableReminderActions,
       enableDeleteForMe: enableDeleteForMe,
       enableMessageInfo: enableMessageInfo,
@@ -85,6 +88,7 @@ class SampleAppConfigData {
     required this.appStyle,
     required this.locale,
     required this.forceRtl,
+    required this.enableDynamicColor,
     required this.enableReminderActions,
     required this.enableDeleteForMe,
     required this.enableMessageInfo,
@@ -104,6 +108,7 @@ class SampleAppConfigData {
       appStyle: SampleAppStyle.values[appStyleIndex.clamp(0, SampleAppStyle.values.length - 1)],
       locale: localeStr.isEmpty ? null : Locale(localeStr),
       forceRtl: prefs.getBool(_kForceRtl, defaultValue: false).getValue(),
+      enableDynamicColor: prefs.getBool(_kEnableDynamicColor, defaultValue: false).getValue(),
       enableReminderActions: prefs.getBool(_kEnableReminderActions, defaultValue: false).getValue(),
       enableDeleteForMe: prefs.getBool(_kEnableDeleteForMe, defaultValue: false).getValue(),
       enableMessageInfo: prefs.getBool(_kEnableMessageInfo, defaultValue: false).getValue(),
@@ -128,6 +133,10 @@ class SampleAppConfigData {
 
   /// Whether to force RTL layout direction.
   final bool forceRtl;
+
+  /// Whether dynamic colors (derived from the OS/device palette) are used
+  /// for theming, on platforms that support it.
+  final bool enableDynamicColor;
 
   /// Whether reminder actions appear in the message context menu.
   final bool enableReminderActions;
@@ -166,6 +175,7 @@ class SampleAppConfigData {
     SampleAppStyle? appStyle,
     Object? locale = _sentinel,
     bool? forceRtl,
+    bool? enableDynamicColor,
     bool? enableReminderActions,
     bool? enableDeleteForMe,
     bool? enableMessageInfo,
@@ -180,6 +190,7 @@ class SampleAppConfigData {
       appStyle: appStyle ?? this.appStyle,
       locale: locale == _sentinel ? this.locale : locale as Locale?,
       forceRtl: forceRtl ?? this.forceRtl,
+      enableDynamicColor: enableDynamicColor ?? this.enableDynamicColor,
       enableReminderActions: enableReminderActions ?? this.enableReminderActions,
       enableDeleteForMe: enableDeleteForMe ?? this.enableDeleteForMe,
       enableMessageInfo: enableMessageInfo ?? this.enableMessageInfo,
@@ -201,6 +212,7 @@ class SampleAppConfigData {
     prefs.setInt(_kAppStyle, appStyle.index);
     prefs.setString(_kLocale, locale?.languageCode ?? '');
     prefs.setBool(_kForceRtl, forceRtl);
+    prefs.setBool(_kEnableDynamicColor, enableDynamicColor);
     prefs.setBool(_kEnableReminderActions, enableReminderActions);
     prefs.setBool(_kEnableDeleteForMe, enableDeleteForMe);
     prefs.setBool(_kEnableMessageInfo, enableMessageInfo);

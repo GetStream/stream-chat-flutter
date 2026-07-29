@@ -189,8 +189,8 @@ class WebSocket with TimerHelper {
       'api_key': apiKey,
       'authorization': token.rawValue,
       'stream-auth-type': token.authType.name,
-      if (userAgent != null) 'X-Stream-Client': jsonEncode(userAgent),
       ...queryParameters,
+      if (userAgent != null) 'X-Stream-Client': jsonEncode(userAgent),
     };
 
     final scheme = switch (baseUrl) {

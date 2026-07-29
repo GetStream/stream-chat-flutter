@@ -1,0 +1,17 @@
+name: 'Cache CocoaPods'
+description: 'Cache CocoaPods dependencies for sample_app iOS builds'
+inputs:
+  key-suffix:
+    description: 'Cache key suffix (e.g. runner.os or iOS version from matrix)'
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/cache@v6
+      with:
+        path: |
+          sample_app/ios/Pods
+          sample_app/ios/Podfile.lock
+          ~/Library/Caches/CocoaPods
+        key: pods-${{ inputs.key-suffix }}-${{ hashFiles('sample_app/pubspec.lock', 'sample_app/ios/Podfile') }}
+        restore-keys: pods-${{ inputs.key-suffix }}-

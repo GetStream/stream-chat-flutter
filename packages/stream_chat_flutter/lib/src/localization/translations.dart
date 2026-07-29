@@ -1,12 +1,21 @@
 // ignore_for_file: lines_longer_than_80_chars
 
 import 'package:jiffy/jiffy.dart';
+import 'package:stream_chat_flutter/src/localization/accessibility_translations.dart';
 import 'package:stream_chat_flutter/src/message_list_view/message_list_view.dart';
 import 'package:stream_chat_flutter/src/misc/connection_status_builder.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 /// Translation strings for the stream chat widgets
 abstract class Translations {
+  /// Accessibility (a11y) translation strings.
+  ///
+  /// Namespaced separately from visible strings because a11y translations
+  /// have different maintenance needs (screen-reader read-order testing,
+  /// pacing punctuation) and follow their own naming convention. See
+  /// [AccessibilityTranslations].
+  AccessibilityTranslations get accessibility;
+
   /// The error shown when [launchURL] fails
   String get launchUrlError;
 
@@ -187,6 +196,25 @@ abstract class Translations {
 
   /// The error shown when something went wrong
   String get somethingWentWrongError;
+
+  /// The title shown when there is no internet connection.
+  String get connectionErrorTitle;
+
+  /// The description shown when there is no internet connection.
+  String get connectionErrorDescription;
+
+  /// The title shown when the connection is too slow or the request timed out.
+  String get slowConnectionErrorTitle;
+
+  /// The description shown when the connection is too slow or the request
+  /// timed out.
+  String get slowConnectionErrorDescription;
+
+  /// The title shown for a generic, uncategorised error.
+  String get genericErrorTitle;
+
+  /// The description shown for a generic, uncategorised error.
+  String get genericErrorDescription;
 
   /// The label for "OK"
   String get okLabel;
@@ -760,6 +788,9 @@ class DefaultTranslations implements Translations {
   static const instance = DefaultTranslations._();
 
   @override
+  AccessibilityTranslations get accessibility => const DefaultAccessibilityTranslations();
+
+  @override
   String get launchUrlError => 'Cannot launch the url';
 
   @override
@@ -932,6 +963,24 @@ class DefaultTranslations implements Translations {
 
   @override
   String get somethingWentWrongError => 'Something went wrong';
+
+  @override
+  String get connectionErrorTitle => 'No Internet Connection';
+
+  @override
+  String get connectionErrorDescription => 'Please check your internet connection';
+
+  @override
+  String get slowConnectionErrorTitle => 'Slow Internet Connection';
+
+  @override
+  String get slowConnectionErrorDescription => 'There seems to be a problem with your internet connection';
+
+  @override
+  String get genericErrorTitle => 'Error';
+
+  @override
+  String get genericErrorDescription => 'Oops, something went wrong';
 
   @override
   String get addMoreFilesLabel => 'Add more';
@@ -1478,7 +1527,7 @@ Attachment limit exceeded: it's not possible to add more than $limit attachments
   String get emptyMessagePreviewText => '';
 
   @override
-  String get voiceRecordingText => 'Voice Recording';
+  String get voiceRecordingText => 'Voice recording';
 
   @override
   String get audioAttachmentText => 'Audio';
