@@ -245,12 +245,23 @@ void main() {
 
   streamTestWithEnv(
     description: 'thread reply also sent to the channel appears in both places',
-    skip:
-        "The in-channel copy of a thread reply doesn't expose a 'Thread Reply' action, "
-        'so openThread() must target the parent message reliably first (needs a stable selector).',
     body: (env) async {
-      // Placeholder; the channel-side assertion works, opening the thread from
-      // the in-channel reply does not. See skip reason.
+      const threadReply = 'thread reply';
+
+      step('GIVEN the user opens a channel');
+      await env.backendRobot.generateChannels(channelsCount: 1, messagesCount: 1);
+      await env.userRobot.login().openChannel();
+
+      step('WHEN the participant adds a thread reply and also sends it to the channel');
+      await env.participantRobot.sendMessageInThread(threadReply, alsoSendInChannel: true);
+
+      step('THEN the user observes the thread reply in the channel');
+      await env.userRobot.assertMessage(threadReply);
+
+      step('AND the user observes the thread reply in the thread');
+      // The in-channel copy is the newest message and has no 'Thread Reply'
+      // action, so the thread is opened from the parent's replies footer.
+      await env.userRobot.openThreadFromReplies().assertThreadReply(threadReply);
     },
   );
 

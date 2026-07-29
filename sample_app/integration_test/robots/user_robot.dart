@@ -67,6 +67,19 @@ class UserRobot {
     return this;
   }
 
+  /// Opens the thread from a parent message's "N replies" footer, mirroring the
+  /// native robot's `threadReplyCountButton` route into a thread.
+  ///
+  /// [openThread]'s long-press route can't be used when a thread reply was also
+  /// sent to the channel: that in-channel copy is the newest message and exposes
+  /// no 'Thread Reply' action. The footer renders only on the parent, so it is
+  /// unambiguous.
+  Future<UserRobot> openThreadFromReplies() async {
+    await tester.tapFinder(MessageListPage.list.threadReplies);
+    await tester.waitUntilVisible(MessageListPage.threadHeader);
+    return this;
+  }
+
   /// Navigates back (out of a thread, or out of the channel).
   Future<UserRobot> tapBackButton() async {
     await tester.tapFinder(MessageListPage.backButton);
@@ -131,6 +144,8 @@ extension UserRobotChain on Future<UserRobot> {
   Future<UserRobot> deleteMessage({int messageIndex = 0}) => then((it) => it.deleteMessage(messageIndex: messageIndex));
 
   Future<UserRobot> openThread({int messageIndex = 0}) => then((it) => it.openThread(messageIndex: messageIndex));
+
+  Future<UserRobot> openThreadFromReplies() => then((it) => it.openThreadFromReplies());
 
   Future<UserRobot> tapBackButton() => then((it) => it.tapBackButton());
 

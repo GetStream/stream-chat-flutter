@@ -80,4 +80,9 @@ final class _MessageList {
 
   /// A rendered URL preview card on a message.
   Finder get linkPreview => find.byType(StreamLinkPreviewAttachment);
+
+  /// The "N replies" footer under a message that has thread replies. It only
+  /// renders on messages whose `replyCount > 0` (i.e. thread parents), and
+  /// tapping it opens the thread.
+  Finder get threadReplies => find.byType(StreamMessageReplies);
 }
