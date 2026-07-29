@@ -24,7 +24,7 @@ dependencies:
   async: ^2.13.1
   collection: ^1.19.1
   diacritic: ^0.1.6
-  dio: ^5.9.2
+  dio: ^5.11.0
   equatable: ^2.0.8
   freezed_annotation: ^3.0.0
   http_parser: ^4.1.2

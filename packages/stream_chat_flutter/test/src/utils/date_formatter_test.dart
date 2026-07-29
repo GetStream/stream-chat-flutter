@@ -27,31 +27,31 @@ void main() {
       });
     });
 
-    testWidgets('formats same-day dates as Today at H:mm', (tester) async {
+    testWidgets('formats same-day dates as Today at time', (tester) async {
       await withClock(Clock.fixed(referenceDate), () async {
         await pumpFormatted(tester, DateTime(2026, 4, 7, 9, 41));
-        expect(find.text('Today at 9:41'), findsOneWidget);
+        expect(find.text('Today at 9:41 AM'), findsOneWidget);
       });
     });
 
-    testWidgets('formats previous-day dates as Yesterday at H:mm', (tester) async {
+    testWidgets('formats previous-day dates as Yesterday at time', (tester) async {
       await withClock(Clock.fixed(referenceDate), () async {
         await pumpFormatted(tester, DateTime(2026, 4, 6, 9, 41));
-        expect(find.text('Yesterday at 9:41'), findsOneWidget);
+        expect(find.text('Yesterday at 9:41 AM'), findsOneWidget);
       });
     });
 
-    testWidgets('formats recent dates within a week as Weekday at H:mm', (tester) async {
+    testWidgets('formats recent dates within a week as Weekday at time', (tester) async {
       await withClock(Clock.fixed(referenceDate), () async {
         await pumpFormatted(tester, DateTime(2026, 4, 4, 9, 41));
-        expect(find.text('Saturday at 9:41'), findsOneWidget);
+        expect(find.text('Saturday at 9:41 AM'), findsOneWidget);
       });
     });
 
-    testWidgets('formats older dates as MMM do at H:mm', (tester) async {
+    testWidgets('formats older dates as MMM do at time', (tester) async {
       await withClock(Clock.fixed(referenceDate), () async {
         await pumpFormatted(tester, DateTime(2026, 1, 1, 9, 41));
-        expect(find.text('Jan 1st at 9:41'), findsOneWidget);
+        expect(find.text('Jan 1st at 9:41 AM'), findsOneWidget);
       });
     });
   });

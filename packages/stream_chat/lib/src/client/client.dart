@@ -101,6 +101,7 @@ class StreamChatClient {
     Iterable<Interceptor>? chatApiInterceptors,
     HttpClientAdapter? httpClientAdapter,
     bool recoverStateOnReconnect = true,
+    this.isLocalUnreadCountEnabled = false,
   }) : _recoverStateOnReconnect = recoverStateOnReconnect {
     logger.info('Initiating new StreamChatClient');
 
@@ -211,6 +212,21 @@ class StreamChatClient {
 
   /// Chat persistence client
   ChatPersistenceClient? chatPersistenceClient;
+
+  /// Whether the SDK should track unread counts locally, on-device, for
+  /// channels that have read events disabled (e.g. livestream channel
+  /// types).
+  ///
+  /// Channels with read events disabled never receive `message.read` /
+  /// `notification.mark_*` events from the server, and reject the mark-read
+  /// endpoint, so their unread count is always `0` by default.
+  ///
+  /// When this is `true`, [Channel.unreadCount] is instead incremented
+  /// locally as new messages arrive and reset locally (with no network
+  /// request) when [Channel.markRead] is called, for those channels only.
+  /// Channels with read events enabled are unaffected and keep relying on
+  /// server-driven unread counts.
+  final bool isLocalUnreadCountEnabled;
 
   /// Returns `True` if the [chatPersistenceClient] is available and connected.
   /// Otherwise, returns `False`.
@@ -1014,7 +1030,7 @@ class StreamChatClient {
     for (final channelState in channelStates) {
       final channel = channels[channelState.channel!.cid];
       if (channel != null) {
-        channel.state?.updateChannelState(channelState);
+        channel.state?.updateChannelStateFromServer(channelState);
         newChannels.add(channel);
       } else {
         final newChannel = Channel.fromState(this, channelState);

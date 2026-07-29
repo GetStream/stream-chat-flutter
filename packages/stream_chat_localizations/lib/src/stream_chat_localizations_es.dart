@@ -186,6 +186,24 @@ class StreamChatLocalizationsEs extends GlobalStreamChatLocalizations {
   String get somethingWentWrongError => 'Algo ha salido mal';
 
   @override
+  String get connectionErrorTitle => 'Sin conexión a Internet';
+
+  @override
+  String get connectionErrorDescription => 'Comprueba tu conexión a Internet';
+
+  @override
+  String get slowConnectionErrorTitle => 'Conexión a Internet lenta';
+
+  @override
+  String get slowConnectionErrorDescription => 'Parece que hay un problema con tu conexión a Internet';
+
+  @override
+  String get genericErrorTitle => 'Error';
+
+  @override
+  String get genericErrorDescription => 'Vaya, algo ha salido mal';
+
+  @override
   String get addMoreFilesLabel => 'Añadir más';
 
   @override
@@ -891,7 +909,7 @@ class _AccessibilityTranslationsEs extends AccessibilityTranslations {
       'Pausar grabación de voz, ${formatDuration(duration)}';
 
   @override
-  String get attachmentPickerTooltip => 'Abrir selector de archivos adjuntos';
+  String get attachmentPickerTooltip => 'Alternar selector de archivos adjuntos';
 
   @override
   String get attachmentPickerOpenHint => 'toca dos veces para abrir el selector de archivos adjuntos';
@@ -973,6 +991,54 @@ class _AccessibilityTranslationsEs extends AccessibilityTranslations {
   String get deselectMediaTapHint => 'deseleccionar';
 
   @override
+  String get outgoingMessagePreviewLabel => 'Tú';
+
+  @override
+  String incomingMessagePreviewLabel({String? senderName}) {
+    return senderName ?? 'Mensaje';
+  }
+
+  @override
+  String get pollPreviewLabel => 'Encuesta';
+
+  @override
+  String get draftPreviewLabel => 'Borrador';
+
+  @override
+  String get messageSendingStatusLabel => 'Enviando';
+
+  @override
+  String get messageSentStatusLabel => 'Enviado';
+
+  @override
+  String get messageDeliveredStatusLabel => 'Entregado';
+
+  @override
+  String get messageReadStatusLabel => 'Leído';
+
+  @override
+  String unreadMessagesLabel({required int count}) {
+    return Intl.plural(
+      count,
+      one: '$count mensaje sin leer',
+      other: '$count mensajes sin leer',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String get channelGroupLabel => 'Grupo';
+
+  @override
+  String get systemMessagePreviewLabel => 'Sistema';
+
+  @override
+  String get channelMutedLabel => 'silenciado';
+
+  @override
+  String get channelPinnedLabel => 'fijado';
+
+  @override
   String get savePollTooltip => 'Guardar encuesta';
 
   @override
@@ -1036,14 +1102,39 @@ class _AccessibilityTranslationsEs extends AccessibilityTranslations {
 
   @override
   String attachmentsAddedAnnouncement({required int count}) {
-    if (count == 1) return '1 archivo adjunto añadido';
-    return '$count archivos adjuntos añadidos';
+    return Intl.plural(
+      count,
+      one: '$count archivo adjunto añadido',
+      other: '$count archivos adjuntos añadidos',
+      locale: localeName,
+    );
   }
 
   @override
   String attachmentsRemovedAnnouncement({required int count}) {
-    if (count == 1) return '1 archivo adjunto eliminado';
-    return '$count archivos adjuntos eliminados';
+    return Intl.plural(
+      count,
+      one: '$count archivo adjunto eliminado',
+      other: '$count archivos adjuntos eliminados',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String formatRecentDateTime(DateTime date) {
+    if (date.isWithinLastMinute) return 'Ahora mismo';
+
+    final localDate = date.toLocal();
+    final jiffyDate = Jiffy.parseFromDateTime(localDate);
+    final time = jiffyDate.jm;
+
+    if (localDate.isToday) return 'Hoy a las $time';
+    if (localDate.isYesterday) return 'Ayer a las $time';
+    if (localDate.isWithinLastWeek) return '${jiffyDate.EEEE} a las $time';
+    if (localDate.isInSameYear) {
+      return '${jiffyDate.format(pattern: 'd MMM')} a las $time';
+    }
+    return '${jiffyDate.format(pattern: 'd MMM yyyy')} a las $time';
   }
 
   @override

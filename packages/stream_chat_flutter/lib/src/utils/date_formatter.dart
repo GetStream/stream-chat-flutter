@@ -26,16 +26,16 @@ String formatDate(BuildContext context, DateTime date) {
 ///
 /// Output examples:
 /// - `Just now`
-/// - `Today at 9:41`
-/// - `Yesterday at 9:41`
-/// - `Saturday at 9:41`
-/// - `Jan 1st at 9:41`
+/// - `Today at 9:41 AM`
+/// - `Yesterday at 9:41 AM`
+/// - `Saturday at 9:41 AM`
+/// - `Jan 1st at 9:41 AM`
 String formatRecentDateTime(BuildContext context, DateTime date) {
   if (date.isWithinLastMinute) return context.translations.justNowLabel;
 
   final localDate = date.toLocal();
   final jiffyDate = Jiffy.parseFromDateTime(localDate);
-  final time = jiffyDate.format(pattern: 'H:mm');
+  final time = jiffyDate.jm;
 
   if (localDate.isToday) return '${context.translations.todayLabel} at $time';
   if (localDate.isYesterday) return '${context.translations.yesterdayLabel} at $time';
