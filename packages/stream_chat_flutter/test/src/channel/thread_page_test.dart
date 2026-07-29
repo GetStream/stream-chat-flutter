@@ -37,7 +37,6 @@ void main() {
     final parent = Message(id: 'parent-id', text: 'Hello world!', type: 'deleted');
 
     await _pumpThreadPage(tester, parent: parent);
-    _ignoreDeletedBubbleOverflow(tester);
 
     expect(find.byType(StreamMessageComposer), findsNothing);
   });
@@ -46,7 +45,6 @@ void main() {
     final parent = Message(id: 'parent-id', text: 'Hello world!', type: 'deleted');
 
     await _pumpThreadPage(tester, parent: parent);
-    _ignoreDeletedBubbleOverflow(tester);
 
     expect(find.byType(StreamMessageListView), findsOneWidget);
   });
@@ -124,7 +122,8 @@ void main() {
     await _pumpThreadPage(tester);
     final controller = _composerController(tester);
 
-    await tester.pumpWidget(const MaterialApp(home: SizedBox.shrink()));
+    // A bare widget, so the whole app subtree unmounts.
+    await tester.pumpWidget(const SizedBox.shrink());
 
     // A disposed ChangeNotifier throws when listened to again.
     expect(() => controller.addListener(() {}), throwsFlutterError);
@@ -133,20 +132,6 @@ void main() {
 
 StreamMessageListView _messageListView(WidgetTester tester) {
   return tester.widget<StreamMessageListView>(find.byType(StreamMessageListView));
-}
-
-/// Drains the overflow [FlutterError] the deleted-message bubble reports.
-///
-/// `StreamMessageDeleted` lays out its icon and label in a fixed-width bubble.
-/// The test font is squarer — and so wider — than the font that ships with the
-/// app, which pushes the label a few pixels past the bubble. It fits in a real
-/// app, so it is not what these tests are about.
-void _ignoreDeletedBubbleOverflow(WidgetTester tester) {
-  final exception = tester.takeException();
-  if (exception == null) return;
-
-  expect(exception, isFlutterError);
-  expect('$exception', contains('overflowed'));
 }
 
 /// The controller the page created and handed to its composer.

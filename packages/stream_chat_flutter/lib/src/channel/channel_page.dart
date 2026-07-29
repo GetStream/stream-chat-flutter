@@ -18,7 +18,10 @@ class StreamChannelPage extends StatefulWidget {
   /// Initial scroll alignment for the message list.
   final double? initialAlignment;
 
-  /// Callback for when the back button is pressed.
+  /// Called when the header's back button is pressed.
+  ///
+  /// Replaces the default action, which pops the current route. When null the
+  /// default is kept.
   final VoidCallback? onBackPressed;
 
   /// Called when the default channel-avatar trailing is pressed.
@@ -63,6 +66,12 @@ class _StreamChannelPageState extends State<StreamChannelPage> {
   @override
   Widget build(BuildContext context) {
     final appBar = StreamChannelHeader(
+      // Leaving this null keeps the header's own default back button, which
+      // pops the route.
+      leading: switch (widget.onBackPressed) {
+        final onBackPressed? => StreamBackButton(onPressed: onBackPressed, showUnreadCount: true),
+        _ => null,
+      },
       onChannelAvatarPressed: (channel) => widget.onChannelAvatarPressed?.call(context, channel),
     );
 

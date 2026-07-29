@@ -36,6 +36,34 @@ void main() {
     expect(pressedChannel, isNotNull);
   });
 
+  testWidgets('tapping back invokes onBackPressed', (tester) async {
+    var backPressed = 0;
+    await _pumpChannelPage(tester, onBackPressed: () => backPressed++);
+
+    await tester.tap(find.byType(StreamBackButton));
+    await tester.pumpAndSettle();
+
+    expect(backPressed, 1);
+  });
+
+  testWidgets('onBackPressed replaces the default pop', (tester) async {
+    await _pumpChannelPage(tester, onBackPressed: () {}, pushOntoARoute: true);
+
+    await tester.tap(find.byType(StreamBackButton));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(StreamChannelPage), findsOneWidget);
+  });
+
+  testWidgets('pops the route when onBackPressed is not set', (tester) async {
+    await _pumpChannelPage(tester, pushOntoARoute: true);
+
+    await tester.tap(find.byType(StreamBackButton));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(StreamChannelPage), findsNothing);
+  });
+
   testWidgets('replying to a message quotes it in the composer', (tester) async {
     final message = Message(id: 'message-id', text: 'Hello world!');
 
@@ -108,7 +136,8 @@ void main() {
     await _pumpChannelPage(tester);
     final controller = _composerController(tester);
 
-    await tester.pumpWidget(const MaterialApp(home: SizedBox.shrink()));
+    // A bare widget, so the whole app subtree unmounts.
+    await tester.pumpWidget(const SizedBox.shrink());
 
     // A disposed ChangeNotifier throws when listened to again.
     expect(() => controller.addListener(() {}), throwsFlutterError);
@@ -156,6 +185,8 @@ Future<void> _pumpChannelPage(
   WidgetTester tester, {
   StreamAppStyle appStyle = StreamAppStyle.regular,
   void Function(BuildContext context, Channel channel)? onChannelAvatarPressed,
+  VoidCallback? onBackPressed,
+  bool pushOntoARoute = false,
 }) async {
   final originalRecordPlatform = RecordPlatform.instance;
   RecordPlatform.instance = FakeRecordPlatform();
@@ -198,16 +229,26 @@ Future<void> _pumpChannelPage(
   when(() => channelState.currentUserRead).thenReturn(null);
   when(() => channelState.currentUserReadStream).thenAnswer((_) => const Stream.empty());
 
+  final page = StreamChannelPage(
+    onChannelAvatarPressed: onChannelAvatarPressed,
+    onBackPressed: onBackPressed,
+  );
+
   await tester.pumpWidget(
     MaterialApp(
       theme: ThemeData(extensions: [StreamTheme(appStyle: appStyle)]),
-      home: StreamChat(
+      // Chat context lives above the navigator so it survives a pop.
+      builder: (context, child) => StreamChat(
         client: client,
-        child: StreamChannel(
-          channel: channel,
-          child: StreamChannelPage(onChannelAvatarPressed: onChannelAvatarPressed),
-        ),
+        child: StreamChannel(channel: channel, child: child!),
       ),
+      // '/channel' seeds the stack with '/' underneath it, giving the back
+      // button something to pop to.
+      initialRoute: pushOntoARoute ? '/channel' : '/',
+      routes: {
+        '/': (_) => pushOntoARoute ? const Scaffold(body: SizedBox.shrink()) : page,
+        '/channel': (_) => page,
+      },
     ),
   );
 
