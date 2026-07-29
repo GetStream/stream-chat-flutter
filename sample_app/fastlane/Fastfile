@@ -21,6 +21,13 @@ def ios_device?(device)
   device.to_s.match?(/\A[0-9A-F]{8}-[0-9A-F]{4}-/i)
 end
 
+def boot_simulator(udid)
+  return if `xcrun simctl list devices booted`.to_s.include?(udid)
+  return unless `xcrun simctl list devices`.to_s.include?(udid)
+
+  sh("xcrun simctl bootstatus #{udid} -b")
+end
+
 # Video is recorded on ANDROID ONLY — iOS recording is intentionally disabled.
 def start_screen_recording(ios:, device:, path:)
   return nil if ios
@@ -175,6 +182,7 @@ lane :run_e2e_test do |options|
       retries = (options[:retries] || 2).to_i
 
       failed = []
+      first_attempt = true
       targets.each do |target|
         test_name = File.basename(target, '.dart')
 
@@ -187,6 +195,8 @@ lane :run_e2e_test do |options|
         ok = false
         attempt = 0
         loop do
+          boot_simulator(udid: device) if ios && !first_attempt
+          first_attempt = false
           attempt += 1
 
           flags = [target, "--dart-define=E2E_TARGET=#{test_name}"]
