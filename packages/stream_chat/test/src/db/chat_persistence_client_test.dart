@@ -9,6 +9,7 @@ import 'package:stream_chat/src/core/models/filter.dart';
 import 'package:stream_chat/src/core/models/location.dart';
 import 'package:stream_chat/src/core/models/member.dart';
 import 'package:stream_chat/src/core/models/message.dart';
+import 'package:stream_chat/src/core/models/pending_operation.dart';
 import 'package:stream_chat/src/core/models/poll.dart';
 import 'package:stream_chat/src/core/models/poll_vote.dart';
 import 'package:stream_chat/src/core/models/reaction.dart';
@@ -291,6 +292,24 @@ void main() {
         members: [Member(user: user)],
       );
       persistenceClient.updateChannelStates([channelState]);
+    });
+
+    test('insertPendingOperation defaults to a no-op', () async {
+      const operation = PendingOperation(
+        type: 'reaction.add',
+        targetMessageId: 'message-id',
+        payload: {'reaction': 'like'},
+      );
+      await persistenceClient.insertPendingOperation(operation);
+    });
+
+    test('getPendingOperations defaults to an empty list', () async {
+      final operations = await persistenceClient.getPendingOperations();
+      expect(operations, isEmpty);
+    });
+
+    test('deletePendingOperation defaults to a no-op', () async {
+      await persistenceClient.deletePendingOperation(1);
     });
   });
 }
