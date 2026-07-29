@@ -24,6 +24,16 @@ class GroupInfoScreen extends StatelessWidget {
     final colorScheme = context.streamColorScheme;
     final channel = StreamChannel.of(context).channel;
 
+    // Mirrors how [StreamAppBar] resolves its own behavior — per-instance
+    // style, then the ambient app bar theme, then the global app style — so
+    // the trailing button floats exactly when the bar it sits in does.
+    final appStyle = context.streamTheme.appStyle;
+    final isFloatingStyle = switch (context.streamAppBarTheme.style?.behavior) {
+      .floating => true,
+      .regular => false,
+      _ => appStyle.isFloating,
+    };
+
     return StreamScaffold(
       backgroundColor: colorScheme.backgroundApp,
       appBar: StreamAppBar(
@@ -32,7 +42,7 @@ class GroupInfoScreen extends StatelessWidget {
           true => StreamButton(
             type: .outline,
             style: .secondary,
-            size: .small,
+            isFloating: isFloatingStyle,
             onPressed: () => showEditGroupSheet(context, channel),
             child: const Text('Edit'),
           ),
