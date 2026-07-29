@@ -115,8 +115,7 @@ class StreamMessageListView extends StatefulWidget {
     this.onEditMessageTap,
     this.onReplyTap,
     this.onUserAvatarTap,
-    @Deprecated('Use onReactionTap instead. onReactionTap also reports the tapped reaction.')
-    this.onReactionsTap,
+    @Deprecated('Use onReactionTap instead. onReactionTap also reports the tapped reaction.') this.onReactionsTap,
     this.onReactionTap,
     this.onQuotedMessageTap,
     this.onMessageLinkTap,

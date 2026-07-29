@@ -52,7 +52,12 @@ void main() {
     Reaction? tapped;
     final message = Message(
       reactionGroups: {'love': ReactionGroup(count: 1)},
-      ownReactions: [Reaction(type: 'love', user: User(id: 'u1'))],
+      ownReactions: [
+        Reaction(
+          type: 'love',
+          user: User(id: 'u1'),
+        ),
+      ],
     );
 
     await pumpReactions(
