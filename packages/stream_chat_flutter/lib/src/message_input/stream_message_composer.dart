@@ -14,6 +14,17 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 const _kCommandTrigger = '/';
 const _kMentionTrigger = '@';
 
+// How far the floating composer's lower background paints bleed *up*, under the
+// paint above them.
+//
+// The floating composer stacks several same-colored fills (the pill's gradient
+// band, the picker panel, the safe-area strip). Where two of them merely abut at
+// a fractional device-pixel boundary, both edges get antialiased; composited in
+// sequence their coverages don't sum to 1, so a hairline of whatever is behind
+// (the message list) survives. Overlapping instead of abutting removes the seam,
+// and is invisible because the paints share a color.
+const _kFloatingSeamBleed = 1.0;
+
 /// Signature for the function that determines if a [matchedUri] should be
 /// previewed as an OG Attachment.
 typedef OgPreviewFilter = bool Function(Uri matchedUri, String messageText);
@@ -859,7 +870,9 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
                 bottom: 0,
                 left: 0,
                 right: 0,
-                height: safeAreaPadding.bottom,
+                // Bleeds up under the pill/picker above it to avoid a seam;
+                // this is a Positioned, so it only affects painting.
+                height: safeAreaPadding.bottom + _kFloatingSeamBleed,
                 child: ColoredBox(color: bandColor),
               ),
               Padding(padding: safeAreaPadding, child: child),
@@ -1040,11 +1053,16 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
             // above the picker while making it the last-painted child.
             verticalDirection: VerticalDirection.up,
             children: [
-              SizeTransition(
-                sizeFactor: _pickerAnimation,
-                // ignore: deprecated_member_use, alternative is only available since Flutter 3.44
-                axisAlignment: -1,
-                child: _buildInlineAttachmentPicker(context),
+              // The panel fill lives outside the SizeTransition: its ClipRect
+              // would otherwise clip away the upward bleed.
+              _TopBleedFill(
+                color: context.streamColorScheme.backgroundElevation1,
+                child: SizeTransition(
+                  sizeFactor: _pickerAnimation,
+                  // ignore: deprecated_member_use, alternative is only available since Flutter 3.44
+                  axisAlignment: -1,
+                  child: _buildInlineAttachmentPicker(context),
+                ),
               ),
               // Gradient wraps only the pill — not the picker sibling — so
               // the gradient height tracks the pill and doesn't stretch when
@@ -1111,7 +1129,9 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
             commandValidator: _effectiveController.validateCommand,
           );
 
-    return ColoredBox(color: context.streamColorScheme.backgroundElevation1, child: child);
+    // The panel's background is painted by the _TopBleedFill wrapping the
+    // SizeTransition around this widget, not here.
+    return child;
   }
 
   // Validates [command]: on disabled, surfaces the "unavailable" snackbar and
@@ -1666,5 +1686,47 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     _messageUpdatedSubscription?.cancel();
     _messageDeletedSubscription?.cancel();
     super.dispose();
+  }
+}
+
+/// Fills [child]'s bounds with [color], bleeding [_kFloatingSeamBleed] logical
+/// pixels above its own top edge so it tucks under whatever paints on top of it.
+///
+/// See [_kFloatingSeamBleed] for why the overlap is needed.
+class _TopBleedFill extends StatelessWidget {
+  const _TopBleedFill({required this.color, required this.child});
+
+  final Color color;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    // CustomPaint runs the painter before the child and never clips, which is
+    // what lets the fill escape above its own bounds.
+    return CustomPaint(
+      painter: _TopBleedFillPainter(color: color, bleed: _kFloatingSeamBleed),
+      child: child,
+    );
+  }
+}
+
+class _TopBleedFillPainter extends CustomPainter {
+  const _TopBleedFillPainter({required this.color, required this.bleed});
+
+  final Color color;
+  final double bleed;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    // Nothing to tuck under when collapsed; skip so we don't leave a stray line.
+    if (size.isEmpty) return;
+
+    final rect = Rect.fromLTWH(0, -bleed, size.width, size.height + bleed);
+    canvas.drawRect(rect, Paint()..color = color);
+  }
+
+  @override
+  bool shouldRepaint(_TopBleedFillPainter oldDelegate) {
+    return oldDelegate.color != color || oldDelegate.bleed != bleed;
   }
 }
