@@ -3,8 +3,7 @@
 part of 'drift_chat_database.dart';
 
 // ignore_for_file: type=lint
-class $ChannelsTable extends Channels
-    with TableInfo<$ChannelsTable, ChannelEntity> {
+class $ChannelsTable extends Channels with TableInfo<$ChannelsTable, ChannelEntity> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
@@ -37,8 +36,7 @@ class $ChannelsTable extends Channels
     requiredDuringInsert: true,
   );
   @override
-  late final GeneratedColumnWithTypeConverter<List<String>?, String>
-  ownCapabilities = GeneratedColumn<String>(
+  late final GeneratedColumnWithTypeConverter<List<String>?, String> ownCapabilities = GeneratedColumn<String>(
     'own_capabilities',
     aliasedName,
     true,
@@ -46,8 +44,7 @@ class $ChannelsTable extends Channels
     requiredDuringInsert: false,
   ).withConverter<List<String>?>($ChannelsTable.$converterownCapabilitiesn);
   @override
-  late final GeneratedColumnWithTypeConverter<Map<String, dynamic>, String>
-  config = GeneratedColumn<String>(
+  late final GeneratedColumnWithTypeConverter<Map<String, dynamic>, String> config = GeneratedColumn<String>(
     'config',
     aliasedName,
     false,
@@ -71,14 +68,13 @@ class $ChannelsTable extends Channels
     'lastMessageAt',
   );
   @override
-  late final GeneratedColumn<DateTime> lastMessageAt =
-      GeneratedColumn<DateTime>(
-        'last_message_at',
-        aliasedName,
-        true,
-        type: DriftSqlType.dateTime,
-        requiredDuringInsert: false,
-      );
+  late final GeneratedColumn<DateTime> lastMessageAt = GeneratedColumn<DateTime>(
+    'last_message_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -149,8 +145,7 @@ class $ChannelsTable extends Channels
     requiredDuringInsert: false,
   );
   @override
-  late final GeneratedColumnWithTypeConverter<List<String>?, String>
-  filterTags = GeneratedColumn<String>(
+  late final GeneratedColumnWithTypeConverter<List<String>?, String> filterTags = GeneratedColumn<String>(
     'filter_tags',
     aliasedName,
     true,
@@ -167,8 +162,7 @@ class $ChannelsTable extends Channels
     requiredDuringInsert: false,
   );
   @override
-  late final GeneratedColumnWithTypeConverter<Map<String, dynamic>?, String>
-  extraData = GeneratedColumn<String>(
+  late final GeneratedColumnWithTypeConverter<Map<String, dynamic>?, String> extraData = GeneratedColumn<String>(
     'extra_data',
     aliasedName,
     true,
@@ -382,20 +376,19 @@ class $ChannelsTable extends Channels
     return $ChannelsTable(attachedDatabase, alias);
   }
 
-  static TypeConverter<List<String>, String> $converterownCapabilities =
-      ListConverter<String>();
-  static TypeConverter<List<String>?, String?> $converterownCapabilitiesn =
-      NullAwareTypeConverter.wrap($converterownCapabilities);
-  static TypeConverter<Map<String, dynamic>, String> $converterconfig =
-      MapConverter();
-  static TypeConverter<List<String>, String> $converterfilterTags =
-      ListConverter<String>();
-  static TypeConverter<List<String>?, String?> $converterfilterTagsn =
-      NullAwareTypeConverter.wrap($converterfilterTags);
-  static TypeConverter<Map<String, dynamic>, String> $converterextraData =
-      MapConverter();
-  static TypeConverter<Map<String, dynamic>?, String?> $converterextraDatan =
-      NullAwareTypeConverter.wrap($converterextraData);
+  static TypeConverter<List<String>, String> $converterownCapabilities = ListConverter<String>();
+  static TypeConverter<List<String>?, String?> $converterownCapabilitiesn = NullAwareTypeConverter.wrap(
+    $converterownCapabilities,
+  );
+  static TypeConverter<Map<String, dynamic>, String> $converterconfig = MapConverter();
+  static TypeConverter<List<String>, String> $converterfilterTags = ListConverter<String>();
+  static TypeConverter<List<String>?, String?> $converterfilterTagsn = NullAwareTypeConverter.wrap(
+    $converterfilterTags,
+  );
+  static TypeConverter<Map<String, dynamic>, String> $converterextraData = MapConverter();
+  static TypeConverter<Map<String, dynamic>?, String?> $converterextraDatan = NullAwareTypeConverter.wrap(
+    $converterextraData,
+  );
 }
 
 class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
@@ -582,14 +575,10 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
     id: id ?? this.id,
     type: type ?? this.type,
     cid: cid ?? this.cid,
-    ownCapabilities: ownCapabilities.present
-        ? ownCapabilities.value
-        : this.ownCapabilities,
+    ownCapabilities: ownCapabilities.present ? ownCapabilities.value : this.ownCapabilities,
     config: config ?? this.config,
     frozen: frozen ?? this.frozen,
-    lastMessageAt: lastMessageAt.present
-        ? lastMessageAt.value
-        : this.lastMessageAt,
+    lastMessageAt: lastMessageAt.present ? lastMessageAt.value : this.lastMessageAt,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
     deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
@@ -605,29 +594,17 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
       id: data.id.present ? data.id.value : this.id,
       type: data.type.present ? data.type.value : this.type,
       cid: data.cid.present ? data.cid.value : this.cid,
-      ownCapabilities: data.ownCapabilities.present
-          ? data.ownCapabilities.value
-          : this.ownCapabilities,
+      ownCapabilities: data.ownCapabilities.present ? data.ownCapabilities.value : this.ownCapabilities,
       config: data.config.present ? data.config.value : this.config,
       frozen: data.frozen.present ? data.frozen.value : this.frozen,
-      lastMessageAt: data.lastMessageAt.present
-          ? data.lastMessageAt.value
-          : this.lastMessageAt,
+      lastMessageAt: data.lastMessageAt.present ? data.lastMessageAt.value : this.lastMessageAt,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
-      memberCount: data.memberCount.present
-          ? data.memberCount.value
-          : this.memberCount,
-      messageCount: data.messageCount.present
-          ? data.messageCount.value
-          : this.messageCount,
-      createdById: data.createdById.present
-          ? data.createdById.value
-          : this.createdById,
-      filterTags: data.filterTags.present
-          ? data.filterTags.value
-          : this.filterTags,
+      memberCount: data.memberCount.present ? data.memberCount.value : this.memberCount,
+      messageCount: data.messageCount.present ? data.messageCount.value : this.messageCount,
+      createdById: data.createdById.present ? data.createdById.value : this.createdById,
+      filterTags: data.filterTags.present ? data.filterTags.value : this.filterTags,
       team: data.team.present ? data.team.value : this.team,
       extraData: data.extraData.present ? data.extraData.value : this.extraData,
     );
@@ -926,8 +903,7 @@ class ChannelsCompanion extends UpdateCompanion<ChannelEntity> {
   }
 }
 
-class $MessagesTable extends Messages
-    with TableInfo<$MessagesTable, MessageEntity> {
+class $MessagesTable extends Messages with TableInfo<$MessagesTable, MessageEntity> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
@@ -953,8 +929,7 @@ class $MessagesTable extends Messages
     requiredDuringInsert: false,
   );
   @override
-  late final GeneratedColumnWithTypeConverter<List<String>, String>
-  attachments = GeneratedColumn<String>(
+  late final GeneratedColumnWithTypeConverter<List<String>, String> attachments = GeneratedColumn<String>(
     'attachments',
     aliasedName,
     false,
@@ -995,8 +970,7 @@ class $MessagesTable extends Messages
     ),
   );
   @override
-  late final GeneratedColumnWithTypeConverter<List<String>?, String>
-  mentionedGroupIds = GeneratedColumn<String>(
+  late final GeneratedColumnWithTypeConverter<List<String>?, String> mentionedGroupIds = GeneratedColumn<String>(
     'mentioned_group_ids',
     aliasedName,
     true,
@@ -1004,8 +978,7 @@ class $MessagesTable extends Messages
     requiredDuringInsert: false,
   ).withConverter<List<String>?>($MessagesTable.$convertermentionedGroupIdsn);
   @override
-  late final GeneratedColumnWithTypeConverter<List<String>?, String>
-  mentionedGroups = GeneratedColumn<String>(
+  late final GeneratedColumnWithTypeConverter<List<String>?, String> mentionedGroups = GeneratedColumn<String>(
     'mentioned_groups',
     aliasedName,
     true,
@@ -1027,8 +1000,7 @@ class $MessagesTable extends Messages
     ),
   );
   @override
-  late final GeneratedColumnWithTypeConverter<List<String>?, String>
-  mentionedRoles = GeneratedColumn<String>(
+  late final GeneratedColumnWithTypeConverter<List<String>?, String> mentionedRoles = GeneratedColumn<String>(
     'mentioned_roles',
     aliasedName,
     true,
@@ -1036,8 +1008,7 @@ class $MessagesTable extends Messages
     requiredDuringInsert: false,
   ).withConverter<List<String>?>($MessagesTable.$convertermentionedRolesn);
   @override
-  late final GeneratedColumnWithTypeConverter<List<String>, String>
-  mentionedUsers = GeneratedColumn<String>(
+  late final GeneratedColumnWithTypeConverter<List<String>, String> mentionedUsers = GeneratedColumn<String>(
     'mentioned_users',
     aliasedName,
     false,
@@ -1045,11 +1016,7 @@ class $MessagesTable extends Messages
     requiredDuringInsert: true,
   ).withConverter<List<String>>($MessagesTable.$convertermentionedUsers);
   @override
-  late final GeneratedColumnWithTypeConverter<
-    Map<String, ReactionGroup>?,
-    String
-  >
-  reactionGroups =
+  late final GeneratedColumnWithTypeConverter<Map<String, ReactionGroup>?, String> reactionGroups =
       GeneratedColumn<String>(
         'reaction_groups',
         aliasedName,
@@ -1145,74 +1112,68 @@ class $MessagesTable extends Messages
     'localCreatedAt',
   );
   @override
-  late final GeneratedColumn<DateTime> localCreatedAt =
-      GeneratedColumn<DateTime>(
-        'local_created_at',
-        aliasedName,
-        true,
-        type: DriftSqlType.dateTime,
-        requiredDuringInsert: false,
-      );
+  late final GeneratedColumn<DateTime> localCreatedAt = GeneratedColumn<DateTime>(
+    'local_created_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _remoteCreatedAtMeta = const VerificationMeta(
     'remoteCreatedAt',
   );
   @override
-  late final GeneratedColumn<DateTime> remoteCreatedAt =
-      GeneratedColumn<DateTime>(
-        'remote_created_at',
-        aliasedName,
-        true,
-        type: DriftSqlType.dateTime,
-        requiredDuringInsert: false,
-      );
+  late final GeneratedColumn<DateTime> remoteCreatedAt = GeneratedColumn<DateTime>(
+    'remote_created_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _localUpdatedAtMeta = const VerificationMeta(
     'localUpdatedAt',
   );
   @override
-  late final GeneratedColumn<DateTime> localUpdatedAt =
-      GeneratedColumn<DateTime>(
-        'local_updated_at',
-        aliasedName,
-        true,
-        type: DriftSqlType.dateTime,
-        requiredDuringInsert: false,
-      );
+  late final GeneratedColumn<DateTime> localUpdatedAt = GeneratedColumn<DateTime>(
+    'local_updated_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _remoteUpdatedAtMeta = const VerificationMeta(
     'remoteUpdatedAt',
   );
   @override
-  late final GeneratedColumn<DateTime> remoteUpdatedAt =
-      GeneratedColumn<DateTime>(
-        'remote_updated_at',
-        aliasedName,
-        true,
-        type: DriftSqlType.dateTime,
-        requiredDuringInsert: false,
-      );
+  late final GeneratedColumn<DateTime> remoteUpdatedAt = GeneratedColumn<DateTime>(
+    'remote_updated_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _localDeletedAtMeta = const VerificationMeta(
     'localDeletedAt',
   );
   @override
-  late final GeneratedColumn<DateTime> localDeletedAt =
-      GeneratedColumn<DateTime>(
-        'local_deleted_at',
-        aliasedName,
-        true,
-        type: DriftSqlType.dateTime,
-        requiredDuringInsert: false,
-      );
+  late final GeneratedColumn<DateTime> localDeletedAt = GeneratedColumn<DateTime>(
+    'local_deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _remoteDeletedAtMeta = const VerificationMeta(
     'remoteDeletedAt',
   );
   @override
-  late final GeneratedColumn<DateTime> remoteDeletedAt =
-      GeneratedColumn<DateTime>(
-        'remote_deleted_at',
-        aliasedName,
-        true,
-        type: DriftSqlType.dateTime,
-        requiredDuringInsert: false,
-      );
+  late final GeneratedColumn<DateTime> remoteDeletedAt = GeneratedColumn<DateTime>(
+    'remote_deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _deletedForMeMeta = const VerificationMeta(
     'deletedForMe',
   );
@@ -1227,17 +1188,15 @@ class $MessagesTable extends Messages
       'CHECK ("deleted_for_me" IN (0, 1))',
     ),
   );
-  static const VerificationMeta _messageTextUpdatedAtMeta =
-      const VerificationMeta('messageTextUpdatedAt');
+  static const VerificationMeta _messageTextUpdatedAtMeta = const VerificationMeta('messageTextUpdatedAt');
   @override
-  late final GeneratedColumn<DateTime> messageTextUpdatedAt =
-      GeneratedColumn<DateTime>(
-        'message_text_updated_at',
-        aliasedName,
-        true,
-        type: DriftSqlType.dateTime,
-        requiredDuringInsert: false,
-      );
+  late final GeneratedColumn<DateTime> messageTextUpdatedAt = GeneratedColumn<DateTime>(
+    'message_text_updated_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
   @override
   late final GeneratedColumn<String> userId = GeneratedColumn<String>(
@@ -1319,8 +1278,7 @@ class $MessagesTable extends Messages
     ),
   );
   @override
-  late final GeneratedColumnWithTypeConverter<Map<String, String>?, String>
-  i18n = GeneratedColumn<String>(
+  late final GeneratedColumnWithTypeConverter<Map<String, String>?, String> i18n = GeneratedColumn<String>(
     'i18n',
     aliasedName,
     true,
@@ -1328,8 +1286,7 @@ class $MessagesTable extends Messages
     requiredDuringInsert: false,
   ).withConverter<Map<String, String>?>($MessagesTable.$converteri18n);
   @override
-  late final GeneratedColumnWithTypeConverter<List<String>?, String>
-  restrictedVisibility =
+  late final GeneratedColumnWithTypeConverter<List<String>?, String> restrictedVisibility =
       GeneratedColumn<String>(
         'restricted_visibility',
         aliasedName,
@@ -1340,8 +1297,7 @@ class $MessagesTable extends Messages
         $MessagesTable.$converterrestrictedVisibilityn,
       );
   @override
-  late final GeneratedColumnWithTypeConverter<Map<String, dynamic>?, String>
-  extraData = GeneratedColumn<String>(
+  late final GeneratedColumnWithTypeConverter<Map<String, dynamic>?, String> extraData = GeneratedColumn<String>(
     'extra_data',
     aliasedName,
     true,
@@ -1779,13 +1735,12 @@ class $MessagesTable extends Messages
           data['${effectivePrefix}i18n'],
         ),
       ),
-      restrictedVisibility: $MessagesTable.$converterrestrictedVisibilityn
-          .fromSql(
-            attachedDatabase.typeMapping.read(
-              DriftSqlType.string,
-              data['${effectivePrefix}restricted_visibility'],
-            ),
-          ),
+      restrictedVisibility: $MessagesTable.$converterrestrictedVisibilityn.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}restricted_visibility'],
+        ),
+      ),
       extraData: $MessagesTable.$converterextraDatan.fromSql(
         attachedDatabase.typeMapping.read(
           DriftSqlType.string,
@@ -1800,38 +1755,33 @@ class $MessagesTable extends Messages
     return $MessagesTable(attachedDatabase, alias);
   }
 
-  static TypeConverter<List<String>, String> $converterattachments =
-      ListConverter<String>();
-  static TypeConverter<List<String>, String> $convertermentionedGroupIds =
-      ListConverter<String>();
-  static TypeConverter<List<String>?, String?> $convertermentionedGroupIdsn =
-      NullAwareTypeConverter.wrap($convertermentionedGroupIds);
-  static TypeConverter<List<String>, String> $convertermentionedGroups =
-      ListConverter<String>();
-  static TypeConverter<List<String>?, String?> $convertermentionedGroupsn =
-      NullAwareTypeConverter.wrap($convertermentionedGroups);
-  static TypeConverter<List<String>, String> $convertermentionedRoles =
-      ListConverter<String>();
-  static TypeConverter<List<String>?, String?> $convertermentionedRolesn =
-      NullAwareTypeConverter.wrap($convertermentionedRoles);
-  static TypeConverter<List<String>, String> $convertermentionedUsers =
-      ListConverter<String>();
-  static TypeConverter<Map<String, ReactionGroup>, String>
-  $converterreactionGroups = ReactionGroupsConverter();
-  static TypeConverter<Map<String, ReactionGroup>?, String?>
-  $converterreactionGroupsn = NullAwareTypeConverter.wrap(
+  static TypeConverter<List<String>, String> $converterattachments = ListConverter<String>();
+  static TypeConverter<List<String>, String> $convertermentionedGroupIds = ListConverter<String>();
+  static TypeConverter<List<String>?, String?> $convertermentionedGroupIdsn = NullAwareTypeConverter.wrap(
+    $convertermentionedGroupIds,
+  );
+  static TypeConverter<List<String>, String> $convertermentionedGroups = ListConverter<String>();
+  static TypeConverter<List<String>?, String?> $convertermentionedGroupsn = NullAwareTypeConverter.wrap(
+    $convertermentionedGroups,
+  );
+  static TypeConverter<List<String>, String> $convertermentionedRoles = ListConverter<String>();
+  static TypeConverter<List<String>?, String?> $convertermentionedRolesn = NullAwareTypeConverter.wrap(
+    $convertermentionedRoles,
+  );
+  static TypeConverter<List<String>, String> $convertermentionedUsers = ListConverter<String>();
+  static TypeConverter<Map<String, ReactionGroup>, String> $converterreactionGroups = ReactionGroupsConverter();
+  static TypeConverter<Map<String, ReactionGroup>?, String?> $converterreactionGroupsn = NullAwareTypeConverter.wrap(
     $converterreactionGroups,
   );
-  static TypeConverter<Map<String, String>?, String?> $converteri18n =
-      NullableMapConverter<String>();
-  static TypeConverter<List<String>, String> $converterrestrictedVisibility =
-      ListConverter<String>();
-  static TypeConverter<List<String>?, String?> $converterrestrictedVisibilityn =
-      NullAwareTypeConverter.wrap($converterrestrictedVisibility);
-  static TypeConverter<Map<String, dynamic>, String> $converterextraData =
-      MapConverter();
-  static TypeConverter<Map<String, dynamic>?, String?> $converterextraDatan =
-      NullAwareTypeConverter.wrap($converterextraData);
+  static TypeConverter<Map<String, String>?, String?> $converteri18n = NullableMapConverter<String>();
+  static TypeConverter<List<String>, String> $converterrestrictedVisibility = ListConverter<String>();
+  static TypeConverter<List<String>?, String?> $converterrestrictedVisibilityn = NullAwareTypeConverter.wrap(
+    $converterrestrictedVisibility,
+  );
+  static TypeConverter<Map<String, dynamic>, String> $converterextraData = MapConverter();
+  static TypeConverter<Map<String, dynamic>?, String?> $converterextraDatan = NullAwareTypeConverter.wrap(
+    $converterextraData,
+  );
 }
 
 class MessageEntity extends DataClass implements Insertable<MessageEntity> {
@@ -2260,157 +2210,77 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
     attachments: attachments ?? this.attachments,
     state: state ?? this.state,
     type: type ?? this.type,
-    mentionedChannel: mentionedChannel.present
-        ? mentionedChannel.value
-        : this.mentionedChannel,
-    mentionedGroupIds: mentionedGroupIds.present
-        ? mentionedGroupIds.value
-        : this.mentionedGroupIds,
-    mentionedGroups: mentionedGroups.present
-        ? mentionedGroups.value
-        : this.mentionedGroups,
-    mentionedHere: mentionedHere.present
-        ? mentionedHere.value
-        : this.mentionedHere,
-    mentionedRoles: mentionedRoles.present
-        ? mentionedRoles.value
-        : this.mentionedRoles,
+    mentionedChannel: mentionedChannel.present ? mentionedChannel.value : this.mentionedChannel,
+    mentionedGroupIds: mentionedGroupIds.present ? mentionedGroupIds.value : this.mentionedGroupIds,
+    mentionedGroups: mentionedGroups.present ? mentionedGroups.value : this.mentionedGroups,
+    mentionedHere: mentionedHere.present ? mentionedHere.value : this.mentionedHere,
+    mentionedRoles: mentionedRoles.present ? mentionedRoles.value : this.mentionedRoles,
     mentionedUsers: mentionedUsers ?? this.mentionedUsers,
-    reactionGroups: reactionGroups.present
-        ? reactionGroups.value
-        : this.reactionGroups,
+    reactionGroups: reactionGroups.present ? reactionGroups.value : this.reactionGroups,
     parentId: parentId.present ? parentId.value : this.parentId,
-    quotedMessageId: quotedMessageId.present
-        ? quotedMessageId.value
-        : this.quotedMessageId,
+    quotedMessageId: quotedMessageId.present ? quotedMessageId.value : this.quotedMessageId,
     pollId: pollId.present ? pollId.value : this.pollId,
     replyCount: replyCount.present ? replyCount.value : this.replyCount,
-    showInChannel: showInChannel.present
-        ? showInChannel.value
-        : this.showInChannel,
+    showInChannel: showInChannel.present ? showInChannel.value : this.showInChannel,
     shadowed: shadowed ?? this.shadowed,
     command: command.present ? command.value : this.command,
-    localCreatedAt: localCreatedAt.present
-        ? localCreatedAt.value
-        : this.localCreatedAt,
-    remoteCreatedAt: remoteCreatedAt.present
-        ? remoteCreatedAt.value
-        : this.remoteCreatedAt,
-    localUpdatedAt: localUpdatedAt.present
-        ? localUpdatedAt.value
-        : this.localUpdatedAt,
-    remoteUpdatedAt: remoteUpdatedAt.present
-        ? remoteUpdatedAt.value
-        : this.remoteUpdatedAt,
-    localDeletedAt: localDeletedAt.present
-        ? localDeletedAt.value
-        : this.localDeletedAt,
-    remoteDeletedAt: remoteDeletedAt.present
-        ? remoteDeletedAt.value
-        : this.remoteDeletedAt,
+    localCreatedAt: localCreatedAt.present ? localCreatedAt.value : this.localCreatedAt,
+    remoteCreatedAt: remoteCreatedAt.present ? remoteCreatedAt.value : this.remoteCreatedAt,
+    localUpdatedAt: localUpdatedAt.present ? localUpdatedAt.value : this.localUpdatedAt,
+    remoteUpdatedAt: remoteUpdatedAt.present ? remoteUpdatedAt.value : this.remoteUpdatedAt,
+    localDeletedAt: localDeletedAt.present ? localDeletedAt.value : this.localDeletedAt,
+    remoteDeletedAt: remoteDeletedAt.present ? remoteDeletedAt.value : this.remoteDeletedAt,
     deletedForMe: deletedForMe.present ? deletedForMe.value : this.deletedForMe,
-    messageTextUpdatedAt: messageTextUpdatedAt.present
-        ? messageTextUpdatedAt.value
-        : this.messageTextUpdatedAt,
+    messageTextUpdatedAt: messageTextUpdatedAt.present ? messageTextUpdatedAt.value : this.messageTextUpdatedAt,
     userId: userId.present ? userId.value : this.userId,
     channelRole: channelRole.present ? channelRole.value : this.channelRole,
     pinned: pinned ?? this.pinned,
     pinnedAt: pinnedAt.present ? pinnedAt.value : this.pinnedAt,
     pinExpires: pinExpires.present ? pinExpires.value : this.pinExpires,
-    pinnedByUserId: pinnedByUserId.present
-        ? pinnedByUserId.value
-        : this.pinnedByUserId,
+    pinnedByUserId: pinnedByUserId.present ? pinnedByUserId.value : this.pinnedByUserId,
     channelCid: channelCid ?? this.channelCid,
     i18n: i18n.present ? i18n.value : this.i18n,
-    restrictedVisibility: restrictedVisibility.present
-        ? restrictedVisibility.value
-        : this.restrictedVisibility,
+    restrictedVisibility: restrictedVisibility.present ? restrictedVisibility.value : this.restrictedVisibility,
     extraData: extraData.present ? extraData.value : this.extraData,
   );
   MessageEntity copyWithCompanion(MessagesCompanion data) {
     return MessageEntity(
       id: data.id.present ? data.id.value : this.id,
-      messageText: data.messageText.present
-          ? data.messageText.value
-          : this.messageText,
-      attachments: data.attachments.present
-          ? data.attachments.value
-          : this.attachments,
+      messageText: data.messageText.present ? data.messageText.value : this.messageText,
+      attachments: data.attachments.present ? data.attachments.value : this.attachments,
       state: data.state.present ? data.state.value : this.state,
       type: data.type.present ? data.type.value : this.type,
-      mentionedChannel: data.mentionedChannel.present
-          ? data.mentionedChannel.value
-          : this.mentionedChannel,
-      mentionedGroupIds: data.mentionedGroupIds.present
-          ? data.mentionedGroupIds.value
-          : this.mentionedGroupIds,
-      mentionedGroups: data.mentionedGroups.present
-          ? data.mentionedGroups.value
-          : this.mentionedGroups,
-      mentionedHere: data.mentionedHere.present
-          ? data.mentionedHere.value
-          : this.mentionedHere,
-      mentionedRoles: data.mentionedRoles.present
-          ? data.mentionedRoles.value
-          : this.mentionedRoles,
-      mentionedUsers: data.mentionedUsers.present
-          ? data.mentionedUsers.value
-          : this.mentionedUsers,
-      reactionGroups: data.reactionGroups.present
-          ? data.reactionGroups.value
-          : this.reactionGroups,
+      mentionedChannel: data.mentionedChannel.present ? data.mentionedChannel.value : this.mentionedChannel,
+      mentionedGroupIds: data.mentionedGroupIds.present ? data.mentionedGroupIds.value : this.mentionedGroupIds,
+      mentionedGroups: data.mentionedGroups.present ? data.mentionedGroups.value : this.mentionedGroups,
+      mentionedHere: data.mentionedHere.present ? data.mentionedHere.value : this.mentionedHere,
+      mentionedRoles: data.mentionedRoles.present ? data.mentionedRoles.value : this.mentionedRoles,
+      mentionedUsers: data.mentionedUsers.present ? data.mentionedUsers.value : this.mentionedUsers,
+      reactionGroups: data.reactionGroups.present ? data.reactionGroups.value : this.reactionGroups,
       parentId: data.parentId.present ? data.parentId.value : this.parentId,
-      quotedMessageId: data.quotedMessageId.present
-          ? data.quotedMessageId.value
-          : this.quotedMessageId,
+      quotedMessageId: data.quotedMessageId.present ? data.quotedMessageId.value : this.quotedMessageId,
       pollId: data.pollId.present ? data.pollId.value : this.pollId,
-      replyCount: data.replyCount.present
-          ? data.replyCount.value
-          : this.replyCount,
-      showInChannel: data.showInChannel.present
-          ? data.showInChannel.value
-          : this.showInChannel,
+      replyCount: data.replyCount.present ? data.replyCount.value : this.replyCount,
+      showInChannel: data.showInChannel.present ? data.showInChannel.value : this.showInChannel,
       shadowed: data.shadowed.present ? data.shadowed.value : this.shadowed,
       command: data.command.present ? data.command.value : this.command,
-      localCreatedAt: data.localCreatedAt.present
-          ? data.localCreatedAt.value
-          : this.localCreatedAt,
-      remoteCreatedAt: data.remoteCreatedAt.present
-          ? data.remoteCreatedAt.value
-          : this.remoteCreatedAt,
-      localUpdatedAt: data.localUpdatedAt.present
-          ? data.localUpdatedAt.value
-          : this.localUpdatedAt,
-      remoteUpdatedAt: data.remoteUpdatedAt.present
-          ? data.remoteUpdatedAt.value
-          : this.remoteUpdatedAt,
-      localDeletedAt: data.localDeletedAt.present
-          ? data.localDeletedAt.value
-          : this.localDeletedAt,
-      remoteDeletedAt: data.remoteDeletedAt.present
-          ? data.remoteDeletedAt.value
-          : this.remoteDeletedAt,
-      deletedForMe: data.deletedForMe.present
-          ? data.deletedForMe.value
-          : this.deletedForMe,
+      localCreatedAt: data.localCreatedAt.present ? data.localCreatedAt.value : this.localCreatedAt,
+      remoteCreatedAt: data.remoteCreatedAt.present ? data.remoteCreatedAt.value : this.remoteCreatedAt,
+      localUpdatedAt: data.localUpdatedAt.present ? data.localUpdatedAt.value : this.localUpdatedAt,
+      remoteUpdatedAt: data.remoteUpdatedAt.present ? data.remoteUpdatedAt.value : this.remoteUpdatedAt,
+      localDeletedAt: data.localDeletedAt.present ? data.localDeletedAt.value : this.localDeletedAt,
+      remoteDeletedAt: data.remoteDeletedAt.present ? data.remoteDeletedAt.value : this.remoteDeletedAt,
+      deletedForMe: data.deletedForMe.present ? data.deletedForMe.value : this.deletedForMe,
       messageTextUpdatedAt: data.messageTextUpdatedAt.present
           ? data.messageTextUpdatedAt.value
           : this.messageTextUpdatedAt,
       userId: data.userId.present ? data.userId.value : this.userId,
-      channelRole: data.channelRole.present
-          ? data.channelRole.value
-          : this.channelRole,
+      channelRole: data.channelRole.present ? data.channelRole.value : this.channelRole,
       pinned: data.pinned.present ? data.pinned.value : this.pinned,
       pinnedAt: data.pinnedAt.present ? data.pinnedAt.value : this.pinnedAt,
-      pinExpires: data.pinExpires.present
-          ? data.pinExpires.value
-          : this.pinExpires,
-      pinnedByUserId: data.pinnedByUserId.present
-          ? data.pinnedByUserId.value
-          : this.pinnedByUserId,
-      channelCid: data.channelCid.present
-          ? data.channelCid.value
-          : this.channelCid,
+      pinExpires: data.pinExpires.present ? data.pinExpires.value : this.pinExpires,
+      pinnedByUserId: data.pinnedByUserId.present ? data.pinnedByUserId.value : this.pinnedByUserId,
+      channelCid: data.channelCid.present ? data.channelCid.value : this.channelCid,
       i18n: data.i18n.present ? data.i18n.value : this.i18n,
       restrictedVisibility: data.restrictedVisibility.present
           ? data.restrictedVisibility.value
@@ -2736,8 +2606,7 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
       if (localDeletedAt != null) 'local_deleted_at': localDeletedAt,
       if (remoteDeletedAt != null) 'remote_deleted_at': remoteDeletedAt,
       if (deletedForMe != null) 'deleted_for_me': deletedForMe,
-      if (messageTextUpdatedAt != null)
-        'message_text_updated_at': messageTextUpdatedAt,
+      if (messageTextUpdatedAt != null) 'message_text_updated_at': messageTextUpdatedAt,
       if (userId != null) 'user_id': userId,
       if (channelRole != null) 'channel_role': channelRole,
       if (pinned != null) 'pinned': pinned,
@@ -2746,8 +2615,7 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
       if (pinnedByUserId != null) 'pinned_by_user_id': pinnedByUserId,
       if (channelCid != null) 'channel_cid': channelCid,
       if (i18n != null) 'i18n': i18n,
-      if (restrictedVisibility != null)
-        'restricted_visibility': restrictedVisibility,
+      if (restrictedVisibility != null) 'restricted_visibility': restrictedVisibility,
       if (extraData != null) 'extra_data': extraData,
       if (rowid != null) 'rowid': rowid,
     });
@@ -3025,8 +2893,7 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
   }
 }
 
-class $DraftMessagesTable extends DraftMessages
-    with TableInfo<$DraftMessagesTable, DraftMessageEntity> {
+class $DraftMessagesTable extends DraftMessages with TableInfo<$DraftMessagesTable, DraftMessageEntity> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
@@ -3052,8 +2919,7 @@ class $DraftMessagesTable extends DraftMessages
     requiredDuringInsert: false,
   );
   @override
-  late final GeneratedColumnWithTypeConverter<List<String>, String>
-  attachments = GeneratedColumn<String>(
+  late final GeneratedColumnWithTypeConverter<List<String>, String> attachments = GeneratedColumn<String>(
     'attachments',
     aliasedName,
     false,
@@ -3071,8 +2937,7 @@ class $DraftMessagesTable extends DraftMessages
     defaultValue: const Constant('regular'),
   );
   @override
-  late final GeneratedColumnWithTypeConverter<List<String>, String>
-  mentionedUsers = GeneratedColumn<String>(
+  late final GeneratedColumnWithTypeConverter<List<String>, String> mentionedUsers = GeneratedColumn<String>(
     'mentioned_users',
     aliasedName,
     false,
@@ -3178,8 +3043,7 @@ class $DraftMessagesTable extends DraftMessages
     ),
   );
   @override
-  late final GeneratedColumnWithTypeConverter<Map<String, dynamic>?, String>
-  extraData =
+  late final GeneratedColumnWithTypeConverter<Map<String, dynamic>?, String> extraData =
       GeneratedColumn<String>(
         'extra_data',
         aliasedName,
@@ -3373,18 +3237,15 @@ class $DraftMessagesTable extends DraftMessages
     return $DraftMessagesTable(attachedDatabase, alias);
   }
 
-  static TypeConverter<List<String>, String> $converterattachments =
-      ListConverter<String>();
-  static TypeConverter<List<String>, String> $convertermentionedUsers =
-      ListConverter<String>();
-  static TypeConverter<Map<String, dynamic>, String> $converterextraData =
-      MapConverter();
-  static TypeConverter<Map<String, dynamic>?, String?> $converterextraDatan =
-      NullAwareTypeConverter.wrap($converterextraData);
+  static TypeConverter<List<String>, String> $converterattachments = ListConverter<String>();
+  static TypeConverter<List<String>, String> $convertermentionedUsers = ListConverter<String>();
+  static TypeConverter<Map<String, dynamic>, String> $converterextraData = MapConverter();
+  static TypeConverter<Map<String, dynamic>?, String?> $converterextraDatan = NullAwareTypeConverter.wrap(
+    $converterextraData,
+  );
 }
 
-class DraftMessageEntity extends DataClass
-    implements Insertable<DraftMessageEntity> {
+class DraftMessageEntity extends DataClass implements Insertable<DraftMessageEntity> {
   /// The message id
   final String id;
 
@@ -3552,13 +3413,9 @@ class DraftMessageEntity extends DataClass
     type: type ?? this.type,
     mentionedUsers: mentionedUsers ?? this.mentionedUsers,
     parentId: parentId.present ? parentId.value : this.parentId,
-    quotedMessageId: quotedMessageId.present
-        ? quotedMessageId.value
-        : this.quotedMessageId,
+    quotedMessageId: quotedMessageId.present ? quotedMessageId.value : this.quotedMessageId,
     pollId: pollId.present ? pollId.value : this.pollId,
-    showInChannel: showInChannel.present
-        ? showInChannel.value
-        : this.showInChannel,
+    showInChannel: showInChannel.present ? showInChannel.value : this.showInChannel,
     command: command.present ? command.value : this.command,
     silent: silent ?? this.silent,
     createdAt: createdAt ?? this.createdAt,
@@ -3568,30 +3425,18 @@ class DraftMessageEntity extends DataClass
   DraftMessageEntity copyWithCompanion(DraftMessagesCompanion data) {
     return DraftMessageEntity(
       id: data.id.present ? data.id.value : this.id,
-      messageText: data.messageText.present
-          ? data.messageText.value
-          : this.messageText,
-      attachments: data.attachments.present
-          ? data.attachments.value
-          : this.attachments,
+      messageText: data.messageText.present ? data.messageText.value : this.messageText,
+      attachments: data.attachments.present ? data.attachments.value : this.attachments,
       type: data.type.present ? data.type.value : this.type,
-      mentionedUsers: data.mentionedUsers.present
-          ? data.mentionedUsers.value
-          : this.mentionedUsers,
+      mentionedUsers: data.mentionedUsers.present ? data.mentionedUsers.value : this.mentionedUsers,
       parentId: data.parentId.present ? data.parentId.value : this.parentId,
-      quotedMessageId: data.quotedMessageId.present
-          ? data.quotedMessageId.value
-          : this.quotedMessageId,
+      quotedMessageId: data.quotedMessageId.present ? data.quotedMessageId.value : this.quotedMessageId,
       pollId: data.pollId.present ? data.pollId.value : this.pollId,
-      showInChannel: data.showInChannel.present
-          ? data.showInChannel.value
-          : this.showInChannel,
+      showInChannel: data.showInChannel.present ? data.showInChannel.value : this.showInChannel,
       command: data.command.present ? data.command.value : this.command,
       silent: data.silent.present ? data.silent.value : this.silent,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
-      channelCid: data.channelCid.present
-          ? data.channelCid.value
-          : this.channelCid,
+      channelCid: data.channelCid.present ? data.channelCid.value : this.channelCid,
       extraData: data.extraData.present ? data.extraData.value : this.extraData,
     );
   }
@@ -3861,8 +3706,7 @@ class DraftMessagesCompanion extends UpdateCompanion<DraftMessageEntity> {
   }
 }
 
-class $LocationsTable extends Locations
-    with TableInfo<$LocationsTable, LocationEntity> {
+class $LocationsTable extends Locations with TableInfo<$LocationsTable, LocationEntity> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
@@ -3930,14 +3774,13 @@ class $LocationsTable extends Locations
     'createdByDeviceId',
   );
   @override
-  late final GeneratedColumn<String> createdByDeviceId =
-      GeneratedColumn<String>(
-        'created_by_device_id',
-        aliasedName,
-        true,
-        type: DriftSqlType.string,
-        requiredDuringInsert: false,
-      );
+  late final GeneratedColumn<String> createdByDeviceId = GeneratedColumn<String>(
+    'created_by_device_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _endAtMeta = const VerificationMeta('endAt');
   @override
   late final GeneratedColumn<DateTime> endAt = GeneratedColumn<DateTime>(
@@ -4225,25 +4068,19 @@ class LocationEntity extends DataClass implements Insertable<LocationEntity> {
     userId: userId.present ? userId.value : this.userId,
     latitude: latitude ?? this.latitude,
     longitude: longitude ?? this.longitude,
-    createdByDeviceId: createdByDeviceId.present
-        ? createdByDeviceId.value
-        : this.createdByDeviceId,
+    createdByDeviceId: createdByDeviceId.present ? createdByDeviceId.value : this.createdByDeviceId,
     endAt: endAt.present ? endAt.value : this.endAt,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
   );
   LocationEntity copyWithCompanion(LocationsCompanion data) {
     return LocationEntity(
-      channelCid: data.channelCid.present
-          ? data.channelCid.value
-          : this.channelCid,
+      channelCid: data.channelCid.present ? data.channelCid.value : this.channelCid,
       messageId: data.messageId.present ? data.messageId.value : this.messageId,
       userId: data.userId.present ? data.userId.value : this.userId,
       latitude: data.latitude.present ? data.latitude.value : this.latitude,
       longitude: data.longitude.present ? data.longitude.value : this.longitude,
-      createdByDeviceId: data.createdByDeviceId.present
-          ? data.createdByDeviceId.value
-          : this.createdByDeviceId,
+      createdByDeviceId: data.createdByDeviceId.present ? data.createdByDeviceId.value : this.createdByDeviceId,
       endAt: data.endAt.present ? data.endAt.value : this.endAt,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
@@ -4475,8 +4312,7 @@ class $PendingOperationsTable extends PendingOperations
     requiredDuringInsert: false,
   );
   @override
-  late final GeneratedColumnWithTypeConverter<Map<String, dynamic>, String>
-  payload =
+  late final GeneratedColumnWithTypeConverter<Map<String, dynamic>, String> payload =
       GeneratedColumn<String>(
         'payload',
         aliasedName,
@@ -4555,12 +4391,10 @@ class $PendingOperationsTable extends PendingOperations
     return $PendingOperationsTable(attachedDatabase, alias);
   }
 
-  static TypeConverter<Map<String, dynamic>, String> $converterpayload =
-      MapConverter();
+  static TypeConverter<Map<String, dynamic>, String> $converterpayload = MapConverter();
 }
 
-class PendingOperationEntity extends DataClass
-    implements Insertable<PendingOperationEntity> {
+class PendingOperationEntity extends DataClass implements Insertable<PendingOperationEntity> {
   /// Autoincrement id.
   final int id;
 
@@ -4625,18 +4459,14 @@ class PendingOperationEntity extends DataClass
   }) => PendingOperationEntity(
     id: id ?? this.id,
     type: type ?? this.type,
-    targetMessageId: targetMessageId.present
-        ? targetMessageId.value
-        : this.targetMessageId,
+    targetMessageId: targetMessageId.present ? targetMessageId.value : this.targetMessageId,
     payload: payload ?? this.payload,
   );
   PendingOperationEntity copyWithCompanion(PendingOperationsCompanion data) {
     return PendingOperationEntity(
       id: data.id.present ? data.id.value : this.id,
       type: data.type.present ? data.type.value : this.type,
-      targetMessageId: data.targetMessageId.present
-          ? data.targetMessageId.value
-          : this.targetMessageId,
+      targetMessageId: data.targetMessageId.present ? data.targetMessageId.value : this.targetMessageId,
       payload: data.payload.present ? data.payload.value : this.payload,
     );
   }
@@ -4664,8 +4494,7 @@ class PendingOperationEntity extends DataClass
           other.payload == this.payload);
 }
 
-class PendingOperationsCompanion
-    extends UpdateCompanion<PendingOperationEntity> {
+class PendingOperationsCompanion extends UpdateCompanion<PendingOperationEntity> {
   final Value<int> id;
   final Value<String> type;
   final Value<String?> targetMessageId;
@@ -4743,8 +4572,7 @@ class PendingOperationsCompanion
   }
 }
 
-class $PinnedMessagesTable extends PinnedMessages
-    with TableInfo<$PinnedMessagesTable, PinnedMessageEntity> {
+class $PinnedMessagesTable extends PinnedMessages with TableInfo<$PinnedMessagesTable, PinnedMessageEntity> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
@@ -4770,8 +4598,7 @@ class $PinnedMessagesTable extends PinnedMessages
     requiredDuringInsert: false,
   );
   @override
-  late final GeneratedColumnWithTypeConverter<List<String>, String>
-  attachments = GeneratedColumn<String>(
+  late final GeneratedColumnWithTypeConverter<List<String>, String> attachments = GeneratedColumn<String>(
     'attachments',
     aliasedName,
     false,
@@ -4812,8 +4639,7 @@ class $PinnedMessagesTable extends PinnedMessages
     ),
   );
   @override
-  late final GeneratedColumnWithTypeConverter<List<String>?, String>
-  mentionedGroupIds =
+  late final GeneratedColumnWithTypeConverter<List<String>?, String> mentionedGroupIds =
       GeneratedColumn<String>(
         'mentioned_group_ids',
         aliasedName,
@@ -4824,8 +4650,7 @@ class $PinnedMessagesTable extends PinnedMessages
         $PinnedMessagesTable.$convertermentionedGroupIdsn,
       );
   @override
-  late final GeneratedColumnWithTypeConverter<List<String>?, String>
-  mentionedGroups =
+  late final GeneratedColumnWithTypeConverter<List<String>?, String> mentionedGroups =
       GeneratedColumn<String>(
         'mentioned_groups',
         aliasedName,
@@ -4850,8 +4675,7 @@ class $PinnedMessagesTable extends PinnedMessages
     ),
   );
   @override
-  late final GeneratedColumnWithTypeConverter<List<String>?, String>
-  mentionedRoles =
+  late final GeneratedColumnWithTypeConverter<List<String>?, String> mentionedRoles =
       GeneratedColumn<String>(
         'mentioned_roles',
         aliasedName,
@@ -4862,8 +4686,7 @@ class $PinnedMessagesTable extends PinnedMessages
         $PinnedMessagesTable.$convertermentionedRolesn,
       );
   @override
-  late final GeneratedColumnWithTypeConverter<List<String>, String>
-  mentionedUsers = GeneratedColumn<String>(
+  late final GeneratedColumnWithTypeConverter<List<String>, String> mentionedUsers = GeneratedColumn<String>(
     'mentioned_users',
     aliasedName,
     false,
@@ -4871,11 +4694,7 @@ class $PinnedMessagesTable extends PinnedMessages
     requiredDuringInsert: true,
   ).withConverter<List<String>>($PinnedMessagesTable.$convertermentionedUsers);
   @override
-  late final GeneratedColumnWithTypeConverter<
-    Map<String, ReactionGroup>?,
-    String
-  >
-  reactionGroups =
+  late final GeneratedColumnWithTypeConverter<Map<String, ReactionGroup>?, String> reactionGroups =
       GeneratedColumn<String>(
         'reaction_groups',
         aliasedName,
@@ -4971,74 +4790,68 @@ class $PinnedMessagesTable extends PinnedMessages
     'localCreatedAt',
   );
   @override
-  late final GeneratedColumn<DateTime> localCreatedAt =
-      GeneratedColumn<DateTime>(
-        'local_created_at',
-        aliasedName,
-        true,
-        type: DriftSqlType.dateTime,
-        requiredDuringInsert: false,
-      );
+  late final GeneratedColumn<DateTime> localCreatedAt = GeneratedColumn<DateTime>(
+    'local_created_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _remoteCreatedAtMeta = const VerificationMeta(
     'remoteCreatedAt',
   );
   @override
-  late final GeneratedColumn<DateTime> remoteCreatedAt =
-      GeneratedColumn<DateTime>(
-        'remote_created_at',
-        aliasedName,
-        true,
-        type: DriftSqlType.dateTime,
-        requiredDuringInsert: false,
-      );
+  late final GeneratedColumn<DateTime> remoteCreatedAt = GeneratedColumn<DateTime>(
+    'remote_created_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _localUpdatedAtMeta = const VerificationMeta(
     'localUpdatedAt',
   );
   @override
-  late final GeneratedColumn<DateTime> localUpdatedAt =
-      GeneratedColumn<DateTime>(
-        'local_updated_at',
-        aliasedName,
-        true,
-        type: DriftSqlType.dateTime,
-        requiredDuringInsert: false,
-      );
+  late final GeneratedColumn<DateTime> localUpdatedAt = GeneratedColumn<DateTime>(
+    'local_updated_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _remoteUpdatedAtMeta = const VerificationMeta(
     'remoteUpdatedAt',
   );
   @override
-  late final GeneratedColumn<DateTime> remoteUpdatedAt =
-      GeneratedColumn<DateTime>(
-        'remote_updated_at',
-        aliasedName,
-        true,
-        type: DriftSqlType.dateTime,
-        requiredDuringInsert: false,
-      );
+  late final GeneratedColumn<DateTime> remoteUpdatedAt = GeneratedColumn<DateTime>(
+    'remote_updated_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _localDeletedAtMeta = const VerificationMeta(
     'localDeletedAt',
   );
   @override
-  late final GeneratedColumn<DateTime> localDeletedAt =
-      GeneratedColumn<DateTime>(
-        'local_deleted_at',
-        aliasedName,
-        true,
-        type: DriftSqlType.dateTime,
-        requiredDuringInsert: false,
-      );
+  late final GeneratedColumn<DateTime> localDeletedAt = GeneratedColumn<DateTime>(
+    'local_deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _remoteDeletedAtMeta = const VerificationMeta(
     'remoteDeletedAt',
   );
   @override
-  late final GeneratedColumn<DateTime> remoteDeletedAt =
-      GeneratedColumn<DateTime>(
-        'remote_deleted_at',
-        aliasedName,
-        true,
-        type: DriftSqlType.dateTime,
-        requiredDuringInsert: false,
-      );
+  late final GeneratedColumn<DateTime> remoteDeletedAt = GeneratedColumn<DateTime>(
+    'remote_deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _deletedForMeMeta = const VerificationMeta(
     'deletedForMe',
   );
@@ -5053,17 +4866,15 @@ class $PinnedMessagesTable extends PinnedMessages
       'CHECK ("deleted_for_me" IN (0, 1))',
     ),
   );
-  static const VerificationMeta _messageTextUpdatedAtMeta =
-      const VerificationMeta('messageTextUpdatedAt');
+  static const VerificationMeta _messageTextUpdatedAtMeta = const VerificationMeta('messageTextUpdatedAt');
   @override
-  late final GeneratedColumn<DateTime> messageTextUpdatedAt =
-      GeneratedColumn<DateTime>(
-        'message_text_updated_at',
-        aliasedName,
-        true,
-        type: DriftSqlType.dateTime,
-        requiredDuringInsert: false,
-      );
+  late final GeneratedColumn<DateTime> messageTextUpdatedAt = GeneratedColumn<DateTime>(
+    'message_text_updated_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
   @override
   late final GeneratedColumn<String> userId = GeneratedColumn<String>(
@@ -5142,8 +4953,7 @@ class $PinnedMessagesTable extends PinnedMessages
     requiredDuringInsert: true,
   );
   @override
-  late final GeneratedColumnWithTypeConverter<Map<String, String>?, String>
-  i18n = GeneratedColumn<String>(
+  late final GeneratedColumnWithTypeConverter<Map<String, String>?, String> i18n = GeneratedColumn<String>(
     'i18n',
     aliasedName,
     true,
@@ -5151,8 +4961,7 @@ class $PinnedMessagesTable extends PinnedMessages
     requiredDuringInsert: false,
   ).withConverter<Map<String, String>?>($PinnedMessagesTable.$converteri18n);
   @override
-  late final GeneratedColumnWithTypeConverter<List<String>?, String>
-  restrictedVisibility =
+  late final GeneratedColumnWithTypeConverter<List<String>?, String> restrictedVisibility =
       GeneratedColumn<String>(
         'restricted_visibility',
         aliasedName,
@@ -5163,8 +4972,7 @@ class $PinnedMessagesTable extends PinnedMessages
         $PinnedMessagesTable.$converterrestrictedVisibilityn,
       );
   @override
-  late final GeneratedColumnWithTypeConverter<Map<String, dynamic>?, String>
-  extraData =
+  late final GeneratedColumnWithTypeConverter<Map<String, dynamic>?, String> extraData =
       GeneratedColumn<String>(
         'extra_data',
         aliasedName,
@@ -5477,13 +5285,12 @@ class $PinnedMessagesTable extends PinnedMessages
         DriftSqlType.bool,
         data['${effectivePrefix}mentioned_channel'],
       ),
-      mentionedGroupIds: $PinnedMessagesTable.$convertermentionedGroupIdsn
-          .fromSql(
-            attachedDatabase.typeMapping.read(
-              DriftSqlType.string,
-              data['${effectivePrefix}mentioned_group_ids'],
-            ),
-          ),
+      mentionedGroupIds: $PinnedMessagesTable.$convertermentionedGroupIdsn.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}mentioned_group_ids'],
+        ),
+      ),
       mentionedGroups: $PinnedMessagesTable.$convertermentionedGroupsn.fromSql(
         attachedDatabase.typeMapping.read(
           DriftSqlType.string,
@@ -5606,13 +5413,12 @@ class $PinnedMessagesTable extends PinnedMessages
           data['${effectivePrefix}i18n'],
         ),
       ),
-      restrictedVisibility: $PinnedMessagesTable.$converterrestrictedVisibilityn
-          .fromSql(
-            attachedDatabase.typeMapping.read(
-              DriftSqlType.string,
-              data['${effectivePrefix}restricted_visibility'],
-            ),
-          ),
+      restrictedVisibility: $PinnedMessagesTable.$converterrestrictedVisibilityn.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}restricted_visibility'],
+        ),
+      ),
       extraData: $PinnedMessagesTable.$converterextraDatan.fromSql(
         attachedDatabase.typeMapping.read(
           DriftSqlType.string,
@@ -5627,42 +5433,36 @@ class $PinnedMessagesTable extends PinnedMessages
     return $PinnedMessagesTable(attachedDatabase, alias);
   }
 
-  static TypeConverter<List<String>, String> $converterattachments =
-      ListConverter<String>();
-  static TypeConverter<List<String>, String> $convertermentionedGroupIds =
-      ListConverter<String>();
-  static TypeConverter<List<String>?, String?> $convertermentionedGroupIdsn =
-      NullAwareTypeConverter.wrap($convertermentionedGroupIds);
-  static TypeConverter<List<String>, String> $convertermentionedGroups =
-      ListConverter<String>();
-  static TypeConverter<List<String>?, String?> $convertermentionedGroupsn =
-      NullAwareTypeConverter.wrap($convertermentionedGroups);
-  static TypeConverter<List<String>, String> $convertermentionedRoles =
-      ListConverter<String>();
-  static TypeConverter<List<String>?, String?> $convertermentionedRolesn =
-      NullAwareTypeConverter.wrap($convertermentionedRoles);
-  static TypeConverter<List<String>, String> $convertermentionedUsers =
-      ListConverter<String>();
-  static TypeConverter<Map<String, ReactionGroup>, String>
-  $converterreactionGroups = ReactionGroupsConverter();
-  static TypeConverter<Map<String, ReactionGroup>?, String?>
-  $converterreactionGroupsn = NullAwareTypeConverter.wrap(
+  static TypeConverter<List<String>, String> $converterattachments = ListConverter<String>();
+  static TypeConverter<List<String>, String> $convertermentionedGroupIds = ListConverter<String>();
+  static TypeConverter<List<String>?, String?> $convertermentionedGroupIdsn = NullAwareTypeConverter.wrap(
+    $convertermentionedGroupIds,
+  );
+  static TypeConverter<List<String>, String> $convertermentionedGroups = ListConverter<String>();
+  static TypeConverter<List<String>?, String?> $convertermentionedGroupsn = NullAwareTypeConverter.wrap(
+    $convertermentionedGroups,
+  );
+  static TypeConverter<List<String>, String> $convertermentionedRoles = ListConverter<String>();
+  static TypeConverter<List<String>?, String?> $convertermentionedRolesn = NullAwareTypeConverter.wrap(
+    $convertermentionedRoles,
+  );
+  static TypeConverter<List<String>, String> $convertermentionedUsers = ListConverter<String>();
+  static TypeConverter<Map<String, ReactionGroup>, String> $converterreactionGroups = ReactionGroupsConverter();
+  static TypeConverter<Map<String, ReactionGroup>?, String?> $converterreactionGroupsn = NullAwareTypeConverter.wrap(
     $converterreactionGroups,
   );
-  static TypeConverter<Map<String, String>?, String?> $converteri18n =
-      NullableMapConverter<String>();
-  static TypeConverter<List<String>, String> $converterrestrictedVisibility =
-      ListConverter<String>();
-  static TypeConverter<List<String>?, String?> $converterrestrictedVisibilityn =
-      NullAwareTypeConverter.wrap($converterrestrictedVisibility);
-  static TypeConverter<Map<String, dynamic>, String> $converterextraData =
-      MapConverter();
-  static TypeConverter<Map<String, dynamic>?, String?> $converterextraDatan =
-      NullAwareTypeConverter.wrap($converterextraData);
+  static TypeConverter<Map<String, String>?, String?> $converteri18n = NullableMapConverter<String>();
+  static TypeConverter<List<String>, String> $converterrestrictedVisibility = ListConverter<String>();
+  static TypeConverter<List<String>?, String?> $converterrestrictedVisibilityn = NullAwareTypeConverter.wrap(
+    $converterrestrictedVisibility,
+  );
+  static TypeConverter<Map<String, dynamic>, String> $converterextraData = MapConverter();
+  static TypeConverter<Map<String, dynamic>?, String?> $converterextraDatan = NullAwareTypeConverter.wrap(
+    $converterextraData,
+  );
 }
 
-class PinnedMessageEntity extends DataClass
-    implements Insertable<PinnedMessageEntity> {
+class PinnedMessageEntity extends DataClass implements Insertable<PinnedMessageEntity> {
   /// The message id
   final String id;
 
@@ -6092,157 +5892,77 @@ class PinnedMessageEntity extends DataClass
     attachments: attachments ?? this.attachments,
     state: state ?? this.state,
     type: type ?? this.type,
-    mentionedChannel: mentionedChannel.present
-        ? mentionedChannel.value
-        : this.mentionedChannel,
-    mentionedGroupIds: mentionedGroupIds.present
-        ? mentionedGroupIds.value
-        : this.mentionedGroupIds,
-    mentionedGroups: mentionedGroups.present
-        ? mentionedGroups.value
-        : this.mentionedGroups,
-    mentionedHere: mentionedHere.present
-        ? mentionedHere.value
-        : this.mentionedHere,
-    mentionedRoles: mentionedRoles.present
-        ? mentionedRoles.value
-        : this.mentionedRoles,
+    mentionedChannel: mentionedChannel.present ? mentionedChannel.value : this.mentionedChannel,
+    mentionedGroupIds: mentionedGroupIds.present ? mentionedGroupIds.value : this.mentionedGroupIds,
+    mentionedGroups: mentionedGroups.present ? mentionedGroups.value : this.mentionedGroups,
+    mentionedHere: mentionedHere.present ? mentionedHere.value : this.mentionedHere,
+    mentionedRoles: mentionedRoles.present ? mentionedRoles.value : this.mentionedRoles,
     mentionedUsers: mentionedUsers ?? this.mentionedUsers,
-    reactionGroups: reactionGroups.present
-        ? reactionGroups.value
-        : this.reactionGroups,
+    reactionGroups: reactionGroups.present ? reactionGroups.value : this.reactionGroups,
     parentId: parentId.present ? parentId.value : this.parentId,
-    quotedMessageId: quotedMessageId.present
-        ? quotedMessageId.value
-        : this.quotedMessageId,
+    quotedMessageId: quotedMessageId.present ? quotedMessageId.value : this.quotedMessageId,
     pollId: pollId.present ? pollId.value : this.pollId,
     replyCount: replyCount.present ? replyCount.value : this.replyCount,
-    showInChannel: showInChannel.present
-        ? showInChannel.value
-        : this.showInChannel,
+    showInChannel: showInChannel.present ? showInChannel.value : this.showInChannel,
     shadowed: shadowed ?? this.shadowed,
     command: command.present ? command.value : this.command,
-    localCreatedAt: localCreatedAt.present
-        ? localCreatedAt.value
-        : this.localCreatedAt,
-    remoteCreatedAt: remoteCreatedAt.present
-        ? remoteCreatedAt.value
-        : this.remoteCreatedAt,
-    localUpdatedAt: localUpdatedAt.present
-        ? localUpdatedAt.value
-        : this.localUpdatedAt,
-    remoteUpdatedAt: remoteUpdatedAt.present
-        ? remoteUpdatedAt.value
-        : this.remoteUpdatedAt,
-    localDeletedAt: localDeletedAt.present
-        ? localDeletedAt.value
-        : this.localDeletedAt,
-    remoteDeletedAt: remoteDeletedAt.present
-        ? remoteDeletedAt.value
-        : this.remoteDeletedAt,
+    localCreatedAt: localCreatedAt.present ? localCreatedAt.value : this.localCreatedAt,
+    remoteCreatedAt: remoteCreatedAt.present ? remoteCreatedAt.value : this.remoteCreatedAt,
+    localUpdatedAt: localUpdatedAt.present ? localUpdatedAt.value : this.localUpdatedAt,
+    remoteUpdatedAt: remoteUpdatedAt.present ? remoteUpdatedAt.value : this.remoteUpdatedAt,
+    localDeletedAt: localDeletedAt.present ? localDeletedAt.value : this.localDeletedAt,
+    remoteDeletedAt: remoteDeletedAt.present ? remoteDeletedAt.value : this.remoteDeletedAt,
     deletedForMe: deletedForMe.present ? deletedForMe.value : this.deletedForMe,
-    messageTextUpdatedAt: messageTextUpdatedAt.present
-        ? messageTextUpdatedAt.value
-        : this.messageTextUpdatedAt,
+    messageTextUpdatedAt: messageTextUpdatedAt.present ? messageTextUpdatedAt.value : this.messageTextUpdatedAt,
     userId: userId.present ? userId.value : this.userId,
     channelRole: channelRole.present ? channelRole.value : this.channelRole,
     pinned: pinned ?? this.pinned,
     pinnedAt: pinnedAt.present ? pinnedAt.value : this.pinnedAt,
     pinExpires: pinExpires.present ? pinExpires.value : this.pinExpires,
-    pinnedByUserId: pinnedByUserId.present
-        ? pinnedByUserId.value
-        : this.pinnedByUserId,
+    pinnedByUserId: pinnedByUserId.present ? pinnedByUserId.value : this.pinnedByUserId,
     channelCid: channelCid ?? this.channelCid,
     i18n: i18n.present ? i18n.value : this.i18n,
-    restrictedVisibility: restrictedVisibility.present
-        ? restrictedVisibility.value
-        : this.restrictedVisibility,
+    restrictedVisibility: restrictedVisibility.present ? restrictedVisibility.value : this.restrictedVisibility,
     extraData: extraData.present ? extraData.value : this.extraData,
   );
   PinnedMessageEntity copyWithCompanion(PinnedMessagesCompanion data) {
     return PinnedMessageEntity(
       id: data.id.present ? data.id.value : this.id,
-      messageText: data.messageText.present
-          ? data.messageText.value
-          : this.messageText,
-      attachments: data.attachments.present
-          ? data.attachments.value
-          : this.attachments,
+      messageText: data.messageText.present ? data.messageText.value : this.messageText,
+      attachments: data.attachments.present ? data.attachments.value : this.attachments,
       state: data.state.present ? data.state.value : this.state,
       type: data.type.present ? data.type.value : this.type,
-      mentionedChannel: data.mentionedChannel.present
-          ? data.mentionedChannel.value
-          : this.mentionedChannel,
-      mentionedGroupIds: data.mentionedGroupIds.present
-          ? data.mentionedGroupIds.value
-          : this.mentionedGroupIds,
-      mentionedGroups: data.mentionedGroups.present
-          ? data.mentionedGroups.value
-          : this.mentionedGroups,
-      mentionedHere: data.mentionedHere.present
-          ? data.mentionedHere.value
-          : this.mentionedHere,
-      mentionedRoles: data.mentionedRoles.present
-          ? data.mentionedRoles.value
-          : this.mentionedRoles,
-      mentionedUsers: data.mentionedUsers.present
-          ? data.mentionedUsers.value
-          : this.mentionedUsers,
-      reactionGroups: data.reactionGroups.present
-          ? data.reactionGroups.value
-          : this.reactionGroups,
+      mentionedChannel: data.mentionedChannel.present ? data.mentionedChannel.value : this.mentionedChannel,
+      mentionedGroupIds: data.mentionedGroupIds.present ? data.mentionedGroupIds.value : this.mentionedGroupIds,
+      mentionedGroups: data.mentionedGroups.present ? data.mentionedGroups.value : this.mentionedGroups,
+      mentionedHere: data.mentionedHere.present ? data.mentionedHere.value : this.mentionedHere,
+      mentionedRoles: data.mentionedRoles.present ? data.mentionedRoles.value : this.mentionedRoles,
+      mentionedUsers: data.mentionedUsers.present ? data.mentionedUsers.value : this.mentionedUsers,
+      reactionGroups: data.reactionGroups.present ? data.reactionGroups.value : this.reactionGroups,
       parentId: data.parentId.present ? data.parentId.value : this.parentId,
-      quotedMessageId: data.quotedMessageId.present
-          ? data.quotedMessageId.value
-          : this.quotedMessageId,
+      quotedMessageId: data.quotedMessageId.present ? data.quotedMessageId.value : this.quotedMessageId,
       pollId: data.pollId.present ? data.pollId.value : this.pollId,
-      replyCount: data.replyCount.present
-          ? data.replyCount.value
-          : this.replyCount,
-      showInChannel: data.showInChannel.present
-          ? data.showInChannel.value
-          : this.showInChannel,
+      replyCount: data.replyCount.present ? data.replyCount.value : this.replyCount,
+      showInChannel: data.showInChannel.present ? data.showInChannel.value : this.showInChannel,
       shadowed: data.shadowed.present ? data.shadowed.value : this.shadowed,
       command: data.command.present ? data.command.value : this.command,
-      localCreatedAt: data.localCreatedAt.present
-          ? data.localCreatedAt.value
-          : this.localCreatedAt,
-      remoteCreatedAt: data.remoteCreatedAt.present
-          ? data.remoteCreatedAt.value
-          : this.remoteCreatedAt,
-      localUpdatedAt: data.localUpdatedAt.present
-          ? data.localUpdatedAt.value
-          : this.localUpdatedAt,
-      remoteUpdatedAt: data.remoteUpdatedAt.present
-          ? data.remoteUpdatedAt.value
-          : this.remoteUpdatedAt,
-      localDeletedAt: data.localDeletedAt.present
-          ? data.localDeletedAt.value
-          : this.localDeletedAt,
-      remoteDeletedAt: data.remoteDeletedAt.present
-          ? data.remoteDeletedAt.value
-          : this.remoteDeletedAt,
-      deletedForMe: data.deletedForMe.present
-          ? data.deletedForMe.value
-          : this.deletedForMe,
+      localCreatedAt: data.localCreatedAt.present ? data.localCreatedAt.value : this.localCreatedAt,
+      remoteCreatedAt: data.remoteCreatedAt.present ? data.remoteCreatedAt.value : this.remoteCreatedAt,
+      localUpdatedAt: data.localUpdatedAt.present ? data.localUpdatedAt.value : this.localUpdatedAt,
+      remoteUpdatedAt: data.remoteUpdatedAt.present ? data.remoteUpdatedAt.value : this.remoteUpdatedAt,
+      localDeletedAt: data.localDeletedAt.present ? data.localDeletedAt.value : this.localDeletedAt,
+      remoteDeletedAt: data.remoteDeletedAt.present ? data.remoteDeletedAt.value : this.remoteDeletedAt,
+      deletedForMe: data.deletedForMe.present ? data.deletedForMe.value : this.deletedForMe,
       messageTextUpdatedAt: data.messageTextUpdatedAt.present
           ? data.messageTextUpdatedAt.value
           : this.messageTextUpdatedAt,
       userId: data.userId.present ? data.userId.value : this.userId,
-      channelRole: data.channelRole.present
-          ? data.channelRole.value
-          : this.channelRole,
+      channelRole: data.channelRole.present ? data.channelRole.value : this.channelRole,
       pinned: data.pinned.present ? data.pinned.value : this.pinned,
       pinnedAt: data.pinnedAt.present ? data.pinnedAt.value : this.pinnedAt,
-      pinExpires: data.pinExpires.present
-          ? data.pinExpires.value
-          : this.pinExpires,
-      pinnedByUserId: data.pinnedByUserId.present
-          ? data.pinnedByUserId.value
-          : this.pinnedByUserId,
-      channelCid: data.channelCid.present
-          ? data.channelCid.value
-          : this.channelCid,
+      pinExpires: data.pinExpires.present ? data.pinExpires.value : this.pinExpires,
+      pinnedByUserId: data.pinnedByUserId.present ? data.pinnedByUserId.value : this.pinnedByUserId,
+      channelCid: data.channelCid.present ? data.channelCid.value : this.channelCid,
       i18n: data.i18n.present ? data.i18n.value : this.i18n,
       restrictedVisibility: data.restrictedVisibility.present
           ? data.restrictedVisibility.value
@@ -6568,8 +6288,7 @@ class PinnedMessagesCompanion extends UpdateCompanion<PinnedMessageEntity> {
       if (localDeletedAt != null) 'local_deleted_at': localDeletedAt,
       if (remoteDeletedAt != null) 'remote_deleted_at': remoteDeletedAt,
       if (deletedForMe != null) 'deleted_for_me': deletedForMe,
-      if (messageTextUpdatedAt != null)
-        'message_text_updated_at': messageTextUpdatedAt,
+      if (messageTextUpdatedAt != null) 'message_text_updated_at': messageTextUpdatedAt,
       if (userId != null) 'user_id': userId,
       if (channelRole != null) 'channel_role': channelRole,
       if (pinned != null) 'pinned': pinned,
@@ -6578,8 +6297,7 @@ class PinnedMessagesCompanion extends UpdateCompanion<PinnedMessageEntity> {
       if (pinnedByUserId != null) 'pinned_by_user_id': pinnedByUserId,
       if (channelCid != null) 'channel_cid': channelCid,
       if (i18n != null) 'i18n': i18n,
-      if (restrictedVisibility != null)
-        'restricted_visibility': restrictedVisibility,
+      if (restrictedVisibility != null) 'restricted_visibility': restrictedVisibility,
       if (extraData != null) 'extra_data': extraData,
       if (rowid != null) 'rowid': rowid,
     });
@@ -6900,17 +6618,15 @@ class $PollsTable extends Polls with TableInfo<$PollsTable, PollEntity> {
     requiredDuringInsert: false,
   );
   @override
-  late final GeneratedColumnWithTypeConverter<List<String>, String> options =
-      GeneratedColumn<String>(
-        'options',
-        aliasedName,
-        false,
-        type: DriftSqlType.string,
-        requiredDuringInsert: true,
-      ).withConverter<List<String>>($PollsTable.$converteroptions);
+  late final GeneratedColumnWithTypeConverter<List<String>, String> options = GeneratedColumn<String>(
+    'options',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  ).withConverter<List<String>>($PollsTable.$converteroptions);
   @override
-  late final GeneratedColumnWithTypeConverter<VotingVisibility, String>
-  votingVisibility = GeneratedColumn<String>(
+  late final GeneratedColumnWithTypeConverter<VotingVisibility, String> votingVisibility = GeneratedColumn<String>(
     'voting_visibility',
     aliasedName,
     false,
@@ -6944,21 +6660,19 @@ class $PollsTable extends Polls with TableInfo<$PollsTable, PollEntity> {
     type: DriftSqlType.int,
     requiredDuringInsert: false,
   );
-  static const VerificationMeta _allowUserSuggestedOptionsMeta =
-      const VerificationMeta('allowUserSuggestedOptions');
+  static const VerificationMeta _allowUserSuggestedOptionsMeta = const VerificationMeta('allowUserSuggestedOptions');
   @override
-  late final GeneratedColumn<bool> allowUserSuggestedOptions =
-      GeneratedColumn<bool>(
-        'allow_user_suggested_options',
-        aliasedName,
-        false,
-        type: DriftSqlType.bool,
-        requiredDuringInsert: false,
-        defaultConstraints: GeneratedColumn.constraintIsAlways(
-          'CHECK ("allow_user_suggested_options" IN (0, 1))',
-        ),
-        defaultValue: const Constant(false),
-      );
+  late final GeneratedColumn<bool> allowUserSuggestedOptions = GeneratedColumn<bool>(
+    'allow_user_suggested_options',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("allow_user_suggested_options" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
   static const VerificationMeta _allowAnswersMeta = const VerificationMeta(
     'allowAnswers',
   );
@@ -7002,8 +6716,7 @@ class $PollsTable extends Polls with TableInfo<$PollsTable, PollEntity> {
     defaultValue: const Constant(0),
   );
   @override
-  late final GeneratedColumnWithTypeConverter<Map<String, int>, String>
-  voteCountsByOption = GeneratedColumn<String>(
+  late final GeneratedColumnWithTypeConverter<Map<String, int>, String> voteCountsByOption = GeneratedColumn<String>(
     'vote_counts_by_option',
     aliasedName,
     false,
@@ -7058,8 +6771,7 @@ class $PollsTable extends Polls with TableInfo<$PollsTable, PollEntity> {
     defaultValue: currentDateAndTime,
   );
   @override
-  late final GeneratedColumnWithTypeConverter<Map<String, dynamic>?, String>
-  extraData = GeneratedColumn<String>(
+  late final GeneratedColumnWithTypeConverter<Map<String, dynamic>?, String> extraData = GeneratedColumn<String>(
     'extra_data',
     aliasedName,
     true,
@@ -7291,16 +7003,13 @@ class $PollsTable extends Polls with TableInfo<$PollsTable, PollEntity> {
     return $PollsTable(attachedDatabase, alias);
   }
 
-  static TypeConverter<List<String>, String> $converteroptions =
-      ListConverter<String>();
-  static TypeConverter<VotingVisibility, String> $convertervotingVisibility =
-      const VotingVisibilityConverter();
-  static TypeConverter<Map<String, int>, String> $convertervoteCountsByOption =
-      MapConverter<int>();
-  static TypeConverter<Map<String, dynamic>, String> $converterextraData =
-      MapConverter();
-  static TypeConverter<Map<String, dynamic>?, String?> $converterextraDatan =
-      NullAwareTypeConverter.wrap($converterextraData);
+  static TypeConverter<List<String>, String> $converteroptions = ListConverter<String>();
+  static TypeConverter<VotingVisibility, String> $convertervotingVisibility = const VotingVisibilityConverter();
+  static TypeConverter<Map<String, int>, String> $convertervoteCountsByOption = MapConverter<int>();
+  static TypeConverter<Map<String, dynamic>, String> $converterextraData = MapConverter();
+  static TypeConverter<Map<String, dynamic>?, String?> $converterextraDatan = NullAwareTypeConverter.wrap(
+    $converterextraData,
+  );
 }
 
 class PollEntity extends DataClass implements Insertable<PollEntity> {
@@ -7512,11 +7221,8 @@ class PollEntity extends DataClass implements Insertable<PollEntity> {
     options: options ?? this.options,
     votingVisibility: votingVisibility ?? this.votingVisibility,
     enforceUniqueVote: enforceUniqueVote ?? this.enforceUniqueVote,
-    maxVotesAllowed: maxVotesAllowed.present
-        ? maxVotesAllowed.value
-        : this.maxVotesAllowed,
-    allowUserSuggestedOptions:
-        allowUserSuggestedOptions ?? this.allowUserSuggestedOptions,
+    maxVotesAllowed: maxVotesAllowed.present ? maxVotesAllowed.value : this.maxVotesAllowed,
+    allowUserSuggestedOptions: allowUserSuggestedOptions ?? this.allowUserSuggestedOptions,
     allowAnswers: allowAnswers ?? this.allowAnswers,
     isClosed: isClosed ?? this.isClosed,
     answersCount: answersCount ?? this.answersCount,
@@ -7531,36 +7237,20 @@ class PollEntity extends DataClass implements Insertable<PollEntity> {
     return PollEntity(
       id: data.id.present ? data.id.value : this.id,
       name: data.name.present ? data.name.value : this.name,
-      description: data.description.present
-          ? data.description.value
-          : this.description,
+      description: data.description.present ? data.description.value : this.description,
       options: data.options.present ? data.options.value : this.options,
-      votingVisibility: data.votingVisibility.present
-          ? data.votingVisibility.value
-          : this.votingVisibility,
-      enforceUniqueVote: data.enforceUniqueVote.present
-          ? data.enforceUniqueVote.value
-          : this.enforceUniqueVote,
-      maxVotesAllowed: data.maxVotesAllowed.present
-          ? data.maxVotesAllowed.value
-          : this.maxVotesAllowed,
+      votingVisibility: data.votingVisibility.present ? data.votingVisibility.value : this.votingVisibility,
+      enforceUniqueVote: data.enforceUniqueVote.present ? data.enforceUniqueVote.value : this.enforceUniqueVote,
+      maxVotesAllowed: data.maxVotesAllowed.present ? data.maxVotesAllowed.value : this.maxVotesAllowed,
       allowUserSuggestedOptions: data.allowUserSuggestedOptions.present
           ? data.allowUserSuggestedOptions.value
           : this.allowUserSuggestedOptions,
-      allowAnswers: data.allowAnswers.present
-          ? data.allowAnswers.value
-          : this.allowAnswers,
+      allowAnswers: data.allowAnswers.present ? data.allowAnswers.value : this.allowAnswers,
       isClosed: data.isClosed.present ? data.isClosed.value : this.isClosed,
-      answersCount: data.answersCount.present
-          ? data.answersCount.value
-          : this.answersCount,
-      voteCountsByOption: data.voteCountsByOption.present
-          ? data.voteCountsByOption.value
-          : this.voteCountsByOption,
+      answersCount: data.answersCount.present ? data.answersCount.value : this.answersCount,
+      voteCountsByOption: data.voteCountsByOption.present ? data.voteCountsByOption.value : this.voteCountsByOption,
       voteCount: data.voteCount.present ? data.voteCount.value : this.voteCount,
-      createdById: data.createdById.present
-          ? data.createdById.value
-          : this.createdById,
+      createdById: data.createdById.present ? data.createdById.value : this.createdById,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       extraData: data.extraData.present ? data.extraData.value : this.extraData,
@@ -7724,13 +7414,11 @@ class PollsCompanion extends UpdateCompanion<PollEntity> {
       if (votingVisibility != null) 'voting_visibility': votingVisibility,
       if (enforceUniqueVote != null) 'enforce_unique_vote': enforceUniqueVote,
       if (maxVotesAllowed != null) 'max_votes_allowed': maxVotesAllowed,
-      if (allowUserSuggestedOptions != null)
-        'allow_user_suggested_options': allowUserSuggestedOptions,
+      if (allowUserSuggestedOptions != null) 'allow_user_suggested_options': allowUserSuggestedOptions,
       if (allowAnswers != null) 'allow_answers': allowAnswers,
       if (isClosed != null) 'is_closed': isClosed,
       if (answersCount != null) 'answers_count': answersCount,
-      if (voteCountsByOption != null)
-        'vote_counts_by_option': voteCountsByOption,
+      if (voteCountsByOption != null) 'vote_counts_by_option': voteCountsByOption,
       if (voteCount != null) 'vote_count': voteCount,
       if (createdById != null) 'created_by_id': createdById,
       if (createdAt != null) 'created_at': createdAt,
@@ -7768,8 +7456,7 @@ class PollsCompanion extends UpdateCompanion<PollEntity> {
       votingVisibility: votingVisibility ?? this.votingVisibility,
       enforceUniqueVote: enforceUniqueVote ?? this.enforceUniqueVote,
       maxVotesAllowed: maxVotesAllowed ?? this.maxVotesAllowed,
-      allowUserSuggestedOptions:
-          allowUserSuggestedOptions ?? this.allowUserSuggestedOptions,
+      allowUserSuggestedOptions: allowUserSuggestedOptions ?? this.allowUserSuggestedOptions,
       allowAnswers: allowAnswers ?? this.allowAnswers,
       isClosed: isClosed ?? this.isClosed,
       answersCount: answersCount ?? this.answersCount,
@@ -7881,8 +7568,7 @@ class PollsCompanion extends UpdateCompanion<PollEntity> {
   }
 }
 
-class $PollVotesTable extends PollVotes
-    with TableInfo<$PollVotesTable, PollVoteEntity> {
+class $PollVotesTable extends PollVotes with TableInfo<$PollVotesTable, PollVoteEntity> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
@@ -8180,9 +7866,7 @@ class PollVoteEntity extends DataClass implements Insertable<PollVoteEntity> {
       id: data.id.present ? data.id.value : this.id,
       pollId: data.pollId.present ? data.pollId.value : this.pollId,
       optionId: data.optionId.present ? data.optionId.value : this.optionId,
-      answerText: data.answerText.present
-          ? data.answerText.value
-          : this.answerText,
+      answerText: data.answerText.present ? data.answerText.value : this.answerText,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       userId: data.userId.present ? data.userId.value : this.userId,
@@ -8429,8 +8113,7 @@ class $PinnedMessageReactionsTable extends PinnedMessageReactions
     defaultValue: const Constant(0),
   );
   @override
-  late final GeneratedColumnWithTypeConverter<Map<String, dynamic>?, String>
-  extraData =
+  late final GeneratedColumnWithTypeConverter<Map<String, dynamic>?, String> extraData =
       GeneratedColumn<String>(
         'extra_data',
         aliasedName,
@@ -8561,14 +8244,13 @@ class $PinnedMessageReactionsTable extends PinnedMessageReactions
     return $PinnedMessageReactionsTable(attachedDatabase, alias);
   }
 
-  static TypeConverter<Map<String, dynamic>, String> $converterextraData =
-      MapConverter();
-  static TypeConverter<Map<String, dynamic>?, String?> $converterextraDatan =
-      NullAwareTypeConverter.wrap($converterextraData);
+  static TypeConverter<Map<String, dynamic>, String> $converterextraData = MapConverter();
+  static TypeConverter<Map<String, dynamic>?, String?> $converterextraDatan = NullAwareTypeConverter.wrap(
+    $converterextraData,
+  );
 }
 
-class PinnedMessageReactionEntity extends DataClass
-    implements Insertable<PinnedMessageReactionEntity> {
+class PinnedMessageReactionEntity extends DataClass implements Insertable<PinnedMessageReactionEntity> {
   /// The id of the user that sent the reaction
   final String? userId;
 
@@ -8731,8 +8413,7 @@ class PinnedMessageReactionEntity extends DataClass
           other.extraData == this.extraData);
 }
 
-class PinnedMessageReactionsCompanion
-    extends UpdateCompanion<PinnedMessageReactionEntity> {
+class PinnedMessageReactionsCompanion extends UpdateCompanion<PinnedMessageReactionEntity> {
   final Value<String?> userId;
   final Value<String?> messageId;
   final Value<String> type;
@@ -8866,8 +8547,7 @@ class PinnedMessageReactionsCompanion
   }
 }
 
-class $ReactionsTable extends Reactions
-    with TableInfo<$ReactionsTable, ReactionEntity> {
+class $ReactionsTable extends Reactions with TableInfo<$ReactionsTable, ReactionEntity> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
@@ -8950,8 +8630,7 @@ class $ReactionsTable extends Reactions
     defaultValue: const Constant(0),
   );
   @override
-  late final GeneratedColumnWithTypeConverter<Map<String, dynamic>?, String>
-  extraData = GeneratedColumn<String>(
+  late final GeneratedColumnWithTypeConverter<Map<String, dynamic>?, String> extraData = GeneratedColumn<String>(
     'extra_data',
     aliasedName,
     true,
@@ -9076,10 +8755,10 @@ class $ReactionsTable extends Reactions
     return $ReactionsTable(attachedDatabase, alias);
   }
 
-  static TypeConverter<Map<String, dynamic>, String> $converterextraData =
-      MapConverter();
-  static TypeConverter<Map<String, dynamic>?, String?> $converterextraDatan =
-      NullAwareTypeConverter.wrap($converterextraData);
+  static TypeConverter<Map<String, dynamic>, String> $converterextraData = MapConverter();
+  static TypeConverter<Map<String, dynamic>?, String?> $converterextraDatan = NullAwareTypeConverter.wrap(
+    $converterextraData,
+  );
 }
 
 class ReactionEntity extends DataClass implements Insertable<ReactionEntity> {
@@ -9469,8 +9148,7 @@ class $UsersTable extends Users with TableInfo<$UsersTable, UserEntity> {
     defaultValue: const Constant(false),
   );
   @override
-  late final GeneratedColumnWithTypeConverter<Map<String, String>?, String>
-  teamsRole = GeneratedColumn<String>(
+  late final GeneratedColumnWithTypeConverter<Map<String, String>?, String> teamsRole = GeneratedColumn<String>(
     'teams_role',
     aliasedName,
     true,
@@ -9489,8 +9167,7 @@ class $UsersTable extends Users with TableInfo<$UsersTable, UserEntity> {
     requiredDuringInsert: false,
   );
   @override
-  late final GeneratedColumnWithTypeConverter<Map<String, dynamic>, String>
-  extraData = GeneratedColumn<String>(
+  late final GeneratedColumnWithTypeConverter<Map<String, dynamic>, String> extraData = GeneratedColumn<String>(
     'extra_data',
     aliasedName,
     false,
@@ -9644,12 +9321,11 @@ class $UsersTable extends Users with TableInfo<$UsersTable, UserEntity> {
     return $UsersTable(attachedDatabase, alias);
   }
 
-  static TypeConverter<Map<String, String>, String> $converterteamsRole =
-      MapConverter<String>();
-  static TypeConverter<Map<String, String>?, String?> $converterteamsRolen =
-      NullAwareTypeConverter.wrap($converterteamsRole);
-  static TypeConverter<Map<String, dynamic>, String> $converterextraData =
-      MapConverter();
+  static TypeConverter<Map<String, String>, String> $converterteamsRole = MapConverter<String>();
+  static TypeConverter<Map<String, String>?, String?> $converterteamsRolen = NullAwareTypeConverter.wrap(
+    $converterteamsRole,
+  );
+  static TypeConverter<Map<String, dynamic>, String> $converterextraData = MapConverter();
 }
 
 class UserEntity extends DataClass implements Insertable<UserEntity> {
@@ -9796,9 +9472,7 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
     online: online ?? this.online,
     banned: banned ?? this.banned,
     teamsRole: teamsRole.present ? teamsRole.value : this.teamsRole,
-    avgResponseTime: avgResponseTime.present
-        ? avgResponseTime.value
-        : this.avgResponseTime,
+    avgResponseTime: avgResponseTime.present ? avgResponseTime.value : this.avgResponseTime,
     extraData: extraData ?? this.extraData,
   );
   UserEntity copyWithCompanion(UsersCompanion data) {
@@ -9808,15 +9482,11 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
       language: data.language.present ? data.language.value : this.language,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
-      lastActive: data.lastActive.present
-          ? data.lastActive.value
-          : this.lastActive,
+      lastActive: data.lastActive.present ? data.lastActive.value : this.lastActive,
       online: data.online.present ? data.online.value : this.online,
       banned: data.banned.present ? data.banned.value : this.banned,
       teamsRole: data.teamsRole.present ? data.teamsRole.value : this.teamsRole,
-      avgResponseTime: data.avgResponseTime.present
-          ? data.avgResponseTime.value
-          : this.avgResponseTime,
+      avgResponseTime: data.avgResponseTime.present ? data.avgResponseTime.value : this.avgResponseTime,
       extraData: data.extraData.present ? data.extraData.value : this.extraData,
     );
   }
@@ -10038,8 +9708,7 @@ class UsersCompanion extends UpdateCompanion<UserEntity> {
   }
 }
 
-class $MembersTable extends Members
-    with TableInfo<$MembersTable, MemberEntity> {
+class $MembersTable extends Members with TableInfo<$MembersTable, MemberEntity> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
@@ -10082,26 +9751,24 @@ class $MembersTable extends Members
     'inviteAcceptedAt',
   );
   @override
-  late final GeneratedColumn<DateTime> inviteAcceptedAt =
-      GeneratedColumn<DateTime>(
-        'invite_accepted_at',
-        aliasedName,
-        true,
-        type: DriftSqlType.dateTime,
-        requiredDuringInsert: false,
-      );
+  late final GeneratedColumn<DateTime> inviteAcceptedAt = GeneratedColumn<DateTime>(
+    'invite_accepted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _inviteRejectedAtMeta = const VerificationMeta(
     'inviteRejectedAt',
   );
   @override
-  late final GeneratedColumn<DateTime> inviteRejectedAt =
-      GeneratedColumn<DateTime>(
-        'invite_rejected_at',
-        aliasedName,
-        true,
-        type: DriftSqlType.dateTime,
-        requiredDuringInsert: false,
-      );
+  late final GeneratedColumn<DateTime> inviteRejectedAt = GeneratedColumn<DateTime>(
+    'invite_rejected_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _invitedMeta = const VerificationMeta(
     'invited',
   );
@@ -10185,8 +9852,7 @@ class $MembersTable extends Members
     defaultValue: const Constant(false),
   );
   @override
-  late final GeneratedColumnWithTypeConverter<Map<String, dynamic>?, String>
-  extraData = GeneratedColumn<String>(
+  late final GeneratedColumnWithTypeConverter<Map<String, dynamic>?, String> extraData = GeneratedColumn<String>(
     'extra_data',
     aliasedName,
     true,
@@ -10218,8 +9884,7 @@ class $MembersTable extends Members
     defaultValue: currentDateAndTime,
   );
   @override
-  late final GeneratedColumnWithTypeConverter<List<String>, String>
-  deletedMessages = GeneratedColumn<String>(
+  late final GeneratedColumnWithTypeConverter<List<String>, String> deletedMessages = GeneratedColumn<String>(
     'deleted_messages',
     aliasedName,
     false,
@@ -10434,12 +10099,11 @@ class $MembersTable extends Members
     return $MembersTable(attachedDatabase, alias);
   }
 
-  static TypeConverter<Map<String, dynamic>, String> $converterextraData =
-      MapConverter();
-  static TypeConverter<Map<String, dynamic>?, String?> $converterextraDatan =
-      NullAwareTypeConverter.wrap($converterextraData);
-  static TypeConverter<List<String>, String> $converterdeletedMessages =
-      ListConverter<String>();
+  static TypeConverter<Map<String, dynamic>, String> $converterextraData = MapConverter();
+  static TypeConverter<Map<String, dynamic>?, String?> $converterextraDatan = NullAwareTypeConverter.wrap(
+    $converterextraData,
+  );
+  static TypeConverter<List<String>, String> $converterdeletedMessages = ListConverter<String>();
 }
 
 class MemberEntity extends DataClass implements Insertable<MemberEntity> {
@@ -10617,12 +10281,8 @@ class MemberEntity extends DataClass implements Insertable<MemberEntity> {
     userId: userId ?? this.userId,
     channelCid: channelCid ?? this.channelCid,
     channelRole: channelRole.present ? channelRole.value : this.channelRole,
-    inviteAcceptedAt: inviteAcceptedAt.present
-        ? inviteAcceptedAt.value
-        : this.inviteAcceptedAt,
-    inviteRejectedAt: inviteRejectedAt.present
-        ? inviteRejectedAt.value
-        : this.inviteRejectedAt,
+    inviteAcceptedAt: inviteAcceptedAt.present ? inviteAcceptedAt.value : this.inviteAcceptedAt,
+    inviteRejectedAt: inviteRejectedAt.present ? inviteRejectedAt.value : this.inviteRejectedAt,
     invited: invited ?? this.invited,
     banned: banned ?? this.banned,
     shadowBanned: shadowBanned ?? this.shadowBanned,
@@ -10637,36 +10297,20 @@ class MemberEntity extends DataClass implements Insertable<MemberEntity> {
   MemberEntity copyWithCompanion(MembersCompanion data) {
     return MemberEntity(
       userId: data.userId.present ? data.userId.value : this.userId,
-      channelCid: data.channelCid.present
-          ? data.channelCid.value
-          : this.channelCid,
-      channelRole: data.channelRole.present
-          ? data.channelRole.value
-          : this.channelRole,
-      inviteAcceptedAt: data.inviteAcceptedAt.present
-          ? data.inviteAcceptedAt.value
-          : this.inviteAcceptedAt,
-      inviteRejectedAt: data.inviteRejectedAt.present
-          ? data.inviteRejectedAt.value
-          : this.inviteRejectedAt,
+      channelCid: data.channelCid.present ? data.channelCid.value : this.channelCid,
+      channelRole: data.channelRole.present ? data.channelRole.value : this.channelRole,
+      inviteAcceptedAt: data.inviteAcceptedAt.present ? data.inviteAcceptedAt.value : this.inviteAcceptedAt,
+      inviteRejectedAt: data.inviteRejectedAt.present ? data.inviteRejectedAt.value : this.inviteRejectedAt,
       invited: data.invited.present ? data.invited.value : this.invited,
       banned: data.banned.present ? data.banned.value : this.banned,
-      shadowBanned: data.shadowBanned.present
-          ? data.shadowBanned.value
-          : this.shadowBanned,
+      shadowBanned: data.shadowBanned.present ? data.shadowBanned.value : this.shadowBanned,
       pinnedAt: data.pinnedAt.present ? data.pinnedAt.value : this.pinnedAt,
-      archivedAt: data.archivedAt.present
-          ? data.archivedAt.value
-          : this.archivedAt,
-      isModerator: data.isModerator.present
-          ? data.isModerator.value
-          : this.isModerator,
+      archivedAt: data.archivedAt.present ? data.archivedAt.value : this.archivedAt,
+      isModerator: data.isModerator.present ? data.isModerator.value : this.isModerator,
       extraData: data.extraData.present ? data.extraData.value : this.extraData,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
-      deletedMessages: data.deletedMessages.present
-          ? data.deletedMessages.value
-          : this.deletedMessages,
+      deletedMessages: data.deletedMessages.present ? data.deletedMessages.value : this.deletedMessages,
     );
   }
 
@@ -10999,37 +10643,33 @@ class $ReadsTable extends Reads with TableInfo<$ReadsTable, ReadEntity> {
     'lastReadMessageId',
   );
   @override
-  late final GeneratedColumn<String> lastReadMessageId =
-      GeneratedColumn<String>(
-        'last_read_message_id',
-        aliasedName,
-        true,
-        type: DriftSqlType.string,
-        requiredDuringInsert: false,
-      );
+  late final GeneratedColumn<String> lastReadMessageId = GeneratedColumn<String>(
+    'last_read_message_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _lastDeliveredAtMeta = const VerificationMeta(
     'lastDeliveredAt',
   );
   @override
-  late final GeneratedColumn<DateTime> lastDeliveredAt =
-      GeneratedColumn<DateTime>(
-        'last_delivered_at',
-        aliasedName,
-        true,
-        type: DriftSqlType.dateTime,
-        requiredDuringInsert: false,
-      );
-  static const VerificationMeta _lastDeliveredMessageIdMeta =
-      const VerificationMeta('lastDeliveredMessageId');
+  late final GeneratedColumn<DateTime> lastDeliveredAt = GeneratedColumn<DateTime>(
+    'last_delivered_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _lastDeliveredMessageIdMeta = const VerificationMeta('lastDeliveredMessageId');
   @override
-  late final GeneratedColumn<String> lastDeliveredMessageId =
-      GeneratedColumn<String>(
-        'last_delivered_message_id',
-        aliasedName,
-        true,
-        type: DriftSqlType.string,
-        requiredDuringInsert: false,
-      );
+  late final GeneratedColumn<String> lastDeliveredMessageId = GeneratedColumn<String>(
+    'last_delivered_message_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     lastRead,
@@ -11257,32 +10897,18 @@ class ReadEntity extends DataClass implements Insertable<ReadEntity> {
     userId: userId ?? this.userId,
     channelCid: channelCid ?? this.channelCid,
     unreadMessages: unreadMessages ?? this.unreadMessages,
-    lastReadMessageId: lastReadMessageId.present
-        ? lastReadMessageId.value
-        : this.lastReadMessageId,
-    lastDeliveredAt: lastDeliveredAt.present
-        ? lastDeliveredAt.value
-        : this.lastDeliveredAt,
-    lastDeliveredMessageId: lastDeliveredMessageId.present
-        ? lastDeliveredMessageId.value
-        : this.lastDeliveredMessageId,
+    lastReadMessageId: lastReadMessageId.present ? lastReadMessageId.value : this.lastReadMessageId,
+    lastDeliveredAt: lastDeliveredAt.present ? lastDeliveredAt.value : this.lastDeliveredAt,
+    lastDeliveredMessageId: lastDeliveredMessageId.present ? lastDeliveredMessageId.value : this.lastDeliveredMessageId,
   );
   ReadEntity copyWithCompanion(ReadsCompanion data) {
     return ReadEntity(
       lastRead: data.lastRead.present ? data.lastRead.value : this.lastRead,
       userId: data.userId.present ? data.userId.value : this.userId,
-      channelCid: data.channelCid.present
-          ? data.channelCid.value
-          : this.channelCid,
-      unreadMessages: data.unreadMessages.present
-          ? data.unreadMessages.value
-          : this.unreadMessages,
-      lastReadMessageId: data.lastReadMessageId.present
-          ? data.lastReadMessageId.value
-          : this.lastReadMessageId,
-      lastDeliveredAt: data.lastDeliveredAt.present
-          ? data.lastDeliveredAt.value
-          : this.lastDeliveredAt,
+      channelCid: data.channelCid.present ? data.channelCid.value : this.channelCid,
+      unreadMessages: data.unreadMessages.present ? data.unreadMessages.value : this.unreadMessages,
+      lastReadMessageId: data.lastReadMessageId.present ? data.lastReadMessageId.value : this.lastReadMessageId,
+      lastDeliveredAt: data.lastDeliveredAt.present ? data.lastDeliveredAt.value : this.lastDeliveredAt,
       lastDeliveredMessageId: data.lastDeliveredMessageId.present
           ? data.lastDeliveredMessageId.value
           : this.lastDeliveredMessageId,
@@ -11374,8 +11000,7 @@ class ReadsCompanion extends UpdateCompanion<ReadEntity> {
       if (unreadMessages != null) 'unread_messages': unreadMessages,
       if (lastReadMessageId != null) 'last_read_message_id': lastReadMessageId,
       if (lastDeliveredAt != null) 'last_delivered_at': lastDeliveredAt,
-      if (lastDeliveredMessageId != null)
-        'last_delivered_message_id': lastDeliveredMessageId,
+      if (lastDeliveredMessageId != null) 'last_delivered_message_id': lastDeliveredMessageId,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -11397,8 +11022,7 @@ class ReadsCompanion extends UpdateCompanion<ReadEntity> {
       unreadMessages: unreadMessages ?? this.unreadMessages,
       lastReadMessageId: lastReadMessageId ?? this.lastReadMessageId,
       lastDeliveredAt: lastDeliveredAt ?? this.lastDeliveredAt,
-      lastDeliveredMessageId:
-          lastDeliveredMessageId ?? this.lastDeliveredMessageId,
+      lastDeliveredMessageId: lastDeliveredMessageId ?? this.lastDeliveredMessageId,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -11451,8 +11075,7 @@ class ReadsCompanion extends UpdateCompanion<ReadEntity> {
   }
 }
 
-class $ChannelQueriesTable extends ChannelQueries
-    with TableInfo<$ChannelQueriesTable, ChannelQueryEntity> {
+class $ChannelQueriesTable extends ChannelQueries with TableInfo<$ChannelQueriesTable, ChannelQueryEntity> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
@@ -11535,8 +11158,7 @@ class $ChannelQueriesTable extends ChannelQueries
   }
 }
 
-class ChannelQueryEntity extends DataClass
-    implements Insertable<ChannelQueryEntity> {
+class ChannelQueryEntity extends DataClass implements Insertable<ChannelQueryEntity> {
   /// The unique hash of this query
   final String queryHash;
 
@@ -11570,17 +11192,14 @@ class ChannelQueryEntity extends DataClass
     };
   }
 
-  ChannelQueryEntity copyWith({String? queryHash, String? channelCid}) =>
-      ChannelQueryEntity(
-        queryHash: queryHash ?? this.queryHash,
-        channelCid: channelCid ?? this.channelCid,
-      );
+  ChannelQueryEntity copyWith({String? queryHash, String? channelCid}) => ChannelQueryEntity(
+    queryHash: queryHash ?? this.queryHash,
+    channelCid: channelCid ?? this.channelCid,
+  );
   ChannelQueryEntity copyWithCompanion(ChannelQueriesCompanion data) {
     return ChannelQueryEntity(
       queryHash: data.queryHash.present ? data.queryHash.value : this.queryHash,
-      channelCid: data.channelCid.present
-          ? data.channelCid.value
-          : this.channelCid,
+      channelCid: data.channelCid.present ? data.channelCid.value : this.channelCid,
     );
   }
 
@@ -11598,9 +11217,7 @@ class ChannelQueryEntity extends DataClass
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is ChannelQueryEntity &&
-          other.queryHash == this.queryHash &&
-          other.channelCid == this.channelCid);
+      (other is ChannelQueryEntity && other.queryHash == this.queryHash && other.channelCid == this.channelCid);
 }
 
 class ChannelQueriesCompanion extends UpdateCompanion<ChannelQueryEntity> {
@@ -11686,17 +11303,15 @@ class $ChannelQueriesMetadataTable extends ChannelQueriesMetadata
     requiredDuringInsert: true,
   );
   @override
-  late final GeneratedColumnWithTypeConverter<Filter, String> filter =
-      GeneratedColumn<String>(
-        'filter',
-        aliasedName,
-        false,
-        type: DriftSqlType.string,
-        requiredDuringInsert: true,
-      ).withConverter<Filter>($ChannelQueriesMetadataTable.$converterfilter);
+  late final GeneratedColumnWithTypeConverter<Filter, String> filter = GeneratedColumn<String>(
+    'filter',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  ).withConverter<Filter>($ChannelQueriesMetadataTable.$converterfilter);
   @override
-  late final GeneratedColumnWithTypeConverter<SortOrder<ChannelState>, String>
-  sort =
+  late final GeneratedColumnWithTypeConverter<SortOrder<ChannelState>, String> sort =
       GeneratedColumn<String>(
         'sort',
         aliasedName,
@@ -11764,14 +11379,11 @@ class $ChannelQueriesMetadataTable extends ChannelQueriesMetadata
     return $ChannelQueriesMetadataTable(attachedDatabase, alias);
   }
 
-  static TypeConverter<Filter, String> $converterfilter =
-      const FilterConverter();
-  static TypeConverter<SortOrder<ChannelState>, String> $convertersort =
-      const ChannelStateSortOrderConverter();
+  static TypeConverter<Filter, String> $converterfilter = const FilterConverter();
+  static TypeConverter<SortOrder<ChannelState>, String> $convertersort = const ChannelStateSortOrderConverter();
 }
 
-class ChannelQueryMetadataEntity extends DataClass
-    implements Insertable<ChannelQueryMetadataEntity> {
+class ChannelQueryMetadataEntity extends DataClass implements Insertable<ChannelQueryMetadataEntity> {
   /// The query hash this metadata is associated with. Matches the hashes
   /// produced by `ChannelQueryDao` for predefined-filter queries.
   final String queryHash;
@@ -11864,8 +11476,7 @@ class ChannelQueryMetadataEntity extends DataClass
           other.sort == this.sort);
 }
 
-class ChannelQueriesMetadataCompanion
-    extends UpdateCompanion<ChannelQueryMetadataEntity> {
+class ChannelQueriesMetadataCompanion extends UpdateCompanion<ChannelQueryMetadataEntity> {
   final Value<String> queryHash;
   final Value<Filter> filter;
   final Value<SortOrder<ChannelState>> sort;
@@ -11946,8 +11557,7 @@ class ChannelQueriesMetadataCompanion
   }
 }
 
-class $ConnectionEventsTable extends ConnectionEvents
-    with TableInfo<$ConnectionEventsTable, ConnectionEventEntity> {
+class $ConnectionEventsTable extends ConnectionEvents with TableInfo<$ConnectionEventsTable, ConnectionEventEntity> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
@@ -11971,8 +11581,7 @@ class $ConnectionEventsTable extends ConnectionEvents
     requiredDuringInsert: true,
   );
   @override
-  late final GeneratedColumnWithTypeConverter<Map<String, dynamic>?, String>
-  ownUser =
+  late final GeneratedColumnWithTypeConverter<Map<String, dynamic>?, String> ownUser =
       GeneratedColumn<String>(
         'own_user',
         aliasedName,
@@ -12142,14 +11751,13 @@ class $ConnectionEventsTable extends ConnectionEvents
     return $ConnectionEventsTable(attachedDatabase, alias);
   }
 
-  static TypeConverter<Map<String, dynamic>, String> $converterownUser =
-      MapConverter();
-  static TypeConverter<Map<String, dynamic>?, String?> $converterownUsern =
-      NullAwareTypeConverter.wrap($converterownUser);
+  static TypeConverter<Map<String, dynamic>, String> $converterownUser = MapConverter();
+  static TypeConverter<Map<String, dynamic>?, String?> $converterownUsern = NullAwareTypeConverter.wrap(
+    $converterownUser,
+  );
 }
 
-class ConnectionEventEntity extends DataClass
-    implements Insertable<ConnectionEventEntity> {
+class ConnectionEventEntity extends DataClass implements Insertable<ConnectionEventEntity> {
   /// event id
   final int id;
 
@@ -12245,12 +11853,8 @@ class ConnectionEventEntity extends DataClass
     id: id ?? this.id,
     type: type ?? this.type,
     ownUser: ownUser.present ? ownUser.value : this.ownUser,
-    totalUnreadCount: totalUnreadCount.present
-        ? totalUnreadCount.value
-        : this.totalUnreadCount,
-    unreadChannels: unreadChannels.present
-        ? unreadChannels.value
-        : this.unreadChannels,
+    totalUnreadCount: totalUnreadCount.present ? totalUnreadCount.value : this.totalUnreadCount,
+    unreadChannels: unreadChannels.present ? unreadChannels.value : this.unreadChannels,
     lastEventAt: lastEventAt.present ? lastEventAt.value : this.lastEventAt,
     lastSyncAt: lastSyncAt.present ? lastSyncAt.value : this.lastSyncAt,
   );
@@ -12259,18 +11863,10 @@ class ConnectionEventEntity extends DataClass
       id: data.id.present ? data.id.value : this.id,
       type: data.type.present ? data.type.value : this.type,
       ownUser: data.ownUser.present ? data.ownUser.value : this.ownUser,
-      totalUnreadCount: data.totalUnreadCount.present
-          ? data.totalUnreadCount.value
-          : this.totalUnreadCount,
-      unreadChannels: data.unreadChannels.present
-          ? data.unreadChannels.value
-          : this.unreadChannels,
-      lastEventAt: data.lastEventAt.present
-          ? data.lastEventAt.value
-          : this.lastEventAt,
-      lastSyncAt: data.lastSyncAt.present
-          ? data.lastSyncAt.value
-          : this.lastSyncAt,
+      totalUnreadCount: data.totalUnreadCount.present ? data.totalUnreadCount.value : this.totalUnreadCount,
+      unreadChannels: data.unreadChannels.present ? data.unreadChannels.value : this.unreadChannels,
+      lastEventAt: data.lastEventAt.present ? data.lastEventAt.value : this.lastEventAt,
+      lastSyncAt: data.lastSyncAt.present ? data.lastSyncAt.value : this.lastSyncAt,
     );
   }
 
@@ -12428,20 +12024,17 @@ abstract class _$DriftChatDatabase extends GeneratedDatabase {
   late final $MessagesTable messages = $MessagesTable(this);
   late final $DraftMessagesTable draftMessages = $DraftMessagesTable(this);
   late final $LocationsTable locations = $LocationsTable(this);
-  late final $PendingOperationsTable pendingOperations =
-      $PendingOperationsTable(this);
+  late final $PendingOperationsTable pendingOperations = $PendingOperationsTable(this);
   late final $PinnedMessagesTable pinnedMessages = $PinnedMessagesTable(this);
   late final $PollsTable polls = $PollsTable(this);
   late final $PollVotesTable pollVotes = $PollVotesTable(this);
-  late final $PinnedMessageReactionsTable pinnedMessageReactions =
-      $PinnedMessageReactionsTable(this);
+  late final $PinnedMessageReactionsTable pinnedMessageReactions = $PinnedMessageReactionsTable(this);
   late final $ReactionsTable reactions = $ReactionsTable(this);
   late final $UsersTable users = $UsersTable(this);
   late final $MembersTable members = $MembersTable(this);
   late final $ReadsTable reads = $ReadsTable(this);
   late final $ChannelQueriesTable channelQueries = $ChannelQueriesTable(this);
-  late final $ChannelQueriesMetadataTable channelQueriesMetadata =
-      $ChannelQueriesMetadataTable(this);
+  late final $ChannelQueriesMetadataTable channelQueriesMetadata = $ChannelQueriesMetadataTable(this);
   late final $ConnectionEventsTable connectionEvents = $ConnectionEventsTable(
     this,
   );
@@ -12474,8 +12067,7 @@ abstract class _$DriftChatDatabase extends GeneratedDatabase {
   late final PinnedMessageDao pinnedMessageDao = PinnedMessageDao(
     this as DriftChatDatabase,
   );
-  late final PinnedMessageReactionDao pinnedMessageReactionDao =
-      PinnedMessageReactionDao(this as DriftChatDatabase);
+  late final PinnedMessageReactionDao pinnedMessageReactionDao = PinnedMessageReactionDao(this as DriftChatDatabase);
   late final MemberDao memberDao = MemberDao(this as DriftChatDatabase);
   late final PollDao pollDao = PollDao(this as DriftChatDatabase);
   late final PollVoteDao pollVoteDao = PollVoteDao(this as DriftChatDatabase);
@@ -12488,8 +12080,7 @@ abstract class _$DriftChatDatabase extends GeneratedDatabase {
     this as DriftChatDatabase,
   );
   @override
-  Iterable<TableInfo<Table, Object?>> get allTables =>
-      allSchemaEntities.whereType<TableInfo<Table, Object?>>();
+  Iterable<TableInfo<Table, Object?>> get allTables => allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities => [
     channels,
@@ -12631,15 +12222,14 @@ typedef $$ChannelsTableUpdateCompanionBuilder =
       Value<int> rowid,
     });
 
-final class $$ChannelsTableReferences
-    extends BaseReferences<_$DriftChatDatabase, $ChannelsTable, ChannelEntity> {
+final class $$ChannelsTableReferences extends BaseReferences<_$DriftChatDatabase, $ChannelsTable, ChannelEntity> {
   $$ChannelsTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
-  static MultiTypedResultKey<$MessagesTable, List<MessageEntity>>
-  _messagesRefsTable(_$DriftChatDatabase db) => MultiTypedResultKey.fromTable(
-    db.messages,
-    aliasName: $_aliasNameGenerator(db.channels.cid, db.messages.channelCid),
-  );
+  static MultiTypedResultKey<$MessagesTable, List<MessageEntity>> _messagesRefsTable(_$DriftChatDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.messages,
+        aliasName: $_aliasNameGenerator(db.channels.cid, db.messages.channelCid),
+      );
 
   $$MessagesTableProcessedTableManager get messagesRefs {
     final manager = $$MessagesTableTableManager(
@@ -12653,15 +12243,15 @@ final class $$ChannelsTableReferences
     );
   }
 
-  static MultiTypedResultKey<$DraftMessagesTable, List<DraftMessageEntity>>
-  _draftMessagesRefsTable(_$DriftChatDatabase db) =>
-      MultiTypedResultKey.fromTable(
-        db.draftMessages,
-        aliasName: $_aliasNameGenerator(
-          db.channels.cid,
-          db.draftMessages.channelCid,
-        ),
-      );
+  static MultiTypedResultKey<$DraftMessagesTable, List<DraftMessageEntity>> _draftMessagesRefsTable(
+    _$DriftChatDatabase db,
+  ) => MultiTypedResultKey.fromTable(
+    db.draftMessages,
+    aliasName: $_aliasNameGenerator(
+      db.channels.cid,
+      db.draftMessages.channelCid,
+    ),
+  );
 
   $$DraftMessagesTableProcessedTableManager get draftMessagesRefs {
     final manager = $$DraftMessagesTableTableManager(
@@ -12675,11 +12265,11 @@ final class $$ChannelsTableReferences
     );
   }
 
-  static MultiTypedResultKey<$LocationsTable, List<LocationEntity>>
-  _locationsRefsTable(_$DriftChatDatabase db) => MultiTypedResultKey.fromTable(
-    db.locations,
-    aliasName: $_aliasNameGenerator(db.channels.cid, db.locations.channelCid),
-  );
+  static MultiTypedResultKey<$LocationsTable, List<LocationEntity>> _locationsRefsTable(_$DriftChatDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.locations,
+        aliasName: $_aliasNameGenerator(db.channels.cid, db.locations.channelCid),
+      );
 
   $$LocationsTableProcessedTableManager get locationsRefs {
     final manager = $$LocationsTableTableManager(
@@ -12693,11 +12283,11 @@ final class $$ChannelsTableReferences
     );
   }
 
-  static MultiTypedResultKey<$MembersTable, List<MemberEntity>>
-  _membersRefsTable(_$DriftChatDatabase db) => MultiTypedResultKey.fromTable(
-    db.members,
-    aliasName: $_aliasNameGenerator(db.channels.cid, db.members.channelCid),
-  );
+  static MultiTypedResultKey<$MembersTable, List<MemberEntity>> _membersRefsTable(_$DriftChatDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.members,
+        aliasName: $_aliasNameGenerator(db.channels.cid, db.members.channelCid),
+      );
 
   $$MembersTableProcessedTableManager get membersRefs {
     final manager = $$MembersTableTableManager(
@@ -12731,8 +12321,7 @@ final class $$ChannelsTableReferences
   }
 }
 
-class $$ChannelsTableFilterComposer
-    extends Composer<_$DriftChatDatabase, $ChannelsTable> {
+class $$ChannelsTableFilterComposer extends Composer<_$DriftChatDatabase, $ChannelsTable> {
   $$ChannelsTableFilterComposer({
     required super.$db,
     required super.$table,
@@ -12755,18 +12344,12 @@ class $$ChannelsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnWithTypeConverterFilters<List<String>?, List<String>, String>
-  get ownCapabilities => $composableBuilder(
+  ColumnWithTypeConverterFilters<List<String>?, List<String>, String> get ownCapabilities => $composableBuilder(
     column: $table.ownCapabilities,
     builder: (column) => ColumnWithTypeConverterFilters(column),
   );
 
-  ColumnWithTypeConverterFilters<
-    Map<String, dynamic>,
-    Map<String, dynamic>,
-    String
-  >
-  get config => $composableBuilder(
+  ColumnWithTypeConverterFilters<Map<String, dynamic>, Map<String, dynamic>, String> get config => $composableBuilder(
     column: $table.config,
     builder: (column) => ColumnWithTypeConverterFilters(column),
   );
@@ -12811,8 +12394,7 @@ class $$ChannelsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnWithTypeConverterFilters<List<String>?, List<String>, String>
-  get filterTags => $composableBuilder(
+  ColumnWithTypeConverterFilters<List<String>?, List<String>, String> get filterTags => $composableBuilder(
     column: $table.filterTags,
     builder: (column) => ColumnWithTypeConverterFilters(column),
   );
@@ -12822,15 +12404,11 @@ class $$ChannelsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnWithTypeConverterFilters<
-    Map<String, dynamic>?,
-    Map<String, dynamic>,
-    String
-  >
-  get extraData => $composableBuilder(
-    column: $table.extraData,
-    builder: (column) => ColumnWithTypeConverterFilters(column),
-  );
+  ColumnWithTypeConverterFilters<Map<String, dynamic>?, Map<String, dynamic>, String> get extraData =>
+      $composableBuilder(
+        column: $table.extraData,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
 
   Expression<bool> messagesRefs(
     Expression<bool> Function($$MessagesTableFilterComposer f) f,
@@ -12850,8 +12428,7 @@ class $$ChannelsTableFilterComposer
             $table: $db.messages,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
           ),
     );
     return f(composer);
@@ -12875,8 +12452,7 @@ class $$ChannelsTableFilterComposer
             $table: $db.draftMessages,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
           ),
     );
     return f(composer);
@@ -12900,8 +12476,7 @@ class $$ChannelsTableFilterComposer
             $table: $db.locations,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
           ),
     );
     return f(composer);
@@ -12925,8 +12500,7 @@ class $$ChannelsTableFilterComposer
             $table: $db.members,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
           ),
     );
     return f(composer);
@@ -12950,16 +12524,14 @@ class $$ChannelsTableFilterComposer
             $table: $db.reads,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
           ),
     );
     return f(composer);
   }
 }
 
-class $$ChannelsTableOrderingComposer
-    extends Composer<_$DriftChatDatabase, $ChannelsTable> {
+class $$ChannelsTableOrderingComposer extends Composer<_$DriftChatDatabase, $ChannelsTable> {
   $$ChannelsTableOrderingComposer({
     required super.$db,
     required super.$table,
@@ -13048,8 +12620,7 @@ class $$ChannelsTableOrderingComposer
   );
 }
 
-class $$ChannelsTableAnnotationComposer
-    extends Composer<_$DriftChatDatabase, $ChannelsTable> {
+class $$ChannelsTableAnnotationComposer extends Composer<_$DriftChatDatabase, $ChannelsTable> {
   $$ChannelsTableAnnotationComposer({
     required super.$db,
     required super.$table,
@@ -13057,40 +12628,32 @@ class $$ChannelsTableAnnotationComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  GeneratedColumn<String> get id =>
-      $composableBuilder(column: $table.id, builder: (column) => column);
+  GeneratedColumn<String> get id => $composableBuilder(column: $table.id, builder: (column) => column);
 
-  GeneratedColumn<String> get type =>
-      $composableBuilder(column: $table.type, builder: (column) => column);
+  GeneratedColumn<String> get type => $composableBuilder(column: $table.type, builder: (column) => column);
 
-  GeneratedColumn<String> get cid =>
-      $composableBuilder(column: $table.cid, builder: (column) => column);
+  GeneratedColumn<String> get cid => $composableBuilder(column: $table.cid, builder: (column) => column);
 
-  GeneratedColumnWithTypeConverter<List<String>?, String> get ownCapabilities =>
-      $composableBuilder(
-        column: $table.ownCapabilities,
-        builder: (column) => column,
-      );
+  GeneratedColumnWithTypeConverter<List<String>?, String> get ownCapabilities => $composableBuilder(
+    column: $table.ownCapabilities,
+    builder: (column) => column,
+  );
 
   GeneratedColumnWithTypeConverter<Map<String, dynamic>, String> get config =>
       $composableBuilder(column: $table.config, builder: (column) => column);
 
-  GeneratedColumn<bool> get frozen =>
-      $composableBuilder(column: $table.frozen, builder: (column) => column);
+  GeneratedColumn<bool> get frozen => $composableBuilder(column: $table.frozen, builder: (column) => column);
 
   GeneratedColumn<DateTime> get lastMessageAt => $composableBuilder(
     column: $table.lastMessageAt,
     builder: (column) => column,
   );
 
-  GeneratedColumn<DateTime> get createdAt =>
-      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+  GeneratedColumn<DateTime> get createdAt => $composableBuilder(column: $table.createdAt, builder: (column) => column);
 
-  GeneratedColumn<DateTime> get updatedAt =>
-      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+  GeneratedColumn<DateTime> get updatedAt => $composableBuilder(column: $table.updatedAt, builder: (column) => column);
 
-  GeneratedColumn<DateTime> get deletedAt =>
-      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+  GeneratedColumn<DateTime> get deletedAt => $composableBuilder(column: $table.deletedAt, builder: (column) => column);
 
   GeneratedColumn<int> get memberCount => $composableBuilder(
     column: $table.memberCount,
@@ -13107,17 +12670,14 @@ class $$ChannelsTableAnnotationComposer
     builder: (column) => column,
   );
 
-  GeneratedColumnWithTypeConverter<List<String>?, String> get filterTags =>
-      $composableBuilder(
-        column: $table.filterTags,
-        builder: (column) => column,
-      );
+  GeneratedColumnWithTypeConverter<List<String>?, String> get filterTags => $composableBuilder(
+    column: $table.filterTags,
+    builder: (column) => column,
+  );
 
-  GeneratedColumn<String> get team =>
-      $composableBuilder(column: $table.team, builder: (column) => column);
+  GeneratedColumn<String> get team => $composableBuilder(column: $table.team, builder: (column) => column);
 
-  GeneratedColumnWithTypeConverter<Map<String, dynamic>?, String>
-  get extraData =>
+  GeneratedColumnWithTypeConverter<Map<String, dynamic>?, String> get extraData =>
       $composableBuilder(column: $table.extraData, builder: (column) => column);
 
   Expression<T> messagesRefs<T extends Object>(
@@ -13138,8 +12698,7 @@ class $$ChannelsTableAnnotationComposer
             $table: $db.messages,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
           ),
     );
     return f(composer);
@@ -13163,8 +12722,7 @@ class $$ChannelsTableAnnotationComposer
             $table: $db.draftMessages,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
           ),
     );
     return f(composer);
@@ -13188,8 +12746,7 @@ class $$ChannelsTableAnnotationComposer
             $table: $db.locations,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
           ),
     );
     return f(composer);
@@ -13213,8 +12770,7 @@ class $$ChannelsTableAnnotationComposer
             $table: $db.members,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
           ),
     );
     return f(composer);
@@ -13238,8 +12794,7 @@ class $$ChannelsTableAnnotationComposer
             $table: $db.reads,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
           ),
     );
     return f(composer);
@@ -13272,12 +12827,9 @@ class $$ChannelsTableTableManager
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer: () =>
-              $$ChannelsTableFilterComposer($db: db, $table: table),
-          createOrderingComposer: () =>
-              $$ChannelsTableOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer: () =>
-              $$ChannelsTableAnnotationComposer($db: db, $table: table),
+          createFilteringComposer: () => $$ChannelsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () => $$ChannelsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () => $$ChannelsTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<String> id = const Value.absent(),
@@ -13383,108 +12935,73 @@ class $$ChannelsTableTableManager
                   getPrefetchedDataCallback: (items) async {
                     return [
                       if (messagesRefs)
-                        await $_getPrefetchedData<
-                          ChannelEntity,
-                          $ChannelsTable,
-                          MessageEntity
-                        >(
+                        await $_getPrefetchedData<ChannelEntity, $ChannelsTable, MessageEntity>(
                           currentTable: table,
-                          referencedTable: $$ChannelsTableReferences
-                              ._messagesRefsTable(db),
-                          managerFromTypedResult: (p0) =>
-                              $$ChannelsTableReferences(
-                                db,
-                                table,
-                                p0,
-                              ).messagesRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.channelCid == item.cid,
-                              ),
+                          referencedTable: $$ChannelsTableReferences._messagesRefsTable(db),
+                          managerFromTypedResult: (p0) => $$ChannelsTableReferences(
+                            db,
+                            table,
+                            p0,
+                          ).messagesRefs,
+                          referencedItemsForCurrentItem: (item, referencedItems) => referencedItems.where(
+                            (e) => e.channelCid == item.cid,
+                          ),
                           typedResults: items,
                         ),
                       if (draftMessagesRefs)
-                        await $_getPrefetchedData<
-                          ChannelEntity,
-                          $ChannelsTable,
-                          DraftMessageEntity
-                        >(
+                        await $_getPrefetchedData<ChannelEntity, $ChannelsTable, DraftMessageEntity>(
                           currentTable: table,
-                          referencedTable: $$ChannelsTableReferences
-                              ._draftMessagesRefsTable(db),
-                          managerFromTypedResult: (p0) =>
-                              $$ChannelsTableReferences(
-                                db,
-                                table,
-                                p0,
-                              ).draftMessagesRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.channelCid == item.cid,
-                              ),
+                          referencedTable: $$ChannelsTableReferences._draftMessagesRefsTable(db),
+                          managerFromTypedResult: (p0) => $$ChannelsTableReferences(
+                            db,
+                            table,
+                            p0,
+                          ).draftMessagesRefs,
+                          referencedItemsForCurrentItem: (item, referencedItems) => referencedItems.where(
+                            (e) => e.channelCid == item.cid,
+                          ),
                           typedResults: items,
                         ),
                       if (locationsRefs)
-                        await $_getPrefetchedData<
-                          ChannelEntity,
-                          $ChannelsTable,
-                          LocationEntity
-                        >(
+                        await $_getPrefetchedData<ChannelEntity, $ChannelsTable, LocationEntity>(
                           currentTable: table,
-                          referencedTable: $$ChannelsTableReferences
-                              ._locationsRefsTable(db),
-                          managerFromTypedResult: (p0) =>
-                              $$ChannelsTableReferences(
-                                db,
-                                table,
-                                p0,
-                              ).locationsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.channelCid == item.cid,
-                              ),
+                          referencedTable: $$ChannelsTableReferences._locationsRefsTable(db),
+                          managerFromTypedResult: (p0) => $$ChannelsTableReferences(
+                            db,
+                            table,
+                            p0,
+                          ).locationsRefs,
+                          referencedItemsForCurrentItem: (item, referencedItems) => referencedItems.where(
+                            (e) => e.channelCid == item.cid,
+                          ),
                           typedResults: items,
                         ),
                       if (membersRefs)
-                        await $_getPrefetchedData<
-                          ChannelEntity,
-                          $ChannelsTable,
-                          MemberEntity
-                        >(
+                        await $_getPrefetchedData<ChannelEntity, $ChannelsTable, MemberEntity>(
                           currentTable: table,
-                          referencedTable: $$ChannelsTableReferences
-                              ._membersRefsTable(db),
-                          managerFromTypedResult: (p0) =>
-                              $$ChannelsTableReferences(
-                                db,
-                                table,
-                                p0,
-                              ).membersRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.channelCid == item.cid,
-                              ),
+                          referencedTable: $$ChannelsTableReferences._membersRefsTable(db),
+                          managerFromTypedResult: (p0) => $$ChannelsTableReferences(
+                            db,
+                            table,
+                            p0,
+                          ).membersRefs,
+                          referencedItemsForCurrentItem: (item, referencedItems) => referencedItems.where(
+                            (e) => e.channelCid == item.cid,
+                          ),
                           typedResults: items,
                         ),
                       if (readsRefs)
-                        await $_getPrefetchedData<
-                          ChannelEntity,
-                          $ChannelsTable,
-                          ReadEntity
-                        >(
+                        await $_getPrefetchedData<ChannelEntity, $ChannelsTable, ReadEntity>(
                           currentTable: table,
-                          referencedTable: $$ChannelsTableReferences
-                              ._readsRefsTable(db),
-                          managerFromTypedResult: (p0) =>
-                              $$ChannelsTableReferences(
-                                db,
-                                table,
-                                p0,
-                              ).readsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.channelCid == item.cid,
-                              ),
+                          referencedTable: $$ChannelsTableReferences._readsRefsTable(db),
+                          managerFromTypedResult: (p0) => $$ChannelsTableReferences(
+                            db,
+                            table,
+                            p0,
+                          ).readsRefs,
+                          referencedItemsForCurrentItem: (item, referencedItems) => referencedItems.where(
+                            (e) => e.channelCid == item.cid,
+                          ),
                           typedResults: items,
                         ),
                     ];
@@ -13598,14 +13115,12 @@ typedef $$MessagesTableUpdateCompanionBuilder =
       Value<int> rowid,
     });
 
-final class $$MessagesTableReferences
-    extends BaseReferences<_$DriftChatDatabase, $MessagesTable, MessageEntity> {
+final class $$MessagesTableReferences extends BaseReferences<_$DriftChatDatabase, $MessagesTable, MessageEntity> {
   $$MessagesTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
-  static $ChannelsTable _channelCidTable(_$DriftChatDatabase db) =>
-      db.channels.createAlias(
-        $_aliasNameGenerator(db.messages.channelCid, db.channels.cid),
-      );
+  static $ChannelsTable _channelCidTable(_$DriftChatDatabase db) => db.channels.createAlias(
+    $_aliasNameGenerator(db.messages.channelCid, db.channels.cid),
+  );
 
   $$ChannelsTableProcessedTableManager get channelCid {
     final $_column = $_itemColumn<String>('channel_cid')!;
@@ -13621,15 +13136,15 @@ final class $$MessagesTableReferences
     );
   }
 
-  static MultiTypedResultKey<$DraftMessagesTable, List<DraftMessageEntity>>
-  _draftMessagesRefsTable(_$DriftChatDatabase db) =>
-      MultiTypedResultKey.fromTable(
-        db.draftMessages,
-        aliasName: $_aliasNameGenerator(
-          db.messages.id,
-          db.draftMessages.parentId,
-        ),
-      );
+  static MultiTypedResultKey<$DraftMessagesTable, List<DraftMessageEntity>> _draftMessagesRefsTable(
+    _$DriftChatDatabase db,
+  ) => MultiTypedResultKey.fromTable(
+    db.draftMessages,
+    aliasName: $_aliasNameGenerator(
+      db.messages.id,
+      db.draftMessages.parentId,
+    ),
+  );
 
   $$DraftMessagesTableProcessedTableManager get draftMessagesRefs {
     final manager = $$DraftMessagesTableTableManager(
@@ -13643,11 +13158,11 @@ final class $$MessagesTableReferences
     );
   }
 
-  static MultiTypedResultKey<$LocationsTable, List<LocationEntity>>
-  _locationsRefsTable(_$DriftChatDatabase db) => MultiTypedResultKey.fromTable(
-    db.locations,
-    aliasName: $_aliasNameGenerator(db.messages.id, db.locations.messageId),
-  );
+  static MultiTypedResultKey<$LocationsTable, List<LocationEntity>> _locationsRefsTable(_$DriftChatDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.locations,
+        aliasName: $_aliasNameGenerator(db.messages.id, db.locations.messageId),
+      );
 
   $$LocationsTableProcessedTableManager get locationsRefs {
     final manager = $$LocationsTableTableManager(
@@ -13661,11 +13176,11 @@ final class $$MessagesTableReferences
     );
   }
 
-  static MultiTypedResultKey<$ReactionsTable, List<ReactionEntity>>
-  _reactionsRefsTable(_$DriftChatDatabase db) => MultiTypedResultKey.fromTable(
-    db.reactions,
-    aliasName: $_aliasNameGenerator(db.messages.id, db.reactions.messageId),
-  );
+  static MultiTypedResultKey<$ReactionsTable, List<ReactionEntity>> _reactionsRefsTable(_$DriftChatDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.reactions,
+        aliasName: $_aliasNameGenerator(db.messages.id, db.reactions.messageId),
+      );
 
   $$ReactionsTableProcessedTableManager get reactionsRefs {
     final manager = $$ReactionsTableTableManager(
@@ -13680,8 +13195,7 @@ final class $$MessagesTableReferences
   }
 }
 
-class $$MessagesTableFilterComposer
-    extends Composer<_$DriftChatDatabase, $MessagesTable> {
+class $$MessagesTableFilterComposer extends Composer<_$DriftChatDatabase, $MessagesTable> {
   $$MessagesTableFilterComposer({
     required super.$db,
     required super.$table,
@@ -13699,8 +13213,7 @@ class $$MessagesTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnWithTypeConverterFilters<List<String>, List<String>, String>
-  get attachments => $composableBuilder(
+  ColumnWithTypeConverterFilters<List<String>, List<String>, String> get attachments => $composableBuilder(
     column: $table.attachments,
     builder: (column) => ColumnWithTypeConverterFilters(column),
   );
@@ -13720,14 +13233,12 @@ class $$MessagesTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnWithTypeConverterFilters<List<String>?, List<String>, String>
-  get mentionedGroupIds => $composableBuilder(
+  ColumnWithTypeConverterFilters<List<String>?, List<String>, String> get mentionedGroupIds => $composableBuilder(
     column: $table.mentionedGroupIds,
     builder: (column) => ColumnWithTypeConverterFilters(column),
   );
 
-  ColumnWithTypeConverterFilters<List<String>?, List<String>, String>
-  get mentionedGroups => $composableBuilder(
+  ColumnWithTypeConverterFilters<List<String>?, List<String>, String> get mentionedGroups => $composableBuilder(
     column: $table.mentionedGroups,
     builder: (column) => ColumnWithTypeConverterFilters(column),
   );
@@ -13737,27 +13248,21 @@ class $$MessagesTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnWithTypeConverterFilters<List<String>?, List<String>, String>
-  get mentionedRoles => $composableBuilder(
+  ColumnWithTypeConverterFilters<List<String>?, List<String>, String> get mentionedRoles => $composableBuilder(
     column: $table.mentionedRoles,
     builder: (column) => ColumnWithTypeConverterFilters(column),
   );
 
-  ColumnWithTypeConverterFilters<List<String>, List<String>, String>
-  get mentionedUsers => $composableBuilder(
+  ColumnWithTypeConverterFilters<List<String>, List<String>, String> get mentionedUsers => $composableBuilder(
     column: $table.mentionedUsers,
     builder: (column) => ColumnWithTypeConverterFilters(column),
   );
 
-  ColumnWithTypeConverterFilters<
-    Map<String, ReactionGroup>?,
-    Map<String, ReactionGroup>,
-    String
-  >
-  get reactionGroups => $composableBuilder(
-    column: $table.reactionGroups,
-    builder: (column) => ColumnWithTypeConverterFilters(column),
-  );
+  ColumnWithTypeConverterFilters<Map<String, ReactionGroup>?, Map<String, ReactionGroup>, String> get reactionGroups =>
+      $composableBuilder(
+        column: $table.reactionGroups,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
 
   ColumnFilters<String> get parentId => $composableBuilder(
     column: $table.parentId,
@@ -13864,31 +13369,21 @@ class $$MessagesTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnWithTypeConverterFilters<
-    Map<String, String>?,
-    Map<String, String>,
-    String
-  >
-  get i18n => $composableBuilder(
+  ColumnWithTypeConverterFilters<Map<String, String>?, Map<String, String>, String> get i18n => $composableBuilder(
     column: $table.i18n,
     builder: (column) => ColumnWithTypeConverterFilters(column),
   );
 
-  ColumnWithTypeConverterFilters<List<String>?, List<String>, String>
-  get restrictedVisibility => $composableBuilder(
+  ColumnWithTypeConverterFilters<List<String>?, List<String>, String> get restrictedVisibility => $composableBuilder(
     column: $table.restrictedVisibility,
     builder: (column) => ColumnWithTypeConverterFilters(column),
   );
 
-  ColumnWithTypeConverterFilters<
-    Map<String, dynamic>?,
-    Map<String, dynamic>,
-    String
-  >
-  get extraData => $composableBuilder(
-    column: $table.extraData,
-    builder: (column) => ColumnWithTypeConverterFilters(column),
-  );
+  ColumnWithTypeConverterFilters<Map<String, dynamic>?, Map<String, dynamic>, String> get extraData =>
+      $composableBuilder(
+        column: $table.extraData,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
 
   $$ChannelsTableFilterComposer get channelCid {
     final $$ChannelsTableFilterComposer composer = $composerBuilder(
@@ -13906,8 +13401,7 @@ class $$MessagesTableFilterComposer
             $table: $db.channels,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
           ),
     );
     return composer;
@@ -13931,8 +13425,7 @@ class $$MessagesTableFilterComposer
             $table: $db.draftMessages,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
           ),
     );
     return f(composer);
@@ -13956,8 +13449,7 @@ class $$MessagesTableFilterComposer
             $table: $db.locations,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
           ),
     );
     return f(composer);
@@ -13981,16 +13473,14 @@ class $$MessagesTableFilterComposer
             $table: $db.reactions,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
           ),
     );
     return f(composer);
   }
 }
 
-class $$MessagesTableOrderingComposer
-    extends Composer<_$DriftChatDatabase, $MessagesTable> {
+class $$MessagesTableOrderingComposer extends Composer<_$DriftChatDatabase, $MessagesTable> {
   $$MessagesTableOrderingComposer({
     required super.$db,
     required super.$table,
@@ -14194,16 +13684,14 @@ class $$MessagesTableOrderingComposer
             $table: $db.channels,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
           ),
     );
     return composer;
   }
 }
 
-class $$MessagesTableAnnotationComposer
-    extends Composer<_$DriftChatDatabase, $MessagesTable> {
+class $$MessagesTableAnnotationComposer extends Composer<_$DriftChatDatabase, $MessagesTable> {
   $$MessagesTableAnnotationComposer({
     required super.$db,
     required super.$table,
@@ -14211,76 +13699,65 @@ class $$MessagesTableAnnotationComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  GeneratedColumn<String> get id =>
-      $composableBuilder(column: $table.id, builder: (column) => column);
+  GeneratedColumn<String> get id => $composableBuilder(column: $table.id, builder: (column) => column);
 
   GeneratedColumn<String> get messageText => $composableBuilder(
     column: $table.messageText,
     builder: (column) => column,
   );
 
-  GeneratedColumnWithTypeConverter<List<String>, String> get attachments =>
-      $composableBuilder(
-        column: $table.attachments,
-        builder: (column) => column,
-      );
+  GeneratedColumnWithTypeConverter<List<String>, String> get attachments => $composableBuilder(
+    column: $table.attachments,
+    builder: (column) => column,
+  );
 
-  GeneratedColumn<String> get state =>
-      $composableBuilder(column: $table.state, builder: (column) => column);
+  GeneratedColumn<String> get state => $composableBuilder(column: $table.state, builder: (column) => column);
 
-  GeneratedColumn<String> get type =>
-      $composableBuilder(column: $table.type, builder: (column) => column);
+  GeneratedColumn<String> get type => $composableBuilder(column: $table.type, builder: (column) => column);
 
   GeneratedColumn<bool> get mentionedChannel => $composableBuilder(
     column: $table.mentionedChannel,
     builder: (column) => column,
   );
 
-  GeneratedColumnWithTypeConverter<List<String>?, String>
-  get mentionedGroupIds => $composableBuilder(
+  GeneratedColumnWithTypeConverter<List<String>?, String> get mentionedGroupIds => $composableBuilder(
     column: $table.mentionedGroupIds,
     builder: (column) => column,
   );
 
-  GeneratedColumnWithTypeConverter<List<String>?, String> get mentionedGroups =>
-      $composableBuilder(
-        column: $table.mentionedGroups,
-        builder: (column) => column,
-      );
+  GeneratedColumnWithTypeConverter<List<String>?, String> get mentionedGroups => $composableBuilder(
+    column: $table.mentionedGroups,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<bool> get mentionedHere => $composableBuilder(
     column: $table.mentionedHere,
     builder: (column) => column,
   );
 
-  GeneratedColumnWithTypeConverter<List<String>?, String> get mentionedRoles =>
-      $composableBuilder(
-        column: $table.mentionedRoles,
-        builder: (column) => column,
-      );
+  GeneratedColumnWithTypeConverter<List<String>?, String> get mentionedRoles => $composableBuilder(
+    column: $table.mentionedRoles,
+    builder: (column) => column,
+  );
 
-  GeneratedColumnWithTypeConverter<List<String>, String> get mentionedUsers =>
-      $composableBuilder(
-        column: $table.mentionedUsers,
-        builder: (column) => column,
-      );
+  GeneratedColumnWithTypeConverter<List<String>, String> get mentionedUsers => $composableBuilder(
+    column: $table.mentionedUsers,
+    builder: (column) => column,
+  );
 
-  GeneratedColumnWithTypeConverter<Map<String, ReactionGroup>?, String>
-  get reactionGroups => $composableBuilder(
+  GeneratedColumnWithTypeConverter<Map<String, ReactionGroup>?, String> get reactionGroups => $composableBuilder(
     column: $table.reactionGroups,
     builder: (column) => column,
   );
 
-  GeneratedColumn<String> get parentId =>
-      $composableBuilder(column: $table.parentId, builder: (column) => column);
+  GeneratedColumn<String> get parentId => $composableBuilder(column: $table.parentId, builder: (column) => column);
 
   GeneratedColumn<String> get quotedMessageId => $composableBuilder(
     column: $table.quotedMessageId,
     builder: (column) => column,
   );
 
-  GeneratedColumn<String> get pollId =>
-      $composableBuilder(column: $table.pollId, builder: (column) => column);
+  GeneratedColumn<String> get pollId => $composableBuilder(column: $table.pollId, builder: (column) => column);
 
   GeneratedColumn<int> get replyCount => $composableBuilder(
     column: $table.replyCount,
@@ -14292,11 +13769,9 @@ class $$MessagesTableAnnotationComposer
     builder: (column) => column,
   );
 
-  GeneratedColumn<bool> get shadowed =>
-      $composableBuilder(column: $table.shadowed, builder: (column) => column);
+  GeneratedColumn<bool> get shadowed => $composableBuilder(column: $table.shadowed, builder: (column) => column);
 
-  GeneratedColumn<String> get command =>
-      $composableBuilder(column: $table.command, builder: (column) => column);
+  GeneratedColumn<String> get command => $composableBuilder(column: $table.command, builder: (column) => column);
 
   GeneratedColumn<DateTime> get localCreatedAt => $composableBuilder(
     column: $table.localCreatedAt,
@@ -14338,19 +13813,16 @@ class $$MessagesTableAnnotationComposer
     builder: (column) => column,
   );
 
-  GeneratedColumn<String> get userId =>
-      $composableBuilder(column: $table.userId, builder: (column) => column);
+  GeneratedColumn<String> get userId => $composableBuilder(column: $table.userId, builder: (column) => column);
 
   GeneratedColumn<String> get channelRole => $composableBuilder(
     column: $table.channelRole,
     builder: (column) => column,
   );
 
-  GeneratedColumn<bool> get pinned =>
-      $composableBuilder(column: $table.pinned, builder: (column) => column);
+  GeneratedColumn<bool> get pinned => $composableBuilder(column: $table.pinned, builder: (column) => column);
 
-  GeneratedColumn<DateTime> get pinnedAt =>
-      $composableBuilder(column: $table.pinnedAt, builder: (column) => column);
+  GeneratedColumn<DateTime> get pinnedAt => $composableBuilder(column: $table.pinnedAt, builder: (column) => column);
 
   GeneratedColumn<DateTime> get pinExpires => $composableBuilder(
     column: $table.pinExpires,
@@ -14365,14 +13837,12 @@ class $$MessagesTableAnnotationComposer
   GeneratedColumnWithTypeConverter<Map<String, String>?, String> get i18n =>
       $composableBuilder(column: $table.i18n, builder: (column) => column);
 
-  GeneratedColumnWithTypeConverter<List<String>?, String>
-  get restrictedVisibility => $composableBuilder(
+  GeneratedColumnWithTypeConverter<List<String>?, String> get restrictedVisibility => $composableBuilder(
     column: $table.restrictedVisibility,
     builder: (column) => column,
   );
 
-  GeneratedColumnWithTypeConverter<Map<String, dynamic>?, String>
-  get extraData =>
+  GeneratedColumnWithTypeConverter<Map<String, dynamic>?, String> get extraData =>
       $composableBuilder(column: $table.extraData, builder: (column) => column);
 
   $$ChannelsTableAnnotationComposer get channelCid {
@@ -14391,8 +13861,7 @@ class $$MessagesTableAnnotationComposer
             $table: $db.channels,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
           ),
     );
     return composer;
@@ -14416,8 +13885,7 @@ class $$MessagesTableAnnotationComposer
             $table: $db.draftMessages,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
           ),
     );
     return f(composer);
@@ -14441,8 +13909,7 @@ class $$MessagesTableAnnotationComposer
             $table: $db.locations,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
           ),
     );
     return f(composer);
@@ -14466,8 +13933,7 @@ class $$MessagesTableAnnotationComposer
             $table: $db.reactions,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
           ),
     );
     return f(composer);
@@ -14499,12 +13965,9 @@ class $$MessagesTableTableManager
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer: () =>
-              $$MessagesTableFilterComposer($db: db, $table: table),
-          createOrderingComposer: () =>
-              $$MessagesTableOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer: () =>
-              $$MessagesTableAnnotationComposer($db: db, $table: table),
+          createFilteringComposer: () => $$MessagesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () => $$MessagesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () => $$MessagesTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<String> id = const Value.absent(),
@@ -14518,8 +13981,7 @@ class $$MessagesTableTableManager
                 Value<bool?> mentionedHere = const Value.absent(),
                 Value<List<String>?> mentionedRoles = const Value.absent(),
                 Value<List<String>> mentionedUsers = const Value.absent(),
-                Value<Map<String, ReactionGroup>?> reactionGroups =
-                    const Value.absent(),
+                Value<Map<String, ReactionGroup>?> reactionGroups = const Value.absent(),
                 Value<String?> parentId = const Value.absent(),
                 Value<String?> quotedMessageId = const Value.absent(),
                 Value<String?> pollId = const Value.absent(),
@@ -14543,8 +14005,7 @@ class $$MessagesTableTableManager
                 Value<String?> pinnedByUserId = const Value.absent(),
                 Value<String> channelCid = const Value.absent(),
                 Value<Map<String, String>?> i18n = const Value.absent(),
-                Value<List<String>?> restrictedVisibility =
-                    const Value.absent(),
+                Value<List<String>?> restrictedVisibility = const Value.absent(),
                 Value<Map<String, dynamic>?> extraData = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => MessagesCompanion(
@@ -14600,8 +14061,7 @@ class $$MessagesTableTableManager
                 Value<bool?> mentionedHere = const Value.absent(),
                 Value<List<String>?> mentionedRoles = const Value.absent(),
                 required List<String> mentionedUsers,
-                Value<Map<String, ReactionGroup>?> reactionGroups =
-                    const Value.absent(),
+                Value<Map<String, ReactionGroup>?> reactionGroups = const Value.absent(),
                 Value<String?> parentId = const Value.absent(),
                 Value<String?> quotedMessageId = const Value.absent(),
                 Value<String?> pollId = const Value.absent(),
@@ -14625,8 +14085,7 @@ class $$MessagesTableTableManager
                 Value<String?> pinnedByUserId = const Value.absent(),
                 required String channelCid,
                 Value<Map<String, String>?> i18n = const Value.absent(),
-                Value<List<String>?> restrictedVisibility =
-                    const Value.absent(),
+                Value<List<String>?> restrictedVisibility = const Value.absent(),
                 Value<Map<String, dynamic>?> extraData = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => MessagesCompanion.insert(
@@ -14712,11 +14171,8 @@ class $$MessagesTableTableManager
                               state.withJoin(
                                     currentTable: table,
                                     currentColumn: table.channelCid,
-                                    referencedTable: $$MessagesTableReferences
-                                        ._channelCidTable(db),
-                                    referencedColumn: $$MessagesTableReferences
-                                        ._channelCidTable(db)
-                                        .cid,
+                                    referencedTable: $$MessagesTableReferences._channelCidTable(db),
+                                    referencedColumn: $$MessagesTableReferences._channelCidTable(db).cid,
                                   )
                                   as T;
                         }
@@ -14726,66 +14182,45 @@ class $$MessagesTableTableManager
                   getPrefetchedDataCallback: (items) async {
                     return [
                       if (draftMessagesRefs)
-                        await $_getPrefetchedData<
-                          MessageEntity,
-                          $MessagesTable,
-                          DraftMessageEntity
-                        >(
+                        await $_getPrefetchedData<MessageEntity, $MessagesTable, DraftMessageEntity>(
                           currentTable: table,
-                          referencedTable: $$MessagesTableReferences
-                              ._draftMessagesRefsTable(db),
-                          managerFromTypedResult: (p0) =>
-                              $$MessagesTableReferences(
-                                db,
-                                table,
-                                p0,
-                              ).draftMessagesRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.parentId == item.id,
-                              ),
+                          referencedTable: $$MessagesTableReferences._draftMessagesRefsTable(db),
+                          managerFromTypedResult: (p0) => $$MessagesTableReferences(
+                            db,
+                            table,
+                            p0,
+                          ).draftMessagesRefs,
+                          referencedItemsForCurrentItem: (item, referencedItems) => referencedItems.where(
+                            (e) => e.parentId == item.id,
+                          ),
                           typedResults: items,
                         ),
                       if (locationsRefs)
-                        await $_getPrefetchedData<
-                          MessageEntity,
-                          $MessagesTable,
-                          LocationEntity
-                        >(
+                        await $_getPrefetchedData<MessageEntity, $MessagesTable, LocationEntity>(
                           currentTable: table,
-                          referencedTable: $$MessagesTableReferences
-                              ._locationsRefsTable(db),
-                          managerFromTypedResult: (p0) =>
-                              $$MessagesTableReferences(
-                                db,
-                                table,
-                                p0,
-                              ).locationsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.messageId == item.id,
-                              ),
+                          referencedTable: $$MessagesTableReferences._locationsRefsTable(db),
+                          managerFromTypedResult: (p0) => $$MessagesTableReferences(
+                            db,
+                            table,
+                            p0,
+                          ).locationsRefs,
+                          referencedItemsForCurrentItem: (item, referencedItems) => referencedItems.where(
+                            (e) => e.messageId == item.id,
+                          ),
                           typedResults: items,
                         ),
                       if (reactionsRefs)
-                        await $_getPrefetchedData<
-                          MessageEntity,
-                          $MessagesTable,
-                          ReactionEntity
-                        >(
+                        await $_getPrefetchedData<MessageEntity, $MessagesTable, ReactionEntity>(
                           currentTable: table,
-                          referencedTable: $$MessagesTableReferences
-                              ._reactionsRefsTable(db),
-                          managerFromTypedResult: (p0) =>
-                              $$MessagesTableReferences(
-                                db,
-                                table,
-                                p0,
-                              ).reactionsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.messageId == item.id,
-                              ),
+                          referencedTable: $$MessagesTableReferences._reactionsRefsTable(db),
+                          managerFromTypedResult: (p0) => $$MessagesTableReferences(
+                            db,
+                            table,
+                            p0,
+                          ).reactionsRefs,
+                          referencedItemsForCurrentItem: (item, referencedItems) => referencedItems.where(
+                            (e) => e.messageId == item.id,
+                          ),
                           typedResults: items,
                         ),
                     ];
@@ -14853,22 +14288,16 @@ typedef $$DraftMessagesTableUpdateCompanionBuilder =
     });
 
 final class $$DraftMessagesTableReferences
-    extends
-        BaseReferences<
-          _$DriftChatDatabase,
-          $DraftMessagesTable,
-          DraftMessageEntity
-        > {
+    extends BaseReferences<_$DriftChatDatabase, $DraftMessagesTable, DraftMessageEntity> {
   $$DraftMessagesTableReferences(
     super.$_db,
     super.$_table,
     super.$_typedResult,
   );
 
-  static $MessagesTable _parentIdTable(_$DriftChatDatabase db) =>
-      db.messages.createAlias(
-        $_aliasNameGenerator(db.draftMessages.parentId, db.messages.id),
-      );
+  static $MessagesTable _parentIdTable(_$DriftChatDatabase db) => db.messages.createAlias(
+    $_aliasNameGenerator(db.draftMessages.parentId, db.messages.id),
+  );
 
   $$MessagesTableProcessedTableManager? get parentId {
     final $_column = $_itemColumn<String>('parent_id');
@@ -14884,10 +14313,9 @@ final class $$DraftMessagesTableReferences
     );
   }
 
-  static $ChannelsTable _channelCidTable(_$DriftChatDatabase db) =>
-      db.channels.createAlias(
-        $_aliasNameGenerator(db.draftMessages.channelCid, db.channels.cid),
-      );
+  static $ChannelsTable _channelCidTable(_$DriftChatDatabase db) => db.channels.createAlias(
+    $_aliasNameGenerator(db.draftMessages.channelCid, db.channels.cid),
+  );
 
   $$ChannelsTableProcessedTableManager get channelCid {
     final $_column = $_itemColumn<String>('channel_cid')!;
@@ -14904,8 +14332,7 @@ final class $$DraftMessagesTableReferences
   }
 }
 
-class $$DraftMessagesTableFilterComposer
-    extends Composer<_$DriftChatDatabase, $DraftMessagesTable> {
+class $$DraftMessagesTableFilterComposer extends Composer<_$DriftChatDatabase, $DraftMessagesTable> {
   $$DraftMessagesTableFilterComposer({
     required super.$db,
     required super.$table,
@@ -14923,8 +14350,7 @@ class $$DraftMessagesTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnWithTypeConverterFilters<List<String>, List<String>, String>
-  get attachments => $composableBuilder(
+  ColumnWithTypeConverterFilters<List<String>, List<String>, String> get attachments => $composableBuilder(
     column: $table.attachments,
     builder: (column) => ColumnWithTypeConverterFilters(column),
   );
@@ -14934,8 +14360,7 @@ class $$DraftMessagesTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnWithTypeConverterFilters<List<String>, List<String>, String>
-  get mentionedUsers => $composableBuilder(
+  ColumnWithTypeConverterFilters<List<String>, List<String>, String> get mentionedUsers => $composableBuilder(
     column: $table.mentionedUsers,
     builder: (column) => ColumnWithTypeConverterFilters(column),
   );
@@ -14970,15 +14395,11 @@ class $$DraftMessagesTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnWithTypeConverterFilters<
-    Map<String, dynamic>?,
-    Map<String, dynamic>,
-    String
-  >
-  get extraData => $composableBuilder(
-    column: $table.extraData,
-    builder: (column) => ColumnWithTypeConverterFilters(column),
-  );
+  ColumnWithTypeConverterFilters<Map<String, dynamic>?, Map<String, dynamic>, String> get extraData =>
+      $composableBuilder(
+        column: $table.extraData,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
 
   $$MessagesTableFilterComposer get parentId {
     final $$MessagesTableFilterComposer composer = $composerBuilder(
@@ -14996,8 +14417,7 @@ class $$DraftMessagesTableFilterComposer
             $table: $db.messages,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
           ),
     );
     return composer;
@@ -15019,16 +14439,14 @@ class $$DraftMessagesTableFilterComposer
             $table: $db.channels,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
           ),
     );
     return composer;
   }
 }
 
-class $$DraftMessagesTableOrderingComposer
-    extends Composer<_$DriftChatDatabase, $DraftMessagesTable> {
+class $$DraftMessagesTableOrderingComposer extends Composer<_$DriftChatDatabase, $DraftMessagesTable> {
   $$DraftMessagesTableOrderingComposer({
     required super.$db,
     required super.$table,
@@ -15112,8 +14530,7 @@ class $$DraftMessagesTableOrderingComposer
             $table: $db.messages,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
           ),
     );
     return composer;
@@ -15135,16 +14552,14 @@ class $$DraftMessagesTableOrderingComposer
             $table: $db.channels,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
           ),
     );
     return composer;
   }
 }
 
-class $$DraftMessagesTableAnnotationComposer
-    extends Composer<_$DriftChatDatabase, $DraftMessagesTable> {
+class $$DraftMessagesTableAnnotationComposer extends Composer<_$DriftChatDatabase, $DraftMessagesTable> {
   $$DraftMessagesTableAnnotationComposer({
     required super.$db,
     required super.$table,
@@ -15152,53 +14567,44 @@ class $$DraftMessagesTableAnnotationComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  GeneratedColumn<String> get id =>
-      $composableBuilder(column: $table.id, builder: (column) => column);
+  GeneratedColumn<String> get id => $composableBuilder(column: $table.id, builder: (column) => column);
 
   GeneratedColumn<String> get messageText => $composableBuilder(
     column: $table.messageText,
     builder: (column) => column,
   );
 
-  GeneratedColumnWithTypeConverter<List<String>, String> get attachments =>
-      $composableBuilder(
-        column: $table.attachments,
-        builder: (column) => column,
-      );
+  GeneratedColumnWithTypeConverter<List<String>, String> get attachments => $composableBuilder(
+    column: $table.attachments,
+    builder: (column) => column,
+  );
 
-  GeneratedColumn<String> get type =>
-      $composableBuilder(column: $table.type, builder: (column) => column);
+  GeneratedColumn<String> get type => $composableBuilder(column: $table.type, builder: (column) => column);
 
-  GeneratedColumnWithTypeConverter<List<String>, String> get mentionedUsers =>
-      $composableBuilder(
-        column: $table.mentionedUsers,
-        builder: (column) => column,
-      );
+  GeneratedColumnWithTypeConverter<List<String>, String> get mentionedUsers => $composableBuilder(
+    column: $table.mentionedUsers,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get quotedMessageId => $composableBuilder(
     column: $table.quotedMessageId,
     builder: (column) => column,
   );
 
-  GeneratedColumn<String> get pollId =>
-      $composableBuilder(column: $table.pollId, builder: (column) => column);
+  GeneratedColumn<String> get pollId => $composableBuilder(column: $table.pollId, builder: (column) => column);
 
   GeneratedColumn<bool> get showInChannel => $composableBuilder(
     column: $table.showInChannel,
     builder: (column) => column,
   );
 
-  GeneratedColumn<String> get command =>
-      $composableBuilder(column: $table.command, builder: (column) => column);
+  GeneratedColumn<String> get command => $composableBuilder(column: $table.command, builder: (column) => column);
 
-  GeneratedColumn<bool> get silent =>
-      $composableBuilder(column: $table.silent, builder: (column) => column);
+  GeneratedColumn<bool> get silent => $composableBuilder(column: $table.silent, builder: (column) => column);
 
-  GeneratedColumn<DateTime> get createdAt =>
-      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+  GeneratedColumn<DateTime> get createdAt => $composableBuilder(column: $table.createdAt, builder: (column) => column);
 
-  GeneratedColumnWithTypeConverter<Map<String, dynamic>?, String>
-  get extraData =>
+  GeneratedColumnWithTypeConverter<Map<String, dynamic>?, String> get extraData =>
       $composableBuilder(column: $table.extraData, builder: (column) => column);
 
   $$MessagesTableAnnotationComposer get parentId {
@@ -15217,8 +14623,7 @@ class $$DraftMessagesTableAnnotationComposer
             $table: $db.messages,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
           ),
     );
     return composer;
@@ -15240,8 +14645,7 @@ class $$DraftMessagesTableAnnotationComposer
             $table: $db.channels,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
           ),
     );
     return composer;
@@ -15270,12 +14674,9 @@ class $$DraftMessagesTableTableManager
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer: () =>
-              $$DraftMessagesTableFilterComposer($db: db, $table: table),
-          createOrderingComposer: () =>
-              $$DraftMessagesTableOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer: () =>
-              $$DraftMessagesTableAnnotationComposer($db: db, $table: table),
+          createFilteringComposer: () => $$DraftMessagesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () => $$DraftMessagesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () => $$DraftMessagesTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<String> id = const Value.absent(),
@@ -15377,11 +14778,8 @@ class $$DraftMessagesTableTableManager
                           state.withJoin(
                                 currentTable: table,
                                 currentColumn: table.parentId,
-                                referencedTable: $$DraftMessagesTableReferences
-                                    ._parentIdTable(db),
-                                referencedColumn: $$DraftMessagesTableReferences
-                                    ._parentIdTable(db)
-                                    .id,
+                                referencedTable: $$DraftMessagesTableReferences._parentIdTable(db),
+                                referencedColumn: $$DraftMessagesTableReferences._parentIdTable(db).id,
                               )
                               as T;
                     }
@@ -15390,11 +14788,8 @@ class $$DraftMessagesTableTableManager
                           state.withJoin(
                                 currentTable: table,
                                 currentColumn: table.channelCid,
-                                referencedTable: $$DraftMessagesTableReferences
-                                    ._channelCidTable(db),
-                                referencedColumn: $$DraftMessagesTableReferences
-                                    ._channelCidTable(db)
-                                    .cid,
+                                referencedTable: $$DraftMessagesTableReferences._channelCidTable(db),
+                                referencedColumn: $$DraftMessagesTableReferences._channelCidTable(db).cid,
                               )
                               as T;
                     }
@@ -15451,15 +14846,12 @@ typedef $$LocationsTableUpdateCompanionBuilder =
       Value<int> rowid,
     });
 
-final class $$LocationsTableReferences
-    extends
-        BaseReferences<_$DriftChatDatabase, $LocationsTable, LocationEntity> {
+final class $$LocationsTableReferences extends BaseReferences<_$DriftChatDatabase, $LocationsTable, LocationEntity> {
   $$LocationsTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
-  static $ChannelsTable _channelCidTable(_$DriftChatDatabase db) =>
-      db.channels.createAlias(
-        $_aliasNameGenerator(db.locations.channelCid, db.channels.cid),
-      );
+  static $ChannelsTable _channelCidTable(_$DriftChatDatabase db) => db.channels.createAlias(
+    $_aliasNameGenerator(db.locations.channelCid, db.channels.cid),
+  );
 
   $$ChannelsTableProcessedTableManager? get channelCid {
     final $_column = $_itemColumn<String>('channel_cid');
@@ -15475,10 +14867,9 @@ final class $$LocationsTableReferences
     );
   }
 
-  static $MessagesTable _messageIdTable(_$DriftChatDatabase db) =>
-      db.messages.createAlias(
-        $_aliasNameGenerator(db.locations.messageId, db.messages.id),
-      );
+  static $MessagesTable _messageIdTable(_$DriftChatDatabase db) => db.messages.createAlias(
+    $_aliasNameGenerator(db.locations.messageId, db.messages.id),
+  );
 
   $$MessagesTableProcessedTableManager? get messageId {
     final $_column = $_itemColumn<String>('message_id');
@@ -15495,8 +14886,7 @@ final class $$LocationsTableReferences
   }
 }
 
-class $$LocationsTableFilterComposer
-    extends Composer<_$DriftChatDatabase, $LocationsTable> {
+class $$LocationsTableFilterComposer extends Composer<_$DriftChatDatabase, $LocationsTable> {
   $$LocationsTableFilterComposer({
     required super.$db,
     required super.$table,
@@ -15555,8 +14945,7 @@ class $$LocationsTableFilterComposer
             $table: $db.channels,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
           ),
     );
     return composer;
@@ -15578,16 +14967,14 @@ class $$LocationsTableFilterComposer
             $table: $db.messages,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
           ),
     );
     return composer;
   }
 }
 
-class $$LocationsTableOrderingComposer
-    extends Composer<_$DriftChatDatabase, $LocationsTable> {
+class $$LocationsTableOrderingComposer extends Composer<_$DriftChatDatabase, $LocationsTable> {
   $$LocationsTableOrderingComposer({
     required super.$db,
     required super.$table,
@@ -15646,8 +15033,7 @@ class $$LocationsTableOrderingComposer
             $table: $db.channels,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
           ),
     );
     return composer;
@@ -15669,16 +15055,14 @@ class $$LocationsTableOrderingComposer
             $table: $db.messages,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
           ),
     );
     return composer;
   }
 }
 
-class $$LocationsTableAnnotationComposer
-    extends Composer<_$DriftChatDatabase, $LocationsTable> {
+class $$LocationsTableAnnotationComposer extends Composer<_$DriftChatDatabase, $LocationsTable> {
   $$LocationsTableAnnotationComposer({
     required super.$db,
     required super.$table,
@@ -15686,28 +15070,22 @@ class $$LocationsTableAnnotationComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  GeneratedColumn<String> get userId =>
-      $composableBuilder(column: $table.userId, builder: (column) => column);
+  GeneratedColumn<String> get userId => $composableBuilder(column: $table.userId, builder: (column) => column);
 
-  GeneratedColumn<double> get latitude =>
-      $composableBuilder(column: $table.latitude, builder: (column) => column);
+  GeneratedColumn<double> get latitude => $composableBuilder(column: $table.latitude, builder: (column) => column);
 
-  GeneratedColumn<double> get longitude =>
-      $composableBuilder(column: $table.longitude, builder: (column) => column);
+  GeneratedColumn<double> get longitude => $composableBuilder(column: $table.longitude, builder: (column) => column);
 
   GeneratedColumn<String> get createdByDeviceId => $composableBuilder(
     column: $table.createdByDeviceId,
     builder: (column) => column,
   );
 
-  GeneratedColumn<DateTime> get endAt =>
-      $composableBuilder(column: $table.endAt, builder: (column) => column);
+  GeneratedColumn<DateTime> get endAt => $composableBuilder(column: $table.endAt, builder: (column) => column);
 
-  GeneratedColumn<DateTime> get createdAt =>
-      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+  GeneratedColumn<DateTime> get createdAt => $composableBuilder(column: $table.createdAt, builder: (column) => column);
 
-  GeneratedColumn<DateTime> get updatedAt =>
-      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+  GeneratedColumn<DateTime> get updatedAt => $composableBuilder(column: $table.updatedAt, builder: (column) => column);
 
   $$ChannelsTableAnnotationComposer get channelCid {
     final $$ChannelsTableAnnotationComposer composer = $composerBuilder(
@@ -15725,8 +15103,7 @@ class $$LocationsTableAnnotationComposer
             $table: $db.channels,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
           ),
     );
     return composer;
@@ -15748,8 +15125,7 @@ class $$LocationsTableAnnotationComposer
             $table: $db.messages,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
           ),
     );
     return composer;
@@ -15776,12 +15152,9 @@ class $$LocationsTableTableManager
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer: () =>
-              $$LocationsTableFilterComposer($db: db, $table: table),
-          createOrderingComposer: () =>
-              $$LocationsTableOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer: () =>
-              $$LocationsTableAnnotationComposer($db: db, $table: table),
+          createFilteringComposer: () => $$LocationsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () => $$LocationsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () => $$LocationsTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<String?> channelCid = const Value.absent(),
@@ -15863,11 +15236,8 @@ class $$LocationsTableTableManager
                           state.withJoin(
                                 currentTable: table,
                                 currentColumn: table.channelCid,
-                                referencedTable: $$LocationsTableReferences
-                                    ._channelCidTable(db),
-                                referencedColumn: $$LocationsTableReferences
-                                    ._channelCidTable(db)
-                                    .cid,
+                                referencedTable: $$LocationsTableReferences._channelCidTable(db),
+                                referencedColumn: $$LocationsTableReferences._channelCidTable(db).cid,
                               )
                               as T;
                     }
@@ -15876,11 +15246,8 @@ class $$LocationsTableTableManager
                           state.withJoin(
                                 currentTable: table,
                                 currentColumn: table.messageId,
-                                referencedTable: $$LocationsTableReferences
-                                    ._messageIdTable(db),
-                                referencedColumn: $$LocationsTableReferences
-                                    ._messageIdTable(db)
-                                    .id,
+                                referencedTable: $$LocationsTableReferences._messageIdTable(db),
+                                referencedColumn: $$LocationsTableReferences._messageIdTable(db).id,
                               )
                               as T;
                     }
@@ -15925,8 +15292,7 @@ typedef $$PendingOperationsTableUpdateCompanionBuilder =
       Value<Map<String, dynamic>> payload,
     });
 
-class $$PendingOperationsTableFilterComposer
-    extends Composer<_$DriftChatDatabase, $PendingOperationsTable> {
+class $$PendingOperationsTableFilterComposer extends Composer<_$DriftChatDatabase, $PendingOperationsTable> {
   $$PendingOperationsTableFilterComposer({
     required super.$db,
     required super.$table,
@@ -15949,19 +15315,13 @@ class $$PendingOperationsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnWithTypeConverterFilters<
-    Map<String, dynamic>,
-    Map<String, dynamic>,
-    String
-  >
-  get payload => $composableBuilder(
+  ColumnWithTypeConverterFilters<Map<String, dynamic>, Map<String, dynamic>, String> get payload => $composableBuilder(
     column: $table.payload,
     builder: (column) => ColumnWithTypeConverterFilters(column),
   );
 }
 
-class $$PendingOperationsTableOrderingComposer
-    extends Composer<_$DriftChatDatabase, $PendingOperationsTable> {
+class $$PendingOperationsTableOrderingComposer extends Composer<_$DriftChatDatabase, $PendingOperationsTable> {
   $$PendingOperationsTableOrderingComposer({
     required super.$db,
     required super.$table,
@@ -15990,8 +15350,7 @@ class $$PendingOperationsTableOrderingComposer
   );
 }
 
-class $$PendingOperationsTableAnnotationComposer
-    extends Composer<_$DriftChatDatabase, $PendingOperationsTable> {
+class $$PendingOperationsTableAnnotationComposer extends Composer<_$DriftChatDatabase, $PendingOperationsTable> {
   $$PendingOperationsTableAnnotationComposer({
     required super.$db,
     required super.$table,
@@ -15999,11 +15358,9 @@ class $$PendingOperationsTableAnnotationComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  GeneratedColumn<int> get id =>
-      $composableBuilder(column: $table.id, builder: (column) => column);
+  GeneratedColumn<int> get id => $composableBuilder(column: $table.id, builder: (column) => column);
 
-  GeneratedColumn<String> get type =>
-      $composableBuilder(column: $table.type, builder: (column) => column);
+  GeneratedColumn<String> get type => $composableBuilder(column: $table.type, builder: (column) => column);
 
   GeneratedColumn<String> get targetMessageId => $composableBuilder(
     column: $table.targetMessageId,
@@ -16027,11 +15384,7 @@ class $$PendingOperationsTableTableManager
           $$PendingOperationsTableUpdateCompanionBuilder,
           (
             PendingOperationEntity,
-            BaseReferences<
-              _$DriftChatDatabase,
-              $PendingOperationsTable,
-              PendingOperationEntity
-            >,
+            BaseReferences<_$DriftChatDatabase, $PendingOperationsTable, PendingOperationEntity>,
           ),
           PendingOperationEntity,
           PrefetchHooks Function()
@@ -16043,15 +15396,12 @@ class $$PendingOperationsTableTableManager
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer: () =>
-              $$PendingOperationsTableFilterComposer($db: db, $table: table),
-          createOrderingComposer: () =>
-              $$PendingOperationsTableOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer: () =>
-              $$PendingOperationsTableAnnotationComposer(
-                $db: db,
-                $table: table,
-              ),
+          createFilteringComposer: () => $$PendingOperationsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () => $$PendingOperationsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () => $$PendingOperationsTableAnnotationComposer(
+            $db: db,
+            $table: table,
+          ),
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
@@ -16076,9 +15426,7 @@ class $$PendingOperationsTableTableManager
                 targetMessageId: targetMessageId,
                 payload: payload,
               ),
-          withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
-              .toList(),
+          withReferenceMapper: (p0) => p0.map((e) => (e.readTable(table), BaseReferences(db, table, e))).toList(),
           prefetchHooksCallback: null,
         ),
       );
@@ -16096,11 +15444,7 @@ typedef $$PendingOperationsTableProcessedTableManager =
       $$PendingOperationsTableUpdateCompanionBuilder,
       (
         PendingOperationEntity,
-        BaseReferences<
-          _$DriftChatDatabase,
-          $PendingOperationsTable,
-          PendingOperationEntity
-        >,
+        BaseReferences<_$DriftChatDatabase, $PendingOperationsTable, PendingOperationEntity>,
       ),
       PendingOperationEntity,
       PrefetchHooks Function()
@@ -16189,33 +15533,23 @@ typedef $$PinnedMessagesTableUpdateCompanionBuilder =
     });
 
 final class $$PinnedMessagesTableReferences
-    extends
-        BaseReferences<
-          _$DriftChatDatabase,
-          $PinnedMessagesTable,
-          PinnedMessageEntity
-        > {
+    extends BaseReferences<_$DriftChatDatabase, $PinnedMessagesTable, PinnedMessageEntity> {
   $$PinnedMessagesTableReferences(
     super.$_db,
     super.$_table,
     super.$_typedResult,
   );
 
-  static MultiTypedResultKey<
-    $PinnedMessageReactionsTable,
-    List<PinnedMessageReactionEntity>
-  >
-  _pinnedMessageReactionsRefsTable(_$DriftChatDatabase db) =>
-      MultiTypedResultKey.fromTable(
-        db.pinnedMessageReactions,
-        aliasName: $_aliasNameGenerator(
-          db.pinnedMessages.id,
-          db.pinnedMessageReactions.messageId,
-        ),
-      );
+  static MultiTypedResultKey<$PinnedMessageReactionsTable, List<PinnedMessageReactionEntity>>
+  _pinnedMessageReactionsRefsTable(_$DriftChatDatabase db) => MultiTypedResultKey.fromTable(
+    db.pinnedMessageReactions,
+    aliasName: $_aliasNameGenerator(
+      db.pinnedMessages.id,
+      db.pinnedMessageReactions.messageId,
+    ),
+  );
 
-  $$PinnedMessageReactionsTableProcessedTableManager
-  get pinnedMessageReactionsRefs {
+  $$PinnedMessageReactionsTableProcessedTableManager get pinnedMessageReactionsRefs {
     final manager = $$PinnedMessageReactionsTableTableManager(
       $_db,
       $_db.pinnedMessageReactions,
@@ -16230,8 +15564,7 @@ final class $$PinnedMessagesTableReferences
   }
 }
 
-class $$PinnedMessagesTableFilterComposer
-    extends Composer<_$DriftChatDatabase, $PinnedMessagesTable> {
+class $$PinnedMessagesTableFilterComposer extends Composer<_$DriftChatDatabase, $PinnedMessagesTable> {
   $$PinnedMessagesTableFilterComposer({
     required super.$db,
     required super.$table,
@@ -16249,8 +15582,7 @@ class $$PinnedMessagesTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnWithTypeConverterFilters<List<String>, List<String>, String>
-  get attachments => $composableBuilder(
+  ColumnWithTypeConverterFilters<List<String>, List<String>, String> get attachments => $composableBuilder(
     column: $table.attachments,
     builder: (column) => ColumnWithTypeConverterFilters(column),
   );
@@ -16270,14 +15602,12 @@ class $$PinnedMessagesTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnWithTypeConverterFilters<List<String>?, List<String>, String>
-  get mentionedGroupIds => $composableBuilder(
+  ColumnWithTypeConverterFilters<List<String>?, List<String>, String> get mentionedGroupIds => $composableBuilder(
     column: $table.mentionedGroupIds,
     builder: (column) => ColumnWithTypeConverterFilters(column),
   );
 
-  ColumnWithTypeConverterFilters<List<String>?, List<String>, String>
-  get mentionedGroups => $composableBuilder(
+  ColumnWithTypeConverterFilters<List<String>?, List<String>, String> get mentionedGroups => $composableBuilder(
     column: $table.mentionedGroups,
     builder: (column) => ColumnWithTypeConverterFilters(column),
   );
@@ -16287,27 +15617,21 @@ class $$PinnedMessagesTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnWithTypeConverterFilters<List<String>?, List<String>, String>
-  get mentionedRoles => $composableBuilder(
+  ColumnWithTypeConverterFilters<List<String>?, List<String>, String> get mentionedRoles => $composableBuilder(
     column: $table.mentionedRoles,
     builder: (column) => ColumnWithTypeConverterFilters(column),
   );
 
-  ColumnWithTypeConverterFilters<List<String>, List<String>, String>
-  get mentionedUsers => $composableBuilder(
+  ColumnWithTypeConverterFilters<List<String>, List<String>, String> get mentionedUsers => $composableBuilder(
     column: $table.mentionedUsers,
     builder: (column) => ColumnWithTypeConverterFilters(column),
   );
 
-  ColumnWithTypeConverterFilters<
-    Map<String, ReactionGroup>?,
-    Map<String, ReactionGroup>,
-    String
-  >
-  get reactionGroups => $composableBuilder(
-    column: $table.reactionGroups,
-    builder: (column) => ColumnWithTypeConverterFilters(column),
-  );
+  ColumnWithTypeConverterFilters<Map<String, ReactionGroup>?, Map<String, ReactionGroup>, String> get reactionGroups =>
+      $composableBuilder(
+        column: $table.reactionGroups,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
 
   ColumnFilters<String> get parentId => $composableBuilder(
     column: $table.parentId,
@@ -16419,61 +15743,48 @@ class $$PinnedMessagesTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnWithTypeConverterFilters<
-    Map<String, String>?,
-    Map<String, String>,
-    String
-  >
-  get i18n => $composableBuilder(
+  ColumnWithTypeConverterFilters<Map<String, String>?, Map<String, String>, String> get i18n => $composableBuilder(
     column: $table.i18n,
     builder: (column) => ColumnWithTypeConverterFilters(column),
   );
 
-  ColumnWithTypeConverterFilters<List<String>?, List<String>, String>
-  get restrictedVisibility => $composableBuilder(
+  ColumnWithTypeConverterFilters<List<String>?, List<String>, String> get restrictedVisibility => $composableBuilder(
     column: $table.restrictedVisibility,
     builder: (column) => ColumnWithTypeConverterFilters(column),
   );
 
-  ColumnWithTypeConverterFilters<
-    Map<String, dynamic>?,
-    Map<String, dynamic>,
-    String
-  >
-  get extraData => $composableBuilder(
-    column: $table.extraData,
-    builder: (column) => ColumnWithTypeConverterFilters(column),
-  );
+  ColumnWithTypeConverterFilters<Map<String, dynamic>?, Map<String, dynamic>, String> get extraData =>
+      $composableBuilder(
+        column: $table.extraData,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
 
   Expression<bool> pinnedMessageReactionsRefs(
     Expression<bool> Function($$PinnedMessageReactionsTableFilterComposer f) f,
   ) {
-    final $$PinnedMessageReactionsTableFilterComposer composer =
-        $composerBuilder(
-          composer: this,
-          getCurrentColumn: (t) => t.id,
-          referencedTable: $db.pinnedMessageReactions,
-          getReferencedColumn: (t) => t.messageId,
-          builder:
-              (
-                joinBuilder, {
-                $addJoinBuilderToRootComposer,
-                $removeJoinBuilderFromRootComposer,
-              }) => $$PinnedMessageReactionsTableFilterComposer(
-                $db: $db,
-                $table: $db.pinnedMessageReactions,
-                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-                joinBuilder: joinBuilder,
-                $removeJoinBuilderFromRootComposer:
-                    $removeJoinBuilderFromRootComposer,
-              ),
-        );
+    final $$PinnedMessageReactionsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.pinnedMessageReactions,
+      getReferencedColumn: (t) => t.messageId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PinnedMessageReactionsTableFilterComposer(
+            $db: $db,
+            $table: $db.pinnedMessageReactions,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
+          ),
+    );
     return f(composer);
   }
 }
 
-class $$PinnedMessagesTableOrderingComposer
-    extends Composer<_$DriftChatDatabase, $PinnedMessagesTable> {
+class $$PinnedMessagesTableOrderingComposer extends Composer<_$DriftChatDatabase, $PinnedMessagesTable> {
   $$PinnedMessagesTableOrderingComposer({
     required super.$db,
     required super.$table,
@@ -16667,8 +15978,7 @@ class $$PinnedMessagesTableOrderingComposer
   );
 }
 
-class $$PinnedMessagesTableAnnotationComposer
-    extends Composer<_$DriftChatDatabase, $PinnedMessagesTable> {
+class $$PinnedMessagesTableAnnotationComposer extends Composer<_$DriftChatDatabase, $PinnedMessagesTable> {
   $$PinnedMessagesTableAnnotationComposer({
     required super.$db,
     required super.$table,
@@ -16676,76 +15986,65 @@ class $$PinnedMessagesTableAnnotationComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  GeneratedColumn<String> get id =>
-      $composableBuilder(column: $table.id, builder: (column) => column);
+  GeneratedColumn<String> get id => $composableBuilder(column: $table.id, builder: (column) => column);
 
   GeneratedColumn<String> get messageText => $composableBuilder(
     column: $table.messageText,
     builder: (column) => column,
   );
 
-  GeneratedColumnWithTypeConverter<List<String>, String> get attachments =>
-      $composableBuilder(
-        column: $table.attachments,
-        builder: (column) => column,
-      );
+  GeneratedColumnWithTypeConverter<List<String>, String> get attachments => $composableBuilder(
+    column: $table.attachments,
+    builder: (column) => column,
+  );
 
-  GeneratedColumn<String> get state =>
-      $composableBuilder(column: $table.state, builder: (column) => column);
+  GeneratedColumn<String> get state => $composableBuilder(column: $table.state, builder: (column) => column);
 
-  GeneratedColumn<String> get type =>
-      $composableBuilder(column: $table.type, builder: (column) => column);
+  GeneratedColumn<String> get type => $composableBuilder(column: $table.type, builder: (column) => column);
 
   GeneratedColumn<bool> get mentionedChannel => $composableBuilder(
     column: $table.mentionedChannel,
     builder: (column) => column,
   );
 
-  GeneratedColumnWithTypeConverter<List<String>?, String>
-  get mentionedGroupIds => $composableBuilder(
+  GeneratedColumnWithTypeConverter<List<String>?, String> get mentionedGroupIds => $composableBuilder(
     column: $table.mentionedGroupIds,
     builder: (column) => column,
   );
 
-  GeneratedColumnWithTypeConverter<List<String>?, String> get mentionedGroups =>
-      $composableBuilder(
-        column: $table.mentionedGroups,
-        builder: (column) => column,
-      );
+  GeneratedColumnWithTypeConverter<List<String>?, String> get mentionedGroups => $composableBuilder(
+    column: $table.mentionedGroups,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<bool> get mentionedHere => $composableBuilder(
     column: $table.mentionedHere,
     builder: (column) => column,
   );
 
-  GeneratedColumnWithTypeConverter<List<String>?, String> get mentionedRoles =>
-      $composableBuilder(
-        column: $table.mentionedRoles,
-        builder: (column) => column,
-      );
+  GeneratedColumnWithTypeConverter<List<String>?, String> get mentionedRoles => $composableBuilder(
+    column: $table.mentionedRoles,
+    builder: (column) => column,
+  );
 
-  GeneratedColumnWithTypeConverter<List<String>, String> get mentionedUsers =>
-      $composableBuilder(
-        column: $table.mentionedUsers,
-        builder: (column) => column,
-      );
+  GeneratedColumnWithTypeConverter<List<String>, String> get mentionedUsers => $composableBuilder(
+    column: $table.mentionedUsers,
+    builder: (column) => column,
+  );
 
-  GeneratedColumnWithTypeConverter<Map<String, ReactionGroup>?, String>
-  get reactionGroups => $composableBuilder(
+  GeneratedColumnWithTypeConverter<Map<String, ReactionGroup>?, String> get reactionGroups => $composableBuilder(
     column: $table.reactionGroups,
     builder: (column) => column,
   );
 
-  GeneratedColumn<String> get parentId =>
-      $composableBuilder(column: $table.parentId, builder: (column) => column);
+  GeneratedColumn<String> get parentId => $composableBuilder(column: $table.parentId, builder: (column) => column);
 
   GeneratedColumn<String> get quotedMessageId => $composableBuilder(
     column: $table.quotedMessageId,
     builder: (column) => column,
   );
 
-  GeneratedColumn<String> get pollId =>
-      $composableBuilder(column: $table.pollId, builder: (column) => column);
+  GeneratedColumn<String> get pollId => $composableBuilder(column: $table.pollId, builder: (column) => column);
 
   GeneratedColumn<int> get replyCount => $composableBuilder(
     column: $table.replyCount,
@@ -16757,11 +16056,9 @@ class $$PinnedMessagesTableAnnotationComposer
     builder: (column) => column,
   );
 
-  GeneratedColumn<bool> get shadowed =>
-      $composableBuilder(column: $table.shadowed, builder: (column) => column);
+  GeneratedColumn<bool> get shadowed => $composableBuilder(column: $table.shadowed, builder: (column) => column);
 
-  GeneratedColumn<String> get command =>
-      $composableBuilder(column: $table.command, builder: (column) => column);
+  GeneratedColumn<String> get command => $composableBuilder(column: $table.command, builder: (column) => column);
 
   GeneratedColumn<DateTime> get localCreatedAt => $composableBuilder(
     column: $table.localCreatedAt,
@@ -16803,19 +16100,16 @@ class $$PinnedMessagesTableAnnotationComposer
     builder: (column) => column,
   );
 
-  GeneratedColumn<String> get userId =>
-      $composableBuilder(column: $table.userId, builder: (column) => column);
+  GeneratedColumn<String> get userId => $composableBuilder(column: $table.userId, builder: (column) => column);
 
   GeneratedColumn<String> get channelRole => $composableBuilder(
     column: $table.channelRole,
     builder: (column) => column,
   );
 
-  GeneratedColumn<bool> get pinned =>
-      $composableBuilder(column: $table.pinned, builder: (column) => column);
+  GeneratedColumn<bool> get pinned => $composableBuilder(column: $table.pinned, builder: (column) => column);
 
-  GeneratedColumn<DateTime> get pinnedAt =>
-      $composableBuilder(column: $table.pinnedAt, builder: (column) => column);
+  GeneratedColumn<DateTime> get pinnedAt => $composableBuilder(column: $table.pinnedAt, builder: (column) => column);
 
   GeneratedColumn<DateTime> get pinExpires => $composableBuilder(
     column: $table.pinExpires,
@@ -16835,39 +16129,35 @@ class $$PinnedMessagesTableAnnotationComposer
   GeneratedColumnWithTypeConverter<Map<String, String>?, String> get i18n =>
       $composableBuilder(column: $table.i18n, builder: (column) => column);
 
-  GeneratedColumnWithTypeConverter<List<String>?, String>
-  get restrictedVisibility => $composableBuilder(
+  GeneratedColumnWithTypeConverter<List<String>?, String> get restrictedVisibility => $composableBuilder(
     column: $table.restrictedVisibility,
     builder: (column) => column,
   );
 
-  GeneratedColumnWithTypeConverter<Map<String, dynamic>?, String>
-  get extraData =>
+  GeneratedColumnWithTypeConverter<Map<String, dynamic>?, String> get extraData =>
       $composableBuilder(column: $table.extraData, builder: (column) => column);
 
   Expression<T> pinnedMessageReactionsRefs<T extends Object>(
     Expression<T> Function($$PinnedMessageReactionsTableAnnotationComposer a) f,
   ) {
-    final $$PinnedMessageReactionsTableAnnotationComposer composer =
-        $composerBuilder(
-          composer: this,
-          getCurrentColumn: (t) => t.id,
-          referencedTable: $db.pinnedMessageReactions,
-          getReferencedColumn: (t) => t.messageId,
-          builder:
-              (
-                joinBuilder, {
-                $addJoinBuilderToRootComposer,
-                $removeJoinBuilderFromRootComposer,
-              }) => $$PinnedMessageReactionsTableAnnotationComposer(
-                $db: $db,
-                $table: $db.pinnedMessageReactions,
-                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-                joinBuilder: joinBuilder,
-                $removeJoinBuilderFromRootComposer:
-                    $removeJoinBuilderFromRootComposer,
-              ),
-        );
+    final $$PinnedMessageReactionsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.pinnedMessageReactions,
+      getReferencedColumn: (t) => t.messageId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PinnedMessageReactionsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.pinnedMessageReactions,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
+          ),
+    );
     return f(composer);
   }
 }
@@ -16894,12 +16184,9 @@ class $$PinnedMessagesTableTableManager
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer: () =>
-              $$PinnedMessagesTableFilterComposer($db: db, $table: table),
-          createOrderingComposer: () =>
-              $$PinnedMessagesTableOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer: () =>
-              $$PinnedMessagesTableAnnotationComposer($db: db, $table: table),
+          createFilteringComposer: () => $$PinnedMessagesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () => $$PinnedMessagesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () => $$PinnedMessagesTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<String> id = const Value.absent(),
@@ -16913,8 +16200,7 @@ class $$PinnedMessagesTableTableManager
                 Value<bool?> mentionedHere = const Value.absent(),
                 Value<List<String>?> mentionedRoles = const Value.absent(),
                 Value<List<String>> mentionedUsers = const Value.absent(),
-                Value<Map<String, ReactionGroup>?> reactionGroups =
-                    const Value.absent(),
+                Value<Map<String, ReactionGroup>?> reactionGroups = const Value.absent(),
                 Value<String?> parentId = const Value.absent(),
                 Value<String?> quotedMessageId = const Value.absent(),
                 Value<String?> pollId = const Value.absent(),
@@ -16938,8 +16224,7 @@ class $$PinnedMessagesTableTableManager
                 Value<String?> pinnedByUserId = const Value.absent(),
                 Value<String> channelCid = const Value.absent(),
                 Value<Map<String, String>?> i18n = const Value.absent(),
-                Value<List<String>?> restrictedVisibility =
-                    const Value.absent(),
+                Value<List<String>?> restrictedVisibility = const Value.absent(),
                 Value<Map<String, dynamic>?> extraData = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => PinnedMessagesCompanion(
@@ -16995,8 +16280,7 @@ class $$PinnedMessagesTableTableManager
                 Value<bool?> mentionedHere = const Value.absent(),
                 Value<List<String>?> mentionedRoles = const Value.absent(),
                 required List<String> mentionedUsers,
-                Value<Map<String, ReactionGroup>?> reactionGroups =
-                    const Value.absent(),
+                Value<Map<String, ReactionGroup>?> reactionGroups = const Value.absent(),
                 Value<String?> parentId = const Value.absent(),
                 Value<String?> quotedMessageId = const Value.absent(),
                 Value<String?> pollId = const Value.absent(),
@@ -17020,8 +16304,7 @@ class $$PinnedMessagesTableTableManager
                 Value<String?> pinnedByUserId = const Value.absent(),
                 required String channelCid,
                 Value<Map<String, String>?> i18n = const Value.absent(),
-                Value<List<String>?> restrictedVisibility =
-                    const Value.absent(),
+                Value<List<String>?> restrictedVisibility = const Value.absent(),
                 Value<Map<String, dynamic>?> extraData = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => PinnedMessagesCompanion.insert(
@@ -17082,20 +16365,14 @@ class $$PinnedMessagesTableTableManager
               getPrefetchedDataCallback: (items) async {
                 return [
                   if (pinnedMessageReactionsRefs)
-                    await $_getPrefetchedData<
-                      PinnedMessageEntity,
-                      $PinnedMessagesTable,
-                      PinnedMessageReactionEntity
-                    >(
+                    await $_getPrefetchedData<PinnedMessageEntity, $PinnedMessagesTable, PinnedMessageReactionEntity>(
                       currentTable: table,
-                      referencedTable: $$PinnedMessagesTableReferences
-                          ._pinnedMessageReactionsRefsTable(db),
-                      managerFromTypedResult: (p0) =>
-                          $$PinnedMessagesTableReferences(
-                            db,
-                            table,
-                            p0,
-                          ).pinnedMessageReactionsRefs,
+                      referencedTable: $$PinnedMessagesTableReferences._pinnedMessageReactionsRefsTable(db),
+                      managerFromTypedResult: (p0) => $$PinnedMessagesTableReferences(
+                        db,
+                        table,
+                        p0,
+                      ).pinnedMessageReactionsRefs,
                       referencedItemsForCurrentItem: (item, referencedItems) =>
                           referencedItems.where((e) => e.messageId == item.id),
                       typedResults: items,
@@ -17165,15 +16442,14 @@ typedef $$PollsTableUpdateCompanionBuilder =
       Value<int> rowid,
     });
 
-final class $$PollsTableReferences
-    extends BaseReferences<_$DriftChatDatabase, $PollsTable, PollEntity> {
+final class $$PollsTableReferences extends BaseReferences<_$DriftChatDatabase, $PollsTable, PollEntity> {
   $$PollsTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
-  static MultiTypedResultKey<$PollVotesTable, List<PollVoteEntity>>
-  _pollVotesRefsTable(_$DriftChatDatabase db) => MultiTypedResultKey.fromTable(
-    db.pollVotes,
-    aliasName: $_aliasNameGenerator(db.polls.id, db.pollVotes.pollId),
-  );
+  static MultiTypedResultKey<$PollVotesTable, List<PollVoteEntity>> _pollVotesRefsTable(_$DriftChatDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.pollVotes,
+        aliasName: $_aliasNameGenerator(db.polls.id, db.pollVotes.pollId),
+      );
 
   $$PollVotesTableProcessedTableManager get pollVotesRefs {
     final manager = $$PollVotesTableTableManager(
@@ -17188,8 +16464,7 @@ final class $$PollsTableReferences
   }
 }
 
-class $$PollsTableFilterComposer
-    extends Composer<_$DriftChatDatabase, $PollsTable> {
+class $$PollsTableFilterComposer extends Composer<_$DriftChatDatabase, $PollsTable> {
   $$PollsTableFilterComposer({
     required super.$db,
     required super.$table,
@@ -17212,14 +16487,12 @@ class $$PollsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnWithTypeConverterFilters<List<String>, List<String>, String>
-  get options => $composableBuilder(
+  ColumnWithTypeConverterFilters<List<String>, List<String>, String> get options => $composableBuilder(
     column: $table.options,
     builder: (column) => ColumnWithTypeConverterFilters(column),
   );
 
-  ColumnWithTypeConverterFilters<VotingVisibility, VotingVisibility, String>
-  get votingVisibility => $composableBuilder(
+  ColumnWithTypeConverterFilters<VotingVisibility, VotingVisibility, String> get votingVisibility => $composableBuilder(
     column: $table.votingVisibility,
     builder: (column) => ColumnWithTypeConverterFilters(column),
   );
@@ -17254,11 +16527,11 @@ class $$PollsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnWithTypeConverterFilters<Map<String, int>, Map<String, int>, String>
-  get voteCountsByOption => $composableBuilder(
-    column: $table.voteCountsByOption,
-    builder: (column) => ColumnWithTypeConverterFilters(column),
-  );
+  ColumnWithTypeConverterFilters<Map<String, int>, Map<String, int>, String> get voteCountsByOption =>
+      $composableBuilder(
+        column: $table.voteCountsByOption,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
 
   ColumnFilters<int> get voteCount => $composableBuilder(
     column: $table.voteCount,
@@ -17280,15 +16553,11 @@ class $$PollsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnWithTypeConverterFilters<
-    Map<String, dynamic>?,
-    Map<String, dynamic>,
-    String
-  >
-  get extraData => $composableBuilder(
-    column: $table.extraData,
-    builder: (column) => ColumnWithTypeConverterFilters(column),
-  );
+  ColumnWithTypeConverterFilters<Map<String, dynamic>?, Map<String, dynamic>, String> get extraData =>
+      $composableBuilder(
+        column: $table.extraData,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
 
   Expression<bool> pollVotesRefs(
     Expression<bool> Function($$PollVotesTableFilterComposer f) f,
@@ -17308,16 +16577,14 @@ class $$PollsTableFilterComposer
             $table: $db.pollVotes,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
           ),
     );
     return f(composer);
   }
 }
 
-class $$PollsTableOrderingComposer
-    extends Composer<_$DriftChatDatabase, $PollsTable> {
+class $$PollsTableOrderingComposer extends Composer<_$DriftChatDatabase, $PollsTable> {
   $$PollsTableOrderingComposer({
     required super.$db,
     required super.$table,
@@ -17411,8 +16678,7 @@ class $$PollsTableOrderingComposer
   );
 }
 
-class $$PollsTableAnnotationComposer
-    extends Composer<_$DriftChatDatabase, $PollsTable> {
+class $$PollsTableAnnotationComposer extends Composer<_$DriftChatDatabase, $PollsTable> {
   $$PollsTableAnnotationComposer({
     required super.$db,
     required super.$table,
@@ -17420,11 +16686,9 @@ class $$PollsTableAnnotationComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  GeneratedColumn<String> get id =>
-      $composableBuilder(column: $table.id, builder: (column) => column);
+  GeneratedColumn<String> get id => $composableBuilder(column: $table.id, builder: (column) => column);
 
-  GeneratedColumn<String> get name =>
-      $composableBuilder(column: $table.name, builder: (column) => column);
+  GeneratedColumn<String> get name => $composableBuilder(column: $table.name, builder: (column) => column);
 
   GeneratedColumn<String> get description => $composableBuilder(
     column: $table.description,
@@ -17434,8 +16698,7 @@ class $$PollsTableAnnotationComposer
   GeneratedColumnWithTypeConverter<List<String>, String> get options =>
       $composableBuilder(column: $table.options, builder: (column) => column);
 
-  GeneratedColumnWithTypeConverter<VotingVisibility, String>
-  get votingVisibility => $composableBuilder(
+  GeneratedColumnWithTypeConverter<VotingVisibility, String> get votingVisibility => $composableBuilder(
     column: $table.votingVisibility,
     builder: (column) => column,
   );
@@ -17460,36 +16723,30 @@ class $$PollsTableAnnotationComposer
     builder: (column) => column,
   );
 
-  GeneratedColumn<bool> get isClosed =>
-      $composableBuilder(column: $table.isClosed, builder: (column) => column);
+  GeneratedColumn<bool> get isClosed => $composableBuilder(column: $table.isClosed, builder: (column) => column);
 
   GeneratedColumn<int> get answersCount => $composableBuilder(
     column: $table.answersCount,
     builder: (column) => column,
   );
 
-  GeneratedColumnWithTypeConverter<Map<String, int>, String>
-  get voteCountsByOption => $composableBuilder(
+  GeneratedColumnWithTypeConverter<Map<String, int>, String> get voteCountsByOption => $composableBuilder(
     column: $table.voteCountsByOption,
     builder: (column) => column,
   );
 
-  GeneratedColumn<int> get voteCount =>
-      $composableBuilder(column: $table.voteCount, builder: (column) => column);
+  GeneratedColumn<int> get voteCount => $composableBuilder(column: $table.voteCount, builder: (column) => column);
 
   GeneratedColumn<String> get createdById => $composableBuilder(
     column: $table.createdById,
     builder: (column) => column,
   );
 
-  GeneratedColumn<DateTime> get createdAt =>
-      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+  GeneratedColumn<DateTime> get createdAt => $composableBuilder(column: $table.createdAt, builder: (column) => column);
 
-  GeneratedColumn<DateTime> get updatedAt =>
-      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+  GeneratedColumn<DateTime> get updatedAt => $composableBuilder(column: $table.updatedAt, builder: (column) => column);
 
-  GeneratedColumnWithTypeConverter<Map<String, dynamic>?, String>
-  get extraData =>
+  GeneratedColumnWithTypeConverter<Map<String, dynamic>?, String> get extraData =>
       $composableBuilder(column: $table.extraData, builder: (column) => column);
 
   Expression<T> pollVotesRefs<T extends Object>(
@@ -17510,8 +16767,7 @@ class $$PollsTableAnnotationComposer
             $table: $db.pollVotes,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
           ),
     );
     return f(composer);
@@ -17538,12 +16794,9 @@ class $$PollsTableTableManager
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer: () =>
-              $$PollsTableFilterComposer($db: db, $table: table),
-          createOrderingComposer: () =>
-              $$PollsTableOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer: () =>
-              $$PollsTableAnnotationComposer($db: db, $table: table),
+          createFilteringComposer: () => $$PollsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () => $$PollsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () => $$PollsTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<String> id = const Value.absent(),
@@ -17557,8 +16810,7 @@ class $$PollsTableTableManager
                 Value<bool> allowAnswers = const Value.absent(),
                 Value<bool> isClosed = const Value.absent(),
                 Value<int> answersCount = const Value.absent(),
-                Value<Map<String, int>> voteCountsByOption =
-                    const Value.absent(),
+                Value<Map<String, int>> voteCountsByOption = const Value.absent(),
                 Value<int> voteCount = const Value.absent(),
                 Value<String?> createdById = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
@@ -17627,8 +16879,7 @@ class $$PollsTableTableManager
               ),
           withReferenceMapper: (p0) => p0
               .map(
-                (e) =>
-                    (e.readTable(table), $$PollsTableReferences(db, table, e)),
+                (e) => (e.readTable(table), $$PollsTableReferences(db, table, e)),
               )
               .toList(),
           prefetchHooksCallback: ({pollVotesRefs = false}) {
@@ -17639,16 +16890,10 @@ class $$PollsTableTableManager
               getPrefetchedDataCallback: (items) async {
                 return [
                   if (pollVotesRefs)
-                    await $_getPrefetchedData<
-                      PollEntity,
-                      $PollsTable,
-                      PollVoteEntity
-                    >(
+                    await $_getPrefetchedData<PollEntity, $PollsTable, PollVoteEntity>(
                       currentTable: table,
-                      referencedTable: $$PollsTableReferences
-                          ._pollVotesRefsTable(db),
-                      managerFromTypedResult: (p0) =>
-                          $$PollsTableReferences(db, table, p0).pollVotesRefs,
+                      referencedTable: $$PollsTableReferences._pollVotesRefsTable(db),
+                      managerFromTypedResult: (p0) => $$PollsTableReferences(db, table, p0).pollVotesRefs,
                       referencedItemsForCurrentItem: (item, referencedItems) =>
                           referencedItems.where((e) => e.pollId == item.id),
                       typedResults: items,
@@ -17698,13 +16943,11 @@ typedef $$PollVotesTableUpdateCompanionBuilder =
       Value<int> rowid,
     });
 
-final class $$PollVotesTableReferences
-    extends
-        BaseReferences<_$DriftChatDatabase, $PollVotesTable, PollVoteEntity> {
+final class $$PollVotesTableReferences extends BaseReferences<_$DriftChatDatabase, $PollVotesTable, PollVoteEntity> {
   $$PollVotesTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
-  static $PollsTable _pollIdTable(_$DriftChatDatabase db) => db.polls
-      .createAlias($_aliasNameGenerator(db.pollVotes.pollId, db.polls.id));
+  static $PollsTable _pollIdTable(_$DriftChatDatabase db) =>
+      db.polls.createAlias($_aliasNameGenerator(db.pollVotes.pollId, db.polls.id));
 
   $$PollsTableProcessedTableManager? get pollId {
     final $_column = $_itemColumn<String>('poll_id');
@@ -17721,8 +16964,7 @@ final class $$PollVotesTableReferences
   }
 }
 
-class $$PollVotesTableFilterComposer
-    extends Composer<_$DriftChatDatabase, $PollVotesTable> {
+class $$PollVotesTableFilterComposer extends Composer<_$DriftChatDatabase, $PollVotesTable> {
   $$PollVotesTableFilterComposer({
     required super.$db,
     required super.$table,
@@ -17776,16 +17018,14 @@ class $$PollVotesTableFilterComposer
             $table: $db.polls,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
           ),
     );
     return composer;
   }
 }
 
-class $$PollVotesTableOrderingComposer
-    extends Composer<_$DriftChatDatabase, $PollVotesTable> {
+class $$PollVotesTableOrderingComposer extends Composer<_$DriftChatDatabase, $PollVotesTable> {
   $$PollVotesTableOrderingComposer({
     required super.$db,
     required super.$table,
@@ -17839,16 +17079,14 @@ class $$PollVotesTableOrderingComposer
             $table: $db.polls,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
           ),
     );
     return composer;
   }
 }
 
-class $$PollVotesTableAnnotationComposer
-    extends Composer<_$DriftChatDatabase, $PollVotesTable> {
+class $$PollVotesTableAnnotationComposer extends Composer<_$DriftChatDatabase, $PollVotesTable> {
   $$PollVotesTableAnnotationComposer({
     required super.$db,
     required super.$table,
@@ -17856,25 +17094,20 @@ class $$PollVotesTableAnnotationComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  GeneratedColumn<String> get id =>
-      $composableBuilder(column: $table.id, builder: (column) => column);
+  GeneratedColumn<String> get id => $composableBuilder(column: $table.id, builder: (column) => column);
 
-  GeneratedColumn<String> get optionId =>
-      $composableBuilder(column: $table.optionId, builder: (column) => column);
+  GeneratedColumn<String> get optionId => $composableBuilder(column: $table.optionId, builder: (column) => column);
 
   GeneratedColumn<String> get answerText => $composableBuilder(
     column: $table.answerText,
     builder: (column) => column,
   );
 
-  GeneratedColumn<DateTime> get createdAt =>
-      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+  GeneratedColumn<DateTime> get createdAt => $composableBuilder(column: $table.createdAt, builder: (column) => column);
 
-  GeneratedColumn<DateTime> get updatedAt =>
-      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+  GeneratedColumn<DateTime> get updatedAt => $composableBuilder(column: $table.updatedAt, builder: (column) => column);
 
-  GeneratedColumn<String> get userId =>
-      $composableBuilder(column: $table.userId, builder: (column) => column);
+  GeneratedColumn<String> get userId => $composableBuilder(column: $table.userId, builder: (column) => column);
 
   $$PollsTableAnnotationComposer get pollId {
     final $$PollsTableAnnotationComposer composer = $composerBuilder(
@@ -17892,8 +17125,7 @@ class $$PollVotesTableAnnotationComposer
             $table: $db.polls,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
           ),
     );
     return composer;
@@ -17920,12 +17152,9 @@ class $$PollVotesTableTableManager
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer: () =>
-              $$PollVotesTableFilterComposer($db: db, $table: table),
-          createOrderingComposer: () =>
-              $$PollVotesTableOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer: () =>
-              $$PollVotesTableAnnotationComposer($db: db, $table: table),
+          createFilteringComposer: () => $$PollVotesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () => $$PollVotesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () => $$PollVotesTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<String?> id = const Value.absent(),
@@ -17999,11 +17228,8 @@ class $$PollVotesTableTableManager
                           state.withJoin(
                                 currentTable: table,
                                 currentColumn: table.pollId,
-                                referencedTable: $$PollVotesTableReferences
-                                    ._pollIdTable(db),
-                                referencedColumn: $$PollVotesTableReferences
-                                    ._pollIdTable(db)
-                                    .id,
+                                referencedTable: $$PollVotesTableReferences._pollIdTable(db),
+                                referencedColumn: $$PollVotesTableReferences._pollIdTable(db).id,
                               )
                               as T;
                     }
@@ -18059,25 +17285,19 @@ typedef $$PinnedMessageReactionsTableUpdateCompanionBuilder =
     });
 
 final class $$PinnedMessageReactionsTableReferences
-    extends
-        BaseReferences<
-          _$DriftChatDatabase,
-          $PinnedMessageReactionsTable,
-          PinnedMessageReactionEntity
-        > {
+    extends BaseReferences<_$DriftChatDatabase, $PinnedMessageReactionsTable, PinnedMessageReactionEntity> {
   $$PinnedMessageReactionsTableReferences(
     super.$_db,
     super.$_table,
     super.$_typedResult,
   );
 
-  static $PinnedMessagesTable _messageIdTable(_$DriftChatDatabase db) =>
-      db.pinnedMessages.createAlias(
-        $_aliasNameGenerator(
-          db.pinnedMessageReactions.messageId,
-          db.pinnedMessages.id,
-        ),
-      );
+  static $PinnedMessagesTable _messageIdTable(_$DriftChatDatabase db) => db.pinnedMessages.createAlias(
+    $_aliasNameGenerator(
+      db.pinnedMessageReactions.messageId,
+      db.pinnedMessages.id,
+    ),
+  );
 
   $$PinnedMessagesTableProcessedTableManager? get messageId {
     final $_column = $_itemColumn<String>('message_id');
@@ -18094,8 +17314,7 @@ final class $$PinnedMessageReactionsTableReferences
   }
 }
 
-class $$PinnedMessageReactionsTableFilterComposer
-    extends Composer<_$DriftChatDatabase, $PinnedMessageReactionsTable> {
+class $$PinnedMessageReactionsTableFilterComposer extends Composer<_$DriftChatDatabase, $PinnedMessageReactionsTable> {
   $$PinnedMessageReactionsTableFilterComposer({
     required super.$db,
     required super.$table,
@@ -18133,15 +17352,11 @@ class $$PinnedMessageReactionsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnWithTypeConverterFilters<
-    Map<String, dynamic>?,
-    Map<String, dynamic>,
-    String
-  >
-  get extraData => $composableBuilder(
-    column: $table.extraData,
-    builder: (column) => ColumnWithTypeConverterFilters(column),
-  );
+  ColumnWithTypeConverterFilters<Map<String, dynamic>?, Map<String, dynamic>, String> get extraData =>
+      $composableBuilder(
+        column: $table.extraData,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
 
   $$PinnedMessagesTableFilterComposer get messageId {
     final $$PinnedMessagesTableFilterComposer composer = $composerBuilder(
@@ -18159,8 +17374,7 @@ class $$PinnedMessageReactionsTableFilterComposer
             $table: $db.pinnedMessages,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
           ),
     );
     return composer;
@@ -18227,8 +17441,7 @@ class $$PinnedMessageReactionsTableOrderingComposer
             $table: $db.pinnedMessages,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
           ),
     );
     return composer;
@@ -18244,26 +17457,19 @@ class $$PinnedMessageReactionsTableAnnotationComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  GeneratedColumn<String> get userId =>
-      $composableBuilder(column: $table.userId, builder: (column) => column);
+  GeneratedColumn<String> get userId => $composableBuilder(column: $table.userId, builder: (column) => column);
 
-  GeneratedColumn<String> get type =>
-      $composableBuilder(column: $table.type, builder: (column) => column);
+  GeneratedColumn<String> get type => $composableBuilder(column: $table.type, builder: (column) => column);
 
-  GeneratedColumn<String> get emojiCode =>
-      $composableBuilder(column: $table.emojiCode, builder: (column) => column);
+  GeneratedColumn<String> get emojiCode => $composableBuilder(column: $table.emojiCode, builder: (column) => column);
 
-  GeneratedColumn<DateTime> get createdAt =>
-      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+  GeneratedColumn<DateTime> get createdAt => $composableBuilder(column: $table.createdAt, builder: (column) => column);
 
-  GeneratedColumn<DateTime> get updatedAt =>
-      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+  GeneratedColumn<DateTime> get updatedAt => $composableBuilder(column: $table.updatedAt, builder: (column) => column);
 
-  GeneratedColumn<int> get score =>
-      $composableBuilder(column: $table.score, builder: (column) => column);
+  GeneratedColumn<int> get score => $composableBuilder(column: $table.score, builder: (column) => column);
 
-  GeneratedColumnWithTypeConverter<Map<String, dynamic>?, String>
-  get extraData =>
+  GeneratedColumnWithTypeConverter<Map<String, dynamic>?, String> get extraData =>
       $composableBuilder(column: $table.extraData, builder: (column) => column);
 
   $$PinnedMessagesTableAnnotationComposer get messageId {
@@ -18282,8 +17488,7 @@ class $$PinnedMessageReactionsTableAnnotationComposer
             $table: $db.pinnedMessages,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
           ),
     );
     return composer;
@@ -18315,21 +17520,18 @@ class $$PinnedMessageReactionsTableTableManager
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer: () =>
-              $$PinnedMessageReactionsTableFilterComposer(
-                $db: db,
-                $table: table,
-              ),
-          createOrderingComposer: () =>
-              $$PinnedMessageReactionsTableOrderingComposer(
-                $db: db,
-                $table: table,
-              ),
-          createComputedFieldComposer: () =>
-              $$PinnedMessageReactionsTableAnnotationComposer(
-                $db: db,
-                $table: table,
-              ),
+          createFilteringComposer: () => $$PinnedMessageReactionsTableFilterComposer(
+            $db: db,
+            $table: table,
+          ),
+          createOrderingComposer: () => $$PinnedMessageReactionsTableOrderingComposer(
+            $db: db,
+            $table: table,
+          ),
+          createComputedFieldComposer: () => $$PinnedMessageReactionsTableAnnotationComposer(
+            $db: db,
+            $table: table,
+          ),
           updateCompanionCallback:
               ({
                 Value<String?> userId = const Value.absent(),
@@ -18407,13 +17609,8 @@ class $$PinnedMessageReactionsTableTableManager
                           state.withJoin(
                                 currentTable: table,
                                 currentColumn: table.messageId,
-                                referencedTable:
-                                    $$PinnedMessageReactionsTableReferences
-                                        ._messageIdTable(db),
-                                referencedColumn:
-                                    $$PinnedMessageReactionsTableReferences
-                                        ._messageIdTable(db)
-                                        .id,
+                                referencedTable: $$PinnedMessageReactionsTableReferences._messageIdTable(db),
+                                referencedColumn: $$PinnedMessageReactionsTableReferences._messageIdTable(db).id,
                               )
                               as T;
                     }
@@ -18468,15 +17665,12 @@ typedef $$ReactionsTableUpdateCompanionBuilder =
       Value<int> rowid,
     });
 
-final class $$ReactionsTableReferences
-    extends
-        BaseReferences<_$DriftChatDatabase, $ReactionsTable, ReactionEntity> {
+final class $$ReactionsTableReferences extends BaseReferences<_$DriftChatDatabase, $ReactionsTable, ReactionEntity> {
   $$ReactionsTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
-  static $MessagesTable _messageIdTable(_$DriftChatDatabase db) =>
-      db.messages.createAlias(
-        $_aliasNameGenerator(db.reactions.messageId, db.messages.id),
-      );
+  static $MessagesTable _messageIdTable(_$DriftChatDatabase db) => db.messages.createAlias(
+    $_aliasNameGenerator(db.reactions.messageId, db.messages.id),
+  );
 
   $$MessagesTableProcessedTableManager? get messageId {
     final $_column = $_itemColumn<String>('message_id');
@@ -18493,8 +17687,7 @@ final class $$ReactionsTableReferences
   }
 }
 
-class $$ReactionsTableFilterComposer
-    extends Composer<_$DriftChatDatabase, $ReactionsTable> {
+class $$ReactionsTableFilterComposer extends Composer<_$DriftChatDatabase, $ReactionsTable> {
   $$ReactionsTableFilterComposer({
     required super.$db,
     required super.$table,
@@ -18532,15 +17725,11 @@ class $$ReactionsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnWithTypeConverterFilters<
-    Map<String, dynamic>?,
-    Map<String, dynamic>,
-    String
-  >
-  get extraData => $composableBuilder(
-    column: $table.extraData,
-    builder: (column) => ColumnWithTypeConverterFilters(column),
-  );
+  ColumnWithTypeConverterFilters<Map<String, dynamic>?, Map<String, dynamic>, String> get extraData =>
+      $composableBuilder(
+        column: $table.extraData,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
 
   $$MessagesTableFilterComposer get messageId {
     final $$MessagesTableFilterComposer composer = $composerBuilder(
@@ -18558,16 +17747,14 @@ class $$ReactionsTableFilterComposer
             $table: $db.messages,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
           ),
     );
     return composer;
   }
 }
 
-class $$ReactionsTableOrderingComposer
-    extends Composer<_$DriftChatDatabase, $ReactionsTable> {
+class $$ReactionsTableOrderingComposer extends Composer<_$DriftChatDatabase, $ReactionsTable> {
   $$ReactionsTableOrderingComposer({
     required super.$db,
     required super.$table,
@@ -18626,16 +17813,14 @@ class $$ReactionsTableOrderingComposer
             $table: $db.messages,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
           ),
     );
     return composer;
   }
 }
 
-class $$ReactionsTableAnnotationComposer
-    extends Composer<_$DriftChatDatabase, $ReactionsTable> {
+class $$ReactionsTableAnnotationComposer extends Composer<_$DriftChatDatabase, $ReactionsTable> {
   $$ReactionsTableAnnotationComposer({
     required super.$db,
     required super.$table,
@@ -18643,26 +17828,19 @@ class $$ReactionsTableAnnotationComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  GeneratedColumn<String> get userId =>
-      $composableBuilder(column: $table.userId, builder: (column) => column);
+  GeneratedColumn<String> get userId => $composableBuilder(column: $table.userId, builder: (column) => column);
 
-  GeneratedColumn<String> get type =>
-      $composableBuilder(column: $table.type, builder: (column) => column);
+  GeneratedColumn<String> get type => $composableBuilder(column: $table.type, builder: (column) => column);
 
-  GeneratedColumn<String> get emojiCode =>
-      $composableBuilder(column: $table.emojiCode, builder: (column) => column);
+  GeneratedColumn<String> get emojiCode => $composableBuilder(column: $table.emojiCode, builder: (column) => column);
 
-  GeneratedColumn<DateTime> get createdAt =>
-      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+  GeneratedColumn<DateTime> get createdAt => $composableBuilder(column: $table.createdAt, builder: (column) => column);
 
-  GeneratedColumn<DateTime> get updatedAt =>
-      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+  GeneratedColumn<DateTime> get updatedAt => $composableBuilder(column: $table.updatedAt, builder: (column) => column);
 
-  GeneratedColumn<int> get score =>
-      $composableBuilder(column: $table.score, builder: (column) => column);
+  GeneratedColumn<int> get score => $composableBuilder(column: $table.score, builder: (column) => column);
 
-  GeneratedColumnWithTypeConverter<Map<String, dynamic>?, String>
-  get extraData =>
+  GeneratedColumnWithTypeConverter<Map<String, dynamic>?, String> get extraData =>
       $composableBuilder(column: $table.extraData, builder: (column) => column);
 
   $$MessagesTableAnnotationComposer get messageId {
@@ -18681,8 +17859,7 @@ class $$ReactionsTableAnnotationComposer
             $table: $db.messages,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
           ),
     );
     return composer;
@@ -18709,12 +17886,9 @@ class $$ReactionsTableTableManager
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer: () =>
-              $$ReactionsTableFilterComposer($db: db, $table: table),
-          createOrderingComposer: () =>
-              $$ReactionsTableOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer: () =>
-              $$ReactionsTableAnnotationComposer($db: db, $table: table),
+          createFilteringComposer: () => $$ReactionsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () => $$ReactionsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () => $$ReactionsTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<String?> userId = const Value.absent(),
@@ -18792,11 +17966,8 @@ class $$ReactionsTableTableManager
                           state.withJoin(
                                 currentTable: table,
                                 currentColumn: table.messageId,
-                                referencedTable: $$ReactionsTableReferences
-                                    ._messageIdTable(db),
-                                referencedColumn: $$ReactionsTableReferences
-                                    ._messageIdTable(db)
-                                    .id,
+                                referencedTable: $$ReactionsTableReferences._messageIdTable(db),
+                                referencedColumn: $$ReactionsTableReferences._messageIdTable(db).id,
                               )
                               as T;
                     }
@@ -18857,8 +18028,7 @@ typedef $$UsersTableUpdateCompanionBuilder =
       Value<int> rowid,
     });
 
-class $$UsersTableFilterComposer
-    extends Composer<_$DriftChatDatabase, $UsersTable> {
+class $$UsersTableFilterComposer extends Composer<_$DriftChatDatabase, $UsersTable> {
   $$UsersTableFilterComposer({
     required super.$db,
     required super.$table,
@@ -18906,12 +18076,7 @@ class $$UsersTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnWithTypeConverterFilters<
-    Map<String, String>?,
-    Map<String, String>,
-    String
-  >
-  get teamsRole => $composableBuilder(
+  ColumnWithTypeConverterFilters<Map<String, String>?, Map<String, String>, String> get teamsRole => $composableBuilder(
     column: $table.teamsRole,
     builder: (column) => ColumnWithTypeConverterFilters(column),
   );
@@ -18921,19 +18086,14 @@ class $$UsersTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnWithTypeConverterFilters<
-    Map<String, dynamic>,
-    Map<String, dynamic>,
-    String
-  >
-  get extraData => $composableBuilder(
-    column: $table.extraData,
-    builder: (column) => ColumnWithTypeConverterFilters(column),
-  );
+  ColumnWithTypeConverterFilters<Map<String, dynamic>, Map<String, dynamic>, String> get extraData =>
+      $composableBuilder(
+        column: $table.extraData,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
 }
 
-class $$UsersTableOrderingComposer
-    extends Composer<_$DriftChatDatabase, $UsersTable> {
+class $$UsersTableOrderingComposer extends Composer<_$DriftChatDatabase, $UsersTable> {
   $$UsersTableOrderingComposer({
     required super.$db,
     required super.$table,
@@ -18997,8 +18157,7 @@ class $$UsersTableOrderingComposer
   );
 }
 
-class $$UsersTableAnnotationComposer
-    extends Composer<_$DriftChatDatabase, $UsersTable> {
+class $$UsersTableAnnotationComposer extends Composer<_$DriftChatDatabase, $UsersTable> {
   $$UsersTableAnnotationComposer({
     required super.$db,
     required super.$table,
@@ -19006,34 +18165,26 @@ class $$UsersTableAnnotationComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  GeneratedColumn<String> get id =>
-      $composableBuilder(column: $table.id, builder: (column) => column);
+  GeneratedColumn<String> get id => $composableBuilder(column: $table.id, builder: (column) => column);
 
-  GeneratedColumn<String> get role =>
-      $composableBuilder(column: $table.role, builder: (column) => column);
+  GeneratedColumn<String> get role => $composableBuilder(column: $table.role, builder: (column) => column);
 
-  GeneratedColumn<String> get language =>
-      $composableBuilder(column: $table.language, builder: (column) => column);
+  GeneratedColumn<String> get language => $composableBuilder(column: $table.language, builder: (column) => column);
 
-  GeneratedColumn<DateTime> get createdAt =>
-      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+  GeneratedColumn<DateTime> get createdAt => $composableBuilder(column: $table.createdAt, builder: (column) => column);
 
-  GeneratedColumn<DateTime> get updatedAt =>
-      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+  GeneratedColumn<DateTime> get updatedAt => $composableBuilder(column: $table.updatedAt, builder: (column) => column);
 
   GeneratedColumn<DateTime> get lastActive => $composableBuilder(
     column: $table.lastActive,
     builder: (column) => column,
   );
 
-  GeneratedColumn<bool> get online =>
-      $composableBuilder(column: $table.online, builder: (column) => column);
+  GeneratedColumn<bool> get online => $composableBuilder(column: $table.online, builder: (column) => column);
 
-  GeneratedColumn<bool> get banned =>
-      $composableBuilder(column: $table.banned, builder: (column) => column);
+  GeneratedColumn<bool> get banned => $composableBuilder(column: $table.banned, builder: (column) => column);
 
-  GeneratedColumnWithTypeConverter<Map<String, String>?, String>
-  get teamsRole =>
+  GeneratedColumnWithTypeConverter<Map<String, String>?, String> get teamsRole =>
       $composableBuilder(column: $table.teamsRole, builder: (column) => column);
 
   GeneratedColumn<int> get avgResponseTime => $composableBuilder(
@@ -19041,8 +18192,7 @@ class $$UsersTableAnnotationComposer
     builder: (column) => column,
   );
 
-  GeneratedColumnWithTypeConverter<Map<String, dynamic>, String>
-  get extraData =>
+  GeneratedColumnWithTypeConverter<Map<String, dynamic>, String> get extraData =>
       $composableBuilder(column: $table.extraData, builder: (column) => column);
 }
 
@@ -19069,12 +18219,9 @@ class $$UsersTableTableManager
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer: () =>
-              $$UsersTableFilterComposer($db: db, $table: table),
-          createOrderingComposer: () =>
-              $$UsersTableOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer: () =>
-              $$UsersTableAnnotationComposer($db: db, $table: table),
+          createFilteringComposer: () => $$UsersTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () => $$UsersTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () => $$UsersTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<String> id = const Value.absent(),
@@ -19131,9 +18278,7 @@ class $$UsersTableTableManager
                 extraData: extraData,
                 rowid: rowid,
               ),
-          withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
-              .toList(),
+          withReferenceMapper: (p0) => p0.map((e) => (e.readTable(table), BaseReferences(db, table, e))).toList(),
           prefetchHooksCallback: null,
         ),
       );
@@ -19195,14 +18340,12 @@ typedef $$MembersTableUpdateCompanionBuilder =
       Value<int> rowid,
     });
 
-final class $$MembersTableReferences
-    extends BaseReferences<_$DriftChatDatabase, $MembersTable, MemberEntity> {
+final class $$MembersTableReferences extends BaseReferences<_$DriftChatDatabase, $MembersTable, MemberEntity> {
   $$MembersTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
-  static $ChannelsTable _channelCidTable(_$DriftChatDatabase db) =>
-      db.channels.createAlias(
-        $_aliasNameGenerator(db.members.channelCid, db.channels.cid),
-      );
+  static $ChannelsTable _channelCidTable(_$DriftChatDatabase db) => db.channels.createAlias(
+    $_aliasNameGenerator(db.members.channelCid, db.channels.cid),
+  );
 
   $$ChannelsTableProcessedTableManager get channelCid {
     final $_column = $_itemColumn<String>('channel_cid')!;
@@ -19219,8 +18362,7 @@ final class $$MembersTableReferences
   }
 }
 
-class $$MembersTableFilterComposer
-    extends Composer<_$DriftChatDatabase, $MembersTable> {
+class $$MembersTableFilterComposer extends Composer<_$DriftChatDatabase, $MembersTable> {
   $$MembersTableFilterComposer({
     required super.$db,
     required super.$table,
@@ -19278,15 +18420,11 @@ class $$MembersTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnWithTypeConverterFilters<
-    Map<String, dynamic>?,
-    Map<String, dynamic>,
-    String
-  >
-  get extraData => $composableBuilder(
-    column: $table.extraData,
-    builder: (column) => ColumnWithTypeConverterFilters(column),
-  );
+  ColumnWithTypeConverterFilters<Map<String, dynamic>?, Map<String, dynamic>, String> get extraData =>
+      $composableBuilder(
+        column: $table.extraData,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
 
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
@@ -19298,8 +18436,7 @@ class $$MembersTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnWithTypeConverterFilters<List<String>, List<String>, String>
-  get deletedMessages => $composableBuilder(
+  ColumnWithTypeConverterFilters<List<String>, List<String>, String> get deletedMessages => $composableBuilder(
     column: $table.deletedMessages,
     builder: (column) => ColumnWithTypeConverterFilters(column),
   );
@@ -19320,16 +18457,14 @@ class $$MembersTableFilterComposer
             $table: $db.channels,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
           ),
     );
     return composer;
   }
 }
 
-class $$MembersTableOrderingComposer
-    extends Composer<_$DriftChatDatabase, $MembersTable> {
+class $$MembersTableOrderingComposer extends Composer<_$DriftChatDatabase, $MembersTable> {
   $$MembersTableOrderingComposer({
     required super.$db,
     required super.$table,
@@ -19423,16 +18558,14 @@ class $$MembersTableOrderingComposer
             $table: $db.channels,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
           ),
     );
     return composer;
   }
 }
 
-class $$MembersTableAnnotationComposer
-    extends Composer<_$DriftChatDatabase, $MembersTable> {
+class $$MembersTableAnnotationComposer extends Composer<_$DriftChatDatabase, $MembersTable> {
   $$MembersTableAnnotationComposer({
     required super.$db,
     required super.$table,
@@ -19440,8 +18573,7 @@ class $$MembersTableAnnotationComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  GeneratedColumn<String> get userId =>
-      $composableBuilder(column: $table.userId, builder: (column) => column);
+  GeneratedColumn<String> get userId => $composableBuilder(column: $table.userId, builder: (column) => column);
 
   GeneratedColumn<String> get channelRole => $composableBuilder(
     column: $table.channelRole,
@@ -19458,19 +18590,16 @@ class $$MembersTableAnnotationComposer
     builder: (column) => column,
   );
 
-  GeneratedColumn<bool> get invited =>
-      $composableBuilder(column: $table.invited, builder: (column) => column);
+  GeneratedColumn<bool> get invited => $composableBuilder(column: $table.invited, builder: (column) => column);
 
-  GeneratedColumn<bool> get banned =>
-      $composableBuilder(column: $table.banned, builder: (column) => column);
+  GeneratedColumn<bool> get banned => $composableBuilder(column: $table.banned, builder: (column) => column);
 
   GeneratedColumn<bool> get shadowBanned => $composableBuilder(
     column: $table.shadowBanned,
     builder: (column) => column,
   );
 
-  GeneratedColumn<DateTime> get pinnedAt =>
-      $composableBuilder(column: $table.pinnedAt, builder: (column) => column);
+  GeneratedColumn<DateTime> get pinnedAt => $composableBuilder(column: $table.pinnedAt, builder: (column) => column);
 
   GeneratedColumn<DateTime> get archivedAt => $composableBuilder(
     column: $table.archivedAt,
@@ -19482,21 +18611,17 @@ class $$MembersTableAnnotationComposer
     builder: (column) => column,
   );
 
-  GeneratedColumnWithTypeConverter<Map<String, dynamic>?, String>
-  get extraData =>
+  GeneratedColumnWithTypeConverter<Map<String, dynamic>?, String> get extraData =>
       $composableBuilder(column: $table.extraData, builder: (column) => column);
 
-  GeneratedColumn<DateTime> get createdAt =>
-      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+  GeneratedColumn<DateTime> get createdAt => $composableBuilder(column: $table.createdAt, builder: (column) => column);
 
-  GeneratedColumn<DateTime> get updatedAt =>
-      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+  GeneratedColumn<DateTime> get updatedAt => $composableBuilder(column: $table.updatedAt, builder: (column) => column);
 
-  GeneratedColumnWithTypeConverter<List<String>, String> get deletedMessages =>
-      $composableBuilder(
-        column: $table.deletedMessages,
-        builder: (column) => column,
-      );
+  GeneratedColumnWithTypeConverter<List<String>, String> get deletedMessages => $composableBuilder(
+    column: $table.deletedMessages,
+    builder: (column) => column,
+  );
 
   $$ChannelsTableAnnotationComposer get channelCid {
     final $$ChannelsTableAnnotationComposer composer = $composerBuilder(
@@ -19514,8 +18639,7 @@ class $$MembersTableAnnotationComposer
             $table: $db.channels,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
           ),
     );
     return composer;
@@ -19542,12 +18666,9 @@ class $$MembersTableTableManager
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer: () =>
-              $$MembersTableFilterComposer($db: db, $table: table),
-          createOrderingComposer: () =>
-              $$MembersTableOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer: () =>
-              $$MembersTableAnnotationComposer($db: db, $table: table),
+          createFilteringComposer: () => $$MembersTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () => $$MembersTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () => $$MembersTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<String> userId = const Value.absent(),
@@ -19653,11 +18774,8 @@ class $$MembersTableTableManager
                           state.withJoin(
                                 currentTable: table,
                                 currentColumn: table.channelCid,
-                                referencedTable: $$MembersTableReferences
-                                    ._channelCidTable(db),
-                                referencedColumn: $$MembersTableReferences
-                                    ._channelCidTable(db)
-                                    .cid,
+                                referencedTable: $$MembersTableReferences._channelCidTable(db),
+                                referencedColumn: $$MembersTableReferences._channelCidTable(db).cid,
                               )
                               as T;
                     }
@@ -19710,12 +18828,11 @@ typedef $$ReadsTableUpdateCompanionBuilder =
       Value<int> rowid,
     });
 
-final class $$ReadsTableReferences
-    extends BaseReferences<_$DriftChatDatabase, $ReadsTable, ReadEntity> {
+final class $$ReadsTableReferences extends BaseReferences<_$DriftChatDatabase, $ReadsTable, ReadEntity> {
   $$ReadsTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
-  static $ChannelsTable _channelCidTable(_$DriftChatDatabase db) => db.channels
-      .createAlias($_aliasNameGenerator(db.reads.channelCid, db.channels.cid));
+  static $ChannelsTable _channelCidTable(_$DriftChatDatabase db) =>
+      db.channels.createAlias($_aliasNameGenerator(db.reads.channelCid, db.channels.cid));
 
   $$ChannelsTableProcessedTableManager get channelCid {
     final $_column = $_itemColumn<String>('channel_cid')!;
@@ -19732,8 +18849,7 @@ final class $$ReadsTableReferences
   }
 }
 
-class $$ReadsTableFilterComposer
-    extends Composer<_$DriftChatDatabase, $ReadsTable> {
+class $$ReadsTableFilterComposer extends Composer<_$DriftChatDatabase, $ReadsTable> {
   $$ReadsTableFilterComposer({
     required super.$db,
     required super.$table,
@@ -19787,16 +18903,14 @@ class $$ReadsTableFilterComposer
             $table: $db.channels,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
           ),
     );
     return composer;
   }
 }
 
-class $$ReadsTableOrderingComposer
-    extends Composer<_$DriftChatDatabase, $ReadsTable> {
+class $$ReadsTableOrderingComposer extends Composer<_$DriftChatDatabase, $ReadsTable> {
   $$ReadsTableOrderingComposer({
     required super.$db,
     required super.$table,
@@ -19850,16 +18964,14 @@ class $$ReadsTableOrderingComposer
             $table: $db.channels,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
           ),
     );
     return composer;
   }
 }
 
-class $$ReadsTableAnnotationComposer
-    extends Composer<_$DriftChatDatabase, $ReadsTable> {
+class $$ReadsTableAnnotationComposer extends Composer<_$DriftChatDatabase, $ReadsTable> {
   $$ReadsTableAnnotationComposer({
     required super.$db,
     required super.$table,
@@ -19867,11 +18979,9 @@ class $$ReadsTableAnnotationComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  GeneratedColumn<DateTime> get lastRead =>
-      $composableBuilder(column: $table.lastRead, builder: (column) => column);
+  GeneratedColumn<DateTime> get lastRead => $composableBuilder(column: $table.lastRead, builder: (column) => column);
 
-  GeneratedColumn<String> get userId =>
-      $composableBuilder(column: $table.userId, builder: (column) => column);
+  GeneratedColumn<String> get userId => $composableBuilder(column: $table.userId, builder: (column) => column);
 
   GeneratedColumn<int> get unreadMessages => $composableBuilder(
     column: $table.unreadMessages,
@@ -19909,8 +19019,7 @@ class $$ReadsTableAnnotationComposer
             $table: $db.channels,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
           ),
     );
     return composer;
@@ -19937,12 +19046,9 @@ class $$ReadsTableTableManager
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer: () =>
-              $$ReadsTableFilterComposer($db: db, $table: table),
-          createOrderingComposer: () =>
-              $$ReadsTableOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer: () =>
-              $$ReadsTableAnnotationComposer($db: db, $table: table),
+          createFilteringComposer: () => $$ReadsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () => $$ReadsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () => $$ReadsTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<DateTime> lastRead = const Value.absent(),
@@ -19985,8 +19091,7 @@ class $$ReadsTableTableManager
               ),
           withReferenceMapper: (p0) => p0
               .map(
-                (e) =>
-                    (e.readTable(table), $$ReadsTableReferences(db, table, e)),
+                (e) => (e.readTable(table), $$ReadsTableReferences(db, table, e)),
               )
               .toList(),
           prefetchHooksCallback: ({channelCid = false}) {
@@ -20014,11 +19119,8 @@ class $$ReadsTableTableManager
                           state.withJoin(
                                 currentTable: table,
                                 currentColumn: table.channelCid,
-                                referencedTable: $$ReadsTableReferences
-                                    ._channelCidTable(db),
-                                referencedColumn: $$ReadsTableReferences
-                                    ._channelCidTable(db)
-                                    .cid,
+                                referencedTable: $$ReadsTableReferences._channelCidTable(db),
+                                referencedColumn: $$ReadsTableReferences._channelCidTable(db).cid,
                               )
                               as T;
                     }
@@ -20061,8 +19163,7 @@ typedef $$ChannelQueriesTableUpdateCompanionBuilder =
       Value<int> rowid,
     });
 
-class $$ChannelQueriesTableFilterComposer
-    extends Composer<_$DriftChatDatabase, $ChannelQueriesTable> {
+class $$ChannelQueriesTableFilterComposer extends Composer<_$DriftChatDatabase, $ChannelQueriesTable> {
   $$ChannelQueriesTableFilterComposer({
     required super.$db,
     required super.$table,
@@ -20081,8 +19182,7 @@ class $$ChannelQueriesTableFilterComposer
   );
 }
 
-class $$ChannelQueriesTableOrderingComposer
-    extends Composer<_$DriftChatDatabase, $ChannelQueriesTable> {
+class $$ChannelQueriesTableOrderingComposer extends Composer<_$DriftChatDatabase, $ChannelQueriesTable> {
   $$ChannelQueriesTableOrderingComposer({
     required super.$db,
     required super.$table,
@@ -20101,8 +19201,7 @@ class $$ChannelQueriesTableOrderingComposer
   );
 }
 
-class $$ChannelQueriesTableAnnotationComposer
-    extends Composer<_$DriftChatDatabase, $ChannelQueriesTable> {
+class $$ChannelQueriesTableAnnotationComposer extends Composer<_$DriftChatDatabase, $ChannelQueriesTable> {
   $$ChannelQueriesTableAnnotationComposer({
     required super.$db,
     required super.$table,
@@ -20110,8 +19209,7 @@ class $$ChannelQueriesTableAnnotationComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  GeneratedColumn<String> get queryHash =>
-      $composableBuilder(column: $table.queryHash, builder: (column) => column);
+  GeneratedColumn<String> get queryHash => $composableBuilder(column: $table.queryHash, builder: (column) => column);
 
   GeneratedColumn<String> get channelCid => $composableBuilder(
     column: $table.channelCid,
@@ -20132,11 +19230,7 @@ class $$ChannelQueriesTableTableManager
           $$ChannelQueriesTableUpdateCompanionBuilder,
           (
             ChannelQueryEntity,
-            BaseReferences<
-              _$DriftChatDatabase,
-              $ChannelQueriesTable,
-              ChannelQueryEntity
-            >,
+            BaseReferences<_$DriftChatDatabase, $ChannelQueriesTable, ChannelQueryEntity>,
           ),
           ChannelQueryEntity,
           PrefetchHooks Function()
@@ -20148,12 +19242,9 @@ class $$ChannelQueriesTableTableManager
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer: () =>
-              $$ChannelQueriesTableFilterComposer($db: db, $table: table),
-          createOrderingComposer: () =>
-              $$ChannelQueriesTableOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer: () =>
-              $$ChannelQueriesTableAnnotationComposer($db: db, $table: table),
+          createFilteringComposer: () => $$ChannelQueriesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () => $$ChannelQueriesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () => $$ChannelQueriesTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<String> queryHash = const Value.absent(),
@@ -20174,9 +19265,7 @@ class $$ChannelQueriesTableTableManager
                 channelCid: channelCid,
                 rowid: rowid,
               ),
-          withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
-              .toList(),
+          withReferenceMapper: (p0) => p0.map((e) => (e.readTable(table), BaseReferences(db, table, e))).toList(),
           prefetchHooksCallback: null,
         ),
       );
@@ -20194,11 +19283,7 @@ typedef $$ChannelQueriesTableProcessedTableManager =
       $$ChannelQueriesTableUpdateCompanionBuilder,
       (
         ChannelQueryEntity,
-        BaseReferences<
-          _$DriftChatDatabase,
-          $ChannelQueriesTable,
-          ChannelQueryEntity
-        >,
+        BaseReferences<_$DriftChatDatabase, $ChannelQueriesTable, ChannelQueryEntity>,
       ),
       ChannelQueryEntity,
       PrefetchHooks Function()
@@ -20218,8 +19303,7 @@ typedef $$ChannelQueriesMetadataTableUpdateCompanionBuilder =
       Value<int> rowid,
     });
 
-class $$ChannelQueriesMetadataTableFilterComposer
-    extends Composer<_$DriftChatDatabase, $ChannelQueriesMetadataTable> {
+class $$ChannelQueriesMetadataTableFilterComposer extends Composer<_$DriftChatDatabase, $ChannelQueriesMetadataTable> {
   $$ChannelQueriesMetadataTableFilterComposer({
     required super.$db,
     required super.$table,
@@ -20232,21 +19316,16 @@ class $$ChannelQueriesMetadataTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnWithTypeConverterFilters<Filter, Filter, String> get filter =>
-      $composableBuilder(
-        column: $table.filter,
-        builder: (column) => ColumnWithTypeConverterFilters(column),
-      );
-
-  ColumnWithTypeConverterFilters<
-    SortOrder<ChannelState>,
-    SortOrder<ChannelState>,
-    String
-  >
-  get sort => $composableBuilder(
-    column: $table.sort,
+  ColumnWithTypeConverterFilters<Filter, Filter, String> get filter => $composableBuilder(
+    column: $table.filter,
     builder: (column) => ColumnWithTypeConverterFilters(column),
   );
+
+  ColumnWithTypeConverterFilters<SortOrder<ChannelState>, SortOrder<ChannelState>, String> get sort =>
+      $composableBuilder(
+        column: $table.sort,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
 }
 
 class $$ChannelQueriesMetadataTableOrderingComposer
@@ -20283,8 +19362,7 @@ class $$ChannelQueriesMetadataTableAnnotationComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  GeneratedColumn<String> get queryHash =>
-      $composableBuilder(column: $table.queryHash, builder: (column) => column);
+  GeneratedColumn<String> get queryHash => $composableBuilder(column: $table.queryHash, builder: (column) => column);
 
   GeneratedColumnWithTypeConverter<Filter, String> get filter =>
       $composableBuilder(column: $table.filter, builder: (column) => column);
@@ -20306,11 +19384,7 @@ class $$ChannelQueriesMetadataTableTableManager
           $$ChannelQueriesMetadataTableUpdateCompanionBuilder,
           (
             ChannelQueryMetadataEntity,
-            BaseReferences<
-              _$DriftChatDatabase,
-              $ChannelQueriesMetadataTable,
-              ChannelQueryMetadataEntity
-            >,
+            BaseReferences<_$DriftChatDatabase, $ChannelQueriesMetadataTable, ChannelQueryMetadataEntity>,
           ),
           ChannelQueryMetadataEntity,
           PrefetchHooks Function()
@@ -20322,21 +19396,18 @@ class $$ChannelQueriesMetadataTableTableManager
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer: () =>
-              $$ChannelQueriesMetadataTableFilterComposer(
-                $db: db,
-                $table: table,
-              ),
-          createOrderingComposer: () =>
-              $$ChannelQueriesMetadataTableOrderingComposer(
-                $db: db,
-                $table: table,
-              ),
-          createComputedFieldComposer: () =>
-              $$ChannelQueriesMetadataTableAnnotationComposer(
-                $db: db,
-                $table: table,
-              ),
+          createFilteringComposer: () => $$ChannelQueriesMetadataTableFilterComposer(
+            $db: db,
+            $table: table,
+          ),
+          createOrderingComposer: () => $$ChannelQueriesMetadataTableOrderingComposer(
+            $db: db,
+            $table: table,
+          ),
+          createComputedFieldComposer: () => $$ChannelQueriesMetadataTableAnnotationComposer(
+            $db: db,
+            $table: table,
+          ),
           updateCompanionCallback:
               ({
                 Value<String> queryHash = const Value.absent(),
@@ -20361,9 +19432,7 @@ class $$ChannelQueriesMetadataTableTableManager
                 sort: sort,
                 rowid: rowid,
               ),
-          withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
-              .toList(),
+          withReferenceMapper: (p0) => p0.map((e) => (e.readTable(table), BaseReferences(db, table, e))).toList(),
           prefetchHooksCallback: null,
         ),
       );
@@ -20381,11 +19450,7 @@ typedef $$ChannelQueriesMetadataTableProcessedTableManager =
       $$ChannelQueriesMetadataTableUpdateCompanionBuilder,
       (
         ChannelQueryMetadataEntity,
-        BaseReferences<
-          _$DriftChatDatabase,
-          $ChannelQueriesMetadataTable,
-          ChannelQueryMetadataEntity
-        >,
+        BaseReferences<_$DriftChatDatabase, $ChannelQueriesMetadataTable, ChannelQueryMetadataEntity>,
       ),
       ChannelQueryMetadataEntity,
       PrefetchHooks Function()
@@ -20411,8 +19476,7 @@ typedef $$ConnectionEventsTableUpdateCompanionBuilder =
       Value<DateTime?> lastSyncAt,
     });
 
-class $$ConnectionEventsTableFilterComposer
-    extends Composer<_$DriftChatDatabase, $ConnectionEventsTable> {
+class $$ConnectionEventsTableFilterComposer extends Composer<_$DriftChatDatabase, $ConnectionEventsTable> {
   $$ConnectionEventsTableFilterComposer({
     required super.$db,
     required super.$table,
@@ -20430,12 +19494,7 @@ class $$ConnectionEventsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnWithTypeConverterFilters<
-    Map<String, dynamic>?,
-    Map<String, dynamic>,
-    String
-  >
-  get ownUser => $composableBuilder(
+  ColumnWithTypeConverterFilters<Map<String, dynamic>?, Map<String, dynamic>, String> get ownUser => $composableBuilder(
     column: $table.ownUser,
     builder: (column) => ColumnWithTypeConverterFilters(column),
   );
@@ -20461,8 +19520,7 @@ class $$ConnectionEventsTableFilterComposer
   );
 }
 
-class $$ConnectionEventsTableOrderingComposer
-    extends Composer<_$DriftChatDatabase, $ConnectionEventsTable> {
+class $$ConnectionEventsTableOrderingComposer extends Composer<_$DriftChatDatabase, $ConnectionEventsTable> {
   $$ConnectionEventsTableOrderingComposer({
     required super.$db,
     required super.$table,
@@ -20506,8 +19564,7 @@ class $$ConnectionEventsTableOrderingComposer
   );
 }
 
-class $$ConnectionEventsTableAnnotationComposer
-    extends Composer<_$DriftChatDatabase, $ConnectionEventsTable> {
+class $$ConnectionEventsTableAnnotationComposer extends Composer<_$DriftChatDatabase, $ConnectionEventsTable> {
   $$ConnectionEventsTableAnnotationComposer({
     required super.$db,
     required super.$table,
@@ -20515,11 +19572,9 @@ class $$ConnectionEventsTableAnnotationComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  GeneratedColumn<int> get id =>
-      $composableBuilder(column: $table.id, builder: (column) => column);
+  GeneratedColumn<int> get id => $composableBuilder(column: $table.id, builder: (column) => column);
 
-  GeneratedColumn<String> get type =>
-      $composableBuilder(column: $table.type, builder: (column) => column);
+  GeneratedColumn<String> get type => $composableBuilder(column: $table.type, builder: (column) => column);
 
   GeneratedColumnWithTypeConverter<Map<String, dynamic>?, String> get ownUser =>
       $composableBuilder(column: $table.ownUser, builder: (column) => column);
@@ -20558,11 +19613,7 @@ class $$ConnectionEventsTableTableManager
           $$ConnectionEventsTableUpdateCompanionBuilder,
           (
             ConnectionEventEntity,
-            BaseReferences<
-              _$DriftChatDatabase,
-              $ConnectionEventsTable,
-              ConnectionEventEntity
-            >,
+            BaseReferences<_$DriftChatDatabase, $ConnectionEventsTable, ConnectionEventEntity>,
           ),
           ConnectionEventEntity,
           PrefetchHooks Function()
@@ -20574,12 +19625,9 @@ class $$ConnectionEventsTableTableManager
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer: () =>
-              $$ConnectionEventsTableFilterComposer($db: db, $table: table),
-          createOrderingComposer: () =>
-              $$ConnectionEventsTableOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer: () =>
-              $$ConnectionEventsTableAnnotationComposer($db: db, $table: table),
+          createFilteringComposer: () => $$ConnectionEventsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () => $$ConnectionEventsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () => $$ConnectionEventsTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
@@ -20616,9 +19664,7 @@ class $$ConnectionEventsTableTableManager
                 lastEventAt: lastEventAt,
                 lastSyncAt: lastSyncAt,
               ),
-          withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
-              .toList(),
+          withReferenceMapper: (p0) => p0.map((e) => (e.readTable(table), BaseReferences(db, table, e))).toList(),
           prefetchHooksCallback: null,
         ),
       );
@@ -20636,11 +19682,7 @@ typedef $$ConnectionEventsTableProcessedTableManager =
       $$ConnectionEventsTableUpdateCompanionBuilder,
       (
         ConnectionEventEntity,
-        BaseReferences<
-          _$DriftChatDatabase,
-          $ConnectionEventsTable,
-          ConnectionEventEntity
-        >,
+        BaseReferences<_$DriftChatDatabase, $ConnectionEventsTable, ConnectionEventEntity>,
       ),
       ConnectionEventEntity,
       PrefetchHooks Function()
@@ -20649,42 +19691,28 @@ typedef $$ConnectionEventsTableProcessedTableManager =
 class $DriftChatDatabaseManager {
   final _$DriftChatDatabase _db;
   $DriftChatDatabaseManager(this._db);
-  $$ChannelsTableTableManager get channels =>
-      $$ChannelsTableTableManager(_db, _db.channels);
-  $$MessagesTableTableManager get messages =>
-      $$MessagesTableTableManager(_db, _db.messages);
-  $$DraftMessagesTableTableManager get draftMessages =>
-      $$DraftMessagesTableTableManager(_db, _db.draftMessages);
-  $$LocationsTableTableManager get locations =>
-      $$LocationsTableTableManager(_db, _db.locations);
+  $$ChannelsTableTableManager get channels => $$ChannelsTableTableManager(_db, _db.channels);
+  $$MessagesTableTableManager get messages => $$MessagesTableTableManager(_db, _db.messages);
+  $$DraftMessagesTableTableManager get draftMessages => $$DraftMessagesTableTableManager(_db, _db.draftMessages);
+  $$LocationsTableTableManager get locations => $$LocationsTableTableManager(_db, _db.locations);
   $$PendingOperationsTableTableManager get pendingOperations =>
       $$PendingOperationsTableTableManager(_db, _db.pendingOperations);
-  $$PinnedMessagesTableTableManager get pinnedMessages =>
-      $$PinnedMessagesTableTableManager(_db, _db.pinnedMessages);
-  $$PollsTableTableManager get polls =>
-      $$PollsTableTableManager(_db, _db.polls);
-  $$PollVotesTableTableManager get pollVotes =>
-      $$PollVotesTableTableManager(_db, _db.pollVotes);
-  $$PinnedMessageReactionsTableTableManager get pinnedMessageReactions =>
-      $$PinnedMessageReactionsTableTableManager(
-        _db,
-        _db.pinnedMessageReactions,
-      );
-  $$ReactionsTableTableManager get reactions =>
-      $$ReactionsTableTableManager(_db, _db.reactions);
-  $$UsersTableTableManager get users =>
-      $$UsersTableTableManager(_db, _db.users);
-  $$MembersTableTableManager get members =>
-      $$MembersTableTableManager(_db, _db.members);
-  $$ReadsTableTableManager get reads =>
-      $$ReadsTableTableManager(_db, _db.reads);
-  $$ChannelQueriesTableTableManager get channelQueries =>
-      $$ChannelQueriesTableTableManager(_db, _db.channelQueries);
-  $$ChannelQueriesMetadataTableTableManager get channelQueriesMetadata =>
-      $$ChannelQueriesMetadataTableTableManager(
-        _db,
-        _db.channelQueriesMetadata,
-      );
+  $$PinnedMessagesTableTableManager get pinnedMessages => $$PinnedMessagesTableTableManager(_db, _db.pinnedMessages);
+  $$PollsTableTableManager get polls => $$PollsTableTableManager(_db, _db.polls);
+  $$PollVotesTableTableManager get pollVotes => $$PollVotesTableTableManager(_db, _db.pollVotes);
+  $$PinnedMessageReactionsTableTableManager get pinnedMessageReactions => $$PinnedMessageReactionsTableTableManager(
+    _db,
+    _db.pinnedMessageReactions,
+  );
+  $$ReactionsTableTableManager get reactions => $$ReactionsTableTableManager(_db, _db.reactions);
+  $$UsersTableTableManager get users => $$UsersTableTableManager(_db, _db.users);
+  $$MembersTableTableManager get members => $$MembersTableTableManager(_db, _db.members);
+  $$ReadsTableTableManager get reads => $$ReadsTableTableManager(_db, _db.reads);
+  $$ChannelQueriesTableTableManager get channelQueries => $$ChannelQueriesTableTableManager(_db, _db.channelQueries);
+  $$ChannelQueriesMetadataTableTableManager get channelQueriesMetadata => $$ChannelQueriesMetadataTableTableManager(
+    _db,
+    _db.channelQueriesMetadata,
+  );
   $$ConnectionEventsTableTableManager get connectionEvents =>
       $$ConnectionEventsTableTableManager(_db, _db.connectionEvents);
 }
