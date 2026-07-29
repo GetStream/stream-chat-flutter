@@ -68,7 +68,8 @@ class MessageRules {
   /// Returns `false` for the current user's own messages, messages from muted
   /// users, silent/shadowed/ephemeral messages, thread-only replies, restricted
   /// messages, and messages already read. Also returns `false` if the channel
-  /// is muted or doesn't support read events.
+  /// is muted, or doesn't support read events unless
+  /// [Channel.usesLocalUnreadCount] is enabled for the channel.
   static bool canCountAsUnread(
     Message message,
     Channel channel,
@@ -80,8 +81,12 @@ class MessageRules {
     // Don't count if the user has disabled read receipts.
     if (!currentUser.isReadReceiptsEnabled) return false;
 
-    // Don't count if the channel doesn't support read receipts.
-    if (!channel.canUseReadReceipts) return false;
+    // Don't count if the channel doesn't support read receipts, unless local
+    // unread tracking owns the count for this channel (see
+    // [Channel.usesLocalUnreadCount]).
+    if (!channel.canUseReadReceipts && !channel.usesLocalUnreadCount) {
+      return false;
+    }
 
     // Don't count if the channel is muted.
     if (channel.isMuted) return false;
