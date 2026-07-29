@@ -148,6 +148,31 @@ void main() {
       );
     });
 
+    test('drops an operation with a missing targetMessageId', () async {
+      await persistence.insertPendingOperation(
+        PendingOperation(
+          type: ReactionPendingOperation.addType,
+          // No targetMessageId — the reaction can never be routed to a message.
+          payload: {
+            ReactionPendingOperation.reactionKey: Reaction(type: 'like').toJson(),
+          },
+        ),
+      );
+
+      await replayer.replay();
+
+      // Dropped without ever hitting the API — it can never be replayed.
+      expect(persistence.storedPendingOperations, isEmpty);
+      verifyNever(
+        () => api.message.sendReaction(
+          any(),
+          any(),
+          skipPush: any(named: 'skipPush'),
+          enforceUnique: any(named: 'enforceUnique'),
+        ),
+      );
+    });
+
     test('drops an operation of an unknown type', () async {
       await persistence.insertPendingOperation(
         const PendingOperation(

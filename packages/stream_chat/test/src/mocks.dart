@@ -108,8 +108,15 @@ class MockPersistenceClient extends Mock implements ChatPersistenceClient {
   /// loop's per-operation error isolation.
   final Set<int> failDeleteForIds = {};
 
+  /// When `true`, [insertPendingOperation] throws, to exercise the enqueue
+  /// failure fallback in `Channel.sendReaction`/`deleteReaction`.
+  bool failInsert = false;
+
   @override
   Future<void> insertPendingOperation(PendingOperation operation) async {
+    if (failInsert) {
+      throw Exception('simulated insert failure');
+    }
     // Assign an autoincrement id like the real DAO so replay can delete by id.
     storedPendingOperations.add(
       PendingOperation(

@@ -1625,16 +1625,19 @@ class Channel {
       );
     } catch (e) {
       final retriable = e is StreamChatNetworkError && e.isRetriable;
-      if (_client.persistenceEnabled && retriable) {
-        // Enqueue the operation for retry when back online.
-        await _enqueuePendingOperation(
-          ReactionPendingOperation.add(
-            reaction,
-            skipPush: skipPush,
-            enforceUnique: enforceUnique,
-          ),
-        );
-      } else {
+      // Enqueue the operation for retry when back online, keeping the
+      // optimistic state only if it was actually enqueued.
+      final enqueued =
+          _client.persistenceEnabled &&
+          retriable &&
+          await _enqueuePendingOperation(
+            ReactionPendingOperation.add(
+              reaction,
+              skipPush: skipPush,
+              enforceUnique: enforceUnique,
+            ),
+          );
+      if (!enqueued) {
         // Reset the message if the update fails. Use replace (not merge)
         // so the rollback wins over the optimistic local state — otherwise
         // `Message.updateWith`'s enrichment preservation would keep the
@@ -1665,15 +1668,18 @@ class Channel {
       );
     } catch (e) {
       final retriable = e is StreamChatNetworkError && e.isRetriable;
-      if (_client.persistenceEnabled && retriable) {
-        // Enqueue the operation for retry when back online.
-        await _enqueuePendingOperation(
-          ReactionPendingOperation.delete(
-            messageId: message.id,
-            reactionType: reaction.type,
-          ),
-        );
-      } else {
+      // Enqueue the operation for retry when back online, keeping the
+      // optimistic state only if it was actually enqueued.
+      final enqueued =
+          _client.persistenceEnabled &&
+          retriable &&
+          await _enqueuePendingOperation(
+            ReactionPendingOperation.delete(
+              messageId: message.id,
+              reactionType: reaction.type,
+            ),
+          );
+      if (!enqueued) {
         // Reset the message if the update fails. Use replace (not merge)
         // for symmetry with `sendReaction` — see that method for context.
         state?.replaceMessage(message);
@@ -1683,14 +1689,19 @@ class Channel {
   }
 
   /// Persists [operation] to the pending-operation queue when a persistence
-  /// client is available
-  Future<void> _enqueuePendingOperation(PendingOperation operation) async {
+  /// client is available.
+  ///
+  /// Returns `true` when the operation was enqueued, or `false` when there is
+  /// no persistence client or the insert failed.
+  Future<bool> _enqueuePendingOperation(PendingOperation operation) async {
     final persistence = _client.chatPersistenceClient;
-    if (persistence == null) return;
+    if (persistence == null) return false;
     try {
       await persistence.insertPendingOperation(operation);
+      return true;
     } catch (e, stk) {
       client.logger.warning('Failed to enqueue pending operation', e, stk);
+      return false;
     }
   }
 

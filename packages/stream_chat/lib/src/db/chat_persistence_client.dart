@@ -356,15 +356,6 @@ abstract class ChatPersistenceClient {
   /// Deletes all the pinned messages reactions by [messageIds]
   Future<void> deletePinnedMessageReactionsByMessageId(List<String> messageIds);
 
-  /// Inserts [operation] into the pending-operation queue.
-  Future<void> insertPendingOperation(PendingOperation operation) async {}
-
-  /// Returns all stored pending operations ordered by insertion.
-  Future<List<PendingOperation>> getPendingOperations() async => [];
-
-  /// Deletes the pending operation with the given [id].
-  Future<void> deletePendingOperation(int id) async {}
-
   /// Deletes all the poll votes by [pollIds]
   Future<void> deletePollVotesByPollIds(List<String> pollIds);
 
@@ -545,6 +536,23 @@ abstract class ChatPersistenceClient {
       updateLocations(locations),
     ]);
   }
+
+  /// Inserts [operation] into the pending-operation queue.
+  ///
+  /// Pending operations are optimistic mutations queued for replay once
+  /// connectivity is restored. The default no-op drops them unless overridden
+  /// alongside [getPendingOperations] and [deletePendingOperation].
+  Future<void> insertPendingOperation(PendingOperation operation) async {}
+
+  /// Returns all stored pending operations ordered by insertion.
+  ///
+  /// Defaults to an empty list; see [insertPendingOperation].
+  Future<List<PendingOperation>> getPendingOperations() async => [];
+
+  /// Deletes the pending operation with the given [id].
+  ///
+  /// No-op by default; see [insertPendingOperation].
+  Future<void> deletePendingOperation(int id) async {}
 
   List<Reaction> _expandReactions(Message message) {
     final own = message.ownReactions;

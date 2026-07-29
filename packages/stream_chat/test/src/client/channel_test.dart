@@ -3222,6 +3222,39 @@ void main() {
           expect(current.ownReactions, anyOf(isNull, isEmpty));
         },
       );
+
+      test(
+        'a failed enqueue reverts the reaction instead of keeping it unsynced',
+        () async {
+          final persistence = MockPersistenceClient()..failInsert = true;
+          when(() => client.chatPersistenceClient).thenReturn(persistence);
+
+          const type = 'like';
+          final message = Message(id: 'offline-msg-4', state: MessageState.sent);
+          final reaction = Reaction(
+            type: type,
+            messageId: message.id,
+            user: client.state.currentUser,
+          );
+
+          when(
+            () => client.sendReaction(message.id, reaction),
+          ).thenThrow(StreamChatNetworkError(ChatErrorCode.inputError));
+
+          await expectLater(
+            channel.sendReaction(message, reaction),
+            throwsA(isA<StreamChatNetworkError>()),
+          );
+
+          // Enqueue failed, so nothing is queued and the optimistic reaction
+          // is rolled back to keep local state consistent with the server.
+          expect(persistence.storedPendingOperations, isEmpty);
+          final current = channel.state!.messages.firstWhere(
+            (m) => m.id == message.id,
+          );
+          expect(current.ownReactions, anyOf(isNull, isEmpty));
+        },
+      );
     });
 
     group('`.sendReaction in thread`', () {
@@ -3628,6 +3661,46 @@ void main() {
           );
 
           // No queue to replay from, so the optimistic removal is rolled back.
+          final current = channel.state!.messages.firstWhere(
+            (m) => m.id == messageId,
+          );
+          expect(current.ownReactions?.map((r) => r.type), contains(type));
+        },
+      );
+
+      test(
+        'a failed enqueue restores the reaction instead of dropping it',
+        () async {
+          final persistence = MockPersistenceClient()..failInsert = true;
+          when(() => client.chatPersistenceClient).thenReturn(persistence);
+
+          const type = 'like';
+          const messageId = 'offline-del-4';
+          final reaction = Reaction(
+            type: type,
+            messageId: messageId,
+            userId: 'test-user-id',
+          );
+          final message = Message(
+            id: messageId,
+            ownReactions: [reaction],
+            latestReactions: [reaction],
+            reactionGroups: {type: ReactionGroup(count: 1, sumScores: 1)},
+            state: MessageState.sent,
+          );
+
+          when(
+            () => client.deleteReaction(messageId, type),
+          ).thenThrow(StreamChatNetworkError(ChatErrorCode.inputError));
+
+          await expectLater(
+            channel.deleteReaction(message, reaction),
+            throwsA(isA<StreamChatNetworkError>()),
+          );
+
+          // Enqueue failed, so nothing is queued and the optimistic removal is
+          // rolled back — the reaction is restored to match the server.
+          expect(persistence.storedPendingOperations, isEmpty);
           final current = channel.state!.messages.firstWhere(
             (m) => m.id == messageId,
           );

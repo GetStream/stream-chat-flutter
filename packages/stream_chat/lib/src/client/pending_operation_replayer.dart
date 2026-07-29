@@ -89,20 +89,28 @@ class PendingOperationReplayer {
   Future<void> Function()? _replayCallFor(PendingOperation operation) {
     switch (operation.type) {
       case ReactionPendingOperation.addType:
+        final targetMessageId = operation.targetMessageId;
+        if (targetMessageId == null) {
+          throw StateError('Missing targetMessageId for ${operation.type}');
+        }
         final reaction = Reaction.fromJson(
           operation.payload[ReactionPendingOperation.reactionKey] as Map<String, dynamic>,
         );
         final skipPush = operation.payload[ReactionPendingOperation.skipPushKey] as bool? ?? false;
         final enforceUnique = operation.payload[ReactionPendingOperation.enforceUniqueKey] as bool? ?? false;
         return () => _client.sendReaction(
-          operation.targetMessageId!,
+          targetMessageId,
           reaction,
           skipPush: skipPush,
           enforceUnique: enforceUnique,
         );
       case ReactionPendingOperation.deleteType:
+        final targetMessageId = operation.targetMessageId;
+        if (targetMessageId == null) {
+          throw StateError('Missing targetMessageId for ${operation.type}');
+        }
         final reactionType = operation.payload[ReactionPendingOperation.reactionTypeKey] as String;
-        return () => _client.deleteReaction(operation.targetMessageId!, reactionType);
+        return () => _client.deleteReaction(targetMessageId, reactionType);
       default:
         // Unknown operation type — cannot be replayed by this version.
         return null;
