@@ -58,6 +58,7 @@ dev_dependencies:
   flutter_launcher_icons: ^0.14.4
   integration_test:
     sdk: flutter
+  url_launcher_platform_interface: ^2.3.2
 
 flutter:
   uses-material-design: true

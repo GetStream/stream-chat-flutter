@@ -6,8 +6,7 @@ import 'support/stream_test_case.dart';
 // Ported from the native MessageList suites (`MessageList_Tests.swift` /
 // `MessageListTests.kt`), adapted to the in-process integration_test setup.
 // A few native cases can't run under this binding (offline writes throw, the
-// lifecycle reconnect hangs, url_launcher opens the real browser on-device) and
-// are kept as documented `skip:`s.
+// lifecycle reconnect hangs) and are kept as documented `skip:`s.
 //
 // TODO(allure): fill each test's `allureId` from Allure TestOps project 135.
 void main() {
@@ -432,14 +431,30 @@ void main() {
     },
   );
 
+  // Mirrors the native test_messageWithLinkOpensSafari: the browser is stood in
+  // for by a fake `UrlLauncherPlatform`, so the tap is verified without the real
+  // browser taking over the device (which suspends the app and hangs the run).
   streamTestWithEnv(
     description: 'message with a link opens the browser',
-    skip:
-        'On-device, url_launcher opens the real browser (the plugin uses its own '
-        'Pigeon channel, not the mocked plugins.flutter.io/url_launcher). Verifying '
-        'in-process would require overriding UrlLauncherPlatform.instance (extra dep).',
     body: (env) async {
-      // Placeholder mirroring native test_messageWithLinkOpensSafari. See skip reason.
+      const link = 'https://youtube.com/watch?v=xOX7MsrbaPY';
+      // Tapping the preview opens the attachment's asset URL, which comes from
+      // the mock server's canned OG payload — the canonical (`www.`) form of the
+      // link, not the text the participant typed.
+      const openedLink = 'https://www.youtube.com/watch?v=xOX7MsrbaPY';
+
+      step('GIVEN the user opens a channel');
+      await env.userRobot.login().openChannel();
+
+      step('WHEN the participant sends a message with a YouTube link');
+      await env.participantRobot.sendMessage(link);
+      await env.userRobot.assertLinkPreview();
+
+      step('AND the user taps the link preview');
+      await env.userRobot.tapLinkPreview();
+
+      step('THEN the browser opens the link');
+      await env.assertBrowserOpened(url: openedLink);
     },
   );
 

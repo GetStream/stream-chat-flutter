@@ -1,16 +1,17 @@
 import 'dart:async';
 
-import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart' show AppLifecycleState;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sample_app/app.dart';
 import 'package:sample_app/auth/auth_controller.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:url_launcher_platform_interface/url_launcher_platform_interface.dart';
 
 import '../mock_server/mock_server.dart';
 import '../robots/backend_robot.dart';
 import '../robots/participant_robot.dart';
 import '../robots/user_robot.dart';
+import 'fake_url_launcher.dart';
 
 class StreamTestEnv {
   MockServer? _mockServer;
@@ -25,34 +26,24 @@ class StreamTestEnv {
   final _connectivity = StreamController<List<ConnectivityResult>>.broadcast();
   var _connectivityPrimed = false;
 
-  // The url_launcher channel has no plugin implementation under `flutter test`,
-  // so it is mocked to record every external URL the app tries to open (tapping
-  // a link/link-preview routes through `launchURL` → this channel).
-  static const _urlLauncherChannel = MethodChannel('plugins.flutter.io/url_launcher');
-  final launchedUrls = <String>[];
+  // Records every external URL the app tries to open (tapping a link or a link
+  // preview routes through the SDK's `launchURL`) instead of handing it to the
+  // real browser. Installed in [setUp], restored in [tearDown].
+  final _urlLauncher = FakeUrlLauncher();
+  UrlLauncherPlatform? _realUrlLauncher;
+
+  /// The external URLs the app has opened so far, in order.
+  List<String> get launchedUrls => _urlLauncher.launchedUrls;
 
   Future<void> setUp(WidgetTester tester, {bool persistence = false}) async {
     _tester = tester;
+    _realUrlLauncher = UrlLauncherPlatform.instance;
+    UrlLauncherPlatform.instance = _urlLauncher;
+
     final server = _mockServer = await MockServer.start();
     backendRobot = BackendRobot(server);
     participantRobot = ParticipantRobot(server);
     userRobot = UserRobot(tester);
-
-    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
-      _urlLauncherChannel,
-      (call) async {
-        switch (call.method) {
-          case 'canLaunch':
-            return true;
-          case 'launch':
-            final url = (call.arguments as Map?)?['url'] as String?;
-            if (url != null) launchedUrls.add(url);
-            return true;
-          default:
-            return null;
-        }
-      },
-    );
 
     authController
       ..debugConnectionOverride = StreamConnectionOverride(
@@ -68,15 +59,22 @@ class StreamTestEnv {
 
   /// Waits until the app opens an external URL (via url_launcher), mirroring the
   /// native "link opens the browser" assertion without a real browser.
+  ///
+  /// When [url] is given, the launch must be for that exact URL.
   Future<void> assertBrowserOpened({
+    String? url,
     Duration timeout = const Duration(seconds: 10),
   }) async {
     final end = DateTime.now().add(timeout);
     while (DateTime.now().isBefore(end)) {
       await _tester.pump(const Duration(milliseconds: 100));
-      if (launchedUrls.isNotEmpty) return;
+      if (url == null && launchedUrls.isNotEmpty) return;
+      if (url != null && launchedUrls.contains(url)) return;
     }
-    throw TestFailure('Expected an external URL launch, but none was recorded');
+    throw TestFailure(
+      'Expected the browser to open${url == null ? '' : ' with $url'}, '
+      'but the launched URLs were: $launchedUrls',
+    );
   }
 
   /// Simulates a full network outage: the SDK's HTTP requests all fail and the
@@ -138,7 +136,8 @@ class StreamTestEnv {
     try {
       await authController.debugReset();
     } finally {
-      _tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(_urlLauncherChannel, null);
+      // Null when tearDown runs before setUp installed the fake.
+      if (_realUrlLauncher case final real?) UrlLauncherPlatform.instance = real;
       await _connectivity.close();
       // Null when MockServer.start() itself failed during setUp.
       await _mockServer?.stop();
