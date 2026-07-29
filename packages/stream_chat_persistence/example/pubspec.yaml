@@ -23,8 +23,8 @@ dependencies:
   cupertino_icons: ^1.0.3
   flutter:
     sdk: flutter
-  stream_chat: ^10.1.0
-  stream_chat_persistence: ^10.1.0
+  stream_chat: ^10.2.0
+  stream_chat_persistence: ^10.2.0
 
 dependency_overrides:
   stream_chat:

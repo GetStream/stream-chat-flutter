@@ -186,6 +186,24 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
   String get somethingWentWrongError => 'Alguna cosa ha anat malament';
 
   @override
+  String get connectionErrorTitle => 'Sense connexió a Internet';
+
+  @override
+  String get connectionErrorDescription => 'Comprova la teva connexió a Internet';
+
+  @override
+  String get slowConnectionErrorTitle => 'Connexió a Internet lenta';
+
+  @override
+  String get slowConnectionErrorDescription => 'Sembla que hi ha un problema amb la teva connexió a Internet';
+
+  @override
+  String get genericErrorTitle => 'Error';
+
+  @override
+  String get genericErrorDescription => 'Vaja, alguna cosa ha anat malament';
+
+  @override
   String get addMoreFilesLabel => 'Afegir més';
 
   @override
@@ -889,7 +907,7 @@ class _AccessibilityTranslationsCa extends AccessibilityTranslations {
       "Pausa l'enregistrament de veu, ${formatDuration(duration)}";
 
   @override
-  String get attachmentPickerTooltip => 'Obre el selector de fitxers adjunts';
+  String get attachmentPickerTooltip => 'Alterna el selector de fitxers adjunts';
 
   @override
   String get attachmentPickerOpenHint => 'toca dos vegades per obrir el selector de fitxers adjunts';
@@ -971,6 +989,54 @@ class _AccessibilityTranslationsCa extends AccessibilityTranslations {
   String get deselectMediaTapHint => 'desselecciona';
 
   @override
+  String get outgoingMessagePreviewLabel => 'Tu';
+
+  @override
+  String incomingMessagePreviewLabel({String? senderName}) {
+    return senderName ?? 'Missatge';
+  }
+
+  @override
+  String get pollPreviewLabel => 'Enquesta';
+
+  @override
+  String get draftPreviewLabel => 'Esborrany';
+
+  @override
+  String get messageSendingStatusLabel => "S'està enviant";
+
+  @override
+  String get messageSentStatusLabel => 'Enviat';
+
+  @override
+  String get messageDeliveredStatusLabel => 'Lliurat';
+
+  @override
+  String get messageReadStatusLabel => 'Llegit';
+
+  @override
+  String unreadMessagesLabel({required int count}) {
+    return Intl.plural(
+      count,
+      one: '$count missatge no llegit',
+      other: '$count missatges no llegits',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String get channelGroupLabel => 'Grup';
+
+  @override
+  String get systemMessagePreviewLabel => 'Sistema';
+
+  @override
+  String get channelMutedLabel => 'silenciat';
+
+  @override
+  String get channelPinnedLabel => 'fixat';
+
+  @override
   String get savePollTooltip => "Desa l'enquesta";
 
   @override
@@ -1034,14 +1100,39 @@ class _AccessibilityTranslationsCa extends AccessibilityTranslations {
 
   @override
   String attachmentsAddedAnnouncement({required int count}) {
-    if (count == 1) return '1 fitxer adjunt afegit';
-    return '$count fitxers adjunts afegits';
+    return Intl.plural(
+      count,
+      one: '$count fitxer adjunt afegit',
+      other: '$count fitxers adjunts afegits',
+      locale: localeName,
+    );
   }
 
   @override
   String attachmentsRemovedAnnouncement({required int count}) {
-    if (count == 1) return '1 fitxer adjunt eliminat';
-    return '$count fitxers adjunts eliminats';
+    return Intl.plural(
+      count,
+      one: '$count fitxer adjunt eliminat',
+      other: '$count fitxers adjunts eliminats',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String formatRecentDateTime(DateTime date) {
+    if (date.isWithinLastMinute) return 'Ara mateix';
+
+    final localDate = date.toLocal();
+    final jiffyDate = Jiffy.parseFromDateTime(localDate);
+    final time = jiffyDate.jm;
+
+    if (localDate.isToday) return 'Avui a les $time';
+    if (localDate.isYesterday) return 'Ahir a les $time';
+    if (localDate.isWithinLastWeek) return '${jiffyDate.EEEE} a les $time';
+    if (localDate.isInSameYear) {
+      return '${jiffyDate.format(pattern: 'd MMM')} a les $time';
+    }
+    return '${jiffyDate.format(pattern: 'd MMM yyyy')} a les $time';
   }
 
   @override

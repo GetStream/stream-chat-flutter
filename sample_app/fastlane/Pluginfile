@@ -2,6 +2,6 @@
 #
 # Ensure this file is checked in to source control!
 
-gem 'fastlane-plugin-stream_actions'
+gem 'fastlane-plugin-stream_actions', '0.4.6'
 gem 'fastlane-plugin-firebase_app_distribution'
 gem 'fastlane-plugin-aws_s3'

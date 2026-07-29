@@ -248,6 +248,7 @@ class StreamChannelListTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final icons = context.streamIcons;
     final spacing = context.streamSpacing;
+    final a11y = context.translations.accessibility;
 
     final channelListItemTheme = StreamChannelListItemTheme.of(context);
     final defaults = _StreamChannelListItemThemeDefaults(context);
@@ -258,8 +259,8 @@ class StreamChannelListTile extends StatelessWidget {
     final effectiveAttributePosition = channelListItemTheme.attributePosition ?? defaults.attributePosition;
 
     final channelAttributes = [
-      if (isMuted) Icon(icons.mute),
-      if (isPinned) Icon(icons.pin),
+      if (isMuted) Icon(icons.mute, semanticLabel: a11y.channelMutedLabel),
+      if (isPinned) Icon(icons.pin, semanticLabel: a11y.channelPinnedLabel),
     ];
 
     Widget? attributesRow;
@@ -274,7 +275,7 @@ class StreamChannelListTile extends StatelessWidget {
     final titleTrailing = effectiveAttributePosition == .inlineTitle ? attributesRow : null;
     final subtitleTrailing = effectiveAttributePosition == .trailingBottom ? attributesRow : null;
 
-    return Padding(
+    final listItem = Padding(
       padding: EdgeInsets.all(spacing.xxs),
       child: StreamListTileTheme(
         data: StreamListTileThemeData(
@@ -318,6 +319,8 @@ class StreamChannelListTile extends StatelessWidget {
         ),
       ),
     );
+
+    return MergeSemantics(child: listItem);
   }
 }
 
@@ -342,6 +345,7 @@ class _TitleRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final spacing = context.streamSpacing;
     final colorScheme = context.streamColorScheme;
+    final a11y = context.translations.accessibility;
 
     return Row(
       mainAxisSize: .min,
@@ -374,7 +378,11 @@ class _TitleRow extends StatelessWidget {
             spacing: spacing.xs,
             children: [
               if (timestamp case final timestamp?) DefaultTextStyle.merge(style: timestampStyle, child: timestamp),
-              if (unreadCount > 0) StreamBadgeNotification(label: '$unreadCount'),
+              if (unreadCount > 0)
+                StreamBadgeNotification(
+                  label: '$unreadCount',
+                  semanticLabel: a11y.unreadMessagesLabel(count: unreadCount),
+                ),
             ],
           ),
       ],
@@ -584,20 +592,13 @@ class _ChannelLastMessageWithStatus extends StatefulWidget {
 class _ChannelLastMessageWithStatusState extends State<_ChannelLastMessageWithStatus> {
   Message? _currentLastMessage;
 
-  static bool _defaultLastMessagePredicate(Message message) {
-    if (message.isShadowed) return false;
-    if (message.isError) return false;
-    if (message.isEphemeral) return false;
-
-    return true;
-  }
-
   @override
   Widget build(BuildContext context) {
     final channelState = widget.channel.state;
     if (channelState == null) return const Empty();
 
     final currentUser = widget.channel.client.state.currentUser;
+    final predicate = _defaultLastMessagePredicateForUser(currentUser?.id);
 
     return BetterStreamBuilder<(Draft?, List<Message>)>(
       stream: CombineLatestStream.combine2(
@@ -623,7 +624,7 @@ class _ChannelLastMessageWithStatusState extends State<_ChannelLastMessageWithSt
         }
 
         // Find the last valid message.
-        final message = messages.lastWhereOrNull(_defaultLastMessagePredicate);
+        final message = messages.lastWhereOrNull(predicate);
         // `_currentLastMessage` holds the most recent message seen while the
         // channel has the latest messages (isUpToDate).
         // While isUpToDate is false (e.g. Channel.query(idAround:) truncates
@@ -659,6 +660,8 @@ class _ChannelLastMessageWithStatusState extends State<_ChannelLastMessageWithSt
               message: latestLastMessage,
             );
           }
+
+          deliveryPrefix = ExcludeSemantics(child: deliveryPrefix);
         }
 
         return Row(
@@ -686,11 +689,13 @@ class ChannelLastMessageText extends StatefulWidget {
     super.key,
     required this.channel,
     this.textStyle,
-    this.lastMessagePredicate = _defaultLastMessagePredicate,
+    LastMessagePredicate? lastMessagePredicate,
   }) : assert(
          channel.state != null,
          'Channel ${channel.id} is not initialized',
-       );
+       ),
+       lastMessagePredicate =
+           lastMessagePredicate ?? _defaultLastMessagePredicateForUser(channel.client.state.currentUser?.id);
 
   /// The channel to display the last message of.
   final Channel channel;
@@ -703,20 +708,22 @@ class ChannelLastMessageText extends StatefulWidget {
   ///
   /// This predicate is used to filter out messages that should not be
   /// considered for the last message.
-  final bool Function(Message) lastMessagePredicate;
-
-  // The default predicate to determine if the message should be
-  // considered for the last message.
-  static bool _defaultLastMessagePredicate(Message message) {
-    if (message.isShadowed) return false;
-    if (message.isError) return false;
-    if (message.isEphemeral) return false;
-
-    return true;
-  }
+  final LastMessagePredicate lastMessagePredicate;
 
   @override
   State<ChannelLastMessageText> createState() => _ChannelLastMessageTextState();
+}
+
+// The default predicate to determine if the message should be
+// considered for the last message.
+LastMessagePredicate _defaultLastMessagePredicateForUser(String? currentUserId) {
+  return (Message message) {
+    final isMyMessage = currentUserId != null && message.user?.id == currentUserId;
+    if (message.shadowed && !isMyMessage) return false;
+    if (message.isError) return false;
+    if (message.isEphemeral) return false;
+    return true;
+  };
 }
 
 class _ChannelLastMessageTextState extends State<ChannelLastMessageText> {

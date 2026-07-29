@@ -1,0 +1,13 @@
+name: 'Cache Gradle'
+description: 'Cache Gradle dependencies for sample_app Android builds'
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/cache@v6
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+          sample_app/android/.gradle
+        key: gradle-${{ runner.os }}-${{ hashFiles('sample_app/android/gradle/wrapper/gradle-wrapper.properties', 'sample_app/android/app/build.gradle', 'sample_app/android/build.gradle', 'sample_app/android/settings.gradle', '**/pubspec.lock') }}
+        restore-keys: gradle-${{ runner.os }}-

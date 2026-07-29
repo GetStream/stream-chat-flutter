@@ -1,9 +1,10 @@
 skip_docs
-import '../../Fastfile'
+import '../../fastlane/Fastfile'
 default_platform(:android)
 
 before_all do
   if is_ci
+    setup_ci
     setup_git_config
   end
 end
@@ -56,7 +57,7 @@ platform :android do
   # Usage: bundle exec fastlane android distribute_to_s3
   lane :distribute_to_s3 do |options|
     build_apk
-    
+
     bucket_with_path = ENV.fetch("AWS_S3_BUCKET")
     bucket_name, upload_path = bucket_with_path.chomp('/').split('/', 2)
 

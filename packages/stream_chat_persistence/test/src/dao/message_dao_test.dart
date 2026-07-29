@@ -355,6 +355,26 @@ void main() {
       expect(replies.last.id, threadId(29));
     });
 
+    test('limit of 0 is treated as unset and returns all replies', () async {
+      await _prepareTestData(
+        cid,
+        threads: true,
+        mapAllThreadToFirstMessage: true,
+        count: 30,
+      );
+
+      final replies = await messageDao.getThreadMessagesByParentId(
+        parentId,
+        options: const PaginationParams(limit: 0),
+      );
+
+      // limit: 0 is treated as "unset" → no SQL LIMIT is applied → all 30
+      // replies are returned in ASC order: id0..id29.
+      expect(replies.length, 30);
+      expect(replies.first.id, threadId(0));
+      expect(replies.last.id, threadId(29));
+    });
+
     test('lessThan only excludes the cursor', () async {
       await _prepareTestData(
         cid,
