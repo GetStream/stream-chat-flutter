@@ -81,16 +81,20 @@ class StreamMessageReactions extends StatelessWidget {
       ),
     );
 
-    // When the current user has reacted with a given type, report their full
-    // reaction (user, score, timestamps); otherwise a template carrying just
-    // the type and emoji code — mirroring the reaction picker.
-    final ownReactionsMap = {for (final it in [...?message.ownReactions]) it.type: it};
+    final ownReactions = [...?message.ownReactions];
+    final ownReactionsMap = {for (final it in ownReactions) it.type: it};
 
     Reaction? reactionOf(core.StreamReactionsItem? item) {
-      return switch (item?.key) {
-        final type? => ownReactionsMap[type] ?? Reaction(type: type, emojiCode: resolver.emojiCode(type)),
-        _ => null,
+      final reactionType = item?.key;
+      if (reactionType == null) return null;
+
+      final reactionEmojiCode = resolver.emojiCode(reactionType);
+      final pickedReaction = switch (ownReactionsMap[reactionType]) {
+        final reaction? => reaction,
+        _ => Reaction(type: reactionType, emojiCode: reactionEmojiCode),
       };
+
+      return pickedReaction;
     }
 
     return core.StreamReactions(
@@ -98,7 +102,7 @@ class StreamMessageReactions extends StatelessWidget {
       position: effectivePosition,
       overlap: effectiveOverlap,
       onReactionPressed: switch (onReactionTap) {
-        final onReactionTap? => (item) => onReactionTap(reactionOf(item)),
+        final onTap? => (item) => onTap(reactionOf(item)),
         _ => null,
       },
       items: [...?items],
