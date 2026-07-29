@@ -40,7 +40,7 @@ class StreamMessageContent extends StatefulWidget {
     this.onLinkTap,
     this.onMentionTap,
     this.onAnyMentionTap,
-    this.onReactionsTap,
+    this.onReactionTap,
     this.onQuotedMessageTap,
     this.reactionSorting,
   });
@@ -104,10 +104,11 @@ class StreamMessageContent extends StatefulWidget {
   /// only.
   final core.MarkdownTapAnyMentionCallback? onAnyMentionTap;
 
-  /// Called when the reactions area is tapped.
+  /// Called when a reaction chip is tapped, with the tapped [Reaction].
   ///
-  /// If null, tapping reactions has no effect.
-  final VoidCallback? onReactionsTap;
+  /// Reports `null` when the tap does not map to a single reaction (a
+  /// clustered or overflow chip). If null, tapping reactions has no effect.
+  final ValueSetter<Reaction?>? onReactionTap;
 
   /// Called when the quoted message is tapped.
   ///
@@ -168,7 +169,7 @@ class _StreamMessageContentState extends State<StreamMessageContent> {
           StreamMessageReactions(
             message: widget.message,
             sorting: widget.reactionSorting,
-            onPressed: widget.onReactionsTap,
+            onReactionTap: widget.onReactionTap,
             child: Builder(
               builder: (context) {
                 final bubbleContent = ConstrainedBox(

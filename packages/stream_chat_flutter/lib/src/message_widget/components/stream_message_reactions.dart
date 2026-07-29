@@ -24,7 +24,7 @@ class StreamMessageReactions extends StatelessWidget {
     this.type,
     this.position,
     this.sorting,
-    this.onPressed,
+    this.onReactionTap,
     this.child,
   });
 
@@ -50,10 +50,11 @@ class StreamMessageReactions extends StatelessWidget {
   /// Defaults to [ReactionSorting.byFirstReactionAt] when null.
   final Comparator<ReactionGroup>? sorting;
 
-  /// Called when the reactions area is pressed.
+  /// Called when a reaction chip is tapped, with the tapped [Reaction].
   ///
-  /// If null, pressing the reactions area has no effect.
-  final VoidCallback? onPressed;
+  /// Reports `null` when the tap does not map to a single reaction (a
+  /// clustered or overflow chip). If null, tapping has no effect.
+  final ValueSetter<Reaction?>? onReactionTap;
 
   /// The child widget (typically the message bubble) that reactions are
   /// displayed on.
@@ -74,16 +75,32 @@ class StreamMessageReactions extends StatelessWidget {
 
     final items = sortedReactionGroups?.map(
       (group) => core.StreamReactionsItem(
+        key: group.key,
         count: group.value.count,
         emoji: resolver.resolve(group.key),
       ),
     );
 
+    // When the current user has reacted with a given type, report their full
+    // reaction (user, score, timestamps); otherwise a template carrying just
+    // the type and emoji code — mirroring the reaction picker.
+    final ownReactionsMap = {for (final it in [...?message.ownReactions]) it.type: it};
+
+    Reaction? reactionOf(core.StreamReactionsItem? item) {
+      return switch (item?.key) {
+        final type? => ownReactionsMap[type] ?? Reaction(type: type, emojiCode: resolver.emojiCode(type)),
+        _ => null,
+      };
+    }
+
     return core.StreamReactions(
       type: effectiveType,
       position: effectivePosition,
       overlap: effectiveOverlap,
-      onPressed: onPressed,
+      onReactionPressed: switch (onReactionTap) {
+        final onReactionTap? => (item) => onReactionTap(reactionOf(item)),
+        _ => null,
+      },
       items: [...?items],
       child: child,
     );

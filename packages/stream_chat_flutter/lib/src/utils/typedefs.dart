@@ -187,7 +187,16 @@ typedef OnMessageLongPress = void Function(Message);
 /// {@template onReactionsTap}
 /// The action to perform when a message's reactions are tapped.
 /// {@endtemplate}
+@Deprecated('Use OnReactionTap instead. OnReactionTap also reports the tapped reaction.')
 typedef OnReactionsTap = void Function(Message);
+
+/// {@template onReactionTap}
+/// The action to perform when a message's reaction is tapped.
+///
+/// Reports the tapped [Reaction], or `null` when the tap does not map to a
+/// single reaction (for example a clustered or overflow chip).
+/// {@endtemplate}
+typedef OnReactionTap = void Function(Reaction? reaction, Message message);
 
 /// {@template onReactionsHover}
 /// The action to perform when a message's reactions are hovered.
