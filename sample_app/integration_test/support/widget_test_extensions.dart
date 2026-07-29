@@ -49,9 +49,9 @@ extension E2EWidgetTester on WidgetTester {
   Future<void> tapFinder(Finder finder) async {
     await waitUntilVisible(finder);
     await ensureVisible(finder.first);
-    await pumpAndSettle();
+    await settle();
     await tap(finder.first);
-    await pumpAndSettle();
+    await settle();
   }
 
   Future<void> enterTextInField(Type inputFieldType, String text) async {
@@ -68,7 +68,7 @@ extension E2EWidgetTester on WidgetTester {
     final scrollable = find.byType(Scrollable).first;
     await waitUntilVisible(scrollable);
     await drag(scrollable, Offset(0, delta));
-    await pumpAndSettle();
+    await settle();
   }
 
   /// Repeatedly scrolls the message list up (towards older messages) until
@@ -82,11 +82,13 @@ extension E2EWidgetTester on WidgetTester {
     final end = DateTime.now().add(timeout);
     while (DateTime.now().isBefore(end)) {
       if (finder.evaluate().isNotEmpty) {
-        await pumpAndSettle();
+        await settle();
         return;
       }
       await drag(scrollable, const Offset(0, 400));
-      await pumpAndSettle();
+      // Bounded, so [timeout] is actually re-checked between iterations even
+      // while a perpetual animation (e.g. a reconnect spinner) is running.
+      await settle();
     }
     throw TestFailure('Timed out scrolling up to reveal $finder');
   }
