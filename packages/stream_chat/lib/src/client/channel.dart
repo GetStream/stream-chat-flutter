@@ -1854,7 +1854,10 @@ class Channel {
   /// read from a particular message onwards.
   ///
   /// If [usesLocalUnreadCount] is `true` for this channel, this updates the
-  /// unread count locally, on-device, without making a network request.
+  /// unread count locally, on-device, without making a network request. In
+  /// that case [messageId] is recorded as the read boundary but does **not**
+  /// narrow the count: the channel is always treated as fully read and the
+  /// count drops to zero. See [ChannelClientState.markReadLocally].
   Future<EmptyResponse> markRead({String? messageId}) async {
     _checkInitialized();
 
@@ -3640,6 +3643,15 @@ class ChannelClientState {
   /// Used for channels that track unread counts locally (see
   /// [Channel.usesLocalUnreadCount]), since the server rejects the mark-read
   /// endpoint for channels that have read events disabled.
+  ///
+  /// [messageId] only sets the resulting [Read.lastReadMessageId]; it does not
+  /// narrow which messages stay unread. The count always drops to zero and
+  /// [Read.lastRead] is always `now`, so messages newer than [messageId] are
+  /// marked read as well. This differs from the server, which recomputes the
+  /// count as the number of messages after [messageId], and from
+  /// [markUnreadLocally], which does recompute from the locally-known
+  /// messages. Callers that need a partial boundary should use
+  /// [markUnreadLocally] instead.
   void markReadLocally({String? messageId}) {
     final currentUser = _client.state.currentUser;
     if (currentUser == null) return;
