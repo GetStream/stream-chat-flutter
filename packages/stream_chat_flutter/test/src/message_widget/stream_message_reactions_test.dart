@@ -68,6 +68,36 @@ void main() {
     expect(tapped?.user?.id, 'u1');
   });
 
+  testWidgets('segmented: tapping the overflow chip reports null', (tester) async {
+    var called = false;
+    Reaction? tapped;
+    // More groups than the visible segment limit (4) so an overflow chip shows.
+    final message = Message(
+      reactionGroups: {
+        'like': ReactionGroup(count: 1),
+        'love': ReactionGroup(count: 1),
+        'haha': ReactionGroup(count: 1),
+        'wow': ReactionGroup(count: 1),
+        'sad': ReactionGroup(count: 1),
+      },
+    );
+
+    await pumpReactions(
+      tester,
+      message: message,
+      type: StreamReactionsType.segmented,
+      onReactionTap: (reaction) {
+        called = true;
+        tapped = reaction;
+      },
+    );
+
+    // The overflow "+N" chip is the trailing chip; it maps to no single reaction.
+    await tester.tap(find.byType(IconButton).last);
+    expect(called, isTrue);
+    expect(tapped, isNull);
+  });
+
   testWidgets('clustered: tapping the grouped chip reports null', (tester) async {
     var called = false;
     Reaction? tapped;

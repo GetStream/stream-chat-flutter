@@ -180,7 +180,11 @@ class StreamMessageItemProps {
     this.onBouncedErrorMessageActions,
     this.onEditMessageTap,
     this.attachmentBuilders,
-  });
+  }) : assert(
+         onReactionsTap == null || onReactionTap == null,
+         'Only one of onReactionsTap or onReactionTap can be provided. '
+         'Prefer onReactionTap; onReactionsTap is deprecated.',
+       );
 
   /// The message to display.
   final Message message;
