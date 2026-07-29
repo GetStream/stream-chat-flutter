@@ -21,7 +21,7 @@ def ios_device?(device)
   device.to_s.match?(/\A[0-9A-F]{8}-[0-9A-F]{4}-/i)
 end
 
-def boot_simulator(udid)
+def boot_simulator(udid:)
   return if `xcrun simctl list devices booted`.to_s.include?(udid)
   return unless `xcrun simctl list devices`.to_s.include?(udid)
 
