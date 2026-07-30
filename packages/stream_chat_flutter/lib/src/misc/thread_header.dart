@@ -89,8 +89,12 @@ class StreamThreadHeader extends StatelessWidget implements PreferredSizeWidget 
       alternativeWidget: fallbackSubtitle,
     );
 
+    // [style] is merged into the theme data as well as passed to the bar, so
+    // every slot below — the default back button and anything the caller
+    // supplied — resolves the same chain the bar itself does: [style], then the
+    // per-header theme, then the ambient app bar theme, then the app style.
     return StreamAppBarTheme(
-      data: headerTheme,
+      data: headerTheme.merge(StreamAppBarThemeData(style: style)),
       child: StreamAppBar(
         leading: leading,
         automaticallyImplyLeading: automaticallyImplyLeading,

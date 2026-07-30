@@ -118,6 +118,34 @@ void main() {
     expect(messageListView.bottomPadding, 0);
   });
 
+  testWidgets('tapping back invokes onBackPressed', (tester) async {
+    var backPressed = 0;
+    await _pumpThreadPage(tester, onBackPressed: () => backPressed++);
+
+    await tester.tap(find.byType(StreamBackButton));
+    await tester.pumpAndSettle();
+
+    expect(backPressed, 1);
+  });
+
+  testWidgets('onBackPressed replaces the default pop', (tester) async {
+    await _pumpThreadPage(tester, onBackPressed: () {}, pushOntoARoute: true);
+
+    await tester.tap(find.byType(StreamBackButton));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(StreamThreadPage), findsOneWidget);
+  });
+
+  testWidgets('pops the route when onBackPressed is not set', (tester) async {
+    await _pumpThreadPage(tester, pushOntoARoute: true);
+
+    await tester.tap(find.byType(StreamBackButton));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(StreamThreadPage), findsNothing);
+  });
+
   testWidgets('disposes its composer controller when removed from the tree', (tester) async {
     await _pumpThreadPage(tester);
     final controller = _composerController(tester);
@@ -149,6 +177,8 @@ Future<void> _pumpThreadPage(
   Message? parent,
   StreamAppStyle appStyle = StreamAppStyle.regular,
   void Function(Message message)? onViewInChannelTap,
+  VoidCallback? onBackPressed,
+  bool pushOntoARoute = false,
 }) async {
   final originalRecordPlatform = RecordPlatform.instance;
   RecordPlatform.instance = FakeRecordPlatform();
@@ -170,8 +200,12 @@ Future<void> _pumpThreadPage(
   when(() => clientState.currentUserStream).thenAnswer((_) => Stream.value(currentUser));
   when(() => clientState.totalUnreadCount).thenReturn(0);
   when(() => clientState.totalUnreadCountStream).thenAnswer((_) => Stream.value(0));
-  when(() => clientState.channels).thenReturn({});
-  when(() => clientState.channelsStream).thenAnswer((_) => Stream.value({}));
+  // Keyed by cid so the header's back button can resolve the channel's unread
+  // count. Without it StreamUnreadIndicator.channels gets a null stream and
+  // renders nothing, which silently makes the back button untappable.
+  final channelsById = {channel.cid!: channel};
+  when(() => clientState.channels).thenReturn(channelsById);
+  when(() => clientState.channelsStream).thenAnswer((_) => Stream.value(channelsById));
 
   when(() => channel.client).thenReturn(client);
   when(() => channel.state).thenReturn(channelState);
@@ -206,19 +240,27 @@ Future<void> _pumpThreadPage(
   when(() => channelState.currentUserRead).thenReturn(null);
   when(() => channelState.currentUserReadStream).thenAnswer((_) => const Stream.empty());
 
+  final page = StreamThreadPage(
+    parent: parentMessage,
+    onViewInChannelTap: onViewInChannelTap,
+    onBackPressed: onBackPressed,
+  );
+
   await tester.pumpWidget(
     MaterialApp(
       theme: ThemeData(extensions: [StreamTheme(appStyle: appStyle)]),
-      home: StreamChat(
+      // Chat context lives above the navigator so it survives a pop.
+      builder: (context, child) => StreamChat(
         client: client,
-        child: StreamChannel(
-          channel: channel,
-          child: StreamThreadPage(
-            parent: parentMessage,
-            onViewInChannelTap: onViewInChannelTap,
-          ),
-        ),
+        child: StreamChannel(channel: channel, child: child!),
       ),
+      // '/thread' seeds the stack with '/' underneath it, giving the back
+      // button something to pop to.
+      initialRoute: pushOntoARoute ? '/thread' : '/',
+      routes: {
+        '/': (_) => pushOntoARoute ? const Scaffold(body: SizedBox.shrink()) : page,
+        '/thread': (_) => page,
+      },
     ),
   );
 

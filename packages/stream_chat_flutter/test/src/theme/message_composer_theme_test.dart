@@ -6,48 +6,48 @@ import '../mocks.dart';
 
 void main() {
   test('copyWith with no arguments returns an equal MessageComposerThemeData', () {
-    const themeData = StreamMessageComposerThemeData(location: ComposerLocation.floating);
+    const themeData = StreamMessageComposerThemeData(location: StreamComposerLocation.floating);
 
     expect(themeData.copyWith(), themeData);
   });
 
   test('copyWith with no arguments preserves the hashCode', () {
-    const themeData = StreamMessageComposerThemeData(location: ComposerLocation.floating);
+    const themeData = StreamMessageComposerThemeData(location: StreamComposerLocation.floating);
 
     expect(themeData.copyWith().hashCode, themeData.hashCode);
   });
 
   test('copyWith overrides the location', () {
-    const docked = StreamMessageComposerThemeData(location: ComposerLocation.docked);
+    const docked = StreamMessageComposerThemeData(location: StreamComposerLocation.docked);
 
-    expect(docked.copyWith(location: ComposerLocation.floating).location, ComposerLocation.floating);
+    expect(docked.copyWith(location: StreamComposerLocation.floating).location, StreamComposerLocation.floating);
   });
 
   test('MessageComposerThemeData instances with different locations are not equal', () {
     expect(
-      const StreamMessageComposerThemeData(location: ComposerLocation.docked),
-      isNot(const StreamMessageComposerThemeData(location: ComposerLocation.floating)),
+      const StreamMessageComposerThemeData(location: StreamComposerLocation.docked),
+      isNot(const StreamMessageComposerThemeData(location: StreamComposerLocation.floating)),
     );
   });
 
   test('lerp at t = 0 resolves to the start location', () {
     expect(
       StreamMessageComposerThemeData.lerp(_dockedTheme, _floatingTheme, 0)?.location,
-      ComposerLocation.docked,
+      StreamComposerLocation.docked,
     );
   });
 
   test('lerp below the halfway point resolves to the start location', () {
     expect(
       StreamMessageComposerThemeData.lerp(_dockedTheme, _floatingTheme, 0.49)?.location,
-      ComposerLocation.docked,
+      StreamComposerLocation.docked,
     );
   });
 
   test('lerp at or past the halfway point resolves to the end location', () {
     expect(
       StreamMessageComposerThemeData.lerp(_dockedTheme, _floatingTheme, 0.5)?.location,
-      ComposerLocation.floating,
+      StreamComposerLocation.floating,
     );
   });
 
@@ -76,7 +76,7 @@ void main() {
   testWidgets('of returns the global theme location when no local theme is present', (tester) async {
     final context = await _pumpAndCaptureContext(tester, globalTheme: _floatingTheme);
 
-    expect(StreamMessageComposerTheme.of(context).location, ComposerLocation.floating);
+    expect(StreamMessageComposerTheme.of(context).location, StreamComposerLocation.floating);
   });
 
   testWidgets('of merges the local theme over the global theme', (tester) async {
@@ -86,7 +86,7 @@ void main() {
       localTheme: _floatingTheme,
     );
 
-    expect(StreamMessageComposerTheme.of(context).location, ComposerLocation.floating);
+    expect(StreamMessageComposerTheme.of(context).location, StreamComposerLocation.floating);
   });
 
   testWidgets('of falls back to the global theme when the local theme sets no location', (tester) async {
@@ -96,7 +96,7 @@ void main() {
       localTheme: const StreamMessageComposerThemeData(),
     );
 
-    expect(StreamMessageComposerTheme.of(context).location, ComposerLocation.floating);
+    expect(StreamMessageComposerTheme.of(context).location, StreamComposerLocation.floating);
   });
 
   testWidgets('wrap re-establishes the theme in a detached subtree', (tester) async {
@@ -123,7 +123,7 @@ void main() {
       ),
     );
 
-    expect(StreamMessageComposerTheme.of(capturedContext).location, ComposerLocation.floating);
+    expect(StreamMessageComposerTheme.of(capturedContext).location, StreamComposerLocation.floating);
   });
 
   testWidgets('updateShouldNotify is true when the data changes', (tester) async {
@@ -141,8 +141,8 @@ void main() {
   });
 }
 
-const _dockedTheme = StreamMessageComposerThemeData(location: ComposerLocation.docked);
-const _floatingTheme = StreamMessageComposerThemeData(location: ComposerLocation.floating);
+const _dockedTheme = StreamMessageComposerThemeData(location: StreamComposerLocation.docked);
+const _floatingTheme = StreamMessageComposerThemeData(location: StreamComposerLocation.floating);
 
 /// Pumps a [StreamChat] configured with [globalTheme], optionally wrapped in a
 /// local [StreamMessageComposerTheme] carrying [localTheme], and returns a

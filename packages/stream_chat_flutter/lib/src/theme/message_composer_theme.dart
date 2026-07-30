@@ -16,7 +16,7 @@ part 'message_composer_theme.g.theme.dart';
 ///  * [StreamMessageComposerThemeData.location], which carries this
 ///    value.
 ///  * [StreamAppStyle], the global app-wide style that acts as fallback.
-enum ComposerLocation {
+enum StreamComposerLocation {
   /// The composer floats above the on-screen keyboard with appropriate safe
   /// area padding.
   floating,
@@ -37,7 +37,7 @@ enum ComposerLocation {
 /// ```dart
 /// StreamMessageComposerTheme(
 ///   data: StreamMessageComposerThemeData(
-///     location: ComposerLocation.floating,
+///     location: StreamComposerLocation.floating,
 ///   ),
 ///   child: StreamChannel(
 ///     channel: channel,
@@ -95,7 +95,7 @@ class StreamMessageComposerTheme extends InheritedTheme {
 /// ```dart
 /// StreamChatThemeData(
 ///   messageComposerTheme: StreamMessageComposerThemeData(
-///     location: ComposerLocation.floating,
+///     location: StreamComposerLocation.floating,
 ///   ),
 /// )
 /// ```
@@ -103,7 +103,7 @@ class StreamMessageComposerTheme extends InheritedTheme {
 ///
 /// See also:
 ///
-///  * [ComposerLocation], the enum that describes the placement options.
+///  * [StreamComposerLocation], the enum that describes the placement options.
 ///  * [StreamMessageComposerTheme], for overriding the theme in a subtree.
 @themeGen
 @immutable
@@ -114,12 +114,12 @@ class StreamMessageComposerThemeData with _$StreamMessageComposerThemeData {
   /// The placement of the message composer.
   ///
   /// When null the value falls back to the ambient [StreamAppStyle]:
-  /// [StreamAppStyle.floating] → [ComposerLocation.floating],
-  /// [StreamAppStyle.regular] → [ComposerLocation.docked].
+  /// [StreamAppStyle.floating] → [StreamComposerLocation.floating],
+  /// [StreamAppStyle.regular] → [StreamComposerLocation.docked].
   ///
   /// Set this to override the global style for the composer only, without
   /// affecting other components.
-  final ComposerLocation? location;
+  final StreamComposerLocation? location;
 
   /// Linearly interpolate between two [StreamMessageComposerThemeData] objects.
   static StreamMessageComposerThemeData? lerp(

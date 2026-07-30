@@ -34,14 +34,10 @@ mixin _$StreamMessageComposerThemeData {
     );
   }
 
-  StreamMessageComposerThemeData copyWith({
-    ComposerLocation? location,
-  }) {
+  StreamMessageComposerThemeData copyWith({StreamComposerLocation? location}) {
     final _this = (this as StreamMessageComposerThemeData);
 
-    return StreamMessageComposerThemeData(
-      location: location ?? _this.location,
-    );
+    return StreamMessageComposerThemeData(location: location ?? _this.location);
   }
 
   StreamMessageComposerThemeData merge(StreamMessageComposerThemeData? other) {

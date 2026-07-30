@@ -155,4 +155,80 @@ void main() {
       expect(trailingTapped, 1);
     },
   );
+
+  group('default avatar floating behavior', () {
+    // The header installs its own StreamAppBarTheme around the bar, so the
+    // avatar has to resolve from inside it — otherwise channelListHeaderTheme
+    // is invisible to the avatar while the bar honours it.
+    Future<void> pumpHeader(
+      WidgetTester tester, {
+      StreamAppStyle appStyle = StreamAppStyle.regular,
+      StreamAppBarBehavior? themeBehavior,
+      StreamAppBarBehavior? styleBehavior,
+    }) async {
+      final client = MockClient();
+      final clientState = MockClientState();
+
+      when(() => client.state).thenReturn(clientState);
+      when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
+      when(() => client.wsConnectionStatusStream).thenAnswer((_) => Stream.value(ConnectionStatus.connected));
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(extensions: [StreamTheme(appStyle: appStyle)]),
+          home: StreamChat(
+            client: client,
+            themeData: StreamChatThemeData(
+              channelListHeaderTheme: switch (themeBehavior) {
+                final behavior? => StreamAppBarThemeData(style: StreamAppBarStyle(behavior: behavior)),
+                _ => null,
+              },
+            ),
+            child: Scaffold(
+              body: StreamChannelListHeader(
+                style: switch (styleBehavior) {
+                  final behavior? => StreamAppBarStyle(behavior: behavior),
+                  _ => null,
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    bool? avatarIsFloating(WidgetTester tester) {
+      return tester.widget<StreamUserAvatar>(find.byType(StreamUserAvatar)).isFloating;
+    }
+
+    testWidgets('is not floating by default', (tester) async {
+      await pumpHeader(tester);
+
+      expect(avatarIsFloating(tester), isNot(isTrue));
+    });
+
+    testWidgets('floats when the app style is floating', (tester) async {
+      await pumpHeader(tester, appStyle: StreamAppStyle.floating);
+
+      expect(avatarIsFloating(tester), isTrue);
+    });
+
+    testWidgets('floats when the header theme says so, over a regular app style', (tester) async {
+      await pumpHeader(tester, themeBehavior: StreamAppBarBehavior.floating);
+
+      expect(avatarIsFloating(tester), isTrue);
+    });
+
+    testWidgets('the header style wins over both the header theme and the app style', (tester) async {
+      await pumpHeader(
+        tester,
+        appStyle: StreamAppStyle.floating,
+        themeBehavior: StreamAppBarBehavior.floating,
+        styleBehavior: StreamAppBarBehavior.regular,
+      );
+
+      expect(avatarIsFloating(tester), isNot(isTrue));
+    });
+  });
 }

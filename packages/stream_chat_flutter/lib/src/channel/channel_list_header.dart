@@ -126,9 +126,7 @@ class StreamChannelListHeader extends StatelessWidget implements PreferredSizeWi
     final _client = client ?? StreamChat.of(context).client;
     final headerTheme = StreamChatTheme.of(context).channelListHeaderTheme;
 
-    final isFloating = isFloatingAppBar(context, override: style?.behavior);
-
-    final leading = _DefaultUserAvatar(client: _client, onPressed: onUserAvatarPressed, isFloating: isFloating);
+    final leading = _DefaultUserAvatar(client: _client, onPressed: onUserAvatarPressed);
 
     return Portal(
       child: StreamConnectionStatusBuilder(
@@ -161,10 +159,15 @@ class StreamChannelListHeader extends StatelessWidget implements PreferredSizeWi
             showMessage: showConnectionStateTile && showStatus,
             message: statusString,
             // Wrap the bar in a [StreamAppBarTheme] so the per-header chat
-            // theme drives all default styling — the bar internally merges
-            // in any [style] override the caller passed.
+            // theme drives all default styling.
+            //
+            // [style] is merged into the theme data as well as passed to the
+            // bar, so every slot below — the default avatar and anything the
+            // caller supplied — resolves the same chain the bar itself does:
+            // [style], then the per-header theme, then the ambient app bar
+            // theme, then the app style.
             child: StreamAppBarTheme(
-              data: headerTheme,
+              data: headerTheme.merge(StreamAppBarThemeData(style: style)),
               child: StreamAppBar(
                 leading: leading,
                 title: title,
@@ -182,16 +185,20 @@ class StreamChannelListHeader extends StatelessWidget implements PreferredSizeWi
 }
 
 class _DefaultUserAvatar extends StatelessWidget {
-  const _DefaultUserAvatar({required this.client, this.onPressed, this.isFloating = false});
+  const _DefaultUserAvatar({required this.client, this.onPressed});
 
   final StreamChatClient client;
   final void Function(User user)? onPressed;
-  final bool isFloating;
 
   @override
   Widget build(BuildContext context) {
     final user = client.state.currentUser;
     if (user == null) return const SizedBox.shrink();
+
+    // Resolved from context rather than passed in, so it picks up the header's
+    // [StreamAppBarTheme] — this widget is built inside it, same as the bar's
+    // other slots.
+    final isFloating = isFloatingAppBar(context);
 
     // Caller-provided handler wins; otherwise mirror Material AppBar and
     // open the enclosing Scaffold's drawer if one exists. With no callback

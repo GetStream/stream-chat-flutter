@@ -31,6 +31,7 @@ class StreamThreadPage extends StatefulWidget {
     this.initialScrollIndex,
     this.initialAlignment,
     this.onViewInChannelTap,
+    this.onBackPressed,
   });
 
   /// The parent message of the thread.
@@ -45,21 +46,21 @@ class StreamThreadPage extends StatefulWidget {
   /// Called when the user taps "View in channel".
   final void Function(Message message)? onViewInChannelTap;
 
+  /// Called when the header's back button is pressed.
+  ///
+  /// Replaces the default action, which pops the current route. When null the
+  /// default is kept.
+  final VoidCallback? onBackPressed;
+
   @override
   State<StreamThreadPage> createState() => _StreamThreadPageState();
 }
 
 class _StreamThreadPageState extends State<StreamThreadPage> {
-  final FocusNode _focusNode = FocusNode();
-  late StreamMessageComposerController _messageComposerController;
-
-  @override
-  void initState() {
-    super.initState();
-    _messageComposerController = StreamMessageComposerController(
-      message: Message(parentId: widget.parent.id),
-    );
-  }
+  late final FocusNode _focusNode = FocusNode();
+  late final StreamMessageComposerController _messageComposerController = StreamMessageComposerController(
+    message: Message(parentId: widget.parent.id),
+  );
 
   @override
   void dispose() {
@@ -70,23 +71,39 @@ class _StreamThreadPageState extends State<StreamThreadPage> {
 
   void _reply(Message message) {
     _messageComposerController.quotedMessage = message;
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
       _focusNode.requestFocus();
     });
   }
 
   void _editMessage(Message message) {
     _messageComposerController.editMessage(message);
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
       _focusNode.requestFocus();
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final appBar = StreamThreadHeader(parent: widget.parent);
+    final channel = StreamChannel.maybeOf(context)?.channel;
 
-    final composer = widget.parent.type != 'deleted'
+    final appBar = StreamThreadHeader(
+      parent: widget.parent,
+      // Leaving this null keeps the header's own default back button, which
+      // pops the route.
+      leading: switch (widget.onBackPressed) {
+        final onBackPressed? => StreamBackButton(
+          onPressed: onBackPressed,
+          channelId: channel?.cid,
+          showUnreadCount: true,
+        ),
+        _ => null,
+      },
+    );
+
+    final composer = !widget.parent.isDeleted
         ? StreamMessageComposer(
             focusNode: _focusNode,
             messageComposerController: _messageComposerController,

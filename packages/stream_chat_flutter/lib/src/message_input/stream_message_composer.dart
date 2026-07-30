@@ -101,7 +101,7 @@ class StreamMessageComposer extends StatelessWidget {
     TextCapitalization textCapitalization = TextCapitalization.sentences,
     bool autofocus = false,
     bool autoCorrect = true,
-    ComposerLocation? location,
+    StreamComposerLocation? location,
   }) : props = .new(
          onMessageSent: onMessageSent,
          preMessageSending: preMessageSending,
@@ -412,7 +412,7 @@ class MessageComposerProps {
   final bool autoCorrect;
 
   /// The location of the message composer.
-  final ComposerLocation? location;
+  final StreamComposerLocation? location;
 
   /// Returns a copy of this [MessageComposerProps] with the given fields
   /// replaced with new values.
@@ -452,7 +452,7 @@ class MessageComposerProps {
     TextCapitalization? textCapitalization,
     bool? autofocus,
     bool? autoCorrect,
-    ComposerLocation? location,
+    StreamComposerLocation? location,
   }) {
     return MessageComposerProps(
       onMessageSent: onMessageSent ?? this.onMessageSent,
@@ -834,10 +834,7 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     final safeAreaEnabled = widget.props.enableSafeArea ?? true;
     final viewPadding = MediaQuery.paddingOf(context);
 
-    final effectiveComposerLocation =
-        widget.props.location ??
-        StreamMessageComposerTheme.of(context).location ??
-        (StreamTheme.of(context).appStyle.isFloating ? ComposerLocation.floating : ComposerLocation.docked);
+    final effectiveComposerLocation = _resolveLocation(context);
 
     // The body behind the pill (and picker) — animated safe-area insets.
     final composerBody = AnimatedBuilder(
@@ -992,17 +989,23 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     );
   }
 
+  /// The composer's effective placement: the explicit
+  /// [MessageComposerProps.location], then
+  /// [StreamMessageComposerThemeData.location], then the ambient
+  /// [StreamAppStyle].
+  StreamComposerLocation _resolveLocation(BuildContext context) {
+    return widget.props.location ??
+        StreamMessageComposerTheme.of(context).location ??
+        (StreamTheme.of(context).appStyle.isFloating ? .floating : .docked);
+  }
+
   Widget _buildMessageInput(
     BuildContext context,
     StreamMessageComposerController controller,
     FocusNode focusNode,
   ) {
     final currentUserId = StreamChat.of(context).currentUser?.id;
-    final effectiveComposerLocation =
-        widget.props.location ??
-        StreamMessageComposerTheme.of(context).location ??
-        (StreamTheme.of(context).appStyle.isFloating ? ComposerLocation.floating : ComposerLocation.docked);
-    final isFloating = effectiveComposerLocation == .floating;
+    final isFloating = _resolveLocation(context) == .floating;
 
     return StreamMessageValueListenableBuilder(
       valueListenable: controller,

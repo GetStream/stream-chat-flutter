@@ -12,45 +12,45 @@ void main() {
   testWidgets('composer is docked when the app style is regular', (tester) async {
     await _pumpComposer(tester, appStyle: StreamAppStyle.regular);
 
-    expect(_resolvedLocation(tester), ComposerLocation.docked);
+    expect(_resolvedLocation(tester), StreamComposerLocation.docked);
   });
 
   testWidgets('composer floats when the app style is floating', (tester) async {
     await _pumpComposer(tester, appStyle: StreamAppStyle.floating);
 
-    expect(_resolvedLocation(tester), ComposerLocation.floating);
+    expect(_resolvedLocation(tester), StreamComposerLocation.floating);
   });
 
   testWidgets('the global composer theme overrides the app style', (tester) async {
     await _pumpComposer(
       tester,
       appStyle: StreamAppStyle.regular,
-      globalTheme: const StreamMessageComposerThemeData(location: ComposerLocation.floating),
+      globalTheme: const StreamMessageComposerThemeData(location: StreamComposerLocation.floating),
     );
 
-    expect(_resolvedLocation(tester), ComposerLocation.floating);
+    expect(_resolvedLocation(tester), StreamComposerLocation.floating);
   });
 
   testWidgets('a local composer theme overrides the global theme', (tester) async {
     await _pumpComposer(
       tester,
       appStyle: StreamAppStyle.floating,
-      globalTheme: const StreamMessageComposerThemeData(location: ComposerLocation.floating),
-      localTheme: const StreamMessageComposerThemeData(location: ComposerLocation.docked),
+      globalTheme: const StreamMessageComposerThemeData(location: StreamComposerLocation.floating),
+      localTheme: const StreamMessageComposerThemeData(location: StreamComposerLocation.docked),
     );
 
-    expect(_resolvedLocation(tester), ComposerLocation.docked);
+    expect(_resolvedLocation(tester), StreamComposerLocation.docked);
   });
 
   testWidgets('the location property overrides both the theme and the app style', (tester) async {
     await _pumpComposer(
       tester,
       appStyle: StreamAppStyle.floating,
-      globalTheme: const StreamMessageComposerThemeData(location: ComposerLocation.floating),
-      location: ComposerLocation.docked,
+      globalTheme: const StreamMessageComposerThemeData(location: StreamComposerLocation.floating),
+      location: StreamComposerLocation.docked,
     );
 
-    expect(_resolvedLocation(tester), ComposerLocation.docked);
+    expect(_resolvedLocation(tester), StreamComposerLocation.docked);
   });
 
   testWidgets('the docked composer fills its background with the elevation-1 color', (tester) async {
@@ -101,9 +101,9 @@ void main() {
 }
 
 /// The location the composer resolved, read back from the input it built.
-ComposerLocation _resolvedLocation(WidgetTester tester) {
+StreamComposerLocation _resolvedLocation(WidgetTester tester) {
   final input = tester.widget<StreamChatMessageInput>(find.byType(StreamChatMessageInput));
-  return input.isFloating ? ComposerLocation.floating : ComposerLocation.docked;
+  return input.isFloating ? StreamComposerLocation.floating : StreamComposerLocation.docked;
 }
 
 /// Finds the opaque background fill the docked composer paints behind itself.
@@ -135,7 +135,7 @@ Future<void> _pumpComposer(
   required StreamAppStyle appStyle,
   StreamMessageComposerThemeData? globalTheme,
   StreamMessageComposerThemeData? localTheme,
-  ComposerLocation? location,
+  StreamComposerLocation? location,
   bool? enableSafeArea,
   double bottomPadding = 0,
 }) async {

@@ -84,15 +84,8 @@ class StreamChannelPage extends StatefulWidget {
 }
 
 class _StreamChannelPageState extends State<StreamChannelPage> {
-  late final FocusNode _focusNode;
-  late final StreamMessageComposerController _messageComposerController;
-
-  @override
-  void initState() {
-    super.initState();
-    _focusNode = FocusNode();
-    _messageComposerController = StreamMessageComposerController();
-  }
+  late final FocusNode _focusNode = FocusNode();
+  late final StreamMessageComposerController _messageComposerController = StreamMessageComposerController();
 
   @override
   void dispose() {
@@ -103,14 +96,16 @@ class _StreamChannelPageState extends State<StreamChannelPage> {
 
   void _reply(Message message) {
     _messageComposerController.quotedMessage = message;
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
       _focusNode.requestFocus();
     });
   }
 
   void _editMessage(Message message) {
     _messageComposerController.editMessage(message);
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
       _focusNode.requestFocus();
     });
   }
@@ -145,7 +140,6 @@ class _StreamChannelPageState extends State<StreamChannelPage> {
     );
 
     return StreamScaffold(
-      backgroundColor: context.streamColorScheme.backgroundApp,
       appBar: appBar,
       bottom: composer,
       body: _ChannelPageBody(
