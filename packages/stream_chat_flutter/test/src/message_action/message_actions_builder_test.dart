@@ -71,9 +71,10 @@ void main() {
   MockChannel _getChannelWithCapabilities(
     List<ChannelCapability> capabilities, {
     bool enableMutes = true,
+    bool enableReplies = true,
   }) {
     final customChannel = MockChannel(ownCapabilities: capabilities);
-    final channelConfig = ChannelConfig(mutes: enableMutes, replies: true);
+    final channelConfig = ChannelConfig(mutes: enableMutes, replies: enableReplies);
     when(() => customChannel.config).thenReturn(channelConfig);
     return customChannel;
   }
@@ -458,6 +459,34 @@ void main() {
 
         muteDisabledActions.notExpects<MuteUser>(
           reason: 'Mute action unavailable when channel mutes are disabled',
+        );
+      },
+    );
+
+    testWidgets(
+      'hides thread reply when channel replies are disabled',
+      (tester) async {
+        final context = await _getContext(tester);
+
+        // The send-reply capability is granted; only the channel config says no.
+        final channelWithoutReplies = _getChannelWithCapabilities(
+          allChannelCapabilities,
+          enableReplies: false,
+        );
+
+        final actions = StreamMessageActionsBuilder.buildActions(
+          context: context,
+          message: message,
+          channel: channelWithoutReplies,
+          currentUser: currentUser,
+        );
+
+        actions.notExpects<ThreadReply>(
+          reason: 'Thread reply unavailable when channel replies are disabled',
+        );
+
+        actions.expects<QuotedReply>(
+          reason: 'Quoted reply is independent of the replies config',
         );
       },
     );
