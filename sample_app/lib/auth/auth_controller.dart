@@ -45,10 +45,15 @@ Future<void> _sampleAppLogHandler(LogRecord record) async {
 
 @visibleForTesting
 class StreamConnectionOverride {
-  const StreamConnectionOverride({this.baseURL, this.baseWsUrl});
+  const StreamConnectionOverride({
+    this.baseURL,
+    this.baseWsUrl,
+    this.usePersistence = false,
+  });
 
   final String? baseURL;
   final String? baseWsUrl;
+  final bool usePersistence;
 }
 
 StreamChatClient _buildStreamChatClient(
@@ -73,12 +78,14 @@ StreamChatClient _buildStreamChatClient(
       // debugConnectivityStream). See `AuthController.debugForceOffline`.
       chatApiInterceptors: connectionOverride != null ? [_offlineSimulationInterceptor] : null,
     )
-    // No offline persistence under e2e. The persistence client is a shared,
-    // never-cleared SQLite DB, so state leaks across the tests in a bundle and
-    // a reaction event referencing an unpersisted message throws an async
-    // FOREIGN KEY error — which, being async, poisons the shared test binding
-    // and makes every remaining test in the file fail before it can report.
-    ..chatPersistenceClient = connectionOverride != null ? null : _chatPersistenceClient;
+    ..chatPersistenceClient = switch (connectionOverride) {
+      // Production always persists.
+      null => _chatPersistenceClient,
+      // Under e2e, persistence is opt-in per test; the harness empties the DB
+      // on teardown (see AuthController.debugReset) so it can't leak between
+      // tests. Off by default keeps most e2e tests fast and DB-free.
+      final override => override.usePersistence ? _chatPersistenceClient : null,
+    };
 }
 
 /// Rejects every Stream API request with a connection error while
@@ -263,6 +270,8 @@ class AuthController extends ValueNotifier<AuthState> {
     _pushTokenManager?.dispose().ignore();
     _pushTokenManager = null;
 
+    // dispose() won't flush; empty the DB so it can't leak to the next test.
+    await _client?.closePersistenceConnection(flush: true);
     await _client?.dispose();
     _client = null;
     _activeApiKey = null;

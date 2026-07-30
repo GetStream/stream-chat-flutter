@@ -72,6 +72,7 @@ void streamTestWithEnv({
   required String description,
   required Future<void> Function(StreamTestEnv env) body,
   String? skip,
+  bool persistence = false,
 }) {
   streamTest(
     allureId: allureId,
@@ -82,7 +83,7 @@ void streamTestWithEnv({
       // Registered before setUp so cleanup also runs when setup fails partway
       // (e.g. the mock server started but the app failed to boot).
       addTearDown(env.tearDown);
-      await env.setUp(tester);
+      await env.setUp(tester, persistence: persistence);
       await body(env);
     },
   );
