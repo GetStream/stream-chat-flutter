@@ -1,5 +1,7 @@
 // ignore_for_file: avoid_redundant_argument_values, lines_longer_than_80_chars
 
+import 'dart:async';
+
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/src/client/reaction_pending_operation.dart';
 import 'package:stream_chat/src/core/http/token.dart';
@@ -5505,6 +5507,83 @@ void main() {
         ),
       ).called(1);
       expect(persistence.storedPendingOperations, isEmpty);
+    });
+  });
+
+  group('dispose during reconnect recovery', () {
+    const apiKey = 'test-api-key';
+    final user = User(id: 'test-user-id');
+    final token = Token.development(user.id).rawValue;
+
+    late FakeChatApi api;
+    late FakeWebSocket ws;
+    late StreamChatClient client;
+    var disposed = false;
+
+    setUpAll(() {
+      registerFallbackValue(const PaginationParams());
+      registerFallbackValue(Filter.equal('cid', ''));
+    });
+
+    setUp(() {
+      api = FakeChatApi();
+      ws = FakeWebSocket();
+      disposed = false;
+    });
+
+    // The test disposes the client itself; avoid disposing it a second time.
+    tearDown(() async {
+      if (!disposed) await client.dispose();
+    });
+
+    // Disposing the client while a reconnect is still recovering must complete
+    // cleanly: recovery work that finishes after disposal is discarded, never
+    // surfacing as an error.
+    test('disposing mid-recovery does not surface a late recovery event', () async {
+      // Keep the recovery's channel query pending so the client is still
+      // mid-recovery at the moment it is disposed.
+      final pendingQuery = Completer<QueryChannelsResponse>();
+      when(
+        () => api.channel.queryChannels(
+          filter: any(named: 'filter'),
+          sort: any(named: 'sort'),
+          state: any(named: 'state'),
+          watch: any(named: 'watch'),
+          presence: any(named: 'presence'),
+          memberLimit: any(named: 'memberLimit'),
+          messageLimit: any(named: 'messageLimit'),
+          paginationParams: any(named: 'paginationParams'),
+        ),
+      ).thenAnswer((_) => pendingQuery.future);
+
+      client = StreamChatClient(apiKey, chatApi: api, ws: ws);
+      await client.connectUser(user, token);
+      await delay(300);
+
+      // Track a channel so reconnecting triggers channel recovery, which then
+      // blocks on the pending query above.
+      final channel = Channel.fromState(
+        client,
+        ChannelState(channel: ChannelModel(cid: 'messaging:c1')),
+      );
+      client.state.addChannels({'messaging:c1': channel});
+
+      // Drop then restore the connection to start a reconnect recovery.
+      ws.connectionStatus = ConnectionStatus.disconnected;
+      await delay(100);
+      ws.connectionStatus = ConnectionStatus.connected;
+      await delay(100);
+
+      // Dispose while the recovery is still in flight.
+      await client.dispose();
+      disposed = true;
+
+      // Let the now-orphaned recovery finish. Its trailing work must be
+      // discarded silently instead of thrown as an unhandled async error.
+      pendingQuery.complete(QueryChannelsResponse()..channels = []);
+      await delay(300);
+
+      expect(client.wsConnectionStatus, ConnectionStatus.disconnected);
     });
   });
 

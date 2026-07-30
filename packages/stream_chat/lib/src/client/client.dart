@@ -578,11 +578,14 @@ class StreamChatClient {
 
   /// Method called to add a new event to the [_eventController].
   void handleEvent(Event event) {
+    // Ignore events that arrive after the client has been disposed.
+    if (_eventController.isClosed) return;
+
     if (event.type == EventType.healthCheck) {
       return _handleHealthCheckEvent(event);
     }
     state.updateUser(event.user);
-    return _eventController.add(event);
+    return _eventController.safeAdd(event);
   }
 
   void _onConnectionStatusChanged(
