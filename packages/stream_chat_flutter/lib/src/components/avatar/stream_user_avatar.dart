@@ -88,9 +88,9 @@ class StreamUserAvatar extends StatelessWidget {
 
   /// Whether to show a drop shadow around the avatar.
   ///
-  /// Defaults to false. The shadow style is determined by
-  /// [StreamAvatarThemeData.boxShadow], falling back to
-  /// [StreamBoxShadow.elevation3].
+  /// Defaults to false. The shadow depth is determined by
+  /// [StreamAvatarThemeData.floatingElevation], falling back to
+  /// [StreamElevation.level2].
   final bool? isFloating;
 
   /// The size of the avatar.
