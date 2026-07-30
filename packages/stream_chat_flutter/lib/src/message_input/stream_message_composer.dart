@@ -825,6 +825,7 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     };
 
     final spacing = context.streamSpacing;
+    final colorScheme = context.streamColorScheme;
     final safeAreaEnabled = widget.props.enableSafeArea ?? true;
     final viewPadding = MediaQuery.paddingOf(context);
 
@@ -854,12 +855,24 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
         // seamless — abutting fills would each be antialiased at a fractional
         // device-pixel boundary and let a hairline of the message list through.
         if (effectiveComposerLocation == .floating) {
+          // At rest the backdrop fades into `backgroundElevation0`, matching the
+          // floating app bar and bottom nav bar. It rises to
+          // `backgroundElevation1` as the picker opens, so the picker panel —
+          // which paints no background of its own — sits on the elevated
+          // surface it expects. In light mode the two tokens are the same
+          // colour, so this only reads as a change in dark mode.
+          final backdropColor = Color.lerp(
+            colorScheme.backgroundElevation0,
+            colorScheme.backgroundElevation1,
+            _pickerAnimation.value,
+          )!;
+
           return Stack(
             children: [
               Positioned.fill(
                 child: CustomPaint(
                   painter: _FloatingComposerBackdropPainter(
-                    color: context.streamColorScheme.backgroundElevation1,
+                    color: backdropColor,
                     fadeExtent: _pillHeight,
                   ),
                 ),
@@ -879,7 +892,7 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
       child: switch (effectiveComposerLocation) {
         .floating => composerBody,
         .docked => DecoratedBox(
-          decoration: BoxDecoration(color: context.streamColorScheme.backgroundElevation1),
+          decoration: BoxDecoration(color: colorScheme.backgroundElevation1),
           child: composerBody,
         ),
       },
