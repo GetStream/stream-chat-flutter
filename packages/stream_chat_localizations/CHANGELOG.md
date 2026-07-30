@@ -1,6 +1,7 @@
 ## 9.27.0
 
 - Updated `stream_chat_flutter` dependency to [`9.27.0`](https://pub.dev/packages/stream_chat_flutter/changelog).
+- Added connection-error translations (`connectionErrorTitle`/`Description`, `slowConnectionErrorTitle`/`Description`, `genericErrorTitle`/`Description`) for all supported locales.
 
 ## 9.26.0
 

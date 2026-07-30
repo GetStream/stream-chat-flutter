@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// A widget that is displayed when a [StreamScrollView] encounters an error
@@ -10,6 +9,8 @@ class StreamScrollViewErrorWidget extends StatelessWidget {
     super.key,
     this.errorTitle,
     this.errorTitleStyle,
+    this.errorSubtitle,
+    this.errorSubtitleStyle,
     this.errorIcon,
     this.retryButtonText,
     this.retryButtonTextStyle,
@@ -20,15 +21,28 @@ class StreamScrollViewErrorWidget extends StatelessWidget {
   });
 
   /// The title of the error.
+  ///
+  /// Defaults to a generic localized error title.
   final Widget? errorTitle;
 
   /// The style of the title.
   final TextStyle? errorTitleStyle;
 
+  /// An optional supporting description shown below the title.
+  ///
+  /// When no [errorTitle] is supplied, this defaults to a generic localized
+  /// description so the out-of-the-box error state matches the design.
+  final Widget? errorSubtitle;
+
+  /// The style of the subtitle.
+  final TextStyle? errorSubtitleStyle;
+
   /// The icon to display when the list shows error.
   final Widget? errorIcon;
 
   /// The text to display in the retry button.
+  ///
+  /// Defaults to a localized "Try Again" label.
   final Widget? retryButtonText;
 
   /// The style of the retryButtonText.
@@ -49,44 +63,77 @@ class StreamScrollViewErrorWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final chatThemeData = StreamChatTheme.of(context);
+    final textTheme = chatThemeData.textTheme;
+    final colorTheme = chatThemeData.colorTheme;
+    final translations = context.translations;
 
-    final errorIcon = AnimatedSwitcher(
-      duration: kThemeChangeDuration,
-      child: this.errorIcon ??
-          Icon(
-            Icons.error_outline_rounded,
-            size: 148,
-            color: chatThemeData.colorTheme.disabled,
-          ),
+    final icon = IconTheme.merge(
+      data: IconThemeData(size: 32, color: colorTheme.textLowEmphasis),
+      child: errorIcon ?? const Icon(Icons.error_outline_rounded),
     );
 
-    final titleText = AnimatedDefaultTextStyle(
-      style: errorTitleStyle ?? chatThemeData.textTheme.headline,
+    final effectiveErrorTitle =
+        errorTitle ?? Text(translations.genericErrorTitle);
+    // The generic subtitle only pairs with the generic title, not a custom one.
+    final resolvedSubtitle = errorSubtitle ??
+        (errorTitle == null
+            ? Text(translations.genericErrorDescription)
+            : null);
+    final effectiveTitleStyle = errorTitleStyle ??
+        textTheme.headline.copyWith(color: colorTheme.textHighEmphasis);
+    final effectiveSubtitleStyle = errorSubtitleStyle ??
+        textTheme.body.copyWith(color: colorTheme.textLowEmphasis);
+    final effectiveRetryButtonText =
+        retryButtonText ?? Text(translations.tryAgainLabel);
+
+    final title = AnimatedDefaultTextStyle(
+      style: effectiveTitleStyle,
+      textAlign: TextAlign.center,
       duration: kThemeChangeDuration,
-      child: errorTitle ?? const Empty(),
+      child: effectiveErrorTitle,
     );
 
-    final retryButtonText = AnimatedDefaultTextStyle(
-      style: errorTitleStyle ??
-          chatThemeData.textTheme.headline.copyWith(
-            color: Colors.white,
-          ),
-      duration: kThemeChangeDuration,
-      child: this.retryButtonText ?? Text(context.translations.retryLabel),
-    );
-
-    return Column(
-      mainAxisSize: mainAxisSize,
-      mainAxisAlignment: mainAxisAlignment,
-      crossAxisAlignment: crossAxisAlignment,
-      children: [
-        errorIcon,
-        titleText,
-        ElevatedButton(
-          onPressed: onRetryPressed,
-          child: retryButtonText,
+    Widget? subtitle;
+    if (resolvedSubtitle != null) {
+      subtitle = Padding(
+        padding: const EdgeInsets.only(top: 4),
+        child: AnimatedDefaultTextStyle(
+          style: effectiveSubtitleStyle,
+          textAlign: TextAlign.center,
+          duration: kThemeChangeDuration,
+          child: resolvedSubtitle,
         ),
-      ],
+      );
+    }
+
+    final retryButton = OutlinedButton(
+      onPressed: onRetryPressed,
+      style: OutlinedButton.styleFrom(
+        textStyle: retryButtonTextStyle ?? textTheme.bodyBold,
+        foregroundColor: colorTheme.accentPrimary,
+        disabledForegroundColor: colorTheme.disabled,
+      ),
+      child: effectiveRetryButtonText,
+    );
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 16,
+        vertical: 40,
+      ),
+      child: Column(
+        mainAxisSize: mainAxisSize,
+        mainAxisAlignment: mainAxisAlignment,
+        crossAxisAlignment: crossAxisAlignment,
+        children: [
+          icon,
+          const SizedBox(height: 8),
+          title,
+          if (subtitle != null) subtitle,
+          const SizedBox(height: 16),
+          retryButton,
+        ],
+      ),
     );
   }
 }

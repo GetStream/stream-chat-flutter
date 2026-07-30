@@ -163,6 +163,25 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
   String get somethingWentWrongError => 'लोड करने में समस्या';
 
   @override
+  String get connectionErrorTitle => 'इंटरनेट कनेक्शन नहीं है';
+
+  @override
+  String get connectionErrorDescription => 'कृपया अपना इंटरनेट कनेक्शन जांचें';
+
+  @override
+  String get slowConnectionErrorTitle => 'धीमा इंटरनेट कनेक्शन';
+
+  @override
+  String get slowConnectionErrorDescription =>
+      'ऐसा लगता है कि आपके इंटरनेट कनेक्शन में कोई समस्या है';
+
+  @override
+  String get genericErrorTitle => 'त्रुटि';
+
+  @override
+  String get genericErrorDescription => 'ओह, कुछ गलत हो गया';
+
+  @override
   String get addMoreFilesLabel => 'और फ़ाइलें जोड़ें';
 
   @override

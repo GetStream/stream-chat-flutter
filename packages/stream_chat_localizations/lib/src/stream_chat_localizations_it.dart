@@ -172,6 +172,26 @@ Il file è troppo grande per essere caricato. Il limite è di $limitInMB MB.''';
   String get somethingWentWrongError => 'Qualcosa è andato storto';
 
   @override
+  String get connectionErrorTitle => 'Nessuna connessione a Internet';
+
+  @override
+  String get connectionErrorDescription =>
+      'Controlla la tua connessione a Internet';
+
+  @override
+  String get slowConnectionErrorTitle => 'Connessione a Internet lenta';
+
+  @override
+  String get slowConnectionErrorDescription =>
+      'Sembra esserci un problema con la tua connessione a Internet';
+
+  @override
+  String get genericErrorTitle => 'Errore';
+
+  @override
+  String get genericErrorDescription => 'Ops, qualcosa è andato storto';
+
+  @override
   String get addMoreFilesLabel => 'Aggiungi altri file';
 
   @override

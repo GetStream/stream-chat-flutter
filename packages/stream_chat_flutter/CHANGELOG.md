@@ -3,9 +3,12 @@
 ✅ Added
 
 - Added a `LastMessagePredicate` typedef for the `ChannelLastMessageText.lastMessagePredicate` filter.
+- Added an `errorSubtitle` to `StreamScrollViewErrorWidget`, which now falls back to the generic error copy (title and description) when values aren't provided.
 
 🐞 Fixed
 
+- Fixed the default `StreamChannel` loading and error states not being themed or localized; `StreamChat` now installs themed, connection-aware defaults, overridable per `StreamChannel` or via `DefaultStreamChannelBuilders`.
+- Fixed the default list/scroll-view error states (channel, message, member, user, thread, poll-vote, search, and photo) showing raw or fixed errors; they are now connection-aware (no internet / slow connection), falling back to each view's specific error text.
 - Fixed link preview enrichment failing for uppercase URL schemes (e.g. `HTTPS://`) by normalizing the scheme before enriching.
 - Fixed `StreamMessageListView` firing `markThreadRead` on a reply-less parent, which produced a guaranteed 404 every time the thread view was opened before the first reply.
 - Fixed shadowed messages not hidden in channel list items.

@@ -3,11 +3,14 @@
 ✅ Added
 
 - Added support for predefined filters on `StreamChannelListController`.
+- Added `StreamChannelState.retry()` to re-run a failed channel initialization, for use as the retry action in `StreamChannel.errorBuilder`.
+- Added `DefaultStreamChannelBuilders`, an inherited widget that supplies default loading and error builders to descendant `StreamChannel`s (resolved via `loadingBuilderOf`/`errorBuilderOf`).
 
 🐞 Fixed
 
 - Fixed `StreamChannelListController` not handling `notification.channel_deleted` event.
 - Fixed backwards pagination not working if channel was never opened.
+- Fixed `StreamChannel`'s default error state exposing raw error details; it now shows a safe error state (icon, message, and a Try Again button wired to `retry()`) that adapts to the failure type.
 
 ## 9.26.0
 

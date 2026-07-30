@@ -161,6 +161,25 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
   String get somethingWentWrongError => 'Noe gikk galt';
 
   @override
+  String get connectionErrorTitle => 'Ingen internettforbindelse';
+
+  @override
+  String get connectionErrorDescription => 'Sjekk internettforbindelsen din';
+
+  @override
+  String get slowConnectionErrorTitle => 'Treg internettforbindelse';
+
+  @override
+  String get slowConnectionErrorDescription =>
+      'Det ser ut til å være et problem med internettforbindelsen din';
+
+  @override
+  String get genericErrorTitle => 'Feil';
+
+  @override
+  String get genericErrorDescription => 'Oi, noe gikk galt';
+
+  @override
   String get addMoreFilesLabel => 'Legg til flere filer';
 
   @override

@@ -331,6 +331,26 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
   String get tryAgainLabel => 'Try Again';
 
   @override
+  String get connectionErrorTitle => 'No Internet Connection';
+
+  @override
+  String get connectionErrorDescription =>
+      'Please check your internet connection';
+
+  @override
+  String get slowConnectionErrorTitle => 'Slow Internet Connection';
+
+  @override
+  String get slowConnectionErrorDescription =>
+      'There seems to be a problem with your internet connection';
+
+  @override
+  String get genericErrorTitle => 'Error';
+
+  @override
+  String get genericErrorDescription => 'Oops, something went wrong';
+
+  @override
   String membersCountText(int count) {
     if (count == 1) return '1 Member';
     return '$count Members';

@@ -4,6 +4,7 @@ import 'package:stream_chat_flutter/src/scroll_view/stream_scroll_view_error_wid
 import 'package:stream_chat_flutter/src/scroll_view/stream_scroll_view_load_more_error.dart';
 import 'package:stream_chat_flutter/src/scroll_view/stream_scroll_view_load_more_indicator.dart';
 import 'package:stream_chat_flutter/src/scroll_view/stream_scroll_view_loading_widget.dart';
+import 'package:stream_chat_flutter/src/utils/network_error_text.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// Default separator builder for [StreamDraftListView].
@@ -347,14 +348,23 @@ class StreamDraftListView extends StatelessWidget {
           const Center(
             child: StreamScrollViewLoadingWidget(),
           ),
-      errorBuilder: (context, error) =>
-          errorBuilder?.call(context, error) ??
-          Center(
-            child: StreamScrollViewErrorWidget(
-              errorTitle: Text(context.translations.loadingMessagesError),
-              onRetryPressed: controller.refresh,
-            ),
+      errorBuilder: (context, error) {
+        if (errorBuilder?.call(context, error) case final builder?) {
+          return builder;
+        }
+
+        final translations = context.translations;
+        final text = resolveNetworkErrorText(context, error,
+            fallbackTitle: translations.loadingMessagesError);
+
+        return Center(
+          child: StreamScrollViewErrorWidget(
+            errorTitle: Text(text.title),
+            errorSubtitle: Text(text.description),
+            onRetryPressed: controller.refresh,
           ),
+        );
+      },
     );
   }
 }

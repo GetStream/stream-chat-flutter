@@ -114,6 +114,43 @@ void main() {
       expect(newChannelInstance.name, newName);
       expect(newChannelInstance.extraData['name'], newName);
     });
+
+    test('setters remain usable after a failed watch()', () async {
+      // Make initialization fail.
+      when(
+        () => client.queryChannel(
+          channelType,
+          channelId: any(named: 'channelId'),
+          channelData: any(named: 'channelData'),
+          state: any(named: 'state'),
+          watch: any(named: 'watch'),
+          presence: any(named: 'presence'),
+          messagesPagination: any(named: 'messagesPagination'),
+          membersPagination: any(named: 'membersPagination'),
+          watchersPagination: any(named: 'watchersPagination'),
+        ),
+      ).thenThrow(StreamChatNetworkError(ChatErrorCode.inputError));
+
+      // A failed watch() also completes `initialized` with the error. Attach
+      // the expectation up-front so that error has a listener the moment it
+      // occurs and isn't reported as an unhandled async error.
+      final initializedFailure = expectLater(
+        channel.initialized,
+        throwsA(isA<StreamChatNetworkError>()),
+      );
+
+      await expectLater(
+        channel.watch(),
+        throwsA(isA<StreamChatNetworkError>()),
+      );
+      await initializedFailure;
+
+      // Init never *succeeded*, so the raw setters must still work. Previously
+      // they threw because the completer was merely `isCompleted` (it had
+      // completed with an error).
+      expect(() => channel.name = 'New name', returnsNormally);
+      expect(channel.name, 'New name');
+    });
   });
 
   group('Initialized Channel with Persistence', () {
@@ -507,7 +544,7 @@ void main() {
             (_) async => throw StreamChatNetworkError.raw(
               code: 0,
               message: 'Request cancelled',
-              isRequestCancelledError: true,
+              type: StreamChatNetworkErrorType.cancel,
             ),
           );
 
@@ -561,7 +598,7 @@ void main() {
             (_) async => throw StreamChatNetworkError.raw(
               code: 0,
               message: 'Request cancelled',
-              isRequestCancelledError: true,
+              type: StreamChatNetworkErrorType.cancel,
             ),
           );
 
@@ -638,7 +675,7 @@ void main() {
             (_) async => throw StreamChatNetworkError.raw(
               code: 0,
               message: 'Request cancelled',
-              isRequestCancelledError: true,
+              type: StreamChatNetworkErrorType.cancel,
             ),
           );
 
@@ -710,7 +747,7 @@ void main() {
             (_) async => throw StreamChatNetworkError.raw(
               code: 0,
               message: 'Request cancelled',
-              isRequestCancelledError: true,
+              type: StreamChatNetworkErrorType.cancel,
             ),
           );
 
@@ -2949,6 +2986,65 @@ void main() {
               membersPagination: any(named: 'membersPagination'),
               watchersPagination: any(named: 'watchersPagination'),
             )).called(1);
+      });
+
+      test(
+          'a successful retry after a failed init reconciles '
+          '`initialized` and `state`', () async {
+        final freshChannel = Channel(client, channelType, channelId);
+        addTearDown(freshChannel.dispose);
+
+        var attempts = 0;
+        when(
+          () => client.queryChannel(
+            channelType,
+            channelId: channelId,
+            watch: true,
+            channelData: any(named: 'channelData'),
+            messagesPagination: any(named: 'messagesPagination'),
+            membersPagination: any(named: 'membersPagination'),
+            watchersPagination: any(named: 'watchersPagination'),
+          ),
+        ).thenAnswer((_) async {
+          if (++attempts == 1) {
+            throw StreamChatNetworkError(ChatErrorCode.inputError);
+          }
+          return _generateChannelState(channelId, channelType);
+        });
+
+        // First init fails: `initialized` errors and `state` stays null.
+        // Attach the expectation before watch() so the error is handled.
+        final firstInit = expectLater(
+          freshChannel.initialized,
+          throwsA(isA<StreamChatNetworkError>()),
+        );
+        await expectLater(
+          freshChannel.watch(),
+          throwsA(isA<StreamChatNetworkError>()),
+        );
+        await firstInit;
+        expect(freshChannel.state, isNull);
+
+        // Retrying resets the completer; the successful watch initializes the
+        // channel and `initialized`/`state` agree again.
+        await freshChannel.watch();
+        expect(freshChannel.state, isNotNull);
+        await expectLater(freshChannel.initialized, completion(isTrue));
+
+        // Two query attempts were made: the failed init and the retry. Verify
+        // them here so the shared `client` mock's interaction count doesn't
+        // leak into later tests in this group.
+        verify(
+          () => client.queryChannel(
+            channelType,
+            channelId: channelId,
+            watch: true,
+            channelData: any(named: 'channelData'),
+            messagesPagination: any(named: 'messagesPagination'),
+            membersPagination: any(named: 'membersPagination'),
+            watchersPagination: any(named: 'watchersPagination'),
+          ),
+        ).called(2);
       });
 
       test('should rethrow if `.query` throws', () async {

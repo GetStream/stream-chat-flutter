@@ -36,26 +36,34 @@ class StreamScrollViewEmptyWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final chatThemeData = StreamChatTheme.of(context);
+    final textTheme = chatThemeData.textTheme;
+    final colorTheme = chatThemeData.colorTheme;
 
-    final emptyIcon = AnimatedSwitcher(
-      duration: kThemeChangeDuration,
-      child: this.emptyIcon,
+    final effectiveTitleStyle = emptyTitleStyle ?? textTheme.headline;
+
+    final icon = IconTheme.merge(
+      data: IconThemeData(size: 32, color: colorTheme.textLowEmphasis),
+      child: emptyIcon,
     );
 
     final emptyTitleText = AnimatedDefaultTextStyle(
-      style: emptyTitleStyle ?? chatThemeData.textTheme.headline,
+      style: effectiveTitleStyle,
       duration: kThemeChangeDuration,
       child: emptyTitle,
     );
 
-    return Column(
-      mainAxisSize: mainAxisSize,
-      mainAxisAlignment: mainAxisAlignment,
-      crossAxisAlignment: crossAxisAlignment,
-      children: [
-        emptyIcon,
-        emptyTitleText,
-      ],
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 16,
+        vertical: 40,
+      ),
+      child: Column(
+        spacing: 8,
+        mainAxisSize: mainAxisSize,
+        mainAxisAlignment: mainAxisAlignment,
+        crossAxisAlignment: crossAxisAlignment,
+        children: [icon, emptyTitleText],
+      ),
     );
   }
 }
