@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 
 /// A widget that is displayed while the [StreamScrollView] is loading.
 class StreamScrollViewLoadingWidget extends StatelessWidget {
@@ -16,9 +17,20 @@ class StreamScrollViewLoadingWidget extends StatelessWidget {
   final double width;
 
   @override
-  Widget build(BuildContext context) => SizedBox(
+  Widget build(BuildContext context) {
+    final colorTheme = StreamChatTheme.of(context).colorTheme;
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 16,
+        vertical: 40,
+      ),
+      child: SizedBox(
         height: height,
         width: width,
-        child: const CircularProgressIndicator.adaptive(),
-      );
+        child: CircularProgressIndicator.adaptive(
+          valueColor: AlwaysStoppedAnimation<Color>(colorTheme.accentPrimary),
+        ),
+      ),
+    );
+  }
 }

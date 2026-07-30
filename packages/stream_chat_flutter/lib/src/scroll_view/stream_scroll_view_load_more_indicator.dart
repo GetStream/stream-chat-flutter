@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 
 /// A widget that shows a loading indicator when the user is near the bottom of
 /// the list.
@@ -17,9 +18,14 @@ class StreamScrollViewLoadMoreIndicator extends StatelessWidget {
   final double width;
 
   @override
-  Widget build(BuildContext context) => SizedBox(
-        height: height,
-        width: width,
-        child: const CircularProgressIndicator.adaptive(),
-      );
+  Widget build(BuildContext context) {
+    final colorTheme = StreamChatTheme.of(context).colorTheme;
+    return SizedBox(
+      height: height,
+      width: width,
+      child: CircularProgressIndicator.adaptive(
+        valueColor: AlwaysStoppedAnimation<Color>(colorTheme.accentPrimary),
+      ),
+    );
+  }
 }

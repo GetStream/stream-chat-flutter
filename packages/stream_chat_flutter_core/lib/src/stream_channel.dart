@@ -1038,27 +1038,37 @@ class DefaultStreamChannelBuilders extends InheritedWidget {
       color: backgroundColor,
       child: Center(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 40),
+          padding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 40,
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.error_outline, size: 32),
+              const Icon(Icons.error_outline_rounded, size: 32),
               const SizedBox(height: 8),
               Text(
                 title,
                 textAlign: TextAlign.center,
                 style:
-                    const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                    const TextStyle(fontSize: 16, fontWeight: FontWeight.w400),
               ),
               const SizedBox(height: 4),
               Text(
                 message,
                 textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 16),
+                style:
+                    const TextStyle(fontSize: 14, fontWeight: FontWeight.w400),
               ),
               const SizedBox(height: 16),
               OutlinedButton(
                 onPressed: () => StreamChannel.maybeOf(context)?.retry(),
+                style: OutlinedButton.styleFrom(
+                  textStyle: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
                 child: const Text('Try Again'),
               ),
             ],

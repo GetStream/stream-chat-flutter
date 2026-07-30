@@ -364,6 +364,7 @@ class StreamUserListView extends StatelessWidget {
           return Center(
             child: StreamScrollViewErrorWidget(
               errorTitle: Text(text.title),
+              errorSubtitle: Text(text.description),
               onRetryPressed: controller.refresh,
             ),
           );

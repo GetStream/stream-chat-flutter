@@ -63,62 +63,77 @@ class StreamScrollViewErrorWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final chatThemeData = StreamChatTheme.of(context);
+    final textTheme = chatThemeData.textTheme;
+    final colorTheme = chatThemeData.colorTheme;
     final translations = context.translations;
 
-    final errorIcon = AnimatedSwitcher(
-      duration: kThemeChangeDuration,
-      child: this.errorIcon ??
-          Icon(
-            Icons.error_outline_rounded,
-            size: 148,
-            color: chatThemeData.colorTheme.disabled,
-          ),
+    final icon = IconTheme.merge(
+      data: IconThemeData(size: 32, color: colorTheme.textLowEmphasis),
+      child: errorIcon ?? const Icon(Icons.error_outline_rounded),
     );
 
-    final titleText = AnimatedDefaultTextStyle(
-      style: errorTitleStyle ?? chatThemeData.textTheme.headline,
-      textAlign: TextAlign.center,
-      duration: kThemeChangeDuration,
-      child: errorTitle ?? Text(translations.genericErrorTitle),
-    );
-
+    final effectiveErrorTitle =
+        errorTitle ?? Text(translations.genericErrorTitle);
     // The generic subtitle only pairs with the generic title, not a custom one.
     final resolvedSubtitle = errorSubtitle ??
         (errorTitle == null
             ? Text(translations.genericErrorDescription)
             : null);
+    final effectiveTitleStyle = errorTitleStyle ??
+        textTheme.headline.copyWith(color: colorTheme.textHighEmphasis);
+    final effectiveSubtitleStyle = errorSubtitleStyle ??
+        textTheme.body.copyWith(color: colorTheme.textLowEmphasis);
+    final effectiveRetryButtonText =
+        retryButtonText ?? Text(translations.tryAgainLabel);
 
-    final retryButtonText = AnimatedDefaultTextStyle(
-      style: errorTitleStyle ??
-          chatThemeData.textTheme.headline.copyWith(
-            color: Colors.white,
-          ),
+    final title = AnimatedDefaultTextStyle(
+      style: effectiveTitleStyle,
+      textAlign: TextAlign.center,
       duration: kThemeChangeDuration,
-      child: this.retryButtonText ?? Text(translations.retryLabel),
+      child: effectiveErrorTitle,
     );
 
-    return Column(
-      mainAxisSize: mainAxisSize,
-      mainAxisAlignment: mainAxisAlignment,
-      crossAxisAlignment: crossAxisAlignment,
-      children: [
-        errorIcon,
-        titleText,
-        if (resolvedSubtitle != null)
-          AnimatedDefaultTextStyle(
-            style: errorSubtitleStyle ??
-                chatThemeData.textTheme.body.copyWith(
-                  color: chatThemeData.colorTheme.textLowEmphasis,
-                ),
-            textAlign: TextAlign.center,
-            duration: kThemeChangeDuration,
-            child: resolvedSubtitle,
-          ),
-        ElevatedButton(
-          onPressed: onRetryPressed,
-          child: retryButtonText,
+    Widget? subtitle;
+    if (resolvedSubtitle != null) {
+      subtitle = Padding(
+        padding: const EdgeInsets.only(top: 4),
+        child: AnimatedDefaultTextStyle(
+          style: effectiveSubtitleStyle,
+          textAlign: TextAlign.center,
+          duration: kThemeChangeDuration,
+          child: resolvedSubtitle,
         ),
-      ],
+      );
+    }
+
+    final retryButton = OutlinedButton(
+      onPressed: onRetryPressed,
+      style: OutlinedButton.styleFrom(
+        textStyle: retryButtonTextStyle ?? textTheme.bodyBold,
+        foregroundColor: colorTheme.accentPrimary,
+        disabledForegroundColor: colorTheme.disabled,
+      ),
+      child: effectiveRetryButtonText,
+    );
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 16,
+        vertical: 40,
+      ),
+      child: Column(
+        mainAxisSize: mainAxisSize,
+        mainAxisAlignment: mainAxisAlignment,
+        crossAxisAlignment: crossAxisAlignment,
+        children: [
+          icon,
+          const SizedBox(height: 8),
+          title,
+          if (subtitle != null) subtitle,
+          const SizedBox(height: 16),
+          retryButton,
+        ],
+      ),
     );
   }
 }
