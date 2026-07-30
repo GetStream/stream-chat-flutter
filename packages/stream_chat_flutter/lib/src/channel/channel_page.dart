@@ -2,6 +2,58 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// A channel page with optional floating composer support.
+///
+/// Wires up a [StreamChannelHeader], a [StreamMessageListView] and a
+/// [StreamMessageComposer], laid out floating or docked according to the ambient
+/// [StreamAppStyle]. Expects a [StreamChannel] ancestor.
+///
+/// ## Customizing this page
+///
+/// The constructor is deliberately small — most customization happens through
+/// the component factory and the global configuration, both of which reach
+/// inside this page because the components resolve them themselves.
+///
+/// Swap out components with [streamChatComponentBuilders], passed to
+/// [StreamChat.componentBuilders]:
+///
+/// ```dart
+/// StreamChat(
+///   client: client,
+///   componentBuilders: StreamComponentBuilders(
+///     extensions: streamChatComponentBuilders(
+///       // Applies to the messages this page's list renders.
+///       messageItem: (context, props) => DefaultStreamMessageItem(
+///         props: props.copyWith(maxWidth: 320),
+///       ),
+///       // Applies to this page's composer.
+///       messageComposer: (context, props) => DefaultStreamMessageComposer(
+///         props: props.copyWith(disableAttachments: true),
+///       ),
+///     ),
+///   ),
+///   child: child,
+/// )
+/// ```
+///
+/// `messageItem`, `messageComposer`, `quotedMessage`, `mentionItem`, the
+/// attachment builders, `mediaGallery` and `videoPlayer` all apply here.
+///
+/// Change list behaviour — `swipeToReply`, `highlightInitialMessage`,
+/// `autoScrollPolicy` and the rest — through
+/// [StreamChatConfigurationData.messageListViewConfiguration] on
+/// [StreamChat.configData].
+///
+/// Not reachable from here: the list-level slots on
+/// [StreamMessageListViewBuilders] (`header`, `footer`, `dateDivider`,
+/// `floatingDateDivider`, `threadSeparator`, `scrollToBottomButton`, `empty`,
+/// `loading`, `error`) and [StreamChannelHeader]'s title, subtitle and actions.
+/// Those have no component-factory entry, so customizing them means composing
+/// [StreamMessageListView] and [StreamChannelHeader] directly instead of using
+/// this page.
+///
+/// See also:
+///
+///  * [StreamThreadPage], the equivalent page for a single thread.
 class StreamChannelPage extends StatefulWidget {
   /// Creates a [StreamChannelPage].
   const StreamChannelPage({

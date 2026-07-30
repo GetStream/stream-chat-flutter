@@ -2,6 +2,27 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// A page that displays a thread of messages for a given parent message.
+///
+/// Wires up a [StreamThreadHeader], a [StreamMessageListView] scoped to [parent]
+/// and a [StreamMessageComposer] that addresses new messages to the thread, laid
+/// out floating or docked according to the ambient [StreamAppStyle]. Expects a
+/// [StreamChannel] ancestor.
+///
+/// The composer is omitted when [parent] is deleted.
+///
+/// ## Customizing this page
+///
+/// As with [StreamChannelPage], the constructor is small because customization
+/// happens through the component factory and the global configuration rather
+/// than through parameters — see [StreamChannelPage] for the full rundown and an
+/// example. In short:
+///
+///  * Components (`messageItem`, `messageComposer`, attachments, …) —
+///    [streamChatComponentBuilders] on [StreamChat.componentBuilders].
+///  * List behaviour — [StreamChatConfigurationData.messageListViewConfiguration]
+///    on [StreamChat.configData].
+///  * Not reachable: [StreamMessageListViewBuilders] list-level slots and
+///    [StreamThreadHeader]'s title and actions.
 class StreamThreadPage extends StatefulWidget {
   /// Creates a [StreamThreadPage].
   const StreamThreadPage({
