@@ -270,14 +270,20 @@ class AuthController extends ValueNotifier<AuthState> {
     _pushTokenManager?.dispose().ignore();
     _pushTokenManager = null;
 
-    // `disconnectUser` tears down in the order that matters: it disposes the
-    // channel state first — which cancels each channel's debounced persistence
-    // writes — and only then closes the DB, flushing it so nothing leaks into
-    // the next test. Closing the connection first and calling `dispose()` after
-    // (which does not flush) left those debounced writes firing a second later
-    // against a disconnected client, throwing an async StateError that the
-    // framework then reported against an unrelated, already-passed test.
-    await _client?.disconnectUser(flushChatPersistence: true);
+    // Detach persistence from the client *before* closing it. Every SDK path
+    // that reaches for it either uses `chatPersistenceClient?.` or is guarded by
+    // `persistenceEnabled` (which is false once this is null), so anything that
+    // lands after this point short-circuits instead of asserting against a
+    // disconnected database. Ordering the teardown differently could not close
+    // that window: a debounced channel-state write fires up to a second later,
+    // and an HTTP request already on the wire cannot be cancelled at all — its
+    // response builds a `ChannelClientState`, whose constructor reads the cached
+    // threads. Both used to throw an async StateError, which the test framework
+    // then blamed on an unrelated test that had already passed.
+    final persistence = _client?.chatPersistenceClient;
+    _client?.chatPersistenceClient = null;
+    // dispose() won't flush; empty the DB so it can't leak into the next test.
+    await persistence?.disconnect(flush: true);
     await _client?.dispose();
     _client = null;
     _activeApiKey = null;

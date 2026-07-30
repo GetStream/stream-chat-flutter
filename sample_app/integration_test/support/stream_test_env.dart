@@ -35,13 +35,8 @@ class StreamTestEnv {
   /// The external URLs the app has opened so far, in order.
   List<String> get launchedUrls => _urlLauncher.launchedUrls;
 
-  // Whether this test opted into the on-disk cache. Only matters at teardown —
-  // see [_drainPendingPersistenceWork].
-  var _usePersistence = false;
-
   Future<void> setUp(WidgetTester tester, {bool persistence = false}) async {
     _tester = tester;
-    _usePersistence = persistence;
     _realUrlLauncher = UrlLauncherPlatform.instance;
     UrlLauncherPlatform.instance = _urlLauncher;
 
@@ -166,28 +161,8 @@ class StreamTestEnv {
     throw TestFailure('Timed out waiting for connection status: $status');
   }
 
-  // Disposing the client cancels the debounced persistence writes, but it cannot
-  // cancel an HTTP request that is already out. A `queryChannels` still in
-  // flight when the DB closes throws from `ChannelClientState`'s constructor
-  // (which reads the cached threads) — an async error, so the framework blames
-  // whichever test it can still see rather than this one, failing an unrelated
-  // test that had already passed. `goOnline()` returns as soon as the socket is
-  // up, so a recovery query is routinely still pending here; give it a moment to
-  // land. Bounded, not a proof: it shrinks the window rather than closing it, and
-  // the real fix belongs in the SDK (mapping a query result should not touch a
-  // disconnected persistence client). Only the persistence tests pay the cost —
-  // without a persistence client every one of those calls is a null-safe no-op.
-  Future<void> _drainPendingPersistenceWork() async {
-    if (!_usePersistence) return;
-    final end = DateTime.now().add(const Duration(seconds: 2));
-    while (DateTime.now().isBefore(end)) {
-      await _tester.pump(const Duration(milliseconds: 100));
-    }
-  }
-
   Future<void> tearDown() async {
     try {
-      await _drainPendingPersistenceWork();
       await authController.debugReset();
     } finally {
       // Null when tearDown runs before setUp installed the fake.
