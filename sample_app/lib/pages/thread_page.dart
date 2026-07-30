@@ -103,7 +103,7 @@ class _ThreadPageState extends State<ThreadPage> {
               // See the channel page: an unhandled composer error would escape
               // as an unhandled async error.
               onError: (error, stackTrace) {
-                debugPrint('[composer] sending the thread reply failed: $error');
+                debugPrint('[composer:thread] $error; $stackTrace');
               },
               enableVoiceRecording: true,
             ),

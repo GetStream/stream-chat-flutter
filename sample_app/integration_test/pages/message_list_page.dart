@@ -99,19 +99,24 @@ final class _MessageList {
   Finder sendingStatus(MessageDeliveryStatus status) {
     bool hasStatus(StreamSendingIndicator it) {
       final state = it.message.state;
+      // The indicator picks its branch by priority — read, then delivered, then
+      // the message's own state — and `isCompleted` does not revert once the
+      // message is later delivered or read. So every state-based case has to
+      // rule those two flags out, or a read message would match `sent` too.
+      final unacknowledged = !it.isMessageRead && !it.isMessageDelivered;
       switch (status) {
         case MessageDeliveryStatus.read:
           return it.isMessageRead;
         case MessageDeliveryStatus.pending:
-          return state.isOutgoing;
+          return unacknowledged && state.isOutgoing;
         case MessageDeliveryStatus.sent:
-          return state.isCompleted;
+          return unacknowledged && state.isCompleted;
         case MessageDeliveryStatus.failed:
           return state.isFailed;
         case MessageDeliveryStatus.nil:
           // No branch of the indicator applies, so it renders nothing. A failed
           // message also lands here — [errorBadge] is what marks that one.
-          return !it.isMessageRead && !it.isMessageDelivered && !state.isCompleted && !state.isOutgoing;
+          return unacknowledged && !state.isCompleted && !state.isOutgoing;
       }
     }
 

@@ -126,9 +126,10 @@ class _ChannelPageState extends State<ChannelPage> {
                 // button drops the returned future that surfaces as an
                 // unhandled async error. The SDK already keeps the message in a
                 // failed state and retries it once the connection is back, so
-                // logging is enough here.
+                // logging is enough here. Typing events report through here too,
+                // hence the neutral wording.
                 onError: (error, stackTrace) {
-                  debugPrint('[composer] sending the message failed: $error');
+                  debugPrint('[composer] $error; $stackTrace');
                 },
                 enableVoiceRecording: true,
                 allowedAttachmentPickerTypes: [
