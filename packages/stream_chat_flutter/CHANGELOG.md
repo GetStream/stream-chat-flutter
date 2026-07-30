@@ -33,6 +33,7 @@
 - Fixed the default list/scroll-view error states (channel, message, member, user, thread, poll-vote, reaction, search, and photo) showing raw or fixed errors; they are now connection-aware (no internet / slow connection), falling back to each view's specific error text.
 - Fixed `StreamTypingIndicator` briefly showing typing users from a different context (main channel vs. thread) on its first frame.
 - Fixed the "Message deleted" bubble overflowing its maximum width when the localized label is long; the label now wraps instead.
+- Fixed the scroll-to-bottom button in thread views keying off the parent channel's up-to-date state instead of the thread's own scroll position, so it no longer appears while already at the newest reply.
 
 ## 10.2.0
 
