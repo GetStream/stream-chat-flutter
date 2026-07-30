@@ -83,7 +83,9 @@ class StreamMessageItem extends StatelessWidget {
     void Function(Message parentMessage, Message? threadMessage)? onThreadTap,
     void Function(Message)? onViewInChannelTap,
     void Function(Message)? onReplyTap,
+    @Deprecated('Use onReactionTap instead. onReactionTap also reports the tapped reaction.')
     void Function(Message)? onReactionsTap,
+    OnReactionTap? onReactionTap,
     void Function(Message quotedMessage)? onQuotedMessageTap,
     Comparator<ReactionGroup>? reactionSorting,
     MessageActionsBuilder? actionsBuilder,
@@ -91,7 +93,12 @@ class StreamMessageItem extends StatelessWidget {
     void Function(BuildContext, Message)? onBouncedErrorMessageActions,
     void Function(Message)? onEditMessageTap,
     List<StreamAttachmentWidgetBuilder>? attachmentBuilders,
-  }) : props = .new(
+  }) : assert(
+         onReactionsTap == null || onReactionTap == null,
+         'Only one of onReactionsTap or onReactionTap can be provided. '
+         'Prefer onReactionTap; onReactionsTap is deprecated.',
+       ),
+       props = .new(
          message: message,
          padding: padding,
          spacing: spacing,
@@ -108,6 +115,7 @@ class StreamMessageItem extends StatelessWidget {
          onViewInChannelTap: onViewInChannelTap,
          onReplyTap: onReplyTap,
          onReactionsTap: onReactionsTap,
+         onReactionTap: onReactionTap,
          onQuotedMessageTap: onQuotedMessageTap,
          reactionSorting: reactionSorting,
          actionsBuilder: actionsBuilder,
@@ -163,7 +171,8 @@ class StreamMessageItemProps {
     this.onThreadTap,
     this.onViewInChannelTap,
     this.onReplyTap,
-    this.onReactionsTap,
+    @Deprecated('Use onReactionTap instead. onReactionTap also reports the tapped reaction.') this.onReactionsTap,
+    this.onReactionTap,
     this.onQuotedMessageTap,
     this.reactionSorting,
     this.actionsBuilder,
@@ -171,7 +180,11 @@ class StreamMessageItemProps {
     this.onBouncedErrorMessageActions,
     this.onEditMessageTap,
     this.attachmentBuilders,
-  });
+  }) : assert(
+         onReactionsTap == null || onReactionTap == null,
+         'Only one of onReactionsTap or onReactionTap can be provided. '
+         'Prefer onReactionTap; onReactionsTap is deprecated.',
+       );
 
   /// The message to display.
   final Message message;
@@ -303,7 +316,15 @@ class StreamMessageItemProps {
   /// If null, the default behaviour opens a [ReactionDetailSheet] showing
   /// the full list of reactions. Provide this callback to replace that
   /// default with custom handling.
+  ///
+  /// Prefer [onReactionTap], which also reports the tapped reaction.
   final void Function(Message message)? onReactionsTap;
+
+  /// {@macro onReactionTap}
+  ///
+  /// If null, the default behaviour opens a [ReactionDetailSheet] showing
+  /// the full list of reactions.
+  final OnReactionTap? onReactionTap;
 
   /// Called when an inline quoted message is tapped.
   ///
@@ -367,7 +388,9 @@ class StreamMessageItemProps {
     void Function(Message, Message?)? onThreadTap,
     void Function(Message)? onViewInChannelTap,
     void Function(Message)? onReplyTap,
+    @Deprecated('Use onReactionTap instead. onReactionTap also reports the tapped reaction.')
     void Function(Message)? onReactionsTap,
+    OnReactionTap? onReactionTap,
     void Function(Message)? onQuotedMessageTap,
     Comparator<ReactionGroup>? reactionSorting,
     MessageActionsBuilder? actionsBuilder,
@@ -393,6 +416,7 @@ class StreamMessageItemProps {
       onViewInChannelTap: onViewInChannelTap ?? this.onViewInChannelTap,
       onReplyTap: onReplyTap ?? this.onReplyTap,
       onReactionsTap: onReactionsTap ?? this.onReactionsTap,
+      onReactionTap: onReactionTap ?? this.onReactionTap,
       onQuotedMessageTap: onQuotedMessageTap ?? this.onQuotedMessageTap,
       reactionSorting: reactionSorting ?? this.reactionSorting,
       actionsBuilder: actionsBuilder ?? this.actionsBuilder,
@@ -522,9 +546,10 @@ class DefaultStreamMessageItem extends StatelessWidget {
         },
         _ => null,
       },
-      onReactionsTap: switch (props.onReactionsTap) {
-        final onReactionsTap? => () => onReactionsTap(message),
-        _ => () => _showMessageReactionsModal(context, message),
+      onReactionTap: switch ((props.onReactionTap, props.onReactionsTap)) {
+        (final onReactionTap?, _) => (reaction) => onReactionTap(context, .new(message: message, reaction: reaction)),
+        (_, final onReactionsTap?) => (_) => onReactionsTap(message),
+        _ => (_) => _showMessageReactionsModal(context, message),
       },
     );
 
