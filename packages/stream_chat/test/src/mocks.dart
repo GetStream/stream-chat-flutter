@@ -4,6 +4,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/src/client/channel.dart';
 import 'package:stream_chat/src/client/channel_delivery_reporter.dart';
 import 'package:stream_chat/src/client/client.dart';
+import 'package:stream_chat/src/client/pending_operations_manager.dart';
 import 'package:stream_chat/src/core/api/attachment_file_uploader.dart';
 import 'package:stream_chat/src/core/api/channel_api.dart';
 import 'package:stream_chat/src/core/api/device_api.dart';
@@ -113,19 +114,21 @@ class MockPersistenceClient extends Mock implements ChatPersistenceClient {
   bool failInsert = false;
 
   @override
-  Future<void> insertPendingOperation(PendingOperation operation) async {
+  Future<int?> insertPendingOperation(PendingOperation operation) async {
     if (failInsert) {
       throw Exception('simulated insert failure');
     }
     // Assign an autoincrement id like the real DAO so replay can delete by id.
+    final id = _nextPendingOperationId++;
     storedPendingOperations.add(
       PendingOperation(
-        id: _nextPendingOperationId++,
+        id: id,
         type: operation.type,
         targetMessageId: operation.targetMessageId,
         payload: operation.payload,
       ),
     );
+    return id;
   }
 
   @override
@@ -147,6 +150,14 @@ class MockPersistenceClient extends Mock implements ChatPersistenceClient {
 class MockStreamChatClient extends Mock implements StreamChatClient {
   @override
   bool get persistenceEnabled => chatPersistenceClient != null;
+
+  // A real manager backed by this mock, so `Channel.sendReaction` /
+  // `deleteReaction` can enqueue through it. It reads `persistenceEnabled`,
+  // `chatPersistenceClient` and `logger` off this mock.
+  late final PendingOperationsManager _pendingOperationsManager = PendingOperationsManager(this);
+
+  @override
+  PendingOperationsManager get pendingOperationsManager => _pendingOperationsManager;
 
   // A plain settable field (not a `when(...)` stub) so tests can flip it
   // with a direct assignment, e.g. `client.isLocalUnreadCountEnabled = true`.

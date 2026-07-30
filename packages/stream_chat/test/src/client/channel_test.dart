@@ -3118,13 +3118,10 @@ void main() {
       );
 
       test(
-        'transient error persists a pending add and keeps the reaction',
+        'a retriable failure keeps the optimistic reaction for replay',
         () async {
-          final persistence = MockPersistenceClient();
-          when(() => client.chatPersistenceClient).thenReturn(persistence);
-
           const type = 'like';
-          final message = Message(id: 'offline-msg-1', state: MessageState.sent);
+          final message = Message(id: 'offline-msg', state: MessageState.sent);
           final reaction = Reaction(
             type: type,
             messageId: message.id,
@@ -3141,118 +3138,11 @@ void main() {
             throwsA(isA<StreamChatNetworkError>()),
           );
 
-          final ops = persistence.storedPendingOperations;
-          expect(ops, hasLength(1));
-          expect(ops.single.type, 'reaction.add');
-          expect(ops.single.targetMessageId, message.id);
-
-          // The optimistic reaction is kept (no revert).
+          // The optimistic reaction is kept (queued for replay on reconnect)
           final current = channel.state!.messages.firstWhere(
             (m) => m.id == message.id,
           );
           expect(current.ownReactions?.map((r) => r.type), contains(type));
-        },
-      );
-
-      test(
-        'transient add stores the full call options in the payload',
-        () async {
-          final persistence = MockPersistenceClient();
-          when(() => client.chatPersistenceClient).thenReturn(persistence);
-
-          const type = 'like';
-          final message = Message(id: 'offline-msg-2', state: MessageState.sent);
-          final reaction = Reaction(
-            type: type,
-            messageId: message.id,
-            user: client.state.currentUser,
-          );
-
-          when(
-            () => client.sendReaction(
-              message.id,
-              reaction,
-              enforceUnique: true,
-              skipPush: true,
-            ),
-          ).thenThrow(StreamChatNetworkError(ChatErrorCode.inputError));
-
-          await expectLater(
-            channel.sendReaction(
-              message,
-              reaction,
-              enforceUnique: true,
-              skipPush: true,
-            ),
-            throwsA(isA<StreamChatNetworkError>()),
-          );
-
-          final op = persistence.storedPendingOperations.single;
-          expect(op.payload['enforce_unique'], isTrue);
-          expect(op.payload['skip_push'], isTrue);
-        },
-      );
-
-      test(
-        'without persistence a failed reaction is reverted, not queued',
-        () async {
-          when(() => client.chatPersistenceClient).thenReturn(null);
-
-          const type = 'like';
-          final message = Message(id: 'offline-msg-3', state: MessageState.sent);
-          final reaction = Reaction(
-            type: type,
-            messageId: message.id,
-            user: client.state.currentUser,
-          );
-
-          when(
-            () => client.sendReaction(message.id, reaction),
-          ).thenThrow(StreamChatNetworkError(ChatErrorCode.inputError));
-
-          await expectLater(
-            channel.sendReaction(message, reaction),
-            throwsA(isA<StreamChatNetworkError>()),
-          );
-
-          // No queue to replay from, so the optimistic reaction is rolled back.
-          final current = channel.state!.messages.firstWhere(
-            (m) => m.id == message.id,
-          );
-          expect(current.ownReactions, anyOf(isNull, isEmpty));
-        },
-      );
-
-      test(
-        'a failed enqueue reverts the reaction instead of keeping it unsynced',
-        () async {
-          final persistence = MockPersistenceClient()..failInsert = true;
-          when(() => client.chatPersistenceClient).thenReturn(persistence);
-
-          const type = 'like';
-          final message = Message(id: 'offline-msg-4', state: MessageState.sent);
-          final reaction = Reaction(
-            type: type,
-            messageId: message.id,
-            user: client.state.currentUser,
-          );
-
-          when(
-            () => client.sendReaction(message.id, reaction),
-          ).thenThrow(StreamChatNetworkError(ChatErrorCode.inputError));
-
-          await expectLater(
-            channel.sendReaction(message, reaction),
-            throwsA(isA<StreamChatNetworkError>()),
-          );
-
-          // Enqueue failed, so nothing is queued and the optimistic reaction
-          // is rolled back to keep local state consistent with the server.
-          expect(persistence.storedPendingOperations, isEmpty);
-          final current = channel.state!.messages.firstWhere(
-            (m) => m.id == message.id,
-          );
-          expect(current.ownReactions, anyOf(isNull, isEmpty));
         },
       );
     });
@@ -3595,13 +3485,10 @@ void main() {
       );
 
       test(
-        'transient error persists a pending delete',
+        'a retriable failure keeps the optimistic removal for replay',
         () async {
-          final persistence = MockPersistenceClient();
-          when(() => client.chatPersistenceClient).thenReturn(persistence);
-
           const type = 'like';
-          const messageId = 'offline-del-1';
+          const messageId = 'offline-del';
           final reaction = Reaction(
             type: type,
             messageId: messageId,
@@ -3624,143 +3511,14 @@ void main() {
             throwsA(isA<StreamChatNetworkError>()),
           );
 
-          final op = persistence.storedPendingOperations.single;
-          expect(op.type, 'reaction.delete');
-          expect(op.targetMessageId, messageId);
-          expect(op.payload['reaction_type'], type);
-        },
-      );
-
-      test(
-        'without persistence a failed delete is reverted, not queued',
-        () async {
-          when(() => client.chatPersistenceClient).thenReturn(null);
-
-          const type = 'like';
-          const messageId = 'offline-del-3';
-          final reaction = Reaction(
-            type: type,
-            messageId: messageId,
-            userId: 'test-user-id',
-          );
-          final message = Message(
-            id: messageId,
-            ownReactions: [reaction],
-            latestReactions: [reaction],
-            reactionGroups: {type: ReactionGroup(count: 1, sumScores: 1)},
-            state: MessageState.sent,
-          );
-
-          when(
-            () => client.deleteReaction(messageId, type),
-          ).thenThrow(StreamChatNetworkError(ChatErrorCode.inputError));
-
-          await expectLater(
-            channel.deleteReaction(message, reaction),
-            throwsA(isA<StreamChatNetworkError>()),
-          );
-
-          // No queue to replay from, so the optimistic removal is rolled back.
+          // The optimistic removal is kept (queued for replay on reconnect)
           final current = channel.state!.messages.firstWhere(
             (m) => m.id == messageId,
           );
-          expect(current.ownReactions?.map((r) => r.type), contains(type));
-        },
-      );
-
-      test(
-        'a failed enqueue restores the reaction instead of dropping it',
-        () async {
-          final persistence = MockPersistenceClient()..failInsert = true;
-          when(() => client.chatPersistenceClient).thenReturn(persistence);
-
-          const type = 'like';
-          const messageId = 'offline-del-4';
-          final reaction = Reaction(
-            type: type,
-            messageId: messageId,
-            userId: 'test-user-id',
+          expect(
+            current.ownReactions?.map((r) => r.type) ?? <String>[],
+            isNot(contains(type)),
           );
-          final message = Message(
-            id: messageId,
-            ownReactions: [reaction],
-            latestReactions: [reaction],
-            reactionGroups: {type: ReactionGroup(count: 1, sumScores: 1)},
-            state: MessageState.sent,
-          );
-
-          when(
-            () => client.deleteReaction(messageId, type),
-          ).thenThrow(StreamChatNetworkError(ChatErrorCode.inputError));
-
-          await expectLater(
-            channel.deleteReaction(message, reaction),
-            throwsA(isA<StreamChatNetworkError>()),
-          );
-
-          // Enqueue failed, so nothing is queued and the optimistic removal is
-          // rolled back — the reaction is restored to match the server.
-          expect(persistence.storedPendingOperations, isEmpty);
-          final current = channel.state!.messages.firstWhere(
-            (m) => m.id == messageId,
-          );
-          expect(current.ownReactions?.map((r) => r.type), contains(type));
-        },
-      );
-
-      test(
-        'terminal delete restores the reaction and leaves the queue untouched',
-        () async {
-          final persistence = MockPersistenceClient();
-          when(() => client.chatPersistenceClient).thenReturn(persistence);
-
-          const type = 'like';
-          const messageId = 'offline-del-2';
-          final reaction = Reaction(
-            type: type,
-            messageId: messageId,
-            user: client.state.currentUser,
-          );
-          final message = Message(
-            id: messageId,
-            ownReactions: [reaction],
-            state: MessageState.sent,
-            // `Message.createdAt` falls back to `DateTime.now()` per call
-            // when not provided, which breaks merge/sort keyed on createdAt.
-            createdAt: DateTime.now(),
-          );
-
-          // A reaction that was only ever added optimistically offline.
-          when(
-            () => client.sendReaction(messageId, reaction),
-          ).thenThrow(StreamChatNetworkError(ChatErrorCode.inputError));
-          await expectLater(
-            channel.sendReaction(message, reaction),
-            throwsA(isA<StreamChatNetworkError>()),
-          );
-          expect(persistence.storedPendingOperations, hasLength(1));
-
-          // Deleting it fails terminally (server never had it → 404).
-          when(() => client.deleteReaction(messageId, type)).thenThrow(
-            StreamChatNetworkError(
-              ChatErrorCode.inputError,
-              data: ErrorResponse()..statusCode = 404,
-            ),
-          );
-
-          // A terminal delete rolls back the optimistic removal (restoring the
-          // reaction), symmetric with `sendReaction`; it does not manipulate
-          // the queue, so the queued add remains.
-          await expectLater(
-            channel.deleteReaction(message, reaction),
-            throwsA(isA<StreamChatNetworkError>()),
-          );
-
-          final current = channel.state!.messages.firstWhere(
-            (m) => m.id == messageId,
-          );
-          expect(current.ownReactions?.map((r) => r.type), contains(type));
-          expect(persistence.storedPendingOperations, hasLength(1));
         },
       );
     });

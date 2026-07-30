@@ -537,12 +537,13 @@ abstract class ChatPersistenceClient {
     ]);
   }
 
-  /// Inserts [operation] into the pending-operation queue.
+  /// Inserts [operation] into the pending-operation queue, returning the id
+  /// assigned to the stored row (or `null` when nothing was stored).
   ///
   /// Pending operations are optimistic mutations queued for replay once
   /// connectivity is restored. The default no-op drops them unless overridden
   /// alongside [getPendingOperations] and [deletePendingOperation].
-  Future<void> insertPendingOperation(PendingOperation operation) async {}
+  Future<int?> insertPendingOperation(PendingOperation operation) async => null;
 
   /// Returns all stored pending operations ordered by insertion.
   ///

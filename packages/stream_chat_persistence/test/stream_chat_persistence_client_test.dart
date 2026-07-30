@@ -1379,9 +1379,9 @@ void main() {
         targetMessageId: 'testMessageId',
         payload: {'reaction': 'like'},
       );
-      when(() => mockDatabase.pendingOperationDao.insertPendingOperation(operation)).thenAnswer((_) => Future.value());
+      when(() => mockDatabase.pendingOperationDao.insertPendingOperation(operation)).thenAnswer((_) => Future.value(1));
 
-      await client.insertPendingOperation(operation);
+      expect(await client.insertPendingOperation(operation), 1);
       verify(() => mockDatabase.pendingOperationDao.insertPendingOperation(operation)).called(1);
     });
 

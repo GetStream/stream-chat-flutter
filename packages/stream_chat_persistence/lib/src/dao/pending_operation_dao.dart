@@ -12,8 +12,8 @@ class PendingOperationDao extends DatabaseAccessor<DriftChatDatabase> with _$Pen
   /// Creates a new pending operation dao instance
   PendingOperationDao(super.db);
 
-  /// Appends [operation] to the queue.
-  Future<void> insertPendingOperation(PendingOperation operation) =>
+  /// Appends [operation] to the queue, returning its autoincrement `id`.
+  Future<int> insertPendingOperation(PendingOperation operation) =>
       into(pendingOperations).insert(operation.toCompanion());
 
   /// Returns all pending operations ordered by insertion (`id` ascending).

@@ -294,13 +294,13 @@ void main() {
       persistenceClient.updateChannelStates([channelState]);
     });
 
-    test('insertPendingOperation defaults to a no-op', () async {
+    test('insertPendingOperation defaults to returning null', () async {
       const operation = PendingOperation(
         type: 'reaction.add',
         targetMessageId: 'message-id',
         payload: {'reaction': 'like'},
       );
-      await persistenceClient.insertPendingOperation(operation);
+      expect(await persistenceClient.insertPendingOperation(operation), isNull);
     });
 
     test('getPendingOperations defaults to an empty list', () async {

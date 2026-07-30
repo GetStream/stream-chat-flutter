@@ -654,7 +654,7 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   }
 
   @override
-  Future<void> insertPendingOperation(PendingOperation operation) {
+  Future<int?> insertPendingOperation(PendingOperation operation) {
     assert(_debugIsConnected, '');
     _logger.info('insertPendingOperation');
     return db!.pendingOperationDao.insertPendingOperation(operation);

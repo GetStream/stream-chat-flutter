@@ -8,7 +8,7 @@ import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/src/client/channel.dart';
 import 'package:stream_chat/src/client/channel_delivery_reporter.dart';
 import 'package:stream_chat/src/client/event_resolvers.dart' as event_resolvers;
-import 'package:stream_chat/src/client/pending_operation_replayer.dart';
+import 'package:stream_chat/src/client/pending_operations_manager.dart';
 import 'package:stream_chat/src/client/query_channels_result.dart';
 import 'package:stream_chat/src/client/retry_policy.dart';
 import 'package:stream_chat/src/core/api/attachment_file_uploader.dart';
@@ -164,8 +164,12 @@ class StreamChatClient {
   final _tokenManager = TokenManager();
   final _connectionIdManager = ConnectionIdManager();
   late final _appSettingsManager = AppSettingsManager(_chatApi.general);
-  late final _pendingOperationReplayer = PendingOperationReplayer(this);
   static final _systemEnvironmentManager = SystemEnvironmentManager();
+
+  /// Owns the queue of pending operations (e.g. reactions added or removed
+  /// while offline) and replays them when the connection recovers.
+  @internal
+  late final pendingOperationsManager = PendingOperationsManager(this);
 
   /// Updates the system environment information used by the client.
   ///
@@ -437,6 +441,8 @@ class StreamChatClient {
       // Connect to persistence client if its set.
       if (chatPersistenceClient != null) {
         await openPersistenceConnection(ownUser);
+        // Restore any operations that were queued before process death.
+        await pendingOperationsManager.hydrate();
       }
 
       // Connect to websocket if [connectWebSocket] is true.
@@ -612,7 +618,7 @@ class StreamChatClient {
       // Replay pending offline operations (e.g. reactions) BEFORE any
       // server-state refresh, so the server has each mutation before a re-query
       // returns state that would otherwise clobber the optimistic change.
-      await _pendingOperationReplayer.replay();
+      await pendingOperationsManager.replay();
 
       // connection recovered
       final cids = [...state.channels.keys.toSet()];
@@ -2544,6 +2550,10 @@ class StreamChatClient {
     // resetting state.
     state.dispose();
     state = ClientState(this);
+
+    // clearing the in-memory pending-operation queue so a user's queued
+    // operations never replay under the next connected user.
+    pendingOperationsManager.clear();
 
     // clearing app settings cache.
     _appSettingsManager.clear();

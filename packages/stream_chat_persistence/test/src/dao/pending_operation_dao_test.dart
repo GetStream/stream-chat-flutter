@@ -29,7 +29,7 @@ void main() {
   );
 
   test('round-trips an operation, preserving identity + payload', () async {
-    await dao.insertPendingOperation(operation());
+    final id = await dao.insertPendingOperation(operation());
 
     final operations = await dao.getPendingOperations();
     expect(operations, hasLength(1));
@@ -38,7 +38,8 @@ void main() {
     expect(op.type, 'reaction.add');
     expect(op.targetMessageId, 'm1');
     expect(op.payload, {'reaction': 'like', 'enforce_unique': true});
-    expect(op.id, isNotNull);
+    // insert returns the assigned autoincrement id.
+    expect(op.id, id);
   });
 
   test('insert appends — the same target queues as two distinct rows', () async {

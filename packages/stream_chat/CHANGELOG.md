@@ -14,7 +14,7 @@
 🔄 Changed
 
 - Raised the minimum `dio` version to `^5.11.0`.
-- When offline storage is enabled, `Channel.sendReaction` and `Channel.deleteReaction` keep the optimistic change on a transient/offline error and replay it on reconnect, instead of reverting it.
+- `Channel.sendReaction` and `Channel.deleteReaction` now keep the optimistic change on a transient/offline error and replay it when the connection recovers, instead of reverting it.
 
 🐞 Fixed
 

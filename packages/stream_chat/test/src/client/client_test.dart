@@ -1173,9 +1173,18 @@ void main() {
       );
     });
 
-    test('`.disconnectUser` should reset state and user', () async {
+    test('`.disconnectUser` should reset state, user, and pending operations', () async {
+      when(
+        () => api.message.deleteReaction(any(), any()),
+      ).thenAnswer((_) async => EmptyResponse());
+
       expect(client.state.currentUser, isNotNull);
       expect(client.wsConnectionStatus, ConnectionStatus.connected);
+
+      // Queue an operation as the current user.
+      await client.pendingOperationsManager.enqueue(
+        ReactionPendingOperation.delete(messageId: 'm1', reactionType: 'like'),
+      );
 
       expectLater(
         // skipping initial connected value
@@ -1187,6 +1196,11 @@ void main() {
 
       expect(client.state.currentUser, isNull);
       expect(client.wsConnectionStatus, ConnectionStatus.disconnected);
+
+      // The in-memory queue was cleared, so a replay makes no calls — a user's
+      // queued operations can never leak into the next session.
+      await client.pendingOperationsManager.replay();
+      verifyNever(() => api.message.deleteReaction(any(), any()));
     });
   });
 
@@ -5491,9 +5505,9 @@ void main() {
     }
 
     test('connection recovery replays the pending-operation queue', () async {
-      // Focused replay semantics live in pending_operation_replayer_test.dart;
+      // Focused replay semantics live in pending_operations_manager_test.dart;
       // this asserts only the wiring — that recovery triggers a replay.
-      await persistence.insertPendingOperation(addOp('m1'));
+      await client.pendingOperationsManager.enqueue(addOp('m1'));
       stubSendReactionOk();
 
       await simulateReconnect();

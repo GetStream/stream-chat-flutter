@@ -29,6 +29,19 @@ class PendingOperation extends Equatable {
   /// The operation-specific value fields, stored as JSON.
   final Map<String, dynamic> payload;
 
+  /// Returns a copy of this operation with the given fields replaced.
+  PendingOperation copyWith({
+    int? id,
+    String? type,
+    String? targetMessageId,
+    Map<String, dynamic>? payload,
+  }) => PendingOperation(
+    id: id ?? this.id,
+    type: type ?? this.type,
+    targetMessageId: targetMessageId ?? this.targetMessageId,
+    payload: payload ?? this.payload,
+  );
+
   @override
   List<Object?> get props => [
     type,
