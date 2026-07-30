@@ -192,8 +192,11 @@ typedef OnReactionsTap = void Function(Message);
 
 /// {@template onReactionTap}
 /// The action to perform when a message's reaction is tapped.
+///
+/// The [BuildContext] is the context at the tapped message, useful for
+/// navigation or showing overlays relative to it.
 /// {@endtemplate}
-typedef OnReactionTap = void Function(ReactionTapDetails details);
+typedef OnReactionTap = void Function(BuildContext context, ReactionTapDetails details);
 
 /// Details of a reaction tap, passed to [OnReactionTap].
 @immutable

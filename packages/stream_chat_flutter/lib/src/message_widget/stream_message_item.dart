@@ -547,7 +547,7 @@ class DefaultStreamMessageItem extends StatelessWidget {
         _ => null,
       },
       onReactionTap: switch ((props.onReactionTap, props.onReactionsTap)) {
-        (final onReactionTap?, _) => (reaction) => onReactionTap(.new(message: message, reaction: reaction)),
+        (final onReactionTap?, _) => (reaction) => onReactionTap(context, .new(message: message, reaction: reaction)),
         (_, final onReactionsTap?) => (_) => onReactionsTap(message),
         _ => (_) => _showMessageReactionsModal(context, message),
       },
