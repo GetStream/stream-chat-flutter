@@ -51,6 +51,7 @@ class DefaultStreamMessageComposerInput extends StatelessWidget {
         : context.streamColorScheme.borderDefault;
 
     final borderRadius = BorderRadius.all(context.streamRadius.xxxl);
+    final elevation = context.streamElevation;
 
     // Material clips its children via PhysicalShape, so the border is drawn
     // outside the Material to keep it from being clipped away.
@@ -64,7 +65,7 @@ class DefaultStreamMessageComposerInput extends StatelessWidget {
         clipBehavior: Clip.antiAlias,
         color: context.streamColorScheme.backgroundElevation1,
         borderRadius: borderRadius,
-        elevation: isFloating ? StreamElevation.level3 : StreamElevation.none,
+        elevation: isFloating ? elevation.level3 : elevation.none,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
