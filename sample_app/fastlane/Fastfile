@@ -143,6 +143,26 @@ def failed_test_names(log)
   failed.uniq
 end
 
+# A leaked async error fails the run but is NOT attributable to a test
+def post_completion_failure?(log)
+  return false unless File.exist?(log)
+
+  post_completion_marker = 'This test failed after it had already completed'
+  File.read(log).include?(post_completion_marker)
+end
+
+# The test the runner pinned the leaked error on. Reported for triage only — the
+# attribution is unreliable, since the error escaped from whichever test leaked
+# the work, not necessarily this one.
+def post_completion_blamed_tests(log)
+  return [] unless File.exist?(log)
+
+  File.read(log)
+      .gsub(/\e\[[0-9;]*m/, '')
+      .scan(/❌ (.+?) \(failed after test completion\)/)
+      .flatten.uniq
+end
+
 # Builds a single Dart-regex alternation matching any of `names`, for one`flutter test --name`.
 # Each name is regex-escaped so the test descriptions match literally.
 def name_alternation(names)
@@ -238,6 +258,18 @@ lane :run_e2e_test do |options|
           end
 
           break if ok || attempt > retries
+
+          # Not retriable: a whole-file retry can neither narrow nor fix a leaked
+          # async error, and a run that happens to pass would only be hiding it.
+          # Fail fast with the diagnosis instead of burning every attempt.
+          if post_completion_failure?(attempt_log)
+            blamed = post_completion_blamed_tests(attempt_log)
+            UI.important("#{target} (attempt #{attempt}/#{retries + 1}): a test leaked async work that threw " \
+                         'AFTER it had completed, so the failure is not attributable to any single test' \
+                         "#{blamed.empty? ? '' : " (the runner blamed: #{blamed.join(', ')})"}. " \
+                         'Not retrying — fix the leak; see the exception above.')
+            break
+          end
 
           only = failed_test_names(attempt_log)
           if only.empty?
