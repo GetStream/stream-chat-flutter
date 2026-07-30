@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:stream_chat_flutter/src/utils/app_bar_behavior.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template streamBackButton}
@@ -38,14 +39,7 @@ class StreamBackButton extends StatelessWidget {
       .iOS || .macOS => context.streamIcons.chevronLeft,
       _ => context.streamIcons.arrowLeft,
     };
-    final effectiveAppBarBehavior =
-        appBarBehavior ??
-        StreamAppBarTheme.of(context).style?.behavior ??
-        (StreamTheme.of(context).appStyle.isFloating ? .floating : .regular);
-    final isFloating = switch (effectiveAppBarBehavior) {
-      .floating => true,
-      .regular => false,
-    };
+    final isFloating = isFloatingAppBar(context, override: appBarBehavior);
 
     Widget button = StreamButton.icon(
       type: isFloating ? .outline : .ghost,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_portal/flutter_portal.dart';
+import 'package:stream_chat_flutter/src/utils/app_bar_behavior.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template streamChannelHeader}
@@ -148,20 +149,13 @@ class StreamChannelHeader extends StatelessWidget implements PreferredSizeWidget
     var subtitle = this.subtitle;
     subtitle ??= StreamChannelInfo(channel: channel);
 
-    final effectiveAppBarBehavior =
-        style?.behavior ??
-        StreamAppBarTheme.of(context).style?.behavior ??
-        (StreamTheme.of(context).appStyle.isFloating ? .floating : .regular);
-    final showAvatarShadow = switch (effectiveAppBarBehavior) {
-      .floating => true,
-      .regular => false,
-    };
+    final isFloating = isFloatingAppBar(context, override: style?.behavior);
 
     var trailing = this.trailing;
     trailing ??= _DefaultChannelAvatar(
       channel: channel,
       onPressed: onChannelAvatarPressed,
-      isFloating: showAvatarShadow,
+      isFloating: isFloating,
     );
 
     return Portal(
