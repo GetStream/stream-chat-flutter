@@ -1,3 +1,4 @@
+import 'mock_server/data_types.dart';
 import 'robots/user_robot.dart';
 import 'robots/user_robot_message_list_asserts.dart';
 import 'support/step.dart';
@@ -5,8 +6,6 @@ import 'support/stream_test_case.dart';
 
 // Ported from the native MessageList suites (`MessageList_Tests.swift` /
 // `MessageListTests.kt`), adapted to the in-process integration_test setup.
-// A few native cases can't run under this binding (offline writes throw, the
-// lifecycle reconnect hangs) and are kept as documented `skip:`s.
 //
 // TODO(allure): fill each test's `allureId` from Allure TestOps project 135.
 void main() {
@@ -200,24 +199,56 @@ void main() {
     },
   );
 
+  // Both offline cases run with persistence on, mirroring the native
+  // `setIsLocalStorageEnabled(to: .on)`.
   streamTestWithEnv(
     description: 'user adds a message while offline',
-    skip:
-        'Offline channel.sendMessage throws an unhandled async StreamChatNetworkError '
-        'that the integration_test binding surfaces (and poisons the bundle with). '
-        'The message is still optimistically queued; the throw is the harness limitation.',
+    persistence: true,
     body: (env) async {
-      // Placeholder mirroring native test_addMessageWhileOffline. See skip reason.
+      step('GIVEN the user opens a channel');
+      await env.userRobot.login().openChannel();
+
+      step('AND the user becomes offline');
+      await env.goOffline();
+
+      step('WHEN the user sends a new message');
+      await env.userRobot.sendMessage(sampleText);
+
+      step('THEN the message is shown as failed to be sent');
+      // The send is optimistic, so the text shows up right away; the SDK marks
+      // the message failed once its retries are exhausted.
+      await env.userRobot.assertMessage(sampleText).assertMessageFailedToBeSent();
+
+      step('WHEN the user becomes online');
+      await env.goOnline();
+
+      step('THEN the message is delivered');
+      // The channel's retry queue replays failed messages on
+      // `connection.recovered`, which flips the status to sent.
+      await env.userRobot.assertMessageDeliveryStatus(MessageDeliveryStatus.sent);
     },
   );
 
   streamTestWithEnv(
     description: 'user recovers a message received while in the background',
-    skip:
-        'Lifecycle-driven reconnect (moveToForeground → client.maybeReconnect) spins '
-        'indefinitely under the in-process integration_test binding and hangs the run.',
+    persistence: true,
     body: (env) async {
-      // Placeholder mirroring native test_offlineRecoveryWithinSession. See skip reason.
+      step('GIVEN the user opens a channel');
+      await env.userRobot.login().openChannel();
+
+      step('AND the user goes to the background');
+      await env.moveToBackground();
+
+      step('WHEN the participant sends a new message');
+      // Nothing is pumped between here and the foregrounding — see
+      // `StreamTestEnv.moveToBackground`.
+      await env.participantRobot.sendMessage(sampleText);
+
+      step('AND the user comes back to the foreground');
+      await env.moveToForeground();
+
+      step('THEN the new message is delivered');
+      await env.userRobot.assertMessage(sampleText);
     },
   );
 

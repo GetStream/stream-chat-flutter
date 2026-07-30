@@ -85,4 +85,39 @@ final class _MessageList {
   /// renders on messages whose `replyCount > 0` (i.e. thread parents), and
   /// tapping it opens the thread.
   Finder get threadReplies => find.byType(StreamMessageReplies);
+
+  /// The badge the SDK overlays on a message that failed to send (or bounced).
+  /// `StreamMessageItem` only builds it while the message is in a failed state,
+  /// so its presence *is* the failure indicator.
+  Finder get errorBadge => find.byType(StreamErrorBadge);
+
+  /// The delivery-status icon on one of the current user's own messages.
+  ///
+  /// The glyph itself comes from the theme's icon set, so the status is matched
+  /// against what the SDK handed [StreamSendingIndicator] rather than against
+  /// the rendered icon.
+  Finder sendingStatus(MessageDeliveryStatus status) {
+    bool hasStatus(StreamSendingIndicator it) {
+      final state = it.message.state;
+      switch (status) {
+        case MessageDeliveryStatus.read:
+          return it.isMessageRead;
+        case MessageDeliveryStatus.pending:
+          return state.isOutgoing;
+        case MessageDeliveryStatus.sent:
+          return state.isCompleted;
+        case MessageDeliveryStatus.failed:
+          return state.isFailed;
+        case MessageDeliveryStatus.nil:
+          // No branch of the indicator applies, so it renders nothing. A failed
+          // message also lands here — [errorBadge] is what marks that one.
+          return !it.isMessageRead && !it.isMessageDelivered && !state.isCompleted && !state.isOutgoing;
+      }
+    }
+
+    return find.byWidgetPredicate(
+      (widget) => widget is StreamSendingIndicator && hasStatus(widget),
+      description: 'sending indicator with status ${status.name}',
+    );
+  }
 }

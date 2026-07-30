@@ -89,16 +89,45 @@ class StreamTestEnv {
   /// Simulates the app being sent to the background. `StreamChatCore` pauses
   /// reconnection and (after its keep-alive) disconnects. Mirrors the native
   /// `deviceRobot.moveApplication(to: .background)`.
+  ///
+  /// Nothing may be pumped until [moveToForeground]: a backgrounded lifecycle
+  /// state sets `SchedulerBinding.framesEnabled` to false, which turns
+  /// `scheduleFrame()` into a no-op. The app still observes the change (the
+  /// states are dispatched to the observers synchronously) and the WebSocket
+  /// keeps delivering events, since neither needs frames.
   Future<void> moveToBackground() async {
-    _tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
     await _tester.pump();
+    _dispatchLifecycle(_toBackground);
   }
 
   /// Simulates the app returning to the foreground. `StreamChatCore` resumes and
   /// reconnects, recovering anything missed. Mirrors `moveApplication(to: .foreground)`.
   Future<void> moveToForeground() async {
-    _tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    _dispatchLifecycle(_toForeground);
+    // Frames are enabled again, so pumping is safe.
     await _tester.pump();
+  }
+
+  // The whole chain the OS would send has to be replayed, not just the final
+  // state: the framework's own listeners assert on the transition order (see
+  // `AppLifecycleListener.didChangeAppLifecycleState`), so jumping straight
+  // from paused to resumed throws.
+  static const _toBackground = [
+    AppLifecycleState.inactive,
+    AppLifecycleState.hidden,
+    AppLifecycleState.paused,
+  ];
+
+  static const _toForeground = [
+    AppLifecycleState.hidden,
+    AppLifecycleState.inactive,
+    AppLifecycleState.resumed,
+  ];
+
+  void _dispatchLifecycle(List<AppLifecycleState> states) {
+    for (final state in states) {
+      _tester.binding.handleAppLifecycleStateChanged(state);
+    }
   }
 
   Future<void> _setConnectivity({required bool online}) async {

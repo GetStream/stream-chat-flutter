@@ -76,6 +76,30 @@ extension UserRobotMessageListAsserts on UserRobot {
     return this;
   }
 
+  /// Asserts the message at [messageIndex] is marked as failed to be sent.
+  /// Mirrors the native `assertMessageFailedToBeSent`.
+  Future<UserRobot> assertMessageFailedToBeSent({int messageIndex = 0}) async {
+    await _waitOnMessage(MessageListPage.list.errorBadge, messageIndex: messageIndex);
+    return this;
+  }
+
+  /// Asserts the delivery status shown on the message at [messageIndex].
+  Future<UserRobot> assertMessageDeliveryStatus(
+    MessageDeliveryStatus status, {
+    int messageIndex = 0,
+  }) async {
+    await _waitOnMessage(MessageListPage.list.sendingStatus(status), messageIndex: messageIndex);
+    return this;
+  }
+
+  /// Waits for [finder] to appear inside the message at [messageIndex] (index 0
+  /// being the newest message), so a status on an older message can't satisfy
+  /// the assertion.
+  Future<void> _waitOnMessage(Finder finder, {required int messageIndex}) {
+    final message = find.byType(MessageListPage.messageItem).at(messageIndex);
+    return tester.waitUntilVisible(find.descendant(of: message, matching: finder));
+  }
+
   /// Scrolls up through the paged history until the oldest message loads. The
   /// mock server seeds message text as the 1-based index, so the oldest message
   /// is `'1'` (the newest is `'$messagesCount'`).
@@ -163,6 +187,14 @@ extension UserRobotMessageListAssertsChain on Future<UserRobot> {
       then((it) => it.assertMentionsOverlay(isDisplayed: isDisplayed));
 
   Future<UserRobot> assertLinkPreview() => then((it) => it.assertLinkPreview());
+
+  Future<UserRobot> assertMessageFailedToBeSent({int messageIndex = 0}) =>
+      then((it) => it.assertMessageFailedToBeSent(messageIndex: messageIndex));
+
+  Future<UserRobot> assertMessageDeliveryStatus(
+    MessageDeliveryStatus status, {
+    int messageIndex = 0,
+  }) => then((it) => it.assertMessageDeliveryStatus(status, messageIndex: messageIndex));
 
   Future<UserRobot> assertReaction({
     required ReactionType type,

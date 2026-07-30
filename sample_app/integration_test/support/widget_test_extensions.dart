@@ -27,21 +27,21 @@ extension E2EWidgetTester on WidgetTester {
   Future<void> tapText(String text) async {
     await waitUntilVisible(find.text(text));
     await tap(find.text(text));
-    await pumpAndSettle();
+    await settle();
   }
 
   Future<void> tapByType(Type type, {int index = 0}) async {
     final finder = find.byType(type);
     await waitUntilVisible(finder.at(index));
     await tap(finder.at(index));
-    await pumpAndSettle();
+    await settle();
   }
 
   Future<void> tapByKey(Key key) async {
     final finder = find.byKey(key);
     await waitUntilVisible(finder);
     await tap(finder);
-    await pumpAndSettle();
+    await settle();
   }
 
   /// Taps [finder], scrolling it into view first. Used for message-action rows
@@ -58,7 +58,7 @@ extension E2EWidgetTester on WidgetTester {
     final finder = find.byType(inputFieldType);
     await waitUntilVisible(finder);
     await enterText(finder, text);
-    await pumpAndSettle();
+    await settle();
   }
 
   /// Drags the message list by [delta] logical pixels. A positive [delta]
@@ -159,13 +159,13 @@ extension E2EWidgetTester on WidgetTester {
       if (!resolves) continue;
 
       await longPress(target);
-      await pumpAndSettle();
+      await settle();
       if (appears.evaluate().isNotEmpty) return;
 
       // Integration tests: after a message has reactions, [WidgetTester.longPress]
       // can lose the gesture arena while [InkWell.onLongPress] is still wired.
       if (_tryInvokeMessageLongPress(target)) {
-        await pumpAndSettle();
+        await settle();
         if (appears.evaluate().isNotEmpty) return;
       }
 
