@@ -312,6 +312,7 @@ Widget _locationAwareMessageComposer(BuildContext context, MessageComposerProps 
         ...defaultOptions,
         TabbedAttachmentPickerOption(
           key: 'location-picker',
+          title: 'Location',
           icon: context.streamIcons.location,
           supportedTypes: [const LocationPickerType()],
           isEnabled: (value) {
