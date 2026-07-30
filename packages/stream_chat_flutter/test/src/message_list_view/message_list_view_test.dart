@@ -243,7 +243,13 @@ void main() {
       StreamMessageListViewConfiguration? config,
       StreamMessageListViewConfiguration? globalConfig,
     }) async {
-      final messages = generateConversation(20, users: [OwnUser(id: 'ownid'), User(id: 'otherid')]);
+      final messages = generateConversation(
+        20,
+        users: [
+          OwnUser(id: 'ownid'),
+          User(id: 'otherid'),
+        ],
+      );
       when(() => channelClientState.messagesStream).thenAnswer((_) => Stream.value(messages));
       when(() => channelClientState.messages).thenReturn(messages);
 
@@ -317,7 +323,13 @@ void main() {
     // every dependent and re-runs didChangeDependencies. That would resolve the
     // config for the wrong reason and hide a missing didUpdateWidget.
     testWidgets('picks up a changed config without a dependency change', (tester) async {
-      final messages = generateConversation(20, users: [OwnUser(id: 'ownid'), User(id: 'otherid')]);
+      final messages = generateConversation(
+        20,
+        users: [
+          OwnUser(id: 'ownid'),
+          User(id: 'otherid'),
+        ],
+      );
       when(() => channelClientState.messagesStream).thenAnswer((_) => Stream.value(messages));
       when(() => channelClientState.messages).thenReturn(messages);
 
