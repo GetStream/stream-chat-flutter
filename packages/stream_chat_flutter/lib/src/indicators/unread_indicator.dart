@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -17,12 +18,16 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// {@endtemplate}
 class StreamUnreadIndicator extends StatelessWidget {
   /// Displays the total unread count.
+  ///
+  /// Optionally, provide [excludeCid] to omit a specific channel's unread
+  /// messages from the total — for example, the currently open channel.
   const StreamUnreadIndicator({
     super.key,
     this.child,
     this.alignment,
     this.offset,
     this.semanticLabel,
+    this.excludeCid,
   }) : _unreadType = const _TotalUnreadCount();
 
   /// Displays the unreadChannel count.
@@ -35,7 +40,8 @@ class StreamUnreadIndicator extends StatelessWidget {
     this.alignment,
     this.offset,
     this.semanticLabel,
-  }) : _unreadType = _UnreadChannels(cid: cid);
+  }) : _unreadType = _UnreadChannels(cid: cid),
+       excludeCid = null;
 
   /// Displays the unreadThreads count.
   ///
@@ -47,9 +53,17 @@ class StreamUnreadIndicator extends StatelessWidget {
     this.alignment,
     this.offset,
     this.semanticLabel,
-  }) : _unreadType = _UnreadThreads(id: id);
+  }) : _unreadType = _UnreadThreads(id: id),
+       excludeCid = null;
 
   final _UnreadTypes _unreadType;
+
+  /// The cid of a channel whose unread messages are excluded from the total
+  /// unread count.
+  ///
+  /// Only applies to the default (total) constructor; ignored by
+  /// [StreamUnreadIndicator.channels] and [StreamUnreadIndicator.threads].
+  final String? excludeCid;
 
   /// Optional child widget to overlay the badge on.
   ///
@@ -85,7 +99,7 @@ class StreamUnreadIndicator extends StatelessWidget {
     final client = StreamChat.of(context).client;
 
     final stream = switch (_unreadType) {
-      _TotalUnreadCount() => client.state.totalUnreadCountStream,
+      _TotalUnreadCount() => _totalUnreadCountStream(client, excludeCid),
       _UnreadChannels(cid: final cid) => switch (cid) {
         final cid? => client.state.channels[cid]?.state?.unreadCountStream,
         _ => client.state.unreadChannelsStream,
@@ -97,7 +111,7 @@ class StreamUnreadIndicator extends StatelessWidget {
     };
 
     final initialData = switch (_unreadType) {
-      _TotalUnreadCount() => client.state.totalUnreadCount,
+      _TotalUnreadCount() => _totalUnreadCount(client, excludeCid),
       _UnreadChannels(cid: final cid) => switch (cid) {
         final cid? => client.state.channels[cid]?.state?.unreadCount,
         _ => client.state.unreadChannels,
@@ -134,6 +148,42 @@ class StreamUnreadIndicator extends StatelessWidget {
     );
   }
 }
+
+/// Returns the client's total unread message count as a stream, optionally
+/// subtracting the unread messages of the channel identified by [excludeCid].
+Stream<int> _totalUnreadCountStream(
+  StreamChatClient client,
+  String? excludeCid,
+) {
+  final totalUnreadCount = client.state.totalUnreadCountStream;
+  if (excludeCid == null) return totalUnreadCount;
+
+  final excludedUnreadCount = client.state.channels[excludeCid]?.state?.unreadCountStream ?? Stream.value(0);
+
+  // The total and the excluded channel's unread count update through separate
+  // streams. Both settle within the same event-loop turn, so debouncing on a
+  // zero duration coalesces them into a single emission and avoids rendering a
+  // transient count before the two values agree.
+  return Rx.combineLatest2<int, int, int>(
+    totalUnreadCount,
+    excludedUnreadCount,
+    _subtractExcluded,
+  ).debounceTime(Duration.zero).distinct();
+}
+
+/// Returns the client's total unread message count, optionally subtracting the
+/// unread messages of the channel identified by [excludeCid].
+int _totalUnreadCount(StreamChatClient client, String? excludeCid) {
+  final totalUnreadCount = client.state.totalUnreadCount;
+  if (excludeCid == null) return totalUnreadCount;
+
+  final excludedUnreadCount = client.state.channels[excludeCid]?.state?.unreadCount ?? 0;
+
+  return _subtractExcluded(totalUnreadCount, excludedUnreadCount);
+}
+
+/// Subtracts [excluded] from [total], flooring the result at zero.
+int _subtractExcluded(int total, int excluded) => total > excluded ? total - excluded : 0;
 
 sealed class _UnreadTypes {
   const _UnreadTypes._();

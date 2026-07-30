@@ -9,18 +9,43 @@ class StreamBackButton extends StatelessWidget {
   const StreamBackButton({
     super.key,
     this.onPressed,
+    @Deprecated(
+      "Use 'unreadIndicator: StreamUnreadIndicator()' instead. "
+      'This will be removed in a future version.',
+    )
     this.showUnreadCount = false,
+    @Deprecated(
+      "Use 'unreadIndicator: StreamUnreadIndicator.channels(cid: cid)' instead. "
+      'This will be removed in a future version.',
+    )
     this.channelId,
-  });
+    Widget? unreadIndicator = _unset,
+  }) : _unreadIndicator = unreadIndicator;
 
   /// Callback for when button is pressed
   final VoidCallback? onPressed;
 
   /// Show unread count
+  @Deprecated(
+    "Use 'unreadIndicator: StreamUnreadIndicator()' instead. "
+    'This will be removed in a future version.',
+  )
   final bool showUnreadCount;
 
   /// Channel ID used to retrieve unread count
+  @Deprecated(
+    "Use 'unreadIndicator: StreamUnreadIndicator.channels(cid: cid)' instead. "
+    'This will be removed in a future version.',
+  )
   final String? channelId;
+
+  /// The unread badge overlaid on the top-end corner of the button.
+  ///
+  /// Typically a [StreamUnreadIndicator]. The badge hides itself when its
+  /// count is zero. Null when not explicitly set.
+  Widget? get unreadIndicator => identical(_unreadIndicator, _unset) ? null : _unreadIndicator;
+
+  final Widget? _unreadIndicator;
 
   @override
   Widget build(BuildContext context) {
@@ -47,13 +72,43 @@ class StreamBackButton extends StatelessWidget {
       },
     );
 
-    if (showUnreadCount) {
-      button = switch (channelId) {
-        final cid? => StreamUnreadIndicator.channels(offset: .zero, cid: cid, child: button),
-        _ => StreamUnreadIndicator(offset: .zero, child: button),
-      };
+    if (_effectiveUnreadIndicator case final indicator?) {
+      // The indicator is childless here, so it renders only the bare badge
+      // (or nothing when the count is zero). Overlay it on the top-end corner
+      // of the button.
+      button = Stack(
+        clipBehavior: Clip.none,
+        children: [
+          button,
+          Positioned.fill(
+            child: FittedBox(
+              fit: BoxFit.none,
+              alignment: AlignmentDirectional.topEnd,
+              child: indicator,
+            ),
+          ),
+        ],
+      );
     }
 
     return button;
   }
+
+  Widget? get _effectiveUnreadIndicator {
+    if (!identical(_unreadIndicator, _unset)) return _unreadIndicator;
+    if (!showUnreadCount) return null;
+    return switch (channelId) {
+      final cid? => StreamUnreadIndicator.channels(cid: cid),
+      _ => const StreamUnreadIndicator(),
+    };
+  }
 }
+
+class _WidgetSentinel extends Widget {
+  const _WidgetSentinel();
+
+  @override
+  Element createElement() => throw StateError('_WidgetSentinel must never be built.');
+}
+
+const _unset = _WidgetSentinel();

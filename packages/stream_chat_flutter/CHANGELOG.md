@@ -7,12 +7,14 @@
 - Added an `errorSubtitle` to `StreamScrollViewErrorWidget`, which now falls back to the design's generic error copy (title, description, and a "Try Again" retry label) when values aren't provided.
 - Added a `size` (`StreamLoadingSpinnerSize`) parameter to `StreamScrollViewLoadingWidget`.
 - Added `onReactionTap` to `StreamMessageItem` and `StreamMessageListView`, reporting the tapped message's `BuildContext` and a `ReactionTapDetails` with the tapped `message` and `reaction` (the reaction is `null` for a clustered or overflow chip that maps to no single reaction).
+- Added an `unreadIndicator` parameter to `StreamBackButton` that overlays a widget (typically a `StreamUnreadIndicator`) on the button's top-end corner. Pass `StreamUnreadIndicator(excludeCid: cid)` to show the total unread count of other channels, or `StreamUnreadIndicator.channels(cid: cid)` for a single channel's count.
 
 ⚠️ Deprecated
 
 - Deprecated `StreamMessageReactionPicker.onReactionPicked` in favor of `onReactionSelected`.
 - Deprecated `onReactionsTap` (and the `OnReactionsTap` typedef) on `StreamMessageItem` and `StreamMessageListView` in favor of `onReactionTap`.
 - Deprecated `height`/`width` of `StreamScrollViewLoadingWidget` in favor of `size`.
+- Deprecated `StreamBackButton.showUnreadCount` and `StreamBackButton.channelId` in favor of `unreadIndicator`.
 
 🐞 Fixed
 
@@ -20,6 +22,7 @@
 - Fixed the default list/scroll-view error states (channel, message, member, user, thread, poll-vote, reaction, search, and photo) showing raw or fixed errors; they are now connection-aware (no internet / slow connection), falling back to each view's specific error text.
 - Fixed `StreamTypingIndicator` briefly showing typing users from a different context (main channel vs. thread) on its first frame.
 - Fixed the attachment picker throwing a `Tooltip` assertion error when a custom `TabbedAttachmentPickerOption` is added without a `title`; the tooltip is now only shown when a title is provided.
+- Fixed the `StreamBackButton` unread badge including the currently open channel in its total count.
 
 ## 10.2.0
 
