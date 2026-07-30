@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:sample_app/pages/channel_file_display_screen.dart';
 import 'package:sample_app/pages/channel_media_display_screen.dart';
 import 'package:sample_app/pages/pinned_messages_screen.dart';
+import 'package:sample_app/utils/scaffold_insets.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// Detail screen for a 1:1 chat correspondence.
@@ -34,7 +35,7 @@ class ChatInfoScreen extends StatelessWidget {
       // top of the body so individual rows stay style-free.
       body: Builder(
         builder: (context) {
-          final topInset = StreamScaffoldInsets.maybeOf(context)?.topPadding ?? 0.0;
+          final topInset = context.streamTopInset;
           return IconTheme.merge(
             data: const IconThemeData(size: 20),
             child: SingleChildScrollView(

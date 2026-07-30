@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:sample_app/pages/channel_file_display_screen.dart';
 import 'package:sample_app/pages/channel_media_display_screen.dart';
 import 'package:sample_app/pages/pinned_messages_screen.dart';
+import 'package:sample_app/utils/scaffold_insets.dart';
 import 'package:sample_app/widgets/add_members_sheet.dart';
 import 'package:sample_app/widgets/all_members_sheet.dart';
 import 'package:sample_app/widgets/edit_group_sheet.dart';
@@ -53,7 +54,7 @@ class GroupInfoScreen extends StatelessWidget {
       // top of the body so individual rows stay style-free.
       body: Builder(
         builder: (context) {
-          final topInset = StreamScaffoldInsets.maybeOf(context)?.topPadding ?? 0.0;
+          final topInset = context.streamTopInset;
           return IconTheme.merge(
             data: const IconThemeData(size: 20),
             child: SingleChildScrollView(

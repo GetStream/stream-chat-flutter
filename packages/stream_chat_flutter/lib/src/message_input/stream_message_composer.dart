@@ -609,6 +609,11 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
   StreamSubscription<Event>? _messageUpdatedSubscription;
   StreamSubscription<Event>? _messageDeletedSubscription;
 
+  // Height of the floating pill, reported from layout and read back at paint
+  // time by _FloatingComposerBackdropPainter. Layout always runs before paint,
+  // so the backdrop's fade is never a frame behind the pill.
+  final _pillHeight = ValueNotifier<double>(0);
+
   @override
   void initState() {
     super.initState();
@@ -1075,11 +1080,6 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
       },
     );
   }
-
-  // Height of the floating pill, reported from layout and read back at paint
-  // time by _FloatingComposerBackdropPainter. Layout always runs before paint,
-  // so the backdrop's fade is never a frame behind the pill.
-  final _pillHeight = ValueNotifier<double>(0);
 
   Widget _buildInlineAttachmentPicker(BuildContext context) {
     if (!_isPickerVisible) return const SizedBox.shrink();

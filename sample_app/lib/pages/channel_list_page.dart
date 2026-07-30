@@ -1,5 +1,3 @@
-// ignore_for_file: deprecated_member_use, avoid_redundant_argument_values
-
 import 'dart:async';
 import 'dart:math' as math;
 

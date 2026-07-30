@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sample_app/routes/routes.dart';
 import 'package:sample_app/state/new_group_chat_state.dart';
+import 'package:sample_app/utils/scaffold_insets.dart';
 import 'package:sample_app/widgets/search_text_field.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -110,7 +111,7 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
                 child: NestedScrollView(
                   floatHeaderSlivers: true,
                   headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
-                    final topInset = StreamScaffoldInsets.maybeOf(context)?.topPadding ?? 0.0;
+                    final topInset = context.streamTopInset;
                     return <Widget>[
                       if (topInset > 0) SliverToBoxAdapter(child: SizedBox(height: topInset)),
                       SliverToBoxAdapter(

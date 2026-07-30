@@ -5,6 +5,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sample_app/routes/routes.dart';
+import 'package:sample_app/utils/scaffold_insets.dart';
 import 'package:sample_app/widgets/channel_detail_sheet.dart';
 import 'package:sample_app/widgets/search_text_field.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -87,7 +88,7 @@ class _ChannelList extends State<ChannelList> {
             // When the app bar is floating it overlaps this scroll view from
             // the top. Insert a spacer sliver so the search bar starts below
             // the visible bottom edge of the floating bar.
-            final topInset = StreamScaffoldInsets.maybeOf(context)?.topPadding ?? 0.0;
+            final topInset = context.streamTopInset;
             return [
               if (topInset > 0) SliverToBoxAdapter(child: SizedBox(height: topInset)),
               SliverToBoxAdapter(
@@ -114,7 +115,7 @@ class _ChannelListDefault extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bottomPadding = StreamScaffoldInsets.maybeOf(context)?.bottomPadding ?? 0.0;
+    final bottomPadding = context.streamBottomInset;
 
     return SlidableAutoCloseBehavior(
       child: RefreshIndicator(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sample_app/utils/scaffold_insets.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// Lists every file shared in the enclosing channel, grouped by the
@@ -45,7 +46,7 @@ class _ChannelFileDisplayScreenState extends State<ChannelFileDisplayScreen> {
       body: ValueListenableBuilder<PagedValue<String, GetMessageResponse>>(
         valueListenable: _controller,
         builder: (context, value, _) {
-          final topInset = StreamScaffoldInsets.maybeOf(context)?.topPadding ?? 0.0;
+          final topInset = context.streamTopInset;
           return value.when(
             (items, nextPageKey, _) {
               // Flatten messages → individual file attachments paired with

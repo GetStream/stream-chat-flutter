@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sample_app/auth/auth_controller.dart';
 import 'package:sample_app/routes/routes.dart';
+import 'package:sample_app/utils/scaffold_insets.dart';
 import 'package:sample_app/widgets/stream_version.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -105,7 +106,7 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
       appBar: StreamAppBar(title: const Text('Custom settings')),
       body: Builder(
         builder: (context) {
-          final topInset = StreamScaffoldInsets.maybeOf(context)?.topPadding ?? 0.0;
+          final topInset = context.streamTopInset;
           return Padding(
             padding: EdgeInsets.fromLTRB(16, 16 + topInset, 16, 0),
             child: Form(
