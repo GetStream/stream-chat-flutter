@@ -135,6 +135,7 @@ class _ChannelPageState extends State<ChannelPage> {
                   if (locationEnabled)
                     TabbedAttachmentPickerOption(
                       key: 'location-picker',
+                      title: 'Location',
                       icon: context.streamIcons.location,
                       supportedTypes: [const LocationPickerType()],
                       isEnabled: (value) {

@@ -23,7 +23,7 @@ class StreamTestEnv {
   final _connectivity = StreamController<List<ConnectivityResult>>.broadcast();
   var _connectivityPrimed = false;
 
-  Future<void> setUp(WidgetTester tester) async {
+  Future<void> setUp(WidgetTester tester, {bool persistence = false}) async {
     _tester = tester;
     final server = _mockServer = await MockServer.start();
     backendRobot = BackendRobot(server);
@@ -34,6 +34,7 @@ class StreamTestEnv {
       ..debugConnectionOverride = StreamConnectionOverride(
         baseURL: server.url,
         baseWsUrl: server.wsUrl,
+        usePersistence: persistence,
       )
       ..debugConnectivityStream = _connectivity.stream;
 
