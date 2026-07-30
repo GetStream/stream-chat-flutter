@@ -4,10 +4,6 @@ import 'robots/user_robot_message_list_asserts.dart';
 import 'support/step.dart';
 import 'support/stream_test_case.dart';
 
-// Ported from the native MessageList suites (`MessageList_Tests.swift` /
-// `MessageListTests.kt`), adapted to the in-process integration_test setup.
-//
-// TODO(allure): fill each test's `allureId` from Allure TestOps project 135.
 void main() {
   const sampleText = 'Test';
   // A message long enough to wrap across several lines, so editing to/from it
@@ -34,6 +30,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '11346',
     description: 'message list updates when the participant sends a message',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -48,6 +45,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '11336',
     description: 'user sends a message with one emoji',
     body: (env) async {
       const message = '🍏';
@@ -64,6 +62,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '11347',
     description: 'user sends a message with multiple emojis',
     body: (env) async {
       const message = '🍏🙂👍';
@@ -80,6 +79,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '11339',
     description: 'user receives a message with an emoji',
     body: (env) async {
       const message = '🚢';
@@ -96,6 +96,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '11345',
     description: 'user sends a message with multiple lines',
     body: (env) async {
       const message = 'alpha\nbeta\ngamma';
@@ -116,6 +117,7 @@ void main() {
   // MARK: Message editing
 
   streamTestWithEnv(
+    allureId: '11337',
     description: 'user edits a message',
     body: (env) async {
       const editedMessage = 'hello';
@@ -135,6 +137,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '11341',
     description: 'user sees a message edited by the participant',
     body: (env) async {
       const editedMessage = 'hello';
@@ -157,6 +160,7 @@ void main() {
   // MARK: Typing indicator
 
   streamTestWithEnv(
+    allureId: '11343',
     description: 'user observes the typing indicator',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -180,6 +184,7 @@ void main() {
   // MARK: Offline
 
   streamTestWithEnv(
+    allureId: '11338',
     description: 'user sees the participant message received while offline',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -202,6 +207,7 @@ void main() {
   // Both offline cases run with persistence on, mirroring the native
   // `setIsLocalStorageEnabled(to: .on)`.
   streamTestWithEnv(
+    allureId: '11527',
     description: 'user adds a message while offline',
     persistence: true,
     body: (env) async {
@@ -230,6 +236,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '11526',
     description: 'user recovers a message received while in the background',
     persistence: true,
     body: (env) async {
@@ -255,6 +262,7 @@ void main() {
   // MARK: Thread replies
 
   streamTestWithEnv(
+    allureId: '11350',
     description: 'thread reply appears in the thread when the participant adds it',
     body: (env) async {
       const threadReply = 'thread reply';
@@ -275,6 +283,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '11492',
     description: 'thread reply also sent to the channel appears in both places',
     body: (env) async {
       const threadReply = 'thread reply';
@@ -297,6 +306,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '11329',
     description: 'thread typing indicator hides when the participant stops typing',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -323,6 +333,7 @@ void main() {
   // MARK: Deleted messages
 
   streamTestWithEnv(
+    allureId: '11332',
     description: 'user deletes a message',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -340,6 +351,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '11333',
     description: 'user sees a message deleted by the participant',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -358,6 +370,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '11335',
     description: 'user sees a message hard-deleted by the participant',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -378,6 +391,7 @@ void main() {
   // MARK: Mentions
 
   streamTestWithEnv(
+    allureId: '11349',
     description: 'user sees the mentions overlay when typing @',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -400,6 +414,7 @@ void main() {
   // MARK: Scroll to bottom
 
   streamTestWithEnv(
+    allureId: '11334',
     description: 'message list scrolls down when the user receives a new message at the bottom',
     body: (env) async {
       const newMessage = 'New message';
@@ -417,6 +432,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '11348',
     description: 'message list does not scroll down when scrolled up and the user receives a message',
     body: (env) async {
       const newMessage = 'New message';
@@ -439,6 +455,7 @@ void main() {
   // MARK: Pagination
 
   streamTestWithEnv(
+    allureId: '11331',
     description: 'user paginates the message list',
     body: (env) async {
       const messagesCount = 60;
@@ -458,6 +475,7 @@ void main() {
   // composer suppresses enrichment on the user's own outgoing link, and the
   // mock server only serves a canned OG response for YouTube URLs.
   streamTestWithEnv(
+    allureId: '11340',
     description: 'user sees a link preview for a YouTube link',
     body: (env) async {
       const link = 'https://youtube.com/watch?v=xOX7MsrbaPY';
@@ -477,6 +495,7 @@ void main() {
   // for by a fake `UrlLauncherPlatform`, so the tap is verified without the real
   // browser taking over the device (which suspends the app and hangs the run).
   streamTestWithEnv(
+    allureId: '11493',
     description: 'message with a link opens the browser',
     body: (env) async {
       const link = 'https://youtube.com/watch?v=xOX7MsrbaPY';
@@ -503,6 +522,7 @@ void main() {
   // MARK: Message grouping & size
 
   streamTestWithEnv(
+    allureId: '11330',
     description: 'message cell grows when the user edits it to a longer message',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -517,6 +537,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '11344',
     description: 'message cell shrinks when the user edits it to a shorter message',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -531,6 +552,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '11342',
     description: 'composer does not grow beyond its line limit',
     body: (env) async {
       step('GIVEN the user opens a channel');
