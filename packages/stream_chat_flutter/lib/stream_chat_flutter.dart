@@ -97,6 +97,9 @@ export 'src/message_modal/moderated_message_actions_modal.dart';
 export 'src/message_widget/components/stream_message_footer.dart';
 export 'src/message_widget/components/stream_message_header.dart';
 export 'src/message_widget/components/stream_message_leading.dart';
+// The reactions component itself is internal; only the public reaction-tap
+// callback types are exported.
+export 'src/message_widget/components/stream_message_reactions.dart' show OnReactionTap, ReactionTapDetails;
 export 'src/message_widget/stream_message_item.dart';
 export 'src/message_widget/stream_moderated_message.dart';
 export 'src/message_widget/stream_quoted_message.dart';

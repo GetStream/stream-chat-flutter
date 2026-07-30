@@ -4,6 +4,30 @@ import 'package:stream_chat_flutter/src/stream_chat_configuration.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:stream_core_flutter/chat.dart' as core;
 
+/// {@template onReactionTap}
+/// The action to perform when a message's reaction is tapped.
+/// {@endtemplate}
+typedef OnReactionTap = void Function(ReactionTapDetails details);
+
+/// Details of a reaction tap, passed to [OnReactionTap].
+@immutable
+class ReactionTapDetails {
+  /// Creates details for a reaction tap.
+  const ReactionTapDetails({
+    required this.message,
+    required this.reaction,
+  });
+
+  /// The message whose reaction was tapped.
+  final Message message;
+
+  /// The tapped reaction.
+  ///
+  /// `null` when the tap does not map to a single reaction (for example a
+  /// clustered or overflow chip).
+  final Reaction? reaction;
+}
+
 /// Displays reaction groups for a message as emoji chips overlaid on, or
 /// placed beneath, the [child] widget.
 ///
