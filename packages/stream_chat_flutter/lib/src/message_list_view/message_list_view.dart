@@ -352,12 +352,19 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
 
   MessageListController get _messageListController => widget.messageListController ?? _defaultController;
 
-  /// Returns the effective [StreamMessageListViewConfiguration] for this list.
+  /// The effective [StreamMessageListViewConfiguration] for this list.
   ///
-  /// Uses [widget.config] when explicitly provided, otherwise falls back to
-  /// [StreamChatConfigurationData.messageListViewConfiguration] from the
-  /// nearest [StreamChatConfiguration] ancestor.
-  StreamMessageListViewConfiguration get _config =>
+  /// [StreamMessageListView.config] when explicitly provided, otherwise
+  /// [StreamChatConfigurationData.messageListViewConfiguration] from the nearest
+  /// [StreamChatConfiguration] ancestor.
+  ///
+  /// Resolved into a field rather than read through a getter because the
+  /// fallback is an inherited-widget lookup, which asserts the element is active
+  /// and so must not run from a stream callback — `_messageNewListener` reads
+  /// this.
+  late StreamMessageListViewConfiguration _config;
+
+  StreamMessageListViewConfiguration _resolveConfig() =>
       widget.config ?? StreamChatConfiguration.of(context).messageListViewConfiguration;
 
   StreamSubscription<Message>? _messageNewListener;
@@ -377,6 +384,9 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    // Before anything else — the branches below read `_config`.
+    _config = _resolveConfig();
+
     final newStreamChannel = StreamChannel.of(context);
 
     if (newStreamChannel != streamChannel) {
@@ -444,6 +454,14 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
         _unreadState.value = _readUnreadSnapshot();
       });
     }
+  }
+
+  @override
+  void didUpdateWidget(covariant StreamMessageListView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // `config` can change without dependencies changing, so re-resolve here as
+    // well as in `didChangeDependencies`.
+    if (widget.config != oldWidget.config) _config = _resolveConfig();
   }
 
   @override

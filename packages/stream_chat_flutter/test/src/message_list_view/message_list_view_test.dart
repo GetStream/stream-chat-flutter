@@ -233,4 +233,143 @@ void main() {
 
     expect(find.byType(StreamButton), findsNothing);
   });
+
+  group('effective configuration', () {
+    // The scroll-to-bottom button is the observable: it renders as a
+    // StreamButton, and `showScrollToBottom` decides whether it exists at all.
+    // Scrolled away from the bottom so it would otherwise be visible.
+    Future<void> pumpScrolledAwayList(
+      WidgetTester tester, {
+      StreamMessageListViewConfiguration? config,
+      StreamMessageListViewConfiguration? globalConfig,
+    }) async {
+      final messages = generateConversation(20, users: [OwnUser(id: 'ownid'), User(id: 'otherid')]);
+      when(() => channelClientState.messagesStream).thenAnswer((_) => Stream.value(messages));
+      when(() => channelClientState.messages).thenReturn(messages);
+
+      await tester.runAsync(() async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: DefaultAssetBundle(
+              bundle: rootBundle,
+              child: StreamChat(
+                client: client,
+                configData: switch (globalConfig) {
+                  final globalConfig? => StreamChatConfigurationData(messageListViewConfiguration: globalConfig),
+                  _ => null,
+                },
+                child: StreamChannel(
+                  channel: channel,
+                  child: StreamMessageListView(
+                    initialScrollIndex: 7,
+                    config: config,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+      });
+    }
+
+    testWidgets('falls back to the global configuration when config is null', (tester) async {
+      await pumpScrolledAwayList(
+        tester,
+        globalConfig: const StreamMessageListViewConfiguration(showScrollToBottom: false),
+      );
+
+      expect(find.byType(StreamButton), findsNothing);
+    });
+
+    testWidgets('prefers an explicit config over the global one', (tester) async {
+      await pumpScrolledAwayList(
+        tester,
+        globalConfig: const StreamMessageListViewConfiguration(showScrollToBottom: false),
+        config: const StreamMessageListViewConfiguration(),
+      );
+
+      expect(find.byType(StreamButton), findsOneWidget);
+    });
+
+    testWidgets('picks up a changed global configuration', (tester) async {
+      await pumpScrolledAwayList(
+        tester,
+        globalConfig: const StreamMessageListViewConfiguration(showScrollToBottom: false),
+      );
+      expect(find.byType(StreamButton), findsNothing);
+
+      // Guards the didChangeDependencies re-resolve.
+      await pumpScrolledAwayList(
+        tester,
+        globalConfig: const StreamMessageListViewConfiguration(),
+      );
+
+      expect(find.byType(StreamButton), findsOneWidget);
+    });
+
+    // Guards the didUpdateWidget re-resolve. The config is cached in a field, so
+    // a swapped `config` has to invalidate it.
+    //
+    // Swapping via setState below the StreamChat ancestor rather than a second
+    // pumpWidget, because StreamChatConfigurationData has no `==` — rebuilding
+    // StreamChat hands StreamChatConfiguration a fresh instance, which notifies
+    // every dependent and re-runs didChangeDependencies. That would resolve the
+    // config for the wrong reason and hide a missing didUpdateWidget.
+    testWidgets('picks up a changed config without a dependency change', (tester) async {
+      final messages = generateConversation(20, users: [OwnUser(id: 'ownid'), User(id: 'otherid')]);
+      when(() => channelClientState.messagesStream).thenAnswer((_) => Stream.value(messages));
+      when(() => channelClientState.messages).thenReturn(messages);
+
+      final swapper = GlobalKey<_ConfigSwapperState>();
+
+      await tester.runAsync(() async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: DefaultAssetBundle(
+              bundle: rootBundle,
+              child: StreamChat(
+                client: client,
+                child: StreamChannel(
+                  channel: channel,
+                  child: _ConfigSwapper(
+                    key: swapper,
+                    initialConfig: const StreamMessageListViewConfiguration(),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+      });
+
+      expect(find.byType(StreamButton), findsOneWidget);
+
+      swapper.currentState!.swap(const StreamMessageListViewConfiguration(showScrollToBottom: false));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(StreamButton), findsNothing);
+    });
+  });
+}
+
+/// Rebuilds only its [StreamMessageListView] child when [swap] is called,
+/// leaving every ancestor untouched.
+class _ConfigSwapper extends StatefulWidget {
+  const _ConfigSwapper({super.key, required this.initialConfig});
+
+  final StreamMessageListViewConfiguration initialConfig;
+
+  @override
+  State<_ConfigSwapper> createState() => _ConfigSwapperState();
+}
+
+class _ConfigSwapperState extends State<_ConfigSwapper> {
+  late StreamMessageListViewConfiguration _config = widget.initialConfig;
+
+  void swap(StreamMessageListViewConfiguration config) => setState(() => _config = config);
+
+  @override
+  Widget build(BuildContext context) => StreamMessageListView(initialScrollIndex: 7, config: _config);
 }
