@@ -171,20 +171,24 @@ Future<void> _pumpComposer(
   await tester.pumpWidget(
     MaterialApp(
       theme: ThemeData(extensions: [StreamTheme(appStyle: appStyle)]),
-      home: MediaQuery(
-        data: MediaQueryData(padding: EdgeInsets.only(bottom: bottomPadding)),
-        child: StreamChat(
-          client: client,
-          themeData: StreamChatThemeData(messageComposerTheme: globalTheme),
-          child: StreamChannel(
-            channel: channel,
-            child: Scaffold(
-              body: Align(
-                alignment: Alignment.bottomCenter,
-                child: switch (localTheme) {
-                  final localTheme? => StreamMessageComposerTheme(data: localTheme, child: composer),
-                  _ => composer,
-                },
+      // Overrides only the padding, so the ambient size, text scale and platform
+      // brightness the test binding provides are preserved.
+      home: Builder(
+        builder: (context) => MediaQuery(
+          data: MediaQuery.of(context).copyWith(padding: EdgeInsets.only(bottom: bottomPadding)),
+          child: StreamChat(
+            client: client,
+            themeData: StreamChatThemeData(messageComposerTheme: globalTheme),
+            child: StreamChannel(
+              channel: channel,
+              child: Scaffold(
+                body: Align(
+                  alignment: Alignment.bottomCenter,
+                  child: switch (localTheme) {
+                    final localTheme? => StreamMessageComposerTheme(data: localTheme, child: composer),
+                    _ => composer,
+                  },
+                ),
               ),
             ),
           ),

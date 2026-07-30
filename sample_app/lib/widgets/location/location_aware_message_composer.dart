@@ -28,13 +28,22 @@ Widget locationAwareMessageComposer(BuildContext context, MessageComposerProps p
 
   return DefaultStreamMessageComposer(
     props: props.copyWith(
+      // Appended to what the caller already allowed rather than replacing it,
+      // so an upstream narrowing of the picker types still holds. The filter
+      // keeps the list free of duplicates if location was already allowed.
       allowedAttachmentPickerTypes: [
-        ...AttachmentPickerType.values,
+        ...props.allowedAttachmentPickerTypes.where((it) => it != const LocationPickerType()),
         const LocationPickerType(),
       ],
-      onAttachmentPickerResult: (result) => _onCustomAttachmentPickerResult(channel, result),
+      // Location results are handled here; anything else falls through to the
+      // caller's handler so wrapping the composer doesn't swallow their results.
+      onAttachmentPickerResult: (result) {
+        if (_onCustomAttachmentPickerResult(channel, result)) return true;
+        return props.onAttachmentPickerResult?.call(result) ?? false;
+      },
       attachmentPickerOptionsBuilder: (context, defaultOptions) => [
-        ...defaultOptions,
+        // The caller's builder runs first so its options survive too.
+        ...(props.attachmentPickerOptionsBuilder?.call(context, defaultOptions) ?? defaultOptions),
         TabbedAttachmentPickerOption(
           key: 'location-picker',
           title: 'Location',
