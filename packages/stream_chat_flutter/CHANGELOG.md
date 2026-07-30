@@ -6,10 +6,12 @@
 - Added `onReactionSelected` to `StreamMessageReactionPicker`, a context-aware callback that provides the `BuildContext` for navigation.
 - Added an `errorSubtitle` to `StreamScrollViewErrorWidget`, which now falls back to the design's generic error copy (title, description, and a "Try Again" retry label) when values aren't provided.
 - Added a `size` (`StreamLoadingSpinnerSize`) parameter to `StreamScrollViewLoadingWidget`.
+- Added `onReactionTap` to `StreamMessageItem` and `StreamMessageListView`, reporting the tapped message's `BuildContext` and a `ReactionTapDetails` with the tapped `message` and `reaction` (the reaction is `null` for a clustered or overflow chip that maps to no single reaction).
 
 ⚠️ Deprecated
 
 - Deprecated `StreamMessageReactionPicker.onReactionPicked` in favor of `onReactionSelected`.
+- Deprecated `onReactionsTap` (and the `OnReactionsTap` typedef) on `StreamMessageItem` and `StreamMessageListView` in favor of `onReactionTap`.
 - Deprecated `height`/`width` of `StreamScrollViewLoadingWidget` in favor of `size`.
 
 🐞 Fixed

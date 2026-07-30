@@ -187,7 +187,32 @@ typedef OnMessageLongPress = void Function(Message);
 /// {@template onReactionsTap}
 /// The action to perform when a message's reactions are tapped.
 /// {@endtemplate}
+@Deprecated('Use OnReactionTap instead. OnReactionTap also reports the tapped reaction.')
 typedef OnReactionsTap = void Function(Message);
+
+/// {@template onReactionTap}
+/// The action to perform when a message's reaction is tapped.
+///
+/// The [BuildContext] is the context at the tapped message, useful for
+/// navigation or showing overlays relative to it.
+/// {@endtemplate}
+typedef OnReactionTap = void Function(BuildContext context, ReactionTapDetails details);
+
+/// Details of a reaction tap, passed to [OnReactionTap].
+@immutable
+class ReactionTapDetails {
+  /// Creates details for a reaction tap.
+  const ReactionTapDetails({required this.message, required this.reaction});
+
+  /// The message whose reaction was tapped.
+  final Message message;
+
+  /// The tapped reaction.
+  ///
+  /// `null` when the tap does not map to a single reaction (for example a
+  /// clustered or overflow chip).
+  final Reaction? reaction;
+}
 
 /// {@template onReactionsHover}
 /// The action to perform when a message's reactions are hovered.
