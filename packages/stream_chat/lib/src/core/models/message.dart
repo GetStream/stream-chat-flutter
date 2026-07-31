@@ -160,7 +160,7 @@ class Message extends Equatable implements ComparableFieldProvider {
       final sumScores = reactionScores?[type] ?? 0;
 
       // Keep the group while count is positive; score may be zero or negative.
-      if (count == 0) continue;
+      if (count <= 0) continue;
       groups[type] = ReactionGroup(count: count, sumScores: sumScores);
     }
 

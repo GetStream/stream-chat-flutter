@@ -312,10 +312,12 @@ void main() {
         'is derived from legacy reaction fields even when the score total is '
         'zero or negative',
         () {
-          final message = Message.fromJson(const {
-            'reaction_counts': {'like': 2, 'dislike': 3},
-            'reaction_scores': {'like': 0, 'dislike': -3},
-          });
+          final message = Message(
+            // ignore: deprecated_member_use_from_same_package
+            reactionCounts: const {'like': 2, 'dislike': 3},
+            // ignore: deprecated_member_use_from_same_package
+            reactionScores: const {'like': 0, 'dislike': -3},
+          );
 
           // Both groups must be retained because their count is positive, even
           // though the summed scores are zero and negative respectively.
