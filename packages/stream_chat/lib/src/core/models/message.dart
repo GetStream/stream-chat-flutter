@@ -172,8 +172,8 @@ class Message extends Equatable implements ComparableFieldProvider {
       final count = reactionCounts?[type] ?? 0;
       final sumScores = reactionScores?[type] ?? 0;
 
-      // Keep the group while count is positive; score may be zero.
-      if (count == 0) continue;
+      // Keep the group while count is positive; score may be zero or negative.
+      if (count <= 0) continue;
       final now = DateTime.timestamp();
       groups[type] = {
         'count': count,
@@ -1026,7 +1026,7 @@ extension MessageReactionHelper on Message {
       final group = reactionGroups.remove(type);
       if (group == null) continue;
 
-      // Keep the group while count is positive; score may be zero.
+      // Keep the group while count is positive; score may be zero or negative.
       final updatedCount = group.count - 1;
       final updatedSumScores = group.sumScores - reaction.score;
 

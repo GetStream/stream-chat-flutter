@@ -523,19 +523,20 @@ void main() {
 
       test(
         'synthesizes groups from legacy reaction_counts/reaction_scores '
-        'even when the score total is zero',
+        'even when the score total is zero or negative',
         () {
           final message = Message.fromJson(const {
-            'reaction_counts': {'like': 2},
-            'reaction_scores': {'like': 0},
+            'reaction_counts': {'like': 2, 'dislike': 3},
+            'reaction_scores': {'like': 0, 'dislike': -3},
           });
 
-          // The group must be retained because its count is positive, even
-          // though the summed scores are zero.
+          // Both groups must be retained because their count is positive, even
+          // though the summed scores are zero and negative respectively.
           expect(message.reactionGroups, isNotNull);
-          expect(message.reactionGroups!.containsKey('like'), isTrue);
           expect(message.reactionGroups!['like']!.count, 2);
           expect(message.reactionGroups!['like']!.sumScores, 0);
+          expect(message.reactionGroups!['dislike']!.count, 3);
+          expect(message.reactionGroups!['dislike']!.sumScores, -3);
         },
       );
     });

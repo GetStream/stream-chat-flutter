@@ -362,13 +362,13 @@ void main() {
         expect(updatedMessage.reactionGroups, isEmpty);
       });
 
-      test('should keep reaction group when count remains after sumScores '
-          'reaches zero', () {
-        // Own reaction with a score that cancels out the group total, leaving
-        // sumScores at 0 while another user's reaction keeps count positive.
+      test('should keep reaction group with non-positive score sum while '
+          'count remains positive', () {
+        // A positively-scored own reaction and a negatively-scored reaction
+        // from another user net the group score to zero while count is 2.
         final ownReaction = Reaction(
           type: 'like',
-          score: 0,
+          score: 1,
           user: testUser,
           userId: testUser.id,
           messageId: emptyMessage.id,
@@ -377,7 +377,7 @@ void main() {
         final otherUser = User(id: 'other-user-id');
         final otherReaction = Reaction(
           type: 'like',
-          score: 0,
+          score: -1,
           user: otherUser,
           userId: otherUser.id,
           messageId: emptyMessage.id,
@@ -399,10 +399,10 @@ void main() {
         final updatedMessage = messageWithReactions.deleteMyReaction();
 
         // The group must survive because another user's reaction remains, even
-        // though the summed scores are zero.
+        // though the remaining summed score is negative.
         expect(updatedMessage.reactionGroups!.length, 1);
         expect(updatedMessage.reactionGroups!['like']!.count, 1);
-        expect(updatedMessage.reactionGroups!['like']!.sumScores, 0);
+        expect(updatedMessage.reactionGroups!['like']!.sumScores, -1);
         expect(updatedMessage.latestReactions!.length, 1);
         expect(updatedMessage.latestReactions!.first.userId, otherUser.id);
       });
