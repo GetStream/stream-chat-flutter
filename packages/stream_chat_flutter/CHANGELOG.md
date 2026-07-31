@@ -21,12 +21,14 @@
 - Added an `errorSubtitle` to `StreamScrollViewErrorWidget`, which now falls back to the design's generic error copy (title, description, and a "Try Again" retry label) when values aren't provided.
 - Added a `size` (`StreamLoadingSpinnerSize`) parameter to `StreamScrollViewLoadingWidget`.
 - Added `onReactionTap` to `StreamMessageItem` and `StreamMessageListView`, reporting the tapped message's `BuildContext` and a `ReactionTapDetails` with the tapped `message` and `reaction` (the reaction is `null` for a clustered or overflow chip that maps to no single reaction).
+- Added an `unreadIndicator` parameter to `StreamBackButton` that overlays a widget (typically a `StreamUnreadIndicator`) on the button's top-end corner. Pass `StreamUnreadIndicator(excludeCid: cid)` to show the total unread count of other channels, or `StreamUnreadIndicator.channels(cid: cid)` for a single channel's count.
 
 ⚠️ Deprecated
 
 - Deprecated `StreamMessageReactionPicker.onReactionPicked` in favor of `onReactionSelected`.
 - Deprecated `onReactionsTap` (and the `OnReactionsTap` typedef) on `StreamMessageItem` and `StreamMessageListView` in favor of `onReactionTap`.
 - Deprecated `height`/`width` of `StreamScrollViewLoadingWidget` in favor of `size`.
+- Deprecated `StreamBackButton.showUnreadCount` and `StreamBackButton.channelId` in favor of `unreadIndicator`.
 
 🐞 Fixed
 
@@ -36,6 +38,7 @@
 - Fixed the attachment picker throwing a `Tooltip` assertion error when a custom `TabbedAttachmentPickerOption` is added without a `title`; the tooltip is now only shown when a title is provided.
 - Fixed the "Message deleted" bubble overflowing its maximum width when the localized label is long; the label now wraps instead.
 - Fixed the scroll-to-bottom button in thread views keying off the parent channel's up-to-date state instead of the thread's own scroll position, so it no longer appears while already at the newest reply. Note that thread views now show the button at all: it follows `showScrollToBottom` from the effective `StreamMessageListViewConfiguration`, so set that to `false` to restore the previous always-hidden behavior.
+- Fixed the `StreamBackButton` unread badge including the currently open channel in its total count.
 
 ## 10.2.0
 

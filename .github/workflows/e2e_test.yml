@@ -2,6 +2,15 @@ name: E2E Tests
 
 on:
   workflow_dispatch:
+    inputs:
+      android:
+        description: "Run Android e2e tests"
+        type: boolean
+        default: true
+      ios:
+        description: "Run iOS e2e tests"
+        type: boolean
+        default: true
   pull_request:
 
 permissions:
@@ -18,6 +27,8 @@ env:
 
 jobs:
   android:
+    # Always on pull_request; opt-out via the checkbox on workflow_dispatch.
+    if: github.event_name != 'workflow_dispatch' || inputs.android
     runs-on: ubuntu-latest
     timeout-minutes: 40
     env:
@@ -80,6 +91,8 @@ jobs:
             sample_app/build/e2e-test.log
 
   ios:
+    # Only on workflow_dispatch, when the checkbox is ticked.
+    if: github.event_name == 'workflow_dispatch' && inputs.ios
     runs-on: macos-15
     timeout-minutes: 40
     env:
