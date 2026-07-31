@@ -1026,10 +1026,16 @@ extension MessageReactionHelper on Message {
       if (group == null) continue;
 
       // Update the reaction group.
+      //
+      // The group exists as long as at least one reaction remains, mirroring
+      // the backend which derives groups from the reaction count alone. The
+      // score is an independent aggregate and must not gate the group, else a
+      // group whose scores net to zero would be dropped while its count (and
+      // thus other users' reactions) is still positive.
       final updatedCount = group.count - 1;
       final updatedSumScores = group.sumScores - reaction.score;
 
-      if (updatedCount > 0 && updatedSumScores > 0) {
+      if (updatedCount > 0) {
         reactionGroups[type] = group.copyWith(
           count: updatedCount,
           sumScores: updatedSumScores,
