@@ -1,8 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import '../mock_server/data_types.dart';
 import '../pages/message_list_page.dart';
 import '../support/widget_test_extensions.dart';
+import 'backend_robot.dart';
 import 'user_robot.dart';
 
 extension UserRobotMessageListAsserts on UserRobot {
@@ -100,13 +102,41 @@ extension UserRobotMessageListAsserts on UserRobot {
     return tester.waitUntilVisible(find.descendant(of: message, matching: finder));
   }
 
-  /// Scrolls up through the paged history until the oldest message loads. The
-  /// mock server seeds message text as the 1-based index, so the oldest message
-  /// is `'1'` (the newest is `'$messagesCount'`).
+  /// Scrolls up through the history until all [messagesCount] messages are
+  /// loaded and the oldest one is on screen.
+  ///
+  /// Both ends come from the channel's own state instead of the message text:
+  /// what the mock server seeds as text depends on how the channel was generated
+  /// (see `messagesText` on [BackendRobot.generateChannels]), message identity
+  /// does not.
   Future<UserRobot> assertMessageListPagination({required int messagesCount}) async {
-    await tester.waitUntilVisible(find.text('$messagesCount'));
-    await tester.scrollUpUntilVisible(find.text('1'));
+    await tester.waitUntilVisible(find.byType(MessageListPage.list.view));
+
+    // Pages in whatever the channel query didn't return. The mock server hands
+    // over the whole history up front, so today this holds without scrolling.
+    await tester.scrollUpUntil(
+      () => _loadedMessages.length >= messagesCount,
+      description: 'all $messagesCount messages to load',
+    );
+    expect(_loadedMessages, hasLength(messagesCount));
+
+    final oldest = MessageListPage.list.message(_loadedMessages.first.id);
+    // Guards against a vacuous pass: the oldest message has to be out of view
+    // (i.e. actually reached by scrolling), and it would be on screen already if
+    // the loaded history were ordered newest-first.
+    expect(oldest, findsNothing);
+    await tester.scrollUpUntil(
+      () => oldest.evaluate().isNotEmpty,
+      description: 'the oldest message to be reached',
+    );
     return this;
+  }
+
+  /// The slice of the channel's history the message list has loaded so far,
+  /// oldest first.
+  List<Message> get _loadedMessages {
+    final context = tester.element(find.byType(MessageListPage.list.view));
+    return StreamChannel.of(context).channel.state?.messages ?? const [];
   }
 
   /// Edits the first message to [newText] and asserts its cell grew (or shrank)

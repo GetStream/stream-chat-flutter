@@ -72,16 +72,18 @@ extension E2EWidgetTester on WidgetTester {
   }
 
   /// Repeatedly scrolls the message list up (towards older messages) until
-  /// [finder] is visible, paging through history as needed.
-  Future<void> scrollUpUntilVisible(
-    Finder finder, {
+  /// [condition] holds, paging through history as needed. [description] names
+  /// what was being waited for, completing the failure message.
+  Future<void> scrollUpUntil(
+    bool Function() condition, {
+    required String description,
     Duration timeout = const Duration(seconds: 30),
   }) async {
     final scrollable = find.byType(Scrollable).first;
     await waitUntilVisible(scrollable);
     final end = DateTime.now().add(timeout);
     while (DateTime.now().isBefore(end)) {
-      if (finder.evaluate().isNotEmpty) {
+      if (condition()) {
         await settle();
         return;
       }
@@ -90,7 +92,7 @@ extension E2EWidgetTester on WidgetTester {
       // while a perpetual animation (e.g. a reconnect spinner) is running.
       await settle();
     }
-    throw TestFailure('Timed out scrolling up to reveal $finder');
+    throw TestFailure('Timed out scrolling up, waiting for $description');
   }
 
   Future<void> waitUntilVisible(

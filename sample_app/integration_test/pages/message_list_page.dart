@@ -65,6 +65,18 @@ final class _MessageActions {
 final class _MessageList {
   const _MessageList();
 
+  /// The message list itself. Also the entry point to the channel driving it:
+  /// `StreamChannel.of()` on its context resolves the channel whose state holds
+  /// however much of the history has been paged in.
+  Type get view => StreamMessageListView;
+
+  /// The row rendering the message with [id]. Matches on message identity, so
+  /// it locates a message regardless of what it says.
+  Finder message(String id) => find.byWidgetPredicate(
+    (widget) => widget is StreamMessageItem && widget.props.message.id == id,
+    description: 'message row for $id',
+  );
+
   /// The "… is typing" text of [StreamTypingIndicator]. The indicator widget is
   /// always mounted (it renders an empty child when nobody types), so presence
   /// is detected by its text, not by the widget type.
