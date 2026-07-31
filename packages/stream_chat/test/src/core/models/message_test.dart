@@ -520,6 +520,24 @@ void main() {
           expect(message.reactionGroups!['love']!.sumScores, 5);
         },
       );
+
+      test(
+        'synthesizes groups from legacy reaction_counts/reaction_scores '
+        'even when the score total is zero',
+        () {
+          final message = Message.fromJson(const {
+            'reaction_counts': {'like': 2},
+            'reaction_scores': {'like': 0},
+          });
+
+          // The group must be retained because its count is positive, even
+          // though the summed scores are zero.
+          expect(message.reactionGroups, isNotNull);
+          expect(message.reactionGroups!.containsKey('like'), isTrue);
+          expect(message.reactionGroups!['like']!.count, 2);
+          expect(message.reactionGroups!['like']!.sumScores, 0);
+        },
+      );
     });
   });
 
