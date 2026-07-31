@@ -365,7 +365,8 @@ void main() {
         expect(updatedMessage.reactionGroups, isEmpty);
       });
 
-      test('should keep reaction group with non-positive score sum while '
+      test(
+          'should keep reaction group with non-positive score sum while '
           'count remains positive', () {
         // A positively-scored own reaction and a negatively-scored reaction
         // from another user net the group score to zero while count is 2.
