@@ -3,6 +3,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_chat_flutter_ai/src/chart/chart_view.dart';
+import 'package:stream_chat_flutter_ai/src/chart/heatmap_chart_view.dart';
 import 'package:stream_chat_flutter_ai/src/chart/uspec.dart';
 
 void main() {
@@ -45,10 +46,45 @@ void main() {
       expect(find.byType(LineChart), findsNothing);
     });
 
-    testWidgets('heatmap renders a placeholder, not a line fallback', (tester) async {
-      await tester.pumpWidget(_wrap(const ChartView(spec: _heatmapSpec)));
-      expect(find.text('Heatmap'), findsOneWidget);
-      expect(find.byType(LineChart), findsNothing);
+    group('heatmap', () {
+      testWidgets('renders a labelled grid, not a line fallback', (tester) async {
+        await tester.pumpWidget(_wrap(const ChartView(spec: _heatmapSpec)));
+
+        expect(find.byType(HeatmapChartView), findsOneWidget);
+        expect(find.byType(LineChart), findsNothing);
+        // One label per series (rows) and per distinct point.x (columns).
+        expect(find.text('Row 1'), findsOneWidget);
+        expect(find.text('Row 2'), findsOneWidget);
+        expect(find.text('A'), findsOneWidget);
+        expect(find.text('B'), findsOneWidget);
+        // Every cell is filled, and the legend spans the full value range.
+        expect(_filledCells(tester), 4);
+        expect(find.text('1.0'), findsOneWidget);
+        expect(find.text('9.0'), findsOneWidget);
+      });
+
+      testWidgets('leaves cells a ragged row has no value for unfilled', (tester) async {
+        await tester.pumpWidget(_wrap(const ChartView(spec: _raggedHeatmapSpec)));
+
+        // 3 distinct columns x 2 rows, but the second row only has 2 points.
+        expect(find.text('C'), findsOneWidget);
+        expect(_filledCells(tester), 5);
+      });
+
+      testWidgets('renders a uniform grid at full intensity', (tester) async {
+        await tester.pumpWidget(_wrap(const ChartView(spec: _uniformHeatmapSpec)));
+
+        expect(_filledCells(tester), 2);
+        // min == max, so both ends of the legend show the same value.
+        expect(find.text('4.0'), findsNWidgets(2));
+      });
+
+      testWidgets('renders nothing when there are no points', (tester) async {
+        await tester.pumpWidget(_wrap(const ChartView(spec: _emptyHeatmapSpec)));
+
+        expect(find.byType(HeatmapChartView), findsOneWidget);
+        expect(_filledCells(tester), 0);
+      });
     });
 
     group('golden', () {
@@ -199,6 +235,55 @@ const _heatmapSpec = USpec(
     ),
   ],
 );
+
+const _raggedHeatmapSpec = USpec(
+  kind: USpecKind.heatmap,
+  series: [
+    USeries(
+      name: 'Row 1',
+      points: [
+        UPoint(x: 'A', y: 0, z: 1),
+        UPoint(x: 'B', y: 0, z: 5),
+        UPoint(x: 'C', y: 0, z: 7),
+      ],
+    ),
+    USeries(
+      name: 'Row 2',
+      points: [
+        UPoint(x: 'A', y: 0, z: 3),
+        UPoint(x: 'C', y: 0, z: 9),
+      ],
+    ),
+  ],
+);
+
+const _uniformHeatmapSpec = USpec(
+  kind: USpecKind.heatmap,
+  series: [
+    USeries(
+      name: 'Row 1',
+      points: [
+        UPoint(x: 'A', y: 0, z: 4),
+        UPoint(x: 'B', y: 0, z: 4),
+      ],
+    ),
+  ],
+);
+
+const _emptyHeatmapSpec = USpec(kind: USpecKind.heatmap, series: []);
+
+/// Counts the heatmap cells that were given a fill color — cells a row has no
+/// value for are left unfilled, and the gradient legend paints a gradient
+/// rather than a flat color.
+int _filledCells(WidgetTester tester) {
+  final containers = tester.widgetList<Container>(
+    find.descendant(of: find.byType(HeatmapChartView), matching: find.byType(Container)),
+  );
+  return containers.where((c) {
+    final decoration = c.decoration;
+    return decoration is BoxDecoration && decoration.color != null;
+  }).length;
+}
 
 Widget _wrap(Widget child) {
   return MaterialApp(

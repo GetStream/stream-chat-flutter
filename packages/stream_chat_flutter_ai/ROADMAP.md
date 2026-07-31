@@ -13,7 +13,7 @@ Status legend: ⬜ Not started · 🚧 In progress · ✅ Done · 🅾️ Option
 | # | Feature | Phase | Effort | Status |
 |---|---|---|---|---|
 | 1.1 | Standalone suggested-prompt chips (`SuggestionsView`) | 1 | S | ✅ |
-| 1.2 | Chart schema & kind breadth (`USpec`) | 1 | M | 🚧 |
+| 1.2 | Chart schema & kind breadth (`USpec`) | 1 | M | ✅ |
 | 2.1 | Code syntax highlighting (`CodeBlockView`) | 2 | M | ⬜ |
 | 2.2 | Composer factory slot coverage | 2 | M | ⬜ |
 | 2.3 | Localization scaffolding | 2 | M | ⬜ |
@@ -60,7 +60,7 @@ Theme-driven (`Theme.of(context).colorScheme`), consistent with the composer pil
   truncates to 2 lines; widget test covering render + tap — see `suggestions_view_test.dart`.
 - **Effort:** S (½ day).
 
-### 1.2 Chart schema & kind breadth (`USpec`) 🚧
+### 1.2 Chart schema & kind breadth (`USpec`) ✅
 
 **Gap:** Swift's `parseUSpec` auto-detects **7 schemas** (Chart.js, Plotly single + full figure,
 ECharts, Highcharts, Vega-Lite, a legacy custom schema, flat pie) and renders **8 kinds** (line,
@@ -80,10 +80,12 @@ chart** (the `switch` default case, `_ => _buildLineChart()`).
 - [x] 1.2.5 Add `USpecKind.histogram` (auto-bin into ~10 buckets, mirroring Swift's `makeBins`) and
       `USpecKind.bubble` (point size from a `size`/`z` field — requires an optional `size` field
       on `UPoint`).
-- [ ] 1.2.6 Add heatmap (fl_chart has no native heatmap — render as a `GridView`/`CustomPaint`
-      grid, or document as deferred if the cost isn't justified). Parsing already lands
-      (`USpecKind.heatmap` from Plotly/Vega-Lite `rect` marks); `ChartView` renders a placeholder
-      for it until the grid is built.
+- [x] 1.2.6 Add heatmap. `fl_chart` has no native heatmap, so `HeatmapChartView`
+      (`lib/src/chart/heatmap_chart_view.dart`) draws the grid with plain Material widgets: one row
+      per series (labelled with `USeries.name`), one column per distinct `UPoint.x`, cell color from
+      `UPoint.z ?? UPoint.y` on a sequential blue scale, plus a gradient scale bar labelled with the
+      value range. Axis gutters match the `fl_chart` kinds' reserved sizes so a heatmap lines up
+      with a bar/line chart in the same message.
 
 Fence-language routing already exists in `lib/src/ai_markdown_body.dart`
 (`json, chart, chartjs, echarts, plotly, vega`) — extend the language set as needed, the hook is
@@ -92,8 +94,7 @@ already there.
 - **Acceptance:** a unit test per new schema, feeding a representative JSON payload and asserting
   the resulting `USpec.kind`/series; scatter/bubble/histogram render visibly distinct from a plain
   line chart.
-- **Effort:** M overall — schemas are independent, land 1.2.1–1.2.2 first, the rest as follow-ups.
-  Heatmap (1.2.6) is the one most likely to warrant deferral.
+- **Effort:** M overall — schemas are independent, landed 1.2.1–1.2.2 first, the rest as follow-ups.
 
 ---
 

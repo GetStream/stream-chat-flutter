@@ -1,5 +1,6 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:stream_chat_flutter_ai/src/chart/heatmap_chart_view.dart';
 import 'package:stream_chat_flutter_ai/src/chart/uspec.dart';
 
 const _kChartHeight = 220.0;
@@ -27,10 +28,9 @@ Color _seriesColor(int index) => _kSeriesColors[index % _kSeriesColors.length];
 /// Renders a [USpec] chart using `fl_chart`.
 ///
 /// Supports [USpecKind.line], [USpecKind.area], [USpecKind.bar],
-/// [USpecKind.pie], [USpecKind.scatter], [USpecKind.bubble], and
-/// [USpecKind.histogram]. [USpecKind.heatmap] renders as a placeholder — a
-/// full grid render is not yet implemented (`fl_chart` has no native
-/// heatmap widget).
+/// [USpecKind.pie], [USpecKind.scatter], [USpecKind.bubble],
+/// [USpecKind.histogram], and [USpecKind.heatmap] — the last of which is drawn
+/// by [HeatmapChartView] rather than `fl_chart`, which has no heatmap widget.
 class ChartView extends StatelessWidget {
   /// Creates a [ChartView].
   const ChartView({super.key, required this.spec});
@@ -49,7 +49,7 @@ class ChartView extends StatelessWidget {
         USpecKind.scatter => _buildScatterChart(bubble: false),
         USpecKind.bubble => _buildScatterChart(bubble: true),
         USpecKind.histogram => _buildHistogramChart(),
-        USpecKind.heatmap => _buildHeatmapPlaceholder(),
+        USpecKind.heatmap => HeatmapChartView(spec: spec),
         _ => _buildLineChart(),
       },
     );
@@ -219,16 +219,6 @@ class ChartView extends StatelessWidget {
       final hi = minV + (i + 1) * step;
       return _HistogramBin(label: '${lo.toStringAsFixed(1)}–${hi.toStringAsFixed(1)}', count: counts[i]);
     });
-  }
-
-  // ---------------------------------------------------------------------------
-  // Heatmap (deferred — placeholder render)
-  // ---------------------------------------------------------------------------
-
-  Widget _buildHeatmapPlaceholder() {
-    return const Center(
-      child: Text('Heatmap', style: TextStyle(fontSize: 13, color: Colors.black54)),
-    );
   }
 
   // ---------------------------------------------------------------------------
