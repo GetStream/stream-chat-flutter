@@ -113,12 +113,9 @@ class _StreamChannelPageState extends State<StreamChannelPage> {
   @override
   Widget build(BuildContext context) {
     final appBar = StreamChannelHeader(
-      // Leaving this null keeps the header's own default back button, which
-      // pops the route.
-      leading: switch (widget.onBackPressed) {
-        final onBackPressed? => StreamBackButton(onPressed: onBackPressed, showUnreadCount: true),
-        _ => null,
-      },
+      // Leaving this null keeps the header's default back button, which pops
+      // the route.
+      onBackPressed: widget.onBackPressed,
       onChannelAvatarPressed: (channel) => widget.onChannelAvatarPressed?.call(context, channel),
     );
 

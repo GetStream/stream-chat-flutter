@@ -22,6 +22,7 @@ class StreamThreadHeader extends StatelessWidget implements PreferredSizeWidget 
     required this.parent,
     this.leading,
     this.automaticallyImplyLeading = true,
+    this.onBackPressed,
     this.title,
     this.subtitle,
     this.trailing,
@@ -37,6 +38,12 @@ class StreamThreadHeader extends StatelessWidget implements PreferredSizeWidget 
 
   /// {@macro StreamAppBar.automaticallyImplyLeading}
   final bool automaticallyImplyLeading;
+
+  /// Called when the default [StreamBackButton] is pressed, replacing its
+  /// default `Navigator.maybePop`.
+  ///
+  /// Ignored when [leading] is provided.
+  final VoidCallback? onBackPressed;
 
   /// {@macro StreamAppBar.title}
   ///
@@ -75,7 +82,7 @@ class StreamThreadHeader extends StatelessWidget implements PreferredSizeWidget 
         final cid? => StreamUnreadIndicator.channels(cid: cid),
         null => const StreamUnreadIndicator(),
       };
-      leading = StreamBackButton(unreadIndicator: unreadIndicator);
+      leading = StreamBackButton(onPressed: onBackPressed, unreadIndicator: unreadIndicator);
     }
 
     Widget? fallbackSubtitle;

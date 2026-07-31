@@ -9,6 +9,7 @@
 
 - Added `StreamChannelPage` — a ready-to-use channel page widget that wires up `StreamChannelHeader`, `StreamMessageListView`, and `StreamMessageComposer` with floating or docked layout driven by the active app style.
 - Added `StreamThreadPage` — a ready-to-use thread page widget with the same floating/docked layout support, plus an `onBackPressed` callback that replaces the header back button's default pop.
+- Added `onBackPressed` to `StreamChannelHeader` and `StreamThreadHeader` — replaces the default back button's `Navigator.maybePop` without rebuilding the whole `leading`, so callers keep the header's default unread badge. Ignored when `leading` is supplied.
 - Added `StreamComposerLocation` and `MessageComposerProps.location` — explicitly controls whether `StreamMessageComposer` renders `floating` or `docked`. When null it falls back to `StreamMessageComposerThemeData.location`, and then to the ambient `StreamAppStyle`.
 - Added `StreamMessageComposerTheme` and `StreamMessageComposerThemeData` — a component theme for the composer, also available globally as `StreamChatThemeData.messageComposerTheme`.
 - Added `StreamMessageListView.config` — accepts an explicit `StreamMessageListViewConfiguration` per widget; falls back to `StreamChatConfigurationData.messageListViewConfiguration` from the nearest ancestor when omitted.

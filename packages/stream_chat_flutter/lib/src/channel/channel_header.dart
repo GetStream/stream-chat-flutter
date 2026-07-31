@@ -77,6 +77,7 @@ class StreamChannelHeader extends StatelessWidget implements PreferredSizeWidget
     this.showConnectionStateTile = false,
     this.leading,
     this.automaticallyImplyLeading = true,
+    this.onBackPressed,
     this.title,
     this.subtitle,
     this.trailing,
@@ -104,6 +105,12 @@ class StreamChannelHeader extends StatelessWidget implements PreferredSizeWidget
   ///
   /// Defaults to `true`. Set to `false` to suppress the back button.
   final bool automaticallyImplyLeading;
+
+  /// Called when the default [StreamBackButton] is pressed, replacing its
+  /// default `Navigator.maybePop`.
+  ///
+  /// Ignored when [leading] is provided.
+  final VoidCallback? onBackPressed;
 
   /// {@macro StreamAppBar.title}
   ///
@@ -141,6 +148,7 @@ class StreamChannelHeader extends StatelessWidget implements PreferredSizeWidget
     var leading = this.leading;
     if (leading == null && automaticallyImplyLeading) {
       leading = StreamBackButton(
+        onPressed: onBackPressed,
         unreadIndicator: StreamUnreadIndicator(excludeCid: channel.cid),
       );
     }

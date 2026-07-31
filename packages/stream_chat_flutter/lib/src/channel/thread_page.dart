@@ -87,20 +87,11 @@ class _StreamThreadPageState extends State<StreamThreadPage> {
 
   @override
   Widget build(BuildContext context) {
-    final channel = StreamChannel.maybeOf(context)?.channel;
-
     final appBar = StreamThreadHeader(
       parent: widget.parent,
-      // Leaving this null keeps the header's own default back button, which
-      // pops the route.
-      leading: switch (widget.onBackPressed) {
-        final onBackPressed? => StreamBackButton(
-          onPressed: onBackPressed,
-          channelId: channel?.cid,
-          showUnreadCount: true,
-        ),
-        _ => null,
-      },
+      // Leaving this null keeps the header's default back button, which pops
+      // the route.
+      onBackPressed: widget.onBackPressed,
     );
 
     final composer = !widget.parent.isDeleted
