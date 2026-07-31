@@ -203,6 +203,9 @@ Future<void> _pumpChannelPage(
   when(() => clientState.currentUserStream).thenAnswer((_) => Stream.value(currentUser));
   when(() => clientState.totalUnreadCount).thenReturn(0);
   when(() => clientState.totalUnreadCountStream).thenAnswer((_) => Stream.value(0));
+  // Keyed by cid so the header's back button can resolve the open channel's
+  // unread count and exclude it from the total.
+  when(() => clientState.channels).thenReturn({channel.cid!: channel});
 
   when(() => channel.client).thenReturn(client);
   when(() => channel.state).thenReturn(channelState);
@@ -224,6 +227,7 @@ Future<void> _pumpChannelPage(
   when(() => channelState.threadsStream).thenAnswer((_) => const Stream.empty());
   when(() => channelState.draft).thenReturn(null);
   when(() => channelState.isUpToDateStream).thenAnswer((_) => Stream.value(true));
+  when(() => channelState.unreadCount).thenReturn(0);
   when(() => channelState.unreadCountStream).thenAnswer((_) => Stream.value(0));
   when(() => channelState.readStream).thenAnswer((_) => Stream.value([]));
   when(() => channelState.currentUserRead).thenReturn(null);
