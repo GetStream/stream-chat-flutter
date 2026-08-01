@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/indicators/sending_indicator.dart';
-import 'package:stream_chat_flutter/src/utils/extensions.dart';
-import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_core_flutter/chat.dart' as core;
 
 /// Displays the sending status of a message, including attachment upload
 /// progress and sent/delivered/read indicators.
@@ -51,6 +50,14 @@ class StreamMessageSendingStatus extends StatelessWidget {
 
     final channel = StreamChannel.maybeOf(context)?.channel;
 
+    // Previews sit on the modal scrim, where neither the accent-colored read
+    // receipt nor the muted sent/delivered icon has enough contrast, so both
+    // fall back to the on-scrim color.
+    final iconColor = switch (core.StreamMessageLayout.presentationOf(context)) {
+      .preview => context.streamColorScheme.textOnAccent,
+      .standard => null,
+    };
+
     return BetterStreamBuilder<List<Read>>(
       stream: channel?.state?.readStream,
       initialData: channel?.state?.read,
@@ -65,6 +72,7 @@ class StreamMessageSendingStatus extends StatelessWidget {
           message: message,
           isMessageRead: isMessageRead,
           isMessageDelivered: isMessageDelivered,
+          color: iconColor,
         );
       },
     );
