@@ -4254,6 +4254,40 @@ void main() {
         expect(client.state.activeLiveLocations, isEmpty);
       });
 
+      test('should auto-expire an active live location once at endAt', () async {
+        final expiredEvents = <Event>[];
+        final sub = client.on(EventType.locationExpired).listen(expiredEvents.add);
+        addTearDown(sub.cancel);
+
+        // Setting an active location schedules a one-shot expiry timer.
+        client.state.activeLiveLocations = [
+          Location(
+            channelCid: 'test-channel:123',
+            messageId: 'message-123',
+            userId: userId,
+            latitude: 40.7128,
+            longitude: -74.0060,
+            createdByDeviceId: 'device-1',
+            endAt: DateTime.now().add(const Duration(milliseconds: 200)),
+          ),
+        ];
+        expect(client.state.activeLiveLocations, hasLength(1));
+
+        // Before endAt nothing is emitted and the location stays active.
+        await delay(80);
+        expect(expiredEvents, isEmpty);
+        expect(client.state.activeLiveLocations, hasLength(1));
+
+        // After endAt the timer fires once and the location is removed.
+        await delay(250);
+        expect(expiredEvents, hasLength(1));
+        expect(client.state.activeLiveLocations, isEmpty);
+
+        // The timer is one-shot: no further events are emitted.
+        await delay(200);
+        expect(expiredEvents, hasLength(1));
+      });
+
       test('should ignore location events for other users', () async {
         final location = Location(
           channelCid: 'test-channel:123',

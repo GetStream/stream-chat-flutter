@@ -22,6 +22,7 @@
 - Fixed `Channel.name`/`image`/`extraData` setters throwing after a *failed* initialization; they now only throw once the channel is successfully initialized.
 - Fixed `Channel.initialized` staying errored after a failed init; it now reflects a subsequent successful (re)initialization.
 - Fixed a `StateError` (`Cannot add new events after calling close`) thrown when the client is disposed while a reconnect recovery is still in flight.
+- Fixed live location expiry emitting repeated `location.expired` events for the same expired location.
 
 ## 10.2.0
 
