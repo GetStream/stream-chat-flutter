@@ -59,24 +59,52 @@ class _ThreadPageState extends State<ThreadPage> {
       body: Column(
         children: <Widget>[
           Expanded(
-            child: StreamMessageListView(
-              parentMessage: widget.parent,
-              initialScrollIndex: widget.initialScrollIndex,
-              initialAlignment: widget.initialAlignment,
-              onReplyTap: _reply,
-              onEditMessageTap: _editMessage,
-              config: const StreamMessageListViewConfiguration(
-                swipeToReply: true,
-                showScrollToBottom: false,
-                highlightInitialMessage: true,
-              ),
-              onViewInChannelTap: widget.onViewInChannelTap,
+            child: Stack(
+              children: <Widget>[
+                StreamMessageListView(
+                  parentMessage: widget.parent,
+                  initialScrollIndex: widget.initialScrollIndex,
+                  initialAlignment: widget.initialAlignment,
+                  onReplyTap: _reply,
+                  onEditMessageTap: _editMessage,
+                  config: const StreamMessageListViewConfiguration(
+                    swipeToReply: true,
+                    showScrollToBottom: false,
+                    highlightInitialMessage: true,
+                  ),
+                  onViewInChannelTap: widget.onViewInChannelTap,
+                ),
+                Positioned(
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  child: Container(
+                    alignment: Alignment.centerLeft,
+                    color: context.streamColorScheme.backgroundApp.withValues(alpha: .9),
+                    child: StreamTypingIndicator(
+                      parentId: widget.parent.id,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      style: context.streamTextTheme.captionDefault.copyWith(
+                        color: context.streamColorScheme.textSecondary,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
           if (widget.parent.type != 'deleted')
             StreamMessageComposer(
               focusNode: _focusNode,
               messageComposerController: _messageComposerController,
+              // See the channel page: an unhandled composer error would escape
+              // as an unhandled async error.
+              onError: (error, stackTrace) {
+                debugPrint('[composer:thread] $error; $stackTrace');
+              },
               enableVoiceRecording: true,
             ),
         ],
