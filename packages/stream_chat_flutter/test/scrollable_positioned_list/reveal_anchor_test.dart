@@ -20,6 +20,9 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_chat_flutter/scrollable_positioned_list/scrollable_positioned_list.dart';
+// Not exported from the barrel file; imported directly to assert which
+// viewport implementation `shrinkWrap: true` actually builds.
+import 'package:stream_chat_flutter/scrollable_positioned_list/src/wrapping.dart';
 
 const _viewportHeight = 600.0;
 const _viewportWidth = 400.0;
@@ -36,6 +39,7 @@ void main() {
     WidgetTester tester, {
     required bool reverse,
     bool selectableItems = false,
+    bool shrinkWrap = false,
   }) async {
     tester.view.devicePixelRatio = 1.0;
     tester.view.physicalSize = const Size(_viewportWidth, _viewportHeight);
@@ -49,6 +53,7 @@ void main() {
           body: ScrollablePositionedList.builder(
             itemCount: _itemCount,
             reverse: reverse,
+            shrinkWrap: shrinkWrap,
             itemScrollController: controller,
             itemBuilder: (context, i) => SizedBox(
               key: ValueKey('item-$i'),
@@ -141,25 +146,87 @@ void main() {
     });
   }
 
+  // `shrinkWrap: true` swaps `UnboundedViewport` for
+  // `CustomShrinkWrappingViewport`, so the reveal correction runs through
+  // `CustomRenderShrinkWrappingViewport.getOffsetToReveal` — a separate
+  // implementation from the one the groups above cover.
+  group('shrinkWrap', () {
+    testWidgets('the shrink-wrapping viewport is the one under test', (tester) async {
+      await pump(tester, reverse: true, shrinkWrap: true);
+
+      expect(
+        tester.allRenderObjects.whereType<CustomRenderShrinkWrappingViewport>(),
+        isNotEmpty,
+        reason: 'shrinkWrap: true must build the shrink-wrapping viewport',
+      );
+    });
+
+    for (final reverse in [false, true]) {
+      testWidgets('ensureVisible moves by exactly the on-screen offset (reverse: $reverse)', (tester) async {
+        await pump(tester, reverse: reverse, shrinkWrap: true);
+
+        final target = itemInsideViewport(tester, reverse: reverse);
+        final expectedDelta = leadingEdgeOf(tester, target, reverse: reverse);
+        final before = positionOf(tester).pixels;
+
+        await Scrollable.ensureVisible(tester.element(target));
+        await tester.pumpAndSettle();
+
+        expect(
+          positionOf(tester).pixels - before,
+          closeTo(expectedDelta, 1),
+          reason:
+              'reveal must not add anchor * mainAxisExtent '
+              '(${_anchor * _viewportHeight}px) to the scroll offset',
+        );
+        expect(
+          leadingEdgeOf(tester, target, reverse: reverse),
+          closeTo(0, 1),
+          reason: 'the revealed item should sit at the leading edge',
+        );
+      });
+
+      testWidgets('a second ensureVisible on the same item is a no-op (reverse: $reverse)', (tester) async {
+        await pump(tester, reverse: reverse, shrinkWrap: true);
+
+        final target = itemInsideViewport(tester, reverse: reverse);
+        await Scrollable.ensureVisible(tester.element(target));
+        await tester.pumpAndSettle();
+
+        final settled = positionOf(tester).pixels;
+        await Scrollable.ensureVisible(tester.element(target));
+        await tester.pumpAndSettle();
+
+        expect(positionOf(tester).pixels, closeTo(settled, 1));
+      });
+    }
+  });
+
   testWidgets('selecting text in a message does not scroll the list', (tester) async {
+    // Reset inside the body rather than via `addTearDown`: `flutter_test`
+    // asserts the foundation debug vars are unset at the end of the test
+    // body, which runs before any tear-down.
     debugDefaultTargetPlatformOverride = TargetPlatform.macOS;
-    await pump(tester, reverse: true, selectableItems: true);
+    try {
+      await pump(tester, reverse: true, selectableItems: true);
 
-    final target = itemInsideViewport(tester, reverse: true);
-    final before = positionOf(tester).pixels;
+      final target = itemInsideViewport(tester, reverse: true);
+      final before = positionOf(tester).pixels;
 
-    // Drag-select across the text. On macOS this reports
-    // `SelectionChangedCause.drag`, which makes `EditableText` call
-    // `bringIntoView` -> `RenderEditable.showOnScreen`.
-    final start = tester.getCenter(target) - const Offset(30, 0);
-    final gesture = await tester.startGesture(start, kind: PointerDeviceKind.mouse);
-    await tester.pump(const Duration(milliseconds: 50));
-    await gesture.moveTo(start + const Offset(50, 0));
-    await tester.pumpAndSettle();
-    await gesture.up();
-    await tester.pumpAndSettle();
+      // Drag-select across the text. On macOS this reports
+      // `SelectionChangedCause.drag`, which makes `EditableText` call
+      // `bringIntoView` -> `RenderEditable.showOnScreen`.
+      final start = tester.getCenter(target) - const Offset(30, 0);
+      final gesture = await tester.startGesture(start, kind: PointerDeviceKind.mouse);
+      await tester.pump(const Duration(milliseconds: 50));
+      await gesture.moveTo(start + const Offset(50, 0));
+      await tester.pumpAndSettle();
+      await gesture.up();
+      await tester.pumpAndSettle();
 
-    expect(positionOf(tester).pixels, closeTo(before, 1));
-    debugDefaultTargetPlatformOverride = null;
+      expect(positionOf(tester).pixels, closeTo(before, 1));
+    } finally {
+      debugDefaultTargetPlatformOverride = null;
+    }
   });
 }
