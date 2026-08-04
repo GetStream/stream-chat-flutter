@@ -4,19 +4,6 @@ import 'package:stream_chat_localizations/stream_chat_localizations.dart';
 import 'package:streaming_shared_preferences/streaming_shared_preferences.dart';
 
 // ---------------------------------------------------------------------------
-// AppStyle enum
-// ---------------------------------------------------------------------------
-
-/// The visual style for the app's UI chrome (app bar, composer, bottom bar).
-enum SampleAppStyle {
-  /// Standard docked composer with solid app bar and bottom bar.
-  regular,
-
-  /// Floating composer with translucent overlapping chrome.
-  floating,
-}
-
-// ---------------------------------------------------------------------------
 // Preference keys
 // ---------------------------------------------------------------------------
 
@@ -53,7 +40,7 @@ class SampleAppConfigData {
   factory SampleAppConfigData({
     Locale? locale,
     ThemeMode themeMode = .system,
-    SampleAppStyle appStyle = .regular,
+    StreamAppStyle appStyle = .regular,
     bool forceRtl = false,
     bool enableDynamicColor = false,
     bool enableReminderActions = false,
@@ -102,10 +89,10 @@ class SampleAppConfigData {
   /// Loads config from [StreamingSharedPreferences], falling back to defaults.
   factory SampleAppConfigData.fromPreferences(StreamingSharedPreferences prefs) {
     final localeStr = prefs.getString(_kLocale, defaultValue: '').getValue();
-    final appStyleIndex = prefs.getInt(_kAppStyle, defaultValue: SampleAppStyle.regular.index).getValue();
+    final appStyleIndex = prefs.getInt(_kAppStyle, defaultValue: StreamAppStyle.regular.index).getValue();
     return SampleAppConfigData.raw(
       themeMode: ThemeMode.values[prefs.getInt(_kThemeMode, defaultValue: ThemeMode.system.index).getValue()],
-      appStyle: SampleAppStyle.values[appStyleIndex.clamp(0, SampleAppStyle.values.length - 1)],
+      appStyle: StreamAppStyle.values[appStyleIndex.clamp(0, StreamAppStyle.values.length - 1)],
       locale: localeStr.isEmpty ? null : Locale(localeStr),
       forceRtl: prefs.getBool(_kForceRtl, defaultValue: false).getValue(),
       enableDynamicColor: prefs.getBool(_kEnableDynamicColor, defaultValue: false).getValue(),
@@ -126,7 +113,7 @@ class SampleAppConfigData {
   final ThemeMode themeMode;
 
   /// The visual style for the app chrome (app bar, composer, bottom bar).
-  final SampleAppStyle appStyle;
+  final StreamAppStyle appStyle;
 
   /// The locale override for the app. When null, the system locale is used.
   final Locale? locale;
@@ -172,7 +159,7 @@ class SampleAppConfigData {
   /// pass explicitly as `null` to reset to default/system.
   SampleAppConfigData copyWith({
     ThemeMode? themeMode,
-    SampleAppStyle? appStyle,
+    StreamAppStyle? appStyle,
     Object? locale = _sentinel,
     bool? forceRtl,
     bool? enableDynamicColor,

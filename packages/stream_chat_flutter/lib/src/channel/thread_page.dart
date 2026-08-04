@@ -5,7 +5,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 ///
 /// Wires up a [StreamThreadHeader], a [StreamMessageListView] scoped to [parent]
 /// and a [StreamMessageComposer] that addresses new messages to the thread, laid
-/// out floating or docked according to the ambient [StreamAppStyle]. Expects a
+/// out floating or regular according to the ambient [StreamAppStyle]. Expects a
 /// [StreamChannel] ancestor.
 ///
 /// The composer is omitted when [parent] is deleted.

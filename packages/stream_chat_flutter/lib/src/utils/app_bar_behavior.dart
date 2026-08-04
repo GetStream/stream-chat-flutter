@@ -6,8 +6,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// Precedence, highest first:
 ///
 /// 1. [override] — a widget-local value, such as
-///    [StreamAppBarStyle.behavior] passed to a header or
-///    [StreamBackButton.appBarBehavior].
+///    [StreamAppBarStyle.behavior] passed to a header.
 /// 2. [StreamAppBarStyle.behavior] from the ambient [StreamAppBarTheme].
 /// 3. The ambient [StreamAppStyle] — [StreamAppStyle.floating] maps to
 ///    [StreamAppBarBehavior.floating], [StreamAppStyle.regular] to

@@ -4,7 +4,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// A channel page with optional floating composer support.
 ///
 /// Wires up a [StreamChannelHeader], a [StreamMessageListView] and a
-/// [StreamMessageComposer], laid out floating or docked according to the ambient
+/// [StreamMessageComposer], laid out floating or regular according to the ambient
 /// [StreamAppStyle]. Expects a [StreamChannel] ancestor.
 ///
 /// ## Customizing this page
@@ -154,7 +154,7 @@ class _StreamChannelPageState extends State<StreamChannelPage> {
 ///
 /// Reads [StreamScaffoldInsets] to provide correct [topPadding] and
 /// [bottomPadding] to [StreamMessageListView], and positions the typing
-/// indicator just above the composer (floating or docked) using the same
+/// indicator just above the composer (floating or regular) using the same
 /// inset values.
 class _ChannelPageBody extends StatelessWidget {
   const _ChannelPageBody({

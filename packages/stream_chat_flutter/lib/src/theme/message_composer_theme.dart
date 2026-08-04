@@ -4,31 +4,35 @@ import 'package:theme_extensions_builder_annotation/theme_extensions_builder_ann
 
 part 'message_composer_theme.g.theme.dart';
 
-/// The placement of the message composer — floating above the keyboard or
-/// docked at the bottom edge of the screen.
+/// The message composer's visual/layout behavior — floating above the keyboard
+/// or docked at the bottom edge of the screen.
+///
+/// Mirrors [StreamAppBarBehavior] and [StreamBottomAppBarBehavior] so every
+/// component names its placement the same way.
 ///
 /// When null on [StreamMessageComposerThemeData], the ambient [StreamAppStyle]
 /// is used as a fallback — [StreamAppStyle.floating] maps to [floating] and
-/// [StreamAppStyle.regular] maps to [docked].
+/// [StreamAppStyle.regular] maps to [regular].
 ///
 /// See also:
 ///
-///  * [StreamMessageComposerThemeData.location], which carries this
+///  * [StreamMessageComposerThemeData.behavior], which carries this
 ///    value.
 ///  * [StreamAppStyle], the global app-wide style that acts as fallback.
-enum StreamComposerLocation {
+enum StreamMessageComposerBehavior {
+  /// The composer sits within the layout flow, docked at the bottom edge of
+  /// the screen.
+  regular,
+
   /// The composer floats above the on-screen keyboard with appropriate safe
   /// area padding.
   floating,
-
-  /// The composer is docked at the bottom edge of the screen.
-  docked,
 }
 
 /// Applies a message composer theme to descendant composer widgets.
 ///
 /// Wrap a subtree with [StreamMessageComposerTheme] to override the composer
-/// location. Access the merged theme using [StreamMessageComposerTheme.of].
+/// behavior. Access the merged theme using [StreamMessageComposerTheme.of].
 ///
 /// {@tool snippet}
 ///
@@ -37,7 +41,7 @@ enum StreamComposerLocation {
 /// ```dart
 /// StreamMessageComposerTheme(
 ///   data: StreamMessageComposerThemeData(
-///     location: StreamComposerLocation.floating,
+///     behavior: StreamMessageComposerBehavior.floating,
 ///   ),
 ///   child: StreamChannel(
 ///     channel: channel,
@@ -50,7 +54,7 @@ enum StreamComposerLocation {
 /// See also:
 ///
 ///  * [StreamMessageComposerThemeData], which describes the theme data.
-///  * [StreamMessageComposerThemeData.location], the setting it holds.
+///  * [StreamMessageComposerThemeData.behavior], the setting it holds.
 class StreamMessageComposerTheme extends InheritedTheme {
   /// Creates a message composer theme that controls descendant composers.
   const StreamMessageComposerTheme({
@@ -69,7 +73,7 @@ class StreamMessageComposerTheme extends InheritedTheme {
   /// precedence over global values from [StreamChatTheme.of].
   ///
   /// This allows partial overrides — for example, overriding only
-  /// [StreamMessageComposerThemeData.location] in a subtree while
+  /// [StreamMessageComposerThemeData.behavior] in a subtree while
   /// inheriting other properties from the global theme.
   static StreamMessageComposerThemeData of(BuildContext context) {
     final localTheme = context.dependOnInheritedWidgetOfExactType<StreamMessageComposerTheme>();
@@ -95,7 +99,7 @@ class StreamMessageComposerTheme extends InheritedTheme {
 /// ```dart
 /// StreamChatThemeData(
 ///   messageComposerTheme: StreamMessageComposerThemeData(
-///     location: StreamComposerLocation.floating,
+///     behavior: StreamMessageComposerBehavior.floating,
 ///   ),
 /// )
 /// ```
@@ -103,23 +107,23 @@ class StreamMessageComposerTheme extends InheritedTheme {
 ///
 /// See also:
 ///
-///  * [StreamComposerLocation], the enum that describes the placement options.
+///  * [StreamMessageComposerBehavior], the enum that describes the placement options.
 ///  * [StreamMessageComposerTheme], for overriding the theme in a subtree.
 @themeGen
 @immutable
 class StreamMessageComposerThemeData with _$StreamMessageComposerThemeData {
   /// Creates message composer theme data with optional overrides.
-  const StreamMessageComposerThemeData({this.location});
+  const StreamMessageComposerThemeData({this.behavior});
 
-  /// The placement of the message composer.
+  /// The visual/layout behavior of the message composer.
   ///
   /// When null the value falls back to the ambient [StreamAppStyle]:
-  /// [StreamAppStyle.floating] → [StreamComposerLocation.floating],
-  /// [StreamAppStyle.regular] → [StreamComposerLocation.docked].
+  /// [StreamAppStyle.floating] → [StreamMessageComposerBehavior.floating],
+  /// [StreamAppStyle.regular] → [StreamMessageComposerBehavior.regular].
   ///
   /// Set this to override the global style for the composer only, without
   /// affecting other components.
-  final StreamComposerLocation? location;
+  final StreamMessageComposerBehavior? behavior;
 
   /// Linearly interpolate between two [StreamMessageComposerThemeData] objects.
   static StreamMessageComposerThemeData? lerp(

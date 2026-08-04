@@ -101,7 +101,7 @@ class StreamMessageComposer extends StatelessWidget {
     TextCapitalization textCapitalization = TextCapitalization.sentences,
     bool autofocus = false,
     bool autoCorrect = true,
-    StreamComposerLocation? location,
+    StreamMessageComposerBehavior? behavior,
   }) : props = .new(
          onMessageSent: onMessageSent,
          preMessageSending: preMessageSending,
@@ -139,7 +139,7 @@ class StreamMessageComposer extends StatelessWidget {
          textCapitalization: textCapitalization,
          autofocus: autofocus,
          autoCorrect: autoCorrect,
-         location: location,
+         behavior: behavior,
        );
 
   /// Creates a [StreamMessageComposer] from a pre-built [MessageComposerProps].
@@ -201,7 +201,7 @@ class MessageComposerProps {
     this.textCapitalization = TextCapitalization.sentences,
     this.autofocus = false,
     this.autoCorrect = true,
-    this.location,
+    this.behavior,
   });
 
   /// Function called after sending the message.
@@ -411,8 +411,8 @@ class MessageComposerProps {
   /// Defaults to true.
   final bool autoCorrect;
 
-  /// The location of the message composer.
-  final StreamComposerLocation? location;
+  /// The behavior of the message composer.
+  final StreamMessageComposerBehavior? behavior;
 
   /// Returns a copy of this [MessageComposerProps] with the given fields
   /// replaced with new values.
@@ -452,7 +452,7 @@ class MessageComposerProps {
     TextCapitalization? textCapitalization,
     bool? autofocus,
     bool? autoCorrect,
-    StreamComposerLocation? location,
+    StreamMessageComposerBehavior? behavior,
   }) {
     return MessageComposerProps(
       onMessageSent: onMessageSent ?? this.onMessageSent,
@@ -490,7 +490,7 @@ class MessageComposerProps {
       textCapitalization: textCapitalization ?? this.textCapitalization,
       autofocus: autofocus ?? this.autofocus,
       autoCorrect: autoCorrect ?? this.autoCorrect,
-      location: location ?? this.location,
+      behavior: behavior ?? this.behavior,
     );
   }
 
@@ -834,7 +834,7 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     final safeAreaEnabled = widget.props.enableSafeArea ?? true;
     final viewPadding = MediaQuery.paddingOf(context);
 
-    final effectiveComposerLocation = _resolveLocation(context);
+    final effectiveComposerBehavior = _resolveBehavior(context);
 
     // The body behind the pill (and picker) — animated safe-area insets.
     final composerBody = AnimatedBuilder(
@@ -856,7 +856,7 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
         // the safe-area zone. Painting it as a single layer is what keeps it
         // seamless — abutting fills would each be antialiased at a fractional
         // device-pixel boundary and let a hairline of the message list through.
-        if (effectiveComposerLocation == .floating) {
+        if (effectiveComposerBehavior == .floating) {
           // At rest the backdrop fades into `backgroundElevation0`, matching the
           // floating app bar and bottom nav bar. It rises to
           // `backgroundElevation1` as the picker opens, so the picker panel —
@@ -891,9 +891,9 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
 
     final composer = Material(
       color: Colors.transparent,
-      child: switch (effectiveComposerLocation) {
+      child: switch (effectiveComposerBehavior) {
         .floating => composerBody,
-        .docked => DecoratedBox(
+        .regular => DecoratedBox(
           decoration: BoxDecoration(color: colorScheme.backgroundElevation1),
           child: composerBody,
         ),
@@ -990,13 +990,13 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
   }
 
   /// The composer's effective placement: the explicit
-  /// [MessageComposerProps.location], then
-  /// [StreamMessageComposerThemeData.location], then the ambient
+  /// [MessageComposerProps.behavior], then
+  /// [StreamMessageComposerThemeData.behavior], then the ambient
   /// [StreamAppStyle].
-  StreamComposerLocation _resolveLocation(BuildContext context) {
-    return widget.props.location ??
-        StreamMessageComposerTheme.of(context).location ??
-        (StreamTheme.of(context).appStyle.isFloating ? .floating : .docked);
+  StreamMessageComposerBehavior _resolveBehavior(BuildContext context) {
+    return widget.props.behavior ??
+        StreamMessageComposerTheme.of(context).behavior ??
+        (StreamTheme.of(context).appStyle.isFloating ? .floating : .regular);
   }
 
   Widget _buildMessageInput(
@@ -1005,7 +1005,7 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     FocusNode focusNode,
   ) {
     final currentUserId = StreamChat.of(context).currentUser?.id;
-    final isFloating = _resolveLocation(context) == .floating;
+    final isFloating = _resolveBehavior(context) == .floating;
 
     return StreamMessageValueListenableBuilder(
       valueListenable: controller,
@@ -1058,17 +1058,7 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
           },
           child: Column(
             mainAxisSize: MainAxisSize.min,
-            // Reversed paint order so the pill (and its shadow) paints on top
-            // of the picker panel. VerticalDirection.up keeps the pill visually
-            // above the picker while making it the last-painted child.
-            verticalDirection: VerticalDirection.up,
             children: [
-              SizeTransition(
-                sizeFactor: _pickerAnimation,
-                // ignore: deprecated_member_use, alternative is only available since Flutter 3.44
-                axisAlignment: -1,
-                child: _buildInlineAttachmentPicker(context),
-              ),
               // Both the pill and the picker sit on one backdrop painted behind
               // the whole composer. Reporting the pill's height keeps that
               // backdrop's fade confined to the pill, so the fade grows with the
@@ -1077,6 +1067,12 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
                 _ReportHeight(onHeightChanged: (height) => _pillHeight.value = height, child: pill)
               else
                 pill,
+              SizeTransition(
+                sizeFactor: _pickerAnimation,
+                // ignore: deprecated_member_use, alternative is only available since Flutter 3.44
+                axisAlignment: -1,
+                child: _buildInlineAttachmentPicker(context),
+              ),
             ],
           ),
         );
@@ -1095,31 +1091,31 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     };
     final useSystemPicker = widget.props.useSystemAttachmentPicker || isWebOrDesktop;
 
-    final child = useSystemPicker
-        ? systemAttachmentPickerBuilder(
-            context: context,
-            controller: _pickerController!,
-            allowedTypes: allowedTypes,
-            pollConfig: widget.props.pollConfig,
-            optionsBuilder: widget.props.attachmentPickerOptionsBuilder,
-            onError: _onPickerError,
-            onPollCreated: _onPollCreated,
-          )
-        : tabbedAttachmentPickerBuilder(
-            context: context,
-            controller: _pickerController!,
-            allowedTypes: allowedTypes,
-            pollConfig: widget.props.pollConfig,
-            optionsBuilder: widget.props.attachmentPickerOptionsBuilder,
-            onError: _onPickerError,
-            onPollCreated: _onPollCreated,
-            onCommandSelected: _onCommandSelected,
-            commandValidator: _effectiveController.validateCommand,
-          );
+    // Neither branch paints a background: when floating, the panel sits on the
+    // composer-wide backdrop painted by _FloatingComposerBackdropPainter.
+    if (useSystemPicker) {
+      return systemAttachmentPickerBuilder(
+        context: context,
+        controller: _pickerController!,
+        allowedTypes: allowedTypes,
+        pollConfig: widget.props.pollConfig,
+        optionsBuilder: widget.props.attachmentPickerOptionsBuilder,
+        onError: _onPickerError,
+        onPollCreated: _onPollCreated,
+      );
+    }
 
-    // No background here: when floating, the panel sits on the composer-wide
-    // backdrop painted by _FloatingComposerBackdropPainter.
-    return child;
+    return tabbedAttachmentPickerBuilder(
+      context: context,
+      controller: _pickerController!,
+      allowedTypes: allowedTypes,
+      pollConfig: widget.props.pollConfig,
+      optionsBuilder: widget.props.attachmentPickerOptionsBuilder,
+      onError: _onPickerError,
+      onPollCreated: _onPollCreated,
+      onCommandSelected: _onCommandSelected,
+      commandValidator: _effectiveController.validateCommand,
+    );
   }
 
   // Validates [command]: on disabled, surfaces the "unavailable" snackbar and

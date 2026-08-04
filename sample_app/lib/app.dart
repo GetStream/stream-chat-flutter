@@ -179,11 +179,7 @@ class _StreamChatSampleAppState extends State<StreamChatSampleApp>
             child: Builder(
               builder: (context) {
                 final config = context.sampleAppConfig;
-
-                final appStyle = switch (config.appStyle) {
-                  SampleAppStyle.regular => StreamAppStyle.regular,
-                  SampleAppStyle.floating => StreamAppStyle.floating,
-                };
+                final appStyle = config.appStyle;
 
                 return DynamicColorBuilder(
                   builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {

@@ -6,97 +6,100 @@ import '../mocks.dart';
 
 void main() {
   test('copyWith with no arguments returns an equal MessageComposerThemeData', () {
-    const themeData = StreamMessageComposerThemeData(location: StreamComposerLocation.floating);
+    const themeData = StreamMessageComposerThemeData(behavior: StreamMessageComposerBehavior.floating);
 
     expect(themeData.copyWith(), themeData);
   });
 
   test('copyWith with no arguments preserves the hashCode', () {
-    const themeData = StreamMessageComposerThemeData(location: StreamComposerLocation.floating);
+    const themeData = StreamMessageComposerThemeData(behavior: StreamMessageComposerBehavior.floating);
 
     expect(themeData.copyWith().hashCode, themeData.hashCode);
   });
 
-  test('copyWith overrides the location', () {
-    const docked = StreamMessageComposerThemeData(location: StreamComposerLocation.docked);
+  test('copyWith overrides the behavior', () {
+    const regular = StreamMessageComposerThemeData(behavior: StreamMessageComposerBehavior.regular);
 
-    expect(docked.copyWith(location: StreamComposerLocation.floating).location, StreamComposerLocation.floating);
-  });
-
-  test('MessageComposerThemeData instances with different locations are not equal', () {
     expect(
-      const StreamMessageComposerThemeData(location: StreamComposerLocation.docked),
-      isNot(const StreamMessageComposerThemeData(location: StreamComposerLocation.floating)),
+      regular.copyWith(behavior: StreamMessageComposerBehavior.floating).behavior,
+      StreamMessageComposerBehavior.floating,
     );
   });
 
-  test('lerp at t = 0 resolves to the start location', () {
+  test('MessageComposerThemeData instances with different behaviors are not equal', () {
     expect(
-      StreamMessageComposerThemeData.lerp(_dockedTheme, _floatingTheme, 0)?.location,
-      StreamComposerLocation.docked,
+      const StreamMessageComposerThemeData(behavior: StreamMessageComposerBehavior.regular),
+      isNot(const StreamMessageComposerThemeData(behavior: StreamMessageComposerBehavior.floating)),
     );
   });
 
-  test('lerp below the halfway point resolves to the start location', () {
+  test('lerp at t = 0 resolves to the start behavior', () {
     expect(
-      StreamMessageComposerThemeData.lerp(_dockedTheme, _floatingTheme, 0.49)?.location,
-      StreamComposerLocation.docked,
+      StreamMessageComposerThemeData.lerp(_regularTheme, _floatingTheme, 0)?.behavior,
+      StreamMessageComposerBehavior.regular,
     );
   });
 
-  test('lerp at or past the halfway point resolves to the end location', () {
+  test('lerp below the halfway point resolves to the start behavior', () {
     expect(
-      StreamMessageComposerThemeData.lerp(_dockedTheme, _floatingTheme, 0.5)?.location,
-      StreamComposerLocation.floating,
+      StreamMessageComposerThemeData.lerp(_regularTheme, _floatingTheme, 0.49)?.behavior,
+      StreamMessageComposerBehavior.regular,
     );
   });
 
-  test('lerp at t = 1 resolves to the end location', () {
-    expect(StreamMessageComposerThemeData.lerp(_dockedTheme, _floatingTheme, 1), _floatingTheme);
+  test('lerp at or past the halfway point resolves to the end behavior', () {
+    expect(
+      StreamMessageComposerThemeData.lerp(_regularTheme, _floatingTheme, 0.5)?.behavior,
+      StreamMessageComposerBehavior.floating,
+    );
   });
 
-  test('merge with null keeps the original location', () {
-    expect(_dockedTheme.merge(null), _dockedTheme);
+  test('lerp at t = 1 resolves to the end behavior', () {
+    expect(StreamMessageComposerThemeData.lerp(_regularTheme, _floatingTheme, 1), _floatingTheme);
   });
 
-  test('merge overrides the location with the other theme', () {
-    expect(_dockedTheme.merge(_floatingTheme), _floatingTheme);
+  test('merge with null keeps the original behavior', () {
+    expect(_regularTheme.merge(null), _regularTheme);
   });
 
-  test('merge with an empty theme keeps the original location', () {
+  test('merge overrides the behavior with the other theme', () {
+    expect(_regularTheme.merge(_floatingTheme), _floatingTheme);
+  });
+
+  test('merge with an empty theme keeps the original behavior', () {
     expect(_floatingTheme.merge(const StreamMessageComposerThemeData()), _floatingTheme);
   });
 
-  testWidgets('of returns a null location when no theme is configured', (tester) async {
+  testWidgets('of returns a null behavior when no theme is configured', (tester) async {
     final context = await _pumpAndCaptureContext(tester);
 
-    expect(StreamMessageComposerTheme.of(context).location, isNull);
+    expect(StreamMessageComposerTheme.of(context).behavior, isNull);
   });
 
-  testWidgets('of returns the global theme location when no local theme is present', (tester) async {
+  testWidgets('of returns the global theme behavior when no local theme is present', (tester) async {
     final context = await _pumpAndCaptureContext(tester, globalTheme: _floatingTheme);
 
-    expect(StreamMessageComposerTheme.of(context).location, StreamComposerLocation.floating);
+    expect(StreamMessageComposerTheme.of(context).behavior, StreamMessageComposerBehavior.floating);
   });
 
   testWidgets('of merges the local theme over the global theme', (tester) async {
     final context = await _pumpAndCaptureContext(
       tester,
-      globalTheme: _dockedTheme,
+      globalTheme: _regularTheme,
       localTheme: _floatingTheme,
     );
 
-    expect(StreamMessageComposerTheme.of(context).location, StreamComposerLocation.floating);
+    expect(StreamMessageComposerTheme.of(context).behavior, StreamMessageComposerBehavior.floating);
   });
 
-  testWidgets('of falls back to the global theme when the local theme sets no location', (tester) async {
+  testWidgets('of falls back to the global theme when the local theme sets no behavior', (tester) async {
     final context = await _pumpAndCaptureContext(
       tester,
       globalTheme: _floatingTheme,
       localTheme: const StreamMessageComposerThemeData(),
     );
 
-    expect(StreamMessageComposerTheme.of(context).location, StreamComposerLocation.floating);
+    expect(StreamMessageComposerTheme.of(context).behavior, StreamMessageComposerBehavior.floating);
   });
 
   testWidgets('wrap re-establishes the theme in a detached subtree', (tester) async {
@@ -123,26 +126,26 @@ void main() {
       ),
     );
 
-    expect(StreamMessageComposerTheme.of(capturedContext).location, StreamComposerLocation.floating);
+    expect(StreamMessageComposerTheme.of(capturedContext).behavior, StreamMessageComposerBehavior.floating);
   });
 
   testWidgets('updateShouldNotify is true when the data changes', (tester) async {
-    const oldWidget = StreamMessageComposerTheme(data: _dockedTheme, child: SizedBox.shrink());
+    const oldWidget = StreamMessageComposerTheme(data: _regularTheme, child: SizedBox.shrink());
     const newWidget = StreamMessageComposerTheme(data: _floatingTheme, child: SizedBox.shrink());
 
     expect(newWidget.updateShouldNotify(oldWidget), isTrue);
   });
 
   testWidgets('updateShouldNotify is false when the data is unchanged', (tester) async {
-    const oldWidget = StreamMessageComposerTheme(data: _dockedTheme, child: SizedBox.shrink());
-    const newWidget = StreamMessageComposerTheme(data: _dockedTheme, child: SizedBox.shrink());
+    const oldWidget = StreamMessageComposerTheme(data: _regularTheme, child: SizedBox.shrink());
+    const newWidget = StreamMessageComposerTheme(data: _regularTheme, child: SizedBox.shrink());
 
     expect(newWidget.updateShouldNotify(oldWidget), isFalse);
   });
 }
 
-const _dockedTheme = StreamMessageComposerThemeData(location: StreamComposerLocation.docked);
-const _floatingTheme = StreamMessageComposerThemeData(location: StreamComposerLocation.floating);
+const _regularTheme = StreamMessageComposerThemeData(behavior: StreamMessageComposerBehavior.regular);
+const _floatingTheme = StreamMessageComposerThemeData(behavior: StreamMessageComposerBehavior.floating);
 
 /// Pumps a [StreamChat] configured with [globalTheme], optionally wrapped in a
 /// local [StreamMessageComposerTheme] carrying [localTheme], and returns a

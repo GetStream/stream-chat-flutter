@@ -9,51 +9,51 @@ import '../fakes.dart';
 import '../mocks.dart';
 
 void main() {
-  testWidgets('composer is docked when the app style is regular', (tester) async {
+  testWidgets('composer is regular when the app style is regular', (tester) async {
     await _pumpComposer(tester, appStyle: StreamAppStyle.regular);
 
-    expect(_resolvedLocation(tester), StreamComposerLocation.docked);
+    expect(_resolvedBehavior(tester), StreamMessageComposerBehavior.regular);
   });
 
   testWidgets('composer floats when the app style is floating', (tester) async {
     await _pumpComposer(tester, appStyle: StreamAppStyle.floating);
 
-    expect(_resolvedLocation(tester), StreamComposerLocation.floating);
+    expect(_resolvedBehavior(tester), StreamMessageComposerBehavior.floating);
   });
 
   testWidgets('the global composer theme overrides the app style', (tester) async {
     await _pumpComposer(
       tester,
       appStyle: StreamAppStyle.regular,
-      globalTheme: const StreamMessageComposerThemeData(location: StreamComposerLocation.floating),
+      globalTheme: const StreamMessageComposerThemeData(behavior: StreamMessageComposerBehavior.floating),
     );
 
-    expect(_resolvedLocation(tester), StreamComposerLocation.floating);
+    expect(_resolvedBehavior(tester), StreamMessageComposerBehavior.floating);
   });
 
   testWidgets('a local composer theme overrides the global theme', (tester) async {
     await _pumpComposer(
       tester,
       appStyle: StreamAppStyle.floating,
-      globalTheme: const StreamMessageComposerThemeData(location: StreamComposerLocation.floating),
-      localTheme: const StreamMessageComposerThemeData(location: StreamComposerLocation.docked),
+      globalTheme: const StreamMessageComposerThemeData(behavior: StreamMessageComposerBehavior.floating),
+      localTheme: const StreamMessageComposerThemeData(behavior: StreamMessageComposerBehavior.regular),
     );
 
-    expect(_resolvedLocation(tester), StreamComposerLocation.docked);
+    expect(_resolvedBehavior(tester), StreamMessageComposerBehavior.regular);
   });
 
-  testWidgets('the location property overrides both the theme and the app style', (tester) async {
+  testWidgets('the behavior property overrides both the theme and the app style', (tester) async {
     await _pumpComposer(
       tester,
       appStyle: StreamAppStyle.floating,
-      globalTheme: const StreamMessageComposerThemeData(location: StreamComposerLocation.floating),
-      location: StreamComposerLocation.docked,
+      globalTheme: const StreamMessageComposerThemeData(behavior: StreamMessageComposerBehavior.floating),
+      behavior: StreamMessageComposerBehavior.regular,
     );
 
-    expect(_resolvedLocation(tester), StreamComposerLocation.docked);
+    expect(_resolvedBehavior(tester), StreamMessageComposerBehavior.regular);
   });
 
-  testWidgets('the docked composer fills its background with the elevation-1 color', (tester) async {
+  testWidgets('the regular composer fills its background with the elevation-1 color', (tester) async {
     await _pumpComposer(tester, appStyle: StreamAppStyle.regular);
 
     expect(_backgroundFillFinder(tester), findsOneWidget);
@@ -100,13 +100,13 @@ void main() {
   });
 }
 
-/// The location the composer resolved, read back from the input it built.
-StreamComposerLocation _resolvedLocation(WidgetTester tester) {
+/// The behavior the composer resolved, read back from the input it built.
+StreamMessageComposerBehavior _resolvedBehavior(WidgetTester tester) {
   final input = tester.widget<StreamChatMessageInput>(find.byType(StreamChatMessageInput));
-  return input.isFloating ? StreamComposerLocation.floating : StreamComposerLocation.docked;
+  return input.isFloating ? StreamMessageComposerBehavior.floating : StreamMessageComposerBehavior.regular;
 }
 
-/// Finds the opaque background fill the docked composer paints behind itself.
+/// Finds the opaque background fill the regular composer paints behind itself.
 Finder _backgroundFillFinder(WidgetTester tester) {
   final context = tester.element(find.byType(StreamChatMessageInput));
   final fill = BoxDecoration(color: context.streamColorScheme.backgroundElevation1);
@@ -135,7 +135,7 @@ Future<void> _pumpComposer(
   required StreamAppStyle appStyle,
   StreamMessageComposerThemeData? globalTheme,
   StreamMessageComposerThemeData? localTheme,
-  StreamComposerLocation? location,
+  StreamMessageComposerBehavior? behavior,
   bool? enableSafeArea,
   double bottomPadding = 0,
 }) async {
@@ -164,7 +164,7 @@ Future<void> _pumpComposer(
   when(() => channelState.draft).thenReturn(null);
 
   final composer = StreamMessageComposer(
-    location: location,
+    behavior: behavior,
     enableSafeArea: enableSafeArea,
   );
 

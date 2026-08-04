@@ -20,7 +20,7 @@ class StreamBackButton extends StatelessWidget {
       'This will be removed in a future version.',
     )
     this.channelId,
-    this.appBarBehavior,
+    this.isFloating,
     Widget? unreadIndicator = _unset,
   }) : _unreadIndicator = unreadIndicator;
 
@@ -41,11 +41,12 @@ class StreamBackButton extends StatelessWidget {
   )
   final String? channelId;
 
-  /// Controls the back button's visual/layout behavior (floating vs regular).
+  /// Whether the button adopts its floating presentation — an outlined button
+  /// instead of a ghost one.
   ///
-  /// When null, falls back to [StreamAppBarStyle.appBarBehavior] from the
-  /// ambient [StreamAppBarTheme], then to the ambient [StreamAppStyle].
-  final StreamAppBarBehavior? appBarBehavior;
+  /// When null, falls back to [StreamAppBarStyle.behavior] from the ambient
+  /// [StreamAppBarTheme], then to the ambient [StreamAppStyle].
+  final bool? isFloating;
 
   /// The unread badge overlaid on the top-end corner of the button.
   ///
@@ -64,7 +65,7 @@ class StreamBackButton extends StatelessWidget {
       .iOS || .macOS => context.streamIcons.chevronLeft,
       _ => context.streamIcons.arrowLeft,
     };
-    final isFloating = isFloatingAppBar(context, override: appBarBehavior);
+    final isFloating = this.isFloating ?? isFloatingAppBar(context);
 
     Widget button = StreamButton.icon(
       type: isFloating ? .outline : .ghost,

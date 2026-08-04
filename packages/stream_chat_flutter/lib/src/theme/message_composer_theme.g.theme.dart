@@ -30,14 +30,16 @@ mixin _$StreamMessageComposerThemeData {
     }
 
     return StreamMessageComposerThemeData(
-      location: t < 0.5 ? a.location : b.location,
+      behavior: t < 0.5 ? a.behavior : b.behavior,
     );
   }
 
-  StreamMessageComposerThemeData copyWith({StreamComposerLocation? location}) {
+  StreamMessageComposerThemeData copyWith({
+    StreamMessageComposerBehavior? behavior,
+  }) {
     final _this = (this as StreamMessageComposerThemeData);
 
-    return StreamMessageComposerThemeData(location: location ?? _this.location);
+    return StreamMessageComposerThemeData(behavior: behavior ?? _this.behavior);
   }
 
   StreamMessageComposerThemeData merge(StreamMessageComposerThemeData? other) {
@@ -51,7 +53,7 @@ mixin _$StreamMessageComposerThemeData {
       return other;
     }
 
-    return copyWith(location: other.location);
+    return copyWith(behavior: other.behavior);
   }
 
   @override
@@ -67,13 +69,13 @@ mixin _$StreamMessageComposerThemeData {
     final _this = (this as StreamMessageComposerThemeData);
     final _other = (other as StreamMessageComposerThemeData);
 
-    return _other.location == _this.location;
+    return _other.behavior == _this.behavior;
   }
 
   @override
   int get hashCode {
     final _this = (this as StreamMessageComposerThemeData);
 
-    return Object.hash(runtimeType, _this.location);
+    return Object.hash(runtimeType, _this.behavior);
   }
 }
