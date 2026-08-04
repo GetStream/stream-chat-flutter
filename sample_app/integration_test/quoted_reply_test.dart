@@ -4,9 +4,6 @@ import 'robots/user_robot_message_list_asserts.dart';
 import 'support/step.dart';
 import 'support/stream_test_case.dart';
 
-// The skipped tests carry no `allureId`: a skipped test uploads no result, so
-// TestOps has not created a case for it yet. Read the ids back from project 135
-// once FLU-667 / FLU-668 land and they start running.
 void main() {
   const sampleText = 'Test message';
   const quoteReply = 'Alright';
@@ -348,6 +345,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '11711',
     description: 'user adds a quoted reply in a thread to a message that is not in the list',
     skip: 'https://linear.app/stream/issue/FLU-667',
     body: (env) async {
@@ -381,6 +379,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '11712',
     description: 'participant adds a quoted reply in a thread to a message that is not in the list',
     skip: 'https://linear.app/stream/issue/FLU-667',
     body: (env) async {
@@ -478,6 +477,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '11713',
     description: 'scroll to bottom shows no unread count after jumping to a quote in a thread',
     // TODO(FLU-667): same as the other in-thread jump cases — jumping to a quote
     // inside a thread does not surface the scroll-to-bottom button.
@@ -694,6 +694,7 @@ void main() {
   // MARK: Thread root message
 
   streamTestWithEnv(
+    allureId: '11714',
     description: 'thread root message is only visible on the last page of the thread',
     skip: 'https://linear.app/stream/issue/FLU-668',
     body: (env) async {
@@ -721,6 +722,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '11715',
     description: 'thread root message is not loaded when the reply count equals the page size',
     // TODO(FLU-668): the thread renders its root message twice once it is
     // scrolled to — measured with 15, 25 and 30 replies, so it is not about
@@ -757,6 +759,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '11716',
     description: 'thread root message is loaded when the reply count is below the page size',
     // TODO(FLU-668): the thread renders its root message twice once it is
     // scrolled to — measured with 15, 25 and 30 replies, so it is not about
@@ -786,6 +789,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '11717',
     description: 'user quotes the thread root message when it is not in the list',
     skip: 'https://linear.app/stream/issue/FLU-667',
     body: (env) async {
