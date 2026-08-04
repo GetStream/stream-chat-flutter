@@ -142,6 +142,39 @@ class CustomRenderShrinkWrappingViewport extends CustomRenderViewport {
 
   late double _shrinkWrapExtent;
 
+  /// The main axis extent the last layout pass resolved the anchor origin
+  /// against. Set by [_attemptLayout]; null until the first layout.
+  double? _layoutMainAxisExtent;
+
+  /// [RenderViewportBase]'s implementation resolves the target in
+  /// scroll-offset space and ignores [anchor], so a reveal on a list with a
+  /// non-zero anchor scrolls `anchor * mainAxisExtent` too far. Shift it back
+  /// into `pixels` space.
+  ///
+  /// `UnboundedRenderViewport.getOffsetToReveal` in `viewport.dart` carries
+  /// the full explanation; this is the shrink-wrapping twin.
+  @override
+  RevealedOffset getOffsetToReveal(
+    RenderObject target,
+    double alignment, {
+    Rect? rect,
+    Axis? axis,
+  }) {
+    final revealed = super.getOffsetToReveal(target, alignment, rect: rect, axis: axis);
+    final mainAxisExtent = _layoutMainAxisExtent ?? (this.axis == Axis.vertical ? size.height : size.width);
+    final correction = anchor * mainAxisExtent;
+    if (correction == 0 || !correction.isFinite || !revealed.offset.isFinite) return revealed;
+
+    final revealedRect = switch (axisDirection) {
+      AxisDirection.up => revealed.rect.translate(0, correction),
+      AxisDirection.down => revealed.rect.translate(0, -correction),
+      AxisDirection.left => revealed.rect.translate(correction, 0),
+      AxisDirection.right => revealed.rect.translate(-correction, 0),
+    };
+
+    return RevealedOffset(offset: revealed.offset + correction, rect: revealedRect);
+  }
+
   /// This value is set during layout based on the [CacheExtentStyle].
   ///
   /// When the style is [CacheExtentStyle.viewport], it is the main axis extent
@@ -289,6 +322,11 @@ class CustomRenderShrinkWrappingViewport extends CustomRenderViewport {
   ) {
     assert(!mainAxisExtent.isNaN, 'The maxExtent of $this has not been set.');
     assert(mainAxisExtent >= 0.0, 'The maxExtent of $this is negative.');
+    // Anchor origin is `mainAxisExtent * anchor`, and in a shrink-wrapping
+    // viewport this extent is the incoming constraint — not `size`, which
+    // ends up as the (smaller) shrink-wrapped content extent. Record it for
+    // [getOffsetToReveal].
+    _layoutMainAxisExtent = mainAxisExtent;
     assert(
       crossAxisExtent.isFinite,
       'The crossAxisExtent of $this is not finite.',
