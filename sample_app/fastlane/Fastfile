@@ -21,6 +21,23 @@ def ios_device?(device)
   device.to_s.match?(/\A[0-9A-F]{8}-[0-9A-F]{4}-/i)
 end
 
+def batch_targets(targets, batch:, batch_count:)
+  return targets if batch.nil? || batch_count.to_i <= 1
+
+  count = batch_count.to_i
+  index = batch.to_i
+  slice = targets.each_slice((targets.size / count.to_f).ceil).to_a[index] || []
+
+  if slice.empty?
+    UI.important("Batch #{index + 1}/#{count}: no test files fell into this batch — nothing to run")
+  else
+    UI.important("Batch #{index + 1}/#{count}: running #{slice.size} of #{targets.size} test files " \
+                 "(#{slice.map { |t| File.basename(t) }.join(', ')})")
+  end
+
+  slice
+end
+
 def boot_simulator(udid:)
   return if `xcrun simctl list devices booted`.to_s.include?(udid)
   return unless `xcrun simctl list devices`.to_s.include?(udid)
@@ -159,6 +176,9 @@ lane :run_e2e_test do |options|
     Dir.chdir(root_path) do
       targets = options[:target] ? [options[:target]] : Dir['integration_test/*_test.dart'].sort
       UI.user_error!('No e2e test files found') if targets.empty?
+
+      targets = batch_targets(targets, batch: options[:batch], batch_count: options[:batch_count])
+      next if targets.empty?
 
       retries = (options[:retries] || 2).to_i
 
