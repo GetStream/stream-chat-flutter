@@ -852,6 +852,20 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
               )!
             : EdgeInsets.zero;
 
+        // Ink splashes paint into the nearest enclosing [Material], *below* its
+        // child subtree — so this sits under both backgrounds below (the
+        // regular fill and the floating backdrop painter), letting descendants
+        // without a material of their own (the command picker's rows) ripple on
+        // top of the background instead of beneath it.
+        //
+        // Transparent canvas type rather than [MaterialType.transparency]: the
+        // latter would stop absorbing hit tests, and the body extends behind a
+        // floating composer, so taps on the chrome would reach the message list.
+        final content = Material(
+          color: Colors.transparent,
+          child: Padding(padding: safeAreaPadding, child: child),
+        );
+
         // For floating: one continuous backdrop behind the pill, the picker and
         // the safe-area zone. Painting it as a single layer is what keeps it
         // seamless — abutting fills would each be antialiased at a fractional
@@ -879,26 +893,23 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
                   ),
                 ),
               ),
-              Padding(padding: safeAreaPadding, child: child),
+              content,
             ],
           );
         }
 
-        return Padding(padding: safeAreaPadding, child: child);
+        return content;
       },
       child: Center(heightFactor: 1, child: messageInput),
     );
 
-    final composer = Material(
-      color: Colors.transparent,
-      child: switch (effectiveComposerBehavior) {
-        .floating => composerBody,
-        .regular => DecoratedBox(
-          decoration: BoxDecoration(color: colorScheme.backgroundElevation1),
-          child: composerBody,
-        ),
-      },
-    );
+    final composer = switch (effectiveComposerBehavior) {
+      .floating => composerBody,
+      .regular => DecoratedBox(
+        decoration: BoxDecoration(color: colorScheme.backgroundElevation1),
+        child: composerBody,
+      ),
+    };
 
     return ComposerAttachmentAnnouncer(
       controller: _effectiveController,
