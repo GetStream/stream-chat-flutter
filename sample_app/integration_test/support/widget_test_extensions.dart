@@ -110,6 +110,39 @@ extension E2EWidgetTester on WidgetTester {
     throw TestFailure('Timed out scrolling, waiting for $description');
   }
 
+  /// The plain text the [Text] found by [finder] renders, or null when it is not
+  /// in the tree.
+  ///
+  /// Handles both a plain [Text] (`data`) and a `Text.rich` (`textSpan`) — the
+  /// SDK's message previews are the latter, and their spans can carry
+  /// inline-icon [WidgetSpan]s (a deleted message, an attachment type). Dropping
+  /// the placeholders leaves their separator spaces behind, hence collapsing the
+  /// whitespace afterwards.
+  String? renderedText(Finder finder) {
+    final elements = finder.evaluate();
+    if (elements.isEmpty) return null;
+
+    final text = elements.first.widget as Text;
+    final rendered = text.data ?? text.textSpan?.toPlainText(includePlaceholders: false) ?? '';
+    return rendered.replaceAll(RegExp(r'\s+'), ' ').trim();
+  }
+
+  /// Polls until the text rendered by [finder] equals [expected], then asserts —
+  /// so a failure reports what was actually on screen instead of a bare timeout.
+  Future<void> expectRenderedText(
+    Finder finder,
+    String expected, {
+    Duration timeout = const Duration(seconds: 30),
+  }) async {
+    await waitUntilVisible(finder);
+
+    final end = DateTime.now().add(timeout);
+    while (renderedText(finder) != expected && DateTime.now().isBefore(end)) {
+      await pump(const Duration(milliseconds: 100));
+    }
+    expect(renderedText(finder), expected);
+  }
+
   Future<void> waitUntilVisible(
     Finder finder, {
     Duration timeout = const Duration(seconds: 30),
@@ -150,6 +183,14 @@ extension E2EWidgetTester on WidgetTester {
     } catch (_) {
       // Timed out settling (perpetual animation) — safe to proceed.
     }
+  }
+
+  /// Swipes [target] from its start edge towards its end edge, far enough to
+  /// pass the SDK's swipe-to-reply threshold (20% of the row's width).
+  Future<void> swipeToReply(Finder target) async {
+    await waitUntilVisible(target);
+    await drag(target, Offset(getSize(target).width * 0.4, 0));
+    await settle();
   }
 
   /// Long-presses [target] until [appears] shows up.

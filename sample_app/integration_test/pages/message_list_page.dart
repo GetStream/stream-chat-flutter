@@ -63,6 +63,9 @@ final class _MessageActions {
   Finder get delete => find.text('Delete Message');
   Finder get threadReply => find.text('Thread Reply');
 
+  /// Starts a quoted reply (`replyLabel`). Distinct from [threadReply].
+  Finder get reply => find.text('Reply');
+
   /// The confirm button in the delete-confirmation dialog.
   Finder get deleteConfirm => find.text('Delete');
 }
@@ -82,9 +85,43 @@ final class _MessageList {
     description: 'message row for $id',
   );
 
+  /// The row rendering the message whose text is exactly [text].
+  ///
+  /// The open actions modal renders its own copy of the message under
+  /// `Key('MessageItem')`; excluding keyed rows keeps this finder unambiguous
+  /// while the modal is up.
+  Finder messageWithText(String text) => find.byWidgetPredicate(
+    (widget) => widget is StreamMessageItem && widget.key == null && widget.props.message.text == text,
+    description: 'message row with text "$text"',
+  );
+
+  /// The quoted-message bubble a reply carries above its own text.
+  Finder get quotedMessage => find.byType(StreamQuotedMessage);
+
+  /// The quote's text preview. Rendered by the same [StreamMessagePreviewText]
+  /// as the channel list, but with no channel in scope — so it carries no
+  /// "You:" / sender prefix, and a deleted quote reads "Message deleted".
+  Finder get quotedMessageText => find.descendant(
+    of: quotedMessage,
+    matching: find.descendant(of: find.byType(StreamMessagePreviewText), matching: find.byType(Text)),
+  );
+
   /// A system message row (e.g. the "channel truncated" notice). System
   /// messages get their own row widget rather than a [StreamMessageItem].
   Finder get systemMessage => find.byType(StreamSystemMessage);
+
+  /// The row an error message gets — what the backend returns for an unknown
+  /// slash command. Error messages bypass [StreamMessageItem] entirely.
+  Finder get moderatedMessage => find.byType(StreamModeratedMessage);
+
+  /// A rendered Giphy attachment.
+  Finder get giphy => find.byType(StreamGiphyAttachment);
+
+  /// Thread-participant avatars shown next to the "N replies" footer.
+  Finder get threadRepliesAvatars => find.descendant(
+    of: threadReplies,
+    matching: find.byType(StreamUserAvatar),
+  );
 
   /// The floating "scroll to bottom" button.
   ///

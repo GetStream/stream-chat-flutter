@@ -1,4 +1,3 @@
-import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -31,16 +30,9 @@ extension UserRobotChannelListAsserts on UserRobot {
       null => text,
     };
 
-    final preview = _inChannel(ChannelListPage.channel.previewText, channelIndex);
-    await tester.waitUntilVisible(preview);
-
-    // The row is rebuilt as events land, so poll for the expected text and only
-    // then assert — that way the failure message carries what it actually said.
-    final end = DateTime.now().add(const Duration(seconds: 30));
-    while (_renderedText(preview) != expected && DateTime.now().isBefore(end)) {
-      await tester.pump(const Duration(milliseconds: 100));
-    }
-    expect(_renderedText(preview), expected);
+    // The row is rebuilt as events land, so this polls for the expected text
+    // rather than reading it once.
+    await tester.expectRenderedText(_inChannel(ChannelListPage.channel.previewText, channelIndex), expected);
     return this;
   }
 
@@ -121,22 +113,6 @@ extension UserRobotChannelListAsserts on UserRobot {
     of: find.byType(ChannelListPage.channelTile).at(channelIndex),
     matching: finder,
   );
-
-  /// The plain text the [Text] found by [finder] renders, or null when it isn't
-  /// in the tree.
-  ///
-  /// A message preview is a `Text.rich` whose span can carry inline-icon
-  /// [WidgetSpan]s (a deleted message, an attachment type). Dropping the
-  /// placeholders leaves their separator spaces behind, hence collapsing the
-  /// whitespace afterwards.
-  String? _renderedText(Finder finder) {
-    final elements = finder.evaluate();
-    if (elements.isEmpty) return null;
-
-    final text = elements.first.widget as Text;
-    final rendered = text.data ?? text.textSpan?.toPlainText(includePlaceholders: false) ?? '';
-    return rendered.replaceAll(RegExp(r'\s+'), ' ').trim();
-  }
 }
 
 /// Chainable counterparts to [UserRobotChannelListAsserts], so an assertion can
