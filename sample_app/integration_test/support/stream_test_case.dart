@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 
@@ -37,6 +38,18 @@ void streamTest({
     // still forwarding each line to stdout. Result/attachment markers are
     // printed outside this zone (in stopTest / captureFailureArtifacts), so
     // they never end up in the captured log.
+    // `takeException()` below hands back only the exception, so the framework
+    // never gets to dump the details that name the offending widget — which is
+    // what you actually need for a layout error like a RenderFlex overflow.
+    // Logging them here keeps that diagnosis available; the binding still records
+    // the error, so `takeException` behaves exactly as before.
+    final previousOnError = FlutterError.onError;
+    FlutterError.onError = (details) {
+      debugPrint('[flutter-error] $details');
+      previousOnError?.call(details);
+    };
+    addTearDown(() => FlutterError.onError = previousOnError);
+
     final log = StringBuffer();
     Future<void> runBody() => runZoned(
       () async {
