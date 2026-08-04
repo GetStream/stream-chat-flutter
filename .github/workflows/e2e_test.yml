@@ -26,7 +26,8 @@ env:
   GITHUB_PR_NUM: ${{ github.event.pull_request.number }}
 
 jobs:
-  allure_launch:
+  allure_launch_android:
+    if: github.event_name != 'workflow_dispatch' || inputs.android
     runs-on: ubuntu-latest
     timeout-minutes: 10
     outputs:
@@ -34,22 +35,29 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      - uses: ./.github/actions/setup-ruby
-
-      - name: Launch Allure TestOps
-        working-directory: sample_app/android
-        run: bundle exec fastlane allure_launch
-        env:
-          GITHUB_EVENT: ${{ toJson(github.event) }}
-
-      - name: Publish the launch id
+      - uses: ./.github/actions/allure-launch
         id: launch
-        run: echo "launch_id=$LAUNCH_ID" >> "$GITHUB_OUTPUT"
+        with:
+          working-directory: sample_app/android
+
+  allure_launch_ios:
+    if: github.event_name == 'workflow_dispatch' && inputs.ios
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      launch_id: ${{ steps.launch.outputs.launch_id }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: ./.github/actions/allure-launch
+        id: launch
+        with:
+          working-directory: sample_app/ios
 
   android:
     # Always on pull_request; opt-out via the checkbox on workflow_dispatch.
     if: github.event_name != 'workflow_dispatch' || inputs.android
-    needs: allure_launch
+    needs: allure_launch_android
     runs-on: ubuntu-latest
     timeout-minutes: 40
     strategy:
@@ -58,7 +66,7 @@ jobs:
         batch: [0, 1]
     env:
       ANDROID_API_LEVEL: "34"
-      LAUNCH_ID: ${{ needs.allure_launch.outputs.launch_id }}
+      LAUNCH_ID: ${{ needs.allure_launch_android.outputs.launch_id }}
     steps:
       - uses: actions/checkout@v7
 
@@ -113,7 +121,7 @@ jobs:
   ios:
     # Only on workflow_dispatch, when the checkbox is ticked.
     if: github.event_name == 'workflow_dispatch' && inputs.ios
-    needs: allure_launch
+    needs: allure_launch_ios
     runs-on: macos-15
     timeout-minutes: 40
     strategy:
@@ -123,7 +131,7 @@ jobs:
     env:
       IOS_SIMULATOR_VERSION: "26.2"
       IOS_SIMULATOR_DEVICE: "iPhone 17"
-      LAUNCH_ID: ${{ needs.allure_launch.outputs.launch_id }}
+      LAUNCH_ID: ${{ needs.allure_launch_ios.outputs.launch_id }}
     steps:
       - uses: actions/checkout@v7
 
