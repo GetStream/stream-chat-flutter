@@ -34,6 +34,11 @@ final class _Composer {
 
   /// Command suggestions overlay shown while typing `/`.
   Finder get commandsOverlay => find.byType(StreamCommandAutocompleteOptions);
+
+  /// The "also send in channel" checkbox, which the composer only shows while
+  /// inside a thread. `DmCheckboxListTile` is not exported, so it is located by
+  /// its label (`alsoSendAsDirectMessageLabel`).
+  Finder get alsoSendInChannelCheckbox => find.text('Also send in Channel');
 }
 
 final class _Reactions {
@@ -75,6 +80,30 @@ final class _MessageList {
   Finder message(String id) => find.byWidgetPredicate(
     (widget) => widget is StreamMessageItem && widget.props.message.id == id,
     description: 'message row for $id',
+  );
+
+  /// A system message row (e.g. the "channel truncated" notice). System
+  /// messages get their own row widget rather than a [StreamMessageItem].
+  Finder get systemMessage => find.byType(StreamSystemMessage);
+
+  /// The floating "scroll to bottom" button.
+  ///
+  /// It has no key or dedicated type — it is a floating [StreamButton] the view
+  /// swaps for an `Empty()` whenever it should be hidden, so its presence in the
+  /// tree *is* the "button is shown" signal.
+  Finder get scrollToBottomButton => find.descendant(
+    of: find.byType(view),
+    matching: find.byWidgetPredicate(
+      (widget) => widget is StreamButton && widget.props.isFloating == true,
+      description: 'floating scroll-to-bottom button',
+    ),
+  );
+
+  /// The unread-count badge wrapped around [scrollToBottomButton]. The SDK only
+  /// builds it while the count is greater than zero.
+  Finder get scrollToBottomUnreadBadge => find.descendant(
+    of: find.byType(view),
+    matching: find.byType(StreamBadgeNotification),
   );
 
   /// The "… is typing" text of [StreamTypingIndicator]. The indicator widget is

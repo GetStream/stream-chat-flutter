@@ -78,6 +78,21 @@ extension E2EWidgetTester on WidgetTester {
     bool Function() condition, {
     required String description,
     Duration timeout = const Duration(seconds: 30),
+  }) => _scrollUntil(condition, const Offset(0, 400), description: description, timeout: timeout);
+
+  /// Repeatedly scrolls the list down (towards the end of the list) until
+  /// [condition] holds, paging in further entries as needed.
+  Future<void> scrollDownUntil(
+    bool Function() condition, {
+    required String description,
+    Duration timeout = const Duration(seconds: 30),
+  }) => _scrollUntil(condition, const Offset(0, -400), description: description, timeout: timeout);
+
+  Future<void> _scrollUntil(
+    bool Function() condition,
+    Offset step, {
+    required String description,
+    required Duration timeout,
   }) async {
     final scrollable = find.byType(Scrollable).first;
     await waitUntilVisible(scrollable);
@@ -87,12 +102,12 @@ extension E2EWidgetTester on WidgetTester {
         await settle();
         return;
       }
-      await drag(scrollable, const Offset(0, 400));
+      await drag(scrollable, step);
       // Bounded, so [timeout] is actually re-checked between iterations even
       // while a perpetual animation (e.g. a reconnect spinner) is running.
       await settle();
     }
-    throw TestFailure('Timed out scrolling up, waiting for $description');
+    throw TestFailure('Timed out scrolling, waiting for $description');
   }
 
   Future<void> waitUntilVisible(

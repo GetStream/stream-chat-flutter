@@ -53,6 +53,41 @@ extension UserRobotMessageListAsserts on UserRobot {
     return this;
   }
 
+  /// Asserts the message list holds exactly [count] rows.
+  ///
+  /// A system message occupies a row of its own ([StreamSystemMessage]) rather
+  /// than a [MessageListPage.messageItem], so both are counted — mirroring the
+  /// native cell count. The list is lazy, so this is only meaningful for counts
+  /// small enough to fit on screen.
+  Future<UserRobot> assertMessageCount(int count) async {
+    int rowCount() =>
+        find.byType(MessageListPage.messageItem).evaluate().length +
+        MessageListPage.list.systemMessage.evaluate().length;
+
+    final end = DateTime.now().add(const Duration(seconds: 30));
+    while (rowCount() != count && DateTime.now().isBefore(end)) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+    expect(rowCount(), count);
+    return this;
+  }
+
+  /// Asserts whether the floating scroll-to-bottom button is shown.
+  ///
+  /// When it is not, its unread-count badge cannot be either — the SDK only
+  /// wraps the button once the count is above zero — which is what the native
+  /// `assertScrollToBottomButtonUnreadCount(0)` checks.
+  Future<UserRobot> assertScrollToBottomButton({required bool isDisplayed}) async {
+    final button = MessageListPage.list.scrollToBottomButton;
+    if (isDisplayed) {
+      await tester.waitUntilVisible(button);
+    } else {
+      await tester.waitUntilNotVisible(button);
+      await tester.waitUntilNotVisible(MessageListPage.list.scrollToBottomUnreadBadge);
+    }
+    return this;
+  }
+
   Future<UserRobot> assertTypingIndicator({required bool isDisplayed}) async {
     final indicator = MessageListPage.list.typingIndicator;
     if (isDisplayed) {
@@ -209,6 +244,11 @@ extension UserRobotMessageListAssertsChain on Future<UserRobot> {
       then((it) => it.assertDeletedMessage(isDisplayed: isDisplayed));
 
   Future<UserRobot> assertHardDeletedMessage(String text) => then((it) => it.assertHardDeletedMessage(text));
+
+  Future<UserRobot> assertMessageCount(int count) => then((it) => it.assertMessageCount(count));
+
+  Future<UserRobot> assertScrollToBottomButton({required bool isDisplayed}) =>
+      then((it) => it.assertScrollToBottomButton(isDisplayed: isDisplayed));
 
   Future<UserRobot> assertTypingIndicator({required bool isDisplayed}) =>
       then((it) => it.assertTypingIndicator(isDisplayed: isDisplayed));

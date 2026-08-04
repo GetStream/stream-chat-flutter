@@ -19,6 +19,12 @@ class UserRobot {
     return this;
   }
 
+  /// Waits for the channel list to render its rows.
+  Future<UserRobot> waitForChannelListToLoad() async {
+    await tester.waitUntilVisible(find.byType(ChannelListPage.channelTile));
+    return this;
+  }
+
   Future<UserRobot> openChannel({int index = 0}) async {
     final tile = find.byType(ChannelListPage.channelTile).at(index);
     await tester.waitUntilVisible(tile);
@@ -80,10 +86,30 @@ class UserRobot {
     return this;
   }
 
+  /// Sends [text] from inside a thread, optionally ticking the composer's
+  /// "also send in channel" checkbox first so the reply is copied into the
+  /// channel as well.
+  Future<UserRobot> sendMessageInThread(
+    String text, {
+    bool alsoSendInChannel = false,
+  }) async {
+    if (alsoSendInChannel) {
+      await tester.tapFinder(MessageListPage.composer.alsoSendInChannelCheckbox);
+    }
+    return sendMessage(text);
+  }
+
   /// Navigates back (out of a thread, or out of the channel).
   Future<UserRobot> tapBackButton() async {
     await tester.tapFinder(MessageListPage.backButton);
     return this;
+  }
+
+  /// Leaves the thread and then the channel, landing back on the channel list.
+  Future<UserRobot> moveToChannelListFromThread() async {
+    await tapBackButton();
+    await tester.waitUntilNotVisible(MessageListPage.threadHeader);
+    return tapBackButton();
   }
 
   Future<UserRobot> scrollMessageListUp() async {
@@ -130,6 +156,8 @@ extension UserRobotChain on Future<UserRobot> {
     UserCredentials user = PredefinedUsers.currentUser,
   ]) => then((it) => it.login(user));
 
+  Future<UserRobot> waitForChannelListToLoad() => then((it) => it.waitForChannelListToLoad());
+
   Future<UserRobot> openChannel({int index = 0}) => then((it) => it.openChannel(index: index));
 
   Future<UserRobot> sendMessage(String text) => then((it) => it.sendMessage(text));
@@ -147,7 +175,12 @@ extension UserRobotChain on Future<UserRobot> {
 
   Future<UserRobot> openThreadFromReplies() => then((it) => it.openThreadFromReplies());
 
+  Future<UserRobot> sendMessageInThread(String text, {bool alsoSendInChannel = false}) =>
+      then((it) => it.sendMessageInThread(text, alsoSendInChannel: alsoSendInChannel));
+
   Future<UserRobot> tapBackButton() => then((it) => it.tapBackButton());
+
+  Future<UserRobot> moveToChannelListFromThread() => then((it) => it.moveToChannelListFromThread());
 
   Future<UserRobot> scrollMessageListUp() => then((it) => it.scrollMessageListUp());
 
