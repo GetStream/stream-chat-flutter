@@ -10,6 +10,8 @@ import 'package:sample_app/utils/app_config.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart' hide PushProvider;
 import 'package:stream_chat_persistence/stream_chat_persistence.dart';
 
+bool get platformSupportsPersistenceCredentials => !CurrentPlatform.isWeb && !CurrentPlatform.isMacOS;
+
 /// Secure-storage keys for the active session.
 const kStreamApiKey = 'STREAM_API_KEY';
 const kStreamUserId = 'STREAM_USER_ID';
@@ -217,7 +219,7 @@ class AuthController extends ValueNotifier<AuthState> {
     try {
       final ownUser = await client.connectUser(user, token);
 
-      if (persistCredentials && !CurrentPlatform.isWeb) {
+      if (persistCredentials && platformSupportsPersistenceCredentials) {
         const secureStorage = FlutterSecureStorage();
         await Future.wait([
           secureStorage.write(key: kStreamApiKey, value: apiKey),
@@ -252,7 +254,7 @@ class AuthController extends ValueNotifier<AuthState> {
     _pushTokenManager?.dispose().ignore();
     _pushTokenManager = null;
 
-    if (!CurrentPlatform.isWeb) {
+    if (platformSupportsPersistenceCredentials) {
       const secureStorage = FlutterSecureStorage();
       await secureStorage.deleteAll();
     }
