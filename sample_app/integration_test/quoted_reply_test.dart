@@ -261,6 +261,32 @@ void main() {
     },
   );
 
+  streamTestWithEnv(
+    description: 'scroll to bottom shows no unread count after jumping to a quote',
+    body: (env) async {
+      step('GIVEN the user opens a channel');
+      await env.backendRobot.generateChannels(channelsCount: 1, messagesCount: messagesCount);
+      await env.userRobot.login().openChannel().waitForMessageListToLoad();
+
+      step('WHEN the user adds a quoted reply to the oldest message');
+      await env.userRobot.quoteMessage(quoteReply, quotedText: '1');
+
+      step('AND the user quotes a message with an invalid command');
+      await env.userRobot.quoteMessage('/$invalidCommand');
+
+      step('THEN the user observes the invalid command message');
+      await env.userRobot.assertInvalidCommandMessage(invalidCommand);
+
+      step('WHEN the user taps the quoted message');
+      await env.userRobot.tapQuotedMessage();
+
+      step('THEN the user is scrolled up to the quote, with nothing counted as unread');
+      // The user sent everything here, so their own messages must not register as
+      // unread on the scroll-to-bottom button.
+      await env.userRobot.assertScrollToBottomButton(isDisplayed: true, unreadCount: 0);
+    },
+  );
+
   // MARK: In a thread
 
   streamTestWithEnv(
@@ -308,7 +334,6 @@ void main() {
 
   streamTestWithEnv(
     description: 'user adds a quoted reply in a thread to a message that is not in the list',
-    // TODO(FLU-605): jumping to a quote inside a thread does not surface the scroll-to-bottom button (Android ignores this case on AND-76).
     skip: 'https://linear.app/stream/issue/FLU-605',
     body: (env) async {
       step('GIVEN the user opens a channel with a long thread');
@@ -342,7 +367,6 @@ void main() {
 
   streamTestWithEnv(
     description: 'participant adds a quoted reply in a thread to a message that is not in the list',
-    // TODO(FLU-605): tapping a quote inside a thread does not scroll the reply out of view (Android ignores this case on AND-960).
     skip: 'https://linear.app/stream/issue/FLU-605',
     body: (env) async {
       step('GIVEN the user opens a channel with a long thread');
@@ -432,6 +456,38 @@ void main() {
       await env.userRobot
           .assertInvalidCommandMessage(invalidCommand)
           .assertQuotedMessage(text: quoteReply, isDisplayed: false);
+    },
+  );
+
+  streamTestWithEnv(
+    description: 'scroll to bottom shows no unread count after jumping to a quote in a thread',
+    // TODO(FLU-605): same as the other in-thread jump cases — jumping to a quote
+    // inside a thread does not surface the scroll-to-bottom button.
+    skip: 'https://linear.app/stream/issue/FLU-605',
+    body: (env) async {
+      step('GIVEN the user opens a channel with a long thread');
+      await env.backendRobot.generateChannels(
+        channelsCount: 1,
+        messagesCount: 1,
+        messagesText: parentText,
+        repliesCount: messagesCount,
+      );
+      await env.userRobot.login().openChannel().waitForMessageListToLoad();
+
+      step('WHEN the user adds a quoted reply to the oldest reply in the thread');
+      await env.userRobot.openThread(parentText: parentText).quoteMessage(quoteReply, quotedText: '1');
+
+      step('AND the user quotes a message with an invalid command');
+      await env.userRobot.quoteMessage('/$invalidCommand');
+
+      step('THEN the user observes the invalid command message');
+      await env.userRobot.assertInvalidCommandMessage(invalidCommand);
+
+      step('WHEN the user taps the quoted message');
+      await env.userRobot.tapQuotedMessage();
+
+      step('THEN the user is scrolled up to the quote, with nothing counted as unread');
+      await env.userRobot.assertScrollToBottomButton(isDisplayed: true, unreadCount: 0);
     },
   );
 
@@ -614,7 +670,6 @@ void main() {
 
   streamTestWithEnv(
     description: 'thread root message is only visible on the last page of the thread',
-    // TODO(FLU-605): the thread renders its root message twice once an older page is paged in.
     skip: 'https://linear.app/stream/issue/FLU-605',
     body: (env) async {
       step('GIVEN the user opens a channel with a long thread');
@@ -641,9 +696,72 @@ void main() {
   );
 
   streamTestWithEnv(
+    description: 'thread root message is not loaded when the reply count equals the page size',
+    // TODO(FLU-605): the thread renders its root message twice once it is
+    // scrolled to — measured with 15, 25 and 30 replies, so it is not about
+    // crossing a page boundary.
+    skip: 'https://linear.app/stream/issue/FLU-605',
+    body: (env) async {
+      // The thread page size the SDK requests; a full page leaves no room for the
+      // root message, so it only arrives with the next one.
+      const pageSize = 25;
+
+      step('GIVEN the user opens a channel whose thread has exactly one page of replies');
+      await env.backendRobot.generateChannels(
+        channelsCount: 1,
+        messagesCount: 1,
+        messagesText: parentText,
+        repliesCount: pageSize,
+      );
+      await env.userRobot.login().openChannel();
+
+      step('WHEN the user opens the thread');
+      await env.userRobot.openThreadFromReplies();
+
+      step('THEN the parent message is not loaded');
+      await env.userRobot.assertMessages(text: parentText, count: 0);
+
+      step('WHEN the user scrolls up to load one more page');
+      // Native scrolls twice; a swipe there is a full screen, `scrollMessageListUp`
+      // drags 300px, so reaching the top of the thread takes more of them.
+      await env.userRobot.scrollMessageListUp(times: 8);
+
+      step('THEN the parent message is loaded');
+      await env.userRobot.assertMessages(text: parentText, count: 1);
+    },
+  );
+
+  streamTestWithEnv(
+    description: 'thread root message is loaded when the reply count is below the page size',
+    // TODO(FLU-605): the thread renders its root message twice once it is
+    // scrolled to — measured with 15, 25 and 30 replies, so it is not about
+    // crossing a page boundary.
+    skip: 'https://linear.app/stream/issue/FLU-605',
+    body: (env) async {
+      const replies = 15;
+
+      step('GIVEN the user opens a channel whose thread has less than a page of replies');
+      await env.backendRobot.generateChannels(
+        channelsCount: 1,
+        messagesCount: 1,
+        messagesText: parentText,
+        repliesCount: replies,
+      );
+      await env.userRobot.login().openChannel();
+
+      step('WHEN the user opens the thread and scrolls to the top of it');
+      // Native asserts the parent cell is simply *there*, but the Flutter list is
+      // lazy: with this many replies the root is loaded yet not built until it is
+      // scrolled near, so reaching it is part of observing it here.
+      await env.userRobot.openThreadFromReplies().scrollMessageListUp(times: 8);
+
+      step('THEN the parent message is loaded exactly once');
+      await env.userRobot.assertMessages(text: parentText, count: 1);
+    },
+  );
+
+  streamTestWithEnv(
     description: 'user quotes the thread root message when it is not in the list',
-    // TODO(FLU-605): same as the two cases above — jumping to a quote inside a
-    // thread does not surface the scroll-to-bottom button.
     skip: 'https://linear.app/stream/issue/FLU-605',
     body: (env) async {
       step('GIVEN the user opens a long thread');

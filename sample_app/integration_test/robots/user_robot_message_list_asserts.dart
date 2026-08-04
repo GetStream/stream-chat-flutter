@@ -1,3 +1,4 @@
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -173,13 +174,29 @@ extension UserRobotMessageListAsserts on UserRobot {
   /// When it is not, its unread-count badge cannot be either — the SDK only
   /// wraps the button once the count is above zero — which is what the native
   /// `assertScrollToBottomButtonUnreadCount(0)` checks.
-  Future<UserRobot> assertScrollToBottomButton({required bool isDisplayed}) async {
+  Future<UserRobot> assertScrollToBottomButton({
+    required bool isDisplayed,
+    int? unreadCount,
+  }) async {
     final button = MessageListPage.list.scrollToBottomButton;
+    final badge = MessageListPage.list.scrollToBottomUnreadBadge;
+
     if (isDisplayed) {
       await tester.waitUntilVisible(button);
     } else {
       await tester.waitUntilNotVisible(button);
-      await tester.waitUntilNotVisible(MessageListPage.list.scrollToBottomUnreadBadge);
+      await tester.waitUntilNotVisible(badge);
+    }
+
+    // The SDK only wraps the button in a badge once the count is above zero, so
+    // an expected count of 0 is asserted as the badge being absent.
+    switch (unreadCount) {
+      case null:
+        break;
+      case 0:
+        await tester.waitUntilNotVisible(badge);
+      case final count:
+        await tester.expectRenderedText(find.descendant(of: badge, matching: find.byType(Text)), '$count');
     }
     return this;
   }
@@ -360,8 +377,8 @@ extension UserRobotMessageListAssertsChain on Future<UserRobot> {
 
   Future<UserRobot> assertMessageCount(int count) => then((it) => it.assertMessageCount(count));
 
-  Future<UserRobot> assertScrollToBottomButton({required bool isDisplayed}) =>
-      then((it) => it.assertScrollToBottomButton(isDisplayed: isDisplayed));
+  Future<UserRobot> assertScrollToBottomButton({required bool isDisplayed, int? unreadCount}) =>
+      then((it) => it.assertScrollToBottomButton(isDisplayed: isDisplayed, unreadCount: unreadCount));
 
   Future<UserRobot> assertTypingIndicator({required bool isDisplayed}) =>
       then((it) => it.assertTypingIndicator(isDisplayed: isDisplayed));
