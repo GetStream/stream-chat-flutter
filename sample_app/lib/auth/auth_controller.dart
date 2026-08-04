@@ -166,10 +166,11 @@ class AuthController extends ValueNotifier<AuthState> {
 
   /// Restores a previous session from secure storage, if any.
   ///
-  /// No-op on web or when no credentials are stored; failures are
-  /// swallowed so the user simply lands on the login flow.
+  /// No-op on platforms without credential persistence or when no credentials
+  /// are stored; failures are swallowed so the user simply lands on the login
+  /// flow.
   Future<void> tryAutoConnect() async {
-    if (CurrentPlatform.isWeb) return;
+    if (!platformSupportsPersistenceCredentials) return;
     if (value is! Unauthenticated) return;
 
     const secureStorage = FlutterSecureStorage();
@@ -293,7 +294,7 @@ class AuthController extends ValueNotifier<AuthState> {
     debugConnectivityStream = null;
     debugForceOffline = false;
 
-    if (!CurrentPlatform.isWeb) {
+    if (platformSupportsPersistenceCredentials) {
       const secureStorage = FlutterSecureStorage();
       await secureStorage.deleteAll();
     }
