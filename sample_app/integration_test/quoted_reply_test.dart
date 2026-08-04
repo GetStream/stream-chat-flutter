@@ -4,9 +4,9 @@ import 'robots/user_robot_message_list_asserts.dart';
 import 'support/step.dart';
 import 'support/stream_test_case.dart';
 
-// TODO(allure): fill in each test's `allureId` from Allure TestOps project 135
-// once this suite has run in a launch — TestOps auto-creates a case per new
-// `fullName`, so the mapping is read back from the API afterwards.
+// The skipped tests carry no `allureId`: a skipped test uploads no result, so
+// TestOps has not created a case for it yet. Read the ids back from project 135
+// once FLU-667 / FLU-668 land and they start running.
 void main() {
   const sampleText = 'Test message';
   const quoteReply = 'Alright';
@@ -20,6 +20,7 @@ void main() {
   // MARK: In the channel
 
   streamTestWithEnv(
+    allureId: '11626',
     description: 'swiping a message starts a quoted reply',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -38,6 +39,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '11614',
     description: 'user adds a quoted reply to a message in the list',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -58,6 +60,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '11628',
     description: 'participant adds a quoted reply to a message in the list',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -75,6 +78,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '11609',
     description: 'user adds a quoted reply to a message that is not in the list',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -102,6 +106,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '11620',
     description: 'participant adds a quoted reply to a message that is not in the list',
     body: (env) async {
       const firstMessage = '1';
@@ -129,6 +134,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '11616',
     description: 'participant adds a quoted reply with a file to a message that is not in the list',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -150,6 +156,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '11615',
     description: 'participant adds a quoted reply with a giphy to a message that is not in the list',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -165,6 +172,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '11613',
     description: 'quoted reply deleted by the participant shows the deleted message',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -184,6 +192,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '11617',
     description: 'original message deleted by the participant shows as deleted in the quote',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -207,6 +216,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '11630',
     description: 'quoted reply deleted by the user shows the deleted message',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -226,6 +236,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '11627',
     description: 'original message deleted by the user shows as deleted in the quote',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -245,6 +256,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '11610',
     description: 'user adds a quoted reply with an invalid command',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -262,6 +274,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '11678',
     description: 'scroll to bottom shows no unread count after jumping to a quote',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -290,6 +303,7 @@ void main() {
   // MARK: In a thread
 
   streamTestWithEnv(
+    allureId: '11623',
     description: 'user adds a quoted reply in a thread',
     body: (env) async {
       step('GIVEN the user opens a channel with a thread');
@@ -313,6 +327,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '11625',
     description: 'participant adds a quoted reply in a thread',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -398,6 +413,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '11624',
     description: 'participant adds a quoted reply with a file in a thread',
     body: (env) async {
       step('GIVEN the user opens a channel with a long thread');
@@ -418,6 +434,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '11621',
     description: 'participant adds a quoted reply with a giphy in a thread',
     body: (env) async {
       step('GIVEN the user opens a channel with a long thread');
@@ -438,6 +455,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '11619',
     description: 'user adds a quoted reply with an invalid command in a thread',
     body: (env) async {
       step('GIVEN the user opens a channel with a thread');
@@ -494,6 +512,7 @@ void main() {
   // MARK: Thread reply count
 
   streamTestWithEnv(
+    allureId: '11612',
     description: 'thread reply count shows one reply',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -517,6 +536,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '11611',
     description: 'thread reply count shows multiple replies',
     body: (env) async {
       const replies = 5;
@@ -544,6 +564,7 @@ void main() {
   // MARK: Thread reply also sent to the channel
 
   streamTestWithEnv(
+    allureId: '11622',
     description: 'quoted reply in a thread is also shown in the channel when also sent there',
     body: (env) async {
       const quotedText = '$messagesCount';
@@ -579,6 +600,7 @@ void main() {
   // MARK: Deletions in a thread
 
   streamTestWithEnv(
+    allureId: '11631',
     description: 'quoted reply deleted by the participant shows the deleted message in a thread',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -597,6 +619,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '11618',
     description: 'original message deleted by the participant shows as deleted in the quote in a thread',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -618,6 +641,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '11632',
     description: 'quoted reply deleted by the user shows the deleted message in a thread',
     body: (env) async {
       step('GIVEN the user opens a channel with a thread');
@@ -643,6 +667,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '11629',
     description: 'original message deleted by the user shows as deleted in the quote in a thread',
     body: (env) async {
       step('GIVEN the user opens a channel with a thread');

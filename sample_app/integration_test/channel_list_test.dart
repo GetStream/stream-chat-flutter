@@ -6,15 +6,13 @@ import 'robots/user_robot_message_list_asserts.dart';
 import 'support/step.dart';
 import 'support/stream_test_case.dart';
 
-// TODO(allure): fill in each test's `allureId` from Allure TestOps project 135
-// once this suite has run in a launch — TestOps auto-creates a case per new
-// `fullName`, so the mapping is read back from the API afterwards.
 void main() {
   const sampleText = 'Test';
 
   // MARK: Channel preview
 
   streamTestWithEnv(
+    allureId: '11637',
     description: 'channel preview updates when the participant sends a message',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -35,6 +33,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '11634',
     description: 'channel preview updates when the user sends a message',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -61,6 +60,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '11643',
     description: 'channel preview updates when the participant sends a message while the user is offline',
     body: (env) async {
       step('GIVEN the user opens the channel list');
@@ -84,6 +84,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '11638',
     description: 'error message is not shown in the channel preview',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -108,6 +109,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '11635',
     description: 'channel preview shows no messages when the channel is empty',
     body: (env) async {
       step('WHEN the user opens the channel list');
@@ -127,6 +129,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '11644',
     description: 'channel preview shows the deleted message when the only message in the channel is deleted',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -157,6 +160,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '11641',
     description: 'channel preview shows the deleted message when the last message is deleted',
     body: (env) async {
       const oldMessage = 'Old';
@@ -187,6 +191,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '11640',
     description: 'channel preview is not updated when a thread reply is sent',
     body: (env) async {
       const channelMessage = 'Channel message';
@@ -213,6 +218,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '11639',
     description: 'channel preview is updated when a thread reply is also sent to the channel',
     body: (env) async {
       const channelMessage = 'Channel message';
@@ -238,6 +244,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '11642',
     description: 'channel preview is updated when the preview message is edited',
     body: (env) async {
       const editedMessage = 'edited message';
@@ -265,6 +272,7 @@ void main() {
   // MARK: Truncate channel
 
   streamTestWithEnv(
+    allureId: '11645',
     description: 'message list and channel preview are updated when the channel is truncated with a message',
     body: (env) async {
       const systemMessage = 'Channel truncated';
@@ -298,6 +306,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '11633',
     description: 'message list and channel preview are updated when the channel is truncated without a message',
     body: (env) async {
       step('GIVEN the user opens a channel with messages');
@@ -327,6 +336,7 @@ void main() {
   // MARK: Pagination
 
   streamTestWithEnv(
+    allureId: '11636',
     description: 'user paginates the channel list',
     body: (env) async {
       const channelsCount = 30;
