@@ -334,7 +334,7 @@ void main() {
 
   streamTestWithEnv(
     description: 'user adds a quoted reply in a thread to a message that is not in the list',
-    skip: 'https://linear.app/stream/issue/FLU-605',
+    skip: 'https://linear.app/stream/issue/FLU-667',
     body: (env) async {
       step('GIVEN the user opens a channel with a long thread');
       await env.backendRobot.generateChannels(
@@ -367,7 +367,7 @@ void main() {
 
   streamTestWithEnv(
     description: 'participant adds a quoted reply in a thread to a message that is not in the list',
-    skip: 'https://linear.app/stream/issue/FLU-605',
+    skip: 'https://linear.app/stream/issue/FLU-667',
     body: (env) async {
       step('GIVEN the user opens a channel with a long thread');
       await env.backendRobot.generateChannels(
@@ -461,9 +461,9 @@ void main() {
 
   streamTestWithEnv(
     description: 'scroll to bottom shows no unread count after jumping to a quote in a thread',
-    // TODO(FLU-605): same as the other in-thread jump cases — jumping to a quote
+    // TODO(FLU-667): same as the other in-thread jump cases — jumping to a quote
     // inside a thread does not surface the scroll-to-bottom button.
-    skip: 'https://linear.app/stream/issue/FLU-605',
+    skip: 'https://linear.app/stream/issue/FLU-667',
     body: (env) async {
       step('GIVEN the user opens a channel with a long thread');
       await env.backendRobot.generateChannels(
@@ -670,7 +670,7 @@ void main() {
 
   streamTestWithEnv(
     description: 'thread root message is only visible on the last page of the thread',
-    skip: 'https://linear.app/stream/issue/FLU-605',
+    skip: 'https://linear.app/stream/issue/FLU-668',
     body: (env) async {
       step('GIVEN the user opens a channel with a long thread');
       await env.backendRobot.generateChannels(
@@ -697,10 +697,10 @@ void main() {
 
   streamTestWithEnv(
     description: 'thread root message is not loaded when the reply count equals the page size',
-    // TODO(FLU-605): the thread renders its root message twice once it is
+    // TODO(FLU-668): the thread renders its root message twice once it is
     // scrolled to — measured with 15, 25 and 30 replies, so it is not about
     // crossing a page boundary.
-    skip: 'https://linear.app/stream/issue/FLU-605',
+    skip: 'https://linear.app/stream/issue/FLU-668',
     body: (env) async {
       // The thread page size the SDK requests; a full page leaves no room for the
       // root message, so it only arrives with the next one.
@@ -733,10 +733,10 @@ void main() {
 
   streamTestWithEnv(
     description: 'thread root message is loaded when the reply count is below the page size',
-    // TODO(FLU-605): the thread renders its root message twice once it is
+    // TODO(FLU-668): the thread renders its root message twice once it is
     // scrolled to — measured with 15, 25 and 30 replies, so it is not about
     // crossing a page boundary.
-    skip: 'https://linear.app/stream/issue/FLU-605',
+    skip: 'https://linear.app/stream/issue/FLU-668',
     body: (env) async {
       const replies = 15;
 
@@ -762,7 +762,7 @@ void main() {
 
   streamTestWithEnv(
     description: 'user quotes the thread root message when it is not in the list',
-    skip: 'https://linear.app/stream/issue/FLU-605',
+    skip: 'https://linear.app/stream/issue/FLU-667',
     body: (env) async {
       step('GIVEN the user opens a long thread');
       await env.backendRobot.generateChannels(
