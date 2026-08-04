@@ -5,6 +5,28 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+extension E2EFinder on Finder {
+  /// [evaluate], but empty instead of throwing when this finder indexes past
+  /// what is currently rendered.
+  ///
+  /// An indexed finder (`find.byType(X).at(0)`, including one used as the `of:`
+  /// of a descendant finder) raises an `IndexError` from `evaluate()` when
+  /// nothing matches `X` yet, rather than resolving to nothing. For a loop that
+  /// is *waiting* for something to appear that is not an error — it just is not
+  /// there yet — and letting it throw kills the test on the first tick instead.
+  List<Element> evaluateSafely() {
+    try {
+      // Materialized inside the `try` on purpose: the result can be lazy, so
+      // returning it unconsumed would throw in the caller instead, after this
+      // catch has unwound.
+      return evaluate().toList();
+    } on RangeError {
+      // IndexError implements RangeError.
+      return const [];
+    }
+  }
+}
+
 extension E2EWidgetTester on WidgetTester {
   Future<void> scrollToText(String text) async {
     final target = find.text(text);
@@ -119,7 +141,7 @@ extension E2EWidgetTester on WidgetTester {
   /// the placeholders leaves their separator spaces behind, hence collapsing the
   /// whitespace afterwards.
   String? renderedText(Finder finder) {
-    final elements = finder.evaluate();
+    final elements = finder.evaluateSafely();
     if (elements.isEmpty) return null;
 
     final text = elements.first.widget as Text;
@@ -150,7 +172,7 @@ extension E2EWidgetTester on WidgetTester {
     final end = DateTime.now().add(timeout);
     while (DateTime.now().isBefore(end)) {
       await pump(const Duration(milliseconds: 100));
-      if (finder.evaluate().isNotEmpty) {
+      if (finder.evaluateSafely().isNotEmpty) {
         await settle();
         return;
       }
@@ -165,7 +187,7 @@ extension E2EWidgetTester on WidgetTester {
     final end = DateTime.now().add(timeout);
     while (DateTime.now().isBefore(end)) {
       await pump(const Duration(milliseconds: 100));
-      if (finder.evaluate().isEmpty) {
+      if (finder.evaluateSafely().isEmpty) {
         await settle();
         return;
       }
@@ -208,13 +230,7 @@ extension E2EWidgetTester on WidgetTester {
       await pump(const Duration(milliseconds: 100));
       if (appears.evaluate().isNotEmpty) return;
 
-      bool resolves;
-      try {
-        resolves = target.evaluate().isNotEmpty;
-      } catch (_) {
-        resolves = false;
-      }
-      if (!resolves) continue;
+      if (target.evaluateSafely().isEmpty) continue;
 
       await longPress(target);
       await settle();
@@ -234,7 +250,7 @@ extension E2EWidgetTester on WidgetTester {
 
   bool _tryInvokeMessageLongPress(Finder target) {
     final inkWells = find.descendant(of: target, matching: find.byType(InkWell));
-    if (inkWells.evaluate().isEmpty) return false;
+    if (inkWells.evaluateSafely().isEmpty) return false;
 
     final onLongPress = widget<InkWell>(inkWells.first).onLongPress;
     if (onLongPress == null) return false;
