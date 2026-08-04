@@ -142,6 +142,34 @@ class CustomRenderShrinkWrappingViewport extends CustomRenderViewport {
 
   late double _shrinkWrapExtent;
 
+  /// [RenderViewportBase]'s implementation resolves the target in
+  /// scroll-offset space and ignores [anchor], so a reveal on a list with a
+  /// non-zero anchor scrolls `anchor * mainAxisExtent` too far. Shift it back
+  /// into `pixels` space.
+  ///
+  /// `UnboundedRenderViewport.getOffsetToReveal` in `viewport.dart` carries
+  /// the full explanation; this is the shrink-wrapping twin.
+  @override
+  RevealedOffset getOffsetToReveal(
+    RenderObject target,
+    double alignment, {
+    Rect? rect,
+    Axis? axis,
+  }) {
+    final revealed = super.getOffsetToReveal(target, alignment, rect: rect, axis: axis);
+    final correction = anchor * (this.axis == Axis.vertical ? size.height : size.width);
+    if (correction == 0 || !revealed.offset.isFinite) return revealed;
+
+    final revealedRect = switch (axisDirection) {
+      AxisDirection.up => revealed.rect.translate(0, correction),
+      AxisDirection.down => revealed.rect.translate(0, -correction),
+      AxisDirection.left => revealed.rect.translate(correction, 0),
+      AxisDirection.right => revealed.rect.translate(-correction, 0),
+    };
+
+    return RevealedOffset(offset: revealed.offset + correction, rect: revealedRect);
+  }
+
   /// This value is set during layout based on the [CacheExtentStyle].
   ///
   /// When the style is [CacheExtentStyle.viewport], it is the main axis extent
