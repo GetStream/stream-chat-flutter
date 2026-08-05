@@ -96,9 +96,7 @@ void main() {
       await env.userRobot.tapQuotedMessage();
 
       step('THEN the user is scrolled up to the quote');
-      await env.userRobot
-          .assertQuotedMessage(text: quoteReply, isDisplayed: false)
-          .assertScrollToBottomButton(isDisplayed: true);
+      await env.userRobot.assertMessageOnScreen('1').assertScrollToBottomButton(isDisplayed: true);
     },
   );
 
@@ -124,9 +122,7 @@ void main() {
       await env.userRobot.tapQuotedMessage();
 
       step('THEN the user is scrolled up to the quote');
-      await env.userRobot
-          .assertQuotedMessage(text: quoteReply, isDisplayed: false)
-          .assertScrollToBottomButton(isDisplayed: true);
+      await env.userRobot.assertMessageOnScreen('1').assertScrollToBottomButton(isDisplayed: true);
     },
   );
 
@@ -347,7 +343,6 @@ void main() {
   streamTestWithEnv(
     allureId: '11711',
     description: 'user adds a quoted reply in a thread to a message that is not in the list',
-    skip: 'https://linear.app/stream/issue/FLU-667',
     body: (env) async {
       step('GIVEN the user opens a channel with a long thread');
       await env.backendRobot.generateChannels(
@@ -372,16 +367,14 @@ void main() {
       await env.userRobot.tapQuotedMessage();
 
       step('THEN the user is scrolled up to the quote');
-      await env.userRobot
-          .assertQuotedMessage(text: quoteReply, isDisplayed: false)
-          .assertScrollToBottomButton(isDisplayed: true);
+      await env.userRobot.assertMessageOnScreen('1').assertScrollToBottomButton(isDisplayed: true);
     },
   );
 
   streamTestWithEnv(
     allureId: '11712',
     description: 'participant adds a quoted reply in a thread to a message that is not in the list',
-    skip: 'https://linear.app/stream/issue/FLU-667',
+    skip: 'https://linear.app/stream/issue/FLU-671',
     body: (env) async {
       step('GIVEN the user opens a channel with a long thread');
       await env.backendRobot.generateChannels(
@@ -405,9 +398,7 @@ void main() {
       await env.userRobot.tapQuotedMessage();
 
       step('THEN the user is scrolled up to the quote');
-      await env.userRobot
-          .assertQuotedMessage(text: quoteReply, isDisplayed: false)
-          .assertScrollToBottomButton(isDisplayed: true);
+      await env.userRobot.assertMessageOnScreen('1').assertScrollToBottomButton(isDisplayed: true);
     },
   );
 
@@ -479,9 +470,6 @@ void main() {
   streamTestWithEnv(
     allureId: '11713',
     description: 'scroll to bottom shows no unread count after jumping to a quote in a thread',
-    // TODO(FLU-667): same as the other in-thread jump cases — jumping to a quote
-    // inside a thread does not surface the scroll-to-bottom button.
-    skip: 'https://linear.app/stream/issue/FLU-667',
     body: (env) async {
       step('GIVEN the user opens a channel with a long thread');
       await env.backendRobot.generateChannels(
@@ -791,7 +779,6 @@ void main() {
   streamTestWithEnv(
     allureId: '11717',
     description: 'user quotes the thread root message when it is not in the list',
-    skip: 'https://linear.app/stream/issue/FLU-667',
     body: (env) async {
       step('GIVEN the user opens a long thread');
       await env.backendRobot.generateChannels(
@@ -812,9 +799,7 @@ void main() {
       await env.userRobot.tapQuotedMessage();
 
       step('THEN the root message is loaded');
-      await env.userRobot
-          .assertQuotedMessage(text: quoteReply, isDisplayed: false)
-          .assertScrollToBottomButton(isDisplayed: true);
+      await env.userRobot.assertMessageOnScreen(sampleText).assertScrollToBottomButton(isDisplayed: true);
     },
   );
 }

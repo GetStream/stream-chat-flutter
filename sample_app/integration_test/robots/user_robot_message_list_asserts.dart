@@ -91,6 +91,22 @@ extension UserRobotMessageListAsserts on UserRobot {
     return this;
   }
 
+  /// Asserts the message [text] is actually on screen.
+  ///
+  /// `hitTestable()` is what makes this a *visibility* check: a plain finder
+  /// matches a row that is merely built, so it can report a row the list has
+  /// already scrolled past — which makes "the row is gone" a poor stand-in for
+  /// "the list scrolled away from it".
+  Future<UserRobot> assertMessageOnScreen(String text, {bool isDisplayed = true}) async {
+    final message = MessageListPage.list.messageWithText(text).hitTestable();
+    if (isDisplayed) {
+      await tester.waitUntilVisible(message);
+    } else {
+      await tester.waitUntilNotVisible(message);
+    }
+    return this;
+  }
+
   /// Asserts the backend's "unknown command" error message is shown.
   Future<UserRobot> assertInvalidCommandMessage(String command) async {
     await tester.waitUntilVisible(MessageListPage.list.moderatedMessage);
