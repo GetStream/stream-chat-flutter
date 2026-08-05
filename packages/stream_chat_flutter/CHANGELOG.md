@@ -24,6 +24,7 @@
 - Fixed the attachment picker throwing a `Tooltip` assertion error when a custom `TabbedAttachmentPickerOption` is added without a `title`; the tooltip is now only shown when a title is provided.
 - Fixed the `StreamBackButton` unread badge including the currently open channel in its total count.
 - Fixed `StreamMessageListView` jumping several screens when selecting text in a message on desktop or web. The `ScrollablePositionedList` viewports now account for their `anchor` in `getOffsetToReveal`, so implicit reveals (`Scrollable.ensureVisible`, `RenderObject.showOnScreen`) no longer overshoot. [#2862](https://github.com/GetStream/stream-chat-flutter/issues/2862)
+- Fixed modal dialogs (message actions, delete/flag confirmation) rendering over a white scrim in light theme; they now use the design system's scrim token.
 
 ## 10.2.0
 
