@@ -114,7 +114,9 @@ extension UserRobotMessageListAsserts on UserRobot {
   /// The two are worded differently by the SDK: the in-thread separator uses
   /// `threadSeparatorText` (so one reply reads "1 reply"), while the channel
   /// footer hardcodes `'$replyCount replies'` — which makes a single reply read
-  /// "1 replies". Asserted as rendered.
+  /// "1 replies". Asserted as rendered, so the channel branch below encodes a
+  /// bug on purpose: fixing FLU-669 makes "1 replies" become "1 reply", and this
+  /// assert has to change with it.
   Future<UserRobot> assertThreadReplyLabel({
     required int replies,
     bool inThread = false,

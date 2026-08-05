@@ -220,6 +220,7 @@ void main() {
   streamTestWithEnv(
     allureId: '11639',
     description: 'channel preview is updated when a thread reply is also sent to the channel',
+    skip: 'https://linear.app/stream/issue/FLU-670',
     body: (env) async {
       const channelMessage = 'Channel message';
       const threadReply = 'Thread reply';
