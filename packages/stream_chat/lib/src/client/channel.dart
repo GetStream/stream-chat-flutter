@@ -3927,7 +3927,10 @@ class ChannelClientState {
     final threadMessages = updatedThreads[parentId] ?? <Message>[];
     final updatedThreadMessages = _mergeMessagesIntoExisting(
       existing: threadMessages,
-      toMerge: messages,
+      // A thread holds replies only — the parent is rendered from its own copy,
+      // so letting it in here would show the root twice. The offline path
+      // already filters on `parent_id`; this keeps the online one in line.
+      toMerge: messages.where((it) => it.id != parentId),
     );
 
     // Update the thread with the modified message list.

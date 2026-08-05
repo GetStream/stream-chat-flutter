@@ -683,8 +683,7 @@ void main() {
 
   streamTestWithEnv(
     allureId: '11714',
-    description: 'thread root message is only visible on the last page of the thread',
-    skip: 'https://linear.app/stream/issue/FLU-668',
+    description: 'thread root message is visible once at the top of a long thread',
     body: (env) async {
       step('GIVEN the user opens a channel with a long thread');
       await env.backendRobot.generateChannels(
@@ -698,27 +697,23 @@ void main() {
       step('WHEN the user opens the thread');
       await env.userRobot.openThreadFromReplies();
 
-      step('THEN the parent message is not loaded');
+      step('THEN the root message is not on screen yet');
       await env.userRobot.assertMessages(text: sampleText, count: 0);
 
-      step('WHEN the user scrolls up to load one more page');
+      step('WHEN the user scrolls up to the top of the thread');
       await env.userRobot.scrollMessageListUp(times: 8);
 
-      step('THEN the parent message is loaded');
+      step('THEN the root message is shown exactly once');
       await env.userRobot.assertMessages(text: sampleText, count: 1);
     },
   );
 
   streamTestWithEnv(
     allureId: '11715',
-    description: 'thread root message is not loaded when the reply count equals the page size',
-    // TODO(FLU-668): the thread renders its root message twice once it is
-    // scrolled to — measured with 15, 25 and 30 replies, so it is not about
-    // crossing a page boundary.
-    skip: 'https://linear.app/stream/issue/FLU-668',
+    description: 'thread root message is visible once when the reply count equals the page size',
     body: (env) async {
-      // The thread page size the SDK requests; a full page leaves no room for the
-      // root message, so it only arrives with the next one.
+      // The thread page size the SDK requests: the replies fill a page exactly,
+      // so the next page is the one that reaches the top of the thread.
       const pageSize = 25;
 
       step('GIVEN the user opens a channel whose thread has exactly one page of replies');
@@ -730,29 +725,19 @@ void main() {
       );
       await env.userRobot.login().openChannel();
 
-      step('WHEN the user opens the thread');
-      await env.userRobot.openThreadFromReplies();
-
-      step('THEN the parent message is not loaded');
-      await env.userRobot.assertMessages(text: parentText, count: 0);
-
-      step('WHEN the user scrolls up to load one more page');
+      step('WHEN the user opens the thread and scrolls up to the top of it');
       // Native scrolls twice; a swipe there is a full screen, `scrollMessageListUp`
       // drags 300px, so reaching the top of the thread takes more of them.
-      await env.userRobot.scrollMessageListUp(times: 8);
+      await env.userRobot.openThreadFromReplies().scrollMessageListUp(times: 8);
 
-      step('THEN the parent message is loaded');
+      step('THEN the root message is shown exactly once');
       await env.userRobot.assertMessages(text: parentText, count: 1);
     },
   );
 
   streamTestWithEnv(
     allureId: '11716',
-    description: 'thread root message is loaded when the reply count is below the page size',
-    // TODO(FLU-668): the thread renders its root message twice once it is
-    // scrolled to — measured with 15, 25 and 30 replies, so it is not about
-    // crossing a page boundary.
-    skip: 'https://linear.app/stream/issue/FLU-668',
+    description: 'thread root message is visible once when the reply count is below the page size',
     body: (env) async {
       const replies = 15;
 
@@ -766,12 +751,12 @@ void main() {
       await env.userRobot.login().openChannel();
 
       step('WHEN the user opens the thread and scrolls to the top of it');
-      // Native asserts the parent cell is simply *there*, but the Flutter list is
-      // lazy: with this many replies the root is loaded yet not built until it is
-      // scrolled near, so reaching it is part of observing it here.
+      // Native asserts the root cell is simply *there*, but the Flutter list is
+      // lazy: the root is always part of the thread view, yet it is not built
+      // until it is scrolled near, so reaching it is part of observing it here.
       await env.userRobot.openThreadFromReplies().scrollMessageListUp(times: 8);
 
-      step('THEN the parent message is loaded exactly once');
+      step('THEN the root message is shown exactly once');
       await env.userRobot.assertMessages(text: parentText, count: 1);
     },
   );
