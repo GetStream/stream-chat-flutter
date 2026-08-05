@@ -201,6 +201,42 @@ itself is for. If a `group` is doing the work a separate file should be doing,
 [split the file instead](STYLE_GUIDE.md#prefer-more-test-files-avoid-long-test-files).
 Nested groups more than one level deep are almost always a signal to split.
 
+## A failing golden on a local run is not necessarily a regression
+
+Committed goldens are always generated on CI, so they encode that host's font
+hinting and antialiasing. A local `flutter test` renders differently, and will
+report golden failures that have nothing to do with your change. Never conclude
+"my change broke these goldens" from a local run alone, and never conclude the
+opposite either — that a green local run means you changed nothing visually.
+
+To find out what your change actually affected, compare **two local runs** instead
+of comparing against the committed PNGs:
+
+```bash
+# 1. with your change reverted (git stash), regenerate and keep a copy
+GITHUB_ACTIONS=true flutter test --update-goldens
+cp -R <goldens/ci dirs> /tmp/baseline/
+
+# 2. restore your change, regenerate again, and diff the two sets
+GITHUB_ACTIONS=true flutter test --update-goldens
+```
+
+Whatever differs between the two sets is genuinely yours; everything else is host
+drift. Amplifying the pixel diff (e.g. with PIL) makes a subtle change easy to
+confirm.
+
+Two things that make this easy to get wrong:
+
+- Only `goldens/ci/` is committed — `goldens/<platform>/` is gitignored. A local
+  run silently rewrites the platform goldens and `git status` stays clean, so an
+  empty `git status` is not evidence that nothing changed.
+- Alchemist picks CI goldens off the `GITHUB_ACTIONS` environment variable (see
+  `test/flutter_test_config.dart`). Without it you are exercising the gitignored
+  platform goldens, not the ones CI compares against.
+
+Regenerate committed goldens with the `update_goldens` GitHub Action, never from
+your machine — see [Golden tests in STYLE_GUIDE.md](STYLE_GUIDE.md#golden-tests).
+
 ## See also
 
 - [STYLE_GUIDE.md — Testing](STYLE_GUIDE.md#testing) — repo-level testing conventions

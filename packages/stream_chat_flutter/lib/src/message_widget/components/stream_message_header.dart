@@ -104,12 +104,18 @@ class DefaultStreamMessageHeader extends core.NullableStatelessWidget {
     final colorScheme = context.streamColorScheme;
     final crossAxisAlignment = core.StreamMessageLayout.crossAxisAlignmentOf(context);
 
+    // Previews sit on the modal scrim, where accent-colored annotations don't
+    // have enough contrast, so they fall back to the on-scrim color.
+    final isPreview = core.StreamMessageLayout.presentationOf(context) == .preview;
+    final accentColor = isPreview ? colorScheme.textOnAccent : colorScheme.accentPrimary;
+    final linkColor = isPreview ? colorScheme.textOnAccent : colorScheme.textLink;
+
     Widget? savedForLaterAnnotation;
     if (message.reminder case final reminder? when reminder.remindAt == null) {
       savedForLaterAnnotation = core.StreamMessageAnnotation(
         leading: Icon(icons.save),
         label: Text(translations.savedForLaterLabel),
-        style: .from(textColor: colorScheme.accentPrimary, iconColor: colorScheme.accentPrimary),
+        style: .from(textColor: accentColor, iconColor: accentColor),
       );
     }
 
@@ -137,7 +143,7 @@ class DefaultStreamMessageHeader extends core.NullableStatelessWidget {
         leading: Icon(icons.arrowUpRight),
         label: Text(annotationLabel),
         trailing: Text(translations.viewLabel),
-        style: .from(trailingTextColor: colorScheme.textLink),
+        style: .from(trailingTextColor: linkColor),
       );
     }
 

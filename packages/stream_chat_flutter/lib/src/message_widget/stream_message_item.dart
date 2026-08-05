@@ -850,7 +850,9 @@ class DefaultStreamMessageItem extends StatelessWidget {
       builder: (_) => StreamChatConfiguration(
         data: StreamChatConfiguration.of(context),
         child: StreamMessageLayout(
-          data: layout,
+          // The message is re-rendered on top of the modal scrim, so its
+          // metadata and annotations switch to their on-scrim colors.
+          data: layout.copyWith(presentation: core.StreamMessagePresentation.preview),
           child: StreamMessageActionsModal(
             message: message,
             messageActions: actions,
