@@ -511,8 +511,6 @@ void main() {
       await env.participantRobot.sendMessageInThread(sampleText);
 
       step('THEN the user observes the thread reply count in the channel');
-      // The channel footer hardcodes "N replies", so a single reply reads
-      // "1 replies" — see `assertThreadReplyLabel`.
       await env.userRobot.assertThreadReplyLabel(replies: 1).assertThreadReplyLabelAvatars(count: 1);
 
       step('WHEN the user opens the thread');

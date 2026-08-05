@@ -23,6 +23,7 @@
 - Fixed `StreamTypingIndicator` briefly showing typing users from a different context (main channel vs. thread) on its first frame.
 - Fixed the attachment picker throwing a `Tooltip` assertion error when a custom `TabbedAttachmentPickerOption` is added without a `title`; the tooltip is now only shown when a title is provided.
 - Fixed the `StreamBackButton` unread badge including the currently open channel in its total count.
+- Fixed the thread-replies footer under a message in the channel being hardcoded English and reading "1 replies" for a single reply; it now uses `threadReplyCountText`, which is localized and correctly singularized.
 - Fixed `StreamMessageListView` jumping several screens when selecting text in a message on desktop or web. The `ScrollablePositionedList` viewports now account for their `anchor` in `getOffsetToReveal`, so implicit reveals (`Scrollable.ensureVisible`, `RenderObject.showOnScreen`) no longer overshoot. [#2862](https://github.com/GetStream/stream-chat-flutter/issues/2862)
 
 ## 10.2.0
