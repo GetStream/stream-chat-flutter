@@ -6,14 +6,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 extension E2EFinder on Finder {
-  /// [evaluate], but empty instead of throwing when this finder indexes past
-  /// what is currently rendered.
+  /// [evaluate], but empty instead of throwing when this finder narrows to a
+  /// match that is not currently rendered.
   ///
-  /// An indexed finder (`find.byType(X).at(0)`, including one used as the `of:`
-  /// of a descendant finder) raises an `IndexError` from `evaluate()` when
-  /// nothing matches `X` yet, rather than resolving to nothing. For a loop that
-  /// is *waiting* for something to appear that is not an error — it just is not
-  /// there yet — and letting it throw kills the test on the first tick instead.
+  /// A narrowing finder raises from `evaluate()` when nothing matches yet,
+  /// rather than resolving to nothing — `find.byType(X).at(0)` (including one
+  /// used as the `of:` of a descendant finder) raises an `IndexError`, and
+  /// `.first` / `.last` raise a `StateError`. For a loop that is *waiting* for
+  /// something to appear that is not an error — it just is not there yet — and
+  /// letting it throw kills the test on the first tick instead. It matters just
+  /// as much when waiting for something to go away, where "no match" is the
+  /// expected end state.
   List<Element> evaluateSafely() {
     try {
       // Materialized inside the `try` on purpose: the result can be lazy, so
@@ -22,6 +25,9 @@ extension E2EFinder on Finder {
       return evaluate().toList();
     } on RangeError {
       // IndexError implements RangeError.
+      return const [];
+    } on StateError {
+      // `Iterable.first` / `.last` on an empty match.
       return const [];
     }
   }

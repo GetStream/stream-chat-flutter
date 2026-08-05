@@ -23,6 +23,8 @@ end
 
 def batch_targets(targets, batch:, batch_count:)
   return targets if batch.nil? || batch_count.to_i <= 1
+  # `each_slice(0)` raises, and a zero slice size is exactly what an empty list computes.
+  return [] if targets.empty?
 
   count = batch_count.to_i
   index = batch.to_i

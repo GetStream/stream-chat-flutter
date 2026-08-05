@@ -246,7 +246,8 @@ extension UserRobotChain on Future<UserRobot> {
 
   Future<UserRobot> waitForMessageListToLoad() => then((it) => it.waitForMessageListToLoad());
 
-  Future<UserRobot> openThread({int messageIndex = 0}) => then((it) => it.openThread(messageIndex: messageIndex));
+  Future<UserRobot> openThread({int messageIndex = 0, String? parentText}) =>
+      then((it) => it.openThread(messageIndex: messageIndex, parentText: parentText));
 
   Future<UserRobot> openThreadFromReplies() => then((it) => it.openThreadFromReplies());
 

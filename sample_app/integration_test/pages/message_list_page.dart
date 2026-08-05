@@ -114,6 +114,11 @@ final class _MessageList {
   /// slash command. Error messages bypass [StreamMessageItem] entirely.
   Finder get moderatedMessage => find.byType(StreamModeratedMessage);
 
+  /// The row an ephemeral message gets, e.g. a Giphy preview awaiting a
+  /// send/shuffle/cancel. Like the system and error rows, it is not a
+  /// [StreamMessageItem].
+  Finder get ephemeralMessage => find.byType(StreamEphemeralMessage);
+
   /// A rendered Giphy attachment.
   Finder get giphy => find.byType(StreamGiphyAttachment);
 

@@ -96,7 +96,9 @@ void main() {
 
       step('WHEN the user sends a message with an invalid command');
       // The mock server answers an unknown command with an error-type message.
-      await env.userRobot.sendMessage('/test');
+      // Asserted here so the preview check below cannot pass on a run where the
+      // error message never arrived. The mock strips the leading slash.
+      await env.userRobot.sendMessage('/test').assertInvalidCommandMessage('test');
 
       step('AND the user goes back to the channel list');
       await env.userRobot.tapBackButton();

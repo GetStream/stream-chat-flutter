@@ -164,14 +164,16 @@ extension UserRobotMessageListAsserts on UserRobot {
 
   /// Asserts the message list holds exactly [count] rows.
   ///
-  /// A system message occupies a row of its own ([StreamSystemMessage]) rather
-  /// than a [MessageListPage.messageItem], so both are counted — mirroring the
-  /// native cell count. The list is lazy, so this is only meaningful for counts
-  /// small enough to fit on screen.
+  /// `buildMessage` returns a row of its own — never a [MessageListPage.messageItem] —
+  /// for system, ephemeral and error messages, so all four types are counted here,
+  /// mirroring the native cell count. The list is lazy, so this is only meaningful
+  /// for counts small enough to fit on screen.
   Future<UserRobot> assertMessageCount(int count) async {
     int rowCount() =>
         find.byType(MessageListPage.messageItem).evaluate().length +
-        MessageListPage.list.systemMessage.evaluate().length;
+        MessageListPage.list.systemMessage.evaluate().length +
+        MessageListPage.list.ephemeralMessage.evaluate().length +
+        MessageListPage.list.moderatedMessage.evaluate().length;
 
     final end = DateTime.now().add(const Duration(seconds: 30));
     while (rowCount() != count && DateTime.now().isBefore(end)) {

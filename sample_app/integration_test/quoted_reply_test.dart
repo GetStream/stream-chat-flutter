@@ -260,9 +260,9 @@ void main() {
       await env.userRobot.quoteMessage('/$invalidCommand');
 
       step('THEN the user observes the invalid command message');
-      await env.userRobot
-          .assertInvalidCommandMessage(invalidCommand)
-          .assertQuotedMessage(text: quoteReply, isDisplayed: false);
+      // No text: the rejected reply carries none, so this asserts that no quote
+      // bubble is rendered at all.
+      await env.userRobot.assertInvalidCommandMessage(invalidCommand).assertQuotedMessage(isDisplayed: false);
     },
   );
 
@@ -461,9 +461,7 @@ void main() {
       await env.userRobot.openThread(parentText: parentText).quoteMessage('/$invalidCommand');
 
       step('THEN the user observes the invalid command message');
-      await env.userRobot
-          .assertInvalidCommandMessage(invalidCommand)
-          .assertQuotedMessage(text: quoteReply, isDisplayed: false);
+      await env.userRobot.assertInvalidCommandMessage(invalidCommand).assertQuotedMessage(isDisplayed: false);
     },
   );
 
