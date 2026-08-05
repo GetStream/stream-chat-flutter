@@ -202,7 +202,7 @@ lane :run_e2e_test do |options|
           first_attempt = false
           attempt += 1
 
-          flags = [target, "--dart-define=E2E_TARGET=#{test_name}"]
+          flags = [target, '--no-pub', "--dart-define=E2E_TARGET=#{test_name}"]
           flags << "-d #{device}" if device
 
           if options[:verbose]
