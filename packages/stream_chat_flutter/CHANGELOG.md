@@ -25,6 +25,10 @@
 - Fixed the `StreamBackButton` unread badge including the currently open channel in its total count.
 - Fixed `StreamMessageListView` jumping several screens when selecting text in a message on desktop or web. The `ScrollablePositionedList` viewports now account for their `anchor` in `getOffsetToReveal`, so implicit reveals (`Scrollable.ensureVisible`, `RenderObject.showOnScreen`) no longer overshoot. [#2862](https://github.com/GetStream/stream-chat-flutter/issues/2862)
 
+🔄 Changed
+
+- Improved message text selection experience on desktop and web.
+
 ## 10.2.0
 
 ⚠️ Changed
