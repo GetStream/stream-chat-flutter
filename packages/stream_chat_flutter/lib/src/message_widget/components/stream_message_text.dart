@@ -71,13 +71,17 @@ class StreamMessageText extends StatelessWidget {
 
         if (messageText == null || messageText.trim().isEmpty) return const Empty();
 
-        return core.StreamMessageText(
+        final streamMessageText = core.StreamMessageText(
           messageText,
-          selectable: isDesktopDeviceOrWeb,
+          selectable: false,
           onTapLink: onLinkTap,
           onTapMention: onMentionTap,
           onTapAnyMention: onAnyMentionTap,
         );
+
+        if (isDesktopDeviceOrWeb) return SelectionArea(child: streamMessageText);
+
+        return streamMessageText;
       },
     );
   }
