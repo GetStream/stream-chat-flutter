@@ -238,6 +238,10 @@ void main() {
       when(
         () => client.channelDeliveryReporter.submitForDelivery(any()),
       ).thenAnswer((_) async {});
+
+      // No persistence in this group by default; pending-operation tests
+      // install a MockPersistenceClient locally.
+      when(() => client.chatPersistenceClient).thenReturn(null);
     });
 
     // Setting up a initialized channel
@@ -253,6 +257,8 @@ void main() {
 
     tearDown(() {
       channel.dispose();
+      // Restore the no-persistence default for the next test.
+      when(() => client.chatPersistenceClient).thenReturn(null);
       clearInteractions(client);
     });
 
@@ -2981,7 +2987,12 @@ void main() {
 
           when(
             () => client.sendReaction(message.id, reaction),
-          ).thenThrow(StreamChatNetworkError(ChatErrorCode.inputError));
+          ).thenThrow(
+            StreamChatNetworkError(
+              ChatErrorCode.inputError,
+              data: ErrorResponse()..statusCode = 400,
+            ),
+          );
 
           expectLater(
             // skipping first seed message list -> [] messages
@@ -3105,6 +3116,35 @@ void main() {
           ).called(1);
         },
       );
+
+      test(
+        'a retriable failure keeps the optimistic reaction for replay',
+        () async {
+          const type = 'like';
+          final message = Message(id: 'offline-msg', state: MessageState.sent);
+          final reaction = Reaction(
+            type: type,
+            messageId: message.id,
+            user: client.state.currentUser,
+          );
+
+          // data == null → retriable/offline error.
+          when(
+            () => client.sendReaction(message.id, reaction),
+          ).thenThrow(StreamChatNetworkError(ChatErrorCode.inputError));
+
+          await expectLater(
+            channel.sendReaction(message, reaction),
+            throwsA(isA<StreamChatNetworkError>()),
+          );
+
+          // The optimistic reaction is kept (queued for replay on reconnect)
+          final current = channel.state!.messages.firstWhere(
+            (m) => m.id == message.id,
+          );
+          expect(current.ownReactions?.map((r) => r.type), contains(type));
+        },
+      );
     });
 
     group('`.sendReaction in thread`', () {
@@ -3185,7 +3225,12 @@ void main() {
 
           when(
             () => client.sendReaction(message.id, reaction),
-          ).thenThrow(StreamChatNetworkError(ChatErrorCode.inputError));
+          ).thenThrow(
+            StreamChatNetworkError(
+              ChatErrorCode.inputError,
+              data: ErrorResponse()..statusCode = 400,
+            ),
+          );
 
           expectLater(
             // skipping first seed message list -> [] messages
@@ -3367,7 +3412,7 @@ void main() {
       });
 
       test(
-        'should restore prev message state if `client.deleteReaction` throws',
+        'restores the reaction if `client.deleteReaction` throws terminally',
         () async {
           const userId = 'test-user-id';
           const messageId = 'test-message-id';
@@ -3388,12 +3433,23 @@ void main() {
               ),
             },
             state: MessageState.sent,
+            // `Message.createdAt` falls back to `DateTime.now()` per call
+            // when not provided, which breaks merge/sort keyed on createdAt.
+            createdAt: DateTime.now(),
           );
 
           when(
             () => client.deleteReaction(messageId, type),
-          ).thenThrow(StreamChatNetworkError(ChatErrorCode.inputError));
+          ).thenThrow(
+            StreamChatNetworkError(
+              ChatErrorCode.inputError,
+              data: ErrorResponse()..statusCode = 400,
+            ),
+          );
 
+          // A terminal delete rolls back the optimistic removal (restores the
+          // reaction), symmetric with `sendReaction`: the stream emits the
+          // removal, then the restore.
           expectLater(
             // skipping first seed message list -> [] messages
             channel.state?.messagesStream.skip(1),
@@ -3419,13 +3475,50 @@ void main() {
             ]),
           );
 
-          try {
-            await channel.deleteReaction(message, reaction);
-          } catch (e) {
-            expect(e, isA<StreamChatNetworkError>());
-          }
+          await expectLater(
+            channel.deleteReaction(message, reaction),
+            throwsA(isA<StreamChatNetworkError>()),
+          );
 
           verify(() => client.deleteReaction(messageId, type)).called(1);
+        },
+      );
+
+      test(
+        'a retriable failure keeps the optimistic removal for replay',
+        () async {
+          const type = 'like';
+          const messageId = 'offline-del';
+          final reaction = Reaction(
+            type: type,
+            messageId: messageId,
+            userId: 'test-user-id',
+          );
+          final message = Message(
+            id: messageId,
+            ownReactions: [reaction],
+            latestReactions: [reaction],
+            reactionGroups: {type: ReactionGroup(count: 1, sumScores: 1)},
+            state: MessageState.sent,
+          );
+
+          when(
+            () => client.deleteReaction(messageId, type),
+          ).thenThrow(StreamChatNetworkError(ChatErrorCode.inputError));
+
+          await expectLater(
+            channel.deleteReaction(message, reaction),
+            throwsA(isA<StreamChatNetworkError>()),
+          );
+
+          // The optimistic removal is kept (queued for replay on reconnect)
+          final current = channel.state!.messages.firstWhere(
+            (m) => m.id == messageId,
+          );
+          expect(
+            current.ownReactions?.map((r) => r.type) ?? <String>[],
+            isNot(contains(type)),
+          );
         },
       );
     });
@@ -3488,7 +3581,7 @@ void main() {
       });
 
       test(
-        'should restore prev message state if `client.deleteReaction` throws',
+        'restores the reaction if `client.deleteReaction` throws terminally',
         () async {
           const userId = 'test-user-id';
           const messageId = 'test-message-id';
@@ -3518,8 +3611,16 @@ void main() {
 
           when(
             () => client.deleteReaction(messageId, type),
-          ).thenThrow(StreamChatNetworkError(ChatErrorCode.inputError));
+          ).thenThrow(
+            StreamChatNetworkError(
+              ChatErrorCode.inputError,
+              data: ErrorResponse()..statusCode = 400,
+            ),
+          );
 
+          // A terminal delete rolls back the optimistic removal (restores the
+          // reaction), symmetric with `sendReaction`: the stream emits the
+          // removal, then the restore.
           expectLater(
             // skipping first seed message list -> [] messages
             channel.state?.threadsStream.skip(1).map((event) => event['test-parent-id']),
@@ -3547,11 +3648,10 @@ void main() {
             ]),
           );
 
-          try {
-            await channel.deleteReaction(message, reaction);
-          } catch (e) {
-            expect(e, isA<StreamChatNetworkError>());
-          }
+          await expectLater(
+            channel.deleteReaction(message, reaction),
+            throwsA(isA<StreamChatNetworkError>()),
+          );
 
           verify(() => client.deleteReaction(messageId, type)).called(1);
         },
@@ -4947,6 +5047,9 @@ void main() {
       when(
         () => client.channelDeliveryReporter.submitForDelivery(any()),
       ).thenAnswer((_) async {});
+
+      // No persistence in this group.
+      when(() => client.chatPersistenceClient).thenReturn(null);
     });
 
     group(

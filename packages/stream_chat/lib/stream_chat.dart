@@ -58,6 +58,7 @@ export 'src/core/models/message_state.dart';
 export 'src/core/models/moderation.dart';
 export 'src/core/models/mute.dart';
 export 'src/core/models/own_user.dart';
+export 'src/core/models/pending_operation.dart';
 export 'src/core/models/poll.dart';
 export 'src/core/models/poll_option.dart';
 export 'src/core/models/poll_vote.dart';
