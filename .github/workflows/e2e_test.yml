@@ -59,7 +59,7 @@ jobs:
     if: github.event_name != 'workflow_dispatch' || inputs.android
     needs: allure_launch_android
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: 60
     strategy:
       fail-fast: false
       matrix:
@@ -126,7 +126,7 @@ jobs:
     if: github.event_name == 'workflow_dispatch' && inputs.ios
     needs: allure_launch_ios
     runs-on: macos-15
-    timeout-minutes: 40
+    timeout-minutes: 60
     strategy:
       fail-fast: false
       matrix:
