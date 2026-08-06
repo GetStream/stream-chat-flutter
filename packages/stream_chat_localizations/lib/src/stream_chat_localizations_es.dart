@@ -810,7 +810,7 @@ No es posible añadir más de $limit archivos adjuntos
   String get showTranslationLabel => 'Ver traducción';
 
   @override
-  String translatedFromLanguageText(String languageCode) => 'Traducido de ${_languageNameEs(languageCode)}';
+  String translatedFromLanguageText(String languageCode) => 'Traducido del ${_languageNameEs(languageCode)}';
 
   @override
   String get createPollPromptLabel => '¡Crea una encuesta y deja que todos voten!';
