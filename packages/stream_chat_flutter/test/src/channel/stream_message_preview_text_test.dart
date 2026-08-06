@@ -851,6 +851,26 @@ void main() {
 
       expect(find.text('Hello, world!'), findsOneWidget);
     });
+
+    testWidgets('shows original text when translationDisplayEnabled is false', (tester) async {
+      final message = Message(
+        text: 'Hello, world!',
+        user: User(id: 'other-user-id', name: 'Other User'),
+        i18n: const {
+          'fr_text': 'Bonjour, monde!',
+        },
+      );
+
+      await pumpMessagePreview(
+        tester,
+        message,
+        language: 'fr',
+        configData: StreamChatConfigurationData(translationDisplayEnabled: false),
+      );
+
+      expect(find.text('Hello, world!'), findsOneWidget);
+      expect(find.text('Bonjour, monde!'), findsNothing);
+    });
   });
 
   group('Custom MessagePreviewFormatter', () {
