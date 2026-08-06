@@ -312,20 +312,6 @@ extension IconButtonX on IconButton {
   }
 }
 
-/// Extensions on a nullable [User].
-extension UserX on User? {
-  /// The language to use when translating content for this user:
-  /// [User.language] when set to a non-empty value, otherwise the device's
-  /// locale.
-  ///
-  /// Stream's API defaults [User.language] to `''` rather than omitting it,
-  /// so an empty string is treated the same as a missing value.
-  String languageOrDeviceLocale(BuildContext context) => switch (this?.language) {
-    null || '' => Localizations.localeOf(context).languageCode,
-    final language => language,
-  };
-}
-
 /// Extensions on List<User>
 extension UserListX on List<User> {
   /// It does an search on a list of [User] and returns users with
@@ -473,8 +459,15 @@ extension MessageX on Message {
     return messageTextLength * (fontSize ?? 1) * multiplier;
   }
 
-  /// It returns the message with the translated text if available locally
-  Message translate(String language) => copyWith(text: i18n?['${language}_text'] ?? text);
+  /// It returns the message with the translated text if available locally.
+  ///
+  /// Returns the message unchanged when [language] is `null` or empty —
+  /// Stream's API defaults [User.language] to `''` rather than omitting it,
+  /// so both are treated as "no language to translate to".
+  Message translate(String? language) => switch (language) {
+    null || '' => this,
+    final language => copyWith(text: i18n?['${language}_text'] ?? text),
+  };
 
   /// It returns the message replacing the mentioned user names with
   ///  the respective user ids

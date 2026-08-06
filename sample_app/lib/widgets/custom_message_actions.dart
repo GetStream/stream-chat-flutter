@@ -217,8 +217,9 @@ abstract final class _MessageInfoAction {
 /// picks it up automatically — this sample app only needs to fetch it.
 ///
 /// Only shown for messages from other users — translating your own message
-/// isn't a useful action — and always translates directly to
-/// [BuildContext.translationUserLanguage], with no language picker.
+/// isn't a useful action — and always translates directly to the current
+/// user's [User.language], with no language picker. Hidden entirely when
+/// that isn't set server-side, rather than guessing a target language.
 abstract final class _TranslateAction {
   static List<StreamContextMenuAction> build(
     BuildContext context,
@@ -232,7 +233,8 @@ abstract final class _TranslateAction {
     final isSentByCurrentUser = message.user?.id == currentUser?.id;
     if (isSentByCurrentUser) return const [];
 
-    final userLanguage = context.translationUserLanguage;
+    final userLanguage = currentUser?.language;
+    if (userLanguage == null || userLanguage.isEmpty) return const [];
 
     // Already covers the message's own language: the server includes a
     // self-referential entry keyed by its source language, so this is also
@@ -267,13 +269,4 @@ abstract final class _TranslateAction {
       );
     }
   }
-}
-
-/// Convenient access to the language translations should target for the
-/// current user.
-extension _TranslationUserLanguageExtension on BuildContext {
-  /// The language translations should target for the current user:
-  /// [User.language] when set to a non-empty value, otherwise the app's
-  /// locale.
-  String get translationUserLanguage => StreamChat.of(this).currentUser.languageOrDeviceLocale(this);
 }

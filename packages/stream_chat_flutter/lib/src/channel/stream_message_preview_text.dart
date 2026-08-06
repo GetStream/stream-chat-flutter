@@ -39,7 +39,7 @@ class StreamMessagePreviewText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final currentUser = StreamChat.maybeOf(context)?.currentUser;
-    final translationLanguage = language ?? currentUser.languageOrDeviceLocale(context);
+    final translationLanguage = language ?? currentUser?.language;
     final config = StreamChatConfiguration.of(context);
     final translatedMessage = config.translationDisplayEnabled ? message.translate(translationLanguage) : message;
     final previewMessage = translatedMessage.replaceMentions(linkify: false);

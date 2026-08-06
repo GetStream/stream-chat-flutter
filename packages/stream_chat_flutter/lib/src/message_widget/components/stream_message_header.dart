@@ -133,19 +133,19 @@ class DefaultStreamMessageHeader extends core.NullableStatefulWidget {
 }
 
 class _DefaultStreamMessageHeaderState extends core.NullableState<DefaultStreamMessageHeader> {
-  late String _language;
-  StreamSubscription<String>? _languageSubscription;
+  late String? _language;
+  StreamSubscription<String?>? _languageSubscription;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    // `Localizations.localeOf` (via `languageOrDeviceLocale`) registers an
-    // inherited-widget dependency, so this (and the `currentUserStream`
-    // subscription it seeds) must happen here rather than in `initState`.
+    // `StreamChat.of` registers an inherited-widget dependency, so this (and
+    // the `currentUserStream` subscription it seeds) must happen here rather
+    // than in `initState`.
     final streamChat = StreamChat.of(context);
-    _language = streamChat.currentUser.languageOrDeviceLocale(context);
-    final languageStream = streamChat.currentUserStream.map((it) => it.languageOrDeviceLocale(context));
+    _language = streamChat.currentUser?.language;
+    final languageStream = streamChat.currentUserStream.map((it) => it?.language);
     _languageSubscription ??= languageStream.listen((language) {
       if (language == _language) return;
       setState(() => _language = language);
@@ -221,29 +221,33 @@ class _DefaultStreamMessageHeaderState extends core.NullableState<DefaultStreamM
 
     Widget? translatedAnnotation;
     final translationDisplayEnabled = StreamChatConfiguration.of(context).translationDisplayEnabled;
+    // No language to translate to — either translation display is off, or
+    // the current user has none set.
     if (translationDisplayEnabled) {
-      // The server includes a self-referential entry for the message's own
-      // source language (e.g. `es_text` equal to `message.text` on a
-      // Spanish message), so a plain null-check isn't enough — a user
-      // whose language matches the source would otherwise see the
-      // annotation with nothing to actually toggle.
-      if (message.i18n?['${_language}_text'] case final translatedText? when translatedText != message.text) {
-        final label = switch (props.showOriginalText) {
-          true => translations.originalLabel,
-          false => switch (message.i18n?['language']) {
-            null || '' => translations.translatedLabel,
-            final sourceLanguage => translations.translatedFromLanguageText(sourceLanguage),
-          },
-        };
-        final trailing = props.showOriginalText ? translations.showTranslationLabel : translations.showOriginalLabel;
+      if (_language case final language? when language.isNotEmpty) {
+        // The server includes a self-referential entry for the message's own
+        // source language (e.g. `es_text` equal to `message.text` on a
+        // Spanish message), so a plain null-check isn't enough — a user
+        // whose language matches the source would otherwise see the
+        // annotation with nothing to actually toggle.
+        if (message.i18n?['${language}_text'] case final translatedText? when translatedText != message.text) {
+          final label = switch (props.showOriginalText) {
+            true => translations.originalLabel,
+            false => switch (message.i18n?['language']) {
+              null || '' => translations.translatedLabel,
+              final sourceLanguage => translations.translatedFromLanguageText(sourceLanguage),
+            },
+          };
+          final trailing = props.showOriginalText ? translations.showTranslationLabel : translations.showOriginalLabel;
 
-        translatedAnnotation = core.StreamMessageAnnotation(
-          onTap: props.onToggleOriginalText,
-          leading: Icon(icons.translate),
-          label: Text('$label ·'),
-          trailing: Text(trailing),
-          style: .from(trailingTextColor: linkColor),
-        );
+          translatedAnnotation = core.StreamMessageAnnotation(
+            onTap: props.onToggleOriginalText,
+            leading: Icon(icons.translate),
+            label: Text('$label ·'),
+            trailing: Text(trailing),
+            style: .from(trailingTextColor: linkColor),
+          );
+        }
       }
     }
 
