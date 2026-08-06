@@ -71,12 +71,11 @@ class StreamMessageText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final streamChat = StreamChat.of(context);
-    final deviceLanguage = Localizations.localeOf(context).languageCode;
     final translationDisplayEnabled = StreamChatConfiguration.of(context).translationDisplayEnabled;
 
     return BetterStreamBuilder<String>(
-      initialData: _resolveLanguage(streamChat.currentUser?.language, deviceLanguage),
-      stream: streamChat.currentUserStream.map((it) => _resolveLanguage(it?.language, deviceLanguage)),
+      initialData: streamChat.currentUser.languageOrDeviceLocale(context),
+      stream: streamChat.currentUserStream.map((it) => it.languageOrDeviceLocale(context)),
       builder: (context, language) {
         final translated = (showOriginalText || !translationDisplayEnabled) ? message : message.translate(language);
         final messageText = translated.replaceMentions().text?.replaceAll('\n', '\n\n').trim();
@@ -94,10 +93,3 @@ class StreamMessageText extends StatelessWidget {
     );
   }
 }
-
-// Stream's API defaults `User.language` to `''` rather than omitting it, so
-// an empty string must fall back the same way a missing value does.
-String _resolveLanguage(String? language, String fallback) => switch (language) {
-  null || '' => fallback,
-  final language => language,
-};

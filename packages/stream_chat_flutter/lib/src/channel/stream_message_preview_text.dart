@@ -39,15 +39,7 @@ class StreamMessagePreviewText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final currentUser = StreamChat.maybeOf(context)?.currentUser;
-    // Stream's API defaults `User.language` to `''` rather than omitting
-    // it, so an empty string must fall back the same way a missing value
-    // does.
-    final translationLanguage =
-        language ??
-        switch (currentUser?.language) {
-          null || '' => Localizations.localeOf(context).languageCode,
-          final userLanguage => userLanguage,
-        };
+    final translationLanguage = language ?? currentUser.languageOrDeviceLocale(context);
     final config = StreamChatConfiguration.of(context);
     final translatedMessage = config.translationDisplayEnabled ? message.translate(translationLanguage) : message;
     final previewMessage = translatedMessage.replaceMentions(linkify: false);

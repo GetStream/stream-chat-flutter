@@ -140,18 +140,16 @@ class _DefaultStreamMessageHeaderState extends core.NullableState<DefaultStreamM
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    // `Localizations.localeOf` registers an inherited-widget dependency, so
-    // this (and the `currentUserStream` subscription it seeds) must happen
-    // here rather than in `initState`.
+    // `Localizations.localeOf` (via `languageOrDeviceLocale`) registers an
+    // inherited-widget dependency, so this (and the `currentUserStream`
+    // subscription it seeds) must happen here rather than in `initState`.
     final streamChat = StreamChat.of(context);
-    final deviceLanguage = Localizations.localeOf(context).languageCode;
-    _language = _resolveLanguage(streamChat.currentUser?.language, deviceLanguage);
-    _languageSubscription ??= streamChat.currentUserStream
-        .map((it) => _resolveLanguage(it?.language, deviceLanguage))
-        .listen((language) {
-          if (language == _language) return;
-          setState(() => _language = language);
-        });
+    _language = streamChat.currentUser.languageOrDeviceLocale(context);
+    final languageStream = streamChat.currentUserStream.map((it) => it.languageOrDeviceLocale(context));
+    _languageSubscription ??= languageStream.listen((language) {
+      if (language == _language) return;
+      setState(() => _language = language);
+    });
   }
 
   @override
@@ -266,10 +264,3 @@ class _DefaultStreamMessageHeaderState extends core.NullableState<DefaultStreamM
     );
   }
 }
-
-// Stream's API defaults `User.language` to `''` rather than omitting it, so
-// an empty string must fall back the same way a missing value does.
-String _resolveLanguage(String? language, String fallback) => switch (language) {
-  null || '' => fallback,
-  final language => language,
-};

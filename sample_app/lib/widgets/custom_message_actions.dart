@@ -275,11 +275,5 @@ extension _TranslationUserLanguageExtension on BuildContext {
   /// The language translations should target for the current user:
   /// [User.language] when set to a non-empty value, otherwise the app's
   /// locale.
-  String get translationUserLanguage {
-    final currentUser = StreamChat.of(this).currentUser;
-    return switch (currentUser?.language) {
-      null || '' => Localizations.localeOf(this).languageCode,
-      final language => language,
-    };
-  }
+  String get translationUserLanguage => StreamChat.of(this).currentUser.languageOrDeviceLocale(this);
 }
