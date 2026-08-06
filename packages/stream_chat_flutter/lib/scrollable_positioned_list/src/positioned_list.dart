@@ -13,7 +13,6 @@ import 'package:stream_chat_flutter/scrollable_positioned_list/src/indexed_key.d
 import 'package:stream_chat_flutter/scrollable_positioned_list/src/item_positions_listener.dart';
 import 'package:stream_chat_flutter/scrollable_positioned_list/src/item_positions_notifier.dart';
 import 'package:stream_chat_flutter/scrollable_positioned_list/src/scroll_view.dart';
-import 'package:stream_chat_flutter/scrollable_positioned_list/src/wrapping.dart';
 
 /// A list of widgets similar to [ListView], except scroll control
 /// and position reporting is based on index rather than pixel offset.
@@ -560,14 +559,6 @@ class _PositionedListState extends State<PositionedList> {
         for (final element in elements) {
           final box = element.renderObject! as RenderBox;
           viewport ??= RenderAbstractViewport.of(box) as RenderViewportBase?;
-          var anchor = 0.0;
-          if (viewport is RenderViewport) {
-            anchor = viewport.anchor;
-          }
-
-          if (viewport is CustomRenderViewport) {
-            anchor = viewport.anchor;
-          }
 
           final key = element.widget.key! as IndexedKey;
           // Skip this element if `box` has never been laid out, isn't
@@ -588,9 +579,13 @@ class _PositionedListState extends State<PositionedList> {
           if (!box.attached) continue;
           try {
             if (widget.scrollDirection == Axis.vertical) {
+              // `getOffsetToReveal` is anchor-aware on both viewports used
+              // here (see `UnboundedRenderViewport.getOffsetToReveal`), so
+              // the delta against the current pixels is already the item's
+              // painted offset from the viewport's leading edge.
               final reveal = viewport!.getOffsetToReveal(box, 0).offset;
               if (!reveal.isFinite) continue;
-              final itemOffset = reveal - viewport.offset.pixels + anchor * viewport.size.height;
+              final itemOffset = reveal - viewport.offset.pixels;
               final viewportDimension = scrollController.position.viewportDimension;
               // content* edges are measured from the visible content (inside the
               // padding) so overlays under a floating bar can key off 0..1;

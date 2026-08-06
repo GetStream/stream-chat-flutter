@@ -361,6 +361,51 @@ void main() {
         // Should have updated the reaction group counts
         expect(updatedMessage.reactionGroups, isEmpty);
       });
+
+      test('should keep reaction group with non-positive score sum while '
+          'count remains positive', () {
+        // A positively-scored own reaction and a negatively-scored reaction
+        // from another user net the group score to zero while count is 2.
+        final ownReaction = Reaction(
+          type: 'like',
+          score: 1,
+          user: testUser,
+          userId: testUser.id,
+          messageId: emptyMessage.id,
+        );
+
+        final otherUser = User(id: 'other-user-id');
+        final otherReaction = Reaction(
+          type: 'like',
+          score: -1,
+          user: otherUser,
+          userId: otherUser.id,
+          messageId: emptyMessage.id,
+        );
+
+        final messageWithReactions = emptyMessage.copyWith(
+          ownReactions: [ownReaction],
+          latestReactions: [ownReaction, otherReaction],
+          reactionGroups: {
+            'like': ReactionGroup(
+              count: 2,
+              sumScores: 0,
+              firstReactionAt: ownReaction.createdAt,
+              lastReactionAt: otherReaction.createdAt,
+            ),
+          },
+        );
+
+        final updatedMessage = messageWithReactions.deleteMyReaction();
+
+        // The group must survive because another user's reaction remains, even
+        // though the remaining summed score is negative.
+        expect(updatedMessage.reactionGroups!.length, 1);
+        expect(updatedMessage.reactionGroups!['like']!.count, 1);
+        expect(updatedMessage.reactionGroups!['like']!.sumScores, -1);
+        expect(updatedMessage.latestReactions!.length, 1);
+        expect(updatedMessage.latestReactions!.first.userId, otherUser.id);
+      });
     });
   });
 }
