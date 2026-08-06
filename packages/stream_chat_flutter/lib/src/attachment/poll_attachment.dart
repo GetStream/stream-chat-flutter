@@ -152,7 +152,7 @@ class _DefaultStreamPollAttachmentState extends State<DefaultStreamPollAttachmen
               ),
               replace: true,
             );
-          } catch (_) {
+          } on Exception catch (_) {
             messenger?.show(
               StreamSnackbar(
                 message: Text(translations.endVoteErrorMessage),

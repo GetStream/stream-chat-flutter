@@ -292,12 +292,12 @@ abstract class Translations {
   /// The text of an error shown when deleting a message fails
   String get deleteMessageError;
 
-  /// The text shown when a message is successfully pinned or unpinned
-  /// based on [pinned]
+  /// The text shown when a message is successfully pinned or unpinned, where
+  /// [pinned] is the message's resulting pinned state (`true` after a pin).
   String togglePinUnpinMessageSuccessText({required bool pinned});
 
-  /// The text of an error shown when pinning or unpinning a message fails
-  /// based on [pinned]
+  /// The text of an error shown when pinning or unpinning a message fails, where
+  /// [pinned] is the pinned state that was being applied (`true` for a pin).
   String togglePinUnpinMessageErrorText({required bool pinned});
 
   /// The text of an error shown when flagging a message fails

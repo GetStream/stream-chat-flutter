@@ -72,6 +72,9 @@ class StreamAudioRecorderController extends ValueNotifier<AudioRecorderState>
         // recording session again to record audio.
         final granted = await _recorder.hasPermission(request: true);
         if (!granted && permissionDeniedMessage != null) {
+          // Cancel any pending info timer so it can't clear the denial message.
+          _infoTimer?.cancel();
+          _infoTimer = null;
           value = RecordStateIdle(message: permissionDeniedMessage);
         }
         return;

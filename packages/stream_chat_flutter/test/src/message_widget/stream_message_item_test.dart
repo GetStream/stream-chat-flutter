@@ -33,6 +33,7 @@ void main() {
         ownCapabilities: const [
           ChannelCapability.sendMessage,
           ChannelCapability.pinMessage,
+          ChannelCapability.deleteAnyMessage,
         ],
       );
       channelState = MockChannelState();
@@ -52,7 +53,7 @@ void main() {
       ),
     );
 
-    Future<void> openActionsAndTapPin(WidgetTester tester) async {
+    Future<void> openActionsAndTap(WidgetTester tester, String actionLabel) async {
       final gesture = await tester.startGesture(
         tester.getCenter(find.byType(StreamMessageItem).first),
       );
@@ -60,7 +61,7 @@ void main() {
       await gesture.up();
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Pin to Conversation'));
+      await tester.tap(find.text(actionLabel));
       await tester.pumpAndSettle();
     }
 
@@ -70,7 +71,7 @@ void main() {
       await tester.pumpWidget(buildHarness());
       await tester.pumpAndSettle();
 
-      await openActionsAndTapPin(tester);
+      await openActionsAndTap(tester, 'Pin to Conversation');
 
       verify(() => channel.pinMessage(message)).called(1);
       expect(find.text('Message pinned'), findsOneWidget);
@@ -82,9 +83,39 @@ void main() {
       await tester.pumpWidget(buildHarness());
       await tester.pumpAndSettle();
 
-      await openActionsAndTapPin(tester);
+      await openActionsAndTap(tester, 'Pin to Conversation');
 
+      verify(() => channel.pinMessage(message)).called(1);
       expect(find.text('Error pinning message'), findsOneWidget);
+    });
+
+    testWidgets('shows a success snackbar when a confirmed delete succeeds', (tester) async {
+      when(() => channel.deleteMessage(message)).thenAnswer((_) async => EmptyResponse());
+
+      await tester.pumpWidget(buildHarness());
+      await tester.pumpAndSettle();
+
+      // Opens the actions modal and taps "Delete Message", surfacing the
+      // confirmation dialog; then confirm via "Delete".
+      await openActionsAndTap(tester, 'Delete Message');
+      await tester.tap(find.text('Delete'));
+      await tester.pumpAndSettle();
+
+      verify(() => channel.deleteMessage(message)).called(1);
+      expect(find.text('Message deleted'), findsOneWidget);
+    });
+
+    testWidgets('shows an error snackbar when a confirmed delete fails', (tester) async {
+      when(() => channel.deleteMessage(message)).thenThrow(Exception('failed to delete'));
+
+      await tester.pumpWidget(buildHarness());
+      await tester.pumpAndSettle();
+
+      await openActionsAndTap(tester, 'Delete Message');
+      await tester.tap(find.text('Delete'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Error deleting message'), findsOneWidget);
     });
 
     testWidgets('confirms with a snackbar when copying a message', (tester) async {
@@ -103,15 +134,7 @@ void main() {
       await tester.pumpWidget(buildHarness());
       await tester.pumpAndSettle();
 
-      final gesture = await tester.startGesture(
-        tester.getCenter(find.byType(StreamMessageItem).first),
-      );
-      await tester.pump(const Duration(milliseconds: 700));
-      await gesture.up();
-      await tester.pumpAndSettle();
-
-      await tester.tap(find.text('Copy Message'));
-      await tester.pumpAndSettle();
+      await openActionsAndTap(tester, 'Copy Message');
 
       expect(find.text('Message copied to clipboard'), findsOneWidget);
     });

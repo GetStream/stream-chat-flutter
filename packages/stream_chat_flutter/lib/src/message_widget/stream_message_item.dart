@@ -965,7 +965,8 @@ class DefaultStreamMessageItem extends StatelessWidget {
   }
 
   // Runs [action] and shows a success or error snackbar on [messenger] with the
-  // given messages. Does nothing if [messenger] is null.
+  // given messages. When [messenger] is null the action still runs; only the
+  // snackbar feedback is skipped.
   Future<void> _runWithFeedback(
     StreamSnackbarMessenger? messenger,
     Future<void> Function() action, {
@@ -979,7 +980,7 @@ class DefaultStreamMessageItem extends StatelessWidget {
         StreamSnackbar(message: Text(successMessage), variant: .success),
         replace: true,
       );
-    } catch (_) {
+    } on Exception catch (_) {
       messenger?.show(
         StreamSnackbar(message: Text(errorMessage), variant: .error),
         replace: true,
