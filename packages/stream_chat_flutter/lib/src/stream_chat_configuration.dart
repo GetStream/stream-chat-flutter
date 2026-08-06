@@ -265,7 +265,8 @@ class StreamChatConfigurationData {
   final StreamReactionsPosition? reactionPosition;
 
   /// The default [StreamMessageListViewConfiguration] applied to every
-  /// [StreamMessageListView] that does not provide its own explicit [config].
+  /// [StreamMessageListView] that does not provide its own explicit
+  /// [StreamMessageListView.config].
   ///
   /// Defaults to [StreamMessageListViewConfiguration] with all defaults.
   final StreamMessageListViewConfiguration messageListViewConfiguration;
