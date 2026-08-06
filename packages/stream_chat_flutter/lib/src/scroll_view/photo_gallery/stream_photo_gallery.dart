@@ -322,7 +322,7 @@ class StreamPhotoGallery extends StatelessWidget {
       primary: primary,
       physics: physics,
       shrinkWrap: shrinkWrap,
-      padding: padding ?? EdgeInsets.only(bottom: MediaQuery.paddingOf(context).bottom),
+      padding: padding,
       scrollController: scrollController,
       addAutomaticKeepAlives: addAutomaticKeepAlives,
       addRepaintBoundaries: addRepaintBoundaries,

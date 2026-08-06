@@ -136,8 +136,6 @@ class _ThreadBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final insets = StreamScaffoldInsets.of(context);
-
     return StreamMessageListView(
       parentMessage: parent,
       initialScrollIndex: initialScrollIndex,
@@ -145,8 +143,6 @@ class _ThreadBody extends StatelessWidget {
       onReplyTap: onReply,
       onEditMessageTap: onEditMessageTap,
       onViewInChannelTap: onViewInChannelTap,
-      topPadding: insets.topPadding,
-      bottomPadding: insets.bottomPadding,
     );
   }
 }

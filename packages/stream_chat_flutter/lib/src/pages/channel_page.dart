@@ -152,10 +152,10 @@ class _StreamChannelPageState extends State<StreamChannelPage> {
 
 /// The body of [StreamChannelPage].
 ///
-/// Reads [StreamScaffoldInsets] to provide correct [topPadding] and
-/// [bottomPadding] to [StreamMessageListView], and positions the typing
-/// indicator just above the composer (floating or regular) using the same
-/// inset values.
+/// Positions the typing indicator just above the composer (floating or docked)
+/// via a bottom [SafeArea] over the floating-bar insets in `MediaQuery.padding`
+/// (injected by [StreamScaffold]). [StreamMessageListView] reads the same insets
+/// directly to pad its scroll content.
 class _ChannelPageBody extends StatelessWidget {
   const _ChannelPageBody({
     required this.typingIndicator,
@@ -173,8 +173,6 @@ class _ChannelPageBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final insets = StreamScaffoldInsets.of(context);
-
     return Stack(
       children: [
         StreamMessageListView(
@@ -185,14 +183,14 @@ class _ChannelPageBody extends StatelessWidget {
           threadBuilder: (_, parentMessage) {
             return StreamThreadPage(parent: parentMessage!);
           },
-          topPadding: insets.topPadding,
-          bottomPadding: insets.bottomPadding,
         ),
         Positioned(
-          bottom: insets.bottomPadding,
           left: 0,
           right: 0,
-          child: typingIndicator,
+          bottom: 0,
+          // A bottom SafeArea lifts the indicator above the composer / bottom
+          // bar — the scaffold injects its extent into MediaQuery.padding.bottom.
+          child: SafeArea(top: false, child: typingIndicator),
         ),
       ],
     );

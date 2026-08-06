@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'dart:math';
+import 'dart:math' as math;
 
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
@@ -127,8 +127,6 @@ class StreamMessageListView extends StatefulWidget {
     this.onMessageLongPress,
     this.config,
     this.builders = const StreamMessageListViewBuilders(),
-    this.topPadding = 0,
-    this.bottomPadding = 0,
   });
 
   /// Predicate used to filter messages.
@@ -288,18 +286,6 @@ class StreamMessageListView extends StatefulWidget {
   /// Defaults to [StreamMessageListViewBuilders] with no overrides.
   final StreamMessageListViewBuilders builders;
 
-  /// Top padding added to the message list scroll view.
-  ///
-  /// Used by the floating app bar layout to keep the first message visible
-  /// below the app bar without requiring a separate [setState] call.
-  final double topPadding;
-
-  /// Bottom padding added to the message list scroll view.
-  ///
-  /// Used by the floating composer layout to keep the last message visible
-  /// above the composer without requiring a separate [setState] call.
-  final double bottomPadding;
-
   @override
   _StreamMessageListViewState createState() => _StreamMessageListViewState();
 }
@@ -363,9 +349,10 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
   /// and so must not run from a stream callback — `_messageNewListener` reads
   /// this.
   late StreamMessageListViewConfiguration _config;
-
-  StreamMessageListViewConfiguration _resolveConfig() =>
-      widget.config ?? StreamChatConfiguration.of(context).messageListViewConfiguration;
+  StreamMessageListViewConfiguration _resolveConfig() {
+    if (widget.config case final config?) return config;
+    return StreamChatConfiguration.of(context).messageListViewConfiguration;
+  }
 
   StreamSubscription<Message>? _messageNewListener;
   StreamSubscription? _userReadListener;
@@ -573,6 +560,11 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     );
   }
 
+  // Safe-area insets injected into MediaQuery by the enclosing scaffold (a
+  // floating app bar / composer, or the system safe area). Read directly so the
+  // list self-insets without the caller threading padding in.
+  EdgeInsets get _scaffoldInsets => MediaQuery.paddingOf(context);
+
   @override
   Widget build(BuildContext context) {
     Widget defaultLoadingBuilder(BuildContext context) {
@@ -675,8 +667,8 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
                 child: ScrollablePositionedList.separated(
                   key: Key('mlv-${streamChannel?.channel.cid}-${widget.parentMessage?.id}'),
                   padding: .only(
-                    top: max(widget.topPadding, context.streamSpacing.sm),
-                    bottom: max(widget.bottomPadding, context.streamSpacing.sm),
+                    top: _scaffoldInsets.top + context.streamSpacing.sm,
+                    bottom: _scaffoldInsets.bottom + context.streamSpacing.sm,
                   ),
                   keyboardDismissBehavior: _config.keyboardDismissBehavior,
                   itemPositionsListener: _itemPositionListener,
@@ -832,7 +824,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
         ),
         if (_config.showFloatingDateDivider)
           Positioned(
-            top: max(widget.topPadding, context.streamSpacing.sm),
+            top: math.max(_scaffoldInsets.top, context.streamSpacing.sm),
             child: FloatingDateDivider(
               itemCount: itemCount,
               reverse: _config.reverse,
@@ -870,7 +862,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
             ),
         if (_config.showUnreadIndicator && !_isThreadConversation)
           Positioned(
-            top: max(widget.topPadding, context.streamSpacing.sm),
+            top: _scaffoldInsets.top + context.streamSpacing.sm,
             child: UnreadIndicatorButton(
               onJumpTap: scrollToUnreadDefaultTapAction,
               onDismissTap: _markMessagesAsRead,
@@ -978,7 +970,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
 
     if (_scrollController case final controller? when controller.isAttached) {
       return controller.scrollTo(
-        index: max(firstUnreadMessageIndex + 2, 0),
+        index: math.max(firstUnreadMessageIndex + 2, 0),
         alignment: 0.5, // center the message in the viewport
       );
     }
@@ -1147,7 +1139,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
         }
 
         return PositionedDirectional(
-          bottom: max(16, widget.bottomPadding),
+          bottom: _scaffoldInsets.bottom + 16,
           end: 16,
           child: button,
         );
@@ -1261,9 +1253,10 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
 
     var isLastItemFullyVisible = false;
     if (lastItemPosition != null) {
-      // We consider the last item fully visible if its leading edge (reversed)
-      // is greater than or equal to 0.
-      isLastItemFullyVisible = lastItemPosition.itemLeadingEdge >= 0;
+      // Fully visible = its leading edge (reversed) sits within the visible
+      // content (>= 0), not merely within the raw viewport — so an item behind
+      // the floating composer counts as hidden and the scroll-to-bottom shows.
+      isLastItemFullyVisible = (lastItemPosition.contentLeadingEdge ?? lastItemPosition.itemLeadingEdge) >= 0;
     }
 
     if (mounted) _showScrollToBottom.value = !isLastItemFullyVisible;

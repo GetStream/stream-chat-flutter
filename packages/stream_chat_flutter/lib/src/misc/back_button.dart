@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/utils/app_bar_behavior.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template streamBackButton}
@@ -20,7 +19,6 @@ class StreamBackButton extends StatelessWidget {
       'This will be removed in a future version.',
     )
     this.channelId,
-    this.isFloating,
     Widget? unreadIndicator = _unset,
   }) : _unreadIndicator = unreadIndicator;
 
@@ -41,13 +39,6 @@ class StreamBackButton extends StatelessWidget {
   )
   final String? channelId;
 
-  /// Whether the button adopts its floating presentation — an outlined button
-  /// instead of a ghost one.
-  ///
-  /// When null, falls back to [StreamAppBarStyle.behavior] from the ambient
-  /// [StreamAppBarTheme], then to the ambient [StreamAppStyle].
-  final bool? isFloating;
-
   /// The unread badge overlaid on the top-end corner of the button.
   ///
   /// Typically a [StreamUnreadIndicator]. The badge hides itself when its
@@ -65,11 +56,15 @@ class StreamBackButton extends StatelessWidget {
       .iOS || .macOS => context.streamIcons.chevronLeft,
       _ => context.streamIcons.arrowLeft,
     };
-    final isFloating = this.isFloating ?? isFloatingAppBar(context);
+
+    final appStyle = StreamTheme.of(context).appStyle;
+    final toolbarBehavior = StreamToolbarScope.maybeOf(context);
+
+    final effectiveIsFloating = toolbarBehavior?.isFloating ?? appStyle.isFloating;
 
     Widget button = StreamButton.icon(
-      type: isFloating ? .outline : .ghost,
-      isFloating: isFloating,
+      type: effectiveIsFloating ? .outline : .ghost,
+      isFloating: effectiveIsFloating,
       size: .medium,
       style: .secondary,
       tooltip: backTooltip,

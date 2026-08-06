@@ -7,7 +7,7 @@ part 'message_composer_theme.g.theme.dart';
 /// The message composer's visual/layout behavior — floating above the keyboard
 /// or docked at the bottom edge of the screen.
 ///
-/// Mirrors [StreamAppBarBehavior] and [StreamBottomAppBarBehavior] so every
+/// Mirrors [StreamToolbarBehavior] so every
 /// component names its placement the same way.
 ///
 /// When null on [StreamMessageComposerThemeData], the ambient [StreamAppStyle]

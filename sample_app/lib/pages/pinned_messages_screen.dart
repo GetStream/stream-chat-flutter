@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sample_app/routes/routes.dart';
-import 'package:sample_app/utils/scaffold_insets.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// Lists every pinned message in the enclosing channel.
@@ -43,7 +42,7 @@ class _PinnedMessagesScreenState extends State<PinnedMessagesScreen> {
       appBar: StreamAppBar(title: const Text('Pinned Messages')),
       body: Builder(
         builder: (context) {
-          final topInset = context.streamTopInset;
+          final topInset = MediaQuery.paddingOf(context).top;
           return StreamMessageSearchListView(
             controller: _controller,
             padding: EdgeInsets.only(top: topInset),

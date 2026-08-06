@@ -5,7 +5,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sample_app/routes/routes.dart';
-import 'package:sample_app/utils/scaffold_insets.dart';
 import 'package:sample_app/widgets/chips_input_text_field.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -144,7 +143,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
       appBar: StreamAppBar(title: const Text('New Chat')),
       body: StreamConnectionStatusBuilder(
         statusBuilder: (context, status) {
-          final topInset = context.streamTopInset;
+          final topInset = MediaQuery.paddingOf(context).top;
           var statusString = '';
           var showStatus = true;
 
@@ -281,6 +280,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
                             onPanDown: (_) => FocusScope.of(context).unfocus(),
                             child: StreamUserListView(
                               controller: userListController,
+                              padding: EdgeInsets.only(bottom: MediaQuery.paddingOf(context).bottom),
                               onUserTap: (user) {
                                 _controller.clear();
                                 if (!_selectedUsers.contains(user)) {

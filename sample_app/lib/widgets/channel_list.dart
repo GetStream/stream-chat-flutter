@@ -5,7 +5,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sample_app/routes/routes.dart';
-import 'package:sample_app/utils/scaffold_insets.dart';
 import 'package:sample_app/widgets/channel_detail_sheet.dart';
 import 'package:sample_app/widgets/search_text_field.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -88,7 +87,7 @@ class _ChannelList extends State<ChannelList> {
             // When the app bar is floating it overlaps this scroll view from
             // the top. Insert a spacer sliver so the search bar starts below
             // the visible bottom edge of the floating bar.
-            final topInset = context.streamTopInset;
+            final topInset = MediaQuery.paddingOf(context).top;
             return [
               if (topInset > 0) SliverToBoxAdapter(child: SizedBox(height: topInset)),
               SliverToBoxAdapter(
@@ -115,14 +114,18 @@ class _ChannelListDefault extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bottomPadding = context.streamBottomInset;
+    final bottomPadding = MediaQuery.paddingOf(context).bottom;
 
     return SlidableAutoCloseBehavior(
       child: RefreshIndicator(
         onRefresh: channelListController.refresh,
         child: StreamChannelListView(
           controller: channelListController,
-          padding: bottomPadding > 0 ? EdgeInsets.only(bottom: bottomPadding) : null,
+          // Always explicit (never null) — the header already handles the top
+          // inset via a spacer sliver, so the list must NOT auto-consume the
+          // injected top padding a second time. A null padding would do exactly
+          // that whenever bottomPadding is 0 (e.g. a docked bottom bar).
+          padding: EdgeInsets.only(bottom: bottomPadding),
           itemBuilder: (context, channels, index, defaultWidget) {
             final channel = channels[index];
 

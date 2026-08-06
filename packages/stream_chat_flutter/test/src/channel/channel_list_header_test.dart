@@ -163,8 +163,8 @@ void main() {
     Future<void> pumpHeader(
       WidgetTester tester, {
       StreamAppStyle appStyle = StreamAppStyle.regular,
-      StreamAppBarBehavior? themeBehavior,
-      StreamAppBarBehavior? styleBehavior,
+      StreamToolbarBehavior? themeBehavior,
+      StreamToolbarBehavior? styleBehavior,
     }) async {
       final client = MockClient();
       final clientState = MockClientState();
@@ -215,7 +215,7 @@ void main() {
     });
 
     testWidgets('floats when the header theme says so, over a regular app style', (tester) async {
-      await pumpHeader(tester, themeBehavior: StreamAppBarBehavior.floating);
+      await pumpHeader(tester, themeBehavior: StreamToolbarBehavior.floating);
 
       expect(avatarIsFloating(tester), isTrue);
     });
@@ -224,8 +224,8 @@ void main() {
       await pumpHeader(
         tester,
         appStyle: StreamAppStyle.floating,
-        themeBehavior: StreamAppBarBehavior.floating,
-        styleBehavior: StreamAppBarBehavior.regular,
+        themeBehavior: StreamToolbarBehavior.floating,
+        styleBehavior: StreamToolbarBehavior.regular,
       );
 
       expect(avatarIsFloating(tester), isNot(isTrue));

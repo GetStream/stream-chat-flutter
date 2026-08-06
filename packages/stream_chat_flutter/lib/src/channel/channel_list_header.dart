@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_portal/flutter_portal.dart';
-import 'package:stream_chat_flutter/src/utils/app_bar_behavior.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// {@template streamChannelListHeader}
@@ -158,16 +157,10 @@ class StreamChannelListHeader extends StatelessWidget implements PreferredSizeWi
           return StreamInfoTile(
             showMessage: showConnectionStateTile && showStatus,
             message: statusString,
-            // Wrap the bar in a [StreamAppBarTheme] so the per-header chat
-            // theme drives all default styling.
-            //
-            // [style] is merged into the theme data as well as passed to the
-            // bar, so every slot below — the default avatar and anything the
-            // caller supplied — resolves the same chain the bar itself does:
-            // [style], then the per-header theme, then the ambient app bar
-            // theme, then the app style.
+            // Apply the per-header theme as a theme; the bar resolves `style`
+            // over it and republishes the resolved behaviour to its slots.
             child: StreamAppBarTheme(
-              data: headerTheme.merge(StreamAppBarThemeData(style: style)),
+              data: headerTheme,
               child: StreamAppBar(
                 leading: leading,
                 title: title,
@@ -195,10 +188,10 @@ class _DefaultUserAvatar extends StatelessWidget {
     final user = client.state.currentUser;
     if (user == null) return const SizedBox.shrink();
 
-    // Resolved from context rather than passed in, so it picks up the header's
-    // [StreamAppBarTheme] — this widget is built inside it, same as the bar's
-    // other slots.
-    final isFloating = isFloatingAppBar(context);
+    final appStyle = StreamTheme.of(context).appStyle;
+    final toolbarBehavior = StreamToolbarScope.maybeOf(context);
+
+    final effectiveIsFloating = toolbarBehavior?.isFloating ?? appStyle.isFloating;
 
     // Caller-provided handler wins; otherwise mirror Material AppBar and
     // open the enclosing Scaffold's drawer if one exists. With no callback
@@ -222,7 +215,7 @@ class _DefaultUserAvatar extends StatelessWidget {
             size: .lg,
             user: user,
             showOnlineIndicator: false,
-            isFloating: isFloating,
+            isFloating: effectiveIsFloating,
           ),
         ),
       ),

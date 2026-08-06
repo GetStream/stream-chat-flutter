@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:sample_app/utils/scaffold_insets.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// Lists every file shared in the enclosing channel, grouped by the
@@ -46,7 +45,6 @@ class _ChannelFileDisplayScreenState extends State<ChannelFileDisplayScreen> {
       body: ValueListenableBuilder<PagedValue<String, GetMessageResponse>>(
         valueListenable: _controller,
         builder: (context, value, _) {
-          final topInset = context.streamTopInset;
           return value.when(
             (items, nextPageKey, _) {
               // Flatten messages → individual file attachments paired with
@@ -72,8 +70,10 @@ class _ChannelFileDisplayScreenState extends State<ChannelFileDisplayScreen> {
                 onEndOfPage: () async {
                   if (nextPageKey != null) await _controller.loadMore(nextPageKey);
                 },
+                // No `padding` — the ListView auto-insets from the
+                // MediaQuery.padding injected by StreamScaffold (floating bars
+                // and the system safe area).
                 child: ListView.builder(
-                  padding: EdgeInsets.only(top: topInset),
                   itemCount: rows.length,
                   itemBuilder: (context, index) => rows[index].build(context),
                 ),

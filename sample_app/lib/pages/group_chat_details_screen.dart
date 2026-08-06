@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sample_app/routes/routes.dart';
 import 'package:sample_app/state/new_group_chat_state.dart';
-import 'package:sample_app/utils/scaffold_insets.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 class GroupChatDetailsScreen extends StatefulWidget {
@@ -108,7 +107,7 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
               message: statusString,
               child: Builder(
                 builder: (context) {
-                  final topInset = context.streamTopInset;
+                  final topInset = MediaQuery.paddingOf(context).top;
                   return Column(
                     children: [
                       if (topInset > 0) SizedBox(height: topInset),
@@ -172,6 +171,7 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
                               behavior: HitTestBehavior.opaque,
                               onPanDown: (_) => FocusScope.of(context).unfocus(),
                               child: ListView.separated(
+                                padding: EdgeInsets.only(bottom: MediaQuery.paddingOf(context).bottom),
                                 itemCount: widget.groupChatState.users.length + 1,
                                 separatorBuilder: (_, __) => Container(
                                   height: 1,

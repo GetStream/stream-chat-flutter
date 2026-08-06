@@ -82,7 +82,10 @@ class StreamThreadHeader extends StatelessWidget implements PreferredSizeWidget 
         final cid? => StreamUnreadIndicator.channels(cid: cid),
         null => const StreamUnreadIndicator(),
       };
-      leading = StreamBackButton(onPressed: onBackPressed, unreadIndicator: unreadIndicator);
+      leading = StreamBackButton(
+        onPressed: onBackPressed,
+        unreadIndicator: unreadIndicator,
+      );
     }
 
     Widget? fallbackSubtitle;
@@ -100,12 +103,10 @@ class StreamThreadHeader extends StatelessWidget implements PreferredSizeWidget 
       alternativeWidget: fallbackSubtitle,
     );
 
-    // [style] is merged into the theme data as well as passed to the bar, so
-    // every slot below — the default back button and anything the caller
-    // supplied — resolves the same chain the bar itself does: [style], then the
-    // per-header theme, then the ambient app bar theme, then the app style.
+    // Apply the per-header theme as a theme; the bar resolves `style` over it
+    // and republishes the resolved behaviour to its slots.
     return StreamAppBarTheme(
-      data: headerTheme.merge(StreamAppBarThemeData(style: style)),
+      data: headerTheme,
       child: StreamAppBar(
         leading: leading,
         automaticallyImplyLeading: automaticallyImplyLeading,

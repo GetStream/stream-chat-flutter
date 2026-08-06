@@ -337,7 +337,7 @@ class _PositionedListState extends State<PositionedList> {
   @override
   Widget build(BuildContext context) {
     _rebuildKeyIndexMap();
-    return RegistryWidget(
+    Widget list = RegistryWidget(
       elementNotifier: registeredElements,
       child: UnboundedCustomScrollView(
         anchor: widget.alignment,
@@ -410,6 +410,23 @@ class _PositionedListState extends State<PositionedList> {
         ],
       ),
     );
+
+    // Match BoxScrollView: when the main-axis MediaQuery padding was
+    // auto-consumed (no explicit padding), strip it from descendants so nested
+    // widgets and scrollables don't inset for it a second time.
+    final mediaQuery = MediaQuery.maybeOf(context);
+    if (widget.padding == null && mediaQuery != null) {
+      list = MediaQuery(
+        data: mediaQuery.copyWith(
+          padding: widget.scrollDirection == Axis.vertical
+              ? mediaQuery.padding.copyWith(top: 0, bottom: 0)
+              : mediaQuery.padding.copyWith(left: 0, right: 0),
+        ),
+        child: list,
+      );
+    }
+
+    return list;
   }
 
   Widget _buildSeparatedListElement(int index) {
@@ -441,8 +458,19 @@ class _PositionedListState extends State<PositionedList> {
     );
   }
 
-  EdgeInsets get _resolvedPadding =>
-      widget.padding?.resolve(Directionality.maybeOf(context) ?? TextDirection.ltr) ?? EdgeInsets.zero;
+  EdgeInsets get _resolvedPadding {
+    final padding = widget.padding;
+    if (padding != null) {
+      return padding.resolve(Directionality.maybeOf(context) ?? TextDirection.ltr);
+    }
+    // Match BoxScrollView: with no explicit padding, consume the main-axis
+    // MediaQuery padding so the list auto-insets like a ListView. The cross-axis
+    // remainder is handed to descendants in [build].
+    final mediaPadding = MediaQuery.maybeOf(context)?.padding ?? EdgeInsets.zero;
+    return widget.scrollDirection == Axis.vertical
+        ? mediaPadding.copyWith(left: 0, right: 0)
+        : mediaPadding.copyWith(top: 0, bottom: 0);
+  }
 
   AxisDirection get _axisDirection {
     if (widget.scrollDirection == Axis.vertical) {
@@ -563,12 +591,22 @@ class _PositionedListState extends State<PositionedList> {
               final reveal = viewport!.getOffsetToReveal(box, 0).offset;
               if (!reveal.isFinite) continue;
               final itemOffset = reveal - viewport.offset.pixels + anchor * viewport.size.height;
+              final viewportDimension = scrollController.position.viewportDimension;
+              // content* edges are measured from the visible content (inside the
+              // padding) so overlays under a floating bar can key off 0..1;
+              // subtract the leading padding (the bottom when reversed, which
+              // `_leadingSliverPadding` resolves). item* stays viewport-relative
+              // for scroll mechanics (alignment / anchor preservation).
+              final leadingPad = _leadingSliverPadding.vertical;
+              final contentExtent = viewportDimension - _resolvedPadding.vertical;
+              final contentDenom = contentExtent > 0 ? contentExtent : viewportDimension;
               positions.add(
                 ItemPosition(
                   index: key.index,
-                  itemLeadingEdge: itemOffset.round() / scrollController.position.viewportDimension,
-                  itemTrailingEdge:
-                      (itemOffset + box.size.height).round() / scrollController.position.viewportDimension,
+                  itemLeadingEdge: itemOffset.round() / viewportDimension,
+                  itemTrailingEdge: (itemOffset + box.size.height).round() / viewportDimension,
+                  contentLeadingEdge: (itemOffset - leadingPad).round() / contentDenom,
+                  contentTrailingEdge: (itemOffset + box.size.height - leadingPad).round() / contentDenom,
                 ),
               );
             } else {
@@ -579,11 +617,18 @@ class _PositionedListState extends State<PositionedList> {
               final isRight = _axisDirection == AxisDirection.right;
               final leadingPx = isRight ? itemOffset : viewportDimension - (itemOffset + box.size.width);
               final trailingPx = isRight ? itemOffset + box.size.width : viewportDimension - itemOffset;
+              // content* edges (see the vertical branch): drop the leading
+              // padding so 0..1 spans the visible content.
+              final leadingPad = _leadingSliverPadding.horizontal;
+              final contentExtent = viewportDimension - _resolvedPadding.horizontal;
+              final contentDenom = contentExtent > 0 ? contentExtent : viewportDimension;
               positions.add(
                 ItemPosition(
                   index: key.index,
                   itemLeadingEdge: leadingPx.round() / viewportDimension,
                   itemTrailingEdge: trailingPx.round() / viewportDimension,
+                  contentLeadingEdge: (leadingPx - leadingPad).round() / contentDenom,
+                  contentTrailingEdge: (trailingPx - leadingPad).round() / contentDenom,
                 ),
               );
             }

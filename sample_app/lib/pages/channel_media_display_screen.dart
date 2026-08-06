@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:sample_app/utils/scaffold_insets.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// Lists every photo + video shared in the enclosing channel as a 3-up
@@ -45,7 +44,7 @@ class _ChannelMediaDisplayScreenState extends State<ChannelMediaDisplayScreen> {
       body: ValueListenableBuilder<PagedValue<String, GetMessageResponse>>(
         valueListenable: _controller,
         builder: (context, value, _) {
-          final topInset = context.streamTopInset;
+          final topInset = MediaQuery.paddingOf(context).top;
           final spacing = context.streamSpacing;
           return value.when(
             (items, nextPageKey, _) {
@@ -68,7 +67,7 @@ class _ChannelMediaDisplayScreenState extends State<ChannelMediaDisplayScreen> {
                 },
                 child: StreamMediaGallery(
                   attachments: attachments,
-                  padding: EdgeInsets.fromLTRB(spacing.xxxs, topInset + spacing.xxxs, spacing.xxxs, spacing.xxxs),
+                  padding: EdgeInsets.all(spacing.xxxs) + EdgeInsets.only(top: topInset),
                   onItemTap: (index) => _openPreview(context, attachments, index),
                 ),
               );

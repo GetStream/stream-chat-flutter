@@ -3,7 +3,6 @@ import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:sample_app/config/sample_app_config.dart';
-import 'package:sample_app/utils/scaffold_insets.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// Whether dynamic color extraction is supported on the current platform.
@@ -28,9 +27,9 @@ class SampleAppConfigScreen extends StatelessWidget {
       appBar: StreamAppBar(title: const Text('Configuration')),
       body: Builder(
         builder: (context) {
-          final topInset = context.streamTopInset;
+          final topInset = MediaQuery.paddingOf(context).top;
           return SingleChildScrollView(
-            padding: EdgeInsets.fromLTRB(spacing.md, topInset, spacing.md, 0),
+            padding: EdgeInsets.symmetric(horizontal: spacing.md) + EdgeInsets.only(top: topInset),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
