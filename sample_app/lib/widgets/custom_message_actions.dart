@@ -14,21 +14,24 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 ///   → _ReminderActions    (remind me, save for later, edit/remove reminder)
 ///   → _DeleteForMeAction  (delete message for current user only)
 ///   → _MessageInfoAction  (show message delivery info sheet)
+///   → _TranslateAction    (translate message on request)
 /// ```
 Widget customMessageItemBuilder(
   BuildContext context,
   StreamMessageItemProps props,
 ) {
+  final message = props.message;
+
   return DefaultStreamMessageItem(
     props: props.copyWith(
       actionsBuilder: (context, defaultActions) {
-        final message = props.message;
         return StreamContextMenuAction.partitioned(
           items: [
             ...defaultActions,
             ..._ReminderActions.build(context, message),
             ..._DeleteForMeAction.build(context, message),
             ..._MessageInfoAction.build(context, message),
+            ..._TranslateAction.build(context, message),
           ],
         );
       },
@@ -199,5 +202,84 @@ abstract final class _MessageInfoAction {
         onTap: () => MessageInfoSheet.show(context: context, message: message),
       ),
     ];
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Translate action
+// ---------------------------------------------------------------------------
+
+/// Requests an on-request translation for a message and merges the result
+/// into the channel's local state.
+///
+/// Once merged, the message's `i18n` map carries the translation, and the
+/// SDK's own message rendering (`StreamMessageText`, `DefaultStreamMessageHeader`)
+/// picks it up automatically — this sample app only needs to fetch it.
+///
+/// Only shown for messages from other users — translating your own message
+/// isn't a useful action — and always translates directly to
+/// [BuildContext.translationUserLanguage], with no language picker.
+abstract final class _TranslateAction {
+  static List<StreamContextMenuAction> build(
+    BuildContext context,
+    Message message,
+  ) {
+    if (!context.sampleAppConfig.enableMessageTranslation) return const [];
+    if (message.deletedAt != null) return const [];
+    if (message.text == null || message.text!.isEmpty) return const [];
+
+    final currentUser = StreamChat.of(context).currentUser;
+    final isSentByCurrentUser = message.user?.id == currentUser?.id;
+    if (isSentByCurrentUser) return const [];
+
+    final userLanguage = context.translationUserLanguage;
+
+    // Already covers the message's own language: the server includes a
+    // self-referential entry keyed by its source language, so this is also
+    // `true` when the original text is already in the user's language —
+    // either way, there's nothing left to translate.
+    final alreadyTranslated = message.i18n?['${userLanguage}_text'] != null;
+
+    final icons = context.streamIcons;
+    return [
+      StreamContextMenuAction(
+        label: const Text('Translate'),
+        leading: Icon(icons.translate),
+        enabled: !alreadyTranslated,
+        onTap: () => _translate(context, message, userLanguage),
+      ),
+    ];
+  }
+
+  static Future<void> _translate(
+    BuildContext context,
+    Message message,
+    String language,
+  ) async {
+    final channel = StreamChannel.of(context).channel;
+    try {
+      final response = await channel.translateMessage(message.id, language);
+      channel.state?.updateMessage(response.message);
+    } catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to translate message: $e')),
+      );
+    }
+  }
+}
+
+/// Convenient access to the language translations should target for the
+/// current user.
+extension _TranslationUserLanguageExtension on BuildContext {
+  /// The language translations should target for the current user:
+  /// [User.language] when set to a non-empty value, otherwise the app's
+  /// locale.
+  String get translationUserLanguage {
+    final currentUser = StreamChat.of(this).currentUser;
+    return switch (currentUser?.language) {
+      null || '' => Localizations.localeOf(this).languageCode,
+      final language => language,
+    };
   }
 }
