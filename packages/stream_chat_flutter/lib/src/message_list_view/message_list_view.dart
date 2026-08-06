@@ -1194,10 +1194,11 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       child: Builder(
         builder: (context) => switch (widget.messageBuilder) {
           final builder? => builder.call(context, message, messageItemProps),
-          // Keyed by message id so per-message local state (e.g. a
-          // translation's show-original toggle) stays attached to the
-          // correct message if the list reorders, rather than leaking onto
-          // whatever message next occupies the same position.
+          // Keyed by message id so per-message local state (e.g. in the
+          // content/attachments/leading widgets) stays attached to the
+          // correct message when pagination prepends older messages and
+          // shifts every already-rendered item's index, rather than leaking
+          // onto whatever message next occupies the same position.
           _ => StreamMessageItem.fromProps(key: ValueKey(message.id), props: messageItemProps),
         },
       ),
