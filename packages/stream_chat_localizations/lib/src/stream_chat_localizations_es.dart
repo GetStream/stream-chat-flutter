@@ -499,6 +499,12 @@ No es posible añadir más de $limit archivos adjuntos
   String unreadMessagesSeparatorText() => 'Nuevos mensajes';
 
   @override
+  String unreadMessagesSeparatorLabel({required int count}) {
+    if (count == 1) return '1 mensaje no leído';
+    return '$count mensajes no leídos';
+  }
+
+  @override
   String get enableFileAccessMessage => 'Habilite el acceso a los archivos para poder compartirlos con amigos.';
 
   @override

@@ -496,6 +496,12 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
   String unreadMessagesSeparatorText() => 'Missatges nous';
 
   @override
+  String unreadMessagesSeparatorLabel({required int count}) {
+    if (count == 1) return '1 missatge no llegit';
+    return '$count missatges no llegits';
+  }
+
+  @override
   String get enableFileAccessMessage => "Habilita l'accés als fitxers per poder compartir-los amb amics";
 
   @override

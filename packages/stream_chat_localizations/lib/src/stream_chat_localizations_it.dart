@@ -502,6 +502,12 @@ Attenzione: il limite massimo di $limit file è stato superato.
   String unreadMessagesSeparatorText() => 'Nuovi messaggi';
 
   @override
+  String unreadMessagesSeparatorLabel({required int count}) {
+    if (count == 1) return '1 messaggio non letto';
+    return '$count messaggi non letti';
+  }
+
+  @override
   String get enableFileAccessMessage =>
       "Per favore attiva l'accesso ai file cosí potrai condividerli con i tuoi amici.";
 

@@ -497,6 +497,12 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
   String unreadMessagesSeparatorText() => 'नए संदेश।';
 
   @override
+  String unreadMessagesSeparatorLabel({required int count}) {
+    if (count == 1) return '1 अपठित संदेश';
+    return '$count अपठित संदेश';
+  }
+
+  @override
   String get enableFileAccessMessage => 'कृपया फ़ाइलों तक पहुंच सक्षम करें ताकि आप उन्हें मित्रों के साथ साझा कर सकें।';
 
   @override

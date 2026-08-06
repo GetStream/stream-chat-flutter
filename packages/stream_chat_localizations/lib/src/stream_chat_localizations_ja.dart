@@ -485,6 +485,11 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   String unreadMessagesSeparatorText() => '新しいメッセージ。';
 
   @override
+  String unreadMessagesSeparatorLabel({required int count}) {
+    return '未読メッセージ $count 件';
+  }
+
+  @override
   String get enableFileAccessMessage => '友達と共有できるように、ファイルへのアクセスを有効にしてください。';
 
   @override
