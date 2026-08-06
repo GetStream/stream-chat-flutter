@@ -102,6 +102,10 @@ abstract class Translations {
   /// in the [StreamMessageListView]
   String unreadMessagesSeparatorText();
 
+  /// The label for the unread messages separator in the
+  /// [StreamMessageListView], e.g. "5 unread messages".
+  String unreadMessagesSeparatorLabel({required int count});
+
   /// The label for "connected" in [StreamConnectionStatusBuilder]
   String get connectedLabel;
 
@@ -1289,6 +1293,12 @@ Attachment limit exceeded: it's not possible to add more than $limit attachments
 
   @override
   String unreadMessagesSeparatorText() => 'New messages';
+
+  @override
+  String unreadMessagesSeparatorLabel({required int count}) {
+    if (count == 1) return '1 unread message';
+    return '$count unread messages';
+  }
 
   @override
   String get enableFileAccessMessage =>
