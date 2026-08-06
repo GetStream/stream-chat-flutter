@@ -37,6 +37,7 @@ class StreamChannel extends StatefulWidget {
     required this.channel,
     this.showLoading = true,
     this.initialMessageId,
+    this.openAtFirstUnread = true,
     this.errorBuilder = _resolveErrorBuilder,
     this.loadingBuilder = _resolveLoadingBuilder,
   }) : _shouldPosition = true;
@@ -60,6 +61,7 @@ class StreamChannel extends StatefulWidget {
     required this.channel,
   }) : showLoading = false,
        initialMessageId = null,
+       openAtFirstUnread = true,
        errorBuilder = _resolveErrorBuilder,
        loadingBuilder = _resolveLoadingBuilder,
        _shouldPosition = false;
@@ -75,6 +77,18 @@ class StreamChannel extends StatefulWidget {
 
   /// If passed the channel will load from this particular message.
   final String? initialMessageId;
+
+  /// Whether the channel should open positioned at the first unread message
+  /// when it has pre-existing unread messages.
+  ///
+  /// Defaults to `true`, preserving the SDK's existing behaviour. Set to
+  /// `false` to always open at the latest message instead — the message
+  /// list then surfaces pre-existing unread via its unread divider and
+  /// jump-to-unread pill rather than by scrolling there automatically.
+  ///
+  /// Has no effect on [StreamChannel.value], which never repositions the
+  /// loaded window.
+  final bool openAtFirstUnread;
 
   /// Widget builder used while the channel is initialising.
   ///
@@ -856,33 +870,37 @@ class StreamChannelState extends State<StreamChannel> {
       return loadChannelAtMessage(initialMessageId);
     }
 
-    // Otherwise, we should load the channel at the first unread
-    // message if available.
-    if (channel.state case final state? when state.unreadCount > 0) {
-      final currentUserRead = state.currentUserRead;
+    // Otherwise, we should load the channel at the first unread message if
+    // available — unless the caller opted out via
+    // [StreamChannel.openAtFirstUnread], in which case we fall through to
+    // load-latest below.
+    if (widget.openAtFirstUnread) {
+      if (channel.state case final state? when state.unreadCount > 0) {
+        final currentUserRead = state.currentUserRead;
 
-      // Skip if we don't have read state for the current user.
-      if (currentUserRead == null) return;
+        // Skip if we don't have read state for the current user.
+        if (currentUserRead == null) return;
 
-      // Load the channel at the last read message if available.
-      if (currentUserRead.lastReadMessageId case final lastReadMessageId?) {
-        try {
-          return await loadChannelAtMessage(lastReadMessageId);
-        } catch (e) {
-          // If the loadChannelAtMessage for any reason fails, we fallback to
-          // loading the channel at the last read date.
-          //
-          // One example of this is when the channel becomes too large and
-          // exceeds a certain threshold (I believe it's a 1000 members) it
-          // can't update the readstate anymore for each individual member.
+        // Load the channel at the last read message if available.
+        if (currentUserRead.lastReadMessageId case final lastReadMessageId?) {
+          try {
+            return await loadChannelAtMessage(lastReadMessageId);
+          } catch (e) {
+            // If the loadChannelAtMessage for any reason fails, we fallback to
+            // loading the channel at the last read date.
+            //
+            // One example of this is when the channel becomes too large and
+            // exceeds a certain threshold (I believe it's a 1000 members) it
+            // can't update the readstate anymore for each individual member.
+          }
         }
-      }
 
-      // Skip the "never read" sentinel: the server ignores it as
-      // `created_at_around` and returns the tail, which would mis-infer
-      // `_topPaginationEnded = true`. Fall through to load-latest below.
-      if (currentUserRead.lastRead.isAfter(_minValidLastRead)) {
-        return loadChannelAtTimestamp(currentUserRead.lastRead);
+        // Skip the "never read" sentinel: the server ignores it as
+        // `created_at_around` and returns the tail, which would mis-infer
+        // `_topPaginationEnded = true`. Fall through to load-latest below.
+        if (currentUserRead.lastRead.isAfter(_minValidLastRead)) {
+          return loadChannelAtTimestamp(currentUserRead.lastRead);
+        }
       }
     }
 

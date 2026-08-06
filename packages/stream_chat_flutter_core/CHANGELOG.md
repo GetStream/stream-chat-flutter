@@ -4,6 +4,7 @@
 
 - Added `StreamChannelState.retry()` to re-run a failed channel initialization, for use as the retry action in `StreamChannel.errorBuilder`.
 - Added `DefaultStreamChannelBuilders`, an inherited widget that supplies default loading and error builders to descendant `StreamChannel`s (resolved via `loadingBuilderOf`/`errorBuilderOf`).
+- Added `StreamChannel.openAtFirstUnread`, defaulting to `true` (preserving existing behavior). Set to `false` to always open a channel at the latest message, instead of scrolling to the first pre-existing unread message.
 
 🐞 Fixed
 
