@@ -42,7 +42,8 @@ class StreamThreadHeader extends StatelessWidget implements PreferredSizeWidget 
   /// Called when the default [StreamBackButton] is pressed, replacing its
   /// default `Navigator.maybePop`.
   ///
-  /// Ignored when [leading] is provided.
+  /// Ignored when [leading] is provided or [automaticallyImplyLeading] is
+  /// false, since no default back button is built in those cases.
   final VoidCallback? onBackPressed;
 
   /// {@macro StreamAppBar.title}
