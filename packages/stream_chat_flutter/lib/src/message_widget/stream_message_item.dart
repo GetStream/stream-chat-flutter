@@ -454,6 +454,9 @@ class DefaultStreamMessageItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final message = props.message;
 
+    final translationStore = StreamMessageTranslations.of(context);
+    final showOriginalText = translationStore?.isShowingOriginalText(message.id) ?? false;
+
     final placement = StreamMessageLayout.of(context);
     final theme = core.StreamMessageItemTheme.of(context);
     final defaults = _StreamMessageItemDefaults(
@@ -492,6 +495,11 @@ class DefaultStreamMessageItem extends StatelessWidget {
           final onTap? => () => onTap(message),
           _ => () => _onViewThread(context, message),
         },
+        showOriginalText: showOriginalText,
+        onToggleOriginalText: switch (translationStore) {
+          final store? => () => store.toggleOriginalText(message.id),
+          null => null,
+        },
       ),
     );
 
@@ -527,6 +535,7 @@ class DefaultStreamMessageItem extends StatelessWidget {
       attachmentBuilders: props.attachmentBuilders,
       reactionSorting: props.reactionSorting,
       onQuotedMessageTap: props.onQuotedMessageTap,
+      showOriginalText: showOriginalText,
       onLinkTap: (_, href, __) {
         if (href == null) return;
         if (props.onMessageLinkTap case final onTap?) return onTap(message, href);

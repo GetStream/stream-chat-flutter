@@ -165,6 +165,7 @@ class StreamChatConfigurationData {
     List<StreamAttachmentWidgetBuilder>? attachmentBuilders,
     StreamReactionsType? reactionType,
     StreamReactionsPosition? reactionPosition,
+    bool translationDisplayEnabled = true,
   }) {
     return StreamChatConfigurationData._(
       reactionIconResolver: reactionIconResolver ?? const DefaultReactionIconResolver(),
@@ -175,6 +176,7 @@ class StreamChatConfigurationData {
       attachmentBuilders: attachmentBuilders,
       reactionType: reactionType,
       reactionPosition: reactionPosition,
+      translationDisplayEnabled: translationDisplayEnabled,
     );
   }
 
@@ -185,6 +187,7 @@ class StreamChatConfigurationData {
     required this.messagePreviewFormatter,
     required this.imageCDN,
     required this.attachmentBuilders,
+    required this.translationDisplayEnabled,
     this.reactionType,
     this.reactionPosition,
   });
@@ -200,6 +203,7 @@ class StreamChatConfigurationData {
     List<StreamAttachmentWidgetBuilder>? attachmentBuilders,
     StreamReactionsType? reactionType,
     StreamReactionsPosition? reactionPosition,
+    bool? translationDisplayEnabled,
   }) {
     return StreamChatConfigurationData(
       reactionIconResolver: reactionIconResolver ?? this.reactionIconResolver,
@@ -210,6 +214,7 @@ class StreamChatConfigurationData {
       attachmentBuilders: attachmentBuilders ?? this.attachmentBuilders,
       reactionType: reactionType ?? this.reactionType,
       reactionPosition: reactionPosition ?? this.reactionPosition,
+      translationDisplayEnabled: translationDisplayEnabled ?? this.translationDisplayEnabled,
     );
   }
 
@@ -258,4 +263,14 @@ class StreamChatConfigurationData {
   /// When null, the widget resolves its own default
   /// ([StreamReactionsPosition.header]).
   final StreamReactionsPosition? reactionPosition;
+
+  /// Whether a message automatically displays as its translation — and
+  /// shows a "Translated" annotation with a link to see the original —
+  /// when [Message.i18n] has one for the current user's language.
+  ///
+  /// Set to `false` to always show a message's original text regardless of
+  /// available translations.
+  ///
+  /// Defaults to `true`.
+  final bool translationDisplayEnabled;
 }
