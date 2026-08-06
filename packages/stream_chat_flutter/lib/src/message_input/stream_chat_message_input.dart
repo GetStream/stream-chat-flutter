@@ -298,8 +298,14 @@ class _StreamChatMessageInputContent extends StatelessWidget {
           // Return if the recording is already started.
           if (audioRecorderController.isRecording) return;
 
+          // Capture the message before the async gap to avoid using a
+          // potentially unmounted BuildContext after awaiting.
+          final permissionDeniedMessage = context.translations.audioRecordingPermissionMessage;
+
           await widget.feedback.onRecordStart(context);
-          return audioRecorderController.startRecord();
+          return audioRecorderController.startRecord(
+            permissionDeniedMessage: permissionDeniedMessage,
+          );
         },
         onLongPressEnd: (_) async {
           // Return if the recording not yet started or already locked.

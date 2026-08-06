@@ -514,6 +514,50 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
       ' Kanalnachrichten.';
 
   @override
+  String get messageMarkedAsUnreadText => 'Nachricht als ungelesen markiert';
+
+  @override
+  String get deleteMessageError => 'Fehler beim Löschen der Nachricht';
+
+  @override
+  String togglePinUnpinMessageSuccessText({required bool pinned}) {
+    if (pinned) return 'Nachricht angeheftet';
+    return 'Anheftung der Nachricht aufgehoben';
+  }
+
+  @override
+  String togglePinUnpinMessageErrorText({required bool pinned}) {
+    if (pinned) return 'Fehler beim Anheften der Nachricht';
+    return 'Fehler beim Aufheben der Anheftung';
+  }
+
+  @override
+  String get flagMessageError => 'Fehler beim Hinzufügen der Meldung';
+
+  @override
+  String get messageCopiedToClipboardText => 'Nachricht in die Zwischenablage kopiert';
+
+  @override
+  String get sendMessageError => 'Senden der Nachricht fehlgeschlagen';
+
+  @override
+  String get editMessageError => 'Bearbeiten der Nachricht fehlgeschlagen';
+
+  @override
+  String toggleMuteUnmuteUserSuccessText({required String user, required bool isMuted}) {
+    if (isMuted) return 'Stummschaltung von $user wurde aufgehoben';
+    return '$user wurde stummgeschaltet';
+  }
+
+  @override
+  String toggleMuteUnmuteUserErrorText({required bool isMuted}) {
+    if (isMuted) {
+      return 'Fehler beim Aufheben der Stummschaltung, bitte versuche es erneut';
+    }
+    return 'Fehler beim Stummschalten, bitte versuche es erneut';
+  }
+
+  @override
   String createPollLabel({bool isNew = false}) {
     if (isNew) return 'Erstellen einer neuen Umfrage';
     return 'Umfrage erstellen';
@@ -650,6 +694,12 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
   String get endVoteLabel => 'Abstimmung beenden';
 
   @override
+  String get endVoteSuccessMessage => 'Abstimmung beendet';
+
+  @override
+  String get endVoteErrorMessage => 'Abstimmung konnte nicht beendet werden';
+
+  @override
   String get pollResultsLabel => 'Umfrage-Ergebnisse';
 
   @override
@@ -701,6 +751,9 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
 
   @override
   String get holdToRecordLabel => 'Zum Aufnehmen halten, zum Senden loslassen';
+
+  @override
+  String get audioRecordingPermissionMessage => 'Bitte erlaube die Audioberechtigung in den Einstellungen.';
 
   @override
   String get sendAnywayLabel => 'Trotzdem senden';

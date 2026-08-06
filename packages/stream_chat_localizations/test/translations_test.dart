@@ -100,6 +100,10 @@ void main() {
       expect(localizations.togglePinUnpinText(pinned: true), isNotNull);
       // un-pinned
       expect(localizations.togglePinUnpinText(pinned: false), isNotNull);
+      expect(localizations.togglePinUnpinMessageSuccessText(pinned: true), isNotNull);
+      expect(localizations.togglePinUnpinMessageSuccessText(pinned: false), isNotNull);
+      expect(localizations.togglePinUnpinMessageErrorText(pinned: true), isNotNull);
+      expect(localizations.togglePinUnpinMessageErrorText(pinned: false), isNotNull);
       // delete-failed
       expect(
         localizations.toggleDeleteRetryDeleteMessageText(isDeleteFailed: true),
@@ -222,6 +226,16 @@ void main() {
       expect(localizations.toggleMuteUnmuteUserQuestion(isMuted: true), isNotNull);
       expect(localizations.toggleMuteUnmuteUserText(isMuted: true), isNotNull);
       expect(localizations.toggleMuteUnmuteUserText(isMuted: false), isNotNull);
+      expect(
+        localizations.toggleMuteUnmuteUserSuccessText(user: 'test-user', isMuted: true),
+        isNotNull,
+      );
+      expect(
+        localizations.toggleMuteUnmuteUserSuccessText(user: 'test-user', isMuted: false),
+        isNotNull,
+      );
+      expect(localizations.toggleMuteUnmuteUserErrorText(isMuted: true), isNotNull);
+      expect(localizations.toggleMuteUnmuteUserErrorText(isMuted: false), isNotNull);
       expect(localizations.toggleBlockUnblockUserText(isBlocked: true), isNotNull);
       expect(localizations.toggleBlockUnblockUserText(isBlocked: false), isNotNull);
       expect(localizations.viewLibrary, isNotNull);
@@ -232,6 +246,12 @@ void main() {
       expect(localizations.unreadMessagesSeparatorText(), isNotNull);
       expect(localizations.markUnreadError, isNotNull);
       expect(localizations.markAsUnreadLabel, isNotNull);
+      expect(localizations.messageMarkedAsUnreadText, isNotNull);
+      expect(localizations.deleteMessageError, isNotNull);
+      expect(localizations.flagMessageError, isNotNull);
+      expect(localizations.messageCopiedToClipboardText, isNotNull);
+      expect(localizations.sendMessageError, isNotNull);
+      expect(localizations.editMessageError, isNotNull);
       // Create poll
       expect(localizations.createPollLabel(), isNotNull);
       // Create a new poll
@@ -282,6 +302,8 @@ void main() {
       expect(localizations.createLabel, isNotNull);
       expect(localizations.endLabel, isNotNull);
       expect(localizations.endVoteLabel, isNotNull);
+      expect(localizations.endVoteSuccessMessage, isNotNull);
+      expect(localizations.endVoteErrorMessage, isNotNull);
       expect(localizations.enterANewOptionLabel, isNotNull);
       expect(localizations.enterYourCommentLabel, isNotNull);
       expect(localizations.loadingPollVotesError, isNotNull);
@@ -328,6 +350,7 @@ void main() {
       expect(localizations.loadingLabel, isNotNull);
       expect(localizations.slideToCancelLabel, isNotNull);
       expect(localizations.holdToRecordLabel, isNotNull);
+      expect(localizations.audioRecordingPermissionMessage, isNotNull);
       expect(localizations.sendAnywayLabel, isNotNull);
       expect(localizations.moderatedMessageBlockedText, isNotNull);
       expect(localizations.moderationReviewModalTitle, isNotNull);

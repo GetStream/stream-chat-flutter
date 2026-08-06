@@ -877,48 +877,144 @@ class DefaultStreamMessageItem extends StatelessWidget {
   }
 
   // Dispatches a MessageAction to the appropriate channel or callback handler.
+  //
+  // Mutating actions (delete, pin, flag, mark-unread, mute) and copy surface a
+  // success/error snackbar via [_runWithFeedback]; reactions, resend and
+  // block/unblock stay fire-and-forget, and edit/reply/thread delegate to their
+  // callbacks.
   Future<void> _onActionTap(
     BuildContext context,
     Channel channel,
     MessageAction action,
-  ) async => switch (action) {
-    SelectReaction() => _selectReaction(context, action.message, channel, action.reaction),
-    CopyMessage() => _copyMessage(action.message, channel),
-    DeleteMessage() => _maybeDeleteMessage(context, action.message, channel),
-    HardDeleteMessage() => channel.deleteMessage(action.message, hard: true),
-    EditMessage() => props.onEditMessageTap?.call(action.message),
-    FlagMessage() => _maybeFlagMessage(context, action.message, channel),
-    MarkUnread() => channel.markUnread(action.message.id),
-    MuteUser() => channel.client.muteUser(action.user.id),
-    UnmuteUser() => channel.client.unmuteUser(action.user.id),
-    BlockUser() => channel.client.blockUser(action.user.id),
-    UnblockUser() => channel.client.unblockUser(action.user.id),
-    PinMessage() => channel.pinMessage(action.message),
-    UnpinMessage() => channel.unpinMessage(action.message),
-    ResendMessage() => channel.retryMessage(action.message),
-    QuotedReply() => props.onReplyTap?.call(action.message),
-    ThreadReply() => props.onThreadTap?.call(action.message, null),
-  };
+  ) async {
+    final translations = context.translations;
+    // Resolved up-front — before the confirmation dialogs and before the action
+    // can remove the message item (e.g. a delete) — so the snackbar still shows.
+    final messenger = StreamSnackbarMessenger.maybeOf(context);
 
-  // Copies the message text (with mentions replaced) to the clipboard.
+    switch (action) {
+      case SelectReaction():
+        return _selectReaction(context, action.message, channel, action.reaction).ignore();
+      case CopyMessage():
+        return _copyMessage(action.message, messenger, translations.messageCopiedToClipboardText);
+      case DeleteMessage():
+        return _maybeDeleteMessage(context, action.message, channel, messenger);
+      case HardDeleteMessage():
+        return _runWithFeedback(
+          messenger,
+          () => channel.deleteMessage(action.message, hard: true),
+          successMessage: translations.messageDeletedLabel,
+          errorMessage: translations.deleteMessageError,
+        );
+      case EditMessage():
+        return props.onEditMessageTap?.call(action.message);
+      case FlagMessage():
+        return _maybeFlagMessage(context, action.message, channel, messenger);
+      case MarkUnread():
+        return _runWithFeedback(
+          messenger,
+          () => channel.markUnread(action.message.id),
+          successMessage: translations.messageMarkedAsUnreadText,
+          errorMessage: translations.markUnreadError,
+        );
+      case MuteUser():
+        return _runWithFeedback(
+          messenger,
+          () => channel.client.muteUser(action.user.id),
+          successMessage: translations.toggleMuteUnmuteUserSuccessText(
+            user: action.user.name,
+            isMuted: false,
+          ),
+          errorMessage: translations.toggleMuteUnmuteUserErrorText(isMuted: false),
+        );
+      case UnmuteUser():
+        return _runWithFeedback(
+          messenger,
+          () => channel.client.unmuteUser(action.user.id),
+          successMessage: translations.toggleMuteUnmuteUserSuccessText(
+            user: action.user.name,
+            isMuted: true,
+          ),
+          errorMessage: translations.toggleMuteUnmuteUserErrorText(isMuted: true),
+        );
+      case BlockUser():
+        return channel.client.blockUser(action.user.id).ignore();
+      case UnblockUser():
+        return channel.client.unblockUser(action.user.id).ignore();
+      case PinMessage():
+        return _runWithFeedback(
+          messenger,
+          () => channel.pinMessage(action.message),
+          successMessage: translations.togglePinUnpinMessageSuccessText(pinned: true),
+          errorMessage: translations.togglePinUnpinMessageErrorText(pinned: true),
+        );
+      case UnpinMessage():
+        return _runWithFeedback(
+          messenger,
+          () => channel.unpinMessage(action.message),
+          successMessage: translations.togglePinUnpinMessageSuccessText(pinned: false),
+          errorMessage: translations.togglePinUnpinMessageErrorText(pinned: false),
+        );
+      case ResendMessage():
+        return channel.retryMessage(action.message).ignore();
+      case QuotedReply():
+        return props.onReplyTap?.call(action.message);
+      case ThreadReply():
+        return props.onThreadTap?.call(action.message, null);
+    }
+  }
+
+  // Runs [action] and shows a success or error snackbar on [messenger] with the
+  // given messages. Does nothing if [messenger] is null.
+  Future<void> _runWithFeedback(
+    StreamSnackbarMessenger? messenger,
+    Future<void> Function() action, {
+    required String errorMessage,
+    String? successMessage,
+  }) async {
+    try {
+      await action();
+      if (successMessage == null) return;
+      messenger?.show(
+        StreamSnackbar(message: Text(successMessage), variant: .success),
+        replace: true,
+      );
+    } catch (_) {
+      messenger?.show(
+        StreamSnackbar(message: Text(errorMessage), variant: .error),
+        replace: true,
+      );
+    }
+  }
+
+  // Copies the message text (with mentions replaced) to the clipboard and
+  // confirms with a snackbar on [messenger].
   Future<void> _copyMessage(
     Message message,
-    Channel channel,
+    StreamSnackbarMessenger? messenger,
+    String confirmationMessage,
   ) async {
     final presentableMessage = message.replaceMentions(linkify: false);
 
     final messageText = presentableMessage.text;
     if (messageText == null || messageText.isEmpty) return;
 
-    return Clipboard.setData(ClipboardData(text: messageText));
+    await Clipboard.setData(ClipboardData(text: messageText));
+    messenger?.show(
+      StreamSnackbar(message: Text(confirmationMessage)),
+      replace: true,
+    );
   }
 
-  // Shows a confirmation dialog before deleting the message.
-  Future<EmptyResponse?> _maybeDeleteMessage(
+  // Shows a confirmation dialog before deleting the message, then a
+  // success/error snackbar on [messenger] once confirmed.
+  Future<void> _maybeDeleteMessage(
     BuildContext context,
     Message message,
     Channel channel,
+    StreamSnackbarMessenger? messenger,
   ) async {
+    final translations = context.translations;
     final confirmDelete = await showStreamDialog<bool>(
       context: context,
       builder: (context) => StreamMessageActionConfirmationModal(
@@ -930,17 +1026,25 @@ class DefaultStreamMessageItem extends StatelessWidget {
       ),
     );
 
-    if (confirmDelete != true) return null;
+    if (confirmDelete != true) return;
 
-    return channel.deleteMessage(message);
+    return _runWithFeedback(
+      messenger,
+      () => channel.deleteMessage(message),
+      successMessage: translations.messageDeletedLabel,
+      errorMessage: translations.deleteMessageError,
+    );
   }
 
-  // Shows a confirmation dialog before flagging the message.
-  Future<EmptyResponse?> _maybeFlagMessage(
+  // Shows a confirmation dialog before flagging the message, then a
+  // success/error snackbar on [messenger] once confirmed.
+  Future<void> _maybeFlagMessage(
     BuildContext context,
     Message message,
     Channel channel,
+    StreamSnackbarMessenger? messenger,
   ) async {
+    final translations = context.translations;
     final confirmFlag = await showStreamDialog<bool>(
       context: context,
       builder: (context) => StreamMessageActionConfirmationModal(
@@ -952,10 +1056,14 @@ class DefaultStreamMessageItem extends StatelessWidget {
       ),
     );
 
-    if (confirmFlag != true) return null;
+    if (confirmFlag != true) return;
 
-    final messageId = message.id;
-    return channel.client.flagMessage(messageId);
+    return _runWithFeedback(
+      messenger,
+      () => channel.client.flagMessage(message.id),
+      successMessage: translations.flagMessageSuccessfulLabel,
+      errorMessage: translations.flagMessageError,
+    );
   }
 
   // Toggles a reaction: removes it if already present, otherwise sends it.

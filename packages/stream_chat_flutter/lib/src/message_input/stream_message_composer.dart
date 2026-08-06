@@ -1471,13 +1471,15 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     required Message message,
     required Channel channel,
   }) async {
-    try {
-      // A message is considered fresh if it doesn't have a remoteCreatedAt.
-      final isFreshMessage = message.remoteCreatedAt == null;
+    // A message is considered fresh if it doesn't have a remoteCreatedAt.
+    final isFreshMessage = message.remoteCreatedAt == null;
 
-      // Note: edited messages which are bounced back with an error needs to be
-      // sent as new messages as the backend doesn't store them.
-      final resp = await switch (!isFreshMessage && !message.isBouncedWithError) {
+    // Note: edited messages which are bounced back with an error needs to be
+    // sent as new messages as the backend doesn't store them.
+    final isUpdate = !isFreshMessage && !message.isBouncedWithError;
+
+    try {
+      final resp = await switch (isUpdate) {
         true => channel.updateMessage(message),
         false => channel.sendMessage(message),
       };
@@ -1486,6 +1488,17 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     } catch (e, stk) {
       if (widget.props.onError != null) {
         return widget.props.onError?.call(e, stk);
+      }
+
+      if (mounted) {
+        final translations = context.translations;
+        StreamSnackbarMessenger.maybeOf(context)?.show(
+          StreamSnackbar(
+            message: Text(isUpdate ? translations.editMessageError : translations.sendMessageError),
+            variant: .error,
+          ),
+          replace: true,
+        );
       }
 
       rethrow;

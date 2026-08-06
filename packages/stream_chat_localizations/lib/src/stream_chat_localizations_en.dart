@@ -514,6 +514,48 @@ class StreamChatLocalizationsEn extends GlobalStreamChatLocalizations {
       ' than the newest 100 channel messages.';
 
   @override
+  String get messageMarkedAsUnreadText => 'Message marked as unread';
+
+  @override
+  String get deleteMessageError => 'Error deleting message';
+
+  @override
+  String togglePinUnpinMessageSuccessText({required bool pinned}) {
+    if (pinned) return 'Message pinned';
+    return 'Message unpinned';
+  }
+
+  @override
+  String togglePinUnpinMessageErrorText({required bool pinned}) {
+    if (pinned) return 'Error pinning message';
+    return 'Error removing message pin';
+  }
+
+  @override
+  String get flagMessageError => 'Error adding flag';
+
+  @override
+  String get messageCopiedToClipboardText => 'Message copied to clipboard';
+
+  @override
+  String get sendMessageError => 'Send message request failed';
+
+  @override
+  String get editMessageError => 'Edit message request failed';
+
+  @override
+  String toggleMuteUnmuteUserSuccessText({required String user, required bool isMuted}) {
+    if (isMuted) return '$user has been unmuted';
+    return '$user has been muted';
+  }
+
+  @override
+  String toggleMuteUnmuteUserErrorText({required bool isMuted}) {
+    if (isMuted) return 'Error unmuting a user, please try again';
+    return 'Error muting a user, please try again';
+  }
+
+  @override
   String createPollLabel({bool isNew = false}) {
     if (isNew) return 'Create a new poll';
     return 'Create Poll';
@@ -650,6 +692,12 @@ class StreamChatLocalizationsEn extends GlobalStreamChatLocalizations {
   String get endVoteLabel => 'End Poll';
 
   @override
+  String get endVoteSuccessMessage => 'Poll ended';
+
+  @override
+  String get endVoteErrorMessage => 'Failed to end the poll';
+
+  @override
   String get pollResultsLabel => 'Poll Results';
 
   @override
@@ -701,6 +749,9 @@ class StreamChatLocalizationsEn extends GlobalStreamChatLocalizations {
 
   @override
   String get holdToRecordLabel => 'Hold to record. Release to save.';
+
+  @override
+  String get audioRecordingPermissionMessage => 'Please allow Audio permissions in settings.';
 
   @override
   String get sendAnywayLabel => 'Send Anyway';
