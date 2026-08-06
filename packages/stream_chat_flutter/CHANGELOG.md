@@ -8,6 +8,7 @@
 - Added a `size` (`StreamLoadingSpinnerSize`) parameter to `StreamScrollViewLoadingWidget`.
 - Added `onReactionTap` to `StreamMessageItem` and `StreamMessageListView`, reporting the tapped message's `BuildContext` and a `ReactionTapDetails` with the tapped `message` and `reaction` (the reaction is `null` for a clustered or overflow chip that maps to no single reaction).
 - Added an `unreadIndicator` parameter to `StreamBackButton` that overlays a widget (typically a `StreamUnreadIndicator`) on the button's top-end corner. Pass `StreamUnreadIndicator(excludeCid: cid)` to show the total unread count of other channels, or `StreamUnreadIndicator.channels(cid: cid)` for a single channel's count.
+- Added a "Translated"/"Original" message annotation, shown automatically when `Message.i18n` has a translation for the current user's language, with a "Show original"/"Show translation" link to toggle between the two. The toggle state is tracked per `StreamMessageListView` via the new `StreamMessageTranslationStore`, so it survives messages scrolling out of and back into view. `StreamMessageText` gained a `showOriginalText` parameter for direct control, and `StreamChatConfigurationData.translationDisplayEnabled` (default `true`) turns the whole feature off SDK-wide.
 
 ⚠️ Deprecated
 

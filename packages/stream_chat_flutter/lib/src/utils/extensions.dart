@@ -459,8 +459,15 @@ extension MessageX on Message {
     return messageTextLength * (fontSize ?? 1) * multiplier;
   }
 
-  /// It returns the message with the translated text if available locally
-  Message translate(String language) => copyWith(text: i18n?['${language}_text'] ?? text);
+  /// It returns the message with the translated text if available locally.
+  ///
+  /// Returns the message unchanged when [language] is `null` or empty —
+  /// Stream's API defaults [User.language] to `''` rather than omitting it,
+  /// so both are treated as "no language to translate to".
+  Message translate(String? language) => switch (language) {
+    null || '' => this,
+    final language => copyWith(text: i18n?['${language}_text'] ?? text),
+  };
 
   /// It returns the message replacing the mentioned user names with
   ///  the respective user ids

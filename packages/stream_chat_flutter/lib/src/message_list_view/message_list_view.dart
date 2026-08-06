@@ -295,6 +295,11 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
   late final ItemPositionsListener _itemPositionListener;
   StreamChannelState? streamChannel;
 
+  // Owned per list instance, so a channel view and an open thread (a
+  // separate `StreamMessageListView`) each get independent translation
+  // toggle state. See [StreamMessageTranslationStore].
+  final _translationStore = StreamMessageTranslationStore();
+
   // Drives the unread-messages separator. Held in a [ValueNotifier] so read
   // events can update it without rebuilding the entire list view.
   final _unreadState = ValueNotifier<({int count, String? firstUnreadId})>((count: 0, firstUnreadId: null));
@@ -435,6 +440,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     debouncedMarkThreadRead.cancel();
     _unreadState.dispose();
     _highlightState.dispose();
+    _translationStore.dispose();
     super.dispose();
   }
 
@@ -567,21 +573,24 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     // TODO: Revisit this nested Portal setup during desktop reactions refactor
     // and remove the extra layer if a dedicated message-list portal label is
     // no longer required.
-    return Portal(
-      labels: const [kPortalMessageListViewLabel],
+    return StreamMessageTranslations(
+      store: _translationStore,
       child: Portal(
-        child: ScaffoldMessenger(
-          child: MessageListCore(
-            paginationLimit: widget.config.paginationLimit,
-            maximumMessageLimit: widget.config.maximumMessageLimit,
-            retentionTrimBuffer: widget.config.retentionTrimBuffer,
-            messageFilter: widget.messageFilter,
-            loadingBuilder: defaultLoadingBuilder,
-            emptyBuilder: defaultEmptyBuilder,
-            messageListBuilder: defaultMessageListBuilder,
-            messageListController: _messageListController,
-            parentMessage: widget.parentMessage,
-            errorBuilder: defaultErrorBuilder,
+        labels: const [kPortalMessageListViewLabel],
+        child: Portal(
+          child: ScaffoldMessenger(
+            child: MessageListCore(
+              paginationLimit: widget.config.paginationLimit,
+              maximumMessageLimit: widget.config.maximumMessageLimit,
+              retentionTrimBuffer: widget.config.retentionTrimBuffer,
+              messageFilter: widget.messageFilter,
+              loadingBuilder: defaultLoadingBuilder,
+              emptyBuilder: defaultEmptyBuilder,
+              messageListBuilder: defaultMessageListBuilder,
+              messageListController: _messageListController,
+              parentMessage: widget.parentMessage,
+              errorBuilder: defaultErrorBuilder,
+            ),
           ),
         ),
       ),
@@ -1185,7 +1194,12 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       child: Builder(
         builder: (context) => switch (widget.messageBuilder) {
           final builder? => builder.call(context, message, messageItemProps),
-          _ => StreamMessageItem.fromProps(props: messageItemProps),
+          // Keyed by message id so per-message local state (e.g. in the
+          // content/attachments/leading widgets) stays attached to the
+          // correct message when pagination prepends older messages and
+          // shifts every already-rendered item's index, rather than leaking
+          // onto whatever message next occupies the same position.
+          _ => StreamMessageItem.fromProps(key: ValueKey(message.id), props: messageItemProps),
         },
       ),
     );

@@ -454,6 +454,9 @@ class DefaultStreamMessageItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final message = props.message;
 
+    final translationStore = StreamMessageTranslations.of(context);
+    final showOriginalText = translationStore?.isShowingOriginalText(message.id) ?? false;
+
     final placement = StreamMessageLayout.of(context);
     final theme = core.StreamMessageItemTheme.of(context);
     final defaults = _StreamMessageItemDefaults(
@@ -492,6 +495,11 @@ class DefaultStreamMessageItem extends StatelessWidget {
           final onTap? => () => onTap(message),
           _ => () => _onViewThread(context, message),
         },
+        showOriginalText: showOriginalText,
+        onToggleOriginalText: switch (translationStore) {
+          final store? => () => store.toggleOriginalText(message.id),
+          null => null,
+        },
       ),
     );
 
@@ -527,6 +535,7 @@ class DefaultStreamMessageItem extends StatelessWidget {
       attachmentBuilders: props.attachmentBuilders,
       reactionSorting: props.reactionSorting,
       onQuotedMessageTap: props.onQuotedMessageTap,
+      showOriginalText: showOriginalText,
       onLinkTap: (_, href, __) {
         if (href == null) return;
         if (props.onMessageLinkTap case final onTap?) return onTap(message, href);
@@ -844,6 +853,21 @@ class DefaultStreamMessageItem extends StatelessWidget {
       leadingInset = effectiveAvatarSize.value + effectiveSpacing;
     }
 
+    // Captured before the dialog opens, since the modal's overlay sits
+    // outside the StreamMessageListView subtree that provides this scope.
+    final translationStore = StreamMessageTranslations.of(context);
+
+    final messageItem = StreamMessageItem(
+      key: const Key('MessageItem'),
+      message: message.trimmed,
+      padding: EdgeInsets.zero,
+      backgroundColor: core.StreamColors.transparent,
+    );
+    final messageWidget = switch (translationStore) {
+      final store? => StreamMessageTranslations(store: store, child: messageItem),
+      null => messageItem,
+    };
+
     final action = await showStreamDialog(
       context: context,
       useRootNavigator: false,
@@ -860,12 +884,7 @@ class DefaultStreamMessageItem extends StatelessWidget {
             leadingInset: leadingInset,
             messageWidget: StreamChannel.value(
               channel: channel,
-              child: StreamMessageItem(
-                key: const Key('MessageItem'),
-                message: message.trimmed,
-                padding: EdgeInsets.zero,
-                backgroundColor: core.StreamColors.transparent,
-              ),
+              child: messageWidget,
             ),
           ),
         ),

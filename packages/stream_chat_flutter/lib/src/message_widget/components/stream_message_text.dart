@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/src/stream_chat.dart';
+import 'package:stream_chat_flutter/src/stream_chat_configuration.dart';
 import 'package:stream_chat_flutter/src/utils/device_segmentation.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
@@ -12,7 +13,10 @@ import 'package:stream_core_flutter/chat.dart' as core;
 ///
 /// The message text is translated into the current user's language, mention
 /// syntax is replaced with display names, and the result is rendered as
-/// markdown.
+/// markdown. Pass [showOriginalText] to display the original text instead,
+/// even when a translation is available. Automatic translation can be
+/// turned off SDK-wide via
+/// [StreamChatConfigurationData.translationDisplayEnabled].
 ///
 /// The widget rebuilds automatically when the current user's language
 /// changes, ensuring the displayed text stays in sync.
@@ -30,10 +34,15 @@ class StreamMessageText extends StatelessWidget {
     this.onLinkTap,
     this.onMentionTap,
     this.onAnyMentionTap,
+    this.showOriginalText = false,
   });
 
   /// The message whose text to display.
   final Message message;
+
+  /// Whether to display [message]'s original text instead of a translation,
+  /// when [Message.i18n] has one for the current user's language.
+  final bool showOriginalText;
 
   /// Called when a link in the rendered markdown is tapped.
   ///
@@ -62,12 +71,19 @@ class StreamMessageText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final streamChat = StreamChat.of(context);
+    final translationDisplayEnabled = StreamChatConfiguration.of(context).translationDisplayEnabled;
 
-    return BetterStreamBuilder<String>(
-      initialData: streamChat.currentUser?.language ?? 'en',
-      stream: streamChat.currentUserStream.map((it) => it?.language ?? 'en'),
-      builder: (context, language) {
-        final messageText = message.translate(language).replaceMentions().text?.replaceAll('\n', '\n\n').trim();
+    // `BetterStreamBuilder`'s type parameter can't be nullable, so the
+    // current user's (possibly unset) language is wrapped in a record —
+    // itself always non-null — rather than defaulting it to an empty string.
+    return BetterStreamBuilder<({String? language})>(
+      initialData: (language: streamChat.currentUser?.language),
+      stream: streamChat.currentUserStream.map((it) => (language: it?.language)),
+      builder: (context, data) {
+        final translated = (showOriginalText || !translationDisplayEnabled)
+            ? message
+            : message.translate(data.language);
+        final messageText = translated.replaceMentions().text?.replaceAll('\n', '\n\n').trim();
 
         if (messageText == null || messageText.trim().isEmpty) return const Empty();
 

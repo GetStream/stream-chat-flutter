@@ -13,6 +13,7 @@ const _kEnableDynamicColor = 'config.enableDynamicColor';
 const _kEnableReminderActions = 'config.enableReminderActions';
 const _kEnableDeleteForMe = 'config.enableDeleteForMe';
 const _kEnableMessageInfo = 'config.enableMessageInfo';
+const _kEnableMessageTranslation = 'config.enableMessageTranslation';
 const _kEnableLocationSharing = 'config.enableLocationSharing';
 const _kDraftMessagesEnabled = 'config.draftMessagesEnabled';
 const _kEnforceUniqueReactions = 'config.enforceUniqueReactions';
@@ -44,6 +45,7 @@ class SampleAppConfigData {
     bool enableReminderActions = false,
     bool enableDeleteForMe = false,
     bool enableMessageInfo = false,
+    bool enableMessageTranslation = false,
     bool enableLocationSharing = false,
     bool draftMessagesEnabled = true,
     bool enforceUniqueReactions = false,
@@ -58,6 +60,7 @@ class SampleAppConfigData {
       enableReminderActions: enableReminderActions,
       enableDeleteForMe: enableDeleteForMe,
       enableMessageInfo: enableMessageInfo,
+      enableMessageTranslation: enableMessageTranslation,
       enableLocationSharing: enableLocationSharing,
       draftMessagesEnabled: draftMessagesEnabled,
       enforceUniqueReactions: enforceUniqueReactions,
@@ -75,6 +78,7 @@ class SampleAppConfigData {
     required this.enableReminderActions,
     required this.enableDeleteForMe,
     required this.enableMessageInfo,
+    required this.enableMessageTranslation,
     required this.enableLocationSharing,
     required this.draftMessagesEnabled,
     required this.enforceUniqueReactions,
@@ -93,6 +97,7 @@ class SampleAppConfigData {
       enableReminderActions: prefs.getBool(_kEnableReminderActions, defaultValue: false).getValue(),
       enableDeleteForMe: prefs.getBool(_kEnableDeleteForMe, defaultValue: false).getValue(),
       enableMessageInfo: prefs.getBool(_kEnableMessageInfo, defaultValue: false).getValue(),
+      enableMessageTranslation: prefs.getBool(_kEnableMessageTranslation, defaultValue: false).getValue(),
       enableLocationSharing: prefs.getBool(_kEnableLocationSharing, defaultValue: false).getValue(),
       draftMessagesEnabled: prefs.getBool(_kDraftMessagesEnabled, defaultValue: false).getValue(),
       enforceUniqueReactions: prefs.getBool(_kEnforceUniqueReactions, defaultValue: false).getValue(),
@@ -125,6 +130,9 @@ class SampleAppConfigData {
   /// Whether the "Message Info" action appears in the message context menu.
   final bool enableMessageInfo;
 
+  /// Whether the "Translate" action appears in the message context menu.
+  final bool enableMessageTranslation;
+
   /// Whether location sharing (attachment builder + picker) is enabled.
   final bool enableLocationSharing;
 
@@ -156,6 +164,7 @@ class SampleAppConfigData {
     bool? enableReminderActions,
     bool? enableDeleteForMe,
     bool? enableMessageInfo,
+    bool? enableMessageTranslation,
     bool? enableLocationSharing,
     bool? draftMessagesEnabled,
     bool? enforceUniqueReactions,
@@ -170,6 +179,7 @@ class SampleAppConfigData {
       enableReminderActions: enableReminderActions ?? this.enableReminderActions,
       enableDeleteForMe: enableDeleteForMe ?? this.enableDeleteForMe,
       enableMessageInfo: enableMessageInfo ?? this.enableMessageInfo,
+      enableMessageTranslation: enableMessageTranslation ?? this.enableMessageTranslation,
       enableLocationSharing: enableLocationSharing ?? this.enableLocationSharing,
       draftMessagesEnabled: draftMessagesEnabled ?? this.draftMessagesEnabled,
       enforceUniqueReactions: enforceUniqueReactions ?? this.enforceUniqueReactions,
@@ -191,6 +201,7 @@ class SampleAppConfigData {
     prefs.setBool(_kEnableReminderActions, enableReminderActions);
     prefs.setBool(_kEnableDeleteForMe, enableDeleteForMe);
     prefs.setBool(_kEnableMessageInfo, enableMessageInfo);
+    prefs.setBool(_kEnableMessageTranslation, enableMessageTranslation);
     prefs.setBool(_kEnableLocationSharing, enableLocationSharing);
     prefs.setBool(_kDraftMessagesEnabled, draftMessagesEnabled);
     prefs.setBool(_kEnforceUniqueReactions, enforceUniqueReactions);
