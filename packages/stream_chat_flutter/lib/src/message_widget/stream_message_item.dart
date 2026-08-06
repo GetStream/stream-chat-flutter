@@ -853,6 +853,21 @@ class DefaultStreamMessageItem extends StatelessWidget {
       leadingInset = effectiveAvatarSize.value + effectiveSpacing;
     }
 
+    // Captured before the dialog opens, since the modal's overlay sits
+    // outside the StreamMessageListView subtree that provides this scope.
+    final translationStore = StreamMessageTranslations.of(context);
+
+    final messageItem = StreamMessageItem(
+      key: const Key('MessageItem'),
+      message: message.trimmed,
+      padding: EdgeInsets.zero,
+      backgroundColor: core.StreamColors.transparent,
+    );
+    final messageWidget = switch (translationStore) {
+      final store? => StreamMessageTranslations(store: store, child: messageItem),
+      null => messageItem,
+    };
+
     final action = await showStreamDialog(
       context: context,
       useRootNavigator: false,
@@ -869,12 +884,7 @@ class DefaultStreamMessageItem extends StatelessWidget {
             leadingInset: leadingInset,
             messageWidget: StreamChannel.value(
               channel: channel,
-              child: StreamMessageItem(
-                key: const Key('MessageItem'),
-                message: message.trimmed,
-                padding: EdgeInsets.zero,
-                backgroundColor: core.StreamColors.transparent,
-              ),
+              child: messageWidget,
             ),
           ),
         ),
