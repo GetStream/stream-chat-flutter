@@ -781,6 +781,7 @@ class _ChannelLastMessageTextState extends State<ChannelLastMessageText> with _L
 /// widgets rendering it so they always agree on it.
 mixin _LastMessageResolver<T extends StatefulWidget> on State<T> {
   Message? _currentLastMessage;
+  ChannelClientState? _currentChannelState;
 
   /// Returns the newest message in [messages] passing [predicate], or `null`
   /// when there is nothing to preview.
@@ -793,6 +794,14 @@ mixin _LastMessageResolver<T extends StatefulWidget> on State<T> {
     List<Message> messages,
     LastMessagePredicate predicate,
   ) {
+    // List items are unkeyed, so reordering rebinds this State to another
+    // channel. Drop the cache so the previous channel's message can never be
+    // used as a fallback for this one.
+    if (_currentChannelState != channelState) {
+      _currentChannelState = channelState;
+      _currentLastMessage = null;
+    }
+
     final message = messages.lastWhereOrNull(predicate);
     if (!channelState.isUpToDate) return [message, _currentLastMessage].latest;
 
