@@ -5,6 +5,35 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import '../mocks.dart';
 
+// Returns sentinels that no hardcoded English label could produce, so both the
+// singular and the plural case prove the widget went through `translations`.
+class _FakeLocalizations implements StreamChatLocalizations {
+  @override
+  String threadReplyCountText(int count) => count == 1 ? 'singular:$count' : 'plural:$count';
+
+  // Strings the rest of the row needs; only the label under test is faked.
+  @override
+  AccessibilityTranslations get accessibility => DefaultTranslations.instance.accessibility;
+
+  // Anything else throws instead of resolving to null, so an unstubbed lookup
+  // fails the test loudly rather than rendering an empty label.
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+class _FakeLocalizationsDelegate extends LocalizationsDelegate<StreamChatLocalizations> {
+  const _FakeLocalizationsDelegate();
+
+  @override
+  bool isSupported(Locale locale) => true;
+
+  @override
+  Future<StreamChatLocalizations> load(Locale locale) async => _FakeLocalizations();
+
+  @override
+  bool shouldReload(_FakeLocalizationsDelegate old) => false;
+}
+
 void main() {
   group('StreamMessageItem thread replies label', () {
     final currentUser = OwnUser(id: 'current-user');
@@ -33,6 +62,7 @@ void main() {
       );
 
       return MaterialApp(
+        localizationsDelegates: const [_FakeLocalizationsDelegate()],
         home: StreamChat(
           client: client,
           connectivityStream: Stream.value(const [ConnectivityResult.mobile]),
@@ -46,35 +76,35 @@ void main() {
       );
     }
 
-    // Asserting against `threadReplyCountText` too pins the label to the
-    // translations table, so re-hardcoding it fails even if the plural is right.
-    testWidgets('reads "1 reply" for a single reply', (tester) async {
+    testWidgets('takes the singular label from the injected translations', (tester) async {
       await tester.pumpWidget(buildScene(1));
       await tester.pumpAndSettle();
 
-      expect(find.text('1 reply'), findsOneWidget);
-      expect(
-        find.text(DefaultTranslations.instance.threadReplyCountText(1)),
-        findsOneWidget,
-      );
+      expect(find.text('singular:1'), findsOneWidget);
+      expect(find.text(DefaultTranslations.instance.threadReplyCountText(1)), findsNothing);
     });
 
-    testWidgets('reads "3 replies" for multiple replies', (tester) async {
+    testWidgets('takes the plural label from the injected translations', (tester) async {
       await tester.pumpWidget(buildScene(3));
       await tester.pumpAndSettle();
 
-      expect(find.text('3 replies'), findsOneWidget);
-      expect(
-        find.text(DefaultTranslations.instance.threadReplyCountText(3)),
-        findsOneWidget,
-      );
+      expect(find.text('plural:3'), findsOneWidget);
+      expect(find.text(DefaultTranslations.instance.threadReplyCountText(3)), findsNothing);
     });
 
     testWidgets('is not rendered when there are no replies', (tester) async {
       await tester.pumpWidget(buildScene(0));
       await tester.pumpAndSettle();
 
-      expect(find.textContaining('repl'), findsNothing);
+      expect(find.textContaining('singular:'), findsNothing);
+      expect(find.textContaining('plural:'), findsNothing);
     });
+  });
+
+  // The widget tests above deliberately never see the shipped strings, so pin
+  // the default table's pluralization here.
+  test('DefaultTranslations pluralizes the thread reply count', () {
+    expect(DefaultTranslations.instance.threadReplyCountText(1), '1 reply');
+    expect(DefaultTranslations.instance.threadReplyCountText(3), '3 replies');
   });
 }
