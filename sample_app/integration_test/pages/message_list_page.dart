@@ -34,6 +34,11 @@ final class _Composer {
 
   /// Command suggestions overlay shown while typing `/`.
   Finder get commandsOverlay => find.byType(StreamCommandAutocompleteOptions);
+
+  /// The "also send in channel" checkbox, which the composer only shows while
+  /// inside a thread. `DmCheckboxListTile` is not exported, so it is located by
+  /// its label (`alsoSendAsDirectMessageLabel`).
+  Finder get alsoSendInChannelCheckbox => find.text('Also send in Channel');
 }
 
 final class _Reactions {
@@ -58,6 +63,9 @@ final class _MessageActions {
   Finder get delete => find.text('Delete Message');
   Finder get threadReply => find.text('Thread Reply');
 
+  /// Starts a quoted reply (`replyLabel`). Distinct from [threadReply].
+  Finder get reply => find.text('Reply');
+
   /// The confirm button in the delete-confirmation dialog.
   Finder get deleteConfirm => find.text('Delete');
 }
@@ -75,6 +83,69 @@ final class _MessageList {
   Finder message(String id) => find.byWidgetPredicate(
     (widget) => widget is StreamMessageItem && widget.props.message.id == id,
     description: 'message row for $id',
+  );
+
+  /// The row rendering the message whose text is exactly [text].
+  ///
+  /// The open actions modal renders its own copy of the message under
+  /// `Key('MessageItem')`; excluding keyed rows keeps this finder unambiguous
+  /// while the modal is up.
+  Finder messageWithText(String text) => find.byWidgetPredicate(
+    (widget) => widget is StreamMessageItem && widget.key == null && widget.props.message.text == text,
+    description: 'message row with text "$text"',
+  );
+
+  /// The quoted-message bubble a reply carries above its own text.
+  Finder get quotedMessage => find.byType(StreamQuotedMessage);
+
+  /// The quote's text preview. Rendered by the same [StreamMessagePreviewText]
+  /// as the channel list, but with no channel in scope — so it carries no
+  /// "You:" / sender prefix, and a deleted quote reads "Message deleted".
+  Finder get quotedMessageText => find.descendant(
+    of: quotedMessage,
+    matching: find.descendant(of: find.byType(StreamMessagePreviewText), matching: find.byType(Text)),
+  );
+
+  /// A system message row (e.g. the "channel truncated" notice). System
+  /// messages get their own row widget rather than a [StreamMessageItem].
+  Finder get systemMessage => find.byType(StreamSystemMessage);
+
+  /// The row an error message gets — what the backend returns for an unknown
+  /// slash command. Error messages bypass [StreamMessageItem] entirely.
+  Finder get moderatedMessage => find.byType(StreamModeratedMessage);
+
+  /// The row an ephemeral message gets, e.g. a Giphy preview awaiting a
+  /// send/shuffle/cancel. Like the system and error rows, it is not a
+  /// [StreamMessageItem].
+  Finder get ephemeralMessage => find.byType(StreamEphemeralMessage);
+
+  /// A rendered Giphy attachment.
+  Finder get giphy => find.byType(StreamGiphyAttachment);
+
+  /// Thread-participant avatars shown next to the "N replies" footer.
+  Finder get threadRepliesAvatars => find.descendant(
+    of: threadReplies,
+    matching: find.byType(StreamUserAvatar),
+  );
+
+  /// The floating "scroll to bottom" button.
+  ///
+  /// It has no key or dedicated type — it is a floating [StreamButton] the view
+  /// swaps for an `Empty()` whenever it should be hidden, so its presence in the
+  /// tree *is* the "button is shown" signal.
+  Finder get scrollToBottomButton => find.descendant(
+    of: find.byType(view),
+    matching: find.byWidgetPredicate(
+      (widget) => widget is StreamButton && widget.props.isFloating == true,
+      description: 'floating scroll-to-bottom button',
+    ),
+  );
+
+  /// The unread-count badge wrapped around [scrollToBottomButton]. The SDK only
+  /// builds it while the count is greater than zero.
+  Finder get scrollToBottomUnreadBadge => find.descendant(
+    of: find.byType(view),
+    matching: find.byType(StreamBadgeNotification),
   );
 
   /// The "… is typing" text of [StreamTypingIndicator]. The indicator widget is
@@ -97,6 +168,11 @@ final class _MessageList {
   /// renders on messages whose `replyCount > 0` (i.e. thread parents), and
   /// tapping it opens the thread.
   Finder get threadReplies => find.byType(StreamMessageReplies);
+
+  /// The banner between a thread's parent message and its replies. It is the
+  /// second-to-last row, so it only renders at the top of the thread.
+  /// `ThreadSeparator` is not exported, hence matching on the runtime type.
+  Finder get threadSeparator => find.byWidgetPredicate((it) => it.runtimeType.toString() == 'ThreadSeparator');
 
   /// The badge the SDK overlays on a message that failed to send (or bounced).
   /// `StreamMessageItem` only builds it while the message is in a failed state,

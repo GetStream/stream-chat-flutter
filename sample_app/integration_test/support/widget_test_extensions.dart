@@ -5,6 +5,34 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+extension E2EFinder on Finder {
+  /// [evaluate], but empty instead of throwing when this finder narrows to a
+  /// match that is not currently rendered.
+  ///
+  /// A narrowing finder raises from `evaluate()` when nothing matches yet,
+  /// rather than resolving to nothing — `find.byType(X).at(0)` (including one
+  /// used as the `of:` of a descendant finder) raises an `IndexError`, and
+  /// `.first` / `.last` raise a `StateError`. For a loop that is *waiting* for
+  /// something to appear that is not an error — it just is not there yet — and
+  /// letting it throw kills the test on the first tick instead. It matters just
+  /// as much when waiting for something to go away, where "no match" is the
+  /// expected end state.
+  List<Element> evaluateSafely() {
+    try {
+      // Materialized inside the `try` on purpose: the result can be lazy, so
+      // returning it unconsumed would throw in the caller instead, after this
+      // catch has unwound.
+      return evaluate().toList();
+    } on RangeError {
+      // IndexError implements RangeError.
+      return const [];
+    } on StateError {
+      // `Iterable.first` / `.last` on an empty match.
+      return const [];
+    }
+  }
+}
+
 extension E2EWidgetTester on WidgetTester {
   Future<void> scrollToText(String text) async {
     final target = find.text(text);
@@ -78,6 +106,21 @@ extension E2EWidgetTester on WidgetTester {
     bool Function() condition, {
     required String description,
     Duration timeout = const Duration(seconds: 30),
+  }) => _scrollUntil(condition, const Offset(0, 400), description: description, timeout: timeout);
+
+  /// Repeatedly scrolls the list down (towards the end of the list) until
+  /// [condition] holds, paging in further entries as needed.
+  Future<void> scrollDownUntil(
+    bool Function() condition, {
+    required String description,
+    Duration timeout = const Duration(seconds: 30),
+  }) => _scrollUntil(condition, const Offset(0, -400), description: description, timeout: timeout);
+
+  Future<void> _scrollUntil(
+    bool Function() condition,
+    Offset step, {
+    required String description,
+    required Duration timeout,
   }) async {
     final scrollable = find.byType(Scrollable).first;
     await waitUntilVisible(scrollable);
@@ -87,12 +130,45 @@ extension E2EWidgetTester on WidgetTester {
         await settle();
         return;
       }
-      await drag(scrollable, const Offset(0, 400));
+      await drag(scrollable, step);
       // Bounded, so [timeout] is actually re-checked between iterations even
       // while a perpetual animation (e.g. a reconnect spinner) is running.
       await settle();
     }
-    throw TestFailure('Timed out scrolling up, waiting for $description');
+    throw TestFailure('Timed out scrolling, waiting for $description');
+  }
+
+  /// The plain text the [Text] found by [finder] renders, or null when it is not
+  /// in the tree.
+  ///
+  /// Handles both a plain [Text] (`data`) and a `Text.rich` (`textSpan`) — the
+  /// SDK's message previews are the latter, and their spans can carry
+  /// inline-icon [WidgetSpan]s (a deleted message, an attachment type). Dropping
+  /// the placeholders leaves their separator spaces behind, hence collapsing the
+  /// whitespace afterwards.
+  String? renderedText(Finder finder) {
+    final elements = finder.evaluateSafely();
+    if (elements.isEmpty) return null;
+
+    final text = elements.first.widget as Text;
+    final rendered = text.data ?? text.textSpan?.toPlainText(includePlaceholders: false) ?? '';
+    return rendered.replaceAll(RegExp(r'\s+'), ' ').trim();
+  }
+
+  /// Polls until the text rendered by [finder] equals [expected], then asserts —
+  /// so a failure reports what was actually on screen instead of a bare timeout.
+  Future<void> expectRenderedText(
+    Finder finder,
+    String expected, {
+    Duration timeout = const Duration(seconds: 30),
+  }) async {
+    await waitUntilVisible(finder);
+
+    final end = DateTime.now().add(timeout);
+    while (renderedText(finder) != expected && DateTime.now().isBefore(end)) {
+      await pump(const Duration(milliseconds: 100));
+    }
+    expect(renderedText(finder), expected);
   }
 
   Future<void> waitUntilVisible(
@@ -102,7 +178,7 @@ extension E2EWidgetTester on WidgetTester {
     final end = DateTime.now().add(timeout);
     while (DateTime.now().isBefore(end)) {
       await pump(const Duration(milliseconds: 100));
-      if (finder.evaluate().isNotEmpty) {
+      if (finder.evaluateSafely().isNotEmpty) {
         await settle();
         return;
       }
@@ -117,7 +193,7 @@ extension E2EWidgetTester on WidgetTester {
     final end = DateTime.now().add(timeout);
     while (DateTime.now().isBefore(end)) {
       await pump(const Duration(milliseconds: 100));
-      if (finder.evaluate().isEmpty) {
+      if (finder.evaluateSafely().isEmpty) {
         await settle();
         return;
       }
@@ -137,6 +213,14 @@ extension E2EWidgetTester on WidgetTester {
     }
   }
 
+  /// Swipes [target] from its start edge towards its end edge, far enough to
+  /// pass the SDK's swipe-to-reply threshold (20% of the row's width).
+  Future<void> swipeToReply(Finder target) async {
+    await waitUntilVisible(target);
+    await drag(target, Offset(getSize(target).width * 0.4, 0));
+    await settle();
+  }
+
   /// Long-presses [target] until [appears] shows up.
   ///
   /// A message's long-press handler is disabled while it is still being sent,
@@ -152,13 +236,7 @@ extension E2EWidgetTester on WidgetTester {
       await pump(const Duration(milliseconds: 100));
       if (appears.evaluate().isNotEmpty) return;
 
-      bool resolves;
-      try {
-        resolves = target.evaluate().isNotEmpty;
-      } catch (_) {
-        resolves = false;
-      }
-      if (!resolves) continue;
+      if (target.evaluateSafely().isEmpty) continue;
 
       await longPress(target);
       await settle();
@@ -178,7 +256,7 @@ extension E2EWidgetTester on WidgetTester {
 
   bool _tryInvokeMessageLongPress(Finder target) {
     final inkWells = find.descendant(of: target, matching: find.byType(InkWell));
-    if (inkWells.evaluate().isEmpty) return false;
+    if (inkWells.evaluateSafely().isEmpty) return false;
 
     final onLongPress = widget<InkWell>(inkWells.first).onLongPress;
     if (onLongPress == null) return false;
