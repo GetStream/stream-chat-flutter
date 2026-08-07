@@ -418,6 +418,33 @@ void main() {
     );
 
     testWidgets(
+      "rebinding to a not-up-to-date empty channel shows that channel's empty state",
+      (tester) async {
+        // Same State reused across channels, but B is still loading, so the
+        // preserve-last-known fallback kicks in. It must not fall back to a
+        // message belonging to channel A.
+        final other = User(id: 'other');
+        final msgA = Message(id: 'ma', text: 'channel-a-message', user: other);
+
+        when(() => stateA.messages).thenReturn([msgA]);
+        await pumpSubtitle(tester, channelA);
+        messagesA.add([msgA]);
+        await tester.pumpAndSettle();
+
+        expect(find.text('channel-a-message'), findsOneWidget);
+
+        isUpToDateB = false;
+        when(() => stateB.messages).thenReturn([]);
+        await pumpSubtitle(tester, channelB);
+        messagesB.add([]);
+        await tester.pumpAndSettle();
+
+        expect(find.text('channel-a-message'), findsNothing);
+        expect(find.text(emptyText), findsOneWidget);
+      },
+    );
+
+    testWidgets(
       'shows the empty-state when the channel is truncated while up-to-date',
       (tester) async {
         // A channel.truncated event clears messages but leaves isUpToDate true.
