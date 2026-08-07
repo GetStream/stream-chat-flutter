@@ -490,13 +490,14 @@ class _ChannelListDeliveryStatus extends StatelessWidget {
   }
 }
 
-/// A widget that displays the date of the message shown in the channel
-/// preview.
+/// A widget that displays the date of a channel's latest previewable sent
+/// message.
 ///
-/// Dates the latest previewable sent message, and displays nothing when there
-/// is none. Drafts are ignored — they have no sent date — so when the subtitle
-/// previews a draft this still dates the last sent message. Deliberately not
-/// [Channel.lastMessageAt], which survives a truncated channel.
+/// Displays nothing when there is none. Drafts are ignored — they have no sent
+/// date — so this is not always the message the preview subtitle shows: with a
+/// draft the subtitle previews the draft while this still dates the last sent
+/// message. Deliberately not [Channel.lastMessageAt], which survives a
+/// truncated channel.
 class ChannelLastMessageDate extends StatefulWidget {
   /// Creates a new instance of the [ChannelLastMessageDate] widget.
   ChannelLastMessageDate({
