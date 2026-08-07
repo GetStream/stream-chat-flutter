@@ -5,6 +5,7 @@ import 'dart:async';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart' hide Message;
 import 'package:go_router/go_router.dart';
 import 'package:media_kit/media_kit.dart';
@@ -202,8 +203,9 @@ class _StreamChatSampleAppState extends State<StreamChatSampleApp>
                         GlobalMaterialLocalizations.delegate,
                         GlobalWidgetsLocalizations.delegate,
                       ],
-                      builder: (context, child) {
-                        return ListenableBuilder(
+                      builder: (context, child) => _EdgeToEdgeSystemBars(
+                        themeMode: config.themeMode,
+                        child: ListenableBuilder(
                           listenable: authController,
                           builder: (context, cachedChild) {
                             final wrapped = Directionality(
@@ -239,8 +241,8 @@ class _StreamChatSampleAppState extends State<StreamChatSampleApp>
                             );
                           },
                           child: child,
-                        );
-                      },
+                        ),
+                      ),
                       routerConfig: _setupRouter(),
                     );
                   },
@@ -296,6 +298,44 @@ extension on SampleAppConfigData {
         highlightInitialMessage: true,
         swipeToReply: true,
       ),
+    );
+  }
+}
+
+/// Renders the app edge-to-edge with transparent, theme-aware system bars.
+///
+/// Wrapped once below the theme so it re-resolves on theme changes. The
+/// navigation bar keeps `systemNavigationBarContrastEnforced: false` so it stays
+/// fully transparent (content bleeds behind it) instead of the OS painting an
+/// opaque three-button-nav scrim; icon brightness carries legibility instead.
+/// Pair with `SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge)` in
+/// `main()`.
+class _EdgeToEdgeSystemBars extends StatelessWidget {
+  const _EdgeToEdgeSystemBars({
+    required this.themeMode,
+    required this.child,
+  });
+
+  final ThemeMode themeMode;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = switch (themeMode) {
+      ThemeMode.light => false,
+      ThemeMode.dark => true,
+      ThemeMode.system => Theme.brightnessOf(context) == .dark,
+    };
+
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: isDark ? .light : .dark,
+        systemNavigationBarColor: Colors.transparent,
+        systemNavigationBarContrastEnforced: false,
+        systemNavigationBarIconBrightness: isDark ? .light : .dark,
+      ),
+      child: child,
     );
   }
 }
