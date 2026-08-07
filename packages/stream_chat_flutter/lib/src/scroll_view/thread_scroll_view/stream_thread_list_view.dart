@@ -334,8 +334,8 @@ class StreamThreadListView extends StatelessWidget {
       ),
       loadingBuilder: (context) =>
           loadingBuilder?.call(context) ??
-          const Center(
-            child: StreamThreadListSkeletonLoading(),
+          Center(
+            child: StreamThreadListSkeletonLoading(padding: padding),
           ),
       errorBuilder: (context, error) {
         if (errorBuilder?.call(context, error) case final builder?) return builder;

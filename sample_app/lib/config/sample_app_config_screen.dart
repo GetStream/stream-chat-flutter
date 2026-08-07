@@ -22,153 +22,171 @@ class SampleAppConfigScreen extends StatelessWidget {
     final spacing = context.streamSpacing;
     final icons = context.streamIcons;
 
-    return Scaffold(
+    return StreamScaffold(
       backgroundColor: colorScheme.backgroundApp,
       appBar: StreamAppBar(title: const Text('Configuration')),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.symmetric(horizontal: spacing.md),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SizedBox(height: spacing.xs),
-
-            // ── Appearance ──
-            const _SectionHeader(title: 'Appearance'),
-            SizedBox(height: spacing.xs),
-            _SettingsCard(
+      body: Builder(
+        builder: (context) {
+          final topInset = MediaQuery.paddingOf(context).top;
+          return SingleChildScrollView(
+            padding: EdgeInsets.symmetric(horizontal: spacing.md) + EdgeInsets.only(top: topInset),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _SegmentedRow<ThemeMode>(
-                  title: 'Theme',
-                  value: config.themeMode,
-                  segments: const {
-                    ThemeMode.system: 'System',
-                    ThemeMode.light: 'Light',
-                    ThemeMode.dark: 'Dark',
-                  },
-                  segmentIcons: const {
-                    ThemeMode.system: Icons.brightness_auto_outlined,
-                    ThemeMode.light: Icons.light_mode_outlined,
-                    ThemeMode.dark: Icons.dark_mode_outlined,
-                  },
-                  onChanged: (v) => SampleAppConfig.update(context, config.copyWith(themeMode: v)),
+                SizedBox(height: spacing.xs),
+
+                // ── Appearance ──
+                const _SectionHeader(title: 'Appearance'),
+                SizedBox(height: spacing.xs),
+                _SettingsCard(
+                  children: [
+                    _SegmentedRow<ThemeMode>(
+                      title: 'Theme',
+                      value: config.themeMode,
+                      segments: const {
+                        ThemeMode.system: 'System',
+                        ThemeMode.light: 'Light',
+                        ThemeMode.dark: 'Dark',
+                      },
+                      segmentIcons: const {
+                        ThemeMode.system: Icons.brightness_auto_outlined,
+                        ThemeMode.light: Icons.light_mode_outlined,
+                        ThemeMode.dark: Icons.dark_mode_outlined,
+                      },
+                      onChanged: (v) => SampleAppConfig.update(context, config.copyWith(themeMode: v)),
+                    ),
+                    _SegmentedRow<StreamSurfaceStyle>(
+                      title: 'Surface Style',
+                      value: config.surfaceStyle,
+                      segments: const {
+                        StreamSurfaceStyle.regular: 'Regular',
+                        StreamSurfaceStyle.floating: 'Floating',
+                      },
+                      segmentIcons: const {
+                        StreamSurfaceStyle.regular: Icons.web_asset_outlined,
+                        StreamSurfaceStyle.floating: Icons.filter_none_outlined,
+                      },
+                      onChanged: (v) => SampleAppConfig.update(context, config.copyWith(surfaceStyle: v)),
+                    ),
+                    _SwitchRow(
+                      icon: Icons.palette_outlined,
+                      title: 'Dynamic Color',
+                      subtitle: _dynamicColorSupported
+                          ? 'Theme colors derived from the device wallpaper/accent'
+                          : 'Only supported on Android, macOS, Windows, and Linux',
+                      value: _dynamicColorSupported && config.enableDynamicColor,
+                      onChanged: _dynamicColorSupported
+                          ? (v) => SampleAppConfig.update(context, config.copyWith(enableDynamicColor: v))
+                          : null,
+                    ),
+                    _LocaleRow(config: config),
+                    _SwitchRow(
+                      icon: icons.reorder,
+                      title: 'Force RTL',
+                      subtitle: 'Right-to-left layout direction',
+                      value: config.forceRtl,
+                      onChanged: (v) => SampleAppConfig.update(context, config.copyWith(forceRtl: v)),
+                    ),
+                  ],
                 ),
-                _SwitchRow(
-                  icon: Icons.palette_outlined,
-                  title: 'Dynamic Color',
-                  subtitle: _dynamicColorSupported
-                      ? 'Theme colors derived from the device wallpaper/accent'
-                      : 'Only supported on Android, macOS, Windows, and Linux',
-                  value: _dynamicColorSupported && config.enableDynamicColor,
-                  onChanged: _dynamicColorSupported
-                      ? (v) => SampleAppConfig.update(context, config.copyWith(enableDynamicColor: v))
-                      : null,
+
+                SizedBox(height: spacing.xl),
+
+                // ── Features ──
+                const _SectionHeader(title: 'Features'),
+                SizedBox(height: spacing.xs),
+                _SettingsCard(
+                  children: [
+                    _SwitchRow(
+                      icon: icons.bell,
+                      title: 'Reminders',
+                      subtitle: 'Remind me, Save for later, Edit',
+                      value: config.enableReminderActions,
+                      onChanged: (v) => SampleAppConfig.update(context, config.copyWith(enableReminderActions: v)),
+                    ),
+                    _SwitchRow(
+                      icon: icons.delete,
+                      title: 'Delete for Me',
+                      subtitle: 'Delete message for current user',
+                      value: config.enableDeleteForMe,
+                      onChanged: (v) => SampleAppConfig.update(context, config.copyWith(enableDeleteForMe: v)),
+                    ),
+                    _SwitchRow(
+                      icon: icons.info,
+                      title: 'Message Info',
+                      subtitle: 'Show delivery info sheet',
+                      value: config.enableMessageInfo,
+                      onChanged: (v) => SampleAppConfig.update(context, config.copyWith(enableMessageInfo: v)),
+                    ),
+                    _SwitchRow(
+                      icon: icons.location,
+                      title: 'Location Sharing',
+                      subtitle: 'Attachment builder and picker',
+                      value: config.enableLocationSharing,
+                      onChanged: (v) => SampleAppConfig.update(context, config.copyWith(enableLocationSharing: v)),
+                    ),
+                  ],
                 ),
-                _LocaleRow(config: config),
-                _SwitchRow(
-                  icon: icons.reorder,
-                  title: 'Force RTL',
-                  subtitle: 'Right-to-left layout direction',
-                  value: config.forceRtl,
-                  onChanged: (v) => SampleAppConfig.update(context, config.copyWith(forceRtl: v)),
+
+                SizedBox(height: spacing.xl),
+
+                // ── Chat ──
+                const _SectionHeader(title: 'Chat'),
+                SizedBox(height: spacing.xs),
+                _SettingsCard(
+                  children: [
+                    _SwitchRow(
+                      icon: icons.edit,
+                      title: 'Draft Messages',
+                      subtitle: 'Enable draft message saving',
+                      value: config.draftMessagesEnabled,
+                      onChanged: (v) => SampleAppConfig.update(context, config.copyWith(draftMessagesEnabled: v)),
+                    ),
+                    _SwitchRow(
+                      icon: icons.emoji,
+                      title: 'Unique Reactions',
+                      subtitle: 'New reaction replaces existing',
+                      value: config.enforceUniqueReactions,
+                      onChanged: (v) => SampleAppConfig.update(context, config.copyWith(enforceUniqueReactions: v)),
+                    ),
+                  ],
                 ),
+
+                SizedBox(height: spacing.xl),
+
+                // ── Reactions ──
+                const _SectionHeader(title: 'Reactions'),
+                SizedBox(height: spacing.xs),
+                _SettingsCard(
+                  children: [
+                    _SegmentedRow<StreamReactionsType?>(
+                      title: 'Reaction Type',
+                      value: config.reactionType,
+                      segments: const {
+                        null: 'Default',
+                        StreamReactionsType.segmented: 'Segmented',
+                        StreamReactionsType.clustered: 'Clustered',
+                      },
+                      onChanged: (v) => SampleAppConfig.update(context, config.copyWith(reactionType: v)),
+                    ),
+                    _SegmentedRow<StreamReactionsPosition?>(
+                      title: 'Reaction Position',
+                      value: config.reactionPosition,
+                      segments: const {
+                        null: 'Default',
+                        StreamReactionsPosition.header: 'Header',
+                        StreamReactionsPosition.footer: 'Footer',
+                      },
+                      onChanged: (v) => SampleAppConfig.update(context, config.copyWith(reactionPosition: v)),
+                    ),
+                  ],
+                ),
+
+                SizedBox(height: spacing.xxl),
               ],
             ),
-
-            SizedBox(height: spacing.xl),
-
-            // ── Features ──
-            const _SectionHeader(title: 'Features'),
-            SizedBox(height: spacing.xs),
-            _SettingsCard(
-              children: [
-                _SwitchRow(
-                  icon: icons.bell,
-                  title: 'Reminders',
-                  subtitle: 'Remind me, Save for later, Edit',
-                  value: config.enableReminderActions,
-                  onChanged: (v) => SampleAppConfig.update(context, config.copyWith(enableReminderActions: v)),
-                ),
-                _SwitchRow(
-                  icon: icons.delete,
-                  title: 'Delete for Me',
-                  subtitle: 'Delete message for current user',
-                  value: config.enableDeleteForMe,
-                  onChanged: (v) => SampleAppConfig.update(context, config.copyWith(enableDeleteForMe: v)),
-                ),
-                _SwitchRow(
-                  icon: icons.info,
-                  title: 'Message Info',
-                  subtitle: 'Show delivery info sheet',
-                  value: config.enableMessageInfo,
-                  onChanged: (v) => SampleAppConfig.update(context, config.copyWith(enableMessageInfo: v)),
-                ),
-                _SwitchRow(
-                  icon: icons.location,
-                  title: 'Location Sharing',
-                  subtitle: 'Attachment builder and picker',
-                  value: config.enableLocationSharing,
-                  onChanged: (v) => SampleAppConfig.update(context, config.copyWith(enableLocationSharing: v)),
-                ),
-              ],
-            ),
-
-            SizedBox(height: spacing.xl),
-
-            // ── Chat ──
-            const _SectionHeader(title: 'Chat'),
-            SizedBox(height: spacing.xs),
-            _SettingsCard(
-              children: [
-                _SwitchRow(
-                  icon: icons.edit,
-                  title: 'Draft Messages',
-                  subtitle: 'Enable draft message saving',
-                  value: config.draftMessagesEnabled,
-                  onChanged: (v) => SampleAppConfig.update(context, config.copyWith(draftMessagesEnabled: v)),
-                ),
-                _SwitchRow(
-                  icon: icons.emoji,
-                  title: 'Unique Reactions',
-                  subtitle: 'New reaction replaces existing',
-                  value: config.enforceUniqueReactions,
-                  onChanged: (v) => SampleAppConfig.update(context, config.copyWith(enforceUniqueReactions: v)),
-                ),
-              ],
-            ),
-
-            SizedBox(height: spacing.xl),
-
-            // ── Reactions ──
-            const _SectionHeader(title: 'Reactions'),
-            SizedBox(height: spacing.xs),
-            _SettingsCard(
-              children: [
-                _SegmentedRow<StreamReactionsType?>(
-                  title: 'Reaction Type',
-                  value: config.reactionType,
-                  segments: const {
-                    null: 'Default',
-                    StreamReactionsType.segmented: 'Segmented',
-                    StreamReactionsType.clustered: 'Clustered',
-                  },
-                  onChanged: (v) => SampleAppConfig.update(context, config.copyWith(reactionType: v)),
-                ),
-                _SegmentedRow<StreamReactionsPosition?>(
-                  title: 'Reaction Position',
-                  value: config.reactionPosition,
-                  segments: const {
-                    null: 'Default',
-                    StreamReactionsPosition.header: 'Header',
-                    StreamReactionsPosition.footer: 'Footer',
-                  },
-                  onChanged: (v) => SampleAppConfig.update(context, config.copyWith(reactionPosition: v)),
-                ),
-              ],
-            ),
-
-            SizedBox(height: spacing.xxl),
-          ],
-        ),
+          );
+        },
       ),
     );
   }

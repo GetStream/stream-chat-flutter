@@ -15,6 +15,7 @@ mixin _$StreamChatThemeData on ThemeExtension<StreamChatThemeData> {
     StreamAppBarThemeData? channelHeaderTheme,
     StreamAppBarThemeData? channelListHeaderTheme,
     StreamAppBarThemeData? threadHeaderTheme,
+    StreamMessageComposerThemeData? messageComposerTheme,
     StreamMessageListViewThemeData? messageListViewTheme,
     StreamPollCreatorThemeData? pollCreatorTheme,
     StreamPollInteractorThemeData? pollInteractorTheme,
@@ -34,6 +35,7 @@ mixin _$StreamChatThemeData on ThemeExtension<StreamChatThemeData> {
       channelListHeaderTheme:
           channelListHeaderTheme ?? _this.channelListHeaderTheme,
       threadHeaderTheme: threadHeaderTheme ?? _this.threadHeaderTheme,
+      messageComposerTheme: messageComposerTheme ?? _this.messageComposerTheme,
       messageListViewTheme: messageListViewTheme ?? _this.messageListViewTheme,
       pollCreatorTheme: pollCreatorTheme ?? _this.pollCreatorTheme,
       pollInteractorTheme: pollInteractorTheme ?? _this.pollInteractorTheme,
@@ -78,6 +80,11 @@ mixin _$StreamChatThemeData on ThemeExtension<StreamChatThemeData> {
       threadHeaderTheme: StreamAppBarThemeData.lerp(
         _this.threadHeaderTheme,
         other.threadHeaderTheme,
+        t,
+      )!,
+      messageComposerTheme: StreamMessageComposerThemeData.lerp(
+        _this.messageComposerTheme,
+        other.messageComposerTheme,
         t,
       )!,
       messageListViewTheme: StreamMessageListViewThemeData.lerp(
@@ -155,6 +162,7 @@ mixin _$StreamChatThemeData on ThemeExtension<StreamChatThemeData> {
     return _other.channelHeaderTheme == _this.channelHeaderTheme &&
         _other.channelListHeaderTheme == _this.channelListHeaderTheme &&
         _other.threadHeaderTheme == _this.threadHeaderTheme &&
+        _other.messageComposerTheme == _this.messageComposerTheme &&
         _other.messageListViewTheme == _this.messageListViewTheme &&
         _other.pollCreatorTheme == _this.pollCreatorTheme &&
         _other.pollInteractorTheme == _this.pollInteractorTheme &&
@@ -178,6 +186,7 @@ mixin _$StreamChatThemeData on ThemeExtension<StreamChatThemeData> {
       _this.channelHeaderTheme,
       _this.channelListHeaderTheme,
       _this.threadHeaderTheme,
+      _this.messageComposerTheme,
       _this.messageListViewTheme,
       _this.pollCreatorTheme,
       _this.pollInteractorTheme,

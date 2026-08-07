@@ -71,9 +71,10 @@ void main() {
   MockChannel _getChannelWithCapabilities(
     List<ChannelCapability> capabilities, {
     bool enableMutes = true,
+    bool enableReplies = true,
   }) {
     final customChannel = MockChannel(ownCapabilities: capabilities);
-    final channelConfig = ChannelConfig(mutes: enableMutes);
+    final channelConfig = ChannelConfig(mutes: enableMutes, replies: enableReplies);
     when(() => customChannel.config).thenReturn(channelConfig);
     return customChannel;
   }

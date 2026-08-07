@@ -39,7 +39,7 @@ class _ChannelFileDisplayScreenState extends State<ChannelFileDisplayScreen> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = context.streamColorScheme;
-    return Scaffold(
+    return StreamScaffold(
       backgroundColor: colorScheme.backgroundApp,
       appBar: StreamAppBar(title: const Text('Files')),
       body: ValueListenableBuilder<PagedValue<String, GetMessageResponse>>(

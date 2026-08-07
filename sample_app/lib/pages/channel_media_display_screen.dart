@@ -38,44 +38,46 @@ class _ChannelMediaDisplayScreenState extends State<ChannelMediaDisplayScreen> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = context.streamColorScheme;
-    return Scaffold(
+    return StreamScaffold(
       backgroundColor: colorScheme.backgroundApp,
       appBar: StreamAppBar(title: Text(context.translations.photosAndVideosLabel)),
       body: ValueListenableBuilder<PagedValue<String, GetMessageResponse>>(
         valueListenable: _controller,
-        builder: (context, value, _) => value.when(
-          (items, nextPageKey, _) {
-            // Flatten messages → individual image/video attachments.
-            // Excludes link previews (`ogScrapeUrl != null`) so we don't
-            // render every shared URL's thumbnail in the grid.
-            final attachments = <StreamMediaGalleryAttachment>[
-              for (final response in items)
-                ...response.message.toMediaGalleryAttachments(
-                  filter: (a) =>
-                      (a.type == AttachmentType.image || a.type == AttachmentType.video) && a.ogScrapeUrl == null,
+        builder: (context, value, _) {
+          return value.when(
+            (items, nextPageKey, _) {
+              // Flatten messages → individual image/video attachments.
+              // Excludes link previews (`ogScrapeUrl != null`) so we don't
+              // render every shared URL's thumbnail in the grid.
+              final attachments = <StreamMediaGalleryAttachment>[
+                for (final response in items)
+                  ...response.message.toMediaGalleryAttachments(
+                    filter: (a) =>
+                        (a.type == AttachmentType.image || a.type == AttachmentType.video) && a.ogScrapeUrl == null,
+                  ),
+              ];
+
+              if (attachments.isEmpty) return const Center(child: _EmptyState());
+
+              return LazyLoadScrollView(
+                onEndOfPage: () async {
+                  if (nextPageKey != null) await _controller.loadMore(nextPageKey);
+                },
+                child: StreamMediaGallery(
+                  attachments: attachments,
+                  onItemTap: (index) => _openPreview(context, attachments, index),
                 ),
-            ];
-
-            if (attachments.isEmpty) return const Center(child: _EmptyState());
-
-            return LazyLoadScrollView(
-              onEndOfPage: () async {
-                if (nextPageKey != null) await _controller.loadMore(nextPageKey);
-              },
-              child: StreamMediaGallery(
-                attachments: attachments,
-                onItemTap: (index) => _openPreview(context, attachments, index),
+              );
+            },
+            loading: () => const Center(child: StreamScrollViewLoadingWidget()),
+            error: (_) => Center(
+              child: StreamScrollViewErrorWidget(
+                errorTitle: const Text('Failed to load media'),
+                onRetryPressed: _controller.refresh,
               ),
-            );
-          },
-          loading: () => const Center(child: StreamScrollViewLoadingWidget()),
-          error: (_) => Center(
-            child: StreamScrollViewErrorWidget(
-              errorTitle: const Text('Failed to load media'),
-              onRetryPressed: _controller.refresh,
             ),
-          ),
-        ),
+          );
+        },
       ),
     );
   }

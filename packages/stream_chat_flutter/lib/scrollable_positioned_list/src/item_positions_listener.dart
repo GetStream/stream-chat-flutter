@@ -24,6 +24,8 @@ class ItemPosition {
     required this.index,
     required this.itemLeadingEdge,
     required this.itemTrailingEdge,
+    this.contentLeadingEdge,
+    this.contentTrailingEdge,
   });
 
   /// Index of the item.
@@ -41,6 +43,22 @@ class ItemPosition {
   /// May be greater than one if the item is partially visible.
   final double itemTrailingEdge;
 
+  /// Distance in proportion of the visible content's main axis length from the
+  /// leading edge of that content to the leading edge of the item.
+  ///
+  /// The visible content is the area inside the list's padding. Consider using
+  /// this for overlays inside that area, such as under a floating bar; scroll
+  /// logic keeps using [itemLeadingEdge]. Equal to [itemLeadingEdge] when the list has no
+  /// inset, and `null` only when the source omits it (a list always provides
+  /// it).
+  final double? contentLeadingEdge;
+
+  /// Distance in proportion of the visible content's main axis length from the
+  /// leading edge of that content to the trailing edge of the item.
+  ///
+  /// See [contentLeadingEdge].
+  final double? contentTrailingEdge;
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -48,12 +66,20 @@ class ItemPosition {
           runtimeType == other.runtimeType &&
           index == other.index &&
           itemLeadingEdge == other.itemLeadingEdge &&
-          itemTrailingEdge == other.itemTrailingEdge;
+          itemTrailingEdge == other.itemTrailingEdge &&
+          contentLeadingEdge == other.contentLeadingEdge &&
+          contentTrailingEdge == other.contentTrailingEdge;
 
   @override
-  int get hashCode => 31 * (31 * (index.hashCode + 7) + itemLeadingEdge.hashCode) + itemTrailingEdge.hashCode;
+  int get hashCode => Object.hash(
+    index,
+    itemLeadingEdge,
+    itemTrailingEdge,
+    contentLeadingEdge,
+    contentTrailingEdge,
+  );
 
   @override
   String toString() =>
-      '''ItemPosition(index: $index, itemLeadingEdge: $itemLeadingEdge, itemTrailingEdge: $itemTrailingEdge)''';
+      '''ItemPosition(index: $index, itemLeadingEdge: $itemLeadingEdge, itemTrailingEdge: $itemTrailingEdge, contentLeadingEdge: $contentLeadingEdge, contentTrailingEdge: $contentTrailingEdge)''';
 }
