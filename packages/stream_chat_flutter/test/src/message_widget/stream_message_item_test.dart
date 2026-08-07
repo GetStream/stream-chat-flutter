@@ -46,10 +46,8 @@ void main() {
       );
     }
 
-    // The label used to be a hardcoded `'$replyCount replies'`, which read
-    // "1 replies" for a single reply. Asserting against
-    // `threadReplyCountText` as well pins the label to the translations
-    // table, so re-hardcoding it fails here even if the plural form is right.
+    // Asserting against `threadReplyCountText` too pins the label to the
+    // translations table, so re-hardcoding it fails even if the plural is right.
     testWidgets('reads "1 reply" for a single reply', (tester) async {
       await tester.pumpWidget(buildScene(1));
       await tester.pumpAndSettle();

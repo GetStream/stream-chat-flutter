@@ -162,16 +162,11 @@ void main() {
     );
   });
 
-  // The date comes from the message the preview shows, not from
-  // `Channel.lastMessageAt`: the server leaves that pointing at a message
-  // truncation removed, which used to leave the tile stamping a time on a
-  // preview that reads "No messages yet".
   group('ChannelLastMessageDate', () {
     const currentUserId = 'me';
 
-    // A date the preview must never show: `lastMessageAt` is stubbed to it in
-    // every test here, so reading the channel model instead of the message
-    // list is a visible failure rather than a coincidence.
+    // A date the preview must never show. Stubbed as `lastMessageAt` in every
+    // test, so reading the channel model is a visible failure.
     final lastMessageAt = DateTime(2024, 6, 6, 6, 6);
 
     late MockClient client;
@@ -209,8 +204,8 @@ void main() {
           home: StreamChat(
             client: client,
             child: Scaffold(
-              // Formatting the raw timestamp keeps the assertions independent
-              // of the default formatter's relative-date wording.
+              // Raw timestamps, so the assertions don't depend on the default
+              // formatter's relative-date wording.
               body: ChannelLastMessageDate(
                 channel: channel,
                 formatter: (context, date) => date.toIso8601String(),
@@ -237,8 +232,7 @@ void main() {
     });
 
     testWidgets('shows nothing when the channel has no messages to preview', (tester) async {
-      // What a truncated channel looks like: the messages are gone while the
-      // channel model still carries `lastMessageAt`.
+      // A truncated channel: messages gone, `lastMessageAt` still set.
       await pumpWithMessages(tester, []);
 
       expect(find.byType(StreamTimestamp), findsNothing);
@@ -246,8 +240,8 @@ void main() {
     });
 
     testWidgets('follows the same message the preview text does', (tester) async {
-      // The newest message is filtered out of the preview, so the timestamp
-      // has to fall back with it instead of tracking the channel model.
+      // The newest message is filtered out of the preview, so the date has to
+      // fall back with it.
       final visible = Message(
         text: 'visible',
         user: User(id: 'other'),

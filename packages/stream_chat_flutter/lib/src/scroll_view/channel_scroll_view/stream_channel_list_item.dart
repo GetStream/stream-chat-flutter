@@ -493,11 +493,9 @@ class _ChannelListDeliveryStatus extends StatelessWidget {
 /// A widget that displays the date of the message shown in the channel
 /// preview.
 ///
-/// Reads the same message the preview subtitle does, so the two never
-/// disagree: nothing is displayed when the channel has no message to preview,
-/// e.g. after the channel is truncated. Note this is the preview message's
-/// date, not [Channel.lastMessageAt], which the server keeps pointing at a
-/// truncated message.
+/// Reads the same message the preview subtitle does, so the two never disagree
+/// and nothing is displayed when there is no message to preview. Deliberately
+/// not [Channel.lastMessageAt], which survives a truncated channel.
 class ChannelLastMessageDate extends StatefulWidget {
   /// Creates a new instance of the [ChannelLastMessageDate] widget.
   ChannelLastMessageDate({
@@ -536,9 +534,7 @@ class _ChannelLastMessageDateState extends State<ChannelLastMessageDate> with _L
       stream: channelState.messagesStream,
       initialData: channelState.messages,
       builder: (context, messages) {
-        // Unlike the subtitle, a draft is not considered here: it has no sent
-        // date to show, and the preview keeps the last message's timestamp
-        // while the draft text is displayed.
+        // Drafts are ignored, unlike in the subtitle: they have no sent date.
         final lastMessage = resolveLastMessage(channelState, messages, predicate);
         if (lastMessage == null) return const Empty();
 
@@ -781,18 +777,17 @@ class _ChannelLastMessageTextState extends State<ChannelLastMessageText> with _L
   }
 }
 
-/// Resolves the message a channel preview should reflect, shared by every
-/// widget that renders part of that preview so they always agree on it.
+/// Resolves the message a channel preview should reflect, shared by the
+/// widgets rendering it so they always agree on it.
 mixin _LastMessageResolver<T extends StatefulWidget> on State<T> {
   Message? _currentLastMessage;
 
   /// Returns the newest message in [messages] passing [predicate], or `null`
-  /// when the channel has nothing to preview.
+  /// when there is nothing to preview.
   ///
-  /// [_currentLastMessage] holds the most recent message seen while the
-  /// channel has the latest messages (isUpToDate). While isUpToDate is false
-  /// (e.g. Channel.query(idAround:) truncates state mid-load), fall back to it
-  /// so the preview shows the actual latest message.
+  /// While the channel is not up to date (e.g. Channel.query(idAround:)
+  /// truncates state mid-load), falls back to the last message seen while it
+  /// was, so the preview still shows the actual latest message.
   Message? resolveLastMessage(
     ChannelClientState channelState,
     List<Message> messages,
