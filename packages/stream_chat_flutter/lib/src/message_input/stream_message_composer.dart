@@ -565,7 +565,7 @@ class DefaultStreamMessageComposer extends StatefulWidget {
 
 /// State of [DefaultStreamMessageComposer].
 class DefaultStreamMessageComposerState extends State<DefaultStreamMessageComposer>
-    with RestorationMixin<DefaultStreamMessageComposer>, SingleTickerProviderStateMixin {
+    with RestorationMixin<DefaultStreamMessageComposer>, SingleTickerProviderStateMixin, WidgetsBindingObserver {
   bool get _commandEnabled => _effectiveController.message.command != null;
 
   bool get _isPickerVisible => _pickerController != null;
@@ -620,6 +620,7 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _pickerAnimationController = AnimationController(
       duration: const Duration(milliseconds: 200),
       vsync: this,
@@ -644,6 +645,9 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
       if (mounted) return _initializeState();
     });
   }
+
+  @override
+  void didChangeMetrics() => setState(() {}); // Rebuilds when the keyboard opens/closes.
 
   void _initializeState() {
     // Call the listener once to make sure the initial state is reflected
@@ -833,6 +837,8 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     };
 
     final spacing = context.streamSpacing;
+    final keyboardVisible = View.of(context).viewInsets.bottom > 0;
+
     final content = Material(
       type: .transparency,
       child: switch (widget.props.enableSafeArea) {
@@ -840,7 +846,7 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
         _ => StreamSafeArea.driven(
           top: false,
           listenable: _pickerAnimation,
-          minimum: .only(bottom: spacing.md),
+          minimum: .only(bottom: keyboardVisible ? spacing.md : spacing.safeAreaBottom()),
           child: Center(heightFactor: 1, child: messageInput),
         ),
       },
@@ -1621,6 +1627,7 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _pickerAnimation.dispose();
     _pickerAnimationController.dispose();
     _stopPickerSync();
