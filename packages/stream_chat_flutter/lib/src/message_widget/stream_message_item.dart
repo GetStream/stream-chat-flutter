@@ -506,7 +506,7 @@ class DefaultStreamMessageItem extends StatelessWidget {
           maxAvatars: 3,
           onTap: () => _onViewThread(context, message),
           showConnector: placement.contentKind != .jumbomoji,
-          label: Text(context.translations.threadReplyCountText(replyCount)),
+          label: Text('$replyCount replies'),
           avatars: message.threadParticipants?.map(
             (user) => StreamUserAvatar(user: user, showOnlineIndicator: false),
           ),
