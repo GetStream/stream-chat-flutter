@@ -88,6 +88,9 @@ class StreamChannel extends StatefulWidget {
   ///
   /// Has no effect on [StreamChannel.value], which never repositions the
   /// loaded window.
+  ///
+  /// Only read once, during channel initialization — changing it after this
+  /// widget has mounted does not reposition the current viewport.
   final bool openAtFirstUnread;
 
   /// Widget builder used while the channel is initialising.

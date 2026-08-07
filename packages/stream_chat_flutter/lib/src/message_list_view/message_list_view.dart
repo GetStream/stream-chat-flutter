@@ -357,7 +357,13 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
   // burned on capturing the baseline instead of acting on it. Cleared once
   // a mark-read actually goes through, or once `isMarkedAsUnread` itself
   // clears (so a future mark-unread starts its own fresh snapshot).
-  Iterable<ItemPosition>? _markUnreadViewportSnapshot;
+  //
+  // Holds visible item *indices* rather than full [ItemPosition]s: comparing
+  // full positions would latch divergence on a sub-pixel edge change from an
+  // unrelated relayout (async attachment sizing, keyboard inset, image
+  // load) even though the user never scrolled, undoing the manual
+  // mark-unread almost instantly.
+  List<int>? _markUnreadViewportSnapshot;
 
   // Sticky once true: sighted the first time [_handleItemPositionsChanged]
   // (or, as a fallback, [_maybeMarkMessagesAsRead] itself) sees item
@@ -424,7 +430,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       // read-stream emission while still marked unread shouldn't keep
       // chasing the latest position and never let a genuine scroll differ
       // from it.
-      _markUnreadViewportSnapshot ??= _itemPositionListener.itemPositions.value.toList();
+      _markUnreadViewportSnapshot ??= _itemPositionListener.itemPositions.value.map((it) => it.index).toList();
     } else {
       _markUnreadViewportSnapshot = null;
       _markUnreadViewportDiverged = false;
@@ -603,7 +609,10 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     _highlightState.value = (id: messageId, generation: _highlightState.value.generation + 1);
   }
 
-  Future<void> _scrollToMessage({
+  // Returns whether the list actually scrolled to `messageId` — `false` for
+  // any of the bail-out paths below (target not found even after
+  // pagination, widget unmounted mid-pagination, or the SPL not attached).
+  Future<bool> _scrollToMessage({
     required String messageId,
     double alignment = 0.5, // center the message in the viewport by default
     bool highlight = true,
@@ -617,7 +626,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     if (index < 0) {
       // No around-reply pagination in thread mode yet — bail rather than
       // clobber the parent channel's loaded window.
-      if (_isThreadConversation) return;
+      if (_isThreadConversation) return false;
 
       // Target isn't in the loaded channel window. Paginate around it, wait
       // one frame for the BetterStreamBuilder rebuild to flush `messages`,
@@ -625,17 +634,17 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       // `_buildListView` on each emission, so an index captured before the
       // await would be stale.
       await streamChannel!.loadChannelAtMessage(messageId);
-      if (!mounted) return;
+      if (!mounted) return false;
       await WidgetsBinding.instance.endOfFrame;
-      if (!mounted) return;
+      if (!mounted) return false;
       index = messages.indexWhere((m) => m.id == messageId);
-      if (index < 0) return;
+      if (index < 0) return false;
     }
 
     // Bail when the SPL isn't attached — `scrollTo` would throw, and
     // highlighting an off-screen message is meaningless.
     final controller = _scrollController;
-    if (controller == null || !controller.isAttached) return;
+    if (controller == null || !controller.isAttached) return false;
 
     // Wait for the scroll to settle before flagging the message as
     // highlighted; otherwise the highlight tween fires while the list is
@@ -647,6 +656,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     );
 
     if (highlight && mounted) _highlightMessage(messageId);
+    return true;
   }
 
   // Wraps [child] in the highlight pulse if [message] is the currently
@@ -1105,12 +1115,16 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     final anchorId = _unreadDivider.value.anchorId ?? _unreadBaseline?.lastReadMessageId;
     if (anchorId == null) return;
 
-    _hasSeenFirstUnread.value = true;
     // Delegates to [_scrollToMessage], which falls back to
     // [StreamChannelState.loadChannelAtMessage] when the anchor isn't in the
     // currently loaded window — after which the real anchor resolves
     // naturally via the retry in [_buildListView], rendering divider A too.
-    await _scrollToMessage(messageId: anchorId, highlight: false);
+    final didJump = await _scrollToMessage(messageId: anchorId, highlight: false);
+    // Only claim the boundary as seen once the jump actually landed —
+    // otherwise (message not found even after pagination, or the SPL not
+    // attached) the pill would vanish and the mark-read gate would open for
+    // a boundary the user never actually reached.
+    if (didJump && mounted) _hasSeenFirstUnread.value = true;
   }
 
   Future<void> _onUnreadPillDismissTap() async {
@@ -1440,15 +1454,22 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
   // unchanged and re-block a mark-read the round trip should already have
   // earned. Safe to call on every position-changed tick — a no-op once
   // already diverged.
+  //
+  // Compares the set of visible item *indices* rather than full
+  // [ItemPosition]s (which also carry leading/trailing edge offsets) — an
+  // unrelated relayout that nudges an edge by a fraction of a pixel isn't
+  // evidence the user did anything, and shouldn't count as divergence.
   void _checkMarkUnreadViewportDivergence(Iterable<ItemPosition> itemPositions) {
+    final visibleIndices = itemPositions.map((it) => it.index).toList();
+
     if (_markUnreadViewportSnapshot == null) {
-      _markUnreadViewportSnapshot = itemPositions.toList();
+      _markUnreadViewportSnapshot = visibleIndices;
       return;
     }
     if (_markUnreadViewportDiverged) return;
 
-    const positionsEquality = UnorderedIterableEquality<ItemPosition>();
-    if (!positionsEquality.equals(itemPositions, _markUnreadViewportSnapshot)) {
+    const indicesEquality = UnorderedIterableEquality<int>();
+    if (!indicesEquality.equals(visibleIndices, _markUnreadViewportSnapshot)) {
       _markUnreadViewportDiverged = true;
     }
   }

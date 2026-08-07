@@ -55,6 +55,12 @@ class StreamMessageListViewConfiguration {
   ///
   /// Only affects channel reads; has no effect on thread reads or on
   /// [markReadWhenAtTheBottom] being `false`.
+  ///
+  /// Participates in this configuration's `==`/`hashCode`, so an inline
+  /// closure gives every rebuild a new identity and can make otherwise
+  /// identical configurations compare unequal. Hosts that rely on
+  /// configuration equality should hoist the predicate into a field or a
+  /// static function instead.
   final StreamShouldMarkReadPredicate? shouldMarkRead;
 
   /// Whether swiping a message triggers a quoted-reply action.

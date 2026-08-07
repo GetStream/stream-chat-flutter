@@ -1,3 +1,5 @@
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+
 /// The information available when deciding whether to automatically mark a
 /// [StreamMessageListView]'s channel as read.
 ///

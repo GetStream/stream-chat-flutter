@@ -330,16 +330,29 @@ void main() {
       (tester) async {
         final other = User(id: 'otherid');
         final messages = generateConversation(20, users: [other]).reversed.toList();
+        StreamMarkReadDetails? capturedDetails;
 
         await pumpMessageList(
           tester,
           messages: messages,
           isUpToDate: true,
           unreadCount: 5,
-          shouldMarkRead: (details) => false,
+          shouldMarkRead: (details) {
+            capturedDetails = details;
+            return false;
+          },
         );
 
         verifyNever(() => channel.markRead(messageId: any(named: 'messageId')));
+
+        // Opened at the bottom with nothing pre-existing unread and no
+        // active manual mark-unread — the default gating would have
+        // allowed this; only the override blocks it.
+        expect(capturedDetails, isNotNull);
+        expect(capturedDetails!.unreadCount, 5);
+        expect(capturedDetails!.hasSeenLastMessage, isTrue);
+        expect(capturedDetails!.hasSeenFirstUnreadMessage, isTrue);
+        expect(capturedDetails!.isMarkedAsUnread, isFalse);
       },
     );
 
@@ -349,6 +362,7 @@ void main() {
         final other = User(id: 'otherid');
         final messages = generateConversation(20, users: [other]).reversed.toList();
         final lastReadMessageId = messages[10].id;
+        StreamMarkReadDetails? capturedDetails;
 
         await pumpMessageList(
           tester,
@@ -362,10 +376,46 @@ void main() {
             unreadMessages: 5,
             lastReadMessageId: lastReadMessageId,
           ),
-          shouldMarkRead: (details) => true,
+          shouldMarkRead: (details) {
+            capturedDetails = details;
+            return true;
+          },
         );
 
         verify(() => channel.markRead(messageId: any(named: 'messageId'))).called(1);
+
+        // The unseen pre-existing unread boundary is exactly what the
+        // default gating would have blocked on; the override allows it
+        // anyway.
+        expect(capturedDetails, isNotNull);
+        expect(capturedDetails!.unreadCount, 5);
+        expect(capturedDetails!.hasSeenFirstUnreadMessage, isFalse);
+        expect(capturedDetails!.isMarkedAsUnread, isFalse);
+      },
+    );
+
+    testWidgets(
+      'a shouldMarkRead override sees isMarkedAsUnread when the channel has an active manual mark-unread',
+      (tester) async {
+        final other = User(id: 'otherid');
+        final messages = generateConversation(20, users: [other]).reversed.toList();
+        when(() => channelClientState.isMarkedAsUnread).thenReturn(true);
+        StreamMarkReadDetails? capturedDetails;
+
+        await pumpMessageList(
+          tester,
+          messages: messages,
+          isUpToDate: true,
+          unreadCount: 5,
+          shouldMarkRead: (details) {
+            capturedDetails = details;
+            return false;
+          },
+        );
+
+        expect(capturedDetails, isNotNull);
+        expect(capturedDetails!.isMarkedAsUnread, isTrue);
+        expect(capturedDetails!.unreadCount, 5);
       },
     );
   });
