@@ -31,13 +31,16 @@ int getInitialIndex(
     if (targetMessageIndex != -1) return targetMessageIndex + 2;
   }
 
-  // Otherwise, return the first unread message index if available.
-  if (channelState.getFirstUnreadMessage() case final firstUnreadMessage?) {
-    final firstUnreadMessageIndex = messages.indexWhere(
-      (it) => it.id == firstUnreadMessage.id,
-    );
+  // Otherwise, return the first unread message index if available — unless
+  // the caller opted out via [StreamChannel.openAtFirstUnread].
+  if (channelState.widget.openAtFirstUnread) {
+    if (channelState.getFirstUnreadMessage() case final firstUnreadMessage?) {
+      final firstUnreadMessageIndex = messages.indexWhere(
+        (it) => it.id == firstUnreadMessage.id,
+      );
 
-    if (firstUnreadMessageIndex != -1) return firstUnreadMessageIndex + 2;
+      if (firstUnreadMessageIndex != -1) return firstUnreadMessageIndex + 2;
+    }
   }
 
   return 0;

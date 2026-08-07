@@ -229,7 +229,8 @@ void main() {
       expect(localizations.enableFileAccessMessage, isNotNull);
       expect(localizations.allowFileAccessMessage, isNotNull);
       expect(localizations.unreadCountIndicatorLabel(unreadCount: 2), isNotNull);
-      expect(localizations.unreadMessagesSeparatorText(), isNotNull);
+      expect(localizations.unreadMessagesSeparatorLabel(count: 1), isNotNull);
+      expect(localizations.unreadMessagesSeparatorLabel(count: 2), isNotNull);
       expect(localizations.markUnreadError, isNotNull);
       expect(localizations.markAsUnreadLabel, isNotNull);
       // Create poll

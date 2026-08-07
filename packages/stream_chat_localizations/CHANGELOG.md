@@ -3,6 +3,7 @@
 ✅ Added
 
 - Added connection-error translations (`connectionErrorTitle`/`Description`, `slowConnectionErrorTitle`/`Description`, `genericErrorTitle`/`Description`) for all supported locales.
+- Added `unreadMessagesSeparatorLabel` for all supported locales.
 
 ## 10.2.0
 

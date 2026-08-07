@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
-import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:stream_core_flutter/chat.dart' as core;
 
 /// {@template unreadIndicatorButton}
-/// A button that displays the number of unread messages in a channel.
+/// A floating "jump to unread" pill showing a fixed unread count.
 ///
-/// [UnreadIndicatorButton] listens to the current user's read state and shows
-/// a jump-to-unread button when there are unread messages. Users can tap to
-/// navigate to the oldest unread message or dismiss the indicator.
+/// [UnreadIndicatorButton] is purely presentational: the host
+/// [StreamMessageListView] decides when it should be visible (only while the
+/// pre-existing unread boundary sits above the viewport) and supplies the
+/// frozen [unreadCount]. Users can tap to navigate to the first unread
+/// message or dismiss the indicator.
 ///
 /// {@tool snippet}
 ///
@@ -17,8 +17,9 @@ import 'package:stream_core_flutter/chat.dart' as core;
 ///
 /// ```dart
 /// UnreadIndicatorButton(
-///   onJumpTap: (lastReadMessageId) async {
-///     // scroll to the unread message
+///   unreadCount: 5,
+///   onJumpTap: () async {
+///     // scroll to the first unread message
 ///   },
 ///   onDismissTap: () async {
 ///     // mark channel as read
@@ -29,21 +30,27 @@ import 'package:stream_core_flutter/chat.dart' as core;
 ///
 /// See also:
 ///
-///  * [StreamMessageListView], which hosts this widget.
+///  * [StreamMessageListView], which hosts this widget and owns its
+///    visibility.
 /// {@endtemplate}
 class UnreadIndicatorButton extends StatelessWidget {
   /// Creates an unread indicator button.
   const UnreadIndicatorButton({
     super.key,
+    required this.unreadCount,
     required this.onJumpTap,
     required this.onDismissTap,
   });
 
-  /// Called when the jump-to-unread area is tapped.
+  /// The fixed unread count to display.
   ///
-  /// Receives the ID of the last message the current user has read,
-  /// which can be used to scroll to that position.
-  final Future<void> Function(String? lastReadMessageId) onJumpTap;
+  /// This is the pre-existing unread boundary's count, captured when the
+  /// channel was opened — it does not change for the lifetime of the
+  /// session.
+  final int unreadCount;
+
+  /// Called when the jump-to-unread area is tapped.
+  final Future<void> Function() onJumpTap;
 
   /// Called when the dismiss button is tapped.
   ///
@@ -52,22 +59,10 @@ class UnreadIndicatorButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final channel = StreamChannel.of(context).channel;
-    if (channel.state == null) return const Empty();
-
-    return BetterStreamBuilder(
-      initialData: channel.state!.currentUserRead,
-      stream: channel.state!.currentUserReadStream,
-      builder: (context, currentUserRead) {
-        final unreadCount = currentUserRead.unreadMessages;
-        if (unreadCount <= 0) return const Empty();
-
-        return core.StreamJumpToUnreadButton(
-          label: context.translations.unreadCountIndicatorLabel(unreadCount: unreadCount),
-          onJumpPressed: () => onJumpTap(currentUserRead.lastReadMessageId),
-          onDismissPressed: onDismissTap,
-        );
-      },
+    return core.StreamJumpToUnreadButton(
+      label: context.translations.unreadCountIndicatorLabel(unreadCount: unreadCount),
+      onJumpPressed: onJumpTap,
+      onDismissPressed: onDismissTap,
     );
   }
 }

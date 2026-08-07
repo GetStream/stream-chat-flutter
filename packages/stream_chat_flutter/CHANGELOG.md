@@ -8,6 +8,18 @@
 - Added a `size` (`StreamLoadingSpinnerSize`) parameter to `StreamScrollViewLoadingWidget`.
 - Added `onReactionTap` to `StreamMessageItem` and `StreamMessageListView`, reporting the tapped message's `BuildContext` and a `ReactionTapDetails` with the tapped `message` and `reaction` (the reaction is `null` for a clustered or overflow chip that maps to no single reaction).
 - Added an `unreadIndicator` parameter to `StreamBackButton` that overlays a widget (typically a `StreamUnreadIndicator`) on the button's top-end corner. Pass `StreamUnreadIndicator(excludeCid: cid)` to show the total unread count of other channels, or `StreamUnreadIndicator.channels(cid: cid)` for a single channel's count.
+- Added `StreamMessageListViewConfiguration.shouldMarkRead` to fully override the automatic mark-read gating described below.
+- Added `Channel.isMarkedAsUnread` (via `ChannelClientState`), reporting whether the current user has an active manual mark-unread that hasn't been read past yet.
+- Added `StreamChannel.openAtFirstUnread` (`stream_chat_flutter_core`), defaulting to `true`. Set to `false` to always open a channel at the latest message instead of scrolling to the first pre-existing unread message.
+- Added `Translations.unreadMessagesSeparatorLabel`, used by the default `UnreadMessagesSeparator` to show a count, e.g. "5 unread messages".
+
+🔄 Changed
+
+- Changed the "↑ N unread" jump-to-unread pill to a count fixed when the channel opens, staying on screen for the whole session rather than reacting to the live, shrinking unread count. The pill now shows as soon as that count is known — even before the boundary message itself has loaded — and dismisses permanently for the session once tapped, dismissed, or scrolled past; it no longer reappears when a new message arrives.
+- Changed the scroll-to-bottom badge to count only messages that arrive out of view during the current session, rather than being seeded from the channel's unread count. It always resets to 0 once the user reaches the bottom.
+- Changed the "unread messages" divider to show a count, starting at the channel's open-time unread total and counting up as further messages arrive during the session — mirroring WhatsApp — instead of a fixed, count-less label.
+- Changed `UnreadIndicatorButton` to take a `required int unreadCount` and render unconditionally, dropping its internal read-state subscription — `StreamMessageListView` now owns its visibility.
+- Tightened `StreamMessageListView`'s automatic mark-read gating to also require that the pre-existing unread boundary (if any) has been seen or scrolled past, and that there's no pending manual mark-unread — mirroring the iOS SDK. Previously, reaching the bottom with unread messages present was sufficient.
 
 ⚠️ Deprecated
 

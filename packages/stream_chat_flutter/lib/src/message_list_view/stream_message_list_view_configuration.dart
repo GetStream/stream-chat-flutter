@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:stream_chat_flutter/src/message_list_view/auto_scroll_policy.dart';
+import 'package:stream_chat_flutter/src/message_list_view/mark_read_details.dart';
 
 /// {@template streamMessageListConfiguration}
 /// Holds all behavior flags and non-theme, non-builder configuration for
@@ -36,12 +37,31 @@ class StreamMessageListViewConfiguration {
     this.keyboardDismissBehavior = .onDrag,
     this.scrollPhysics = const ClampingScrollPhysics(),
     this.autoScrollPolicy = .whenOwnMessageOrAtBottom,
+    this.shouldMarkRead,
   });
 
   /// Whether to mark the channel as read when the user scrolls to the bottom.
   ///
   /// Defaults to true.
   final bool markReadWhenAtTheBottom;
+
+  /// Overrides the built-in gating for automatic mark-read.
+  ///
+  /// When null (the default), the list marks the channel as read once the
+  /// bottom has been seen, the pre-existing unread boundary (if any) has
+  /// been seen or scrolled past, and there is no active manual mark-unread —
+  /// see [StreamMarkReadDetails]. Provide this to fully control the decision
+  /// instead.
+  ///
+  /// Only affects channel reads; has no effect on thread reads or on
+  /// [markReadWhenAtTheBottom] being `false`.
+  ///
+  /// Participates in this configuration's `==`/`hashCode`, so an inline
+  /// closure gives every rebuild a new identity and can make otherwise
+  /// identical configurations compare unequal. Hosts that rely on
+  /// configuration equality should hoist the predicate into a field or a
+  /// static function instead.
+  final StreamShouldMarkReadPredicate? shouldMarkRead;
 
   /// Whether swiping a message triggers a quoted-reply action.
   ///
@@ -162,9 +182,11 @@ class StreamMessageListViewConfiguration {
     ScrollViewKeyboardDismissBehavior? keyboardDismissBehavior,
     ScrollPhysics? scrollPhysics,
     StreamAutoScrollPolicy? autoScrollPolicy,
+    StreamShouldMarkReadPredicate? shouldMarkRead,
   }) {
     return StreamMessageListViewConfiguration(
       markReadWhenAtTheBottom: markReadWhenAtTheBottom ?? this.markReadWhenAtTheBottom,
+      shouldMarkRead: shouldMarkRead ?? this.shouldMarkRead,
       swipeToReply: swipeToReply ?? this.swipeToReply,
       showScrollToBottom: showScrollToBottom ?? this.showScrollToBottom,
       showUnreadCountOnScrollToBottom: showUnreadCountOnScrollToBottom ?? this.showUnreadCountOnScrollToBottom,
@@ -204,7 +226,8 @@ class StreamMessageListViewConfiguration {
         other.retentionTrimBuffer == retentionTrimBuffer &&
         other.keyboardDismissBehavior == keyboardDismissBehavior &&
         other.scrollPhysics == scrollPhysics &&
-        other.autoScrollPolicy == autoScrollPolicy;
+        other.autoScrollPolicy == autoScrollPolicy &&
+        other.shouldMarkRead == shouldMarkRead;
   }
 
   @override
@@ -226,5 +249,6 @@ class StreamMessageListViewConfiguration {
     keyboardDismissBehavior,
     scrollPhysics,
     autoScrollPolicy,
+    shouldMarkRead,
   );
 }

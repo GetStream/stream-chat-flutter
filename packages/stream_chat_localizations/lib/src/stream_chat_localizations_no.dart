@@ -437,6 +437,12 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
   String unreadMessagesSeparatorText() => 'Nye meldinger.';
 
   @override
+  String unreadMessagesSeparatorLabel({required int count}) {
+    if (count == 1) return '1 ulest melding';
+    return '$count uleste meldinger';
+  }
+
+  @override
   String get couldNotReadBytesFromFileError => 'Kunne ikke lese bytes fra filen.';
 
   @override

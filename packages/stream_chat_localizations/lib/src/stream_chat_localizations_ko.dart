@@ -486,6 +486,11 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
   String unreadMessagesSeparatorText() => '새 메시지.';
 
   @override
+  String unreadMessagesSeparatorLabel({required int count}) {
+    return '읽지 않은 메시지 $count개';
+  }
+
+  @override
   String get enableFileAccessMessage => '친구와 공유할 수 있도록 파일에 대한 액세스를 허용하세요.';
 
   @override
