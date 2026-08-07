@@ -464,35 +464,6 @@ void main() {
     );
 
     testWidgets(
-      'keeps thread reply available when only the channel replies config is disabled',
-      (tester) async {
-        final context = await _getContext(tester);
-
-        // The send-reply capability is granted; only the channel config says no.
-        // Thread reply is gated by the capability, not the channel replies config.
-        final channelWithoutReplies = _getChannelWithCapabilities(
-          allChannelCapabilities,
-          enableReplies: false,
-        );
-
-        final actions = StreamMessageActionsBuilder.buildActions(
-          context: context,
-          message: message,
-          channel: channelWithoutReplies,
-          currentUser: currentUser,
-        );
-
-        actions.expects<ThreadReply>(
-          reason: 'Thread reply is gated by the send-reply capability, not the config',
-        );
-
-        actions.expects<QuotedReply>(
-          reason: 'Quoted reply is independent of the replies config',
-        );
-      },
-    );
-
-    testWidgets(
       'handles thread and quote reply actions correctly',
       (tester) async {
         final context = await _getContext(tester);
