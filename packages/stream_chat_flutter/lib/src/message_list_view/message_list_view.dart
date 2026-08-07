@@ -593,6 +593,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     _unreadDividerGrowth.dispose();
     _hasSeenFirstUnread.dispose();
     _scrollToBottomBadge.dispose();
+    _showScrollToBottom.dispose();
     _highlightState.dispose();
     super.dispose();
   }
