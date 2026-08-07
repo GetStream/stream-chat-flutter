@@ -4,6 +4,7 @@
 
 - Added `StreamChannelState.retry()` to re-run a failed channel initialization, for use as the retry action in `StreamChannel.errorBuilder`.
 - Added `DefaultStreamChannelBuilders`, an inherited widget that supplies default loading and error builders to descendant `StreamChannel`s (resolved via `loadingBuilderOf`/`errorBuilderOf`).
+- Added `search()` and `clearResults()` to `StreamMessageSearchListController`, `StreamUserListController`, and `StreamMemberListController`. `search()` runs a debounced query whose delay adapts to the query length — short, low-selectivity queries wait a little longer — and ignores results from superseded searches; `clearResults()` cancels any pending search and clears the current results.
 
 🐞 Fixed
 

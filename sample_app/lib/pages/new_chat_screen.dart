@@ -1,7 +1,5 @@
 // ignore_for_file: deprecated_member_use
 
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sample_app/routes/routes.dart';
@@ -44,26 +42,21 @@ class _NewChatScreenState extends State<NewChatScreen> {
 
   Channel? channel;
 
-  Timer? _debounce;
-
   bool _showUserList = true;
 
   void _userNameListener() {
-    if (_debounce?.isActive ?? false) _debounce!.cancel();
-    _debounce = Timer(const Duration(milliseconds: 350), () {
-      if (mounted) {
-        setState(() {
-          _userNameQuery = _controller.text;
-          _isSearchActive = _userNameQuery.isNotEmpty;
-        });
-
-        userListController.filter = Filter.and([
-          if (_userNameQuery.isNotEmpty) Filter.autoComplete('name', _userNameQuery),
-          Filter.notEqual('id', StreamChat.of(context).currentUser!.id),
-        ]);
-        userListController.doInitialLoad();
-      }
+    setState(() {
+      _userNameQuery = _controller.text;
+      _isSearchActive = _userNameQuery.isNotEmpty;
     });
+
+    return userListController.search(
+      _userNameQuery,
+      filter: Filter.and([
+        if (_userNameQuery.isNotEmpty) Filter.autoComplete('name', _userNameQuery),
+        Filter.notEqual('id', StreamChat.of(context).currentUser!.id),
+      ]),
+    );
   }
 
   @override

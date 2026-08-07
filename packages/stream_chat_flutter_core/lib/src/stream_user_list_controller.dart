@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:collection/collection.dart';
 import 'package:stream_chat/stream_chat.dart' hide Success;
 import 'package:stream_chat_flutter_core/src/paged_value_notifier.dart';
+import 'package:stream_chat_flutter_core/src/search_debounce_mixin.dart';
 
 /// The default channel page limit to load.
 const defaultUserPagedLimit = 10;
@@ -20,8 +21,9 @@ const _kDefaultBackendPaginationLimit = 30;
 /// This class lets you perform tasks such as:
 /// * Load initial data.
 /// * Load more data using [loadMore].
+/// * Search with a query-length-aware debounce using [search].
 /// * Replace the previously loaded users.
-class StreamUserListController extends PagedValueNotifier<int, User> {
+class StreamUserListController extends PagedValueNotifier<int, User> with SearchDebounceMixin {
   /// Creates a Stream user list controller.
   ///
   /// * `client` is the Stream chat client to use for the channels list.
@@ -89,6 +91,9 @@ class StreamUserListController extends PagedValueNotifier<int, User> {
   ///
   /// Note: This will not trigger a new query. make sure to call
   /// [doInitialLoad] after setting a new filter.
+  ///
+  /// To reload as a search query changes, consider [search], which applies a
+  /// query-length-aware debounce and ignores results from superseded queries.
   set filter(Filter? value) => _activeFilter = value;
 
   /// Allows for the change of the query sort used for user queries.
@@ -99,6 +104,19 @@ class StreamUserListController extends PagedValueNotifier<int, User> {
   /// Note: This will not trigger a new query. make sure to call
   /// [doInitialLoad] after setting a new sort.
   set sort(SortOrder<User>? value) => _activeSort = value;
+
+  /// Searches users matching [query], debounced by the query length.
+  ///
+  /// [query] selects the debounce delay by its length — short, low-selectivity
+  /// queries wait longer before hitting the backend to reduce load, longer
+  /// queries use the standard delay. When [filter] is provided it becomes the
+  /// active filter for the reload; otherwise the current filter is reused.
+  /// Rapidly superseded searches are dropped, so only the latest query's
+  /// results are applied.
+  void search(String query, {Filter? filter}) {
+    if (filter != null) _activeFilter = filter;
+    debouncedSearch(query.length);
+  }
 
   @override
   set value(PagedValue<int, User> newValue) {
@@ -115,6 +133,11 @@ class StreamUserListController extends PagedValueNotifier<int, User> {
 
   @override
   Future<void> doInitialLoad() async {
+    // A debounced search is already scheduled; let it perform the load instead
+    // of firing an extra, un-debounced request (e.g. on first view mount).
+    if (hasPendingSearch) return;
+
+    final generation = beginLoad();
     final limit = min(
       this.limit * defaultInitialPagedLimitMultiplier,
       _kDefaultBackendPaginationLimit,
@@ -127,6 +150,7 @@ class StreamUserListController extends PagedValueNotifier<int, User> {
         pagination: PaginationParams(limit: limit),
       );
 
+      if (isStale(generation)) return;
       final users = userResponse.users;
       final nextKey = users.length < limit ? null : users.length;
       value = PagedValue(
@@ -134,8 +158,10 @@ class StreamUserListController extends PagedValueNotifier<int, User> {
         nextPageKey: nextKey,
       );
     } on StreamChatError catch (error) {
+      if (isStale(generation)) return;
       value = PagedValue.error(error);
     } catch (error) {
+      if (isStale(generation)) return;
       final chatError = StreamChatError(error.toString());
       value = PagedValue.error(chatError);
     }
@@ -143,6 +169,7 @@ class StreamUserListController extends PagedValueNotifier<int, User> {
 
   @override
   Future<void> loadMore(int nextPageKey) async {
+    final generation = loadGeneration;
     final previousValue = value.asSuccess;
 
     try {
@@ -153,6 +180,9 @@ class StreamUserListController extends PagedValueNotifier<int, User> {
         pagination: PaginationParams(limit: limit, offset: nextPageKey),
       );
 
+      // Drop the page if a newer search or clearResults() superseded it, so it
+      // cannot repopulate results the user has already moved on from.
+      if (isStale(generation)) return;
       final users = userResponse.users;
       final previousItems = previousValue.items;
       final newItems = previousItems + users;
@@ -162,8 +192,10 @@ class StreamUserListController extends PagedValueNotifier<int, User> {
         nextPageKey: nextKey,
       );
     } on StreamChatError catch (error) {
+      if (isStale(generation)) return;
       value = previousValue.copyWith(error: error);
     } catch (error) {
+      if (isStale(generation)) return;
       final chatError = StreamChatError(error.toString());
       value = previousValue.copyWith(error: chatError);
     }
