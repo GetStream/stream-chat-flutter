@@ -3927,7 +3927,7 @@ class ChannelClientState {
     final threadMessages = updatedThreads[parentId] ?? <Message>[];
     final updatedThreadMessages = _mergeMessagesIntoExisting(
       existing: threadMessages,
-      toMerge: messages,
+      toMerge: messages.where((it) => it.id != parentId),
     );
 
     // Update the thread with the modified message list.

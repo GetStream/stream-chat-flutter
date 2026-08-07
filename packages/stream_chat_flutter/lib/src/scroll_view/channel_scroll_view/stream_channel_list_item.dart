@@ -490,8 +490,15 @@ class _ChannelListDeliveryStatus extends StatelessWidget {
   }
 }
 
-/// A widget that displays the channel last message date.
-class ChannelLastMessageDate extends StatelessWidget {
+/// A widget that displays the date of a channel's latest previewable sent
+/// message.
+///
+/// Displays nothing when there is none. Drafts are ignored — they have no sent
+/// date — so this is not always the message the preview subtitle shows: with a
+/// draft the subtitle previews the draft while this still dates the last sent
+/// message. Deliberately not [Channel.lastMessageAt], which survives a
+/// truncated channel.
+class ChannelLastMessageDate extends StatefulWidget {
   /// Creates a new instance of the [ChannelLastMessageDate] widget.
   ChannelLastMessageDate({
     super.key,
@@ -513,15 +520,32 @@ class ChannelLastMessageDate extends StatelessWidget {
   final DateFormatter? formatter;
 
   @override
+  State<ChannelLastMessageDate> createState() => _ChannelLastMessageDateState();
+}
+
+class _ChannelLastMessageDateState extends State<ChannelLastMessageDate> with _LastMessageResolver {
+  @override
   Widget build(BuildContext context) {
-    return BetterStreamBuilder<DateTime>(
-      stream: channel.lastMessageAtStream,
-      initialData: channel.lastMessageAt,
-      builder: (context, lastMessageAt) => StreamTimestamp(
-        date: lastMessageAt.toLocal(),
-        style: textStyle,
-        formatter: formatter,
-      ),
+    final channelState = widget.channel.state;
+    if (channelState == null) return const Empty();
+
+    final currentUser = widget.channel.client.state.currentUser;
+    final predicate = _defaultLastMessagePredicateForUser(currentUser?.id);
+
+    return BetterStreamBuilder<List<Message>>(
+      stream: channelState.messagesStream,
+      initialData: channelState.messages,
+      builder: (context, messages) {
+        // Drafts are ignored, unlike in the subtitle: they have no sent date.
+        final lastMessage = resolveLastMessage(channelState, messages, predicate);
+        if (lastMessage == null) return const Empty();
+
+        return StreamTimestamp(
+          date: lastMessage.createdAt.toLocal(),
+          style: widget.textStyle,
+          formatter: widget.formatter,
+        );
+      },
     );
   }
 }
@@ -589,9 +613,7 @@ class _ChannelLastMessageWithStatus extends StatefulWidget {
   State<_ChannelLastMessageWithStatus> createState() => _ChannelLastMessageWithStatusState();
 }
 
-class _ChannelLastMessageWithStatusState extends State<_ChannelLastMessageWithStatus> {
-  Message? _currentLastMessage;
-
+class _ChannelLastMessageWithStatusState extends State<_ChannelLastMessageWithStatus> with _LastMessageResolver {
   @override
   Widget build(BuildContext context) {
     final channelState = widget.channel.state;
@@ -623,21 +645,7 @@ class _ChannelLastMessageWithStatusState extends State<_ChannelLastMessageWithSt
           );
         }
 
-        // Find the last valid message.
-        final message = messages.lastWhereOrNull(predicate);
-        // `_currentLastMessage` holds the most recent message seen while the
-        // channel has the latest messages (isUpToDate).
-        // While isUpToDate is false (e.g. Channel.query(idAround:) truncates
-        // state mid-load), fall back to it so the preview shows the actual
-        // latest message.
-        final Message? latestLastMessage;
-        if (channelState.isUpToDate) {
-          latestLastMessage = message;
-          _currentLastMessage = latestLastMessage;
-        } else {
-          latestLastMessage = [message, _currentLastMessage].latest;
-        }
-
+        final latestLastMessage = resolveLastMessage(channelState, messages, predicate);
         if (latestLastMessage == null) {
           return Text(
             context.translations.emptyMessagesText,
@@ -726,9 +734,7 @@ LastMessagePredicate _defaultLastMessagePredicateForUser(String? currentUserId) 
   };
 }
 
-class _ChannelLastMessageTextState extends State<ChannelLastMessageText> {
-  Message? _currentLastMessage;
-
+class _ChannelLastMessageTextState extends State<ChannelLastMessageText> with _LastMessageResolver {
   @override
   Widget build(BuildContext context) {
     final channelState = widget.channel.state;
@@ -753,20 +759,7 @@ class _ChannelLastMessageTextState extends State<ChannelLastMessageText> {
         }
 
         // Otherwise, show the channel last message if it exists.
-        final message = messages.lastWhereOrNull(widget.lastMessagePredicate);
-        // `_currentLastMessage` holds the most recent message seen while the
-        // channel has the latest messages (isUpToDate).
-        // While isUpToDate is false (e.g. Channel.query(idAround:) truncates
-        // state mid-load), fall back to it so the preview shows the actual
-        // latest message.
-        final Message? latestLastMessage;
-        if (channelState.isUpToDate) {
-          latestLastMessage = message;
-          _currentLastMessage = latestLastMessage;
-        } else {
-          latestLastMessage = [message, _currentLastMessage].latest;
-        }
-
+        final latestLastMessage = resolveLastMessage(channelState, messages, widget.lastMessagePredicate);
         if (latestLastMessage == null) {
           return Text(
             maxLines: 1,
@@ -783,6 +776,44 @@ class _ChannelLastMessageTextState extends State<ChannelLastMessageText> {
         );
       },
     );
+  }
+}
+
+/// Resolves the message a channel preview should reflect, shared by the
+/// widgets rendering it so they always agree on it.
+mixin _LastMessageResolver<T extends StatefulWidget> on State<T> {
+  Message? _currentLastMessage;
+  ChannelClientState? _currentChannelState;
+
+  /// Returns the newest message in [messages] passing [predicate], or `null`
+  /// when there is nothing to preview.
+  ///
+  /// While the channel is not up to date (e.g. Channel.query(idAround:)
+  /// truncates state mid-load), falls back to the last message seen while it
+  /// was, so the preview still shows the actual latest message.
+  Message? resolveLastMessage(
+    ChannelClientState channelState,
+    List<Message> messages,
+    LastMessagePredicate predicate,
+  ) {
+    // List items are unkeyed, so reordering rebinds this State to another
+    // channel. Drop the cache so the previous channel's message can never be
+    // used as a fallback for this one.
+    if (_currentChannelState != channelState) {
+      _currentChannelState = channelState;
+      _currentLastMessage = null;
+    }
+
+    // The predicate can change while the cache is held; a message it no longer
+    // accepts must not come back as the fallback.
+    if (_currentLastMessage case final cached? when !predicate(cached)) {
+      _currentLastMessage = null;
+    }
+
+    final message = messages.lastWhereOrNull(predicate);
+    if (!channelState.isUpToDate) return [message, _currentLastMessage].latest;
+
+    return _currentLastMessage = message;
   }
 }
 
