@@ -69,7 +69,6 @@ class _AddMembersSheetState extends State<AddMembersSheet> {
 
   late final TextEditingController _searchController = TextEditingController()..addListener(_onSearchChanged);
 
-  Timer? _debounce;
   String _query = '';
 
   // Locally tracked selections — channel.addMembers fires only when the
@@ -96,18 +95,12 @@ class _AddMembersSheetState extends State<AddMembersSheet> {
     final next = _searchController.text;
     if (next == _query) return;
 
-    _debounce?.cancel();
-    _debounce = Timer(const Duration(milliseconds: 350), () {
-      if (!mounted) return;
-      setState(() => _query = next);
-      _userListController.filter = _filter(query: next);
-      _userListController.doInitialLoad();
-    });
+    setState(() => _query = next);
+    return _userListController.search(next, filter: _filter(query: next));
   }
 
   @override
   void dispose() {
-    _debounce?.cancel();
     _searchController.dispose();
     _userListController.dispose();
     super.dispose();

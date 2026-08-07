@@ -3,31 +3,31 @@ import 'dart:math';
 
 import 'package:stream_chat/stream_chat.dart' hide Success;
 import 'package:stream_chat_flutter_core/src/paged_value_notifier.dart';
+import 'package:stream_chat_flutter_core/src/search_debounce_mixin.dart';
 
 /// The default channel page limit to load.
 const defaultMessageSearchPagedLimit = 10;
 
 const _kDefaultBackendPaginationLimit = 30;
 
-/// A controller for a user list.
+/// A controller for a message search list.
 ///
 /// This class lets you perform tasks such as:
 /// * Load initial data.
 /// * Load more data using [loadMore].
-/// * Replace the previously loaded users.
-class StreamMessageSearchListController extends PagedValueNotifier<String, GetMessageResponse> {
-  /// Creates a Stream user list controller.
+/// * Search with a query-length-aware debounce using [search].
+/// * Replace the previously loaded results.
+class StreamMessageSearchListController extends PagedValueNotifier<String, GetMessageResponse>
+    with SearchDebounceMixin {
+  /// Creates a Stream message search list controller.
   ///
-  /// * `client` is the Stream chat client to use for the channels list.
+  /// * `client` is the Stream chat client to use for the message search.
   ///
-  /// * `filter` is the query filters to use.
+  /// * `filter` is the channel query filters to use.
   ///
-  /// * `sort` is the sorting used for the users matching the filters.
+  /// * `sort` is the sorting used for the messages matching the filters.
   ///
-  /// * `presence` sets whether you'll receive user presence updates via the
-  /// websocket events.
-  ///
-  /// * `limit` is the limit to apply to the user list.
+  /// * `limit` is the limit to apply to the message search.
   StreamMessageSearchListController({
     required this.client,
     required this.filter,
@@ -49,7 +49,7 @@ class StreamMessageSearchListController extends PagedValueNotifier<String, GetMe
        _activeSort = sort,
        super(const PagedValue.loading());
 
-  /// Creates a [StreamUserListController] from the passed [value].
+  /// Creates a [StreamMessageSearchListController] from the passed [value].
   StreamMessageSearchListController.fromValue(
     super.value, {
     required this.client,
@@ -71,12 +71,12 @@ class StreamMessageSearchListController extends PagedValueNotifier<String, GetMe
        _activeSearchQuery = searchQuery,
        _activeSort = sort;
 
-  /// The client to use for the channels list.
+  /// The client to use for the message search.
   final StreamChatClient client;
 
-  /// The query filters to use.
+  /// The channel query filters to use.
   ///
-  /// You can query on any of the custom fields you've defined on the [User].
+  /// You can query on any of the custom fields you've defined on the [Channel].
   ///
   /// You can also filter other built-in channel fields.
   final Filter filter;
@@ -84,9 +84,9 @@ class StreamMessageSearchListController extends PagedValueNotifier<String, GetMe
 
   /// The message query filters to use.
   ///
-  /// You can query on any of the custom fields you've defined on the [Channel].
+  /// You can query on any of the custom fields you've defined on the [Message].
   ///
-  /// You can also filter other built-in channel fields.
+  /// You can also filter other built-in message fields.
   final Filter? messageFilter;
   Filter? _activeMessageFilter;
 
@@ -94,7 +94,7 @@ class StreamMessageSearchListController extends PagedValueNotifier<String, GetMe
   final String? searchQuery;
   String? _activeSearchQuery;
 
-  /// The sorting used for the users matching the filters.
+  /// The sorting used for the messages matching the filters.
   ///
   /// Sorting is based on field and direction, multiple sorting options
   /// can be provided.
@@ -103,11 +103,11 @@ class StreamMessageSearchListController extends PagedValueNotifier<String, GetMe
   final SortOrder? sort;
   SortOrder? _activeSort;
 
-  /// The limit to apply to the user list. The default is set to
-  /// [defaultUserPagedLimit].
+  /// The limit to apply to the message search. The default is set to
+  /// [defaultMessageSearchPagedLimit].
   final int limit;
 
-  /// Allows for the change of filters used for user queries.
+  /// Allows for the change of filters used for message search queries.
   ///
   /// Use this if you need to support runtime filter changes,
   /// through custom filters UI.
@@ -116,7 +116,7 @@ class StreamMessageSearchListController extends PagedValueNotifier<String, GetMe
   /// [doInitialLoad] after setting a new filter.
   set filter(Filter value) => _activeFilter = value;
 
-  /// Allows for the change of message filters used for user queries.
+  /// Allows for the change of message filters used for message search queries.
   ///
   /// Use this if you need to support runtime filter changes,
   /// through custom filters UI.
@@ -125,16 +125,19 @@ class StreamMessageSearchListController extends PagedValueNotifier<String, GetMe
   /// [doInitialLoad] after setting a new filter.
   set messageFilter(Filter? value) => _activeMessageFilter = value;
 
-  /// Allows for the change of filters used for user queries.
+  /// Allows for the change of filters used for message search queries.
   ///
   /// Use this if you need to support runtime filter changes,
   /// through custom filters UI.
   ///
   /// Note: This will not trigger a new query. make sure to call
   /// [doInitialLoad] after setting a new filter.
+  ///
+  /// To reload as the query changes, consider [search], which applies a
+  /// query-length-aware debounce and ignores results from superseded queries.
   set searchQuery(String? value) => _activeSearchQuery = value;
 
-  /// Allows for the change of the query sort used for user queries.
+  /// Allows for the change of the query sort used for message search queries.
   ///
   /// Use this if you need to support runtime sort changes,
   /// through custom sort UI.
@@ -143,8 +146,23 @@ class StreamMessageSearchListController extends PagedValueNotifier<String, GetMe
   /// [doInitialLoad] after setting a new sort.
   set sort(SortOrder? value) => _activeSort = value;
 
+  /// Searches messages matching [query], debounced by the query length.
+  ///
+  /// Short, low-selectivity queries wait longer before hitting the backend to
+  /// reduce load; longer queries use the standard delay. Rapidly superseded
+  /// searches are dropped, so only the latest query's results are applied.
+  void search(String query) {
+    _activeSearchQuery = query;
+    debouncedSearch(query.length);
+  }
+
   @override
   Future<void> doInitialLoad() async {
+    // A debounced search is already scheduled; let it perform the load instead
+    // of firing an extra, un-debounced request (e.g. on first view mount).
+    if (hasPendingSearch) return;
+
+    final generation = beginLoad();
     final limit = min(
       this.limit * defaultInitialPagedLimitMultiplier,
       _kDefaultBackendPaginationLimit,
@@ -158,6 +176,7 @@ class StreamMessageSearchListController extends PagedValueNotifier<String, GetMe
         paginationParams: PaginationParams(limit: limit),
       );
 
+      if (isStale(generation)) return;
       final results = response.results;
       final nextKey = response.next;
       value = PagedValue(
@@ -165,8 +184,10 @@ class StreamMessageSearchListController extends PagedValueNotifier<String, GetMe
         nextPageKey: nextKey,
       );
     } on StreamChatError catch (error) {
+      if (isStale(generation)) return;
       value = PagedValue.error(error);
     } catch (error) {
+      if (isStale(generation)) return;
       final chatError = StreamChatError(error.toString());
       value = PagedValue.error(chatError);
     }
@@ -174,6 +195,7 @@ class StreamMessageSearchListController extends PagedValueNotifier<String, GetMe
 
   @override
   Future<void> loadMore(String nextPageKey) async {
+    final generation = loadGeneration;
     final previousValue = value.asSuccess;
 
     try {
@@ -185,6 +207,9 @@ class StreamMessageSearchListController extends PagedValueNotifier<String, GetMe
         paginationParams: PaginationParams(limit: limit, next: nextPageKey),
       );
 
+      // Drop the page if a newer search or clearResults() superseded it, so it
+      // cannot repopulate results the user has already moved on from.
+      if (isStale(generation)) return;
       final results = response.results;
       final previousItems = previousValue.items;
       final newItems = previousItems + results;
@@ -195,8 +220,10 @@ class StreamMessageSearchListController extends PagedValueNotifier<String, GetMe
         nextPageKey: nextKey,
       );
     } on StreamChatError catch (error) {
+      if (isStale(generation)) return;
       value = previousValue.copyWith(error: error);
     } catch (error) {
+      if (isStale(generation)) return;
       final chatError = StreamChatError(error.toString());
       value = previousValue.copyWith(error: chatError);
     }
