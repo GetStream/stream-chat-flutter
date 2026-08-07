@@ -208,4 +208,98 @@ void main() {
       );
     },
   );
+
+  // An explicit color is what lets the long-press preview draw the indicator in
+  // white against the modal scrim, where both accentPrimary and textSecondary
+  // lack contrast. See FLU-647.
+  group('StreamSendingIndicator color override', () {
+    const override = Color(0xFF4CAF50);
+
+    Future<Icon> pumpIndicator(
+      WidgetTester tester, {
+      required Message message,
+      bool isMessageRead = false,
+      bool isMessageDelivered = false,
+      Color? color,
+    }) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: StreamChatTheme(
+            data: StreamChatThemeData(),
+            child: Scaffold(
+              body: Center(
+                child: StreamSendingIndicator(
+                  message: message,
+                  isMessageRead: isMessageRead,
+                  isMessageDelivered: isMessageDelivered,
+                  color: color,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      return tester.widget<Icon>(find.byType(Icon));
+    }
+
+    testWidgets('applies to the read indicator', (tester) async {
+      final icon = await pumpIndicator(
+        tester,
+        message: Message(state: MessageState.sent),
+        isMessageRead: true,
+        color: override,
+      );
+
+      expect(icon.color, override);
+    });
+
+    testWidgets('applies to the delivered indicator', (tester) async {
+      final icon = await pumpIndicator(
+        tester,
+        message: Message(state: MessageState.sent),
+        isMessageDelivered: true,
+        color: override,
+      );
+
+      expect(icon.color, override);
+    });
+
+    testWidgets('applies to the sent indicator', (tester) async {
+      final icon = await pumpIndicator(
+        tester,
+        message: Message(state: MessageState.sent),
+        color: override,
+      );
+
+      expect(icon.color, override);
+    });
+
+    testWidgets('applies to the sending indicator', (tester) async {
+      final icon = await pumpIndicator(
+        tester,
+        message: Message(state: MessageState.sending),
+        color: override,
+      );
+
+      expect(icon.color, override);
+    });
+
+    testWidgets('falls back to the theme colors when null', (tester) async {
+      final colorScheme = StreamColorScheme.light();
+
+      final read = await pumpIndicator(
+        tester,
+        message: Message(state: MessageState.sent),
+        isMessageRead: true,
+      );
+      expect(read.color, colorScheme.accentPrimary);
+
+      final sent = await pumpIndicator(
+        tester,
+        message: Message(state: MessageState.sent),
+      );
+      expect(sent.color, colorScheme.textSecondary);
+    });
+  });
 }
