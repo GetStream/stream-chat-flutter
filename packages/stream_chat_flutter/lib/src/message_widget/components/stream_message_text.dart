@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:stream_chat_flutter/src/misc/empty_widget.dart';
 import 'package:stream_chat_flutter/src/stream_chat.dart';
@@ -30,6 +31,7 @@ class StreamMessageText extends StatelessWidget {
     this.onLinkTap,
     this.onMentionTap,
     this.onAnyMentionTap,
+    this.onSelectionChanged,
   });
 
   /// The message whose text to display.
@@ -59,6 +61,9 @@ class StreamMessageText extends StatelessWidget {
   /// If null, falls back to [onMentionTap] for user mentions only.
   final core.MarkdownTapAnyMentionCallback? onAnyMentionTap;
 
+  /// Called when the selected content changes.
+  final ValueChanged<SelectedContent?>? onSelectionChanged;
+
   @override
   Widget build(BuildContext context) {
     final streamChat = StreamChat.of(context);
@@ -79,7 +84,9 @@ class StreamMessageText extends StatelessWidget {
           onTapAnyMention: onAnyMentionTap,
         );
 
-        if (isDesktopDeviceOrWeb) return SelectionArea(child: streamMessageText);
+        if (isDesktopDeviceOrWeb) {
+          return SelectionArea(onSelectionChanged: onSelectionChanged, child: streamMessageText);
+        }
 
         return streamMessageText;
       },
