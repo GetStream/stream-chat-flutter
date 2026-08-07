@@ -35,7 +35,7 @@ final class _ChannelPreview {
   Finder get previewText => find.descendant(of: preview, matching: find.byType(Text));
 
   /// The last-message timestamp. [ChannelLastMessageDate] renders nothing while
-  /// the channel has no `lastMessageAt`, so the widget's presence *is* the
+  /// the channel has no message to preview, so the widget's presence *is* the
   /// "timestamp is shown" signal.
   Finder get timestamp => find.byType(StreamTimestamp);
 

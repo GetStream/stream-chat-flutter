@@ -162,6 +162,111 @@ void main() {
     );
   });
 
+  // The date comes from the message the preview shows, not from
+  // `Channel.lastMessageAt`: the server leaves that pointing at a message
+  // truncation removed, which used to leave the tile stamping a time on a
+  // preview that reads "No messages yet".
+  group('ChannelLastMessageDate', () {
+    const currentUserId = 'me';
+
+    // A date the preview must never show: `lastMessageAt` is stubbed to it in
+    // every test here, so reading the channel model instead of the message
+    // list is a visible failure rather than a coincidence.
+    final lastMessageAt = DateTime(2024, 6, 6, 6, 6);
+
+    late MockClient client;
+    late MockClientState clientState;
+    late MockChannel channel;
+    late MockChannelState channelState;
+
+    setUp(() {
+      client = MockClient();
+      clientState = MockClientState();
+      channel = MockChannel();
+      channelState = MockChannelState();
+
+      final currentUser = OwnUser(id: currentUserId, name: 'Me');
+
+      when(() => client.state).thenReturn(clientState);
+      when(() => clientState.currentUser).thenReturn(currentUser);
+      when(() => clientState.currentUserStream).thenAnswer((_) => Stream.value(currentUser));
+      when(() => channel.state).thenReturn(channelState);
+      when(() => channel.client).thenReturn(client);
+      when(() => channel.lastMessageAt).thenReturn(lastMessageAt);
+      when(() => channel.lastMessageAtStream).thenAnswer((_) => Stream.value(lastMessageAt));
+      when(() => channelState.channelState).thenReturn(const ChannelState());
+    });
+
+    Future<void> pumpWithMessages(
+      WidgetTester tester,
+      List<Message> messages,
+    ) async {
+      when(() => channelState.messages).thenReturn(messages);
+      when(() => channelState.messagesStream).thenAnswer((_) => Stream.value(messages));
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: StreamChat(
+            client: client,
+            child: Scaffold(
+              // Formatting the raw timestamp keeps the assertions independent
+              // of the default formatter's relative-date wording.
+              body: ChannelLastMessageDate(
+                channel: channel,
+                formatter: (context, date) => date.toIso8601String(),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('shows the preview message date, not lastMessageAt', (tester) async {
+      final createdAt = DateTime(2024, 1, 1, 10, 30);
+      final message = Message(
+        text: 'hello world',
+        user: User(id: 'other'),
+        createdAt: createdAt,
+      );
+
+      await pumpWithMessages(tester, [message]);
+
+      expect(find.text(createdAt.toLocal().toIso8601String()), findsOneWidget);
+      expect(find.text(lastMessageAt.toLocal().toIso8601String()), findsNothing);
+    });
+
+    testWidgets('shows nothing when the channel has no messages to preview', (tester) async {
+      // What a truncated channel looks like: the messages are gone while the
+      // channel model still carries `lastMessageAt`.
+      await pumpWithMessages(tester, []);
+
+      expect(find.byType(StreamTimestamp), findsNothing);
+      expect(find.text(lastMessageAt.toLocal().toIso8601String()), findsNothing);
+    });
+
+    testWidgets('follows the same message the preview text does', (tester) async {
+      // The newest message is filtered out of the preview, so the timestamp
+      // has to fall back with it instead of tracking the channel model.
+      final visible = Message(
+        text: 'visible',
+        user: User(id: 'other'),
+        createdAt: DateTime(2024, 1, 1, 10),
+      );
+      final errored = Message(
+        text: 'errored',
+        type: MessageType.error,
+        user: User(id: 'other'),
+        createdAt: DateTime(2024, 1, 2, 11),
+      );
+
+      await pumpWithMessages(tester, [visible, errored]);
+
+      expect(find.text(visible.createdAt.toLocal().toIso8601String()), findsOneWidget);
+      expect(find.text(errored.createdAt.toLocal().toIso8601String()), findsNothing);
+    });
+  });
+
   group('ChannelListTileSubtitle', () {
     // The default English translation; matches `context.translations.emptyMessagesText`.
     const emptyText = 'No messages yet';

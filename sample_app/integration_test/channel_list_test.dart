@@ -148,15 +148,9 @@ void main() {
       await env.userRobot.tapBackButton();
 
       step('THEN the channel preview shows the deleted message');
-      // Android expects "No messages" here, because its preview drops deleted
-      // messages. On Flutter a soft-deleted message stays in the channel state
-      // and keeps being the last message, so the preview reads "Message
-      // deleted" even when it was the channel's only one.
       await env.userRobot.assertMessageInChannelPreview('Message deleted', fromCurrentUser: false);
 
       step('AND the message timestamp is shown');
-      // Android expects it hidden; `lastMessageAt` survives a soft delete, so
-      // `ChannelLastMessageDate` keeps rendering a timestamp.
       await env.userRobot.assertMessagePreviewTimestamp();
     },
   );
@@ -182,9 +176,6 @@ void main() {
       await env.userRobot.tapBackButton();
 
       step('THEN the channel preview shows the deleted message');
-      // Flutter keeps a soft-deleted message as the channel's last message and
-      // previews it as "Message deleted", like iOS does. Android instead drops
-      // it and falls back to the previous message.
       await env.userRobot.assertMessageInChannelPreview('Message deleted', fromCurrentUser: false);
 
       step('AND the message timestamp is shown');
@@ -330,11 +321,8 @@ void main() {
       step('THEN the channel preview is empty');
       await env.userRobot.assertMessageInChannelPreview('No messages yet');
 
-      step('AND the message timestamp is still shown');
-      // iOS expects it hidden here. On Flutter `lastMessageAt` lives on the
-      // channel model and truncation only empties `state.messages`, so nothing
-      // clears it and `ChannelLastMessageDate` keeps rendering.
-      await env.userRobot.assertMessagePreviewTimestamp();
+      step('AND the message timestamp is not shown');
+      await env.userRobot.assertMessagePreviewTimestamp(isDisplayed: false);
     },
   );
 
