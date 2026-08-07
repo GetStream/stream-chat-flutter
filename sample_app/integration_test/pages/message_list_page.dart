@@ -169,6 +169,11 @@ final class _MessageList {
   /// tapping it opens the thread.
   Finder get threadReplies => find.byType(StreamMessageReplies);
 
+  /// The banner between a thread's parent message and its replies. It is the
+  /// second-to-last row, so it only renders at the top of the thread.
+  /// `ThreadSeparator` is not exported, hence matching on the runtime type.
+  Finder get threadSeparator => find.byWidgetPredicate((it) => it.runtimeType.toString() == 'ThreadSeparator');
+
   /// The badge the SDK overlays on a message that failed to send (or bounced).
   /// `StreamMessageItem` only builds it while the message is in a failed state,
   /// so its presence *is* the failure indicator.

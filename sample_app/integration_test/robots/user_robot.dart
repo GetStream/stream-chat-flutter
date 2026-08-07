@@ -174,10 +174,23 @@ class UserRobot {
     return this;
   }
 
-  Future<UserRobot> scrollMessageListUp({int times = 1}) async {
-    for (var i = 0; i < times; i++) {
-      await tester.scrollMessageList(300);
-    }
+  /// Nudges the message list up by one drag. To *arrive* somewhere, scroll
+  /// until it is visible instead — a fixed number of drags is viewport-
+  /// dependent.
+  Future<UserRobot> scrollMessageListUp() async {
+    await tester.scrollMessageList(300);
+    return this;
+  }
+
+  /// Scrolls a thread up to its top, paging in older replies as needed.
+  ///
+  /// Stops on the separator, the row right under the parent message, so the
+  /// parent and any duplicate copy of it among the replies are both built.
+  Future<UserRobot> scrollToTopOfThread() async {
+    await tester.scrollUpUntil(
+      () => MessageListPage.list.threadSeparator.evaluate().isNotEmpty,
+      description: 'the top of the thread',
+    );
     return this;
   }
 
@@ -258,9 +271,11 @@ extension UserRobotChain on Future<UserRobot> {
 
   Future<UserRobot> moveToChannelListFromThread() => then((it) => it.moveToChannelListFromThread());
 
-  Future<UserRobot> scrollMessageListUp({int times = 1}) => then((it) => it.scrollMessageListUp(times: times));
+  Future<UserRobot> scrollMessageListUp() => then((it) => it.scrollMessageListUp());
 
   Future<UserRobot> scrollMessageListDown() => then((it) => it.scrollMessageListDown());
+
+  Future<UserRobot> scrollToTopOfThread() => then((it) => it.scrollToTopOfThread());
 
   Future<UserRobot> tapLinkPreview() => then((it) => it.tapLinkPreview());
 

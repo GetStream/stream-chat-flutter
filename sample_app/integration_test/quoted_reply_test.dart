@@ -697,7 +697,7 @@ void main() {
       await env.userRobot.assertMessages(text: sampleText, count: 0);
 
       step('WHEN the user scrolls up to the top of the thread');
-      await env.userRobot.scrollMessageListUp(times: 8);
+      await env.userRobot.scrollToTopOfThread();
 
       step('THEN the root message is shown exactly once');
       await env.userRobot.assertMessages(text: sampleText, count: 1);
@@ -722,9 +722,7 @@ void main() {
       await env.userRobot.login().openChannel();
 
       step('WHEN the user opens the thread and scrolls up to the top of it');
-      // Native scrolls twice; a swipe there is a full screen, `scrollMessageListUp`
-      // drags 300px, so reaching the top of the thread takes more of them.
-      await env.userRobot.openThreadFromReplies().scrollMessageListUp(times: 8);
+      await env.userRobot.openThreadFromReplies().scrollToTopOfThread();
 
       step('THEN the root message is shown exactly once');
       await env.userRobot.assertMessages(text: parentText, count: 1);
@@ -747,10 +745,7 @@ void main() {
       await env.userRobot.login().openChannel();
 
       step('WHEN the user opens the thread and scrolls to the top of it');
-      // Native asserts the root cell is simply *there*, but the Flutter list is
-      // lazy: the root is always part of the thread view, yet it is not built
-      // until it is scrolled near, so reaching it is part of observing it here.
-      await env.userRobot.openThreadFromReplies().scrollMessageListUp(times: 8);
+      await env.userRobot.openThreadFromReplies().scrollToTopOfThread();
 
       step('THEN the root message is shown exactly once');
       await env.userRobot.assertMessages(text: parentText, count: 1);
@@ -771,7 +766,7 @@ void main() {
       await env.userRobot.login().openChannel().openThreadFromReplies();
 
       step('WHEN the user quotes the root message');
-      await env.userRobot.scrollMessageListUp(times: 5).quoteMessage(quoteReply, quotedText: sampleText);
+      await env.userRobot.quoteMessage(quoteReply, quotedText: sampleText);
 
       step('AND the user re-enters the thread');
       await env.userRobot.tapBackButton().openThreadFromReplies();
