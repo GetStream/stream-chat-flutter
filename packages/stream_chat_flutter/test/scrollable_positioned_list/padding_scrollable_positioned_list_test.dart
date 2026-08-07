@@ -155,7 +155,9 @@ void main() {
       ]);
     });
 
-    testWidgets('aggregate (first sliver top + last sliver bottom) equals ListView single SliverPadding', (tester) async {
+    testWidgets('aggregate (first sliver top + last sliver bottom) equals ListView single SliverPadding', (
+      tester,
+    ) async {
       // ListView oracle: one SliverPadding carrying the whole main-axis inset.
       tester.view
         ..devicePixelRatio = 1.0
