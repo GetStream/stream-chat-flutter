@@ -523,6 +523,50 @@ Attenzione: il limite massimo di $limit file è stato superato.
       ' del canale.';
 
   @override
+  String get messageMarkedAsUnreadText => 'Messaggio contrassegnato come non letto';
+
+  @override
+  String get deleteMessageError => "Errore durante l'eliminazione del messaggio";
+
+  @override
+  String togglePinUnpinMessageSuccessText({required bool pinned}) {
+    if (pinned) return 'Messaggio messo in evidenza';
+    return 'Messaggio rimosso dagli elementi in evidenza';
+  }
+
+  @override
+  String togglePinUnpinMessageErrorText({required bool pinned}) {
+    if (pinned) return 'Errore durante la messa in evidenza del messaggio';
+    return 'Errore durante la rimozione del messaggio dagli elementi in evidenza';
+  }
+
+  @override
+  String get flagMessageError => 'Errore durante la segnalazione del messaggio';
+
+  @override
+  String get messageCopiedToClipboardText => 'Messaggio copiato negli appunti';
+
+  @override
+  String get sendMessageError => 'Invio del messaggio non riuscito';
+
+  @override
+  String get editMessageError => 'Modifica del messaggio non riuscita';
+
+  @override
+  String toggleMuteUnmuteUserSuccessText({required String user, required bool isMuted}) {
+    if (isMuted) return "L'audio di $user è stato attivato";
+    return "L'audio di $user è stato disattivato";
+  }
+
+  @override
+  String toggleMuteUnmuteUserErrorText({required bool isMuted}) {
+    if (isMuted) {
+      return "Errore durante l'attivazione dell'audio, riprova";
+    }
+    return "Errore durante la disattivazione dell'audio, riprova";
+  }
+
+  @override
   String createPollLabel({bool isNew = false}) {
     if (isNew) return 'Crea un nuovo sondaggio';
     return 'Crea sondaggio';
@@ -659,6 +703,12 @@ Attenzione: il limite massimo di $limit file è stato superato.
   String get endVoteLabel => 'Termina votazione';
 
   @override
+  String get endVoteSuccessMessage => 'Votazione terminata';
+
+  @override
+  String get endVoteErrorMessage => 'Impossibile terminare la votazione';
+
+  @override
   String get pollResultsLabel => 'Risultati del sondaggio';
 
   @override
@@ -710,6 +760,9 @@ Attenzione: il limite massimo di $limit file è stato superato.
 
   @override
   String get holdToRecordLabel => 'Tieni premuto per registrare, rilascia per inviare';
+
+  @override
+  String get audioRecordingPermissionMessage => 'Consenti le autorizzazioni audio nelle impostazioni.';
 
   @override
   String get sendAnywayLabel => 'Invia comunque';

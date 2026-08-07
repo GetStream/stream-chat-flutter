@@ -517,6 +517,50 @@ Não é possível adicionar mais de $limit arquivos de uma vez
       ' não lidas mais antigas do que as 100 mensagens mais recentes do canal.';
 
   @override
+  String get messageMarkedAsUnreadText => 'Mensagem marcada como não lida';
+
+  @override
+  String get deleteMessageError => 'Erro ao excluir a mensagem';
+
+  @override
+  String togglePinUnpinMessageSuccessText({required bool pinned}) {
+    if (pinned) return 'Mensagem fixada';
+    return 'Mensagem desafixada';
+  }
+
+  @override
+  String togglePinUnpinMessageErrorText({required bool pinned}) {
+    if (pinned) return 'Erro ao fixar a mensagem';
+    return 'Erro ao desafixar a mensagem';
+  }
+
+  @override
+  String get flagMessageError => 'Erro ao denunciar a mensagem';
+
+  @override
+  String get messageCopiedToClipboardText => 'Mensagem copiada para a área de transferência';
+
+  @override
+  String get sendMessageError => 'Falha ao enviar a mensagem';
+
+  @override
+  String get editMessageError => 'Falha ao editar a mensagem';
+
+  @override
+  String toggleMuteUnmuteUserSuccessText({required String user, required bool isMuted}) {
+    if (isMuted) return 'O som de $user foi ativado';
+    return '$user foi silenciado';
+  }
+
+  @override
+  String toggleMuteUnmuteUserErrorText({required bool isMuted}) {
+    if (isMuted) {
+      return 'Erro ao ativar o som do usuário, tente novamente';
+    }
+    return 'Erro ao silenciar o usuário, tente novamente';
+  }
+
+  @override
   String createPollLabel({bool isNew = false}) {
     if (isNew) return 'Criar uma nova sondagem';
     return 'Criar sondagem';
@@ -653,6 +697,12 @@ Não é possível adicionar mais de $limit arquivos de uma vez
   String get endVoteLabel => 'Encerrar votação';
 
   @override
+  String get endVoteSuccessMessage => 'Votação encerrada';
+
+  @override
+  String get endVoteErrorMessage => 'Não foi possível encerrar a votação';
+
+  @override
   String get pollResultsLabel => 'Resultados da votação';
 
   @override
@@ -704,6 +754,9 @@ Não é possível adicionar mais de $limit arquivos de uma vez
 
   @override
   String get holdToRecordLabel => 'Mantenha pressionado para gravar, solte para enviar';
+
+  @override
+  String get audioRecordingPermissionMessage => 'Permita as permissões de áudio nas configurações.';
 
   @override
   String get sendAnywayLabel => 'Enviar mesmo assim';

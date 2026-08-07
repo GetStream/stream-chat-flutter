@@ -516,6 +516,48 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
       ' canal.';
 
   @override
+  String get messageMarkedAsUnreadText => 'Missatge marcat com a no llegit';
+
+  @override
+  String get deleteMessageError => 'Error en eliminar el missatge';
+
+  @override
+  String togglePinUnpinMessageSuccessText({required bool pinned}) {
+    if (pinned) return 'Missatge fixat';
+    return 'Missatge desfixat';
+  }
+
+  @override
+  String togglePinUnpinMessageErrorText({required bool pinned}) {
+    if (pinned) return 'Error en fixar el missatge';
+    return 'Error en desfixar el missatge';
+  }
+
+  @override
+  String get flagMessageError => 'Error en reportar el missatge';
+
+  @override
+  String get messageCopiedToClipboardText => 'Missatge copiat al porta-retalls';
+
+  @override
+  String get sendMessageError => "No s'ha pogut enviar el missatge";
+
+  @override
+  String get editMessageError => "No s'ha pogut editar el missatge";
+
+  @override
+  String toggleMuteUnmuteUserSuccessText({required String user, required bool isMuted}) {
+    if (isMuted) return "S'ha activat el so de $user";
+    return "S'ha silenciat $user";
+  }
+
+  @override
+  String toggleMuteUnmuteUserErrorText({required bool isMuted}) {
+    if (isMuted) return "Error en activar el so de l'usuari, torna-ho a provar";
+    return "Error en silenciar l'usuari, torna-ho a provar";
+  }
+
+  @override
   String createPollLabel({bool isNew = false}) {
     if (isNew) return 'Crear una enquesta nova';
     return 'Crea enquesta';
@@ -652,6 +694,12 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
   String get endVoteLabel => 'Finalitzar votació';
 
   @override
+  String get endVoteSuccessMessage => 'Votació finalitzada';
+
+  @override
+  String get endVoteErrorMessage => "No s'ha pogut finalitzar la votació";
+
+  @override
   String get pollResultsLabel => 'Resultats de la votació';
 
   @override
@@ -703,6 +751,9 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
 
   @override
   String get holdToRecordLabel => 'Mantén premut per gravar, deixa anar per enviar';
+
+  @override
+  String get audioRecordingPermissionMessage => "Permet els permisos d'àudio a la configuració.";
 
   @override
   String get sendAnywayLabel => 'Enviar igualment';

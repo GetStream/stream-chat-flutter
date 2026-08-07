@@ -3,6 +3,7 @@
 ✅ Added
 
 - Added connection-error translations (`connectionErrorTitle`/`Description`, `slowConnectionErrorTitle`/`Description`, `genericErrorTitle`/`Description`) for all supported locales.
+- Added action-feedback snackbar translations (message copy, pin/unpin, delete, flag, mark unread, mute/unmute user, end poll, audio-recording permission, and message send/edit failures) for all supported locales.
 
 ## 10.2.0
 

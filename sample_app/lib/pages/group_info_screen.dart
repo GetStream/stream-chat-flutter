@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:sample_app/pages/channel_file_display_screen.dart';
 import 'package:sample_app/pages/channel_media_display_screen.dart';
 import 'package:sample_app/pages/pinned_messages_screen.dart';
+import 'package:sample_app/utils/action_feedback.dart';
 import 'package:sample_app/widgets/add_members_sheet.dart';
 import 'package:sample_app/widgets/all_members_sheet.dart';
 import 'package:sample_app/widgets/edit_group_sheet.dart';
@@ -295,10 +296,21 @@ class _ActionsSection extends StatelessWidget {
             trailing: StreamSwitch(
               value: isMuted,
               onChanged: (_) {
+                final messenger = StreamSnackbarMessenger.maybeOf(context);
                 if (isMuted) {
-                  channel.unmute();
+                  runWithFeedback(
+                    messenger,
+                    channel.unmute,
+                    successMessage: 'Channel unmuted',
+                    errorMessage: 'Failed to update channel mute status',
+                  ).ignore();
                 } else {
-                  channel.mute();
+                  runWithFeedback(
+                    messenger,
+                    channel.mute,
+                    successMessage: 'Channel muted',
+                    errorMessage: 'Failed to update channel mute status',
+                  ).ignore();
                 }
               },
             ),
@@ -328,6 +340,7 @@ class _ActionsSection extends StatelessWidget {
     final currentUserId = StreamChat.of(context).currentUser?.id;
     if (currentUserId == null) return;
 
+    final messenger = StreamSnackbarMessenger.maybeOf(context);
     final confirmed = await _showConfirmationDialog(
       context: context,
       title: 'Leave group',
@@ -336,15 +349,27 @@ class _ActionsSection extends StatelessWidget {
     );
     if (confirmed != true) return;
 
-    await channel.removeMembers([currentUserId]);
-    // Pop every screen until we land on the channel list — going back to
-    // the channel page would crash since we're no longer a member.
-    navigator.popUntil((route) => route.isFirst);
+    try {
+      await channel.removeMembers([currentUserId]);
+      messenger?.show(
+        StreamSnackbar(message: const Text('Left channel'), variant: .success),
+        replace: true,
+      );
+      // Pop every screen until we land on the channel list — going back to
+      // the channel page would crash since we're no longer a member.
+      navigator.popUntil((route) => route.isFirst);
+    } catch (_) {
+      messenger?.show(
+        StreamSnackbar(message: const Text('Failed to leave channel'), variant: .error),
+        replace: true,
+      );
+    }
   }
 
   Future<void> _confirmDelete(BuildContext context) async {
     final navigator = Navigator.of(context);
     final channel = StreamChannel.of(context).channel;
+    final messenger = StreamSnackbarMessenger.maybeOf(context);
 
     final confirmed = await _showConfirmationDialog(
       context: context,
@@ -354,11 +379,22 @@ class _ActionsSection extends StatelessWidget {
     );
     if (confirmed != true) return;
 
-    await channel.delete();
-    // Pop every screen until we land on the channel list — going back to
-    // the channel page would crash trying to read state from the now
-    // deleted channel.
-    navigator.popUntil((route) => route.isFirst);
+    try {
+      await channel.delete();
+      messenger?.show(
+        StreamSnackbar(message: const Text('Channel deleted'), variant: .success),
+        replace: true,
+      );
+      // Pop every screen until we land on the channel list — going back to
+      // the channel page would crash trying to read state from the now
+      // deleted channel.
+      navigator.popUntil((route) => route.isFirst);
+    } catch (_) {
+      messenger?.show(
+        StreamSnackbar(message: const Text('Failed to delete channel'), variant: .error),
+        replace: true,
+      );
+    }
   }
 }
 

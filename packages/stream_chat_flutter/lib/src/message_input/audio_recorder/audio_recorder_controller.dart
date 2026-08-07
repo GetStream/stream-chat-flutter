@@ -58,15 +58,25 @@ class StreamAudioRecorderController extends ValueNotifier<AudioRecorderState>
   final AudioRecorder _recorder;
 
   /// Starts a new recording session.
-  Future<void> startRecord() async {
+  ///
+  /// When audio permission is denied, [permissionDeniedMessage] (if provided) is
+  /// surfaced through [RecordStateIdle.message] so the message input can prompt
+  /// the user to grant access.
+  Future<void> startRecord({String? permissionDeniedMessage}) async {
     // Only start the recorder if it is currently idle.
     if (value case RecordStateIdle()) {
       // Return if the recorder does not have permission to record audio.
       final hasPermission = await _recorder.hasPermission(request: false);
       if (!hasPermission) {
-        /// Request permission to record audio.
-        /// User has to start the recording session again to record audio.
-        await _recorder.hasPermission(request: true);
+        // Request permission to record audio. The user has to start the
+        // recording session again to record audio.
+        final granted = await _recorder.hasPermission(request: true);
+        if (!granted && permissionDeniedMessage != null) {
+          // Cancel any pending info timer so it can't clear the denial message.
+          _infoTimer?.cancel();
+          _infoTimer = null;
+          value = RecordStateIdle(message: permissionDeniedMessage);
+        }
         return;
       }
 
