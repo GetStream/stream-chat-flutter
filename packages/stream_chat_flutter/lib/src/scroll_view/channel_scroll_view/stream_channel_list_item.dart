@@ -493,9 +493,10 @@ class _ChannelListDeliveryStatus extends StatelessWidget {
 /// A widget that displays the date of the message shown in the channel
 /// preview.
 ///
-/// Reads the same message the preview subtitle does, so the two never disagree
-/// and nothing is displayed when there is no message to preview. Deliberately
-/// not [Channel.lastMessageAt], which survives a truncated channel.
+/// Dates the latest previewable sent message, and displays nothing when there
+/// is none. Drafts are ignored — they have no sent date — so when the subtitle
+/// previews a draft this still dates the last sent message. Deliberately not
+/// [Channel.lastMessageAt], which survives a truncated channel.
 class ChannelLastMessageDate extends StatefulWidget {
   /// Creates a new instance of the [ChannelLastMessageDate] widget.
   ChannelLastMessageDate({
@@ -799,6 +800,12 @@ mixin _LastMessageResolver<T extends StatefulWidget> on State<T> {
     // used as a fallback for this one.
     if (_currentChannelState != channelState) {
       _currentChannelState = channelState;
+      _currentLastMessage = null;
+    }
+
+    // The predicate can change while the cache is held; a message it no longer
+    // accepts must not come back as the fallback.
+    if (_currentLastMessage case final cached? when !predicate(cached)) {
       _currentLastMessage = null;
     }
 

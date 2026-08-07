@@ -130,6 +130,52 @@ void main() {
     });
 
     testWidgets(
+      'drops the cached message once the predicate stops accepting it',
+      (tester) async {
+        final message = Message(
+          text: 'no longer previewable',
+          user: User(id: 'other'),
+          createdAt: DateTime(2024, 1, 1),
+        );
+
+        Future<void> pumpWithPredicate(bool Function(Message) predicate) {
+          return tester.pumpWidget(
+            MaterialApp(
+              home: StreamChat(
+                client: client,
+                child: Scaffold(
+                  body: ChannelLastMessageText(
+                    channel: channel,
+                    lastMessagePredicate: predicate,
+                  ),
+                ),
+              ),
+            ),
+          );
+        }
+
+        when(() => channelState.messages).thenReturn([message]);
+        when(() => channelState.messagesStream).thenAnswer((_) => Stream.value([message]));
+
+        await pumpWithPredicate((_) => true);
+        await tester.pumpAndSettle();
+
+        expect(find.text('no longer previewable'), findsOneWidget);
+
+        // The channel starts reloading, so the cache is what the preview would
+        // fall back to — but the new predicate rejects the cached message.
+        when(() => channelState.isUpToDate).thenReturn(false);
+        when(() => channelState.messages).thenReturn([]);
+        when(() => channelState.messagesStream).thenAnswer((_) => Stream.value([]));
+
+        await pumpWithPredicate((_) => false);
+        await tester.pumpAndSettle();
+
+        expect(find.text('no longer previewable'), findsNothing);
+      },
+    );
+
+    testWidgets(
       'custom lastMessagePredicate fully replaces the default',
       (tester) async {
         final shadowedByOther = Message(

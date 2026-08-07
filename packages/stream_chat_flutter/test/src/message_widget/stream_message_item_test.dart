@@ -98,6 +98,8 @@ void main() {
 
       expect(find.textContaining('singular:'), findsNothing);
       expect(find.textContaining('plural:'), findsNothing);
+      // A hardcoded label would render the default "0 replies" here.
+      expect(find.text(DefaultTranslations.instance.threadReplyCountText(0)), findsNothing);
     });
   });
 
