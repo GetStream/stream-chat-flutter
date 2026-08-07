@@ -303,9 +303,7 @@ class _StreamChatMessageInputContent extends StatelessWidget {
           final permissionDeniedMessage = context.translations.audioRecordingPermissionMessage;
 
           await widget.feedback.onRecordStart(context);
-          return audioRecorderController.startRecord(
-            permissionDeniedMessage: permissionDeniedMessage,
-          );
+          return audioRecorderController.startRecord(permissionDeniedMessage: permissionDeniedMessage);
         },
         onLongPressEnd: (_) async {
           // Return if the recording not yet started or already locked.

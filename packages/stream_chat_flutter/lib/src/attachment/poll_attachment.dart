@@ -146,18 +146,12 @@ class _DefaultStreamPollAttachmentState extends State<DefaultStreamPollAttachmen
           try {
             await channel.closePoll(poll);
             messenger?.show(
-              StreamSnackbar(
-                message: Text(translations.endVoteSuccessMessage),
-                variant: .success,
-              ),
+              StreamSnackbar(message: Text(translations.endVoteSuccessMessage), variant: .success),
               replace: true,
             );
           } on Exception catch (_) {
             messenger?.show(
-              StreamSnackbar(
-                message: Text(translations.endVoteErrorMessage),
-                variant: .error,
-              ),
+              StreamSnackbar(message: Text(translations.endVoteErrorMessage), variant: .error),
               replace: true,
             );
           }

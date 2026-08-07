@@ -892,76 +892,54 @@ class DefaultStreamMessageItem extends StatelessWidget {
     // can remove the message item (e.g. a delete) — so the snackbar still shows.
     final messenger = StreamSnackbarMessenger.maybeOf(context);
 
-    switch (action) {
-      case SelectReaction():
-        return _selectReaction(context, action.message, channel, action.reaction).ignore();
-      case CopyMessage():
-        return _copyMessage(action.message, messenger, translations.messageCopiedToClipboardText);
-      case DeleteMessage():
-        return _maybeDeleteMessage(context, action.message, channel, messenger);
-      case HardDeleteMessage():
-        return _runWithFeedback(
-          messenger,
-          () => channel.deleteMessage(action.message, hard: true),
-          successMessage: translations.messageDeletedLabel,
-          errorMessage: translations.deleteMessageError,
-        );
-      case EditMessage():
-        return props.onEditMessageTap?.call(action.message);
-      case FlagMessage():
-        return _maybeFlagMessage(context, action.message, channel, messenger);
-      case MarkUnread():
-        return _runWithFeedback(
-          messenger,
-          () => channel.markUnread(action.message.id),
-          successMessage: translations.messageMarkedAsUnreadText,
-          errorMessage: translations.markUnreadError,
-        );
-      case MuteUser():
-        return _runWithFeedback(
-          messenger,
-          () => channel.client.muteUser(action.user.id),
-          successMessage: translations.toggleMuteUnmuteUserSuccessText(
-            user: action.user.name,
-            isMuted: false,
-          ),
-          errorMessage: translations.toggleMuteUnmuteUserErrorText(isMuted: false),
-        );
-      case UnmuteUser():
-        return _runWithFeedback(
-          messenger,
-          () => channel.client.unmuteUser(action.user.id),
-          successMessage: translations.toggleMuteUnmuteUserSuccessText(
-            user: action.user.name,
-            isMuted: true,
-          ),
-          errorMessage: translations.toggleMuteUnmuteUserErrorText(isMuted: true),
-        );
-      case BlockUser():
-        return channel.client.blockUser(action.user.id).ignore();
-      case UnblockUser():
-        return channel.client.unblockUser(action.user.id).ignore();
-      case PinMessage():
-        return _runWithFeedback(
-          messenger,
-          () => channel.pinMessage(action.message),
-          successMessage: translations.togglePinUnpinMessageSuccessText(pinned: true),
-          errorMessage: translations.togglePinUnpinMessageErrorText(pinned: true),
-        );
-      case UnpinMessage():
-        return _runWithFeedback(
-          messenger,
-          () => channel.unpinMessage(action.message),
-          successMessage: translations.togglePinUnpinMessageSuccessText(pinned: false),
-          errorMessage: translations.togglePinUnpinMessageErrorText(pinned: false),
-        );
-      case ResendMessage():
-        return channel.retryMessage(action.message).ignore();
-      case QuotedReply():
-        return props.onReplyTap?.call(action.message);
-      case ThreadReply():
-        return props.onThreadTap?.call(action.message, null);
-    }
+    return switch (action) {
+      SelectReaction() => _selectReaction(context, action.message, channel, action.reaction).ignore(),
+      CopyMessage() => _copyMessage(action.message, messenger, translations.messageCopiedToClipboardText),
+      DeleteMessage() => _maybeDeleteMessage(context, action.message, channel, messenger),
+      HardDeleteMessage() => _runWithFeedback(
+        messenger,
+        () => channel.deleteMessage(action.message, hard: true),
+        successMessage: translations.messageDeletedLabel,
+        errorMessage: translations.deleteMessageError,
+      ),
+      EditMessage() => props.onEditMessageTap?.call(action.message),
+      FlagMessage() => _maybeFlagMessage(context, action.message, channel, messenger),
+      MarkUnread() => _runWithFeedback(
+        messenger,
+        () => channel.markUnread(action.message.id),
+        successMessage: translations.messageMarkedAsUnreadText,
+        errorMessage: translations.markUnreadError,
+      ),
+      MuteUser() => _runWithFeedback(
+        messenger,
+        () => channel.client.muteUser(action.user.id),
+        successMessage: translations.toggleMuteUnmuteUserSuccessText(user: action.user.name, isMuted: false),
+        errorMessage: translations.toggleMuteUnmuteUserErrorText(isMuted: false),
+      ),
+      UnmuteUser() => _runWithFeedback(
+        messenger,
+        () => channel.client.unmuteUser(action.user.id),
+        successMessage: translations.toggleMuteUnmuteUserSuccessText(user: action.user.name, isMuted: true),
+        errorMessage: translations.toggleMuteUnmuteUserErrorText(isMuted: true),
+      ),
+      BlockUser() => channel.client.blockUser(action.user.id).ignore(),
+      UnblockUser() => channel.client.unblockUser(action.user.id).ignore(),
+      PinMessage() => _runWithFeedback(
+        messenger,
+        () => channel.pinMessage(action.message),
+        successMessage: translations.togglePinUnpinMessageSuccessText(pinned: true),
+        errorMessage: translations.togglePinUnpinMessageErrorText(pinned: true),
+      ),
+      UnpinMessage() => _runWithFeedback(
+        messenger,
+        () => channel.unpinMessage(action.message),
+        successMessage: translations.togglePinUnpinMessageSuccessText(pinned: false),
+        errorMessage: translations.togglePinUnpinMessageErrorText(pinned: false),
+      ),
+      ResendMessage() => channel.retryMessage(action.message).ignore(),
+      QuotedReply() => props.onReplyTap?.call(action.message),
+      ThreadReply() => props.onThreadTap?.call(action.message, null),
+    };
   }
 
   // Runs [action] and shows a success or error snackbar on [messenger] with the

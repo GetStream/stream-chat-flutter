@@ -1490,16 +1490,15 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
         return widget.props.onError?.call(e, stk);
       }
 
-      if (mounted) {
-        final translations = context.translations;
-        StreamSnackbarMessenger.maybeOf(context)?.show(
-          StreamSnackbar(
-            message: Text(isUpdate ? translations.editMessageError : translations.sendMessageError),
-            variant: .error,
-          ),
-          replace: true,
-        );
-      }
+      if (!mounted) return;
+
+      final translations = context.translations;
+      final message = isUpdate ? translations.editMessageError : translations.sendMessageError;
+
+      StreamSnackbarMessenger.maybeOf(context)?.show(
+        StreamSnackbar(message: Text(message), variant: .error),
+        replace: true,
+      );
 
       rethrow;
     }
