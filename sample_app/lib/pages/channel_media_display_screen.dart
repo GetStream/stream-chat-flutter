@@ -44,8 +44,6 @@ class _ChannelMediaDisplayScreenState extends State<ChannelMediaDisplayScreen> {
       body: ValueListenableBuilder<PagedValue<String, GetMessageResponse>>(
         valueListenable: _controller,
         builder: (context, value, _) {
-          final topInset = MediaQuery.paddingOf(context).top;
-          final spacing = context.streamSpacing;
           return value.when(
             (items, nextPageKey, _) {
               // Flatten messages → individual image/video attachments.
@@ -67,7 +65,6 @@ class _ChannelMediaDisplayScreenState extends State<ChannelMediaDisplayScreen> {
                 },
                 child: StreamMediaGallery(
                   attachments: attachments,
-                  padding: EdgeInsets.all(spacing.xxxs) + EdgeInsets.only(top: topInset),
                   onItemTap: (index) => _openPreview(context, attachments, index),
                 ),
               );

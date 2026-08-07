@@ -508,9 +508,9 @@ void main() {
     // avatar and back button can disagree with each other.
     Future<void> pumpHeader(
       WidgetTester tester, {
-      StreamAppStyle appStyle = StreamAppStyle.regular,
-      StreamToolbarBehavior? themeBehavior,
-      StreamToolbarBehavior? styleBehavior,
+      StreamSurfaceStyle surfaceStyle = StreamSurfaceStyle.regular,
+      StreamSurfaceStyle? themeSurfaceStyle,
+      StreamSurfaceStyle? styleSurfaceStyle,
     }) async {
       final client = MockClient();
       final clientState = MockClientState();
@@ -543,12 +543,12 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData(extensions: [StreamTheme(appStyle: appStyle)]),
+          theme: ThemeData(extensions: [StreamTheme(surfaceStyle: surfaceStyle)]),
           home: StreamChat(
             client: client,
             themeData: StreamChatThemeData(
-              channelHeaderTheme: switch (themeBehavior) {
-                final behavior? => StreamAppBarThemeData(style: StreamAppBarStyle(behavior: behavior)),
+              channelHeaderTheme: switch (themeSurfaceStyle) {
+                final surfaceStyle? => StreamAppBarThemeData(style: StreamAppBarStyle(surfaceStyle: surfaceStyle)),
                 _ => null,
               },
             ),
@@ -556,8 +556,8 @@ void main() {
               channel: channel,
               child: Scaffold(
                 body: StreamChannelHeader(
-                  style: switch (styleBehavior) {
-                    final behavior? => StreamAppBarStyle(behavior: behavior),
+                  style: switch (styleSurfaceStyle) {
+                    final surfaceStyle? => StreamAppBarStyle(surfaceStyle: surfaceStyle),
                     _ => null,
                   },
                 ),
@@ -585,13 +585,13 @@ void main() {
     });
 
     testWidgets('floats when the app style is floating', (tester) async {
-      await pumpHeader(tester, appStyle: StreamAppStyle.floating);
+      await pumpHeader(tester, surfaceStyle: StreamSurfaceStyle.floating);
 
       expect(avatarIsFloating(tester), isTrue);
     });
 
     testWidgets('floats when the header theme says so, over a regular app style', (tester) async {
-      await pumpHeader(tester, themeBehavior: StreamToolbarBehavior.floating);
+      await pumpHeader(tester, themeSurfaceStyle: StreamSurfaceStyle.floating);
 
       expect(avatarIsFloating(tester), isTrue);
     });
@@ -599,16 +599,16 @@ void main() {
     testWidgets('the header style wins over both the header theme and the app style', (tester) async {
       await pumpHeader(
         tester,
-        appStyle: StreamAppStyle.floating,
-        themeBehavior: StreamToolbarBehavior.floating,
-        styleBehavior: StreamToolbarBehavior.regular,
+        surfaceStyle: StreamSurfaceStyle.floating,
+        themeSurfaceStyle: StreamSurfaceStyle.floating,
+        styleSurfaceStyle: StreamSurfaceStyle.regular,
       );
 
       expect(avatarIsFloating(tester), isNot(isTrue));
     });
 
     testWidgets('the default back button agrees with the avatar under the header theme', (tester) async {
-      await pumpHeader(tester, themeBehavior: StreamToolbarBehavior.floating);
+      await pumpHeader(tester, themeSurfaceStyle: StreamSurfaceStyle.floating);
 
       expect(backButtonIsFloating(tester), isTrue);
       expect(backButtonIsFloating(tester), avatarIsFloating(tester));
@@ -617,8 +617,8 @@ void main() {
     testWidgets('the default back button agrees with the avatar under the header style', (tester) async {
       await pumpHeader(
         tester,
-        appStyle: StreamAppStyle.floating,
-        styleBehavior: StreamToolbarBehavior.regular,
+        surfaceStyle: StreamSurfaceStyle.floating,
+        styleSurfaceStyle: StreamSurfaceStyle.regular,
       );
 
       expect(backButtonIsFloating(tester), isNot(isTrue));

@@ -18,7 +18,7 @@ void main() {
   });
 
   testWidgets('renders a typing indicator above the composer', (tester) async {
-    await _pumpChannelPage(tester, appStyle: StreamAppStyle.floating);
+    await _pumpChannelPage(tester, surfaceStyle: StreamSurfaceStyle.floating);
 
     final indicator = tester.getRect(_bodyTypingIndicator());
     final composer = tester.getRect(find.byType(StreamMessageComposer));
@@ -115,21 +115,24 @@ void main() {
   });
 
   testWidgets('insets the message list behind a floating app bar and composer', (tester) async {
-    await _pumpChannelPage(tester, appStyle: StreamAppStyle.floating);
+    await _pumpChannelPage(tester, surfaceStyle: StreamSurfaceStyle.floating);
 
-    final messageListView = _messageListView(tester);
+    // The floating scaffold injects the bar extents into MediaQuery.padding,
+    // which the message list consumes to inset its content behind the chrome.
+    final padding = MediaQuery.paddingOf(tester.element(find.byType(StreamMessageListView)));
 
-    expect(messageListView.topPadding, greaterThan(0));
-    expect(messageListView.bottomPadding, greaterThan(0));
+    expect(padding.top, greaterThan(0));
+    expect(padding.bottom, greaterThan(0));
   });
 
   testWidgets('does not inset the message list when the app style is regular', (tester) async {
     await _pumpChannelPage(tester);
 
-    final messageListView = _messageListView(tester);
+    // Regular bars occupy their own space, so nothing is injected into padding.
+    final padding = MediaQuery.paddingOf(tester.element(find.byType(StreamMessageListView)));
 
-    expect(messageListView.topPadding, 0);
-    expect(messageListView.bottomPadding, 0);
+    expect(padding.top, 0);
+    expect(padding.bottom, 0);
   });
 
   testWidgets('disposes its composer controller when removed from the tree', (tester) async {
@@ -183,7 +186,7 @@ FocusNode _composerFocusNode(WidgetTester tester) {
 
 Future<void> _pumpChannelPage(
   WidgetTester tester, {
-  StreamAppStyle appStyle = StreamAppStyle.regular,
+  StreamSurfaceStyle surfaceStyle = StreamSurfaceStyle.regular,
   void Function(BuildContext context, Channel channel)? onChannelAvatarPressed,
   VoidCallback? onBackPressed,
   bool pushOntoARoute = false,
@@ -240,7 +243,7 @@ Future<void> _pumpChannelPage(
 
   await tester.pumpWidget(
     MaterialApp(
-      theme: ThemeData(extensions: [StreamTheme(appStyle: appStyle)]),
+      theme: ThemeData(extensions: [StreamTheme(surfaceStyle: surfaceStyle)]),
       // Chat context lives above the navigator so it survives a pop.
       builder: (context, child) => StreamChat(
         client: client,

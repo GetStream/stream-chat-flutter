@@ -62,9 +62,9 @@ class DefaultStreamMessageComposerInput extends StatelessWidget {
         border: Border.all(color: borderColor),
       ),
       child: Material(
+        borderRadius: borderRadius,
         clipBehavior: Clip.antiAlias,
         color: context.streamColorScheme.backgroundElevation1,
-        borderRadius: borderRadius,
         elevation: isFloating ? elevation.level3 : elevation.none,
         child: Column(
           mainAxisSize: MainAxisSize.min,

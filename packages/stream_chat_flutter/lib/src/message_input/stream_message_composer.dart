@@ -101,7 +101,7 @@ class StreamMessageComposer extends StatelessWidget {
     TextCapitalization textCapitalization = TextCapitalization.sentences,
     bool autofocus = false,
     bool autoCorrect = true,
-    StreamMessageComposerBehavior? behavior,
+    StreamSurfaceStyle? surfaceStyle,
   }) : props = .new(
          onMessageSent: onMessageSent,
          preMessageSending: preMessageSending,
@@ -139,7 +139,7 @@ class StreamMessageComposer extends StatelessWidget {
          textCapitalization: textCapitalization,
          autofocus: autofocus,
          autoCorrect: autoCorrect,
-         behavior: behavior,
+         surfaceStyle: surfaceStyle,
        );
 
   /// Creates a [StreamMessageComposer] from a pre-built [MessageComposerProps].
@@ -201,7 +201,7 @@ class MessageComposerProps {
     this.textCapitalization = TextCapitalization.sentences,
     this.autofocus = false,
     this.autoCorrect = true,
-    this.behavior,
+    this.surfaceStyle,
   });
 
   /// Function called after sending the message.
@@ -411,8 +411,11 @@ class MessageComposerProps {
   /// Defaults to true.
   final bool autoCorrect;
 
-  /// The behavior of the message composer.
-  final StreamMessageComposerBehavior? behavior;
+  /// The surface style of the message composer.
+  ///
+  /// When null, falls back to [StreamMessageComposerThemeData.surfaceStyle],
+  /// then the ambient [StreamSurfaceStyle].
+  final StreamSurfaceStyle? surfaceStyle;
 
   /// Returns a copy of this [MessageComposerProps] with the given fields
   /// replaced with new values.
@@ -452,7 +455,7 @@ class MessageComposerProps {
     TextCapitalization? textCapitalization,
     bool? autofocus,
     bool? autoCorrect,
-    StreamMessageComposerBehavior? behavior,
+    StreamSurfaceStyle? surfaceStyle,
   }) {
     return MessageComposerProps(
       onMessageSent: onMessageSent ?? this.onMessageSent,
@@ -490,7 +493,7 @@ class MessageComposerProps {
       textCapitalization: textCapitalization ?? this.textCapitalization,
       autofocus: autofocus ?? this.autofocus,
       autoCorrect: autoCorrect ?? this.autoCorrect,
-      behavior: behavior ?? this.behavior,
+      surfaceStyle: surfaceStyle ?? this.surfaceStyle,
     );
   }
 
@@ -830,84 +833,37 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     };
 
     final spacing = context.streamSpacing;
-    final colorScheme = context.streamColorScheme;
-    final safeAreaEnabled = widget.props.enableSafeArea ?? true;
-    final viewPadding = MediaQuery.paddingOf(context);
-
-    final effectiveComposerBehavior = _resolveBehavior(context);
-
-    // The body behind the pill (and picker) — animated safe-area insets.
-    final composerBody = AnimatedBuilder(
-      animation: _pickerAnimation,
-      builder: (context, child) {
-        final safeAreaPadding = safeAreaEnabled
-            ? EdgeInsets.lerp(
-                EdgeInsets.only(
-                  left: viewPadding.left,
-                  right: viewPadding.right,
-                  bottom: math.max(viewPadding.bottom, spacing.md),
-                ),
-                EdgeInsets.zero,
-                _pickerAnimation.value,
-              )!
-            : EdgeInsets.zero;
-
-        // Ink splashes paint into the nearest enclosing [Material], *below* its
-        // child subtree — so this sits under both backgrounds below (the
-        // regular fill and the floating backdrop painter), letting descendants
-        // without a material of their own (the command picker's rows) ripple on
-        // top of the background instead of beneath it.
-        //
-        // Transparent canvas type rather than [MaterialType.transparency]: the
-        // latter would stop absorbing hit tests, and the body extends behind a
-        // floating composer, so taps on the chrome would reach the message list.
-        final content = Material(
-          color: Colors.transparent,
-          child: Padding(padding: safeAreaPadding, child: child),
-        );
-
-        // For floating: one continuous backdrop behind the pill, the picker and
-        // the safe-area zone. Painting it as a single layer is what keeps it
-        // seamless — abutting fills would each be antialiased at a fractional
-        // device-pixel boundary and let a hairline of the message list through.
-        if (effectiveComposerBehavior == .floating) {
-          // At rest the backdrop fades into `backgroundElevation0`, matching the
-          // floating app bar and bottom nav bar. It rises to
-          // `backgroundElevation1` as the picker opens, so the picker panel —
-          // which paints no background of its own — sits on the elevated
-          // surface it expects. In light mode the two tokens are the same
-          // colour, so this only reads as a change in dark mode.
-          final backdropColor = Color.lerp(
-            colorScheme.backgroundElevation0,
-            colorScheme.backgroundElevation1,
-            _pickerAnimation.value,
-          )!;
-
-          return Stack(
-            children: [
-              Positioned.fill(
-                child: CustomPaint(
-                  painter: _FloatingComposerBackdropPainter(
-                    color: backdropColor,
-                    fadeExtent: _pillHeight,
-                  ),
-                ),
-              ),
-              content,
-            ],
-          );
-        }
-
-        return content;
+    final content = Material(
+      type: .transparency,
+      child: switch (widget.props.enableSafeArea) {
+        false => Center(heightFactor: 1, child: messageInput),
+        _ => StreamSafeArea.driven(
+          top: false,
+          listenable: _pickerAnimation,
+          minimum: .only(bottom: spacing.md),
+          child: Center(heightFactor: 1, child: messageInput),
+        ),
       },
-      child: Center(heightFactor: 1, child: messageInput),
     );
 
-    final composer = switch (effectiveComposerBehavior) {
-      .floating => composerBody,
+    final colorScheme = context.streamColorScheme;
+    final effectiveSurfaceStyle = _resolveSurfaceStyle(context);
+
+    final composer = switch (effectiveSurfaceStyle) {
       .regular => DecoratedBox(
-        decoration: BoxDecoration(color: colorScheme.backgroundElevation1),
-        child: composerBody,
+        decoration: BoxDecoration(
+          color: colorScheme.backgroundElevation1,
+        ),
+        child: content,
+      ),
+      .floating => CustomPaint(
+        painter: _FloatingComposerBackdropPainter(
+          animation: _pickerAnimation,
+          restColor: colorScheme.backgroundElevation0,
+          raisedColor: colorScheme.backgroundElevation1,
+          fadeExtent: _pillHeight,
+        ),
+        child: content,
       ),
     };
 
@@ -1000,14 +956,15 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     );
   }
 
-  /// The composer's effective placement: the explicit
-  /// [MessageComposerProps.behavior], then
-  /// [StreamMessageComposerThemeData.behavior], then the ambient
-  /// [StreamAppStyle].
-  StreamMessageComposerBehavior _resolveBehavior(BuildContext context) {
-    return widget.props.behavior ??
-        StreamMessageComposerTheme.of(context).behavior ??
-        (StreamTheme.of(context).appStyle.isFloating ? .floating : .regular);
+  // The composer's effective placement: the explicit
+  // MessageComposerProps.surfaceStyle, then
+  // StreamMessageComposerThemeData.surfaceStyle, then the ambient
+  // StreamSurfaceStyle.
+  StreamSurfaceStyle _resolveSurfaceStyle(BuildContext context) {
+    if (widget.props.surfaceStyle case final style?) return style;
+    final theme = StreamMessageComposerTheme.of(context);
+    if (theme.surfaceStyle case final style?) return style;
+    return context.streamSurfaceStyle;
   }
 
   Widget _buildMessageInput(
@@ -1016,7 +973,7 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     FocusNode focusNode,
   ) {
     final currentUserId = StreamChat.of(context).currentUser?.id;
-    final isFloating = _resolveBehavior(context) == .floating;
+    final isFloating = _resolveSurfaceStyle(context).isFloating;
 
     return StreamMessageValueListenableBuilder(
       valueListenable: controller,
@@ -1075,7 +1032,10 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
               // backdrop's fade confined to the pill, so the fade grows with the
               // pill but never stretches when the picker opens or closes.
               if (isFloating)
-                _ReportHeight(onHeightChanged: (height) => _pillHeight.value = height, child: pill)
+                _ReportHeight(
+                  onHeightChanged: (height) => _pillHeight.value = height,
+                  child: pill,
+                )
               else
                 pill,
               SizeTransition(
@@ -1102,8 +1062,6 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     };
     final useSystemPicker = widget.props.useSystemAttachmentPicker || isWebOrDesktop;
 
-    // Neither branch paints a background: when floating, the panel sits on the
-    // composer-wide backdrop painted by _FloatingComposerBackdropPainter.
     if (useSystemPicker) {
       return systemAttachmentPickerBuilder(
         context: context,
@@ -1685,32 +1643,45 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
   }
 }
 
-/// Paints the floating composer's whole background in a single pass: a fade from
-/// transparent to solid [color] across the top [fadeExtent] logical pixels (the
-/// height of the pill), then solid [color] for the remaining height (the
-/// attachment picker and the safe-area zone).
-///
-/// One paint rather than several abutting ones is what makes this seamless.
-/// Separate fills would each be antialiased where they meet, and because they
-/// composite in sequence their coverages don't sum to 1 — leaving a hairline of
-/// the message list visible between them.
-///
-/// [fadeExtent] is read at paint time rather than baked in at build time, so the
-/// fade tracks the pill as it grows (attachments, a quoted message, wrapped
-/// text) while staying independent of the total height. That is what keeps the
-/// fade from stretching when the picker opens or closes.
+// Paints the floating composer's whole background in a single pass: a fade from
+// transparent to the solid backdrop color across the top fadeExtent logical
+// pixels (the height of the pill), then the solid color for the remaining height
+// (the attachment picker and the safe-area zone).
+//
+// One paint rather than several abutting ones is what makes this seamless.
+// Separate fills would each be antialiased where they meet, and because they
+// composite in sequence their coverages don't sum to 1 — leaving a hairline of
+// the message list visible between them.
+//
+// fadeExtent is read at paint time rather than baked in at build time, so the
+// fade tracks the pill as it grows (attachments, a quoted message, wrapped
+// text) while staying independent of the total height. That is what keeps the
+// fade from stretching when the picker opens or closes.
 class _FloatingComposerBackdropPainter extends CustomPainter {
   _FloatingComposerBackdropPainter({
-    required this.color,
+    required this.animation,
+    required this.restColor,
+    required this.raisedColor,
     required this.fadeExtent,
-  }) : super(repaint: fadeExtent);
+  }) : super(repaint: Listenable.merge([animation, fadeExtent]));
 
-  final Color color;
+  // Animation that drives the backdrop color from restColor to raisedColor as
+  // the attachment picker opens.
+  final Animation<double> animation;
+
+  // The backdrop color at rest, with the picker closed.
+  final Color restColor;
+
+  // The backdrop color with the picker fully open.
+  final Color raisedColor;
+
   final ValueNotifier<double> fadeExtent;
 
   @override
   void paint(Canvas canvas, Size size) {
     if (size.isEmpty) return;
+
+    final color = Color.lerp(restColor, raisedColor, animation.value)!;
 
     // The gradient runs bottom-to-top, so the solid run is measured from the
     // bottom and the fade occupies the top `extent` pixels.
@@ -1730,7 +1701,10 @@ class _FloatingComposerBackdropPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_FloatingComposerBackdropPainter oldDelegate) {
-    return oldDelegate.color != color || oldDelegate.fadeExtent != fadeExtent;
+    return oldDelegate.restColor != restColor ||
+        oldDelegate.raisedColor != raisedColor ||
+        oldDelegate.animation != animation ||
+        oldDelegate.fadeExtent != fadeExtent;
   }
 }
 

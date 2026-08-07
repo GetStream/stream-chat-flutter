@@ -83,24 +83,28 @@ class _ChannelList extends State<ChannelList> {
         },
         child: NestedScrollView(
           controller: _scrollController,
-          headerSliverBuilder: (context, __) {
-            // When the app bar is floating it overlaps this scroll view from
-            // the top. Insert a spacer sliver so the search bar starts below
-            // the visible bottom edge of the floating bar.
-            final topInset = MediaQuery.paddingOf(context).top;
-            return [
-              if (topInset > 0) SliverToBoxAdapter(child: SizedBox(height: topInset)),
-              SliverToBoxAdapter(
+          floatHeaderSlivers: true,
+          headerSliverBuilder: (context, __) => [
+            SliverSafeArea(
+              bottom: false,
+              sliver: SliverToBoxAdapter(
                 child: SearchTextField(
                   controller: _controller,
                   hintText: 'Search',
                 ),
               ),
-            ];
-          },
-          body: _isSearchActive
-              ? _ChannelListSearch(_messageSearchListController)
-              : _ChannelListDefault(_channelListController),
+            ),
+          ],
+          // The header already handled the top inset; strip it so the body
+          // lists (null padding) only re-add the bottom, clearing the bottom bar.
+          body: MediaQuery.removePadding(
+            context: context,
+            removeTop: true,
+            child: switch (_isSearchActive) {
+              true => _ChannelListSearch(_messageSearchListController),
+              false => _ChannelListDefault(_channelListController),
+            },
+          ),
         ),
       ),
     );
@@ -114,18 +118,11 @@ class _ChannelListDefault extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bottomPadding = MediaQuery.paddingOf(context).bottom;
-
     return SlidableAutoCloseBehavior(
       child: RefreshIndicator(
         onRefresh: channelListController.refresh,
         child: StreamChannelListView(
           controller: channelListController,
-          // Always explicit (never null) — the header already handles the top
-          // inset via a spacer sliver, so the list must NOT auto-consume the
-          // injected top padding a second time. A null padding would do exactly
-          // that whenever bottomPadding is 0 (e.g. a docked bottom bar).
-          padding: EdgeInsets.only(bottom: bottomPadding),
           itemBuilder: (context, channels, index, defaultWidget) {
             final channel = channels[index];
 

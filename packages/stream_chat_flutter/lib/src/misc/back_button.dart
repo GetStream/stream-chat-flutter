@@ -57,10 +57,10 @@ class StreamBackButton extends StatelessWidget {
       _ => context.streamIcons.arrowLeft,
     };
 
-    final appStyle = StreamTheme.of(context).appStyle;
-    final toolbarBehavior = StreamToolbarScope.maybeOf(context);
+    final surfaceStyle = StreamTheme.of(context).surfaceStyle;
+    final toolbarSurfaceStyle = StreamToolbarScope.maybeOf(context);
 
-    final effectiveIsFloating = toolbarBehavior?.isFloating ?? appStyle.isFloating;
+    final effectiveIsFloating = toolbarSurfaceStyle?.isFloating ?? surfaceStyle.isFloating;
 
     Widget button = StreamButton.icon(
       type: effectiveIsFloating ? .outline : .ghost,

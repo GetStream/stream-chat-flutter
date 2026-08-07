@@ -30,16 +30,16 @@ mixin _$StreamMessageComposerThemeData {
     }
 
     return StreamMessageComposerThemeData(
-      behavior: t < 0.5 ? a.behavior : b.behavior,
+      surfaceStyle: t < 0.5 ? a.surfaceStyle : b.surfaceStyle,
     );
   }
 
-  StreamMessageComposerThemeData copyWith({
-    StreamMessageComposerBehavior? behavior,
-  }) {
+  StreamMessageComposerThemeData copyWith({StreamSurfaceStyle? surfaceStyle}) {
     final _this = (this as StreamMessageComposerThemeData);
 
-    return StreamMessageComposerThemeData(behavior: behavior ?? _this.behavior);
+    return StreamMessageComposerThemeData(
+      surfaceStyle: surfaceStyle ?? _this.surfaceStyle,
+    );
   }
 
   StreamMessageComposerThemeData merge(StreamMessageComposerThemeData? other) {
@@ -53,7 +53,7 @@ mixin _$StreamMessageComposerThemeData {
       return other;
     }
 
-    return copyWith(behavior: other.behavior);
+    return copyWith(surfaceStyle: other.surfaceStyle);
   }
 
   @override
@@ -69,13 +69,13 @@ mixin _$StreamMessageComposerThemeData {
     final _this = (this as StreamMessageComposerThemeData);
     final _other = (other as StreamMessageComposerThemeData);
 
-    return _other.behavior == _this.behavior;
+    return _other.surfaceStyle == _this.surfaceStyle;
   }
 
   @override
   int get hashCode {
     final _this = (this as StreamMessageComposerThemeData);
 
-    return Object.hash(runtimeType, _this.behavior);
+    return Object.hash(runtimeType, _this.surfaceStyle);
   }
 }

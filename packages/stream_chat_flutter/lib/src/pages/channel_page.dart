@@ -5,7 +5,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 ///
 /// Wires up a [StreamChannelHeader], a [StreamMessageListView] and a
 /// [StreamMessageComposer], laid out floating or regular according to the ambient
-/// [StreamAppStyle]. Expects a [StreamChannel] ancestor.
+/// [StreamSurfaceStyle]. Expects a [StreamChannel] ancestor.
 ///
 /// ## Customizing this page
 ///
@@ -38,7 +38,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// `messageItem`, `messageComposer`, `quotedMessage`, `mentionItem`, the
 /// attachment builders, `mediaGallery` and `videoPlayer` all apply here.
 ///
-/// Change list behaviour — `swipeToReply`, `highlightInitialMessage`,
+/// Change list behavior — `swipeToReply`, `highlightInitialMessage`,
 /// `autoScrollPolicy` and the rest — through
 /// [StreamChatConfigurationData.messageListViewConfiguration] on
 /// [StreamChat.configData].
@@ -76,7 +76,7 @@ class StreamChannelPage extends StatefulWidget {
   /// default is kept.
   final VoidCallback? onBackPressed;
 
-  /// Called when the default channel-avatar trailing is pressed.
+  /// Called when the default channel-avatar in the trailing slot is pressed.
   final void Function(BuildContext context, Channel channel)? onChannelAvatarPressed;
 
   @override
@@ -150,12 +150,12 @@ class _StreamChannelPageState extends State<StreamChannelPage> {
   }
 }
 
-/// The body of [StreamChannelPage].
-///
-/// Positions the typing indicator just above the composer (floating or docked)
-/// via a bottom [SafeArea] over the floating-bar insets in `MediaQuery.padding`
-/// (injected by [StreamScaffold]). [StreamMessageListView] reads the same insets
-/// directly to pad its scroll content.
+// The body of a channel page.
+//
+// Positions the typing indicator just above the composer (floating or docked)
+// via a bottom SafeArea over the floating-bar insets in MediaQuery.padding
+// (injected by StreamScaffold). StreamMessageListView reads the same insets
+// directly to pad its scroll content.
 class _ChannelPageBody extends StatelessWidget {
   const _ChannelPageBody({
     required this.typingIndicator,

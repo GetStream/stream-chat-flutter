@@ -338,16 +338,16 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
 
   MessageListController get _messageListController => widget.messageListController ?? _defaultController;
 
-  /// The effective [StreamMessageListViewConfiguration] for this list.
-  ///
-  /// [StreamMessageListView.config] when explicitly provided, otherwise
-  /// [StreamChatConfigurationData.messageListViewConfiguration] from the nearest
-  /// [StreamChatConfiguration] ancestor.
-  ///
-  /// Resolved into a field rather than read through a getter because the
-  /// fallback is an inherited-widget lookup, which asserts the element is active
-  /// and so must not run from a stream callback — `_messageNewListener` reads
-  /// this.
+  // The effective StreamMessageListViewConfiguration for this list.
+  //
+  // StreamMessageListView.config when explicitly provided, otherwise
+  // StreamChatConfigurationData.messageListViewConfiguration from the nearest
+  // StreamChatConfiguration ancestor.
+  //
+  // Resolved into a field rather than read through a getter because the
+  // fallback is an inherited-widget lookup, which asserts the element is active
+  // and so must not run from a stream callback — _messageNewListener reads
+  // this.
   late StreamMessageListViewConfiguration _config;
   StreamMessageListViewConfiguration _resolveConfig() {
     if (widget.config case final config?) return config;
@@ -666,10 +666,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
                 },
                 child: ScrollablePositionedList.separated(
                   key: Key('mlv-${streamChannel?.channel.cid}-${widget.parentMessage?.id}'),
-                  padding: .only(
-                    top: _scaffoldInsets.top + context.streamSpacing.sm,
-                    bottom: _scaffoldInsets.bottom + context.streamSpacing.sm,
-                  ),
+                  padding: _scaffoldInsets + .symmetric(vertical: context.streamSpacing.sm),
                   keyboardDismissBehavior: _config.keyboardDismissBehavior,
                   itemPositionsListener: _itemPositionListener,
                   initialScrollIndex: initialIndex,
@@ -862,7 +859,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
             ),
         if (_config.showUnreadIndicator && !_isThreadConversation)
           Positioned(
-            top: _scaffoldInsets.top + context.streamSpacing.sm,
+            top: math.max(_scaffoldInsets.top, context.streamSpacing.sm),
             child: UnreadIndicatorButton(
               onJumpTap: scrollToUnreadDefaultTapAction,
               onDismissTap: _markMessagesAsRead,
@@ -1139,8 +1136,8 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
         }
 
         return PositionedDirectional(
-          bottom: _scaffoldInsets.bottom + 16,
-          end: 16,
+          bottom: math.max(_scaffoldInsets.bottom, context.streamSpacing.md),
+          end: context.streamSpacing.md,
           child: button,
         );
       },

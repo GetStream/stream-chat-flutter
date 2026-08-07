@@ -110,13 +110,14 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
                 child: NestedScrollView(
                   floatHeaderSlivers: true,
                   headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
-                    final topInset = MediaQuery.paddingOf(context).top;
                     return <Widget>[
-                      if (topInset > 0) SliverToBoxAdapter(child: SizedBox(height: topInset)),
-                      SliverToBoxAdapter(
-                        child: SearchTextField(
-                          controller: _controller,
-                          hintText: 'Search',
+                      SliverSafeArea(
+                        bottom: false,
+                        sliver: SliverToBoxAdapter(
+                          child: SearchTextField(
+                            controller: _controller,
+                            hintText: 'Search',
+                          ),
                         ),
                       ),
                       if (state.users.isNotEmpty)
@@ -203,52 +204,57 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
                       ),
                     ];
                   },
-                  body: GestureDetector(
-                    behavior: HitTestBehavior.opaque,
-                    onPanDown: (_) => FocusScope.of(context).unfocus(),
-                    child: StreamUserListView(
-                      controller: userListController,
-                      padding: EdgeInsets.only(bottom: MediaQuery.paddingOf(context).bottom),
-                      itemBuilder: (context, items, index, defaultWidget) {
-                        return defaultWidget.copyWith(
-                          selected: state.users.contains(items[index]),
-                        );
-                      },
-                      onUserTap: groupChatState.addOrRemoveUser,
-                      emptyBuilder: (_) {
-                        return LayoutBuilder(
-                          builder: (context, viewportConstraints) {
-                            return SingleChildScrollView(
-                              physics: const AlwaysScrollableScrollPhysics(),
-                              child: ConstrainedBox(
-                                constraints: BoxConstraints(
-                                  minHeight: viewportConstraints.maxHeight,
-                                ),
-                                child: Center(
-                                  child: Column(
-                                    children: [
-                                      Padding(
-                                        padding: const EdgeInsets.all(24),
-                                        child: Icon(
-                                          context.streamIcons.search,
-                                          size: 96,
-                                          color: context.streamColorScheme.textSecondary,
+                  // Header handled the top inset; strip it so the body list
+                  // (null padding) only re-adds the bottom.
+                  body: MediaQuery.removePadding(
+                    context: context,
+                    removeTop: true,
+                    child: GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onPanDown: (_) => FocusScope.of(context).unfocus(),
+                      child: StreamUserListView(
+                        controller: userListController,
+                        itemBuilder: (context, items, index, defaultWidget) {
+                          return defaultWidget.copyWith(
+                            selected: state.users.contains(items[index]),
+                          );
+                        },
+                        onUserTap: groupChatState.addOrRemoveUser,
+                        emptyBuilder: (_) {
+                          return LayoutBuilder(
+                            builder: (context, viewportConstraints) {
+                              return SingleChildScrollView(
+                                physics: const AlwaysScrollableScrollPhysics(),
+                                child: ConstrainedBox(
+                                  constraints: BoxConstraints(
+                                    minHeight: viewportConstraints.maxHeight,
+                                  ),
+                                  child: Center(
+                                    child: Column(
+                                      children: [
+                                        Padding(
+                                          padding: const EdgeInsets.all(24),
+                                          child: Icon(
+                                            context.streamIcons.search,
+                                            size: 96,
+                                            color: context.streamColorScheme.textSecondary,
+                                          ),
                                         ),
-                                      ),
-                                      Text(
-                                        'No user matches these keywords...',
-                                        style: context.streamTextTheme.captionDefault.copyWith(
-                                          color: context.streamColorScheme.textSecondary,
+                                        Text(
+                                          'No user matches these keywords...',
+                                          style: context.streamTextTheme.captionDefault.copyWith(
+                                            color: context.streamColorScheme.textSecondary,
+                                          ),
                                         ),
-                                      ),
-                                    ],
+                                      ],
+                                    ),
                                   ),
                                 ),
-                              ),
-                            );
-                          },
-                        );
-                      },
+                              );
+                            },
+                          );
+                        },
+                      ),
                     ),
                   ),
                 ),

@@ -11,7 +11,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// loading spinner + _Searching for network…_ when connecting, and an
 /// _Offline_ label with a _try again_ affordance when disconnected.
 ///
-/// The leading slot is always the signed-in user's avatar. Tap behaviour
+/// The leading slot is always the signed-in user's avatar. Tap behavior
 /// is wired through [onUserAvatarPressed]; when the callback is null the
 /// avatar mirrors Material [AppBar]'s auto-implied leading by opening the
 /// enclosing [Scaffold]'s drawer if one exists, and is otherwise rendered
@@ -158,7 +158,7 @@ class StreamChannelListHeader extends StatelessWidget implements PreferredSizeWi
             showMessage: showConnectionStateTile && showStatus,
             message: statusString,
             // Apply the per-header theme as a theme; the bar resolves `style`
-            // over it and republishes the resolved behaviour to its slots.
+            // over it and republishes the resolved behavior to its slots.
             child: StreamAppBarTheme(
               data: headerTheme,
               child: StreamAppBar(
@@ -188,10 +188,10 @@ class _DefaultUserAvatar extends StatelessWidget {
     final user = client.state.currentUser;
     if (user == null) return const SizedBox.shrink();
 
-    final appStyle = StreamTheme.of(context).appStyle;
-    final toolbarBehavior = StreamToolbarScope.maybeOf(context);
+    final surfaceStyle = StreamTheme.of(context).surfaceStyle;
+    final toolbarSurfaceStyle = StreamToolbarScope.maybeOf(context);
 
-    final effectiveIsFloating = toolbarBehavior?.isFloating ?? appStyle.isFloating;
+    final effectiveIsFloating = toolbarSurfaceStyle?.isFloating ?? surfaceStyle.isFloating;
 
     // Caller-provided handler wins; otherwise mirror Material AppBar and
     // open the enclosing Scaffold's drawer if one exists. With no callback

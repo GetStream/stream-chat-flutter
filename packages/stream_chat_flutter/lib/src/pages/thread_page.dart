@@ -5,7 +5,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 ///
 /// Wires up a [StreamThreadHeader], a [StreamMessageListView] scoped to [parent]
 /// and a [StreamMessageComposer] that addresses new messages to the thread, laid
-/// out floating or regular according to the ambient [StreamAppStyle]. Expects a
+/// out floating or regular according to the ambient [StreamSurfaceStyle]. Expects a
 /// [StreamChannel] ancestor.
 ///
 /// The composer is omitted when [parent] is deleted.
@@ -19,7 +19,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 ///
 ///  * Components (`messageItem`, `messageComposer`, attachments, …) —
 ///    [streamChatComponentBuilders] on [StreamChat.componentBuilders].
-///  * List behaviour — [StreamChatConfigurationData.messageListViewConfiguration]
+///  * List behavior — [StreamChatConfigurationData.messageListViewConfiguration]
 ///    on [StreamChat.configData].
 ///  * Not reachable: [StreamMessageListViewBuilders] list-level slots and
 ///    [StreamThreadHeader]'s title and actions.

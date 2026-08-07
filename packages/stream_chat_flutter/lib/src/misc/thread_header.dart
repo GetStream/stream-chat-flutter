@@ -105,7 +105,7 @@ class StreamThreadHeader extends StatelessWidget implements PreferredSizeWidget 
     );
 
     // Apply the per-header theme as a theme; the bar resolves `style` over it
-    // and republishes the resolved behaviour to its slots.
+    // and republishes the resolved behavior to its slots.
     return StreamAppBarTheme(
       data: headerTheme,
       child: StreamAppBar(

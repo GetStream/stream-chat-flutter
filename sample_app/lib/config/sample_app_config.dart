@@ -8,7 +8,7 @@ import 'package:streaming_shared_preferences/streaming_shared_preferences.dart';
 // ---------------------------------------------------------------------------
 
 const _kThemeMode = 'config.themeMode';
-const _kAppStyle = 'config.appStyle';
+const _kSurfaceStyle = 'config.surfaceStyle';
 const _kForceRtl = 'config.forceRtl';
 const _kEnableDynamicColor = 'config.enableDynamicColor';
 const _kEnableReminderActions = 'config.enableReminderActions';
@@ -40,7 +40,7 @@ class SampleAppConfigData {
   factory SampleAppConfigData({
     Locale? locale,
     ThemeMode themeMode = .system,
-    StreamAppStyle appStyle = .regular,
+    StreamSurfaceStyle surfaceStyle = .regular,
     bool forceRtl = false,
     bool enableDynamicColor = false,
     bool enableReminderActions = false,
@@ -54,7 +54,7 @@ class SampleAppConfigData {
   }) {
     return SampleAppConfigData.raw(
       themeMode: themeMode,
-      appStyle: appStyle,
+      surfaceStyle: surfaceStyle,
       locale: locale,
       forceRtl: forceRtl,
       enableDynamicColor: enableDynamicColor,
@@ -72,7 +72,7 @@ class SampleAppConfigData {
   /// Raw constructor used internally and by persistence.
   const SampleAppConfigData.raw({
     required this.themeMode,
-    required this.appStyle,
+    required this.surfaceStyle,
     required this.locale,
     required this.forceRtl,
     required this.enableDynamicColor,
@@ -89,10 +89,10 @@ class SampleAppConfigData {
   /// Loads config from [StreamingSharedPreferences], falling back to defaults.
   factory SampleAppConfigData.fromPreferences(StreamingSharedPreferences prefs) {
     final localeStr = prefs.getString(_kLocale, defaultValue: '').getValue();
-    final appStyleIndex = prefs.getInt(_kAppStyle, defaultValue: StreamAppStyle.regular.index).getValue();
+    final surfaceStyleIndex = prefs.getInt(_kSurfaceStyle, defaultValue: StreamSurfaceStyle.regular.index).getValue();
     return SampleAppConfigData.raw(
       themeMode: ThemeMode.values[prefs.getInt(_kThemeMode, defaultValue: ThemeMode.system.index).getValue()],
-      appStyle: StreamAppStyle.values[appStyleIndex.clamp(0, StreamAppStyle.values.length - 1)],
+      surfaceStyle: StreamSurfaceStyle.values[surfaceStyleIndex.clamp(0, StreamSurfaceStyle.values.length - 1)],
       locale: localeStr.isEmpty ? null : Locale(localeStr),
       forceRtl: prefs.getBool(_kForceRtl, defaultValue: false).getValue(),
       enableDynamicColor: prefs.getBool(_kEnableDynamicColor, defaultValue: false).getValue(),
@@ -113,7 +113,7 @@ class SampleAppConfigData {
   final ThemeMode themeMode;
 
   /// The visual style for the app chrome (app bar, composer, bottom bar).
-  final StreamAppStyle appStyle;
+  final StreamSurfaceStyle surfaceStyle;
 
   /// The locale override for the app. When null, the system locale is used.
   final Locale? locale;
@@ -159,7 +159,7 @@ class SampleAppConfigData {
   /// pass explicitly as `null` to reset to default/system.
   SampleAppConfigData copyWith({
     ThemeMode? themeMode,
-    StreamAppStyle? appStyle,
+    StreamSurfaceStyle? surfaceStyle,
     Object? locale = _sentinel,
     bool? forceRtl,
     bool? enableDynamicColor,
@@ -174,7 +174,7 @@ class SampleAppConfigData {
   }) {
     return SampleAppConfigData.raw(
       themeMode: themeMode ?? this.themeMode,
-      appStyle: appStyle ?? this.appStyle,
+      surfaceStyle: surfaceStyle ?? this.surfaceStyle,
       locale: locale == _sentinel ? this.locale : locale as Locale?,
       forceRtl: forceRtl ?? this.forceRtl,
       enableDynamicColor: enableDynamicColor ?? this.enableDynamicColor,
@@ -196,7 +196,7 @@ class SampleAppConfigData {
   /// Persists all fields to [StreamingSharedPreferences].
   void saveToPreferences(StreamingSharedPreferences prefs) {
     prefs.setInt(_kThemeMode, themeMode.index);
-    prefs.setInt(_kAppStyle, appStyle.index);
+    prefs.setInt(_kSurfaceStyle, surfaceStyle.index);
     prefs.setString(_kLocale, locale?.languageCode ?? '');
     prefs.setBool(_kForceRtl, forceRtl);
     prefs.setBool(_kEnableDynamicColor, enableDynamicColor);

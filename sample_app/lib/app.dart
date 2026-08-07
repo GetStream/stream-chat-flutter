@@ -179,7 +179,7 @@ class _StreamChatSampleAppState extends State<StreamChatSampleApp>
             child: Builder(
               builder: (context) {
                 final config = context.sampleAppConfig;
-                final appStyle = config.appStyle;
+                final surfaceStyle = config.surfaceStyle;
 
                 return DynamicColorBuilder(
                   builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
@@ -187,12 +187,12 @@ class _StreamChatSampleAppState extends State<StreamChatSampleApp>
                       theme: createTheme(
                         dynamicColor: config.enableDynamicColor ? lightDynamic : null,
                         brightness: Brightness.light,
-                        appStyle: appStyle,
+                        surfaceStyle: surfaceStyle,
                       ),
                       darkTheme: createTheme(
                         dynamicColor: config.enableDynamicColor ? darkDynamic : null,
                         brightness: Brightness.dark,
-                        appStyle: appStyle,
+                        surfaceStyle: surfaceStyle,
                       ),
                       themeMode: config.themeMode,
                       locale: config.locale,
@@ -256,7 +256,7 @@ class _StreamChatSampleAppState extends State<StreamChatSampleApp>
   ThemeData createTheme({
     required ColorScheme? dynamicColor,
     required Brightness brightness,
-    required StreamAppStyle appStyle,
+    required StreamSurfaceStyle surfaceStyle,
   }) {
     return ThemeData(
       brightness: brightness,
@@ -269,7 +269,7 @@ class _StreamChatSampleAppState extends State<StreamChatSampleApp>
                   brightness: brightness,
                 ),
           brightness: brightness,
-          appStyle: appStyle,
+          surfaceStyle: surfaceStyle,
         ),
       ],
     );

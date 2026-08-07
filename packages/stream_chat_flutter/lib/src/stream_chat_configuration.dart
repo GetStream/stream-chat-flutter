@@ -268,6 +268,7 @@ class StreamChatConfigurationData {
   /// [StreamMessageListView] that does not provide its own explicit
   /// [StreamMessageListView.config].
   ///
-  /// Defaults to [StreamMessageListViewConfiguration] with all defaults.
+  /// Defaults to a [StreamMessageListViewConfiguration] with all fields at their
+  /// defaults.
   final StreamMessageListViewConfiguration messageListViewConfiguration;
 }

@@ -1,38 +1,14 @@
 import 'package:flutter/widgets.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
+import 'package:stream_core_flutter/core.dart';
 import 'package:theme_extensions_builder_annotation/theme_extensions_builder_annotation.dart';
 
 part 'message_composer_theme.g.theme.dart';
 
-/// The message composer's visual/layout behavior — floating above the keyboard
-/// or docked at the bottom edge of the screen.
-///
-/// Mirrors [StreamToolbarBehavior] so every
-/// component names its placement the same way.
-///
-/// When null on [StreamMessageComposerThemeData], the ambient [StreamAppStyle]
-/// is used as a fallback — [StreamAppStyle.floating] maps to [floating] and
-/// [StreamAppStyle.regular] maps to [regular].
-///
-/// See also:
-///
-///  * [StreamMessageComposerThemeData.behavior], which carries this
-///    value.
-///  * [StreamAppStyle], the global app-wide style that acts as fallback.
-enum StreamMessageComposerBehavior {
-  /// The composer sits within the layout flow, docked at the bottom edge of
-  /// the screen.
-  regular,
-
-  /// The composer floats above the on-screen keyboard with appropriate safe
-  /// area padding.
-  floating,
-}
-
 /// Applies a message composer theme to descendant composer widgets.
 ///
 /// Wrap a subtree with [StreamMessageComposerTheme] to override the composer
-/// behavior. Access the merged theme using [StreamMessageComposerTheme.of].
+/// surface style. Access the merged theme using [StreamMessageComposerTheme.of].
 ///
 /// {@tool snippet}
 ///
@@ -41,7 +17,7 @@ enum StreamMessageComposerBehavior {
 /// ```dart
 /// StreamMessageComposerTheme(
 ///   data: StreamMessageComposerThemeData(
-///     behavior: StreamMessageComposerBehavior.floating,
+///     surfaceStyle: StreamSurfaceStyle.floating,
 ///   ),
 ///   child: StreamChannel(
 ///     channel: channel,
@@ -54,7 +30,7 @@ enum StreamMessageComposerBehavior {
 /// See also:
 ///
 ///  * [StreamMessageComposerThemeData], which describes the theme data.
-///  * [StreamMessageComposerThemeData.behavior], the setting it holds.
+///  * [StreamMessageComposerThemeData.surfaceStyle], the setting it holds.
 class StreamMessageComposerTheme extends InheritedTheme {
   /// Creates a message composer theme that controls descendant composers.
   const StreamMessageComposerTheme({
@@ -73,7 +49,7 @@ class StreamMessageComposerTheme extends InheritedTheme {
   /// precedence over global values from [StreamChatTheme.of].
   ///
   /// This allows partial overrides — for example, overriding only
-  /// [StreamMessageComposerThemeData.behavior] in a subtree while
+  /// [StreamMessageComposerThemeData.surfaceStyle] in a subtree while
   /// inheriting other properties from the global theme.
   static StreamMessageComposerThemeData of(BuildContext context) {
     final localTheme = context.dependOnInheritedWidgetOfExactType<StreamMessageComposerTheme>();
@@ -90,7 +66,7 @@ class StreamMessageComposerTheme extends InheritedTheme {
 /// Theme data for customizing the message composer placement.
 ///
 /// All fields are nullable. When a field is null, the consuming widget falls
-/// back to the ambient [StreamAppStyle].
+/// back to the ambient [StreamSurfaceStyle].
 ///
 /// {@tool snippet}
 ///
@@ -99,7 +75,7 @@ class StreamMessageComposerTheme extends InheritedTheme {
 /// ```dart
 /// StreamChatThemeData(
 ///   messageComposerTheme: StreamMessageComposerThemeData(
-///     behavior: StreamMessageComposerBehavior.floating,
+///     surfaceStyle: StreamSurfaceStyle.floating,
 ///   ),
 /// )
 /// ```
@@ -107,23 +83,23 @@ class StreamMessageComposerTheme extends InheritedTheme {
 ///
 /// See also:
 ///
-///  * [StreamMessageComposerBehavior], the enum that describes the placement options.
+///  * [StreamSurfaceStyle], the enum that describes the placement options.
 ///  * [StreamMessageComposerTheme], for overriding the theme in a subtree.
 @themeGen
 @immutable
 class StreamMessageComposerThemeData with _$StreamMessageComposerThemeData {
   /// Creates message composer theme data with optional overrides.
-  const StreamMessageComposerThemeData({this.behavior});
+  const StreamMessageComposerThemeData({this.surfaceStyle});
 
-  /// The visual/layout behavior of the message composer.
+  /// The visual/layout surface style of the message composer.
   ///
-  /// When null the value falls back to the ambient [StreamAppStyle]:
-  /// [StreamAppStyle.floating] → [StreamMessageComposerBehavior.floating],
-  /// [StreamAppStyle.regular] → [StreamMessageComposerBehavior.regular].
+  /// When null the value falls back to the ambient [StreamSurfaceStyle]:
+  /// [StreamSurfaceStyle.floating] renders the composer floating,
+  /// [StreamSurfaceStyle.regular] renders it docked.
   ///
-  /// Set this to override the global style for the composer only, without
-  /// affecting other components.
-  final StreamMessageComposerBehavior? behavior;
+  /// Overrides the global style for the composer only, leaving other components
+  /// unaffected.
+  final StreamSurfaceStyle? surfaceStyle;
 
   /// Linearly interpolate between two [StreamMessageComposerThemeData] objects.
   static StreamMessageComposerThemeData? lerp(

@@ -6,80 +6,80 @@ import '../mocks.dart';
 
 void main() {
   test('copyWith with no arguments returns an equal MessageComposerThemeData', () {
-    const themeData = StreamMessageComposerThemeData(behavior: StreamMessageComposerBehavior.floating);
+    const themeData = StreamMessageComposerThemeData(surfaceStyle: StreamSurfaceStyle.floating);
 
     expect(themeData.copyWith(), themeData);
   });
 
   test('copyWith with no arguments preserves the hashCode', () {
-    const themeData = StreamMessageComposerThemeData(behavior: StreamMessageComposerBehavior.floating);
+    const themeData = StreamMessageComposerThemeData(surfaceStyle: StreamSurfaceStyle.floating);
 
     expect(themeData.copyWith().hashCode, themeData.hashCode);
   });
 
-  test('copyWith overrides the behavior', () {
-    const regular = StreamMessageComposerThemeData(behavior: StreamMessageComposerBehavior.regular);
+  test('copyWith overrides the surfaceStyle', () {
+    const regular = StreamMessageComposerThemeData(surfaceStyle: StreamSurfaceStyle.regular);
 
     expect(
-      regular.copyWith(behavior: StreamMessageComposerBehavior.floating).behavior,
-      StreamMessageComposerBehavior.floating,
+      regular.copyWith(surfaceStyle: StreamSurfaceStyle.floating).surfaceStyle,
+      StreamSurfaceStyle.floating,
     );
   });
 
   test('MessageComposerThemeData instances with different behaviors are not equal', () {
     expect(
-      const StreamMessageComposerThemeData(behavior: StreamMessageComposerBehavior.regular),
-      isNot(const StreamMessageComposerThemeData(behavior: StreamMessageComposerBehavior.floating)),
+      const StreamMessageComposerThemeData(surfaceStyle: StreamSurfaceStyle.regular),
+      isNot(const StreamMessageComposerThemeData(surfaceStyle: StreamSurfaceStyle.floating)),
     );
   });
 
-  test('lerp at t = 0 resolves to the start behavior', () {
+  test('lerp at t = 0 resolves to the start surfaceStyle', () {
     expect(
-      StreamMessageComposerThemeData.lerp(_regularTheme, _floatingTheme, 0)?.behavior,
-      StreamMessageComposerBehavior.regular,
+      StreamMessageComposerThemeData.lerp(_regularTheme, _floatingTheme, 0)?.surfaceStyle,
+      StreamSurfaceStyle.regular,
     );
   });
 
-  test('lerp below the halfway point resolves to the start behavior', () {
+  test('lerp below the halfway point resolves to the start surfaceStyle', () {
     expect(
-      StreamMessageComposerThemeData.lerp(_regularTheme, _floatingTheme, 0.49)?.behavior,
-      StreamMessageComposerBehavior.regular,
+      StreamMessageComposerThemeData.lerp(_regularTheme, _floatingTheme, 0.49)?.surfaceStyle,
+      StreamSurfaceStyle.regular,
     );
   });
 
-  test('lerp at or past the halfway point resolves to the end behavior', () {
+  test('lerp at or past the halfway point resolves to the end surfaceStyle', () {
     expect(
-      StreamMessageComposerThemeData.lerp(_regularTheme, _floatingTheme, 0.5)?.behavior,
-      StreamMessageComposerBehavior.floating,
+      StreamMessageComposerThemeData.lerp(_regularTheme, _floatingTheme, 0.5)?.surfaceStyle,
+      StreamSurfaceStyle.floating,
     );
   });
 
-  test('lerp at t = 1 resolves to the end behavior', () {
+  test('lerp at t = 1 resolves to the end surfaceStyle', () {
     expect(StreamMessageComposerThemeData.lerp(_regularTheme, _floatingTheme, 1), _floatingTheme);
   });
 
-  test('merge with null keeps the original behavior', () {
+  test('merge with null keeps the original surfaceStyle', () {
     expect(_regularTheme.merge(null), _regularTheme);
   });
 
-  test('merge overrides the behavior with the other theme', () {
+  test('merge overrides the surfaceStyle with the other theme', () {
     expect(_regularTheme.merge(_floatingTheme), _floatingTheme);
   });
 
-  test('merge with an empty theme keeps the original behavior', () {
+  test('merge with an empty theme keeps the original surfaceStyle', () {
     expect(_floatingTheme.merge(const StreamMessageComposerThemeData()), _floatingTheme);
   });
 
-  testWidgets('of returns a null behavior when no theme is configured', (tester) async {
+  testWidgets('of returns a null surfaceStyle when no theme is configured', (tester) async {
     final context = await _pumpAndCaptureContext(tester);
 
-    expect(StreamMessageComposerTheme.of(context).behavior, isNull);
+    expect(StreamMessageComposerTheme.of(context).surfaceStyle, isNull);
   });
 
-  testWidgets('of returns the global theme behavior when no local theme is present', (tester) async {
+  testWidgets('of returns the global theme surfaceStyle when no local theme is present', (tester) async {
     final context = await _pumpAndCaptureContext(tester, globalTheme: _floatingTheme);
 
-    expect(StreamMessageComposerTheme.of(context).behavior, StreamMessageComposerBehavior.floating);
+    expect(StreamMessageComposerTheme.of(context).surfaceStyle, StreamSurfaceStyle.floating);
   });
 
   testWidgets('of merges the local theme over the global theme', (tester) async {
@@ -89,17 +89,17 @@ void main() {
       localTheme: _floatingTheme,
     );
 
-    expect(StreamMessageComposerTheme.of(context).behavior, StreamMessageComposerBehavior.floating);
+    expect(StreamMessageComposerTheme.of(context).surfaceStyle, StreamSurfaceStyle.floating);
   });
 
-  testWidgets('of falls back to the global theme when the local theme sets no behavior', (tester) async {
+  testWidgets('of falls back to the global theme when the local theme sets no surfaceStyle', (tester) async {
     final context = await _pumpAndCaptureContext(
       tester,
       globalTheme: _floatingTheme,
       localTheme: const StreamMessageComposerThemeData(),
     );
 
-    expect(StreamMessageComposerTheme.of(context).behavior, StreamMessageComposerBehavior.floating);
+    expect(StreamMessageComposerTheme.of(context).surfaceStyle, StreamSurfaceStyle.floating);
   });
 
   testWidgets('wrap re-establishes the theme in a detached subtree', (tester) async {
@@ -126,7 +126,7 @@ void main() {
       ),
     );
 
-    expect(StreamMessageComposerTheme.of(capturedContext).behavior, StreamMessageComposerBehavior.floating);
+    expect(StreamMessageComposerTheme.of(capturedContext).surfaceStyle, StreamSurfaceStyle.floating);
   });
 
   testWidgets('updateShouldNotify is true when the data changes', (tester) async {
@@ -144,8 +144,8 @@ void main() {
   });
 }
 
-const _regularTheme = StreamMessageComposerThemeData(behavior: StreamMessageComposerBehavior.regular);
-const _floatingTheme = StreamMessageComposerThemeData(behavior: StreamMessageComposerBehavior.floating);
+const _regularTheme = StreamMessageComposerThemeData(surfaceStyle: StreamSurfaceStyle.regular);
+const _floatingTheme = StreamMessageComposerThemeData(surfaceStyle: StreamSurfaceStyle.floating);
 
 /// Pumps a [StreamChat] configured with [globalTheme], optionally wrapped in a
 /// local [StreamMessageComposerTheme] carrying [localTheme], and returns a

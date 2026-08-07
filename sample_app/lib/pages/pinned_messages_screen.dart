@@ -40,16 +40,10 @@ class _PinnedMessagesScreenState extends State<PinnedMessagesScreen> {
     return StreamScaffold(
       backgroundColor: colorScheme.backgroundApp,
       appBar: StreamAppBar(title: const Text('Pinned Messages')),
-      body: Builder(
-        builder: (context) {
-          final topInset = MediaQuery.paddingOf(context).top;
-          return StreamMessageSearchListView(
-            controller: _controller,
-            padding: EdgeInsets.only(top: topInset),
-            emptyBuilder: (_) => const Center(child: _EmptyState()),
-            onMessageTap: _openMessage,
-          );
-        },
+      body: StreamMessageSearchListView(
+        controller: _controller,
+        emptyBuilder: (_) => const Center(child: _EmptyState()),
+        onMessageTap: _openMessage,
       ),
     );
   }

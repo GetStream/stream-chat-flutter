@@ -14,7 +14,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// suppress the default, or pass [leading] to replace it entirely.
 ///
 /// The default trailing is the channel avatar (via [StreamChannelAvatar]).
-/// Tap behaviour is wired through [onChannelAvatarPressed]; when the
+/// Tap behavior is wired through [onChannelAvatarPressed]; when the
 /// callback is null the avatar is rendered non-interactive. Pass [trailing]
 /// to replace the avatar with a custom action — the callback is then
 /// ignored.
@@ -106,7 +106,7 @@ class StreamChannelHeader extends StatelessWidget implements PreferredSizeWidget
   final bool automaticallyImplyLeading;
 
   /// Called when the default [StreamBackButton] is pressed, replacing its
-  /// default `Navigator.maybePop`.
+  /// default [Navigator.maybePop].
   ///
   /// Ignored when [leading] is provided.
   final VoidCallback? onBackPressed;
@@ -184,7 +184,7 @@ class StreamChannelHeader extends StatelessWidget implements PreferredSizeWidget
             showMessage: showConnectionStateTile && showStatus,
             message: statusString,
             // Apply the per-header theme as a theme; the bar resolves `style`
-            // over it and republishes the resolved behaviour to its slots.
+            // over it and republishes the resolved behavior to its slots.
             child: StreamAppBarTheme(
               data: headerTheme,
               child: StreamAppBar(
@@ -213,10 +213,10 @@ class _DefaultChannelAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final appStyle = StreamTheme.of(context).appStyle;
-    final toolbarBehavior = StreamToolbarScope.maybeOf(context);
+    final surfaceStyle = StreamTheme.of(context).surfaceStyle;
+    final toolbarSurfaceStyle = StreamToolbarScope.maybeOf(context);
 
-    final effectiveIsFloating = toolbarBehavior?.isFloating ?? appStyle.isFloating;
+    final effectiveIsFloating = toolbarSurfaceStyle?.isFloating ?? surfaceStyle.isFloating;
 
     final effectiveOnTap = switch (onPressed) {
       final cb? => () => cb(channel),

@@ -10,51 +10,51 @@ import '../mocks.dart';
 
 void main() {
   testWidgets('composer is regular when the app style is regular', (tester) async {
-    await _pumpComposer(tester, appStyle: StreamAppStyle.regular);
+    await _pumpComposer(tester, surfaceStyle: StreamSurfaceStyle.regular);
 
-    expect(_resolvedBehavior(tester), StreamMessageComposerBehavior.regular);
+    expect(_resolvedSurfaceStyle(tester), StreamSurfaceStyle.regular);
   });
 
   testWidgets('composer floats when the app style is floating', (tester) async {
-    await _pumpComposer(tester, appStyle: StreamAppStyle.floating);
+    await _pumpComposer(tester, surfaceStyle: StreamSurfaceStyle.floating);
 
-    expect(_resolvedBehavior(tester), StreamMessageComposerBehavior.floating);
+    expect(_resolvedSurfaceStyle(tester), StreamSurfaceStyle.floating);
   });
 
   testWidgets('the global composer theme overrides the app style', (tester) async {
     await _pumpComposer(
       tester,
-      appStyle: StreamAppStyle.regular,
-      globalTheme: const StreamMessageComposerThemeData(behavior: StreamMessageComposerBehavior.floating),
+      surfaceStyle: StreamSurfaceStyle.regular,
+      globalTheme: const StreamMessageComposerThemeData(surfaceStyle: StreamSurfaceStyle.floating),
     );
 
-    expect(_resolvedBehavior(tester), StreamMessageComposerBehavior.floating);
+    expect(_resolvedSurfaceStyle(tester), StreamSurfaceStyle.floating);
   });
 
   testWidgets('a local composer theme overrides the global theme', (tester) async {
     await _pumpComposer(
       tester,
-      appStyle: StreamAppStyle.floating,
-      globalTheme: const StreamMessageComposerThemeData(behavior: StreamMessageComposerBehavior.floating),
-      localTheme: const StreamMessageComposerThemeData(behavior: StreamMessageComposerBehavior.regular),
+      surfaceStyle: StreamSurfaceStyle.floating,
+      globalTheme: const StreamMessageComposerThemeData(surfaceStyle: StreamSurfaceStyle.floating),
+      localTheme: const StreamMessageComposerThemeData(surfaceStyle: StreamSurfaceStyle.regular),
     );
 
-    expect(_resolvedBehavior(tester), StreamMessageComposerBehavior.regular);
+    expect(_resolvedSurfaceStyle(tester), StreamSurfaceStyle.regular);
   });
 
-  testWidgets('the behavior property overrides both the theme and the app style', (tester) async {
+  testWidgets('the surfaceStyle property overrides both the theme and the app style', (tester) async {
     await _pumpComposer(
       tester,
-      appStyle: StreamAppStyle.floating,
-      globalTheme: const StreamMessageComposerThemeData(behavior: StreamMessageComposerBehavior.floating),
-      behavior: StreamMessageComposerBehavior.regular,
+      surfaceStyle: StreamSurfaceStyle.floating,
+      globalTheme: const StreamMessageComposerThemeData(surfaceStyle: StreamSurfaceStyle.floating),
+      composerSurfaceStyle: StreamSurfaceStyle.regular,
     );
 
-    expect(_resolvedBehavior(tester), StreamMessageComposerBehavior.regular);
+    expect(_resolvedSurfaceStyle(tester), StreamSurfaceStyle.regular);
   });
 
   testWidgets('the regular composer fills its background with the elevation-1 color', (tester) async {
-    await _pumpComposer(tester, appStyle: StreamAppStyle.regular);
+    await _pumpComposer(tester, surfaceStyle: StreamSurfaceStyle.regular);
 
     expect(_backgroundFillFinder(tester), findsOneWidget);
   });
@@ -62,26 +62,30 @@ void main() {
   testWidgets('the floating composer does not fill its background', (tester) async {
     // Floating paints a fading backdrop instead of an opaque fill, so the
     // message list stays visible behind the composer.
-    await _pumpComposer(tester, appStyle: StreamAppStyle.floating);
+    await _pumpComposer(tester, surfaceStyle: StreamSurfaceStyle.floating);
 
     expect(_backgroundFillFinder(tester), findsNothing);
   });
 
   testWidgets('the floating composer lifts the input above the bottom safe area', (tester) async {
     const bottomInset = 34.0;
-    await _pumpComposer(tester, appStyle: StreamAppStyle.floating, bottomPadding: bottomInset);
+    await _pumpComposer(tester, surfaceStyle: StreamSurfaceStyle.floating, bottomPadding: bottomInset);
 
     final gap = _gapBelowInput(tester);
 
+    // The inset (34) is larger than the spacing.md floor, so it is used as-is —
+    // the composer sits flush above it rather than lifting further.
     expect(gap, moreOrLessEquals(bottomInset));
   });
 
-  testWidgets('the floating composer keeps a minimum gap when there is no safe area', (tester) async {
-    await _pumpComposer(tester, appStyle: StreamAppStyle.floating);
+  testWidgets('the floating composer floors the bottom gap at spacing.md without an inset', (tester) async {
+    // With no injected inset the floor keeps the composer off the edge; a larger
+    // inset would absorb it, so the composer never stacks a fixed gap on top of
+    // a system bar drawn outside the window.
+    await _pumpComposer(tester, surfaceStyle: StreamSurfaceStyle.floating);
 
     final gap = _gapBelowInput(tester);
 
-    // Falls back to `spacing.md` so the pill never sits flush with the edge.
     final context = tester.element(find.byType(StreamChatMessageInput));
     expect(gap, moreOrLessEquals(context.streamSpacing.md));
   });
@@ -89,7 +93,7 @@ void main() {
   testWidgets('the floating composer leaves no gap when the safe area is disabled', (tester) async {
     await _pumpComposer(
       tester,
-      appStyle: StreamAppStyle.floating,
+      surfaceStyle: StreamSurfaceStyle.floating,
       bottomPadding: 34,
       enableSafeArea: false,
     );
@@ -98,12 +102,42 @@ void main() {
 
     expect(gap, moreOrLessEquals(0));
   });
+
+  testWidgets('the floating composer collapses the bottom inset while the attachment picker is open', (tester) async {
+    // The inset lifts the pill above the system inset when the picker is closed,
+    // but must collapse to zero while it is open so the edge-to-edge attachment
+    // gallery can reach the screen bottom.
+    await _pumpComposer(tester, surfaceStyle: StreamSurfaceStyle.floating, bottomPadding: 34);
+
+    double insetBottom() {
+      // The applied inset is the outermost Padding inside the composer's safe area.
+      final padding = tester.widget<Padding>(
+        find.descendant(of: find.byType(StreamSafeArea), matching: find.byType(Padding)).first,
+      );
+      return padding.padding.resolve(TextDirection.ltr).bottom;
+    }
+
+    // Closed: the injected inset (34) exceeds the spacing.md floor, so it is used as-is.
+    expect(insetBottom(), moreOrLessEquals(34));
+
+    await tester.tap(_attachmentButtonFinder);
+    await tester.pumpAndSettle();
+
+    // Open: the inset has collapsed.
+    expect(insetBottom(), moreOrLessEquals(0));
+  });
 }
 
-/// The behavior the composer resolved, read back from the input it built.
-StreamMessageComposerBehavior _resolvedBehavior(WidgetTester tester) {
+/// The composer's attachment (picker) button, in the leading slot.
+final _attachmentButtonFinder = find.descendant(
+  of: find.byType(DefaultStreamMessageComposerLeading),
+  matching: find.byType(StreamButton),
+);
+
+/// The surface style the composer resolved, read back from the input it built.
+StreamSurfaceStyle _resolvedSurfaceStyle(WidgetTester tester) {
   final input = tester.widget<StreamChatMessageInput>(find.byType(StreamChatMessageInput));
-  return input.isFloating ? StreamMessageComposerBehavior.floating : StreamMessageComposerBehavior.regular;
+  return input.isFloating ? StreamSurfaceStyle.floating : StreamSurfaceStyle.regular;
 }
 
 /// Finds the opaque background fill the regular composer paints behind itself.
@@ -132,10 +166,10 @@ double _gapBelowInput(WidgetTester tester) {
 /// compared against the input pill's.
 Future<void> _pumpComposer(
   WidgetTester tester, {
-  required StreamAppStyle appStyle,
+  required StreamSurfaceStyle surfaceStyle,
   StreamMessageComposerThemeData? globalTheme,
   StreamMessageComposerThemeData? localTheme,
-  StreamMessageComposerBehavior? behavior,
+  StreamSurfaceStyle? composerSurfaceStyle,
   bool? enableSafeArea,
   double bottomPadding = 0,
 }) async {
@@ -149,6 +183,10 @@ Future<void> _pumpComposer(
   final channelState = MockChannelState();
 
   when(() => client.state).thenReturn(clientState);
+  // Read by the attachment validator when the picker opens.
+  when(() => client.appSettings).thenReturn(
+    const AppSettings(fileUploadConfig: UploadConfig(), imageUploadConfig: UploadConfig()),
+  );
   when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
   when(() => clientState.currentUserStream).thenAnswer((_) => Stream.value(OwnUser(id: 'user-id')));
   when(() => channel.state).thenReturn(channelState);
@@ -164,13 +202,13 @@ Future<void> _pumpComposer(
   when(() => channelState.draft).thenReturn(null);
 
   final composer = StreamMessageComposer(
-    behavior: behavior,
+    surfaceStyle: composerSurfaceStyle,
     enableSafeArea: enableSafeArea,
   );
 
   await tester.pumpWidget(
     MaterialApp(
-      theme: ThemeData(extensions: [StreamTheme(appStyle: appStyle)]),
+      theme: ThemeData(extensions: [StreamTheme(surfaceStyle: surfaceStyle)]),
       // Overrides only the padding, so the ambient size, text scale and platform
       // brightness the test binding provides are preserved.
       home: Builder(
