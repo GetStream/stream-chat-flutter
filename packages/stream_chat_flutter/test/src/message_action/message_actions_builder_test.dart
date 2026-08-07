@@ -464,11 +464,12 @@ void main() {
     );
 
     testWidgets(
-      'hides thread reply when channel replies are disabled',
+      'keeps thread reply available when only the channel replies config is disabled',
       (tester) async {
         final context = await _getContext(tester);
 
         // The send-reply capability is granted; only the channel config says no.
+        // Thread reply is gated by the capability, not the channel replies config.
         final channelWithoutReplies = _getChannelWithCapabilities(
           allChannelCapabilities,
           enableReplies: false,
@@ -481,8 +482,8 @@ void main() {
           currentUser: currentUser,
         );
 
-        actions.notExpects<ThreadReply>(
-          reason: 'Thread reply unavailable when channel replies are disabled',
+        actions.expects<ThreadReply>(
+          reason: 'Thread reply is gated by the send-reply capability, not the config',
         );
 
         actions.expects<QuotedReply>(
