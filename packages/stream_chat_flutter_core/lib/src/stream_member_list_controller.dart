@@ -105,13 +105,14 @@ class StreamMemberListController extends PagedValueNotifier<int, Member> with Se
   /// Searches members whose name matches [query], debounced by its length.
   ///
   /// [query] is matched against the member name as an autocomplete filter,
-  /// merged with the controller's base [filter]; an empty [query] reloads the
+  /// merged with the controller's base [filter]; a blank [query] reloads the
   /// base [filter]. Rapidly superseded searches are dropped, so only the latest
   /// query's results are applied.
   ///
   /// To search on other fields, use [searchWithFilter].
   void search(String query) {
-    final nameFilter = query.isEmpty ? null : Filter.autoComplete('name', query);
+    final trimmed = query.trim();
+    final nameFilter = trimmed.isEmpty ? null : Filter.autoComplete('name', trimmed);
     final filters = [?filter, ?nameFilter];
     searchWithFilter(filters.length > 1 ? .and(filters) : filters.firstOrNull);
   }

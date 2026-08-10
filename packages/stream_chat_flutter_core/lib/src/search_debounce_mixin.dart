@@ -31,7 +31,6 @@ mixin SearchDebounceMixin<Key, Value> on PagedValueNotifier<Key, Value> {
   /// The policy driving [debouncedSearch]'s length-based delays.
   @protected
   SearchDebouncePolicy get debouncePolicy;
-
   late final _searchDebouncer = SearchDebouncer(doInitialLoad, policy: debouncePolicy);
 
   int _loadGeneration = 0;

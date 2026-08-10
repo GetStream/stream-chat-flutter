@@ -59,7 +59,7 @@ void main() {
       expect(await usedFilter.future, Filter.query('text', 'abc'));
     });
 
-    test('an empty query clears results without querying', () async {
+    test('a blank query clears results without querying', () async {
       var queried = false;
       when(
         () => client.search(
@@ -77,7 +77,7 @@ void main() {
       final controller = buildController();
       addTearDown(controller.dispose);
 
-      controller.search('');
+      controller.search('   ');
       await pumpEventQueue();
 
       expect(queried, isFalse);

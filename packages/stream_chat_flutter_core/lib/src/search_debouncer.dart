@@ -70,12 +70,13 @@ class SearchDebouncePolicy {
 class SearchDebouncer {
   /// Creates a [SearchDebouncer] that runs [onSearch] after the delay [policy]
   /// selects for the query length elapses.
-  SearchDebouncer(
-    Function onSearch, {
-    SearchDebouncePolicy policy = const SearchDebouncePolicy(),
-  }) : _policy = policy,
-       _shortQuery = debounce(onSearch, policy.shortQueryDelay),
-       _longQuery = debounce(onSearch, policy.defaultDelay);
+  SearchDebouncer(Function onSearch, {SearchDebouncePolicy? policy})
+    : this._(onSearch, policy ?? const SearchDebouncePolicy());
+
+  SearchDebouncer._(Function onSearch, SearchDebouncePolicy policy)
+    : _policy = policy,
+      _shortQuery = debounce(onSearch, policy.shortQueryDelay),
+      _longQuery = debounce(onSearch, policy.defaultDelay);
 
   final SearchDebouncePolicy _policy;
   final Debounce _shortQuery;
