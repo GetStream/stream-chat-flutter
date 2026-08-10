@@ -34,7 +34,7 @@ void main() {
   }
 
   group('search', () {
-    test('queries messages with a full-text filter after debouncing', () async {
+    test('queries messages with an autocomplete filter after debouncing', () async {
       final usedFilter = Completer<Filter?>();
       when(
         () => client.search(
@@ -56,7 +56,7 @@ void main() {
       controller.search('abc');
 
       // Waits for the debounced query to fire rather than a fixed timeout.
-      expect(await usedFilter.future, Filter.query('text', 'abc'));
+      expect(await usedFilter.future, Filter.autoComplete('text', 'abc'));
     });
 
     test('a blank query clears results without querying', () async {
