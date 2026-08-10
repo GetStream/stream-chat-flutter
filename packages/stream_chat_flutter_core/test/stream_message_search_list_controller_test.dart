@@ -58,6 +58,31 @@ void main() {
       // Waits for the debounced query to fire rather than a fixed timeout.
       expect(await usedQuery.future, 'abc');
     });
+
+    test('an empty query clears results without querying', () async {
+      var queried = false;
+      when(
+        () => client.search(
+          any(),
+          sort: any(named: 'sort'),
+          query: any(named: 'query'),
+          messageFilters: any(named: 'messageFilters'),
+          paginationParams: any(named: 'paginationParams'),
+        ),
+      ).thenAnswer((_) async {
+        queried = true;
+        return searchResponse();
+      });
+
+      final controller = buildController();
+      addTearDown(controller.dispose);
+
+      controller.search('');
+      await pumpEventQueue();
+
+      expect(queried, isFalse);
+      expect(controller.value.asSuccess.items, isEmpty);
+    });
   });
 
   group('superseded results', () {
