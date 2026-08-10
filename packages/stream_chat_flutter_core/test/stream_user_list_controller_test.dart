@@ -44,7 +44,10 @@ void main() {
       controller.search('abc');
 
       // Waits for the debounced query to fire rather than a fixed timeout.
-      expect(await usedFilter.future, Filter.autoComplete('name', 'abc'));
+      expect(
+        await usedFilter.future,
+        Filter.or([Filter.autoComplete('name', 'abc'), Filter.autoComplete('id', 'abc')]),
+      );
     });
 
     test('doInitialLoad does not query while a search is pending', () async {
@@ -111,7 +114,10 @@ void main() {
       // The three calls coalesce into a single query for the latest term.
       await fired.future;
       expect(queryCount, 1);
-      expect(lastFilter, Filter.autoComplete('name', 'abc'));
+      expect(
+        lastFilter,
+        Filter.or([Filter.autoComplete('name', 'abc'), Filter.autoComplete('id', 'abc')]),
+      );
 
       // No further query fires after the coalesced one.
       await Future<void>.delayed(const Duration(milliseconds: 150));

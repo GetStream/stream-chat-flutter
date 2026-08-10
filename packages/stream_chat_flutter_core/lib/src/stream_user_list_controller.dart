@@ -110,20 +110,25 @@ class StreamUserListController extends PagedValueNotifier<int, User> with Search
   /// [doInitialLoad] after setting a new sort.
   set sort(SortOrder<User>? value) => _activeSort = value;
 
-  /// Searches users whose name matches [query], debounced by its length.
+  /// Searches users whose name or id matches [query], debounced by its length.
   ///
-  /// [query] is matched against the user name as an autocomplete filter, merged
-  /// with the controller's base [filter]; an empty [query] reloads the base
-  /// [filter]. Rapidly superseded searches are dropped, so only the latest
+  /// [query] is matched against the user name and id as an autocomplete filter,
+  /// merged with the controller's base [filter]; an empty [query] reloads the
+  /// base [filter]. Rapidly superseded searches are dropped, so only the latest
   /// query's results are applied.
   ///
   /// To search on other fields, set [filter] directly and call [doInitialLoad].
   void search(String query) {
-    final nameFilter = query.isEmpty ? null : Filter.autoComplete('name', query);
-    _activeFilter = switch ((filter, nameFilter)) {
-      (final base?, final name?) => .and([base, name]),
+    final searchFilter = query.isEmpty
+        ? null
+        : Filter.or([
+            Filter.autoComplete('name', query),
+            Filter.autoComplete('id', query),
+          ]);
+    _activeFilter = switch ((filter, searchFilter)) {
+      (final base?, final search?) => .and([base, search]),
       (final base?, _) => base,
-      (_, final name?) => name,
+      (_, final search?) => search,
       _ => null,
     };
     debouncedSearch(query.length);
