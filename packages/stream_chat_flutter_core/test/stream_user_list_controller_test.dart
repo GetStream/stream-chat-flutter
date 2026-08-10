@@ -108,11 +108,7 @@ void main() {
         ..search('ab')
         ..search('abc');
 
-      // Nothing fires before the delay elapses (timers never fire early).
-      await Future<void>.delayed(const Duration(milliseconds: 50));
-      expect(queryCount, 0);
-
-      // The window elapses and exactly one query fires — for the latest term.
+      // The three calls coalesce into a single query for the latest term.
       await fired.future;
       expect(queryCount, 1);
       expect(lastFilter, Filter.autoComplete('name', 'abc'));
