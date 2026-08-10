@@ -42,9 +42,14 @@ mixin SearchDebounceMixin<Key, Value> on PagedValueNotifier<Key, Value> {
   /// Bumps the load generation so any load already in flight is treated as
   /// superseded — its response is discarded and cannot overwrite the results
   /// of the newly scheduled search.
+  ///
+  /// Moves to a loading state while the search runs, so an active search never
+  /// renders stale or empty results as "no results" — mirroring the iOS SDK,
+  /// whose controller reports a fetching state until the query resolves.
   @internal
   void debouncedSearch(int queryLength) {
     _loadGeneration += 1;
+    value = PagedValue<Key, Value>.loading();
     _searchDebouncer(queryLength);
   }
 
@@ -56,11 +61,13 @@ mixin SearchDebounceMixin<Key, Value> on PagedValueNotifier<Key, Value> {
   @internal
   bool get hasPendingSearch => _searchDebouncer.isActive;
 
-  /// Cancels any pending search, invalidates in-flight loads, and resets the
-  /// results to an empty list.
+  /// Cancels any pending search, invalidates in-flight loads, and clears the
+  /// current results.
   ///
   /// Consider calling this when the search input is emptied, so results for an
-  /// abandoned query are neither shown nor repopulated by a late response.
+  /// abandoned query are neither shown nor repopulated by a late response. A
+  /// subsequent [debouncedSearch] shows a loading state rather than this empty
+  /// list, so the next search does not briefly render as "no results".
   void clearResults() {
     _searchDebouncer.cancel();
     // Bump the generation so an already-running load is treated as superseded

@@ -300,5 +300,21 @@ void main() {
 
       expect(controller.value.asSuccess.items, isEmpty);
     });
+
+    test('a following search shows a loading state, not the cleared list', () {
+      final controller = StreamUserListController(
+        client: client,
+        debouncePolicy: const .constant(Duration(milliseconds: 100)),
+      );
+      addTearDown(controller.dispose);
+
+      controller.clearResults();
+      expect(controller.value.asSuccess.items, isEmpty);
+
+      // Starting a search moves to a loading state rather than leaving the
+      // cleared empty list on screen (which would render as "no results").
+      controller.search('abc');
+      expect(controller.value.isSuccess, isFalse);
+    });
   });
 }
