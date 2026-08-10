@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/stream_chat.dart' hide Success;
 import 'package:stream_chat_flutter_core/src/paged_value_notifier.dart';
+import 'package:stream_chat_flutter_core/src/search_debouncer.dart';
 import 'package:stream_chat_flutter_core/src/stream_user_list_controller.dart';
 
 import 'mocks.dart';
@@ -35,7 +36,8 @@ void main() {
         return usersResponse([User(id: 'user-1')]);
       });
 
-      final controller = StreamUserListController(client: client);
+      final controller = StreamUserListController(client: client)
+        ..debouncePolicy = const SearchDebouncePolicy.constant(Duration.zero);
       addTearDown(controller.dispose);
 
       controller.search('abc');
@@ -58,7 +60,8 @@ void main() {
         return usersResponse([]);
       });
 
-      final controller = StreamUserListController(client: client);
+      final controller = StreamUserListController(client: client)
+        ..debouncePolicy = const SearchDebouncePolicy.constant(Duration.zero);
       addTearDown(controller.dispose);
 
       controller.search('a');
@@ -68,7 +71,7 @@ void main() {
       expect(queryCount, 0);
 
       // Once the debounce elapses, exactly one query fires.
-      await Future<void>.delayed(const Duration(milliseconds: 600));
+      await pumpEventQueue();
       expect(queryCount, 1);
     });
   });
@@ -174,7 +177,8 @@ void main() {
         ),
       ).thenAnswer((_) => responses[call++].future);
 
-      final controller = StreamUserListController(client: client);
+      final controller = StreamUserListController(client: client)
+        ..debouncePolicy = const SearchDebouncePolicy.constant(Duration.zero);
       addTearDown(controller.dispose);
 
       // Request A is issued and left in flight.
@@ -191,7 +195,7 @@ void main() {
 
       // The debounced search then fires and applies its own result.
       responses[1].complete(usersResponse([User(id: 'fresh')]));
-      await Future<void>.delayed(const Duration(milliseconds: 600));
+      await pumpEventQueue();
       expect(controller.value.asSuccess.items.single.id, 'fresh');
     });
   });
@@ -212,12 +216,13 @@ void main() {
       });
 
       final controller = StreamUserListController(client: client)
+        ..debouncePolicy = const SearchDebouncePolicy.constant(Duration.zero)
         ..search('ab')
         ..clearResults();
       addTearDown(controller.dispose);
 
-      // Wait past the short query's 500ms window to prove it never fires.
-      await Future<void>.delayed(const Duration(milliseconds: 600));
+      // Pump the event queue to prove the cancelled search never fires.
+      await pumpEventQueue();
       expect(queried, isFalse);
     });
 

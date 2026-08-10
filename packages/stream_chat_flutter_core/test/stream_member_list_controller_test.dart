@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/stream_chat.dart' hide Success;
+import 'package:stream_chat_flutter_core/src/search_debouncer.dart';
 import 'package:stream_chat_flutter_core/src/stream_member_list_controller.dart';
 
 import 'mocks.dart';
@@ -33,7 +34,8 @@ void main() {
         return membersResponse([Member(user: User(id: 'user-1'))]);
       });
 
-      final controller = StreamMemberListController(channel: channel);
+      final controller = StreamMemberListController(channel: channel)
+        ..debouncePolicy = const SearchDebouncePolicy.constant(Duration.zero);
       addTearDown(controller.dispose);
 
       controller.search('abc');
