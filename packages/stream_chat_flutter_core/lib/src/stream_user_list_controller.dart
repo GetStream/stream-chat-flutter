@@ -117,7 +117,7 @@ class StreamUserListController extends PagedValueNotifier<int, User> with Search
   /// base [filter]. Rapidly superseded searches are dropped, so only the latest
   /// query's results are applied.
   ///
-  /// To search on other fields, use [searchWithFilter].
+  /// To search on other fields, consider [searchWithFilter].
   void search(String query) {
     final trimmed = query.trim();
     if (trimmed.isEmpty) return searchWithFilter(filter);

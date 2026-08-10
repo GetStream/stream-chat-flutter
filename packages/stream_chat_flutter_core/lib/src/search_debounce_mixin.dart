@@ -65,7 +65,7 @@ mixin SearchDebounceMixin<Key, Value> on PagedValueNotifier<Key, Value> {
   /// Cancels any pending search, invalidates in-flight loads, and clears the
   /// current results.
   ///
-  /// Call this when the search query is cleared.
+  /// Consider calling this when the search query is cleared.
   void clearResults() {
     _searchDebouncer.cancel();
     // Bump the generation so an already-running load is treated as superseded
