@@ -31,12 +31,15 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
   );
 
   void _userNameListener() {
+    final query = _controller.text;
+    if (query == _userNameQuery) return;
+
     setState(() {
-      _userNameQuery = _controller.text;
-      _isSearchActive = _userNameQuery.isNotEmpty;
+      _userNameQuery = query;
+      _isSearchActive = query.isNotEmpty;
     });
 
-    return userListController.search(_userNameQuery);
+    userListController.search(query);
   }
 
   @override
