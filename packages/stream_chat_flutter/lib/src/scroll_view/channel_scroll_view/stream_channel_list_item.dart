@@ -498,7 +498,7 @@ class _ChannelListDeliveryStatus extends StatelessWidget {
 /// draft the subtitle previews the draft while this still dates the last sent
 /// message. Deliberately not [Channel.lastMessageAt], which survives a
 /// truncated channel.
-class ChannelLastMessageDate extends StatefulWidget {
+class ChannelLastMessageDate extends StatelessWidget {
   /// Creates a new instance of the [ChannelLastMessageDate] widget.
   ChannelLastMessageDate({
     super.key,
@@ -520,10 +520,32 @@ class ChannelLastMessageDate extends StatefulWidget {
   final DateFormatter? formatter;
 
   @override
-  State<ChannelLastMessageDate> createState() => _ChannelLastMessageDateState();
+  Widget build(BuildContext context) {
+    return _ChannelLastMessageDateContent(
+      channel: channel,
+      textStyle: textStyle,
+      formatter: formatter,
+    );
+  }
 }
 
-class _ChannelLastMessageDateState extends State<ChannelLastMessageDate> with _LastMessageResolver {
+/// Holds the resolver cache so [ChannelLastMessageDate] can stay stateless.
+class _ChannelLastMessageDateContent extends StatefulWidget {
+  const _ChannelLastMessageDateContent({
+    required this.channel,
+    this.textStyle,
+    this.formatter,
+  });
+
+  final Channel channel;
+  final TextStyle? textStyle;
+  final DateFormatter? formatter;
+
+  @override
+  State<_ChannelLastMessageDateContent> createState() => _ChannelLastMessageDateContentState();
+}
+
+class _ChannelLastMessageDateContentState extends State<_ChannelLastMessageDateContent> with _LastMessageResolver {
   @override
   Widget build(BuildContext context) {
     final channelState = widget.channel.state;
