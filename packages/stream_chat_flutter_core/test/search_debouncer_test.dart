@@ -106,4 +106,21 @@ void main() {
       expect(searchQueryLength(null), isNull);
     });
   });
+
+  group('combineFilters', () {
+    final a = Filter.equal('a', '1');
+    final b = Filter.equal('b', '2');
+
+    test('returns null when all filters are null', () {
+      expect(combineFilters([null, null]), isNull);
+    });
+
+    test('returns the sole non-null filter unwrapped', () {
+      expect(combineFilters([null, a]), a);
+    });
+
+    test('combines multiple non-null filters with and', () {
+      expect(combineFilters([a, null, b]), Filter.and([a, b]));
+    });
+  });
 }

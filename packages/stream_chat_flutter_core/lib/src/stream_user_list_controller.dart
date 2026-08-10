@@ -119,16 +119,15 @@ class StreamUserListController extends PagedValueNotifier<int, User> with Search
   ///
   /// To search on other fields, use [searchWithFilter].
   void search(String query) {
-    final trimmed = query.trim();
-    final filters = [
-      ?filter,
-      if (trimmed.isNotEmpty)
-        Filter.or([
-          Filter.autoComplete('name', trimmed),
-          Filter.autoComplete('id', trimmed),
-        ]),
-    ];
-    searchWithFilter(filters.length > 1 ? .and(filters) : filters.firstOrNull);
+    Filter? searchFilter;
+    if (query.trim() case final trimmed when trimmed.isNotEmpty) {
+      searchFilter = Filter.or([
+        Filter.autoComplete('name', trimmed),
+        Filter.autoComplete('id', trimmed),
+      ]);
+    }
+
+    searchWithFilter(combineFilters([filter, searchFilter]));
   }
 
   /// Searches with the given [filter], debounced by the search text it holds.
