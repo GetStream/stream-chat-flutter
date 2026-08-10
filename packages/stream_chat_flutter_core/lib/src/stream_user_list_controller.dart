@@ -99,8 +99,6 @@ class StreamUserListController extends PagedValueNotifier<int, User> with Search
   ///
   /// Note: This will not trigger a new query. make sure to call
   /// [doInitialLoad] after setting a new filter.
-  ///
-  /// To reload as a search query changes, consider [search].
   set filter(Filter? value) => _activeFilter = value;
 
   /// Allows for the change of the query sort used for user queries.

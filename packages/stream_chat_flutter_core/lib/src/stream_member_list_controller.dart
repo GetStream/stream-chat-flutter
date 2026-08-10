@@ -91,8 +91,6 @@ class StreamMemberListController extends PagedValueNotifier<int, Member> with Se
   ///
   /// Note: This will not trigger a new query. make sure to call
   /// [doInitialLoad] after setting a new filter.
-  ///
-  /// To reload as a search query changes, consider [search].
   set filter(Filter? value) => _activeFilter = value;
 
   /// Allows for the change of the query sort used for member queries.

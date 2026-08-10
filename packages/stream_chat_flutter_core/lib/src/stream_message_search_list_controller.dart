@@ -140,8 +140,6 @@ class StreamMessageSearchListController extends PagedValueNotifier<String, GetMe
   ///
   /// Note: This will not trigger a new query. make sure to call
   /// [doInitialLoad] after setting a new filter.
-  ///
-  /// To reload as the query changes, consider [search].
   set searchQuery(String? value) => _activeSearchQuery = value;
 
   /// Allows for the change of the query sort used for message search queries.

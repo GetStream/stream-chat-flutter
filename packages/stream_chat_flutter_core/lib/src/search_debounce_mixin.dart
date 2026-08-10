@@ -4,8 +4,8 @@ import 'package:stream_chat_flutter_core/src/search_debouncer.dart';
 
 /// Adds query-length-aware, debounced search to a [PagedValueNotifier].
 ///
-/// The mixin owns the [SearchDebouncer] and a load generation counter so a
-/// slower, older query can no longer overwrite the results of a newer one.
+/// Owns a [SearchDebouncer] and a load generation counter so a slower, older
+/// query can no longer overwrite the results of a newer one.
 ///
 /// Mixers call [debouncedSearch] from their own `search` method, and guard
 /// their [PagedValueNotifier.doInitialLoad] with [beginLoad] and [isStale]
