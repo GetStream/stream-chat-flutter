@@ -127,7 +127,7 @@ class StreamUserListController extends PagedValueNotifier<int, User> with Search
       ]);
     }
 
-    searchWithFilter(combineFilters([filter, searchFilter]));
+    searchWithFilter(filter.merge(searchFilter));
   }
 
   /// Searches with the given [filter], debounced by the search text it holds.

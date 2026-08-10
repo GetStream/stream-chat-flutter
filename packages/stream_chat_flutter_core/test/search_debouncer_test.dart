@@ -107,20 +107,25 @@ void main() {
     });
   });
 
-  group('combineFilters', () {
+  group('Filter.merge', () {
     final a = Filter.equal('a', '1');
     final b = Filter.equal('b', '2');
+    const Filter? none = null;
 
-    test('returns null when all filters are null', () {
-      expect(combineFilters([null, null]), isNull);
+    test('returns null when both are null', () {
+      expect(none.merge(none), isNull);
     });
 
-    test('returns the sole non-null filter unwrapped', () {
-      expect(combineFilters([null, a]), a);
+    test('returns the other filter when this is null', () {
+      expect(none.merge(a), a);
     });
 
-    test('combines multiple non-null filters with and', () {
-      expect(combineFilters([a, null, b]), Filter.and([a, b]));
+    test('returns this filter when other is null', () {
+      expect(a.merge(none), a);
+    });
+
+    test('ands two non-null filters', () {
+      expect(a.merge(b), Filter.and([a, b]));
     });
   });
 }

@@ -30,18 +30,18 @@ int? searchQueryLength(Filter? filter) {
   return null;
 }
 
-/// Combines the non-null [filters] with a logical AND.
-///
-/// Returns `null` when none are present, the sole filter when only one is (no
-/// redundant `$and` wrapper), and `Filter.and(...)` otherwise.
+/// AND-combination helpers for a nullable [Filter].
 @internal
-Filter? combineFilters(Iterable<Filter?> filters) {
-  final present = filters.nonNulls.toList();
-  return switch (present) {
-    [] => null,
-    [final only] => only,
-    _ => Filter.and(present),
-  };
+extension FilterMerge on Filter? {
+  /// Returns this filter ANDed with [other], or whichever of the two is
+  /// non-null (null when both are); avoids a redundant `$and` around a lone
+  /// filter.
+  Filter? merge(Filter? other) {
+    final self = this;
+    if (self == null) return other;
+    if (other == null) return self;
+    return Filter.and([self, other]);
+  }
 }
 
 /// A query-length-aware debounce policy for search input.

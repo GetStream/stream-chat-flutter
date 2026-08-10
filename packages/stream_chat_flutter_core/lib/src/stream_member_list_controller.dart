@@ -116,7 +116,7 @@ class StreamMemberListController extends PagedValueNotifier<int, Member> with Se
       searchFilter = Filter.autoComplete('name', trimmed);
     }
 
-    searchWithFilter(combineFilters([filter, searchFilter]));
+    searchWithFilter(filter.merge(searchFilter));
   }
 
   /// Searches with the given [filter], debounced by the search text it holds.
