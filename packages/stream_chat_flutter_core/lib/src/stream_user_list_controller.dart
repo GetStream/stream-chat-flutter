@@ -125,11 +125,8 @@ class StreamUserListController extends PagedValueNotifier<int, User> with Search
             Filter.autoComplete('name', query),
             Filter.autoComplete('id', query),
           ]);
-    _activeFilter = switch ([?filter, ?searchFilter]) {
-      [] => null,
-      [final only] => only,
-      final all => .and(all),
-    };
+    final filters = [?filter, ?searchFilter];
+    _activeFilter = filters.length > 1 ? .and(filters) : filters.firstOrNull;
     debouncedSearch(query.length);
   }
 
