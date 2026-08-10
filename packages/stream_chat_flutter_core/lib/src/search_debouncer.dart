@@ -16,8 +16,6 @@ class SearchDebouncePolicy {
   });
 
   /// Creates a policy that applies a single [delay] to every query length.
-  ///
-  /// Useful in tests to make debounced searches fire deterministically.
   const SearchDebouncePolicy.constant(Duration delay)
     : shortQueryMaxLength = 0,
       shortQueryDelay = delay,

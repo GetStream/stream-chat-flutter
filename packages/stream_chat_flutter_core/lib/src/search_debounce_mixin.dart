@@ -27,9 +27,6 @@ import 'package:stream_chat_flutter_core/src/search_debouncer.dart';
 /// ```
 mixin SearchDebounceMixin<Key, Value> on PagedValueNotifier<Key, Value> {
   /// The policy driving [debouncedSearch]'s length-based delays.
-  ///
-  /// Supplied by the mixing controller; tests pass a custom policy to make
-  /// debounced searches fire deterministically.
   @protected
   SearchDebouncePolicy get debouncePolicy;
 
@@ -61,8 +58,7 @@ mixin SearchDebounceMixin<Key, Value> on PagedValueNotifier<Key, Value> {
   /// Cancels any pending search, invalidates in-flight loads, and clears the
   /// current results.
   ///
-  /// Call this when the search query is cleared, so results for an abandoned
-  /// query are not repopulated by a late response.
+  /// Call this when the search query is cleared.
   void clearResults() {
     _searchDebouncer.cancel();
     // Bump the generation so an already-running load is treated as superseded
@@ -80,8 +76,7 @@ mixin SearchDebounceMixin<Key, Value> on PagedValueNotifier<Key, Value> {
   /// The current load generation, without starting a new one.
   ///
   /// Capture this at the start of a paged `loadMore` and pass it to [isStale]
-  /// before applying the result, so a page in flight when a newer search (or
-  /// [clearResults]) arrives is discarded instead of repopulating stale items.
+  /// before applying the result.
   @internal
   int get loadGeneration => _loadGeneration;
 
