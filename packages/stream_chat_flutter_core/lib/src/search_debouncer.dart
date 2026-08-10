@@ -14,8 +14,8 @@ int? searchQueryLength(Filter? filter) {
   if (filter == null) return null;
 
   final value = filter.value;
-  final isTextSearch =
-      filter.operator == '${FilterOperator.autoComplete}' || filter.operator == '${FilterOperator.query}';
+  var isTextSearch = filter.operator == '${FilterOperator.query}';
+  isTextSearch |= filter.operator == '${FilterOperator.autoComplete}';
   if (isTextSearch && value is String) return value.length;
 
   if (value is Iterable<Filter>) {
