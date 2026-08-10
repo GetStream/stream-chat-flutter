@@ -151,18 +151,17 @@ class StreamMessageSearchListController extends PagedValueNotifier<String, GetMe
   /// [doInitialLoad] after setting a new sort.
   set sort(SortOrder? value) => _activeSort = value;
 
-  /// Searches messages matching [query], debounced by its length.
+  /// Searches messages whose text matches [query], debounced by its length.
   ///
-  /// [query] becomes the active search, clearing any active message filter (the
-  /// two are mutually exclusive). An empty [query] clears the results instead of
-  /// querying, since the backend rejects empty message searches. Rapidly
-  /// superseded searches are dropped, so only the latest query's results are
-  /// applied.
+  /// [query] is applied as a full-text filter on the message text. An empty
+  /// [query] clears the results instead of querying, since the backend rejects
+  /// empty message searches. Rapidly superseded searches are dropped, so only
+  /// the latest query's results are applied.
+  ///
+  /// To search on other message fields, use [searchWithFilter].
   void search(String query) {
     if (query.isEmpty) return clearResults();
-    _activeSearchQuery = query;
-    _activeMessageFilter = null;
-    debouncedSearch(query.length);
+    searchWithFilter(Filter.query('text', query));
   }
 
   /// Searches with an explicit message [filter], debounced by the search text

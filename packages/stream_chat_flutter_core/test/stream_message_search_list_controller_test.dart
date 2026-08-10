@@ -34,8 +34,8 @@ void main() {
   }
 
   group('search', () {
-    test('queries messages with the typed query after debouncing', () async {
-      final usedQuery = Completer<String?>();
+    test('queries messages with a full-text filter after debouncing', () async {
+      final usedFilter = Completer<Filter?>();
       when(
         () => client.search(
           any(),
@@ -45,8 +45,8 @@ void main() {
           paginationParams: any(named: 'paginationParams'),
         ),
       ).thenAnswer((invocation) async {
-        final query = invocation.namedArguments[#query] as String?;
-        if (!usedQuery.isCompleted) usedQuery.complete(query);
+        final messageFilters = invocation.namedArguments[#messageFilters] as Filter?;
+        if (!usedFilter.isCompleted) usedFilter.complete(messageFilters);
         return searchResponse();
       });
 
@@ -56,7 +56,7 @@ void main() {
       controller.search('abc');
 
       // Waits for the debounced query to fire rather than a fixed timeout.
-      expect(await usedQuery.future, 'abc');
+      expect(await usedFilter.future, Filter.query('text', 'abc'));
     });
 
     test('an empty query clears results without querying', () async {
