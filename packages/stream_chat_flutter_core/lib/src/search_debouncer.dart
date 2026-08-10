@@ -30,7 +30,6 @@ int? searchQueryLength(Filter? filter) {
   return null;
 }
 
-/// AND-combination helpers for a nullable [Filter].
 @internal
 extension FilterMerge on Filter? {
   /// Returns this filter ANDed with [other], or whichever of the two is
@@ -84,11 +83,15 @@ class SearchDebouncePolicy {
 class SearchDebouncer {
   /// Creates a [SearchDebouncer] that runs [onSearch] after the delay [policy]
   /// selects for the query length elapses.
-  SearchDebouncer(Function onSearch, {SearchDebouncePolicy? policy})
-    : this._(onSearch, policy ?? const SearchDebouncePolicy());
+  SearchDebouncer(
+    Function onSearch, {
+    SearchDebouncePolicy? policy,
+  }) : this._(onSearch, policy ?? const SearchDebouncePolicy());
 
-  SearchDebouncer._(Function onSearch, SearchDebouncePolicy policy)
-    : _policy = policy,
+  SearchDebouncer._(
+    Function onSearch,
+    SearchDebouncePolicy policy,
+  ) : _policy = policy,
       _shortQuery = debounce(onSearch, policy.shortQueryDelay),
       _longQuery = debounce(onSearch, policy.defaultDelay);
 
