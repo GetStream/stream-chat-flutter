@@ -109,22 +109,21 @@ class StreamMemberListController extends PagedValueNotifier<int, Member> with Se
   /// base [filter]. Rapidly superseded searches are dropped, so only the latest
   /// query's results are applied.
   ///
-  /// To search on other fields, set [filter] directly and call [doInitialLoad].
+  /// To search on other fields, use [searchWithFilter].
   void search(String query) {
     final nameFilter = query.isEmpty ? null : Filter.autoComplete('name', query);
     final filters = [?filter, ?nameFilter];
-    _activeFilter = filters.length > 1 ? .and(filters) : filters.firstOrNull;
-    debouncedSearch(query.length);
+    searchWithFilter(filters.length > 1 ? .and(filters) : filters.firstOrNull);
   }
 
-  /// Searches with an explicit [filter], debounced by the search text it holds.
+  /// Searches with the given [filter], debounced by the search text it holds.
   ///
-  /// The [filter] becomes the active filter. When it carries a text-search
-  /// operator ([Filter.autoComplete] or [Filter.query]) the reload is debounced
-  /// by that text's length; otherwise it reloads immediately. Rapidly
-  /// superseded searches are dropped, so only the latest query's results are
-  /// applied.
-  void searchWithFilter(Filter filter) {
+  /// The [filter] becomes the active filter; a null [filter] matches all. When
+  /// it carries a text-search operator ([Filter.autoComplete] or [Filter.query])
+  /// the reload is debounced by that text's length; otherwise it reloads
+  /// immediately. Rapidly superseded searches are dropped, so only the latest
+  /// query's results are applied.
+  void searchWithFilter(Filter? filter) {
     _activeFilter = filter;
     debouncedSearch(searchQueryLength(filter));
   }
