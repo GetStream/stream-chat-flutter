@@ -28,7 +28,7 @@ import 'package:stream_chat_flutter_core/src/search_debouncer.dart';
 mixin SearchDebounceMixin<Key, Value> on PagedValueNotifier<Key, Value> {
   /// The policy driving [debouncedSearch]'s length-based delays.
   ///
-  /// Supplied by the mixing controller; overridden only in tests to make
+  /// Supplied by the mixing controller; tests pass a custom policy to make
   /// debounced searches fire deterministically.
   @protected
   SearchDebouncePolicy get debouncePolicy;
@@ -39,13 +39,10 @@ mixin SearchDebounceMixin<Key, Value> on PagedValueNotifier<Key, Value> {
 
   /// Schedules a debounced reload whose delay adapts to [queryLength].
   ///
-  /// Bumps the load generation so any load already in flight is treated as
-  /// superseded — its response is discarded and cannot overwrite the results
-  /// of the newly scheduled search.
-  ///
-  /// Moves to a loading state while the search runs, so an active search never
-  /// renders stale or empty results as "no results" — mirroring the iOS SDK,
-  /// whose controller reports a fetching state until the query resolves.
+  /// Bumps the load generation so any load already in flight is superseded: its
+  /// response is discarded and cannot overwrite the newly scheduled search.
+  /// Also moves to a loading state, so an active search is not represented by
+  /// stale or empty results until it resolves.
   @internal
   void debouncedSearch(int queryLength) {
     _loadGeneration += 1;
@@ -56,18 +53,16 @@ mixin SearchDebounceMixin<Key, Value> on PagedValueNotifier<Key, Value> {
   /// Whether a debounced search has been scheduled but has not run yet.
   ///
   /// Guard [PagedValueNotifier.doInitialLoad] with this so an immediate load
-  /// (e.g. the one a list view triggers when it first mounts) does not bypass
-  /// the debounce — the scheduled search performs the load instead.
+  /// does not bypass the debounce — the scheduled search performs the load
+  /// instead.
   @internal
   bool get hasPendingSearch => _searchDebouncer.isActive;
 
   /// Cancels any pending search, invalidates in-flight loads, and clears the
   /// current results.
   ///
-  /// Consider calling this when the search input is emptied, so results for an
-  /// abandoned query are neither shown nor repopulated by a late response. A
-  /// subsequent [debouncedSearch] shows a loading state rather than this empty
-  /// list, so the next search does not briefly render as "no results".
+  /// Call this when the search query is cleared, so results for an abandoned
+  /// query are not repopulated by a late response.
   void clearResults() {
     _searchDebouncer.cancel();
     // Bump the generation so an already-running load is treated as superseded

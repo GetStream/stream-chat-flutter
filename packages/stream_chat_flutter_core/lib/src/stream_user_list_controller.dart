@@ -117,9 +117,8 @@ class StreamUserListController extends PagedValueNotifier<int, User> with Search
   ///
   /// [query] is matched against the user name as an autocomplete filter, merged
   /// with the controller's base [filter]; an empty [query] reloads the base
-  /// [filter]. Shorter, low-selectivity queries wait longer before hitting the
-  /// backend; longer queries use the standard delay. Rapidly superseded
-  /// searches are dropped, so only the latest query's results are applied.
+  /// [filter]. Rapidly superseded searches are dropped, so only the latest
+  /// query's results are applied.
   ///
   /// To search on other fields, set [filter] directly and call [doInitialLoad].
   void search(String query) {
@@ -149,7 +148,7 @@ class StreamUserListController extends PagedValueNotifier<int, User> with Search
   @override
   Future<void> doInitialLoad() async {
     // A debounced search is already scheduled; let it perform the load instead
-    // of firing an extra, un-debounced request (e.g. on first view mount).
+    // of firing an extra, un-debounced request.
     if (hasPendingSearch) return;
 
     final generation = beginLoad();
@@ -195,8 +194,8 @@ class StreamUserListController extends PagedValueNotifier<int, User> with Search
         pagination: PaginationParams(limit: limit, offset: nextPageKey),
       );
 
-      // Drop the page if a newer search or clearResults() superseded it, so it
-      // cannot repopulate results the user has already moved on from.
+      // Drop the page if a newer search or clearResults() superseded it, so a
+      // stale page cannot repopulate the results.
       if (isStale(generation)) return;
       final users = userResponse.users;
       final previousItems = previousValue.items;

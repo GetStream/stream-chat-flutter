@@ -154,14 +154,11 @@ class StreamMessageSearchListController extends PagedValueNotifier<String, GetMe
   /// [doInitialLoad] after setting a new sort.
   set sort(SortOrder? value) => _activeSort = value;
 
-  /// Searches messages matching [query], debounced by the query length.
+  /// Searches messages matching [query], debounced by its length.
   ///
-  /// Short, low-selectivity queries wait longer before hitting the backend to
-  /// reduce load; longer queries use the standard delay. Rapidly superseded
-  /// searches are dropped, so only the latest query's results are applied.
-  ///
-  /// An empty [query] clears the results instead of querying, since the backend
-  /// rejects empty message searches.
+  /// Rapidly superseded searches are dropped, so only the latest query's
+  /// results are applied. An empty [query] clears the results instead of
+  /// querying, since the backend rejects empty message searches.
   void search(String query) {
     if (query.isEmpty) return clearResults();
     // A text search and a message filter are mutually exclusive, so drop any
@@ -174,7 +171,7 @@ class StreamMessageSearchListController extends PagedValueNotifier<String, GetMe
   @override
   Future<void> doInitialLoad() async {
     // A debounced search is already scheduled; let it perform the load instead
-    // of firing an extra, un-debounced request (e.g. on first view mount).
+    // of firing an extra, un-debounced request.
     if (hasPendingSearch) return;
 
     final generation = beginLoad();
@@ -222,8 +219,8 @@ class StreamMessageSearchListController extends PagedValueNotifier<String, GetMe
         paginationParams: PaginationParams(limit: limit, next: nextPageKey),
       );
 
-      // Drop the page if a newer search or clearResults() superseded it, so it
-      // cannot repopulate results the user has already moved on from.
+      // Drop the page if a newer search or clearResults() superseded it, so a
+      // stale page cannot repopulate the results.
       if (isStale(generation)) return;
       final results = response.results;
       final previousItems = previousValue.items;
