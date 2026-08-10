@@ -2,10 +2,11 @@ import 'package:meta/meta.dart';
 import 'package:rate_limiter/rate_limiter.dart';
 import 'package:stream_chat/stream_chat.dart' show Filter;
 
-// Wire operators of the text-search filters (`Filter.autoComplete` and
-// `Filter.query`) — the only ones a user types into incrementally.
-const _autoCompleteOperator = r'$autocomplete';
-const _queryOperator = r'$q';
+// The wire operators of the text-search filters — the only ones a user types
+// into incrementally. Read from the LLC [Filter] so they stay in sync with it
+// rather than being hardcoded.
+final _autoCompleteOperator = Filter.autoComplete('', '').operator;
+final _queryOperator = Filter.query('', '').operator;
 
 /// The length of the search text in [filter], or `null` when it holds none.
 ///
