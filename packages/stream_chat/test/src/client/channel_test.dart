@@ -5477,6 +5477,95 @@ void main() {
     );
 
     group(
+      '${EventType.channelTruncated} or ${EventType.notificationChannelTruncated}',
+      () {
+        final initialLastMessageAt = DateTime.now();
+        const channelId = 'test-channel-id';
+        const channelType = 'test-channel-type';
+        late Channel channel;
+
+        setUp(() {
+          final channelState =
+              _generateChannelState(
+                channelId,
+                channelType,
+                mockChannelConfig: true,
+                lastMessageAt: initialLastMessageAt,
+              ).copyWith(
+                messages: [
+                  Message(
+                    id: 'test-message-id',
+                    user: client.state.currentUser,
+                    createdAt: initialLastMessageAt,
+                  ),
+                ],
+              );
+
+          channel = Channel.fromState(client, channelState);
+        });
+
+        tearDown(() => channel.dispose());
+
+        test('should clear messages and apply the event channel fields', () async {
+          expect(channel.state!.messages, isNotEmpty);
+          expect(channel.lastMessageAt, equals(initialLastMessageAt));
+          expect(channel.truncatedAt, isNull);
+
+          final truncatedAt = initialLastMessageAt.add(const Duration(seconds: 3));
+          final truncatedEvent = Event(
+            cid: channel.cid,
+            type: EventType.channelTruncated,
+            channel: ChannelModel(
+              id: channelId,
+              type: channelType,
+              lastMessageAt: truncatedAt,
+              truncatedAt: truncatedAt,
+            ),
+          );
+
+          client.addEvent(truncatedEvent);
+
+          // Wait for the event to get processed
+          await Future.delayed(Duration.zero);
+
+          expect(channel.state!.messages, isEmpty);
+          expect(channel.truncatedAt, equals(truncatedAt));
+          expect(channel.lastMessageAt, equals(truncatedAt));
+        });
+
+        test('should keep the system message sent with the truncation', () async {
+          final truncatedAt = initialLastMessageAt.add(const Duration(seconds: 3));
+          final systemMessage = Message(
+            id: 'system-message-id',
+            text: 'Channel truncated',
+            createdAt: truncatedAt,
+          );
+
+          final truncatedEvent = Event(
+            cid: channel.cid,
+            type: EventType.notificationChannelTruncated,
+            message: systemMessage,
+            channel: ChannelModel(
+              id: channelId,
+              type: channelType,
+              lastMessageAt: truncatedAt,
+              truncatedAt: truncatedAt,
+            ),
+          );
+
+          client.addEvent(truncatedEvent);
+
+          // Wait for the event to get processed
+          await Future.delayed(Duration.zero);
+
+          expect(channel.state!.messages, hasLength(1));
+          expect(channel.state!.messages.first.id, equals(systemMessage.id));
+          expect(channel.lastMessageAt, equals(truncatedAt));
+        });
+      },
+    );
+
+    group(
       EventType.messageUpdated,
       () {
         const channelId = 'test-channel-id';
