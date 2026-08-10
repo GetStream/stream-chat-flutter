@@ -153,13 +153,13 @@ class StreamMessageSearchListController extends PagedValueNotifier<String, GetMe
 
   /// Searches messages matching [query], debounced by its length.
   ///
-  /// Rapidly superseded searches are dropped, so only the latest query's
-  /// results are applied. An empty [query] clears the results instead of
-  /// querying, since the backend rejects empty message searches.
+  /// [query] becomes the active search, clearing any active message filter (the
+  /// two are mutually exclusive). An empty [query] clears the results instead of
+  /// querying, since the backend rejects empty message searches. Rapidly
+  /// superseded searches are dropped, so only the latest query's results are
+  /// applied.
   void search(String query) {
     if (query.isEmpty) return clearResults();
-    // A text search and a message filter are mutually exclusive, so drop any
-    // active message filter before searching by query.
     _activeSearchQuery = query;
     _activeMessageFilter = null;
     debouncedSearch(query.length);
