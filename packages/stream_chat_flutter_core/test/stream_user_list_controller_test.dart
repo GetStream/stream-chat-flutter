@@ -119,6 +119,62 @@ void main() {
     });
   });
 
+  group('searchWithFilter', () {
+    test('debounces a filter that carries search text', () async {
+      final usedFilter = Completer<Filter?>();
+      when(
+        () => client.queryUsers(
+          filter: any(named: 'filter'),
+          sort: any(named: 'sort'),
+          presence: any(named: 'presence'),
+          pagination: any(named: 'pagination'),
+        ),
+      ).thenAnswer((invocation) async {
+        final filter = invocation.namedArguments[#filter] as Filter?;
+        if (!usedFilter.isCompleted) usedFilter.complete(filter);
+        return usersResponse([]);
+      });
+
+      final controller = StreamUserListController(
+        client: client,
+        debouncePolicy: const .constant(Duration.zero),
+      );
+      addTearDown(controller.dispose);
+
+      final filter = Filter.and([
+        Filter.autoComplete('name', 'jo'),
+        Filter.notEqual('id', 'me'),
+      ]);
+      controller.searchWithFilter(filter);
+
+      expect(await usedFilter.future, filter);
+    });
+
+    test('runs a filter with no search text immediately', () async {
+      var queryCount = 0;
+      when(
+        () => client.queryUsers(
+          filter: any(named: 'filter'),
+          sort: any(named: 'sort'),
+          presence: any(named: 'presence'),
+          pagination: any(named: 'pagination'),
+        ),
+      ).thenAnswer((_) async {
+        queryCount += 1;
+        return usersResponse([]);
+      });
+
+      // Default policy (500ms) — a non-text filter must not wait for it.
+      final controller = StreamUserListController(client: client);
+      addTearDown(controller.dispose);
+
+      controller.searchWithFilter(Filter.equal('id', 'user-1'));
+      await pumpEventQueue();
+
+      expect(queryCount, 1);
+    });
+  });
+
   group('superseded results', () {
     test('a slower earlier load does not overwrite a newer load', () async {
       final responses = <Completer<QueryUsersResponse>>[

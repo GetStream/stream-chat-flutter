@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:meta/meta.dart';
 import 'package:stream_chat_flutter_core/src/paged_value_notifier.dart';
 import 'package:stream_chat_flutter_core/src/search_debouncer.dart';
@@ -34,16 +36,22 @@ mixin SearchDebounceMixin<Key, Value> on PagedValueNotifier<Key, Value> {
 
   int _loadGeneration = 0;
 
-  /// Schedules a debounced reload whose delay adapts to [queryLength].
+  /// Schedules a reload, debounced by [queryLength]. A null [queryLength] — a
+  /// query with no debounce-able text — reloads immediately.
   ///
   /// Bumps the load generation so any load already in flight is superseded: its
   /// response is discarded and cannot overwrite the newly scheduled search.
   /// Also moves to a loading state, so an active search is not represented by
   /// stale or empty results until it resolves.
   @internal
-  void debouncedSearch(int queryLength) {
+  void debouncedSearch(int? queryLength) {
     _loadGeneration += 1;
     value = PagedValue<Key, Value>.loading();
+    if (queryLength == null) {
+      _searchDebouncer.cancel();
+      unawaited(doInitialLoad());
+      return;
+    }
     _searchDebouncer(queryLength);
   }
 

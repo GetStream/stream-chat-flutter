@@ -6,6 +6,7 @@ import 'package:stream_chat/stream_chat.dart' hide Success;
 import 'package:stream_chat_flutter_core/src/paged_value_notifier.dart';
 import 'package:stream_chat_flutter_core/src/search_debounce_mixin.dart';
 import 'package:stream_chat_flutter_core/src/search_debouncer.dart';
+import 'package:stream_chat_flutter_core/src/search_query_length.dart';
 
 /// The default channel page limit to load.
 const defaultMessageSearchPagedLimit = 10;
@@ -163,6 +164,20 @@ class StreamMessageSearchListController extends PagedValueNotifier<String, GetMe
     _activeSearchQuery = query;
     _activeMessageFilter = null;
     debouncedSearch(query.length);
+  }
+
+  /// Searches with an explicit message [filter], debounced by the search text
+  /// it holds.
+  ///
+  /// The [filter] becomes the active message filter, clearing any active search
+  /// query. When it carries a text-search operator ([Filter.autoComplete] or
+  /// [Filter.query]) the reload is debounced by that text's length; otherwise
+  /// it reloads immediately. Rapidly superseded searches are dropped, so only
+  /// the latest query's results are applied.
+  void searchWithFilter(Filter filter) {
+    _activeMessageFilter = filter;
+    _activeSearchQuery = null;
+    debouncedSearch(searchQueryLength(filter));
   }
 
   @override
