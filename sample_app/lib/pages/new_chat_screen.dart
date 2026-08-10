@@ -50,13 +50,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
       _isSearchActive = _userNameQuery.isNotEmpty;
     });
 
-    return userListController.search(
-      _userNameQuery,
-      filter: Filter.and([
-        if (_userNameQuery.isNotEmpty) Filter.autoComplete('name', _userNameQuery),
-        Filter.notEqual('id', StreamChat.of(context).currentUser!.id),
-      ]),
-    );
+    return userListController.search(_userNameQuery);
   }
 
   @override

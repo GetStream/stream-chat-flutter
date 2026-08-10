@@ -53,6 +53,7 @@ class _ChannelList extends State<ChannelList> {
     _controller.removeListener(_channelQueryListener);
     _controller.dispose();
     _scrollController.dispose();
+    _messageSearchListController.dispose();
     _channelListController.dispose();
     super.dispose();
   }

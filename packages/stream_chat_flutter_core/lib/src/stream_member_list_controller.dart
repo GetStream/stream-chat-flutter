@@ -97,16 +97,23 @@ class StreamMemberListController extends PagedValueNotifier<int, Member> with Se
   /// [doInitialLoad] after setting a new sort.
   set sort(SortOrder<Member>? value) => _activeSort = value;
 
-  /// Searches members matching [query], debounced by the query length.
+  /// Searches members whose name matches [query], debounced by its length.
   ///
-  /// [query] selects the debounce delay by its length — short, low-selectivity
-  /// queries wait longer before hitting the backend to reduce load, longer
-  /// queries use the standard delay. When [filter] is provided it becomes the
-  /// active filter for the reload; otherwise the current filter is reused.
-  /// Rapidly superseded searches are dropped, so only the latest query's
-  /// results are applied.
-  void search(String query, {Filter? filter}) {
-    if (filter != null) _activeFilter = filter;
+  /// [query] is matched against the member name as an autocomplete filter,
+  /// merged with the controller's base [filter]; an empty [query] reloads the
+  /// base [filter]. Shorter, low-selectivity queries wait longer before hitting
+  /// the backend; longer queries use the standard delay. Rapidly superseded
+  /// searches are dropped, so only the latest query's results are applied.
+  ///
+  /// To search on other fields, set [filter] directly and call [doInitialLoad].
+  void search(String query) {
+    final nameFilter = query.isEmpty ? null : Filter.autoComplete('name', query);
+    _activeFilter = switch ((filter, nameFilter)) {
+      (final base?, final name?) => Filter.and([base, name]),
+      (final base?, _) => base,
+      (_, final name?) => name,
+      _ => null,
+    };
     debouncedSearch(query.length);
   }
 

@@ -63,7 +63,7 @@ class _AddMembersSheetState extends State<AddMembersSheet> {
   late final StreamUserListController _userListController = StreamUserListController(
     client: _client,
     limit: 25,
-    filter: _filter(query: ''),
+    filter: _baseFilter(),
     sort: const [SortOption<User>.asc(UserSortKey.name)],
   );
 
@@ -79,16 +79,15 @@ class _AddMembersSheetState extends State<AddMembersSheet> {
 
   bool get _canConfirm => _selectedIds.isNotEmpty && !_saving;
 
-  Filter _filter({required String query}) {
+  // Excludes the current user and existing channel members from the directory
+  // search — they can't be added again.
+  Filter _baseFilter() {
     final excludedIds = <String>{
       if (_currentUserId case final id?) id,
       for (final member in _channel.state!.members)
         if (member.userId case final id?) id,
     };
-    return Filter.and([
-      if (query.isNotEmpty) Filter.autoComplete('name', query),
-      Filter.notIn('id', excludedIds.toList()),
-    ]);
+    return Filter.notIn('id', excludedIds.toList());
   }
 
   void _onSearchChanged() {
@@ -96,7 +95,7 @@ class _AddMembersSheetState extends State<AddMembersSheet> {
     if (next == _query) return;
 
     setState(() => _query = next);
-    return _userListController.search(next, filter: _filter(query: next));
+    return _userListController.search(next);
   }
 
   @override

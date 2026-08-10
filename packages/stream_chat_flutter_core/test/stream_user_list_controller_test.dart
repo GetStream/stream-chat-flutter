@@ -38,11 +38,10 @@ void main() {
       final controller = StreamUserListController(client: client);
       addTearDown(controller.dispose);
 
-      final filter = Filter.autoComplete('name', 'abc');
-      controller.search('abc', filter: filter);
+      controller.search('abc');
 
       // Waits for the debounced query to fire rather than a fixed timeout.
-      expect(await usedFilter.future, filter);
+      expect(await usedFilter.future, Filter.autoComplete('name', 'abc'));
     });
 
     test('doInitialLoad does not query while a search is pending', () async {
@@ -62,7 +61,7 @@ void main() {
       final controller = StreamUserListController(client: client);
       addTearDown(controller.dispose);
 
-      controller.search('a', filter: Filter.autoComplete('name', 'a'));
+      controller.search('a');
       // An immediate load (e.g. a list view mounting) must not fire its own
       // request while the debounced search is scheduled.
       await controller.doInitialLoad();
@@ -157,7 +156,43 @@ void main() {
       page.complete(usersResponse([User(id: 'page-2')]));
       await more;
 
+      expect(controller.value.asSuccess.items, isEmpty);
+    });
+
+    test('a search invalidates a load already in flight', () async {
+      final responses = <Completer<QueryUsersResponse>>[
+        Completer<QueryUsersResponse>(),
+        Completer<QueryUsersResponse>(),
+      ];
+      var call = 0;
+      when(
+        () => client.queryUsers(
+          filter: any(named: 'filter'),
+          sort: any(named: 'sort'),
+          presence: any(named: 'presence'),
+          pagination: any(named: 'pagination'),
+        ),
+      ).thenAnswer((_) => responses[call++].future);
+
+      final controller = StreamUserListController(client: client);
+      addTearDown(controller.dispose);
+
+      // Request A is issued and left in flight.
+      final inFlight = controller.doInitialLoad();
+      // A new search is scheduled while A is still in flight; it must
+      // supersede A so its response can no longer be applied.
+      controller.search('abc');
+
+      // A completes during the new search's debounce window; its result is
+      // dropped rather than briefly shown.
+      responses[0].complete(usersResponse([User(id: 'stale')]));
+      await inFlight;
       expect(controller.value.isSuccess, isFalse);
+
+      // The debounced search then fires and applies its own result.
+      responses[1].complete(usersResponse([User(id: 'fresh')]));
+      await Future<void>.delayed(const Duration(milliseconds: 600));
+      expect(controller.value.asSuccess.items.single.id, 'fresh');
     });
   });
 
@@ -177,7 +212,7 @@ void main() {
       });
 
       final controller = StreamUserListController(client: client)
-        ..search('ab', filter: Filter.autoComplete('name', 'ab'))
+        ..search('ab')
         ..clearResults();
       addTearDown(controller.dispose);
 
@@ -206,7 +241,7 @@ void main() {
       response.complete(usersResponse([User(id: 'stale')]));
       await load;
 
-      expect(controller.value.isSuccess, isFalse);
+      expect(controller.value.asSuccess.items, isEmpty);
     });
   });
 }

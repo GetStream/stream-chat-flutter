@@ -31,8 +31,15 @@ mixin SearchDebounceMixin<Key, Value> on PagedValueNotifier<Key, Value> {
   int _loadGeneration = 0;
 
   /// Schedules a debounced reload whose delay adapts to [queryLength].
+  ///
+  /// Bumps the load generation so any load already in flight is treated as
+  /// superseded — its response is discarded and cannot overwrite the results
+  /// of the newly scheduled search.
   @internal
-  void debouncedSearch(int queryLength) => _searchDebouncer(queryLength);
+  void debouncedSearch(int queryLength) {
+    _loadGeneration += 1;
+    _searchDebouncer(queryLength);
+  }
 
   /// Whether a debounced search has been scheduled but has not run yet.
   ///
@@ -42,7 +49,8 @@ mixin SearchDebounceMixin<Key, Value> on PagedValueNotifier<Key, Value> {
   @internal
   bool get hasPendingSearch => _searchDebouncer.isActive;
 
-  /// Cancels any pending or in-flight search and clears the current results.
+  /// Cancels any pending search, invalidates in-flight loads, and resets the
+  /// results to an empty list.
   ///
   /// Consider calling this when the search input is emptied, so results for an
   /// abandoned query are neither shown nor repopulated by a late response.
@@ -51,7 +59,7 @@ mixin SearchDebounceMixin<Key, Value> on PagedValueNotifier<Key, Value> {
     // Bump the generation so an already-running load is treated as superseded
     // and cannot repopulate the cleared results when its response arrives.
     _loadGeneration += 1;
-    value = PagedValue<Key, Value>.loading();
+    value = PagedValue<Key, Value>(items: []);
   }
 
   /// Marks the start of an initial load and returns its generation token.
@@ -73,6 +81,7 @@ mixin SearchDebounceMixin<Key, Value> on PagedValueNotifier<Key, Value> {
   @internal
   bool isStale(int generation) => generation != _loadGeneration;
 
+  /// Cancels any pending debounced search before disposing the notifier.
   @override
   void dispose() {
     _searchDebouncer.cancel();

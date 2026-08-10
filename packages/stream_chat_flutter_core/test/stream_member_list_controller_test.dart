@@ -36,11 +36,10 @@ void main() {
       final controller = StreamMemberListController(channel: channel);
       addTearDown(controller.dispose);
 
-      final filter = Filter.autoComplete('name', 'abc');
-      controller.search('abc', filter: filter);
+      controller.search('abc');
 
       // Waits for the debounced query to fire rather than a fixed timeout.
-      expect(await usedFilter.future, filter);
+      expect(await usedFilter.future, Filter.autoComplete('name', 'abc'));
     });
   });
 
