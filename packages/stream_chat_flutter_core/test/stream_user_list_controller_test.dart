@@ -77,6 +77,50 @@ void main() {
       await pumpEventQueue();
       expect(queryCount, 1);
     });
+
+    test('coalesces rapid searches into a single debounced query', () async {
+      var queryCount = 0;
+      Filter? lastFilter;
+      final fired = Completer<void>();
+      when(
+        () => client.queryUsers(
+          filter: any(named: 'filter'),
+          sort: any(named: 'sort'),
+          presence: any(named: 'presence'),
+          pagination: any(named: 'pagination'),
+        ),
+      ).thenAnswer((invocation) async {
+        queryCount += 1;
+        lastFilter = invocation.namedArguments[#filter] as Filter?;
+        if (!fired.isCompleted) fired.complete();
+        return usersResponse([]);
+      });
+
+      final controller = StreamUserListController(
+        client: client,
+        debouncePolicy: const .constant(Duration(milliseconds: 100)),
+      );
+      addTearDown(controller.dispose);
+
+      // Rapid keystrokes, all within the debounce window.
+      controller
+        ..search('a')
+        ..search('ab')
+        ..search('abc');
+
+      // Nothing fires before the delay elapses (timers never fire early).
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+      expect(queryCount, 0);
+
+      // The window elapses and exactly one query fires — for the latest term.
+      await fired.future;
+      expect(queryCount, 1);
+      expect(lastFilter, Filter.autoComplete('name', 'abc'));
+
+      // No further query fires after the coalesced one.
+      await Future<void>.delayed(const Duration(milliseconds: 150));
+      expect(queryCount, 1);
+    });
   });
 
   group('superseded results', () {

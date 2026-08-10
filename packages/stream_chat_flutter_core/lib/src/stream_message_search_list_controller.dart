@@ -37,7 +37,7 @@ class StreamMessageSearchListController extends PagedValueNotifier<String, GetMe
     this.searchQuery,
     this.sort,
     this.limit = defaultMessageSearchPagedLimit,
-    @visibleForTesting this.debouncePolicy = const .new(),
+    @visibleForTesting this.debouncePolicy = const SearchDebouncePolicy(),
   }) : assert(
          messageFilter != null || searchQuery != null,
          'Either messageFilter or searchQuery must be provided',
@@ -61,7 +61,7 @@ class StreamMessageSearchListController extends PagedValueNotifier<String, GetMe
     this.searchQuery,
     this.sort,
     this.limit = defaultMessageSearchPagedLimit,
-    @visibleForTesting this.debouncePolicy = const .new(),
+    @visibleForTesting this.debouncePolicy = const SearchDebouncePolicy(),
   }) : assert(
          messageFilter != null || searchQuery != null,
          'Either messageFilter or searchQuery must be provided',

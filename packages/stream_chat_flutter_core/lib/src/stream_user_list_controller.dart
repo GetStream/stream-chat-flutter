@@ -44,7 +44,7 @@ class StreamUserListController extends PagedValueNotifier<int, User> with Search
     this.sort = defaultUserListSort,
     this.presence = true,
     this.limit = defaultUserPagedLimit,
-    @visibleForTesting this.debouncePolicy = const .new(),
+    @visibleForTesting this.debouncePolicy = const SearchDebouncePolicy(),
   }) : _activeFilter = filter,
        _activeSort = sort,
        super(const PagedValue.loading());
@@ -57,7 +57,7 @@ class StreamUserListController extends PagedValueNotifier<int, User> with Search
     this.sort = defaultUserListSort,
     this.presence = true,
     this.limit = defaultUserPagedLimit,
-    @visibleForTesting this.debouncePolicy = const .new(),
+    @visibleForTesting this.debouncePolicy = const SearchDebouncePolicy(),
   }) : _activeFilter = filter,
        _activeSort = sort;
 

@@ -40,7 +40,7 @@ class StreamMemberListController extends PagedValueNotifier<int, Member> with Se
     this.filter,
     this.sort = defaultMemberListSort,
     this.limit = defaultMemberPagedLimit,
-    @visibleForTesting this.debouncePolicy = const .new(),
+    @visibleForTesting this.debouncePolicy = const SearchDebouncePolicy(),
   }) : _activeFilter = filter,
        _activeSort = sort,
        super(const PagedValue.loading());
@@ -52,7 +52,7 @@ class StreamMemberListController extends PagedValueNotifier<int, Member> with Se
     this.filter,
     this.sort = defaultMemberListSort,
     this.limit = defaultMemberPagedLimit,
-    @visibleForTesting this.debouncePolicy = const .new(),
+    @visibleForTesting this.debouncePolicy = const SearchDebouncePolicy(),
   }) : _activeFilter = filter,
        _activeSort = sort;
 
