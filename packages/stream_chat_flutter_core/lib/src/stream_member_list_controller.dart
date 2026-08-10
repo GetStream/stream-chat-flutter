@@ -112,11 +112,10 @@ class StreamMemberListController extends PagedValueNotifier<int, Member> with Se
   /// To search on other fields, set [filter] directly and call [doInitialLoad].
   void search(String query) {
     final nameFilter = query.isEmpty ? null : Filter.autoComplete('name', query);
-    _activeFilter = switch ((filter, nameFilter)) {
-      (final base?, final name?) => .and([base, name]),
-      (final base?, _) => base,
-      (_, final name?) => name,
-      _ => null,
+    _activeFilter = switch ([?filter, ?nameFilter]) {
+      [] => null,
+      [final only] => only,
+      final all => .and(all),
     };
     debouncedSearch(query.length);
   }
