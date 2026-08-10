@@ -1,9 +1,11 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:meta/meta.dart';
 import 'package:stream_chat/stream_chat.dart' hide Success;
 import 'package:stream_chat_flutter_core/src/paged_value_notifier.dart';
 import 'package:stream_chat_flutter_core/src/search_debounce_mixin.dart';
+import 'package:stream_chat_flutter_core/src/search_debouncer.dart';
 
 /// The default channel page limit to load.
 const defaultMessageSearchPagedLimit = 10;
@@ -35,6 +37,7 @@ class StreamMessageSearchListController extends PagedValueNotifier<String, GetMe
     this.searchQuery,
     this.sort,
     this.limit = defaultMessageSearchPagedLimit,
+    @visibleForTesting this.debouncePolicy = const .new(),
   }) : assert(
          messageFilter != null || searchQuery != null,
          'Either messageFilter or searchQuery must be provided',
@@ -58,6 +61,7 @@ class StreamMessageSearchListController extends PagedValueNotifier<String, GetMe
     this.searchQuery,
     this.sort,
     this.limit = defaultMessageSearchPagedLimit,
+    @visibleForTesting this.debouncePolicy = const .new(),
   }) : assert(
          messageFilter != null || searchQuery != null,
          'Either messageFilter or searchQuery must be provided',
@@ -70,6 +74,10 @@ class StreamMessageSearchListController extends PagedValueNotifier<String, GetMe
        _activeMessageFilter = messageFilter,
        _activeSearchQuery = searchQuery,
        _activeSort = sort;
+
+  @override
+  @visibleForTesting
+  final SearchDebouncePolicy debouncePolicy;
 
   /// The client to use for the message search.
   final StreamChatClient client;

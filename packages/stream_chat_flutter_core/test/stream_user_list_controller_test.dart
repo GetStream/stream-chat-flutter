@@ -4,7 +4,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/stream_chat.dart' hide Success;
 import 'package:stream_chat_flutter_core/src/paged_value_notifier.dart';
-import 'package:stream_chat_flutter_core/src/search_debouncer.dart';
 import 'package:stream_chat_flutter_core/src/stream_user_list_controller.dart';
 
 import 'mocks.dart';
@@ -36,8 +35,10 @@ void main() {
         return usersResponse([User(id: 'user-1')]);
       });
 
-      final controller = StreamUserListController(client: client)
-        ..debouncePolicy = const SearchDebouncePolicy.constant(Duration.zero);
+      final controller = StreamUserListController(
+        client: client,
+        debouncePolicy: const .constant(Duration.zero),
+      );
       addTearDown(controller.dispose);
 
       controller.search('abc');
@@ -60,8 +61,10 @@ void main() {
         return usersResponse([]);
       });
 
-      final controller = StreamUserListController(client: client)
-        ..debouncePolicy = const SearchDebouncePolicy.constant(Duration.zero);
+      final controller = StreamUserListController(
+        client: client,
+        debouncePolicy: const .constant(Duration.zero),
+      );
       addTearDown(controller.dispose);
 
       controller.search('a');
@@ -177,8 +180,10 @@ void main() {
         ),
       ).thenAnswer((_) => responses[call++].future);
 
-      final controller = StreamUserListController(client: client)
-        ..debouncePolicy = const SearchDebouncePolicy.constant(Duration.zero);
+      final controller = StreamUserListController(
+        client: client,
+        debouncePolicy: const .constant(Duration.zero),
+      );
       addTearDown(controller.dispose);
 
       // Request A is issued and left in flight.
@@ -215,10 +220,13 @@ void main() {
         return usersResponse([]);
       });
 
-      final controller = StreamUserListController(client: client)
-        ..debouncePolicy = const SearchDebouncePolicy.constant(Duration.zero)
-        ..search('ab')
-        ..clearResults();
+      final controller =
+          StreamUserListController(
+              client: client,
+              debouncePolicy: const .constant(Duration.zero),
+            )
+            ..search('ab')
+            ..clearResults();
       addTearDown(controller.dispose);
 
       // Pump the event queue to prove the cancelled search never fires.

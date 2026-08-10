@@ -28,10 +28,10 @@ import 'package:stream_chat_flutter_core/src/search_debouncer.dart';
 mixin SearchDebounceMixin<Key, Value> on PagedValueNotifier<Key, Value> {
   /// The policy driving [debouncedSearch]'s length-based delays.
   ///
-  /// Defaults to the standard timing; set only in tests to make debounced
-  /// searches fire deterministically. Must be set before the first search.
-  @visibleForTesting
-  SearchDebouncePolicy debouncePolicy = const SearchDebouncePolicy();
+  /// Supplied by the mixing controller; overridden only in tests to make
+  /// debounced searches fire deterministically.
+  @protected
+  SearchDebouncePolicy get debouncePolicy;
 
   late final _searchDebouncer = SearchDebouncer(doInitialLoad, policy: debouncePolicy);
 

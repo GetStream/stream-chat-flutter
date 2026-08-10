@@ -45,7 +45,7 @@ class SearchDebouncer {
   /// selects for the query length elapses.
   SearchDebouncer(
     Function onSearch, {
-    SearchDebouncePolicy policy = const SearchDebouncePolicy(),
+    SearchDebouncePolicy policy = const .new(),
   }) : _policy = policy,
        _shortQuery = debounce(onSearch, policy.shortQueryDelay),
        _longQuery = debounce(onSearch, policy.defaultDelay);

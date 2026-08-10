@@ -2,9 +2,11 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:collection/collection.dart';
+import 'package:meta/meta.dart';
 import 'package:stream_chat/stream_chat.dart' hide Success;
 import 'package:stream_chat_flutter_core/src/paged_value_notifier.dart';
 import 'package:stream_chat_flutter_core/src/search_debounce_mixin.dart';
+import 'package:stream_chat_flutter_core/src/search_debouncer.dart';
 
 /// The default channel page limit to load.
 const defaultUserPagedLimit = 10;
@@ -42,6 +44,7 @@ class StreamUserListController extends PagedValueNotifier<int, User> with Search
     this.sort = defaultUserListSort,
     this.presence = true,
     this.limit = defaultUserPagedLimit,
+    @visibleForTesting this.debouncePolicy = const .new(),
   }) : _activeFilter = filter,
        _activeSort = sort,
        super(const PagedValue.loading());
@@ -54,8 +57,13 @@ class StreamUserListController extends PagedValueNotifier<int, User> with Search
     this.sort = defaultUserListSort,
     this.presence = true,
     this.limit = defaultUserPagedLimit,
+    @visibleForTesting this.debouncePolicy = const .new(),
   }) : _activeFilter = filter,
        _activeSort = sort;
+
+  @override
+  @visibleForTesting
+  final SearchDebouncePolicy debouncePolicy;
 
   /// The client to use for the channels list.
   final StreamChatClient client;
@@ -117,7 +125,7 @@ class StreamUserListController extends PagedValueNotifier<int, User> with Search
   void search(String query) {
     final nameFilter = query.isEmpty ? null : Filter.autoComplete('name', query);
     _activeFilter = switch ((filter, nameFilter)) {
-      (final base?, final name?) => Filter.and([base, name]),
+      (final base?, final name?) => .and([base, name]),
       (final base?, _) => base,
       (_, final name?) => name,
       _ => null,
