@@ -120,11 +120,12 @@ class StreamMemberListController extends PagedValueNotifier<int, Member> with Se
 
   /// Searches with the given [filter], debounced by the search text it holds.
   ///
-  /// The [filter] becomes the active filter; a null [filter] matches all. When
-  /// it carries a text-search operator ([Filter.autoComplete] or [Filter.query])
-  /// the reload is debounced by that text's length; otherwise it reloads
-  /// immediately. Rapidly superseded searches are dropped, so only the latest
-  /// query's results are applied.
+  /// Unlike [search], the [filter] replaces the controller's base filter rather
+  /// than narrowing it; merge the two yourself to keep the base scope. A null
+  /// [filter] matches all. When it carries a text-search operator
+  /// ([Filter.autoComplete] or [Filter.query]) the reload is debounced by that
+  /// text's length; otherwise it reloads immediately. Rapidly superseded
+  /// searches are dropped, so only the latest query's results are applied.
   void searchWithFilter(Filter? filter) {
     _activeFilter = filter;
     debouncedSearch(searchQueryLength(filter));
