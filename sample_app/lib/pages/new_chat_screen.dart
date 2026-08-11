@@ -33,7 +33,11 @@ class _NewChatScreenState extends State<NewChatScreen> {
   Filter _filter({String query = ''}) {
     return Filter.and([
       Filter.notEqual('id', StreamChat.of(context).currentUser!.id),
-      if (query.isNotEmpty) Filter.autoComplete('name', query),
+      if (query.isNotEmpty)
+        Filter.or([
+          Filter.autoComplete('name', query),
+          Filter.autoComplete('id', query),
+        ]),
     ]);
   }
 
@@ -127,8 +131,8 @@ class _NewChatScreenState extends State<NewChatScreen> {
   void dispose() {
     _searchFocusNode.dispose();
     _messageInputFocusNode.dispose();
-    _controller.clear();
     _controller.removeListener(_userNameListener);
+    _controller.clear();
     _controller.dispose();
     userListController.dispose();
     super.dispose();

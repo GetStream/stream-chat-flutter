@@ -90,7 +90,11 @@ class _AddMembersSheetState extends State<AddMembersSheet> {
     };
     return Filter.and([
       Filter.notIn('id', excludedIds.toList()),
-      if (query.isNotEmpty) Filter.autoComplete('name', query),
+      if (query.isNotEmpty)
+        Filter.or([
+          Filter.autoComplete('name', query),
+          Filter.autoComplete('id', query),
+        ]),
     ]);
   }
 
