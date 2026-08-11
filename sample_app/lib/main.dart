@@ -2,16 +2,12 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:marionette_flutter/marionette_flutter.dart';
 import 'package:sample_app/app.dart';
 import 'package:sample_app/firebase_options.dart';
 import 'package:sample_app/utils/platform_support.dart';
 
 Future<void> main() async {
-  // Set up edge-to-edge UI.
-  SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-
   // In debug mode, initialize the Marionette binding so AI agents can drive
   // the running app over MCP (inspect widgets, tap, type, scroll, screenshot).
   // Falls back to the standard binding in release/profile builds.

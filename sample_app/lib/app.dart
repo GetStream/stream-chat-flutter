@@ -5,7 +5,6 @@ import 'dart:async';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart' hide Message;
 import 'package:go_router/go_router.dart';
 import 'package:media_kit/media_kit.dart';
@@ -203,45 +202,42 @@ class _StreamChatSampleAppState extends State<StreamChatSampleApp>
                         GlobalMaterialLocalizations.delegate,
                         GlobalWidgetsLocalizations.delegate,
                       ],
-                      builder: (context, child) => _EdgeToEdgeSystemBars(
-                        themeMode: config.themeMode,
-                        child: ListenableBuilder(
-                          listenable: authController,
-                          builder: (context, cachedChild) {
-                            final wrapped = Directionality(
-                              textDirection: config.forceRtl ? .rtl : .ltr,
-                              child: cachedChild ?? const SizedBox.shrink(),
-                            );
+                      builder: (context, child) => ListenableBuilder(
+                        listenable: authController,
+                        builder: (context, cachedChild) {
+                          final wrapped = Directionality(
+                            textDirection: config.forceRtl ? .rtl : .ltr,
+                            child: cachedChild ?? const SizedBox.shrink(),
+                          );
 
-                            // StreamChat stays mounted as long as a client
-                            // exists so `StreamChat.of(context)` remains
-                            // valid across logout transitions.
-                            final client = authController.client;
-                            if (client != null) {
-                              return StreamChat(
-                                client: client,
-                                // Null in production → the SDK uses the real
-                                // connectivity monitor; set only by e2e tests.
-                                connectivityStream: authController.debugConnectivityStream,
-                                componentBuilders: StreamComponentBuilders(
-                                  extensions: streamChatComponentBuilders(
-                                    messageItem: customMessageItemBuilder,
-                                    messageComposer: locationAwareMessageComposer,
-                                    videoPlayer: (context, props) => SampleAppVideoPlayer(props: props),
-                                  ),
+                          // StreamChat stays mounted as long as a client
+                          // exists so `StreamChat.of(context)` remains
+                          // valid across logout transitions.
+                          final client = authController.client;
+                          if (client != null) {
+                            return StreamChat(
+                              client: client,
+                              // Null in production → the SDK uses the real
+                              // connectivity monitor; set only by e2e tests.
+                              connectivityStream: authController.debugConnectivityStream,
+                              componentBuilders: StreamComponentBuilders(
+                                extensions: streamChatComponentBuilders(
+                                  messageItem: customMessageItemBuilder,
+                                  messageComposer: locationAwareMessageComposer,
+                                  videoPlayer: (context, props) => SampleAppVideoPlayer(props: props),
                                 ),
-                                configData: config.toStreamChatConfigurationData(),
-                                child: wrapped,
-                              );
-                            }
-
-                            return StreamChatTheme(
-                              data: StreamChatThemeData(),
+                              ),
+                              configData: config.toStreamChatConfigurationData(),
                               child: wrapped,
                             );
-                          },
-                          child: child,
-                        ),
+                          }
+
+                          return StreamChatTheme(
+                            data: StreamChatThemeData(),
+                            child: wrapped,
+                          );
+                        },
+                        child: child,
                       ),
                       routerConfig: _setupRouter(),
                     );
@@ -298,44 +294,6 @@ extension on SampleAppConfigData {
         highlightInitialMessage: true,
         swipeToReply: true,
       ),
-    );
-  }
-}
-
-/// Renders the app edge-to-edge with transparent, theme-aware system bars.
-///
-/// Wrapped once below the theme so it re-resolves on theme changes. The
-/// navigation bar keeps `systemNavigationBarContrastEnforced: false` so it stays
-/// fully transparent (content bleeds behind it) instead of the OS painting an
-/// opaque three-button-nav scrim; icon brightness carries legibility instead.
-/// Pair with `SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge)` in
-/// `main()`.
-class _EdgeToEdgeSystemBars extends StatelessWidget {
-  const _EdgeToEdgeSystemBars({
-    required this.themeMode,
-    required this.child,
-  });
-
-  final ThemeMode themeMode;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = switch (themeMode) {
-      ThemeMode.light => false,
-      ThemeMode.dark => true,
-      ThemeMode.system => Theme.brightnessOf(context) == .dark,
-    };
-
-    return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle(
-        statusBarColor: Colors.transparent,
-        statusBarIconBrightness: isDark ? .light : .dark,
-        systemNavigationBarColor: Colors.transparent,
-        systemNavigationBarContrastEnforced: false,
-        systemNavigationBarIconBrightness: isDark ? .light : .dark,
-      ),
-      child: child,
     );
   }
 }
