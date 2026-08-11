@@ -83,7 +83,8 @@ void main() {
     addTearDown(debouncer.cancel);
 
     debouncer.cancel();
-    // Past the longest delay a pending run could have used.
+    // The cancelled run's 300ms timer was started first, so it would have
+    // fired before this longer one.
     await after(const Duration(milliseconds: 500));
 
     expect(ran, isFalse);
