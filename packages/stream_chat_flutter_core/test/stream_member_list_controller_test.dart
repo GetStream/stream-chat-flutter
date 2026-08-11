@@ -1,9 +1,9 @@
 import 'dart:async';
 
+import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/stream_chat.dart' hide Success;
-import 'package:stream_chat_flutter_core/src/search_debouncer.dart';
 import 'package:stream_chat_flutter_core/src/stream_member_list_controller.dart';
 
 import 'mocks.dart';
@@ -11,14 +11,7 @@ import 'mocks.dart';
 void main() {
   final channel = MockChannel();
 
-  setUp(() {
-    // Run searches without waiting out the real debounce delays; the delays
-    // themselves are covered in search_debouncer_test.dart.
-    SearchDebouncer.debugPolicyOverride = const SearchDebouncePolicy.constant(Duration.zero);
-  });
-
   tearDown(() {
-    SearchDebouncer.debugPolicyOverride = null;
     reset(channel);
   });
 
@@ -27,8 +20,8 @@ void main() {
   }
 
   group('search', () {
-    test('queries members with the provided filter after debouncing', () async {
-      final usedFilter = Completer<Filter?>();
+    test('queries members with the provided filter after debouncing', () {
+      Filter? usedFilter;
       when(
         () => channel.queryMembers(
           filter: any(named: 'filter'),
@@ -36,18 +29,23 @@ void main() {
           pagination: any(named: 'pagination'),
         ),
       ).thenAnswer((invocation) async {
-        final filter = invocation.namedArguments[#filter] as Filter?;
-        if (!usedFilter.isCompleted) usedFilter.complete(filter);
+        usedFilter ??= invocation.namedArguments[#filter] as Filter?;
         return membersResponse([Member(user: User(id: 'user-1'))]);
       });
 
-      final controller = StreamMemberListController(channel: channel);
-      addTearDown(controller.dispose);
+      fakeAsync((async) {
+        final controller = StreamMemberListController(channel: channel);
+        addTearDown(controller.dispose);
 
-      controller.search('abc');
+        controller.search('abc');
 
-      // Waits for the debounced query to fire rather than a fixed timeout.
-      expect(await usedFilter.future, Filter.autoComplete('name', 'abc'));
+        // 'abc' is longer than a short query, so the 300ms delay applies.
+        async.elapse(const Duration(milliseconds: 299));
+        expect(usedFilter, isNull);
+
+        async.elapse(const Duration(milliseconds: 1));
+        expect(usedFilter, Filter.autoComplete('name', 'abc'));
+      });
     });
   });
 

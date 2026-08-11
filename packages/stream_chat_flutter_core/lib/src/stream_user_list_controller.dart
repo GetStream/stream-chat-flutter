@@ -123,12 +123,12 @@ class StreamUserListController extends PagedValueNotifier<int, User> with Search
     final trimmed = query.trim();
     if (trimmed.isEmpty) return searchWithFilter(filter);
 
-    searchWithFilter(
-      Filter.or([
-        Filter.autoComplete('name', trimmed),
-        Filter.autoComplete('id', trimmed),
-      ]),
-    );
+    final searchFilter = Filter.or([
+      Filter.autoComplete('name', trimmed),
+      Filter.autoComplete('id', trimmed),
+    ]);
+
+    return searchWithFilter(searchFilter);
   }
 
   /// Searches with the given [filter], debounced by the search text it holds.

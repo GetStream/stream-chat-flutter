@@ -1,10 +1,10 @@
 import 'dart:async';
 
+import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/stream_chat.dart' hide Success;
 import 'package:stream_chat_flutter_core/src/paged_value_notifier.dart';
-import 'package:stream_chat_flutter_core/src/search_debouncer.dart';
 import 'package:stream_chat_flutter_core/src/stream_user_list_controller.dart';
 
 import 'mocks.dart';
@@ -12,14 +12,7 @@ import 'mocks.dart';
 void main() {
   final client = MockClient();
 
-  setUp(() {
-    // Run searches without waiting out the real debounce delays; the delays
-    // themselves are covered in search_debouncer_test.dart.
-    SearchDebouncer.debugPolicyOverride = const SearchDebouncePolicy.constant(Duration.zero);
-  });
-
   tearDown(() {
-    SearchDebouncer.debugPolicyOverride = null;
     reset(client);
   });
 
@@ -28,8 +21,8 @@ void main() {
   }
 
   group('search', () {
-    test('queries users with the provided filter after debouncing', () async {
-      final usedFilter = Completer<Filter?>();
+    test('queries users with the provided filter after debouncing', () {
+      Filter? usedFilter;
       when(
         () => client.queryUsers(
           filter: any(named: 'filter'),
@@ -38,83 +31,29 @@ void main() {
           pagination: any(named: 'pagination'),
         ),
       ).thenAnswer((invocation) async {
-        final filter = invocation.namedArguments[#filter] as Filter?;
-        if (!usedFilter.isCompleted) usedFilter.complete(filter);
+        usedFilter ??= invocation.namedArguments[#filter] as Filter?;
         return usersResponse([User(id: 'user-1')]);
       });
 
-      final controller = StreamUserListController(client: client);
-      addTearDown(controller.dispose);
+      fakeAsync((async) {
+        final controller = StreamUserListController(client: client);
+        addTearDown(controller.dispose);
 
-      controller.search('abc');
+        controller.search('abc');
 
-      // Waits for the debounced query to fire rather than a fixed timeout.
-      expect(
-        await usedFilter.future,
-        Filter.or([Filter.autoComplete('name', 'abc'), Filter.autoComplete('id', 'abc')]),
-      );
-    });
+        // 'abc' is longer than a short query, so the 300ms delay applies.
+        async.elapse(const Duration(milliseconds: 299));
+        expect(usedFilter, isNull);
 
-    test('replaces the base filter rather than narrowing it', () async {
-      final usedFilter = Completer<Filter?>();
-      when(
-        () => client.queryUsers(
-          filter: any(named: 'filter'),
-          sort: any(named: 'sort'),
-          presence: any(named: 'presence'),
-          pagination: any(named: 'pagination'),
-        ),
-      ).thenAnswer((invocation) async {
-        final filter = invocation.namedArguments[#filter] as Filter?;
-        if (!usedFilter.isCompleted) usedFilter.complete(filter);
-        return usersResponse([]);
+        async.elapse(const Duration(milliseconds: 1));
+        expect(
+          usedFilter,
+          Filter.or([Filter.autoComplete('name', 'abc'), Filter.autoComplete('id', 'abc')]),
+        );
       });
-
-      final controller = StreamUserListController(
-        client: client,
-        filter: Filter.notEqual('id', 'me'),
-      );
-      addTearDown(controller.dispose);
-
-      controller.search('abc');
-
-      // The base filter is not merged in — combining it with the search text
-      // would let it skew the debounce policy and contradict the search.
-      expect(
-        await usedFilter.future,
-        Filter.or([Filter.autoComplete('name', 'abc'), Filter.autoComplete('id', 'abc')]),
-      );
     });
 
-    test('a blank query restores the base filter', () async {
-      final filters = <Filter?>[];
-      final restored = Completer<void>();
-      when(
-        () => client.queryUsers(
-          filter: any(named: 'filter'),
-          sort: any(named: 'sort'),
-          presence: any(named: 'presence'),
-          pagination: any(named: 'pagination'),
-        ),
-      ).thenAnswer((invocation) async {
-        filters.add(invocation.namedArguments[#filter] as Filter?);
-        if (filters.length == 2 && !restored.isCompleted) restored.complete();
-        return usersResponse([]);
-      });
-
-      final baseFilter = Filter.notEqual('id', 'me');
-      final controller = StreamUserListController(client: client, filter: baseFilter);
-      addTearDown(controller.dispose);
-
-      controller.search('abc');
-      await pumpEventQueue();
-      controller.search('');
-
-      await restored.future;
-      expect(filters.last, baseFilter);
-    });
-
-    test('doInitialLoad does not query while a search is pending', () async {
+    test('a short query waits longer than a standard one', () {
       var queryCount = 0;
       when(
         () => client.queryUsers(
@@ -128,24 +67,120 @@ void main() {
         return usersResponse([]);
       });
 
-      final controller = StreamUserListController(client: client);
-      addTearDown(controller.dispose);
+      fakeAsync((async) {
+        final controller = StreamUserListController(client: client);
+        addTearDown(controller.dispose);
 
-      controller.search('a');
-      // An immediate load (e.g. a list view mounting) must not fire its own
-      // request while the debounced search is scheduled.
-      await controller.doInitialLoad();
-      expect(queryCount, 0);
+        // A 2-char query is low-selectivity, so it waits the full 500ms rather
+        // than the 300ms standard delay.
+        controller.search('ab');
 
-      // Once the debounce elapses, exactly one query fires.
-      await pumpEventQueue();
-      expect(queryCount, 1);
+        async.elapse(const Duration(milliseconds: 499));
+        expect(queryCount, 0);
+
+        async.elapse(const Duration(milliseconds: 1));
+        expect(queryCount, 1);
+      });
     });
 
-    test('coalesces rapid searches into a single debounced query', () async {
+    test('replaces the base filter rather than narrowing it', () {
+      Filter? usedFilter;
+      when(
+        () => client.queryUsers(
+          filter: any(named: 'filter'),
+          sort: any(named: 'sort'),
+          presence: any(named: 'presence'),
+          pagination: any(named: 'pagination'),
+        ),
+      ).thenAnswer((invocation) async {
+        usedFilter ??= invocation.namedArguments[#filter] as Filter?;
+        return usersResponse([]);
+      });
+
+      fakeAsync((async) {
+        final controller = StreamUserListController(
+          client: client,
+          filter: Filter.notEqual('id', 'me'),
+        );
+        addTearDown(controller.dispose);
+
+        controller.search('abc');
+        async.elapse(const Duration(milliseconds: 300));
+
+        // The base filter is not merged in — combining it with the search text
+        // would let it skew the debounce policy and contradict the search.
+        expect(
+          usedFilter,
+          Filter.or([Filter.autoComplete('name', 'abc'), Filter.autoComplete('id', 'abc')]),
+        );
+      });
+    });
+
+    test('a blank query restores the base filter', () {
+      final filters = <Filter?>[];
+      when(
+        () => client.queryUsers(
+          filter: any(named: 'filter'),
+          sort: any(named: 'sort'),
+          presence: any(named: 'presence'),
+          pagination: any(named: 'pagination'),
+        ),
+      ).thenAnswer((invocation) async {
+        filters.add(invocation.namedArguments[#filter] as Filter?);
+        return usersResponse([]);
+      });
+
+      final baseFilter = Filter.notEqual('id', 'me');
+
+      fakeAsync((async) {
+        final controller = StreamUserListController(client: client, filter: baseFilter);
+        addTearDown(controller.dispose);
+
+        controller.search('abc');
+        async.elapse(const Duration(milliseconds: 300));
+
+        // Clearing the field restores the scope the controller was built with.
+        controller.search('');
+        async.elapse(const Duration(milliseconds: 500));
+
+        expect(filters.last, baseFilter);
+      });
+    });
+
+    test('doInitialLoad does not query while a search is pending', () {
+      var queryCount = 0;
+      when(
+        () => client.queryUsers(
+          filter: any(named: 'filter'),
+          sort: any(named: 'sort'),
+          presence: any(named: 'presence'),
+          pagination: any(named: 'pagination'),
+        ),
+      ).thenAnswer((_) async {
+        queryCount += 1;
+        return usersResponse([]);
+      });
+
+      fakeAsync((async) {
+        final controller = StreamUserListController(client: client);
+        addTearDown(controller.dispose);
+
+        controller.search('a');
+        // An immediate load (e.g. a list view mounting) must not fire its own
+        // request while the debounced search is scheduled.
+        unawaited(controller.doInitialLoad());
+        async.flushMicrotasks();
+        expect(queryCount, 0);
+
+        // Once the debounce elapses, exactly one query fires.
+        async.elapse(const Duration(milliseconds: 500));
+        expect(queryCount, 1);
+      });
+    });
+
+    test('coalesces rapid searches into a single debounced query', () {
       var queryCount = 0;
       Filter? lastFilter;
-      final fired = Completer<void>();
       when(
         () => client.queryUsers(
           filter: any(named: 'filter'),
@@ -156,36 +191,38 @@ void main() {
       ).thenAnswer((invocation) async {
         queryCount += 1;
         lastFilter = invocation.namedArguments[#filter] as Filter?;
-        if (!fired.isCompleted) fired.complete();
         return usersResponse([]);
       });
 
-      final controller = StreamUserListController(client: client);
-      addTearDown(controller.dispose);
+      fakeAsync((async) {
+        final controller = StreamUserListController(client: client);
+        addTearDown(controller.dispose);
 
-      // Rapid keystrokes, all issued before the debounce elapses.
-      controller
-        ..search('a')
-        ..search('ab')
-        ..search('abc');
+        // Rapid keystrokes, each well within the debounce window.
+        controller.search('a');
+        async.elapse(const Duration(milliseconds: 50));
+        controller.search('ab');
+        async.elapse(const Duration(milliseconds: 50));
+        controller.search('abc');
 
-      // The three calls coalesce into a single query for the latest term.
-      await fired.future;
-      expect(queryCount, 1);
-      expect(
-        lastFilter,
-        Filter.or([Filter.autoComplete('name', 'abc'), Filter.autoComplete('id', 'abc')]),
-      );
+        // The three calls coalesce into a single query for the latest term.
+        async.elapse(const Duration(milliseconds: 300));
+        expect(queryCount, 1);
+        expect(
+          lastFilter,
+          Filter.or([Filter.autoComplete('name', 'abc'), Filter.autoComplete('id', 'abc')]),
+        );
 
-      // Pump the event queue to prove no superseded query fires afterwards.
-      await pumpEventQueue();
-      expect(queryCount, 1);
+        // No superseded query fires after the coalesced one.
+        async.elapse(const Duration(seconds: 1));
+        expect(queryCount, 1);
+      });
     });
   });
 
   group('searchWithFilter', () {
-    test('debounces a filter that carries search text', () async {
-      final usedFilter = Completer<Filter?>();
+    test('debounces a filter that carries search text', () {
+      Filter? usedFilter;
       when(
         () => client.queryUsers(
           filter: any(named: 'filter'),
@@ -194,24 +231,30 @@ void main() {
           pagination: any(named: 'pagination'),
         ),
       ).thenAnswer((invocation) async {
-        final filter = invocation.namedArguments[#filter] as Filter?;
-        if (!usedFilter.isCompleted) usedFilter.complete(filter);
+        usedFilter ??= invocation.namedArguments[#filter] as Filter?;
         return usersResponse([]);
       });
 
-      final controller = StreamUserListController(client: client);
-      addTearDown(controller.dispose);
+      fakeAsync((async) {
+        final controller = StreamUserListController(client: client);
+        addTearDown(controller.dispose);
 
-      final filter = Filter.and([
-        Filter.autoComplete('name', 'jo'),
-        Filter.notEqual('id', 'me'),
-      ]);
-      controller.searchWithFilter(filter);
+        final filter = Filter.and([
+          Filter.autoComplete('name', 'jo'),
+          Filter.notEqual('id', 'me'),
+        ]);
+        controller.searchWithFilter(filter);
 
-      expect(await usedFilter.future, filter);
+        // The filter's search text is 2 chars, so the 500ms delay applies.
+        async.elapse(const Duration(milliseconds: 499));
+        expect(usedFilter, isNull);
+
+        async.elapse(const Duration(milliseconds: 1));
+        expect(usedFilter, filter);
+      });
     });
 
-    test('runs a filter with no search text immediately', () async {
+    test('runs a filter with no search text immediately', () {
       var queryCount = 0;
       when(
         () => client.queryUsers(
@@ -225,17 +268,16 @@ void main() {
         return usersResponse([]);
       });
 
-      // A delay long enough that any debounced search would still be pending,
-      // so an immediate query is the only way this can pass.
-      SearchDebouncer.debugPolicyOverride = const SearchDebouncePolicy.constant(Duration(minutes: 1));
+      fakeAsync((async) {
+        final controller = StreamUserListController(client: client);
+        addTearDown(controller.dispose);
 
-      final controller = StreamUserListController(client: client);
-      addTearDown(controller.dispose);
+        // A non-text filter must not wait for any debounce delay.
+        controller.searchWithFilter(Filter.equal('id', 'user-1'));
 
-      controller.searchWithFilter(Filter.equal('id', 'user-1'));
-      await pumpEventQueue();
-
-      expect(queryCount, 1);
+        async.flushMicrotasks();
+        expect(queryCount, 1);
+      });
     });
   });
 
@@ -325,45 +367,50 @@ void main() {
       expect(controller.value.asSuccess.items, isEmpty);
     });
 
-    test('a search invalidates a load already in flight', () async {
-      final responses = <Completer<QueryUsersResponse>>[
-        Completer<QueryUsersResponse>(),
-        Completer<QueryUsersResponse>(),
-      ];
-      var call = 0;
-      when(
-        () => client.queryUsers(
-          filter: any(named: 'filter'),
-          sort: any(named: 'sort'),
-          presence: any(named: 'presence'),
-          pagination: any(named: 'pagination'),
-        ),
-      ).thenAnswer((_) => responses[call++].future);
+    test('a search invalidates a load already in flight', () {
+      fakeAsync((async) {
+        // Created inside the zone: a Completer built outside it schedules its
+        // completion on the real microtask queue, which async cannot drain.
+        final responses = <Completer<QueryUsersResponse>>[
+          Completer<QueryUsersResponse>(),
+          Completer<QueryUsersResponse>(),
+        ];
+        var call = 0;
+        when(
+          () => client.queryUsers(
+            filter: any(named: 'filter'),
+            sort: any(named: 'sort'),
+            presence: any(named: 'presence'),
+            pagination: any(named: 'pagination'),
+          ),
+        ).thenAnswer((_) => responses[call++].future);
 
-      final controller = StreamUserListController(client: client);
-      addTearDown(controller.dispose);
+        final controller = StreamUserListController(client: client);
+        addTearDown(controller.dispose);
 
-      // Request A is issued and left in flight.
-      final inFlight = controller.doInitialLoad();
-      // A new search is scheduled while A is still in flight; it must
-      // supersede A so its response can no longer be applied.
-      controller.search('abc');
+        // Request A is issued and left in flight.
+        unawaited(controller.doInitialLoad());
+        // A new search is scheduled while A is still in flight; it must
+        // supersede A so its response can no longer be applied.
+        controller.search('abc');
 
-      // A completes during the new search's debounce window; its result is
-      // dropped rather than briefly shown.
-      responses[0].complete(usersResponse([User(id: 'stale')]));
-      await inFlight;
-      expect(controller.value.isSuccess, isFalse);
+        // A completes during the new search's debounce window; its result is
+        // dropped rather than briefly shown.
+        responses[0].complete(usersResponse([User(id: 'stale')]));
+        async.flushMicrotasks();
+        expect(controller.value.isSuccess, isFalse);
 
-      // The debounced search then fires and applies its own result.
-      responses[1].complete(usersResponse([User(id: 'fresh')]));
-      await pumpEventQueue();
-      expect(controller.value.asSuccess.items.single.id, 'fresh');
+        // The debounced search then fires and applies its own result.
+        async.elapse(const Duration(milliseconds: 300));
+        responses[1].complete(usersResponse([User(id: 'fresh')]));
+        async.flushMicrotasks();
+        expect(controller.value.asSuccess.items.single.id, 'fresh');
+      });
     });
   });
 
   group('clearResults', () {
-    test('cancels a pending debounced search', () async {
+    test('cancels a pending debounced search', () {
       var queried = false;
       when(
         () => client.queryUsers(
@@ -377,14 +424,17 @@ void main() {
         return usersResponse([]);
       });
 
-      final controller = StreamUserListController(client: client)
-        ..search('ab')
-        ..clearResults();
-      addTearDown(controller.dispose);
+      fakeAsync((async) {
+        final controller = StreamUserListController(client: client)
+          ..search('ab')
+          ..clearResults();
+        addTearDown(controller.dispose);
 
-      // Pump the event queue to prove the cancelled search never fires.
-      await pumpEventQueue();
-      expect(queried, isFalse);
+        // Well past the longest debounce delay, proving the cancelled search
+        // never fires.
+        async.elapse(const Duration(seconds: 1));
+        expect(queried, isFalse);
+      });
     });
 
     test('drops an in-flight load and resets the results', () async {
@@ -411,16 +461,18 @@ void main() {
     });
 
     test('a following search shows a loading state, not the cleared list', () {
-      final controller = StreamUserListController(client: client);
-      addTearDown(controller.dispose);
+      fakeAsync((async) {
+        final controller = StreamUserListController(client: client);
+        addTearDown(controller.dispose);
 
-      controller.clearResults();
-      expect(controller.value.asSuccess.items, isEmpty);
+        controller.clearResults();
+        expect(controller.value.asSuccess.items, isEmpty);
 
-      // Starting a search moves to a loading state rather than leaving the
-      // cleared empty list on screen (which would render as "no results").
-      controller.search('abc');
-      expect(controller.value.isSuccess, isFalse);
+        // Starting a search moves to a loading state rather than leaving the
+        // cleared empty list on screen (which would render as "no results").
+        controller.search('abc');
+        expect(controller.value.isSuccess, isFalse);
+      });
     });
   });
 }

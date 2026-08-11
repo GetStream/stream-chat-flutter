@@ -1,9 +1,9 @@
 import 'dart:async';
 
+import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/stream_chat.dart' hide Success;
-import 'package:stream_chat_flutter_core/src/search_debouncer.dart';
 import 'package:stream_chat_flutter_core/src/stream_message_search_list_controller.dart';
 
 import 'mocks.dart';
@@ -15,14 +15,7 @@ void main() {
     registerFallbackValue(Filter.equal('cid', 'messaging:123'));
   });
 
-  setUp(() {
-    // Run searches without waiting out the real debounce delays; the delays
-    // themselves are covered in search_debouncer_test.dart.
-    SearchDebouncer.debugPolicyOverride = const SearchDebouncePolicy.constant(Duration.zero);
-  });
-
   tearDown(() {
-    SearchDebouncer.debugPolicyOverride = null;
     reset(client);
   });
 
@@ -41,8 +34,8 @@ void main() {
   }
 
   group('search', () {
-    test('queries messages with an autocomplete filter after debouncing', () async {
-      final usedFilter = Completer<Filter?>();
+    test('queries messages with an autocomplete filter after debouncing', () {
+      Filter? usedFilter;
       when(
         () => client.search(
           any(),
@@ -52,21 +45,26 @@ void main() {
           paginationParams: any(named: 'paginationParams'),
         ),
       ).thenAnswer((invocation) async {
-        final messageFilters = invocation.namedArguments[#messageFilters] as Filter?;
-        if (!usedFilter.isCompleted) usedFilter.complete(messageFilters);
+        usedFilter ??= invocation.namedArguments[#messageFilters] as Filter?;
         return searchResponse();
       });
 
-      final controller = buildController();
-      addTearDown(controller.dispose);
+      fakeAsync((async) {
+        final controller = buildController();
+        addTearDown(controller.dispose);
 
-      controller.search('abc');
+        controller.search('abc');
 
-      // Waits for the debounced query to fire rather than a fixed timeout.
-      expect(await usedFilter.future, Filter.autoComplete('text', 'abc'));
+        // 'abc' is longer than a short query, so the 300ms delay applies.
+        async.elapse(const Duration(milliseconds: 299));
+        expect(usedFilter, isNull);
+
+        async.elapse(const Duration(milliseconds: 1));
+        expect(usedFilter, Filter.autoComplete('text', 'abc'));
+      });
     });
 
-    test('a blank query clears results without querying', () async {
+    test('a blank query clears results without querying', () {
       var queried = false;
       when(
         () => client.search(
@@ -81,14 +79,17 @@ void main() {
         return searchResponse();
       });
 
-      final controller = buildController();
-      addTearDown(controller.dispose);
+      fakeAsync((async) {
+        final controller = buildController();
+        addTearDown(controller.dispose);
 
-      controller.search('   ');
-      await pumpEventQueue();
+        controller.search('   ');
 
-      expect(queried, isFalse);
-      expect(controller.value.asSuccess.items, isEmpty);
+        // Well past the longest debounce delay, proving nothing was scheduled.
+        async.elapse(const Duration(seconds: 1));
+        expect(queried, isFalse);
+        expect(controller.value.asSuccess.items, isEmpty);
+      });
     });
   });
 

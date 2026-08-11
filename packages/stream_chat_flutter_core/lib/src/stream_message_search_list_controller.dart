@@ -162,7 +162,10 @@ class StreamMessageSearchListController extends PagedValueNotifier<String, GetMe
   void search(String query) {
     final trimmed = query.trim();
     if (trimmed.isEmpty) return clearResults();
-    searchWithFilter(Filter.autoComplete('text', trimmed));
+
+    final searchFilter = Filter.autoComplete('text', trimmed);
+
+    return searchWithFilter(searchFilter);
   }
 
   /// Searches with an explicit message [filter], debounced by the search text

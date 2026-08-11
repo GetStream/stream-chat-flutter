@@ -44,12 +44,6 @@ class SearchDebouncePolicy {
     this.defaultDelay = const Duration(milliseconds: 300),
   });
 
-  /// Creates a policy that applies a single [delay] to every query length.
-  const SearchDebouncePolicy.constant(Duration delay)
-    : shortQueryMaxLength = 0,
-      shortQueryDelay = delay,
-      defaultDelay = delay;
-
   /// Queries of at most this many characters use [shortQueryDelay].
   final int shortQueryMaxLength;
 
@@ -73,7 +67,7 @@ class SearchDebouncer {
   SearchDebouncer(
     Function onSearch, {
     SearchDebouncePolicy? policy,
-  }) : this._(onSearch, debugPolicyOverride ?? policy ?? const SearchDebouncePolicy());
+  }) : this._(onSearch, policy ?? const SearchDebouncePolicy());
 
   SearchDebouncer._(
     Function onSearch,
@@ -81,14 +75,6 @@ class SearchDebouncer {
   ) : _policy = policy,
       _shortQuery = debounce(onSearch, policy.shortQueryDelay),
       _longQuery = debounce(onSearch, policy.defaultDelay);
-
-  /// Overrides the policy of every [SearchDebouncer] created while it is set.
-  ///
-  /// Lets tests drive searches without waiting out the real delays. Reset it to
-  /// null afterwards, and set it before constructing the debouncer, since the
-  /// policy is resolved at construction.
-  @visibleForTesting
-  static SearchDebouncePolicy? debugPolicyOverride;
 
   final SearchDebouncePolicy _policy;
   final Debounce _shortQuery;

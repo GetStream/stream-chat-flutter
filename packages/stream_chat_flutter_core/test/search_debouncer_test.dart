@@ -1,93 +1,84 @@
-import 'dart:async';
-
+import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter_core/src/search_debouncer.dart';
 
-/// Completes once a timer started *now* for [duration] fires.
-///
-/// Used instead of sleeping for a fixed period: a timer never fires early, so
-/// racing a debouncer against a shorter timer is deterministic no matter how
-/// loaded the machine is.
-Future<void> after(Duration duration) => Future<void>.delayed(duration);
-
 void main() {
-  test('coalesces rapid calls into a single run', () async {
-    var runCount = 0;
-    final firstRun = Completer<void>();
-    final debouncer = SearchDebouncer(() {
-      runCount += 1;
-      if (!firstRun.isCompleted) firstRun.complete();
+  test('coalesces rapid calls into a single run', () {
+    fakeAsync((async) {
+      var runCount = 0;
+      SearchDebouncer(() => runCount += 1)
+        ..call(3)
+        ..call(3)
+        ..call(3);
+
+      async.elapse(const Duration(milliseconds: 300));
+      expect(runCount, 1);
+
+      // No superseded run is left scheduled behind the coalesced one.
+      async.elapse(const Duration(seconds: 1));
+      expect(runCount, 1);
     });
-    addTearDown(debouncer.cancel);
-
-    debouncer(3);
-    debouncer(3);
-    debouncer(3);
-
-    await firstRun.future;
-    // Any superseded run would have been scheduled at most 500ms after the
-    // last call, so it must have fired before this timer, started later.
-    await after(const Duration(milliseconds: 500));
-    expect(runCount, 1);
   });
 
-  test('waits longer for a short query than the standard delay', () async {
-    var ran = false;
-    final debouncer = SearchDebouncer(() => ran = true)..call(1);
-    addTearDown(debouncer.cancel);
+  test('waits longer for a short query than the standard delay', () {
+    fakeAsync((async) {
+      var ran = false;
+      SearchDebouncer(() => ran = true).call(1);
 
-    // A short (<= 2 char) query uses a 500ms delay, so it is still pending
-    // when this shorter timer fires — timers never fire early.
-    await after(const Duration(milliseconds: 300));
+      // A short (<= 2 char) query uses the 500ms delay, not the 300ms one.
+      async.elapse(const Duration(milliseconds: 499));
+      expect(ran, isFalse);
 
-    expect(ran, isFalse);
-  });
-
-  test('runs a longer query sooner than a short query', () async {
-    final shortRan = Completer<void>();
-    final longRan = Completer<void>();
-    final shortQuery = SearchDebouncer(shortRan.complete)..call(1);
-    final longQuery = SearchDebouncer(longRan.complete)..call(3);
-    addTearDown(shortQuery.cancel);
-    addTearDown(longQuery.cancel);
-
-    // The longer query's 300ms delay elapses first; the short query's 500ms
-    // delay is still pending, since timers never fire early.
-    await longRan.future;
-    expect(shortRan.isCompleted, isFalse);
-  });
-
-  test('cancels the pending short query when a longer query arrives', () async {
-    var runCount = 0;
-    final firstRun = Completer<void>();
-    final debouncer = SearchDebouncer(() {
-      runCount += 1;
-      if (!firstRun.isCompleted) firstRun.complete();
+      async.elapse(const Duration(milliseconds: 1));
+      expect(ran, isTrue);
     });
-    addTearDown(debouncer.cancel);
-
-    debouncer(1); // short query: 500ms delay
-    debouncer(4); // longer query: 300ms delay, supersedes the short one
-
-    await firstRun.future;
-    // The cancelled short query would have run at most 500ms after its call,
-    // so it must have fired before this timer, started later.
-    await after(const Duration(milliseconds: 500));
-    expect(runCount, 1);
   });
 
-  test('cancel prevents a pending run', () async {
-    var ran = false;
-    final debouncer = SearchDebouncer(() => ran = true)..call(3);
-    addTearDown(debouncer.cancel);
+  test('runs a longer query sooner than a short query', () {
+    fakeAsync((async) {
+      var shortRan = false;
+      var longRan = false;
+      SearchDebouncer(() => shortRan = true).call(1);
+      SearchDebouncer(() => longRan = true).call(3);
 
-    debouncer.cancel();
-    // The cancelled run's 300ms timer was started first, so it would have
-    // fired before this longer one.
-    await after(const Duration(milliseconds: 500));
+      // The longer query's 300ms delay elapses first.
+      async.elapse(const Duration(milliseconds: 300));
+      expect(longRan, isTrue);
+      expect(shortRan, isFalse);
 
-    expect(ran, isFalse);
+      // The short query's 500ms delay elapses later.
+      async.elapse(const Duration(milliseconds: 200));
+      expect(shortRan, isTrue);
+    });
+  });
+
+  test('cancels the pending short query when a longer query arrives', () {
+    fakeAsync((async) {
+      var runCount = 0;
+      SearchDebouncer(() => runCount += 1)
+        ..call(1) // short query: 500ms delay
+        ..call(4); // longer query: 300ms delay, supersedes the short one
+
+      async.elapse(const Duration(milliseconds: 300));
+      expect(runCount, 1);
+
+      // Past the short query's 500ms window, proving it never runs.
+      async.elapse(const Duration(milliseconds: 300));
+      expect(runCount, 1);
+    });
+  });
+
+  test('cancel prevents a pending run', () {
+    fakeAsync((async) {
+      var ran = false;
+      SearchDebouncer(() => ran = true)
+        ..call(3)
+        ..cancel();
+
+      async.elapse(const Duration(seconds: 1));
+      expect(ran, isFalse);
+    });
   });
 
   group('searchQueryLength', () {
