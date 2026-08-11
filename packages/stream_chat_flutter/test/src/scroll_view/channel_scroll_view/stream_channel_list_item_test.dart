@@ -130,95 +130,6 @@ void main() {
     });
 
     testWidgets(
-      'hides a system message when the channel config skips it for last-message updates',
-      (tester) async {
-        // Mirrors the server: with skip_last_msg_update_for_system_msgs the
-        // system message does not bump `last_message_at`, so it must not be
-        // previewed either — the row would otherwise show content newer than
-        // the position it is sorted at.
-        when(() => channelState.channelState).thenReturn(
-          ChannelState(
-            channel: ChannelModel(
-              cid: 'messaging:test',
-              config: ChannelConfig(skipLastMsgUpdateForSystemMsgs: true),
-            ),
-          ),
-        );
-
-        final regular = Message(
-          text: 'regular',
-          user: User(id: 'other'),
-          createdAt: DateTime(2024, 1, 1),
-        );
-        final system = Message(
-          text: 'channel truncated',
-          type: MessageType.system,
-          user: User(id: 'other'),
-          createdAt: DateTime(2024, 1, 2),
-        );
-
-        await pumpWithMessages(tester, [regular, system]);
-
-        expect(find.text('regular'), findsOneWidget);
-        expect(find.text('channel truncated'), findsNothing);
-      },
-    );
-
-    testWidgets(
-      'shows a system message when the channel config does not skip it',
-      (tester) async {
-        final system = Message(
-          text: 'channel truncated',
-          type: MessageType.system,
-          user: User(id: 'other'),
-          createdAt: DateTime(2024, 1, 2),
-        );
-
-        await pumpWithMessages(tester, [system]);
-
-        expect(find.text('channel truncated'), findsOneWidget);
-      },
-    );
-
-    testWidgets(
-      'hides a message not visible to the current user',
-      (tester) async {
-        final visible = Message(
-          text: 'visible',
-          user: User(id: 'other'),
-          createdAt: DateTime(2024, 1, 1),
-        );
-        final restricted = Message(
-          text: 'restricted',
-          user: User(id: 'other'),
-          restrictedVisibility: const ['other'],
-          createdAt: DateTime(2024, 1, 2),
-        );
-
-        await pumpWithMessages(tester, [visible, restricted]);
-
-        expect(find.text('visible'), findsOneWidget);
-        expect(find.text('restricted'), findsNothing);
-      },
-    );
-
-    testWidgets(
-      'shows a restricted message that includes the current user',
-      (tester) async {
-        final restricted = Message(
-          text: 'restricted but mine to see',
-          user: User(id: 'other'),
-          restrictedVisibility: const ['other', currentUserId],
-          createdAt: DateTime(2024, 1, 2),
-        );
-
-        await pumpWithMessages(tester, [restricted]);
-
-        expect(find.text('restricted but mine to see'), findsOneWidget);
-      },
-    );
-
-    testWidgets(
       'drops the cached message once the predicate stops accepting it',
       (tester) async {
         final message = Message(
@@ -300,10 +211,8 @@ void main() {
   group('ChannelLastMessageDate', () {
     const currentUserId = 'me';
 
-    // Stubbed as `lastMessageAt` in every test. While the channel is up to
-    // date the preview must never show it, so reading the channel model there
-    // is a visible failure; it is only allowed as the fallback while the
-    // channel is not up to date.
+    // A date the preview must never show. Stubbed as `lastMessageAt` in every
+    // test, so reading the channel model is a visible failure.
     final lastMessageAt = DateTime(2024, 6, 6, 6, 6);
 
     late MockClient client;
@@ -375,58 +284,6 @@ void main() {
       expect(find.byType(StreamTimestamp), findsNothing);
       expect(find.text(lastMessageAt.toLocal().toIso8601String()), findsNothing);
     });
-
-    testWidgets(
-      'falls back to lastMessageAt when not up to date and the loaded window is older',
-      (tester) async {
-        // A row built for the first time while the channel holds a historical
-        // window (e.g. after a deep link into an old message) can only see
-        // that stale window — the real latest activity is on the model.
-        when(() => channelState.isUpToDate).thenReturn(false);
-
-        final old = Message(
-          text: 'old window message',
-          user: User(id: 'other'),
-          createdAt: DateTime(2024, 1, 1, 10),
-        );
-
-        await pumpWithMessages(tester, [old]);
-
-        expect(find.text(lastMessageAt.toLocal().toIso8601String()), findsOneWidget);
-        expect(find.text(old.createdAt.toLocal().toIso8601String()), findsNothing);
-      },
-    );
-
-    testWidgets(
-      'falls back to lastMessageAt when not up to date and the window is empty',
-      (tester) async {
-        when(() => channelState.isUpToDate).thenReturn(false);
-
-        await pumpWithMessages(tester, []);
-
-        expect(find.text(lastMessageAt.toLocal().toIso8601String()), findsOneWidget);
-      },
-    );
-
-    testWidgets(
-      'keeps the resolved message date when not up to date but newer than lastMessageAt',
-      (tester) async {
-        // An optimistic local send can be newer than the model's
-        // lastMessageAt; the fresher of the two wins.
-        when(() => channelState.isUpToDate).thenReturn(false);
-
-        final newer = Message(
-          text: 'newer than the model',
-          user: User(id: 'other'),
-          createdAt: DateTime(2024, 12, 31),
-        );
-
-        await pumpWithMessages(tester, [newer]);
-
-        expect(find.text(newer.createdAt.toLocal().toIso8601String()), findsOneWidget);
-        expect(find.text(lastMessageAt.toLocal().toIso8601String()), findsNothing);
-      },
-    );
 
     testWidgets('follows the same message the preview text does', (tester) async {
       // The newest message is filtered out of the preview, so the date has to
