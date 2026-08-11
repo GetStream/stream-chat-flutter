@@ -2699,13 +2699,6 @@ class ChannelClientState {
         final channel = event.channel!;
         await _client.chatPersistenceClient?.deleteMessageByCid(channel.cid);
         truncate();
-        // Apply the channel fields the truncation updated (e.g. truncatedAt,
-        // and lastMessageAt when the truncation kept a system message).
-        updateChannelState(
-          channelState.copyWith(
-            channel: channelState.channel?.merge(channel),
-          ),
-        );
         if (event.message != null) {
           updateMessage(event.message!);
         }
