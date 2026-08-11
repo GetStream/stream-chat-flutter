@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sample_app/routes/routes.dart';
@@ -23,38 +21,43 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
 
   bool _isSearchActive = false;
 
-  Timer? _debounce;
-
   late final userListController = StreamUserListController(
     client: StreamChat.of(context).client,
     sort: [const SortOption.asc('name')],
     limit: 25,
-    filter: Filter.and([
-      Filter.notEqual('id', StreamChat.of(context).currentUser!.id),
-    ]),
+    filter: _filter(),
   );
 
+  // Excludes the current user from the directory listing — searching must keep
+  // excluding them, so the search text is combined with this rather than
+  // replacing it.
+  Filter _filter({String query = ''}) {
+    return Filter.and([
+      Filter.notEqual('id', StreamChat.of(context).currentUser!.id),
+      if (query.isNotEmpty)
+        Filter.or([
+          Filter.autoComplete('name', query),
+          Filter.autoComplete('id', query),
+        ]),
+    ]);
+  }
+
   void _userNameListener() {
-    if (_debounce?.isActive ?? false) _debounce!.cancel();
-    _debounce = Timer(const Duration(milliseconds: 350), () {
-      if (mounted) {
-        setState(() {
-          _userNameQuery = _controller.text;
-          _isSearchActive = _userNameQuery.isNotEmpty;
-        });
-        userListController.filter = Filter.and([
-          if (_userNameQuery.isNotEmpty) Filter.autoComplete('name', _userNameQuery),
-          Filter.notEqual('id', StreamChat.of(context).currentUser!.id),
-        ]);
-        userListController.doInitialLoad();
-      }
+    final query = _controller.text;
+    if (query == _userNameQuery) return;
+
+    setState(() {
+      _userNameQuery = query;
+      _isSearchActive = query.isNotEmpty;
     });
+
+    userListController.searchWithFilter(_filter(query: query));
   }
 
   @override
   void dispose() {
-    _controller.clear();
     _controller.removeListener(_userNameListener);
+    _controller.clear();
     _controller.dispose();
     userListController.dispose();
     super.dispose();

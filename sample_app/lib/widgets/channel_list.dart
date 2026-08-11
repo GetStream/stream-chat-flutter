@@ -34,19 +34,11 @@ class _ChannelList extends State<ChannelList> {
 
   bool _isSearchActive = false;
 
-  Timer? _debounce;
-
   void _channelQueryListener() {
-    if (_debounce?.isActive ?? false) _debounce!.cancel();
-    _debounce = Timer(const Duration(milliseconds: 350), () {
-      if (mounted) {
-        _messageSearchListController.searchQuery = _controller.text;
-        setState(() {
-          _isSearchActive = _controller.text.isNotEmpty;
-        });
-        if (_isSearchActive) _messageSearchListController.doInitialLoad();
-      }
-    });
+    final query = _controller.text;
+    setState(() => _isSearchActive = query.isNotEmpty);
+    if (query.isEmpty) return _messageSearchListController.clearResults();
+    return _messageSearchListController.search(query);
   }
 
   late final _channelListController = StreamChannelListController(
@@ -61,6 +53,7 @@ class _ChannelList extends State<ChannelList> {
     _controller.removeListener(_channelQueryListener);
     _controller.dispose();
     _scrollController.dispose();
+    _messageSearchListController.dispose();
     _channelListController.dispose();
     super.dispose();
   }
