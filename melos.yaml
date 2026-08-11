@@ -105,7 +105,10 @@ command:
       streaming_shared_preferences: ^2.0.0
       svg_icon_widget: ^0.0.1
       stream_core_flutter:
-        path: /Users/xsahil03x/StudioProjects/stream-core-flutter/packages/stream_core_flutter
+        git:
+          url: https://github.com/GetStream/stream-core-flutter.git
+          ref: 4e43166d8a911601f64ff0b3d701fd336f1d1da6
+          path: packages/stream_core_flutter
       stream_thumbnail: ^0.1.0
       synchronized: ^3.4.0
       thumblr: ^0.0.4
