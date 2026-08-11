@@ -493,11 +493,18 @@ class _ChannelListDeliveryStatus extends StatelessWidget {
 /// A widget that displays the date of a channel's latest previewable sent
 /// message.
 ///
-/// Displays nothing when there is none. Drafts are ignored — they have no sent
-/// date — so this is not always the message the preview subtitle shows: with a
-/// draft the subtitle previews the draft while this still dates the last sent
-/// message. Deliberately not [Channel.lastMessageAt], which survives a
-/// truncated channel.
+/// Displays nothing when there is none — including when the loaded message
+/// window is empty or fully filtered (e.g. a small `messageLimit` on the
+/// channel query), matching the subtitle's empty state. Drafts are ignored —
+/// they have no sent date — so this is not always the message the preview
+/// subtitle shows: with a draft the subtitle previews the draft while this
+/// still dates the last sent message.
+///
+/// Derived from the loaded messages rather than [Channel.lastMessageAt],
+/// which survives a truncated channel. [Channel.lastMessageAt] is consulted
+/// only while the channel holds a historical message window (it is not up to
+/// date), where the loaded messages may all predate the channel's actual
+/// latest activity.
 class ChannelLastMessageDate extends StatelessWidget {
   /// Creates a new instance of the [ChannelLastMessageDate] widget.
   ChannelLastMessageDate({
@@ -551,8 +558,7 @@ class _ChannelLastMessageDateContentState extends State<_ChannelLastMessageDateC
     final channelState = widget.channel.state;
     if (channelState == null) return const Empty();
 
-    final currentUser = widget.channel.client.state.currentUser;
-    final predicate = _defaultLastMessagePredicateForUser(currentUser?.id);
+    final predicate = _defaultLastMessagePredicate(widget.channel);
 
     return BetterStreamBuilder<List<Message>>(
       stream: channelState.messagesStream,
@@ -560,10 +566,26 @@ class _ChannelLastMessageDateContentState extends State<_ChannelLastMessageDateC
       builder: (context, messages) {
         // Drafts are ignored, unlike in the subtitle: they have no sent date.
         final lastMessage = resolveLastMessage(channelState, messages, predicate);
-        if (lastMessage == null) return const Empty();
+        var date = lastMessage?.createdAt;
+
+        // While the channel holds a historical window (isUpToDate is false,
+        // e.g. after Channel.query(idAround:)), the loaded messages may all
+        // predate the channel's real latest activity, and the resolver's
+        // fallback only exists if this row was built while the channel was up
+        // to date. [Channel.lastMessageAt] is the one source that still knows
+        // the latest activity, so prefer it when it is newer. It is
+        // deliberately not consulted while up to date: after a truncation it
+        // keeps the pre-truncation date.
+        if (!channelState.isUpToDate) {
+          if (widget.channel.lastMessageAt case final lastMessageAt? when date == null || lastMessageAt.isAfter(date)) {
+            date = lastMessageAt;
+          }
+        }
+
+        if (date == null) return const Empty();
 
         return StreamTimestamp(
-          date: lastMessage.createdAt.toLocal(),
+          date: date.toLocal(),
           style: widget.textStyle,
           formatter: widget.formatter,
         );
@@ -642,7 +664,7 @@ class _ChannelLastMessageWithStatusState extends State<_ChannelLastMessageWithSt
     if (channelState == null) return const Empty();
 
     final currentUser = widget.channel.client.state.currentUser;
-    final predicate = _defaultLastMessagePredicateForUser(currentUser?.id);
+    final predicate = _defaultLastMessagePredicate(widget.channel);
 
     return BetterStreamBuilder<(Draft?, List<Message>)>(
       stream: CombineLatestStream.combine2(
@@ -724,8 +746,7 @@ class ChannelLastMessageText extends StatefulWidget {
          channel.state != null,
          'Channel ${channel.id} is not initialized',
        ),
-       lastMessagePredicate =
-           lastMessagePredicate ?? _defaultLastMessagePredicateForUser(channel.client.state.currentUser?.id);
+       lastMessagePredicate = lastMessagePredicate ?? _defaultLastMessagePredicate(channel);
 
   /// The channel to display the last message of.
   final Channel channel;
@@ -746,12 +767,30 @@ class ChannelLastMessageText extends StatefulWidget {
 
 // The default predicate to determine if the message should be
 // considered for the last message.
-LastMessagePredicate _defaultLastMessagePredicateForUser(String? currentUserId) {
+//
+// Mirrors `MessageRules.canUpdateChannelLastMessageAt` — the rules deciding
+// whether a message bumps `last_message_at`, the field the channel list is
+// sorted on — so the previewed message (and its date) cannot contradict the
+// row's position in the list. The one deliberate divergence: the current
+// user's own shadowed messages stay previewable, so a shadow-banned user
+// cannot tell from their own channel list.
+LastMessagePredicate _defaultLastMessagePredicate(Channel channel) {
   return (Message message) {
+    final currentUserId = channel.client.state.currentUser?.id;
     final isMyMessage = currentUserId != null && message.user?.id == currentUserId;
     if (message.shadowed && !isMyMessage) return false;
     if (message.isError) return false;
     if (message.isEphemeral) return false;
+
+    final config = channel.state?.channelState.channel?.config;
+    if (message.isSystem && config?.skipLastMsgUpdateForSystemMsgs == true) {
+      return false;
+    }
+
+    if (currentUserId != null && message.isNotVisibleTo(currentUserId)) {
+      return false;
+    }
+
     return true;
   };
 }
