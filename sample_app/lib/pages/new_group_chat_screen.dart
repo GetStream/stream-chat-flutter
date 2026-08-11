@@ -25,10 +25,18 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
     client: StreamChat.of(context).client,
     sort: [const SortOption.asc('name')],
     limit: 25,
-    filter: Filter.and([
-      Filter.notEqual('id', StreamChat.of(context).currentUser!.id),
-    ]),
+    filter: _filter(),
   );
+
+  // Excludes the current user from the directory listing — searching must keep
+  // excluding them, so the search text is combined with this rather than
+  // replacing it.
+  Filter _filter({String query = ''}) {
+    return Filter.and([
+      Filter.notEqual('id', StreamChat.of(context).currentUser!.id),
+      if (query.isNotEmpty) Filter.autoComplete('name', query),
+    ]);
+  }
 
   void _userNameListener() {
     final query = _controller.text;
@@ -39,7 +47,7 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
       _isSearchActive = query.isNotEmpty;
     });
 
-    userListController.search(query);
+    userListController.searchWithFilter(_filter(query: query));
   }
 
   @override

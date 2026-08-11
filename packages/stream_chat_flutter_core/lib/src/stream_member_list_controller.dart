@@ -105,27 +105,26 @@ class StreamMemberListController extends PagedValueNotifier<int, Member> with Se
   /// Searches members whose name matches [query], debounced by its length.
   ///
   /// [query] is matched against the member name as an autocomplete filter,
-  /// merged with the controller's base [filter]; a blank [query] reloads the
-  /// base [filter]. Rapidly superseded searches are dropped, so only the latest
-  /// query's results are applied.
+  /// which replaces the controller's base [filter] for the duration of the
+  /// search; a blank [query] restores it. Rapidly superseded searches are
+  /// dropped, so only the latest query's results are applied.
   ///
-  /// To search on other fields, consider [searchWithFilter].
+  /// To search on other fields, or to keep the base [filter] applied while
+  /// searching, use [searchWithFilter].
   void search(String query) {
     final trimmed = query.trim();
     if (trimmed.isEmpty) return searchWithFilter(filter);
 
-    final searchFilter = Filter.autoComplete('name', trimmed);
-    searchWithFilter(filter.merge(searchFilter));
+    searchWithFilter(Filter.autoComplete('name', trimmed));
   }
 
   /// Searches with the given [filter], debounced by the search text it holds.
   ///
-  /// Unlike [search], the [filter] replaces the controller's base filter rather
-  /// than narrowing it; merge the two yourself to keep the base scope. A null
-  /// [filter] matches all. When it carries a text-search operator
-  /// ([Filter.autoComplete] or [Filter.query]) the reload is debounced by that
-  /// text's length; otherwise it reloads immediately. Rapidly superseded
-  /// searches are dropped, so only the latest query's results are applied.
+  /// The [filter] becomes the active filter; a null [filter] matches all. When
+  /// it carries a text-search operator ([Filter.autoComplete] or [Filter.query])
+  /// the reload is debounced by that text's length; otherwise it reloads
+  /// immediately. Rapidly superseded searches are dropped, so only the latest
+  /// query's results are applied.
   void searchWithFilter(Filter? filter) {
     _activeFilter = filter;
     debouncedSearch(searchQueryLength(filter));

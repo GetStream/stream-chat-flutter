@@ -30,19 +30,6 @@ int? searchQueryLength(Filter? filter) {
   return null;
 }
 
-@internal
-extension FilterMerge on Filter? {
-  /// Returns this filter ANDed with [other], or whichever of the two is
-  /// non-null (null when both are); avoids a redundant `$and` around a lone
-  /// filter.
-  Filter? merge(Filter? other) {
-    final self = this;
-    if (self == null) return other;
-    if (other == null) return self;
-    return Filter.and([self, other]);
-  }
-}
-
 /// A query-length-aware debounce policy for search input.
 ///
 /// Short, low-selectivity queries (of at most [shortQueryMaxLength] characters)

@@ -21,13 +21,21 @@ class _NewChatScreenState extends State<NewChatScreen> {
   late final userListController = StreamUserListController(
     client: StreamChat.of(context).client,
     limit: 25,
-    filter: Filter.and([
-      Filter.notEqual('id', StreamChat.of(context).currentUser!.id),
-    ]),
+    filter: _filter(),
     sort: [
       const SortOption.asc(UserSortKey.name),
     ],
   );
+
+  // Excludes the current user from the directory listing — searching must keep
+  // excluding them, so the search text is combined with this rather than
+  // replacing it.
+  Filter _filter({String query = ''}) {
+    return Filter.and([
+      Filter.notEqual('id', StreamChat.of(context).currentUser!.id),
+      if (query.isNotEmpty) Filter.autoComplete('name', query),
+    ]);
+  }
 
   ChipInputTextFieldState? get _chipInputTextFieldState => _chipInputTextFieldStateKey.currentState;
 
@@ -53,7 +61,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
       _isSearchActive = query.isNotEmpty;
     });
 
-    userListController.search(query);
+    userListController.searchWithFilter(_filter(query: query));
   }
 
   @override

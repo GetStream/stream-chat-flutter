@@ -55,6 +55,65 @@ void main() {
       );
     });
 
+    test('replaces the base filter rather than narrowing it', () async {
+      final usedFilter = Completer<Filter?>();
+      when(
+        () => client.queryUsers(
+          filter: any(named: 'filter'),
+          sort: any(named: 'sort'),
+          presence: any(named: 'presence'),
+          pagination: any(named: 'pagination'),
+        ),
+      ).thenAnswer((invocation) async {
+        final filter = invocation.namedArguments[#filter] as Filter?;
+        if (!usedFilter.isCompleted) usedFilter.complete(filter);
+        return usersResponse([]);
+      });
+
+      final controller = StreamUserListController(
+        client: client,
+        filter: Filter.notEqual('id', 'me'),
+      );
+      addTearDown(controller.dispose);
+
+      controller.search('abc');
+
+      // The base filter is not merged in — combining it with the search text
+      // would let it skew the debounce policy and contradict the search.
+      expect(
+        await usedFilter.future,
+        Filter.or([Filter.autoComplete('name', 'abc'), Filter.autoComplete('id', 'abc')]),
+      );
+    });
+
+    test('a blank query restores the base filter', () async {
+      final filters = <Filter?>[];
+      final restored = Completer<void>();
+      when(
+        () => client.queryUsers(
+          filter: any(named: 'filter'),
+          sort: any(named: 'sort'),
+          presence: any(named: 'presence'),
+          pagination: any(named: 'pagination'),
+        ),
+      ).thenAnswer((invocation) async {
+        filters.add(invocation.namedArguments[#filter] as Filter?);
+        if (filters.length == 2 && !restored.isCompleted) restored.complete();
+        return usersResponse([]);
+      });
+
+      final baseFilter = Filter.notEqual('id', 'me');
+      final controller = StreamUserListController(client: client, filter: baseFilter);
+      addTearDown(controller.dispose);
+
+      controller.search('abc');
+      await pumpEventQueue();
+      controller.search('');
+
+      await restored.future;
+      expect(filters.last, baseFilter);
+    });
+
     test('doInitialLoad does not query while a search is pending', () async {
       var queryCount = 0;
       when(
