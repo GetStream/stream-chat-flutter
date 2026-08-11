@@ -837,7 +837,15 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     };
 
     final spacing = context.streamSpacing;
-    final keyboardVisible = View.of(context).viewInsets.bottom > 0;
+    final platform = Theme.of(context).platform;
+    final hasBottomInset = MediaQuery.paddingOf(context).bottom > 0;
+
+    // Apple platforms rest on the bottom inset; elsewhere a margin clears it,
+    // and stands in when there is none.
+    final bottomSafeAreaMargin = switch (platform) {
+      .iOS || .macOS when hasBottomInset => spacing.none,
+      _ => spacing.md,
+    };
 
     final content = Material(
       type: .transparency,
@@ -846,7 +854,7 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
         _ => StreamSafeArea.driven(
           top: false,
           listenable: _pickerAnimation,
-          minimum: .only(bottom: keyboardVisible ? spacing.md : spacing.safeAreaBottom()),
+          margin: .only(bottom: bottomSafeAreaMargin),
           child: Center(heightFactor: 1, child: messageInput),
         ),
       },

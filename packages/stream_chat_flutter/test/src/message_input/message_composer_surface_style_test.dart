@@ -67,27 +67,50 @@ void main() {
     expect(_backgroundFillFinder(tester), findsNothing);
   });
 
-  testWidgets('the floating composer lifts the input above the bottom safe area', (tester) async {
+  testWidgets('the composer clears the bottom inset by a margin', (tester) async {
     const bottomInset = 34.0;
     await _pumpComposer(tester, surfaceStyle: StreamSurfaceStyle.floating, bottomPadding: bottomInset);
 
     final gap = _gapBelowInput(tester);
 
-    // The inset (34) is larger than the spacing.md floor, so it is used as-is —
-    // the composer sits flush above it rather than lifting further.
-    expect(gap, moreOrLessEquals(bottomInset));
+    // The margin is added on top of the inset, so the composer clears the system
+    // bar rather than sitting flush against it.
+    final context = tester.element(find.byType(StreamChatMessageInput));
+    expect(gap, moreOrLessEquals(bottomInset + context.streamSpacing.md));
   });
 
-  testWidgets('the floating composer floors the bottom gap at spacing.md without an inset', (tester) async {
-    // With no injected inset the floor keeps the composer off the edge; a larger
-    // inset would absorb it, so the composer never stacks a fixed gap on top of
-    // a system bar drawn outside the window.
+  testWidgets('the composer keeps its margin without an inset', (tester) async {
+    // No inset means the window does not extend behind the system bar, so the
+    // margin stands in for it rather than stacking on a bar the composer can't
+    // see.
     await _pumpComposer(tester, surfaceStyle: StreamSurfaceStyle.floating);
 
     final gap = _gapBelowInput(tester);
 
     final context = tester.element(find.byType(StreamChatMessageInput));
     expect(gap, moreOrLessEquals(context.streamSpacing.md));
+  });
+
+  testWidgets('the composer rests on the bottom inset on Apple platforms', (tester) async {
+    const bottomInset = 34.0;
+    await _pumpComposer(
+      tester,
+      surfaceStyle: StreamSurfaceStyle.floating,
+      bottomPadding: bottomInset,
+      platform: TargetPlatform.iOS,
+    );
+
+    // Apple platforms add no margin — the home indicator inset is the gap.
+    expect(_gapBelowInput(tester), moreOrLessEquals(bottomInset));
+  });
+
+  testWidgets('the composer keeps a margin on Apple platforms without an inset', (tester) async {
+    // iPhones without a home indicator, iPads with a home button, macOS and web
+    // on either: no inset to rest on, so the margin applies after all.
+    await _pumpComposer(tester, surfaceStyle: StreamSurfaceStyle.floating, platform: TargetPlatform.iOS);
+
+    final context = tester.element(find.byType(StreamChatMessageInput));
+    expect(_gapBelowInput(tester), moreOrLessEquals(context.streamSpacing.md));
   });
 
   testWidgets('the floating composer leaves no gap when the safe area is disabled', (tester) async {
@@ -117,8 +140,9 @@ void main() {
       return padding.padding.resolve(TextDirection.ltr).bottom;
     }
 
-    // Closed: the injected inset (34) exceeds the spacing.md floor, so it is used as-is.
-    expect(insetBottom(), moreOrLessEquals(34));
+    // Closed: the injected inset (34) plus the margin.
+    final context = tester.element(find.byType(StreamChatMessageInput));
+    expect(insetBottom(), moreOrLessEquals(34 + context.streamSpacing.md));
 
     await tester.tap(_attachmentButtonFinder);
     await tester.pumpAndSettle();
@@ -172,6 +196,7 @@ Future<void> _pumpComposer(
   StreamSurfaceStyle? composerSurfaceStyle,
   bool? enableSafeArea,
   double bottomPadding = 0,
+  TargetPlatform? platform,
 }) async {
   final originalRecordPlatform = RecordPlatform.instance;
   RecordPlatform.instance = FakeRecordPlatform();
@@ -208,7 +233,10 @@ Future<void> _pumpComposer(
 
   await tester.pumpWidget(
     MaterialApp(
-      theme: ThemeData(extensions: [StreamTheme(surfaceStyle: surfaceStyle)]),
+      theme: ThemeData(
+        platform: platform,
+        extensions: [StreamTheme(surfaceStyle: surfaceStyle)],
+      ),
       // Overrides only the padding, so the ambient size, text scale and platform
       // brightness the test binding provides are preserved.
       home: Builder(
