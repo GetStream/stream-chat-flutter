@@ -93,6 +93,44 @@ void main() {
     });
   });
 
+  group('searchWithFilter', () {
+    test('clears the active search query', () {
+      var captured = false;
+      Filter? usedMessageFilter;
+      String? usedQuery;
+      when(
+        () => client.search(
+          any(),
+          sort: any(named: 'sort'),
+          query: any(named: 'query'),
+          messageFilters: any(named: 'messageFilters'),
+          paginationParams: any(named: 'paginationParams'),
+        ),
+      ).thenAnswer((invocation) async {
+        if (!captured) {
+          captured = true;
+          usedMessageFilter = invocation.namedArguments[#messageFilters] as Filter?;
+          usedQuery = invocation.namedArguments[#query] as String?;
+        }
+        return searchResponse();
+      });
+
+      fakeAsync((async) {
+        // The controller is built with a searchQuery, and the backend rejects a
+        // query and a message filter together, so the query must be dropped.
+        final controller = buildController();
+        addTearDown(controller.dispose);
+
+        final filter = Filter.autoComplete('text', 'abc');
+        controller.searchWithFilter(filter);
+        async.elapse(const Duration(milliseconds: 300));
+
+        expect(usedMessageFilter, filter);
+        expect(usedQuery, isNull);
+      });
+    });
+  });
+
   group('superseded results', () {
     test('a slower earlier load does not overwrite a newer load', () async {
       final responses = <Completer<SearchMessagesResponse>>[

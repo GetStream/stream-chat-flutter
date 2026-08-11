@@ -47,6 +47,35 @@ void main() {
         expect(usedFilter, Filter.autoComplete('name', 'abc'));
       });
     });
+
+    test('replaces the base filter rather than narrowing it', () {
+      Filter? usedFilter;
+      when(
+        () => channel.queryMembers(
+          filter: any(named: 'filter'),
+          sort: any(named: 'sort'),
+          pagination: any(named: 'pagination'),
+        ),
+      ).thenAnswer((invocation) async {
+        usedFilter ??= invocation.namedArguments[#filter] as Filter?;
+        return membersResponse([]);
+      });
+
+      fakeAsync((async) {
+        final controller = StreamMemberListController(
+          channel: channel,
+          filter: Filter.equal('banned', true),
+        );
+        addTearDown(controller.dispose);
+
+        controller.search('abc');
+        async.elapse(const Duration(milliseconds: 300));
+
+        // The base filter is not merged in — combining it with the search text
+        // would let it skew the debounce policy and contradict the search.
+        expect(usedFilter, Filter.autoComplete('name', 'abc'));
+      });
+    });
   });
 
   group('superseded results', () {
