@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/stream_chat.dart' hide Success;
 import 'package:stream_chat_flutter_core/src/paged_value_notifier.dart';
+import 'package:stream_chat_flutter_core/src/search_debouncer.dart';
 import 'package:stream_chat_flutter_core/src/stream_user_list_controller.dart';
 
 import 'mocks.dart';
@@ -11,7 +12,14 @@ import 'mocks.dart';
 void main() {
   final client = MockClient();
 
+  setUp(() {
+    // Run searches without waiting out the real debounce delays; the delays
+    // themselves are covered in search_debouncer_test.dart.
+    SearchDebouncer.debugPolicyOverride = const SearchDebouncePolicy.constant(Duration.zero);
+  });
+
   tearDown(() {
+    SearchDebouncer.debugPolicyOverride = null;
     reset(client);
   });
 
@@ -35,10 +43,7 @@ void main() {
         return usersResponse([User(id: 'user-1')]);
       });
 
-      final controller = StreamUserListController(
-        client: client,
-        debouncePolicy: const .constant(Duration.zero),
-      );
+      final controller = StreamUserListController(client: client);
       addTearDown(controller.dispose);
 
       controller.search('abc');
@@ -64,10 +69,7 @@ void main() {
         return usersResponse([]);
       });
 
-      final controller = StreamUserListController(
-        client: client,
-        debouncePolicy: const .constant(Duration.zero),
-      );
+      final controller = StreamUserListController(client: client);
       addTearDown(controller.dispose);
 
       controller.search('a');
@@ -99,13 +101,10 @@ void main() {
         return usersResponse([]);
       });
 
-      final controller = StreamUserListController(
-        client: client,
-        debouncePolicy: const .constant(Duration(milliseconds: 100)),
-      );
+      final controller = StreamUserListController(client: client);
       addTearDown(controller.dispose);
 
-      // Rapid keystrokes, all within the debounce window.
+      // Rapid keystrokes, all issued before the debounce elapses.
       controller
         ..search('a')
         ..search('ab')
@@ -119,8 +118,8 @@ void main() {
         Filter.or([Filter.autoComplete('name', 'abc'), Filter.autoComplete('id', 'abc')]),
       );
 
-      // No further query fires after the coalesced one.
-      await Future<void>.delayed(const Duration(milliseconds: 150));
+      // Pump the event queue to prove no superseded query fires afterwards.
+      await pumpEventQueue();
       expect(queryCount, 1);
     });
   });
@@ -141,10 +140,7 @@ void main() {
         return usersResponse([]);
       });
 
-      final controller = StreamUserListController(
-        client: client,
-        debouncePolicy: const .constant(Duration.zero),
-      );
+      final controller = StreamUserListController(client: client);
       addTearDown(controller.dispose);
 
       final filter = Filter.and([
@@ -170,7 +166,10 @@ void main() {
         return usersResponse([]);
       });
 
-      // Default policy (500ms) — a non-text filter must not wait for it.
+      // A delay long enough that any debounced search would still be pending,
+      // so an immediate query is the only way this can pass.
+      SearchDebouncer.debugPolicyOverride = const SearchDebouncePolicy.constant(Duration(minutes: 1));
+
       final controller = StreamUserListController(client: client);
       addTearDown(controller.dispose);
 
@@ -282,10 +281,7 @@ void main() {
         ),
       ).thenAnswer((_) => responses[call++].future);
 
-      final controller = StreamUserListController(
-        client: client,
-        debouncePolicy: const .constant(Duration.zero),
-      );
+      final controller = StreamUserListController(client: client);
       addTearDown(controller.dispose);
 
       // Request A is issued and left in flight.
@@ -322,13 +318,9 @@ void main() {
         return usersResponse([]);
       });
 
-      final controller =
-          StreamUserListController(
-              client: client,
-              debouncePolicy: const .constant(Duration.zero),
-            )
-            ..search('ab')
-            ..clearResults();
+      final controller = StreamUserListController(client: client)
+        ..search('ab')
+        ..clearResults();
       addTearDown(controller.dispose);
 
       // Pump the event queue to prove the cancelled search never fires.
@@ -360,10 +352,7 @@ void main() {
     });
 
     test('a following search shows a loading state, not the cleared list', () {
-      final controller = StreamUserListController(
-        client: client,
-        debouncePolicy: const .constant(Duration(milliseconds: 100)),
-      );
+      final controller = StreamUserListController(client: client);
       addTearDown(controller.dispose);
 
       controller.clearResults();

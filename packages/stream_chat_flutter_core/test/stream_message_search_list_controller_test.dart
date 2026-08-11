@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/stream_chat.dart' hide Success;
+import 'package:stream_chat_flutter_core/src/search_debouncer.dart';
 import 'package:stream_chat_flutter_core/src/stream_message_search_list_controller.dart';
 
 import 'mocks.dart';
@@ -14,7 +15,14 @@ void main() {
     registerFallbackValue(Filter.equal('cid', 'messaging:123'));
   });
 
+  setUp(() {
+    // Run searches without waiting out the real debounce delays; the delays
+    // themselves are covered in search_debouncer_test.dart.
+    SearchDebouncer.debugPolicyOverride = const SearchDebouncePolicy.constant(Duration.zero);
+  });
+
   tearDown(() {
+    SearchDebouncer.debugPolicyOverride = null;
     reset(client);
   });
 
@@ -29,7 +37,6 @@ void main() {
       client: client,
       filter: Filter.in_('members', const ['user-id']),
       searchQuery: '',
-      debouncePolicy: const .constant(Duration.zero),
     );
   }
 

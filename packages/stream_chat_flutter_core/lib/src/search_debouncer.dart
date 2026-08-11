@@ -86,7 +86,7 @@ class SearchDebouncer {
   SearchDebouncer(
     Function onSearch, {
     SearchDebouncePolicy? policy,
-  }) : this._(onSearch, policy ?? const SearchDebouncePolicy());
+  }) : this._(onSearch, debugPolicyOverride ?? policy ?? const SearchDebouncePolicy());
 
   SearchDebouncer._(
     Function onSearch,
@@ -94,6 +94,14 @@ class SearchDebouncer {
   ) : _policy = policy,
       _shortQuery = debounce(onSearch, policy.shortQueryDelay),
       _longQuery = debounce(onSearch, policy.defaultDelay);
+
+  /// Overrides the policy of every [SearchDebouncer] created while it is set.
+  ///
+  /// Lets tests drive searches without waiting out the real delays. Reset it to
+  /// null afterwards, and set it before constructing the debouncer, since the
+  /// policy is resolved at construction.
+  @visibleForTesting
+  static SearchDebouncePolicy? debugPolicyOverride;
 
   final SearchDebouncePolicy _policy;
   final Debounce _shortQuery;

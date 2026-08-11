@@ -44,9 +44,9 @@ class StreamUserListController extends PagedValueNotifier<int, User> with Search
     this.sort = defaultUserListSort,
     this.presence = true,
     this.limit = defaultUserPagedLimit,
-    @visibleForTesting this.debouncePolicy = const SearchDebouncePolicy(),
   }) : _activeFilter = filter,
        _activeSort = sort,
+       debouncePolicy = const SearchDebouncePolicy(),
        super(const PagedValue.loading());
 
   /// Creates a [StreamUserListController] from the passed [value].
@@ -57,12 +57,12 @@ class StreamUserListController extends PagedValueNotifier<int, User> with Search
     this.sort = defaultUserListSort,
     this.presence = true,
     this.limit = defaultUserPagedLimit,
-    @visibleForTesting this.debouncePolicy = const SearchDebouncePolicy(),
   }) : _activeFilter = filter,
-       _activeSort = sort;
+       _activeSort = sort,
+       debouncePolicy = const SearchDebouncePolicy();
 
   @override
-  @visibleForTesting
+  @protected
   final SearchDebouncePolicy debouncePolicy;
 
   /// The client to use for the channels list.
