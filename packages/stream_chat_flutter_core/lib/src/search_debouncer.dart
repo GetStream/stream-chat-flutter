@@ -58,8 +58,7 @@ class SearchDebouncePolicy {
 /// [SearchDebouncePolicy].
 ///
 /// Backed by two [Debounce] functions — one per delay — because a [Debounce]'s
-/// wait is fixed at construction. Each call runs the debouncer for the matching
-/// query length and cancels the other so only a single search is scheduled.
+/// wait is fixed at construction.
 @internal
 class SearchDebouncer {
   /// Creates a [SearchDebouncer] that runs [onSearch] after the delay [policy]

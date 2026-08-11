@@ -29,8 +29,10 @@ import 'package:stream_chat_flutter_core/src/search_debouncer.dart';
 /// ```
 mixin SearchDebounceMixin<Key, Value> on PagedValueNotifier<Key, Value> {
   /// The policy driving [debouncedSearch]'s length-based delays.
+  ///
+  /// Override to tune the delays for a particular list.
   @protected
-  SearchDebouncePolicy get debouncePolicy;
+  SearchDebouncePolicy get debouncePolicy => const SearchDebouncePolicy();
   late final _searchDebouncer = SearchDebouncer(doInitialLoad, policy: debouncePolicy);
 
   int _loadGeneration = 0;

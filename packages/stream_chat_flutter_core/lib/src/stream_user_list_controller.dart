@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:collection/collection.dart';
-import 'package:meta/meta.dart';
 import 'package:stream_chat/stream_chat.dart' hide Success;
 import 'package:stream_chat_flutter_core/src/paged_value_notifier.dart';
 import 'package:stream_chat_flutter_core/src/search_debounce_mixin.dart';
@@ -46,7 +45,6 @@ class StreamUserListController extends PagedValueNotifier<int, User> with Search
     this.limit = defaultUserPagedLimit,
   }) : _activeFilter = filter,
        _activeSort = sort,
-       debouncePolicy = const SearchDebouncePolicy(),
        super(const PagedValue.loading());
 
   /// Creates a [StreamUserListController] from the passed [value].
@@ -58,12 +56,7 @@ class StreamUserListController extends PagedValueNotifier<int, User> with Search
     this.presence = true,
     this.limit = defaultUserPagedLimit,
   }) : _activeFilter = filter,
-       _activeSort = sort,
-       debouncePolicy = const SearchDebouncePolicy();
-
-  @override
-  @protected
-  final SearchDebouncePolicy debouncePolicy;
+       _activeSort = sort;
 
   /// The client to use for the channels list.
   final StreamChatClient client;
@@ -113,9 +106,9 @@ class StreamUserListController extends PagedValueNotifier<int, User> with Search
   /// Searches users whose name or id matches [query], debounced by its length.
   ///
   /// [query] is matched against the user name and id as an autocomplete filter,
-  /// which replaces the controller's base [filter] for the duration of the
-  /// search; a blank [query] restores it. Rapidly superseded searches are
-  /// dropped, so only the latest query's results are applied.
+  /// which replaces the controller's base [filter] rather than narrowing it; a
+  /// blank [query] restores it. Rapidly superseded searches are dropped, so only
+  /// the latest query's results are applied.
   ///
   /// To search on other fields, or to keep the base [filter] applied while
   /// searching, use [searchWithFilter].

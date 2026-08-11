@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:meta/meta.dart';
 import 'package:stream_chat/stream_chat.dart' hide Success;
 import 'package:stream_chat_flutter_core/src/paged_value_notifier.dart';
 import 'package:stream_chat_flutter_core/src/search_debounce_mixin.dart';
@@ -49,7 +48,6 @@ class StreamMessageSearchListController extends PagedValueNotifier<String, GetMe
        _activeMessageFilter = messageFilter,
        _activeSearchQuery = searchQuery,
        _activeSort = sort,
-       debouncePolicy = const SearchDebouncePolicy(),
        super(const PagedValue.loading());
 
   /// Creates a [StreamMessageSearchListController] from the passed [value].
@@ -72,12 +70,7 @@ class StreamMessageSearchListController extends PagedValueNotifier<String, GetMe
        _activeFilter = filter,
        _activeMessageFilter = messageFilter,
        _activeSearchQuery = searchQuery,
-       _activeSort = sort,
-       debouncePolicy = const SearchDebouncePolicy();
-
-  @override
-  @protected
-  final SearchDebouncePolicy debouncePolicy;
+       _activeSort = sort;
 
   /// The client to use for the message search.
   final StreamChatClient client;
