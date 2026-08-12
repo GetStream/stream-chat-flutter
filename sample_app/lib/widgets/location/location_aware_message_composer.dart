@@ -20,6 +20,7 @@ Widget locationAwareMessageComposer(BuildContext context, MessageComposerProps p
 
   final locationEnabled =
       channel != null &&
+      channel.state != null &&
       context.sampleAppConfig.enableLocationSharing &&
       channel.config?.sharedLocations == true &&
       channel.canShareLocation;
