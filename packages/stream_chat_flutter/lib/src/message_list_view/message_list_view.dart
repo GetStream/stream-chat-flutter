@@ -456,29 +456,8 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     double alignment = 0.5, // center the message in the viewport by default
     bool highlight = true,
   }) async {
-    // In a thread the parent message lives outside the `messages` list and
-    // is rendered as the very last item, so search for it explicitly when a
-    // thread reply quotes it.
-    final isThreadParent = _isThreadConversation && messageId == widget.parentMessage?.id;
-    var index = isThreadParent ? messages.length + 2 : messages.indexWhere((m) => m.id == messageId);
-
-    if (index < 0) {
-      // No around-reply pagination in thread mode yet — bail rather than
-      // clobber the parent channel's loaded window.
-      if (_isThreadConversation) return;
-
-      // Target isn't in the loaded channel window. Paginate around it, wait
-      // one frame for the BetterStreamBuilder rebuild to flush `messages`,
-      // then re-scan against the fresh list — `messages` is reassigned in
-      // `_buildListView` on each emission, so an index captured before the
-      // await would be stale.
-      await streamChannel!.loadChannelAtMessage(messageId);
-      if (!mounted) return;
-      await WidgetsBinding.instance.endOfFrame;
-      if (!mounted) return;
-      index = messages.indexWhere((m) => m.id == messageId);
-      if (index < 0) return;
-    }
+    final itemIndex = await _resolveScrollTargetIndex(messageId);
+    if (itemIndex == null) return;
 
     // Bail when the SPL isn't attached — `scrollTo` would throw, and
     // highlighting an off-screen message is meaningless.
@@ -490,11 +469,48 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     // still animating (or before the target item is even mounted) and the
     // user only sees the tail end of the fade.
     await controller.scrollTo(
-      index: index + 2, // +2 to account for loader and footer
+      index: itemIndex,
       alignment: alignment,
     );
 
     if (highlight && mounted) _highlightMessage(messageId);
+  }
+
+  // Resolves the scroll-view item index showing [messageId], paginating the
+  // channel around it when it isn't in the loaded window.
+  //
+  // Returns null when the target can't be reached.
+  Future<int?> _resolveScrollTargetIndex(String messageId) async {
+    int itemIndexOf(int messageIndex) =>
+        MessageListLayout(messageCount: messages.length).itemIndexOfMessage(messageIndex);
+
+    // In a thread the parent message lives outside the `messages` list and is
+    // rendered in its own trailing slot, so target that slot directly when a
+    // thread reply quotes it.
+    if (_isThreadConversation && messageId == widget.parentMessage?.id) {
+      return MessageListLayout(messageCount: messages.length).parentMessageIndex;
+    }
+
+    final index = messages.indexWhere((m) => m.id == messageId);
+    if (index >= 0) return itemIndexOf(index);
+
+    // No around-reply pagination in thread mode yet — bail rather than
+    // clobber the parent channel's loaded window.
+    if (_isThreadConversation) return null;
+
+    // Target isn't in the loaded channel window. Paginate around it, wait
+    // one frame for the BetterStreamBuilder rebuild to flush `messages`,
+    // then re-scan against the fresh list — `messages` is reassigned in
+    // `_buildListView` on each emission, so an index captured before the
+    // await would be stale.
+    await streamChannel!.loadChannelAtMessage(messageId);
+    if (!mounted) return null;
+    await WidgetsBinding.instance.endOfFrame;
+    if (!mounted) return null;
+
+    final refreshedIndex = messages.indexWhere((m) => m.id == messageId);
+    if (refreshedIndex < 0) return null;
+    return itemIndexOf(refreshedIndex);
   }
 
   // Wraps [child] in the highlight pulse if [message] is the currently
@@ -746,18 +762,18 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
         return _buildThreadSeparator(context);
 
       case MessageListSeparatorSlot.endEdgeGap:
-        return _buildEndEdgeGap();
+        return _buildEndEdgeGap(context);
 
       case MessageListSeparatorSlot.startEdgeGap:
         final builder = widget.config.reverse ? widget.builders.footer : widget.builders.header;
         if (builder == null) return const Empty();
-        return const SizedBox(height: 8);
+        return SizedBox(height: context.streamSpacing.xs);
 
       case MessageListSeparatorSlot.loaderGap:
         return const Empty();
 
       case MessageListSeparatorSlot.betweenMessages:
-        return _buildMessageSeparator(context, index);
+        return _buildMessageSeparator(context, layout, index);
     }
   }
 
@@ -772,9 +788,9 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
 
   // The gap adjoining the trailing edge widget. When that edge has no builder
   // the gap carries the date divider for the last message instead.
-  Widget _buildEndEdgeGap() {
+  Widget _buildEndEdgeGap(BuildContext context) {
     final builder = widget.config.reverse ? widget.builders.header : widget.builders.footer;
-    if (builder != null) return const SizedBox(height: 8);
+    if (builder != null) return SizedBox(height: context.streamSpacing.xs);
     if (messages.isEmpty) return const Empty();
 
     final message = messages.last;
@@ -784,13 +800,16 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     );
   }
 
-  Widget _buildMessageSeparator(BuildContext context, int index) {
-    // Separator `index` sits between items `index` and `index + 1`, so the two
-    // messages it divides are offset by one and two message slots — in the
-    // order they are rendered, which the list direction flips.
+  Widget _buildMessageSeparator(BuildContext context, MessageListLayout layout, int index) {
+    // Separator `index` sits between items `index` and `index + 1`, so it
+    // divides those two items' messages. Which of the pair is "next" depends on
+    // the list direction.
+    final first = messages[layout.messageIndexAt(index)];
+    final second = messages[layout.messageIndexAt(index + 1)];
+
     final (message, nextMessage) = switch (widget.config.reverse) {
-      true => (messages[index - 1], messages[index - 2]),
-      false => (messages[index - 2], messages[index - 1]),
+      true => (second, first),
+      false => (first, second),
     };
 
     final spacingRules = _resolveSpacingRules(message: message, nextMessage: nextMessage);
@@ -1164,9 +1183,9 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     final itemPositions = _itemPositionListener.itemPositions.value;
     if (itemPositions.isEmpty) return;
 
-    // Index of the last item in the list view is 2 as 1 is the progress
-    // indicator and 0 is the footer.
-    const lastItemIndex = 2;
+    // The list is reversed, so the newest message — the first in `messages` —
+    // is the one that sits at the visual bottom.
+    const lastItemIndex = MessageListLayout.firstMessageItemIndex;
     final lastItemPosition = itemPositions.firstWhereOrNull(
       (position) => position.index == lastItemIndex,
     );

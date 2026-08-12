@@ -54,7 +54,7 @@ enum MessageListSeparatorSlot {
 /// slots are laid out, so index arithmetic is not repeated across the item,
 /// separator and item-key builders.
 @immutable
-class MessageListLayout {
+final class MessageListLayout {
   /// Creates a layout for a list holding [messageCount] messages.
   const MessageListLayout({required this.messageCount});
 
@@ -65,11 +65,16 @@ class MessageListLayout {
   /// pagination loading indicator at either end and the thread parent message.
   static const fixedSlotCount = 5;
 
-  /// The index of the first item holding a message.
-  static const _firstMessageIndex = 2;
+  /// The item index of the first message, past the leading edge widget and the
+  /// pagination loading indicator that precede it.
+  static const firstMessageItemIndex = 2;
 
   /// The total number of items in the scroll view.
   int get itemCount => messageCount + fixedSlotCount;
+
+  /// The item index of the thread parent message, which occupies the final slot
+  /// and lives outside the loaded messages.
+  int get parentMessageIndex => itemCount - 1;
 
   /// The role of the item at [index].
   MessageListItemSlot itemSlotAt(int index) => switch (index) {
@@ -94,12 +99,12 @@ class MessageListLayout {
   /// The position in the loaded messages of the message shown at item [index].
   ///
   /// Only meaningful when [itemSlotAt] returns [MessageListItemSlot.message].
-  int messageIndexAt(int index) => index - _firstMessageIndex;
+  int messageIndexAt(int index) => index - firstMessageItemIndex;
 
   /// The item index at which the message at [messageIndex] is shown.
   ///
   /// This is the inverse of [messageIndexAt].
-  int itemIndexOfMessage(int messageIndex) => messageIndex + _firstMessageIndex;
+  int itemIndexOfMessage(int messageIndex) => messageIndex + firstMessageItemIndex;
 
   @override
   bool operator ==(Object other) => other is MessageListLayout && other.messageCount == messageCount;

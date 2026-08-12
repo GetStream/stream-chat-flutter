@@ -131,6 +131,33 @@ void main() {
     });
   });
 
+  group('fixed slot indices', () {
+    test('parentMessageIndex is the final item and matches its slot', () {
+      for (var messageCount = 0; messageCount <= 20; messageCount++) {
+        final layout = MessageListLayout(messageCount: messageCount);
+
+        expect(layout.parentMessageIndex, layout.itemCount - 1);
+        expect(layout.itemSlotAt(layout.parentMessageIndex), MessageListItemSlot.parentMessage);
+      }
+    });
+
+    test('parentMessageIndex matches the original messages.length + 4 target', () {
+      // The old call site computed `messages.length + 2` and then added 2 again
+      // at the scroll site.
+      for (var messageCount = 0; messageCount <= 20; messageCount++) {
+        expect(MessageListLayout(messageCount: messageCount).parentMessageIndex, messageCount + 4);
+      }
+    });
+
+    test('firstMessageItemIndex is the first message slot', () {
+      const layout = MessageListLayout(messageCount: 3);
+
+      expect(MessageListLayout.firstMessageItemIndex, 2);
+      expect(layout.itemSlotAt(MessageListLayout.firstMessageItemIndex), MessageListItemSlot.message);
+      expect(layout.messageIndexAt(MessageListLayout.firstMessageItemIndex), 0);
+    });
+  });
+
   group('message index mapping', () {
     test('maps the first message slot to message 0', () {
       const layout = MessageListLayout(messageCount: 5);

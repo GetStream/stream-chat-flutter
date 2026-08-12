@@ -56,6 +56,12 @@ jobs:
     timeout-minutes: 15
     if: needs.gate.outputs.should_run == 'true'
     runs-on: ubuntu-latest
+    # Overrides the workflow-level block, so `contents: read` must be repeated.
+    # The complexity audit posts a sticky PR comment, which needs write access;
+    # without it the action still annotates but silently skips the comment.
+    permissions:
+      contents: read
+      pull-requests: write
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v7
@@ -74,8 +80,26 @@ jobs:
         if: github.base_ref == 'master'
         run: |
           melos run lint:pub
-      - uses: kevmoo/cognitive_complexity.dart@main
+      # Gates cognitive complexity on declarations the PR actually touches.
+      #
+      # `targets` must be listed explicitly: the action defaults to `lib`, which
+      # does not exist at the root of this monorepo, so the default silently
+      # matches nothing and the gate passes unconditionally.
+      #
+      # PR-only, because `diff-base` needs a base ref. On push to master
+      # `github.base_ref` is empty, and an empty `diff-base` makes the action
+      # scan whole files rather than the diff — which would fail on the
+      # pre-existing hotspots this gate is not meant to block.
+      - name: "Cognitive Complexity"
+        if: github.event_name == 'pull_request'
+        uses: kevmoo/cognitive_complexity.dart@main
         with:
+          targets: >-
+            packages/stream_chat/lib
+            packages/stream_chat_flutter/lib
+            packages/stream_chat_flutter_core/lib
+            packages/stream_chat_persistence/lib
+            packages/stream_chat_localizations/lib
           diff-base: origin/${{ github.base_ref }}
           fail-threshold: 15
           fail-on-increase: true
