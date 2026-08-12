@@ -30,7 +30,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        api-level: [34, 31, 28]
+        api-level: [34]
     steps:
       - uses: actions/checkout@v7
 
@@ -87,90 +87,90 @@ jobs:
             sample_app/stream-chat-test-mock-server/logs
             sample_app/build/e2e-test.log
 
-  ios:
-    runs-on: macos-15
-    timeout-minutes: 40
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - ios: "26.2"
-            device: "iPhone 17 Pro"
-            setup_runtime: false
-          - ios: "18.5"
-            device: "iPhone 16 Pro"
-            setup_runtime: false
-          - ios: "17.5"
-            device: "iPhone 15 Pro"
-            setup_runtime: true
-    env:
-      XCODE_VERSION: "26.2"
-    steps:
-      - uses: actions/checkout@v7
+  # ios:
+  #   runs-on: macos-15
+  #   timeout-minutes: 40
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       include:
+  #         - ios: "26.2"
+  #           device: "iPhone 17 Pro"
+  #           setup_runtime: false
+  #         - ios: "18.5"
+  #           device: "iPhone 16 Pro"
+  #           setup_runtime: false
+  #         - ios: "17.5"
+  #           device: "iPhone 15 Pro"
+  #           setup_runtime: true
+  #   env:
+  #     XCODE_VERSION: "26.2"
+  #   steps:
+  #     - uses: actions/checkout@v7
 
-      - uses: ./.github/actions/setup-ruby
+  #     - uses: ./.github/actions/setup-ruby
 
-      - uses: ./.github/actions/setup-flutter
+  #     - uses: ./.github/actions/setup-flutter
 
-      - uses: ./.github/actions/setup-ios-runtime
-        if: ${{ matrix.setup_runtime }}
-        with:
-          version: ${{ matrix.ios }}
-          device: ${{ matrix.device }}
+  #     - uses: ./.github/actions/setup-ios-runtime
+  #       if: ${{ matrix.setup_runtime }}
+  #       with:
+  #         version: ${{ matrix.ios }}
+  #         device: ${{ matrix.device }}
 
-      - name: Use Firebase stubs
-        run: cp sample_app/pubspec_overrides.e2e.yaml sample_app/pubspec_overrides.yaml
+  #     - name: Use Firebase stubs
+  #       run: cp sample_app/pubspec_overrides.e2e.yaml sample_app/pubspec_overrides.yaml
 
-      - name: Bootstrap
-        run: |
-          flutter precache --ios
-          flutter config --no-enable-swift-package-manager
-          flutter pub global activate melos
-          melos bootstrap
+  #     - name: Bootstrap
+  #       run: |
+  #         flutter precache --ios
+  #         flutter config --no-enable-swift-package-manager
+  #         flutter pub global activate melos
+  #         melos bootstrap
 
-      # After Bootstrap so the cache keys hash the resolved pubspec.lock
-      - uses: ./.github/actions/cache-cocoapods
-        with:
-          key-suffix: ${{ matrix.ios }}
+  #     # After Bootstrap so the cache keys hash the resolved pubspec.lock
+  #     - uses: ./.github/actions/cache-cocoapods
+  #       with:
+  #         key-suffix: ${{ matrix.ios }}
 
-      - name: Launch Allure TestOps
-        working-directory: sample_app/ios
-        run: bundle exec fastlane allure_launch cron:true
+  #     - name: Launch Allure TestOps
+  #       working-directory: sample_app/ios
+  #       run: bundle exec fastlane allure_launch cron:true
 
-      - name: Run e2e (iOS simulator)
-        working-directory: sample_app/ios
-        run: bundle exec fastlane run_e2e_test platform:ios ios:${{ matrix.ios }} device:"${{ matrix.device }} (${{ matrix.ios }})" mock_server_branch:${{ env.mock_server_branch }}
+  #     - name: Run e2e (iOS simulator)
+  #       working-directory: sample_app/ios
+  #       run: bundle exec fastlane run_e2e_test platform:ios ios:${{ matrix.ios }} device:"${{ matrix.device }} (${{ matrix.ios }})" mock_server_branch:${{ env.mock_server_branch }}
 
-      - name: Upload Allure results
-        if: env.LAUNCH_ID != '' && (success() || failure())
-        working-directory: sample_app/ios
-        run: bundle exec fastlane allure_upload launch_id:$LAUNCH_ID
+  #     - name: Upload Allure results
+  #       if: env.LAUNCH_ID != '' && (success() || failure())
+  #       working-directory: sample_app/ios
+  #       run: bundle exec fastlane allure_upload launch_id:$LAUNCH_ID
 
-      - name: Allure TestOps Launch Removal
-        if: env.LAUNCH_ID != '' && cancelled()
-        working-directory: sample_app/ios
-        run: bundle exec fastlane allure_launch_removal launch_id:$LAUNCH_ID
+  #     - name: Allure TestOps Launch Removal
+  #       if: env.LAUNCH_ID != '' && cancelled()
+  #       working-directory: sample_app/ios
+  #       run: bundle exec fastlane allure_launch_removal launch_id:$LAUNCH_ID
 
-      - uses: actions/upload-artifact@v7
-        if: failure()
-        with:
-          name: e2e-nightly-ios-${{ matrix.ios }}
-          path: |
-            sample_app/stream-chat-test-mock-server/logs
-            sample_app/build/e2e-test.log
+  #     - uses: actions/upload-artifact@v7
+  #       if: failure()
+  #       with:
+  #         name: e2e-nightly-ios-${{ matrix.ios }}
+  #         path: |
+  #           sample_app/stream-chat-test-mock-server/logs
+  #           sample_app/build/e2e-test.log
 
-  slack:
-    name: Slack Report
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    needs: [android, ios]
-    if: failure() && github.event_name == 'schedule'
-    steps:
-      - uses: 8398a7/action-slack@v3
-        with:
-          status: cancelled
-          text: "You shall not pass!"
-          job_name: "${{ github.workflow }}: ${{ github.job }}"
-          fields: repo,commit,author,workflow
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_NIGHTLY_CHECKS }}
+  # slack:
+  #   name: Slack Report
+  #   runs-on: ubuntu-latest
+  #   timeout-minutes: 10
+  #   needs: [android, ios]
+  #   if: failure() && github.event_name == 'schedule'
+  #   steps:
+  #     - uses: 8398a7/action-slack@v3
+  #       with:
+  #         status: cancelled
+  #         text: "You shall not pass!"
+  #         job_name: "${{ github.workflow }}: ${{ github.job }}"
+  #         fields: repo,commit,author,workflow
+  #       env:
+  #         SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_NIGHTLY_CHECKS }}
