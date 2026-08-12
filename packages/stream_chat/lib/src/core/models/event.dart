@@ -45,6 +45,7 @@ class Event {
     this.pushPreference,
     this.channelPushPreference,
     this.channelMessageCount,
+    this.watcherCount,
     this.lastDeliveredAt,
     this.lastDeliveredMessageId,
     this.extraData = const {},
@@ -173,6 +174,12 @@ class Event {
   /// The total number of messages in the channel.
   final int? channelMessageCount;
 
+  /// The number of users currently watching the channel.
+  ///
+  /// Sent with `user.watching.start`, `user.watching.stop` and `message.new`
+  /// events, reflecting the authoritative watcher count after the change.
+  final int? watcherCount;
+
   /// The date of the last delivered message.
   final DateTime? lastDeliveredAt;
 
@@ -222,6 +229,7 @@ class Event {
     'push_preference',
     'channel_push_preference',
     'channel_message_count',
+    'watcher_count',
     'last_delivered_at',
     'last_delivered_message_id',
   ];
@@ -269,6 +277,7 @@ class Event {
     PushPreference? pushPreference,
     ChannelPushPreference? channelPushPreference,
     int? channelMessageCount,
+    int? watcherCount,
     DateTime? lastDeliveredAt,
     String? lastDeliveredMessageId,
     Map<String, Object?>? extraData,
@@ -309,6 +318,7 @@ class Event {
     pushPreference: pushPreference ?? this.pushPreference,
     channelPushPreference: channelPushPreference ?? this.channelPushPreference,
     channelMessageCount: channelMessageCount ?? this.channelMessageCount,
+    watcherCount: watcherCount ?? this.watcherCount,
     lastDeliveredAt: lastDeliveredAt ?? this.lastDeliveredAt,
     lastDeliveredMessageId: lastDeliveredMessageId ?? this.lastDeliveredMessageId,
     isLocal: isLocal,

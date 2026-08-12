@@ -128,6 +128,7 @@ void setupMockChannel({
   final allMembers = members.isNotEmpty ? members : _defaultMembers(channel.id);
 
   when(() => client.state).thenReturn(clientState);
+  when(() => client.isLocalUnreadCountEnabled).thenReturn(false);
   when(() => channel.lastMessageAt).thenReturn(DateTime.parse('2020-06-22 12:00:00'));
   when(() => channel.lastMessageAtStream).thenAnswer((_) => Stream.value(DateTime.parse('2020-06-22 12:00:00')));
   when(() => channel.currentUserLastMessageAt).thenReturn(DateTime.parse('2020-06-22 12:00:00'));
@@ -140,6 +141,8 @@ void setupMockChannel({
   when(channel.getRemainingCooldown).thenReturn(0);
   when(() => channel.getRemainingCooldown(lastMessageAt: any(named: 'lastMessageAt'))).thenReturn(0);
   when(() => channel.isDistinct).thenReturn(false);
+  when(() => channel.isGroup).thenReturn(true);
+  when(() => channel.isOneToOne).thenReturn(false);
   when(() => channel.isMuted).thenReturn(false);
   when(() => channel.isMutedStream).thenAnswer((_) => Stream.value(false));
   when(() => channel.isPinned).thenReturn(false);

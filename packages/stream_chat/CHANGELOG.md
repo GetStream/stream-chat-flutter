@@ -2,10 +2,41 @@
 
 ✅ Added
 
-- Added an `upsert` flag to `ChannelClientState.updateMessage` (defaults to `true`). Pass `false` to update a message only if it's already loaded in the state, skipping unknown messages instead of adding them.
+- Added `StreamChatClient.isLocalUnreadCountEnabled` (default `false`). When enabled, channels that have read events disabled (e.g. livestream channel types) track their unread count locally, on-device: incoming messages increment it, hard-deleted messages decrement it, and `Channel.markRead` / `markUnread` / `markUnreadByTimestamp` update it locally without a network request — including `Read.lastReadMessageId`, so the unread divider and jump-to-unread button anchor to the right message. Channels that support read receipts are unaffected and keep relying on server-driven unread counts.
+- Added `Event.watcherCount`, exposing the server-provided `watcher_count` field on events (e.g. `user.watching.start`, `user.watching.stop`, `message.new`).
+- Added `StreamChatNetworkError.type` (a `StreamChatNetworkErrorType` capturing the transport failure kind — connection error, timeout, cancellation, etc.).
+- Exported `FilterOperator` alongside `Filter`.
+
+⚠️ Deprecated
+
+- Deprecated `StreamChatNetworkError.isRequestCancelledError` in favor of `type == StreamChatNetworkErrorType.cancel`.
 
 🔄 Changed
 
+- Raised the minimum `dio` version to `^5.11.0`.
+
+🐞 Fixed
+
+- Fixed `StreamWebSocketError.toString()` using a `WebSocketError(...)` prefix instead of the class name; it now also includes `code`, and `StreamChatNetworkError.toString()` now surfaces the transport `type` when known.
+- Fixed `ChannelClientState.watcherCount` staying stale during a session.
+- Fixed watchers not being removed from `ChannelClientState.watchers` on `user.watching.stop`.
+- Fixed `Channel.name`/`image`/`extraData` setters throwing after a *failed* initialization; they now only throw once the channel is successfully initialized.
+- Fixed `Channel.initialized` staying errored after a failed init; it now reflects a subsequent successful (re)initialization.
+- Fixed a `StateError` (`Cannot add new events after calling close`) thrown when the client is disposed while a reconnect recovery is still in flight.
+- Fixed `Message.deleteMyReaction` dropping an entire reaction group when its summed scores reached zero even though other users' reactions kept the count positive; the group is now retained as long as its count stays above zero.
+- Fixed reaction groups synthesized from legacy `reaction_counts`/`reaction_scores` payloads being discarded at parse time when their score total was zero or negative despite a positive count.
+- Fixed `Channel.getReplies` adding the parent message to `ChannelClientState.threads` when a backend returns it alongside the replies, which rendered the thread root twice. The online path now filters it out, matching the offline one.
+
+## 10.2.0
+
+✅ Added
+
+- Added an `upsert` flag to `ChannelClientState.updateMessage` (defaults to `true`). Pass `false` to update a message only if it's already loaded in the state, skipping unknown messages instead of adding them.
+- Added `EventType.userPresenceChanged` (`user.presence.changed`) constant.
+
+🔄 Changed
+
+- Reduced the default `participantLimit` and `memberLimit` on `ThreadOptions` from `100` to `10`.
 - `StreamChatClient.updateSystemEnvironment` now sanitizes the passed `SystemEnvironment`: `sdkName`, `sdkVersion`, and `osName` are locked to internal defaults, and `sdkIdentifier` only accepts the `dart` → `flutter` promotion (other values, including a `flutter` → `dart` demotion, are ignored). `appName`, `appVersion`, `osVersion`, and `deviceModel` continue to pass through as-is.
 
 🐞 Fixed
@@ -13,7 +44,6 @@
 - `StreamChatNetworkError.fromDioException` no longer throws `FormatException` when an edge/proxy returns a non-JSON body (e.g. a plain `upstream request timeout` from a 504); the original network error now surfaces with `statusCode` / `statusMessage` intact.
 - `ComparableField` now folds diacritics/ligatures and ignores case when comparing strings, so `SortOption` on fields like `name` no longer pushes lowercase or non-ASCII names (`jhon`, `Łukasz`, `Øystein`) to the end of client-sorted lists ([#2601](https://github.com/GetStream/stream-chat-flutter/issues/2601)).
 - Fixed `message.updated` and soft `message.deleted` events being incorrectly upserted into `ChannelState.messages` (and thread reply lists) when they targeted a message outside the currently loaded window.
-
 ## 10.1.0
 
 ✅ Added

@@ -10,6 +10,8 @@ import 'package:sample_app/utils/app_config.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart' hide PushProvider;
 import 'package:stream_chat_persistence/stream_chat_persistence.dart';
 
+bool get platformSupportsPersistenceCredentials => !CurrentPlatform.isWeb && !CurrentPlatform.isMacOS;
+
 /// Secure-storage keys for the active session.
 const kStreamApiKey = 'STREAM_API_KEY';
 const kStreamUserId = 'STREAM_USER_ID';
@@ -45,10 +47,15 @@ Future<void> _sampleAppLogHandler(LogRecord record) async {
 
 @visibleForTesting
 class StreamConnectionOverride {
-  const StreamConnectionOverride({this.baseURL, this.baseWsUrl});
+  const StreamConnectionOverride({
+    this.baseURL,
+    this.baseWsUrl,
+    this.usePersistence = false,
+  });
 
   final String? baseURL;
   final String? baseWsUrl;
+  final bool usePersistence;
 }
 
 StreamChatClient _buildStreamChatClient(
@@ -57,19 +64,47 @@ StreamChatClient _buildStreamChatClient(
 }) {
   final logLevel = connectionOverride != null ? Level.OFF : (kDebugMode ? Level.INFO : Level.SEVERE);
   return StreamChatClient(
-    apiKey,
-    logLevel: logLevel,
-    logHandlerFunction: _sampleAppLogHandler,
-    retryPolicy: RetryPolicy(
-      maxRetryAttempts: 3,
-      shouldRetry: (client, attempt, error) {
-        return error is StreamChatNetworkError && error.isRetriable;
-      },
-    ),
-    baseURL: connectionOverride?.baseURL,
-    baseWsUrl: connectionOverride?.baseWsUrl,
-  )..chatPersistenceClient = _chatPersistenceClient;
+      apiKey,
+      logLevel: logLevel,
+      logHandlerFunction: _sampleAppLogHandler,
+      retryPolicy: RetryPolicy(
+        maxRetryAttempts: 3,
+        shouldRetry: (client, attempt, error) {
+          return error is StreamChatNetworkError && error.isRetriable;
+        },
+      ),
+      baseURL: connectionOverride?.baseURL,
+      baseWsUrl: connectionOverride?.baseWsUrl,
+      // e2e only: lets the harness simulate a full network outage by failing
+      // every HTTP request (paired with the WebSocket close from
+      // debugConnectivityStream). See `AuthController.debugForceOffline`.
+      chatApiInterceptors: connectionOverride != null ? [_offlineSimulationInterceptor] : null,
+    )
+    ..chatPersistenceClient = switch (connectionOverride) {
+      // Production always persists.
+      null => _chatPersistenceClient,
+      // Under e2e, persistence is opt-in per test; the harness empties the DB
+      // on teardown (see AuthController.debugReset) so it can't leak between
+      // tests. Off by default keeps most e2e tests fast and DB-free.
+      final override => override.usePersistence ? _chatPersistenceClient : null,
+    };
 }
+
+/// Rejects every Stream API request with a connection error while
+/// [AuthController.debugForceOffline] is set, mimicking a device that has lost
+/// its network — the HTTP half of the e2e offline switch.
+final _offlineSimulationInterceptor = InterceptorsWrapper(
+  onRequest: (options, handler) {
+    if (!authController.debugForceOffline) return handler.next(options);
+    return handler.reject(
+      DioException(
+        requestOptions: options,
+        type: DioExceptionType.connectionError,
+        error: 'e2e: simulated offline',
+      ),
+    );
+  },
+);
 
 /// Authentication state exposed by [AuthController].
 sealed class AuthState {
@@ -111,15 +146,31 @@ class AuthController extends ValueNotifier<AuthState> {
   @visibleForTesting
   StreamConnectionOverride? debugConnectionOverride;
 
+  /// Test-controlled connectivity source fed to the `StreamChat` widget.
+  ///
+  /// When set, it replaces the real `connectivity_plus` monitor so e2e tests
+  /// can deterministically drive the client offline/online (see the e2e
+  /// harness's `goOffline`/`goOnline`). Null in production (read by `app.dart`,
+  /// so it can't be `@visibleForTesting` like [debugConnectionOverride]).
+  Stream<List<ConnectivityResult>>? debugConnectivityStream;
+
+  /// e2e only: when true, every Stream API HTTP request fails with a simulated
+  /// connection error (see [_offlineSimulationInterceptor]). Paired with the
+  /// WebSocket close driven by [debugConnectivityStream] to simulate a full
+  /// network outage. Toggled by the harness's `goOffline`/`goOnline`.
+  @visibleForTesting
+  bool debugForceOffline = false;
+
   String? _activeApiKey;
   PushTokenManager? _pushTokenManager;
 
   /// Restores a previous session from secure storage, if any.
   ///
-  /// No-op on web or when no credentials are stored; failures are
-  /// swallowed so the user simply lands on the login flow.
+  /// No-op on platforms without credential persistence or when no credentials
+  /// are stored; failures are swallowed so the user simply lands on the login
+  /// flow.
   Future<void> tryAutoConnect() async {
-    if (CurrentPlatform.isWeb) return;
+    if (!platformSupportsPersistenceCredentials) return;
     if (value is! Unauthenticated) return;
 
     const secureStorage = FlutterSecureStorage();
@@ -169,7 +220,7 @@ class AuthController extends ValueNotifier<AuthState> {
     try {
       final ownUser = await client.connectUser(user, token);
 
-      if (persistCredentials && !CurrentPlatform.isWeb) {
+      if (persistCredentials && platformSupportsPersistenceCredentials) {
         const secureStorage = FlutterSecureStorage();
         await Future.wait([
           secureStorage.write(key: kStreamApiKey, value: apiKey),
@@ -204,7 +255,7 @@ class AuthController extends ValueNotifier<AuthState> {
     _pushTokenManager?.dispose().ignore();
     _pushTokenManager = null;
 
-    if (!CurrentPlatform.isWeb) {
+    if (platformSupportsPersistenceCredentials) {
       const secureStorage = FlutterSecureStorage();
       await secureStorage.deleteAll();
     }
@@ -222,12 +273,28 @@ class AuthController extends ValueNotifier<AuthState> {
     _pushTokenManager?.dispose().ignore();
     _pushTokenManager = null;
 
+    // Detach persistence from the client *before* closing it. Every SDK path
+    // that reaches for it either uses `chatPersistenceClient?.` or is guarded by
+    // `persistenceEnabled` (which is false once this is null), so anything that
+    // lands after this point short-circuits instead of asserting against a
+    // disconnected database. Ordering the teardown differently could not close
+    // that window: a debounced channel-state write fires up to a second later,
+    // and an HTTP request already on the wire cannot be cancelled at all — its
+    // response builds a `ChannelClientState`, whose constructor reads the cached
+    // threads. Both used to throw an async StateError, which the test framework
+    // then blamed on an unrelated test that had already passed.
+    final persistence = _client?.chatPersistenceClient;
+    _client?.chatPersistenceClient = null;
+    // dispose() won't flush; empty the DB so it can't leak into the next test.
+    await persistence?.disconnect(flush: true);
     await _client?.dispose();
     _client = null;
     _activeApiKey = null;
     debugConnectionOverride = null;
+    debugConnectivityStream = null;
+    debugForceOffline = false;
 
-    if (!CurrentPlatform.isWeb) {
+    if (platformSupportsPersistenceCredentials) {
       const secureStorage = FlutterSecureStorage();
       await secureStorage.deleteAll();
     }

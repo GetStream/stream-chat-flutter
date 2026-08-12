@@ -1,7 +1,16 @@
-name: e2e
+name: E2E Tests
 
 on:
   workflow_dispatch:
+    inputs:
+      android:
+        description: "Run Android e2e tests"
+        type: boolean
+        default: true
+      ios:
+        description: "Run iOS e2e tests"
+        type: boolean
+        default: true
   pull_request:
 
 permissions:
@@ -18,12 +27,14 @@ env:
 
 jobs:
   android:
+    # Always on pull_request; opt-out via the checkbox on workflow_dispatch.
+    if: github.event_name != 'workflow_dispatch' || inputs.android
     runs-on: ubuntu-latest
     timeout-minutes: 40
     env:
       ANDROID_API_LEVEL: "34"
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - uses: ./.github/actions/setup-java
 
@@ -54,6 +65,13 @@ jobs:
           profile: pixel_6
           script: cd sample_app/android && bundle exec fastlane run_e2e_test device:emulator-5554
 
+      - name: Attach videos to failed tests
+        if: failure()
+        working-directory: sample_app/android
+        run: |
+          sudo apt-get update && sudo apt-get install -y ffmpeg
+          bundle exec fastlane attach_videos
+
       - name: Upload Allure results
         if: env.LAUNCH_ID != '' && (success() || failure())
         working-directory: sample_app/android
@@ -73,26 +91,22 @@ jobs:
             sample_app/build/e2e-test.log
 
   ios:
+    # Only on workflow_dispatch, when the checkbox is ticked.
+    if: github.event_name == 'workflow_dispatch' && inputs.ios
     runs-on: macos-15
     timeout-minutes: 40
     env:
       IOS_SIMULATOR_VERSION: "26.2"
       IOS_SIMULATOR_DEVICE: "iPhone 17"
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - uses: ./.github/actions/setup-flutter
 
       - uses: ./.github/actions/setup-ruby
 
-      - uses: ./.github/actions/cache-cocoapods
-        with:
-          key-suffix: ${{ runner.os }}
-
-      - uses: ./.github/actions/cache-xcode-cas
-        with:
-          key-suffix: ${{ runner.os }}
-          xcode-version: ${{ env.IOS_SIMULATOR_VERSION }}
+      - name: Use Firebase stubs
+        run: cp sample_app/pubspec_overrides.e2e.yaml sample_app/pubspec_overrides.yaml
 
       - name: Bootstrap
         run: |
@@ -100,6 +114,11 @@ jobs:
           flutter config --no-enable-swift-package-manager
           flutter pub global activate melos
           melos bootstrap
+
+      # After Bootstrap so the cache keys hash the resolved pubspec.lock
+      - uses: ./.github/actions/cache-cocoapods
+        with:
+          key-suffix: ${{ runner.os }}
 
       - name: Launch Allure TestOps
         working-directory: sample_app/ios

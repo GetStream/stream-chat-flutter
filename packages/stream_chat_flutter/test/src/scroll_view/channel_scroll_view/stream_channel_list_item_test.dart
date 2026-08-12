@@ -130,6 +130,52 @@ void main() {
     });
 
     testWidgets(
+      'drops the cached message once the predicate stops accepting it',
+      (tester) async {
+        final message = Message(
+          text: 'no longer previewable',
+          user: User(id: 'other'),
+          createdAt: DateTime(2024, 1, 1),
+        );
+
+        Future<void> pumpWithPredicate(bool Function(Message) predicate) {
+          return tester.pumpWidget(
+            MaterialApp(
+              home: StreamChat(
+                client: client,
+                child: Scaffold(
+                  body: ChannelLastMessageText(
+                    channel: channel,
+                    lastMessagePredicate: predicate,
+                  ),
+                ),
+              ),
+            ),
+          );
+        }
+
+        when(() => channelState.messages).thenReturn([message]);
+        when(() => channelState.messagesStream).thenAnswer((_) => Stream.value([message]));
+
+        await pumpWithPredicate((_) => true);
+        await tester.pumpAndSettle();
+
+        expect(find.text('no longer previewable'), findsOneWidget);
+
+        // The channel starts reloading, so the cache is what the preview would
+        // fall back to — but the new predicate rejects the cached message.
+        when(() => channelState.isUpToDate).thenReturn(false);
+        when(() => channelState.messages).thenReturn([]);
+        when(() => channelState.messagesStream).thenAnswer((_) => Stream.value([]));
+
+        await pumpWithPredicate((_) => false);
+        await tester.pumpAndSettle();
+
+        expect(find.text('no longer previewable'), findsNothing);
+      },
+    );
+
+    testWidgets(
       'custom lastMessagePredicate fully replaces the default',
       (tester) async {
         final shadowedByOther = Message(
@@ -160,6 +206,105 @@ void main() {
         expect(find.text('shadowed by other'), findsOneWidget);
       },
     );
+  });
+
+  group('ChannelLastMessageDate', () {
+    const currentUserId = 'me';
+
+    // A date the preview must never show. Stubbed as `lastMessageAt` in every
+    // test, so reading the channel model is a visible failure.
+    final lastMessageAt = DateTime(2024, 6, 6, 6, 6);
+
+    late MockClient client;
+    late MockClientState clientState;
+    late MockChannel channel;
+    late MockChannelState channelState;
+
+    setUp(() {
+      client = MockClient();
+      clientState = MockClientState();
+      channel = MockChannel();
+      channelState = MockChannelState();
+
+      final currentUser = OwnUser(id: currentUserId, name: 'Me');
+
+      when(() => client.state).thenReturn(clientState);
+      when(() => clientState.currentUser).thenReturn(currentUser);
+      when(() => clientState.currentUserStream).thenAnswer((_) => Stream.value(currentUser));
+      when(() => channel.state).thenReturn(channelState);
+      when(() => channel.client).thenReturn(client);
+      when(() => channel.lastMessageAt).thenReturn(lastMessageAt);
+      when(() => channel.lastMessageAtStream).thenAnswer((_) => Stream.value(lastMessageAt));
+      when(() => channelState.channelState).thenReturn(const ChannelState());
+    });
+
+    Future<void> pumpWithMessages(
+      WidgetTester tester,
+      List<Message> messages,
+    ) async {
+      when(() => channelState.messages).thenReturn(messages);
+      when(() => channelState.messagesStream).thenAnswer((_) => Stream.value(messages));
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: StreamChat(
+            client: client,
+            child: Scaffold(
+              // Raw timestamps, so the assertions don't depend on the default
+              // formatter's relative-date wording.
+              body: ChannelLastMessageDate(
+                channel: channel,
+                formatter: (context, date) => date.toIso8601String(),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('shows the preview message date, not lastMessageAt', (tester) async {
+      final createdAt = DateTime(2024, 1, 1, 10, 30);
+      final message = Message(
+        text: 'hello world',
+        user: User(id: 'other'),
+        createdAt: createdAt,
+      );
+
+      await pumpWithMessages(tester, [message]);
+
+      expect(find.text(createdAt.toLocal().toIso8601String()), findsOneWidget);
+      expect(find.text(lastMessageAt.toLocal().toIso8601String()), findsNothing);
+    });
+
+    testWidgets('shows nothing when the channel has no messages to preview', (tester) async {
+      // A truncated channel: messages gone, `lastMessageAt` still set.
+      await pumpWithMessages(tester, []);
+
+      expect(find.byType(StreamTimestamp), findsNothing);
+      expect(find.text(lastMessageAt.toLocal().toIso8601String()), findsNothing);
+    });
+
+    testWidgets('follows the same message the preview text does', (tester) async {
+      // The newest message is filtered out of the preview, so the date has to
+      // fall back with it.
+      final visible = Message(
+        text: 'visible',
+        user: User(id: 'other'),
+        createdAt: DateTime(2024, 1, 1, 10),
+      );
+      final errored = Message(
+        text: 'errored',
+        type: MessageType.error,
+        user: User(id: 'other'),
+        createdAt: DateTime(2024, 1, 2, 11),
+      );
+
+      await pumpWithMessages(tester, [visible, errored]);
+
+      expect(find.text(visible.createdAt.toLocal().toIso8601String()), findsOneWidget);
+      expect(find.text(errored.createdAt.toLocal().toIso8601String()), findsNothing);
+    });
   });
 
   group('ChannelListTileSubtitle', () {
@@ -319,6 +464,33 @@ void main() {
     );
 
     testWidgets(
+      "rebinding to a not-up-to-date empty channel shows that channel's empty state",
+      (tester) async {
+        // Same State reused across channels, but B is still loading, so the
+        // preserve-last-known fallback kicks in. It must not fall back to a
+        // message belonging to channel A.
+        final other = User(id: 'other');
+        final msgA = Message(id: 'ma', text: 'channel-a-message', user: other);
+
+        when(() => stateA.messages).thenReturn([msgA]);
+        await pumpSubtitle(tester, channelA);
+        messagesA.add([msgA]);
+        await tester.pumpAndSettle();
+
+        expect(find.text('channel-a-message'), findsOneWidget);
+
+        isUpToDateB = false;
+        when(() => stateB.messages).thenReturn([]);
+        await pumpSubtitle(tester, channelB);
+        messagesB.add([]);
+        await tester.pumpAndSettle();
+
+        expect(find.text('channel-a-message'), findsNothing);
+        expect(find.text(emptyText), findsOneWidget);
+      },
+    );
+
+    testWidgets(
       'shows the empty-state when the channel is truncated while up-to-date',
       (tester) async {
         // A channel.truncated event clears messages but leaves isUpToDate true.
@@ -342,4 +514,167 @@ void main() {
       },
     );
   });
+
+  group('StreamChannelListTile a11y', () {
+    Widget wrap(Widget child) => MaterialApp(
+      theme: ThemeData(extensions: [StreamTheme()]),
+      home: Scaffold(body: child),
+    );
+
+    testWidgets('merges children into a single accessible node with the composed label', (tester) async {
+      final handle = tester.ensureSemantics();
+
+      await tester.pumpWidget(
+        wrap(
+          StreamChannelListTile(
+            avatar: const _SilentAvatar(),
+            title: const Text('General'),
+            subtitle: const Text('Alice: 2 photos'),
+            timestamp: const Text('2h'),
+            unreadCount: 2,
+            isMuted: true,
+            onTap: () {},
+          ),
+        ),
+      );
+
+      // A silent avatar (a DM avatar wraps itself in ExcludeSemantics) must
+      // contribute nothing to the merged label.
+      expect(find.bySemanticsLabel('AVATAR-SENTINEL'), findsNothing);
+
+      // The tile's composed label carries the name, muted state, unread
+      // count, preview, and timestamp — merged into one accessible node.
+      // MergeSemantics joins the child labels with newlines, so match with
+      // `dotAll: true` so `.` crosses the line breaks.
+      expect(
+        find.bySemanticsLabel(
+          RegExp(
+            'General.*muted.*2h.*2 unread.*Alice: 2 photos',
+            dotAll: true,
+          ),
+        ),
+        findsOneWidget,
+      );
+
+      handle.dispose();
+    });
+
+    testWidgets('a labeled avatar contributes its label to the composed row announcement', (tester) async {
+      final handle = tester.ensureSemantics();
+
+      await tester.pumpWidget(
+        wrap(
+          StreamChannelListTile(
+            avatar: const _LabeledAvatar('Group'),
+            title: const Text('Team'),
+            subtitle: const Text('Alice: sup'),
+            timestamp: const Text('2h'),
+            onTap: () {},
+          ),
+        ),
+      );
+
+      // A group avatar's semantics label (emitted by StreamChannelAvatar for
+      // groups) is picked up by the row's MergeSemantics wrap and prepended
+      // to the announcement, restoring the "this is a group" context that
+      // the multi-avatar visual conveys to sighted users.
+      expect(
+        find.bySemanticsLabel(
+          RegExp('Group.*Team.*Alice: sup', dotAll: true),
+        ),
+        findsOneWidget,
+      );
+
+      handle.dispose();
+    });
+
+    testWidgets('unreadCount == 0 omits the "unread" state from the label', (tester) async {
+      final handle = tester.ensureSemantics();
+
+      await tester.pumpWidget(
+        wrap(
+          StreamChannelListTile(
+            avatar: const SizedBox.shrink(),
+            title: const Text('General'),
+            subtitle: const Text('Hi'),
+            timestamp: const Text('2h'),
+            onTap: () {},
+          ),
+        ),
+      );
+
+      expect(find.bySemanticsLabel(RegExp('General')), findsOneWidget);
+      expect(find.bySemanticsLabel(RegExp('unread')), findsNothing);
+
+      handle.dispose();
+    });
+
+    testWidgets('isPinned adds the "pinned" fragment to the merged label', (tester) async {
+      final handle = tester.ensureSemantics();
+
+      await tester.pumpWidget(
+        wrap(
+          StreamChannelListTile(
+            avatar: const _SilentAvatar(),
+            title: const Text('General'),
+            subtitle: const Text('Hi'),
+            timestamp: const Text('2h'),
+            isPinned: true,
+            onTap: () {},
+          ),
+        ),
+      );
+
+      expect(
+        find.bySemanticsLabel(RegExp('General.*pinned.*2h.*Hi', dotAll: true)),
+        findsOneWidget,
+      );
+      handle.dispose();
+    });
+
+    testWidgets('muted + pinned combined announce in order', (tester) async {
+      final handle = tester.ensureSemantics();
+
+      await tester.pumpWidget(
+        wrap(
+          StreamChannelListTile(
+            avatar: const _SilentAvatar(),
+            title: const Text('General'),
+            subtitle: const Text('Hi'),
+            timestamp: const Text('2h'),
+            isMuted: true,
+            isPinned: true,
+            onTap: () {},
+          ),
+        ),
+      );
+
+      expect(
+        find.bySemanticsLabel(RegExp('General.*muted.*pinned.*2h.*Hi', dotAll: true)),
+        findsOneWidget,
+      );
+      handle.dispose();
+    });
+  });
+}
+
+// Simulates a DM avatar — silent (wraps its sentinel text in
+// ExcludeSemantics). Keeps the a11y assertions independent of any real
+// avatar widget's internals.
+class _SilentAvatar extends StatelessWidget {
+  const _SilentAvatar();
+
+  @override
+  Widget build(BuildContext context) => const ExcludeSemantics(child: Text('AVATAR-SENTINEL'));
+}
+
+// Simulates a group avatar — participates in semantics with a label,
+// matching what StreamChannelAvatar emits for group channels.
+class _LabeledAvatar extends StatelessWidget {
+  const _LabeledAvatar(this.label);
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) => Semantics(label: label, child: const SizedBox.shrink());
 }

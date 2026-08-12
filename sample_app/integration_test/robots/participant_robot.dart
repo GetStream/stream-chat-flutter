@@ -174,3 +174,31 @@ class ParticipantRobot {
     return this;
   }
 }
+
+/// Fluent chaining over async [ParticipantRobot] actions so test steps read like
+/// the native robots (`participantRobot.readMessage().addReaction(type)`).
+///
+/// Only the methods currently used by the ported suites are mirrored here; add
+/// more from [ParticipantRobot] as new suites need to chain them.
+extension ParticipantRobotChain on Future<ParticipantRobot> {
+  Future<ParticipantRobot> readMessage() => then((it) => it.readMessage());
+
+  Future<ParticipantRobot> sendMessage(String text, {int delay = 0}) =>
+      then((it) => it.sendMessage(text, delay: delay));
+
+  Future<ParticipantRobot> editMessage(String text) => then((it) => it.editMessage(text));
+
+  Future<ParticipantRobot> deleteMessage({bool hard = false}) => then((it) => it.deleteMessage(hard: hard));
+
+  Future<ParticipantRobot> sendMessageInThread(String text, {bool alsoSendInChannel = false}) =>
+      then((it) => it.sendMessageInThread(text, alsoSendInChannel: alsoSendInChannel));
+
+  Future<ParticipantRobot> startTyping() => then((it) => it.startTyping());
+
+  Future<ParticipantRobot> stopTyping() => then((it) => it.stopTyping());
+
+  Future<ParticipantRobot> addReaction(ReactionType type, {int delay = 0}) =>
+      then((it) => it.addReaction(type, delay: delay));
+
+  Future<ParticipantRobot> deleteReaction(ReactionType type) => then((it) => it.deleteReaction(type));
+}

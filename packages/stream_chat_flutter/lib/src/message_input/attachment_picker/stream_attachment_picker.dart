@@ -202,6 +202,25 @@ class _TabbedAttachmentPickerOptions extends StatelessWidget {
                       _ => null,
                     };
 
+                    Widget button = StreamButton.icon(
+                      style: StreamButtonStyle.secondary,
+                      type: StreamButtonType.ghost,
+                      size: StreamButtonSize.large,
+                      onPressed: onPressed,
+                      isSelected: isSelected,
+                      autofocus: isSelected,
+                      icon: Icon(option.icon),
+                    );
+
+                    // Only show a tooltip if the option provides a title.
+                    if (option.title case final title?) {
+                      button = Tooltip(
+                        message: title,
+                        excludeFromSemantics: true,
+                        child: button,
+                      );
+                    }
+
                     return MergeSemantics(
                       child: Semantics(
                         label: option.title,
@@ -209,19 +228,7 @@ class _TabbedAttachmentPickerOptions extends StatelessWidget {
                         role: SemanticsRole.tab,
                         child: Stack(
                           children: [
-                            Tooltip(
-                              message: option.title,
-                              excludeFromSemantics: true,
-                              child: StreamButton.icon(
-                                style: StreamButtonStyle.secondary,
-                                type: StreamButtonType.ghost,
-                                size: StreamButtonSize.large,
-                                onPressed: onPressed,
-                                isSelected: isSelected,
-                                autofocus: isSelected,
-                                icon: Icon(option.icon),
-                              ),
-                            ),
+                            button,
                             Semantics(
                               label: localizations.tabLabel(
                                 tabIndex: index + 1,

@@ -122,6 +122,15 @@ class _ChannelPageState extends State<ChannelPage> {
                 focusNode: _focusNode,
                 messageComposerController: _messageComposerController,
                 onQuotedMessageCleared: _messageComposerController.clearQuotedMessage,
+                // Without a handler the composer rethrows, and since the send
+                // button drops the returned future that surfaces as an
+                // unhandled async error. The SDK already keeps the message in a
+                // failed state and retries it once the connection is back, so
+                // logging is enough here. Typing events report through here too,
+                // hence the neutral wording.
+                onError: (error, stackTrace) {
+                  debugPrint('[composer] $error; $stackTrace');
+                },
                 enableVoiceRecording: true,
                 allowedAttachmentPickerTypes: [
                   ...AttachmentPickerType.values,
@@ -135,6 +144,7 @@ class _ChannelPageState extends State<ChannelPage> {
                   if (locationEnabled)
                     TabbedAttachmentPickerOption(
                       key: 'location-picker',
+                      title: 'Location',
                       icon: context.streamIcons.location,
                       supportedTypes: [const LocationPickerType()],
                       isEnabled: (value) {

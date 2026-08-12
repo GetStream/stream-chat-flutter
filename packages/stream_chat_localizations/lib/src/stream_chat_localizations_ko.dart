@@ -179,6 +179,24 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
   String get somethingWentWrongError => '뭔가 잘못됐습느다';
 
   @override
+  String get connectionErrorTitle => '인터넷 연결 없음';
+
+  @override
+  String get connectionErrorDescription => '인터넷 연결을 확인해 주세요';
+
+  @override
+  String get slowConnectionErrorTitle => '인터넷 연결이 느림';
+
+  @override
+  String get slowConnectionErrorDescription => '인터넷 연결에 문제가 있는 것 같습니다';
+
+  @override
+  String get genericErrorTitle => '오류';
+
+  @override
+  String get genericErrorDescription => '앗, 문제가 발생했습니다';
+
+  @override
   String get addMoreFilesLabel => '더 추가';
 
   @override
@@ -869,7 +887,7 @@ class _AccessibilityTranslationsKo extends AccessibilityTranslations {
   String voiceRecordingPreviewPauseLabel({required Duration duration}) => '음성 녹음 일시정지, ${formatDuration(duration)}';
 
   @override
-  String get attachmentPickerTooltip => '첨부 파일 선택 열기';
+  String get attachmentPickerTooltip => '첨부 파일 선택 전환';
 
   @override
   String get attachmentPickerOpenHint => '두 번 탭하여 첨부 파일 선택 열기';
@@ -951,6 +969,54 @@ class _AccessibilityTranslationsKo extends AccessibilityTranslations {
   String get deselectMediaTapHint => '선택 해제';
 
   @override
+  String get outgoingMessagePreviewLabel => '나';
+
+  @override
+  String incomingMessagePreviewLabel({String? senderName}) {
+    return senderName ?? '메시지';
+  }
+
+  @override
+  String get pollPreviewLabel => '투표';
+
+  @override
+  String get draftPreviewLabel => '임시 저장';
+
+  @override
+  String get messageSendingStatusLabel => '보내는 중';
+
+  @override
+  String get messageSentStatusLabel => '보냄';
+
+  @override
+  String get messageDeliveredStatusLabel => '전달됨';
+
+  @override
+  String get messageReadStatusLabel => '읽음';
+
+  @override
+  String unreadMessagesLabel({required int count}) {
+    return Intl.plural(
+      count,
+      one: '읽지 않은 메시지 $count개',
+      other: '읽지 않은 메시지 $count개',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String get channelGroupLabel => '그룹';
+
+  @override
+  String get systemMessagePreviewLabel => '시스템';
+
+  @override
+  String get channelMutedLabel => '음소거됨';
+
+  @override
+  String get channelPinnedLabel => '고정됨';
+
+  @override
   String get savePollTooltip => '투표 저장';
 
   @override
@@ -1013,12 +1079,39 @@ class _AccessibilityTranslationsKo extends AccessibilityTranslations {
 
   @override
   String attachmentsAddedAnnouncement({required int count}) {
-    return '첨부 파일 $count개가 추가되었습니다';
+    return Intl.plural(
+      count,
+      one: '첨부 파일 $count개가 추가되었습니다',
+      other: '첨부 파일 $count개가 추가되었습니다',
+      locale: localeName,
+    );
   }
 
   @override
   String attachmentsRemovedAnnouncement({required int count}) {
-    return '첨부 파일 $count개가 삭제되었습니다';
+    return Intl.plural(
+      count,
+      one: '첨부 파일 $count개가 삭제되었습니다',
+      other: '첨부 파일 $count개가 삭제되었습니다',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String formatRecentDateTime(DateTime date) {
+    if (date.isWithinLastMinute) return '방금';
+
+    final localDate = date.toLocal();
+    final jiffyDate = Jiffy.parseFromDateTime(localDate);
+    final time = jiffyDate.jm;
+
+    if (localDate.isToday) return '오늘 $time';
+    if (localDate.isYesterday) return '어제 $time';
+    if (localDate.isWithinLastWeek) return '${jiffyDate.EEEE} $time';
+    if (localDate.isInSameYear) {
+      return '${jiffyDate.format(pattern: 'M월 d일')} $time';
+    }
+    return '${jiffyDate.format(pattern: 'yyyy년 M월 d일')} $time';
   }
 
   @override

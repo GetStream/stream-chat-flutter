@@ -185,6 +185,24 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
   String get somethingWentWrongError => 'लोड करने में समस्या';
 
   @override
+  String get connectionErrorTitle => 'इंटरनेट कनेक्शन नहीं है';
+
+  @override
+  String get connectionErrorDescription => 'कृपया अपना इंटरनेट कनेक्शन जांचें';
+
+  @override
+  String get slowConnectionErrorTitle => 'धीमा इंटरनेट कनेक्शन';
+
+  @override
+  String get slowConnectionErrorDescription => 'ऐसा लगता है कि आपके इंटरनेट कनेक्शन में कोई समस्या है';
+
+  @override
+  String get genericErrorTitle => 'त्रुटि';
+
+  @override
+  String get genericErrorDescription => 'ओह, कुछ गलत हो गया';
+
+  @override
   String get addMoreFilesLabel => 'और जोड़ें';
 
   @override
@@ -888,7 +906,7 @@ class _AccessibilityTranslationsHi extends AccessibilityTranslations {
       'वॉइस रिकॉर्डिंग रोकें, ${formatDuration(duration)}';
 
   @override
-  String get attachmentPickerTooltip => 'अटैचमेंट चयनकर्ता खोलें';
+  String get attachmentPickerTooltip => 'अटैचमेंट चयनकर्ता टॉगल करें';
 
   @override
   String get attachmentPickerOpenHint => 'अटैचमेंट चयनकर्ता खोलने के लिए दो बार टैप करें';
@@ -970,6 +988,54 @@ class _AccessibilityTranslationsHi extends AccessibilityTranslations {
   String get deselectMediaTapHint => 'चयन हटाएँ';
 
   @override
+  String get outgoingMessagePreviewLabel => 'आप';
+
+  @override
+  String incomingMessagePreviewLabel({String? senderName}) {
+    return senderName ?? 'संदेश';
+  }
+
+  @override
+  String get pollPreviewLabel => 'पोल';
+
+  @override
+  String get draftPreviewLabel => 'मसौदा';
+
+  @override
+  String get messageSendingStatusLabel => 'भेजा जा रहा है';
+
+  @override
+  String get messageSentStatusLabel => 'भेजा गया';
+
+  @override
+  String get messageDeliveredStatusLabel => 'पहुंचा दिया';
+
+  @override
+  String get messageReadStatusLabel => 'पढ़ा गया';
+
+  @override
+  String unreadMessagesLabel({required int count}) {
+    return Intl.plural(
+      count,
+      one: '$count अपठित संदेश',
+      other: '$count अपठित संदेश',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String get channelGroupLabel => 'ग्रुप';
+
+  @override
+  String get systemMessagePreviewLabel => 'सिस्टम';
+
+  @override
+  String get channelMutedLabel => 'म्यूट';
+
+  @override
+  String get channelPinnedLabel => 'पिन किया गया';
+
+  @override
   String get savePollTooltip => 'पोल सहेजें';
 
   @override
@@ -1033,12 +1099,39 @@ class _AccessibilityTranslationsHi extends AccessibilityTranslations {
 
   @override
   String attachmentsAddedAnnouncement({required int count}) {
-    return '$count अटैचमेंट जोड़े गए';
+    return Intl.plural(
+      count,
+      one: '$count अटैचमेंट जोड़ा गया',
+      other: '$count अटैचमेंट जोड़े गए',
+      locale: localeName,
+    );
   }
 
   @override
   String attachmentsRemovedAnnouncement({required int count}) {
-    return '$count अटैचमेंट हटाए गए';
+    return Intl.plural(
+      count,
+      one: '$count अटैचमेंट हटाया गया',
+      other: '$count अटैचमेंट हटाए गए',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String formatRecentDateTime(DateTime date) {
+    if (date.isWithinLastMinute) return 'अभी';
+
+    final localDate = date.toLocal();
+    final jiffyDate = Jiffy.parseFromDateTime(localDate);
+    final time = jiffyDate.jm;
+
+    if (localDate.isToday) return 'आज $time पर';
+    if (localDate.isYesterday) return 'कल $time पर';
+    if (localDate.isWithinLastWeek) return '${jiffyDate.EEEE} $time पर';
+    if (localDate.isInSameYear) {
+      return '${jiffyDate.format(pattern: 'd MMM')} $time पर';
+    }
+    return '${jiffyDate.format(pattern: 'd MMM yyyy')} $time पर';
   }
 
   @override

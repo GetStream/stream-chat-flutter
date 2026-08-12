@@ -1,11 +1,233 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+import '../mock_server/data_types.dart';
+import '../pages/message_list_page.dart';
 import '../support/widget_test_extensions.dart';
+import 'backend_robot.dart';
 import 'user_robot.dart';
 
 extension UserRobotMessageListAsserts on UserRobot {
-  Future<UserRobot> assertMessage(String text) async {
-    await tester.waitUntilVisible(find.text(text));
+  Future<UserRobot> assertMessage(String text, {bool isDisplayed = true}) async {
+    final message = find.text(text);
+    if (isDisplayed) {
+      await tester.waitUntilVisible(message);
+    } else {
+      await tester.waitUntilNotVisible(message);
+    }
     return this;
   }
+
+  /// Asserts a message whose rendered text merely *contains* [text]. Useful for
+  /// multi-line messages: the markdown renderer collapses single newlines, so
+  /// the literal `'a\nb'` never matches — but each token still appears.
+  Future<UserRobot> assertMessageContains(String text) async {
+    await tester.waitUntilVisible(find.textContaining(text));
+    return this;
+  }
+
+  /// A thread reply is rendered as a regular message inside the thread view.
+  Future<UserRobot> assertThreadReply(String text) => assertMessage(text);
+
+  Future<UserRobot> assertEditedMessage(String text) async {
+    await assertMessage(text);
+    await tester.waitUntilVisible(MessageListPage.list.editedLabel);
+    return this;
+  }
+
+  Future<UserRobot> assertDeletedMessage({bool isDisplayed = true}) async {
+    final deleted = MessageListPage.list.deletedMessage;
+    if (isDisplayed) {
+      await tester.waitUntilVisible(deleted);
+    } else {
+      await tester.waitUntilNotVisible(deleted);
+    }
+    return this;
+  }
+
+  /// A hard-deleted message vanishes entirely: neither its text nor the
+  /// soft-delete placeholder remains.
+  Future<UserRobot> assertHardDeletedMessage(String text) async {
+    await assertMessage(text, isDisplayed: false);
+    await assertDeletedMessage(isDisplayed: false);
+    return this;
+  }
+
+  Future<UserRobot> assertTypingIndicator({required bool isDisplayed}) async {
+    final indicator = MessageListPage.list.typingIndicator;
+    if (isDisplayed) {
+      await tester.waitUntilVisible(indicator);
+    } else {
+      await tester.waitUntilNotVisible(indicator);
+    }
+    return this;
+  }
+
+  Future<UserRobot> assertMentionsOverlay({required bool isDisplayed}) async {
+    final overlay = MessageListPage.composer.mentionsOverlay;
+    if (isDisplayed) {
+      await tester.waitUntilVisible(overlay);
+    } else {
+      await tester.waitUntilNotVisible(overlay);
+    }
+    return this;
+  }
+
+  Future<UserRobot> assertLinkPreview() async {
+    await tester.waitUntilVisible(MessageListPage.list.linkPreview);
+    return this;
+  }
+
+  /// Asserts the message at [messageIndex] is marked as failed to be sent.
+  /// Mirrors the native `assertMessageFailedToBeSent`.
+  Future<UserRobot> assertMessageFailedToBeSent({int messageIndex = 0}) async {
+    await _waitOnMessage(MessageListPage.list.errorBadge, messageIndex: messageIndex);
+    return this;
+  }
+
+  /// Asserts the delivery status shown on the message at [messageIndex].
+  Future<UserRobot> assertMessageDeliveryStatus(
+    MessageDeliveryStatus status, {
+    int messageIndex = 0,
+  }) async {
+    await _waitOnMessage(MessageListPage.list.sendingStatus(status), messageIndex: messageIndex);
+    return this;
+  }
+
+  /// Waits for [finder] to appear inside the message at [messageIndex] (index 0
+  /// being the newest message), so a status on an older message can't satisfy
+  /// the assertion.
+  Future<void> _waitOnMessage(Finder finder, {required int messageIndex}) {
+    final message = find.byType(MessageListPage.messageItem).at(messageIndex);
+    return tester.waitUntilVisible(find.descendant(of: message, matching: finder));
+  }
+
+  /// Scrolls up through the history until all [messagesCount] messages are
+  /// loaded and the oldest one is on screen.
+  ///
+  /// Both ends come from the channel's own state instead of the message text:
+  /// what the mock server seeds as text depends on how the channel was generated
+  /// (see `messagesText` on [BackendRobot.generateChannels]), message identity
+  /// does not.
+  Future<UserRobot> assertMessageListPagination({required int messagesCount}) async {
+    await tester.waitUntilVisible(find.byType(MessageListPage.list.view));
+
+    // Pages in whatever the channel query didn't return. The mock server hands
+    // over the whole history up front, so today this holds without scrolling.
+    await tester.scrollUpUntil(
+      () => _loadedMessages.length >= messagesCount,
+      description: 'all $messagesCount messages to load',
+    );
+    expect(_loadedMessages, hasLength(messagesCount));
+
+    final oldest = MessageListPage.list.message(_loadedMessages.first.id);
+    // Guards against a vacuous pass: the oldest message has to be out of view
+    // (i.e. actually reached by scrolling), and it would be on screen already if
+    // the loaded history were ordered newest-first.
+    expect(oldest, findsNothing);
+    await tester.scrollUpUntil(
+      () => oldest.evaluate().isNotEmpty,
+      description: 'the oldest message to be reached',
+    );
+    return this;
+  }
+
+  /// The slice of the channel's history the message list has loaded so far,
+  /// oldest first.
+  List<Message> get _loadedMessages {
+    final context = tester.element(find.byType(MessageListPage.list.view));
+    return StreamChannel.of(context).channel.state?.messages ?? const [];
+  }
+
+  /// Edits the first message to [newText] and asserts its cell grew (or shrank)
+  /// accordingly.
+  Future<UserRobot> assertMessageSizeChangesAfterEditing(
+    String newText, {
+    required bool increased,
+  }) async {
+    final message = find.byType(MessageListPage.messageItem);
+    final before = tester.getSize(message.first).height;
+
+    await editMessage(newText);
+    await assertMessage(newText);
+
+    final after = tester.getSize(message.first).height;
+    if (increased) {
+      expect(after, greaterThan(before));
+    } else {
+      expect(after, lessThan(before));
+    }
+    return this;
+  }
+
+  /// Asserts the composer grows with multi-line input but stops growing once it
+  /// reaches its height cap.
+  Future<UserRobot> assertComposerGrowsWithinLimit() async {
+    final field = find.byType(MessageListPage.composer.inputField);
+
+    final emptyHeight = tester.getSize(field).height;
+    await typeText('1\n2\n3');
+    expect(tester.getSize(field).height, greaterThan(emptyHeight));
+
+    await typeText('1\n2\n3\n4\n5\n6\n7\n8\n9\n10');
+    final cappedHeight = tester.getSize(field).height;
+    await typeText('1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n11\n12');
+    expect(tester.getSize(field).height, cappedHeight);
+
+    await clearComposer();
+    return this;
+  }
+
+  Future<UserRobot> assertReaction({
+    required ReactionType type,
+    required bool isDisplayed,
+  }) async {
+    // Reaction display chips carry no keys, so they're located by emoji glyph.
+    final reaction = find.text(type.emoji);
+    if (isDisplayed) {
+      await tester.waitUntilVisible(reaction);
+    } else {
+      await tester.waitUntilNotVisible(reaction);
+    }
+    return this;
+  }
+}
+
+/// Chainable counterparts to [UserRobotMessageListAsserts], so an assertion can
+/// follow a fluent action chain (`userRobot.addReaction(x).assertReaction(...)`).
+extension UserRobotMessageListAssertsChain on Future<UserRobot> {
+  Future<UserRobot> assertMessage(String text, {bool isDisplayed = true}) =>
+      then((it) => it.assertMessage(text, isDisplayed: isDisplayed));
+
+  Future<UserRobot> assertMessageContains(String text) => then((it) => it.assertMessageContains(text));
+
+  Future<UserRobot> assertThreadReply(String text) => then((it) => it.assertThreadReply(text));
+
+  Future<UserRobot> assertEditedMessage(String text) => then((it) => it.assertEditedMessage(text));
+
+  Future<UserRobot> assertDeletedMessage({bool isDisplayed = true}) =>
+      then((it) => it.assertDeletedMessage(isDisplayed: isDisplayed));
+
+  Future<UserRobot> assertHardDeletedMessage(String text) => then((it) => it.assertHardDeletedMessage(text));
+
+  Future<UserRobot> assertTypingIndicator({required bool isDisplayed}) =>
+      then((it) => it.assertTypingIndicator(isDisplayed: isDisplayed));
+
+  Future<UserRobot> assertMentionsOverlay({required bool isDisplayed}) =>
+      then((it) => it.assertMentionsOverlay(isDisplayed: isDisplayed));
+
+  Future<UserRobot> assertLinkPreview() => then((it) => it.assertLinkPreview());
+
+  Future<UserRobot> assertMessageFailedToBeSent({int messageIndex = 0}) =>
+      then((it) => it.assertMessageFailedToBeSent(messageIndex: messageIndex));
+
+  Future<UserRobot> assertMessageDeliveryStatus(
+    MessageDeliveryStatus status, {
+    int messageIndex = 0,
+  }) => then((it) => it.assertMessageDeliveryStatus(status, messageIndex: messageIndex));
+
+  Future<UserRobot> assertReaction({
+    required ReactionType type,
+    required bool isDisplayed,
+  }) => then((it) => it.assertReaction(type: type, isDisplayed: isDisplayed));
 }

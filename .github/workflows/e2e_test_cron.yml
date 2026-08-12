@@ -32,7 +32,7 @@ jobs:
       matrix:
         api-level: [34, 31, 28]
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - uses: ./.github/actions/setup-java
 
@@ -61,6 +61,13 @@ jobs:
           profile: pixel_6
           emulator-options: -no-snapshot-save -no-window -no-audio -no-boot-anim -gpu swiftshader_indirect
           script: cd sample_app/android && bundle exec fastlane run_e2e_test device:emulator-5554 mock_server_branch:${{ env.mock_server_branch }}
+
+      - name: Attach videos to failed tests
+        if: failure()
+        working-directory: sample_app/android
+        run: |
+          sudo apt-get update && sudo apt-get install -y ffmpeg
+          bundle exec fastlane attach_videos
 
       - name: Upload Allure results
         if: env.LAUNCH_ID != '' && (success() || failure())
@@ -99,7 +106,7 @@ jobs:
     env:
       XCODE_VERSION: "26.2"
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - uses: ./.github/actions/setup-ruby
 
@@ -111,14 +118,8 @@ jobs:
           version: ${{ matrix.ios }}
           device: ${{ matrix.device }}
 
-      - uses: ./.github/actions/cache-cocoapods
-        with:
-          key-suffix: ${{ matrix.ios }}
-
-      - uses: ./.github/actions/cache-xcode-cas
-        with:
-          key-suffix: ${{ matrix.ios }}
-          xcode-version: ${{ env.XCODE_VERSION }}
+      - name: Use Firebase stubs
+        run: cp sample_app/pubspec_overrides.e2e.yaml sample_app/pubspec_overrides.yaml
 
       - name: Bootstrap
         run: |
@@ -126,6 +127,11 @@ jobs:
           flutter config --no-enable-swift-package-manager
           flutter pub global activate melos
           melos bootstrap
+
+      # After Bootstrap so the cache keys hash the resolved pubspec.lock
+      - uses: ./.github/actions/cache-cocoapods
+        with:
+          key-suffix: ${{ matrix.ios }}
 
       - name: Launch Allure TestOps
         working-directory: sample_app/ios

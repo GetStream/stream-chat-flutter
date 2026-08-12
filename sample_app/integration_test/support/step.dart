@@ -1,3 +1,4 @@
 import '../allure/allure.dart';
 
-Future<T> step<T>(String description, Future<T> Function() body) => Allure.instance.step(description, body);
+/// Records a BDD step marker in the Allure report.
+void step(String description) => Allure.instance.beginStep(description);

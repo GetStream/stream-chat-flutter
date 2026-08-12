@@ -13,6 +13,7 @@ class StreamSendingIndicator extends StatelessWidget {
     this.isMessageRead = false,
     this.isMessageDelivered = false,
     this.size,
+    this.color,
   });
 
   /// The message whose sending status is to be shown.
@@ -27,15 +28,23 @@ class StreamSendingIndicator extends StatelessWidget {
   /// The size of the indicator icon.
   final double? size;
 
+  /// The color of the indicator icon.
+  ///
+  /// When null, read messages use `StreamColorScheme.accentPrimary` and every
+  /// other state uses `StreamColorScheme.textSecondary`.
+  final Color? color;
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = context.streamColorScheme;
+    final a11y = context.translations.accessibility;
 
     if (isMessageRead) {
       return Icon(
         context.streamIcons.checks,
         size: size,
-        color: colorScheme.accentPrimary,
+        color: color ?? colorScheme.accentPrimary,
+        semanticLabel: a11y.messageReadStatusLabel,
       );
     }
 
@@ -43,7 +52,8 @@ class StreamSendingIndicator extends StatelessWidget {
       return Icon(
         context.streamIcons.checks,
         size: size,
-        color: colorScheme.textSecondary,
+        color: color ?? colorScheme.textSecondary,
+        semanticLabel: a11y.messageDeliveredStatusLabel,
       );
     }
 
@@ -51,7 +61,8 @@ class StreamSendingIndicator extends StatelessWidget {
       return Icon(
         context.streamIcons.checkmark,
         size: size,
-        color: colorScheme.textSecondary,
+        color: color ?? colorScheme.textSecondary,
+        semanticLabel: a11y.messageSentStatusLabel,
       );
     }
 
@@ -59,7 +70,8 @@ class StreamSendingIndicator extends StatelessWidget {
       return Icon(
         context.streamIcons.clock,
         size: size,
-        color: colorScheme.textSecondary,
+        color: color ?? colorScheme.textSecondary,
+        semanticLabel: a11y.messageSendingStatusLabel,
       );
     }
 

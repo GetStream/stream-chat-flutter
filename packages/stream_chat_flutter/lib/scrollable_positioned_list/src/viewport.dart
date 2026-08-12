@@ -341,6 +341,48 @@ class UnboundedRenderViewport extends RenderViewport {
     );
   }
 
+  /// [RenderViewportBase.getOffsetToReveal] converts the target into the
+  /// viewport's *scroll offset* space and returns that value directly as the
+  /// `offset.pixels` to move to. That conversion is anchor-blind: it assumes
+  /// scroll offset 0 sits at the viewport's leading edge, whereas
+  /// [_attemptLayout] puts it at `mainAxisExtent * anchor - pixels`. Revealing
+  /// a target therefore lands it `anchor * mainAxisExtent` past where it
+  /// should be.
+  ///
+  /// Stock [RenderViewport] clamps `anchor` to `[0, 1]`, so the error is at
+  /// most one viewport. Here `anchor` is unbounded — the anchor-preservation
+  /// path in `ScrollablePositionedList` folds accumulated scroll pixels into
+  /// it, so it grows without limit as the list paginates. Any implicit reveal
+  /// (`Scrollable.ensureVisible`, or `RenderEditable.showOnScreen` when text
+  /// selection moves inside a selectable message) would then teleport the list
+  /// by many screens.
+  ///
+  /// Shift the result back into `pixels` space so a reveal is a no-op for a
+  /// target that is already at the requested alignment.
+  @override
+  RevealedOffset getOffsetToReveal(
+    RenderObject target,
+    double alignment, {
+    Rect? rect,
+    Axis? axis,
+  }) {
+    final revealed = super.getOffsetToReveal(target, alignment, rect: rect, axis: axis);
+    final correction = anchor * (this.axis == Axis.vertical ? size.height : size.width);
+    if (correction == 0 || !revealed.offset.isFinite) return revealed;
+
+    // `super` derived `rect` from `offset.pixels - targetOffset`; moving
+    // `targetOffset` by `correction` moves the revealed rect by the same
+    // amount against the axis direction.
+    final revealedRect = switch (axisDirection) {
+      AxisDirection.up => revealed.rect.translate(0, correction),
+      AxisDirection.down => revealed.rect.translate(0, -correction),
+      AxisDirection.left => revealed.rect.translate(correction, 0),
+      AxisDirection.right => revealed.rect.translate(-correction, 0),
+    };
+
+    return RevealedOffset(offset: revealed.offset + correction, rect: revealedRect);
+  }
+
   @override
   bool get hasVisualOverflow => _hasVisualOverflow;
 

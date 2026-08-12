@@ -68,6 +68,7 @@ class StreamUserAvatar extends StatelessWidget {
     required this.user,
     this.showBorder = true,
     this.showOnlineIndicator = true,
+    this.semanticsLabel,
   });
 
   /// The user whose avatar is displayed.
@@ -90,6 +91,12 @@ class StreamUserAvatar extends StatelessWidget {
   /// [StreamAvatarSize.lg].
   final StreamAvatarSize? size;
 
+  /// Screen-reader label for the avatar.
+  ///
+  /// When null (the default), the avatar is silent. When non-null, the
+  /// avatar is exposed as a labeled image node.
+  final String? semanticsLabel;
+
   @override
   Widget build(BuildContext context) {
     final avatarTheme = context.streamAvatarTheme;
@@ -109,6 +116,7 @@ class StreamUserAvatar extends StatelessWidget {
       showBorder: showBorder,
       backgroundColor: effectiveBackgroundColor,
       foregroundColor: effectiveForegroundColor,
+      semanticsLabel: semanticsLabel,
       placeholder: (_) => _StreamUserAvatarPlaceholder(user: user, size: effectiveSize),
     );
 
@@ -145,6 +153,12 @@ class StreamUserAvatar extends StatelessWidget {
 // Displays user initials or a fallback person icon when no name is available.
 // Shows full initials (up to 2 characters) for medium and larger sizes,
 // and only the first initial for extra-small and small sizes.
+//
+// The initials are decorative — a visual identifier for sighted users, not
+// information a screen reader can act on. Wrapped in [ExcludeSemantics] so
+// consumers who leave [StreamUserAvatar.semanticsLabel] null get a silent
+// avatar by default; passing a `semanticsLabel` re-emits a labeled image
+// node via the base [StreamAvatar]'s semantics wrap.
 class _StreamUserAvatarPlaceholder extends StatelessWidget {
   const _StreamUserAvatarPlaceholder({
     required this.user,
@@ -157,13 +171,16 @@ class _StreamUserAvatarPlaceholder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final userInitials = user.name.initials;
+    final Widget content;
     if (userInitials != null && userInitials.isNotEmpty) {
-      return switch (size) {
+      content = switch (size) {
         .md || .lg || .xl || .xxl => Text(userInitials),
         .xs || .sm => Text(userInitials.characters.first),
       };
+    } else {
+      content = Icon(context.streamIcons.user);
     }
 
-    return Icon(context.streamIcons.user);
+    return ExcludeSemantics(child: content);
   }
 }
