@@ -89,12 +89,16 @@ void main() {
       // Simulate logout: the channel's state is disposed and nulled...
       liveState = null;
 
-      // ...then the framework rebuilds the avatar (as an inherited-dependency
-      // change would) against the now-disposed channel.
-      rebuildNotifier.value++;
-      await tester.pump();
-      // ...and, for good measure, a trailing members emission too.
+      // ...then a members emission arrives while the nested BetterStreamBuilder
+      // is still mounted, exercising the member-stream disposal path against the
+      // now-disposed channel.
       membersController.add(List.of(members));
+      await tester.pump();
+      expect(tester.takeException(), isNull);
+
+      // ...and separately, the framework rebuilds the avatar (as an inherited-
+      // dependency change would) against the now-disposed channel.
+      rebuildNotifier.value++;
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 50));
 

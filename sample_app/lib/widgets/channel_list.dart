@@ -34,6 +34,11 @@ class _ChannelList extends State<ChannelList> {
   }
 
   void _initControllers() {
+    // Preserve any active search query so recreating the controllers (e.g. on a
+    // dependency change) keeps the visible results in sync with the search field
+    // instead of leaving the UI in active-search mode with an empty query.
+    final searchQuery = _controller.text;
+
     if (_controllersAreInitialized) {
       _messageSearchListController.dispose();
       _channelListController.dispose();
@@ -43,12 +48,13 @@ class _ChannelList extends State<ChannelList> {
       client: _streamChat.client,
       filter: Filter.in_('members', [_streamChat.currentUser!.id]),
       limit: 5,
-      searchQuery: '',
+      searchQuery: searchQuery,
       sort: [
         const SortOption.desc(ChannelSortKey.pinnedAt),
         const SortOption.asc(ChannelSortKey.createdAt),
       ],
     );
+    if (searchQuery.isNotEmpty) _messageSearchListController.search(searchQuery);
     _channelListController = StreamChannelListController(
       client: _streamChat.client,
       predefinedFilter: 'stream_chat_flutter_sample_app',
