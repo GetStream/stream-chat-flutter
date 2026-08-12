@@ -18,21 +18,50 @@ class ChannelList extends StatefulWidget {
 
 class _ChannelList extends State<ChannelList> {
   final ScrollController _scrollController = ScrollController();
-
-  late final StreamMessageSearchListController _messageSearchListController = StreamMessageSearchListController(
-    client: StreamChat.of(context).client,
-    filter: Filter.in_('members', [StreamChat.of(context).currentUser!.id]),
-    limit: 5,
-    searchQuery: '',
-    sort: [
-      const SortOption.desc(ChannelSortKey.pinnedAt),
-      const SortOption.asc(ChannelSortKey.createdAt),
-    ],
-  );
+  late StreamChatState _streamChat;
 
   late final TextEditingController _controller = TextEditingController()..addListener(_channelQueryListener);
 
   bool _isSearchActive = false;
+  bool _controllersAreInitialized = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _streamChat = StreamChat.of(context);
+    _initControllers();
+    _controllersAreInitialized = true;
+  }
+
+  void _initControllers() {
+    // Preserve any active search query so recreating the controllers (e.g. on a
+    // dependency change) keeps the visible results in sync with the search field
+    // instead of leaving the UI in active-search mode with an empty query.
+    final searchQuery = _controller.text;
+
+    if (_controllersAreInitialized) {
+      _messageSearchListController.dispose();
+      _channelListController.dispose();
+    }
+
+    _messageSearchListController = StreamMessageSearchListController(
+      client: _streamChat.client,
+      filter: Filter.in_('members', [_streamChat.currentUser!.id]),
+      limit: 5,
+      searchQuery: searchQuery,
+      sort: [
+        const SortOption.desc(ChannelSortKey.pinnedAt),
+        const SortOption.asc(ChannelSortKey.createdAt),
+      ],
+    );
+    if (searchQuery.isNotEmpty) _messageSearchListController.search(searchQuery);
+    _channelListController = StreamChannelListController(
+      client: _streamChat.client,
+      predefinedFilter: 'stream_chat_flutter_sample_app',
+      filterValues: {'user_id': _streamChat.currentUser!.id},
+      limit: 30,
+    );
+  }
 
   void _channelQueryListener() {
     final query = _controller.text;
@@ -41,12 +70,8 @@ class _ChannelList extends State<ChannelList> {
     return _messageSearchListController.search(query);
   }
 
-  late final _channelListController = StreamChannelListController(
-    client: StreamChat.of(context).client,
-    predefinedFilter: 'stream_chat_flutter_sample_app',
-    filterValues: {'user_id': StreamChat.of(context).currentUser!.id},
-    limit: 30,
-  );
+  late StreamMessageSearchListController _messageSearchListController;
+  late StreamChannelListController _channelListController;
 
   @override
   void dispose() {
