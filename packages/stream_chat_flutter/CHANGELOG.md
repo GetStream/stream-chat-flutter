@@ -2,21 +2,23 @@
 
 ⚠️ Changed
 
-- `StreamPhotoGallery` now defaults its `padding` to the bottom safe-area inset instead of no padding, so the last row clears the home indicator. Pass an explicit `padding` to opt out.
-- `StreamMessageListView.config` is now nullable (`StreamMessageListViewConfiguration?`) instead of defaulting to `const StreamMessageListViewConfiguration()`. Passing a value is unchanged; code that *reads* `config` off a `StreamMessageListView` instance now gets a nullable value.
-- `StreamMediaGalleryPreview` chrome now follows the app style — when floating, the header and footer float over full-bleed media and the footer's share / gallery buttons outline + elevate to match the back button; when regular, the chrome is docked and the media is inset between the bars.
+- `StreamMediaGallery` no longer applies its own outer padding or strips the ambient `MediaQuery` padding; pass `padding` to inset the grid.
+- `StreamMessageListView.config` is now nullable; reading it off an instance yields `StreamMessageListViewConfiguration?` rather than a default instance.
+- `StreamMediaGalleryPreview` chrome now follows the app style — floating over full-bleed media, or docked with the media inset between the bars.
+- `StreamChannelHeader`, `StreamChannelListHeader`, and `StreamThreadHeader` now resolve `surfaceStyle` from their per-header theme and pass it to every slot in the bar.
+- Thread views now show the scroll-to-bottom button, following `showScrollToBottom` from the effective `StreamMessageListViewConfiguration`; set it to `false` to hide it.
 
 ✅ Added
 
-- Added `StreamChannelPage` — a ready-to-use channel page widget that wires up `StreamChannelHeader`, `StreamMessageListView`, and `StreamMessageComposer` with floating or docked layout driven by the active app style.
-- Added `StreamThreadPage` — a ready-to-use thread page widget with the same floating/docked layout support, plus an `onBackPressed` callback that replaces the header back button's default pop.
-- Added `onBackPressed` to `StreamChannelHeader` and `StreamThreadHeader` — replaces the default back button's `Navigator.maybePop` without rebuilding the whole `leading`, so callers keep the header's default unread badge. Ignored when `leading` is supplied.
-- Added `MessageComposerProps.surfaceStyle` (a `StreamSurfaceStyle`) — explicitly controls whether `StreamMessageComposer` renders `floating` or `regular`. When null it falls back to `StreamMessageComposerThemeData.surfaceStyle`, and then to the ambient `StreamSurfaceStyle`.
+- Added `StreamChannelPage` — a ready-to-use channel page wiring up `StreamChannelHeader`, `StreamMessageListView`, and `StreamMessageComposer` with floating or docked layout.
+- Added `StreamThreadPage` — the thread equivalent, plus an `onBackPressed` that replaces the header back button's default pop.
+- Added `onBackPressed` to `StreamChannelHeader` and `StreamThreadHeader`, replacing the default back button's pop without rebuilding `leading`. Ignored when `leading` is supplied.
+- Added `MessageComposerProps.surfaceStyle`, selecting whether `StreamMessageComposer` renders floating or regular. Falls back to `StreamMessageComposerThemeData.surfaceStyle`, then the ambient `StreamSurfaceStyle`.
 - Added `StreamMessageComposerTheme` and `StreamMessageComposerThemeData` — a component theme for the composer, also available globally as `StreamChatThemeData.messageComposerTheme`.
-- Added `StreamMessageListView.config` — accepts an explicit `StreamMessageListViewConfiguration` per widget; falls back to `StreamChatConfigurationData.messageListViewConfiguration` from the nearest ancestor when omitted.
-- Added an `isFloating` parameter to `StreamBackButton`, controlling floating vs pinned back-button appearance. Falls back to the enclosing bar's resolved behavior, and then to the ambient `StreamSurfaceStyle`, when null. `StreamChannelHeader`, `StreamChannelListHeader`, and `StreamThreadHeader` now layer their per-header theme (`channelHeaderTheme` / `channelListHeaderTheme` / `threadHeaderTheme`) under `style` and pass the pair to the bar, which republishes its resolved behavior to its slots — so every slot in the bar — the default avatar's drop shadow, the default back button, and any `leading`/`trailing` the caller supplies — resolves the same chain the bar itself uses: `style`, then the per-header theme, then the ambient `StreamAppBarTheme`, then `StreamSurfaceStyle`.
-- Added `messageListViewConfiguration` field to `StreamChatConfigurationData`, allowing a global `StreamMessageListViewConfiguration` default for all `StreamMessageListView` widgets. Pass it via `StreamChat.configData` to configure behaviors like `swipeToReply` and `highlightInitialMessage` app-wide without wiring them per-page.
-- Re-exported `StreamScaffold`, `StreamScaffoldInsets`, `StreamBottomNavBar`, `StreamBottomNavBarItem`, `StreamSurfaceStyle`, and `streamFloatingFadeLinearGradient` from `stream_core_flutter` via `package:stream_chat_flutter/stream_chat_flutter.dart`.
+- Added `StreamMessageComposer.resolveSurfaceStyle`, reporting the surface style a composer renders with in a given context.
+- Added `StreamMessageListView.config` — an explicit `StreamMessageListViewConfiguration` per widget, falling back to `StreamChatConfigurationData.messageListViewConfiguration`.
+- Added `StreamChatConfigurationData.messageListViewConfiguration` — an app-wide `StreamMessageListViewConfiguration` default, passed via `StreamChat.configData`.
+- Added `isFloating` to `StreamBackButton`, selecting the floating or pinned appearance. Falls back to the enclosing bar's resolved style, then the ambient `StreamSurfaceStyle`.
 - Added `StreamMessageListViewConfiguration.autoScrollPolicy` to control whether and how `StreamMessageListView` scrolls to the newest message when a new message arrives. Use `StreamAutoScrollPolicy.disabled` to fully control scrolling yourself.
 - Added `onReactionSelected` to `StreamMessageReactionPicker`, a context-aware callback that provides the `BuildContext` for navigation.
 - Added an `errorSubtitle` to `StreamScrollViewErrorWidget`, which now falls back to the design's generic error copy (title, description, and a "Try Again" retry label) when values aren't provided.
@@ -38,7 +40,7 @@
 - Fixed `StreamTypingIndicator` briefly showing typing users from a different context (main channel vs. thread) on its first frame.
 - Fixed the attachment picker throwing a `Tooltip` assertion error when a custom `TabbedAttachmentPickerOption` is added without a `title`; the tooltip is now only shown when a title is provided.
 - Fixed the "Message deleted" bubble overflowing its maximum width when the localized label is long; the label now wraps instead.
-- Fixed the scroll-to-bottom button in thread views keying off the parent channel's up-to-date state instead of the thread's own scroll position, so it no longer appears while already at the newest reply. Note that thread views now show the button at all: it follows `showScrollToBottom` from the effective `StreamMessageListViewConfiguration`, so set that to `false` to restore the previous always-hidden behavior.
+- Fixed the thread scroll-to-bottom button keying off the parent channel's up-to-date state instead of the thread's own scroll position, so it no longer appears while already at the newest reply.
 - Fixed the `StreamBackButton` unread badge including the currently open channel in its total count.
 - Fixed `StreamMessageListView` jumping several screens when selecting text in a message on desktop or web. The `ScrollablePositionedList` viewports now account for their `anchor` in `getOffsetToReveal`, so implicit reveals (`Scrollable.ensureVisible`, `RenderObject.showOnScreen`) no longer overshoot. [#2862](https://github.com/GetStream/stream-chat-flutter/issues/2862)
 - Fixed modal dialogs (message actions, delete/flag confirmation) rendering over a white scrim in light theme; they now use the design system's scrim token.
