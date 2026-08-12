@@ -978,10 +978,6 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     );
   }
 
-  // The composer's effective placement: the explicit
-  // MessageComposerProps.surfaceStyle, then
-  // StreamMessageComposerThemeData.surfaceStyle, then the ambient
-  // StreamSurfaceStyle.
   StreamSurfaceStyle _resolveSurfaceStyle(BuildContext context) =>
       StreamMessageComposer.resolveSurfaceStyle(context, surfaceStyle: widget.props.surfaceStyle);
 
