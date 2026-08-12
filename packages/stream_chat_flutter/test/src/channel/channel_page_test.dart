@@ -135,6 +135,42 @@ void main() {
     expect(padding.bottom, 0);
   });
 
+  testWidgets(
+    'a floating composer override insets the list even when the app style is regular',
+    (tester) async {
+      await _pumpChannelPage(
+        tester,
+        composerSurfaceStyle: StreamSurfaceStyle.floating,
+      );
+
+      // The composer's own theme is floating, so the scaffold must publish the
+      // bottom inset for it even though the ambient app style is regular. The
+      // app bar stays regular, so only the bottom is inset.
+      final padding = MediaQuery.paddingOf(tester.element(find.byType(StreamMessageListView)));
+
+      expect(padding.top, 0);
+      expect(padding.bottom, greaterThan(0));
+    },
+  );
+
+  testWidgets(
+    'a regular composer override drops the bottom inset even when the app style is floating',
+    (tester) async {
+      await _pumpChannelPage(
+        tester,
+        surfaceStyle: StreamSurfaceStyle.floating,
+        composerSurfaceStyle: StreamSurfaceStyle.regular,
+      );
+
+      // The composer docks itself via its own theme, so the scaffold must not
+      // inset the list for it — but the floating app bar still insets the top.
+      final padding = MediaQuery.paddingOf(tester.element(find.byType(StreamMessageListView)));
+
+      expect(padding.top, greaterThan(0));
+      expect(padding.bottom, 0);
+    },
+  );
+
   testWidgets('disposes its composer controller when removed from the tree', (tester) async {
     await _pumpChannelPage(tester);
     final controller = _composerController(tester);
@@ -187,6 +223,7 @@ FocusNode _composerFocusNode(WidgetTester tester) {
 Future<void> _pumpChannelPage(
   WidgetTester tester, {
   StreamSurfaceStyle surfaceStyle = StreamSurfaceStyle.regular,
+  StreamSurfaceStyle? composerSurfaceStyle,
   void Function(BuildContext context, Channel channel)? onChannelAvatarPressed,
   VoidCallback? onBackPressed,
   bool pushOntoARoute = false,
@@ -245,10 +282,16 @@ Future<void> _pumpChannelPage(
     MaterialApp(
       theme: ThemeData(extensions: [StreamTheme(surfaceStyle: surfaceStyle)]),
       // Chat context lives above the navigator so it survives a pop.
-      builder: (context, child) => StreamChat(
-        client: client,
-        child: StreamChannel(channel: channel, child: child!),
-      ),
+      builder: (context, child) {
+        Widget content = StreamChannel(channel: channel, child: child!);
+        if (composerSurfaceStyle != null) {
+          content = StreamMessageComposerTheme(
+            data: StreamMessageComposerThemeData(surfaceStyle: composerSurfaceStyle),
+            child: content,
+          );
+        }
+        return StreamChat(client: client, child: content);
+      },
       // '/channel' seeds the stack with '/' underneath it, giving the back
       // button something to pop to.
       initialRoute: pushOntoARoute ? '/channel' : '/',

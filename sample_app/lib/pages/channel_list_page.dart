@@ -88,6 +88,10 @@ class _ChannelListPageState extends State<ChannelListPage> {
         title: Text(enabledTabs[_currentIndex].navItem.label, style: textTheme.headingSm),
       ),
       drawer: LeftDrawer(user: user),
+      // Keep the scaffold's bottom-slot layout in sync with the nav bar's own
+      // surface style, so a nav-bar-only override is applied fully instead of
+      // just partly (the nav bar rendering vs. the scaffold inset).
+      bottomSurfaceStyle: StreamBottomNavBar.resolveSurfaceStyle(context),
       bottom: StreamBottomNavBar(
         currentIndex: _currentIndex,
         onTap: (i) => setState(() => _currentIndex = i),

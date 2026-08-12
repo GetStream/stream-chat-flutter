@@ -105,6 +105,10 @@ class _StreamThreadPageState extends State<StreamThreadPage> {
     return StreamScaffold(
       appBar: appBar,
       bottom: composer,
+      // Keep the scaffold's bottom-slot layout in sync with the composer's own
+      // surface style; see StreamChannelPage for the rationale. Harmless when
+      // the composer is null (deleted parent) — the bottom slot is then empty.
+      bottomSurfaceStyle: StreamMessageComposer.resolveSurfaceStyle(context),
       body: _ThreadBody(
         parent: widget.parent,
         initialScrollIndex: widget.initialScrollIndex,

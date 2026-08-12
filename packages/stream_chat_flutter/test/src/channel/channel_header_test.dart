@@ -511,6 +511,7 @@ void main() {
       StreamSurfaceStyle surfaceStyle = StreamSurfaceStyle.regular,
       StreamSurfaceStyle? themeSurfaceStyle,
       StreamSurfaceStyle? styleSurfaceStyle,
+      StreamSurfaceStyle? ancestorSurfaceStyle,
     }) async {
       final client = MockClient();
       final clientState = MockClientState();
@@ -555,10 +556,22 @@ void main() {
             child: StreamChannel(
               channel: channel,
               child: Scaffold(
-                body: StreamChannelHeader(
-                  style: switch (styleSurfaceStyle) {
-                    final surfaceStyle? => StreamAppBarStyle(surfaceStyle: surfaceStyle),
-                    _ => null,
+                body: Builder(
+                  builder: (context) {
+                    Widget header = StreamChannelHeader(
+                      style: switch (styleSurfaceStyle) {
+                        final surfaceStyle? => StreamAppBarStyle(surfaceStyle: surfaceStyle),
+                        _ => null,
+                      },
+                    );
+                    // An app-level per-component override placed above the header.
+                    if (ancestorSurfaceStyle case final surfaceStyle?) {
+                      header = StreamAppBarTheme(
+                        data: StreamAppBarThemeData(style: StreamAppBarStyle(surfaceStyle: surfaceStyle)),
+                        child: header,
+                      );
+                    }
+                    return header;
                   },
                 ),
               ),
@@ -594,6 +607,16 @@ void main() {
       await pumpHeader(tester, themeSurfaceStyle: StreamSurfaceStyle.floating);
 
       expect(avatarIsFloating(tester), isTrue);
+    });
+
+    testWidgets('floats when an ancestor StreamAppBarTheme override says so, over a regular app style', (tester) async {
+      // Regression: the header wraps its bar in its own StreamAppBarTheme. That
+      // wrapper must merge — not shadow — an ancestor override, or an app-level
+      // surfaceStyle never reaches the header and it stays regular.
+      await pumpHeader(tester, ancestorSurfaceStyle: StreamSurfaceStyle.floating);
+
+      expect(avatarIsFloating(tester), isTrue);
+      expect(backButtonIsFloating(tester), isTrue);
     });
 
     testWidgets('the header style wins over both the header theme and the app style', (tester) async {

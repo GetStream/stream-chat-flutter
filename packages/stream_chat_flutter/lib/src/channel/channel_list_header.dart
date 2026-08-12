@@ -157,10 +157,14 @@ class StreamChannelListHeader extends StatelessWidget implements PreferredSizeWi
           return StreamInfoTile(
             showMessage: showConnectionStateTile && showStatus,
             message: statusString,
-            // Apply the per-header theme as a theme; the bar resolves `style`
-            // over it and republishes the resolved behavior to its slots.
+            // Layer the per-header theme over the inherited app bar theme
+            // instead of replacing it, so an ancestor StreamAppBarTheme override
+            // (e.g. an app-wide surfaceStyle) still reaches the bar for fields
+            // the header theme leaves unset. Without the merge the wrapper would
+            // shadow that ancestor entirely and the header would fall back to
+            // the ambient surface style.
             child: StreamAppBarTheme(
-              data: headerTheme,
+              data: StreamAppBarTheme.of(context).merge(headerTheme),
               child: StreamAppBar(
                 leading: leading,
                 title: title,

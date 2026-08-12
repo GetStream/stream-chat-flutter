@@ -154,6 +154,30 @@ class StreamMessageComposer extends StatelessWidget {
   /// The properties for the message composer.
   final MessageComposerProps props;
 
+  /// Resolves the effective [StreamSurfaceStyle] a composer would render with
+  /// in [context].
+  ///
+  /// Precedence mirrors the composer's own resolution: an explicit [override]
+  /// (e.g. [MessageComposerProps.surfaceStyle]), then
+  /// [StreamMessageComposerThemeData.surfaceStyle], then the ambient
+  /// [StreamSurfaceStyle].
+  ///
+  /// A page that drops a composer into a [StreamScaffold] bottom slot passes the
+  /// result as [StreamScaffold.bottomSurfaceStyle] so the scaffold's layout
+  /// (its floating inset and body overlap) stays in sync with how the composer
+  /// actually renders — otherwise the scaffold falls back to the ambient style
+  /// alone and a composer-only override is applied only partly.
+  static StreamSurfaceStyle resolveSurfaceStyle(
+    BuildContext context, {
+    StreamSurfaceStyle? override,
+  }) {
+    if (override != null) return override;
+    if (StreamMessageComposerTheme.of(context).surfaceStyle case final style?) {
+      return style;
+    }
+    return context.streamSurfaceStyle;
+  }
+
   @override
   Widget build(BuildContext context) {
     final builder = context.chatComponentBuilder<MessageComposerProps>();
@@ -974,12 +998,8 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
   // MessageComposerProps.surfaceStyle, then
   // StreamMessageComposerThemeData.surfaceStyle, then the ambient
   // StreamSurfaceStyle.
-  StreamSurfaceStyle _resolveSurfaceStyle(BuildContext context) {
-    if (widget.props.surfaceStyle case final style?) return style;
-    final theme = StreamMessageComposerTheme.of(context);
-    if (theme.surfaceStyle case final style?) return style;
-    return context.streamSurfaceStyle;
-  }
+  StreamSurfaceStyle _resolveSurfaceStyle(BuildContext context) =>
+      StreamMessageComposer.resolveSurfaceStyle(context, override: widget.props.surfaceStyle);
 
   Widget _buildMessageInput(
     BuildContext context,
