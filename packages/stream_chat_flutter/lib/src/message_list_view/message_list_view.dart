@@ -8,6 +8,7 @@ import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat_flutter/scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:stream_chat_flutter/src/message_list_view/floating_date_divider.dart';
 import 'package:stream_chat_flutter/src/message_list_view/loading_indicator.dart';
+import 'package:stream_chat_flutter/src/message_list_view/message_list_view_layout.dart';
 import 'package:stream_chat_flutter/src/message_list_view/mlv_utils.dart';
 import 'package:stream_chat_flutter/src/message_list_view/stream_message_list_empty_state.dart';
 import 'package:stream_chat_flutter/src/message_list_view/stream_message_list_skeleton_loading.dart';
@@ -591,205 +592,19 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
   Widget _buildListView(List<Message> data) {
     messages = data;
 
-    final itemCount =
-        messages.length + // total messages
-        2 + // top + bottom loading indicator
-        2 + // header + footer
-        1; // parent message
+    final layout = MessageListLayout(messageCount: messages.length);
 
     final child = Stack(
       alignment: Alignment.center,
       children: [
         StreamConnectionStatusBuilder(
-          statusBuilder: (context, status) {
-            var statusString = '';
-            var showStatus = true;
-            switch (status) {
-              case ConnectionStatus.connected:
-                statusString = context.translations.connectedLabel;
-                showStatus = false;
-                break;
-              case ConnectionStatus.connecting:
-                statusString = context.translations.reconnectingLabel;
-                break;
-              case ConnectionStatus.disconnected:
-                statusString = context.translations.disconnectedLabel;
-                break;
-            }
-
-            return StreamInfoTile(
-              showMessage: widget.config.showConnectionStateTile && showStatus,
-              tileAnchor: Alignment.topCenter,
-              childAnchor: Alignment.topCenter,
-              message: statusString,
-              child: LazyLoadScrollView(
-                onStartOfPage: () async {
-                  if (_upToDate) return;
-                  return _paginateData(.bottom);
-                },
-                onEndOfPage: () async {
-                  return _paginateData(.top);
-                },
-                child: ScrollablePositionedList.separated(
-                  key: Key('mlv-${streamChannel?.channel.cid}-${widget.parentMessage?.id}'),
-                  padding: .symmetric(vertical: context.streamSpacing.sm),
-                  keyboardDismissBehavior: widget.config.keyboardDismissBehavior,
-                  itemPositionsListener: _itemPositionListener,
-                  initialScrollIndex: initialIndex,
-                  initialAlignment: initialAlignment,
-                  physics: widget.config.scrollPhysics,
-                  itemScrollController: _scrollController,
-                  reverse: widget.config.reverse,
-                  shrinkWrap: widget.config.shrinkWrap,
-                  itemCount: itemCount,
-                  itemKeyBuilder: (index) {
-                    // Layout (see comment block below): indices 0/1 and the
-                    // top 3 indices are fixed slots (footer, loaders,
-                    // header, parent message). Anything in between is a
-                    // message at `messages[index - 2]`.
-                    if (index < 2) return null;
-                    if (index >= itemCount - 3) return null;
-                    final messageIndex = index - 2;
-                    if (messageIndex >= messages.length) return null;
-                    return messages[messageIndex].id;
-                  },
-
-                  // Item Count -> 8 (1 parent, 2 header+footer, 2 top+bottom, 3 messages)
-                  // eg:     |Type|         rev(|Index(item)|)     rev(|Index(separator)|)    |Index(item)|    |Index(separator)|
-                  //     ParentMessage  ->        7                                             (count-1)
-                  //        Separator(ThreadSeparator)          ->           6                                      (count-2)
-                  //     Header         ->        6                                             (count-2)
-                  //        Separator(Header -> 8??T -> 0||52)  ->           5                                      (count-3)
-                  //     TopLoader      ->        5                                             (count-3)
-                  //        Separator(0)                        ->           4                                      (count-4)
-                  //     Message        ->        4                                             (count-4)
-                  //        Separator(2||8)                     ->           3                                      (count-5)
-                  //     Message        ->        3                                             (count-5)
-                  //        Separator(2||8)                     ->           2                                      (count-6)
-                  //     Message        ->        2                                             (count-6)
-                  //        Separator(0)                        ->           1                                      (count-7)
-                  //     BottomLoader   ->        1                                             (count-7)
-                  //        Separator(Footer -> 8??30)          ->           0                                      (count-8)
-                  //     Footer         ->        0                                             (count-8)
-                  separatorBuilder: (context, i) {
-                    if (i == itemCount - 2) {
-                      if (widget.parentMessage == null) {
-                        return const Empty();
-                      }
-
-                      if (widget.builders.threadSeparator != null) {
-                        return widget.builders.threadSeparator!(context, widget.parentMessage!);
-                      }
-
-                      return ThreadSeparator(parentMessage: widget.parentMessage!);
-                    }
-                    if (i == itemCount - 3) {
-                      if (widget.config.reverse ? widget.builders.header == null : widget.builders.footer == null) {
-                        if (messages.isNotEmpty) {
-                          final message = messages.last;
-                          return _maybeBuildWithUnreadMessagesSeparator(
-                            message: message,
-                            separator: _buildDateDivider(message),
-                          );
-                        }
-
-                        return const Empty();
-                      }
-                      return const SizedBox(height: 8);
-                    }
-                    if (i == 0) {
-                      if (widget.config.reverse ? widget.builders.footer == null : widget.builders.header == null) {
-                        return const Empty();
-                      }
-                      return const SizedBox(height: 8);
-                    }
-
-                    if (i == 1 || i == itemCount - 4) return const Empty();
-
-                    late final Message message, nextMessage;
-                    if (widget.config.reverse) {
-                      message = messages[i - 1];
-                      nextMessage = messages[i - 2];
-                    } else {
-                      message = messages[i - 2];
-                      nextMessage = messages[i - 1];
-                    }
-
-                    Widget separator;
-
-                    final spacingRules = _resolveSpacingRules(
-                      message: message,
-                      nextMessage: nextMessage,
-                    );
-
-                    if (spacingRules == null) {
-                      separator = _buildDateDivider(nextMessage);
-                    } else {
-                      separator =
-                          widget.builders.spacing?.call(context, spacingRules) ??
-                          _defaultSpacingWidget(context, spacingRules);
-                    }
-
-                    return _maybeBuildWithUnreadMessagesSeparator(
-                      message: nextMessage,
-                      separator: separator,
-                    );
-                  },
-                  itemBuilder: (context, i) {
-                    if (i == itemCount - 1) {
-                      if (widget.parentMessage == null) {
-                        return const Empty();
-                      }
-                      return buildParentMessage(widget.parentMessage!);
-                    }
-
-                    if (i == itemCount - 2) {
-                      if (widget.config.reverse) {
-                        return widget.builders.header?.call(context) ?? const Empty();
-                      } else {
-                        return widget.builders.footer?.call(context) ?? const Empty();
-                      }
-                    }
-
-                    if (i == itemCount - 3) {
-                      return _buildPaginationLoadingIndicator(
-                        context: context,
-                        direction: QueryDirection.top,
-                      );
-                    }
-
-                    if (i == 1) {
-                      return _buildPaginationLoadingIndicator(
-                        context: context,
-                        direction: QueryDirection.bottom,
-                      );
-                    }
-
-                    if (i == 0) {
-                      if (widget.config.reverse) {
-                        return widget.builders.footer?.call(context) ?? const Empty();
-                      } else {
-                        return widget.builders.header?.call(context) ?? const Empty();
-                      }
-                    }
-
-                    // Offset the index to account for two extra items
-                    // (loader and footer) at the bottom of the ListView.
-                    final messageIndex = i - 2;
-                    final message = messages[messageIndex];
-
-                    return buildMessage(message, messages, messageIndex);
-                  },
-                ),
-              ),
-            );
-          },
+          statusBuilder: (context, status) => _buildConnectionStatusTile(context, status, layout),
         ),
         if (widget.config.showFloatingDateDivider)
           Positioned(
             top: context.streamSpacing.sm,
             child: FloatingDateDivider(
-              itemCount: itemCount,
+              itemCount: layout.itemCount,
               reverse: widget.config.reverse,
               fadeNearInlineDivider: widget.config.fadeFloatingDateDividerNearInline,
               itemPositionListener: _itemPositionListener.itemPositions,
@@ -838,6 +653,157 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     }
 
     return child;
+  }
+
+  Widget _buildConnectionStatusTile(
+    BuildContext context,
+    ConnectionStatus status,
+    MessageListLayout layout,
+  ) {
+    final (message: statusMessage, showStatus: showStatus) = switch (status) {
+      ConnectionStatus.connected => (message: context.translations.connectedLabel, showStatus: false),
+      ConnectionStatus.connecting => (message: context.translations.reconnectingLabel, showStatus: true),
+      ConnectionStatus.disconnected => (message: context.translations.disconnectedLabel, showStatus: true),
+    };
+
+    return StreamInfoTile(
+      showMessage: widget.config.showConnectionStateTile && showStatus,
+      tileAnchor: Alignment.topCenter,
+      childAnchor: Alignment.topCenter,
+      message: statusMessage,
+      child: LazyLoadScrollView(
+        onStartOfPage: () async {
+          if (_upToDate) return;
+          return _paginateData(.bottom);
+        },
+        onEndOfPage: () async {
+          return _paginateData(.top);
+        },
+        child: ScrollablePositionedList.separated(
+          key: Key('mlv-${streamChannel?.channel.cid}-${widget.parentMessage?.id}'),
+          padding: .symmetric(vertical: context.streamSpacing.sm),
+          keyboardDismissBehavior: widget.config.keyboardDismissBehavior,
+          itemPositionsListener: _itemPositionListener,
+          initialScrollIndex: initialIndex,
+          initialAlignment: initialAlignment,
+          physics: widget.config.scrollPhysics,
+          itemScrollController: _scrollController,
+          reverse: widget.config.reverse,
+          shrinkWrap: widget.config.shrinkWrap,
+          itemCount: layout.itemCount,
+          itemKeyBuilder: (index) => _messageIdAt(layout, index),
+          separatorBuilder: (context, index) => _buildSeparator(context, layout, index),
+          itemBuilder: (context, index) => _buildItem(context, layout, index),
+        ),
+      ),
+    );
+  }
+
+  // Anchor key for the item at [index]; null for every non-message slot so the
+  // scroll view opts out of anchor preservation there.
+  String? _messageIdAt(MessageListLayout layout, int index) {
+    if (layout.itemSlotAt(index) != MessageListItemSlot.message) return null;
+
+    final messageIndex = layout.messageIndexAt(index);
+    if (messageIndex < 0 || messageIndex >= messages.length) return null;
+    return messages[messageIndex].id;
+  }
+
+  Widget _buildItem(BuildContext context, MessageListLayout layout, int index) {
+    // The header and footer swap ends when the list is reversed.
+    final (startEdge: startEdgeBuilder, endEdge: endEdgeBuilder) = switch (widget.config.reverse) {
+      true => (startEdge: widget.builders.footer, endEdge: widget.builders.header),
+      false => (startEdge: widget.builders.header, endEdge: widget.builders.footer),
+    };
+
+    switch (layout.itemSlotAt(index)) {
+      case MessageListItemSlot.parentMessage:
+        final parentMessage = widget.parentMessage;
+        if (parentMessage == null) return const Empty();
+        return buildParentMessage(parentMessage);
+
+      case MessageListItemSlot.endEdge:
+        return endEdgeBuilder?.call(context) ?? const Empty();
+
+      case MessageListItemSlot.topLoader:
+        return _buildPaginationLoadingIndicator(context: context, direction: QueryDirection.top);
+
+      case MessageListItemSlot.bottomLoader:
+        return _buildPaginationLoadingIndicator(context: context, direction: QueryDirection.bottom);
+
+      case MessageListItemSlot.startEdge:
+        return startEdgeBuilder?.call(context) ?? const Empty();
+
+      case MessageListItemSlot.message:
+        final messageIndex = layout.messageIndexAt(index);
+        return buildMessage(messages[messageIndex], messages, messageIndex);
+    }
+  }
+
+  Widget _buildSeparator(BuildContext context, MessageListLayout layout, int index) {
+    switch (layout.separatorSlotAt(index)) {
+      case MessageListSeparatorSlot.threadSeparator:
+        return _buildThreadSeparator(context);
+
+      case MessageListSeparatorSlot.endEdgeGap:
+        return _buildEndEdgeGap();
+
+      case MessageListSeparatorSlot.startEdgeGap:
+        final builder = widget.config.reverse ? widget.builders.footer : widget.builders.header;
+        if (builder == null) return const Empty();
+        return const SizedBox(height: 8);
+
+      case MessageListSeparatorSlot.loaderGap:
+        return const Empty();
+
+      case MessageListSeparatorSlot.betweenMessages:
+        return _buildMessageSeparator(context, index);
+    }
+  }
+
+  Widget _buildThreadSeparator(BuildContext context) {
+    final parentMessage = widget.parentMessage;
+    if (parentMessage == null) return const Empty();
+
+    final builder = widget.builders.threadSeparator;
+    if (builder != null) return builder(context, parentMessage);
+    return ThreadSeparator(parentMessage: parentMessage);
+  }
+
+  // The gap adjoining the trailing edge widget. When that edge has no builder
+  // the gap carries the date divider for the last message instead.
+  Widget _buildEndEdgeGap() {
+    final builder = widget.config.reverse ? widget.builders.header : widget.builders.footer;
+    if (builder != null) return const SizedBox(height: 8);
+    if (messages.isEmpty) return const Empty();
+
+    final message = messages.last;
+    return _maybeBuildWithUnreadMessagesSeparator(
+      message: message,
+      separator: _buildDateDivider(message),
+    );
+  }
+
+  Widget _buildMessageSeparator(BuildContext context, int index) {
+    // Separator `index` sits between items `index` and `index + 1`, so the two
+    // messages it divides are offset by one and two message slots — in the
+    // order they are rendered, which the list direction flips.
+    final (message, nextMessage) = switch (widget.config.reverse) {
+      true => (messages[index - 1], messages[index - 2]),
+      false => (messages[index - 2], messages[index - 1]),
+    };
+
+    final spacingRules = _resolveSpacingRules(message: message, nextMessage: nextMessage);
+
+    final separator = switch (spacingRules) {
+      null => _buildDateDivider(nextMessage),
+      final rules => widget.builders.spacing?.call(context, rules) ?? _defaultSpacingWidget(context, rules),
+    };
+
+    return _maybeBuildWithUnreadMessagesSeparator(
+      message: nextMessage,
+      separator: separator,
+    );
   }
 
   // Default spacing widget between adjacent messages — mirrors the old
@@ -921,9 +887,10 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     final firstUnreadMessageIndex = messages.lastIndexWhere((it) => it.id == firstUnreadId);
     if (firstUnreadMessageIndex == -1) return;
 
+    final layout = MessageListLayout(messageCount: messages.length);
     if (_scrollController case final controller? when controller.isAttached) {
       return controller.scrollTo(
-        index: max(firstUnreadMessageIndex + 2, 0),
+        index: max(layout.itemIndexOfMessage(firstUnreadMessageIndex), 0),
         alignment: 0.5, // center the message in the viewport
       );
     }

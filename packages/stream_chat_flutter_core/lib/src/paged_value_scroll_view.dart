@@ -1,6 +1,8 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:stream_chat/stream_chat.dart';
+// `Success` is hidden so that it unambiguously refers to the PagedValue
+// variant rather than the attachment-upload state of the same name.
+import 'package:stream_chat/stream_chat.dart' hide Success;
 import 'package:stream_chat_flutter_core/src/paged_value_notifier.dart';
 
 /// Signature for a function that creates a widget for a given index, e.g., in a
@@ -290,62 +292,69 @@ class _PagedValueListViewState<K, V> extends State<PagedValueListView<K, V>> {
   @override
   Widget build(BuildContext context) => PagedValueListenableBuilder<K, V>(
     valueListenable: _controller,
-    builder: (context, value, _) => value.when(
-      (items, nextPageKey, error) {
-        if (items.isEmpty) {
-          return widget.emptyBuilder(context);
-        }
-
-        return ListView.separated(
-          scrollDirection: widget.scrollDirection,
-          padding: widget.padding,
-          physics: widget.physics,
-          reverse: widget.reverse,
-          controller: widget.scrollController,
-          primary: widget.primary,
-          shrinkWrap: widget.shrinkWrap,
-          addAutomaticKeepAlives: widget.addAutomaticKeepAlives,
-          addRepaintBoundaries: widget.addRepaintBoundaries,
-          addSemanticIndexes: widget.addSemanticIndexes,
-          keyboardDismissBehavior: widget.keyboardDismissBehavior,
-          restorationId: widget.restorationId,
-          dragStartBehavior: widget.dragStartBehavior,
-          // ignore: deprecated_member_use
-          cacheExtent: widget.cacheExtent,
-          clipBehavior: widget.clipBehavior,
-          itemCount: value.itemCount,
-          separatorBuilder: (context, index) => widget.separatorBuilder(context, items, index),
-          itemBuilder: (context, index) {
-            if (!_hasRequestedNextPage) {
-              final newPageRequestTriggerIndex = items.length - widget.loadMoreTriggerIndex;
-              final isBuildingTriggerIndexItem = index == newPageRequestTriggerIndex;
-              if (nextPageKey != null && isBuildingTriggerIndexItem) {
-                // Schedules the request for the end of this frame.
-                WidgetsBinding.instance.addPostFrameCallback((_) async {
-                  if (error == null) {
-                    await _controller.loadMore(nextPageKey);
-                  }
-                  _hasRequestedNextPage = false;
-                });
-                _hasRequestedNextPage = true;
-              }
-            }
-
-            if (index == items.length) {
-              if (error != null) {
-                return widget.loadMoreErrorBuilder(context, error);
-              }
-              return widget.loadMoreIndicatorBuilder(context);
-            }
-
-            return widget.itemBuilder(context, items, index);
-          },
-        );
-      },
-      loading: () => widget.loadingBuilder(context),
-      error: (error) => widget.errorBuilder(context, error),
-    ),
+    builder: (context, value, _) => switch (value) {
+      Loading<K, V>() => widget.loadingBuilder(context),
+      Error<K, V>(:final error) => widget.errorBuilder(context, error),
+      Success<K, V>(:final items) when items.isEmpty => widget.emptyBuilder(context),
+      final Success<K, V> success => _buildListView(context, success),
+    },
   );
+
+  Widget _buildListView(BuildContext context, Success<K, V> value) {
+    final items = value.items;
+
+    return ListView.separated(
+      scrollDirection: widget.scrollDirection,
+      padding: widget.padding,
+      physics: widget.physics,
+      reverse: widget.reverse,
+      controller: widget.scrollController,
+      primary: widget.primary,
+      shrinkWrap: widget.shrinkWrap,
+      addAutomaticKeepAlives: widget.addAutomaticKeepAlives,
+      addRepaintBoundaries: widget.addRepaintBoundaries,
+      addSemanticIndexes: widget.addSemanticIndexes,
+      keyboardDismissBehavior: widget.keyboardDismissBehavior,
+      restorationId: widget.restorationId,
+      dragStartBehavior: widget.dragStartBehavior,
+      // ignore: deprecated_member_use
+      cacheExtent: widget.cacheExtent,
+      clipBehavior: widget.clipBehavior,
+      itemCount: value.itemCount,
+      separatorBuilder: (context, index) => widget.separatorBuilder(context, items, index),
+      itemBuilder: (context, index) => _buildItem(context, value, index),
+    );
+  }
+
+  /// Builds the item at [index], which is either one of [Success.items] or the
+  /// trailing load-more slot.
+  Widget _buildItem(BuildContext context, Success<K, V> value, int index) {
+    _maybeRequestNextPage(value, index);
+
+    final items = value.items;
+    if (index != items.length) return widget.itemBuilder(context, items, index);
+
+    final error = value.error;
+    if (error != null) return widget.loadMoreErrorBuilder(context, error);
+    return widget.loadMoreIndicatorBuilder(context);
+  }
+
+  /// Schedules a next-page request when [index] is the load-more trigger index.
+  void _maybeRequestNextPage(Success<K, V> value, int index) {
+    if (_hasRequestedNextPage) return;
+
+    final nextPageKey = value.nextPageKey;
+    if (nextPageKey == null) return;
+    if (index != value.items.length - widget.loadMoreTriggerIndex) return;
+
+    // Schedules the request for the end of this frame.
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (value.error == null) await _controller.loadMore(nextPageKey);
+      _hasRequestedNextPage = false;
+    });
+
+    _hasRequestedNextPage = true;
+  }
 }
 
 /// A [GridView] that loads more pages when the user scrolls to the end of the
@@ -651,66 +660,73 @@ class _PagedValueGridViewState<K, V> extends State<PagedValueGridView<K, V>> {
   @override
   Widget build(BuildContext context) => PagedValueListenableBuilder<K, V>(
     valueListenable: _controller,
-    builder: (context, value, _) => value.when(
-      (items, nextPageKey, error) {
-        if (items.isEmpty) {
-          return widget.emptyBuilder(context);
-        }
-
-        return GridView.builder(
-          scrollDirection: widget.scrollDirection,
-          reverse: widget.reverse,
-          controller: widget.scrollController,
-          primary: widget.primary,
-          physics: widget.physics,
-          shrinkWrap: widget.shrinkWrap,
-          padding: widget.padding,
-          addAutomaticKeepAlives: widget.addAutomaticKeepAlives,
-          addRepaintBoundaries: widget.addRepaintBoundaries,
-          addSemanticIndexes: widget.addSemanticIndexes,
-          // ignore: deprecated_member_use
-          cacheExtent: widget.cacheExtent,
-          semanticChildCount: widget.semanticChildCount,
-          dragStartBehavior: widget.dragStartBehavior,
-          keyboardDismissBehavior: widget.keyboardDismissBehavior,
-          restorationId: widget.restorationId,
-          clipBehavior: widget.clipBehavior,
-          itemCount: value.itemCount + (widget.leadingItemBuilder != null ? 1 : 0),
-          gridDelegate: widget.gridDelegate,
-          itemBuilder: (context, index) {
-            var adjustedIndex = index;
-            if (widget.leadingItemBuilder != null) {
-              if (index == 0) return widget.leadingItemBuilder!(context);
-              adjustedIndex = index - 1;
-            }
-
-            if (!_hasRequestedNextPage) {
-              final newPageRequestTriggerIndex = items.length - widget.loadMoreTriggerIndex;
-              if (nextPageKey != null && adjustedIndex == newPageRequestTriggerIndex) {
-                // Schedules the request for the end of this frame.
-                WidgetsBinding.instance.addPostFrameCallback((_) async {
-                  if (error == null) {
-                    await _controller.loadMore(nextPageKey);
-                  }
-                  _hasRequestedNextPage = false;
-                });
-                _hasRequestedNextPage = true;
-              }
-            }
-
-            if (adjustedIndex == items.length) {
-              if (error != null) {
-                return widget.loadMoreErrorBuilder(context, error);
-              }
-              return widget.loadMoreIndicatorBuilder(context);
-            }
-
-            return widget.itemBuilder(context, items, adjustedIndex);
-          },
-        );
-      },
-      loading: () => widget.loadingBuilder(context),
-      error: (error) => widget.errorBuilder(context, error),
-    ),
+    builder: (context, value, _) => switch (value) {
+      Loading<K, V>() => widget.loadingBuilder(context),
+      Error<K, V>(:final error) => widget.errorBuilder(context, error),
+      Success<K, V>(:final items) when items.isEmpty => widget.emptyBuilder(context),
+      final Success<K, V> success => _buildGridView(context, success),
+    },
   );
+
+  Widget _buildGridView(BuildContext context, Success<K, V> value) => GridView.builder(
+    scrollDirection: widget.scrollDirection,
+    reverse: widget.reverse,
+    controller: widget.scrollController,
+    primary: widget.primary,
+    physics: widget.physics,
+    shrinkWrap: widget.shrinkWrap,
+    padding: widget.padding,
+    addAutomaticKeepAlives: widget.addAutomaticKeepAlives,
+    addRepaintBoundaries: widget.addRepaintBoundaries,
+    addSemanticIndexes: widget.addSemanticIndexes,
+    // ignore: deprecated_member_use
+    cacheExtent: widget.cacheExtent,
+    semanticChildCount: widget.semanticChildCount,
+    dragStartBehavior: widget.dragStartBehavior,
+    keyboardDismissBehavior: widget.keyboardDismissBehavior,
+    restorationId: widget.restorationId,
+    clipBehavior: widget.clipBehavior,
+    itemCount: value.itemCount + (widget.leadingItemBuilder != null ? 1 : 0),
+    gridDelegate: widget.gridDelegate,
+    itemBuilder: (context, index) => _buildItem(context, value, index),
+  );
+
+  /// Builds the item at [index], which is either the optional leading item, one
+  /// of [Success.items], or the trailing load-more slot.
+  Widget _buildItem(BuildContext context, Success<K, V> value, int index) {
+    final leadingItemBuilder = widget.leadingItemBuilder;
+
+    // The leading item occupies index 0 and shifts the paged items by one.
+    var itemIndex = index;
+    if (leadingItemBuilder != null) {
+      if (index == 0) return leadingItemBuilder(context);
+      itemIndex = index - 1;
+    }
+
+    _maybeRequestNextPage(value, itemIndex);
+
+    final items = value.items;
+    if (itemIndex != items.length) return widget.itemBuilder(context, items, itemIndex);
+
+    final error = value.error;
+    if (error != null) return widget.loadMoreErrorBuilder(context, error);
+    return widget.loadMoreIndicatorBuilder(context);
+  }
+
+  /// Schedules a next-page request when [index] is the load-more trigger index.
+  void _maybeRequestNextPage(Success<K, V> value, int index) {
+    if (_hasRequestedNextPage) return;
+
+    final nextPageKey = value.nextPageKey;
+    if (nextPageKey == null) return;
+    if (index != value.items.length - widget.loadMoreTriggerIndex) return;
+
+    // Schedules the request for the end of this frame.
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (value.error == null) await _controller.loadMore(nextPageKey);
+      _hasRequestedNextPage = false;
+    });
+
+    _hasRequestedNextPage = true;
+  }
 }

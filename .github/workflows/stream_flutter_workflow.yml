@@ -74,6 +74,11 @@ jobs:
         if: github.base_ref == 'master'
         run: |
           melos run lint:pub
+      - uses: kevmoo/cognitive_complexity.dart@main
+        with:
+          diff-base: origin/${{ github.base_ref }}
+          fail-threshold: 15
+          fail-on-increase: true
 
   format:
     needs: gate
