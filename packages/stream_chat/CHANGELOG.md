@@ -27,6 +27,7 @@
 - Fixed a `StateError` (`Cannot add new events after calling close`) thrown when the client is disposed while a reconnect recovery is still in flight.
 - Fixed `Message.deleteMyReaction` dropping an entire reaction group when its summed scores reached zero even though other users' reactions kept the count positive; the group is now retained as long as its count stays above zero.
 - Fixed reaction groups synthesized from legacy `reaction_counts`/`reaction_scores` payloads being discarded at parse time when their score total was zero or negative despite a positive count.
+- Fixed `Channel.getReplies` adding the parent message to `ChannelClientState.threads` when a backend returns it alongside the replies, which rendered the thread root twice. The online path now filters it out, matching the offline one.
 
 ## 10.2.0
 
