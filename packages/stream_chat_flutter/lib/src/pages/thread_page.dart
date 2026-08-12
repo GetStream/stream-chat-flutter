@@ -147,6 +147,7 @@ class _ThreadBody extends StatelessWidget {
       onReplyTap: onReply,
       onEditMessageTap: onEditMessageTap,
       onViewInChannelTap: onViewInChannelTap,
+      enableSafeArea: true,
     );
   }
 }

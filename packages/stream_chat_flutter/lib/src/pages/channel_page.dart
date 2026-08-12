@@ -189,6 +189,7 @@ class _ChannelPageBody extends StatelessWidget {
           threadBuilder: (_, parentMessage) {
             return StreamThreadPage(parent: parentMessage!);
           },
+          enableSafeArea: true,
         ),
         Positioned(
           left: 0,

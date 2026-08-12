@@ -127,6 +127,7 @@ class StreamMessageListView extends StatefulWidget {
     this.onMessageLongPress,
     this.config,
     this.builders = const StreamMessageListViewBuilders(),
+    this.enableSafeArea = false,
   });
 
   /// Predicate used to filter messages.
@@ -285,6 +286,8 @@ class StreamMessageListView extends StatefulWidget {
   ///
   /// Defaults to [StreamMessageListViewBuilders] with no overrides.
   final StreamMessageListViewBuilders builders;
+
+  final bool enableSafeArea;
 
   @override
   _StreamMessageListViewState createState() => _StreamMessageListViewState();
@@ -563,7 +566,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
   // Safe-area insets injected into MediaQuery by the enclosing scaffold (a
   // floating app bar / composer, or the system safe area). Read directly so the
   // list self-insets without the caller threading padding in.
-  EdgeInsets get _scaffoldInsets => MediaQuery.paddingOf(context);
+  EdgeInsets get _scaffoldInsets => widget.enableSafeArea ? MediaQuery.paddingOf(context) : EdgeInsets.zero;
 
   @override
   Widget build(BuildContext context) {
