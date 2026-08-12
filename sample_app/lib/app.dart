@@ -202,42 +202,44 @@ class _StreamChatSampleAppState extends State<StreamChatSampleApp>
                         GlobalMaterialLocalizations.delegate,
                         GlobalWidgetsLocalizations.delegate,
                       ],
-                      builder: (context, child) => ListenableBuilder(
-                        listenable: authController,
-                        builder: (context, cachedChild) {
-                          final wrapped = Directionality(
-                            textDirection: config.forceRtl ? .rtl : .ltr,
-                            child: cachedChild ?? const SizedBox.shrink(),
-                          );
+                      builder: (context, child) => _ComponentSurfaceStyleOverrides(
+                        child: ListenableBuilder(
+                          listenable: authController,
+                          builder: (context, cachedChild) {
+                            final wrapped = Directionality(
+                              textDirection: config.forceRtl ? .rtl : .ltr,
+                              child: cachedChild ?? const SizedBox.shrink(),
+                            );
 
-                          // StreamChat stays mounted as long as a client
-                          // exists so `StreamChat.of(context)` remains
-                          // valid across logout transitions.
-                          final client = authController.client;
-                          if (client != null) {
-                            return StreamChat(
-                              client: client,
-                              // Null in production → the SDK uses the real
-                              // connectivity monitor; set only by e2e tests.
-                              connectivityStream: authController.debugConnectivityStream,
-                              componentBuilders: StreamComponentBuilders(
-                                extensions: streamChatComponentBuilders(
-                                  messageItem: customMessageItemBuilder,
-                                  messageComposer: locationAwareMessageComposer,
-                                  videoPlayer: (context, props) => SampleAppVideoPlayer(props: props),
+                            // StreamChat stays mounted as long as a client
+                            // exists so `StreamChat.of(context)` remains
+                            // valid across logout transitions.
+                            final client = authController.client;
+                            if (client != null) {
+                              return StreamChat(
+                                client: client,
+                                // Null in production → the SDK uses the real
+                                // connectivity monitor; set only by e2e tests.
+                                connectivityStream: authController.debugConnectivityStream,
+                                componentBuilders: StreamComponentBuilders(
+                                  extensions: streamChatComponentBuilders(
+                                    messageItem: customMessageItemBuilder,
+                                    messageComposer: locationAwareMessageComposer,
+                                    videoPlayer: (context, props) => SampleAppVideoPlayer(props: props),
+                                  ),
                                 ),
-                              ),
-                              configData: config.toStreamChatConfigurationData(),
+                                configData: config.toStreamChatConfigurationData(),
+                                child: wrapped,
+                              );
+                            }
+
+                            return StreamChatTheme(
+                              data: StreamChatThemeData(),
                               child: wrapped,
                             );
-                          }
-
-                          return StreamChatTheme(
-                            data: StreamChatThemeData(),
-                            child: wrapped,
-                          );
-                        },
-                        child: child,
+                          },
+                          child: child,
+                        ),
                       ),
                       routerConfig: _setupRouter(),
                     );
@@ -293,6 +295,49 @@ extension on SampleAppConfigData {
       messageListViewConfiguration: const StreamMessageListViewConfiguration(
         highlightInitialMessage: true,
         swipeToReply: true,
+      ),
+    );
+  }
+}
+
+/// Applies the per-component [StreamSurfaceStyle] overrides from
+/// [SampleAppConfigData] so each chrome component's floating/regular placement
+/// can be toggled independently of the app-wide `surfaceStyle`.
+///
+/// Each override wraps the subtree in the component's own inherited theme.
+/// A null override leaves that component's `surfaceStyle` unset, so it merges
+/// back to the ambient app-wide [StreamTheme.surfaceStyle].
+class _ComponentSurfaceStyleOverrides extends StatelessWidget {
+  const _ComponentSurfaceStyleOverrides({
+    required this.child,
+  });
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    const StreamSurfaceStyle? appBarSurfaceStyle = .floating;
+    const StreamSurfaceStyle? bottomAppBarSurfaceStyle = .regular;
+    const StreamSurfaceStyle? bottomNavBarSurfaceStyle = .regular;
+    const StreamSurfaceStyle? composerSurfaceStyle = .regular;
+
+    return StreamAppBarTheme(
+      data: const StreamAppBarThemeData(
+        style: StreamAppBarStyle(surfaceStyle: appBarSurfaceStyle),
+      ),
+      child: StreamBottomAppBarTheme(
+        data: const StreamBottomAppBarThemeData(
+          style: StreamBottomAppBarStyle(surfaceStyle: bottomAppBarSurfaceStyle),
+        ),
+        child: StreamBottomNavBarTheme(
+          data: const StreamBottomNavBarThemeData(
+            style: StreamBottomNavBarStyle(surfaceStyle: bottomNavBarSurfaceStyle),
+          ),
+          child: StreamMessageComposerTheme(
+            data: const StreamMessageComposerThemeData(surfaceStyle: composerSurfaceStyle),
+            child: child,
+          ),
+        ),
       ),
     );
   }
