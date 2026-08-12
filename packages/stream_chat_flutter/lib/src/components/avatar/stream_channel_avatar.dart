@@ -84,7 +84,11 @@ class StreamChannelAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    assert(channel.state != null, 'Channel ${channel.id} is not initialized');
+    // The channel may be disposed (e.g. on logout) while this avatar is still
+    // mounted and the framework rebuilds it (a parent rebuild, or an inherited
+    // dependency change re-running the inner builder). Reading channel state
+    // then throws, so bail out instead.
+    if (channel.state == null) return const SizedBox.shrink();
 
     final effectiveSize = size ?? StreamAvatarGroupSize.lg;
     final effectiveLabel = semanticsLabel ?? _defaultSemanticsLabel(context);
@@ -100,9 +104,13 @@ class StreamChannelAvatar extends StatelessWidget {
         placeholder: (_) => const _StreamChannelAvatarPlaceholder(),
       ),
       noDataBuilder: (context) => BetterStreamBuilder(
-        stream: channel.state!.membersStream,
-        initialData: channel.state!.members,
+        stream: channel.state?.membersStream,
+        initialData: channel.state?.members,
         builder: (context, members) {
+          // This builder is re-run by inherited-dependency changes too, so
+          // it can fire after the channel is disposed — guard again here.
+          if (channel.state == null) return const SizedBox.shrink();
+
           final users = members.map((it) => it.user!).toList();
           final currentUserId = channel.client.state.currentUser?.id;
 
