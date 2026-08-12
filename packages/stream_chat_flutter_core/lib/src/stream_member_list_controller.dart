@@ -4,6 +4,8 @@ import 'dart:math';
 import 'package:collection/collection.dart';
 import 'package:stream_chat/stream_chat.dart' hide Success;
 import 'package:stream_chat_flutter_core/src/paged_value_notifier.dart';
+import 'package:stream_chat_flutter_core/src/search_debounce_mixin.dart';
+import 'package:stream_chat_flutter_core/src/search_debouncer.dart';
 
 /// The default channel page limit to load.
 const defaultMemberPagedLimit = 10;
@@ -20,8 +22,9 @@ const _kDefaultBackendPaginationLimit = 30;
 /// This class lets you perform tasks such as:
 /// * Load initial data.
 /// * Load more data using [loadMore].
+/// * Search with a query-length-aware debounce using [search].
 /// * Replace the previously loaded members.
-class StreamMemberListController extends PagedValueNotifier<int, Member> {
+class StreamMemberListController extends PagedValueNotifier<int, Member> with SearchDebounceMixin {
   /// Creates a Stream member list controller.
   ///
   /// * `client` is the Stream chat client to use for the channels list.
@@ -92,6 +95,36 @@ class StreamMemberListController extends PagedValueNotifier<int, Member> {
   /// [doInitialLoad] after setting a new sort.
   set sort(SortOrder<Member>? value) => _activeSort = value;
 
+  /// Searches members whose name matches [query], debounced by its length.
+  ///
+  /// [query] is matched against the member name as an autocomplete filter,
+  /// which replaces the controller's base [filter] rather than narrowing it; a
+  /// blank [query] restores it. Rapidly superseded searches are dropped, so only
+  /// the latest query's results are applied.
+  ///
+  /// To search on other fields, or to keep the base [filter] applied while
+  /// searching, use [searchWithFilter].
+  void search(String query) {
+    final trimmed = query.trim();
+    if (trimmed.isEmpty) return searchWithFilter(filter);
+
+    final searchFilter = Filter.autoComplete('name', trimmed);
+
+    return searchWithFilter(searchFilter);
+  }
+
+  /// Searches with the given [filter], debounced by the search text it holds.
+  ///
+  /// The [filter] becomes the active filter; a null [filter] matches all. When
+  /// it carries a text-search operator ([Filter.autoComplete] or [Filter.query])
+  /// the reload is debounced by that text's length; otherwise it reloads
+  /// immediately. Rapidly superseded searches are dropped, so only the latest
+  /// query's results are applied.
+  void searchWithFilter(Filter? filter) {
+    _activeFilter = filter;
+    debouncedSearch(searchQueryLength(filter));
+  }
+
   @override
   set value(PagedValue<int, Member> newValue) {
     super.value = switch (_activeSort) {
@@ -107,6 +140,11 @@ class StreamMemberListController extends PagedValueNotifier<int, Member> {
 
   @override
   Future<void> doInitialLoad() async {
+    // A debounced search is already scheduled; let it perform the load instead
+    // of firing an extra, un-debounced request.
+    if (hasPendingSearch) return;
+
+    final generation = beginLoad();
     final limit = min(
       this.limit * defaultInitialPagedLimitMultiplier,
       _kDefaultBackendPaginationLimit,
@@ -118,6 +156,7 @@ class StreamMemberListController extends PagedValueNotifier<int, Member> {
         pagination: PaginationParams(limit: limit),
       );
 
+      if (isStale(generation)) return;
       final members = memberResponse.members;
       final nextKey = members.length < limit ? null : members.length;
       value = PagedValue(
@@ -125,8 +164,10 @@ class StreamMemberListController extends PagedValueNotifier<int, Member> {
         nextPageKey: nextKey,
       );
     } on StreamChatError catch (error) {
+      if (isStale(generation)) return;
       value = PagedValue.error(error);
     } catch (error) {
+      if (isStale(generation)) return;
       final chatError = StreamChatError(error.toString());
       value = PagedValue.error(chatError);
     }
@@ -134,6 +175,7 @@ class StreamMemberListController extends PagedValueNotifier<int, Member> {
 
   @override
   Future<void> loadMore(int nextPageKey) async {
+    final generation = loadGeneration;
     final previousValue = value.asSuccess;
 
     try {
@@ -143,6 +185,9 @@ class StreamMemberListController extends PagedValueNotifier<int, Member> {
         pagination: PaginationParams(limit: limit, offset: nextPageKey),
       );
 
+      // Drop the page if a newer search or clearResults() superseded it, so a
+      // stale page cannot repopulate the results.
+      if (isStale(generation)) return;
       final members = memberResponse.members;
       final previousItems = previousValue.items;
       final newItems = previousItems + members;
@@ -152,8 +197,10 @@ class StreamMemberListController extends PagedValueNotifier<int, Member> {
         nextPageKey: nextKey,
       );
     } on StreamChatError catch (error) {
+      if (isStale(generation)) return;
       value = previousValue.copyWith(error: error);
     } catch (error) {
+      if (isStale(generation)) return;
       final chatError = StreamChatError(error.toString());
       value = previousValue.copyWith(error: chatError);
     }
