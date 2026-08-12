@@ -17,6 +17,8 @@
 
 🐞 Fixed
 
+- Fixed pinned channels appearing at the bottom of the list when sorting by `pinned_at` descending.
+- Fixed channels without messages appearing at the top of the list when sorting by `last_message_at` descending.
 - Fixed `StreamWebSocketError.toString()` using a `WebSocketError(...)` prefix instead of the class name; it now also includes `code`, and `StreamChatNetworkError.toString()` now surfaces the transport `type` when known.
 - Fixed `ChannelClientState.watcherCount` staying stale during a session.
 - Fixed watchers not being removed from `ChannelClientState.watchers` on `user.watching.stop`.
