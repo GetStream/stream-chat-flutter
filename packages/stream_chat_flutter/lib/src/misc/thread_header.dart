@@ -104,9 +104,6 @@ class StreamThreadHeader extends StatelessWidget implements PreferredSizeWidget 
       alternativeWidget: fallbackSubtitle,
     );
 
-    // The bar resolves `style` over the ambient app bar theme, so layering the
-    // per-header theme under `style` keeps a caller's StreamAppBarTheme in the
-    // chain.
     return StreamAppBar(
       leading: leading,
       automaticallyImplyLeading: automaticallyImplyLeading,

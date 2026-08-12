@@ -157,9 +157,6 @@ class StreamChannelListHeader extends StatelessWidget implements PreferredSizeWi
           return StreamInfoTile(
             showMessage: showConnectionStateTile && showStatus,
             message: statusString,
-            // The bar resolves `style` over the ambient app bar theme, so
-            // layering the per-header theme under `style` keeps a caller's
-            // StreamAppBarTheme in the chain.
             child: StreamAppBar(
               leading: leading,
               title: title,
