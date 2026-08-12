@@ -1,3 +1,9 @@
+## Upcoming
+
+🐞 Fixed
+
+- Fixed truncated channels being the first to fall out of the 250-channel cap returned by `getChannelCids`.
+
 ## 10.2.0
 
 🚀 Performance
