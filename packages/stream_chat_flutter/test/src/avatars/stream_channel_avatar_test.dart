@@ -52,7 +52,13 @@ void main() {
       when(() => channel.image).thenReturn(null);
       when(() => channel.imageStream).thenAnswer((_) => Stream<String?>.value(null));
       when(() => channel.isGroup).thenReturn(false);
-      when(() => channel.isOneToOne).thenReturn(true);
+      // Reading channel properties after disposal throws in real code; model
+      // that so the member-stream builder must rely on the disposed-channel
+      // guard rather than reaching this getter.
+      when(() => channel.isOneToOne).thenAnswer((_) {
+        if (liveState == null) throw StateError('Channel is disposed');
+        return true;
+      });
 
       when(() => channelState.membersStream).thenAnswer((_) => membersController.stream);
       when(() => channelState.members).thenReturn(members);
@@ -94,7 +100,10 @@ void main() {
       // now-disposed channel.
       membersController.add(List.of(members));
       await tester.pump();
+      await tester.pump(const Duration(milliseconds: 50));
       expect(tester.takeException(), isNull);
+      // The guard rendered the fallback instead of reaching the throwing getter.
+      expect(find.byType(StreamUserAvatar), findsNothing);
 
       // ...and separately, the framework rebuilds the avatar (as an inherited-
       // dependency change would) against the now-disposed channel.
