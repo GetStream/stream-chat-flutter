@@ -577,7 +577,7 @@ class DefaultStreamMessageComposer extends StatefulWidget {
 
 /// State of [DefaultStreamMessageComposer].
 class DefaultStreamMessageComposerState extends State<DefaultStreamMessageComposer>
-    with RestorationMixin<DefaultStreamMessageComposer>, SingleTickerProviderStateMixin, WidgetsBindingObserver {
+    with RestorationMixin<DefaultStreamMessageComposer>, SingleTickerProviderStateMixin {
   bool get _commandEnabled => _effectiveController.message.command != null;
 
   bool get _isPickerVisible => _pickerController != null;
@@ -632,7 +632,6 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this);
     _pickerAnimationController = AnimationController(
       duration: const Duration(milliseconds: 200),
       vsync: this,
@@ -657,9 +656,6 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
       if (mounted) return _initializeState();
     });
   }
-
-  @override
-  void didChangeMetrics() => setState(() {}); // Rebuilds when the keyboard opens/closes.
 
   void _initializeState() {
     // Call the listener once to make sure the initial state is reflected
@@ -1643,7 +1639,6 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
 
   @override
   void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
     _pickerAnimation.dispose();
     _pickerAnimationController.dispose();
     _stopPickerSync();
