@@ -502,10 +502,10 @@ void main() {
   );
 
   group('default slot floating behavior', () {
-    // The header installs its own StreamAppBarTheme around the bar, so both
-    // default slots have to resolve from inside it — otherwise
-    // channelHeaderTheme is invisible to them while the bar honours it, and the
-    // avatar and back button can disagree with each other.
+    // The header layers channelHeaderTheme under `style` and hands the pair to
+    // the bar, which republishes what it resolved to its slots. Both default
+    // slots therefore have to agree with the bar and with each other, whichever
+    // link in the chain set the behavior.
     Future<void> pumpHeader(
       WidgetTester tester, {
       StreamSurfaceStyle surfaceStyle = StreamSurfaceStyle.regular,
@@ -610,13 +610,22 @@ void main() {
     });
 
     testWidgets('floats when an ancestor StreamAppBarTheme override says so, over a regular app style', (tester) async {
-      // Regression: the header wraps its bar in its own StreamAppBarTheme. That
-      // wrapper must merge — not shadow — an ancestor override, or an app-level
-      // surfaceStyle never reaches the header and it stays regular.
+      // Regression: the header must not stand between the bar and a caller's
+      // StreamAppBarTheme, or an app-level surfaceStyle never reaches it.
       await pumpHeader(tester, ancestorSurfaceStyle: StreamSurfaceStyle.floating);
 
       expect(avatarIsFloating(tester), isTrue);
       expect(backButtonIsFloating(tester), isTrue);
+    });
+
+    testWidgets('the header theme wins over an ancestor StreamAppBarTheme override', (tester) async {
+      await pumpHeader(
+        tester,
+        ancestorSurfaceStyle: StreamSurfaceStyle.floating,
+        themeSurfaceStyle: StreamSurfaceStyle.regular,
+      );
+
+      expect(avatarIsFloating(tester), isNot(isTrue));
     });
 
     testWidgets('the header style wins over both the header theme and the app style', (tester) async {
