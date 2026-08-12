@@ -520,6 +520,50 @@ Limite de pièces jointes dépassée : il n'est pas possible d'ajouter plus de $
       ' du canal.';
 
   @override
+  String get messageMarkedAsUnreadText => 'Message marqué comme non lu';
+
+  @override
+  String get deleteMessageError => 'Erreur lors de la suppression du message';
+
+  @override
+  String togglePinUnpinMessageSuccessText({required bool pinned}) {
+    if (pinned) return 'Message épinglé';
+    return 'Message désépinglé';
+  }
+
+  @override
+  String togglePinUnpinMessageErrorText({required bool pinned}) {
+    if (pinned) return "Erreur lors de l'épinglage du message";
+    return 'Erreur lors du désépinglage du message';
+  }
+
+  @override
+  String get flagMessageError => 'Erreur lors du signalement du message';
+
+  @override
+  String get messageCopiedToClipboardText => 'Message copié dans le presse-papiers';
+
+  @override
+  String get sendMessageError => "Échec de l'envoi du message";
+
+  @override
+  String get editMessageError => 'Échec de la modification du message';
+
+  @override
+  String toggleMuteUnmuteUserSuccessText({required String user, required bool isMuted}) {
+    if (isMuted) return 'Le son de $user a été réactivé';
+    return 'Le son de $user a été coupé';
+  }
+
+  @override
+  String toggleMuteUnmuteUserErrorText({required bool isMuted}) {
+    if (isMuted) {
+      return 'Erreur lors de la réactivation du son, veuillez réessayer';
+    }
+    return 'Erreur lors de la coupure du son, veuillez réessayer';
+  }
+
+  @override
   String createPollLabel({bool isNew = false}) {
     if (isNew) return 'Créer un sondage';
     return 'Créer sondage';
@@ -656,6 +700,12 @@ Limite de pièces jointes dépassée : il n'est pas possible d'ajouter plus de $
   String get endVoteLabel => 'Terminer le vote';
 
   @override
+  String get endVoteSuccessMessage => 'Vote terminé';
+
+  @override
+  String get endVoteErrorMessage => 'Impossible de terminer le vote';
+
+  @override
   String get pollResultsLabel => 'Résultats du sondage';
 
   @override
@@ -707,6 +757,9 @@ Limite de pièces jointes dépassée : il n'est pas possible d'ajouter plus de $
 
   @override
   String get holdToRecordLabel => 'Maintenez pour enregistrer, relâchez pour envoyer';
+
+  @override
+  String get audioRecordingPermissionMessage => 'Veuillez autoriser les permissions audio dans les paramètres.';
 
   @override
   String get sendAnywayLabel => 'Envoyer quand même';

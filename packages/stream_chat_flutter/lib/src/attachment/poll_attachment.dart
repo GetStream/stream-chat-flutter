@@ -9,6 +9,7 @@ import 'package:stream_chat_flutter/src/poll/stream_poll_comments_sheet.dart';
 import 'package:stream_chat_flutter/src/poll/stream_poll_options_sheet.dart';
 import 'package:stream_chat_flutter/src/poll/stream_poll_results_sheet.dart';
 import 'package:stream_chat_flutter/src/stream_chat.dart';
+import 'package:stream_chat_flutter/src/utils/extensions.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:stream_core_flutter/chat.dart';
 
@@ -136,10 +137,24 @@ class _DefaultStreamPollAttachmentState extends State<DefaultStreamPollAttachmen
         final channel = StreamChannel.of(context).channel;
 
         Future<void> onEndVote() async {
+          final translations = context.translations;
+          final messenger = StreamSnackbarMessenger.maybeOf(context);
+
           final confirm = await showPollEndVoteDialog(context: context);
           if (confirm == null || !confirm) return;
 
-          channel.closePoll(poll).ignore();
+          try {
+            await channel.closePoll(poll);
+            messenger?.show(
+              StreamSnackbar(message: Text(translations.endVoteSuccessMessage), variant: .success),
+              replace: true,
+            );
+          } on Exception catch (_) {
+            messenger?.show(
+              StreamSnackbar(message: Text(translations.endVoteErrorMessage), variant: .error),
+              replace: true,
+            );
+          }
         }
 
         Future<void> onAddComment() async {

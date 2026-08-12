@@ -516,6 +516,50 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
       ' सभी अपठित संदेशों को अपठित मार्क नहीं किया जा सकता है।';
 
   @override
+  String get messageMarkedAsUnreadText => 'संदेश को अपठित के रूप में चिह्नित किया गया';
+
+  @override
+  String get deleteMessageError => 'संदेश हटाने में त्रुटि';
+
+  @override
+  String togglePinUnpinMessageSuccessText({required bool pinned}) {
+    if (pinned) return 'संदेश पिन किया गया';
+    return 'संदेश अनपिन किया गया';
+  }
+
+  @override
+  String togglePinUnpinMessageErrorText({required bool pinned}) {
+    if (pinned) return 'संदेश पिन करने में त्रुटि';
+    return 'संदेश पिन हटाने में त्रुटि';
+  }
+
+  @override
+  String get flagMessageError => 'फ्लैग जोड़ने में त्रुटि';
+
+  @override
+  String get messageCopiedToClipboardText => 'संदेश क्लिपबोर्ड पर कॉपी किया गया';
+
+  @override
+  String get sendMessageError => 'संदेश भेजने में विफल';
+
+  @override
+  String get editMessageError => 'संदेश संपादित करने में विफल';
+
+  @override
+  String toggleMuteUnmuteUserSuccessText({required String user, required bool isMuted}) {
+    if (isMuted) return '$user को अनम्यूट कर दिया गया है';
+    return '$user को म्यूट कर दिया गया है';
+  }
+
+  @override
+  String toggleMuteUnmuteUserErrorText({required bool isMuted}) {
+    if (isMuted) {
+      return 'उपयोगकर्ता को अनम्यूट करने में त्रुटि, कृपया पुनः प्रयास करें';
+    }
+    return 'उपयोगकर्ता को म्यूट करने में त्रुटि, कृपया पुनः प्रयास करें';
+  }
+
+  @override
   String createPollLabel({bool isNew = false}) {
     if (isNew) return 'एक नया पोल बनाएँ';
     return 'पोल बनाएँ';
@@ -591,6 +635,12 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
 
   @override
   String get endVoteLabel => 'वोट समाप्त करें';
+
+  @override
+  String get endVoteSuccessMessage => 'वोट समाप्त हो गया';
+
+  @override
+  String get endVoteErrorMessage => 'वोट समाप्त करने में विफल';
 
   @override
   String get enterANewOptionLabel => 'एक नया विकल्प दर्ज करें';
@@ -703,6 +753,9 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
 
   @override
   String get holdToRecordLabel => 'रिकॉर्ड करने के लिए दबाए रखें, भेजने के लिए छोड़ें';
+
+  @override
+  String get audioRecordingPermissionMessage => 'कृपया सेटिंग्स में ऑडियो अनुमति दें।';
 
   @override
   String get sendAnywayLabel => 'फिर भी भेजें';

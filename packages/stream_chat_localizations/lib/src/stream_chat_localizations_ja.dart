@@ -502,6 +502,50 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   String get markUnreadError => 'メッセージを未読にする際にエラーが発生しました。最新の100件のチャンネルメッセージより古い未読メッセージはマークできません。';
 
   @override
+  String get messageMarkedAsUnreadText => 'メッセージを未読としてマークしました';
+
+  @override
+  String get deleteMessageError => 'メッセージの削除中にエラーが発生しました';
+
+  @override
+  String togglePinUnpinMessageSuccessText({required bool pinned}) {
+    if (pinned) return 'メッセージをピンしました';
+    return 'メッセージのピンを外しました';
+  }
+
+  @override
+  String togglePinUnpinMessageErrorText({required bool pinned}) {
+    if (pinned) return 'メッセージのピンに失敗しました';
+    return 'メッセージのピン解除に失敗しました';
+  }
+
+  @override
+  String get flagMessageError => 'フラグの追加中にエラーが発生しました';
+
+  @override
+  String get messageCopiedToClipboardText => 'メッセージをクリップボードにコピーしました';
+
+  @override
+  String get sendMessageError => 'メッセージの送信に失敗しました';
+
+  @override
+  String get editMessageError => 'メッセージの編集に失敗しました';
+
+  @override
+  String toggleMuteUnmuteUserSuccessText({required String user, required bool isMuted}) {
+    if (isMuted) return '$userのミュートを解除しました';
+    return '$userをミュートしました';
+  }
+
+  @override
+  String toggleMuteUnmuteUserErrorText({required bool isMuted}) {
+    if (isMuted) {
+      return 'ユーザーのミュート解除に失敗しました。もう一度お試しください';
+    }
+    return 'ユーザーのミュートに失敗しました。もう一度お試しください';
+  }
+
+  @override
   String createPollLabel({bool isNew = false}) {
     if (isNew) return '新しい投票を作成する';
     return '投票の作成';
@@ -634,6 +678,12 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   String get endVoteLabel => '投票を終了';
 
   @override
+  String get endVoteSuccessMessage => '投票が終了しました';
+
+  @override
+  String get endVoteErrorMessage => '投票を終了できませんでした';
+
+  @override
   String get pollResultsLabel => '投票結果';
 
   @override
@@ -684,6 +734,9 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
 
   @override
   String get holdToRecordLabel => '長押しで録音、離すと送信';
+
+  @override
+  String get audioRecordingPermissionMessage => '設定でオーディオの権限を許可してください。';
 
   @override
   String get sendAnywayLabel => 'それでも送信';

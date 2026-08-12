@@ -505,6 +505,50 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
       ' 표시할 수 없습니다.';
 
   @override
+  String get messageMarkedAsUnreadText => '메시지를 읽지 않음으로 표시했습니다';
+
+  @override
+  String get deleteMessageError => '메시지를 삭제하는 중 오류가 발생했습니다';
+
+  @override
+  String togglePinUnpinMessageSuccessText({required bool pinned}) {
+    if (pinned) return '메시지를 고정했습니다';
+    return '메시지 고정을 해제했습니다';
+  }
+
+  @override
+  String togglePinUnpinMessageErrorText({required bool pinned}) {
+    if (pinned) return '메시지를 고정하는 중 오류가 발생했습니다';
+    return '메시지 고정을 해제하는 중 오류가 발생했습니다';
+  }
+
+  @override
+  String get flagMessageError => '플래그를 추가하는 중 오류가 발생했습니다';
+
+  @override
+  String get messageCopiedToClipboardText => '메시지를 클립보드에 복사했습니다';
+
+  @override
+  String get sendMessageError => '메시지 전송에 실패했습니다';
+
+  @override
+  String get editMessageError => '메시지 편집에 실패했습니다';
+
+  @override
+  String toggleMuteUnmuteUserSuccessText({required String user, required bool isMuted}) {
+    if (isMuted) return '$user님의 음소거를 해제했습니다';
+    return '$user님을 음소거했습니다';
+  }
+
+  @override
+  String toggleMuteUnmuteUserErrorText({required bool isMuted}) {
+    if (isMuted) {
+      return '사용자 음소거 해제 중 오류가 발생했습니다. 다시 시도해 주세요';
+    }
+    return '사용자 음소거 중 오류가 발생했습니다. 다시 시도해 주세요';
+  }
+
+  @override
   String createPollLabel({bool isNew = false}) {
     if (isNew) return '새 투표 만들기';
     return '투표 만들기';
@@ -637,6 +681,12 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
   String get endVoteLabel => '투표 종료';
 
   @override
+  String get endVoteSuccessMessage => '투표가 종료되었습니다';
+
+  @override
+  String get endVoteErrorMessage => '투표를 종료하지 못했습니다';
+
+  @override
   String get pollResultsLabel => '투표 결과';
 
   @override
@@ -687,6 +737,9 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
 
   @override
   String get holdToRecordLabel => '길게 눌러서 녹음, 놓아서 전송';
+
+  @override
+  String get audioRecordingPermissionMessage => '설정에서 오디오 권한을 허용해 주세요.';
 
   @override
   String get sendAnywayLabel => '그래도 보내기';

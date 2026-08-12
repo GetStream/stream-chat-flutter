@@ -286,6 +286,43 @@ abstract class Translations {
   /// The text of an error shown when marking a message as unread fails
   String get markUnreadError;
 
+  /// The text shown when a message is successfully marked as unread
+  String get messageMarkedAsUnreadText;
+
+  /// The text of an error shown when deleting a message fails
+  String get deleteMessageError;
+
+  /// The text shown when a message is successfully pinned or unpinned, where
+  /// [pinned] is the message's resulting pinned state (`true` after a pin).
+  String togglePinUnpinMessageSuccessText({required bool pinned});
+
+  /// The text of an error shown when pinning or unpinning a message fails, where
+  /// [pinned] is the pinned state that was being applied (`true` for a pin).
+  String togglePinUnpinMessageErrorText({required bool pinned});
+
+  /// The text of an error shown when flagging a message fails
+  String get flagMessageError;
+
+  /// The text shown when a message is copied to the clipboard
+  String get messageCopiedToClipboardText;
+
+  /// The text of an error shown when sending a message fails
+  String get sendMessageError;
+
+  /// The text of an error shown when editing a message fails
+  String get editMessageError;
+
+  /// The text shown when a [user] is successfully muted or unmuted
+  /// based on [isMuted]
+  String toggleMuteUnmuteUserSuccessText({
+    required String user,
+    required bool isMuted,
+  });
+
+  /// The text of an error shown when muting or unmuting a user fails
+  /// based on [isMuted]
+  String toggleMuteUnmuteUserErrorText({required bool isMuted});
+
   /// The text for showing delete/retry-delete based on [isDeleteFailed]
   String toggleDeleteRetryDeleteMessageText({required bool isDeleteFailed});
 
@@ -594,6 +631,12 @@ abstract class Translations {
   /// The label for "End Poll".
   String get endVoteLabel;
 
+  /// The text shown when a poll is successfully ended
+  String get endVoteSuccessMessage;
+
+  /// The text of an error shown when ending a poll fails
+  String get endVoteErrorMessage;
+
   /// The label for "Poll Results".
   String get pollResultsLabel;
 
@@ -637,6 +680,9 @@ abstract class Translations {
 
   /// The label for "Hold to record"
   String get holdToRecordLabel;
+
+  /// The message shown when audio recording permission is denied
+  String get audioRecordingPermissionMessage;
 
   /// The label for "Send Anyway"
   String get sendAnywayLabel;
@@ -1304,6 +1350,51 @@ Attachment limit exceeded: it's not possible to add more than $limit attachments
       ' newest 100 channel messages.';
 
   @override
+  String get messageMarkedAsUnreadText => 'Message marked as unread';
+
+  @override
+  String get deleteMessageError => 'Error deleting message';
+
+  @override
+  String togglePinUnpinMessageSuccessText({required bool pinned}) {
+    if (pinned) return 'Message pinned';
+    return 'Message unpinned';
+  }
+
+  @override
+  String togglePinUnpinMessageErrorText({required bool pinned}) {
+    if (pinned) return 'Error pinning message';
+    return 'Error removing message pin';
+  }
+
+  @override
+  String get flagMessageError => 'Error adding flag';
+
+  @override
+  String get messageCopiedToClipboardText => 'Message copied to clipboard';
+
+  @override
+  String get sendMessageError => 'Send message request failed';
+
+  @override
+  String get editMessageError => 'Edit message request failed';
+
+  @override
+  String toggleMuteUnmuteUserSuccessText({
+    required String user,
+    required bool isMuted,
+  }) {
+    if (isMuted) return '$user has been unmuted';
+    return '$user has been muted';
+  }
+
+  @override
+  String toggleMuteUnmuteUserErrorText({required bool isMuted}) {
+    if (isMuted) return 'Error unmuting a user, please try again';
+    return 'Error muting a user, please try again';
+  }
+
+  @override
   String createPollLabel({bool isNew = false}) {
     if (isNew) return 'Create a new poll';
     return 'Create Poll';
@@ -1458,6 +1549,12 @@ Attachment limit exceeded: it's not possible to add more than $limit attachments
   String get endVoteLabel => 'End Poll';
 
   @override
+  String get endVoteSuccessMessage => 'Poll ended';
+
+  @override
+  String get endVoteErrorMessage => 'Failed to end the poll';
+
+  @override
   String get pollResultsLabel => 'Poll Results';
 
   @override
@@ -1509,6 +1606,9 @@ Attachment limit exceeded: it's not possible to add more than $limit attachments
 
   @override
   String get holdToRecordLabel => 'Hold to record. Release to save.';
+
+  @override
+  String get audioRecordingPermissionMessage => 'Please allow Audio permissions in settings.';
 
   @override
   String get sendAnywayLabel => 'Send Anyway';

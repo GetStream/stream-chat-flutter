@@ -5,6 +5,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sample_app/routes/routes.dart';
+import 'package:sample_app/utils/action_feedback.dart';
 import 'package:sample_app/widgets/channel_detail_sheet.dart';
 import 'package:sample_app/widgets/search_text_field.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -155,8 +156,21 @@ class _ChannelListDefault extends StatelessWidget {
                       foregroundColor: colorScheme.textOnAccent,
                       backgroundColor: colorScheme.accentPrimary,
                       onPressed: (_) {
-                        if (isMuted) return channel.unmute().ignore();
-                        return channel.mute().ignore();
+                        final messenger = StreamSnackbarMessenger.maybeOf(context);
+                        if (isMuted) {
+                          return runWithFeedback(
+                            messenger,
+                            channel.unmute,
+                            successMessage: 'Channel unmuted',
+                            errorMessage: 'Failed to update channel mute status',
+                          ).ignore();
+                        }
+                        return runWithFeedback(
+                          messenger,
+                          channel.mute,
+                          successMessage: 'Channel muted',
+                          errorMessage: 'Failed to update channel mute status',
+                        ).ignore();
                       },
                       child: Icon(isMuted ? icons.audio : icons.mute, size: 20),
                     ),
@@ -204,15 +218,41 @@ Future<void> _onChannelDetailAction(
   ChannelDetailAction action,
 ) async {
   final client = StreamChat.of(context).client;
+  final messenger = StreamSnackbarMessenger.maybeOf(context);
   return switch (action) {
     ViewChannelInfo(:final user) => _pushChannelInfo(context, channel, user),
-    PinChannel() => channel.pin(),
-    UnpinChannel() => channel.unpin(),
-    MuteChannelMember(:final user) => client.muteUser(user.id),
-    UnmuteChannelMember(:final user) => client.unmuteUser(user.id),
-    BlockChannelMember(:final user) => client.blockUser(user.id),
-    LeaveChannel() => _maybeLeaveChannel(context, channel),
-    DeleteChannel() => _maybeDeleteChannel(context, channel),
+    PinChannel() => runWithFeedback(
+      messenger,
+      () => channel.pin(),
+      successMessage: 'Channel pinned',
+      errorMessage: 'Failed to update channel pinned status',
+    ),
+    UnpinChannel() => runWithFeedback(
+      messenger,
+      () => channel.unpin(),
+      successMessage: 'Channel unpinned',
+      errorMessage: 'Failed to update channel pinned status',
+    ),
+    MuteChannelMember(:final user) => runWithFeedback(
+      messenger,
+      () => client.muteUser(user.id),
+      successMessage: '${user.name} has been muted',
+      errorMessage: 'Error muting a user, please try again',
+    ),
+    UnmuteChannelMember(:final user) => runWithFeedback(
+      messenger,
+      () => client.unmuteUser(user.id),
+      successMessage: '${user.name} has been unmuted',
+      errorMessage: 'Error unmuting a user, please try again',
+    ),
+    BlockChannelMember(:final user) => runWithFeedback(
+      messenger,
+      () => client.blockUser(user.id),
+      successMessage: 'User blocked',
+      errorMessage: 'Failed to block user',
+    ),
+    LeaveChannel() => _maybeLeaveChannel(context, channel, messenger),
+    DeleteChannel() => _maybeDeleteChannel(context, channel, messenger),
   };
 }
 
@@ -240,7 +280,11 @@ Future<void> _pushChannelInfo(BuildContext context, Channel channel, User? user)
 // Shows a confirmation dialog before removing the current user from the
 // channel. Leave is only surfaced for group channels in the detail sheet,
 // so the copy is group-specific here.
-Future<void> _maybeLeaveChannel(BuildContext context, Channel channel) async {
+Future<void> _maybeLeaveChannel(
+  BuildContext context,
+  Channel channel,
+  StreamSnackbarMessenger? messenger,
+) async {
   final currentUserId = StreamChat.of(context).currentUser?.id;
   if (currentUserId == null) return;
 
@@ -252,13 +296,22 @@ Future<void> _maybeLeaveChannel(BuildContext context, Channel channel) async {
   );
 
   if (confirmed != true) return;
-  await channel.removeMembers([currentUserId]);
+  return runWithFeedback(
+    messenger,
+    () => channel.removeMembers([currentUserId]),
+    successMessage: 'Left channel',
+    errorMessage: 'Failed to leave channel',
+  );
 }
 
 // Shows a confirmation dialog before deleting the channel. On success, pops
 // the channel page if currently visible (e.g. when invoked from inside a
 // channel route).
-Future<void> _maybeDeleteChannel(BuildContext context, Channel channel) async {
+Future<void> _maybeDeleteChannel(
+  BuildContext context,
+  Channel channel,
+  StreamSnackbarMessenger? messenger,
+) async {
   final router = GoRouter.of(context);
   final subject = channel.isOneToOne ? 'conversation' : 'group';
 
@@ -270,8 +323,20 @@ Future<void> _maybeDeleteChannel(BuildContext context, Channel channel) async {
   );
 
   if (confirmed != true) return;
-  await channel.delete();
-  if (router.canPop()) router.pop();
+
+  try {
+    await channel.delete();
+    messenger?.show(
+      StreamSnackbar(message: const Text('Channel deleted'), variant: .success),
+      replace: true,
+    );
+    if (router.canPop()) router.pop();
+  } catch (_) {
+    messenger?.show(
+      StreamSnackbar(message: const Text('Failed to delete channel'), variant: .error),
+      replace: true,
+    );
+  }
 }
 
 class _ChannelListSearch extends StatelessWidget {

@@ -502,6 +502,48 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
       ' uleste som er eldre enn de 100 nyeste kanalmeldingene.';
 
   @override
+  String get messageMarkedAsUnreadText => 'Melding merket som ulest';
+
+  @override
+  String get deleteMessageError => 'Feil ved sletting av melding';
+
+  @override
+  String togglePinUnpinMessageSuccessText({required bool pinned}) {
+    if (pinned) return 'Melding festet';
+    return 'Melding løsnet';
+  }
+
+  @override
+  String togglePinUnpinMessageErrorText({required bool pinned}) {
+    if (pinned) return 'Feil ved festing av melding';
+    return 'Feil ved løsning av melding';
+  }
+
+  @override
+  String get flagMessageError => 'Feil ved rapportering av melding';
+
+  @override
+  String get messageCopiedToClipboardText => 'Melding kopiert til utklippstavlen';
+
+  @override
+  String get sendMessageError => 'Kunne ikke sende meldingen';
+
+  @override
+  String get editMessageError => 'Kunne ikke redigere meldingen';
+
+  @override
+  String toggleMuteUnmuteUserSuccessText({required String user, required bool isMuted}) {
+    if (isMuted) return 'Lyden til $user er slått på igjen';
+    return '$user er dempet';
+  }
+
+  @override
+  String toggleMuteUnmuteUserErrorText({required bool isMuted}) {
+    if (isMuted) return 'Feil ved oppheving av demping, prøv igjen';
+    return 'Feil ved demping av bruker, prøv igjen';
+  }
+
+  @override
   String createPollLabel({bool isNew = false}) {
     if (isNew) return 'Opprett en ny avstemning';
     return 'Opprett avstemning';
@@ -635,6 +677,12 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
   String get endVoteLabel => 'Avslutt avstemning';
 
   @override
+  String get endVoteSuccessMessage => 'Avstemning avsluttet';
+
+  @override
+  String get endVoteErrorMessage => 'Kunne ikke avslutte avstemningen';
+
+  @override
   String get pollResultsLabel => 'Resultater for avstemningen';
 
   @override
@@ -686,6 +734,9 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
 
   @override
   String get holdToRecordLabel => 'Hold for å ta opp, slipp for å sende';
+
+  @override
+  String get audioRecordingPermissionMessage => 'Tillat lydtillatelser i innstillingene.';
 
   @override
   String get sendAnywayLabel => 'Send likevel';
