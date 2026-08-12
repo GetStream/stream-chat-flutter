@@ -63,13 +63,12 @@ class _AddMembersSheetState extends State<AddMembersSheet> {
   late final StreamUserListController _userListController = StreamUserListController(
     client: _client,
     limit: 25,
-    filter: _filter(query: ''),
+    filter: _filter(),
     sort: const [SortOption<User>.asc(UserSortKey.name)],
   );
 
   late final TextEditingController _searchController = TextEditingController()..addListener(_onSearchChanged);
 
-  Timer? _debounce;
   String _query = '';
 
   // Locally tracked selections — channel.addMembers fires only when the
@@ -80,15 +79,22 @@ class _AddMembersSheetState extends State<AddMembersSheet> {
 
   bool get _canConfirm => _selectedIds.isNotEmpty && !_saving;
 
-  Filter _filter({required String query}) {
+  // Excludes the current user and existing channel members from the directory
+  // search — they can't be added again, so the search text is combined with
+  // the exclusion rather than replacing it.
+  Filter _filter({String query = ''}) {
     final excludedIds = <String>{
       if (_currentUserId case final id?) id,
       for (final member in _channel.state!.members)
         if (member.userId case final id?) id,
     };
     return Filter.and([
-      if (query.isNotEmpty) Filter.autoComplete('name', query),
       Filter.notIn('id', excludedIds.toList()),
+      if (query.isNotEmpty)
+        Filter.or([
+          Filter.autoComplete('name', query),
+          Filter.autoComplete('id', query),
+        ]),
     ]);
   }
 
@@ -96,18 +102,12 @@ class _AddMembersSheetState extends State<AddMembersSheet> {
     final next = _searchController.text;
     if (next == _query) return;
 
-    _debounce?.cancel();
-    _debounce = Timer(const Duration(milliseconds: 350), () {
-      if (!mounted) return;
-      setState(() => _query = next);
-      _userListController.filter = _filter(query: next);
-      _userListController.doInitialLoad();
-    });
+    setState(() => _query = next);
+    return _userListController.searchWithFilter(_filter(query: next));
   }
 
   @override
   void dispose() {
-    _debounce?.cancel();
     _searchController.dispose();
     _userListController.dispose();
     super.dispose();
