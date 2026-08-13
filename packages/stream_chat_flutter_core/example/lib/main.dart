@@ -13,8 +13,7 @@ Future<void> main() async {
   await client.connectUser(
     User(
       id: 'cool-shadow-7',
-      image:
-          'https://getstream.io/random_png/?id=cool-shadow-7&amp;name=Cool+shadow',
+      image: 'https://getstream.io/random_png/?id=cool-shadow-7&amp;name=Cool+shadow',
     ),
     '''eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoiY29vbC1zaGFkb3ctNyJ9.gkOlCRb1qgy4joHPaxFwPOdXcGvSPvp6QY0S4mpRkVo''',
   );
@@ -33,7 +32,7 @@ class StreamExample extends StatelessWidget {
   ///
   /// If you'd prefer using pre-made UI widgets for your app, please see our
   /// other package, `stream_chat_flutter`.
-  const StreamExample({Key? key, required this.client}) : super(key: key);
+  const StreamExample({super.key, required this.client});
 
   /// Instance of Stream Client.
   /// Stream's [StreamChatClient] can be used to connect to our servers and
@@ -44,7 +43,7 @@ class StreamExample extends StatelessWidget {
   @override
   Widget build(BuildContext context) => MaterialApp(
     title: 'Stream Chat Core Example',
-    home: HomeScreen(),
+    home: const HomeScreen(),
     builder: (context, child) => StreamChatCore(client: client, child: child!),
   );
 }
@@ -57,7 +56,7 @@ class StreamExample extends StatelessWidget {
 class HomeScreen extends StatefulWidget {
   /// Builds a basic layout displaying a list of [Channel]s the user is a
   /// part of.
-  const HomeScreen({Key? key}) : super(key: key);
+  const HomeScreen({super.key});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -104,9 +103,7 @@ class _HomeScreenState extends State<HomeScreen> {
               /// pages to load and there are no errors with pagination.
               /// In case we need to show a loading indicator or and error
               /// tile we're increasing the count by 1.
-              itemCount: (nextPageKey != null || error != null)
-                  ? channels.length + 1
-                  : channels.length,
+              itemCount: (nextPageKey != null || error != null) ? channels.length + 1 : channels.length,
               itemBuilder: (BuildContext context, int index) {
                 if (index == channels.length) {
                   if (error != null) {
@@ -117,7 +114,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: Text(error.message),
                     );
                   }
-                  return CircularProgressIndicator();
+                  return const CircularProgressIndicator();
                 }
 
                 final _item = channels[index];
@@ -181,15 +178,14 @@ class _HomeScreenState extends State<HomeScreen> {
 /// callbacks for building UIs based on different api results.
 class MessageScreen extends StatefulWidget {
   /// Build a MessageScreen
-  const MessageScreen({Key? key}) : super(key: key);
+  const MessageScreen({super.key});
 
   @override
   _MessageScreenState createState() => _MessageScreenState();
 }
 
 class _MessageScreenState extends State<MessageScreen> {
-  final StreamMessageComposerController messageComposerController =
-      StreamMessageComposerController();
+  final StreamMessageComposerController messageComposerController = StreamMessageComposerController();
   late final ScrollController _scrollController;
   final messageListController = MessageListController();
 
@@ -242,8 +238,7 @@ class _MessageScreenState extends State<MessageScreen> {
                 },
                 child: MessageListCore(
                   messageListController: messageListController,
-                  emptyBuilder: (BuildContext context) =>
-                      const Center(child: Text('Nothing here yet')),
+                  emptyBuilder: (BuildContext context) => const Center(child: Text('Nothing here yet')),
                   loadingBuilder: (BuildContext context) => const Center(
                     child: SizedBox(
                       height: 100,
@@ -251,34 +246,32 @@ class _MessageScreenState extends State<MessageScreen> {
                       child: CircularProgressIndicator(),
                     ),
                   ),
-                  messageListBuilder:
-                      (BuildContext context, List<Message> messages) =>
-                          ListView.builder(
-                            controller: _scrollController,
-                            itemCount: messages.length,
-                            reverse: true,
-                            itemBuilder: (BuildContext context, int index) {
-                              final item = messages[index];
-                              final client = StreamChatCore.of(context).client;
-                              if (item.user!.id == client.uid) {
-                                return Align(
-                                  alignment: Alignment.centerRight,
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(8),
-                                    child: Text(item.text!),
-                                  ),
-                                );
-                              } else {
-                                return Align(
-                                  alignment: Alignment.centerLeft,
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(8),
-                                    child: Text(item.text!),
-                                  ),
-                                );
-                              }
-                            },
+                  messageListBuilder: (BuildContext context, List<Message> messages) => ListView.builder(
+                    controller: _scrollController,
+                    itemCount: messages.length,
+                    reverse: true,
+                    itemBuilder: (BuildContext context, int index) {
+                      final item = messages[index];
+                      final client = StreamChatCore.of(context).client;
+                      if (item.user!.id == client.uid) {
+                        return Align(
+                          alignment: Alignment.centerRight,
+                          child: Padding(
+                            padding: const EdgeInsets.all(8),
+                            child: Text(item.text!),
                           ),
+                        );
+                      } else {
+                        return Align(
+                          alignment: Alignment.centerLeft,
+                          child: Padding(
+                            padding: const EdgeInsets.all(8),
+                            child: Text(item.text!),
+                          ),
+                        );
+                      }
+                    },
+                  ),
                   errorBuilder: (BuildContext context, error) {
                     print(error.toString());
                     return const Center(

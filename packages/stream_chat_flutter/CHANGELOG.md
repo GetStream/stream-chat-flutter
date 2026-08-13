@@ -43,9 +43,16 @@
 - Fixed the "Message deleted" bubble overflowing its maximum width when the localized label is long; the label now wraps instead.
 - Fixed the thread scroll-to-bottom button keying off the parent channel's up-to-date state instead of the thread's own scroll position, so it no longer appears while already at the newest reply.
 - Fixed the `StreamBackButton` unread badge including the currently open channel in its total count.
+- Fixed the thread-replies footer under a message in the channel being hardcoded English and reading "1 replies" for a single reply; it now uses `threadReplyCountText`, which is localized and correctly singularized.
+- Fixed a channel-list row briefly previewing another channel's last message after the list reorders. The preserved last-known message is now dropped when a row is rebound to a different channel, instead of being used as a fallback while the new channel is still loading.
+- Fixed the channel list still showing a timestamp next to "No messages yet" after a channel is truncated. `ChannelLastMessageDate` now reads the date off the message the preview actually shows instead of `Channel.lastMessageAt`, which cannot be cleared once a truncation removes every message.
 - Fixed `StreamMessageListView` jumping several screens when selecting text in a message on desktop or web. The `ScrollablePositionedList` viewports now account for their `anchor` in `getOffsetToReveal`, so implicit reveals (`Scrollable.ensureVisible`, `RenderObject.showOnScreen`) no longer overshoot. [#2862](https://github.com/GetStream/stream-chat-flutter/issues/2862)
 - Fixed modal dialogs (message actions, delete/flag confirmation) rendering over a white scrim in light theme; they now use the design system's scrim token.
 - Fixed the message metadata in the long-press actions modal keeping its muted in-list colors against the dark scrim. The previewed message now renders its annotations ("Saved for later", "Pinned by", "Replied to a thread" + "View", "Reminder set"), username, sending status and read receipts, timestamp, "Edited" label, and thread-reply count in white. Added `StreamSendingIndicator.color` to override the indicator's icon color.
+
+🔄 Changed
+
+- Improved message text selection experience on desktop and web.
 
 ## 10.2.0
 
