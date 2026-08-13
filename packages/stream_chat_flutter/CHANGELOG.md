@@ -34,6 +34,7 @@
 
 🐞 Fixed
 
+- Fixed a failed send surfacing as an unhandled async error when `StreamMessageComposer` has no `onError`; it is now reported through `FlutterError.reportError`.
 - Fixed the default `StreamChannel` loading and error states not being themed or localized; `StreamChat` now installs themed, connection-aware defaults, overridable per `StreamChannel` or via `DefaultStreamChannelBuilders`.
 - Fixed the default list/scroll-view error states (channel, message, member, user, thread, poll-vote, reaction, search, and photo) showing raw or fixed errors; they are now connection-aware (no internet / slow connection), falling back to each view's specific error text.
 - Fixed `StreamTypingIndicator` briefly showing typing users from a different context (main channel vs. thread) on its first frame.

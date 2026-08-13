@@ -301,6 +301,9 @@ class MessageComposerProps {
   final StreamMentionItemBuilder? mentionItemBuilder;
 
   /// A callback for error reporting
+  ///
+  /// When null, errors are forwarded to [FlutterError.reportError] so they stay
+  /// visible to the console and to any handler the host app registered.
   final ErrorListener? onError;
 
   /// The maximum number of attachments that can be sent with a single message.
@@ -1557,12 +1560,25 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
       };
 
       widget.props.onMessageSent?.call(resp.message);
-    } catch (e, stk) {
-      if (widget.props.onError != null) {
-        return widget.props.onError?.call(e, stk);
+    } catch (error, stackTrace) {
+      if (widget.props.onError case final onError?) {
+        return onError(error, stackTrace);
       }
 
-      rethrow;
+      // The send button drops this future, so rethrowing would escape as an
+      // unhandled async error. Forward it through Flutter's error plumbing
+      // instead, so host apps (Crashlytics / Sentry / console) still see it.
+      // Connection failures are marked silent: the message is left in a failed
+      // state and retried on reconnect, so they are expected in release.
+      FlutterError.reportError(
+        FlutterErrorDetails(
+          exception: error,
+          stack: stackTrace,
+          library: 'stream_chat_flutter',
+          context: ErrorDescription('while sending a message'),
+          silent: error is StreamChatNetworkError,
+        ),
+      );
     }
   }
 
