@@ -90,7 +90,7 @@ void main() {
 
   testWidgets(
     'StreamMessageText allows selecting text on desktop',
-        (tester) async {
+    (tester) async {
       addTearDown(() {
         CurrentPlatform.debugCurrentPlatformOverride = null;
       });
@@ -101,8 +101,7 @@ void main() {
 
       final user = OwnUser(id: 'test-user', language: 'en');
       when(() => clientState.currentUser).thenReturn(user);
-      when(() => clientState.currentUserStream)
-          .thenAnswer((_) => Stream.value(user));
+      when(() => clientState.currentUserStream).thenAnswer((_) => Stream.value(user));
 
       const text = '- Item 1\n- Item 2\n- Item 3';
 
