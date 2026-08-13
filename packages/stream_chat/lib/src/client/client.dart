@@ -677,7 +677,7 @@ class StreamChatClient {
         }
 
         final updatedSyncAt = events.lastOrNull?.createdAt ?? DateTime.now();
-        return chatPersistenceClient?.updateLastSyncAt(updatedSyncAt);
+        return await chatPersistenceClient?.updateLastSyncAt(updatedSyncAt);
       } catch (error, stk) {
         // If we got a 400 error, it means that either the sync time is too
         // old or the channel list is too long or too many events need to be
