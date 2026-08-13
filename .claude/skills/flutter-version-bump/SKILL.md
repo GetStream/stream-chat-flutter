@@ -381,10 +381,46 @@ back the ~470-diagnostic local flood.
 
 ### Android / iOS build floors
 
-The `build` matrix job compiles the sample app for both platforms. New Flutter versions bump bundled AGP, Gradle,
-Kotlin, and the Xcode/macOS floor. Symptoms and fixes live in `sample_app/android/{app/build.gradle,build.gradle,
-gradle.properties}` and `sample_app/ios/`. Precedent: 3.44 needed `compileSdk` floored at 36 via
-`Math.max(flutter.compileSdkVersion, 36)` in both the `:app` module and the root `subprojects` block.
+The `build` matrix job compiles the sample app for both platforms. Every Flutter release raises its Gradle / AGP /
+Kotlin floors, and the check is **fail-fast** — it reports only the first violated floor, so fixing one commonly
+just reveals the next. Read all of them out of the SDK up front instead of iterating through CI:
+
+```bash
+grep -n "Version(" $NEW/packages/flutter_tools/gradle/src/main/kotlin/DependencyVersionChecker.kt | head
+```
+
+Each tool has an `error…Version` (hard floor, fails the build) and a `warn…Version` (deprecation only). But the
+release notes also publish an **"Android dependency matrix"** — the combination Flutter actually tested. Prefer
+the verified matrix over the bare floors: the floors only tell you what will not be rejected, while the matrix is
+what the release was exercised against, and it is where the *next* release's floors will land.
+
+Flutter 3.47, showing how far apart the two are:
+
+| Tool | error floor | warn floor | **verified matrix** | Set in |
+|---|---|---|---|---|
+| Gradle | 8.14.0 | 9.1.0 | **9.3.1** | `sample_app/android/gradle/wrapper/gradle-wrapper.properties` |
+| AGP | 8.11.1 | 9.0.1 | **9.1.0** | `sample_app/android/settings.gradle` |
+| Kotlin (KGP) | 2.2.20 | 2.3.20 | **2.4.0** | `sample_app/android/settings.gradle` |
+| Java | — | — | **17** minimum | `.github/actions/setup-java` + `app/build.gradle` |
+
+The matrix is internally constrained — "AGP 9.1.0 is the newest compatible with KGP 2.4.0; Gradle 9.3.1 is the
+minimum for AGP 9.1.0" — so move all three together or not at all.
+
+Also prefer the SDK's API-level variables (`flutter.compileSdkVersion`, `targetSdkVersion`, `minSdkVersion`) over
+hardcoded numbers, so future releases carry the project forward automatically.
+
+**Validate Android locally — you probably can.** `flutter doctor` showing a working Android toolchain means
+`(cd sample_app && flutter build apk --release)` reproduces the CI `build (android)` job in one shot, instead of
+5-minute CI round trips per attempt. Only fall back to "unverifiable locally" if the toolchain is genuinely
+missing.
+
+Also check `sample_app/android/{app/build.gradle,build.gradle,gradle.properties}` for SDK floors. Precedent: 3.44
+needed `compileSdk` floored at 36 via `Math.max(flutter.compileSdkVersion, 36)` in both the `:app` module and the
+root `subprojects` block.
+
+> The five `packages/*/example/android` projects are still on Gradle 7.6 and are **not** built by CI, so they
+> never gate a PR. They are broken for anyone building an example locally on a modern Flutter. Out of scope for a
+> compat bump — but say so rather than letting it look verified.
 
 If CI pins an Xcode version (`maxim-lobanov/setup-xcode` in `stream_flutter_workflow.yml`), a Flutter release that
 raises its Xcode floor needs that pin raised too. A release that raises the **macOS** floor can also strand the
