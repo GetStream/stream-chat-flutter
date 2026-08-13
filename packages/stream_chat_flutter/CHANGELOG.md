@@ -31,6 +31,10 @@
 - Fixed modal dialogs (message actions, delete/flag confirmation) rendering over a white scrim in light theme; they now use the design system's scrim token.
 - Fixed the message metadata in the long-press actions modal keeping its muted in-list colors against the dark scrim. The previewed message now renders its annotations ("Saved for later", "Pinned by", "Replied to a thread" + "View", "Reminder set"), username, sending status and read receipts, timestamp, "Edited" label, and thread-reply count in white. Added `StreamSendingIndicator.color` to override the indicator's icon color.
 
+🔄 Changed
+
+- Improved message text selection experience on desktop and web.
+
 ## 10.2.0
 
 ⚠️ Changed
