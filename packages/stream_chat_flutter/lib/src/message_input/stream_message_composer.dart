@@ -162,9 +162,8 @@ class StreamMessageComposer extends StatelessWidget {
     BuildContext context, {
     StreamSurfaceStyle? surfaceStyle,
   }) {
-    final themeStyle = StreamMessageComposerTheme.of(context).surfaceStyle;
-    final effective = surfaceStyle ?? themeStyle;
-
+    final themeStyle = StreamMessageComposerTheme.of(context);
+    final effective = surfaceStyle ?? themeStyle.surfaceStyle;
     return effective ?? context.streamSurfaceStyle;
   }
 
