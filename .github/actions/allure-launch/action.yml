@@ -1,0 +1,27 @@
+name: 'Allure Launch'
+description: 'Create an Allure TestOps launch and expose its id'
+inputs:
+  working-directory:
+    description: 'Platform fastlane directory to run the lane from'
+    required: false
+    default: sample_app/android
+outputs:
+  launch_id:
+    description: 'The created launch id; empty when the e2e check was not required'
+    value: ${{ steps.publish.outputs.launch_id }}
+runs:
+  using: "composite"
+  steps:
+    - uses: ./.github/actions/setup-ruby
+
+    - name: Launch Allure TestOps
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: bundle exec fastlane allure_launch
+      env:
+        GITHUB_EVENT: ${{ toJson(github.event) }}
+
+    - name: Publish the launch id
+      id: publish
+      shell: bash
+      run: echo "launch_id=$LAUNCH_ID" >> "$GITHUB_OUTPUT"
