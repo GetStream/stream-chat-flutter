@@ -93,6 +93,27 @@ class StreamTestEnv {
     throw TestFailure('Timed out waiting for a framework error to be reported');
   }
 
+  /// Truncates the channel the user currently has open, leaving the system
+  /// message [withSystemMessage] behind when one is given.
+  ///
+  /// This calls the SDK rather than driving the UI because there is nothing to
+  /// drive: the native suites reach truncation through their sample app's debug
+  /// menu, and this sample app exposes no such action. Truncation is a
+  /// server-side event as far as the app is concerned, so what the tests care
+  /// about is how the message list and the channel preview react to it.
+  Future<void> truncateChannel({String? withSystemMessage}) async {
+    final context = _tester.element(find.byType(StreamMessageListView));
+    final channel = StreamChannel.of(context).channel;
+
+    await channel.truncate(
+      message: switch (withSystemMessage) {
+        final text? => Message(text: text),
+        _ => null,
+      },
+    );
+    await _tester.pump();
+  }
+
   /// Simulates a full network outage: the SDK's HTTP requests all fail and the
   /// WebSocket is closed. Mirrors the native `disableInternetConnection` /
   /// `setConnectivity(.off)`. Missed server-side events are recovered on

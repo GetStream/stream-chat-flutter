@@ -23,6 +23,7 @@
 - Added an `errorSubtitle` to `StreamScrollViewErrorWidget`, which now falls back to the design's generic error copy (title, description, and a "Try Again" retry label) when values aren't provided.
 - Added a `size` (`StreamLoadingSpinnerSize`) parameter to `StreamScrollViewLoadingWidget`.
 - Added `onReactionTap` to `StreamMessageItem` and `StreamMessageListView`, reporting the tapped message's `BuildContext` and a `ReactionTapDetails` with the tapped `message` and `reaction` (the reaction is `null` for a clustered or overflow chip that maps to no single reaction).
+- Exported `StreamEphemeralMessage`, the row `StreamMessageListView` builds for ephemeral messages, matching its already-exported `StreamSystemMessage` and `StreamModeratedMessage` siblings.
 - Added an `unreadIndicator` parameter to `StreamBackButton` that overlays a widget (typically a `StreamUnreadIndicator`) on the button's top-end corner. Pass `StreamUnreadIndicator(excludeCid: cid)` to show the total unread count of other channels, or `StreamUnreadIndicator.channels(cid: cid)` for a single channel's count.
 
 ⚠️ Deprecated
