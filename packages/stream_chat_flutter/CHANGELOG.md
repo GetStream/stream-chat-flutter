@@ -5,7 +5,6 @@
 - `StreamMediaGallery` no longer applies its own outer padding or strips the ambient `MediaQuery` padding; pass `padding` to inset the grid.
 - `StreamMessageListView.config` is now nullable; reading it off an instance yields `StreamMessageListViewConfiguration?` rather than a default instance.
 - `StreamMediaGalleryPreview` chrome now follows the app style — floating over full-bleed media, or docked with the media inset between the bars.
-- `StreamChannelHeader`, `StreamChannelListHeader`, and `StreamThreadHeader` now resolve `surfaceStyle` from their per-header theme and pass it to every slot in the bar.
 - Thread views now show the scroll-to-bottom button, following `showScrollToBottom` from the effective `StreamMessageListViewConfiguration`; set it to `false` to hide it.
 
 ✅ Added
@@ -18,7 +17,7 @@
 - Added `StreamMessageComposerTheme` and `StreamMessageComposerThemeData` — a component theme for the composer, also available globally as `StreamChatThemeData.messageComposerTheme`.
 - Added `StreamMessageListView.config` — an explicit `StreamMessageListViewConfiguration` per widget, falling back to `StreamChatConfigurationData.messageListViewConfiguration`.
 - Added `StreamChatConfigurationData.messageListViewConfiguration` — an app-wide `StreamMessageListViewConfiguration` default, passed via `StreamChat.configData`.
-- Added `isFloating` to `StreamBackButton`, selecting the floating or pinned appearance. Falls back to the enclosing bar's resolved style, then the ambient `StreamSurfaceStyle`.
+- Added floating support to `StreamChannelHeader`, `StreamChannelListHeader`, and `StreamThreadHeader` — each resolves the surface style from its per-header theme and republishes it to every slot, including the new `StreamBackButton.isFloating`.
 - Added `StreamMessageListViewConfiguration.autoScrollPolicy` to control whether and how `StreamMessageListView` scrolls to the newest message when a new message arrives. Use `StreamAutoScrollPolicy.disabled` to fully control scrolling yourself.
 - Added `onReactionSelected` to `StreamMessageReactionPicker`, a context-aware callback that provides the `BuildContext` for navigation.
 - Added an `errorSubtitle` to `StreamScrollViewErrorWidget`, which now falls back to the design's generic error copy (title, description, and a "Try Again" retry label) when values aren't provided.
@@ -35,7 +34,6 @@
 
 🐞 Fixed
 
-- Fixed `StreamChannelPage` and `StreamThreadPage` not insetting the message list when only the per-header theme set `surfaceStyle`, leaving floating chrome drawn over a gap.
 - Fixed the default `StreamChannel` loading and error states not being themed or localized; `StreamChat` now installs themed, connection-aware defaults, overridable per `StreamChannel` or via `DefaultStreamChannelBuilders`.
 - Fixed the default list/scroll-view error states (channel, message, member, user, thread, poll-vote, reaction, search, and photo) showing raw or fixed errors; they are now connection-aware (no internet / slow connection), falling back to each view's specific error text.
 - Fixed `StreamTypingIndicator` briefly showing typing users from a different context (main channel vs. thread) on its first frame.

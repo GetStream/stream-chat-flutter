@@ -287,12 +287,11 @@ class StreamMessageListView extends StatefulWidget {
   /// Defaults to [StreamMessageListViewBuilders] with no overrides.
   final StreamMessageListViewBuilders builders;
 
-  /// Whether to pad the list's content by the ambient [MediaQuery] padding.
+  /// Whether to pad the list's scrollable to avoid partial obstructions
+  /// indicated by [MediaQuery]'s padding.
   ///
-  /// Enable this when floating chrome overlaps the list: content still scrolls
-  /// behind the bars, but the first and last messages rest clear of them, as do
-  /// the floating date divider, the unread indicator, and the scroll-to-bottom
-  /// button.
+  /// Content still scrolls through the obstructed area; only the limits of the
+  /// scrollable are inset, so the first and last items come to rest clear of it.
   ///
   /// Defaults to false.
   final bool enableSafeArea;
