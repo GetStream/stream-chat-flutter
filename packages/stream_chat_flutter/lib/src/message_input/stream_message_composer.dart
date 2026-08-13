@@ -1727,12 +1727,12 @@ class _FloatingComposerBackdropPainter extends CustomPainter {
   }
 }
 
-/// Reports [child]'s laid-out height via [onHeightChanged] during layout.
-///
-/// Used to feed the pill's height to [_FloatingComposerBackdropPainter]. The
-/// callback fires inside `performLayout`, which is safe for the listener to turn
-/// into a repaint: the framework flushes all layout before any painting, so the
-/// backdrop sees the current height in the same frame.
+// Reports [child]'s laid-out height via [onHeightChanged] during layout.
+//
+// Used to feed the pill's height to [_FloatingComposerBackdropPainter]. The
+// callback fires inside `performLayout`, which is safe for the listener to turn
+// into a repaint: the framework flushes all layout before any painting, so the
+// backdrop sees the current height in the same frame.
 class _ReportHeight extends SingleChildRenderObjectWidget {
   const _ReportHeight({required this.onHeightChanged, required super.child});
 

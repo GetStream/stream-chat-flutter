@@ -213,12 +213,12 @@ void main() {
   });
 }
 
-/// Whether the composer rendered its floating appearance.
+// Whether the composer rendered its floating appearance.
 bool _composerIsFloating(WidgetTester tester) {
   return tester.widget<StreamChatMessageInput>(find.byType(StreamChatMessageInput)).isFloating;
 }
 
-/// Whether the header's default back button rendered its floating appearance.
+// Whether the header's default back button rendered its floating appearance.
 bool? _backButtonIsFloating(WidgetTester tester) {
   final button = find.descendant(of: find.byType(StreamBackButton), matching: find.byType(StreamButton));
   return tester.widget<StreamButton>(button).props.isFloating;
@@ -228,10 +228,10 @@ StreamMessageListView _messageListView(WidgetTester tester) {
   return tester.widget<StreamMessageListView>(find.byType(StreamMessageListView));
 }
 
-/// The typing indicator the page renders in its body.
-///
-/// The header renders one of its own as part of the channel subtitle, so the
-/// plain type finder is ambiguous.
+// The typing indicator the page renders in its body.
+//
+// The header renders one of its own as part of the channel subtitle, so the
+// plain type finder is ambiguous.
 Finder _bodyTypingIndicator() {
   final inHeader = find
       .descendant(of: find.byType(StreamChannelHeader), matching: find.byType(StreamTypingIndicator))
@@ -243,7 +243,7 @@ Finder _bodyTypingIndicator() {
   });
 }
 
-/// The gesture detector wrapping the header's channel avatar.
+// The gesture detector wrapping the header's channel avatar.
 Finder _channelAvatarTapTarget() {
   return find.ancestor(
     of: find.byType(StreamChannelAvatar),
@@ -251,12 +251,12 @@ Finder _channelAvatarTapTarget() {
   );
 }
 
-/// The controller the page created and handed to its composer.
+// The controller the page created and handed to its composer.
 StreamMessageComposerController _composerController(WidgetTester tester) {
   return tester.widget<StreamChatMessageInput>(find.byType(StreamChatMessageInput)).controller!;
 }
 
-/// The focus node the page created and handed to its composer.
+// The focus node the page created and handed to its composer.
 FocusNode _composerFocusNode(WidgetTester tester) {
   return tester.widget<StreamChatMessageInput>(find.byType(StreamChatMessageInput)).focusNode!;
 }

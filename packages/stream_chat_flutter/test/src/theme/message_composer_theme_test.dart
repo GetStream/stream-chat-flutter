@@ -147,9 +147,9 @@ void main() {
 const _regularTheme = StreamMessageComposerThemeData(surfaceStyle: StreamSurfaceStyle.regular);
 const _floatingTheme = StreamMessageComposerThemeData(surfaceStyle: StreamSurfaceStyle.floating);
 
-/// Pumps a [StreamChat] configured with [globalTheme], optionally wrapped in a
-/// local [StreamMessageComposerTheme] carrying [localTheme], and returns a
-/// context below both.
+// Pumps a [StreamChat] configured with [globalTheme], optionally wrapped in a
+// local [StreamMessageComposerTheme] carrying [localTheme], and returns a
+// context below both.
 Future<BuildContext> _pumpAndCaptureContext(
   WidgetTester tester, {
   StreamMessageComposerThemeData? globalTheme,

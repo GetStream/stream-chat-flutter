@@ -73,33 +73,33 @@ void main() {
   }
 }
 
-/// Mirrors the default `StreamMessageItemProps.maxWidth`, which is what caps
-/// the bubble in a real message list. Used by the layout tests, so they pin
-/// the real geometry.
+// Mirrors the default `StreamMessageItemProps.maxWidth`, which is what caps
+// the bubble in a real message list. Used by the layout tests, so they pin
+// the real geometry.
 const _bubbleMaxWidth = 272.0;
 
-/// The cap used by the goldens instead of [_bubbleMaxWidth].
-///
-/// Every glyph in the test font is a square of the font size, so text measures
-/// far wider here than in a real app — at [_bubbleMaxWidth] even the English
-/// label would wrap, which is not what users see. Widening the cap absorbs that
-/// difference so the goldens show the line breaks a real font produces.
+// The cap used by the goldens instead of [_bubbleMaxWidth].
+//
+// Every glyph in the test font is a square of the font size, so text measures
+// far wider here than in a real app — at [_bubbleMaxWidth] even the English
+// label would wrap, which is not what users see. Widening the cap absorbs that
+// difference so the goldens show the line breaks a real font produces.
 const _goldenBubbleMaxWidth = 350.0;
 
-/// Short enough that the bubble hugs it, showing it is not forced to full width.
+// Short enough that the bubble hugs it, showing it is not forced to full width.
 const _tinyLabel = 'Del';
 
-/// The shipped English label.
+// The shipped English label.
 const _shortLabel = 'Message deleted';
 
-/// The longest `messageDeletedLabel` in `stream_chat_localizations` that uses
-/// Latin script, so the golden renders it without needing extra fonts.
+// The longest `messageDeletedLabel` in `stream_chat_localizations` that uses
+// Latin script, so the golden renders it without needing extra fonts.
 const _longestShippedLabel = 'Messaggio eliminato';
 
-/// Longer than any shipped translation, to show the wrapping behaviour.
+// Longer than any shipped translation, to show the wrapping behaviour.
 const _longLabel = 'This message was deleted by a moderator';
 
-/// A [StreamMessageDeleted] reading [label], capped at [maxWidth].
+// A [StreamMessageDeleted] reading [label], capped at [maxWidth].
 Widget _deletedBubble(String label, {double maxWidth = _bubbleMaxWidth}) {
   return Builder(
     builder: (context) => Localizations.override(
@@ -130,7 +130,7 @@ Widget _wrapWithApp(Widget child, {Brightness brightness = Brightness.light}) {
   );
 }
 
-/// Serves a [StreamChatLocalizations] whose `messageDeletedLabel` is fixed.
+// Serves a [StreamChatLocalizations] whose `messageDeletedLabel` is fixed.
 class _FixedLabelDelegate extends LocalizationsDelegate<StreamChatLocalizations> {
   const _FixedLabelDelegate(this.label);
 
@@ -148,10 +148,10 @@ class _FixedLabelDelegate extends LocalizationsDelegate<StreamChatLocalizations>
   bool shouldReload(_FixedLabelDelegate old) => old.label != label;
 }
 
-/// A [StreamChatLocalizations] that only answers `messageDeletedLabel`.
-///
-/// [StreamMessageDeleted] reads nothing else, so anything else reaching this
-/// stub is a mistake worth failing on rather than quietly defaulting.
+// A [StreamChatLocalizations] that only answers `messageDeletedLabel`.
+//
+// [StreamMessageDeleted] reads nothing else, so anything else reaching this
+// stub is a mistake worth failing on rather than quietly defaulting.
 class _FixedLabelTranslations implements StreamChatLocalizations {
   const _FixedLabelTranslations(this.messageDeletedLabel);
 

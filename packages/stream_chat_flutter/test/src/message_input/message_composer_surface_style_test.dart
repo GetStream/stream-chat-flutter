@@ -152,19 +152,19 @@ void main() {
   });
 }
 
-/// The composer's attachment (picker) button, in the leading slot.
+// The composer's attachment (picker) button, in the leading slot.
 final _attachmentButtonFinder = find.descendant(
   of: find.byType(DefaultStreamMessageComposerLeading),
   matching: find.byType(StreamButton),
 );
 
-/// The surface style the composer resolved, read back from the input it built.
+// The surface style the composer resolved, read back from the input it built.
 StreamSurfaceStyle _resolvedSurfaceStyle(WidgetTester tester) {
   final input = tester.widget<StreamChatMessageInput>(find.byType(StreamChatMessageInput));
   return input.isFloating ? StreamSurfaceStyle.floating : StreamSurfaceStyle.regular;
 }
 
-/// Finds the opaque background fill the regular composer paints behind itself.
+// Finds the opaque background fill the regular composer paints behind itself.
 Finder _backgroundFillFinder(WidgetTester tester) {
   final context = tester.element(find.byType(StreamChatMessageInput));
   final fill = BoxDecoration(color: context.streamColorScheme.backgroundElevation1);
@@ -175,8 +175,8 @@ Finder _backgroundFillFinder(WidgetTester tester) {
   );
 }
 
-/// The vertical distance between the bottom of the input pill and the bottom
-/// of the composer.
+// The vertical distance between the bottom of the input pill and the bottom
+// of the composer.
 double _gapBelowInput(WidgetTester tester) {
   final composer = tester.getRect(find.byType(StreamMessageComposer));
   final input = tester.getRect(find.byType(StreamChatMessageInput));
@@ -184,10 +184,10 @@ double _gapBelowInput(WidgetTester tester) {
   return composer.bottom - input.bottom;
 }
 
-/// Pumps a [StreamMessageComposer] with the given placement inputs.
-///
-/// The composer is placed at the bottom of the screen so its rect can be
-/// compared against the input pill's.
+// Pumps a [StreamMessageComposer] with the given placement inputs.
+//
+// The composer is placed at the bottom of the screen so its rect can be
+// compared against the input pill's.
 Future<void> _pumpComposer(
   WidgetTester tester, {
   required StreamSurfaceStyle surfaceStyle,

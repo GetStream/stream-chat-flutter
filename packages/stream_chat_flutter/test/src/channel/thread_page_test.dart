@@ -183,7 +183,7 @@ void main() {
   });
 }
 
-/// Whether the header's default back button rendered its floating appearance.
+// Whether the header's default back button rendered its floating appearance.
 bool? _backButtonIsFloating(WidgetTester tester) {
   final button = find.descendant(of: find.byType(StreamBackButton), matching: find.byType(StreamButton));
   return tester.widget<StreamButton>(button).props.isFloating;
@@ -193,12 +193,12 @@ StreamMessageListView _messageListView(WidgetTester tester) {
   return tester.widget<StreamMessageListView>(find.byType(StreamMessageListView));
 }
 
-/// The controller the page created and handed to its composer.
+// The controller the page created and handed to its composer.
 StreamMessageComposerController _composerController(WidgetTester tester) {
   return tester.widget<StreamChatMessageInput>(find.byType(StreamChatMessageInput)).controller!;
 }
 
-/// The focus node the page created and handed to its composer.
+// The focus node the page created and handed to its composer.
 FocusNode _composerFocusNode(WidgetTester tester) {
   return tester.widget<StreamChatMessageInput>(find.byType(StreamChatMessageInput)).focusNode!;
 }
