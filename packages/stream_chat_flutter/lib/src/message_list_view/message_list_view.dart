@@ -287,11 +287,11 @@ class StreamMessageListView extends StatefulWidget {
   /// Defaults to [StreamMessageListViewBuilders] with no overrides.
   final StreamMessageListViewBuilders builders;
 
-  /// Whether to pad the list's scrollable to avoid partial obstructions
+  /// Whether this list pads its scrollable to avoid partial obstructions
   /// indicated by [MediaQuery]'s padding.
   ///
-  /// Content still scrolls through the obstructed area; only the limits of the
-  /// scrollable are inset, so the first and last items come to rest clear of it.
+  /// Content still scrolls through the obstructed area; only the scrollable's
+  /// limits are inset, so the first and last items come to rest clear of it.
   ///
   /// Defaults to false.
   final bool enableSafeArea;
