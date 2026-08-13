@@ -127,14 +127,21 @@ void setupMockChannel({
 
   final allMembers = members.isNotEmpty ? members : _defaultMembers(channel.id);
 
+  // The channel-level dates are derived from [messages] so the stubs can
+  // never contradict the message list the tile previews.
+  final lastMessageAt = _latestCreatedAt(messages);
+  final currentUserLastMessageAt = _latestCreatedAt(
+    messages.where((it) => it.user?.id == clientState.currentUser?.id),
+  );
+
   when(() => client.state).thenReturn(clientState);
   when(() => client.isLocalUnreadCountEnabled).thenReturn(false);
-  when(() => channel.lastMessageAt).thenReturn(DateTime.parse('2020-06-22 12:00:00'));
-  when(() => channel.lastMessageAtStream).thenAnswer((_) => Stream.value(DateTime.parse('2020-06-22 12:00:00')));
-  when(() => channel.currentUserLastMessageAt).thenReturn(DateTime.parse('2020-06-22 12:00:00'));
+  when(() => channel.lastMessageAt).thenReturn(lastMessageAt);
+  when(() => channel.lastMessageAtStream).thenAnswer((_) => Stream.value(lastMessageAt));
+  when(() => channel.currentUserLastMessageAt).thenReturn(currentUserLastMessageAt);
   when(
     () => channel.currentUserLastMessageAtStream,
-  ).thenAnswer((_) => Stream.value(DateTime.parse('2020-06-22 12:00:00')));
+  ).thenAnswer((_) => Stream.value(currentUserLastMessageAt));
   when(() => channel.state).thenReturn(channelState);
   when(() => channel.client).thenReturn(client);
   when(() => channel.config).thenReturn(ChannelConfig(mutes: true));
@@ -164,6 +171,15 @@ void setupMockChannel({
   // pending timer.
   when(() => channel.createDraft(any())).thenAnswer((_) async => CreateDraftResponse());
   when(() => channel.deleteDraft(parentId: any(named: 'parentId'))).thenAnswer((_) async => EmptyResponse());
+}
+
+/// The most recent [Message.createdAt] in [messages], or `null` when there
+/// are none.
+DateTime? _latestCreatedAt(Iterable<Message> messages) {
+  return messages.fold(null, (latest, message) {
+    if (latest == null || message.createdAt.isAfter(latest)) return message.createdAt;
+    return latest;
+  });
 }
 
 /// Creates a [MockChannel] pre-configured with fake data for list views.
