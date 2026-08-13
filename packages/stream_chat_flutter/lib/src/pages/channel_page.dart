@@ -139,11 +139,8 @@ class _StreamChannelPageState extends State<StreamChannelPage> {
     return StreamScaffold(
       appBar: appBar,
       bottom: composer,
-      // Keep the scaffold's bottom-slot layout in sync with the composer's own
-      // surface style. The scaffold otherwise resolves the bottom slot from the
-      // ambient StreamSurfaceStyle alone, so a composer-only override (via
-      // StreamMessageComposerTheme) would be applied only partly — the composer
-      // would render regular/floating while the scaffold inset kept the other.
+      // Resolved from the slots so the body inset matches what the chrome draws.
+      appBarSurfaceStyle: StreamChannelHeader.resolveSurfaceStyle(context),
       bottomSurfaceStyle: StreamMessageComposer.resolveSurfaceStyle(context),
       body: _ChannelPageBody(
         initialScrollIndex: widget.initialScrollIndex,

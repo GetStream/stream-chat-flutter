@@ -121,6 +121,28 @@ void main() {
     expect(padding.bottom, 0);
   });
 
+  testWidgets('a floating header theme insets the list and floats the header together', (tester) async {
+    // threadHeaderTheme lives on StreamChatThemeData, which StreamScaffold
+    // cannot read; both halves are asserted together.
+    await _pumpThreadPage(tester, headerSurfaceStyle: StreamSurfaceStyle.floating);
+
+    final padding = MediaQuery.paddingOf(tester.element(find.byType(StreamMessageListView)));
+    expect(padding.top, greaterThan(0));
+    expect(_backButtonIsFloating(tester), isTrue);
+  });
+
+  testWidgets('a regular header theme docks the header and drops the top inset together', (tester) async {
+    await _pumpThreadPage(
+      tester,
+      surfaceStyle: StreamSurfaceStyle.floating,
+      headerSurfaceStyle: StreamSurfaceStyle.regular,
+    );
+
+    final padding = MediaQuery.paddingOf(tester.element(find.byType(StreamMessageListView)));
+    expect(padding.top, 0);
+    expect(_backButtonIsFloating(tester), isFalse);
+  });
+
   testWidgets('tapping back invokes onBackPressed', (tester) async {
     var backPressed = 0;
     await _pumpThreadPage(tester, onBackPressed: () => backPressed++);
@@ -161,6 +183,12 @@ void main() {
   });
 }
 
+/// Whether the header's default back button rendered its floating appearance.
+bool? _backButtonIsFloating(WidgetTester tester) {
+  final button = find.descendant(of: find.byType(StreamBackButton), matching: find.byType(StreamButton));
+  return tester.widget<StreamButton>(button).props.isFloating;
+}
+
 StreamMessageListView _messageListView(WidgetTester tester) {
   return tester.widget<StreamMessageListView>(find.byType(StreamMessageListView));
 }
@@ -179,6 +207,7 @@ Future<void> _pumpThreadPage(
   WidgetTester tester, {
   Message? parent,
   StreamSurfaceStyle surfaceStyle = StreamSurfaceStyle.regular,
+  StreamSurfaceStyle? headerSurfaceStyle,
   void Function(Message message)? onViewInChannelTap,
   VoidCallback? onBackPressed,
   bool pushOntoARoute = false,
@@ -255,6 +284,12 @@ Future<void> _pumpThreadPage(
       // Chat context lives above the navigator so it survives a pop.
       builder: (context, child) => StreamChat(
         client: client,
+        themeData: switch (headerSurfaceStyle) {
+          final surfaceStyle? => StreamChatThemeData(
+            threadHeaderTheme: StreamAppBarThemeData(style: StreamAppBarStyle(surfaceStyle: surfaceStyle)),
+          ),
+          _ => null,
+        },
         child: StreamChannel(channel: channel, child: child!),
       ),
       // '/thread' seeds the stack with '/' underneath it, giving the back

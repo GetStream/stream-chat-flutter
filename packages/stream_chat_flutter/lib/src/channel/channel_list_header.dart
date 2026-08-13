@@ -120,10 +120,33 @@ class StreamChannelListHeader extends StatelessWidget implements PreferredSizeWi
   @override
   Size get preferredSize => const Size.fromHeight(kStreamToolbarHeight);
 
+  /// Resolves the surface style this header renders with in [context].
+  ///
+  /// Precedence: the per-instance [style], then
+  /// [StreamChatThemeData.channelListHeaderTheme], then the ambient app bar theme,
+  /// then the ambient surface style.
+  static StreamSurfaceStyle resolveSurfaceStyle(
+    BuildContext context, {
+    StreamAppBarStyle? style,
+  }) => StreamAppBar.resolveSurfaceStyle(
+    context,
+    style: _effectiveStyle(context, style),
+  );
+
+  // The per-instance style layered over the per-header theme.
+  static StreamAppBarStyle? _effectiveStyle(
+    BuildContext context,
+    StreamAppBarStyle? style,
+  ) {
+    final theme = StreamChatTheme.of(context);
+    final themeStyle = theme.channelListHeaderTheme.style;
+
+    return themeStyle?.merge(style) ?? style;
+  }
+
   @override
   Widget build(BuildContext context) {
     final _client = client ?? StreamChat.of(context).client;
-    final headerTheme = StreamChatTheme.of(context).channelListHeaderTheme;
 
     final leading = _DefaultUserAvatar(client: _client, onPressed: onUserAvatarPressed);
 
@@ -163,7 +186,7 @@ class StreamChannelListHeader extends StatelessWidget implements PreferredSizeWi
               subtitle: subtitle,
               trailing: trailing,
               primary: primary,
-              style: headerTheme.style?.merge(style) ?? style,
+              style: _effectiveStyle(context, style),
             ),
           );
         },

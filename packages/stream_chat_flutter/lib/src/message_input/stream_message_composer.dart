@@ -163,7 +163,9 @@ class StreamMessageComposer extends StatelessWidget {
     StreamSurfaceStyle? surfaceStyle,
   }) {
     final themeStyle = StreamMessageComposerTheme.of(context).surfaceStyle;
-    return surfaceStyle ?? themeStyle ?? context.streamSurfaceStyle;
+    final effective = surfaceStyle ?? themeStyle;
+
+    return effective ?? context.streamSurfaceStyle;
   }
 
   @override
@@ -978,8 +980,12 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     );
   }
 
-  StreamSurfaceStyle _resolveSurfaceStyle(BuildContext context) =>
-      StreamMessageComposer.resolveSurfaceStyle(context, surfaceStyle: widget.props.surfaceStyle);
+  StreamSurfaceStyle _resolveSurfaceStyle(BuildContext context) {
+    return StreamMessageComposer.resolveSurfaceStyle(
+      context,
+      surfaceStyle: widget.props.surfaceStyle,
+    );
+  }
 
   Widget _buildMessageInput(
     BuildContext context,

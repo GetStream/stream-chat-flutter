@@ -10,12 +10,12 @@
 
 ✅ Added
 
+- Added `resolveSurfaceStyle` to `StreamMessageComposer`, `StreamChannelHeader`, `StreamChannelListHeader`, and `StreamThreadHeader`, reporting the surface style each renders with so a page can lay its scaffold slot out to match.
 - Added `StreamChannelPage` — a ready-to-use channel page wiring up `StreamChannelHeader`, `StreamMessageListView`, and `StreamMessageComposer` with floating or docked layout.
 - Added `StreamThreadPage` — the thread equivalent, plus an `onBackPressed` that replaces the header back button's default pop.
 - Added `onBackPressed` to `StreamChannelHeader` and `StreamThreadHeader`, replacing the default back button's pop without rebuilding `leading`. Ignored when `leading` is supplied.
 - Added `MessageComposerProps.surfaceStyle`, selecting whether `StreamMessageComposer` renders floating or regular. Falls back to `StreamMessageComposerThemeData.surfaceStyle`, then the ambient `StreamSurfaceStyle`.
 - Added `StreamMessageComposerTheme` and `StreamMessageComposerThemeData` — a component theme for the composer, also available globally as `StreamChatThemeData.messageComposerTheme`.
-- Added `StreamMessageComposer.resolveSurfaceStyle`, reporting the surface style a composer renders with in a given context.
 - Added `StreamMessageListView.config` — an explicit `StreamMessageListViewConfiguration` per widget, falling back to `StreamChatConfigurationData.messageListViewConfiguration`.
 - Added `StreamChatConfigurationData.messageListViewConfiguration` — an app-wide `StreamMessageListViewConfiguration` default, passed via `StreamChat.configData`.
 - Added `isFloating` to `StreamBackButton`, selecting the floating or pinned appearance. Falls back to the enclosing bar's resolved style, then the ambient `StreamSurfaceStyle`.
@@ -35,6 +35,7 @@
 
 🐞 Fixed
 
+- Fixed `StreamChannelPage` and `StreamThreadPage` not insetting the message list when only the per-header theme set `surfaceStyle`, leaving floating chrome drawn over a gap.
 - Fixed the default `StreamChannel` loading and error states not being themed or localized; `StreamChat` now installs themed, connection-aware defaults, overridable per `StreamChannel` or via `DefaultStreamChannelBuilders`.
 - Fixed the default list/scroll-view error states (channel, message, member, user, thread, poll-vote, reaction, search, and photo) showing raw or fixed errors; they are now connection-aware (no internet / slow connection), falling back to each view's specific error text.
 - Fixed `StreamTypingIndicator` briefly showing typing users from a different context (main channel vs. thread) on its first frame.

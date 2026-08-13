@@ -150,6 +150,7 @@ void main() {
 
       expect(padding.top, 0);
       expect(padding.bottom, greaterThan(0));
+      expect(_composerIsFloating(tester), isTrue);
     },
   );
 
@@ -168,6 +169,35 @@ void main() {
 
       expect(padding.top, greaterThan(0));
       expect(padding.bottom, 0);
+      expect(_composerIsFloating(tester), isFalse);
+    },
+  );
+
+  testWidgets(
+    'a floating header theme insets the list and floats the header together',
+    (tester) async {
+      // channelHeaderTheme lives on StreamChatThemeData, which StreamScaffold
+      // cannot read; both halves are asserted together.
+      await _pumpChannelPage(tester, headerSurfaceStyle: StreamSurfaceStyle.floating);
+
+      final padding = MediaQuery.paddingOf(tester.element(find.byType(StreamMessageListView)));
+      expect(padding.top, greaterThan(0));
+      expect(_backButtonIsFloating(tester), isTrue);
+    },
+  );
+
+  testWidgets(
+    'a regular header theme docks the header and drops the top inset together',
+    (tester) async {
+      await _pumpChannelPage(
+        tester,
+        surfaceStyle: StreamSurfaceStyle.floating,
+        headerSurfaceStyle: StreamSurfaceStyle.regular,
+      );
+
+      final padding = MediaQuery.paddingOf(tester.element(find.byType(StreamMessageListView)));
+      expect(padding.top, 0);
+      expect(_backButtonIsFloating(tester), isFalse);
     },
   );
 
@@ -181,6 +211,17 @@ void main() {
     // A disposed ChangeNotifier throws when listened to again.
     expect(() => controller.addListener(() {}), throwsFlutterError);
   });
+}
+
+/// Whether the composer rendered its floating appearance.
+bool _composerIsFloating(WidgetTester tester) {
+  return tester.widget<StreamChatMessageInput>(find.byType(StreamChatMessageInput)).isFloating;
+}
+
+/// Whether the header's default back button rendered its floating appearance.
+bool? _backButtonIsFloating(WidgetTester tester) {
+  final button = find.descendant(of: find.byType(StreamBackButton), matching: find.byType(StreamButton));
+  return tester.widget<StreamButton>(button).props.isFloating;
 }
 
 StreamMessageListView _messageListView(WidgetTester tester) {
@@ -224,6 +265,7 @@ Future<void> _pumpChannelPage(
   WidgetTester tester, {
   StreamSurfaceStyle surfaceStyle = StreamSurfaceStyle.regular,
   StreamSurfaceStyle? composerSurfaceStyle,
+  StreamSurfaceStyle? headerSurfaceStyle,
   void Function(BuildContext context, Channel channel)? onChannelAvatarPressed,
   VoidCallback? onBackPressed,
   bool pushOntoARoute = false,
@@ -290,7 +332,16 @@ Future<void> _pumpChannelPage(
             child: content,
           );
         }
-        return StreamChat(client: client, child: content);
+        return StreamChat(
+          client: client,
+          themeData: switch (headerSurfaceStyle) {
+            final surfaceStyle? => StreamChatThemeData(
+              channelHeaderTheme: StreamAppBarThemeData(style: StreamAppBarStyle(surfaceStyle: surfaceStyle)),
+            ),
+            _ => null,
+          },
+          child: content,
+        );
       },
       // '/channel' seeds the stack with '/' underneath it, giving the back
       // button something to pop to.
