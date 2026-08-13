@@ -1,3 +1,4 @@
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -50,6 +51,167 @@ extension UserRobotMessageListAsserts on UserRobot {
   Future<UserRobot> assertHardDeletedMessage(String text) async {
     await assertMessage(text, isDisplayed: false);
     await assertDeletedMessage(isDisplayed: false);
+    return this;
+  }
+
+  /// Asserts a quoted reply is (or is not) on screen, and — when [quote] is
+  /// given — that its quoted bubble previews [quote].
+  ///
+  /// [text] identifies the reply by its own text. Leave it null for a reply that
+  /// has none (an attachment-only quote, which the mock server sends with no
+  /// body): the assertion then applies to whichever quoted bubble is on screen.
+  ///
+  /// [isDisplayed] `false` is how the native suites check that tapping a quote
+  /// jumped the list away from the reply.
+  Future<UserRobot> assertQuotedMessage({
+    String? text,
+    String? quote,
+    bool isDisplayed = true,
+  }) async {
+    final reply = switch (text) {
+      final text? => MessageListPage.list.messageWithText(text),
+      _ => MessageListPage.list.quotedMessage.first,
+    };
+
+    if (!isDisplayed) {
+      await tester.waitUntilNotVisible(reply);
+      return this;
+    }
+
+    await tester.waitUntilVisible(reply);
+    if (quote == null) return this;
+
+    // Scoping to the reply only makes sense when it was located by its own text;
+    // otherwise `reply` already *is* the bubble.
+    final bubbleText = switch (text) {
+      != null => find.descendant(of: reply, matching: MessageListPage.list.quotedMessageText),
+      _ => MessageListPage.list.quotedMessageText.first,
+    };
+    await tester.expectRenderedText(bubbleText, quote);
+    return this;
+  }
+
+  /// Asserts the message [text] is actually on screen.
+  ///
+  /// `hitTestable()` is what makes this a *visibility* check: a plain finder
+  /// matches a row that is merely built, so it can report a row the list has
+  /// already scrolled past — which makes "the row is gone" a poor stand-in for
+  /// "the list scrolled away from it".
+  Future<UserRobot> assertMessageOnScreen(String text, {bool isDisplayed = true}) async {
+    final message = MessageListPage.list.messageWithText(text).hitTestable();
+    if (isDisplayed) {
+      await tester.waitUntilVisible(message);
+    } else {
+      await tester.waitUntilNotVisible(message);
+    }
+    return this;
+  }
+
+  /// Asserts the backend's "unknown command" error message is shown.
+  Future<UserRobot> assertInvalidCommandMessage(String command) async {
+    await tester.waitUntilVisible(MessageListPage.list.moderatedMessage);
+    await tester.waitUntilVisible(find.textContaining("command $command doesn't exist"));
+    return this;
+  }
+
+  Future<UserRobot> assertGiphy({required bool isDisplayed}) async {
+    final giphy = MessageListPage.list.giphy;
+    if (isDisplayed) {
+      await tester.waitUntilVisible(giphy);
+    } else {
+      await tester.waitUntilNotVisible(giphy);
+    }
+    return this;
+  }
+
+  /// Asserts the thread-reply count, either on the parent's footer in the
+  /// channel or on the separator inside the thread.
+  ///
+  /// The two go through different translations — the footer uses
+  /// `threadReplyCountText`, the separator `threadSeparatorText` — but both read
+  /// the same in English, so [inThread] only picks which one to look at.
+  Future<UserRobot> assertThreadReplyLabel({
+    required int replies,
+    bool inThread = false,
+  }) async {
+    final label = replies == 1 ? '1 reply' : '$replies replies';
+
+    final scope = switch (inThread) {
+      true => find.text(label),
+      false => find.descendant(of: MessageListPage.list.threadReplies, matching: find.text(label)),
+    };
+    await tester.waitUntilVisible(scope);
+    return this;
+  }
+
+  Future<UserRobot> assertThreadReplyLabelAvatars({required int count}) async {
+    await tester.waitUntilVisible(MessageListPage.list.threadReplies);
+    expect(MessageListPage.list.threadRepliesAvatars, findsNWidgets(count));
+    return this;
+  }
+
+  /// Asserts how many rows currently render the message [text].
+  Future<UserRobot> assertMessages({required String text, required int count}) async {
+    final messages = MessageListPage.list.messageWithText(text);
+
+    final end = DateTime.now().add(const Duration(seconds: 30));
+    while (messages.evaluate().length != count && DateTime.now().isBefore(end)) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+    expect(messages, findsNWidgets(count));
+    return this;
+  }
+
+  /// Asserts the message list holds exactly [count] rows.
+  ///
+  /// `buildMessage` returns a row of its own — never a [MessageListPage.messageItem] —
+  /// for system, ephemeral and error messages, so all four types are counted here,
+  /// mirroring the native cell count. The list is lazy, so this is only meaningful
+  /// for counts small enough to fit on screen.
+  Future<UserRobot> assertMessageCount(int count) async {
+    int rowCount() =>
+        find.byType(MessageListPage.messageItem).evaluate().length +
+        MessageListPage.list.systemMessage.evaluate().length +
+        MessageListPage.list.ephemeralMessage.evaluate().length +
+        MessageListPage.list.moderatedMessage.evaluate().length;
+
+    final end = DateTime.now().add(const Duration(seconds: 30));
+    while (rowCount() != count && DateTime.now().isBefore(end)) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+    expect(rowCount(), count);
+    return this;
+  }
+
+  /// Asserts whether the floating scroll-to-bottom button is shown.
+  ///
+  /// When it is not, its unread-count badge cannot be either — the SDK only
+  /// wraps the button once the count is above zero — which is what the native
+  /// `assertScrollToBottomButtonUnreadCount(0)` checks.
+  Future<UserRobot> assertScrollToBottomButton({
+    required bool isDisplayed,
+    int? unreadCount,
+  }) async {
+    final button = MessageListPage.list.scrollToBottomButton;
+    final badge = MessageListPage.list.scrollToBottomUnreadBadge;
+
+    if (isDisplayed) {
+      await tester.waitUntilVisible(button);
+    } else {
+      await tester.waitUntilNotVisible(button);
+      await tester.waitUntilNotVisible(badge);
+    }
+
+    // The SDK only wraps the button in a badge once the count is above zero, so
+    // an expected count of 0 is asserted as the badge being absent.
+    switch (unreadCount) {
+      case null:
+        break;
+      case 0:
+        await tester.waitUntilNotVisible(badge);
+      case final count:
+        await tester.expectRenderedText(find.descendant(of: badge, matching: find.byType(Text)), '$count');
+    }
     return this;
   }
 
@@ -209,6 +371,28 @@ extension UserRobotMessageListAssertsChain on Future<UserRobot> {
       then((it) => it.assertDeletedMessage(isDisplayed: isDisplayed));
 
   Future<UserRobot> assertHardDeletedMessage(String text) => then((it) => it.assertHardDeletedMessage(text));
+
+  Future<UserRobot> assertQuotedMessage({String? text, String? quote, bool isDisplayed = true}) =>
+      then((it) => it.assertQuotedMessage(text: text, quote: quote, isDisplayed: isDisplayed));
+
+  Future<UserRobot> assertInvalidCommandMessage(String command) =>
+      then((it) => it.assertInvalidCommandMessage(command));
+
+  Future<UserRobot> assertGiphy({required bool isDisplayed}) => then((it) => it.assertGiphy(isDisplayed: isDisplayed));
+
+  Future<UserRobot> assertThreadReplyLabel({required int replies, bool inThread = false}) =>
+      then((it) => it.assertThreadReplyLabel(replies: replies, inThread: inThread));
+
+  Future<UserRobot> assertThreadReplyLabelAvatars({required int count}) =>
+      then((it) => it.assertThreadReplyLabelAvatars(count: count));
+
+  Future<UserRobot> assertMessages({required String text, required int count}) =>
+      then((it) => it.assertMessages(text: text, count: count));
+
+  Future<UserRobot> assertMessageCount(int count) => then((it) => it.assertMessageCount(count));
+
+  Future<UserRobot> assertScrollToBottomButton({required bool isDisplayed, int? unreadCount}) =>
+      then((it) => it.assertScrollToBottomButton(isDisplayed: isDisplayed, unreadCount: unreadCount));
 
   Future<UserRobot> assertTypingIndicator({required bool isDisplayed}) =>
       then((it) => it.assertTypingIndicator(isDisplayed: isDisplayed));

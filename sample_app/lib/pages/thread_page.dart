@@ -69,7 +69,6 @@ class _ThreadPageState extends State<ThreadPage> {
                   onEditMessageTap: _editMessage,
                   config: const StreamMessageListViewConfiguration(
                     swipeToReply: true,
-                    showScrollToBottom: false,
                     highlightInitialMessage: true,
                   ),
                   onViewInChannelTap: widget.onViewInChannelTap,
