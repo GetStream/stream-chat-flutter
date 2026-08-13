@@ -154,7 +154,7 @@ class StreamMessageComposer extends StatelessWidget {
   /// The properties for the message composer.
   final MessageComposerProps props;
 
-  /// Resolves the surface style a composer would render with in [context].
+  /// The surface style this composer renders with in [context].
   ///
   /// Precedence: the per-instance [surfaceStyle], then
   /// [StreamMessageComposerThemeData.surfaceStyle], then the ambient style.

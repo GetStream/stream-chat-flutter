@@ -46,11 +46,10 @@ class ItemPosition {
   /// Distance in proportion of the visible content's main axis length from the
   /// leading edge of that content to the leading edge of the item.
   ///
-  /// The visible content is the area inside the list's padding. Consider using
-  /// this for overlays inside that area, such as under a floating bar; scroll
-  /// logic keeps using [itemLeadingEdge]. Equal to [itemLeadingEdge] when the list has no
-  /// inset, and `null` only when the source omits it (a list always provides
-  /// it).
+  /// The visible content is the area inside the list's padding, so prefer this
+  /// over [itemLeadingEdge] when positioning an overlay within that area.
+  ///
+  /// Equal to [itemLeadingEdge] when the list has no inset.
   final double? contentLeadingEdge;
 
   /// Distance in proportion of the visible content's main axis length from the

@@ -92,8 +92,10 @@ class StreamMediaGalleryProps {
   /// Number of tiles per row. Defaults to 3.
   final int crossAxisCount;
 
-  /// Padding around the grid. Defaults to null, leaving the grid to inherit
-  /// any insets from its surroundings.
+  /// The padding around this grid.
+  ///
+  /// Defaults to null, leaving the grid to inherit any insets from its
+  /// surroundings.
   final EdgeInsetsGeometry? padding;
 
   /// Scroll controller for the underlying [GridView].
