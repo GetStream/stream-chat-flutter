@@ -53,6 +53,14 @@ void main() {
         client: client,
         id: 'general',
         name: 'General',
+        messages: [
+          Message(
+            id: 'msg-1',
+            text: 'Hey everyone!',
+            user: noahSmith,
+            createdAt: DateTime(2024, 6, 1, 10, 15),
+          ),
+        ],
       );
 
       final draft = Draft(
