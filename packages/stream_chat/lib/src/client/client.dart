@@ -689,8 +689,13 @@ class StreamChatClient {
             'Resetting the persistence client to enable a fresh start.',
           );
 
-          await chatPersistenceClient?.flush();
-          return chatPersistenceClient?.updateLastSyncAt(DateTime.now());
+          try {
+            await chatPersistenceClient?.flush();
+            return await chatPersistenceClient?.updateLastSyncAt(DateTime.now());
+          } catch (resetError, resetStk) {
+            logger.warning('Error resetting the persistence client', resetError, resetStk);
+            return;
+          }
         }
 
         logger.warning('Error syncing events', error, stk);

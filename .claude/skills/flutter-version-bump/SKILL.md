@@ -156,13 +156,15 @@ Mirror `melos run analyze` (`--fatal-infos`, examples excluded) and **filter loc
 not in CI and will otherwise bury the real signal:
 
 ```bash
+set -o pipefail   # otherwise a matching grep masks an analyzer that crashed
 for V in $OLD $NEW; do
   echo "##### $V"
   for p in packages/stream_chat packages/stream_chat_flutter_core packages/stream_chat_flutter \
            packages/stream_chat_persistence packages/stream_chat_localizations sample_app docs/docs_screenshots; do
     echo "### $p"
+    # `|| true` so a package with no diagnostics is not reported as a failure
     (cd "$p" && $V/bin/cache/dart-sdk/bin/dart analyze --fatal-infos . 2>&1 \
-      | grep -E "^\s+(info|warning|error)" | grep -v " build/")
+      | { grep -E "^\s+(info|warning|error)" | grep -v " build/" || true; })
   done
 done
 ```
@@ -368,9 +370,13 @@ Verify all of this rather than trusting the note — the behaviour is a moving t
 in a later Flutter:
 
 ```bash
-# Does this SDK still inject? Start from the committed version, not your working copy.
-git checkout origin/master -- sample_app/analysis_options.yaml
-(cd sample_app && flutter pub get) && git diff --stat -- sample_app/analysis_options.yaml
+# Probe in a throwaway worktree — never `git checkout` over your working copy, which
+# is exactly how you lose the change this PR is making.
+probe=$(mktemp -d)/probe
+git worktree add --detach "$probe" origin/master
+(cd "$probe/sample_app" && flutter pub get) \
+  && git -C "$probe" diff --stat -- sample_app/analysis_options.yaml
+git worktree remove --force "$probe"
 ```
 
 If it is *not* injected: nothing to decide, move on. If it is, the trade-off is — commit it (tree stays clean,
@@ -435,7 +441,7 @@ jobs as unverified and let the PR's own CI run be the check, rather than implyin
 ```bash
 melos bootstrap
 melos run analyze
-melos run format; ./.github/workflows/scripts/validate-formatting.sh
+melos run format && ./.github/workflows/scripts/validate-formatting.sh
 CI=true melos run test:all
 git status --short          # expect only your intended edits
 git clean -fdn -- '*/failures'   # review, then drop -n to remove alchemist's diff images
