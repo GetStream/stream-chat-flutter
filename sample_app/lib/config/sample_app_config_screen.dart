@@ -55,19 +55,7 @@ class SampleAppConfigScreen extends StatelessWidget {
                       },
                       onChanged: (v) => SampleAppConfig.update(context, config.copyWith(themeMode: v)),
                     ),
-                    _SegmentedRow<StreamSurfaceStyle>(
-                      title: 'Surface Style',
-                      value: config.surfaceStyle,
-                      segments: const {
-                        StreamSurfaceStyle.regular: 'Regular',
-                        StreamSurfaceStyle.floating: 'Floating',
-                      },
-                      segmentIcons: const {
-                        StreamSurfaceStyle.regular: Icons.web_asset_outlined,
-                        StreamSurfaceStyle.floating: Icons.filter_none_outlined,
-                      },
-                      onChanged: (v) => SampleAppConfig.update(context, config.copyWith(surfaceStyle: v)),
-                    ),
+                    _SurfaceStyleRows(config: config),
                     _SwitchRow(
                       icon: Icons.palette_outlined,
                       title: 'Dynamic Color',
@@ -299,6 +287,137 @@ class _SwitchRow extends StatelessWidget {
 // ---------------------------------------------------------------------------
 // Segmented row
 // ---------------------------------------------------------------------------
+
+// The app-wide surface style, plus the per-component overrides folded behind a
+// disclosure so they don't crowd the section until they're wanted.
+class _SurfaceStyleRows extends StatefulWidget {
+  const _SurfaceStyleRows({required this.config});
+
+  final SampleAppConfigData config;
+
+  @override
+  State<_SurfaceStyleRows> createState() => _SurfaceStyleRowsState();
+}
+
+class _SurfaceStyleRowsState extends State<_SurfaceStyleRows> {
+  bool _expanded = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final config = widget.config;
+    final colorScheme = context.streamColorScheme;
+    final icons = context.streamIcons;
+
+    final overrides = <_SurfaceOverride>[
+      _SurfaceOverride('App Bar', config.appBarSurfaceStyle, (v) => config.copyWith(appBarSurfaceStyle: v)),
+      _SurfaceOverride(
+        'Bottom App Bar',
+        config.bottomAppBarSurfaceStyle,
+        (v) => config.copyWith(bottomAppBarSurfaceStyle: v),
+      ),
+      _SurfaceOverride(
+        'Bottom Nav Bar',
+        config.bottomNavBarSurfaceStyle,
+        (v) => config.copyWith(bottomNavBarSurfaceStyle: v),
+      ),
+      _SurfaceOverride('Composer', config.composerSurfaceStyle, (v) => config.copyWith(composerSurfaceStyle: v)),
+      // These two go through the SDK's own header themes rather than
+      // StreamAppBarTheme — a different resolution path worth exercising.
+      _SurfaceOverride(
+        'Channel Header',
+        config.channelHeaderSurfaceStyle,
+        (v) => config.copyWith(channelHeaderSurfaceStyle: v),
+      ),
+      _SurfaceOverride(
+        'Thread Header',
+        config.threadHeaderSurfaceStyle,
+        (v) => config.copyWith(threadHeaderSurfaceStyle: v),
+      ),
+    ];
+
+    final pinned = overrides.where((it) => it.value != null).length;
+
+    Widget divider() => Divider(height: 1, color: colorScheme.borderSubtle);
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _SegmentedRow<StreamSurfaceStyle>(
+          title: 'Surface Style',
+          value: config.surfaceStyle,
+          segments: const {
+            StreamSurfaceStyle.regular: 'Regular',
+            StreamSurfaceStyle.floating: 'Floating',
+          },
+          segmentIcons: const {
+            StreamSurfaceStyle.regular: Icons.web_asset_outlined,
+            StreamSurfaceStyle.floating: Icons.filter_none_outlined,
+          },
+          onChanged: (v) => SampleAppConfig.update(context, config.copyWith(surfaceStyle: v)),
+        ),
+        divider(),
+        StreamListTile(
+          leading: Icon(icons.sidebar, size: 24),
+          title: const Text('Per-component overrides'),
+          subtitle: Text(
+            switch (pinned) {
+              0 => 'Every component follows the app style',
+              _ => '$pinned of ${overrides.length} pinned away from the app style',
+            },
+          ),
+          trailing: Icon(_expanded ? icons.chevronUp : icons.chevronDown, size: 20),
+          onTap: () => setState(() => _expanded = !_expanded),
+        ),
+        if (_expanded)
+          for (final override in overrides) ...[
+            divider(),
+            _SegmentedRow<StreamSurfaceStyle?>(
+              title: override.title,
+              value: override.value,
+              segments: _componentSurfaceSegments,
+              onChanged: (v) => SampleAppConfig.update(context, override.apply(v)),
+            ),
+          ],
+        if (_expanded && pinned > 0) ...[
+          divider(),
+          StreamListTile(
+            leading: Icon(icons.refresh, size: 24),
+            title: const Text('Clear overrides'),
+            subtitle: const Text('Return every component to the app style'),
+            onTap: () => SampleAppConfig.update(
+              context,
+              config.copyWith(
+                appBarSurfaceStyle: null,
+                bottomAppBarSurfaceStyle: null,
+                bottomNavBarSurfaceStyle: null,
+                composerSurfaceStyle: null,
+                channelHeaderSurfaceStyle: null,
+                threadHeaderSurfaceStyle: null,
+              ),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+// One row in the per-component override list.
+class _SurfaceOverride {
+  const _SurfaceOverride(this.title, this.value, this.apply);
+
+  final String title;
+  final StreamSurfaceStyle? value;
+  final SampleAppConfigData Function(StreamSurfaceStyle? value) apply;
+}
+
+// Segments for a per-component override: null inherits the app-wide surface
+// style, the others pin the component.
+const _componentSurfaceSegments = <StreamSurfaceStyle?, String>{
+  null: 'Auto',
+  StreamSurfaceStyle.regular: 'Regular',
+  StreamSurfaceStyle.floating: 'Floating',
+};
 
 class _SegmentedRow<T> extends StatelessWidget {
   const _SegmentedRow({
