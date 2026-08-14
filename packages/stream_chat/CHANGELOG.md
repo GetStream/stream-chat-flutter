@@ -1,7 +1,12 @@
 ## Upcoming
 
+🔄 Changed
+
+- Raised the minimum `rate_limiter` version to `^1.1.1`.
+
 🐞 Fixed
 
+- Fixed `StreamChatClient.sync` letting a failure from its final `updateLastSyncAt` write escape to the caller; it is now handled by the method's own error handling, like every other sync failure.
 - Fixed truncated channels dropping to the bottom of the list when sorting by `last_updated`.
 
 ## 9.27.0
