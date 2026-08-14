@@ -6812,6 +6812,178 @@ void main() {
         },
       );
 
+      test(
+        'should reset unread count on notification mark read event',
+        () async {
+          final currentUser = client.state.currentUser!;
+          final currentRead = Read(
+            user: currentUser,
+            lastRead: DateTime(2020),
+            unreadMessages: 10,
+          );
+
+          // Setup initial read state
+          channel.state?.updateChannelState(
+            channel.state!.channelState.copyWith(
+              read: [currentRead],
+            ),
+          );
+
+          when(
+            () => client.channelDeliveryReporter.reconcileDelivery([channel]),
+          ).thenAnswer((_) => Future.value());
+
+          // Verify initial state
+          expect(channel.state?.unreadCount, 10);
+
+          // notification.mark_read is delivered on the reading user's own
+          // connection, so it reaches non-watched channels as well.
+          client.addEvent(
+            Event(
+              cid: channel.cid,
+              type: EventType.notificationMarkRead,
+              user: currentUser,
+              createdAt: DateTime(2022),
+              lastReadMessageId: 'message-123',
+            ),
+          );
+
+          // Wait for event to be processed
+          await Future.delayed(Duration.zero);
+
+          // Verify read state is updated
+          final updatedRead = channel.state?.read.first;
+          expect(updatedRead?.user.id, currentUser.id);
+          expect(channel.state?.unreadCount, 0);
+          expect(updatedRead?.lastReadMessageId, 'message-123');
+          expect(
+            updatedRead?.lastRead.isAtSameMomentAs(DateTime(2022)),
+            isTrue,
+          );
+        },
+      );
+
+      test(
+        'should preserve delivery info on notification mark read event',
+        () async {
+          final currentUser = User(id: 'test-user');
+          final currentRead = Read(
+            user: currentUser,
+            lastRead: DateTime(2020),
+            unreadMessages: 10,
+            lastDeliveredAt: DateTime(2021),
+            lastDeliveredMessageId: 'delivered-msg-456',
+          );
+
+          // Setup initial read state
+          channel.state?.updateChannelState(
+            channel.state!.channelState.copyWith(
+              read: [currentRead],
+            ),
+          );
+
+          client.addEvent(
+            Event(
+              cid: channel.cid,
+              type: EventType.notificationMarkRead,
+              user: currentUser,
+              createdAt: DateTime(2022),
+              lastReadMessageId: 'message-123',
+            ),
+          );
+
+          // Wait for event to be processed
+          await Future.delayed(Duration.zero);
+
+          // Verify read state is updated but delivery info is preserved
+          final updatedRead = channel.state?.read.first;
+          expect(updatedRead?.unreadMessages, 0);
+          expect(
+            updatedRead?.lastDeliveredAt?.isAtSameMomentAs(DateTime(2021)),
+            isTrue,
+          );
+          expect(updatedRead?.lastDeliveredMessageId, 'delivered-msg-456');
+        },
+      );
+
+      test(
+        'should not update channel read state on thread notification mark '
+        'read event',
+        () async {
+          final currentUser = User(id: 'test-user');
+          final currentRead = Read(
+            user: currentUser,
+            lastRead: DateTime(2020),
+            unreadMessages: 10,
+            lastReadMessageId: 'channel-msg-1',
+          );
+
+          // Setup initial read state
+          channel.state?.updateChannelState(
+            channel.state!.channelState.copyWith(
+              read: [currentRead],
+            ),
+          );
+
+          client.addEvent(
+            Event(
+              cid: channel.cid,
+              type: EventType.notificationMarkRead,
+              user: currentUser,
+              createdAt: DateTime(2022),
+              lastReadMessageId: 'thread-reply-99',
+              thread: Thread(
+                channelCid: channel.cid!,
+                parentMessageId: 'parent-msg-1',
+                createdByUserId: currentUser.id,
+                replyCount: 3,
+                participantCount: 2,
+              ),
+            ),
+          );
+
+          // Wait for event to be processed
+          await Future.delayed(Duration.zero);
+
+          // Channel read state must be untouched — thread reads
+          // must not clobber the channel-level Read.
+          final after = channel.state?.read.first;
+          expect(after?.unreadMessages, 10);
+          expect(after?.lastReadMessageId, 'channel-msg-1');
+          expect(after?.lastRead.isAtSameMomentAs(DateTime(2020)), isTrue);
+        },
+      );
+
+      test(
+        'should reconcile delivery when notification mark read event is from '
+        'current user',
+        () async {
+          final currentUser = client.state.currentUser;
+
+          when(
+            () => client.channelDeliveryReporter.reconcileDelivery([channel]),
+          ).thenAnswer((_) => Future.value());
+
+          client.addEvent(
+            Event(
+              cid: channel.cid,
+              type: EventType.notificationMarkRead,
+              user: currentUser,
+              createdAt: DateTime(2022),
+              lastReadMessageId: 'message-123',
+            ),
+          );
+
+          // Wait for event to be processed
+          await Future.delayed(Duration.zero);
+
+          // Verify reconcileDelivery was called
+          verify(
+            () => client.channelDeliveryReporter.reconcileDelivery([channel]),
+          ).called(1);
+        },
+      );
+
       test('should update read state on message delivered event', () async {
         final currentUser = User(id: 'test-user');
         final distantPast = DateTime.fromMillisecondsSinceEpoch(0, isUtc: true);

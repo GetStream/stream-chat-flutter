@@ -30,6 +30,7 @@
 - Fixed reaction groups synthesized from legacy `reaction_counts`/`reaction_scores` payloads being discarded at parse time when their score total was zero or negative despite a positive count.
 - Fixed `Channel.getReplies` adding the parent message to `ChannelClientState.threads` when a backend returns it alongside the replies, which rendered the thread root twice. The online path now filters it out, matching the offline one.
 - Fixed truncated channels dropping to the bottom of the list when sorting by `last_updated`.
+- Fixed `ChannelClientState` no longer handling `notification.mark_read` (regression since 9.20.0), which left `unreadCount` stale after `Channel.markRead` on channels the user isn't watching.
 
 ## 10.2.0
 
