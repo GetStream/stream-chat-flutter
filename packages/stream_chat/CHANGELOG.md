@@ -25,6 +25,7 @@
 - Fixed `Channel.initialized` staying errored after a failed init; it now reflects a subsequent successful (re)initialization.
 - `ComparableField` now folds diacritics/ligatures and ignores case when comparing strings, so `SortOption` on fields like `name` no longer pushes lowercase or non-ASCII names (`jhon`, `Łukasz`, `Øystein`) to the end of client-sorted lists ([#2601](https://github.com/GetStream/stream-chat-flutter/issues/2601)).
 - Fixed `message.updated` and soft `message.deleted` events being incorrectly upserted into `ChannelState.messages` (and thread reply lists) when they targeted a message outside the currently loaded window.
+- Fixed `StreamChatClient.sync` letting a failure from its final `updateLastSyncAt` write escape to the caller; it is now handled by the method's own error handling, like every other sync failure.
 - Fixed `Message.deleteMyReaction` dropping an entire reaction group when its summed scores reached zero even though other users' reactions kept the count positive; the group is now retained as long as its count stays above zero.
 - Fixed reaction groups derived from legacy `reaction_counts`/`reaction_scores` payloads being discarded when their score total was zero or negative despite a positive count.
 
