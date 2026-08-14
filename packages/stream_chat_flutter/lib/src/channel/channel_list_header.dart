@@ -11,7 +11,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// loading spinner + _Searching for network…_ when connecting, and an
 /// _Offline_ label with a _try again_ affordance when disconnected.
 ///
-/// The leading slot is always the signed-in user's avatar. Tap behaviour
+/// The leading slot is always the signed-in user's avatar. Tap behavior
 /// is wired through [onUserAvatarPressed]; when the callback is null the
 /// avatar mirrors Material [AppBar]'s auto-implied leading by opening the
 /// enclosing [Scaffold]'s drawer if one exists, and is otherwise rendered
@@ -120,10 +120,33 @@ class StreamChannelListHeader extends StatelessWidget implements PreferredSizeWi
   @override
   Size get preferredSize => const Size.fromHeight(kStreamToolbarHeight);
 
+  /// The surface style this header renders with in [context].
+  ///
+  /// Precedence: the per-instance [style], then
+  /// [StreamChatThemeData.channelListHeaderTheme], then the ambient app bar theme,
+  /// then the ambient surface style.
+  static StreamSurfaceStyle resolveSurfaceStyle(
+    BuildContext context, {
+    StreamAppBarStyle? style,
+  }) => StreamAppBar.resolveSurfaceStyle(
+    context,
+    style: _effectiveStyle(context, style),
+  );
+
+  // The per-instance style layered over the per-header theme.
+  static StreamAppBarStyle? _effectiveStyle(
+    BuildContext context,
+    StreamAppBarStyle? style,
+  ) {
+    final theme = StreamChatTheme.of(context);
+    final themeStyle = theme.channelListHeaderTheme.style;
+
+    return themeStyle?.merge(style) ?? style;
+  }
+
   @override
   Widget build(BuildContext context) {
     final _client = client ?? StreamChat.of(context).client;
-    final headerTheme = StreamChatTheme.of(context).channelListHeaderTheme;
 
     final leading = _DefaultUserAvatar(client: _client, onPressed: onUserAvatarPressed);
 
@@ -157,19 +180,13 @@ class StreamChannelListHeader extends StatelessWidget implements PreferredSizeWi
           return StreamInfoTile(
             showMessage: showConnectionStateTile && showStatus,
             message: statusString,
-            // Wrap the bar in a [StreamAppBarTheme] so the per-header chat
-            // theme drives all default styling — the bar internally merges
-            // in any [style] override the caller passed.
-            child: StreamAppBarTheme(
-              data: headerTheme,
-              child: StreamAppBar(
-                leading: leading,
-                title: title,
-                subtitle: subtitle,
-                trailing: trailing,
-                primary: primary,
-                style: style,
-              ),
+            child: StreamAppBar(
+              leading: leading,
+              title: title,
+              subtitle: subtitle,
+              trailing: trailing,
+              primary: primary,
+              style: _effectiveStyle(context, style),
             ),
           );
         },
@@ -188,6 +205,11 @@ class _DefaultUserAvatar extends StatelessWidget {
   Widget build(BuildContext context) {
     final user = client.state.currentUser;
     if (user == null) return const SizedBox.shrink();
+
+    final surfaceStyle = StreamTheme.of(context).surfaceStyle;
+    final toolbarSurfaceStyle = StreamToolbarScope.maybeOf(context);
+
+    final effectiveIsFloating = toolbarSurfaceStyle?.isFloating ?? surfaceStyle.isFloating;
 
     // Caller-provided handler wins; otherwise mirror Material AppBar and
     // open the enclosing Scaffold's drawer if one exists. With no callback
@@ -211,6 +233,7 @@ class _DefaultUserAvatar extends StatelessWidget {
             size: .lg,
             user: user,
             showOnlineIndicator: false,
+            isFloating: effectiveIsFloating,
           ),
         ),
       ),

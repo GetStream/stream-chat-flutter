@@ -5,7 +5,9 @@ import 'package:sample_app/state/new_group_chat_state.dart';
 import 'package:sample_app/widgets/search_text_field.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// A screen for creating a new group chat by searching for and selecting users.
 class NewGroupChatScreen extends StatefulWidget {
+  /// Creates a [NewGroupChatScreen].
   const NewGroupChatScreen({super.key});
 
   @override
@@ -69,7 +71,7 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
       animation: groupChatState,
       builder: (context, child) {
         final state = groupChatState;
-        return Scaffold(
+        return StreamScaffold(
           backgroundColor: context.streamColorScheme.backgroundApp,
           appBar: StreamAppBar(
             title: const Text('Add Group Members'),
@@ -112,10 +114,13 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
                   floatHeaderSlivers: true,
                   headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
                     return <Widget>[
-                      SliverToBoxAdapter(
-                        child: SearchTextField(
-                          controller: _controller,
-                          hintText: 'Search',
+                      SliverSafeArea(
+                        bottom: false,
+                        sliver: SliverToBoxAdapter(
+                          child: SearchTextField(
+                            controller: _controller,
+                            hintText: 'Search',
+                          ),
                         ),
                       ),
                       if (state.users.isNotEmpty)
@@ -202,51 +207,57 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
                       ),
                     ];
                   },
-                  body: GestureDetector(
-                    behavior: HitTestBehavior.opaque,
-                    onPanDown: (_) => FocusScope.of(context).unfocus(),
-                    child: StreamUserListView(
-                      controller: userListController,
-                      itemBuilder: (context, items, index, defaultWidget) {
-                        return defaultWidget.copyWith(
-                          selected: state.users.contains(items[index]),
-                        );
-                      },
-                      onUserTap: groupChatState.addOrRemoveUser,
-                      emptyBuilder: (_) {
-                        return LayoutBuilder(
-                          builder: (context, viewportConstraints) {
-                            return SingleChildScrollView(
-                              physics: const AlwaysScrollableScrollPhysics(),
-                              child: ConstrainedBox(
-                                constraints: BoxConstraints(
-                                  minHeight: viewportConstraints.maxHeight,
-                                ),
-                                child: Center(
-                                  child: Column(
-                                    children: [
-                                      Padding(
-                                        padding: const EdgeInsets.all(24),
-                                        child: Icon(
-                                          context.streamIcons.search,
-                                          size: 96,
-                                          color: context.streamColorScheme.textSecondary,
+                  // Header handled the top inset; strip it so the body list
+                  // (null padding) only re-adds the bottom.
+                  body: MediaQuery.removePadding(
+                    context: context,
+                    removeTop: true,
+                    child: GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onPanDown: (_) => FocusScope.of(context).unfocus(),
+                      child: StreamUserListView(
+                        controller: userListController,
+                        itemBuilder: (context, items, index, defaultWidget) {
+                          return defaultWidget.copyWith(
+                            selected: state.users.contains(items[index]),
+                          );
+                        },
+                        onUserTap: groupChatState.addOrRemoveUser,
+                        emptyBuilder: (_) {
+                          return LayoutBuilder(
+                            builder: (context, viewportConstraints) {
+                              return SingleChildScrollView(
+                                physics: const AlwaysScrollableScrollPhysics(),
+                                child: ConstrainedBox(
+                                  constraints: BoxConstraints(
+                                    minHeight: viewportConstraints.maxHeight,
+                                  ),
+                                  child: Center(
+                                    child: Column(
+                                      children: [
+                                        Padding(
+                                          padding: const EdgeInsets.all(24),
+                                          child: Icon(
+                                            context.streamIcons.search,
+                                            size: 96,
+                                            color: context.streamColorScheme.textSecondary,
+                                          ),
                                         ),
-                                      ),
-                                      Text(
-                                        'No user matches these keywords...',
-                                        style: context.streamTextTheme.captionDefault.copyWith(
-                                          color: context.streamColorScheme.textSecondary,
+                                        Text(
+                                          'No user matches these keywords...',
+                                          style: context.streamTextTheme.captionDefault.copyWith(
+                                            color: context.streamColorScheme.textSecondary,
+                                          ),
                                         ),
-                                      ),
-                                    ],
+                                      ],
+                                    ),
                                   ),
                                 ),
-                              ),
-                            );
-                          },
-                        );
-                      },
+                              );
+                            },
+                          );
+                        },
+                      ),
                     ),
                   ),
                 ),

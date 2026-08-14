@@ -22,6 +22,7 @@ class StreamThreadHeader extends StatelessWidget implements PreferredSizeWidget 
     required this.parent,
     this.leading,
     this.automaticallyImplyLeading = true,
+    this.onBackPressed,
     this.title,
     this.subtitle,
     this.trailing,
@@ -37,6 +38,13 @@ class StreamThreadHeader extends StatelessWidget implements PreferredSizeWidget 
 
   /// {@macro StreamAppBar.automaticallyImplyLeading}
   final bool automaticallyImplyLeading;
+
+  /// Called when the default [StreamBackButton] is pressed, replacing its
+  /// default [Navigator.maybePop].
+  ///
+  /// Ignored when [leading] is provided or [automaticallyImplyLeading] is
+  /// false.
+  final VoidCallback? onBackPressed;
 
   /// {@macro StreamAppBar.title}
   ///
@@ -64,10 +72,33 @@ class StreamThreadHeader extends StatelessWidget implements PreferredSizeWidget 
   @override
   Size get preferredSize => const Size.fromHeight(kStreamToolbarHeight);
 
+  /// The surface style this header renders with in [context].
+  ///
+  /// Precedence: the per-instance [style], then
+  /// [StreamChatThemeData.threadHeaderTheme], then the ambient app bar theme,
+  /// then the ambient surface style.
+  static StreamSurfaceStyle resolveSurfaceStyle(
+    BuildContext context, {
+    StreamAppBarStyle? style,
+  }) => StreamAppBar.resolveSurfaceStyle(
+    context,
+    style: _effectiveStyle(context, style),
+  );
+
+  // The per-instance style layered over the per-header theme.
+  static StreamAppBarStyle? _effectiveStyle(
+    BuildContext context,
+    StreamAppBarStyle? style,
+  ) {
+    final theme = StreamChatTheme.of(context);
+    final themeStyle = theme.threadHeaderTheme.style;
+
+    return themeStyle?.merge(style) ?? style;
+  }
+
   @override
   Widget build(BuildContext context) {
     final channel = StreamChannel.maybeOf(context)?.channel;
-    final headerTheme = StreamChatTheme.of(context).threadHeaderTheme;
 
     var leading = this.leading;
     if (leading == null && automaticallyImplyLeading) {
@@ -75,7 +106,10 @@ class StreamThreadHeader extends StatelessWidget implements PreferredSizeWidget 
         final cid? => StreamUnreadIndicator.channels(cid: cid),
         null => const StreamUnreadIndicator(),
       };
-      leading = StreamBackButton(unreadIndicator: unreadIndicator);
+      leading = StreamBackButton(
+        onPressed: onBackPressed,
+        unreadIndicator: unreadIndicator,
+      );
     }
 
     Widget? fallbackSubtitle;
@@ -93,18 +127,15 @@ class StreamThreadHeader extends StatelessWidget implements PreferredSizeWidget 
       alternativeWidget: fallbackSubtitle,
     );
 
-    return StreamAppBarTheme(
-      data: headerTheme,
-      child: StreamAppBar(
-        leading: leading,
-        automaticallyImplyLeading: automaticallyImplyLeading,
-        title: title,
-        subtitle: subtitle,
-        trailing: trailing,
-        primary: primary,
-        excludeHeaderSemantics: true,
-        style: style,
-      ),
+    return StreamAppBar(
+      leading: leading,
+      automaticallyImplyLeading: automaticallyImplyLeading,
+      title: title,
+      subtitle: subtitle,
+      trailing: trailing,
+      primary: primary,
+      excludeHeaderSemantics: true,
+      style: _effectiveStyle(context, style),
     );
   }
 }

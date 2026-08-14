@@ -68,6 +68,7 @@ class StreamUserAvatar extends StatelessWidget {
     required this.user,
     this.showBorder = true,
     this.showOnlineIndicator = true,
+    this.isFloating,
     this.semanticsLabel,
   });
 
@@ -84,6 +85,13 @@ class StreamUserAvatar extends StatelessWidget {
   ///
   /// Defaults to true.
   final bool showOnlineIndicator;
+
+  /// Whether to show a drop shadow around the avatar.
+  ///
+  /// Defaults to null, treated as not floating. The shadow depth is determined
+  /// by [StreamAvatarThemeData.floatingElevation], falling back to
+  /// [StreamElevation.level2].
+  final bool? isFloating;
 
   /// The size of the avatar.
   ///
@@ -114,6 +122,7 @@ class StreamUserAvatar extends StatelessWidget {
       size: effectiveSize,
       imageUrl: user.image,
       showBorder: showBorder,
+      isFloating: isFloating,
       backgroundColor: effectiveBackgroundColor,
       foregroundColor: effectiveForegroundColor,
       semanticsLabel: semanticsLabel,

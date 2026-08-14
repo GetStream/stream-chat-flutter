@@ -96,6 +96,8 @@ class StreamChatMessageInput extends StatefulWidget {
   final bool autocorrect;
 
   /// Whether the message composer is floating.
+  ///
+  /// Defaults to false.
   final bool isFloating;
 
   @override

@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:sample_app/pages/channel_page.dart';
-import 'package:sample_app/pages/thread_page.dart';
 import 'package:sample_app/widgets/stream_draft_list_view.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -71,10 +69,10 @@ class _DraftListPageState extends State<DraftListPage> {
                   channel: channel,
                   initialMessageId: draft.parentId,
                   child: switch (draft.parentMessage) {
-                    final parent? => ThreadPage(
+                    final parent? => StreamThreadPage(
                       parent: parent.copyWith(draft: draft),
                     ),
-                    _ => const ChannelPage(),
+                    _ => const StreamChannelPage(),
                   },
                 );
               },

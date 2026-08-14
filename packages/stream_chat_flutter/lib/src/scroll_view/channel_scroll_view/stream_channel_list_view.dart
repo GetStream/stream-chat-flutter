@@ -333,7 +333,7 @@ class StreamChannelListView extends StatelessWidget {
           child: StreamLoadingSpinner(),
         ),
       ),
-      loadingBuilder: (context) => loadingBuilder?.call(context) ?? const StreamChannelListSkeletonLoading(),
+      loadingBuilder: (context) => loadingBuilder?.call(context) ?? StreamChannelListSkeletonLoading(padding: padding),
       errorBuilder: (context, error) {
         if (errorBuilder?.call(context, error) case final builder?) return builder;
 
