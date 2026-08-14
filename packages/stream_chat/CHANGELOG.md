@@ -1,7 +1,12 @@
 ## Upcoming
 
+🔄 Changed
+
+- Raised the minimum `rate_limiter` version to `^1.1.1`.
+
 🐞 Fixed
 
+- Fixed `StreamChatClient.sync` letting a failure from its final `updateLastSyncAt` write escape to the caller; it is now handled by the method's own error handling, like every other sync failure.
 - Fixed `Channel.getReplies` adding the parent message to `ChannelClientState.threads` when a backend returns it alongside the replies, which rendered the thread root twice. The online path now filters it out, matching the offline one.
 
 ## 9.27.0
