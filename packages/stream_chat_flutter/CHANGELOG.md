@@ -1,3 +1,9 @@
+## Upcoming
+
+🔄 Changed
+
+- Raised the minimum `rate_limiter` version to `^1.1.1`.
+
 ## 9.27.0
 
 ✅ Added
