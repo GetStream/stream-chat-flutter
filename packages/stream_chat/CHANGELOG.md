@@ -1,3 +1,10 @@
+## Upcoming
+
+🐞 Fixed
+
+- Fixed pinned channels appearing at the bottom of the list when sorting by `pinned_at` descending.
+- Fixed channels without messages appearing at the top of the list when sorting by `last_message_at` descending.
+
 ## 9.27.0
 
 ✅ Added
