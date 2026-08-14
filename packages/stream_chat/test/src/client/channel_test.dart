@@ -3112,6 +3112,32 @@ void main() {
       verify(() => client.getReplies(parentId)).called(1);
     });
 
+    test('`.getReplies` keeps the parent message out of the thread', () async {
+      const parentId = 'test-parent-id';
+
+      // Some backends return the parent as the first message of the oldest
+      // page. It is rendered from its own copy, so it must not also become a
+      // reply — otherwise the thread shows its root twice.
+      final messages = [
+        Message(id: parentId),
+        ...List.generate(
+          3,
+          (index) => Message(id: 'test-message-id-$index', parentId: parentId),
+        ),
+      ];
+
+      when(() => client.getReplies(parentId)).thenAnswer(
+        (_) async => QueryRepliesResponse()..messages = messages,
+      );
+
+      await channel.getReplies(parentId);
+
+      final threadMessages = channel.state!.threads[parentId];
+      expect(threadMessages, isNotNull);
+      expect(threadMessages!.length, messages.length - 1);
+      expect(threadMessages.any((it) => it.id == parentId), isFalse);
+    });
+
     test('`.getReactions`', () async {
       const messageId = 'test-message-id';
 

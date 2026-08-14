@@ -8,6 +8,7 @@
 
 - Fixed `StreamChatClient.sync` letting a failure from its final `updateLastSyncAt` write escape to the caller; it is now handled by the method's own error handling, like every other sync failure.
 - Fixed `ChannelClientState` no longer handling `notification.mark_read` (regression since 9.20.0), which left `unreadCount` stale after `Channel.markRead` on channels the user isn't watching.
+- Fixed `Channel.getReplies` adding the parent message to `ChannelClientState.threads` when a backend returns it alongside the replies, which rendered the thread root twice. The online path now filters it out, matching the offline one.
 - Fixed truncated channels dropping to the bottom of the list when sorting by `last_updated`.
 
 ## 9.27.0
