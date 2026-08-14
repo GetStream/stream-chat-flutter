@@ -22,11 +22,13 @@ environment:
   flutter: ">=3.44.0"
 
 dependencies:
+  cupertino_ui: ^1.0.0
   flutter:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
   intl: ^0.20.2
+  material_ui: ^1.0.0
   stream_chat_flutter: ^10.3.0
 
 dev_dependencies:

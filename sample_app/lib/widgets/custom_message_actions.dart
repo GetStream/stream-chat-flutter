@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:sample_app/config/sample_app_config.dart';
 import 'package:sample_app/widgets/message_info_sheet.dart';
 import 'package:sample_app/widgets/reminder_dialog.dart';

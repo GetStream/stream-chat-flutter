@@ -1,7 +1,7 @@
 // ignore_for_file: no-empty-block
 
-import 'package:flutter/material.dart';
 import 'package:flutter_portal/flutter_portal.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 export 'stream_command_autocomplete_options.dart';

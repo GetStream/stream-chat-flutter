@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'dart:ui';
 
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat_flutter/src/message_widget/components/stream_message_text.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart' hide StreamMessageText;

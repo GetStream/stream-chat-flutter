@@ -1,5 +1,5 @@
 import 'package:ezanimation/ezanimation.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// {@template staggeredScaleTransition}
 /// A widget that scales in its [children] with a staggered animation.

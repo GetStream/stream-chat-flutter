@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// The default size for the icon inside the message input icon button.
 const double kDefaultMessageInputIconSize = 32;

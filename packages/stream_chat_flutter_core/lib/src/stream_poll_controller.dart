@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:stream_chat/stream_chat.dart';
 
 part 'stream_poll_controller.freezed.dart';

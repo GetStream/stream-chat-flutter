@@ -2,8 +2,8 @@
 // (riding out a cold-boot scroll race) — see scrollToText.
 // ignore_for_file: avoid_catching_errors
 
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 
 extension E2EFinder on Finder {
   /// [evaluate], but empty instead of throwing when this finder narrows to a

@@ -1,7 +1,8 @@
+import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_localizations/flutter_localizations.dart' show GlobalWidgetsLocalizations;
 import 'package:intl/intl.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 part 'stream_chat_localizations_ca.dart';

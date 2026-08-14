@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:stream_chat_flutter/src/poll/interactor/poll_footer.dart';
 import 'package:stream_chat_flutter/src/poll/interactor/poll_header.dart';
 import 'package:stream_chat_flutter/src/poll/interactor/poll_options_list_view.dart';

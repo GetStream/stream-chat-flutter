@@ -1,6 +1,6 @@
 // ignore_for_file: public_member_api_docs, use_super_parameters
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 class MaterialAppWrapper extends MaterialApp {
   MaterialAppWrapper({

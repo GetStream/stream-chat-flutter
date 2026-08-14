@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart' hide Action;
+import 'package:material_ui/material_ui.dart' hide Action;
 import 'package:stream_chat_flutter/src/attachment/giphy_attachment.dart';
 import 'package:stream_chat_flutter/src/message_widget/components/stream_message_footer.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';

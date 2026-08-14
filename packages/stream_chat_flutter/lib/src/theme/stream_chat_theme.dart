@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart' hide TextTheme;
+import 'package:material_ui/material_ui.dart' hide TextTheme;
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:theme_extensions_builder_annotation/theme_extensions_builder_annotation.dart';
 

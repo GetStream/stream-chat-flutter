@@ -1,7 +1,7 @@
 // ignore_for_file: lines_longer_than_80_chars
 
 import 'package:alchemist/alchemist.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:stream_chat_flutter/src/poll/interactor/poll_add_comment_dialog.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 

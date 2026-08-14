@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:sample_app/widgets/stream_draft_list_tile.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 

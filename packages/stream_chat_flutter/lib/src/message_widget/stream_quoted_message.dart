@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:stream_chat_flutter/src/attachment/thumbnail/media_attachment_thumbnail.dart';
 import 'package:stream_chat_flutter/src/channel/stream_message_preview_text.dart';
 import 'package:stream_chat_flutter/src/components/stream_chat_component_builders.dart';

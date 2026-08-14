@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 class SimpleFrame extends StatelessWidget {
   const SimpleFrame({super.key, required this.child});

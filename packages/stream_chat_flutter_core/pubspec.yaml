@@ -24,10 +24,12 @@ environment:
 dependencies:
   collection: ^1.19.1
   connectivity_plus: ^7.1.1
+  cupertino_ui: ^1.0.0
   device_info_plus: ">=12.4.0 <14.0.0"
   flutter:
     sdk: flutter
   freezed_annotation: ^3.0.0
+  material_ui: ^1.0.0
   meta: ^1.9.1
   package_info_plus: ">=9.0.1 <11.0.0"
   rate_limiter: ^1.1.0

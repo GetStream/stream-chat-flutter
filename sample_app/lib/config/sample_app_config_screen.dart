@@ -1,7 +1,7 @@
 import 'dart:io' show Platform;
 
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:sample_app/config/sample_app_config.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 

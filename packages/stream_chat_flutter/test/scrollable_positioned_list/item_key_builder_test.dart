@@ -5,8 +5,8 @@
 // 3. Element/State reuse when items keep their identity across rebuilds.
 // 4. No-op behavior on rebuilds that don't change `itemCount`.
 
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:stream_chat_flutter/scrollable_positioned_list/scrollable_positioned_list.dart';
 
 const _viewportHeight = 400.0;

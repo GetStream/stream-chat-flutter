@@ -1,6 +1,6 @@
 library conditional_parent_builder;
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// {@template parentBuilder}
 /// A function that provides the [BuildContext] and the [child] widget.

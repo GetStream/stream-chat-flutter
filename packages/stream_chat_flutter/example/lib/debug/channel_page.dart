@@ -2,7 +2,7 @@
 
 import 'dart:async';
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_flutter_example/debug/actions/add_user.dart';
 import 'package:stream_chat_flutter_example/debug/actions/ban_user.dart';

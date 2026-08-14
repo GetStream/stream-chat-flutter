@@ -1,5 +1,5 @@
 import 'package:clock/clock.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:stream_chat_flutter/src/utils/extensions.dart';
 

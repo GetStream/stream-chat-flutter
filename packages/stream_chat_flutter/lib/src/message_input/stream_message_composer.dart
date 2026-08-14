@@ -2,11 +2,11 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:desktop_drop/desktop_drop.dart';
-import 'package:flutter/material.dart';
 // Needed for RenderProxyBox; it also re-exports the semantics library that
 // Assertiveness comes from, which is why flutter/semantics.dart isn't imported.
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:stream_chat_flutter/src/message_input/audio_recorder/audio_recorder_announcer.dart';
 import 'package:stream_chat_flutter/src/message_input/composer_attachment_announcer.dart';
 import 'package:stream_chat_flutter/src/message_input/error_alert_sheet.dart';

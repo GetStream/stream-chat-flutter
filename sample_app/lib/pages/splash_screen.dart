@@ -1,7 +1,7 @@
 // ignore_for_file: deprecated_member_use
 
-import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
+import 'package:material_ui/material_ui.dart';
 
 mixin SplashScreenStateMixin<T extends StatefulWidget> on State<T> implements TickerProvider {
   late final _animationController = AnimationController(

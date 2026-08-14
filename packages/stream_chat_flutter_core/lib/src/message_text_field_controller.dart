@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// A function that takes a [BuildContext] and returns a [TextStyle].
 typedef TextStyleBuilder =
