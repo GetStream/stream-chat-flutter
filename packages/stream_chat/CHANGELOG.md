@@ -1,7 +1,12 @@
 ## Upcoming
 
+🔄 Changed
+
+- Raised the minimum `rate_limiter` version to `^1.1.1`.
+
 🐞 Fixed
 
+- Fixed `StreamChatClient.sync` letting a failure from its final `updateLastSyncAt` write escape to the caller; it is now handled by the method's own error handling, like every other sync failure.
 - Fixed pinned channels appearing at the bottom of the list when sorting by `pinned_at` descending.
 - Fixed channels without messages appearing at the top of the list when sorting by `last_message_at` descending.
 
