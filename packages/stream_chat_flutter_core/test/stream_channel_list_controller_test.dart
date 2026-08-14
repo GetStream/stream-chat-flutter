@@ -275,6 +275,33 @@ void main() {
     expect((captured.single as PaginationParams).offset, equals(nextPageKey));
   });
 
+  test('local sort places channels with disposed state last instead of crashing', () {
+    ChannelState channelStateFor({required DateTime createdAt}) => ChannelState(
+      channel: ChannelModel(cid: 'messaging:${createdAt.millisecondsSinceEpoch}', createdAt: createdAt),
+    );
+
+    final older = MockChannel();
+    when(() => older.state.channelState).thenReturn(channelStateFor(createdAt: DateTime(2026, 1, 1)));
+
+    final newer = MockChannel();
+    when(() => newer.state.channelState).thenReturn(channelStateFor(createdAt: DateTime(2026, 6, 1)));
+
+    // A channel disposed while a query is in flight (client disconnect or
+    // logout, a channel-removal event) has its state nulled out.
+    final disposed = NonInitializedMockChannel();
+
+    final controller = StreamChannelListController(
+      client: client,
+      channelStateSort: defaultChannelListSort,
+    );
+
+    expect(
+      () => controller.value = PagedValue<int, Channel>(items: [disposed, older, newer]),
+      returnsNormally,
+    );
+    expect(controller.value.asSuccess.items, equals([newer, older, disposed]));
+  });
+
   // The controller's only responsibility for events is routing them to the
   // matching handler method. The handler's behavior for each event is covered
   // in stream_channel_list_event_handler_test.dart, so here we inject a mock
