@@ -53,7 +53,7 @@ class SortOption<T extends ComparableFieldProvider> {
   const SortOption.desc(
     this.field, {
     NullOrdering? nullOrdering,
-    Comparator<T>? comparator,
+    this._comparator,
   }) : direction = SortOption.DESC,
        // The server orders pinned_at and last_message_at NULLS LAST whichever
        // direction they are sorted in, so pinned and message-less channels
@@ -63,8 +63,7 @@ class SortOption<T extends ComparableFieldProvider> {
            nullOrdering ??
            (field == ChannelSortKey.pinnedAt || field == ChannelSortKey.lastMessageAt
                ? NullOrdering.nullsLast
-               : NullOrdering.nullsFirst),
-       _comparator = comparator;
+               : NullOrdering.nullsFirst);
 
   /// Creates a SortOption for ascending order sorting by the specified field.
   ///
@@ -76,12 +75,11 @@ class SortOption<T extends ComparableFieldProvider> {
   const SortOption.asc(
     this.field, {
     NullOrdering? nullOrdering,
-    Comparator<T>? comparator,
+    this._comparator,
   }) : direction = SortOption.ASC,
        // Every field the server sorts ascending orders nulls last, either
        // explicitly or by inheriting the default.
-       nullOrdering = nullOrdering ?? NullOrdering.nullsLast,
-       _comparator = comparator;
+       nullOrdering = nullOrdering ?? NullOrdering.nullsLast;
 
   /// Creates a [SortOption] from its JSON-serialized representation.
   ///

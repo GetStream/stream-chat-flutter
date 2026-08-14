@@ -1,5 +1,9 @@
 ## 10.3.0
 
+🔄 Changed
+
+- Raised minimum Flutter to `>=3.44.0` and Dart SDK to `^3.12.0`.
+
 🐞 Fixed
 
 - Fixed truncated channels being the first to fall out of the 250-channel cap returned by `getChannelCids`.

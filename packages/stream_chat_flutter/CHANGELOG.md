@@ -33,6 +33,10 @@
 - Deprecated `height`/`width` of `StreamScrollViewLoadingWidget` in favor of `size`.
 - Deprecated `StreamBackButton.showUnreadCount` and `StreamBackButton.channelId` in favor of `unreadIndicator`.
 
+🔄 Changed
+
+- Raised minimum Flutter to `>=3.44.0` and Dart SDK to `^3.12.0`.
+
 🐞 Fixed
 
 - Fixed a failed send surfacing as an unhandled async error when `StreamMessageComposer` has no `onError`; it is now reported through `FlutterError.reportError`.

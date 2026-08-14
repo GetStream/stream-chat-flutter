@@ -4,8 +4,8 @@
 class ConnectionIdManager {
   /// Initialize a new connection id manager
   ConnectionIdManager({
-    String? connectionId,
-  }) : _connectionId = connectionId;
+    this._connectionId,
+  });
 
   String? _connectionId;
 

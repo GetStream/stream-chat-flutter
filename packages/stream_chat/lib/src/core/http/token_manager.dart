@@ -9,12 +9,10 @@ typedef TokenProvider = Future<String> Function(String userId);
 class TokenManager {
   /// Initialize a new token manager
   TokenManager({
-    String? userId,
-    Token? token,
+    this._userId,
+    this._token,
     TokenProvider? tokenProvider,
-  }) : _userId = userId,
-       _token = token,
-       _provider = tokenProvider;
+  }) : _provider = tokenProvider;
 
   String? _type;
   Token? _token;

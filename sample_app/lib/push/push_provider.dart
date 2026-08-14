@@ -14,9 +14,8 @@ class PushProvider {
   /// Firebase Cloud Messaging; works on both iOS and Android.
   const PushProvider.firebase({
     required this.name,
-    TokenStreamProvider tokenStreamProvider = _firebaseTokenProvider,
-  }) : _tokenStreamProvider = tokenStreamProvider,
-       type = chat.PushProvider.firebase;
+    this._tokenStreamProvider = _firebaseTokenProvider,
+  }) : type = chat.PushProvider.firebase;
 
   /// Raw Apple Push Notification service.
   ///
@@ -26,9 +25,8 @@ class PushProvider {
   /// non-Firebase tooling.
   const PushProvider.apn({
     required this.name,
-    TokenStreamProvider tokenStreamProvider = _apnTokenProvider,
-  }) : _tokenStreamProvider = tokenStreamProvider,
-       type = chat.PushProvider.apn;
+    this._tokenStreamProvider = _apnTokenProvider,
+  }) : type = chat.PushProvider.apn;
 
   static Stream<String> _firebaseTokenProvider() async* {
     // On iOS, `getToken()` throws if the APNs token isn't registered with
