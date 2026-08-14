@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 
@@ -15,15 +16,40 @@ import 'stream_test_env.dart';
 /// video recording to its failed tests. Empty when run ad-hoc.
 const _e2eTarget = String.fromEnvironment('E2E_TARGET');
 
+/// The platforms the e2e suite runs on.
+///
+/// Tests are declared inside the app process, so the running platform is known
+/// when [streamTest] decides whether to skip.
+enum E2ePlatform {
+  android,
+  ios;
+
+  /// The platform the suite is currently running on, or `null` when it is
+  /// neither Android nor iOS (e.g. a host-side run).
+  static E2ePlatform? get current => switch (defaultTargetPlatform) {
+    TargetPlatform.android => android,
+    TargetPlatform.iOS => ios,
+    _ => null,
+  };
+}
+
+/// Whether a test carrying [skip] should be skipped on the running platform.
+///
+/// [skipPlatforms] narrows a skip to the platforms where the issue reproduces;
+/// `null` (the default) skips everywhere.
+bool skipsHere(String? skip, Set<E2ePlatform>? skipPlatforms) =>
+    skip != null && (skipPlatforms == null || skipPlatforms.contains(E2ePlatform.current));
+
 void streamTest({
   String? allureId,
   required String description,
   required Future<void> Function(WidgetTester tester) body,
   String? skip,
+  Set<E2ePlatform>? skipPlatforms,
 }) {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets(description, skip: skip != null, (tester) async {
+  testWidgets(description, skip: skipsHere(skip, skipPlatforms), (tester) async {
     Allure.instance.startTest(
       name: description,
       fullName: Invoker.current?.liveTest.test.name ?? description,
@@ -37,6 +63,13 @@ void streamTest({
     // still forwarding each line to stdout. Result/attachment markers are
     // printed outside this zone (in stopTest / captureFailureArtifacts), so
     // they never end up in the captured log.
+    final previousOnError = FlutterError.onError;
+    FlutterError.onError = (details) {
+      debugPrint('[flutter-error] $details');
+      previousOnError?.call(details);
+    };
+    addTearDown(() => FlutterError.onError = previousOnError);
+
     final log = StringBuffer();
     Future<void> runBody() => runZoned(
       () async {
@@ -72,12 +105,14 @@ void streamTestWithEnv({
   required String description,
   required Future<void> Function(StreamTestEnv env) body,
   String? skip,
+  Set<E2ePlatform>? skipPlatforms,
   bool persistence = false,
 }) {
   streamTest(
     allureId: allureId,
     description: description,
     skip: skip,
+    skipPlatforms: skipPlatforms,
     body: (tester) async {
       final env = StreamTestEnv();
       // Registered before setUp so cleanup also runs when setup fails partway
