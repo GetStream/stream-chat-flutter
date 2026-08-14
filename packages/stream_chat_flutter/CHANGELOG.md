@@ -4,10 +4,6 @@
 
 - Raised the minimum `rate_limiter` version to `^1.1.1`.
 
-🐞 Fixed
-
-- Fixed a channel-list row previewing another channel's last message: list items are unkeyed, so a reorder rebinds the same state to a different channel and the preserved last-known message was still used as a fallback. The cache is now dropped when the row is rebound, or when the `lastMessagePredicate` stops accepting the cached message.
-
 ## 9.27.0
 
 ✅ Added
