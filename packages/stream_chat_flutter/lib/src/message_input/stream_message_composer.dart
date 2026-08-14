@@ -3,7 +3,9 @@ import 'dart:math' as math;
 
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/semantics.dart';
+// Needed for RenderProxyBox; it also re-exports the semantics library that
+// Assertiveness comes from, which is why flutter/semantics.dart isn't imported.
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:stream_chat_flutter/src/message_input/audio_recorder/audio_recorder_announcer.dart';
 import 'package:stream_chat_flutter/src/message_input/composer_attachment_announcer.dart';
@@ -99,6 +101,7 @@ class StreamMessageComposer extends StatelessWidget {
     TextCapitalization textCapitalization = TextCapitalization.sentences,
     bool autofocus = false,
     bool autoCorrect = true,
+    StreamSurfaceStyle? surfaceStyle,
   }) : props = .new(
          onMessageSent: onMessageSent,
          preMessageSending: preMessageSending,
@@ -136,6 +139,7 @@ class StreamMessageComposer extends StatelessWidget {
          textCapitalization: textCapitalization,
          autofocus: autofocus,
          autoCorrect: autoCorrect,
+         surfaceStyle: surfaceStyle,
        );
 
   /// Creates a [StreamMessageComposer] from a pre-built [MessageComposerProps].
@@ -149,6 +153,19 @@ class StreamMessageComposer extends StatelessWidget {
 
   /// The properties for the message composer.
   final MessageComposerProps props;
+
+  /// The surface style this composer renders with in [context].
+  ///
+  /// Precedence: the per-instance [surfaceStyle], then
+  /// [StreamMessageComposerThemeData.surfaceStyle], then the ambient style.
+  static StreamSurfaceStyle resolveSurfaceStyle(
+    BuildContext context, {
+    StreamSurfaceStyle? surfaceStyle,
+  }) {
+    final themeStyle = StreamMessageComposerTheme.of(context);
+    final effective = surfaceStyle ?? themeStyle.surfaceStyle;
+    return effective ?? context.streamSurfaceStyle;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -197,6 +214,7 @@ class MessageComposerProps {
     this.textCapitalization = TextCapitalization.sentences,
     this.autofocus = false,
     this.autoCorrect = true,
+    this.surfaceStyle,
   });
 
   /// Function called after sending the message.
@@ -283,6 +301,9 @@ class MessageComposerProps {
   final StreamMentionItemBuilder? mentionItemBuilder;
 
   /// A callback for error reporting
+  ///
+  /// When null, errors are forwarded to [FlutterError.reportError] so they stay
+  /// visible to the console and to any handler the host app registered.
   final ErrorListener? onError;
 
   /// The maximum number of attachments that can be sent with a single message.
@@ -406,6 +427,12 @@ class MessageComposerProps {
   /// Defaults to true.
   final bool autoCorrect;
 
+  /// The surface style of the message composer.
+  ///
+  /// When null, falls back to [StreamMessageComposerThemeData.surfaceStyle],
+  /// then the ambient [StreamSurfaceStyle].
+  final StreamSurfaceStyle? surfaceStyle;
+
   /// Returns a copy of this [MessageComposerProps] with the given fields
   /// replaced with new values.
   MessageComposerProps copyWith({
@@ -444,6 +471,7 @@ class MessageComposerProps {
     TextCapitalization? textCapitalization,
     bool? autofocus,
     bool? autoCorrect,
+    StreamSurfaceStyle? surfaceStyle,
   }) {
     return MessageComposerProps(
       onMessageSent: onMessageSent ?? this.onMessageSent,
@@ -481,6 +509,7 @@ class MessageComposerProps {
       textCapitalization: textCapitalization ?? this.textCapitalization,
       autofocus: autofocus ?? this.autofocus,
       autoCorrect: autoCorrect ?? this.autoCorrect,
+      surfaceStyle: surfaceStyle ?? this.surfaceStyle,
     );
   }
 
@@ -598,6 +627,11 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
   StreamSubscription<Draft?>? _draftStreamSubscription;
   StreamSubscription<Event>? _messageUpdatedSubscription;
   StreamSubscription<Event>? _messageDeletedSubscription;
+
+  // Height of the floating pill, reported from layout and read back at paint
+  // time by _FloatingComposerBackdropPainter. Layout always runs before paint,
+  // so the backdrop's fade is never a frame behind the pill.
+  final _pillHeight = ValueNotifier<double>(0);
 
   @override
   void initState() {
@@ -815,31 +849,49 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     };
 
     final spacing = context.streamSpacing;
-    final safeAreaEnabled = widget.props.enableSafeArea ?? true;
-    final viewPadding = MediaQuery.paddingOf(context);
+    final platform = Theme.of(context).platform;
+    final hasBottomInset = MediaQuery.paddingOf(context).bottom > 0;
 
-    final composer = Material(
-      color: context.streamColorScheme.backgroundElevation1,
-      child: AnimatedBuilder(
-        animation: _pickerAnimation,
-        builder: (context, child) {
-          final safeAreaPadding = safeAreaEnabled
-              ? EdgeInsets.lerp(
-                  EdgeInsets.only(
-                    left: viewPadding.left,
-                    top: viewPadding.top,
-                    right: viewPadding.right,
-                    bottom: math.max(viewPadding.bottom, spacing.md),
-                  ),
-                  EdgeInsets.zero,
-                  _pickerAnimation.value,
-                )!
-              : EdgeInsets.zero;
-          return Padding(padding: safeAreaPadding, child: child);
-        },
-        child: Center(heightFactor: 1, child: messageInput),
-      ),
+    // Apple platforms rest on the bottom inset; elsewhere a margin clears it,
+    // and stands in when there is none.
+    final bottomSafeAreaMargin = switch (platform) {
+      .iOS || .macOS when hasBottomInset => spacing.none,
+      _ => spacing.md,
+    };
+
+    final content = Material(
+      type: .transparency,
+      child: switch (widget.props.enableSafeArea) {
+        false => Center(heightFactor: 1, child: messageInput),
+        _ => StreamSafeArea.driven(
+          top: false,
+          listenable: _pickerAnimation,
+          margin: .only(bottom: bottomSafeAreaMargin),
+          child: Center(heightFactor: 1, child: messageInput),
+        ),
+      },
     );
+
+    final colorScheme = context.streamColorScheme;
+    final effectiveSurfaceStyle = _resolveSurfaceStyle(context);
+
+    final composer = switch (effectiveSurfaceStyle) {
+      .regular => DecoratedBox(
+        decoration: BoxDecoration(
+          color: colorScheme.backgroundElevation1,
+        ),
+        child: content,
+      ),
+      .floating => CustomPaint(
+        painter: _FloatingComposerBackdropPainter(
+          animation: _pickerAnimation,
+          restColor: colorScheme.backgroundElevation0,
+          raisedColor: colorScheme.backgroundElevation1,
+          fadeExtent: _pillHeight,
+        ),
+        child: content,
+      ),
+    };
 
     return ComposerAttachmentAnnouncer(
       controller: _effectiveController,
@@ -930,69 +982,94 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     );
   }
 
+  StreamSurfaceStyle _resolveSurfaceStyle(BuildContext context) {
+    return StreamMessageComposer.resolveSurfaceStyle(
+      context,
+      surfaceStyle: widget.props.surfaceStyle,
+    );
+  }
+
   Widget _buildMessageInput(
     BuildContext context,
     StreamMessageComposerController controller,
     FocusNode focusNode,
   ) {
     final currentUserId = StreamChat.of(context).currentUser?.id;
+    final isFloating = _resolveSurfaceStyle(context).isFloating;
 
     return StreamMessageValueListenableBuilder(
       valueListenable: controller,
-      builder: (context, value, _) => PopScope(
-        canPop: !_isPickerVisible,
-        onPopInvokedWithResult: (didPop, _) {
-          if (!didPop) _hidePicker();
-        },
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            DropTarget(
-              onDragDone: (details) async {
-                final attachments = <Attachment>[];
-                for (final file in details.files) {
-                  attachments.add(await file.toAttachment(type: AttachmentType.file));
-                }
-                if (attachments.isNotEmpty) _addAttachments(attachments);
+      builder: (context, value, _) {
+        // Extracted so the floating gradient can wrap just the pill, keeping
+        // gradient height stable when the picker (a sibling) opens.
+        final pill = DropTarget(
+          onDragDone: (details) async {
+            final attachments = <Attachment>[];
+            for (final file in details.files) {
+              attachments.add(await file.toAttachment(type: AttachmentType.file));
+            }
+            if (attachments.isNotEmpty) _addAttachments(attachments);
+          },
+          onDragEntered: (_) {},
+          onDragExited: (_) {},
+          child: Focus(
+            skipTraversal: true,
+            onKeyEvent: _handleKeyPressed,
+            child: StreamChatMessageInput(
+              controller: controller,
+              currentUserId: currentUserId,
+              onAttachmentButtonPressed: widget.props.disableAttachments ? null : _onAttachmentButtonPressed,
+              isPickerOpen: _isPickerVisible,
+              placeholder: _buildPlaceholder(context),
+              focusNode: focusNode,
+              onSendPressed: sendMessage,
+              canAlsoSendToChannel: _shouldShowSendToChannelCheckbox(),
+              audioRecorderController: widget.props.enableVoiceRecording ? _audioRecorderController : null,
+              sendVoiceRecordingAutomatically: widget.props.sendVoiceRecordingAutomatically,
+              feedback: widget.props.voiceRecordingFeedback,
+              onQuotedMessageCleared: () {
+                _effectiveController.clearQuotedMessage();
+                widget.props.onQuotedMessageCleared?.call();
               },
-              onDragEntered: (_) {},
-              onDragExited: (_) {},
-              child: Focus(
-                skipTraversal: true,
-                onKeyEvent: _handleKeyPressed,
-                child: StreamChatMessageInput(
-                  controller: controller,
-                  currentUserId: currentUserId,
-                  onAttachmentButtonPressed: widget.props.disableAttachments ? null : _onAttachmentButtonPressed,
-                  isPickerOpen: _isPickerVisible,
-                  placeholder: _buildPlaceholder(context),
-                  focusNode: focusNode,
-                  onSendPressed: sendMessage,
-                  canAlsoSendToChannel: _shouldShowSendToChannelCheckbox(),
-                  audioRecorderController: widget.props.enableVoiceRecording ? _audioRecorderController : null,
-                  sendVoiceRecordingAutomatically: widget.props.sendVoiceRecordingAutomatically,
-                  feedback: widget.props.voiceRecordingFeedback,
-                  onQuotedMessageCleared: () {
-                    _effectiveController.clearQuotedMessage();
-                    widget.props.onQuotedMessageCleared?.call();
-                  },
-                  textInputAction: widget.props.textInputAction,
-                  keyboardType: widget.props.keyboardType,
-                  textCapitalization: widget.props.textCapitalization,
-                  autofocus: widget.props.autofocus,
-                  autocorrect: widget.props.autoCorrect,
-                ),
+              textInputAction: widget.props.textInputAction,
+              keyboardType: widget.props.keyboardType,
+              textCapitalization: widget.props.textCapitalization,
+              autofocus: widget.props.autofocus,
+              autocorrect: widget.props.autoCorrect,
+              isFloating: isFloating,
+            ),
+          ),
+        );
+
+        return PopScope(
+          canPop: !_isPickerVisible,
+          onPopInvokedWithResult: (didPop, _) {
+            if (!didPop) _hidePicker();
+          },
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Both the pill and the picker sit on one backdrop painted behind
+              // the whole composer. Reporting the pill's height keeps that
+              // backdrop's fade confined to the pill, so the fade grows with the
+              // pill but never stretches when the picker opens or closes.
+              if (isFloating)
+                _ReportHeight(
+                  onHeightChanged: (height) => _pillHeight.value = height,
+                  child: pill,
+                )
+              else
+                pill,
+              SizeTransition(
+                sizeFactor: _pickerAnimation,
+                // ignore: deprecated_member_use, alternative is only available since Flutter 3.44
+                axisAlignment: -1,
+                child: _buildInlineAttachmentPicker(context),
               ),
-            ),
-            SizeTransition(
-              sizeFactor: _pickerAnimation,
-              // ignore: deprecated_member_use
-              axisAlignment: -1,
-              child: _buildInlineAttachmentPicker(context),
-            ),
-          ],
-        ),
-      ),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -1483,12 +1560,25 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
       };
 
       widget.props.onMessageSent?.call(resp.message);
-    } catch (e, stk) {
-      if (widget.props.onError != null) {
-        return widget.props.onError?.call(e, stk);
+    } catch (error, stackTrace) {
+      if (widget.props.onError case final onError?) {
+        return onError(error, stackTrace);
       }
 
-      rethrow;
+      // The send button drops this future, so rethrowing would escape as an
+      // unhandled async error. Forward it through Flutter's error plumbing
+      // instead, so host apps (Crashlytics / Sentry / console) still see it.
+      // Connection failures are marked silent: the message is left in a failed
+      // state and retried on reconnect, so they are expected in release.
+      FlutterError.reportError(
+        FlutterErrorDetails(
+          exception: error,
+          stack: stackTrace,
+          library: 'stream_chat_flutter',
+          context: ErrorDescription('while sending a message'),
+          silent: error is StreamChatNetworkError,
+        ),
+      );
     }
   }
 
@@ -1583,6 +1673,106 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     _draftStreamSubscription?.cancel();
     _messageUpdatedSubscription?.cancel();
     _messageDeletedSubscription?.cancel();
+    _pillHeight.dispose();
     super.dispose();
+  }
+}
+
+// Paints the floating composer's whole background in a single pass: a fade from
+// transparent to the solid backdrop color across the top fadeExtent logical
+// pixels (the height of the pill), then the solid color for the remaining height
+// (the attachment picker and the safe-area zone).
+//
+// One paint rather than several abutting ones is what makes this seamless.
+// Separate fills would each be antialiased where they meet, and because they
+// composite in sequence their coverages don't sum to 1 — leaving a hairline of
+// the message list visible between them.
+//
+// fadeExtent is read at paint time rather than baked in at build time, so the
+// fade tracks the pill as it grows (attachments, a quoted message, wrapped
+// text) while staying independent of the total height. That is what keeps the
+// fade from stretching when the picker opens or closes.
+class _FloatingComposerBackdropPainter extends CustomPainter {
+  _FloatingComposerBackdropPainter({
+    required this.animation,
+    required this.restColor,
+    required this.raisedColor,
+    required this.fadeExtent,
+  }) : super(repaint: Listenable.merge([animation, fadeExtent]));
+
+  // Animation that drives the backdrop color from restColor to raisedColor as
+  // the attachment picker opens.
+  final Animation<double> animation;
+
+  // The backdrop color at rest, with the picker closed.
+  final Color restColor;
+
+  // The backdrop color with the picker fully open.
+  final Color raisedColor;
+
+  final ValueNotifier<double> fadeExtent;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (size.isEmpty) return;
+
+    final color = Color.lerp(restColor, raisedColor, animation.value)!;
+
+    // The gradient runs bottom-to-top, so the solid run is measured from the
+    // bottom and the fade occupies the top `extent` pixels.
+    final extent = math.min(fadeExtent.value, size.height);
+    final solidFraction = (1 - extent / size.height).clamp(0.0, 1.0);
+
+    final rect = Offset.zero & size;
+    final gradient = streamFloatingFadeLinearGradient(
+      color: color,
+      solidFraction: solidFraction,
+      begin: Alignment.bottomCenter,
+      end: Alignment.topCenter,
+    );
+
+    canvas.drawRect(rect, Paint()..shader = gradient.createShader(rect));
+  }
+
+  @override
+  bool shouldRepaint(_FloatingComposerBackdropPainter oldDelegate) {
+    return oldDelegate.restColor != restColor ||
+        oldDelegate.raisedColor != raisedColor ||
+        oldDelegate.animation != animation ||
+        oldDelegate.fadeExtent != fadeExtent;
+  }
+}
+
+// Reports [child]'s laid-out height via [onHeightChanged] during layout.
+//
+// Used to feed the pill's height to [_FloatingComposerBackdropPainter]. The
+// callback fires inside `performLayout`, which is safe for the listener to turn
+// into a repaint: the framework flushes all layout before any painting, so the
+// backdrop sees the current height in the same frame.
+class _ReportHeight extends SingleChildRenderObjectWidget {
+  const _ReportHeight({required this.onHeightChanged, required super.child});
+
+  final ValueChanged<double> onHeightChanged;
+
+  @override
+  _RenderReportHeight createRenderObject(BuildContext context) {
+    return _RenderReportHeight(onHeightChanged: onHeightChanged);
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, _RenderReportHeight renderObject) {
+    renderObject.onHeightChanged = onHeightChanged;
+  }
+}
+
+class _RenderReportHeight extends RenderProxyBox {
+  _RenderReportHeight({required this.onHeightChanged});
+
+  ValueChanged<double> onHeightChanged;
+
+  @override
+  void performLayout() {
+    super.performLayout();
+    onHeightChanged(size.height);
   }
 }

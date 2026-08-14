@@ -144,7 +144,7 @@ void setupMockChannel({
   ).thenAnswer((_) => Stream.value(currentUserLastMessageAt));
   when(() => channel.state).thenReturn(channelState);
   when(() => channel.client).thenReturn(client);
-  when(() => channel.config).thenReturn(ChannelConfig(mutes: true));
+  when(() => channel.config).thenReturn(ChannelConfig(mutes: true, replies: true));
   when(channel.getRemainingCooldown).thenReturn(0);
   when(() => channel.getRemainingCooldown(lastMessageAt: any(named: 'lastMessageAt'))).thenReturn(0);
   when(() => channel.isDistinct).thenReturn(false);

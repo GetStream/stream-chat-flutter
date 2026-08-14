@@ -1,7 +1,23 @@
 ## Upcoming
 
+⚠️ Changed
+
+- `StreamMediaGallery` no longer applies its own outer padding or strips the ambient `MediaQuery` padding; pass `padding` to inset the grid.
+- `StreamMessageListView.config` is now nullable; reading it off an instance yields `StreamMessageListViewConfiguration?` rather than a default instance.
+- `StreamMediaGalleryPreview` chrome now follows the app style — floating over full-bleed media, or docked with the media inset between the bars.
+- Thread views now show the scroll-to-bottom button, following `showScrollToBottom` from the effective `StreamMessageListViewConfiguration`; set it to `false` to hide it.
+
 ✅ Added
 
+- Added `resolveSurfaceStyle` to `StreamMessageComposer`, `StreamChannelHeader`, `StreamChannelListHeader`, and `StreamThreadHeader`, reporting the surface style each renders with so a page can lay its scaffold slot out to match.
+- Added `StreamChannelPage` — a ready-to-use channel page wiring up `StreamChannelHeader`, `StreamMessageListView`, and `StreamMessageComposer` with floating or docked layout.
+- Added `StreamThreadPage` — the thread equivalent, plus an `onBackPressed` that replaces the header back button's default pop.
+- Added `onBackPressed` to `StreamChannelHeader` and `StreamThreadHeader`, replacing the default back button's pop without rebuilding `leading`. Ignored when `leading` is supplied.
+- Added `MessageComposerProps.surfaceStyle`, selecting whether `StreamMessageComposer` renders floating or regular. Falls back to `StreamMessageComposerThemeData.surfaceStyle`, then the ambient `StreamSurfaceStyle`.
+- Added `StreamMessageComposerTheme` and `StreamMessageComposerThemeData` — a component theme for the composer, also available globally as `StreamChatThemeData.messageComposerTheme`.
+- Added `StreamMessageListView.config` — an explicit `StreamMessageListViewConfiguration` per widget, falling back to `StreamChatConfigurationData.messageListViewConfiguration`.
+- Added `StreamChatConfigurationData.messageListViewConfiguration` — an app-wide `StreamMessageListViewConfiguration` default, passed via `StreamChat.configData`.
+- Added floating support to `StreamChannelHeader`, `StreamChannelListHeader`, and `StreamThreadHeader` — each resolves the surface style from its per-header theme and republishes it to every slot, including the new `StreamBackButton.isFloating`.
 - Added `StreamMessageListViewConfiguration.autoScrollPolicy` to control whether and how `StreamMessageListView` scrolls to the newest message when a new message arrives. Use `StreamAutoScrollPolicy.disabled` to fully control scrolling yourself.
 - Added `onReactionSelected` to `StreamMessageReactionPicker`, a context-aware callback that provides the `BuildContext` for navigation.
 - Added an `errorSubtitle` to `StreamScrollViewErrorWidget`, which now falls back to the design's generic error copy (title, description, and a "Try Again" retry label) when values aren't provided.
@@ -19,10 +35,13 @@
 
 🐞 Fixed
 
+- Fixed a failed send surfacing as an unhandled async error when `StreamMessageComposer` has no `onError`; it is now reported through `FlutterError.reportError`.
 - Fixed the default `StreamChannel` loading and error states not being themed or localized; `StreamChat` now installs themed, connection-aware defaults, overridable per `StreamChannel` or via `DefaultStreamChannelBuilders`.
 - Fixed the default list/scroll-view error states (channel, message, member, user, thread, poll-vote, reaction, search, and photo) showing raw or fixed errors; they are now connection-aware (no internet / slow connection), falling back to each view's specific error text.
 - Fixed `StreamTypingIndicator` briefly showing typing users from a different context (main channel vs. thread) on its first frame.
 - Fixed the attachment picker throwing a `Tooltip` assertion error when a custom `TabbedAttachmentPickerOption` is added without a `title`; the tooltip is now only shown when a title is provided.
+- Fixed the "Message deleted" bubble overflowing its maximum width when the localized label is long; the label now wraps instead.
+- Fixed the thread scroll-to-bottom button keying off the parent channel's up-to-date state instead of the thread's own scroll position, so it no longer appears while already at the newest reply.
 - Fixed the `StreamBackButton` unread badge including the currently open channel in its total count.
 - Fixed the thread-replies footer under a message in the channel being hardcoded English and reading "1 replies" for a single reply; it now uses `threadReplyCountText`, which is localized and correctly singularized.
 - Fixed a channel-list row briefly previewing another channel's last message after the list reorders. The preserved last-known message is now dropped when a row is rebound to a different channel, instead of being used as a fallback while the new channel is still loading.

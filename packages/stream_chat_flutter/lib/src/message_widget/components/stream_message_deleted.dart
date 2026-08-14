@@ -29,7 +29,11 @@ class StreamMessageDeleted extends StatelessWidget {
         mainAxisSize: .min,
         children: [
           Icon(icons.noSign, size: 16),
-          core.StreamMessageText(padding: .zero, context.translations.messageDeletedLabel),
+          // Flexible so a long translation wraps inside the bubble instead of
+          // overflowing it — the bubble has a fixed maximum width.
+          Flexible(
+            child: core.StreamMessageText(padding: .zero, context.translations.messageDeletedLabel),
+          ),
         ],
       ),
     );

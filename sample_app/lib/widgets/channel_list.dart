@@ -101,17 +101,28 @@ class _ChannelList extends State<ChannelList> {
         },
         child: NestedScrollView(
           controller: _scrollController,
-          headerSliverBuilder: (_, __) => [
-            SliverToBoxAdapter(
-              child: SearchTextField(
-                controller: _controller,
-                hintText: 'Search',
+          floatHeaderSlivers: true,
+          headerSliverBuilder: (context, __) => [
+            SliverSafeArea(
+              bottom: false,
+              sliver: SliverToBoxAdapter(
+                child: SearchTextField(
+                  controller: _controller,
+                  hintText: 'Search',
+                ),
               ),
             ),
           ],
-          body: _isSearchActive
-              ? _ChannelListSearch(_messageSearchListController)
-              : _ChannelListDefault(_channelListController),
+          // The header already handled the top inset; strip it so the body
+          // lists (null padding) only re-add the bottom, clearing the bottom bar.
+          body: MediaQuery.removePadding(
+            context: context,
+            removeTop: true,
+            child: switch (_isSearchActive) {
+              true => _ChannelListSearch(_messageSearchListController),
+              false => _ChannelListDefault(_channelListController),
+            },
+          ),
         ),
       ),
     );

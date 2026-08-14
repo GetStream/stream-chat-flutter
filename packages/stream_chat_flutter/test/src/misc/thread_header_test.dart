@@ -72,6 +72,61 @@ void main() {
   );
 
   testWidgets(
+    'onBackPressed replaces the default back button pop',
+    (WidgetTester tester) async {
+      final client = MockClient();
+      final clientState = MockClientState();
+      final channel = MockChannel();
+      final channelState = MockChannelState();
+
+      when(() => client.state).thenReturn(clientState);
+      when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
+      when(() => clientState.channels).thenReturn({channel.cid!: channel});
+      when(() => clientState.totalUnreadCount).thenReturn(0);
+      when(() => clientState.totalUnreadCountStream).thenAnswer((_) => Stream.value(0));
+      when(() => client.wsConnectionStatusStream).thenAnswer((_) => Stream.value(ConnectionStatus.connected));
+
+      when(() => channel.state).thenReturn(channelState);
+      when(() => channel.client).thenReturn(client);
+      when(() => channel.lastMessageAt).thenReturn(null);
+      when(() => channel.isMuted).thenReturn(false);
+      when(() => channel.isMutedStream).thenAnswer((_) => Stream.value(false));
+      when(() => channel.name).thenReturn('test');
+      when(() => channel.nameStream).thenAnswer((_) => Stream.value('test'));
+
+      when(() => channelState.members).thenReturn([]);
+      when(() => channelState.membersStream).thenAnswer((_) => Stream.value([]));
+      when(() => channelState.unreadCount).thenReturn(0);
+      when(() => channelState.unreadCountStream).thenAnswer((_) => Stream.value(0));
+
+      var backPressed = false;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: StreamChat(
+            client: client,
+            child: StreamChannel(
+              channel: channel,
+              child: Scaffold(
+                body: StreamThreadHeader(
+                  parent: Message(replyCount: 1),
+                  onBackPressed: () => backPressed = true,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byType(StreamBackButton));
+
+      expect(backPressed, true);
+    },
+  );
+
+  testWidgets(
     'it should apply passed props',
     (WidgetTester tester) async {
       final client = MockClient();
