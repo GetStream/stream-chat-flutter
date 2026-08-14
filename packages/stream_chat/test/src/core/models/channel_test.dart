@@ -327,4 +327,35 @@ void main() {
 
     expect(channel.filterTags, equals(['tag1', 'tag2', 'tag3']));
   });
+
+  test('.lastUpdatedAt should return lastMessageAt if newer than createdAt',
+      () {
+    final channel = ChannelModel(
+      cid: 'test:channel',
+      createdAt: DateTime(2023, 6, 10),
+      lastMessageAt: DateTime(2023, 6, 15),
+    );
+
+    expect(channel.lastUpdatedAt, DateTime(2023, 6, 15));
+  });
+
+  test('.lastUpdatedAt should return createdAt if lastMessageAt is null', () {
+    final channel = ChannelModel(
+      cid: 'test:channel',
+      createdAt: DateTime(2023, 6, 10),
+    );
+
+    expect(channel.lastUpdatedAt, DateTime(2023, 6, 10));
+  });
+
+  test('.lastUpdatedAt should return createdAt if lastMessageAt is older', () {
+    final channel = ChannelModel(
+      cid: 'test:channel',
+      createdAt: DateTime(2023, 6, 10),
+      // Truncating a channel moves lastMessageAt back instead of clearing it.
+      lastMessageAt: DateTime(1970),
+    );
+
+    expect(channel.lastUpdatedAt, DateTime(2023, 6, 10));
+  });
 }

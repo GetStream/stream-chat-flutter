@@ -118,6 +118,42 @@ void main() {
         expect(field!.value, equals(DateTime(2023, 6, 15)));
       });
 
+      test('should return ComparableField for channel.lastUpdatedAt', () {
+        final channelState = createChannelState(
+          id: 'test-channel',
+          createdAt: DateTime(2023, 6, 10),
+          lastMessageAt: DateTime(2023, 6, 15),
+        );
+
+        final field = channelState.getComparableField(
+          ChannelSortKey.lastUpdated,
+        );
+
+        expect(field, isNotNull);
+        expect(field!.value, equals(DateTime(2023, 6, 15)));
+      });
+
+      test(
+        'should fall back to createdAt for a truncated channel.lastUpdatedAt',
+        () {
+          final channelState = createChannelState(
+            id: 'test-channel',
+            createdAt: DateTime(2023, 6, 10),
+            // Truncating a channel moves lastMessageAt back instead of
+            // clearing it, so the channel must not sink below never-used
+            // channels.
+            lastMessageAt: DateTime(1970),
+          );
+
+          final field = channelState.getComparableField(
+            ChannelSortKey.lastUpdated,
+          );
+
+          expect(field, isNotNull);
+          expect(field!.value, equals(DateTime(2023, 6, 10)));
+        },
+      );
+
       test('should return ComparableField for channel.createdAt', () {
         final channelState = createChannelState(
           id: 'test-channel',

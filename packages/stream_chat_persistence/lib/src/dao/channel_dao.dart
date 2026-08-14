@@ -33,12 +33,27 @@ class ChannelDao extends DatabaseAccessor<DriftChatDatabase>
   Future<int> deleteChannelByCids(List<String> cids) async =>
       (delete(channels)..where((tbl) => tbl.cid.isIn(cids))).go();
 
-  /// Get the channel cids saved in the storage
+  /// Get the channel cids saved in the storage, capped at the 250 most
+  /// recently active channels.
   Future<List<String>> get cids => (select(channels)
-        ..orderBy([(c) => OrderingTerm.desc(c.lastMessageAt)])
+        ..orderBy([(c) => OrderingTerm.desc(_lastUpdatedAt(c))])
         ..limit(250))
       .map((c) => c.cid)
       .get();
+
+  // The later of `lastMessageAt` and `createdAt`, mirroring
+  // `ChannelModel.lastUpdatedAt`. Truncating a channel moves `lastMessageAt`
+  // back instead of clearing it, so ordering on that column alone would rank a
+  // truncated channel as the stalest row and drop it from the cap first.
+  Expression<DateTime> _lastUpdatedAt($ChannelsTable c) => CaseWhenExpression(
+        cases: [
+          CaseWhen(
+            c.lastMessageAt.isBiggerThan(c.createdAt),
+            then: c.lastMessageAt,
+          ),
+        ],
+        orElse: c.createdAt,
+      );
 
   /// Updates all the channels using the new [channelList] data
   Future<void> updateChannels(List<ChannelModel> channelList) => batch(
