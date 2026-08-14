@@ -1,7 +1,12 @@
 ## Upcoming
 
+🔄 Changed
+
+- Raised the minimum `rate_limiter` version to `^1.1.1`.
+
 🐞 Fixed
 
+- Fixed `StreamChatClient.sync` letting a failure from its final `updateLastSyncAt` write escape to the caller; it is now handled by the method's own error handling, like every other sync failure.
 - Fixed `ChannelClientState` no longer handling `notification.mark_read` (regression since 9.20.0), which left `unreadCount` stale after `Channel.markRead` on channels the user isn't watching.
 
 ## 9.27.0

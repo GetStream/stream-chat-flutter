@@ -51,27 +51,24 @@ void main() {
     });
 
     Future<Object?> enrichUrlFrom(WidgetTester tester, String text) async {
-      // Enrichment runs behind a real-clock debounce, so drive the flow with
-      // real timers via runAsync.
-      await tester.runAsync(() async {
-        await tester.pumpWidget(
-          MaterialApp(
-            home: StreamChat(
-              client: client,
-              connectivityStream: Stream.value([ConnectivityResult.mobile]),
-              child: StreamChannel(
-                channel: channel,
-                child: const Scaffold(body: StreamMessageInput()),
-              ),
+      await tester.pumpWidget(
+        MaterialApp(
+          home: StreamChat(
+            client: client,
+            connectivityStream: Stream.value([ConnectivityResult.mobile]),
+            child: StreamChannel(
+              channel: channel,
+              child: const Scaffold(body: StreamMessageInput()),
             ),
           ),
-        );
-        await tester.pumpAndSettle();
+        ),
+      );
+      await tester.pumpAndSettle();
 
-        await tester.enterText(find.byType(TextField), text);
-        await Future<void>.delayed(const Duration(milliseconds: 500));
-        await tester.pumpAndSettle();
-      });
+      await tester.enterText(find.byType(TextField), text);
+      // Enrichment runs behind a 350ms debounce; advance past it.
+      await tester.pump(const Duration(milliseconds: 500));
+      await tester.pumpAndSettle();
 
       return verify(() => client.enrichUrl(captureAny())).captured.single;
     }
