@@ -9,6 +9,7 @@
 🐞 Fixed
 
 - Fixed `StreamChannel`'s default error state exposing raw error details; it now shows a safe error state (icon, message, and a Try Again button wired to `retry()`) that adapts to the failure type.
+- Fixed `StreamChannelListController` crashing with a null-check error when its local sort ran over a channel disposed mid-query (e.g. a client disconnect/logout racing an in-flight `loadMore`); such channels are now sorted last instead.
 
 ## 10.2.0
 
