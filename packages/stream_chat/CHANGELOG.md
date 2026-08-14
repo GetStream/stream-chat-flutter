@@ -1,3 +1,9 @@
+## Upcoming
+
+🐞 Fixed
+
+- Fixed truncated channels dropping to the bottom of the list when sorting by `last_updated`.
+
 ## 9.27.0
 
 ✅ Added
