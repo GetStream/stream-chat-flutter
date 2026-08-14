@@ -3450,7 +3450,7 @@ class ChannelClientState {
   void _listenReadEvents() {
     _subscriptions
       ..add(
-        _channel.on(EventType.messageRead).listen(
+        _channel.on(EventType.messageRead, EventType.notificationMarkRead).listen(
           (event) {
             // Skip handling the event if delivered for a thread
             if (event.thread != null) return;
