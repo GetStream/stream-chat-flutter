@@ -33,7 +33,7 @@ dependencies:
   logging: ^1.2.0
   meta: ^1.9.1
   mime: ^2.0.0
-  rate_limiter: ^1.0.0
+  rate_limiter: ^1.1.1
   rxdart: ^0.28.0
   synchronized: ^3.1.0+1
   uuid: ^4.4.0
