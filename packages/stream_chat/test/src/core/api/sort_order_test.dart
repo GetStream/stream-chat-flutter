@@ -3,7 +3,10 @@
 import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
 import 'package:stream_chat/src/core/api/sort_order.dart';
+import 'package:stream_chat/src/core/models/channel_model.dart';
+import 'package:stream_chat/src/core/models/channel_state.dart';
 import 'package:stream_chat/src/core/models/comparable_field.dart';
+import 'package:stream_chat/src/core/models/member.dart';
 import 'package:test/test.dart';
 
 /// Simple test model that implements ComparableFieldProvider
@@ -70,6 +73,209 @@ void main() {
       final option = SortOption<TestModel>.fromJson(json);
       expect(option.field, 'age');
       expect(option.direction, SortOption.ASC);
+    });
+
+    test('should default to DESC when direction is missing from JSON', () {
+      final option = SortOption<TestModel>.fromJson({'field': 'age'});
+      expect(option.field, 'age');
+      expect(option.direction, SortOption.DESC);
+    });
+
+    test(
+      'should default pinnedAt and lastMessageAt to nullsLast in both '
+      'directions',
+      () {
+        const sortKeys = [
+          ChannelSortKey.pinnedAt,
+          ChannelSortKey.lastMessageAt,
+        ];
+
+        for (final key in sortKeys) {
+          expect(
+            SortOption<ChannelState>.desc(key).nullOrdering,
+            NullOrdering.nullsLast,
+            reason: '$key desc',
+          );
+          expect(
+            SortOption<ChannelState>.asc(key).nullOrdering,
+            NullOrdering.nullsLast,
+            reason: '$key asc',
+          );
+        }
+      },
+    );
+
+    test('should let an explicit nullOrdering override the default', () {
+      const option = SortOption<ChannelState>.desc(
+        ChannelSortKey.pinnedAt,
+        nullOrdering: NullOrdering.nullsFirst,
+      );
+
+      expect(option.nullOrdering, NullOrdering.nullsFirst);
+    });
+
+    test('should resolve field defaults when deserialized from json', () {
+      final pinnedAt = SortOption<ChannelState>.fromJson(
+        {'field': 'pinned_at', 'direction': -1},
+      );
+      final lastMessageAt = SortOption<ChannelState>.fromJson(
+        {'field': 'last_message_at', 'direction': -1},
+      );
+      final lastUpdated = SortOption<ChannelState>.fromJson(
+        {'field': 'last_updated', 'direction': -1},
+      );
+
+      expect(pinnedAt.nullOrdering, NullOrdering.nullsLast);
+      expect(lastMessageAt.nullOrdering, NullOrdering.nullsLast);
+      expect(lastUpdated.nullOrdering, NullOrdering.nullsFirst);
+    });
+
+    test('should resolve field defaults on the deprecated constructor', () {
+      // ignore: deprecated_member_use_from_same_package
+      const pinnedAt = SortOption<ChannelState>(ChannelSortKey.pinnedAt);
+      // ignore: deprecated_member_use_from_same_package
+      const lastUpdated = SortOption<ChannelState>(ChannelSortKey.lastUpdated);
+      const ascending = SortOption<ChannelState>(
+        // ignore: deprecated_member_use_from_same_package
+        ChannelSortKey.lastUpdated,
+        direction: SortOption.ASC,
+      );
+
+      expect(pinnedAt.nullOrdering, NullOrdering.nullsLast);
+      expect(lastUpdated.nullOrdering, NullOrdering.nullsFirst);
+      expect(ascending.nullOrdering, NullOrdering.nullsLast);
+    });
+  });
+
+  group('Channel sort server parity', () {
+    final createdAt = DateTime.utc(2026, 1, 1);
+
+    ChannelState channelState(
+      String id, {
+      DateTime? pinnedAt,
+      DateTime? lastMessageAt,
+    }) {
+      return ChannelState(
+        channel: ChannelModel(
+          id: id,
+          type: 'messaging',
+          createdAt: createdAt,
+          lastMessageAt: lastMessageAt,
+        ),
+        membership: Member(userId: 'me', pinnedAt: pinnedAt),
+      );
+    }
+
+    List<String> idsOf(List<ChannelState> states) =>
+        states.map((it) => it.channel!.id).toList();
+
+    test('should keep pinned channels on top when sorting by pinnedAt desc',
+        () {
+      final channels = [
+        channelState(
+          'unpinned-recent',
+          lastMessageAt: createdAt.add(const Duration(days: 5)),
+        ),
+        channelState(
+          'pinned-old',
+          pinnedAt: createdAt.add(const Duration(days: 1)),
+        ),
+        channelState(
+          'unpinned-older',
+          lastMessageAt: createdAt.add(const Duration(days: 4)),
+        ),
+        channelState(
+          'pinned-new',
+          pinnedAt: createdAt.add(const Duration(days: 2)),
+        ),
+      ];
+
+      const sort = [
+        SortOption<ChannelState>.desc(ChannelSortKey.pinnedAt),
+        SortOption<ChannelState>.desc(ChannelSortKey.lastUpdated),
+      ];
+
+      expect(idsOf(channels.sorted(sort.compare)), [
+        'pinned-new',
+        'pinned-old',
+        'unpinned-recent',
+        'unpinned-older',
+      ]);
+    });
+
+    test('should keep pinned channels on top when sorting by pinnedAt asc', () {
+      final channels = [
+        channelState(
+          'unpinned',
+          lastMessageAt: createdAt.add(const Duration(days: 5)),
+        ),
+        channelState(
+          'pinned-new',
+          pinnedAt: createdAt.add(const Duration(days: 2)),
+        ),
+        channelState(
+          'pinned-old',
+          pinnedAt: createdAt.add(const Duration(days: 1)),
+        ),
+      ];
+
+      const sort = [SortOption<ChannelState>.asc(ChannelSortKey.pinnedAt)];
+
+      expect(
+        idsOf(channels.sorted(sort.compare)),
+        ['pinned-old', 'pinned-new', 'unpinned'],
+      );
+    });
+
+    test(
+      'should keep channels without messages at the bottom when sorting by '
+      'lastMessageAt desc',
+      () {
+        final channels = [
+          channelState('no-messages'),
+          channelState(
+            'newest',
+            lastMessageAt: createdAt.add(const Duration(days: 5)),
+          ),
+          channelState(
+            'oldest',
+            lastMessageAt: createdAt.add(const Duration(days: 1)),
+          ),
+        ];
+
+        const sort = [
+          SortOption<ChannelState>.desc(ChannelSortKey.lastMessageAt),
+        ];
+
+        expect(
+          idsOf(channels.sorted(sort.compare)),
+          ['newest', 'oldest', 'no-messages'],
+        );
+      },
+    );
+
+    test('should keep nulls first for other fields when sorting desc', () {
+      final channels = [
+        ChannelState(
+          channel: ChannelModel(
+            id: 'red-team',
+            type: 'messaging',
+            createdAt: createdAt,
+            extraData: const {'team': 'red'},
+          ),
+        ),
+        ChannelState(
+          channel: ChannelModel(
+            id: 'no-team',
+            type: 'messaging',
+            createdAt: createdAt,
+          ),
+        ),
+      ];
+
+      const sort = [SortOption<ChannelState>.desc('team')];
+
+      expect(idsOf(channels.sorted(sort.compare)), ['no-team', 'red-team']);
     });
   });
 
