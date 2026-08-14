@@ -27,6 +27,7 @@
 - Fixed `message.updated` and soft `message.deleted` events being incorrectly upserted into `ChannelState.messages` (and thread reply lists) when they targeted a message outside the currently loaded window.
 - Fixed `Message.deleteMyReaction` dropping an entire reaction group when its summed scores reached zero even though other users' reactions kept the count positive; the group is now retained as long as its count stays above zero.
 - Fixed reaction groups derived from legacy `reaction_counts`/`reaction_scores` payloads being discarded when their score total was zero or negative despite a positive count.
+- Fixed `ChannelClientState` no longer handling `notification.mark_read` (regression since 9.20.0), which left `unreadCount` stale after `Channel.markRead` on channels the user isn't watching.
 
 ## 9.26.0
 
