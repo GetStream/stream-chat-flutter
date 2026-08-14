@@ -59,6 +59,16 @@ Run these checks. **If any fail, stop the skill, surface the failing check to th
 - `gh pr list --head release/v<version> --state all --json number` returns `[]`.
 - Latest CI on the base-branch tip is green: `gh run list --branch <base> --limit 5` — no failures on the most
   recent runs.
+- No publishable package depends on `stream_core_flutter` by git ref or path — pub.dev rejects both, and
+  `release_publish.yml` publishes in dependency order, so the earlier packages go live and only
+  `stream_chat_flutter` fails, leaving the version half-published:
+
+  ```bash
+  grep -n "stream-core-flutter.git\|path: .*stream_core_flutter" melos.yaml packages/*/pubspec.yaml
+  ```
+
+  Any hit is a hard stop: `stream_core_flutter` must be released to pub.dev first (its own repo has a `release-pr`
+  skill), then the pin swapped to a version constraint. Surface it and stop — don't pick the version yourself.
 
 ## Steps
 
@@ -135,24 +145,35 @@ For each, **apply the first matching rule below** — it's a decision tree, not 
 **Every package gets a `## <version>` header**, even if it's only a dep-bump line. Empty version sections and
 missing headers both fail pana.
 
-### 4. Sanity-check
+### 4. Analyze, then commit
 
 ```bash
 melos run analyze
-melos run lint:pub
 ```
 
-If either fails, surface to the user and stop.
-
-### 5. Commit and push
+If it fails, surface to the user and stop.
 
 ```bash
 git add -A
 git commit -m "chore(repo): release v<version>"
-git push -u origin release/v<version>
 ```
 
 Single commit. The message format is load-bearing: `release_tag.yml` parses `vX.Y.Z` from it after merge.
+
+`melos run lint:pub` is deliberately *not* here: it shells out to `pub publish -n`, which fails any dirty tree with
+"N checked-in files are modified in git". It can only pass once the release commit exists — hence step 5.
+
+### 5. Verify publishability, then push
+
+```bash
+melos run lint:pub
+```
+
+If it fails, surface to the user and stop — don't push.
+
+```bash
+git push -u origin release/v<version>
+```
 
 ### 6. Generate the PR body
 
