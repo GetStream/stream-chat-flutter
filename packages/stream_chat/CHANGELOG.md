@@ -10,6 +10,8 @@
 - Fixed `ChannelClientState` no longer handling `notification.mark_read` (regression since 9.20.0), which left `unreadCount` stale after `Channel.markRead` on channels the user isn't watching.
 - Fixed `Channel.getReplies` adding the parent message to `ChannelClientState.threads` when a backend returns it alongside the replies, which rendered the thread root twice. The online path now filters it out, matching the offline one.
 - Fixed truncated channels dropping to the bottom of the list when sorting by `last_updated`.
+- Fixed pinned channels appearing at the bottom of the list when sorting by `pinned_at` descending.
+- Fixed channels without messages appearing at the top of the list when sorting by `last_message_at` descending.
 
 ## 9.27.0
 
