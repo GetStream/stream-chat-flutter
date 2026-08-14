@@ -3478,7 +3478,9 @@ class ChannelClientState {
     List<Message> messages, {
     bool upsert = true,
   }) {
-    var messagesToMerge = messages;
+    // The parent is rendered in its own slot, so keep it out of the reply list
+    // even when a backend returns it alongside the replies.
+    var messagesToMerge = messages.where((it) => it.id != parentId).toList();
     if (!upsert) {
       final existingThread = threads[parentId];
       // Don't create a phantom entry for a thread that was never paged in,
@@ -3486,7 +3488,7 @@ class ChannelClientState {
       if (existingThread == null) return;
       final existingIds = {for (final m in existingThread) m.id};
       messagesToMerge =
-          messages.where((m) => existingIds.contains(m.id)).toList();
+          messagesToMerge.where((m) => existingIds.contains(m.id)).toList();
       if (messagesToMerge.isEmpty) return;
     }
 

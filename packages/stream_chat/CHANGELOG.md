@@ -1,3 +1,9 @@
+## Upcoming
+
+🐞 Fixed
+
+- Fixed `Channel.getReplies` adding the parent message to `ChannelClientState.threads` when a backend returns it alongside the replies, which rendered the thread root twice. The online path now filters it out, matching the offline one.
+
 ## 9.27.0
 
 ✅ Added
