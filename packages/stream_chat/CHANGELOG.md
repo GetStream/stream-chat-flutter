@@ -1,5 +1,9 @@
 ## Upcoming
 
+✅ Added
+
+- Added `Event.watcherCount`, exposing the server-provided `watcher_count` field on events (e.g. `user.watching.start`, `user.watching.stop`, `message.new`).
+
 🔄 Changed
 
 - Raised the minimum `rate_limiter` version to `^1.1.1`.
@@ -7,6 +11,8 @@
 🐞 Fixed
 
 - Fixed `StreamChatClient.sync` letting a failure from its final `updateLastSyncAt` write escape to the caller; it is now handled by the method's own error handling, like every other sync failure.
+- Fixed `ChannelClientState.watcherCount` staying stale during a session.
+- Fixed watchers not being removed from `ChannelClientState.watchers` on `user.watching.stop`.
 
 ## 9.27.0
 
