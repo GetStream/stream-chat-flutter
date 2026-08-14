@@ -397,12 +397,12 @@ class _ChannelLastMessageTextState extends State<ChannelLastMessageText> {
   Message? _currentLastMessage;
   ChannelClientState? _currentChannelState;
 
-  /// Returns the newest message in [messages] passing the predicate, or `null`
-  /// when there is nothing to preview.
-  ///
-  /// While the channel is not up to date (e.g. Channel.query(idAround:)
-  /// truncates state mid-load), falls back to the last message seen while it
-  /// was, so the preview still shows the actual latest message.
+  // Returns the newest message in [messages] passing the widget's
+  // lastMessagePredicate, or `null` when there is nothing to preview.
+  //
+  // While the channel is not up to date (e.g. Channel.query(idAround:)
+  // truncates state mid-load), falls back to the last message seen while it
+  // was, so the preview still shows the actual latest message.
   Message? _resolveLastMessage(
     ChannelClientState channelState,
     List<Message> messages,
