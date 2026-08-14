@@ -38,6 +38,7 @@ import 'package:stream_chat/src/core/models/poll_vote.dart';
 import 'package:stream_chat/src/core/models/push_preference.dart';
 import 'package:stream_chat/src/core/models/thread.dart';
 import 'package:stream_chat/src/core/models/user.dart';
+import 'package:stream_chat/src/core/util/extension.dart';
 import 'package:stream_chat/src/core/util/in_flight_cache.dart';
 import 'package:stream_chat/src/core/util/utils.dart';
 import 'package:stream_chat/src/db/chat_persistence_client.dart';
@@ -540,11 +541,14 @@ class StreamChatClient {
 
   /// Method called to add a new event to the [_eventController].
   void handleEvent(Event event) {
+    // Ignore events that arrive after the client has been disposed.
+    if (_eventController.isClosed) return;
+
     if (event.type == EventType.healthCheck) {
       return _handleHealthCheckEvent(event);
     }
     state.updateUser(event.user);
-    return _eventController.add(event);
+    return _eventController.safeAdd(event);
   }
 
   void _onConnectionStatusChanged(

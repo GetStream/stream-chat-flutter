@@ -1,5 +1,9 @@
 ## Upcoming
 
+✅ Added
+
+- Added `Event.watcherCount`, exposing the server-provided `watcher_count` field on events (e.g. `user.watching.start`, `user.watching.stop`, `message.new`).
+
 🔄 Changed
 
 - Raised the minimum `rate_limiter` version to `^1.1.1`.
@@ -12,6 +16,10 @@
 - Fixed truncated channels dropping to the bottom of the list when sorting by `last_updated`.
 - Fixed pinned channels appearing at the bottom of the list when sorting by `pinned_at` descending.
 - Fixed channels without messages appearing at the top of the list when sorting by `last_message_at` descending.
+- Fixed `ChannelClientState.watcherCount` staying stale during a session.
+- Fixed watchers not being removed from `ChannelClientState.watchers` on `user.watching.stop`.
+- Fixed a `StateError` (`Cannot add new events after calling close`) thrown when the client is disposed while a reconnect recovery is still in flight.
+
 
 ## 9.27.0
 
