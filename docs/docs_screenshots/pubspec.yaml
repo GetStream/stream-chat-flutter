@@ -20,7 +20,10 @@ dependencies:
   record: ^6.2.0
   stream_chat_flutter: ^10.3.0
   stream_core_flutter:
-    path: ../../../stream-core-flutter/packages/stream_core_flutter
+    git:
+      url: https://github.com/GetStream/stream-core-flutter.git
+      ref: 91a16b2f86b88b497f3de6d9505ddd8e64db7908
+      path: packages/stream_core_flutter
 
 dev_dependencies:
   alchemist: ^0.14.0
