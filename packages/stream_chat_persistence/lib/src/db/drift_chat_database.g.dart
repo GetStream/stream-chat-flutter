@@ -4272,6 +4272,306 @@ class LocationsCompanion extends UpdateCompanion<LocationEntity> {
   }
 }
 
+class $PendingOperationsTable extends PendingOperations
+    with TableInfo<$PendingOperationsTable, PendingOperationEntity> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $PendingOperationsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _typeMeta = const VerificationMeta('type');
+  @override
+  late final GeneratedColumn<String> type = GeneratedColumn<String>(
+    'type',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _targetMessageIdMeta = const VerificationMeta(
+    'targetMessageId',
+  );
+  @override
+  late final GeneratedColumn<String> targetMessageId = GeneratedColumn<String>(
+    'target_message_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<Map<String, dynamic>, String> payload =
+      GeneratedColumn<String>(
+        'payload',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      ).withConverter<Map<String, dynamic>>(
+        $PendingOperationsTable.$converterpayload,
+      );
+  @override
+  List<GeneratedColumn> get $columns => [id, type, targetMessageId, payload];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'pending_operations';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<PendingOperationEntity> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('type')) {
+      context.handle(
+        _typeMeta,
+        type.isAcceptableOrUnknown(data['type']!, _typeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_typeMeta);
+    }
+    if (data.containsKey('target_message_id')) {
+      context.handle(
+        _targetMessageIdMeta,
+        targetMessageId.isAcceptableOrUnknown(
+          data['target_message_id']!,
+          _targetMessageIdMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  PendingOperationEntity map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return PendingOperationEntity(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      type: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}type'],
+      )!,
+      targetMessageId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}target_message_id'],
+      ),
+      payload: $PendingOperationsTable.$converterpayload.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}payload'],
+        )!,
+      ),
+    );
+  }
+
+  @override
+  $PendingOperationsTable createAlias(String alias) {
+    return $PendingOperationsTable(attachedDatabase, alias);
+  }
+
+  static TypeConverter<Map<String, dynamic>, String> $converterpayload = MapConverter();
+}
+
+class PendingOperationEntity extends DataClass implements Insertable<PendingOperationEntity> {
+  /// Autoincrement id.
+  final int id;
+
+  /// The operation-type discriminator (e.g. `reaction.add`).
+  final String type;
+
+  /// The id of the message the operation targets, if any.
+  final String? targetMessageId;
+
+  /// The operation-specific value fields, stored as JSON.
+  final Map<String, dynamic> payload;
+  const PendingOperationEntity({
+    required this.id,
+    required this.type,
+    this.targetMessageId,
+    required this.payload,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['type'] = Variable<String>(type);
+    if (!nullToAbsent || targetMessageId != null) {
+      map['target_message_id'] = Variable<String>(targetMessageId);
+    }
+    {
+      map['payload'] = Variable<String>(
+        $PendingOperationsTable.$converterpayload.toSql(payload),
+      );
+    }
+    return map;
+  }
+
+  factory PendingOperationEntity.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return PendingOperationEntity(
+      id: serializer.fromJson<int>(json['id']),
+      type: serializer.fromJson<String>(json['type']),
+      targetMessageId: serializer.fromJson<String?>(json['targetMessageId']),
+      payload: serializer.fromJson<Map<String, dynamic>>(json['payload']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'type': serializer.toJson<String>(type),
+      'targetMessageId': serializer.toJson<String?>(targetMessageId),
+      'payload': serializer.toJson<Map<String, dynamic>>(payload),
+    };
+  }
+
+  PendingOperationEntity copyWith({
+    int? id,
+    String? type,
+    Value<String?> targetMessageId = const Value.absent(),
+    Map<String, dynamic>? payload,
+  }) => PendingOperationEntity(
+    id: id ?? this.id,
+    type: type ?? this.type,
+    targetMessageId: targetMessageId.present ? targetMessageId.value : this.targetMessageId,
+    payload: payload ?? this.payload,
+  );
+  PendingOperationEntity copyWithCompanion(PendingOperationsCompanion data) {
+    return PendingOperationEntity(
+      id: data.id.present ? data.id.value : this.id,
+      type: data.type.present ? data.type.value : this.type,
+      targetMessageId: data.targetMessageId.present ? data.targetMessageId.value : this.targetMessageId,
+      payload: data.payload.present ? data.payload.value : this.payload,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PendingOperationEntity(')
+          ..write('id: $id, ')
+          ..write('type: $type, ')
+          ..write('targetMessageId: $targetMessageId, ')
+          ..write('payload: $payload')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, type, targetMessageId, payload);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is PendingOperationEntity &&
+          other.id == this.id &&
+          other.type == this.type &&
+          other.targetMessageId == this.targetMessageId &&
+          other.payload == this.payload);
+}
+
+class PendingOperationsCompanion extends UpdateCompanion<PendingOperationEntity> {
+  final Value<int> id;
+  final Value<String> type;
+  final Value<String?> targetMessageId;
+  final Value<Map<String, dynamic>> payload;
+  const PendingOperationsCompanion({
+    this.id = const Value.absent(),
+    this.type = const Value.absent(),
+    this.targetMessageId = const Value.absent(),
+    this.payload = const Value.absent(),
+  });
+  PendingOperationsCompanion.insert({
+    this.id = const Value.absent(),
+    required String type,
+    this.targetMessageId = const Value.absent(),
+    required Map<String, dynamic> payload,
+  }) : type = Value(type),
+       payload = Value(payload);
+  static Insertable<PendingOperationEntity> custom({
+    Expression<int>? id,
+    Expression<String>? type,
+    Expression<String>? targetMessageId,
+    Expression<String>? payload,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (type != null) 'type': type,
+      if (targetMessageId != null) 'target_message_id': targetMessageId,
+      if (payload != null) 'payload': payload,
+    });
+  }
+
+  PendingOperationsCompanion copyWith({
+    Value<int>? id,
+    Value<String>? type,
+    Value<String?>? targetMessageId,
+    Value<Map<String, dynamic>>? payload,
+  }) {
+    return PendingOperationsCompanion(
+      id: id ?? this.id,
+      type: type ?? this.type,
+      targetMessageId: targetMessageId ?? this.targetMessageId,
+      payload: payload ?? this.payload,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (type.present) {
+      map['type'] = Variable<String>(type.value);
+    }
+    if (targetMessageId.present) {
+      map['target_message_id'] = Variable<String>(targetMessageId.value);
+    }
+    if (payload.present) {
+      map['payload'] = Variable<String>(
+        $PendingOperationsTable.$converterpayload.toSql(payload.value),
+      );
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PendingOperationsCompanion(')
+          ..write('id: $id, ')
+          ..write('type: $type, ')
+          ..write('targetMessageId: $targetMessageId, ')
+          ..write('payload: $payload')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $PinnedMessagesTable extends PinnedMessages with TableInfo<$PinnedMessagesTable, PinnedMessageEntity> {
   @override
   final GeneratedDatabase attachedDatabase;
@@ -11724,6 +12024,7 @@ abstract class _$DriftChatDatabase extends GeneratedDatabase {
   late final $MessagesTable messages = $MessagesTable(this);
   late final $DraftMessagesTable draftMessages = $DraftMessagesTable(this);
   late final $LocationsTable locations = $LocationsTable(this);
+  late final $PendingOperationsTable pendingOperations = $PendingOperationsTable(this);
   late final $PinnedMessagesTable pinnedMessages = $PinnedMessagesTable(this);
   late final $PollsTable polls = $PollsTable(this);
   late final $PollVotesTable pollVotes = $PollVotesTable(this);
@@ -11760,6 +12061,9 @@ abstract class _$DriftChatDatabase extends GeneratedDatabase {
     this as DriftChatDatabase,
   );
   late final LocationDao locationDao = LocationDao(this as DriftChatDatabase);
+  late final PendingOperationDao pendingOperationDao = PendingOperationDao(
+    this as DriftChatDatabase,
+  );
   late final PinnedMessageDao pinnedMessageDao = PinnedMessageDao(
     this as DriftChatDatabase,
   );
@@ -11783,6 +12087,7 @@ abstract class _$DriftChatDatabase extends GeneratedDatabase {
     messages,
     draftMessages,
     locations,
+    pendingOperations,
     pinnedMessages,
     polls,
     pollVotes,
@@ -14971,6 +15276,178 @@ typedef $$LocationsTableProcessedTableManager =
       (LocationEntity, $$LocationsTableReferences),
       LocationEntity,
       PrefetchHooks Function({bool channelCid, bool messageId})
+    >;
+typedef $$PendingOperationsTableCreateCompanionBuilder =
+    PendingOperationsCompanion Function({
+      Value<int> id,
+      required String type,
+      Value<String?> targetMessageId,
+      required Map<String, dynamic> payload,
+    });
+typedef $$PendingOperationsTableUpdateCompanionBuilder =
+    PendingOperationsCompanion Function({
+      Value<int> id,
+      Value<String> type,
+      Value<String?> targetMessageId,
+      Value<Map<String, dynamic>> payload,
+    });
+
+class $$PendingOperationsTableFilterComposer extends Composer<_$DriftChatDatabase, $PendingOperationsTable> {
+  $$PendingOperationsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get type => $composableBuilder(
+    column: $table.type,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get targetMessageId => $composableBuilder(
+    column: $table.targetMessageId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<Map<String, dynamic>, Map<String, dynamic>, String> get payload => $composableBuilder(
+    column: $table.payload,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+}
+
+class $$PendingOperationsTableOrderingComposer extends Composer<_$DriftChatDatabase, $PendingOperationsTable> {
+  $$PendingOperationsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get type => $composableBuilder(
+    column: $table.type,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get targetMessageId => $composableBuilder(
+    column: $table.targetMessageId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get payload => $composableBuilder(
+    column: $table.payload,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$PendingOperationsTableAnnotationComposer extends Composer<_$DriftChatDatabase, $PendingOperationsTable> {
+  $$PendingOperationsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id => $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get type => $composableBuilder(column: $table.type, builder: (column) => column);
+
+  GeneratedColumn<String> get targetMessageId => $composableBuilder(
+    column: $table.targetMessageId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumnWithTypeConverter<Map<String, dynamic>, String> get payload =>
+      $composableBuilder(column: $table.payload, builder: (column) => column);
+}
+
+class $$PendingOperationsTableTableManager
+    extends
+        RootTableManager<
+          _$DriftChatDatabase,
+          $PendingOperationsTable,
+          PendingOperationEntity,
+          $$PendingOperationsTableFilterComposer,
+          $$PendingOperationsTableOrderingComposer,
+          $$PendingOperationsTableAnnotationComposer,
+          $$PendingOperationsTableCreateCompanionBuilder,
+          $$PendingOperationsTableUpdateCompanionBuilder,
+          (
+            PendingOperationEntity,
+            BaseReferences<_$DriftChatDatabase, $PendingOperationsTable, PendingOperationEntity>,
+          ),
+          PendingOperationEntity,
+          PrefetchHooks Function()
+        > {
+  $$PendingOperationsTableTableManager(
+    _$DriftChatDatabase db,
+    $PendingOperationsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () => $$PendingOperationsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () => $$PendingOperationsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () => $$PendingOperationsTableAnnotationComposer(
+            $db: db,
+            $table: table,
+          ),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> type = const Value.absent(),
+                Value<String?> targetMessageId = const Value.absent(),
+                Value<Map<String, dynamic>> payload = const Value.absent(),
+              }) => PendingOperationsCompanion(
+                id: id,
+                type: type,
+                targetMessageId: targetMessageId,
+                payload: payload,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String type,
+                Value<String?> targetMessageId = const Value.absent(),
+                required Map<String, dynamic> payload,
+              }) => PendingOperationsCompanion.insert(
+                id: id,
+                type: type,
+                targetMessageId: targetMessageId,
+                payload: payload,
+              ),
+          withReferenceMapper: (p0) => p0.map((e) => (e.readTable(table), BaseReferences(db, table, e))).toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$PendingOperationsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$DriftChatDatabase,
+      $PendingOperationsTable,
+      PendingOperationEntity,
+      $$PendingOperationsTableFilterComposer,
+      $$PendingOperationsTableOrderingComposer,
+      $$PendingOperationsTableAnnotationComposer,
+      $$PendingOperationsTableCreateCompanionBuilder,
+      $$PendingOperationsTableUpdateCompanionBuilder,
+      (
+        PendingOperationEntity,
+        BaseReferences<_$DriftChatDatabase, $PendingOperationsTable, PendingOperationEntity>,
+      ),
+      PendingOperationEntity,
+      PrefetchHooks Function()
     >;
 typedef $$PinnedMessagesTableCreateCompanionBuilder =
     PinnedMessagesCompanion Function({
@@ -19218,6 +19695,8 @@ class $DriftChatDatabaseManager {
   $$MessagesTableTableManager get messages => $$MessagesTableTableManager(_db, _db.messages);
   $$DraftMessagesTableTableManager get draftMessages => $$DraftMessagesTableTableManager(_db, _db.draftMessages);
   $$LocationsTableTableManager get locations => $$LocationsTableTableManager(_db, _db.locations);
+  $$PendingOperationsTableTableManager get pendingOperations =>
+      $$PendingOperationsTableTableManager(_db, _db.pendingOperations);
   $$PinnedMessagesTableTableManager get pinnedMessages => $$PinnedMessagesTableTableManager(_db, _db.pinnedMessages);
   $$PollsTableTableManager get polls => $$PollsTableTableManager(_db, _db.polls);
   $$PollVotesTableTableManager get pollVotes => $$PollVotesTableTableManager(_db, _db.pollVotes);

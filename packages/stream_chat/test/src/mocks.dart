@@ -4,6 +4,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/src/client/channel.dart';
 import 'package:stream_chat/src/client/channel_delivery_reporter.dart';
 import 'package:stream_chat/src/client/client.dart';
+import 'package:stream_chat/src/client/pending_operations_manager.dart';
 import 'package:stream_chat/src/core/api/attachment_file_uploader.dart';
 import 'package:stream_chat/src/core/api/channel_api.dart';
 import 'package:stream_chat/src/core/api/device_api.dart';
@@ -20,6 +21,7 @@ import 'package:stream_chat/src/core/http/stream_http_client.dart';
 import 'package:stream_chat/src/core/http/token_manager.dart';
 import 'package:stream_chat/src/core/models/channel_config.dart';
 import 'package:stream_chat/src/core/models/event.dart';
+import 'package:stream_chat/src/core/models/pending_operation.dart';
 import 'package:stream_chat/src/core/util/event_controller.dart';
 import 'package:stream_chat/src/db/chat_persistence_client.dart';
 import 'package:stream_chat/src/event_type.dart';
@@ -96,11 +98,66 @@ class MockPersistenceClient extends Mock implements ChatPersistenceClient {
     _userId = null;
     _isConnected = false;
   }
+
+  /// In-memory pending-operation queue. Real overrides (not mocktail stubs)
+  /// so they behave like a working queue and don't register as interactions
+  /// for `verifyNoMoreInteractions`. Populate it with [insertPendingOperation].
+  final List<PendingOperation> storedPendingOperations = [];
+  int _nextPendingOperationId = 1;
+
+  /// Ids for which [deletePendingOperation] throws, to exercise the replay
+  /// loop's per-operation error isolation.
+  final Set<int> failDeleteForIds = {};
+
+  /// When `true`, [insertPendingOperation] throws, to exercise the enqueue
+  /// failure fallback in `Channel.sendReaction`/`deleteReaction`.
+  bool failInsert = false;
+
+  @override
+  Future<int?> insertPendingOperation(PendingOperation operation) async {
+    if (failInsert) {
+      throw Exception('simulated insert failure');
+    }
+    // Assign an autoincrement id like the real DAO so replay can delete by id.
+    final id = _nextPendingOperationId++;
+    storedPendingOperations.add(
+      PendingOperation(
+        id: id,
+        type: operation.type,
+        targetMessageId: operation.targetMessageId,
+        payload: operation.payload,
+      ),
+    );
+    return id;
+  }
+
+  @override
+  Future<List<PendingOperation>> getPendingOperations() async {
+    // Return a snapshot (like the DAO) so a delete during replay iteration
+    // cannot concurrently modify the list being iterated.
+    return [...storedPendingOperations];
+  }
+
+  @override
+  Future<void> deletePendingOperation(int id) async {
+    if (failDeleteForIds.contains(id)) {
+      throw Exception('simulated delete failure for operation $id');
+    }
+    storedPendingOperations.removeWhere((it) => it.id == id);
+  }
 }
 
 class MockStreamChatClient extends Mock implements StreamChatClient {
   @override
-  bool get persistenceEnabled => false;
+  bool get persistenceEnabled => chatPersistenceClient != null;
+
+  // A real manager backed by this mock, so `Channel.sendReaction` /
+  // `deleteReaction` can enqueue through it. It reads `persistenceEnabled`,
+  // `chatPersistenceClient` and `logger` off this mock.
+  late final PendingOperationsManager _pendingOperationsManager = PendingOperationsManager(this);
+
+  @override
+  PendingOperationsManager get pendingOperationsManager => _pendingOperationsManager;
 
   // A plain settable field (not a `when(...)` stub) so tests can flip it
   // with a direct assignment, e.g. `client.isLocalUnreadCountEnabled = true`.

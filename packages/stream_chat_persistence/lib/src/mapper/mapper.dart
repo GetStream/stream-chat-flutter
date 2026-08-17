@@ -4,6 +4,7 @@ export 'event_mapper.dart';
 export 'location_mapper.dart';
 export 'member_mapper.dart';
 export 'message_mapper.dart';
+export 'pending_operation_mapper.dart';
 export 'pinned_message_mapper.dart';
 export 'pinned_message_reaction_mapper.dart';
 export 'poll_mapper.dart';

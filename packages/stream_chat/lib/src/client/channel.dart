@@ -5,6 +5,7 @@ import 'dart:math' as math;
 
 import 'package:collection/collection.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:stream_chat/src/client/reaction_pending_operation.dart';
 import 'package:stream_chat/src/client/retry_queue.dart';
 import 'package:stream_chat/src/core/util/utils.dart';
 import 'package:stream_chat/stream_chat.dart';
@@ -1616,19 +1617,30 @@ class Channel {
     state?.updateMessage(updatedMessage);
 
     try {
-      final reactionResp = await _client.sendReaction(
+      return await _client.sendReaction(
         messageId,
         reaction,
         skipPush: skipPush,
         enforceUnique: enforceUnique,
       );
-      return reactionResp;
-    } catch (_) {
-      // Reset the message if the update fails. Use replace (not merge)
-      // so the rollback wins over the optimistic local state — otherwise
-      // `Message.updateWith`'s enrichment preservation would keep the
-      // optimistic `ownReactions` for messages that previously had none.
-      state?.replaceMessage(message);
+    } catch (e) {
+      final retriable = e is StreamChatNetworkError && e.isRetriable;
+      if (retriable) {
+        // Keep the optimistic reaction and queue it for replay on reconnect.
+        await _client.pendingOperationsManager.enqueue(
+          ReactionPendingOperation.add(
+            reaction,
+            skipPush: skipPush,
+            enforceUnique: enforceUnique,
+          ),
+        );
+      } else {
+        // Reset the message on terminal failure. Use replace (not merge)
+        // so the rollback wins over the optimistic local state — otherwise
+        // `Message.updateWith`'s enrichment preservation would keep the
+        // optimistic `ownReactions` for messages that previously had none.
+        state?.replaceMessage(message);
+      }
       rethrow;
     }
   }
@@ -1647,15 +1659,25 @@ class Channel {
     state?.updateMessage(updatedMessage);
 
     try {
-      final deleteResponse = await _client.deleteReaction(
+      return await _client.deleteReaction(
         message.id,
         reaction.type,
       );
-      return deleteResponse;
-    } catch (_) {
-      // Reset the message if the update fails. Use replace (not merge)
-      // for symmetry with `sendReaction` — see that method for context.
-      state?.replaceMessage(message);
+    } catch (e) {
+      final retriable = e is StreamChatNetworkError && e.isRetriable;
+      if (retriable) {
+        // Keep the optimistic removal and queue it for replay on reconnect.
+        await _client.pendingOperationsManager.enqueue(
+          ReactionPendingOperation.delete(
+            messageId: message.id,
+            reactionType: reaction.type,
+          ),
+        );
+      } else {
+        // Reset the message on terminal failure. Use replace (not merge)
+        // for symmetry with `sendReaction` — see that method for context.
+        state?.replaceMessage(message);
+      }
       rethrow;
     }
   }

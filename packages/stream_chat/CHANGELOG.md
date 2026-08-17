@@ -1,3 +1,13 @@
+## Upcoming
+
+✅ Added
+
+- Added support for sending and deleting reactions while offline.
+
+🔄 Changed
+
+- `Channel.sendReaction` and `Channel.deleteReaction` now keep the optimistic change on a transient/offline error and replay it when the connection recovers, instead of reverting it.
+
 ## 10.3.0
 
 ✅ Added

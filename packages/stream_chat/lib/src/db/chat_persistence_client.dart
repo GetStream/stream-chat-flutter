@@ -11,6 +11,7 @@ import 'package:stream_chat/src/core/models/filter.dart';
 import 'package:stream_chat/src/core/models/location.dart';
 import 'package:stream_chat/src/core/models/member.dart';
 import 'package:stream_chat/src/core/models/message.dart';
+import 'package:stream_chat/src/core/models/pending_operation.dart';
 import 'package:stream_chat/src/core/models/poll.dart';
 import 'package:stream_chat/src/core/models/poll_vote.dart';
 import 'package:stream_chat/src/core/models/reaction.dart';
@@ -535,6 +536,24 @@ abstract class ChatPersistenceClient {
       updateLocations(locations),
     ]);
   }
+
+  /// Inserts [operation] into the pending-operation queue, returning the id
+  /// assigned to the stored row (or `null` when nothing was stored).
+  ///
+  /// Pending operations are optimistic mutations queued for replay once
+  /// connectivity is restored. The default no-op drops them unless overridden
+  /// alongside [getPendingOperations] and [deletePendingOperation].
+  Future<int?> insertPendingOperation(PendingOperation operation) async => null;
+
+  /// Returns all stored pending operations ordered by insertion.
+  ///
+  /// Defaults to an empty list; see [insertPendingOperation].
+  Future<List<PendingOperation>> getPendingOperations() async => [];
+
+  /// Deletes the pending operation with the given [id].
+  ///
+  /// No-op by default; see [insertPendingOperation].
+  Future<void> deletePendingOperation(int id) async {}
 
   List<Reaction> _expandReactions(Message message) {
     final own = message.ownReactions;

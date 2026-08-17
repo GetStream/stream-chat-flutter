@@ -63,6 +63,10 @@ class MockChatDatabase extends Mock implements DriftChatDatabase {
   LocationDao? _locationDao;
 
   @override
+  PendingOperationDao get pendingOperationDao => _pendingOperationDao ??= MockPendingOperationDao();
+  PendingOperationDao? _pendingOperationDao;
+
+  @override
   Future<void> flush() => Future.value();
 
   @override
@@ -96,3 +100,5 @@ class MockPollVoteDao extends Mock implements PollVoteDao {}
 class MockDraftMessageDao extends Mock implements DraftMessageDao {}
 
 class MockLocationDao extends Mock implements LocationDao {}
+
+class MockPendingOperationDao extends Mock implements PendingOperationDao {}

@@ -1373,6 +1373,37 @@ void main() {
       });
     });
 
+    test('insertPendingOperation', () async {
+      const operation = PendingOperation(
+        type: 'reaction.add',
+        targetMessageId: 'testMessageId',
+        payload: {'reaction': 'like'},
+      );
+      when(() => mockDatabase.pendingOperationDao.insertPendingOperation(operation)).thenAnswer((_) => Future.value(1));
+
+      expect(await client.insertPendingOperation(operation), 1);
+      verify(() => mockDatabase.pendingOperationDao.insertPendingOperation(operation)).called(1);
+    });
+
+    test('getPendingOperations', () async {
+      const operations = [
+        PendingOperation(id: 1, type: 'reaction.add', payload: {}),
+      ];
+      when(() => mockDatabase.pendingOperationDao.getPendingOperations()).thenAnswer((_) => Future.value(operations));
+
+      final result = await client.getPendingOperations();
+      expect(result, operations);
+      verify(() => mockDatabase.pendingOperationDao.getPendingOperations()).called(1);
+    });
+
+    test('deletePendingOperation', () async {
+      const id = 42;
+      when(() => mockDatabase.pendingOperationDao.deletePendingOperation(id)).thenAnswer((_) => Future.value());
+
+      await client.deletePendingOperation(id);
+      verify(() => mockDatabase.pendingOperationDao.deletePendingOperation(id)).called(1);
+    });
+
     tearDown(() async {
       await client.disconnect(flush: true);
     });

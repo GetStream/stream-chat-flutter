@@ -1,3 +1,9 @@
+## Upcoming
+
+✅ Added
+
+- Added support for sending and deleting reactions while offline.
+
 ## 10.3.0
 
 🐞 Fixed
