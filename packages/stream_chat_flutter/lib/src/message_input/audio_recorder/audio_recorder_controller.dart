@@ -42,11 +42,10 @@ class StreamAudioRecorderController extends ValueNotifier<AudioRecorderState>
   @visibleForTesting
   StreamAudioRecorderController.raw({
     required this.config,
-    required AudioRecorder recorder,
+    required this._recorder,
     AudioRecorderState initialState = const RecordStateIdle(),
     Duration amplitudeInterval = const Duration(milliseconds: 100),
-  }) : _recorder = recorder,
-       super(initialState) {
+  }) : super(initialState) {
     // Listen to the recorder amplitude changes
     _recorderAmplitudeSubscription = _recorder
         .onAmplitudeChanged(amplitudeInterval) //

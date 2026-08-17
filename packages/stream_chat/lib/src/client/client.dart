@@ -100,9 +100,9 @@ class StreamChatClient {
     AttachmentFileUploaderProvider attachmentFileUploaderProvider = StreamAttachmentFileUploader.new,
     Iterable<Interceptor>? chatApiInterceptors,
     HttpClientAdapter? httpClientAdapter,
-    bool recoverStateOnReconnect = true,
+    this._recoverStateOnReconnect = true,
     this.isLocalUnreadCountEnabled = false,
-  }) : _recoverStateOnReconnect = recoverStateOnReconnect {
+  }) {
     logger.info('Initiating new StreamChatClient');
 
     final options = StreamHttpClientOptions(

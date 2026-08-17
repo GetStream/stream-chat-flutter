@@ -29,11 +29,10 @@ class ChannelDeliveryReporter {
   ///
   /// The optional [logger] logs warnings and errors during operation.
   ChannelDeliveryReporter({
-    Logger? logger,
+    this._logger,
     required this.onMarkChannelsDelivered,
     Duration throttleDuration = const Duration(seconds: 1),
-  }) : _logger = logger,
-       _markAsDeliveredThrottleDuration = throttleDuration;
+  }) : _markAsDeliveredThrottleDuration = throttleDuration;
 
   final Logger? _logger;
   final Duration _markAsDeliveredThrottleDuration;
