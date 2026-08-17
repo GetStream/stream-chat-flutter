@@ -5,7 +5,7 @@ require 'shellwords'
 require 'json'
 require 'securerandom'
 require 'fileutils'
-require 'base64'
+require File.expand_path('e2e_log', __dir__)
 import File.expand_path('Allurefile', __dir__)
 
 mock_server_repo_name = 'stream-chat-test-mock-server'
@@ -19,6 +19,32 @@ end
 
 def ios_device?(device)
   device.to_s.match?(/\A[0-9A-F]{8}-[0-9A-F]{4}-/i)
+end
+
+def batch_targets(targets, batch:, batch_count:)
+  return targets if batch.nil? || batch_count.to_i <= 1
+  # `each_slice(0)` raises, and a zero slice size is exactly what an empty list computes.
+  return [] if targets.empty?
+
+  count = batch_count.to_i
+  index = batch.to_i
+  slice = targets.each_slice((targets.size / count.to_f).ceil).to_a[index] || []
+
+  if slice.empty?
+    UI.important("Batch #{index + 1}/#{count}: no test files fell into this batch — nothing to run")
+  else
+    UI.important("Batch #{index + 1}/#{count}: running #{slice.size} of #{targets.size} test files " \
+                 "(#{slice.map { |t| File.basename(t) }.join(', ')})")
+  end
+
+  slice
+end
+
+def boot_simulator(udid:)
+  return if `xcrun simctl list devices booted`.to_s.include?(udid)
+  return unless `xcrun simctl list devices`.to_s.include?(udid)
+
+  sh("xcrun simctl bootstatus #{udid} -b")
 end
 
 # Video is recorded on ANDROID ONLY — iOS recording is intentionally disabled.
@@ -124,25 +150,6 @@ lane :stop_mock_server do
   Net::HTTP.get_response(URI("http://localhost:#{mock_server_driver_port}/stop")) rescue nil
 end
 
-def failed_test_names(log)
-  return [] unless File.exist?(log)
-
-  failed = []
-  File.read(log).scan(%r{E2E-TEST::(passed|failed|broken|skipped)::([A-Za-z0-9+/=]+)}) do |status, name_b64|
-    next unless %w[failed broken].include?(status)
-
-    failed << Base64.decode64(name_b64).force_encoding('UTF-8')
-  end
-  failed.uniq
-end
-
-# Builds a single Dart-regex alternation matching any of `names`, for one`flutter test --name`.
-# Each name is regex-escaped so the test descriptions match literally.
-def name_alternation(names)
-  escaped = names.map { |n| n.gsub(%r{[.*+?^${}()|\[\]\\/]}) { |c| "\\#{c}" } }
-  "(#{escaped.join('|')})"
-end
-
 lane :run_e2e_test do |options|
   next unless is_check_required(sources: sources_matrix[:e2e], force_check: @force_check)
 
@@ -172,9 +179,13 @@ lane :run_e2e_test do |options|
       targets = options[:target] ? [options[:target]] : Dir['integration_test/*_test.dart'].sort
       UI.user_error!('No e2e test files found') if targets.empty?
 
+      targets = batch_targets(targets, batch: options[:batch], batch_count: options[:batch_count])
+      next if targets.empty?
+
       retries = (options[:retries] || 2).to_i
 
       failed = []
+      first_attempt = true
       targets.each do |target|
         test_name = File.basename(target, '.dart')
 
@@ -187,9 +198,11 @@ lane :run_e2e_test do |options|
         ok = false
         attempt = 0
         loop do
+          boot_simulator(udid: device) if ios && !first_attempt
+          first_attempt = false
           attempt += 1
 
-          flags = [target, "--dart-define=E2E_TARGET=#{test_name}"]
+          flags = [target, '--no-pub', "--dart-define=E2E_TARGET=#{test_name}"]
           flags << "-d #{device}" if device
 
           if options[:verbose]
@@ -199,7 +212,7 @@ lane :run_e2e_test do |options|
             flags << "--reporter #{ENV['GITHUB_ACTIONS'] ? 'github' : 'expanded'}"
           end
 
-          flags << "--name #{Shellwords.escape(name_alternation(only))}" if only
+          flags << "--name #{Shellwords.escape(E2ELog.name_alternation(only))}" if only
           # Per-attempt path so retries don't overwrite earlier recordings.
           rec = start_screen_recording(ios: ios, device: device, path: "#{videos_dir}/#{test_name}.attempt#{attempt}.mp4")
 
@@ -227,9 +240,32 @@ lane :run_e2e_test do |options|
             }
           end
 
+          # A run that reports tests it never ran must not go green, however
+          # `flutter test` exited. Also the best retry target when there is no
+          # failure to attribute — those are exactly the tests still owed a result.
+          phantom = E2ELog.phantom_test_names(attempt_log)
+          unless phantom.empty?
+            ok = false
+            UI.important("#{target}: #{phantom.size} test(s) reported without ever running " \
+                         "(no result emitted): #{phantom.join(', ')}")
+          end
+
           break if ok || attempt > retries
 
-          only = failed_test_names(attempt_log)
+          # Not retriable: a whole-file retry can neither narrow nor fix a leaked
+          # async error, and a run that happens to pass would only be hiding it.
+          # Fail fast with the diagnosis instead of burning every attempt.
+          if E2ELog.post_completion_failure?(attempt_log)
+            blamed = E2ELog.post_completion_blamed_tests(attempt_log)
+            UI.important("#{target} (attempt #{attempt}/#{retries + 1}): a test leaked async work that threw " \
+                         'AFTER it had completed, so the failure is not attributable to any single test' \
+                         "#{blamed.empty? ? '' : " (the runner blamed: #{blamed.join(', ')})"}. " \
+                         'Not retrying — fix the leak; see the exception above.')
+            break
+          end
+
+          only = E2ELog.failed_test_names(attempt_log)
+          only = phantom if only.empty?
           if only.empty?
             only = nil
             UI.important("#{target} failed (attempt #{attempt}/#{retries + 1}); retrying whole file…")

@@ -16,6 +16,7 @@ import 'package:sample_app/routes/app_routes.dart';
 import 'package:sample_app/routes/routes.dart';
 import 'package:sample_app/widgets/custom_message_actions.dart';
 import 'package:sample_app/widgets/location/location_attachment.dart';
+import 'package:sample_app/widgets/location/location_aware_message_composer.dart';
 import 'package:sample_app/widgets/location/location_detail_dialog.dart';
 import 'package:sample_app/widgets/video_player.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -178,16 +179,20 @@ class _StreamChatSampleAppState extends State<StreamChatSampleApp>
             child: Builder(
               builder: (context) {
                 final config = context.sampleAppConfig;
+                final surfaceStyle = config.surfaceStyle;
+
                 return DynamicColorBuilder(
                   builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
                     return MaterialApp.router(
                       theme: createTheme(
                         dynamicColor: config.enableDynamicColor ? lightDynamic : null,
                         brightness: Brightness.light,
+                        surfaceStyle: surfaceStyle,
                       ),
                       darkTheme: createTheme(
                         dynamicColor: config.enableDynamicColor ? darkDynamic : null,
                         brightness: Brightness.dark,
+                        surfaceStyle: surfaceStyle,
                       ),
                       themeMode: config.themeMode,
                       locale: config.locale,
@@ -197,8 +202,9 @@ class _StreamChatSampleAppState extends State<StreamChatSampleApp>
                         GlobalMaterialLocalizations.delegate,
                         GlobalWidgetsLocalizations.delegate,
                       ],
-                      builder: (context, child) {
-                        return ListenableBuilder(
+                      builder: (context, child) => _ComponentSurfaceStyleOverrides(
+                        config: config,
+                        child: ListenableBuilder(
                           listenable: authController,
                           builder: (context, cachedChild) {
                             final wrapped = Directionality(
@@ -219,9 +225,11 @@ class _StreamChatSampleAppState extends State<StreamChatSampleApp>
                                 componentBuilders: StreamComponentBuilders(
                                   extensions: streamChatComponentBuilders(
                                     messageItem: customMessageItemBuilder,
+                                    messageComposer: locationAwareMessageComposer,
                                     videoPlayer: (context, props) => SampleAppVideoPlayer(props: props),
                                   ),
                                 ),
+                                themeData: config.toStreamChatThemeData(),
                                 configData: config.toStreamChatConfigurationData(),
                                 child: wrapped,
                               );
@@ -233,8 +241,8 @@ class _StreamChatSampleAppState extends State<StreamChatSampleApp>
                             );
                           },
                           child: child,
-                        );
-                      },
+                        ),
+                      ),
                       routerConfig: _setupRouter(),
                     );
                   },
@@ -250,6 +258,7 @@ class _StreamChatSampleAppState extends State<StreamChatSampleApp>
   ThemeData createTheme({
     required ColorScheme? dynamicColor,
     required Brightness brightness,
+    required StreamSurfaceStyle surfaceStyle,
   }) {
     return ThemeData(
       brightness: brightness,
@@ -262,6 +271,7 @@ class _StreamChatSampleAppState extends State<StreamChatSampleApp>
                   brightness: brightness,
                 ),
           brightness: brightness,
+          surfaceStyle: surfaceStyle,
         ),
       ],
     );
@@ -269,6 +279,32 @@ class _StreamChatSampleAppState extends State<StreamChatSampleApp>
 }
 
 extension on SampleAppConfigData {
+  /// Maps the per-header overrides onto the SDK's own header themes.
+  ///
+  /// Deliberately a different channel from [_ComponentSurfaceStyleOverrides]:
+  /// these themes live on [StreamChatThemeData], which the pages read to decide
+  /// the scaffold's inset, so both halves have to agree.
+  StreamChatThemeData? toStreamChatThemeData() {
+    final channelHeader = channelHeaderSurfaceStyle;
+    final threadHeader = threadHeaderSurfaceStyle;
+    if (channelHeader == null && threadHeader == null) return null;
+
+    return StreamChatThemeData(
+      channelHeaderTheme: switch (channelHeader) {
+        final surfaceStyle? => StreamAppBarThemeData(
+          style: .new(surfaceStyle: surfaceStyle),
+        ),
+        _ => null,
+      },
+      threadHeaderTheme: switch (threadHeader) {
+        final surfaceStyle? => StreamAppBarThemeData(
+          style: .new(surfaceStyle: surfaceStyle),
+        ),
+        _ => null,
+      },
+    );
+  }
+
   /// Maps chat-relevant flags to a [StreamChatConfigurationData].
   StreamChatConfigurationData toStreamChatConfigurationData() {
     return StreamChatConfigurationData(
@@ -284,6 +320,60 @@ extension on SampleAppConfigData {
             },
           ),
       ],
+      messageListViewConfiguration: const StreamMessageListViewConfiguration(
+        highlightInitialMessage: true,
+        swipeToReply: true,
+      ),
     );
+  }
+}
+
+// Applies the per-component surface style overrides from the sample app config,
+// so each chrome component can be toggled independently of the app-wide style.
+//
+// A null override leaves that component unwrapped, falling back to the ambient
+// StreamTheme.surfaceStyle.
+class _ComponentSurfaceStyleOverrides extends StatelessWidget {
+  const _ComponentSurfaceStyleOverrides({
+    required this.config,
+    required this.child,
+  });
+
+  final SampleAppConfigData config;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    var scoped = child;
+
+    if (config.appBarSurfaceStyle case final surfaceStyle?) {
+      scoped = StreamAppBarTheme(
+        data: .new(style: .new(surfaceStyle: surfaceStyle)),
+        child: scoped,
+      );
+    }
+
+    if (config.bottomAppBarSurfaceStyle case final surfaceStyle?) {
+      scoped = StreamBottomAppBarTheme(
+        data: .new(style: .new(surfaceStyle: surfaceStyle)),
+        child: scoped,
+      );
+    }
+
+    if (config.bottomNavBarSurfaceStyle case final surfaceStyle?) {
+      scoped = StreamBottomNavBarTheme(
+        data: .new(style: .new(surfaceStyle: surfaceStyle)),
+        child: scoped,
+      );
+    }
+
+    if (config.composerSurfaceStyle case final surfaceStyle?) {
+      scoped = StreamMessageComposerTheme(
+        data: .new(surfaceStyle: surfaceStyle),
+        child: scoped,
+      );
+    }
+
+    return scoped;
   }
 }

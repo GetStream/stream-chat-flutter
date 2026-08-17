@@ -5,10 +5,10 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// companion to [StreamMediaGalleryPreview].
 ///
 /// Each cell is rendered by a [StreamMediaGalleryItem] in a 1:1 grid with
-/// the sender's avatar surfaced on every tile. Inter-cell gutters and the
-/// outer padding both default to `spacing.xxxs` (2 logical pixels) so
-/// every gap in the grid is uniform; pass [StreamMediaGalleryProps.padding]
-/// to override.
+/// the sender's avatar surfaced on every tile. Inter-cell gutters default to
+/// `spacing.xxxs` (2 logical pixels) so every gap in the grid is uniform. The
+/// grid has no outer padding of its own; supply [StreamMediaGalleryProps.padding]
+/// to inset it from its container.
 ///
 /// {@tool snippet}
 ///
@@ -92,7 +92,10 @@ class StreamMediaGalleryProps {
   /// Number of tiles per row. Defaults to 3.
   final int crossAxisCount;
 
-  /// Padding around the grid.
+  /// The padding around this grid.
+  ///
+  /// Defaults to null, leaving the grid to inherit any insets from its
+  /// surroundings.
   final EdgeInsetsGeometry? padding;
 
   /// Scroll controller for the underlying [GridView].
@@ -121,31 +124,25 @@ class DefaultStreamMediaGallery extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final spacing = context.streamSpacing;
-    final effectivePadding = props.padding ?? EdgeInsets.all(spacing.xxxs);
 
-    return MediaQuery.removePadding(
-      context: context,
-      removeTop: true,
-      removeBottom: true,
-      child: GridView.builder(
-        padding: effectivePadding,
-        controller: props.scrollController,
-        itemCount: props.attachments.length,
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: props.crossAxisCount,
-          crossAxisSpacing: spacing.xxxs,
-          mainAxisSpacing: spacing.xxxs,
-        ),
-        itemBuilder: (context, index) {
-          final ga = props.attachments[index];
-          return StreamMediaGalleryItem(
-            attachment: ga.attachment,
-            author: ga.message.user,
-            onTap: props.onItemTap == null ? null : () => props.onItemTap!(index),
-            onLongPress: props.onItemLongPress == null ? null : () => props.onItemLongPress!(index),
-          );
-        },
+    return GridView.builder(
+      padding: props.padding,
+      controller: props.scrollController,
+      itemCount: props.attachments.length,
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: props.crossAxisCount,
+        crossAxisSpacing: spacing.xxxs,
+        mainAxisSpacing: spacing.xxxs,
       ),
+      itemBuilder: (context, index) {
+        final ga = props.attachments[index];
+        return StreamMediaGalleryItem(
+          attachment: ga.attachment,
+          author: ga.message.user,
+          onTap: props.onItemTap == null ? null : () => props.onItemTap!(index),
+          onLongPress: props.onItemLongPress == null ? null : () => props.onItemLongPress!(index),
+        );
+      },
     );
   }
 }

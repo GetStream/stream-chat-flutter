@@ -3,14 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sample_app/pages/advanced_options_page.dart';
 import 'package:sample_app/pages/channel_list_page.dart';
-import 'package:sample_app/pages/channel_page.dart';
 import 'package:sample_app/pages/chat_info_screen.dart';
 import 'package:sample_app/pages/choose_user_page.dart';
 import 'package:sample_app/pages/group_chat_details_screen.dart';
 import 'package:sample_app/pages/group_info_screen.dart';
 import 'package:sample_app/pages/new_chat_screen.dart';
 import 'package:sample_app/pages/new_group_chat_screen.dart';
-import 'package:sample_app/pages/thread_page.dart';
 import 'package:sample_app/routes/routes.dart';
 import 'package:sample_app/state/new_group_chat_state.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -45,9 +43,33 @@ final appRoutes = [
             child: Builder(
               builder: (context) {
                 return (parentMessage != null)
-                    ? ThreadPage(parent: parentMessage)
-                    : ChannelPage(
-                        highlightInitialMessage: messageId != null,
+                    ? StreamThreadPage(parent: parentMessage)
+                    : StreamChannelPage(
+                        onChannelAvatarPressed: (context, channel) {
+                          final isOneToOne = channel.isOneToOne;
+                          final currentUserId = StreamChat.of(context).currentUser?.id;
+
+                          final channelMembers = channel.state?.members ?? [];
+                          final otherUser = (isOneToOne && currentUserId != null)
+                              ? channelMembers.firstWhereOrNull((m) => m.userId != currentUserId)?.user
+                              : null;
+
+                          final router = GoRouter.of(context);
+
+                          if (otherUser != null) {
+                            router.pushNamed(
+                              Routes.CHAT_INFO_SCREEN.name,
+                              pathParameters: Routes.CHAT_INFO_SCREEN.params(channel),
+                              extra: otherUser,
+                            );
+                            return;
+                          }
+
+                          router.pushNamed(
+                            Routes.GROUP_INFO_SCREEN.name,
+                            pathParameters: Routes.GROUP_INFO_SCREEN.params(channel),
+                          );
+                        },
                       );
               },
             ),

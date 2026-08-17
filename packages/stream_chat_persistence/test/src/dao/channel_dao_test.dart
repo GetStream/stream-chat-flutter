@@ -144,22 +144,18 @@ void main() {
     final cids = await channelDao.cids;
     expect(cids, []);
 
-    const id = 'testId';
-    const cid = 'testCid';
-    const type = 'testType';
+    // Saving channels ordered by the later of lastMessageAt and createdAt, so
+    // a truncated channel keeps its position instead of sinking below stale
+    // channels.
+    await channelDao.updateChannels([
+      ChannelModel(cid: 'test:stale', createdAt: DateTime(2023), lastMessageAt: DateTime(2023, 2)),
+      ChannelModel(cid: 'test:truncated', createdAt: DateTime(2023, 6), lastMessageAt: DateTime(1970)),
+      ChannelModel(cid: 'test:active', createdAt: DateTime(2023), lastMessageAt: DateTime(2023, 9)),
+    ]);
 
-    // Saving a dummy channel
-    final dummyChannel = ChannelModel(
-      id: id,
-      type: type,
-      cid: cid,
-      config: ChannelConfig(),
-    );
-    await channelDao.updateChannels([dummyChannel]);
-
-    // Should return the cid of the dummy channel
+    // Should return the saved cids, most recently active first
     final updatedCids = await channelDao.cids;
-    expect(updatedCids, [cid]);
+    expect(updatedCids, ['test:active', 'test:truncated', 'test:stale']);
   });
 
   test('updateChannels', () async {

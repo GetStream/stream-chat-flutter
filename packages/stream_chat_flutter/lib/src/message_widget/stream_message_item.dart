@@ -506,7 +506,7 @@ class DefaultStreamMessageItem extends StatelessWidget {
           maxAvatars: 3,
           onTap: () => _onViewThread(context, message),
           showConnector: placement.contentKind != .jumbomoji,
-          label: Text('$replyCount replies'),
+          label: Text(context.translations.threadReplyCountText(replyCount)),
           avatars: message.threadParticipants?.map(
             (user) => StreamUserAvatar(user: user, showOnlineIndicator: false),
           ),
@@ -850,7 +850,9 @@ class DefaultStreamMessageItem extends StatelessWidget {
       builder: (_) => StreamChatConfiguration(
         data: StreamChatConfiguration.of(context),
         child: StreamMessageLayout(
-          data: layout,
+          // The message is re-rendered on top of the modal scrim, so its
+          // metadata and annotations switch to their on-scrim colors.
+          data: layout.copyWith(presentation: core.StreamMessagePresentation.preview),
           child: StreamMessageActionsModal(
             message: message,
             messageActions: actions,
