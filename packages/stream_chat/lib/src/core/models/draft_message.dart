@@ -22,16 +22,14 @@ class DraftMessage extends Equatable {
     this.showInChannel,
     this.mentionedUsers = const [],
     this.quotedMessage,
-    String? quotedMessageId,
+    this._quotedMessageId,
     this.silent = false,
     this.command,
     this.poll,
-    String? pollId,
+    this._pollId,
     this.extraData = const {},
   }) : id = id ?? const Uuid().v4(),
-       type = MessageType(type),
-       _quotedMessageId = quotedMessageId,
-       _pollId = pollId;
+       type = MessageType(type);
 
   /// Create a new instance from JSON.
   factory DraftMessage.fromJson(Map<String, dynamic> json) => _$DraftMessageFromJson(
