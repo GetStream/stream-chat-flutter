@@ -1,3 +1,9 @@
+## Upcoming
+
+🔄 Changed
+
+- Raised minimum Dart SDK to `^3.12.0`.
+
 ## 10.3.0
 
 ✅ Added
@@ -14,7 +20,6 @@
 🔄 Changed
 
 - Raised the minimum `dio` version to `^5.11.0`.
-- Raised minimum Dart SDK to `^3.12.0`.
 
 🐞 Fixed
 
