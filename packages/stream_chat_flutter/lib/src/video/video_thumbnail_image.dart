@@ -1,7 +1,7 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:stream_chat_flutter/src/video/video_service.dart';
 import 'package:stream_thumbnail/stream_thumbnail.dart';
 

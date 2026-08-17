@@ -1,7 +1,7 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_animations/flutter_map_animations.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:sample_app/widgets/location/location_user_marker.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 

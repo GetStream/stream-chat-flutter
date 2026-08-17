@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// {@template aiTypingIndicatorView}
 /// A widget that displays a typing indicator for the AI.

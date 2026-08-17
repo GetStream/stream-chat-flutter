@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:sample_app/auth/auth_controller.dart';
 import 'package:sample_app/routes/routes.dart';
 import 'package:sample_app/utils/app_config.dart';

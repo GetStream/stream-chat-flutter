@@ -155,3 +155,8 @@ linter:
     - prefer_null_aware_method_calls
     - use_named_constants
     - use_raw_strings
+    # Guards the material_ui/cupertino_ui migration: fails any new import
+    # of package:flutter/material.dart or package:flutter/cupertino.dart.
+    # Unknown to the 3.44 floor, but legacy_version_analyze analyses lib/
+    # rather than the package root, so it never sees this file.
+    - migrate_design_widgets

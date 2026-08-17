@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:stream_chat_flutter/src/attachment/builder/attachment_widget_builder.dart';
 import 'package:stream_chat_flutter/src/message_widget/components/stream_message_deleted.dart';
 import 'package:stream_chat_flutter/src/message_widget/components/stream_message_reactions.dart';

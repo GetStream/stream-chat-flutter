@@ -1,9 +1,9 @@
 // ignore_for_file: lines_longer_than_80_chars, avoid_redundant_argument_values
 
 import 'package:alchemist/alchemist.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:stream_chat_flutter/src/poll/creator/poll_option_reorderable_list_view.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 

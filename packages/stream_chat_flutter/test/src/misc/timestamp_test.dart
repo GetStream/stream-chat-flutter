@@ -1,7 +1,7 @@
 import 'package:alchemist/alchemist.dart';
 import 'package:clock/clock.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:stream_chat_flutter/src/misc/timestamp.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 import 'package:stream_core_flutter/chat.dart';

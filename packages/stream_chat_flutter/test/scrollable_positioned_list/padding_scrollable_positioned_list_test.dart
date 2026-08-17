@@ -2,8 +2,8 @@
 // ListView (BoxScrollView) does — in particular, auto-consuming
 // `MediaQuery.padding` when `padding` is null.
 
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:stream_chat_flutter/scrollable_positioned_list/scrollable_positioned_list.dart';
 
 const screenHeight = 400.0;

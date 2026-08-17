@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:stream_chat_flutter/src/components/message_composer/message_composer_input_center.dart';
 import 'package:stream_chat_flutter/src/components/message_composer/message_composer_input_header.dart';
 import 'package:stream_chat_flutter/src/components/message_composer/message_composer_input_leading.dart';

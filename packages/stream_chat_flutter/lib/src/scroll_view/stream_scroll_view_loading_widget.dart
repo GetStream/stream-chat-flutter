@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:stream_core_flutter/chat.dart';
 
 /// A widget that is displayed while the [StreamScrollView] is loading.

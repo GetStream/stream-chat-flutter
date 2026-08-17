@@ -1,6 +1,6 @@
 // ignore_for_file: parameter_assignments, use_is_even_rather_than_modulo
 import 'dart:math' as math;
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// {@template streamSeparatedReorderableListView}
 /// A custom implementation of [ReorderableListView] that supports separators.

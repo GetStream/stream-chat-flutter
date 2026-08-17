@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Signature for a function that creates a widget for a given index, e.g., in a
 /// list, grid.

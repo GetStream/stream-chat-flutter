@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:stream_core_flutter/chat.dart';
 
 /// Avatar fixtures sourced from Stream's Chat SDK Design System (Figma node

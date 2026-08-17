@@ -1,5 +1,5 @@
 import 'package:alchemist/alchemist.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:stream_chat_flutter/src/poll/creator/poll_question_text_field.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
 import 'package:stream_core_flutter/chat.dart';

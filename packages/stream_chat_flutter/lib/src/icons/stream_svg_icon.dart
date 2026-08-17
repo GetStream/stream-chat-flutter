@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:stream_core_flutter/chat.dart';
 
 part 'stream_svg_icon.g.dart';

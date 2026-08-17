@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:stream_chat_flutter/src/ai_assistant/ai_typing_indicator_view.dart';
 
 void main() {

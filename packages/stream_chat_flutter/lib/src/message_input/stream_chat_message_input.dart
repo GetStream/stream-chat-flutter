@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_portal/flutter_portal.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:stream_chat_flutter/src/components/message_composer/message_composer_input.dart';
 import 'package:stream_chat_flutter/src/components/message_composer/message_composer_leading.dart';
 import 'package:stream_chat_flutter/src/components/message_composer/message_composer_trailing.dart';

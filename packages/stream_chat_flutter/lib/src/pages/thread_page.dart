@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// A page that displays a thread of messages for a given parent message.

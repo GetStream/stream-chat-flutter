@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Signature for a function that builds an error widget when an attachment
 /// thumbnail fails to load.
