@@ -1,5 +1,9 @@
 ## Upcoming
 
+✅ Added
+
+- Added `onReactionLongPress` to `StreamMessageItem` and `StreamMessageListView`, reporting the long-pressed message's `BuildContext` and a `ReactionLongPressDetails` with the `message` and `reaction` (the reaction is `null` for a clustered or overflow chip that maps to no single reaction). When null, long-pressing a reaction keeps falling through to the message actions modal.
+
 🔄 Changed
 
 - Raised minimum Flutter to `>=3.44.0` and Dart SDK to `^3.12.0`.

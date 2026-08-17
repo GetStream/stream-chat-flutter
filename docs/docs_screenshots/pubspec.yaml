@@ -19,7 +19,8 @@ dependencies:
     sdk: flutter
   record: ^6.2.0
   stream_chat_flutter: ^10.3.0
-  stream_core_flutter: ^0.5.0
+  stream_core_flutter:
+    path: ../../../stream-core-flutter/packages/stream_core_flutter
 
 dev_dependencies:
   alchemist: ^0.14.0

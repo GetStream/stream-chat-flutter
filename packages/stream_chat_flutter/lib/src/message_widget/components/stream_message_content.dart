@@ -41,6 +41,7 @@ class StreamMessageContent extends StatefulWidget {
     this.onMentionTap,
     this.onAnyMentionTap,
     this.onReactionTap,
+    this.onReactionLongPress,
     this.onQuotedMessageTap,
     this.reactionSorting,
   });
@@ -110,6 +111,13 @@ class StreamMessageContent extends StatefulWidget {
   /// clustered or overflow chip). If null, tapping reactions has no effect.
   final ValueSetter<Reaction?>? onReactionTap;
 
+  /// Called when a reaction chip is long-pressed, with the pressed [Reaction].
+  ///
+  /// Reports `null` when the long press does not map to a single reaction (a
+  /// clustered or overflow chip). If null, long-pressing reactions falls
+  /// through to the enclosing message's long-press handler.
+  final ValueSetter<Reaction?>? onReactionLongPress;
+
   /// Called when the quoted message is tapped.
   ///
   /// If null, tapping the quoted message has no effect.
@@ -170,6 +178,7 @@ class _StreamMessageContentState extends State<StreamMessageContent> {
             message: widget.message,
             sorting: widget.reactionSorting,
             onReactionTap: widget.onReactionTap,
+            onReactionLongPress: widget.onReactionLongPress,
             child: Builder(
               builder: (context) {
                 final bubbleContent = ConstrainedBox(

@@ -86,6 +86,7 @@ class StreamMessageItem extends StatelessWidget {
     @Deprecated('Use onReactionTap instead. onReactionTap also reports the tapped reaction.')
     void Function(Message)? onReactionsTap,
     OnReactionTap? onReactionTap,
+    OnReactionLongPress? onReactionLongPress,
     void Function(Message quotedMessage)? onQuotedMessageTap,
     Comparator<ReactionGroup>? reactionSorting,
     MessageActionsBuilder? actionsBuilder,
@@ -116,6 +117,7 @@ class StreamMessageItem extends StatelessWidget {
          onReplyTap: onReplyTap,
          onReactionsTap: onReactionsTap,
          onReactionTap: onReactionTap,
+         onReactionLongPress: onReactionLongPress,
          onQuotedMessageTap: onQuotedMessageTap,
          reactionSorting: reactionSorting,
          actionsBuilder: actionsBuilder,
@@ -173,6 +175,7 @@ class StreamMessageItemProps {
     this.onReplyTap,
     @Deprecated('Use onReactionTap instead. onReactionTap also reports the tapped reaction.') this.onReactionsTap,
     this.onReactionTap,
+    this.onReactionLongPress,
     this.onQuotedMessageTap,
     this.reactionSorting,
     this.actionsBuilder,
@@ -326,6 +329,12 @@ class StreamMessageItemProps {
   /// the full list of reactions.
   final OnReactionTap? onReactionTap;
 
+  /// {@macro onReactionLongPress}
+  ///
+  /// If null, long-pressing a reaction falls through to the message's own
+  /// long-press handling, which opens the [StreamMessageActionsModal].
+  final OnReactionLongPress? onReactionLongPress;
+
   /// Called when an inline quoted message is tapped.
   ///
   /// Receives the [Message] that was quoted. Typically used to scroll to
@@ -391,6 +400,7 @@ class StreamMessageItemProps {
     @Deprecated('Use onReactionTap instead. onReactionTap also reports the tapped reaction.')
     void Function(Message)? onReactionsTap,
     OnReactionTap? onReactionTap,
+    OnReactionLongPress? onReactionLongPress,
     void Function(Message)? onQuotedMessageTap,
     Comparator<ReactionGroup>? reactionSorting,
     MessageActionsBuilder? actionsBuilder,
@@ -417,6 +427,7 @@ class StreamMessageItemProps {
       onReplyTap: onReplyTap ?? this.onReplyTap,
       onReactionsTap: onReactionsTap ?? this.onReactionsTap,
       onReactionTap: onReactionTap ?? this.onReactionTap,
+      onReactionLongPress: onReactionLongPress ?? this.onReactionLongPress,
       onQuotedMessageTap: onQuotedMessageTap ?? this.onQuotedMessageTap,
       reactionSorting: reactionSorting ?? this.reactionSorting,
       actionsBuilder: actionsBuilder ?? this.actionsBuilder,
@@ -550,6 +561,10 @@ class DefaultStreamMessageItem extends StatelessWidget {
         (final onReactionTap?, _) => (reaction) => onReactionTap(context, .new(message: message, reaction: reaction)),
         (_, final onReactionsTap?) => (_) => onReactionsTap(message),
         _ => (_) => _showMessageReactionsModal(context, message),
+      },
+      onReactionLongPress: switch (props.onReactionLongPress) {
+        final onLongPress? => (reaction) => onLongPress(context, .new(message: message, reaction: reaction)),
+        _ => null,
       },
     );
 
