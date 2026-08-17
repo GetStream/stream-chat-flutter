@@ -31,11 +31,11 @@ class ChannelDeliveryReporter {
   ChannelDeliveryReporter({
     this._logger,
     required this.onMarkChannelsDelivered,
-    Duration throttleDuration = const Duration(seconds: 1),
-  }) : _markAsDeliveredThrottleDuration = throttleDuration;
+    this._throttleDuration = const Duration(seconds: 1),
+  });
 
   final Logger? _logger;
-  final Duration _markAsDeliveredThrottleDuration;
+  final Duration _throttleDuration;
 
   /// The callback invoked to send delivery receipts.
   ///
@@ -147,7 +147,7 @@ class ChannelDeliveryReporter {
   late final _throttledMarkCandidatesAsDelivered = Throttle(
     leading: false,
     _markCandidatesAsDelivered,
-    _markAsDeliveredThrottleDuration,
+    _throttleDuration,
   );
 
   static const _maxCandidatesPerBatch = 100;

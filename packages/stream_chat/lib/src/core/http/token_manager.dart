@@ -11,13 +11,13 @@ class TokenManager {
   TokenManager({
     this._userId,
     this._token,
-    TokenProvider? tokenProvider,
-  }) : _provider = tokenProvider;
+    this._tokenProvider,
+  });
 
   String? _type;
   Token? _token;
 
-  TokenProvider? _provider;
+  TokenProvider? _tokenProvider;
 
   String? _userId;
 
@@ -51,7 +51,7 @@ class TokenManager {
     }
     if (provider != null) {
       _type = 'provider';
-      _provider = provider;
+      _tokenProvider = provider;
     }
 
     return loadToken();
@@ -64,7 +64,7 @@ class TokenManager {
       'Please call `setTokenOrProvider` before calling `loadToken`',
     );
     if (refresh || _token == null) {
-      final rawValue = await _provider!(_userId!);
+      final rawValue = await _tokenProvider!(_userId!);
       _token = Token.fromRawValue(rawValue);
     }
     return _token!;
@@ -74,6 +74,6 @@ class TokenManager {
   void reset() {
     _userId = null;
     _token = null;
-    _provider = null;
+    _tokenProvider = null;
   }
 }
