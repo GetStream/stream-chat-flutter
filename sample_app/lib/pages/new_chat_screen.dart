@@ -1,7 +1,5 @@
 // ignore_for_file: deprecated_member_use
 
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sample_app/routes/routes.dart';
@@ -23,13 +21,25 @@ class _NewChatScreenState extends State<NewChatScreen> {
   late final userListController = StreamUserListController(
     client: StreamChat.of(context).client,
     limit: 25,
-    filter: Filter.and([
-      Filter.notEqual('id', StreamChat.of(context).currentUser!.id),
-    ]),
+    filter: _filter(),
     sort: [
       const SortOption.asc(UserSortKey.name),
     ],
   );
+
+  // Excludes the current user from the directory listing — searching must keep
+  // excluding them, so the search text is combined with this rather than
+  // replacing it.
+  Filter _filter({String query = ''}) {
+    return Filter.and([
+      Filter.notEqual('id', StreamChat.of(context).currentUser!.id),
+      if (query.isNotEmpty)
+        Filter.or([
+          Filter.autoComplete('name', query),
+          Filter.autoComplete('id', query),
+        ]),
+    ]);
+  }
 
   ChipInputTextFieldState? get _chipInputTextFieldState => _chipInputTextFieldStateKey.currentState;
 
@@ -44,26 +54,18 @@ class _NewChatScreenState extends State<NewChatScreen> {
 
   Channel? channel;
 
-  Timer? _debounce;
-
   bool _showUserList = true;
 
   void _userNameListener() {
-    if (_debounce?.isActive ?? false) _debounce!.cancel();
-    _debounce = Timer(const Duration(milliseconds: 350), () {
-      if (mounted) {
-        setState(() {
-          _userNameQuery = _controller.text;
-          _isSearchActive = _userNameQuery.isNotEmpty;
-        });
+    final query = _controller.text;
+    if (query == _userNameQuery) return;
 
-        userListController.filter = Filter.and([
-          if (_userNameQuery.isNotEmpty) Filter.autoComplete('name', _userNameQuery),
-          Filter.notEqual('id', StreamChat.of(context).currentUser!.id),
-        ]);
-        userListController.doInitialLoad();
-      }
+    setState(() {
+      _userNameQuery = query;
+      _isSearchActive = query.isNotEmpty;
     });
+
+    userListController.searchWithFilter(_filter(query: query));
   }
 
   @override
@@ -129,8 +131,8 @@ class _NewChatScreenState extends State<NewChatScreen> {
   void dispose() {
     _searchFocusNode.dispose();
     _messageInputFocusNode.dispose();
-    _controller.clear();
     _controller.removeListener(_userNameListener);
+    _controller.clear();
     _controller.dispose();
     userListController.dispose();
     super.dispose();
@@ -138,11 +140,12 @@ class _NewChatScreenState extends State<NewChatScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return StreamScaffold(
       backgroundColor: context.streamColorScheme.backgroundApp,
       appBar: StreamAppBar(title: const Text('New Chat')),
       body: StreamConnectionStatusBuilder(
         statusBuilder: (context, status) {
+          final topInset = MediaQuery.paddingOf(context).top;
           var statusString = '';
           var showStatus = true;
 
@@ -169,6 +172,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  if (topInset > 0) SizedBox(height: topInset),
                   ChipsInputTextField<User>(
                     key: _chipInputTextFieldStateKey,
                     controller: _controller,
@@ -278,6 +282,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
                             onPanDown: (_) => FocusScope.of(context).unfocus(),
                             child: StreamUserListView(
                               controller: userListController,
+                              padding: EdgeInsets.only(bottom: MediaQuery.paddingOf(context).bottom),
                               onUserTap: (user) {
                                 _controller.clear();
                                 if (!_selectedUsers.contains(user)) {

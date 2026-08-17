@@ -14,7 +14,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// suppress the default, or pass [leading] to replace it entirely.
 ///
 /// The default trailing is the channel avatar (via [StreamChannelAvatar]).
-/// Tap behaviour is wired through [onChannelAvatarPressed]; when the
+/// Tap behavior is wired through [onChannelAvatarPressed]; when the
 /// callback is null the avatar is rendered non-interactive. Pass [trailing]
 /// to replace the avatar with a custom action — the callback is then
 /// ignored.
@@ -76,6 +76,7 @@ class StreamChannelHeader extends StatelessWidget implements PreferredSizeWidget
     this.showConnectionStateTile = false,
     this.leading,
     this.automaticallyImplyLeading = true,
+    this.onBackPressed,
     this.title,
     this.subtitle,
     this.trailing,
@@ -103,6 +104,12 @@ class StreamChannelHeader extends StatelessWidget implements PreferredSizeWidget
   ///
   /// Defaults to `true`. Set to `false` to suppress the back button.
   final bool automaticallyImplyLeading;
+
+  /// Called when the default [StreamBackButton] is pressed, replacing its
+  /// default [Navigator.maybePop].
+  ///
+  /// Ignored when [leading] is provided.
+  final VoidCallback? onBackPressed;
 
   /// {@macro StreamAppBar.title}
   ///
@@ -132,14 +139,40 @@ class StreamChannelHeader extends StatelessWidget implements PreferredSizeWidget
   @override
   Size get preferredSize => const Size.fromHeight(kStreamToolbarHeight);
 
+  /// The surface style this header renders with in [context].
+  ///
+  /// Precedence: the per-instance [style], then
+  /// [StreamChatThemeData.channelHeaderTheme], then the ambient app bar theme,
+  /// then the ambient surface style.
+  static StreamSurfaceStyle resolveSurfaceStyle(
+    BuildContext context, {
+    StreamAppBarStyle? style,
+  }) => StreamAppBar.resolveSurfaceStyle(
+    context,
+    style: _effectiveStyle(context, style),
+  );
+
+  // The per-instance style layered over the per-header theme.
+  static StreamAppBarStyle? _effectiveStyle(
+    BuildContext context,
+    StreamAppBarStyle? style,
+  ) {
+    final theme = StreamChatTheme.of(context);
+    final themeStyle = theme.channelHeaderTheme.style;
+
+    return themeStyle?.merge(style) ?? style;
+  }
+
   @override
   Widget build(BuildContext context) {
     final channel = StreamChannel.of(context).channel;
-    final headerTheme = StreamChatTheme.of(context).channelHeaderTheme;
 
     var leading = this.leading;
     if (leading == null && automaticallyImplyLeading) {
-      leading = const StreamBackButton(showUnreadCount: true);
+      leading = StreamBackButton(
+        onPressed: onBackPressed,
+        unreadIndicator: StreamUnreadIndicator(excludeCid: channel.cid),
+      );
     }
 
     var title = this.title;
@@ -173,22 +206,15 @@ class StreamChannelHeader extends StatelessWidget implements PreferredSizeWidget
           return StreamInfoTile(
             showMessage: showConnectionStateTile && showStatus,
             message: statusString,
-            // Wrap the bar in a [StreamAppBarTheme] so the per-header chat
-            // theme drives all default styling (background, padding,
-            // typography, divider) — the bar internally merges in any
-            // [style] override the caller passed.
-            child: StreamAppBarTheme(
-              data: headerTheme,
-              child: StreamAppBar(
-                leading: leading,
-                automaticallyImplyLeading: false,
-                title: title,
-                subtitle: subtitle,
-                trailing: trailing,
-                primary: primary,
-                excludeHeaderSemantics: true,
-                style: style,
-              ),
+            child: StreamAppBar(
+              leading: leading,
+              automaticallyImplyLeading: false,
+              title: title,
+              subtitle: subtitle,
+              trailing: trailing,
+              primary: primary,
+              excludeHeaderSemantics: true,
+              style: _effectiveStyle(context, style),
             ),
           );
         },
@@ -205,6 +231,11 @@ class _DefaultChannelAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final surfaceStyle = StreamTheme.of(context).surfaceStyle;
+    final toolbarSurfaceStyle = StreamToolbarScope.maybeOf(context);
+
+    final effectiveIsFloating = toolbarSurfaceStyle?.isFloating ?? surfaceStyle.isFloating;
+
     final effectiveOnTap = switch (onPressed) {
       final cb? => () => cb(channel),
       _ => null,
@@ -222,6 +253,7 @@ class _DefaultChannelAvatar extends StatelessWidget {
           child: StreamChannelAvatar(
             size: .lg,
             channel: channel,
+            isFloating: effectiveIsFloating,
           ),
         ),
       ),

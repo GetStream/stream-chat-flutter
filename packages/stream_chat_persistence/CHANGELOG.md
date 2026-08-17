@@ -4,12 +4,19 @@
 
 - Added support for sending and deleting reactions while offline.
 
+## 10.3.0
+
+🐞 Fixed
+
+- Fixed truncated channels being the first to fall out of the 250-channel cap returned by `getChannelCids`.
+
 ## 10.2.0
 
 🚀 Performance
 
 - Add indices on the `channel_cid` column on the `Messages`, `Members`, and `Reads` tables to improve read times on large databases.
 - Add indices on the `message_id` column on the `Reactions` table to improve read times on large databases.
+- Speed up hydrating a page of cached messages (`MessageDao`/`PinnedMessageDao`): derive each message's own reactions from the already-fetched reactions instead of issuing a second query, and stop re-fetching/re-hydrating quoted messages that are already part of the loaded page.
 
 🐞 Fixed
 

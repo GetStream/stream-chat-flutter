@@ -65,16 +65,14 @@ class StreamMediaGalleryPreviewFooter extends StatelessWidget implements Preferr
     final icons = context.streamIcons;
 
     return StreamBottomAppBar(
-      leading: StreamButton.icon(
-        type: StreamButtonType.ghost,
-        style: StreamButtonStyle.secondary,
+      leading: StreamToolbarButton.icon(
+        style: .secondary,
         icon: Icon(icons.export),
         onPressed: onSharePressed,
       ),
       title: title,
-      trailing: StreamButton.icon(
-        type: StreamButtonType.ghost,
-        style: StreamButtonStyle.secondary,
+      trailing: StreamToolbarButton.icon(
+        style: .secondary,
         icon: Icon(icons.gallery),
         onPressed: onGalleryPressed,
       ),

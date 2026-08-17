@@ -118,6 +118,52 @@ void main() {
           expect(tester.takeException(), isA<ArgumentError>());
         },
       );
+
+      testWidgets(
+        'should allow adding a custom option without a title',
+        (tester) async {
+          final controller = StreamAttachmentPickerController();
+          addTearDown(controller.dispose);
+
+          await tester.pumpWidget(
+            _wrapWithStreamChatApp(
+              Builder(
+                builder: (context) {
+                  return SizedBox(
+                    height: 400,
+                    child: tabbedAttachmentPickerBuilder(
+                      context: context,
+                      controller: controller,
+                      allowedTypes: [
+                        ...AttachmentPickerType.values,
+                        const _TestPickerType(),
+                      ],
+                      optionsBuilder: (context, defaultOptions) {
+                        return [
+                          ...defaultOptions,
+                          TabbedAttachmentPickerOption(
+                            key: 'untitled',
+                            icon: Icons.pin_drop,
+                            supportedTypes: const [_TestPickerType()],
+                            optionViewBuilder: (context, controller) {
+                              return const Text('Untitled option');
+                            },
+                          ),
+                        ];
+                      },
+                    ),
+                  );
+                },
+              ),
+            ),
+          );
+
+          await tester.pumpAndSettle();
+
+          expect(tester.takeException(), isNull);
+          expect(find.byIcon(Icons.pin_drop), findsOneWidget);
+        },
+      );
     });
 
     group('allowedTypes', () {
@@ -309,6 +355,10 @@ void main() {
       );
     });
   });
+}
+
+final class _TestPickerType extends CustomAttachmentPickerType {
+  const _TestPickerType();
 }
 
 Widget _wrapWithStreamChatApp(

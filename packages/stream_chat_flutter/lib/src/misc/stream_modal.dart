@@ -39,7 +39,7 @@ Future<T?> showStreamDialog<T>({
     routeSettings: routeSettings,
     transitionDuration: transitionDuration,
     barrierDismissible: barrierDismissible,
-    barrierColor: barrierColor ?? colorScheme.backgroundOverlayLight,
+    barrierColor: barrierColor ?? colorScheme.backgroundScrim,
     barrierLabel: barrierLabel ?? localizations.modalBarrierDismissLabel,
     transitionBuilder: (context, animation, secondaryAnimation, child) {
       final sigma = 10 * animation.value;

@@ -10,6 +10,8 @@ import 'package:sample_app/utils/app_config.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart' hide PushProvider;
 import 'package:stream_chat_persistence/stream_chat_persistence.dart';
 
+bool get platformSupportsPersistenceCredentials => !CurrentPlatform.isWeb && !CurrentPlatform.isMacOS;
+
 /// Secure-storage keys for the active session.
 const kStreamApiKey = 'STREAM_API_KEY';
 const kStreamUserId = 'STREAM_USER_ID';
@@ -164,10 +166,11 @@ class AuthController extends ValueNotifier<AuthState> {
 
   /// Restores a previous session from secure storage, if any.
   ///
-  /// No-op on web or when no credentials are stored; failures are
-  /// swallowed so the user simply lands on the login flow.
+  /// No-op on platforms without credential persistence or when no credentials
+  /// are stored; failures are swallowed so the user simply lands on the login
+  /// flow.
   Future<void> tryAutoConnect() async {
-    if (CurrentPlatform.isWeb) return;
+    if (!platformSupportsPersistenceCredentials) return;
     if (value is! Unauthenticated) return;
 
     const secureStorage = FlutterSecureStorage();
@@ -217,7 +220,7 @@ class AuthController extends ValueNotifier<AuthState> {
     try {
       final ownUser = await client.connectUser(user, token);
 
-      if (persistCredentials && !CurrentPlatform.isWeb) {
+      if (persistCredentials && platformSupportsPersistenceCredentials) {
         const secureStorage = FlutterSecureStorage();
         await Future.wait([
           secureStorage.write(key: kStreamApiKey, value: apiKey),
@@ -252,7 +255,7 @@ class AuthController extends ValueNotifier<AuthState> {
     _pushTokenManager?.dispose().ignore();
     _pushTokenManager = null;
 
-    if (!CurrentPlatform.isWeb) {
+    if (platformSupportsPersistenceCredentials) {
       const secureStorage = FlutterSecureStorage();
       await secureStorage.deleteAll();
     }
@@ -270,8 +273,20 @@ class AuthController extends ValueNotifier<AuthState> {
     _pushTokenManager?.dispose().ignore();
     _pushTokenManager = null;
 
-    // dispose() won't flush; empty the DB so it can't leak to the next test.
-    await _client?.closePersistenceConnection(flush: true);
+    // Detach persistence from the client *before* closing it. Every SDK path
+    // that reaches for it either uses `chatPersistenceClient?.` or is guarded by
+    // `persistenceEnabled` (which is false once this is null), so anything that
+    // lands after this point short-circuits instead of asserting against a
+    // disconnected database. Ordering the teardown differently could not close
+    // that window: a debounced channel-state write fires up to a second later,
+    // and an HTTP request already on the wire cannot be cancelled at all — its
+    // response builds a `ChannelClientState`, whose constructor reads the cached
+    // threads. Both used to throw an async StateError, which the test framework
+    // then blamed on an unrelated test that had already passed.
+    final persistence = _client?.chatPersistenceClient;
+    _client?.chatPersistenceClient = null;
+    // dispose() won't flush; empty the DB so it can't leak into the next test.
+    await persistence?.disconnect(flush: true);
     await _client?.dispose();
     _client = null;
     _activeApiKey = null;
@@ -279,7 +294,7 @@ class AuthController extends ValueNotifier<AuthState> {
     debugConnectivityStream = null;
     debugForceOffline = false;
 
-    if (!CurrentPlatform.isWeb) {
+    if (platformSupportsPersistenceCredentials) {
       const secureStorage = FlutterSecureStorage();
       await secureStorage.deleteAll();
     }

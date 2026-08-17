@@ -1,4 +1,4 @@
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/components/message_composer/message_composer_input_center.dart';
 import 'package:stream_chat_flutter/src/components/message_composer/message_composer_input_header.dart';
 import 'package:stream_chat_flutter/src/components/message_composer/message_composer_input_leading.dart';
@@ -50,34 +50,40 @@ class DefaultStreamMessageComposerInput extends StatelessWidget {
         ? context.streamColorScheme.borderDisabled
         : context.streamColorScheme.borderDefault;
 
-    return Container(
-      clipBehavior: Clip.antiAlias,
-      foregroundDecoration: BoxDecoration(
-        borderRadius: BorderRadius.all(context.streamRadius.xxxl),
+    final borderRadius = BorderRadius.all(context.streamRadius.xxxl);
+    final elevation = context.streamElevation;
+
+    // Material clips its children via PhysicalShape, so the border is drawn
+    // outside the Material to keep it from being clipped away.
+    return DecoratedBox(
+      position: DecorationPosition.foreground,
+      decoration: BoxDecoration(
+        borderRadius: borderRadius,
         border: Border.all(color: borderColor),
       ),
-      decoration: BoxDecoration(
+      child: Material(
+        borderRadius: borderRadius,
+        clipBehavior: Clip.antiAlias,
         color: context.streamColorScheme.backgroundElevation1,
-        borderRadius: BorderRadius.all(context.streamRadius.xxxl),
-        boxShadow: isFloating ? context.streamBoxShadow.elevation3 : null,
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          StreamMessageComposerInputHeader(props: props),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              StreamMessageComposerInputLeading(props: props),
-              Expanded(
-                child: StreamMessageComposerInputCenter(
-                  props: MessageComposerInputCenterProps.from(props),
+        elevation: isFloating ? elevation.level3 : elevation.none,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            StreamMessageComposerInputHeader(props: props),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                StreamMessageComposerInputLeading(props: props),
+                Expanded(
+                  child: StreamMessageComposerInputCenter(
+                    props: MessageComposerInputCenterProps.from(props),
+                  ),
                 ),
-              ),
-              StreamMessageComposerInputTrailing(props: props),
-            ],
-          ),
-        ],
+                StreamMessageComposerInputTrailing(props: props),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
