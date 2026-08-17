@@ -1,3 +1,9 @@
+## Upcoming
+
+🐞 Fixed
+
+- Fixed live location expiry emitting repeated `location.expired` events for the same expired location.
+
 ## 10.3.0
 
 ✅ Added

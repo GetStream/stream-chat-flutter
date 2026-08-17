@@ -7927,6 +7927,57 @@ void main() {
         expect(channel.state?.activeLiveLocations, isEmpty);
       });
 
+      test("should auto-expire another user's live location once at endAt", () async {
+        final liveLocation = Location(
+          channelCid: channel.cid,
+          userId: 'user1', // Another user.
+          messageId: 'msg1',
+          latitude: 40.7128,
+          longitude: -74.0060,
+          createdByDeviceId: 'device1',
+          endAt: DateTime.now().add(const Duration(milliseconds: 200)),
+        );
+
+        channel.state?.addNewMessage(
+          Message(id: 'msg1', sharedLocation: liveLocation),
+        );
+        expect(channel.state?.activeLiveLocations, hasLength(1));
+
+        // Before endAt no expiry event is emitted.
+        await Future.delayed(const Duration(milliseconds: 80));
+        verifyNever(() => client.handleEvent(any()));
+
+        // After endAt the scheduler emits exactly one location.expired event.
+        await Future.delayed(const Duration(milliseconds: 250));
+        final captured = verify(() => client.handleEvent(captureAny())).captured;
+        expect(captured, hasLength(1));
+        final event = captured.single as Event;
+        expect(event.type, EventType.locationExpired);
+        expect(event.message?.id, 'msg1');
+      });
+
+      test("should not auto-expire the current user's own live location", () async {
+        final ownLocation = Location(
+          channelCid: channel.cid,
+          userId: 'test-user-id', // The current user (handled by the client).
+          messageId: 'msg-own',
+          latitude: 40.7128,
+          longitude: -74.0060,
+          createdByDeviceId: 'device1',
+          endAt: DateTime.now().add(const Duration(milliseconds: 150)),
+        );
+
+        channel.state?.addNewMessage(
+          Message(id: 'msg-own', sharedLocation: ownLocation),
+        );
+        expect(channel.state?.activeLiveLocations, hasLength(1));
+
+        // The channel scheduler skips the current user's own locations, so no
+        // expiry event is emitted even after endAt passes.
+        await Future.delayed(const Duration(milliseconds: 300));
+        verifyNever(() => client.handleEvent(any()));
+      });
+
       test('should not add static location to active locations', () async {
         final staticLocation = Location(
           channelCid: channel.cid,

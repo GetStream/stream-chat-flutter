@@ -5,6 +5,7 @@ import 'dart:math' as math;
 
 import 'package:collection/collection.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:stream_chat/src/client/live_location_expiration_scheduler.dart';
 import 'package:stream_chat/src/client/retry_queue.dart';
 import 'package:stream_chat/src/core/util/utils.dart';
 import 'package:stream_chat/stream_chat.dart';
@@ -2553,7 +2554,7 @@ class ChannelClientState {
 
     _startCleaningStalePinnedMessages();
 
-    _startCleaningExpiredLocations();
+    _startSchedulingLocationExpiration();
 
     _listenChannelPushPreferenceUpdated();
 
@@ -4045,40 +4046,38 @@ class ChannelClientState {
     );
   }
 
-  Timer? _staleLiveLocationsCleanerTimer;
-  void _startCleaningExpiredLocations() {
-    _staleLiveLocationsCleanerTimer?.cancel();
-    _staleLiveLocationsCleanerTimer = Timer.periodic(
-      const Duration(seconds: 1),
-      (_) {
-        final currentUserId = _channel._client.state.currentUser?.id;
-        if (currentUserId == null) return;
+  late final _locationExpirationScheduler = LiveLocationExpirationScheduler(
+    onExpired: _handleLocationExpired,
+  );
 
-        final expired = activeLiveLocations.where((it) => it.isExpired);
-        if (expired.isEmpty) return;
-
-        for (final sharedLocation in expired) {
-          // Skip if the location is shared by the current user,
-          // as we are already handling them in the client.
-          if (sharedLocation.userId == currentUserId) continue;
-
-          final lastUpdatedAt = DateTime.timestamp();
-          final locationExpiredEvent = Event(
-            type: EventType.locationExpired,
-            cid: sharedLocation.channelCid,
-            message: Message(
-              id: sharedLocation.messageId,
-              updatedAt: lastUpdatedAt,
-              sharedLocation: sharedLocation.copyWith(
-                updatedAt: lastUpdatedAt,
-              ),
-            ),
-          );
-
-          _channel._client.handleEvent(locationExpiredEvent);
-        }
-      },
+  // Listens for changes to the active live locations and (re)schedules the
+  // one-shot expiry timers accordingly.
+  void _startSchedulingLocationExpiration() {
+    _subscriptions.add(
+      activeLiveLocationsStream.listen(_locationExpirationScheduler.schedule),
     );
+  }
+
+  // Emits a synthetic `location.expired` event for the expired [location].
+  void _handleLocationExpired(Location location) {
+    // The current user's own live locations are handled by the client-level
+    // scheduler in [ClientState]; skip them here.
+    final currentUserId = _channel._client.state.currentUser?.id;
+    if (currentUserId == null || location.userId == currentUserId) return;
+
+    final lastUpdatedAt = DateTime.timestamp();
+
+    final locationExpiredEvent = Event(
+      type: EventType.locationExpired,
+      cid: location.channelCid,
+      message: Message(
+        id: location.messageId,
+        updatedAt: lastUpdatedAt,
+        sharedLocation: location.copyWith(updatedAt: lastUpdatedAt),
+      ),
+    );
+
+    _channel._client.handleEvent(locationExpiredEvent);
   }
 
   // Listens to channel push preference update events and updates the state
@@ -4578,7 +4577,7 @@ class ChannelClientState {
     _threadsController.close();
     _staleTypingEventsCleanerTimer?.cancel();
     _stalePinnedMessagesCleanerTimer?.cancel();
-    _staleLiveLocationsCleanerTimer?.cancel();
+    _locationExpirationScheduler.cancel();
     _typingEventsController.close();
   }
 }
