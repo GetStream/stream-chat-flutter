@@ -42,6 +42,7 @@ dependencies:
   lottie: ^3.3.3
   marionette_flutter: ^0.6.0
   # Add media_kit_libs_video if you want to run it on windows or linux platforms.
+  material_ui: ^1.0.0
   media_kit: ^1.2.6
   media_kit_video: ^2.0.1
   path_provider_android: ">=2.2.5 <2.3.0"
@@ -54,6 +55,7 @@ dependencies:
   video_player: ^2.11.1
   yaml: ^3.1.2
 
+  cupertino_ui: any
 dev_dependencies:
   flutter_launcher_icons: ^0.14.4
   integration_test:

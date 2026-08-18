@@ -1,6 +1,6 @@
 // ignore_for_file: deprecated_member_use
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sample_app/routes/routes.dart';
 import 'package:sample_app/widgets/chips_input_text_field.dart';

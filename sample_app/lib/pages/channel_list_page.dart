@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:app_badge_plus/app_badge_plus.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sample_app/auth/auth_controller.dart';
 import 'package:sample_app/config/sample_app_config.dart';

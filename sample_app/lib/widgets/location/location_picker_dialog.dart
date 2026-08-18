@@ -1,6 +1,6 @@
 import 'package:avatar_glow/avatar_glow.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
+import 'package:cupertino_ui/cupertino_ui.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:sample_app/utils/location_provider.dart';
 import 'package:sample_app/widgets/location/location_user_marker.dart';
 import 'package:sample_app/widgets/simple_map_view.dart';

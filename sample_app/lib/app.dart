@@ -3,10 +3,11 @@
 import 'dart:async';
 
 import 'package:dynamic_color/dynamic_color.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' as legacy;
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart' hide Message;
 import 'package:go_router/go_router.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:sample_app/auth/auth_controller.dart';
 import 'package:sample_app/config/sample_app_config.dart';
@@ -20,7 +21,7 @@ import 'package:sample_app/widgets/location/location_aware_message_composer.dart
 import 'package:sample_app/widgets/location/location_detail_dialog.dart';
 import 'package:sample_app/widgets/video_player.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-import 'package:stream_chat_localizations/stream_chat_localizations.dart';
+import 'package:stream_chat_localizations/stream_chat_localizations.dart' hide GlobalMaterialLocalizations;
 import 'package:streaming_shared_preferences/streaming_shared_preferences.dart';
 
 /// Root widget of the sample app: boots prefs + notifications, runs
@@ -182,18 +183,20 @@ class _StreamChatSampleAppState extends State<StreamChatSampleApp>
                 final surfaceStyle = config.surfaceStyle;
 
                 return DynamicColorBuilder(
-                  builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
+                  builder: (legacy.ColorScheme? lightDynamic, legacy.ColorScheme? darkDynamic) {
+                    final lightStreamTheme = createTheme(
+                      dynamicColor: config.enableDynamicColor ? lightDynamic : null,
+                      brightness: Brightness.light,
+                      surfaceStyle: surfaceStyle,
+                    );
+                    final darkStreamTheme = createTheme(
+                      dynamicColor: config.enableDynamicColor ? darkDynamic : null,
+                      brightness: Brightness.dark,
+                      surfaceStyle: surfaceStyle,
+                    );
                     return MaterialApp.router(
-                      theme: createTheme(
-                        dynamicColor: config.enableDynamicColor ? lightDynamic : null,
-                        brightness: Brightness.light,
-                        surfaceStyle: surfaceStyle,
-                      ),
-                      darkTheme: createTheme(
-                        dynamicColor: config.enableDynamicColor ? darkDynamic : null,
-                        brightness: Brightness.dark,
-                        surfaceStyle: surfaceStyle,
-                      ),
+                      theme: ThemeData.light(),
+                      darkTheme: ThemeData.dark(),
                       themeMode: config.themeMode,
                       locale: config.locale,
                       supportedLocales: supportedLocales,
@@ -202,45 +205,53 @@ class _StreamChatSampleAppState extends State<StreamChatSampleApp>
                         GlobalMaterialLocalizations.delegate,
                         GlobalWidgetsLocalizations.delegate,
                       ],
-                      builder: (context, child) => _ComponentSurfaceStyleOverrides(
-                        config: config,
-                        child: ListenableBuilder(
-                          listenable: authController,
-                          builder: (context, cachedChild) {
-                            final wrapped = Directionality(
-                              textDirection: config.forceRtl ? .rtl : .ltr,
-                              child: cachedChild ?? const SizedBox.shrink(),
-                            );
-
-                            // StreamChat stays mounted as long as a client
-                            // exists so `StreamChat.of(context)` remains
-                            // valid across logout transitions.
-                            final client = authController.client;
-                            if (client != null) {
-                              return StreamChat(
-                                client: client,
-                                // Null in production → the SDK uses the real
-                                // connectivity monitor; set only by e2e tests.
-                                connectivityStream: authController.debugConnectivityStream,
-                                componentBuilders: StreamComponentBuilders(
-                                  extensions: streamChatComponentBuilders(
-                                    messageItem: customMessageItemBuilder,
-                                    messageComposer: locationAwareMessageComposer,
-                                    videoPlayer: (context, props) => SampleAppVideoPlayer(props: props),
-                                  ),
-                                ),
-                                themeData: config.toStreamChatThemeData(),
-                                configData: config.toStreamChatConfigurationData(),
-                                child: wrapped,
-                              );
-                            }
-
-                            return StreamChatTheme(
-                              data: StreamChatThemeData(),
-                              child: wrapped,
-                            );
+                      builder: (context, child) => MaterialUiCompatibilityBridge(
+                        child: legacy.Theme(
+                          data: switch (Theme.of(context).brightness) {
+                            Brightness.light => lightStreamTheme,
+                            Brightness.dark => darkStreamTheme,
                           },
-                          child: child,
+                          child: _ComponentSurfaceStyleOverrides(
+                            config: config,
+                            child: ListenableBuilder(
+                              listenable: authController,
+                              builder: (context, cachedChild) {
+                                final wrapped = Directionality(
+                                  textDirection: config.forceRtl ? .rtl : .ltr,
+                                  child: cachedChild ?? const SizedBox.shrink(),
+                                );
+
+                                // StreamChat stays mounted as long as a client
+                                // exists so `StreamChat.of(context)` remains
+                                // valid across logout transitions.
+                                final client = authController.client;
+                                if (client != null) {
+                                  return StreamChat(
+                                    client: client,
+                                    // Null in production → the SDK uses the real
+                                    // connectivity monitor; set only by e2e tests.
+                                    connectivityStream: authController.debugConnectivityStream,
+                                    componentBuilders: StreamComponentBuilders(
+                                      extensions: streamChatComponentBuilders(
+                                        messageItem: customMessageItemBuilder,
+                                        messageComposer: locationAwareMessageComposer,
+                                        videoPlayer: (context, props) => SampleAppVideoPlayer(props: props),
+                                      ),
+                                    ),
+                                    themeData: config.toStreamChatThemeData(),
+                                    configData: config.toStreamChatConfigurationData(),
+                                    child: wrapped,
+                                  );
+                                }
+
+                                return StreamChatTheme(
+                                  data: StreamChatThemeData(),
+                                  child: wrapped,
+                                );
+                              },
+                              child: child,
+                            ),
+                          ),
                         ),
                       ),
                       routerConfig: _setupRouter(),
@@ -255,12 +266,12 @@ class _StreamChatSampleAppState extends State<StreamChatSampleApp>
     );
   }
 
-  ThemeData createTheme({
-    required ColorScheme? dynamicColor,
+  legacy.ThemeData createTheme({
+    required legacy.ColorScheme? dynamicColor,
     required Brightness brightness,
     required StreamSurfaceStyle surfaceStyle,
   }) {
-    return ThemeData(
+    return legacy.ThemeData(
       brightness: brightness,
       extensions: [
         StreamTheme(

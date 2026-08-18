@@ -1,6 +1,6 @@
 // ignore_for_file: deprecated_member_use
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 class SearchTextField extends StatelessWidget {
