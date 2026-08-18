@@ -214,6 +214,30 @@ class ReactionTapDetails {
   final Reaction? reaction;
 }
 
+/// {@template onReactionLongPress}
+/// The action to perform when a message's reaction is long-pressed.
+///
+/// The [BuildContext] is the context at the long-pressed message, useful for
+/// navigation or showing overlays relative to it.
+/// {@endtemplate}
+typedef OnReactionLongPress = void Function(BuildContext context, ReactionLongPressDetails details);
+
+/// Details of a reaction long press, passed to [OnReactionLongPress].
+@immutable
+class ReactionLongPressDetails {
+  /// Creates details for a reaction long press.
+  const ReactionLongPressDetails({required this.message, required this.reaction});
+
+  /// The message whose reaction was long-pressed.
+  final Message message;
+
+  /// The long-pressed reaction.
+  ///
+  /// `null` when the long press does not map to a single reaction (for example
+  /// a clustered or overflow chip).
+  final Reaction? reaction;
+}
+
 /// {@template onReactionsHover}
 /// The action to perform when a message's reactions are hovered.
 /// {@endtemplate}
