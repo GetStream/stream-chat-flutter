@@ -6,8 +6,8 @@
 
 ⚠️ Changed
 
-- Long-pressing a reaction chip now opens the `ReactionDetailSheet` instead of the message actions modal. The chips always claim the long press, so this applies whether or not `onReactionLongPress` is set.
-- Tapping or long-pressing a reaction chip now opens the `ReactionDetailSheet` pre-filtered to that reaction; it previously opened unfiltered.
+- Long-pressing a reaction chip no longer opens the message actions modal; the chips always claim the long press. Left unset, `onReactionLongPress` defaults to opening the `ReactionDetailSheet`.
+- Tapping or long-pressing a reaction chip now opens the `ReactionDetailSheet` pre-filtered to that reaction; it previously opened unfiltered. Clustered and overflow chips map to no single reaction, so they still open unfiltered.
 
 🔄 Changed
 
