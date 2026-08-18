@@ -2,7 +2,12 @@
 
 ✅ Added
 
-- Added `onReactionLongPress` to `StreamMessageItem` and `StreamMessageListView`, reporting the long-pressed message's `BuildContext` and a `ReactionLongPressDetails` with the `message` and `reaction` (the reaction is `null` for a clustered or overflow chip that maps to no single reaction). When null, long-pressing a reaction keeps falling through to the message actions modal.
+- Added `onReactionLongPress` to `StreamMessageItem` and `StreamMessageListView`, reporting the long-pressed message's `BuildContext` and a `ReactionLongPressDetails` with the `message` and `reaction` (the reaction is `null` for a clustered or overflow chip that maps to no single reaction).
+
+⚠️ Changed
+
+- Long-pressing a reaction chip now opens the `ReactionDetailSheet` instead of the message actions modal. The chips always claim the long press, so this applies whether or not `onReactionLongPress` is set.
+- Tapping or long-pressing a reaction chip now opens the `ReactionDetailSheet` pre-filtered to that reaction; it previously opened unfiltered.
 
 🔄 Changed
 

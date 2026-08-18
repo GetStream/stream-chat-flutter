@@ -325,14 +325,16 @@ class StreamMessageItemProps {
 
   /// {@macro onReactionTap}
   ///
-  /// If null, the default behaviour opens a [ReactionDetailSheet] showing
-  /// the full list of reactions.
+  /// If null, the default behaviour opens a [ReactionDetailSheet] pre-filtered
+  /// to the tapped reaction.
   final OnReactionTap? onReactionTap;
 
   /// {@macro onReactionLongPress}
   ///
-  /// If null, long-pressing a reaction falls through to the message's own
-  /// long-press handling, which opens the [StreamMessageActionsModal].
+  /// If null, the default behaviour matches [onReactionTap] and opens a
+  /// [ReactionDetailSheet] pre-filtered to the long-pressed reaction. The
+  /// chips always claim the long press, so it never reaches the message's own
+  /// long-press handling.
   final OnReactionLongPress? onReactionLongPress;
 
   /// Called when an inline quoted message is tapped.
@@ -560,11 +562,11 @@ class DefaultStreamMessageItem extends StatelessWidget {
       onReactionTap: switch ((props.onReactionTap, props.onReactionsTap)) {
         (final onReactionTap?, _) => (reaction) => onReactionTap(context, .new(message: message, reaction: reaction)),
         (_, final onReactionsTap?) => (_) => onReactionsTap(message),
-        _ => (_) => _showMessageReactionsModal(context, message),
+        _ => (reaction) => _showMessageReactionsModal(context, message, initialReaction: reaction),
       },
       onReactionLongPress: switch (props.onReactionLongPress) {
         final onLongPress? => (reaction) => onLongPress(context, .new(message: message, reaction: reaction)),
-        _ => null,
+        _ => (reaction) => _showMessageReactionsModal(context, message, initialReaction: reaction),
       },
     );
 
@@ -732,13 +734,15 @@ class DefaultStreamMessageItem extends StatelessWidget {
   // Opens the reaction detail sheet and handles the returned action.
   Future<void> _showMessageReactionsModal(
     BuildContext context,
-    Message message,
-  ) async {
+    Message message, {
+    Reaction? initialReaction,
+  }) async {
     final channel = StreamChannel.of(context).channel;
 
     final action = await ReactionDetailSheet.show(
       context: context,
       message: message,
+      initialReactionType: initialReaction?.type,
     );
 
     if (action is! MessageAction) return;

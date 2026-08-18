@@ -132,39 +132,53 @@ void main() {
         reactionGroups: {'love': ReactionGroup(count: 2)},
       );
 
+      // Wrapping above the navigator keeps pushed routes — the reaction detail
+      // sheet — under StreamChat and StreamChannel. The sheet renders shipped
+      // strings, so this group uses the real translations.
       return MaterialApp(
-        localizationsDelegates: const [_FakeLocalizationsDelegate()],
-        home: StreamChat(
+        builder: (context, child) => StreamChat(
           client: client,
           connectivityStream: Stream.value(const [ConnectivityResult.mobile]),
-          child: StreamChannel(
-            channel: channel,
-            child: Scaffold(
-              body: StreamMessageItem(
-                message: message,
-                onReactionLongPress: onReactionLongPress,
-                onMessageLongPress: onMessageLongPress,
-              ),
-            ),
+          child: StreamChannel(channel: channel, child: child!),
+        ),
+        home: Scaffold(
+          body: StreamMessageItem(
+            message: message,
+            onReactionLongPress: onReactionLongPress,
+            onMessageLongPress: onMessageLongPress,
           ),
         ),
       );
     }
 
     // The reaction chips sit inside the message row's own long-press InkWell,
-    // so both recognizers enter the same gesture arena.
+    // so both recognizers enter the same gesture arena. The chip always
+    // registers one, so it always wins over the message's own long press.
     Finder reactionChip() => find.descendant(
       of: find.byType(StreamMessageReactions),
       matching: find.byType(IconButton),
     );
 
-    testWidgets('the chip wins over the message long press', (tester) async {
+    testWidgets('reports the long-pressed reaction', (tester) async {
       Reaction? longPressed;
+
+      await tester.pumpWidget(
+        buildScene(onReactionLongPress: (_, details) => longPressed = details.reaction),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.longPress(reactionChip().first);
+      await tester.pumpAndSettle();
+
+      expect(longPressed?.type, 'love');
+    });
+
+    testWidgets('takes precedence over the message long press', (tester) async {
       var messageLongPressed = false;
 
       await tester.pumpWidget(
         buildScene(
-          onReactionLongPress: (_, details) => longPressed = details.reaction,
+          onReactionLongPress: (_, __) {},
           onMessageLongPress: (_) => messageLongPressed = true,
         ),
       );
@@ -173,11 +187,15 @@ void main() {
       await tester.longPress(reactionChip().first);
       await tester.pumpAndSettle();
 
-      expect(longPressed?.type, 'love');
       expect(messageLongPressed, isFalse);
     });
 
-    testWidgets('the message long press still fires when onReactionLongPress is null', (tester) async {
+    testWidgets('opens the detail sheet filtered to the reaction by default', (tester) async {
+      // The sheet needs more height than the default test surface.
+      tester.view.physicalSize = const Size(1200, 2000);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+
       var messageLongPressed = false;
 
       await tester.pumpWidget(
@@ -185,11 +203,14 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // No chip-level recognizer is registered, so the gesture falls through.
       await tester.longPress(reactionChip().first);
       await tester.pumpAndSettle();
 
-      expect(messageLongPressed, isTrue);
+      final sheet = tester.widget<ReactionDetailSheet>(find.byType(ReactionDetailSheet));
+      expect(sheet.initialReactionType, 'love');
+      // The default pre-empts the message's long press rather than falling
+      // through to the actions modal.
+      expect(messageLongPressed, isFalse);
     });
   });
 

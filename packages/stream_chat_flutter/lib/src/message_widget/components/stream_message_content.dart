@@ -114,8 +114,8 @@ class StreamMessageContent extends StatefulWidget {
   /// Called when a reaction chip is long-pressed, with the pressed [Reaction].
   ///
   /// Reports `null` when the long press does not map to a single reaction (a
-  /// clustered or overflow chip). If null, long-pressing reactions falls
-  /// through to the enclosing message's long-press handler.
+  /// clustered or overflow chip). If null, the chips register no long-press
+  /// gesture, leaving it to an ancestor.
   final ValueSetter<Reaction?>? onReactionLongPress;
 
   /// Called when the quoted message is tapped.
