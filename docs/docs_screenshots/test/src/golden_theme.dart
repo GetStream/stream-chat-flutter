@@ -90,6 +90,11 @@ void docsGoldenTest(
       final userCleanup = await whilePerforming?.call(tester);
       return () async {
         await userCleanup?.call();
+        // Components that announce to screen readers (e.g. the voice recording
+        // snackbar) leave a pending delayed Timer behind on iOS/macOS. Nothing
+        // pumps it during a golden test, so cancel it before the binding
+        // asserts that no timers are outstanding.
+        StreamSemanticsAnnouncer.cancel();
         CurrentPlatform.debugCurrentPlatformOverride = null;
         debugDefaultTargetPlatformOverride = null;
       };

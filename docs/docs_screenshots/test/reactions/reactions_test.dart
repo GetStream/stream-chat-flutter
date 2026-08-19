@@ -361,6 +361,88 @@ void main() {
       );
     },
   );
+
+  // --------------------------------------------------------------------------
+  // reaction type — segmented (one chip per type) vs. clustered (a single
+  // chip grouping every type).
+  // --------------------------------------------------------------------------
+
+  Widget reactionTypeShowcase(StreamReactionsType type) {
+    final client = MockClient();
+    final clientState = MockClientState();
+    when(() => client.state).thenReturn(clientState);
+    when(() => clientState.currentUser).thenReturn(ownUser);
+
+    final channel = MockChannel(type: 'messaging', id: 'general');
+    final channelState = MockChannelState();
+    setupMockChannel(client: client, clientState: clientState, channel: channel, channelState: channelState);
+
+    final message = Message(
+      id: 'msg-reaction-type',
+      text: 'Shipping this today',
+      user: noahSmith,
+      createdAt: DateTime(2024, 6, 1, 10, 0),
+      reactionGroups: {
+        'love': ReactionGroup(
+          count: 3,
+          sumScores: 3,
+          firstReactionAt: DateTime(2024, 6, 1),
+          lastReactionAt: DateTime(2024, 6, 1),
+        ),
+        'like': ReactionGroup(
+          count: 2,
+          sumScores: 2,
+          firstReactionAt: DateTime(2024, 6, 1),
+          lastReactionAt: DateTime(2024, 6, 1),
+        ),
+        'haha': ReactionGroup(
+          count: 1,
+          sumScores: 1,
+          firstReactionAt: DateTime(2024, 6, 1),
+          lastReactionAt: DateTime(2024, 6, 1),
+        ),
+        'wow': ReactionGroup(
+          count: 1,
+          sumScores: 1,
+          firstReactionAt: DateTime(2024, 6, 1),
+          lastReactionAt: DateTime(2024, 6, 1),
+        ),
+        'sad': ReactionGroup(
+          count: 1,
+          sumScores: 1,
+          firstReactionAt: DateTime(2024, 6, 1),
+          lastReactionAt: DateTime(2024, 6, 1),
+        ),
+      },
+    );
+
+    return StreamChat(
+      client: client,
+      connectivityStream: Stream.value([ConnectivityResult.mobile]),
+      configData: StreamChatConfigurationData(reactionType: type),
+      child: StreamChannel(
+        showLoading: false,
+        channel: channel,
+        child: Scaffold(
+          body: Center(child: StreamMessageItem(message: message)),
+        ),
+      ),
+    );
+  }
+
+  docsGoldenTest(
+    'reaction type segmented',
+    fileName: 'reaction_type_segmented',
+    constraints: const BoxConstraints.tightFor(width: 375, height: 140),
+    builder: () => reactionTypeShowcase(StreamReactionsType.segmented),
+  );
+
+  docsGoldenTest(
+    'reaction type clustered',
+    fileName: 'reaction_type_clustered',
+    constraints: const BoxConstraints.tightFor(width: 375, height: 140),
+    builder: () => reactionTypeShowcase(StreamReactionsType.clustered),
+  );
 }
 
 /// Opens [ReactionDetailSheet] in a post-frame callback so the golden test
