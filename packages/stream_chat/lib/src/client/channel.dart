@@ -4,6 +4,7 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:collection/collection.dart';
+import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/src/client/retry_queue.dart';
 import 'package:stream_chat/src/core/util/utils.dart';
@@ -198,7 +199,7 @@ class Channel {
   /// Channel configuration.
   ChannelConfig? get config {
     _checkInitialized();
-    return state!._channelState.channel?.config;
+    return state!.channelState.channel?.config;
   }
 
   /// Channel configuration as a stream.
@@ -210,7 +211,7 @@ class Channel {
   /// Relationship of the current user to this channel.
   Member? get membership {
     _checkInitialized();
-    return state!._channelState.membership;
+    return state!.channelState.membership;
   }
 
   /// Relationship of the current user to this channel as a stream.
@@ -222,7 +223,7 @@ class Channel {
   /// Channel user creator.
   User? get createdBy {
     _checkInitialized();
-    return state!._channelState.channel?.createdBy;
+    return state!.channelState.channel?.createdBy;
   }
 
   /// Channel user creator as a stream.
@@ -234,7 +235,7 @@ class Channel {
   /// Channel frozen status.
   bool get frozen {
     _checkInitialized();
-    return state!._channelState.channel?.frozen == true;
+    return state!.channelState.channel?.frozen == true;
   }
 
   /// Channel frozen status as a stream.
@@ -246,7 +247,7 @@ class Channel {
   /// Channel disabled status.
   bool get disabled {
     _checkInitialized();
-    return state!._channelState.channel?.disabled == true;
+    return state!.channelState.channel?.disabled == true;
   }
 
   /// Channel disabled status as a stream.
@@ -258,7 +259,7 @@ class Channel {
   /// Channel hidden status.
   bool get hidden {
     _checkInitialized();
-    return state!._channelState.channel?.hidden == true;
+    return state!.channelState.channel?.hidden == true;
   }
 
   /// Channel hidden status as a stream.
@@ -296,7 +297,7 @@ class Channel {
   /// The last date at which the channel got truncated.
   DateTime? get truncatedAt {
     _checkInitialized();
-    return state!._channelState.channel?.truncatedAt;
+    return state!.channelState.channel?.truncatedAt;
   }
 
   /// The last date at which the channel got truncated as a stream.
@@ -308,7 +309,7 @@ class Channel {
   /// Cooldown count
   int get cooldown {
     _checkInitialized();
-    return state!._channelState.channel?.cooldown ?? 0;
+    return state!.channelState.channel?.cooldown ?? 0;
   }
 
   /// Cooldown count as a stream
@@ -343,7 +344,7 @@ class Channel {
   /// Channel creation date.
   DateTime? get createdAt {
     _checkInitialized();
-    return state!._channelState.channel?.createdAt;
+    return state!.channelState.channel?.createdAt;
   }
 
   /// Channel creation date as a stream.
@@ -355,7 +356,7 @@ class Channel {
   /// Channel last message date.
   DateTime? get lastMessageAt {
     _checkInitialized();
-    return state!._channelState.channel?.lastMessageAt;
+    return state!.channelState.channel?.lastMessageAt;
   }
 
   /// Channel last message date as a stream.
@@ -435,7 +436,7 @@ class Channel {
   /// Channel updated date.
   DateTime? get updatedAt {
     _checkInitialized();
-    return state!._channelState.channel?.updatedAt;
+    return state!.channelState.channel?.updatedAt;
   }
 
   /// Channel updated date as a stream.
@@ -447,7 +448,7 @@ class Channel {
   /// Channel deletion date.
   DateTime? get deletedAt {
     _checkInitialized();
-    return state!._channelState.channel?.deletedAt;
+    return state!.channelState.channel?.deletedAt;
   }
 
   /// Channel deletion date as a stream.
@@ -459,7 +460,7 @@ class Channel {
   /// Channel member count.
   int? get memberCount {
     _checkInitialized();
-    return state!._channelState.channel?.memberCount;
+    return state!.channelState.channel?.memberCount;
   }
 
   /// Channel member count as a stream.
@@ -474,7 +475,7 @@ class Channel {
   /// enabled for your app.
   int? get messageCount {
     _checkInitialized();
-    return state!._channelState.channel?.messageCount;
+    return state!.channelState.channel?.messageCount;
   }
 
   /// Channel message count as a stream.
@@ -491,27 +492,27 @@ class Channel {
   /// Generally used for filtering channels while querying.
   List<String>? get filterTags {
     _checkInitialized();
-    return state!._channelState.channel?.filterTags;
+    return state!.channelState.channel?.filterTags;
   }
 
   /// Channel id.
-  String? get id => state?._channelState.channel?.id ?? _id;
+  String? get id => state?.channelState.channel?.id ?? _id;
 
   /// Channel type.
-  String get type => state?._channelState.channel?.type ?? _type;
+  String get type => state?.channelState.channel?.type ?? _type;
 
   /// Channel cid.
-  String? get cid => state?._channelState.channel?.cid ?? _cid;
+  String? get cid => state?.channelState.channel?.cid ?? _cid;
 
   /// Channel team.
   String? get team {
     _checkInitialized();
-    return state!._channelState.channel?.team;
+    return state!.channelState.channel?.team;
   }
 
   /// Channel extra data.
   Map<String, Object?> get extraData {
-    var data = state?._channelState.channel?.extraData;
+    var data = state?.channelState.channel?.extraData;
     if (data == null || data.isEmpty) {
       data = _extraData;
     }
@@ -519,7 +520,7 @@ class Channel {
   }
 
   /// List of user permissions on this channel
-  List<ChannelCapability> get ownCapabilities => state?._channelState.channel?.ownCapabilities ?? [];
+  List<ChannelCapability> get ownCapabilities => state?.channelState.channel?.ownCapabilities ?? [];
 
   /// List of user permissions on this channel
   Stream<List<ChannelCapability>> get ownCapabilitiesStream {
@@ -849,7 +850,7 @@ class Channel {
       state?.updateMessage(failedMessage);
       // If the error is retriable, add it to the retry queue.
       if (e is StreamChatNetworkError && e.isRetriable) {
-        state?._retryQueue.add([failedMessage]);
+        state?.scheduleRetry(failedMessage);
       }
 
       rethrow;
@@ -938,7 +939,7 @@ class Channel {
       state?.updateMessage(failedMessage);
       // If the error is retriable, add it to the retry queue.
       if (e is StreamChatNetworkError && e.isRetriable) {
-        state?._retryQueue.add([failedMessage]);
+        state?.scheduleRetry(failedMessage);
       }
 
       rethrow;
@@ -1005,7 +1006,7 @@ class Channel {
       state?.updateMessage(failedMessage);
       // If the error is retriable, add it to the retry queue.
       if (e is StreamChatNetworkError && e.isRetriable) {
-        state?._retryQueue.add([failedMessage]);
+        state?.scheduleRetry(failedMessage);
       }
 
       rethrow;
@@ -1100,7 +1101,7 @@ class Channel {
       state?.deleteMessage(failedMessage, hardDelete: scope.hard);
       // If the error is retriable, add it to the retry queue.
       if (e is StreamChatNetworkError && e.isRetriable) {
-        state?._retryQueue.add([failedMessage]);
+        state?.scheduleRetry(failedMessage);
       }
 
       rethrow;
@@ -2568,7 +2569,7 @@ class ChannelClientState {
   }
 
   final Channel _channel;
-  StreamChatClient get _client => _channel._client;
+  StreamChatClient get _client => _channel.client;
   final _subscriptions = CompositeSubscription();
 
   void _listenMemberAdded() {
@@ -2818,6 +2819,11 @@ class ChannelClientState {
     if (failedMessages.isEmpty) return;
     _retryQueue.add(failedMessages);
   }
+
+  /// Adds a failed [message] to the retry queue, scheduling it to be
+  /// automatically resent once the connection is re-established.
+  @internal
+  void scheduleRetry(Message message) => _retryQueue.add([message]);
 
   Message? _findPollMessage(String pollId) {
     final message = messages.firstWhereOrNull((it) => it.pollId == pollId);
@@ -4051,7 +4057,7 @@ class ChannelClientState {
     _staleLiveLocationsCleanerTimer = Timer.periodic(
       const Duration(seconds: 1),
       (_) {
-        final currentUserId = _channel._client.state.currentUser?.id;
+        final currentUserId = _client.state.currentUser?.id;
         if (currentUserId == null) return;
 
         final expired = activeLiveLocations.where((it) => it.isExpired);
@@ -4075,7 +4081,7 @@ class ChannelClientState {
             ),
           );
 
-          _channel._client.handleEvent(locationExpiredEvent);
+          _client.handleEvent(locationExpiredEvent);
         }
       },
     );
@@ -4810,7 +4816,7 @@ extension ChannelCapabilityCheck on Channel {
   /// livestream channel types that disable read events). Channels that
   /// support read receipts always rely on server-driven unread counts.
   bool get usesLocalUnreadCount {
-    return _client.isLocalUnreadCountEnabled && !canUseReadReceipts;
+    return client.isLocalUnreadCountEnabled && !canUseReadReceipts;
   }
 
   /// True, if the current user has connect events capability.
