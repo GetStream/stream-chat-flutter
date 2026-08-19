@@ -1,4 +1,4 @@
-import 'package:stream_chat/src/client/channel.dart';
+import 'package:stream_chat/src/client/channel/channel.dart';
 import 'package:stream_chat/src/core/models/predefined_filter.dart';
 
 /// The result of a `queryChannelsWithResult` call on [StreamChatClient].

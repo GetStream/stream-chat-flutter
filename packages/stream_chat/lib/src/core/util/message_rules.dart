@@ -1,4 +1,5 @@
-import 'package:stream_chat/src/client/channel.dart';
+import 'package:stream_chat/src/client/channel/channel.dart';
+import 'package:stream_chat/src/client/channel/channel_capability_check.dart';
 import 'package:stream_chat/src/core/models/message.dart';
 import 'package:stream_chat/src/core/models/own_user.dart';
 
