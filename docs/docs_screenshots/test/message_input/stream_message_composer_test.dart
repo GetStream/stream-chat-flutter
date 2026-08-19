@@ -71,7 +71,7 @@ void main() {
 
   docsGoldenTest(
     'message input default',
-    fileName: 'message_input',
+    fileName: 'message_composer',
     constraints: const BoxConstraints.tightFor(width: 375, height: 100),
     builder: () {
       final client = MockClient();
@@ -101,7 +101,7 @@ void main() {
 
   docsGoldenTest(
     'message input actions on right',
-    fileName: 'message_input_change_position',
+    fileName: 'message_composer_change_position',
     constraints: const BoxConstraints.tightFor(width: 375, height: 100),
     builder: () {
       final client = MockClient();
@@ -156,7 +156,7 @@ void main() {
 
   docsGoldenTest(
     'custom send icon via StreamIcons',
-    fileName: 'message_input_custom_send_icon',
+    fileName: 'message_composer_custom_send_icon',
     constraints: const BoxConstraints.tightFor(width: 375, height: 100),
     builder: () {
       final client = MockClient();
@@ -237,7 +237,7 @@ void main() {
 
   docsGoldenTest(
     'message input with quoted message',
-    fileName: 'message_input_quoted_message',
+    fileName: 'message_composer_quoted_message',
     constraints: const BoxConstraints.tightFor(width: 375, height: 180),
     builder: () {
       final client = MockClient();
@@ -331,7 +331,7 @@ void main() {
 
   docsGoldenTest(
     'custom composer buttons',
-    fileName: 'message_input_custom_buttons',
+    fileName: 'message_composer_custom_buttons',
     constraints: const BoxConstraints.tightFor(width: 375, height: 100),
     builder: () {
       final client = MockClient();

@@ -225,32 +225,6 @@ void main() {
     },
   );
 
-  docsGoldenTest(
-    'message with rounded avatar',
-    fileName: 'message_rounded_avatar',
-    constraints: const BoxConstraints.tightFor(width: 375, height: 120),
-    builder: () {
-      final client = MockClient();
-      final clientState = MockClientState();
-      final channel = MockChannel(type: 'messaging', id: 'general');
-      final channelState = MockChannelState();
-      _setupBasicChannel(client, clientState, channel, channelState);
-
-      final message = Message(
-        id: 'msg-4',
-        text: 'Message with user avatar shown.',
-        user: _sender,
-        createdAt: DateTime(2024, 6, 1, 10, 0),
-      );
-
-      return _buildMessageScaffold(
-        client: client,
-        channel: channel,
-        child: Center(child: StreamMessageItem(message: message)),
-      );
-    },
-  );
-
   // Mirrors the placement-aware `resolveWith` example in the "Customizing
   // Text" section of the message item docs — one ambient theme, two messages,
   // colour and weight resolved from the alignment.
