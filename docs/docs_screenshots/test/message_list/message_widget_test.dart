@@ -251,6 +251,9 @@ void main() {
     },
   );
 
+  // Mirrors the placement-aware `resolveWith` example in the "Customizing
+  // Text" section of the message item docs — one ambient theme, two messages,
+  // colour and weight resolved from the alignment.
   docsGoldenTest(
     'message styles',
     fileName: 'message_styles',
@@ -270,21 +273,27 @@ void main() {
           showLoading: false,
           channel: channel,
           child: Scaffold(
-            body: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                core.StreamMessageItemTheme(
-                  data: core.StreamMessageItemThemeData(
-                    text: core.StreamMessageTextStyle.from(
-                      textColor: Colors.deepPurple,
-                      textStyle: const TextStyle(
-                        fontSize: 16,
-                        fontStyle: FontStyle.italic,
-                        fontFamily: 'Roboto',
-                      ),
-                    ),
-                  ),
-                  child: StreamMessageItem(
+            body: core.StreamMessageItemTheme(
+              data: core.StreamMessageItemThemeData(
+                text: core.StreamMessageTextStyle(
+                  textColor: core.StreamMessageLayoutProperty.resolveWith((p) {
+                    final isEnd = p.alignment == core.StreamMessageAlignment.end;
+                    return isEnd ? Colors.indigo : Colors.deepPurple;
+                  }),
+                  // fontFamily is a golden-test detail: a custom TextStyle that
+                  // names no family falls back to the Ahem test font.
+                  textStyle: core.StreamMessageLayoutProperty.resolveWith((p) {
+                    final isEnd = p.alignment == core.StreamMessageAlignment.end;
+                    return isEnd
+                        ? const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, fontFamily: 'Roboto')
+                        : const TextStyle(fontSize: 16, fontStyle: FontStyle.italic, fontFamily: 'Roboto');
+                  }),
+                ),
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  StreamMessageItem(
                     message: Message(
                       id: 'msg-from-other',
                       text: 'This is a message from ${_sender.name}.',
@@ -292,21 +301,9 @@ void main() {
                       createdAt: DateTime(2024, 6, 1, 10, 0),
                     ),
                   ),
-                ),
-                core.StreamMessageLayout(
-                  data: const core.StreamMessageLayoutData(
-                    alignment: core.StreamMessageAlignment.end,
-                  ),
-                  child: core.StreamMessageItemTheme(
-                    data: core.StreamMessageItemThemeData(
-                      text: core.StreamMessageTextStyle.from(
-                        textColor: Colors.indigo,
-                        textStyle: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          fontFamily: 'Roboto',
-                        ),
-                      ),
+                  core.StreamMessageLayout(
+                    data: const core.StreamMessageLayoutData(
+                      alignment: core.StreamMessageAlignment.end,
                     ),
                     child: StreamMessageItem(
                       message: Message(
@@ -317,8 +314,8 @@ void main() {
                       ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
