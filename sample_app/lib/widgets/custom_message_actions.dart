@@ -14,7 +14,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 ///   → _ReminderActions    (remind me, save for later, edit/remove reminder)
 ///   → _DeleteForMeAction  (delete message for current user only)
 ///   → _MessageInfoAction  (show message delivery info sheet)
-///   → _TranslateAction    (translate message on request)
+///   → _TranslateMessageAction (translate message on request)
 /// ```
 Widget customMessageItemBuilder(
   BuildContext context,
@@ -31,7 +31,7 @@ Widget customMessageItemBuilder(
             ..._ReminderActions.build(context, message),
             ..._DeleteForMeAction.build(context, message),
             ..._MessageInfoAction.build(context, message),
-            ..._TranslateAction.build(context, message),
+            ..._TranslateMessageAction.build(context, message),
           ],
         );
       },
@@ -219,8 +219,8 @@ abstract final class _MessageInfoAction {
 /// Only shown for messages from other users — translating your own message
 /// isn't a useful action — and always translates directly to the current
 /// user's [User.language], with no language picker. Hidden entirely when
-/// that isn't set server-side, rather than guessing a target language.
-abstract final class _TranslateAction {
+/// that isn't set, rather than guessing a target language.
+abstract final class _TranslateMessageAction {
   static List<StreamContextMenuAction> build(
     BuildContext context,
     Message message,
@@ -233,27 +233,29 @@ abstract final class _TranslateAction {
     final isSentByCurrentUser = message.user?.id == currentUser?.id;
     if (isSentByCurrentUser) return const [];
 
-    final userLanguage = currentUser?.language;
-    if (userLanguage == null || userLanguage.isEmpty) return const [];
+    // The SDK renders translations for the user's own language, so that is
+    // what we ask the backend for. Set at login by `AuthController.connect`.
+    final language = currentUser?.language;
+    if (language == null || language.isEmpty) return const [];
 
     // Already covers the message's own language: the server includes a
     // self-referential entry keyed by its source language, so this is also
-    // `true` when the original text is already in the user's language —
+    // `true` when the original text is already in the display language —
     // either way, there's nothing left to translate.
-    final alreadyTranslated = message.i18n?['${userLanguage}_text'] != null;
+    final alreadyTranslated = message.i18n?['${language}_text'] != null;
 
     final icons = context.streamIcons;
     return [
       StreamContextMenuAction(
-        label: const Text('Translate'),
+        label: const Text('Translate Message'),
         leading: Icon(icons.translate),
         enabled: !alreadyTranslated,
-        onTap: () => _translate(context, message, userLanguage),
+        onTap: () => _translateMessage(context, message, language),
       ),
     ];
   }
 
-  static Future<void> _translate(
+  static Future<void> _translateMessage(
     BuildContext context,
     Message message,
     String language,
@@ -264,8 +266,11 @@ abstract final class _TranslateAction {
       channel.state?.updateMessage(response.message);
     } catch (e) {
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to translate message: $e')),
+      StreamSnackbarMessenger.of(context).show(
+        StreamSnackbar(
+          message: Text('Failed to translate message: $e'),
+          variant: .error,
+        ),
       );
     }
   }

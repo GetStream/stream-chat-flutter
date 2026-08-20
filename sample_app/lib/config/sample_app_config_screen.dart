@@ -105,7 +105,7 @@ class SampleAppConfigScreen extends StatelessWidget {
                 _SwitchRow(
                   icon: icons.translate,
                   title: 'Message Translation',
-                  subtitle: 'Translate a message on request',
+                  subtitle: 'Show translations, annotate them, and translate on request',
                   value: config.enableMessageTranslation,
                   onChanged: (v) => SampleAppConfig.update(context, config.copyWith(enableMessageTranslation: v)),
                 ),

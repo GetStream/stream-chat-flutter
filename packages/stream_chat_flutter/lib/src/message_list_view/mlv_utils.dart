@@ -2,6 +2,7 @@ import 'package:collection/collection.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat_flutter/scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_core_flutter/chat.dart' as core;
 
 /// Determines at which point in the [MessageListView] the initial index should
 /// be.
@@ -157,7 +158,7 @@ StreamMessageContentKind resolveContentKind(Message message) {
   }
 
   if (!hasQuote && attachmentCount == 0) {
-    final emojiCount = StreamMessageText.emojiCount(message.text);
+    final emojiCount = core.StreamMessageText.emojiCount(message.text);
     if (emojiCount != null && emojiCount <= 3) return .jumbomoji;
   }
 

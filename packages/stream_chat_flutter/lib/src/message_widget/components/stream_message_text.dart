@@ -13,10 +13,9 @@ import 'package:stream_core_flutter/chat.dart' as core;
 ///
 /// The message text is translated into the current user's language, mention
 /// syntax is replaced with display names, and the result is rendered as
-/// markdown. Pass [showOriginalText] to display the original text instead,
+/// markdown. Pass `showTranslatedText: false` to display the original text
 /// even when a translation is available. Automatic translation can be
-/// turned off SDK-wide via
-/// [StreamChatConfigurationData.translationDisplayEnabled].
+/// turned off SDK-wide via [StreamMessageTranslationConfiguration.enabled].
 ///
 /// The widget rebuilds automatically when the current user's language
 /// changes, ensuring the displayed text stays in sync.
@@ -34,15 +33,17 @@ class StreamMessageText extends StatelessWidget {
     this.onLinkTap,
     this.onMentionTap,
     this.onAnyMentionTap,
-    this.showOriginalText = false,
+    this.showTranslatedText = true,
   });
 
   /// The message whose text to display.
   final Message message;
 
-  /// Whether to display [message]'s original text instead of a translation,
-  /// when [Message.i18n] has one for the current user's language.
-  final bool showOriginalText;
+  /// Whether to display the translation of [message] when [Message.i18n] has
+  /// one for the current user's language.
+  ///
+  /// Set to `false` to display the original text instead. Defaults to `true`.
+  final bool showTranslatedText;
 
   /// Called when a link in the rendered markdown is tapped.
   ///
@@ -71,7 +72,7 @@ class StreamMessageText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final streamChat = StreamChat.of(context);
-    final translationDisplayEnabled = StreamChatConfiguration.of(context).translationDisplayEnabled;
+    final translationConfig = StreamChatConfiguration.of(context).messageTranslation;
 
     // `BetterStreamBuilder`'s type parameter can't be nullable, so the
     // current user's (possibly unset) language is wrapped in a record —
@@ -80,9 +81,9 @@ class StreamMessageText extends StatelessWidget {
       initialData: (language: streamChat.currentUser?.language),
       stream: streamChat.currentUserStream.map((it) => (language: it?.language)),
       builder: (context, data) {
-        final translated = (showOriginalText || !translationDisplayEnabled)
-            ? message
-            : message.translate(data.language);
+        final translated = (showTranslatedText && translationConfig.enabled)
+            ? message.translate(data.language)
+            : message;
         final messageText = translated.replaceMentions().text?.replaceAll('\n', '\n\n').trim();
 
         if (messageText == null || messageText.trim().isEmpty) return const Empty();

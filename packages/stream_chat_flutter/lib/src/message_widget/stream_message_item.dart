@@ -6,7 +6,6 @@ import 'package:flutter/services.dart';
 import 'package:stream_chat_flutter/platform_widget_builder/src/platform_widget_builder.dart';
 import 'package:stream_chat_flutter/src/context_menu/context_menu.dart';
 import 'package:stream_chat_flutter/src/context_menu/context_menu_region.dart';
-import 'package:stream_chat_flutter/src/message_widget/components/stream_message_content.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_core_flutter/chat.dart' as core;
 
@@ -455,7 +454,7 @@ class DefaultStreamMessageItem extends StatelessWidget {
     final message = props.message;
 
     final translationStore = StreamMessageTranslations.of(context);
-    final showOriginalText = translationStore?.isShowingOriginalText(message.id) ?? false;
+    final showsOriginalText = translationStore?.isShowingOriginalText(message.id) ?? false;
 
     final placement = StreamMessageLayout.of(context);
     final theme = core.StreamMessageItemTheme.of(context);
@@ -495,8 +494,8 @@ class DefaultStreamMessageItem extends StatelessWidget {
           final onTap? => () => onTap(message),
           _ => () => _onViewThread(context, message),
         },
-        showOriginalText: showOriginalText,
-        onToggleOriginalText: switch (translationStore) {
+        showTranslatedText: !showsOriginalText,
+        onToggleTranslatedText: switch (translationStore) {
           final store? => () => store.toggleOriginalText(message.id),
           null => null,
         },
@@ -535,7 +534,7 @@ class DefaultStreamMessageItem extends StatelessWidget {
       attachmentBuilders: props.attachmentBuilders,
       reactionSorting: props.reactionSorting,
       onQuotedMessageTap: props.onQuotedMessageTap,
-      showOriginalText: showOriginalText,
+      showTranslatedText: !showsOriginalText,
       onLinkTap: (_, href, __) {
         if (href == null) return;
         if (props.onMessageLinkTap case final onTap?) return onTap(message, href);

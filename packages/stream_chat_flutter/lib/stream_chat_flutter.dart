@@ -14,6 +14,7 @@ export 'package:stream_core_flutter/chat.dart'
         // additional features and customization options.
         StreamMessageContent,
         StreamMessageContentProps,
+        StreamMessageText,
         StreamMessageComposerAttachment,
         StreamMessageComposerAttachmentProps;
 
@@ -94,9 +95,11 @@ export 'src/message_modal/message_action_confirmation_modal.dart';
 export 'src/message_modal/message_actions_modal.dart';
 export 'src/message_modal/message_modal.dart';
 export 'src/message_modal/moderated_message_actions_modal.dart';
+export 'src/message_widget/components/stream_message_content.dart';
 export 'src/message_widget/components/stream_message_footer.dart';
 export 'src/message_widget/components/stream_message_header.dart';
 export 'src/message_widget/components/stream_message_leading.dart';
+export 'src/message_widget/components/stream_message_text.dart';
 export 'src/message_widget/stream_message_item.dart';
 export 'src/message_widget/stream_message_translation_store.dart';
 export 'src/message_widget/stream_moderated_message.dart';

@@ -43,7 +43,7 @@ class StreamMessageContent extends StatefulWidget {
     this.onReactionTap,
     this.onQuotedMessageTap,
     this.reactionSorting,
-    this.showOriginalText = false,
+    this.showTranslatedText = true,
   });
 
   /// The message to display.
@@ -121,12 +121,11 @@ class StreamMessageContent extends StatefulWidget {
   /// Passed through to [StreamMessageReactions.sorting].
   final Comparator<ReactionGroup>? reactionSorting;
 
-  /// Whether [message] should display its original text instead of a
-  /// translation, when [Message.i18n] has one for the current user's
-  /// language.
+  /// Whether [message] should display its translation when [Message.i18n]
+  /// has one for the current user's language.
   ///
-  /// Passed through to [StreamMessageText.showOriginalText].
-  final bool showOriginalText;
+  /// Passed through to [StreamMessageText.showTranslatedText].
+  final bool showTranslatedText;
 
   @override
   State<StreamMessageContent> createState() => _StreamMessageContentState();
@@ -206,7 +205,7 @@ class _StreamMessageContentState extends State<StreamMessageContent> {
                           onLinkTap: widget.onLinkTap,
                           onMentionTap: widget.onMentionTap,
                           onAnyMentionTap: widget.onAnyMentionTap,
-                          showOriginalText: widget.showOriginalText,
+                          showTranslatedText: widget.showTranslatedText,
                         ),
                     ],
                   ),

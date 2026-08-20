@@ -2,10 +2,17 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 const kDefaultStreamApiKey = 'kv7mcsxr24p8';
 
+/// The demo accounts, keyed by their (pre-generated) user token.
+///
+/// Each carries a [User.language] roughly matching its name, so signing in as
+/// different users demonstrates message translation: the backend only
+/// auto-translates for users that have a language set, and the UI renders the
+/// translation for the current user's language.
 final defaultUsers = <String, User>{
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoic2FsdmF0b3JlIn0.pgiJz7sIc7iP29BHKFwe3nLm5-OaR_1l2P-SlgiC9a8':
       User(
         id: 'salvatore',
+        language: 'it',
         extraData: const {
           'name': 'Salvatore Giordano',
           'image':
@@ -14,6 +21,7 @@ final defaultUsers = <String, User>{
       ),
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoic2FoaWwifQ.WnIUoB5gR2kcAsFhiDvkiD6zdHXZ-VSU2aQWWkhsvfo': User(
     id: 'sahil',
+    language: 'hi',
     extraData: const {
       'name': 'Sahil Kumar',
       'image': 'https://avatars.githubusercontent.com/u/25670178?s=400&u=30ded3784d8d2310c5748f263fd5e6433c119aa1&v=4',
@@ -21,6 +29,7 @@ final defaultUsers = <String, User>{
   ),
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiYmVuIn0.nAz2sNFGQwY7rl2Og2z3TGHUsdpnN53tOsUglJFvLmg': User(
     id: 'ben',
+    language: 'en',
     extraData: const {
       'name': 'Ben Golden',
       'image': 'https://avatars.githubusercontent.com/u/1581974?s=400&v=4',
@@ -28,6 +37,7 @@ final defaultUsers = <String, User>{
   ),
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidGhpZXJyeSJ9.lEq6TrZtHzjoNtf7HHRufUPyGo_pa8vg4_XhEBp4ckY': User(
     id: 'thierry',
+    language: 'nl',
     extraData: const {
       'name': 'Thierry Schellenbach',
       'image': 'https://avatars.githubusercontent.com/u/265409?s=400&u=2d0e3bb1820db992066196bff7b004f0eee8e28d&v=4',
@@ -35,6 +45,7 @@ final defaultUsers = <String, User>{
   ),
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidG9tbWFzbyJ9.GLSI0ESshERMo2WjUpysD709NEtn1zmGimUN2an7g9o': User(
     id: 'tommaso',
+    language: 'it',
     extraData: const {
       'name': 'Tommaso Barbugli',
       'image': 'https://avatars.githubusercontent.com/u/88735?s=400&v=4',
@@ -49,6 +60,7 @@ final defaultUsers = <String, User>{
   // ),
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoibmVldmFzaCJ9.3EdHegTxibrz3A9cTiKmpEyawwcCVB8FXnoFzr4eKvw': User(
     id: 'neevash',
+    language: 'en',
     extraData: const {
       'name': 'Neevash Ramdial',
       'image': 'https://avatars.githubusercontent.com/u/25674767?s=400&u=1d7333baf7dd9d143db8bfcdb31a838b89cfff9c&v=4',
@@ -56,12 +68,14 @@ final defaultUsers = <String, User>{
   ),
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoicWF0ZXN0MSJ9.fnelU7HcP7QoEEsCGteNlF1fppofzNlrnpDQuIgeKCU': User(
     id: 'qatest1',
+    language: 'es',
     extraData: const {
       'name': 'QA test 1',
     },
   ),
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoicWF0ZXN0MiJ9.vSCqAEbs2WVmMWsOsa7065Fsjq-rsTih6qsHPynl7XM': User(
     id: 'qatest2',
+    language: 'ja',
     extraData: const {
       'name': 'QA test 2',
     },

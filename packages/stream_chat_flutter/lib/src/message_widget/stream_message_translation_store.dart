@@ -1,7 +1,12 @@
 import 'package:flutter/widgets.dart';
 
-/// Tracks, for messages within a single message list, which ones are
-/// currently showing their original text instead of a translation.
+/// Tracks, for messages within a single message list, which ones the user
+/// has switched back to their original text.
+///
+/// Showing the translation is the default, so [value] holds only the
+/// exceptions — the ids of messages switched to their original text. It is
+/// empty while every message shows its translation. This mirrors
+/// `MessageOriginalTranslationsStore` in the Swift SDK.
 ///
 /// One store is owned per [StreamMessageListView] instance — a channel view
 /// and an open thread each get independent toggle state, since opening a
@@ -9,20 +14,21 @@ import 'package:flutter/widgets.dart';
 /// the individual message widget, is what makes the toggle survive message
 /// items being disposed and recreated as they scroll out of and back into
 /// the list's render window.
-class StreamMessageTranslationStore extends ChangeNotifier {
-  final _originalTextMessageIds = <String>{};
+class StreamMessageTranslationStore extends ValueNotifier<Set<String>> {
+  /// Creates a store in which every message shows its translation.
+  StreamMessageTranslationStore() : super(const {});
 
   /// Whether [messageId] is currently showing its original text instead of
-  /// a translation.
-  bool isShowingOriginalText(String messageId) => _originalTextMessageIds.contains(messageId);
+  /// its translation.
+  bool isShowingOriginalText(String messageId) => value.contains(messageId);
 
   /// Switches [messageId] between showing its original text and its
   /// translation.
   void toggleOriginalText(String messageId) {
-    if (!_originalTextMessageIds.remove(messageId)) {
-      _originalTextMessageIds.add(messageId);
-    }
-    notifyListeners();
+    value = switch (value.contains(messageId)) {
+      true => {...value}..remove(messageId),
+      false => {...value, messageId},
+    };
   }
 }
 

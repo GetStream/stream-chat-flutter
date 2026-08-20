@@ -26,13 +26,13 @@ class StreamMessageHeader extends core.NullableStatelessWidget {
     super.key,
     required Message message,
     VoidCallback? onViewChannelTap,
-    bool showOriginalText = false,
-    VoidCallback? onToggleOriginalText,
+    bool showTranslatedText = true,
+    VoidCallback? onToggleTranslatedText,
   }) : props = .new(
          message: message,
          onViewChannelTap: onViewChannelTap,
-         showOriginalText: showOriginalText,
-         onToggleOriginalText: onToggleOriginalText,
+         showTranslatedText: showTranslatedText,
+         onToggleTranslatedText: onToggleTranslatedText,
        );
 
   /// Creates a message header from pre-built [props].
@@ -60,8 +60,8 @@ class StreamMessageHeaderProps {
   const StreamMessageHeaderProps({
     required this.message,
     this.onViewChannelTap,
-    this.showOriginalText = false,
-    this.onToggleOriginalText,
+    this.showTranslatedText = true,
+    this.onToggleTranslatedText,
   });
 
   /// The message whose annotations to display.
@@ -70,33 +70,33 @@ class StreamMessageHeaderProps {
   /// Called when the "View" link in the show-in-channel annotation is tapped.
   final VoidCallback? onViewChannelTap;
 
-  /// Whether [message] is currently displayed in its original language,
-  /// despite a translation being available in [Message.i18n].
+  /// Whether [message] is currently displaying its translation from
+  /// [Message.i18n] rather than its original text.
   ///
   /// Only relevant when a translation exists for the current user's
-  /// language; ignored otherwise. Toggled via [onToggleOriginalText].
-  final bool showOriginalText;
+  /// language; ignored otherwise. Toggled via [onToggleTranslatedText].
+  final bool showTranslatedText;
 
   /// Called when the "Show original"/"Show translation" link in the
   /// translation annotation is tapped.
   ///
   /// If null, the link is still rendered when a translation is available,
   /// but tapping it has no effect.
-  final VoidCallback? onToggleOriginalText;
+  final VoidCallback? onToggleTranslatedText;
 
   /// Returns a copy of this [StreamMessageHeaderProps] with the given fields
   /// replaced with new values.
   StreamMessageHeaderProps copyWith({
     Message? message,
     VoidCallback? onViewChannelTap,
-    bool? showOriginalText,
-    VoidCallback? onToggleOriginalText,
+    bool? showTranslatedText,
+    VoidCallback? onToggleTranslatedText,
   }) {
     return StreamMessageHeaderProps(
       message: message ?? this.message,
       onViewChannelTap: onViewChannelTap ?? this.onViewChannelTap,
-      showOriginalText: showOriginalText ?? this.showOriginalText,
-      onToggleOriginalText: onToggleOriginalText ?? this.onToggleOriginalText,
+      showTranslatedText: showTranslatedText ?? this.showTranslatedText,
+      onToggleTranslatedText: onToggleTranslatedText ?? this.onToggleTranslatedText,
     );
   }
 }
@@ -114,10 +114,12 @@ class StreamMessageHeaderProps {
 ///     invokes [StreamMessageHeaderProps.onViewChannelTap].
 ///  4. **Reminder** — when a reminder exists with a scheduled time.
 ///  5. **Translated** — when [Message.i18n] has a translation for the
-///     current user's language. Reads "Translated from {language}" when the
-///     original language is known, otherwise plain "Translated". Includes a
-///     "Show original"/"Show translation" link that invokes
-///     [StreamMessageHeaderProps.onToggleOriginalText].
+///     current user's language and
+///     [StreamMessageTranslationConfiguration.annotationEnabled] is set.
+///     Reads "Translated from {language}" when the original language is
+///     known, otherwise plain "Translated". Includes a "Show original"/"Show
+///     translation" link that invokes
+///     [StreamMessageHeaderProps.onToggleTranslatedText].
 ///
 /// Returns `null` when no annotations apply, allowing the parent layout to
 /// collapse the slot and skip spacing automatically.
@@ -220,10 +222,12 @@ class _DefaultStreamMessageHeaderState extends core.NullableState<DefaultStreamM
     }
 
     Widget? translatedAnnotation;
-    final translationDisplayEnabled = StreamChatConfiguration.of(context).translationDisplayEnabled;
-    // No language to translate to — either translation display is off, or
-    // the current user has none set.
-    if (translationDisplayEnabled) {
+    final translationConfig = StreamChatConfiguration.of(context).messageTranslation;
+    // Opt-in: without an annotation, translated messages are still shown
+    // translated, just silently — the SDK's long-standing behaviour.
+    if (translationConfig.enabled && translationConfig.annotationEnabled) {
+      // Stream's API reports an unset `User.language` as `''` rather than
+      // omitting it, so both cases mean "nothing to translate to".
       if (_language case final language? when language.isNotEmpty) {
         // The server includes a self-referential entry for the message's own
         // source language (e.g. `es_text` equal to `message.text` on a
@@ -231,17 +235,19 @@ class _DefaultStreamMessageHeaderState extends core.NullableState<DefaultStreamM
         // whose language matches the source would otherwise see the
         // annotation with nothing to actually toggle.
         if (message.i18n?['${language}_text'] case final translatedText? when translatedText != message.text) {
-          final label = switch (props.showOriginalText) {
-            true => translations.originalLabel,
-            false => switch (message.i18n?['language']) {
+          final label = switch (props.showTranslatedText) {
+            false => translations.originalLabel,
+            true => switch (message.i18n?['language']) {
               null || '' => translations.translatedLabel,
               final sourceLanguage => translations.translatedFromLanguageText(sourceLanguage),
             },
           };
-          final trailing = props.showOriginalText ? translations.showTranslationLabel : translations.showOriginalLabel;
+          final trailing = props.showTranslatedText
+              ? translations.showOriginalLabel
+              : translations.showTranslationLabel;
 
           translatedAnnotation = core.StreamMessageAnnotation(
-            onTap: props.onToggleOriginalText,
+            onTap: props.onToggleTranslatedText,
             leading: Icon(icons.translate),
             label: Text('$label ·'),
             trailing: Text(trailing),

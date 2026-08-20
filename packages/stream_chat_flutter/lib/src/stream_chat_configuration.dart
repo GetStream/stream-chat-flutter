@@ -165,7 +165,7 @@ class StreamChatConfigurationData {
     List<StreamAttachmentWidgetBuilder>? attachmentBuilders,
     StreamReactionsType? reactionType,
     StreamReactionsPosition? reactionPosition,
-    bool translationDisplayEnabled = true,
+    StreamMessageTranslationConfiguration messageTranslation = const StreamMessageTranslationConfiguration(),
   }) {
     return StreamChatConfigurationData._(
       reactionIconResolver: reactionIconResolver ?? const DefaultReactionIconResolver(),
@@ -176,7 +176,7 @@ class StreamChatConfigurationData {
       attachmentBuilders: attachmentBuilders,
       reactionType: reactionType,
       reactionPosition: reactionPosition,
-      translationDisplayEnabled: translationDisplayEnabled,
+      messageTranslation: messageTranslation,
     );
   }
 
@@ -187,7 +187,7 @@ class StreamChatConfigurationData {
     required this.messagePreviewFormatter,
     required this.imageCDN,
     required this.attachmentBuilders,
-    required this.translationDisplayEnabled,
+    required this.messageTranslation,
     this.reactionType,
     this.reactionPosition,
   });
@@ -203,7 +203,7 @@ class StreamChatConfigurationData {
     List<StreamAttachmentWidgetBuilder>? attachmentBuilders,
     StreamReactionsType? reactionType,
     StreamReactionsPosition? reactionPosition,
-    bool? translationDisplayEnabled,
+    StreamMessageTranslationConfiguration? messageTranslation,
   }) {
     return StreamChatConfigurationData(
       reactionIconResolver: reactionIconResolver ?? this.reactionIconResolver,
@@ -214,7 +214,7 @@ class StreamChatConfigurationData {
       attachmentBuilders: attachmentBuilders ?? this.attachmentBuilders,
       reactionType: reactionType ?? this.reactionType,
       reactionPosition: reactionPosition ?? this.reactionPosition,
-      translationDisplayEnabled: translationDisplayEnabled ?? this.translationDisplayEnabled,
+      messageTranslation: messageTranslation ?? this.messageTranslation,
     );
   }
 
@@ -264,13 +264,71 @@ class StreamChatConfigurationData {
   /// ([StreamReactionsPosition.header]).
   final StreamReactionsPosition? reactionPosition;
 
-  /// Whether a message automatically displays as its translation — and
-  /// shows a "Translated" annotation with a link to see the original —
-  /// when [Message.i18n] has one for the current user's language.
+  /// How messages that carry a translation in [Message.i18n] are displayed.
   ///
-  /// Set to `false` to always show a message's original text regardless of
-  /// available translations.
+  /// Defaults to [StreamMessageTranslationConfiguration]'s own defaults:
+  /// translations are displayed automatically, without an annotation.
+  final StreamMessageTranslationConfiguration messageTranslation;
+}
+
+/// {@template streamMessageTranslationConfiguration}
+/// Configures how messages that carry a translation in [Message.i18n] are
+/// displayed.
+///
+/// Pass an instance to [StreamChatConfigurationData.messageTranslation]:
+///
+/// ```dart
+/// StreamChat(
+///   client: client,
+///   configData: StreamChatConfigurationData(
+///     messageTranslation: const StreamMessageTranslationConfiguration(
+///       annotationEnabled: true,
+///     ),
+///   ),
+///   child: ChannelListPage(),
+/// )
+/// ```
+/// {@endtemplate}
+class StreamMessageTranslationConfiguration {
+  /// {@macro streamMessageTranslationConfiguration}
+  const StreamMessageTranslationConfiguration({
+    this.enabled = true,
+    this.annotationEnabled = false,
+  });
+
+  /// Whether a message displays its translation in place of its original
+  /// text when [Message.i18n] has one for the current user's [User.language].
   ///
-  /// Defaults to `true`.
-  final bool translationDisplayEnabled;
+  /// Applies to full messages ([StreamMessageText]) as well as to the
+  /// previews shown in the channel and thread lists
+  /// ([StreamMessagePreviewText]).
+  ///
+  /// Defaults to `true`, which is what the SDK has always done. Set it to
+  /// `false` to always show a message's original text, regardless of the
+  /// translations available for it.
+  final bool enabled;
+
+  /// Whether a message displaying a translation shows a
+  /// "Translated"/"Original" annotation, with a "Show original"/"Show
+  /// translation" link that switches between the two.
+  ///
+  /// Ignored when [enabled] is `false` — no translation is on display, so
+  /// there is nothing to annotate or switch away from.
+  ///
+  /// Defaults to `false`, matching the SDK's long-standing behaviour of
+  /// translating messages without annotating them. Opt in to make the
+  /// translation visible and reversible to the user.
+  final bool annotationEnabled;
+
+  /// Copies the configuration options from one
+  /// [StreamMessageTranslationConfiguration] to another.
+  StreamMessageTranslationConfiguration copyWith({
+    bool? enabled,
+    bool? annotationEnabled,
+  }) {
+    return StreamMessageTranslationConfiguration(
+      enabled: enabled ?? this.enabled,
+      annotationEnabled: annotationEnabled ?? this.annotationEnabled,
+    );
+  }
 }

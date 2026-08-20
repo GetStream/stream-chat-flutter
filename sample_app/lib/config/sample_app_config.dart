@@ -130,7 +130,13 @@ class SampleAppConfigData {
   /// Whether the "Message Info" action appears in the message context menu.
   final bool enableMessageInfo;
 
-  /// Whether the "Translate" action appears in the message context menu.
+  /// Whether message translations are surfaced: the "Translate Message"
+  /// action in the message context menu, the SDK rendering a message's
+  /// translation in place of its original text, and the translation
+  /// annotation on messages that show one.
+  ///
+  /// When off, messages always render their original text, even if the
+  /// backend already translated them.
   final bool enableMessageTranslation;
 
   /// Whether location sharing (attachment builder + picker) is enabled.

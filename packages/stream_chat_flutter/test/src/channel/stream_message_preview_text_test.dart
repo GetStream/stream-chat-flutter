@@ -852,7 +852,7 @@ void main() {
       expect(find.text('Hello, world!'), findsOneWidget);
     });
 
-    testWidgets('shows original text when translationDisplayEnabled is false', (tester) async {
+    testWidgets('shows original text when translations are disabled', (tester) async {
       final message = Message(
         text: 'Hello, world!',
         user: User(id: 'other-user-id', name: 'Other User'),
@@ -865,8 +865,27 @@ void main() {
         tester,
         message,
         language: 'fr',
-        configData: StreamChatConfigurationData(translationDisplayEnabled: false),
+        configData: StreamChatConfigurationData(
+          messageTranslation: const StreamMessageTranslationConfiguration(enabled: false),
+        ),
       );
+
+      expect(find.text('Hello, world!'), findsOneWidget);
+      expect(find.text('Bonjour, monde!'), findsNothing);
+    });
+
+    testWidgets('shows original text when no language is set', (tester) async {
+      final message = Message(
+        text: 'Hello, world!',
+        user: User(id: 'other-user-id', name: 'Other User'),
+        i18n: const {
+          'fr_text': 'Bonjour, monde!',
+        },
+      );
+
+      // The mocked current user has no `language`, so there is nothing to
+      // translate to.
+      await pumpMessagePreview(tester, message);
 
       expect(find.text('Hello, world!'), findsOneWidget);
       expect(find.text('Bonjour, monde!'), findsNothing);
