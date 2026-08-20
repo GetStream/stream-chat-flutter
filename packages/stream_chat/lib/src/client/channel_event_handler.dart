@@ -5,6 +5,10 @@ import 'package:stream_chat/stream_chat.dart';
 ///
 /// Drops events with a missing payload, as well as events that do not apply
 /// to the channel or the current user.
+///
+/// Also performs the side effects an event triggers outside the channel
+/// state: member refresh, persisted-message cleanup, and delivery
+/// reconciliation.
 class ChannelEventHandler {
   /// Creates a handler routing events of the given [_channel] to the given
   /// [_mutations].
