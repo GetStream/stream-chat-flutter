@@ -5,6 +5,27 @@ import 'package:flutter/foundation.dart';
 import 'package:stream_chat_flutter/scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+// The current user's read boundary: where in the channel they had read up to.
+// A mark-unread moves it backward, which is how a fresh one is told apart
+// from the read-stream emissions that keep arriving during a session.
+//
+// A record rather than a class so equality stays structural — the whole point
+// is comparing a newly observed boundary against the previous one.
+typedef _ReadBoundary = ({DateTime? lastRead, String? lastReadMessageId});
+
+// Every input the mark-read gate reads, captured as the key of one attempt.
+// Comparing a new key against the last one is what stops a mark-read that
+// keeps failing from being retried on every scroll frame, while still letting
+// a genuine change through.
+//
+// Also a record for its structural equality, which the comparison relies on.
+typedef _MarkReadAttempt = ({
+  String? newestMessageId,
+  int unreadCount,
+  bool isMarkedAsUnread,
+  bool viewportDiverged,
+});
+
 /// Owns the unread-message state machine behind [StreamMessageListView]:
 /// the unread messages divider and its floating pill, the scroll-to-bottom
 /// badge count, and the auto mark-read gate (including protection for an
@@ -14,6 +35,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// position ticks, read-stream emissions and pill taps — and renders from the
 /// exposed [ValueListenable]s. This class never touches the widget tree, and
 /// reaches the list's live state only through the accessors it is given.
+@internal
 class MessageListUnreadController {
   /// Creates a controller wired to the message list's live state.
   ///
@@ -77,9 +99,9 @@ class MessageListUnreadController {
 
   // Grows by one for every message that arrives out of view while divider
   // A is on screen, so the divider's displayed count keeps counting up
-  // during the session (mirroring WhatsApp) instead of staying frozen at
-  // the open-time count. Added on top of `_unreadDivider.value.count` for
-  // display only — the pill keeps using the frozen count.
+  // during the session instead of staying frozen at the open-time count.
+  // Added on top of `_unreadDivider.value.count` for display only — the
+  // pill keeps using the frozen count.
   final ValueNotifier<int> _unreadDividerGrowth = ValueNotifier(0);
 
   // Sticky: becomes true once the user has seen (rendered) or scrolled past
@@ -155,7 +177,7 @@ class MessageListUnreadController {
   // [_maybeMarkMessagesAsRead] actually reads is part of the key, so a
   // genuine change — a new message, a mark-unread, the viewport diverging
   // after one — still gets its attempt.
-  ({String? newestMessageId, int unreadCount, bool isMarkedAsUnread, bool viewportDiverged})? _lastMarkReadAttempt;
+  _MarkReadAttempt? _lastMarkReadAttempt;
 
   // Previous value of `channel.state.isMarkedAsUnread`, so
   // [handleCurrentUserReadChanged] can act on a new mark-unread rather than
@@ -167,9 +189,9 @@ class MessageListUnreadController {
   // moves the boundary backward, so a change here while the flag is already
   // set is how a *second* mark-unread is told apart from the read-stream
   // emissions that keep arriving during one.
-  ({DateTime? lastRead, String? lastReadMessageId})? _lastReadBoundary;
+  _ReadBoundary? _lastReadBoundary;
 
-  static ({DateTime? lastRead, String? lastReadMessageId})? _readBoundaryOf(Read? read) {
+  static _ReadBoundary? _readBoundaryOf(Read? read) {
     if (read == null) return null;
     return (lastRead: read.lastRead, lastReadMessageId: read.lastReadMessageId);
   }
@@ -363,8 +385,8 @@ class MessageListUnreadController {
     if (_isThreadConversation || !countsAsUnread) return;
 
     // The divider counts every qualifying arrival — including ones seen
-    // live at the bottom — so it keeps counting up like WhatsApp's. The
-    // badge is narrower: it only exists to flag what was missed while
+    // live at the bottom — so it keeps counting up for the whole session.
+    // The badge is narrower: it only exists to flag what was missed while
     // scrolled away, so it skips arrivals that were already in view and
     // resets once the bottom is reached (see [handleItemPositionsChanged]).
     _unreadDividerGrowth.value += 1;

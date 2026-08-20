@@ -18,7 +18,7 @@
 - `Translations.unreadMessagesSeparatorLabel` is a new interface member. Classes that `extends Translations` (or `GlobalStreamChatLocalizations`) inherit the fallback and need no change, but a class that `implements` either interface directly must add this member — Dart does not inherit method bodies through `implements`. Forward it to your existing `unreadMessagesSeparatorText()` to keep the previous copy.
 - Changed the "↑ N unread" jump-to-unread pill to a count fixed when the channel opens, shown as soon as that count is known and dismissed permanently for the session once tapped, dismissed, or scrolled past.
 - Changed the scroll-to-bottom badge to count only messages that arrive out of view during the current session, rather than being seeded from the channel's unread count. It always resets to 0 once the user reaches the bottom.
-- Changed the "unread messages" divider to show a count, starting at the channel's open-time unread total and counting up as further messages arrive during the session — mirroring WhatsApp — instead of a fixed, count-less label.
+- Changed the "unread messages" divider to show a count, starting at the channel's open-time unread total and counting up as further messages arrive during the session, instead of a fixed, count-less label.
 - Tightened `StreamMessageListView`'s automatic mark-read gating to also require that the pre-existing unread boundary has been seen or scrolled past, and that there's no pending manual mark-unread. Channels with no boundary to reach — opened fully read, never opened at all, or tracking unread locally — are unaffected.
 
 ⚠️ Deprecated
