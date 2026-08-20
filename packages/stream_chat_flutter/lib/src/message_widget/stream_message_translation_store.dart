@@ -1,12 +1,58 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/widgets.dart';
+
+/// The translation display state of the messages within a single message
+/// list.
+///
+/// Showing the translation is the default, so this holds only the
+/// exceptions — see [messagesShowingOriginalText].
+@immutable
+class StreamMessageTranslationState {
+  /// Creates a state in which every message shows its translation.
+  const StreamMessageTranslationState({
+    this.messagesShowingOriginalText = const {},
+  });
+
+  /// The ids of the messages the user has switched back to their original
+  /// text.
+  ///
+  /// Empty while every message shows its translation.
+  final Set<String> messagesShowingOriginalText;
+
+  /// Whether [messageId] is currently showing its original text instead of
+  /// its translation.
+  bool isShowingOriginalText(String messageId) {
+    return messagesShowingOriginalText.contains(messageId);
+  }
+
+  /// Copies the state, replacing the provided fields.
+  StreamMessageTranslationState copyWith({
+    Set<String>? messagesShowingOriginalText,
+  }) {
+    return StreamMessageTranslationState(
+      messagesShowingOriginalText: messagesShowingOriginalText ?? this.messagesShowingOriginalText,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+
+    return other is StreamMessageTranslationState &&
+        const SetEquality<String>().equals(
+          other.messagesShowingOriginalText,
+          messagesShowingOriginalText,
+        );
+  }
+
+  @override
+  int get hashCode => const SetEquality<String>().hash(messagesShowingOriginalText);
+}
 
 /// Tracks, for messages within a single message list, which ones the user
 /// has switched back to their original text.
 ///
-/// Showing the translation is the default, so [value] holds only the
-/// exceptions — the ids of messages switched to their original text. It is
-/// empty while every message shows its translation. This mirrors
-/// `MessageOriginalTranslationsStore` in the Swift SDK.
+/// Mirrors `MessageOriginalTranslationsStore` in the Swift SDK.
 ///
 /// One store is owned per [StreamMessageListView] instance — a channel view
 /// and an open thread each get independent toggle state, since opening a
@@ -14,21 +60,25 @@ import 'package:flutter/widgets.dart';
 /// the individual message widget, is what makes the toggle survive message
 /// items being disposed and recreated as they scroll out of and back into
 /// the list's render window.
-class StreamMessageTranslationStore extends ValueNotifier<Set<String>> {
+class StreamMessageTranslationStore extends ValueNotifier<StreamMessageTranslationState> {
   /// Creates a store in which every message shows its translation.
-  StreamMessageTranslationStore() : super(const {});
+  StreamMessageTranslationStore() : super(const StreamMessageTranslationState());
 
   /// Whether [messageId] is currently showing its original text instead of
   /// its translation.
-  bool isShowingOriginalText(String messageId) => value.contains(messageId);
+  bool isShowingOriginalText(String messageId) => value.isShowingOriginalText(messageId);
 
   /// Switches [messageId] between showing its original text and its
   /// translation.
   void toggleOriginalText(String messageId) {
-    value = switch (value.contains(messageId)) {
-      true => {...value}..remove(messageId),
-      false => {...value, messageId},
-    };
+    final showingOriginalText = value.messagesShowingOriginalText;
+
+    value = value.copyWith(
+      messagesShowingOriginalText: switch (showingOriginalText.contains(messageId)) {
+        true => {...showingOriginalText}..remove(messageId),
+        false => {...showingOriginalText, messageId},
+      },
+    );
   }
 }
 
