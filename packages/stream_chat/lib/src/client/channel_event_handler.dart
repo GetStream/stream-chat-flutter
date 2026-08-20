@@ -1,37 +1,20 @@
-import 'dart:math' as math;
-
-import 'package:collection/collection.dart';
+import 'package:stream_chat/src/client/channel_state_mutations.dart';
 import 'package:stream_chat/stream_chat.dart';
 
 /// Translates channel events into [ChannelClientState] mutations.
+///
+/// Validates and routes each event; the resulting state writes are performed
+/// by [ChannelStateMutations].
 class ChannelEventHandler {
-  /// Creates a handler updating the given [_state] of the given [_channel].
-  ///
-  /// The write callbacks perform the state mutations that
-  /// [ChannelClientState] does not expose publicly.
+  /// Creates a handler routing events of the given [_channel] to the given
+  /// [_mutations].
   const ChannelEventHandler({
     required this._channel,
-    required this._state,
-    required this._upsertTypingEvent,
-    required this._removeTypingEvent,
-    required this._removeWatcher,
-    required this._updateMember,
-    required this._deleteMessagesFromUser,
+    required this._mutations,
   });
 
   final Channel _channel;
-  final ChannelClientState _state;
-
-  final void Function(User user, Event event) _upsertTypingEvent;
-  final void Function(User user) _removeTypingEvent;
-  final void Function(User watcher, {int? watcherCount}) _removeWatcher;
-  final void Function(Member member) _updateMember;
-  final Future<void> Function({
-    required String userId,
-    bool hardDelete,
-    DateTime? deletedAt,
-  })
-  _deleteMessagesFromUser;
+  final ChannelStateMutations _mutations;
 
   StreamChatClient get _client => _channel.client;
 
@@ -162,7 +145,7 @@ class ChannelEventHandler {
     final currentUser = _client.state.currentUser;
     if (event.isFromUser(userId: currentUser?.id)) return;
 
-    _upsertTypingEvent(user, event);
+    _mutations.onTypingStart(user, event);
   }
 
   void _onTypingStop(Event event) {
@@ -172,22 +155,21 @@ class ChannelEventHandler {
     final currentUser = _client.state.currentUser;
     if (event.isFromUser(userId: currentUser?.id)) return;
 
-    _removeTypingEvent(user);
+    _mutations.onTypingStop(user);
   }
 
   void _onMessageNew(Event event) {
     final message = event.message;
     if (message == null) return;
 
-    _state.addNewMessage(message);
-
     // Only message.new carries a reliable watcher count;
     // notification.message_new targets non-watchers and reports 0.
-    if (event.watcherCount case final watcherCount? when event.type == EventType.messageNew) {
-      _state.updateChannelState(
-        _state.channelState.copyWith(watcherCount: watcherCount),
-      );
-    }
+    final watcherCount = switch (event.type) {
+      EventType.messageNew => event.watcherCount,
+      _ => null,
+    };
+
+    _mutations.onMessageNew(message, watcherCount: watcherCount);
   }
 
   void _onMessageDeleted(Event event) {
@@ -198,297 +180,105 @@ class ChannelEventHandler {
       deletedForMe: event.deletedForMe,
     );
 
-    // Decrement the locally-tracked unread count for hard-deleted
-    // messages that would have counted as unread. Soft-deleted messages
-    // keep their slot. Only applies to channels that track unread counts
-    // locally (see [Channel.usesLocalUnreadCount]) — server-driven
-    // channels get corrected counts from server read events instead.
-    if (hardDelete && _channel.usesLocalUnreadCount && MessageRules.canCountAsUnread(message, _channel)) {
-      _state.unreadCount = math.max(0, _state.unreadCount - 1);
-    }
-
-    return _state.deleteMessage(message, hardDelete: hardDelete);
+    return _mutations.onMessageDeleted(message, hardDelete: hardDelete);
   }
 
   void _onMessageUpdated(Event event) {
     final message = event.message;
     if (message == null) return;
 
-    return _state.updateMessage(message, upsert: false);
+    return _mutations.onMessageUpdated(message);
   }
 
   void _onDraftUpdated(Event event) {
     final draft = event.draft;
     if (draft == null) return;
 
-    return _state.updateDraft(draft);
+    return _mutations.onDraftUpdated(draft);
   }
 
   void _onDraftDeleted(Event event) {
     final draft = event.draft;
     if (draft == null) return;
 
-    return _state.deleteDraft(draft);
+    return _mutations.onDraftDeleted(draft);
   }
 
   void _onReactionNew(Event event) {
     final (eventReaction, eventMessage) = (event.reaction, event.message);
     if (eventReaction == null || eventMessage == null) return;
 
-    final messageId = eventMessage.id;
-    final parentId = eventMessage.parentId;
-
-    for (final message in [..._state.messages, ...?_state.threads[parentId]]) {
-      if (message.id == messageId) {
-        final currentUserId = _client.state.currentUser?.id;
-
-        final currentMessage = switch (currentUserId) {
-          final userId? when userId == eventReaction.userId => message.addMyReaction(eventReaction),
-          _ => message,
-        };
-
-        return _state.updateMessage(
-          eventMessage.copyWith(
-            ownReactions: currentMessage.ownReactions,
-          ),
-        );
-      }
-    }
+    return _mutations.onReactionNew(eventMessage, eventReaction);
   }
 
   void _onReactionUpdated(Event event) {
     final (eventReaction, eventMessage) = (event.reaction, event.message);
     if (eventReaction == null || eventMessage == null) return;
 
-    final messageId = eventMessage.id;
-    final parentId = eventMessage.parentId;
-
-    for (final message in [..._state.messages, ...?_state.threads[parentId]]) {
-      if (message.id == messageId) {
-        final currentUserId = _client.state.currentUser?.id;
-
-        final currentMessage = switch (currentUserId) {
-          final userId? when userId == eventReaction.userId =>
-            // reaction.updated is only called if enforce_unique is true
-            message.addMyReaction(eventReaction, enforceUnique: true),
-          _ => message,
-        };
-
-        return _state.updateMessage(
-          eventMessage.copyWith(
-            ownReactions: currentMessage.ownReactions,
-          ),
-        );
-      }
-    }
+    return _mutations.onReactionUpdated(eventMessage, eventReaction);
   }
 
   void _onReactionDeleted(Event event) {
     final (eventReaction, eventMessage) = (event.reaction, event.message);
     if (eventReaction == null || eventMessage == null) return;
 
-    final messageId = eventMessage.id;
-    final parentId = eventMessage.parentId;
-
-    for (final message in [..._state.messages, ...?_state.threads[parentId]]) {
-      if (message.id == messageId) {
-        final currentUserId = _client.state.currentUser?.id;
-
-        final currentMessage = switch (currentUserId) {
-          final userId? when userId == eventReaction.userId => message.deleteMyReaction(
-            reactionType: eventReaction.type,
-          ),
-          _ => message,
-        };
-
-        return _state.updateMessage(
-          eventMessage.copyWith(
-            ownReactions: currentMessage.ownReactions,
-          ),
-        );
-      }
-    }
-  }
-
-  Message? _findPollMessage(String pollId) {
-    final message = _state.messages.firstWhereOrNull((it) => it.pollId == pollId);
-    if (message != null) return message;
-
-    final threadMessage = _state.threads.values.flattened.firstWhereOrNull((it) {
-      return it.pollId == pollId;
-    });
-
-    return threadMessage;
+    return _mutations.onReactionDeleted(eventMessage, eventReaction);
   }
 
   void _onPollCreated(Event event) {
     final message = event.message;
     if (message == null || message.poll == null) return;
 
-    return _state.addNewMessage(message);
+    return _mutations.onPollCreated(message);
   }
 
   void _onPollUpdated(Event event) {
     final eventPoll = event.poll;
     if (eventPoll == null) return;
 
-    final pollMessage = _findPollMessage(eventPoll.id);
-    if (pollMessage == null) return;
-
-    final oldPoll = pollMessage.poll;
-
-    final latestAnswers = oldPoll?.latestAnswers ?? eventPoll.latestAnswers;
-    final ownVotesAndAnswers = oldPoll?.ownVotesAndAnswers ?? eventPoll.ownVotesAndAnswers;
-
-    final poll = eventPoll.copyWith(
-      latestAnswers: latestAnswers,
-      ownVotesAndAnswers: ownVotesAndAnswers,
-    );
-
-    final message = pollMessage.copyWith(poll: poll);
-    _state.updateMessage(message);
+    return _mutations.onPollUpdated(eventPoll);
   }
 
   void _onPollClosed(Event event) {
     final eventPoll = event.poll;
     if (eventPoll == null) return;
 
-    final pollMessage = _findPollMessage(eventPoll.id);
-    if (pollMessage == null) return;
-
-    final oldPoll = pollMessage.poll;
-    final poll = oldPoll?.copyWith(isClosed: true) ?? eventPoll;
-
-    final message = pollMessage.copyWith(poll: poll);
-    _state.updateMessage(message);
+    return _mutations.onPollClosed(eventPoll);
   }
 
   void _onPollAnswerCasted(Event event) {
     final (eventPoll, eventPollVote) = (event.poll, event.pollVote);
     if (eventPoll == null || eventPollVote == null) return;
 
-    final pollMessage = _findPollMessage(eventPoll.id);
-    if (pollMessage == null) return;
-
-    final oldPoll = pollMessage.poll;
-
-    final latestAnswers = <String, PollVote>{
-      for (final ans in oldPoll?.latestAnswers ?? []) ans.id: ans,
-      eventPollVote.id!: eventPollVote,
-    };
-
-    final currentUserId = _client.state.currentUser?.id;
-    final ownVotesAndAnswers = <String, PollVote>{
-      for (final vote in oldPoll?.ownVotesAndAnswers ?? []) vote.id: vote,
-      if (eventPollVote.userId == currentUserId) eventPollVote.id!: eventPollVote,
-    };
-
-    final poll = eventPoll.copyWith(
-      latestAnswers: [...latestAnswers.values],
-      ownVotesAndAnswers: [...ownVotesAndAnswers.values],
-    );
-
-    final message = pollMessage.copyWith(poll: poll);
-    _state.updateMessage(message);
+    return _mutations.onPollAnswerCasted(eventPoll, eventPollVote);
   }
 
   void _onPollVoteCasted(Event event) {
     final (eventPoll, eventPollVote) = (event.poll, event.pollVote);
     if (eventPoll == null || eventPollVote == null) return;
 
-    final pollMessage = _findPollMessage(eventPoll.id);
-    if (pollMessage == null) return;
-
-    final oldPoll = pollMessage.poll;
-
-    final latestAnswers = oldPoll?.latestAnswers ?? eventPoll.latestAnswers;
-    final currentUserId = _client.state.currentUser?.id;
-    final ownVotesAndAnswers = <String, PollVote>{
-      for (final vote in oldPoll?.ownVotesAndAnswers ?? []) vote.id: vote,
-      if (eventPollVote.userId == currentUserId) eventPollVote.id!: eventPollVote,
-    };
-
-    final poll = eventPoll.copyWith(
-      latestAnswers: latestAnswers,
-      ownVotesAndAnswers: [...ownVotesAndAnswers.values],
-    );
-
-    final message = pollMessage.copyWith(poll: poll);
-    _state.updateMessage(message);
+    return _mutations.onPollVoteCasted(eventPoll, eventPollVote);
   }
 
   void _onPollVoteChanged(Event event) {
     final (eventPoll, eventPollVote) = (event.poll, event.pollVote);
     if (eventPoll == null || eventPollVote == null) return;
 
-    final pollMessage = _findPollMessage(eventPoll.id);
-    if (pollMessage == null) return;
-
-    final oldPoll = pollMessage.poll;
-
-    final latestAnswers = oldPoll?.latestAnswers ?? eventPoll.latestAnswers;
-    final currentUserId = _client.state.currentUser?.id;
-    final ownVotesAndAnswers = <String, PollVote>{
-      for (final vote in oldPoll?.ownVotesAndAnswers ?? []) vote.id: vote,
-      if (eventPollVote.userId == currentUserId) eventPollVote.id!: eventPollVote,
-    };
-
-    final poll = eventPoll.copyWith(
-      latestAnswers: latestAnswers,
-      ownVotesAndAnswers: [...ownVotesAndAnswers.values],
-    );
-
-    final message = pollMessage.copyWith(poll: poll);
-    _state.updateMessage(message);
+    return _mutations.onPollVoteChanged(eventPoll, eventPollVote);
   }
 
   void _onPollAnswerRemoved(Event event) {
     final (eventPoll, eventPollVote) = (event.poll, event.pollVote);
     if (eventPoll == null || eventPollVote == null) return;
 
-    final pollMessage = _findPollMessage(eventPoll.id);
-    if (pollMessage == null) return;
-
-    final oldPoll = pollMessage.poll;
-
-    final latestAnswers = <String, PollVote>{
-      for (final ans in oldPoll?.latestAnswers ?? []) ans.id: ans,
-    }..remove(eventPollVote.id);
-
-    final ownVotesAndAnswers = <String, PollVote>{
-      for (final vote in oldPoll?.ownVotesAndAnswers ?? []) vote.id: vote,
-    }..remove(eventPollVote.id);
-
-    final poll = eventPoll.copyWith(
-      latestAnswers: [...latestAnswers.values],
-      ownVotesAndAnswers: [...ownVotesAndAnswers.values],
-    );
-
-    final message = pollMessage.copyWith(poll: poll);
-    _state.updateMessage(message);
+    return _mutations.onPollAnswerRemoved(eventPoll, eventPollVote);
   }
 
   void _onPollVoteRemoved(Event event) {
     final (eventPoll, eventPollVote) = (event.poll, event.pollVote);
     if (eventPoll == null || eventPollVote == null) return;
 
-    final pollMessage = _findPollMessage(eventPoll.id);
-    if (pollMessage == null) return;
-
-    final oldPoll = pollMessage.poll;
-
-    final latestAnswers = oldPoll?.latestAnswers ?? eventPoll.latestAnswers;
-    final ownVotesAndAnswers = <String, PollVote>{
-      for (final vote in oldPoll?.ownVotesAndAnswers ?? []) vote.id: vote,
-    }..remove(eventPollVote.id);
-
-    final poll = eventPoll.copyWith(
-      latestAnswers: latestAnswers,
-      ownVotesAndAnswers: [...ownVotesAndAnswers.values],
-    );
-
-    final message = pollMessage.copyWith(poll: poll);
-    _state.updateMessage(message);
+    return _mutations.onPollVoteRemoved(eventPoll, eventPollVote);
   }
 
   void _onMessageRead(Event event) {
@@ -498,19 +288,11 @@ class ChannelEventHandler {
     final user = event.user;
     if (user == null) return;
 
-    final currentRead = _state.userReadOf(userId: user.id);
-
-    final updatedRead = Read(
-      user: user,
+    _mutations.onMessageRead(
+      user,
       lastRead: event.createdAt,
-      unreadMessages: 0, // Reset unread count
       lastReadMessageId: event.lastReadMessageId,
-      // Preserve delivery info as it's not part of the read event.
-      lastDeliveredAt: currentRead?.lastDeliveredAt,
-      lastDeliveredMessageId: currentRead?.lastDeliveredMessageId,
     );
-
-    _state.updateRead([updatedRead]);
 
     // If the read event is from the current user, reconcile the
     // channel delivery status with the updated read state.
@@ -524,39 +306,23 @@ class ChannelEventHandler {
     final user = event.user;
     if (user == null) return;
 
-    final currentRead = _state.userReadOf(userId: user.id);
-
-    final updatedRead = Read(
-      user: user,
+    return _mutations.onNotificationMarkUnread(
+      user,
       lastRead: event.lastReadAt!,
       unreadMessages: event.unreadMessages,
       lastReadMessageId: event.lastReadMessageId,
-      // Preserve delivery info as it's not part of the read event.
-      lastDeliveredAt: currentRead?.lastDeliveredAt,
-      lastDeliveredMessageId: currentRead?.lastDeliveredMessageId,
     );
-
-    return _state.updateRead([updatedRead]);
   }
 
   void _onMessageDelivered(Event event) {
     final user = event.user;
     if (user == null) return;
 
-    final currentRead = _state.userReadOf(userId: user.id);
-    final never = DateTime.fromMillisecondsSinceEpoch(0, isUtc: true);
-
-    final updatedRead = Read(
-      user: user,
+    _mutations.onMessageDelivered(
+      user,
       lastDeliveredAt: event.lastDeliveredAt,
       lastDeliveredMessageId: event.lastDeliveredMessageId,
-      // Preserve read info as it's not part of the delivery event.
-      lastRead: currentRead?.lastRead ?? never,
-      unreadMessages: currentRead?.unreadMessages,
-      lastReadMessageId: currentRead?.lastReadMessageId,
     );
-
-    _state.updateRead([updatedRead]);
 
     // If the delivered event is from the current user, reconcile
     // the channel delivery with the updated read state.
@@ -569,102 +335,46 @@ class ChannelEventHandler {
   Future<void> _onChannelTruncated(Event event) async {
     final channel = event.channel!;
     await _client.chatPersistenceClient?.deleteMessageByCid(channel.cid);
-    _state.truncate();
-    if (event.message != null) {
-      _state.updateMessage(event.message!);
-    }
+
+    _mutations.onChannelTruncated(message: event.message);
   }
 
   void _onChannelUpdated(Event event) {
     final channel = event.channel!;
-    _state.updateChannelState(
-      _state.channelState.copyWith(
-        channel: _state.channelState.channel?.merge(channel),
-        members: channel.members,
-      ),
-    );
+
+    return _mutations.onChannelUpdated(channel);
   }
 
   void _onChannelMessageCount(Event event) {
     final messageCount = event.channelMessageCount;
     if (messageCount == null) return;
 
-    _state.updateChannelState(
-      _state.channelState.copyWith(
-        channel: _state.channelState.channel?.copyWith(
-          messageCount: messageCount,
-        ),
-      ),
-    );
+    return _mutations.onChannelMessageCount(messageCount);
   }
 
   void _onMemberAdded(Event event) {
     final member = event.member!;
-    final existingMembers = _state.channelState.members ?? [];
 
-    _state.updateChannelState(
-      _state.channelState.copyWith(
-        members: [...existingMembers, member],
-      ),
-    );
+    return _mutations.onMemberAdded(member);
   }
 
   void _onMemberRemoved(Event event) {
     final user = event.user!;
-    final existingRead = _state.channelState.read ?? [];
-    final existingMembers = _state.channelState.members ?? [];
 
-    _state.updateChannelState(
-      _state.channelState.copyWith(
-        read: [...existingRead.where((r) => r.user.id != user.id)],
-        members: [...existingMembers.where((m) => m.userId != user.id)],
-      ),
-    );
+    return _mutations.onMemberRemoved(user);
   }
 
   void _onMemberUserUpdated(Event event) {
     final user = event.user;
     if (user == null) return;
 
-    final existingMembers = [...?_state.channelState.members];
-    final existingMembership = _state.channelState.membership;
-
-    // Return if the user is not a existing member of the channel.
-    if (!existingMembers.any((m) => m.userId == user.id)) return;
-
-    Member? maybeUpdateMemberUser(Member? existingMember) {
-      if (existingMember == null) return null;
-      if (existingMember.userId == user.id) {
-        return existingMember.copyWith(user: user);
-      }
-      return existingMember;
-    }
-
-    _state.updateChannelState(
-      _state.channelState.copyWith(
-        membership: maybeUpdateMemberUser(existingMembership),
-        members: [...existingMembers.map(maybeUpdateMemberUser).nonNulls],
-      ),
-    );
+    return _mutations.onMemberUserUpdated(user);
   }
 
   void _onMemberUpdated(Event event) {
     final member = event.member!;
-    final existingMembers = _state.channelState.members ?? [];
-    final existingMembership = _state.channelState.membership;
 
-    Member? maybeUpdateMember(Member? existingMember) {
-      if (existingMember == null) return null;
-      if (existingMember.userId == member.userId) return member;
-      return existingMember;
-    }
-
-    _state.updateChannelState(
-      _state.channelState.copyWith(
-        membership: maybeUpdateMember(existingMembership),
-        members: [...existingMembers.map(maybeUpdateMember).nonNulls],
-      ),
-    );
+    return _mutations.onMemberUpdated(member);
   }
 
   Future<void> _onMemberBanned(Event event) async {
@@ -674,7 +384,7 @@ class ChannelEventHandler {
     final user = event.user!;
     final member = await _channel.queryMembers(filter: Filter.equal('id', user.id)).then((it) => it.members.first);
 
-    _updateMember(member);
+    _mutations.onMemberBanned(member);
   }
 
   Future<void> _onMemberUnbanned(Event event) async {
@@ -684,14 +394,14 @@ class ChannelEventHandler {
     final user = event.user!;
     final member = await _channel.queryMembers(filter: Filter.equal('id', user.id)).then((it) => it.members.first);
 
-    _updateMember(member);
+    _mutations.onMemberUnbanned(member);
   }
 
   Future<void> _onUserMessagesDeleted(Event event) async {
     final user = event.user;
     if (user == null) return;
 
-    return _deleteMessagesFromUser(
+    return _mutations.onUserMessagesDeleted(
       userId: user.id,
       hardDelete: event.hardDelete ?? false,
       deletedAt: event.createdAt,
@@ -700,103 +410,64 @@ class ChannelEventHandler {
 
   void _onUserStartWatching(Event event) {
     final watcher = event.user;
-    if (watcher != null) {
-      final existingWatchers = _state.channelState.watchers;
-      _state.updateChannelState(
-        _state.channelState.copyWith(
-          watchers: [
-            watcher,
-            ...?existingWatchers?.where((user) => user.id != watcher.id),
-          ],
-          watcherCount: event.watcherCount,
-        ),
-      );
-    }
+    if (watcher == null) return;
+
+    return _mutations.onUserStartWatching(watcher, watcherCount: event.watcherCount);
   }
 
   void _onUserStopWatching(Event event) {
     final watcher = event.user;
-    if (watcher != null) {
-      _removeWatcher(watcher, watcherCount: event.watcherCount);
-    }
+    if (watcher == null) return;
+
+    return _mutations.onUserStopWatching(watcher, watcherCount: event.watcherCount);
   }
 
   void _onReminderCreated(Event event) {
     final reminder = event.reminder;
     if (reminder == null) return;
 
-    _state.updateReminder(reminder);
+    return _mutations.onReminderCreated(reminder);
   }
 
   void _onReminderUpdated(Event event) {
     final reminder = event.reminder;
     if (reminder == null) return;
 
-    _state.updateReminder(reminder);
+    return _mutations.onReminderUpdated(reminder);
   }
 
   void _onReminderDeleted(Event event) {
     final reminder = event.reminder;
     if (reminder == null) return;
 
-    _state.deleteReminder(reminder);
+    return _mutations.onReminderDeleted(reminder);
   }
 
   void _onLocationShared(Event event) {
     final message = event.message;
     if (message == null || message.sharedLocation == null) return;
 
-    return _state.addNewMessage(message);
-  }
-
-  Message? _findLocationMessage(String id) {
-    final message = _state.messages.firstWhereOrNull((it) {
-      return it.sharedLocation?.messageId == id;
-    });
-
-    if (message != null) return message;
-
-    return _state.threads.values.flattened.firstWhereOrNull((it) {
-      return it.sharedLocation?.messageId == id;
-    });
+    return _mutations.onLocationShared(message);
   }
 
   void _onLocationUpdated(Event event) {
     final location = event.message?.sharedLocation;
     if (location == null) return;
 
-    final messageId = location.messageId;
-    if (messageId == null) return;
-
-    final oldMessage = _findLocationMessage(messageId);
-    if (oldMessage == null) return;
-
-    final updatedMessage = oldMessage.copyWith(sharedLocation: location);
-    return _state.updateMessage(updatedMessage);
+    return _mutations.onLocationUpdated(location);
   }
 
   void _onLocationExpired(Event event) {
     final location = event.message?.sharedLocation;
     if (location == null) return;
 
-    final messageId = location.messageId;
-    if (messageId == null) return;
-
-    final oldMessage = _findLocationMessage(messageId);
-    if (oldMessage == null) return;
-
-    final updatedMessage = oldMessage.copyWith(sharedLocation: location);
-    return _state.updateMessage(updatedMessage);
+    return _mutations.onLocationExpired(location);
   }
 
   void _onChannelPushPreferenceUpdated(Event event) {
     final pushPreferences = event.channelPushPreference;
     if (pushPreferences == null) return;
 
-    _state.updateChannelState(
-      _state.channelState.copyWith(
-        pushPreferences: pushPreferences,
-      ),
-    );
+    return _mutations.onChannelPushPreferenceUpdated(pushPreferences);
   }
 }

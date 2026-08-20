@@ -6,6 +6,7 @@ import 'dart:math' as math;
 import 'package:collection/collection.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/src/client/channel_event_handler.dart';
+import 'package:stream_chat/src/client/channel_state_mutations.dart';
 import 'package:stream_chat/src/client/retry_queue.dart';
 import 'package:stream_chat/src/core/util/utils.dart';
 import 'package:stream_chat/stream_chat.dart';
@@ -2482,7 +2483,7 @@ class ChannelClientState {
     // Update the persistence storage with the seeded channel state.
     _debouncedUpdatePersistenceChannelState.call([channelState]);
 
-    final handler = ChannelEventHandler(
+    final mutations = ChannelStateMutations(
       channel: _channel,
       state: this,
       upsertTypingEvent: _upsertTypingEvent,
@@ -2491,6 +2492,7 @@ class ChannelClientState {
       updateMember: _updateMember,
       deleteMessagesFromUser: _deleteMessagesFromUser,
     );
+    final handler = ChannelEventHandler(channel: _channel, mutations: mutations);
     _subscriptions.add(_channel.on().listen(handler.handleEvent));
 
     _startCleaningStaleTypingEvents();
