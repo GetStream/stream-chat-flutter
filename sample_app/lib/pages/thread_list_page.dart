@@ -1,7 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:sample_app/pages/thread_page.dart';
 import 'package:sample_app/routes/routes.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -63,7 +62,7 @@ class _ThreadListPageState extends State<ThreadListPage> {
                         .where((msg) => msg != null)
                         .cast<Message>(),
                     builder: (_, parentMessage) {
-                      return ThreadPage(
+                      return StreamThreadPage(
                         parent: parentMessage,
                         onViewInChannelTap: (message) {
                           GoRouter.of(context).goNamed(

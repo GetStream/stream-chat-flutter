@@ -2,11 +2,43 @@
 
 ✅ Added
 
+- Added `onReactionLongPress` to `StreamMessageItem` and `StreamMessageListView`, reporting the long-pressed message's `BuildContext` and a `ReactionLongPressDetails` with the `message` and `reaction` (the reaction is `null` for a clustered or overflow chip that maps to no single reaction).
+
+⚠️ Changed
+
+- Long-pressing a reaction chip no longer opens the message actions modal; the chips always claim the long press. Left unset, `onReactionLongPress` defaults to opening the `ReactionDetailSheet`.
+- Tapping or long-pressing a reaction chip now opens the `ReactionDetailSheet` pre-filtered to that reaction; it previously opened unfiltered. Clustered and overflow chips map to no single reaction, so they still open unfiltered.
+
+🔄 Changed
+
+- Raised minimum Flutter to `>=3.44.0` and Dart SDK to `^3.12.0`.
+
+## 10.3.0
+
+⚠️ Changed
+
+- `StreamMediaGallery` no longer applies its own outer padding or strips the ambient `MediaQuery` padding; pass `padding` to inset the grid.
+- `StreamMessageListView.config` is now nullable; reading it off an instance yields `StreamMessageListViewConfiguration?` rather than a default instance.
+- `StreamMediaGalleryPreview` chrome now follows the app style — floating over full-bleed media, or docked with the media inset between the bars.
+- Thread views now show the scroll-to-bottom button, following `showScrollToBottom` from the effective `StreamMessageListViewConfiguration`; set it to `false` to hide it.
+
+✅ Added
+
+- Added `resolveSurfaceStyle` to `StreamMessageComposer`, `StreamChannelHeader`, `StreamChannelListHeader`, and `StreamThreadHeader`, reporting the surface style each renders with so a page can lay its scaffold slot out to match.
+- Added `StreamChannelPage` — a ready-to-use channel page wiring up `StreamChannelHeader`, `StreamMessageListView`, and `StreamMessageComposer` with floating or docked layout.
+- Added `StreamThreadPage` — the thread equivalent, plus an `onBackPressed` that replaces the header back button's default pop.
+- Added `onBackPressed` to `StreamChannelHeader` and `StreamThreadHeader`, replacing the default back button's pop without rebuilding `leading`. Ignored when `leading` is supplied.
+- Added `MessageComposerProps.surfaceStyle`, selecting whether `StreamMessageComposer` renders floating or regular. Falls back to `StreamMessageComposerThemeData.surfaceStyle`, then the ambient `StreamSurfaceStyle`.
+- Added `StreamMessageComposerTheme` and `StreamMessageComposerThemeData` — a component theme for the composer, also available globally as `StreamChatThemeData.messageComposerTheme`.
+- Added `StreamMessageListView.config` — an explicit `StreamMessageListViewConfiguration` per widget, falling back to `StreamChatConfigurationData.messageListViewConfiguration`.
+- Added `StreamChatConfigurationData.messageListViewConfiguration` — an app-wide `StreamMessageListViewConfiguration` default, passed via `StreamChat.configData`.
+- Added floating support to `StreamChannelHeader`, `StreamChannelListHeader`, and `StreamThreadHeader` — each resolves the surface style from its per-header theme and republishes it to every slot, including the new `StreamBackButton.isFloating`.
 - Added `StreamMessageListViewConfiguration.autoScrollPolicy` to control whether and how `StreamMessageListView` scrolls to the newest message when a new message arrives. Use `StreamAutoScrollPolicy.disabled` to fully control scrolling yourself.
 - Added `onReactionSelected` to `StreamMessageReactionPicker`, a context-aware callback that provides the `BuildContext` for navigation.
 - Added an `errorSubtitle` to `StreamScrollViewErrorWidget`, which now falls back to the design's generic error copy (title, description, and a "Try Again" retry label) when values aren't provided.
 - Added a `size` (`StreamLoadingSpinnerSize`) parameter to `StreamScrollViewLoadingWidget`.
 - Added `onReactionTap` to `StreamMessageItem` and `StreamMessageListView`, reporting the tapped message's `BuildContext` and a `ReactionTapDetails` with the tapped `message` and `reaction` (the reaction is `null` for a clustered or overflow chip that maps to no single reaction).
+- Exported `StreamEphemeralMessage`, the row `StreamMessageListView` builds for ephemeral messages, matching its already-exported `StreamSystemMessage` and `StreamModeratedMessage` siblings.
 - Added an `unreadIndicator` parameter to `StreamBackButton` that overlays a widget (typically a `StreamUnreadIndicator`) on the button's top-end corner. Pass `StreamUnreadIndicator(excludeCid: cid)` to show the total unread count of other channels, or `StreamUnreadIndicator.channels(cid: cid)` for a single channel's count.
 - Exported this package's `StreamMessageContent` and `StreamMessageText`, which were previously unreachable from `package:stream_chat_flutter/stream_chat_flutter.dart` — the barrel hid `stream_core_flutter`'s `StreamMessageContent` without exporting a replacement, and its `StreamMessageText` (a lower-level markdown renderer taking a raw `String`) resolved instead of the chat-specialized one. `StreamMessageText` from the barrel now means the chat version, which takes a `Message`; the core widget and its `emojiCount` helper are still available as `StreamMessageText` from `package:stream_core_flutter/chat.dart`, alongside the already-exported `DefaultStreamMessageText` and `StreamMessageTextProps`.
 - Added `StreamChatConfigurationData.messageTranslation`, a `StreamMessageTranslationConfiguration` that collects every message-translation setting: `enabled` (default `true`) controls whether messages display a translation from `Message.i18n` at all, `annotationEnabled` (default `false`) opts into a "Translated"/"Original" annotation with a "Show original"/"Show translation" link that switches between the two. The defaults preserve the SDK's existing behaviour — translations are shown, silently — so the annotation is opt-in. Its toggle state is tracked per `StreamMessageListView` via the new `StreamMessageTranslationStore`, so it survives messages scrolling out of and back into view, and can be driven directly through `showTranslatedText`/`onToggleTranslatedText` on `StreamMessageHeaderProps`, `StreamMessageContent`, and `StreamMessageText`.
@@ -21,14 +53,24 @@
 🐞 Fixed
 
 - Fixed message text and previews translating to English for users with no `User.language` set. They now show the original text, matching the backend, which only auto-translates for users that have a language.
+- Fixed a failed send surfacing as an unhandled async error when `StreamMessageComposer` has no `onError`; it is now reported through `FlutterError.reportError`.
 - Fixed the default `StreamChannel` loading and error states not being themed or localized; `StreamChat` now installs themed, connection-aware defaults, overridable per `StreamChannel` or via `DefaultStreamChannelBuilders`.
 - Fixed the default list/scroll-view error states (channel, message, member, user, thread, poll-vote, reaction, search, and photo) showing raw or fixed errors; they are now connection-aware (no internet / slow connection), falling back to each view's specific error text.
 - Fixed `StreamTypingIndicator` briefly showing typing users from a different context (main channel vs. thread) on its first frame.
 - Fixed the attachment picker throwing a `Tooltip` assertion error when a custom `TabbedAttachmentPickerOption` is added without a `title`; the tooltip is now only shown when a title is provided.
+- Fixed the "Message deleted" bubble overflowing its maximum width when the localized label is long; the label now wraps instead.
+- Fixed the thread scroll-to-bottom button keying off the parent channel's up-to-date state instead of the thread's own scroll position, so it no longer appears while already at the newest reply.
 - Fixed the `StreamBackButton` unread badge including the currently open channel in its total count.
+- Fixed the thread-replies footer under a message in the channel being hardcoded English and reading "1 replies" for a single reply; it now uses `threadReplyCountText`, which is localized and correctly singularized.
+- Fixed a channel-list row briefly previewing another channel's last message after the list reorders. The preserved last-known message is now dropped when a row is rebound to a different channel, instead of being used as a fallback while the new channel is still loading.
+- Fixed the channel list still showing a timestamp next to "No messages yet" after a channel is truncated. `ChannelLastMessageDate` now reads the date off the message the preview actually shows instead of `Channel.lastMessageAt`, which cannot be cleared once a truncation removes every message.
 - Fixed `StreamMessageListView` jumping several screens when selecting text in a message on desktop or web. The `ScrollablePositionedList` viewports now account for their `anchor` in `getOffsetToReveal`, so implicit reveals (`Scrollable.ensureVisible`, `RenderObject.showOnScreen`) no longer overshoot. [#2862](https://github.com/GetStream/stream-chat-flutter/issues/2862)
 - Fixed modal dialogs (message actions, delete/flag confirmation) rendering over a white scrim in light theme; they now use the design system's scrim token.
 - Fixed the message metadata in the long-press actions modal keeping its muted in-list colors against the dark scrim. The previewed message now renders its annotations ("Saved for later", "Pinned by", "Replied to a thread" + "View", "Reminder set"), username, sending status and read receipts, timestamp, "Edited" label, and thread-reply count in white. Added `StreamSendingIndicator.color` to override the indicator's icon color.
+
+🔄 Changed
+
+- Improved message text selection experience on desktop and web.
 
 ## 10.2.0
 
@@ -1194,7 +1236,6 @@ messages of other users and mark channel as unread from selected message onwards
     * `StreamMessageInput.mediaAttachmentBuilder` to customize the media attachment item shown in
       `MediaAttachmentList`.
 
-
 - Added `StreamMessageInput.quotedMessageAttachmentThumbnailBuilders` to customize the thumbnail
   builders for quoted
   message attachments.
@@ -2264,7 +2305,6 @@ typedef MessageBuilder = Widget Function(
 
 > **_NOTE:_** the last parameter is the default `MessageWidget`
 > You can call `.copyWith` to customize just a subset of properties
-
 
 ✅ Added
 

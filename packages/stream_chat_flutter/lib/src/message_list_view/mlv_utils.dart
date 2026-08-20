@@ -44,8 +44,11 @@ int getInitialIndex(
   return 0;
 }
 
-/// Gets the index of the top element in the viewport.
+/// Gets the index of the top element in the visible content.
 int? getTopElementIndex(Iterable<ItemPosition> values) {
+  // Measured against the visible content (inside the list's padding) so a
+  // floating bar's inset doesn't skew which item counts as "on top".
+  double trailing(ItemPosition p) => p.contentTrailingEdge ?? p.itemTrailingEdge;
   final inView = values.where((position) {
     if (position.itemLeadingEdge == position.itemTrailingEdge) {
       // If the item's leading and trailing edges are the same, it means the
@@ -53,17 +56,18 @@ int? getTopElementIndex(Iterable<ItemPosition> values) {
       return false;
     }
 
-    return position.itemTrailingEdge > 0;
+    return trailing(position) > 0;
   });
 
   if (inView.isEmpty) return null;
   return inView.reduce((min, position) {
-    return position.itemTrailingEdge < min.itemTrailingEdge ? position : min;
+    return trailing(position) < trailing(min) ? position : min;
   }).index;
 }
 
-/// Gets the index of the bottom element in the viewport.
+/// Gets the index of the bottom element in the visible content.
 int? getBottomElementIndex(Iterable<ItemPosition> values) {
+  double leading(ItemPosition p) => p.contentLeadingEdge ?? p.itemLeadingEdge;
   final inView = values.where((position) {
     if (position.itemLeadingEdge == position.itemTrailingEdge) {
       // If the item's leading and trailing edges are the same, it means the
@@ -71,12 +75,12 @@ int? getBottomElementIndex(Iterable<ItemPosition> values) {
       return false;
     }
 
-    return position.itemLeadingEdge < 1;
+    return leading(position) < 1;
   });
 
   if (inView.isEmpty) return null;
   return inView.reduce((max, position) {
-    return position.itemLeadingEdge > max.itemLeadingEdge ? position : max;
+    return leading(position) > leading(max) ? position : max;
   }).index;
 }
 

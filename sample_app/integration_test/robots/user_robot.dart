@@ -19,6 +19,12 @@ class UserRobot {
     return this;
   }
 
+  /// Waits for the channel list to render its rows.
+  Future<UserRobot> waitForChannelListToLoad() async {
+    await tester.waitUntilVisible(find.byType(ChannelListPage.channelTile));
+    return this;
+  }
+
   Future<UserRobot> openChannel({int index = 0}) async {
     final tile = find.byType(ChannelListPage.channelTile).at(index);
     await tester.waitUntilVisible(tile);
@@ -51,16 +57,65 @@ class UserRobot {
     return this;
   }
 
-  Future<UserRobot> deleteMessage({int messageIndex = 0}) async {
-    final message = find.byType(MessageListPage.messageItem).at(messageIndex);
+  Future<UserRobot> deleteMessage({int messageIndex = 0, String? text}) async {
+    final message = await _resolveMessage(messageIndex: messageIndex, text: text);
     await tester.longPressUntilVisible(message, MessageListPage.actions.delete);
     await tester.tapFinder(MessageListPage.actions.delete);
     await tester.tapFinder(MessageListPage.actions.deleteConfirm);
     return this;
   }
 
-  Future<UserRobot> openThread({int messageIndex = 0}) async {
-    final message = find.byType(MessageListPage.messageItem).at(messageIndex);
+  /// Quotes a message and sends [text] as the reply.
+  Future<UserRobot> quoteMessage(
+    String text, {
+    int messageIndex = 0,
+    String? quotedText,
+  }) async {
+    final message = await _resolveMessage(messageIndex: messageIndex, text: quotedText);
+    await tester.longPressUntilVisible(message, MessageListPage.actions.reply);
+    await tester.tapFinder(MessageListPage.actions.reply);
+    return sendMessage(text);
+  }
+
+  /// Swipes a message, which the SDK treats as starting a quoted reply.
+  Future<UserRobot> swipeMessage({int messageIndex = 0, String? text}) async {
+    await tester.swipeToReply(await _resolveMessage(messageIndex: messageIndex, text: text));
+    return this;
+  }
+
+  /// Taps a reply's quoted bubble, which jumps the list to the original message.
+  Future<UserRobot> tapQuotedMessage() async {
+    await tester.tapFinder(MessageListPage.list.quotedMessage);
+    return this;
+  }
+
+  /// The message row to act on: the one whose text is [text] when given,
+  /// otherwise the one at [messageIndex] (0 being the newest).
+  ///
+  /// Naming a message also scrolls up to it, so an older message that has not
+  /// been reached yet can still be acted on.
+  Future<Finder> _resolveMessage({required int messageIndex, String? text}) async {
+    if (text == null) return find.byType(MessageListPage.messageItem).at(messageIndex);
+
+    final message = MessageListPage.list.messageWithText(text);
+    await tester.scrollUpUntil(
+      () => message.evaluate().isNotEmpty,
+      description: 'the message with text "$text"',
+    );
+    // A thread renders its root message on top of the paged-in history, so the
+    // same text can resolve to more than one row; acting on the first is enough.
+    return message.first;
+  }
+
+  /// Opens the thread of a message.
+  ///
+  /// [parentText] must be given whenever the channel already holds thread
+  /// replies: the mock server's replies are rendered in the channel list too, so
+  /// the newest row is a *reply*, and the SDK offers no 'Thread Reply' action on
+  /// one (its `parentId` is set). Naming the parent also handles it being
+  /// scrolled out of view, since it is the oldest message.
+  Future<UserRobot> openThread({int messageIndex = 0, String? parentText}) async {
+    final message = await _resolveMessage(messageIndex: messageIndex, text: parentText);
     await tester.longPressUntilVisible(message, MessageListPage.actions.threadReply);
     await tester.tapFinder(MessageListPage.actions.threadReply);
     await tester.waitUntilVisible(MessageListPage.threadHeader);
@@ -75,9 +130,29 @@ class UserRobot {
   /// no 'Thread Reply' action. The footer renders only on the parent, so it is
   /// unambiguous.
   Future<UserRobot> openThreadFromReplies() async {
+    // The footer only renders on the parent, which is the channel's oldest
+    // message — and the mock server's replies are rendered in the channel as
+    // well, so it can start out scrolled past.
+    await tester.scrollUpUntil(
+      () => MessageListPage.list.threadReplies.evaluate().isNotEmpty,
+      description: 'the thread replies footer',
+    );
     await tester.tapFinder(MessageListPage.list.threadReplies);
     await tester.waitUntilVisible(MessageListPage.threadHeader);
     return this;
+  }
+
+  /// Sends [text] from inside a thread, optionally ticking the composer's
+  /// "also send in channel" checkbox first so the reply is copied into the
+  /// channel as well.
+  Future<UserRobot> sendMessageInThread(
+    String text, {
+    bool alsoSendInChannel = false,
+  }) async {
+    if (alsoSendInChannel) {
+      await tester.tapFinder(MessageListPage.composer.alsoSendInChannelCheckbox);
+    }
+    return sendMessage(text);
   }
 
   /// Navigates back (out of a thread, or out of the channel).
@@ -86,8 +161,36 @@ class UserRobot {
     return this;
   }
 
+  /// Leaves the thread and then the channel, landing back on the channel list.
+  Future<UserRobot> moveToChannelListFromThread() async {
+    await tapBackButton();
+    await tester.waitUntilNotVisible(MessageListPage.threadHeader);
+    return tapBackButton();
+  }
+
+  /// Waits for the message list to be interactive.
+  Future<UserRobot> waitForMessageListToLoad() async {
+    await tester.waitUntilVisible(find.byType(MessageListPage.composer.inputField));
+    return this;
+  }
+
+  /// Nudges the message list up by one drag. To *arrive* somewhere, scroll
+  /// until it is visible instead — a fixed number of drags is viewport-
+  /// dependent.
   Future<UserRobot> scrollMessageListUp() async {
     await tester.scrollMessageList(300);
+    return this;
+  }
+
+  /// Scrolls a thread up to its top, paging in older replies as needed.
+  ///
+  /// Stops on the separator, the row right under the parent message, so the
+  /// parent and any duplicate copy of it among the replies are both built.
+  Future<UserRobot> scrollToTopOfThread() async {
+    await tester.scrollUpUntil(
+      () => MessageListPage.list.threadSeparator.evaluate().isNotEmpty,
+      description: 'the top of the thread',
+    );
     return this;
   }
 
@@ -130,6 +233,8 @@ extension UserRobotChain on Future<UserRobot> {
     UserCredentials user = PredefinedUsers.currentUser,
   ]) => then((it) => it.login(user));
 
+  Future<UserRobot> waitForChannelListToLoad() => then((it) => it.waitForChannelListToLoad());
+
   Future<UserRobot> openChannel({int index = 0}) => then((it) => it.openChannel(index: index));
 
   Future<UserRobot> sendMessage(String text) => then((it) => it.sendMessage(text));
@@ -141,17 +246,36 @@ extension UserRobotChain on Future<UserRobot> {
   Future<UserRobot> editMessage(String newText, {int messageIndex = 0}) =>
       then((it) => it.editMessage(newText, messageIndex: messageIndex));
 
-  Future<UserRobot> deleteMessage({int messageIndex = 0}) => then((it) => it.deleteMessage(messageIndex: messageIndex));
+  Future<UserRobot> deleteMessage({int messageIndex = 0, String? text}) =>
+      then((it) => it.deleteMessage(messageIndex: messageIndex, text: text));
 
-  Future<UserRobot> openThread({int messageIndex = 0}) => then((it) => it.openThread(messageIndex: messageIndex));
+  Future<UserRobot> quoteMessage(String text, {int messageIndex = 0, String? quotedText}) =>
+      then((it) => it.quoteMessage(text, messageIndex: messageIndex, quotedText: quotedText));
+
+  Future<UserRobot> swipeMessage({int messageIndex = 0, String? text}) =>
+      then((it) => it.swipeMessage(messageIndex: messageIndex, text: text));
+
+  Future<UserRobot> tapQuotedMessage() => then((it) => it.tapQuotedMessage());
+
+  Future<UserRobot> waitForMessageListToLoad() => then((it) => it.waitForMessageListToLoad());
+
+  Future<UserRobot> openThread({int messageIndex = 0, String? parentText}) =>
+      then((it) => it.openThread(messageIndex: messageIndex, parentText: parentText));
 
   Future<UserRobot> openThreadFromReplies() => then((it) => it.openThreadFromReplies());
 
+  Future<UserRobot> sendMessageInThread(String text, {bool alsoSendInChannel = false}) =>
+      then((it) => it.sendMessageInThread(text, alsoSendInChannel: alsoSendInChannel));
+
   Future<UserRobot> tapBackButton() => then((it) => it.tapBackButton());
+
+  Future<UserRobot> moveToChannelListFromThread() => then((it) => it.moveToChannelListFromThread());
 
   Future<UserRobot> scrollMessageListUp() => then((it) => it.scrollMessageListUp());
 
   Future<UserRobot> scrollMessageListDown() => then((it) => it.scrollMessageListDown());
+
+  Future<UserRobot> scrollToTopOfThread() => then((it) => it.scrollToTopOfThread());
 
   Future<UserRobot> tapLinkPreview() => then((it) => it.tapLinkPreview());
 

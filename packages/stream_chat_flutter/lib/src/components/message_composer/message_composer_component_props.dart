@@ -55,6 +55,8 @@ class MessageComposerComponentProps {
   final StreamMessageComposerController controller;
 
   /// Whether the message composer is floating.
+  ///
+  /// Defaults to false.
   final bool isFloating;
 
   /// The callback for when the send button is pressed.

@@ -168,20 +168,14 @@ class AudioRecorderFeedbackWrapper extends AudioRecorderFeedback {
   /// - [onStop]: Called when recording stops.
   const AudioRecorderFeedbackWrapper({
     super.enableFeedback = true,
-    _FeedbackCallback? onStart,
-    _FeedbackCallback? onPause,
-    _FeedbackCallback? onFinish,
-    _FeedbackCallback? onLock,
-    _FeedbackCallback? onCancel,
-    _FeedbackCallback? onStartCancel,
-    _FeedbackCallback? onStop,
-  }) : _onStop = onStop,
-       _onStartCancel = onStartCancel,
-       _onCancel = onCancel,
-       _onLock = onLock,
-       _onFinish = onFinish,
-       _onPause = onPause,
-       _onStart = onStart;
+    this._onStart,
+    this._onPause,
+    this._onFinish,
+    this._onLock,
+    this._onCancel,
+    this._onStartCancel,
+    this._onStop,
+  });
 
   // Callback for when recording starts.
   final _FeedbackCallback? _onStart;

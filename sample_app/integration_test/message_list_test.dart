@@ -224,6 +224,9 @@ void main() {
       // The send is optimistic, so the text shows up right away; the SDK marks
       // the message failed once its retries are exhausted.
       await env.userRobot.assertMessage(sampleText).assertMessageFailedToBeSent();
+      // The composer reports the failed send through FlutterError, which the
+      // failed bubble asserted above already covers.
+      await env.takeExpectedError();
 
       step('WHEN the user becomes online');
       await env.goOnline();

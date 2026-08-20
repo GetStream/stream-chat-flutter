@@ -47,7 +47,7 @@ class Message extends Equatable implements ComparableFieldProvider {
     this.ownReactions,
     this.parentId,
     this.quotedMessage,
-    String? quotedMessageId,
+    this._quotedMessageId,
     this.replyCount = 0,
     this.threadParticipants,
     this.showInChannel,
@@ -66,7 +66,7 @@ class Message extends Equatable implements ComparableFieldProvider {
     DateTime? pinExpires,
     this.pinnedBy,
     this.poll,
-    String? pollId,
+    this._pollId,
     this.extraData = const {},
     this.state = const MessageState.initial(),
     this.i18n,
@@ -81,9 +81,7 @@ class Message extends Equatable implements ComparableFieldProvider {
        pinExpires = pinExpires?.toUtc(),
        remoteCreatedAt = createdAt,
        remoteUpdatedAt = updatedAt,
-       remoteDeletedAt = deletedAt,
-       _quotedMessageId = quotedMessageId,
-       _pollId = pollId;
+       remoteDeletedAt = deletedAt;
 
   /// Create a new instance from JSON.
   factory Message.fromJson(Map<String, dynamic> json) {

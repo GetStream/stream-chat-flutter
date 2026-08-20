@@ -8,6 +8,13 @@ import 'package:streaming_shared_preferences/streaming_shared_preferences.dart';
 // ---------------------------------------------------------------------------
 
 const _kThemeMode = 'config.themeMode';
+const _kSurfaceStyle = 'config.surfaceStyle';
+const _kAppBarSurfaceStyle = 'config.appBarSurfaceStyle';
+const _kBottomAppBarSurfaceStyle = 'config.bottomAppBarSurfaceStyle';
+const _kBottomNavBarSurfaceStyle = 'config.bottomNavBarSurfaceStyle';
+const _kComposerSurfaceStyle = 'config.composerSurfaceStyle';
+const _kChannelHeaderSurfaceStyle = 'config.channelHeaderSurfaceStyle';
+const _kThreadHeaderSurfaceStyle = 'config.threadHeaderSurfaceStyle';
 const _kForceRtl = 'config.forceRtl';
 const _kEnableDynamicColor = 'config.enableDynamicColor';
 const _kEnableReminderActions = 'config.enableReminderActions';
@@ -40,6 +47,13 @@ class SampleAppConfigData {
   factory SampleAppConfigData({
     Locale? locale,
     ThemeMode themeMode = .system,
+    StreamSurfaceStyle surfaceStyle = .regular,
+    StreamSurfaceStyle? appBarSurfaceStyle,
+    StreamSurfaceStyle? bottomAppBarSurfaceStyle,
+    StreamSurfaceStyle? bottomNavBarSurfaceStyle,
+    StreamSurfaceStyle? composerSurfaceStyle,
+    StreamSurfaceStyle? channelHeaderSurfaceStyle,
+    StreamSurfaceStyle? threadHeaderSurfaceStyle,
     bool forceRtl = false,
     bool enableDynamicColor = false,
     bool enableReminderActions = false,
@@ -54,6 +68,13 @@ class SampleAppConfigData {
   }) {
     return SampleAppConfigData.raw(
       themeMode: themeMode,
+      surfaceStyle: surfaceStyle,
+      appBarSurfaceStyle: appBarSurfaceStyle,
+      bottomAppBarSurfaceStyle: bottomAppBarSurfaceStyle,
+      bottomNavBarSurfaceStyle: bottomNavBarSurfaceStyle,
+      composerSurfaceStyle: composerSurfaceStyle,
+      channelHeaderSurfaceStyle: channelHeaderSurfaceStyle,
+      threadHeaderSurfaceStyle: threadHeaderSurfaceStyle,
       locale: locale,
       forceRtl: forceRtl,
       enableDynamicColor: enableDynamicColor,
@@ -72,6 +93,13 @@ class SampleAppConfigData {
   /// Raw constructor used internally and by persistence.
   const SampleAppConfigData.raw({
     required this.themeMode,
+    required this.surfaceStyle,
+    required this.appBarSurfaceStyle,
+    required this.bottomAppBarSurfaceStyle,
+    required this.bottomNavBarSurfaceStyle,
+    required this.composerSurfaceStyle,
+    required this.channelHeaderSurfaceStyle,
+    required this.threadHeaderSurfaceStyle,
     required this.locale,
     required this.forceRtl,
     required this.enableDynamicColor,
@@ -89,8 +117,24 @@ class SampleAppConfigData {
   /// Loads config from [StreamingSharedPreferences], falling back to defaults.
   factory SampleAppConfigData.fromPreferences(StreamingSharedPreferences prefs) {
     final localeStr = prefs.getString(_kLocale, defaultValue: '').getValue();
+    final surfaceStyleIndex = prefs.getInt(_kSurfaceStyle, defaultValue: StreamSurfaceStyle.regular.index).getValue();
     return SampleAppConfigData.raw(
       themeMode: ThemeMode.values[prefs.getInt(_kThemeMode, defaultValue: ThemeMode.system.index).getValue()],
+      surfaceStyle: StreamSurfaceStyle.values[surfaceStyleIndex.clamp(0, StreamSurfaceStyle.values.length - 1)],
+      appBarSurfaceStyle: _intToSurfaceStyle(prefs.getInt(_kAppBarSurfaceStyle, defaultValue: -1).getValue()),
+      bottomAppBarSurfaceStyle: _intToSurfaceStyle(
+        prefs.getInt(_kBottomAppBarSurfaceStyle, defaultValue: -1).getValue(),
+      ),
+      bottomNavBarSurfaceStyle: _intToSurfaceStyle(
+        prefs.getInt(_kBottomNavBarSurfaceStyle, defaultValue: -1).getValue(),
+      ),
+      composerSurfaceStyle: _intToSurfaceStyle(prefs.getInt(_kComposerSurfaceStyle, defaultValue: -1).getValue()),
+      channelHeaderSurfaceStyle: _intToSurfaceStyle(
+        prefs.getInt(_kChannelHeaderSurfaceStyle, defaultValue: -1).getValue(),
+      ),
+      threadHeaderSurfaceStyle: _intToSurfaceStyle(
+        prefs.getInt(_kThreadHeaderSurfaceStyle, defaultValue: -1).getValue(),
+      ),
       locale: localeStr.isEmpty ? null : Locale(localeStr),
       forceRtl: prefs.getBool(_kForceRtl, defaultValue: false).getValue(),
       enableDynamicColor: prefs.getBool(_kEnableDynamicColor, defaultValue: false).getValue(),
@@ -110,6 +154,44 @@ class SampleAppConfigData {
 
   /// The theme mode for the app (system, light, dark).
   final ThemeMode themeMode;
+
+  /// The visual style for the app chrome (app bar, composer, bottom bar).
+  final StreamSurfaceStyle surfaceStyle;
+
+  /// Per-component override for the app bar's surface style.
+  ///
+  /// Null leaves the component on [surfaceStyle].
+  final StreamSurfaceStyle? appBarSurfaceStyle;
+
+  /// Per-component override for the bottom app bar's surface style.
+  ///
+  /// Null leaves the component on [surfaceStyle].
+  final StreamSurfaceStyle? bottomAppBarSurfaceStyle;
+
+  /// Per-component override for the bottom nav bar's surface style.
+  ///
+  /// Null leaves the component on [surfaceStyle].
+  final StreamSurfaceStyle? bottomNavBarSurfaceStyle;
+
+  /// Per-component override for the message composer's surface style.
+  ///
+  /// Null leaves the component on [surfaceStyle].
+  final StreamSurfaceStyle? composerSurfaceStyle;
+
+  /// Per-component override for the channel header, applied through the SDK's
+  /// own `channelHeaderTheme` rather than `StreamAppBarTheme`.
+  ///
+  /// A separate resolution path worth exercising: it reaches the header's chrome
+  /// through the chat theme, and the body inset through the page.
+  ///
+  /// Null leaves the header on [appBarSurfaceStyle], then [surfaceStyle].
+  final StreamSurfaceStyle? channelHeaderSurfaceStyle;
+
+  /// Per-component override for the thread header, applied through the SDK's own
+  /// `threadHeaderTheme`.
+  ///
+  /// Null leaves the header on [appBarSurfaceStyle], then [surfaceStyle].
+  final StreamSurfaceStyle? threadHeaderSurfaceStyle;
 
   /// The locale override for the app. When null, the system locale is used.
   final Locale? locale;
@@ -164,6 +246,13 @@ class SampleAppConfigData {
   /// pass explicitly as `null` to reset to default/system.
   SampleAppConfigData copyWith({
     ThemeMode? themeMode,
+    StreamSurfaceStyle? surfaceStyle,
+    Object? appBarSurfaceStyle = _sentinel,
+    Object? bottomAppBarSurfaceStyle = _sentinel,
+    Object? bottomNavBarSurfaceStyle = _sentinel,
+    Object? composerSurfaceStyle = _sentinel,
+    Object? channelHeaderSurfaceStyle = _sentinel,
+    Object? threadHeaderSurfaceStyle = _sentinel,
     Object? locale = _sentinel,
     bool? forceRtl,
     bool? enableDynamicColor,
@@ -179,6 +268,25 @@ class SampleAppConfigData {
   }) {
     return SampleAppConfigData.raw(
       themeMode: themeMode ?? this.themeMode,
+      surfaceStyle: surfaceStyle ?? this.surfaceStyle,
+      appBarSurfaceStyle: appBarSurfaceStyle == _sentinel
+          ? this.appBarSurfaceStyle
+          : appBarSurfaceStyle as StreamSurfaceStyle?,
+      bottomAppBarSurfaceStyle: bottomAppBarSurfaceStyle == _sentinel
+          ? this.bottomAppBarSurfaceStyle
+          : bottomAppBarSurfaceStyle as StreamSurfaceStyle?,
+      bottomNavBarSurfaceStyle: bottomNavBarSurfaceStyle == _sentinel
+          ? this.bottomNavBarSurfaceStyle
+          : bottomNavBarSurfaceStyle as StreamSurfaceStyle?,
+      composerSurfaceStyle: composerSurfaceStyle == _sentinel
+          ? this.composerSurfaceStyle
+          : composerSurfaceStyle as StreamSurfaceStyle?,
+      channelHeaderSurfaceStyle: channelHeaderSurfaceStyle == _sentinel
+          ? this.channelHeaderSurfaceStyle
+          : channelHeaderSurfaceStyle as StreamSurfaceStyle?,
+      threadHeaderSurfaceStyle: threadHeaderSurfaceStyle == _sentinel
+          ? this.threadHeaderSurfaceStyle
+          : threadHeaderSurfaceStyle as StreamSurfaceStyle?,
       locale: locale == _sentinel ? this.locale : locale as Locale?,
       forceRtl: forceRtl ?? this.forceRtl,
       enableDynamicColor: enableDynamicColor ?? this.enableDynamicColor,
@@ -201,6 +309,13 @@ class SampleAppConfigData {
   /// Persists all fields to [StreamingSharedPreferences].
   void saveToPreferences(StreamingSharedPreferences prefs) {
     prefs.setInt(_kThemeMode, themeMode.index);
+    prefs.setInt(_kSurfaceStyle, surfaceStyle.index);
+    prefs.setInt(_kAppBarSurfaceStyle, _surfaceStyleToInt(appBarSurfaceStyle));
+    prefs.setInt(_kBottomAppBarSurfaceStyle, _surfaceStyleToInt(bottomAppBarSurfaceStyle));
+    prefs.setInt(_kBottomNavBarSurfaceStyle, _surfaceStyleToInt(bottomNavBarSurfaceStyle));
+    prefs.setInt(_kComposerSurfaceStyle, _surfaceStyleToInt(composerSurfaceStyle));
+    prefs.setInt(_kChannelHeaderSurfaceStyle, _surfaceStyleToInt(channelHeaderSurfaceStyle));
+    prefs.setInt(_kThreadHeaderSurfaceStyle, _surfaceStyleToInt(threadHeaderSurfaceStyle));
     prefs.setString(_kLocale, locale?.languageCode ?? '');
     prefs.setBool(_kForceRtl, forceRtl);
     prefs.setBool(_kEnableDynamicColor, enableDynamicColor);
@@ -214,6 +329,13 @@ class SampleAppConfigData {
     prefs.setInt(_kReactionType, _reactionTypeToInt(reactionType));
     prefs.setInt(_kReactionPosition, _reactionPositionToInt(reactionPosition));
   }
+
+  static StreamSurfaceStyle? _intToSurfaceStyle(int value) {
+    if (value < 0 || value >= StreamSurfaceStyle.values.length) return null;
+    return StreamSurfaceStyle.values[value];
+  }
+
+  static int _surfaceStyleToInt(StreamSurfaceStyle? value) => value?.index ?? -1;
 
   static StreamReactionsType? _intToReactionType(int value) {
     if (value < 0 || value >= StreamReactionsType.values.length) return null;

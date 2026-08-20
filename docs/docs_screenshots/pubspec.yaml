@@ -11,18 +11,18 @@ publish_to: none
 #   2. Run `melos bootstrap` to apply changes.
 
 environment:
-  sdk: ^3.11.0
-  flutter: ">=3.41.0"
+  sdk: ^3.12.0
+  flutter: ">=3.44.0"
 
 dependencies:
   flutter:
     sdk: flutter
   record: ^6.2.0
-  stream_chat_flutter: ^10.2.0
+  stream_chat_flutter: ^10.3.0
   stream_core_flutter:
     git:
       url: https://github.com/GetStream/stream-core-flutter.git
-      ref: 3ba1a36b6a3d9d3a194ccb8f0deaf4d69c5842eb
+      ref: 4b7ed86a52c3109fad0a6f5118120082e378c610
       path: packages/stream_core_flutter
 
 dev_dependencies:

@@ -173,7 +173,7 @@ class _PollFooterButton extends StatelessWidget {
   const _PollFooterButton({
     required this.label,
     required this.type,
-    this.onPressed,
+    required this.onPressed,
   });
 
   // Creates a primary poll footer button (outline style).

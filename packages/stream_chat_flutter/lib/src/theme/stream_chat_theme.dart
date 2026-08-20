@@ -132,6 +132,7 @@ class StreamChatThemeData extends ThemeExtension<StreamChatThemeData> with _$Str
     StreamAppBarThemeData? channelHeaderTheme,
     StreamAppBarThemeData? channelListHeaderTheme,
     StreamAppBarThemeData? threadHeaderTheme,
+    StreamMessageComposerThemeData? messageComposerTheme,
     StreamMessageListViewThemeData? messageListViewTheme,
     StreamPollCreatorThemeData? pollCreatorTheme,
     StreamPollInteractorThemeData? pollInteractorTheme,
@@ -148,6 +149,9 @@ class StreamChatThemeData extends ThemeExtension<StreamChatThemeData> with _$Str
     channelHeaderTheme ??= const StreamAppBarThemeData();
     channelListHeaderTheme ??= const StreamAppBarThemeData();
     threadHeaderTheme ??= const StreamAppBarThemeData();
+
+    // Message composer
+    messageComposerTheme ??= const StreamMessageComposerThemeData();
 
     // Message list
     messageListViewTheme ??= const StreamMessageListViewThemeData();
@@ -170,6 +174,7 @@ class StreamChatThemeData extends ThemeExtension<StreamChatThemeData> with _$Str
       channelHeaderTheme: channelHeaderTheme,
       channelListHeaderTheme: channelListHeaderTheme,
       threadHeaderTheme: threadHeaderTheme,
+      messageComposerTheme: messageComposerTheme,
       messageListViewTheme: messageListViewTheme,
       pollCreatorTheme: pollCreatorTheme,
       pollInteractorTheme: pollInteractorTheme,
@@ -189,6 +194,7 @@ class StreamChatThemeData extends ThemeExtension<StreamChatThemeData> with _$Str
     required this.channelHeaderTheme,
     required this.channelListHeaderTheme,
     required this.threadHeaderTheme,
+    required this.messageComposerTheme,
     required this.messageListViewTheme,
     required this.pollCreatorTheme,
     required this.pollInteractorTheme,
@@ -210,6 +216,9 @@ class StreamChatThemeData extends ThemeExtension<StreamChatThemeData> with _$Str
 
   /// The thread header app bar theme for this theme.
   final StreamAppBarThemeData threadHeaderTheme;
+
+  /// The message composer theme for this theme.
+  final StreamMessageComposerThemeData messageComposerTheme;
 
   /// The message list view theme for this theme.
   final StreamMessageListViewThemeData messageListViewTheme;

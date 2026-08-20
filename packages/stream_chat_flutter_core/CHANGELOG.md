@@ -1,13 +1,21 @@
 ## Upcoming
 
+🔄 Changed
+
+- Raised minimum Flutter to `>=3.44.0` and Dart SDK to `^3.12.0`.
+
+## 10.3.0
+
 ✅ Added
 
 - Added `StreamChannelState.retry()` to re-run a failed channel initialization, for use as the retry action in `StreamChannel.errorBuilder`.
 - Added `DefaultStreamChannelBuilders`, an inherited widget that supplies default loading and error builders to descendant `StreamChannel`s (resolved via `loadingBuilderOf`/`errorBuilderOf`).
+- Added `search()`, `searchWithFilter()`, and `clearResults()` to `StreamMessageSearchListController`, `StreamUserListController`, and `StreamMemberListController`. `search()`/`searchWithFilter()` debounce reloads by the search-text length (a filter with no search text reloads immediately) and drop superseded results; `clearResults()` cancels any pending search and clears the results.
 
 🐞 Fixed
 
 - Fixed `StreamChannel`'s default error state exposing raw error details; it now shows a safe error state (icon, message, and a Try Again button wired to `retry()`) that adapts to the failure type.
+- Fixed `StreamChannelListController` crashing with a null-check error when its local sort ran over a channel disposed mid-query (e.g. a client disconnect/logout racing an in-flight `loadMore`); such channels are now sorted last instead.
 
 ## 10.2.0
 

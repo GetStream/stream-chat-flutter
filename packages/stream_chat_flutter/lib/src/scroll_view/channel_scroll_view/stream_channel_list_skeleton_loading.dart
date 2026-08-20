@@ -10,15 +10,23 @@ class StreamChannelListSkeletonLoading extends StatelessWidget {
   const StreamChannelListSkeletonLoading({
     super.key,
     this.itemCount = 7,
+    this.padding,
   });
 
   /// The number of skeleton items to display.
   final int itemCount;
 
+  /// Padding around the skeleton list.
+  ///
+  /// When null, the list auto-insets from `MediaQuery.padding` — matching the
+  /// real [StreamChannelListView] so the layout doesn't shift once it loads.
+  final EdgeInsetsGeometry? padding;
+
   @override
   Widget build(BuildContext context) {
     return StreamSkeletonLoading(
       child: ListView.separated(
+        padding: padding,
         physics: const NeverScrollableScrollPhysics(),
         itemCount: itemCount,
         separatorBuilder: (context, index) => const SizedBox(height: 1),

@@ -165,6 +165,7 @@ class StreamChatConfigurationData {
     List<StreamAttachmentWidgetBuilder>? attachmentBuilders,
     StreamReactionsType? reactionType,
     StreamReactionsPosition? reactionPosition,
+    StreamMessageListViewConfiguration messageListViewConfiguration = const StreamMessageListViewConfiguration(),
     StreamMessageTranslationConfiguration messageTranslation = const StreamMessageTranslationConfiguration(),
   }) {
     return StreamChatConfigurationData._(
@@ -176,6 +177,7 @@ class StreamChatConfigurationData {
       attachmentBuilders: attachmentBuilders,
       reactionType: reactionType,
       reactionPosition: reactionPosition,
+      messageListViewConfiguration: messageListViewConfiguration,
       messageTranslation: messageTranslation,
     );
   }
@@ -187,6 +189,7 @@ class StreamChatConfigurationData {
     required this.messagePreviewFormatter,
     required this.imageCDN,
     required this.attachmentBuilders,
+    required this.messageListViewConfiguration,
     required this.messageTranslation,
     this.reactionType,
     this.reactionPosition,
@@ -203,6 +206,7 @@ class StreamChatConfigurationData {
     List<StreamAttachmentWidgetBuilder>? attachmentBuilders,
     StreamReactionsType? reactionType,
     StreamReactionsPosition? reactionPosition,
+    StreamMessageListViewConfiguration? messageListViewConfiguration,
     StreamMessageTranslationConfiguration? messageTranslation,
   }) {
     return StreamChatConfigurationData(
@@ -214,6 +218,7 @@ class StreamChatConfigurationData {
       attachmentBuilders: attachmentBuilders ?? this.attachmentBuilders,
       reactionType: reactionType ?? this.reactionType,
       reactionPosition: reactionPosition ?? this.reactionPosition,
+      messageListViewConfiguration: messageListViewConfiguration ?? this.messageListViewConfiguration,
       messageTranslation: messageTranslation ?? this.messageTranslation,
     );
   }
@@ -263,6 +268,14 @@ class StreamChatConfigurationData {
   /// When null, the widget resolves its own default
   /// ([StreamReactionsPosition.header]).
   final StreamReactionsPosition? reactionPosition;
+
+  /// The default [StreamMessageListViewConfiguration] applied to every
+  /// [StreamMessageListView] that does not provide its own explicit
+  /// [StreamMessageListView.config].
+  ///
+  /// Defaults to a [StreamMessageListViewConfiguration] with all fields at their
+  /// defaults.
+  final StreamMessageListViewConfiguration messageListViewConfiguration;
 
   /// How messages that carry a translation in [Message.i18n] are displayed.
   ///

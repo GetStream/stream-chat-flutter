@@ -24,9 +24,9 @@ command:
 
     # Dart and Flutter environment used in the project.
     environment:
-      sdk: ^3.11.0
+      sdk: ^3.12.0
       # We are not using carat '^' syntax here because flutter don't follow semantic versioning.
-      flutter: ">=3.41.0"
+      flutter: ">=3.44.0"
 
     # List of all the dependencies used in the project.
     dependencies:
@@ -90,24 +90,24 @@ command:
       path_provider_android: ">=2.2.5 <2.3.0"
       photo_manager: ^3.9.0
       photo_view: ^0.15.0
-      rate_limiter: ^1.0.0
+      rate_limiter: ^1.1.0
       record: ^6.2.0
       responsive_builder: ^0.7.0
       rxdart: ^0.28.0
       share_plus: ">=12.0.2 <14.0.0"
       shimmer: ^3.0.0
       sqlite3_flutter_libs: ^0.5.26
-      stream_chat: ^10.2.0
-      stream_chat_flutter: ^10.2.0
-      stream_chat_flutter_core: ^10.2.0
-      stream_chat_localizations: ^10.2.0
-      stream_chat_persistence: ^10.2.0
+      stream_chat: ^10.3.0
+      stream_chat_flutter: ^10.3.0
+      stream_chat_flutter_core: ^10.3.0
+      stream_chat_localizations: ^10.3.0
+      stream_chat_persistence: ^10.3.0
       streaming_shared_preferences: ^2.0.0
       svg_icon_widget: ^0.0.1
       stream_core_flutter:
         git:
           url: https://github.com/GetStream/stream-core-flutter.git
-          ref: 3ba1a36b6a3d9d3a194ccb8f0deaf4d69c5842eb
+          ref: 4b7ed86a52c3109fad0a6f5118120082e378c610
           path: packages/stream_core_flutter
       stream_thumbnail: ^0.1.0
       synchronized: ^3.4.0

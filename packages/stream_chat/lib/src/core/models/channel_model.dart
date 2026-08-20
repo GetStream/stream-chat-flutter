@@ -94,8 +94,18 @@ class ChannelModel {
   final DateTime createdAt;
 
   /// The date at which the channel was last updated.
+  ///
+  /// Resolves to whichever of [lastMessageAt] and [createdAt] is more recent.
+  /// Truncating a channel leaves [lastMessageAt] set to a value older than
+  /// [createdAt] rather than clearing it, so taking the later of the two keeps
+  /// the channel in place under a `last_updated` sort.
   @JsonKey(includeToJson: false, includeFromJson: false)
-  DateTime get lastUpdatedAt => lastMessageAt ?? createdAt;
+  DateTime get lastUpdatedAt {
+    if (lastMessageAt case final lastMessageAt? when lastMessageAt.isAfter(createdAt)) {
+      return lastMessageAt;
+    }
+    return createdAt;
+  }
 
   /// The date of the last channel update
   @JsonKey(includeToJson: false)
