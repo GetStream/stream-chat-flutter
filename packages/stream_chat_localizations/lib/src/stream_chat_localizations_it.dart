@@ -499,6 +499,7 @@ Attenzione: il limite massimo di $limit file è stato superato.
   String get linkDisabledError => 'I links sono disattivati';
 
   @override
+  // ignore: deprecated_member_use
   String unreadMessagesSeparatorText() => 'Nuovi messaggi';
 
   @override

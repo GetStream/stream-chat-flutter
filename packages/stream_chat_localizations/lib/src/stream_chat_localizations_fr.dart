@@ -496,6 +496,7 @@ Limite de pièces jointes dépassée : il n'est pas possible d'ajouter plus de $
   String get linkDisabledError => 'Les liens sont désactivés';
 
   @override
+  // ignore: deprecated_member_use
   String unreadMessagesSeparatorText() => 'Nouveaux messages';
 
   @override

@@ -12,11 +12,10 @@
 //      past — trivially satisfied when the channel opened fully read.
 //   6. There is no active manual mark-unread (`channel.state.isMarkedAsUnread`).
 //
-// `StreamMessageListViewConfiguration.shouldMarkRead` can override 4-6.
-//
 // In a thread, it fires `channel.markThreadRead(parentId)` instead, gated
-// only on the parent having at least one reply and the channel being up to
-// date — conditions 4-6 don't apply there.
+// only on the parent having at least one reply. A thread read is independent
+// of the parent channel's own loaded window, so conditions 2 and 4-6 don't
+// apply there.
 //
 // These tests pin the expected behavior so regressions in the underlying
 // position-listener flow (SPL `itemPositions`, scroll wiring, etc.) surface
@@ -115,7 +114,6 @@ void main() {
     Message? parentMessage,
     Read? currentUserRead,
     bool openAtFirstUnread = false,
-    StreamShouldMarkReadPredicate? shouldMarkRead,
   }) async {
     when(() => channelClientState.isUpToDate).thenReturn(isUpToDate);
     when(() => channelClientState.unreadCount).thenReturn(unreadCount);
@@ -133,19 +131,22 @@ void main() {
     await tester.runAsync(() async {
       await tester.pumpWidget(
         MaterialApp(
-          home: DefaultAssetBundle(
-            bundle: rootBundle,
-            child: StreamChat(
-              client: client,
-              themeData: StreamChatThemeData(),
-              child: StreamChannel(
-                channel: channel,
-                openAtFirstUnread: openAtFirstUnread,
-                child: StreamMessageListView(
-                  parentMessage: parentMessage,
-                  config: StreamMessageListViewConfiguration(
-                    markReadWhenAtTheBottom: markReadWhenAtTheBottom,
-                    shouldMarkRead: shouldMarkRead,
+          // Scaffold supplies the Material ancestor some message widgets
+          // need once older messages scroll into view.
+          home: Scaffold(
+            body: DefaultAssetBundle(
+              bundle: rootBundle,
+              child: StreamChat(
+                client: client,
+                themeData: StreamChatThemeData(),
+                child: StreamChannel(
+                  channel: channel,
+                  openAtFirstUnread: openAtFirstUnread,
+                  child: StreamMessageListView(
+                    parentMessage: parentMessage,
+                    config: StreamMessageListViewConfiguration(
+                      markReadWhenAtTheBottom: markReadWhenAtTheBottom,
+                    ),
                   ),
                 ),
               ),
@@ -324,100 +325,6 @@ void main() {
         verify(() => channel.markRead(messageId: any(named: 'messageId'))).called(1);
       },
     );
-
-    testWidgets(
-      'a shouldMarkRead override that returns false blocks an otherwise-allowed mark-read',
-      (tester) async {
-        final other = User(id: 'otherid');
-        final messages = generateConversation(20, users: [other]).reversed.toList();
-        StreamMarkReadDetails? capturedDetails;
-
-        await pumpMessageList(
-          tester,
-          messages: messages,
-          isUpToDate: true,
-          unreadCount: 5,
-          shouldMarkRead: (details) {
-            capturedDetails = details;
-            return false;
-          },
-        );
-
-        verifyNever(() => channel.markRead(messageId: any(named: 'messageId')));
-
-        // Opened at the bottom with nothing pre-existing unread and no
-        // active manual mark-unread — the default gating would have
-        // allowed this; only the override blocks it.
-        expect(capturedDetails, isNotNull);
-        expect(capturedDetails!.unreadCount, 5);
-        expect(capturedDetails!.hasSeenLastMessage, isTrue);
-        expect(capturedDetails!.hasSeenFirstUnreadMessage, isTrue);
-        expect(capturedDetails!.isMarkedAsUnread, isFalse);
-      },
-    );
-
-    testWidgets(
-      'a shouldMarkRead override that returns true allows a mark-read the default gating would block',
-      (tester) async {
-        final other = User(id: 'otherid');
-        final messages = generateConversation(20, users: [other]).reversed.toList();
-        final lastReadMessageId = messages[10].id;
-        StreamMarkReadDetails? capturedDetails;
-
-        await pumpMessageList(
-          tester,
-          messages: messages,
-          isUpToDate: true,
-          unreadCount: 5,
-          openAtFirstUnread: false,
-          currentUserRead: Read(
-            user: ownUser,
-            lastRead: DateTime.now(),
-            unreadMessages: 5,
-            lastReadMessageId: lastReadMessageId,
-          ),
-          shouldMarkRead: (details) {
-            capturedDetails = details;
-            return true;
-          },
-        );
-
-        verify(() => channel.markRead(messageId: any(named: 'messageId'))).called(1);
-
-        // The unseen pre-existing unread boundary is exactly what the
-        // default gating would have blocked on; the override allows it
-        // anyway.
-        expect(capturedDetails, isNotNull);
-        expect(capturedDetails!.unreadCount, 5);
-        expect(capturedDetails!.hasSeenFirstUnreadMessage, isFalse);
-        expect(capturedDetails!.isMarkedAsUnread, isFalse);
-      },
-    );
-
-    testWidgets(
-      'a shouldMarkRead override sees isMarkedAsUnread when the channel has an active manual mark-unread',
-      (tester) async {
-        final other = User(id: 'otherid');
-        final messages = generateConversation(20, users: [other]).reversed.toList();
-        when(() => channelClientState.isMarkedAsUnread).thenReturn(true);
-        StreamMarkReadDetails? capturedDetails;
-
-        await pumpMessageList(
-          tester,
-          messages: messages,
-          isUpToDate: true,
-          unreadCount: 5,
-          shouldMarkRead: (details) {
-            capturedDetails = details;
-            return false;
-          },
-        );
-
-        expect(capturedDetails, isNotNull);
-        expect(capturedDetails!.isMarkedAsUnread, isTrue);
-        expect(capturedDetails!.unreadCount, 5);
-      },
-    );
   });
 
   group('thread markThreadRead gates', () {
@@ -468,6 +375,55 @@ void main() {
           parentMessage: parent,
           messages: [parent, reply],
           isUpToDate: true,
+          unreadCount: 0,
+        );
+
+        verify(() => channel.markThreadRead(parent.id)).called(1);
+      },
+    );
+
+    testWidgets(
+      'fires even when the parent channel is not up to date',
+      (tester) async {
+        // A thread read has nothing to do with where the parent channel's
+        // own loaded window sits — gating it on the channel's `isUpToDate`
+        // silently blocked thread reads whenever the channel was scrolled
+        // back into history.
+        final other = User(id: 'otherid');
+        final parent = Message(
+          id: 'parent-id',
+          user: other,
+          text: 'parent',
+          replyCount: 1,
+          createdAt: DateTime.utc(2026),
+        );
+        final reply = Message(
+          id: 'reply-id',
+          user: other,
+          text: 'reply',
+          parentId: parent.id,
+          createdAt: DateTime.utc(2026, 1, 1, 0, 1),
+        );
+
+        // A channel that isn't up to date triggers a reload; stub it so the
+        // thread's own list still renders and the gate is actually reached.
+        when(
+          () => channel.query(
+            state: any(named: 'state'),
+            watch: any(named: 'watch'),
+            presence: any(named: 'presence'),
+            messagesPagination: any(named: 'messagesPagination'),
+            membersPagination: any(named: 'membersPagination'),
+            watchersPagination: any(named: 'watchersPagination'),
+            preferOffline: any(named: 'preferOffline'),
+          ),
+        ).thenAnswer((_) async => ChannelState(messages: [parent, reply]));
+
+        await pumpMessageList(
+          tester,
+          parentMessage: parent,
+          messages: [parent, reply],
+          isUpToDate: false,
           unreadCount: 0,
         );
 
@@ -640,7 +596,7 @@ void main() {
         // Not awaited directly: `_scrollToMessage`'s fallback awaits
         // `WidgetsBinding.instance.endOfFrame` after the query, which only
         // resolves once the test binding actually pumps a frame.
-        unawaited(indicator.onJumpTap());
+        unawaited(indicator.onJumpTap(null));
         await tester.pumpAndSettle();
 
         verify(
@@ -649,6 +605,169 @@ void main() {
             messagesPagination: const PaginationParams(limit: 30, idAround: lastReadMessageId),
           ),
         ).called(1);
+      },
+    );
+  });
+
+  group('unread pill after a manual mark-unread', () {
+    // Marking a message unread restarts the pill's session against the
+    // moved-back boundary. Its anchor is the message the user was looking at,
+    // so it starts out on screen — which used to retire the pill on the very
+    // next layout tick.
+    Future<List<Message>> pumpMarkedUnread(
+      WidgetTester tester, {
+      required User other,
+    }) async {
+      final messages = generateConversation(40, users: [other]).reversed.toList();
+
+      await pumpMessageList(
+        tester,
+        messages: messages,
+        isUpToDate: true,
+        unreadCount: 0,
+        markReadWhenAtTheBottom: false,
+      );
+
+      // Now the user marks a visible message unread: the channel reports an
+      // active manual mark-unread and a boundary pointing back at it.
+      when(() => channelClientState.isMarkedAsUnread).thenReturn(true);
+      when(() => channelClientState.unreadCount).thenReturn(3);
+      final markedRead = Read(
+        user: ownUser,
+        lastRead: DateTime.now(),
+        unreadMessages: 3,
+        lastReadMessageId: messages[messages.length - 2].id,
+      );
+      when(() => channelClientState.currentUserRead).thenReturn(markedRead);
+
+      await tester.runAsync(() async {
+        unreadCountController.add(3);
+        currentUserReadController.add(markedRead);
+        await tester.pumpAndSettle();
+      });
+
+      return messages;
+    }
+
+    testWidgets(
+      'a small scroll that keeps the boundary on screen does not dismiss it',
+      (tester) async {
+        final other = User(id: 'otherid');
+        await pumpMarkedUnread(tester, other: other);
+
+        expect(find.byType(UnreadIndicatorButton), findsOneWidget);
+
+        // The slightest scroll used to be enough to retire the pill, because
+        // simply having the anchor visible counted as reaching the boundary.
+        await tester.drag(find.byType(StreamMessageListView), const Offset(0, 30));
+        await tester.pumpAndSettle();
+
+        expect(find.byType(UnreadIndicatorButton), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'stays dismissed when further messages arrive after being dismissed',
+      (tester) async {
+        final other = User(id: 'otherid');
+        final messages = await pumpMarkedUnread(tester, other: other);
+
+        expect(find.byType(UnreadIndicatorButton), findsOneWidget);
+
+        final indicator = tester.widget<UnreadIndicatorButton>(
+          find.byType(UnreadIndicatorButton),
+        );
+        await indicator.onDismissTap();
+        await tester.pumpAndSettle();
+
+        expect(find.byType(UnreadIndicatorButton), findsNothing);
+
+        // Each arrival re-emits the read stream while `isMarkedAsUnread` is
+        // still set. That used to re-run the whole mark-unread reset and
+        // flicker the pill back in and straight out again.
+        final arrival = Message(
+          id: 'arrived-after-dismiss',
+          text: 'After dismiss',
+          user: other,
+          createdAt: DateTime.now(),
+        );
+        final updated = [...messages, arrival];
+        when(() => channelClientState.messages).thenReturn(updated);
+        final laterRead = Read(
+          user: ownUser,
+          lastRead: DateTime.now(),
+          unreadMessages: 4,
+          lastReadMessageId: messages[messages.length - 2].id,
+        );
+        when(() => channelClientState.currentUserRead).thenReturn(laterRead);
+
+        await tester.runAsync(() async {
+          messagesController.add(updated);
+          currentUserReadController.add(laterRead);
+
+          // Pumped one frame at a time: the regression was a *transient*
+          // reappearance — the reset cleared `_hasSeenFirstUnread` on the
+          // read emission and the next layout latched it straight back — so
+          // it is invisible to an end-state assertion after pumpAndSettle.
+          for (var i = 0; i < 5; i++) {
+            await tester.pump();
+            expect(
+              find.byType(UnreadIndicatorButton),
+              findsNothing,
+              reason: 'pill reappeared on frame $i after a later arrival',
+            );
+          }
+          await tester.pumpAndSettle();
+        });
+
+        expect(find.byType(UnreadIndicatorButton), findsNothing);
+      },
+    );
+  });
+
+  group('unread pill on a never-read channel', () {
+    testWidgets(
+      'tapping jump scrolls to the oldest loaded message instead of doing nothing',
+      (tester) async {
+        // A channel the user has never opened reports unread messages with no
+        // read boundary at all: no `lastReadMessageId`, and the anchor can't
+        // resolve until top pagination ends. The tap used to be inert.
+        final other = User(id: 'otherid');
+        final messages = generateConversation(20, users: [other]).reversed.toList();
+
+        await pumpMessageList(
+          tester,
+          messages: messages,
+          isUpToDate: true,
+          unreadCount: 5,
+          openAtFirstUnread: false,
+          currentUserRead: Read(
+            user: ownUser,
+            lastRead: DateTime.utc(1970),
+            unreadMessages: 5,
+          ),
+        );
+
+        expect(find.byType(UnreadIndicatorButton), findsOneWidget);
+
+        final indicator = tester.widget<UnreadIndicatorButton>(
+          find.byType(UnreadIndicatorButton),
+        );
+
+        // This list is in production order (oldest first), so the oldest
+        // loaded message is the first entry. It's already in the window, so
+        // the jump scrolls without needing a query.
+        final oldestLoaded = messages.first;
+
+        // Not awaited directly: the scroll only completes once the test
+        // binding pumps frames (same reason as the fallback-jump test above).
+        unawaited(indicator.onJumpTap(null));
+        await tester.pumpAndSettle();
+
+        expect(find.text(oldestLoaded.text!), findsOneWidget);
+        // The real boundary is further back than this landed, so the pill
+        // stays up rather than latching as seen.
+        expect(find.byType(UnreadIndicatorButton), findsOneWidget);
       },
     );
   });

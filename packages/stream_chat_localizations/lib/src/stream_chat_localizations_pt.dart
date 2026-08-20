@@ -495,6 +495,7 @@ Não é possível adicionar mais de $limit arquivos de uma vez
   String get viewLibrary => 'Ver biblioteca';
 
   @override
+  // ignore: deprecated_member_use
   String unreadMessagesSeparatorText() => 'Novas mensagens';
 
   @override

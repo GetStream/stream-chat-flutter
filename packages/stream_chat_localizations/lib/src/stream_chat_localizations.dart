@@ -122,6 +122,18 @@ abstract class GlobalStreamChatLocalizations implements StreamChatLocalizations 
   /// (e.g. `'en'`, `'de'`, `'fr'`).
   final String localeName;
 
+  /// The label for the unread messages separator, e.g. "5 unread messages".
+  ///
+  /// Defaults to the count-less `unreadMessagesSeparatorText` so subclasses
+  /// written before this method existed keep compiling, and any custom text
+  /// they already override keeps being shown. The bundled locales override
+  /// this to include the count.
+  @override
+  String unreadMessagesSeparatorLabel({required int count}) {
+    // ignore: deprecated_member_use
+    return unreadMessagesSeparatorText();
+  }
+
   /// A [LocalizationsDelegate] for [StreamChatLocalizations].
   ///
   /// Most internationalized apps will use

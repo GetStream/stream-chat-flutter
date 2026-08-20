@@ -100,11 +100,21 @@ abstract class Translations {
 
   /// The text for showing the unread messages count
   /// in the [StreamMessageListView]
+  @Deprecated('Use unreadMessagesSeparatorLabel instead. Will be removed in the next major version.')
   String unreadMessagesSeparatorText();
 
   /// The label for the unread messages separator in the
   /// [StreamMessageListView], e.g. "5 unread messages".
-  String unreadMessagesSeparatorLabel({required int count});
+  ///
+  /// Defaults to the count-less `unreadMessagesSeparatorText` so that
+  /// implementations written before this method existed — including ones
+  /// that customise only that older string — keep rendering their own text
+  /// rather than silently reverting to the built-in copy. Override this to
+  /// show the count.
+  String unreadMessagesSeparatorLabel({required int count}) {
+    // ignore: deprecated_member_use_from_same_package
+    return unreadMessagesSeparatorText();
+  }
 
   /// The label for "connected" in [StreamConnectionStatusBuilder]
   String get connectedLabel;
@@ -1292,6 +1302,7 @@ Attachment limit exceeded: it's not possible to add more than $limit attachments
   String get linkDisabledError => 'Links are disabled';
 
   @override
+  // ignore: deprecated_member_use_from_same_package
   String unreadMessagesSeparatorText() => 'New messages';
 
   @override

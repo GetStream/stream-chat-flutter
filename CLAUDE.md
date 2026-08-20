@@ -125,6 +125,43 @@ Optional local persistence using Drift (SQLite). Implements `ChatPersistenceClie
 - Trailing commas: `preserve` (formatter setting)
 - Generated files (`.g.dart`, `.freezed.dart`) are excluded from analysis
 
+## Breaking Changes
+
+This is a published SDK: every symbol exported from a package's barrel
+(`lib/<package>.dart`) is public API that customers may already depend on.
+
+**Always ask the user for explicit permission before making a change that could break
+customer code.** Propose the change, name what breaks and who it affects, offer a
+non-breaking alternative if one exists, and wait for a decision. Do not assume a change
+is acceptable because it is small, "unlikely to be used", or internally more correct.
+
+Treat all of the following as potentially breaking, even when the diff looks trivial:
+
+- Removing, renaming, or moving a public class, method, getter, typedef, or extension
+- Changing a constructor parameter's type, name, or nullability — including changing a
+  callback signature (e.g. `void Function(String?)` → `void Function()`)
+- Adding a `required` parameter to an existing public constructor or method
+- Adding a member to, or changing a member's signature on, an interface customers
+  implement or subclass (e.g. `Translations`, `ChatPersistenceClient`, theme data classes)
+- Changing a default value, or changing which widget/behaviour a public widget renders
+- Making a public widget stop reading state it used to read (a customer's override or
+  wrapper may silently stop taking effect — a *behavioural* break with no compile error)
+- Changing the semantics of an existing field without changing its type
+
+Behavioural breaks deserve the same scrutiny as compile breaks; they are worse, because
+customers get no compiler warning.
+
+When a breaking change is approved:
+
+- Prefer the non-breaking path where it exists: add the new API alongside the old one,
+  `@Deprecated('Use X instead.')` the old one, and keep it for at least one minor release.
+- Make new parameters optional with a default that preserves the previous behaviour.
+- Use `refactor(scope)!:` / `feat(scope)!:` in the commit and PR title.
+- Record it in the package's `CHANGELOG.md` under `🔄 Changed` (or `⚠️ Deprecated`),
+  spelling out the migration for customers.
+- If a translation key or theme property stops being used, deprecate it rather than
+  leaving it silently dead.
+
 ## PR & Commit Conventions
 
 PR titles follow [Conventional Commits](https://www.conventionalcommits.org/):

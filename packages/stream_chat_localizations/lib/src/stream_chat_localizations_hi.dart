@@ -494,6 +494,7 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
   String get linkDisabledError => 'लिंक भेजना प्रतिबंधित';
 
   @override
+  // ignore: deprecated_member_use
   String unreadMessagesSeparatorText() => 'नए संदेश।';
 
   @override

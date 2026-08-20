@@ -434,6 +434,7 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
   String get viewLibrary => 'Se bibliotek';
 
   @override
+  // ignore: deprecated_member_use
   String unreadMessagesSeparatorText() => 'Nye meldinger.';
 
   @override

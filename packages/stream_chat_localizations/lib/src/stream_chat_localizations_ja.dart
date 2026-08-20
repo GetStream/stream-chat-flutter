@@ -482,6 +482,7 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   String get linkDisabledError => 'リンクが無効になっています';
 
   @override
+  // ignore: deprecated_member_use
   String unreadMessagesSeparatorText() => '新しいメッセージ。';
 
   @override

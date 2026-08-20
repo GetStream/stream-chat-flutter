@@ -483,6 +483,7 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
   String get linkDisabledError => '링크가 비활성화되었습니다.';
 
   @override
+  // ignore: deprecated_member_use
   String unreadMessagesSeparatorText() => '새 메시지.';
 
   @override

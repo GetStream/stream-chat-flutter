@@ -493,6 +493,7 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
   String get linkDisabledError => 'Els enllaços estan deshabilitats';
 
   @override
+  // ignore: deprecated_member_use
   String unreadMessagesSeparatorText() => 'Missatges nous';
 
   @override

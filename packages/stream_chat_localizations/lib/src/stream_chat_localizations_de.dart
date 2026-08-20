@@ -490,6 +490,7 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
   String get viewLibrary => 'Bibliothek öffnen';
 
   @override
+  // ignore: deprecated_member_use
   String unreadMessagesSeparatorText() => 'Neue Nachrichten';
 
   @override

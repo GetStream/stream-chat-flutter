@@ -8,18 +8,17 @@
 - Added a `size` (`StreamLoadingSpinnerSize`) parameter to `StreamScrollViewLoadingWidget`.
 - Added `onReactionTap` to `StreamMessageItem` and `StreamMessageListView`, reporting the tapped message's `BuildContext` and a `ReactionTapDetails` with the tapped `message` and `reaction` (the reaction is `null` for a clustered or overflow chip that maps to no single reaction).
 - Added an `unreadIndicator` parameter to `StreamBackButton` that overlays a widget (typically a `StreamUnreadIndicator`) on the button's top-end corner. Pass `StreamUnreadIndicator(excludeCid: cid)` to show the total unread count of other channels, or `StreamUnreadIndicator.channels(cid: cid)` for a single channel's count.
-- Added `StreamMessageListViewConfiguration.shouldMarkRead` to fully override the automatic mark-read gating described below.
 - Added `Channel.isMarkedAsUnread` (via `ChannelClientState`), reporting whether the current user has an active manual mark-unread that hasn't been read past yet.
 - Added `StreamChannel.openAtFirstUnread` (`stream_chat_flutter_core`), defaulting to `true`. Set to `false` to always open a channel at the latest message instead of scrolling to the first pre-existing unread message.
-- Added `Translations.unreadMessagesSeparatorLabel`, used by the default `UnreadMessagesSeparator` to show a count, e.g. "5 unread messages".
+- Added `Translations.unreadMessagesSeparatorLabel`, used by the default `UnreadMessagesSeparator` to show a count, e.g. "5 unread messages". It has a default implementation that falls back to the (now deprecated) `unreadMessagesSeparatorText`, so existing translation classes keep compiling and any custom text they already override keeps being shown.
+- Added an optional `unreadCount` to `UnreadIndicatorButton`. When supplied, the widget renders unconditionally with that count and skips its internal read-state subscription, letting the host own visibility — this is how `StreamMessageListView` now drives it. Omitting it keeps the previous self-subscribing behaviour, and `onJumpTap` keeps its `String? lastReadMessageId` argument, so existing usages are unaffected.
 
 🔄 Changed
 
 - Changed the "↑ N unread" jump-to-unread pill to a count fixed when the channel opens, staying on screen for the whole session rather than reacting to the live, shrinking unread count. The pill now shows as soon as that count is known — even before the boundary message itself has loaded — and dismisses permanently for the session once tapped, dismissed, or scrolled past; it no longer reappears when a new message arrives.
 - Changed the scroll-to-bottom badge to count only messages that arrive out of view during the current session, rather than being seeded from the channel's unread count. It always resets to 0 once the user reaches the bottom.
 - Changed the "unread messages" divider to show a count, starting at the channel's open-time unread total and counting up as further messages arrive during the session — mirroring WhatsApp — instead of a fixed, count-less label.
-- Changed `UnreadIndicatorButton` to take a `required int unreadCount` and render unconditionally, dropping its internal read-state subscription — `StreamMessageListView` now owns its visibility.
-- Tightened `StreamMessageListView`'s automatic mark-read gating to also require that the pre-existing unread boundary (if any) has been seen or scrolled past, and that there's no pending manual mark-unread — mirroring the iOS SDK. Previously, reaching the bottom with unread messages present was sufficient.
+- Tightened `StreamMessageListView`'s automatic mark-read gating to also require that the pre-existing unread boundary (if any) has been seen or scrolled past, and that there's no pending manual mark-unread. Previously, reaching the bottom with unread messages present was sufficient.
 
 ⚠️ Deprecated
 
@@ -27,6 +26,7 @@
 - Deprecated `onReactionsTap` (and the `OnReactionsTap` typedef) on `StreamMessageItem` and `StreamMessageListView` in favor of `onReactionTap`.
 - Deprecated `height`/`width` of `StreamScrollViewLoadingWidget` in favor of `size`.
 - Deprecated `StreamBackButton.showUnreadCount` and `StreamBackButton.channelId` in favor of `unreadIndicator`.
+- Deprecated `Translations.unreadMessagesSeparatorText` in favor of `unreadMessagesSeparatorLabel`, which takes a `count`. The old string is still used as the fallback for translation classes that haven't overridden the new one.
 
 🐞 Fixed
 
@@ -35,6 +35,12 @@
 - Fixed `StreamTypingIndicator` briefly showing typing users from a different context (main channel vs. thread) on its first frame.
 - Fixed the attachment picker throwing a `Tooltip` assertion error when a custom `TabbedAttachmentPickerOption` is added without a `title`; the tooltip is now only shown when a title is provided.
 - Fixed the `StreamBackButton` unread badge including the currently open channel in its total count.
+- Fixed messages arriving while the user was mid-drag or mid-fling being dropped from the scroll-to-bottom badge and the unread divider's count. The "don't fight a scroll in motion" guard ran before the counting, so those arrivals were never counted at all.
+- Fixed the scroll-to-bottom badge and unread divider counting messages the channel's own unread count ignores — silent, shadowed, ephemeral, thread-only, restricted, and muted-sender messages no longer inflate either counter.
+- Fixed thread reads being blocked whenever the parent channel wasn't up to date. `markThreadRead` no longer consults the channel's `isUpToDate`, which is unrelated to a thread's own read state.
+- Fixed the jump-to-unread pill being dismissed by the slightest scroll after marking a message unread. Its anchor is the message the user just acted on, so it starts out on screen; only scrolling past it now retires the pill.
+- Fixed the jump-to-unread pill flickering back in and straight out on every new message after being dismissed. The mark-unread reset now runs on the transition into the marked-unread state rather than on every read-state emission while it is set.
+- Fixed tapping the jump-to-unread pill doing nothing on a channel the current user has never opened, where there is no read boundary to jump to. It now scrolls to the oldest loaded message and pulls in the next page, leaving the pill up until the real boundary is reached.
 - Fixed `StreamMessageListView` jumping several screens when selecting text in a message on desktop or web. The `ScrollablePositionedList` viewports now account for their `anchor` in `getOffsetToReveal`, so implicit reveals (`Scrollable.ensureVisible`, `RenderObject.showOnScreen`) no longer overshoot. [#2862](https://github.com/GetStream/stream-chat-flutter/issues/2862)
 
 ## 10.2.0

@@ -375,6 +375,20 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
   // mark-read that should already have been earned by that round trip.
   bool _markUnreadViewportDiverged = false;
 
+  // Previous value of `channel.state.isMarkedAsUnread`, so
+  // [_handleCurrentUserReadChanged] can act on the *transition* into the
+  // marked-unread state rather than on every read-stream emission that
+  // happens while it's set.
+  bool _wasMarkedAsUnread = false;
+
+  // Whether divider A's current session came from an explicit mark-unread
+  // rather than from pre-existing unread at channel open. The anchor of a
+  // manual mark-unread is the message the user was looking at when they
+  // marked it, so it's already on screen — see
+  // [_maybeUpdateHasSeenFirstUnread] for why that changes what counts as
+  // having reached the boundary.
+  bool _unreadFromManualMarkUnread = false;
+
   // Captures [_unreadBaseline] the first time the current user's read state
   // becomes available, then attempts to resolve divider A's anchor against
   // it. No-ops in a thread, where divider A doesn't apply.
@@ -413,25 +427,37 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
 
   // Reacts to a `currentUserReadStream` emission. An explicit mark-unread
   // moves the read boundary backward — treat it as a new session start for
-  // divider A/the pill, mirroring iOS's `forceUpdate` path.
+  // divider A/the pill.
+  //
+  // The reset is deliberately gated on the *transition* into
+  // `isMarkedAsUnread`, not on the flag being set: the read stream also
+  // emits while it stays set (every new message, for one), and re-running
+  // the reset then would clear `_hasSeenFirstUnread` again and flicker the
+  // pill back in and straight out on each arrival.
   void _handleCurrentUserReadChanged() {
     if (_isThreadConversation) return;
 
     final channel = streamChannel?.channel;
     if (channel == null) return;
 
-    if (channel.state?.isMarkedAsUnread ?? false) {
+    final isMarkedAsUnread = channel.state?.isMarkedAsUnread ?? false;
+    final justMarkedAsUnread = isMarkedAsUnread && !_wasMarkedAsUnread;
+    _wasMarkedAsUnread = isMarkedAsUnread;
+
+    if (justMarkedAsUnread) {
       _unreadBaselineCaptured = false;
       _unreadBaseline = null;
       _unreadDivider.value = (count: 0, anchorId: null);
       _unreadDividerGrowth.value = 0;
       _hasSeenFirstUnread.value = false;
+      _unreadFromManualMarkUnread = true;
       // Only capture once per mark-unread session — a later, unrelated
       // read-stream emission while still marked unread shouldn't keep
       // chasing the latest position and never let a genuine scroll differ
       // from it.
       _markUnreadViewportSnapshot ??= _itemPositionListener.itemPositions.value.map((it) => it.index).toList();
-    } else {
+    } else if (!isMarkedAsUnread) {
+      _unreadFromManualMarkUnread = false;
       _markUnreadViewportSnapshot = null;
       _markUnreadViewportDiverged = false;
     }
@@ -502,6 +528,8 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       _hasSeenLastMessage = false;
       _markUnreadViewportSnapshot = null;
       _markUnreadViewportDiverged = false;
+      _wasMarkedAsUnread = false;
+      _unreadFromManualMarkUnread = false;
       _captureUnreadBaselineIfNeeded();
 
       final highlightInitialMessage = widget.config.highlightInitialMessage;
@@ -526,18 +554,21 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
 
       _messageNewListener?.cancel();
       _messageNewListener = newMessageStream?.listen((message) {
-        // Don't fight a scroll already in motion (drag, fling, or
-        // still-running animated scrollTo).
-        if (_scrollController?.isScrolling == true) return;
-
         final currentUser = streamChannel?.channel.client.state.currentUser;
         final isAtBottom = !_showScrollToBottom.value;
 
-        // The scroll-to-bottom badge and divider A's growing count only
-        // apply to the channel's own message stream (not thread replies),
-        // and never count the current user's own messages.
-        final isOwnMessage = message.user?.id == currentUser?.id;
-        if (!_isThreadConversation && !isOwnMessage) {
+        // Counted before the in-motion guard below, not after: a message
+        // landing while the user happens to be mid-drag or mid-fling is
+        // exactly what the badge and divider exist to report, and bailing
+        // first would drop it from both counts permanently.
+        //
+        // Qualifying arrivals are filtered the same way the channel's own
+        // unread count filters them, so silent, shadowed, ephemeral,
+        // thread-only, restricted, muted-sender and own messages don't
+        // inflate either counter. The badge and divider also only apply to
+        // the channel's message stream, never to thread replies.
+        final countsAsUnread = _countsTowardsUnreadIndicators(message, currentUser);
+        if (!_isThreadConversation && countsAsUnread) {
           // The divider counts every qualifying arrival — including ones
           // seen live at the bottom — so it keeps counting up like
           // WhatsApp's. The badge is narrower: it only exists to flag
@@ -547,6 +578,10 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
           _unreadDividerGrowth.value += 1;
           if (!isAtBottom) _scrollToBottomBadge.value += 1;
         }
+
+        // Don't fight a scroll already in motion (drag, fling, or
+        // still-running animated scrollTo).
+        if (_scrollController?.isScrolling == true) return;
 
         final details = StreamAutoScrollDetails(
           message: message,
@@ -1009,7 +1044,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
                     if (seen) return const Empty();
                     return UnreadIndicatorButton(
                       unreadCount: unread.count,
-                      onJumpTap: _onUnreadPillJumpTap,
+                      onJumpTap: (_) => _onUnreadPillJumpTap(),
                       onDismissTap: _onUnreadPillDismissTap,
                     );
                   },
@@ -1114,7 +1149,23 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     // so fall back to the frozen baseline's own last-read boundary, known
     // immediately from the server `Read`, rather than doing nothing.
     final anchorId = _unreadDivider.value.anchorId ?? _unreadBaseline?.lastReadMessageId;
-    if (anchorId == null) return;
+
+    // A channel the user has never opened reports unread messages but has
+    // no read boundary at all: the anchor can't resolve until top
+    // pagination ends, and there's no `lastReadMessageId` to fall back on
+    // either. Everything loaded is unread, so head for the oldest message
+    // currently loaded — as far back as the boundary can be, and it pulls
+    // the next page in on arrival — rather than leaving the tap inert.
+    //
+    // `_hasSeenFirstUnread` is deliberately not latched here: the real
+    // boundary is further back than where this lands, so the pill stays up
+    // until it's genuinely reached.
+    if (anchorId == null) {
+      final oldestLoaded = messages.lastOrNull;
+      if (oldestLoaded == null) return;
+      await _scrollToMessage(messageId: oldestLoaded.id, highlight: false);
+      return;
+    }
 
     // Delegates to [_scrollToMessage], which falls back to
     // [StreamChannelState.loadChannelAtMessage] when the anchor isn't in the
@@ -1396,6 +1447,45 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     return _maybeWrapWithHighlight(message: message, child: layout);
   }
 
+  // Whether a freshly-arrived [message] should bump the scroll-to-bottom
+  // badge and divider A's growing count.
+  //
+  // This is the message- and sender-level half of
+  // [MessageRules.canCountAsUnread], which is what keeps silent, shadowed,
+  // ephemeral, thread-only, restricted, muted-sender and own messages from
+  // inflating either counter.
+  //
+  // The channel-level half of that rule (`isMuted`, `canUseReadReceipts`,
+  // `usesLocalUnreadCount`) is deliberately left out. Those govern whether
+  // the server tracks an unread count for the channel at all, whereas these
+  // two counters are purely local "what arrived while you weren't looking"
+  // indicators that should keep working either way — and
+  // `usesLocalUnreadCount` is an extension getter reading `Channel`'s
+  // private client field, so it can't be resolved against a channel double
+  // at all.
+  bool _countsTowardsUnreadIndicators(Message message, OwnUser? currentUser) {
+    if (currentUser == null) return false;
+
+    if (message.silent) return false;
+    if (message.shadowed) return false;
+    if (message.isEphemeral) return false;
+
+    // Thread replies don't count towards the channel's unread state unless
+    // they were explicitly also sent to the channel.
+    if (message.parentId != null && message.showInChannel != true) return false;
+
+    final sender = message.user;
+    if (sender == null) return false;
+    if (sender.id == currentUser.id) return false;
+
+    if (message.isNotVisibleTo(currentUser.id)) return false;
+
+    final isSenderMuted = currentUser.mutes.any((it) => it.target.id == sender.id);
+    if (isSenderMuted) return false;
+
+    return true;
+  }
+
   void _handleItemPositionsChanged() {
     final itemPositions = _itemPositionListener.itemPositions.value;
     if (itemPositions.isEmpty) return;
@@ -1481,6 +1571,10 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
   // when the baseline is recaptured (channel change, or an explicit
   // mark-unread — see [_handleCurrentUserReadChanged]).
   //
+  // Sessions started by an explicit mark-unread require scrolling *past*
+  // the anchor, since it starts out on screen — see
+  // [_unreadFromManualMarkUnread].
+  //
   // Returns true iff this call flips [_hasSeenFirstUnread] from false to
   // true.
   bool _maybeUpdateHasSeenFirstUnread(Iterable<ItemPosition> itemPositions) {
@@ -1496,12 +1590,21 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     final visibleIndices = itemPositions.map((position) => position.index).toList();
     if (visibleIndices.isEmpty) return false;
 
-    final isAnchorVisible = visibleIndices.contains(anchorItemIndex);
     // Smaller item indices are newer/closer to the bottom. If even the
     // newest visible item is older than the anchor, the anchor has scrolled
     // off the bottom of the viewport — the user scrolled past it.
     final isScrolledPast = visibleIndices.reduce(min) > anchorItemIndex;
-    if (!isAnchorVisible && !isScrolledPast) return false;
+
+    if (_unreadFromManualMarkUnread) {
+      // The anchor of a manual mark-unread is the message the user was
+      // looking at when they marked it, so it's on screen from the outset.
+      // Counting that sighting would dismiss the pill on the very next
+      // layout tick — the smallest scroll, or none at all. Only actually
+      // scrolling past the boundary retires it.
+      if (!isScrolledPast) return false;
+    } else if (!visibleIndices.contains(anchorItemIndex) && !isScrolledPast) {
+      return false;
+    }
 
     _hasSeenFirstUnread.value = true;
     return true;
@@ -1509,11 +1612,12 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
 
   // Marks messages as read if the conditions are met.
   //
-  // In a thread: the parent must have at least one reply (the server-side
-  // thread object doesn't exist until the first reply lands), and the
-  // channel must be up to date.
+  // In a thread: the parent must have at least one reply — the server-side
+  // thread object doesn't exist until the first reply lands, so
+  // `markThreadRead` on a reply-less parent 404s. A thread read is
+  // independent of where the parent channel's own loaded window sits.
   //
-  // In the channel, mirrors iOS's `shouldMarkChannelRead` gating:
+  // In the channel, all of:
   //  1. The newest page is loaded (`isUpToDate`).
   //  2. There is something unread to mark.
   //  3. The bottom has been seen — either it's visible now, or it was
@@ -1527,11 +1631,9 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
   //     user's action instantly.
   //  5. Divider A's anchor has actually been seen or scrolled past
   //     (`hasSeenFirstUnreadMessage`) — trivially satisfied when there's
-  //     nothing to see (the channel opened fully read) or for channels using
-  //     local unread counts, mirroring iOS's escape hatch.
-  //
-  // A caller-supplied [StreamMessageListViewConfiguration.shouldMarkRead]
-  // overrides conditions 3-5.
+  //     nothing to see (the channel opened fully read) or for channels
+  //     using local unread counts, which have no server read state to
+  //     anchor against.
   Future<void> _maybeMarkMessagesAsRead() async {
     final channel = streamChannel?.channel;
     if (channel == null) return;
@@ -1542,7 +1644,6 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       // A server-side thread object only exists once the parent has at
       // least one reply; markThreadRead on a reply-less parent returns 404.
       if ((widget.parentMessage?.replyCount ?? 0) == 0) return;
-      if (!(channel.state?.isUpToDate ?? false)) return;
       return _debouncedMarkMessagesAsRead();
     }
 
@@ -1561,22 +1662,6 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     final hasSeenFirstUnreadMessage = noPreexistingUnread || _hasSeenFirstUnread.value || usesLocalUnreadCount;
     final isMarkedAsUnread = channel.state?.isMarkedAsUnread ?? false;
     final hasSeenLastMessage = _hasSeenLastMessage || !_showScrollToBottom.value;
-
-    if (widget.config.shouldMarkRead case final shouldMarkRead?) {
-      final details = StreamMarkReadDetails(
-        hasSeenLastMessage: hasSeenLastMessage,
-        hasSeenFirstUnreadMessage: hasSeenFirstUnreadMessage,
-        isMarkedAsUnread: isMarkedAsUnread,
-        unreadCount: unreadCount,
-      );
-      if (!shouldMarkRead(details)) return;
-
-      await _debouncedMarkMessagesAsRead();
-      _hasSeenLastMessage = false;
-      _markUnreadViewportSnapshot = null;
-      _markUnreadViewportDiverged = false;
-      return;
-    }
 
     if (!hasSeenLastMessage) return;
     if (!hasSeenFirstUnreadMessage) return;

@@ -3,7 +3,10 @@
 ✅ Added
 
 - Added connection-error translations (`connectionErrorTitle`/`Description`, `slowConnectionErrorTitle`/`Description`, `genericErrorTitle`/`Description`) for all supported locales.
-- Added `unreadMessagesSeparatorLabel` for all supported locales.
+- Added `unreadMessagesSeparatorLabel` for all supported locales, showing a count (e.g. "5 unread messages").
+  `GlobalStreamChatLocalizations` provides a default implementation that falls back to the deprecated
+  count-less `unreadMessagesSeparatorText`, so localization subclasses written before this method existed
+  keep compiling and keep showing any custom text they already override.
 
 ## 10.2.0
 

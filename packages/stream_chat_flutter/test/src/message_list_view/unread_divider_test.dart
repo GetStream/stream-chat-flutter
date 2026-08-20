@@ -296,6 +296,170 @@ void main() {
     return tester.widget<StreamBadgeNotification>(finder).props.label;
   }
 
+  group('unread counting filters', () {
+    // Messages the channel's own unread count ignores must not inflate the
+    // badge or the divider either. Each case scrolls away from the bottom
+    // first so a counted arrival would be visible as a badge.
+    Future<void> expectNotCounted(
+      WidgetTester tester, {
+      required Message Function(User other) build,
+      OwnUser? overrideOwnUser,
+    }) async {
+      final other = User(id: 'otherid');
+      final messages = generateConversation(40, users: [other]).reversed.toList();
+
+      if (overrideOwnUser case final replacement?) {
+        when(() => clientState.currentUser).thenReturn(replacement);
+      }
+
+      await pumpMessageList(
+        tester,
+        messages: messages,
+        unreadCount: 0,
+        currentUserRead: Read(user: ownUser, lastRead: DateTime.now(), unreadMessages: 0),
+      );
+
+      await tester.drag(find.byType(StreamMessageListView), const Offset(0, 400));
+      await tester.pumpAndSettle();
+
+      final filtered = build(other);
+      await deliverMessageNew(tester, newMessage: filtered, existing: messages);
+
+      expect(badgeLabel(tester), isNull);
+
+      // Control: an ordinary message, delivered the same way, does bump the
+      // badge. Without this the assertion above would also hold if the
+      // new-message pipeline were simply inert. Sent by a third user so the
+      // muted-sender case's control isn't filtered out too.
+      await deliverMessageNew(
+        tester,
+        newMessage: Message(
+          id: 'control-counted',
+          text: 'Ordinary arrival',
+          user: User(id: 'controlid'),
+          createdAt: DateTime.now(),
+        ),
+        existing: [...messages, filtered],
+      );
+
+      expect(badgeLabel(tester), '1');
+    }
+
+    testWidgets('silent messages do not count', (tester) async {
+      await expectNotCounted(
+        tester,
+        build: (other) => Message(
+          id: 'silent-message',
+          text: 'Silent',
+          user: other,
+          silent: true,
+          createdAt: DateTime.now(),
+        ),
+      );
+    });
+
+    testWidgets('shadowed messages do not count', (tester) async {
+      await expectNotCounted(
+        tester,
+        build: (other) => Message(
+          id: 'shadowed-message',
+          text: 'Shadowed',
+          user: other,
+          shadowed: true,
+          createdAt: DateTime.now(),
+        ),
+      );
+    });
+
+    testWidgets('ephemeral messages do not count', (tester) async {
+      await expectNotCounted(
+        tester,
+        build: (other) => Message(
+          id: 'ephemeral-message',
+          text: 'Ephemeral',
+          user: other,
+          type: MessageType.ephemeral,
+          createdAt: DateTime.now(),
+        ),
+      );
+    });
+
+    testWidgets('thread replies not also sent to the channel do not count', (tester) async {
+      await expectNotCounted(
+        tester,
+        build: (other) => Message(
+          id: 'thread-only-reply',
+          text: 'Thread only',
+          user: other,
+          parentId: 'some-parent',
+          createdAt: DateTime.now(),
+        ),
+      );
+    });
+
+    testWidgets('messages from a muted user do not count', (tester) async {
+      final other = User(id: 'otherid');
+      await expectNotCounted(
+        tester,
+        overrideOwnUser: OwnUser(
+          id: 'ownid',
+          mutes: [Mute(user: ownUser, target: other, createdAt: DateTime.now(), updatedAt: DateTime.now())],
+        ),
+        build: (_) => Message(
+          id: 'from-muted-user',
+          text: 'From muted',
+          user: other,
+          createdAt: DateTime.now(),
+        ),
+      );
+    });
+
+    testWidgets(
+      'a message arriving mid-drag still counts towards the badge',
+      (tester) async {
+        // Regression: the "don't fight a scroll already in motion" guard used
+        // to sit above the counting, so anything landing while the user was
+        // dragging or flinging was dropped from both counters for good.
+        final other = User(id: 'otherid');
+        final messages = generateConversation(40, users: [other]).reversed.toList();
+
+        await pumpMessageList(
+          tester,
+          messages: messages,
+          unreadCount: 0,
+          currentUserRead: Read(user: ownUser, lastRead: DateTime.now(), unreadMessages: 0),
+        );
+
+        // Hold a drag open so the underlying ScrollPosition reports
+        // isScrolling == true while the message lands.
+        final gesture = await tester.startGesture(
+          tester.getCenter(find.byType(StreamMessageListView)),
+        );
+        // Stepped moves with a frame between each, so the list actually
+        // scrolls and the view registers as away from the bottom. The
+        // pointer stays down throughout, so the underlying ScrollPosition
+        // keeps reporting isScrolling == true.
+        for (var i = 0; i < 8; i++) {
+          await gesture.moveBy(const Offset(0, 50));
+          await tester.pump();
+        }
+
+        final midDrag = Message(
+          id: 'arrived-mid-drag',
+          text: 'Landed while dragging',
+          user: other,
+          createdAt: DateTime.now(),
+        );
+        await deliverMessageNew(tester, newMessage: midDrag, existing: messages);
+
+        expect(badgeLabel(tester), '1');
+
+        await gesture.up();
+        await tester.pumpAndSettle();
+      },
+    );
+  });
+
   group('scroll-to-bottom badge', () {
     testWidgets(
       'appears only once the user is scrolled away from the bottom, and skips own messages',

@@ -496,6 +496,7 @@ No es posible añadir más de $limit archivos adjuntos
   String get linkDisabledError => 'Los enlaces están deshabilitados';
 
   @override
+  // ignore: deprecated_member_use
   String unreadMessagesSeparatorText() => 'Nuevos mensajes';
 
   @override

@@ -3678,8 +3678,7 @@ class ChannelClientState {
   /// Set by [markUnreadLocally] and by a `notification.mark_unread` event for
   /// the current user; cleared by [markReadLocally] and by a `message.read`
   /// event for the current user. Intended for UI-layer gating that shouldn't
-  /// immediately undo a manual mark-unread — mirrors the iOS SDK's
-  /// `ReadStateHandler.isMarkedAsUnread`.
+  /// immediately undo a manual mark-unread.
   bool get isMarkedAsUnread => _isMarkedAsUnread;
   bool _isMarkedAsUnread = false;
 

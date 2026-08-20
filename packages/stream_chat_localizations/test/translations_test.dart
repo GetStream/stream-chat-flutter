@@ -225,6 +225,9 @@ void main() {
       expect(localizations.toggleBlockUnblockUserText(isBlocked: true), isNotNull);
       expect(localizations.toggleBlockUnblockUserText(isBlocked: false), isNotNull);
       expect(localizations.viewLibrary, isNotNull);
+      // Still asserted after deprecation: it remains the fallback for
+      // translation classes that haven't overridden the count-based label.
+      // ignore: deprecated_member_use
       expect(localizations.unreadMessagesSeparatorText(), isNotNull);
       expect(localizations.enableFileAccessMessage, isNotNull);
       expect(localizations.allowFileAccessMessage, isNotNull);

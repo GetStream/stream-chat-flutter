@@ -508,6 +508,7 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
   String get viewLibrary => 'View library';
 
   @override
+  // ignore: deprecated_member_use
   String unreadMessagesSeparatorText() => 'New messages';
 
   @override
