@@ -3326,9 +3326,8 @@ class ChannelClientState {
 
   /// Adds a new message to the channel state and updates the unread count.
   void addNewMessage(Message message) {
-    final isThreadMessage = message.parentId != null;
-    final isNotShownInChannel = message.showInChannel != true;
-    final isThreadOnlyMessage = isThreadMessage && isNotShownInChannel;
+    // A message not shown in the channel is necessarily a thread-only reply.
+    final isThreadOnlyMessage = !_isShownInChannel(message);
 
     // Only add the message if the channel is upToDate or if the message is
     // a thread-only message.
@@ -4209,14 +4208,8 @@ class ChannelClientState {
   }) {
     if (messages.isEmpty) return;
 
-    final affectedMessages = messages.map((it) {
-      // If it's not a thread message, consider it affected.
-      if (it.parentId == null) return it;
-      // If it's a thread message shown in channel, consider it affected.
-      if (it.showInChannel == true) return it;
-
-      return null; // Thread message not shown in channel, ignore it.
-    }).nonNulls;
+    // Only messages shown in the channel are affected.
+    final affectedMessages = messages.where(_isShownInChannel);
 
     // If there are no affected messages, return early.
     if (affectedMessages.isEmpty) return;
@@ -4451,14 +4444,8 @@ class ChannelClientState {
   void _removeChannelMessages(Iterable<Message> messages) {
     if (messages.isEmpty) return;
 
-    final affectedMessages = messages.map((it) {
-      // If it's not a thread message, consider it affected.
-      if (it.parentId == null) return it;
-      // If it's a thread message shown in channel, consider it affected.
-      if (it.showInChannel == true) return it;
-
-      return null; // Thread message not shown in channel, ignore it.
-    }).nonNulls;
+    // Only messages shown in the channel are affected.
+    final affectedMessages = messages.where(_isShownInChannel);
 
     // If there are no affected messages, return early.
     if (affectedMessages.isEmpty) return;
@@ -4581,6 +4568,14 @@ class ChannelClientState {
     _staleLiveLocationsCleanerTimer?.cancel();
     _typingEventsController.close();
   }
+}
+
+bool _isShownInChannel(Message message) {
+  // Non-thread messages are always shown in the channel.
+  if (message.parentId == null) return true;
+
+  // Thread messages are only shown if explicitly marked.
+  return message.showInChannel == true;
 }
 
 bool _pinIsValid(Message message) {
