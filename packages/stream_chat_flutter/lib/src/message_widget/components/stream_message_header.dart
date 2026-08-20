@@ -134,14 +134,15 @@ class DefaultStreamMessageHeader extends core.NullableStatelessWidget {
     if (message.showInChannel case true) {
       final listKind = core.StreamMessageLayout.listKindOf(context);
       final annotationLabel = switch (listKind) {
-        .channel => '${translations.repliedToThreadAnnotationLabel} ·',
-        .thread => '${translations.alsoSentInChannelAnnotationLabel} ·',
+        .channel => translations.repliedToThreadAnnotationLabel,
+        .thread => translations.alsoSentInChannelAnnotationLabel,
       };
 
       showInChannelAnnotation = core.StreamMessageAnnotation(
         onTap: props.onViewChannelTap,
         leading: Icon(icons.arrowUpRight),
         label: Text(annotationLabel),
+        separator: core.StreamMessageAnnotation.separator,
         trailing: Text(translations.viewLabel),
         style: .from(trailingTextColor: linkColor),
       );
@@ -151,7 +152,8 @@ class DefaultStreamMessageHeader extends core.NullableStatelessWidget {
     if (message.reminder?.remindAt?.toLocal() case final remindAt?) {
       reminderAnnotation = core.StreamMessageAnnotation(
         leading: Icon(icons.bell),
-        label: Text('${translations.reminderSetLabel} ·'),
+        label: Text(translations.reminderSetLabel),
+        separator: core.StreamMessageAnnotation.separator,
         trailing: Text(translations.reminderAtText(Jiffy.parseFromDateTime(remindAt).jm)),
       );
     }
