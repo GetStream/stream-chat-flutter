@@ -116,6 +116,7 @@ class StreamMessageListView extends StatefulWidget {
     this.onUserAvatarTap,
     @Deprecated('Use onReactionTap instead. onReactionTap also reports the tapped reaction.') this.onReactionsTap,
     this.onReactionTap,
+    this.onReactionLongPress,
     this.onQuotedMessageTap,
     this.onMessageLinkTap,
     @Deprecated('Use onMentionTap and switch on StreamUserMention instead') this.onUserMentionTap,
@@ -193,6 +194,11 @@ class StreamMessageListView extends StatefulWidget {
   ///
   /// Forwarded to each [StreamMessageItem] in the list.
   final OnReactionTap? onReactionTap;
+
+  /// {@macro onReactionLongPress}
+  ///
+  /// Forwarded to each [StreamMessageItem] in the list.
+  final OnReactionLongPress? onReactionLongPress;
 
   /// Called when a quoted message is tapped.
   ///
@@ -1084,6 +1090,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       onUserAvatarTap: widget.onUserAvatarTap,
       onReactionsTap: widget.onReactionsTap,
       onReactionTap: widget.onReactionTap,
+      onReactionLongPress: widget.onReactionLongPress,
       onQuotedMessageTap: widget.onQuotedMessageTap,
       onMessageLinkTap: widget.onMessageLinkTap,
       onUserMentionTap: widget.onUserMentionTap,
@@ -1210,6 +1217,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       onUserAvatarTap: widget.onUserAvatarTap,
       onReactionsTap: widget.onReactionsTap,
       onReactionTap: widget.onReactionTap,
+      onReactionLongPress: widget.onReactionLongPress,
       onMessageLinkTap: widget.onMessageLinkTap,
       onUserMentionTap: widget.onUserMentionTap,
       onMentionTap: widget.onMentionTap,

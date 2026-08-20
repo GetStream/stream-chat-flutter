@@ -1,3 +1,9 @@
+## Upcoming
+
+🔄 Changed
+
+- Raised minimum Dart SDK to `^3.12.0`.
+
 ## 10.3.0
 
 ✅ Added

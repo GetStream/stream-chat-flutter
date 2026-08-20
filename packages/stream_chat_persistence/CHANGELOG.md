@@ -1,3 +1,9 @@
+## Upcoming
+
+🔄 Changed
+
+- Raised minimum Flutter to `>=3.44.0` and Dart SDK to `^3.12.0`.
+
 ## 10.3.0
 
 🐞 Fixed
@@ -26,7 +32,6 @@
 
 - Read only the thread replies matching the `PaginationParams` from DB when calling `MessageDao.getThreadMessagesByParentId` instead of reading all replies for the thread and applying pagination in memory.
 - Read only the messages matching the `PaginationParams` from DB when calling `PinnedMessageDao.getMessagesByCid` instead of reading all pinned messages for the channel and applying pagination in memory.
-
 
 🐞 Fixed
 

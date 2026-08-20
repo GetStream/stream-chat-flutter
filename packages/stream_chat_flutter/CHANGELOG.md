@@ -1,3 +1,18 @@
+## Upcoming
+
+✅ Added
+
+- Added `onReactionLongPress` to `StreamMessageItem` and `StreamMessageListView`, reporting the long-pressed message's `BuildContext` and a `ReactionLongPressDetails` with the `message` and `reaction` (the reaction is `null` for a clustered or overflow chip that maps to no single reaction).
+
+⚠️ Changed
+
+- Long-pressing a reaction chip no longer opens the message actions modal; the chips always claim the long press. Left unset, `onReactionLongPress` defaults to opening the `ReactionDetailSheet`.
+- Tapping or long-pressing a reaction chip now opens the `ReactionDetailSheet` pre-filtered to that reaction; it previously opened unfiltered. Clustered and overflow chips map to no single reaction, so they still open unfiltered.
+
+🔄 Changed
+
+- Raised minimum Flutter to `>=3.44.0` and Dart SDK to `^3.12.0`.
+
 ## 10.3.0
 
 ⚠️ Changed
@@ -1218,7 +1233,6 @@ messages of other users and mark channel as unread from selected message onwards
     * `StreamMessageInput.mediaAttachmentBuilder` to customize the media attachment item shown in
       `MediaAttachmentList`.
 
-
 - Added `StreamMessageInput.quotedMessageAttachmentThumbnailBuilders` to customize the thumbnail
   builders for quoted
   message attachments.
@@ -2288,7 +2302,6 @@ typedef MessageBuilder = Widget Function(
 
 > **_NOTE:_** the last parameter is the default `MessageWidget`
 > You can call `.copyWith` to customize just a subset of properties
-
 
 ✅ Added
 

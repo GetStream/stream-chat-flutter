@@ -83,12 +83,11 @@ class StreamChatNetworkError extends StreamChatError {
     int? statusCode,
     this.data,
     StackTrace? stacktrace,
-    @Deprecated('Set type to StreamChatNetworkErrorType.cancel instead') bool? isRequestCancelledError,
+    @Deprecated('Set type to StreamChatNetworkErrorType.cancel instead') this._isRequestCancelledError,
     this.type = .unknown,
   }) : code = errorCode.code,
        statusCode = statusCode ?? data?.statusCode,
        stackTrace = stacktrace ?? StackTrace.current,
-       _isRequestCancelledError = isRequestCancelledError,
        super(errorCode.message);
 
   /// Creates a [StreamChatNetworkError] from raw values.
@@ -98,10 +97,9 @@ class StreamChatNetworkError extends StreamChatError {
     this.statusCode,
     this.data,
     StackTrace? stacktrace,
-    @Deprecated('Set type to StreamChatNetworkErrorType.cancel instead') bool? isRequestCancelledError,
+    @Deprecated('Set type to StreamChatNetworkErrorType.cancel instead') this._isRequestCancelledError,
     this.type = .unknown,
   }) : stackTrace = stacktrace ?? StackTrace.current,
-       _isRequestCancelledError = isRequestCancelledError,
        super(message);
 
   /// Creates a [StreamChatNetworkError] from a [DioException].

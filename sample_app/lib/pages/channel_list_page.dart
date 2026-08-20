@@ -11,6 +11,7 @@ import 'package:sample_app/pages/draft_list_page.dart';
 import 'package:sample_app/pages/reminders_page.dart';
 import 'package:sample_app/pages/thread_list_page.dart';
 import 'package:sample_app/routes/routes.dart';
+import 'package:sample_app/utils/location_provider.dart';
 import 'package:sample_app/utils/platform_support.dart';
 import 'package:sample_app/utils/shared_location_service.dart';
 import 'package:sample_app/widgets/channel_list.dart';
@@ -30,6 +31,7 @@ class _ChannelListPageState extends State<ChannelListPage> {
 
   late final _locationService = SharedLocationService(
     client: StreamChat.of(context).client,
+    locationProvider: LocationProvider(),
   );
 
   @override

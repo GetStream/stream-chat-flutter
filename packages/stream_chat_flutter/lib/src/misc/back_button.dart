@@ -19,8 +19,8 @@ class StreamBackButton extends StatelessWidget {
       'This will be removed in a future version.',
     )
     this.channelId,
-    Widget? unreadIndicator = _unset,
-  }) : _unreadIndicator = unreadIndicator;
+    this._unreadIndicator = _unset,
+  });
 
   /// Callback for when button is pressed
   final VoidCallback? onPressed;

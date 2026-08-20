@@ -40,14 +40,14 @@ class WebSocket with TimerHelper {
     required this.tokenManager,
     this.systemEnvironmentManager,
     this.handler,
-    Logger? logger,
+    this._logger,
     this.webSocketChannelProvider,
     this.reconnectionMonitorInterval = 10,
     this.healthCheckInterval = 20,
     this.reconnectionMonitorTimeout = 40,
     this.maxReconnectAttempts = 6,
     this.queryParameters = const {},
-  }) : _logger = logger;
+  });
 
   ///
   final String apiKey;
