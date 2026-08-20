@@ -4,39 +4,39 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 void main() {
   group('StreamMessageTranslationState', () {
+    /// Returns the state of a store that has toggled [messageIds], in order.
+    StreamMessageTranslationState stateShowingOriginalText(List<String> messageIds) {
+      final store = StreamMessageTranslationStore();
+      addTearDown(store.dispose);
+      messageIds.forEach(store.toggleOriginalText);
+      return store.value;
+    }
+
     test('shows the translation for every message by default', () {
-      const state = StreamMessageTranslationState();
+      final state = stateShowingOriginalText([]);
 
       expect(state.messagesShowingOriginalText, isEmpty);
       expect(state.isShowingOriginalText('message-1'), isFalse);
     });
 
     test('isShowingOriginalText only matches the tracked ids', () {
-      const state = StreamMessageTranslationState(messagesShowingOriginalText: {'message-1'});
+      final state = stateShowingOriginalText(['message-1']);
 
       expect(state.isShowingOriginalText('message-1'), isTrue);
       expect(state.isShowingOriginalText('message-2'), isFalse);
     });
 
-    test('copyWith replaces the tracked ids', () {
-      const state = StreamMessageTranslationState(messagesShowingOriginalText: {'message-1'});
+    test('exposes the tracked ids as an unmodifiable set', () {
+      final state = stateShowingOriginalText(['message-1']);
 
-      final copy = state.copyWith(messagesShowingOriginalText: const {'message-2'});
-
-      expect(copy.messagesShowingOriginalText, const {'message-2'});
-    });
-
-    test('copyWith keeps the tracked ids when they are not provided', () {
-      const state = StreamMessageTranslationState(messagesShowingOriginalText: {'message-1'});
-
-      expect(state.copyWith().messagesShowingOriginalText, const {'message-1'});
+      expect(() => state.messagesShowingOriginalText.add('message-2'), throwsUnsupportedError);
+      expect(() => state.messagesShowingOriginalText.remove('message-1'), throwsUnsupportedError);
     });
 
     test('compares equal by the tracked ids, not by set identity', () {
-      const state = StreamMessageTranslationState(messagesShowingOriginalText: {'message-1', 'message-2'});
-      final reorderedIds = {'message-2', 'message-1'};
-      final equal = StreamMessageTranslationState(messagesShowingOriginalText: reorderedIds);
-      const different = StreamMessageTranslationState(messagesShowingOriginalText: {'message-1'});
+      final state = stateShowingOriginalText(['message-1', 'message-2']);
+      final equal = stateShowingOriginalText(['message-2', 'message-1']);
+      final different = stateShowingOriginalText(['message-1']);
 
       expect(state, equal);
       expect(state.hashCode, equal.hashCode);
@@ -51,7 +51,7 @@ void main() {
     tearDown(() => store.dispose());
 
     test('shows the translation for every message by default', () {
-      expect(store.value, const StreamMessageTranslationState());
+      expect(store.value.messagesShowingOriginalText, isEmpty);
       expect(store.isShowingOriginalText('message-1'), isFalse);
     });
 
@@ -93,10 +93,15 @@ void main() {
     test('does not notify listeners when the state is unchanged', () {
       store.toggleOriginalText('message-1');
 
+      // An equal state from another store, so the dedup cannot rely on the
+      // two being the same instance.
+      final equivalent = StreamMessageTranslationStore()..toggleOriginalText('message-1');
+      addTearDown(equivalent.dispose);
+
       var notifications = 0;
       store
         ..addListener(() => notifications++)
-        ..value = const StreamMessageTranslationState(messagesShowingOriginalText: {'message-1'});
+        ..value = equivalent.value;
 
       expect(notifications, 0);
     });

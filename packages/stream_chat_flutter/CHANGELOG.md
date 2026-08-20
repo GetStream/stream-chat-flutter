@@ -40,8 +40,9 @@
 - Added `onReactionTap` to `StreamMessageItem` and `StreamMessageListView`, reporting the tapped message's `BuildContext` and a `ReactionTapDetails` with the tapped `message` and `reaction` (the reaction is `null` for a clustered or overflow chip that maps to no single reaction).
 - Exported `StreamEphemeralMessage`, the row `StreamMessageListView` builds for ephemeral messages, matching its already-exported `StreamSystemMessage` and `StreamModeratedMessage` siblings.
 - Added an `unreadIndicator` parameter to `StreamBackButton` that overlays a widget (typically a `StreamUnreadIndicator`) on the button's top-end corner. Pass `StreamUnreadIndicator(excludeCid: cid)` to show the total unread count of other channels, or `StreamUnreadIndicator.channels(cid: cid)` for a single channel's count.
-- Exported this package's `StreamMessageContent`, which was previously unreachable from `package:stream_chat_flutter/stream_chat_flutter.dart` — the barrel hid `stream_core_flutter`'s `StreamMessageContent` without exporting a replacement.
-- Added `StreamChatConfigurationData.messageTranslation`, a `StreamMessageTranslationConfiguration` that collects every message-translation setting: `enabled` (default `true`) controls whether messages display a translation from `Message.i18n` at all, `annotationEnabled` (default `false`) opts into a "Translated"/"Original" annotation with a "Show original"/"Show translation" link that switches between the two. The defaults preserve the SDK's existing behaviour — translations are shown, silently — so the annotation is opt-in. Its toggle state is tracked per `StreamMessageListView` via the new `StreamMessageTranslationStore`, so it survives messages scrolling out of and back into view, and can be driven directly through `showTranslatedText`/`onToggleTranslatedText` on `StreamMessageHeaderProps` and `StreamMessageContent`.
+- Exported this package's `StreamMessageContent`, which was previously unreachable from `package:stream_chat_flutter/stream_chat_flutter.dart`.
+- Added `StreamChatConfigurationData.messageTranslation`, a `StreamMessageTranslationConfiguration` with `enabled` (default `true`) to display translations from `Message.i18n` and `annotationEnabled` (default `false`) to opt into a "Translated"/"Original" annotation with a toggle link.
+- Added `StreamMessageTranslationStore`, tracking the annotation's toggle state per `StreamMessageListView`. Also drivable via `showTranslatedText` on `StreamMessageHeaderProps`, `StreamMessageContent`, and `StreamMessageText`, and `onToggleTranslatedText` on `StreamMessageHeaderProps`.
 
 ⚠️ Deprecated
 
@@ -52,7 +53,7 @@
 
 🐞 Fixed
 
-- Fixed message text and previews translating to English for users with no `User.language` set. They now show the original text, matching the backend, which only auto-translates for users that have a language.
+- Fixed message text and previews translating to English for users with no `User.language` set; they now show the original text.
 - Fixed a failed send surfacing as an unhandled async error when `StreamMessageComposer` has no `onError`; it is now reported through `FlutterError.reportError`.
 - Fixed the default `StreamChannel` loading and error states not being themed or localized; `StreamChat` now installs themed, connection-aware defaults, overridable per `StreamChannel` or via `DefaultStreamChannelBuilders`.
 - Fixed the default list/scroll-view error states (channel, message, member, user, thread, poll-vote, reaction, search, and photo) showing raw or fixed errors; they are now connection-aware (no internet / slow connection), falling back to each view's specific error text.

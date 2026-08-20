@@ -6,10 +6,12 @@ import 'package:flutter/widgets.dart';
 ///
 /// Showing the translation is the default, so this holds only the
 /// exceptions — see [messagesShowingOriginalText].
+///
+/// Instances are created only by a [StreamMessageTranslationStore] — read
+/// one from its value, and change it through the store.
 @immutable
 class StreamMessageTranslationState {
-  /// Creates a state in which every message shows its translation.
-  const StreamMessageTranslationState({
+  const StreamMessageTranslationState._({
     this.messagesShowingOriginalText = const {},
   });
 
@@ -25,11 +27,10 @@ class StreamMessageTranslationState {
     return messagesShowingOriginalText.contains(messageId);
   }
 
-  /// Copies the state, replacing the provided fields.
-  StreamMessageTranslationState copyWith({
+  StreamMessageTranslationState _copyWith({
     Set<String>? messagesShowingOriginalText,
   }) {
-    return StreamMessageTranslationState(
+    return StreamMessageTranslationState._(
       messagesShowingOriginalText: messagesShowingOriginalText ?? this.messagesShowingOriginalText,
     );
   }
@@ -62,7 +63,7 @@ class StreamMessageTranslationState {
 /// the list's render window.
 class StreamMessageTranslationStore extends ValueNotifier<StreamMessageTranslationState> {
   /// Creates a store in which every message shows its translation.
-  StreamMessageTranslationStore() : super(const StreamMessageTranslationState());
+  StreamMessageTranslationStore() : super(const StreamMessageTranslationState._());
 
   /// Whether [messageId] is currently showing its original text instead of
   /// its translation.
@@ -73,11 +74,13 @@ class StreamMessageTranslationStore extends ValueNotifier<StreamMessageTranslati
   void toggleOriginalText(String messageId) {
     final showingOriginalText = value.messagesShowingOriginalText;
 
-    value = value.copyWith(
-      messagesShowingOriginalText: switch (showingOriginalText.contains(messageId)) {
-        true => {...showingOriginalText}..remove(messageId),
-        false => {...showingOriginalText, messageId},
-      },
+    value = value._copyWith(
+      messagesShowingOriginalText: Set<String>.unmodifiable(
+        switch (showingOriginalText.contains(messageId)) {
+          true => {...showingOriginalText}..remove(messageId),
+          false => {...showingOriginalText, messageId},
+        },
+      ),
     );
   }
 }
