@@ -101,6 +101,7 @@ export 'src/message_widget/components/stream_message_header.dart';
 export 'src/message_widget/components/stream_message_leading.dart';
 export 'src/message_widget/components/stream_message_text.dart';
 export 'src/message_widget/stream_message_item.dart';
+export 'src/message_widget/stream_message_translation_configuration.dart';
 export 'src/message_widget/stream_message_translation_store.dart';
 export 'src/message_widget/stream_moderated_message.dart';
 export 'src/message_widget/stream_quoted_message.dart';
