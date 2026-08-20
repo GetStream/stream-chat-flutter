@@ -2517,10 +2517,9 @@ class ChannelClientState {
 
   /// Removes the [watcher] from the channel state, optionally updating the
   /// [watcherCount] when provided.
-  ///
-  /// Writes the state directly instead of going through [updateChannelState],
-  /// whose watcher list merge would undo the removal.
   void _removeWatcher(User watcher, {int? watcherCount}) {
+    // Writes the state directly: the watcher list merge in
+    // [updateChannelState] would undo the removal.
     final existingWatchers = channelState.watchers ?? const <User>[];
     _channelState = channelState.copyWith(
       watchers: existingWatchers.where((user) => user.id != watcher.id).toList(),

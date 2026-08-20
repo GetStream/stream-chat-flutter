@@ -1,10 +1,10 @@
 import 'package:stream_chat/src/client/channel_state_mutations.dart';
 import 'package:stream_chat/stream_chat.dart';
 
-/// Translates channel events into [ChannelClientState] mutations.
+/// Routes channel events to the matching [ChannelStateMutations] methods.
 ///
-/// Validates and routes each event; the resulting state writes are performed
-/// by [ChannelStateMutations].
+/// Drops events with a missing payload, as well as events that do not apply
+/// to the channel or the current user.
 class ChannelEventHandler {
   /// Creates a handler routing events of the given [_channel] to the given
   /// [_mutations].
@@ -20,14 +20,13 @@ class ChannelEventHandler {
 
   /// Handles the given channel [event].
   ///
-  /// Handlers run in the same relative order as the subscriptions they
-  /// replace, which were wired in the [ChannelClientState] constructor and
-  /// fired in subscription order. Two of those subscriptions were unfiltered
-  /// and observed every event ([_onChannelMessageCount] and
-  /// [_onMemberUserUpdated]), so dispatch happens in three blocks around them
-  /// to preserve the original execution order.
+  /// Routes the event by its type through three dispatch blocks, running
+  /// [_onChannelMessageCount] between the first and second block and
+  /// [_onMemberUserUpdated] between the second and third; those two observe
+  /// every event regardless of its type.
   void handleEvent(Event event) {
-    // Block 1: handlers wired before the channel-message-count listener.
+    // Block 1: typing, message, draft, reaction, poll, read, and channel
+    // events.
     switch (event.type) {
       // typing events
       case EventType.typingStart:
@@ -87,10 +86,10 @@ class ChannelEventHandler {
         _onChannelUpdated(event);
     }
 
-    // Unfiltered: updates the channel message count on any event carrying one.
+    // Updates the channel message count on any event carrying one.
     _onChannelMessageCount(event);
 
-    // Block 2: handlers wired between the two unfiltered listeners.
+    // Block 2: member added and removed events.
     switch (event.type) {
       // member events
       case EventType.memberAdded:
@@ -99,10 +98,11 @@ class ChannelEventHandler {
         _onMemberRemoved(event);
     }
 
-    // Unfiltered: merges an updated event user into the member list.
+    // Merges the event user into the member list on any event carrying one.
     _onMemberUserUpdated(event);
 
-    // Block 3: handlers wired after the member-user merge listener.
+    // Block 3: remaining member, watching, reminder, location, and push
+    // preference events.
     switch (event.type) {
       // member events
       case EventType.memberUpdated:

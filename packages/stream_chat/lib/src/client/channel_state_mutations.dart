@@ -5,14 +5,10 @@ import 'package:stream_chat/stream_chat.dart';
 
 /// Applies channel event payloads as [ChannelClientState] mutations.
 ///
-/// Owns the state writes for the events dispatched by the channel event
-/// handler: each method computes the new state from the current one and the
-/// given payload.
+/// Each method computes the new state from the current one and the given
+/// payload, and writes it to the state.
 class ChannelStateMutations {
   /// Creates mutations writing to the given [_state] of the given [_channel].
-  ///
-  /// The write callbacks perform the state mutations that
-  /// [ChannelClientState] does not expose publicly.
   const ChannelStateMutations({
     required this._channel,
     required this._state,
@@ -487,10 +483,10 @@ class ChannelStateMutations {
     );
   }
 
-  /// Replaces the [member] refreshed after a ban.
+  /// Replaces the member matching the banned [member]'s user id, if any.
   void onMemberBanned(Member member) => _updateMember(member);
 
-  /// Replaces the [member] refreshed after an unban.
+  /// Replaces the member matching the unbanned [member]'s user id, if any.
   void onMemberUnbanned(Member member) => _updateMember(member);
 
   /// Marks all messages from the user identified by [userId] as deleted.
