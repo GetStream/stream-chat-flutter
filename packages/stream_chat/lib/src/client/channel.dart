@@ -5,6 +5,7 @@ import 'dart:math' as math;
 
 import 'package:collection/collection.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:stream_chat/src/client/channel_event_handler.dart';
 import 'package:stream_chat/src/client/retry_queue.dart';
 import 'package:stream_chat/src/core/util/utils.dart';
 import 'package:stream_chat/stream_chat.dart';
@@ -2481,81 +2482,22 @@ class ChannelClientState {
     // Update the persistence storage with the seeded channel state.
     _debouncedUpdatePersistenceChannelState.call([channelState]);
 
-    // region TYPING EVENTS
-    _listenTypingEvents();
-    // endregion
-
-    // region MESSAGE EVENTS
-    _listenMessageNew();
-    _listenMessageDeleted();
-    _listenMessageUpdated();
-    // endregion
-
-    // region DRAFT EVENTS
-    _listenDraftUpdated();
-    _listenDraftDeleted();
-    // endregion
-
-    // region REACTION EVENTS
-    _listenReactionNew();
-    _listenReactionUpdated();
-    _listenReactionDeleted();
-    // endregion
-
-    // region POLL EVENTS
-    _listenPollCreated();
-    _listenPollUpdated();
-    _listenPollClosed();
-    _listenPollAnswerCasted();
-    _listenPollVoteCasted();
-    _listenPollVoteChanged();
-    _listenPollAnswerRemoved();
-    _listenPollVoteRemoved();
-    // endregion
-
-    // region READ EVENTS
-    _listenReadEvents();
-    // endregion
-
-    // region CHANNEL EVENTS
-    _listenChannelTruncated();
-    _listenChannelUpdated();
-    _listenChannelMessageCount();
-    // endregion
-
-    // region MEMBER EVENTS
-    _listenMemberAdded();
-    _listenMemberRemoved();
-    _listenMemberUpdated();
-    _listenMemberBanned();
-    _listenMemberUnbanned();
-    _listenUserMessagesDeleted();
-    // endregion
-
-    // region USER WATCHING EVENTS
-    _listenUserStartWatching();
-    _listenUserStopWatching();
-    // endregion
-
-    // region REMINDER EVENTS
-    _listenReminderCreated();
-    _listenReminderUpdated();
-    _listenReminderDeleted();
-    // endregion
-
-    // region LOCATION EVENTS
-    _listenLocationShared();
-    _listenLocationUpdated();
-    _listenLocationExpired();
-    // endregion
+    final handler = ChannelEventHandler(
+      channel: _channel,
+      state: this,
+      upsertTypingEvent: _upsertTypingEvent,
+      removeTypingEvent: _removeTypingEvent,
+      removeWatcher: _removeWatcher,
+      updateMember: _updateMember,
+      deleteMessagesFromUser: _deleteMessagesFromUser,
+    );
+    _subscriptions.add(_channel.on().listen(handler.handleEvent));
 
     _startCleaningStaleTypingEvents();
 
     _startCleaningStalePinnedMessages();
 
     _startCleaningExpiredLocations();
-
-    _listenChannelPushPreferenceUpdated();
 
     final persistenceClient = _client.chatPersistenceClient;
     persistenceClient
@@ -2571,212 +2513,22 @@ class ChannelClientState {
   StreamChatClient get _client => _channel._client;
   final _subscriptions = CompositeSubscription();
 
-  void _listenMemberAdded() {
-    _subscriptions.add(
-      _channel.on(EventType.memberAdded).listen((Event e) {
-        final member = e.member!;
-        final existingMembers = channelState.members ?? [];
-
-        updateChannelState(
-          channelState.copyWith(
-            members: [...existingMembers, member],
-          ),
-        );
-      }),
+  /// Removes the [watcher] from the channel state, optionally updating the
+  /// [watcherCount] when provided.
+  ///
+  /// Writes the state directly instead of going through [updateChannelState],
+  /// whose watcher list merge would undo the removal.
+  void _removeWatcher(User watcher, {int? watcherCount}) {
+    final existingWatchers = channelState.watchers ?? const <User>[];
+    _channelState = channelState.copyWith(
+      watchers: existingWatchers.where((user) => user.id != watcher.id).toList(),
+      watcherCount: watcherCount,
     );
   }
 
-  void _listenMemberRemoved() {
-    _subscriptions.add(
-      _channel.on(EventType.memberRemoved).listen((Event e) {
-        final user = e.user!;
-        final existingRead = channelState.read ?? [];
-        final existingMembers = channelState.members ?? [];
-
-        updateChannelState(
-          channelState.copyWith(
-            read: [...existingRead.where((r) => r.user.id != user.id)],
-            members: [...existingMembers.where((m) => m.userId != user.id)],
-          ),
-        );
-      }),
-    );
-  }
-
-  void _listenMemberUpdated() {
-    _subscriptions
-      // Listen to events containing member users
-      ..add(
-        _channel.on().listen(
-          (event) {
-            final user = event.user;
-            if (user == null) return;
-
-            final existingMembers = [...?channelState.members];
-            final existingMembership = channelState.membership;
-
-            // Return if the user is not a existing member of the channel.
-            if (!existingMembers.any((m) => m.userId == user.id)) return;
-
-            Member? maybeUpdateMemberUser(Member? existingMember) {
-              if (existingMember == null) return null;
-              if (existingMember.userId == user.id) {
-                return existingMember.copyWith(user: user);
-              }
-              return existingMember;
-            }
-
-            updateChannelState(
-              channelState.copyWith(
-                membership: maybeUpdateMemberUser(existingMembership),
-                members: [...existingMembers.map(maybeUpdateMemberUser).nonNulls],
-              ),
-            );
-          },
-        ),
-      )
-      // Listen to member updated events.
-      ..add(
-        _channel.on(EventType.memberUpdated).listen(
-          (Event e) {
-            final member = e.member!;
-            final existingMembers = channelState.members ?? [];
-            final existingMembership = channelState.membership;
-
-            Member? maybeUpdateMember(Member? existingMember) {
-              if (existingMember == null) return null;
-              if (existingMember.userId == member.userId) return member;
-              return existingMember;
-            }
-
-            updateChannelState(
-              channelState.copyWith(
-                membership: maybeUpdateMember(existingMembership),
-                members: [...existingMembers.map(maybeUpdateMember).nonNulls],
-              ),
-            );
-          },
-        ),
-      );
-  }
-
-  void _listenChannelUpdated() {
-    _subscriptions.add(
-      _channel.on(EventType.channelUpdated).listen((Event e) {
-        final channel = e.channel!;
-        updateChannelState(
-          channelState.copyWith(
-            channel: channelState.channel?.merge(channel),
-            members: channel.members,
-          ),
-        );
-      }),
-    );
-  }
-
-  void _listenChannelMessageCount() {
-    _subscriptions.add(
-      _channel.on().listen(
-        (Event e) {
-          final messageCount = e.channelMessageCount;
-          if (messageCount == null) return;
-
-          updateChannelState(
-            channelState.copyWith(
-              channel: channelState.channel?.copyWith(
-                messageCount: messageCount,
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  void _listenChannelTruncated() {
-    _subscriptions.add(
-      _channel.on(EventType.channelTruncated, EventType.notificationChannelTruncated).listen((event) async {
-        final channel = event.channel!;
-        await _client.chatPersistenceClient?.deleteMessageByCid(channel.cid);
-        truncate();
-        if (event.message != null) {
-          updateMessage(event.message!);
-        }
-      }),
-    );
-  }
-
-  void _listenMemberBanned() {
-    _subscriptions.add(
-      _channel
-          .on(EventType.userBanned)
-          .where((it) => it.cid != null) // filters channel ban from app ban
-          .listen(
-            (event) async {
-              final user = event.user!;
-              final member = await _channel
-                  .queryMembers(filter: Filter.equal('id', user.id))
-                  .then((it) => it.members.first);
-
-              _updateMember(member);
-            },
-          ),
-    );
-  }
-
-  void _listenUserStartWatching() {
-    _subscriptions.add(
-      _channel.on(EventType.userWatchingStart).listen((event) {
-        final watcher = event.user;
-        if (watcher != null) {
-          final existingWatchers = channelState.watchers;
-          updateChannelState(
-            channelState.copyWith(
-              watchers: [
-                watcher,
-                ...?existingWatchers?.where((user) => user.id != watcher.id),
-              ],
-              watcherCount: event.watcherCount,
-            ),
-          );
-        }
-      }),
-    );
-  }
-
-  void _listenUserStopWatching() {
-    _subscriptions.add(
-      _channel.on(EventType.userWatchingStop).listen((event) {
-        final watcher = event.user;
-        if (watcher != null) {
-          final existingWatchers = channelState.watchers ?? const <User>[];
-          _channelState = channelState.copyWith(
-            watchers: existingWatchers.where((user) => user.id != watcher.id).toList(),
-            watcherCount: event.watcherCount,
-          );
-        }
-      }),
-    );
-  }
-
-  void _listenMemberUnbanned() {
-    _subscriptions.add(
-      _channel
-          .on(EventType.userUnbanned)
-          .where((it) => it.cid != null) // filters channel ban from app ban
-          .listen(
-            (event) async {
-              final user = event.user!;
-              final member = await _channel
-                  .queryMembers(filter: Filter.equal('id', user.id))
-                  .then((it) => it.members.first);
-
-              _updateMember(member);
-            },
-          ),
-    );
-  }
-
+  /// Replaces the member matching [member]'s user id in the channel state.
+  ///
+  /// Does nothing if no member with the same user id exists.
   void _updateMember(Member member) {
     final currentMembers = [...members];
     final memberIndex = currentMembers.indexWhere(
@@ -2819,274 +2571,6 @@ class ChannelClientState {
     _retryQueue.add(failedMessages);
   }
 
-  Message? _findPollMessage(String pollId) {
-    final message = messages.firstWhereOrNull((it) => it.pollId == pollId);
-    if (message != null) return message;
-
-    final threadMessage = threads.values.flattened.firstWhereOrNull((it) {
-      return it.pollId == pollId;
-    });
-
-    return threadMessage;
-  }
-
-  void _listenPollCreated() {
-    _subscriptions.add(
-      _channel.on(EventType.pollCreated).listen((event) {
-        final message = event.message;
-        if (message == null || message.poll == null) return;
-
-        return addNewMessage(message);
-      }),
-    );
-  }
-
-  void _listenPollUpdated() {
-    _subscriptions.add(
-      _channel.on(EventType.pollUpdated).listen((event) {
-        final eventPoll = event.poll;
-        if (eventPoll == null) return;
-
-        final pollMessage = _findPollMessage(eventPoll.id);
-        if (pollMessage == null) return;
-
-        final oldPoll = pollMessage.poll;
-
-        final latestAnswers = oldPoll?.latestAnswers ?? eventPoll.latestAnswers;
-        final ownVotesAndAnswers = oldPoll?.ownVotesAndAnswers ?? eventPoll.ownVotesAndAnswers;
-
-        final poll = eventPoll.copyWith(
-          latestAnswers: latestAnswers,
-          ownVotesAndAnswers: ownVotesAndAnswers,
-        );
-
-        final message = pollMessage.copyWith(poll: poll);
-        updateMessage(message);
-      }),
-    );
-  }
-
-  void _listenPollClosed() {
-    _subscriptions.add(
-      _channel.on(EventType.pollClosed).listen((event) {
-        final eventPoll = event.poll;
-        if (eventPoll == null) return;
-
-        final pollMessage = _findPollMessage(eventPoll.id);
-        if (pollMessage == null) return;
-
-        final oldPoll = pollMessage.poll;
-        final poll = oldPoll?.copyWith(isClosed: true) ?? eventPoll;
-
-        final message = pollMessage.copyWith(poll: poll);
-        updateMessage(message);
-      }),
-    );
-  }
-
-  void _listenPollAnswerCasted() {
-    _subscriptions.add(
-      _channel.on(EventType.pollAnswerCasted).listen((event) {
-        final (eventPoll, eventPollVote) = (event.poll, event.pollVote);
-        if (eventPoll == null || eventPollVote == null) return;
-
-        final pollMessage = _findPollMessage(eventPoll.id);
-        if (pollMessage == null) return;
-
-        final oldPoll = pollMessage.poll;
-
-        final latestAnswers = <String, PollVote>{
-          for (final ans in oldPoll?.latestAnswers ?? []) ans.id: ans,
-          eventPollVote.id!: eventPollVote,
-        };
-
-        final currentUserId = _client.state.currentUser?.id;
-        final ownVotesAndAnswers = <String, PollVote>{
-          for (final vote in oldPoll?.ownVotesAndAnswers ?? []) vote.id: vote,
-          if (eventPollVote.userId == currentUserId) eventPollVote.id!: eventPollVote,
-        };
-
-        final poll = eventPoll.copyWith(
-          latestAnswers: [...latestAnswers.values],
-          ownVotesAndAnswers: [...ownVotesAndAnswers.values],
-        );
-
-        final message = pollMessage.copyWith(poll: poll);
-        updateMessage(message);
-      }),
-    );
-  }
-
-  void _listenPollVoteCasted() {
-    _subscriptions.add(
-      _channel.on(EventType.pollVoteCasted).listen((event) {
-        final (eventPoll, eventPollVote) = (event.poll, event.pollVote);
-        if (eventPoll == null || eventPollVote == null) return;
-
-        final pollMessage = _findPollMessage(eventPoll.id);
-        if (pollMessage == null) return;
-
-        final oldPoll = pollMessage.poll;
-
-        final latestAnswers = oldPoll?.latestAnswers ?? eventPoll.latestAnswers;
-        final currentUserId = _client.state.currentUser?.id;
-        final ownVotesAndAnswers = <String, PollVote>{
-          for (final vote in oldPoll?.ownVotesAndAnswers ?? []) vote.id: vote,
-          if (eventPollVote.userId == currentUserId) eventPollVote.id!: eventPollVote,
-        };
-
-        final poll = eventPoll.copyWith(
-          latestAnswers: latestAnswers,
-          ownVotesAndAnswers: [...ownVotesAndAnswers.values],
-        );
-
-        final message = pollMessage.copyWith(poll: poll);
-        updateMessage(message);
-      }),
-    );
-  }
-
-  void _listenPollAnswerRemoved() {
-    _subscriptions.add(
-      _channel.on(EventType.pollAnswerRemoved).listen((event) {
-        final (eventPoll, eventPollVote) = (event.poll, event.pollVote);
-        if (eventPoll == null || eventPollVote == null) return;
-
-        final pollMessage = _findPollMessage(eventPoll.id);
-        if (pollMessage == null) return;
-
-        final oldPoll = pollMessage.poll;
-
-        final latestAnswers = <String, PollVote>{
-          for (final ans in oldPoll?.latestAnswers ?? []) ans.id: ans,
-        }..remove(eventPollVote.id);
-
-        final ownVotesAndAnswers = <String, PollVote>{
-          for (final vote in oldPoll?.ownVotesAndAnswers ?? []) vote.id: vote,
-        }..remove(eventPollVote.id);
-
-        final poll = eventPoll.copyWith(
-          latestAnswers: [...latestAnswers.values],
-          ownVotesAndAnswers: [...ownVotesAndAnswers.values],
-        );
-
-        final message = pollMessage.copyWith(poll: poll);
-        updateMessage(message);
-      }),
-    );
-  }
-
-  void _listenPollVoteRemoved() {
-    _subscriptions.add(
-      _channel.on(EventType.pollVoteRemoved).listen((event) {
-        final (eventPoll, eventPollVote) = (event.poll, event.pollVote);
-        if (eventPoll == null || eventPollVote == null) return;
-
-        final pollMessage = _findPollMessage(eventPoll.id);
-        if (pollMessage == null) return;
-
-        final oldPoll = pollMessage.poll;
-
-        final latestAnswers = oldPoll?.latestAnswers ?? eventPoll.latestAnswers;
-        final ownVotesAndAnswers = <String, PollVote>{
-          for (final vote in oldPoll?.ownVotesAndAnswers ?? []) vote.id: vote,
-        }..remove(eventPollVote.id);
-
-        final poll = eventPoll.copyWith(
-          latestAnswers: latestAnswers,
-          ownVotesAndAnswers: [...ownVotesAndAnswers.values],
-        );
-
-        final message = pollMessage.copyWith(poll: poll);
-        updateMessage(message);
-      }),
-    );
-  }
-
-  void _listenPollVoteChanged() {
-    _subscriptions.add(
-      _channel.on(EventType.pollVoteChanged).listen((event) {
-        final (eventPoll, eventPollVote) = (event.poll, event.pollVote);
-        if (eventPoll == null || eventPollVote == null) return;
-
-        final pollMessage = _findPollMessage(eventPoll.id);
-        if (pollMessage == null) return;
-
-        final oldPoll = pollMessage.poll;
-
-        final latestAnswers = oldPoll?.latestAnswers ?? eventPoll.latestAnswers;
-        final currentUserId = _client.state.currentUser?.id;
-        final ownVotesAndAnswers = <String, PollVote>{
-          for (final vote in oldPoll?.ownVotesAndAnswers ?? []) vote.id: vote,
-          if (eventPollVote.userId == currentUserId) eventPollVote.id!: eventPollVote,
-        };
-
-        final poll = eventPoll.copyWith(
-          latestAnswers: latestAnswers,
-          ownVotesAndAnswers: [...ownVotesAndAnswers.values],
-        );
-
-        final message = pollMessage.copyWith(poll: poll);
-        updateMessage(message);
-      }),
-    );
-  }
-
-  void _listenDraftUpdated() {
-    _subscriptions.add(
-      _channel.on(EventType.draftUpdated).listen((event) {
-        final draft = event.draft;
-        if (draft == null) return;
-
-        return updateDraft(draft);
-      }),
-    );
-  }
-
-  void _listenDraftDeleted() {
-    _subscriptions.add(
-      _channel.on(EventType.draftDeleted).listen((event) {
-        final draft = event.draft;
-        if (draft == null) return;
-
-        return deleteDraft(draft);
-      }),
-    );
-  }
-
-  void _listenReminderCreated() {
-    _subscriptions.add(
-      _channel.on(EventType.reminderCreated).listen((event) {
-        final reminder = event.reminder;
-        if (reminder == null) return;
-
-        updateReminder(reminder);
-      }),
-    );
-  }
-
-  void _listenReminderUpdated() {
-    _subscriptions.add(
-      _channel.on(EventType.reminderUpdated).listen((event) {
-        final reminder = event.reminder;
-        if (reminder == null) return;
-
-        updateReminder(reminder);
-      }),
-    );
-  }
-
-  void _listenReminderDeleted() {
-    _subscriptions.add(
-      _channel.on(EventType.reminderDeleted).listen((event) {
-        final reminder = event.reminder;
-        if (reminder == null) return;
-
-        deleteReminder(reminder);
-      }),
-    );
-  }
-
   /// Updates the [reminder] of the message if it exists.
   void updateReminder(MessageReminder reminder) {
     final messageId = reminder.messageId;
@@ -3111,217 +2595,6 @@ class ChannelClientState {
         );
       }
     }
-  }
-
-  Message? _findLocationMessage(String id) {
-    final message = messages.firstWhereOrNull((it) {
-      return it.sharedLocation?.messageId == id;
-    });
-
-    if (message != null) return message;
-
-    final threadMessage = threads.values.flattened.firstWhereOrNull((it) {
-      return it.sharedLocation?.messageId == id;
-    });
-
-    return threadMessage;
-  }
-
-  void _listenLocationShared() {
-    _subscriptions.add(
-      _channel.on(EventType.locationShared).listen((event) {
-        final message = event.message;
-        if (message == null || message.sharedLocation == null) return;
-
-        return addNewMessage(message);
-      }),
-    );
-  }
-
-  void _listenLocationUpdated() {
-    _subscriptions.add(
-      _channel.on(EventType.locationUpdated).listen((event) {
-        final location = event.message?.sharedLocation;
-        if (location == null) return;
-
-        final messageId = location.messageId;
-        if (messageId == null) return;
-
-        final oldMessage = _findLocationMessage(messageId);
-        if (oldMessage == null) return;
-
-        final updatedMessage = oldMessage.copyWith(sharedLocation: location);
-        return updateMessage(updatedMessage);
-      }),
-    );
-  }
-
-  void _listenLocationExpired() {
-    _subscriptions.add(
-      _channel.on(EventType.locationExpired).listen((event) {
-        final location = event.message?.sharedLocation;
-        if (location == null) return;
-
-        final messageId = location.messageId;
-        if (messageId == null) return;
-
-        final oldMessage = _findLocationMessage(messageId);
-        if (oldMessage == null) return;
-
-        final updatedMessage = oldMessage.copyWith(sharedLocation: location);
-        return updateMessage(updatedMessage);
-      }),
-    );
-  }
-
-  void _listenReactionDeleted() {
-    _subscriptions.add(
-      _channel.on(EventType.reactionDeleted).listen((event) {
-        final (eventReaction, eventMessage) = (event.reaction, event.message);
-        if (eventReaction == null || eventMessage == null) return;
-
-        final messageId = eventMessage.id;
-        final parentId = eventMessage.parentId;
-
-        for (final message in [...messages, ...?threads[parentId]]) {
-          if (message.id == messageId) {
-            final currentUserId = _channel.client.state.currentUser?.id;
-
-            final currentMessage = switch (currentUserId) {
-              final userId? when userId == eventReaction.userId => message.deleteMyReaction(
-                reactionType: eventReaction.type,
-              ),
-              _ => message,
-            };
-
-            return updateMessage(
-              eventMessage.copyWith(
-                ownReactions: currentMessage.ownReactions,
-              ),
-            );
-          }
-        }
-      }),
-    );
-  }
-
-  void _listenReactionNew() {
-    _subscriptions.add(
-      _channel.on(EventType.reactionNew).listen((event) {
-        final (eventReaction, eventMessage) = (event.reaction, event.message);
-        if (eventReaction == null || eventMessage == null) return;
-
-        final messageId = eventMessage.id;
-        final parentId = eventMessage.parentId;
-
-        for (final message in [...messages, ...?threads[parentId]]) {
-          if (message.id == messageId) {
-            final currentUserId = _channel.client.state.currentUser?.id;
-
-            final currentMessage = switch (currentUserId) {
-              final userId? when userId == eventReaction.userId => message.addMyReaction(eventReaction),
-              _ => message,
-            };
-
-            return updateMessage(
-              eventMessage.copyWith(
-                ownReactions: currentMessage.ownReactions,
-              ),
-            );
-          }
-        }
-      }),
-    );
-  }
-
-  void _listenReactionUpdated() {
-    _subscriptions.add(
-      _channel.on(EventType.reactionUpdated).listen((event) {
-        final (eventReaction, eventMessage) = (event.reaction, event.message);
-        if (eventReaction == null || eventMessage == null) return;
-
-        final messageId = eventMessage.id;
-        final parentId = eventMessage.parentId;
-
-        for (final message in [...messages, ...?threads[parentId]]) {
-          if (message.id == messageId) {
-            final currentUserId = _channel.client.state.currentUser?.id;
-
-            final currentMessage = switch (currentUserId) {
-              final userId? when userId == eventReaction.userId =>
-                // reaction.updated is only called if enforce_unique is true
-                message.addMyReaction(eventReaction, enforceUnique: true),
-              _ => message,
-            };
-
-            return updateMessage(
-              eventMessage.copyWith(
-                ownReactions: currentMessage.ownReactions,
-              ),
-            );
-          }
-        }
-      }),
-    );
-  }
-
-  void _listenMessageUpdated() {
-    _subscriptions.add(
-      _channel.on(EventType.messageUpdated).listen((event) {
-        final message = event.message;
-        if (message == null) return;
-
-        return updateMessage(message, upsert: false);
-      }),
-    );
-  }
-
-  void _listenMessageDeleted() {
-    _subscriptions.add(
-      _channel.on(EventType.messageDeleted).listen((event) {
-        final hardDelete = event.hardDelete ?? false;
-
-        final message = event.message!.copyWith(
-          // TODO: Remove once deletedForMe is properly enriched on the backend.
-          deletedForMe: event.deletedForMe,
-        );
-
-        // Decrement the locally-tracked unread count for hard-deleted
-        // messages that would have counted as unread. Soft-deleted messages
-        // keep their slot. Only applies to channels that track unread counts
-        // locally (see [Channel.usesLocalUnreadCount]) — server-driven
-        // channels get corrected counts from server read events instead.
-        if (hardDelete && _channel.usesLocalUnreadCount && MessageRules.canCountAsUnread(message, _channel)) {
-          unreadCount = math.max(0, unreadCount - 1);
-        }
-
-        return deleteMessage(message, hardDelete: hardDelete);
-      }),
-    );
-  }
-
-  void _listenMessageNew() {
-    _subscriptions.add(
-      _channel
-          .on(
-            EventType.messageNew,
-            EventType.notificationMessageNew,
-          )
-          .listen((event) {
-            final message = event.message;
-            if (message == null) return;
-
-            addNewMessage(message);
-
-            // Only message.new carries a reliable watcher count;
-            // notification.message_new targets non-watchers and reports 0.
-            if (event.watcherCount case final watcherCount? when event.type == EventType.messageNew) {
-              updateChannelState(
-                channelState.copyWith(watcherCount: watcherCount),
-              );
-            }
-          }),
-    );
   }
 
   /// Adds a new message to the channel state and updates the unread count.
@@ -3444,94 +2717,6 @@ class ChannelClientState {
   /// Removes/Updates the [message] based on the [hardDelete] value.
   void deleteMessage(Message message, {bool hardDelete = false}) {
     return _deleteMessages([message], hardDelete: hardDelete);
-  }
-
-  void _listenReadEvents() {
-    _subscriptions
-      ..add(
-        _channel.on(EventType.messageRead, EventType.notificationMarkRead).listen(
-          (event) {
-            // Skip handling the event if delivered for a thread
-            if (event.thread != null) return;
-
-            final user = event.user;
-            if (user == null) return;
-
-            final currentRead = userReadOf(userId: user.id);
-
-            final updatedRead = Read(
-              user: user,
-              lastRead: event.createdAt,
-              unreadMessages: 0, // Reset unread count
-              lastReadMessageId: event.lastReadMessageId,
-              // Preserve delivery info as it's not part of the read event.
-              lastDeliveredAt: currentRead?.lastDeliveredAt,
-              lastDeliveredMessageId: currentRead?.lastDeliveredMessageId,
-            );
-
-            updateRead([updatedRead]);
-
-            // If the read event is from the current user, reconcile the
-            // channel delivery status with the updated read state.
-            final currentUser = _client.state.currentUser;
-            if (event.isFromUser(userId: currentUser?.id)) {
-              _client.channelDeliveryReporter.reconcileDelivery([_channel]);
-            }
-          },
-        ),
-      )
-      ..add(
-        _channel.on(EventType.notificationMarkUnread).listen(
-          (event) {
-            final user = event.user;
-            if (user == null) return;
-
-            final currentRead = userReadOf(userId: user.id);
-
-            final updatedRead = Read(
-              user: user,
-              lastRead: event.lastReadAt!,
-              unreadMessages: event.unreadMessages,
-              lastReadMessageId: event.lastReadMessageId,
-              // Preserve delivery info as it's not part of the read event.
-              lastDeliveredAt: currentRead?.lastDeliveredAt,
-              lastDeliveredMessageId: currentRead?.lastDeliveredMessageId,
-            );
-
-            return updateRead([updatedRead]);
-          },
-        ),
-      )
-      ..add(
-        _channel.on(EventType.messageDelivered).listen(
-          (event) {
-            final user = event.user;
-            if (user == null) return;
-
-            final currentRead = userReadOf(userId: user.id);
-            final never = DateTime.fromMillisecondsSinceEpoch(0, isUtc: true);
-
-            final updatedRead = Read(
-              user: user,
-              lastDeliveredAt: event.lastDeliveredAt,
-              lastDeliveredMessageId: event.lastDeliveredMessageId,
-              // Preserve read info as it's not part of the delivery event.
-              lastRead: currentRead?.lastRead ?? never,
-              unreadMessages: currentRead?.unreadMessages,
-              lastReadMessageId: currentRead?.lastReadMessageId,
-            );
-
-            updateRead([updatedRead]);
-
-            // If the delivered event is from the current user, reconcile
-            // the channel delivery with the updated read state.
-            final currentUser = _client.state.currentUser;
-            if (event.isFromUser(userId: currentUser?.id)) {
-              _client.channelDeliveryReporter.reconcileDelivery([_channel]);
-            }
-          },
-        ),
-      );
   }
 
   /// Channel message list.
@@ -3956,36 +3141,14 @@ class ChannelClientState {
   Map<User, Event> get typingEvents => _typingEventsController.value;
   final _typingEventsController = BehaviorSubject.seeded(<User, Event>{});
 
-  void _listenTypingEvents() {
-    _subscriptions
-      ..add(
-        _channel.on(EventType.typingStart).listen(
-          (event) {
-            final user = event.user;
-            if (user == null) return;
+  /// Adds or replaces the typing [event] for the given [user].
+  void _upsertTypingEvent(User user, Event event) {
+    _typingEventsController.safeAdd({...typingEvents, user: event});
+  }
 
-            final currentUser = _client.state.currentUser;
-            if (event.isFromUser(userId: currentUser?.id)) return;
-
-            final events = {...typingEvents, user: event};
-            _typingEventsController.safeAdd(events);
-          },
-        ),
-      )
-      ..add(
-        _channel.on(EventType.typingStop).listen(
-          (event) {
-            final user = event.user;
-            if (user == null) return;
-
-            final currentUser = _client.state.currentUser;
-            if (event.isFromUser(userId: currentUser?.id)) return;
-
-            final events = {...typingEvents}..remove(user);
-            _typingEventsController.safeAdd(events);
-          },
-        ),
-      );
+  /// Removes the typing event for the given [user], if any.
+  void _removeTypingEvent(User user) {
+    _typingEventsController.safeAdd({...typingEvents}..remove(user));
   }
 
   Timer? _staleTypingEventsCleanerTimer;
@@ -4080,24 +3243,8 @@ class ChannelClientState {
     );
   }
 
-  // Listens to channel push preference update events and updates the state
-  void _listenChannelPushPreferenceUpdated() {
-    _subscriptions.add(
-      _channel.on(EventType.channelPushPreferenceUpdated).listen(
-        (event) {
-          final pushPreferences = event.channelPushPreference;
-          if (pushPreferences == null) return;
-
-          updateChannelState(
-            channelState.copyWith(
-              pushPreferences: pushPreferences,
-            ),
-          );
-        },
-      ),
-    );
-  }
-
+  /// Deletes all messages from the user identified by [userId], both from
+  /// the persistence layer and the channel state.
   Future<void> _deleteMessagesFromUser({
     required String userId,
     bool hardDelete = false,
@@ -4535,23 +3682,6 @@ class ChannelClientState {
         });
 
     return updatedMessages;
-  }
-
-  // Listens to user message deleted events and marks messages from that user
-  // as either soft or hard deleted based on the event data.
-  void _listenUserMessagesDeleted() {
-    _subscriptions.add(
-      _channel.on(EventType.userMessagesDeleted).listen((event) async {
-        final user = event.user;
-        if (user == null) return;
-
-        return _deleteMessagesFromUser(
-          userId: user.id,
-          hardDelete: event.hardDelete ?? false,
-          deletedAt: event.createdAt,
-        );
-      }),
-    );
   }
 
   /// Call this method to dispose this object.
