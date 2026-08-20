@@ -490,13 +490,16 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
   String get viewLibrary => 'Bibliothek öffnen';
 
   @override
-  // ignore: deprecated_member_use
   String unreadMessagesSeparatorText() => 'Neue Nachrichten';
 
   @override
   String unreadMessagesSeparatorLabel({required int count}) {
-    if (count == 1) return '1 ungelesene Nachricht';
-    return '$count ungelesene Nachrichten';
+    return Intl.plural(
+      count,
+      one: '$count ungelesene Nachricht',
+      other: '$count ungelesene Nachrichten',
+      locale: localeName,
+    );
   }
 
   @override

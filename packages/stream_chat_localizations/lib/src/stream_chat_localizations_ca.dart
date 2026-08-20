@@ -493,13 +493,16 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
   String get linkDisabledError => 'Els enllaços estan deshabilitats';
 
   @override
-  // ignore: deprecated_member_use
   String unreadMessagesSeparatorText() => 'Missatges nous';
 
   @override
   String unreadMessagesSeparatorLabel({required int count}) {
-    if (count == 1) return '1 missatge no llegit';
-    return '$count missatges no llegits';
+    return Intl.plural(
+      count,
+      one: '$count missatge no llegit',
+      other: '$count missatges no llegits',
+      locale: localeName,
+    );
   }
 
   @override

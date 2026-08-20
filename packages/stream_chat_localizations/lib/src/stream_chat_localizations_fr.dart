@@ -496,13 +496,16 @@ Limite de pièces jointes dépassée : il n'est pas possible d'ajouter plus de $
   String get linkDisabledError => 'Les liens sont désactivés';
 
   @override
-  // ignore: deprecated_member_use
   String unreadMessagesSeparatorText() => 'Nouveaux messages';
 
   @override
   String unreadMessagesSeparatorLabel({required int count}) {
-    if (count == 1) return '1 message non lu';
-    return '$count messages non lus';
+    return Intl.plural(
+      count,
+      one: '$count message non lu',
+      other: '$count messages non lus',
+      locale: localeName,
+    );
   }
 
   @override

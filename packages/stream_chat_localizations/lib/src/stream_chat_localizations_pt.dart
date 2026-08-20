@@ -495,13 +495,16 @@ Não é possível adicionar mais de $limit arquivos de uma vez
   String get viewLibrary => 'Ver biblioteca';
 
   @override
-  // ignore: deprecated_member_use
   String unreadMessagesSeparatorText() => 'Novas mensagens';
 
   @override
   String unreadMessagesSeparatorLabel({required int count}) {
-    if (count == 1) return '1 mensagem não lida';
-    return '$count mensagens não lidas';
+    return Intl.plural(
+      count,
+      one: '$count mensagem não lida',
+      other: '$count mensagens não lidas',
+      locale: localeName,
+    );
   }
 
   @override

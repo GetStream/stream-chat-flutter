@@ -499,13 +499,16 @@ Attenzione: il limite massimo di $limit file è stato superato.
   String get linkDisabledError => 'I links sono disattivati';
 
   @override
-  // ignore: deprecated_member_use
   String unreadMessagesSeparatorText() => 'Nuovi messaggi';
 
   @override
   String unreadMessagesSeparatorLabel({required int count}) {
-    if (count == 1) return '1 messaggio non letto';
-    return '$count messaggi non letti';
+    return Intl.plural(
+      count,
+      one: '$count messaggio non letto',
+      other: '$count messaggi non letti',
+      locale: localeName,
+    );
   }
 
   @override

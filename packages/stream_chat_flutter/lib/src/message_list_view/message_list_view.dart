@@ -323,13 +323,22 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
   // [_maybeMarkMessagesAsRead]) gates auto mark-read.
   final ValueNotifier<bool> _hasSeenFirstUnread = ValueNotifier(false);
 
+  // Whether the list has reported item positions at least once.
+  //
+  // The pill waits on this. Its count is published synchronously while the
+  // channel is attached, but `_hasSeenFirstUnread` can only be decided from
+  // item positions, which arrive in a post-frame callback — so without this
+  // the pill paints for exactly one frame on every channel opened at its
+  // first unread message, then disappears.
+  final ValueNotifier<bool> _hasLaidOut = ValueNotifier(false);
+
   // Scroll-to-bottom badge count. Counts messages that arrive while the user
   // is scrolled away from the bottom; resets to 0 once they reach the bottom.
   final ValueNotifier<int> _scrollToBottomBadge = ValueNotifier(0);
 
-  // Sticky "bottom was reached" flag for the FLU-640 mark-read gate. Cleared
-  // after each successful mark-read so returning to the bottom is required
-  // again before the next one.
+  // Sticky "bottom was reached" flag for the mark-read gate. Cleared after
+  // each successful mark-read so returning to the bottom is required again
+  // before the next one.
   bool _hasSeenLastMessage = false;
 
   // While non-null, the viewport captured at the moment an active manual
@@ -375,11 +384,31 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
   // mark-read that should already have been earned by that round trip.
   bool _markUnreadViewportDiverged = false;
 
+  // State the last mark-read attempt was made against. Item positions tick
+  // on every scroll frame, so without this a mark-read that keeps failing
+  // would be retried for as long as the user keeps scrolling at the bottom
+  // (once a second, as bounded by the debounce). Every input the gate in
+  // [_maybeMarkMessagesAsRead] actually reads is part of the key, so a
+  // genuine change — a new message, a mark-unread, the viewport diverging
+  // after one — still gets its attempt.
+  ({String? newestMessageId, int unreadCount, bool isMarkedAsUnread, bool viewportDiverged})? _lastMarkReadAttempt;
+
   // Previous value of `channel.state.isMarkedAsUnread`, so
-  // [_handleCurrentUserReadChanged] can act on the *transition* into the
-  // marked-unread state rather than on every read-stream emission that
-  // happens while it's set.
+  // [_handleCurrentUserReadChanged] can act on a new mark-unread rather than
+  // on every read-stream emission that happens while the flag stays set.
+  // Seeded from the channel on attach, since it can already be set there.
   bool _wasMarkedAsUnread = false;
+
+  // Read boundary observed alongside [_wasMarkedAsUnread]. A mark-unread
+  // moves the boundary backward, so a change here while the flag is already
+  // set is how a *second* mark-unread is told apart from the read-stream
+  // emissions that keep arriving during one.
+  ({DateTime? lastRead, String? lastReadMessageId})? _lastReadBoundary;
+
+  static ({DateTime? lastRead, String? lastReadMessageId})? _readBoundaryOf(Read? read) {
+    if (read == null) return null;
+    return (lastRead: read.lastRead, lastReadMessageId: read.lastReadMessageId);
+  }
 
   // Whether divider A's current session came from an explicit mark-unread
   // rather than from pre-existing unread at channel open. The anchor of a
@@ -429,11 +458,21 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
   // moves the read boundary backward — treat it as a new session start for
   // divider A/the pill.
   //
-  // The reset is deliberately gated on the *transition* into
-  // `isMarkedAsUnread`, not on the flag being set: the read stream also
-  // emits while it stays set (every new message, for one), and re-running
-  // the reset then would clear `_hasSeenFirstUnread` again and flicker the
-  // pill back in and straight out on each arrival.
+  // The reset is deliberately gated on a *new* mark-unread — the flag
+  // turning on, or the read boundary moving again while it's already on —
+  // rather than on the flag merely being set: the read stream also emits
+  // while it stays set (every new message, for one), and re-running the
+  // reset then would clear `_hasSeenFirstUnread` again and flicker the pill
+  // back in and straight out on each arrival. An arriving message bumps
+  // `unreadMessages` but leaves the boundary untouched, so gating on the
+  // boundary avoids that flicker while still catching a second mark-unread.
+  //
+  // Watching the boundary rather than only the transition matters because
+  // `isMarkedAsUnread` is cleared solely by a mark-read (see
+  // `ChannelClientState.markReadLocally`), and both
+  // [_captureUnreadBaselineIfNeeded] and [_resolveUnreadDivider] freeze once
+  // resolved — so this reset is the only thing that can move divider A once
+  // a mark-unread session is under way.
   void _handleCurrentUserReadChanged() {
     if (_isThreadConversation) return;
 
@@ -441,8 +480,11 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     if (channel == null) return;
 
     final isMarkedAsUnread = channel.state?.isMarkedAsUnread ?? false;
-    final justMarkedAsUnread = isMarkedAsUnread && !_wasMarkedAsUnread;
+    final readBoundary = _readBoundaryOf(channel.state?.currentUserRead);
+    final boundaryMoved = readBoundary != _lastReadBoundary;
+    final justMarkedAsUnread = isMarkedAsUnread && (!_wasMarkedAsUnread || boundaryMoved);
     _wasMarkedAsUnread = isMarkedAsUnread;
+    _lastReadBoundary = readBoundary;
 
     if (justMarkedAsUnread) {
       _unreadBaselineCaptured = false;
@@ -451,11 +493,16 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       _unreadDividerGrowth.value = 0;
       _hasSeenFirstUnread.value = false;
       _unreadFromManualMarkUnread = true;
-      // Only capture once per mark-unread session — a later, unrelated
-      // read-stream emission while still marked unread shouldn't keep
-      // chasing the latest position and never let a genuine scroll differ
-      // from it.
-      _markUnreadViewportSnapshot ??= _itemPositionListener.itemPositions.value.map((it) => it.index).toList();
+      // Each mark-unread starts its own session, so the snapshot is taken
+      // fresh here rather than kept from a previous one — but only from a
+      // viewport that has actually been laid out. `itemPositions` is still
+      // empty before the first frame, and capturing that would make the
+      // very first laid-out frame look like divergence, defeating guard 4
+      // and leaving the fallback in [_handleItemPositionsChanged]
+      // unreachable. Left null instead, for that fallback to fill in.
+      final visibleIndices = _itemPositionListener.itemPositions.value.map((it) => it.index).toList();
+      _markUnreadViewportSnapshot = visibleIndices.isEmpty ? null : visibleIndices;
+      _markUnreadViewportDiverged = false;
     } else if (!isMarkedAsUnread) {
       _unreadFromManualMarkUnread = false;
       _markUnreadViewportSnapshot = null;
@@ -519,6 +566,8 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       debouncedMarkRead.cancel();
       debouncedMarkThreadRead.cancel();
 
+      final newChannelState = newStreamChannel.channel.state;
+
       _unreadBaselineCaptured = false;
       _unreadBaseline = null;
       _unreadDivider.value = (count: 0, anchorId: null);
@@ -526,10 +575,21 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       _scrollToBottomBadge.value = 0;
       _hasSeenFirstUnread.value = false;
       _hasSeenLastMessage = false;
+      _showScrollToBottom.value = false;
+      _hasLaidOut.value = false;
+      _lastMarkReadAttempt = null;
       _markUnreadViewportSnapshot = null;
       _markUnreadViewportDiverged = false;
-      _wasMarkedAsUnread = false;
-      _unreadFromManualMarkUnread = false;
+      // Seeded from the channel's own state rather than hardcoded to false:
+      // a channel can mount with a manual mark-unread already active (mark
+      // unread, leave, come back — the flag lives on the cached
+      // `ChannelClientState`). `currentUserReadStream` is backed by a
+      // `BehaviorSubject`, so the subscription below replays the current
+      // value straight away; without this seed that replay would read as a
+      // brand-new mark-unread and restart a session that never ended.
+      _wasMarkedAsUnread = newChannelState?.isMarkedAsUnread ?? false;
+      _lastReadBoundary = _readBoundaryOf(newChannelState?.currentUserRead);
+      _unreadFromManualMarkUnread = _wasMarkedAsUnread;
       _captureUnreadBaselineIfNeeded();
 
       final highlightInitialMessage = widget.config.highlightInitialMessage;
@@ -546,7 +606,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
         });
       }
 
-      final state = streamChannel?.channel.state;
+      final state = newChannelState;
       final newMessageStream = switch (widget.parentMessage?.id) {
         final parentId? => state?.newThreadMessageStream(parentId),
         _ => state?.newMessageStream,
@@ -629,6 +689,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     _hasSeenFirstUnread.dispose();
     _scrollToBottomBadge.dispose();
     _showScrollToBottom.dispose();
+    _hasLaidOut.dispose();
     _highlightState.dispose();
     super.dispose();
   }
@@ -1039,13 +1100,24 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
                 // scrolled most of the way there themselves.
                 if (unread.count <= 0) return const Empty();
                 return ValueListenableBuilder<bool>(
-                  valueListenable: _hasSeenFirstUnread,
-                  builder: (context, seen, __) {
-                    if (seen) return const Empty();
-                    return UnreadIndicatorButton(
-                      unreadCount: unread.count,
-                      onJumpTap: (_) => _onUnreadPillJumpTap(),
-                      onDismissTap: _onUnreadPillDismissTap,
+                  valueListenable: _hasLaidOut,
+                  builder: (context, laidOut, ___) {
+                    // Item positions decide whether the boundary is already
+                    // on screen, and they only arrive after the first frame
+                    // is laid out. Painting before then would flash the pill
+                    // for a frame on every channel opened at its first
+                    // unread message — which is the default.
+                    if (!laidOut) return const Empty();
+                    return ValueListenableBuilder<bool>(
+                      valueListenable: _hasSeenFirstUnread,
+                      builder: (context, seen, __) {
+                        if (seen) return const Empty();
+                        return UnreadIndicatorButton(
+                          unreadCount: unread.count,
+                          onJumpTap: (_) => _onUnreadPillJumpTap(),
+                          onDismissTap: _onUnreadPillDismissTap,
+                        );
+                      },
                     );
                   },
                 );
@@ -1171,17 +1243,25 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     // [StreamChannelState.loadChannelAtMessage] when the anchor isn't in the
     // currently loaded window — after which the real anchor resolves
     // naturally via the retry in [_buildListView], rendering divider A too.
+    // `_scrollToMessage` can await pagination and a frame, and this same
+    // `State` survives a channel change — so remember which channel the tap
+    // was for and drop the result if it isn't the current one any more.
+    final tappedFor = streamChannel;
     final didJump = await _scrollToMessage(messageId: anchorId, highlight: false);
+    if (!mounted || streamChannel != tappedFor) return;
     // Only claim the boundary as seen once the jump actually landed —
     // otherwise (message not found even after pagination, or the SPL not
     // attached) the pill would vanish and the mark-read gate would open for
     // a boundary the user never actually reached.
-    if (didJump && mounted) _hasSeenFirstUnread.value = true;
+    if (didJump) _hasSeenFirstUnread.value = true;
   }
 
   Future<void> _onUnreadPillDismissTap() async {
     _hasSeenFirstUnread.value = true;
-    await _markMessagesAsRead();
+    // Dismissing is a local decision; if the request behind it fails there
+    // is nothing to show the user, and letting it escape here would surface
+    // as an unhandled async error instead.
+    _markMessagesAsRead().ignore();
   }
 
   late final debouncedMarkRead = debounce(
@@ -1463,8 +1543,14 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
   // `usesLocalUnreadCount` is an extension getter reading `Channel`'s
   // private client field, so it can't be resolved against a channel double
   // at all.
+  //
+  // The user-level half (`isReadReceiptsEnabled`) is *not* left out: it
+  // isn't about how the channel is configured but about the user opting out
+  // of unread tracking entirely, and honouring it here is what keeps these
+  // indicators from counting up while the channel itself reports zero.
   bool _countsTowardsUnreadIndicators(Message message, OwnUser? currentUser) {
     if (currentUser == null) return false;
+    if (!currentUser.isReadReceiptsEnabled) return false;
 
     if (message.silent) return false;
     if (message.shadowed) return false;
@@ -1487,8 +1573,12 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
   }
 
   void _handleItemPositionsChanged() {
+    if (!mounted) return;
+
     final itemPositions = _itemPositionListener.itemPositions.value;
     if (itemPositions.isEmpty) return;
+
+    _hasLaidOut.value = true;
 
     // Snapshot the viewport (or check it against an existing snapshot for
     // divergence) the first time it's genuinely laid out while marked as
@@ -1521,16 +1611,14 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       isLastItemFullyVisible = lastItemPosition.itemLeadingEdge >= 0;
     }
 
-    if (mounted) _showScrollToBottom.value = !isLastItemFullyVisible;
+    _showScrollToBottom.value = !isLastItemFullyVisible;
     if (isLastItemFullyVisible) {
       _hasSeenLastMessage = true;
       _scrollToBottomBadge.value = 0;
     }
 
-    // Attempt a mark-read whenever either half of the FLU-640 gate could
-    // have just become satisfied; `_maybeMarkMessagesAsRead` does the actual
-    // deciding, and the leading-edge debounce inside it makes repeated
-    // attempts cheap.
+    // Attempt a mark-read whenever either half of the gate could have just
+    // become satisfied; `_maybeMarkMessagesAsRead` does the actual deciding.
     if ((isLastItemFullyVisible || justSeenFirstUnread) && widget.config.markReadWhenAtTheBottom) {
       _maybeMarkMessagesAsRead().ignore();
     }
@@ -1590,9 +1678,12 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     final visibleIndices = itemPositions.map((position) => position.index).toList();
     if (visibleIndices.isEmpty) return false;
 
-    // Smaller item indices are newer/closer to the bottom. If even the
-    // newest visible item is older than the anchor, the anchor has scrolled
-    // off the bottom of the viewport — the user scrolled past it.
+    // Smaller item indices are newer. That is a property of the
+    // index-to-message mapping (`messages[i - 2]`, newest first), not of the
+    // scroll direction, so it holds regardless of `config.reverse`. If even
+    // the newest visible item is older than the anchor, the anchor is no
+    // longer in view and the user has scrolled back past it into read
+    // history.
     final isScrolledPast = visibleIndices.reduce(min) > anchorItemIndex;
 
     if (_unreadFromManualMarkUnread) {
@@ -1630,10 +1721,13 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
   //     message just marked, with nothing yet scrolled) would undo the
   //     user's action instantly.
   //  5. Divider A's anchor has actually been seen or scrolled past
-  //     (`hasSeenFirstUnreadMessage`) — trivially satisfied when there's
-  //     nothing to see (the channel opened fully read) or for channels
-  //     using local unread counts, which have no server read state to
-  //     anchor against.
+  //     (`hasSeenFirstUnreadMessage`) — trivially satisfied when there is
+  //     no boundary to see in the first place: the channel opened fully
+  //     read, the user has never opened it at all (no `lastReadMessageId`,
+  //     so the anchor could only resolve once top pagination reached the
+  //     very start of the channel — effectively never for real history),
+  //     or the channel uses local unread counts and so has no server read
+  //     state to anchor against.
   Future<void> _maybeMarkMessagesAsRead() async {
     final channel = streamChannel?.channel;
     if (channel == null) return;
@@ -1653,13 +1747,17 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     final unreadCount = channel.state?.unreadCount ?? 0;
     if (unreadCount <= 0) return;
 
-    final noPreexistingUnread = _unreadBaselineCaptured && _unreadBaseline == null;
+    // True both when the channel opened fully read (no baseline) and when
+    // the user has never opened it (a baseline with no `lastReadMessageId`).
+    // Neither has a boundary the user could reach, so requiring one would
+    // leave the channel permanently unread — see condition 5 above.
+    final hasNoUnreadBoundary = _unreadBaselineCaptured && _unreadBaseline?.lastReadMessageId == null;
     // Equivalent to `channel.usesLocalUnreadCount`, spelled out via
     // `channel.client` rather than `Channel`'s private client field so it
     // stays evaluable against a test double that only implements the public
     // API surface.
     final usesLocalUnreadCount = channel.client.isLocalUnreadCountEnabled && !channel.canUseReadReceipts;
-    final hasSeenFirstUnreadMessage = noPreexistingUnread || _hasSeenFirstUnread.value || usesLocalUnreadCount;
+    final hasSeenFirstUnreadMessage = hasNoUnreadBoundary || _hasSeenFirstUnread.value || usesLocalUnreadCount;
     final isMarkedAsUnread = channel.state?.isMarkedAsUnread ?? false;
     final hasSeenLastMessage = _hasSeenLastMessage || !_showScrollToBottom.value;
 
@@ -1676,6 +1774,17 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       _checkMarkUnreadViewportDivergence(_itemPositionListener.itemPositions.value);
       if (!_markUnreadViewportDiverged) return;
     }
+
+    // Everything the gate above reads is in the key, so an attempt is only
+    // skipped when repeating it could not produce a different outcome.
+    final attempt = (
+      newestMessageId: messages.firstOrNull?.id,
+      unreadCount: unreadCount,
+      isMarkedAsUnread: isMarkedAsUnread,
+      viewportDiverged: _markUnreadViewportDiverged,
+    );
+    if (attempt == _lastMarkReadAttempt) return;
+    _lastMarkReadAttempt = attempt;
 
     await _debouncedMarkMessagesAsRead();
     _hasSeenLastMessage = false;

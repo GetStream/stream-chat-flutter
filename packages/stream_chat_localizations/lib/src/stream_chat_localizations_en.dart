@@ -492,13 +492,16 @@ class StreamChatLocalizationsEn extends GlobalStreamChatLocalizations {
   String get viewLibrary => 'View library';
 
   @override
-  // ignore: deprecated_member_use
   String unreadMessagesSeparatorText() => 'New messages';
 
   @override
   String unreadMessagesSeparatorLabel({required int count}) {
-    if (count == 1) return '1 unread message';
-    return '$count unread messages';
+    return Intl.plural(
+      count,
+      one: '$count unread message',
+      other: '$count unread messages',
+      locale: localeName,
+    );
   }
 
   @override

@@ -232,8 +232,18 @@ void main() {
       expect(localizations.enableFileAccessMessage, isNotNull);
       expect(localizations.allowFileAccessMessage, isNotNull);
       expect(localizations.unreadCountIndicatorLabel(unreadCount: 2), isNotNull);
-      expect(localizations.unreadMessagesSeparatorLabel(count: 1), isNotNull);
-      expect(localizations.unreadMessagesSeparatorLabel(count: 2), isNotNull);
+      // Deliberately not `isNotNull` — the return type is non-nullable, so
+      // that can never fail. Asserting the count is actually rendered is what
+      // catches a locale that forgot to override this and silently fell back
+      // to the count-less deprecated string.
+      expect(localizations.unreadMessagesSeparatorLabel(count: 0), contains('0'));
+      expect(localizations.unreadMessagesSeparatorLabel(count: 1), contains('1'));
+      expect(localizations.unreadMessagesSeparatorLabel(count: 2), contains('2'));
+      expect(
+        localizations.unreadMessagesSeparatorLabel(count: 2),
+        // ignore: deprecated_member_use
+        isNot(localizations.unreadMessagesSeparatorText()),
+      );
       expect(localizations.markUnreadError, isNotNull);
       expect(localizations.markAsUnreadLabel, isNotNull);
       // Create poll

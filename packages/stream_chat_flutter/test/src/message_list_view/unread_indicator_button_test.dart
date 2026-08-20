@@ -99,12 +99,15 @@ void main() {
         },
       );
 
-      expect(find.byType(StreamJumpToUnreadButton), findsOneWidget);
+      final pill = find.byType(StreamJumpToUnreadButton);
+      expect(pill, findsOneWidget);
 
-      final button = tester.widget<UnreadIndicatorButton>(find.byType(UnreadIndicatorButton));
-      await button.onJumpTap(
-        channelClientState.currentUserRead!.lastReadMessageId,
-      );
+      // Tapping the widget's own jump area, rather than calling `onJumpTap`
+      // directly: what has to keep working is the wiring from the leading
+      // section to the callback, including the argument the widget passes.
+      final label = tester.widget<StreamJumpToUnreadButton>(pill).props.label;
+      await tester.tap(find.text(label));
+      await tester.pumpAndSettle();
 
       expect(called, isTrue);
       expect(received, 'boundary-id');

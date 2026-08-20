@@ -11,14 +11,16 @@ import 'mocks.dart';
 
 Future<StreamChannelState> _pumpStreamChannel(
   WidgetTester tester,
-  Channel channel,
-) async {
+  Channel channel, {
+  bool openAtFirstUnread = true,
+}) async {
   StreamChannelState? channelState;
   await tester.pumpWidget(
     MaterialApp(
       home: Scaffold(
         body: StreamChannel(
           channel: channel,
+          openAtFirstUnread: openAtFirstUnread,
           child: Builder(
             builder: (context) {
               channelState = StreamChannel.of(context);
@@ -1089,6 +1091,71 @@ void main() {
 
         expect(captured.idAround, equals('last-read-msg'));
         expect(captured.createdAtAround, isNull);
+      },
+    );
+
+    testWidgets(
+      'does not position at the boundary when openAtFirstUnread is false',
+      (tester) async {
+        final read = Read(
+          user: User(id: 'testUserId'),
+          lastRead: DateTime.now(),
+          unreadMessages: 100,
+          lastReadMessageId: 'last-read-msg',
+        );
+        when(() => mockChannel.state.unreadCount).thenReturn(100);
+        when(() => mockChannel.state.currentUserRead).thenReturn(read);
+
+        await _pumpStreamChannel(tester, mockChannel, openAtFirstUnread: false);
+
+        // `isUpToDate` is true (setUp), so opting out of the unread anchor
+        // leaves nothing to query at all — the loaded window stays put at
+        // the latest page.
+        verifyNever(
+          () => mockChannel.query(
+            preferOffline: any(named: 'preferOffline'),
+            messagesPagination: any(named: 'messagesPagination'),
+          ),
+        );
+      },
+    );
+
+    testWidgets(
+      'openAtFirstUnread: false still honours an explicit initialMessageId',
+      (tester) async {
+        final read = Read(
+          user: User(id: 'testUserId'),
+          lastRead: DateTime.now(),
+          unreadMessages: 100,
+          lastReadMessageId: 'last-read-msg',
+        );
+        when(() => mockChannel.state.unreadCount).thenReturn(100);
+        when(() => mockChannel.state.currentUserRead).thenReturn(read);
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: StreamChannel(
+                channel: mockChannel,
+                openAtFirstUnread: false,
+                initialMessageId: 'jump-to-me',
+                child: const Text('Channel Content'),
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        final captured =
+            verify(
+                  () => mockChannel.query(
+                    preferOffline: any(named: 'preferOffline'),
+                    messagesPagination: captureAny(named: 'messagesPagination'),
+                  ),
+                ).captured.single
+                as PaginationParams;
+
+        expect(captured.idAround, equals('jump-to-me'));
       },
     );
 

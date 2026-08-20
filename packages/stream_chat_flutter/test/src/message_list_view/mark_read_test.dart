@@ -1,7 +1,7 @@
 // Tests for `StreamMessageListView`'s mark-read-at-the-bottom behavior.
 //
 // The logic lives in `_handleItemPositionsChanged` →
-// `_maybeMarkMessagesAsRead` (FLU-640). Marking the channel read requires all
+// `_maybeMarkMessagesAsRead`. Marking the channel read requires all
 // of:
 //
 //   1. `markReadWhenAtTheBottom` is true (the default).
@@ -27,6 +27,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import '../../test_utils/data_generator.dart';
@@ -99,7 +100,7 @@ void main() {
     ).thenAnswer((_) async => QueryRepliesResponse()..messages = []);
   });
 
-  // Default: opened with nothing pre-existing unread, so the FLU-640
+  // Default: opened with nothing pre-existing unread, so the
   // "has seen the first unread boundary" condition is trivially satisfied
   // and doesn't gate these tests unless a `currentUserRead` override says
   // otherwise.
@@ -187,6 +188,33 @@ void main() {
     );
 
     testWidgets(
+      'fires on a channel the user has never opened, whose boundary can '
+      'never resolve',
+      (tester) async {
+        // No `lastReadMessageId` at all, and top pagination hasn't reached
+        // the start of the channel, so the unread anchor can never resolve.
+        // Requiring the boundary to have been seen would leave a channel
+        // like this permanently unread.
+        final other = User(id: 'otherid');
+        final messages = generateConversation(20, users: [other]).reversed.toList();
+
+        await pumpMessageList(
+          tester,
+          messages: messages,
+          isUpToDate: true,
+          unreadCount: 5,
+          currentUserRead: Read(
+            user: ownUser,
+            lastRead: DateTime.now().subtract(const Duration(days: 1)),
+            unreadMessages: 5,
+          ),
+        );
+
+        verify(() => channel.markRead(messageId: any(named: 'messageId'))).called(1);
+      },
+    );
+
+    testWidgets(
       'does NOT fire when isUpToDate=false (gate on incomplete state)',
       (tester) async {
         final other = User(id: 'otherid');
@@ -246,7 +274,7 @@ void main() {
 
     testWidgets(
       'does NOT fire when opened at the bottom with an unseen pre-existing '
-      'unread boundary (FLU-640)',
+      'unread boundary',
       (tester) async {
         final other = User(id: 'otherid');
         final messages = generateConversation(20, users: [other]).reversed.toList();
@@ -511,6 +539,43 @@ void main() {
     );
 
     testWidgets(
+      'retires once the user scrolls back to the unread boundary',
+      (tester) async {
+        final other = User(id: 'otherid');
+        final messages = generateConversation(20, users: [other]).reversed.toList();
+
+        await pumpMessageList(
+          tester,
+          messages: messages,
+          isUpToDate: true,
+          unreadCount: 5,
+          markReadWhenAtTheBottom: false,
+          currentUserRead: Read(
+            user: ownUser,
+            lastRead: DateTime.now(),
+            unreadMessages: 5,
+            lastReadMessageId: messages[10].id,
+          ),
+        );
+
+        expect(find.byType(UnreadIndicatorButton), findsOneWidget);
+
+        // Scrolling back until the boundary is on screen is what the pill
+        // exists to prompt, so reaching it retires the pill for good.
+        await tester.drag(find.byType(StreamMessageListView), const Offset(0, 1500));
+        await tester.pumpAndSettle();
+
+        expect(find.byType(UnreadIndicatorButton), findsNothing);
+
+        // Sticky: returning to the bottom does not bring it back.
+        await tester.drag(find.byType(StreamMessageListView), const Offset(0, -3000));
+        await tester.pumpAndSettle();
+
+        expect(find.byType(UnreadIndicatorButton), findsNothing);
+      },
+    );
+
+    testWidgets(
       'absent when the channel opened with nothing pre-existing unread',
       (tester) async {
         final other = User(id: 'otherid');
@@ -614,7 +679,7 @@ void main() {
     // moved-back boundary. Its anchor is the message the user was looking at,
     // so it starts out on screen — which used to retire the pill on the very
     // next layout tick.
-    Future<List<Message>> pumpMarkedUnread(
+    Future<({List<Message> messages, Read markedRead})> pumpMarkedUnread(
       WidgetTester tester, {
       required User other,
     }) async {
@@ -646,7 +711,7 @@ void main() {
         await tester.pumpAndSettle();
       });
 
-      return messages;
+      return (messages: messages, markedRead: markedRead);
     }
 
     testWidgets(
@@ -670,7 +735,7 @@ void main() {
       'stays dismissed when further messages arrive after being dismissed',
       (tester) async {
         final other = User(id: 'otherid');
-        final messages = await pumpMarkedUnread(tester, other: other);
+        final (:messages, :markedRead) = await pumpMarkedUnread(tester, other: other);
 
         expect(find.byType(UnreadIndicatorButton), findsOneWidget);
 
@@ -693,12 +758,12 @@ void main() {
         );
         final updated = [...messages, arrival];
         when(() => channelClientState.messages).thenReturn(updated);
-        final laterRead = Read(
-          user: ownUser,
-          lastRead: DateTime.now(),
-          unreadMessages: 4,
-          lastReadMessageId: messages[messages.length - 2].id,
-        );
+        // Only the count moves. An arrival never shifts the read boundary
+        // itself — `ChannelClientState.unreadCount` copies the existing
+        // `Read` with a new `unreadMessages` and nothing else — and the
+        // distinction matters, since a boundary that *did* move is how a
+        // second mark-unread is recognised.
+        final laterRead = markedRead.copyWith(unreadMessages: 4);
         when(() => channelClientState.currentUserRead).thenReturn(laterRead);
 
         await tester.runAsync(() async {
@@ -721,6 +786,101 @@ void main() {
         });
 
         expect(find.byType(UnreadIndicatorButton), findsNothing);
+      },
+    );
+
+    testWidgets(
+      'a second mark-unread further back re-anchors the pill',
+      (tester) async {
+        final other = User(id: 'otherid');
+        final (:messages, :markedRead) = await pumpMarkedUnread(tester, other: other);
+
+        UnreadIndicatorButton pill() => tester.widget<UnreadIndicatorButton>(
+          find.byType(UnreadIndicatorButton),
+        );
+
+        expect(pill().unreadCount, 3);
+
+        // Marking an older message unread while the first mark-unread is
+        // still active. `isMarkedAsUnread` never returned to false in
+        // between — only a mark-read clears it — so the flag on its own says
+        // nothing has happened. The read boundary moving back is the signal.
+        final secondMarkedRead = Read(
+          user: ownUser,
+          lastRead: markedRead.lastRead.subtract(const Duration(minutes: 5)),
+          unreadMessages: 6,
+          lastReadMessageId: messages[messages.length - 5].id,
+        );
+        when(() => channelClientState.unreadCount).thenReturn(6);
+        when(() => channelClientState.currentUserRead).thenReturn(secondMarkedRead);
+
+        await tester.runAsync(() async {
+          unreadCountController.add(6);
+          currentUserReadController.add(secondMarkedRead);
+          await tester.pumpAndSettle();
+        });
+
+        expect(pill().unreadCount, 6);
+      },
+    );
+  });
+
+  group('mounting with a mark-unread already active', () {
+    testWidgets(
+      'does not mark read until the viewport actually moves',
+      (tester) async {
+        // Channels tracking unread locally are exempt from the "boundary
+        // seen" gate, so the mark-unread viewport guard is all that stands
+        // between reopening the channel and silently undoing the
+        // mark-unread. The guard used to snapshot the viewport before the
+        // first layout, so the first laid-out frame already looked like the
+        // user had moved.
+        when(() => client.isLocalUnreadCountEnabled).thenReturn(true);
+        when(() => channelClientState.isMarkedAsUnread).thenReturn(true);
+
+        final other = User(id: 'otherid');
+        final messages = generateConversation(40, users: [other]).reversed.toList();
+        final markedRead = Read(
+          user: ownUser,
+          lastRead: DateTime.now(),
+          unreadMessages: 3,
+          lastReadMessageId: messages[messages.length - 2].id,
+        );
+
+        // A seeded subject, like production's: subscribing replays the
+        // current value straight away, so the listener runs before the first
+        // frame reports any item positions. A plain broadcast controller
+        // can't reproduce that ordering, and this bug lives in it.
+        final seededReads = BehaviorSubject<Read?>.seeded(markedRead);
+        addTearDown(seededReads.close);
+        when(() => channelClientState.currentUserReadStream).thenAnswer((_) => seededReads.stream);
+
+        // Mounted before the messages land, as on a cold open: the read
+        // replay above therefore arrives while nothing is laid out yet and
+        // there is no viewport to snapshot.
+        await pumpMessageList(
+          tester,
+          messages: const [],
+          isUpToDate: true,
+          unreadCount: 3,
+          currentUserRead: markedRead,
+        );
+
+        when(() => channelClientState.messages).thenReturn(messages);
+        await tester.runAsync(() async {
+          messagesController.add(messages);
+          await tester.pumpAndSettle();
+        });
+
+        verifyNever(() => channel.markRead(messageId: any(named: 'messageId')));
+
+        // Scrolling away and back is what earns the mark-read.
+        await tester.drag(find.byType(StreamMessageListView), const Offset(0, 300));
+        await tester.pumpAndSettle();
+        await tester.drag(find.byType(StreamMessageListView), const Offset(0, -1000));
+        await tester.pumpAndSettle();
+
+        verify(() => channel.markRead(messageId: any(named: 'messageId'))).called(1);
       },
     );
   });

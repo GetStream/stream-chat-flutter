@@ -1,5 +1,5 @@
 // Tests for the unread-messages divider, the jump-to-unread pill, and the
-// scroll-to-bottom badge (FLU-649 / FLU-650).
+// scroll-to-bottom badge.
 //
 //  - The unread divider ("{n} unread messages"): anchored to the
 //    pre-existing unread boundary captured when the channel opens. The
@@ -195,6 +195,25 @@ void main() {
         );
 
         expect(find.textContaining('unread message'), findsNothing);
+
+        // Messages arriving while the channel is open must not introduce a
+        // separator of their own: there is exactly one divider, anchored at
+        // the boundary the channel opened with — and here there wasn't one.
+        await tester.drag(find.byType(StreamMessageListView), const Offset(0, 400));
+        await tester.pumpAndSettle();
+
+        await deliverMessageNew(
+          tester,
+          newMessage: Message(
+            id: 'arrived-while-open',
+            text: 'Arrived while open',
+            user: other,
+            createdAt: DateTime.now(),
+          ),
+          existing: messages,
+        );
+
+        expect(find.textContaining('unread message'), findsNothing);
       },
     );
 
@@ -296,6 +315,72 @@ void main() {
     return tester.widget<StreamBadgeNotification>(finder).props.label;
   }
 
+  group('openAtFirstUnread', () {
+    // Deterministic texts (rather than the faker-generated ones elsewhere in
+    // this file) so "which message is on screen" is a stable assertion.
+    List<Message> buildMessages(User author) => [
+      for (var i = 0; i < 40; i++)
+        Message(
+          id: 'm$i',
+          text: 'message-$i',
+          user: author,
+          createdAt: DateTime.utc(2026).add(Duration(minutes: i)),
+        ),
+    ];
+
+    testWidgets('opens positioned at the first unread message by default', (tester) async {
+      final other = User(id: 'otherid');
+      final messages = buildMessages(other);
+
+      // Opening at the boundary re-queries the channel around it; the
+      // mocked state keeps returning the same window.
+      when(
+        () => channel.query(
+          preferOffline: any(named: 'preferOffline'),
+          messagesPagination: any(named: 'messagesPagination'),
+        ),
+      ).thenAnswer((_) async => const ChannelState());
+
+      await pumpMessageList(
+        tester,
+        messages: messages,
+        unreadCount: 34,
+        openAtFirstUnread: true,
+        currentUserRead: Read(
+          user: ownUser,
+          lastRead: DateTime.utc(2026, 1, 1, 0, 5),
+          unreadMessages: 34,
+          lastReadMessageId: 'm5',
+        ),
+      );
+
+      // The first unread message is on screen; the newest one is not.
+      expect(find.text('message-6'), findsOneWidget);
+      expect(find.text('message-39'), findsNothing);
+    });
+
+    testWidgets('opens at the latest message when set to false', (tester) async {
+      final other = User(id: 'otherid');
+      final messages = buildMessages(other);
+
+      await pumpMessageList(
+        tester,
+        messages: messages,
+        unreadCount: 34,
+        openAtFirstUnread: false,
+        currentUserRead: Read(
+          user: ownUser,
+          lastRead: DateTime.utc(2026, 1, 1, 0, 5),
+          unreadMessages: 34,
+          lastReadMessageId: 'm5',
+        ),
+      );
+
+      expect(find.text('message-39'), findsOneWidget);
+      expect(find.text('message-6'), findsNothing);
+    });
+  });
+
   group('unread counting filters', () {
     // Messages the channel's own unread count ignores must not inflate the
     // badge or the divider either. Each case scrolls away from the bottom
@@ -395,6 +480,58 @@ void main() {
           createdAt: DateTime.now(),
         ),
       );
+    });
+
+    testWidgets('messages restricted to other users do not count', (tester) async {
+      await expectNotCounted(
+        tester,
+        build: (other) => Message(
+          id: 'restricted-message',
+          text: 'Not for you',
+          user: other,
+          restrictedVisibility: const ['someoneelse'],
+          createdAt: DateTime.now(),
+        ),
+      );
+    });
+
+    testWidgets('nothing counts while the user has read receipts disabled', (tester) async {
+      // No control arrival here, deliberately: this filter is user-level, so
+      // with it on nothing counts at all. The control is every other test in
+      // this group — they use the same delivery path with receipts enabled
+      // (the default) and do bump the badge.
+      final other = User(id: 'otherid');
+      final messages = generateConversation(40, users: [other]).reversed.toList();
+
+      when(() => clientState.currentUser).thenReturn(
+        OwnUser(
+          id: 'ownid',
+          privacySettings: const PrivacySettings(readReceipts: ReadReceipts(enabled: false)),
+        ),
+      );
+
+      await pumpMessageList(
+        tester,
+        messages: messages,
+        unreadCount: 0,
+        currentUserRead: Read(user: ownUser, lastRead: DateTime.now(), unreadMessages: 0),
+      );
+
+      await tester.drag(find.byType(StreamMessageListView), const Offset(0, 400));
+      await tester.pumpAndSettle();
+
+      await deliverMessageNew(
+        tester,
+        newMessage: Message(
+          id: 'ordinary-arrival',
+          text: 'Ordinary arrival',
+          user: other,
+          createdAt: DateTime.now(),
+        ),
+        existing: messages,
+      );
+
+      expect(badgeLabel(tester), isNull);
     });
 
     testWidgets('messages from a muted user do not count', (tester) async {
@@ -543,6 +680,22 @@ void main() {
         await deliverMessageNew(tester, newMessage: ownMessage, existing: messages);
 
         expect(badgeLabel(tester), isNull);
+
+        // Control: the same delivery path with someone else's message does
+        // bump the badge, so the assertion above isn't just measuring an
+        // inert pipeline.
+        await deliverMessageNew(
+          tester,
+          newMessage: Message(
+            id: 'control-from-other',
+            text: 'Ordinary arrival',
+            user: other,
+            createdAt: DateTime.now(),
+          ),
+          existing: [...messages, ownMessage],
+        );
+
+        expect(badgeLabel(tester), '1');
       },
     );
 

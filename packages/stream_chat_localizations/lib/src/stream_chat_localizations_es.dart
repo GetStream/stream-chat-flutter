@@ -496,13 +496,16 @@ No es posible añadir más de $limit archivos adjuntos
   String get linkDisabledError => 'Los enlaces están deshabilitados';
 
   @override
-  // ignore: deprecated_member_use
   String unreadMessagesSeparatorText() => 'Nuevos mensajes';
 
   @override
   String unreadMessagesSeparatorLabel({required int count}) {
-    if (count == 1) return '1 mensaje no leído';
-    return '$count mensajes no leídos';
+    return Intl.plural(
+      count,
+      one: '$count mensaje sin leer',
+      other: '$count mensajes sin leer',
+      locale: localeName,
+    );
   }
 
   @override

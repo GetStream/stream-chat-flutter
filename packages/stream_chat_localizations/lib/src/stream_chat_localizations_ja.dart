@@ -482,12 +482,16 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   String get linkDisabledError => 'リンクが無効になっています';
 
   @override
-  // ignore: deprecated_member_use
   String unreadMessagesSeparatorText() => '新しいメッセージ。';
 
   @override
   String unreadMessagesSeparatorLabel({required int count}) {
-    return '未読メッセージ $count 件';
+    return Intl.plural(
+      count,
+      one: '$count件の未読メッセージ',
+      other: '$count件の未読メッセージ',
+      locale: localeName,
+    );
   }
 
   @override
