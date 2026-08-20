@@ -358,6 +358,14 @@ void main() {
       expect(localizations.viewLabel, isNotNull);
       expect(localizations.reminderSetLabel, isNotNull);
       expect(localizations.reminderAtText('3:00 PM'), isNotNull);
+      expect(localizations.translatedLabel, isNotNull);
+      expect(localizations.originalLabel, isNotNull);
+      expect(localizations.showOriginalLabel, isNotNull);
+      expect(localizations.showTranslationLabel, isNotNull);
+      // known language code
+      expect(localizations.translatedFromLanguageText('es'), isNotNull);
+      // unknown language code, falls back to the uppercased code itself
+      expect(localizations.translatedFromLanguageText('xx'), contains('XX'));
       expect(localizations.createPollPromptLabel, isNotNull);
       expect(localizations.takePhotoAndShareLabel, isNotNull);
       expect(localizations.takeVideoAndShareLabel, isNotNull);

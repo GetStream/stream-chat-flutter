@@ -230,4 +230,33 @@ void main() {
       expect(builds, 2);
     });
   });
+
+  group('StreamMessageTranslationConfiguration', () {
+    test('translates messages without annotating them by default', () {
+      const config = StreamMessageTranslationConfiguration();
+
+      expect(config.enabled, isTrue);
+      expect(config.annotationEnabled, isFalse);
+    });
+
+    test('copyWith replaces only the given fields', () {
+      const config = StreamMessageTranslationConfiguration();
+
+      final annotated = config.copyWith(annotationEnabled: true);
+      expect(annotated.enabled, isTrue);
+      expect(annotated.annotationEnabled, isTrue);
+
+      final disabled = annotated.copyWith(enabled: false);
+      expect(disabled.enabled, isFalse);
+      expect(disabled.annotationEnabled, isTrue);
+    });
+
+    test('copyWith without arguments keeps every field', () {
+      const config = StreamMessageTranslationConfiguration(enabled: false, annotationEnabled: true);
+
+      final copy = config.copyWith();
+      expect(copy.enabled, isFalse);
+      expect(copy.annotationEnabled, isTrue);
+    });
+  });
 }
