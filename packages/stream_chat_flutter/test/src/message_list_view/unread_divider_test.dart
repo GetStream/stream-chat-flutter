@@ -5,8 +5,8 @@
 //    pre-existing unread boundary captured when the channel opens. The
 //    anchor is frozen — it stays on screen for the whole session regardless
 //    of scrolling or reads — but its displayed count keeps counting up as
-//    further messages arrive out of view during the session, mirroring
-//    WhatsApp, rather than staying frozen at the open-time count.
+//    further messages arrive out of view during the session, rather than
+//    staying frozen at the open-time count.
 //  - The pill shows the count of unread messages captured when the channel
 //    was opened — this one *does* stay frozen — and is gated on that
 //    boundary being above the viewport.
