@@ -183,9 +183,24 @@ class StreamChatState extends State<StreamChat> {
   /// Gets configuration options from widget
   StreamChatConfigurationData get configData => widget.configData ?? StreamChatConfigurationData();
 
+  /// Tracks which messages the user has switched back to their original text.
+  ///
+  /// Owned here so the toggle is shared by every message list in the app — a
+  /// channel and its open thread render the same parent message, and both
+  /// should agree on which text it shows. Matches the Swift and Android SDKs,
+  /// which key this state by message id above the individual list.
+  late final StreamMessageTranslationStore _translationStore;
+
   @override
   void initState() {
     super.initState();
+    _translationStore = StreamMessageTranslationStore();
+  }
+
+  @override
+  void dispose() {
+    _translationStore.dispose();
+    super.dispose();
   }
 
   @override
@@ -201,6 +216,8 @@ class StreamChatState extends State<StreamChat> {
         child: StreamSnackbarScope(child: widget.child ?? const Empty()),
       ),
     );
+
+    child = StreamMessageTranslations(store: _translationStore, child: child);
 
     final theme = widget.themeData ?? StreamChatThemeData();
     child = StreamChatTheme(data: theme, child: child);

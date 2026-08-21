@@ -466,8 +466,8 @@ class DefaultStreamMessageItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final message = props.message;
 
-    final translationStore = StreamMessageTranslations.maybeOf(context);
-    final showsOriginalText = translationStore?.isShowingOriginalText(message.id) ?? false;
+    final translationStore = StreamMessageTranslations.of(context);
+    final showsOriginalText = translationStore.isShowingOriginalText(message.id);
 
     final placement = StreamMessageLayout.of(context);
     final theme = core.StreamMessageItemTheme.of(context);
@@ -508,10 +508,7 @@ class DefaultStreamMessageItem extends StatelessWidget {
           _ => () => _onViewThread(context, message),
         },
         showTranslatedText: !showsOriginalText,
-        onToggleTranslatedText: switch (translationStore) {
-          final store? => () => store.toggleOriginalText(message.id),
-          null => null,
-        },
+        onToggleTranslatedText: () => translationStore.toggleOriginalText(message.id),
       ),
     );
 
@@ -871,20 +868,12 @@ class DefaultStreamMessageItem extends StatelessWidget {
       leadingInset = effectiveAvatarSize.value + effectiveSpacing;
     }
 
-    // Captured before the dialog opens, since the modal's overlay sits
-    // outside the StreamMessageListView subtree that provides this scope.
-    final translationStore = StreamMessageTranslations.maybeOf(context);
-
-    final messageItem = StreamMessageItem(
+    final messageWidget = StreamMessageItem(
       key: const Key('MessageItem'),
       message: message.trimmed,
       padding: EdgeInsets.zero,
       backgroundColor: core.StreamColors.transparent,
     );
-    final messageWidget = switch (translationStore) {
-      final store? => StreamMessageTranslations(store: store, child: messageItem),
-      null => messageItem,
-    };
 
     final action = await showStreamDialog(
       context: context,

@@ -312,11 +312,6 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
   late final ItemPositionsListener _itemPositionListener;
   StreamChannelState? streamChannel;
 
-  // Owned per list instance, so a channel view and an open thread (a
-  // separate `StreamMessageListView`) each get independent translation
-  // toggle state. See [StreamMessageTranslationStore].
-  final _translationStore = StreamMessageTranslationStore();
-
   // Drives the unread-messages separator. Held in a [ValueNotifier] so read
   // events can update it without rebuilding the entire list view.
   final _unreadState = ValueNotifier<({int count, String? firstUnreadId})>((count: 0, firstUnreadId: null));
@@ -484,7 +479,6 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     debouncedMarkThreadRead.cancel();
     _unreadState.dispose();
     _highlightState.dispose();
-    _translationStore.dispose();
     super.dispose();
   }
 
@@ -622,24 +616,21 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     // TODO: Revisit this nested Portal setup during desktop reactions refactor
     // and remove the extra layer if a dedicated message-list portal label is
     // no longer required.
-    return StreamMessageTranslations(
-      store: _translationStore,
+    return Portal(
+      labels: const [kPortalMessageListViewLabel],
       child: Portal(
-        labels: const [kPortalMessageListViewLabel],
-        child: Portal(
-          child: ScaffoldMessenger(
-            child: MessageListCore(
-              paginationLimit: _config.paginationLimit,
-              maximumMessageLimit: _config.maximumMessageLimit,
-              retentionTrimBuffer: _config.retentionTrimBuffer,
-              messageFilter: widget.messageFilter,
-              loadingBuilder: defaultLoadingBuilder,
-              emptyBuilder: defaultEmptyBuilder,
-              messageListBuilder: defaultMessageListBuilder,
-              messageListController: _messageListController,
-              parentMessage: widget.parentMessage,
-              errorBuilder: defaultErrorBuilder,
-            ),
+        child: ScaffoldMessenger(
+          child: MessageListCore(
+            paginationLimit: _config.paginationLimit,
+            maximumMessageLimit: _config.maximumMessageLimit,
+            retentionTrimBuffer: _config.retentionTrimBuffer,
+            messageFilter: widget.messageFilter,
+            loadingBuilder: defaultLoadingBuilder,
+            emptyBuilder: defaultEmptyBuilder,
+            messageListBuilder: defaultMessageListBuilder,
+            messageListController: _messageListController,
+            parentMessage: widget.parentMessage,
+            errorBuilder: defaultErrorBuilder,
           ),
         ),
       ),

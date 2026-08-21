@@ -1,6 +1,9 @@
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+
+import '../mocks.dart';
 
 void main() {
   group('StreamMessageTranslationState', () {
@@ -105,6 +108,25 @@ void main() {
 
       expect(notifications, 0);
     });
+
+    test('clear switches every message back to its translation', () {
+      store
+        ..toggleOriginalText('message-1')
+        ..toggleOriginalText('message-2')
+        ..clear();
+
+      expect(store.isShowingOriginalText('message-1'), isFalse);
+      expect(store.isShowingOriginalText('message-2'), isFalse);
+    });
+
+    test('clear does not notify listeners when nothing is toggled', () {
+      var notifications = 0;
+      store
+        ..addListener(() => notifications++)
+        ..clear();
+
+      expect(notifications, 0);
+    });
   });
 
   group('StreamMessageTranslations', () {
@@ -166,7 +188,7 @@ void main() {
       );
     });
 
-    testWidgets('a nested scope shadows the outer store, the way an open thread does', (tester) async {
+    testWidgets('a nested scope shadows the outer store, isolating that subtree', (tester) async {
       final threadStore = StreamMessageTranslationStore();
       addTearDown(threadStore.dispose);
 
@@ -189,7 +211,7 @@ void main() {
 
       expect(found, same(threadStore));
 
-      // Toggling in the thread leaves the channel list's own state alone.
+      // Toggling inside the nested scope leaves the outer store alone.
       threadStore.toggleOriginalText('message-1');
 
       expect(store.isShowingOriginalText('message-1'), isFalse);
@@ -229,6 +251,38 @@ void main() {
       await tester.pumpWidget(buildScope(itemIsInRenderWindow: true));
 
       expect(showsOriginalText, isTrue);
+    });
+
+    testWidgets('StreamChat provides a store, so no explicit scope is needed', (tester) async {
+      final client = MockClient();
+      final clientState = MockClientState();
+      when(() => client.state).thenReturn(clientState);
+      when(() => clientState.currentUser).thenReturn(OwnUser(id: 'current-user'));
+
+      StreamMessageTranslationStore? found;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: StreamChat(
+            client: client,
+            connectivityStream: Stream.value(const [ConnectivityResult.mobile]),
+            child: Builder(
+              builder: (context) {
+                found = StreamMessageTranslations.of(context);
+                return const SizedBox.shrink();
+              },
+            ),
+          ),
+        ),
+      );
+
+      expect(found, isNotNull);
+      expect(tester.takeException(), isNull);
+
+      // The same store is handed to every subtree under StreamChat, which is
+      // what lets a channel list and its open thread agree on a toggle.
+      found!.toggleOriginalText('message-1');
+      expect(found!.isShowingOriginalText('message-1'), isTrue);
     });
 
     testWidgets('rebuilds its descendants when a message is toggled', (tester) async {

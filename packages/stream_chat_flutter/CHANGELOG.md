@@ -42,7 +42,7 @@
 - Added an `unreadIndicator` parameter to `StreamBackButton` that overlays a widget (typically a `StreamUnreadIndicator`) on the button's top-end corner. Pass `StreamUnreadIndicator(excludeCid: cid)` to show the total unread count of other channels, or `StreamUnreadIndicator.channels(cid: cid)` for a single channel's count.
 - Exported this package's `StreamMessageContent`, which was previously unreachable from `package:stream_chat_flutter/stream_chat_flutter.dart`.
 - Added `StreamChatConfigurationData.messageTranslation`, a `StreamMessageTranslationConfiguration` with `enabled` (default `true`) to display translations from `Message.i18n` and `annotationEnabled` (default `false`) to opt into a "Translated"/"Original" annotation with a toggle link.
-- Added `StreamMessageTranslationStore`, tracking the annotation's toggle state per `StreamMessageListView`. Also drivable via `showTranslatedText` on `StreamMessageHeaderProps`, `StreamMessageContent`, and `StreamMessageText`, and `onToggleTranslatedText` on `StreamMessageHeaderProps`.
+- Added `StreamMessageTranslationStore`, tracking the annotation's toggle state by message id. `StreamChat` owns one and provides it through a `StreamMessageTranslations` scope, so a channel list and its open thread agree on which text a message shows; nest another `StreamMessageTranslations` to isolate a subtree, and call `clear()` to switch everything back to its translation. Also drivable via `showTranslatedText` on `StreamMessageHeaderProps`, `StreamMessageContent`, and `StreamMessageText`, and `onToggleTranslatedText` on `StreamMessageHeaderProps`.
 
 ⚠️ Deprecated
 

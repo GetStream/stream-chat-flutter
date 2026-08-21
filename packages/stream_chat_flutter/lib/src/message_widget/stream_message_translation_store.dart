@@ -50,17 +50,22 @@ class StreamMessageTranslationState {
   int get hashCode => const SetEquality<String>().hash(messagesShowingOriginalText);
 }
 
-/// Tracks, for messages within a single message list, which ones the user
-/// has switched back to their original text.
+/// Tracks which messages the user has switched back to their original text.
 ///
-/// Mirrors `MessageOriginalTranslationsStore` in the Swift SDK.
+/// Mirrors `MessageOriginalTranslationsStore` in the Swift and Android SDKs,
+/// which likewise key this state by message id above the individual list.
 ///
-/// One store is owned per [StreamMessageListView] instance — a channel view
-/// and an open thread each get independent toggle state, since opening a
-/// thread creates its own [StreamMessageListView]. The store, rather than
-/// the individual message widget, is what makes the toggle survive message
-/// items being disposed and recreated as they scroll out of and back into
-/// the list's render window.
+/// [StreamChat] owns one store for the whole app and provides it through a
+/// [StreamMessageTranslations] scope, so every message list shares it. That
+/// matters because the same message can render in more than one list at
+/// once — a thread's parent message also appears in the channel list — and
+/// both should agree on which text it shows. Holding the state here rather
+/// than on the message widget is also what makes a toggle survive message
+/// items being disposed and recreated as they scroll out of and back into a
+/// list's render window.
+///
+/// Nest another [StreamMessageTranslations] to give a subtree its own
+/// isolated toggle state.
 class StreamMessageTranslationStore extends ValueNotifier<StreamMessageTranslationState> {
   /// Creates a store in which every message shows its translation.
   StreamMessageTranslationStore() : super(const StreamMessageTranslationState._());
@@ -82,6 +87,15 @@ class StreamMessageTranslationStore extends ValueNotifier<StreamMessageTranslati
         },
       ),
     );
+  }
+
+  /// Switches every message back to showing its translation.
+  ///
+  /// Useful when the state should not outlive a session — for example after
+  /// the connected user changes.
+  void clear() {
+    if (value.messagesShowingOriginalText.isEmpty) return;
+    value = value._copyWith(messagesShowingOriginalText: const {});
   }
 }
 
