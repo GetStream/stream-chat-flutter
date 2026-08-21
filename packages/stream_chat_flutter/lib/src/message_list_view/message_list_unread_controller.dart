@@ -534,6 +534,13 @@ class MessageListUnreadController {
   // isn't about how the channel is configured but about the user opting out
   // of unread tracking entirely, and honouring it here is what keeps these
   // indicators from counting up while the channel itself reports zero.
+  //
+  // Silent messages are excluded even though — unlike shadowed ones — they
+  // are rendered in the list: not bumping the unread count is the definition
+  // of the flag rather than a side effect of hiding the message. It is also
+  // what [MessageRules.canCountAsUnread] and the channel's own unread count
+  // already do, so counting them here would make the divider disagree with
+  // `channel.state.unreadCount` in the same view.
   bool _countsTowardsUnreadIndicators(Message message, OwnUser? currentUser) {
     if (currentUser == null) return false;
     if (!currentUser.isReadReceiptsEnabled) return false;
