@@ -99,8 +99,54 @@ class StreamMessageTranslations extends InheritedNotifier<StreamMessageTranslati
   }) : super(notifier: store);
 
   /// Returns the [StreamMessageTranslationStore] from the nearest ancestor
-  /// [StreamMessageTranslations], or `null` if there isn't one.
-  static StreamMessageTranslationStore? of(BuildContext context) {
+  /// [StreamMessageTranslations] that encloses the given [context].
+  ///
+  /// This will throw a [FlutterError] if no [StreamMessageTranslations] is
+  /// found in the widget tree above the given context.
+  ///
+  /// Typical usage:
+  ///
+  /// ```dart
+  /// final store = StreamMessageTranslations.of(context);
+  /// ```
+  ///
+  /// If you want to return null instead of throwing, use [maybeOf].
+  static StreamMessageTranslationStore of(BuildContext context) {
+    final result = maybeOf(context);
+    if (result != null) return result;
+
+    throw FlutterError.fromParts(<DiagnosticsNode>[
+      ErrorSummary(
+        'StreamMessageTranslations.of() called with a context that does not '
+        'contain a StreamMessageTranslations.',
+      ),
+      ErrorDescription(
+        'No StreamMessageTranslations ancestor could be found starting from '
+        'the context that was passed to StreamMessageTranslations.of(). '
+        'StreamMessageListView provides one for the messages it hosts, so '
+        'this usually happens when a message widget is built outside of a '
+        'message list.',
+      ),
+      ErrorHint(
+        'To fix this, wrap the subtree in a StreamMessageTranslations with a '
+        'store you own:\n\n'
+        '  StreamMessageTranslations(\n'
+        '    store: _translationStore,\n'
+        '    child: StreamMessageItem(message: message),\n'
+        '  )',
+      ),
+      context.describeElement('The context used was'),
+    ]);
+  }
+
+  /// Returns the [StreamMessageTranslationStore] from the nearest ancestor
+  /// [StreamMessageTranslations] that encloses the given context.
+  ///
+  /// Returns null if no such ancestor exists.
+  ///
+  /// See also:
+  ///  * [of], which throws if no [StreamMessageTranslations] is found.
+  static StreamMessageTranslationStore? maybeOf(BuildContext context) {
     final widget = context.dependOnInheritedWidgetOfExactType<StreamMessageTranslations>();
     return widget?.notifier;
   }

@@ -466,7 +466,7 @@ class DefaultStreamMessageItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final message = props.message;
 
-    final translationStore = StreamMessageTranslations.of(context);
+    final translationStore = StreamMessageTranslations.maybeOf(context);
     final showsOriginalText = translationStore?.isShowingOriginalText(message.id) ?? false;
 
     final placement = StreamMessageLayout.of(context);
@@ -873,7 +873,7 @@ class DefaultStreamMessageItem extends StatelessWidget {
 
     // Captured before the dialog opens, since the modal's overlay sits
     // outside the StreamMessageListView subtree that provides this scope.
-    final translationStore = StreamMessageTranslations.of(context);
+    final translationStore = StreamMessageTranslations.maybeOf(context);
 
     final messageItem = StreamMessageItem(
       key: const Key('MessageItem'),

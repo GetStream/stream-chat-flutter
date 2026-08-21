@@ -131,19 +131,39 @@ void main() {
       expect(found, same(store));
     });
 
-    testWidgets('returns null without an ancestor scope', (tester) async {
+    testWidgets('maybeOf returns null without an ancestor scope', (tester) async {
       StreamMessageTranslationStore? found;
 
       await tester.pumpWidget(
         Builder(
           builder: (context) {
-            found = StreamMessageTranslations.of(context);
+            found = StreamMessageTranslations.maybeOf(context);
             return const SizedBox.shrink();
           },
         ),
       );
 
       expect(found, isNull);
+    });
+
+    testWidgets('of throws without an ancestor scope', (tester) async {
+      await tester.pumpWidget(
+        Builder(
+          builder: (context) {
+            StreamMessageTranslations.of(context);
+            return const SizedBox.shrink();
+          },
+        ),
+      );
+
+      expect(
+        tester.takeException(),
+        isA<FlutterError>().having(
+          (it) => it.message,
+          'message',
+          contains('StreamMessageTranslations.of() called with a context that does not contain'),
+        ),
+      );
     });
 
     testWidgets('a nested scope shadows the outer store, the way an open thread does', (tester) async {
@@ -185,7 +205,7 @@ void main() {
             false => const SizedBox.shrink(),
             true => Builder(
               builder: (context) {
-                final store = StreamMessageTranslations.of(context)!;
+                final store = StreamMessageTranslations.of(context);
                 showsOriginalText = store.isShowingOriginalText('message-1');
                 return const SizedBox.shrink();
               },
