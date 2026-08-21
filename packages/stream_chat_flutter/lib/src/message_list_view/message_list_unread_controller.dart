@@ -220,17 +220,37 @@ class MessageListUnreadController {
 
   // Debounced channel mark-read.
   late final _debouncedMarkRead = debounce(
-    ([String? id]) => _channel()?.markRead(messageId: id),
+    ([String? id]) => _retryableMarkRead(_channel()?.markRead(messageId: id)),
     const Duration(seconds: 1),
     leading: true,
   );
 
   // Debounced thread mark-read.
   late final _debouncedMarkThreadRead = debounce(
-    (String parentId) => _channel()?.markThreadRead(parentId),
+    (String parentId) => _retryableMarkRead(_channel()?.markThreadRead(parentId)),
     const Duration(seconds: 1),
     leading: true,
   );
+
+  // Clears [_lastMarkReadAttempt] when a mark-read request fails, so the same
+  // state can be attempted again.
+  //
+  // The gate records the attempt key before the request is issued, and a
+  // failed request leaves every input that key is built from unchanged — the
+  // count only drops once the server's read event arrives. Without this, one
+  // transient failure (offline, a 5xx) would block every later attempt for
+  // that state until a new message arrived or the channel was reopened.
+  //
+  // The error itself is swallowed rather than rethrown: the request is a
+  // best-effort background action with no user-facing surface, and the future
+  // is discarded by the debouncer, so rethrowing would only raise an
+  // unhandled async error.
+  Future<EmptyResponse>? _retryableMarkRead(Future<EmptyResponse>? request) {
+    return request?.onError((_, __) {
+      _lastMarkReadAttempt = null;
+      return EmptyResponse();
+    });
+  }
 
   /// Resets every piece of unread state for a newly attached channel.
   ///

@@ -7,6 +7,7 @@
 // individual condition of the mark-read gate, the attempt-dedupe key, the
 // mark-unread viewport divergence latch, and the pill's jump fallbacks.
 
+import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat_flutter/scrollable_positioned_list/scrollable_positioned_list.dart';
@@ -494,21 +495,45 @@ void main() {
       verify(() => channel.markRead()).called(1);
     });
 
-    test('a new newest message earns a fresh attempt', () async {
+    test('a new newest message earns a fresh attempt', () {
       when(() => channelState.unreadCount).thenReturn(3);
       when(() => channelState.currentUserRead).thenReturn(read(unreadMessages: 3));
       messages = [message(id: 'newest')];
-      final controller = buildController()..attach();
-      tick(controller, [2], isAtBottom: true);
 
-      // The debounce is leading-edge, so let its window lapse before the
-      // second attempt, which is otherwise swallowed by the debouncer
-      // rather than by the dedupe key under test.
-      await Future<void>.delayed(const Duration(milliseconds: 1100));
-      messages = [message(id: 'even-newer'), message(id: 'newest')];
-      tick(controller, [2], isAtBottom: true);
+      fakeAsync((async) {
+        final controller = buildController()..attach();
+        tick(controller, [2], isAtBottom: true);
 
-      verify(() => channel.markRead()).called(2);
+        // The debounce is leading-edge, so let its window lapse before the
+        // second attempt, which is otherwise swallowed by the debouncer
+        // rather than by the dedupe key under test.
+        async.elapse(const Duration(seconds: 1));
+        messages = [message(id: 'even-newer'), message(id: 'newest')];
+        tick(controller, [2], isAtBottom: true);
+
+        verify(() => channel.markRead()).called(2);
+      });
+    });
+
+    test('a failed mark-read can be retried for the same state', () {
+      when(() => channelState.unreadCount).thenReturn(3);
+      when(() => channelState.currentUserRead).thenReturn(read(unreadMessages: 3));
+      when(() => channel.markRead()).thenAnswer((_) => Future.error(Exception('offline')));
+      messages = [message(id: 'newest')];
+
+      fakeAsync((async) {
+        final controller = buildController()..attach();
+        tick(controller, [2], isAtBottom: true);
+
+        // Nothing about the channel changes when the request fails — the
+        // count only drops once the server's read event arrives — so without
+        // the attempt key being cleared this second tick would be deduped
+        // away and the channel would stay unread.
+        async.elapse(const Duration(seconds: 1));
+        tick(controller, [2], isAtBottom: true);
+
+        verify(() => channel.markRead()).called(2);
+      });
     });
 
     group('with an active manual mark-unread', () {
