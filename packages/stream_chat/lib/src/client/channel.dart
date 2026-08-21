@@ -6,6 +6,7 @@ import 'dart:math' as math;
 import 'package:collection/collection.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/src/client/retry_queue.dart';
+import 'package:stream_chat/src/core/util/message_merging.dart';
 import 'package:stream_chat/src/core/util/utils.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:synchronized/synchronized.dart';
@@ -3418,16 +3419,7 @@ class ChannelClientState {
   /// state — [message] is used as-is. Useful for local rollbacks of an
   /// optimistic update, where the caller has the full prior snapshot and
   /// doesn't want the merge falling back to the optimistic values.
-  void replaceMessage(Message message) => _updateMessages([message], update: _replaceUpdate);
-
-  // Default `update` for [_updateMessages]: merge incoming with the
-  // locally-known message via `Message.updateWith`, preserving enrichment
-  // the server may strip on partial payloads.
-  static Message _mergeUpdate(Message original, Message updated) => original.updateWith(updated);
-
-  // Replace `update` for [_updateMessages]: take the incoming as-is. Used
-  // by local rollback paths.
-  static Message _replaceUpdate(Message _, Message updated) => updated;
+  void replaceMessage(Message message) => _updateMessages([message], update: MessageMerging.replaceUpdate);
 
   /// Cleans up all the stale error messages which requires no action.
   void cleanUpStaleErrorMessages() {
@@ -3790,8 +3782,8 @@ class ChannelClientState {
     final newMessages = messages.mergeSorted(
       updatedState.messages,
       key: (message) => message.id,
-      update: _mergeUpdate,
-      compare: _sortByCreatedAt,
+      update: MessageMerging.mergeUpdate,
+      compare: MessageMerging.sortByCreatedAt,
     );
 
     final watchers = _channelState.watchers ?? const <User>[];
@@ -3863,8 +3855,6 @@ class ChannelClientState {
     return remoteState.copyWith(read: preservedReads.toList());
   }
 
-  int _sortByCreatedAt(Message a, Message b) => a.createdAt.compareTo(b.createdAt);
-
   /// The channel state related to this client.
   ChannelState get _channelState => _channelStateController.value;
 
@@ -3925,7 +3915,7 @@ class ChannelClientState {
     final updatedThreads = {...threads};
 
     final threadMessages = updatedThreads[parentId] ?? <Message>[];
-    final updatedThreadMessages = _mergeMessagesIntoExisting(
+    final updatedThreadMessages = MessageMerging.mergeMessages(
       existing: threadMessages,
       toMerge: messages.where((it) => it.id != parentId),
     );
@@ -4036,7 +4026,7 @@ class ChannelClientState {
 
           updateChannelState(
             _channelState.copyWith(
-              pinnedMessages: pinnedMessages.where(_pinIsValid).toList(),
+              pinnedMessages: pinnedMessages.where(MessageMerging.pinIsValid).toList(),
               messages: expiredMessages,
             ),
           );
@@ -4147,7 +4137,7 @@ class ChannelClientState {
 
   void _updateMessages(
     Iterable<Message> messages, {
-    Message Function(Message original, Message updated) update = _mergeUpdate,
+    Message Function(Message original, Message updated) update = MessageMerging.mergeUpdate,
     bool upsert = true,
   }) {
     if (messages.isEmpty) return;
@@ -4160,43 +4150,21 @@ class ChannelClientState {
 
   void _updateThreadMessages(
     Iterable<Message> messages, {
-    Message Function(Message original, Message updated) update = _mergeUpdate,
+    Message Function(Message original, Message updated) update = MessageMerging.mergeUpdate,
     bool upsert = true,
   }) {
     if (messages.isEmpty) return;
 
-    // Group messages by parentId so each thread merge only sees its own
-    // replies — passing the full batch to every thread would leak replies
-    // across thread boundaries (the merge dedups by id, not by parentId).
-    final messagesByThread = <String, List<Message>>{};
-    for (final m in messages) {
-      if (m.parentId case final parentId?) (messagesByThread[parentId] ??= []).add(m);
-    }
+    final currentThreads = threads;
+    final updatedThreads = MessageMerging.mergeThreadMessages(
+      existing: currentThreads,
+      toMerge: messages,
+      update: update,
+      upsert: upsert,
+    );
 
-    // If there are no affected threads, return early.
-    if (messagesByThread.isEmpty) return;
-
-    final updatedThreads = {...threads};
-    for (final MapEntry(key: thread, :value) in messagesByThread.entries) {
-      final existingThreadMessages = updatedThreads[thread];
-
-      // Don't create a phantom entry for a thread that wasn't loaded: with
-      // `upsert: false` an out-of-window reply is dropped, so there's nothing
-      // to merge. Writing it back would make `threads.containsKey(parentId)`
-      // report a thread that was never paged in.
-      if (existingThreadMessages == null && !upsert) continue;
-
-      final threadMessages = existingThreadMessages ?? <Message>[];
-      final updatedThreadMessages = _mergeMessagesIntoExisting(
-        existing: threadMessages,
-        toMerge: value,
-        update: update,
-        upsert: upsert,
-      );
-
-      // Update the thread with the modified message list.
-      updatedThreads[thread] = updatedThreadMessages.toList();
-    }
+    // Nothing targeted a thread — skip the write.
+    if (identical(updatedThreads, currentThreads)) return;
 
     // Update the threads map.
     _threads = updatedThreads;
@@ -4204,25 +4172,19 @@ class ChannelClientState {
 
   void _updateChannelMessages(
     Iterable<Message> messages, {
-    Message Function(Message original, Message updated) update = _mergeUpdate,
+    Message Function(Message original, Message updated) update = MessageMerging.mergeUpdate,
     bool upsert = true,
   }) {
     if (messages.isEmpty) return;
 
-    final affectedMessages = messages.map((it) {
-      // If it's not a thread message, consider it affected.
-      if (it.parentId == null) return it;
-      // If it's a thread message shown in channel, consider it affected.
-      if (it.showInChannel == true) return it;
-
-      return null; // Thread message not shown in channel, ignore it.
-    }).nonNulls;
+    // Only messages shown in the channel are affected.
+    final affectedMessages = messages.where(MessageMerging.isShownInChannel);
 
     // If there are no affected messages, return early.
     if (affectedMessages.isEmpty) return;
 
     final channelMessages = [...this.messages];
-    final updatedChannelMessages = _mergeMessagesIntoExisting(
+    final updatedChannelMessages = MessageMerging.mergeMessages(
       existing: channelMessages,
       toMerge: affectedMessages,
       update: update,
@@ -4245,7 +4207,7 @@ class ChannelClientState {
 
   void _updatePinnedMessages(
     Iterable<Message> messages, {
-    Message Function(Message original, Message updated) update = _mergeUpdate,
+    Message Function(Message original, Message updated) update = MessageMerging.mergeUpdate,
   }) {
     if (messages.isEmpty) return;
 
@@ -4254,7 +4216,7 @@ class ChannelClientState {
     // land right back on an empty `pinnedMessages` list.
     if (pinnedMessages.isEmpty && messages.every((m) => !m.pinned)) return;
 
-    final updatedPinnedMessages = _mergePinnedMessagesIntoExisting(
+    final updatedPinnedMessages = MessageMerging.mergePinnedMessages(
       existing: pinnedMessages,
       toMerge: messages,
       update: update,
@@ -4269,133 +4231,13 @@ class ChannelClientState {
     if (messages.isEmpty) return;
 
     final activeLiveLocations = [...this.activeLiveLocations];
-    final updatedActiveLiveLocations = _mergeActiveLocationsIntoExisting(
+    final updatedActiveLiveLocations = MessageMerging.mergeActiveLocations(
       existing: activeLiveLocations,
       toMerge: messages,
     );
 
     _channelState = _channelState.copyWith(
       activeLiveLocations: updatedActiveLiveLocations.toList(),
-    );
-  }
-
-  Iterable<Location> _mergeActiveLocationsIntoExisting({
-    required Iterable<Location> existing,
-    required Iterable<Message> toMerge,
-  }) {
-    if (toMerge.isEmpty) return existing;
-
-    final mergedLocations = existing.mergeFrom(
-      toMerge,
-      key: (it) => (it.userId, it.channelCid, it.createdByDeviceId),
-      value: (message) => message.sharedLocation,
-      update: (original, updated) => updated,
-    );
-
-    final toUpdateMap = {for (final m in toMerge) m.id: m};
-    final updatedLocations = mergedLocations.where((it) {
-      // Remove the location if it's expired.
-      if (it.isExpired) return false;
-
-      final updatedMessage = toUpdateMap[it.messageId];
-      // Remove the location if the attached message is deleted.
-      if (updatedMessage?.isDeleted == true) return false;
-
-      return true;
-    });
-
-    return updatedLocations;
-  }
-
-  Iterable<Message> _mergePinnedMessagesIntoExisting({
-    required Iterable<Message> existing,
-    required Iterable<Message> toMerge,
-    Message Function(Message original, Message updated) update = _mergeUpdate,
-  }) {
-    return _mergeMessagesIntoExisting(
-      existing: existing,
-      toMerge: toMerge,
-      update: update,
-    ).where(_pinIsValid);
-  }
-
-  Iterable<Message> _mergeMessagesIntoExisting({
-    required Iterable<Message> existing,
-    required Iterable<Message> toMerge,
-    Message Function(Message original, Message updated) update = _mergeUpdate,
-    bool upsert = true,
-  }) {
-    if (toMerge.isEmpty) return existing;
-
-    // [update] decides whether each pair is reconciled (default — see
-    // `_mergeUpdate`) or replaced (`_replaceUpdate`, used by local rollback
-    // paths that don't want enrichment fallback to keep optimistic values).
-    //
-    // [upsert] controls whether ids not already in [existing] are inserted.
-    // Event-driven paths (`message.updated`, `message.deleted` soft) pass
-    // `upsert: false` so an out-of-window message isn't dropped into a gap
-    // between the loaded slice and history the client hasn't paged in yet.
-    final existingList = existing is List<Message> ? existing : existing.toList();
-    var toMergeList = toMerge is List<Message> ? toMerge : toMerge.toList();
-
-    // Single-message fast path. The hot ingest path (server echoes, edits,
-    // reactions, read receipts) always lands here, and `lastIndexWhere` +
-    // `sortedUpsertAt` skips the O(N) keymap build that the two-pointer
-    // merge would otherwise do up front.
-    if (toMergeList.length == 1) {
-      final message = toMergeList.first;
-      final oldIndex = existingList.lastIndexWhere((it) => it.id == message.id);
-
-      // upsert: false — skip update if message is not loaded
-      if (oldIndex == -1 && !upsert) return existingList;
-
-      final resolved = oldIndex == -1 ? message : update(existingList[oldIndex], message);
-
-      final mergedMessages = existingList.sortedUpsertAt(
-        oldIndex,
-        resolved,
-        update: update,
-        compare: _sortByCreatedAt,
-      );
-
-      // Non-delete updates can't change what embedded quotedMessage copies
-      // should display, so we can skip the rewrite entirely.
-      if (!resolved.isDeleted) return mergedMessages;
-
-      return mergedMessages.updateIf(
-        (it) => it.quotedMessageId == resolved.id,
-        (it) => it.copyWith(quotedMessage: resolved),
-      );
-    }
-
-    // upsert: false - skip messages not loaded in the window
-    if (!upsert) {
-      final existingIds = {for (final m in existingList) m.id};
-      toMergeList = toMergeList.where((m) => existingIds.contains(m.id)).toList();
-      if (toMergeList.isEmpty) return existingList;
-    }
-
-    // Batch path: receiver (`existingList`) is maintained sorted as a
-    // state invariant; `mergeSorted` sorts `toMergeList` internally and
-    // returns a sorted result.
-    final mergedMessages = existingList.mergeSorted(
-      toMergeList,
-      key: (message) => message.id,
-      update: update,
-      compare: _sortByCreatedAt,
-    );
-
-    // Refresh embedded `quotedMessage` refs only for messages quoting an
-    // incoming message that is now deleted. `updateIf` returns the same
-    // list reference when nothing matches, so steady-state allocates
-    // nothing for this step.
-    final deletedIds = toMergeList.where((m) => m.isDeleted).map((m) => m.id).toSet();
-    if (deletedIds.isEmpty) return mergedMessages;
-
-    final mergedById = {for (final m in mergedMessages) m.id: m};
-    return mergedMessages.updateIf(
-      (it) => deletedIds.contains(it.quotedMessageId),
-      (it) => it.copyWith(quotedMessage: mergedById[it.quotedMessageId]),
     );
   }
 
@@ -4417,32 +4259,14 @@ class ChannelClientState {
   void _removeThreadMessages(Iterable<Message> messages) {
     if (messages.isEmpty) return;
 
-    final affectedThreads = {...messages.map((it) => it.parentId).nonNulls};
-    // If there are no affected threads, return early.
-    if (affectedThreads.isEmpty) return;
+    final currentThreads = threads;
+    final updatedThreads = MessageMerging.removeThreadMessages(
+      existing: currentThreads,
+      toRemove: messages,
+    );
 
-    final updatedThreads = {...threads};
-    for (final thread in affectedThreads) {
-      final threadMessages = updatedThreads[thread];
-      // Continue if the thread doesn't exist.
-      if (threadMessages == null) continue;
-
-      // Remove the deleted message from the thread messages and reference from
-      // other messages quoting it.
-      final updatedThreadMessages = _removeMessagesFromExisting(
-        existing: threadMessages,
-        toRemove: messages,
-      );
-
-      // If there are no more messages in the thread, remove the thread entry.
-      if (updatedThreadMessages.isEmpty) {
-        updatedThreads.remove(thread);
-        continue;
-      }
-
-      // Otherwise, update the thread with the modified message list.
-      updatedThreads[thread] = updatedThreadMessages.toList();
-    }
+    // Nothing targeted a thread — skip the write.
+    if (identical(updatedThreads, currentThreads)) return;
 
     // Update the threads map.
     _threads = updatedThreads;
@@ -4451,20 +4275,14 @@ class ChannelClientState {
   void _removeChannelMessages(Iterable<Message> messages) {
     if (messages.isEmpty) return;
 
-    final affectedMessages = messages.map((it) {
-      // If it's not a thread message, consider it affected.
-      if (it.parentId == null) return it;
-      // If it's a thread message shown in channel, consider it affected.
-      if (it.showInChannel == true) return it;
-
-      return null; // Thread message not shown in channel, ignore it.
-    }).nonNulls;
+    // Only messages shown in the channel are affected.
+    final affectedMessages = messages.where(MessageMerging.isShownInChannel);
 
     // If there are no affected messages, return early.
     if (affectedMessages.isEmpty) return;
 
     final channelMessages = [...this.messages];
-    final updatedChannelMessages = _removeMessagesFromExisting(
+    final updatedChannelMessages = MessageMerging.removeMessages(
       existing: channelMessages,
       toRemove: affectedMessages,
     );
@@ -4478,7 +4296,7 @@ class ChannelClientState {
     if (messages.isEmpty) return;
 
     final pinnedMessages = [...this.pinnedMessages];
-    final updatedPinnedMessages = _removePinnedMessagesFromExisting(
+    final updatedPinnedMessages = MessageMerging.removePinnedMessages(
       existing: pinnedMessages,
       toRemove: messages,
     );
@@ -4492,7 +4310,7 @@ class ChannelClientState {
     if (messages.isEmpty) return;
 
     final activeLiveLocations = [...this.activeLiveLocations];
-    final updatedActiveLiveLocations = _removeActiveLocationsFromExisting(
+    final updatedActiveLiveLocations = MessageMerging.removeActiveLocations(
       existing: activeLiveLocations,
       toRemove: messages,
     );
@@ -4500,54 +4318,6 @@ class ChannelClientState {
     _channelState = _channelState.copyWith(
       activeLiveLocations: updatedActiveLiveLocations.toList(),
     );
-  }
-
-  Iterable<Location> _removeActiveLocationsFromExisting({
-    required Iterable<Location> existing,
-    required Iterable<Message> toRemove,
-  }) {
-    if (toRemove.isEmpty) return existing;
-
-    final toRemoveIds = toRemove.map((m) => m.id).toSet();
-    final updatedLocations = existing.where(
-      // Remove the location if its attached message is in the toRemove list.
-      (it) => !toRemoveIds.contains(it.messageId),
-    );
-
-    return updatedLocations;
-  }
-
-  Iterable<Message> _removePinnedMessagesFromExisting({
-    required Iterable<Message> existing,
-    required Iterable<Message> toRemove,
-  }) {
-    return _removeMessagesFromExisting(
-      existing: existing,
-      toRemove: toRemove,
-    ).where(_pinIsValid);
-  }
-
-  Iterable<Message> _removeMessagesFromExisting({
-    required Iterable<Message> existing,
-    required Iterable<Message> toRemove,
-  }) {
-    if (toRemove.isEmpty) return existing;
-
-    final toRemoveIds = toRemove.map((m) => m.id).toSet();
-    final updatedMessages = existing
-        .where((it) {
-          // Remove the message if it's in the toRemove list.
-          return !toRemoveIds.contains(it.id);
-        })
-        .map((it) {
-          // Continue if the message doesn't quote any of the deleted messages.
-          if (!toRemoveIds.contains(it.quotedMessageId)) return it;
-
-          // Setting it to null will remove the quoted message from the message.
-          return it.copyWith(quotedMessageId: null, quotedMessage: null);
-        });
-
-    return updatedMessages;
   }
 
   // Listens to user message deleted events and marks messages from that user
@@ -4581,21 +4351,6 @@ class ChannelClientState {
     _staleLiveLocationsCleanerTimer?.cancel();
     _typingEventsController.close();
   }
-}
-
-bool _pinIsValid(Message message) {
-  // If the message is deleted, the pin is not valid.
-  if (message.isDeleted) return false;
-
-  // If the message is not pinned, it's not valid.
-  if (message.pinned != true) return false;
-
-  // If there's no expiration, the pin is valid.
-  final pinExpires = message.pinExpires;
-  if (pinExpires == null) return true;
-
-  // If there's an expiration, check if it's still valid.
-  return pinExpires.isAfter(DateTime.now());
 }
 
 /// Extension methods for reading related operations on a ChannelClientState.
