@@ -89,7 +89,7 @@ class StreamMessageText extends StatelessWidget {
           return SelectionArea(
             // Rebuilding a live selection area after the browser context menu
             // toggles throws on web; the key replaces it instead.
-            // TODO: Remove once the minimum Flutter has flutter/flutter#186459.
+            // TODO(flutter): Remove once the minimum Flutter has flutter/flutter#186459.
             key: ValueKey(BrowserContextMenu.enabled),
             onSelectionChanged: onSelectionChanged,
             child: streamMessageText,
