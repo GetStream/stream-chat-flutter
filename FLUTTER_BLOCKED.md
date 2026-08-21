@@ -8,6 +8,18 @@ fix, so this file is the checklist for the floor raise in the
 Code sites are tagged `// TODO(flutter): …`, so `grep -rn 'TODO(flutter)' packages/` finds
 them all even if this file falls behind. Keep both in sync: add the tag *and* a row here.
 
+This is the single registry for the whole monorepo — every workaround lives here, not in a
+file of its own. There is one entry today; that is the current count, not the format.
+
+## Adding an entry
+
+Append a row to the table and a `###` section below it, matching the shape of the existing
+one. A section is worth writing only if it answers the four questions the person deleting
+the workaround will have: what breaks without it, which upstream release fixes it, how to
+confirm that release really carries the fix, and what must *not* be deleted alongside it.
+
+When a workaround is removed, delete its row and section — git history is the archive.
+
 ## Open
 
 | Removable at | What | Where | Upstream |
