@@ -271,6 +271,32 @@ void main() {
     });
   });
 
+  group('empty positions ticks', () {
+    test('an empty viewport does not count as laid out', () {
+      final controller = buildController();
+
+      tick(controller, [], isAtBottom: false);
+
+      expect(controller.hasLaidOut.value, isFalse);
+    });
+
+    test('an empty viewport cannot satisfy the mark-unread divergence guard', () {
+      // Without the guard the empty tick would snapshot an empty index set,
+      // which the first real frame would then read as divergence and use to
+      // undo the manual mark-unread.
+      when(() => channelState.isMarkedAsUnread).thenReturn(true);
+      when(() => channelState.unreadCount).thenReturn(3);
+      when(() => channelState.currentUserRead).thenReturn(read(unreadMessages: 3));
+      messages = [message(id: 'newest')];
+      final controller = buildController()..attach();
+
+      tick(controller, [], isAtBottom: true);
+      tick(controller, [2, 3], isAtBottom: true);
+
+      verifyNever(() => channel.markRead());
+    });
+  });
+
   group('baseline capture', () {
     test('publishes the frozen count before the anchor resolves', () {
       when(() => channelState.currentUserRead).thenReturn(read(unreadMessages: 5, lastReadMessageId: 'm-5'));

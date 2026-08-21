@@ -225,15 +225,15 @@ class MessageListUnreadController {
   /// meaning [resolveDividerAnchor] is worth retrying once layout settles.
   bool get needsAnchorResolution => _unreadBaseline != null && _unreadDivider.value.anchorId == null;
 
-  /// Debounced channel mark-read.
-  late final debouncedMarkRead = debounce(
+  // Debounced channel mark-read.
+  late final _debouncedMarkRead = debounce(
     ([String? id]) => _channel()?.markRead(messageId: id),
     const Duration(seconds: 1),
     leading: true,
   );
 
-  /// Debounced thread mark-read.
-  late final debouncedMarkThreadRead = debounce(
+  // Debounced thread mark-read.
+  late final _debouncedMarkThreadRead = debounce(
     (String parentId) => _channel()?.markThreadRead(parentId),
     const Duration(seconds: 1),
     leading: true,
@@ -246,8 +246,8 @@ class MessageListUnreadController {
   /// stream — the seeding below exists precisely to survive that stream's
   /// immediate replay.
   void attach() {
-    debouncedMarkRead.cancel();
-    debouncedMarkThreadRead.cancel();
+    _debouncedMarkRead.cancel();
+    _debouncedMarkThreadRead.cancel();
 
     final channelState = _channel()?.state;
 
@@ -399,6 +399,15 @@ class MessageListUnreadController {
     Iterable<ItemPosition> itemPositions, {
     required bool isAtBottom,
   }) {
+    // Guarded here as well as at the call site: an empty viewport is not a
+    // laid-out one, and letting it through would both flip [hasLaidOut] on a
+    // frame that renders nothing and let
+    // [_checkMarkUnreadViewportDivergence] snapshot an empty index set —
+    // which the very next non-empty frame would read as divergence, undoing
+    // an active manual mark-unread. See [handleCurrentUserReadChanged],
+    // which avoids capturing that same empty viewport for this reason.
+    if (itemPositions.isEmpty) return;
+
     _hasLaidOut.value = true;
 
     // Snapshot the viewport (or check it against an existing snapshot for
@@ -497,10 +506,10 @@ class MessageListUnreadController {
   Future<void> _debouncedMarkMessagesAsRead() async {
     if (_parentMessage() case final parent?) {
       // If we are in a thread, mark the thread as read.
-      debouncedMarkThreadRead.call([parent.id]);
+      _debouncedMarkThreadRead.call([parent.id]);
     } else {
       // Otherwise, mark the channel as read.
-      debouncedMarkRead.call();
+      _debouncedMarkRead.call();
     }
   }
 
@@ -724,8 +733,8 @@ class MessageListUnreadController {
   /// this.
   void dispose() {
     _disposed = true;
-    debouncedMarkRead.cancel();
-    debouncedMarkThreadRead.cancel();
+    _debouncedMarkRead.cancel();
+    _debouncedMarkThreadRead.cancel();
     _unreadDivider.dispose();
     _unreadDividerGrowth.dispose();
     _hasSeenFirstUnread.dispose();
