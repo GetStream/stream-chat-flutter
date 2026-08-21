@@ -990,9 +990,9 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
   }
 
   // Wraps an already-built [separator] with the unread-messages line if
-  // [message] happens to be divider A's anchor. Defined as a method (rather
-  // than a closure inside [separatorBuilder]) so a fresh inner closure isn't
-  // allocated for every visible separator on every rebuild.
+  // [message] happens to be the unread divider's anchor. Defined as a method
+  // (rather than a closure inside [separatorBuilder]) so a fresh inner closure
+  // isn't allocated for every visible separator on every rebuild.
   Widget _maybeBuildWithUnreadMessagesSeparator({
     required Message message,
     required Widget separator,

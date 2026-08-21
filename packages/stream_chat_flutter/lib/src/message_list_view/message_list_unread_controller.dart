@@ -1,3 +1,69 @@
+// Unread state for the message list: what each indicator means, and how the
+// three of them behave together.
+//
+// There are three separate surfaces, and the most common source of confusion
+// is that they answer three different questions:
+//
+//  - The **unread messages divider** ("N unread messages") — an inline
+//    separator marking where you had read up to when you opened the channel.
+//    Its anchor is captured once, at open, and never moves: it stays put
+//    across scrolling and across an auto mark-read, so the place you left off
+//    remains findable for the whole visit. Its *count* does climb as further
+//    qualifying messages arrive during the session.
+//  - The **jump-to-unread pill** (floating, at the top) — a way to get *to*
+//    that divider. It shows the count frozen at open and deliberately ignores
+//    the divider's growth, so the number does not move under the user's
+//    finger. Once the boundary has been reached it is gone for the rest of the
+//    session.
+//  - The **scroll-to-bottom badge** — purely "what did I miss while looking
+//    away". It counts only messages that arrive while scrolled up, and resets
+//    to 0 on reaching the bottom. It is never seeded from the channel's
+//    unread count, so opening a channel with 50 unread shows no badge.
+//
+// Notably there is *no* separate "new messages" banner for messages that
+// arrive while the channel is open: an arrival grows the existing divider's
+// count, and that is all.
+//
+// How that plays out, case by case:
+//
+//  - **Opened with unread messages.** The divider is anchored at the first
+//    unread message and the pill appears with the open-time count. By
+//    default ([StreamChannel.openAtFirstUnread]) the list also opens
+//    positioned at that boundary, so the pill is usually retired on the first
+//    laid-out frame. With `openAtFirstUnread: false` the list opens at the
+//    newest message instead and the pill stays up until the user scrolls back
+//    to the boundary, taps it, or dismisses it.
+//  - **Opened fully read.** No divider and no pill — there is no boundary to
+//    anchor to, and later arrivals do not create one. Only the badge reacts,
+//    and only while scrolled away from the bottom.
+//  - **Messages arriving during the session.** The divider's count climbs
+//    whether or not the user is at the bottom; the badge climbs only when
+//    they are scrolled away. Neither can make the pill reappear.
+//  - **Manually marked unread.** Treated as a fresh start: the baseline is
+//    recaptured, the divider re-anchors, and the pill comes back. Because the
+//    anchor is the message the user just acted on — already on screen —
+//    only scrolling *past* it retires the pill, and auto mark-read stays
+//    blocked until the viewport genuinely moves, so the action is not undone
+//    on the next layout tick.
+//  - **Never opened by this user.** The channel reports unread messages but
+//    has no read boundary at all, so the anchor cannot resolve until top
+//    pagination reaches the start of the channel. The pill still shows, and
+//    tapping it jumps as far back as is currently loaded (pulling in the next
+//    page) rather than doing nothing; it stays up, since the real boundary
+//    has not been reached. Auto mark-read is exempt from waiting for a
+//    boundary here — see [_maybeMarkMessagesAsRead] condition 5 — as are
+//    channels tracking unread counts locally.
+//  - **Threads.** None of the three surfaces apply; only the thread's own
+//    mark-read does.
+//
+// What counts towards the divider and badge is narrower than "a message
+// arrived": silent, shadowed, ephemeral, thread-only, restricted, own and
+// muted-sender messages are all skipped, and nothing counts while the user
+// has read receipts disabled. See [_countsTowardsUnreadIndicators].
+//
+// Auto mark-read has its own five-condition gate, documented on
+// [_maybeMarkMessagesAsRead].
+
 import 'dart:math';
 
 import 'package:collection/collection.dart';
@@ -73,7 +139,7 @@ class MessageListUnreadController {
 
   bool _disposed = false;
 
-  // --- Divider A: pre-existing unread, frozen at channel open ---
+  // --- The unread divider: pre-existing unread, frozen at channel open ---
   //
   // [_unreadBaseline] is the current user's [Read] captured once when the
   // channel is attached (or on the first `currentUserReadStream` emission if
@@ -84,7 +150,7 @@ class MessageListUnreadController {
   Read? _unreadBaseline;
   bool _unreadBaselineCaptured = false;
 
-  // Resolved anchor for divider A. The anchor (and `count`, the frozen
+  // Resolved anchor for the unread divider. The anchor (and `count`, the frozen
   // baseline used by the pill) is frozen once non-null: recomputation is
   // skipped as soon as `anchorId` is set. May take a few rebuilds to resolve
   // if top pagination hasn't finished loading the boundary yet.
@@ -98,7 +164,7 @@ class MessageListUnreadController {
   final ValueNotifier<int> _unreadDividerGrowth = ValueNotifier(0);
 
   // Sticky: becomes true once the user has seen (rendered) or scrolled past
-  // divider A's anchor. Drives the pill's permanent dismissal and (see
+  // the unread divider's anchor. Drives the pill's permanent dismissal and (see
   // [_maybeMarkMessagesAsRead]) gates auto mark-read.
   final ValueNotifier<bool> _hasSeenFirstUnread = ValueNotifier(false);
 
@@ -189,7 +255,7 @@ class MessageListUnreadController {
     return (lastRead: read.lastRead, lastReadMessageId: read.lastReadMessageId);
   }
 
-  // Whether divider A's current session came from an explicit mark-unread
+  // Whether the unread divider's current session came from an explicit mark-unread
   // rather than from pre-existing unread at channel open. The anchor of a
   // manual mark-unread is the message the user was looking at when they
   // marked it, so it's already on screen — see
@@ -289,8 +355,8 @@ class MessageListUnreadController {
   }
 
   // Captures [_unreadBaseline] the first time the current user's read state
-  // becomes available, then attempts to resolve divider A's anchor against
-  // it. No-ops in a thread, where divider A doesn't apply.
+  // becomes available, then attempts to resolve the unread divider's anchor
+  // against it. No-ops in a thread, where the divider doesn't apply.
   void _captureUnreadBaselineIfNeeded() {
     if (_unreadBaselineCaptured || _isThreadConversation) return;
 
@@ -310,7 +376,7 @@ class MessageListUnreadController {
     resolveDividerAnchor();
   }
 
-  /// Resolves divider A's anchor against the frozen baseline. A no-op once
+  /// Resolves the unread divider's anchor against the frozen baseline. A no-op once
   /// resolved, and while top pagination hasn't loaded the boundary yet.
   void resolveDividerAnchor() {
     if (_isThreadConversation || _unreadDivider.value.anchorId != null) return;
@@ -326,7 +392,7 @@ class MessageListUnreadController {
 
   /// Reacts to a `currentUserReadStream` emission. An explicit mark-unread
   /// moves the read boundary backward — treat it as a new session start for
-  /// divider A/the pill.
+  /// the unread divider and the pill.
   ///
   /// The reset is deliberately gated on a *new* mark-unread — the flag
   /// turning on, or the read boundary moving again while it's already on —
@@ -341,7 +407,7 @@ class MessageListUnreadController {
   /// `isMarkedAsUnread` is cleared solely by a mark-read (see
   /// `ChannelClientState.markReadLocally`), and both the baseline capture and
   /// [resolveDividerAnchor] freeze once resolved — so this reset is the only
-  /// thing that can move divider A once a mark-unread session is under way.
+  /// thing that can move the divider once a mark-unread session is under way.
   void handleCurrentUserReadChanged() {
     if (_isThreadConversation) return;
 
@@ -481,7 +547,7 @@ class MessageListUnreadController {
     // [StreamChannelState.loadChannelAtMessage] when the anchor isn't in the
     // currently loaded window — after which the real anchor resolves
     // naturally via the list's retry of [resolveDividerAnchor], rendering
-    // divider A too. That can await pagination and a frame, and this
+    // the divider too. That can await pagination and a frame, and this
     // controller survives a channel change — so remember which channel the
     // tap was for and drop the result if it isn't the current one any more.
     final tappedFor = _attachToken();
@@ -527,7 +593,7 @@ class MessageListUnreadController {
   }
 
   // Whether a freshly-arrived [message] should bump the scroll-to-bottom
-  // badge and divider A's growing count.
+  // badge and the unread divider's growing count.
   //
   // This is the message- and sender-level half of
   // [MessageRules.canCountAsUnread], which is what keeps silent, shadowed,
@@ -607,9 +673,9 @@ class MessageListUnreadController {
     }
   }
 
-  // Marks divider A's anchor as seen once it renders on screen, or once the
-  // user scrolls past it without it ever rendering (a fast fling can skip
-  // intermediate frames). Sticky: never reverts once true, and reset only
+  // Marks the unread divider's anchor as seen once it renders on screen, or
+  // once the user scrolls past it without it ever rendering (a fast fling can
+  // skip intermediate frames). Sticky: never reverts once true, and reset only
   // when the baseline is recaptured (channel change, or an explicit
   // mark-unread — see [handleCurrentUserReadChanged]).
   //
@@ -674,7 +740,7 @@ class MessageListUnreadController {
   //     anchor being immediately "visible" again (it's usually the very
   //     message just marked, with nothing yet scrolled) would undo the
   //     user's action instantly.
-  //  5. Divider A's anchor has actually been seen or scrolled past
+  //  5. The unread divider's anchor has actually been seen or scrolled past
   //     (`hasSeenFirstUnreadMessage`) — trivially satisfied when there is
   //     no boundary to see in the first place: the channel opened fully
   //     read, the user has never opened it at all (no `lastReadMessageId`,
