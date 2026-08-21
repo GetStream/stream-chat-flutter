@@ -7,6 +7,7 @@ import 'package:collection/collection.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/src/client/retry_queue.dart';
 import 'package:stream_chat/src/core/util/message_merging.dart';
+import 'package:stream_chat/src/core/util/message_predicates.dart';
 import 'package:stream_chat/src/core/util/utils.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:synchronized/synchronized.dart';
@@ -4026,7 +4027,7 @@ class ChannelClientState {
 
           updateChannelState(
             _channelState.copyWith(
-              pinnedMessages: pinnedMessages.where(MessageMerging.pinIsValid).toList(),
+              pinnedMessages: pinnedMessages.where((it) => it.hasValidPin).toList(),
               messages: expiredMessages,
             ),
           );
@@ -4178,7 +4179,7 @@ class ChannelClientState {
     if (messages.isEmpty) return;
 
     // Only messages shown in the channel are affected.
-    final affectedMessages = messages.where(MessageMerging.isShownInChannel);
+    final affectedMessages = messages.where((it) => it.isShownInChannel);
 
     // If there are no affected messages, return early.
     if (affectedMessages.isEmpty) return;
@@ -4276,7 +4277,7 @@ class ChannelClientState {
     if (messages.isEmpty) return;
 
     // Only messages shown in the channel are affected.
-    final affectedMessages = messages.where(MessageMerging.isShownInChannel);
+    final affectedMessages = messages.where((it) => it.isShownInChannel);
 
     // If there are no affected messages, return early.
     if (affectedMessages.isEmpty) return;

@@ -1,6 +1,7 @@
 import 'package:stream_chat/src/core/models/location.dart';
 import 'package:stream_chat/src/core/models/message.dart';
 import 'package:stream_chat/src/core/util/list_extensions.dart';
+import 'package:stream_chat/src/core/util/message_predicates.dart';
 
 /// Provides the merge and removal operations reconciling incoming messages
 /// with the locally-held channel state collections.
@@ -58,7 +59,7 @@ class MessageMerging {
   }
 
   /// Merges [toMerge] into the [existing] pinned messages, keeping only
-  /// messages that are still valid pins (see [pinIsValid]).
+  /// messages that are still valid pins (see [MessagePredicates.hasValidPin]).
   static Iterable<Message> mergePinnedMessages({
     required Iterable<Message> existing,
     required Iterable<Message> toMerge,
@@ -68,7 +69,7 @@ class MessageMerging {
       existing: existing,
       toMerge: toMerge,
       update: update,
-    ).where(pinIsValid);
+    ).where((it) => it.hasValidPin);
   }
 
   /// Merges [toMerge] into [existing], returning a list sorted by
@@ -222,7 +223,7 @@ class MessageMerging {
   }
 
   /// Removes [toRemove] from the [existing] pinned messages, keeping only
-  /// messages that are still valid pins (see [pinIsValid]).
+  /// messages that are still valid pins (see [MessagePredicates.hasValidPin]).
   static Iterable<Message> removePinnedMessages({
     required Iterable<Message> existing,
     required Iterable<Message> toRemove,
@@ -230,7 +231,7 @@ class MessageMerging {
     return removeMessages(
       existing: existing,
       toRemove: toRemove,
-    ).where(pinIsValid);
+    ).where((it) => it.hasValidPin);
   }
 
   /// Removes [toRemove] from [existing], clearing the quoted-message
@@ -297,36 +298,5 @@ class MessageMerging {
     }
 
     return updatedThreads;
-  }
-
-  /// Whether the [message] is shown in the channel message list.
-  ///
-  /// Non-thread messages always are; thread replies only when explicitly
-  /// marked to also show in the channel.
-  static bool isShownInChannel(Message message) {
-    // Non-thread messages are always shown in the channel.
-    if (message.parentId == null) return true;
-
-    // Thread messages are only shown if explicitly marked.
-    return message.showInChannel == true;
-  }
-
-  /// Whether the [message] represents a currently valid pin.
-  ///
-  /// Returns `false` if the message is deleted, not pinned, or its
-  /// [Message.pinExpires] has passed.
-  static bool pinIsValid(Message message) {
-    // If the message is deleted, the pin is not valid.
-    if (message.isDeleted) return false;
-
-    // If the message is not pinned, it's not valid.
-    if (message.pinned != true) return false;
-
-    // If there's no expiration, the pin is valid.
-    final pinExpires = message.pinExpires;
-    if (pinExpires == null) return true;
-
-    // If there's an expiration, check if it's still valid.
-    return pinExpires.isAfter(DateTime.now());
   }
 }

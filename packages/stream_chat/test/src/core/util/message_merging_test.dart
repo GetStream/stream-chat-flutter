@@ -90,33 +90,6 @@ void main() {
     });
   });
 
-  group('MessageMerging.pinIsValid', () {
-    test('is false for a deleted message', () {
-      final message = _message('m1', pinned: true, type: MessageType.deleted);
-      expect(MessageMerging.pinIsValid(message), isFalse);
-    });
-
-    test('is false for an unpinned message', () {
-      final message = _message('m1');
-      expect(MessageMerging.pinIsValid(message), isFalse);
-    });
-
-    test('is true for a pinned message without expiration', () {
-      final message = _message('m1', pinned: true);
-      expect(MessageMerging.pinIsValid(message), isTrue);
-    });
-
-    test('is true while the pin expiration is in the future', () {
-      final message = _message('m1', pinned: true, pinExpires: DateTime.now().add(const Duration(hours: 1)));
-      expect(MessageMerging.pinIsValid(message), isTrue);
-    });
-
-    test('is false once the pin expiration has passed', () {
-      final message = _message('m1', pinned: true, pinExpires: DateTime.now().subtract(const Duration(hours: 1)));
-      expect(MessageMerging.pinIsValid(message), isFalse);
-    });
-  });
-
   group('MessageMerging.mergeMessages', () {
     test('returns the existing messages untouched when there is nothing to merge', () {
       final existing = [_message('m1')];
@@ -387,22 +360,6 @@ void main() {
       final result = MessageMerging.mergeActiveLocations(existing: [active], toMerge: [incoming]);
 
       expect(result, isEmpty);
-    });
-  });
-
-  group('MessageMerging.isShownInChannel', () {
-    test('is true for a non-thread message', () {
-      expect(MessageMerging.isShownInChannel(_message('m1')), isTrue);
-    });
-
-    test('is true for a thread reply marked to show in the channel', () {
-      final reply = _message('m1', parentId: 'p1', showInChannel: true);
-      expect(MessageMerging.isShownInChannel(reply), isTrue);
-    });
-
-    test('is false for a thread-only reply', () {
-      final reply = _message('m1', parentId: 'p1');
-      expect(MessageMerging.isShownInChannel(reply), isFalse);
     });
   });
 
