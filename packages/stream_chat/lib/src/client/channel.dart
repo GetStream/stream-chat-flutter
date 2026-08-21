@@ -3450,7 +3450,7 @@ class ChannelClientState {
   void _listenReadEvents() {
     _subscriptions
       ..add(
-        _channel.on(EventType.messageRead).listen(
+        _channel.on(EventType.messageRead, EventType.notificationMarkRead).listen(
           (event) {
             // Skip handling the event if delivered for a thread
             if (event.thread != null) return;
@@ -3950,7 +3950,7 @@ class ChannelClientState {
     final threadMessages = updatedThreads[parentId] ?? <Message>[];
     final updatedThreadMessages = _mergeMessagesIntoExisting(
       existing: threadMessages,
-      toMerge: messages,
+      toMerge: messages.where((it) => it.id != parentId),
     );
 
     // Update the thread with the modified message list.

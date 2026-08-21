@@ -1,9 +1,22 @@
+## Upcoming
+
+🔄 Changed
+
+- Raised minimum Flutter to `>=3.44.0` and Dart SDK to `^3.12.0`.
+
+## 10.3.0
+
+🐞 Fixed
+
+- Fixed truncated channels being the first to fall out of the 250-channel cap returned by `getChannelCids`.
+
 ## 10.2.0
 
 🚀 Performance
 
 - Add indices on the `channel_cid` column on the `Messages`, `Members`, and `Reads` tables to improve read times on large databases.
 - Add indices on the `message_id` column on the `Reactions` table to improve read times on large databases.
+- Speed up hydrating a page of cached messages (`MessageDao`/`PinnedMessageDao`): derive each message's own reactions from the already-fetched reactions instead of issuing a second query, and stop re-fetching/re-hydrating quoted messages that are already part of the loaded page.
 
 🐞 Fixed
 
@@ -19,7 +32,6 @@
 
 - Read only the thread replies matching the `PaginationParams` from DB when calling `MessageDao.getThreadMessagesByParentId` instead of reading all replies for the thread and applying pagination in memory.
 - Read only the messages matching the `PaginationParams` from DB when calling `PinnedMessageDao.getMessagesByCid` instead of reading all pinned messages for the channel and applying pagination in memory.
-
 
 🐞 Fixed
 

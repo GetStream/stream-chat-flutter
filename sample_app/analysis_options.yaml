@@ -1,5 +1,15 @@
 include: ../analysis_options.yaml
 
+analyzer:
+  exclude:
+    - build/**
+    - android/**
+    - ios/**
+    - web/**
+    - windows/**
+    - macos/**
+    - linux/**
+
 linter:
   rules:
     cascade_invocations: false

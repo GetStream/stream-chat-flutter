@@ -37,7 +37,7 @@ class _PinnedMessagesScreenState extends State<PinnedMessagesScreen> {
   Widget build(BuildContext context) {
     final colorScheme = context.streamColorScheme;
 
-    return Scaffold(
+    return StreamScaffold(
       backgroundColor: colorScheme.backgroundApp,
       appBar: StreamAppBar(title: const Text('Pinned Messages')),
       body: StreamMessageSearchListView(

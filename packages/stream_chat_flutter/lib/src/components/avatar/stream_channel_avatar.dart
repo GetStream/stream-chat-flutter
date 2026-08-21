@@ -55,6 +55,7 @@ class StreamChannelAvatar extends StatelessWidget {
     super.key,
     this.size,
     required this.channel,
+    this.isFloating,
     this.semanticsLabel,
   });
 
@@ -66,6 +67,13 @@ class StreamChannelAvatar extends StatelessWidget {
   /// If null, defaults to [StreamAvatarGroupSize.lg].
   final StreamAvatarGroupSize? size;
 
+  /// Whether to show a drop shadow around the avatar.
+  ///
+  /// Defaults to null, treated as not floating. The shadow depth is determined
+  /// by [StreamAvatarThemeData.floatingElevation], falling back to
+  /// [StreamElevation.level2].
+  final bool? isFloating;
+
   /// Screen-reader label for the avatar.
   ///
   /// When null (the default), a `"Group"` label is emitted for group
@@ -76,7 +84,11 @@ class StreamChannelAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    assert(channel.state != null, 'Channel ${channel.id} is not initialized');
+    // The channel may be disposed (e.g. on logout) while this avatar is still
+    // mounted and the framework rebuilds it (a parent rebuild, or an inherited
+    // dependency change re-running the inner builder). Reading channel state
+    // then throws, so bail out instead.
+    if (channel.state == null) return const SizedBox.shrink();
 
     final effectiveSize = size ?? StreamAvatarGroupSize.lg;
     final effectiveLabel = semanticsLabel ?? _defaultSemanticsLabel(context);
@@ -88,12 +100,17 @@ class StreamChannelAvatar extends StatelessWidget {
         imageUrl: channelImage,
         semanticsLabel: effectiveLabel,
         size: _avatarSizeForAvatarGroupSize(effectiveSize),
+        isFloating: isFloating,
         placeholder: (_) => const _StreamChannelAvatarPlaceholder(),
       ),
       noDataBuilder: (context) => BetterStreamBuilder(
-        stream: channel.state!.membersStream,
-        initialData: channel.state!.members,
+        stream: channel.state?.membersStream,
+        initialData: channel.state?.members,
         builder: (context, members) {
+          // This builder is re-run by inherited-dependency changes too, so
+          // it can fire after the channel is disposed — guard again here.
+          if (channel.state == null) return const SizedBox.shrink();
+
           final users = members.map((it) => it.user!).toList();
           final currentUserId = channel.client.state.currentUser?.id;
 
@@ -108,6 +125,7 @@ class StreamChannelAvatar extends StatelessWidget {
               size: _avatarSizeForAvatarGroupSize(effectiveSize),
               // TODO: make this configurable when the online state is shown.
               showOnlineIndicator: otherUser.online,
+              isFloating: isFloating,
             );
           }
 
@@ -115,6 +133,7 @@ class StreamChannelAvatar extends StatelessWidget {
             size: effectiveSize,
             semanticsLabel: effectiveLabel,
             users: users.sortedBy((it) => it.id == currentUserId ? 1 : 0),
+            isFloating: isFloating,
           );
         },
       ),

@@ -44,22 +44,15 @@ class MessageListUnreadController {
   /// a channel change, `messages` on every stream emission, and the widget's
   /// configuration on any rebuild.
   MessageListUnreadController({
-    required Channel? Function() channel,
-    required Message? Function(Read? currentUserRead) getFirstUnreadMessage,
-    required Message? Function() parentMessage,
-    required List<Message> Function() messages,
-    required Iterable<ItemPosition> Function() itemPositions,
-    required bool Function() markReadWhenAtTheBottom,
-    required Future<bool> Function(String messageId) scrollToMessage,
-    required Object? Function() attachToken,
-  }) : _channel = channel,
-       _getFirstUnreadMessage = getFirstUnreadMessage,
-       _parentMessage = parentMessage,
-       _messages = messages,
-       _itemPositions = itemPositions,
-       _markReadWhenAtTheBottom = markReadWhenAtTheBottom,
-       _scrollToMessage = scrollToMessage,
-       _attachToken = attachToken;
+    required this._channel,
+    required this._getFirstUnreadMessage,
+    required this._parentMessage,
+    required this._messages,
+    required this._itemPositions,
+    required this._markReadWhenAtTheBottom,
+    required this._scrollToMessage,
+    required this._attachToken,
+  });
 
   final Channel? Function() _channel;
   final Message? Function(Read? currentUserRead) _getFirstUnreadMessage;

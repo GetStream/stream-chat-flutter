@@ -1,11 +1,18 @@
 ## Upcoming
 
+🔄 Changed
+
+- Raised minimum Dart SDK to `^3.12.0`.
+
+## 10.3.0
+
 ✅ Added
 
 - Added `StreamChatClient.isLocalUnreadCountEnabled` (default `false`). When enabled, channels that have read events disabled (e.g. livestream channel types) track their unread count locally, on-device: incoming messages increment it, hard-deleted messages decrement it, and `Channel.markRead` / `markUnread` / `markUnreadByTimestamp` update it locally without a network request — including `Read.lastReadMessageId`, so the unread divider and jump-to-unread button anchor to the right message. Channels that support read receipts are unaffected and keep relying on server-driven unread counts.
 - Added `Event.watcherCount`, exposing the server-provided `watcher_count` field on events (e.g. `user.watching.start`, `user.watching.stop`, `message.new`).
 - Added `StreamChatNetworkError.type` (a `StreamChatNetworkErrorType` capturing the transport failure kind — connection error, timeout, cancellation, etc.).
 - Added `ChannelClientState.isMarkedAsUnread`, reporting whether the current user has an active manual mark-unread on the channel that hasn't been read past yet. Set by `markUnreadLocally` and by a `notification.mark_unread` event for the current user; cleared by `markReadLocally` and by a `message.read` event for the current user.
+- Exported `FilterOperator` alongside `Filter`.
 
 ⚠️ Deprecated
 
@@ -17,14 +24,20 @@
 
 🐞 Fixed
 
+- Fixed pinned channels appearing at the bottom of the list when sorting by `pinned_at` descending.
+- Fixed channels without messages appearing at the top of the list when sorting by `last_message_at` descending.
 - Fixed `StreamWebSocketError.toString()` using a `WebSocketError(...)` prefix instead of the class name; it now also includes `code`, and `StreamChatNetworkError.toString()` now surfaces the transport `type` when known.
 - Fixed `ChannelClientState.watcherCount` staying stale during a session.
 - Fixed watchers not being removed from `ChannelClientState.watchers` on `user.watching.stop`.
 - Fixed `Channel.name`/`image`/`extraData` setters throwing after a *failed* initialization; they now only throw once the channel is successfully initialized.
 - Fixed `Channel.initialized` staying errored after a failed init; it now reflects a subsequent successful (re)initialization.
 - Fixed a `StateError` (`Cannot add new events after calling close`) thrown when the client is disposed while a reconnect recovery is still in flight.
+- Fixed `StreamChatClient.sync` letting a failure from its final `updateLastSyncAt` write escape to the caller; it is now handled by the method's own error handling, like every other sync failure.
 - Fixed `Message.deleteMyReaction` dropping an entire reaction group when its summed scores reached zero even though other users' reactions kept the count positive; the group is now retained as long as its count stays above zero.
 - Fixed reaction groups synthesized from legacy `reaction_counts`/`reaction_scores` payloads being discarded at parse time when their score total was zero or negative despite a positive count.
+- Fixed `Channel.getReplies` adding the parent message to `ChannelClientState.threads` when a backend returns it alongside the replies, which rendered the thread root twice. The online path now filters it out, matching the offline one.
+- Fixed truncated channels dropping to the bottom of the list when sorting by `last_updated`.
+- Fixed `ChannelClientState` no longer handling `notification.mark_read` (regression since 9.20.0), which left `unreadCount` stale after `Channel.markRead` on channels the user isn't watching.
 
 ## 10.2.0
 

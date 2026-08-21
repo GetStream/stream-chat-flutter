@@ -7,10 +7,9 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 class SharedLocationService {
   SharedLocationService({
-    required StreamChatClient client,
-    LocationProvider? locationProvider,
-  }) : _client = client,
-       _locationProvider = locationProvider ?? LocationProvider();
+    required this._client,
+    required this._locationProvider,
+  });
 
   final StreamChatClient _client;
   final LocationProvider _locationProvider;

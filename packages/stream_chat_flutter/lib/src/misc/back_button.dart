@@ -19,8 +19,8 @@ class StreamBackButton extends StatelessWidget {
       'This will be removed in a future version.',
     )
     this.channelId,
-    Widget? unreadIndicator = _unset,
-  }) : _unreadIndicator = unreadIndicator;
+    this._unreadIndicator = _unset,
+  });
 
   /// Callback for when button is pressed
   final VoidCallback? onPressed;
@@ -57,8 +57,14 @@ class StreamBackButton extends StatelessWidget {
       _ => context.streamIcons.arrowLeft,
     };
 
+    final surfaceStyle = StreamTheme.of(context).surfaceStyle;
+    final toolbarSurfaceStyle = StreamToolbarScope.maybeOf(context);
+
+    final effectiveIsFloating = toolbarSurfaceStyle?.isFloating ?? surfaceStyle.isFloating;
+
     Widget button = StreamButton.icon(
-      type: .ghost,
+      type: effectiveIsFloating ? .outline : .ghost,
+      isFloating: effectiveIsFloating,
       size: .medium,
       style: .secondary,
       tooltip: backTooltip,

@@ -55,6 +55,7 @@ class StreamUserAvatarGroup extends StatelessWidget {
     super.key,
     required this.users,
     this.size,
+    this.isFloating,
     this.semanticsLabel,
   });
 
@@ -65,6 +66,13 @@ class StreamUserAvatarGroup extends StatelessWidget {
   ///
   /// If null, defaults to [StreamAvatarGroupSize.lg].
   final StreamAvatarGroupSize? size;
+
+  /// Whether to show a drop shadow around the avatar group.
+  ///
+  /// Defaults to null, treated as not floating. The shadow depth is determined
+  /// by [StreamAvatarThemeData.floatingElevation], falling back to
+  /// [StreamElevation.level2].
+  final bool? isFloating;
 
   /// Screen-reader label for the avatar group.
   ///
@@ -82,6 +90,7 @@ class StreamUserAvatarGroup extends StatelessWidget {
         (user) => StreamUserAvatar(
           user: user,
           showOnlineIndicator: false,
+          isFloating: isFloating,
         ),
       ),
     );

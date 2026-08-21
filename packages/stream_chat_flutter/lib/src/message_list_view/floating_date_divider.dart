@@ -138,24 +138,30 @@ class FloatingDateDivider extends StatelessWidget {
     for (final p in positions) {
       if (p.index != itemIndex) continue;
 
+      // Measured against the visible content (inside the list's padding), so a
+      // floating bar's inset doesn't shift where the fade hands off. Falls back
+      // to the viewport-relative edges when content edges aren't provided.
+      final leadingEdge = p.contentLeadingEdge ?? p.itemLeadingEdge;
+      final trailingEdge = p.contentTrailingEdge ?? p.itemTrailingEdge;
+
       var opacity = 1.0;
 
       if (reverse) {
         // Fade as the inline divider ABOVE becomes visible
-        // (trailing edge = top of item, 1.0 = viewport top).
-        if (hasDateDividerAbove && p.itemTrailingEdge < 1) {
+        // (trailing edge = top of item, 1.0 = content top).
+        if (hasDateDividerAbove && trailingEdge < 1) {
           opacity = clampDouble(
-            (p.itemTrailingEdge - (1.0 - _fadeRange)) / _fadeRange,
+            (trailingEdge - (1.0 - _fadeRange)) / _fadeRange,
             0,
             1,
           );
         }
 
-        // Fade as the inline divider BELOW approaches the viewport top
+        // Fade as the inline divider BELOW approaches the content top
         // (leading edge = bottom of item, approaching 1.0).
         if (hasDateDividerBelow) {
           final t = clampDouble(
-            ((1.0 - _fadeRange) - p.itemLeadingEdge) / _fadeRange,
+            ((1.0 - _fadeRange) - leadingEdge) / _fadeRange,
             0,
             1,
           );
@@ -163,20 +169,20 @@ class FloatingDateDivider extends StatelessWidget {
         }
       } else {
         // Fade as the inline divider ABOVE becomes visible
-        // (leading edge = top of item, 0.0 = viewport top).
-        if (hasDateDividerAbove && p.itemLeadingEdge > 0) {
+        // (leading edge = top of item, 0.0 = content top).
+        if (hasDateDividerAbove && leadingEdge > 0) {
           opacity = clampDouble(
-            (_fadeRange - p.itemLeadingEdge) / _fadeRange,
+            (_fadeRange - leadingEdge) / _fadeRange,
             0,
             1,
           );
         }
 
-        // Fade as the inline divider BELOW approaches the viewport top
+        // Fade as the inline divider BELOW approaches the content top
         // (trailing edge = bottom of item, approaching 0.0).
         if (hasDateDividerBelow) {
           final t = clampDouble(
-            (p.itemTrailingEdge - _fadeRange) / _fadeRange,
+            (trailingEdge - _fadeRange) / _fadeRange,
             0,
             1,
           );

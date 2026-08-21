@@ -444,4 +444,217 @@ void main() {
       expect(titleTapped, true);
     },
   );
+
+  testWidgets(
+    'onBackPressed replaces the default back button pop',
+    (WidgetTester tester) async {
+      final client = MockClient();
+      final clientState = MockClientState();
+      final channel = MockChannel();
+      final channelState = MockChannelState();
+      final user = OwnUser(id: 'user-id');
+
+      when(() => client.state).thenReturn(clientState);
+      when(() => clientState.currentUser).thenReturn(user);
+      when(() => clientState.currentUserStream).thenAnswer((_) => Stream.value(user));
+      when(() => clientState.totalUnreadCount).thenReturn(0);
+      when(() => clientState.totalUnreadCountStream).thenAnswer((_) => Stream.value(0));
+      when(() => clientState.channels).thenReturn({channel.cid!: channel});
+      when(() => client.wsConnectionStatusStream).thenAnswer((_) => Stream.value(ConnectionStatus.connected));
+
+      when(() => channel.client).thenReturn(client);
+      when(() => channel.state).thenReturn(channelState);
+      when(() => channel.lastMessageAt).thenReturn(null);
+      when(() => channel.name).thenReturn('test');
+      when(() => channel.nameStream).thenAnswer((_) => Stream.value('test'));
+      when(() => channel.image).thenReturn(null);
+      when(() => channel.imageStream).thenAnswer((_) => Stream.value(null));
+      when(() => channel.isMuted).thenReturn(false);
+      when(() => channel.isMutedStream).thenAnswer((_) => Stream.value(false));
+
+      when(() => channelState.members).thenReturn([]);
+      when(() => channelState.membersStream).thenAnswer((_) => Stream.value([]));
+      when(() => channelState.unreadCount).thenReturn(0);
+      when(() => channelState.unreadCountStream).thenAnswer((_) => Stream.value(0));
+
+      var backPressed = false;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: StreamChat(
+            client: client,
+            child: StreamChannel(
+              channel: channel,
+              child: Scaffold(
+                body: StreamChannelHeader(onBackPressed: () => backPressed = true),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byType(StreamBackButton));
+
+      expect(backPressed, true);
+    },
+  );
+
+  group('default slot floating behavior', () {
+    // The header layers channelHeaderTheme under `style` and hands the pair to
+    // the bar, which republishes what it resolved to its slots. Both default
+    // slots therefore have to agree with the bar and with each other, whichever
+    // link in the chain set the behavior.
+    Future<void> pumpHeader(
+      WidgetTester tester, {
+      StreamSurfaceStyle surfaceStyle = StreamSurfaceStyle.regular,
+      StreamSurfaceStyle? themeSurfaceStyle,
+      StreamSurfaceStyle? styleSurfaceStyle,
+      StreamSurfaceStyle? ancestorSurfaceStyle,
+    }) async {
+      final client = MockClient();
+      final clientState = MockClientState();
+      final channel = MockChannel();
+      final channelState = MockChannelState();
+      final user = OwnUser(id: 'user-id');
+
+      when(() => client.state).thenReturn(clientState);
+      when(() => clientState.currentUser).thenReturn(user);
+      when(() => clientState.currentUserStream).thenAnswer((_) => Stream.value(user));
+      when(() => clientState.totalUnreadCount).thenReturn(0);
+      when(() => clientState.totalUnreadCountStream).thenAnswer((_) => Stream.value(0));
+      when(() => clientState.channels).thenReturn({channel.cid!: channel});
+      when(() => client.wsConnectionStatusStream).thenAnswer((_) => Stream.value(ConnectionStatus.connected));
+
+      when(() => channel.client).thenReturn(client);
+      when(() => channel.state).thenReturn(channelState);
+      when(() => channel.lastMessageAt).thenReturn(null);
+      when(() => channel.name).thenReturn('test');
+      when(() => channel.nameStream).thenAnswer((_) => Stream.value('test'));
+      when(() => channel.image).thenReturn(null);
+      when(() => channel.imageStream).thenAnswer((_) => Stream.value(null));
+      when(() => channel.isMuted).thenReturn(false);
+      when(() => channel.isMutedStream).thenAnswer((_) => Stream.value(false));
+
+      when(() => channelState.members).thenReturn([]);
+      when(() => channelState.membersStream).thenAnswer((_) => Stream.value([]));
+      when(() => channelState.unreadCount).thenReturn(0);
+      when(() => channelState.unreadCountStream).thenAnswer((_) => Stream.value(0));
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(extensions: [StreamTheme(surfaceStyle: surfaceStyle)]),
+          home: StreamChat(
+            client: client,
+            themeData: StreamChatThemeData(
+              channelHeaderTheme: switch (themeSurfaceStyle) {
+                final surfaceStyle? => StreamAppBarThemeData(style: StreamAppBarStyle(surfaceStyle: surfaceStyle)),
+                _ => null,
+              },
+            ),
+            child: StreamChannel(
+              channel: channel,
+              child: Scaffold(
+                body: Builder(
+                  builder: (context) {
+                    Widget header = StreamChannelHeader(
+                      style: switch (styleSurfaceStyle) {
+                        final surfaceStyle? => StreamAppBarStyle(surfaceStyle: surfaceStyle),
+                        _ => null,
+                      },
+                    );
+                    // An app-level per-component override placed above the header.
+                    if (ancestorSurfaceStyle case final surfaceStyle?) {
+                      header = StreamAppBarTheme(
+                        data: StreamAppBarThemeData(style: StreamAppBarStyle(surfaceStyle: surfaceStyle)),
+                        child: header,
+                      );
+                    }
+                    return header;
+                  },
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    bool? avatarIsFloating(WidgetTester tester) {
+      return tester.widget<StreamChannelAvatar>(find.byType(StreamChannelAvatar)).isFloating;
+    }
+
+    bool? backButtonIsFloating(WidgetTester tester) {
+      final button = find.descendant(of: find.byType(StreamBackButton), matching: find.byType(StreamButton));
+      return tester.widget<StreamButton>(button).props.isFloating;
+    }
+
+    testWidgets('is not floating by default', (tester) async {
+      await pumpHeader(tester);
+
+      expect(avatarIsFloating(tester), isNot(isTrue));
+    });
+
+    testWidgets('floats when the app style is floating', (tester) async {
+      await pumpHeader(tester, surfaceStyle: StreamSurfaceStyle.floating);
+
+      expect(avatarIsFloating(tester), isTrue);
+    });
+
+    testWidgets('floats when the header theme says so, over a regular app style', (tester) async {
+      await pumpHeader(tester, themeSurfaceStyle: StreamSurfaceStyle.floating);
+
+      expect(avatarIsFloating(tester), isTrue);
+    });
+
+    testWidgets('floats when an ancestor StreamAppBarTheme override says so, over a regular app style', (tester) async {
+      // Regression: the header must not stand between the bar and a caller's
+      // StreamAppBarTheme, or an app-level surfaceStyle never reaches it.
+      await pumpHeader(tester, ancestorSurfaceStyle: StreamSurfaceStyle.floating);
+
+      expect(avatarIsFloating(tester), isTrue);
+      expect(backButtonIsFloating(tester), isTrue);
+    });
+
+    testWidgets('the header theme wins over an ancestor StreamAppBarTheme override', (tester) async {
+      await pumpHeader(
+        tester,
+        ancestorSurfaceStyle: StreamSurfaceStyle.floating,
+        themeSurfaceStyle: StreamSurfaceStyle.regular,
+      );
+
+      expect(avatarIsFloating(tester), isNot(isTrue));
+    });
+
+    testWidgets('the header style wins over both the header theme and the app style', (tester) async {
+      await pumpHeader(
+        tester,
+        surfaceStyle: StreamSurfaceStyle.floating,
+        themeSurfaceStyle: StreamSurfaceStyle.floating,
+        styleSurfaceStyle: StreamSurfaceStyle.regular,
+      );
+
+      expect(avatarIsFloating(tester), isNot(isTrue));
+    });
+
+    testWidgets('the default back button agrees with the avatar under the header theme', (tester) async {
+      await pumpHeader(tester, themeSurfaceStyle: StreamSurfaceStyle.floating);
+
+      expect(backButtonIsFloating(tester), isTrue);
+      expect(backButtonIsFloating(tester), avatarIsFloating(tester));
+    });
+
+    testWidgets('the default back button agrees with the avatar under the header style', (tester) async {
+      await pumpHeader(
+        tester,
+        surfaceStyle: StreamSurfaceStyle.floating,
+        styleSurfaceStyle: StreamSurfaceStyle.regular,
+      );
+
+      expect(backButtonIsFloating(tester), isNot(isTrue));
+      expect(backButtonIsFloating(tester), avatarIsFloating(tester));
+    });
+  });
 }

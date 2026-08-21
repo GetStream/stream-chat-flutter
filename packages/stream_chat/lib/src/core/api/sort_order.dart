@@ -1,6 +1,7 @@
 // ignore_for_file: constant_identifier_names
 
 import 'package:json_annotation/json_annotation.dart';
+import 'package:stream_chat/src/core/models/channel_state.dart';
 import 'package:stream_chat/src/core/models/comparable_field.dart';
 
 part 'sort_order.g.dart';
@@ -51,10 +52,18 @@ class SortOption<T extends ComparableFieldProvider> {
   /// ```
   const SortOption.desc(
     this.field, {
-    this.nullOrdering = NullOrdering.nullsFirst,
-    Comparator<T>? comparator,
+    NullOrdering? nullOrdering,
+    this._comparator,
   }) : direction = SortOption.DESC,
-       _comparator = comparator;
+       // The server orders pinned_at and last_message_at NULLS LAST whichever
+       // direction they are sorted in, so pinned and message-less channels
+       // stay at the end of the list. Every other field is ordered with a bare
+       // direction, which puts nulls first on a descending sort.
+       nullOrdering =
+           nullOrdering ??
+           (field == ChannelSortKey.pinnedAt || field == ChannelSortKey.lastMessageAt
+               ? NullOrdering.nullsLast
+               : NullOrdering.nullsFirst);
 
   /// Creates a SortOption for ascending order sorting by the specified field.
   ///
@@ -65,16 +74,18 @@ class SortOption<T extends ComparableFieldProvider> {
   /// ```
   const SortOption.asc(
     this.field, {
-    this.nullOrdering = NullOrdering.nullsLast,
-    Comparator<T>? comparator,
+    NullOrdering? nullOrdering,
+    this._comparator,
   }) : direction = SortOption.ASC,
-       _comparator = comparator;
+       // Every field the server sorts ascending orders nulls last, either
+       // explicitly or by inheriting the default.
+       nullOrdering = nullOrdering ?? NullOrdering.nullsLast;
 
   /// Creates a [SortOption] from its JSON-serialized representation.
   ///
   /// Reconstructs via [SortOption.desc] / [SortOption.asc] based on the
-  /// `direction` field; `nullOrdering` defaults follow each constructor and
-  /// any custom comparator is discarded (comparators are not serialized).
+  /// `direction` field; [nullOrdering] resolves to the default for the field
+  /// and any custom comparator is discarded (comparators are not serialized).
   factory SortOption.fromJson(Map<String, dynamic> json) {
     final field = json['field'] as String;
     final direction = json['direction'] as int;
@@ -95,8 +106,11 @@ class SortOption<T extends ComparableFieldProvider> {
 
   /// The null ordering strategy to use when comparing null values.
   ///
-  /// Defaults to `NullOrdering.nullsFirst`, which treats null values as less
-  /// than any non-null value.
+  /// When not passed to the constructor, defaults to the ordering the server
+  /// applies for [field]: [NullOrdering.nullsLast] for
+  /// [ChannelSortKey.pinnedAt] and [ChannelSortKey.lastMessageAt] in either
+  /// direction, and for every field on an ascending sort;
+  /// [NullOrdering.nullsFirst] for any other field on a descending sort.
   @JsonKey(includeToJson: false, includeFromJson: false)
   final NullOrdering nullOrdering;
 

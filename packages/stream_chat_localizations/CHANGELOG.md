@@ -1,5 +1,11 @@
 ## Upcoming
 
+🔄 Changed
+
+- Raised minimum Flutter to `>=3.44.0` and Dart SDK to `^3.12.0`.
+
+## 10.3.0
+
 ✅ Added
 
 - Added connection-error translations (`connectionErrorTitle`/`Description`, `slowConnectionErrorTitle`/`Description`, `genericErrorTitle`/`Description`) for all supported locales.

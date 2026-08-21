@@ -100,9 +100,9 @@ class StreamChatClient {
     AttachmentFileUploaderProvider attachmentFileUploaderProvider = StreamAttachmentFileUploader.new,
     Iterable<Interceptor>? chatApiInterceptors,
     HttpClientAdapter? httpClientAdapter,
-    bool recoverStateOnReconnect = true,
+    this._recoverStateOnReconnect = true,
     this.isLocalUnreadCountEnabled = false,
-  }) : _recoverStateOnReconnect = recoverStateOnReconnect {
+  }) {
     logger.info('Initiating new StreamChatClient');
 
     final options = StreamHttpClientOptions(
@@ -677,7 +677,7 @@ class StreamChatClient {
         }
 
         final updatedSyncAt = events.lastOrNull?.createdAt ?? DateTime.now();
-        return chatPersistenceClient?.updateLastSyncAt(updatedSyncAt);
+        return await chatPersistenceClient?.updateLastSyncAt(updatedSyncAt);
       } catch (error, stk) {
         // If we got a 400 error, it means that either the sync time is too
         // old or the channel list is too long or too many events need to be
@@ -689,8 +689,13 @@ class StreamChatClient {
             'Resetting the persistence client to enable a fresh start.',
           );
 
-          await chatPersistenceClient?.flush();
-          return chatPersistenceClient?.updateLastSyncAt(DateTime.now());
+          try {
+            await chatPersistenceClient?.flush();
+            return await chatPersistenceClient?.updateLastSyncAt(DateTime.now());
+          } catch (resetError, resetStk) {
+            logger.warning('Error resetting the persistence client', resetError, resetStk);
+            return;
+          }
         }
 
         logger.warning('Error syncing events', error, stk);
