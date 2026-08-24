@@ -4,10 +4,10 @@ import 'package:stream_chat_persistence/stream_chat_persistence.dart';
 
 /// Credentials and client setup shared by the tutorial entry points.
 ///
-/// This mirrors the top of `lib/main.dart` in Step 4 of the
+/// This mirrors the top of the tutorial's own `main.dart` in Step 4 of the
 /// [Flutter Chat tutorial](https://getstream.io/chat/sdk/flutter/tutorial/).
-/// The three `main_step*.dart` entry points differ only in `MyApp`, so the
-/// setup lives here rather than being repeated in each of them.
+/// The three `tutorial_main_step*.dart` entry points differ only in `MyApp`,
+/// so the setup lives here rather than being repeated in each of them.
 
 /// Credentials from Step 3 of the tutorial.
 /// - API key: `getstream env --target flutter` writes it to `dart_defines.json`,

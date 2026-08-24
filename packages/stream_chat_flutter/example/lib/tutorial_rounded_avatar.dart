@@ -6,7 +6,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 ///
 /// From Step 6 of the
 /// [Flutter Chat tutorial](https://getstream.io/chat/sdk/flutter/tutorial/).
-/// Registered on the `avatar` component-builder slot in `main_step6.dart`.
+/// Registered on the `avatar` component-builder slot in `tutorial_main_step6.dart`.
 /// Because `avatar` is a single global slot, the change lands in the message
 /// rows, the channel list, and the headers at once - including inside
 /// [StreamChannelPage], which owns those widgets itself.

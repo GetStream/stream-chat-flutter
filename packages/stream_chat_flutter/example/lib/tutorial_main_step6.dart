@@ -1,27 +1,28 @@
 // ignore_for_file: public_member_api_docs
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-import 'package:stream_chat_flutter_example/tutorial/channel_list_page.dart';
-import 'package:stream_chat_flutter_example/tutorial/client.dart';
+import 'package:stream_chat_flutter_example/tutorial_channel_list_page.dart';
+import 'package:stream_chat_flutter_example/tutorial_client.dart';
+import 'package:stream_chat_flutter_example/tutorial_rounded_avatar.dart';
 
-/// Step 5 of the
+/// Step 6 of the
 /// [Flutter Chat tutorial](https://getstream.io/chat/sdk/flutter/tutorial/) -
-/// the same app, themed.
+/// the themed app, with one widget swapped out.
 ///
-/// Run with: `flutter run -t lib/tutorial/main_step5.dart`
+/// Run with: `flutter run -t lib/tutorial_main_step6.dart`
 ///
-/// Theming works in two layers, and you rarely need more than the first:
+/// Theming changes tokens (colors, fonts, shapes). To change an actual
+/// *widget*, register a component builder and override only the slot you want -
+/// every other widget keeps its default. Here [RoundedAvatar] replaces the
+/// circular avatar with a rounded square.
 ///
-/// 1. Design tokens - a [StreamTheme] registered as a [ThemeData] extension.
-///    Give it a brand color and Stream derives its whole semantic palette
-///    from that swatch.
-/// 2. Per-widget overrides - a [StreamChatThemeData] passed to
-///    [StreamChat.themeData], merged on top. Reach for this only when one
-///    component needs to differ.
+/// `avatar` is one of the shared slots you pass directly. Chat-specific ones -
+/// `messageItem`, `channelListItem`, `messageComposer` - go through
+/// `extensions: streamChatComponentBuilders(...)` instead.
 ///
-/// Both land inside [StreamChannelPage] as well, since it resolves the ambient
-/// theme like any other Stream widget. Only `MyApp` changes from
-/// `main_step4.dart`.
+/// Component builders resolve through the factory, so they reach inside
+/// [StreamChannelPage] too even though it owns its own header, list, and
+/// composer. Only `MyApp` changes from `tutorial_main_step5.dart`.
 Future<void> main() async {
   final client = await connectTutorialUser();
 
@@ -77,6 +78,9 @@ class MyApp extends StatelessWidget {
       builder: (context, child) => StreamChat(
         client: client,
         themeData: customTheme,
+        componentBuilders: StreamComponentBuilders(
+          avatar: (context, props) => RoundedAvatar(props: props),
+        ),
         child: child,
       ),
       home: const ChannelListPage(),
