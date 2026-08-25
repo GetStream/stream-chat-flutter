@@ -12,9 +12,11 @@
 🔄 Changed
 
 - Raised minimum Flutter to `>=3.44.0` and Dart SDK to `^3.12.0`.
+- Migrated to `file_picker` 12. `PlatformFileX.toAttachmentFile` and `PlatformFileX.toAttachment` are now asynchronous, matching the existing `XFileX` extensions, because `PlatformFile` no longer exposes the eagerly-loaded `bytes` and `size` getters. `StreamAttachmentHandler.pickFile`'s own signature is unchanged, but `withData` and `withReadStream` are no longer forwarded — `file_picker` deprecated them in favour of reading the content on demand.
 
 🐞 Fixed
 
+- Fixed `StreamAttachmentHandler.pickFile` throwing when the file picker returned an empty selection: it took `.files.first` unconditionally. It now uses `FilePicker.pickFile` and returns `null`.
 - Fixed a crash on web when the message list rebuilt while messages were selectable, for example after opening the attachment picker.
 - Fixed the browser's native context menu reappearing over the message context menu on web after scrolling messages out of view or deleting one.
 - Fixed the SDK re-enabling the browser's native context menu on web in apps that had disabled it themselves.
