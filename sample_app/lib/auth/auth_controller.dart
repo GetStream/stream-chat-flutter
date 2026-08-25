@@ -16,6 +16,7 @@ bool get platformSupportsPersistenceCredentials => !CurrentPlatform.isWeb && !Cu
 const kStreamApiKey = 'STREAM_API_KEY';
 const kStreamUserId = 'STREAM_USER_ID';
 const kStreamToken = 'STREAM_TOKEN';
+const kStreamBaseUrlKey = 'STREAM_BASE_URL';
 
 // Firebase on both platforms: raw APNs payloads lack the FCM metadata that
 // `firebase_messaging.onMessageOpenedApp` needs to fire on tap.
@@ -60,6 +61,7 @@ class StreamConnectionOverride {
 
 StreamChatClient _buildStreamChatClient(
   String apiKey, {
+  String? baseUrl,
   StreamConnectionOverride? connectionOverride,
 }) {
   final logLevel = connectionOverride != null ? Level.OFF : (kDebugMode ? Level.INFO : Level.SEVERE);
@@ -73,7 +75,7 @@ StreamChatClient _buildStreamChatClient(
           return error is StreamChatNetworkError && error.isRetriable;
         },
       ),
-      baseURL: connectionOverride?.baseURL,
+      baseURL: connectionOverride?.baseURL ?? baseUrl,
       baseWsUrl: connectionOverride?.baseWsUrl,
       // e2e only: lets the harness simulate a full network outage by failing
       // every HTTP request (paired with the WebSocket close from
@@ -143,6 +145,18 @@ class AuthController extends ValueNotifier<AuthState> {
   /// The active client, or `null` before the first [connect].
   StreamChatClient? get client => _client;
 
+  /// Whether the session is pointed at something other than the app's own
+  /// defaults — a custom API key or base URL entered in "Advanced Options".
+  ///
+  /// Features that depend on server-side configuration only present on the
+  /// demo app (the channel list's predefined filter) switch to a portable
+  /// equivalent when this is true.
+  bool get usingCustomBackend {
+    final apiKey = _activeApiKey ?? kDefaultStreamApiKey;
+    final baseUrl = _activeBaseUrl ?? '';
+    return apiKey != kDefaultStreamApiKey || baseUrl != kStreamBaseUrl;
+  }
+
   @visibleForTesting
   StreamConnectionOverride? debugConnectionOverride;
 
@@ -162,6 +176,7 @@ class AuthController extends ValueNotifier<AuthState> {
   bool debugForceOffline = false;
 
   String? _activeApiKey;
+  String? _activeBaseUrl;
   PushTokenManager? _pushTokenManager;
 
   /// Restores a previous session from secure storage, if any.
@@ -177,6 +192,7 @@ class AuthController extends ValueNotifier<AuthState> {
     final apiKey = await secureStorage.read(key: kStreamApiKey);
     final userId = await secureStorage.read(key: kStreamUserId);
     final token = await secureStorage.read(key: kStreamToken);
+    final baseUrl = await secureStorage.read(key: kStreamBaseUrlKey);
     if (userId == null || token == null) return;
 
     try {
@@ -184,6 +200,7 @@ class AuthController extends ValueNotifier<AuthState> {
         apiKey: apiKey ?? kDefaultStreamApiKey,
         user: User(id: userId),
         token: token,
+        baseUrl: (baseUrl ?? '').isEmpty ? null : baseUrl,
         persistCredentials: false,
       );
     } catch (e, stk) {
@@ -202,20 +219,25 @@ class AuthController extends ValueNotifier<AuthState> {
     required String apiKey,
     required User user,
     required String token,
+    String? baseUrl,
     bool persistCredentials = true,
   }) async {
     value = const Authenticating();
 
-    if (_client != null && _activeApiKey != apiKey) {
+    // The base URL is baked into the client at construction, so a change to it
+    // needs a fresh client just as much as a change of app does.
+    if (_client != null && (_activeApiKey != apiKey || _activeBaseUrl != baseUrl)) {
       await _client!.dispose();
       _client = null;
     }
 
     final client = _client ??= _buildStreamChatClient(
       apiKey,
+      baseUrl: baseUrl,
       connectionOverride: debugConnectionOverride,
     );
     _activeApiKey = apiKey;
+    _activeBaseUrl = baseUrl;
 
     try {
       final ownUser = await client.connectUser(user, token);
@@ -226,6 +248,7 @@ class AuthController extends ValueNotifier<AuthState> {
           secureStorage.write(key: kStreamApiKey, value: apiKey),
           secureStorage.write(key: kStreamUserId, value: user.id),
           secureStorage.write(key: kStreamToken, value: token),
+          secureStorage.write(key: kStreamBaseUrlKey, value: baseUrl ?? ''),
         ]);
       }
 
@@ -290,6 +313,7 @@ class AuthController extends ValueNotifier<AuthState> {
     await _client?.dispose();
     _client = null;
     _activeApiKey = null;
+    _activeBaseUrl = null;
     debugConnectionOverride = null;
     debugConnectivityStream = null;
     debugForceOffline = false;

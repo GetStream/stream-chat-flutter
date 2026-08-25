@@ -91,6 +91,7 @@ class ChooseUserPage extends StatelessWidget {
                                 apiKey: kDefaultStreamApiKey,
                                 user: user,
                                 token: token,
+                                baseUrl: kStreamBaseUrl.isEmpty ? null : kStreamBaseUrl,
                               );
                             } finally {
                               // Pop the progress dialog regardless of outcome.
