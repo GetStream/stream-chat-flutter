@@ -309,6 +309,35 @@ void main() {
       expect(builds, 2);
     });
 
+    testWidgets('of narrows the dependency to the given message', (tester) async {
+      var builds = 0;
+
+      await tester.pumpWidget(
+        StreamMessageTranslations(
+          store: store,
+          child: Builder(
+            builder: (context) {
+              StreamMessageTranslations.of(context, messageId: 'message-1');
+              builds++;
+              return const SizedBox.shrink();
+            },
+          ),
+        ),
+      );
+
+      expect(builds, 1);
+
+      store.toggleOriginalText('message-2');
+      await tester.pump();
+
+      expect(builds, 1);
+
+      store.toggleOriginalText('message-1');
+      await tester.pump();
+
+      expect(builds, 2);
+    });
+
     testWidgets('isShowingOriginalTextOf reports the state of the given message', (tester) async {
       var showsOriginalText = false;
 

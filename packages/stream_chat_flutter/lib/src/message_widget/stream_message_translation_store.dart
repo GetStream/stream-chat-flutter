@@ -126,15 +126,13 @@ class StreamMessageTranslations extends StatefulWidget {
   /// its translation, in the nearest ancestor scope.
   ///
   /// The given [context] is rebuilt when *this* message is toggled, and not
-  /// when another message in the same scope is. Prefer this over reading the
-  /// store through [of], which rebuilds on every change.
+  /// when another message in the same scope is.
   ///
   /// This will throw a [FlutterError] if no [StreamMessageTranslations] is
   /// found in the widget tree above the given context.
   static bool isShowingOriginalTextOf(BuildContext context, String messageId) {
-    final scope = InheritedModel.inheritFrom<_StreamMessageTranslationsScope>(context, aspect: messageId);
-    if (scope != null) return scope.state.isShowingOriginalText(messageId);
-    throw _missingScopeError(context);
+    final store = of(context, messageId: messageId);
+    return store.isShowingOriginalText(messageId);
   }
 
   /// Switches [messageId] between showing its original text and its
@@ -147,17 +145,19 @@ class StreamMessageTranslations extends StatefulWidget {
   /// This will throw a [FlutterError] if no [StreamMessageTranslations] is
   /// found in the widget tree above the given context.
   static void toggleOriginalText(BuildContext context, String messageId) {
+    // Deliberately not `of`: a tap handler wants the store, not a dependency
+    // on the scope it came from.
     final scope = context.getInheritedWidgetOfExactType<_StreamMessageTranslationsScope>();
-    if (scope == null) throw _missingScopeError(context);
-    return scope.store.toggleOriginalText(messageId);
+    final store = scope?.store ?? _missingScope(context);
+    return store.toggleOriginalText(messageId);
   }
 
   /// Returns the [StreamMessageTranslationStore] from the nearest ancestor
   /// [StreamMessageTranslations] that encloses the given [context].
   ///
-  /// The given [context] is rebuilt whenever *any* message in the scope is
-  /// toggled. To depend on a single message instead, use
-  /// [isShowingOriginalTextOf].
+  /// Pass a [messageId] to depend on that message alone — the given [context]
+  /// is then rebuilt only when that message is toggled. Left null, [context]
+  /// is rebuilt whenever *any* message in the scope is.
   ///
   /// This will throw a [FlutterError] if no [StreamMessageTranslations] is
   /// found in the widget tree above the given context.
@@ -169,10 +169,8 @@ class StreamMessageTranslations extends StatefulWidget {
   /// ```
   ///
   /// If you want to return null instead of throwing, use [maybeOf].
-  static StreamMessageTranslationStore of(BuildContext context) {
-    final result = maybeOf(context);
-    if (result != null) return result;
-    throw _missingScopeError(context);
+  static StreamMessageTranslationStore of(BuildContext context, {String? messageId}) {
+    return maybeOf(context, messageId: messageId) ?? _missingScope(context);
   }
 
   /// Returns the [StreamMessageTranslationStore] from the nearest ancestor
@@ -181,14 +179,19 @@ class StreamMessageTranslations extends StatefulWidget {
   /// Returns null if no such ancestor exists.
   ///
   /// See also:
-  ///  * [of], which throws if no [StreamMessageTranslations] is found.
-  static StreamMessageTranslationStore? maybeOf(BuildContext context) {
-    final scope = context.dependOnInheritedWidgetOfExactType<_StreamMessageTranslationsScope>();
+  ///  * [of], which throws if no [StreamMessageTranslations] is found, and
+  ///    documents how [messageId] narrows the dependency.
+  static StreamMessageTranslationStore? maybeOf(BuildContext context, {String? messageId}) {
+    // A null aspect falls through to `dependOnInheritedWidgetOfExactType`,
+    // which depends on the scope as a whole.
+    final scope = InheritedModel.inheritFrom<_StreamMessageTranslationsScope>(context, aspect: messageId);
     return scope?.store;
   }
 
-  static FlutterError _missingScopeError(BuildContext context) {
-    return FlutterError.fromParts(<DiagnosticsNode>[
+  // The single failure path for every accessor above, so each one reads as a
+  // plain lookup.
+  static Never _missingScope(BuildContext context) {
+    throw FlutterError.fromParts(<DiagnosticsNode>[
       ErrorSummary(
         'StreamMessageTranslations was requested with a context that does '
         'not contain a StreamMessageTranslations.',
