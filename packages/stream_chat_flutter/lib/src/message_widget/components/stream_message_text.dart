@@ -79,16 +79,14 @@ class StreamMessageText extends StatelessWidget {
     final streamChat = StreamChat.of(context);
     final translationConfig = StreamChatConfiguration.of(context).messageTranslation;
 
-    // `BetterStreamBuilder`'s type parameter can't be nullable, so the
-    // current user's (possibly unset) language is wrapped in a record —
-    // itself always non-null — rather than defaulting it to an empty string.
-    return BetterStreamBuilder<({String? language})>(
-      initialData: (language: streamChat.currentUser?.language),
-      stream: streamChat.currentUserStream.map((it) => (language: it?.language)),
-      builder: (context, data) {
-        final translated = (showTranslatedText && translationConfig.enabled)
-            ? message.translate(data.language)
-            : message;
+    // An unset language arrives from the API as `''` anyway, and `translate`
+    // treats it the same as null, so it stands in for "no language" here —
+    // `BetterStreamBuilder`'s type parameter can't be nullable.
+    return BetterStreamBuilder<String>(
+      initialData: streamChat.currentUser?.language ?? '',
+      stream: streamChat.currentUserStream.map((it) => it?.language ?? ''),
+      builder: (context, language) {
+        final translated = (showTranslatedText && translationConfig.enabled) ? message.translate(language) : message;
         final messageText = translated.replaceMentions().text?.replaceAll('\n', '\n\n').trim();
 
         if (messageText == null || messageText.trim().isEmpty) return const Empty();

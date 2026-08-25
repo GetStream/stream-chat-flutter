@@ -189,13 +189,7 @@ class StreamChatState extends State<StreamChat> {
   /// channel and its open thread render the same parent message, and both
   /// should agree on which text it shows. Matches the Swift and Android SDKs,
   /// which key this state by message id above the individual list.
-  late final StreamMessageTranslationStore _translationStore;
-
-  @override
-  void initState() {
-    super.initState();
-    _translationStore = StreamMessageTranslationStore();
-  }
+  final _translationStore = StreamMessageTranslationStore();
 
   @override
   void dispose() {
