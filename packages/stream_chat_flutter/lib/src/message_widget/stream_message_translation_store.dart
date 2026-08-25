@@ -101,19 +101,63 @@ class StreamMessageTranslationStore extends ValueNotifier<StreamMessageTranslati
 
 /// Provides a [StreamMessageTranslationStore] to the widget tree.
 ///
+/// Reads through [isShowingOriginalTextOf] depend on a single message, so a
+/// toggle rebuilds only the message that changed rather than every message
+/// sharing the store.
+///
 /// See also:
 ///
 ///  * [StreamMessageTranslationStore], the store this scope provides.
-class StreamMessageTranslations extends InheritedNotifier<StreamMessageTranslationStore> {
+class StreamMessageTranslations extends StatefulWidget {
   /// Creates a message translation scope.
   const StreamMessageTranslations({
     super.key,
-    required StreamMessageTranslationStore store,
-    required super.child,
-  }) : super(notifier: store);
+    required this.store,
+    required this.child,
+  });
+
+  /// The store holding the translation state of this scope's messages.
+  final StreamMessageTranslationStore store;
+
+  /// The widget below this scope in the tree.
+  final Widget child;
+
+  /// Whether [messageId] is currently showing its original text instead of
+  /// its translation, in the nearest ancestor scope.
+  ///
+  /// The given [context] is rebuilt when *this* message is toggled, and not
+  /// when another message in the same scope is. Prefer this over reading the
+  /// store through [of], which rebuilds on every change.
+  ///
+  /// This will throw a [FlutterError] if no [StreamMessageTranslations] is
+  /// found in the widget tree above the given context.
+  static bool isShowingOriginalTextOf(BuildContext context, String messageId) {
+    final scope = InheritedModel.inheritFrom<_StreamMessageTranslationsScope>(context, aspect: messageId);
+    if (scope != null) return scope.state.isShowingOriginalText(messageId);
+    throw _missingScopeError(context);
+  }
+
+  /// Switches [messageId] between showing its original text and its
+  /// translation, in the nearest ancestor scope.
+  ///
+  /// A convenience for `StreamMessageTranslations.of(context)
+  /// .toggleOriginalText(messageId)` that does not make [context] depend on
+  /// the scope, so it is safe to call from a callback.
+  ///
+  /// This will throw a [FlutterError] if no [StreamMessageTranslations] is
+  /// found in the widget tree above the given context.
+  static void toggleOriginalText(BuildContext context, String messageId) {
+    final scope = context.getInheritedWidgetOfExactType<_StreamMessageTranslationsScope>();
+    if (scope == null) throw _missingScopeError(context);
+    return scope.store.toggleOriginalText(messageId);
+  }
 
   /// Returns the [StreamMessageTranslationStore] from the nearest ancestor
   /// [StreamMessageTranslations] that encloses the given [context].
+  ///
+  /// The given [context] is rebuilt whenever *any* message in the scope is
+  /// toggled. To depend on a single message instead, use
+  /// [isShowingOriginalTextOf].
   ///
   /// This will throw a [FlutterError] if no [StreamMessageTranslations] is
   /// found in the widget tree above the given context.
@@ -128,18 +172,32 @@ class StreamMessageTranslations extends InheritedNotifier<StreamMessageTranslati
   static StreamMessageTranslationStore of(BuildContext context) {
     final result = maybeOf(context);
     if (result != null) return result;
+    throw _missingScopeError(context);
+  }
 
-    throw FlutterError.fromParts(<DiagnosticsNode>[
+  /// Returns the [StreamMessageTranslationStore] from the nearest ancestor
+  /// [StreamMessageTranslations] that encloses the given context.
+  ///
+  /// Returns null if no such ancestor exists.
+  ///
+  /// See also:
+  ///  * [of], which throws if no [StreamMessageTranslations] is found.
+  static StreamMessageTranslationStore? maybeOf(BuildContext context) {
+    final scope = context.dependOnInheritedWidgetOfExactType<_StreamMessageTranslationsScope>();
+    return scope?.store;
+  }
+
+  static FlutterError _missingScopeError(BuildContext context) {
+    return FlutterError.fromParts(<DiagnosticsNode>[
       ErrorSummary(
-        'StreamMessageTranslations.of() called with a context that does not '
-        'contain a StreamMessageTranslations.',
+        'StreamMessageTranslations was requested with a context that does '
+        'not contain a StreamMessageTranslations.',
       ),
       ErrorDescription(
         'No StreamMessageTranslations ancestor could be found starting from '
-        'the context that was passed to StreamMessageTranslations.of(). '
-        'StreamMessageListView provides one for the messages it hosts, so '
-        'this usually happens when a message widget is built outside of a '
-        'message list.',
+        'the context that was passed. StreamChat provides one for its whole '
+        'subtree, so this usually happens when a message widget is built '
+        'outside of a StreamChat.',
       ),
       ErrorHint(
         'To fix this, wrap the subtree in a StreamMessageTranslations with a '
@@ -153,15 +211,54 @@ class StreamMessageTranslations extends InheritedNotifier<StreamMessageTranslati
     ]);
   }
 
-  /// Returns the [StreamMessageTranslationStore] from the nearest ancestor
-  /// [StreamMessageTranslations] that encloses the given context.
-  ///
-  /// Returns null if no such ancestor exists.
-  ///
-  /// See also:
-  ///  * [of], which throws if no [StreamMessageTranslations] is found.
-  static StreamMessageTranslationStore? maybeOf(BuildContext context) {
-    final widget = context.dependOnInheritedWidgetOfExactType<StreamMessageTranslations>();
-    return widget?.notifier;
+  @override
+  State<StreamMessageTranslations> createState() => _StreamMessageTranslationsState();
+}
+
+class _StreamMessageTranslationsState extends State<StreamMessageTranslations> {
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder(
+      valueListenable: widget.store,
+      // Passed through untouched, so a change only rebuilds the scope itself
+      // and the messages depending on the ids that changed.
+      child: widget.child,
+      builder: (context, state, child) => _StreamMessageTranslationsScope(
+        store: widget.store,
+        state: state,
+        child: child!,
+      ),
+    );
+  }
+}
+
+// Does the actual providing, keyed by message id so a dependent only rebuilds
+// for the message it asked about.
+class _StreamMessageTranslationsScope extends InheritedModel<String> {
+  const _StreamMessageTranslationsScope({
+    required this.store,
+    required this.state,
+    required super.child,
+  });
+
+  final StreamMessageTranslationStore store;
+  final StreamMessageTranslationState state;
+
+  @override
+  bool updateShouldNotify(_StreamMessageTranslationsScope oldWidget) {
+    return oldWidget.store != store || oldWidget.state != state;
+  }
+
+  @override
+  bool updateShouldNotifyDependent(
+    _StreamMessageTranslationsScope oldWidget,
+    Set<String> messageIds,
+  ) {
+    // A different store means every message's state may have changed.
+    if (oldWidget.store != store) return true;
+
+    return messageIds.any((it) {
+      return oldWidget.state.isShowingOriginalText(it) != state.isShowingOriginalText(it);
+    });
   }
 }

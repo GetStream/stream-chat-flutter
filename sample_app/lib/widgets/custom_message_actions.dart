@@ -209,12 +209,13 @@ abstract final class _MessageInfoAction {
 // Translate action
 // ---------------------------------------------------------------------------
 
-/// Requests an on-request translation for a message and merges the result
-/// into the channel's local state.
+/// Requests an on-request translation for a message.
 ///
-/// Once merged, the message's `i18n` map carries the translation, and the
-/// SDK's own message rendering (`StreamMessageText`, `DefaultStreamMessageHeader`)
-/// picks it up automatically — this sample app only needs to fetch it.
+/// `Channel.translateMessage` merges the result into the channel's local
+/// state, so the message's `i18n` map carries the translation and the SDK's
+/// own message rendering (`StreamMessageText`,
+/// `DefaultStreamMessageHeader`) picks it up automatically — this sample app
+/// only needs to ask for it.
 ///
 /// Only shown for messages from other users — translating your own message
 /// isn't a useful action — and always translates directly to the current
@@ -262,8 +263,9 @@ abstract final class _TranslateMessageAction {
   ) async {
     final channel = StreamChannel.of(context).channel;
     try {
-      final response = await channel.translateMessage(message.id, language);
-      channel.state?.updateMessage(response.message);
+      // The SDK merges the translation into the channel state itself, which
+      // is all the message widgets need to pick it up.
+      await channel.translateMessage(message.id, language);
     } catch (e) {
       if (!context.mounted) return;
       StreamSnackbarMessenger.of(context).show(

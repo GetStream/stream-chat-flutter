@@ -466,8 +466,9 @@ class DefaultStreamMessageItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final message = props.message;
 
-    final translationStore = StreamMessageTranslations.of(context);
-    final showsOriginalText = translationStore.isShowingOriginalText(message.id);
+    // Depends on this message alone, so toggling another message in the same
+    // scope doesn't rebuild this one.
+    final showsOriginalText = StreamMessageTranslations.isShowingOriginalTextOf(context, message.id);
 
     final placement = StreamMessageLayout.of(context);
     final theme = core.StreamMessageItemTheme.of(context);
@@ -508,7 +509,7 @@ class DefaultStreamMessageItem extends StatelessWidget {
           _ => () => _onViewThread(context, message),
         },
         showTranslatedText: !showsOriginalText,
-        onToggleTranslatedText: () => translationStore.toggleOriginalText(message.id),
+        onToggleTranslatedText: () => StreamMessageTranslations.toggleOriginalText(context, message.id),
       ),
     );
 

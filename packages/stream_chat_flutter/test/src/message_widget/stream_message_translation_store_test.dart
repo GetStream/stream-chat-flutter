@@ -183,7 +183,7 @@ void main() {
         isA<FlutterError>().having(
           (it) => it.message,
           'message',
-          contains('StreamMessageTranslations.of() called with a context that does not contain'),
+          contains('StreamMessageTranslations was requested with a context that does not contain'),
         ),
       );
     });
@@ -307,6 +307,141 @@ void main() {
       await tester.pump();
 
       expect(builds, 2);
+    });
+
+    testWidgets('isShowingOriginalTextOf reports the state of the given message', (tester) async {
+      var showsOriginalText = false;
+
+      await tester.pumpWidget(
+        StreamMessageTranslations(
+          store: store,
+          child: Builder(
+            builder: (context) {
+              showsOriginalText = StreamMessageTranslations.isShowingOriginalTextOf(context, 'message-1');
+              return const SizedBox.shrink();
+            },
+          ),
+        ),
+      );
+
+      expect(showsOriginalText, isFalse);
+
+      store.toggleOriginalText('message-1');
+      await tester.pump();
+
+      expect(showsOriginalText, isTrue);
+    });
+
+    testWidgets('isShowingOriginalTextOf rebuilds only the message that was toggled', (tester) async {
+      var firstBuilds = 0;
+      var secondBuilds = 0;
+
+      Widget messageBuilder(String messageId, VoidCallback onBuild) {
+        return Builder(
+          builder: (context) {
+            StreamMessageTranslations.isShowingOriginalTextOf(context, messageId);
+            onBuild();
+            return const SizedBox.shrink();
+          },
+        );
+      }
+
+      await tester.pumpWidget(
+        StreamMessageTranslations(
+          store: store,
+          child: Column(
+            children: [
+              messageBuilder('message-1', () => firstBuilds++),
+              messageBuilder('message-2', () => secondBuilds++),
+            ],
+          ),
+        ),
+      );
+
+      expect((firstBuilds, secondBuilds), (1, 1));
+
+      store.toggleOriginalText('message-1');
+      await tester.pump();
+
+      expect((firstBuilds, secondBuilds), (2, 1));
+    });
+
+    testWidgets('isShowingOriginalTextOf throws without an ancestor scope', (tester) async {
+      await tester.pumpWidget(
+        Builder(
+          builder: (context) {
+            StreamMessageTranslations.isShowingOriginalTextOf(context, 'message-1');
+            return const SizedBox.shrink();
+          },
+        ),
+      );
+
+      expect(tester.takeException(), isFlutterError);
+    });
+
+    testWidgets('toggleOriginalText toggles through the nearest scope', (tester) async {
+      late BuildContext capturedContext;
+
+      await tester.pumpWidget(
+        StreamMessageTranslations(
+          store: store,
+          child: Builder(
+            builder: (context) {
+              capturedContext = context;
+              return const SizedBox.shrink();
+            },
+          ),
+        ),
+      );
+
+      StreamMessageTranslations.toggleOriginalText(capturedContext, 'message-1');
+      expect(store.isShowingOriginalText('message-1'), isTrue);
+
+      StreamMessageTranslations.toggleOriginalText(capturedContext, 'message-1');
+      expect(store.isShowingOriginalText('message-1'), isFalse);
+    });
+
+    testWidgets('toggleOriginalText does not make its caller depend on the scope', (tester) async {
+      var builds = 0;
+      late BuildContext capturedContext;
+
+      await tester.pumpWidget(
+        StreamMessageTranslations(
+          store: store,
+          child: Builder(
+            builder: (context) {
+              capturedContext = context;
+              builds++;
+              return const SizedBox.shrink();
+            },
+          ),
+        ),
+      );
+
+      expect(builds, 1);
+
+      StreamMessageTranslations.toggleOriginalText(capturedContext, 'message-1');
+      await tester.pump();
+
+      expect(builds, 1);
+    });
+
+    testWidgets('toggleOriginalText throws without an ancestor scope', (tester) async {
+      late BuildContext capturedContext;
+
+      await tester.pumpWidget(
+        Builder(
+          builder: (context) {
+            capturedContext = context;
+            return const SizedBox.shrink();
+          },
+        ),
+      );
+
+      expect(
+        () => StreamMessageTranslations.toggleOriginalText(capturedContext, 'message-1'),
+        throwsA(isFlutterError),
+      );
     });
   });
 
