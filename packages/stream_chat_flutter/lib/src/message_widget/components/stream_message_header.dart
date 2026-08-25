@@ -114,8 +114,8 @@ class StreamMessageHeaderProps {
 ///     invokes [StreamMessageHeaderProps.onViewChannelTap].
 ///  4. **Reminder** — when a reminder exists with a scheduled time.
 ///  5. **Translated** — when [Message.i18n] has a translation for the
-///     current user's language and
-///     [StreamMessageTranslationConfiguration.annotationEnabled] is set.
+///     current user's language, the message was not written in that language,
+///     and [StreamMessageTranslationConfiguration.annotationEnabled] is set.
 ///     Reads "Translated from {language}" when the original language is
 ///     known, otherwise plain "Translated". Includes a "Show original"/"Show
 ///     translation" link that invokes
@@ -226,34 +226,26 @@ class _DefaultStreamMessageHeaderState extends core.NullableState<DefaultStreamM
     // Opt-in: without an annotation, translated messages are still shown
     // translated, just silently — the SDK's long-standing behaviour.
     if (translationConfig.enabled && translationConfig.annotationEnabled) {
-      // Stream's API reports an unset `User.language` as `''` rather than
-      // omitting it, so both cases mean "nothing to translate to".
-      if (_language case final language? when language.isNotEmpty) {
-        // The server includes a self-referential entry for the message's own
-        // source language (e.g. `es_text` equal to `message.text` on a
-        // Spanish message), so a plain null-check isn't enough — a user
-        // whose language matches the source would otherwise see the
-        // annotation with nothing to actually toggle.
-        if (message.i18n?['${language}_text'] case final translatedText? when translatedText != message.text) {
-          final label = switch (props.showTranslatedText) {
-            false => translations.originalLabel,
-            true => switch (message.i18n?['language']) {
-              null || '' => translations.translatedLabel,
-              final sourceLanguage => translations.translatedFromLanguageText(sourceLanguage),
-            },
-          };
-          final trailing = props.showTranslatedText
-              ? translations.showOriginalLabel
-              : translations.showTranslationLabel;
+      // A translation into the reader's own language is what there is to
+      // toggle; `translatedText` returns null when there is nothing to show,
+      // including for a reader of the language the message was written in.
+      if (message.translatedText(_language) != null) {
+        final label = switch (props.showTranslatedText) {
+          false => translations.originalLabel,
+          true => switch (message.originalLanguage) {
+            null => translations.translatedLabel,
+            final sourceLanguage => translations.translatedFromLanguageText(sourceLanguage),
+          },
+        };
+        final trailing = props.showTranslatedText ? translations.showOriginalLabel : translations.showTranslationLabel;
 
-          translatedAnnotation = core.StreamMessageAnnotation(
-            onTap: props.onToggleTranslatedText,
-            leading: Icon(icons.translate),
-            label: Text('$label ·'),
-            trailing: Text(trailing),
-            style: .from(trailingTextColor: linkColor),
-          );
-        }
+        translatedAnnotation = core.StreamMessageAnnotation(
+          onTap: props.onToggleTranslatedText,
+          leading: Icon(icons.translate),
+          label: Text('$label ·'),
+          trailing: Text(trailing),
+          style: .from(trailingTextColor: linkColor),
+        );
       }
     }
 

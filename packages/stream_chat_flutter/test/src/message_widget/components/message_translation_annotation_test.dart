@@ -196,11 +196,46 @@ void main() {
 
     testWidgets('stays hidden for a user whose language is the source language', (tester) async {
       // The server echoes the message's own language back in `i18n`, so
-      // `es_text` exists but equals the original text — there is nothing to
+      // `es_text` exists for a Spanish reader — but there is nothing to
       // toggle between.
       await pumpHeader(
         tester,
         message: translated,
+        userLanguage: 'es',
+        translationConfig: const StreamMessageTranslationConfiguration(annotationEnabled: true),
+      );
+
+      expect(find.textContaining('Translated'), findsNothing);
+    });
+
+    testWidgets('stays hidden for the source language even when its entry differs from the text', (tester) async {
+      // Editing a message leaves the previously translated entries in place,
+      // so the echoed `es_text` can drift from `message.text`. The languages
+      // still match, so there is nothing to toggle between.
+      final edited = translated.copyWith(text: 'Hola, mundo! (editado)');
+
+      await pumpHeader(
+        tester,
+        message: edited,
+        userLanguage: 'es',
+        translationConfig: const StreamMessageTranslationConfiguration(annotationEnabled: true),
+      );
+
+      expect(find.textContaining('Translated'), findsNothing);
+    });
+
+    testWidgets('compares the source language case-insensitively', (tester) async {
+      final message = translated.copyWith(
+        i18n: const {
+          'language': 'ES',
+          'es_text': 'Hola, mundo!',
+          'en_text': 'Hello, world!',
+        },
+      );
+
+      await pumpHeader(
+        tester,
+        message: message,
         userLanguage: 'es',
         translationConfig: const StreamMessageTranslationConfiguration(annotationEnabled: true),
       );
