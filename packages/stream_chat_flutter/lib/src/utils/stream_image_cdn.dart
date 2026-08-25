@@ -137,8 +137,7 @@ class StreamImageCDN {
     if (uri == null || !uri.host.contains(_streamCDNHost)) return sourceUrl;
     if (resize == null) return sourceUrl;
 
-    final queryParameters = {
-      ...uri.queryParameters,
+    final transform = {
       'w': resize.width == 0 ? '*' : resize.width.floor().toString(),
       'h': resize.height == 0 ? '*' : resize.height.floor().toString(),
       'resize': resize.mode.value,
@@ -146,7 +145,21 @@ class StreamImageCDN {
       if (resize.mode == ResizeMode.crop) 'crop': resize.crop.value,
     };
 
-    return uri.replace(queryParameters: queryParameters).toString();
+    // Rebuild the query from the raw string rather than via
+    // `replace(queryParameters:)`, which re-encodes every existing value.
+    // Signed CDN URLs carry base64 parameters (`URLPrefix`, `Signature`) whose
+    // `=` padding would become `%3D`, invalidating the signature (HTTP 403).
+    final preserved = uri.query.split('&').where((pair) {
+      if (pair.isEmpty) return false;
+      final name = Uri.decodeQueryComponent(pair.split('=').first);
+      return !transform.containsKey(name);
+    });
+
+    final applied = transform.entries.map(
+      (it) => '${it.key}=${Uri.encodeQueryComponent(it.value)}',
+    );
+
+    return uri.replace(query: [...preserved, ...applied].join('&')).toString();
   }
 
   /// Returns a stable cache key for [imageUrl], stripping volatile

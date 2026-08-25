@@ -118,6 +118,80 @@ void main() {
       });
     });
 
+    // Both backends hand the SDK a signed URL, but they sign it differently:
+    // CloudFront uses URL-safe base64 (`-`, `~`, `_` padding) while GCP Cloud
+    // CDN uses standard base64, which is padded with `=`. Rebuilding the query
+    // through `Uri.replace(queryParameters:)` re-encodes `=` as `%3D`, so only
+    // the GCP-signed URLs break — the signature no longer matches and the CDN
+    // answers 403. These two tests pin that difference.
+    group('signed CDN URLs', () {
+      test('preserves a CloudFront-signed URL (production backend)', () {
+        const policy =
+            'eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly91cy1lYX'
+            'N0LnN0cmVhbS1pby1jZG4uY29tIn1dfQ__';
+        const signature =
+            'YNQTx6dJ4utuWCBN8HiXX1y~WwnD1n5a4er5xz5d6lqR03WVvH9'
+            '1zYOEFXANuRoTgdGdX5ud0Gs8UTOcSgQU3Sg__';
+        const url =
+            'https://us-east.stream-io-cdn.com/102400/images/photo.jpg'
+            '?Key-Pair-Id=APKAIHG36VEWPDULE23Q'
+            '&Policy=$policy'
+            '&Signature=$signature'
+            '&oh=1920&ow=1440';
+
+        final result = cdn.resolveUrl(
+          url,
+          resize: const ImageResize(width: 200, height: 300),
+        );
+
+        // CloudFront pads with `_`, so nothing here needs escaping.
+        expect(result, contains('Policy=$policy'));
+        expect(result, contains('Signature=$signature'));
+        expect(Uri.parse(result).queryParameters['Policy'], equals(policy));
+        expect(
+          Uri.parse(result).queryParameters['Signature'],
+          equals(signature),
+        );
+        expect(result, contains('w=200'));
+        expect(result, contains('h=300'));
+      });
+
+      test('preserves a GCP Cloud CDN-signed URL (staging backend)', () {
+        // Standard base64 — note the `==` and `=` padding.
+        const urlPrefix =
+            'aHR0cHM6Ly91cy1lYXN0MS5nY3Auc3RyZWFtLWlvLWNkbi5jb20'
+            'vMTcxNjgxOS9pbWFnZXMvcGhvdG8uanBlZw==';
+        const signature = 'kQATRhlxwyG6Uvz3D6-R61GefTA=';
+        const url =
+            'https://us-east1.gcp.stream-io-cdn.com/1716819/images/photo.jpeg'
+            '?oh=447&ow=447'
+            '&URLPrefix=$urlPrefix'
+            '&Expires=1787660573'
+            '&KeyName=chat-us-east1-cdn-key'
+            '&Signature=$signature';
+
+        final result = cdn.resolveUrl(
+          url,
+          resize: const ImageResize(width: 200, height: 300),
+        );
+
+        // The regression: `=` must not come back as `%3D`.
+        expect(result, isNot(contains('%3D')));
+        expect(result, contains('URLPrefix=$urlPrefix'));
+        expect(result, contains('Signature=$signature'));
+        expect(
+          Uri.parse(result).queryParameters['URLPrefix'],
+          equals(urlPrefix),
+        );
+        expect(
+          Uri.parse(result).queryParameters['Signature'],
+          equals(signature),
+        );
+        expect(result, contains('w=200'));
+        expect(result, contains('h=300'));
+      });
+    });
+
     group('non-Stream URLs', () {
       test('returns URL unchanged regardless of resize', () {
         const url = 'https://example.com/photo.jpg';
