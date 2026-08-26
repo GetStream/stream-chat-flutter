@@ -5,7 +5,7 @@ import 'package:theme_extensions_builder_annotation/theme_extensions_builder_ann
 import 'poll_option_style.dart';
 import 'stream_chat_theme.dart';
 
-export 'package:stream_chat_flutter/src/theme/poll_option_style.dart';
+export 'poll_option_style.dart';
 
 part 'poll_interactor_theme.g.theme.dart';
 

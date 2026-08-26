@@ -8,7 +8,7 @@ import '../../attachment/handler/stream_attachment_handler.dart';
 import '../stream_attachment_validator.dart';
 import 'stream_attachment_picker_result.dart';
 
-export 'package:stream_chat_flutter/src/message_input/stream_attachment_validator.dart';
+export '../stream_attachment_validator.dart';
 
 /// Controller class for [StreamAttachmentPicker].
 class StreamAttachmentPickerController extends ValueNotifier<AttachmentPickerValue>
